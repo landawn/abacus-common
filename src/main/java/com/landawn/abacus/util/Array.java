@@ -42,7 +42,6 @@ import com.landawn.abacus.annotation.NullSafe;
  *   <li><b>Multi-dimensional Support:</b> Operations on 1D, 2D, and 3D arrays</li>
  *   <li><b>Null-Aware Operations:</b> Boxing, unboxing, and concatenation methods define explicit {@code null} behavior</li>
  *   <li><b>Type Safety:</b> Generic methods with compile-time type checking</li>
- *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
  *   <li><b>Range Operations:</b> Subset processing with fromIndex/toIndex parameters</li>
  *   <li><b>Reflection Integration:</b> Dynamic array creation using component types</li>
  * </ul>
@@ -130,14 +129,16 @@ import com.landawn.abacus.annotation.NullSafe;
  *   <li><b>Generic Support:</b> Type-safe transposition for object arrays</li>
  * </ul>
  *
- * <p><b>Performance Characteristics:</b>
- * <ul>
- *   <li><b>Memory Efficient:</b> Minimal object allocation and copying</li>
- *   <li><b>Cache Friendly:</b> Sequential access patterns optimized for CPU cache</li>
- *   <li><b>Algorithm Selection:</b> Optimal algorithms chosen based on array size and type</li>
- *   <li><b>Zero-Copy Operations:</b> Direct array manipulation where possible</li>
- *   <li><b>Bulk Processing:</b> Optimized for large array operations</li>
- * </ul>
+ * <p><b>Cost model:</b> these are thin, straightforward implementations, not tuned kernels. A method that
+ * returns a non-empty array allocates one and fills it element by element (or via
+ * {@link System#arraycopy} where the component types match), so cost is linear in the number of elements,
+ * and no method reuses or aliases a caller's array unless its own contract says so - {@link #of(int...)} and
+ * the rest of the {@code of} family return the argument itself, and {@link #asList(Object...)} wraps it.
+ * An <i>empty</i> result is usually a shared, cached zero-length array rather than a fresh one, which is
+ * safe because a zero-length array has nothing to mutate. The {@code box} family additionally allocates
+ * one wrapper per element unless the value is served by the JDK's own wrapper caches. The {@code unbox}
+ * family reads primitive values from existing wrappers without allocating new wrappers.
+ * Nothing here is parallelized.
  *
  * <p><b>Concurrency:</b>
  * <ul>
@@ -163,40 +164,19 @@ import com.landawn.abacus.annotation.NullSafe;
  *   <li><b>Matrix Validation:</b> Validation of array structure for matrix operations</li>
  * </ul>
  *
- * <p><b>Integration with Java Arrays:</b>
- * <ul>
- *   <li><b>Arrays Class Extension:</b> Extends java.util.Arrays functionality</li>
- *   <li><b>Reflection Integration:</b> Full integration with java.lang.reflect.Array</li>
- *   <li><b>Collection Compatibility:</b> Seamless integration with Java Collections</li>
- *   <li><b>Stream Support:</b> Compatible with Java 8+ Stream operations</li>
- * </ul>
+ * <p>The reflective element accessors — {@link #get(Object, int)}, the {@code getBoolean}/{@code getInt}/… family,
+ * {@link #set(Object, int, Object)} and the {@code setBoolean}/{@code setInt}/… family — add no checks of their
+ * own; they surface whatever {@link java.lang.reflect.Array} throws, <i>including its messages</i>. That reflective
+ * path still raises a <b>message-less</b> {@code ArrayIndexOutOfBoundsException} for a bad index and a message-less
+ * {@code NullPointerException} for a {@code null} array, where ordinary array access would say
+ * "Index 5 out of bounds for length 1". Prefer direct indexing when the component type is known at compile time;
+ * reach for these only when it is not.</p>
  *
- * <p><b>Best Practices:</b>
- * <ul>
- *   <li>Use appropriate default values for {@code null} replacement during unboxing</li>
- *   <li>Validate matrix structure before performing transpose operations</li>
- *   <li>Prefer range-based operations for processing array subsets</li>
- *   <li>Consider memory implications when working with large multi-dimensional arrays</li>
- *   <li>Use the type-safe generic methods for object array operations</li>
- *   <li>Cache the results of expensive operations like matrix transposition</li>
- * </ul>
- *
- * <p><b>Performance Tips:</b>
- * <ul>
- *   <li>Use primitive arrays when possible to avoid boxing overhead</li>
- *   <li>Process arrays in sequential order for better cache performance</li>
- *   <li>Consider the cost of array copying in performance-critical code</li>
- *   <li>Use appropriate array sizes to minimize memory allocation</li>
- *   <li>Prefer bulk operations over element-by-element processing</li>
- * </ul>
- *
- * <p><b>Common Patterns:</b>
- * <ul>
- *   <li><b>Safe Unboxing:</b> {@code int[] result = Array.unbox(wrappers, defaultValue);}</li>
- *   <li><b>Matrix Processing:</b> {@code int[][] transposed = Array.transpose(matrix);}</li>
- *   <li><b>Range Operations:</b> {@code int[] subset = Array.unbox(array, from, to, defaultValue);}</li>
- *   <li><b>Dynamic Creation:</b> {@code T[] array = Array.newInstance(type, size);}</li>
- * </ul>
+ * <p><b>Relationship to the JDK array APIs:</b> this class does not extend {@link java.util.Arrays}; it is a
+ * separate facade that wraps {@link java.lang.reflect.Array} for the reflective {@code newInstance}/{@code get}/
+ * {@code set} family and adds the boxing, range, repeat, concat and transpose operations {@code java.util.Arrays}
+ * does not have. It neither accepts nor returns a {@link java.util.stream.Stream}, and its only bridge to the
+ * collections framework is {@link #asList(Object...)}.
  *
  * <p><b>Related Utility Classes:</b>
  * <ul>
@@ -263,6 +243,12 @@ import com.landawn.abacus.annotation.NullSafe;
  *   <li><b>{@link ArrayUtil}:</b> {@link Beta} sealed-hierarchy implementation holder; invoke methods through {@link Array} directly</li>
  * </ul>
  *
+ * <p><b>Name collision with {@link java.lang.reflect.Array}:</b> this class deliberately mirrors, and largely
+ * wraps, {@code java.lang.reflect.Array}, and shares its simple name. A compilation unit that does
+ * {@code import java.lang.reflect.*} therefore cannot refer to either one as {@code Array} - the reference is
+ * ambiguous and will not compile. Import this class explicitly
+ * ({@code import com.landawn.abacus.util.Array;}) or qualify the reflection class in full.</p>
+ *
  * <p><b>Attribution:</b>
  * This class includes code adapted from Apache Commons Lang and other open source projects under
  * the Apache License 2.0. Methods from these libraries may have been modified for consistency,
@@ -275,7 +261,7 @@ import com.landawn.abacus.annotation.NullSafe;
  * @see com.landawn.abacus.util.Iterables
  * @see com.landawn.abacus.util.stream.Stream
  */
-@SuppressWarnings({ "java:S1168" })
+@SuppressWarnings("java:S1168")
 public abstract sealed class Array permits Array.ArrayUtil {
     private Array() {
         // Utility class.
@@ -293,19 +279,29 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the type of the array.
-     * @param componentType the Class object representing the component type of the new array.
+     * @param componentType the Class object representing the component type of the new array. Must not be {@code null}
+     *        or {@link Void#TYPE}.
      * @param length the length of the new array.
-     * @return a new array of the specified component type and length; a shared, cached empty array may be returned when {@code length} is 0.
+     * @return a new array of the specified component type and length. When {@code length} is 0 and
+     *         {@code componentType} is one of the common built-in types, a shared immutable empty array is
+     *         returned instead of a fresh one; for every other component type a new array is returned.
+     * @throws IllegalArgumentException if {@code componentType} is {@code null} or {@link Void#TYPE}, or the resulting array would exceed 255 dimensions.
      * @throws NegativeArraySizeException if the specified length is negative.
-     * @throws IllegalArgumentException if {@code componentType} is {@code null}.
      */
     public static <T> T newInstance(final Class<?> componentType, final int length) throws IllegalArgumentException, NegativeArraySizeException {
         N.checkArgNotNull(componentType, cs.componentType);
 
         if (length == 0) {
-            final Object result = N.CLASS_EMPTY_ARRAY.computeIfAbsent(componentType, k -> java.lang.reflect.Array.newInstance(componentType, length));
+            // Read-only lookup, never computeIfAbsent: caching a miss put the *caller's* Class into a static
+            // map that is never evicted, which pins that class - and therefore its ClassLoader - for the life
+            // of the JVM. Since N.newArray(cls, 0) funnels here, a single zero-length array created for an
+            // application class leaked its whole classloader on every container redeploy. A zero-length
+            // allocation is far too cheap to be worth that, so only the pre-seeded built-in types are shared.
+            final Object result = N.CLASS_EMPTY_ARRAY.get(componentType);
 
-            return (T) result;
+            if (result != null) {
+                return (T) result;
+            }
         }
 
         return (T) java.lang.reflect.Array.newInstance(componentType, length);
@@ -324,16 +320,22 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the type of the array.
-     * @param componentType the Class object representing the component type of the new array.
-     * @param dimensions the dimensions of the new array. Must not be {@code null} or empty.
+     * @param componentType the Class object representing the component type of the new array. Must not be {@code null}
+     *        or {@link Void#TYPE}.
+     * @param dimensions the dimensions of the new array. Must not be {@code null} or empty, and there must be no more
+     *        than 255 of them.
      * @return a new multi-dimensional array of the specified component type and dimensions.
-     * @throws IllegalArgumentException if the component type or dimensions are not valid for array creation.
-     * @throws NullPointerException if {@code dimensions} is {@code null}.
+     * @throws IllegalArgumentException if {@code componentType} is null or {@link Void#TYPE}, {@code dimensions} is null or empty, or the sum of its length and the existing array dimensions of {@code componentType} exceeds 255.
      * @throws NegativeArraySizeException if any of the specified dimensions is negative.
      * @see java.lang.reflect.Array#newInstance(Class, int...)
      */
     public static <T> T newInstance(final Class<?> componentType, final int... dimensions) throws IllegalArgumentException, NegativeArraySizeException {
         N.checkArgNotNull(componentType, cs.componentType);
+
+        N.checkArgNotNull(dimensions, cs.dimensions);
+        if (dimensions.length == 0) {
+            throw new IllegalArgumentException("'dimensions' cannot be empty: at least one dimension is required");
+        }
 
         return (T) java.lang.reflect.Array.newInstance(componentType, dimensions);
     }
@@ -385,7 +387,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @see java.lang.reflect.Array#get(Object, int)
      */
     @MayReturnNull
-    public static <T> T get(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static <T> T get(final Object array, final int index) throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return (T) java.lang.reflect.Array.get(array, index);
     }
 
@@ -407,11 +409,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index of the boolean value to be retrieved.
      * @return the boolean value at the specified index.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or its elements cannot be converted to the requested primitive type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getBoolean(Object, int)
      */
-    public static boolean getBoolean(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static boolean getBoolean(final Object array, final int index)
+            throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getBoolean(array, index);
     }
 
@@ -433,11 +436,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index of the byte value to be retrieved.
      * @return the byte value at the specified index.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or its elements cannot be converted to the requested primitive type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getByte(Object, int)
      */
-    public static byte getByte(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static byte getByte(final Object array, final int index) throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getByte(array, index);
     }
 
@@ -459,11 +462,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index of the char value to be retrieved.
      * @return the char value at the specified index.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or its elements cannot be converted to the requested primitive type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getChar(Object, int)
      */
-    public static char getChar(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static char getChar(final Object array, final int index) throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getChar(array, index);
     }
 
@@ -485,11 +488,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index of the short value to be retrieved.
      * @return the short value at the specified index.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or its elements cannot be converted to the requested primitive type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getShort(Object, int)
      */
-    public static short getShort(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static short getShort(final Object array, final int index) throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getShort(array, index);
     }
 
@@ -511,11 +514,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index of the integer value to be retrieved.
      * @return the integer value at the specified index.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or its elements cannot be converted to the requested primitive type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getInt(Object, int)
      */
-    public static int getInt(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static int getInt(final Object array, final int index) throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getInt(array, index);
     }
 
@@ -537,11 +540,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index of the long value to be retrieved.
      * @return the long value at the specified index.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or its elements cannot be converted to the requested primitive type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getLong(Object, int)
      */
-    public static long getLong(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static long getLong(final Object array, final int index) throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getLong(array, index);
     }
 
@@ -563,11 +566,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index of the float value to be retrieved.
      * @return the float value at the specified index.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or its elements cannot be converted to the requested primitive type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getFloat(Object, int)
      */
-    public static float getFloat(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static float getFloat(final Object array, final int index) throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getFloat(array, index);
     }
 
@@ -589,11 +592,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index of the double value to be retrieved.
      * @return the double value at the specified index.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or its elements cannot be converted to the requested primitive type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#getDouble(Object, int)
      */
-    public static double getDouble(final Object array, final int index) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static double getDouble(final Object array, final int index) throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return java.lang.reflect.Array.getDouble(array, index);
     }
 
@@ -602,6 +605,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * <p>This method uses {@link java.lang.reflect.Array#set(Object, int, Object)} to set the value.
      * The array can be an object array or a primitive array.
+     * The {@code value} must be storable in the array: for an object array it must be assignable to the
+     * component type, and for a primitive array it must be a wrapper whose value converts to the component
+     * type by an identity or widening primitive conversion. A value that is not raises
+     * {@link IllegalArgumentException} (with a message such as "array element type mismatch") -
+     * <i>not</i> the {@link ArrayStoreException} an ordinary array assignment would raise.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -613,11 +621,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index at which the value is to be set.
      * @param value the value to be set.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if the provided object is not an array, or if {@code value} cannot be
+     *         stored into it (see above).
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#set(Object, int, Object)
      */
-    public static void set(final Object array, final int index, final Object value) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static void set(final Object array, final int index, final Object value)
+            throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.set(array, index, value);
     }
 
@@ -625,9 +635,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Sets the boolean value at the specified index in the provided array.
      *
      * <p>This method uses {@link java.lang.reflect.Array#setBoolean(Object, int, boolean)} to set the boolean value.
-     * The array must be a primitive array whose component type is convertible to the target type
-     * by an identity or widening primitive conversion; object arrays (including boxed arrays) are not
-     * supported — use {@link #get(Object, int)} / {@link #set(Object, int, Object)} for those.
+     * The array must be a primitive array whose component type is one to which the given value can be
+     * converted by an identity or widening primitive conversion — note this is the reverse of the
+     * {@code get*} rule, so e.g. {@code setInt} accepts an {@code int[]}, {@code long[]}, {@code float[]}
+     * or {@code double[]} but rejects a {@code short[]}. Object arrays (including boxed arrays) are not
+     * supported — use {@link #set(Object, int, Object)} / {@link #get(Object, int)} for those.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -639,11 +651,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index at which the boolean value is to be set.
      * @param z the boolean value to be set.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or the supplied primitive value cannot be converted to its component type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setBoolean(Object, int, boolean)
      */
-    public static void setBoolean(final Object array, final int index, final boolean z) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static void setBoolean(final Object array, final int index, final boolean z)
+            throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setBoolean(array, index, z);
     }
 
@@ -651,9 +664,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Sets the byte value at the specified index in the provided array.
      *
      * <p>This method uses {@link java.lang.reflect.Array#setByte(Object, int, byte)} to set the byte value.
-     * The array must be a primitive array whose component type is convertible to the target type
-     * by an identity or widening primitive conversion; object arrays (including boxed arrays) are not
-     * supported — use {@link #get(Object, int)} / {@link #set(Object, int, Object)} for those.
+     * The array must be a primitive array whose component type is one to which the given value can be
+     * converted by an identity or widening primitive conversion — note this is the reverse of the
+     * {@code get*} rule, so e.g. {@code setInt} accepts an {@code int[]}, {@code long[]}, {@code float[]}
+     * or {@code double[]} but rejects a {@code short[]}. Object arrays (including boxed arrays) are not
+     * supported — use {@link #set(Object, int, Object)} / {@link #get(Object, int)} for those.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -665,11 +680,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index at which the byte value is to be set.
      * @param b the byte value to be set.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or the supplied primitive value cannot be converted to its component type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setByte(Object, int, byte)
      */
-    public static void setByte(final Object array, final int index, final byte b) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static void setByte(final Object array, final int index, final byte b)
+            throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setByte(array, index, b);
     }
 
@@ -677,9 +693,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Sets the char value at the specified index in the provided array.
      *
      * <p>This method uses {@link java.lang.reflect.Array#setChar(Object, int, char)} to set the char value.
-     * The array must be a primitive array whose component type is convertible to the target type
-     * by an identity or widening primitive conversion; object arrays (including boxed arrays) are not
-     * supported — use {@link #get(Object, int)} / {@link #set(Object, int, Object)} for those.
+     * The array must be a primitive array whose component type is one to which the given value can be
+     * converted by an identity or widening primitive conversion — note this is the reverse of the
+     * {@code get*} rule, so e.g. {@code setInt} accepts an {@code int[]}, {@code long[]}, {@code float[]}
+     * or {@code double[]} but rejects a {@code short[]}. Object arrays (including boxed arrays) are not
+     * supported — use {@link #set(Object, int, Object)} / {@link #get(Object, int)} for those.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -691,11 +709,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index at which the char value is to be set.
      * @param c the char value to be set.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or the supplied primitive value cannot be converted to its component type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setChar(Object, int, char)
      */
-    public static void setChar(final Object array, final int index, final char c) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static void setChar(final Object array, final int index, final char c)
+            throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setChar(array, index, c);
     }
 
@@ -703,9 +722,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Sets the short value at the specified index in the provided array.
      *
      * <p>This method uses {@link java.lang.reflect.Array#setShort(Object, int, short)} to set the short value.
-     * The array must be a primitive array whose component type is convertible to the target type
-     * by an identity or widening primitive conversion; object arrays (including boxed arrays) are not
-     * supported — use {@link #get(Object, int)} / {@link #set(Object, int, Object)} for those.
+     * The array must be a primitive array whose component type is one to which the given value can be
+     * converted by an identity or widening primitive conversion — note this is the reverse of the
+     * {@code get*} rule, so e.g. {@code setInt} accepts an {@code int[]}, {@code long[]}, {@code float[]}
+     * or {@code double[]} but rejects a {@code short[]}. Object arrays (including boxed arrays) are not
+     * supported — use {@link #set(Object, int, Object)} / {@link #get(Object, int)} for those.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -717,11 +738,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index at which the short value is to be set.
      * @param s the short value to be set.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or the supplied primitive value cannot be converted to its component type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setShort(Object, int, short)
      */
-    public static void setShort(final Object array, final int index, final short s) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static void setShort(final Object array, final int index, final short s)
+            throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setShort(array, index, s);
     }
 
@@ -729,9 +751,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Sets the integer value at the specified index in the provided array.
      *
      * <p>This method uses {@link java.lang.reflect.Array#setInt(Object, int, int)} to set the integer value.
-     * The array must be a primitive array whose component type is convertible to the target type
-     * by an identity or widening primitive conversion; object arrays (including boxed arrays) are not
-     * supported — use {@link #get(Object, int)} / {@link #set(Object, int, Object)} for those.
+     * The array must be a primitive array whose component type is one to which the given value can be
+     * converted by an identity or widening primitive conversion — note this is the reverse of the
+     * {@code get*} rule, so e.g. {@code setInt} accepts an {@code int[]}, {@code long[]}, {@code float[]}
+     * or {@code double[]} but rejects a {@code short[]}. Object arrays (including boxed arrays) are not
+     * supported — use {@link #set(Object, int, Object)} / {@link #get(Object, int)} for those.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -743,11 +767,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index at which the integer value is to be set.
      * @param i the integer value to be set.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or the supplied primitive value cannot be converted to its component type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setInt(Object, int, int)
      */
-    public static void setInt(final Object array, final int index, final int i) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static void setInt(final Object array, final int index, final int i)
+            throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setInt(array, index, i);
     }
 
@@ -755,9 +780,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Sets the long value at the specified index in the provided array.
      *
      * <p>This method uses {@link java.lang.reflect.Array#setLong(Object, int, long)} to set the long value.
-     * The array must be a primitive array whose component type is convertible to the target type
-     * by an identity or widening primitive conversion; object arrays (including boxed arrays) are not
-     * supported — use {@link #get(Object, int)} / {@link #set(Object, int, Object)} for those.
+     * The array must be a primitive array whose component type is one to which the given value can be
+     * converted by an identity or widening primitive conversion — note this is the reverse of the
+     * {@code get*} rule, so e.g. {@code setInt} accepts an {@code int[]}, {@code long[]}, {@code float[]}
+     * or {@code double[]} but rejects a {@code short[]}. Object arrays (including boxed arrays) are not
+     * supported — use {@link #set(Object, int, Object)} / {@link #get(Object, int)} for those.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -769,11 +796,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index at which the long value is to be set.
      * @param l the long value to be set.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or the supplied primitive value cannot be converted to its component type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setLong(Object, int, long)
      */
-    public static void setLong(final Object array, final int index, final long l) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static void setLong(final Object array, final int index, final long l)
+            throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setLong(array, index, l);
     }
 
@@ -781,9 +809,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Sets the float value at the specified index in the provided array.
      *
      * <p>This method uses {@link java.lang.reflect.Array#setFloat(Object, int, float)} to set the float value.
-     * The array must be a primitive array whose component type is convertible to the target type
-     * by an identity or widening primitive conversion; object arrays (including boxed arrays) are not
-     * supported — use {@link #get(Object, int)} / {@link #set(Object, int, Object)} for those.
+     * The array must be a primitive array whose component type is one to which the given value can be
+     * converted by an identity or widening primitive conversion — note this is the reverse of the
+     * {@code get*} rule, so e.g. {@code setInt} accepts an {@code int[]}, {@code long[]}, {@code float[]}
+     * or {@code double[]} but rejects a {@code short[]}. Object arrays (including boxed arrays) are not
+     * supported — use {@link #set(Object, int, Object)} / {@link #get(Object, int)} for those.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -795,11 +825,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index at which the float value is to be set.
      * @param f the float value to be set.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or the supplied primitive value cannot be converted to its component type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setFloat(Object, int, float)
      */
-    public static void setFloat(final Object array, final int index, final float f) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static void setFloat(final Object array, final int index, final float f)
+            throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setFloat(array, index, f);
     }
 
@@ -807,9 +838,11 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Sets the double value at the specified index in the provided array.
      *
      * <p>This method uses {@link java.lang.reflect.Array#setDouble(Object, int, double)} to set the double value.
-     * The array must be a primitive array whose component type is convertible to the target type
-     * by an identity or widening primitive conversion; object arrays (including boxed arrays) are not
-     * supported — use {@link #get(Object, int)} / {@link #set(Object, int, Object)} for those.
+     * The array must be a primitive array whose component type is one to which the given value can be
+     * converted by an identity or widening primitive conversion — note this is the reverse of the
+     * {@code get*} rule, so e.g. {@code setInt} accepts an {@code int[]}, {@code long[]}, {@code float[]}
+     * or {@code double[]} but rejects a {@code short[]}. Object arrays (including boxed arrays) are not
+     * supported — use {@link #set(Object, int, Object)} / {@link #get(Object, int)} for those.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -821,11 +854,12 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param index the index at which the double value is to be set.
      * @param d the double value to be set.
      * @throws NullPointerException if the specified {@code array} is {@code null}.
-     * @throws IllegalArgumentException if the provided object is not an array.
+     * @throws IllegalArgumentException if {@code array} is not a primitive array, or the supplied primitive value cannot be converted to its component type by identity or widening conversion.
      * @throws ArrayIndexOutOfBoundsException if the index is out of the array's bounds.
      * @see java.lang.reflect.Array#setDouble(Object, int, double)
      */
-    public static void setDouble(final Object array, final int index, final double d) throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+    public static void setDouble(final Object array, final int index, final double d)
+            throws NullPointerException, IllegalArgumentException, ArrayIndexOutOfBoundsException {
         java.lang.reflect.Array.setDouble(array, index, d);
     }
 
@@ -1129,16 +1163,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * String[] b = Array.oF("x", "y");   // returns ["x", "y"]
      * }</pre>
      *
-     * <p>This method is an alias of {@link #ofValues(Object...)}, retained to disambiguate generic
-     * varargs from the many typed {@code of(...)} overloads (for example {@code of(int...)} or
-     * {@code of(CharSequence...)}). Prefer {@link N#asArray(Object...)} or a suitably typed
-     * {@code of(...)} overload.
+     * <p>This method exists only to disambiguate generic varargs from the many typed {@code of(...)}
+     * overloads (for example {@code of(int...)} or {@code of(CharSequence...)}), which is why its name
+     * differs from {@code of} by capitalization alone. {@link #ofValues(Object...)} is the same method
+     * under a readable name; both are deprecated, so use {@link N#asArray(Object...)} (or a suitably typed
+     * {@code of(...)} overload) instead of either.
      *
      * @param <T> the type of the elements in the array.
      * @param a the input array.
      * @return the same input array, or {@code null} if {@code a} is {@code null}.
      * @deprecated replaced by {@link N#asArray(Object...)}.
-     * @see #ofValues(Object...)
      * @see N#asArray(Object...)
      */
     @Deprecated
@@ -1157,14 +1191,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * String[] b = Array.ofValues("x", "y");   // returns ["x", "y"]
      * }</pre>
      *
-     * <p>This is the readable equivalent of {@link #oF(Object...)}; the distinct name avoids generic
-     * varargs ambiguity with the typed {@code of(...)} overloads.
+     * <p>This is the readably named form of the same operation as {@link #oF(Object...)}: a distinct name
+     * is needed because a plain {@code of(T...)} would be ambiguous with the typed {@code of(...)}
+     * overloads. Both are deprecated, so use {@link N#asArray(Object...)} instead of either.
      *
      * @param <T> the type of the elements in the array.
      * @param a the input array.
      * @return the same input array, or {@code null} if {@code a} is {@code null}.
      * @deprecated replaced by {@link N#asArray(Object...)}.
-     * @see #oF(Object...)
      * @see N#asArray(Object...)
      */
     @Deprecated
@@ -1285,16 +1319,18 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @return an integer array containing integers from <i>startInclusive</i> to <i>endExclusive</i>, or an empty array if startInclusive &gt;= endExclusive.
      * @throws IllegalArgumentException if the range size exceeds Integer.MAX_VALUE (overflow detected).
      */
-    public static int[] range(int startInclusive, final int endExclusive) {
+    public static int[] range(int startInclusive, final int endExclusive) throws IllegalArgumentException {
         if (startInclusive >= endExclusive) {
             return N.EMPTY_INT_ARRAY;
         }
 
-        if ((long) endExclusive - startInclusive > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow"); //NOSONAR
+        final long size = (long) endExclusive - startInclusive;
+
+        if (size > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + size); //NOSONAR
         }
 
-        final int[] a = new int[endExclusive - startInclusive];
+        final int[] a = new int[(int) size];
 
         for (int i = 0, len = a.length; i < len; i++) {
             a[i] = startInclusive++;
@@ -1322,7 +1358,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @throws IllegalArgumentException if the computed range size exceeds {@code Integer.MAX_VALUE} (overflow
      *         detected).
      */
-    public static long[] range(long startInclusive, final long endExclusive) {
+    public static long[] range(long startInclusive, final long endExclusive) throws IllegalArgumentException {
         if (startInclusive >= endExclusive) {
             return N.EMPTY_LONG_ARRAY;
         }
@@ -1330,7 +1366,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long range = endExclusive - startInclusive;
 
         if (range < 0 || range > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException(
+                    "Overflow. Array size is too large to allocate: the range [" + startInclusive + ", " + endExclusive + ") exceeds Integer.MAX_VALUE");
         }
 
         final long[] a = new long[(int) range];
@@ -1356,13 +1393,21 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * char[] digits = Array.range('0', '9', 3);     // returns {'0', '3', '6'}
      * }</pre>
      *
+     * <p><b>Why {@code by} is an {@code int} here</b> (the {@code byte}/{@code short}/{@code int}/{@code long}
+     * members take a step of their own type): {@code char} is unsigned, so a {@code char} step could never express
+     * a descending range. A magnitude beyond the {@code char} domain is accepted rather than rejected, and simply
+     * cannot advance twice: for a non-empty, direction-consistent range with distinct endpoints, {@code |by| > 65535}
+     * always yields exactly the one-element array {@code {startInclusive}} - a step that large steps past
+     * {@code endExclusive} in one go. (An equal-endpoint or direction-inconsistent range is empty for any step, as
+     * above, so it stays empty.)</p>
+     *
      * @param startInclusive the first character (inclusive) in the char array.
      * @param endExclusive the upper bound (exclusive) of the char array.
      * @param by the step to increment (if positive) or decrement (if negative) for each subsequent character.
      * @return a char array containing characters from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
-    public static char[] range(char startInclusive, final char endExclusive, final int by) {
+    public static char[] range(char startInclusive, final char endExclusive, final int by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("Parameter 'by' cannot be zero"); //NOSONAR
         }
@@ -1402,7 +1447,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @return a byte array containing bytes from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
-    public static byte[] range(byte startInclusive, final byte endExclusive, final byte by) {
+    public static byte[] range(byte startInclusive, final byte endExclusive, final byte by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
@@ -1441,7 +1486,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @return a short array containing short integers from <i>startInclusive</i> to <i>endExclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
-    public static short[] range(short startInclusive, final short endExclusive, final short by) {
+    public static short[] range(short startInclusive, final short endExclusive, final short by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
@@ -1481,7 +1526,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE
      *         (overflow detected).
      */
-    public static int[] range(int startInclusive, final int endExclusive, final int by) {
+    public static int[] range(int startInclusive, final int endExclusive, final int by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
@@ -1493,7 +1538,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long len = ((long) endExclusive - startInclusive) / by + (((long) endExclusive - startInclusive) % by == 0 ? 0 : 1);
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final int[] a = new int[(int) len];
@@ -1526,7 +1571,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE
      *         (overflow detected).
      */
-    public static long[] range(long startInclusive, final long endExclusive, final long by) {
+    public static long[] range(long startInclusive, final long endExclusive, final long by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
@@ -1551,7 +1596,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         }
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final long[] a = new long[(int) len];
@@ -1687,18 +1732,20 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @return an integer array containing integers from <i>startInclusive</i> to <i>endInclusive</i>, or an empty array if startInclusive &gt; endInclusive.
      * @throws IllegalArgumentException if the range size exceeds Integer.MAX_VALUE (overflow detected).
      */
-    public static int[] rangeClosed(int startInclusive, final int endInclusive) {
+    public static int[] rangeClosed(int startInclusive, final int endInclusive) throws IllegalArgumentException {
         if (startInclusive > endInclusive) {
             return N.EMPTY_INT_ARRAY;
         } else if (startInclusive == endInclusive) {
             return Array.of(startInclusive);
         }
 
-        if ((long) endInclusive - startInclusive + 1 > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+        final long size = (long) endInclusive - startInclusive + 1;
+
+        if (size > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + size);
         }
 
-        final int[] a = new int[endInclusive - startInclusive + 1];
+        final int[] a = new int[(int) size];
 
         for (int i = 0, len = a.length; i < len; i++) {
             a[i] = startInclusive++;
@@ -1727,7 +1774,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @throws IllegalArgumentException if the computed range size exceeds {@code Integer.MAX_VALUE} (overflow
      *         detected).
      */
-    public static long[] rangeClosed(long startInclusive, final long endInclusive) {
+    public static long[] rangeClosed(long startInclusive, final long endInclusive) throws IllegalArgumentException {
         if (startInclusive > endInclusive) {
             return N.EMPTY_LONG_ARRAY;
         } else if (startInclusive == endInclusive) {
@@ -1737,7 +1784,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long range = endInclusive - startInclusive + 1;
 
         if (range <= 0 || range > Integer.MAX_VALUE) { // Check the final length
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException(
+                    "Overflow. Array size is too large to allocate: the range [" + startInclusive + ", " + endInclusive + "] exceeds Integer.MAX_VALUE");
         }
 
         final long[] a = new long[(int) range];
@@ -1755,7 +1803,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new char array starting from the <i>startInclusive</i> character up to and including the <i>endInclusive</i> character.
      * The characters are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
-     * If start equals end, a single-element array containing that value is returned regardless of the step value.
+     * If start equals end, a single-element array containing that value is returned for any non-zero step.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1764,13 +1812,21 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * char[] single = Array.rangeClosed('x', 'x', 5);     // returns {'x'}
      * }</pre>
      *
+     * <p><b>Why {@code by} is an {@code int} here</b> (the {@code byte}/{@code short}/{@code int}/{@code long}
+     * members take a step of their own type): {@code char} is unsigned, so a {@code char} step could never express
+     * a descending range. A magnitude beyond the {@code char} domain is accepted rather than rejected, and simply
+     * cannot advance twice: for a direction-consistent range with distinct endpoints, {@code |by| > 65535} always
+     * yields exactly the one-element array {@code {startInclusive}} - a step that large steps past
+     * {@code endInclusive} in one go. (Equal endpoints already yield that same single element for any step, and a
+     * direction-inconsistent range is empty for any step.)</p>
+     *
      * @param startInclusive the first character (inclusive) in the char array.
      * @param endInclusive the upper bound (inclusive) of the char array.
      * @param by the step to increment (if positive) or decrement (if negative) for each subsequent character.
      * @return a char array containing characters from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
-    public static char[] rangeClosed(char startInclusive, final char endInclusive, final int by) {
+    public static char[] rangeClosed(char startInclusive, final char endInclusive, final int by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
@@ -1798,7 +1854,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new byte array starting from the <i>startInclusive</i> byte up to and including the <i>endInclusive</i> byte.
      * The bytes are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
-     * If start equals end, a single-element array containing that value is returned regardless of the step value.
+     * If start equals end, a single-element array containing that value is returned for any non-zero step.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1813,7 +1869,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @return a byte array containing bytes from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
-    public static byte[] rangeClosed(byte startInclusive, final byte endInclusive, final byte by) {
+    public static byte[] rangeClosed(byte startInclusive, final byte endInclusive, final byte by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
@@ -1840,7 +1896,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new short array starting from the <i>startInclusive</i> short integer up to and including the <i>endInclusive</i> short integer.
      * The short integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
-     * If start equals end, a single-element array containing that value is returned regardless of the step value.
+     * If start equals end, a single-element array containing that value is returned for any non-zero step.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1855,7 +1911,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @return a short array containing short integers from <i>startInclusive</i> to <i>endInclusive</i> incremented or decremented by <i>by</i>, or an empty array if the range is empty or direction is inconsistent.
      * @throws IllegalArgumentException if <i>by</i> is zero.
      */
-    public static short[] rangeClosed(short startInclusive, final short endInclusive, final short by) {
+    public static short[] rangeClosed(short startInclusive, final short endInclusive, final short by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
@@ -1882,7 +1938,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new integer array starting from the <i>startInclusive</i> integer up to and including the <i>endInclusive</i> integer.
      * The integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
-     * If start equals end, a single-element array containing that value is returned regardless of the step value.
+     * If start equals end, a single-element array containing that value is returned for any non-zero step.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1898,7 +1954,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE
      *         (overflow detected).
      */
-    public static int[] rangeClosed(int startInclusive, final int endInclusive, final int by) {
+    public static int[] rangeClosed(int startInclusive, final int endInclusive, final int by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
@@ -1912,7 +1968,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long len = ((long) endInclusive - startInclusive) / by + 1;
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final int[] a = new int[(int) len];
@@ -1930,7 +1986,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>This method generates a new long array starting from the <i>startInclusive</i> long integer up to and including the <i>endInclusive</i> long integer.
      * The long integers are generated in ascending order if <i>by</i> is positive, and in descending order if <i>by</i> is negative.
      * If the step direction is inconsistent with the range (e.g., positive step but end &lt; start), an empty array is returned.
-     * If start equals end, a single-element array containing that value is returned regardless of the step value.
+     * If start equals end, a single-element array containing that value is returned for any non-zero step.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1946,7 +2002,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @throws IllegalArgumentException if <i>by</i> is zero or if the resulting array size exceeds Integer.MAX_VALUE
      *         (overflow detected).
      */
-    public static long[] rangeClosed(long startInclusive, final long endInclusive, final long by) {
+    public static long[] rangeClosed(long startInclusive, final long endInclusive, final long by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("Parameter 'by' cannot be zero");
         }
@@ -1972,7 +2028,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         }
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final long[] a = new long[(int) len];
@@ -2030,7 +2086,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input boolean array to be repeated.
+     * @param a the input boolean array to be repeated, may be {@code null} or empty, in which case an empty
+     *        array is returned (this family does <i>not</i> follow the null-in/null-out convention the
+     *        {@code box}/{@code unbox} conversions use).
      * @param n the number of times to repeat the array (must be non-negative).
      * @return a new boolean array containing the input array repeated n times.
      * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
@@ -2047,7 +2105,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long len = aLen * (long) n;
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final boolean[] ret = new boolean[(int) len];
@@ -2105,7 +2163,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input char array to be repeated.
+     * @param a the input char array to be repeated, may be {@code null} or empty, in which case an empty
+     *        array is returned (this family does <i>not</i> follow the null-in/null-out convention the
+     *        {@code box}/{@code unbox} conversions use).
      * @param n the number of times to repeat the array (must be non-negative).
      * @return a new char array containing the input array repeated n times.
      * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
@@ -2121,7 +2181,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long len = aLen * (long) n;
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final char[] ret = new char[(int) len];
@@ -2179,7 +2239,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input byte array to be repeated.
+     * @param a the input byte array to be repeated, may be {@code null} or empty, in which case an empty
+     *        array is returned (this family does <i>not</i> follow the null-in/null-out convention the
+     *        {@code box}/{@code unbox} conversions use).
      * @param n the number of times to repeat the array (must be non-negative).
      * @return a new byte array containing the input array repeated n times.
      * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
@@ -2195,7 +2257,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long len = aLen * (long) n;
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final byte[] ret = new byte[(int) len];
@@ -2253,7 +2315,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input short array to be repeated.
+     * @param a the input short array to be repeated, may be {@code null} or empty, in which case an empty
+     *        array is returned (this family does <i>not</i> follow the null-in/null-out convention the
+     *        {@code box}/{@code unbox} conversions use).
      * @param n the number of times to repeat the array (must be non-negative).
      * @return a new short array containing the input array repeated n times.
      * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
@@ -2269,7 +2333,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long len = aLen * (long) n;
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final short[] ret = new short[(int) len];
@@ -2327,7 +2391,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input integer array to be repeated.
+     * @param a the input integer array to be repeated, may be {@code null} or empty, in which case an empty
+     *        array is returned (this family does <i>not</i> follow the null-in/null-out convention the
+     *        {@code box}/{@code unbox} conversions use).
      * @param n the number of times to repeat the array (must be non-negative).
      * @return a new integer array containing the input array repeated n times.
      * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
@@ -2343,7 +2409,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long len = aLen * (long) n;
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final int[] ret = new int[(int) len];
@@ -2401,7 +2467,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input long array to be repeated.
+     * @param a the input long array to be repeated, may be {@code null} or empty, in which case an empty
+     *        array is returned (this family does <i>not</i> follow the null-in/null-out convention the
+     *        {@code box}/{@code unbox} conversions use).
      * @param n the number of times to repeat the array (must be non-negative).
      * @return a new long array containing the input array repeated n times.
      * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
@@ -2417,7 +2485,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long len = aLen * (long) n;
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final long[] ret = new long[(int) len];
@@ -2475,7 +2543,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input float array to be repeated.
+     * @param a the input float array to be repeated, may be {@code null} or empty, in which case an empty
+     *        array is returned (this family does <i>not</i> follow the null-in/null-out convention the
+     *        {@code box}/{@code unbox} conversions use).
      * @param n the number of times to repeat the array (must be non-negative).
      * @return a new float array containing the input array repeated n times.
      * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
@@ -2491,7 +2561,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long len = aLen * (long) n;
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final float[] ret = new float[(int) len];
@@ -2549,7 +2619,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input double array to be repeated.
+     * @param a the input double array to be repeated, may be {@code null} or empty, in which case an empty
+     *        array is returned (this family does <i>not</i> follow the null-in/null-out convention the
+     *        {@code box}/{@code unbox} conversions use).
      * @param n the number of times to repeat the array (must be non-negative).
      * @return a new double array containing the input array repeated n times.
      * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
@@ -2565,7 +2637,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long len = aLen * (long) n;
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final double[] ret = new double[(int) len];
@@ -2623,7 +2695,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Result: {} (empty array)
      * }</pre>
      *
-     * @param a the input String array to be repeated.
+     * @param a the input String array to be repeated, may be {@code null} or empty, in which case an empty
+     *        array is returned (this family does <i>not</i> follow the null-in/null-out convention the
+     *        {@code box}/{@code unbox} conversions use).
      * @param n the number of times to repeat the array (must be non-negative).
      * @return a new String array containing the input array repeated n times.
      * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
@@ -2639,7 +2713,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long len = aLen * (long) n;
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final String[] ret = new String[(int) len];
@@ -2658,10 +2732,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] nums = Array.repeat(Integer.valueOf(42), 5);   // returns [42, 42, 42, 42, 42]
-     * LocalDate[] dates = Array.repeat(LocalDate.now(), 3);    // returns [today, today, today]
+     * LocalDate[] dates = Array.repeat(LocalDate.now(), 3);    // returns 3 references to the same LocalDate
      * Integer[] empty = Array.repeat(Integer.valueOf(7), 0);   // returns empty Integer[]
      * Array.repeat((Object) null, 3);                          // throws IllegalArgumentException
      * }</pre>
+     *
+     * <p>Because the component type is the element's <i>runtime</i> class rather than {@code T}, storing a
+     * sibling subtype into the result throws {@link ArrayStoreException} — see
+     * {@link Array#repeatNonNull(Object, int)}, which documents this in full. {@link Array#repeat(Object, int, Class)}
+     * avoids it by taking the intended component type explicitly.</p>
      *
      * @param <T> the type of the elements in the array.
      * @param element the value to be repeated in the array.
@@ -2671,7 +2750,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @deprecated the array's component type is derived from {@code element.getClass()}, so a {@code null}
      *  element is rejected with an {@link IllegalArgumentException}. Prefer {@link Array#repeatNonNull(Object, int)},
      *  which states that requirement in its name, or {@link Array#repeat(Object, int, Class)}, which takes an
-     *  explicit element class and therefore accepts a {@code null} element.
+     *  explicit element class and therefore accepts a {@code null} element and controls the component type.
      * @see #repeat(Object, int, Class)
      * @see #repeatNonNull(Object, int)
      * @see N#repeat(Object, int)
@@ -2699,15 +2778,25 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Returns [42, 42, 42, 42, 42]
      * }</pre>
      *
+     * <p>Unlike {@link #repeatNonNull(Object, int)}, the component type is taken from {@code elementClass}
+     * rather than from {@code element.getClass()}, so {@code element} may be {@code null} and the result can
+     * hold any subtype of {@code elementClass}. It is only as wide as the class the caller passes: supplying
+     * {@code Integer.class} still yields an {@code Integer[]} that rejects a {@code Double}.</p>
+     *
      * @param <T> the type of the elements in the array.
-     * @param element the value to be repeated in the array.
+     * @param element the value to be repeated in the array; may be {@code null}.
      * @param n the length of the array to be generated.
-     * @param elementClass the class of the elements in the array.
+     * @param elementClass the class of the elements in the array; this becomes the array's component type. Must not be {@code null}.
      * @return an array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if <i>n</i> is negative.
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null} or {@link Void#TYPE}, {@code n} is negative, or the resulting array length or dimension count exceeds the supported limit.
+     * @throws ClassCastException if {@code elementClass} is a primitive type other than {@code void}, producing an array that cannot be returned as an object array.
+     * @throws ArrayStoreException if at least one value is copied and it is not assignable to the result array component type.
+     * @see #repeatNonNull(Object, int)
      * @see N#repeat(Object, int)
      */
-    public static <T> T[] repeat(final T element, final int n, final Class<? extends T> elementClass) throws IllegalArgumentException {
+    public static <T> T[] repeat(final T element, final int n, final Class<? extends T> elementClass)
+            throws IllegalArgumentException, ClassCastException, ArrayStoreException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
         N.checkArgNotNegative(n, cs.n);
 
         final T[] a = N.newArray(elementClass, n);
@@ -2739,13 +2828,19 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the type of the elements in the array.
-     * @param a the input array to be repeated.
+     * @param a the input array to be repeated, may be {@code null} or empty, in which case an empty
+     *        array is returned (this family does <i>not</i> follow the null-in/null-out convention the
+     *        {@code box}/{@code unbox} conversions use).
      * @param n the number of times to repeat the array (must be non-negative).
-     * @param elementClass the class of the elements in the array.
+     * @param elementClass the class of the elements in the array; this becomes the result's component type. Must not be {@code null}.
      * @return a new array containing the input array repeated n times.
-     * @throws IllegalArgumentException if n is negative or if the resulting length exceeds Integer.MAX_VALUE.
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null} or {@link Void#TYPE}, {@code n} is negative, or the resulting array length or dimension count exceeds the supported limit.
+     * @throws ClassCastException if {@code elementClass} is a primitive type other than {@code void}, producing an array that cannot be returned as an object array.
+     * @throws ArrayStoreException if at least one value is copied and it is not assignable to the result array component type.
      */
-    public static <T> T[] repeat(final T[] a, final int n, final Class<? extends T> elementClass) throws IllegalArgumentException {
+    public static <T> T[] repeat(final T[] a, final int n, final Class<? extends T> elementClass)
+            throws IllegalArgumentException, ClassCastException, ArrayStoreException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
         N.checkArgNotNegative(n, cs.n);
 
         if (N.isEmpty(a)) {
@@ -2756,7 +2851,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
         final long len = aLen * (long) n;
 
         if (len > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("overflow");
+            throw new IllegalArgumentException("Overflow. Array size is too large to allocate: " + len);
         }
 
         final T[] ret = N.newArray(elementClass, (int) len);
@@ -2777,11 +2872,27 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * identically and reject a {@code null} element with an {@link IllegalArgumentException}; only the name differs.
      * Use {@link Array#repeat(Object, int, Class)} if the element may be {@code null}.</p>
      *
+     * <p><b>The array's component type is {@code element.getClass()}, not {@code T}</b> — the returned array
+     * is only as wide as the element's <i>runtime</i> class, so storing a sibling subtype into it throws
+     * {@link ArrayStoreException} even though the static type {@code T[]} permits it:</p>
+     * <pre>{@code
+     * Number[] a = Array.repeatNonNull((Number) Integer.valueOf(1), 3);   // runtime type is Integer[]
+     * a[0] = Double.valueOf(1.5);                                         // throws ArrayStoreException
+     *
+     * // An enum constant with a body is its own anonymous subclass, so this bites without any cast:
+     * enum E { A { public String toString() { return "A!"; } }, B }
+     * E[] es = Array.repeatNonNull(E.A, 2);   // runtime type is E$1[], not E[]
+     * es[0] = E.B;                            // throws ArrayStoreException
+     * }</pre>
+     *
+     * <p>Use {@link Array#repeat(Object, int, Class)} and pass the intended component type when the result
+     * must accept other subtypes of {@code T}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] integers = Array.repeatNonNull(42, 5);               // returns {42, 42, 42, 42, 42}
      * String[] strings = Array.repeatNonNull("hello", 3);            // returns {"hello", "hello", "hello"}
-     * LocalDate[] dates = Array.repeatNonNull(LocalDate.now(), 4);   // returns {today, today, today, today}
+     * LocalDate[] dates = Array.repeatNonNull(LocalDate.now(), 4);   // returns 4 references to the same LocalDate
      * // Array.repeatNonNull(null, 5);  // throws IllegalArgumentException
      * }</pre>
      *
@@ -2808,6 +2919,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p>Each element in the returned array is a random integer that can be any value
      * in the full range of int values (from Integer.MIN_VALUE to Integer.MAX_VALUE).</p>
      *
+     * <p><b>Source of randomness, and what it costs:</b> values are drawn from a {@link java.security.SecureRandom}
+     * held by {@link N}, shared with the other {@code Array.random(...)} overloads. (It is <i>not</i> the instance
+     * used by {@link IntList#random(int)} and the other {@code PrimitiveList}/{@code Stream} {@code random(...)}
+     * methods - each of those classes holds its own.) The output is therefore cryptographically strong and
+     * <i>not</i> reproducible - there is no seed to fix. The price is throughput: generation is roughly two orders
+     * of magnitude slower per value than {@link java.util.concurrent.ThreadLocalRandom}, and because the underlying
+     * DRBG serialises internally that instance is a contention point - concurrent callers do not scale. This is
+     * fine for test data, identifiers and sampling; for bulk or hot-path generation that does not need
+     * cryptographic strength, fill the array from {@code ThreadLocalRandom.current()} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] randomInts = Array.random(5);
@@ -2816,13 +2937,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param len the length of the array to be generated. Must be non-negative.
      * @return an array of random integers of the specified length.
-     * @throws NegativeArraySizeException if len is negative.
+     * @throws IllegalArgumentException if {@code len} is negative.
+     * @see java.security.SecureRandom
      * @see Random#nextInt()
      * @see IntList#random(int)
      * @see #random(int, int, int)
      */
     @Beta
-    public static int[] random(final int len) {
+    public static int[] random(final int len) throws IllegalArgumentException {
+        N.checkArgNotNegative(len, cs.len);
+
         final int[] a = new int[len];
 
         for (int i = 0; i < len; i++) {
@@ -2835,7 +2959,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
     /**
      * Generates an array of random integers within the specified range.
      *
-     * <p>Each element in the returned array is a random integer in the range [startInclusive, endExclusive).</p>
+     * <p>Each element in the returned array is a random integer in the range [startInclusive, endExclusive).
+     * The whole {@code int} range is supported, including {@code random(Integer.MIN_VALUE, Integer.MAX_VALUE, len)},
+     * whose span does not fit in an {@code int}.</p>
+     *
+     * <p><b>Source of randomness, and what it costs:</b> see {@link #random(int)} - values come from the same
+     * shared, cryptographically strong {@link java.security.SecureRandom}, with the same throughput and
+     * contention characteristics.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2848,22 +2978,27 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param endExclusive the upper bound (exclusive) of the random integers.
      * @param len the length of the array to be generated. Must be non-negative.
      * @return an array of random integers within the specified range.
-     * @throws IllegalArgumentException if startInclusive is not less than endExclusive.
-     * @throws NegativeArraySizeException if len is negative.
+     * @throws IllegalArgumentException if {@code startInclusive} is not less than {@code endExclusive}, or if
+     *         {@code len} is negative.
+     * @see java.security.SecureRandom
      * @see Random#nextInt(int)
      * @see IntList#random(int, int, int)
      * @see #random(int)
      */
     @Beta
-    public static int[] random(final int startInclusive, final int endExclusive, final int len) {
+    public static int[] random(final int startInclusive, final int endExclusive, final int len) throws IllegalArgumentException {
         if (startInclusive >= endExclusive) {
             throw new IllegalArgumentException("'startInclusive' (" + startInclusive + ") must be less than 'endExclusive' (" + endExclusive + ")");
         }
 
+        N.checkArgNotNegative(len, cs.len);
+
         final int[] a = new int[len];
         final long mod = (long) endExclusive - (long) startInclusive;
 
-        if (mod < Integer.MAX_VALUE) {
+        // <=, not <: a span of exactly Integer.MAX_VALUE is a legal nextInt(bound) argument, so only a span
+        // that genuinely overflows an int needs the slower nextLong path.
+        if (mod <= Integer.MAX_VALUE) {
             final int n = (int) mod;
 
             for (int i = 0; i < len; i++) {
@@ -2889,9 +3024,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
      * <ul>
      *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
-     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If only one array has a row at that index, a copy of that row is used in the result</li>
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
+     *
+     * <p>A {@code null} row inside either input is therefore treated as an empty row: the returned array never
+     * contains a {@code null} row, whatever the other argument is. This differs from the generic
+     * {@link #concat2D(Object[][], Object[][])}, which propagates a {@code null} row.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -2914,29 +3053,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * boolean[][] a = {{true, false}};
      * boolean[][] b = new boolean[0][];
      * boolean[][] result = Array.concat(a, b);
-     * // result = {{true, false}} (clone of a)
+     * // result = {{true, false}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * boolean[][] result = Array.concat((boolean[][]) null, null);
      * // result = new boolean[0][]
      * }</pre>
      *
-     * @param a the first two-dimensional boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second two-dimensional boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first two-dimensional boolean array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second two-dimensional boolean array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new two-dimensional boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair exceeds
+     *         {@code Integer.MAX_VALUE}
      */
-    public static boolean[][] concat(final boolean[][] a, final boolean[][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new boolean[0][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static boolean[][] concat(final boolean[][] a, final boolean[][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null rows unchanged, while this loop replaces them with empty arrays. Whether a
+        // null row survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final boolean[][] result = new boolean[maxLen][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = N.concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -2954,9 +3094,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
      *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
-     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If only one array has a layer at that index, a copy of that layer is used in the result</li>
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
+     *
+     * <p>A {@code null} layer inside either input is therefore treated as an empty layer: the returned array
+     * never contains a {@code null} layer, whatever the other argument is. This differs from the generic
+     * {@link #concat3D(Object[][][], Object[][][])}, which propagates a {@code null} layer.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -2979,29 +3123,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * boolean[][][] a = {{{true, false}}};
      * boolean[][][] b = new boolean[0][][];
      * boolean[][][] result = Array.concat(a, b);
-     * // result = {{{true, false}}} (clone of a)
+     * // result = {{{true, false}}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * boolean[][][] result = Array.concat((boolean[][][]) null, null);
      * // result = new boolean[0][][]
      * }</pre>
      *
-     * @param a the first three-dimensional boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second three-dimensional boolean array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first three-dimensional boolean array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second three-dimensional boolean array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new three-dimensional boolean array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair (inside
+     *         corresponding layers) exceeds {@code Integer.MAX_VALUE}
      */
-    public static boolean[][][] concat(final boolean[][][] a, final boolean[][][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new boolean[0][][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static boolean[][][] concat(final boolean[][][] a, final boolean[][][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null layers unchanged, while this loop replaces them with empty arrays. Whether a
+        // null layer survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final boolean[][][] result = new boolean[maxLen][][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3019,9 +3164,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
      * <ul>
      *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
-     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If only one array has a row at that index, a copy of that row is used in the result</li>
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
+     *
+     * <p>A {@code null} row inside either input is therefore treated as an empty row: the returned array never
+     * contains a {@code null} row, whatever the other argument is. This differs from the generic
+     * {@link #concat2D(Object[][], Object[][])}, which propagates a {@code null} row.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3044,29 +3193,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * char[][] a = {{'a', 'b'}};
      * char[][] b = new char[0][];
      * char[][] result = Array.concat(a, b);
-     * // result = {{'a', 'b'}} (clone of a)
+     * // result = {{'a', 'b'}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * char[][] result = Array.concat((char[][]) null, null);
      * // result = new char[0][]
      * }</pre>
      *
-     * @param a the first two-dimensional char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second two-dimensional char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first two-dimensional char array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second two-dimensional char array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new two-dimensional char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair exceeds
+     *         {@code Integer.MAX_VALUE}
      */
-    public static char[][] concat(final char[][] a, final char[][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new char[0][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static char[][] concat(final char[][] a, final char[][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null rows unchanged, while this loop replaces them with empty arrays. Whether a
+        // null row survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final char[][] result = new char[maxLen][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = N.concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3084,9 +3234,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
      *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
-     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If only one array has a layer at that index, a copy of that layer is used in the result</li>
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
+     *
+     * <p>A {@code null} layer inside either input is therefore treated as an empty layer: the returned array
+     * never contains a {@code null} layer, whatever the other argument is. This differs from the generic
+     * {@link #concat3D(Object[][][], Object[][][])}, which propagates a {@code null} layer.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3109,29 +3263,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * char[][][] a = {{{'a', 'b'}}};
      * char[][][] b = new char[0][][];
      * char[][][] result = Array.concat(a, b);
-     * // result = {{{'a', 'b'}}} (clone of a)
+     * // result = {{{'a', 'b'}}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * char[][][] result = Array.concat((char[][][]) null, null);
      * // result = new char[0][][]
      * }</pre>
      *
-     * @param a the first three-dimensional char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second three-dimensional char array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first three-dimensional char array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second three-dimensional char array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new three-dimensional char array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair (inside
+     *         corresponding layers) exceeds {@code Integer.MAX_VALUE}
      */
-    public static char[][][] concat(final char[][][] a, final char[][][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new char[0][][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static char[][][] concat(final char[][][] a, final char[][][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null layers unchanged, while this loop replaces them with empty arrays. Whether a
+        // null layer survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final char[][][] result = new char[maxLen][][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3149,9 +3304,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
      * <ul>
      *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
-     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If only one array has a row at that index, a copy of that row is used in the result</li>
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
+     *
+     * <p>A {@code null} row inside either input is therefore treated as an empty row: the returned array never
+     * contains a {@code null} row, whatever the other argument is. This differs from the generic
+     * {@link #concat2D(Object[][], Object[][])}, which propagates a {@code null} row.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3174,29 +3333,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * byte[][] a = {{1, 2}};
      * byte[][] b = new byte[0][];
      * byte[][] result = Array.concat(a, b);
-     * // result = {{1, 2}} (clone of a)
+     * // result = {{1, 2}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * byte[][] result = Array.concat((byte[][]) null, null);
      * // result = new byte[0][]
      * }</pre>
      *
-     * @param a the first two-dimensional byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second two-dimensional byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first two-dimensional byte array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second two-dimensional byte array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new two-dimensional byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair exceeds
+     *         {@code Integer.MAX_VALUE}
      */
-    public static byte[][] concat(final byte[][] a, final byte[][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new byte[0][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static byte[][] concat(final byte[][] a, final byte[][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null rows unchanged, while this loop replaces them with empty arrays. Whether a
+        // null row survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final byte[][] result = new byte[maxLen][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = N.concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3214,9 +3374,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
      *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
-     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If only one array has a layer at that index, a copy of that layer is used in the result</li>
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
+     *
+     * <p>A {@code null} layer inside either input is therefore treated as an empty layer: the returned array
+     * never contains a {@code null} layer, whatever the other argument is. This differs from the generic
+     * {@link #concat3D(Object[][][], Object[][][])}, which propagates a {@code null} layer.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3239,29 +3403,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * byte[][][] a = {{{1, 2}}};
      * byte[][][] b = new byte[0][][];
      * byte[][][] result = Array.concat(a, b);
-     * // result = {{{1, 2}}} (clone of a)
+     * // result = {{{1, 2}}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * byte[][][] result = Array.concat((byte[][][]) null, null);
      * // result = new byte[0][][]
      * }</pre>
      *
-     * @param a the first three-dimensional byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second three-dimensional byte array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first three-dimensional byte array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second three-dimensional byte array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new three-dimensional byte array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair (inside
+     *         corresponding layers) exceeds {@code Integer.MAX_VALUE}
      */
-    public static byte[][][] concat(final byte[][][] a, final byte[][][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new byte[0][][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static byte[][][] concat(final byte[][][] a, final byte[][][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null layers unchanged, while this loop replaces them with empty arrays. Whether a
+        // null layer survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final byte[][][] result = new byte[maxLen][][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3279,9 +3444,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
      * <ul>
      *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
-     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If only one array has a row at that index, a copy of that row is used in the result</li>
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
+     *
+     * <p>A {@code null} row inside either input is therefore treated as an empty row: the returned array never
+     * contains a {@code null} row, whatever the other argument is. This differs from the generic
+     * {@link #concat2D(Object[][], Object[][])}, which propagates a {@code null} row.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3304,29 +3473,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * short[][] a = {{1, 2}};
      * short[][] b = new short[0][];
      * short[][] result = Array.concat(a, b);
-     * // result = {{1, 2}} (clone of a)
+     * // result = {{1, 2}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * short[][] result = Array.concat((short[][]) null, null);
      * // result = new short[0][]
      * }</pre>
      *
-     * @param a the first two-dimensional short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second two-dimensional short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first two-dimensional short array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second two-dimensional short array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new two-dimensional short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair exceeds
+     *         {@code Integer.MAX_VALUE}
      */
-    public static short[][] concat(final short[][] a, final short[][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new short[0][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static short[][] concat(final short[][] a, final short[][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null rows unchanged, while this loop replaces them with empty arrays. Whether a
+        // null row survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final short[][] result = new short[maxLen][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = N.concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3344,9 +3514,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
      *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
-     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If only one array has a layer at that index, a copy of that layer is used in the result</li>
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
+     *
+     * <p>A {@code null} layer inside either input is therefore treated as an empty layer: the returned array
+     * never contains a {@code null} layer, whatever the other argument is. This differs from the generic
+     * {@link #concat3D(Object[][][], Object[][][])}, which propagates a {@code null} layer.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3369,29 +3543,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * short[][][] a = {{{1, 2}}};
      * short[][][] b = new short[0][][];
      * short[][][] result = Array.concat(a, b);
-     * // result = {{{1, 2}}} (clone of a)
+     * // result = {{{1, 2}}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * short[][][] result = Array.concat((short[][][]) null, null);
      * // result = new short[0][][]
      * }</pre>
      *
-     * @param a the first three-dimensional short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second three-dimensional short array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first three-dimensional short array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second three-dimensional short array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new three-dimensional short array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair (inside
+     *         corresponding layers) exceeds {@code Integer.MAX_VALUE}
      */
-    public static short[][][] concat(final short[][][] a, final short[][][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new short[0][][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static short[][][] concat(final short[][][] a, final short[][][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null layers unchanged, while this loop replaces them with empty arrays. Whether a
+        // null layer survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final short[][][] result = new short[maxLen][][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3409,9 +3584,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
      * <ul>
      *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
-     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If only one array has a row at that index, a copy of that row is used in the result</li>
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
+     *
+     * <p>A {@code null} row inside either input is therefore treated as an empty row: the returned array never
+     * contains a {@code null} row, whatever the other argument is. This differs from the generic
+     * {@link #concat2D(Object[][], Object[][])}, which propagates a {@code null} row.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3434,29 +3613,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * int[][] a = {{1, 2}};
      * int[][] b = new int[0][];
      * int[][] result = Array.concat(a, b);
-     * // result = {{1, 2}} (clone of a)
+     * // result = {{1, 2}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * int[][] result = Array.concat((int[][]) null, null);
      * // result = new int[0][]
      * }</pre>
      *
-     * @param a the first two-dimensional int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second two-dimensional int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first two-dimensional int array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second two-dimensional int array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new two-dimensional int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair exceeds
+     *         {@code Integer.MAX_VALUE}
      */
-    public static int[][] concat(final int[][] a, final int[][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new int[0][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static int[][] concat(final int[][] a, final int[][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null rows unchanged, while this loop replaces them with empty arrays. Whether a
+        // null row survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final int[][] result = new int[maxLen][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = N.concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3474,9 +3654,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
      *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
-     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If only one array has a layer at that index, a copy of that layer is used in the result</li>
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
+     *
+     * <p>A {@code null} layer inside either input is therefore treated as an empty layer: the returned array
+     * never contains a {@code null} layer, whatever the other argument is. This differs from the generic
+     * {@link #concat3D(Object[][][], Object[][][])}, which propagates a {@code null} layer.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3499,29 +3683,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * int[][][] a = {{{1, 2}}};
      * int[][][] b = new int[0][][];
      * int[][][] result = Array.concat(a, b);
-     * // result = {{{1, 2}}} (clone of a)
+     * // result = {{{1, 2}}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * int[][][] result = Array.concat((int[][][]) null, null);
      * // result = new int[0][][]
      * }</pre>
      *
-     * @param a the first three-dimensional int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second three-dimensional int array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first three-dimensional int array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second three-dimensional int array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new three-dimensional int array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair (inside
+     *         corresponding layers) exceeds {@code Integer.MAX_VALUE}
      */
-    public static int[][][] concat(final int[][][] a, final int[][][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new int[0][][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static int[][][] concat(final int[][][] a, final int[][][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null layers unchanged, while this loop replaces them with empty arrays. Whether a
+        // null layer survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final int[][][] result = new int[maxLen][][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3539,9 +3724,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
      * <ul>
      *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
-     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If only one array has a row at that index, a copy of that row is used in the result</li>
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
+     *
+     * <p>A {@code null} row inside either input is therefore treated as an empty row: the returned array never
+     * contains a {@code null} row, whatever the other argument is. This differs from the generic
+     * {@link #concat2D(Object[][], Object[][])}, which propagates a {@code null} row.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3564,29 +3753,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * long[][] a = {{1L, 2L}};
      * long[][] b = new long[0][];
      * long[][] result = Array.concat(a, b);
-     * // result = {{1L, 2L}} (clone of a)
+     * // result = {{1L, 2L}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * long[][] result = Array.concat((long[][]) null, null);
      * // result = new long[0][]
      * }</pre>
      *
-     * @param a the first two-dimensional long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second two-dimensional long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first two-dimensional long array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second two-dimensional long array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new two-dimensional long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair exceeds
+     *         {@code Integer.MAX_VALUE}
      */
-    public static long[][] concat(final long[][] a, final long[][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new long[0][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static long[][] concat(final long[][] a, final long[][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null rows unchanged, while this loop replaces them with empty arrays. Whether a
+        // null row survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final long[][] result = new long[maxLen][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = N.concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3604,9 +3794,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
      *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
-     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If only one array has a layer at that index, a copy of that layer is used in the result</li>
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
+     *
+     * <p>A {@code null} layer inside either input is therefore treated as an empty layer: the returned array
+     * never contains a {@code null} layer, whatever the other argument is. This differs from the generic
+     * {@link #concat3D(Object[][][], Object[][][])}, which propagates a {@code null} layer.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3629,29 +3823,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * long[][][] a = {{{1L, 2L}}};
      * long[][][] b = new long[0][][];
      * long[][][] result = Array.concat(a, b);
-     * // result = {{{1L, 2L}}} (clone of a)
+     * // result = {{{1L, 2L}}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * long[][][] result = Array.concat((long[][][]) null, null);
      * // result = new long[0][][]
      * }</pre>
      *
-     * @param a the first three-dimensional long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second three-dimensional long array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first three-dimensional long array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second three-dimensional long array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new three-dimensional long array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair (inside
+     *         corresponding layers) exceeds {@code Integer.MAX_VALUE}
      */
-    public static long[][][] concat(final long[][][] a, final long[][][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new long[0][][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static long[][][] concat(final long[][][] a, final long[][][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null layers unchanged, while this loop replaces them with empty arrays. Whether a
+        // null layer survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final long[][][] result = new long[maxLen][][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3669,9 +3864,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
      * <ul>
      *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
-     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If only one array has a row at that index, a copy of that row is used in the result</li>
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
+     *
+     * <p>A {@code null} row inside either input is therefore treated as an empty row: the returned array never
+     * contains a {@code null} row, whatever the other argument is. This differs from the generic
+     * {@link #concat2D(Object[][], Object[][])}, which propagates a {@code null} row.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3694,29 +3893,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * float[][] a = {{1.0f, 2.0f}};
      * float[][] b = new float[0][];
      * float[][] result = Array.concat(a, b);
-     * // result = {{1.0f, 2.0f}} (clone of a)
+     * // result = {{1.0f, 2.0f}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * float[][] result = Array.concat((float[][]) null, null);
      * // result = new float[0][]
      * }</pre>
      *
-     * @param a the first two-dimensional float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second two-dimensional float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first two-dimensional float array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second two-dimensional float array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new two-dimensional float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair exceeds
+     *         {@code Integer.MAX_VALUE}
      */
-    public static float[][] concat(final float[][] a, final float[][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new float[0][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static float[][] concat(final float[][] a, final float[][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null rows unchanged, while this loop replaces them with empty arrays. Whether a
+        // null row survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final float[][] result = new float[maxLen][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = N.concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3734,9 +3934,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
      *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
-     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If only one array has a layer at that index, a copy of that layer is used in the result</li>
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
+     *
+     * <p>A {@code null} layer inside either input is therefore treated as an empty layer: the returned array
+     * never contains a {@code null} layer, whatever the other argument is. This differs from the generic
+     * {@link #concat3D(Object[][][], Object[][][])}, which propagates a {@code null} layer.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3759,29 +3963,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * float[][][] a = {{{1.0f, 2.0f}}};
      * float[][][] b = new float[0][][];
      * float[][][] result = Array.concat(a, b);
-     * // result = {{{1.0f, 2.0f}}} (clone of a)
+     * // result = {{{1.0f, 2.0f}}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * float[][][] result = Array.concat((float[][][]) null, null);
      * // result = new float[0][][]
      * }</pre>
      *
-     * @param a the first three-dimensional float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second three-dimensional float array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first three-dimensional float array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second three-dimensional float array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new three-dimensional float array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair (inside
+     *         corresponding layers) exceeds {@code Integer.MAX_VALUE}
      */
-    public static float[][][] concat(final float[][][] a, final float[][][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new float[0][][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static float[][][] concat(final float[][][] a, final float[][][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null layers unchanged, while this loop replaces them with empty arrays. Whether a
+        // null layer survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final float[][][] result = new float[maxLen][][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3799,9 +4004,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
      * <ul>
      *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
-     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If only one array has a row at that index, a copy of that row is used in the result</li>
      *   <li>If neither array has a row at that index (both are null), the result row is an empty array</li>
      * </ul>
+     *
+     * <p>A {@code null} row inside either input is therefore treated as an empty row: the returned array never
+     * contains a {@code null} row, whatever the other argument is. This differs from the generic
+     * {@link #concat2D(Object[][], Object[][])}, which propagates a {@code null} row.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3824,29 +4033,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * double[][] a = {{1.0, 2.0}};
      * double[][] b = new double[0][];
      * double[][] result = Array.concat(a, b);
-     * // result = {{1.0, 2.0}} (clone of a)
+     * // result = {{1.0, 2.0}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * double[][] result = Array.concat((double[][]) null, null);
      * // result = new double[0][]
      * }</pre>
      *
-     * @param a the first two-dimensional double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second two-dimensional double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first two-dimensional double array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second two-dimensional double array to concatenate. Can be {@code null} or empty, in which case the result is a row-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new two-dimensional double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair exceeds
+     *         {@code Integer.MAX_VALUE}
      */
-    public static double[][] concat(final double[][] a, final double[][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new double[0][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static double[][] concat(final double[][] a, final double[][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null rows unchanged, while this loop replaces them with empty arrays. Whether a
+        // null row survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final double[][] result = new double[maxLen][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = N.concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3864,9 +4074,13 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
      *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat method</li>
-     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If only one array has a layer at that index, a copy of that layer is used in the result</li>
      *   <li>If neither array has a layer at that index (both are null), the result layer is an empty two-dimensional array</li>
      * </ul>
+     *
+     * <p>A {@code null} layer inside either input is therefore treated as an empty layer: the returned array
+     * never contains a {@code null} layer, whatever the other argument is. This differs from the generic
+     * {@link #concat3D(Object[][][], Object[][][])}, which propagates a {@code null} layer.
      *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
      * which will be handled gracefully.
@@ -3889,29 +4103,30 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * double[][][] a = {{{1.0, 2.0}}};
      * double[][][] b = new double[0][][];
      * double[][][] result = Array.concat(a, b);
-     * // result = {{{1.0, 2.0}}} (clone of a)
+     * // result = {{{1.0, 2.0}}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null/empty
      * double[][][] result = Array.concat((double[][][]) null, null);
      * // result = new double[0][][]
      * }</pre>
      *
-     * @param a the first three-dimensional double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned (or an empty array if both are null/empty).
-     * @param b the second three-dimensional double array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned (or an empty array if both are null/empty).
+     * @param a the first three-dimensional double array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code b} (or an empty array if both are null/empty).
+     * @param b the second three-dimensional double array to concatenate. Can be {@code null} or empty, in which case the result is a layer-wise copy of {@code a} (or an empty array if both are null/empty).
      * @return a new three-dimensional double array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair (inside
+     *         corresponding layers) exceeds {@code Integer.MAX_VALUE}
      */
-    public static double[][][] concat(final double[][][] a, final double[][][] b) {
-        if (N.isEmpty(a)) {
-            return N.isEmpty(b) ? new double[0][][] : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+    public static double[][][] concat(final double[][][] a, final double[][][] b) throws IllegalArgumentException {
+        // No shortcut for an empty/null side: returning N.clone(a) there used to hand back the
+        // caller's null layers unchanged, while this loop replaces them with empty arrays. Whether a
+        // null layer survived then depended only on whether the *other* argument happened to be empty.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final double[][][] result = new double[maxLen][][];
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
+        for (int i = 0; i < maxLen; i++) {
             result[i] = concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
         }
 
@@ -3929,12 +4144,39 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each row index:
      * <ul>
      *   <li>If both arrays have a row at that index, the rows are concatenated together</li>
-     *   <li>If only one array has a row at that index, that row is used in the result</li>
+     *   <li>If only one array has a row at that index, a copy of that row is used in the result</li>
      *   <li>If neither array has a row at that index (both are null), the result row is {@code null}</li>
      * </ul>
      *
+     * <p><b>Deliberate divergence from the primitive overloads.</b> {@link #concat(int[][], int[][])} and its
+     * siblings normalise a {@code null} row to an empty row, so their result never contains {@code null}. This
+     * method propagates {@code null} instead, consistently on every path, so that a result row is {@code null}
+     * exactly when both input rows are {@code null} - matching {@link N#concat(Object[], Object[])}, which
+     * returns {@code null} for two {@code null} rows, and matching the top-level rule that
+     * {@code concat2D(null, null)} is {@code null} rather than an empty array. Iterate the result
+     * with a {@code null} check, or use {@link N#nullToEmpty(Object[], Class)} per row, passing the row's
+     * array class (e.g. {@code String[].class}).
+     *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
-     * which will be handled gracefully. The method preserves the component type of the input arrays in the result.
+     * which will be handled gracefully. Every array dimension is copied; the elements themselves are shared.
+     *
+     * <p><b>Result component type:</b> the returned array's runtime component type is always {@code a}'s, whatever
+     * {@code a}'s length - it falls back to {@code b}'s only when {@code a} itself is {@code null}. This is the rule
+     * {@link N#concat(Object[], Object[])} applies one dimension down, so a row of {@code b} that is not assignable
+     * to {@code a}'s type raises an {@link ArrayStoreException} regardless of whether {@code a} happens to be empty.
+     *
+     * <p><b>Why two {@code null}s give {@code null}:</b> unlike the primitive overloads such as
+     * {@link #concat(boolean[][], boolean[][])} — which return an empty array for two {@code null}s because
+     * their component type is fixed by the signature — the runtime component type of {@code T[][]} is only
+     * recoverable from an actual argument, so with both {@code null} there is nothing to allocate and
+     * {@code null} is returned instead.
+     *
+     * <p><b>Why the name carries a {@code 2D} suffix:</b> to read as a pair with {@link #concat3D(Object[][][], Object[][][])}
+     * and to keep the dimension visible at the call site. It is <i>not</i> forced by overload resolution:
+     * {@code concat(T[][], T[][])} and {@code concat(T[][][], T[][][])} would coexist without ambiguity, because
+     * a three-dimensional argument matches both and the three-dimensional one is the more specific
+     * ({@code T[][][]} is a {@code S[][]} with {@code S = T[]}). Note that an uncast {@code Array.concat(null, null)}
+     * is already ambiguous among the primitive overloads regardless.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3954,7 +4196,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * String[][] a = {{"hello", "world"}};
      * String[][] b = new String[0][];
      * String[][] result = Array.concat2D(a, b);
-     * // result = {{"hello", "world"}} (clone of a)
+     * // result = {{"hello", "world"}} (a row-wise copy of a)
      *
      * // Example 4: Both arrays are null
      * String[][] result = Array.concat2D(null, null);
@@ -3963,39 +4205,55 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * // Example 5: Non-null empty first array with null second array
      * String[][] result = Array.concat2D(new String[0][], null);
      * // result = String[0][] (non-null empty array)
+     *
+     * // Example 6: an empty first array still fixes the result's component type
+     * Number[][] nums = {{2.5}, {3}};
+     * Array.concat2D(new Integer[0][], nums);   // throws ArrayStoreException - a Number[] row cannot go into an Integer[][]
      * }</pre>
      *
      * @param <T> the component type of the elements in the arrays.
-     * @param a the first two-dimensional array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned
-     *           when {@code b} is non-{@code null}, or an empty array when {@code b} is {@code null}.
-     * @param b the second two-dimensional array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned
-     *           when {@code a} is non-{@code null} and non-empty.
+     * @param a the first two-dimensional array to concatenate. Can be {@code null} or empty, in which case the result is a
+     *           row-wise copy of {@code b} (or, when {@code b} is {@code null} too, an empty array if {@code a} is
+     *           non-{@code null} and {@code null} if it is not). Note that a non-{@code null}
+     *           {@code a} still dictates the result's runtime component type even when it is empty.
+     * @param b the second two-dimensional array to concatenate. Can be {@code null} or empty, in which case the result is a
+     *           row-wise copy of {@code a}.
      * @return a new two-dimensional array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each row in the result is the concatenation of the corresponding rows from {@code a} and {@code b}.
      *         Returns {@code null} only when both {@code a} and {@code b} are {@code null}.
+     * @throws ArrayStoreException if a copied element, row, or layer is incompatible with the runtime component type selected from the corresponding non-null input arrays.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair exceeds
+     *         {@code Integer.MAX_VALUE}
      *
      * @see N#concat(Object[], Object[])
      * @see #concat3D(Object[][][], Object[][][])
      */
     @MayReturnNull
-    public static <T> T[][] concat2D(final T[][] a, final T[][] b) {
+    public static <T> T[][] concat2D(final T[][] a, final T[][] b) throws ArrayStoreException, IllegalArgumentException {
         if (a == null && b == null) {
             return null;
         }
 
         final Class<?> componentType = a != null ? a.getClass().getComponentType() : b.getClass().getComponentType();
 
-        if (N.isEmpty(a)) {
-            return b == null ? Array.newInstance(componentType, 0) : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return a == null ? Array.newInstance(componentType, 0) : N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+        // No shortcut for an empty/null side: returning N.clone(b) there gave the result *b*'s component type
+        // even though a's was available, so the runtime type of the result - and whether an element of b could
+        // be stored in it at all - depended on a's length rather than on a's type. N.concat(T[], T[]) settled
+        // that rule for the family (a's type wins whenever a is non-null); this keeps the 2-D form to it.
+        // Content and aliasing are unchanged: N.clone copies every dimension, and so does the loop below.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final T[][] result = newInstance(componentType, maxLen);
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
-            result[i] = N.concat(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
+        for (int i = 0; i < maxLen; i++) {
+            final T[] rowA = i < aLen ? a[i] : null;
+            final T[] rowB = i < bLen ? b[i] : null;
+
+            // N.concat re-derives the row's component type reflectively on every call. When only one side has a
+            // row there is nothing to concatenate, so clone it directly: same contents, same null-in/null-out,
+            // and roughly half the cost on a matrix whose other operand is empty.
+            result[i] = rowA == null ? N.clone(rowB) : rowB == null ? N.clone(rowA) : N.concat(rowA, rowB);
         }
 
         return result;
@@ -4012,12 +4270,25 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * The resulting array's length equals the maximum length of the two input arrays. For each layer index:
      * <ul>
      *   <li>If both arrays have a layer at that index, the layers are concatenated using the two-dimensional concat2D method</li>
-     *   <li>If only one array has a layer at that index, that layer is used in the result</li>
+     *   <li>If only one array has a layer at that index, a copy of that layer is used in the result</li>
      *   <li>If neither array has a layer at that index (both are null), the result layer is {@code null}</li>
      * </ul>
      *
+     * <p><b>Deliberate divergence from the primitive overloads.</b> {@link #concat(int[][][], int[][][])} and its
+     * siblings normalise a {@code null} layer to an empty layer, so their result never contains {@code null}.
+     * This method propagates {@code null} instead, consistently on every path, for the reason given on
+     * {@link #concat2D(Object[][], Object[][])}.
+     *
      * <p>The operation creates a new array and does not modify the input arrays. Both input arrays can be {@code null} or empty,
-     * which will be handled gracefully. The method preserves the component type of the input arrays in the result.
+     * which will be handled gracefully. Every array dimension is copied; the elements themselves are shared.
+     *
+     * <p><b>Result component type:</b> as on {@link #concat2D(Object[][], Object[][])}, the returned array's runtime
+     * component type is always {@code a}'s, whatever {@code a}'s length - it falls back to {@code b}'s only when
+     * {@code a} itself is {@code null}.
+     *
+     * <p>See {@link #concat2D(Object[][], Object[][])} for why this family is named {@code concat2D}/{@code concat3D}
+     * rather than {@code concat}, and why two {@code null} arguments yield {@code null} here while the primitive
+     * overloads yield an empty array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4037,7 +4308,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * String[][][] a = {{{"hello", "world"}}};
      * String[][][] b = new String[0][][];
      * String[][][] result = Array.concat3D(a, b);
-     * // result = {{{"hello", "world"}}} (clone of a)
+     * // result = {{{"hello", "world"}}} (a layer-wise copy of a)
      *
      * // Example 4: Both arrays are null
      * String[][][] result = Array.concat3D(null, null);
@@ -4049,36 +4320,42 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param <T> the component type of the elements in the arrays.
-     * @param a the first three-dimensional array to concatenate. Can be {@code null} or empty, in which case a clone of {@code b} is returned
-     *           when {@code b} is non-{@code null}, or an empty array when {@code b} is {@code null}.
-     * @param b the second three-dimensional array to concatenate. Can be {@code null} or empty, in which case a clone of {@code a} is returned
-     *           when {@code a} is non-{@code null} and non-empty.
+     * @param a the first three-dimensional array to concatenate. Can be {@code null} or empty, in which case the result is a
+     *           layer-wise copy of {@code b} (or, when {@code b} is {@code null} too, an empty array if {@code a} is
+     *           non-{@code null} and {@code null} if it is not). Note that a non-{@code null}
+     *           {@code a} still dictates the result's runtime component type even when it is empty.
+     * @param b the second three-dimensional array to concatenate. Can be {@code null} or empty, in which case the result is a
+     *           layer-wise copy of {@code a}.
      * @return a new three-dimensional array containing the element-wise concatenation of the input arrays. The length equals max(a.length, b.length).
      *         Each two-dimensional layer in the result is the concatenation of the corresponding layers from {@code a} and {@code b}.
      *         Returns {@code null} only when both {@code a} and {@code b} are {@code null}.
+     * @throws ArrayStoreException if a copied element, row, or layer is incompatible with the runtime component type selected from the corresponding non-null input arrays.
+     * @throws IllegalArgumentException if the combined length of a corresponding row pair (inside
+     *         corresponding layers) exceeds {@code Integer.MAX_VALUE}
      *
      * @see N#concat(Object[], Object[])
      * @see #concat2D(Object[][], Object[][])
      */
     @MayReturnNull
-    public static <T> T[][][] concat3D(final T[][][] a, final T[][][] b) {
+    public static <T> T[][][] concat3D(final T[][][] a, final T[][][] b) throws ArrayStoreException, IllegalArgumentException {
         if (a == null && b == null) {
             return null;
         }
 
         final Class<?> componentType = a != null ? a.getClass().getComponentType() : b.getClass().getComponentType();
 
-        if (N.isEmpty(a)) {
-            return b == null ? Array.newInstance(componentType, 0) : N.clone(b);
-        } else if (N.isEmpty(b)) {
-            return a == null ? Array.newInstance(componentType, 0) : N.clone(a);
-        }
-
-        final int maxLen = N.max(N.len(a), N.len(b));
+        // No shortcut for an empty/null side - see concat2D(Object[][], Object[][]) for why.
+        final int aLen = N.len(a);
+        final int bLen = N.len(b);
+        final int maxLen = N.max(aLen, bLen);
         final T[][][] result = newInstance(componentType, maxLen);
 
-        for (int i = 0, aLen = N.len(a), bLen = N.len(b); i < maxLen; i++) {
-            result[i] = concat2D(i < aLen ? a[i] : null, i < bLen ? b[i] : null);
+        for (int i = 0; i < maxLen; i++) {
+            final T[][] layerA = i < aLen ? a[i] : null;
+            final T[][] layerB = i < bLen ? b[i] : null;
+
+            // As in concat2D: a layer that has no counterpart is copied rather than run through the merge.
+            result[i] = layerA == null ? N.clone(layerB) : layerB == null ? N.clone(layerA) : concat2D(layerA, layerB);
         }
 
         return result;
@@ -4121,7 +4398,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Boolean objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #box(boolean[])
      */
     @MayReturnNull
@@ -4183,7 +4462,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Character objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #box(char[])
      */
     @MayReturnNull
@@ -4245,7 +4526,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Byte objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #box(byte[])
      */
     @MayReturnNull
@@ -4307,7 +4590,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Short objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #box(short[])
      */
     @MayReturnNull
@@ -4369,7 +4654,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Integer objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #box(int[])
      */
     @MayReturnNull
@@ -4431,7 +4718,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Long objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #box(long[])
      */
     @MayReturnNull
@@ -4493,7 +4782,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Float objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #box(float[])
      */
     @MayReturnNull
@@ -4555,7 +4846,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param fromIndex the start index of the portion to be converted (inclusive).
      * @param toIndex the end index of the portion to be converted (exclusive).
      * @return an array of Double objects representing the specified portion of the input array, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #box(double[])
      */
     @MayReturnNull
@@ -4590,8 +4883,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Boolean[][] nullResult = Array.box((boolean[][]) null);   // returns null
      * }</pre>
      *
-     * @param a the two-dimensional array of primitive booleans to be converted.
-     * @return a two-dimensional array of Boolean objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive booleans to be converted. May be {@code null}.
+     * @return a two-dimensional array of Boolean objects, {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result.
      * @see #box(boolean[])
      */
     @MayReturnNull
@@ -4619,8 +4912,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Character[][] nullResult = Array.box((char[][]) null);   // returns null
      * }</pre>
      *
-     * @param a the two-dimensional array of primitive chars to be converted.
-     * @return a two-dimensional array of Character objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive chars to be converted. May be {@code null}.
+     * @return a two-dimensional array of Character objects, {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result.
      * @see #box(char[])
      */
     @MayReturnNull
@@ -4648,8 +4941,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Byte[][] nullResult = Array.box((byte[][]) null);   // returns null
      * }</pre>
      *
-     * @param a the two-dimensional array of primitive bytes to be converted.
-     * @return a two-dimensional array of Byte objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive bytes to be converted. May be {@code null}.
+     * @return a two-dimensional array of Byte objects, {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result.
      * @see #box(byte[])
      */
     @MayReturnNull
@@ -4677,8 +4970,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Short[][] nullResult = Array.box((short[][]) null);   // returns null
      * }</pre>
      *
-     * @param a the two-dimensional array of primitive shorts to be converted.
-     * @return a two-dimensional array of Short objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive shorts to be converted. May be {@code null}.
+     * @return a two-dimensional array of Short objects, {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result.
      * @see #box(short[])
      */
     @MayReturnNull
@@ -4706,8 +4999,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Integer[][] nullResult = Array.box((int[][]) null);   // returns null
      * }</pre>
      *
-     * @param a the two-dimensional array of primitive integers to be converted.
-     * @return a two-dimensional array of Integer objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive integers to be converted. May be {@code null}.
+     * @return a two-dimensional array of Integer objects, {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result.
      * @see #box(int[])
      */
     @MayReturnNull
@@ -4735,8 +5028,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Long[][] nullResult = Array.box((long[][]) null);   // returns null
      * }</pre>
      *
-     * @param a the two-dimensional array of primitive longs to be converted.
-     * @return a two-dimensional array of Long objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive longs to be converted. May be {@code null}.
+     * @return a two-dimensional array of Long objects, {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result.
      * @see #box(long[])
      */
     @MayReturnNull
@@ -4764,8 +5057,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Float[][] nullResult = Array.box((float[][]) null);   // returns null
      * }</pre>
      *
-     * @param a the two-dimensional array of primitive floats to be converted.
-     * @return a two-dimensional array of Float objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive floats to be converted. May be {@code null}.
+     * @return a two-dimensional array of Float objects, {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result.
      * @see #box(float[])
      */
     @MayReturnNull
@@ -4793,8 +5086,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Double[][] nullResult = Array.box((double[][]) null);   // returns null
      * }</pre>
      *
-     * @param a the two-dimensional array of primitive doubles to be converted.
-     * @return a two-dimensional array of Double objects, {@code null} if the input array is {@code null}.
+     * @param a the two-dimensional array of primitive doubles to be converted. May be {@code null}.
+     * @return a two-dimensional array of Double objects, {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result.
      * @see #box(double[])
      */
     @MayReturnNull
@@ -4822,8 +5115,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Boolean[][][] nullResult = Array.box((boolean[][][]) null);   // returns null
      * }</pre>
      *
-     * @param a the three-dimensional array of primitive booleans to be converted.
-     * @return a three-dimensional array of Boolean objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive booleans to be converted. May be {@code null}.
+     * @return a three-dimensional array of Boolean objects, {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result.
      * @see #box(boolean[])
      * @see #box(boolean[][])
      */
@@ -4852,8 +5145,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Character[][][] nullResult = Array.box((char[][][]) null);   // returns null
      * }</pre>
      *
-     * @param a the three-dimensional array of primitive chars to be converted.
-     * @return a three-dimensional array of Character objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive chars to be converted. May be {@code null}.
+     * @return a three-dimensional array of Character objects, {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result.
      * @see #box(char[])
      * @see #box(char[][])
      */
@@ -4882,8 +5175,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Byte[][][] nullResult = Array.box((byte[][][]) null);   // returns null
      * }</pre>
      *
-     * @param a the three-dimensional array of primitive bytes to be converted.
-     * @return a three-dimensional array of Byte objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive bytes to be converted. May be {@code null}.
+     * @return a three-dimensional array of Byte objects, {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result.
      * @see #box(byte[])
      * @see #box(byte[][])
      */
@@ -4912,8 +5205,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Short[][][] nullResult = Array.box((short[][][]) null);   // returns null
      * }</pre>
      *
-     * @param a the three-dimensional array of primitive shorts to be converted.
-     * @return a three-dimensional array of Short objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive shorts to be converted. May be {@code null}.
+     * @return a three-dimensional array of Short objects, {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result.
      * @see #box(short[])
      * @see #box(short[][])
      */
@@ -4942,8 +5235,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Integer[][][] nullResult = Array.box((int[][][]) null);   // returns null
      * }</pre>
      *
-     * @param a the three-dimensional array of primitive integers to be converted.
-     * @return a three-dimensional array of Integer objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive integers to be converted. May be {@code null}.
+     * @return a three-dimensional array of Integer objects, {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result.
      * @see #box(int[])
      * @see #box(int[][])
      */
@@ -4972,8 +5265,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Long[][][] nullResult = Array.box((long[][][]) null);   // returns null
      * }</pre>
      *
-     * @param a the three-dimensional array of primitive longs to be converted.
-     * @return a three-dimensional array of Long objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive longs to be converted. May be {@code null}.
+     * @return a three-dimensional array of Long objects, {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result.
      * @see #box(long[])
      * @see #box(long[][])
      */
@@ -5002,8 +5295,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Float[][][] nullResult = Array.box((float[][][]) null);   // returns null
      * }</pre>
      *
-     * @param a the three-dimensional array of primitive floats to be converted.
-     * @return a three-dimensional array of Float objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive floats to be converted. May be {@code null}.
+     * @return a three-dimensional array of Float objects, {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result.
      * @see #box(float[])
      * @see #box(float[][])
      */
@@ -5032,8 +5325,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Double[][][] nullResult = Array.box((double[][][]) null);   // returns null
      * }</pre>
      *
-     * @param a the three-dimensional array of primitive doubles to be converted.
-     * @return a three-dimensional array of Double objects, {@code null} if the input array is {@code null}.
+     * @param a the three-dimensional array of primitive doubles to be converted. May be {@code null}.
+     * @return a three-dimensional array of Double objects, {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result.
      * @see #box(double[])
      * @see #box(double[][])
      */
@@ -5116,7 +5409,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
      * @return an array of primitive booleans, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #unbox(Boolean[], boolean)
      */
     @MayReturnNull
@@ -5206,7 +5501,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
      * @return an array of primitive chars, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #unbox(Character[], char)
      * @see #unbox(Character[])
      */
@@ -5295,7 +5592,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
      * @return an array of primitive bytes, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #unbox(Byte[], byte)
      * @see #unbox(Byte[])
      */
@@ -5384,7 +5683,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
      * @return an array of primitive shorts, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #unbox(Short[], short)
      * @see #unbox(Short[])
      */
@@ -5473,7 +5774,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
      * @return an array of primitive integers, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #unbox(Integer[], int)
      * @see #unbox(Integer...)
      */
@@ -5562,7 +5865,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
      * @return an array of primitive longs, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #unbox(Long[], long)
      * @see #unbox(Long...)
      */
@@ -5654,7 +5959,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
      * @return an array of primitive floats, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #unbox(Float[], float)
      * @see #unbox(Float...)
      */
@@ -5743,7 +6050,9 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param toIndex the ending index (exclusive) in the array to be converted.
      * @param valueForNull the value to be used for {@code null} values in the input array.
      * @return an array of primitive doubles, {@code null} if the input array is {@code null}.
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; a.length or fromIndex &gt; toIndex.
+     * @throws IndexOutOfBoundsException if {@code a} is non-{@code null} and fromIndex &lt; 0, toIndex &gt; a.length
+     *         or fromIndex &gt; toIndex. A {@code null} {@code a} returns {@code null} without any range validation,
+     *         so no index is rejected in that case.
      * @see #unbox(Double[], double)
      * @see #unbox(Double...)
      */
@@ -5781,7 +6090,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the two-dimensional array of Boolean objects to be converted. May be {@code null}.
-     * @return a two-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Boolean[][], boolean)
      * @see #unbox(Boolean[])
      */
@@ -5803,7 +6112,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array of Boolean objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Boolean[], boolean)
      */
     @MayReturnNull
@@ -5833,7 +6142,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the two-dimensional array of Character objects to be converted. May be {@code null}.
-     * @return a two-dimensional array of primitive chars, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive chars, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Character[][], char)
      * @see #unbox(Character[])
      */
@@ -5855,7 +6164,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array of Character objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive chars, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive chars, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Character[], char)
      */
     @MayReturnNull
@@ -5885,7 +6194,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the two-dimensional array of Byte objects to be converted. May be {@code null}.
-     * @return a two-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Byte[][], byte)
      * @see #unbox(Byte[])
      */
@@ -5907,7 +6216,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array of Byte objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Byte[], byte)
      */
     @MayReturnNull
@@ -5937,7 +6246,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the two-dimensional array of Short objects to be converted. May be {@code null}.
-     * @return a two-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Short[][], short)
      * @see #unbox(Short[])
      */
@@ -5959,7 +6268,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array of Short objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Short[], short)
      */
     @MayReturnNull
@@ -5989,7 +6298,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the two-dimensional array of Integer objects to be converted. May be {@code null}.
-     * @return a two-dimensional array of primitive integers, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive integers, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Integer[][], int)
      * @see #unbox(Integer[])
      */
@@ -6011,7 +6320,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array of Integer objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive integers, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive integers, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Integer[], int)
      */
     @MayReturnNull
@@ -6041,7 +6350,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the two-dimensional array of Long objects to be converted. May be {@code null}.
-     * @return a two-dimensional array of primitive longs, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive longs, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Long[][], long)
      * @see #unbox(Long[])
      */
@@ -6063,7 +6372,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array of Long objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive longs, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive longs, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Long[], long)
      */
     @MayReturnNull
@@ -6093,7 +6402,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the two-dimensional array of Float objects to be converted. May be {@code null}.
-     * @return a two-dimensional array of primitive floats, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive floats, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Float[][], float)
      * @see #unbox(Float[])
      */
@@ -6115,7 +6424,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array of Float objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive floats, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive floats, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Float[], float)
      */
     @MayReturnNull
@@ -6145,7 +6454,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the two-dimensional array of Double objects to be converted. May be {@code null}.
-     * @return a two-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Double[][], double)
      * @see #unbox(Double[])
      */
@@ -6167,7 +6476,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the two-dimensional array of Double objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a two-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}.
+     * @return a two-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}. A {@code null} row of the input is preserved as a {@code null} row of the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Double[], double)
      */
     @MayReturnNull
@@ -6197,7 +6506,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the three-dimensional array of Boolean objects to be converted. May be {@code null}.
-     * @return a three-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Boolean[][][], boolean)
      * @see #unbox(Boolean[][])
      */
@@ -6219,7 +6528,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the three-dimensional array of Boolean objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive booleans, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Boolean[][], boolean)
      */
     @MayReturnNull
@@ -6249,7 +6558,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the three-dimensional array of Character objects to be converted. May be {@code null}.
-     * @return a three-dimensional array of primitive chars, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive chars, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Character[][][], char)
      * @see #unbox(Character[][])
      */
@@ -6271,7 +6580,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the three-dimensional array of Character objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive chars, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive chars, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Character[][], char)
      */
     @MayReturnNull
@@ -6301,7 +6610,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the three-dimensional array of Byte objects to be converted. May be {@code null}.
-     * @return a three-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Byte[][][], byte)
      * @see #unbox(Byte[][])
      */
@@ -6323,7 +6632,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the three-dimensional array of Byte objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive bytes, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Byte[][], byte)
      */
     @MayReturnNull
@@ -6353,7 +6662,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the three-dimensional array of Short objects to be converted. May be {@code null}.
-     * @return a three-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Short[][][], short)
      * @see #unbox(Short[][])
      */
@@ -6375,7 +6684,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the three-dimensional array of Short objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive shorts, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Short[][], short)
      */
     @MayReturnNull
@@ -6405,7 +6714,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the three-dimensional array of Integer objects to be converted. May be {@code null}.
-     * @return a three-dimensional array of primitive integers, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive integers, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Integer[][][], int)
      * @see #unbox(Integer[][])
      */
@@ -6427,7 +6736,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the three-dimensional array of Integer objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive integers, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive integers, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Integer[][], int)
      */
     @MayReturnNull
@@ -6457,7 +6766,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the three-dimensional array of Long objects to be converted. May be {@code null}.
-     * @return a three-dimensional array of primitive longs, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive longs, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Long[][][], long)
      * @see #unbox(Long[][])
      */
@@ -6479,7 +6788,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the three-dimensional array of Long objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive longs, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive longs, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Long[][], long)
      */
     @MayReturnNull
@@ -6509,7 +6818,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the three-dimensional array of Float objects to be converted. May be {@code null}.
-     * @return a three-dimensional array of primitive floats, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive floats, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Float[][][], float)
      * @see #unbox(Float[][])
      */
@@ -6531,7 +6840,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the three-dimensional array of Float objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive floats, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive floats, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Float[][], float)
      */
     @MayReturnNull
@@ -6561,7 +6870,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * }</pre>
      *
      * @param a the three-dimensional array of Double objects to be converted. May be {@code null}.
-     * @return a three-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Double[][][], double)
      * @see #unbox(Double[][])
      */
@@ -6583,7 +6892,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param a the three-dimensional array of Double objects to be converted. May be {@code null}.
      * @param valueForNull the value to be used for {@code null} values in the input array.
-     * @return a three-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}.
+     * @return a three-dimensional array of primitive doubles, or {@code null} if the input array is {@code null}. A {@code null} layer or row of the input is preserved as {@code null} in the result; only {@code null} <i>elements</i> inside a row are replaced with the default value.
      * @see #unbox(Double[][], double)
      */
     @MayReturnNull
@@ -6627,7 +6936,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     @Beta
-    public static boolean[][] transpose(final boolean[][] a) {
+    public static boolean[][] transpose(final boolean[][] a) throws IllegalArgumentException {
         checkIfMatrixArray(a);
 
         if (a == null) {
@@ -6681,7 +6990,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     @Beta
-    public static char[][] transpose(final char[][] a) {
+    public static char[][] transpose(final char[][] a) throws IllegalArgumentException {
         checkIfMatrixArray(a);
 
         if (a == null) {
@@ -6735,7 +7044,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     @Beta
-    public static byte[][] transpose(final byte[][] a) {
+    public static byte[][] transpose(final byte[][] a) throws IllegalArgumentException {
         checkIfMatrixArray(a);
 
         if (a == null) {
@@ -6788,7 +7097,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     @Beta
-    public static short[][] transpose(final short[][] a) {
+    public static short[][] transpose(final short[][] a) throws IllegalArgumentException {
         checkIfMatrixArray(a);
 
         if (a == null) {
@@ -6841,7 +7150,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     @Beta
-    public static int[][] transpose(final int[][] a) {
+    public static int[][] transpose(final int[][] a) throws IllegalArgumentException {
         checkIfMatrixArray(a);
 
         if (a == null) {
@@ -6894,7 +7203,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     @Beta
-    public static long[][] transpose(final long[][] a) {
+    public static long[][] transpose(final long[][] a) throws IllegalArgumentException {
         checkIfMatrixArray(a);
 
         if (a == null) {
@@ -6947,7 +7256,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     @Beta
-    public static float[][] transpose(final float[][] a) {
+    public static float[][] transpose(final float[][] a) throws IllegalArgumentException {
         checkIfMatrixArray(a);
 
         if (a == null) {
@@ -7000,7 +7309,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     @MayReturnNull
     @Beta
-    public static double[][] transpose(final double[][] a) {
+    public static double[][] transpose(final double[][] a) throws IllegalArgumentException {
         checkIfMatrixArray(a);
 
         if (a == null) {
@@ -7052,14 +7361,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
      *
      * @param <T> the type of the elements in the two-dimensional array.
      * @param a the two-dimensional array to be transposed. May be {@code null}.
-     * @return the transposed two-dimensional array, whose component type is the component type of {@code a},
-     *         or {@code null} if the input array is {@code null}.
+     * @return the transposed two-dimensional array, whose runtime component type is {@code a}'s own component
+     *         type, or {@code null} if the input array is {@code null}.
      * @throws IllegalArgumentException if the input array is not a valid matrix (i.e. contains a {@code null}
      *         sub-array or sub-arrays of differing lengths).
      */
     @MayReturnNull
     @Beta
-    public static <T> T[][] transpose(final T[][] a) {
+    public static <T> T[][] transpose(final T[][] a) throws IllegalArgumentException {
         checkIfMatrixArray(a);
 
         if (a == null) {
@@ -7092,13 +7401,16 @@ public abstract sealed class Array permits Array.ArrayUtil {
         return c;
     }
 
-    private static void checkIfMatrixArray(final Object[] a) {
+    /**
+     * @throws IllegalArgumentException if a row is {@code null}, a row whose length is inspected is not an array, or row lengths differ.
+     */
+    private static void checkIfMatrixArray(final Object[] a) throws IllegalArgumentException {
         if (a == null || a.length == 0) {
             return;
         }
 
         if (a[0] == null) {
-            throw new IllegalArgumentException("Sub arrays must not be null");
+            throw new IllegalArgumentException("Sub-array at index 0 must not be null");
         }
 
         if (a.length == 1) {
@@ -7109,11 +7421,14 @@ public abstract sealed class Array permits Array.ArrayUtil {
 
         for (int i = 1, len = a.length; i < len; i++) {
             if (a[i] == null) {
-                throw new IllegalArgumentException("Sub arrays must not be null");
+                throw new IllegalArgumentException("Sub-array at index " + i + " must not be null");
             }
 
-            if (getLength(a[i]) != cols) {
-                throw new IllegalArgumentException("Subarray lengths must be the same");
+            final int colsOfRow = getLength(a[i]);
+
+            if (colsOfRow != cols) {
+                throw new IllegalArgumentException(
+                        "Sub-array lengths must all be the same: sub-array at index " + i + " has length " + colsOfRow + ", but index 0 has length " + cols);
             }
         }
     }

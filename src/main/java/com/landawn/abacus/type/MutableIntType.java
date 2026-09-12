@@ -82,12 +82,13 @@ public class MutableIntType extends NumberType<MutableInt> {
      * @param str the string to parse, may be {@code null} or empty
      * @return a {@code MutableInt} containing the parsed integer value,
      *         or {@code null} if the input is {@code null} or empty
-     * @throws NumberFormatException if the string cannot be parsed as an integer
+     * @throws NumberFormatException if the string is not a valid integer token
+     * @throws ArithmeticException if the string is a well-formed integer outside the {@code int} range
      * @see #valueOf(Object)
      * @see #stringOf(MutableInt)
      */
     @Override
-    public MutableInt valueOf(final String str) {
+    public MutableInt valueOf(final String str) throws NumberFormatException, ArithmeticException {
         return Strings.isEmpty(str) ? null : MutableInt.of(Numbers.toInt(str));
     }
 
@@ -100,10 +101,11 @@ public class MutableIntType extends NumberType<MutableInt> {
      * @param columnIndex the 1-based index of the column to retrieve
      * @return a {@code MutableInt} wrapping the retrieved value,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public MutableInt get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public MutableInt get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final int value = rs.getInt(columnIndex);
 
         return rs.wasNull() ? null : MutableInt.of(value);
@@ -118,10 +120,11 @@ public class MutableIntType extends NumberType<MutableInt> {
      * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
      * @return a {@code MutableInt} wrapping the retrieved value,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public MutableInt get(final ResultSet rs, final String columnName) throws SQLException {
+    public MutableInt get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final int value = rs.getInt(columnName);
 
         return rs.wasNull() ? null : MutableInt.of(value);
@@ -135,10 +138,11 @@ public class MutableIntType extends NumberType<MutableInt> {
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code MutableInt} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final MutableInt x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final MutableInt x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.INTEGER);
         } else {
@@ -154,10 +158,11 @@ public class MutableIntType extends NumberType<MutableInt> {
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code MutableInt} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final MutableInt x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final MutableInt x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.INTEGER);
         } else {
@@ -175,7 +180,8 @@ public class MutableIntType extends NumberType<MutableInt> {
      *
      * @param appendable the target to write to
      * @param x the {@code MutableInt} to append, may be {@code null}
-     * @throws IOException if an I/O error occurs while appending
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -187,7 +193,7 @@ public class MutableIntType extends NumberType<MutableInt> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final MutableInt x) throws IOException {
+    public void appendTo(final Appendable appendable, final MutableInt x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -211,10 +217,11 @@ public class MutableIntType extends NumberType<MutableInt> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code MutableInt} to write, may be {@code null}
      * @param config the serialization configuration controlling null-number output; may be {@code null}
-     * @throws IOException if an I/O error occurs while writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final MutableInt x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final MutableInt x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             if (config != null && config.isWriteNullNumberAsZero()) {
                 writer.writeInt(0);

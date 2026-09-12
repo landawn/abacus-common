@@ -15,6 +15,6 @@ public class SqlTimestampAdapter extends XmlAdapter<String, Timestamp> {
 
     @Override
     public Timestamp unmarshal(String v) throws Exception {
-        return Dates.parseTimestamp(v);
+        return Dates.parseToTimestamp(v);
     }
 }

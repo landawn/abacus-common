@@ -14,9 +14,9 @@
 
 package com.landawn.abacus.util;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.SortedMap;
 
 import com.landawn.abacus.annotation.Beta;
 
@@ -38,12 +38,19 @@ import com.landawn.abacus.annotation.Beta;
  * <li>{@link #builder()} - provides a builder for constructing immutable maps</li>
  * </ul>
  *
- * <p>The implementation preserves the iteration order of entries when created from a LinkedHashMap
- * or SortedMap, otherwise no specific iteration order is guaranteed.</p>
+ * <p>{@link #copyOf(Map)} preserves the source map's entry iteration order, and the {@code of(...)}
+ * factories and {@link #builder()} preserve the order in which the entries were supplied.</p>
  *
  * <p><b>Note:</b> unlike {@link Map#of(Object, Object)}, which throws {@link IllegalArgumentException} on
  * duplicate keys, the {@code of(...)} factory methods here accept duplicate keys and keep the last value
  * supplied for each key (last-value-wins).</p>
+ *
+ * <p><b>Note:</b> also unlike {@link Map#of(Object, Object)}, {@code null} keys and {@code null} values are
+ * permitted throughout - by the {@code of(...)} factories, by {@link #copyOf(Map)} and by the
+ * {@link Builder}. {@link #get(Object)} returning {@code null} is therefore not proof that a key is absent;
+ * use {@link #containsKey(Object)} to tell the two apart. (The sorted and bidirectional subtypes are
+ * stricter: {@link ImmutableSortedMap} rejects a {@code null} key under natural ordering, and
+ * {@link ImmutableBiMap} rejects {@code null} keys and values outright.)</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -70,15 +77,36 @@ import com.landawn.abacus.annotation.Beta;
 @SuppressWarnings("java:S2160")
 public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
 
+    // Collections.emptyMap()'s view spliterators report only SIZED|SUBSIZED, dropping the DISTINCT that
+    // Set.spliterator() promises for keySet()/entrySet() and the ORDERED that every ImmutableMap built by
+    // of(...)/copyOf(...)/a no-argument builder() reports - they all back onto a LinkedHashMap, whereas a
+    // wrap(aHashMap) view reports no ORDERED at all; an operator that intersects characteristics
+    // (Stream.concat) then yields an unordered stream, making a later findFirst() on a parallel stream
+    // non-deterministic. A second, deliberate consequence: an unmodifiable LinkedHashMap also makes every
+    // mutator on this singleton's keySet()/values()/entrySet() throw UnsupportedOperationException, as
+    // AbstractImmutableMap.keySet()/values()/entrySet() already promise and every non-empty ImmutableMap
+    // already did - Collections.emptyMap()'s views silently no-op'd or answered false instead. Both halves
+    // are pinned by ImmutableMapTest; do NOT "simplify" this to Map.of() either: its get(null) and
+    // containsKey(null) throw NullPointerException, which this empty map must not.
     @SuppressWarnings("rawtypes")
-    private static final ImmutableMap EMPTY = new ImmutableMap(N.emptyMap(), false);
+    private static final ImmutableMap EMPTY = new ImmutableMap(Collections.unmodifiableMap(new LinkedHashMap<>(0)), true, true);
 
-    ImmutableMap(final Map<? extends K, ? extends V> map) {
+    /**
+     * Constructs an immutable view over the supplied backing map.
+     *
+     * @throws NullPointerException if {@code map} is {@code null}
+     */
+    ImmutableMap(final Map<? extends K, ? extends V> map) throws NullPointerException {
         super(map);
     }
 
-    ImmutableMap(final Map<? extends K, ? extends V> map, final boolean isUnmodifiable) {
-        super(map, isUnmodifiable);
+    /**
+     * Constructs an immutable view over the supplied backing map.
+     *
+     * @throws NullPointerException if {@code map} is {@code null} and {@code isUnmodifiable} is false
+     */
+    ImmutableMap(final Map<? extends K, ? extends V> map, final boolean isUnmodifiable, final boolean ownsBacking) throws NullPointerException {
+        super(map, isUnmodifiable, ownsBacking);
     }
 
     /**
@@ -119,11 +147,11 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
     public static <K, V> ImmutableMap<K, V> of(final K k1, final V v1) {
         final Map<K, V> map = N.newLinkedHashMap(1);
         map.put(k1, v1);
-        return new ImmutableMap<>(map, false);
+        return new ImmutableMap<>(map, false, true);
     }
 
     /**
-     * Returns an ImmutableMap containing exactly two key-value mappings.
+     * Returns an ImmutableMap containing up to two key-value mappings.
      * The returned map is immutable and will have a size of 2 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
      * If the same key is provided more than once, the later value overwrites the earlier one.
@@ -148,11 +176,11 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
         final Map<K, V> map = N.newLinkedHashMap(2);
         map.put(k1, v1);
         map.put(k2, v2);
-        return new ImmutableMap<>(map, false);
+        return new ImmutableMap<>(map, false, true);
     }
 
     /**
-     * Returns an ImmutableMap containing exactly three key-value mappings.
+     * Returns an ImmutableMap containing up to three key-value mappings.
      * The returned map is immutable and will have a size of 3 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, the later value overwrites the earlier one.
@@ -181,11 +209,11 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
-        return new ImmutableMap<>(map, false);
+        return new ImmutableMap<>(map, false, true);
     }
 
     /**
-     * Returns an ImmutableMap containing exactly four key-value mappings.
+     * Returns an ImmutableMap containing up to four key-value mappings.
      * The returned map is immutable and will have a size of 4 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, the later value overwrites the earlier one.
@@ -215,11 +243,11 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
         map.put(k2, v2);
         map.put(k3, v3);
         map.put(k4, v4);
-        return new ImmutableMap<>(map, false);
+        return new ImmutableMap<>(map, false, true);
     }
 
     /**
-     * Returns an ImmutableMap containing exactly five key-value mappings.
+     * Returns an ImmutableMap containing up to five key-value mappings.
      * The returned map is immutable and will have a size of 5 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, the later value overwrites the earlier one.
@@ -254,11 +282,11 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
         map.put(k3, v3);
         map.put(k4, v4);
         map.put(k5, v5);
-        return new ImmutableMap<>(map, false);
+        return new ImmutableMap<>(map, false, true);
     }
 
     /**
-     * Returns an ImmutableMap containing exactly six key-value mappings.
+     * Returns an ImmutableMap containing up to six key-value mappings.
      * The returned map is immutable and will have a size of 6 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, the later value overwrites the earlier one.
@@ -296,11 +324,11 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
         map.put(k4, v4);
         map.put(k5, v5);
         map.put(k6, v6);
-        return new ImmutableMap<>(map, false);
+        return new ImmutableMap<>(map, false, true);
     }
 
     /**
-     * Returns an ImmutableMap containing exactly seven key-value mappings.
+     * Returns an ImmutableMap containing up to seven key-value mappings.
      * The returned map is immutable and will have a size of 7 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, the later value overwrites the earlier one.
@@ -342,11 +370,11 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
         map.put(k5, v5);
         map.put(k6, v6);
         map.put(k7, v7);
-        return new ImmutableMap<>(map, false);
+        return new ImmutableMap<>(map, false, true);
     }
 
     /**
-     * Returns an ImmutableMap containing exactly eight key-value mappings.
+     * Returns an ImmutableMap containing up to eight key-value mappings.
      * The returned map is immutable and will have a size of 8 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, the later value overwrites the earlier one.
@@ -390,11 +418,11 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
         map.put(k6, v6);
         map.put(k7, v7);
         map.put(k8, v8);
-        return new ImmutableMap<>(map, false);
+        return new ImmutableMap<>(map, false, true);
     }
 
     /**
-     * Returns an ImmutableMap containing exactly nine key-value mappings.
+     * Returns an ImmutableMap containing up to nine key-value mappings.
      * The returned map is immutable and will have a size of 9 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, the later value overwrites the earlier one.
@@ -441,11 +469,11 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
         map.put(k7, v7);
         map.put(k8, v8);
         map.put(k9, v9);
-        return new ImmutableMap<>(map, false);
+        return new ImmutableMap<>(map, false, true);
     }
 
     /**
-     * Returns an ImmutableMap containing exactly ten key-value mappings.
+     * Returns an ImmutableMap containing up to ten key-value mappings.
      * The returned map is immutable and will have a size of 10 (or fewer if duplicate keys are supplied).
      * The iteration order is guaranteed to match the order of insertion.
      * If duplicate keys are provided, the later value overwrites the earlier one.
@@ -495,15 +523,34 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
         map.put(k8, v8);
         map.put(k9, v9);
         map.put(k10, v10);
-        return new ImmutableMap<>(map, false);
+        return new ImmutableMap<>(map, false, true);
     }
 
     /**
      * Returns an ImmutableMap containing all mappings from the provided map.
-     * If the provided map is already an ImmutableMap, it is returned directly without copying.
      * If the map is {@code null} or empty, an empty ImmutableMap is returned.
      * Otherwise, a new ImmutableMap is created with a defensive copy of the map's entries.
-     * The iteration order is preserved if the source map is a LinkedHashMap or SortedMap.
+     *
+     * <p>The source map's entry iteration order is always preserved, whatever the source's concrete type -
+     * including an ordered source presented through a wrapper such as
+     * {@code Collections.unmodifiableMap(aLinkedHashMap)}, whose concrete class reveals nothing about its
+     * ordering.</p>
+     *
+     * <p><b>Note:</b> only the entries and their order are copied, never the source's key-comparison rule.
+     * The copy is a {@link LinkedHashMap}, so its keys are compared with {@code equals}/{@code hashCode}. A
+     * source that uses some other rule - a {@link java.util.SortedMap} with a {@link java.util.Comparator},
+     * or an {@link java.util.IdentityHashMap} - therefore yields a copy that can answer
+     * {@link #containsKey(Object)} and {@link #get(Object)} differently from the source. Use
+     * {@link ImmutableSortedMap#copyOf(Map)} to keep a comparator.</p>
+     *
+     * <p>The copy is skipped only when {@code map} is a <i>plain</i> {@code ImmutableMap} that already owns
+     * its backing storage - that is, one produced by this class's own {@code of(...)}, {@code copyOf(...)},
+     * {@link #empty()}, or a consumed no-argument {@link #builder()}. An {@code ImmutableMap} produced by
+     * {@link #wrap(Map)} or {@link #builder(Map)} is a live view over storage its creator may still modify,
+     * so it is copied like any other map; and a
+     * subtype that compares keys by some other rule - {@link ImmutableSortedMap} or
+     * {@link ImmutableNavigableMap} with a {@link java.util.Comparator} - is likewise copied, so that the
+     * key-comparison rule stated above is dropped whatever the source's ownership.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -518,16 +565,24 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param <K> the type of keys in the map.
      * @param <V> the type of values in the map.
      * @param map the map whose mappings are to be placed in the {@code ImmutableMap}.
-     * @return an {@code ImmutableMap} containing all mappings from the source map, or the same instance if it is already an {@code ImmutableMap}, or an empty instance if {@code map} is {@code null} or empty.
+     * @return an {@code ImmutableMap} containing all mappings from the source map, in the source's entry
+     *         iteration order; the same instance if it is already a plain {@code ImmutableMap} that owns its
+     *         backing storage; or an empty instance if {@code map} is {@code null} or empty.
      * @see #wrap(Map)
      */
     public static <K, V> ImmutableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
-        if (map instanceof ImmutableMap) {
+        // The exact class, not `instanceof`: ImmutableSortedMap (and through it ImmutableNavigableMap) is an
+        // ImmutableMap, so an `instanceof` test would hand a comparator-keyed source straight back and silently
+        // keep its key-comparison rule - exactly what the copy documented above is supposed to drop. Whether
+        // get/containsKey answered by equals or by a comparator would then depend on the invisible ownsBacking
+        // flag of the argument. ImmutableMap's own of(...)/copyOf(...)/empty() and consumed no-argument
+        // builders produce the equals-keyed, order-preserving, owning instances a copy can be skipped for.
+        if (map != null && map.getClass() == ImmutableMap.class && ((ImmutableMap<K, V>) map).ownsBacking) {
             return (ImmutableMap<K, V>) map;
         } else if (N.isEmpty(map)) {
             return empty();
         } else {
-            return new ImmutableMap<>(map instanceof LinkedHashMap || map instanceof SortedMap ? N.newLinkedHashMap(map) : N.newHashMap(map), false);
+            return new ImmutableMap<>(N.newLinkedHashMap(map), false, true);
         }
     }
 
@@ -563,7 +618,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
         } else if (map == null) {
             return empty();
         } else {
-            return new ImmutableMap<>(map);
+            return new ImmutableMap<>(map, false, false);
         }
     }
 
@@ -581,6 +636,9 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      *     .put("three", 3)
      *     .build();
      * }</pre>
+     *
+     * <p>The builder uses its own private storage, so the map returned by {@link Builder#build()} is an
+     * independent, stable value once the builder has been consumed.</p>
      *
      * @param <K> the type of keys to be maintained by the map.
      * @param <V> the type of mapped values.
@@ -605,6 +663,11 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      *     .build();
      * }</pre>
      *
+     * <p><b>Warning:</b> the caller keeps a reference to {@code backedMap}, so the map returned by
+     * {@link Builder#build()} is a live view over storage the caller can still modify. It is treated as
+     * such: {@link #copyOf(Map)} will copy it rather than return it unchanged. Use the no-arg
+     * {@link #builder()} when an independent value is wanted.</p>
+     *
      * @param <K> the type of keys to be maintained by the map.
      * @param <V> the type of mapped values.
      * @param backedMap the map to be used as the backing storage for the Builder.
@@ -612,7 +675,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * @throws IllegalArgumentException if backedMap is {@code null}.
      */
     public static <K, V> Builder<K, V> builder(final Map<K, V> backedMap) throws IllegalArgumentException {
-        N.checkArgNotNull(backedMap);
+        N.checkArgNotNull(backedMap, cs.backedMap);
 
         return new Builder<>(backedMap);
     }
@@ -627,6 +690,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * Map<String, Integer> otherMap = Map.of("three", 3);
      * ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer>builder()
      *     .put("one", 1)
      *     .put("two", 2)
@@ -640,12 +704,29 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
     public static final class Builder<K, V> {
         private final Map<K, V> map;
 
+        /** Whether {@link #map} is the builder's own storage, unreachable to any caller. */
+        private final boolean ownsStorage;
+
+        /** Set by {@link #build()}; further entry additions are rejected from then on. */
+        private boolean built;
+
         Builder() {
             map = new LinkedHashMap<>();
+            ownsStorage = true;
         }
 
         Builder(final Map<K, V> backedMap) {
             map = backedMap;
+            ownsStorage = false;
+        }
+
+        /**
+         * @throws IllegalStateException if this builder has already been consumed by {@code build()}
+         */
+        private void assertNotBuilt() throws IllegalStateException {
+            if (built) {
+                throw new IllegalStateException("This builder has already been consumed by build() and cannot be modified");
+            }
         }
 
         /**
@@ -662,8 +743,11 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
          * @param key the key with which the specified value is to be associated.
          * @param value the value to be associated with the specified key.
          * @return this builder instance for method chaining.
+         * @throws IllegalStateException if {@link #build()} has already been called on this builder.
          */
-        public Builder<K, V> put(final K key, final V value) {
+        public Builder<K, V> put(final K key, final V value) throws IllegalStateException {
+            assertNotBuilt();
+
             map.put(key, value);
 
             return this;
@@ -685,8 +769,11 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
          *
          * @param m the map whose mappings are to be added, may be {@code null} or empty.
          * @return this builder instance for method chaining.
+         * @throws IllegalStateException if {@link #build()} has already been called on this builder.
          */
-        public Builder<K, V> putAll(final Map<? extends K, ? extends V> m) {
+        public Builder<K, V> putAll(final Map<? extends K, ? extends V> m) throws IllegalStateException {
+            assertNotBuilt();
+
             if (N.notEmpty(m)) {
                 map.putAll(m);
             }
@@ -696,23 +783,30 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
 
         /**
          * Builds and returns an ImmutableMap containing all entries added to this builder.
-         * After calling this method, the builder should not be used further as the created
-         * ImmutableMap may be backed by the builder's internal storage.
+         * The returned map is backed by the builder's storage rather than by a copy, so this method
+         * consumes the builder: any subsequent {@code put}/{@code putAll} call throws
+         * {@link IllegalStateException}. {@code build()} itself may be called more than once and returns
+         * an equal map each time.
          *
          * <p>The returned map is immutable and will throw UnsupportedOperationException
          * for any modification attempts. The iteration order depends on the type of map
-         * used internally by the builder.</p>
+         * used internally by the builder. When the builder was created by {@link ImmutableMap#builder()}
+         * its storage is private and the result is an independent value; when it was created by
+         * {@link ImmutableMap#builder(Map)} the caller can still modify the map it supplied, so the result
+         * stays a live view and {@link ImmutableMap#copyOf(Map)} will copy it.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ImmutableMap<String, Integer> map = builder.build();
-         * // builder should not be used after this point
+         * // builder.put("more", 1);   // throws IllegalStateException
          * }</pre>
          *
          * @return a new ImmutableMap containing all added entries.
          */
         public ImmutableMap<K, V> build() {
-            return ImmutableMap.wrap(map);
+            built = true;
+
+            return new ImmutableMap<>(map, false, ownsStorage);
         }
     }
 }

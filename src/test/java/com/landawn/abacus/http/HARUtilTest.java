@@ -23,16 +23,82 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.stream.Stream;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
 public class HARUtilTest extends TestBase {
+
+    @Test
+    public void testReplaySynthesizedFormReplacesCapturedContentType() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            for (final String headerName : new String[] { null, "Content-Type", "cOnTeNt-TyPe" }) {
+                for (final String originalText : new String[] { null, "" }) {
+                    for (final String capturedType : new String[] { "multipart/form-data; boundary=abc", "application/json",
+                            "application/x-www-form-urlencoded; charset=ISO-8859-1" }) {
+                        final Map<String, Object> entry = createRequestEntry(server.url("/form").toString());
+                        entry.put("method", "POST");
+                        entry.put("headers", headerName == null ? List.of() : List.of(Map.of("name", headerName, "value", capturedType)));
+                        final Map<String, Object> postData = new HashMap<>();
+                        postData.put("text", originalText);
+                        postData.put("mimeType", "multipart/form-data");
+                        postData.put("params", java.util.Arrays.asList(null, Map.of("value", "ignored"), Map.of("name", "a", "value", "two words"),
+                                Map.of("name", "a", "value", "caf\u00e9\u4e2d\ud83d\ude00"), Map.of("name", "empty")));
+                        entry.put("postData", postData);
+                        server.enqueue(new MockResponse().setBody("ok"));
+                        assertEquals("ok", HARUtil.sendRequestByRequestEntry(entry, String.class));
+                        final RecordedRequest sent = server.takeRequest();
+                        assertEquals(List.of("application/x-www-form-urlencoded; charset=UTF-8"), sent.getHeaders().values("Content-Type"));
+                        assertEquals("a=two+words&a=caf%C3%A9%E4%B8%AD%F0%9F%98%80&empty=", sent.getBody().readUtf8());
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testReplayPreservesRawOrAbsentBodyHeaders() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            for (final String text : new String[] { null, "", "raw caf\u00e9\u4e2d\ud83d\ude00" }) {
+                for (final List<?> params : List.of(List.of(), java.util.Arrays.asList(null, Map.of("value", "no-name")))) {
+                    final Map<String, Object> entry = createRequestEntry(server.url("/raw").toString());
+                    entry.put("method", "POST");
+                    entry.put("headers", List.of(Map.of("name", "cOnTeNt-TyPe", "value", "text/plain; charset=UTF-8")));
+                    final Map<String, Object> postData = new HashMap<>();
+                    postData.put("text", text);
+                    postData.put("mimeType", "application/json");
+                    postData.put("params", params);
+                    entry.put("postData", postData);
+                    server.enqueue(new MockResponse().setBody("ok"));
+                    assertEquals("ok", HARUtil.sendRequestByRequestEntry(entry, String.class));
+                    final RecordedRequest sent = server.takeRequest();
+                    assertEquals("text/plain; charset=UTF-8", sent.getHeader("Content-Type"));
+                    assertEquals(text == null ? "" : text, sent.getBody().readUtf8());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testReplayOriginalTextTakesPrecedenceOverFormParams() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            final Map<String, Object> entry = createRequestEntry(server.url("/original").toString());
+            entry.put("method", "POST");
+            entry.put("headers", List.of(Map.of("name", "Content-Type", "value", "application/json")));
+            entry.put("postData", Map.of("text", "{\"a\":1}", "mimeType", "multipart/form-data", "params", List.of(Map.of("name", "a", "value", "2"))));
+            server.enqueue(new MockResponse().setBody("ok"));
+            assertEquals("ok", HARUtil.sendRequestByRequestEntry(entry, String.class));
+            final RecordedRequest sent = server.takeRequest();
+            assertEquals("application/json", sent.getHeader("Content-Type"));
+            assertEquals("{\"a\":1}", sent.getBody().readUtf8());
+        }
+    }
 
     private String sampleHAR;
     private File tempHARFile;
@@ -164,17 +230,13 @@ public class HARUtilTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> HARUtil.configureCurlLoggingForCurrentThread(true, '\'', null));
     }
 
-    // --- sendRequest(File, String) ---
-
     @Test
-    public void testSendRequest_FileAndString() {
+    public void testSendRequest_MissingUrlOverloads() {
+        Predicate<String> missing = url -> url.contains("/nonexistent");
         assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(tempHARFile, "https://api.example.com/nonexistent"));
-    } // --- sendRequest(File, Predicate) ---
-
-    @Test
-    public void testSendRequest_FileAndPredicate() {
-        Predicate<String> filter = url -> url.contains("/nonexistent");
-        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(tempHARFile, filter));
+        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(tempHARFile, missing));
+        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(sampleHAR, "https://api.example.com/nonexistent"));
+        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(sampleHAR, missing));
     }
 
     @Test
@@ -196,66 +258,15 @@ public class HARUtilTest extends TestBase {
         }
     }
 
-    // --- sendRequest(String, String) ---
-
     @Test
-    public void testSendRequest_StringAndString() {
-        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(sampleHAR, "https://api.example.com/nonexistent"));
-    } // --- sendRequest(String, Predicate) ---
-
-    @Test
-    public void testSendRequest_StringAndPredicate() {
-        Predicate<String> filter = url -> url.contains("/nonexistent");
-        assertThrows(RuntimeException.class, () -> HARUtil.sendRequest(sampleHAR, filter));
-    } // --- sendRequests(File, Predicate) ---
-
-    @Test
-    public void testSendRequests_FileAndPredicate() {
-        Predicate<String> filter = url -> url.contains("/nonexistent");
-        List<String> results = HARUtil.sendRequests(tempHARFile, filter);
-        assertNotNull(results);
-        assertTrue(results.isEmpty());
+    public void testSendAndStreamRequestsOverloads() {
+        Predicate<String> missing = url -> url.contains("/nonexistent");
+        Predicate<String> users = url -> url.contains("/users");
+        assertTrue(HARUtil.sendRequests(tempHARFile, missing).isEmpty());
+        assertTrue(HARUtil.sendRequests(sampleHAR, missing).isEmpty());
+        assertNotNull(HARUtil.streamRequests(tempHARFile, users));
+        assertNotNull(HARUtil.streamRequests(sampleHAR, users));
     }
-
-    @Test
-    public void testSendMultiRequestsByHARWithFile() {
-        Predicate<String> filter = url -> url.contains("/nonexistent");
-        List<String> results = HARUtil.sendRequests(tempHARFile, filter);
-        assertTrue(results.isEmpty());
-    }
-
-    // --- sendRequests(String, Predicate) ---
-
-    @Test
-    public void testSendRequests_StringAndPredicate() {
-        Predicate<String> filter = url -> url.contains("/nonexistent");
-        List<String> results = HARUtil.sendRequests(sampleHAR, filter);
-        assertNotNull(results);
-        assertTrue(results.isEmpty());
-    }
-
-    @Test
-    public void testSendMultiRequestsByHARWithString() {
-        Predicate<String> filter = url -> url.contains("/nonexistent");
-        List<String> results = HARUtil.sendRequests(sampleHAR, filter);
-        assertTrue(results.isEmpty());
-    }
-
-    // --- streamRequests(File, Predicate) ---
-
-    @Test
-    public void testStreamRequests_FileAndPredicate() {
-        Predicate<String> filter = url -> url.contains("/users");
-        Stream<Tuple.Tuple2<Map<String, Object>, HttpResponse>> stream = HARUtil.streamRequests(tempHARFile, filter);
-        assertNotNull(stream);
-    } // --- streamRequests(String, Predicate) ---
-
-    @Test
-    public void testStreamRequests_StringAndPredicate() {
-        Predicate<String> filter = url -> url.contains("/users");
-        Stream<Tuple.Tuple2<Map<String, Object>, HttpResponse>> stream = HARUtil.streamRequests(sampleHAR, filter);
-        assertNotNull(stream);
-    } // --- sendRequestByRequestEntry ---
 
     @Test
     public void testSendRequestByRequestEntry() throws Exception {
@@ -326,31 +337,18 @@ public class HARUtilTest extends TestBase {
         }
     }
 
-    // --- findRequestEntry(File, Predicate) ---
-
     @Test
-    public void testFindRequestEntry_File() {
-        Predicate<String> filter = url -> url.contains("/users");
-        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(tempHARFile, filter);
-        assertTrue(entry.isPresent());
-        assertEquals("https://api.example.com/users", entry.get().get("url"));
-    }
-
-    @Test
-    public void testGetRequestEntryByUrlFromHARWithFile() {
-        Predicate<String> filter = url -> url.contains("/users");
-        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(tempHARFile, filter);
-        assertTrue(entry.isPresent());
-    }
-
-    // --- findRequestEntry(String, Predicate) ---
-
-    @Test
-    public void testFindRequestEntry_String() {
-        Predicate<String> filter = url -> url.contains("/users");
-        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(sampleHAR, filter);
-        assertTrue(entry.isPresent());
-        assertEquals("https://api.example.com/users", entry.get().get("url"));
+    public void testFindRequestEntry_FileAndStringOverloads() {
+        Predicate<String> users = url -> url.contains("/users");
+        Predicate<String> missing = url -> url.contains("/nonexistent");
+        Optional<Map<String, Object>> fromFile = HARUtil.findRequestEntry(tempHARFile, users);
+        Optional<Map<String, Object>> fromString = HARUtil.findRequestEntry(sampleHAR, users);
+        assertTrue(fromFile.isPresent());
+        assertTrue(fromString.isPresent());
+        assertEquals("https://api.example.com/users", fromFile.get().get("url"));
+        assertEquals("https://api.example.com/users", fromString.get().get("url"));
+        assertFalse(HARUtil.findRequestEntry(tempHARFile, missing).isPresent());
+        assertFalse(HARUtil.findRequestEntry(sampleHAR, missing).isPresent());
     }
 
     @Test
@@ -380,31 +378,6 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
-    public void testFindRequestEntry_File_NoMatch() {
-        Predicate<String> filter = url -> url.contains("/nonexistent");
-        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(tempHARFile, filter);
-        assertFalse(entry.isPresent());
-    }
-
-    @Test
-    public void testFindRequestEntry_String_NoMatch() {
-        Predicate<String> filter = url -> url.contains("/nonexistent");
-        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(sampleHAR, filter);
-        assertFalse(entry.isPresent());
-    }
-
-    @Test
-    public void testGetRequestEntryByUrlFromHARWithString() {
-        Predicate<String> filter = url -> url.contains("/users");
-        Optional<Map<String, Object>> entry = HARUtil.findRequestEntry(sampleHAR, filter);
-        assertTrue(entry.isPresent());
-
-        filter = url -> url.contains("/nonexistent");
-        entry = HARUtil.findRequestEntry(sampleHAR, filter);
-        assertFalse(entry.isPresent());
-    }
-
-    @Test
     public void testGetRequestEntryByUrlFromHARMultipleEntries() {
         String har = createTestHarStringWithMultipleEntries();
 
@@ -417,92 +390,20 @@ public class HARUtilTest extends TestBase {
 
     @Test
     public void testGetRequestUrl() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("url", "https://api.example.com/users");
-
-        String url = HARUtil.getRequestUrl(requestEntry);
-        assertEquals("https://api.example.com/users", url);
+        assertEquals("https://api.example.com/users", HARUtil.getRequestUrl(Map.of("url", "https://api.example.com/users")));
+        assertEquals("https://api.example.com/search?q=test&limit=10", HARUtil.getRequestUrl(Map.of("url", "https://api.example.com/search?q=test&limit=10")));
     }
-
-    @Test
-    public void testGetRequestUrl_WithQueryParams() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("url", "https://api.example.com/search?q=test&limit=10");
-
-        String url = HARUtil.getRequestUrl(requestEntry);
-        assertEquals("https://api.example.com/search?q=test&limit=10", url);
-    } // --- getHttpMethodByRequestEntry ---
 
     @Test
     public void testGetHttpMethodByRequestEntry() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("method", "POST");
-
-        HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
-        assertEquals(HttpMethod.POST, method);
-    }
-
-    @Test
-    public void testGetHttpMethodByRequestEntry_GET() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("method", "GET");
-
-        HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
-        assertEquals(HttpMethod.GET, method);
-    }
-
-    @Test
-    public void testGetHttpMethodByRequestEntryDelete() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("method", "DELETE");
-
-        HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
-        assertEquals(HttpMethod.DELETE, method);
-    }
-
-    @Test
-    public void testGetHttpMethodByRequestEntryHead() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("method", "HEAD");
-
-        HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
-        assertEquals(HttpMethod.HEAD, method);
-    }
-
-    @Test
-    public void testGetHttpMethodByRequestEntryOptions() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("method", "OPTIONS");
-
-        HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
-        assertEquals(HttpMethod.OPTIONS, method);
-    }
-
-    @Test
-    public void testGetHttpMethodByRequestEntryPatch() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("method", "PATCH");
-
-        HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
-        assertEquals(HttpMethod.PATCH, method);
-    }
-
-    @Test
-    public void testGetHttpMethodByRequestEntryLowercase() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("method", "get");
-
-        HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
-        assertEquals(HttpMethod.GET, method);
-    }
-
-    @Test
-    public void testGetHttpMethodByRequestEntryMixedCase() {
-        Map<String, Object> requestEntry = new HashMap<>();
-        requestEntry.put("method", "PuT");
-
-        HttpMethod method = HARUtil.getHttpMethodByRequestEntry(requestEntry);
-        assertEquals(HttpMethod.PUT, method);
+        assertEquals(HttpMethod.POST, HARUtil.getHttpMethodByRequestEntry(Map.of("method", "POST")));
+        assertEquals(HttpMethod.GET, HARUtil.getHttpMethodByRequestEntry(Map.of("method", "GET")));
+        assertEquals(HttpMethod.DELETE, HARUtil.getHttpMethodByRequestEntry(Map.of("method", "DELETE")));
+        assertEquals(HttpMethod.HEAD, HARUtil.getHttpMethodByRequestEntry(Map.of("method", "HEAD")));
+        assertEquals(HttpMethod.OPTIONS, HARUtil.getHttpMethodByRequestEntry(Map.of("method", "OPTIONS")));
+        assertEquals(HttpMethod.PATCH, HARUtil.getHttpMethodByRequestEntry(Map.of("method", "PATCH")));
+        assertEquals(HttpMethod.GET, HARUtil.getHttpMethodByRequestEntry(Map.of("method", "get")));
+        assertEquals(HttpMethod.PUT, HARUtil.getHttpMethodByRequestEntry(Map.of("method", "PuT")));
     }
 
     @Test
@@ -636,12 +537,9 @@ public class HARUtilTest extends TestBase {
 
     @Test
     public void testGetBodyAndMimeTypeByRequestEntryNoPostData() {
-        Map<String, Object> requestEntry = new HashMap<>();
-
-        Tuple2<String, String> result = HARUtil.getBodyAndMimeTypeByRequestEntry(requestEntry);
-        assertNotNull(result);
-        assertEquals(null, result._1);
-        assertEquals(null, result._2);
+        Tuple2<String, String> result = HARUtil.getBodyAndMimeTypeByRequestEntry(new HashMap<>());
+        assertNull(result._1);
+        assertNull(result._2);
     }
 
     @Test
@@ -709,15 +607,6 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetBodyAndMimeTypeByRequestEntryEmpty() {
-        Map<String, Object> requestEntry = new HashMap<>();
-
-        Tuple.Tuple2<String, String> result = HARUtil.getBodyAndMimeTypeByRequestEntry(requestEntry);
-        assertNull(result._1);
-        assertNull(result._2);
-    }
-
-    @Test
     public void testGetBodyAndMimeTypeByRequestEntryWithXml() {
         Map<String, Object> requestEntry = new HashMap<>();
         Map<String, String> postData = new HashMap<>();
@@ -733,66 +622,15 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
-    public void testSendRequestWithNoEntries() {
-        String harWithoutEntries = "{\"log\": {}}";
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            HARUtil.sendRequest(harWithoutEntries, url -> true);
-        });
-    }
-
-    @Test
-    public void testSendRequestWithEmptyEntries() {
-        String harWithEmptyEntries = "{\"log\": {\"entries\": []}}";
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            HARUtil.sendRequest(harWithEmptyEntries, url -> true);
-        });
-    }
-
-    @Test
-    public void testSendRequestsWithNoEntries() {
-        String harWithoutEntries = "{\"log\": {}}";
-
-        List<String> result = HARUtil.sendRequests(harWithoutEntries, url -> true);
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testSendRequestsWithEmptyEntries() {
-        String harWithEmptyEntries = "{\"log\": {\"entries\": []}}";
-
-        List<String> result = HARUtil.sendRequests(harWithEmptyEntries, url -> true);
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testStreamRequestsWithNoEntries() {
-        String harWithoutEntries = "{\"log\": {}}";
-
-        var result = HARUtil.streamRequests(harWithoutEntries, url -> true);
-        assertNotNull(result);
-        assertTrue(result.toList().isEmpty());
-    }
-
-    @Test
-    public void testStreamRequestsWithEmptyEntries() {
-        String harWithEmptyEntries = "{\"log\": {\"entries\": []}}";
-
-        var result = HARUtil.streamRequests(harWithEmptyEntries, url -> true);
-        assertNotNull(result);
-        assertTrue(result.toList().isEmpty());
-    }
-
-    @Test
-    public void testFindRequestEntryWithNoEntries() {
-        String harWithoutEntries = "{\"log\": {}}";
-
-        Optional<Map<String, Object>> result = HARUtil.findRequestEntry(harWithoutEntries, url -> true);
-        assertNotNull(result);
-        assertFalse(result.isPresent());
+    public void testEmptyHarOverloads() {
+        String noEntries = "{\"log\": {}}";
+        String emptyEntries = "{\"log\": {\"entries\": []}}";
+        for (String har : new String[] { noEntries, emptyEntries }) {
+            assertThrows(IllegalArgumentException.class, () -> HARUtil.sendRequest(har, url -> true));
+            assertTrue(HARUtil.sendRequests(har, url -> true).isEmpty());
+            assertTrue(HARUtil.streamRequests(har, url -> true).toList().isEmpty());
+            assertFalse(HARUtil.findRequestEntry(har, url -> true).isPresent());
+        }
     }
 
     @Test
@@ -806,13 +644,257 @@ public class HARUtilTest extends TestBase {
         assertEquals("https://api.example.com/valid", result.get().get("url"));
     }
 
-    @Test
-    public void testFindRequestEntryWithEmptyEntries() {
-        String harWithEmptyEntries = "{\"log\": {\"entries\": []}}";
+    // ==================== a08 F-2: bodies on body-less methods ====================
 
-        Optional<Map<String, Object>> result = HARUtil.findRequestEntry(harWithEmptyEntries, url -> true);
-        assertNotNull(result);
-        assertFalse(result.isPresent());
+    @Test
+    public void testReplayDropsEmptyBodyOnBodylessMethods() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+
+            for (final String method : new String[] { "GET", "HEAD", "TRACE" }) {
+                for (final String mimeType : new String[] { null, "", "application/json" }) {
+                    final Map<String, Object> entry = new HashMap<>();
+                    entry.put("url", server.url("/items?q=1").toString());
+                    entry.put("method", method);
+                    entry.put("headers", List.of(Map.of("name", "Accept", "value", "application/json")));
+                    final Map<String, Object> postData = new HashMap<>();
+                    postData.put("text", "");
+                    if (mimeType != null) {
+                        postData.put("mimeType", mimeType);
+                    }
+                    entry.put("postData", postData);
+                    server.enqueue(new MockResponse().setResponseCode(200).setBody("HEAD".equals(method) ? "" : "ok"));
+
+                    final HttpResponse response = HARUtil.sendRequestByRequestEntry(entry, HttpResponse.class);
+                    assertEquals(200, response.statusCode(), method + " / " + mimeType);
+
+                    final RecordedRequest sent = server.takeRequest();
+                    assertEquals(method, sent.getMethod());
+                    assertEquals("/items?q=1", sent.getPath());
+                    assertEquals("application/json", sent.getHeader("Accept"));
+                    assertEquals(0L, sent.getBody().size(), method + " / " + mimeType);
+                    assertNull(sent.getHeader("Content-Type"), method + " / " + mimeType);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testReplayRejectsNonEmptyBodyOnBodylessMethods() {
+        for (final String method : new String[] { "GET", "HEAD", "TRACE", "get" }) {
+            for (final String text : new String[] { "{\"q\":1}", " ", "café中😀" }) {
+                final Map<String, Object> entry = new HashMap<>();
+                entry.put("url", "http://127.0.0.1:9/items");
+                entry.put("method", method);
+                entry.put("headers", List.of());
+                entry.put("postData", Map.of("text", text, "mimeType", "application/json"));
+
+                final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> HARUtil.sendRequestByRequestEntry(entry, String.class),
+                        method + " / " + text);
+                assertTrue(ex.getMessage().contains(method.toUpperCase(java.util.Locale.ROOT)), ex.getMessage());
+                assertTrue(ex.getMessage().contains("cannot send one"), ex.getMessage());
+            }
+
+            // A body synthesized from postData.params counts as a body too.
+            final Map<String, Object> withParams = new HashMap<>();
+            withParams.put("url", "http://127.0.0.1:9/items");
+            withParams.put("method", method);
+            withParams.put("headers", List.of());
+            withParams.put("postData", Map.of("params", List.of(Map.of("name", "a", "value", "1"))));
+            assertThrows(IllegalArgumentException.class, () -> HARUtil.sendRequestByRequestEntry(withParams, String.class));
+        }
+    }
+
+    @Test
+    public void testReplayStillAttachesBodiesForBodyMethods() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+
+            for (final String method : new String[] { "POST", "PUT", "DELETE", "OPTIONS" }) {
+                for (final String text : new String[] { "", "{\"a\":1}", "café中" }) {
+                    final Map<String, Object> entry = new HashMap<>();
+                    entry.put("url", server.url("/items").toString());
+                    entry.put("method", method);
+                    entry.put("headers", List.of());
+                    entry.put("postData", Map.of("text", text, "mimeType", "application/json"));
+                    server.enqueue(new MockResponse().setResponseCode(200).setBody("ok"));
+
+                    assertEquals("ok", HARUtil.sendRequestByRequestEntry(entry, String.class));
+
+                    final RecordedRequest sent = server.takeRequest();
+                    assertEquals(method, sent.getMethod());
+                    assertEquals(text, sent.getBody().readUtf8(), method + " / " + text);
+                    assertEquals("application/json", sent.getHeader("Content-Type"), method + " / " + text);
+                }
+            }
+
+            // No postData at all on a body method: nothing is sent and no Content-Type is invented.
+            final Map<String, Object> entry = new HashMap<>();
+            entry.put("url", server.url("/items").toString());
+            entry.put("method", "POST");
+            entry.put("headers", List.of());
+            server.enqueue(new MockResponse().setResponseCode(200).setBody("ok"));
+            assertEquals("ok", HARUtil.sendRequestByRequestEntry(entry, String.class));
+            final RecordedRequest sent = server.takeRequest();
+            assertEquals("POST", sent.getMethod());
+            assertEquals(0L, sent.getBody().size());
+        }
+    }
+
+    @Test
+    public void testReplayOfPatchEntryIsRejectedByHttpRequest() {
+        final Map<String, Object> entry = new HashMap<>();
+        entry.put("url", "http://127.0.0.1:9/items/1");
+        entry.put("method", "PATCH");
+        entry.put("headers", List.of());
+        entry.put("postData", Map.of("text", "{\"a\":1}", "mimeType", "application/json"));
+
+        assertThrows(UnsupportedOperationException.class, () -> HARUtil.sendRequestByRequestEntry(entry, String.class));
+
+        final String har = "{\"log\":{\"entries\":[{\"request\":{\"method\":\"PATCH\",\"url\":\"http://127.0.0.1:9/items/1\",\"headers\":[]}}]}}";
+        assertThrows(UnsupportedOperationException.class, () -> HARUtil.sendRequest(har, "http://127.0.0.1:9/items/1"));
+        assertThrows(UnsupportedOperationException.class, () -> HARUtil.sendRequests(har, url -> true));
+        assertThrows(UnsupportedOperationException.class, () -> HARUtil.streamRequests(har, url -> true).toList());
+    }
+
+    @Test
+    public void testSendRequestsStopsAtTheFirstFailingEntry() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            final String base = server.url("/").toString();
+            final String har = "{\"log\":{\"entries\":[" //
+                    + "{\"request\":{\"method\":\"GET\",\"url\":\"" + base + "a\",\"headers\":[]}}," //
+                    + "{\"request\":{\"method\":\"GET\",\"url\":\"" + base
+                    + "b\",\"headers\":[],\"postData\":{\"text\":\"{}\",\"mimeType\":\"application/json\"}}}," //
+                    + "{\"request\":{\"method\":\"GET\",\"url\":\"" + base + "c\",\"headers\":[]}}]}}";
+            server.enqueue(new MockResponse().setBody("a"));
+            server.enqueue(new MockResponse().setBody("c"));
+
+            assertThrows(IllegalArgumentException.class, () -> HARUtil.sendRequests(har, url -> true));
+            assertEquals(1, server.getRequestCount());
+            assertEquals("/a", server.takeRequest().getPath());
+
+            assertThrows(IllegalArgumentException.class, () -> HARUtil.streamRequests(har, url -> true).toList());
+            assertEquals(2, server.getRequestCount());
+            assertEquals("/a", server.takeRequest().getPath());
+        }
+    }
+
+    // ==================== a08 F-6: non-string HAR values ====================
+
+    @Test
+    public void testGetHeadersByRequestEntryCoercesNonStringNamesAndValues() {
+        final List<Map<String, Object>> headers = new ArrayList<>();
+        headers.add(Map.of("name", "X-Num", "value", 5));
+        headers.add(Map.of("name", "X-Bool", "value", true));
+        headers.add(Map.of("name", "X-Dec", "value", 1.5));
+        headers.add(Map.of("name", 7, "value", "seven"));
+        headers.add(Map.of("name", "X-Long", "value", 9_000_000_000L));
+        final Map<String, Object> entry = new HashMap<>();
+        entry.put("headers", headers);
+
+        final HttpHeaders result = HARUtil.getHeadersByRequestEntry(entry);
+        assertEquals("5", result.getAsString("X-Num"));
+        assertEquals("true", result.getAsString("X-Bool"));
+        assertEquals("1.5", result.getAsString("X-Dec"));
+        assertEquals("seven", result.getAsString("7"));
+        assertEquals("9000000000", result.getAsString("X-Long"));
+
+        // The same shape arriving through JSON parsing.
+        final String har = "{\"log\":{\"entries\":[{\"request\":{\"method\":\"GET\",\"url\":\"http://h/\",\"headers\":[{\"name\":\"X-Num\",\"value\":5},"
+                + "{\"name\":\"X-Bool\",\"value\":false},{\"name\":\"Accept\",\"value\":\"text/plain\"}]}}]}}";
+        final Map<String, Object> parsed = HARUtil.findRequestEntry(har, url -> true).get();
+        final HttpHeaders fromJson = HARUtil.getHeadersByRequestEntry(parsed);
+        assertEquals("5", fromJson.getAsString("X-Num"));
+        assertEquals("false", fromJson.getAsString("X-Bool"));
+        assertEquals("text/plain", fromJson.getAsString("Accept"));
+
+        // Null / no-name entries are still skipped.
+        final Map<String, Object> nullValue = new HashMap<>();
+        nullValue.put("name", "X-Null");
+        nullValue.put("value", null);
+        assertNull(HARUtil.getHeadersByRequestEntry(Map.of("headers", java.util.Arrays.asList(null, Map.of("value", 3), nullValue))).get("X-Null"));
+        assertEquals(List.of("X-Null"), new ArrayList<>(HARUtil.getHeadersByRequestEntry(Map.of("headers", List.of(nullValue))).headerNames()));
+    }
+
+    @Test
+    public void testGetBodyAndMimeTypeByRequestEntryCoercesNonStringValues() {
+        final Object[][] cases = { { 42, "text/plain", "42", "text/plain" }, { true, "text/plain", "true", "text/plain" }, { 1.5, 7, "1.5", "7" },
+                { "{\"a\":1}", "application/json", "{\"a\":1}", "application/json" }, { 0L, null, "0", null } };
+
+        for (final Object[] entry : cases) {
+            final Map<String, Object> postData = new HashMap<>();
+            postData.put("text", entry[0]);
+            postData.put("mimeType", entry[1]);
+            final Map<String, Object> requestEntry = new HashMap<>();
+            requestEntry.put("postData", postData);
+
+            final Tuple2<String, String> result = HARUtil.getBodyAndMimeTypeByRequestEntry(requestEntry);
+            assertEquals(entry[2], result._1, String.valueOf(entry[0]));
+            assertEquals(entry[3], result._2, String.valueOf(entry[1]));
+        }
+
+        // Absent postData is still (null, null).
+        final Tuple2<String, String> absent = HARUtil.getBodyAndMimeTypeByRequestEntry(new HashMap<>());
+        assertNull(absent._1);
+        assertNull(absent._2);
+    }
+
+    @Test
+    public void testReplaySendsCoercedNumericBody() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setBody("ok"));
+
+            final Map<String, Object> entry = new HashMap<>();
+            entry.put("url", server.url("/n").toString());
+            entry.put("method", "POST");
+            entry.put("headers", List.of(Map.of("name", "X-Num", "value", 5)));
+            entry.put("postData", Map.of("text", 42, "mimeType", "text/plain"));
+
+            assertEquals("ok", HARUtil.sendRequestByRequestEntry(entry, String.class));
+
+            final RecordedRequest sent = server.takeRequest();
+            assertEquals("42", sent.getBody().readUtf8());
+            assertEquals("5", sent.getHeader("X-Num"));
+            assertEquals("text/plain", sent.getHeader("Content-Type"));
+        }
+    }
+
+    // G02-39/40: a HAR container that is not a JSON array (an object or a scalar) is treated as absent instead
+    // of dying with a bare ClassCastException that names neither the field nor the entry; non-object elements
+    // inside such an array are skipped the same way. Each method keeps its own empty-input policy.
+    @Test
+    public void reviewFixes20260908_malformedHarContainersAreRejectedWithoutClassCastException() {
+        // "headers" that is not an array -> no headers at all
+        assertTrue(HARUtil.getHeadersByRequestEntry(Map.of("headers", Map.of("X-Foo", "1"))).isEmpty());
+        assertTrue(HARUtil.getHeadersByRequestEntry(Map.of("headers", "X-Foo: 1")).isEmpty());
+        assertTrue(HARUtil.getHeadersByRequestEntry(Map.of("headers", 7)).isEmpty());
+        // a non-object element inside the array is skipped, the well-formed ones are kept
+        assertEquals("1", HARUtil.getHeadersByRequestEntry(Map.of("headers", java.util.Arrays.asList("X-Foo: 1", Map.of("name", "X-Foo", "value", "1"))))
+                .get("X-Foo"));
+
+        // "log.entries" that is not an array: each walk method keeps its own empty-input policy
+        for (final String har : new String[] { "{\"log\": {\"entries\": {}}}", "{\"log\": {\"entries\": \"x\"}}" }) {
+            assertThrows(IllegalArgumentException.class, () -> HARUtil.sendRequest(har, url -> true), har);
+            assertEquals(List.of(), HARUtil.sendRequests(har, url -> true), har);
+            assertEquals(0, HARUtil.streamRequests(har, url -> true).count(), har);
+            assertFalse(HARUtil.findRequestEntry(har, url -> true).isPresent(), har);
+        }
+
+        // a non-object entry inside log.entries is skipped rather than aborting the walk
+        final String mixed = "{\"log\": {\"entries\": [\"junk\", {\"request\": {\"url\": \"http://h/ok\"}}]}}";
+        assertEquals("http://h/ok", HARUtil.findRequestEntry(mixed, url -> true).get().get("url"));
+
+        // "postData.params" that is not an array is treated as absent
+        final Map<String, Object> scalarParams = new HashMap<>();
+        scalarParams.put("postData", Map.of("params", "a=1"));
+        assertNull(HARUtil.getBodyAndMimeTypeByRequestEntry(scalarParams)._1);
+
+        // a non-object element inside postData.params is skipped
+        final Map<String, Object> mixedParams = new HashMap<>();
+        mixedParams.put("postData", Map.of("params", java.util.Arrays.asList("junk", Map.of("name", "a", "value", "1"))));
+        assertEquals("a=1", HARUtil.getBodyAndMimeTypeByRequestEntry(mixedParams)._1);
     }
 
 }

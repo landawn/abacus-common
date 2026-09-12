@@ -14,6 +14,9 @@
 
 package com.landawn.abacus.pool;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * Abstract base class for implementing poolable objects.
  * This class provides a convenient base implementation of the {@link Poolable} interface,
@@ -21,6 +24,12 @@ package com.landawn.abacus.pool;
  *
  * <p>Subclasses need only implement the {@link #destroy(Poolable.Caller)} method to define
  * their cleanup behavior when removed from a pool.
+ *
+ * <p>This class is {@link Serializable} so that instances can be written as part of a serialized
+ * {@link Pool} (every {@code Pool} is {@code Serializable}). The {@link ActivityPrint} is carried
+ * with the object. A subclass is serializable only if all of its own non-transient state is
+ * {@code Serializable}; otherwise writing a pool that contains it fails with
+ * {@link java.io.NotSerializableException}.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -52,7 +61,10 @@ package com.landawn.abacus.pool;
  * @see ObjectPool
  * @see KeyedObjectPool
  */
-public abstract class AbstractPoolable implements Poolable {
+public abstract class AbstractPoolable implements Poolable, Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 6217430519258462071L;
 
     /**
      * The activity print tracking lifecycle and usage statistics for this poolable object.
@@ -77,12 +89,12 @@ public abstract class AbstractPoolable implements Poolable {
      * }
      * }</pre>
      *
-     * @param liveTime the maximum lifetime in milliseconds before this object expires (must be positive)
+     * @param maxLiveTime the maximum lifetime in milliseconds before this object expires (must be positive)
      * @param maxIdleTime the maximum idle time in milliseconds before this object expires (must be positive)
-     * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive.
+     * @throws IllegalArgumentException if maxLiveTime or maxIdleTime is not positive.
      */
-    protected AbstractPoolable(final long liveTime, final long maxIdleTime) {
-        activityPrint = new ActivityPrint(liveTime, maxIdleTime);
+    protected AbstractPoolable(final long maxLiveTime, final long maxIdleTime) throws IllegalArgumentException {
+        activityPrint = new ActivityPrint(maxLiveTime, maxIdleTime);
     }
 
     /**

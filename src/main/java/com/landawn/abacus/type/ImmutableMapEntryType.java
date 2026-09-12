@@ -21,6 +21,8 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
@@ -123,6 +125,20 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
     }
 
     /**
+     * Indicates whether values of this type are immutable.
+     * An {@link AbstractMap.SimpleImmutableEntry} cannot be modified after construction - its key and value fields
+     * are {@code final} and {@link AbstractMap.SimpleImmutableEntry#setValue(Object) setValue} always throws - so
+     * its values are immutable by construction. As with the other immutable handlers, this describes the entry
+     * itself; it makes no promise about the key and value objects it holds.
+     *
+     * @return {@code true}, always
+     */
+    @Override
+    public boolean isImmutable() {
+        return true;
+    }
+
+    /**
      * Serializes an immutable map entry to its JSON string representation as a single-entry object
      * (e.g., {@code {"age":25}}).
      *
@@ -151,14 +167,20 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
-     * @param str the JSON string to parse; may be {@code null} or empty
-     * @return a new immutable map entry, or {@code null} if the input is {@code null}, empty, or {@code "{}"}
+     * @param str the JSON string to parse; may be {@code null}, empty, blank, or {@code "{}"}
+     * @return a new immutable map entry, or {@code null} if the input is {@code null}, empty, blank, or {@code "{}"}
      * @throws IllegalArgumentException if the JSON object contains more than one entry.
+     * @throws ParsingException if {@code str} is not a JSON object: a JSON array, a
+     *         bare scalar and trailing content after the object are all reported this way
+     * @throws RuntimeException if a key or value cannot be converted to the declared key/value type (for example
+     *         {@code NumberFormatException} for a non-numeric value in a {@code Map.ImmutableEntry<String, Integer>}).
+     *         A duplicate key is not detected: the last value wins.
      * @see #valueOf(Object)
      * @see #stringOf(AbstractMap.SimpleImmutableEntry)
      */
+    @MayReturnNull
     @Override
-    public AbstractMap.SimpleImmutableEntry<K, V> valueOf(final String str) {
+    public AbstractMap.SimpleImmutableEntry<K, V> valueOf(final String str) throws IllegalArgumentException, ParsingException, RuntimeException {
         if (Strings.isEmpty(str) || Strings.isBlank(str) || "{}".equals(str)) {
             return null; // NOSONAR
         }
@@ -181,6 +203,13 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * The output format is a single-entry map (e.g., {@code {age:25}}).
      * {@link Writer} instances are wrapped in a buffered writer for better performance.
      * <p>
+     * The value is appended by its declared value type handler. When that declared type is {@code Object} the
+     * handler of the value's runtime class is used instead, exactly as
+     * {@link #serializeTo(CharacterWriter, AbstractMap.SimpleImmutableEntry, JsonXmlSerConfig)} does, so a map,
+     * collection or bean value keeps the {@code toString()}-style form rather than falling back to
+     * {@code ObjectType}'s JSON {@code stringOf}. The key keeps its declared handler, as it does in
+     * {@code serializeTo}.
+     * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
      * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
@@ -188,7 +217,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      *
      * @param appendable the {@link Appendable} to write to
      * @param x the immutable map entry to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws IOException if appending the entry delimiters, key, value or null literal fails, or flushing the temporary writer fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -214,7 +243,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
 
                     keyType.appendTo(bw, x.getKey());
                     bw.write(SK._COLON);
-                    valueType.appendTo(bw, x.getValue());
+                    AbstractTupleType.appendElement(bw, valueType, x.getValue());
 
                     bw.write(SK._BRACE_R);
 
@@ -234,7 +263,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
 
                 keyType.appendTo(appendable, x.getKey());
                 appendable.append(SK._COLON);
-                valueType.appendTo(appendable, x.getValue());
+                AbstractTupleType.appendElement(appendable, valueType, x.getValue());
 
                 appendable.append(SK._BRACE_R);
             }
@@ -251,6 +280,15 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * It is the streaming counterpart of {@code stringOf}
      * and is invoked by the JSON/XML serializers.
      * <p>
+     * The value is written by its <i>declared</i> type handler. For an {@code Object}-typed value slot
+     * ({@code Map.ImmutableEntry<K, Object>}) that handler is the generic object type, which dispatches on the runtime
+     * type of the value: a scalar keeps its JSON shape (an entry {@code ("k", 1)} is written as {@code {"k":1}} and
+     * reads back as an {@code Integer}), a {@code Date}/temporal value honours the config's {@code DateTimeFormat},
+     * and a map, bean or collection value is written as structural JSON under a {@code JsonSerConfig} (as escaped
+     * text under an XML config). The output therefore agrees with
+     * {@link #stringOf(AbstractMap.SimpleImmutableEntry)}, which goes through the map serializer, and with a
+     * {@code Map<K, Object>} property holding the same value.
+     * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
      * quoting or escaping.
@@ -258,7 +296,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * @param writer the {@link CharacterWriter} to write to
      * @param x the immutable map entry to write; may be {@code null}
      * @param config the serialization configuration to use; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws IOException if writing the entry delimiters, key, value or null literal to {@code writer} fails
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final AbstractMap.SimpleImmutableEntry<K, V> x, final JsonXmlSerConfig<?> config) throws IOException {
@@ -269,12 +307,18 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
 
             serializeKey(writer, x.getKey(), config);
             writer.write(SK._COLON);
-            valueType.serializeTo(writer, x.getValue(), config);
+            // The same slot writer the Pair/Triple/Tuple/optional handlers use: a declared handler that is not
+            // serializable (a map, bean or collection value type) would quote its whole JSON rendering as one string,
+            // which disagrees with this type's own stringOf and with a Map<K, V> property holding the same value.
+            AbstractTupleType.serializeSlot(writer, valueType, x.getValue(), config);
 
             writer.write(SK._BRACE_R);
         }
     }
 
+    /**
+     * @throws IOException if writing the serialized key to the JSON writer fails
+     */
     private void serializeKey(final CharacterWriter writer, final K key, final JsonXmlSerConfig<?> config) throws IOException {
         final boolean isQuoteMapKey = config instanceof JsonSerConfig jsonConfig ? jsonConfig.isQuoteMapKey() : config != null;
 

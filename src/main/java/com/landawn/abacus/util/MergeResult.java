@@ -192,12 +192,12 @@ public enum MergeResult {
      * Stream<Integer> merged = Stream.merge(stream1, stream2, minMerger);
      * }</pre>
      *
-     * @param <T> the type of the values (must extend Comparable)
+     * @param <T> the mutually comparable value type, implementing {@code Comparable<? super T>}
      * @return a BiFunction that returns {@link #TAKE_FIRST} if first is less than or equal to second,
      *         {@link #TAKE_SECOND} otherwise
      */
     @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> BiFunction<T, T, MergeResult> minFirst() {
+    public static <T extends Comparable<? super T>> BiFunction<T, T, MergeResult> minFirst() {
         return (BiFunction) MIN_FIRST_BF;
     }
 
@@ -244,12 +244,12 @@ public enum MergeResult {
      * Stream<Integer> merged = Stream.merge(stream1, stream2, maxMerger);
      * }</pre>
      *
-     * @param <T> the type of the values (must extend Comparable)
+     * @param <T> the mutually comparable value type, implementing {@code Comparable<? super T>}
      * @return a BiFunction that returns {@link #TAKE_FIRST} if first is greater than or equal to second,
      *         {@link #TAKE_SECOND} otherwise
      */
     @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> BiFunction<T, T, MergeResult> maxFirst() {
+    public static <T extends Comparable<? super T>> BiFunction<T, T, MergeResult> maxFirst() {
         return (BiFunction) MAX_FIRST_BF;
     }
 

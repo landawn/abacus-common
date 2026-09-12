@@ -217,8 +217,17 @@ import com.landawn.abacus.util.function.ToIntFunction;
  *       <td><b><i>abacus</i></b>: returns {@code u.OptionalInt} (and {@code u.OptionalDouble} for {@code average()}) &middot; &#9888;&#65039; <b><i>JDK</i></b>: returns {@code java.util.OptionalInt}/{@code OptionalDouble}</td>
  *     </tr>
  *     <tr>
+ *       <td><b>null arguments</b> to any operation</td>
+ *       <td><b><i>abacus</i></b>: throws {@link IllegalArgumentException} (via {@code checkArgNotNull}),
+ *           and the stream is <b>closed</b> before the exception propagates &middot; &#9888;&#65039;
+ *           <b><i>JDK</i></b>: throws {@link NullPointerException} and leaves the stream open.
+ *           This applies throughout: a {@code null} mapper, predicate, comparator, collector,
+ *           supplier or action is rejected with {@code IllegalArgumentException} naming the
+ *           parameter, whether or not the individual method's javadoc repeats it.</td>
+ *     </tr>
+ *     <tr>
  *       <td>{@code count()}</td>
- *       <td><b><i>abacus</i></b>: always traverses the pipeline, so an upstream {@code peek}/{@code filter} still runs &middot; &#9888;&#65039; <b><i>JDK</i></b> (9+): may return the count without traversal when the element count is already known</td>
+ *       <td><b><i>abacus</i></b>: traverses the pipeline, so an upstream {@code peek}/{@code filter} still runs. The one exception is a stream created by {@code from(java.util.stream.*)} with no abacus operation after it: that delegates {@code count()} straight to the wrapped JDK stream, which may skip its own {@code peek} &middot; &#9888;&#65039; <b><i>JDK</i></b> (9+): may return the count without traversal when the element count is already known</td>
  *     </tr>
  *     <tr>
  *       <td>{@code peek}/{@code onEach}</td>
@@ -285,12 +294,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new stream consisting of the elements that match the given predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#filter(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract IntStream filter(final IntPredicate predicate);
+    public abstract IntStream filter(final IntPredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the longest prefix of elements from this stream
@@ -306,7 +316,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * individually satisfy the predicate.<br>
      * There is no guarantee of encounter-order prefix semantics in parallel streams.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
+     * <p>Parallel-stream behavior of these related operations:</p>
      * <pre>
      * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
      * │     Method      │        Boundary         │                            Warning                             │
@@ -314,11 +324,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
      * │                 │ (predicate false)       │ individually satisfy the predicate                             │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * │ dropWhile (+    │ first unmatched         │ prefix boundary is preserved: only the leading run is          │
+     * │ onDrop)         │ (predicate false)       │ dropped (predicate checks are serialized). Downstream          │
+     * │                 │                         │ encounter order is unspecified                                 │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * │ skipUntil       │ first matched           │ prefix boundary is preserved: only the leading run is          │
+     * │                 │ (predicate true)        │ skipped (it is dropWhile(not predicate)). Downstream           │
+     * │                 │                         │ encounter order is unspecified                                 │
      * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
      * </pre>
      *
@@ -339,12 +351,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new stream consisting of elements from this stream until an element is encountered that doesn't match the predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#takeWhile(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract IntStream takeWhile(final IntPredicate predicate);
+    public abstract IntStream takeWhile(final IntPredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the remaining elements of this stream after
@@ -356,28 +369,25 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * returns {@code false}, effectively performing a "drop while condition is true"
      * operation that preserves encounter order in sequential streams.
      *
-     * <p><b>Notes on parallel streams:</b><br>
-     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
-     * the predicate returns {@code false}) may still be processed and dropped if they individually
-     * satisfy the predicate.<br>
-     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
-     * is no guarantee of encounter-order prefix/suffix semantics.
+     * <p><b>Notes on parallel streams:</b> The initial matching prefix is determined in the order this
+     * operation's <i>immediate upstream</i> hands it elements: the predicate checks are serialized under
+     * the source iterator's lock, so exactly the leading run of that arrival order is dropped. That is
+     * source encounter order only when no parallel stage precedes this one. An upstream parallel stage
+     * merges its workers' output in completion order, so the prefix dropped here can differ from the
+     * source-order prefix, and elements that follow the source-order boundary can be dropped with it.
+     * Once the predicate first returns {@code false}, that element and all later elements are retained
+     * without further predicate checks. Parallel downstream processing may reorder the retained elements.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
-     * <pre>
-     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
-     * │     Method      │        Boundary         │                            Warning                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
-     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
-     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
-     * </pre>
+     * <p>Parallel-stream behavior of these related operations:</p>
+     * <ul>
+     *   <li>{@code takeWhile}: elements after the first predicate failure may still be included
+     *       if they individually satisfy the predicate.</li>
+     *   <li>{@code dropWhile}, including the {@code onDrop} overload: drops only the initial
+     *       matching prefix; the first nonmatching element and all later elements are retained.</li>
+     *   <li>{@code skipUntil}: skips only the initial nonmatching prefix; the first matching
+     *       element and all later elements are retained.</li>
+     * </ul>
+     * <p>Parallel processing does not guarantee the encounter order of the retained elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -397,12 +407,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#dropWhile(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract IntStream dropWhile(final IntPredicate predicate);
+    public abstract IntStream dropWhile(final IntPredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an IntStream consisting of the results of applying the given function to the elements of this stream.
@@ -425,11 +436,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from int to int
      * @return a new IntStream consisting of the results of applying the mapper function to each element
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see Stream#map(Function)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream map(IntUnaryOperator mapper);
+    public abstract IntStream map(IntUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a CharStream consisting of the results of applying the given
@@ -459,12 +471,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from int to char
      * @return a new CharStream consisting of the results of applying the mapper function to each element
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(IntUnaryOperator)
      * @see #mapToObj(IntFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract CharStream mapToChar(IntToCharFunction mapper);
+    public abstract CharStream mapToChar(IntToCharFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a ByteStream consisting of the results of applying the given
@@ -494,12 +507,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from int to byte
      * @return a new ByteStream consisting of the results of applying the mapper function to each element
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(IntUnaryOperator)
      * @see #mapToObj(IntFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract ByteStream mapToByte(IntToByteFunction mapper);
+    public abstract ByteStream mapToByte(IntToByteFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a ShortStream consisting of the results of applying the given
@@ -529,12 +543,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from int to short
      * @return a new ShortStream consisting of the results of applying the mapper function to each element of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(IntUnaryOperator)
      * @see #mapToObj(IntFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract ShortStream mapToShort(IntToShortFunction mapper);
+    public abstract ShortStream mapToShort(IntToShortFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a LongStream consisting of the results of applying the given
@@ -564,12 +579,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from int to long
      * @return a new LongStream consisting of the results of applying the mapper function to each element of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(IntUnaryOperator)
      * @see #mapToObj(IntFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream mapToLong(IntToLongFunction mapper);
+    public abstract LongStream mapToLong(IntToLongFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a FloatStream consisting of the results of applying the given
@@ -599,12 +615,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from int to float
      * @return a new FloatStream consisting of the results of applying the mapper function to each element of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(IntUnaryOperator)
      * @see #mapToDouble(IntToDoubleFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream mapToFloat(IntToFloatFunction mapper);
+    public abstract FloatStream mapToFloat(IntToFloatFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a DoubleStream consisting of the results of applying the given
@@ -634,13 +651,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from int to double
      * @return a new DoubleStream consisting of the results of applying the mapper function to each element of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(IntUnaryOperator)
      * @see #mapToFloat(IntToFloatFunction)
      * @see java.util.stream.IntStream#mapToDouble(IntToDoubleFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream mapToDouble(IntToDoubleFunction mapper);
+    public abstract DoubleStream mapToDouble(IntToDoubleFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an object-valued Stream consisting of the results of applying the
@@ -671,12 +689,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from int to T
      * @return a new Stream of objects resulting from applying the mapper function to each element of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(IntUnaryOperator)
      * @see java.util.stream.IntStream#mapToObj(IntFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> mapToObj(IntFunction<? extends T> mapper);
+    public abstract <T> Stream<T> mapToObj(IntFunction<? extends T> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of replacing each element of
@@ -714,11 +733,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from int to IntStream
      * @return a new {@link IntStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see Stream#flatMap(Function)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream flatMap(IntFunction<? extends IntStream> mapper);
+    public abstract IntStream flatMap(IntFunction<? extends IntStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of replacing each element of this stream with the contents
@@ -762,6 +782,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from int to {@code Collection<Integer>}
      * @return a new {@code IntStream} consisting of the flattened contents of the collections produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(IntFunction)
      * @see #flatMapArray(IntFunction)
      * @see Stream#flatmap(java.util.function.Function)
@@ -769,7 +790,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     // @ai-ignore flatmap/flatMap naming - intentional: flatMap maps to IntStream, flatmap maps to Collection<Integer>, flatMapArray maps to int[]. Do not suggest renaming.
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream flatmap(IntFunction<? extends Collection<Integer>> mapper); //NOSONAR
+    public abstract IntStream flatmap(IntFunction<? extends Collection<Integer>> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns a stream consisting of the results of replacing each element of this stream with the contents
@@ -806,6 +827,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from int to int[]
      * @return a new {@code IntStream} consisting of the flattened contents of the arrays produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(IntFunction)
      * @see #flattMap(IntFunction)
      * @see #flatMapToLong(IntFunction)
@@ -814,7 +836,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     // @ai-ignore flatMapArray/flatMap/flattMap naming - intentional: flatMap maps to IntStream, flatMapArray maps to int[], flattMap maps to JDK java.util.stream.IntStream. Do not suggest renaming.
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream flatMapArray(IntFunction<int[]> mapper); //NOSONAR
+    public abstract IntStream flatMapArray(IntFunction<int[]> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * This method is deprecated and not supported.
@@ -828,14 +850,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *               (parameter is not used as this method always throws)
      * @return the new stream (this method never returns as it always throws)
      * @throws IllegalStateException if the stream is already closed
-     * @throws UnsupportedOperationException always thrown as this method is not supported
+     * @throws UnsupportedOperationException if the stream is open; this method is not supported.
      * @deprecated This method is not supported. Use {@link #flatmap(IntFunction)} instead
      * @see #flatmap(IntFunction)
      */
     @Deprecated
     @ParallelSupported
     @IntermediateOp
-    IntStream flattmap(@SuppressWarnings("unused") final IntFunction<? extends Collection<Integer>> mapper) throws UnsupportedOperationException { // NOSONAR
+    IntStream flattmap(@SuppressWarnings("unused") final IntFunction<? extends Collection<Integer>> mapper)
+            throws IllegalStateException, UnsupportedOperationException { // NOSONAR
         assertNotClosed();
 
         throw new UnsupportedOperationException("Method 'flattmap' is deprecated and unsupported; use 'flatmap' or 'flatMap' instead");
@@ -878,6 +901,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element to a JDK IntStream
      * @return a new {@code IntStream} consisting of the flattened contents of the mapped JDK {@code IntStream} instances
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(IntFunction)
      * @see #flatMapArray(IntFunction)
      */
@@ -885,7 +909,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream flattMap(IntFunction<? extends java.util.stream.IntStream> mapper); //NOSONAR
+    public abstract IntStream flattMap(IntFunction<? extends java.util.stream.IntStream> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Alias for {@link #flattMap(IntFunction)}.
@@ -915,7 +939,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public IntStream flatMapJdkStream(IntFunction<? extends java.util.stream.IntStream> mapper) throws IllegalArgumentException {
+    public IntStream flatMapJdkStream(IntFunction<? extends java.util.stream.IntStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -951,10 +975,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element to a CharStream
      * @return a new {@link CharStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract CharStream flatMapToChar(IntFunction<? extends CharStream> mapper);
+    public abstract CharStream flatMapToChar(IntFunction<? extends CharStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a ByteStream consisting of the results of replacing each element of
@@ -979,10 +1004,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element to a ByteStream
      * @return a new {@link ByteStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract ByteStream flatMapToByte(IntFunction<? extends ByteStream> mapper);
+    public abstract ByteStream flatMapToByte(IntFunction<? extends ByteStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a ShortStream consisting of the results of replacing each element of
@@ -1007,10 +1033,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element to a ShortStream
      * @return a new {@link ShortStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract ShortStream flatMapToShort(IntFunction<? extends ShortStream> mapper);
+    public abstract ShortStream flatMapToShort(IntFunction<? extends ShortStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a LongStream consisting of the results of replacing each element of
@@ -1035,10 +1062,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element to a LongStream
      * @return a new {@link LongStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream flatMapToLong(IntFunction<? extends LongStream> mapper);
+    public abstract LongStream flatMapToLong(IntFunction<? extends LongStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a FloatStream consisting of the results of replacing each element of
@@ -1063,10 +1091,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element to a FloatStream
      * @return a new {@link FloatStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream flatMapToFloat(IntFunction<? extends FloatStream> mapper);
+    public abstract FloatStream flatMapToFloat(IntFunction<? extends FloatStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a DoubleStream consisting of the results of replacing each element of
@@ -1091,10 +1120,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element to a DoubleStream
      * @return a new {@link DoubleStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream flatMapToDouble(IntFunction<? extends DoubleStream> mapper);
+    public abstract DoubleStream flatMapToDouble(IntFunction<? extends DoubleStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of this stream
@@ -1121,12 +1151,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element to a Stream
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(IntFunction)
      * @see #flatmapToObj(IntFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatMapToObj(IntFunction<? extends Stream<? extends T>> mapper);
+    public abstract <T> Stream<T> flatMapToObj(IntFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of this stream
@@ -1151,12 +1182,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element to a Collection
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the collections produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMapToObj(IntFunction)
      * @see #flatMapArrayToObj(IntFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatmapToObj(IntFunction<? extends Collection<? extends T>> mapper); //NOSONAR
+    public abstract <T> Stream<T> flatmapToObj(IntFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of this stream
@@ -1181,13 +1213,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element to an array
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the arrays produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMapToObj(IntFunction)
      * @see #flatmapToObj(IntFunction)
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatMapArrayToObj(IntFunction<T[]> mapper);
+    public abstract <T> Stream<T> flatMapArrayToObj(IntFunction<T[]> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given
@@ -1214,10 +1247,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *               output values for each input value
      * @return a new {@link IntStream} consisting of the elements generated by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream mapMulti(IntMapMultiConsumer mapper);
+    public abstract IntStream mapMulti(IntMapMultiConsumer mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the elements that have a non-empty result
@@ -1241,11 +1275,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element to an OptionalInt
      * @return a new {@link IntStream} consisting of the present values from the non-empty {@code OptionalInt} results produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream mapPartial(IntFunction<OptionalInt> mapper);
+    public abstract IntStream mapPartial(IntFunction<OptionalInt> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the elements that have a non-empty result
@@ -1269,11 +1304,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element to a JDK OptionalInt
      * @return a new {@link IntStream} consisting of the present values from the non-empty {@code java.util.OptionalInt} results produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream mapPartialJdk(IntFunction<java.util.OptionalInt> mapper);
+    public abstract IntStream mapPartialJdk(IntFunction<java.util.OptionalInt> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given mapper function to the first and last element of the ranges in this stream,
@@ -1295,17 +1331,22 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
      *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output element
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code sameRange}, {@code mapper} is {@code null}
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract IntStream rangeMap(final IntBiPredicate sameRange, final IntBinaryOperator mapper);
+    public abstract IntStream rangeMap(final IntBiPredicate sameRange, final IntBinaryOperator mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given mapper function to the first and last element of the ranges in this stream,
@@ -1328,6 +1369,10 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param <T> the element type of the new stream
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
@@ -1335,11 +1380,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapper a function that maps a range (defined by its first and last element) to an output object of type T
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code sameRange}, {@code mapper} is {@code null}
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract <T> Stream<T> rangeMapToObj(final IntBiPredicate sameRange, final IntBiFunction<? extends T> mapper);
+    public abstract <T> Stream<T> rangeMapToObj(final IntBiPredicate sameRange, final IntBiFunction<? extends T> mapper)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream into groups based on a predicate.
@@ -1362,15 +1409,20 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential};
      * buffers the current group in an {@link IntList}.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
      * @return a stream of lists, each containing a sequence of consecutive elements that are collapsible with each other
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code collapsible} is {@code null}
      * @see Stream#collapse(BiPredicate)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<IntList> collapse(final IntBiPredicate collapsible);
+    public abstract Stream<IntList> collapse(final IntBiPredicate collapsible) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream by applying a merge function when elements are collapsible.
@@ -1406,16 +1458,22 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
      * @param mergeFunction a function to merge two collapsible elements into one
      * @return a stream of merged elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code collapsible}, {@code mergeFunction} is {@code null}
      * @see Stream#collapse(BiPredicate, BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract IntStream collapse(final IntBiPredicate collapsible, final IntBinaryOperator mergeFunction);
+    public abstract IntStream collapse(final IntBiPredicate collapsible, final IntBinaryOperator mergeFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream by applying a merge function when elements are collapsible.
@@ -1447,16 +1505,22 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param collapsible a predicate that determines if the next element from this stream should be collapsed with the first and last elements of current group
      *          The collapsible predicate takes three elements: the first and last elements of current group, and the next element to check.
      * @param mergeFunction a function to merge two collapsible elements into one
      * @return a stream of merged elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code collapsible}, {@code mergeFunction} is {@code null}
      * @see Stream#collapse(TriPredicate, BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract IntStream collapse(final IntTriPredicate collapsible, final IntBinaryOperator mergeFunction);
+    public abstract IntStream collapse(final IntTriPredicate collapsible, final IntBinaryOperator mergeFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -1484,14 +1548,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>The first successfully read source element initializes the result without invoking the accumulator.</p>
+     *
      * @param accumulator an {@code IntBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code IntStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract IntStream scan(final IntBinaryOperator accumulator);
+    public abstract IntStream scan(final IntBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -1524,11 +1591,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param accumulator an {@code IntBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code IntStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(Object, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract IntStream scan(final int init, final IntBinaryOperator accumulator);
+    public abstract IntStream scan(final int init, final IntBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -1553,16 +1621,21 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
+     * @param init the seed. If {@code initIncluded} is {@code false}, used once to compute the first
+     *        output element and omitted if this stream is empty. If {@code initIncluded} is {@code true},
+     *        {@code init} is the first output element (even when this stream is empty) and is then fed
+     *        to {@code accumulator} for subsequent elements.
      * @param initIncluded a boolean value that determines if the initial value should be included as the first element in the returned stream.
      * @param accumulator an {@code IntBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code IntStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(Object, boolean, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract IntStream scan(final int init, final boolean initIncluded, final IntBinaryOperator accumulator);
+    public abstract IntStream scan(final int init, final boolean initIncluded, final IntBinaryOperator accumulator)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the specified elements followed by the elements of this stream.
@@ -1585,7 +1658,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract IntStream prepend(final int... a);
+    public abstract IntStream prepend(final int... a) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of the elements of this stream with the specified elements appended.
@@ -1608,7 +1681,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract IntStream append(final int... a);
+    public abstract IntStream append(final int... a) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of this stream's elements when it is non-empty, or the specified elements when it is empty.
@@ -1635,7 +1708,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract IntStream appendIfEmpty(final int... a);
+    public abstract IntStream appendIfEmpty(final int... a) throws IllegalStateException;
 
     /**
      * Returns an IntStream consisting of the top n elements of this stream, according to the natural order of the elements.
@@ -1664,7 +1737,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract IntStream top(int n);
+    public abstract IntStream top(int n) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an IntStream consisting of the top n elements of this stream compared by the provided Comparator.
@@ -1694,7 +1767,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract IntStream top(final int n, Comparator<? super Integer> comparator);
+    public abstract IntStream top(final int n, Comparator<? super Integer> comparator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an IntList containing all the elements of this stream.
@@ -1715,7 +1788,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract IntList toIntList();
+    public abstract IntList toIntList() throws IllegalStateException;
 
     /**
      * Returns a Map containing the results of applying the given functions to the elements of this stream.
@@ -1741,6 +1814,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param valueMapper a non-interfering, stateless function to apply to each element to produce values
      * @return a Map whose keys and values are the result of applying the mapper functions to the input elements
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper} is {@code null}
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      * @see Collectors#toMap(Function, Function)
@@ -1748,7 +1822,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Throwables.IntFunction<? extends K, E> keyMapper,
-            Throwables.IntFunction<? extends V, E2> valueMapper) throws E, E2;
+            Throwables.IntFunction<? extends V, E2> valueMapper) throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a Map containing the results of applying the given functions to the elements of this stream.
@@ -1763,14 +1837,20 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * LinkedHashMap<String, Integer> orderedMap = IntStream.of(3, 1, 4, 2)
      *     .toMap(i -> "key" + i,
      *            i -> i * 10,
-     *            LinkedHashMap::new);   // returns LinkedHashMap preserving order
+     *            () -> new LinkedHashMap<String, Integer>());   // returns LinkedHashMap preserving order
      *
      * // Create a TreeMap for sorted keys
      * TreeMap<Integer, String> sortedMap = IntStream.of(5, 2, 8, 1)
      *     .toMap(i -> i,
      *            i -> "value" + i,
-     *            TreeMap::new);   // returns TreeMap with keys sorted
+     *            () -> new TreeMap<Integer, String>());   // returns TreeMap with keys sorted
      * }</pre>
+     *
+     * <p><b>Note:</b> supply {@code mapFactory} as a lambda, not as a constructor reference. A
+     * constructor reference such as {@code LinkedHashMap::new} is <i>inexact</i>, so the compiler
+     * cannot choose between this overload and
+     * {@link #toMap(Throwables.IntFunction, Throwables.IntFunction, BinaryOperator)} and reports
+     * {@code reference to toMap is ambiguous}.
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
@@ -1784,6 +1864,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapFactory a supplier which returns a new, empty Map into which the results will be inserted
      * @return a Map whose keys and values are the result of applying the mapper functions to the input elements
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is {@code null}
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      * @see Collectors#toMap(Function, Function, Supplier)
@@ -1791,7 +1872,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.IntFunction<? extends K, E> keyMapper,
-            Throwables.IntFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory) throws E, E2;
+            Throwables.IntFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a Map containing the results of applying the given functions to the elements of this stream.
@@ -1832,6 +1914,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mergeFunction a merge function, used to resolve collisions between values associated with the same key
      * @return a Map whose keys and values are the result of applying the mapper functions to the input elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction} is {@code null}
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator)
@@ -1839,7 +1922,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Throwables.IntFunction<? extends K, E> keyMapper,
-            Throwables.IntFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction) throws E, E2;
+            Throwables.IntFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction) throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a Map containing the results of applying the given functions to the elements of this stream.
@@ -1856,14 +1939,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *     .toMap(i -> "key" + i,
      *            i -> i,
      *            (v1, v2) -> v1 + v2,
-     *            LinkedHashMap::new);   // returns LinkedHashMap with insertion order
+     *            () -> new LinkedHashMap<String, Integer>());   // returns LinkedHashMap with insertion order
      *
      * // Create a TreeMap with natural ordering
      * TreeMap<Integer, String> sortedMap = IntStream.of(5, 2, 8, 2, 1)
      *     .toMap(i -> i,
      *            i -> "value" + i,
      *            (v1, v2) -> v1,
-     *            TreeMap::new);   // returns TreeMap sorted by keys
+     *            Suppliers.ofTreeMap());   // returns TreeMap sorted by keys
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
@@ -1879,6 +1962,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapFactory a supplier which returns a new, empty Map into which the results will be inserted
      * @return a Map whose keys and values are the result of applying the mapper functions to the input elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, {@code mapFactory} is {@code null}
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -1886,7 +1970,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.IntFunction<? extends K, E> keyMapper,
-            Throwables.IntFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory) throws E, E2;
+            Throwables.IntFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Groups the elements of this stream according to a classification function and performs a reduction
@@ -1904,7 +1989,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Note:</b> Each {@code int} element is boxed to {@link Integer} before being passed to the
      * downstream collector, since {@link Collector} cannot be parameterized on a primitive type.
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported};
+     * maintains a downstream accumulation result for each key; additional buffering depends on the collector.
      *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
@@ -1913,13 +1999,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param downstream a Collector implementing the downstream reduction
      * @return a Map containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code downstream} is {@code null}
      * @throws E if the classifier throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, E extends Exception> Map<K, D> groupTo(Throwables.IntFunction<? extends K, E> keyMapper,
-            final Collector<? super Integer, ?, D> downstream) throws E;
+            final Collector<? super Integer, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Groups the elements of this stream according to a classification function and performs a reduction
@@ -1934,21 +2021,22 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * LinkedHashMap<String, List<Integer>> grouped = IntStream.of(1, 2, 3, 4, 5, 6)
      *     .groupTo(i -> i % 2 == 0 ? "even" : "odd",
      *              Collectors.toList(),
-     *              LinkedHashMap::new);
+     *              () -> new LinkedHashMap<String, List<Integer>>());
      * // returns LinkedHashMap {"odd"=[1, 3, 5], "even"=[2, 4, 6]}
      *
      * // Group with TreeMap for sorted keys
      * TreeMap<Integer, Long> countByRange = IntStream.range(0, 20)
      *     .groupTo(i -> i / 5,
      *              Collectors.counting(),
-     *              TreeMap::new);
+     *              Suppliers.ofTreeMap());
      * // returns TreeMap {0=5, 1=5, 2=5, 3=5}
      * }</pre>
      *
      * <p><b>Note:</b> Each {@code int} element is boxed to {@link Integer} before being passed to the
      * downstream collector, since {@link Collector} cannot be parameterized on a primitive type.
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported};
+     * maintains a downstream accumulation result for each key; additional buffering depends on the collector.
      *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
@@ -1959,13 +2047,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param mapFactory a supplier which returns a new, empty Map into which the results will be inserted
      * @return a Map containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}
      * @throws E if the classifier throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, M extends Map<K, D>, E extends Exception> M groupTo(Throwables.IntFunction<? extends K, E> keyMapper,
-            final Collector<? super Integer, ?, D> downstream, final Supplier<? extends M> mapFactory) throws E;
+            final Collector<? super Integer, ?, D> downstream, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Performs a reduction on the elements of this stream, using the provided identity value and an
@@ -1998,11 +2088,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#reduce(Object, BinaryOperator)
      */
     @ParallelSupported
     @TerminalOp
-    public abstract int reduce(int identity, IntBinaryOperator accumulator);
+    public abstract int reduce(int identity, IntBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a reduction on the elements of this stream, using an associative accumulation
@@ -2035,11 +2126,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an OptionalInt describing the result of the reduction, or an empty OptionalInt if the stream is empty
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#reduce(BinaryOperator)
      */
     @ParallelSupported
     @TerminalOp
-    public abstract OptionalInt reduce(IntBinaryOperator accumulator);
+    public abstract OptionalInt reduce(IntBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream using explicit supplier,
@@ -2078,13 +2170,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *                 {@code combiner} if {@code R} is a {@code Map/Collection/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code combiner} is {@code null}
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see BiConsumers#ofAddAll()
      * @see BiConsumers#ofPutAll()
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <R> R collect(Supplier<R> supplier, ObjIntConsumer<? super R> accumulator, BiConsumer<R, R> combiner);
+    public abstract <R> R collect(Supplier<R> supplier, ObjIntConsumer<? super R> accumulator, BiConsumer<R, R> combiner)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream using explicit supplier
@@ -2119,6 +2213,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *                    additional element into a result
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator} is {@code null}
      * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of:
      *         {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
      *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
@@ -2128,7 +2223,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <R> R collect(Supplier<R> supplier, ObjIntConsumer<? super R> accumulator);
+    public abstract <R> R collect(Supplier<R> supplier, ObjIntConsumer<? super R> accumulator)
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Performs an action for each element of this stream.
@@ -2156,7 +2252,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @ParallelSupported
     @TerminalOp
-    public void foreach(final IntConsumer action) throws IllegalArgumentException { // NOSONAR
+    public void foreach(final IntConsumer action) throws IllegalStateException, IllegalArgumentException { // NOSONAR
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -2185,11 +2281,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEach(final Throwables.IntConsumer<E> action) throws E;
+    public abstract <E extends Exception> void forEach(final Throwables.IntConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Performs an action for each element of this stream, providing the element index to the action.
@@ -2215,13 +2312,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements. The first parameter is the
-     *               element index and the second parameter is the element value.
+     *               element index and the second parameter is the element value. &#9888;&#65039; On a
+     *               parallel stream the first parameter is an invocation counter shared by the
+     *               workers, not the element's position; only sequential execution pairs an element
+     *               with its true index. It is an {@code int} and wraps past {@code Integer.MAX_VALUE}.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEachIndexed(Throwables.IntIntConsumer<E> action) throws E;
+    public abstract <E extends Exception> void forEachIndexed(Throwables.IntIntConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether any elements of this stream match the provided predicate.
@@ -2252,11 +2353,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return {@code true} if any elements of the stream match the provided predicate,
      *         otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean anyMatch(final Throwables.IntPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean anyMatch(final Throwables.IntPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether all elements of this stream match the provided predicate.
@@ -2287,11 +2390,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return {@code true} if either all elements of the stream match the provided predicate or
      *         the stream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean allMatch(final Throwables.IntPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean allMatch(final Throwables.IntPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether no elements of this stream match the provided predicate.
@@ -2322,19 +2427,23 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return {@code true} if either no elements of the stream match the provided predicate or
      *         the stream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean noneMatch(final Throwables.IntPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean noneMatch(final Throwables.IntPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns the first element of this stream wrapped in an {@code OptionalInt}, or an empty
      * {@code OptionalInt} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is a deterministic alias of {@link #first()}: it always returns the first element
-     * in encounter order, even for parallel streams. The {@code findFirst} name is kept to align with
+     * <p>This method is an alias of {@link #first()} even in parallel: it does not race workers at the
+     * terminal. Sequential streams return the encounter-order first element. Parallel streams return
+     * the first element of the current pipeline iterator after any upstream reordering.
+     * Use {@link #findAny(Throwables.IntPredicate)} for unordered parallel search. The {@code findFirst} name is kept to align with
      * the standard {@link java.util.stream.IntStream#findFirst()} API.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2355,7 +2464,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @ParallelSupported
     @TerminalOp
-    public OptionalInt findFirst() {
+    public OptionalInt findFirst() throws IllegalStateException {
         assertNotClosed();
 
         return first();
@@ -2366,10 +2475,10 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * {@code OptionalInt} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>Despite the name, this method is deterministic: unlike {@link java.util.stream.IntStream#findAny()},
-     * which may return an arbitrary element (especially for parallel streams), this method is an alias of
-     * {@link #first()} and always returns the first element in encounter order, even for parallel
-     * streams. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
+     * <p>This method is an alias of {@link #first()} even in parallel: it does not race workers at the
+     * terminal. Sequential streams return the encounter-order first element. Parallel streams return
+     * the first element of the current pipeline iterator after any upstream reordering.
+     * Use {@link #findAny(Throwables.IntPredicate)} for unordered parallel search. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2389,7 +2498,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @ParallelSupported
     @TerminalOp
-    public OptionalInt findAny() {
+    public OptionalInt findAny() throws IllegalStateException {
         assertNotClosed();
 
         return first();
@@ -2416,6 +2525,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalInt} containing the first element that matches the predicate, or an empty {@code OptionalInt} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findAny(Throwables.IntPredicate)
      * @see #findLast(Throwables.IntPredicate)
@@ -2423,7 +2533,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalInt findFirst(final Throwables.IntPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalInt findFirst(final Throwables.IntPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns any element of this stream that matches the given {@code predicate}, wrapped in an
@@ -2434,7 +2545,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * streams there is no ordering guarantee: the matching element found first by any worker thread is
      * returned, so the result may differ between runs — which is what can make it faster than
      * {@link #findFirst(Throwables.IntPredicate)} in parallel. (Note the contrast with the no-arg {@link #findAny()},
-     * which is a deterministic alias of {@link #first()}.)</p>
+     * which is an alias of {@link #first()}.)</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2448,6 +2559,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalInt} containing a matching element, or an empty {@code OptionalInt} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.IntPredicate)
      * @see #findLast(Throwables.IntPredicate)
@@ -2455,17 +2567,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalInt findAny(final Throwables.IntPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalInt findAny(final Throwables.IntPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns the last element of this stream that matches the given {@code predicate}, wrapped in an
      * {@code OptionalInt}, or an empty {@code OptionalInt} if no element matches. This is a terminal
      * operation, and the stream is then closed.
      *
-     * <p>Unlike {@link #findFirst(Throwables.IntPredicate)}, this operation cannot short-circuit: every element
-     * must be tested, because a later element is always a better candidate. The result is deterministic
-     * even for parallel streams: when several elements match, the one at the largest encounter-order
-     * index wins.</p>
+     * <p>Finding the last match generally requires traversing the source. Array-backed streams may
+     * instead search backwards and stop at the first matching element. When several elements match,
+     * the one at the largest encounter-order index in the current pipeline wins. Parallel
+     * intermediate operations may already have reordered the original source.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2479,6 +2592,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalInt} containing the last element that matches the predicate, or an empty {@code OptionalInt} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.IntPredicate)
      * @see #findAny(Throwables.IntPredicate)
@@ -2487,7 +2601,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @Beta
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalInt findLast(final Throwables.IntPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalInt findLast(final Throwables.IntPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns an OptionalInt describing the minimum element of this stream,
@@ -2513,7 +2628,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalInt min();
+    public abstract OptionalInt min() throws IllegalStateException;
 
     /**
      * Returns an OptionalInt describing the maximum element of this stream,
@@ -2539,7 +2654,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalInt max();
+    public abstract OptionalInt max() throws IllegalStateException;
 
     /**
      * Returns the <i>k-th</i> largest element in the stream.
@@ -2568,7 +2683,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalInt kthLargest(int k);
+    public abstract OptionalInt kthLargest(int k) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns the sum of elements in this stream. This is a special case of a reduction.
@@ -2599,7 +2714,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract int sum();
+    public abstract int sum() throws IllegalStateException, ArithmeticException;
 
     /**
      * Returns an OptionalDouble describing the arithmetic mean of elements of this stream,
@@ -2627,7 +2742,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalDouble average();
+    public abstract OptionalDouble average() throws IllegalStateException;
 
     /**
      * Returns an IntSummaryStatistics describing various summary data about the elements of this stream.
@@ -2652,7 +2767,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract IntSummaryStatistics summaryStatistics();
+    public abstract IntSummaryStatistics summaryStatistics() throws IllegalStateException;
 
     /**
      * Returns a pair consisting of IntSummaryStatistics for the elements of this stream,
@@ -2696,7 +2811,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract Pair<IntSummaryStatistics, Optional<Map<Percentage, Integer>>> summaryStatisticsAndPercentiles();
+    public abstract Pair<IntSummaryStatistics, Optional<Map<Percentage, Integer>>> summaryStatisticsAndPercentiles() throws IllegalStateException;
 
     /**
      * Merges this stream with another stream, selecting elements based on the provided selector function.
@@ -2730,10 +2845,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *                     otherwise the second parameter is selected.
      * @return the merged stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract IntStream mergeWith(final IntStream b, final IntBiFunction<MergeResult> nextSelector);
+    public abstract IntStream mergeWith(final IntStream b, final IntBiFunction<MergeResult> nextSelector)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with the given stream using the provided zip function.
@@ -2757,11 +2874,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param zipFunction an IntBinaryOperator that determines the combination of elements in the combined IntStream.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      * @see #zipWith(IntStream, int, int, IntBinaryOperator)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream zipWith(IntStream b, IntBinaryOperator zipFunction);
+    public abstract IntStream zipWith(IntStream b, IntBinaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with two other streams using the provided zip function.
@@ -2785,11 +2903,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param zipFunction an IntTernaryOperator that determines the combination of elements in the combined IntStream.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStreams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      * @see #zipWith(IntStream, IntStream, int, int, int, IntTernaryOperator)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream zipWith(IntStream b, IntStream c, IntTernaryOperator zipFunction);
+    public abstract IntStream zipWith(IntStream b, IntStream c, IntTernaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with the given stream using the provided zip function, with default values for missing elements.
@@ -2813,10 +2932,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param zipFunction an IntBinaryOperator that determines the combination of elements in the combined IntStream.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream zipWith(IntStream b, int valueForNoneA, int valueForNoneB, IntBinaryOperator zipFunction);
+    public abstract IntStream zipWith(IntStream b, int valueForNoneA, int valueForNoneB, IntBinaryOperator zipFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with two other streams using the provided zip function, with default values for missing elements.
@@ -2844,10 +2965,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param zipFunction an IntTernaryOperator that determines the combination of elements in the combined IntStream.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStreams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream zipWith(IntStream b, IntStream c, int valueForNoneA, int valueForNoneB, int valueForNoneC, IntTernaryOperator zipFunction);
+    public abstract IntStream zipWith(IntStream b, IntStream c, int valueForNoneA, int valueForNoneB, int valueForNoneC, IntTernaryOperator zipFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Converts this IntStream to a LongStream by widening each int element to a long element.
@@ -2888,7 +3011,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract LongStream asLongStream();
+    public abstract LongStream asLongStream() throws IllegalStateException;
 
     /**
      * Converts this IntStream to a FloatStream by converting each int element to a float element.
@@ -2930,7 +3053,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract FloatStream asFloatStream();
+    public abstract FloatStream asFloatStream() throws IllegalStateException;
 
     /**
      * Converts this IntStream to a DoubleStream by converting each int element to a double element.
@@ -2980,7 +3103,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream asDoubleStream();
+    public abstract DoubleStream asDoubleStream() throws IllegalStateException;
 
     /**
      * Returns a Stream consisting of the elements of this stream, each boxed to an Integer.
@@ -3013,7 +3136,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<Integer> boxed();
+    public abstract Stream<Integer> boxed() throws IllegalStateException;
 
     /**
      * Converts this IntStream to a java.util.stream.IntStream.
@@ -3040,7 +3163,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract java.util.stream.IntStream toJdkStream();
+    public abstract java.util.stream.IntStream toJdkStream() throws IllegalStateException;
 
     /**
      * Transforms this IntStream using the provided function that operates on java.util.stream.IntStream.
@@ -3072,7 +3195,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @SequentialOnly
     @IntermediateOp
     public IntStream transformViaJdkStream(final Function<? super java.util.stream.IntStream, ? extends java.util.stream.IntStream> transfer)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(transfer, cs.transfer);
@@ -3112,16 +3235,16 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @SequentialOnly
     @IntermediateOp
     public IntStream transformViaJdkStream(final Function<? super java.util.stream.IntStream, ? extends java.util.stream.IntStream> transfer,
-            final boolean deferred) throws IllegalArgumentException {
+            final boolean deferred) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(transfer, cs.transfer);
 
         if (deferred) {
             final Supplier<IntStream> delayInitializer = () -> IntStream.from(transfer.apply(toJdkStream()));
-            return IntStream.defer(delayInitializer);
+            return IntStream.defer(delayInitializer).onClose(this::close);
         } else {
-            return IntStream.from(transfer.apply(toJdkStream()));
+            return IntStream.from(transfer.apply(toJdkStream())).onClose(this::close);
         }
     }
 
@@ -3132,7 +3255,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return an IntIteratorEx providing extended iteration capabilities including advance() and count()
      * @throws IllegalStateException if the stream is already closed
      */
-    abstract IntIteratorEx iteratorEx();
+    abstract IntIteratorEx iteratorEx() throws IllegalStateException;
 
     // private static final IntStream EMPTY_STREAM = new ArrayIntStream(N.EMPTY_INT_ARRAY, true, null);
 
@@ -3369,7 +3492,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *         the array length, or {@code fromIndex} is greater than {@code toIndex}
      */
-    public static IntStream of(final int[] a, final int fromIndex, final int toIndex) {
+    public static IntStream of(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return isEmptyRange(N.len(a), fromIndex, toIndex) ? empty() : new ArrayIntStream(a, fromIndex, toIndex);
     }
 
@@ -3682,6 +3805,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 }
 
                 @Override
+                boolean supportsFailureAtomicAdvance() {
+                    return true;
+                }
+
+                @Override
                 public void advance(long n) {
                     if (n > 0) {
                         while (n-- > 0 && cursor < totalSize) {
@@ -3715,6 +3843,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                     }
 
                     return mapper.applyAsInt(cursor, cursor = (cnt++ < biggerCount ? cursor + biggerSize : cursor + smallerSize));
+                }
+
+                @Override
+                boolean supportsFailureAtomicAdvance() {
+                    return true;
                 }
 
                 @Override
@@ -4029,6 +4162,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0) {
                     return;
@@ -4050,8 +4188,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 return ret;
             }
 
+            /**
+             * @throws IllegalStateException if the number of remaining elements exceeds {@link Integer#MAX_VALUE}.
+             */
             @Override
-            public int[] toArray() {
+            public int[] toArray() throws IllegalStateException {
                 if (cnt > Integer.MAX_VALUE) {
                     throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + cnt);
                 }
@@ -4091,7 +4232,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return an IntStream of integers with the specified step
      * @throws IllegalArgumentException if by is zero.
      */
-    public static IntStream range(final int startInclusive, final int endExclusive, final int by) {
+    public static IntStream range(final int startInclusive, final int endExclusive, final int by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("'by' cannot be zero");
         }
@@ -4126,6 +4267,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0) {
                     return;
@@ -4147,8 +4293,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 return ret;
             }
 
+            /**
+             * @throws IllegalStateException if the number of remaining elements exceeds {@link Integer#MAX_VALUE}.
+             */
             @Override
-            public int[] toArray() {
+            public int[] toArray() throws IllegalStateException {
                 if (cnt > Integer.MAX_VALUE) {
                     throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + cnt);
                 }
@@ -4213,6 +4362,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0) {
                     return;
@@ -4234,8 +4388,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 return ret;
             }
 
+            /**
+             * @throws IllegalStateException if the number of remaining elements exceeds {@link Integer#MAX_VALUE}.
+             */
             @Override
-            public int[] toArray() {
+            public int[] toArray() throws IllegalStateException {
                 if (cnt > Integer.MAX_VALUE) {
                     throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + cnt);
                 }
@@ -4275,7 +4432,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return an IntStream of integers with the specified step
      * @throws IllegalArgumentException if by is zero.
      */
-    public static IntStream rangeClosed(final int startInclusive, final int endInclusive, final int by) {
+    public static IntStream rangeClosed(final int startInclusive, final int endInclusive, final int by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("'by' cannot be zero");
         }
@@ -4310,6 +4467,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0) {
                     return;
@@ -4331,8 +4493,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 return ret;
             }
 
+            /**
+             * @throws IllegalStateException if the number of remaining elements exceeds {@link Integer#MAX_VALUE}.
+             */
             @Override
-            public int[] toArray() {
+            public int[] toArray() throws IllegalStateException {
                 if (cnt > Integer.MAX_VALUE) {
                     throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + cnt);
                 }
@@ -4398,6 +4563,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0) {
                     return;
@@ -4413,8 +4583,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 return ret;
             }
 
+            /**
+             * @throws IllegalStateException if the number of remaining elements exceeds {@link Integer#MAX_VALUE}.
+             */
             @Override
-            public int[] toArray() {
+            public int[] toArray() throws IllegalStateException {
                 if (cnt > Integer.MAX_VALUE) {
                     throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + cnt);
                 }
@@ -4473,7 +4646,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return an infinite IntStream of random integers in the range [startInclusive, endExclusive)
      * @throws IllegalArgumentException if startInclusive &gt;= endExclusive.
      */
-    public static IntStream random(final int startInclusive, final int endExclusive) {
+    public static IntStream random(final int startInclusive, final int endExclusive) throws IllegalArgumentException {
         if (startInclusive >= endExclusive) {
             throw new IllegalArgumentException("'startInclusive' (" + startInclusive + ") must be less than 'endExclusive' (" + endExclusive + ")");
         }
@@ -4625,6 +4798,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * Creates an IntStream of indices from the given source starting from the specified index,
      * advancing by the specified increment, using the provided index function.
      * A positive increment iterates forward; a negative increment iterates backward.
+     * If an index lookup fails during manual iteration, the next pull retries that lookup from the same starting index.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4690,10 +4864,46 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             return IntStream.empty();
         }
 
-        final IntUnaryOperator f = idx -> ((increment > 0 && idx >= sourceLen - increment) || (increment < 0 && idx + increment < 0)) ? N.INDEX_NOT_FOUND
-                : indexFunc.apply(source, idx + increment);
+        // Lazy, like every other factory: the first index is computed on the first pull, not when the stream is
+        // built, so an indexFunc that reads a live source or throws does so only once the stream is consumed.
+        return of(new IntIteratorEx() {
+            private boolean started = false;
+            private boolean hasNextVal = false;
+            private int cur = N.INDEX_NOT_FOUND;
 
-        return iterate(indexFunc.apply(source, fromIndex), com.landawn.abacus.util.function.IntPredicate.NOT_NEGATIVE, f);
+            @Override
+            public boolean hasNext() {
+                if (!hasNextVal) {
+                    if (!started) {
+                        final Integer idx = indexFunc.apply(source, fromIndex);
+                        cur = idx == null ? N.INDEX_NOT_FOUND : idx;
+                        started = true;
+                    } else if (cur >= 0) {
+                        if ((increment > 0 && cur >= sourceLen - increment) || (increment < 0 && cur + increment < 0)) {
+                            cur = N.INDEX_NOT_FOUND;
+                        } else {
+                            final Integer idx = indexFunc.apply(source, cur + increment);
+                            cur = idx == null ? N.INDEX_NOT_FOUND : idx;
+                        }
+                    }
+
+                    hasNextVal = cur >= 0;
+                }
+
+                return hasNextVal;
+            }
+
+            @Override
+            public int nextInt() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                hasNextVal = false;
+
+                return cur;
+            }
+        });
     }
 
     /**
@@ -4858,15 +5068,28 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             private boolean isFirst = true;
             private boolean hasMore = true;
             private boolean hasNextVal = false;
+            private int pending;
+            private boolean hasPending = false;
 
             @Override
             public boolean hasNext() {
                 if (!hasNextVal && hasMore) {
                     if (isFirst) {
-                        isFirst = false;
-                        hasNextVal = hasNext.test(cur = init);
+                        hasNextVal = hasNext.test(init);
+                        if (hasNextVal) {
+                            isFirst = false;
+                            cur = init;
+                        }
                     } else {
-                        hasNextVal = hasNext.test(cur = f.applyAsInt(cur));
+                        if (!hasPending) {
+                            pending = f.applyAsInt(cur);
+                            hasPending = true;
+                        }
+                        hasNextVal = hasNext.test(pending);
+                        hasPending = false;
+                        if (hasNextVal) {
+                            cur = pending;
+                        }
                     }
 
                     if (!hasNextVal) {
@@ -5006,6 +5229,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return an IntStream containing all the ints from the input arrays
      * @see Stream#concat(Object[][])
      */
+    @SafeVarargs
     public static IntStream concat(final int[]... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -5034,6 +5258,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return an IntStream containing all the ints from the input IntIterators in order
      * @see Stream#concat(Iterator[])
      */
+    @SafeVarargs
     public static IntStream concat(final IntIterator... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -5061,6 +5286,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return an IntStream containing all the ints from the input IntStreams in order
      * @see Stream#concat(Stream[])
      */
+    @SafeVarargs
     public static IntStream concat(final IntStream... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -5453,7 +5679,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     public static IntStream zip(final IntStream a, final IntStream b, final IntBinaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), zipFunction).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> zip(ia, ib, zipFunction).onClose(newCloseHandler(a, b)));
     }
 
     /**
@@ -5483,7 +5709,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     public static IntStream zip(final IntStream a, final IntStream b, final IntStream c, final IntTernaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), iterate(c), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
+        return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
+                (ia, ib, ic) -> zip(ia, ib, ic, zipFunction).onClose(newCloseHandler(Array.asList(a, b, c))));
     }
 
     /**
@@ -5511,7 +5738,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * {@link IntTernaryOperator} and avoid boxing).
      *
      * @param streams the collection of int streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
-     * @param zipFunction the function to combine arrays of values from the streams.
+     * @param zipFunction the function to combine arrays of values from the streams; a {@code null} result is unboxed as {@code 0}
      * @return a stream of combined values. Empty if the collection is empty
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see #zip(Collection, int[], IntNFunction)
@@ -5771,7 +5998,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b),
+                (ia, ib) -> zip(ia, ib, valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b)));
     }
 
     /**
@@ -5806,8 +6034,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             final int valueForNoneC, final IntTernaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(Array.asList(a, b, c)));
+        return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
+                (ia, ib, ic) -> zip(ia, ib, ic, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction).onClose(newCloseHandler(Array.asList(a, b, c))));
     }
 
     /**
@@ -5838,7 +6066,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param streams the collection of int streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone array of default values, must have same size as streams collection
-     * @param zipFunction the function to combine arrays of values from the streams.
+     * @param zipFunction the function to combine arrays of values from the streams; a {@code null} result is unboxed as {@code 0}
      * @return a stream of combined values that will close all input streams when closed
      * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of streams collection, or
      *         if {@code zipFunction} is {@code null}.
@@ -6010,46 +6238,30 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
             @Override
             public int nextInt() {
-                if (hasNextA) {
-                    if (iterB.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = iterB.nextInt())) == MergeResult.TAKE_FIRST) {
-                            hasNextA = false;
-                            hasNextB = true;
-                            return nextA;
-                        } else {
-                            return nextB;
-                        }
-                    } else {
+                // Peek both heads before calling the selector so a throwing selector retries the same values.
+                if (!hasNextA && iterA.hasNext()) {
+                    nextA = iterA.nextInt();
+                    hasNextA = true;
+                }
+                if (!hasNextB && iterB.hasNext()) {
+                    nextB = iterB.nextInt();
+                    hasNextB = true;
+                }
+
+                if (hasNextA && hasNextB) {
+                    if (nextSelector.apply(nextA, nextB) == MergeResult.TAKE_FIRST) {
                         hasNextA = false;
                         return nextA;
-                    }
-                } else if (hasNextB) {
-                    if (iterA.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.nextInt()), nextB) == MergeResult.TAKE_FIRST) {
-                            return nextA;
-                        } else {
-                            hasNextA = true;
-                            hasNextB = false;
-                            return nextB;
-                        }
                     } else {
                         hasNextB = false;
                         return nextB;
                     }
-                } else if (iterA.hasNext()) {
-                    if (iterB.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.nextInt()), (nextB = iterB.nextInt())) == MergeResult.TAKE_FIRST) {
-                            hasNextB = true;
-                            return nextA;
-                        } else {
-                            hasNextA = true;
-                            return nextB;
-                        }
-                    } else {
-                        return iterA.nextInt();
-                    }
-                } else if (iterB.hasNext()) {
-                    return iterB.nextInt();
+                } else if (hasNextA) {
+                    hasNextA = false;
+                    return nextA;
+                } else if (hasNextB) {
+                    hasNextB = false;
+                    return nextB;
                 } else {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -6132,7 +6344,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     public static IntStream merge(final IntStream a, final IntStream b, final IntBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
-        return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> merge(ia, ib, nextSelector).onClose(newCloseHandler(a, b)));
     }
 
     /**

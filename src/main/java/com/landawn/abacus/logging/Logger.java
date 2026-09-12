@@ -50,7 +50,20 @@ import java.util.function.Supplier;
  * substitute each {@code {}} (SLF4J style) or {@code %s} (printf style) placeholder in the template
  * with the corresponding argument, in order. The two styles cannot be mixed within the same template.
  * If there are more arguments than placeholders, the extra arguments are appended to the formatted
- * message in square brackets. Concrete formatting is performed by {@link AbstractLogger}.</p>
+ * message in square brackets; if there are fewer, the unmatched placeholders are left in the output
+ * verbatim. Placeholders are matched literally: {@code %s} is the only recognised printf conversion
+ * ({@code %d}, {@code %n}, {@code %5s}, ... are plain text, and a {@code %s} inside prose such as
+ * {@code "90%sure"} is consumed), and there is no escape sequence ({@code \{}} and {@code %%} are not
+ * special). To emit a literal {@code {}} or {@code %s}, pass it as an argument: substituted arguments are
+ * never re-scanned for placeholders. Arguments are rendered with {@code N.toString(Object)}; an argument
+ * whose {@code toString()} throws (or overflows the stack, as a self-referential collection does) never
+ * aborts the log call and is rendered as a {@code [FAILED toString() of <class>@<hash>: <error>]} marker
+ * instead. Concrete formatting is performed by {@link AbstractLogger}.</p>
+ *
+ * <p><b>Overload capture of {@code xxx(String, Throwable)}:</b> a call such as
+ * {@code logger.error("Failed {}", ex)} whose single argument is a {@code Throwable} binds to the more
+ * specific {@code xxx(String, Throwable)} overload, so the stack trace <i>is</i> logged but the template
+ * is emitted untouched, with its {@code {}} left literal.</p>
  *
  * <p><b>Trailing {@code Throwable} caveat (differs from SLF4J):</b> unlike SLF4J, a {@code Throwable}
  * passed as the last argument to the plain {@code xxx(String, Object...)} family is <b>not</b>
@@ -361,26 +374,32 @@ public interface Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
-    void trace(Supplier<String> supplier);
+    void trace(Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Logs a message at the {@code TRACE} level with an exception using a {@link Supplier}.
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #trace(Throwable, Supplier)} for consistent exception-first parameter order
      */
     @Deprecated
-    void trace(Supplier<String> supplier, Throwable t);
+    void trace(Supplier<String> supplier, Throwable t) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Logs a message at the {@code TRACE} level with an exception using a {@link Supplier} for lazy evaluation.
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
-    void trace(Throwable t, Supplier<String> supplier);
+    void trace(Throwable t, Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Checks if the logger instance is enabled for the {@code DEBUG} level.
@@ -609,26 +628,32 @@ public interface Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
-    void debug(Supplier<String> supplier);
+    void debug(Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Logs a message at the {@code DEBUG} level with an exception using a {@link Supplier}.
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #debug(Throwable, Supplier)} for consistent exception-first parameter order
      */
     @Deprecated
-    void debug(Supplier<String> supplier, Throwable t);
+    void debug(Supplier<String> supplier, Throwable t) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Logs a message at the {@code DEBUG} level with an exception using a {@link Supplier} for lazy evaluation.
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
-    void debug(Throwable t, Supplier<String> supplier);
+    void debug(Throwable t, Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Checks if the logger instance is enabled for the {@code INFO} level.
@@ -858,26 +883,32 @@ public interface Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
-    void info(Supplier<String> supplier);
+    void info(Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Logs a message at the {@code INFO} level with an exception using a {@link Supplier}.
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #info(Throwable, Supplier)} for consistent exception-first parameter order
      */
     @Deprecated
-    void info(Supplier<String> supplier, Throwable t);
+    void info(Supplier<String> supplier, Throwable t) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Logs a message at the {@code INFO} level with an exception using a {@link Supplier} for lazy evaluation.
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
-    void info(Throwable t, Supplier<String> supplier);
+    void info(Throwable t, Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Checks if the logger instance is enabled for the {@code WARN} level.
@@ -1107,26 +1138,32 @@ public interface Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
-    void warn(Supplier<String> supplier);
+    void warn(Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Logs a message at the {@code WARN} level with an exception using a {@link Supplier}.
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #warn(Throwable, Supplier)} for consistent exception-first parameter order
      */
     @Deprecated
-    void warn(Supplier<String> supplier, Throwable t);
+    void warn(Supplier<String> supplier, Throwable t) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Logs a message at the {@code WARN} level with an exception using a {@link Supplier} for lazy evaluation.
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
-    void warn(Throwable t, Supplier<String> supplier);
+    void warn(Throwable t, Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Checks if the logger instance is enabled for the {@code ERROR} level.
@@ -1365,25 +1402,31 @@ public interface Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
-    void error(Supplier<String> supplier);
+    void error(Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Logs a message at the {@code ERROR} level with an exception using a {@link Supplier}.
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #error(Throwable, Supplier)} for consistent exception-first parameter order
      */
     @Deprecated
-    void error(Supplier<String> supplier, Throwable t);
+    void error(Supplier<String> supplier, Throwable t) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Logs a message at the {@code ERROR} level with an exception using a {@link Supplier} for lazy evaluation.
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
-    void error(Throwable t, Supplier<String> supplier);
+    void error(Throwable t, Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
 
 }

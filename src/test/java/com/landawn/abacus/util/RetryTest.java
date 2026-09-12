@@ -1,294 +1,90 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.RetryExhaustedException;
 
 public class RetryTest extends TestBase {
 
     @Test
-    public void testRetryOf_WithRetryCondition() {
-        Retry<Void> retry = Retry.withFixedDelay(2, 100, e -> e instanceof RuntimeException);
-        Assertions.assertNotNull(retry);
-    }
-
-    @Test
-    public void testRetryOf_WithBiPredicate() {
-        Retry<String> retry = Retry.withFixedDelay(2, 100, (result, exception) -> exception != null || "retry".equals(result));
-        Assertions.assertNotNull(retry);
-    }
-
-    @Test
-    public void testOf_WithBiPredicate_ZeroRetryTimes() {
-        Retry<String> retry = Retry.withFixedDelay(0, 1000, (result, ex) -> result == null);
-        Assertions.assertNotNull(retry);
-    }
-
-    @Test
-    public void testOf_WithBiPredicate_ZeroRetryInterval() {
-        Retry<String> retry = Retry.withFixedDelay(3, 0, (result, ex) -> result == null);
-        Assertions.assertNotNull(retry);
-    }
-
-    @Test
-    public void testOf_WithPredicate_ValidParameters() {
-        Retry<Void> retry = Retry.withFixedDelay(3, 1000, e -> e instanceof IOException);
-        Assertions.assertNotNull(retry);
-    }
-
-    @Test
-    public void testOf_WithPredicate_ZeroRetryTimes() {
-        Retry<Void> retry = Retry.withFixedDelay(0, 1000, e -> e instanceof IOException);
-        Assertions.assertNotNull(retry);
-    }
-
-    @Test
-    public void testOf_WithPredicate_ZeroRetryInterval() {
-        Retry<Void> retry = Retry.withFixedDelay(3, 0, e -> e instanceof IOException);
-        Assertions.assertNotNull(retry);
-    }
-
-    @Test
-    public void testOf_WithPredicate_NegativeRetryTimes() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.withFixedDelay(-1, 1000, e -> e instanceof IOException);
-        });
-    }
-
-    @Test
-    public void testOf_WithPredicate_NegativeRetryInterval() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.withFixedDelay(3, -1, e -> e instanceof IOException);
-        });
-    }
-
-    @Test
-    public void testOf_WithPredicate_NullRetryCondition() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.withFixedDelay(3, 1000, (Predicate) null);
-        });
-    }
-
-    @Test
-    public void testOf_WithBiPredicate_ValidParameters() {
-        Retry<String> retry = Retry.withFixedDelay(3, 1000, (result, ex) -> result == null || ex instanceof IOException);
-        Assertions.assertNotNull(retry);
-    }
-
-    @Test
-    public void testOf_WithBiPredicate_NegativeRetryTimes() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.withFixedDelay(-1, 1000, (result, ex) -> result == null);
-        });
-    }
-
-    @Test
-    public void testOf_WithBiPredicate_NegativeRetryInterval() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.withFixedDelay(3, -1, (result, ex) -> result == null);
-        });
-    }
-
-    @Test
-    public void testOf_WithBiPredicate_NullRetryCondition() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.withFixedDelay(3, 1000, (java.util.function.BiPredicate<String, Exception>) null);
-        });
-    }
-
-    // withFixedDelay(Predicate) creates working Retry
-    @Test
     public void testWithFixedDelay() throws Exception {
-        Retry<Void> retry = Retry.withFixedDelay(2, 50, e -> e instanceof IOException);
-        Assertions.assertNotNull(retry);
-        AtomicInteger counter = new AtomicInteger(0);
-        retry.run(() -> {
-            if (counter.incrementAndGet() < 2) {
+        Retry<Void> onException = Retry.withFixedDelay(2, 0, e -> e instanceof IOException);
+        assertNotNull(onException);
+        AtomicInteger runs = new AtomicInteger();
+        onException.run(() -> {
+            if (runs.incrementAndGet() < 2) {
                 throw new IOException("fail");
             }
         });
-        Assertions.assertEquals(2, counter.get());
-    }
+        assertEquals(2, runs.get());
 
-    // withFixedDelay(BiPredicate) creates working Retry for call
-    @Test
-    public void testWithFixedDelay_BiPredicate() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(2, 50, (result, ex) -> "bad".equals(result) || ex instanceof IOException);
-        Assertions.assertNotNull(retry);
-        AtomicInteger counter = new AtomicInteger(0);
-        String result = retry.call(() -> {
-            if (counter.incrementAndGet() < 2) {
-                return "bad";
-            }
-            return "good";
-        });
-        Assertions.assertEquals("good", result);
-        Assertions.assertEquals(2, counter.get());
+        Retry<String> onResult = Retry.withFixedDelay(2, 0, (result, ex) -> "bad".equals(result) || ex instanceof IOException);
+        AtomicInteger calls = new AtomicInteger();
+        assertEquals("good", onResult.call(() -> calls.incrementAndGet() < 2 ? "bad" : "good"));
+        assertEquals(2, calls.get());
+
+        assertNotNull(Retry.withFixedDelay(0, 0, e -> e instanceof IOException));
+        assertNotNull(Retry.withFixedDelay(0, 1000, (result, ex) -> result == null));
     }
 
     @Test
-    public void testNegativeRetryTimes() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.withFixedDelay(-1, 100, e -> true);
-        });
+    public void testWithFixedDelay_Invalid() {
+        assertThrows(IllegalArgumentException.class, () -> Retry.withFixedDelay(-1, 1000, e -> e instanceof IOException));
+        assertThrows(IllegalArgumentException.class, () -> Retry.withFixedDelay(3, -1, e -> e instanceof IOException));
+        assertThrows(IllegalArgumentException.class, () -> Retry.withFixedDelay(3, 1000, (Predicate<? super Exception>) null));
+        assertThrows(IllegalArgumentException.class, () -> Retry.withFixedDelay(-1, 1000, (result, ex) -> result == null));
+        assertThrows(IllegalArgumentException.class, () -> Retry.withFixedDelay(3, -1, (result, ex) -> result == null));
+        assertThrows(IllegalArgumentException.class, () -> Retry.withFixedDelay(3, 1000, (BiPredicate<String, Exception>) null));
     }
 
     @Test
-    public void testNegativeRetryInterval() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.withFixedDelay(2, -1, e -> true);
-        });
-    }
+    public void testRun() throws Exception {
+        AtomicInteger first = new AtomicInteger();
+        Retry.withFixedDelay(3, 0, e -> e instanceof IOException).run(first::incrementAndGet);
+        assertEquals(1, first.get());
 
-    @Test
-    public void testNullRetryCondition() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Retry.withFixedDelay(2, 100, (Predicate<? super Exception>) null);
-        });
-    }
-
-    @Test
-    public void testRun_SuccessOnFirstAttempt() throws Exception {
-        Retry<Void> retry = Retry.withFixedDelay(3, 100, e -> e instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        retry.run(() -> {
-            counter.incrementAndGet();
-        });
-
-        Assertions.assertEquals(1, counter.get());
-    }
-
-    @Test
-    public void testRun_SuccessOnSecondAttempt() throws Exception {
-        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        retry.run(() -> {
-            int count = counter.incrementAndGet();
-            if (count < 2) {
-                throw new IOException("Attempt " + count + " failed");
+        AtomicInteger retried = new AtomicInteger();
+        Retry.withFixedDelay(3, 0, e -> e instanceof IOException).run(() -> {
+            if (retried.incrementAndGet() < 3) {
+                throw new IOException("Attempt " + retried.get() + " failed");
             }
         });
+        assertEquals(3, retried.get());
 
-        Assertions.assertEquals(2, counter.get());
-    }
+        AtomicInteger always = new AtomicInteger();
+        IOException exhausted = assertThrows(IOException.class, () -> Retry.withFixedDelay(2, 0, e -> e instanceof IOException).run(() -> {
+            always.incrementAndGet();
+            throw new IOException("Always fails");
+        }));
+        assertEquals("Always fails", exhausted.getMessage());
+        assertEquals(3, always.get());
 
-    @Test
-    public void testRun_SuccessOnThirdAttempt() throws Exception {
-        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
+        AtomicInteger unmatched = new AtomicInteger();
+        RuntimeException runtime = assertThrows(RuntimeException.class, () -> Retry.withFixedDelay(3, 0, e -> e instanceof IOException).run(() -> {
+            unmatched.incrementAndGet();
+            throw new RuntimeException("Non-matching exception");
+        }));
+        assertEquals("Non-matching exception", runtime.getMessage());
+        assertEquals(1, unmatched.get());
 
-        retry.run(() -> {
-            int count = counter.incrementAndGet();
-            if (count < 3) {
-                throw new IOException("Attempt " + count + " failed");
-            }
-        });
-
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testRun_FailAfterAllRetries() {
-        Retry<Void> retry = Retry.withFixedDelay(2, 50, e -> e instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        IOException exception = Assertions.assertThrows(IOException.class, () -> {
-            retry.run(() -> {
-                counter.incrementAndGet();
-                throw new IOException("Always fails");
-            });
-        });
-
-        Assertions.assertEquals("Always fails", exception.getMessage());
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testRun_NoRetryOnNocountMatchBetweeningException() {
-        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
-            retry.run(() -> {
-                counter.incrementAndGet();
-                throw new RuntimeException("Non-matching exception");
-            });
-        });
-
-        Assertions.assertEquals("Non-matching exception", exception.getMessage());
-        Assertions.assertEquals(1, counter.get());
-    }
-
-    @Test
-    public void testRun_WithZeroRetryTimes() throws Exception {
-        Retry<Void> retry = Retry.withFixedDelay(0, 50, e -> e instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        retry.run(() -> {
-            counter.incrementAndGet();
-        });
-
-        Assertions.assertEquals(1, counter.get());
-    }
-
-    @Test
-    public void testRun_WithZeroRetryTimes_ThrowsException() {
-        Retry<Void> retry = Retry.withFixedDelay(0, 50, e -> e instanceof IOException);
-
-        Assertions.assertThrows(IOException.class, () -> {
-            retry.run(() -> {
-                throw new IOException("Fails immediately");
-            });
-        });
-    }
-
-    @Test
-    public void testRun_WithBiPredicateRetryCondition() throws Exception {
-        Retry<Void> retry = Retry.withFixedDelay(3, 50, (result, ex) -> ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        retry.run(() -> {
-            int count = counter.incrementAndGet();
-            if (count < 2) {
-                throw new IOException("Attempt " + count + " failed");
-            }
-        });
-
-        Assertions.assertEquals(2, counter.get());
-    }
-
-    @Test
-    public void testRun_WithZeroRetryInterval() throws Exception {
-        Retry<Void> retry = Retry.withFixedDelay(2, 0, e -> e instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        long startTime = System.currentTimeMillis();
-        retry.run(() -> {
-            int count = counter.incrementAndGet();
-            if (count < 2) {
-                throw new IOException("Attempt " + count + " failed");
-            }
-        });
-        long endTime = System.currentTimeMillis();
-
-        Assertions.assertEquals(2, counter.get());
-        Assertions.assertTrue(endTime - startTime < 500);
-    }
-
-    @Test
-    public void testRun_MultipleExceptionTypes() throws Exception {
-        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof IOException || e instanceof IllegalArgumentException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        retry.run(() -> {
-            int count = counter.incrementAndGet();
+        AtomicInteger mixed = new AtomicInteger();
+        Retry.withFixedDelay(3, 0, e -> e instanceof IOException || e instanceof IllegalArgumentException).run(() -> {
+            int count = mixed.incrementAndGet();
             if (count == 1) {
                 throw new IOException("First attempt");
             }
@@ -296,494 +92,201 @@ public class RetryTest extends TestBase {
                 throw new IllegalArgumentException("Second attempt");
             }
         });
+        assertEquals(3, mixed.get());
 
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testRun_SuccessOnFirstTry() throws Exception {
-        AtomicInteger counter = new AtomicInteger(0);
-        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> true);
-
-        retry.run(() -> {
-            counter.incrementAndGet();
-        });
-
-        Assertions.assertEquals(1, counter.get());
-    }
-
-    @Test
-    public void testRun_SuccessAfterRetry() throws Exception {
-        AtomicInteger counter = new AtomicInteger(0);
-        Retry<Void> retry = Retry.withFixedDelay(3, 50, e -> e instanceof RuntimeException);
-
-        retry.run(() -> {
-            if (counter.incrementAndGet() < 3) {
-                throw new RuntimeException("Fail");
+        AtomicInteger bi = new AtomicInteger();
+        Retry.<Void> withFixedDelay(3, 0, (result, ex) -> ex instanceof IOException).run(() -> {
+            if (bi.incrementAndGet() < 2) {
+                throw new IOException("fail");
             }
         });
-
-        Assertions.assertEquals(3, counter.get());
+        assertEquals(2, bi.get());
     }
 
     @Test
-    public void testRun_FailureAfterAllRetries() {
-        AtomicInteger counter = new AtomicInteger(0);
-        Retry<Void> retry = Retry.withFixedDelay(2, 50, e -> e instanceof RuntimeException);
-
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            retry.run(() -> {
-                counter.incrementAndGet();
-                throw new RuntimeException("Always fail");
-            });
-        });
-
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testRun_WithZeroRetries() throws Exception {
-        AtomicInteger counter = new AtomicInteger(0);
-        Retry<Void> retry = Retry.withFixedDelay(0, 0, e -> true);
-
-        retry.run(() -> {
-            counter.incrementAndGet();
-        });
-
-        Assertions.assertEquals(1, counter.get());
-    }
-
-    @Test
-    public void testRunAndCallRejectNullActions() {
-        final Retry<String> retry = Retry.withFixedDelay(1, 0, (result, ex) -> false);
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> retry.run(null));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> retry.call(null));
-    }
-
-    @Test
-    public void testRun_BiPredicate_FailAfterAllRetries() {
-        Retry<Void> retry = Retry.withFixedDelay(2, 0, (result, ex) -> ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        Assertions.assertThrows(IOException.class, () -> {
-            retry.run(() -> {
-                counter.incrementAndGet();
-                throw new IOException("always");
-            });
-        });
-
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testRun_BiPredicate_NoRetryOnNonMatchingException() {
-        Retry<Void> retry = Retry.withFixedDelay(3, 0, (result, ex) -> ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            retry.run(() -> {
-                counter.incrementAndGet();
-                throw new RuntimeException("not retryable");
-            });
-        });
-
-        Assertions.assertEquals(1, counter.get());
-    }
-
-    @Test
-    public void testCall_SuccessOnFirstAttempt() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(3, 100, (result, ex) -> result == null || ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        String result = retry.call(() -> {
-            counter.incrementAndGet();
-            return "Success";
-        });
-
-        Assertions.assertEquals("Success", result);
-        Assertions.assertEquals(1, counter.get());
-    }
-
-    @Test
-    public void testCall_SuccessOnSecondAttempt() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> result == null || ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        String result = retry.call(() -> {
-            int count = counter.incrementAndGet();
-            if (count < 2) {
-                throw new IOException("Attempt " + count + " failed");
-            }
-            return "Success";
-        });
-
-        Assertions.assertEquals("Success", result);
-        Assertions.assertEquals(2, counter.get());
-    }
-
-    @Test
-    public void testCall_SuccessOnThirdAttempt() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> result == null || ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        String result = retry.call(() -> {
-            int count = counter.incrementAndGet();
-            if (count < 3) {
-                throw new IOException("Attempt " + count + " failed");
-            }
-            return "Success";
-        });
-
-        Assertions.assertEquals("Success", result);
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testCall_FailAfterAllRetries() {
-        Retry<String> retry = Retry.withFixedDelay(2, 50, (result, ex) -> result == null || ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        IOException exception = Assertions.assertThrows(IOException.class, () -> {
-            retry.call(() -> {
-                counter.incrementAndGet();
-                throw new IOException("Always fails");
-            });
-        });
-
-        Assertions.assertEquals("Always fails", exception.getMessage());
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testCall_NoRetryOnNocountMatchBetweeningException() {
-        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
-            retry.call(() -> {
-                counter.incrementAndGet();
-                throw new RuntimeException("Non-matching exception");
-            });
-        });
-
-        Assertions.assertEquals("Non-matching exception", exception.getMessage());
-        Assertions.assertEquals(1, counter.get());
-    }
-
-    @Test
-    public void testCall_RetryOnUnsatisfactoryResult() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> result == null || result.equals("Bad"));
-        AtomicInteger counter = new AtomicInteger(0);
-
-        String result = retry.call(() -> {
-            int count = counter.incrementAndGet();
-            if (count < 3) {
-                return "Bad";
-            }
-            return "Good";
-        });
-
-        Assertions.assertEquals("Good", result);
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testCall_RetryOnNullResult() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> result == null);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        String result = retry.call(() -> {
-            int count = counter.incrementAndGet();
-            if (count < 2) {
-                return null;
-            }
-            return "Success";
-        });
-
-        Assertions.assertEquals("Success", result);
-        Assertions.assertEquals(2, counter.get());
-    }
-
-    @Test
-    public void testCall_FailsAfterRetriesWithUnsatisfactoryResult() {
-        Retry<String> retry = Retry.withFixedDelay(2, 50, (result, ex) -> result == null);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
-            retry.call(() -> {
-                counter.incrementAndGet();
-                return null;
-            });
-        });
-
-        Assertions.assertTrue(exception.getMessage().contains("Still failed after retried"));
-        Assertions.assertTrue(exception.getMessage().contains("2 times"));
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testCall_EvaluatesResultPredicateOncePerAttempt() {
-        final AtomicInteger predicateCalls = new AtomicInteger();
-        final Retry<String> retry = Retry.withFixedDelay(2, 0, (result, ex) -> predicateCalls.incrementAndGet() <= 3);
-
-        final RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> retry.call(() -> "rejected"));
-
-        Assertions.assertTrue(exception.getMessage().contains("Still failed after retried 2 times"));
-        Assertions.assertEquals(3, predicateCalls.get());
-    }
-
-    @Test
-    public void testCall_FinalRejectedResultDoesNotRethrowStaleException() {
-        final AtomicInteger calls = new AtomicInteger();
-        final IOException firstFailure = new IOException("first attempt");
-        final Retry<String> retry = Retry.withFixedDelay(1, 0, (result, ex) -> ex != null || "rejected".equals(result));
-
-        final RuntimeException failure = Assertions.assertThrows(RuntimeException.class, () -> retry.call(() -> {
-            if (calls.getAndIncrement() == 0) {
-                throw firstFailure;
-            }
-
-            return "rejected";
+    public void testRun_EdgeCase() throws Exception {
+        AtomicInteger zero = new AtomicInteger();
+        Retry.withFixedDelay(0, 0, e -> e instanceof IOException).run(zero::incrementAndGet);
+        assertEquals(1, zero.get());
+        assertThrows(IOException.class, () -> Retry.withFixedDelay(0, 0, e -> e instanceof IOException).run(() -> {
+            throw new IOException("Fails immediately");
         }));
 
-        Assertions.assertTrue(failure.getMessage().contains("rejected"));
-        Assertions.assertSame(firstFailure, failure.getCause());
-        Assertions.assertEquals(2, calls.get());
+        AtomicInteger noDelay = new AtomicInteger();
+        long start = System.currentTimeMillis();
+        Retry.withFixedDelay(2, 0, e -> e instanceof IOException).run(() -> {
+            if (noDelay.incrementAndGet() < 2) {
+                throw new IOException("fail");
+            }
+        });
+        assertEquals(2, noDelay.get());
+        assertTrue(System.currentTimeMillis() - start < 500);
+
+        Retry<String> retry = Retry.withFixedDelay(1, 0, (result, ex) -> false);
+        assertThrows(IllegalArgumentException.class, () -> retry.run(null));
+        assertThrows(IllegalArgumentException.class, () -> retry.call(null));
+
+        AtomicInteger biFail = new AtomicInteger();
+        assertThrows(IOException.class, () -> Retry.<Void> withFixedDelay(2, 0, (result, ex) -> ex instanceof IOException).run(() -> {
+            biFail.incrementAndGet();
+            throw new IOException("always");
+        }));
+        assertEquals(3, biFail.get());
+
+        AtomicInteger biUnmatched = new AtomicInteger();
+        assertThrows(RuntimeException.class, () -> Retry.<Void> withFixedDelay(3, 0, (result, ex) -> ex instanceof IOException).run(() -> {
+            biUnmatched.incrementAndGet();
+            throw new RuntimeException("not retryable");
+        }));
+        assertEquals(1, biUnmatched.get());
     }
 
     @Test
-    public void testCall_DoesNotRetryWhenResultPredicateThrows() {
-        final AtomicInteger callableCalls = new AtomicInteger();
-        final AtomicInteger predicateCalls = new AtomicInteger();
-        final IllegalStateException predicateFailure = new IllegalStateException("predicate failure");
-        final Retry<String> retry = Retry.withFixedDelay(2, 0, (result, ex) -> {
-            predicateCalls.incrementAndGet();
+    public void testCall() throws Exception {
+        AtomicInteger first = new AtomicInteger();
+        assertEquals("Success", Retry.<String> withFixedDelay(3, 0, (result, ex) -> result == null || ex instanceof IOException).call(() -> {
+            first.incrementAndGet();
+            return "Success";
+        }));
+        assertEquals(1, first.get());
 
+        AtomicInteger retried = new AtomicInteger();
+        assertEquals("Success", Retry.<String> withFixedDelay(3, 0, (result, ex) -> result == null || ex instanceof IOException).call(() -> {
+            if (retried.incrementAndGet() < 3) {
+                throw new IOException("Attempt " + retried.get() + " failed");
+            }
+            return "Success";
+        }));
+        assertEquals(3, retried.get());
+
+        AtomicInteger always = new AtomicInteger();
+        IOException exhausted = assertThrows(IOException.class,
+                () -> Retry.<String> withFixedDelay(2, 0, (result, ex) -> result == null || ex instanceof IOException).call(() -> {
+                    always.incrementAndGet();
+                    throw new IOException("Always fails");
+                }));
+        assertEquals("Always fails", exhausted.getMessage());
+        assertEquals(3, always.get());
+
+        AtomicInteger unmatched = new AtomicInteger();
+        RuntimeException runtime = assertThrows(RuntimeException.class,
+                () -> Retry.<String> withFixedDelay(3, 0, (result, ex) -> ex instanceof IOException).call(() -> {
+                    unmatched.incrementAndGet();
+                    throw new RuntimeException("Non-matching exception");
+                }));
+        assertEquals("Non-matching exception", runtime.getMessage());
+        assertEquals(1, unmatched.get());
+
+        AtomicInteger badResult = new AtomicInteger();
+        assertEquals("Good", Retry.<String> withFixedDelay(3, 0, (result, ex) -> result == null || "Bad".equals(result)).call(() -> {
+            return badResult.incrementAndGet() < 3 ? "Bad" : "Good";
+        }));
+        assertEquals(3, badResult.get());
+
+        AtomicInteger mixed = new AtomicInteger();
+        assertEquals(Integer.valueOf(150),
+                Retry.<Integer> withFixedDelay(3, 0, (result, ex) -> (result != null && result < 100) || ex instanceof IOException).call(() -> {
+                    int count = mixed.incrementAndGet();
+                    if (count == 1) {
+                        throw new IOException("First attempt fails");
+                    }
+                    if (count == 2) {
+                        return 50;
+                    }
+                    return 150;
+                }));
+        assertEquals(3, mixed.get());
+    }
+
+    @Test
+    public void testCall_EdgeCase() throws Exception {
+        AtomicInteger nullThenValue = new AtomicInteger();
+        assertEquals("Success", Retry.<String> withFixedDelay(3, 0, (result, ex) -> result == null).call(() -> {
+            return nullThenValue.incrementAndGet() < 2 ? null : "Success";
+        }));
+        assertEquals(2, nullThenValue.get());
+        assertNull(Retry.<String> withFixedDelay(3, 0, (result, ex) -> false).call(() -> null));
+
+        AtomicInteger rejected = new AtomicInteger();
+        RuntimeException stillMatched = assertThrows(RuntimeException.class,
+                () -> Retry.<String> withFixedDelay(2, 0, (result, ex) -> result == null).call(() -> {
+                    rejected.incrementAndGet();
+                    return null;
+                }));
+        assertTrue(stillMatched.getMessage().contains("still matched the retry condition"));
+        assertTrue(stillMatched.getMessage().contains("3 attempts"));
+        assertTrue(stillMatched.getMessage().contains("2 retries"));
+        assertEquals(3, rejected.get());
+
+        AtomicInteger predicateCalls = new AtomicInteger();
+        RuntimeException alwaysRejected = assertThrows(RuntimeException.class,
+                () -> Retry.<String> withFixedDelay(2, 0, (result, ex) -> predicateCalls.incrementAndGet() <= 3).call(() -> "rejected"));
+        assertTrue(alwaysRejected.getMessage().contains("3 attempts"));
+        assertEquals(3, predicateCalls.get());
+
+        AtomicInteger stale = new AtomicInteger();
+        IOException firstFailure = new IOException("first attempt");
+        RuntimeException rejectedAfterException = assertThrows(RuntimeException.class,
+                () -> Retry.<String> withFixedDelay(1, 0, (result, ex) -> ex != null || "rejected".equals(result)).call(() -> {
+                    if (stale.getAndIncrement() == 0) {
+                        throw firstFailure;
+                    }
+                    return "rejected";
+                }));
+        assertFalse(rejectedAfterException.getMessage().contains("rejected"));
+        assertNull(rejectedAfterException.getCause());
+        assertArrayEquals(new Throwable[] { firstFailure }, rejectedAfterException.getSuppressed());
+        assertEquals(2, stale.get());
+
+        AtomicInteger callableCalls = new AtomicInteger();
+        AtomicInteger throwingPredicateCalls = new AtomicInteger();
+        IllegalStateException predicateFailure = new IllegalStateException("predicate failure");
+        IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> Retry.<String> withFixedDelay(2, 0, (result, ex) -> {
+            throwingPredicateCalls.incrementAndGet();
             if (ex == null) {
                 throw predicateFailure;
             }
-
             return true;
-        });
-
-        final IllegalStateException thrown = Assertions.assertThrows(IllegalStateException.class, () -> retry.call(() -> {
+        }).call(() -> {
             callableCalls.incrementAndGet();
             return "result";
         }));
+        assertSame(predicateFailure, thrown);
+        assertEquals(1, callableCalls.get());
+        assertEquals(1, throwingPredicateCalls.get());
 
-        Assertions.assertSame(predicateFailure, thrown);
-        Assertions.assertEquals(1, callableCalls.get());
-        Assertions.assertEquals(1, predicateCalls.get());
-    }
+        assertThrows(RetryExhaustedException.class, () -> Retry.<String> withFixedDelay(0, 0, (r, e) -> true).call(() -> "success"));
+        assertEquals("Success", Retry.<String> withFixedDelay(0, 0, (result, ex) -> result == null).call(() -> "Success"));
+        assertThrows(IOException.class, () -> Retry.<String> withFixedDelay(0, 0, (result, ex) -> ex instanceof IOException).call(() -> {
+            throw new IOException("Fails immediately");
+        }));
 
-    @Test
-    public void testCall_WithZeroRetryTimes() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(0, 50, (result, ex) -> result == null);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        String result = retry.call(() -> {
-            counter.incrementAndGet();
-            return "Success";
-        });
-
-        Assertions.assertEquals("Success", result);
-        Assertions.assertEquals(1, counter.get());
-    }
-
-    @Test
-    public void testCall_WithZeroRetryTimes_ThrowsException() {
-        Retry<String> retry = Retry.withFixedDelay(0, 50, (result, ex) -> ex instanceof IOException);
-
-        Assertions.assertThrows(IOException.class, () -> {
-            retry.call(() -> {
-                throw new IOException("Fails immediately");
-            });
-        });
-    }
-
-    @Test
-    public void testCall_WithPredicateRetryCondition() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(3, 50, (String result, Exception ex) -> ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        String result = retry.call(() -> {
-            int count = counter.incrementAndGet();
-            if (count < 2) {
-                throw new IOException("Attempt " + count + " failed");
-            }
-            return "Success";
-        });
-
-        Assertions.assertEquals("Success", result);
-        Assertions.assertEquals(2, counter.get());
-    }
-
-    @Test
-    public void testCall_WithZeroRetryInterval() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(2, 0, (result, ex) -> result == null || ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        long startTime = System.currentTimeMillis();
-        String result = retry.call(() -> {
-            int count = counter.incrementAndGet();
-            if (count < 2) {
-                throw new IOException("Attempt " + count + " failed");
-            }
-            return "Success";
-        });
-        long endTime = System.currentTimeMillis();
-
-        Assertions.assertEquals("Success", result);
-        Assertions.assertEquals(2, counter.get());
-        Assertions.assertTrue(endTime - startTime < 500);
-    }
-
-    @Test
-    public void testCall_ExceptionThenSuccessfulResult() throws Exception {
-        Retry<Integer> retry = Retry.withFixedDelay(3, 50, (result, ex) -> (result != null && result < 100) || ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        Integer result = retry.call(() -> {
-            int count = counter.incrementAndGet();
-            if (count == 1) {
-                throw new IOException("First attempt fails");
-            }
-            if (count == 2) {
-                return 50;
-            }
-            return 150;
-        });
-
-        Assertions.assertEquals(150, result);
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testCall_MixedExceptionAndResultRetries() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(5, 30, (result, ex) -> (result != null && result.startsWith("Retry")) || ex instanceof IOException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        String result = retry.call(() -> {
-            int count = counter.incrementAndGet();
-            switch (count) {
-                case 1:
-                    throw new IOException("First fails");
-                case 2:
-                    return "Retry-1";
-                case 3:
-                    throw new IOException("Third fails");
-                case 4:
-                    return "Retry-2";
-                default:
+        AtomicInteger changing = new AtomicInteger();
+        assertEquals("Success",
+                Retry.<String> withFixedDelay(3, 0, (result, ex) -> ex instanceof IOException || ex instanceof IllegalStateException).call(() -> {
+                    int count = changing.incrementAndGet();
+                    if (count == 1) {
+                        throw new IOException("IOException");
+                    }
+                    if (count == 2) {
+                        throw new IllegalStateException("IllegalStateException");
+                    }
                     return "Success";
-            }
-        });
+                }));
+        assertEquals(3, changing.get());
 
-        Assertions.assertEquals("Success", result);
-        Assertions.assertEquals(5, counter.get());
-    }
-
-    @Test
-    public void testCall_ReturnNullWithNullConditionFalse() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> false);
-
-        String result = retry.call(() -> null);
-
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testCall_ExceptionChangesAcrossRetries() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, ex) -> ex instanceof IOException || ex instanceof IllegalStateException);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        String result = retry.call(() -> {
-            int count = counter.incrementAndGet();
-            if (count == 1) {
-                throw new IOException("IOException");
-            }
-            if (count == 2) {
-                throw new IllegalStateException("IllegalStateException");
-            }
-            return "Success";
-        });
-
-        Assertions.assertEquals("Success", result);
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testCall_AllRetriesThrowDifferentExceptions() {
-        Retry<String> retry = Retry.withFixedDelay(2, 50, (result, ex) -> ex instanceof Exception);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        Exception exception = Assertions.assertThrows(IllegalStateException.class, () -> {
-            retry.call(() -> {
-                int count = counter.incrementAndGet();
-                if (count == 1) {
-                    throw new IOException("First");
-                } else if (count == 2) {
-                    throw new IllegalArgumentException("Second");
-                } else {
+        AtomicInteger lastWins = new AtomicInteger();
+        assertEquals("Third",
+                assertThrows(IllegalStateException.class, () -> Retry.<String> withFixedDelay(2, 0, (result, ex) -> ex instanceof Exception).call(() -> {
+                    int count = lastWins.incrementAndGet();
+                    if (count == 1) {
+                        throw new IOException("First");
+                    }
+                    if (count == 2) {
+                        throw new IllegalArgumentException("Second");
+                    }
                     throw new IllegalStateException("Third");
-                }
-            });
-        });
-
-        Assertions.assertEquals("Third", exception.getMessage());
-        Assertions.assertEquals(3, counter.get());
+                })).getMessage());
+        assertEquals(3, lastWins.get());
     }
-
-    @Test
-    public void testCall_SuccessOnFirstTry() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(3, 50, (r, e) -> r == null);
-
-        String result = retry.call(() -> "success");
-
-        Assertions.assertEquals("success", result);
-    }
-
-    @Test
-    public void testCall_SuccessAfterRetry() throws Exception {
-        AtomicInteger counter = new AtomicInteger(0);
-        Retry<String> retry = Retry.withFixedDelay(3, 50, (r, e) -> e instanceof RuntimeException);
-
-        String result = retry.call(() -> {
-            if (counter.incrementAndGet() < 3) {
-                throw new RuntimeException("Fail");
-            }
-            return "success";
-        });
-
-        Assertions.assertEquals("success", result);
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testCall_WithBiPredicateRetryCondition() throws Exception {
-        AtomicInteger counter = new AtomicInteger(0);
-        Retry<String> retry = Retry.withFixedDelay(3, 50, (result, exception) -> exception != null || "retry".equals(result));
-
-        String result = retry.call(() -> {
-            counter.incrementAndGet();
-            if (counter.get() < 3) {
-                return "retry";
-            }
-            return "success";
-        });
-
-        Assertions.assertEquals("success", result);
-        Assertions.assertEquals(3, counter.get());
-    }
-
-    @Test
-    public void testCall_WithZeroRetries() throws Exception {
-        Retry<String> retry = Retry.withFixedDelay(0, 0, (r, e) -> true);
-
-        String result = retry.call(() -> "success");
-
-        Assertions.assertEquals("success", result);
-    }
-
 }

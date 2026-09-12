@@ -208,4 +208,46 @@ public class TripleTypeTest extends TestBase {
         tripleType.appendTo(sb, triple);
         org.junit.jupiter.api.Assertions.assertNotEquals(sb.toString(), json);
     }
+
+    @SuppressWarnings("unchecked")
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+        final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            ((Type<Object>) type).serializeTo(jsonWriter, value, config);
+            return jsonWriter.toString();
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(jsonWriter);
+        }
+    }
+
+    // T6-01 (2026-09-06): Object slots dispatch on the runtime class; non-serializable handlers write embedded JSON.
+    @Test
+    public void reviewFixes20260906_objectSlotsUseRuntimeTypeAndEmbeddedJson() throws IOException {
+        final Type<?> type = createType("Triple<Object, Object, Object>");
+        final com.landawn.abacus.parser.JsonSerConfig jsc = com.landawn.abacus.parser.JsonSerConfig.create();
+
+        assertEquals("[1, \"a\", {\"k\": 1}]", reviewFixes20260906_ser(type, Triple.of(1, "a", com.landawn.abacus.util.N.asMap("k", 1)), jsc));
+        assertEquals("[true, [2], null]", reviewFixes20260906_ser(type, Triple.of(true, com.landawn.abacus.util.N.asList(2), null), jsc));
+        assertEquals("[1, a, 2.5]", reviewFixes20260906_ser(type, Triple.of(1, "a", 2.5d), null));
+        assertEquals("[[1, \"a\", {\"k\": 1}]]", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(Triple.of(1, "a", com.landawn.abacus.util.N.asMap("k", 1)))));
+        // declared null slots honour the element handlers' null flags
+        assertEquals("[\"a\", 0, false]", reviewFixes20260906_ser(tripleType, Triple.of("a", null, null), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true).setWriteNullBooleanAsFalse(true)));
+        assertEquals("[\"a\", null, null]", reviewFixes20260906_ser(tripleType, Triple.of("a", null, null), jsc));
+    }
+
+    // T6-08 (2026-09-06): documented exception types of valueOf.
+    @Test
+    public void reviewFixes20260906_valueOfExceptionTypes() {
+        assertNull(tripleType.valueOf(""));
+        assertThrows(IllegalArgumentException.class, () -> tripleType.valueOf(" "));
+        assertThrows(IllegalArgumentException.class, () -> tripleType.valueOf("[\"a\", 1]"));
+        // Unquoted numeric payloads use JSON numeric conversion; quoted values use the declared text handler.
+        assertEquals(Triple.of("a", 1, true), tripleType.valueOf("[\"a\", 1.5, true]"));
+        assertEquals(Triple.of("\u6c49\ud83d\ude42", -1, false), tripleType.valueOf("[\"\u6c49\ud83d\ude42\", -1.5, false]"));
+        assertEquals(Triple.of("", Integer.MAX_VALUE, true), tripleType.valueOf("[\"\", 2147483647.9, true]"));
+        assertThrows(ArithmeticException.class, () -> tripleType.valueOf("[null, 2147483648, true]"));
+        assertThrows(NumberFormatException.class, () -> tripleType.valueOf("[\"a\", \"1.5\", true]"));
+        assertThrows(NumberFormatException.class, () -> tripleType.valueOf("[\"a\", \"bad\", true]"));
+    }
 }

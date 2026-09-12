@@ -117,4 +117,19 @@ public class PrimitiveShortListTypeTest extends TestBase {
         assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
+    // T8-09 / T8-13 (documented): overflow is an ArithmeticException (not NumberFormatException); blank input is null.
+    @Test
+    public void reviewFixes20260906_valueOfDocumentedFailureModesAndBlankInput() {
+        org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> type.valueOf("[32768]"));
+        org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> type.valueOf("[-32769]"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("[abc]"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,,2]"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1, ]"));
+        assertEquals(ShortList.of((short) 32767, (short) -32768), type.valueOf("[32767, -32768]"));
+
+        assertNull(type.valueOf("   "));
+        assertNull(type.valueOf(""));
+        org.junit.jupiter.api.Assertions.assertTrue(type.valueOf("[ ]").isEmpty());
+    }
+
 }

@@ -59,7 +59,7 @@ import com.landawn.abacus.util.TypeAttrParser;
  * @see TypeFactory
  * @see AbstractType
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "java:S2160" })
 public class TypeType extends AbstractType<Type> {
 
     /**
@@ -83,8 +83,9 @@ public class TypeType extends AbstractType<Type> {
      * This constructor is package-private and should only be called by TypeFactory or subclasses.
      *
      * @param typeName the name to use for this type
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}, or a generic parameter name is blank or structurally invalid.
      */
-    TypeType(final String typeName) {
+    TypeType(final String typeName) throws IllegalArgumentException {
         super(typeName);
 
         final String[] typeParameterNames = TypeAttrParser.parse(typeName).getTypeParameters();
@@ -165,7 +166,7 @@ public class TypeType extends AbstractType<Type> {
      * @see #stringOf(Type)
      */
     @Override
-    public Type valueOf(final String str) {
+    public Type valueOf(final String str) throws IllegalArgumentException {
         return (Strings.isEmpty(str)) ? null : TypeFactory.getType(str);
     }
 }

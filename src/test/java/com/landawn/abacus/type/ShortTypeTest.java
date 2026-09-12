@@ -129,10 +129,27 @@ public class ShortTypeTest extends TestBase {
         assertNull(shortType.valueOf(chars, 0, 0));
     }
 
+    // T4-02: out-of-range is an ArithmeticException on the char[] path too (unified overflow policy)
     @Test
     public void test_valueOf_charArray_outOfRange() {
         char[] chars = "99999".toCharArray();
-        assertThrows(NumberFormatException.class, () -> shortType.valueOf(chars, 0, 5));
+        assertThrows(ArithmeticException.class, () -> shortType.valueOf(chars, 0, 5));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOf_charArray_overflowAndRadixPrefix() {
+        assertThrows(ArithmeticException.class, () -> shortType.valueOf("99999"));
+        assertThrows(ArithmeticException.class, () -> shortType.valueOf("32768".toCharArray(), 0, 5));
+        assertThrows(ArithmeticException.class, () -> shortType.valueOf("-32769".toCharArray(), 0, 6));
+        assertThrows(NumberFormatException.class, () -> shortType.valueOf("12x".toCharArray(), 0, 3));
+        assertThrows(NumberFormatException.class, () -> shortType.valueOf("0x".toCharArray(), 0, 2));
+
+        assertEquals(Short.valueOf((short) 32767), shortType.valueOf("32767".toCharArray(), 0, 5));
+        assertEquals(Short.valueOf((short) -32768), shortType.valueOf("-32768".toCharArray(), 0, 6));
+        assertEquals(Short.valueOf((short) 31), shortType.valueOf("0x1F".toCharArray(), 0, 4));
+        assertEquals(Short.valueOf((short) -31), shortType.valueOf("-0x1F".toCharArray(), 0, 5));
+        assertEquals(Short.valueOf((short) 31), shortType.valueOf("#1F".toCharArray(), 0, 3));
+        assertEquals(shortType.valueOf("0x7FFF"), shortType.valueOf("0x7FFF".toCharArray(), 0, 6));
     }
 
     @Test

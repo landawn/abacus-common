@@ -36,7 +36,7 @@ public class FileParserTest extends AbstractTest {
         List<String> lines = Stream.range(0, 1000).map(it -> Strings.uuid()).toList();
         IOUtil.writeLines(lines, file);
 
-        IOUtil.forLines(file, lineParser);
+        IOUtil.forEachLine(file, lineParser);
 
         IOUtil.deleteIfExists(file);
         assertNotNull(lines);

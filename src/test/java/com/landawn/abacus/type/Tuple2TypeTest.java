@@ -202,4 +202,51 @@ public class Tuple2TypeTest extends TestBase {
         CallableStatement stmt = mock(CallableStatement.class);
         assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
+
+    @SuppressWarnings("unchecked")
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+        final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            ((Type<Object>) type).serializeTo(jsonWriter, value, config);
+            return jsonWriter.toString();
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(jsonWriter);
+        }
+    }
+
+    // T6-01 (2026-09-06): a DECLARED bean/map slot (non-serializable handler) is written as embedded JSON, not a quoted string.
+    @Test
+    public void reviewFixes20260906_declaredBeanSlotWritesEmbeddedJson() throws IOException {
+        final Type<?> beanTuple = Type.of("Tuple2<" + ReviewFixesBean.class.getName() + ", Integer>");
+        final com.landawn.abacus.parser.JsonSerConfig jsc = com.landawn.abacus.parser.JsonSerConfig.create();
+        final com.landawn.abacus.parser.JsonSerConfig zero = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true);
+
+        assertEquals("[{\"a\": 1, \"s\": \"x\"}, 2]", reviewFixes20260906_ser(beanTuple, Tuple.of(new ReviewFixesBean(), 2), jsc));
+        assertEquals("[{\"a\": 1, \"s\": \"x\"}, 0]", reviewFixes20260906_ser(beanTuple, Tuple.of(new ReviewFixesBean(), null), zero));
+        assertEquals("[null, 2]", reviewFixes20260906_ser(beanTuple, Tuple.of(null, 2), jsc));
+        assertEquals("[1, \"a\"]", reviewFixes20260906_ser(Type.of("Tuple2<Object, Object>"), Tuple.of(1, "a"), jsc));
+        assertEquals("[[1, \"a\"]]", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(Tuple.of(1, "a"))));
+
+        // bean round trip through the real parser (a map value is resolved by its runtime class -> Tuple2<Object, Object>)
+        final ReviewFixesHolder holder = new ReviewFixesHolder();
+        final String json = com.landawn.abacus.util.N.toJson(holder);
+        assertEquals("{\"tb\": [{\"a\": 1, \"s\": \"x\"}, 2], \"mt\": {\"k\": [5, \"v\"]}}", json);
+        final ReviewFixesHolder back = com.landawn.abacus.util.N.fromJson(json, ReviewFixesHolder.class);
+        assertEquals(Integer.valueOf(2), back.tb._2);
+        assertEquals(1, back.tb._1.a);
+        assertEquals("x", back.tb._1.s);
+        assertEquals(Integer.valueOf(5), back.mt.get("k")._1);
+        assertEquals("v", back.mt.get("k")._2);
+    }
+
+    public static class ReviewFixesBean {
+        public int a = 1;
+        public String s = "x";
+    }
+
+    public static class ReviewFixesHolder {
+        public Tuple2<ReviewFixesBean, Integer> tb = Tuple.of(new ReviewFixesBean(), 2);
+        public java.util.Map<String, Tuple2<Integer, String>> mt = com.landawn.abacus.util.N.asMap("k", Tuple.of(5, "v"));
+    }
 }

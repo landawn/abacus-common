@@ -30,8 +30,9 @@ public class BooleanNFunctionTest extends TestBase {
         BooleanNFunction<Integer> function = args -> {
             int count = 0;
             for (boolean arg : args) {
-                if (arg)
+                if (arg) {
                     count++;
+                }
             }
             return count;
         };
@@ -45,7 +46,8 @@ public class BooleanNFunctionTest extends TestBase {
     public void testAnonymousClass() {
         BooleanNFunction<String> function = new BooleanNFunction<>() {
             @Override
-            public String apply(boolean... args) {
+            @SafeVarargs
+            public final String apply(boolean... args) {
                 return "Length: " + args.length;
             }
         };
@@ -70,8 +72,9 @@ public class BooleanNFunctionTest extends TestBase {
         BooleanNFunction<Double> function = args -> {
             int trueCount = 0;
             for (boolean arg : args) {
-                if (arg)
+                if (arg) {
                     trueCount++;
+                }
             }
             return args.length == 0 ? 0.0 : (double) trueCount / args.length;
         };
@@ -112,8 +115,9 @@ public class BooleanNFunctionTest extends TestBase {
     public void testAllTrue() {
         BooleanNFunction<Boolean> function = args -> {
             for (boolean arg : args) {
-                if (!arg)
+                if (!arg) {
                     return false;
+                }
             }
             return true;
         };
@@ -127,8 +131,9 @@ public class BooleanNFunctionTest extends TestBase {
     public void testAnyTrue() {
         BooleanNFunction<Boolean> function = args -> {
             for (boolean arg : args) {
-                if (arg)
+                if (arg) {
                     return true;
+                }
             }
             return false;
         };
@@ -163,8 +168,9 @@ public class BooleanNFunctionTest extends TestBase {
         BooleanNFunction<Integer> function = args -> {
             int count = 0;
             for (boolean arg : args) {
-                if (arg)
+                if (arg) {
                     count++;
+                }
             }
             return count;
         };

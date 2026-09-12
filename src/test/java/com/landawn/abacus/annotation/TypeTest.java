@@ -21,7 +21,7 @@ import com.landawn.abacus.annotation.Type.Scope;
 import com.landawn.abacus.util.EnumType;
 
 public class TypeTest extends TestBase {
-    static class TestClass {
+    public static class TestClass {
         @Type
         private String field1;
 

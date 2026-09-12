@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
@@ -62,50 +60,10 @@ public class DigestUtilTest extends TestBase {
     public void test_digest_MessageDigest_ByteBuffer() {
         MessageDigest md = DigestUtil.getSha256Digest();
         ByteBuffer buffer = ByteBuffer.wrap(TEST_BYTES);
-        int originalPosition = buffer.position();
         byte[] result = DigestUtil.digest(md, buffer);
         assertNotNull(result);
         assertEquals(32, result.length);
         assertEquals(buffer.limit(), buffer.position());
-    }
-
-    @Test
-    public void testDigestWithByteArray() {
-        MessageDigest md = DigestUtil.getMd5Digest();
-        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
-
-        byte[] digest = DigestUtil.digest(md, data);
-
-        Assertions.assertNotNull(digest);
-        Assertions.assertEquals(16, digest.length);
-    }
-
-    @Test
-    public void testDigestWithByteBuffer() {
-        MessageDigest md = DigestUtil.getSha1Digest();
-        ByteBuffer buffer = ByteBuffer.wrap("test".getBytes(StandardCharsets.UTF_8));
-
-        byte[] digest = DigestUtil.digest(md, buffer);
-
-        Assertions.assertNotNull(digest);
-        Assertions.assertEquals(20, digest.length);
-    }
-
-    @Test
-    public void testDigest_ByteArray() {
-        MessageDigest md = DigestUtil.getMd5Digest();
-        byte[] result = DigestUtil.digest(md, TEST_BYTES);
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.length > 0);
-    }
-
-    @Test
-    public void testDigest_ByteBuffer() {
-        MessageDigest md = DigestUtil.getMd5Digest();
-        ByteBuffer buffer = ByteBuffer.wrap(TEST_BYTES);
-        byte[] result = DigestUtil.digest(md, buffer);
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.length > 0);
     }
 
     @Test
@@ -159,65 +117,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testDigestWithInputStream() throws IOException {
-        MessageDigest md = DigestUtil.getSha256Digest();
-        ByteArrayInputStream is = new ByteArrayInputStream("test".getBytes(StandardCharsets.UTF_8));
-
-        byte[] digest = DigestUtil.digest(md, is);
-
-        Assertions.assertNotNull(digest);
-        Assertions.assertEquals(32, digest.length);
-    }
-
-    @Test
-    public void testDigest_File() throws IOException {
-        File tempFile = File.createTempFile("test", ".txt");
-        tempFile.deleteOnExit();
-        Files.write(tempFile.toPath(), TEST_BYTES);
-
-        MessageDigest md = DigestUtil.getMd5Digest();
-        byte[] result = DigestUtil.digest(md, tempFile);
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.length > 0);
-    }
-
-    @Test
-    public void testDigest_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        MessageDigest md = DigestUtil.getMd5Digest();
-        byte[] result = DigestUtil.digest(md, stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.length > 0);
-    }
-
-    @Test
-    public void testDigest_Path() throws IOException {
-        Path tempPath = Files.createTempFile("test", ".txt");
-        Files.write(tempPath, TEST_BYTES);
-
-        MessageDigest md = DigestUtil.getMd5Digest();
-        byte[] result = DigestUtil.digest(md, tempPath, StandardOpenOption.READ);
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.length > 0);
-
-        Files.delete(tempPath);
-    }
-
-    @Test
-    public void testDigest_RandomAccessFile() throws IOException {
-        File tempFile = File.createTempFile("test", ".txt");
-        tempFile.deleteOnExit();
-        Files.write(tempFile.toPath(), TEST_BYTES);
-
-        try (RandomAccessFile raf = new RandomAccessFile(tempFile, "r")) {
-            MessageDigest md = DigestUtil.getMd5Digest();
-            byte[] result = DigestUtil.digest(md, raf);
-            Assertions.assertNotNull(result);
-            Assertions.assertTrue(result.length > 0);
-        }
-    }
-
-    @Test
     public void test_getDigest_String() {
         MessageDigest md = DigestUtil.getDigest("SHA-256");
         assertNotNull(md);
@@ -230,13 +129,6 @@ public class DigestUtilTest extends TestBase {
         MessageDigest result = DigestUtil.getDigest("SHA-512", fallback);
         assertNotNull(result);
         assertEquals("SHA-512", result.getAlgorithm());
-    }
-
-    @Test
-    public void testGetDigest() {
-        MessageDigest md = DigestUtil.getDigest("MD5");
-        Assertions.assertNotNull(md);
-        Assertions.assertEquals("MD5", md.getAlgorithm());
     }
 
     @Test
@@ -255,14 +147,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetDigestWithDefault() {
-        MessageDigest defaultMd = DigestUtil.getSha256Digest();
-        MessageDigest md = DigestUtil.getDigest("INVALID_ALGORITHM", defaultMd);
-
-        Assertions.assertSame(defaultMd, md);
-    }
-
-    @Test
     public void testGetDigest_WithDefault() {
         MessageDigest defaultMd = DigestUtil.getMd5Digest();
         MessageDigest md = DigestUtil.getDigest("SHA-256", defaultMd);
@@ -271,13 +155,6 @@ public class DigestUtilTest extends TestBase {
 
         MessageDigest fallback = DigestUtil.getDigest("INVALID", defaultMd);
         Assertions.assertSame(defaultMd, fallback);
-    }
-
-    @Test
-    public void testGetMd2Digest() {
-        MessageDigest md = DigestUtil.getMd2Digest();
-        Assertions.assertNotNull(md);
-        Assertions.assertEquals("MD2", md.getAlgorithm());
     }
 
     @Test
@@ -345,26 +222,12 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetSha3_224Digest() {
-        MessageDigest md = DigestUtil.getSha3_224Digest();
-        assertNotNull(md);
-        assertEquals("SHA3-224", md.getAlgorithm());
-    }
-
-    @Test
     public void test_getSha3_256Digest() {
         if (DigestUtil.isAvailable("SHA3-256")) {
             MessageDigest md = DigestUtil.getSha3_256Digest();
             assertNotNull(md);
             assertEquals("SHA3-256", md.getAlgorithm());
         }
-    }
-
-    @Test
-    public void testGetSha3_256Digest() {
-        MessageDigest md = DigestUtil.getSha3_256Digest();
-        assertNotNull(md);
-        assertEquals("SHA3-256", md.getAlgorithm());
     }
 
     @Test
@@ -377,26 +240,12 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetSha3_384Digest() {
-        MessageDigest md = DigestUtil.getSha3_384Digest();
-        assertNotNull(md);
-        assertEquals("SHA3-384", md.getAlgorithm());
-    }
-
-    @Test
     public void test_getSha3_512Digest() {
         if (DigestUtil.isAvailable("SHA3-512")) {
             MessageDigest md = DigestUtil.getSha3_512Digest();
             assertNotNull(md);
             assertEquals("SHA3-512", md.getAlgorithm());
         }
-    }
-
-    @Test
-    public void testGetSha3_512Digest() {
-        MessageDigest md = DigestUtil.getSha3_512Digest();
-        assertNotNull(md);
-        assertEquals("SHA3-512", md.getAlgorithm());
     }
 
     @Test
@@ -416,26 +265,12 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetSha512_224Digest() {
-        MessageDigest md = DigestUtil.getSha512_224Digest();
-        assertNotNull(md);
-        assertEquals("SHA-512/224", md.getAlgorithm());
-    }
-
-    @Test
     public void test_getSha512_256Digest() {
         if (DigestUtil.isAvailable("SHA-512/256")) {
             MessageDigest md = DigestUtil.getSha512_256Digest();
             assertNotNull(md);
             assertEquals("SHA-512/256", md.getAlgorithm());
         }
-    }
-
-    @Test
-    public void testGetSha512_256Digest() {
-        MessageDigest md = DigestUtil.getSha512_256Digest();
-        assertNotNull(md);
-        assertEquals("SHA-512/256", md.getAlgorithm());
     }
 
     @Test
@@ -453,14 +288,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetShaDigest() {
-        @SuppressWarnings("deprecation")
-        MessageDigest md = DigestUtil.getShaDigest();
-        assertNotNull(md);
-        assertEquals("SHA-1", md.getAlgorithm());
-    }
-
-    @Test
     public void test_isAvailable_validAlgorithm() {
         assertTrue(DigestUtil.isAvailable("SHA-256"));
         assertTrue(DigestUtil.isAvailable("MD5"));
@@ -471,13 +298,6 @@ public class DigestUtilTest extends TestBase {
     public void test_isAvailable_invalidAlgorithm() {
         assertFalse(DigestUtil.isAvailable("INVALID_ALGORITHM"));
         assertFalse(DigestUtil.isAvailable(null));
-    }
-
-    @Test
-    public void testIsAvailable() {
-        Assertions.assertTrue(DigestUtil.isAvailable("MD5"));
-        Assertions.assertTrue(DigestUtil.isAvailable("SHA-256"));
-        Assertions.assertFalse(DigestUtil.isAvailable("INVALID_ALGORITHM"));
     }
 
     @Test
@@ -499,20 +319,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testMd2_ByteArray() {
-        byte[] result = DigestUtil.md2(TEST_BYTES);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(16, result.length);
-    }
-
-    @Test
-    public void testMd2_String() {
-        byte[] result = DigestUtil.md2(TEST_STRING);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(16, result.length);
-    }
-
-    @Test
     public void test_md2_InputStream() throws IOException {
         if (DigestUtil.isAvailable("MD2")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -521,14 +327,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(16, result.length);
             }
         }
-    }
-
-    @Test
-    public void testMd2_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        byte[] result = DigestUtil.md2(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(16, result.length);
     }
 
     @Test
@@ -550,20 +348,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testMd2Hex_ByteArray() {
-        String result = DigestUtil.md2Hex(TEST_BYTES);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(32, result.length());
-    }
-
-    @Test
-    public void testMd2Hex_String() {
-        String result = DigestUtil.md2Hex(TEST_STRING);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(32, result.length());
-    }
-
-    @Test
     public void test_md2Hex_InputStream() throws IOException {
         if (DigestUtil.isAvailable("MD2")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -572,14 +356,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(32, result.length());
             }
         }
-    }
-
-    @Test
-    public void testMd2Hex_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        String result = DigestUtil.md2Hex(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(32, result.length());
     }
 
     @Test
@@ -605,23 +381,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testMd5ByteArray() {
-        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
-        byte[] digest = DigestUtil.md5(data);
-
-        Assertions.assertNotNull(digest);
-        Assertions.assertEquals(16, digest.length);
-    }
-
-    @Test
-    public void testMd5String() {
-        byte[] digest = DigestUtil.md5("test");
-
-        Assertions.assertNotNull(digest);
-        Assertions.assertEquals(16, digest.length);
-    }
-
-    @Test
     public void test_md5_InputStream() throws IOException {
         try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
             byte[] result = DigestUtil.md5(is);
@@ -641,23 +400,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testMd5InputStream() throws IOException {
-        ByteArrayInputStream is = new ByteArrayInputStream("test".getBytes(StandardCharsets.UTF_8));
-        byte[] digest = DigestUtil.md5(is);
-
-        Assertions.assertNotNull(digest);
-        Assertions.assertEquals(16, digest.length);
-    }
-
-    @Test
-    public void testMd5_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        byte[] result = DigestUtil.md5(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(16, result.length);
-    }
-
-    @Test
     public void test_md5Hex_byteArray() {
         String result = DigestUtil.md5Hex(TEST_BYTES);
         assertNotNull(result);
@@ -674,29 +416,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testMd5Hex() {
-        String hex = DigestUtil.md5Hex("test");
-
-        Assertions.assertNotNull(hex);
-        Assertions.assertEquals(32, hex.length());
-        Assertions.assertTrue(hex.matches("[0-9a-f]+"));
-    }
-
-    @Test
-    public void testMd5Hex_ByteArray() {
-        String result = DigestUtil.md5Hex(TEST_BYTES);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(32, result.length());
-    }
-
-    @Test
-    public void testMd5Hex_String() {
-        String result = DigestUtil.md5Hex(TEST_STRING);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(32, result.length());
-    }
-
-    @Test
     public void test_md5Hex_InputStream() throws IOException {
         try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
             String result = DigestUtil.md5Hex(is);
@@ -704,14 +423,6 @@ public class DigestUtilTest extends TestBase {
             assertEquals(32, result.length());
             assertEquals("b10a8db164e0754105b7a99be72e3fe5", result);
         }
-    }
-
-    @Test
-    public void testMd5Hex_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        String result = DigestUtil.md5Hex(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(32, result.length());
     }
 
     @Test
@@ -728,24 +439,6 @@ public class DigestUtilTest extends TestBase {
         assertEquals(20, result.length);
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testSha_ByteArray() {
-        byte[] result = DigestUtil.sha(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(20, result.length);
-        assertArrayEquals(DigestUtil.sha1(TEST_BYTES), result);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testSha_String() {
-        byte[] result = DigestUtil.sha(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(20, result.length);
-        assertArrayEquals(DigestUtil.sha1(TEST_STRING), result);
-    }
-
     @Test
     public void test_sha_InputStream() throws IOException {
         try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -753,14 +446,6 @@ public class DigestUtilTest extends TestBase {
             assertNotNull(result);
             assertEquals(20, result.length);
         }
-    }
-
-    @Test
-    public void testSha_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        byte[] result = DigestUtil.sha(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(20, result.length);
     }
 
     @Test
@@ -778,36 +463,12 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha1() {
-        byte[] digest = DigestUtil.sha1("test");
-
-        Assertions.assertNotNull(digest);
-        Assertions.assertEquals(20, digest.length);
-    }
-
-    @Test
-    public void testSha1_String() {
-        byte[] result = DigestUtil.sha1(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(20, result.length);
-        assertArrayEquals(DigestUtil.sha1(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha1_InputStream() throws IOException {
         try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
             byte[] result = DigestUtil.sha1(is);
             assertNotNull(result);
             assertEquals(20, result.length);
         }
-    }
-
-    @Test
-    public void testSha1_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        byte[] result = DigestUtil.sha1(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(20, result.length);
     }
 
     @Test
@@ -825,37 +486,12 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha1Hex() {
-        String hex = DigestUtil.sha1Hex("test");
-
-        Assertions.assertNotNull(hex);
-        Assertions.assertEquals(40, hex.length());
-        Assertions.assertTrue(hex.matches("[0-9a-f]+"));
-    }
-
-    @Test
-    public void testSha1Hex_String() {
-        String result = DigestUtil.sha1Hex(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(40, result.length());
-        assertEquals(DigestUtil.sha1Hex(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha1Hex_InputStream() throws IOException {
         try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
             String result = DigestUtil.sha1Hex(is);
             assertNotNull(result);
             assertEquals(40, result.length());
         }
-    }
-
-    @Test
-    public void testSha1Hex_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        String result = DigestUtil.sha1Hex(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(40, result.length());
     }
 
     @Test
@@ -888,22 +524,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha256() {
-        byte[] digest = DigestUtil.sha256("test");
-
-        Assertions.assertNotNull(digest);
-        Assertions.assertEquals(32, digest.length);
-    }
-
-    @Test
-    public void testSha256_String() {
-        byte[] result = DigestUtil.sha256(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(32, result.length);
-        assertArrayEquals(DigestUtil.sha256(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha256_InputStream() throws IOException {
         try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
             byte[] result = DigestUtil.sha256(is);
@@ -930,14 +550,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha256_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        byte[] result = DigestUtil.sha256(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(32, result.length);
-    }
-
-    @Test
     public void test_sha256Hex_byteArray() {
         String result = DigestUtil.sha256Hex(TEST_BYTES);
         assertNotNull(result);
@@ -952,37 +564,12 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha256Hex() {
-        String hex = DigestUtil.sha256Hex("test");
-
-        Assertions.assertNotNull(hex);
-        Assertions.assertEquals(64, hex.length());
-        Assertions.assertTrue(hex.matches("[0-9a-f]+"));
-    }
-
-    @Test
-    public void testSha256Hex_String() {
-        String result = DigestUtil.sha256Hex(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(64, result.length());
-        assertEquals(DigestUtil.sha256Hex(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha256Hex_InputStream() throws IOException {
         try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
             String result = DigestUtil.sha256Hex(is);
             assertNotNull(result);
             assertEquals(64, result.length());
         }
-    }
-
-    @Test
-    public void testSha256Hex_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        String result = DigestUtil.sha256Hex(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(64, result.length());
     }
 
     @Test
@@ -1004,21 +591,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha3_224_ByteArray2() {
-        byte[] result = DigestUtil.sha3_224(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(28, result.length);
-    }
-
-    @Test
-    public void testSha3_224_String() {
-        byte[] result = DigestUtil.sha3_224(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(28, result.length);
-        assertArrayEquals(DigestUtil.sha3_224(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha3_224_InputStream() throws IOException {
         if (DigestUtil.isAvailable("SHA3-224")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -1027,15 +599,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(28, result.length);
             }
         }
-    }
-
-    @Test
-    public void testSha3_224_InputStream2() throws IOException {
-        InputStream is = new ByteArrayInputStream(TEST_BYTES);
-        byte[] result = DigestUtil.sha3_224(is);
-        assertNotNull(result);
-        assertEquals(28, result.length);
-        assertArrayEquals(DigestUtil.sha3_224(TEST_BYTES), result);
     }
 
     @Test
@@ -1057,21 +620,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha3_224Hex_ByteArray2() {
-        String result = DigestUtil.sha3_224Hex(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(56, result.length());
-    }
-
-    @Test
-    public void testSha3_224Hex_String() {
-        String result = DigestUtil.sha3_224Hex(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(56, result.length());
-        assertEquals(DigestUtil.sha3_224Hex(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha3_224Hex_InputStream() throws IOException {
         if (DigestUtil.isAvailable("SHA3-224")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -1080,14 +628,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(56, result.length());
             }
         }
-    }
-
-    @Test
-    public void testSha3_224Hex_InputStream2() throws IOException {
-        InputStream is = new ByteArrayInputStream(TEST_BYTES);
-        String result = DigestUtil.sha3_224Hex(is);
-        assertNotNull(result);
-        assertEquals(56, result.length());
     }
 
     @Test
@@ -1109,21 +649,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha3_256_ByteArray2() {
-        byte[] result = DigestUtil.sha3_256(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(32, result.length);
-    }
-
-    @Test
-    public void testSha3_256_String() {
-        byte[] result = DigestUtil.sha3_256(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(32, result.length);
-        assertArrayEquals(DigestUtil.sha3_256(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha3_256_InputStream() throws IOException {
         if (DigestUtil.isAvailable("SHA3-256")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -1132,15 +657,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(32, result.length);
             }
         }
-    }
-
-    @Test
-    public void testSha3_256_InputStream2() throws IOException {
-        InputStream is = new ByteArrayInputStream(TEST_BYTES);
-        byte[] result = DigestUtil.sha3_256(is);
-        assertNotNull(result);
-        assertEquals(32, result.length);
-        assertArrayEquals(DigestUtil.sha3_256(TEST_BYTES), result);
     }
 
     @Test
@@ -1162,21 +678,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha3_256Hex_ByteArray2() {
-        String result = DigestUtil.sha3_256Hex(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(64, result.length());
-    }
-
-    @Test
-    public void testSha3_256Hex_String() {
-        String result = DigestUtil.sha3_256Hex(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(64, result.length());
-        assertEquals(DigestUtil.sha3_256Hex(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha3_256Hex_InputStream() throws IOException {
         if (DigestUtil.isAvailable("SHA3-256")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -1185,14 +686,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(64, result.length());
             }
         }
-    }
-
-    @Test
-    public void testSha3_256Hex_InputStream2() throws IOException {
-        InputStream is = new ByteArrayInputStream(TEST_BYTES);
-        String result = DigestUtil.sha3_256Hex(is);
-        assertNotNull(result);
-        assertEquals(64, result.length());
     }
 
     @Test
@@ -1214,21 +707,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha3_384_ByteArray() {
-        byte[] result = DigestUtil.sha3_384(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(48, result.length);
-    }
-
-    @Test
-    public void testSha3_384_String() {
-        byte[] result = DigestUtil.sha3_384(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(48, result.length);
-        assertArrayEquals(DigestUtil.sha3_384(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha3_384_InputStream() throws IOException {
         if (DigestUtil.isAvailable("SHA3-384")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -1237,15 +715,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(48, result.length);
             }
         }
-    }
-
-    @Test
-    public void testSha3_384_InputStream() throws IOException {
-        InputStream is = new ByteArrayInputStream(TEST_BYTES);
-        byte[] result = DigestUtil.sha3_384(is);
-        assertNotNull(result);
-        assertEquals(48, result.length);
-        assertArrayEquals(DigestUtil.sha3_384(TEST_BYTES), result);
     }
 
     @Test
@@ -1267,21 +736,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha3_384Hex_ByteArray() {
-        String result = DigestUtil.sha3_384Hex(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(96, result.length());
-    }
-
-    @Test
-    public void testSha3_384Hex_String() {
-        String result = DigestUtil.sha3_384Hex(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(96, result.length());
-        assertEquals(DigestUtil.sha3_384Hex(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha3_384Hex_InputStream() throws IOException {
         if (DigestUtil.isAvailable("SHA3-384")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -1290,14 +744,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(96, result.length());
             }
         }
-    }
-
-    @Test
-    public void testSha3_384Hex_InputStream() throws IOException {
-        InputStream is = new ByteArrayInputStream(TEST_BYTES);
-        String result = DigestUtil.sha3_384Hex(is);
-        assertNotNull(result);
-        assertEquals(96, result.length());
     }
 
     @Test
@@ -1319,21 +765,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha3_512_ByteArray() {
-        byte[] result = DigestUtil.sha3_512(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(64, result.length);
-    }
-
-    @Test
-    public void testSha3_512_String() {
-        byte[] result = DigestUtil.sha3_512(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(64, result.length);
-        assertArrayEquals(DigestUtil.sha3_512(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha3_512_InputStream() throws IOException {
         if (DigestUtil.isAvailable("SHA3-512")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -1342,15 +773,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(64, result.length);
             }
         }
-    }
-
-    @Test
-    public void testSha3_512_InputStream() throws IOException {
-        InputStream is = new ByteArrayInputStream(TEST_BYTES);
-        byte[] result = DigestUtil.sha3_512(is);
-        assertNotNull(result);
-        assertEquals(64, result.length);
-        assertArrayEquals(DigestUtil.sha3_512(TEST_BYTES), result);
     }
 
     @Test
@@ -1372,21 +794,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha3_512Hex_ByteArray() {
-        String result = DigestUtil.sha3_512Hex(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(128, result.length());
-    }
-
-    @Test
-    public void testSha3_512Hex_String() {
-        String result = DigestUtil.sha3_512Hex(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(128, result.length());
-        assertEquals(DigestUtil.sha3_512Hex(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha3_512Hex_InputStream() throws IOException {
         if (DigestUtil.isAvailable("SHA3-512")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -1395,14 +802,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(128, result.length());
             }
         }
-    }
-
-    @Test
-    public void testSha3_512Hex_InputStream() throws IOException {
-        InputStream is = new ByteArrayInputStream(TEST_BYTES);
-        String result = DigestUtil.sha3_512Hex(is);
-        assertNotNull(result);
-        assertEquals(128, result.length());
     }
 
     @Test
@@ -1420,28 +819,12 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha384_String() {
-        byte[] result = DigestUtil.sha384(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(48, result.length);
-        assertArrayEquals(DigestUtil.sha384(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha384_InputStream() throws IOException {
         try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
             byte[] result = DigestUtil.sha384(is);
             assertNotNull(result);
             assertEquals(48, result.length);
         }
-    }
-
-    @Test
-    public void testSha384_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        byte[] result = DigestUtil.sha384(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(48, result.length);
     }
 
     @Test
@@ -1459,28 +842,12 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha384Hex_String() {
-        String result = DigestUtil.sha384Hex(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(96, result.length());
-        assertEquals(DigestUtil.sha384Hex(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha384Hex_InputStream() throws IOException {
         try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
             String result = DigestUtil.sha384Hex(is);
             assertNotNull(result);
             assertEquals(96, result.length());
         }
-    }
-
-    @Test
-    public void testSha384Hex_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        String result = DigestUtil.sha384Hex(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(96, result.length());
     }
 
     @Test
@@ -1498,36 +865,12 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha512() {
-        byte[] digest = DigestUtil.sha512("test");
-
-        Assertions.assertNotNull(digest);
-        Assertions.assertEquals(64, digest.length);
-    }
-
-    @Test
-    public void testSha512_String() {
-        byte[] result = DigestUtil.sha512(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(64, result.length);
-        assertArrayEquals(DigestUtil.sha512(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha512_InputStream() throws IOException {
         try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
             byte[] result = DigestUtil.sha512(is);
             assertNotNull(result);
             assertEquals(64, result.length);
         }
-    }
-
-    @Test
-    public void testSha512_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        byte[] result = DigestUtil.sha512(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(64, result.length);
     }
 
     @Test
@@ -1549,21 +892,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha512_224_ByteArray() {
-        byte[] result = DigestUtil.sha512_224(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(28, result.length);
-    }
-
-    @Test
-    public void testSha512_224_String() {
-        byte[] result = DigestUtil.sha512_224(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(28, result.length);
-        assertArrayEquals(DigestUtil.sha512_224(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha512_224_InputStream() throws IOException {
         if (DigestUtil.isAvailable("SHA-512/224")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -1572,15 +900,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(28, result.length);
             }
         }
-    }
-
-    @Test
-    public void testSha512_224_InputStream() throws IOException {
-        InputStream is = new ByteArrayInputStream(TEST_BYTES);
-        byte[] result = DigestUtil.sha512_224(is);
-        assertNotNull(result);
-        assertEquals(28, result.length);
-        assertArrayEquals(DigestUtil.sha512_224(TEST_BYTES), result);
     }
 
     @Test
@@ -1602,21 +921,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha512_224Hex_ByteArray() {
-        String result = DigestUtil.sha512_224Hex(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(56, result.length());
-    }
-
-    @Test
-    public void testSha512_224Hex_String() {
-        String result = DigestUtil.sha512_224Hex(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(56, result.length());
-        assertEquals(DigestUtil.sha512_224Hex(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha512_224Hex_InputStream() throws IOException {
         if (DigestUtil.isAvailable("SHA-512/224")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -1625,15 +929,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(56, result.length());
             }
         }
-    }
-
-    @Test
-    public void testSha512_224Hex_InputStream() throws IOException {
-        InputStream is = new ByteArrayInputStream(TEST_BYTES);
-        String result = DigestUtil.sha512_224Hex(is);
-        assertNotNull(result);
-        assertEquals(56, result.length());
-        assertEquals(DigestUtil.sha512_224Hex(TEST_BYTES), result);
     }
 
     @Test
@@ -1655,21 +950,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha512_256_ByteArray() {
-        byte[] result = DigestUtil.sha512_256(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(32, result.length);
-    }
-
-    @Test
-    public void testSha512_256_String() {
-        byte[] result = DigestUtil.sha512_256(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(32, result.length);
-        assertArrayEquals(DigestUtil.sha512_256(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha512_256_InputStream() throws IOException {
         if (DigestUtil.isAvailable("SHA-512/256")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -1678,15 +958,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(32, result.length);
             }
         }
-    }
-
-    @Test
-    public void testSha512_256_InputStream() throws IOException {
-        InputStream is = new ByteArrayInputStream(TEST_BYTES);
-        byte[] result = DigestUtil.sha512_256(is);
-        assertNotNull(result);
-        assertEquals(32, result.length);
-        assertArrayEquals(DigestUtil.sha512_256(TEST_BYTES), result);
     }
 
     @Test
@@ -1708,21 +979,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha512_256Hex_ByteArray() {
-        String result = DigestUtil.sha512_256Hex(TEST_BYTES);
-        assertNotNull(result);
-        assertEquals(64, result.length());
-    }
-
-    @Test
-    public void testSha512_256Hex_String() {
-        String result = DigestUtil.sha512_256Hex(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(64, result.length());
-        assertEquals(DigestUtil.sha512_256Hex(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha512_256Hex_InputStream() throws IOException {
         if (DigestUtil.isAvailable("SHA-512/256")) {
             try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
@@ -1731,15 +987,6 @@ public class DigestUtilTest extends TestBase {
                 assertEquals(64, result.length());
             }
         }
-    }
-
-    @Test
-    public void testSha512_256Hex_InputStream() throws IOException {
-        InputStream is = new ByteArrayInputStream(TEST_BYTES);
-        String result = DigestUtil.sha512_256Hex(is);
-        assertNotNull(result);
-        assertEquals(64, result.length());
-        assertEquals(DigestUtil.sha512_256Hex(TEST_BYTES), result);
     }
 
     @Test
@@ -1757,37 +1004,12 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testSha512Hex() {
-        String hex = DigestUtil.sha512Hex("test");
-
-        Assertions.assertNotNull(hex);
-        Assertions.assertEquals(128, hex.length());
-        Assertions.assertTrue(hex.matches("[0-9a-f]+"));
-    }
-
-    @Test
-    public void testSha512Hex_String() {
-        String result = DigestUtil.sha512Hex(TEST_STRING);
-        assertNotNull(result);
-        assertEquals(128, result.length());
-        assertEquals(DigestUtil.sha512Hex(TEST_BYTES), result);
-    }
-
-    @Test
     public void test_sha512Hex_InputStream() throws IOException {
         try (InputStream is = new ByteArrayInputStream(TEST_BYTES)) {
             String result = DigestUtil.sha512Hex(is);
             assertNotNull(result);
             assertEquals(128, result.length());
         }
-    }
-
-    @Test
-    public void testSha512Hex_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        String result = DigestUtil.sha512Hex(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(128, result.length());
     }
 
     @Test
@@ -1832,14 +1054,6 @@ public class DigestUtilTest extends TestBase {
     }
 
     @Test
-    public void testShaHex_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        String result = DigestUtil.shaHex(stream);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(40, result.length());
-    }
-
-    @Test
     public void test_updateDigest_MessageDigest_byteArray() {
         MessageDigest md = DigestUtil.getSha256Digest();
         MessageDigest result = DigestUtil.updateDigest(md, TEST_BYTES);
@@ -1867,50 +1081,6 @@ public class DigestUtilTest extends TestBase {
         assertEquals(md, result);
         byte[] hash = result.digest();
         assertEquals(32, hash.length);
-    }
-
-    @Test
-    public void testUpdateDigestByteArray() {
-        MessageDigest md = DigestUtil.getMd5Digest();
-        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
-
-        MessageDigest updated = DigestUtil.updateDigest(md, data);
-
-        Assertions.assertSame(md, updated);
-    }
-
-    @Test
-    public void testUpdateDigestString() {
-        MessageDigest md = DigestUtil.getMd5Digest();
-
-        MessageDigest updated = DigestUtil.updateDigest(md, "test");
-
-        Assertions.assertSame(md, updated);
-    }
-
-    @Test
-    public void testUpdateDigest_ByteArray() {
-        MessageDigest md = DigestUtil.getMd5Digest();
-        MessageDigest result = DigestUtil.updateDigest(md, TEST_BYTES);
-        Assertions.assertSame(md, result);
-    }
-
-    @Test
-    public void testUpdateDigest_ByteBuffer() {
-        MessageDigest md = DigestUtil.getMd5Digest();
-        ByteBuffer buffer = ByteBuffer.wrap(TEST_BYTES);
-        MessageDigest result = DigestUtil.updateDigest(md, buffer);
-        Assertions.assertSame(md, result);
-    }
-
-    @Test
-    public void testUpdateDigest_String() {
-        MessageDigest md = DigestUtil.getMd5Digest();
-        MessageDigest result = DigestUtil.updateDigest(md, TEST_STRING);
-        Assertions.assertSame(md, result);
-        byte[] digest = md.digest();
-        assertNotNull(digest);
-        assertEquals(16, digest.length);
     }
 
     @Test
@@ -1955,64 +1125,6 @@ public class DigestUtilTest extends TestBase {
             byte[] hash = result.digest();
             assertEquals(32, hash.length);
         }
-    }
-
-    @Test
-    public void testUpdateDigest_File() throws IOException {
-        File tempFile = File.createTempFile("test", ".txt");
-        tempFile.deleteOnExit();
-        Files.write(tempFile.toPath(), TEST_BYTES);
-
-        MessageDigest md = DigestUtil.getMd5Digest();
-        MessageDigest result = DigestUtil.updateDigest(md, tempFile);
-        Assertions.assertSame(md, result);
-    }
-
-    @Test
-    public void testUpdateDigest_InputStream() throws IOException {
-        ByteArrayInputStream stream = new ByteArrayInputStream(TEST_BYTES);
-        MessageDigest md = DigestUtil.getMd5Digest();
-        MessageDigest result = DigestUtil.updateDigest(md, stream);
-        Assertions.assertSame(md, result);
-    }
-
-    @Test
-    public void testUpdateDigest_Path() throws IOException {
-        Path tempPath = Files.createTempFile("test", ".txt");
-        Files.write(tempPath, TEST_BYTES);
-
-        MessageDigest md = DigestUtil.getMd5Digest();
-        MessageDigest result = DigestUtil.updateDigest(md, tempPath, StandardOpenOption.READ);
-        Assertions.assertSame(md, result);
-
-        Files.delete(tempPath);
-    }
-
-    @Test
-    public void testUpdateDigest_RandomAccessFile() throws IOException {
-        try (RandomAccessFile raf = new RandomAccessFile(tempFile, "r")) {
-            MessageDigest md = DigestUtil.getMd5Digest();
-            MessageDigest result = DigestUtil.updateDigest(md, raf);
-            Assertions.assertSame(md, result);
-        }
-    }
-
-    @Test
-    public void test_MessageDigestAlgorithms_values() {
-        String[] algorithms = DigestUtil.MessageDigestAlgorithms.values();
-        assertNotNull(algorithms);
-        assertTrue(algorithms.length > 0);
-
-        boolean hasMD5 = false;
-        boolean hasSHA256 = false;
-        for (String algo : algorithms) {
-            if ("MD5".equals(algo))
-                hasMD5 = true;
-            if ("SHA-256".equals(algo))
-                hasSHA256 = true;
-        }
-        assertTrue(hasMD5);
-        assertTrue(hasSHA256);
     }
 
     @Test

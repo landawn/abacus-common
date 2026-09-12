@@ -104,9 +104,9 @@ public final class MapEntity implements Serializable {
      *
      * @param entityName the name of the entity
      * @param props the initial properties to set
-     * @throws NullPointerException if {@code props} is {@code null}
+     * @throws IllegalArgumentException if {@code props} is {@code null} or contains a {@code null} property name
      */
-    public MapEntity(final String entityName, final Map<String, Object> props) {
+    public MapEntity(final String entityName, final Map<String, Object> props) throws IllegalArgumentException {
         this(entityName);
 
         set(props);
@@ -143,10 +143,13 @@ public final class MapEntity implements Serializable {
      * @param <T> the type of the property value
      * @param propName the property name (can be simple or canonical)
      * @return the property value, or {@code null} if not found
+     * @throws IllegalArgumentException if {@code propName} is {@code null}
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
-    public <T> T get(final String propName) {
+    public <T> T get(final String propName) throws IllegalArgumentException {
+        N.checkArgNotNull(propName, cs.propName);
+
         if (NameUtil.isCanonicalName(entityName, propName)) {
             return (T) values.get(NameUtil.getSimpleName(propName));
         } else {
@@ -176,9 +179,22 @@ public final class MapEntity implements Serializable {
      * @param targetType the class of the target type to convert to
      * @return the property value converted to the target type, or the target type's default value
      *         (which is {@code null} for reference types) if the property is absent or {@code null}
+     * @throws IllegalArgumentException if {@code propName} is {@code null},
+     *         or if {@code targetType} is {@code null}
+     * @throws RuntimeException if the stored value cannot be converted to {@code targetType}; the concrete type
+     *         is whatever {@link N#convert(Object, Class)} raises for that target type, and it is frequently not
+     *         an {@link IllegalArgumentException}. For a stored {@code "abc"}, {@code int.class} raises
+     *         {@link NumberFormatException}; {@code java.util.Date.class}, {@code UUID.class} and an
+     *         {@code enum} raise {@link IllegalArgumentException}; {@code LocalDate.class} raises
+     *         {@link java.time.format.DateTimeParseException}; {@code Number.class} raises
+     *         {@link UnsupportedOperationException}; and a {@code Map}, bean, {@code Thread} or {@code File}
+     *         target raises {@link com.landawn.abacus.exception.ParsingException}. A value that overflows an
+     *         integral {@code targetType} raises {@link ArithmeticException}
      * @see #get(String)
      */
-    public <T> T get(final String propName, final Class<? extends T> targetType) {
+    public <T> T get(final String propName, final Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(propName, cs.propName);
+
         Object propValue = get(propName);
 
         if (propValue == null) {
@@ -203,8 +219,11 @@ public final class MapEntity implements Serializable {
      * @param propName the property name (can be simple or canonical)
      * @param propValue the property value to set
      * @return this MapEntity instance for method chaining
+     * @throws IllegalArgumentException if {@code propName} is {@code null}
      */
-    public MapEntity set(String propName, final Object propValue) {
+    public MapEntity set(String propName, final Object propValue) throws IllegalArgumentException {
+        N.checkArgNotNull(propName, cs.propName);
+
         if (NameUtil.isCanonicalName(entityName, propName)) {
             propName = NameUtil.getSimpleName(propName);
         }
@@ -229,10 +248,12 @@ public final class MapEntity implements Serializable {
      * }</pre>
      *
      * @param nameValues a map of property names to values
-     * @throws NullPointerException if {@code nameValues} is {@code null}
+     * @throws IllegalArgumentException if {@code nameValues} is {@code null} or contains a {@code null} property name
      * @see #set(String, Object)
      */
-    public void set(final Map<String, Object> nameValues) {
+    public void set(final Map<String, Object> nameValues) throws IllegalArgumentException {
+        N.checkArgNotNull(nameValues, cs.nameValues);
+
         for (final Map.Entry<String, Object> entry : nameValues.entrySet()) {
             set(entry.getKey(), entry.getValue());
         }
@@ -251,14 +272,15 @@ public final class MapEntity implements Serializable {
      *
      * @param propName the property name to remove (can be simple or canonical)
      * @return the previous value associated with the property, or {@code null} if there was no mapping
+     * @throws IllegalArgumentException if {@code propName} is {@code null}
      */
     @SuppressWarnings("UnusedReturnValue")
     @MayReturnNull
-    public Object remove(String propName) {
-        if (values.isEmpty()) {
-            return null;
-        }
+    public Object remove(String propName) throws IllegalArgumentException {
+        N.checkArgNotNull(propName, cs.propName);
 
+        // No isEmpty() short-circuit: it let a null propName return quietly from an empty entity while the
+        // same call failed once any property was set. Every accessor validates the property name.
         if (NameUtil.isCanonicalName(entityName, propName)) {
             propName = NameUtil.getSimpleName(propName);
         }
@@ -281,10 +303,12 @@ public final class MapEntity implements Serializable {
      * }</pre>
      *
      * @param propNames a collection of property names to remove
-     * @throws NullPointerException if {@code propNames} is {@code null}
+     * @throws IllegalArgumentException if {@code propNames} is {@code null} or contains a {@code null} property name
      * @see #remove(String)
      */
-    public void removeAll(final Collection<String> propNames) { // NOSONAR
+    public void removeAll(final Collection<String> propNames) throws IllegalArgumentException { // NOSONAR
+        N.checkArgNotNull(propNames, cs.propNames);
+
         // Snapshot first because removing from values invalidates a backed view such as values.keySet().
         for (final String propName : new ArrayList<>(propNames)) {
             remove(propName);
@@ -306,12 +330,12 @@ public final class MapEntity implements Serializable {
      *
      * @param propName the property name to check (can be simple or canonical)
      * @return {@code true} if this entity contains the specified property, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code propName} is {@code null}
      */
-    public boolean containsKey(final String propName) {
-        if (values.isEmpty()) {
-            return false;
-        }
+    public boolean containsKey(final String propName) throws IllegalArgumentException {
+        N.checkArgNotNull(propName, cs.propName);
 
+        // See remove(String): the isEmpty() short-circuit made a null propName state-dependent.
         if (NameUtil.isCanonicalName(entityName, propName)) {
             return values.containsKey(NameUtil.getSimpleName(propName));
 
@@ -423,6 +447,7 @@ public final class MapEntity implements Serializable {
     /**
      * Creates a copy of this MapEntity with the same entity name and properties.
      * The copy is a shallow copy - the property values themselves are not cloned.
+     * Property keys, including literal keys inserted through {@link #props()}, are preserved without normalization.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -436,7 +461,10 @@ public final class MapEntity implements Serializable {
      * @return a new MapEntity instance with the same entity name and properties
      */
     public MapEntity copy() {
-        return new MapEntity(entityName, values);
+        final MapEntity copy = new MapEntity(entityName);
+        // The live property map can contain literal keys that set/constructors would normalize or reject.
+        copy.values.putAll(values);
+        return copy;
     }
 
     /**
@@ -564,8 +592,9 @@ public final class MapEntity implements Serializable {
          * @param idPropName the name of the property to set
          * @param idPropVal the value to associate with the property
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code idPropName} is {@code null}
          */
-        public MapEntityBuilder put(final String idPropName, final Object idPropVal) {
+        public MapEntityBuilder put(final String idPropName, final Object idPropVal) throws IllegalArgumentException {
             mapEntity.set(idPropName, idPropVal);
 
             return this;

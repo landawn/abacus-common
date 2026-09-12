@@ -99,7 +99,11 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
     }
 
     /**
-     * Checks if {@code null} values should be written as empty values.
+     * Checks if {@code null} bean properties should be written as empty values.
+     *
+     * <p>See {@link #setWriteNullToEmpty(boolean)} for the exact scope: only bean properties that survive
+     * the exclusion strategy are affected, and only {@code CharSequence}, collection/array and {@code Map}
+     * properties get an empty value; other {@code null} properties are still written as {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -109,14 +113,30 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
      * config.isWriteNullToEmpty();                  // returns true
      * }</pre>
      *
-     * @return {@code true} if {@code null} values should be written as empty strings/arrays/objects, {@code false} otherwise
+     * @return {@code true} if {@code null} CharSequence/collection/array/Map bean properties should be written as {@code ""}/{@code []}/<code>{}</code>, {@code false} otherwise
      */
     public boolean isWriteNullToEmpty() {
         return writeNullToEmpty;
     }
 
     /**
-     * Sets whether {@code null} values should be written as empty values during serialization.
+     * Sets whether {@code null} bean properties should be written as empty values during serialization.
+     *
+     * <p>Only bean properties are affected, and only when they survive the exclusion strategy: the default
+     * exclusion ({@link Exclusion#NULL}, applied when no exclusion is set on the config or on the bean's
+     * {@code @JsonXmlConfig}) drops {@code null} properties before this flag is consulted, so the flag has
+     * no visible effect unless {@link #setExclusion(Exclusion)} is set to {@link Exclusion#NONE}.
+     * For a surviving {@code null} property, a {@code CharSequence} is written as {@code ""}, a
+     * collection/array as {@code []}, and a {@code Map} as <code>{}</code>; any other {@code null}
+     * (numbers, booleans, dates, nested beans, ...) is left to the other flags and, with all of them off, is
+     * written as {@code null} - a nested bean is NOT written as <code>{}</code>. {@code null} map values and
+     * {@code null} collection elements are not affected by this flag (see
+     * {@link #setWriteNullStringAsEmpty(boolean)} and friends for typed elements).
+     * This flag only wins over {@link #setWriteNullStringAsEmpty(boolean)}, for the slots that have an empty
+     * form: a surviving {@code null} {@code CharSequence}/collection/array/{@code Map} property is emptied even
+     * when that flag is off. A {@code null} number or boolean has no empty form, so
+     * {@link #setWriteNullNumberAsZero(boolean)} / {@link #setWriteNullBooleanAsFalse(boolean)} still apply to
+     * such a property when they are on, writing {@code 0} / {@code false}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -124,10 +144,17 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
      * config.isWriteNullToEmpty();                  // returns true
      * config.setWriteNullToEmpty(false);
      * config.isWriteNullToEmpty();                  // returns false
+     *
+     * // bean with String s = null, List<String> l = null, Map<String, Integer> m = null, Integer i = null, Address a = null:
+     * jsonParser.serialize(bean, new JsonSerConfig().setWriteNullToEmpty(true));
+     * // -> {}                                                          (default Exclusion.NULL drops them first)
+     * jsonParser.serialize(bean, new JsonSerConfig().setWriteNullToEmpty(true).setExclusion(Exclusion.NONE));
+     * // -> {"s": "", "l": [], "m": {}, "i": null, "a": null}          (number and nested bean stay null)
      * }</pre>
      *
-     * @param writeNullToEmpty {@code true} to write {@code null} as empty, {@code false} to write as null
+     * @param writeNullToEmpty {@code true} to write surviving {@code null} CharSequence/collection/array/Map bean properties as {@code ""}/{@code []}/<code>{}</code>, {@code false} to write them as {@code null}
      * @return {@code this} instance for method chaining
+     * @see #setExclusion(Exclusion)
      */
     public JsonSerConfig setWriteNullToEmpty(final boolean writeNullToEmpty) {
         this.writeNullToEmpty = writeNullToEmpty;
@@ -253,12 +280,13 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
      *
      * @param charQuotation the character to use for quoting char values
      * @return {@code this} instance for method chaining
+     * @throws IllegalArgumentException if the quotation character is neither a single quote, a double quote, nor zero.
      * @deprecated this method should not be called as JSON has specific quotation requirements.
      *             JSON always uses double quotes for string and character values.
      */
     @Deprecated
     @Override
-    public JsonSerConfig setCharQuotation(final char charQuotation) {
+    public JsonSerConfig setCharQuotation(final char charQuotation) throws IllegalArgumentException {
         super.setCharQuotation(charQuotation);
 
         return this;
@@ -271,12 +299,13 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
      *
      * @param stringQuotation the character to use for quoting strings
      * @return {@code this} instance for method chaining
+     * @throws IllegalArgumentException if the quotation character is neither a single quote, a double quote, nor zero.
      * @deprecated this method should not be called as JSON requires double quotes for strings.
      *             Calling this method with any value other than '"' may result in invalid JSON.
      */
     @Deprecated
     @Override
-    public JsonSerConfig setStringQuotation(final char stringQuotation) {
+    public JsonSerConfig setStringQuotation(final char stringQuotation) throws IllegalArgumentException {
         super.setStringQuotation(stringQuotation);
 
         return this;
@@ -371,7 +400,10 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
     }
 
     /**
-     * Checks if map keys should be quoted in the JSON output.
+     * Checks if all map keys should be quoted in the JSON output.
+     *
+     * <p>See {@link #setQuoteMapKey(boolean)}: {@code false} only un-quotes numeric, boolean and {@code null}
+     * keys; {@link String} keys are always quoted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -381,7 +413,7 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
      * config.isQuoteMapKey();                       // returns false
      * }</pre>
      *
-     * @return {@code true} if map keys should be quoted, {@code false} otherwise
+     * @return {@code true} if every map key is quoted, {@code false} if numeric/boolean/{@code null} keys are written bare
      */
     public boolean isQuoteMapKey() {
         return quoteMapKey;
@@ -390,15 +422,24 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
     /**
      * Sets whether map keys should be quoted in the JSON output.
      *
+     * <p>When {@code false}, numeric and boolean map keys (and a {@code null} key) are written bare, e.g.
+     * <code>{1: "a", true: "b", null: "c"}</code>. {@link String} keys are <b>always</b> written quoted so
+     * the output stays parseable - unlike {@link #setQuotePropName(boolean)}, which un-quotes every bean
+     * property name. The default {@code true} quotes every key.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig().setQuoteMapKey(false);
      * config.isQuoteMapKey();                       // returns false
      * config.setQuoteMapKey(true);
      * config.isQuoteMapKey();                       // returns true
+     *
+     * // map {"str" -> 1, 2 -> 2, true -> 3, null -> 4}
+     * jsonParser.serialize(map, new JsonSerConfig().setQuoteMapKey(false));   // {"str": 1, 2: 2, true: 3, null: 4}
+     * jsonParser.serialize(map, new JsonSerConfig().setQuoteMapKey(true));    // {"str": 1, "2": 2, "true": 3, "null": 4}
      * }</pre>
      *
-     * @param quoteMapKey {@code true} to quote map keys, {@code false} otherwise
+     * @param quoteMapKey {@code true} to quote every map key (default), {@code false} to write numeric, boolean and {@code null} keys bare (String keys stay quoted)
      * @return {@code this} instance for method chaining
      */
     public JsonSerConfig setQuoteMapKey(final boolean quoteMapKey) {
@@ -521,7 +562,7 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
 
     /**
      * Compares this configuration with another object for equality.
-     * Two configurations are considered equal if all their settings match.
+     * Two configurations are considered equal if they are of exactly the same class and all their settings match.
      *
      * @param obj the object to compare with
      * @return {@code true} if the objects are equal, {@code false} otherwise
@@ -533,7 +574,12 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
             return true;
         }
 
-        if (obj instanceof JsonSerConfig other) {
+        // Require exact same class to keep equals symmetric, the same rule SerializationConfig#equals applies: a
+        // subclass narrowing equality with its own `instanceof <OwnType>` test would otherwise be equal to a plain
+        // JsonSerConfig in one direction only. Mirrors AvroSerConfig/KryoSerConfig, which get it via super.equals.
+        if (obj != null && obj.getClass() == getClass()) {
+            final JsonSerConfig other = (JsonSerConfig) obj;
+
             return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation()) //NOSONAR
                     && N.equals(getStringQuotation(), other.getStringQuotation()) && N.equals(getDateTimeFormat(), other.getDateTimeFormat())
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(isSkipTransientField(), other.isSkipTransientField())
@@ -555,13 +601,14 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
     /**
      * Returns a string representation of this configuration object.
      * The string contains all configuration settings in a readable format.
+     * A disabled quotation (char {@code 0}) is rendered as the text <code>&#92;u0000</code>, never as a raw NUL character.
      *
      * @return a string representation of this configuration
      */
     @Override
     public String toString() {
-        return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(getCharQuotation()) + ", stringQuotation="
-                + N.toString(getStringQuotation()) + ", dateTimeFormat=" + N.toString(getDateTimeFormat()) + ", exclusion=" + N.toString(getExclusion())
+        return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + quotationToString(getCharQuotation()) + ", stringQuotation="
+                + quotationToString(getStringQuotation()) + ", dateTimeFormat=" + N.toString(getDateTimeFormat()) + ", exclusion=" + N.toString(getExclusion())
                 + ", skipTransientField=" + N.toString(isSkipTransientField()) + ", prettyFormat=" + N.toString(isPrettyFormat()) + ", writeLongAsString="
                 + N.toString(isWriteLongAsString()) + ", writeNullStringAsEmpty=" + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero="
                 + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse=" + N.toString(writeNullBooleanAsFalse) + ", writeNullToEmpty="

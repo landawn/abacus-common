@@ -29,11 +29,12 @@ import com.landawn.abacus.util.ThreadMode;
  * <p>The annotated method must meet the following requirements:</p>
  * <ul>
  *   <li>Must be {@code public} — a non-{@code public} annotated method is silently ignored rather
- *       than rejected.</li>
+ *       than rejected (unless it is also {@code static}, see below).</li>
  *   <li>Must have exactly one parameter representing the event type; otherwise registering the
  *       declaring object throws a {@link RuntimeException}.</li>
  *   <li>Must not be {@code static}; otherwise registering the declaring object throws a
- *       {@link RuntimeException}.</li>
+ *       {@link RuntimeException}. This check runs before the visibility check, so a non-{@code public}
+ *       {@code static} annotated method is rejected rather than ignored.</li>
  *   <li>Should not throw checked exceptions (any thrown exceptions are caught and logged).</li>
  * </ul>
  *
@@ -128,7 +129,8 @@ public @interface Subscribe {
      * Indicates whether this subscriber should receive previously posted sticky events upon registration.
      *
      * <p>When {@code true}, every retained sticky event matching this subscriber's type and event ID is
-     * immediately delivered to this subscriber upon registration.</p>
+     * immediately delivered to this subscriber upon registration. When several retained sticky events
+     * match, the order in which they are replayed is unspecified.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -174,8 +176,12 @@ public @interface Subscribe {
     String eventId() default "";
 
     /**
-     * Specifies the minimum time interval (in milliseconds) between event deliveries.
-     * Events posted within this interval will be ignored.
+     * Specifies the minimum time interval (in milliseconds) between accepted delivery attempts.
+     * Events posted within this interval will be ignored. The decision is made on the posting thread at
+     * the moment the event is posted, for every {@link #threadMode()}, so it follows post spacing rather
+     * than executor scheduling; a suppressed asynchronous event is never handed to the executor.
+     * Accepted callbacks may overlap if a callback runs longer than the interval; a failed callback still
+     * counts as an attempt, while a submission the executor rejects does not, because it was never delivered.
      *
      * <p>This is useful for throttling high-frequency events to prevent overwhelming the subscriber.</p>
      *
@@ -196,7 +202,7 @@ public @interface Subscribe {
      * }
      * }</pre>
      *
-     * @return the minimum interval between events in milliseconds; any value {@code <= 0} disables throttling
+     * @return the minimum interval between accepted attempts in milliseconds; any value {@code <= 0} disables throttling
      */
     long intervalMillis() default 0;
 
@@ -204,7 +210,15 @@ public @interface Subscribe {
      * Controls whether duplicate consecutive events should be ignored.
      *
      * <p>When {@code true}, if an event equal to the previous event is posted, it will be ignored.
-     * Events are compared using their {@code equals()} method.</p>
+     * Events are compared using their {@code equals()} method. The comparison is made on the posting
+     * thread at the moment the event is posted, for every {@link #threadMode()}, so "previous" means the
+     * previously <i>posted</i> event, not the one an executor happened to run last; a suppressed
+     * asynchronous duplicate is never handed to the executor.</p>
+     *
+     * <p>The comparison uses the most recently accepted delivery attempt, including one whose callback
+     * throws. An asynchronous submission the executor rejects is not one of them: it was never delivered, so
+     * it does not become the "previous event". Filtering is atomic, but distinct accepted callbacks may
+     * execute concurrently.</p>
      *
      * <p>This is useful for preventing redundant processing of unchanged data.</p>
      *

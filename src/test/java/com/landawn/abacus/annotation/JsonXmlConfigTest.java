@@ -19,12 +19,12 @@ import com.landawn.abacus.util.NamingPolicy;
 
 public class JsonXmlConfigTest extends TestBase {
     @JsonXmlConfig
-    static class TestClass1 {
+    public static class TestClass1 {
     }
 
     @JsonXmlConfig(namingPolicy = NamingPolicy.SCREAMING_SNAKE_CASE, dateFormat = "yyyy-MM-dd", timeZone = "UTC", numberFormat = "#.##", enumerated = EnumType.ORDINAL, exclusion = Exclusion.NONE, ignoredFields = {
             "password", "secret" })
-    static class TestClass2 {
+    public static class TestClass2 {
     }
 
     @Test

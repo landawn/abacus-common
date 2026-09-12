@@ -43,7 +43,8 @@ public class ByteNConsumerTest extends TestBase {
         final List<Byte> result = new ArrayList<>();
         ByteNConsumer consumer = new ByteNConsumer() {
             @Override
-            public void accept(byte... args) {
+            @SafeVarargs
+            public final void accept(byte... args) {
                 byte product = 1;
                 for (byte b : args) {
                     product *= b;

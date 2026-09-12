@@ -8,12 +8,54 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
 public class ActivityPrintTest extends TestBase {
+
+    @Test
+    public void testExpirationTimeSaturationBoundaries() {
+        final ActivityPrint print = new ActivityPrint(1, 1);
+        assertEquals(Long.MAX_VALUE, print.setCreatedTime(Long.MAX_VALUE - 1).getExpirationTime());
+        assertEquals(Long.MAX_VALUE, print.setCreatedTime(Long.MAX_VALUE).getExpirationTime());
+        assertEquals(Long.MIN_VALUE + 1, print.setCreatedTime(Long.MIN_VALUE).getExpirationTime());
+        print.setMaxLiveTime(Long.MAX_VALUE);
+        assertEquals(-1, print.getExpirationTime());
+        assertEquals(Long.MAX_VALUE, print.setCreatedTime(0).getExpirationTime());
+        assertEquals(Long.MAX_VALUE, print.setCreatedTime(1).getExpirationTime());
+    }
+
+    @Test
+    public void testExpirationTimeDoesNotOverflowDuringConcurrentLifetimeChanges() throws InterruptedException {
+        final ActivityPrint print = new ActivityPrint(1, Long.MAX_VALUE).setCreatedTime(1);
+        final AtomicBoolean running = new AtomicBoolean(true);
+        final CountDownLatch started = new CountDownLatch(1);
+        final Thread writer = new Thread(() -> {
+            started.countDown();
+            while (running.get()) {
+                print.setMaxLiveTime(Long.MAX_VALUE);
+                print.setMaxLiveTime(1);
+            }
+        });
+        writer.start();
+        try {
+            started.await();
+            for (int i = 0; i < 1_000_000; i++) {
+                // Either lifetime is valid, but mixing the guard's short lifetime with the
+                // addition's maximum lifetime would wrap the result to Long.MIN_VALUE.
+                final long expiration = print.getExpirationTime();
+                assertTrue(expiration == 2 || expiration == Long.MAX_VALUE);
+            }
+        } finally {
+            running.set(false);
+            writer.join(5_000);
+            assertFalse(writer.isAlive());
+        }
+    }
 
     @Test
     public void testConstructorWithValidValues() {
@@ -362,7 +404,7 @@ public class ActivityPrintTest extends TestBase {
     @Test
     public void testCloneIsIndependent() {
         ActivityPrint original = new ActivityPrint(10000, 5000);
-        ActivityPrint cloned = (ActivityPrint) original.clone();
+        ActivityPrint cloned = original.clone();
 
         original.updateAccessCount();
         original.setMaxLiveTime(15000);
@@ -379,7 +421,7 @@ public class ActivityPrintTest extends TestBase {
         original.updateAccessCount();
         original.updateAccessCount();
 
-        ActivityPrint cloned = (ActivityPrint) original.clone();
+        ActivityPrint cloned = original.clone();
 
         assertNotNull(cloned);
         assertEquals(original.getMaxLiveTime(), cloned.getMaxLiveTime());
@@ -415,7 +457,7 @@ public class ActivityPrintTest extends TestBase {
     @Test
     public void testEquals() {
         ActivityPrint print1 = new ActivityPrint(10000, 5000);
-        ActivityPrint print2 = (ActivityPrint) print1.clone();
+        ActivityPrint print2 = print1.clone();
 
         assertTrue(print1.equals(print2));
         assertTrue(print2.equals(print1));
@@ -424,7 +466,7 @@ public class ActivityPrintTest extends TestBase {
     @Test
     public void testEqualsWithDifferentAccessCount() {
         ActivityPrint print1 = new ActivityPrint(10000, 5000);
-        ActivityPrint print2 = (ActivityPrint) print1.clone();
+        ActivityPrint print2 = print1.clone();
 
         print2.updateAccessCount();
 
@@ -434,7 +476,7 @@ public class ActivityPrintTest extends TestBase {
     @Test
     public void testEqualsWithDifferentLiveTime() {
         ActivityPrint print1 = new ActivityPrint(10000, 5000);
-        ActivityPrint print2 = (ActivityPrint) print1.clone();
+        ActivityPrint print2 = print1.clone();
 
         print2.setMaxLiveTime(15000);
 
@@ -471,7 +513,7 @@ public class ActivityPrintTest extends TestBase {
 
         assertNotNull(str);
         assertTrue(str.contains("createdTime"));
-        assertTrue(str.contains("liveTime"));
+        assertTrue(str.contains("maxLiveTime="), str); // matches getMaxLiveTime(), like maxIdleTime=/getMaxIdleTime()
         assertTrue(str.contains("maxIdleTime"));
         assertTrue(str.contains("lastAccessTime"));
         assertTrue(str.contains("accessCount"));
@@ -490,6 +532,10 @@ public class ActivityPrintTest extends TestBase {
         assertNotNull(str);
         assertTrue(str.contains("12345"));
         assertTrue(str.contains("6789"));
+
+        // Every key matches its accessor: maxLiveTime=/getMaxLiveTime() as maxIdleTime=/getMaxIdleTime() does.
+        assertTrue(str.contains("maxLiveTime=" + print.getMaxLiveTime()), str);
+        assertTrue(str.contains("maxIdleTime=" + print.getMaxIdleTime()), str);
     }
 
     @Test

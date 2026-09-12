@@ -23,9 +23,74 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.u.Nullable;
 
 public class NullableTypeTest extends TestBase {
+
+    @Test
+    public void testHolderTypeJdbcPrimitiveValuesDistinguishSqlNullFromZero() throws SQLException {
+        final HolderType<Integer> type = new HolderType<>("int");
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getInt(1)).thenReturn(0);
+        when(rs.getInt("value")).thenReturn(0);
+        when(rs.wasNull()).thenReturn(true);
+
+        assertNull(type.get(rs, 1).value());
+        assertNull(type.get(rs, "value").value());
+
+        when(rs.wasNull()).thenReturn(false);
+        assertEquals(0, type.get(rs, 1).value());
+        assertEquals(0, type.get(rs, "value").value());
+
+        when(rs.getInt(1)).thenReturn(7);
+        when(rs.getInt("value")).thenReturn(7);
+        assertEquals(7, type.get(rs, 1).value());
+        assertEquals(7, type.get(rs, "value").value());
+    }
+
+    @Test
+    public void testNullableTypeJdbcPrimitiveValuesDistinguishSqlNullFromZero() throws SQLException {
+        final NullableType<Integer> type = new NullableType<>("int");
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getInt(1)).thenReturn(0);
+        when(rs.getInt("value")).thenReturn(0);
+        when(rs.wasNull()).thenReturn(true);
+
+        assertTrue(type.get(rs, 1).isNull());
+        assertTrue(type.get(rs, "value").isNull());
+
+        when(rs.wasNull()).thenReturn(false);
+        assertEquals(0, type.get(rs, 1).get());
+        assertEquals(0, type.get(rs, "value").get());
+
+        when(rs.getInt(1)).thenReturn(7);
+        when(rs.getInt("value")).thenReturn(7);
+        assertEquals(7, type.get(rs, 1).get());
+        assertEquals(7, type.get(rs, "value").get());
+    }
+
+    @Test
+    public void testJdbcReadsPreserveNestedGenericTypes() throws SQLException {
+        final NullableType<List<String>> type = new NullableType<>("List<String>");
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getString(1)).thenReturn("[1]");
+        when(rs.getString("value")).thenReturn("[2]");
+
+        assertEquals(List.of("1"), type.get(rs, 1).get());
+        assertEquals(List.of("2"), type.get(rs, "value").get());
+    }
+
+    @Test
+    public void testHolderJdbcReadsPreserveNestedGenericTypes() throws SQLException {
+        final HolderType<List<String>> type = new HolderType<>("List<String>");
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getString(1)).thenReturn("[1]");
+        when(rs.getString("value")).thenReturn("[2]");
+
+        assertEquals(List.of("1"), type.get(rs, 1).value());
+        assertEquals(List.of("2"), type.get(rs, "value").value());
+    }
 
     private NullableType<String> nullableStringType;
     private NullableType<Integer> nullableIntType;
@@ -161,7 +226,7 @@ public class NullableTypeTest extends TestBase {
     public void testSetPreparedStatementWithNull() throws SQLException {
         PreparedStatement stmt = mock(PreparedStatement.class);
         nullableStringType.set(stmt, 1, null);
-        verify(stmt).setObject(1, null);
+        verify(stmt).setString(1, null);
     }
 
     @Test
@@ -169,7 +234,7 @@ public class NullableTypeTest extends TestBase {
         PreparedStatement stmt = mock(PreparedStatement.class);
         Nullable<String> empty = Nullable.empty();
         nullableStringType.set(stmt, 1, empty);
-        verify(stmt).setObject(1, null);
+        verify(stmt).setString(1, null);
     }
 
     @Test
@@ -177,14 +242,14 @@ public class NullableTypeTest extends TestBase {
         PreparedStatement stmt = mock(PreparedStatement.class);
         Nullable<String> nullable = Nullable.of("test");
         nullableStringType.set(stmt, 1, nullable);
-        verify(stmt).setObject(1, "test");
+        verify(stmt).setString(1, "test");
     }
 
     @Test
     public void testSetCallableStatementWithNull() throws SQLException {
         CallableStatement stmt = mock(CallableStatement.class);
         nullableStringType.set(stmt, "param", null);
-        verify(stmt).setObject("param", null);
+        verify(stmt).setString("param", null);
     }
 
     @Test
@@ -192,7 +257,7 @@ public class NullableTypeTest extends TestBase {
         CallableStatement stmt = mock(CallableStatement.class);
         Nullable<String> empty = Nullable.empty();
         nullableStringType.set(stmt, "param", empty);
-        verify(stmt).setObject("param", null);
+        verify(stmt).setString("param", null);
     }
 
     @Test
@@ -200,7 +265,7 @@ public class NullableTypeTest extends TestBase {
         CallableStatement stmt = mock(CallableStatement.class);
         Nullable<String> nullable = Nullable.of("test");
         nullableStringType.set(stmt, "param", nullable);
-        verify(stmt).setObject("param", "test");
+        verify(stmt).setString("param", "test");
     }
 
     @Test
@@ -266,5 +331,160 @@ public class NullableTypeTest extends TestBase {
         NullableDerivedValue(final String value) {
             super(value);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+        final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            ((Type<Object>) type).serializeTo(jsonWriter, value, config);
+            return jsonWriter.toString();
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(jsonWriter);
+        }
+    }
+
+    // T6-03 (2026-09-06): empty / null-holding / null Nullable are written by the element handler as a null value.
+    @Test
+    public void reviewFixes20260906_emptyOrNullHoldingNullableHonoursElementNullFlags() throws IOException {
+        final com.landawn.abacus.parser.JsonSerConfig zero = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true);
+        final com.landawn.abacus.parser.JsonSerConfig falseCfg = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullBooleanAsFalse(true);
+        final com.landawn.abacus.parser.JsonSerConfig emptyStr = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullStringAsEmpty(true);
+
+        assertEquals("0", reviewFixes20260906_ser(nullableIntType, Nullable.of((Integer) null), zero));
+        assertEquals("0", reviewFixes20260906_ser(nullableIntType, Nullable.empty(), zero));
+        assertEquals("0", reviewFixes20260906_ser(nullableIntType, null, zero));
+        assertEquals("false", reviewFixes20260906_ser(Type.of("Nullable<Boolean>"), Nullable.empty(), falseCfg));
+        assertEquals("\"\"", reviewFixes20260906_ser(nullableStringType, Nullable.of((String) null), emptyStr));
+        assertEquals("null", reviewFixes20260906_ser(nullableStringType, Nullable.empty(), zero));
+        assertEquals("null", reviewFixes20260906_ser(nullableIntType, Nullable.empty(), com.landawn.abacus.parser.JsonSerConfig.create()));
+        assertEquals("null", reviewFixes20260906_ser(nullableIntType, Nullable.of((Integer) null), null));
+        assertEquals("null", reviewFixes20260906_ser(nullableIntType, null, null));
+        assertEquals("7", reviewFixes20260906_ser(nullableIntType, Nullable.of(7), zero));
+        // R9 (2026-09-07): a raw List<Object> element carries no numeric element type, so there is no null policy for the
+        // flag to apply - the parser writes null. The flag reaches the element handler only through a DECLARED slot.
+        assertEquals("[null]", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(Nullable.of((Integer) null)), zero));
+        assertEquals("{\"ln\": [0], \"n\": 0}", com.landawn.abacus.util.N.toJson(new ReviewFixesNullableBean(), zero));
+        assertEquals("{\"ln\": [null], \"n\": null}", com.landawn.abacus.util.N.toJson(new ReviewFixesNullableBean()));
+    }
+
+    // T6-01 (2026-09-06): an Object slot dispatches on the runtime class; a non-serializable handler writes embedded JSON.
+    @Test
+    public void reviewFixes20260906_objectSlotUsesRuntimeTypeAndEmbeddedJson() throws IOException {
+        final Type<?> type = Type.of("Nullable<Object>");
+        final com.landawn.abacus.parser.JsonSerConfig jsc = com.landawn.abacus.parser.JsonSerConfig.create();
+
+        assertEquals("1", reviewFixes20260906_ser(type, Nullable.of(1), jsc));
+        assertEquals("true", reviewFixes20260906_ser(type, Nullable.of(true), jsc));
+        assertEquals("\"s\"", reviewFixes20260906_ser(type, Nullable.of("s"), jsc));
+        assertEquals("[1]", reviewFixes20260906_ser(type, Nullable.of(com.landawn.abacus.util.N.asList(1)), jsc));
+        assertEquals("{\"k\": 1}", reviewFixes20260906_ser(type, Nullable.of(com.landawn.abacus.util.N.asMap("k", 1)), jsc));
+        assertEquals("3", reviewFixes20260906_ser(type, Nullable.of(Nullable.of(3)), jsc));
+        assertEquals("null", reviewFixes20260906_ser(type, Nullable.of((Object) null), jsc));
+        assertEquals("1", reviewFixes20260906_ser(type, Nullable.of(1), null));
+        assertEquals("[1]", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(Nullable.of(1))));
+        assertEquals("{\"x\": [8]}", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asMap("x", Nullable.of(com.landawn.abacus.util.N.asList(8)))));
+    }
+
+    // T6-06 (2026-09-06): a non-null string the element parses to null yields a PRESENT null (documented now).
+    @Test
+    public void reviewFixes20260906_valueOfEmptyStringYieldsPresentNullForNumericElement() {
+        final Nullable<Integer> parsed = nullableIntType.valueOf("");
+        assertTrue(parsed.isPresent());
+        assertTrue(parsed.isNull());
+        assertFalse(nullableIntType.valueOf((String) null).isPresent());
+        assertEquals("", nullableStringType.valueOf("").get());
+        assertTrue(((com.landawn.abacus.util.u.Optional<?>) Type.of("Optional<Integer>").valueOf("")).isEmpty());
+        assertTrue(((java.util.Optional<?>) Type.of("JdkOptional<Integer>").valueOf("")).isEmpty());
+    }
+
+    public static class ReviewFixesNullableBean {
+        public java.util.List<Nullable<Integer>> ln = com.landawn.abacus.util.N.asList(Nullable.of((Integer) null));
+        public Nullable<Integer> n = Nullable.of((Integer) null);
+    }
+
+    // G11-21 (2026-09-08): HolderType.serializeTo now goes through AbstractTupleType.serializeSlot like every other
+    // single-slot wrapper, so a null value is written BY THE DECLARED HANDLER and its null-substitution flags apply.
+    @Test
+    public void reviewFixes20260908_nullHolderIsWrittenByTheDeclaredElementHandler() throws IOException {
+        final Type<?> holderIntType = Type.of("Holder<Integer>");
+        final com.landawn.abacus.parser.JsonSerConfig zero = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true);
+
+        assertEquals("0", reviewFixes20260906_ser(holderIntType, Holder.of((Integer) null), zero));
+        assertEquals("0", reviewFixes20260906_ser(holderIntType, null, zero));
+        assertEquals("0", reviewFixes20260906_ser(holderIntType, Holder.of((Integer) null),
+                com.landawn.abacus.parser.XmlSerConfig.create().setWriteNullNumberAsZero(true)));
+        assertEquals("false", reviewFixes20260906_ser(Type.of("Holder<Boolean>"), Holder.of((Boolean) null),
+                com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullBooleanAsFalse(true)));
+        assertEquals("\"\"", reviewFixes20260906_ser(Type.of("Holder<String>"), Holder.of((String) null),
+                com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullStringAsEmpty(true)));
+
+        // Without such a flag - and with no config at all - the literal null is still written.
+        assertEquals("null", reviewFixes20260906_ser(holderIntType, Holder.of((Integer) null), com.landawn.abacus.parser.JsonSerConfig.create()));
+        assertEquals("null", reviewFixes20260906_ser(holderIntType, Holder.of((Integer) null), null));
+        assertEquals("null", reviewFixes20260906_ser(holderIntType, null, null));
+        assertEquals("7", reviewFixes20260906_ser(holderIntType, Holder.of(7), zero));
+    }
+
+    // G11-21 (2026-09-08): a structured declared element type is written as embedded JSON, not as a quoted JSON string.
+    @Test
+    public void reviewFixes20260908_structuredHolderElementIsWrittenAsEmbeddedJson() throws IOException {
+        final com.landawn.abacus.parser.JsonSerConfig jsc = com.landawn.abacus.parser.JsonSerConfig.create();
+        final ReviewFixesHolderBean bean = new ReviewFixesHolderBean();
+        bean.x = 3;
+
+        assertEquals("{\"x\": 3}", reviewFixes20260906_ser(Type.of("Holder<" + ReviewFixesHolderBean.class.getCanonicalName() + ">"), Holder.of(bean), jsc));
+        assertEquals("{\"k\": 1}",
+                reviewFixes20260906_ser(Type.of("Holder<Map<String, Integer>>"), Holder.of(com.landawn.abacus.util.N.asMap("k", 1)), jsc));
+        assertEquals("[\"a\"]", reviewFixes20260906_ser(Type.of("Holder<List<String>>"), Holder.of(com.landawn.abacus.util.N.asList("a")), jsc));
+
+        // An Object slot still dispatches on the runtime class, exactly as the other single-slot wrappers do.
+        final Type<?> holderObjectType = Type.of("Holder<Object>");
+        assertEquals("1", reviewFixes20260906_ser(holderObjectType, Holder.of(1), jsc));
+        assertEquals("\"s\"", reviewFixes20260906_ser(holderObjectType, Holder.of("s"), jsc));
+        assertEquals("[1]", reviewFixes20260906_ser(holderObjectType, Holder.of(com.landawn.abacus.util.N.asList(1)), jsc));
+    }
+
+    // G18-60 (2026-09-08): appendTo dispatches on the runtime class for an Object slot, exactly as serializeTo does.
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void reviewFixes20260908_appendToObjectSlotUsesRuntimeType() throws IOException {
+        final Type objectSlot = Type.of("Nullable<Object>");
+        final java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+        map.put("k", 1);
+        map.put("s", "v");
+        final List<Object> list = new java.util.ArrayList<>(java.util.Arrays.asList(1, "a"));
+
+        assertEquals("{k:1, s:v}", reviewFixes20260908_appendToString(objectSlot, Nullable.of(map)));
+        assertEquals("[1, a]", reviewFixes20260908_appendToString(objectSlot, Nullable.of(list)));
+
+        // an Object slot must append exactly what the bare value's own handler appends
+        for (final Object value : new Object[] { map, list, new int[] { 1, 2 }, 7, 1.5d, true, "q", com.landawn.abacus.util.Pair.of(1, "a") }) {
+            final Type runtimeType = Type.of(value.getClass());
+
+            assertEquals(reviewFixes20260908_appendToString(runtimeType, value), reviewFixes20260908_appendToString(objectSlot, Nullable.of(value)),
+                    "value " + value);
+        }
+
+        // a declared (non-Object) element type keeps its own handler
+        assertEquals("{k:1, s:v}", reviewFixes20260908_appendToString(Type.of("Nullable<Map<String, Object>>"), Nullable.of(map)));
+        assertEquals("3", reviewFixes20260908_appendToString(Type.of("Nullable<Integer>"), Nullable.of(3)));
+
+        // empty, null-holding and null still write the null literal
+        assertEquals("null", reviewFixes20260908_appendToString(objectSlot, Nullable.empty()));
+        assertEquals("null", reviewFixes20260908_appendToString(objectSlot, Nullable.of(null)));
+        assertEquals("null", reviewFixes20260908_appendToString(objectSlot, null));
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static String reviewFixes20260908_appendToString(final Type type, final Object value) throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, value);
+        return sb.toString();
+    }
+
+    public static class ReviewFixesHolderBean {
+        public int x;
     }
 }

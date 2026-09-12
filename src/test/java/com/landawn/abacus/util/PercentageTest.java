@@ -98,6 +98,12 @@ public class PercentageTest extends TestBase {
 
         ImmutableSet<Percentage> emptyRange = Percentage.range(Percentage._50, Percentage._50, Percentage._10);
         Assertions.assertTrue(emptyRange.isEmpty());
+
+        // Discrete table: 1% + 10% is 11%, which is not a constant, so only _1 is kept.
+        ImmutableSet<Percentage> unaligned = Percentage.range(Percentage._1, Percentage._50, Percentage._10);
+        Assertions.assertEquals(1, unaligned.size());
+        Assertions.assertTrue(unaligned.contains(Percentage._1));
+        Assertions.assertFalse(unaligned.contains(Percentage._10));
     }
 
     @Test

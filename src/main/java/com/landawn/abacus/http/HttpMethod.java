@@ -93,6 +93,10 @@ public enum HttpMethod {
     /**
      * The CONNECT method establishes a tunnel to the server identified by the target resource.
      * Typically used to create an SSL tunnel through an HTTP proxy.
+     *
+     * <p><b>Important Limitation:</b> like {@link #PATCH}, CONNECT cannot be issued by
+     * {@link java.net.HttpURLConnection}, so {@link HttpClient} and {@link HttpRequest} reject it with an
+     * {@link UnsupportedOperationException} before a connection is opened.</p>
      */
     CONNECT,
 
@@ -101,8 +105,11 @@ public enum HttpMethod {
      * Unlike PUT, PATCH is used for partial updates rather than complete replacement.
      *
      * <p><b>Important Limitation:</b> The PATCH method is not supported by {@link java.net.HttpURLConnection}
-     * in the standard Java HTTP client implementation. Attempting to use PATCH with HttpURLConnection
-     * will result in a {@link java.net.ProtocolException}.</p>
+     * in the standard Java HTTP client implementation: issuing it directly on a {@code HttpURLConnection}
+     * results in a {@link java.net.ProtocolException}. {@link HttpClient} and {@link HttpRequest}, which are
+     * backed by {@code HttpURLConnection}, do not let it get that far - they reject PATCH with an
+     * {@link UnsupportedOperationException} before a connection is opened, so it does not surface as an I/O
+     * failure. {@link OkHttpRequest} and {@link com.landawn.abacus.http.v2.HttpRequest} are unaffected.</p>
      *
      * <p><b>Workarounds:</b></p>
      * <ol>

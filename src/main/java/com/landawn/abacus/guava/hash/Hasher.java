@@ -70,6 +70,10 @@ import com.google.common.hash.HashCode;
  * hasher3.put("foo", StandardCharsets.UTF_8).put('\0').put("bar", StandardCharsets.UTF_8).hash();
  * }</pre>
  *
+ * <p>The chunked/whole equivalence above holds only for stateless encodings such as UTF-8: with
+ * UTF-16 every {@link #put(CharSequence, Charset)} call emits its own byte-order mark, so
+ * {@code put("foo", UTF_16).put("bar", UTF_16)} does <i>not</i> equal {@code put("foobar", UTF_16)}.
+ *
  * <p><b>Warning:</b> The result of calling any methods after {@link #hash()} is undefined.
  * Do not reuse a Hasher instance after calling hash().
  *
@@ -103,10 +107,12 @@ public interface Hasher {
      * hasher.put(data);
      * }</pre>
      *
-     * @param bytes the byte array containing data to add to the hash computation
+     * @param bytes the byte array containing data to add to the hash computation; must not be {@code null}
      * @return this hasher instance for method chaining
+     * @throws NullPointerException if {@code bytes} is {@code null}. Note the deliberate asymmetry with
+     *         {@link #put(char[])} just below, which documents a {@code null} array as empty.
      */
-    Hasher put(byte[] bytes);
+    Hasher put(byte[] bytes) throws NullPointerException;
 
     /**
      * Adds a portion of the given byte array to this hasher's internal state.
@@ -123,10 +129,10 @@ public interface Hasher {
      * @param off the starting offset in the array (zero-based, inclusive)
      * @param len the number of bytes to process from the array
      * @return this hasher instance for method chaining
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or if
-     *         {@code off + len > bytes.length}
+     * @throws NullPointerException if {@code bytes} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or if         {@code off + len > bytes.length}
      */
-    Hasher put(byte[] bytes, int off, int len);
+    Hasher put(byte[] bytes, int off, int len) throws NullPointerException, IndexOutOfBoundsException;
 
     /**
      * Adds all remaining bytes from the given ByteBuffer to this hasher's internal state.
@@ -141,8 +147,9 @@ public interface Hasher {
      *
      * @param bytes the ByteBuffer containing data to add to the hash computation
      * @return this hasher instance for method chaining
+     * @throws NullPointerException if {@code bytes} is {@code null}
      */
-    Hasher put(ByteBuffer bytes);
+    Hasher put(ByteBuffer bytes) throws NullPointerException;
 
     /**
      * Adds a short value to this hasher's internal state. The short is interpreted
@@ -286,9 +293,9 @@ public interface Hasher {
      * @param len the number of characters to process from the array
      * @return this hasher instance for method chaining
      * @throws IllegalArgumentException if {@code len} is negative.
-     * @throws IndexOutOfBoundsException if {@code off} is negative, or if {@code off + len > chars.length}
+     * @throws IndexOutOfBoundsException if {@code off} is negative or the requested range exceeds the array length, treating a {@code null} array as empty.
      */
-    Hasher put(char[] chars, int off, int len);
+    Hasher put(char[] chars, int off, int len) throws IllegalArgumentException, IndexOutOfBoundsException;
 
     /**
      * Adds all characters from the given CharSequence to this hasher's internal state
@@ -309,8 +316,9 @@ public interface Hasher {
      *
      * @param charSequence the character sequence to add to the hash computation (String, StringBuilder, etc.)
      * @return this hasher instance for method chaining
+     * @throws NullPointerException if {@code charSequence} is {@code null}
      */
-    Hasher put(CharSequence charSequence);
+    Hasher put(CharSequence charSequence) throws NullPointerException;
 
     /**
      * Adds the given CharSequence to this hasher's internal state after encoding it
@@ -325,6 +333,13 @@ public interface Hasher {
      * the encoding step. Use the unencoded version for better performance when
      * cross-language compatibility is not required.
      *
+     * <p><b>Warning:</b> Characters the charset cannot encode (including unpaired surrogates) are
+     * replaced by the charset's replacement byte (typically {@code '?'}) before hashing, so such inputs
+     * can collide with each other: {@code put("a\uD800", UTF_8)} hashes like {@code put("a?", UTF_8)}.
+     * Use {@link #put(CharSequence)} to hash every {@code char} exactly. Chunked calls equal one call
+     * over the concatenation only for stateless encodings such as UTF-8 (not UTF-16, which emits a
+     * byte-order mark per call).
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * hasher.put("Hello 世界", StandardCharsets.UTF_8)
@@ -334,8 +349,9 @@ public interface Hasher {
      * @param charSequence the character sequence to encode and add to the hash computation
      * @param charset the character encoding to use for converting the sequence to bytes
      * @return this hasher instance for method chaining
+     * @throws NullPointerException if {@code charSequence} or {@code charset} is {@code null}
      */
-    Hasher put(CharSequence charSequence, Charset charset);
+    Hasher put(CharSequence charSequence, Charset charset) throws NullPointerException;
 
     /**
      * Adds an arbitrary object to this hasher's internal state using a Guava {@link Funnel}
@@ -370,11 +386,13 @@ public interface Hasher {
      * }</pre>
      *
      * @param <T> the type of object to hash
-     * @param instance the object instance to add to the hash computation
+     * @param instance the object instance to add to the hash computation; may be {@code null} if the funnel
+     *                 accepts {@code null} (it is passed to the funnel unchecked)
      * @param funnel the funnel used to decompose the object into primitive values
      * @return this hasher instance for method chaining
+     * @throws IllegalArgumentException if {@code funnel} is {@code null}
      */
-    <T> Hasher put(T instance, Funnel<? super T> funnel);
+    <T> Hasher put(T instance, Funnel<? super T> funnel) throws IllegalArgumentException;
 
     /**
      * Computes and returns the final hash code based on all data that has been added

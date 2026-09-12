@@ -101,11 +101,11 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
      * @param closeHandlers handlers to execute when the stream is closed, may be {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
-     *         or {@code fromIndex > toIndex}
+     *         or {@code fromIndex > toIndex}; a {@code null} array is treated as having length zero
      */
     ParallelArrayByteStream(final byte[] values, final int fromIndex, final int toIndex, final boolean sorted, final int maxThreadNum,
             final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads,
-            final Collection<LocalRunnable> closeHandlers) {
+            final Collection<LocalRunnable> closeHandlers) throws IndexOutOfBoundsException {
         super(values, fromIndex, toIndex, sorted, closeHandlers);
 
         this.maxThreadNum = maxThreadNum == 0 ? DEFAULT_MAX_THREAD_NUM : maxThreadNum;
@@ -128,7 +128,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public ByteStream filter(final BytePredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream filter(final BytePredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -157,7 +157,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public ByteStream takeWhile(final BytePredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream takeWhile(final BytePredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -172,13 +172,12 @@ final class ParallelArrayByteStream extends ArrayByteStream {
     }
 
     /**
-     * Returns a parallel stream after dropping matching elements until a worker observes a
-     * non-matching element. If the stream can be processed sequentially,
-     * delegates to the sequential implementation; otherwise boxes elements and delegates to
-     * the parallel object stream's {@code dropWhile}.
+     * Returns a parallel stream after dropping the leading elements that match the predicate.
+     * If the stream can be processed sequentially, delegates to the sequential implementation;
+     * otherwise boxes elements and delegates to the parallel object stream.
      *
-     * <p><b>&#9888;&#65039; Parallel streams:</b> this operation does not guarantee encounter-order prefix/suffix
-     * semantics; later matching elements may be dropped.
+     * <p>The first non-matching element and all remaining elements are retained, but their output
+     * order is not guaranteed to match the source encounter order.
      *
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return a new parallel {@code ByteStream} of the elements selected by the parallel {@code dropWhile} operation
@@ -186,7 +185,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public ByteStream dropWhile(final BytePredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream dropWhile(final BytePredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -211,7 +210,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public ByteStream map(final ByteUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream map(final ByteUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -237,7 +236,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public IntStream mapToInt(final ByteToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream mapToInt(final ByteToIntFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -264,7 +263,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> mapToObj(final ByteFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> mapToObj(final ByteFunction<? extends T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -289,7 +288,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public ByteStream flatMap(final ByteFunction<? extends ByteStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream flatMap(final ByteFunction<? extends ByteStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -318,7 +317,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public ByteStream flatmap(final ByteFunction<? extends Collection<Byte>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream flatmap(final ByteFunction<? extends Collection<Byte>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -347,7 +346,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public ByteStream flatMapArray(final ByteFunction<byte[]> mapper) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream flatMapArray(final ByteFunction<byte[]> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -376,7 +375,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public IntStream flatMapToInt(final ByteFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream flatMapToInt(final ByteFunction<? extends IntStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -406,7 +405,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> flatMapToObj(final ByteFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatMapToObj(final ByteFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -434,7 +433,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> flatmapToObj(final ByteFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final ByteFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -462,7 +461,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
-    public ByteStream onEach(final ByteConsumer action) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream onEach(final ByteConsumer action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -489,11 +488,11 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param <E> the type of exception the action may throw
      * @param action a non-interfering action to perform on each element
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      */
     @Override
-    public <E extends Exception> void forEach(final Throwables.ByteConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> void forEach(final Throwables.ByteConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -514,7 +513,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -531,7 +530,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     byte next = 0;
 
                     try {
@@ -573,15 +572,15 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a {@code Map} whose keys and values are produced by applying the mapper functions
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the key mapper throws an exception
-     * @throws E2 if the value mapper throws an exception
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws E if the key mapper throws an exception
+     * @throws E2 if the value mapper throws an exception
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.ByteFunction<? extends K, E> keyMapper,
             final Throwables.ByteFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalArgumentException, IllegalStateException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -616,15 +615,16 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a {@code Map} from keys to downstream reduction results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}.
      * @throws E if the key mapper throws an exception
-     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}.
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.ByteFunction<? extends K, E> keyMapper,
-            final Collector<? super Byte, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException, IllegalStateException, E {
+            final Collector<? super Byte, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -652,7 +652,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
-    public byte reduce(final byte identity, final ByteBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public byte reduce(final byte identity, final ByteBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -672,7 +672,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -693,7 +693,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     byte result = identity;
                     byte next = 0;
 
@@ -744,7 +744,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
-    public OptionalByte reduce(final ByteBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public OptionalByte reduce(final ByteBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -764,7 +764,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -789,7 +789,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     byte result = 0;
 
                     synchronized (elements) {
@@ -855,7 +855,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjByteConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -877,7 +877,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -898,7 +898,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     final R container = supplier.get();
                     byte next = 0;
 
@@ -935,11 +935,11 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return {@code true} if any element matches the predicate, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.BytePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -960,7 +960,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -980,7 +980,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     byte next = 0;
 
                     try {
@@ -1019,11 +1019,11 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return {@code true} if all elements match the predicate (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.BytePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1044,7 +1044,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -1064,7 +1064,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     byte next = 0;
 
                     try {
@@ -1103,11 +1103,11 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return {@code true} if no elements match the predicate (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.BytePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1128,7 +1128,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -1148,7 +1148,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     byte next = 0;
 
                     try {
@@ -1189,11 +1189,11 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return an {@code OptionalByte} with the first matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
-    public <E extends Exception> OptionalByte findFirst(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> OptionalByte findFirst(final Throwables.BytePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1214,7 +1214,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     final Pair<Integer, Byte> pair = new Pair<>();
@@ -1243,7 +1243,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     final Pair<Integer, Byte> pair = new Pair<>();
 
                     try {
@@ -1291,11 +1291,11 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return an {@code OptionalByte} with any matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
-    public <E extends Exception> OptionalByte findAny(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> OptionalByte findAny(final Throwables.BytePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1316,7 +1316,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     byte next = 0;
@@ -1344,7 +1344,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     byte next = 0;
 
                     try {
@@ -1390,11 +1390,11 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return an {@code OptionalByte} with the last matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
-    public <E extends Exception> OptionalByte findLast(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> OptionalByte findLast(final Throwables.BytePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1415,7 +1415,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     final int from = fromIndex + sliceIndex * sliceSize;
                     int cursor = toIndex - from > sliceSize ? from + sliceSize : toIndex;
                     final Pair<Integer, Byte> pair = new Pair<>();
@@ -1444,7 +1444,7 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             final MutableInt cursor = MutableInt.of(toIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     final Pair<Integer, Byte> pair = new Pair<>();
 
                     try {
@@ -1490,13 +1490,15 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param b the second stream to zip with
      * @param zipFunction a function applied to corresponding elements of both streams
      * @return a new parallel {@code ByteStream} of zipped results
-     * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     *
+     * @throws IllegalStateException if this stream or a source stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      */
     @Override
-    public ByteStream zipWith(final ByteStream b, final ByteBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream zipWith(final ByteStream b, final ByteBinaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -1504,8 +1506,8 @@ final class ParallelArrayByteStream extends ArrayByteStream {
                     cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorByteStream(Stream.parallelZip(boxed(), b.boxed(), zipFunction::applyAsByte, maxThreadNum), false, maxThreadNum,
-                splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorByteStream(Stream.parallelZip(boxed(), b.boxed(), zipFunction::applyAsByte, maxThreadNum, asyncExecutor), false,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -1520,14 +1522,17 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param c the third stream to zip with
      * @param zipFunction a function applied to corresponding elements of all three streams
      * @return a new parallel {@code ByteStream} of zipped results
-     * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     *
+     * @throws IllegalStateException if this stream or a source stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      */
     @Override
     public ByteStream zipWith(final ByteStream b, final ByteStream c, final ByteTernaryOperator zipFunction)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
+        checkArgNotNull(c, cs.c);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -1535,8 +1540,8 @@ final class ParallelArrayByteStream extends ArrayByteStream {
                     cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorByteStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), zipFunction::applyAsByte, maxThreadNum), false, maxThreadNum,
-                splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorByteStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), zipFunction::applyAsByte, maxThreadNum, asyncExecutor), false,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -1553,14 +1558,16 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param valueForNoneB the padding value used when {@code b} has fewer elements than this stream
      * @param zipFunction a function applied to corresponding (possibly padded) elements
      * @return a new parallel {@code ByteStream} of zipped results, with length equal to the longer stream
-     * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     *
+     * @throws IllegalStateException if this stream or a source stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      */
     @Override
     public ByteStream zipWith(final ByteStream b, final byte valueForNoneA, final byte valueForNoneB, final ByteBinaryOperator zipFunction)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -1568,8 +1575,9 @@ final class ParallelArrayByteStream extends ArrayByteStream {
                     asyncExecutor, cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorByteStream(Stream.parallelZip(boxed(), b.boxed(), valueForNoneA, valueForNoneB, zipFunction::applyAsByte, maxThreadNum),
-                false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorByteStream(
+                Stream.parallelZip(boxed(), b.boxed(), valueForNoneA, valueForNoneB, zipFunction::applyAsByte, maxThreadNum, asyncExecutor), false,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -1587,14 +1595,17 @@ final class ParallelArrayByteStream extends ArrayByteStream {
      * @param valueForNoneC the padding value used when {@code c} is exhausted
      * @param zipFunction a function applied to corresponding (possibly padded) elements
      * @return a new parallel {@code ByteStream} of zipped results, with length equal to the longest stream
-     * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     *
+     * @throws IllegalStateException if this stream or a source stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      */
     @Override
     public ByteStream zipWith(final ByteStream b, final ByteStream c, final byte valueForNoneA, final byte valueForNoneB, final byte valueForNoneC,
-            final ByteTernaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
+            final ByteTernaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
+        checkArgNotNull(c, cs.c);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -1602,9 +1613,8 @@ final class ParallelArrayByteStream extends ArrayByteStream {
                     splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorByteStream(
-                Stream.parallelZip(boxed(), b.boxed(), c.boxed(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction::applyAsByte, maxThreadNum), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorByteStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), valueForNoneA, valueForNoneB, valueForNoneC,
+                zipFunction::applyAsByte, maxThreadNum, asyncExecutor), false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**

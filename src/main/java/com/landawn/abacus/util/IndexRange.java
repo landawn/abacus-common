@@ -89,7 +89,7 @@ public record IndexRange(int start, int end) {
      * @return a new {@code IndexRange} {@code [start, end)}
      * @throws IllegalArgumentException if {@code start} is negative or {@code end} is less than {@code start}
      */
-    public static IndexRange of(final int start, final int end) {
+    public static IndexRange of(final int start, final int end) throws IllegalArgumentException {
         return new IndexRange(start, end);
     }
 
@@ -384,11 +384,11 @@ public record IndexRange(int start, int end) {
      *
      * @param other the range to span with this range, must not be {@code null}
      * @return the minimal range that contains all indices from both input ranges
-     * @throws NullPointerException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      * @see #intersection(IndexRange)
      */
-    public IndexRange span(final IndexRange other) {
-        N.requireNonNull(other, "other");
+    public IndexRange span(final IndexRange other) throws IllegalArgumentException {
+        N.checkArgNotNull(other, cs.other);
 
         if (isEmpty()) {
             if (!other.isEmpty()) {
@@ -418,10 +418,9 @@ public record IndexRange(int start, int end) {
      *
      * @param delta the number of positions to shift this range by
      * @return a new {@code IndexRange} {@code [start + delta, end + delta)}
-     * @throws IllegalArgumentException if the shifted range falls out of valid bounds
-     *         (negative start index or integer overflow)
+     * @throws IllegalArgumentException if the shifted start is negative or either shifted endpoint exceeds {@link Integer#MAX_VALUE}
      */
-    public IndexRange shift(final int delta) {
+    public IndexRange shift(final int delta) throws IllegalArgumentException {
         final long newStart = (long) start + delta;
         final long newEnd = (long) end + delta;
 
@@ -465,6 +464,7 @@ public record IndexRange(int start, int end) {
 
     /**
      * Performs the specified action for each index contained in this range, in ascending order.
+     * Safe when {@code end} is {@link Integer#MAX_VALUE} (does not wrap the loop index).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -477,11 +477,12 @@ public record IndexRange(int start, int end) {
      * @throws IllegalArgumentException if {@code action} is {@code null}
      * @see #intStream()
      */
-    public void forEach(final IntConsumer action) {
+    public void forEach(final IntConsumer action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
 
-        for (int i = start; i < end; i++) {
-            action.accept(i);
+        // Iterate with long so end == Integer.MAX_VALUE does not wrap i++ to MIN_VALUE.
+        for (long i = start; i < end; i++) {
+            action.accept((int) i);
         }
     }
 

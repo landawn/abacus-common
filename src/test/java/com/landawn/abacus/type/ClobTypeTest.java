@@ -6,8 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -235,7 +240,7 @@ public class ClobTypeTest extends TestBase {
     @Test
     public void testStringOf_clobTooLarge_throwsUnsupportedOperation() throws SQLException {
         final Clob clob = mock(Clob.class);
-        when(clob.length()).thenReturn((long) Integer.MAX_VALUE + 1L);
+        when(clob.length()).thenReturn(Integer.MAX_VALUE + 1L);
 
         Assertions.assertThrows(UnsupportedOperationException.class, () -> type.stringOf(clob));
         verify(clob).free();
@@ -278,6 +283,96 @@ public class ClobTypeTest extends TestBase {
 
         verify(stmt).setClob(1, clob1);
         verify(stmt).setClob(2, clob2);
+    }
+
+    // ---- review fixes 2026-09-06: T3-01 (empty lob) and T3-02 (valueOf(Object) must never free) ----
+
+    @Test
+    public void reviewFixes20260906_stringOfZeroLengthLobReturnsEmptyWithoutReadingAndStillFrees() throws SQLException {
+        final Clob clob = mock(Clob.class);
+        when(clob.length()).thenReturn(0L);
+
+        assertEquals("", type.stringOf(clob));
+
+        verify(clob, never()).getSubString(anyLong(), anyInt());
+        verify(clob, times(1)).free();
+    }
+
+    @Test
+    public void reviewFixes20260906_stringOfEmptySerialClobReturnsEmptyAndFrees() throws SQLException {
+        final SerialClob empty = new SerialClob(new char[0]);
+
+        assertEquals("", type.stringOf(empty));
+
+        // freed: SerialClob rejects every call after free()
+        Assertions.assertThrows(SerialException.class, empty::length);
+    }
+
+    @Test
+    public void reviewFixes20260906_stringOfNonEmptySerialClobStillReadsContent() throws SQLException {
+        assertEquals("abc", type.stringOf(new SerialClob("abc".toCharArray())));
+        assertEquals("hé😀", type.stringOf(new SerialClob("hé😀".toCharArray())));
+        assertEquals(" ", type.stringOf(new SerialClob(new char[] { ' ' })));
+    }
+
+    @Test
+    public void reviewFixes20260906_stringOfLengthOneStillGoesThroughGetSubString() throws SQLException {
+        final Clob clob = mock(Clob.class);
+        when(clob.length()).thenReturn(1L);
+        when(clob.getSubString(1, 1)).thenReturn("x");
+
+        assertEquals("x", type.stringOf(clob));
+
+        verify(clob).getSubString(1, 1);
+        verify(clob).free();
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectClobReturnsSameInstanceWithoutTouchingIt() throws SQLException {
+        final Clob clob = mock(Clob.class);
+
+        assertSame(clob, type.valueOf((Object) clob));
+
+        verify(clob, never()).free();
+        verify(clob, never()).length();
+        verify(clob, never()).getSubString(anyLong(), anyInt());
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectSerialClobRemainsUsableAfterwards() throws SQLException {
+        final SerialClob sc = new SerialClob("hello".toCharArray());
+
+        assertSame(sc, type.valueOf((Object) sc));
+        assertEquals(5L, sc.length());
+        assertEquals("hello", sc.getSubString(1, 5));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectNonClobThrowsBeforeAnyRead() {
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf((Object) "x"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf((Object) 42));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf((Object) new char[] { 'a' }));
+        // the String overload is unchanged
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf("x"));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectNullReturnsNull() {
+        Assertions.assertNull(type.valueOf((Object) null));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectSubtypeHandlerAcceptsOnlyItsOwnClass() throws SQLException {
+        final ClobType serialType = new ClobType(SerialClob.class);
+        final SerialClob sc = new SerialClob("ab".toCharArray());
+        final Clob foreign = mock(Clob.class);
+
+        assertSame(sc, serialType.valueOf((Object) sc));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> serialType.valueOf((Object) foreign));
+
+        verify(foreign, never()).free();
+        verify(foreign, never()).length();
+        assertEquals(2L, sc.length());
     }
 
 }

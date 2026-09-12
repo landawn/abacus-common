@@ -123,11 +123,13 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target type populated with data from the JSON string; if the source is
      *         {@code null} or empty the target type's default value (or an empty value) is returned
-     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
-    public <T> T parse(final String source, final Type<? extends T> targetType) throws UncheckedIOException, ParsingException {
+    public <T> T parse(final String source, final Type<? extends T> targetType) throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return parse(source, null, targetType);
     }
 
@@ -146,11 +148,15 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param targetType the class of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target class populated with data from the JSON string; if the source is
      *         {@code null} or empty the target type's default value (or an empty value) is returned
-     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
+     * @throws UnsupportedOperationException if the selected overload is not implemented by the concrete parser.
      */
     @Override
-    public <T> T parse(final String source, final Class<? extends T> targetType) throws UncheckedIOException, ParsingException {
+    public <T> T parse(final String source, final Class<? extends T> targetType)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException, UnsupportedOperationException {
         return parse(source, null, targetType);
     }
 
@@ -180,18 +186,22 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] output = new Object[3];
-     * parser.parse("[\"Alice\",\"Bob\",\"Charlie\"]", output);
+     * parser.parseInto("[\"Alice\",\"Bob\",\"Charlie\"]", output);
      * }</pre>
      *
      * @param source the JSON array string to deserialize; may be {@code null} or empty (in which case no action is taken)
      * @param output the array to populate with deserialized elements; must not be {@code null}
-     * @throws UncheckedIOException if an I/O error occurs during deserialization
-     * @throws ParsingException if the JSON structure is invalid or not an array
-     * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
+     * @throws IndexOutOfBoundsException if more parsed elements are retained than the output array can hold
+     * @throws ParsingException if the source cannot be parsed as an element sequence
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
+     * @throws UnsupportedOperationException if the selected overload is not implemented by the concrete parser.
      */
     @Override
-    public void parse(final String source, final Object[] output) throws UncheckedIOException, ParsingException, IndexOutOfBoundsException {
-        parse(source, null, output);
+    public void parseInto(final String source, final Object[] output)
+            throws IllegalArgumentException, IndexOutOfBoundsException, ParsingException, UncheckedIOException, UnsupportedOperationException {
+        parseInto(source, null, output);
     }
 
     /**
@@ -199,7 +209,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      *
      * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
      * subclasses must override this method to provide parsing behavior.
-     * See {@link JsonParser#parse(String, JsonDeserConfig, Object[])} for the public contract and usage.</p>
+     * See {@link JsonParser#parseInto(String, JsonDeserConfig, Object[])} for the public contract and usage.</p>
      *
      * @param source the JSON array string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
@@ -207,7 +217,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
     @Override
-    public void parse(final String source, final JsonDeserConfig config, final Object[] output) throws UnsupportedOperationException {
+    public void parseInto(final String source, final JsonDeserConfig config, final Object[] output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -218,18 +228,22 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> output = new ArrayList<>();
-     * parser.parse("[\"Alice\",\"Bob\"]", output);
+     * parser.parseInto("[\"Alice\",\"Bob\"]", output);
      * }</pre>
      *
      * @param source the JSON array string to deserialize; may be {@code null} or empty (in which case no action is taken)
      * @param output the collection to populate with deserialized elements; must not be {@code null}
-     * @throws UncheckedIOException if an I/O error occurs during deserialization
-     * @throws ParsingException if the JSON structure is invalid or not an array
-     * @throws UnsupportedOperationException if the collection is unmodifiable
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
+     * @throws UnsupportedOperationException if parsing attempts to insert into an output container that does not support insertion, or the concrete
+     *         parser does not implement this overload.
+     * @throws ParsingException if the source cannot be parsed as an element sequence
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
-    public void parse(final String source, final Collection<?> output) throws UncheckedIOException, ParsingException, UnsupportedOperationException {
-        parse(source, null, output);
+    public void parseInto(final String source, final Collection<?> output)
+            throws IllegalArgumentException, UnsupportedOperationException, ParsingException, UncheckedIOException {
+        parseInto(source, null, output);
     }
 
     /**
@@ -237,7 +251,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      *
      * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
      * subclasses must override this method to provide parsing behavior.
-     * See {@link JsonParser#parse(String, JsonDeserConfig, Collection)} for the public contract and usage.</p>
+     * See {@link JsonParser#parseInto(String, JsonDeserConfig, Collection)} for the public contract and usage.</p>
      *
      * @param source the JSON array string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
@@ -245,7 +259,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
     @Override
-    public void parse(final String source, final JsonDeserConfig config, final Collection<?> output) throws UnsupportedOperationException {
+    public void parseInto(final String source, final JsonDeserConfig config, final Collection<?> output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -256,18 +270,22 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> output = new HashMap<>();
-     * parser.parse("{\"name\":\"John\",\"age\":30}", output);
+     * parser.parseInto("{\"name\":\"John\",\"age\":30}", output);
      * }</pre>
      *
      * @param source the JSON object string to deserialize; may be {@code null} or empty (in which case no action is taken)
      * @param output the map to populate with deserialized key-value pairs; must not be {@code null}
-     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
+     * @throws UnsupportedOperationException if parsing attempts to insert into an output container that does not support insertion, or the concrete
+     *         parser does not implement this overload.
      * @throws ParsingException if the JSON structure is invalid or not an object
-     * @throws UnsupportedOperationException if the map is unmodifiable
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
-    public void parse(final String source, final Map<?, ?> output) throws UncheckedIOException, ParsingException, UnsupportedOperationException {
-        parse(source, null, output);
+    public void parseInto(final String source, final Map<?, ?> output)
+            throws IllegalArgumentException, UnsupportedOperationException, ParsingException, UncheckedIOException {
+        parseInto(source, null, output);
     }
 
     /**
@@ -275,7 +293,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      *
      * <p>This base-class implementation always throws {@link UnsupportedOperationException}. Concrete
      * subclasses must override this method to provide parsing behavior.
-     * See {@link JsonParser#parse(String, JsonDeserConfig, Map)} for the public contract and usage.</p>
+     * See {@link JsonParser#parseInto(String, JsonDeserConfig, Map)} for the public contract and usage.</p>
      *
      * @param source the JSON object string to deserialize; may be {@code null} or empty
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
@@ -283,7 +301,7 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
     @Override
-    public void parse(final String source, final JsonDeserConfig config, final Map<?, ?> output) throws UnsupportedOperationException {
+    public void parseInto(final String source, final JsonDeserConfig config, final Map<?, ?> output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -305,12 +323,16 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target type populated with data from the JSON range; if the range is
      *         empty the target type's default value (or an empty value) is returned
-     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws NullPointerException if {@code source} is null and this base implementation performs substring extraction.
+     * @throws IndexOutOfBoundsException if the requested range is outside the source or {@code fromIndex > toIndex}.
+     * @throws IllegalArgumentException if {@code targetType} is null and the concrete parser rejects it.
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final Type<? extends T> targetType)
-            throws UncheckedIOException, ParsingException {
+            throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
         return deserialize(source, fromIndex, toIndex, null, targetType);
     }
 
@@ -332,12 +354,16 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param targetType the class of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target class populated with data from the JSON range; if the range is
      *         empty the target type's default value (or an empty value) is returned
-     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws NullPointerException if {@code source} is null and this base implementation performs substring extraction.
+     * @throws IndexOutOfBoundsException if the requested range is outside the source or {@code fromIndex > toIndex}.
+     * @throws IllegalArgumentException if {@code targetType} is null and the concrete parser rejects it.
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final Class<? extends T> targetType)
-            throws UncheckedIOException, ParsingException {
+            throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
         return deserialize(source, fromIndex, toIndex, null, targetType);
     }
 
@@ -363,12 +389,16 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target type populated with data from the JSON range; if the range is
      *         empty the target type's default value (or an empty value) is returned
-     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws NullPointerException if {@code source} is null and this base implementation performs substring extraction.
+     * @throws IndexOutOfBoundsException if the requested range is outside the source or {@code fromIndex > toIndex}.
+     * @throws IllegalArgumentException if {@code targetType} is null and the concrete parser rejects it.
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Type<? extends T> targetType)
-            throws UncheckedIOException, ParsingException {
+            throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
         return deserialize(source.substring(fromIndex, toIndex), config, targetType);
     }
 
@@ -394,12 +424,16 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param targetType the class of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target class populated with data from the JSON range; if the range is
      *         empty the target type's default value (or an empty value) is returned
-     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws NullPointerException if {@code source} is null and this base implementation performs substring extraction.
+     * @throws IndexOutOfBoundsException if the requested range is outside the source or {@code fromIndex > toIndex}.
+     * @throws IllegalArgumentException if {@code targetType} is null and the concrete parser rejects it.
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Class<? extends T> targetType)
-            throws UncheckedIOException, ParsingException {
+            throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
         return deserialize(source.substring(fromIndex, toIndex), config, targetType);
     }
 
@@ -417,9 +451,13 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param source the JSON array string to stream; may be {@code null} or empty (in which case an empty stream is returned)
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
+     * @throws IllegalArgumentException if {@code elementType} is null or unsupported for streaming.
+     * @throws UnsupportedOperationException if the root of the source is a JSON object or a quoted string
+     * @throws ParsingException if the root token is malformed; malformed later elements fail while consuming the returned stream.
      */
     @Override
-    public <T> Stream<T> stream(final String source, final Type<? extends T> elementType) {
+    public <T> Stream<T> stream(final String source, final Type<? extends T> elementType)
+            throws IllegalArgumentException, UnsupportedOperationException, ParsingException {
         return stream(source, null, elementType);
     }
 
@@ -439,9 +477,16 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param source the file containing the JSON array to stream; must not be {@code null}
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
+     * @throws IllegalArgumentException if the source is null or a failed file open identifies a directory, or {@code elementType} is null or
+     *         unsupported for streaming.
+     * @throws UncheckedIOException if opening or initially reading the source fails; later read failures occur while
+     *         consuming the returned stream.
+     * @throws UnsupportedOperationException if the root of the file content is a JSON object or a quoted string
+     * @throws ParsingException if the root token is malformed; malformed later elements fail while consuming the returned stream.
      */
     @Override
-    public <T> Stream<T> stream(final File source, final Type<? extends T> elementType) {
+    public <T> Stream<T> stream(final File source, final Type<? extends T> elementType)
+            throws IllegalArgumentException, UncheckedIOException, UnsupportedOperationException, ParsingException {
         return stream(source, null, elementType);
     }
 
@@ -462,9 +507,15 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param closeInputStreamWhenStreamIsClosed whether to close the input stream when the stream is closed
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
+     * @throws IllegalArgumentException if the source is null, or {@code elementType} is null or unsupported for streaming.
+     * @throws UncheckedIOException if opening or initially reading the source fails; later read failures occur while
+     *         consuming the returned stream.
+     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
+     * @throws ParsingException if the root token is malformed; malformed later elements fail while consuming the returned stream.
      */
     @Override
-    public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final Type<? extends T> elementType) {
+    public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final Type<? extends T> elementType)
+            throws IllegalArgumentException, UncheckedIOException, UnsupportedOperationException, ParsingException {
         return stream(source, closeInputStreamWhenStreamIsClosed, null, elementType);
     }
 
@@ -485,9 +536,15 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param closeReaderWhenStreamIsClosed whether to close the reader when the stream is closed
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
+     * @throws IllegalArgumentException if the source is null, or {@code elementType} is null or unsupported for streaming.
+     * @throws UncheckedIOException if opening or initially reading the source fails; later read failures occur while
+     *         consuming the returned stream.
+     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
+     * @throws ParsingException if the root token is malformed; malformed later elements fail while consuming the returned stream.
      */
     @Override
-    public <T> Stream<T> stream(final Reader reader, final boolean closeReaderWhenStreamIsClosed, final Type<? extends T> elementType) {
+    public <T> Stream<T> stream(final Reader reader, final boolean closeReaderWhenStreamIsClosed, final Type<? extends T> elementType)
+            throws IllegalArgumentException, UncheckedIOException, UnsupportedOperationException, ParsingException {
         return stream(reader, closeReaderWhenStreamIsClosed, null, elementType);
     }
 

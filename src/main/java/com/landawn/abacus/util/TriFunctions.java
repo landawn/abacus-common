@@ -18,6 +18,18 @@ package com.landawn.abacus.util;
 /**
  * Utility class providing various TriFunction implementations and factory methods.
  * This class is reserved for future TriFunction utilities.
+ *
+ * <p>This class is a top-level sibling of {@link Fn}, not a nested type. Use {@link Fn} for the
+ * general functional-interface factory and {@link Fnn} for {@link Throwables} variants that can
+ * declare checked exceptions. For one- and two-argument functions see {@link Functions} and
+ * {@link BiFunctions}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see Functions
+ * @see BiFunctions
+ * @see TriConsumers
+ * @see TriPredicates
  */
 public final class TriFunctions {
 

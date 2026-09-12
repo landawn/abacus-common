@@ -79,8 +79,9 @@ public class ObjBooleanConsumerTest extends TestBase {
     public void testSideEffects() {
         final int[] counter = { 0 };
         ObjBooleanConsumer<String> consumer = (t, value) -> {
-            if (value)
+            if (value) {
                 counter[0]++;
+            }
         };
 
         consumer.accept("a", true);

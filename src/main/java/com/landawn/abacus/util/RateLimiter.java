@@ -17,7 +17,6 @@ import static java.lang.Math.max;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.util.SmoothRateLimiter.SmoothBursty;
@@ -91,13 +90,10 @@ public abstract class RateLimiter {
      * This factory method creates a rate limiter with smooth bursty behavior, allowing
      * unused permits to accumulate up to one second's worth.
      *
-     * <p>The returned {@code RateLimiter} ensures that on average no more than {@code
-     * permitsPerSecond} are issued during any given second, with sustained requests being smoothly
-     * spread over each second. When the incoming request rate exceeds {@code permitsPerSecond} the
-     * rate limiter will release one permit every {@code
-     * (1.0 / permitsPerSecond)} seconds. When the rate limiter is unused, bursts of up to
-     * {@code permitsPerSecond} permits will be allowed, with subsequent requests being smoothly
-     * limited at the stable rate of {@code permitsPerSecond}.
+     * <p>The returned limiter regulates a sustained average rate, not a strict quota in each
+     * one-second window. Idle permits allow bursts. A request may acquire more than the stored
+     * burst capacity immediately when no earlier debt is due; the cost of the additional permits
+     * delays subsequent requests at the stable rate of {@code permitsPerSecond}.
      *
      * <p><b>Thread Safety:</b> This method is thread-safe. The returned {@code RateLimiter} instance
      * is also thread-safe and can be safely shared across multiple threads. All permit acquisition
@@ -133,7 +129,8 @@ public abstract class RateLimiter {
          * Due to the slight delay of T1, T2 would have to sleep till 2.05 seconds, and T3 would also
          * have to sleep till 3.05 seconds.
          */
-        N.checkArgument(permitsPerSecond > 0.0 && !Double.isNaN(permitsPerSecond), "rate must be positive");
+        // `NaN > 0.0` is already false, so a separate isNaN() check would be dead code.
+        N.checkArgument(permitsPerSecond > 0.0, "rate must be positive: %s", permitsPerSecond);
         return create(permitsPerSecond, SleepingStopwatch.createFromSystemTimer());
     }
 
@@ -143,8 +140,9 @@ public abstract class RateLimiter {
      * @param permitsPerSecond the rate of permits per second
      * @param stopwatch the stopwatch to use for timing
      * @return a newly created {@code RateLimiter} with the specified rate
+     * @throws IllegalArgumentException if {@code stopwatch} is null, or {@code permitsPerSecond} is zero, negative, or NaN
      */
-    static RateLimiter create(final double permitsPerSecond, final SleepingStopwatch stopwatch) {
+    static RateLimiter create(final double permitsPerSecond, final SleepingStopwatch stopwatch) throws IllegalArgumentException {
         final RateLimiter rateLimiter = new SmoothBursty(stopwatch, 1.0 /* maxBurstSeconds */);
         rateLimiter.setRate(permitsPerSecond);
         return rateLimiter;
@@ -165,6 +163,14 @@ public abstract class RateLimiter {
      *
      * <p>The returned {@code RateLimiter} starts in a "cold" state (i.e., the warmup period will
      * follow), and if it is left unused for long enough, it will return to that state.
+     *
+     * <p><b>Sub-microsecond warmup periods:</b> this class measures time in microseconds, so a
+     * {@code warmupPeriod} that converts to {@code 0} microseconds &mdash; a zero period, or any value
+     * below one microsecond such as {@code create(10.0, 999, TimeUnit.NANOSECONDS)} &mdash; has no
+     * warmup to ramp through. Such a call returns the same bursty limiter as {@link #create(double)},
+     * which allows a burst of up to one second's worth of accumulated permits; it does <em>not</em>
+     * return a warming-up limiter with a zero-length warmup. This diverges from Guava, which always
+     * builds a warming-up limiter here and whose ramp arithmetic degenerates for a zero warmup.
      *
      * <p><b>Thread Safety:</b> This method is thread-safe. The returned {@code RateLimiter} instance
      * is also thread-safe and can be safely shared across multiple threads. All permit acquisition
@@ -188,9 +194,8 @@ public abstract class RateLimiter {
      *     before reaching its stable (maximum) rate, must be non-negative
      * @param unit the time unit of the warmupPeriod argument, must not be null
      * @return a newly created {@code RateLimiter} with the specified rate and warmup period
-     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN, or {@code warmupPeriod}
-     *         is negative.
-     * @throws NullPointerException if {@code unit} is {@code null}
+     * @throws IllegalArgumentException if {@code unit} is {@code null}, {@code permitsPerSecond} is negative,
+     *         zero, or NaN, or {@code warmupPeriod} is negative.
      */
     public static RateLimiter create(final double permitsPerSecond, final long warmupPeriod, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(warmupPeriod >= 0, "warmupPeriod must not be negative: %s", warmupPeriod);
@@ -200,15 +205,22 @@ public abstract class RateLimiter {
     /**
      * Creates a {@code RateLimiter} with warmup period, cold factor, and custom stopwatch.
      *
+     * <p>A {@code warmupPeriod} that converts to {@code 0} microseconds yields a {@code SmoothBursty}
+     * limiter rather than a {@code SmoothWarmingUp} one: with no warmup interval, {@code SmoothWarmingUp}
+     * derives {@code maxPermits == thresholdPermits == 0} and its ramp slope becomes a division by zero.
+     *
      * @param permitsPerSecond the rate of permits per second
      * @param warmupPeriod the duration of the warmup period
      * @param unit the time unit for the warmup period
      * @param coldFactor the cold factor for warmup behavior
      * @param stopwatch the stopwatch to use for timing
      * @return a newly created {@code RateLimiter} with the specified rate and warmup behavior
+     * @throws IllegalArgumentException if {@code unit} is {@code null}, or if {@code stopwatch} is null, or {@code permitsPerSecond} is zero, negative, or NaN
      */
     static RateLimiter create(final double permitsPerSecond, final long warmupPeriod, final TimeUnit unit, final double coldFactor,
-            final SleepingStopwatch stopwatch) {
+            final SleepingStopwatch stopwatch) throws IllegalArgumentException {
+        N.checkArgNotNull(unit, cs.unit);
+
         final RateLimiter rateLimiter = unit.toMicros(warmupPeriod) == 0L ? new SmoothBursty(stopwatch, 1.0 /* maxBurstSeconds */)
                 : new SmoothWarmingUp(stopwatch, warmupPeriod, unit, coldFactor);
         rateLimiter.setRate(permitsPerSecond);
@@ -242,8 +254,9 @@ public abstract class RateLimiter {
      * Creates a rate limiter that uses the supplied time source.
      *
      * @param stopwatch the time source and sleeper used by this limiter
+     * @throws IllegalArgumentException if {@code stopwatch} is {@code null}
      */
-    RateLimiter(final SleepingStopwatch stopwatch) {
+    RateLimiter(final SleepingStopwatch stopwatch) throws IllegalArgumentException {
         this.stopwatch = N.checkArgNotNull(stopwatch);
     }
 
@@ -280,8 +293,8 @@ public abstract class RateLimiter {
      * @see #create(double)
      */
     public final void setRate(final double permitsPerSecond) throws IllegalArgumentException {
-        //noinspection ConstantValue
-        N.checkArgument(permitsPerSecond > 0.0 && !Double.isNaN(permitsPerSecond), "rate must be positive");
+        // `NaN > 0.0` is already false, so a separate isNaN() check would be dead code.
+        N.checkArgument(permitsPerSecond > 0.0, "rate must be positive: %s", permitsPerSecond);
         synchronized (mutex()) {
             doSetRate(permitsPerSecond, stopwatch.readMicros());
         }
@@ -290,6 +303,10 @@ public abstract class RateLimiter {
     /**
      * Internal method to set the rate. Subclasses must implement this to update internal state
      * when the rate is changed via {@link #setRate(double)}.
+     *
+     * <p>This method, like the constructor, is package-private: {@code RateLimiter} can only be
+     * extended from within this package, so the requirements below address the in-package
+     * implementations (see {@code SmoothRateLimiter}), not external subclasses.</p>
      *
      * <p><b>Implementation Requirements:</b>
      * <ul>
@@ -324,8 +341,20 @@ public abstract class RateLimiter {
      * limiter.getRate();                         // returns 10.0 (reflects updated rate)
      *
      * RateLimiter warmupLimiter = RateLimiter.create(7.5, 2, TimeUnit.SECONDS);
-     * warmupLimiter.getRate();                   // returns 7.5
+     * warmupLimiter.getRate();                   // returns 7.499999999999999
      * }</pre>
+     *
+     * <p>The rate is stored internally as a permit interval, so a rate that is not exactly
+     * representable does not round-trip: compare with a tolerance rather than for equality. Below
+     * roughly {@code 5.6e-303} permits per second that interval overflows to infinity and this method
+     * reports {@code 0.0} — a value {@link #setRate(double)} itself rejects. Such rates are far below
+     * anything usable (one permit per 1e295 years), but do not treat a {@code 0.0} result as proof that
+     * no rate was ever set.</p>
+     *
+     * <p>At the other extreme {@link Double#POSITIVE_INFINITY} is accepted as a rate - it is positive and
+     * not {@code NaN}, so {@link #create(double)} and {@link #setRate(double)} both take it - and yields a
+     * zero permit interval, i.e. an effectively unlimited limiter that never throttles. This method then
+     * returns {@code Infinity}.</p>
      *
      * @return the current stable rate in permits per second
      * @see #setRate(double)
@@ -346,11 +375,13 @@ public abstract class RateLimiter {
      *     access to the rate value.</li>
      * <li>Implementations must return the current stable rate in permits per second, which
      *     should be the same value that was most recently set via {@link #doSetRate(double, long)}.</li>
-     * <li>The returned value must be positive and not NaN.</li>
+     * <li>The returned value must not be NaN. It is positive except for a rate so small that its permit
+     *     interval overflowed to infinity, where it is {@code 0.0} - see {@link #getRate()}.</li>
      * <li>This method should be lightweight and non-blocking, as it is called while holding a lock.</li>
      * </ul>
      *
-     * @return the current stable rate in permits per second, guaranteed to be positive
+     * @return the current stable rate in permits per second; positive, or {@code 0.0} for a rate whose
+     *         permit interval overflowed to infinity (see {@link #getRate()})
      */
     abstract double doGetRate();
 
@@ -414,7 +445,7 @@ public abstract class RateLimiter {
      * @see #tryAcquire(long, TimeUnit)
      * @see #tryAcquire(int, long, TimeUnit)
      */
-    public double acquire(final int permits) {
+    public double acquire(final int permits) throws IllegalArgumentException {
         final long microsToWait = reserve(permits);
         stopwatch.sleepMicrosUninterruptibly(microsToWait);
         return 1.0 * microsToWait / SECONDS.toMicros(1L);
@@ -426,8 +457,9 @@ public abstract class RateLimiter {
      *
      * @param permits the number of permits to acquire
      * @return time in microseconds to wait until the resource can be acquired, never negative
+     * @throws IllegalArgumentException if {@code permits} is zero or negative
      */
-    final long reserve(final int permits) {
+    final long reserve(final int permits) throws IllegalArgumentException {
         checkPermits(permits);
         synchronized (mutex()) {
             return reserveAndGetWaitLength(permits, stopwatch.readMicros());
@@ -458,14 +490,14 @@ public abstract class RateLimiter {
      * @param timeout the maximum time to wait for the permit. Negative values are treated as zero.
      * @param unit the time unit of the timeout argument, must not be null
      * @return {@code true} if the permit was acquired within the timeout, {@code false} otherwise
-     * @throws NullPointerException if {@code unit} is {@code null}
+     * @throws IllegalArgumentException if {@code unit} is {@code null}
      * @see #tryAcquire()
      * @see #tryAcquire(int)
      * @see #tryAcquire(int, long, TimeUnit)
      * @see #acquire()
      * @see #acquire(int)
      */
-    public boolean tryAcquire(final long timeout, final TimeUnit unit) {
+    public boolean tryAcquire(final long timeout, final TimeUnit unit) throws IllegalArgumentException {
         return tryAcquire(1, timeout, unit);
     }
 
@@ -499,7 +531,7 @@ public abstract class RateLimiter {
      * @see #acquire()
      * @see #acquire(int)
      */
-    public boolean tryAcquire(final int permits) {
+    public boolean tryAcquire(final int permits) throws IllegalArgumentException {
         return tryAcquire(permits, 0, MICROSECONDS);
     }
 
@@ -567,15 +599,16 @@ public abstract class RateLimiter {
      * @param timeout the maximum time to wait for the permits. Negative values are treated as zero.
      * @param unit the time unit of the timeout argument, must not be null
      * @return {@code true} if the permits were acquired, {@code false} otherwise
-     * @throws IllegalArgumentException if the requested number of permits is negative or zero.
-     * @throws NullPointerException if {@code unit} is {@code null}
+     * @throws IllegalArgumentException if {@code unit} is {@code null}, or if {@code permits} is zero or negative
      * @see #tryAcquire()
      * @see #tryAcquire(int)
      * @see #tryAcquire(long, TimeUnit)
      * @see #acquire()
      * @see #acquire(int)
      */
-    public boolean tryAcquire(final int permits, final long timeout, final TimeUnit unit) {
+    public boolean tryAcquire(final int permits, final long timeout, final TimeUnit unit) throws IllegalArgumentException {
+        N.checkArgNotNull(unit, cs.unit);
+
         final long timeoutMicros = max(unit.toMicros(timeout), 0);
         checkPermits(permits);
         long microsToWait;
@@ -668,9 +701,16 @@ public abstract class RateLimiter {
 
     /**
      * Returns a string representation of this {@code RateLimiter}, showing its current stable rate.
-     * The format is "RateLimiter[stableRate=X.Xqps]" where X.X is the current rate in queries per second.
+     * The format is {@code "RateLimiter[stableRate=" + rate + "qps]"}, where the rate is the current
+     * number of queries per second rendered by {@link Double#toString(double)}.
      *
      * <p>Example output: {@code RateLimiter[stableRate=5.0qps]}
+     *
+     * <p>{@link Double#toString(double)} keeps as many digits as are needed to identify the value, so
+     * small and fractional rates survive the round trip - a fixed one-decimal format printed
+     * {@code create(0.05)} as {@code 0.1qps}. It also means a large or very small rate is rendered in
+     * scientific notation: {@code RateLimiter.create(1e7).toString()} returns
+     * {@code RateLimiter[stableRate=1.0E7qps]}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -678,13 +718,14 @@ public abstract class RateLimiter {
      * limiter.toString();      // returns "RateLimiter[stableRate=5.0qps]"
      * limiter.setRate(10.0);
      * limiter.toString();      // returns "RateLimiter[stableRate=10.0qps]"
+     * RateLimiter.create(0.05).toString();   // returns "RateLimiter[stableRate=0.05qps]"
      * }</pre>
      *
      * @return a string representation of this rate limiter
      */
     @Override
     public String toString() {
-        return String.format(Locale.ROOT, "RateLimiter[stableRate=%3.1fqps]", getRate());
+        return "RateLimiter[stableRate=" + getRate() + "qps]";
     }
 
     /**
@@ -790,7 +831,10 @@ public abstract class RateLimiter {
         }
     }
 
-    private static void checkPermits(final int permits) {
+    /**
+     * @throws IllegalArgumentException if {@code permits} is zero or negative
+     */
+    private static void checkPermits(final int permits) throws IllegalArgumentException {
         N.checkArgument(permits > 0, "Requested permits (%s) must be positive", permits);
     }
 }

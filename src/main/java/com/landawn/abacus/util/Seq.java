@@ -14,12 +14,12 @@
 
 package com.landawn.abacus.util;
 
+import java.util.concurrent.RejectedExecutionException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serial;
-import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.security.SecureRandom;
@@ -30,15 +30,19 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
+import java.util.RandomAccess;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -69,6 +73,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.annotation.TerminalOp;
 import com.landawn.abacus.annotation.TerminalOpTriggered;
 import com.landawn.abacus.exception.TooManyElementsException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.If.OrElse;
@@ -99,6 +104,24 @@ import com.landawn.abacus.util.stream.Stream;
  * closing change its lifecycle state, and instances are not safe for concurrent use unless an
  * operation explicitly documents otherwise.</p>
  *
+ * <p><b>Closing a derived sequence closes the one it came from.</b> Every intermediate operation links the new
+ * sequence back to its source, so a terminal operation anywhere in a pipeline releases the whole chain and marks
+ * each link closed. Reaching back to an earlier sequence afterwards therefore fails loudly instead of quietly
+ * traversing an exhausted source:</p>
+ * <pre>{@code
+ * Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
+ * seq.map(i -> i).toList();        // [1, 2, 3]
+ * seq.toList();                    // IllegalStateException: this sequence is already closed
+ * }</pre>
+ * <p>{@link #stream()} links the same way: closing the returned {@link Stream} closes this sequence.
+ * {@link #onClose(Runnable)} is the one intermediate operation that mutates and returns the receiver instead of
+ * deriving a new sequence.</p>
+ *
+ * <p>The check is a lifecycle check, not a fork check: two sequences derived from the same source <i>before</i>
+ * either is consumed both look open, and the second one then reads whatever the first left behind - usually
+ * nothing. Branching a sequence is never supported (the same holds for
+ * {@link com.landawn.abacus.util.stream.Stream}); derive once, or build a fresh sequence per branch.</p>
+ *
  * <p><b>Key Features:</b>
  * <ul>
  *   <li>Supports checked exceptions in stream operations</li>
@@ -116,8 +139,10 @@ import com.landawn.abacus.util.stream.Stream;
  *     .filter(line -> !line.isEmpty())
  *     .map(String::trim);
  *
- * // Database operations without wrapping exceptions
- * Seq<User, SQLException> users = Seq.of(userIds)
+ * // Database operations without wrapping exceptions.
+ * // Pass the exception type explicitly: Seq.of(userIds) alone infers E = Exception,
+ * // which will not assign to Seq<User, SQLException>.
+ * Seq<User, SQLException> users = Seq.of(userIds, SQLException.class)
  *     .map(id -> userDao.findById(id))
  *     .filter(user -> user.isActive());
  *
@@ -222,6 +247,22 @@ import com.landawn.abacus.util.stream.Stream;
  *       {@link #hasMatchCountBetween} match {@link Stream} naming (not {@code isMatchCountBetween}).</li>
  * </ul>
  *
+ * <p><b>Null arguments.</b> Every operation rejects a {@code null} function argument &mdash; mapper,
+ * predicate, comparator, collector, supplier or action &mdash; with an
+ * {@link IllegalArgumentException} naming the parameter, not the {@link NullPointerException}
+ * {@code java.util.stream} would throw, and the sequence is <b>closed</b> before the exception
+ * propagates. This holds whether or not the individual method's javadoc repeats it.
+ *
+ * <p><b>Null elements.</b> A sequence may contain {@code null} elements, and the mapping, filtering and
+ * collecting operations pass them through. The terminal operations that return a single element wrapped in
+ * {@link u.Optional} &mdash; {@link #first()}, {@link #last()}, {@link #onlyOne()}, {@link #elementAt(long)},
+ * {@link #min(Comparator)}, {@link #max(Comparator)}, {@link #findFirst(Throwables.Predicate)},
+ * {@link #findLast(Throwables.Predicate)}, {@link #reduce(Throwables.BinaryOperator)} and their relatives
+ * &mdash; throw a {@link NullPointerException} when the selected element is {@code null}, because
+ * {@code u.Optional} cannot hold {@code null}. This is a deliberate difference from {@link Stream}, whose
+ * counterparts return an empty {@code Optional} for a {@code null} element. Filter or map {@code null} away first,
+ * or switch to {@link #stream()}, when a sequence may hold {@code null}.
+ *
  * <p><b>Reading the per-operation characteristics:</b> each operation below carries a one-line
  * <i>Operation characteristics</i> summary. Its classification terms link to the annotations that
  * define them &mdash; {@link TerminalOp}, {@link IntermediateOp} and {@link TerminalOpTriggered}
@@ -288,6 +329,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     private static final Random RAND = new SecureRandom();
 
     private static final String ERROR_MSG_FOR_NO_SUCH_EX = InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX;
+
+    /** Maximum rendered length of a single element embedded in an exception message. */
+    private static final int MAX_ELEMENT_LENGTH_IN_ERROR_MSG = 128;
 
     private static final int MAX_WAIT_TIME_FOR_QUEUE_OFFER = 9; // unit is milliseconds
     private static final int MAX_WAIT_TIME_FOR_QUEUE_POLL = 7; // unit is milliseconds
@@ -405,8 +449,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Returns a {@code Seq} that is lazily populated by the provided supplier.
      * The supplier is invoked only when a terminal operation is performed on the sequence.
      * This allows for deferred execution and lazy evaluation of the sequence creation.
-     * The supplier's first successful result is memoized; if it throws, a later traversal may retry it.
      * A {@code null} result is treated as an empty sequence.
+     *
+     * <p><b>The supplier is invoked at most once.</b> It is not invoked at all if the returned sequence is
+     * closed without ever being traversed, so a supplier that opens a resource (a file, a JDBC cursor, &hellip;)
+     * opens nothing in that case. The sequence the supplier returned &mdash; and only that instance &mdash; is
+     * closed when the returned sequence is closed. If the supplier throws, the exception propagates from the
+     * terminal operation and a later traversal may invoke it again.</p>
+     * <p>If the supplier returns an already closed sequence, traversal throws {@link IllegalStateException}.</p>
      *
      * <p><b>Implementation Note:</b>
      * This is equivalent to: {@code Seq.just(supplier).flatMap(Supplier::get)}.</p>
@@ -431,7 +481,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public static <T, E extends Exception> Seq<T, E> defer(final Supplier<? extends Seq<? extends T, ? extends E>> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
-        return Seq.<Supplier<? extends Seq<? extends T, ? extends E>>, E> just(supplier).flatMap(Supplier::get).onClose(newCloseHandler(supplier));
+        // No extra close handler is registered for the supplied sequence: flatMap already keeps the sequence it
+        // last created and closes it from its own closeResource(). Asking the supplier for a *second* sequence at
+        // close time (the previous behaviour) invoked a possibly non-idempotent, possibly resource-opening factory
+        // twice, and blew up outright whenever the supplier read state that the terminal operation had just closed
+        // (see transformViaStream(..., true), whose supplier calls this.stream()).
+        return Seq.<Supplier<? extends Seq<? extends T, ? extends E>>, E> just(supplier).flatMap(Supplier::get);
     }
 
     /**
@@ -566,6 +621,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             private int position = 0;
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public boolean hasNext() throws E {
                 return position < len;
             }
@@ -627,6 +687,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
         return create(new Throwables.Iterator<>() {
             private int position = 0;
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
 
             @Override
             public boolean hasNext() throws E {
@@ -692,6 +757,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             private int position = 0;
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public boolean hasNext() throws E {
                 return position < len;
             }
@@ -753,6 +823,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
         return create(new Throwables.Iterator<>() {
             private int position = 0;
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
 
             @Override
             public boolean hasNext() throws E {
@@ -818,6 +893,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             private int position = 0;
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public boolean hasNext() throws E {
                 return position < len;
             }
@@ -879,6 +959,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
         return create(new Throwables.Iterator<>() {
             private int position = 0;
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
 
             @Override
             public boolean hasNext() throws E {
@@ -944,6 +1029,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             private int position = 0;
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public boolean hasNext() throws E {
                 return position < len;
             }
@@ -1007,6 +1097,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             private int position = 0;
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public boolean hasNext() throws E {
                 return position < len;
             }
@@ -1068,6 +1163,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
         return create(new Throwables.Iterator<>() {
             private int position = 0;
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
 
             @Override
             public boolean hasNext() throws E {
@@ -1615,8 +1715,45 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public static <T, E extends Exception> Seq<T, E> ofReversed(final List<? extends T> list) {
         final int size = N.size(list);
 
-        //noinspection resource
-        return Seq.<E> range(0, size).map(idx -> list.get(size - idx - 1));
+        if (size == 0) {
+            return empty();
+        }
+
+        if (list instanceof RandomAccess) {
+            //noinspection resource
+            return Seq.<E> range(0, size).map(idx -> list.get(size - idx - 1));
+        }
+
+        // list.get(int) is O(n) on a linked list, which would make the whole traversal O(n^2). Walk backwards
+        // with a ListIterator instead, which is O(1) per element for any List implementation. It is created on
+        // first access so this path stays as lazy as the RandomAccess one above.
+        return create(new Throwables.Iterator<T, E>() {
+            private ListIterator<? extends T> iter = null;
+
+            @Override
+            public boolean hasNext() {
+                init();
+
+                return iter.hasPrevious();
+            }
+
+            @Override
+            public T next() {
+                init();
+
+                if (!iter.hasPrevious()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return iter.previous();
+            }
+
+            private void init() {
+                if (iter == null) {
+                    iter = list.listIterator(size);
+                }
+            }
+        });
     }
 
     /**
@@ -1652,6 +1789,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             private long cnt = n;
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public boolean hasNext() throws E {
                 return cnt > 0;
             }
@@ -1667,12 +1809,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             @Override
-            public void advance(final long n) {
-                if (n <= 0) {
+            public void advance(final long toSkip) { // not `n`: that names the repeat count captured above
+                if (toSkip <= 0) {
                     return;
                 }
 
-                cnt = n >= cnt ? 0 : cnt - n;
+                cnt = toSkip >= cnt ? 0 : cnt - toSkip;
             }
 
             @Override
@@ -1704,10 +1846,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see #range(int, int, int)
      * @see #rangeClosed(int, int)
      */
-    @SuppressWarnings("deprecation")
     public static <E extends Exception> Seq<Integer, E> range(final int startInclusive, final int endExclusive) {
-        //noinspection resource
-        return of(IntStream.range(startInclusive, endExclusive).boxed().iterator());
+        return range(startInclusive, endExclusive, 1);
     }
 
     /**
@@ -1732,10 +1872,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see #range(int, int)
      * @see #rangeClosed(int, int, int)
      */
-    @SuppressWarnings("deprecation")
-    public static <E extends Exception> Seq<Integer, E> range(final int startInclusive, final int endExclusive, final int by) {
-        //noinspection resource
-        return of(IntStream.range(startInclusive, endExclusive, by).boxed().iterator());
+    public static <E extends Exception> Seq<Integer, E> range(final int startInclusive, final int endExclusive, final int by) throws IllegalArgumentException {
+        if (by == 0) {
+            throw new IllegalArgumentException("'by' cannot be zero");
+        }
+
+        if (endExclusive == startInclusive || (endExclusive > startInclusive && by < 0) || (endExclusive < startInclusive && by > 0)) {
+            return empty();
+        }
+
+        final long span = (long) endExclusive - startInclusive;
+
+        return rangeSeq(startInclusive, by, span / by + (span % by == 0 ? 0 : 1));
     }
 
     /**
@@ -1758,10 +1906,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see #range(int, int)
      * @see #rangeClosed(int, int, int)
      */
-    @SuppressWarnings("deprecation")
     public static <E extends Exception> Seq<Integer, E> rangeClosed(final int startInclusive, final int endInclusive) {
-        //noinspection resource
-        return of(IntStream.rangeClosed(startInclusive, endInclusive).boxed().iterator());
+        return rangeClosed(startInclusive, endInclusive, 1);
     }
 
     /**
@@ -1786,10 +1932,83 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see #rangeClosed(int, int)
      * @see #range(int, int, int)
      */
-    @SuppressWarnings("deprecation")
-    public static <E extends Exception> Seq<Integer, E> rangeClosed(final int startInclusive, final int endInclusive, final int by) {
-        //noinspection resource
-        return of(IntStream.rangeClosed(startInclusive, endInclusive, by).boxed().iterator());
+    public static <E extends Exception> Seq<Integer, E> rangeClosed(final int startInclusive, final int endInclusive, final int by)
+            throws IllegalArgumentException {
+        if (by == 0) {
+            throw new IllegalArgumentException("'by' cannot be zero");
+        }
+
+        if (endInclusive == startInclusive) {
+            return of(startInclusive);
+        }
+
+        if ((endInclusive > startInclusive && by < 0) || (endInclusive < startInclusive && by > 0)) {
+            return empty();
+        }
+
+        return rangeSeq(startInclusive, by, ((long) endInclusive - startInclusive) / by + 1);
+    }
+
+    /**
+     * Shared engine for the four {@code range}/{@code rangeClosed} factories: emits
+     * {@code startInclusive + i * by} for {@code i} in {@code [0, count)}.
+     *
+     * <p>Hand-rolled rather than {@code IntStream.range(..).boxed().iterator()}: routing through an
+     * {@link Iterator} discarded the underlying stream's constant-time {@code count()}/{@code advance(long)}, so
+     * {@code Seq.range(0, n).count()} walked and boxed every element, and every {@code Seq.ofReversed(array)}
+     * inherited that cost.</p>
+     *
+     * @param <E> the type of exception that the sequence operations can throw
+     * @param startInclusive the first value emitted
+     * @param by the step between consecutive values; never zero here
+     * @param count how many values to emit; a non-positive count yields an empty sequence
+     * @return a {@code Seq<Integer, E>} over the requested arithmetic progression
+     */
+    private static <E extends Exception> Seq<Integer, E> rangeSeq(final int startInclusive, final int by, final long count) {
+        if (count <= 0) {
+            return empty();
+        }
+
+        return create(new Throwables.Iterator<>() {
+            private long cursor = 0;
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return cursor < count;
+            }
+
+            @Override
+            public Integer next() {
+                if (cursor >= count) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                // Computed in long and narrowed: `count` was derived from int bounds, so every emitted value is
+                // inside the int range and the cast is exact.
+                return (int) (startInclusive + cursor++ * by);
+            }
+
+            @Override
+            public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
+
+                cursor = n >= count - cursor ? count : cursor + n;
+            }
+
+            @Override
+            public long count() {
+                final long result = count - cursor;
+                cursor = count;
+                return result;
+            }
+        });
     }
 
     /**
@@ -1860,9 +2079,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     }
 
     private static final Splitter lineSplitter = Splitter.forLines();
-    private static final Splitter trimLineSplitter = Splitter.forLines().trimResults();
+    // stripResults(), not trimResults(): Splitter.trimResults() removes only the space character U+0020, so a
+    // tab-only line would survive both `trim` and `omitEmptyLines`. stripResults() removes whitespace per
+    // Character.isWhitespace, which is what splitToLines(str, trim, omitEmptyLines) documents.
+    private static final Splitter trimLineSplitter = Splitter.forLines().stripResults();
     private static final Splitter omitEmptyLinesLineSplitter = Splitter.forLines().omitEmptyStrings();
-    private static final Splitter trimAndOmitEmptyLinesLineSplitter = Splitter.forLines().trimResults().omitEmptyStrings();
+    private static final Splitter trimAndOmitEmptyLinesLineSplitter = Splitter.forLines().stripResults().omitEmptyStrings();
 
     /**
      * Splits the given string into a sequence of lines.
@@ -1905,7 +2127,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * @param <E> the type of exception that the sequence operations can throw.
      * @param str the string to split into lines.
-     * @param trim if {@code true}, trims whitespace from the beginning and end of each line.
+     * @param trim if {@code true}, strips leading and trailing whitespace (per
+     *        {@link Character#isWhitespace(char)}) from each line.
      * @param omitEmptyLines if {@code true}, omits empty lines (or whitespace-only lines if trim is {@code true}) from the result.
      * @return a {@code Seq<String, E>} containing the processed lines (an empty sequence if the string is {@code null}).
      * @see #splitToLines(String)
@@ -1951,8 +2174,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      */
     public static <T, E extends Exception> Seq<T, E> splitByChunkCount(final int totalSize, final int maxChunkCount,
             final Throwables.IntBiFunction<? extends T, ? extends E> mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, cs.mapper);
-
+        // No local checks: the delegate validates all three arguments, and duplicating the mapper check here made
+        // the two overloads report a different argument first for the same invalid call.
         return splitByChunkCount(totalSize, maxChunkCount, false, mapper);
     }
 
@@ -2016,7 +2239,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
-                    return mapper.apply(cursor, cursor = (cnt++ < smallerCount ? cursor + smallerSize : cursor + biggerSize));
+                    final int from = cursor;
+                    cursor += cnt++ < smallerCount ? smallerSize : biggerSize;
+
+                    return mapper.apply(from, cursor);
                 }
 
                 @Override
@@ -2055,7 +2281,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
-                    return mapper.apply(cursor, cursor = (cnt++ < biggerCount ? cursor + biggerSize : cursor + smallerSize));
+                    final int from = cursor;
+                    cursor += cnt++ < biggerCount ? biggerSize : smallerSize;
+
+                    return mapper.apply(from, cursor);
                 }
 
                 @Override
@@ -2096,6 +2325,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }
      * }</pre>
      *
+     * <p>The file is opened by the first terminal operation, not by this method: if it does not exist or cannot
+     * be read, the {@link IOException} is thrown from that terminal operation.</p>
+     *
      * @param file the file to read lines from.
      * @return a {@code Seq<String, IOException>} containing the lines of the file.
      * @throws IllegalArgumentException if {@code file} is {@code null}.
@@ -2103,7 +2335,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see #ofLines(Path)
      * @see #splitToLines(String)
      */
-    public static Seq<String, IOException> ofLines(final File file) {
+    public static Seq<String, IOException> ofLines(final File file) throws IllegalArgumentException {
         return ofLines(file, IOUtil.DEFAULT_CHARSET);
     }
 
@@ -2119,6 +2351,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *          .forEach(System.out::println);
      * }
      * }</pre>
+     *
+     * <p>The file is opened by the first terminal operation, not by this method: if it does not exist or cannot
+     * be read, the {@link IOException} is thrown from that terminal operation.</p>
      *
      * @param file the file to read lines from.
      * @param charset the charset to use for decoding the file; if {@code null}, the default charset is used.
@@ -2148,13 +2383,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }
      * }</pre>
      *
+     * <p>The file is opened by the first terminal operation, not by this method: if it does not exist or cannot
+     * be read, the {@link IOException} is thrown from that terminal operation.</p>
+     *
      * @param path the path to read lines from.
      * @return a {@code Seq<String, IOException>} containing the lines of the file.
      * @throws IllegalArgumentException if {@code path} is {@code null}.
      * @see #ofLines(Path, Charset)
      * @see #ofLines(File)
      */
-    public static Seq<String, IOException> ofLines(final Path path) {
+    public static Seq<String, IOException> ofLines(final Path path) throws IllegalArgumentException {
         return ofLines(path, IOUtil.DEFAULT_CHARSET);
     }
 
@@ -2170,6 +2408,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *     System.out.println("Total lines: " + count);
      * }
      * }</pre>
+     *
+     * <p>The file is opened by the first terminal operation, not by this method: if it does not exist or cannot
+     * be read, the {@link IOException} is thrown from that terminal operation.</p>
      *
      * @param path the path to read lines from.
      * @param charset the charset to use for decoding the file; if {@code null}, the default charset is used.
@@ -2229,19 +2470,32 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }</pre>
      *
      * @param reader the Reader to read lines from.
-     * @param closeReaderWhenStreamIsClosed if {@code true}, the input {@code Reader} will be closed when the sequence is closed.
+     * @param closeReaderWhenStreamIsClosed if {@code true}, the input {@code Reader} will be closed when the sequence
+     *        is closed, whether or not the sequence was ever traversed.
      * @return a {@code Seq<String, IOException>} containing the lines read from the Reader.
      * @throws IllegalArgumentException if {@code reader} is {@code null}.
      * @see #ofLines(Reader)
      * @see #ofLines(File)
      */
     public static Seq<String, IOException> ofLines(final Reader reader, final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
-        N.checkArgNotNull(reader);
+        N.checkArgNotNull(reader, cs.reader);
 
-        final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(null, null, IOUtil.DEFAULT_CHARSET, reader, closeReaderWhenStreamIsClosed);
+        // `closeReader` is false even when the caller asked for closing: the sequence's own close handler below
+        // owns this Reader instead of the line iterator. The iterator is built lazily, so it releases nothing when
+        // its supplier never ran - which left an ALREADY-OPEN caller-supplied Reader dangling whenever the sequence
+        // was closed without pulling an element (`close()` on an untraversed sequence, or an ordinary
+        // `limit(0).toList()`). The File/Path overloads keep the iterator as owner because the reader they close is
+        // one they opened themselves. Single ownership also keeps a traversed sequence from closing twice.
+        final Throwables.Iterator<String, IOException> iter = createLazyLineIterator(null, null, IOUtil.DEFAULT_CHARSET, reader, false);
 
         if (closeReaderWhenStreamIsClosed) {
-            return of(iter).onClose(iter::closeResource); //NOSONAR
+            return of(iter).onClose(() -> { //NOSONAR
+                try {
+                    iter.closeResource();
+                } finally {
+                    IOUtil.close(reader);
+                }
+            });
         } else {
             return of(iter); //NOSONAR
         }
@@ -2262,11 +2516,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param parentPath the parent directory to list files from.
      * @return a {@code Seq<File, IOException>} containing all entries in the directory.
      *         Returns an empty sequence if the directory doesn't exist or is not a directory.
-     * @throws NullPointerException if parentPath is {@code null}
+     * @throws IllegalArgumentException if {@code parentPath} is {@code null}
      * @see #listFiles(File, boolean)
      * @see File#listFiles()
      */
-    public static Seq<File, IOException> listFiles(final File parentPath) {
+    public static Seq<File, IOException> listFiles(final File parentPath) throws IllegalArgumentException {
+        N.checkArgNotNull(parentPath, cs.parentPath);
+
         if (!parentPath.exists()) {
             return empty();
         }
@@ -2281,6 +2537,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * If recursively is {@code true}, all descendant files are listed.
      * Directories are included in the results in both modes; when {@code recursively} is {@code true}, subdirectories are also traversed.
      * The method uses a breadth-first traversal when recursive listing is enabled.
+     *
+     * <p>A symbolic link to a directory is reported as an element but is never descended into, matching
+     * {@link IOUtil#listFiles(File, boolean, boolean)} and {@link Stream#listFiles(File, boolean)}. A link is
+     * therefore never followed out of the tree, and a cyclic link cannot make the traversal run forever.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2301,11 +2561,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return a sequence containing File objects representing the files in the parent directory.
      *         Returns an empty sequence if the parent directory doesn't exist or is not a directory.
      *         When recursive, the sequence includes both files and directories.
-     * @throws NullPointerException if parentPath is {@code null}
+     * @throws IllegalArgumentException if {@code parentPath} is {@code null}
      * @see #listFiles(File)
      * @see File#listFiles()
      */
-    public static Seq<File, IOException> listFiles(final File parentPath, final boolean recursively) {
+    public static Seq<File, IOException> listFiles(final File parentPath, final boolean recursively) throws IllegalArgumentException {
+        N.checkArgNotNull(parentPath, cs.parentPath);
+
         if (!parentPath.exists()) {
             return empty();
         } else if (!recursively) {
@@ -2360,12 +2622,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
              * @return the next file
              * @throws NoSuchElementException if no more files are available
              */
-            public File next() {
+            public File next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                if (subFiles[cursor].isDirectory()) {
+                // A symlinked directory is emitted but NOT queued for traversal. isDirectory() follows the link, so
+                // queueing it would walk the link's target - escaping the tree, and looping forever on a link that
+                // points at one of its own ancestors. Stream.listFiles(..) and IOUtil.listFiles(..) exclude it too.
+                // isSymbolicLink() is false for a Windows directory junction (MOUNT_POINT reparse tag),
+                // so this used to descend through one - looping on a self-junction and, with no cycle at
+                // all, walking out of the tree entirely. IOUtil.listFiles uses the same predicate.
+                if (subFiles[cursor].isDirectory() && !IOUtil.isSymbolicLinkOrJunction(subFiles[cursor])) {
                     paths.offer(subFiles[cursor]);
                 }
 
@@ -2380,7 +2648,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Creates a lazy iterator for reading lines from a file, path, or reader.
      * This is an internal helper method used by various line reading methods.
      * The iterator lazily reads lines from the source as they are requested.
-     * The BufferedReader is created lazily on first access and is properly closed when the iterator is closed.
+     * The BufferedReader is opened on the first {@code hasNext()}/{@code next()} call and is properly closed when
+     * the iterator is closed. Failing to open the source surfaces as an {@link IOException} (never as an
+     * {@link UncheckedIOException}), so it matches the {@code Seq<String, IOException>} the callers hand out.
      *
      * @param file the file to read lines from, can be {@code null} if path or reader is provided
      * @param path the path to read lines from, can be {@code null} if file or reader is provided
@@ -2399,20 +2669,32 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             public synchronized Throwables.Iterator<String, IOException> get() {
                 if (lazyIter == null) {
                     lazyIter = new Throwables.Iterator<>() {
-                        private final BufferedReader bufferedReader;
-
-                        { //NOSONAR
-                            if (reader != null) {
-                                bufferedReader = reader instanceof BufferedReader ? ((BufferedReader) reader) : new BufferedReader(reader);
-                            } else if (file != null) {
-                                bufferedReader = IOUtil.newBufferedReader(file, charset == null ? IOUtil.DEFAULT_CHARSET : charset);
-                            } else {
-                                bufferedReader = IOUtil.newBufferedReader(path, charset == null ? IOUtil.DEFAULT_CHARSET : charset);
-                            }
-                        }
+                        // Opened from openReader() rather than from an instance initializer: an initializer cannot throw a
+                        // checked exception, so the reader had to be created through IOUtil's UncheckedIOException-throwing
+                        // factories, and a missing/unreadable file escaped a Seq<String, IOException> as an *unchecked*
+                        // exception that `catch (IOException)` around the pipeline could not see.
+                        private BufferedReader bufferedReader;
 
                         private String cachedLine;
                         private boolean finished = false;
+
+                        private void openReader() throws IOException {
+                            if (bufferedReader != null) {
+                                return;
+                            }
+
+                            try {
+                                if (reader != null) {
+                                    bufferedReader = reader instanceof BufferedReader ? ((BufferedReader) reader) : new BufferedReader(reader);
+                                } else if (file != null) {
+                                    bufferedReader = IOUtil.newBufferedReader(file, charset == null ? IOUtil.DEFAULT_CHARSET : charset);
+                                } else {
+                                    bufferedReader = IOUtil.newBufferedReader(path, charset == null ? IOUtil.DEFAULT_CHARSET : charset);
+                                }
+                            } catch (final UncheckedIOException e) {
+                                throw e.getCause() != null ? (IOException) e.getCause() : new IOException(e);
+                            }
+                        }
 
                         /**
                          * Returns whether another line can be read from the buffered reader.
@@ -2425,7 +2707,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                          * }</pre>
                          *
                          * @return {@code true} if another line is available
-                         * @throws IOException if an I/O error occurs while reading
+                         * @throws IOException if opening the source or reading the next line fails
                          */
                         public boolean hasNext() throws IOException {
                             if (cachedLine != null) {
@@ -2433,6 +2715,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                             } else if (finished) {
                                 return false;
                             } else {
+                                openReader();
+
                                 cachedLine = bufferedReader.readLine();
                                 if (cachedLine == null) {
                                     finished = true;
@@ -2454,10 +2738,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                          * }</pre>
                          *
                          * @return the next line
-                         * @throws IOException if an I/O error occurs while reading
                          * @throws NoSuchElementException if no more lines are available
+                         * @throws IOException if opening the source or reading the next line fails
                          */
-                        public String next() throws IOException {
+                        public String next() throws NoSuchElementException, IOException {
                             if (!hasNext()) {
                                 throw new NoSuchElementException("No more lines");
                             } else {
@@ -2470,7 +2754,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                         @Override
                         protected void closeResourceInternal() {
                             if (closeReader) {
-                                IOUtil.close(bufferedReader);
+                                IOUtil.close(bufferedReader); // null-safe: the reader may never have been opened.
                             }
                         }
                     };
@@ -2495,7 +2779,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Seq<Integer, Exception> result = Seq.concat(a1, a2);
      * // result contains: [1, 2, 3, 4, 5, 6]
      *
-     * Seq<Integer, Exception> empty = Seq.concat();
+     * Seq<Integer, Exception> empty = Seq.empty();
      * // empty.count() returns 0
      *
      * Integer[] a3 = null;
@@ -2575,7 +2859,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Seq<String, Exception> result = Seq.concat(iter1, iter2);
      * // result contains: ["a", "b", "c", "d"]
      *
-     * Seq<String, Exception> empty = Seq.concat();
+     * Seq<String, Exception> empty = Seq.empty();
      * // empty.count() returns 0
      *
      * Seq<String, Exception> withNull = Seq.concat(iter1, null, iter2);
@@ -2615,7 +2899,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Seq<String, Exception> result = Seq.concat(seq1, seq2);
      * // result contains: ["a", "b", "c", "d"]
      *
-     * Seq<String, Exception> empty = Seq.concat();
+     * Seq<String, Exception> empty = Seq.empty();
      * // empty.count() returns 0
      *
      * Seq<String, Exception> withNull = Seq.concat(seq1, null, seq2);
@@ -2691,7 +2975,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     }
 
                     cur = iterators.next();
-                    iter = cur == null ? null : cur.elements;
+                    // iterate(..) rather than cur.elements: each source is lifecycle-checked as it is activated.
+                    iter = cur == null ? null : iterate(cur);
                 }
 
                 return iter != null && iter.hasNext();
@@ -2712,7 +2997,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Zips two arrays into a single sequence by combining corresponding elements using the provided zip function.
      * The resulting sequence length is equal to the length of the shorter input array.
      * Elements are combined by applying the zip function to elements at the same index from both arrays.
-     * This is a lazy operation - arrays are not accessed until the sequence is consumed.
+     * The array lengths are read by this call; the elements themselves are only read as the sequence is consumed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2756,7 +3041,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                return zipFunction.apply(a[cursor], b[cursor++]);
+                // Advance only after a successful apply, so the cursor never points past a pair the
+                // zipper rejected. This matches the padding zip overloads; note that a Seq closes itself
+                // on failure (closeAfterFailure), so the un-advanced cursor is an invariant, not a retry.
+                final T ret = zipFunction.apply(a[cursor], b[cursor]);
+                cursor++;
+                return ret;
             }
         });
     }
@@ -2765,7 +3055,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Zips three arrays into a single sequence by combining corresponding elements using the provided zip function.
      * The resulting sequence length is equal to the length of the shortest input array.
      * Elements are combined by applying the zip function to elements at the same index from all three arrays.
-     * This is a lazy operation - arrays are not accessed until the sequence is consumed.
+     * The array lengths are read by this call; the elements themselves are only read as the sequence is consumed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2811,7 +3101,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                return zipFunction.apply(a[cursor], b[cursor], c[cursor++]);
+                final T ret = zipFunction.apply(a[cursor], b[cursor], c[cursor]);
+                cursor++;
+                return ret;
             }
         });
     }
@@ -2820,7 +3112,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Zips two iterables into a single sequence by combining corresponding elements using the provided zip function.
      * The resulting sequence length is equal to the length of the shorter input iterable.
      * Elements are combined by applying the zip function to elements at the same position from both iterables.
-     * This is a lazy operation - iterables are not accessed until the sequence is consumed.
+     * Iterators are obtained by this call; their elements and the zip function are evaluated lazily as the sequence is consumed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2856,7 +3148,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Zips three iterables into a single sequence by combining corresponding elements using the provided zip function.
      * The resulting sequence length is equal to the length of the shortest input iterable.
      * Elements are combined by applying the zip function to elements at the same position from all three iterables.
-     * This is a lazy operation - iterables are not accessed until the sequence is consumed.
+     * Iterators are obtained by this call; their elements and the zip function are evaluated lazily as the sequence is consumed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3020,22 +3312,29 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      */
     public static <A, B, T, E extends Exception> Seq<T, E> zip(final Seq<? extends A, E> a, final Seq<? extends B, E> b,
             final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction, cs.zipFunction);
+        // Built before anything is touched - see closeAllThenRethrow.
+        final LocalRunnable closeAll = newCloseHandler(Array.asList(a, b));
 
-        return create(new Throwables.Iterator<>() {
-            private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
-            private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
+        try {
+            N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-            @Override
-            public boolean hasNext() throws E {
-                return iterA.hasNext() && iterB.hasNext();
-            }
+            return create(new Throwables.Iterator<>() {
+                private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
+                private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
 
-            @Override
-            public T next() throws E {
-                return zipFunction.apply(iterA.next(), iterB.next());
-            }
-        }, newCloseHandler(Array.asList(a, b)));
+                @Override
+                public boolean hasNext() throws E {
+                    return iterA.hasNext() && iterB.hasNext();
+                }
+
+                @Override
+                public T next() throws E {
+                    return zipFunction.apply(iterA.next(), iterB.next());
+                }
+            }, closeAll);
+        } catch (final RuntimeException e) {
+            throw closeAllThenRethrow(closeAll, e);
+        }
     }
 
     /**
@@ -3072,30 +3371,37 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      */
     public static <A, B, C, T, E extends Exception> Seq<T, E> zip(final Seq<? extends A, E> a, final Seq<? extends B, E> b, final Seq<? extends C, E> c,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction, cs.zipFunction);
+        // Built before anything is touched - see closeAllThenRethrow.
+        final LocalRunnable closeAll = newCloseHandler(Array.asList(a, b, c));
 
-        return create(new Throwables.Iterator<>() {
-            private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
-            private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
-            private final Throwables.Iterator<? extends C, E> iterC = iterate(c);
+        try {
+            N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-            @Override
-            public boolean hasNext() throws E {
-                return iterA.hasNext() && iterB.hasNext() && iterC.hasNext();
-            }
+            return create(new Throwables.Iterator<>() {
+                private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
+                private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
+                private final Throwables.Iterator<? extends C, E> iterC = iterate(c);
 
-            @Override
-            public T next() throws E {
-                return zipFunction.apply(iterA.next(), iterB.next(), iterC.next());
-            }
-        }, newCloseHandler(Array.asList(a, b, c)));
+                @Override
+                public boolean hasNext() throws E {
+                    return iterA.hasNext() && iterB.hasNext() && iterC.hasNext();
+                }
+
+                @Override
+                public T next() throws E {
+                    return zipFunction.apply(iterA.next(), iterB.next(), iterC.next());
+                }
+            }, closeAll);
+        } catch (final RuntimeException e) {
+            throw closeAllThenRethrow(closeAll, e);
+        }
     }
 
     /**
      * Zips two arrays into a single sequence by combining corresponding elements using the provided zip function.
      * If one array is shorter than the other, the provided default values are used for the missing elements.
      * The resulting sequence length is equal to the length of the longer input array.
-     * This is a lazy operation - arrays are not accessed until the sequence is consumed.
+     * The array lengths are read by this call; the elements themselves are only read as the sequence is consumed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3154,7 +3460,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Zips three arrays into a single sequence by combining corresponding elements using the provided zip function.
      * If one array is shorter than the others, the provided default values are used for the missing elements.
      * The resulting sequence length is equal to the length of the longest input array.
-     * This is a lazy operation - arrays are not accessed until the sequence is consumed.
+     * The array lengths are read by this call; the elements themselves are only read as the sequence is consumed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3220,7 +3526,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Zips two iterables into a single sequence by combining corresponding elements using the provided zip function.
      * If one iterable is shorter than the other, the provided default values are used for the missing elements.
      * The resulting sequence length is equal to the length of the longer input iterable.
-     * This is a lazy operation - iterables are not accessed until the sequence is consumed.
+     * Iterators are obtained by this call; their elements and the zip function are evaluated lazily as the sequence is consumed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3253,7 +3559,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Zips three iterables into a single sequence by combining corresponding elements using the provided zip function.
      * If one iterable is shorter than the others, the provided default values are used for the missing elements.
      * The resulting sequence length is equal to the length of the longest input iterable.
-     * This is a lazy operation - iterables are not accessed until the sequence is consumed.
+     * Iterators are obtained by this call; their elements and the zip function are evaluated lazily as the sequence is consumed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3432,26 +3738,33 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      */
     public static <A, B, T, E extends Exception> Seq<T, E> zip(final Seq<? extends A, E> a, final Seq<? extends B, E> b, final A valueForNoneA,
             final B valueForNoneB, final Throwables.BiFunction<? super A, ? super B, ? extends T, ? extends E> zipFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction, cs.zipFunction);
+        // Built before anything is touched - see closeAllThenRethrow.
+        final LocalRunnable closeAll = newCloseHandler(Array.asList(a, b));
 
-        return create(new Throwables.Iterator<>() {
-            private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
-            private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
+        try {
+            N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-            @Override
-            public boolean hasNext() throws E {
-                return iterA.hasNext() || iterB.hasNext();
-            }
+            return create(new Throwables.Iterator<>() {
+                private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
+                private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
 
-            @Override
-            public T next() throws E {
-                if (!hasNext()) {
-                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                @Override
+                public boolean hasNext() throws E {
+                    return iterA.hasNext() || iterB.hasNext();
                 }
 
-                return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB);
-            }
-        }, newCloseHandler(Array.asList(a, b)));
+                @Override
+                public T next() throws E {
+                    if (!hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB);
+                }
+            }, closeAll);
+        } catch (final RuntimeException e) {
+            throw closeAllThenRethrow(closeAll, e);
+        }
     }
 
     /**
@@ -3491,28 +3804,35 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public static <A, B, C, T, E extends Exception> Seq<T, E> zip(final Seq<? extends A, E> a, final Seq<? extends B, E> b, final Seq<? extends C, E> c,
             final A valueForNoneA, final B valueForNoneB, final C valueForNoneC,
             final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends T, ? extends E> zipFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction, cs.zipFunction);
+        // Built before anything is touched - see closeAllThenRethrow.
+        final LocalRunnable closeAll = newCloseHandler(Array.asList(a, b, c));
 
-        return create(new Throwables.Iterator<>() {
-            private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
-            private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
-            private final Throwables.Iterator<? extends C, E> iterC = iterate(c);
+        try {
+            N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-            @Override
-            public boolean hasNext() throws E {
-                return iterA.hasNext() || iterB.hasNext() || iterC.hasNext();
-            }
+            return create(new Throwables.Iterator<>() {
+                private final Throwables.Iterator<? extends A, E> iterA = iterate(a);
+                private final Throwables.Iterator<? extends B, E> iterB = iterate(b);
+                private final Throwables.Iterator<? extends C, E> iterC = iterate(c);
 
-            @Override
-            public T next() throws E {
-                if (!hasNext()) {
-                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                @Override
+                public boolean hasNext() throws E {
+                    return iterA.hasNext() || iterB.hasNext() || iterC.hasNext();
                 }
 
-                return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
-                        iterC.hasNext() ? iterC.next() : valueForNoneC);
-            }
-        }, newCloseHandler(Array.asList(a, b, c)));
+                @Override
+                public T next() throws E {
+                    if (!hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return zipFunction.apply(iterA.hasNext() ? iterA.next() : valueForNoneA, iterB.hasNext() ? iterB.next() : valueForNoneB,
+                            iterC.hasNext() ? iterC.next() : valueForNoneC);
+                }
+            }, closeAll);
+        } catch (final RuntimeException e) {
+            throw closeAllThenRethrow(closeAll, e);
+        }
     }
 
     /**
@@ -3785,9 +4105,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      */
     public static <T, E extends Exception> Seq<T, E> merge(final Seq<? extends T, E> a, final Seq<? extends T, E> b,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws IllegalArgumentException {
-        N.checkArgNotNull(nextSelector, cs.nextSelector);
+        // Built before anything is touched - see closeAllThenRethrow.
+        final LocalRunnable closeAll = newCloseHandler(Array.asList(a, b));
 
-        return mergeIterators(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(Array.asList(a, b)));
+        try {
+            N.checkArgNotNull(nextSelector, cs.nextSelector);
+
+            return mergeIterators(iterate(a), iterate(b), nextSelector).onClose(closeAll);
+        } catch (final RuntimeException e) {
+            throw closeAllThenRethrow(closeAll, e);
+        }
     }
 
     /**
@@ -3819,9 +4146,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      */
     public static <T, E extends Exception> Seq<T, E> merge(final Seq<? extends T, E> a, final Seq<? extends T, E> b, final Seq<? extends T, E> c,
             final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector) throws IllegalArgumentException {
-        N.checkArgNotNull(nextSelector, cs.nextSelector);
+        // Built before anything is touched - see closeAllThenRethrow. The two-input merge below closes only the
+        // inputs it reached, so c (and, when the rejection happens before the inner merge, a and b too) would be
+        // stranded without this.
+        final LocalRunnable closeAll = newCloseHandler(Array.asList(a, b, c));
 
-        return merge(merge(a, b, nextSelector), c, nextSelector);
+        try {
+            N.checkArgNotNull(nextSelector, cs.nextSelector);
+
+            return merge(merge(a, b, nextSelector), c, nextSelector);
+        } catch (final RuntimeException e) {
+            throw closeAllThenRethrow(closeAll, e);
+        }
     }
 
     /**
@@ -3929,6 +4265,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         return create(new Throwables.Iterator<>() {
@@ -3961,7 +4298,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
                 return next;
             }
-        }, sorted, cmp, closeHandlers);
+        }, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
@@ -3974,12 +4311,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String, Exception> names = Seq.of("Alice", "Bob", "Charlie", "David");
-     * Seq<String, Exception> shortNames = names.filter(
+     * List<String> shortNames = names.filter(
      *     name -> name.length() <= 3,
      *     droppedName -> System.out.println("Filtered out: " + droppedName)
-     * );
-     * // Prints: "Filtered out: Alice", "Filtered out: Charlie", "Filtered out: David"
-     * // Result: ["Bob"]
+     * ).toList();
+     * // shortNames: ["Bob"]
+     * // Prints, while toList() consumes the sequence: "Filtered out: Alice", "Filtered out: Charlie", "Filtered out: David"
+     * // (nothing is dropped - and nothing is printed - until a terminal operation runs)
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
@@ -3995,6 +4333,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Seq<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate, final Throwables.Consumer<? super T, ? extends E> onDrop)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(onDrop, cs.onDrop);
 
@@ -4015,6 +4354,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p>This operation is short-circuiting - it stops evaluating elements once the predicate returns {@code false}.</p>
      *
+     * <p>The first element for which the predicate returns {@code false} is read from the source <i>before</i> it
+     * is tested, so it is consumed and then discarded; nothing after it is read. On a shared or resource-backed
+     * source that element is gone - {@code Seq.of(iterator).takeWhile(n -> n < 3)} over {@code [1, 2, 3, 4]}
+     * yields {@code [1, 2]} and leaves {@code [4]}, not {@code [3, 4]}, in the underlying iterator.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer, Exception> numbers = Seq.of(1, 3, 5, 2, 7, 9);
@@ -4032,6 +4376,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> takeWhile(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         return create(new Throwables.Iterator<>() {
@@ -4064,7 +4409,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
                 return next;
             }
-        }, sorted, cmp, closeHandlers);
+        }, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
@@ -4085,13 +4430,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
      * @param predicate the predicate to apply to each element to determine if it should be dropped
-     * @return a new sequence containing the elements after the predicate becomes false
+     * @return a new sequence containing the elements after the predicate becomes false; a source or
+     *         predicate failure does not complete the dropping phase, and consumed elements are not replayed
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @IntermediateOp
     public Seq<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         return create(new Throwables.Iterator<>() {
@@ -4103,8 +4450,6 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             public boolean hasNext() throws E {
                 if (!hasNext) {
                     if (!dropped) {
-                        dropped = true;
-
                         while (elements.hasNext()) {
                             next = elements.next();
 
@@ -4113,6 +4458,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                                 break;
                             }
                         }
+                        dropped = true;
                     } else if (elements.hasNext()) {
                         next = elements.next();
                         hasNext = true;
@@ -4133,7 +4479,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 return next;
             }
 
-        }, sorted, cmp, closeHandlers);
+        }, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
@@ -4147,12 +4493,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String, Exception> words = Seq.of("a", "an", "the", "quick", "brown");
-     * Seq<String, Exception> result = words.dropWhile(
+     * List<String> result = words.dropWhile(
      *     word -> word.length() <= 3,
      *     droppedWord -> System.out.println("Dropped: " + droppedWord)
-     * );
-     * // Prints: "Dropped: a", "Dropped: an", "Dropped: the"
-     * // Result: ["quick", "brown"]
+     * ).toList();
+     * // result: ["quick", "brown"]
+     * // Prints, while toList() consumes the sequence: "Dropped: a", "Dropped: an", "Dropped: the"
+     * // (nothing is dropped - and nothing is printed - until a terminal operation runs)
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
@@ -4168,6 +4515,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Seq<T, E> dropWhile(final Throwables.Predicate<? super T, ? extends E> predicate, final Throwables.Consumer<? super T, ? extends E> onDrop)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(onDrop, cs.onDrop);
 
@@ -4207,6 +4555,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> skipUntil(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         return dropWhile(Fnn.not(predicate));
@@ -4214,7 +4563,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
     /**
      * Returns a sequence consisting of the distinct elements of this sequence.
-     * Uses the natural equality (equals/hashCode) of elements to determine uniqueness.
+     * Uniqueness is decided by {@code equals}/{@code hashCode}, except that array elements are compared by
+     * <i>content</i> rather than by identity (via {@link Wrapper#of(Object)}, i.e. {@link N#deepEquals(Object, Object)}),
+     * and {@code null} counts as a value of its own. Note that {@link #containsAll(Collection)} and
+     * {@link #containsAny(Collection)} do <i>not</i> share this rule: they compare arrays by identity.
      * This is an intermediate operation that does not consume the sequence.
      *
      * <p>The order of elements is preserved, with the first occurrence of each distinct element retained.</p>
@@ -4226,10 +4578,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // Result: [1, 2, 3, 4, 5]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily and fully short-circuiting; retains the distinct keys seen so far (not the elements themselves).
      *
      * @return a new sequence containing distinct elements
      * @throws IllegalStateException if the sequence is already closed
+     * @see #containsDuplicates()
      */
     @IntermediateOp
     public Seq<T, E> distinct() throws IllegalStateException {
@@ -4245,10 +4598,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * using the provided merge function to handle duplicates.
      * When duplicate elements are encountered, the merge function determines which element to keep.
      *
-     * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
-     * loaded into memory to perform the distinct operation.</p>
+     * <p>This is an intermediate operation that triggers terminal evaluation. The upstream is traversed in full
+     * and one merged value per distinct key is retained in memory.</p>
      *
-     * <p>This method is equivalent to: {@code groupBy(Fnn.identity(), Fnn.identity(), mergeFunction, Suppliers.ofLinkedHashMap()).map(Fnn.value())}.</p>
+     * <p>This method is equivalent to: {@code groupBy(Fnn.identity(), Fnn.identity(), mergeFunction, Suppliers.ofLinkedHashMap()).map(Fnn.value())},
+     * except that the grouping key is normalized the way {@link #distinct()} normalizes it, so array elements are
+     * compared by content rather than by identity.</p>
+     *
+     * <p>A {@code null} result from {@code mergeFunction} removes the element from the result, as
+     * {@link Map#merge(Object, Object, BiFunction)} does. In particular a merge function such as {@code (a, b) -> a}
+     * returns {@code null} when the duplicated element itself is {@code null}, so a {@code null} element that occurs
+     * more than once disappears while a single {@code null} is kept; this differs from {@link #distinct()}, which
+     * always keeps one {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4259,9 +4620,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // Result: [2, 4, 3, 4] (one entry per distinct element, in encounter order)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; retains one merged value per distinct key; memory usage depends on those values.
      *
-     * @param mergeFunction the function to merge elements that are considered equal
+     * @param mergeFunction the function to merge elements that are considered equal; a {@code null} result drops the
+     *        element
      * @return a new sequence containing distinct elements
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}.
@@ -4270,6 +4632,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @TerminalOpTriggered
     public Seq<T, E> distinct(final Throwables.BinaryOperator<T, ? extends E> mergeFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mergeFunction, cs.mergeFunction);
 
         return distinctBy(Fnn.identity(), mergeFunction);
@@ -4279,6 +4642,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Returns a sequence consisting of the distinct elements of this sequence,
      * where distinct elements are determined by the provided key extractor function.
      * Elements with the same key (as determined by the key extractor) are considered duplicates.
+     * Keys are compared the way {@link #distinct()} compares elements: by {@code equals}/{@code hashCode}, except that
+     * an array key is compared by <i>content</i> rather than by identity, and a {@code null} key counts as a value of
+     * its own.
      * This is an intermediate operation that does not consume the sequence.
      *
      * <p>The order of elements is preserved, with the first occurrence of each distinct key retained.</p>
@@ -4297,7 +4663,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // result: [Person[name=Alice, age=30], Person[name=Bob, age=25]]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily and fully short-circuiting; retains the distinct keys seen so far (not the elements themselves).
      *
      * @param keyMapper the function to extract the key from the elements
      * @return a new sequence containing distinct elements based on the extracted keys
@@ -4307,6 +4673,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> distinctBy(final Throwables.Function<? super T, ?, ? extends E> keyMapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         final Set<Object> set = N.newHashSet();
@@ -4319,10 +4686,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * where distinct elements are determined by the provided key extractor function.
      * If multiple elements have the same key, they are merged using the provided merge function.
      *
-     * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
-     * loaded into memory to perform the distinct operation.</p>
+     * <p>This is an intermediate operation that triggers terminal evaluation. The upstream is traversed in full
+     * and one merged value per distinct key is retained in memory.</p>
      *
-     * <p>This method is equivalent to: {@code groupBy(keyMapper, Fnn.identity(), mergeFunction, Suppliers.ofLinkedHashMap()).map(Fnn.value())}.</p>
+     * <p>This method is equivalent to: {@code groupBy(keyMapper, Fnn.identity(), mergeFunction, Suppliers.ofLinkedHashMap()).map(Fnn.value())},
+     * except that the grouping key is normalized the way {@link #distinct()} normalizes it, so an array key is
+     * compared by content rather than by identity.</p>
+     *
+     * <p>A {@code null} result from {@code mergeFunction} removes the whole group from the result, as
+     * {@link Map#merge(Object, Object, BiFunction)} does. In particular a merge function such as {@code (a, b) -> a}
+     * returns {@code null} when the merged elements are themselves {@code null}, so a {@code null} element that occurs
+     * more than once under the same key disappears while a single {@code null} is kept; this differs from
+     * {@link #distinctBy(Throwables.Function)}, which always keeps the first element seen for each key.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4341,10 +4716,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // result: [Sale[product=Apple, amount=25], Sale[product=Banana, amount=5]]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; retains one merged value per distinct key; memory usage depends on those values.
      *
      * @param keyMapper the function to extract the key from the elements
-     * @param mergeFunction the function to merge elements that have the same key
+     * @param mergeFunction the function to merge elements that have the same key; a {@code null} result drops the
+     *        whole group
      * @return a new sequence containing distinct elements based on the extracted keys
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code mergeFunction} is {@code null}.
@@ -4354,13 +4730,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Seq<T, E> distinctBy(final Throwables.Function<? super T, ?, ? extends E> keyMapper, final Throwables.BinaryOperator<T, ? extends E> mergeFunction)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(mergeFunction, cs.mergeFunction);
 
         final Supplier<? extends Map<Object, T>> supplier = Suppliers.ofLinkedHashMap();
 
+        // hashKey(..) - the same normalization distinct()/distinctBy(keyMapper) apply - so an array key compares by
+        // content here too and the merge overloads cannot disagree with them about what a duplicate is.
+        final Throwables.Function<? super T, ?, ? extends E> normalizedKeyMapper = t -> hashKey(keyMapper.apply(t));
+
         //noinspection resource
-        return groupBy(keyMapper, Fnn.identity(), mergeFunction, supplier).map(Fnn.value());
+        return groupBy(normalizedKeyMapper, Fnn.identity(), mergeFunction, supplier).map(Fnn.value());
     }
 
     /**
@@ -4391,6 +4772,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public <R> Seq<R, E> map(final Throwables.Function<? super T, ? extends R, ? extends E> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         return create(new Throwables.Iterator<>() {
@@ -4403,7 +4785,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             public R next() throws E {
                 return mapper.apply(elements.next());
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -4432,6 +4814,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> mapIfNotNull(final Throwables.Function<? super T, ? extends R, ? extends E> mapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         //noinspection resource
@@ -4467,6 +4850,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Seq<T, E> mapFirst(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForFirst)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapperForFirst, cs.mapperForFirst);
 
         return create(new Throwables.Iterator<>() {
@@ -4480,13 +4864,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             @Override
             public T next() throws E {
                 if (isFirst) {
+                    final T first = elements.next();
                     isFirst = false;
-                    return mapperForFirst.apply(elements.next());
+                    return mapperForFirst.apply(first);
                 } else {
                     return elements.next();
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -4519,6 +4904,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> mapFirstOrElse(final Throwables.Function<? super T, ? extends R, E> mapperForFirst,
             final Throwables.Function<? super T, ? extends R, E> mapperForElse) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapperForFirst, cs.mapperForFirst);
         checkArgNotNull(mapperForElse, cs.mapperForElse);
 
@@ -4533,13 +4919,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             @Override
             public R next() throws E {
                 if (isFirst) {
+                    final T first = elements.next();
                     isFirst = false;
-                    return mapperForFirst.apply(elements.next());
+                    return mapperForFirst.apply(first);
                 } else {
                     return mapperForElse.apply(elements.next());
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -4547,7 +4934,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * All other elements remain unchanged.
      * This is an intermediate operation that does not consume the sequence.
      *
-     * <p>The implementation uses a one-element look-ahead buffer to detect the last element.</p>
+     * <p>The last element is detected by calling the source iterator's {@code hasNext()} before emitting the current
+     * element. This check may block or prefetch if the source's {@code hasNext()} does so; {@code mapLast} itself
+     * does not call {@code next()} for the following element before emitting the current one.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4571,6 +4960,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Seq<T, E> mapLast(final Throwables.Function<? super T, ? extends T, ? extends E> mapperForLast)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapperForLast, cs.mapperForLast);
 
         return create(new Throwables.Iterator<>() {
@@ -4592,7 +4982,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     return mapperForLast.apply(next);
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -4625,6 +5015,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> mapLastOrElse(final Throwables.Function<? super T, ? extends R, E> mapperForLast,
             final Throwables.Function<? super T, ? extends R, E> mapperForElse) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapperForLast, cs.mapperForLast);
         checkArgNotNull(mapperForElse, cs.mapperForElse);
 
@@ -4646,7 +5037,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     return mapperForLast.apply(next);
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -4662,7 +5053,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p>This is the monadic bind operation for sequences. Each sequence returned by the mapper
      * is consumed completely before moving to the next element. Each completed mapped sequence is
      * closed before the next one is opened, and closing the returned sequence closes the active
-     * mapped sequence.</p>
+     * mapped sequence. A {@code null} mapped sequence is empty; an already closed mapped sequence
+     * causes {@link IllegalStateException} when traversal reaches it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4687,6 +5079,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> flatMap(final Throwables.Function<? super T, ? extends Seq<? extends R, ? extends E>, ? extends E> mapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         final Throwables.Iterator<R, E> iter = new Throwables.Iterator<>() {
@@ -4719,7 +5112,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                         if (s == null) {
                             cur = null;
                         } else {
-                            cur = s.elements;
+                            cur = iterate(s);
                         }
                     } else {
                         cur = null;
@@ -4741,10 +5134,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
              * }</pre>
              *
              * @return the next mapped element
-             * @throws E if the source iterator fails
              * @throws NoSuchElementException if no more elements are available
+             * @throws E if the source iterator fails
              */
-            public R next() throws E {
+            public R next() throws NoSuchElementException, E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4760,7 +5153,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
         };
 
-        return create(iter, mergeCloseHandlers(iter::closeResource, closeHandlers));
+        return create(iter, mergeCloseHandlers(iter::closeResource, closeHandlersForNewSeq()));
     }
 
     /**
@@ -4798,18 +5191,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @IntermediateOp
-    public <R> Seq<R, E> flatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper) throws IllegalArgumentException {
+    public <R> Seq<R, E> flatmap(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         return create(new Throwables.Iterator<>() {
-            private Collection<? extends R> c = null;
             private Iterator<? extends R> cur = null;
 
             @Override
             public boolean hasNext() throws E {
                 while ((cur == null || !cur.hasNext()) && elements.hasNext()) {
-                    c = mapper.apply(elements.next());
+                    final Collection<? extends R> c = mapper.apply(elements.next());
                     cur = N.isEmpty(c) ? null : c.iterator();
                 }
 
@@ -4817,16 +5211,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             @Override
-            public R next() throws IllegalStateException, E {
+            public R next() throws E {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
-                    assertNotClosed();
-
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return cur.next();
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -4862,18 +5254,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @IntermediateOp
-    public <R> Seq<R, E> flatMapArray(final Throwables.Function<? super T, R[], ? extends E> mapper) throws IllegalArgumentException {
+    public <R> Seq<R, E> flatMapArray(final Throwables.Function<? super T, R[], ? extends E> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         return create(new Throwables.Iterator<>() {
-            private R[] a = null;
             private Iterator<? extends R> cur = null;
 
             @Override
             public boolean hasNext() throws E {
                 while ((cur == null || !cur.hasNext()) && elements.hasNext()) {
-                    a = mapper.apply(elements.next());
+                    final R[] a = mapper.apply(elements.next());
                     cur = N.isEmpty(a) ? null : ObjIterator.of(a);
                 }
 
@@ -4888,7 +5280,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
                 return cur.next();
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -4922,6 +5314,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> flatmapIfNotNull(final Throwables.Function<? super T, ? extends Collection<? extends R>, ? extends E> mapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         //noinspection resource
@@ -4969,6 +5362,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             final Throwables.Function<? super U, ? extends Collection<? extends R>, ? extends E> secondMapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
         checkArgNotNull(secondMapper, cs.secondMapper);
 
@@ -4999,10 +5393,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // Result: [1, 2, 3] ("abc" is filtered out)
      * }</pre>
      *
+     * <p>The mapper must return an empty optional - never {@code null} - for an element that has no result;
+     * a {@code null} return fails with a {@link NullPointerException} when the element is reached.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
      * @param <R> the type of the elements in the new sequence
-     * @param mapper the function to apply to each element, which returns an Optional of new elements
+     * @param mapper the function to apply to each element, which returns an Optional of new elements. It must return an
+     *               empty Optional, never {@code null}, for an element with no result
      * @return a new sequence containing the transformed elements that are present
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
@@ -5012,6 +5410,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public <R> Seq<R, E> mapPartial(final Throwables.Function<? super T, Optional<R>, E> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         //noinspection resource
@@ -5039,9 +5438,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // Result: [1, 2, 3] ("abc" is filtered out)
      * }</pre>
      *
+     * <p>The mapper must return an empty optional - never {@code null} - for an element that has no result;
+     * a {@code null} return fails with a {@link NullPointerException} when the element is reached.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
-     * @param mapper the function to apply to each element, which returns an OptionalInt of new elements
+     * @param mapper the function to apply to each element, which returns an OptionalInt of new elements. It must return an
+     *               empty OptionalInt, never {@code null}, for an element with no result
      * @return a new sequence containing the transformed elements that are present
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
@@ -5051,6 +5454,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<Integer, E> mapPartialToInt(final Throwables.Function<? super T, OptionalInt, E> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         //noinspection resource
@@ -5082,10 +5486,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // empty.count() returns 0
      * }</pre>
      *
+     * <p>The mapper must return an empty optional - never {@code null} - for an element that has no result;
+     * a {@code null} return fails with a {@link NullPointerException} when the element is reached.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
-     * @param mapper the function to apply to each element, which returns an OptionalLong.
-     *               The function should return OptionalLong.empty() for elements that should be filtered out.
+     * @param mapper the function to apply to each element, which returns an OptionalLong. It must return
+     *               {@code OptionalLong.empty()}, never {@code null}, for an element that should be filtered out.
      * @return a new sequence containing Long values extracted from the present OptionalLong results
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
@@ -5096,6 +5503,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<Long, E> mapPartialToLong(final Throwables.Function<? super T, OptionalLong, E> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         //noinspection resource
@@ -5127,10 +5535,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // empty.count() returns 0
      * }</pre>
      *
+     * <p>The mapper must return an empty optional - never {@code null} - for an element that has no result;
+     * a {@code null} return fails with a {@link NullPointerException} when the element is reached.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
-     * @param mapper the function to apply to each element, which returns an OptionalDouble.
-     *               The function should return OptionalDouble.empty() for elements that should be filtered out.
+     * @param mapper the function to apply to each element, which returns an OptionalDouble. It must return
+     *               {@code OptionalDouble.empty()}, never {@code null}, for an element that should be filtered out.
      * @return a new sequence containing Double values extracted from the present OptionalDouble results
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
@@ -5142,6 +5553,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Seq<Double, E> mapPartialToDouble(final Throwables.Function<? super T, OptionalDouble, E> mapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         //noinspection resource
@@ -5187,6 +5599,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> mapMulti(final Throwables.BiConsumer<? super T, ? super Consumer<R>, ? extends E> mapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         // LinkedList (not ArrayDeque) so the mapper may emit null elements, consistent with
@@ -5223,7 +5636,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
                 return queue.poll();
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -5254,6 +5667,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> slidingMap(final Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         return slidingMap(1, mapper);
@@ -5276,6 +5690,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; buffers at most one source element.
      *
+     * <p>During manual iteration, if {@code hasNext()} or {@code next()} encounters a
+     * source failure while skipping the gap between windows, the next such call resumes the unfinished gap.</p>
+     *
      * @param <R> the element type of the new sequence
      * @param increment the distance between the first elements of each pair (must be positive)
      * @param mapper a non-interfering, stateless function to apply to each pair of elements
@@ -5288,8 +5705,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> slidingMap(final int increment, final Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-        checkArgNotNull(mapper, cs.mapper);
 
+        // See sliding(int, IntFunction): the delegate validates increment first.
         return slidingMap(increment, false, mapper);
     }
 
@@ -5310,10 +5727,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; buffers at most one source element.
      *
+     * <p>During manual iteration, if {@code hasNext()} or {@code next()} encounters a
+     * source failure while skipping the gap between windows, the next such call resumes the unfinished gap.</p>
+     *
      * @param <R> the element type of the new sequence
      * @param increment the distance between the first elements of each pair (must be positive)
-     * @param ignoreNotPaired if {@code false}, unpaired elements will be processed with {@code null} as their pair;
-     *                        if {@code true}, the last element will be ignored if there is no element to pair with it
+     * @param ignoreNotPaired if {@code false}, missing positions in a partial pair are supplied as {@code null}; a
+     *                        partial pair is emitted only when it is the initial window or introduces a source
+     *                        element not present in the preceding window (so with {@code increment == 1} the last
+     *                        element is never re-emitted alone). If {@code true}, partial pairs are omitted. (The
+     *                        name and the rule are the same as {@code Stream.slidingMap(int, boolean, ...)}.)
      * @param mapper a non-interfering, stateless function to apply to each pair of elements
      * @return a new sequence consisting of the results of applying the mapper function to each pair of elements
      * @throws IllegalStateException if the sequence is already closed
@@ -5324,6 +5747,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
             final Throwables.BiFunction<? super T, ? super T, R, ? extends E> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgPositive(increment, cs.increment);
         checkArgNotNull(mapper, cs.mapper);
 
@@ -5334,18 +5758,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             private final T none = (T) NONE;
             private T prev = none;
             private R ret = null;
-            private boolean toSkip = false;
+            private int remainingGap = 0;
 
             @Override
             public boolean hasNext() throws E {
-                if (toSkip) {
-                    int skipNum = increment - windowSize;
-
-                    while (skipNum-- > 0 && elements.hasNext()) {
+                if (remainingGap > 0) {
+                    while (remainingGap > 0 && elements.hasNext()) {
                         elements.next();
+                        remainingGap--;
                     }
 
-                    toSkip = false;
+                    remainingGap = 0;
                 }
 
                 if (ignoreNotPaired && prev == none && elements.hasNext()) {
@@ -5361,7 +5784,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                toSkip = increment > windowSize;
+                remainingGap = Math.max(0, increment - windowSize);
 
                 if (ignoreNotPaired) {
                     if (increment == 1) {
@@ -5377,7 +5800,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     return mapper.apply(elements.next(), elements.hasNext() ? elements.next() : null);
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -5408,6 +5831,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> slidingMap(final Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         return slidingMap(1, mapper);
@@ -5430,6 +5854,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; buffers at most two source elements.
      *
+     * <p>During manual iteration, if {@code hasNext()} or {@code next()} encounters a
+     * source failure while skipping the gap between windows, the next such call resumes the unfinished gap.</p>
+     *
      * @param <R> the element type of the new sequence
      * @param increment the distance between the first elements of each triple (must be positive)
      * @param mapper a non-interfering, stateless function to apply to each triple of elements
@@ -5442,8 +5869,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> slidingMap(final int increment, final Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-        checkArgNotNull(mapper, cs.mapper);
 
+        // See sliding(int, IntFunction): the delegate validates increment first.
         return slidingMap(increment, false, mapper);
     }
 
@@ -5466,10 +5893,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; buffers at most two source elements.
      *
+     * <p>During manual iteration, if {@code hasNext()} or {@code next()} encounters a
+     * source failure while skipping the gap between windows, the next such call resumes the unfinished gap.</p>
+     *
      * @param <R> the element type of the new sequence
      * @param increment the distance between the first elements of each triple (must be positive)
-     * @param ignoreNotPaired if {@code false}, unpaired elements will be processed with {@code null} as their pair;
-     *                        if {@code true}, elements that cannot form a complete triple will be ignored
+     * @param ignoreNotPaired if {@code false}, missing positions in a partial triple are supplied as {@code null}; a
+     *                        partial triple is emitted only when it is the initial window or introduces a source
+     *                        element not present in the preceding window. If {@code true}, partial triples are
+     *                        omitted. Despite the name, this governs 3-element windows here; the name and the rule
+     *                        are the same as {@code Stream.slidingMap(int, boolean, ...)}.
      * @param mapper a non-interfering, stateless function to apply to each triple of elements
      * @return a new sequence consisting of the results of applying the mapper function to each triple of elements
      * @throws IllegalStateException if the sequence is already closed
@@ -5480,6 +5913,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> slidingMap(final int increment, final boolean ignoreNotPaired,
             final Throwables.TriFunction<? super T, ? super T, ? super T, R, ? extends E> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgPositive(increment, cs.increment);
         checkArgNotNull(mapper, cs.mapper);
 
@@ -5491,18 +5925,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             private T prev = none;
             private T prevPrev = none;
             private R ret = null;
-            private boolean toSkip = false;
+            private int remainingGap = 0;
 
             @Override
             public boolean hasNext() throws E {
-                if (toSkip) {
-                    int skipNum = increment - windowSize;
-
-                    while (skipNum-- > 0 && elements.hasNext()) {
+                if (remainingGap > 0) {
+                    while (remainingGap > 0 && elements.hasNext()) {
                         elements.next();
+                        remainingGap--;
                     }
 
-                    toSkip = false;
+                    remainingGap = 0;
                 }
 
                 if (ignoreNotPaired) {
@@ -5524,7 +5957,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                toSkip = increment > windowSize;
+                remainingGap = Math.max(0, increment - windowSize);
 
                 if (ignoreNotPaired) {
                     if (increment == 1) {
@@ -5553,7 +5986,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     return ret;
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -5563,6 +5996,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the grouping.</p>
+     *
+     * <p>Entries are emitted in the iteration order of the backing map, which here is a {@link java.util.HashMap} -
+     * i.e. unspecified. Pass a map factory ({@code LinkedHashMap::new}, {@code TreeMap::new}, &hellip;) to the
+     * {@link #groupBy(Throwables.Function, Supplier)} overload when the order matters.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5585,6 +6022,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <K> Seq<Map.Entry<K, List<T>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         return groupBy(keyMapper, Suppliers.ofMap());
@@ -5600,9 +6038,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group strings by their length using a TreeMap to keep keys sorted
-     * seq.groupBy(String::length, TreeMap::new)
+     * seq.groupBy(String::length, () -> new TreeMap<Integer, List<String>>())
      *    .forEach(entry -> System.out.println("Length " + entry.getKey() + ": " + entry.getValue()));
      * }</pre>
+     *
+     * <p><b>Note:</b> supply {@code mapFactory} as a lambda rather than a constructor reference: an inexact
+     * {@code TreeMap::new} leaves this overload and {@link #groupBy(Throwables.Function, Throwables.Function)}
+     * equally applicable.</p>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; buffers all elements in memory.
      *
@@ -5618,6 +6060,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <K> Seq<Map.Entry<K, List<T>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Supplier<? extends Map<K, List<T>>> mapFactory) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
@@ -5655,6 +6098,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <K, V> Seq<Map.Entry<K, List<V>>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
 
@@ -5671,7 +6115,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Group persons by department, collecting their salaries, using a LinkedHashMap
-     * seq.groupBy(Person::getDepartment, Person::getSalary, LinkedHashMap::new)
+     * seq.groupBy(Person::getDepartment, Person::getSalary, () -> new LinkedHashMap<>())
      *    .forEach(entry -> System.out.println("Dept " + entry.getKey() +
      *                                         " salaries: " + entry.getValue()));
      * }</pre>
@@ -5695,6 +6139,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Supplier<? extends Map<K, List<V>>> mapFactory)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
         checkArgNotNull(mapFactory, cs.mapFactory);
@@ -5719,7 +6164,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     iter = Seq.this.groupTo(keyMapper, valueMapper, mapFactory).entrySet().iterator();
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
 
     }
 
@@ -5728,8 +6173,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * and merges values with the same key using the provided merge function.
      * Returns a sequence of Map.Entry objects where each entry contains a key and a single merged value.
      *
-     * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
-     * loaded into memory to perform the grouping.</p>
+     * <p>This intermediate operation traverses the full upstream before emitting results.
+     * It retains one merged value per key; memory usage depends on those values.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5739,7 +6184,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *                                         " sum: " + entry.getValue()));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered traverses the upstream before emitting results, possibly on first traversal}; retains one merged value per key; memory usage depends on those values.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values after mapping
@@ -5758,6 +6203,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Throwables.BinaryOperator<V, ? extends E> mergeFunction)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
         checkArgNotNull(mergeFunction, cs.mergeFunction);
@@ -5769,19 +6215,27 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Groups the elements of this sequence by a key extracted using the provided key extractor function
      * and merges values with the same key using the provided merge function, using the specified map factory.
      *
-     * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
-     * loaded into memory to perform the grouping.</p>
+     * <p>This intermediate operation traverses the full upstream before emitting results.
+     * It retains one merged value per key; memory usage depends on those values.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find the maximum salary per department using a TreeMap
      * seq.groupBy(Person::getDepartment, Person::getSalary,
-     *             BinaryOperator.maxBy(naturalOrder()), TreeMap::new)
+     *             Fnn.max(naturalOrder()), () -> new TreeMap<String, Integer>())
      *    .forEach(entry -> System.out.println("Dept " + entry.getKey() +
      *                                         " max salary: " + entry.getValue()));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; buffers all elements in memory.
+     * <p><b>Note:</b> {@code mergeFunction} is a {@link Throwables.BinaryOperator}, so build it with
+     * {@link Fnn} ({@code Fnn.max(...)}, {@code Fnn.min(...)}) &mdash; a
+     * {@code java.util.function.BinaryOperator} such as {@code BinaryOperator.maxBy(...)} is a
+     * disjoint type and will not compile here. Supply {@code mapFactory} as a lambda rather than a
+     * constructor reference: an inexact {@code TreeMap::new} leaves this overload and
+     * {@link #groupBy(Throwables.Function, Throwables.Function, Throwables.BinaryOperator)}
+     * equally applicable.
+     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered traverses the upstream before emitting results, possibly on first traversal}; retains one merged value per key; memory usage depends on those values.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values after mapping
@@ -5804,6 +6258,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Throwables.BinaryOperator<V, ? extends E> mergeFunction,
             final Supplier<? extends Map<K, V>> mapFactory) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
         checkArgNotNull(mergeFunction, cs.mergeFunction);
@@ -5829,7 +6284,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     iter = Seq.this.toMap(keyMapper, valueMapper, mergeFunction, mapFactory).entrySet().iterator();
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -5837,8 +6292,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * and collects the grouped elements using the provided downstream collector.
      * Returns a sequence of Map.Entry objects where each entry contains a key and the result of the downstream collector.
      *
-     * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
-     * loaded into memory to perform the grouping.</p>
+     * <p>This intermediate operation traverses the full upstream before emitting results.
+     * It retains downstream accumulator state per group; memory usage depends on the collector.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5854,7 +6309,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *                                         " avg salary: " + entry.getValue()));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered traverses the upstream before emitting results, possibly on first traversal}; retains downstream accumulator state per group; memory usage depends on the collector.
      *
      * @param <K> the type of the keys
      * @param <D> the type of the downstream result
@@ -5862,14 +6317,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param downstream the collector to use for elements in each group
      * @return a new sequence containing Map.Entry objects where each key maps to the collector result
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code downstream} is {@code null}.
      */
     @IntermediateOp
     @TerminalOpTriggered
     public <K, D> Seq<Map.Entry<K, D>, E> groupBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Collector<? super T, ?, D> downstream) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
 
         return groupBy(keyMapper, downstream, Suppliers.ofMap());
     }
@@ -5878,8 +6335,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Groups the elements of this sequence by a key extracted using the provided key extractor function,
      * and collects the grouped elements using the provided downstream collector, using the specified map factory.
      *
-     * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
-     * loaded into memory to perform the grouping.</p>
+     * <p>This intermediate operation traverses the full upstream before emitting results.
+     * It retains downstream accumulator state per group; memory usage depends on the collector.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5891,7 +6348,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *                                         ": " + entry.getValue()));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered traverses the upstream before emitting results, possibly on first traversal}; retains downstream accumulator state per group; memory usage depends on the collector.
      *
      * @param <K> the type of the keys
      * @param <D> the type of the downstream result
@@ -5900,7 +6357,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param mapFactory the supplier to create a new map instance for storing the groups
      * @return a new sequence containing Map.Entry objects where each key maps to the collector result
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code downstream}, {@code mapFactory} is
+     *         {@code null}.
      */
     @IntermediateOp
     @TerminalOpTriggered
@@ -5908,7 +6366,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             final Collector<? super T, ?, D> downstream, final Supplier<? extends Map<K, D>> mapFactory)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         return groupBy(keyMapper, Fnn.identity(), downstream, mapFactory);
@@ -5919,8 +6379,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * transforms values using the value mapper, and collects the transformed values using the downstream collector.
      * Returns a sequence of Map.Entry objects where each entry contains a key and the collector result.
      *
-     * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
-     * loaded into memory to perform the grouping.</p>
+     * <p>This intermediate operation traverses the full upstream before emitting results.
+     * It retains downstream accumulator state per group; memory usage depends on the collector.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5932,7 +6392,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *                                         ": " + entry.getValue()));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered traverses the upstream before emitting results, possibly on first traversal}; retains downstream accumulator state per group; memory usage depends on the collector.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values after mapping
@@ -5942,7 +6402,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param downstream the collector to use for the transformed values in each group
      * @return a new sequence containing Map.Entry objects where each key maps to the collector result
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code downstream} is
+     *         {@code null}.
      */
     @IntermediateOp
     @TerminalOpTriggered
@@ -5950,8 +6411,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, ?, D> downstream)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(downstream, cs.downstream);
 
         return groupBy(keyMapper, valueMapper, downstream, Suppliers.ofMap());
     }
@@ -5961,8 +6424,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * transforms values using the value mapper, and collects the transformed values using the downstream collector,
      * using the specified map factory.
      *
-     * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
-     * loaded into memory to perform the grouping.</p>
+     * <p>This intermediate operation traverses the full upstream before emitting results.
+     * It retains downstream accumulator state per group; memory usage depends on the collector.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5975,7 +6438,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *                                         " total: " + entry.getValue()));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered traverses the upstream before emitting results, possibly on first traversal}; retains downstream accumulator state per group; memory usage depends on the collector.
      *
      * @param <K> the type of the keys
      * @param <V> the type of the values after mapping
@@ -5986,8 +6449,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param mapFactory the supplier to create a new map instance for storing the groups
      * @return a new sequence containing Map.Entry objects where each key maps to the collector result
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is
-     *         {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code downstream},
+     *         {@code mapFactory} is {@code null}.
      */
     @IntermediateOp
     @TerminalOpTriggered
@@ -5995,8 +6458,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             final Throwables.Function<? super T, ? extends V, ? extends E> valueMapper, final Collector<? super V, ?, D> downstream,
             final Supplier<? extends Map<K, D>> mapFactory) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         return create(new Throwables.Iterator<>() {
@@ -6019,14 +6484,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     iter = Seq.this.groupTo(keyMapper, valueMapper, downstream, mapFactory).entrySet().iterator();
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
      * Partitions the elements of this sequence into two groups based on the provided predicate.
-     * Returns a sequence containing exactly two Map.Entry objects:
-     * - One with key {@code true} containing a list of elements that satisfy the predicate
-     * - One with key {@code false} containing a list of elements that do not satisfy the predicate
+     * Returns a sequence of exactly two {@code Map.Entry} objects, in this order:
+     * <ul>
+     *   <li>the {@code false} entry, holding a list of the elements that do not satisfy the predicate;</li>
+     *   <li>the {@code true} entry, holding a list of the elements that do.</li>
+     * </ul>
      *
      * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
      * loaded into memory to perform the partitioning.</p>
@@ -6042,7 +6509,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; buffers all elements in memory.
      *
      * @param predicate the predicate used to classify elements
-     * @return a new sequence containing exactly two entries: true-&gt;matching elements, false-&gt;non-matching elements
+     * @return a new sequence containing exactly two entries: false-&gt;non-matching elements, then true-&gt;matching elements
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see Collectors#partitioningBy(Predicate)
@@ -6052,6 +6519,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Seq<Map.Entry<Boolean, List<T>>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         return partitionBy(predicate, Collectors.toList());
@@ -6060,12 +6528,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     /**
      * Partitions the elements of this sequence into two groups based on the provided predicate,
      * and collects each partition using the provided downstream collector.
-     * Returns a sequence containing exactly two Map.Entry objects:
-     * - One with key {@code true} containing the result of collecting elements that satisfy the predicate
-     * - One with key {@code false} containing the result of collecting elements that do not satisfy the predicate
+     * Returns a sequence of exactly two {@code Map.Entry} objects, in this order:
+     * <ul>
+     *   <li>the {@code false} entry, holding the result of collecting the elements that do not satisfy the
+     *       predicate;</li>
+     *   <li>the {@code true} entry, holding the result of collecting the elements that do.</li>
+     * </ul>
      *
-     * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
-     * loaded into memory to perform the partitioning.</p>
+     * <p>This intermediate operation traverses the full upstream before emitting results.
+     * It retains downstream accumulator state per group; memory usage depends on the collector.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6080,14 +6551,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *        (entry.getKey() ? "Empty" : "Non-empty") + ": " + entry.getValue()));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered traverses the upstream before emitting results, possibly on first traversal}; retains downstream accumulator state per group; memory usage depends on the collector.
      *
      * @param <D> the type of the downstream result
      * @param predicate the predicate used to classify elements
      * @param downstream the collector to use for elements in each partition
-     * @return a new sequence containing exactly two entries with the collector results
+     * @return a new sequence containing exactly two entries with the collector results: the {@code false} entry
+     *         first, then the {@code true} entry
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code predicate}, {@code downstream} is {@code null}.
      * @see Collectors#partitioningBy(Predicate, Collector)
      */
     @IntermediateOp
@@ -6095,7 +6567,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <D> Seq<Map.Entry<Boolean, D>, E> partitionBy(final Throwables.Predicate<? super T, E> predicate, final Collector<? super T, ?, D> downstream)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
+        checkArgNotNull(downstream, cs.downstream);
 
         return create(new Throwables.Iterator<>() {
             private Iterator<Entry<Boolean, D>> iter = null;
@@ -6117,15 +6591,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     iter = Seq.this.partitionTo(predicate, downstream).entrySet().iterator();
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
      * Counts the occurrences of elements in this sequence grouped by a key extracted using the provided key extractor function.
      * Returns a sequence of Map.Entry objects where each entry contains a key and the count of elements with that key.
      *
-     * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
-     * loaded into memory to perform the counting.</p>
+     * <p>This intermediate operation traverses the full upstream before emitting results.
+     * It retains one count per distinct key or element.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6140,7 +6614,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *                                         " has " + entry.getValue() + " employees"));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered traverses the upstream before emitting results, possibly on first traversal}; retains one count per distinct key or element.
      *
      * @param <K> the type of the keys
      * @param keyMapper the function to extract the key from each element
@@ -6153,6 +6627,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <K> Seq<Map.Entry<K, Integer>, E> countBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         return groupBy(keyMapper, Collectors.countingToInt());
@@ -6162,8 +6637,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Counts the occurrences of elements in this sequence grouped by a key extracted using the provided key extractor function,
      * using the specified map factory to create the backing map.
      *
-     * <p>This is an intermediate operation that triggers terminal evaluation. All elements will be
-     * loaded into memory to perform the counting.</p>
+     * <p>This intermediate operation traverses the full upstream before emitting results.
+     * It retains one count per distinct key or element.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6173,7 +6648,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *                                         "' appears " + entry.getValue() + " times"));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered traverses the upstream before emitting results, possibly on first traversal}; retains one count per distinct key or element.
      *
      * @param <K> the type of the keys
      * @param keyMapper the function to extract the key from each element
@@ -6187,6 +6662,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <K> Seq<Map.Entry<K, Integer>, E> countBy(final Throwables.Function<? super T, ? extends K, ? extends E> keyMapper,
             final Supplier<? extends Map<K, Integer>> mapFactory) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
@@ -6216,9 +6692,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // One occurrence of 'a' (min of 2 in seq and 1 in set)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; builds a frequency table for the specified collection but does not buffer upstream elements.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; the frequency table for the specified collection is built eagerly by this call, the upstream is then consumed lazily and never buffered.
      *
-     * @param c the collection to find common elements with this sequence
+     * @param c the collection to find common elements with this sequence; a {@code null} collection is treated as empty
      * @return a new sequence containing elements present in both this sequence and the specified collection,
      *         considering the minimum number of occurrences in either source
      * @throws IllegalStateException if the sequence is already closed
@@ -6263,11 +6739,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // Only products with IDs in the set are included
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; builds a frequency table for the specified collection but does not buffer upstream elements.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; the frequency table for the specified collection is built eagerly by this call, the upstream is then consumed lazily and never buffered.
      *
      * @param <U> the type of the elements after mapping
      * @param mapper the function to apply to elements of this sequence for comparison
-     * @param c the collection to find common elements with (after mapping)
+     * @param c the collection to find common elements with (after mapping); a {@code null} collection is treated as empty
      * @return a new sequence containing elements whose mapped values are present in the specified collection,
      *         considering the minimum number of occurrences in either source
      * @throws IllegalStateException if the sequence is already closed
@@ -6281,6 +6757,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <U> Seq<T, E> intersection(final Throwables.Function<? super T, ? extends U, E> mapper, final Collection<U> c)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         final Multiset<?> multiset = Multiset.create(c);
@@ -6310,13 +6787,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // No elements remain because list2 has at least as many occurrences of each value as seq2
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; builds a frequency table for the specified collection but does not buffer upstream elements.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; the frequency table for the specified collection is built eagerly by this call, the upstream is then consumed lazily and never buffered.
      *
-     * @param c the collection to compare against this sequence
+     * @param c the collection to compare against this sequence; a {@code null} collection is treated as empty
      * @return a new sequence containing the elements that are present in this sequence but not in the
      *         specified collection, considering the number of occurrences
      * @throws IllegalStateException if the sequence is already closed
-     * @see #difference(Function, Collection)
+     * @see #difference(Throwables.Function, Collection)
      * @see N#difference(Collection, Collection)
      * @see N#difference(int[], int[])
      */
@@ -6353,11 +6830,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // No elements remain because ids has at least as many occurrences of each mapped value
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; builds a frequency table for the specified collection but does not buffer upstream elements.
+     * <p>{@code mapper} is applied to every element of this sequence, including the elements that follow the point
+     * where the frequency table has been exhausted, matching {@link #intersection(Throwables.Function, Collection)}.</p>
+     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; the frequency table for the specified collection is built eagerly by this call, the upstream is then consumed lazily and never buffered.
      *
      * @param <U> the type of the elements after mapping
      * @param mapper the function to apply to each element of this sequence for comparison
-     * @param c the collection of mapped values to compare against
+     * @param c the collection of mapped values to compare against; a {@code null} collection is treated as empty
      * @return a new sequence containing the elements whose mapped values are not in the specified collection,
      *         considering the number of occurrences after mapping
      * @throws IllegalStateException if the sequence is already closed
@@ -6366,14 +6846,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see N#difference(Collection, Collection)
      */
     @IntermediateOp
-    public <U> Seq<T, E> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c)
+    public <U> Seq<T, E> difference(final Throwables.Function<? super T, ? extends U, E> mapper, final Collection<U> c)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(mapper, cs.mapper);
 
         final Multiset<?> multiset = Multiset.create(c);
 
-        return filter(value -> multiset.isEmpty() || !multiset.remove(mapper.apply(value)));
+        return filter(value -> !multiset.remove(mapper.apply(value)));
     }
 
     /**
@@ -6399,9 +6880,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // - 4 appears only in list, so it remains
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; builds a frequency table for the specified collection but does not buffer upstream elements.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; the frequency table for the specified collection is built eagerly by this call, the upstream is then consumed lazily and never buffered.
      *
-     * @param c the collection to find symmetric difference with this sequence
+     * @param c the collection to find symmetric difference with this sequence; a {@code null} collection is treated as empty
      * @return a new sequence containing elements that are present in either this sequence or the specified
      *         collection, but not in both, considering the number of occurrences
      * @throws IllegalStateException if the sequence is already closed
@@ -6412,7 +6893,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see Iterables#symmetricDifference(Set, Set)
      */
     @IntermediateOp
-    public Seq<T, E> symmetricDifference(final Collection<T> c) throws IllegalStateException {
+    public Seq<T, E> symmetricDifference(final Collection<? extends T> c) throws IllegalStateException {
         assertNotClosed();
 
         final Multiset<?> multiset = Multiset.create(c);
@@ -6493,15 +6974,24 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
-     * @param s the sequence to be prepended to this sequence
+     * @param s the sequence to be prepended to this sequence. It is closed along with the returned sequence, and also
+     *          if this sequence is already closed
      * @return a new Seq with the specified sequence prepended
      * @throws IllegalStateException if the sequence is already closed
      */
     @IntermediateOp
-    public Seq<T, E> prepend(final Seq<T, E> s) throws IllegalStateException {
-        assertNotClosed();
+    public Seq<T, E> prepend(final Seq<? extends T, E> s) throws IllegalStateException {
+        // Built before anything is touched - see closeAllThenRethrow: an already-closed receiver must not strand `s`,
+        // which the success path takes ownership of.
+        final LocalRunnable closeAll = newCloseHandler(Array.asList(this, s));
 
-        return concat(s, this);
+        try {
+            assertNotClosed();
+
+            return concat(s, this);
+        } catch (final RuntimeException e) {
+            throw closeAllThenRethrow(closeAll, e);
+        }
     }
 
     /**
@@ -6526,17 +7016,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
      * @param op the optional element to be prepended to this sequence
-     * @return a new Seq with the specified optional element prepended if present, otherwise returns this sequence unchanged
+     * @return a new Seq with the specified optional element prepended if present, otherwise a new Seq with the same
+     *         elements as this one
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if {@code op} is {@code null}.
      */
     @IntermediateOp
-    public Seq<T, E> prepend(final u.Optional<T> op) throws IllegalStateException { //NOSONAR
-
-        // return prepend(op.isEmpty() ? Seq.<T, E> empty() : Seq.<T, E> just(op.orElseThrow()));
-
+    public Seq<T, E> prepend(final u.Optional<T> op) throws IllegalStateException, IllegalArgumentException { //NOSONAR
         assertNotClosed();
 
-        return op.isEmpty() ? this : prepend(op.orElseThrow());
+        checkArgNotNull(op, cs.op);
+
+        // Prepending nothing preserves both the elements and any known sort order.
+        return op.isEmpty() ? create(elements, sorted, cmp, closeHandlersForNewSeq()) : prepend(op.orElseThrow());
     }
 
     /**
@@ -6611,15 +7103,24 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
-     * @param s the sequence to be appended to this sequence
+     * @param s the sequence to be appended to this sequence. It is closed along with the returned sequence, and also
+     *          if this sequence is already closed
      * @return a new Seq with the specified sequence appended
      * @throws IllegalStateException if the sequence is already closed
      */
     @IntermediateOp
-    public Seq<T, E> append(final Seq<T, E> s) throws IllegalStateException {
-        assertNotClosed();
+    public Seq<T, E> append(final Seq<? extends T, E> s) throws IllegalStateException {
+        // Built before anything is touched - see closeAllThenRethrow: an already-closed receiver must not strand `s`,
+        // which the success path takes ownership of.
+        final LocalRunnable closeAll = newCloseHandler(Array.asList(this, s));
 
-        return concat(this, s);
+        try {
+            assertNotClosed();
+
+            return concat(this, s);
+        } catch (final RuntimeException e) {
+            throw closeAllThenRethrow(closeAll, e);
+        }
     }
 
     /**
@@ -6644,22 +7145,29 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
      * @param op the optional element to be appended to this sequence
-     * @return a new Seq with the specified optional element appended if present, otherwise returns this sequence unchanged
+     * @return a new Seq with the specified optional element appended if present, otherwise a new Seq with the same
+     *         elements as this one
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if {@code op} is {@code null}.
      */
     @IntermediateOp
-    public Seq<T, E> append(final u.Optional<T> op) throws IllegalStateException { //NOSONAR
-
-        // return append(op.isEmpty() ? Seq.<T, E> empty() : Seq.<T, E> just(op.orElseThrow()));
-
+    public Seq<T, E> append(final u.Optional<T> op) throws IllegalStateException, IllegalArgumentException { //NOSONAR
         assertNotClosed();
 
-        return op.isEmpty() ? this : append(op.orElseThrow());
+        checkArgNotNull(op, cs.op);
+
+        // Appending nothing preserves both the elements and any known sort order.
+        return op.isEmpty() ? create(elements, sorted, cmp, closeHandlersForNewSeq()) : append(op.orElseThrow());
     }
 
     /**
      * Appends the specified elements to the end of this sequence if this sequence is empty.
      * If the sequence already contains elements, it remains unchanged.
+     *
+     * <p><b>Despite the name this does not append:</b> when the sequence is empty the fallback elements
+     * <i>replace</i> it, and when it is not empty the fallback is ignored entirely. It is exactly
+     * {@link #defaultIfEmpty(Object)} / {@link #defaultIfEmpty(Supplier)} under another name; the name is kept in
+     * step with {@code Stream.appendIfEmpty(..)}.</p>
      *
      * <p>This is an intermediate operation.</p>
      *
@@ -6677,7 +7185,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
      * @param a the elements to be appended if this sequence is empty
-     * @return a new Seq with the specified elements appended if this sequence is empty, otherwise returns this sequence unchanged
+     * @return a new sequence with the fallback elements if this sequence is empty, otherwise a new sequence
+     *         over the same elements (the receiver is not returned)
      * @throws IllegalStateException if the sequence is already closed
      */
     @IntermediateOp
@@ -6685,12 +7194,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public final Seq<T, E> appendIfEmpty(final T... a) throws IllegalStateException {
         assertNotClosed();
 
-        return appendIfEmpty(Arrays.asList(a));
+        return appendIfEmpty(N.isEmpty(a) ? N.<T> emptyList() : Arrays.asList(a));
     }
 
     /**
      * Appends the elements from the specified collection to the end of this Seq if the Seq is empty.
      * If the sequence already contains elements, it remains unchanged.
+     *
+     * <p><b>Despite the name this does not append:</b> when the sequence is empty the fallback elements
+     * <i>replace</i> it, and when it is not empty the fallback is ignored entirely. It is exactly
+     * {@link #defaultIfEmpty(Object)} / {@link #defaultIfEmpty(Supplier)} under another name; the name is kept in
+     * step with {@code Stream.appendIfEmpty(..)}.</p>
      *
      * <p>This is an intermediate operation.</p>
      *
@@ -6709,7 +7223,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
      * @param c the collection of elements to append if the Seq is empty
-     * @return a new Seq with the elements from the specified collection appended if the Seq is empty, otherwise returns this sequence unchanged
+     * @return a new Seq with the elements from the specified collection appended if the Seq is empty, otherwise a new sequence over the same elements (the receiver is not returned)
      * @throws IllegalStateException if the sequence is already closed
      */
     @IntermediateOp
@@ -6717,7 +7231,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         assertNotClosed();
 
         if (N.isEmpty(c)) {
-            return create(elements, closeHandlers);
+            // Appending nothing preserves both the elements and any known sort order.
+            return create(elements, sorted, cmp, closeHandlersForNewSeq());
         }
 
         return create(new Throwables.Iterator<>() {
@@ -6772,13 +7287,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     }
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
      * Appends the elements from the Seq provided by the supplier to the end of this Seq if the Seq is empty.
      * If the sequence already contains elements, it remains unchanged. The supplier is only invoked if this
      * sequence is empty, providing lazy evaluation of the default elements.
+     *
+     * <p><b>Despite the name this does not append:</b> when the sequence is empty the fallback elements
+     * <i>replace</i> it, and when it is not empty the fallback is ignored entirely. It is exactly
+     * {@link #defaultIfEmpty(Object)} / {@link #defaultIfEmpty(Supplier)} under another name; the name is kept in
+     * step with {@code Stream.appendIfEmpty(..)}.</p>
      *
      * <p>This is an intermediate operation.</p>
      *
@@ -6797,13 +7317,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
      * @param supplier the supplier that provides a Seq of elements to append if the Seq is empty
-     * @return a new Seq with the elements from the Seq provided by the supplier appended if the Seq is empty, otherwise returns this sequence unchanged
+     * @return a new Seq with the elements from the Seq provided by the supplier appended if the Seq is empty, otherwise a new sequence over the same elements (the receiver is not returned)
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @IntermediateOp
     public Seq<T, E> appendIfEmpty(final Supplier<? extends Seq<T, E>> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(supplier, cs.supplier);
 
         final Holder<Seq<T, E>> holder = new Holder<>();
@@ -6862,7 +7383,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     }
                 }
             }
-        }, closeHandlers).onClose(() -> close(holder));
+        }, closeHandlersForNewSeq()).onClose(() -> close(holder));
     }
 
     /**
@@ -6885,7 +7406,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
      * @param defaultValue the default value to return if this Seq is empty
-     * @return a new Seq containing the default value if this Seq is empty, otherwise returns this sequence unchanged
+     * @return a new Seq containing the default value if this Seq is empty, otherwise a new sequence over the same elements (the receiver is not returned)
      * @throws IllegalStateException if the sequence is already closed
      * @see #appendIfEmpty(Object...)
      */
@@ -6918,7 +7439,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
      * @param supplier the supplier that provides a Seq of elements to return if this Seq is empty
-     * @return a new Seq with the elements from the Seq provided by the supplier if this Seq is empty, otherwise returns this sequence unchanged
+     * @return a new Seq with the elements from the Seq provided by the supplier if this Seq is empty, otherwise a new sequence over the same elements (the receiver is not returned)
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see #appendIfEmpty(Supplier)
@@ -6926,6 +7447,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> defaultIfEmpty(final Supplier<? extends Seq<T, E>> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(supplier, cs.supplier);
 
         return appendIfEmpty(supplier);
@@ -6948,10 +7470,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * @return a new {@code Seq} that throws a {@code NoSuchElementException} when a terminal operation finds it empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws NoSuchElementException if the sequence is empty (thrown when terminal operation is executed)
      */
     @IntermediateOp
-    public Seq<T, E> throwIfEmpty() throws IllegalStateException, NoSuchElementException {
+    public Seq<T, E> throwIfEmpty() throws IllegalStateException {
         assertNotClosed();
 
         return throwIfEmpty(Suppliers.newNoSuchElementException());
@@ -6981,6 +7502,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> throwIfEmpty(final Supplier<? extends RuntimeException> exceptionSupplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
         return ifEmpty(() -> {
@@ -7007,6 +7529,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
+     * <p>A failed source emptiness check is retried on the next manual iterator access. Once emptiness
+     * is established, the action is invoked at most once, even if the action itself throws.</p>
+     *
      * @param action the action to be executed if the sequence is empty
      * @return a new {@code Seq} that executes the action if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
@@ -7016,6 +7541,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> ifEmpty(final Throwables.Runnable<? extends E> action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
         return create(new Throwables.Iterator<>() {
@@ -7063,14 +7589,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
             private void init() throws E {
                 if (iter == null) {
+                    final boolean empty = !elements.hasNext();
                     iter = elements;
 
-                    if (!iter.hasNext()) {
+                    if (empty) {
                         action.run();
                     }
                 }
             }
-        }, sorted, cmp, closeHandlers);
+        }, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
@@ -7105,6 +7632,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> onEach(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
         return create(new Throwables.Iterator<>() {
@@ -7119,12 +7647,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 action.accept(next);
                 return next;
             }
-        }, sorted, cmp, closeHandlers);
+        }, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
      * Performs the given action for the first element of this {@code Seq}.
-     * The action is executed only for the first element when it is consumed by a terminal operation.
+     * The action is executed after the first successful source read, including through the sequence's iterator.
+     * A failed source read does not consume the first-element action; a failed action is not repeated on later elements.
      * Subsequent elements are not affected by this action.
      *
      * <p>This is an intermediate operation.</p>
@@ -7151,6 +7680,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> onFirst(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
         return create(new Throwables.Iterator<>() {
@@ -7164,15 +7694,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             @Override
             public T next() throws E {
                 if (isFirst) {
-                    isFirst = false;
                     final T e = elements.next();
+                    isFirst = false;
                     action.accept(e);
                     return e;
                 } else {
                     return elements.next();
                 }
             }
-        }, sorted, cmp, closeHandlers);
+        }, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
@@ -7204,6 +7734,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> onLast(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
         return create(new Throwables.Iterator<>() {
@@ -7225,7 +7756,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
                 return next;
             }
-        }, sorted, cmp, closeHandlers);
+        }, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
@@ -7261,6 +7792,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> peek(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
         return onEach(action);
@@ -7296,6 +7828,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> peekFirst(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
         return onFirst(action);
@@ -7331,6 +7864,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> peekLast(final Throwables.Consumer<? super T, ? extends E> action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
         return onLast(action);
@@ -7364,6 +7898,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Seq<T, E> peekIf(final Throwables.Predicate<? super T, E> predicate, final Throwables.Consumer<? super T, E> action)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(action, cs.action);
 
@@ -7400,9 +7935,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      */
     @Beta
     @IntermediateOp
-    public Seq<T, E> peekIf(final Throwables.BiPredicate<? super T, ? super Long, E> predicate, final Consumer<? super T> action)
+    public Seq<T, E> peekIf(final Throwables.BiPredicate<? super T, ? super Long, E> predicate, final Throwables.Consumer<? super T, E> action)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(action, cs.action);
 
@@ -7436,7 +7972,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @throws IllegalArgumentException if chunkSize is less than or equal to 0.
      */
     @IntermediateOp
-    public Seq<List<T>, E> split(final int chunkSize) throws IllegalStateException {
+    public Seq<List<T>, E> split(final int chunkSize) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         return split(chunkSize, IntFunctions.ofList());
@@ -7451,7 +7987,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String, Exception> seq = Seq.of("a", "b", "c", "d", "e");
-     * List<Set<String>> chunks = seq.split(2, LinkedHashSet::new).toList();
+     * List<LinkedHashSet<String>> chunks = seq.split(2, LinkedHashSet::new).toList();
      * // chunks: [[a, b], [c, d], [e]]
      * }</pre>
      *
@@ -7467,8 +8003,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      */
     @IntermediateOp
     public <C extends Collection<T>> Seq<C, E> split(final int chunkSize, final IntFunction<? extends C> collectionSupplier)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgPositive(chunkSize, cs.chunkSize);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
@@ -7509,7 +8046,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
                 elements.advance(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -7541,9 +8078,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         checkArgPositive(chunkSize, cs.chunkSize);
         checkArgNotNull(collector, cs.collector);
 
-        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
+        final CollectorParts<T, R> parts = collectorParts(collector);
+        final Supplier<Object> supplier = parts.supplier();
+        final BiConsumer<Object, ? super T> accumulator = parts.accumulator();
+        final Function<Object, R> finisher = parts.finisher();
 
         return create(new Throwables.Iterator<>() {
             @Override
@@ -7582,7 +8120,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
                 elements.advance(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -7609,6 +8147,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<List<T>, E> split(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         return split(predicate, Suppliers.ofList());
@@ -7624,7 +8163,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String, Exception> seq = Seq.of("a", "ab", "abc", "d", "de");
-     * List<Set<String>> groups = seq.split(s -> s.length() > 1, LinkedHashSet::new).toList();
+     * List<LinkedHashSet<String>> groups = seq.split(s -> s.length() > 1, LinkedHashSet::new).toList();
      * // groups: [[a], [ab, abc], [d], [de]]
      * }</pre>
      *
@@ -7641,6 +8180,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <C extends Collection<T>> Seq<C, E> split(final Throwables.Predicate<? super T, ? extends E> predicate,
             final Supplier<? extends C> collectionSupplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
@@ -7684,7 +8224,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 return result;
             }
 
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -7713,13 +8253,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> split(final Throwables.Predicate<? super T, ? extends E> predicate, final Collector<? super T, ?, R> collector)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         checkArgNotNull(collector, cs.collector);
 
-        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
+        final CollectorParts<T, R> parts = collectorParts(collector);
+        final Supplier<Object> supplier = parts.supplier();
+        final BiConsumer<Object, ? super T> accumulator = parts.accumulator();
+        final Function<Object, R> finisher = parts.finisher();
 
         return create(new Throwables.Iterator<>() {
             private T next = (T) NONE;
@@ -7761,13 +8303,25 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 return finisher.apply(container);
             }
 
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
      * Splits the sequence at the specified position into two subsequences.
      * The first subsequence contains elements from the start up to the specified position (exclusive),
      * and the second subsequence contains elements from the specified position to the end.
+     *
+     * <p><b>The second sub-sequence is a live view of this sequence's source, not a copy.</b> Only the first
+     * sub-sequence is materialized (into a list); the second one keeps reading from the underlying source. It must
+     * therefore be consumed <i>before</i> the terminal operation on the returned outer sequence completes, because
+     * that terminal operation closes the source. The second subsequence does not keep the source open. Traversing
+     * it afterwards may report exhaustion or fail, depending on the source; for example,
+     * {@code Seq.ofLines(file).splitAt(2).toList().get(1).toList()} returns an empty list because the file iterator
+     * is already closed. Consume the remainder in place instead, e.g.
+     * {@code seq.splitAt(2).forEach(part -> process(part.toList()))}.</p>
+     *
+     * <p>Exactly two sub-sequences are always emitted, whatever the source holds: an empty source yields two empty
+     * sub-sequences, and a {@code position} at or past the end yields the whole source followed by an empty one.</p>
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
@@ -7832,6 +8386,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
             @Override
             public long count() throws E {
+                if (cursor >= 2) {
+                    return 0;
+                }
+
                 iter.count();
 
                 final long ret = 2 - cursor; //NOSONAR
@@ -7841,7 +8399,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
             @Override
             public void advance(final long n) throws E {
-                if (n <= 0) {
+                if (n <= 0 || cursor >= 2) {
                     return;
                 } else if ((n == 1) && (cursor == 0)) {
                     iter.advance(position);
@@ -7851,13 +8409,25 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
                 cursor = n >= 2 ? 2 : cursor + (int) n;
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
      * Splits the sequence at the position where the given predicate returns {@code true}.
      * The first subsequence contains elements from the start up to the position where the predicate returns {@code true} (exclusive),
      * and the second subsequence contains elements from the position where the predicate returns {@code true} to the end.
+     *
+     * <p><b>The second sub-sequence is a live view of this sequence's source, not a copy.</b> Only the first
+     * sub-sequence is materialized (into a list); the second one keeps reading from the underlying source. It must
+     * therefore be consumed <i>before</i> the terminal operation on the returned outer sequence completes, because
+     * that terminal operation closes the source. The second subsequence does not keep the source open. Traversing
+     * it afterwards may report exhaustion or fail, depending on the source. The matching boundary element has
+     * already been buffered and may still be returned even when the rest of the source is no longer available.
+     * Consume the complete remainder in place instead, e.g.
+     * {@code seq.splitAt(where).forEach(part -> process(part.toList()))}.</p>
+     *
+     * <p>Exactly two sub-sequences are always emitted, whatever the source holds: an empty source, or one in which
+     * {@code where} never matches, yields the whole source followed by an empty second sub-sequence.</p>
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
@@ -7880,6 +8450,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<Seq<T, E>, E> splitAt(final Throwables.Predicate<? super T, ? extends E> where) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(where, cs.where);
 
         final Throwables.Iterator<T, E> iter = elements;
@@ -7952,10 +8523,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                              * }</pre>
                              *
                              * @return the next split element
-                             * @throws E if the underlying iterator fails
                              * @throws NoSuchElementException if no more elements are available
+                             * @throws E if the underlying iterator fails
                              */
-                            public T next() throws E {
+                            public T next() throws NoSuchElementException, E {
                                 if (!hasNext()) {
                                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                                 }
@@ -7980,6 +8551,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
             @Override
             public long count() throws E {
+                if (cursor >= 2) {
+                    return 0;
+                }
+
                 iter.count();
 
                 final long ret = 2 - cursor; //NOSONAR
@@ -7989,7 +8564,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
             @Override
             public void advance(final long n) throws E {
-                if (n <= 0) {
+                if (n <= 0 || cursor >= 2) {
                     return;
                 } else if ((n == 1) && (cursor == 0)) {
                     while (iter.hasNext()) {
@@ -8007,13 +8582,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 cursor = n >= 2 ? 2 : cursor + (int) n;
             }
 
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
      * Creates a sliding window view of the sequence with the specified window size.
      * Each window is a list containing a subset of elements from the sequence.
      * Windows slide by 1 element at a time.
+     *
+     * <p><b>The final window may be shorter than {@code windowSize}.</b> A window is emitted for as long as at least
+     * one element of the source has not been consumed yet, so a trailing window that would consist only of elements
+     * already emitted by the previous window is <i>not</i> produced:
+     * {@code Seq.of(1, 2, 3).sliding(2, 1)} yields {@code [[1, 2], [2, 3]]}, not {@code [[1, 2], [2, 3], [3]]};
+     * {@code Seq.of(1, 2, 3, 4).sliding(3, 2)} yields {@code [[1, 2, 3], [3, 4]]}, keeping the short trailing window
+     * because element 4 had not been consumed; and {@code Seq.of(1).sliding(3, 1)} yields {@code [[1]]}.</p>
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
@@ -8032,7 +8614,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @throws IllegalArgumentException if the window size is less than or equal to zero.
      */
     @IntermediateOp
-    public Seq<List<T>, E> sliding(final int windowSize) throws IllegalStateException {
+    public Seq<List<T>, E> sliding(final int windowSize) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         return sliding(windowSize, 1);
@@ -8043,12 +8625,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Each window is a collection containing a subset of elements from the sequence.
      * Windows slide by 1 element at a time.
      *
+     * <p><b>The final window may be shorter than {@code windowSize}.</b> A window is emitted for as long as at least
+     * one element of the source has not been consumed yet, so a trailing window that would consist only of elements
+     * already emitted by the previous window is <i>not</i> produced:
+     * {@code Seq.of(1, 2, 3).sliding(2, 1)} yields {@code [[1, 2], [2, 3]]}, not {@code [[1, 2], [2, 3], [3]]};
+     * {@code Seq.of(1, 2, 3, 4).sliding(3, 2)} yields {@code [[1, 2, 3], [3, 4]]}, keeping the short trailing window
+     * because element 4 had not been consumed; and {@code Seq.of(1).sliding(3, 1)} yields {@code [[1]]}.</p>
+     *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String, Exception> seq = Seq.of("a", "b", "c", "d");
-     * List<Set<String>> windows = seq.sliding(2, LinkedHashSet::new).toList();
+     * List<LinkedHashSet<String>> windows = seq.sliding(2, LinkedHashSet::new).toList();
      * // windows: [[a, b], [b, c], [c, d]]
      * }</pre>
      *
@@ -8066,8 +8655,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <C extends Collection<T>> Seq<C, E> sliding(final int windowSize, final IntFunction<? extends C> collectionSupplier)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-        checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
+        // No local checkArgNotNull: the delegate validates windowSize/increment FIRST, so checking here made
+        // the two overloads name a different first offending argument for the same logical call. Same rule
+        // splitByChunkCount(int, int, ..) follows.
         return sliding(windowSize, 1, collectionSupplier);
     }
 
@@ -8075,6 +8666,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Creates a sliding window view of the sequence with the specified window size and collector.
      * Each window is collected into a result container using the provided collector.
      * Windows slide by 1 element at a time.
+     *
+     * <p><b>The final window may be shorter than {@code windowSize}.</b> A window is emitted for as long as at least
+     * one element of the source has not been consumed yet, so a trailing window that would consist only of elements
+     * already emitted by the previous window is <i>not</i> produced:
+     * {@code Seq.of(1, 2, 3).sliding(2, 1)} yields {@code [[1, 2], [2, 3]]}, not {@code [[1, 2], [2, 3], [3]]};
+     * {@code Seq.of(1, 2, 3, 4).sliding(3, 2)} yields {@code [[1, 2, 3], [3, 4]]}, keeping the short trailing window
+     * because element 4 had not been consumed; and {@code Seq.of(1).sliding(3, 1)} yields {@code [[1]]}.</p>
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
@@ -8098,14 +8696,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public <R> Seq<R, E> sliding(final int windowSize, final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-        checkArgNotNull(collector, cs.collector);
 
+        // See sliding(int, IntFunction): the delegate validates windowSize/increment first.
         return sliding(windowSize, 1, collector);
     }
 
     /**
      * Creates a sliding window view of the sequence with the specified window size and increment.
      * Each window is a list containing a subset of elements from the sequence.
+     *
+     * <p><b>The final window may be shorter than {@code windowSize}.</b> A window is emitted for as long as at least
+     * one element of the source has not been consumed yet, so a trailing window that would consist only of elements
+     * already emitted by the previous window is <i>not</i> produced:
+     * {@code Seq.of(1, 2, 3).sliding(2, 1)} yields {@code [[1, 2], [2, 3]]}, not {@code [[1, 2], [2, 3], [3]]};
+     * {@code Seq.of(1, 2, 3, 4).sliding(3, 2)} yields {@code [[1, 2, 3], [3, 4]]}, keeping the short trailing window
+     * because element 4 had not been consumed; and {@code Seq.of(1).sliding(3, 1)} yields {@code [[1]]}.</p>
      *
      * <p>For example, {@code Seq.of(1, 2, 3, 4, 5).sliding(3, 1)} produces: {@code [[1, 2, 3], [2, 3, 4], [3, 4, 5]]}</p>
      * <p>And {@code Seq.of(1, 2, 3, 4, 5).sliding(3, 2)} produces: {@code [[1, 2, 3], [3, 4, 5]]}</p>
@@ -8130,6 +8735,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; buffers one window at a time.
      *
+     * <p>During manual iteration, if {@code hasNext()} or {@code next()} encounters a
+     * source failure while skipping the gap between windows, the next such call resumes the unfinished gap.</p>
+     *
      * @param windowSize the size of the sliding window, must be greater than 0
      * @param increment the increment by which the window moves forward, must be greater than 0
      * @return a new Seq where each element is a list representing a sliding window of the original sequence
@@ -8149,6 +8757,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Each window is a collection containing a subset of elements from the sequence.
      * The type of collection for each window is determined by the provided supplier.
      *
+     * <p><b>The final window may be shorter than {@code windowSize}.</b> A window is emitted for as long as at least
+     * one element of the source has not been consumed yet, so a trailing window that would consist only of elements
+     * already emitted by the previous window is <i>not</i> produced:
+     * {@code Seq.of(1, 2, 3).sliding(2, 1)} yields {@code [[1, 2], [2, 3]]}, not {@code [[1, 2], [2, 3], [3]]};
+     * {@code Seq.of(1, 2, 3, 4).sliding(3, 2)} yields {@code [[1, 2, 3], [3, 4]]}, keeping the short trailing window
+     * because element 4 had not been consumed; and {@code Seq.of(1).sliding(3, 1)} yields {@code [[1]]}.</p>
+     *
      * <p>This method allows customization of the collection type used for windows. For example,
      * you can create windows as ArrayList, LinkedList, HashSet, etc.</p>
      *
@@ -8161,6 +8776,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; buffers one window at a time.
+     *
+     * <p>During manual iteration, if {@code hasNext()} or {@code next()} encounters a
+     * source failure while skipping the gap between windows, the next such call resumes the unfinished gap.</p>
      *
      * @param <C> the type of the collection to be returned for each window
      * @param windowSize the size of the sliding window, must be greater than 0
@@ -8177,23 +8795,23 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <C extends Collection<T>> Seq<C, E> sliding(final int windowSize, final int increment, final IntFunction<? extends C> collectionSupplier)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
         return create(new Throwables.Iterator<>() {
             private Deque<T> queue = null;
-            private boolean toSkip = false;
+            private int remainingGap = 0;
 
             @Override
             public boolean hasNext() throws E {
-                if (toSkip) {
-                    int skipNum = increment - windowSize;
-
-                    while (skipNum-- > 0 && elements.hasNext()) {
+                if (remainingGap > 0) {
+                    while (remainingGap > 0 && elements.hasNext()) {
                         elements.next();
+                        remainingGap--;
                     }
 
-                    toSkip = false;
+                    remainingGap = 0;
                 }
 
                 // Seq.of(1, 2, 3).sliding(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
@@ -8244,7 +8862,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     }
                 }
 
-                toSkip = increment > windowSize;
+                remainingGap = Math.max(0, increment - windowSize);
 
                 return result;
             }
@@ -8255,8 +8873,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 long len = prevSize + elements.count();
                 final long result;
 
-                if (increment > windowSize && toSkip) {
-                    len = Math.max(0, len - ((long) increment - windowSize));
+                if (remainingGap > 0) {
+                    len = Math.max(0, len - remainingGap);
                 }
 
                 if (len == prevSize) {
@@ -8275,7 +8893,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     queue.clear();
                 }
 
-                toSkip = false;
+                remainingGap = 0;
                 return result;
             }
 
@@ -8320,12 +8938,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     cnt++;
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
      * Creates a sliding window view of the sequence with the specified window size and increment.
      * Each window is collected into a result using the provided collector.
+     *
+     * <p><b>The final window may be shorter than {@code windowSize}.</b> A window is emitted for as long as at least
+     * one element of the source has not been consumed yet, so a trailing window that would consist only of elements
+     * already emitted by the previous window is <i>not</i> produced:
+     * {@code Seq.of(1, 2, 3).sliding(2, 1)} yields {@code [[1, 2], [2, 3]]}, not {@code [[1, 2], [2, 3], [3]]};
+     * {@code Seq.of(1, 2, 3, 4).sliding(3, 2)} yields {@code [[1, 2, 3], [3, 4]]}, keeping the short trailing window
+     * because element 4 had not been consumed; and {@code Seq.of(1).sliding(3, 1)} yields {@code [[1]]}.</p>
      *
      * <p>This method is useful when you need to apply complex aggregations to each window,
      * such as joining strings, computing statistics, or creating custom data structures.</p>
@@ -8339,6 +8964,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; buffers one window at a time.
+     *
+     * <p>During manual iteration, if {@code hasNext()} or {@code next()} encounters a
+     * source failure while skipping the gap between windows, the next such call resumes the unfinished gap.</p>
      *
      * @param <R> the type of the result produced by the collector
      * @param windowSize the size of the sliding window, must be greater than 0
@@ -8359,24 +8987,24 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
         checkArgNotNull(collector, cs.collector);
 
-        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
+        final CollectorParts<T, R> parts = collectorParts(collector);
+        final Supplier<Object> supplier = parts.supplier();
+        final BiConsumer<Object, ? super T> accumulator = parts.accumulator();
+        final Function<Object, R> finisher = parts.finisher();
 
         return create(new Throwables.Iterator<>() {
             private Deque<T> queue = null;
-            private boolean toSkip = false;
+            private int remainingGap = 0;
 
             @Override
             public boolean hasNext() throws E {
-                if (toSkip) {
-                    int skipNum = increment - windowSize;
-
-                    while (skipNum-- > 0 && elements.hasNext()) {
+                if (remainingGap > 0) {
+                    while (remainingGap > 0 && elements.hasNext()) {
                         elements.next();
+                        remainingGap--;
                     }
 
-                    toSkip = false;
+                    remainingGap = 0;
                 }
 
                 // Seq.of(1, 2, 3).sliding(2, 1) will return [[1, 2], [2, 3]], not [[1, 2], [2, 3], [3]]
@@ -8429,7 +9057,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     }
                 }
 
-                toSkip = increment > windowSize;
+                remainingGap = Math.max(0, increment - windowSize);
 
                 return finisher.apply(container);
             }
@@ -8440,8 +9068,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 long len = prevSize + elements.count();
                 final long result;
 
-                if (increment > windowSize && toSkip) {
-                    len = Math.max(0, len - ((long) increment - windowSize));
+                if (remainingGap > 0) {
+                    len = Math.max(0, len - remainingGap);
                 }
 
                 if (len == prevSize) {
@@ -8460,7 +9088,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     queue.clear();
                 }
 
-                toSkip = false;
+                remainingGap = 0;
                 return result;
             }
 
@@ -8505,13 +9133,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     cnt++;
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
      * Skips the first <i>n</i> elements of the sequence and returns a new sequence.
      * If <i>n</i> is greater than the number of elements in the sequence, an empty sequence is returned.
-     * If <i>n</i> is 0, the original sequence is returned unchanged.
+     * If <i>n</i> is 0, the returned sequence shares the original iterator without consuming elements.
+     * Successfully skipped elements are remembered if a source read fails during manual iteration;
+     * retrying continues with the remaining skip count.
      *
      * <p>This is an intermediate operation and will not close the sequence.</p>
      *
@@ -8543,37 +9173,57 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
         checkArgNotNegative(n, cs.n);
 
-        //    if (n == 0) {
-        //        return create(elements, sorted, cmp, closeHandlers);
-        //    }
-
         if (n == 0) {
-            return this;
+            return create(elements, sorted, cmp, closeHandlersForNewSeq());
         }
 
         return create(new Throwables.Iterator<>() {
-            private boolean skipped = false;
+            private long remaining = n;
+
+            private void skipElements() throws E {
+                if (remaining > 0) {
+                    if (elements.supportsFailureAtomicAdvance()) {
+                        elements.advance(remaining);
+                    } else {
+                        while (remaining > 0 && elements.hasNext()) {
+                            elements.next();
+                            remaining--;
+                        }
+                    }
+                    remaining = 0;
+                }
+            }
 
             @Override
             public boolean hasNext() throws E {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
-
+                skipElements();
                 return elements.hasNext();
             }
 
             @Override
             public T next() throws E {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
-
+                skipElements();
                 return elements.next();
             }
-        }, sorted, cmp, closeHandlers);
+
+            @Override
+            boolean supportsFailureAtomicAdvance() throws E {
+                return elements.supportsFailureAtomicAdvance();
+            }
+
+            @Override
+            public void advance(final long count) throws E {
+                if (count <= 0) {
+                    return;
+                }
+                skipElements();
+                if (elements.supportsFailureAtomicAdvance()) {
+                    elements.advance(count);
+                } else {
+                    super.advance(count);
+                }
+            }
+        }, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
@@ -8585,13 +9235,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4, 5);
-     * Seq<Integer, Exception> result = seq.skip(2, skipped -> System.out.println("Skipped: " + skipped));
-     * // Prints: "Skipped: 1", "Skipped: 2"
-     * // result contains: [3, 4, 5]
+     * List<Integer> result = seq.skip(2, skipped -> System.out.println("Skipped: " + skipped)).toList();
+     * // result: [3, 4, 5]
+     * // Prints, while toList() consumes the sequence: "Skipped: 1", "Skipped: 2"
+     * // (nothing is skipped - and nothing is printed - until a terminal operation runs)
      *
-     * Seq<Integer, Exception> skipZero = Seq.<Integer, Exception>of(1, 2, 3, 4, 5)
-     *     .skip(0, skipped -> System.out.println("Skipped: " + skipped));
-     * // Prints nothing (no elements skipped), skipZero contains: [1, 2, 3, 4, 5]
+     * List<Integer> skipZero = Seq.<Integer, Exception>of(1, 2, 3, 4, 5)
+     *     .skip(0, skipped -> System.out.println("Skipped: " + skipped))
+     *     .toList();
+     * // Prints nothing (no elements skipped); skipZero: [1, 2, 3, 4, 5]
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
@@ -8606,11 +9258,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> skip(final long n, final Throwables.Consumer<? super T, ? extends E> onSkip) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNegative(n, cs.n);
         checkArgNotNull(onSkip, cs.onSkip);
 
         if (n == 0) {
-            return this;
+            return create(elements, sorted, cmp, closeHandlersForNewSeq());
         }
 
         final Throwables.Predicate<T, E> filter = new Throwables.Predicate<>() {
@@ -8661,7 +9314,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see #filter(Throwables.Predicate)
      */
     @IntermediateOp
-    public Seq<T, E> skipNulls() {
+    public Seq<T, E> skipNulls() throws IllegalStateException {
         assertNotClosed();
 
         return filter(Fnn.notNull());
@@ -8671,6 +9324,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Skips the last <i>n</i> elements of the sequence and returns a new sequence.
      * This operation requires buffering up to <i>n</i> elements internally to determine which elements are the last ones.
      * If <i>n</i> is greater than the number of elements in the sequence, an empty sequence is returned.
+     * If source traversal fails while the buffer is being filled during manual iteration,
+     * successfully buffered elements are retained and filling resumes on the next access.
      *
      * <br />
      * This is an intermediate operation and will not close the sequence.
@@ -8698,13 +9353,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see #takeLast(int)
      */
     @IntermediateOp
-    public Seq<T, E> skipLast(final int n) throws IllegalArgumentException, IllegalStateException {
+    public Seq<T, E> skipLast(final int n) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNegative(n, cs.n);
 
         if (n <= 0) {
-            return create(elements, sorted, cmp, closeHandlers);
+            return create(elements, sorted, cmp, closeHandlersForNewSeq());
         }
 
         return create(new Throwables.Iterator<>() {
@@ -8714,10 +9369,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             public boolean hasNext() throws E {
                 if (deque == null) {
                     deque = new LinkedList<>();
+                }
 
-                    while (deque.size() < n && elements.hasNext()) {
-                        deque.offerLast(elements.next());
-                    }
+                while (deque.size() < n && elements.hasNext()) {
+                    deque.offerLast(elements.next());
                 }
 
                 return elements.hasNext();
@@ -8734,13 +9389,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 return deque.pollFirst();
             }
 
-        }, sorted, cmp, closeHandlers);
+        }, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
      * Limits the number of elements in the sequence to the specified maximum size.
      * If the sequence contains fewer elements than maxSize, all elements are included.
      * This is a short-circuiting stateful intermediate operation.
+     *
+     * <p>During manual iteration, only successful source reads use up the limit. If traversal fails,
+     * successfully consumed elements still count toward the limit when iteration is retried.
      *
      * <br />
      * This is an intermediate operation and will not close the sequence.
@@ -8787,13 +9445,24 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final T next = elements.next();
                 cnt++;
-                return elements.next();
+                return next;
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() throws E {
+                return cnt >= maxSize || elements.supportsFailureAtomicAdvance();
             }
 
             @Override
             public void advance(final long n) throws E {
-                if (n <= 0) {
+                if (n <= 0 || cnt >= maxSize) {
+                    return;
+                }
+
+                if (!elements.supportsFailureAtomicAdvance()) {
+                    super.advance(n);
                     return;
                 }
 
@@ -8802,7 +9471,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 cnt = n >= maxSize - cnt ? maxSize : cnt + n;
             }
 
-        }, sorted, cmp, closeHandlers);
+        }, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
@@ -8859,7 +9528,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         assertNotClosed();
 
         if (offset == 0) {
-            return maxSize == Long.MAX_VALUE ? this : limit(maxSize);
+            // Derive rather than hand back the receiver: `onClose(..)` is the only intermediate operation that is
+            // documented to return `this`, and the sibling no-op `skip(0)` derives too.
+            return maxSize == Long.MAX_VALUE ? create(elements, sorted, cmp, closeHandlersForNewSeq()) : limit(maxSize);
         } else if (maxSize == Long.MAX_VALUE) {
             return skip(offset);
         } else {
@@ -8873,7 +9544,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * It may cause {@code OutOfMemoryError} if {@code n} is big enough.
      *
      * <br />
-     * All elements are consumed to determine the last {@code n}; at most {@code n} are retained. The sequence is closed after that if a terminal operation is triggered.
+     * Unless {@code n} is {@code 0}, all elements are consumed to determine the last {@code n}; at most {@code n} are retained. The sequence is closed after that if a terminal operation is triggered.
+     *
+     * <p>When {@code n} is {@code 0} the upstream is not traversed at all: the returned sequence is empty, no upstream
+     * side effect (an {@code onEach}/{@code peek} stage, say) runs, and the upstream is released only when the returned
+     * sequence is closed or a terminal operation completes.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8885,7 +9560,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // empty.count() returns 0
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; buffers up to {@code n} elements.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that
+     * {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal};
+     * retains at most {@code n} elements in memory. The upstream sequence is also closed at that point.
      *
      * @param n the number of elements to retain from the end of the sequence
      * @return a new {@code Seq} consisting of the last {@code n} elements
@@ -8897,6 +9574,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @Deprecated
     @Beta
     @IntermediateOp
+    @TerminalOpTriggered
     public Seq<T, E> last(final int n) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
@@ -8909,7 +9587,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * It may cause {@code OutOfMemoryError} if {@code n} is big enough.
      *
      * <br />
-     * All elements are consumed to determine the last {@code n}; at most {@code n} are retained. The sequence is closed after that if a terminal operation is triggered.
+     * Unless {@code n} is {@code 0}, all elements are consumed to determine the last {@code n}; at most {@code n} are retained. The sequence is closed after that if a terminal operation is triggered.
+     *
+     * <p>When {@code n} is {@code 0} the upstream is not traversed at all: the returned sequence is empty, no upstream
+     * side effect (an {@code onEach}/{@code peek} stage, say) runs, and the upstream is released only when the returned
+     * sequence is closed or a terminal operation completes.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8924,7 +9606,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // takeAll contains: [1, 2, 3, 4, 5] (n exceeds size)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; buffers up to {@code n} elements.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that
+     * {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal};
+     * retains at most {@code n} elements in memory. The upstream sequence is also closed at that point.
      *
      * @param n the number of elements to retain from the end of the sequence, must not be negative
      * @return a new {@code Seq} consisting of the last {@code n} elements
@@ -8935,6 +9619,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      */
     @Beta
     @IntermediateOp
+    @TerminalOpTriggered
     public Seq<T, E> takeLast(final int n) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
@@ -8945,7 +9630,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         }
 
         return create(new Throwables.Iterator<>() {
-            private Iterator<T> iter;
+            // Pre-initialised: init() flags itself before draining, so a hasNext() retried after a failed drain has to
+            // degrade to "empty" - as top/reversed/rotated/lazyLoad do - instead of dereferencing a null iter.
+            private Iterator<T> iter = N.emptyIterator();
             private boolean initialized = false;
 
             @Override
@@ -8980,6 +9667,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
                             deque.offerLast(elements.next());
                         }
+                    } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+                        Seq.this.closeAfterFailure(t);
+                        throw t;
                     } finally {
                         Seq.this.close();
                     }
@@ -8987,7 +9677,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     iter = deque.iterator();
                 }
             }
-        }, sorted, cmp, closeHandlers);
+        }, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
@@ -8996,7 +9686,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * There is no guarantee on the order of the returned elements.
      *
      * <br />
-     * This is an intermediate operation and will not close the sequence.
+     * This is an intermediate operation; the returned sequence is not closed by it. Unless {@code n} is {@code 0}, all
+     * elements are consumed to determine the top {@code n}; at most {@code n} are retained. This sequence is closed at
+     * that point, before the returned sequence emits its first element.
+     *
+     * <p>When {@code n} is {@code 0} the upstream is not traversed at all: the returned sequence is empty, no upstream
+     * side effect (an {@code onEach}/{@code peek} stage, say) runs, and the upstream is released only when the returned
+     * sequence is closed or a terminal operation completes.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9011,7 +9707,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // topExceed contains all 6 elements (n exceeds actual size)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; retains at most {@code n} elements in memory.
      *
      * @param n the number of top elements to retain, must not be negative
      * @return a new {@code Seq} consisting of the top {@code n} elements
@@ -9021,6 +9717,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see #top(int, Comparator)
      */
     @IntermediateOp
+    @TerminalOpTriggered
     public Seq<T, E> top(final int n) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
@@ -9039,7 +9736,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * There is no guarantee on the order of the returned elements.
      *
      * <br />
-     * This is an intermediate operation and will not close the sequence.
+     * This is an intermediate operation; the returned sequence is not closed by it. Unless {@code n} is {@code 0}, all
+     * elements are consumed to determine the top {@code n}; at most {@code n} are retained. This sequence is closed at
+     * that point, before the returned sequence emits its first element.
+     *
+     * <p>When {@code n} is {@code 0} the upstream is not traversed at all: the returned sequence is empty, no upstream
+     * side effect (an {@code onEach}/{@code peek} stage, say) runs, and the upstream is released only when the returned
+     * sequence is closed or a terminal operation completes.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9051,23 +9754,32 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *     .top(2, Comparator.<String>naturalOrder().reversed());
      * // customTop contains the 2 greatest elements per the given comparator, i.e. the 2
      * // lexicographically SMALLEST strings ("apple", "banana") because the comparator is reversed
+     *
+     * Seq<String, Exception> none = Seq.<String, Exception>of("a", "b").top(0, Comparator.<String>naturalOrder());
+     * // none.count() returns 0, matching top(0)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; retains at most {@code n} elements in memory.
      *
-     * @param n the number of top elements to retain, must be positive
+     * @param n the number of top elements to retain, must not be negative. {@code 0} yields an empty sequence
      * @param comparator the comparator used for ordering; must not be {@code null}
      * @return a new {@code Seq} consisting of the top {@code n} elements according to the comparator
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if {@code n} is not positive, or if {@code comparator} is {@code null}.
+     * @throws IllegalArgumentException if {@code n} is negative, or if {@code comparator} is {@code null}.
      * @see Stream#top(int, Comparator)
      * @see #kthLargest(int, Comparator)
      */
     @IntermediateOp
+    @TerminalOpTriggered
     public Seq<T, E> top(final int n, final Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-        checkArgPositive(n, cs.n);
+
+        checkArgNotNegative(n, cs.n);
         checkArgNotNull(comparator, cs.comparator);
+
+        if (n == 0) {
+            return limit(0);
+        }
 
         final Comparator<? super T> comparatorToUse = comparator;
 
@@ -9126,53 +9838,63 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             private void init() throws E {
                 if (!initialized) {
                     initialized = true;
-                    if (sorted && isSameComparator(comparatorToUse, cmp)) {
-                        final LinkedList<T> queue = new LinkedList<>();
 
-                        while (elements.hasNext()) {
-                            if (queue.size() >= n) {
-                                queue.poll();
-                            }
+                    // The upstream is drained here, so release it right away rather than holding a file/JDBC handle
+                    // until the outer terminal operation finishes - the same contract takeLast(..)/reversed(..) keep.
+                    try {
+                        if (sorted && isSameComparator(comparatorToUse, cmp)) {
+                            final LinkedList<T> queue = new LinkedList<>();
 
-                            queue.offer(elements.next());
-                        }
-
-                        aar = (T[]) queue.toArray();
-                    } else {
-                        // The requested limit can be much larger than the actual sequence.
-                        // Grow with encountered elements instead of allocating n slots eagerly.
-                        // Wrap values because PriorityQueue rejects null elements even when its
-                        // comparator supports them.
-                        final Queue<Holder<T>> heap = new PriorityQueue<>((a, b) -> comparatorToUse.compare(a.value(), b.value()));
-                        Holder<T> holder = null;
-                        T next = null;
-
-                        while (elements.hasNext()) {
-                            next = elements.next();
-
-                            if (heap.size() >= n) {
-                                if (comparatorToUse.compare(next, heap.peek().value()) > 0) {
-                                    holder = heap.poll();
-                                    holder.setValue(next);
-                                    heap.offer(holder);
+                            while (elements.hasNext()) {
+                                if (queue.size() >= n) {
+                                    queue.poll();
                                 }
-                            } else {
-                                heap.offer(Holder.of(next));
+
+                                queue.offer(elements.next());
+                            }
+
+                            aar = (T[]) queue.toArray();
+                        } else {
+                            // The requested limit can be much larger than the actual sequence.
+                            // Grow with encountered elements instead of allocating n slots eagerly.
+                            // Wrap values because PriorityQueue rejects null elements even when its
+                            // comparator supports them.
+                            final Queue<Holder<T>> heap = new PriorityQueue<>((a, b) -> comparatorToUse.compare(a.value(), b.value()));
+                            Holder<T> holder = null;
+                            T next = null;
+
+                            while (elements.hasNext()) {
+                                next = elements.next();
+
+                                if (heap.size() >= n) {
+                                    if (comparatorToUse.compare(next, heap.peek().value()) > 0) {
+                                        holder = heap.poll();
+                                        holder.setValue(next);
+                                        heap.offer(holder);
+                                    }
+                                } else {
+                                    heap.offer(Holder.of(next));
+                                }
+                            }
+
+                            aar = (T[]) new Object[heap.size()];
+                            int i = 0;
+
+                            for (final Holder<T> e : heap) {
+                                aar[i++] = e.value();
                             }
                         }
-
-                        aar = (T[]) new Object[heap.size()];
-                        int i = 0;
-
-                        for (final Holder<T> e : heap) {
-                            aar[i++] = e.value();
-                        }
+                    } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+                        Seq.this.closeAfterFailure(t);
+                        throw t;
+                    } finally {
+                        Seq.this.close();
                     }
 
                     to = aar.length;
                 }
             }
-        }, false, null, closeHandlers);
+        }, false, null, closeHandlersForNewSeq());
     }
 
     /**
@@ -9261,11 +9983,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             private void init() throws E {
                 if (!initialized) {
                     initialized = true;
-                    aar = (T[]) Seq.this.toArrayForIntermediateOp();
+                    aar = (T[]) Seq.this.toArrayAndClose();
                     cursor = aar.length;
                 }
             }
-        }, false, null, closeHandlers);
+        }, false, null, closeHandlersForNewSeq());
     }
 
     /**
@@ -9309,7 +10031,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         assertNotClosed();
 
         if (distance == 0) {
-            return create(elements, closeHandlers);
+            // Rotating by zero preserves both the elements and any known sort order.
+            return create(elements, sorted, cmp, closeHandlersForNewSeq());
         }
 
         return create(new Throwables.Iterator<>() {
@@ -9334,7 +10057,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                return aar[(start + cnt++) % len];
+                // (long) before the modulo: start can be len and cnt len-1, so the int sum overflows once len >= 2^30+1.
+                return aar[(int) (((long) start + cnt++) % len)];
             }
 
             @Override
@@ -9364,7 +10088,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             private void init() throws E {
                 if (!initialized) {
                     initialized = true;
-                    aar = (T[]) Seq.this.toArrayForIntermediateOp();
+                    aar = (T[]) Seq.this.toArrayAndClose();
                     len = aar.length;
 
                     if (len > 0) {
@@ -9378,7 +10102,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     }
                 }
             }
-        }, false, null, closeHandlers);
+        }, false, null, closeHandlersForNewSeq());
     }
 
     /**
@@ -9499,6 +10223,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p>If the sequence is already sorted with the same comparator, this operation is a no-op.</p>
      *
+     * <p>{@code comparator} sees every element, {@code null} included. Unlike {@link #sorted()}, which orders
+     * {@code null} first, a comparator that cannot accept {@code null} (for example {@code Comparator.naturalOrder()})
+     * fails with a {@link NullPointerException} on a sequence that contains one.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer, Exception> seq = Seq.of(3, 1, 4, 1, 5, 9);
@@ -9525,13 +10253,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @TerminalOpTriggered
     public Seq<T, E> sorted(final Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(comparator, cs.comparator);
 
         final Comparator<? super T> cmp = comparator; //NOSONAR
 
-        if (sorted && cmp == this.cmp) {
-            // return create(elements, sorted, comparator, closeHandlers);
-            return this;
+        if (sorted && isSameComparator(cmp, this.cmp)) {
+            return create(elements, true, cmp, closeHandlersForNewSeq());
         }
 
         return lazyLoad(a -> {
@@ -9574,6 +10302,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @TerminalOpTriggered
     public Seq<T, E> sortedByInt(final ToIntFunction<? super T> keyMapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         final Comparator<? super T> cmpToUse = Comparators.comparingInt(keyMapper);
@@ -9611,6 +10340,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @TerminalOpTriggered
     public Seq<T, E> sortedByLong(final ToLongFunction<? super T> keyMapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         final Comparator<? super T> cmpToUse = Comparators.comparingLong(keyMapper);
@@ -9648,6 +10378,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @TerminalOpTriggered
     public Seq<T, E> sortedByDouble(final ToDoubleFunction<? super T> keyMapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         final Comparator<? super T> cmpToUse = Comparators.comparingDouble(keyMapper);
@@ -9686,6 +10417,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @SuppressWarnings("rawtypes")
     public Seq<T, E> sortedBy(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         final Comparator<? super T> comparator = Comparators.comparingBy(keyMapper);
@@ -9758,6 +10490,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @TerminalOpTriggered
     public Seq<T, E> reverseSorted(final Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(comparator, cs.comparator);
 
         final Comparator<? super T> cmpToUse = Comparators.reverseOrder(comparator);
@@ -9794,6 +10527,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @TerminalOpTriggered
     public Seq<T, E> reverseSortedByInt(final ToIntFunction<? super T> keyMapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         final Comparator<? super T> cmpToUse = Comparators.reversedComparingInt(keyMapper);
@@ -9827,6 +10561,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @TerminalOpTriggered
     public Seq<T, E> reverseSortedByLong(final ToLongFunction<? super T> keyMapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         final Comparator<? super T> cmpToUse = Comparators.reversedComparingLong(keyMapper);
@@ -9860,6 +10595,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @TerminalOpTriggered
     public Seq<T, E> reverseSortedByDouble(final ToDoubleFunction<? super T> keyMapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         final Comparator<? super T> cmpToUse = Comparators.reversedComparingDouble(keyMapper);
@@ -9898,6 +10634,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Seq<T, E> reverseSortedBy(@SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyMapper)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         final Comparator<? super T> cmpToUse = Comparators.reversedComparingBy(keyMapper);
@@ -9961,11 +10698,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             private void init() throws E {
                 if (!initialized) {
                     initialized = true;
-                    aar = (T[]) op.apply(Seq.this.toArrayForIntermediateOp());
+                    aar = (T[]) op.apply(Seq.this.toArrayAndClose());
                     len = aar.length;
                 }
             }
-        }, sorted, cmp, closeHandlers);
+        }, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
@@ -10055,7 +10792,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     list = new ArrayList<>();
                 }
             }
-        }, false, null, closeHandlers);
+        }, false, null, closeHandlersForNewSeq());
     }
 
     /**
@@ -10088,7 +10825,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see #cycled()
      */
     @IntermediateOp
-    public Seq<T, E> cycled(final long rounds) throws IllegalArgumentException, IllegalStateException {
+    public Seq<T, E> cycled(final long rounds) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNegative(rounds, cs.rounds);
@@ -10115,7 +10852,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 }
 
                 if (a != null) {
-                    return cursor < len || rounds - m > 1;
+                    // An empty source has nothing to replay: without the len check, rounds >= 3 answered true here
+                    // after exhaustion while next() fell through to the exhausted upstream iterator.
+                    return len > 0 && (cursor < len || rounds - m > 1);
                 } else if (iter.hasNext()) {
                     return true;
                 } else {
@@ -10156,7 +10895,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     list = new ArrayList<>();
                 }
             }
-        }, false, null, closeHandlers);
+        }, false, null, closeHandlersForNewSeq());
     }
 
     /**
@@ -10216,7 +10955,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see RateLimiter
      */
     @IntermediateOp
-    public Seq<T, E> rateLimited(final double permitsPerSecond) throws IllegalArgumentException, IllegalStateException {
+    public Seq<T, E> rateLimited(final double permitsPerSecond) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgPositive(permitsPerSecond, cs.permitsPerSecond);
@@ -10337,10 +11076,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
-     * @param duration the duration to delay each element
+     * @param duration the duration to delay each element; must not be {@code null} or negative. A duration below
+     *                 one millisecond rounds down to zero and delays nothing. (Unlike {@code Stream.delay(Duration)},
+     *                 which silently treats a negative duration as no delay, a negative duration is rejected here.)
      * @return a new {@code Seq} with each element delayed by the specified duration
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the duration is null.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or negative.
      * @see #debounce(Duration)
      * @see #rateLimited(double)
      * @see #rateLimited(RateLimiter)
@@ -10350,6 +11091,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         assertNotClosed();
 
         checkArgNotNull(duration, cs.duration);
+        checkArgNotNegative(duration.toMillis(), cs.duration);
 
         final long millis = duration.toMillis();
         final Throwables.Consumer<T, E> action = new Throwables.Consumer<>() {
@@ -10374,7 +11116,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * This method is useful for simulating time-based processing or avoiding overwhelming downstream systems.
      *
      * <p><b>Note:</b> the {@link java.time.Duration} is converted to milliseconds (via
-     * {@link java.time.Duration#toMillis()}); any sub-millisecond precision is silently truncated.</p>
+     * {@link java.time.Duration#toMillis()}); any sub-millisecond precision is silently truncated.
+     * Negative durations are rejected before conversion, including values between minus one millisecond and zero.</p>
      *
      * <br />
      * This is an intermediate operation and will not close the sequence.
@@ -10415,10 +11158,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
-     * @param duration the duration to delay each element
+     * @param duration the duration to delay each element; must not be {@code null} or negative. A duration below
+     *                 one millisecond rounds down to zero and delays nothing. (Unlike {@code Stream.delay(Duration)},
+     *                 which silently treats a negative duration as no delay, a negative duration is rejected here.)
      * @return a new {@code Seq} with each element delayed by the specified duration
      * @throws IllegalStateException if the sequence is already closed
-     * @throws IllegalArgumentException if the duration is null.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or negative.
      * @see #debounce(Duration)
      * @see #rateLimited(double)
      * @see #rateLimited(RateLimiter)
@@ -10427,7 +11172,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Seq<T, E> delay(final java.time.Duration duration) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        final Duration durationToUse = duration == null ? null : Duration.ofMillis(duration.toMillis()); // to throw the same exception as the other overload for a null duration.
+        checkArgNotNull(duration, cs.duration);
+        checkArgument(!duration.isNegative(), "duration must not be negative");
+
+        final Duration durationToUse = Duration.ofMillis(duration.toMillis());
 
         return delay(durationToUse);
     }
@@ -10442,7 +11190,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * discarded; the most recent element survives. It is emitted when a later pull observes a gap of at least
      * {@code duration}, or when the upstream is exhausted. The final element of the sequence is always emitted
      * without waiting for an additional timer. Arrival time is measured with {@link System#currentTimeMillis()}
-     * at the moment each element is pulled from the upstream, so this operator is only meaningful for sequences
+     * at the moment each element is pulled from the upstream - the same clock
+     * {@link com.landawn.abacus.util.stream.Stream#debounce(Duration)} uses - so an adjustment to the system
+     * clock can stretch or collapse a quiet window; this operator is only meaningful for sequences
      * whose upstream produces elements over time. For a sequence that produces all of its elements immediately
      * (e.g. one over an in-memory collection), every gap is effectively zero, so only the single last element
      * is emitted.
@@ -10513,7 +11263,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see <a href="http://reactivex.io/documentation/operators/debounce.html">ReactiveX#debounce</a>
      */
     @IntermediateOp
-    public Seq<T, E> debounce(final Duration duration) throws IllegalArgumentException, IllegalStateException {
+    public Seq<T, E> debounce(final Duration duration) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(duration, cs.duration);
@@ -10521,6 +11271,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
         return create(new Throwables.Iterator<>() {
             private final Throwables.Iterator<T, E> iter = iteratorEx();
+            // Milliseconds from currentTimeMillis(), matching Stream.debounce(..) exactly - the two implementations
+            // of this operator must agree. Note the consequence: because this is a wall clock rather than a
+            // monotonic one, a clock step (NTP, DST, a manual change) can stretch or collapse a quiet window.
             private final long durationMillis = duration.toMillis();
             private T prev = null; // the most recent element of the current burst, awaiting a quiet gap
             private boolean hasPrev = false;
@@ -10579,7 +11332,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 next = null;
                 return res;
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -10638,7 +11391,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     return res;
                 }
             }
-        }, closeHandlers);
+        }, closeHandlersForNewSeq());
     }
 
     /**
@@ -10657,6 +11410,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
+     * <p>During manual iteration, if {@code hasNext()} or {@code next()} encounters a
+     * source failure while skipping the gap between selected elements, the next such call resumes the unfinished gap.</p>
+     *
      * @param step the step size to use when iterating through the elements. Must be greater than 0.
      * @return a new {@code Seq} that steps through the elements with the specified step size
      * @throws IllegalStateException if the sequence is already closed
@@ -10670,13 +11426,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         checkArgPositive(step, cs.step);
 
         if (step == 1) {
-            return skip(0);
+            return create(elements, sorted, cmp, closeHandlersForNewSeq());
         }
 
         final long skip = step - 1;
         final Throwables.Iterator<T, E> iter = this.iteratorEx();
 
         final Throwables.Iterator<T, E> iterator = new Throwables.Iterator<>() {
+            // The gap is skipped on the way *in* to the next element, not on the way out of the previous one.
+            // Skipping eagerly inside next() made step(n).first() pull n elements from the source, which is
+            // observable through an upstream peek(..)/onEach(..) and wasteful for a resource-backed source.
+            private long remainingGap = 0;
+
             /**
              * Returns whether another stepped element is available.
              *
@@ -10691,11 +11452,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
              * @throws E if the underlying iterator fails
              */
             public boolean hasNext() throws E {
+                skipGapIfNeeded();
+
                 return iter.hasNext();
             }
 
             /**
-             * Returns the next element and advances by the configured step.
+             * Returns the next stepped element.
              *
              * <p><b>Usage Examples:</b></p>
              * <pre>{@code
@@ -10705,16 +11468,33 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
              * }</pre>
              *
              * @return the next stepped element
+             * @throws NoSuchElementException if no more elements are available
              * @throws E if the underlying iterator fails
              */
-            public T next() throws E {
+            public T next() throws NoSuchElementException, E {
+                skipGapIfNeeded();
+
                 final T next = iter.next();
-                iter.advance(skip);
+                remainingGap = skip;
                 return next;
+            }
+
+            private void skipGapIfNeeded() throws E {
+                if (remainingGap > 0) {
+                    if (iter.supportsFailureAtomicAdvance()) {
+                        iter.advance(remainingGap);
+                    } else {
+                        while (remainingGap > 0 && iter.hasNext()) {
+                            iter.next();
+                            remainingGap--;
+                        }
+                    }
+                    remainingGap = 0;
+                }
             }
         };
 
-        return create(iterator, sorted, cmp, closeHandlers);
+        return create(iterator, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
@@ -10819,7 +11599,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return a new {@code Seq} with elements read asynchronously into {@code queueToBuffer}
      * @throws IllegalArgumentException if {@code queueToBuffer} is {@code null} or not empty.
      */
-    Seq<T, E> buffered(final BlockingQueue<T> queueToBuffer) {
+    Seq<T, E> buffered(final BlockingQueue<T> queueToBuffer) throws IllegalArgumentException {
         checkArgNotNull(queueToBuffer, cs.queueToBuffer);
         checkArgument(queueToBuffer.isEmpty(), "'queueToBuffer' must be empty");
 
@@ -10860,6 +11640,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Seq<T, E> mergeWith(final Collection<? extends T> b, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(nextSelector, cs.nextSelector);
 
         return mergeWith(Seq.of(b), nextSelector);
@@ -10898,9 +11679,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public Seq<T, E> mergeWith(final Seq<? extends T, E> b, final Throwables.BiFunction<? super T, ? super T, MergeResult, E> nextSelector)
             throws IllegalStateException, IllegalArgumentException {
-        assertNotClosed();
-        checkArgNotNull(nextSelector, cs.nextSelector);
-
+        // No local assertNotClosed()/checkArgNotNull: both checks are repeated inside Seq.merge(..), which - unlike
+        // this method - closes BOTH sequences when either fires. Doing them here first closed only `this` and left
+        // `b` open, contradicting b's own "Will be closed along with this Seq".
         return Seq.merge(this, b, nextSelector);
     }
 
@@ -10934,6 +11715,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <T2, R> Seq<R, E> zipWith(final Collection<T2> b, final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         return zip(this, Seq.of(b), zipFunction);
@@ -10972,6 +11754,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <T2, R> Seq<R, E> zipWith(final Collection<T2> b, final T valueForNoneA, final T2 valueForNoneB,
             final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         return zip(this, Seq.of(b), valueForNoneA, valueForNoneB, zipFunction);
@@ -11011,6 +11794,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         return zip(this, Seq.of(b), Seq.of(c), zipFunction);
@@ -11054,6 +11838,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         return zip(this, Seq.of(b), Seq.of(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
@@ -11088,9 +11873,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public <T2, R> Seq<R, E> zipWith(final Seq<T2, E> b, final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction)
             throws IllegalStateException, IllegalArgumentException {
-        assertNotClosed();
-        checkArgNotNull(zipFunction, cs.zipFunction);
-
+        // See mergeWith(Seq, ..): the checks live in zip(..), which closes both sequences on failure.
         return zip(this, b, zipFunction);
     }
 
@@ -11124,9 +11907,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public <T2, R> Seq<R, E> zipWith(final Seq<T2, E> b, final T valueForNoneA, final T2 valueForNoneB,
             final Throwables.BiFunction<? super T, ? super T2, ? extends R, ? extends E> zipFunction) throws IllegalStateException, IllegalArgumentException {
-        assertNotClosed();
-        checkArgNotNull(zipFunction, cs.zipFunction);
-
+        // See mergeWith(Seq, ..): the checks live in zip(..), which closes both sequences on failure.
         return zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
     }
 
@@ -11163,9 +11944,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <T2, T3, R> Seq<R, E> zipWith(final Seq<T2, E> b, final Seq<T3, E> c,
             final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction)
             throws IllegalStateException, IllegalArgumentException {
-        assertNotClosed();
-        checkArgNotNull(zipFunction, cs.zipFunction);
-
+        // See mergeWith(Seq, ..): the checks live in zip(..), which closes all three sequences on failure.
         return zip(this, b, c, zipFunction);
     }
 
@@ -11205,9 +11984,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <T2, T3, R> Seq<R, E> zipWith(final Seq<T2, E> b, final Seq<T3, E> c, final T valueForNoneA, final T2 valueForNoneB, final T3 valueForNoneC,
             final Throwables.TriFunction<? super T, ? super T2, ? super T3, ? extends R, ? extends E> zipFunction)
             throws IllegalStateException, IllegalArgumentException {
-        assertNotClosed();
-        checkArgNotNull(zipFunction, cs.zipFunction);
-
+        // See mergeWith(Seq, ..): the checks live in zip(..), which closes all three sequences on failure.
         return zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
     }
 
@@ -11218,6 +11995,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p>This method is an alias for {@link #forEach(Throwables.Consumer)} that accepts a regular {@link Consumer}
      * instead of a {@link Throwables.Consumer}.</p>
+     *
+     * <p><b>Note the spelling.</b> {@code foreach} and {@link #forEach(Throwables.Consumer) forEach} differ only in
+     * the case of one letter, and most actions are accepted by both, so a typo compiles and silently selects the
+     * other overload. The two behave identically; only the accepted functional interface differs. Prefer
+     * {@code forEach} unless you specifically need a {@code java.util.function.Consumer}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11231,20 +12013,24 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * @param action a non-interfering action to perform on each element
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #forEach(Throwables.Consumer)
      */
     @Beta
     @TerminalOp
-    public void foreach(final Consumer<? super T> action) throws IllegalStateException, E, IllegalArgumentException {
+    public void foreach(final Consumer<? super T> action) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
         try {
             while (elements.hasNext()) {
                 action.accept(elements.next());
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -11273,19 +12059,23 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param <E2> the type of exception that the action may throw
      * @param action a non-interfering action to perform on each element
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the action throws an exception
      */
     @TerminalOp
-    public <E2 extends Exception> void forEach(final Throwables.Consumer<? super T, E2> action) throws IllegalStateException, E, E2, IllegalArgumentException {
+    public <E2 extends Exception> void forEach(final Throwables.Consumer<? super T, E2> action) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
         try {
             while (elements.hasNext()) {
                 action.accept(elements.next());
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -11294,7 +12084,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     /**
      * Performs the given action for each element of this sequence, and then performs the provided onComplete action.
      * <p>The onComplete action is executed even if no elements are present in the sequence, but is not executed
-     * if an exception occurs during element processing.</p>
+     * if advancing the source iterator or evaluating an intermediate operation throws.</p>
      *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
      *
@@ -11314,15 +12104,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param action a non-interfering action to perform on each element
      * @param onComplete a Runnable to execute after all elements have been processed
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws IllegalArgumentException if any of {@code action}, {@code onComplete} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws E2 if the action throws an exception
      * @throws E3 if the onComplete action throws an exception
-     * @throws IllegalArgumentException if any of {@code action}, {@code onComplete} is {@code null}.
      */
     @TerminalOp
     public <E2 extends Exception, E3 extends Exception> void forEach(final Throwables.Consumer<? super T, E2> action, final Throwables.Runnable<E3> onComplete)
-            throws IllegalStateException, E, E2, E3, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
         checkArgNotNull(onComplete, cs.onComplete);
 
@@ -11332,6 +12123,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             onComplete.run();
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -11360,15 +12154,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param flatMapper a function that returns an Iterable for each element
      * @param action a BiConsumer that processes the original element and each item from the Iterable
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws IllegalArgumentException if any of {@code flatMapper}, {@code action} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws E2 if the flat-mapper throws an exception
      * @throws E3 if the action throws an exception
-     * @throws IllegalArgumentException if any of {@code flatMapper}, {@code action} is {@code null}.
      */
     @TerminalOp
     public <U, E2 extends Exception, E3 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Iterable<? extends U>, E2> flatMapper,
-            final Throwables.BiConsumer<? super T, ? super U, E3> action) throws IllegalStateException, E, E2, E3, IllegalArgumentException {
+            final Throwables.BiConsumer<? super T, ? super U, E3> action) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
         checkArgNotNull(flatMapper, cs.flatMapper);
         checkArgNotNull(action, cs.action);
 
@@ -11386,6 +12181,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     }
                 }
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -11425,19 +12223,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param flatMapper2 a function that returns an Iterable of T3 for each T2
      * @param action a TriConsumer that processes the original element, T2, and T3
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws IllegalArgumentException if any of {@code flatMapper}, {@code flatMapper2}, {@code action} is
+     *         {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws E2 if the first flat-mapper throws an exception
      * @throws E3 if the second flat-mapper throws an exception
      * @throws E4 if the action throws an exception
-     * @throws IllegalArgumentException if any of {@code flatMapper}, {@code flatMapper2}, {@code action} is
-     *         {@code null}.
      */
     @TerminalOp
     public <T2, T3, E2 extends Exception, E3 extends Exception, E4 extends Exception> void forEach(
             final Throwables.Function<? super T, ? extends Iterable<T2>, E2> flatMapper,
             final Throwables.Function<? super T2, ? extends Iterable<T3>, E3> flatMapper2,
-            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E4> action) throws IllegalStateException, E, E2, E3, E4, IllegalArgumentException {
+            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E4> action) throws IllegalStateException, IllegalArgumentException, E, E2, E3, E4 {
         assertNotClosed();
+
         checkArgNotNull(flatMapper, cs.flatMapper);
         checkArgNotNull(flatMapper2, cs.flatMapper2);
         checkArgNotNull(action, cs.action);
@@ -11463,6 +12262,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     }
                 }
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -11483,28 +12285,41 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // 2: c
      * }</pre>
      *
+     * <p>The index is an {@code int} (matching {@code Stream.forEachIndexed(..)}), so this operation supports at
+     * most {@link Integer#MAX_VALUE} elements. A longer sequence - reachable for a file- or JDBC-backed source -
+     * fails with an {@link ArithmeticException} on the element that would overflow rather than reporting a
+     * negative index. Use {@link #indexed()}, whose index is a {@code long}, for such sources.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; does not buffer elements in memory.
      *
      * @param <E2> the type of exception that the action may throw
      * @param action a non-interfering action that accepts an index and element
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws ArithmeticException if the sequence holds more than {@link Integer#MAX_VALUE} elements
+     * @throws E2 if the action throws an exception
+     * @see #indexed()
      */
     @Beta
     @TerminalOp
     public <E2 extends Exception> void forEachIndexed(final Throwables.IntObjConsumer<? super T, E2> action)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, ArithmeticException, E2 {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
-        final MutableInt idx = MutableInt.of(0);
+        // Counted as a long and narrowed per element: an int counter wrapped silently to a negative index past
+        // Integer.MAX_VALUE elements, handing the action a value it could only misuse.
+        long idx = 0;
 
         try {
             while (elements.hasNext()) {
-                action.accept(idx.getAndIncrement(), elements.next());
+                action.accept(Numbers.toIntExact(idx++), elements.next());
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -11535,28 +12350,45 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param action a BiConsumer that takes an element and a MutableBoolean flag.
      *               Set the flag to {@code true} to break the loop.
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the action throws an exception
      * @see #forEachUntil(MutableBoolean, Throwables.Consumer)
      */
     @Beta
     @TerminalOp
     public <E2 extends Exception> void forEachUntil(final Throwables.BiConsumer<? super T, MutableBoolean, E2> action)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
         final MutableBoolean flagToBreak = MutableBoolean.of(false);
-        final Throwables.Consumer<? super T, E2> tmp = t -> action.accept(t, flagToBreak);
 
-        //noinspection resource
-        takeWhile(value -> flagToBreak.isFalse()).forEach(tmp);
+        // Deliberately a plain loop rather than takeWhile(flag.isFalse()).forEach(..): takeWhile pulls the next
+        // element from the source *before* testing its predicate, so the element after the break was consumed and
+        // discarded - visible through an upstream peek(..) and destructive for a shared or resource-backed source.
+        try {
+            while (elements.hasNext()) {
+                action.accept(elements.next(), flagToBreak);
+
+                if (flagToBreak.isTrue()) {
+                    break;
+                }
+            }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
+        } finally {
+            close();
+        }
     }
 
     /**
      * Iterates and executes the action until the flag is set to {@code true}.
-     * <p>This method is equivalent to {@code takeWhile(value -> flagToBreak.isFalse()).forEach(action)}.</p>
+     * <p>The flag is re-read before every element, so it may equally be set by the action itself or by another
+     * thread. Only the elements actually passed to {@code action} are consumed from the source; nothing is read
+     * past the point where the flag is observed to be {@code true}.</p>
      *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
      *
@@ -11579,7 +12411,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param action a Consumer to be applied to each element while the flag is {@code false}
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code flagToBreak} is {@code null}, or if {@code action} is {@code null}
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws E2 if the action throws an exception
      * @see #forEachUntil(Throwables.BiConsumer)
      */
@@ -11588,11 +12420,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <E2 extends Exception> void forEachUntil(final MutableBoolean flagToBreak, final Throwables.Consumer<? super T, E2> action)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
-        checkArgNotNull(flagToBreak, "flagToBreak");
+
+        checkArgNotNull(flagToBreak, cs.flagToBreak);
         checkArgNotNull(action, cs.action);
 
-        //noinspection resource
-        takeWhile(value -> flagToBreak.isFalse()).forEach(action);
+        // See the sibling overload: a plain loop consumes exactly the elements it delivers.
+        try {
+            while (flagToBreak.isFalse() && elements.hasNext()) {
+                action.accept(elements.next());
+            }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
+        } finally {
+            close();
+        }
     }
 
     /**
@@ -11618,15 +12460,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param <E2> type of exception that might be thrown from the action
      * @param action a non-interfering action to perform on each adjacent pair of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the action throws an exception
      */
     @Beta
     @TerminalOp
     public <E2 extends Exception> void forEachPair(final Throwables.BiConsumer<? super T, ? super T, E2> action)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
         forEachPair(1, action);
@@ -11665,7 +12508,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param action a non-interfering action to perform on each pair of elements
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if increment is not positive, or if {@code action} is {@code null}.
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws E2 if the action throws an exception
      */
     @Beta
@@ -11673,6 +12516,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <E2 extends Exception> void forEachPair(final int increment, final Throwables.BiConsumer<? super T, ? super T, E2> action)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgPositive(increment, cs.increment);
         checkArgNotNull(action, cs.action);
 
@@ -11703,6 +12547,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
                 isFirst = false;
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -11731,15 +12578,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param <E2> type of exception that might be thrown from the action
      * @param action a non-interfering action to perform on each adjacent triple of elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the action throws an exception
      */
     @Beta
     @TerminalOp
     public <E2 extends Exception> void forEachTriple(final Throwables.TriConsumer<? super T, ? super T, ? super T, E2> action)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
         forEachTriple(1, action);
@@ -11778,7 +12626,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param action a non-interfering action to perform on each triple of elements
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if increment is not positive, or if {@code action} is {@code null}.
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws E2 if the action throws an exception
      */
     @Beta
@@ -11786,6 +12634,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <E2 extends Exception> void forEachTriple(final int increment, final Throwables.TriConsumer<? super T, ? super T, ? super T, E2> action)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgPositive(increment, cs.increment);
         checkArgNotNull(action, cs.action);
 
@@ -11822,6 +12671,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
                 isFirst = false;
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -11832,8 +12684,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
      *
-     * <p>If the sequence is already sorted with the same comparator, this operation will return the first
-     * element for optimal performance.</p>
+     * <p>If this sequence is already sorted by an equivalent comparator - a preceding {@link #sorted(Comparator)},
+     * or a source already declared sorted - the extreme element is returned without invoking {@code comparator} at
+     * all, so a comparator with side effects (or one that would reject these elements) is simply never called.</p>
+     *
+     * <p><b>{@code null} elements:</b> a {@code null} element is passed to {@code comparator} like any other value,
+     * but the returned {@link Optional} cannot hold {@code null}, so a {@link NullPointerException} is thrown if the
+     * minimum turns out to be {@code null}. Use a comparator that sorts {@code null} last (e.g.
+     * {@link Comparators#nullsLast()}), or {@link #skipNulls()}, to avoid it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11850,14 +12708,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param comparator the comparator to determine the order of elements
      * @return an Optional containing the minimum element, or empty if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws NullPointerException if the minimum element is {@code null}
      * @see #minBy(Function)
      * @see Iterables#min(Iterable, Comparator)
      */
     @TerminalOp
-    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException, E, IllegalArgumentException {
+    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
+
         checkArgNotNull(comparator, cs.comparator);
 
         try {
@@ -11878,6 +12738,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return Optional.of(candidate);
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -11889,6 +12752,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
      *
      * <p>This is a convenience method equivalent to calling {@code min(Comparators.nullsLastBy(keyMapper))}.</p>
+     *
+     * <p><b>{@code null} elements:</b> "nulls last" orders a {@code null} <i>key</i>, not a {@code null}
+     * <i>element</i>: {@code keyMapper} is applied to a {@code null} element like any other value, so a key
+     * mapper that cannot accept {@code null} - a method reference such as {@code String::length}, for instance -
+     * can fail during comparison. No comparison or key extraction is needed for a singleton sequence.
+     * A {@code null} key can still win when all keys are {@code null}; ties retain the first element.
+     * A {@code null}-tolerant mapper can also make a {@code null} element win among non-null elements.
+     * The returned {@code Optional} cannot hold a {@code null} winner. Use {@link #skipNulls()} to exclude null elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11902,21 +12773,28 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param keyMapper the function to extract the comparable key for comparison
      * @return an Optional containing the element with the minimum key, or empty if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
      * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws NullPointerException if {@code keyMapper} rejects a {@code null} element during comparison,
+     *         or if the selected minimum element is {@code null}
      * @see #min(Comparator)
      * @see Iterables#minBy(Iterable, Function)
      */
     @TerminalOp
     @SuppressWarnings("rawtypes")
-    public Optional<T> minBy(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalStateException, E, IllegalArgumentException {
+    public Optional<T> minBy(final Function<? super T, ? extends Comparable> keyMapper)
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         final Comparator<? super T> comparator = Comparators.nullsLastBy(keyMapper);
 
         try {
             return min(comparator);
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -11927,6 +12805,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Returns an empty {@code Optional} if this sequence is empty.
      *
      * <p>This is a <b>terminal operation</b>.</p>
+     *
+     * <p><b>{@code null} elements:</b> a {@code null} element is passed to {@code comparator} like any other value,
+     * but the returned {@link Optional} cannot hold {@code null}, so a {@link NullPointerException} is thrown if the
+     * maximum turns out to be {@code null}. Use a comparator that sorts {@code null} first (e.g.
+     * {@link Comparators#nullsFirst()}), or {@link #skipNulls()}, to avoid it.</p>
+     *
+     * <p>If this sequence is already sorted by an equivalent comparator - a preceding {@link #sorted(Comparator)},
+     * or a source already declared sorted - the extreme element is returned without invoking {@code comparator} at
+     * all, so a comparator with side effects (or one that would reject these elements) is simply never called.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11940,14 +12827,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param comparator the comparator used for ordering; must not be {@code null}
      * @return an {@code Optional} describing the maximum element of this sequence, or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during the computation
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws
+     * @throws NullPointerException if the maximum element is {@code null}
      * @see #min(Comparator)
      * @see #maxBy(Function)
      */
     @TerminalOp
-    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException, E, IllegalArgumentException {
+    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
+
         checkArgNotNull(comparator, cs.comparator);
 
         try {
@@ -11956,6 +12845,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             T candidate = elements.next();
+
+            if (sorted && isSameComparator(comparator, cmp)) {
+                // Already ordered by this comparator: the last element is the maximum, so no comparison is needed.
+                // The mirror of the first-element shortcut in min(Comparator).
+                while (elements.hasNext()) {
+                    candidate = elements.next();
+                }
+
+                return Optional.of(candidate);
+            }
 
             while (elements.hasNext()) {
                 final T next = elements.next();
@@ -11966,6 +12865,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return Optional.of(candidate);
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -11973,10 +12875,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
     /**
      * Returns an {@code Optional} containing the maximum element of this sequence according to the comparable value
-     * extracted by the provided key mapper function. Null values are considered to be less than {@code non-null} values.
+     * extracted by the provided key mapper function. Null keys are considered to be less than {@code non-null} keys.
      * Returns an empty {@code Optional} if this sequence is empty.
      *
      * <p>This is a <b>terminal operation</b>.</p>
+     *
+     * <p><b>{@code null} elements:</b> "nulls first" orders a {@code null} <i>key</i>, not a {@code null}
+     * <i>element</i>: {@code keyMapper} is applied to a {@code null} element like any other value, so a key
+     * mapper that cannot accept {@code null} - a method reference such as {@code String::length}, for instance -
+     * can fail during comparison. No comparison or key extraction is needed for a singleton sequence.
+     * A {@code null} key can still win when all keys are {@code null}; ties retain the first element.
+     * A {@code null}-tolerant mapper can also make a {@code null} element win among non-null elements.
+     * The returned {@code Optional} cannot hold a {@code null} winner. Use {@link #skipNulls()} to exclude null elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -11991,22 +12901,29 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return an {@code Optional} describing the element with the maximum extracted key value,
      *         or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during the computation
      * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws
+     * @throws NullPointerException if {@code keyMapper} rejects a {@code null} element during comparison,
+     *         or if the selected maximum element is {@code null}
      * @see #max(Comparator)
      * @see #minBy(Function)
      * @see Iterables#maxBy(Iterable, Function)
      */
     @TerminalOp
     @SuppressWarnings("rawtypes")
-    public Optional<T> maxBy(final Function<? super T, ? extends Comparable> keyMapper) throws IllegalStateException, E, IllegalArgumentException {
+    public Optional<T> maxBy(final Function<? super T, ? extends Comparable> keyMapper)
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         final Comparator<? super T> comparator = Comparators.nullsFirstBy(keyMapper);
 
         try {
             return max(comparator);
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12031,17 +12948,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param predicate a non-interfering, stateless predicate to apply to elements of this sequence
      * @return {@code true} if any elements of the sequence match the provided predicate, otherwise {@code false}
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the predicate throws an exception
      * @see #allMatch(Throwables.Predicate)
      * @see #noneMatch(Throwables.Predicate)
      * @see N#anyMatch(Iterable, Predicate)
      */
     @TerminalOp
     public <E2 extends Exception> boolean anyMatch(final Throwables.Predicate<? super T, E2> predicate)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         try {
@@ -12052,6 +12970,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return false;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12077,17 +12998,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return {@code true} if either all elements of the sequence match the provided predicate or
      *         the sequence is empty, otherwise {@code false}
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the predicate throws an exception
      * @see #anyMatch(Throwables.Predicate)
      * @see #noneMatch(Throwables.Predicate)
      * @see N#allMatch(Iterable, Predicate)
      */
     @TerminalOp
     public <E2 extends Exception> boolean allMatch(final Throwables.Predicate<? super T, E2> predicate)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         try {
@@ -12098,6 +13020,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return true;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12123,17 +13048,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return {@code true} if either no elements of the sequence match the provided predicate or
      *         the sequence is empty, otherwise {@code false}
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the predicate throws an exception
      * @see #anyMatch(Throwables.Predicate)
      * @see #allMatch(Throwables.Predicate)
      * @see N#noneMatch(Iterable, Predicate)
      */
     @TerminalOp
     public <E2 extends Exception> boolean noneMatch(final Throwables.Predicate<? super T, E2> predicate)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         try {
@@ -12144,6 +13070,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return true;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12175,7 +13104,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code atLeast} or {@code atMost} is negative, or if {@code atMost} is less
      *         than {@code atLeast}, or if {@code predicate} is {@code null}.
-     * @throws E if an exception occurs while processing the sequence
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws
      * @throws E2 if the predicate throws an exception
      * @see Stream#hasMatchCountBetween(long, long, Throwables.Predicate)
      * @see #anyMatch(Throwables.Predicate)
@@ -12186,9 +13115,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <E2 extends Exception> boolean hasMatchCountBetween(final long atLeast, final long atMost, final Throwables.Predicate<? super T, E2> predicate)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNegative(atLeast, cs.atLeast);
-        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'");
         checkArgNotNegative(atMost, cs.atMost);
+        checkArgument(atLeast <= atMost, "'atLeast' must be <= 'atMost'. atLeast=%s, atMost=%s", atLeast, atMost);
         checkArgNotNull(predicate, cs.predicate);
 
         long cnt = 0;
@@ -12199,11 +13129,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                     return false;
                 }
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
 
-        return cnt >= atLeast && cnt <= atMost;
+        // No `cnt <= atMost` here: the loop already returned false the moment the count exceeded atMost.
+        return cnt >= atLeast;
     }
 
     /**
@@ -12230,10 +13164,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return an {@code Optional} containing the first element that matches the predicate,
      *         or an empty {@code Optional} if no element matches
      * @throws IllegalStateException if the sequence is already closed
-     * @throws NullPointerException if the matching element is {@code null}
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the predicate throws an exception
+     * @throws NullPointerException if the matching element is {@code null}
      * @see #findFirst()
      * @see #findAny(Throwables.Predicate)
      * @see #findLast(Throwables.Predicate)
@@ -12243,8 +13177,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      */
     @TerminalOp
     public <E2 extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E2> predicate)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2, NullPointerException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         try {
@@ -12259,6 +13194,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return Optional.empty();
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12290,18 +13228,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param predicate a non-interfering, stateless predicate to test each element of this sequence
      * @return an {@code Optional} containing a matching element, or an empty {@code Optional} if no element matches
      * @throws IllegalStateException if the sequence is already closed
-     * @throws NullPointerException if the matching element is {@code null}
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the predicate throws an exception
+     * @throws NullPointerException if the matching element is {@code null}
      * @see #findFirst(Throwables.Predicate)
      * @deprecated replaced by {@link #findFirst(Throwables.Predicate)}
      */
     @Deprecated
     @TerminalOp
     public <E2 extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E2> predicate)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2, NullPointerException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         return findFirst(predicate);
@@ -12316,8 +13255,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * must be tested, because a later element is always a better candidate; only the latest match is retained.</p>
      *
      * <p><b>Null elements:</b> the predicate is applied to {@code null} elements as well, but the returned
-     * {@code Optional} cannot hold {@code null}, so a matching {@code null} element causes a
-     * {@link NullPointerException}.</p>
+     * {@code Optional} cannot hold {@code null}, so a {@link NullPointerException} is thrown if the
+     * last matching element is {@code null}. An earlier matching {@code null} is harmless if a later
+     * non-null element also matches.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -12333,10 +13273,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return an {@code Optional} containing the last element that matches the predicate,
      *         or an empty {@code Optional} if no element matches
      * @throws IllegalStateException if the sequence is already closed
-     * @throws NullPointerException if the matching element is {@code null}
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the predicate throws an exception
+     * @throws NullPointerException if the last matching element is {@code null}
      * @see #reversed()
      * @see #findFirst(Throwables.Predicate)
      * @see #last()
@@ -12345,8 +13285,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @Beta
     @TerminalOp
     public <E2 extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E2> predicate)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2, NullPointerException {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         try {
@@ -12362,6 +13303,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return result == NONE ? Optional.empty() : Optional.of(result);
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12384,7 +13328,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param a the elements to check for containment in this sequence
      * @return {@code true} if {@code a} is {@code null} or empty, or if this sequence contains all of the specified elements; {@code false} otherwise
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #containsAny(Object[])
      * @see #containsNone(Object[])
      * @see N#containsAll(Collection, Object...)
@@ -12399,20 +13343,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 return true;
             } else if (a.length == 1 || (a.length == 2 && N.equals(a[0], a[1]))) {
                 return anyMatch(Fnn.<T, E> pp(Fn.equal(a[0])));
-            } else if (a.length == 2) {
-                //noinspection resource
-                return filter(new Throwables.Predicate<>() {
-                    private final T val1 = a[0];
-                    private final T val2 = a[1];
-
-                    @Override
-                    public boolean test(final T t) {
-                        return N.equals(t, val1) || N.equals(t, val2);
-                    }
-                }).distinct().limit(2).count() == 2;
             } else {
+                // The former two-element shortcut tested membership with N.equals but counted the matches with
+                // distinct(); the two disagree for array elements (see containsAll(Collection)), so it is gone.
                 return containsAll(N.toSet(a));
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12436,7 +13374,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param c the collection of elements to check for containment in this sequence
      * @return {@code true} if {@code c} is {@code null} or empty, or if this sequence contains all elements in the specified collection; {@code false} otherwise
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #containsAny(Collection)
      * @see #containsNone(Collection)
      * @see N#containsAll(Collection, Collection)
@@ -12452,12 +13390,23 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 final T val = c instanceof List ? ((List<T>) c).get(0) : c.iterator().next();
                 return anyMatch(Fnn.<T, E> pp(Fn.equal(val)));
             } else {
-                final Set<T> set = c instanceof Set ? (Set<T>) c : N.newHashSet(c);
-                final int distinctCount = set.size();
+                // Membership and "have I seen them all yet" must use ONE equality rule. Filtering with the
+                // membership set's equals/hashCode and then counting with distinct() - which normalises an ARRAY
+                // element through Wrapper, i.e. by content - disagreed for array elements, so a sequence that did
+                // contain every requested element answered false. Consuming a private copy of the membership set
+                // applies that set's own equality on both sides, matches containsAny(Collection), and
+                // short-circuits as soon as nothing is left to find.
+                final Set<T> remaining = N.newHashSet(c);
 
-                //noinspection resource
-                return filter(set::contains).distinct().limit(distinctCount).count() == distinctCount;
+                return anyMatch(t -> {
+                    remaining.remove(t);
+
+                    return remaining.isEmpty();
+                });
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12480,7 +13429,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param a the elements to check for containment in this sequence
      * @return {@code true} if this sequence contains any of the specified elements; {@code false} if {@code a} is {@code null} or empty, or if no match is found
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #containsAll(Object[])
      * @see #containsNone(Object[])
      * @see N#containsAny(Collection, Object...)
@@ -12510,6 +13459,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
                 return anyMatch(set::contains);
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12533,7 +13485,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param c the collection of elements to check for containment in this sequence
      * @return {@code true} if this sequence contains any element from the specified collection; {@code false} if {@code c} is {@code null} or empty, or if no match is found
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #containsAll(Collection)
      * @see #containsNone(Collection)
      * @see N#containsAny(Collection, Collection)
@@ -12549,10 +13501,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 final T val = c instanceof List ? ((List<T>) c).get(0) : c.iterator().next();
                 return anyMatch(Fnn.<T, E> pp(Fn.equal(val)));
             } else {
-                final Set<T> set = c instanceof Set ? (Set<T>) c : N.newHashSet(c);
-
-                return anyMatch(set::contains);
+                return anyMatch(asMembershipSet(c)::contains);
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12575,7 +13528,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param a the elements to check for non-containment in this sequence
      * @return {@code true} if {@code a} is {@code null} or empty, or if this sequence doesn't contain any of the specified elements; {@code false} otherwise
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #containsAll(Object[])
      * @see #containsAny(Object[])
      */
@@ -12590,6 +13543,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return !containsAny(a);
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12613,7 +13569,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param c the collection of elements to check for non-containment in this sequence
      * @return {@code true} if {@code c} is {@code null} or empty, or if this sequence doesn't contain any element from the specified collection; {@code false} otherwise
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #containsAll(Collection)
      * @see #containsAny(Collection)
      */
@@ -12627,6 +13583,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return !containsAny(c);
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12637,6 +13596,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p>This is a <b>short-circuiting terminal operation</b>.</p>
      *
+     * <p>Elements are compared exactly the way {@link #distinct()} compares them: by {@code equals}/{@code hashCode},
+     * except that array elements are compared by <i>content</i> rather than by identity, and {@code null} counts as a
+     * value of its own. So this method answers "would {@code distinct()} drop anything?".</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer, Exception> seq1 = Seq.of(1, 2, 3, 2, 4);
@@ -12644,13 +13607,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * Seq<Integer, Exception> seq2 = Seq.of(1, 2, 3, 4, 5);
      * boolean hasDups2 = seq2.containsDuplicates();   // returns false
+     *
+     * Seq<int[], Exception> seq3 = Seq.of(new int[] { 1 }, new int[] { 1 });
+     * boolean hasDups3 = seq3.containsDuplicates();   // returns true (arrays compare by content)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation, short-circuiting on the first duplicate;
+     * retains the distinct elements seen so far.
      *
      * @return {@code true} if this sequence contains at least one duplicate element, otherwise {@code false}
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see N#containsDuplicates(Collection)
      */
     @TerminalOp
@@ -12658,15 +13625,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         assertNotClosed();
 
         try {
-            final Set<T> set = N.newHashSet();
+            // hashKey(..) - the same normalization distinct()/distinctBy(..) use - so array elements compare by
+            // content instead of by identity and the two operations cannot disagree about what a duplicate is.
+            final Set<Object> set = N.newHashSet();
 
             while (elements.hasNext()) {
-                if (!set.add(elements.next())) {
+                if (!set.add(hashKey(elements.next()))) {
                     return true;
                 }
             }
 
             return false;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12685,7 +13657,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // third.get() == 5 (the 3rd largest element)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; retains at most {@code k} elements in memory.
      *
      * @param k the position (1-based) of the largest element to find. For example, k=1 finds the largest element,
      *          k=2 finds the second largest, etc.
@@ -12694,13 +13666,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *         has fewer than k elements
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code k} is less than 1, or if {@code comparator} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws NullPointerException if the k-th largest element is {@code null}
-     * @throws E if an exception occurs during iteration
      * @see N#kthLargest(Collection, int, Comparator)
      */
     @TerminalOp
-    public Optional<T> kthLargest(final int k, Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, E {
+    public Optional<T> kthLargest(final int k, Comparator<? super T> comparator)
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
+
         checkArgPositive(k, cs.k);
         checkArgNotNull(comparator, cs.comparator);
 
@@ -12744,6 +13718,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return queue.size() < k ? (Optional<T>) Optional.empty() : Optional.of(queue.peek().value());
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12769,7 +13746,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return an {@code Optional} containing a map where keys are {@code Percentage} values and values are the
      *         corresponding elements at those percentiles, or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see N#percentilesOfSorted(Object[])
      */
     @TerminalOp
@@ -12785,6 +13762,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return Optional.of((Map<Percentage, T>) N.percentilesOfSorted(a));
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12810,13 +13790,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return an {@code Optional} containing a map where keys are {@code Percentage} values and values are the
      *         corresponding elements at those percentiles, or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see N#percentilesOfSorted(Object[])
      */
     @TerminalOp
-    public Optional<Map<Percentage, T>> percentiles(final Comparator<? super T> comparator) throws IllegalStateException, E, IllegalArgumentException {
+    public Optional<Map<Percentage, T>> percentiles(final Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
+
         checkArgNotNull(comparator, cs.comparator);
 
         try {
@@ -12828,6 +13809,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return Optional.of((Map<Percentage, T>) N.percentilesOfSorted(a));
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12858,8 +13842,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return an {@code Optional} containing the first element of this sequence,
      *         or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws NullPointerException if the first element is {@code null}
-     * @throws E if an exception occurs during iteration
      * @see #findFirst()
      * @see #findAny()
      * @see #last()
@@ -12868,7 +13852,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @see Stream#first()
      */
     @TerminalOp
-    public Optional<T> first() throws IllegalStateException, E {
+    public Optional<T> first() throws IllegalStateException, E, NullPointerException {
         assertNotClosed();
 
         try {
@@ -12877,6 +13861,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return Optional.of(elements.next());
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -12903,15 +13890,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * @return an {@code Optional} containing the first element of the sequence, or an empty {@code Optional} if empty
      * @throws IllegalStateException if the sequence is already closed
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws NullPointerException if the first element is {@code null}
-     * @throws E if an exception occurs during iteration
      * @see #first()
      * @see #findAny()
      * @see #findFirst(Throwables.Predicate)
      * @see Stream#findFirst()
      */
     @TerminalOp
-    public Optional<T> findFirst() throws IllegalStateException, E {
+    public Optional<T> findFirst() throws IllegalStateException, E, NullPointerException {
         return first();
     }
 
@@ -12936,15 +13923,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * @return an {@code Optional} containing the first element of the sequence, or an empty {@code Optional} if empty
      * @throws IllegalStateException if the sequence is already closed
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws NullPointerException if the first element is {@code null}
-     * @throws E if an exception occurs during iteration
      * @see #first()
      * @see #findFirst()
      * @see #findFirst(Throwables.Predicate)
      * @see Stream#findAny()
      */
     @TerminalOp
-    public Optional<T> findAny() throws IllegalStateException, E {
+    public Optional<T> findAny() throws IllegalStateException, E, NullPointerException {
         return first();
     }
 
@@ -12969,14 +13956,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return an {@code Optional} containing the last element of this sequence,
      *         or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws NullPointerException if the last element is {@code null}
-     * @throws E if an exception occurs during iteration
      * @see #first()
      * @see #elementAt(long)
      * @see #findLast(Throwables.Predicate)
      */
     @TerminalOp
-    public Optional<T> last() throws IllegalStateException, E {
+    public Optional<T> last() throws IllegalStateException, E, NullPointerException {
         assertNotClosed();
 
         try {
@@ -12991,6 +13978,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return Optional.of(next);
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -13016,14 +14006,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *         or an empty {@code Optional} if the sequence has fewer than {@code position + 1} elements
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code position} is negative.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws NullPointerException if the element at the specified position is {@code null}
-     * @throws E if an exception occurs during iteration
      * @see #first()
      * @see #last()
      */
     @Beta
     @TerminalOp
-    public Optional<T> elementAt(final long position) throws IllegalStateException, IllegalArgumentException, E {
+    public Optional<T> elementAt(final long position) throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
 
         checkArgNotNegative(position, cs.position);
@@ -13035,6 +14025,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 //noinspection resource
                 return skip(position).first();
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -13061,14 +14054,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return an {@code Optional} describing the only element of this sequence,
      *         or an empty {@code Optional} if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws TooManyElementsException if the sequence contains more than one element
      * @throws NullPointerException if the only element is {@code null}
-     * @throws E if an exception occurs during iteration
      * @see #first()
      * @see #last()
      */
     @TerminalOp
-    public Optional<T> onlyOne() throws IllegalStateException, TooManyElementsException, E {
+    public Optional<T> onlyOne() throws IllegalStateException, E, TooManyElementsException, NullPointerException {
         assertNotClosed();
 
         try {
@@ -13078,11 +14071,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 result = Optional.of(elements.next());
 
                 if (elements.hasNext()) {
-                    throw new TooManyElementsException("There are at least two elements: " + Strings.concat(result.get(), ", ", elements.next()));
+                    // Abbreviate: an element's toString() is arbitrary user data and may be huge or multi-line.
+                    throw new TooManyElementsException(
+                            "There are at least two elements: " + Strings.abbreviate(N.toString(result.get()), MAX_ELEMENT_LENGTH_IN_ERROR_MSG) + ", "
+                                    + Strings.abbreviate(N.toString(elements.next()), MAX_ELEMENT_LENGTH_IN_ERROR_MSG));
                 }
             }
 
             return result;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -13103,7 +14102,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * @return the count of elements in this sequence
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      */
     @TerminalOp
     public long count() throws IllegalStateException, E {
@@ -13111,6 +14110,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
         try {
             return elements.count();
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -13132,7 +14134,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * @return an array containing all the elements of this sequence
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #toArray(IntFunction)
      * @see #toList()
      */
@@ -13140,25 +14142,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Object[] toArray() throws IllegalStateException, E {
         assertNotClosed();
 
-        return toArray(true);
+        return toArrayAndClose();
     }
 
-    Object[] toArray(final boolean closeStream) throws E {
-        assertNotClosed();
-
-        try {
-            return toList().toArray();
-        } finally {
-            if (closeStream) {
-                close();
-            }
-        }
-    }
-
-    Object[] toArrayForIntermediateOp() throws E {
-        // return toArray(false);
-
-        return toArray(true);
+    /**
+     * Drains this sequence into an array and closes it. Used by the intermediate operations that must materialize
+     * the whole upstream before they can emit anything ({@code sorted}, {@code reversed}, {@code rotated}, &hellip;).
+     */
+    Object[] toArrayAndClose() throws E {
+        // toList() already closes this sequence, so there is no "leave it open" variant to offer.
+        return toList().toArray();
     }
 
     /**
@@ -13180,20 +14173,24 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param generator a function which produces a new array of the desired type and the provided length
      * @return an array containing all the elements of this sequence
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
      * @throws IllegalArgumentException if {@code generator} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #toList()
      * @see List#toArray(IntFunction)
      */
     @TerminalOp
-    public <A> A[] toArray(final IntFunction<A[]> generator) throws IllegalStateException, E, IllegalArgumentException {
+    public <A> A[] toArray(final IntFunction<A[]> generator) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
+
         checkArgNotNull(generator, cs.generator);
 
         try {
             final List<T> list = toList();
 
             return list.toArray(generator.apply(list.size()));
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -13215,7 +14212,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * @return a {@code List} containing all the elements of this sequence
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #toSet()
      * @see #toCollection(Supplier)
      */
@@ -13231,6 +14228,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return result;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -13253,7 +14253,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * @return a {@code Set} containing all the distinct elements of this sequence
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #toList()
      * @see #toCollection(Supplier)
      */
@@ -13269,6 +14269,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return result;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -13293,14 +14296,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param supplier a function which returns a new, empty collection of the appropriate type
      * @return a collection containing all the elements of this sequence
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #toList()
      * @see #toSet()
      */
     @TerminalOp
-    public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, E, IllegalArgumentException {
+    public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
+
         checkArgNotNull(supplier, cs.supplier);
 
         try {
@@ -13311,6 +14315,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return result;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -13333,7 +14340,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * @return an immutable list containing all the elements of this sequence in encounter order
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #toList()
      * @see #toImmutableSet()
      */
@@ -13362,7 +14369,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * @return an immutable set containing all the distinct elements of this sequence
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see #toSet()
      * @see #toImmutableList()
      */
@@ -13392,16 +14399,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param func the function to apply to the list of all elements
      * @return the result of applying the function to the list
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the function throws an exception
      * @see #toListThenAccept(Throwables.Consumer)
      * @see #toSetThenApply(Throwables.Function)
      */
     @TerminalOp
     public <R, E2 extends Exception> R toListThenApply(final Throwables.Function<? super List<T>, R, E2> func)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(func, cs.func);
 
         return func.apply(toList());
@@ -13426,16 +14434,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param <E2> the type of exception that may be thrown by the consumer
      * @param consumer the action to perform on the list of all elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the consumer throws an exception
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the consumer throws an exception
      * @see #toListThenApply(Throwables.Function)
      * @see #toSetThenAccept(Throwables.Consumer)
      */
     @TerminalOp
     public <E2 extends Exception> void toListThenAccept(final Throwables.Consumer<? super List<T>, E2> consumer)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(consumer, cs.consumer);
 
         consumer.accept(toList());
@@ -13460,16 +14469,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param func the function to apply to the set of distinct elements
      * @return the result of applying the function to the set
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the function throws an exception
      * @see #toSetThenAccept(Throwables.Consumer)
      * @see #toListThenApply(Throwables.Function)
      */
     @TerminalOp
     public <R, E2 extends Exception> R toSetThenApply(final Throwables.Function<? super Set<T>, R, E2> func)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(func, cs.func);
 
         return func.apply(toSet());
@@ -13494,16 +14504,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param <E2> the type of exception that may be thrown by the consumer
      * @param consumer the action to perform on the set of distinct elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the consumer throws an exception
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the consumer throws an exception
      * @see #toSetThenApply(Throwables.Function)
      * @see #toListThenAccept(Throwables.Consumer)
      */
     @TerminalOp
     public <E2 extends Exception> void toSetThenAccept(final Throwables.Consumer<? super Set<T>, E2> consumer)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(consumer, cs.consumer);
 
         consumer.accept(toSet());
@@ -13533,15 +14544,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param func the function to apply to the collection
      * @return the result of applying the function to the collection
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the function throws an exception
      * @throws IllegalArgumentException if any of {@code supplier}, {@code func} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the function throws an exception
      * @see #toCollectionThenAccept(Supplier, Throwables.Consumer)
      */
     @TerminalOp
     public <R, C extends Collection<T>, E2 extends Exception> R toCollectionThenApply(final Supplier<? extends C> supplier,
-            final Throwables.Function<? super C, R, E2> func) throws IllegalStateException, E, E2, IllegalArgumentException {
+            final Throwables.Function<? super C, R, E2> func) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(supplier, cs.supplier);
         checkArgNotNull(func, cs.func);
 
@@ -13569,15 +14581,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param supplier a function which returns a new, empty collection of the appropriate type
      * @param consumer the action to perform on the collection
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if the consumer throws an exception
      * @throws IllegalArgumentException if any of {@code supplier}, {@code consumer} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the consumer throws an exception
      * @see #toCollectionThenApply(Supplier, Throwables.Function)
      */
     @TerminalOp
     public <C extends Collection<T>, E2 extends Exception> void toCollectionThenAccept(final Supplier<? extends C> supplier,
-            final Throwables.Consumer<? super C, E2> consumer) throws IllegalStateException, E, E2, IllegalArgumentException {
+            final Throwables.Consumer<? super C, E2> consumer) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(supplier, cs.supplier);
         checkArgNotNull(consumer, cs.consumer);
 
@@ -13610,18 +14623,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param valueMapper the function to extract values from the elements.
      * @return a Map containing the elements of this sequence transformed into key-value pairs
      * @throws IllegalStateException if the sequence is already closed, or if a duplicate key is encountered
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
-     * @throws E3 if an exception occurs during value extraction
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
+     * @throws E3 if {@code valueMapper} throws while mapping an element to its value
      * @see Fnn#throwingMerger()
      * @see Fnn#replacingMerger()
      * @see Fnn#ignoringMerger()
      */
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> Map<K, V> toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws IllegalStateException, E, E2, E3, IllegalArgumentException {
+            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
 
@@ -13642,7 +14656,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * LinkedHashMap<String, Integer> map = seq.toMap(
      *     person -> person.getName(),
      *     person -> person.getAge(),
-     *     LinkedHashMap::new
+     *     () -> new LinkedHashMap<>()
      * );
      * }</pre>
      *
@@ -13658,11 +14672,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param mapFactory the supplier to create the resulting map.
      * @return a Map containing the elements of this sequence transformed into key-value pairs
      * @throws IllegalStateException if the sequence is already closed, or if a duplicate key is encountered
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
-     * @throws E3 if an exception occurs during value extraction
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is
      *         {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
+     * @throws E3 if {@code valueMapper} throws while mapping an element to its value
      * @see Fnn#throwingMerger()
      * @see Fnn#replacingMerger()
      * @see Fnn#ignoringMerger()
@@ -13670,8 +14684,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @TerminalOp
     public <K, V, M extends Map<K, V>, E2 extends Exception, E3 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, E, E2, E3, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
         checkArgNotNull(mapFactory, cs.mapFactory);
@@ -13705,15 +14720,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param <E4> the type of exception that may be thrown by the merge function
      * @param keyMapper the function to extract keys from the elements.
      * @param valueMapper the function to extract values from the elements.
-     * @param mergeFunction the function to resolve collisions between values associated with the same key.
+     * @param mergeFunction the function to resolve collisions between values associated with the same key. A
+     *                      {@code null} result removes the key, as {@link Map#merge(Object, Object, BiFunction)} does.
      * @return a Map containing the elements of this sequence transformed into key-value pairs
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
-     * @throws E3 if an exception occurs during value extraction
-     * @throws E4 if an exception occurs during merging
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction} is
      *         {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
+     * @throws E3 if {@code valueMapper} throws while mapping an element to its value
+     * @throws E4 if {@code mergeFunction} throws while combining values for the same key
      * @see Fnn#throwingMerger()
      * @see Fnn#replacingMerger()
      * @see Fnn#ignoringMerger()
@@ -13721,8 +14737,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception, E4 extends Exception> Map<K, V> toMap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
-            final Throwables.BinaryOperator<V, E4> mergeFunction) throws IllegalStateException, E, E2, E3, E4, IllegalArgumentException {
+            final Throwables.BinaryOperator<V, E4> mergeFunction) throws IllegalStateException, IllegalArgumentException, E, E2, E3, E4 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
         checkArgNotNull(mergeFunction, cs.mergeFunction);
@@ -13759,16 +14776,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param <E4> the type of exception that may be thrown by the merge function
      * @param keyMapper the function to extract keys from the elements.
      * @param valueMapper the function to extract values from the elements.
-     * @param mergeFunction the function to resolve collisions between values associated with the same key.
+     * @param mergeFunction the function to resolve collisions between values associated with the same key. A
+     *                      {@code null} result removes the key, as {@link Map#merge(Object, Object, BiFunction)} does.
      * @param mapFactory the supplier to create the resulting map.
      * @return a Map containing the elements of this sequence transformed into key-value pairs
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
-     * @throws E3 if an exception occurs during value extraction
-     * @throws E4 if an exception occurs during merging
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction},
      *         {@code mapFactory} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
+     * @throws E3 if {@code valueMapper} throws while mapping an element to its value
+     * @throws E4 if {@code mergeFunction} throws while combining values for the same key
      * @see Fnn#throwingMerger()
      * @see Fnn#replacingMerger()
      * @see Fnn#ignoringMerger()
@@ -13777,8 +14795,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <K, V, M extends Map<K, V>, E2 extends Exception, E3 extends Exception, E4 extends Exception> M toMap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
             final Throwables.BinaryOperator<V, E4> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, E, E2, E3, E4, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2, E3, E4 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
         checkArgNotNull(mergeFunction, cs.mergeFunction);
@@ -13794,6 +14813,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return result;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -13825,18 +14847,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param valueMapper the function to extract values from the elements.
      * @return an ImmutableMap containing the elements of this sequence transformed into key-value pairs
      * @throws IllegalStateException if the sequence is already closed, or if a duplicate key is encountered
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
-     * @throws E3 if an exception occurs during value extraction
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
+     * @throws E3 if {@code valueMapper} throws while mapping an element to its value
      * @see Fnn#throwingMerger()
      * @see Fnn#replacingMerger()
      * @see Fnn#ignoringMerger()
      */
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> ImmutableMap<K, V> toImmutableMap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws IllegalStateException, E, E2, E3, IllegalArgumentException {
+            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
 
@@ -13870,15 +14893,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param <E4> the type of exception that may be thrown by the merge function
      * @param keyMapper the function to extract keys from the elements.
      * @param valueMapper the function to extract values from the elements.
-     * @param mergeFunction the function to resolve collisions between values associated with the same key.
+     * @param mergeFunction the function to resolve collisions between values associated with the same key. A
+     *                      {@code null} result removes the key, as {@link Map#merge(Object, Object, BiFunction)} does.
      * @return an ImmutableMap containing the elements of this sequence transformed into key-value pairs
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
-     * @throws E3 if an exception occurs during value extraction
-     * @throws E4 if an exception occurs during merging
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction} is
      *         {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
+     * @throws E3 if {@code valueMapper} throws while mapping an element to its value
+     * @throws E4 if {@code mergeFunction} throws while combining values for the same key
      * @see Fnn#throwingMerger()
      * @see Fnn#replacingMerger()
      * @see Fnn#ignoringMerger()
@@ -13886,8 +14910,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception, E4 extends Exception> ImmutableMap<K, V> toImmutableMap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
-            final Throwables.BinaryOperator<V, E4> mergeFunction) throws IllegalStateException, E, E2, E3, E4, IllegalArgumentException {
+            final Throwables.BinaryOperator<V, E4> mergeFunction) throws IllegalStateException, IllegalArgumentException, E, E2, E3, E4 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
         checkArgNotNull(mergeFunction, cs.mergeFunction);
@@ -13917,15 +14942,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param keyMapper the function to extract keys from the elements.
      * @return a Map where each key is associated with a list of elements that share that key
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
      * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
      * @see #groupTo(Throwables.Function, Supplier)
      */
     @TerminalOp
     public <K, E2 extends Exception> Map<K, List<T>> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         return groupTo(keyMapper, Suppliers.ofMap());
@@ -13956,15 +14982,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param mapFactory the supplier to create the resulting map.
      * @return a Map where each key is associated with a list of elements that share that key
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code mapFactory} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
      * @see Collectors#groupingBy(Function, Supplier)
      */
     @TerminalOp
     public <K, M extends Map<K, List<T>>, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Supplier<? extends M> mapFactory) throws IllegalStateException, E, E2, IllegalArgumentException {
+            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
@@ -13999,16 +15026,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param valueMapper the function to extract values from the elements.
      * @return a Map where each key is associated with a list of values that share that key
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
-     * @throws E3 if an exception occurs during value extraction
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
+     * @throws E3 if {@code valueMapper} throws while mapping an element to its value
      * @see #groupTo(Throwables.Function, Throwables.Function, Supplier)
      */
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> Map<K, List<V>> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws IllegalStateException, E, E2, E3, IllegalArgumentException {
+            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
 
@@ -14040,24 +15068,27 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param <M> the type of the resulting map
      * @param <E2> the type of exception that may be thrown by the key extractor
      * @param <E3> the type of exception that may be thrown by the value extractor
-     * @param keyMapper the function to extract keys from the elements.
+     * @param keyMapper the function to extract keys from the elements; a {@code null} key is allowed when the map
+     *                  created by {@code mapFactory} permits it (unlike {@code Stream.groupTo} and
+     *                  {@code Collectors.groupingBy}, which reject it)
      * @param valueMapper the function to extract values from the elements.
      * @param mapFactory the supplier to create the resulting map.
      * @return a Map where each key is associated with a list of values that share that key
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
-     * @throws E3 if an exception occurs during value extraction
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is
      *         {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
+     * @throws E3 if {@code valueMapper} throws while mapping an element to its value
      * @see #groupTo(Throwables.Function, Collector, Supplier)
      * @see Collectors#groupingBy(Function, Supplier)
      */
     @TerminalOp
     public <K, V, M extends Map<K, List<V>>, E2 extends Exception, E3 extends Exception> M groupTo(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
-            final Supplier<? extends M> mapFactory) throws IllegalStateException, E, E2, E3, IllegalArgumentException {
+            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
         checkArgNotNull(mapFactory, cs.mapFactory);
@@ -14079,6 +15110,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return result;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -14100,7 +15134,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * );
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; traverses the full sequence and retains downstream accumulator state per group; memory usage depends on the collector.
      *
      * @param <K> the type of keys in the resulting map
      * @param <D> the type of values in the resulting map after applying the downstream collector
@@ -14109,15 +15143,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param downstream the collector to collect the grouped elements.
      * @return a Map where each key is associated with the result of the downstream collector
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code downstream} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
      */
     @TerminalOp
     public <K, D, E2 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Collector<? super T, ?, D> downstream) throws IllegalStateException, E, E2, IllegalArgumentException {
+            final Collector<? super T, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
     }
@@ -14139,7 +15175,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * );
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; traverses the full sequence and retains downstream accumulator state per group; memory usage depends on the collector.
      *
      * @param <K> the type of keys in the resulting map
      * @param <D> the type of values in the resulting map after applying the downstream collector
@@ -14150,15 +15186,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param mapFactory the supplier to create the resulting map.
      * @return a Map where each key is associated with the result of the downstream collector
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code downstream}, {@code mapFactory} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
      */
     @TerminalOp
     public <K, D, M extends Map<K, D>, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Collector<? super T, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, E, E2, IllegalArgumentException {
+            final Collector<? super T, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         return groupTo(keyMapper, Fnn.<T, E> identity(), downstream, mapFactory);
@@ -14181,7 +15219,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * );
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; traverses the full sequence and retains downstream accumulator state per group; memory usage depends on the collector.
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values extracted from elements
@@ -14193,19 +15231,21 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param downstream the collector to collect the grouped values.
      * @return a Map where each key is associated with the result of the downstream collector
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
-     * @throws E3 if an exception occurs during value extraction
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code downstream} is
      *         {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
+     * @throws E3 if {@code valueMapper} throws while mapping an element to its value
      */
     @TerminalOp
     public <K, V, D, E2 extends Exception, E3 extends Exception> Map<K, D> groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, ?, D> downstream)
-            throws IllegalStateException, E, E2, E3, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(downstream, cs.downstream);
 
         return groupTo(keyMapper, valueMapper, downstream, Suppliers.ofMap());
     }
@@ -14229,7 +15269,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * );
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; traverses the full sequence and retains downstream accumulator state per group; memory usage depends on the collector.
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values extracted from elements
@@ -14237,7 +15277,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param <M> the type of the resulting map
      * @param <E2> the type of exception that may be thrown by the key extractor
      * @param <E3> the type of exception that may be thrown by the value extractor
-     * @param keyMapper the function to extract keys from the elements.
+     * @param keyMapper the function to extract keys from the elements; a {@code null} key is allowed when the map
+     *                  created by {@code mapFactory} permits it (unlike {@code Stream.groupTo} and
+     *                  {@code Collectors.groupingBy}, which reject it)
      * @param valueMapper the function to extract values from the elements.
      * @param downstream the collector to collect the grouped values.
      * @param mapFactory the supplier to create the resulting map.
@@ -14245,15 +15287,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the downstream collector is null, or if any of {@code keyMapper},
      *         {@code valueMapper}, {@code mapFactory} is {@code null}.
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
-     * @throws E3 if an exception occurs during value extraction
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
+     * @throws E3 if {@code valueMapper} throws while mapping an element to its value
      */
     @TerminalOp
     public <K, V, D, M extends Map<K, D>, E2 extends Exception, E3 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
             final Throwables.Function<? super T, ? extends V, E3> valueMapper, final Collector<? super V, ?, D> downstream,
             final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
         checkArgNotNull(downstream, cs.downstream);
@@ -14288,6 +15331,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return result;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -14316,15 +15362,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param predicate the predicate to test elements.
      * @return a Map with two entries: {@code true} for elements that match the predicate, and {@code false} for elements that do not
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during predicate evaluation
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code predicate} throws while testing an element
      * @see #partitionTo(Throwables.Predicate, Collector)
      */
     @TerminalOp
     public <E2 extends Exception> Map<Boolean, List<T>> partitionTo(final Throwables.Predicate<? super T, E2> predicate)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(predicate, cs.predicate);
 
         return partitionTo(predicate, Collectors.toList());
@@ -14348,43 +15395,46 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * long numberOfMinors = adultCount.get(false);
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; buffers all elements in memory.
+     * <p>The returned map iterates the {@code false} entry first and the {@code true} entry second, matching
+     * {@link java.util.stream.Collectors#partitioningBy(Predicate, Collector)}. It used to be a plain
+     * {@code HashMap}, whose two-entry order was only incidentally the same and was never a contract.</p>
+     *
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; traverses the full sequence and retains downstream accumulator state per group; memory usage depends on the collector.
      *
      * @param <D> the type of the downstream result
      * @param <E2> the type of exception that may be thrown by the predicate
      * @param predicate the predicate to test elements.
      * @param downstream the collector to apply to each partition.
-     * @return a Map with two entries: {@code true} for the collected result that matches the predicate, and {@code false} for the collected result that does not
+     * @return a Map with exactly two entries, in iteration order: {@code false} for the collected result that does
+     *         not match the predicate, then {@code true} for the collected result that does
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the specified downstream collector is {@code null}, or if
      *         {@code predicate} is {@code null}.
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during predicate evaluation
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code predicate} throws while testing an element
      * @see #partitionTo(Throwables.Predicate)
      */
     @TerminalOp
     public <D, E2 extends Exception> Map<Boolean, D> partitionTo(final Throwables.Predicate<? super T, E2> predicate,
-            final Collector<? super T, ?, D> downstream) throws IllegalArgumentException, IllegalStateException, E, E2 {
+            final Collector<? super T, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
-        checkArgNotNull(predicate, cs.predicate);
 
+        checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(downstream, cs.downstream);
 
-        final Function<Object, D> downstreamFinisher = (Function<Object, D>) downstream.finisher();
-
         final Throwables.Function<T, Boolean, E2> keyMapper = predicate::test;
-        final Supplier<Map<Boolean, D>> mapFactory = () -> N.newHashMap(2);
-        final Map<Boolean, D> map = groupTo(keyMapper, downstream, mapFactory);
+        final Map<Boolean, D> grouped = groupTo(keyMapper, downstream, Suppliers.ofMap());
 
-        if (!map.containsKey(Boolean.TRUE)) {
-            map.put(Boolean.TRUE, downstreamFinisher.apply(downstream.supplier().get()));
-        }
+        // Copied into a LinkedHashMap rather than just filling the gaps in `grouped`: a HashMap left the two-entry
+        // iteration order to Boolean's hash codes, so callers could not rely on the false-then-true order that
+        // Collectors.partitioningBy(..) guarantees.
+        final CollectorParts<T, D> parts = collectorParts(downstream);
+        final Map<Boolean, D> result = N.newLinkedHashMap(2);
 
-        if (!map.containsKey(Boolean.FALSE)) {
-            map.put(Boolean.FALSE, downstreamFinisher.apply(downstream.supplier().get()));
-        }
+        result.put(Boolean.FALSE, grouped.containsKey(Boolean.FALSE) ? grouped.get(Boolean.FALSE) : parts.finisher().apply(parts.supplier().get()));
+        result.put(Boolean.TRUE, grouped.containsKey(Boolean.TRUE) ? grouped.get(Boolean.TRUE) : parts.finisher().apply(parts.supplier().get()));
 
-        return map;
+        return result;
     }
 
     /**
@@ -14409,14 +15459,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param keyMapper the function to extract keys from the elements.
      * @return a ListMultimap where the keys are generated by the key extractor function and the values are the elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
      * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
      */
     @TerminalOp
     public <K, E2 extends Exception> ListMultimap<K, T> toMultimap(final Throwables.Function<? super T, ? extends K, E2> keyMapper)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
 
         return toMultimap(keyMapper, Suppliers.ofListMultimap());
@@ -14448,15 +15499,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param mapFactory the supplier to create the resulting multimap.
      * @return a multimap where the keys are generated by the key extractor function and the values are the elements
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code mapFactory} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
      */
     @TerminalOp
     public <K, V extends Collection<T>, M extends Multimap<K, T, V>, E2 extends Exception> M toMultimap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
@@ -14491,15 +15543,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param valueMapper the function to extract values from the elements.
      * @return a ListMultimap where the keys are generated by the key extractor function and the values are generated by the value extractor function
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
-     * @throws E3 if an exception occurs during value extraction
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
+     * @throws E3 if {@code valueMapper} throws while mapping an element to its value
      */
     @TerminalOp
     public <K, V, E2 extends Exception, E3 extends Exception> ListMultimap<K, V> toMultimap(final Throwables.Function<? super T, ? extends K, E2> keyMapper,
-            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws IllegalStateException, E, E2, E3, IllegalArgumentException {
+            final Throwables.Function<? super T, ? extends V, E3> valueMapper) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
 
@@ -14537,17 +15590,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param mapFactory the supplier to create the resulting multimap.
      * @return a multimap where the keys are generated by the key extractor function and the values are generated by the value extractor function
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
-     * @throws E2 if an exception occurs during key extraction
-     * @throws E3 if an exception occurs during value extraction
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is
      *         {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if {@code keyMapper} throws while mapping an element to its key
+     * @throws E3 if {@code valueMapper} throws while mapping an element to its value
      */
     @TerminalOp
     public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>, E2 extends Exception, E3 extends Exception> M toMultimap(
             final Throwables.Function<? super T, ? extends K, E2> keyMapper, final Throwables.Function<? super T, ? extends V, E3> valueMapper,
-            final Supplier<? extends M> mapFactory) throws IllegalStateException, E, E2, E3, IllegalArgumentException {
+            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
         checkArgNotNull(mapFactory, cs.mapFactory);
@@ -14563,6 +15617,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return result;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -14582,11 +15639,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * int countOfHello = wordCounts.count("hello");
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; traverses the full sequence and retains one count per distinct key or element.
      *
      * @return a Multiset containing all the elements from this sequence with their occurrence counts
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      */
     @TerminalOp
     public Multiset<T> toMultiset() throws IllegalStateException, E {
@@ -14608,17 +15665,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Multiset<String> wordCounts = seq.toMultiset(MyMultiset::new);
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; traverses the full sequence and retains one count per distinct key or element.
      *
      * @param supplier the supplier to create the resulting multiset.
      * @return a Multiset containing all the elements from this sequence with their occurrence counts
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      */
     @TerminalOp
-    public Multiset<T> toMultiset(final Supplier<? extends Multiset<T>> supplier) throws IllegalStateException, E, IllegalArgumentException {
+    public Multiset<T> toMultiset(final Supplier<? extends Multiset<T>> supplier) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
+
         checkArgNotNull(supplier, cs.supplier);
 
         try {
@@ -14629,6 +15687,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return result;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -14651,7 +15712,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * @return a Dataset containing the elements from this sequence
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during the conversion
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see N#newDataset(Collection)
      */
     @Beta
@@ -14680,7 +15741,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param columnNames the list of column names to be used in the Dataset.
      * @return a Dataset containing the elements from this sequence with the specified column names
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during the conversion
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @see N#newDataset(Collection, Collection)
      */
     @TerminalOp
@@ -14714,16 +15775,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param func the function to extract integer values from the elements
      * @return the sum of the integer values as a {@code long}. Returns 0 if this sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during the operation
-     * @throws E2 if the provided function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the provided function throws an exception
      * @see N#sumInt(Iterable, ToIntFunction)
      * @see Stream#sumInt(ToIntFunction)
      */
     @TerminalOp
     public <E2 extends Exception> long sumInt(final Throwables.ToIntFunction<? super T, E2> func)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(func, cs.func);
 
         try {
@@ -14734,6 +15796,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return sum;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -14751,22 +15816,27 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * long totalIds = seq.sumLong(record -> record.getId());
      * }</pre>
      *
+     * <p>The running total is a primitive {@code long} and <b>wraps silently on overflow</b>, exactly like
+     * {@code LongStream.sum()}. Collect with {@code Collectors.summingBigInteger(..)} if the total may exceed
+     * {@link Long#MAX_VALUE}.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; does not buffer elements in memory.
      *
      * @param <E2> the type of exception that the function may throw
      * @param func the function to extract long values from the elements
      * @return the sum of the long values. Returns 0 if this sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during the operation
-     * @throws E2 if the provided function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the provided function throws an exception
      * @see N#sumLong(Iterable, ToLongFunction)
      * @see Stream#sumLong(ToLongFunction)
      */
     @TerminalOp
     public <E2 extends Exception> long sumLong(final Throwables.ToLongFunction<? super T, E2> func)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(func, cs.func);
 
         try {
@@ -14777,6 +15847,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return sum;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -14801,16 +15874,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param func the function to extract double values from the elements
      * @return the sum of the double values. Returns 0.0 if this sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during the operation
-     * @throws E2 if the provided function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the provided function throws an exception
      * @see N#sumDouble(Iterable, ToDoubleFunction)
      * @see Stream#sumDouble(ToDoubleFunction)
      */
     @TerminalOp
     public <E2 extends Exception> double sumDouble(final Throwables.ToDoubleFunction<? super T, E2> func)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(func, cs.func);
 
         try {
@@ -14821,6 +15895,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return summation.sum();
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -14830,8 +15907,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Calculates the average of the integer values extracted from the elements in this sequence
      * using the provided function. The function is applied to each element to extract an integer value,
      * and the average of these values is calculated.
-     * The integral sum is accumulated exactly, expanding to arbitrary precision only if a {@code long}
-     * accumulator would overflow.
+     * The integral sum is accumulated exactly in a lazy signed 128-bit accumulator if a {@code long}
+     * total would overflow, without allocating arbitrary-precision numbers.
      *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
      *
@@ -14850,16 +15927,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param func the function to extract integer values from the elements
      * @return an OptionalDouble containing the average, or empty if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during the operation
-     * @throws E2 if the provided function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the provided function throws an exception
      * @see N#averageInt(Iterable, ToIntFunction)
      * @see Stream#averageInt(ToIntFunction)
      */
     @TerminalOp
     public <E2 extends Exception> OptionalDouble averageInt(final Throwables.ToIntFunction<? super T, E2> func)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(func, cs.func);
 
         try {
@@ -14867,27 +15945,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 return OptionalDouble.empty();
             }
 
-            long sum = 0;
-            BigInteger bigSum = null;
-            long count = 0;
+            final N.LongAverageAccumulator accumulator = new N.LongAverageAccumulator();
 
             do {
-                final int value = func.applyAsInt(elements.next());
-
-                if (bigSum == null) {
-                    try {
-                        sum = Math.addExact(sum, value);
-                    } catch (final ArithmeticException ex) {
-                        bigSum = BigInteger.valueOf(sum).add(BigInteger.valueOf(value));
-                    }
-                } else {
-                    bigSum = bigSum.add(BigInteger.valueOf(value));
-                }
-
-                count++;
+                accumulator.add(func.applyAsInt(elements.next()));
             } while (elements.hasNext());
 
-            return OptionalDouble.of((bigSum == null ? (double) sum : bigSum.doubleValue()) / count);
+            return OptionalDouble.of(accumulator.average());
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -14897,8 +15964,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Calculates the average of the long values extracted from the elements in this sequence
      * using the provided function. The function is applied to each element to extract a long value,
      * and the average of these values is calculated.
-     * The integral sum is accumulated exactly, expanding to arbitrary precision only if a {@code long}
-     * accumulator would overflow.
+     * The integral sum is accumulated exactly in a lazy signed 128-bit accumulator if a {@code long}
+     * total would overflow, without allocating arbitrary-precision numbers.
      *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
      *
@@ -14914,16 +15981,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param func the function to extract long values from the elements
      * @return an OptionalDouble containing the average, or empty if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during the operation
-     * @throws E2 if the provided function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the provided function throws an exception
      * @see N#averageLong(Iterable, ToLongFunction)
      * @see Stream#averageLong(ToLongFunction)
      */
     @TerminalOp
     public <E2 extends Exception> OptionalDouble averageLong(final Throwables.ToLongFunction<? super T, E2> func)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(func, cs.func);
 
         try {
@@ -14931,27 +15999,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 return OptionalDouble.empty();
             }
 
-            long sum = 0;
-            BigInteger bigSum = null;
-            long count = 0;
+            final N.LongAverageAccumulator accumulator = new N.LongAverageAccumulator();
 
             do {
-                final long value = func.applyAsLong(elements.next());
-
-                if (bigSum == null) {
-                    try {
-                        sum = Math.addExact(sum, value);
-                    } catch (final ArithmeticException ex) {
-                        bigSum = BigInteger.valueOf(sum).add(BigInteger.valueOf(value));
-                    }
-                } else {
-                    bigSum = bigSum.add(BigInteger.valueOf(value));
-                }
-
-                count++;
+                accumulator.add(func.applyAsLong(elements.next()));
             } while (elements.hasNext());
 
-            return OptionalDouble.of((bigSum == null ? (double) sum : bigSum.doubleValue()) / count);
+            return OptionalDouble.of(accumulator.average());
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -14977,16 +16034,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param func the function to extract double values from the elements
      * @return an OptionalDouble containing the average, or empty if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during the operation
-     * @throws E2 if the provided function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the provided function throws an exception
      * @see N#averageDouble(Iterable, ToDoubleFunction)
      * @see Stream#averageDouble(ToDoubleFunction)
      */
     @TerminalOp
     public <E2 extends Exception> OptionalDouble averageDouble(final Throwables.ToDoubleFunction<? super T, E2> func)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(func, cs.func);
 
         try {
@@ -15001,6 +16059,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return summation.average();
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -15032,17 +16093,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param accumulator a function for combining two values, must be associative and stateless
      * @return an Optional containing the result of the reduction, or an empty Optional if the sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws NullPointerException if the result of the reduction is {@code null}
-     * @throws E if an exception occurs during iteration of the sequence
-     * @throws E2 if the accumulator function throws an exception
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the accumulator function throws an exception
+     * @throws NullPointerException if the result of the reduction is {@code null}
      * @see #reduce(Object, Throwables.BiFunction)
      * @see Stream#reduce(BinaryOperator)
      */
     @TerminalOp
     public <E2 extends Exception> Optional<T> reduce(final Throwables.BinaryOperator<T, E2> accumulator)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2, NullPointerException {
         assertNotClosed();
+
         checkArgNotNull(accumulator, cs.accumulator);
 
         try {
@@ -15057,6 +16119,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return Optional.of(result);
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -15090,16 +16155,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param accumulator a function for combining the current accumulated value with a sequence element
      * @return the result of the reduction, or {@code identity} if this sequence is empty
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration of the sequence
-     * @throws E2 if the accumulator function throws an exception
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+     * @throws E2 if the accumulator function throws an exception
      * @see #reduce(Throwables.BinaryOperator)
      * @see Stream#reduce(Object, BinaryOperator)
      */
     @TerminalOp
     public <U, E2 extends Exception> U reduce(final U identity, final Throwables.BiFunction<? super U, ? super T, U, E2> accumulator)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(accumulator, cs.accumulator);
 
         try {
@@ -15110,6 +16176,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return result;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -15143,15 +16212,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param accumulator a function that folds an element into the result container
      * @return the result container with all elements of this sequence
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration of the sequence
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator} is {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws E2 if the supplier throws an exception
      * @throws E3 if the accumulator throws an exception
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator} is {@code null}.
      */
     @TerminalOp
     public <R, E2 extends Exception, E3 extends Exception> R collect(final Throwables.Supplier<R, E2> supplier,
-            final Throwables.BiConsumer<? super R, ? super T, E3> accumulator) throws IllegalStateException, E, E2, E3, IllegalArgumentException {
+            final Throwables.BiConsumer<? super R, ? super T, E3> accumulator) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
+
         checkArgNotNull(supplier, cs.supplier);
         checkArgNotNull(accumulator, cs.accumulator);
 
@@ -15163,6 +16233,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return result;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -15200,18 +16273,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param finisher a function that transforms the result container into the final result
      * @return the final result after applying the finisher function
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration of the sequence
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code finisher} is
+     *         {@code null}.
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws E2 if the supplier throws an exception
      * @throws E3 if the accumulator throws an exception
      * @throws E4 if the finisher throws an exception
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code finisher} is
-     *         {@code null}.
      */
     @TerminalOp
     public <R, RR, E2 extends Exception, E3 extends Exception, E4 extends Exception> RR collect(final Throwables.Supplier<R, E2> supplier,
             final Throwables.BiConsumer<? super R, ? super T, E3> accumulator, final Throwables.Function<? super R, ? extends RR, E4> finisher)
-            throws E, E2, E3, E4, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2, E3, E4 {
         assertNotClosed();
+
         checkArgNotNull(supplier, cs.supplier);
         checkArgNotNull(accumulator, cs.accumulator);
         checkArgNotNull(finisher, cs.finisher);
@@ -15224,6 +16298,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return finisher.apply(result);
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -15255,7 +16332,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return the result of the reduction
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the collector is null.
-     * @throws E if an exception occurs during iteration of the sequence
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      */
     @TerminalOp
     public <R> R collect(final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException, E {
@@ -15263,18 +16340,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
         checkArgNotNull(collector, cs.collector);
 
-        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
+        final CollectorParts<T, R> parts = collectorParts(collector);
 
         try {
-            final Object container = supplier.get();
+            final Object container = parts.supplier().get();
 
             while (elements.hasNext()) {
-                accumulator.accept(container, elements.next());
+                parts.accumulator().accept(container, elements.next());
             }
 
-            return finisher.apply(container);
+            return parts.finisher().apply(container);
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -15309,13 +16387,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return the result of applying the function to the collected elements
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the collector is null, or if {@code func} is {@code null}.
-     * @throws E if an exception occurs during iteration of the sequence
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws E2 if the function throws an exception
      */
     @TerminalOp
     public <R, RR, E2 extends Exception> RR collectThenApply(final Collector<? super T, ?, R> collector,
             final Throwables.Function<? super R, ? extends RR, E2> func) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(collector, cs.collector);
         checkArgNotNull(func, cs.func);
 
@@ -15351,13 +16430,14 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param consumer the consumer to accept the collected result
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the collector is null, or if {@code consumer} is {@code null}.
-     * @throws E if an exception occurs during iteration of the sequence
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      * @throws E2 if the consumer throws an exception
      */
     @TerminalOp
     public <R, E2 extends Exception> void collectThenAccept(final Collector<? super T, ?, R> collector, final Throwables.Consumer<? super R, E2> consumer)
             throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(collector, cs.collector);
         checkArgNotNull(consumer, cs.consumer);
 
@@ -15386,7 +16466,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param delimiter the delimiter to separate each element
      * @return a String containing all elements joined by the delimiter
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration of the sequence
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      */
     @TerminalOp
     public String join(final CharSequence delimiter) throws IllegalStateException, E {
@@ -15419,21 +16499,23 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @param suffix the string to be added at the end of the result
      * @return a String containing all elements joined by the delimiter with prefix and suffix
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during iteration of the sequence
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      */
     @TerminalOp
     public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException, E {
         assertNotClosed();
 
-        try {
-            @SuppressWarnings("resource")
-            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseBuffer();
-
+        // try-with-resources: in reuse mode the Joiner holds a pooled StringBuilder, and a throwing
+        // traversal used to drop it on the floor instead of returning it to Objectory.
+        try (final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseBuffer()) {
             while (elements.hasNext()) {
                 joiner.append(elements.next());
             }
 
             return joiner.toString();
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -15459,7 +16541,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return the provided Joiner after appending all elements
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if the joiner is null.
-     * @throws E if an exception occurs during iteration of the sequence
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
      */
     @TerminalOp
     public Joiner joinTo(final Joiner joiner) throws IllegalStateException, IllegalArgumentException, E {
@@ -15474,6 +16556,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             }
 
             return joiner;
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -15499,13 +16584,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; buffers at most 1,001 elements for formatting.
      *
      * @throws IllegalStateException if the sequence is already closed
-     * @throws E if an exception occurs during element processing
+     * @throws E if advancing the source iterator or evaluating an intermediate operation throws
      */
     @Beta
     @TerminalOp
     public void println() throws IllegalStateException, E {
         assertNotClosed();
 
+        // limit(..) derives a sequence linked back to this one, so its terminal toList() closes this sequence too.
+        //noinspection resource
         final List<T> list = limit(N.MAX_SIZE_FOR_PRINTLN + 1).toList();
 
         if (list.size() > N.MAX_SIZE_FOR_PRINTLN) {
@@ -15522,21 +16609,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * The operation does not modify the sequence's elements or behavior.
      *
      * <br />
-     * This is an intermediate operation and will not close the sequence.
+     * This is an intermediate operation and will not close the sequence. Like every other intermediate operation it
+     * returns a <i>new</i> sequence; consuming or closing that one also consumes this one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<String, IOException> ioSeq = Seq.of("a", "b");
      * Seq<String, Exception> casted = ioSeq.cast();
      * // casted.toList() returns ["a", "b"]; exception type widened to Exception
-     *
-     * Seq<String, Exception> alreadyFine = Seq.<String, Exception>of("x").cast();
-     * // alreadyFine is the same instance (no change needed)
+     * // ioSeq is consumed by that terminal operation and must not be reused
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
-     * @return this sequence cast to {@code Seq<T, Exception>}
+     * @return a new sequence over the same elements, typed {@code Seq<T, Exception>}
      * @throws IllegalStateException if the sequence is already closed
      */
     @Beta
@@ -15544,14 +16630,16 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Seq<T, Exception> cast() throws IllegalStateException {
         assertNotClosed();
 
-        return (Seq<T, Exception>) this;
+        // Widening E is sound: E only ever appears in `throws` positions, so callers of the result must already
+        // handle Exception. The iterator is reused as-is; only the declared exception type changes.
+        return create((Throwables.Iterator<T, Exception>) (Throwables.Iterator<T, ?>) elements, sorted, cmp, closeHandlersForNewSeq());
     }
 
     /**
      * Converts this sequence to a sequential {@code Stream}.
      * The returned stream will have the same elements as this sequence.
-     * If this sequence has close handlers registered, they will be transferred to the stream
-     * and will be invoked when the stream is closed.
+     * Closing the returned stream closes this sequence, so any close handlers registered here are invoked and this
+     * sequence cannot be traversed again afterwards.
      *
      * <br />
      * This is an intermediate operation and will not close the sequence.
@@ -15576,11 +16664,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public Stream<T> stream() throws IllegalStateException {
         assertNotClosed();
 
-        if (N.isEmpty(closeHandlers)) {
-            return Stream.of(newObjIteratorEx(elements));
-        } else {
-            return Stream.of(newObjIteratorEx(elements)).onClose(this::close);
-        }
+        // Always link back, even when there is nothing to release: closing the stream must also mark this sequence
+        // consumed, exactly like the sequence-to-sequence link in closeHandlersForNewSeq().
+        return Stream.of(newObjIteratorEx(elements)).onClose(this::close);
     }
 
     /**
@@ -15593,13 +16679,18 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * To avoid eager loading by terminal operations invoked within the transfer function,
      * use {@code Seq.defer(Supplier)} to create a lazily-evaluated sequence.
      *
+     * <p>Closing the returned sequence always closes this one, even when {@code transfer} ignores its input and
+     * returns a sequence built from something else. A {@code null} result is treated as an empty sequence, which
+     * still closes this one.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seq<Integer, Exception> seq = Seq.of(1, 2, 3, 4);
      * Seq<Integer, Exception> squares = seq.transform(s -> Seq.defer(() -> s.filter(n -> n % 2 == 0).map(n -> n * n)));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; the callback is invoked immediately, and this sequence is closed if it throws.
+     * Source traversal and buffering depend on the callback and the sequence or stream it returns.
      *
      * @param <U> the type of elements in the returned sequence
      * @param transfer the transformation function that takes this sequence and returns a new sequence.
@@ -15614,15 +16705,30 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      */
     @Beta
     @IntermediateOp
-    public <U> Seq<U, E> transform(final Function<? super Seq<T, E>, Seq<U, E>> transfer) throws IllegalArgumentException {
+    public <U> Seq<U, E> transform(final Function<? super Seq<T, E>, Seq<U, E>> transfer) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(transfer, cs.transfer);
 
         //    final Supplier<Seq<TT, EE>> delayInitializer = () -> transfer.apply(this);
         //
         //    return Seq.defer(delayInitializer);
 
-        return transfer.apply(this);
+        final Seq<U, E> result;
+
+        try {
+            result = transfer.apply(this);
+        } catch (final RuntimeException | Error e) {
+            // Eager callback: close first, the way collectorParts(..) and every checkArg* in this class do.
+            closeAfterFailure(e);
+            throw e;
+        }
+
+        // Link back the way transformViaStream(..)/sps(..) do. A transfer that ignores its input - or builds its
+        // result from another source - would otherwise leave this sequence, and any file/JDBC handle behind it,
+        // open forever. The handler is registered once-only, so the ordinary case (a transfer deriving from
+        // `this`, which already carries this::close among its close handlers) still closes exactly once.
+        return result == null ? Seq.<U, E> empty().onClose(this::close) : result.onClose(this::close);
     }
 
     /**
@@ -15635,7 +16741,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Seq.<Integer, Exception>of(1, 2, 3, 4).transformViaStream(s -> s.filter(n -> n % 2 == 0).map(n -> n * 10)).toList();   // returns [20, 40]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; the callback is invoked immediately, and this sequence is closed if it throws.
+     * Source traversal and buffering depend on the callback and the sequence or stream it returns.
      *
      * @param <U> the type of elements in the returned sequence
      * @param transfer the transformation function that takes a Stream representation of this sequence
@@ -15653,6 +16760,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <U> Seq<U, E> transformViaStream(final Function<? super Stream<T>, ? extends Stream<? extends U>> transfer)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(transfer, cs.transfer);
 
         return transformViaStream(transfer, false);
@@ -15669,7 +16777,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * Seq.<Integer, Exception>of(1, 2, 3, 4).transformViaStream(s -> s.map(n -> n * 2), true).toList();   // returns [2, 4, 6, 8] (transformation deferred until consumed)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; with {@code deferred == false},
+     * the callback is invoked immediately and this sequence is closed if it throws. With {@code deferred == true}, it
+     * runs when traversal first demands the transformed sequence; closing without traversal does not invoke it. Source
+     * traversal and buffering depend on the callback and the stream it returns.
      *
      * @param <U> the type of elements in the returned sequence
      * @param transfer the transformation function that takes a Stream representation of this sequence
@@ -15687,15 +16798,25 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @Beta
     @IntermediateOp
     public <U> Seq<U, E> transformViaStream(final Function<? super Stream<T>, ? extends Stream<? extends U>> transfer, final boolean deferred)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(transfer, cs.transfer);
 
+        // onClose(this::close) is the safety net for a transfer that ignores its input: closing the sequence built
+        // from the returned stream then closes that stream only, so a transfer such as `st -> Stream.of(1, 2)`
+        // would otherwise leave this sequence - and its file/JDBC handle - open forever.
         if (deferred) {
             final Supplier<Seq<U, E>> delayInitializer = () -> create(transfer.apply(this.stream()), true);
-            return Seq.defer(delayInitializer);
+            return Seq.<U, E> defer(delayInitializer).onClose(this::close);
         } else {
-            return create(transfer.apply(this.stream()), true);
+            try {
+                return Seq.<U, E> create(transfer.apply(this.stream()), true).onClose(this::close);
+            } catch (final RuntimeException | Error e) {
+                // Eager callback: close first, the way collectorParts(..) and every checkArg* in this class do.
+                closeAfterFailure(e);
+                throw e;
+            }
         }
     }
 
@@ -15719,7 +16840,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *                .filter(x -> x > threshold));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; the callback is invoked immediately, and this sequence is closed if it throws.
+     * Source traversal and buffering depend on the callback and the sequence or stream it returns.
      *
      * @param <R> the type of elements in the returned sequence
      * @param ops the function to be applied on the parallel stream. This function takes the
@@ -15738,9 +16860,17 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @IntermediateOp
     public <R> Seq<R, E> sps(final Function<? super Stream<T>, ? extends Stream<? extends R>> ops) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(ops, cs.ops);
 
-        return create(ops.apply(this.stream().parallel()), true);
+        try {
+            // See transformViaStream(..): link back so an `ops` that discards its input cannot strand this sequence.
+            return Seq.<R, E> create(ops.apply(this.stream().parallel()), true).onClose(this::close);
+        } catch (final RuntimeException | Error e) {
+            // Eager callback: close first, the way collectorParts(..) and every checkArg* in this class do.
+            closeAfterFailure(e);
+            throw e;
+        }
     }
 
     /**
@@ -15764,7 +16894,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *                   .filter(Objects::nonNull));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; the callback is invoked immediately, and this sequence is closed if it throws.
+     * Source traversal and buffering depend on the callback and the sequence or stream it returns.
      *
      * @param <R> the type of the elements in the resulting sequence
      * @param maxThreadNum the maximum number of threads to use for parallel processing. Must be
@@ -15787,12 +16918,20 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     @Beta
     @IntermediateOp
     public <R> Seq<R, E> sps(final int maxThreadNum, final Function<? super Stream<T>, ? extends Stream<? extends R>> ops)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgPositive(maxThreadNum, cs.maxThreadNum);
         checkArgNotNull(ops, cs.ops);
 
-        return create(ops.apply(this.stream().parallel(maxThreadNum)), true);
+        try {
+            // See transformViaStream(..): link back so an `ops` that discards its input cannot strand this sequence.
+            return Seq.<R, E> create(ops.apply(this.stream().parallel(maxThreadNum)), true).onClose(this::close);
+        } catch (final RuntimeException | Error e) {
+            // Eager callback: close first, the way collectorParts(..) and every checkArg* in this class do.
+            closeAfterFailure(e);
+            throw e;
+        }
     }
 
     /**
@@ -15824,7 +16963,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; the callback is invoked immediately, and this sequence is closed if it throws.
+     * Source traversal and buffering depend on the callback and the sequence or stream it returns.
      *
      * @param <R> the type of the elements in the resulting sequence
      * @param maxThreadNum the maximum number of threads to use for parallel processing. Must be
@@ -15852,11 +16992,19 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> Seq<R, E> sps(final int maxThreadNum, final Executor executor, final Function<? super Stream<T>, ? extends Stream<? extends R>> ops)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgPositive(maxThreadNum, cs.maxThreadNum);
         checkArgNotNull(executor, cs.executor);
         checkArgNotNull(ops, cs.ops);
 
-        return create(ops.apply(this.stream().parallel(maxThreadNum, executor)), true);
+        try {
+            // See transformViaStream(..): link back so an `ops` that discards its input cannot strand this sequence.
+            return Seq.<R, E> create(ops.apply(this.stream().parallel(maxThreadNum, executor)), true).onClose(this::close);
+        } catch (final RuntimeException | Error e) {
+            // Eager callback: close first, the way collectorParts(..) and every checkArg* in this class do.
+            closeAfterFailure(e);
+            throw e;
+        }
     }
 
     /**
@@ -15867,7 +17015,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * current thread. The operation runs asynchronously and returns a {@code ContinuableFuture<Void>}
      * that can be used to check completion status or chain additional operations.</p>
      *
-     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
+     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.
+     * If both the action and closure fail, the action failure remains the cause of the returned future's failure
+     * and a distinct close failure is suppressed on it. If only closure fails, the future reports that failure.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15878,6 +17028,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // Wait for completion
      * future.get();
      * }</pre>
+     *
+     * <p><b>This sequence stays open on the calling thread.</b> It is closed by the background task once
+     * {@code terminalAction} returns, so until then this sequence still looks open and further operations on it
+     * are accepted rather than rejected. Starting a second operation on it - or on any sequence derived from it -
+     * races with the background traversal of a {@link SequentialOnly}, non-thread-safe cursor. Hand the sequence
+     * to exactly one of the two.</p>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; does not buffer elements in memory.
      *
@@ -15894,18 +17050,22 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public ContinuableFuture<Void> runAsync(final Throwables.Consumer<? super Seq<T, E>, ? extends Exception> terminalAction)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(terminalAction, cs.terminalAction);
 
         try {
             return ContinuableFuture.run(() -> {
                 try {
                     terminalAction.accept(Seq.this);
+                } catch (final Throwable t) { // NOSONAR: preserve the task failure when closing also fails.
+                    closeAfterFailure(t);
+                    throw t;
                 } finally {
                     Seq.this.close();
                 }
             });
         } catch (final RuntimeException | Error e) {
-            closeAfterSchedulingFailure(e);
+            closeAfterFailure(e);
             throw e;
         }
     }
@@ -15919,7 +17079,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * particularly useful when you need to manage thread resources or prioritize different types
      * of operations.</p>
      *
-     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
+     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.
+     * If both the action and closure fail, the action failure remains the cause of the returned future's failure
+     * and a distinct close failure is suppressed on it. If only closure fails, the future reports that failure.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15939,6 +17101,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }
      * }</pre>
      *
+     * <p><b>This sequence stays open on the calling thread.</b> It is closed by the background task once
+     * {@code terminalAction} returns, so until then this sequence still looks open and further operations on it
+     * are accepted rather than rejected. Starting a second operation on it - or on any sequence derived from it -
+     * races with the background traversal of a {@link SequentialOnly}, non-thread-safe cursor. Hand the sequence
+     * to exactly one of the two.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; does not buffer elements in memory.
      *
      * @param terminalAction the terminal operation to be executed on this sequence. The consumer
@@ -15949,14 +17117,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *         with {@code null} when the operation finishes successfully, or completes exceptionally
      *         if the operation throws an exception
      * @throws IllegalStateException if the sequence is already closed
-     * @throws java.util.concurrent.RejectedExecutionException if the executor rejects the task; this sequence is still closed
      * @throws IllegalArgumentException if any of {@code terminalAction}, {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if the executor rejects the task; this sequence is still closed
      */
     @Beta
     @TerminalOp
     public ContinuableFuture<Void> runAsync(final Throwables.Consumer<? super Seq<T, E>, ? extends Exception> terminalAction, final Executor executor)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, RejectedExecutionException {
         assertNotClosed();
+
         checkArgNotNull(terminalAction, cs.terminalAction);
         checkArgNotNull(executor, cs.executor);
 
@@ -15964,12 +17133,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             return ContinuableFuture.run(() -> {
                 try {
                     terminalAction.accept(Seq.this);
+                } catch (final Throwable t) { // NOSONAR: preserve the task failure when closing also fails.
+                    closeAfterFailure(t);
+                    throw t;
                 } finally {
                     Seq.this.close();
                 }
             }, executor);
         } catch (final RuntimeException | Error e) {
-            closeAfterSchedulingFailure(e);
+            closeAfterFailure(e);
             throw e;
         }
     }
@@ -15983,7 +17155,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * without blocking the current thread. Common use cases include asynchronously collecting results,
      * computing aggregates, or transforming the sequence into a different data structure.</p>
      *
-     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
+     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.
+     * If both the action and closure fail, the action failure remains the cause of the returned future's failure
+     * and a distinct close failure is suppressed on it. If only closure fails, the future reports that failure.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15999,6 +17173,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // Get the result
      * List<String> names = future.get();
      * }</pre>
+     *
+     * <p><b>This sequence stays open on the calling thread.</b> It is closed by the background task once
+     * {@code terminalAction} returns, so until then this sequence still looks open and further operations on it
+     * are accepted rather than rejected. Starting a second operation on it - or on any sequence derived from it -
+     * races with the background traversal of a {@link SequentialOnly}, non-thread-safe cursor. Hand the sequence
+     * to exactly one of the two.</p>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; does not buffer elements in memory.
      *
@@ -16017,18 +17197,22 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
     public <R> ContinuableFuture<R> callAsync(final Throwables.Function<? super Seq<T, E>, R, ? extends Exception> terminalAction)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(terminalAction, cs.terminalAction);
 
         try {
             return ContinuableFuture.call(() -> {
                 try {
                     return terminalAction.apply(Seq.this);
+                } catch (final Throwable t) { // NOSONAR: preserve the task failure when closing also fails.
+                    closeAfterFailure(t);
+                    throw t;
                 } finally {
                     Seq.this.close();
                 }
             });
         } catch (final RuntimeException | Error e) {
-            closeAfterSchedulingFailure(e);
+            closeAfterFailure(e);
             throw e;
         }
     }
@@ -16043,7 +17227,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * configurations for different types of computations. For example, you might use a CPU-bound thread
      * pool for computational operations and an I/O-bound thread pool for database operations.</p>
      *
-     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
+     * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.
+     * If both the action and closure fail, the action failure remains the cause of the returned future's failure
+     * and a distinct close failure is suppressed on it. If only closure fails, the future reports that failure.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16063,6 +17249,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }
      * }</pre>
      *
+     * <p><b>This sequence stays open on the calling thread.</b> It is closed by the background task once
+     * {@code terminalAction} returns, so until then this sequence still looks open and further operations on it
+     * are accepted rather than rejected. Starting a second operation on it - or on any sequence derived from it -
+     * races with the background traversal of a {@link SequentialOnly}, non-thread-safe cursor. Hand the sequence
+     * to exactly one of the two.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; does not buffer elements in memory.
      *
      * @param <R> the type of the result produced by the terminal operation
@@ -16075,14 +17267,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *         with the result of the terminal operation when it finishes successfully, or completes
      *         exceptionally if the operation throws an exception
      * @throws IllegalStateException if the sequence is already closed
-     * @throws java.util.concurrent.RejectedExecutionException if the executor rejects the task; this sequence is still closed
      * @throws IllegalArgumentException if any of {@code terminalAction}, {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if the executor rejects the task; this sequence is still closed
      */
     @Beta
     @TerminalOp
     public <R> ContinuableFuture<R> callAsync(final Throwables.Function<? super Seq<T, E>, R, ? extends Exception> terminalAction, final Executor executor)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, RejectedExecutionException {
         assertNotClosed();
+
         checkArgNotNull(terminalAction, cs.terminalAction);
         checkArgNotNull(executor, cs.executor);
 
@@ -16090,22 +17283,34 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             return ContinuableFuture.call(() -> {
                 try {
                     return terminalAction.apply(Seq.this);
+                } catch (final Throwable t) { // NOSONAR: preserve the task failure when closing also fails.
+                    closeAfterFailure(t);
+                    throw t;
                 } finally {
                     Seq.this.close();
                 }
             }, executor);
         } catch (final RuntimeException | Error e) {
-            closeAfterSchedulingFailure(e);
+            closeAfterFailure(e);
             throw e;
         }
     }
 
-    private void closeAfterSchedulingFailure(final Throwable schedulingFailure) {
+    /**
+     * Closes this sequence after {@code primaryFailure} has already been raised: a failure thrown by a close handler
+     * is added to it as a suppressed exception instead of replacing it, so the root cause of a failed terminal
+     * operation (or of a failing argument check) always reaches the caller. Every {@code try ... finally { close(); }}
+     * in this class pairs with a {@code catch (Throwable t) { closeAfterFailure(t); throw t; }} for this reason; the
+     * subsequent {@code finally} finds the sequence already closed and does nothing.
+     *
+     * @param primaryFailure the failure that is about to propagate
+     */
+    private void closeAfterFailure(final Throwable primaryFailure) {
         try {
             close();
-        } catch (final Throwable closeFailure) { // NOSONAR: retain an Error from close without replacing the scheduling failure.
-            if (schedulingFailure != closeFailure) {
-                schedulingFailure.addSuppressed(closeFailure);
+        } catch (final Throwable closeFailure) { // NOSONAR: retain an Error from close without replacing the primary failure.
+            if (primaryFailure != closeFailure) {
+                primaryFailure.addSuppressed(closeFailure);
             }
         }
     }
@@ -16147,14 +17352,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @return an Optional containing the result of the function application if this sequence
      *         is not empty, or an empty Optional if the sequence is empty or the function returns {@code null}
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @throws E if the underlying sequence operations throw an exception
      * @throws E2 if the provided function throws an exception
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
      */
     @TerminalOp
     public <R, E2 extends Exception> u.Optional<R> applyIfNotEmpty(final Throwables.Function<? super Seq<T, E>, R, E2> func)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(func, cs.func);
 
         try {
@@ -16163,6 +17369,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             } else {
                 return Optional.empty();
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -16203,14 +17412,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *         or FALSE if the action was not executed (sequence was empty). This can be used to
      *         chain alternative actions for the empty case
      * @throws IllegalStateException if the sequence is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws E if the underlying sequence operations throw an exception
      * @throws E2 if the provided action throws an exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @TerminalOp
     public <E2 extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Seq<T, E>, E2> action)
-            throws IllegalStateException, E, E2, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
+
         checkArgNotNull(action, cs.action);
 
         try {
@@ -16219,6 +17429,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
 
                 return OrElse.TRUE;
             }
+        } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+            closeAfterFailure(t);
+            throw t;
         } finally {
             close();
         }
@@ -16255,18 +17468,24 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      *
      * <p><b>Note:</b> Close handlers are executed in a synchronized manner to prevent concurrent
      * execution. If a close handler throws an exception, subsequent handlers will still be executed,
-     * and all exceptions will be aggregated.</p>
+     * and all exceptions will be aggregated: the first one propagates with the others attached as suppressed
+     * exceptions. When the sequence is being closed because a terminal operation (or an argument check) already
+     * failed, that primary failure propagates and the close-handler failure is attached to it as a suppressed
+     * exception rather than replacing it.</p>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
      *
      * @param closeHandler the Runnable to be executed when the sequence is closed; must not be {@code null}
-     * @return a sequence with the close handler registered. This may be the same sequence instance.
+     * @return this sequence, with the close handler registered. Unlike the other intermediate operations this one
+     *         mutates and returns the receiver rather than deriving a new sequence, matching
+     *         {@code BaseStream.onClose(Runnable)}
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code closeHandler} is {@code null}.
      */
     @IntermediateOp
     public Seq<T, E> onClose(final Runnable closeHandler) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
         checkArgNotNull(closeHandler, cs.closeHandler);
 
         if (isEmptyCloseHandler(closeHandler)) {
@@ -16330,8 +17549,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }
      *
      * // Or using try-with-resources (recommended)
-     * try (Seq<String, IOException> lines = Seq.ofLines(new File("data.txt"))) {
-     *     lines.limit(10).forEach(System.out::println);
+     * try (Seq<String, IOException> resourceLines = Seq.ofLines(new File("data.txt"))) {
+     *     resourceLines.limit(10).forEach(System.out::println);
      * }
      * }</pre>
      *
@@ -16410,6 +17629,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 private Stream<? extends T> s = stream;
                 private Iterator<? extends T> iter = null;
                 private boolean isInitialized = false;
+
+                @Override
+                boolean supportsFailureAtomicAdvance() {
+                    // Before traversal, advance only installs a lazy Stream.skip stage.
+                    return iter == null;
+                }
 
                 /**
                  * Returns whether another element is available from the wrapped stream iterator.
@@ -16508,8 +17733,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 @SuppressWarnings("deprecation")
                 private void init() {
                     if (!isInitialized) {
-                        isInitialized = true;
+                        // iter first: if s.iterator() throws, a retried hasNext() must re-report that failure instead
+                        // of dereferencing a null iter.
                         iter = s.iterator();
+                        isInitialized = true;
                     }
                 }
             };
@@ -16519,6 +17746,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 private Stream<? extends T> s = stream;
                 private Iterator<? extends T> iter = null;
                 private boolean isInitialized = false;
+
+                @Override
+                boolean supportsFailureAtomicAdvance() {
+                    // Before traversal, advance only installs a lazy Stream.skip stage.
+                    return iter == null;
+                }
 
                 /**
                  * Returns whether another element is available from the stream iterator.
@@ -16601,19 +17834,33 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 @SuppressWarnings("deprecation")
                 private void init() {
                     if (!isInitialized) {
-                        isInitialized = true;
+                        // iter first: if s.iterator() throws, a retried hasNext() must re-report that failure instead
+                        // of dereferencing a null iter.
                         iter = s.iterator();
+                        isInitialized = true;
                     }
                 }
 
             };
         }
 
-        return create(iter).onClose(newCloseHandler((Runnable) iter::closeResource));
+        // create(iter) already registers iter::closeResource; registering it a second time was redundant.
+        return create(iter);
     }
 
     private static <T, E extends Exception> Throwables.Iterator<T, E> iterate(final Seq<? extends T, E> s) {
-        return s == null ? Throwables.Iterator.empty() : (Throwables.Iterator<T, E>) s.iteratorEx();
+        if (s == null) {
+            return Throwables.Iterator.empty();
+        }
+
+        // Reaching for `elements` bypasses the lifecycle check every public operation performs, so without this
+        // guard an already-closed source would be re-traversed instead of rejected: an in-memory sequence would
+        // hand out its elements a second time, and a deferred resource-backed one would report itself exhausted
+        // (Throwables.Iterator.defer(..) answers hasNext() == false once closed), silently yielding an empty
+        // traversal. This check is what turns both into the IllegalStateException every public operation raises.
+        s.assertNotClosed();
+
+        return (Throwables.Iterator<T, E>) s.iteratorEx();
     }
 
     private ObjIteratorEx<T> newObjIteratorEx(final Throwables.Iterator<T, E> elements) {
@@ -16651,7 +17898,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
              * @return the next element
              * @throws NoSuchElementException if no more elements are available
              */
-            public T next() { // NOSONAR
+            public T next() throws NoSuchElementException { // NOSONAR
                 try {
                     return elements.next();
                 } catch (final Exception e) {
@@ -16694,10 +17941,66 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         }
     }
 
+    /**
+     * The three functions of a {@link Collector}, read exactly once.
+     *
+     * @param <A> the type of the values fed to the accumulator
+     * @param <R> the type of the finished result
+     * @param supplier creates a fresh accumulation container
+     * @param accumulator folds one value into a container
+     * @param finisher turns a container into the published result
+     */
+    private record CollectorParts<A, R>(Supplier<Object> supplier, BiConsumer<Object, ? super A> accumulator, Function<Object, R> finisher) {
+    }
+
+    /**
+     * Reads {@code collector}'s three functions, closing this sequence if any of the three accessors fails.
+     *
+     * <p>Without this, a collector whose {@code supplier()}/{@code accumulator()}/{@code finisher()} threw left the
+     * sequence - and any file or JDBC handle behind it - open, while every other argument rejection in this class
+     * closes first. The functions are also read once here rather than per element.</p>
+     *
+     * @param <A> the type of the values fed to the accumulator
+     * @param <R> the type of the finished result
+     * @param collector the collector to read; must not be {@code null}
+     * @return the collector's three functions
+     */
+    private <A, R> CollectorParts<A, R> collectorParts(final Collector<? super A, ?, R> collector) {
+        try {
+            return new CollectorParts<>((Supplier<Object>) collector.supplier(), (BiConsumer<Object, ? super A>) collector.accumulator(),
+                    (Function<Object, R>) collector.finisher());
+        } catch (final RuntimeException | Error e) {
+            closeAfterFailure(e);
+            throw e;
+        }
+    }
+
+    /**
+     * Returns a set with {@code equals}/{@code hashCode} membership semantics holding the elements of {@code c},
+     * for the {@code containsAll}/{@code containsAny} membership tests.
+     *
+     * <p>The caller's collection is reused only when it is already a plain {@link HashSet} or {@link LinkedHashSet}.
+     * Passing an arbitrary {@code Set} straight through was wrong twice over: a null-hostile one
+     * ({@code Set.of(..)}, {@link java.util.TreeSet}, an immutable set) threw {@link NullPointerException} on the first
+     * {@code null} element of the sequence, and one with non-{@code equals} semantics (say a
+     * {@code TreeSet} over {@code String.CASE_INSENSITIVE_ORDER}) disagreed with the {@code distinct()} that counts
+     * the matches, so {@code Seq.of("a", "A").containsAll(ciSet("A", "B"))} answered {@code true}.</p>
+     *
+     * @param <T> the element type
+     * @param c the collection to test membership against; must be non-empty
+     * @return a set safe to probe with arbitrary elements, including {@code null}
+     */
+    private static <T> Set<T> asMembershipSet(final Collection<? extends T> c) {
+        return c.getClass() == HashSet.class || c.getClass() == LinkedHashSet.class ? (Set<T>) c : N.newHashSet(c);
+    }
+
     private void checkArgPositive(final int arg, final String argNameOrErrorMsg) {
         if (arg <= 0) {
             try {
                 N.checkArgPositive(arg, argNameOrErrorMsg);
+            } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+                closeAfterFailure(t);
+                throw t;
             } finally {
                 close();
             }
@@ -16708,6 +18011,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         if (arg <= 0) {
             try {
                 N.checkArgPositive(arg, argNameOrErrorMsg);
+            } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+                closeAfterFailure(t);
+                throw t;
             } finally {
                 close();
             }
@@ -16718,6 +18024,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         if (Double.isNaN(arg) || arg <= 0) {
             try {
                 N.checkArgPositive(arg, argNameOrErrorMsg);
+            } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+                closeAfterFailure(t);
+                throw t;
             } finally {
                 close();
             }
@@ -16729,6 +18038,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         if (arg < 0) {
             try {
                 N.checkArgNotNegative(arg, argNameOrErrorMsg);
+            } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+                closeAfterFailure(t);
+                throw t;
             } finally {
                 close();
             }
@@ -16739,6 +18051,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         if (arg < 0) {
             try {
                 N.checkArgNotNegative(arg, argNameOrErrorMsg);
+            } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+                closeAfterFailure(t);
+                throw t;
             } finally {
                 close();
             }
@@ -16751,6 +18066,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             try {
                 //noinspection ConstantValue
                 N.checkArgNotNull(obj, errorMessage);
+            } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+                closeAfterFailure(t);
+                throw t;
             } finally {
                 close();
             }
@@ -16762,6 +18080,9 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             try {
                 //noinspection ConstantValue,DataFlowIssue
                 N.checkArgument(b, errorMessage);
+            } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+                closeAfterFailure(t);
+                throw t;
             } finally {
                 close();
             }
@@ -16773,6 +18094,23 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             try {
                 //noinspection ConstantValue,DataFlowIssue
                 N.checkArgument(b, errorMessageTemplate, p1, p2);
+            } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+                closeAfterFailure(t);
+                throw t;
+            } finally {
+                close();
+            }
+        }
+    }
+
+    private void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final long p2) {
+        if (!b) {
+            try {
+                //noinspection ConstantValue,DataFlowIssue
+                N.checkArgument(b, errorMessageTemplate, p1, p2);
+            } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
+                closeAfterFailure(t);
+                throw t;
             } finally {
                 close();
             }
@@ -16803,7 +18141,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                         if (next == null) {
                             next = none;
                         } else if (next instanceof NoCachingNoUpdating) {
-                            throw new IllegalStateException("Can't run NoCachingNoUpdating Objects in parallel Stream or Queue");
+                            throw new IllegalStateException("Can't buffer NoCachingNoUpdating objects: the value is recycled before the consumer reads it");
                         }
 
                         if (!queueToBuffer.offer(next)) {
@@ -16815,6 +18153,12 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                         }
                     }
                 } catch (final Throwable e) {
+                    if (e instanceof InterruptedException) {
+                        // Restore the status on this pooled producer thread; the consumer is told separately
+                        // through the error holder, and re-interrupting here would not reach it anyway.
+                        Thread.currentThread().interrupt();
+                    }
+
                     setError(eHolder, e, onGoing);
                 } finally {
                     if ((threadCounter.decrementAndGet() == 0) && (hasMore != null)) {
@@ -16860,11 +18204,25 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                             }
                         }
                     }
+
+                    if (next == null) {
+                        next = queueToBuffer.poll(); // a producer that offered and then failed between the timed poll and the onGoing re-check
+                    }
+                } catch (final InterruptedException e) {
+                    // This is the CALLER's thread being interrupted while waiting for the producer. Casting it to
+                    // `E` delivered an InterruptedException out of, say, a Seq<String, IOException>, where
+                    // `catch (IOException)` could not see it and the interrupt status had already been cleared by
+                    // the throw. Surface it as an unchecked interruption, restoring the caller's status.
+                    onGoing.setFalse();
+
+                    throw toRuntimeException(e, false);
                 } catch (final Exception e) {
                     setError(eHolder, e, onGoing);
                 }
 
-                if (eHolder.value() != null) {
+                // Report the producer's failure only once every element it queued before failing has been handed
+                // out; otherwise buffered() would drop elements the unbuffered pipeline delivers before the failure.
+                if (next == null && eHolder.value() != null) {
                     Seq.<E> setStopFlagAndThrowException(eHolder, onGoing);
                 }
 
@@ -16882,10 +18240,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
              * }</pre>
              *
              * @return the next buffered element
-             * @throws E if a background producer reported an error
              * @throws NoSuchElementException if no more elements are available
+             * @throws E if a background producer reported an error
              */
-            public T next() throws E {
+            public T next() throws NoSuchElementException, E {
                 if (next == null && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -16915,7 +18273,15 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         if (oldValue == null && !map.containsKey(key)) {
             map.put(key, value);
         } else {
-            map.put(key, remappingFunction.apply(oldValue, value));
+            // Same contract as Map.merge: a null result from the merge function removes the mapping instead of
+            // storing a null value (which is what Stream/Collectors.toMap do, and what ConcurrentMap.merge does).
+            final V newValue = remappingFunction.apply(oldValue, value);
+
+            if (newValue == null) {
+                map.remove(key);
+            } else {
+                map.put(key, newValue);
+            }
         }
     }
 
@@ -16958,22 +18324,48 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         return LocalRunnable.wrap(closeHandler);
     }
 
+    /**
+     * Runs {@code closeAll} and hands back {@code cause} so the caller can {@code throw} it.
+     *
+     * <p>The zip/merge factories build their composite close handler <i>before</i> touching their inputs and run
+     * it through here when construction fails, so a rejected function argument or an already-closed input closes
+     * <b>every</b> input rather than stranding the ones the failure never reached - which is what {@code zipWith}'s
+     * {@code @param b ... Will be closed along with this Seq} promises, and what {@link #concat(Collection)} has
+     * always done. A failure from {@code closeAll} itself is suppressed onto {@code cause} rather than replacing
+     * it.</p>
+     *
+     * @param closeAll the composite close handler for every input
+     * @param cause the construction failure to propagate
+     * @return {@code cause}, so the call site can read {@code throw closeAllThenRethrow(closeAll, e);}
+     */
+    private static RuntimeException closeAllThenRethrow(final LocalRunnable closeAll, final RuntimeException cause) {
+        try {
+            closeAll.run();
+        } catch (final RuntimeException e) {
+            if (e != cause) {
+                cause.addSuppressed(e);
+            }
+        }
+
+        return cause;
+    }
+
     @SuppressWarnings("rawtypes")
     private static LocalRunnable newCloseHandler(final Collection<? extends Seq> c) {
         if (N.isEmpty(c)) {
             return EMPTY_CLOSE_HANDLER;
         }
 
-        boolean allEmptyHandlers = true;
+        boolean allClosed = true;
 
         for (final Seq s : c) {
-            if (!(s == null || s.isClosed || isEmptyCloseHandlers(s.closeHandlers))) {
-                allEmptyHandlers = false;
+            if (s != null && !s.isClosed) {
+                allClosed = false;
                 break;
             }
         }
 
-        if (allEmptyHandlers) {
+        if (allClosed) {
             return EMPTY_CLOSE_HANDLER;
         }
 
@@ -16981,7 +18373,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             Throwable failure = null;
 
             for (final Seq s : c) {
-                if (s == null || s.isClosed || isEmptyCloseHandlers(s.closeHandlers)) {
+                // Closing also ends the sequence lifecycle when it has no resource handlers.
+                if (s == null || s.isClosed) {
                     continue;
                 }
 
@@ -17002,15 +18395,28 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         };
     }
 
-    @SuppressWarnings("rawtypes")
-    static LocalRunnable newCloseHandler(final Supplier<? extends Seq> seqSupplier) {
-        return () -> {
-            final Seq s = seqSupplier != null ? seqSupplier.get() : null;
+    // Removed: newCloseHandler(Supplier<? extends Seq>). Its only caller was defer(Supplier), where invoking the
+    // supplier a second time just to close its result re-ran a possibly non-idempotent factory. flatMap already
+    // closes the sequence it created, so no supplier-driven close handler is needed.
 
-            if (s != null && !s.isClosed && !isEmptyCloseHandlers(s.closeHandlers)) {
-                s.close();
-            }
-        };
+    /**
+     * Returns the close handlers a sequence derived from this one must carry: this sequence's own handlers,
+     * followed by {@code this::close}.
+     *
+     * <p>Appending {@code this::close} is what makes the single-use contract hold across a pipeline. Sharing the
+     * parent's handler deque alone released the parent's <i>resources</i> when the derived sequence was closed, but
+     * left the parent's {@code isClosed} flag {@code false}, so a second terminal operation on the parent passed
+     * {@link #assertNotClosed()} and silently returned an empty result over the exhausted iterator instead of
+     * throwing. {@code StreamBase.closeHandlersForNewStream()} solves it the same way.</p>
+     *
+     * <p>Operations that deliberately hand the source on to a sequence they emit - {@link #splitAt(int)} and
+     * {@link #buffered(BlockingQueue)} - stay correct under this: the emitted inner sequences hold the source
+     * <i>iterator</i> and their own lifecycle flag, not this sequence.</p>
+     *
+     * @return a new handler deque for a derived sequence
+     */
+    private Deque<LocalRunnable> closeHandlersForNewSeq() {
+        return mergeCloseHandlers(this::close, closeHandlers);
     }
 
     private static Deque<LocalRunnable> mergeCloseHandlers(final Runnable newCloseHandlerToAdd, final Deque<LocalRunnable> closeHandlers) {
@@ -17066,6 +18472,13 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         synchronized (errorHolder) { //NOSONAR
             if (errorHolder.value() != null) {
                 final Throwable cause = errorHolder.getAndSet(null);
+
+                if (cause instanceof InterruptedException) {
+                    // An interruption raised on a producer thread is not part of the sequence's declared exception
+                    // type, so it cannot be handed over as `E`. Report it as an unchecked interruption without
+                    // touching the caller's interrupt status - the caller's own thread was never interrupted.
+                    throw ExceptionUtil.toRuntimeException(cause, false, false);
+                }
 
                 if (cause instanceof Exception) {
                     // Restore the source's checked exception so the declared "throws E" contract holds

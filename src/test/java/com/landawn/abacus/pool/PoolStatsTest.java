@@ -234,8 +234,27 @@ public class PoolStatsTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 2, 1, 0, 0, -1, -1));
         assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 0, 0, 0, 0, -2, -1));
         assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 0, 0, 0, 0, -1, -2));
-        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 0, 0, 0, 0, -1, 0));
+        // A limit implies a tracked data size ...
         assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 0, 0, 0, 0, 0, -1));
+        assertThrows(IllegalArgumentException.class, () -> new PoolStats(1, 0, 0, 0, 0, 0, 0, 1024, -1));
+    }
+
+    @Test
+    public void testDataSizeWithoutMemoryLimitIsAccepted() {
+        // ... but not the converse: a pool with a memory measure and no limit reports maxMemory == -1
+        // together with its real data size (previously rejected by a biconditional invariant).
+        PoolStats stats = new PoolStats(1, 0, 0, 0, 0, 0, 0, -1, 0);
+        assertEquals(-1, stats.maxMemory());
+        assertEquals(0, stats.dataSize());
+
+        stats = new PoolStats(10, 2, 2, 0, 0, 0, 0, -1, 200);
+        assertEquals(-1, stats.maxMemory());
+        assertEquals(200, stats.dataSize());
+
+        // Fully disabled tracking is still accepted.
+        stats = new PoolStats(10, 2, 2, 0, 0, 0, 0, -1, -1);
+        assertEquals(-1, stats.maxMemory());
+        assertEquals(-1, stats.dataSize());
     }
 
 }

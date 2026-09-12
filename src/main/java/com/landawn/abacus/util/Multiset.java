@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
@@ -143,6 +145,53 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Iteration time proportional to total element count, not distinct elements</li>
  * </ul>
  *
+ * <p><b>Null Handling:</b>
+ * <ul>
+ *   <li><b>Null elements:</b> permitted exactly when the backing map permits {@code null} keys. The default
+ *       {@link HashMap} backing does, so {@code multiset.add(null)} succeeds and {@code getCount(null)}
+ *       reports its count; a {@link TreeMap}-backed multiset throws {@link NullPointerException} instead.</li>
+ *   <li><b>Foreign-typed lookup keys:</b> the query methods that accept {@code Object} - {@link #contains(Object)},
+ *       {@link #getCount(Object)}, {@link #remove(Object, int)}, {@link #removeAllOccurrencesOf(Object)} - pass the
+ *       key straight to the backing map, so they inherit its behaviour for a key of an unrelated type. A
+ *       {@link HashMap} backing reports "absent"; a non-empty {@link TreeMap}-backed multiset throws
+ *       {@link ClassCastException} once it compares the key. An <i>empty</i> sorted backing never compares, so a
+ *       <i>comparator-based</i> one still reports "absent"; a comparator-less {@link TreeMap} throws even when
+ *       empty, because {@code TreeMap.getEntry} casts the key to {@link Comparable} before it inspects the root -
+ *       unless the foreign key happens to be {@link Comparable} itself, in which case the cast succeeds and the
+ *       empty tree reports "absent".</li>
+ *   <li><b>Null collection arguments:</b> {@link #addAll(Collection)}, {@link #removeAll(Collection)} and
+ *       {@link #removeAllOccurrencesOf(Collection)} treat a {@code null} collection as empty and make no
+ *       change; {@link #containsAll(Collection)} treats it as vacuously contained and returns {@code true}.
+ *       This is deliberately more lenient than the {@link Collection} contract, which specifies
+ *       {@link NullPointerException}. {@link #retainAll(Collection)} is the one exception - it throws
+ *       {@link NullPointerException}, because treating {@code null} as empty there would silently discard
+ *       every element.</li>
+ *   <li><b>Null function arguments:</b> rejected. The methods that override a JDK interface
+ *       ({@link #forEach(Consumer)}, {@link #removeIf(Predicate)}, {@link #toArray(Object[])}) throw
+ *       {@link NullPointerException} as their contracts require; this class's own methods throw
+ *       {@link IllegalArgumentException}.</li>
+ * </ul>
+ *
+ * <p><b>Which elements count as "the same":</b> that is decided by the backing map, not by this class - a
+ * {@link HashMap} backing uses {@code equals}/{@code hashCode}, an {@link java.util.IdentityHashMap} backing
+ * uses reference identity, and a {@link TreeMap} backing uses its comparator. The bulk methods that take a
+ * {@link Collection} split on this, and the split is inherited from the {@link Collection} contract rather
+ * than chosen here:
+ * <ul>
+ *   <li>{@link #removeAllOccurrencesOf(Collection)}, {@link #removeOccurrences(Collection, int)} and
+ *       {@link #containsAll(Collection)} look each argument element up <i>in this multiset</i>, so the
+ *       <b>backing map's</b> equivalence decides - which is also what {@link Collection#containsAll}
+ *       specifies ("contains all of the elements in the specified collection").</li>
+ *   <li>{@link #retainAll(Collection)} instead asks {@code c.contains(element)}, so the <b>argument
+ *       collection's</b> equivalence decides - which is what {@link Collection#retainAll} specifies.</li>
+ * </ul>
+ * These agree for the default {@link HashMap} backing. They diverge when the backing map draws finer
+ * distinctions: given an {@code IdentityHashMap}-backed multiset holding two equal-but-distinct instances
+ * {@code a} and {@code b}, {@code removeAllOccurrencesOf(List.of(a))} removes only {@code a}, while
+ * {@code retainAll(List.of(a))} keeps both (because {@code List.contains(b)} is true). Likewise
+ * {@code containsAll(List.of(c))} is {@code false} for a third equal-but-distinct instance {@code c},
+ * even though {@code List.of(a).contains(c)} would be {@code true}.
+ *
  * <p><b>Thread Safety:</b>
  * This class is <b>not</b> thread-safe, regardless of the backing {@code Map} implementation. Many
  * operations (for example {@link #add(Object, int)}, {@link #remove(Object, int)}, and the {@code compute}/
@@ -240,7 +289,7 @@ public final class Multiset<E> implements Collection<E> {
      * @param initialCapacity the initial capacity of the backing map.
      * @throws IllegalArgumentException if the initial capacity is negative.
      */
-    public Multiset(final int initialCapacity) {
+    public Multiset(final int initialCapacity) throws IllegalArgumentException {
         backingMap = N.newHashMap(initialCapacity);
     }
 
@@ -248,9 +297,18 @@ public final class Multiset<E> implements Collection<E> {
      * Constructs a multiset containing the elements of the specified collection.
      * The multiset will contain all elements from the collection, preserving duplicates.
      *
-     * <p>If the input is a {@link Set}, the initial capacity is set to its size. If it is any
-     * other {@link Collection}, the initial capacity is set to half its size (assuming duplicates).
-     * For any other (or {@code null}) iterable, a small default capacity is used.</p>
+     * <p>If the input is another {@code Multiset}, its element counts are transferred one entry at a time
+     * rather than one occurrence at a time, and the initial capacity is its number of distinct elements.
+     * If it is a {@link Set}, the initial capacity is set to its size. If it is any other
+     * {@link Collection}, the initial capacity is set to half its size (assuming duplicates). For any other
+     * (or {@code null}) iterable, a small default capacity is used.</p>
+     *
+     * <p>The new multiset is always {@link HashMap}-backed, so it identifies elements by
+     * {@code equals}/{@code hashCode}. Copying a source whose own backing map draws finer distinctions
+     * (an {@link java.util.IdentityHashMap}, or a comparator that separates elements {@code equals} calls
+     * equal) therefore <i>merges</i> those elements, summing their counts - which is what iterating the
+     * source occurrence by occurrence would also produce. Use {@link #toMap()} or a same-typed backing map
+     * if the source's own equivalence must be preserved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -261,23 +319,32 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param iterable the collection whose elements are to be placed into this multiset; a {@code null}
      *                  iterable results in an empty multiset.
+     * @throws IllegalArgumentException if the elements of {@code iterable} merge to more than
+     *         {@link Integer#MAX_VALUE} occurrences of any one element.
      */
-    public Multiset(final Iterable<? extends E> iterable) {
+    public Multiset(final Iterable<? extends E> iterable) throws IllegalArgumentException {
         this(initCapacity(iterable));
 
-        if (iterable instanceof Collection c) {
+        if (iterable instanceof Multiset<? extends E> multiset) {
+            for (final Map.Entry<? extends E, MutableInt> entry : multiset.backingMap.entrySet()) {
+                add(entry.getKey(), entry.getValue().value());
+            }
+        } else if (iterable instanceof Collection c) {
             addAll(c);
-        } else {
-            if (iterable != null) {
-                for (E e : iterable) {
-                    add(e);
-                }
+        } else if (iterable != null) {
+            for (final E e : iterable) {
+                add(e);
             }
         }
     }
 
     private static int initCapacity(final Iterable<?> iterable) {
-        if (iterable instanceof Set set) {
+        if (iterable instanceof Multiset<?> multiset) {
+            // Must precede the Collection branch: Multiset.size() is the TOTAL occurrence count, so sizing
+            // from it allocates a backing map proportional to the counts instead of to the number of
+            // distinct elements - copying {a x 100_000_000} asked for a 50M-entry map and ran out of heap.
+            return multiset.countOfDistinctElements();
+        } else if (iterable instanceof Set set) {
             return set.size();
         } else if (iterable instanceof Collection c) {
             return c.size() / 2;
@@ -295,15 +362,24 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * // Create a multiset that maintains insertion order
      * Multiset<String> orderedMultiset = new Multiset<>(LinkedHashMap.class);
+     *
+     * // The standard Map interfaces are accepted too, and resolve to their usual implementations
+     * Multiset<String> byInterface = new Multiset<>(Map.class);         // backed by a HashMap
+     * Multiset<String> sorted      = new Multiset<>(SortedMap.class);   // backed by a TreeMap
      * }</pre>
      *
-     * @param valueMapType the class of the map to be used as the backing map; it must have an accessible no-arg constructor.
-     * @throws NullPointerException if {@code valueMapType} is {@code null}.
-     * @throws IllegalArgumentException if the specified map type cannot be instantiated.
+     * @param valueMapType the class of the map to be used as the backing map. It must be <i>instantiable</i>:
+     *        either a concrete class with an accessible no-arg constructor, or one of the standard map
+     *        interfaces and abstract types ({@link Map}, {@link java.util.SortedMap},
+     *        {@link java.util.NavigableMap}, {@link java.util.concurrent.ConcurrentMap},
+     *        {@link java.util.concurrent.ConcurrentNavigableMap}, {@link java.util.AbstractMap}), which
+     *        {@link Suppliers#ofMap(Class)} resolves to their usual implementations.
+     * @throws IllegalArgumentException if {@code valueMapType} is {@code null}
+     *         or if the specified map type has no supported construction path, or its supplier returns a null or non-empty map.
      */
     @SuppressWarnings("rawtypes")
-    public Multiset(final Class<? extends Map> valueMapType) {
-        this(Suppliers.ofMap(N.requireNonNull(valueMapType)));
+    public Multiset(final Class<? extends Map> valueMapType) throws IllegalArgumentException {
+        this(Suppliers.ofMap(N.checkArgNotNull(valueMapType)));
     }
 
     /**
@@ -314,6 +390,17 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * // Create a multiset with a custom map supplier
      * Multiset<String> multiset = new Multiset<>(() -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+     * }</pre>
+     *
+     * <p><b>Overload note:</b> {@link Iterable} is itself a functional interface, so a no-arg lambda whose body
+     * type fits <i>both</i> shapes is ambiguous between this constructor and {@link #Multiset(Iterable)} and
+     * will not compile. In practice that is only a lambda returning {@code null}: give it an explicit target
+     * type when you need one.</p>
+     * <pre>{@code
+     * new Multiset<String>(() -> new TreeMap<>());   // fine - a TreeMap is not an Iterator
+     * // new Multiset<String>(() -> null);           // does NOT compile: "reference to Multiset is ambiguous"
+     * Supplier<Map<String, Object>> supplier = () -> null;
+     * new Multiset<String>(supplier);                // fine - throws IllegalArgumentException as documented
      * }</pre>
      *
      * @param mapSupplier the supplier that provides the empty map to be used as the backing map; must not be {@code null}
@@ -333,7 +420,10 @@ public final class Multiset<E> implements Collection<E> {
         backingMap = (Map<E, MutableInt>) suppliedMap;
     }
 
-    Multiset(final Map<E, MutableInt> valueMap) {
+    /**
+     * @throws NullPointerException if {@code valueMap} is {@code null}
+     */
+    Multiset(final Map<E, MutableInt> valueMap) throws NullPointerException {
         backingMap = N.requireNonNull(valueMap);
     }
 
@@ -378,8 +468,10 @@ public final class Multiset<E> implements Collection<E> {
      * @param coll the iterable whose elements are to be placed into the multiset; a {@code null}
      *             iterable results in an empty multiset.
      * @return a new multiset containing the elements of the specified iterable.
+     * @throws IllegalArgumentException if the elements of {@code coll} merge to more than
+     *         {@link Integer#MAX_VALUE} occurrences of any one element.
      */
-    public static <T> Multiset<T> create(final Iterable<? extends T> coll) {
+    public static <T> Multiset<T> create(final Iterable<? extends T> coll) throws IllegalArgumentException {
         return new Multiset<>(coll);
     }
 
@@ -400,27 +492,12 @@ public final class Multiset<E> implements Collection<E> {
      * @return a new multiset containing the elements from the iterator.
      * @throws IllegalArgumentException if adding an element would exceed {@link Integer#MAX_VALUE} occurrences.
      */
-    public static <T> Multiset<T> create(final Iterator<? extends T> iter) {
+    public static <T> Multiset<T> create(final Iterator<? extends T> iter) throws IllegalArgumentException {
         final Multiset<T> result = new Multiset<>();
 
         if (iter != null) {
-            T e = null;
-            MutableInt count = null;
-
             while (iter.hasNext()) {
-                e = iter.next();
-                count = result.backingMap.get(e);
-
-                if (count == null) {
-                    result.backingMap.put(e, MutableInt.of(1));
-                } else {
-                    if (count.value() == Integer.MAX_VALUE) {
-                        throw new IllegalArgumentException(
-                                "The total count for element '" + e + "' is out of the bound of int (current=" + count.value() + ")"); //NOSONAR
-                    }
-
-                    count.add(1);
-                }
+                result.add(iter.next());
             }
         }
 
@@ -707,8 +784,8 @@ public final class Multiset<E> implements Collection<E> {
      * @see #setCount(Object, int, int)
      * @see #add(Object, int)
      */
-    public int setCount(final E element, final int occurrences) {
-        checkOccurrences(occurrences);
+    public int setCount(final E element, final int occurrences) throws IllegalArgumentException {
+        checkOccurrences(occurrences, cs.occurrences);
 
         final MutableInt count = backingMap.get(element);
         final int oldCount = count == null ? 0 : count.value();
@@ -748,9 +825,9 @@ public final class Multiset<E> implements Collection<E> {
      * @throws IllegalArgumentException if oldOccurrences or newOccurrences is negative.
      * @see #setCount(Object, int)
      */
-    public boolean setCount(final E element, final int oldOccurrences, final int newOccurrences) {
-        checkOccurrences(oldOccurrences);
-        checkOccurrences(newOccurrences);
+    public boolean setCount(final E element, final int oldOccurrences, final int newOccurrences) throws IllegalArgumentException {
+        checkOccurrences(oldOccurrences, cs.oldOccurrences);
+        checkOccurrences(newOccurrences, cs.newOccurrences);
 
         final MutableInt count = backingMap.get(element);
         final int oldCount = count == null ? 0 : count.value();
@@ -791,7 +868,7 @@ public final class Multiset<E> implements Collection<E> {
      * @throws IllegalArgumentException if the element already has {@link Integer#MAX_VALUE} occurrences.
      */
     @Override
-    public boolean add(final E element) {
+    public boolean add(final E element) throws IllegalArgumentException {
         add(element, 1);
         return true;
     }
@@ -817,14 +894,29 @@ public final class Multiset<E> implements Collection<E> {
      * @see #addAndGetCount(Object, int)
      * @see #setCount(Object, int)
      */
-    public int add(final E element, final int occurrencesToAdd) {
-        checkOccurrences(occurrencesToAdd);
+    public int add(final E element, final int occurrencesToAdd) throws IllegalArgumentException {
+        return addAndGetOldCount(element, occurrencesToAdd, "occurrencesToAdd");
+    }
+
+    /**
+     * Shared implementation of {@link #add(Object, int)} and {@link #addAndGetCount(Object, int)}.
+     *
+     * @param element the element to add occurrences of
+     * @param occurrencesToAdd the number of occurrences to add; must be non-negative
+     * @param argName the name of the caller's parameter, so both validation messages point at the argument
+     *                the caller actually passed
+     * @return the count of the element before the operation
+     * @throws IllegalArgumentException if {@code occurrencesToAdd} is negative, or if the addition would
+     *         exceed {@link Integer#MAX_VALUE} occurrences
+     */
+    private int addAndGetOldCount(final E element, final int occurrencesToAdd, final String argName) throws IllegalArgumentException {
+        checkOccurrences(occurrencesToAdd, argName);
 
         MutableInt count = backingMap.get(element);
 
         if (count != null && occurrencesToAdd > (Integer.MAX_VALUE - count.value())) {
-            throw new IllegalArgumentException("The total count for element '" + element + "' is out of the bound of int (current=" + count.value()
-                    + ", occurrencesToAdd=" + occurrencesToAdd + ")");
+            throw new IllegalArgumentException("The total count for element '" + element + "' is out of the bound of int (current=" + count.value() + ", "
+                    + argName + "=" + occurrencesToAdd + ")");
         }
 
         final int oldCount = count == null ? 0 : count.value();
@@ -859,27 +951,10 @@ public final class Multiset<E> implements Collection<E> {
      * @see #add(Object, int)
      */
     @Beta
-    public int addAndGetCount(final E element, final int occurrences) {
-        checkOccurrences(occurrences);
-
-        MutableInt count = backingMap.get(element);
-
-        if (count != null && occurrences > (Integer.MAX_VALUE - count.value())) {
-            throw new IllegalArgumentException("The total count for element '" + element + "' is out of the bound of int (current=" + count.value()
-                    + ", occurrences=" + occurrences + ")");
-        }
-
-        if (count == null) {
-            if (occurrences > 0) {
-                count = MutableInt.of(occurrences);
-                backingMap.put(element, count);
-                return occurrences;
-            }
-            return 0;
-        } else {
-            count.add(occurrences);
-            return count.value();
-        }
+    public int addAndGetCount(final E element, final int occurrences) throws IllegalArgumentException {
+        // The helper returns the count before the operation and has already rejected an addition that
+        // would overflow, so the sum below is exactly the new count and cannot itself overflow.
+        return addAndGetOldCount(element, occurrences, "occurrences") + occurrences;
     }
 
     /**
@@ -895,11 +970,15 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.getCount("a"));   // prints 2
      * }</pre>
      *
-     * @param c the collection containing elements to be added.
+     * @param c the collection containing elements to be added; a {@code null} or empty collection is
+     *          treated as no elements to add and yields {@code false}.
      * @return {@code true} if this multiset changed as a result of the call.
+     * @throws IllegalArgumentException if the addition would push any element past
+     *         {@link Integer#MAX_VALUE} occurrences. Elements are added one at a time, so the elements
+     *         accepted before the failing one stay added.
      */
     @Override
-    public boolean addAll(final Collection<? extends E> c) {
+    public boolean addAll(final Collection<? extends E> c) throws IllegalArgumentException {
         return addAll(c, 1);
     }
 
@@ -921,11 +1000,13 @@ public final class Multiset<E> implements Collection<E> {
      * @param c the collection containing elements to be added.
      * @param occurrencesToAdd the number of occurrences to add for each appearance of an element in {@code c}.
      * @return {@code true} if this multiset changed as a result of the call.
-     * @throws IllegalArgumentException if occurrencesToAdd is negative.
+     * @throws IllegalArgumentException if occurrencesToAdd is negative, or if the addition would push any
+     *         element past {@link Integer#MAX_VALUE} occurrences. Elements are added one at a time, so the
+     *         elements accepted before the failing one stay added.
      */
     @Beta
-    public boolean addAll(final Collection<? extends E> c, final int occurrencesToAdd) {
-        checkOccurrences(occurrencesToAdd);
+    public boolean addAll(final Collection<? extends E> c, final int occurrencesToAdd) throws IllegalArgumentException {
+        checkOccurrences(occurrencesToAdd, cs.occurrencesToAdd);
 
         if (N.isEmpty(c) || occurrencesToAdd == 0) {
             return false;
@@ -977,8 +1058,22 @@ public final class Multiset<E> implements Collection<E> {
      * @see #removeAndGetCount(Object, int)
      * @see #removeAllOccurrencesOf(Object)
      */
-    public int remove(final Object element, final int occurrencesToRemove) {
-        checkOccurrences(occurrencesToRemove);
+    public int remove(final Object element, final int occurrencesToRemove) throws IllegalArgumentException {
+        return removeAndGetOldCount(element, occurrencesToRemove, "occurrencesToRemove");
+    }
+
+    /**
+     * Shared implementation of {@link #remove(Object, int)} and {@link #removeAndGetCount(Object, int)}.
+     *
+     * @param element the element to remove occurrences of
+     * @param occurrencesToRemove the number of occurrences to remove; must be non-negative
+     * @param argName the name of the caller's parameter, so the validation message points at the argument
+     *                the caller actually passed
+     * @return the count of the element before the operation
+     * @throws IllegalArgumentException if {@code occurrencesToRemove} is negative
+     */
+    private int removeAndGetOldCount(final Object element, final int occurrencesToRemove, final String argName) throws IllegalArgumentException {
+        checkOccurrences(occurrencesToRemove, argName);
 
         @SuppressWarnings("SuspiciousMethodCalls")
         final MutableInt count = backingMap.get(element);
@@ -1017,26 +1112,10 @@ public final class Multiset<E> implements Collection<E> {
      * @see #remove(Object, int)
      */
     @Beta
-    public int removeAndGetCount(final Object element, final int occurrences) {
-        checkOccurrences(occurrences);
-
-        @SuppressWarnings("SuspiciousMethodCalls")
-        final MutableInt count = backingMap.get(element);
-
-        if (count == null) {
-            return 0;
-        }
-
-        if (count.value() <= occurrences) {
-            //noinspection SuspiciousMethodCalls
-            backingMap.remove(element);
-
-            return 0;
-        }
-
-        count.subtract(occurrences);
-
-        return count.value();
+    public int removeAndGetCount(final Object element, final int occurrences) throws IllegalArgumentException {
+        // The helper returns the count before the operation and removes the element outright when it holds
+        // no more than `occurrences`, so the remainder is clamped at zero rather than going negative.
+        return Math.max(removeAndGetOldCount(element, occurrences, "occurrences") - occurrences, 0);
     }
 
     /**
@@ -1050,13 +1129,18 @@ public final class Multiset<E> implements Collection<E> {
      *             of each element); use {@link #removeOccurrences(Collection, int)} for clearer semantics.
      */
     @Deprecated
-    public boolean removeAll(final Collection<?> c, final int occurrencesToRemove) {
+    public boolean removeAll(final Collection<?> c, final int occurrencesToRemove) throws IllegalArgumentException {
         return removeOccurrences(c, occurrencesToRemove);
     }
 
     /**
      * Removes the specified number of occurrences of each element in the collection from this multiset.
      * If an element has fewer occurrences than specified, all its occurrences are removed.
+     *
+     * <p>Duplicate elements in {@code c} repeat the removal: an input count of {@code n} removes up to
+     * {@code n * occurrencesToRemove} occurrences. Input contents are captured before mutation, so live
+     * views such as {@link #elementSet()} are supported. Multiset inputs use their counts directly
+     * without expanding repeated elements into an intermediate collection.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1071,8 +1155,8 @@ public final class Multiset<E> implements Collection<E> {
      * @return {@code true} if this multiset changed as a result of the call.
      * @throws IllegalArgumentException if occurrencesToRemove is negative.
      */
-    public boolean removeOccurrences(final Collection<?> c, final int occurrencesToRemove) {
-        checkOccurrences(occurrencesToRemove);
+    public boolean removeOccurrences(final Collection<?> c, final int occurrencesToRemove) throws IllegalArgumentException {
+        checkOccurrences(occurrencesToRemove, cs.occurrencesToRemove);
 
         if (N.isEmpty(c) || occurrencesToRemove == 0) {
             return false;
@@ -1085,11 +1169,20 @@ public final class Multiset<E> implements Collection<E> {
 
         boolean result = false;
 
-        for (final Object e : c) {
-            if (!result) {
-                result = remove(e, occurrencesToRemove) > 0;
-            } else {
-                remove(e, occurrencesToRemove);
+        // The input may be a live elementSet() view of this multiset. Capture it before
+        // removing keys; a Multiset input needs counts, not an array of every occurrence.
+        if (c instanceof Multiset<?> multiset) {
+            final Entry<?>[] entries = multiset.entrySet().toArray(new Entry<?>[0]);
+
+            for (final Entry<?> entry : entries) {
+                final int occurrences = (int) Math.min((long) entry.count() * occurrencesToRemove, Integer.MAX_VALUE);
+                result |= remove(entry.element(), occurrences) > 0;
+            }
+        } else {
+            final Object[] elements = c.toArray();
+
+            for (final Object e : elements) {
+                result |= remove(e, occurrencesToRemove) > 0;
             }
         }
 
@@ -1122,7 +1215,8 @@ public final class Multiset<E> implements Collection<E> {
      * multiset.removeAllOccurrencesOf(collection);
      * }</pre>
      *
-     * @param c the collection containing elements to be removed.
+     * @param c the collection containing elements to be removed; a {@code null} or empty collection is
+     *          treated as no elements to remove and yields {@code false}.
      * @return {@code true} if this multiset changed as a result of the call.
      * @deprecated replaced by {@link #removeAllOccurrencesOf(Collection)} for better clarity.
      */
@@ -1165,16 +1259,18 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset);   // prints {c=1} (only "c" remains)
      * }</pre>
      *
-     * @param c the collection containing elements whose occurrences are to be removed.
+     * @param c the collection containing elements whose occurrences are to be removed; a {@code null} or
+     *          empty collection is treated as no elements to remove and yields {@code false}.
      * @return {@code true} if this multiset changed as a result of the call.
      */
     public boolean removeAllOccurrencesOf(final Collection<?> c) {
         if (N.isEmpty(c)) {
             return false;
         } else if (c == this) {
-            final boolean result = !isEmpty();
+            // N.isEmpty(c) above already established that this multiset is not empty, so clearing it
+            // always changes it.
             clear();
-            return result;
+            return true;
         }
 
         boolean result = false;
@@ -1184,11 +1280,7 @@ public final class Multiset<E> implements Collection<E> {
         final Object[] keys = (c instanceof Multiset) ? ((Multiset<?>) c).elementSet().toArray() : c.toArray();
 
         for (final Object e : keys) {
-            if (!result) {
-                result = backingMap.remove(e) != null;
-            } else {
-                backingMap.remove(e);
-            }
+            result |= backingMap.remove(e) != null;
         }
 
         return result;
@@ -1205,35 +1297,21 @@ public final class Multiset<E> implements Collection<E> {
      * // Removes all occurrences of "apple"
      * }</pre>
      *
+     * <p>This method is exactly equivalent to {@link #removeIf(Predicate)}, which is the {@link Collection}
+     * override of the same operation; it differs only in rejecting a {@code null} predicate with
+     * {@link IllegalArgumentException} rather than {@link NullPointerException}.</p>
+     *
      * @param predicate the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @see #removeIf(Predicate)
      */
     public boolean removeAllOccurrencesIf(final Predicate<? super E> predicate) throws IllegalArgumentException {
+        // Validate here so this method keeps its documented IllegalArgumentException; removeIf, which
+        // implements Collection.removeIf, is required by that contract to throw NullPointerException.
         N.checkArgNotNull(predicate, cs.predicate);
 
-        Set<E> removingKeys = null;
-
-        for (final E key : backingMap.keySet()) {
-            if (predicate.test(key)) {
-                if (removingKeys == null) {
-                    removingKeys = N.newHashSet();
-                }
-
-                removingKeys.add(key);
-            }
-        }
-
-        if (N.isEmpty(removingKeys)) {
-            return false;
-        }
-
-        for (final Object e : removingKeys) {
-            //noinspection SuspiciousMethodCalls
-            backingMap.remove(e);
-        }
-
-        return true;
+        return removeIf(predicate);
     }
 
     /**
@@ -1254,12 +1332,16 @@ public final class Multiset<E> implements Collection<E> {
     public boolean removeAllOccurrencesIf(final ObjIntPredicate<? super E> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
-        Set<E> removingKeys = null;
+        // Stage in a List, never a Set: the backing map may key by identity (IdentityHashMap) or by a
+        // comparator finer than equals, in which case a HashSet would collapse two distinct backing-map
+        // keys into one and leave the second one behind. Keys from a single map iteration are already
+        // unique, so a List needs no de-duplication.
+        List<E> removingKeys = null;
 
         for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
             if (predicate.test(entry.getKey(), entry.getValue().value())) {
                 if (removingKeys == null) {
-                    removingKeys = N.newHashSet();
+                    removingKeys = new ArrayList<>();
                 }
 
                 removingKeys.add(entry.getKey());
@@ -1270,8 +1352,7 @@ public final class Multiset<E> implements Collection<E> {
             return false;
         }
 
-        for (final Object e : removingKeys) {
-            //noinspection SuspiciousMethodCalls
+        for (final E e : removingKeys) {
             backingMap.remove(e);
         }
 
@@ -1469,7 +1550,7 @@ public final class Multiset<E> implements Collection<E> {
      */
     public int merge(final E key, final int value, final IntBiFunction<Integer> remappingFunction) throws IllegalArgumentException {
         N.checkArgNotNull(remappingFunction, cs.remappingFunction);
-        checkOccurrences(value);
+        checkOccurrences(value, cs.value);
 
         final int oldValue = getCount(key);
         // Box to allow null return from the remapping function — treated as "remove" per
@@ -1505,23 +1586,40 @@ public final class Multiset<E> implements Collection<E> {
      * // multiset now contains only "a" (2 occurrences) and "c" (1 occurrence)
      * }</pre>
      *
-     * @param c the collection containing elements to be retained.
+     * <p>Unlike the other bulk methods of this class, a {@code null} argument is <i>not</i> treated as an
+     * empty collection: it throws {@link NullPointerException} as {@link Collection#retainAll} requires.
+     * Treating it as empty would silently discard every element. Passing an explicitly empty collection
+     * still clears this multiset, which is the documented meaning of retaining nothing.</p>
+     *
+     * <p>Membership is tested with {@code c.contains(element)}, so - as {@link Collection#retainAll} also
+     * specifies - a {@code null} element in this multiset propagates a {@link NullPointerException} out of a
+     * {@code c} that forbids {@code null} (a {@link java.util.TreeSet}, say). That applies only to a <i>non-empty</i>
+     * {@code c}; an empty one takes the clear-everything path above without testing any element.</p>
+     *
+     * @param c the collection containing elements to be retained; must not be {@code null}.
      * @return {@code true} if this multiset changed as a result of the call.
+     * @throws NullPointerException if {@code c} is {@code null}, or if {@code c} is non-empty and forbids
+     *         {@code null} elements while this multiset contains {@code null}.
      */
     @Override
-    public boolean retainAll(final Collection<?> c) {
-        if (N.isEmpty(c)) {
+    public boolean retainAll(final Collection<?> c) throws NullPointerException {
+        N.requireNonNull(c, cs.c);
+
+        if (c.isEmpty()) {
             final boolean result = !backingMap.isEmpty();
             clear();
             return result;
         }
 
-        Set<E> others = null;
+        // Stage in a List, never a Set: see removeAllOccurrencesIf(ObjIntPredicate). A HashSet here would
+        // merge two backing-map keys that are equal under equals but distinct under the backing map's own
+        // equivalence, leaving one of them unretained-but-unremoved.
+        List<E> others = null;
 
         for (final E e : backingMap.keySet()) {
             if (!c.contains(e)) {
                 if (others == null) {
-                    others = N.newHashSet(backingMap.size());
+                    others = new ArrayList<>();
                 }
 
                 others.add(e);
@@ -1567,7 +1665,8 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(multiset.containsAll(Arrays.asList("a", "d")));   // prints false
      * }</pre>
      *
-     * @param c the collection to be checked for containment.
+     * @param c the collection to be checked for containment; a {@code null} or empty collection
+     *          is vacuously contained and yields {@code true}
      * @return {@code true} if this multiset contains all elements in the specified collection
      * @see #contains(Object)
      */
@@ -1577,7 +1676,9 @@ public final class Multiset<E> implements Collection<E> {
             return true;
         }
 
-        return backingMap.keySet().containsAll(c);
+        // A Multiset's own iterator yields one element per OCCURRENCE, so passing one straight to
+        // containsAll would walk O(total count). Only distinct elements matter for containment.
+        return backingMap.keySet().containsAll(c instanceof Multiset<?> multiset ? multiset.elementSet() : c);
     }
 
     // Query Operations
@@ -1620,6 +1721,26 @@ public final class Multiset<E> implements Collection<E> {
      * <p>The entry set contains exactly one entry for each distinct element in the multiset.
      * The entry set is backed by the multiset, so changes to the multiset are reflected in
      * the entry set.</p>
+     *
+     * <p><b>The returned set is read-only.</b> Unlike {@link #elementSet()}, it supports no mutation:
+     * {@code add} always throws {@link UnsupportedOperationException}, and {@code remove},
+     * {@code removeAll}, {@code retainAll}, {@code removeIf}, {@code clear} and {@code Iterator.remove}
+     * throw it whenever they would actually have to remove something. As is usual for an optional
+     * operation, a call that turns out to be a no-op may simply report {@code false} instead - for example
+     * {@code removeAll} of an empty collection, or {@code retainAll} of every entry. To remove elements,
+     * use {@link #removeAllOccurrencesOf(Object)} or {@link #elementSet()}.</p>
+     *
+     * <p>Each returned {@link Entry} is an immutable snapshot of an element and its count taken when the
+     * entry was produced, so its {@link Entry#count() count} does not track later changes to the multiset
+     * and never becomes zero.</p>
+     *
+     * <p><b>Caveat for a backing map finer than {@code equals}:</b> this view holds one entry per backing-map
+     * key, but {@link Entry#equals} compares element and count. A multiset whose backing map separates two
+     * elements that {@code equals} calls equal (an {@link java.util.IdentityHashMap}, say) can therefore yield
+     * two entries that are equal to <i>each other</i> when their counts also match - which the {@link Set}
+     * contract does not allow. Iterating the view is unaffected and {@link #size()} is correct; the loss only
+     * appears if the entries are copied into an {@code equals}-based set, as {@code new HashSet<>(entrySet())}
+     * would. Use {@link #toMap()} for such a multiset.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1671,16 +1792,18 @@ public final class Multiset<E> implements Collection<E> {
             final Iterator<Map.Entry<E, MutableInt>> backingEntryIter = backingMap.entrySet().iterator();
 
             return new ObjIterator<>() {
-                private Map.Entry<E, MutableInt> next;
-
                 @Override
                 public boolean hasNext() {
                     return backingEntryIter.hasNext();
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws NoSuchElementException if no element remains in this iterator
+                 */
                 @Override
-                public Entry<E> next() {
-                    next = backingEntryIter.next();
+                public Entry<E> next() throws NoSuchElementException {
+                    final Map.Entry<E, MutableInt> next = backingEntryIter.next();
                     return new ImmutableEntry<>(next.getKey(), next.getValue().value());
                 }
             };
@@ -1702,14 +1825,18 @@ public final class Multiset<E> implements Collection<E> {
      * // May print: a, a, b (order of identical elements not guaranteed)
      * }</pre>
      *
+     * <p>The returned iterator does <i>not</i> support {@link Iterator#remove()} - it throws
+     * {@link UnsupportedOperationException}, as {@code Iterator} permits. Use {@link #remove(Object)},
+     * {@link #removeAllOccurrencesOf(Object)} or {@link #removeIf(Predicate)} instead.</p>
+     *
      * @return an iterator over all element occurrences in this multiset
+     * @see #spliterator()
      */
     @Override
     public ObjIterator<E> iterator() {
         final Iterator<Map.Entry<E, MutableInt>> entryIter = backingMap.entrySet().iterator();
 
         return new ObjIterator<>() {
-            private Map.Entry<E, MutableInt> entry = null;
             private E element = null;
             private int count = 0;
             private int cnt = 0;
@@ -1717,8 +1844,10 @@ public final class Multiset<E> implements Collection<E> {
             @Override
             public boolean hasNext() {
                 if (cnt >= count) {
+                    // The loop skips any entry whose count is not positive, which this class's own mutators
+                    // never store but a caller-supplied backing map could.
                     while (cnt >= count && entryIter.hasNext()) {
-                        entry = entryIter.next();
+                        final Map.Entry<E, MutableInt> entry = entryIter.next();
                         element = entry.getKey();
                         count = entry.getValue().value();
                         cnt = 0;
@@ -1728,8 +1857,12 @@ public final class Multiset<E> implements Collection<E> {
                 return cnt < count;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no element remains in this iterator
+             */
             @Override
-            public E next() {
+            public E next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1739,6 +1872,44 @@ public final class Multiset<E> implements Collection<E> {
                 return element;
             }
         };
+    }
+
+    /**
+     * Returns a spliterator over the element occurrences in this multiset, sized with the <i>exact</i> total
+     * occurrence count - which may exceed {@link Integer#MAX_VALUE}.
+     *
+     * <p>This overrides the {@link Collection#spliterator()} default, which takes its size from
+     * {@link #size()}. That default is wrong for this class: {@code size()} saturates at
+     * {@link Integer#MAX_VALUE}, and because the resulting spliterator still reports
+     * {@link Spliterator#SIZED}, {@code stream().count()} short-circuits on that saturated value and
+     * silently returns {@code Integer.MAX_VALUE} rather than the true total. Sizing from
+     * {@link #sumOfOccurrences()} keeps the exact {@code long}.</p>
+     *
+     * <p>Unlike the inherited default, the returned spliterator is <i>not</i> late-binding: it binds to this
+     * multiset when this method is called, not on first traversal, and the size above is captured at that
+     * moment. Adding or removing occurrences afterwards therefore leaves {@link Spliterator#estimateSize()}
+     * stale. Concurrent-modification behaviour is the backing map's, inherited through {@link #iterator()}:
+     * with a fail-fast backing map (the default {@link HashMap}, or {@link LinkedHashMap}/{@link TreeMap}) a
+     * change to the <i>set of distinct elements</i> during traversal raises
+     * {@link java.util.ConcurrentModificationException}, while a change to an existing element's count does
+     * not (it is not a structural change to the backing map); a weakly consistent backing map such as
+     * {@link java.util.concurrent.ConcurrentHashMap} raises nothing at all. Do not modify the multiset while
+     * a traversal is in progress.</p>
+     *
+     * <p>Characteristics reported are {@link Spliterator#SIZED} and {@link Spliterator#SUBSIZED}, which
+     * {@link Spliterators#spliterator(Iterator, long, int)} adds unconditionally.</p>
+     *
+     * @return a spliterator over all element occurrences in this multiset
+     * @see #iterator()
+     * @see #sumOfOccurrences()
+     * @see #size()
+     */
+    @Override
+    public Spliterator<E> spliterator() {
+        // Deliberately not Collection's default, Spliterators.spliterator(this, 0): that reads size(), which
+        // saturates at Integer.MAX_VALUE, and a SIZED spliterator carrying a saturated size makes
+        // stream().count() return the saturated value instead of the real one. sumOfOccurrences() is exact.
+        return Spliterators.spliterator(iterator(), sumOfOccurrences(), 0);
     }
 
     /**
@@ -1760,22 +1931,32 @@ public final class Multiset<E> implements Collection<E> {
      * @throws NullPointerException if {@code filter} is {@code null}
      */
     @Override
-    public boolean removeIf(final Predicate<? super E> filter) {
+    public boolean removeIf(final Predicate<? super E> filter) throws NullPointerException {
         N.requireNonNull(filter, cs.filter);
 
-        final List<E> removingKeys = new ArrayList<>();
+        // Stage in a List, never a Set: see removeAllOccurrencesIf(ObjIntPredicate). Allocated lazily, so a
+        // filter that matches nothing - the common case for a guard-style predicate - allocates nothing.
+        List<E> removingKeys = null;
 
         for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
             if (filter.test(entry.getKey())) {
+                if (removingKeys == null) {
+                    removingKeys = new ArrayList<>();
+                }
+
                 removingKeys.add(entry.getKey());
             }
         }
 
-        for (final E key : removingKeys) {
-            removeAllOccurrencesOf(key);
+        if (N.isEmpty(removingKeys)) {
+            return false;
         }
 
-        return !removingKeys.isEmpty();
+        for (final E key : removingKeys) {
+            backingMap.remove(key);
+        }
+
+        return true;
     }
 
     /**
@@ -1793,11 +1974,21 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * <p>As required by {@link Collection#size()}, this method returns {@link Integer#MAX_VALUE}
-     * when the exact total is larger. Use {@link #sumOfOccurrences()} when the exact total is needed.</p>
+     * when the exact total is larger. Use {@link #sumOfOccurrences()} when the exact total is needed.
+     * {@link #spliterator()} is overridden so that {@code stream()} does not inherit this saturated value,
+     * and {@link #toArray()} throws {@link IllegalStateException} rather than truncate.</p>
+     *
+     * <p><b>Cost:</b> unlike most {@link Collection#size()} implementations this is <i>not</i> constant
+     * time - the total is summed over every distinct element on each call, so it is
+     * O({@link #countOfDistinctElements()}). Prefer {@link #countOfDistinctElements()} when the number of
+     * distinct elements is what is wanted, and {@link #isEmpty()} (which is constant time) for emptiness
+     * checks. Note that JDK operations which size themselves from a collection - {@code new ArrayList<>(ms)},
+     * {@link Collection#spliterator()}, {@link Collection#stream()} - pay this cost too.</p>
      *
      * @return the total number of element occurrences, saturated at {@link Integer#MAX_VALUE}
      * @see #countOfDistinctElements()
      * @see #sumOfOccurrences()
+     * @see #spliterator()
      */
     @Override
     public int size() {
@@ -1877,12 +2068,15 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(array.length);   // prints 3
      * }</pre>
      *
-     * @return an array containing all the elements in this multiset
+     * @return a newly allocated array containing all the elements in this multiset
      * @throws IllegalStateException if the exact number of occurrences exceeds {@link Integer#MAX_VALUE}.
      */
     @Override
-    public Object[] toArray() {
-        return toArray(N.EMPTY_OBJECT_ARRAY);
+    public Object[] toArray() throws IllegalStateException {
+        // Not toArray(N.EMPTY_OBJECT_ARRAY): for an empty multiset the delegate returns the array it was
+        // given, which would hand every caller that one shared constant. Collection.toArray() requires a
+        // newly allocated array in every case, so pass a fresh one.
+        return toArray(new Object[0]);
     }
 
     /**
@@ -1903,12 +2097,13 @@ public final class Multiset<E> implements Collection<E> {
      * @param a the array into which the elements of this multiset are to be stored, if it is big enough;
      *              otherwise, a new array of the same runtime type is allocated for this purpose
      * @return an array containing all the elements in this multiset
-     * @throws IllegalArgumentException if the provided array is {@code null}.
+     * @throws NullPointerException if {@code a} is {@code null}, as {@link Collection#toArray(Object[])} requires.
      * @throws IllegalStateException if the exact number of occurrences exceeds {@link Integer#MAX_VALUE}.
+     * @throws ArrayStoreException if an element cannot be stored in an array with the runtime component type of {@code a}
      */
     @Override
-    public <T> T[] toArray(final T[] a) throws IllegalArgumentException {
-        N.checkArgNotNull(a, "The specified array cannot be null");
+    public <T> T[] toArray(final T[] a) throws NullPointerException, IllegalStateException, ArrayStoreException {
+        N.requireNonNull(a, cs.a);
 
         final long total = sumOfOccurrences();
         if (total > Integer.MAX_VALUE) {
@@ -1981,9 +2176,13 @@ public final class Multiset<E> implements Collection<E> {
      * @return the map created by {@code supplier}, populated with the elements of this multiset as
      *         keys and their counts as values
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if this multiset is nonempty and the supplier returns {@code null}, or a stored key is {@code null} and the supplied map rejects null-key insertion
+     * @throws ClassCastException if a stored key cannot be compared or inserted into the supplied map
+     * @throws UnsupportedOperationException if entries are copied and the supplied map does not support insertion
      * @see #toMap()
      */
-    public <M extends Map<E, Integer>> M toMap(final IntFunction<? extends M> supplier) throws IllegalArgumentException {
+    public <M extends Map<E, Integer>> M toMap(final IntFunction<? extends M> supplier)
+            throws IllegalArgumentException, NullPointerException, ClassCastException, UnsupportedOperationException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         final M result = supplier.apply(backingMap.size());
@@ -2009,13 +2208,23 @@ public final class Multiset<E> implements Collection<E> {
      * // Map entries ordered: a=1, b=2, c=3
      * }</pre>
      *
+     * <p>The returned map is keyed by {@code equals}/{@code hashCode}, which is what makes the ordering
+     * expressible. If this multiset's backing map draws <i>finer</i> distinctions than that (an
+     * {@link java.util.IdentityHashMap}, or a comparator that separates elements {@code equals} calls equal)
+     * two of its elements would collapse into a single entry; rather than return counts that do not sum to
+     * {@link #sumOfOccurrences()}, this throws. Use {@link #toMap()} or {@link #entrySet()} for such a
+     * multiset. A <i>coarser</i> backing (for example {@code String.CASE_INSENSITIVE_ORDER}) already merged
+     * those elements when they were added, so it is unaffected.</p>
+     *
      * @return a new insertion-ordered map (a {@link LinkedHashMap}) whose iteration order is by
      *         ascending count; empty if this multiset is empty
+     * @throws IllegalStateException if the backing map's key equivalence is finer than {@code equals}/
+     *         {@code hashCode}, so that two distinct elements would collapse into one entry.
      * @see #toMapSortedByOccurrences(Comparator)
      * @see #toMapSortedByKey(Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public Map<E, Integer> toMapSortedByOccurrences() {
+    public Map<E, Integer> toMapSortedByOccurrences() throws IllegalStateException {
         return toMapSortedBy((Comparator) cmpByCount);
     }
 
@@ -2033,13 +2242,23 @@ public final class Multiset<E> implements Collection<E> {
      * // Map entries ordered: c=3, b=2, a=1 (descending by count)
      * }</pre>
      *
+     * <p>The returned map is keyed by {@code equals}/{@code hashCode}, which is what makes the ordering
+     * expressible. If this multiset's backing map draws <i>finer</i> distinctions than that (an
+     * {@link java.util.IdentityHashMap}, or a comparator that separates elements {@code equals} calls equal)
+     * two of its elements would collapse into a single entry; rather than return counts that do not sum to
+     * {@link #sumOfOccurrences()}, this throws. Use {@link #toMap()} or {@link #entrySet()} for such a
+     * multiset. A <i>coarser</i> backing (for example {@code String.CASE_INSENSITIVE_ORDER}) already merged
+     * those elements when they were added, so it is unaffected.</p>
+     *
      * @param cmp the comparator to be used for sorting the counts of the elements
      * @return a new insertion-ordered map (a {@link LinkedHashMap}) whose iteration order is the order
      *         {@code cmp} induces on the counts; empty if this multiset is empty
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalStateException if the backing map's key equivalence is finer than {@code equals}/
+     *         {@code hashCode}, so that two distinct elements would collapse into one entry.
      * @see #toMapSortedByOccurrences()
      */
-    public Map<E, Integer> toMapSortedByOccurrences(final Comparator<? super Integer> cmp) throws IllegalArgumentException {
+    public Map<E, Integer> toMapSortedByOccurrences(final Comparator<? super Integer> cmp) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(cmp, cs.cmp);
 
         return toMapSortedBy((o1, o2) -> cmp.compare(o1.getValue().value(), o2.getValue().value()));
@@ -2059,13 +2278,23 @@ public final class Multiset<E> implements Collection<E> {
      * // Map entries ordered: a=2, b=1, c=1
      * }</pre>
      *
+     * <p>The returned map is keyed by {@code equals}/{@code hashCode}, which is what makes the ordering
+     * expressible. If this multiset's backing map draws <i>finer</i> distinctions than that (an
+     * {@link java.util.IdentityHashMap}, or a comparator that separates elements {@code equals} calls equal)
+     * two of its elements would collapse into a single entry; rather than return counts that do not sum to
+     * {@link #sumOfOccurrences()}, this throws. Use {@link #toMap()} or {@link #entrySet()} for such a
+     * multiset. A <i>coarser</i> backing (for example {@code String.CASE_INSENSITIVE_ORDER}) already merged
+     * those elements when they were added, so it is unaffected.</p>
+     *
      * @param cmp the comparator to be used for sorting the keys of the elements; must not be {@code null}
      * @return a new insertion-ordered map (a {@link LinkedHashMap}) whose iteration order is the order
      *         {@code cmp} induces on the elements; empty if this multiset is empty
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalStateException if the backing map's key equivalence is finer than {@code equals}/
+     *         {@code hashCode}, so that two distinct elements would collapse into one entry.
      * @see #toMapSortedByOccurrences()
      */
-    public Map<E, Integer> toMapSortedByKey(final Comparator<? super E> cmp) throws IllegalArgumentException {
+    public Map<E, Integer> toMapSortedByKey(final Comparator<? super E> cmp) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(cmp, cs.cmp);
 
         return toMapSortedBy(Comparators.comparingByKey(cmp));
@@ -2078,32 +2307,39 @@ public final class Multiset<E> implements Collection<E> {
      * Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.
      * The map is sorted according to the order induced by the provided comparator.</p>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Multiset<String> multiset = Multiset.of("a", "a", "b");
-     * Map<String, Integer> sorted = multiset.toMapSortedBy(
-     *     Comparator.comparing(e -> e.getValue().value()));
-     * }</pre>
+     * <p>This method is package-private because its comparator is expressed over the internal
+     * {@code Map.Entry<E, MutableInt>} representation. Callers outside this package use
+     * {@link #toMapSortedByOccurrences(Comparator)} or {@link #toMapSortedByKey(Comparator)}, which are
+     * thin wrappers over it.</p>
      *
      * @param cmp the comparator to be used for sorting; it compares {@code Map.Entry<E, MutableInt>} objects
      *            by their key, value, or both.
      * @return a new insertion-ordered map (a {@link LinkedHashMap}) whose iteration order is the order
      *         {@code cmp} induces on the backing entries; empty if this multiset is empty
+     * @throws IllegalStateException if the backing map's key equivalence is finer than {@code equals}/
+     *         {@code hashCode}, so that two distinct elements would collapse into one entry.
      */
-    Map<E, Integer> toMapSortedBy(final Comparator<Map.Entry<E, MutableInt>> cmp) {
+    Map<E, Integer> toMapSortedBy(final Comparator<Map.Entry<E, MutableInt>> cmp) throws IllegalStateException {
         if (N.isEmpty(backingMap)) {
             return new LinkedHashMap<>();
         }
 
-        final int distinctElementSize = backingMap.size();
-        final Map.Entry<E, MutableInt>[] entries = backingMap.entrySet().toArray(new Map.Entry[distinctElementSize]);
+        // toArray(new Map.Entry[0]), never toArray(new Map.Entry[backingMap.size()]): the pre-sized form
+        // makes the JDK write Collection.toArray(T[])'s trailing null sentinel whenever the map yields
+        // fewer entries than its size() reported, and the sort below then dereferences that null. The
+        // zero-length form always allocates exactly as many slots as there are entries.
+        final Map.Entry<E, MutableInt>[] entries = backingMap.entrySet().toArray(new Map.Entry[0]);
 
         Arrays.sort(entries, cmp);
 
-        final Map<E, Integer> resultMap = N.newLinkedHashMap(distinctElementSize);
+        final Map<E, Integer> resultMap = N.newLinkedHashMap(entries.length);
 
         for (final Map.Entry<E, MutableInt> entry : entries) {
-            resultMap.put(entry.getKey(), entry.getValue().value());
+            if (resultMap.put(entry.getKey(), entry.getValue().value()) != null) {
+                throw new IllegalStateException("Cannot represent this Multiset as a sorted Map<E, Integer>: its backing map holds '" + entry.getKey()
+                        + "' as distinct from another element that is equal to it under equals/hashCode, so they would collapse into one entry."
+                        + " Use toMap(), toMap(IntFunction) or entrySet(), which preserve the backing map's own equivalence.");
+            }
         }
 
         return resultMap;
@@ -2144,9 +2380,13 @@ public final class Multiset<E> implements Collection<E> {
      *                    once with the number of distinct elements in this multiset as a size hint.
      * @return an immutable map with the elements of this multiset as keys and their counts as values
      * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
+     * @throws NullPointerException if this multiset is nonempty and the supplier returns {@code null}, or a stored key is {@code null} and the supplied map rejects null-key insertion
+     * @throws ClassCastException if a stored key cannot be compared or inserted into the supplied map
+     * @throws UnsupportedOperationException if entries are copied and the supplied map does not support insertion
      * @see #toImmutableMap()
      */
-    public ImmutableMap<E, Integer> toImmutableMap(final IntFunction<? extends Map<E, Integer>> mapSupplier) throws IllegalArgumentException {
+    public ImmutableMap<E, Integer> toImmutableMap(final IntFunction<? extends Map<E, Integer>> mapSupplier)
+            throws IllegalArgumentException, NullPointerException, ClassCastException, UnsupportedOperationException {
         N.checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         return ImmutableMap.wrap(toMap(mapSupplier));
@@ -2168,11 +2408,11 @@ public final class Multiset<E> implements Collection<E> {
      * }</pre>
      *
      * @param action the action to be performed for each element.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws NullPointerException if {@code action} is {@code null}, as {@link Iterable#forEach} requires.
      */
     @Override
-    public void forEach(final Consumer<? super E> action) throws IllegalArgumentException {
-        N.checkArgNotNull(action, cs.action);
+    public void forEach(final Consumer<? super E> action) throws NullPointerException {
+        N.requireNonNull(action, cs.action);
 
         for (E e : this) {
             action.accept(e);
@@ -2255,10 +2495,10 @@ public final class Multiset<E> implements Collection<E> {
      * @param <X> the type of the exception that can be thrown by the function.
      * @param func the function to be applied to this multiset.
      * @return the result of applying the provided function to this multiset
-     * @throws X if the provided function throws an exception of type X
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws X if the provided function throws an exception of type X
      */
-    public <R, X extends Exception> R apply(final Throwables.Function<? super Multiset<E>, ? extends R, X> func) throws X, IllegalArgumentException {
+    public <R, X extends Exception> R apply(final Throwables.Function<? super Multiset<E>, ? extends R, X> func) throws IllegalArgumentException, X {
         N.checkArgNotNull(func, cs.func);
 
         return func.apply(this);
@@ -2282,12 +2522,14 @@ public final class Multiset<E> implements Collection<E> {
      * @param <R> the type of the result returned by the function.
      * @param <X> the type of the exception that can be thrown by the function.
      * @param func the function to be applied to this multiset.
-     * @return an Optional containing the result of applying the provided function to this multiset, or an empty Optional if the multiset is empty
-     * @throws X if the provided function throws an exception of type X
+     * @return an Optional containing the result of applying the provided function to this multiset, or an empty
+     *         Optional if the multiset is empty. An empty Optional is also returned when the function itself
+     *         returns {@code null}.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws X if the provided function throws an exception of type X
      */
     public <R, X extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Multiset<E>, ? extends R, X> func)
-            throws X, IllegalArgumentException {
+            throws IllegalArgumentException, X {
         N.checkArgNotNull(func, cs.func);
 
         return isEmpty() ? Optional.empty() : Optional.ofNullable(func.apply(this));
@@ -2304,10 +2546,10 @@ public final class Multiset<E> implements Collection<E> {
      *
      * @param <X> the type of the exception that can be thrown by the consumer function.
      * @param action the consumer function to be applied to this multiset.
-     * @throws X if the provided consumer function throws an exception of type X
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws X if the provided consumer function throws an exception of type X
      */
-    public <X extends Exception> void accept(final Throwables.Consumer<? super Multiset<E>, X> action) throws X, IllegalArgumentException {
+    public <X extends Exception> void accept(final Throwables.Consumer<? super Multiset<E>, X> action) throws IllegalArgumentException, X {
         N.checkArgNotNull(action, cs.action);
 
         action.accept(this);
@@ -2330,10 +2572,10 @@ public final class Multiset<E> implements Collection<E> {
      * @param <X> the type of the exception that can be thrown by the consumer function.
      * @param action the consumer function to be applied to this multiset.
      * @return an instance of OrElse which can be used to perform some other operation if the Multiset is empty
-     * @throws X if the provided consumer function throws an exception of type X
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws X if the provided consumer function throws an exception of type X
      */
-    public <X extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Multiset<E>, X> action) throws X, IllegalArgumentException {
+    public <X extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Multiset<E>, X> action) throws IllegalArgumentException, X {
         N.checkArgNotNull(action, cs.action);
 
         return If.is(!backingMap.isEmpty()).then(this, action);
@@ -2371,12 +2613,21 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(ms1.equals(ms2));   // prints true
      * }</pre>
      *
+     * <p><b>Equality is delegated to the backing maps, so it is only well defined between multisets whose
+     * backing maps share the same key equivalence.</b> Two multisets built on maps that judge keys
+     * differently - a {@link HashMap} versus an {@link java.util.IdentityHashMap}, or versus a
+     * {@link TreeMap} whose comparator is inconsistent with {@code equals} - can compare unequal in one
+     * direction and equal in the other, and can report different hash codes while comparing equal. This
+     * is inherited from {@link Map#equals(Object)}, which probes the other map with its own lookup rules;
+     * the JDK documents the same hazard for {@code IdentityHashMap} and comparator-inconsistent
+     * {@code TreeMap}. Compare only multisets with compatible backing maps.</p>
+     *
      * @param obj the object to be compared with this Multiset for equality.
      * @return {@code true} if the specified object is equal to this Multiset, {@code false} otherwise.
      */
     @Override
     public boolean equals(final Object obj) {
-        return obj == this || (obj instanceof Multiset && backingMap.equals(((Multiset<E>) obj).backingMap));
+        return obj == this || (obj instanceof Multiset && backingMap.equals(((Multiset<?>) obj).backingMap));
     }
 
     /**
@@ -2385,6 +2636,9 @@ public final class Multiset<E> implements Collection<E> {
      * <p>The string representation consists of a list of key-value mappings in the Multiset, enclosed in braces ({@code {}}).
      * Adjacent mappings are separated by the characters {@code ", "} (comma and space).
      * Each key-value mapping is rendered as the key followed by an equals sign ({@code =}) followed by the associated value.</p>
+     *
+     * <p>Note that this <i>element=count</i> rendering differs from {@link Entry#toString()}, which renders
+     * a single entry in the {@code "element x count"} form ({@code b} / {@code a x 2}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2399,19 +2653,25 @@ public final class Multiset<E> implements Collection<E> {
         return backingMap.toString();
     }
 
-    private static int checkOccurrences(final int occurrences) {
+    /**
+     * Rejects a negative occurrence count.
+     *
+     * @param occurrences the value to validate
+     * @param argName the name of the caller's parameter, so the message points at the argument the caller
+     *                actually passed rather than always saying {@code 'occurrences'}
+     * @throws IllegalArgumentException if {@code occurrences} is negative
+     */
+    private static void checkOccurrences(final int occurrences, final String argName) throws IllegalArgumentException {
         if (occurrences < 0) {
-            throw new IllegalArgumentException("The specified 'occurrences' cannot be negative: " + occurrences);
+            throw new IllegalArgumentException("The specified '" + argName + "' cannot be negative: " + occurrences);
         }
-
-        return occurrences;
     }
 
     /**
      * An unmodifiable element-count pair for a multiset. The {@link Multiset#entrySet} method returns
-     * a view of the multiset whose elements are of this class. A multiset implementation may return
-     * Entry instances that are either live "read-through" views to the Multiset, or immutable
-     * snapshots. Note that this type is unrelated to the similarly-named type {@code Map.Entry}.
+     * a view of the multiset whose elements are of this type. Every entry it yields is an immutable
+     * snapshot taken when the entry was produced: its {@link #count()} does not track later changes to
+     * the multiset. Note that this type is unrelated to the similarly-named type {@code Map.Entry}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2443,11 +2703,10 @@ public final class Multiset<E> implements Collection<E> {
         E element();
 
         /**
-         * Returns the count of the associated element in the underlying multiset. This count may either
-         * be an unchanging snapshot of the count at the time the entry was retrieved, or a live view of
-         * the current count of the element in the multiset, depending on the implementation. Note that
-         * in the former case, this method can never return zero, while in the latter, it will return
-         * zero if all occurrences of the element were since removed from the multiset.
+         * Returns the count of the associated element in the underlying multiset, as an unchanging
+         * snapshot taken when this entry was produced. It does not track later changes to the multiset,
+         * and is therefore always positive - an entry is only ever produced for an element the multiset
+         * actually contains, and removing every occurrence afterwards does not turn this count into zero.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2458,7 +2717,7 @@ public final class Multiset<E> implements Collection<E> {
          * }
          * }</pre>
          *
-         * @return the count of the element; never negative
+         * @return the snapshot count of the element; always positive
          */
         int count();
 
@@ -2466,23 +2725,19 @@ public final class Multiset<E> implements Collection<E> {
          * Compares the specified object with this entry for equality.
          *
          * <p>Returns {@code true} if the given object is also a multiset entry and the two entries
-         * represent the same element and count. That is, two entries {@code a} and {@code b} are equal
-         * if:</p>
-         *
-         * <pre>{@code
-         * Multiset<String> multiset = Multiset.of("a", "a", "b");
-         * Iterator<Multiset.Entry<String>> it = multiset.entrySet().iterator();
-         * Multiset.Entry<String> entry1 = it.next();
-         * Multiset.Entry<String> entry2 = it.next();
-         * boolean same = N.equals(entry1.element(), entry2.element())
-         *     && entry1.count() == entry2.count();
-         * }</pre>
+         * represent the same element and count. That is, entries {@code a} and {@code b} are equal exactly
+         * when {@code N.equals(a.element(), b.element()) && a.count() == b.count()}.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Multiset<String> multiset = Multiset.of("a", "a", "b");
-         * Multiset.Entry<String> entry = multiset.entrySet().iterator().next();
-         * boolean same = entry.equals(entry);   // returns true
+         * Multiset<String> other = Multiset.of("b", "a", "a");
+         *
+         * Multiset.Entry<String> fromA = multiset.entrySet().iterator().next();
+         * boolean sameAsItself = fromA.equals(fromA);   // returns true
+         *
+         * // Entries from different multisets are equal when element and count both match:
+         * boolean crossMultiset = multiset.entrySet().containsAll(other.entrySet());   // returns true
          * }</pre>
          *
          * @param o object to be compared for equality with this multiset entry.

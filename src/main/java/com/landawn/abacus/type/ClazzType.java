@@ -25,8 +25,10 @@ import com.landawn.abacus.util.Strings;
  *
  * <p>Class objects are serialized using their canonical class name (as returned by
  * {@link com.landawn.abacus.util.ClassUtil#getCanonicalClassName(Class)}) and deserialized
- * using {@link com.landawn.abacus.util.ClassUtil#forName(String)}, which handles primitive
- * type names and array notations.</p>
+ * using {@link com.landawn.abacus.util.ClassUtil#forName(String)}. Primitive type names (except
+ * {@code void}) and array notations are supported; names of hidden classes (lambdas) are emitted by
+ * {@code stringOf} but cannot be resolved by {@code valueOf}. A {@link Class} instance handed to
+ * {@link #valueOf(Object)} is returned as is.</p>
  *
  * <p>This class uses raw {@link Class} types due to the inherent erasure of generic type
  * parameters at runtime.</p>
@@ -52,13 +54,31 @@ public class ClazzType extends AbstractType<Class> {
      *
      * @param typeName the fully qualified (or canonical) name of the type parameter class,
      *                 e.g., {@code "java.lang.Integer"} or {@code "int"}
+     * @throws IllegalArgumentException if {@code typeName} names no loadable class (the unbounded wildcards
+     *         {@code "?"} and {@code "? super X"}, which denote {@link Object}, are accepted).
      */
-    protected ClazzType(final String typeName) {
+    protected ClazzType(final String typeName) throws IllegalArgumentException {
         super("Clazz<" + typeName + ">");
 
         final Type<?> parameterType = TypeFactory.getType(typeName);
+
+        // TypeFactory answers a class token it cannot resolve with a fresh ObjectType over Object.class,
+        // named after the token itself. Accepting it would silently make Clazz<com.nosuch.Missing> a handler
+        // whose parameterClass() is Object.class, so reject it: resolution failure is reported here, as it was
+        // before the type argument was resolved through TypeFactory. A name that really denotes Object
+        // resolves to the pooled "Object" handler, and the unbounded wildcards map to Object deliberately.
+        if (parameterType instanceof ObjectType<?> && parameterType.javaType() == Object.class && !ObjectType.OBJECT.equals(parameterType.name())
+                && !isUnboundedWildcard(typeName)) {
+            throw new IllegalArgumentException("No class found by name: " + typeName + " for type: " + name());
+        }
+
         clazz = parameterType.javaType();
         parameterTypes = List.of(parameterType);
+    }
+
+    private static boolean isUnboundedWildcard(final String typeName) {
+        // The two spellings TypeFactory itself maps to Object.class; "? extends X" resolves to its bound.
+        return "?".equals(typeName) || typeName.startsWith("? super ");
     }
 
     /**
@@ -83,6 +103,11 @@ public class ClazzType extends AbstractType<Class> {
      * ClazzType type = (ClazzType) registered;
      * type.parameterClass();   // returns Integer.class
      * }</pre>
+     *
+     * <p>This is always the class the type argument actually resolved to: a name that resolves to no class
+     * is rejected when the handler is constructed, so {@code Object.class} is returned only for a type
+     * argument that genuinely denotes {@link Object} (including the unbounded wildcards {@code "?"} and
+     * {@code "? super X"}).</p>
      *
      * @return the parameter class of this {@code Clazz<T>} type; never {@code null}
      */
@@ -134,7 +159,8 @@ public class ClazzType extends AbstractType<Class> {
     /**
      * Converts a fully qualified (or canonical) class name to the corresponding {@link Class} object.
      * Delegates to {@link com.landawn.abacus.util.ClassUtil#forName(String)}, which supports
-     * primitive type names (e.g., {@code "int"}) and array notations.
+     * primitive type names (e.g., {@code "int"}, but not {@code "void"}) and array notations.
+     * The name of a hidden class (a lambda) cannot be resolved.
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
@@ -142,12 +168,30 @@ public class ClazzType extends AbstractType<Class> {
      *
      * @param str the class name to resolve; may be {@code null} or empty
      * @return the resolved {@link Class} object, or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the class cannot be found or loaded.
+     * @throws IllegalArgumentException if the class cannot be found or loaded (including {@code "void"} and
+     *         hidden-class names).
      * @see #valueOf(Object)
      * @see #stringOf(Class)
      */
     @Override
-    public Class valueOf(final String str) {
+    public Class valueOf(final String str) throws IllegalArgumentException {
         return Strings.isEmpty(str) ? null : ClassUtil.forName(str);
+    }
+
+    /**
+     * Converts an arbitrary object to a {@link Class}. A {@link Class} instance is returned as is; any other
+     * object is converted through its runtime type's string form and {@link #valueOf(String)}.
+     *
+     * <p>Without this short-circuit a {@code Class} argument would be stringified by the generic handler
+     * registered for {@code Class.class} (as {@code "class java.lang.Integer"}), which no class name resolves.</p>
+     *
+     * @param obj the object to convert; may be {@code null}
+     * @return {@code obj} itself if it is a {@link Class}, the class named by its string form otherwise,
+     *         or {@code null} if {@code obj} is {@code null}
+     * @throws IllegalArgumentException if the string form names no loadable class.
+     */
+    @Override
+    public Class valueOf(final Object obj) throws IllegalArgumentException {
+        return obj instanceof Class<?> cls ? cls : super.valueOf(obj);
     }
 }

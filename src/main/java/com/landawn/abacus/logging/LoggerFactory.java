@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.logging;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +38,11 @@ import com.landawn.abacus.util.cs;
  * <p>The factory maintains a cache of logger instances to avoid creating multiple instances
  * for the same logger name. Failure to initialize an optional backend causes the factory to try
  * the next backend, but JVM-fatal errors ({@link VirtualMachineError} and {@link ThreadDeath}) are
- * propagated instead of being silently converted into a logging fallback.</p>
+ * propagated instead of being silently converted into a logging fallback, including when wrapped
+ * by reflective constructor invocation. A backend is cached only after initialization succeeds. The JDK
+ * fallback is the exception: it is always cached, and a failure of its first-use banner (for example a
+ * {@code java.util.logging.Handler} that throws) is swallowed rather than propagated to the caller, since
+ * there is no further backend to fall back to.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -94,9 +99,11 @@ public final class LoggerFactory {
      *
      * @param clazz the class for which to get the logger; must not be {@code null}
      * @return a Logger instance for the specified class
-     * @throws NullPointerException if {@code clazz} is {@code null}
+     * @throws IllegalArgumentException if {@code clazz} is {@code null}
      */
-    public static Logger getLogger(final Class<?> clazz) {
+    public static Logger getLogger(final Class<?> clazz) throws IllegalArgumentException {
+        N.checkArgNotNull(clazz, cs.clazz);
+
         return getLogger(clazz.getName());
     }
 
@@ -146,17 +153,22 @@ public final class LoggerFactory {
                 return logger;
             }
 
+            // Keep optional candidates separate until their initialization messages succeed;
+            // a failed candidate must leave logger null so discovery can try the next backend.
             switch (logType) {
                 case 0:
                     if (IS_ANDROID_PLATFORM) {
                         try {
-                            logger = (Logger) Class.forName("com.landawn.abacus.logging.AndroidLogger").getDeclaredConstructor(String.class).newInstance(name);
+                            final Logger candidate = (Logger) Class.forName("com.landawn.abacus.logging.AndroidLogger")
+                                    .getDeclaredConstructor(String.class)
+                                    .newInstance(name);
 
                             if (!initialized) {
                                 jdkLogger.info("Initialized with Android Logger");
-                                logger.info("Initialized with Android Logger");
+                                candidate.info("Initialized with Android Logger");
                             }
 
+                            logger = candidate;
                             logType = 0;
                             initialized = true;
 
@@ -169,13 +181,14 @@ public final class LoggerFactory {
                 case 1:
                     if (logger == null) {
                         try {
-                            logger = new SLF4JLogger(name);
+                            final Logger candidate = new SLF4JLogger(name);
 
                             if (!initialized) {
                                 jdkLogger.info("Initialized with SLF4J Logger");
-                                logger.info("Initialized with SLF4J Logger");
+                                candidate.info("Initialized with SLF4J Logger");
                             }
 
+                            logger = candidate;
                             logType = 1;
                             initialized = true;
 
@@ -188,13 +201,14 @@ public final class LoggerFactory {
                 case 2:
                     if (logger == null) {
                         try {
-                            logger = new Log4Jv2Logger(name);
+                            final Logger candidate = new Log4Jv2Logger(name);
 
                             if (!initialized) {
                                 jdkLogger.info("Initialized with Log4j v2 Logger");
-                                logger.info("Initialized with Log4j v2 Logger");
+                                candidate.info("Initialized with Log4j v2 Logger");
                             }
 
+                            logger = candidate;
                             logType = 2;
                             initialized = true;
 
@@ -210,8 +224,14 @@ public final class LoggerFactory {
                         logger = new JdkLogger(name);
 
                         if (!initialized) {
-                            jdkLogger.info("Initialized with JDK Logger");
-                            logger.info("Initialized with JDK Logger");
+                            // The terminal fallback cannot fall back any further: a banner failure (a throwing JUL
+                            // handler, say) must not become a caller-side exception from a static initializer.
+                            try {
+                                jdkLogger.info("Initialized with JDK Logger");
+                                logger.info("Initialized with JDK Logger");
+                            } catch (final Throwable e) {
+                                rethrowIfFatal(e);
+                            }
                         }
 
                         logType = 3;
@@ -226,14 +246,19 @@ public final class LoggerFactory {
         }
     }
 
-    /** Propagates errors for which continuing backend discovery is unsafe. */
-    static void rethrowIfFatal(final Throwable e) {
-        if (e instanceof ThreadDeath threadDeath) {
-            throw threadDeath;
+    /** Propagates fatal errors, unwrapping failures from reflective backend construction. */
+    @SuppressWarnings("removal")
+    static void rethrowIfFatal(Throwable e) {
+        while (e instanceof InvocationTargetException && e.getCause() != null) {
+            e = e.getCause();
         }
 
         if (e instanceof VirtualMachineError virtualMachineError) {
             throw virtualMachineError;
+        }
+
+        if (e instanceof ThreadDeath threadDeath) {
+            throw threadDeath;
         }
     }
 }

@@ -17,7 +17,10 @@ package com.landawn.abacus.util;
 import java.util.AbstractCollection;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import com.landawn.abacus.annotation.Beta;
@@ -60,7 +63,23 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     final Collection<E> coll;
 
     /**
-     * Constructs an {@code ImmutableCollection} backed by the provided collection.
+     * Whether this instance exclusively owns {@link #coll}, i.e. no other reference to the backing
+     * collection (or to any collection it is a view of) escapes to code that could still modify it.
+     * Only an owning instance is a stable value; a non-owning one is a read-only <i>view</i> whose
+     * contents can still change underneath it.
+     *
+     * <p>This models the backing collection's <i>stability</i>, not the factory that produced this
+     * instance: {@code copyOf} may safely return an owning instance unchanged, derived views such as
+     * {@link ImmutableList#subList(int, int)} inherit their parent's ownership, and anything built
+     * over caller-supplied storage ({@code wrap} or a builder given a backing collection) is never owning.
+     * A consumed builder with private storage can transfer ownership to its result. It is deliberately
+     * conservative - a false {@code false} only costs a redundant copy, whereas a false {@code true}
+     * would hand out a value that can change.</p>
+     */
+    final boolean ownsBacking;
+
+    /**
+     * Constructs a non-owning {@code ImmutableCollection} backed by the provided collection.
      * The collection reference is stored directly; subclasses that need modification
      * protection should wrap the collection (e.g. via {@link java.util.Collections#unmodifiableCollection})
      * before passing it to this constructor.
@@ -68,7 +87,19 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * @param c the backing collection; must not be {@code null}
      */
     protected ImmutableCollection(final Collection<? extends E> c) {
+        this(c, false);
+    }
+
+    /**
+     * Constructs an {@code ImmutableCollection} backed by the provided collection.
+     *
+     * @param c the backing collection; must not be {@code null}
+     * @param ownsBacking {@code true} only if no other live reference to {@code c} (or to a collection
+     *        {@code c} is a view of) can still be modified; see {@link #ownsBacking}
+     */
+    ImmutableCollection(final Collection<? extends E> c, final boolean ownsBacking) {
         coll = (Collection<E>) c;
+        this.ownsBacking = ownsBacking;
     }
 
     /**
@@ -90,10 +121,22 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * System.out.println(wrapped.size());   // prints 2
      * }</pre>
      *
+     * <p><b>Note:</b> when {@code c} is a non-{@code null} collection that is not already an
+     * {@code ImmutableCollection}, the returned instance is a plain {@code ImmutableCollection}, which - like
+     * {@link AbstractCollection} - uses <i>identity</i> {@code equals}/{@code hashCode}. Two wrappers over the
+     * same collection are therefore not equal to each other, and neither is equal to the collection they wrap.
+     * The two other cases behave differently: {@code c} already an {@code ImmutableCollection} is returned
+     * unchanged, keeping whatever equality that instance has, and a {@code null} {@code c} yields
+     * {@link ImmutableList#empty()}, which is a {@code List} and so uses value equality. An empty
+     * {@code wrap(null)} result is consequently <i>not</i> equal to a {@code wrap(anEmptyList)} one. Use
+     * {@link ImmutableList#wrap(java.util.List)} or {@link ImmutableSet#wrap(Set)} when value equality is
+     * wanted.</p>
+     *
      * @param <E> the type of elements in the collection
      * @param c the collection to be wrapped into an ImmutableCollection
      * @return an ImmutableCollection that contains the elements of the given collection; an empty
      *         ImmutableList if {@code c} is {@code null}, or {@code c} itself if it is already an ImmutableCollection
+     * @see #equals(Object)
      */
     @Beta
     public static <E> ImmutableCollection<E> wrap(final Collection<? extends E> c) {
@@ -103,7 +146,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
             return (ImmutableCollection<E>) c;
         }
 
-        return new ImmutableCollection<>(c);
+        return new ImmutableCollection<>(c, false);
     }
 
     /**
@@ -155,17 +198,14 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * This operation is not supported by ImmutableCollection.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param filter the predicate to use for filtering (ignored)
+     * @param filter the predicate to use for filtering (ignored, and may be {@code null})
      * @return never returns normally
      * @throws UnsupportedOperationException always
-     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @deprecated ImmutableCollection does not support modification operations
      */
     @Deprecated
     @Override
-    public final boolean removeIf(final Predicate<? super E> filter) throws UnsupportedOperationException, IllegalArgumentException {
-        N.checkArgNotNull(filter, cs.filter);
-
+    public final boolean removeIf(final Predicate<? super E> filter) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -227,12 +267,12 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      *
      * @param valueToFind element whose presence in this collection is to be tested
      * @return {@code true} if this collection contains the specified element
-     * @throws ClassCastException if the type of the specified element is incompatible with this collection (optional)
      * @throws NullPointerException if the specified element is {@code null} and this collection
      *         does not permit {@code null} elements (optional)
+     * @throws ClassCastException if the type of the specified element is incompatible with this collection (optional)
      */
     @Override
-    public boolean contains(final Object valueToFind) {
+    public boolean contains(final Object valueToFind) throws NullPointerException, ClassCastException {
         return coll.contains(valueToFind);
     }
 
@@ -257,20 +297,7 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      */
     @Override
     public ObjIterator<E> iterator() {
-        final java.util.Iterator<E> iter = coll.iterator();
-
-        // ObjIterator.of may return a mutable ObjIterator subclass unchanged.
-        return new ObjIterator<>() {
-            @Override
-            public boolean hasNext() {
-                return iter.hasNext();
-            }
-
-            @Override
-            public E next() {
-                return iter.next();
-            }
-        };
+        return ObjIterator.of(coll.iterator());
     }
 
     /**
@@ -289,6 +316,40 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
     @Override
     public int size() {
         return coll.size();
+    }
+
+    /**
+     * Returns a {@link Spliterator} over the elements in this collection, delegating to the backing
+     * collection's own spliterator so that its characteristics (for example {@code SIZED} plus
+     * {@code ORDERED} for a list, or {@code DISTINCT} for a set) and its split policy are preserved.
+     *
+     * <p><b>Note for subclasses:</b> any subclass that presents its backing collection in a different
+     * iteration order must override this method (see {@code ImmutableList.ReverseImmutableList}),
+     * because the returned spliterator traverses the backing collection directly.</p>
+     *
+     * @return a {@code Spliterator} over the elements in this collection
+     */
+    @Override
+    public Spliterator<E> spliterator() {
+        return coll.spliterator();
+    }
+
+    /**
+     * Performs the given action for each element of this collection until all elements have been
+     * processed or the action throws an exception. Delegates to the backing collection so that its
+     * optimized traversal is used instead of a wrapped iterator.
+     *
+     * <p><b>Note for subclasses:</b> any subclass that presents its backing collection in a different
+     * iteration order must override this method (see {@code ImmutableList.ReverseImmutableList}).</p>
+     *
+     * @param action the action to be performed for each element
+     * @throws NullPointerException if {@code action} is {@code null}
+     */
+    @Override
+    public void forEach(final Consumer<? super E> action) throws NullPointerException {
+        Objects.requireNonNull(action);
+
+        coll.forEach(action);
     }
 
     /**
@@ -335,12 +396,11 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      *        stored, if it is big enough; otherwise, a new array of the same
      *        runtime type is allocated for this purpose
      * @return an array containing all of the elements in this collection
-     * @throws ArrayStoreException if the runtime type of the specified array
-     *         is not a supertype of the runtime type of every element in this collection
      * @throws NullPointerException if the specified array is {@code null}
+     * @throws ArrayStoreException if an element is incompatible with the runtime component type of {@code a}
      */
     @Override
-    public <T> T[] toArray(final T[] a) {
+    public <T> T[] toArray(final T[] a) throws NullPointerException, ArrayStoreException {
         return coll.toArray(a);
     }
 
@@ -352,11 +412,18 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ImmutableCollection<Integer> col1 = ImmutableList.of(1, 2, 3);
-     * ImmutableCollection<Integer> col2 = ImmutableList.of(1, 2, 3);
-     * ImmutableCollection<Integer> col3 = ImmutableList.of(4, 5, 6);
-     * System.out.println(col1.equals(col2));   // returns true
-     * System.out.println(col1.equals(col3));   // returns false
+     * List<Integer> source = Arrays.asList(1, 2, 3);
+     *
+     * // A plain ImmutableCollection compares by identity:
+     * ImmutableCollection<Integer> base1 = ImmutableCollection.wrap(source);
+     * ImmutableCollection<Integer> base2 = ImmutableCollection.wrap(source);
+     * System.out.println(base1.equals(base1));   // returns true
+     * System.out.println(base1.equals(base2));   // returns false
+     *
+     * // A List or Set implementation compares by value:
+     * ImmutableCollection<Integer> list1 = ImmutableList.of(1, 2, 3);
+     * ImmutableCollection<Integer> list2 = ImmutableList.of(1, 2, 3);
+     * System.out.println(list1.equals(list2));   // returns true
      * }</pre>
      *
      * @param obj the object to be compared for equality with this collection
@@ -375,10 +442,13 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
             return false;
         }
 
-        // The backing-collection shortcut is only valid when the other side presents its backing
-        // collection in its natural order; a reordered view (e.g. ImmutableList.reversed()) shares
-        // the FORWARD collection as its backing, so unwrapping would compare the wrong order.
-        if (obj instanceof ImmutableCollection ic && !ic.isReorderedView()) {
+        // The backing-collection shortcut is only valid when the other side is also a List/Set
+        // (same equality category) and presents its backing collection in its natural order.
+        // Unwrapping a base wrap() instance (identity-equals) would make
+        // list.equals(wrap) true while wrap.equals(list) is false.
+        // A reordered view (e.g. ImmutableList.reversed()) shares the FORWARD collection as
+        // its backing, so unwrapping would compare the wrong order.
+        if (obj instanceof ImmutableCollection ic && !ic.isReorderedView() && (ic instanceof List<?> || ic instanceof Set<?>)) {
             return coll.equals(ic.coll);
         }
 
@@ -389,6 +459,11 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * Whether this collection presents its backing collection in a different iteration order
      * (e.g. a reversed view). Such instances must not be compared via the backing-collection
      * shortcut in {@link #equals(Object)}.
+     *
+     * <p>The flag only protects such an instance when it is the <i>argument</i> to another
+     * {@code ImmutableCollection}'s {@code equals}. A subclass that returns {@code true} must therefore
+     * also override {@link #equals(Object)} and {@link #hashCode()}: both implementations here read the
+     * backing collection directly, which for a reordered view is in the wrong order.</p>
      *
      * @return {@code true} if this is a reordered view of its backing collection
      */
@@ -419,10 +494,13 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * System.out.println(collection.toString());   // returns [1, 2, 3]
      * }</pre>
      *
+     * <p>Direct self-references are rendered with the standard collection/map marker; indirect cycles are not detected.</p>
+     *
      * @return a string representation of this collection
      */
     @Override
     public String toString() {
-        return coll.toString();
+        // Format through this wrapper so direct self-references use the standard marker.
+        return super.toString();
     }
 }

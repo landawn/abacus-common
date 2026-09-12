@@ -23,6 +23,8 @@ import java.sql.Timestamp;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -122,27 +124,55 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * XMLGregorianCalendar cal2 = type.valueOf("SYS_TIME");   // Current time
      * }</pre>
      *
-     * <p>This method accepts the normalized whole-second representation produced by {@code stringOf}. It treats the
-     * value as a date-time instant through {@link Dates}; it is not a general XML Schema lexical parser for partial
-     * calendar values.</p>
+     * <p>This method accepts the complete XML Schema date-time representation produced by {@code stringOf},
+     * including its fractional seconds (through nanosecond precision) and a defined numeric timezone, and
+     * reconstructs an XML-equal value through {@link Dates#parseToXMLGregorianCalendar(String)}. A complete
+     * value with an undefined timezone is instead resolved in the live default timezone, following the
+     * instant-producing {@code Dates} parsing contract, so its parsed result has a defined numeric offset and is
+     * not XML-equal to the zone-undefined source. Use
+     * {@link javax.xml.datatype.DatatypeFactory#newXMLGregorianCalendar(String)} when exact XML lexical
+     * reconstruction (including an undefined timezone), partial calendar values, leap seconds, or fractions finer
+     * than nanoseconds is required. Purely numeric input (possible epoch milliseconds) is converted via
+     * {@code Dates.createXMLGregorianCalendar(long)}.</p>
      *
      * @param str the string to convert to XMLGregorianCalendar
      * @return an XMLGregorianCalendar instance, or {@code null} if the string is {@code null} or empty
-     * @throws IllegalArgumentException if the string cannot be parsed as a valid date/time.
+     * @throws IllegalArgumentException if the string cannot be parsed as a valid date/time, or if numeric input
+     *         resolves, in the default time zone, to an offset that is not a whole number of minutes within
+     *         {@code -14:00..+14:00} (an {@code XMLGregorianCalendar} cannot carry such an offset; this affects
+     *         pre-1900 instants in zones whose historical local mean time offset has a seconds part)
      * @see #valueOf(Object)
      * @see #stringOf(XMLGregorianCalendar)
      */
+    @MayReturnNull
     @Override
-    public XMLGregorianCalendar valueOf(final String str) {
-        return isNullDateTime(str) ? null : (isSysTime(str) ? Dates.currentXMLGregorianCalendar() : Dates.parseXMLGregorianCalendar(str));
+    public XMLGregorianCalendar valueOf(final String str) throws IllegalArgumentException {
+        if (isNullDateTime(str)) {
+            return null; // NOSONAR
+        }
+
+        if (isSysTime(str)) {
+            return Dates.currentXMLGregorianCalendar();
+        }
+
+        if (isPossibleMillis(str)) {
+            try {
+                return Dates.createXMLGregorianCalendar(Long.parseLong(str));
+            } catch (final NumberFormatException e) {
+                // not a pure long after all; fall through to formatted parsing
+            }
+        }
+
+        return Dates.parseToXMLGregorianCalendar(str);
     }
 
     /**
      * Converts a character array to an XMLGregorianCalendar instance.
      * <p>
-     * This method first checks if the character array represents a long value (epoch milliseconds).
-     * If so, it creates an XMLGregorianCalendar from that timestamp. Otherwise, it converts the
-     * character array to a string and delegates to {@link #valueOf(String)}.
+     * This method first checks if the character array represents a long value (epoch milliseconds: digits ending
+     * in a digit, so a trailing {@code L}/{@code d}/{@code f} type suffix is not accepted). If so, it creates an
+     * XMLGregorianCalendar from that timestamp. Otherwise, it converts the character array to a string and
+     * delegates to {@link #valueOf(String)}, so both overloads give the same answer for the same text.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -155,17 +185,25 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @param offset the starting position in the character array
      * @param len the number of characters to process
      * @return an XMLGregorianCalendar instance, or {@code null} if the input is {@code null} or empty
+     * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see
+     *         {@link #valueOf(String)}, including its default-zone offset restriction on numeric input), or if
+     *         numeric text lies outside the {@code long} range
      */
+    @MayReturnNull
     @Override
-    public XMLGregorianCalendar valueOf(final char[] cbuf, final int offset, final int len) {
+    public XMLGregorianCalendar valueOf(final char[] cbuf, final int offset, final int len) throws IllegalArgumentException {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
 
+        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
+        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
+        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
+        // IllegalArgumentException.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createXMLGregorianCalendar(parseLong(cbuf, offset, len));
-            } catch (final NumberFormatException e) {
+            } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
@@ -186,9 +224,14 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * String str = type.stringOf(cal);   // Returns formatted date/time string
      * }</pre>
      *
-     * <p>The returned value is normalized as a whole-second UTC date-time by {@link Dates#format(XMLGregorianCalendar)}.
-     * Fractional seconds, the original offset, and partial XML Schema calendar fields are therefore not preserved;
-     * use {@link XMLGregorianCalendar#toXMLFormat()} when the exact XML lexical representation is required.</p>
+     * <p>The returned value is the XML Schema lexical representation supplied by
+     * {@link Dates#format(XMLGregorianCalendar)}. It preserves the calendar's fields, fractional scale, and numeric
+     * timezone, including for partial XML Schema values. For a complete ordinary date-time with a defined numeric
+     * timezone and at most nanosecond precision, {@code valueOf(stringOf(value))} is XML-equal to {@code value}.
+     * A complete value with an undefined timezone, partial values, leap seconds, and finer fractions remain
+     * lossless in the returned text but require an XML lexical parser such as
+     * {@link javax.xml.datatype.DatatypeFactory#newXMLGregorianCalendar(String)} for XML-equal reconstruction;
+     * {@code valueOf} resolves a zone-undefined complete date-time in the live default timezone.</p>
      *
      * @param x the XMLGregorianCalendar instance to convert to string
      * @return the string representation of the XMLGregorianCalendar, or {@code null} if the input is null
@@ -216,10 +259,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) of the timestamp value
      * @return the XMLGregorianCalendar value, or {@code null} if the database value is NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    public XMLGregorianCalendar get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public XMLGregorianCalendar get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
         return ts == null ? null : Dates.createXMLGregorianCalendar(ts);
     }
@@ -240,10 +284,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @param rs the ResultSet to read from
      * @param columnName the label of the column containing the timestamp value
      * @return the XMLGregorianCalendar value, or {@code null} if the database value is NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    public XMLGregorianCalendar get(final ResultSet rs, final String columnName) throws SQLException {
+    public XMLGregorianCalendar get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final Timestamp ts = rs.getTimestamp(columnName);
         return ts == null ? null : Dates.createXMLGregorianCalendar(ts);
     }
@@ -264,10 +309,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @param stmt the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the value
      * @param x the XMLGregorianCalendar value to set, or {@code null} for SQL NULL
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final XMLGregorianCalendar x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final XMLGregorianCalendar x) throws NullPointerException, SQLException {
         stmt.setTimestamp(columnIndex, (x == null) ? null : Dates.createTimestamp(x.toGregorianCalendar()));
     }
 
@@ -287,10 +333,11 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @param stmt the CallableStatement to set the value in
      * @param parameterName the name of the parameter where to set the value
      * @param x the XMLGregorianCalendar value to set, or {@code null} for SQL NULL
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final XMLGregorianCalendar x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final XMLGregorianCalendar x) throws NullPointerException, SQLException {
         stmt.setTimestamp(parameterName, (x == null) ? null : Dates.createTimestamp(x.toGregorianCalendar()));
     }
 
@@ -315,19 +362,20 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      *
      * @param appendable the Appendable to write to
      * @param x the XMLGregorianCalendar value to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code x} and {@code appendable} are both null
+     * @throws IOException if appending the null literal fails
+     * @throws IllegalArgumentException if {@code x} is non-null and {@code appendable} is null
+     * @throws IllegalStateException if the fields of {@code x} do not form a valid XML Schema date/time type
+     * @throws UncheckedIOException if appending the XML lexical representation of a non-null value fails
      * @implNote
-     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
-     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
-     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
-     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
-     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
-     * form; it is therefore not, in the general contract, a plain
-     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
-     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
+     * For a non-null value this method appends exactly the same XML lexical text as {@link #stringOf(XMLGregorianCalendar)}.
+     * For {@code null}, it appends the literal {@code "null"}, whereas {@code stringOf(null)} returns {@code null}.
+     * The inverse-parsing limitations for partial values, leap seconds, fine fractions, and undefined timezones are
+     * described by {@link #stringOf(XMLGregorianCalendar)}.
      */
     @Override
-    public void appendTo(final Appendable appendable, final XMLGregorianCalendar x) throws IOException {
+    public void appendTo(final Appendable appendable, final XMLGregorianCalendar x)
+            throws NullPointerException, IOException, IllegalArgumentException, IllegalStateException, UncheckedIOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -375,12 +423,17 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @param writer the CharacterWriter to write to
      * @param x the XMLGregorianCalendar value to write
      * @param config the serialization configuration controlling format and quoting
-     * @throws IOException if an I/O error occurs during the write operation
-     * @throws RuntimeException if the configured {@link DateTimeFormat} is not one of the supported formats
+     * @throws NullPointerException if {@code writer} is null when writing the null literal, a quotation mark or the LONG representation
+     * @throws IOException if directly writing the null literal, a quotation mark or the LONG representation fails
+     * @throws IllegalArgumentException if {@code writer} is null when formatting a non-null value without quotation, or an explicit ISO format
+     *         cannot represent the value's year
+     * @throws IllegalStateException if the default format is selected and the fields of {@code x} do not form a valid XML Schema date/time type
+     * @throws UncheckedIOException if writing a non-null value through {@code Dates.formatTo} fails
      */
     @SuppressWarnings("null")
     @Override
-    public void serializeTo(final CharacterWriter writer, final XMLGregorianCalendar x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final XMLGregorianCalendar x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, IllegalArgumentException, IllegalStateException, UncheckedIOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

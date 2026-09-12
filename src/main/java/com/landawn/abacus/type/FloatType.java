@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
 /**
@@ -26,7 +27,10 @@ import com.landawn.abacus.util.Numbers;
  * <p>When reading from a database, the column value is retrieved via
  * {@link java.sql.ResultSet#getObject(int) ResultSet.getObject} to preserve SQL {@code NULL}:
  * a {@code null} result returns {@code null}, a {@code Float} result is returned directly, and
- * any other numeric type is converted via {@link com.landawn.abacus.util.Numbers#toFloat(Object)}.</p>
+ * any other value is converted via {@link com.landawn.abacus.util.Numbers#toFloat(Object)} (a non-{@link Number}
+ * is parsed from its trimmed string form). Following that method's contract, an empty string column value is read
+ * as {@code 0.0f}, not {@code null} (unlike {@code valueOf("")}); a non-numeric string throws
+ * {@link NumberFormatException}.</p>
  *
  * <p>String serialization and JDBC write operations are inherited from
  * {@link AbstractFloatType}.</p>
@@ -78,13 +82,14 @@ public final class FloatType extends AbstractFloatType {
      *
      * @param rs          the {@link java.sql.ResultSet} to read from; must not be {@code null}
      * @param columnIndex the 1-based column index
-     * @return the converted {@code Float} value
-     *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @return the {@code Float} value of the column, or {@code null} if the column value is SQL {@code NULL}
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      * @throws NumberFormatException if a non-numeric value cannot be converted to {@code float}
      */
+    @MayReturnNull
     @Override
-    public Float get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Float get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, NumberFormatException {
         final Object result = rs.getObject(columnIndex);
 
         if (result == null) {
@@ -104,13 +109,14 @@ public final class FloatType extends AbstractFloatType {
      *
      * @param rs         the {@link java.sql.ResultSet} to read from; must not be {@code null}
      * @param columnName the label of the column to retrieve
-     * @return the converted {@code Float} value
-     *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @return the {@code Float} value of the column, or {@code null} if the column value is SQL {@code NULL}
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      * @throws NumberFormatException if a non-numeric value cannot be converted to {@code float}
      */
+    @MayReturnNull
     @Override
-    public Float get(final ResultSet rs, final String columnName) throws SQLException {
+    public Float get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, NumberFormatException {
         final Object result = rs.getObject(columnName);
 
         if (result == null) {

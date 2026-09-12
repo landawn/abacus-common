@@ -87,12 +87,13 @@ public class Base64EncodedType extends AbstractType<byte[]> {
      *
      * @param base64String the Base64-encoded string to decode; may be {@code null} or empty
      * @return the decoded byte array; an empty byte array if the input is {@code null} or empty
-     * @throws IllegalArgumentException if {@code base64String} contains characters outside the Base64 alphabet.
+     * @throws IllegalArgumentException if {@code base64String} is not valid Base64 (a character outside the
+     *         Base64 alphabet, or malformed padding such as {@code "AQID="})
      * @see #valueOf(Object)
      * @see #stringOf(byte[])
      */
     @Override
-    public byte[] valueOf(final String base64String) {
+    public byte[] valueOf(final String base64String) throws IllegalArgumentException {
         return Strings.base64Decode(base64String);
     }
 }

@@ -14,19 +14,24 @@
 
 package com.landawn.abacus.type;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.io.Writer;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -37,7 +42,8 @@ import com.landawn.abacus.util.IOUtil;
 /**
  * Type handler for {@link java.io.InputStream} and its subclasses.
  * This class provides serialization, deserialization, and database access for {@code InputStream} instances.
- * Streams are serialized by reading all of their bytes and decoding them as a UTF-8 string.
+ * Streams are serialized by reading all of their bytes and decoding them as a UTF-8 string;
+ * {@link AsciiStreamType} and {@link ClobAsciiStreamType} specialize text conversion to US-ASCII.
  * The stream content is consumed during serialization, but the stream is not closed.
  * Arbitrary binary input is not guaranteed to survive UTF-8 decoding and re-encoding; use a
  * {@code byte[]} type when a lossless binary string conversion is required.
@@ -49,10 +55,7 @@ public class InputStreamType extends AbstractType<InputStream> {
     public static final String INPUT_STREAM = InputStream.class.getSimpleName();
 
     private final Class<InputStream> typeClass;
-
-    private final Constructor<?> bytesConstructor;
-
-    private final Constructor<?> streamConstructor;
+    private final Charset charset;
 
     /**
      * Package-private constructor for {@code InputStreamType}.
@@ -69,18 +72,19 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @param typeName the custom type name to register
      */
     InputStreamType(final String typeName) {
+        this(typeName, Charsets.UTF_8);
+    }
+
+    // Keep inherited text conversion consistent with each JDBC stream specialization's writers.
+    InputStreamType(final String typeName, final Charset charset) {
         super(typeName);
-
         typeClass = InputStream.class;
-
-        bytesConstructor = null;
-        streamConstructor = null;
+        this.charset = charset;
     }
 
     /**
      * Package-private constructor for {@code InputStreamType} bound to a concrete {@link InputStream} subclass.
-     * For non-abstract classes, the {@code byte[]} and {@link InputStream} constructors are looked up
-     * for later use by {@link #valueOf(String)}.
+     * Text construction is supported only for the content-preserving classes listed in {@link #valueOf(String)}.
      *
      * @param cls the {@link InputStream} class (or subclass) this type handler represents
      */
@@ -88,14 +92,7 @@ public class InputStreamType extends AbstractType<InputStream> {
         super(ClassUtil.getSimpleClassName(cls));
 
         typeClass = cls;
-
-        if (Modifier.isAbstract(cls.getModifiers())) {
-            bytesConstructor = null;
-            streamConstructor = null;
-        } else {
-            bytesConstructor = ClassUtil.getDeclaredConstructor(cls, byte[].class);
-            streamConstructor = ClassUtil.getDeclaredConstructor(cls, InputStream.class);
-        }
+        charset = Charsets.UTF_8;
     }
 
     /**
@@ -120,54 +117,67 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
-     * Reads the entire contents of an {@link InputStream}, decodes them as UTF-8, and returns the result.
+     * Reads the entire contents of an {@link InputStream} using this handler's charset and returns the result.
+     * The charset is UTF-8, or US-ASCII for the ASCII stream handlers.
      * This operation consumes the stream but does not close it.
      *
-     * <p>For well-formed UTF-8 content, {@link #valueOf(String)} re-encodes the same bytes. Malformed or
+     * <p>For supported stream classes and well-formed content in the handler's charset, {@link #valueOf(String)} re-encodes the same bytes. Malformed or
      * non-text binary input may be replaced during decoding and therefore does not round-trip losslessly.</p>
      *
      * @param x the {@link InputStream} to read; may be {@code null}
      * @return the stream contents as a string, or {@code null} if {@code x} is {@code null}
-     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while reading the stream
+     * @throws UncheckedIOException if reading and decoding the remaining bytes of non-null {@code x} using this type's charset fails
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final InputStream x) {
-        // return x == null ? null : Strings.base64Encode(IOUtil.readAllBytes(x));
-
-        return x == null ? null : IOUtil.readAllToString(x);
+    public String stringOf(final InputStream x) throws UncheckedIOException {
+        return x == null ? null : IOUtil.readAllToString(x, charset);
     }
 
     /**
-     * Converts a string to an {@link InputStream} by encoding it with UTF-8.
-     * Creates the appropriate subclass based on the constructors discovered at construction time;
-     * falls back to {@link ByteArrayInputStream} if no suitable constructor is available.
+     * Converts a string to an {@link InputStream} using UTF-8, or US-ASCII for the ASCII stream handlers.
+     * Unmappable characters and malformed surrogate sequences use the charset encoder's replacement bytes.
+     * Supports {@link InputStream}, {@link ByteArrayInputStream}, {@link BufferedInputStream},
+     * {@link DataInputStream}, {@link PushbackInputStream}, and {@link FilterInputStream} (using a buffered stream).
+     * Other subclasses require an explicitly registered handler; an InputStream or byte-array constructor
+     * does not establish that the class preserves the supplied content.
      *
      * <p>This method round-trips the output of {@link #stringOf(InputStream)} only when the original stream
-     * contained well-formed UTF-8 bytes.</p>
+     * contained well-formed bytes in this handler's charset.</p>
      *
      * @param str the string to convert; may be {@code null}
      * @return a new {@link InputStream} containing the encoded bytes, or {@code null} if {@code str} is {@code null}
+     * @throws UnsupportedOperationException if non-null text is supplied for an unsupported stream class
      * @see #valueOf(Object)
      * @see #stringOf(InputStream)
      */
+    @MayReturnNull
     @Override
-    public InputStream valueOf(final String str) {
-        if (str == null) {
-            return null; // NOSONAR
-        }
+    public InputStream valueOf(final String str) throws UnsupportedOperationException {
+        return str == null ? null : wrap(str.getBytes(charset)); // NOSONAR
+    }
 
-        final byte[] bytes = str.getBytes(Charsets.UTF_8);
-
-        if (bytesConstructor != null) {
-            //noinspection PrimitiveArrayArgumentToVarargsMethod
-            return (InputStream) ClassUtil.invokeConstructor(bytesConstructor, bytes); // NOSONAR
-        } else if (streamConstructor != null) {
-            return (InputStream) ClassUtil.invokeConstructor(streamConstructor, new ByteArrayInputStream(bytes));
-        } else {
+    /**
+     * Wraps raw bytes in a stream of the handled class.
+     *
+     * @param bytes the content to wrap; must not be {@code null}
+     * @return a new {@link InputStream} over {@code bytes}
+     * @throws UnsupportedOperationException if the handled stream class cannot be constructed from content
+     */
+    private InputStream wrap(final byte[] bytes) throws UnsupportedOperationException {
+        // In particular, decoder constructors cannot reconstruct already decoded stringOf output.
+        if (typeClass == (Class<?>) InputStream.class || typeClass == (Class<?>) ByteArrayInputStream.class) {
             return new ByteArrayInputStream(bytes);
+        } else if (typeClass == (Class<?>) BufferedInputStream.class || typeClass == (Class<?>) FilterInputStream.class) {
+            return new BufferedInputStream(new ByteArrayInputStream(bytes));
+        } else if (typeClass == (Class<?>) DataInputStream.class) {
+            return new DataInputStream(new ByteArrayInputStream(bytes));
+        } else if (typeClass == (Class<?>) PushbackInputStream.class) {
+            return new PushbackInputStream(new ByteArrayInputStream(bytes));
         }
+
+        throw new UnsupportedOperationException("Text construction is not supported for stream class: " + typeClass.getName());
     }
 
     /**
@@ -175,16 +185,20 @@ public class InputStreamType extends AbstractType<InputStream> {
      * {@link Blob} instances are converted via {@link Blob#getBinaryStream()}; ownership of a supplied
      * locator is transferred to the returned stream, whose {@link InputStream#close()} method also calls
      * {@link Blob#free()}.
+     * A {@code byte[]} is wrapped as-is (the raw bytes, no charset involved) in a stream of the handled class,
+     * subject to the same supported-class rule as {@link #valueOf(String)}.
      * All other objects are first converted to a string and then to a stream via {@link #valueOf(String)}.
      *
      * @param obj the object to convert; may be {@code null}
      * @return an {@link InputStream} representation of the object, or {@code null} if {@code obj} is {@code null};
      *         when {@code obj} is a {@code Blob}, closing the returned stream also releases the locator
-     * @throws com.landawn.abacus.exception.UncheckedSQLException if a {@link java.sql.SQLException} occurs while reading from a {@link Blob}
+     * @throws UncheckedSQLException if a {@link java.sql.SQLException} occurs while reading from a {@link Blob}
+     * @throws UnsupportedOperationException if content is supplied for an unsupported stream class
      */
+    @MayReturnNull
     @SuppressFBWarnings
     @Override
-    public InputStream valueOf(final Object obj) {
+    public InputStream valueOf(final Object obj) throws UncheckedSQLException, UnsupportedOperationException {
         if (obj == null) {
             return null; // NOSONAR
         } else if (obj instanceof Blob blob) {
@@ -193,6 +207,9 @@ public class InputStreamType extends AbstractType<InputStream> {
             } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             }
+        } else if (obj instanceof byte[] bytes) {
+            // The string route would render the array as its list text ("[1, 2, 3]").
+            return wrap(bytes);
         } else {
             return valueOf(Type.<Object> of(obj.getClass()).stringOf(obj));
         }
@@ -205,10 +222,11 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @param rs the {@link ResultSet} to read from
      * @param columnIndex the 1-based column index
      * @return the binary stream from the column, or {@code null} if the column value is SQL {@code NULL}
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public InputStream get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getBinaryStream(columnIndex);
     }
 
@@ -219,10 +237,11 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @param rs the {@link ResultSet} to read from
      * @param columnName the label of the column to retrieve
      * @return the binary stream from the column, or {@code null} if the column value is SQL {@code NULL}
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public InputStream get(final ResultSet rs, final String columnName) throws SQLException {
+    public InputStream get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getBinaryStream(columnName);
     }
 
@@ -232,10 +251,11 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @param stmt the {@link PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x the {@link InputStream} to set; may be {@code null}
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws NullPointerException, SQLException {
         stmt.setBinaryStream(columnIndex, x);
     }
 
@@ -245,10 +265,11 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @param stmt the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@link InputStream} to set; may be {@code null}
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws NullPointerException, SQLException {
         stmt.setBinaryStream(parameterName, x);
     }
 
@@ -260,10 +281,12 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @param columnIndex the 1-based parameter index
      * @param x the {@link InputStream} to set; may be {@code null}
      * @param sqlTypeOrLength the declared number of bytes in the stream
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setBinaryStream(columnIndex, x, sqlTypeOrLength);
     }
 
@@ -275,10 +298,12 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @param parameterName the name of the parameter to set
      * @param x the {@link InputStream} to set; may be {@code null}
      * @param sqlTypeOrLength the declared number of bytes in the stream
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setBinaryStream(parameterName, x, sqlTypeOrLength);
     }
 
@@ -295,7 +320,9 @@ public class InputStreamType extends AbstractType<InputStream> {
      *
      * @param appendable the {@link Appendable} to write to
      * @param x the {@link InputStream} to read from; may be {@code null}
-     * @throws IOException if an I/O error occurs during reading or writing
+     * @throws IOException if appending to the destination fails, or reading and decoding {@code x} fails while copying directly to a
+     *         {@code Writer}
+     * @throws UncheckedIOException if reading and decoding non-null {@code x} fails when {@code appendable} is not a {@code Writer}
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -307,14 +334,14 @@ public class InputStreamType extends AbstractType<InputStream> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final InputStream x) throws IOException {
+    public void appendTo(final Appendable appendable, final InputStream x) throws IOException, UncheckedIOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
             if (appendable instanceof Writer writer) {
-                IOUtil.write(IOUtil.newInputStreamReader(x), writer);
+                IOUtil.write(IOUtil.newInputStreamReader(x, charset), writer);
             } else {
-                appendable.append(IOUtil.readAllToString(x));
+                appendable.append(IOUtil.readAllToString(x, charset));
             }
         }
     }
@@ -336,10 +363,11 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x the {@link InputStream} to write; may be {@code null}
      * @param config the serialization configuration to use; may be {@code null}
-     * @throws IOException if an I/O error occurs during reading or writing
+     * @throws IOException if writing escaped stream content, quotation marks or the null literal to {@code writer} fails
+     * @throws UncheckedIOException if reading and decoding the remaining bytes of non-null {@code x} fails
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final InputStream x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final InputStream x, final JsonXmlSerConfig<?> config) throws IOException, UncheckedIOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -347,7 +375,7 @@ public class InputStreamType extends AbstractType<InputStream> {
                 writer.writeCharacter(stringOf(x));
             } else {
                 writer.write(config.getStringQuotation());
-                writer.writeCharacter(stringOf(x));
+                Utils.writeStringContent(writer, stringOf(x), config.getStringQuotation());
                 writer.write(config.getStringQuotation());
             }
         }

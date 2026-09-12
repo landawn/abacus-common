@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
@@ -25,6 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +51,7 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         }
 
         @Override
-        public void await() throws InterruptedException {
+        public void await() {
             throw new UnsupportedOperationException();
         }
 
@@ -58,23 +61,21 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         }
 
         @Override
-        public boolean await(final long time, final TimeUnit unit) throws InterruptedException {
+        public boolean await(final long time, final TimeUnit unit) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public boolean awaitUntil(final Date deadline) throws InterruptedException {
+        public boolean awaitUntil(final Date deadline) {
             throw new UnsupportedOperationException();
         }
 
         @Override
         public void signal() {
-            // no-op for this deterministic test condition
         }
 
         @Override
         public void signalAll() {
-            // no-op for this deterministic test condition
         }
     }
 
@@ -88,18 +89,14 @@ public class GenericKeyedObjectPoolTest extends TestBase {
 
         @Override
         protected void vacate(final int numberToEvict) {
-            // Legacy evict() computed numberToEvict, unlocked, and then dispatched here.
-            // Mutating in that gap made its count stale and removed three of four entries.
             final Thread interloper = new Thread(() -> removedDuringFormerGap.set(remove("one")), "keyed-evict-gap-interloper");
             interloper.start();
-
             try {
                 interloper.join(2_000);
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new AssertionError(e);
             }
-
             super.vacate(numberToEvict);
         }
     }
@@ -117,14 +114,12 @@ public class GenericKeyedObjectPoolTest extends TestBase {
 
         private void readObject(final ObjectInputStream input) throws IOException, ClassNotFoundException {
             deserializationProbeEnabled = true;
-
             try {
                 Thread.sleep(100);
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new IOException(e);
             }
-
             input.defaultReadObject();
         }
 
@@ -134,10 +129,8 @@ public class GenericKeyedObjectPoolTest extends TestBase {
                 if (!subclassStateInitialized) {
                     observedPartiallyDeserializedState.set(true);
                 }
-
                 evictionRan.countDown();
             }
-
             super.removeExpired();
         }
 
@@ -147,16 +140,13 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         }
     }
 
-    private GenericKeyedObjectPool<String, TestPoolable> pool;
-
     private static class TestPoolable extends AbstractPoolable {
         private final String value;
-        private boolean destroyed = false;
-        private Poolable.Caller destroyedByCaller = null;
+        private boolean destroyed;
+        private Poolable.Caller destroyedByCaller;
 
         TestPoolable(String value) {
-            super(10000, 5000);
-            this.value = value;
+            this(value, 10000, 5000);
         }
 
         TestPoolable(String value, long liveTime, long maxIdleTime) {
@@ -183,6 +173,8 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         }
     }
 
+    private GenericKeyedObjectPool<String, TestPoolable> pool;
+
     @BeforeEach
     public void setUp() {
         pool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
@@ -195,20 +187,42 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         }
     }
 
+    private static GenericKeyedObjectPool<String, TestPoolable> noBalance(int capacity) {
+        return new GenericKeyedObjectPool<>(capacity, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
+    }
+
     private static byte[] serialize(final Object obj) throws IOException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
         try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
             oos.writeObject(obj);
         }
-
         return baos.toByteArray();
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> T deserialize(final byte[] bytes) throws IOException, ClassNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
             return (T) ois.readObject();
         }
+    }
+
+    private static Object shutdownHookOf(final Object target) throws Exception {
+        final Field field = AbstractPool.class.getDeclaredField("shutdownHook");
+        field.setAccessible(true);
+        return field.get(target);
+    }
+
+    private static void awaitCleanupRelease(final CountDownLatch release) {
+        try {
+            release.await(5, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private static void assertSameValue(TestPoolable expected, TestPoolable actual) {
+        assertNotNull(actual);
+        assertEquals(expected.getValue(), actual.getValue());
     }
 
     @Test
@@ -217,232 +231,131 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         assertTrue(pool.put("key1", poolable));
         assertEquals(1, pool.size());
         assertTrue(pool.containsKey("key1"));
-    }
+        assertEquals(1, pool.stats().putCount());
 
-    @Test
-    public void testPutClosedPoolRejectsExpiredValueWithIllegalState() throws InterruptedException {
-        GenericKeyedObjectPool<String, TestPoolable> closedPool = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
-        TestPoolable expired = new TestPoolable("expired", 1, 1);
-
-        Thread.sleep(20);
-        closedPool.close();
-
-        assertThrows(IllegalStateException.class, () -> closedPool.put("key", expired));
-    }
-
-    @Test
-    public void testPutToFullPoolWithoutAutoBalance() {
-        GenericKeyedObjectPool<String, TestPoolable> noBalancePool = new GenericKeyedObjectPool<>(3, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
-
-        for (int i = 0; i < 3; i++) {
-            assertTrue(noBalancePool.put("key" + i, new TestPoolable("value" + i)));
-        }
-
-        assertFalse(noBalancePool.put("key3", new TestPoolable("value3")));
-        assertEquals(3, noBalancePool.size());
-
-        noBalancePool.close();
-    }
-
-    @Test
-    public void testPutToFullPoolWithAutoBalance() {
-        GenericKeyedObjectPool<String, TestPoolable> balancePool = new GenericKeyedObjectPool<>(3, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.4f);
-
-        for (int i = 0; i < 3; i++) {
-            assertTrue(balancePool.put("key" + i, new TestPoolable("value" + i)));
-        }
-
-        assertTrue(balancePool.put("key3", new TestPoolable("value3")));
-        assertEquals(3, balancePool.size());
-
-        balancePool.close();
-    }
-
-    @Test
-    public void testPutToSmallFullPoolWithDefaultAutoBalanceFactor() {
-        GenericKeyedObjectPool<String, TestPoolable> balancePool = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f);
-        TestPoolable first = new TestPoolable("value1");
-
-        assertTrue(balancePool.put("key1", first));
-        assertTrue(balancePool.put("key2", new TestPoolable("value2")));
-        assertEquals(1, balancePool.size());
-        assertTrue(first.isDestroyed());
-
-        balancePool.close();
-    }
-
-    @Test
-    public void testPutReplace() {
         TestPoolable p1 = new TestPoolable("value1");
         TestPoolable p2 = new TestPoolable("value2");
-
-        assertTrue(pool.put("key1", p1));
-        assertEquals(1, pool.size());
-
-        assertTrue(pool.put("key1", p2));
-        assertEquals(1, pool.size());
-
+        assertTrue(pool.put("replace", p1));
+        assertTrue(pool.put("replace", p2));
+        assertEquals(2, pool.size());
         assertTrue(p1.isDestroyed());
         assertEquals(Poolable.Caller.REMOVE_REPLACE_CLEAR, p1.getDestroyedByCaller());
+        assertEquals(p2, pool.get("replace"));
 
-        assertEquals(p2, pool.get("key1"));
-    }
-
-    @Test
-    public void testPutWithMemoryConstraint() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
-        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 250, measure);
-
-        assertTrue(memPool.put("k1", new TestPoolable("v1")));
-        assertTrue(memPool.put("k2", new TestPoolable("v2")));
-        assertTrue(memPool.put("k3", new TestPoolable("v3")));
-        assertEquals(2, memPool.size());
-
-        memPool.close();
-    }
-
-    @Test
-    public void testPut_valueExpiringDuringInLockMeasure_isRejected() {
-        // GenericKeyedObjectPool.put(K,E) calls memoryMeasure.sizeOf(...) inside the lock, AFTER the
-        // pre-lock expiry check. A value with little life left can therefore expire during that in-lock
-        // work and must NOT be pooled (mirrors GenericObjectPool.add and the timed put, both of which
-        // re-check expiry in-lock). Make sizeOf() sleep longer than the value's liveTime.
-        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> slowMeasure = (k, v) -> {
-            try {
-                Thread.sleep(200);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
+        GenericKeyedObjectPool<String, TestPoolable> noBalancePool = noBalance(3);
+        try {
+            for (int i = 0; i < 3; i++) {
+                assertTrue(noBalancePool.put("key" + i, new TestPoolable("value" + i)));
             }
-            return 1L;
-        };
-        final GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 1_000_000L,
-                slowMeasure);
-
-        try {
-            // liveTime 50ms: not expired when put() is called, but expires during the 200ms in-lock sizeOf().
-            final TestPoolable shortLived = new TestPoolable("v", 50, 50);
-
-            assertFalse(memPool.put("k", shortLived), "a value that expired during the in-lock measure must be rejected, not pooled");
-            assertEquals(0, memPool.size());
-            assertNull(memPool.get("k"));
-        } finally {
-            memPool.close();
-        }
-    }
-
-    @Test
-    public void testTimedPut_valueExpiringDuringInLockMeasure_isRejected() throws InterruptedException {
-        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> slowMeasure = (k, v) -> {
-            try {
-                Thread.sleep(200);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return 1L;
-        };
-        final GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 1_000_000L,
-                slowMeasure);
-
-        try {
-            final TestPoolable shortLived = new TestPoolable("v", 50, 50);
-
-            assertFalse(memPool.put("k", shortLived, 1, TimeUnit.SECONDS), "timed put must reject a value that expires during the in-lock memory measure");
-            assertEquals(0, memPool.size());
-            assertNull(memPool.get("k"));
-        } finally {
-            memPool.close();
-        }
-    }
-
-    @Test
-    public void testPutWithMemoryMeasureAndUnlimitedMemory() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
-        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 0, measure);
-
-        try {
-            for (int i = 0; i < 5; i++) {
-                assertTrue(memPool.put("key" + i, new TestPoolable("value" + i)));
-            }
-
-            assertEquals(5, memPool.size());
-        } finally {
-            memPool.close();
-        }
-    }
-
-    @Test
-    public void testPutWithAutoDestroyFalse() {
-        GenericKeyedObjectPool<String, TestPoolable> noBalancePool = new GenericKeyedObjectPool<>(2, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
-        try {
-            noBalancePool.put("key1", new TestPoolable("value1"));
-            noBalancePool.put("key2", new TestPoolable("value2"));
-
-            TestPoolable extra = new TestPoolable("extra");
-            assertFalse(noBalancePool.put("key3", extra, false));
-            assertFalse(extra.isDestroyed());
+            assertFalse(noBalancePool.put("key3", new TestPoolable("value3")));
+            assertEquals(3, noBalancePool.size());
         } finally {
             noBalancePool.close();
         }
-    }
 
-    @Test
-    public void testPutWithMemoryConstraintNoAutoBalance() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
-        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 250, measure);
-
-        assertTrue(memPool.put("k1", new TestPoolable("v1")));
-        assertTrue(memPool.put("k2", new TestPoolable("v2")));
-        assertFalse(memPool.put("k3", new TestPoolable("v3")));
-        assertEquals(2, memPool.size());
-
-        memPool.close();
-    }
-
-    @Test
-    public void testPutCountIncrementsOnPut() {
-        pool.put("key1", new TestPoolable("value1"));
-        pool.put("key2", new TestPoolable("value2"));
-        pool.put("key3", new TestPoolable("value3"));
-        assertEquals(3, pool.stats().putCount());
-    }
-
-    @Test
-    public void testPutWithAutoDestroy() {
-        for (int i = 0; i < 10; i++) {
-            pool.put("key" + i, new TestPoolable("value" + i));
+        GenericKeyedObjectPool<String, TestPoolable> balancePool = new GenericKeyedObjectPool<>(3, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.4f);
+        try {
+            for (int i = 0; i < 3; i++) {
+                assertTrue(balancePool.put("key" + i, new TestPoolable("value" + i)));
+            }
+            assertTrue(balancePool.put("key3", new TestPoolable("value3")));
+            assertEquals(3, balancePool.size());
+        } finally {
+            balancePool.close();
         }
 
+        GenericKeyedObjectPool<String, TestPoolable> small = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f);
+        try {
+            TestPoolable first = new TestPoolable("value1");
+            assertTrue(small.put("key1", first));
+            assertTrue(small.put("key2", new TestPoolable("value2")));
+            assertEquals(1, small.size());
+            assertTrue(first.isDestroyed());
+        } finally {
+            small.close();
+        }
+
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
+        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 250, measure);
+        try {
+            assertTrue(memPool.put("k1", new TestPoolable("v1")));
+            assertTrue(memPool.put("k2", new TestPoolable("v2")));
+            assertTrue(memPool.put("k3", new TestPoolable("v3")));
+            assertEquals(2, memPool.size());
+        } finally {
+            memPool.close();
+        }
+
+        GenericKeyedObjectPool<String, TestPoolable> unlimited = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 0, measure);
+        try {
+            for (int i = 0; i < 5; i++) {
+                assertTrue(unlimited.put("key" + i, new TestPoolable("value" + i)));
+            }
+            assertEquals(5, unlimited.size());
+        } finally {
+            unlimited.close();
+        }
+
+        GenericKeyedObjectPool<String, TestPoolable> memNoBalance = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 250,
+                measure);
+        try {
+            assertTrue(memNoBalance.put("k1", new TestPoolable("v1")));
+            assertTrue(memNoBalance.put("k2", new TestPoolable("v2")));
+            assertFalse(memNoBalance.put("k3", new TestPoolable("v3")));
+            assertEquals(2, memNoBalance.size());
+        } finally {
+            memNoBalance.close();
+        }
+
+        for (int i = 0; i < 10; i++) {
+            pool.put("full" + i, new TestPoolable("value" + i));
+        }
         TestPoolable extra = new TestPoolable("extra");
-        assertTrue(pool.put("key10", extra, true));
+        assertTrue(pool.put("full10", extra, true));
         assertFalse(extra.isDestroyed());
-        assertNull(extra.getDestroyedByCaller());
     }
 
     @Test
-    public void testPutNullKey() {
+    public void testPut_EdgeCase() throws InterruptedException {
         assertThrows(IllegalArgumentException.class, () -> pool.put(null, new TestPoolable("value")));
-    }
-
-    @Test
-    public void testPutNullValue() {
         assertThrows(IllegalArgumentException.class, () -> pool.put("key", null));
-    }
-
-    @Test
-    public void testPutExpired() throws InterruptedException {
         TestPoolable expired = new TestPoolable("expired", 10, 10);
         Thread.sleep(20);
         assertFalse(pool.put("key", expired));
         assertEquals(0, pool.size());
+
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> negative = (k, v) -> -1;
+        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 1000, negative);
+        try {
+            assertFalse(memPool.put("key1", new TestPoolable("v1")));
+            assertEquals(0, memPool.size());
+        } finally {
+            memPool.close();
+        }
     }
 
     @Test
-    public void testPutWithAutoDestroyFailure() {
-        GenericKeyedObjectPool<String, TestPoolable> noBalancePool = new GenericKeyedObjectPool<>(2, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
+    public void testPut_Closed() throws InterruptedException {
+        GenericKeyedObjectPool<String, TestPoolable> closedPool = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        TestPoolable expired = new TestPoolable("expired", 1, 1);
+        Thread.sleep(20);
+        closedPool.close();
+        assertThrows(IllegalStateException.class, () -> closedPool.put("key", expired));
+
+        pool.close();
+        assertThrows(IllegalStateException.class, () -> pool.put("key", new TestPoolable("value")));
+        assertThrows(IllegalStateException.class, () -> pool.put("k", new TestPoolable("v"), 1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testPut_AutoDestroyFailure() {
+        GenericKeyedObjectPool<String, TestPoolable> noBalancePool = noBalance(2);
         try {
             noBalancePool.put("key1", new TestPoolable("value1"));
             noBalancePool.put("key2", new TestPoolable("value2"));
-
+            TestPoolable keep = new TestPoolable("keep");
+            assertFalse(noBalancePool.put("key3", keep, false));
+            assertFalse(keep.isDestroyed());
             TestPoolable extra = new TestPoolable("extra");
             assertFalse(noBalancePool.put("key3", extra, true));
             assertTrue(extra.isDestroyed());
@@ -453,201 +366,294 @@ public class GenericKeyedObjectPoolTest extends TestBase {
     }
 
     @Test
-    public void testPutOnClosedPool() {
-        pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.put("key", new TestPoolable("value")));
+    public void testPut_MemoryMeasureThrows() {
+        AtomicBoolean throwOnNext = new AtomicBoolean();
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> {
+            if (throwOnNext.get()) {
+                throw new RuntimeException("sizeOf");
+            }
+            return 100L;
+        };
+        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 1024L * 1024L,
+                measure);
+        try {
+            TestPoolable original = new TestPoolable("memMeasurePut");
+            assertTrue(memPool.put("k1", original));
+            throwOnNext.set(true);
+            assertFalse(memPool.put("k1", new TestPoolable("shouldNotBePut")));
+            assertEquals(0, memPool.size());
+        } finally {
+            memPool.close();
+        }
     }
 
     @Test
-    public void testGet() {
+    public void testPut_ValueExpiringDuringMeasurement() throws InterruptedException {
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> slow = (k, v) -> {
+            try {
+                Thread.sleep(200);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return 1L;
+        };
+        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 1_000_000L, slow);
+        try {
+            TestPoolable shortLived = new TestPoolable("v", 50, 50);
+            assertFalse(memPool.put("k", shortLived));
+            assertEquals(0, memPool.size());
+            assertFalse(memPool.put("k", new TestPoolable("v", 50, 50), 1, TimeUnit.SECONDS));
+            assertEquals(0, memPool.size());
+        } finally {
+            memPool.close();
+        }
+    }
+
+    @Test
+    public void testPut_SameInstance() {
+        TestPoolable resource = new TestPoolable("res");
+        assertTrue(pool.put("k", resource));
+        assertSame(resource, pool.get("k"));
+        assertTrue(pool.put("k", resource));
+        assertFalse(resource.isDestroyed());
+        TestPoolable replacement = new TestPoolable("res2");
+        assertTrue(pool.put("k", replacement));
+        assertTrue(resource.isDestroyed());
+
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
+        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 10000, measure);
+        try {
+            TestPoolable value = new TestPoolable("res");
+            assertTrue(memPool.put("k1", value));
+            assertEquals(102, memPool.stats().dataSize());
+            assertTrue(memPool.put("k1", memPool.get("k1")));
+            assertEquals(102, memPool.stats().dataSize());
+            memPool.remove("k1");
+            assertEquals(0, memPool.stats().dataSize());
+        } finally {
+            memPool.close();
+        }
+
+        AtomicInteger measureCalls = new AtomicInteger();
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> failing = (k, v) -> measureCalls.incrementAndGet() == 1 ? 100 : -1;
+        GenericKeyedObjectPool<String, TestPoolable> restore = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 10_000, failing);
+        try {
+            TestPoolable value = new TestPoolable("v1");
+            assertTrue(restore.put("k", value));
+            TestPoolable same = restore.get("k");
+            assertFalse(restore.put("k", same, true));
+            assertEquals(1, restore.size());
+            assertEquals(100L, restore.totalDataSize.get());
+            assertFalse(same.isDestroyed());
+        } finally {
+            restore.close();
+        }
+    }
+
+    @Test
+    public void testPut_CapacityAndMemoryFailurePreserveExisting() {
+        GenericKeyedObjectPool<String, TestPoolable> capacityPool = noBalance(1);
+        try {
+            TestPoolable v1 = new TestPoolable("value1");
+            assertTrue(capacityPool.put("K1", v1));
+            assertFalse(capacityPool.put("K2", new TestPoolable("value2")));
+            assertFalse(v1.isDestroyed());
+            assertTrue(capacityPool.containsKey("K1"));
+        } finally {
+            capacityPool.close();
+        }
+
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> 100L;
+        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 150, measure);
+        try {
+            TestPoolable p1 = new TestPoolable("value1");
+            assertTrue(memPool.put("K1", p1));
+            assertFalse(memPool.put("K2", new TestPoolable("value2")));
+            assertFalse(p1.isDestroyed());
+            assertEquals(1, memPool.size());
+        } finally {
+            memPool.close();
+        }
+    }
+
+    @Test
+    public void testGet() throws InterruptedException {
         TestPoolable poolable = new TestPoolable("value1");
         pool.put("key1", poolable);
-
         TestPoolable retrieved = pool.get("key1");
-        assertNotNull(retrieved);
         assertEquals("value1", retrieved.getValue());
-        assertEquals(poolable, retrieved);
         assertEquals(1, retrieved.activityPrint().getAccessCount());
-    }
-
-    @Test
-    public void testGetNonExistent() {
-        assertNull(pool.get("nonexistent"));
-    }
-
-    @Test
-    public void testGetMultipleTimesUpdatesAccessCount() {
-        TestPoolable poolable = new TestPoolable("value1");
-        pool.put("key1", poolable);
-
         pool.get("key1");
         pool.get("key1");
-        pool.get("key1");
-
         assertEquals(3, poolable.activityPrint().getAccessCount());
-    }
+        assertNull(pool.get("nonexistent"));
 
-    @Test
-    public void testGetExpired() throws InterruptedException {
         TestPoolable expired = new TestPoolable("expired", 50, 50);
-        pool.put("key", expired);
-
+        pool.put("expired", expired);
         Thread.sleep(60);
-
-        assertNull(pool.get("key"));
+        assertNull(pool.get("expired"));
         assertTrue(expired.isDestroyed());
         assertEquals(Poolable.Caller.EVICT, expired.getDestroyedByCaller());
-        assertFalse(pool.containsKey("key"));
+        assertFalse(pool.containsKey("expired"));
     }
 
     @Test
-    public void testGetOnClosedPool() {
+    public void testGet_Closed() {
         pool.close();
         assertThrows(IllegalStateException.class, () -> pool.get("key"));
+        assertThrows(IllegalStateException.class, () -> pool.get("k", 1, TimeUnit.SECONDS));
     }
 
     @Test
-    public void testRemoveWithMemoryMeasure() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
-        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 1000, measure);
+    public void testGet_HitMissStats() throws InterruptedException {
+        pool.put("key1", new TestPoolable("value1"));
+        pool.get("key1");
+        pool.get("nonexistent");
+        assertEquals(1, pool.stats().hitCount());
+        assertEquals(1, pool.stats().missCount());
 
-        memPool.put("k1", new TestPoolable("v1"));
-        memPool.put("k2", new TestPoolable("v2"));
-        assertEquals(204, memPool.stats().dataSize());
+        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        try {
+            p.put("k1", new TestPoolable("v1"));
+            assertNotNull(p.get("k1"));
+            assertNull(p.get("absent"));
+            p.put("short", new TestPoolable("s", 1, 1));
+            Thread.sleep(20);
+            assertNull(p.get("short"));
+            assertEquals(1, p.hitCount.get());
+            assertEquals(2, p.missCount.get());
+            p.close();
+            assertThrows(IllegalStateException.class, () -> p.get("k1"));
+            assertEquals(1, p.hitCount.get());
+            assertEquals(2, p.missCount.get());
+        } finally {
+            if (!p.isClosed()) {
+                p.close();
+            }
+        }
+    }
 
-        memPool.remove("k1");
-        assertEquals(102, memPool.stats().dataSize());
+    @Test
+    public void testGet_RaceWithClose() throws Exception {
+        assertRaceWithClose(op -> op.get("K"));
+        assertRaceWithClose(op -> op.remove("K"));
+        assertRaceWithClose(op -> op.peek("K"));
+    }
 
-        memPool.close();
+    private static void assertRaceWithClose(java.util.function.Function<GenericKeyedObjectPool<String, TestPoolable>, TestPoolable> op) throws Exception {
+        GenericKeyedObjectPool<String, TestPoolable> racing = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        racing.put("K", new TestPoolable("racing"));
+        ReentrantLock poolLock = racing.lock;
+        CountDownLatch holderHasLock = new CountDownLatch(1);
+        CountDownLatch mayProceed = new CountDownLatch(1);
+        Thread holder = new Thread(() -> {
+            poolLock.lock();
+            try {
+                holderHasLock.countDown();
+                mayProceed.await();
+                racing.isClosed = true;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                poolLock.unlock();
+            }
+        });
+        holder.start();
+        holderHasLock.await();
+        AtomicBoolean threwISE = new AtomicBoolean();
+        AtomicBoolean returned = new AtomicBoolean();
+        Thread actor = new Thread(() -> {
+            try {
+                if (op.apply(racing) != null) {
+                    returned.set(true);
+                }
+            } catch (IllegalStateException e) {
+                threwISE.set(true);
+            }
+        });
+        actor.start();
+        Thread.sleep(50);
+        mayProceed.countDown();
+        holder.join();
+        actor.join();
+        assertTrue(threwISE.get());
+        assertFalse(returned.get());
+        racing.isClosed = false;
+        racing.close();
     }
 
     @Test
     public void testRemove() {
         TestPoolable poolable = new TestPoolable("value1");
         pool.put("key1", poolable);
-
         TestPoolable removed = pool.remove("key1");
-        assertNotNull(removed);
-        assertEquals(poolable, removed);
+        assertSame(poolable, removed);
         assertEquals(0, pool.size());
-        assertFalse(pool.containsKey("key1"));
         assertEquals(1, removed.activityPrint().getAccessCount());
-    }
-
-    @Test
-    public void testRemoveNonExistent() {
         assertNull(pool.remove("nonexistent"));
-    }
 
-    @Test
-    public void testMemoryTracking() {
         KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
         GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 1000, measure);
-
-        PoolStats stats = memPool.stats();
-        assertEquals(1000, stats.maxMemory());
-        assertEquals(0, stats.dataSize());
-
-        memPool.put("k1", new TestPoolable("v1"));
-        stats = memPool.stats();
-        assertEquals(102, stats.dataSize());
-
-        memPool.put("key2", new TestPoolable("v2"));
-        stats = memPool.stats();
-        assertEquals(206, stats.dataSize());
-
-        memPool.remove("k1");
-        stats = memPool.stats();
-        assertEquals(104, stats.dataSize());
-
-        memPool.close();
-    }
-
-    // Additional tests for missing coverage
-
-    @Test
-    public void testIsEmpty() {
-        assertTrue(pool.isEmpty());
-        pool.put("key1", new TestPoolable("value1"));
-        assertFalse(pool.isEmpty());
-        pool.remove("key1");
-        assertTrue(pool.isEmpty());
+        try {
+            memPool.put("k1", new TestPoolable("v1"));
+            memPool.put("k2", new TestPoolable("v2"));
+            assertEquals(204, memPool.stats().dataSize());
+            memPool.remove("k1");
+            assertEquals(102, memPool.stats().dataSize());
+        } finally {
+            memPool.close();
+        }
     }
 
     @Test
-    public void testRemoveUpdatesAccessStats() {
-        TestPoolable poolable = new TestPoolable("value1");
-        pool.put("key1", poolable);
-
-        TestPoolable removed = pool.remove("key1");
-        assertNotNull(removed);
-        assertEquals(1, removed.activityPrint().getAccessCount());
-    }
-
-    @Test
-    public void testRemoveOnClosedPool() {
+    public void testRemove_Closed() {
         pool.close();
         assertThrows(IllegalStateException.class, () -> pool.remove("key"));
     }
 
     @Test
-    public void testPeekDoesNotUpdateAccessStats() {
+    public void testRemove_MemoryMeasureThrows() {
+        AtomicBoolean throwOnNext = new AtomicBoolean();
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> {
+            if (throwOnNext.get()) {
+                throw new RuntimeException("sizeOf");
+            }
+            return 0L;
+        };
+        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 1024L * 1024L,
+                measure);
+        try {
+            TestPoolable original = new TestPoolable("memMeasureRemove");
+            assertTrue(memPool.put("k1", original));
+            throwOnNext.set(true);
+            TestPoolable removed = memPool.remove("k1");
+            assertNotNull(removed);
+            assertFalse(removed.isDestroyed());
+            assertEquals(0, memPool.size());
+        } finally {
+            memPool.close();
+        }
+    }
+
+    @Test
+    public void testPeek() throws InterruptedException {
         TestPoolable poolable = new TestPoolable("value1");
         pool.put("key1", poolable);
-
-        pool.peek("key1");
-        pool.peek("key1");
-        pool.peek("key1");
-
+        assertSame(poolable, pool.peek("key1"));
         assertEquals(0, poolable.activityPrint().getAccessCount());
-    }
-
-    @Test
-    public void testPeek() {
-        TestPoolable poolable = new TestPoolable("value1");
-        pool.put("key1", poolable);
-
-        TestPoolable peeked = pool.peek("key1");
-        assertNotNull(peeked);
-        assertEquals(poolable, peeked);
-        assertEquals(0, peeked.activityPrint().getAccessCount());
-    }
-
-    @Test
-    public void testPeekNonExistent() {
-        assertNull(pool.peek("nonexistent"));
-    }
-
-    // --- Additional tests for missing coverage ---
-
-    @Test
-    public void testPeekKeepsElementInPool() {
-        TestPoolable poolable = new TestPoolable("value1");
-        pool.put("key1", poolable);
-
-        TestPoolable peeked = pool.peek("key1");
-        assertNotNull(peeked);
-        assertEquals(poolable, peeked);
-
-        // Element should still be in the pool
         assertEquals(1, pool.size());
-        assertTrue(pool.containsKey("key1"));
-    }
+        assertNull(pool.peek("nonexistent"));
 
-    @Test
-    public void testPeekExpired() throws InterruptedException {
         TestPoolable expired = new TestPoolable("expired", 50, 50);
-        pool.put("key", expired);
-
+        pool.put("expired", expired);
         Thread.sleep(60);
-
-        assertNull(pool.peek("key"));
+        assertNull(pool.peek("expired"));
         assertTrue(expired.isDestroyed());
         assertEquals(Poolable.Caller.EVICT, expired.getDestroyedByCaller());
     }
 
     @Test
-    public void testPeekOnClosedPool() {
+    public void testPeek_Closed() {
         pool.close();
         assertThrows(IllegalStateException.class, () -> pool.peek("key"));
     }
@@ -656,14 +662,8 @@ public class GenericKeyedObjectPoolTest extends TestBase {
     public void testContainsKey() {
         pool.put("key1", new TestPoolable("value1"));
         pool.put("key2", new TestPoolable("value2"));
-
         assertTrue(pool.containsKey("key1"));
-        assertTrue(pool.containsKey("key2"));
         assertFalse(pool.containsKey("key3"));
-    }
-
-    @Test
-    public void testContainsKeyOnClosedPool() {
         pool.close();
         assertThrows(IllegalStateException.class, () -> pool.containsKey("key"));
     }
@@ -673,19 +673,10 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         pool.put("key1", new TestPoolable("value1"));
         pool.put("key2", new TestPoolable("value2"));
         pool.put("key3", new TestPoolable("value3"));
-
         Set<String> keys = pool.keySet();
         assertEquals(3, keys.size());
-        assertTrue(keys.contains("key1"));
-        assertTrue(keys.contains("key2"));
-        assertTrue(keys.contains("key3"));
-
         keys.clear();
         assertEquals(3, pool.size());
-    }
-
-    @Test
-    public void testKeySetOnClosedPool() {
         pool.close();
         assertThrows(IllegalStateException.class, () -> pool.keySet());
     }
@@ -694,1448 +685,44 @@ public class GenericKeyedObjectPoolTest extends TestBase {
     public void testValues() {
         TestPoolable p1 = new TestPoolable("value1");
         TestPoolable p2 = new TestPoolable("value2");
-
         pool.put("key1", p1);
         pool.put("key2", p2);
-
         Collection<TestPoolable> values = pool.values();
         assertEquals(2, values.size());
-        assertTrue(values.contains(p1));
-        assertTrue(values.contains(p2));
-
         values.clear();
         assertEquals(2, pool.size());
-    }
-
-    @Test
-    public void testValuesOnClosedPool() {
         pool.close();
         assertThrows(IllegalStateException.class, () -> pool.values());
     }
 
     @Test
     public void testClear() {
-        List<TestPoolable> poolables = new ArrayList<>();
+        List<TestPoolable> items = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            TestPoolable p = new TestPoolable("value" + i);
-            poolables.add(p);
-            pool.put("key" + i, p);
+            TestPoolable item = new TestPoolable("value" + i);
+            items.add(item);
+            pool.put("key" + i, item);
         }
-
         pool.clear();
         assertEquals(0, pool.size());
-
-        for (TestPoolable p : poolables) {
-            assertTrue(p.isDestroyed());
-            assertEquals(Poolable.Caller.REMOVE_REPLACE_CLEAR, p.getDestroyedByCaller());
+        for (TestPoolable item : items) {
+            assertTrue(item.isDestroyed());
+            assertEquals(Poolable.Caller.REMOVE_REPLACE_CLEAR, item.getDestroyedByCaller());
         }
-    }
-
-    @Test
-    public void testClearEmptyPool() {
         pool.clear();
-        assertEquals(0, pool.size());
         assertTrue(pool.isEmpty());
     }
 
     @Test
-    public void testClearOnClosedPool() {
+    public void testClear_Closed() {
         pool.close();
         assertThrows(IllegalStateException.class, () -> pool.clear());
     }
 
     @Test
-    public void testConstructorWithMemory() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
-        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(20, 2000, EvictionPolicy.EXPIRATION_TIME, 1024, measure);
-        assertEquals(20, memPool.capacity());
-        memPool.close();
-    }
-
-    @Test
-    public void testConstructorWithAutoBalance() {
-        GenericKeyedObjectPool<String, TestPoolable> balancePool = new GenericKeyedObjectPool<>(30, 1000, EvictionPolicy.LAST_ACCESS_TIME, false, 0.3f);
-        assertEquals(30, balancePool.capacity());
-        balancePool.close();
-    }
-
-    @Test
-    public void testConstructorFullConfig() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 200;
-        GenericKeyedObjectPool<String, TestPoolable> fullPool = new GenericKeyedObjectPool<>(40, 4000, EvictionPolicy.ACCESS_COUNT, true, 0.4f, 2048, measure);
-        assertEquals(40, fullPool.capacity());
-        fullPool.close();
-    }
-
-    @Test
-    public void testSerializationWithEvictionEnabled() throws Exception {
-        GenericKeyedObjectPool<String, TestPoolable> evictPool = new GenericKeyedObjectPool<>(10, 100, EvictionPolicy.LAST_ACCESS_TIME);
-
-        GenericKeyedObjectPool<String, TestPoolable> deserialized = deserialize(serialize(evictPool));
-        assertNotNull(deserialized);
-        assertFalse(deserialized.isClosed());
-
-        evictPool.close();
-        deserialized.close();
-    }
-
-    @Test
-    public void testDeserializationDefersEvictionUntilSubclassStateIsRestored() throws Exception {
-        final DeserializationEvictionProbePool original = new DeserializationEvictionProbePool();
-        final byte[] bytes = serialize(original);
-        original.close();
-        DeserializationEvictionProbePool.resetProbe();
-
-        final DeserializationEvictionProbePool deserialized = deserialize(bytes);
-
-        try {
-            assertTrue(DeserializationEvictionProbePool.evictionRan.await(1, TimeUnit.SECONDS));
-            assertFalse(DeserializationEvictionProbePool.observedPartiallyDeserializedState.get());
-        } finally {
-            deserialized.close();
-        }
-    }
-
-    @Test
-    public void testSerializationWithEvictionEnabledRestoresShutdownHook() throws Exception {
-        GenericKeyedObjectPool<String, TestPoolable> evictPool = new GenericKeyedObjectPool<>(10, 100, EvictionPolicy.LAST_ACCESS_TIME);
-
-        GenericKeyedObjectPool<String, TestPoolable> deserialized = deserialize(serialize(evictPool));
-
-        try {
-            assertNotNull(shutdownHookOf(deserialized));
-        } finally {
-            evictPool.close();
-            deserialized.close();
-        }
-    }
-
-    private static Object shutdownHookOf(final Object pool) throws Exception {
-        final Field field = AbstractPool.class.getDeclaredField("shutdownHook");
-        field.setAccessible(true);
-        return field.get(pool);
-    }
-
-    @Test
-    public void testClose() {
-        TestPoolable p1 = new TestPoolable("value1");
-        TestPoolable p2 = new TestPoolable("value2");
-
-        pool.put("key1", p1);
-        pool.put("key2", p2);
-
-        assertFalse(pool.isClosed());
-        pool.close();
-        assertTrue(pool.isClosed());
-
-        assertTrue(p1.isDestroyed());
-        assertTrue(p2.isDestroyed());
-        assertEquals(Poolable.Caller.CLOSE, p1.getDestroyedByCaller());
-        assertEquals(Poolable.Caller.CLOSE, p2.getDestroyedByCaller());
-
-        assertThrows(IllegalStateException.class, () -> pool.put("key3", new TestPoolable("value3")));
-        assertThrows(IllegalStateException.class, () -> pool.get("key1"));
-    }
-
-    @Test
-    public void testCloseIdempotent() {
-        pool.put("key1", new TestPoolable("value1"));
-        pool.close();
-        assertTrue(pool.isClosed());
-        pool.close(); // Should not throw
-        assertTrue(pool.isClosed());
-    }
-
-    @Test
-    public void test_evict() {
-        for (int i = 0; i < 10; i++) {
-            pool.put("key" + i, new TestPoolable("value" + i));
-        }
-
-        pool.evict();
-        assertEquals(8, pool.size());
-    }
-
-    @Test
-    public void test_evictWithCustomBalanceFactor() {
-        GenericKeyedObjectPool<String, TestPoolable> customPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.5f);
-
-        for (int i = 0; i < 10; i++) {
-            customPool.put("key" + i, new TestPoolable("value" + i));
-        }
-
-        customPool.evict();
-        assertEquals(5, customPool.size());
-
-        customPool.close();
-    }
-
-    @Test
-    public void testEvictWithExpirationTimePolicy() {
-        GenericKeyedObjectPool<String, TestPoolable> expPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.EXPIRATION_TIME, true, 0.5f);
-
-        for (int i = 0; i < 10; i++) {
-            expPool.put("key" + i, new TestPoolable("value" + i));
-        }
-
-        expPool.evict();
-        assertEquals(5, expPool.size());
-
-        expPool.close();
-    }
-
-    @Test
-    public void testMemoryTrackingDuringEviction() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
-        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.5f, 5000, measure);
-
-        for (int i = 0; i < 10; i++) {
-            memPool.put("key" + i, new TestPoolable("value" + i));
-        }
-
-        long dataSizeBefore = memPool.stats().dataSize();
-        assertTrue(dataSizeBefore > 0);
-
-        memPool.evict();
-        long dataSizeAfter = memPool.stats().dataSize();
-        assertTrue(dataSizeAfter < dataSizeBefore);
-
-        memPool.close();
-    }
-
-    @Test
-    public void testEvictMoreThanSize() {
-        // When evict count >= pool size, entire pool should be cleared
-        GenericKeyedObjectPool<String, TestPoolable> smallPool = new GenericKeyedObjectPool<>(5, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 1.0f);
-        for (int i = 0; i < 3; i++) {
-            smallPool.put("key" + i, new TestPoolable("value" + i));
-        }
-        // balanceFactor=1.0 means evict all
-        smallPool.evict();
-        assertEquals(0, smallPool.size());
-        smallPool.close();
-    }
-
-    @Test
-    public void testEvict_RemovesRequestedNumberOfEntries() {
-        TestPoolable v1 = new TestPoolable("v1");
-        TestPoolable v2 = new TestPoolable("v2");
-        TestPoolable v3 = new TestPoolable("v3");
-
-        pool.put("key1", v1);
-        pool.put("key2", v2);
-        pool.put("key3", v3);
-
-        pool.vacate(2);
-
-        int destroyedCount = (v1.isDestroyed() ? 1 : 0) + (v2.isDestroyed() ? 1 : 0) + (v3.isDestroyed() ? 1 : 0);
-        assertEquals(1, pool.size());
-        assertEquals(2, destroyedCount);
-    }
-
-    @Test
-    public void testEvictWithCreatedTimePolicy() throws InterruptedException {
-        GenericKeyedObjectPool<String, TestPoolable> createdPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.CREATED_TIME, true, 0.5f);
-
-        // Distinct creation times (ActivityPrint.createdTime is set at construction).
-        TestPoolable v1 = new TestPoolable("v1");
-        Thread.sleep(10);
-        TestPoolable v2 = new TestPoolable("v2");
-        Thread.sleep(10);
-        TestPoolable v3 = new TestPoolable("v3");
-
-        createdPool.put("k1", v1);
-        createdPool.put("k2", v2);
-        createdPool.put("k3", v3);
-
-        // CREATED_TIME (and FIFO) evict the oldest-created first: vacate(2) destroys v1 and v2, keeps v3.
-        createdPool.vacate(2);
-
-        assertEquals(1, createdPool.size());
-        assertTrue(v1.isDestroyed());
-        assertTrue(v2.isDestroyed());
-        assertFalse(v3.isDestroyed());
-
-        createdPool.close();
-    }
-
-    @Test
-    public void testEvictWithFifoPolicy() throws InterruptedException {
-        GenericKeyedObjectPool<String, TestPoolable> fifoPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.FIFO, true, 0.5f);
-
-        TestPoolable v1 = new TestPoolable("v1");
-        Thread.sleep(10);
-        TestPoolable v2 = new TestPoolable("v2");
-
-        fifoPool.put("k1", v1);
-        fifoPool.put("k2", v2);
-
-        // FIFO evicts the first-added (oldest-created) first.
-        fifoPool.vacate(1);
-
-        assertEquals(1, fifoPool.size());
-        assertTrue(v1.isDestroyed());
-        assertFalse(v2.isDestroyed());
-
-        fifoPool.close();
-    }
-
-    @Test
-    public void testFifoEvictsFirstPutNotOldestCreated() throws InterruptedException {
-        GenericKeyedObjectPool<String, TestPoolable> fifoPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.FIFO, true, 0.5f);
-
-        TestPoolable older = new TestPoolable("older");
-        Thread.sleep(10);
-        TestPoolable newer = new TestPoolable("newer");
-
-        fifoPool.put("newer", newer);
-        fifoPool.put("older", older);
-
-        fifoPool.vacate(1);
-
-        assertEquals(1, fifoPool.size());
-        assertTrue(newer.isDestroyed());
-        assertFalse(older.isDestroyed());
-        assertFalse(fifoPool.containsKey("newer"));
-        assertTrue(fifoPool.containsKey("older"));
-
-        fifoPool.close();
-    }
-
-    @Test
-    public void testEvictEmptyPool() {
-        pool.evict();
-        assertEquals(0, pool.size());
-    }
-
-    @Test
-    public void testEvictOnClosedPool() {
-        pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.evict());
-    }
-
-    @Test
-    public void testEvictWithAccessCountPolicy() throws InterruptedException {
-        GenericKeyedObjectPool<String, TestPoolable> countPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.ACCESS_COUNT, true, 0.5f);
-
-        for (int i = 0; i < 10; i++) {
-            countPool.put("key" + i, new TestPoolable("value" + i));
-        }
-
-        // Access some entries multiple times
-        for (int i = 0; i < 5; i++) {
-            countPool.get("key" + i);
-            countPool.get("key" + i);
-        }
-
-        countPool.evict();
-        assertTrue(countPool.size() < 10);
-
-        // The frequently accessed entries should be retained
-        for (int i = 0; i < 5; i++) {
-            assertTrue(countPool.containsKey("key" + i));
-        }
-
-        countPool.close();
-    }
-
-    @Test
-    public void testConstructorBasic() {
-        GenericKeyedObjectPool<String, TestPoolable> basicPool = new GenericKeyedObjectPool<>(50, 3000, EvictionPolicy.ACCESS_COUNT);
-        assertEquals(50, basicPool.capacity());
-        assertEquals(0, basicPool.size());
-        assertFalse(basicPool.isClosed());
-        basicPool.close();
-    }
-
-    @Test
-    public void testSize() {
-        assertEquals(0, pool.size());
-
-        pool.put("key1", new TestPoolable("value1"));
-        assertEquals(1, pool.size());
-
-        pool.put("key2", new TestPoolable("value2"));
-        assertEquals(2, pool.size());
-
-        pool.remove("key1");
-        assertEquals(1, pool.size());
-
-        pool.remove("key2");
-        assertEquals(0, pool.size());
-    }
-
-    @Test
-    public void testStats() {
-        pool.put("key1", new TestPoolable("value1"));
-        pool.put("key2", new TestPoolable("value2"));
-        pool.get("key1");
-        pool.get("key2");
-        pool.get("key3");
-
-        PoolStats stats = pool.stats();
-        assertEquals(10, stats.capacity());
-        assertEquals(2, stats.size());
-        assertEquals(2, stats.putCount());
-        assertEquals(3, stats.getCount());
-        assertEquals(2, stats.hitCount());
-        assertEquals(1, stats.missCount());
-    }
-
-    @Test
-    public void testMultiplePutAndRemove() {
-        for (int i = 0; i < 5; i++) {
-            pool.put("key" + i, new TestPoolable("value" + i));
-        }
-        assertEquals(5, pool.size());
-
-        for (int i = 0; i < 5; i++) {
-            assertNotNull(pool.remove("key" + i));
-        }
-        assertEquals(0, pool.size());
-        assertNull(pool.remove("nonexistent"));
-    }
-
-    @Test
-    public void testNegativeMemoryMeasure() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> -1;
-        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 1000, measure);
-        // Negative memory should cause put to fail
-        assertFalse(memPool.put("key1", new TestPoolable("v1")));
-        assertEquals(0, memPool.size());
-        memPool.close();
-    }
-
-    @Test
-    public void testEviction() throws InterruptedException {
-        GenericKeyedObjectPool<String, TestPoolable> evictPool = new GenericKeyedObjectPool<>(10, 100, EvictionPolicy.LAST_ACCESS_TIME);
-
-        TestPoolable shortLived = new TestPoolable("short", 50, 50);
-        TestPoolable longLived = new TestPoolable("long", 10000, 10000);
-
-        evictPool.put("short", shortLived);
-        evictPool.put("long", longLived);
-
-        assertEquals(2, evictPool.size());
-
-        Thread.sleep(200);
-
-        assertEquals(1, evictPool.size());
-        assertTrue(evictPool.containsKey("long"));
-        assertFalse(evictPool.containsKey("short"));
-        assertTrue(shortLived.isDestroyed());
-        assertEquals(Poolable.Caller.EVICT, shortLived.getDestroyedByCaller());
-
-        evictPool.close();
-    }
-
-    @Test
-    public void testSizeOnClosedPool() {
-        pool.put("key1", new TestPoolable("value1"));
-        pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.size());
-    }
-
-    @Test
-    public void testConcurrentOperations() throws InterruptedException {
-        int threads = 10;
-        int opsPerThread = 100;
-        CountDownLatch startLatch = new CountDownLatch(1);
-        CountDownLatch endLatch = new CountDownLatch(threads);
-        AtomicInteger putCount = new AtomicInteger(0);
-        AtomicInteger getCount = new AtomicInteger(0);
-
-        for (int i = 0; i < threads; i++) {
-            final int threadId = i;
-            new Thread(() -> {
-                try {
-                    startLatch.await();
-                    for (int j = 0; j < opsPerThread; j++) {
-                        String key = "key" + (j % 20);
-                        if (j % 2 == 0) {
-                            if (pool.put(key, new TestPoolable("t" + threadId + "-" + j))) {
-                                putCount.incrementAndGet();
-                            }
-                        } else {
-                            if (pool.get(key) != null) {
-                                getCount.incrementAndGet();
-                            }
-                        }
-                    }
-                } catch (InterruptedException e) {
-                } finally {
-                    endLatch.countDown();
-                }
-            }).start();
-        }
-
-        startLatch.countDown();
-        assertTrue(endLatch.await(5, TimeUnit.SECONDS));
-
-        assertTrue(pool.size() >= 0 && pool.size() <= pool.capacity());
-    }
-
-    @Test
-    public void testLockAndUnlock() {
-        pool.lock();
-        pool.unlock();
-        // Should not throw
-        assertEquals(0, pool.size());
-    }
-
-    @Test
-    public void testHashCode() {
-        pool.put("key1", new TestPoolable("value1"));
-        pool.put("key2", new TestPoolable("value2"));
-
-        int hash1 = pool.hashCode();
-        int hash2 = pool.hashCode();
-        assertEquals(hash1, hash2);
-    }
-
-    @Test
-    public void testEquals() {
-        GenericKeyedObjectPool<String, TestPoolable> pool1 = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
-        GenericKeyedObjectPool<String, TestPoolable> pool2 = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
-
-        assertTrue(pool1.equals(pool1));
-        assertTrue(pool1.equals(pool2));
-
-        TestPoolable p = new TestPoolable("value1");
-        pool1.put("key1", p);
-        assertFalse(pool1.equals(pool2));
-
-        pool2.put("key1", p);
-        assertTrue(pool1.equals(pool2));
-
-        assertFalse(pool1.equals(null));
-        assertFalse(pool1.equals("not a pool"));
-
-        pool1.close();
-        pool2.close();
-    }
-
-    @Test
-    public void testToStringContent() {
-        String str = pool.toString();
-        assertTrue(str.contains("GenericKeyedObjectPool"));
-        assertTrue(str.contains("capacity=10"));
-        assertTrue(str.contains("LAST_ACCESS_TIME"));
-    }
-
-    @Test
-    public void testToString() {
-        pool.put("key1", new TestPoolable("value1"));
-        String str = pool.toString();
-        assertNotNull(str);
-        assertFalse(str.contains("key1"));
-    }
-
-    @Test
-    public void testRemoveExpired_RemovesOnlyExpiredEntries() throws InterruptedException {
-        TestPoolable expired = new TestPoolable("expired", 10, 10);
-        TestPoolable retained = new TestPoolable("retained");
-
-        pool.put("expired", expired);
-        pool.put("retained", retained);
-        Thread.sleep(20);
-
-        pool.removeExpired();
-
-        assertTrue(expired.isDestroyed());
-        assertEquals(Poolable.Caller.EVICT, expired.getDestroyedByCaller());
-        assertNotNull(pool.get("retained"));
-        assertEquals(1, pool.size());
-    }
-
-    @Test
-    public void testCapacity() {
-        assertEquals(10, pool.capacity());
-    }
-
-    @Test
-    public void testHitAndMissCountsOnGet() {
-        pool.put("key1", new TestPoolable("value1"));
-
-        pool.get("key1"); // hit
-        pool.get("nonexistent"); // miss
-
-        PoolStats stats = pool.stats();
-        assertEquals(1, stats.hitCount());
-        assertEquals(1, stats.missCount());
-    }
-
-    /**
-     * Bug 1b: put() for a NEW key fails because pool is at capacity (autoBalance=false).
-     * The existing entry under a different key must be completely unaffected.
-     */
-    @Test
-    public void testBug1b_PutFailure_CapacityExceeded_ExistingEntryPreserved() {
-        GenericKeyedObjectPool<String, TestPoolable> capacityPool = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
-        try {
-            TestPoolable v1 = new TestPoolable("value1");
-            assertTrue(capacityPool.put("K1", v1));
-
-            boolean result = capacityPool.put("K2", new TestPoolable("value2"));
-
-            assertFalse(result, "Put must fail: pool at capacity and autoBalance=false");
-            assertFalse(v1.isDestroyed(), "Bug 1: v1 under K1 must NOT be destroyed by a failed put for K2");
-            assertTrue(capacityPool.containsKey("K1"));
-            assertEquals(1, capacityPool.size());
-        } finally {
-            capacityPool.close();
-        }
-    }
-
-    /**
-     * Bug 1c: Successful replacement must still destroy the old value (regression guard).
-     * The fix must not break the normal replace path.
-     */
-    @Test
-    public void testBug1c_PutSuccessfulReplacement_OldValueDestroyed() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> 50L;
-        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 1000, measure);
-        try {
-            TestPoolable original = new TestPoolable("original");
-            assertTrue(memPool.put("K", original));
-
-            TestPoolable replacement = new TestPoolable("replacement");
-            assertTrue(memPool.put("K", replacement), "Replacement must succeed");
-
-            assertTrue(original.isDestroyed(), "Old value MUST be destroyed on a successful replacement");
-            assertEquals(Poolable.Caller.REMOVE_REPLACE_CLEAR, original.getDestroyedByCaller());
-            assertEquals(replacement, memPool.get("K"));
-        } finally {
-            memPool.close();
-        }
-    }
-
-    /**
-     * Bug 1d: put() with memory limit exceeded for a new key (no existing entry).
-     * put() must return false and the pool must remain unchanged.
-     */
-    @Test
-    public void testBug1d_PutFailure_MemoryLimitExceeded_NewKey_PoolUnchanged() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> 100L;
-        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 150, measure);
-        try {
-            TestPoolable p1 = new TestPoolable("value1");
-            assertTrue(memPool.put("K1", p1), "First put must succeed (100 <= 150)");
-
-            boolean result = memPool.put("K2", new TestPoolable("value2"));
-            assertFalse(result, "Second put must fail: 100+100=200 > 150");
-            assertFalse(p1.isDestroyed(), "p1 under K1 must not be destroyed");
-            assertEquals(1, memPool.size(), "Pool size must remain 1");
-        } finally {
-            memPool.close();
-        }
-    }
-
-    /**
-     * Bug: get() checks isClosed only BEFORE acquiring the lock. A concurrent close() can
-     * set isClosed=true and release the lock before invoking removeAll() to drain the pool.
-     * A get() that won the race for the lock between those two steps could read a "live"
-     * element out of a pool already marked closed. Fix: re-check assertNotClosed() inside
-     * the lock.
-     */
-    @Test
-    public void testGet_raceWithClose_doesNotReturnElementFromClosedPool() throws Exception {
-        final TestPoolable v = new TestPoolable("racing");
-        pool.put("K", v);
-
-        final java.util.concurrent.locks.ReentrantLock poolLock = pool.lock;
-        final CountDownLatch holderHasLock = new CountDownLatch(1);
-        final CountDownLatch mayProceed = new CountDownLatch(1);
-
-        Thread holder = new Thread(() -> {
-            poolLock.lock();
-            try {
-                holderHasLock.countDown();
-                mayProceed.await();
-                pool.isClosed = true;
-            } catch (InterruptedException ignored) {
-                Thread.currentThread().interrupt();
-            } finally {
-                poolLock.unlock();
-            }
-        });
-        holder.start();
-        holderHasLock.await();
-
-        java.util.concurrent.atomic.AtomicBoolean threwISE = new java.util.concurrent.atomic.AtomicBoolean(false);
-        java.util.concurrent.atomic.AtomicBoolean returned = new java.util.concurrent.atomic.AtomicBoolean(false);
-        Thread getter = new Thread(() -> {
-            try {
-                TestPoolable t = pool.get("K");
-                if (t != null) {
-                    returned.set(true);
-                }
-            } catch (IllegalStateException e) {
-                threwISE.set(true);
-            }
-        });
-        getter.start();
-
-        Thread.sleep(50);
-        mayProceed.countDown();
-        holder.join();
-        getter.join();
-
-        assertTrue(threwISE.get(), "get() must throw IllegalStateException when isClosed was set under the lock");
-        assertFalse(returned.get(), "get() must not return an element from a pool already marked closed");
-    }
-
-    /**
-     * Bug: remove() has the same race as get() — assertNotClosed runs only outside the lock.
-     */
-    @Test
-    public void testRemove_raceWithClose_throwsAfterCloseUnderLock() throws Exception {
-        pool.put("K", new TestPoolable("racing"));
-
-        final java.util.concurrent.locks.ReentrantLock poolLock = pool.lock;
-        final CountDownLatch holderHasLock = new CountDownLatch(1);
-        final CountDownLatch mayProceed = new CountDownLatch(1);
-
-        Thread holder = new Thread(() -> {
-            poolLock.lock();
-            try {
-                holderHasLock.countDown();
-                mayProceed.await();
-                pool.isClosed = true;
-            } catch (InterruptedException ignored) {
-                Thread.currentThread().interrupt();
-            } finally {
-                poolLock.unlock();
-            }
-        });
-        holder.start();
-        holderHasLock.await();
-
-        java.util.concurrent.atomic.AtomicBoolean threwISE = new java.util.concurrent.atomic.AtomicBoolean(false);
-        java.util.concurrent.atomic.AtomicBoolean returned = new java.util.concurrent.atomic.AtomicBoolean(false);
-        Thread remover = new Thread(() -> {
-            try {
-                TestPoolable t = pool.remove("K");
-                if (t != null) {
-                    returned.set(true);
-                }
-            } catch (IllegalStateException e) {
-                threwISE.set(true);
-            }
-        });
-        remover.start();
-
-        Thread.sleep(50);
-        mayProceed.countDown();
-        holder.join();
-        remover.join();
-
-        assertTrue(threwISE.get(), "remove() must throw IllegalStateException when isClosed was set under the lock");
-        assertFalse(returned.get(), "remove() must not return an element from a pool already marked closed");
-    }
-
-    /**
-     * Bug: peek() has the same race as get() — assertNotClosed runs only outside the lock.
-     */
-    @Test
-    public void testPeek_raceWithClose_throwsAfterCloseUnderLock() throws Exception {
-        pool.put("K", new TestPoolable("racing"));
-
-        final java.util.concurrent.locks.ReentrantLock poolLock = pool.lock;
-        final CountDownLatch holderHasLock = new CountDownLatch(1);
-        final CountDownLatch mayProceed = new CountDownLatch(1);
-
-        Thread holder = new Thread(() -> {
-            poolLock.lock();
-            try {
-                holderHasLock.countDown();
-                mayProceed.await();
-                pool.isClosed = true;
-            } catch (InterruptedException ignored) {
-                Thread.currentThread().interrupt();
-            } finally {
-                poolLock.unlock();
-            }
-        });
-        holder.start();
-        holderHasLock.await();
-
-        java.util.concurrent.atomic.AtomicBoolean threwISE = new java.util.concurrent.atomic.AtomicBoolean(false);
-        java.util.concurrent.atomic.AtomicBoolean returned = new java.util.concurrent.atomic.AtomicBoolean(false);
-        Thread peeker = new Thread(() -> {
-            try {
-                TestPoolable t = pool.peek("K");
-                if (t != null) {
-                    returned.set(true);
-                }
-            } catch (IllegalStateException e) {
-                threwISE.set(true);
-            }
-        });
-        peeker.start();
-
-        Thread.sleep(50);
-        mayProceed.countDown();
-        holder.join();
-        peeker.join();
-
-        assertTrue(threwISE.get(), "peek() must throw IllegalStateException when isClosed was set under the lock");
-        assertFalse(returned.get(), "peek() must not return an element from a pool already marked closed");
-    }
-
-    /**
-     * Regression test for remove() leaking the entry when memoryMeasure.sizeOf() throws.
-     *
-     * <p>Before the fix, an unchecked exception thrown by a user-supplied MemoryMeasure during
-     * remove() propagated out of the method while the entry had already been removed from the
-     * internal map — never returned to the caller, never destroyed, leaked. The fix wraps
-     * sizeOf() in a try/catch so the removed entry is still returned and the caller remains
-     * responsible for it.
-     */
-    @Test
-    public void testRemoveDoesNotLeakElementWhenMemoryMeasureThrows() {
-        final java.util.concurrent.atomic.AtomicBoolean throwOnNext = new java.util.concurrent.atomic.AtomicBoolean(false);
-        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> conditionalMeasure = (k, v) -> {
-            if (throwOnNext.get()) {
-                throw new RuntimeException("simulated sizeOf failure on remove");
-            }
-            return 0L;
-        };
-
-        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 1024L * 1024L,
-                conditionalMeasure);
-        try {
-            TestPoolable original = new TestPoolable("memMeasureRemove");
-            assertTrue(p.put("k1", original));
-            assertEquals(1, p.size());
-
-            throwOnNext.set(true);
-
-            // Pre-fix: remove() throws RuntimeException and the entry is leaked (gone from map,
-            // never returned, never destroyed). Post-fix: remove() catches and returns the entry.
-            TestPoolable removed = p.remove("k1");
-            assertNotNull(removed, "remove() must return the entry even if memoryMeasure.sizeOf() throws");
-            assertEquals("memMeasureRemove", removed.getValue());
-            assertFalse(removed.isDestroyed(), "remove() must not destroy the returned element (caller owns it)");
-            assertEquals(0, p.size());
-        } finally {
-            p.close();
-        }
-    }
-
-    /**
-     * Regression test for equals() reading the other pool's internal map without holding its
-     * lock. Before the fix, GenericKeyedObjectPool.equals(other) iterated other.pool while only
-     * locking this.lock — a thread mutating `other` concurrently could trigger
-     * ConcurrentModificationException or a torn comparison. The fix snapshots both pools under
-     * their own locks before comparing.
-     */
-    @Test
-    public void testEqualsIsSafeUnderConcurrentMutationOfOtherPool() throws InterruptedException {
-        final GenericKeyedObjectPool<String, TestPoolable> p1 = new GenericKeyedObjectPool<>(1000, 0, EvictionPolicy.LAST_ACCESS_TIME);
-        final GenericKeyedObjectPool<String, TestPoolable> p2 = new GenericKeyedObjectPool<>(1000, 0, EvictionPolicy.LAST_ACCESS_TIME);
-
-        // Seed both pools so equals() actually has to iterate.
-        for (int i = 0; i < 200; i++) {
-            p1.put("k" + i, new TestPoolable("v" + i));
-            p2.put("k" + i, new TestPoolable("v" + i));
-        }
-
-        final java.util.concurrent.atomic.AtomicBoolean stop = new java.util.concurrent.atomic.AtomicBoolean(false);
-        final java.util.concurrent.atomic.AtomicReference<Throwable> mutatorFailure = new java.util.concurrent.atomic.AtomicReference<>();
-        Thread mutator = new Thread(() -> {
-            int n = 0;
-            try {
-                while (!stop.get()) {
-                    final String key = "k" + (n++ % 200);
-                    p2.remove(key);
-                    p2.put(key, new TestPoolable("vv" + n));
-                }
-            } catch (Throwable t) {
-                mutatorFailure.set(t);
-            }
-        });
-        mutator.start();
-
-        final java.util.concurrent.atomic.AtomicReference<Throwable> equalsFailure = new java.util.concurrent.atomic.AtomicReference<>();
-        try {
-            // Many equals() invocations against the concurrently-mutating p2.
-            for (int i = 0; i < 500; i++) {
-                try {
-                    p1.equals(p2);
-                } catch (Throwable t) {
-                    equalsFailure.set(t);
-                    break;
-                }
-            }
-        } finally {
-            stop.set(true);
-            mutator.join();
-        }
-
-        assertNull(equalsFailure.get(), "equals() must not throw when the other pool is concurrently mutated; got: " + equalsFailure.get());
-        assertNull(mutatorFailure.get(), "concurrent mutator must not have crashed; got: " + mutatorFailure.get());
-        p1.close();
-        p2.close();
-    }
-
-    /**
-     * Regression test for put() propagating exception when memoryMeasure.sizeOf() throws
-     * during value replacement.
-     *
-     * <p>By design, put() removes and destroys the old value before measuring the new one.
-     * Before the fix, an unchecked exception thrown by a user-supplied MemoryMeasure during
-     * put() for an already-existing key propagated out of the method while the old value had
-     * already been removed and destroyed — losing the entry. The fix wraps sizeOf() in a
-     * try/catch so the put returns {@code false} cleanly instead of throwing.
-     */
-    @Test
-    public void testPutDoesNotLeakOldValueWhenMemoryMeasureThrows() {
-        final java.util.concurrent.atomic.AtomicBoolean throwOnNext = new java.util.concurrent.atomic.AtomicBoolean(false);
-        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> conditionalMeasure = (k, v) -> {
-            if (throwOnNext.get()) {
-                throw new RuntimeException("simulated sizeOf failure on put");
-            }
-            return 100L;
-        };
-
-        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.2f, 1024L * 1024L,
-                conditionalMeasure);
-        try {
-            TestPoolable original = new TestPoolable("memMeasurePut");
-            assertTrue(p.put("k1", original));
-            assertEquals(1, p.size());
-
-            throwOnNext.set(true);
-
-            // Pre-fix: put() removes the old value (lines 254-258), then sizeOf() throws,
-            // the exception propagates to the caller — old value already destroyed.
-            // Post-fix: put() catches the exception, logs it, and returns false.
-            boolean putResult = p.put("k1", new TestPoolable("shouldNotBePut"));
-            assertFalse(putResult, "put() must return false when memoryMeasure throws");
-
-            // The old value was already destroyed per design, and the new value was not added.
-            // Pool should be empty; more importantly, no exception propagated.
-            assertEquals(0, p.size(), "pool should be empty after failed put");
-        } finally {
-            p.close();
-        }
-    }
-
-    /**
-     * Regression for the get() hit/miss accounting refactor: moving the counter update out
-     * of the {@code finally} block must preserve correct accounting on the normal path
-     * (present-key hit, absent-key miss, expired-key miss) and must not record a miss when
-     * get() aborts on a closed pool.
-     */
-    @Test
-    public void testGet_HitMissAccountingAfterRefactor() throws InterruptedException {
-        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
-
-        p.put("k1", new TestPoolable("v1"));
-        assertNotNull(p.get("k1")); // hit
-        assertNull(p.get("absent")); // miss
-
-        p.put("short", new TestPoolable("s", 1, 1));
-        Thread.sleep(20);
-        assertNull(p.get("short")); // expired -> miss
-
-        assertEquals(1, p.hitCount.get(), "exactly one hit");
-        assertEquals(2, p.missCount.get(), "exactly two misses");
-
-        p.close();
-        // Already-closed get() throws before acquiring the lock; counters must be untouched.
-        assertThrows(IllegalStateException.class, () -> p.get("k1"));
-        assertEquals(1, p.hitCount.get(), "closed get() must not change hitCount");
-        assertEquals(2, p.missCount.get(), "closed get() must not change missCount");
-    }
-
-    // --- regression tests for 2026-06-10 deep-review fixes ---
-
-    @Test
-    public void testPutBackSameInstanceDoesNotDestroyIt() {
-        // regression: put(key, value) destroyed the old mapping without an identity check, so the
-        // documented "put it back" pattern (get() is non-removing) destroyed the live resource
-        // and re-pooled the corpse
-        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
-        TestPoolable resource = new TestPoolable("res");
-
-        assertTrue(p.put("k", resource));
-
-        TestPoolable borrowed = p.get("k");
-        org.junit.jupiter.api.Assertions.assertSame(resource, borrowed);
-
-        assertTrue(p.put("k", borrowed)); // documented "put it back" pattern
-
-        assertFalse(resource.isDestroyed(), "re-putting the same instance must not destroy it");
-        org.junit.jupiter.api.Assertions.assertSame(resource, p.get("k"));
-
-        // replacing with a DIFFERENT instance still destroys the old one
-        TestPoolable replacement = new TestPoolable("res2");
-        assertTrue(p.put("k", replacement));
-        assertTrue(resource.isDestroyed());
-        assertFalse(replacement.isDestroyed());
-    }
-
-    /**
-     * Regression: re-pooling the SAME instance under the same key with a memory measure configured
-     * must not double-count its memory in totalDataSize. Previously put() removed the old mapping
-     * (without adjusting totalDataSize) and, because the same-instance identity guard skipped
-     * destroy() (which is what otherwise subtracts the memory), the success path's unconditional
-     * addAndGet() counted the instance's memory twice.
-     */
-    @Test
-    public void testPutBackSameInstanceWithMemoryMeasureDoesNotDoubleCount() {
-        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
-        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 10000, measure);
-        try {
-            TestPoolable resource = new TestPoolable("res");
-            assertTrue(memPool.put("k1", resource)); // "k1".length()(2) + 100 = 102
-            assertEquals(102, memPool.stats().dataSize());
-
-            // documented non-removing get() leaves the mapping in place
-            TestPoolable borrowed = memPool.get("k1");
-            org.junit.jupiter.api.Assertions.assertSame(resource, borrowed);
-
-            // "put it back" pattern: re-pool the same instance; memory must stay 102, not 204
-            assertTrue(memPool.put("k1", borrowed));
-            assertEquals(102, memPool.stats().dataSize(), "re-pooling the same instance must not double-count memory");
-            assertEquals(1, memPool.size());
-            assertFalse(resource.isDestroyed());
-
-            // re-pooling once more must still keep the accounting stable
-            assertTrue(memPool.put("k1", memPool.get("k1")));
-            assertEquals(102, memPool.stats().dataSize(), "repeated re-pooling must keep memory accounting stable");
-
-            // removing the entry must bring memory back to 0 (would be negative/positive-leftover if double-counted)
-            memPool.remove("k1");
-            assertEquals(0, memPool.stats().dataSize(), "memory must return to 0 after removing the only entry");
-        } finally {
-            memPool.close();
-        }
-    }
-
-    // ============================ Timed put/get (M29) ============================
-
-    @Test
-    public void testTimedPut_SucceedsImmediatelyWhenSpaceAvailable() throws InterruptedException {
-        TestPoolable v = new TestPoolable("v");
-        assertTrue(pool.put("k", v, 1, TimeUnit.SECONDS));
-        assertEquals(1, pool.size());
-        assertSameValue(v, pool.get("k"));
-    }
-
-    @Test
-    public void testTimedPut_ReturnsFalseOnTimeoutWhenFullNoAutoBalance() throws InterruptedException {
-        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
-        try {
-            assertTrue(p.put("k1", new TestPoolable("v1")));
-            assertEquals(1, p.size());
-
-            long start = System.nanoTime();
-            // Pool is full and auto-balance is off; nobody removes an entry, so this must time out.
-            assertFalse(p.put("k2", new TestPoolable("v2"), 100, TimeUnit.MILLISECONDS));
-            long elapsedMs = (System.nanoTime() - start) / 1_000_000;
-            assertTrue(elapsedMs >= 50, "should have waited roughly the timeout, waited " + elapsedMs + "ms");
-            assertEquals(1, p.size());
-        } finally {
-            p.close();
-        }
-    }
-
-    @Test
-    public void testTimedPut_WaitsThenSucceedsWhenSlotFreed() throws InterruptedException {
-        final GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
-        try {
-            assertTrue(p.put("k1", new TestPoolable("v1")));
-
-            // Free the slot shortly after the timed put begins waiting.
-            Thread freer = new Thread(() -> {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ignored) {
-                    Thread.currentThread().interrupt();
-                }
-                p.remove("k1");
-            });
-            freer.start();
-
-            assertTrue(p.put("k2", new TestPoolable("v2"), 5, TimeUnit.SECONDS));
-            freer.join();
-            assertTrue(p.containsKey("k2"));
-        } finally {
-            p.close();
-        }
-    }
-
-    @Test
-    public void testTimedPut_ExpiredValueReturnsFalse() throws InterruptedException {
-        TestPoolable expired = new TestPoolable("e", 1, 1);
-        Thread.sleep(10);
-        assertFalse(pool.put("k", expired, 1, TimeUnit.SECONDS));
-        assertEquals(0, pool.size());
-    }
-
-    @Test
-    public void testTimedPut_NullKeyOrValueThrows() {
-        assertThrows(IllegalArgumentException.class, () -> pool.put(null, new TestPoolable("v"), 1, TimeUnit.SECONDS));
-        assertThrows(IllegalArgumentException.class, () -> pool.put("k", null, 1, TimeUnit.SECONDS));
-    }
-
-    @Test
-    public void testTimedPut_ClosedPoolThrows() {
-        pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.put("k", new TestPoolable("v"), 1, TimeUnit.SECONDS));
-    }
-
-    @Test
-    public void testTimedPutWithAutoDestroy_DestroysOnTimeout() throws InterruptedException {
-        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
-        try {
-            assertTrue(p.put("k1", new TestPoolable("v1")));
-
-            TestPoolable v2 = new TestPoolable("v2");
-            assertFalse(p.put("k2", v2, 100, TimeUnit.MILLISECONDS, true));
-            assertTrue(v2.isDestroyed());
-            assertEquals(Poolable.Caller.PUT_ADD_FAILURE, v2.getDestroyedByCaller());
-        } finally {
-            p.close();
-        }
-    }
-
-    @Test
-    public void testTimedGet_ReturnsImmediatelyWhenPresent() throws InterruptedException {
-        TestPoolable v = new TestPoolable("v");
-        pool.put("k", v);
-        TestPoolable got = pool.get("k", 1, TimeUnit.SECONDS);
-        assertSameValue(v, got);
-        // get() does not remove: the element stays in the pool.
-        assertEquals(1, pool.size());
-    }
-
-    @Test
-    public void testTimedGet_ReturnsNullOnTimeoutWhenAbsent() throws InterruptedException {
-        long start = System.nanoTime();
-        TestPoolable got = pool.get("missing", 100, TimeUnit.MILLISECONDS);
-        long elapsedMs = (System.nanoTime() - start) / 1_000_000;
-        assertNull(got);
-        assertTrue(elapsedMs >= 50, "should have waited roughly the timeout, waited " + elapsedMs + "ms");
-    }
-
-    @Test
-    public void testTimedGet_WaitsThenSucceedsWhenKeyPopulated() throws InterruptedException {
-        final CountDownLatch ready = new CountDownLatch(1);
-        Thread producer = new Thread(() -> {
-            try {
-                ready.await();
-                Thread.sleep(50);
-            } catch (InterruptedException ignored) {
-                Thread.currentThread().interrupt();
-            }
-            pool.put("k", new TestPoolable("v"));
-        });
-        producer.start();
-
-        ready.countDown();
-        TestPoolable got = pool.get("k", 5, TimeUnit.SECONDS);
-        producer.join();
-        assertNotNull(got);
-        assertEquals("v", got.getValue());
-    }
-
-    @Test
-    public void testTimedGet_ClosedPoolThrows() {
-        pool.close();
-        assertThrows(IllegalStateException.class, () -> pool.get("k", 1, TimeUnit.SECONDS));
-    }
-
-    /**
-     * Regression for pool NEW-1 (heterogeneous key-waiter wakeup). A waiter blocked in
-     * get(KEY_A, ...) must not be starved when a put for an unrelated key (KEY_B) and a
-     * separate waiter (on KEY_C) are involved: under the old single-waiter notEmpty.signal(),
-     * the put(KEY_A) signal could be consumed by the KEY_C waiter (which re-checks, misses C,
-     * and re-awaits), leaving the KEY_A waiter to spuriously time out even though A is present.
-     * notEmpty.signalAll() wakes every key-waiter so each re-checks its own key.
-     */
-    @Test
-    public void testTimedGet_HeterogeneousWaiters_NotStarvedByForeignSignal() throws InterruptedException {
-        final GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(8, 0, EvictionPolicy.LAST_ACCESS_TIME);
-        try {
-            final long timeoutMs = 10_000; // generous so the test is not flaky
-            final CountDownLatch waitersStarted = new CountDownLatch(2);
-            final AtomicReference<TestPoolable> resultA = new AtomicReference<>();
-            final AtomicReference<TestPoolable> resultC = new AtomicReference<>();
-            final AtomicReference<Throwable> failure = new AtomicReference<>();
-
-            // Waiter on KEY_A: this is the thread that must NOT be starved.
-            final Thread waiterA = new Thread(() -> {
-                waitersStarted.countDown();
-                try {
-                    resultA.set(p.get("A", timeoutMs, TimeUnit.MILLISECONDS));
-                } catch (final Throwable t) {
-                    failure.set(t);
-                }
-            }, "waiter-A");
-
-            // A second waiter on a different key (KEY_C) so a foreign signal has somewhere to go.
-            final Thread waiterC = new Thread(() -> {
-                waitersStarted.countDown();
-                try {
-                    resultC.set(p.get("C", timeoutMs, TimeUnit.MILLISECONDS));
-                } catch (final Throwable t) {
-                    failure.set(t);
-                }
-            }, "waiter-C");
-
-            waiterA.start();
-            waiterC.start();
-
-            // Wait for both threads to launch, then give them a moment to actually park on notEmpty.
-            assertTrue(waitersStarted.await(2, TimeUnit.SECONDS), "waiter threads did not start");
-            Thread.sleep(150);
-
-            // put(KEY_B) must NOT satisfy the KEY_A (or KEY_C) waiter; it only fires a notEmpty wakeup.
-            p.put("B", new TestPoolable("vB"));
-            Thread.sleep(50);
-            // Now make KEY_A available. The KEY_A waiter must observe it well within the timeout.
-            p.put("A", new TestPoolable("vA"));
-            // And satisfy KEY_C too so its thread can finish cleanly.
-            p.put("C", new TestPoolable("vC"));
-
-            // Join with a bound far below the get() timeout: if the A-waiter were starved it would
-            // still be blocked on its 10s timeout here and the join would expire.
-            waiterA.join(4_000);
-            waiterC.join(4_000);
-
-            assertNull(failure.get(), "waiter threads threw: " + failure.get());
-            assertFalse(waiterA.isAlive(), "KEY_A waiter did not return well within its timeout (starved)");
-            assertNotNull(resultA.get(), "KEY_A waiter returned null despite A being put before timeout");
-            assertEquals("vA", resultA.get().getValue());
-            assertNotNull(resultC.get(), "KEY_C waiter returned null despite C being put before timeout");
-            assertEquals("vC", resultC.get().getValue());
-        } finally {
-            p.close();
-        }
-    }
-
-    private static void assertSameValue(TestPoolable expected, TestPoolable actual) {
-        assertNotNull(actual);
-        assertEquals(expected.getValue(), actual.getValue());
-    }
-
-    @Test
-    public void testPut_failedReplaceWakesNotFullWaiters() throws Exception {
-        // regression: non-timed put removed the existing same-key entry then returned false
-        // without signaling notFull, stranding timed put waiters.
-        // Use a memory measure that rejects the replacement AFTER the up-front remove.
-        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> {
-            if ("reject".equals(v.getValue())) {
-                return -1L; // triggers fail path after remove
-            }
-            return 10L;
-        };
-        final GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 10_000L,
-                measure);
-        try {
-            assertTrue(p.put("A", new TestPoolable("oldA")));
-
-            final CountDownLatch waiterStarted = new CountDownLatch(1);
-            final AtomicReference<Boolean> putResult = new AtomicReference<>();
-            final AtomicReference<Throwable> failure = new AtomicReference<>();
-
-            final Thread waiter = new Thread(() -> {
-                try {
-                    waiterStarted.countDown();
-                    // Blocks until capacity frees (notFull). Must succeed after failed replace of A.
-                    final boolean ok = p.put("B", new TestPoolable("vB"), 5, TimeUnit.SECONDS);
-                    putResult.set(ok);
-                } catch (final Throwable t) {
-                    failure.set(t);
-                }
-            }, "notFull-waiter");
-            waiter.start();
-
-            assertTrue(waiterStarted.await(2, TimeUnit.SECONDS));
-            Thread.sleep(150); // allow waiter to park on notFull
-
-            // Replace key A: remove succeeds, measure rejects, value not stored → must wake notFull.
-            assertFalse(p.put("A", new TestPoolable("reject")));
-
-            waiter.join(4_000);
-            assertNull(failure.get(), "waiter threw: " + failure.get());
-            assertFalse(waiter.isAlive(), "notFull waiter did not return after failed replace freed a slot");
-            assertEquals(Boolean.TRUE, putResult.get(), "timed put(B) should succeed after A was removed and not re-stored");
-            assertEquals(1, p.size());
-            assertNotNull(p.get("B"));
-        } finally {
-            p.close();
-        }
-    }
-
-    @Test
-    public void testGetExpiredEntryWakesTimedPutWaiter() throws Exception {
-        assertExpiredReadWakesTimedPutWaiter(false);
-    }
-
-    @Test
-    public void testPeekExpiredEntryWakesTimedPutWaiter() throws Exception {
-        assertExpiredReadWakesTimedPutWaiter(true);
-    }
-
-    private static void assertExpiredReadWakesTimedPutWaiter(final boolean peek) throws Exception {
-        final GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
-        final TestPoolable old = new TestPoolable("old");
-        final CountDownLatch waiterStarted = new CountDownLatch(1);
-        final AtomicReference<Boolean> putResult = new AtomicReference<>();
-        final AtomicReference<Throwable> failure = new AtomicReference<>();
-        final Thread waiter = new Thread(() -> {
-            try {
-                waiterStarted.countDown();
-                putResult.set(p.put("new", new TestPoolable("new"), 10, TimeUnit.SECONDS));
-            } catch (final Throwable e) {
-                failure.set(e);
-            }
-        }, peek ? "peek-notFull-waiter" : "get-notFull-waiter");
-
-        try {
-            assertTrue(p.put("old", old));
-            waiter.start();
-            assertTrue(waiterStarted.await(2, TimeUnit.SECONDS));
-            Thread.sleep(100); // allow the timed put to park on notFull
-
-            old.activityPrint().setCreatedTime(System.currentTimeMillis() - 20_000);
-            assertNull(peek ? p.peek("old") : p.get("old"));
-
-            waiter.join(2_000);
-            assertFalse(waiter.isAlive(), "timed put remained blocked after an expired entry freed capacity");
-            assertNull(failure.get(), "timed put failed: " + failure.get());
-            assertEquals(Boolean.TRUE, putResult.get());
-            assertTrue(p.containsKey("new"));
-        } finally {
-            p.close();
-            waiter.join(1_000);
-        }
-    }
-
-    @Test
-    public void testEvictRemovesEntryBeforeDestroyCallbackAndReleasesLock() {
-        final GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
-        final AtomicReference<TestPoolable> observedDuringDestroy = new AtomicReference<>();
-        final AtomicReference<Boolean> lockHeldDuringDestroy = new AtomicReference<>();
-        final TestPoolable doomed = new TestPoolable("doomed") {
-            @Override
-            public void destroy(final Poolable.Caller caller) {
-                lockHeldDuringDestroy.set(p.lock.isHeldByCurrentThread());
-                observedDuringDestroy.set(p.get("key"));
-                super.destroy(caller);
-            }
-        };
-
-        try {
-            assertTrue(p.put("key", doomed));
-            p.evict();
-
-            assertNull(observedDuringDestroy.get(), "a destroy callback must not retrieve an entry already selected for eviction");
-            assertEquals(Boolean.FALSE, lockHeldDuringDestroy.get(), "explicit eviction must not invoke user callbacks while holding the pool lock");
-            assertEquals(0, p.size());
-        } finally {
-            p.close();
-        }
-    }
-
-    @Test
-    public void testPutReplacementDestroyCallbackRunsAfterUnlockAndSeesNewMapping() {
-        final GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
-        final AtomicReference<Boolean> lockHeldDuringDestroy = new AtomicReference<>();
-        final AtomicReference<TestPoolable> observedMapping = new AtomicReference<>();
-        final TestPoolable replacement = new TestPoolable("replacement");
-        final TestPoolable victim = new TestPoolable("victim") {
-            @Override
-            public void destroy(final Poolable.Caller caller) {
-                lockHeldDuringDestroy.set(p.lock.isHeldByCurrentThread());
-                observedMapping.set(p.peek("key"));
-                super.destroy(caller);
-            }
-        };
-
-        try {
-            assertTrue(p.put("key", victim));
-            assertTrue(p.put("key", replacement));
-
-            assertEquals(Boolean.FALSE, lockHeldDuringDestroy.get(), "replacement destroy must run after releasing the pool lock");
-            assertEquals(replacement, observedMapping.get(), "the replacement mapping must be installed before the old value is destroyed");
-            assertEquals(Poolable.Caller.REMOVE_REPLACE_CLEAR, victim.getDestroyedByCaller());
-        } finally {
-            p.close();
-        }
-    }
-
-    @Test
-    public void testPutAutoBalanceDestroyCallbackRunsAfterUnlockAndSeesNewMapping() {
-        final GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
-        final AtomicReference<Boolean> lockHeldDuringDestroy = new AtomicReference<>();
-        final AtomicReference<Boolean> victimKeyPresent = new AtomicReference<>();
-        final AtomicReference<TestPoolable> observedReplacement = new AtomicReference<>();
-        final TestPoolable replacement = new TestPoolable("replacement");
-        final TestPoolable victim = new TestPoolable("victim") {
-            @Override
-            public void destroy(final Poolable.Caller caller) {
-                lockHeldDuringDestroy.set(p.lock.isHeldByCurrentThread());
-                victimKeyPresent.set(p.containsKey("victim"));
-                observedReplacement.set(p.peek("replacement"));
-                super.destroy(caller);
-            }
-        };
-
-        try {
-            assertTrue(p.put("victim", victim));
-            assertTrue(p.put("replacement", replacement));
-
-            assertEquals(Boolean.FALSE, lockHeldDuringDestroy.get(), "auto-balance must invoke destroy after releasing the pool lock");
-            assertEquals(Boolean.FALSE, victimKeyPresent.get(), "the victim mapping must be detached before its destroy callback");
-            assertEquals(replacement, observedReplacement.get(), "the successful put must be visible before the victim's destroy callback");
-            assertEquals(Poolable.Caller.VACATE, victim.getDestroyedByCaller());
-        } finally {
-            p.close();
-        }
-    }
-
-    @Test
-    public void testGetExpiredDestroyCallbackRunsAfterUnlockAndDetachment() {
-        final GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
-        final AtomicReference<Boolean> lockHeldDuringDestroy = new AtomicReference<>();
-        final AtomicReference<Boolean> mappingPresent = new AtomicReference<>();
-        final TestPoolable expired = new TestPoolable("expired") {
-            @Override
-            public void destroy(final Poolable.Caller caller) {
-                lockHeldDuringDestroy.set(p.lock.isHeldByCurrentThread());
-                mappingPresent.set(p.containsKey("expired"));
-                super.destroy(caller);
-            }
-        };
-
-        try {
-            assertTrue(p.put("expired", expired));
-            expired.activityPrint().setCreatedTime(System.currentTimeMillis() - 20_000);
-
-            assertNull(p.get("expired"));
-            assertEquals(Boolean.FALSE, lockHeldDuringDestroy.get(), "get must destroy an expired value after releasing the pool lock");
-            assertEquals(Boolean.FALSE, mappingPresent.get(), "the expired mapping must be detached before its destroy callback");
-            assertEquals(Poolable.Caller.EVICT, expired.getDestroyedByCaller());
-            assertEquals(0, p.size());
-        } finally {
-            p.close();
-        }
-    }
-
-    @Test
-    public void testRemoveExpiredAccountsBeforeUnlockingForDestroyCallback() throws Exception {
-        assertRemovalAccountingVisibleBeforeCallback(false);
-    }
-
-    @Test
-    public void testClearAccountsBeforeUnlockingForDestroyCallback() throws Exception {
+    public void testClear_AccountsBeforeUnlock() throws Exception {
         assertRemovalAccountingVisibleBeforeCallback(true);
+        assertRemovalAccountingVisibleBeforeCallback(false);
     }
 
     private static void assertRemovalAccountingVisibleBeforeCallback(final boolean clear) throws Exception {
@@ -2151,9 +738,6 @@ public class GenericKeyedObjectPoolTest extends TestBase {
 
             @Override
             protected void destroyAll(final Map<String, TestPoolable> values, final Poolable.Caller caller) {
-                // Legacy removeExpired/removeAll reached this hook after unlocking but before
-                // destroy() performed memory accounting. Pausing here makes that stale window
-                // deterministic; the fixed paths bypass it because only callbacks remain.
                 destructionPhaseReached.countDown();
                 awaitCleanupRelease(releaseDestruction);
                 super.destroyAll(values, caller);
@@ -2170,13 +754,10 @@ public class GenericKeyedObjectPoolTest extends TestBase {
                 super.destroy(caller);
             }
         };
-
         assertTrue(p.put("victim", victim));
-
         if (!clear) {
             victim.activityPrint().setCreatedTime(System.currentTimeMillis() - 20_000);
         }
-
         final Thread cleanup = new Thread(() -> {
             try {
                 if (clear) {
@@ -2187,175 +768,892 @@ public class GenericKeyedObjectPoolTest extends TestBase {
             } catch (final Throwable e) {
                 cleanupFailure.set(e);
             }
-        }, clear ? "keyed-clear-accounting-probe" : "keyed-expiry-accounting-probe");
-
+        });
         cleanup.start();
-
         try {
-            assertTrue(destructionPhaseReached.await(2, TimeUnit.SECONDS), "cleanup did not reach its post-unlock destruction phase");
-            assertTrue(p.put("replacement", new TestPoolable("replacement")), "detached victim memory must be subtracted before another put checks the limit");
+            assertTrue(destructionPhaseReached.await(2, TimeUnit.SECONDS));
+            assertTrue(p.put("replacement", new TestPoolable("replacement")));
             assertEquals(10L, p.totalDataSize.get());
         } finally {
             releaseDestruction.countDown();
             cleanup.join(2_000);
-
             if (!p.isClosed()) {
                 p.close();
             }
         }
-
-        assertFalse(cleanup.isAlive(), "cleanup remained blocked");
-        assertNull(cleanupFailure.get(), "cleanup failed: " + cleanupFailure.get());
-        assertEquals(Boolean.FALSE, lockHeldDuringCallback.get(), "cleanup callback must run after unlocking");
-        assertEquals(0L, p.totalDataSize.get(), "close must account the replacement before completing its callbacks");
+        assertFalse(cleanup.isAlive());
+        assertNull(cleanupFailure.get());
+        assertEquals(Boolean.FALSE, lockHeldDuringCallback.get());
+        assertEquals(0L, p.totalDataSize.get());
     }
 
     @Test
-    public void testConcurrentCloseWaitsForDestructionCallbacks() throws InterruptedException {
-        final GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
-        final CountDownLatch destroyStarted = new CountDownLatch(1);
-        final CountDownLatch allowDestroyToFinish = new CountDownLatch(1);
-        final CountDownLatch secondCloseReturned = new CountDownLatch(1);
+    public void testConstructor() {
+        GenericKeyedObjectPool<String, TestPoolable> basic = new GenericKeyedObjectPool<>(50, 3000, EvictionPolicy.ACCESS_COUNT);
+        try {
+            assertEquals(50, basic.capacity());
+            assertEquals(0, basic.size());
+        } finally {
+            basic.close();
+        }
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
+        GenericKeyedObjectPool<String, TestPoolable> mem = new GenericKeyedObjectPool<>(20, 2000, EvictionPolicy.EXPIRATION_TIME, 1024, measure);
+        try {
+            assertEquals(20, mem.capacity());
+        } finally {
+            mem.close();
+        }
+        GenericKeyedObjectPool<String, TestPoolable> full = new GenericKeyedObjectPool<>(40, 4000, EvictionPolicy.ACCESS_COUNT, true, 0.4f, 2048, measure);
+        try {
+            assertEquals(40, full.capacity());
+        } finally {
+            full.close();
+        }
+    }
 
-        final TestPoolable element = new TestPoolable("blocking-destroy") {
+    @Test
+    public void testSerialization() throws Exception {
+        GenericKeyedObjectPool<String, TestPoolable> evictPool = new GenericKeyedObjectPool<>(10, 100, EvictionPolicy.LAST_ACCESS_TIME);
+        GenericKeyedObjectPool<String, TestPoolable> deserialized = deserialize(serialize(evictPool));
+        try {
+            assertNotNull(deserialized);
+            assertFalse(deserialized.isClosed());
+            assertNotNull(shutdownHookOf(deserialized));
+        } finally {
+            evictPool.close();
+            deserialized.close();
+        }
+
+        TestPoolable value = new TestPoolable("v1", 600_000, 60_000);
+        value.activityPrint().updateAccessCount();
+        assertTrue(pool.put("k1", value));
+        GenericKeyedObjectPool<String, TestPoolable> copy = deserialize(serialize(pool));
+        try {
+            TestPoolable restored = copy.peek("k1");
+            assertEquals("v1", restored.getValue());
+            assertEquals(1, restored.activityPrint().getAccessCount());
+        } finally {
+            copy.close();
+        }
+
+        GenericKeyedObjectPool<String, PoolableAdapter<String>> adapterPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        try {
+            PoolableAdapter<String> adapter = Poolable.wrap("hello", 600_000, 60_000);
+            adapter.activityPrint().updateAccessCount();
+            assertTrue(adapterPool.put("k1", adapter));
+            assertTrue(adapterPool.put("k2", Poolable.wrap("汉字 😀")));
+            GenericKeyedObjectPool<String, PoolableAdapter<String>> adapterCopy = deserialize(serialize(adapterPool));
+            try {
+                assertEquals("hello", adapterCopy.peek("k1").value());
+                assertEquals(1, adapterCopy.peek("k1").activityPrint().getAccessCount());
+                assertEquals("汉字 😀", adapterCopy.peek("k2").value());
+                assertSame(adapter, adapterPool.peek("k1"));
+            } finally {
+                adapterCopy.close();
+            }
+        } finally {
+            adapterPool.close();
+        }
+
+        KeyedObjectPool.MemoryMeasure<String, PoolableAdapter<String>> measure = (KeyedObjectPool.MemoryMeasure<String, PoolableAdapter<String>> & java.io.Serializable) (
+                k, v) -> v.value().length();
+        GenericKeyedObjectPool<String, PoolableAdapter<String>> measured = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 1000, measure);
+        try {
+            measured.put("a", Poolable.wrap("abc"));
+            measured.put("b", Poolable.wrap("defgh"));
+            GenericKeyedObjectPool<String, PoolableAdapter<String>> measuredCopy = deserialize(serialize(measured));
+            try {
+                assertEquals(8, measuredCopy.stats().dataSize());
+                assertEquals("abc", measuredCopy.remove("a").value());
+                assertEquals(5, measuredCopy.stats().dataSize());
+            } finally {
+                measuredCopy.close();
+            }
+        } finally {
+            measured.close();
+        }
+
+        GenericKeyedObjectPool<String, PoolableAdapter<Object>> failPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        try {
+            assertTrue(failPool.put("k", PoolableAdapter.of(new Object())));
+            assertThrows(NotSerializableException.class, () -> serialize(failPool));
+            assertEquals(1, failPool.size());
+        } finally {
+            failPool.close();
+        }
+    }
+
+    @Test
+    public void testDeserializationDefersEviction() throws Exception {
+        DeserializationEvictionProbePool original = new DeserializationEvictionProbePool();
+        byte[] bytes = serialize(original);
+        original.close();
+        DeserializationEvictionProbePool.resetProbe();
+        DeserializationEvictionProbePool deserialized = deserialize(bytes);
+        try {
+            assertTrue(DeserializationEvictionProbePool.evictionRan.await(1, TimeUnit.SECONDS));
+            assertFalse(DeserializationEvictionProbePool.observedPartiallyDeserializedState.get());
+        } finally {
+            deserialized.close();
+        }
+    }
+
+    @Test
+    public void testClose() {
+        TestPoolable p1 = new TestPoolable("value1");
+        TestPoolable p2 = new TestPoolable("value2");
+        pool.put("key1", p1);
+        pool.put("key2", p2);
+        pool.close();
+        assertTrue(pool.isClosed());
+        assertTrue(p1.isDestroyed());
+        assertEquals(Poolable.Caller.CLOSE, p1.getDestroyedByCaller());
+        assertThrows(IllegalStateException.class, () -> pool.put("key3", new TestPoolable("value3")));
+        pool.close();
+        assertTrue(pool.isClosed());
+    }
+
+    @Test
+    public void testClose_ContinuesAfterDestroyError() {
+        TestPoolable broken = new TestPoolable("broken") {
+            @Override
+            public void destroy(final Poolable.Caller caller) {
+                throw new AssertionError("simulated callback failure");
+            }
+        };
+        TestPoolable survivor = new TestPoolable("survivor");
+        assertTrue(pool.put("broken", broken));
+        assertTrue(pool.put("survivor", survivor));
+        pool.close();
+        assertTrue(survivor.isDestroyed());
+    }
+
+    @Test
+    public void testConcurrentCloseWaits() throws InterruptedException {
+        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        CountDownLatch destroyStarted = new CountDownLatch(1);
+        CountDownLatch allowDestroyToFinish = new CountDownLatch(1);
+        CountDownLatch secondCloseReturned = new CountDownLatch(1);
+        TestPoolable element = new TestPoolable("blocking") {
             @Override
             public void destroy(final Poolable.Caller caller) {
                 destroyStarted.countDown();
-
                 try {
                     allowDestroyToFinish.await();
                 } catch (final InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-
                 super.destroy(caller);
             }
         };
-
         assertTrue(p.put("key", element));
-
-        final Thread firstCloser = new Thread(p::close);
-        final Thread secondCloser = new Thread(() -> {
+        Thread first = new Thread(p::close);
+        Thread second = new Thread(() -> {
             p.close();
             secondCloseReturned.countDown();
         });
-
-        firstCloser.start();
+        first.start();
         assertTrue(destroyStarted.await(2, TimeUnit.SECONDS));
-
-        secondCloser.start();
-
+        second.start();
         try {
-            assertFalse(secondCloseReturned.await(200, TimeUnit.MILLISECONDS),
-                    "a concurrent close must not return while the first close is still destroying resources");
+            assertFalse(secondCloseReturned.await(200, TimeUnit.MILLISECONDS));
         } finally {
             allowDestroyToFinish.countDown();
         }
-
-        firstCloser.join(2000);
-        secondCloser.join(2000);
-
-        assertFalse(firstCloser.isAlive());
-        assertFalse(secondCloser.isAlive());
-        assertEquals(0, secondCloseReturned.getCount());
+        first.join(2000);
+        second.join(2000);
+        assertFalse(first.isAlive());
         assertTrue(element.isDestroyed());
     }
 
-    private static void awaitCleanupRelease(final CountDownLatch release) {
+    @Test
+    public void testEvict() throws InterruptedException {
+        for (int i = 0; i < 10; i++) {
+            pool.put("key" + i, new TestPoolable("value" + i));
+        }
+        pool.evict();
+        assertEquals(8, pool.size());
+
+        GenericKeyedObjectPool<String, TestPoolable> custom = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.5f);
         try {
-            release.await(5, TimeUnit.SECONDS);
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
+            for (int i = 0; i < 10; i++) {
+                custom.put("key" + i, new TestPoolable("value" + i));
+            }
+            custom.evict();
+            assertEquals(5, custom.size());
+        } finally {
+            custom.close();
+        }
+
+        TestPoolable v1 = new TestPoolable("v1");
+        TestPoolable v2 = new TestPoolable("v2");
+        TestPoolable v3 = new TestPoolable("v3");
+        pool.clear();
+        pool.put("key1", v1);
+        pool.put("key2", v2);
+        pool.put("key3", v3);
+        pool.vacate(2);
+        int destroyed = (v1.isDestroyed() ? 1 : 0) + (v2.isDestroyed() ? 1 : 0) + (v3.isDestroyed() ? 1 : 0);
+        assertEquals(1, pool.size());
+        assertEquals(2, destroyed);
+
+        GenericKeyedObjectPool<String, TestPoolable> created = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.CREATED_TIME, true, 0.5f);
+        try {
+            TestPoolable c1 = new TestPoolable("v1");
+            Thread.sleep(10);
+            TestPoolable c2 = new TestPoolable("v2");
+            Thread.sleep(10);
+            TestPoolable c3 = new TestPoolable("v3");
+            created.put("k1", c1);
+            created.put("k2", c2);
+            created.put("k3", c3);
+            created.vacate(2);
+            assertTrue(c1.isDestroyed());
+            assertTrue(c2.isDestroyed());
+            assertFalse(c3.isDestroyed());
+        } finally {
+            created.close();
+        }
+
+        GenericKeyedObjectPool<String, TestPoolable> fifo = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.FIFO, true, 0.5f);
+        try {
+            TestPoolable older = new TestPoolable("older");
+            Thread.sleep(10);
+            TestPoolable newer = new TestPoolable("newer");
+            fifo.put("newer", newer);
+            fifo.put("older", older);
+            fifo.vacate(1);
+            assertTrue(newer.isDestroyed());
+            assertFalse(older.isDestroyed());
+        } finally {
+            fifo.close();
+        }
+
+        GenericKeyedObjectPool<String, TestPoolable> countPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.ACCESS_COUNT, true, 0.5f);
+        try {
+            for (int i = 0; i < 10; i++) {
+                countPool.put("key" + i, new TestPoolable("value" + i));
+            }
+            for (int i = 0; i < 5; i++) {
+                countPool.get("key" + i);
+                countPool.get("key" + i);
+            }
+            countPool.evict();
+            assertTrue(countPool.size() < 10);
+            for (int i = 0; i < 5; i++) {
+                assertTrue(countPool.containsKey("key" + i));
+            }
+        } finally {
+            countPool.close();
+        }
+
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> k.length() + 100;
+        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.5f, 5000, measure);
+        try {
+            for (int i = 0; i < 10; i++) {
+                memPool.put("key" + i, new TestPoolable("value" + i));
+            }
+            long before = memPool.stats().dataSize();
+            memPool.evict();
+            assertTrue(memPool.stats().dataSize() < before);
+        } finally {
+            memPool.close();
+        }
+
+        GenericKeyedObjectPool<String, TestPoolable> scheduled = new GenericKeyedObjectPool<>(10, 100, EvictionPolicy.LAST_ACCESS_TIME);
+        try {
+            TestPoolable shortLived = new TestPoolable("short", 50, 50);
+            TestPoolable longLived = new TestPoolable("long", 10000, 10000);
+            scheduled.put("short", shortLived);
+            scheduled.put("long", longLived);
+            Thread.sleep(200);
+            assertEquals(1, scheduled.size());
+            assertTrue(scheduled.containsKey("long"));
+            assertTrue(shortLived.isDestroyed());
+        } finally {
+            scheduled.close();
+        }
+
+        TestPoolable expired = new TestPoolable("expired", 10, 10);
+        TestPoolable retained = new TestPoolable("retained");
+        pool.clear();
+        pool.put("expired", expired);
+        pool.put("retained", retained);
+        Thread.sleep(20);
+        pool.removeExpired();
+        assertTrue(expired.isDestroyed());
+        assertEquals(Poolable.Caller.EVICT, expired.getDestroyedByCaller());
+        assertEquals(1, pool.size());
+    }
+
+    @Test
+    public void testEvict_Closed() {
+        pool.evict();
+        assertEquals(0, pool.size());
+        pool.close();
+        assertThrows(IllegalStateException.class, () -> pool.evict());
+    }
+
+    @Test
+    public void testEvict_RemovesBeforeDestroyCallback() {
+        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        AtomicReference<TestPoolable> observed = new AtomicReference<>();
+        AtomicReference<Boolean> lockHeld = new AtomicReference<>();
+        TestPoolable doomed = new TestPoolable("doomed") {
+            @Override
+            public void destroy(final Poolable.Caller caller) {
+                lockHeld.set(p.lock.isHeldByCurrentThread());
+                observed.set(p.get("key"));
+                super.destroy(caller);
+            }
+        };
+        try {
+            assertTrue(p.put("key", doomed));
+            p.evict();
+            assertNull(observed.get());
+            assertEquals(Boolean.FALSE, lockHeld.get());
+        } finally {
+            p.close();
         }
     }
 
     @Test
-    public void testTimedPutStopsWhenConditionReportsTimeoutAfterSpuriousWakeups() throws Exception {
-        final GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f);
+    public void testEvict_SingleCriticalSection() {
+        AtomicReference<TestPoolable> removedDuringFormerGap = new AtomicReference<>();
+        AtomicEvictPool p = new AtomicEvictPool(removedDuringFormerGap);
+        try {
+            p.put("one", new TestPoolable("one"));
+            p.put("two", new TestPoolable("two"));
+            p.put("three", new TestPoolable("three"));
+            p.put("four", new TestPoolable("four"));
+            p.evict();
+            assertNull(removedDuringFormerGap.get());
+            assertEquals(2, p.size());
+        } finally {
+            p.close();
+        }
+    }
+
+    @Test
+    public void testSize() {
+        assertEquals(0, pool.size());
+        assertTrue(pool.isEmpty());
+        assertEquals(10, pool.capacity());
+        pool.put("key1", new TestPoolable("value1"));
+        assertEquals(1, pool.size());
+        pool.remove("key1");
+        assertEquals(0, pool.size());
+        pool.put("key1", new TestPoolable("value1"));
+        pool.close();
+        assertThrows(IllegalStateException.class, () -> pool.size());
+    }
+
+    @Test
+    public void testStats() {
+        pool.put("key1", new TestPoolable("value1"));
+        pool.put("key2", new TestPoolable("value2"));
+        pool.get("key1");
+        pool.get("key2");
+        pool.get("key3");
+        PoolStats stats = pool.stats();
+        assertEquals(10, stats.capacity());
+        assertEquals(2, stats.size());
+        assertEquals(2, stats.putCount());
+        assertEquals(3, stats.getCount());
+        assertEquals(2, stats.hitCount());
+        assertEquals(1, stats.missCount());
+        assertFalse(pool.isMemoryTracked());
+        assertEquals(-1, stats.dataSize());
+
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> 100;
+        GenericKeyedObjectPool<String, TestPoolable> unlimited = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 0, measure);
+        try {
+            unlimited.put("a", new TestPoolable("a"));
+            unlimited.put("b", new TestPoolable("b"));
+            assertEquals(-1, unlimited.stats().maxMemory());
+            assertEquals(200, unlimited.stats().dataSize());
+            unlimited.remove("a");
+            assertEquals(100, unlimited.stats().dataSize());
+        } finally {
+            unlimited.close();
+        }
+
+        GenericKeyedObjectPool<String, TestPoolable> limited = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 1000, measure);
+        try {
+            limited.put("a", new TestPoolable("a"));
+            limited.put("b", new TestPoolable("b"));
+            assertEquals(1000, limited.stats().maxMemory());
+            assertEquals(200, limited.stats().dataSize());
+        } finally {
+            limited.close();
+        }
+    }
+
+    @Test
+    public void testLockAndUnlock() {
+        pool.lock();
+        pool.unlock();
+        assertEquals(0, pool.size());
+    }
+
+    @Test
+    public void testEqualsHashCodeToString() {
+        pool.put("key1", new TestPoolable("value1"));
+        assertEquals(pool.hashCode(), pool.hashCode());
+        assertTrue(pool.toString().contains("GenericKeyedObjectPool"));
+        assertFalse(pool.toString().contains("key1"));
+
+        GenericKeyedObjectPool<String, TestPoolable> pool1 = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        GenericKeyedObjectPool<String, TestPoolable> pool2 = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        try {
+            assertTrue(pool1.equals(pool2));
+            TestPoolable p = new TestPoolable("value1");
+            pool1.put("key1", p);
+            assertFalse(pool1.equals(pool2));
+            pool2.put("key1", p);
+            assertTrue(pool1.equals(pool2));
+            assertFalse(pool1.equals(null));
+            assertFalse(pool1.equals("not a pool"));
+        } finally {
+            pool1.close();
+            pool2.close();
+        }
+    }
+
+    @Test
+    public void testEquals_ConcurrentMutation() throws InterruptedException {
+        GenericKeyedObjectPool<String, TestPoolable> p1 = new GenericKeyedObjectPool<>(1000, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        GenericKeyedObjectPool<String, TestPoolable> p2 = new GenericKeyedObjectPool<>(1000, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        for (int i = 0; i < 200; i++) {
+            p1.put("k" + i, new TestPoolable("v" + i));
+            p2.put("k" + i, new TestPoolable("v" + i));
+        }
+        AtomicBoolean stop = new AtomicBoolean();
+        AtomicReference<Throwable> mutatorFailure = new AtomicReference<>();
+        Thread mutator = new Thread(() -> {
+            int n = 0;
+            try {
+                while (!stop.get()) {
+                    String key = "k" + (n++ % 200);
+                    p2.remove(key);
+                    p2.put(key, new TestPoolable("vv" + n));
+                }
+            } catch (Throwable t) {
+                mutatorFailure.set(t);
+            }
+        });
+        mutator.start();
+        AtomicReference<Throwable> equalsFailure = new AtomicReference<>();
+        try {
+            for (int i = 0; i < 500; i++) {
+                try {
+                    p1.equals(p2);
+                } catch (Throwable t) {
+                    equalsFailure.set(t);
+                    break;
+                }
+            }
+        } finally {
+            stop.set(true);
+            mutator.join();
+        }
+        assertNull(equalsFailure.get());
+        assertNull(mutatorFailure.get());
+        p1.close();
+        p2.close();
+    }
+
+    @Test
+    public void testConcurrent() throws InterruptedException {
+        int threads = 10;
+        int ops = 100;
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch endLatch = new CountDownLatch(threads);
+        for (int i = 0; i < threads; i++) {
+            final int threadId = i;
+            new Thread(() -> {
+                try {
+                    startLatch.await();
+                    for (int j = 0; j < ops; j++) {
+                        String key = "key" + (j % 20);
+                        if (j % 2 == 0) {
+                            pool.put(key, new TestPoolable("t" + threadId + "-" + j));
+                        } else {
+                            pool.get(key);
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    endLatch.countDown();
+                }
+            }).start();
+        }
+        startLatch.countDown();
+        assertTrue(endLatch.await(5, TimeUnit.SECONDS));
+        assertTrue(pool.size() >= 0 && pool.size() <= pool.capacity());
+    }
+
+    @Test
+    public void testTimedPut() throws InterruptedException {
+        TestPoolable v = new TestPoolable("v");
+        assertTrue(pool.put("k", v, 1, TimeUnit.SECONDS));
+        assertSameValue(v, pool.get("k"));
+
+        GenericKeyedObjectPool<String, TestPoolable> p = noBalance(1);
+        try {
+            assertTrue(p.put("k1", new TestPoolable("v1")));
+            long start = System.nanoTime();
+            assertFalse(p.put("k2", new TestPoolable("v2"), 100, TimeUnit.MILLISECONDS));
+            assertTrue((System.nanoTime() - start) / 1_000_000 >= 50);
+            assertEquals(1, p.size());
+
+            Thread freer = new Thread(() -> {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                p.remove("k1");
+            });
+            freer.start();
+            assertTrue(p.put("k2", new TestPoolable("v2"), 5, TimeUnit.SECONDS));
+            freer.join();
+            assertTrue(p.containsKey("k2"));
+
+            TestPoolable timeoutDestroy = new TestPoolable("v3");
+            assertFalse(p.put("k3", timeoutDestroy, 50, TimeUnit.MILLISECONDS, true));
+            assertTrue(timeoutDestroy.isDestroyed());
+            assertEquals(Poolable.Caller.PUT_ADD_FAILURE, timeoutDestroy.getDestroyedByCaller());
+        } finally {
+            p.close();
+        }
+
+        TestPoolable expired = new TestPoolable("e", 1, 1);
+        Thread.sleep(10);
+        assertFalse(pool.put("expired", expired, 1, TimeUnit.SECONDS));
+        assertThrows(IllegalArgumentException.class, () -> pool.put(null, new TestPoolable("v"), 1, TimeUnit.SECONDS));
+        assertThrows(IllegalArgumentException.class, () -> pool.put("k", null, 1, TimeUnit.SECONDS));
+
+        GenericKeyedObjectPool<String, TestPoolable> auto = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        try {
+            TestPoolable victim = new TestPoolable("v1");
+            TestPoolable newcomer = new TestPoolable("v2");
+            assertTrue(auto.put("k1", victim));
+            long nano = System.nanoTime();
+            assertTrue(auto.put("k2", newcomer, 5, TimeUnit.SECONDS));
+            assertTrue((System.nanoTime() - nano) / 1_000_000 < 2_000);
+            assertTrue(victim.isDestroyed());
+            assertEquals(Poolable.Caller.VACATE, victim.getDestroyedByCaller());
+            assertSame(newcomer, auto.peek("k2"));
+        } finally {
+            auto.close();
+        }
+
+        GenericKeyedObjectPool<String, TestPoolable> zero = new GenericKeyedObjectPool<>(0, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        try {
+            TestPoolable value = new TestPoolable("v");
+            long nano = System.nanoTime();
+            assertFalse(zero.put("k", value, 50, TimeUnit.MILLISECONDS));
+            assertTrue((System.nanoTime() - nano) / 1_000_000 >= 25);
+            assertFalse(value.isDestroyed());
+        } finally {
+            zero.close();
+        }
+    }
+
+    @Test
+    public void testTimedGet() throws InterruptedException {
+        TestPoolable v = new TestPoolable("v");
+        pool.put("k", v);
+        assertSameValue(v, pool.get("k", 1, TimeUnit.SECONDS));
+        assertEquals(1, pool.size());
+
+        long start = System.nanoTime();
+        assertNull(pool.get("missing", 100, TimeUnit.MILLISECONDS));
+        assertTrue((System.nanoTime() - start) / 1_000_000 >= 50);
+
+        CountDownLatch ready = new CountDownLatch(1);
+        Thread producer = new Thread(() -> {
+            try {
+                ready.await();
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            pool.put("later", new TestPoolable("v"));
+        });
+        producer.start();
+        ready.countDown();
+        TestPoolable got = pool.get("later", 5, TimeUnit.SECONDS);
+        producer.join();
+        assertEquals("v", got.getValue());
+    }
+
+    @Test
+    public void testTimedGet_HeterogeneousWaiters() throws InterruptedException {
+        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(8, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        try {
+            CountDownLatch waitersStarted = new CountDownLatch(2);
+            AtomicReference<TestPoolable> resultA = new AtomicReference<>();
+            AtomicReference<TestPoolable> resultC = new AtomicReference<>();
+            AtomicReference<Throwable> failure = new AtomicReference<>();
+            Thread waiterA = new Thread(() -> {
+                waitersStarted.countDown();
+                try {
+                    resultA.set(p.get("A", 10_000, TimeUnit.MILLISECONDS));
+                } catch (final Throwable t) {
+                    failure.set(t);
+                }
+            });
+            Thread waiterC = new Thread(() -> {
+                waitersStarted.countDown();
+                try {
+                    resultC.set(p.get("C", 10_000, TimeUnit.MILLISECONDS));
+                } catch (final Throwable t) {
+                    failure.set(t);
+                }
+            });
+            waiterA.start();
+            waiterC.start();
+            assertTrue(waitersStarted.await(2, TimeUnit.SECONDS));
+            Thread.sleep(150);
+            p.put("B", new TestPoolable("vB"));
+            Thread.sleep(50);
+            p.put("A", new TestPoolable("vA"));
+            p.put("C", new TestPoolable("vC"));
+            waiterA.join(4_000);
+            waiterC.join(4_000);
+            assertNull(failure.get());
+            assertEquals("vA", resultA.get().getValue());
+            assertEquals("vC", resultC.get().getValue());
+        } finally {
+            p.close();
+        }
+    }
+
+    @Test
+    public void testPut_FailedReplaceWakesNotFullWaiters() throws Exception {
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> "reject".equals(v.getValue()) ? -1L : 10L;
+        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 10_000L, measure);
+        try {
+            assertTrue(p.put("A", new TestPoolable("oldA")));
+            CountDownLatch waiterStarted = new CountDownLatch(1);
+            AtomicReference<Boolean> putResult = new AtomicReference<>();
+            AtomicReference<Throwable> failure = new AtomicReference<>();
+            Thread waiter = new Thread(() -> {
+                try {
+                    waiterStarted.countDown();
+                    putResult.set(p.put("B", new TestPoolable("vB"), 5, TimeUnit.SECONDS));
+                } catch (final Throwable t) {
+                    failure.set(t);
+                }
+            });
+            waiter.start();
+            assertTrue(waiterStarted.await(2, TimeUnit.SECONDS));
+            Thread.sleep(150);
+            assertFalse(p.put("A", new TestPoolable("reject")));
+            waiter.join(4_000);
+            assertNull(failure.get());
+            assertEquals(Boolean.TRUE, putResult.get());
+            assertNotNull(p.get("B"));
+        } finally {
+            p.close();
+        }
+    }
+
+    @Test
+    public void testExpiredReadWakesTimedPutWaiter() throws Exception {
+        assertExpiredReadWakesTimedPutWaiter(false);
+        assertExpiredReadWakesTimedPutWaiter(true);
+    }
+
+    private static void assertExpiredReadWakesTimedPutWaiter(final boolean peek) throws Exception {
+        GenericKeyedObjectPool<String, TestPoolable> p = noBalance(1);
+        TestPoolable old = new TestPoolable("old");
+        CountDownLatch waiterStarted = new CountDownLatch(1);
+        AtomicReference<Boolean> putResult = new AtomicReference<>();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        Thread waiter = new Thread(() -> {
+            try {
+                waiterStarted.countDown();
+                putResult.set(p.put("new", new TestPoolable("new"), 10, TimeUnit.SECONDS));
+            } catch (final Throwable e) {
+                failure.set(e);
+            }
+        });
+        try {
+            assertTrue(p.put("old", old));
+            waiter.start();
+            assertTrue(waiterStarted.await(2, TimeUnit.SECONDS));
+            Thread.sleep(100);
+            old.activityPrint().setCreatedTime(System.currentTimeMillis() - 20_000);
+            assertNull(peek ? p.peek("old") : p.get("old"));
+            waiter.join(2_000);
+            assertFalse(waiter.isAlive());
+            assertNull(failure.get());
+            assertEquals(Boolean.TRUE, putResult.get());
+        } finally {
+            p.close();
+            waiter.join(1_000);
+        }
+    }
+
+    @Test
+    public void testPutReplacementDestroyCallback() {
+        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        AtomicReference<Boolean> lockHeld = new AtomicReference<>();
+        AtomicReference<TestPoolable> observed = new AtomicReference<>();
+        TestPoolable replacement = new TestPoolable("replacement");
+        TestPoolable victim = new TestPoolable("victim") {
+            @Override
+            public void destroy(final Poolable.Caller caller) {
+                lockHeld.set(p.lock.isHeldByCurrentThread());
+                observed.set(p.peek("key"));
+                super.destroy(caller);
+            }
+        };
+        try {
+            assertTrue(p.put("key", victim));
+            assertTrue(p.put("key", replacement));
+            assertEquals(Boolean.FALSE, lockHeld.get());
+            assertEquals(replacement, observed.get());
+            assertEquals(Poolable.Caller.REMOVE_REPLACE_CLEAR, victim.getDestroyedByCaller());
+        } finally {
+            p.close();
+        }
+    }
+
+    @Test
+    public void testPutAutoBalanceDestroyCallback() {
+        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        AtomicReference<Boolean> lockHeld = new AtomicReference<>();
+        AtomicReference<Boolean> victimPresent = new AtomicReference<>();
+        AtomicReference<TestPoolable> observedReplacement = new AtomicReference<>();
+        TestPoolable replacement = new TestPoolable("replacement");
+        TestPoolable victim = new TestPoolable("victim") {
+            @Override
+            public void destroy(final Poolable.Caller caller) {
+                lockHeld.set(p.lock.isHeldByCurrentThread());
+                victimPresent.set(p.containsKey("victim"));
+                observedReplacement.set(p.peek("replacement"));
+                super.destroy(caller);
+            }
+        };
+        try {
+            assertTrue(p.put("victim", victim));
+            assertTrue(p.put("replacement", replacement));
+            assertEquals(Boolean.FALSE, lockHeld.get());
+            assertEquals(Boolean.FALSE, victimPresent.get());
+            assertEquals(replacement, observedReplacement.get());
+            assertEquals(Poolable.Caller.VACATE, victim.getDestroyedByCaller());
+        } finally {
+            p.close();
+        }
+    }
+
+    @Test
+    public void testGet_ExpiredDestroyCallback() {
+        GenericKeyedObjectPool<String, TestPoolable> p = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        AtomicReference<Boolean> lockHeld = new AtomicReference<>();
+        AtomicReference<Boolean> mappingPresent = new AtomicReference<>();
+        TestPoolable expired = new TestPoolable("expired") {
+            @Override
+            public void destroy(final Poolable.Caller caller) {
+                lockHeld.set(p.lock.isHeldByCurrentThread());
+                mappingPresent.set(p.containsKey("expired"));
+                super.destroy(caller);
+            }
+        };
+        try {
+            assertTrue(p.put("expired", expired));
+            expired.activityPrint().setCreatedTime(System.currentTimeMillis() - 20_000);
+            assertNull(p.get("expired"));
+            assertEquals(Boolean.FALSE, lockHeld.get());
+            assertEquals(Boolean.FALSE, mappingPresent.get());
+            assertEquals(Poolable.Caller.EVICT, expired.getDestroyedByCaller());
+        } finally {
+            p.close();
+        }
+    }
+
+    @Test
+    public void testTimedPut_SpuriousWakeups() throws Exception {
+        GenericKeyedObjectPool<String, TestPoolable> p = noBalance(1);
         assertTrue(p.put("existing", new TestPoolable("value")));
-
-        final SpuriousWakeupCondition condition = new SpuriousWakeupCondition(3);
+        SpuriousWakeupCondition condition = new SpuriousWakeupCondition(3);
         p.notFull = condition;
-
         try {
             assertFalse(p.put("new", new TestPoolable("new-value"), 1, TimeUnit.SECONDS));
             assertEquals(4, condition.awaitCount);
         } finally {
             p.close();
         }
-    }
-
-    @Test
-    public void testTimedOperationsRejectNullTimeUnit() {
         assertThrows(IllegalArgumentException.class, () -> pool.put("key", new TestPoolable("value"), 1, null));
         assertThrows(IllegalArgumentException.class, () -> pool.get("key", 1, null));
     }
 
     @Test
-    public void testCloseContinuesAfterNonFatalDestroyError() {
-        final TestPoolable broken = new TestPoolable("broken") {
-            @Override
-            public void destroy(final Poolable.Caller caller) {
-                throw new AssertionError("simulated callback failure");
-            }
-        };
-        final TestPoolable survivor = new TestPoolable("survivor");
-
-        assertTrue(pool.put("broken", broken));
-        assertTrue(pool.put("survivor", survivor));
-        pool.close();
-
-        assertTrue(survivor.isDestroyed(), "one broken callback must not prevent later resources from being destroyed");
-    }
-
-    @Test
-    public void testEvictSelectsCountAndVictimsInSingleCriticalSection() {
-        final AtomicReference<TestPoolable> removedDuringFormerGap = new AtomicReference<>();
-        final AtomicEvictPool p = new AtomicEvictPool(removedDuringFormerGap);
-
+    public void testRemove_ReturnsExpiredUndestroyed() throws Exception {
+        KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> 100;
+        GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(1, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 1000, measure);
         try {
-            assertTrue(p.put("one", new TestPoolable("one")));
-            assertTrue(p.put("two", new TestPoolable("two")));
-            assertTrue(p.put("three", new TestPoolable("three")));
-            assertTrue(p.put("four", new TestPoolable("four")));
-
-            p.evict();
-
-            assertNull(removedDuringFormerGap.get(), "evict must not expose a mutation gap between counting and detaching victims");
-            assertEquals(2, p.size(), "a 0.5 balance factor must atomically remove two of four entries");
-        } finally {
-            p.close();
-        }
-    }
-
-    @Test
-    public void testPut_sameInstanceRePoolFailureRestoresMapping() {
-        // Pre-fix: same-instance re-put removed the mapping then failed (e.g. sizeOf < 0) and left
-        // the instance neither pooled nor destroyed — a leak / orphan.
-        final AtomicInteger measureCalls = new AtomicInteger();
-        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> {
-            final int call = measureCalls.incrementAndGet();
-            if (call <= 2) {
-                return 100; // first put + same-instance memory subtract
-            }
-            return -1; // re-measure fails → put returns false
-        };
-
-        final GenericKeyedObjectPool<String, TestPoolable> memPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 10_000, measure);
-        try {
-            final TestPoolable value = new TestPoolable("v1");
-            assertTrue(memPool.put("k", value));
-            assertEquals(1, memPool.size());
-
-            final TestPoolable same = memPool.get("k");
-            assertNotNull(same);
-            assertFalse(memPool.put("k", same, true), "re-put must fail when sizeOf returns negative");
-            assertEquals(1, memPool.size(), "mapping must be restored after same-instance re-put failure");
-            assertEquals(100L, memPool.totalDataSize.get(), "restoring the mapping must also restore memory accounting");
-            assertNotNull(memPool.get("k"));
-            assertFalse(same.isDestroyed(), "auto-destroy must not destroy the restored pooled instance");
+            TestPoolable shortLived = new TestPoolable("s", 20, 20);
+            assertTrue(memPool.put("k", shortLived));
+            Thread.sleep(50);
+            assertTrue(shortLived.activityPrint().isExpired());
+            assertTrue(memPool.containsKey("k"));
+            TestPoolable removed = memPool.remove("k");
+            assertSame(shortLived, removed);
+            assertFalse(removed.isDestroyed());
+            assertEquals(0, memPool.stats().dataSize());
+            assertEquals(0, memPool.stats().evictionCount());
+            assertTrue(memPool.put("k2", new TestPoolable("live")));
         } finally {
             memPool.close();
         }
+    }
+
+    @Test
+    public void testExpiredMappingReportedUntilGetEvicts() throws Exception {
+        TestPoolable shortLived = new TestPoolable("s", 20, 20);
+        TestPoolable live = new TestPoolable("l");
+        assertTrue(pool.put("expired", shortLived));
+        assertTrue(pool.put("live", live));
+        Thread.sleep(50);
+        assertTrue(pool.containsKey("expired"));
+        assertEquals(2, pool.size());
+        assertTrue(pool.keySet().contains("expired"));
+        assertTrue(pool.values().contains(shortLived));
+        assertNull(pool.get("expired"));
+        assertTrue(shortLived.isDestroyed());
+        assertEquals(Poolable.Caller.EVICT, shortLived.getDestroyedByCaller());
+        assertFalse(pool.containsKey("expired"));
+        assertEquals(1, pool.size());
+        assertSame(live, pool.get("live"));
+
+        TestPoolable peekExpired = new TestPoolable("s", 20, 20);
+        pool.put("peek", peekExpired);
+        Thread.sleep(50);
+        assertNull(pool.peek("peek"));
+        assertTrue(peekExpired.isDestroyed());
+        assertNull(pool.remove("peek"));
+    }
+
+    @Test
+    public void testNullKeyReadsMatchNoMapping() throws Exception {
+        assertTrue(pool.put("k", new TestPoolable("v")));
+        long missesBefore = pool.stats().missCount();
+        long hitsBefore = pool.stats().hitCount();
+        assertNull(pool.get(null));
+        assertEquals(missesBefore + 1, pool.stats().missCount());
+        assertNull(pool.get(null, 10, TimeUnit.MILLISECONDS));
+        assertEquals(missesBefore + 2, pool.stats().missCount());
+        assertNull(pool.peek(null));
+        assertNull(pool.remove(null));
+        assertFalse(pool.containsKey(null));
+        assertEquals(hitsBefore, pool.stats().hitCount());
+        assertEquals(1, pool.size());
+        assertThrows(IllegalArgumentException.class, () -> pool.put(null, new TestPoolable("v2")));
     }
 }

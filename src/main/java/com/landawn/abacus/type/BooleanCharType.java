@@ -164,9 +164,10 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * @param len the number of characters to examine
      * @return {@link Boolean#TRUE} if the single character is {@code 'Y'} or {@code 'y'},
      *         {@link Boolean#FALSE} otherwise
+     * @throws IndexOutOfBoundsException if {@code cbuf} is non-null, {@code len} is one, and {@code offset} is outside the array.
      */
     @Override
-    public Boolean valueOf(final char[] cbuf, final int offset, final int len) {
+    public Boolean valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException {
         return (cbuf == null || len == 0) ? Boolean.FALSE : ((len == 1 && (cbuf[offset] == 'Y' || cbuf[offset] == 'y')) ? Boolean.TRUE : Boolean.FALSE);
     }
 
@@ -179,10 +180,11 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * @param columnIndex the 1-based index of the column containing the Y/N value
      * @return {@link Boolean#TRUE} if the column value is {@code "Y"} (case-insensitive),
      *         {@link Boolean#FALSE} for any other value including SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Boolean get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return valueOf(rs.getString(columnIndex));
     }
 
@@ -195,10 +197,11 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
      * @return {@link Boolean#TRUE} if the column value is {@code "Y"} (case-insensitive),
      *         {@link Boolean#FALSE} for any other value including SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Boolean get(final ResultSet rs, final String columnName) throws SQLException {
+    public Boolean get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return valueOf(rs.getString(columnName));
     }
 
@@ -210,10 +213,11 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * @param stmt the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code Boolean} value to set; {@code null} is stored as SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Boolean x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Boolean x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, java.sql.Types.VARCHAR);
         } else {
@@ -229,10 +233,11 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code Boolean} value to set; {@code null} is stored as SQL NULL
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Boolean x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Boolean x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, java.sql.Types.VARCHAR);
         } else {
@@ -252,14 +257,15 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      *
      * @param appendable the target {@code Appendable}
      * @param x the {@code Boolean} value to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during appending
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This implementation appends {@code stringOf(x)} to {@code appendable}: {@code "Y"} for {@code true} and
      * {@code "N"} for {@code false} or {@code null}. The appended text is therefore identical to {@code stringOf(x)}
      * and round-trips through {@link #valueOf(String)}.
      */
     @Override
-    public void appendTo(final Appendable appendable, final Boolean x) throws IOException {
+    public void appendTo(final Appendable appendable, final Boolean x) throws NullPointerException, IOException {
         appendable.append(stringOf(x));
     }
 
@@ -282,10 +288,11 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * @param config the serialization configuration; if non-{@code null} and its
      *               {@link com.landawn.abacus.parser.JsonXmlSerConfig#getCharQuotation()} is non-zero,
      *               the value is wrapped in that character; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Boolean x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Boolean x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         final char ch = config == null ? 0 : config.getCharQuotation();
 
         if (ch == 0) {

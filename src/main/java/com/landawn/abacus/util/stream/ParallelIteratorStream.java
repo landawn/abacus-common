@@ -121,7 +121,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     ParallelIteratorStream(final Iterator<? extends T> values, final boolean sorted, final Comparator<? super T> comparator, final int maxThreadNum,
             final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads,
-            final Collection<LocalRunnable> closeHandlers) {
+            final Collection<LocalRunnable> closeHandlers) throws IllegalArgumentException {
         super(values, sorted, comparator, closeHandlers);
 
         this.maxThreadNum = maxThreadNum == 0 ? DEFAULT_MAX_THREAD_NUM : maxThreadNum;
@@ -162,7 +162,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public Stream<T> filter(final Predicate<? super T> predicate) throws IllegalArgumentException, IllegalStateException {
+    public Stream<T> filter(final Predicate<? super T> predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -232,7 +232,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public Stream<T> takeWhile(final Predicate<? super T> predicate) throws IllegalArgumentException, IllegalStateException {
+    public Stream<T> takeWhile(final Predicate<? super T> predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -286,16 +286,12 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
     }
 
     /**
-     * Returns a parallel stream that drops elements while the given predicate holds and then passes
-     * all remaining elements through. Elements are consumed from the underlying iterator via a shared
-     * synchronized cursor. Each thread loops, pulling and testing elements, until one of them
-     * encounters an element that fails the predicate (signalled by an {@link AtomicBoolean} flag);
-     * after that, all threads proceed concurrently to consume the
-     * remainder of the stream. The output order of post-drop elements is not guaranteed to match the
-     * input order.
+     * Returns a parallel stream after dropping the leading elements that match the predicate.
+     * Elements are pulled from the underlying iterator and tested under the same lock until the
+     * first non-matching element is found. That element and all remaining elements are retained.
      *
-     * <p><b>&#9888;&#65039; Parallel streams:</b> this operation does not guarantee encounter-order prefix/suffix
-     * semantics; later matching elements may be dropped.
+     * <p>The retained elements are consumed concurrently, so their output order is not guaranteed
+     * to match the source encounter order.
      *
      * @param predicate a non-interfering, stateless predicate; elements are dropped while it returns
      *        {@code true}
@@ -304,7 +300,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public Stream<T> dropWhile(final Predicate<? super T> predicate) throws IllegalArgumentException, IllegalStateException {
+    public Stream<T> dropWhile(final Predicate<? super T> predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -335,17 +331,29 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                             }
                         } else {
                             while (!dropped.get()) {
+                                // Take the element AND decide about it under the same lock. Testing the predicate
+                                // outside it let a thread that had not yet observed `dropped` consume an element
+                                // belonging to the output and silently discard it - dropWhile must drop only the
+                                // LEADING prefix. The drop phase is inherently sequential; only it is serialized,
+                                // the pass-through phase above stays parallel.
                                 synchronized (elements) {
-                                    if (elements.hasNext()) {
-                                        next = elements.next();
-                                    } else {
+                                    if (dropped.get()) {
                                         break;
+                                    }
+
+                                    if (!elements.hasNext()) {
+                                        break;
+                                    }
+
+                                    next = elements.next();
+
+                                    if (!predicate.test(next)) {
+                                        hasNext = true;
+                                        dropped.set(true);
                                     }
                                 }
 
-                                if (!predicate.test(next)) {
-                                    hasNext = true;
-                                    dropped.set(true);
+                                if (hasNext) {
                                     break;
                                 }
                             }
@@ -392,7 +400,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <R> Stream<R> map(final Function<? super T, ? extends R> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <R> Stream<R> map(final Function<? super T, ? extends R> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -659,7 +667,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @Override
     public <R> Stream<R> mapFirstOrElse(final Function<? super T, ? extends R> mapperForFirst, final Function<? super T, ? extends R> mapperForElse)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapperForFirst, cs.mapperForFirst);
@@ -698,7 +706,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @Override
     public <R> Stream<R> mapLastOrElse(final Function<? super T, ? extends R> mapperForLast, final Function<? super T, ? extends R> mapperForElse)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapperForLast, cs.mapperForLast);
@@ -760,7 +768,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public CharStream mapToChar(final ToCharFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public CharStream mapToChar(final ToCharFunction<? super T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -817,7 +825,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public ByteStream mapToByte(final ToByteFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream mapToByte(final ToByteFunction<? super T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -874,7 +882,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public ShortStream mapToShort(final ToShortFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public ShortStream mapToShort(final ToShortFunction<? super T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -931,7 +939,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public IntStream mapToInt(final ToIntFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream mapToInt(final ToIntFunction<? super T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -988,7 +996,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public LongStream mapToLong(final ToLongFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public LongStream mapToLong(final ToLongFunction<? super T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1045,7 +1053,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public FloatStream mapToFloat(final ToFloatFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public FloatStream mapToFloat(final ToFloatFunction<? super T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1102,7 +1110,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public DoubleStream mapToDouble(final ToDoubleFunction<? super T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream mapToDouble(final ToDoubleFunction<? super T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1162,7 +1170,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <R> Stream<R> flatMap(final Function<? super T, ? extends Stream<? extends R>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <R> Stream<R> flatMap(final Function<? super T, ? extends Stream<? extends R>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1179,7 +1187,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             iters.add(new ObjIteratorEx<>() {
                 private T next = null;
                 private Iterator<? extends R> cur = null;
-                private Stream<? extends R> s = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
                 @Override
                 public boolean hasNext() {
@@ -1196,13 +1204,19 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                             }
                         }
 
-                        s = mapper.apply(next);
+                        final Stream<? extends R> mapped = mapper.apply(next);
 
-                        if (s == null) {
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
                             cur = null;
-                        } else {
-                            cur = s.iteratorEx();
+                            break;
                         }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
                     }
 
                     return cur != null && cur.hasNext();
@@ -1219,14 +1233,22 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
                 @Override
                 public void closeResource() {
-                    closeMappedStream();
+                    closeMappedStream(true);
                 }
 
                 private void closeMappedStream() {
-                    if (s != null) {
-                        final Stream<? extends R> tmp = s;
-                        s = null;
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
                         cur = null;
+                    }
+
+                    if (tmp != null) {
                         tmp.close();
                     }
                 }
@@ -1254,7 +1276,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <R> Stream<R> flatmap(final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <R> Stream<R> flatmap(final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1321,7 +1343,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @SuppressFBWarnings
     @Override
-    public <R> Stream<R> flatMapArray(final Function<? super T, R[]> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <R> Stream<R> flatMapArray(final Function<? super T, R[]> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1344,7 +1366,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @SuppressFBWarnings
     @Override
-    public CharStream flatMapToChar(final Function<? super T, ? extends CharStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public CharStream flatMapToChar(final Function<? super T, ? extends CharStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1361,7 +1383,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             iters.add(new ObjIteratorEx<>() {
                 private T next = null;
                 private CharIterator cur = null;
-                private CharStream s = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
                 @Override
                 public boolean hasNext() {
@@ -1378,13 +1400,19 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                             }
                         }
 
-                        s = mapper.apply(next);
+                        final CharStream mapped = mapper.apply(next);
 
-                        if (s == null) {
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
                             cur = null;
-                        } else {
-                            cur = s.iteratorEx();
+                            break;
                         }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
                     }
 
                     return cur != null && cur.hasNext();
@@ -1401,15 +1429,23 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
                 @Override
                 public void closeResource() {
-                    closeMappedStream();
+                    closeMappedStream(true);
                 }
 
                 private void closeMappedStream() {
-                    if (s != null) {
-                        final Runnable closeAction = s::close;
-                        s = null;
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
                         cur = null;
-                        closeAction.run();
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
                     }
                 }
             });
@@ -1436,7 +1472,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @SuppressFBWarnings
     @Override
-    public ByteStream flatMapToByte(final Function<? super T, ? extends ByteStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream flatMapToByte(final Function<? super T, ? extends ByteStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1453,7 +1489,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             iters.add(new ObjIteratorEx<>() {
                 private T next = null;
                 private ByteIterator cur = null;
-                private ByteStream s = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
                 @Override
                 public boolean hasNext() {
@@ -1470,13 +1506,19 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                             }
                         }
 
-                        s = mapper.apply(next);
+                        final ByteStream mapped = mapper.apply(next);
 
-                        if (s == null) {
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
                             cur = null;
-                        } else {
-                            cur = s.iteratorEx();
+                            break;
                         }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
                     }
 
                     return cur != null && cur.hasNext();
@@ -1493,15 +1535,23 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
                 @Override
                 public void closeResource() {
-                    closeMappedStream();
+                    closeMappedStream(true);
                 }
 
                 private void closeMappedStream() {
-                    if (s != null) {
-                        final Runnable closeAction = s::close;
-                        s = null;
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
                         cur = null;
-                        closeAction.run();
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
                     }
                 }
             });
@@ -1528,7 +1578,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @SuppressFBWarnings
     @Override
-    public ShortStream flatMapToShort(final Function<? super T, ? extends ShortStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public ShortStream flatMapToShort(final Function<? super T, ? extends ShortStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1545,7 +1595,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             iters.add(new ObjIteratorEx<>() {
                 private T next = null;
                 private ShortIterator cur = null;
-                private ShortStream s = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
                 @Override
                 public boolean hasNext() {
@@ -1562,13 +1612,19 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                             }
                         }
 
-                        s = mapper.apply(next);
+                        final ShortStream mapped = mapper.apply(next);
 
-                        if (s == null) {
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
                             cur = null;
-                        } else {
-                            cur = s.iteratorEx();
+                            break;
                         }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
                     }
 
                     return cur != null && cur.hasNext();
@@ -1585,15 +1641,23 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
                 @Override
                 public void closeResource() {
-                    closeMappedStream();
+                    closeMappedStream(true);
                 }
 
                 private void closeMappedStream() {
-                    if (s != null) {
-                        final Runnable closeAction = s::close;
-                        s = null;
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
                         cur = null;
-                        closeAction.run();
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
                     }
                 }
             });
@@ -1620,7 +1684,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @SuppressFBWarnings
     @Override
-    public IntStream flatMapToInt(final Function<? super T, ? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream flatMapToInt(final Function<? super T, ? extends IntStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1637,7 +1701,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             iters.add(new ObjIteratorEx<>() {
                 private T next = null;
                 private IntIterator cur = null;
-                private IntStream s = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
                 @Override
                 public boolean hasNext() {
@@ -1654,13 +1718,19 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                             }
                         }
 
-                        s = mapper.apply(next);
+                        final IntStream mapped = mapper.apply(next);
 
-                        if (s == null) {
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
                             cur = null;
-                        } else {
-                            cur = s.iteratorEx();
+                            break;
                         }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
                     }
 
                     return cur != null && cur.hasNext();
@@ -1677,15 +1747,23 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
                 @Override
                 public void closeResource() {
-                    closeMappedStream();
+                    closeMappedStream(true);
                 }
 
                 private void closeMappedStream() {
-                    if (s != null) {
-                        final Runnable closeAction = s::close;
-                        s = null;
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
                         cur = null;
-                        closeAction.run();
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
                     }
                 }
             });
@@ -1712,7 +1790,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @SuppressFBWarnings
     @Override
-    public LongStream flatMapToLong(final Function<? super T, ? extends LongStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public LongStream flatMapToLong(final Function<? super T, ? extends LongStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1729,7 +1807,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             iters.add(new ObjIteratorEx<>() {
                 private T next = null;
                 private LongIterator cur = null;
-                private LongStream s = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
                 @Override
                 public boolean hasNext() {
@@ -1746,13 +1824,19 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                             }
                         }
 
-                        s = mapper.apply(next);
+                        final LongStream mapped = mapper.apply(next);
 
-                        if (s == null) {
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
                             cur = null;
-                        } else {
-                            cur = s.iteratorEx();
+                            break;
                         }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
                     }
 
                     return cur != null && cur.hasNext();
@@ -1769,15 +1853,23 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
                 @Override
                 public void closeResource() {
-                    closeMappedStream();
+                    closeMappedStream(true);
                 }
 
                 private void closeMappedStream() {
-                    if (s != null) {
-                        final Runnable closeAction = s::close;
-                        s = null;
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
                         cur = null;
-                        closeAction.run();
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
                     }
                 }
             });
@@ -1804,7 +1896,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @SuppressFBWarnings
     @Override
-    public FloatStream flatMapToFloat(final Function<? super T, ? extends FloatStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public FloatStream flatMapToFloat(final Function<? super T, ? extends FloatStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1821,7 +1913,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             iters.add(new ObjIteratorEx<>() {
                 private T next = null;
                 private FloatIterator cur = null;
-                private FloatStream s = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
                 @Override
                 public boolean hasNext() {
@@ -1838,13 +1930,19 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                             }
                         }
 
-                        s = mapper.apply(next);
+                        final FloatStream mapped = mapper.apply(next);
 
-                        if (s == null) {
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
                             cur = null;
-                        } else {
-                            cur = s.iteratorEx();
+                            break;
                         }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
                     }
 
                     return cur != null && cur.hasNext();
@@ -1861,15 +1959,23 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
                 @Override
                 public void closeResource() {
-                    closeMappedStream();
+                    closeMappedStream(true);
                 }
 
                 private void closeMappedStream() {
-                    if (s != null) {
-                        final Runnable closeAction = s::close;
-                        s = null;
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
                         cur = null;
-                        closeAction.run();
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
                     }
                 }
             });
@@ -1896,7 +2002,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @SuppressFBWarnings
     @Override
-    public DoubleStream flatMapToDouble(final Function<? super T, ? extends DoubleStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream flatMapToDouble(final Function<? super T, ? extends DoubleStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1913,7 +2019,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             iters.add(new ObjIteratorEx<>() {
                 private T next = null;
                 private DoubleIterator cur = null;
-                private DoubleStream s = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
                 @Override
                 public boolean hasNext() {
@@ -1930,13 +2036,19 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                             }
                         }
 
-                        s = mapper.apply(next);
+                        final DoubleStream mapped = mapper.apply(next);
 
-                        if (s == null) {
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
                             cur = null;
-                        } else {
-                            cur = s.iteratorEx();
+                            break;
                         }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
                     }
 
                     return cur != null && cur.hasNext();
@@ -1953,15 +2065,23 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
                 @Override
                 public void closeResource() {
-                    closeMappedStream();
+                    closeMappedStream(true);
                 }
 
                 private void closeMappedStream() {
-                    if (s != null) {
-                        final Runnable closeAction = s::close;
-                        s = null;
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
                         cur = null;
-                        closeAction.run();
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
                     }
                 }
             });
@@ -1985,7 +2105,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
-    public Stream<T> onEach(final Consumer<? super T> action) throws IllegalArgumentException, IllegalStateException {
+    public Stream<T> onEach(final Consumer<? super T> action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -2043,13 +2163,13 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param action a non-interfering action to perform on each element
      * @param onComplete a runnable invoked once after all elements have been processed successfully
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} or {@code onComplete} is {@code null}.
      * @throws E if the action throws an exception
      * @throws E2 if the {@code onComplete} runnable throws an exception
-     * @throws IllegalArgumentException if {@code action} or {@code onComplete} is {@code null}.
      */
     @Override
     public <E extends Exception, E2 extends Exception> void forEach(final Throwables.Consumer<? super T, E> action, final Throwables.Runnable<E2> onComplete)
-            throws IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -2065,7 +2185,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 T next = null;
 
                 try {
@@ -2133,13 +2253,13 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      *        values; may return {@code null}
      * @param action a non-interfering bi-consumer invoked for each (element, secondary) pair
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code flatMapper} or {@code action} is {@code null}.
      * @throws E if the flat mapper throws an exception
      * @throws E2 if the action throws an exception
-     * @throws IllegalArgumentException if {@code flatMapper} or {@code action} is {@code null}.
      */
     @Override
     public <U, E extends Exception, E2 extends Exception> void forEach(final Throwables.Function<? super T, ? extends Iterable<? extends U>, E> flatMapper,
-            final Throwables.BiConsumer<? super T, ? super U, E2> action) throws IllegalArgumentException, IllegalStateException, E, E2 {
+            final Throwables.BiConsumer<? super T, ? super U, E2> action) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(flatMapper, cs.flatMapper);
@@ -2151,11 +2271,12 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         }
 
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(maxThreadNum);
+        // Nested user iterables must observe peer failures too, so accepted workers can finish before source cleanup.
         final Holder<Throwable> eHolder = new Holder<>();
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 Iterable<? extends U> c = null;
                 T next = null;
 
@@ -2172,7 +2293,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                         c = flatMapper.apply(next);
 
                         if (c != null) {
-                            for (final U u : c) {
+                            for (final Iterator<? extends U> iter = c.iterator(); eHolder.value() == null && iter.hasNext();) {
+                                final U u = iter.next();
                                 action.accept(next, u);
                             }
                         }
@@ -2205,17 +2327,17 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      *        values; may return {@code null}
      * @param action a tri-consumer invoked for each {@code (t, t2, t3)} triple
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code flatMapper}, {@code flatMapper2}, or {@code action} is
+     *         {@code null}.
      * @throws E if {@code flatMapper} throws an exception
      * @throws E2 if {@code flatMapper2} throws an exception
      * @throws E3 if {@code action} throws an exception
-     * @throws IllegalArgumentException if any of {@code flatMapper}, {@code flatMapper2}, or {@code action} is
-     *         {@code null}.
      */
     @Override
     public <T2, T3, E extends Exception, E2 extends Exception, E3 extends Exception> void forEach(
             final Throwables.Function<? super T, ? extends Iterable<T2>, E> flatMapper,
             final Throwables.Function<? super T2, ? extends Iterable<T3>, E2> flatMapper2,
-            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws IllegalArgumentException, E, E2, E3 {
+            final Throwables.TriConsumer<? super T, ? super T2, ? super T3, E3> action) throws IllegalStateException, IllegalArgumentException, E, E2, E3 {
         assertNotClosed();
 
         checkArgNotNull(flatMapper, cs.flatMapper);
@@ -2228,11 +2350,12 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         }
 
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(maxThreadNum);
+        // Nested user iterables must observe peer failures too, so accepted workers can finish before source cleanup.
         final Holder<Throwable> eHolder = new Holder<>();
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 Iterable<T2> c2 = null;
                 Iterable<T3> c3 = null;
                 T next = null;
@@ -2250,11 +2373,13 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                         c2 = flatMapper.apply(next);
 
                         if (c2 != null) {
-                            for (final T2 t2 : c2) {
+                            for (final Iterator<T2> iter2 = c2.iterator(); eHolder.value() == null && iter2.hasNext();) {
+                                final T2 t2 = iter2.next();
                                 c3 = flatMapper2.apply(t2);
 
                                 if (c3 != null) {
-                                    for (final T3 t3 : c3) {
+                                    for (final Iterator<T3> iter3 = c3.iterator(); eHolder.value() == null && iter3.hasNext();) {
+                                        final T3 t3 = iter3.next();
                                         action.accept(next, t2, t3);
                                     }
                                 }
@@ -2307,7 +2432,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, new Runnable() {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, new Runnable() {
                 private T first = null;
                 private T second = null;
 
@@ -2395,7 +2520,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, new Runnable() {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, new Runnable() {
                 private T first = null;
                 private T second = null;
                 private T third = null;
@@ -2472,15 +2597,15 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a map containing the accumulated key/value pairs
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the key mapper throws an exception
-     * @throws E2 if the value mapper throws an exception
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws E if the key mapper throws an exception
+     * @throws E2 if the value mapper throws an exception
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.Function<? super T, ? extends K, E> keyMapper,
             final Throwables.Function<? super T, ? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalArgumentException, IllegalStateException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -2503,7 +2628,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 final M map = mapFactory.get();
                 T next = null;
 
@@ -2564,18 +2689,19 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @return a map from keys to finished downstream results
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if the key mapper returns {@code null}, or if any of {@code keyMapper},
-     *         {@code valueMapper}, or {@code mapFactory} is {@code null}.
+     *         {@code valueMapper}, {@code downstream}, or {@code mapFactory} is {@code null}.
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      */
     @Override
     public <K, V, D, M extends Map<K, D>, E extends Exception, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E> keyMapper,
             final Throwables.Function<? super T, ? extends V, E2> valueMapper, final Collector<? super V, ?, D> downstream,
-            final Supplier<? extends M> mapFactory) throws IllegalArgumentException, IllegalStateException, E, E2 {
+            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
         checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum)) {
@@ -2598,7 +2724,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 @SuppressWarnings("rawtypes")
                 final Map<K, Object> map = (Map) mapFactory.get();
                 K key = null;
@@ -2685,7 +2811,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @return a map from keys to finished downstream results
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if a returned key is {@code null}, or if any of {@code flatKeyExtractor},
-     *         {@code valueMapper}, or {@code mapFactory} is {@code null}.
+     *         {@code valueMapper}, {@code downstream}, or {@code mapFactory} is {@code null}.
      * @throws E if the flat key extractor throws an exception
      * @throws E2 if the value mapper throws an exception
      */
@@ -2693,11 +2819,12 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
     public <K, V, D, M extends Map<K, D>, E extends Exception, E2 extends Exception> M flatGroupTo(
             final Throwables.Function<? super T, ? extends Collection<? extends K>, E> flatKeyExtractor,
             final Throwables.BiFunction<? super K, ? super T, ? extends V, E2> valueMapper, final Collector<? super V, ?, D> downstream,
-            final Supplier<? extends M> mapFactory) throws IllegalArgumentException, E, E2 {
+            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(flatKeyExtractor, cs.flatKeyExtractor);
         checkArgNotNull(valueMapper, cs.valueMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum)) {
@@ -2710,11 +2837,12 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         final Function<Object, D> downstreamFinisher = (Function<Object, D>) downstream.finisher();
 
         final List<ContinuableFuture<Map<K, Object>>> futureList = new ArrayList<>(maxThreadNum);
+        // Nested user iterables must observe peer failures too, so accepted workers can finish before source cleanup.
         final Holder<Throwable> eHolder = new Holder<>();
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 @SuppressWarnings("rawtypes")
                 final Map<K, Object> map = (Map) mapFactory.get();
                 Iterator<? extends K> keyIter = null;
@@ -2737,7 +2865,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                         if (N.notEmpty(kc)) {
                             keyIter = kc.iterator();
 
-                            while (keyIter.hasNext()) {
+                            while (eHolder.value() == null && keyIter.hasNext()) {
                                 key = checkArgNotNull(keyIter.next(), "element cannot be mapped to a null key");
                                 valueContainer = map.get(key);
 
@@ -2806,15 +2934,15 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param mapFactory a supplier providing a new empty multimap into which results are inserted
      * @return a multimap containing all accumulated key/value pairs
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the key mapper throws an exception
-     * @throws E2 if the value mapper throws an exception
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mapFactory} is
      *         {@code null}.
+     * @throws E if the key mapper throws an exception
+     * @throws E2 if the value mapper throws an exception
      */
     @Override
     public <K, V, C extends Collection<V>, M extends Multimap<K, V, C>, E extends Exception, E2 extends Exception> M toMultimap(
             final Throwables.Function<? super T, ? extends K, E> keyMapper, final Throwables.Function<? super T, ? extends V, E2> valueMapper,
-            final Supplier<? extends M> mapFactory) throws IllegalArgumentException, IllegalStateException, E, E2 {
+            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -2832,7 +2960,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 final M map = mapFactory.get();
                 T next = null;
 
@@ -2885,7 +3013,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
-    public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalArgumentException, IllegalStateException {
+    public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -2899,7 +3027,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 T result = (T) NONE;
                 T next = null;
 
@@ -2954,7 +3082,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @Override
     public <U> U reduce(final U identity, final BiFunction<? super U, ? super T, U> accumulator, final BinaryOperator<U> combiner)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -2969,7 +3097,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 U result = identity;
                 T next = null;
 
@@ -3022,7 +3150,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super T> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -3038,7 +3166,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 final R container = supplier.get();
                 T next = null;
 
@@ -3077,11 +3205,14 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param collector the {@code Collector} describing the reduction
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code collector} is {@code null}
      * @see java.util.stream.Collectors
      */
     @Override
-    public <R> R collect(final Collector<? super T, ?, R> collector) throws IllegalStateException {
+    public <R> R collect(final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(collector, cs.collector);
 
         if (canBeSequential(maxThreadNum)) {
             //noinspection resource
@@ -3104,11 +3235,11 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         final List<ContinuableFuture<Object>> futureList = new ArrayList<>(maxThreadNum);
         final Holder<Throwable> eHolder = new Holder<>();
-        final Object singleContainer = isConcurrentCollector ? supplier.get() : null;
+        final Object singleContainer = isConcurrentCollector ? callWithErrorCapture(supplier::get, eHolder) : null;
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 final Object container = isConcurrentCollector ? singleContainer : supplier.get();
                 T next = null;
 
@@ -3158,7 +3289,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
     @Override
-    public Optional<T> min(Comparator<? super T> comparator) throws IllegalArgumentException, IllegalStateException {
+    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -3195,7 +3326,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
     @Override
-    public Optional<T> max(Comparator<? super T> comparator) throws IllegalArgumentException, IllegalStateException {
+    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -3235,12 +3366,12 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @return {@code true} if at least one element matches the predicate; {@code false} if no
      *         element matches or the stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
     public <E extends Exception> boolean anyMatch(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -3255,7 +3386,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 T next = null;
 
                 try {
@@ -3297,12 +3428,12 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @return {@code true} if every element matches the predicate or the stream is empty;
      *         {@code false} if any element fails the predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
     public <E extends Exception> boolean allMatch(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -3317,7 +3448,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 T next = null;
 
                 try {
@@ -3359,12 +3490,12 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @return {@code true} if no element matches the predicate or the stream is empty;
      *         {@code false} if any element matches the predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
     public <E extends Exception> boolean noneMatch(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -3379,7 +3510,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 T next = null;
 
                 try {
@@ -3446,7 +3577,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 T next = null;
 
                 try {
@@ -3488,12 +3619,12 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @return an {@link Optional} describing the first (lowest-index) matching element, or an empty
      *         Optional if no element matches
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
     public <E extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -3509,7 +3640,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 final Pair<Long, T> pair = new Pair<>();
 
                 try {
@@ -3556,12 +3687,12 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @return an {@link Optional} describing some matching element, or an empty Optional if no
      *         element matches
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
     public <E extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -3576,7 +3707,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 T next = null;
 
                 try {
@@ -3622,12 +3753,12 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @return an {@link Optional} describing the last (highest-index) matching element, or an empty
      *         Optional if no element matches
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
     public <E extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -3643,7 +3774,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 final Pair<Long, T> pair = new Pair<>();
 
                 try {
@@ -3693,7 +3824,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @Override
     public <U> Stream<T> intersection(final Function<? super T, ? extends U> mapper, final Collection<U> c)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -3735,7 +3866,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @Override
     public <U> Stream<T> difference(final Function<? super T, ? extends U> mapper, final Collection<U> c)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -3814,7 +3945,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @Override
     public Stream<T> mergeWith(final Collection<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(nextSelector, cs.nextSelector);
@@ -3839,7 +3970,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @Override
     public Stream<T> mergeWith(final Stream<? extends T> b, final BiFunction<? super T, ? super T, MergeResult> nextSelector)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(nextSelector, cs.nextSelector);
@@ -3864,13 +3995,13 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @Override
     public <T2, R> Stream<R> zipWith(final Collection<T2> b, final BiFunction<? super T, ? super T2, ? extends R> zipFunction)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return new ParallelIteratorStream<>(Stream.parallelZip(iteratorEx(), N.iterate(b), zipFunction, maxThreadNum), false, null, maxThreadNum, splitStrategy,
-                asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
+        return new ParallelIteratorStream<>(Stream.parallelZip(iteratorEx(), N.iterate(b), zipFunction, maxThreadNum, asyncExecutor), false, null, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -3891,13 +4022,14 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @Override
     public <T2, R> Stream<R> zipWith(final Collection<T2> b, final T valueForNoneA, final T2 valueForNoneB,
-            final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalArgumentException, IllegalStateException {
+            final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return new ParallelIteratorStream<>(Stream.parallelZip(iteratorEx(), N.iterate(b), valueForNoneA, valueForNoneB, zipFunction, maxThreadNum), false,
-                null, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
+        return new ParallelIteratorStream<>(
+                Stream.parallelZip(iteratorEx(), N.iterate(b), valueForNoneA, valueForNoneB, zipFunction, maxThreadNum, asyncExecutor), false, null,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -3917,13 +4049,13 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @Override
     public <T2, T3, R> Stream<R> zipWith(final Collection<T2> b, final Collection<T3> c,
-            final TriFunction<? super T, ? super T2, ? super T3, ? extends R> zipFunction) throws IllegalArgumentException, IllegalStateException {
+            final TriFunction<? super T, ? super T2, ? super T3, ? extends R> zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return new ParallelIteratorStream<>(Stream.parallelZip(iteratorEx(), N.iterate(b), N.iterate(c), zipFunction, maxThreadNum), false, null, maxThreadNum,
-                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
+        return new ParallelIteratorStream<>(Stream.parallelZip(iteratorEx(), N.iterate(b), N.iterate(c), zipFunction, maxThreadNum, asyncExecutor), false, null,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -3947,14 +4079,14 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      */
     @Override
     public <T2, T3, R> Stream<R> zipWith(final Collection<T2> b, final Collection<T3> c, final T valueForNoneA, final T2 valueForNoneB, final T3 valueForNoneC,
-            final TriFunction<? super T, ? super T2, ? super T3, ? extends R> zipFunction) throws IllegalArgumentException, IllegalStateException {
+            final TriFunction<? super T, ? super T2, ? super T3, ? extends R> zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return new ParallelIteratorStream<>(
-                Stream.parallelZip(iteratorEx(), N.iterate(b), N.iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction, maxThreadNum), false,
-                null, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
+        return new ParallelIteratorStream<>(Stream.parallelZip(iteratorEx(), N.iterate(b), N.iterate(c), valueForNoneA, valueForNoneB, valueForNoneC,
+                zipFunction, maxThreadNum, asyncExecutor), false, null, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
+                closeHandlersForNewStream());
     }
 
     /**
@@ -3969,17 +4101,18 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}.
      */
     @Override
     public <T2, R> Stream<R> zipWith(final Stream<T2> b, final BiFunction<? super T, ? super T2, ? extends R> zipFunction)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return new ParallelIteratorStream<>(Stream.parallelZip(this, b, zipFunction, maxThreadNum), false, null, maxThreadNum, splitStrategy, asyncExecutor,
-                cancelUncompletedThreads, null);
+        return new ParallelIteratorStream<>(Stream.parallelZip(this, b, zipFunction, maxThreadNum, asyncExecutor), false, null, maxThreadNum, splitStrategy,
+                asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -3996,17 +4129,18 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}.
      */
     @Override
     public <T2, R> Stream<R> zipWith(final Stream<T2> b, final T valueForNoneA, final T2 valueForNoneB,
-            final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalArgumentException, IllegalStateException {
+            final BiFunction<? super T, ? super T2, ? extends R> zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return new ParallelIteratorStream<>(Stream.parallelZip(this, b, valueForNoneA, valueForNoneB, zipFunction, maxThreadNum), false, null, maxThreadNum,
-                splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorStream<>(Stream.parallelZip(this, b, valueForNoneA, valueForNoneB, zipFunction, maxThreadNum, asyncExecutor), false, null,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -4022,17 +4156,19 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param zipFunction a function to combine corresponding element triples
      * @return a new parallel stream of zipped results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}.
      */
     @Override
     public <T2, T3, R> Stream<R> zipWith(final Stream<T2> b, final Stream<T3> c, final TriFunction<? super T, ? super T2, ? super T3, ? extends R> zipFunction)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
+        checkArgNotNull(c, cs.c);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return new ParallelIteratorStream<>(Stream.parallelZip(this, b, c, zipFunction, maxThreadNum), false, null, maxThreadNum, splitStrategy, asyncExecutor,
-                cancelUncompletedThreads, null);
+        return new ParallelIteratorStream<>(Stream.parallelZip(this, b, c, zipFunction, maxThreadNum, asyncExecutor), false, null, maxThreadNum, splitStrategy,
+                asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -4052,16 +4188,19 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param zipFunction a function to combine corresponding element triples
      * @return a new parallel stream of zipped results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}.
      */
     @Override
     public <T2, T3, R> Stream<R> zipWith(final Stream<T2> b, final Stream<T3> c, final T valueForNoneA, final T2 valueForNoneB, final T3 valueForNoneC,
             final TriFunction<? super T, ? super T2, ? super T3, ? extends R> zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
+        checkArgNotNull(c, cs.c);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return new ParallelIteratorStream<>(Stream.parallelZip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction, maxThreadNum), false, null,
+        return new ParallelIteratorStream<>(
+                Stream.parallelZip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction, maxThreadNum, asyncExecutor), false, null,
                 maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 

@@ -251,4 +251,67 @@ public class OptionalByteTypeTest extends TestBase {
         optionalByteType.serializeTo(writer, opt, config);
         verify(writer).write((byte) 64);
     }
+
+    @SuppressWarnings("unchecked")
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+        final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            ((Type<Object>) type).serializeTo(jsonWriter, value, config);
+            return jsonWriter.toString();
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(jsonWriter);
+        }
+    }
+
+    // T5-01 / T6-03 (2026-09-06): serializeTo ignored writeNullNumberAsZero for the optional numeric handlers.
+    @Test
+    public void reviewFixes20260906_serializeToHonoursWriteNullNumberAsZero() throws java.io.IOException {
+        final com.landawn.abacus.parser.JsonSerConfig zero = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true);
+
+        assertEquals("0", reviewFixes20260906_ser(optionalByteType, OptionalByte.empty(), zero));
+        assertEquals("0", reviewFixes20260906_ser(optionalByteType, null, zero));
+        assertEquals("0", reviewFixes20260906_ser(optionalByteType, OptionalByte.empty(), com.landawn.abacus.parser.XmlSerConfig.create().setWriteNullNumberAsZero(true)));
+        assertEquals("null", reviewFixes20260906_ser(optionalByteType, OptionalByte.empty(), com.landawn.abacus.parser.JsonSerConfig.create()));
+        assertEquals("null", reviewFixes20260906_ser(optionalByteType, null, com.landawn.abacus.parser.JsonSerConfig.create()));
+        assertEquals("null", reviewFixes20260906_ser(optionalByteType, OptionalByte.empty(), null));
+        assertEquals("null", reviewFixes20260906_ser(optionalByteType, null, null));
+        assertEquals("null", reviewFixes20260906_ser(optionalByteType, OptionalByte.empty(), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullBooleanAsFalse(true)));
+        assertEquals("7", reviewFixes20260906_ser(optionalByteType, OptionalByte.of((byte) 7), zero));
+        assertEquals("7", reviewFixes20260906_ser(optionalByteType, OptionalByte.of((byte) 7), null));
+    }
+
+    // T5-06 (2026-09-06, code change REJECTED - pinned): an empty-string column value is coerced by Numbers.toXxx(Object)
+    // to a PRESENT zero, exactly as the non-optional handlers (IntegerType.get ...) answer, while valueOf("") is empty.
+    @Test
+    public void reviewFixes20260906_getEmptyStringColumnIsPresentZeroUnlikeValueOf() throws SQLException {
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getObject(1)).thenReturn("");
+        when(rs.getObject("c")).thenReturn("");
+        when(rs.getObject(2)).thenReturn(" ");
+        when(rs.getObject(3)).thenReturn("7");
+        when(rs.getObject(4)).thenReturn(null);
+
+        assertTrue(optionalByteType.get(rs, 1).isPresent());
+        assertEquals((byte) 0, optionalByteType.get(rs, 1).get());
+        assertTrue(optionalByteType.get(rs, "c").isPresent());
+        assertEquals((byte) 0, optionalByteType.get(rs, "c").get());
+        assertThrows(NumberFormatException.class, () -> optionalByteType.get(rs, 2));
+        assertEquals((byte) 7, optionalByteType.get(rs, 3).get());
+        assertTrue(optionalByteType.get(rs, 4).isEmpty());
+
+        assertTrue(optionalByteType.valueOf("").isEmpty());
+        assertTrue(optionalByteType.valueOf((String) null).isEmpty());
+        assertEquals((byte) 7, optionalByteType.valueOf("7").get());
+    }
+
+    // T5-03 (2026-09-06): out-of-range text throws ArithmeticException (Numbers.toXxx contract), not NumberFormatException.
+    @Test
+    public void reviewFixes20260906_valueOfOutOfRangeThrowsArithmeticException() {
+        assertThrows(ArithmeticException.class, () -> optionalByteType.valueOf("128"));
+        assertThrows(ArithmeticException.class, () -> optionalByteType.valueOf("-129"));
+        assertThrows(NumberFormatException.class, () -> optionalByteType.valueOf("abc"));
+        assertThrows(NumberFormatException.class, () -> optionalByteType.valueOf(" "));
+        assertEquals((byte) 127, optionalByteType.valueOf("127").get());
+    }
 }

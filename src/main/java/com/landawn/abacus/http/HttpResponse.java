@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
@@ -283,8 +284,10 @@ public class HttpResponse {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return The deserialized response body, or {@code null} if no body was received
      * @throws IllegalArgumentException if {@code resultClass} is {@code null}.
+     * @throws RuntimeException if the non-null body cannot be decoded as the requested type by the selected content-format parser or converter.
      */
-    public <T> T body(final Class<T> resultClass) throws IllegalArgumentException {
+    @MayReturnNull
+    public <T> T body(final Class<T> resultClass) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(resultClass, cs.resultClass);
 
         if (body == null) {
@@ -343,8 +346,10 @@ public class HttpResponse {
      * @param resultType The type information including generic parameters. Must not be {@code null}.
      * @return The deserialized response body, or {@code null} if no body was received
      * @throws IllegalArgumentException if {@code resultType} is {@code null}.
+     * @throws RuntimeException if the non-null body cannot be decoded as the requested type by the selected content-format parser or converter.
      */
-    public <T> T body(final Type<T> resultType) throws IllegalArgumentException {
+    @MayReturnNull
+    public <T> T body(final Type<T> resultType) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(resultType, cs.resultType);
 
         if (body == null) {

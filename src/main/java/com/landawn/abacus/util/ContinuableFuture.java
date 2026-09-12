@@ -14,6 +14,7 @@
 package com.landawn.abacus.util;
 
 import java.util.Arrays;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -23,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -110,20 +112,23 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *     <td>{@code thenRunAsync(Runnable)}</td>
  *     <td>{@code thenRunAsync}</td>
  *     <td>Runs after successful completion; ignores the upstream result.</td>
- *     <td>Same.</td>
+ *     <td>Submits a worker that blocks in {@code get()} immediately (not a completion callback).
+ *         Parent cancellation completes the child exceptionally with {@code ExecutionException(CancellationException)}
+ *         rather than {@code isCancelled() == true}; parent {@code ExecutionException} is wrapped again.</td>
  *   </tr>
  *   <tr>
  *     <td>{@code thenRunAsync(Consumer)}</td>
  *     <td>{@code thenAcceptAsync}</td>
  *     <td>Consumes the successful upstream result.</td>
- *     <td>Same.</td>
+ *     <td>Same wrapping as {@code thenRunAsync(Runnable)}: blocking {@code get()} inside a {@code FutureTask}.</td>
  *   </tr>
  *   <tr>
  *     <td>{@code thenRunAsync(BiConsumer)}</td>
  *     <td>{@code whenCompleteAsync}</td>
  *     <td>Receives the result and exception.</td>
  *     <td>Produces a {@code Void} result instead of preserving the upstream value the way {@code whenComplete}
- *         does; the callback receives {@link Exception}, not {@link Throwable}.</td>
+ *         does. A normally returning callback also recovers an upstream failure; {@code whenComplete} preserves it.
+ *         The callback receives {@link Exception}, not {@link Throwable}.</td>
  *   </tr>
  *   <tr>
  *     <td>{@code thenCallAsync(Callable)}</td>
@@ -136,7 +141,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *     <td>{@code thenCallAsync(Function)}</td>
  *     <td>{@code thenApplyAsync}</td>
  *     <td>Transforms the successful upstream result.</td>
- *     <td>Same, except the callback may throw checked exceptions.</td>
+ *     <td>Same wrapping as {@code thenRunAsync(Runnable)}, except the callback may throw checked exceptions.</td>
  *   </tr>
  *   <tr>
  *     <td>{@code thenCallAsync(BiFunction)}</td>
@@ -184,8 +189,8 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <tr>
  *     <td>{@code runAsyncAfterEither(other, Runnable)}</td>
  *     <td>{@code runAfterEitherAsync}</td>
- *     <td>Runs after the first of the two to complete.</td>
- *     <td>Same.</td>
+ *     <td>Runs after the first of the two to complete, including failure or cancellation.</td>
+ *     <td>The action still runs after an exceptional completion; {@code runAfterEitherAsync} requires normal completion.</td>
  *   </tr>
  *   <tr>
  *     <td>{@code runAsyncAfterEither(other, Consumer)}</td>
@@ -197,16 +202,15 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <tr>
  *     <td>{@code runAsyncAfterEither(other, BiConsumer)}</td>
  *     <td>{@code —}</td>
- *     <td>Reacts to the first <b>successful</b> completion, surfacing an exception only if both fail;
- *         receives (result, exception).</td>
- *     <td>No counterpart; also differs from the other {@code *AfterEither} overloads, which react to the
- *         first to <i>complete</i>.</td>
+ *     <td>Reacts to the first completion, whether successful or exceptional; receives (result, exception).</td>
+ *     <td>No counterpart; use {@code runAsyncAfterFirstSuccess} to wait for a successful result.</td>
  *   </tr>
  *   <tr>
  *     <td>{@code callAsyncAfterEither(other, Callable)}</td>
  *     <td>{@code runAfterEitherAsync} (returning a value)</td>
  *     <td>Runs after the first to complete, ignores its result, and produces a new result.</td>
- *     <td>{@code runAfterEither} returns {@code Void}.</td>
+ *     <td>The action still runs after failure or cancellation; {@code runAfterEitherAsync} requires normal completion
+ *         and returns {@code Void}.</td>
  *   </tr>
  *   <tr>
  *     <td>{@code callAsyncAfterEither(other, Function)}</td>
@@ -222,15 +226,27 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *     <td>No counterpart; reacts to the first to <i>complete</i>, not the first success.</td>
  *   </tr>
  *   <tr>
- *     <td>{@code runAsyncAfterFirstSuccess(other, Runnable | Consumer | BiConsumer)}</td>
+ *     <td>{@code runAsyncAfterFirstSuccess(other, Runnable | Consumer)}</td>
  *     <td>{@code —}</td>
- *     <td>Runs after the first <b>successful</b> completion (fails only if both fail).</td>
+ *     <td>Runs after the first <b>successful</b> completion. If both inputs fail, propagates the failure without running the action.</td>
  *     <td>No counterpart.</td>
  *   </tr>
  *   <tr>
- *     <td>{@code callAsyncAfterFirstSuccess(other, Callable | Function | BiFunction)}</td>
+ *     <td>{@code callAsyncAfterFirstSuccess(other, Callable | Function)}</td>
  *     <td>{@code —}</td>
- *     <td>Produces a result after the first <b>successful</b> completion (fails only if both fail).</td>
+ *     <td>Produces a result after the first <b>successful</b> completion. If both inputs fail, propagates the failure without running the action.</td>
+ *     <td>No counterpart.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code runAsyncAfterFirstSuccess(other, BiConsumer)}</td>
+ *     <td>No direct counterpart.</td>
+ *     <td>Receives the first successful result, or an exception if both inputs fail; a normally returning action recovers that failure.</td>
+ *     <td>No counterpart.</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code callAsyncAfterFirstSuccess(other, BiFunction)}</td>
+ *     <td>No direct counterpart.</td>
+ *     <td>Transforms the first successful result, or an exception if both inputs fail, and may produce a recovery value.</td>
  *     <td>No counterpart.</td>
  *   </tr>
  *   <tr>
@@ -242,7 +258,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <tr>
  *     <td>{@code thenDelay(delay, unit)}</td>
  *     <td>{@code —} (compare {@link CompletableFuture#delayedExecutor(long, TimeUnit)})</td>
- *     <td>Inserts a shared delay after upstream completion and before the next stage.</td>
+ *     <td>Inserts a shared delay after upstream completion; cancellation is immediately terminal.</td>
  *     <td>No direct counterpart: {@code CompletableFuture} needs {@code delayedExecutor}/{@code orTimeout}.</td>
  *   </tr>
  * </table>
@@ -509,12 +525,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param action the action to be executed asynchronously;
+     * @param action the action to be executed asynchronously; must not be {@code null}.
      * @return a {@code ContinuableFuture<Void>} representing the pending completion of the action.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      * @see N#asyncExecute(Throwables.Runnable)
      */
-    public static ContinuableFuture<Void> run(final Throwables.Runnable<? extends Exception> action) throws IllegalArgumentException {
+    public static ContinuableFuture<Void> run(final Throwables.Runnable<? extends Exception> action)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(action, cs.action);
 
         return run(action, N.ASYNC_EXECUTOR.getExecutor());
@@ -540,12 +558,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * }
      * }</pre>
      *
-     * @param action the action to be executed asynchronously;
+     * @param action the action to be executed asynchronously; must not be {@code null}.
      * @param executor the executor to use for running the action; must not be {@code null}.
      * @return a {@code ContinuableFuture<Void>} representing the pending completion of the action.
      * @throws IllegalArgumentException if any of {@code action}, {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
-    public static ContinuableFuture<Void> run(final Throwables.Runnable<? extends Exception> action, final Executor executor) throws IllegalArgumentException {
+    public static ContinuableFuture<Void> run(final Throwables.Runnable<? extends Exception> action, final Executor executor)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(action, cs.action);
         N.checkArgNotNull(executor, cs.executor);
 
@@ -578,12 +598,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <T> the type of the result returned by the callable.
-     * @param action the callable action to be executed asynchronously;
+     * @param action the callable action to be executed asynchronously; must not be {@code null}.
      * @return a {@code ContinuableFuture<T>} representing the pending result of the action.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      * @see N#asyncExecute(Callable)
      */
-    public static <T> ContinuableFuture<T> call(final Callable<? extends T> action) throws IllegalArgumentException {
+    public static <T> ContinuableFuture<T> call(final Callable<? extends T> action) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(action, cs.action);
 
         return call(action, N.ASYNC_EXECUTOR.getExecutor());
@@ -607,12 +628,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <T> the type of the result returned by the callable.
-     * @param action the callable action to be executed asynchronously;
+     * @param action the callable action to be executed asynchronously; must not be {@code null}.
      * @param executor the executor to use for running the action; must not be {@code null}.
      * @return a {@code ContinuableFuture<T>} representing the pending result of the action.
      * @throws IllegalArgumentException if any of {@code action}, {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
-    public static <T> ContinuableFuture<T> call(final Callable<? extends T> action, final Executor executor) throws IllegalArgumentException {
+    public static <T> ContinuableFuture<T> call(final Callable<? extends T> action, final Executor executor)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(action, cs.action);
         N.checkArgNotNull(executor, cs.executor);
 
@@ -784,7 +807,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Cancels this future and all upstream futures in the chain recursively. This method is useful
+     * Cancels this future and all distinct upstream futures in the dependency graph recursively. This method is useful
      * when you have a chain of dependent futures and want to cancel the entire computation pipeline.
      *
      * <p>The method attempts to cancel all futures in the chain and returns {@code true} only if
@@ -809,21 +832,42 @@ public class ContinuableFuture<T> implements Future<T> {
      * @see Future#cancel(boolean)
      */
     public boolean cancelAll(final boolean mayInterruptIfRunning) {
-        final boolean thisCancelled = cancel(mayInterruptIfRunning);
-        boolean upFuturesCancelled = true;
-
-        if (upFutures != null && !upFutures.isEmpty()) {
-            for (final ContinuableFuture<?> preFuture : upFutures) {
-                upFuturesCancelled = upFuturesCancelled & preFuture.cancelAll(mayInterruptIfRunning);
+        IdentityHashMap<ContinuableFuture<?>, Boolean> results = CANCELLATION_RESULTS.get();
+        final boolean outermost = results == null;
+        if (outermost) {
+            results = new IdentityHashMap<>();
+            CANCELLATION_RESULTS.set(results);
+        }
+        try {
+            if (results.containsKey(this)) {
+                return results.get(this);
+            }
+            results.put(this, true);
+            boolean cancelled = cancel(mayInterruptIfRunning);
+            if (upFutures != null) {
+                for (final ContinuableFuture<?> previous : upFutures) {
+                    final boolean previousCancelled = results.containsKey(previous) ? results.get(previous) : previous.cancelAll(mayInterruptIfRunning);
+                    results.put(previous, previousCancelled);
+                    cancelled &= previousCancelled;
+                }
+            }
+            results.put(this, cancelled);
+            return cancelled;
+        } finally {
+            if (outermost) {
+                CANCELLATION_RESULTS.remove();
             }
         }
-
-        return thisCancelled && upFuturesCancelled;
     }
+
+    // Invocation-scoped memoization follows virtual calls, including transparent map/delay/executor wrappers.
+    // Keeping the context through those calls preserves subclass behavior and visits shared ancestors once.
+    private static final ThreadLocal<IdentityHashMap<ContinuableFuture<?>, Boolean>> CANCELLATION_RESULTS = new ThreadLocal<>();
+    private static final ThreadLocal<IdentityHashMap<ContinuableFuture<?>, Boolean>> CANCELLATION_STATUS_RESULTS = new ThreadLocal<>();
 
     /**
      * Checks if this task and all upstream futures in the chain have been cancelled. This method
-     * recursively checks the cancellation status of all futures in the dependency chain.
+     * recursively checks each distinct future's cancellation status once per invocation.
      *
      * <p>Returns {@code true} only if every future in the chain has been cancelled. If any future
      * in the chain is not cancelled, this method returns {@code false}.
@@ -845,15 +889,35 @@ public class ContinuableFuture<T> implements Future<T> {
      * @see Future#isCancelled()
      */
     public boolean isAllCancelled() {
-        if (upFutures != null && !upFutures.isEmpty()) {
-            for (final ContinuableFuture<?> preFuture : upFutures) {
-                if (!preFuture.isAllCancelled()) {
-                    return false;
+        IdentityHashMap<ContinuableFuture<?>, Boolean> results = CANCELLATION_STATUS_RESULTS.get();
+        final boolean outermost = results == null;
+        if (outermost) {
+            results = new IdentityHashMap<>();
+            CANCELLATION_STATUS_RESULTS.set(results);
+        }
+        try {
+            if (results.containsKey(this)) {
+                return results.get(this);
+            }
+            results.put(this, true);
+            if (upFutures != null) {
+                for (final ContinuableFuture<?> previous : upFutures) {
+                    final boolean previousCancelled = results.containsKey(previous) ? results.get(previous) : previous.isAllCancelled();
+                    results.put(previous, previousCancelled);
+                    if (!previousCancelled) {
+                        results.put(this, false);
+                        return false;
+                    }
                 }
             }
+            final boolean cancelled = isCancelled();
+            results.put(this, cancelled);
+            return cancelled;
+        } finally {
+            if (outermost) {
+                CANCELLATION_STATUS_RESULTS.remove();
+            }
         }
-
-        return isCancelled();
     }
 
     /**
@@ -907,13 +971,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @return the computed result.
+     * @throws InterruptedException if the current thread was interrupted while waiting.
      * @throws CancellationException if the computation was cancelled.
      * @throws ExecutionException if the computation threw an exception.
-     * @throws InterruptedException if the current thread was interrupted while waiting.
      * @see Future#get()
      */
     @Override
-    public T get() throws InterruptedException, ExecutionException {
+    public T get() throws InterruptedException, CancellationException, ExecutionException {
         return future.get();
     }
 
@@ -945,14 +1009,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param timeout the maximum time to wait.
      * @param unit the time unit of the timeout argument.
      * @return the computed result.
-     * @throws CancellationException if the computation was cancelled.
-     * @throws ExecutionException if the computation threw an exception.
      * @throws InterruptedException if the current thread was interrupted while waiting.
      * @throws TimeoutException if the wait timed out.
+     * @throws CancellationException if the computation was cancelled.
+     * @throws ExecutionException if the computation threw an exception.
      * @see Future#get(long, TimeUnit)
      */
     @Override
-    public T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public T get(final long timeout, final TimeUnit unit) throws InterruptedException, TimeoutException, CancellationException, ExecutionException {
         return future.get(timeout, unit);
     }
 
@@ -1069,11 +1133,11 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param defaultValue the value to return if the computation is not yet complete.
      * @return the computed result if the computation is already complete, otherwise {@code defaultValue}.
+     * @throws InterruptedException if the current thread was interrupted (propagated from the underlying {@link Future#get()} call).
      * @throws CancellationException if the computation was cancelled.
      * @throws ExecutionException if the computation threw an exception.
-     * @throws InterruptedException if the current thread was interrupted (propagated from the underlying {@link Future#get()} call).
      */
-    public T getNow(final T defaultValue) throws InterruptedException, ExecutionException {
+    public T getNow(final T defaultValue) throws InterruptedException, CancellationException, ExecutionException {
         if (isDone()) {
             return get();
         }
@@ -1107,13 +1171,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <E> the type of exception the function may throw.
      * @param action the function to apply to the result.
      * @return the result of applying the function to the computed result.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws InterruptedException if the current thread was interrupted while waiting.
+     * @throws CancellationException if the computation was cancelled.
      * @throws ExecutionException if the computation threw an exception.
      * @throws E if the function throws an exception.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public <U, E extends Exception> U getThenApply(final Throwables.Function<? super T, ? extends U, E> action)
-            throws InterruptedException, ExecutionException, E, IllegalArgumentException {
+            throws IllegalArgumentException, InterruptedException, CancellationException, ExecutionException, E {
         N.checkArgNotNull(action, cs.action);
 
         return action.apply(get());
@@ -1143,14 +1208,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param unit the time unit of the timeout argument.
      * @param action the function to apply to the result.
      * @return the result of applying the function to the computed result.
-     * @throws InterruptedException if the current thread was interrupted while waiting.
-     * @throws ExecutionException if the computation threw an exception.
-     * @throws TimeoutException if the wait timed out.
-     * @throws E if the function throws an exception.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws InterruptedException if the current thread was interrupted while waiting.
+     * @throws TimeoutException if the wait timed out.
+     * @throws CancellationException if the computation was cancelled.
+     * @throws ExecutionException if the computation threw an exception.
+     * @throws E if the function throws an exception.
      */
     public <U, E extends Exception> U getThenApply(final long timeout, final TimeUnit unit, final Throwables.Function<? super T, ? extends U, E> action)
-            throws InterruptedException, ExecutionException, TimeoutException, E, IllegalArgumentException {
+            throws IllegalArgumentException, InterruptedException, TimeoutException, CancellationException, ExecutionException, E {
         N.checkArgNotNull(action, cs.action);
 
         return action.apply(get(timeout, unit));
@@ -1183,12 +1249,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <E> the type of exception the function may throw.
      * @param action the bi-function to apply to the result and exception.
      * @return the result of applying the function.
-     * @throws E if the bi-function throws an exception.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the bi-function throws an exception.
      * @see #getAsResult()
      */
     public <U, E extends Exception> U getThenApply(final Throwables.BiFunction<? super T, ? super Exception, ? extends U, E> action)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         final Result<T, Exception> result = getAsResult();
@@ -1220,12 +1286,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param unit the time unit of the timeout argument.
      * @param action the bi-function to apply to the result and exception.
      * @return the result of applying the function.
-     * @throws E if the bi-function throws an exception.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the bi-function throws an exception.
      * @see #getAsResult(long, TimeUnit)
      */
     public <U, E extends Exception> U getThenApply(final long timeout, final TimeUnit unit,
-            final Throwables.BiFunction<? super T, ? super Exception, ? extends U, E> action) throws E, IllegalArgumentException {
+            final Throwables.BiFunction<? super T, ? super Exception, ? extends U, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         final Result<T, Exception> result = getAsResult(timeout, unit);
@@ -1252,13 +1318,14 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <E> the type of exception the consumer may throw.
      * @param action the consumer to execute with the result.
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws InterruptedException if the current thread was interrupted while waiting.
+     * @throws CancellationException if the computation was cancelled.
      * @throws ExecutionException if the computation threw an exception.
      * @throws E if the consumer throws an exception.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public <E extends Exception> void getThenAccept(final Throwables.Consumer<? super T, E> action)
-            throws InterruptedException, ExecutionException, E, IllegalArgumentException {
+            throws IllegalArgumentException, InterruptedException, CancellationException, ExecutionException, E {
         N.checkArgNotNull(action, cs.action);
 
         action.accept(get());
@@ -1287,14 +1354,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param timeout the maximum time to wait.
      * @param unit the time unit of the timeout argument.
      * @param action the consumer to execute with the result.
-     * @throws InterruptedException if the current thread was interrupted while waiting.
-     * @throws ExecutionException if the computation threw an exception.
-     * @throws TimeoutException if the wait timed out.
-     * @throws E if the consumer throws an exception.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws InterruptedException if the current thread was interrupted while waiting.
+     * @throws TimeoutException if the wait timed out.
+     * @throws CancellationException if the computation was cancelled.
+     * @throws ExecutionException if the computation threw an exception.
+     * @throws E if the consumer throws an exception.
      */
     public <E extends Exception> void getThenAccept(final long timeout, final TimeUnit unit, final Throwables.Consumer<? super T, E> action)
-            throws InterruptedException, ExecutionException, TimeoutException, E, IllegalArgumentException {
+            throws IllegalArgumentException, InterruptedException, TimeoutException, CancellationException, ExecutionException, E {
         N.checkArgNotNull(action, cs.action);
 
         action.accept(get(timeout, unit));
@@ -1325,11 +1393,11 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <E> the type of exception the bi-consumer may throw.
      * @param action the bi-consumer to execute with the result and exception.
-     * @throws E if the bi-consumer throws an exception.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the bi-consumer throws an exception.
      * @see #getAsResult()
      */
-    public <E extends Exception> void getThenAccept(final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void getThenAccept(final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         final Result<T, Exception> result = getAsResult();
@@ -1360,12 +1428,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param timeout the maximum time to wait.
      * @param unit the time unit of the timeout argument.
      * @param action the bi-consumer to execute with the result and exception.
-     * @throws E if the bi-consumer throws an exception.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the bi-consumer throws an exception.
      * @see #getAsResult(long, TimeUnit)
      */
     public <E extends Exception> void getThenAccept(final long timeout, final TimeUnit unit,
-            final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws E, IllegalArgumentException {
+            final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         final Result<T, Exception> result = getAsResult(timeout, unit);
@@ -1383,8 +1451,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * the function executed asynchronously on the configured executor, use
      * {@link #thenCallAsync(Throwables.Function)} instead.
      *
-     * <p>If the function throws a checked exception, that exception is rethrown from {@code get()}
-     * wrapped as an unchecked exception via {@code ExceptionUtil.toRuntimeException(e, true)}.
+     * <p>If the function throws, {@code get()} reports the failure through {@link ExecutionException},
+     * matching the {@link Future} contract.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1429,19 +1497,19 @@ public class ContinuableFuture<T> implements Future<T> {
 
                 try {
                     return func.apply(ret);
-                } catch (final Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
+                } catch (final Throwable e) {
+                    throw new ExecutionException(e);
                 }
             }
 
             @Override
-            public U get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            public U get(final long timeout, final TimeUnit unit) throws InterruptedException, TimeoutException, ExecutionException {
                 final T ret = ContinuableFuture.this.get(timeout, unit);
 
                 try {
                     return func.apply(ret);
-                } catch (final Exception e) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
+                } catch (final Throwable e) {
+                    throw new ExecutionException(e);
                 }
             }
         }, null, asyncExecutor) {
@@ -1478,8 +1546,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the action to execute after this future completes.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
-    public ContinuableFuture<Void> thenRunAsync(final Throwables.Runnable<? extends Exception> action) throws IllegalArgumentException {
+    public ContinuableFuture<Void> thenRunAsync(final Throwables.Runnable<? extends Exception> action)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
@@ -1511,8 +1581,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the consumer to execute with the result.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
-    public ContinuableFuture<Void> thenRunAsync(final Throwables.Consumer<? super T, ? extends Exception> action) throws IllegalArgumentException {
+    public ContinuableFuture<Void> thenRunAsync(final Throwables.Consumer<? super T, ? extends Exception> action)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
@@ -1550,10 +1622,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the bi-consumer to execute with the result and exception.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      * @see #getAsResult()
      */
     public ContinuableFuture<Void> thenRunAsync(final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
@@ -1586,8 +1659,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the callable to execute after this future completes.
      * @return a new {@code ContinuableFuture<R>} with the result of the callable.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
-    public <R> ContinuableFuture<R> thenCallAsync(final Callable<? extends R> action) throws IllegalArgumentException {
+    public <R> ContinuableFuture<R> thenCallAsync(final Callable<? extends R> action) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
@@ -1618,13 +1692,14 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <R> the type of the result returned by the function.
-     * @param action the function to apply to the result;
+     * @param action the function to apply to the result; must not be {@code null}.
      * @return a new {@code ContinuableFuture<R>} with the transformed result.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      * @see #map(Throwables.Function)
      */
     public <R> ContinuableFuture<R> thenCallAsync(final Throwables.Function<? super T, ? extends R, ? extends Exception> action)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> action.apply(get()));
@@ -1657,10 +1732,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param action the bi-function to apply to the result and exception.
      * @return a new {@code ContinuableFuture<R>} with the transformed result.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      * @see #getAsResult()
      */
     public <R> ContinuableFuture<R> thenCallAsync(final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
@@ -1689,13 +1765,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * });
      * }</pre>
      *
-     * @param other the other future to wait for.
+     * @param other the other future to wait for; must not be {@code null}.
      * @param action the action to execute after both futures complete.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
     public ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
@@ -1730,13 +1808,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <U> the type of the other future's result.
-     * @param other the other future to wait for.
+     * @param other the other future to wait for; must not be {@code null}.
      * @param action the bi-consumer to execute with both results.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
     public <U> ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<U> other,
-            final Throwables.BiConsumer<? super T, ? super U, ? extends Exception> action) throws IllegalArgumentException {
+            final Throwables.BiConsumer<? super T, ? super U, ? extends Exception> action) throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
@@ -1779,19 +1859,28 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <U> the type of the other future's result.
-     * @param other the other future to wait for.
+     * @param other the other future to wait for; must not be {@code null}.
      * @param action the consumer to execute with the tuple of results and exceptions.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      * @see #getAsResult()
      */
     public <U> ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<U> other,
-            final Throwables.Consumer<? super Tuple4<T, ? super Exception, U, ? super Exception>, ? extends Exception> action) throws IllegalArgumentException {
+            final Throwables.Consumer<? super Tuple4<T, Exception, U, Exception>, ? extends Exception> action)
+            throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> result = getAsResult();
-            final Result<U, Exception> result2 = other.getAsResult();
+            // awaitResult, not getAsResult: getAsResult converts the WORKER's own InterruptedException into
+            // "this future failed" and restores the interrupt flag, which then makes the very next get() fail
+            // instantly - so cancelling the combined stage used to invoke the callback with two fabricated
+            // InterruptedExceptions for two futures that had not completed at all. The strict overloads have
+            // always used awaitResult, whose `catch (InterruptedException e) { throw e; }` makes the
+            // interruption terminal for this stage while still reporting genuine input failures as a Result.
+            final Result<T, Exception> result = awaitResult(this);
+            final Result<U, Exception> result2 = awaitResult(other);
 
             action.accept(Tuple.of(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException()));
             return null;
@@ -1822,20 +1911,28 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <U> the type of the other future's result.
-     * @param other the other future to wait for.
+     * @param other the other future to wait for; must not be {@code null}.
      * @param action the quad-consumer to execute with both results and exceptions.
      * @return a new {@code ContinuableFuture<Void>} representing the completion of the action.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      * @see #getAsResult()
      */
     public <U> ContinuableFuture<Void> runAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.QuadConsumer<? super T, ? super Exception, ? super U, ? super Exception, ? extends Exception> action)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> result = getAsResult();
-            final Result<U, Exception> result2 = other.getAsResult();
+            // awaitResult, not getAsResult: getAsResult converts the WORKER's own InterruptedException into
+            // "this future failed" and restores the interrupt flag, which then makes the very next get() fail
+            // instantly - so cancelling the combined stage used to invoke the callback with two fabricated
+            // InterruptedExceptions for two futures that had not completed at all. The strict overloads have
+            // always used awaitResult, whose `catch (InterruptedException e) { throw e; }` makes the
+            // interruption terminal for this stage while still reporting genuine input failures as a Result.
+            final Result<T, Exception> result = awaitResult(this);
+            final Result<U, Exception> result2 = awaitResult(other);
 
             action.accept(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException());
             return null;
@@ -1865,11 +1962,14 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the type of the result returned by the callable.
      * @param other the other future to wait for completion; must not be {@code null}.
-     * @param action the callable to execute after both futures complete;
+     * @param action the callable to execute after both futures complete; must not be {@code null}.
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the callable.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
-    public <R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<?> other, final Callable<? extends R> action) throws IllegalArgumentException {
+    public <R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<?> other, final Callable<? extends R> action)
+            throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
@@ -1905,12 +2005,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <U> the result type of the other ContinuableFuture.
      * @param <R> the result type of the bi-function and the returned ContinuableFuture.
      * @param other the other ContinuableFuture that must complete before executing the action; must not be {@code null}.
-     * @param action the bi-function to execute with both results;
+     * @param action the bi-function to execute with both results; must not be {@code null}.
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the bi-function.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
     public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
-            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends Exception> action) throws IllegalArgumentException {
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends Exception> action)
+            throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
@@ -1955,19 +2058,27 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <U> the result type of the other ContinuableFuture.
      * @param <R> the result type of the function and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the function that processes the tuple of results and exceptions;
+     * @param action the function that processes the tuple of results and exceptions; must not be {@code null}.
      * @return a new {@code ContinuableFuture<R>} that completes with the result of the function.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      * @see #getAsResult()
      */
     public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
-            final Throwables.Function<? super Tuple4<T, ? super Exception, U, ? super Exception>, ? extends R, ? extends Exception> action)
-            throws IllegalArgumentException {
+            final Throwables.Function<? super Tuple4<T, Exception, U, Exception>, ? extends R, ? extends Exception> action)
+            throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> result = getAsResult();
-            final Result<U, Exception> result2 = other.getAsResult();
+            // awaitResult, not getAsResult: getAsResult converts the WORKER's own InterruptedException into
+            // "this future failed" and restores the interrupt flag, which then makes the very next get() fail
+            // instantly - so cancelling the combined stage used to invoke the callback with two fabricated
+            // InterruptedExceptions for two futures that had not completed at all. The strict overloads have
+            // always used awaitResult, whose `catch (InterruptedException e) { throw e; }` makes the
+            // interruption terminal for this stage while still reporting genuine input failures as a Result.
+            final Result<T, Exception> result = awaitResult(this);
+            final Result<U, Exception> result2 = awaitResult(other);
 
             return action.apply(Tuple.of(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException()));
         }, other);
@@ -1986,12 +2097,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Response> apiFuture = ContinuableFuture.call(() -> callAPI());
      * ContinuableFuture<Cache> cacheFuture = ContinuableFuture.call(() -> loadCache());
      *
-     * ContinuableFuture<Result> combined = apiFuture.callAsyncAfterBoth(cacheFuture,
+     * ContinuableFuture<PageModel> combined = apiFuture.callAsyncAfterBoth(cacheFuture,
      *     (apiResponse, apiError, cacheData, cacheError) -> {
      *         if (apiError == null && apiResponse.isValid()) {
-     *             return Result.fromApi(apiResponse);
+     *             return PageModel.fromApi(apiResponse);
      *         } else if (cacheError == null) {
-     *             return Result.fromCache(cacheData);
+     *             return PageModel.fromCache(cacheData);
      *         } else {
      *             throw new ServiceUnavailableException("Both API and cache failed");
      *         }
@@ -2001,18 +2112,26 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <U> the result type of the other ContinuableFuture.
      * @param <R> the result type of the QuadFunction and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the QuadFunction that processes both results and exceptions;
+     * @param action the QuadFunction that processes both results and exceptions; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the result of the QuadFunction.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
     public <U, R> ContinuableFuture<R> callAsyncAfterBoth(final ContinuableFuture<U> other,
             final Throwables.QuadFunction<? super T, ? super Exception, ? super U, ? super Exception, ? extends R, ? extends Exception> action)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> result = getAsResult();
-            final Result<U, Exception> result2 = other.getAsResult();
+            // awaitResult, not getAsResult: getAsResult converts the WORKER's own InterruptedException into
+            // "this future failed" and restores the interrupt flag, which then makes the very next get() fail
+            // instantly - so cancelling the combined stage used to invoke the callback with two fabricated
+            // InterruptedExceptions for two futures that had not completed at all. The strict overloads have
+            // always used awaitResult, whose `catch (InterruptedException e) { throw e; }` makes the
+            // interruption terminal for this stage while still reporting genuine input failures as a Result.
+            final Result<T, Exception> result = awaitResult(this);
+            final Result<U, Exception> result2 = awaitResult(other);
 
             return action.apply(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException());
         }, other);
@@ -2037,16 +2156,18 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param other the other ContinuableFuture to race against; must not be {@code null}.
-     * @param action the Runnable to execute after either future completes;
+     * @param action the Runnable to execute after either future completes; must not be {@code null}.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
     public ContinuableFuture<Void> runAsyncAfterEither(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
+            firstCompletedOf(ContinuableFuture.this, other);
 
             action.run();
             return null;
@@ -2077,16 +2198,18 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param other the other ContinuableFuture to race against; must not be {@code null}.
-     * @param action the Consumer to execute with the first available result;
+     * @param action the Consumer to execute with the first available result; must not be {@code null}.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
     public ContinuableFuture<Void> runAsyncAfterEither(final ContinuableFuture<? extends T> other,
-            final Throwables.Consumer<? super T, ? extends Exception> action) throws IllegalArgumentException {
+            final Throwables.Consumer<? super T, ? extends Exception> action) throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> ret = Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
+            final Result<T, Exception> ret = firstCompletedOf(ContinuableFuture.this, other);
 
             action.accept(ret.orElseIfFailure(null));
             return null;
@@ -2095,14 +2218,11 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Executes the provided BiConsumer action asynchronously after either this ContinuableFuture or the other ContinuableFuture completes.
-     * The BiConsumer receives the result and the exception. If at least one future completes successfully,
-     * it receives {@code (firstSuccessfulResult, null)}; only if both futures fail does it receive
-     * {@code (null, exception)} with the failure of the first future to complete.
+     * The BiConsumer receives {@code (result, null)} if the first completion succeeds, or
+     * {@code (null, exception)} if it fails or is cancelled. The other future may still be pending.
      *
-     * <p>Unlike the {@link #runAsyncAfterEither(ContinuableFuture, Throwables.Runnable) Runnable} and
-     * {@link #runAsyncAfterEither(ContinuableFuture, Throwables.Consumer) Consumer} overloads (which react to
-     * the first future to complete, whether it succeeds or fails), this overload waits for the first
-     * <i>successful</i> completion and only surfaces an exception when neither future succeeds.
+     * <p>Use {@link #runAsyncAfterFirstSuccess(ContinuableFuture, Throwables.BiConsumer)} to wait for
+     * a successful result instead. This method does not cancel the other input future.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2120,17 +2240,19 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param other the other ContinuableFuture to race against; must not be {@code null}.
-     * @param action the BiConsumer to execute with the result and exception;
+     * @param action the BiConsumer to execute with the result and exception; must not be {@code null}.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      * @see #getAsResult()
      */
     public ContinuableFuture<Void> runAsyncAfterEither(final ContinuableFuture<? extends T> other,
-            final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) throws IllegalArgumentException {
+            final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> result = Futures.anyOf(Array.asList(ContinuableFuture.this, other)).getAsResult();
+            final Result<T, Exception> result = firstCompletedOf(ContinuableFuture.this, other);
 
             action.accept(result.orElseIfFailure(null), result.getException());
             return null;
@@ -2157,15 +2279,18 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the result type of the callable and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to race against; must not be {@code null}.
-     * @param action the Callable to execute after either future completes;
+     * @param action the Callable to execute after either future completes; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the result of the callable.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
-    public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<?> other, final Callable<? extends R> action) throws IllegalArgumentException {
+    public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<?> other, final Callable<? extends R> action)
+            throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
+            firstCompletedOf(ContinuableFuture.this, other);
 
             return action.call();
         }, other);
@@ -2192,16 +2317,18 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the result type of the function and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to race against; must not be {@code null}.
-     * @param action the function to transform the first available result;
+     * @param action the function to transform the first available result; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the transformed result.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
     public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<? extends T> other,
-            final Throwables.Function<? super T, ? extends R, ? extends Exception> action) throws IllegalArgumentException {
+            final Throwables.Function<? super T, ? extends R, ? extends Exception> action) throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> ret = Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
+            final Result<T, Exception> ret = firstCompletedOf(ContinuableFuture.this, other);
 
             return action.apply(ret.orElseIfFailure(null));
         }, other);
@@ -2215,9 +2342,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method is useful when you need to compute a new value as soon as either future completes,
      * regardless of which one finishes first or whether it succeeds or fails.
      *
-     * <p><b>Note:</b> unlike the similarly-shaped {@link #runAsyncAfterEither(ContinuableFuture, Throwables.BiConsumer)
-     * BiConsumer overload of runAsyncAfterEither} (which reacts to the first <i>successful</i> completion), this method
-     * reacts to the first future to <i>complete</i>, whether it succeeds or fails. If that first completion failed,
+     * <p>If the first completion failed,
      * the BiFunction receives {@code (null, exception)} even though the other future might still succeed. When you need
      * the first successful result instead, use {@link #callAsyncAfterFirstSuccess(ContinuableFuture, Throwables.BiFunction)}.
      *
@@ -2237,18 +2362,21 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the result type of the BiFunction and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to race against; must not be {@code null}.
-     * @param action the BiFunction to transform the result and exception;
+     * @param action the BiFunction to transform the result and exception; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the transformed result.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      * @see #getAsResult()
      * @see #callAsyncAfterFirstSuccess(ContinuableFuture, Throwables.BiFunction)
      */
     public <R> ContinuableFuture<R> callAsyncAfterEither(final ContinuableFuture<? extends T> other,
-            final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) throws IllegalArgumentException {
+            final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action)
+            throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> ret = Futures.iterate(Array.asList(ContinuableFuture.this, other), r -> r).next();
+            final Result<T, Exception> ret = firstCompletedOf(ContinuableFuture.this, other);
 
             return action.apply(ret.orElseIfFailure(null), ret.getException());
         }, other);
@@ -2275,36 +2403,50 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the Runnable to execute after the first successful completion;
+     * @param action the Runnable to execute after the first successful completion; must not be {@code null}.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
     public ContinuableFuture<Void> runAsyncAfterFirstSuccess(final ContinuableFuture<?> other, final Throwables.Runnable<? extends Exception> action)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
             final ObjIterator<Result<Object, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
-            final Result<Object, Exception> firstResult = iter.next();
+            try {
+                final Result<Object, Exception> firstResult = nextOutcome(iter);
 
-            if (firstResult.isFailure()) {
-                final Result<Object, Exception> secondResult = iter.next();
-
-                if (secondResult.isFailure()) {
-                    final Exception firstException = firstResult.getException();
-
-                    // Keep the second failure visible as a suppressed exception, matching the
-                    // AfterBoth family's throwIfEitherFailed.
-                    if (secondResult.getException() != null && secondResult.getException() != firstException) {
-                        firstException.addSuppressed(secondResult.getException());
+                if (firstResult.isFailure()) {
+                    if (!iter.hasNext()) {
+                        // Without a second outcome there is nothing to combine with, and a bare next() would fail
+                        // with NoSuchElementException and hide the failure already in hand.
+                        throw firstResult.getException();
                     }
 
-                    throw firstException;
-                }
-            }
+                    final Result<Object, Exception> secondResult = nextOutcome(iter);
 
-            action.run();
-            return null;
+                    if (secondResult.isFailure()) {
+                        final Exception firstException = firstResult.getException();
+
+                        // Keep the second failure visible as a suppressed exception, matching the
+                        // AfterBoth family's throwIfEitherFailed. suppressOnce, not addSuppressed: these are the
+                        // input futures' own exceptions, so re-combining the same failed pair must not keep
+                        // appending the same entry.
+                        suppressOnce(firstException, secondResult.getException());
+
+                        throw firstException;
+                    }
+                }
+
+                action.run();
+                return null;
+            } finally {
+                // Stops after the first outcome when that outcome is a success: release the relay
+                // still blocked on the losing input instead of leaving a thread parked on it.
+                Futures.cancelPendingRelays(iter);
+            }
         }, other);
     }
 
@@ -2329,42 +2471,56 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the Consumer to execute with the first successful result;
+     * @param action the Consumer to execute with the first successful result; must not be {@code null}.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
     public ContinuableFuture<Void> runAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
-            final Throwables.Consumer<? super T, ? extends Exception> action) throws IllegalArgumentException {
+            final Throwables.Consumer<? super T, ? extends Exception> action) throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
             final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
-            final Result<T, Exception> firstResult = iter.next();
-            T ret = null;
+            try {
+                final Result<T, Exception> firstResult = nextOutcome(iter);
+                T ret = null;
 
-            if (firstResult.isFailure()) {
-                final Result<T, Exception> secondResult = iter.next();
-
-                if (secondResult.isFailure()) {
-                    final Exception firstException = firstResult.getException();
-
-                    // Keep the second failure visible as a suppressed exception, matching the
-                    // AfterBoth family's throwIfEitherFailed.
-                    if (secondResult.getException() != null && secondResult.getException() != firstException) {
-                        firstException.addSuppressed(secondResult.getException());
+                if (firstResult.isFailure()) {
+                    if (!iter.hasNext()) {
+                        // Without a second outcome there is nothing to combine with, and a bare next() would fail
+                        // with NoSuchElementException and hide the failure already in hand.
+                        throw firstResult.getException();
                     }
 
-                    throw firstException;
+                    final Result<T, Exception> secondResult = nextOutcome(iter);
+
+                    if (secondResult.isFailure()) {
+                        final Exception firstException = firstResult.getException();
+
+                        // Keep the second failure visible as a suppressed exception, matching the
+                        // AfterBoth family's throwIfEitherFailed. suppressOnce, not addSuppressed: these are the
+                        // input futures' own exceptions, so re-combining the same failed pair must not keep
+                        // appending the same entry.
+                        suppressOnce(firstException, secondResult.getException());
+
+                        throw firstException;
+                    } else {
+                        ret = secondResult.orElseIfFailure(null);
+                    }
                 } else {
-                    ret = secondResult.orElseIfFailure(null);
+                    ret = firstResult.orElseIfFailure(null);
                 }
-            } else {
-                ret = firstResult.orElseIfFailure(null);
+
+                action.accept(ret);
+
+                return null;
+            } finally {
+                // Stops after the first outcome when that outcome is a success: release the relay
+                // still blocked on the losing input instead of leaving a thread parked on it.
+                Futures.cancelPendingRelays(iter);
             }
-
-            action.accept(ret);
-
-            return null;
         }, other);
     }
 
@@ -2403,34 +2559,51 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the BiConsumer to execute with the result and exception;
+     * @param action the BiConsumer to execute with the result and exception; must not be {@code null}.
      * @return a new ContinuableFuture&lt;Void&gt; that completes after executing the action.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
     @Beta
     public ContinuableFuture<Void> runAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
-            final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) throws IllegalArgumentException {
+            final Throwables.BiConsumer<? super T, ? super Exception, ? extends Exception> action) throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
             final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
-            final Result<T, Exception> firstResult = iter.next();
-            Result<T, Exception> ret = null;
+            try {
+                final Result<T, Exception> firstResult = nextOutcome(iter);
+                Result<T, Exception> ret = null;
 
-            if (firstResult.isFailure()) {
-                final Result<T, Exception> secondResult = iter.next();
+                // iter.hasNext(): with no second outcome there is nothing to prefer over firstResult, and a bare
+                // next() would fail with NoSuchElementException. It blocks on the same queue that next() did, so
+                // waiting for the other input is unchanged.
+                if (firstResult.isFailure() && iter.hasNext()) {
+                    final Result<T, Exception> secondResult = nextOutcome(iter);
 
-                if (secondResult.isSuccess()) {
-                    ret = secondResult;
+                    if (secondResult.isSuccess()) {
+                        ret = secondResult;
+                    } else if (firstResult.getException() != null) {
+                        // Both inputs failed and only the first exception is handed to the action. Keep the
+                        // second one visible as a suppressed exception, matching the Runnable/Consumer/Function
+                        // variants of this family (which report it the same way before rethrowing) - and only
+                        // once, however often the same failed pair is combined.
+                        suppressOnce(firstResult.getException(), secondResult.getException());
+                    }
                 }
-            }
 
-            if (ret == null) {
-                ret = firstResult;
-            }
+                if (ret == null) {
+                    ret = firstResult;
+                }
 
-            action.accept(ret.orElseIfFailure(null), ret.getException());
-            return null;
+                action.accept(ret.orElseIfFailure(null), ret.getException());
+                return null;
+            } finally {
+                // Stops after the first outcome when that outcome is a success: release the relay
+                // still blocked on the losing input instead of leaving a thread parked on it.
+                Futures.cancelPendingRelays(iter);
+            }
         }, other);
     }
 
@@ -2456,35 +2629,49 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the result type of the callable and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the Callable to execute after the first successful completion;
+     * @param action the Callable to execute after the first successful completion; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the result of the callable.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
     public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<?> other, final Callable<? extends R> action)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
             final ObjIterator<Result<Object, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
-            final Result<Object, Exception> firstResult = iter.next();
+            try {
+                final Result<Object, Exception> firstResult = nextOutcome(iter);
 
-            if (firstResult.isFailure()) {
-                final Result<Object, Exception> secondResult = iter.next();
-
-                if (secondResult.isFailure()) {
-                    final Exception firstException = firstResult.getException();
-
-                    // Keep the second failure visible as a suppressed exception, matching the
-                    // AfterBoth family's throwIfEitherFailed.
-                    if (secondResult.getException() != null && secondResult.getException() != firstException) {
-                        firstException.addSuppressed(secondResult.getException());
+                if (firstResult.isFailure()) {
+                    if (!iter.hasNext()) {
+                        // Without a second outcome there is nothing to combine with, and a bare next() would fail
+                        // with NoSuchElementException and hide the failure already in hand.
+                        throw firstResult.getException();
                     }
 
-                    throw firstException;
-                }
-            }
+                    final Result<Object, Exception> secondResult = nextOutcome(iter);
 
-            return action.call();
+                    if (secondResult.isFailure()) {
+                        final Exception firstException = firstResult.getException();
+
+                        // Keep the second failure visible as a suppressed exception, matching the
+                        // AfterBoth family's throwIfEitherFailed. suppressOnce, not addSuppressed: these are the
+                        // input futures' own exceptions, so re-combining the same failed pair must not keep
+                        // appending the same entry.
+                        suppressOnce(firstException, secondResult.getException());
+
+                        throw firstException;
+                    }
+                }
+
+                return action.call();
+            } finally {
+                // Stops after the first outcome when that outcome is a success: release the relay
+                // still blocked on the losing input instead of leaving a thread parked on it.
+                Futures.cancelPendingRelays(iter);
+            }
         }, other);
     }
 
@@ -2510,40 +2697,54 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the result type of the function and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the function to transform the first successful result;
+     * @param action the function to transform the first successful result; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the transformed result.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      */
     public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
-            final Throwables.Function<? super T, ? extends R, ? extends Exception> action) throws IllegalArgumentException {
+            final Throwables.Function<? super T, ? extends R, ? extends Exception> action) throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
             final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
-            final Result<T, Exception> firstResult = iter.next();
-            T ret = null;
+            try {
+                final Result<T, Exception> firstResult = nextOutcome(iter);
+                T ret = null;
 
-            if (firstResult.isFailure()) {
-                final Result<T, Exception> secondResult = iter.next();
-
-                if (secondResult.isFailure()) {
-                    final Exception firstException = firstResult.getException();
-
-                    // Keep the second failure visible as a suppressed exception, matching the
-                    // AfterBoth family's throwIfEitherFailed.
-                    if (secondResult.getException() != null && secondResult.getException() != firstException) {
-                        firstException.addSuppressed(secondResult.getException());
+                if (firstResult.isFailure()) {
+                    if (!iter.hasNext()) {
+                        // Without a second outcome there is nothing to combine with, and a bare next() would fail
+                        // with NoSuchElementException and hide the failure already in hand.
+                        throw firstResult.getException();
                     }
 
-                    throw firstException;
-                } else {
-                    ret = secondResult.orElseIfFailure(null);
-                }
-            } else {
-                ret = firstResult.orElseIfFailure(null);
-            }
+                    final Result<T, Exception> secondResult = nextOutcome(iter);
 
-            return action.apply(ret);
+                    if (secondResult.isFailure()) {
+                        final Exception firstException = firstResult.getException();
+
+                        // Keep the second failure visible as a suppressed exception, matching the
+                        // AfterBoth family's throwIfEitherFailed. suppressOnce, not addSuppressed: these are the
+                        // input futures' own exceptions, so re-combining the same failed pair must not keep
+                        // appending the same entry.
+                        suppressOnce(firstException, secondResult.getException());
+
+                        throw firstException;
+                    } else {
+                        ret = secondResult.orElseIfFailure(null);
+                    }
+                } else {
+                    ret = firstResult.orElseIfFailure(null);
+                }
+
+                return action.apply(ret);
+            } finally {
+                // Stops after the first outcome when that outcome is a success: release the relay
+                // still blocked on the losing input instead of leaving a thread parked on it.
+                Futures.cancelPendingRelays(iter);
+            }
         }, other);
     }
 
@@ -2556,6 +2757,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * the first future to complete. This allows the BiFunction to handle both cases and produce an appropriate
      * result; unlike the other {@code callAsyncAfterFirstSuccess} overloads, this one never completes the
      * returned future exceptionally because of an upstream failure.
+     *
+     * <p><b>Stability:</b> this overload is the exact mirror of
+     * {@link #runAsyncAfterFirstSuccess(ContinuableFuture, Throwables.BiConsumer)}, which is marked
+     * {@code @Beta}. The caveats stated there apply verbatim here: the both-fail behaviour described above may
+     * be refined to aggregate the two exceptions rather than report only the first, and the method may be
+     * renamed or gain overloads for more than two futures.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2575,34 +2782,104 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <R> the result type of the BiFunction and the returned ContinuableFuture.
      * @param other the other ContinuableFuture to wait for; must not be {@code null}.
-     * @param action the BiFunction to transform based on result and exception;
+     * @param action the BiFunction to transform based on result and exception; must not be {@code null}.
      * @return a new ContinuableFuture that completes with the transformed result.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code other}, {@code action} is {@code null}.
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
      * @see #getAsResult()
      */
     public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
-            final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action) throws IllegalArgumentException {
+            final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action)
+            throws IllegalArgumentException, RejectedExecutionException {
+        N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
             final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
-            final Result<T, Exception> firstResult = iter.next();
-            Result<T, Exception> ret = null;
+            try {
+                final Result<T, Exception> firstResult = nextOutcome(iter);
+                Result<T, Exception> ret = null;
 
-            if (firstResult.isFailure()) {
-                final Result<T, Exception> secondResult = iter.next();
+                // iter.hasNext(): with no second outcome there is nothing to prefer over firstResult, and a bare
+                // next() would fail with NoSuchElementException. It blocks on the same queue that next() did, so
+                // waiting for the other input is unchanged.
+                if (firstResult.isFailure() && iter.hasNext()) {
+                    final Result<T, Exception> secondResult = nextOutcome(iter);
 
-                if (secondResult.isSuccess()) {
-                    ret = secondResult;
+                    if (secondResult.isSuccess()) {
+                        ret = secondResult;
+                    } else if (firstResult.getException() != null) {
+                        // Both inputs failed and only the first exception is handed to the action. Keep the
+                        // second one visible as a suppressed exception, matching the Runnable/Consumer/Function
+                        // variants of this family (which report it the same way before rethrowing) - and only
+                        // once, however often the same failed pair is combined.
+                        suppressOnce(firstResult.getException(), secondResult.getException());
+                    }
                 }
-            }
 
-            if (ret == null) {
-                ret = firstResult;
-            }
+                if (ret == null) {
+                    ret = firstResult;
+                }
 
-            return action.apply(ret.orElseIfFailure(null), ret.getException());
+                return action.apply(ret.orElseIfFailure(null), ret.getException());
+            } finally {
+                // Stops after the first outcome when that outcome is a success: release the relay
+                // still blocked on the losing input instead of leaving a thread parked on it.
+                Futures.cancelPendingRelays(iter);
+            }
         }, other);
+    }
+
+    /**
+     * Waits for whichever of the two futures completes first (successfully or exceptionally) and returns
+     * that outcome, then releases the background relay still blocked on the other one.
+     *
+     * <p>{@link Futures#iterate(java.util.Collection, java.util.function.Function)} starts one relay task
+     * per input; an "either" combinator consumes only the first outcome, so without the explicit release
+     * the losing input would keep a relay thread parked until it completed on its own.</p>
+     *
+     * @param <V> the common result type of the two futures
+     * @param first the first future to race
+     * @param second the second future to race
+     * @return the outcome of whichever future completed first
+     * @throws InterruptedException if this thread is interrupted while waiting for the first outcome
+     */
+    private static <V> Result<V, Exception> firstCompletedOf(final ContinuableFuture<? extends V> first, final ContinuableFuture<? extends V> second)
+            throws InterruptedException {
+        final ObjIterator<Result<V, Exception>> iter = Futures.iterate(Arrays.asList(first, second), Fn.identity());
+
+        try {
+            return nextOutcome(iter);
+        } finally {
+            Futures.cancelPendingRelays(iter);
+        }
+    }
+
+    /**
+     * Reads the next outcome from a {@link Futures#iterate(java.util.Collection, java.util.function.Function)}
+     * iterator, treating this thread's own interruption as terminal for the stage rather than as an outcome of one
+     * of the input futures.
+     *
+     * @param <V> the common result type of the futures being iterated
+     * @param iter the iterator to read the next outcome from
+     * @return the next outcome
+     * @throws InterruptedException if the outcome just read is the iterator's stand-in for this thread's own interruption
+     */
+    private static <V> Result<V, Exception> nextOutcome(final ObjIterator<Result<V, Exception>> iter) throws InterruptedException {
+        final Result<V, Exception> result = iter.next();
+
+        // Futures.iterate reports the CONSUMING thread's own InterruptedException as a failure Result (re-setting
+        // the interrupt flag) instead of throwing it, so without this an interrupted combining worker would read
+        // "an input failed" and still run the caller's action for two futures that had not completed at all. The
+        // flag test is what separates that stand-in from a genuine input failure that happens to be an
+        // InterruptedException: a failure relayed from an input arrives with this thread's flag clear - had it been
+        // set, the queue's take() would have thrown instead of returning a value. This gives the *AfterEither and
+        // *AfterFirstSuccess families the contract awaitResult already gives *AfterBoth.
+        if (result.getException() instanceof final InterruptedException ie && Thread.currentThread().isInterrupted()) {
+            throw ie;
+        }
+
+        return result;
     }
 
     private static <V> Result<V, Exception> awaitResult(final ContinuableFuture<? extends V> continuableFuture) throws InterruptedException {
@@ -2615,14 +2892,37 @@ public class ContinuableFuture<T> implements Future<T> {
         }
     }
 
+    /**
+     * Records {@code secondary} as suppressed on {@code primary}, unless it is already there.
+     *
+     * <p>The two exceptions belong to the <i>input</i> futures and outlive any one combination, so combining the
+     * same failed pair twice used to append the same suppressed exception again and again - an unbounded,
+     * caller-visible mutation of an object this class does not own. The identity check keeps the exception
+     * instance itself unchanged, which callers do rely on.</p>
+     *
+     * @param primary the exception that will be thrown or handed to the action; must not be {@code null}
+     * @param secondary the other input's failure, may be {@code null}
+     */
+    private static void suppressOnce(final Exception primary, final Exception secondary) {
+        if (secondary == null || secondary == primary) {
+            return;
+        }
+
+        for (final Throwable already : primary.getSuppressed()) {
+            if (already == secondary) {
+                return;
+            }
+        }
+
+        primary.addSuppressed(secondary);
+    }
+
     private static void throwIfEitherFailed(final Result<?, Exception> result, final Result<?, Exception> result2) throws Exception {
         final Exception exception = result.getException();
         final Exception exception2 = result2.getException();
 
         if (exception != null) {
-            if (exception2 != null && exception2 != exception) {
-                exception.addSuppressed(exception2);
-            }
+            suppressOnce(exception, exception2);
 
             throw exception;
         } else if (exception2 != null) {
@@ -2630,15 +2930,24 @@ public class ContinuableFuture<T> implements Future<T> {
         }
     }
 
-    private <R> ContinuableFuture<R> execute(final Callable<? extends R> command) {
+    /**
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
+     */
+    private <R> ContinuableFuture<R> execute(final Callable<? extends R> command) throws RejectedExecutionException {
         return execute(command, null);
     }
 
-    private <R> ContinuableFuture<R> execute(final Callable<? extends R> command, final ContinuableFuture<?> other) {
+    /**
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
+     */
+    private <R> ContinuableFuture<R> execute(final Callable<? extends R> command, final ContinuableFuture<?> other) throws RejectedExecutionException {
         return execute(new FutureTask<>(command), other);
     }
 
-    private <R> ContinuableFuture<R> execute(final FutureTask<? extends R> futureTask, final ContinuableFuture<?> other) {
+    /**
+     * @throws RejectedExecutionException if the executor cannot accept the submitted task
+     */
+    private <R> ContinuableFuture<R> execute(final FutureTask<? extends R> futureTask, final ContinuableFuture<?> other) throws RejectedExecutionException {
         asyncExecutor.execute(futureTask);
 
         @SuppressWarnings("rawtypes")
@@ -2652,9 +2961,10 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p>This method is useful for retry backoff, rate limiting, or introducing deliberate
      * pauses in asynchronous workflows. It does not impose a timeout on the upstream operation.
-     * The shared delay window begins after upstream completion (successful, exceptional, or
-     * cancelled) is observed. Delay precision is retained in the supplied {@link TimeUnit}, and
-     * concurrent callers wait independently on that same window so one caller cannot prevent
+     * The shared delay window begins after successful or exceptional upstream completion
+     * is observed. Cancellation bypasses the delay: {@code isDone()} returns {@code true} and
+     * {@code get()} throws {@link CancellationException} immediately. Delay precision is retained in the supplied
+     * {@link TimeUnit}, and concurrent callers wait independently on that same window so one caller cannot prevent
      * another caller from observing its own timeout. For {@link #get(long, TimeUnit)}, the timeout
      * is a single budget covering both the upstream wait and the remaining delay.
      *
@@ -2673,7 +2983,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @throws IllegalArgumentException if {@code delay > 0} and {@code unit} is {@code null}.
      */
     @SuppressWarnings("deprecation")
-    public ContinuableFuture<T> thenDelay(final long delay, final TimeUnit unit) {
+    public ContinuableFuture<T> thenDelay(final long delay, final TimeUnit unit) throws IllegalArgumentException {
         if (delay <= 0) {
             return this;
         }
@@ -2721,16 +3031,17 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Internal method that creates a new ContinuableFuture with the specified executor and delay configuration.
      * This method combines the functionality of thenDelay and thenUse. A positive delay starts
-     * after upstream completion is observed and is shared by every accessor of the returned future.
+     * after non-cancelled upstream completion is observed and is shared by every accessor of the returned future.
      *
      * @param executor the executor to use for subsequent operations; must not be {@code null}.
      * @param delay the delay before executing subsequent operations.
      * @param unit the time unit for the delay.
      * @return a new ContinuableFuture with the specified configuration.
+     * @throws IllegalArgumentException if {@code executor} or {@code unit} is {@code null}
      * @deprecated This is an internal method and should not be used directly. Use {@link #thenDelay(long, TimeUnit)} or {@link #thenUse(Executor)} instead.
      */
     @Deprecated
-    ContinuableFuture<T> with(final Executor executor, final long delay, final TimeUnit unit) {
+    ContinuableFuture<T> with(final Executor executor, final long delay, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgNotNull(executor);
         N.checkArgNotNull(unit);
 
@@ -2745,7 +3056,7 @@ public class ContinuableFuture<T> implements Future<T> {
             public boolean cancel(final boolean mayInterruptIfRunning) {
                 final boolean cancelled = future.cancel(mayInterruptIfRunning);
 
-                if (future.isDone()) {
+                if (!cancelled && future.isDone()) {
                     startDelayIfNeeded();
                 }
 
@@ -2754,17 +3065,15 @@ public class ContinuableFuture<T> implements Future<T> {
 
             @Override
             public boolean isCancelled() {
-                final boolean cancelled = future.isCancelled();
-
-                if (cancelled) {
-                    startDelayIfNeeded();
-                }
-
-                return cancelled;
+                return future.isCancelled();
             }
 
             @Override
             public boolean isDone() {
+                if (future.isCancelled()) {
+                    return true;
+                }
+
                 // The delay stage is not complete until the post-completion delay has elapsed.
                 // Returning future.isDone() alone would make get()/getNow() block while isDone()
                 // was already true, which violates the Future contract.
@@ -2789,7 +3098,6 @@ public class ContinuableFuture<T> implements Future<T> {
             @Override
             public T get() throws InterruptedException, ExecutionException {
                 T result = null;
-                CancellationException cancellationException = null;
                 ExecutionException executionException = null;
                 RuntimeException runtimeException = null;
                 Error error = null;
@@ -2797,7 +3105,8 @@ public class ContinuableFuture<T> implements Future<T> {
                 try {
                     result = future.get();
                 } catch (final CancellationException e) {
-                    cancellationException = e;
+                    // A getter already waiting upstream must also bypass the delay on cancellation.
+                    throw e;
                 } catch (final ExecutionException e) {
                     executionException = e;
                 } catch (final RuntimeException e) {
@@ -2809,9 +3118,7 @@ public class ContinuableFuture<T> implements Future<T> {
                 startDelayIfNeeded();
                 delay(Long.MAX_VALUE);
 
-                if (cancellationException != null) {
-                    throw cancellationException;
-                } else if (executionException != null) {
+                if (executionException != null) {
                     throw executionException;
                 } else if (runtimeException != null) {
                     throw runtimeException;
@@ -2823,11 +3130,10 @@ public class ContinuableFuture<T> implements Future<T> {
             }
 
             @Override
-            public T get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            public T get(final long timeout, final TimeUnit unit) throws InterruptedException, TimeoutException, ExecutionException {
                 final long timeoutNanos = unit.toNanos(timeout);
                 final long startNanos = System.nanoTime();
                 T result = null;
-                CancellationException cancellationException = null;
                 ExecutionException executionException = null;
                 RuntimeException runtimeException = null;
                 Error error = null;
@@ -2837,7 +3143,8 @@ public class ContinuableFuture<T> implements Future<T> {
                     // implementations do not reject a negative value before checking completion.
                     result = future.get(Math.max(0L, timeoutNanos), TimeUnit.NANOSECONDS);
                 } catch (final CancellationException e) {
-                    cancellationException = e;
+                    // A getter already waiting upstream must also bypass the delay on cancellation.
+                    throw e;
                 } catch (final ExecutionException e) {
                     executionException = e;
                 } catch (final RuntimeException e) {
@@ -2858,9 +3165,7 @@ public class ContinuableFuture<T> implements Future<T> {
                     throw new TimeoutException("Timeout after delay");
                 }
 
-                if (cancellationException != null) {
-                    throw cancellationException;
-                } else if (executionException != null) {
+                if (executionException != null) {
                     throw executionException;
                 } else if (runtimeException != null) {
                     throw runtimeException;
@@ -2941,7 +3246,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p><b>Key Characteristics:</b>
      * <ul>
-     *   <li><b>Non-blocking:</b> Returns immediately; result retrieval happens asynchronously</li>
+     *   <li><b>Non-blocking for the caller:</b> this method returns immediately; a worker of the chosen
+     *       executor then blocks in {@code get()} until this future completes</li>
      *   <li><b>Executor Reuse:</b> Uses this future's asyncExecutor for the conversion</li>
      *   <li><b>Exception Wrapping:</b> All exceptions are wrapped in CompletionException</li>
      *   <li><b>Independent Lifecycle:</b> Returned CompletableFuture has independent cancellation</li>
@@ -2976,8 +3282,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>Exception Handling:</b>
      * <ul>
      *   <li><b>InterruptedException:</b> Wrapped in CompletionException</li>
-     *   <li><b>ExecutionException:</b> Wrapped in CompletionException with cause preserved</li>
-     *   <li><b>CancellationException:</b> Wrapped in CompletionException</li>
+     *   <li><b>ExecutionException:</b> Its original cause is propagated without retaining the intermediate wrapper</li>
+     *   <li><b>CancellationException:</b> <i>Not</i> propagated as cancellation. Cancelling this
+     *       {@code ContinuableFuture} makes the returned {@code CompletableFuture} complete exceptionally with the
+     *       {@code CancellationException} as the <i>cause</i>: {@code isCancelled()} stays {@code false} while
+     *       {@code isCompletedExceptionally()} becomes {@code true}, {@code get()} throws
+     *       {@code ExecutionException(CancellationException)} and {@code join()} throws
+     *       {@code CompletionException(CancellationException)}</li>
      *   <li><b>RuntimeException:</b> Wrapped in CompletionException</li>
      * </ul>
      *
@@ -2996,6 +3307,13 @@ public class ContinuableFuture<T> implements Future<T> {
      *   <li>For already-completed futures, consider using {@link CompletableFuture#completedFuture(Object)}</li>
      * </ul>
      *
+     * <p><b>&#9888;&#65039; Starvation warning:</b> this overload uses <i>this future's own executor</i>, which is
+     * usually the executor its upstream task is running or queued on. That pool blocks one worker per conversion,
+     * and {@link AsyncExecutor}'s pool has an unbounded queue - so it never grows past its core size. Converting
+     * more not-yet-started futures than the pool has core threads therefore leaves every worker waiting on work
+     * that can no longer be scheduled. Pass an unrelated executor to {@link #toCompletableFuture(Executor)} when
+     * the futures may still be pending.</p>
+     *
      * @return a new {@code CompletableFuture} that completes with the same result as this {@code ContinuableFuture},
      *         executed asynchronously using this future's {@code asyncExecutor}.
      * @see CompletableFuture#supplyAsync(java.util.function.Supplier, Executor)
@@ -3004,16 +3322,7 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     @Beta
     public CompletableFuture<T> toCompletableFuture() {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return this.get();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new CompletionException(e);
-            } catch (Exception e) {
-                throw new CompletionException(e);
-            }
-        }, asyncExecutor);
+        return CompletableFuture.supplyAsync(this::getForCompletableFuture, asyncExecutor);
     }
 
     /**
@@ -3029,7 +3338,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p><b>Key Characteristics:</b>
      * <ul>
-     *   <li><b>Non-blocking:</b> Returns immediately; result retrieval happens asynchronously</li>
+     *   <li><b>Non-blocking for the caller:</b> this method returns immediately; a worker of the chosen
+     *       executor then blocks in {@code get()} until this future completes</li>
      *   <li><b>Custom Executor:</b> Uses the provided executor instead of this future's asyncExecutor</li>
      *   <li><b>Exception Wrapping:</b> All exceptions are wrapped in CompletionException</li>
      *   <li><b>Independent Lifecycle:</b> Returned CompletableFuture has independent cancellation</li>
@@ -3074,8 +3384,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>Exception Handling:</b>
      * <ul>
      *   <li><b>InterruptedException:</b> Wrapped in CompletionException</li>
-     *   <li><b>ExecutionException:</b> Wrapped in CompletionException with cause preserved</li>
-     *   <li><b>CancellationException:</b> Wrapped in CompletionException</li>
+     *   <li><b>ExecutionException:</b> Its original cause is propagated without retaining the intermediate wrapper</li>
+     *   <li><b>CancellationException:</b> <i>Not</i> propagated as cancellation. Cancelling this
+     *       {@code ContinuableFuture} makes the returned {@code CompletableFuture} complete exceptionally with the
+     *       {@code CancellationException} as the <i>cause</i>: {@code isCancelled()} stays {@code false} while
+     *       {@code isCompletedExceptionally()} becomes {@code true}, {@code get()} throws
+     *       {@code ExecutionException(CancellationException)} and {@code join()} throws
+     *       {@code CompletionException(CancellationException)}</li>
      *   <li><b>RuntimeException:</b> Wrapped in CompletionException</li>
      * </ul>
      *
@@ -3115,15 +3430,18 @@ public class ContinuableFuture<T> implements Future<T> {
     public CompletableFuture<T> toCompletableFuture(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return this.get();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new CompletionException(e);
-            } catch (Exception e) {
-                throw new CompletionException(e);
-            }
-        }, executor);
+        return CompletableFuture.supplyAsync(this::getForCompletableFuture, executor);
+    }
+
+    private T getForCompletableFuture() {
+        try {
+            return get();
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new CompletionException(e);
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            throw new CompletionException(cause == null ? e : cause);
+        }
     }
 }

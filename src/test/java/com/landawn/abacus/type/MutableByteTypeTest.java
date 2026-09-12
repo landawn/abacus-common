@@ -165,4 +165,15 @@ public class MutableByteTypeTest extends TestBase {
             mutableByteType.serializeTo(characterWriter, MutableByte.of((byte) 10), null);
         });
     }
+
+    // T5-03 (2026-09-06): out-of-range text throws ArithmeticException (Numbers.toXxx contract), not NumberFormatException.
+    @Test
+    public void reviewFixes20260906_valueOfOutOfRangeThrowsArithmeticException() {
+        Assertions.assertThrows(ArithmeticException.class, () -> mutableByteType.valueOf("128"));
+        Assertions.assertThrows(ArithmeticException.class, () -> mutableByteType.valueOf("-129"));
+        Assertions.assertThrows(NumberFormatException.class, () -> mutableByteType.valueOf("abc"));
+        Assertions.assertThrows(NumberFormatException.class, () -> mutableByteType.valueOf(" "));
+        assertEquals((byte) 127, mutableByteType.valueOf("127").value());
+        Assertions.assertNull(mutableByteType.valueOf(""));
+    }
 }

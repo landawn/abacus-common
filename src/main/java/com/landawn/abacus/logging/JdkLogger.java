@@ -63,7 +63,9 @@ class JdkLogger extends AbstractLogger {
      * Constructs a {@code JdkLogger} with the specified name.
      *
      * <p>The name is passed to the underlying {@code java.util.logging.Logger}, except that
-     * {@link Logger#ROOT_LOGGER_NAME} selects JUL's native root logger.</p>
+     * {@link Logger#ROOT_LOGGER_NAME} selects JUL's native root logger. Records emitted through that
+     * root facade carry JUL's root logger name ({@code ""}) as their {@code LogRecord} logger name, while
+     * {@link #getName()} still returns {@code "ROOT"}.</p>
      *
      * <p><b>Note:</b> The enclosing class is package-private, so this constructor cannot be invoked
      * from outside the {@code com.landawn.abacus.logging} package. Use
@@ -320,7 +322,8 @@ class JdkLogger extends AbstractLogger {
 
         // millis and thread are filled by the constructor
         final LogRecord logRecord = new LogRecord(level, msg);
-        logRecord.setLoggerName(getName());
+        // JUL's own name for the target logger: "" for the root facade, otherwise identical to getName().
+        logRecord.setLoggerName(loggerImpl.getName());
         logRecord.setThrown(t);
         // Note: parameters in LogRecord are not set because formatting is handled by AbstractLogger
         fillCallerData(callerFQCN, logRecord);

@@ -3,6 +3,7 @@ package com.landawn.abacus.parser.entity;
 import java.sql.Timestamp;
 import java.util.Map;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.Id;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.Table;
@@ -18,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("data_type")
-public class EntityA {
+public class EntityA extends TestBase {
     @Id
     @JsonXmlField(name = "xxx")
     private String stringType;

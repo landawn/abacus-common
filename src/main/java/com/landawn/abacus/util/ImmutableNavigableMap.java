@@ -46,16 +46,23 @@ import com.landawn.abacus.annotation.Beta;
  * System.out.println(map.descendingMap());   // prints {4=four, 3=three, 2=two, 1=one}
  * }</pre>
  *
+ * <p><b>Note:</b> the {@code of(...)} factories accept any key type and throw
+ * {@link ClassCastException} at run time if the keys are not mutually comparable, matching
+ * {@link #copyOf(Map)}. They deliberately carry no {@code Comparable} bound, and one must not be added: a
+ * bound would make them inapplicable to a non-comparable key, so the call would quietly resolve to an
+ * inherited unsorted factory and hand back an unsorted map instead of failing.</p>
+ *
  * @param <K> the key type
  * @param <V> the value type
  * @see ImmutableSortedMap
  * @see NavigableMap
  */
+@com.landawn.abacus.annotation.Immutable
 @SuppressWarnings("java:S2160")
 public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implements NavigableMap<K, V> {
 
     @SuppressWarnings("rawtypes")
-    private static final ImmutableNavigableMap EMPTY = new ImmutableNavigableMap(N.emptyNavigableMap());
+    private static final ImmutableNavigableMap EMPTY = new ImmutableNavigableMap(N.emptyNavigableMap(), true);
 
     private final NavigableMap<K, V> navigableMap;
 
@@ -65,9 +72,22 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * reflected in this read-only view. Use {@link #copyOf(Map)} for independent storage.
      *
      * @param navigableMap the navigable map to back this immutable map
+     * @throws NullPointerException if {@code navigableMap} is {@code null}
      */
-    ImmutableNavigableMap(final NavigableMap<? extends K, ? extends V> navigableMap) {
-        super(navigableMap);
+    ImmutableNavigableMap(final NavigableMap<? extends K, ? extends V> navigableMap) throws NullPointerException {
+        this(navigableMap, false);
+    }
+
+    /**
+     * Constructs an {@code ImmutableNavigableMap} backed by the given navigable map.
+     *
+     * @param navigableMap the navigable map to back this immutable map
+     * @param ownsBacking {@code true} only if no other modifiable reference to {@code navigableMap}
+     *        survives this call; see {@link AbstractImmutableMap#ownsBacking}.
+     * @throws NullPointerException if {@code navigableMap} is {@code null}
+     */
+    ImmutableNavigableMap(final NavigableMap<? extends K, ? extends V> navigableMap, final boolean ownsBacking) throws NullPointerException {
+        super(navigableMap, ownsBacking);
         this.navigableMap = (NavigableMap<K, V>) navigableMap;
     }
 
@@ -99,19 +119,20 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.firstKey());   // prints "count"
      * }</pre>
      *
-     * @param <K> the type of the key in the ImmutableNavigableMap, must extend Comparable
+     * @param <K> the type of the key in the ImmutableNavigableMap; the key must be Comparable
      * @param <V> the type of the value in the ImmutableNavigableMap
      * @param k1 the key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the key
      * @return an ImmutableNavigableMap containing the provided key-value pair
      * @throws NullPointerException if {@code k1} is {@code null}
+     * @throws ClassCastException if {@code k1} cannot be compared with itself in natural order
      */
-    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1) {
-        final NavigableMap<K, V> map = N.newTreeMap();
+    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1) throws NullPointerException, ClassCastException {
+        final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
 
-        return new ImmutableNavigableMap<>(map);
+        return new ImmutableNavigableMap<>(map, true);
     }
 
     /**
@@ -127,7 +148,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map);   // prints {1=one, 2=two}
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
+     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -135,14 +156,15 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v2 the value to be associated with the second key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      * @throws NullPointerException if any key is {@code null}
+     * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
-        final NavigableMap<K, V> map = N.newTreeMap();
+    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2) throws NullPointerException, ClassCastException {
+        final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
         map.put(k2, v2);
 
-        return new ImmutableNavigableMap<>(map);
+        return new ImmutableNavigableMap<>(map, true);
     }
 
     /**
@@ -158,7 +180,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.floorEntry(2);   // returns 2=b
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
+     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -168,15 +190,17 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v3 the value to be associated with the third key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      * @throws NullPointerException if any key is {@code null}
+     * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
-        final NavigableMap<K, V> map = N.newTreeMap();
+    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3)
+            throws NullPointerException, ClassCastException {
+        final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
 
-        return new ImmutableNavigableMap<>(map);
+        return new ImmutableNavigableMap<>(map, true);
     }
 
     /**
@@ -192,7 +216,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.higherKey(4);    // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
+     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -204,17 +228,18 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v4 the value to be associated with the fourth key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      * @throws NullPointerException if any key is {@code null}
+     * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
-            final K k4, final V v4) {
-        final NavigableMap<K, V> map = N.newTreeMap();
+    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4)
+            throws NullPointerException, ClassCastException {
+        final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
         map.put(k4, v4);
 
-        return new ImmutableNavigableMap<>(map);
+        return new ImmutableNavigableMap<>(map, true);
     }
 
     /**
@@ -230,7 +255,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.lowerKey(1);   // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
+     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -244,10 +269,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v5 the value to be associated with the fifth key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      * @throws NullPointerException if any key is {@code null}
+     * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
-            final K k4, final V v4, final K k5, final V v5) {
-        final NavigableMap<K, V> map = N.newTreeMap();
+    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4,
+            final K k5, final V v5) throws NullPointerException, ClassCastException {
+        final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -255,7 +281,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
         map.put(k4, v4);
         map.put(k5, v5);
 
-        return new ImmutableNavigableMap<>(map);
+        return new ImmutableNavigableMap<>(map, true);
     }
 
     /**
@@ -272,7 +298,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.ceilingKey(7);    // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
+     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -288,10 +314,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v6 the value to be associated with the sixth key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      * @throws NullPointerException if any key is {@code null}
+     * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
-            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6) {
-        final NavigableMap<K, V> map = N.newTreeMap();
+    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4,
+            final K k5, final V v5, final K k6, final V v6) throws NullPointerException, ClassCastException {
+        final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -300,7 +327,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
         map.put(k5, v5);
         map.put(k6, v6);
 
-        return new ImmutableNavigableMap<>(map);
+        return new ImmutableNavigableMap<>(map, true);
     }
 
     /**
@@ -317,7 +344,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.higherKey(7);    // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
+     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -335,10 +362,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v7 the value to be associated with the seventh key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      * @throws NullPointerException if any key is {@code null}
+     * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
-            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7) {
-        final NavigableMap<K, V> map = N.newTreeMap();
+    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4,
+            final K k5, final V v5, final K k6, final V v6, final K k7, final V v7) throws NullPointerException, ClassCastException {
+        final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -348,7 +376,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
         map.put(k6, v6);
         map.put(k7, v7);
 
-        return new ImmutableNavigableMap<>(map);
+        return new ImmutableNavigableMap<>(map, true);
     }
 
     /**
@@ -365,7 +393,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.ceilingKey(9);   // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
+     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -385,10 +413,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v8 the value to be associated with the eighth key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      * @throws NullPointerException if any key is {@code null}
+     * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
-            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
-        final NavigableMap<K, V> map = N.newTreeMap();
+    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4,
+            final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) throws NullPointerException, ClassCastException {
+        final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -399,7 +428,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
         map.put(k7, v7);
         map.put(k8, v8);
 
-        return new ImmutableNavigableMap<>(map);
+        return new ImmutableNavigableMap<>(map, true);
     }
 
     /**
@@ -416,7 +445,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.higherKey(9);   // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
+     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -438,10 +467,12 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v9 the value to be associated with the ninth key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      * @throws NullPointerException if any key is {@code null}
+     * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
-            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
-        final NavigableMap<K, V> map = N.newTreeMap();
+    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4,
+            final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9)
+            throws NullPointerException, ClassCastException {
+        final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -453,7 +484,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
         map.put(k8, v8);
         map.put(k9, v9);
 
-        return new ImmutableNavigableMap<>(map);
+        return new ImmutableNavigableMap<>(map, true);
     }
 
     /**
@@ -470,7 +501,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.higherKey(10);    // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap, must extend Comparable
+     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -494,11 +525,12 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param v10 the value to be associated with the tenth key
      * @return an ImmutableNavigableMap containing the provided key-value pairs
      * @throws NullPointerException if any key is {@code null}
+     * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
-            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9,
-            final K k10, final V v10) {
-        final NavigableMap<K, V> map = N.newTreeMap();
+    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4,
+            final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10)
+            throws NullPointerException, ClassCastException {
+        final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -511,12 +543,14 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
         map.put(k9, v9);
         map.put(k10, v10);
 
-        return new ImmutableNavigableMap<>(map);
+        return new ImmutableNavigableMap<>(map, true);
     }
 
     /**
      * Returns an ImmutableNavigableMap containing the same mappings as the provided Map.
-     * If the provided Map is already an instance of ImmutableNavigableMap, it is directly returned.
+     * If the provided Map is already an instance of ImmutableNavigableMap that owns its backing storage
+     * (one produced by {@code of(...)}, {@code copyOf(...)} or {@link #empty()}), it is directly returned;
+     * a {@link #wrap(NavigableMap)}-created view is copied like any other map.
      * If the provided Map is {@code null}, or is empty and not a {@link SortedMap}, an empty
      * ImmutableNavigableMap is returned.
      * Otherwise, a new ImmutableNavigableMap is created with the elements of the provided Map.
@@ -524,6 +558,15 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * <p>If the source is a {@link SortedMap}, the returned map uses the same {@link java.util.Comparator}
      * (or natural ordering) as the source, even when the source is empty. Otherwise, the entries are
      * inserted into a new {@link TreeMap} using the natural ordering of the keys.</p>
+     *
+     * <p><b>Note:</b> a returned same instance is independent of further <i>modification</i>, not of the
+     * source's <i>memory</i>. This holds for every derived view of an owning map, not just a range:
+     * {@code subMap}/{@code headMap}/{@code tailMap}/{@code reversed}/{@code descendingMap} all own their
+     * backing storage too, so they are returned unchanged - and, like every {@code SortedMap} sub-view, each
+     * keeps the whole parent map reachable. The {@code navigableKeySet}/{@code descendingKeySet} views carry
+     * the same retention into {@link ImmutableNavigableSet#copyOf(java.util.Collection)}, where the retained
+     * parent is this whole map, its values included. Wrap the view in a fresh map
+     * ({@code copyOf(new TreeMap<>(view))}) when a small view of a large map must stop retaining it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -538,22 +581,23 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param <K> the type of keys in the Map
      * @param <V> the type of values in the Map
      * @param map the Map whose mappings are to be placed in the {@code ImmutableNavigableMap}
-     * @return an {@code ImmutableNavigableMap} containing the same mappings as the provided map, or the same instance if it is already an
-     *         {@code ImmutableNavigableMap}. The comparator of a {@code SortedMap} source is retained even when the source is empty; a {@code null}
-     *         or empty non-sorted source returns the shared empty instance.
-     * @throws ClassCastException if the keys are not mutually comparable (when the source map is not a {@code SortedMap})
+     * @return an {@code ImmutableNavigableMap} containing the same mappings as the provided map, or the
+     *         same instance if it is already an {@code ImmutableNavigableMap} that owns its backing storage.
+     *         The comparator of a {@code SortedMap} source is retained even when the source is empty; a
+     *         {@code null} or empty non-sorted source returns the shared empty instance.
      * @throws NullPointerException if the map contains a {@code null} key and natural ordering is used
+     * @throws ClassCastException if the keys are not mutually comparable (when the source map is not a {@code SortedMap})
      * @see #wrap(NavigableMap)
      */
-    public static <K, V> ImmutableNavigableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
-        if (map instanceof ImmutableNavigableMap) {
+    public static <K, V> ImmutableNavigableMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws NullPointerException, ClassCastException {
+        if (map instanceof ImmutableNavigableMap && ((ImmutableNavigableMap<K, V>) map).ownsBacking) {
             return (ImmutableNavigableMap<K, V>) map;
         } else if (map instanceof SortedMap sortedMap) {
-            return new ImmutableNavigableMap<>(new TreeMap<>(sortedMap));
+            return new ImmutableNavigableMap<>(new TreeMap<>(sortedMap), true);
         } else if (N.isEmpty(map)) {
             return empty();
         } else {
-            return new ImmutableNavigableMap<>(new TreeMap<>(map));
+            return new ImmutableNavigableMap<>(new TreeMap<>(map), true);
         }
     }
 
@@ -632,11 +676,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param key the reference key whose immediate predecessor entry is requested
      * @return an entry with the greatest key less than {@code key}, or {@code null} if there is no such key
-     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
+     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      */
     @Override
-    public ImmutableEntry<K, V> lowerEntry(final K key) {
+    public ImmutableEntry<K, V> lowerEntry(final K key) throws NullPointerException, ClassCastException {
         final Entry<K, V> lowerEntry = navigableMap.lowerEntry(key);
 
         return lowerEntry == null ? null : ImmutableEntry.copyOf(lowerEntry);
@@ -657,11 +701,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param key the reference key whose immediate predecessor key is requested
      * @return the greatest key less than {@code key}, or {@code null} if there is no such key
-     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
+     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      */
     @Override
-    public K lowerKey(final K key) {
+    public K lowerKey(final K key) throws NullPointerException, ClassCastException {
         return navigableMap.lowerKey(key);
     }
 
@@ -682,11 +726,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param key the reference key whose floor entry is requested
      * @return an entry with the greatest key less than or equal to {@code key}, or {@code null} if there is no such key
-     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
+     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      */
     @Override
-    public ImmutableEntry<K, V> floorEntry(final K key) {
+    public ImmutableEntry<K, V> floorEntry(final K key) throws NullPointerException, ClassCastException {
         final Entry<K, V> floorEntry = navigableMap.floorEntry(key);
 
         return floorEntry == null ? null : ImmutableEntry.copyOf(floorEntry);
@@ -707,11 +751,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param key the reference key whose floor key is requested
      * @return the greatest key less than or equal to {@code key}, or {@code null} if there is no such key
-     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
+     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      */
     @Override
-    public K floorKey(final K key) {
+    public K floorKey(final K key) throws NullPointerException, ClassCastException {
         return navigableMap.floorKey(key);
     }
 
@@ -732,11 +776,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param key the reference key whose ceiling entry is requested
      * @return an entry with the least key greater than or equal to {@code key}, or {@code null} if there is no such key
-     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
+     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      */
     @Override
-    public ImmutableEntry<K, V> ceilingEntry(final K key) {
+    public ImmutableEntry<K, V> ceilingEntry(final K key) throws NullPointerException, ClassCastException {
         final Entry<K, V> ceilingEntry = navigableMap.ceilingEntry(key);
 
         return ceilingEntry == null ? null : ImmutableEntry.copyOf(ceilingEntry);
@@ -757,11 +801,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param key the reference key whose ceiling key is requested
      * @return the least key greater than or equal to {@code key}, or {@code null} if there is no such key
-     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
+     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      */
     @Override
-    public K ceilingKey(final K key) {
+    public K ceilingKey(final K key) throws NullPointerException, ClassCastException {
         return navigableMap.ceilingKey(key);
     }
 
@@ -782,11 +826,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param key the reference key whose immediate successor entry is requested
      * @return an entry with the least key greater than {@code key}, or {@code null} if there is no such key
-     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
+     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      */
     @Override
-    public ImmutableEntry<K, V> higherEntry(final K key) {
+    public ImmutableEntry<K, V> higherEntry(final K key) throws NullPointerException, ClassCastException {
         final Entry<K, V> higherEntry = navigableMap.higherEntry(key);
 
         return higherEntry == null ? null : ImmutableEntry.copyOf(higherEntry);
@@ -807,11 +851,11 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      *
      * @param key the reference key whose immediate successor key is requested
      * @return the least key greater than {@code key}, or {@code null} if there is no such key
-     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      * @throws NullPointerException if {@code key} is {@code null} and this map's comparator does not permit {@code null} keys
+     * @throws ClassCastException if the specified key cannot be compared with the keys currently in the map
      */
     @Override
-    public K higherKey(final K key) {
+    public K higherKey(final K key) throws NullPointerException, ClassCastException {
         return navigableMap.higherKey(key);
     }
 
@@ -903,7 +947,31 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      */
     @Override
     public ImmutableNavigableMap<K, V> descendingMap() {
-        return wrap(navigableMap.descendingMap());
+        // A range/derived view is a window onto this instance's own backing storage, so it is exactly
+        // as stable as this instance is: an owning parent yields an owning view, a wrap()-backed one a live view.
+        return new ImmutableNavigableMap<>(navigableMap.descendingMap(), ownsBacking);
+    }
+
+    /**
+     * Returns an immutable view of this map with its mappings in reverse key order, equivalent to
+     * {@link #descendingMap()} and returning the same narrowed type.
+     *
+     * <p>Required as a covariant re-override: {@link java.util.NavigableMap#reversed()} narrows the return
+     * type of {@link java.util.SortedMap#reversed()}, so {@link ImmutableSortedMap#reversed()} alone would
+     * not satisfy it.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(1, "one", 2, "two", 3, "three");
+     * ImmutableNavigableMap<Integer, String> reversed = map.reversed();
+     * System.out.println(reversed);   // prints {3=three, 2=two, 1=one}
+     * }</pre>
+     *
+     * @return a reverse order view of this map
+     */
+    @Override
+    public ImmutableNavigableMap<K, V> reversed() {
+        return descendingMap();
     }
 
     /**
@@ -931,7 +999,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      */
     @Override
     public ImmutableNavigableSet<K> navigableKeySet() {
-        return ImmutableNavigableSet.wrap(navigableMap.navigableKeySet());
+        // A range/derived view is a window onto this instance's own backing storage, so it is exactly
+        // as stable as this instance is: an owning parent yields an owning view, a wrap()-backed one a live view.
+        return new ImmutableNavigableSet<>(navigableMap.navigableKeySet(), ownsBacking);
     }
 
     /**
@@ -957,7 +1027,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      */
     @Override
     public ImmutableNavigableSet<K> descendingKeySet() {
-        return ImmutableNavigableSet.wrap(navigableMap.descendingKeySet());
+        // A range/derived view is a window onto this instance's own backing storage, so it is exactly
+        // as stable as this instance is: an owning parent yields an owning view, a wrap()-backed one a live view.
+        return new ImmutableNavigableSet<>(navigableMap.descendingKeySet(), ownsBacking);
     }
 
     /**
@@ -989,15 +1061,18 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param toKey high endpoint of the keys in the returned map
      * @param toInclusive {@code true} if the high endpoint is to be included in the returned view
      * @return an immutable view of the portion of this map whose keys range from {@code fromKey} to {@code toKey}
-     * @throws ClassCastException if {@code fromKey} and {@code toKey} cannot be compared to one another
-     *         using this map's comparator (or, if the map has no comparator, using natural ordering)
-     * @throws NullPointerException if {@code fromKey} or {@code toKey} is {@code null} and this map's comparator
-     *         does not permit {@code null} keys
-     * @throws IllegalArgumentException if {@code fromKey} is greater than {@code toKey}.
+     * @throws NullPointerException if an endpoint is null and the backing map rejects null endpoints
+     * @throws ClassCastException if the endpoints cannot be compared with each other, or an endpoint cannot be compared with a backing range bound
+     *         using the configured comparator or natural ordering
+     * @throws IllegalArgumentException if {@code fromKey} is greater than {@code toKey}; or if this map itself has a restricted range, and an
+     *         endpoint lies outside the bounds of the range.
      */
     @Override
-    public ImmutableNavigableMap<K, V> subMap(final K fromKey, final boolean fromInclusive, final K toKey, final boolean toInclusive) {
-        return wrap(navigableMap.subMap(fromKey, fromInclusive, toKey, toInclusive));
+    public ImmutableNavigableMap<K, V> subMap(final K fromKey, final boolean fromInclusive, final K toKey, final boolean toInclusive)
+            throws NullPointerException, ClassCastException, IllegalArgumentException {
+        // A range/derived view is a window onto this instance's own backing storage, so it is exactly
+        // as stable as this instance is: an owning parent yields an owning view, a wrap()-backed one a live view.
+        return new ImmutableNavigableMap<>(navigableMap.subMap(fromKey, fromInclusive, toKey, toInclusive), ownsBacking);
     }
 
     /**
@@ -1024,13 +1099,16 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param inclusive {@code true} if the high endpoint is to be included in the returned view
      * @return an immutable view of the portion of this map whose keys are less than (or equal to,
      *         if {@code inclusive} is true) {@code toKey}
-     * @throws ClassCastException if {@code toKey} is not compatible with this map's comparator
-     *         (or, if the map has no comparator, if {@code toKey} does not implement {@link Comparable})
-     * @throws NullPointerException if {@code toKey} is {@code null} and this map's comparator does not permit {@code null} keys
+     * @throws NullPointerException if {@code toKey} is null and the backing map rejects null endpoints
+     * @throws ClassCastException if the endpoint is incompatible with the ordering, or cannot be compared with a backing range bound
+     * @throws IllegalArgumentException if this map itself has a restricted range, and {@code toKey} lies outside the bounds of the range.
      */
     @Override
-    public ImmutableNavigableMap<K, V> headMap(final K toKey, final boolean inclusive) {
-        return wrap(navigableMap.headMap(toKey, inclusive));
+    public ImmutableNavigableMap<K, V> headMap(final K toKey, final boolean inclusive)
+            throws NullPointerException, ClassCastException, IllegalArgumentException {
+        // A range/derived view is a window onto this instance's own backing storage, so it is exactly
+        // as stable as this instance is: an owning parent yields an owning view, a wrap()-backed one a live view.
+        return new ImmutableNavigableMap<>(navigableMap.headMap(toKey, inclusive), ownsBacking);
     }
 
     /**
@@ -1057,13 +1135,98 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @param inclusive {@code true} if the low endpoint is to be included in the returned view
      * @return an immutable view of the portion of this map whose keys are greater than (or equal to,
      *         if {@code inclusive} is true) {@code fromKey}
-     * @throws ClassCastException if {@code fromKey} is not compatible with this map's comparator
-     *         (or, if the map has no comparator, if {@code fromKey} does not implement {@link Comparable})
-     * @throws NullPointerException if {@code fromKey} is {@code null} and this map's comparator does not permit {@code null} keys
+     * @throws NullPointerException if {@code fromKey} is null and the backing map rejects null endpoints
+     * @throws ClassCastException if the endpoint is incompatible with the ordering, or cannot be compared with a backing range bound
+     * @throws IllegalArgumentException if this map itself has a restricted range, and {@code fromKey} lies outside the bounds of the range.
      */
     @Override
-    public ImmutableNavigableMap<K, V> tailMap(final K fromKey, final boolean inclusive) {
-        return wrap(navigableMap.tailMap(fromKey, inclusive));
+    public ImmutableNavigableMap<K, V> tailMap(final K fromKey, final boolean inclusive)
+            throws NullPointerException, ClassCastException, IllegalArgumentException {
+        // A range/derived view is a window onto this instance's own backing storage, so it is exactly
+        // as stable as this instance is: an owning parent yields an owning view, a wrap()-backed one a live view.
+        return new ImmutableNavigableMap<>(navigableMap.tailMap(fromKey, inclusive), ownsBacking);
+    }
+
+    /**
+     * Returns an immutable view of the portion of this map whose keys range from {@code fromKey},
+     * inclusive, to {@code toKey}, exclusive. Equivalent to
+     * {@code subMap(fromKey, true, toKey, false)}.
+     *
+     * <p>This override narrows the return type of {@link ImmutableSortedMap#subMap(Object, Object)} so that
+     * a range of a navigable map stays navigable.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(
+     *     1, "one", 2, "two", 3, "three", 4, "four"
+     * );
+     * ImmutableNavigableMap<Integer, String> sub = map.subMap(2, 4);
+     * System.out.println(sub);              // prints {2=two, 3=three}
+     * System.out.println(sub.firstKey());   // prints 2
+     * }</pre>
+     *
+     * @param fromKey low endpoint (inclusive) of the keys in the returned map
+     * @param toKey high endpoint (exclusive) of the keys in the returned map
+     * @return an immutable navigable view of the portion of this map whose keys range from
+     *         {@code fromKey}, inclusive, to {@code toKey}, exclusive
+     * @throws NullPointerException if an endpoint is null and the backing map rejects null endpoints
+     * @throws ClassCastException if the endpoints cannot be compared with each other, or an endpoint cannot be compared with a backing range bound
+     *         using the configured comparator or natural ordering
+     * @throws IllegalArgumentException if {@code fromKey} is greater than {@code toKey}; or if this map itself has a restricted range, and an
+     *         endpoint lies outside the bounds of the range.
+     */
+    @Override
+    public ImmutableNavigableMap<K, V> subMap(final K fromKey, final K toKey) throws NullPointerException, ClassCastException, IllegalArgumentException {
+        return subMap(fromKey, true, toKey, false);
+    }
+
+    /**
+     * Returns an immutable view of the portion of this map whose keys are strictly less than
+     * {@code toKey}. Equivalent to {@code headMap(toKey, false)}.
+     *
+     * <p>This override narrows the return type of {@link ImmutableSortedMap#headMap(Object)} so that
+     * a range of a navigable map stays navigable.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableMap<String, Integer> map = ImmutableNavigableMap.of("a", 1, "b", 2, "c", 3);
+     * System.out.println(map.headMap("c"));   // prints {a=1, b=2}
+     * }</pre>
+     *
+     * @param toKey high endpoint (exclusive) of the keys in the returned map
+     * @return an immutable navigable view of the portion of this map whose keys are strictly less than {@code toKey}
+     * @throws NullPointerException if {@code toKey} is null and the backing map rejects null endpoints
+     * @throws ClassCastException if the endpoint is incompatible with the ordering, or cannot be compared with a backing range bound
+     * @throws IllegalArgumentException if this map itself has a restricted range, and {@code toKey} lies outside the bounds of the range.
+     */
+    @Override
+    public ImmutableNavigableMap<K, V> headMap(final K toKey) throws NullPointerException, ClassCastException, IllegalArgumentException {
+        return headMap(toKey, false);
+    }
+
+    /**
+     * Returns an immutable view of the portion of this map whose keys are greater than or equal to
+     * {@code fromKey}. Equivalent to {@code tailMap(fromKey, true)}.
+     *
+     * <p>This override narrows the return type of {@link ImmutableSortedMap#tailMap(Object)} so that
+     * a range of a navigable map stays navigable.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableNavigableMap<String, Integer> map = ImmutableNavigableMap.of("a", 1, "b", 2, "c", 3);
+     * System.out.println(map.tailMap("b"));   // prints {b=2, c=3}
+     * }</pre>
+     *
+     * @param fromKey low endpoint (inclusive) of the keys in the returned map
+     * @return an immutable navigable view of the portion of this map whose keys are greater than or equal
+     *         to {@code fromKey}
+     * @throws NullPointerException if {@code fromKey} is null and the backing map rejects null endpoints
+     * @throws ClassCastException if the endpoint is incompatible with the ordering, or cannot be compared with a backing range bound
+     * @throws IllegalArgumentException if this map itself has a restricted range, and {@code fromKey} lies outside the bounds of the range.
+     */
+    @Override
+    public ImmutableNavigableMap<K, V> tailMap(final K fromKey) throws NullPointerException, ClassCastException, IllegalArgumentException {
+        return tailMap(fromKey, true);
     }
 
     /**

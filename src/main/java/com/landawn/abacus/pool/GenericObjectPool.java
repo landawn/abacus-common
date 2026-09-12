@@ -15,6 +15,7 @@
 package com.landawn.abacus.pool;
 
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serial;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -40,6 +42,14 @@ import com.landawn.abacus.util.Objectory;
 /**
  * A generic implementation of ObjectPool that stores poolable objects in a LIFO (Last-In-First-Out) structure.
  * This implementation uses an ArrayDeque internally for efficient add/remove operations at the head.
+ * Deserialization of a nonempty measured pool requires its stored admission charges; older
+ * serialized forms without those charges must be recreated.
+ *
+ * <p><b>Serialization:</b> a pool is serializable only if every pooled element and the configured
+ * {@link ObjectPool.MemoryMeasure} (a non-transient field) are {@link java.io.Serializable};
+ * otherwise {@code writeObject} fails with {@link java.io.NotSerializableException}. A lambda
+ * measure must be declared with an intersection cast, e.g.
+ * {@code (ObjectPool.MemoryMeasure<E> & Serializable) e -> e.size()}.</p>
  *
  * <p>Features:
  * <ul>
@@ -69,12 +79,14 @@ import com.landawn.abacus.util.Objectory;
  * // Add resources
  * pool.add(new MyResource());
  *
- * // Poll and use resources
+ * // Poll and use resources (poll() returns null when the pool is empty; add(null) throws)
  * MyResource resource = pool.poll();
- * try {
- *     // use resource
- * } finally {
- *     pool.add(resource);   // adds it back to the pool
+ * if (resource != null) {
+ *     try {
+ *         // use resource
+ *     } finally {
+ *         pool.add(resource);   // adds it back to the pool
+ *     }
  * }
  * }</pre>
  *
@@ -92,6 +104,10 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Optional memory measure for tracking memory usage of pooled objects.
      */
     private final ObjectPool.MemoryMeasure<E> memoryMeasure;
+
+    /** Each admission has its own charge, including repeated admissions of the same instance.
+     * Charges follow deque order: polling removes the first and FIFO eviction removes the last. */
+    private IdentityHashMap<E, Deque<Long>> memoryCharges = new IdentityHashMap<>();
 
     /**
      * Internal storage for pooled objects using LIFO ordering.
@@ -129,10 +145,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param evictionPolicy the policy to use for selecting objects to evict
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate object memory size; required when {@code maxMemorySize > 0}
-     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure.
+     * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory size is negative;
+     *         if the balance factor is non-finite or outside [0, 1]; or if a positive memory limit is specified without a memory measure.
      */
     protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final long maxMemorySize,
-            final ObjectPool.MemoryMeasure<E> memoryMeasure) {
+            final ObjectPool.MemoryMeasure<E> memoryMeasure) throws IllegalArgumentException {
         this(capacity, evictDelayInMillis, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
     }
 
@@ -164,7 +181,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure.
      */
     protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
-            final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) {
+            final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) throws IllegalArgumentException {
         super(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
 
         if (maxMemorySize > 0 && memoryMeasure == null) {
@@ -180,6 +197,17 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         // Register shutdown hook AFTER all subclass state is fully initialized so a JVM shutdown
         // racing the constructor cannot invoke close() against a null pool/cmp.
         registerShutdownHook();
+    }
+
+    /**
+     * Memory is tracked (and reported by {@link #stats()}) whenever a memory measure is configured,
+     * even when no positive {@code maxMemorySize} limit is set.
+     *
+     * @return {@code true} if a memory measure is configured
+     */
+    @Override
+    boolean isMemoryTracked() {
+        return memoryMeasure != null;
     }
 
     private Comparator<E> createComparator() {
@@ -259,11 +287,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @param element the object to add, must not be {@code null}
      * @return {@code true} if the object was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the element is null.
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the element is null.
      */
     @Override
-    public boolean add(final E element) throws IllegalStateException {
+    public boolean add(final E element) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         if (element == null) {
@@ -273,6 +301,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         if (element.activityPrint().isExpired()) {
             return false;
         }
+
+        final long admissionMemorySize = measureMemory(element);
 
         List<E> pendingVacated = null;
 
@@ -296,42 +326,37 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             }
 
             if (memoryMeasure != null) {
-                try {
-                    final long elementMemorySize = memoryMeasure.sizeOf(element);
+                final long elementMemorySize = admissionMemorySize;
 
-                    if (elementMemorySize < 0) {
-                        logger.warn("Memory measure returned negative size for element: " + elementMemorySize);
-                        return false;
-                    }
+                if (elementMemorySize < 0) {
+                    logger.warn("Memory measure returned negative size for element: " + elementMemorySize);
+                    return false;
+                }
 
-                    if (maxMemorySize > 0 && elementMemorySize > maxMemorySize - totalDataSize.get()) {
-                        if (autoBalance) {
-                            pendingVacated = appendPendingDestroy(pendingVacated, detachForVacateUnderLock(numberToAutoBalance()), Caller.VACATE);
+                if (elementMemorySize > (maxMemorySize > 0 ? maxMemorySize : Long.MAX_VALUE) - totalDataSize.get()) {
+                    if (autoBalance) {
+                        pendingVacated = appendPendingDestroy(pendingVacated, detachForVacateUnderLock(numberToAutoBalance()), Caller.VACATE);
 
-                            if (maxMemorySize > 0 && elementMemorySize > maxMemorySize - totalDataSize.get()) {
-                                // ignore.
-                                return false;
-                            }
-                        } else {
+                        if (elementMemorySize > (maxMemorySize > 0 ? maxMemorySize : Long.MAX_VALUE) - totalDataSize.get()) {
                             // ignore.
                             return false;
                         }
-                    }
-
-                    // Re-check expiry inside the lock: time spent in sizeOf()/victim selection may have
-                    // expired the element; pushing it would corrupt hit/miss accounting and expose
-                    // a doomed object to the next poller (mirrors the timed add variant).
-                    if (element.activityPrint().isExpired()) {
+                    } else {
+                        // ignore.
                         return false;
                     }
+                }
 
-                    pool.push(element);
-
-                    totalDataSize.addAndGet(elementMemorySize); //NOSONAR
-                } catch (final Exception ex) {
-                    logger.warn("Error measuring memory size of element", ex);
+                // Re-check expiry inside the lock: time spent measuring, acquiring the lock or selecting victims may have
+                // expired the element; pushing it would corrupt hit/miss accounting and expose
+                // a doomed object to the next poller (mirrors the timed add variant).
+                if (element.activityPrint().isExpired()) {
                     return false;
                 }
+
+                pool.push(element);
+
+                recordMemoryCharge(element, elementMemorySize);
             } else {
                 // Re-check expiry inside the lock after any balancing work, mirroring the timed add variant.
                 if (element.activityPrint().isExpired()) {
@@ -354,22 +379,23 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
     /**
      * Adds an object to the pool with optional automatic destruction on failure.
-     * This method ensures proper cleanup of resources if the object cannot be added.
+     * See {@link ObjectPool#add(Poolable, boolean)} for cleanup ownership and concurrency rules.
      *
      * @param element the object to add, must not be {@code null}
-     * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
+     * @param autoDestroyOnFailedToAdd if {@code true}, destroys a rejected non-null element unless
+     *        that same instance remains pooled at the cleanup check
      * @return {@code true} if the object was successfully added, {@code false} otherwise
      * @throws IllegalArgumentException if the element is null.
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
-    public boolean add(final E element, final boolean autoDestroyOnFailedToAdd) {
+    public boolean add(final E element, final boolean autoDestroyOnFailedToAdd) throws IllegalArgumentException, IllegalStateException {
         boolean success = false;
 
         try {
             success = add(element);
         } finally {
-            if (autoDestroyOnFailedToAdd && !success && element != null) {
+            if (autoDestroyOnFailedToAdd && !success && element != null && !containsSameInstance(element)) {
                 element.destroy(Caller.PUT_ADD_FAILURE);
             }
         }
@@ -381,8 +407,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Attempts to add an object to the pool within the specified timeout period.
      * This method blocks until space becomes available, the timeout expires, or the thread is interrupted.
      *
-     * <p>Auto-balance victims are detached and accounted while locked, but their destruction
-     * callbacks are deferred until this invocation releases the pool lock.</p>
+     * <p>When auto-balancing is enabled (the default for every {@link PoolFactory} overload without an
+     * explicit {@code autoBalance} flag), a full pool is first <em>balanced</em> under the lock - a
+     * balance-factor share of the existing elements is detached and destroyed with
+     * {@link Caller#VACATE} - and the element is inserted without waiting. Waiting for space occurs
+     * only when auto-balancing is disabled (or the capacity is {@code 0}). Auto-balance victims are
+     * detached and accounted while locked, but their destruction callbacks are deferred until this
+     * invocation releases the pool lock.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -403,12 +434,12 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *         available, the element was already (or became) expired, the memory measure rejected the element (returned
      *         a negative size, threw, or the element would exceed {@code maxMemorySize} and
      *         balancing did not free enough memory)
-     * @throws IllegalArgumentException if the element or unit is null.
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the element or unit is null.
      * @throws InterruptedException if interrupted while waiting
      */
     @Override
-    public boolean add(final E element, final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
+    public boolean add(final E element, final long timeout, final TimeUnit unit) throws IllegalStateException, IllegalArgumentException, InterruptedException {
         assertNotClosed();
 
         if (element == null) {
@@ -423,11 +454,19 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             return false;
         }
 
-        long nanos = unit.toNanos(timeout);
+        final long admissionMemorySize = measureMemory(element);
+
+        long nanos = Math.max(0, unit.toNanos(timeout));
 
         List<E> pendingVacated = null;
 
-        lock.lock();
+        final long lockStart = System.nanoTime();
+        if (!lock.tryLock(nanos, TimeUnit.NANOSECONDS)) {
+            assertNotClosed();
+            return false;
+        }
+        // Initial lock contention consumes the same waiting budget as the condition wait.
+        nanos = Math.max(0, nanos - (System.nanoTime() - lockStart));
 
         try {
             // Re-check closed-state inside the lock; a concurrent close() between an unlocked
@@ -454,25 +493,18 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     }
 
                     if (memoryMeasure != null) {
-                        final long elementMemorySize;
-
-                        try {
-                            elementMemorySize = memoryMeasure.sizeOf(element);
-                        } catch (final Exception ex) {
-                            logger.warn("Error measuring memory size of element", ex);
-                            return false;
-                        }
+                        final long elementMemorySize = admissionMemorySize;
 
                         if (elementMemorySize < 0) {
                             logger.warn("Memory measure returned negative size for element: " + elementMemorySize);
                             return false;
                         }
 
-                        if (maxMemorySize > 0 && elementMemorySize > maxMemorySize - totalDataSize.get()) {
+                        if (elementMemorySize > (maxMemorySize > 0 ? maxMemorySize : Long.MAX_VALUE) - totalDataSize.get()) {
                             if (autoBalance) {
                                 pendingVacated = appendPendingDestroy(pendingVacated, detachForVacateUnderLock(numberToAutoBalance()), Caller.VACATE);
 
-                                if (maxMemorySize > 0 && elementMemorySize > maxMemorySize - totalDataSize.get()) {
+                                if (elementMemorySize > (maxMemorySize > 0 ? maxMemorySize : Long.MAX_VALUE) - totalDataSize.get()) {
                                     // ignore.
                                     return false;
                                 }
@@ -482,7 +514,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                             }
                         }
 
-                        // Re-check expiry inside the lock: time spent in sizeOf()/victim selection above
+                        // Re-check expiry inside the lock: time spent measuring, acquiring the lock or selecting victims
                         // could have expired the element; pushing it
                         // would corrupt hit/miss accounting and expose a doomed object to the next poller
                         // (mirrors the non-timed add variant).
@@ -492,7 +524,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
                         pool.push(element);
 
-                        totalDataSize.addAndGet(elementMemorySize); //NOSONAR
+                        recordMemoryCharge(element, elementMemorySize);
                     } else {
                         pool.push(element);
                     }
@@ -510,37 +542,64 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                 nanos = notFull.awaitNanos(nanos);
             }
         } finally {
-            lock.unlock();
+            try {
+                // A notified producer can reject its candidate without consuming the free slot.
+                // Pass unused capacity onward so another producer need not wait for its timeout.
+                if (pool.size() < capacity) {
+                    notFull.signal();
+                }
+            } finally {
+                lock.unlock();
+            }
             invokeDestroyCallbacks(pendingVacated, Caller.VACATE);
         }
     }
 
     /**
      * Attempts to add an object to the pool with timeout and automatic destruction on failure.
-     * Combines timeout waiting with automatic resource cleanup.
+     * See {@link ObjectPool#add(Poolable, long, TimeUnit, boolean)} for cleanup ownership rules;
+     * the ownership check may wait for the pool lock after timeout or interruption.
      *
      * @param element the object to add, must not be {@code null}
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument, must not be {@code null}
-     * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
+     * @param autoDestroyOnFailedToAdd if {@code true}, destroys a rejected non-null element unless
+     *        that same instance remains pooled at the cleanup check
      * @return {@code true} if successful, {@code false} if the timeout elapsed or add failed
      * @throws IllegalArgumentException if the element or unit is null.
      * @throws IllegalStateException if the pool has been closed
      * @throws InterruptedException if interrupted while waiting
      */
     @Override
-    public boolean add(final E element, final long timeout, final TimeUnit unit, final boolean autoDestroyOnFailedToAdd) throws InterruptedException {
+    public boolean add(final E element, final long timeout, final TimeUnit unit, final boolean autoDestroyOnFailedToAdd)
+            throws IllegalArgumentException, IllegalStateException, InterruptedException {
         boolean success = false;
 
         try {
             success = add(element, timeout, unit);
         } finally {
-            if (autoDestroyOnFailedToAdd && !success && element != null) {
+            if (autoDestroyOnFailedToAdd && !success && element != null && !containsSameInstance(element)) {
                 element.destroy(Caller.PUT_ADD_FAILURE);
             }
         }
 
         return success;
+    }
+
+    private boolean containsSameInstance(final E element) {
+        // A reentrant admission may retain this candidate even though the outer attempt failed.
+        // Only sample ownership here; user destruction must run after releasing the lock.
+        lock.lock();
+        try {
+            for (final E retained : pool) {
+                if (retained == element) {
+                    return true;
+                }
+            }
+            return false;
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -656,7 +715,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      */
     @MayReturnNull
     @Override
-    public E poll(final long timeout, final TimeUnit unit) throws IllegalStateException, InterruptedException {
+    public E poll(final long timeout, final TimeUnit unit) throws IllegalStateException, IllegalArgumentException, InterruptedException {
         assertNotClosed();
 
         if (unit == null) {
@@ -665,9 +724,16 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
         E element = null;
         List<E> expiredElements = null;
-        long nanos = unit.toNanos(timeout);
+        long nanos = Math.max(0, unit.toNanos(timeout));
 
-        lock.lock();
+        final long lockStart = System.nanoTime();
+        if (!lock.tryLock(nanos, TimeUnit.NANOSECONDS)) {
+            assertNotClosed();
+            missCount.incrementAndGet();
+            return null;
+        }
+        // Initial lock contention consumes the same waiting budget as the condition wait.
+        nanos = Math.max(0, nanos - (System.nanoTime() - lockStart));
 
         try {
             takeLoop: while (true) {
@@ -730,28 +796,39 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Subtracts the just-polled element's measured memory size from {@link #totalDataSize}.
-     * <p>
-     * Must be called while holding {@link #lock} and only when {@link #memoryMeasure} is non-{@code null}.
-     * A user-supplied {@code sizeOf} that throws after the element has already been popped would otherwise
-     * propagate the exception while leaving the popped element neither in the pool nor returned to the
-     * caller — a pure leak (its {@code destroy()} never fires). Any exception is therefore logged and
-     * swallowed; drifting one accounting unit is preferable to leaking a live resource.
+     * Subtracts the just-polled occurrence's admission charge while holding {@link #lock}.
+     * Removal never calls the memory measure: the object may have changed since admission.
      *
      * @param element the element that was just popped from the pool
      */
     private void subtractPolledElementMemory(final E element) {
-        try {
-            final long elementMemorySize = memoryMeasure.sizeOf(element);
+        removeMemoryCharge(element, false);
+    }
 
-            if (elementMemorySize < 0) {
-                logger.warn("Memory measure returned negative size for element: " + elementMemorySize);
-            } else {
-                totalDataSize.addAndGet(-elementMemorySize); //NOSONAR
-            }
-        } catch (final Exception ex) {
-            if (logger.isWarnEnabled()) {
-                logger.warn("Error measuring memory size during poll: " + ExceptionUtil.getErrorMessage(ex, true));
+    // Measure before admission acquires the pool lock: callbacks can reenter or close the pool.
+    private long measureMemory(final E element) {
+        if (memoryMeasure == null) {
+            return 0;
+        }
+        try {
+            return memoryMeasure.sizeOf(element);
+        } catch (final Exception e) {
+            logger.warn("Error measuring memory size of element", e);
+            return -1;
+        }
+    }
+
+    private void recordMemoryCharge(final E element, final long charge) {
+        memoryCharges.computeIfAbsent(element, ignored -> new ArrayDeque<>()).addFirst(charge);
+        totalDataSize.addAndGet(charge);
+    }
+
+    private void removeMemoryCharge(final E element, final boolean oldest) {
+        final Deque<Long> charges = memoryCharges.get(element);
+        if (charges != null) {
+            totalDataSize.addAndGet(-(oldest ? charges.removeLast() : charges.removeFirst()));
+            if (charges.isEmpty()) {
+                memoryCharges.remove(element);
             }
         }
     }
@@ -1016,19 +1093,37 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         if (targets == null || targets.isEmpty()) {
             return;
         }
-        // Remove ONE pool entry per target, by identity. If the same instance happens to be in
-        // the pool more than once, only the first occurrence is removed - matching the
-        // ArrayDeque.remove(Object) cardinality but using identity instead of equals so a
-        // content-equal-but-distinct entry isn't accidentally evicted.
+        // Remove ONE pool entry per target occurrence, by identity. If the same instance happens to
+        // be in the pool more than once, only the head-most occurrences are removed (one per time
+        // it appears in targets) - matching the ArrayDeque.remove(Object) cardinality but using
+        // identity instead of equals so a content-equal-but-distinct entry isn't accidentally evicted.
+        //
+        // Single bulk pass on purpose: this runs under the pool lock, and the victims of every
+        // non-FIFO policy (and of the expiry sweep on a LIFO pool) usually sit at the TAIL. Restarting
+        // pool.iterator() per target and calling Iterator.remove() (which arraycopies per call in
+        // ArrayDeque) was O(n * k) - seconds of lock hold time for a 100k-element pool. ArrayDeque's
+        // removeIf override compacts once, so the whole removal is O(n) regardless of k.
+        final IdentityHashMap<E, Integer> pending = new IdentityHashMap<>(targets.size());
+
         for (final E target : targets) {
-            final Iterator<E> it = pool.iterator();
-            while (it.hasNext()) {
-                if (it.next() == target) {
-                    it.remove();
-                    break;
-                }
-            }
+            pending.merge(target, 1, Integer::sum);
         }
+
+        pool.removeIf(e -> {
+            final Integer count = pending.get(e);
+
+            if (count == null) {
+                return false;
+            }
+
+            if (count == 1) {
+                pending.remove(e);
+            } else {
+                pending.put(e, count - 1);
+            }
+
+            return true;
+        });
     }
 
     private int numberToAutoBalance() {
@@ -1093,6 +1188,15 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * Destroys a single pooled object and updates statistics.
      * Updates memory tracking and eviction counts as appropriate, and handles exceptions gracefully.
      *
+     * <p>This hook is <em>not</em> invoked by the pool's own lifecycle paths ({@code poll},
+     * {@code removeExpired}, {@code evict}/{@code vacate}, auto-balancing, {@code clear} and
+     * {@code close}): those account for detached elements under the pool lock and invoke the
+     * {@link Poolable#destroy(Caller)} callbacks after the lock is released. It is intended for
+     * subclass-initiated destruction of elements that are already detached from the pool. Because it
+     * updates the memory accounting (a non-thread-safe charge map and the total), it must be called
+     * either while holding the pool lock or for elements that are no longer pooled; calling it for an
+     * element still in the pool strips that element's admission charge.</p>
+     *
      * @param element the object to destroy
      * @param caller the reason for destruction (determines whether eviction count is incremented)
      */
@@ -1107,22 +1211,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             evictionCount.incrementAndGet();
         }
 
-        if (element != null) {
-            if (memoryMeasure != null) {
-                try {
-                    final long elementMemorySize = memoryMeasure.sizeOf(element);
-
-                    if (elementMemorySize < 0) {
-                        logger.warn("Memory measure returned negative size for element: " + elementMemorySize);
-                    } else {
-                        totalDataSize.addAndGet(-elementMemorySize); //NOSONAR
-                    }
-                } catch (final Exception e) {
-                    if (logger.isWarnEnabled()) {
-                        logger.warn("Error measuring memory size during destroy: " + ExceptionUtil.getErrorMessage(e, true));
-                    }
-                }
-            }
+        if (element != null && memoryMeasure != null) {
+            removeMemoryCharge(element, caller == Caller.VACATE && evictionPolicy == EvictionPolicy.FIFO);
         }
     }
 
@@ -1191,7 +1281,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     }
 
     /**
-     * Destroys all objects in the provided collection.
+     * Destroys all objects in the provided collection by calling
+     * {@link #destroy(Poolable, Caller)} on each of them.
+     *
+     * <p>Like {@code destroy}, this hook is not invoked by the pool's own eviction, clear or close
+     * paths; it is intended for subclass-initiated destruction of elements already detached from the
+     * pool, and must be called while holding the pool lock or for elements no longer pooled because
+     * it updates the memory accounting.</p>
      *
      * @param collection the collection of objects to destroy
      * @param caller the reason for destruction
@@ -1238,10 +1334,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
     /**
      * Serializes this pool to an ObjectOutputStream.
-     * The pool is locked during serialization to ensure consistency.
+     * The pool is locked during serialization to ensure consistency. Every pooled element and the
+     * configured memory measure are written with the pool, so each must be {@code Serializable};
+     * otherwise a {@link java.io.NotSerializableException} is thrown.
      *
      * @param os the output stream
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if {@code os.defaultWriteObject()} cannot write the pool state, including a nonserializable element or memory
+     *         measure
      */
     @Serial
     private void writeObject(final ObjectOutputStream os) throws IOException {
@@ -1259,12 +1358,14 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * (lock, conditions, comparator, and eviction task).
      *
      * @param is the input stream
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if reading the serialized pool data fails or the stream contains invalid pool state
      * @throws ClassNotFoundException if the class of a serialized object cannot be found
      */
     @Serial
     private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {
         is.defaultReadObject();
+
+        restoreMemoryAccounting();
 
         lock = newLock();
         notEmpty = newCondition(lock);
@@ -1284,5 +1385,36 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             initShutdownHook();
             registerShutdownHook();
         }
+    }
+
+    /**
+     * @throws InvalidObjectException if a nonempty measured pool has no serialized admission charges,
+     *         a charge is negative or the total overflows a long, or a measured pool has a different charge count than element count
+     */
+    private void restoreMemoryAccounting() throws InvalidObjectException {
+        if (memoryCharges == null) {
+            if (memoryMeasure != null && !pool.isEmpty()) {
+                throw new InvalidObjectException("Serialized measured pool has no admission charges; recreate the pool");
+            }
+            memoryCharges = new IdentityHashMap<>();
+        }
+
+        long total = 0;
+        int occurrences = 0;
+        for (final Deque<Long> charges : memoryCharges.values()) {
+            for (final long charge : charges) {
+                if (charge < 0 || charge > Long.MAX_VALUE - total) {
+                    throw new InvalidObjectException("Invalid serialized admission charge: " + charge);
+                }
+                total += charge;
+                occurrences++;
+            }
+        }
+        if (memoryMeasure != null && occurrences != pool.size()) {
+            throw new InvalidObjectException("Serialized admission charges do not match pool size");
+        }
+        // The superclass counter is serialized before the subclass acquires its snapshot lock.
+        // Derive usage from the charges serialized with the elements, not that earlier counter.
+        totalDataSize.set(total);
     }
 }

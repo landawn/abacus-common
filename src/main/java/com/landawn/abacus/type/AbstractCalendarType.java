@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Calendar;
 
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -90,11 +91,13 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      *
      * @param calendar the {@code Calendar} value to convert
      * @return the formatted string representation of the calendar, or {@code null} if the input is {@code null}
+     * @throws IllegalArgumentException if the instant, in the calendar's own time zone, lies outside Common Era years
+     *         0001 through 9999, the range the default ISO 8601 format supports (see {@link Dates#format(Calendar)})
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final Calendar calendar) {
+    public String stringOf(final Calendar calendar) throws IllegalArgumentException {
         return (calendar == null) ? null : Dates.format(calendar);
     }
 
@@ -106,10 +109,11 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code Calendar} value to set, or {@code null} for SQL {@code NULL}
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Calendar x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Calendar x) throws NullPointerException, SQLException {
         stmt.setTimestamp(columnIndex, (x == null) ? null : Dates.createTimestamp(x));
     }
 
@@ -121,10 +125,11 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the {@code Calendar} value to set, or {@code null} for SQL {@code NULL}
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Calendar x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Calendar x) throws NullPointerException, SQLException {
         stmt.setTimestamp(parameterName, (x == null) ? null : Dates.createTimestamp(x));
     }
 
@@ -139,7 +144,12 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Calendar} value to append
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code x} and {@code appendable} are both null
+     * @throws IOException if appending the null literal fails
+     * @throws IllegalArgumentException if {@code x} is non-null and {@code appendable} is null, the instant in the calendar's own time zone lies
+     *         outside Common Era years 0001 through 9999, or that zone cannot be represented by a {@code ZoneId}
+     *         (see {@link Dates#format(Calendar)})
+     * @throws UncheckedIOException if appending a non-null value through {@link Dates#formatTo(Calendar, Appendable)} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -151,7 +161,7 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws NullPointerException, IOException, IllegalArgumentException, UncheckedIOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -182,12 +192,19 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Calendar} value to write
      * @param config the serialization configuration, may be {@code null}
-     * @throws IOException if an I/O error occurs
-     * @throws RuntimeException if an unsupported {@code DateTimeFormat} is specified
+     * @throws NullPointerException if {@code writer} is null when writing the null literal, a quotation mark or the LONG representation
+     * @throws IOException if directly writing the null literal, a quotation mark or the LONG representation fails
+     * @throws IllegalArgumentException if {@code writer} is null when formatting a non-null value without quotation, the default format cannot
+     *         represent the calendar's time zone as a {@code ZoneId}, or the instant lies outside Common Era years 0001 through 9999 and a text
+     *         format is in effect: the default
+     *         format measures the range in the calendar's own time zone, the {@code ISO_8601_*} formats in UTC; {@link DateTimeFormat#LONG} writes
+     *         any instant
+     * @throws UncheckedIOException if writing a non-null value through {@code Dates.formatTo} fails
      */
     @SuppressWarnings("null")
     @Override
-    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, IllegalArgumentException, UncheckedIOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

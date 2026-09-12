@@ -23,11 +23,11 @@ import java.sql.Timestamp;
 
 import org.joda.time.Instant;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
-import com.landawn.abacus.util.Numbers;
 
 /**
  * Type handler for Joda-Time {@link org.joda.time.Instant} objects.
@@ -77,6 +77,14 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
+     * <p>Unlike the {@code java.util.Date}/{@code Calendar} handlers, no year-range check is applied here: an instant
+     * outside Common Era years 0001 through 9999 is printed as is, for example {@code "10000-01-01T00:00:00.000Z"} or
+     * {@code "-0001-01-01T00:00:00.000Z"}. Text whose year has more than four digits or a leading {@code '-'} is
+     * rejected by the inverse parser ({@link #valueOf(String)}) and by every other date handler of this type system,
+     * so it does not round-trip. Year {@code 0000} is the one out-of-range value that does:
+     * {@code "0000-12-31T23:59:59.999Z"} is read back at the same instant here (Joda accepts year zero), although the
+     * {@code Date}/{@code Calendar} handlers reject it.</p>
+     *
      * @param x the {@link Instant} to serialize; may be {@code null}
      * @return the ISO-8601 timestamp string, or {@code null} if {@code x} is {@code null}
      * @see #valueOf(String)
@@ -92,10 +100,16 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * <ul>
      *   <li>{@code null} or null-datetime strings: returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns {@link Instant#now()}</li>
-     *   <li>Numeric strings: parsed as milliseconds since the epoch</li>
-     *   <li>20-character strings: parsed as ISO-8601 date-time ({@code "yyyy-MM-dd'T'HH:mm:ss'Z'"})</li>
-     *   <li>24-character strings: parsed as ISO-8601 timestamp ({@code "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"})</li>
-     *   <li>All other values: parsed as a timestamp via the default timestamp parser</li>
+     *   <li>Numeric strings (an optional sign followed by decimal digits only, as accepted by
+     *       {@link Long#parseLong(String)}; no {@code 0x} hex, no {@code L} suffix): parsed as milliseconds since the
+     *       epoch</li>
+     *   <li>20-character strings ending in {@code 'Z'}/{@code 'z'}: parsed as ISO-8601 date-time
+     *       ({@code "yyyy-MM-dd'T'HH:mm:ss'Z'"})</li>
+     *   <li>24-character strings ending in {@code 'Z'}/{@code 'z'}: parsed as ISO-8601 timestamp
+     *       ({@code "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"})</li>
+     *   <li>All other values (including 20/24-character text of any other shape, such as a compact {@code +HHmm}
+     *       offset or a 4-digit fraction, and {@code 'Z'}-suffixed text the fixed formats reject): parsed as a
+     *       timestamp via the default timestamp parser, {@link Dates#parseToTimestamp(String)}</li>
      * </ul>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
@@ -104,12 +118,14 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * @param str the string to parse; may be {@code null} or empty
      * @return the parsed {@link Instant}, or {@code null} if {@code str} is {@code null} or a null-datetime string
-     * @throws IllegalArgumentException if the string format is not recognized.
+     * @throws IllegalArgumentException if the string format is not recognized, including numeric text outside the
+     *         {@code long} range
      * @see #valueOf(Object)
      * @see #stringOf(Instant)
      */
+    @MayReturnNull
     @Override
-    public Instant valueOf(final String str) {
+    public Instant valueOf(final String str) throws IllegalArgumentException {
         if (isNullDateTime(str)) {
             return null; // NOSONAR
         }
@@ -120,38 +136,61 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
 
         if (isPossibleMillis(str)) {
             try {
-                return Instant.ofEpochMilli(Numbers.toLong(str));
-            } catch (final NumberFormatException e) {
+                // Long.parseLong, not Numbers.toLong: epoch text is decimal digits only, like the java.util.Date /
+                // Calendar handlers ("0x1F4A0" must not become 128160 ms). Overflow is reported as NFE here; the
+                // ArithmeticException arm mirrors the char[] overload so both paths end in the same IAE.
+                return Instant.ofEpochMilli(Long.parseLong(str));
+            } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
 
-        return str.length() == 20 ? Instant.parse(str, jodaISO8601DateTimeFT)
-                : (str.length() == 24 ? Instant.parse(str, jodaISO8601TimestampFT) : Instant.ofEpochMilli(Dates.parseTimestamp(str).getTime()));
+        final int len = str.length();
+
+        // Fast path for the two ISO-8601 UTC shapes produced by stringOf/serializeTo, selected by the terminal
+        // 'Z'/'z' rather than by length alone (a 24-char "+0000" / ".1234" text must reach the general parser).
+        // No charAt(10) == 'T' check: Joda's parser is lenient about lower-case 't'/'z' and year 0000, and that
+        // leniency is kept. Anything the fixed formatter rejects falls through to the general parser.
+        if ((len == 20 && (str.charAt(19) == 'Z' || str.charAt(19) == 'z')) || (len == 24 && (str.charAt(23) == 'Z' || str.charAt(23) == 'z'))) {
+            try {
+                return Instant.parse(str, len == 20 ? jodaISO8601DateTimeFT : jodaISO8601TimestampFT);
+            } catch (final IllegalArgumentException e) {
+                // fall through to the general parser below.
+            }
+        }
+
+        return Instant.ofEpochMilli(Dates.parseToTimestamp(str).getTime());
     }
 
     /**
      * Converts a region of a character array to a Joda {@link Instant} instance.
-     * If the character sequence looks like a {@code long} value (an epoch-millisecond timestamp),
-     * it is parsed as such; otherwise the characters are converted to a {@link String} and
-     * delegated to {@link #valueOf(String)}.
+     * If the character sequence looks like a {@code long} value (an epoch-millisecond timestamp: digits ending in a
+     * digit, so a trailing {@code L}/{@code d}/{@code f} type suffix is not accepted), it is parsed as such; otherwise
+     * the characters are converted to a {@link String} and delegated to {@link #valueOf(String)}, so both overloads
+     * give the same answer for the same text.
      *
      * @param cbuf   the character array containing the value; may be {@code null}
      * @param offset the index of the first character to use
      * @param len    the number of characters to use
-     * @return the parsed Joda instant
-     *         or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @return the parsed Joda instant, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see
+     *         {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
+    @MayReturnNull
     @Override
-    public Instant valueOf(final char[] cbuf, final int offset, final int len) {
+    public Instant valueOf(final char[] cbuf, final int offset, final int len) throws IllegalArgumentException {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
 
+        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
+        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
+        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
+        // IllegalArgumentException.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Instant.ofEpochMilli(parseLong(cbuf, offset, len));
-            } catch (final NumberFormatException e) {
+            } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
@@ -167,10 +206,11 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @param rs          the {@link ResultSet} to read from
      * @param columnIndex the 1-based column index
      * @return a Joda {@link Instant} from the column, or {@code null} if the column value is SQL {@code NULL}
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    public Instant get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Instant get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
         return ts == null ? null : Instant.ofEpochMilli(ts.getTime());
@@ -184,10 +224,11 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @param rs         the {@link ResultSet} to read from
      * @param columnName the label of the column to retrieve
      * @return a Joda {@link Instant} from the column, or {@code null} if the column value is SQL {@code NULL}
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public Instant get(final ResultSet rs, final String columnName) throws SQLException {
+    public Instant get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final Timestamp ts = rs.getTimestamp(columnName);
 
         return ts == null ? null : Instant.ofEpochMilli(ts.getTime());
@@ -201,10 +242,11 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @param stmt        the {@link PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x           the Joda {@link Instant} to set; may be {@code null}
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Instant x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Instant x) throws NullPointerException, SQLException {
         stmt.setTimestamp(columnIndex, x == null ? null : new Timestamp(x.getMillis()));
     }
 
@@ -216,10 +258,11 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @param stmt          the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x             the Joda {@link Instant} to set; may be {@code null}
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Instant x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Instant x) throws NullPointerException, SQLException {
         stmt.setTimestamp(parameterName, x == null ? null : new Timestamp(x.getMillis()));
     }
 
@@ -235,7 +278,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * @param appendable the {@link Appendable} to write to
      * @param x          the Joda {@link Instant} to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws IOException if appending the formatted date/time text or null literal to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -279,8 +322,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the Joda {@link Instant} to write; may be {@code null}
      * @param config the serialization configuration; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
-     * @throws RuntimeException if an unsupported {@code DateTimeFormat} is specified
+     * @throws IOException if writing the selected date/time representation, quotation marks or null literal to {@code writer} fails
      */
     @SuppressWarnings("null")
     @Override

@@ -15,10 +15,13 @@
 package com.landawn.abacus.http;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -55,7 +58,7 @@ import com.landawn.abacus.util.cs;
  * HttpHeaders headers = HttpHeaders.create()
  *     .setContentType("application/json")
  *     .setAuthorization("Bearer token123")
- *     .setAcceptEncoding("gzip, deflate")
+ *     .setAcceptEncoding("gzip, br")
  *     .set("X-Custom-Header", "value");
  *
  * // Or create with initial values
@@ -450,6 +453,12 @@ public final class HttpHeaders {
         /** The Kryo serialization content type: {@code application/kryo}. */
         public static final String APPLICATION_KRYO = "application/kryo";
 
+        /** The arbitrary binary content type: {@code application/octet-stream}. */
+        public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+
+        /** The plain text content type: {@code text/plain}. */
+        public static final String TEXT_PLAIN = "text/plain";
+
         /** The HTML content type: {@code text/html}. */
         public static final String TEXT_HTML = "text/html";
 
@@ -669,7 +678,7 @@ public final class HttpHeaders {
      *
      * @param headers the map of header names to values to copy
      * @return a new {@code HttpHeaders} instance with a copy of the headers
-     * @throws IllegalArgumentException if {@code headers} is {@code null}.
+     * @throws IllegalArgumentException if {@code headers} is null or contains a null header name.
      */
     public static HttpHeaders copyOf(final Map<String, ?> headers) throws IllegalArgumentException {
         N.checkArgNotNull(headers);
@@ -686,17 +695,31 @@ public final class HttpHeaders {
      * A {@code null} value is converted to an empty string. {@link String} values are returned as-is;
      * any other type is converted via {@link N#stringOf(Object)}.
      *
+     * <p>Only {@link Collection}s are joined. An <i>array</i> is not a {@code Collection} and is
+     * rendered by {@code N.stringOf} as a JSON array literal - {@code new String[] {"a", "b"}} becomes
+     * {@code ["a", "b"]}, which is what would go on the wire - so pass a {@code Collection} (for
+     * example {@code Arrays.asList(array)}) when a comma-joined value is intended. A {@code null}
+     * element inside a {@code Collection} renders as the literal token {@code null}
+     * ({@code Arrays.asList("a", null, "b")} becomes {@code a, null, b}).</p>
+     *
+     * <p>This overload is field-agnostic and therefore always uses the {@code ", "} separator. Not every
+     * multiply-valued header field is comma-separated: use {@link #valueOf(String, Object)} when the header
+     * name is known, so that a field with its own list grammar (such as {@code Cookie}) is rendered with the
+     * separator its grammar requires.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String value = HttpHeaders.valueOf(Arrays.asList("gzip", "deflate"));   // "gzip, deflate"
-     * String date = HttpHeaders.valueOf(new Date());                          // date is formatted as an HTTP date
+     * String value = HttpHeaders.valueOf(Arrays.asList("gzip", "br"));   // "gzip, br"
+     * String date = HttpHeaders.valueOf(new Date());                     // date is formatted as an HTTP date
      * }</pre>
      *
      * @param headerValue the header value to convert
      * @return the string representation of the header value, or an empty string if
      *         {@code headerValue} is {@code null}
+     * @throws ArithmeticException if {@code headerValue} is an {@link Instant} whose epoch-millisecond value overflows a {@code long}.
+     * @see #valueOf(String, Object)
      */
-    public static String valueOf(final Object headerValue) {
+    public static String valueOf(final Object headerValue) throws ArithmeticException {
         if (headerValue == null) {
             return Strings.EMPTY;
         } else if (headerValue instanceof String) {
@@ -713,6 +736,37 @@ public final class HttpHeaders {
     }
 
     /**
+     * Converts a header value to the text of a single header line for the named field.
+     * This is the field-aware form of {@link #valueOf(Object)}: it joins a {@link Collection} value with the
+     * separator the field's own grammar requires, and behaves exactly like {@link #valueOf(Object)} for every
+     * other value and field.
+     *
+     * <p>{@code Cookie} is the field whose grammar differs: RFC 6265 &sect;5.4 puts all cookie-pairs of a
+     * request on a single {@code Cookie} line separated by {@code "; "}, so a comma-joined value would be a
+     * malformed cookie string. All other multiply-valued fields handled here use the {@code ", "} of the
+     * comma-separated list grammar (RFC 9110 &sect;5.6.1).</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * HttpHeaders.valueOf("Accept-Encoding", Arrays.asList("gzip", "br"));   // "gzip, br"
+     * HttpHeaders.valueOf("Cookie", Arrays.asList("a=1", "b=2"));            // "a=1; b=2"
+     * }</pre>
+     *
+     * @param headerName the header field name; a {@code null} name is treated as an ordinary field
+     * @param headerValue the header value to convert
+     * @return the text to put on the header line, or an empty string if {@code headerValue} is {@code null}
+     * @throws ArithmeticException if {@code headerValue} is an {@link Instant} whose epoch-millisecond value overflows a {@code long}.
+     * @see #valueOf(Object)
+     */
+    public static String valueOf(final String headerName, final Object headerValue) throws ArithmeticException {
+        if (headerValue instanceof Collection && Names.COOKIE.equalsIgnoreCase(headerName)) {
+            return Strings.join((Collection<?>) headerValue, "; ");
+        }
+
+        return valueOf(headerValue);
+    }
+
+    /**
      * Sets the Content-Type header.
      *
      * <p><b>Usage Examples:</b></p>
@@ -722,8 +776,10 @@ public final class HttpHeaders {
      *
      * @param contentType The content type value (e.g., "application/json")
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setContentType(final String contentType) {
+    public HttpHeaders setContentType(final String contentType) throws UnsupportedOperationException, NullPointerException {
         set(Names.CONTENT_TYPE, contentType);
 
         return this;
@@ -739,10 +795,15 @@ public final class HttpHeaders {
      * headers.setContentEncoding("gzip");
      * }</pre>
      *
-     * @param contentEncoding The content encoding value (e.g., "gzip", "deflate", "br")
+     * <p>Only {@code gzip}, {@code br}, {@code snappy} and {@code lz4} are decoded by this library;
+     * see {@link HttpUtil#getContentFormat(String, String)}.</p>
+     *
+     * @param contentEncoding The content encoding value (e.g., "gzip", "br")
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setContentEncoding(final String contentEncoding) {
+    public HttpHeaders setContentEncoding(final String contentEncoding) throws UnsupportedOperationException, NullPointerException {
         set(Names.CONTENT_ENCODING, contentEncoding);
 
         return this;
@@ -761,8 +822,10 @@ public final class HttpHeaders {
      *
      * @param contentLanguage The content language value (e.g., "en-US", "fr-FR")
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setContentLanguage(final String contentLanguage) {
+    public HttpHeaders setContentLanguage(final String contentLanguage) throws UnsupportedOperationException, NullPointerException {
         set(Names.CONTENT_LANGUAGE, contentLanguage);
 
         return this;
@@ -779,8 +842,9 @@ public final class HttpHeaders {
      *
      * @param contentLength The content length in bytes
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
      */
-    public HttpHeaders setContentLength(final long contentLength) {
+    public HttpHeaders setContentLength(final long contentLength) throws UnsupportedOperationException {
         set(Names.CONTENT_LENGTH, contentLength);
 
         return this;
@@ -799,8 +863,10 @@ public final class HttpHeaders {
      *
      * @param userAgent The user agent string
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setUserAgent(final String userAgent) {
+    public HttpHeaders setUserAgent(final String userAgent) throws UnsupportedOperationException, NullPointerException {
         set(Names.USER_AGENT, userAgent);
 
         return this;
@@ -819,8 +885,10 @@ public final class HttpHeaders {
      *
      * @param cookie The cookie string in the format "name=value; name2=value2"
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setCookie(final String cookie) {
+    public HttpHeaders setCookie(final String cookie) throws UnsupportedOperationException, NullPointerException {
         set(Names.COOKIE, cookie);
 
         return this;
@@ -840,8 +908,10 @@ public final class HttpHeaders {
      *
      * @param value The authorization value (e.g., "Bearer token123", "Basic credentials")
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setAuthorization(final String value) {
+    public HttpHeaders setAuthorization(final String value) throws UnsupportedOperationException, NullPointerException {
         set(Names.AUTHORIZATION, value);
 
         return this;
@@ -860,8 +930,9 @@ public final class HttpHeaders {
      * @param username The username
      * @param password The password
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
      */
-    public HttpHeaders setBasicAuthentication(final String username, final String password) {
+    public HttpHeaders setBasicAuthentication(final String username, final String password) throws UnsupportedOperationException {
         set(Names.AUTHORIZATION, "Basic " + Strings.base64Encode((username + ":" + password).getBytes(Charsets.UTF_8)));
 
         return this;
@@ -878,8 +949,10 @@ public final class HttpHeaders {
      *
      * @param value The proxy authorization value (e.g., "Basic base64credentials")
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setProxyAuthorization(final String value) {
+    public HttpHeaders setProxyAuthorization(final String value) throws UnsupportedOperationException, NullPointerException {
         set(Names.PROXY_AUTHORIZATION, value);
 
         return this;
@@ -899,8 +972,10 @@ public final class HttpHeaders {
      *
      * @param value The cache control directives (e.g., "no-cache", "max-age=3600")
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setCacheControl(final String value) {
+    public HttpHeaders setCacheControl(final String value) throws UnsupportedOperationException, NullPointerException {
         set(Names.CACHE_CONTROL, value);
 
         return this;
@@ -918,8 +993,10 @@ public final class HttpHeaders {
      *
      * @param value The connection value (e.g., "keep-alive", "close")
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setConnection(final String value) {
+    public HttpHeaders setConnection(final String value) throws UnsupportedOperationException, NullPointerException {
         set(Names.CONNECTION, value);
 
         return this;
@@ -937,8 +1014,10 @@ public final class HttpHeaders {
      *
      * @param value The host value (e.g., "example.com", "example.com:8080")
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setHost(final String value) {
+    public HttpHeaders setHost(final String value) throws UnsupportedOperationException, NullPointerException {
         set(Names.HOST, value);
 
         return this;
@@ -956,8 +1035,10 @@ public final class HttpHeaders {
      *
      * @param value The email address of the user making the request
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setFrom(final String value) {
+    public HttpHeaders setFrom(final String value) throws UnsupportedOperationException, NullPointerException {
         set(Names.FROM, value);
 
         return this;
@@ -977,8 +1058,10 @@ public final class HttpHeaders {
      *
      * @param value The media types the client can accept (e.g., "application/json")
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setAccept(final String value) {
+    public HttpHeaders setAccept(final String value) throws UnsupportedOperationException, NullPointerException {
         set(Names.ACCEPT, value);
 
         return this;
@@ -990,17 +1073,24 @@ public final class HttpHeaders {
      * the client can understand. The server can use this to compress the response,
      * reducing bandwidth and improving performance.
      *
+     * <p>Advertise only codings this library can decode - {@code gzip}, {@code br}, {@code snappy},
+     * {@code lz4} - when the response is to be deserialized by it. A server honouring an advertised
+     * {@code deflate} (or {@code compress}, {@code zstd}) would send bytes that
+     * {@link HttpUtil#wrapInputStream(java.io.InputStream, ContentFormat)} passes through undecoded.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * headers.setAcceptEncoding("gzip, deflate, br");
+     * headers.setAcceptEncoding("gzip, br");
      * headers.setAcceptEncoding("gzip");
      * headers.setAcceptEncoding("*");
      * }</pre>
      *
-     * @param acceptEncoding The acceptable encodings (e.g., "gzip, deflate", "br")
+     * @param acceptEncoding The acceptable encodings (e.g., "gzip, br", "br")
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setAcceptEncoding(final String acceptEncoding) {
+    public HttpHeaders setAcceptEncoding(final String acceptEncoding) throws UnsupportedOperationException, NullPointerException {
         set(Names.ACCEPT_ENCODING, acceptEncoding);
 
         return this;
@@ -1018,8 +1108,10 @@ public final class HttpHeaders {
      *
      * @param acceptCharset The acceptable character sets (e.g., "utf-8, iso-8859-1")
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setAcceptCharset(final String acceptCharset) {
+    public HttpHeaders setAcceptCharset(final String acceptCharset) throws UnsupportedOperationException, NullPointerException {
         set(Names.ACCEPT_CHARSET, acceptCharset);
 
         return this;
@@ -1038,8 +1130,10 @@ public final class HttpHeaders {
      *
      * @param acceptLanguage The acceptable languages (e.g., "en-US,en;q=0.9", "fr-FR,fr;q=0.8,en;q=0.5")
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setAcceptLanguage(final String acceptLanguage) {
+    public HttpHeaders setAcceptLanguage(final String acceptLanguage) throws UnsupportedOperationException, NullPointerException {
         set(Names.ACCEPT_LANGUAGE, acceptLanguage);
 
         return this;
@@ -1058,8 +1152,10 @@ public final class HttpHeaders {
      *
      * @param acceptRanges The acceptable range units (e.g., "bytes", "none")
      * @return This HttpHeaders instance for method chaining
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if the supplied header value is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setAcceptRanges(final String acceptRanges) {
+    public HttpHeaders setAcceptRanges(final String acceptRanges) throws UnsupportedOperationException, NullPointerException {
         set(Names.ACCEPT_RANGES, acceptRanges);
 
         return this;
@@ -1079,8 +1175,10 @@ public final class HttpHeaders {
      * @param value The header value (can be a {@code String}, {@code Collection}, {@code Date}, {@code Instant}, or any object)
      * @return This HttpHeaders instance for method chaining
      * @throws IllegalArgumentException if {@code name} is {@code null}.
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if {@code value} is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders set(final String name, final Object value) throws IllegalArgumentException {
+    public HttpHeaders set(final String name, final Object value) throws IllegalArgumentException, UnsupportedOperationException, NullPointerException {
         N.checkArgNotNull(name, cs.name);
 
         final String storedName = findHeaderName(name);
@@ -1109,8 +1207,10 @@ public final class HttpHeaders {
      * @param value The header value (can be a {@code String}, {@code Collection}, {@code Date}, {@code Instant}, or any object)
      * @return This HttpHeaders instance for method chaining
      * @throws IllegalArgumentException if {@code name} is {@code null}.
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if {@code value} is {@code null} and the backing map does not permit null values.
      */
-    public HttpHeaders setIfAbsent(final String name, final Object value) throws IllegalArgumentException {
+    public HttpHeaders setIfAbsent(final String name, final Object value) throws IllegalArgumentException, UnsupportedOperationException, NullPointerException {
         N.checkArgNotNull(name, cs.name);
 
         final String storedName = findHeaderName(name);
@@ -1134,10 +1234,13 @@ public final class HttpHeaders {
      *
      * @param m The map of header names to values; must not be {@code null}
      * @return This HttpHeaders instance for method chaining
-     * @throws NullPointerException if {@code m} is {@code null}
-     * @throws IllegalArgumentException if any key in {@code m} is {@code null}.
+     * @throws IllegalArgumentException if {@code m} or any key in {@code m} is {@code null}.
+     * @throws NullPointerException if a null value is inserted into a backing map that does not permit null values.
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
      */
-    public HttpHeaders setAll(final Map<String, ?> m) {
+    public HttpHeaders setAll(final Map<String, ?> m) throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
+        N.checkArgNotNull(m, cs.m);
+
         for (final Map.Entry<String, ?> entry : m.entrySet()) {
             set(entry.getKey(), entry.getValue());
         }
@@ -1167,25 +1270,37 @@ public final class HttpHeaders {
     }
 
     /**
-     * Returns the value of a header coerced to its {@link String} form via {@link #valueOf(Object)}.
+     * Returns the value of a header coerced to its {@link String} form via {@link #valueOf(String, Object)}.
      * Unlike {@link #get(String)} (which returns the raw stored value), this applies the same
-     * coercion used when writing the header to the wire: {@link Collection} values are joined with
-     * {@code ", "}, {@link Date}/{@link Instant} values are HTTP-date formatted, and a {@code null}
+     * coercion used when writing the header to the wire: {@link Collection} values are joined with the
+     * separator the named field's grammar requires ({@code "; "} for {@code Cookie}, {@code ", "} otherwise),
+     * {@link Date}/{@link Instant} values are HTTP-date formatted, and a {@code null}
      * (absent) header yields {@code null}.
+     *
+     * <p>A header that is present but stored with a {@code null} value (for example after
+     * {@code set("X", (Object) null)}) also yields {@code null} here, even though
+     * {@link #containsHeader(String)} reports it as present; use {@link #containsHeader(String)} to tell
+     * the two cases apart.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * headers.set("Accept-Encoding", Arrays.asList("gzip", "deflate"));
-     * String value = headers.getAsString("Accept-Encoding");   // "gzip, deflate"
+     * headers.set("Accept-Encoding", Arrays.asList("gzip", "br"));
+     * String value = headers.getAsString("Accept-Encoding");   // "gzip, br"
+     *
+     * headers.set("Cookie", Arrays.asList("a=1", "b=2"));
+     * String cookie = headers.getAsString("Cookie");           // "a=1; b=2"
      * }</pre>
      *
      * @param headerName The name of the header to retrieve
-     * @return The coerced header value, or {@code null} if the header is not present
+     * @return The coerced header value, or {@code null} if the header is not present or is stored
+     *         with a {@code null} value
+     * @throws ArithmeticException if the header value is an {@link Instant} whose epoch-millisecond value overflows a {@code long}.
+     * @see #valueOf(String, Object)
      */
-    public String getAsString(final String headerName) {
+    public String getAsString(final String headerName) throws ArithmeticException {
         final Object value = get(headerName);
 
-        return value == null ? null : valueOf(value);
+        return value == null ? null : valueOf(headerName, value);
     }
 
     /**
@@ -1217,8 +1332,9 @@ public final class HttpHeaders {
      *
      * @param headerName The name of the header to remove; a {@code null} name never matches
      * @return The previous value associated with the header, or {@code null} if there was no mapping
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
      */
-    public Object remove(final String headerName) {
+    public Object remove(final String headerName) throws UnsupportedOperationException {
         final String storedName = findHeaderName(headerName);
         return storedName == null ? null : map.remove(storedName);
     }
@@ -1271,10 +1387,12 @@ public final class HttpHeaders {
      * }</pre>
      *
      * @param action The action to be performed for each header.
-     * @throws java.util.ConcurrentModificationException if a header is added or removed while iterating
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws ConcurrentModificationException if the backing map detects structural modification while invoking the action.
+     * @throws RuntimeException if the action throws while processing a header.
      */
-    public void forEach(final BiConsumer<? super String, ? super Object> action) throws IllegalArgumentException {
+    public void forEach(final BiConsumer<? super String, ? super Object> action)
+            throws IllegalArgumentException, ConcurrentModificationException, RuntimeException {
         N.checkArgNotNull(action, cs.action);
 
         map.forEach(action);
@@ -1289,8 +1407,9 @@ public final class HttpHeaders {
      * headers.clear();
      * }</pre>
      *
+     * @throws UnsupportedOperationException if the backing map does not support the requested modification.
      */
-    public void clear() {
+    public void clear() throws UnsupportedOperationException {
         map.clear();
     }
 
@@ -1348,7 +1467,13 @@ public final class HttpHeaders {
     public HttpHeaders copy() {
         final Map<String, Object> copyMap = newMutableCopyMap(map);
 
-        return new HttpHeaders(copyMap).setAll(map);
+        // Copy the entries verbatim rather than replaying them through set(..): set(..) folds a name
+        // onto the case-variant already stored, so a wrapped map holding both "Accept" and "accept"
+        // would collapse into one entry and copy().equals(this) - which equals(Object) matches such
+        // case-duplicates one-to-one - would be false.
+        copyMap.putAll(map);
+
+        return new HttpHeaders(copyMap);
     }
 
     private static Map<String, Object> newMutableCopyMap(final Map<String, ?> source) {
@@ -1394,6 +1519,8 @@ public final class HttpHeaders {
      * Checks if this HttpHeaders is equal to another object.
      * Two {@code HttpHeaders} instances are equal if they contain the same header names and
      * values. Header names are compared case-insensitively, as required by HTTP.
+     * If a wrapped map contains names differing only in case, each name/value occurrence
+     * must have a distinct matching occurrence in the other instance.
      *
      * @param obj The object to compare with
      * @return {@code true} if the objects are equal, {@code false} otherwise
@@ -1408,16 +1535,23 @@ public final class HttpHeaders {
             return false;
         }
 
-        for (final Map.Entry<String, Object> entry : map.entrySet()) {
-            if (!other.containsHeader(entry.getKey()) || !Objects.equals(entry.getValue(), other.get(entry.getKey()))) {
-                return false;
-            }
-        }
+        final List<Map.Entry<String, Object>> unmatched = new ArrayList<>(other.map.entrySet());
 
-        // The forward scan alone is not symmetric when a wrapped map holds case-duplicate names
-        // (reachable only via wrap(Map), which shares the caller's map without normalization).
-        for (final Map.Entry<String, Object> entry : other.map.entrySet()) {
-            if (!containsHeader(entry.getKey()) || !Objects.equals(entry.getValue(), get(entry.getKey()))) {
+        for (final Map.Entry<String, Object> entry : map.entrySet()) {
+            boolean matched = false;
+
+            for (int i = 0; i < unmatched.size(); i++) {
+                final Map.Entry<String, Object> candidate = unmatched.get(i);
+
+                if ((entry.getKey() == null ? candidate.getKey() == null : entry.getKey().equalsIgnoreCase(candidate.getKey()))
+                        && Objects.equals(entry.getValue(), candidate.getValue())) {
+                    unmatched.remove(i);
+                    matched = true;
+                    break;
+                }
+            }
+
+            if (!matched) {
                 return false;
             }
         }

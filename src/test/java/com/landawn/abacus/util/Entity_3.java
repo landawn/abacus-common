@@ -11,7 +11,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-public class Entity_3 {
+import com.landawn.abacus.TestBase;
+
+public class Entity_3 extends TestBase {
 
     private boolean bool;
     private boolean[] boolArray;

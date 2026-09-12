@@ -12,7 +12,7 @@ import com.landawn.abacus.TestBase;
 
 public class IntermediateOpTest extends TestBase {
 
-    static class TestStream {
+    public static class TestStream {
         @IntermediateOp
         public TestStream filter() {
             return this;

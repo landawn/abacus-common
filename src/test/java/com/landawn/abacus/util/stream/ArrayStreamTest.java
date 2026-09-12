@@ -1912,4 +1912,77 @@ public class ArrayStreamTest extends TestBase {
         new ArrayStream<>(new String[0]).ifEmpty(() -> fired.set(true)).iteratorEx().advance(1);
         assertTrue(fired.get());
     }
+
+    /**
+     * {@code split(Predicate)} on an array-backed stream used to return {@code ImmutableList} <b>views</b>
+     * over the caller's array via {@code StreamBase.slice}. Two defects in one: the chunks were
+     * unmodifiable (every other split route in the library returns a mutable {@code ArrayList}), and they
+     * were live, so mutating the array passed to {@code Stream.of(T[])} silently changed lists that had
+     * already been handed out.
+     */
+    @Test
+    public void testSplitByPredicate_returnsMutableCopiesNotViewsOfTheSourceArray() {
+        final Integer[] backing = { 1, 1, 2, 2, 3 };
+        final List<List<Integer>> parts = Stream.of(backing).split(x -> x < 3).toList();
+
+        assertEquals(Arrays.asList(Arrays.asList(1, 1, 2, 2), Arrays.asList(3)), parts);
+
+        // mutable, like every other split route
+        parts.get(0).set(0, 99);
+        assertEquals(Integer.valueOf(99), parts.get(0).get(0));
+
+        // and independent of the caller's array
+        backing[0] = 777;
+        assertEquals(Integer.valueOf(99), parts.get(0).get(0));
+    }
+
+    // ------------------------------------------------------------------------------------------------------
+    // Stream review 2026-09-09 (pass B) - split(int) chunk mutability
+    // ------------------------------------------------------------------------------------------------------
+
+    /**
+     * {@code split(int)} on an array-backed stream returned {@code Array.asList(...)}, a fixed-size
+     * {@code Arrays$ArrayList} whose {@code add} throws - the only route in the split/sliding family that did.
+     * Every other route ({@code Stream.of(Collection)}, {@code Stream.of(Iterator)}, {@code .map().split(n)},
+     * {@code split(int, IntFunction)}, {@code sliding}, {@code split(Predicate)}) yields a mutable
+     * {@code ArrayList}, which is the invariant the sibling test below was written to state.
+     */
+    @Test
+    public void testSplitByChunkSize_returnsMutableChunksLikeEveryOtherSplitRoute() {
+        final List<List<Integer>> fromArray = Stream.of(1, 2, 3, 4, 5).split(2).toList();
+        final List<List<Integer>> fromIterator = Stream.of(Arrays.asList(1, 2, 3, 4, 5).iterator()).split(2).toList();
+
+        assertEquals(fromIterator, fromArray);
+
+        for (final List<Integer> chunk : fromArray) {
+            final int sizeBefore = chunk.size();
+            chunk.add(99); // used to throw UnsupportedOperationException on the array-backed route only
+            assertEquals(sizeBefore + 1, chunk.size());
+        }
+
+        // the parallel form inherits the same method
+        final List<List<Integer>> fromParallel = Stream.of(1, 2, 3, 4, 5).parallel(2).split(2).toList();
+        fromParallel.get(0).add(99);
+    }
+
+    @Test
+    public void testSplitAtKeepsArraySourceOpenForEscapedSecondStream() {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> source = Stream.of(1, 2, 3, 4).onClose(closeCount::incrementAndGet);
+        final List<Stream<Integer>> parts = source.splitAt(2).toList();
+
+        assertEquals(0, closeCount.get());
+        assertEquals(Arrays.asList(1, 2), parts.get(0).toList());
+        assertEquals(0, closeCount.get());
+        assertEquals(Arrays.asList(3, 4), parts.get(1).toList());
+        assertEquals(1, closeCount.get());
+
+        final AtomicInteger abandonedCloseCount = new AtomicInteger();
+        final Stream<Integer> abandonedSource = Stream.of(1, 2, 3, 4).onClose(abandonedCloseCount::incrementAndGet);
+        final List<Stream<Integer>> firstPartOnly = abandonedSource.splitAt(2).limit(1).toList();
+
+        assertEquals(1, abandonedCloseCount.get());
+        assertEquals(Arrays.asList(1, 2), firstPartOnly.get(0).toList());
+    }
+
 }

@@ -117,4 +117,15 @@ public class PrimitiveDoubleListTypeTest extends TestBase {
         assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
+    // T8-09 / T8-13 (documented): an unparseable element is a NumberFormatException; blank input is null.
+    @Test
+    public void reviewFixes20260906_valueOfDocumentedFailureModesAndBlankInput() {
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("[1, x]"));
+        assertEquals(DoubleList.of(1.5, -0.0, Double.NaN), type.valueOf("[1.5, -0.0, NaN]"));
+
+        assertNull(type.valueOf("   "));
+        assertNull(type.valueOf(""));
+        org.junit.jupiter.api.Assertions.assertTrue(type.valueOf("[ ]").isEmpty());
+    }
+
 }

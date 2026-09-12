@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -208,5 +209,31 @@ public class JUDateTypeTest extends TestBase {
 
         dateType.set(stmt, "param_name", null);
         verify(stmt).setTimestamp("param_name", null);
+    }
+
+    // --- review fixes 2026-09-06 (T9-02, T9-03): the char[] fast path is a sibling of the ones pinned in
+    // DateTypeTest / CalendarTypeTest / TimestampTypeTest and carries the identical guard.
+
+    @Test
+    public void reviewFixes20260906_T902_T903_charArrayAgreesWithStringOverload() {
+        // a trailing type suffix used to be stripped by parseLong(char[]) only, so the two overloads disagreed
+        for (final String s : new String[] { "1700000000000L", "1700000000000d", "12345L" }) {
+            assertThrows(IllegalArgumentException.class, () -> dateType.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> dateType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        // overflowing text used to escape the char[] path as ArithmeticException("long overflow")
+        for (final String s : new String[] { "99999999999999999999", "9223372036854775808", "-9223372036854775809" }) {
+            assertThrows(IllegalArgumentException.class, () -> dateType.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> dateType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        for (final String s : new String[] { "1700000000000", "+1700000000000", "-1700000000000" }) {
+            assertEquals(Long.parseLong(s), dateType.valueOf(s.toCharArray(), 0, s.length()).getTime(), s);
+            assertEquals(Long.parseLong(s), dateType.valueOf(s).getTime(), s);
+        }
+
+        assertNull(dateType.valueOf((char[]) null, 0, 0));
+        assertNull(dateType.valueOf(new char[0], 0, 0));
     }
 }

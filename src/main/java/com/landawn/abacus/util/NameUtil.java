@@ -18,6 +18,7 @@ package com.landawn.abacus.util;
 
 import java.util.Map;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.Internal;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 
@@ -137,9 +138,10 @@ public final class NameUtil {
      * @param name the name string to cache; may be {@code null}
      * @param force if {@code true}, an existing entry is replaced with the interned instance when
      *              the pool has capacity; if {@code false}, the existing canonical entry is returned
-     * @return the cached canonical instance when present, otherwise the (possibly interned)
+     * @return the cached canonical instance when one is present, otherwise the (possibly interned)
      *         name string; {@code null} if {@code name} is {@code null}
      */
+    @MayReturnNull
     public static String cacheName(String name, final boolean force) {
         if (name == null) {
             return null;
@@ -195,9 +197,12 @@ public final class NameUtil {
      * @return {@code true} if {@code parentName} is the immediate parent of {@code name}
      *         (i.e. {@code name} starts with {@code parentName + "."} and the remainder
      *         contains no further dots); {@code false} otherwise
-     * @throws NullPointerException if {@code parentName} or {@code name} is {@code null}
+     * @throws IllegalArgumentException if {@code parentName} or {@code name} is {@code null}
      */
-    public static boolean isCanonicalName(final String parentName, final String name) {
+    public static boolean isCanonicalName(final String parentName, final String name) throws IllegalArgumentException {
+        N.checkArgNotNull(parentName, cs.parentName);
+        N.checkArgNotNull(name, cs.name);
+
         return name.length() > parentName.length() && name.charAt(parentName.length()) == '.' && parentName.equals(getParentName(name));
     }
 
@@ -221,9 +226,11 @@ public final class NameUtil {
      *
      * @param name the canonical name from which to extract the simple name
      * @return the simple name (last component after the final dot)
-     * @throws NullPointerException if {@code name} is {@code null}
+     * @throws IllegalArgumentException if {@code name} is {@code null}
      */
-    public static String getSimpleName(final String name) {
+    public static String getSimpleName(final String name) throws IllegalArgumentException {
+        N.checkArgNotNull(name, cs.name);
+
         String simplePropName = simpleNamePool.get(name);
 
         if (simplePropName == null) {
@@ -268,9 +275,11 @@ public final class NameUtil {
      * @param name the canonical name from which to extract the parent name
      * @return the parent name (everything before the last dot), or an empty string
      *         if the name is not a canonical property name
-     * @throws NullPointerException if {@code name} is {@code null}
+     * @throws IllegalArgumentException if {@code name} is {@code null}
      */
-    public static String getParentName(final String name) {
+    public static String getParentName(final String name) throws IllegalArgumentException {
+        N.checkArgNotNull(name, cs.name);
+
         String parentName = parentNamePool.get(name);
 
         if (parentName == null) {

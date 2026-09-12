@@ -116,7 +116,7 @@ public class UncheckedParseExceptionTest extends TestBase {
         ParseException parseException = new ParseException("Parse error", 0);
         UncheckedParseException exception = new UncheckedParseException(parseException);
         Assertions.assertEquals(parseException, exception.getCause());
-        Assertions.assertEquals(0, ((ParseException) exception.getCause()).getErrorOffset());
+        Assertions.assertEquals(0, exception.getCause().getErrorOffset());
     }
 
     @Test
@@ -124,7 +124,7 @@ public class UncheckedParseExceptionTest extends TestBase {
         ParseException parseException = new ParseException("Parse error", -1);
         UncheckedParseException exception = new UncheckedParseException(parseException);
         Assertions.assertEquals(parseException, exception.getCause());
-        Assertions.assertEquals(-1, ((ParseException) exception.getCause()).getErrorOffset());
+        Assertions.assertEquals(-1, exception.getCause().getErrorOffset());
     }
 
     @Test

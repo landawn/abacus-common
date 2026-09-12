@@ -31,235 +31,58 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
- * A specialized utility class that provides convenient typed Class references for parameterized collection types,
- * designed to work around Java's type erasure limitations while improving compile-time convenience and code readability.
- * This class serves as a bridge between Java's generic type system and APIs that require Class objects,
- * particularly useful in reflection, serialization, and framework integration scenarios.
+ * Typed {@code Class} references for parameterized collection types - a way to hand a container class to an API
+ * that wants {@code Class<List<String>>} rather than a raw {@code List.class}, without writing the double cast
+ * yourself.
  *
- * <p>Due to Java's type erasure, generic type information is not available at runtime, making it impossible
- * to obtain a {@code Class<List<String>>} object directly. This utility provides a convenient way to obtain
- * typed Class references that can be used for type hints, API parameters, and improved code documentation,
- * even though the actual generic type parameters are erased at runtime.</p>
+ * <p><b>&#9888;&#65039; These carry no runtime type arguments.</b> Java erases them: every method here returns a
+ * plain {@code Class} object, and the generic signature exists only for the compiler. {@code Clazz.ofList(String.class)}
+ * <i>is</i> {@code List.class}; nothing about {@code String} survives to runtime, and the {@code eleCls}/{@code keyCls}/
+ * {@code valueCls} arguments are read by nobody - they are there so the compiler can infer the type argument, and may
+ * be {@code null}. When a framework must actually know the element type at runtime, use
+ * {@link com.landawn.abacus.type.Type} or {@link TypeReference} instead; they retain it.
  *
- * <p><b>⚠️ IMPORTANT - Type Erasure Limitation:</b>
- * <ul>
- *   <li>The Class objects returned by all methods do NOT contain actual runtime type parameter information</li>
- *   <li>These are primarily useful for providing type hints to APIs that accept Class parameters</li>
- *   <li>For true runtime type parameter information, use {@code Type.of()} or {@code TypeReference}</li>
- *   <li>The generic type parameters exist only for compile-time type safety and documentation</li>
- * </ul>
+ * <p><b>Interface factories vs. implementation factories.</b> {@link #ofList()} and {@link #ofMap()} return the
+ * <i>interface</i>'s {@code Class}, typed {@code Class<List<T>>} / {@code Class<Map<K, V>>}. {@link #ofLinkedList()},
+ * {@link #ofTreeMap()} and their siblings return the <i>implementation</i>'s {@code Class}, and are typed to match:
+ * {@code Class<LinkedList<T>>}, not {@code Class<List<T>>}. That keeps {@link Class#cast(Object)} and
+ * {@link Class#isInstance(Object)} honest - a {@code Class<List<T>>} holding {@code LinkedList.class} would promise to
+ * accept any {@code List} and then reject an {@code ArrayList} at runtime. The predefined constants follow the same
+ * rule: {@link #MAP} is a {@code Class<Map<String, Object>>} because it holds {@code Map.class}, while
+ * {@link #PROPS_MAP} and {@link #LINKED_HASH_MAP} are {@code Class<LinkedHashMap<String, Object>>} because they
+ * hold {@code LinkedHashMap.class}.
  *
- * <p><b>Key Features:</b>
- * <ul>
- *   <li><b>Type Safety:</b> Provides compile-time type checking for parameterized collection types</li>
- *   <li><b>Code Readability:</b> Clear, expressive method names that document intended generic types</li>
- *   <li><b>API Integration:</b> Seamless integration with frameworks and APIs expecting Class parameters</li>
- *   <li><b>Predefined Constants:</b> Common collection type combinations available as static constants</li>
- *   <li><b>Comprehensive Coverage:</b> Support for all major Java collection interfaces and implementations</li>
- *   <li><b>Performance Optimized:</b> Zero runtime overhead beyond normal Class object usage</li>
- *   <li><b>Inference Parameters:</b> Element/key/value {@code Class} parameters are compile-time hints and may be {@code null};
- *       the general {@link #of(Class)} method instead returns its argument directly</li>
- *   <li><b>Framework Friendly:</b> Designed for use with serialization, ORM, and dependency injection frameworks</li>
- * </ul>
+ * <p>{@link #of(Class)} is the one method that behaves differently from all the others: it returns the argument you
+ * gave it, {@code null} included, retyped. It is also deliberately unsound - see its own documentation.
  *
- * <p><b>Design Philosophy:</b>
- * <ul>
- *   <li><b>Pragmatic Type Safety:</b> Provides type safety where possible within JVM limitations</li>
- *   <li><b>Developer Experience:</b> Prioritizes code clarity and ease of use over theoretical purity</li>
- *   <li><b>Framework Integration:</b> Designed to work seamlessly with existing Java frameworks and libraries</li>
- *   <li><b>Performance First:</b> Zero runtime overhead beyond standard Java reflection costs</li>
- *   <li><b>Comprehensive Coverage:</b> Supports all common collection types and patterns</li>
- * </ul>
- *
- * <p><b>Supported Collection Types:</b>
- * <ul>
- *   <li><b>Core Collections:</b> {@code List}, {@code Set}, {@code Map}, {@code Queue}, {@code Deque}</li>
- *   <li><b>Sorted Collections:</b> {@code SortedSet}, {@code SortedMap}, {@code NavigableSet}, {@code NavigableMap}</li>
- *   <li><b>Concurrent Collections:</b> {@code ConcurrentMap}, {@code BlockingQueue}, {@code ConcurrentLinkedQueue}</li>
- *   <li><b>Specialized Collections:</b> {@code BiMap}, {@code Multiset}, {@code ListMultimap}, {@code SetMultimap}</li>
- *   <li><b>Implementation-Specific:</b> {@code LinkedList}, {@code ArrayDeque}, {@code LinkedHashSet},
- *       {@code TreeSet}, {@code LinkedHashMap}, {@code TreeMap}, and concurrent queue/map implementations</li>
- * </ul>
- *
- * <p><b>Method Categories:</b>
- * <ul>
- *   <li><b>Generic Methods:</b> {@code ofList()}, {@code ofSet()}, {@code ofMap()} - Work with interface types</li>
- *   <li><b>Implementation-Specific:</b> {@code ofLinkedList()}, {@code ofLinkedHashMap()} - Target specific implementations</li>
- *   <li><b>Parameterized Variants:</b> Methods accepting Class parameters for documentation purposes</li>
- *   <li><b>Constants:</b> Pre-defined Class objects for common type combinations</li>
- * </ul>
- *
- * <p><b>Common Usage Patterns:</b>
+ * <p><b>Usage Examples:</b>
  * <pre>{@code
- * // Basic collection type references
+ * // Interface types
  * Class<List<String>> stringListType = Clazz.ofList(String.class);
- * Class<Set<Integer>> integerSet = Clazz.ofSet(Integer.class);
  * Class<Map<String, Object>> stringObjectMap = Clazz.ofMap(String.class, Object.class);
  *
- * // Using predefined constants
- * Class<Map<String, Object>> propsMap = Clazz.PROPS_MAP;
- * Class<List<String>> predefinedStringList = Clazz.STRING_LIST;
- * Class<Set<String>> stringSet = Clazz.STRING_SET;
+ * // Implementation types - note the concrete static type
+ * Class<LinkedList<String>> linkedList = Clazz.ofLinkedList(String.class);
+ * Class<TreeSet<Integer>> treeSet = Clazz.ofTreeSet(Integer.class);
+ * Class<ConcurrentHashMap<String, Object>> cache = Clazz.ofConcurrentHashMap(String.class, Object.class);
  *
- * // Implementation-specific types
- * Class<List<String>> linkedList = Clazz.ofLinkedList(String.class);
- * Class<Map<String, Object>> linkedHashMap = Clazz.ofLinkedHashMap(String.class, Object.class);
- * Class<NavigableSet<Integer>> treeSet = Clazz.ofTreeSet(Integer.class);
+ * // Predefined constants for the common shapes
+ * Class<LinkedHashMap<String, Object>> props = Clazz.PROPS_MAP;
+ * Class<List<String>> strings = Clazz.STRING_LIST;
  *
- * // Concurrent collection types
- * Class<ConcurrentMap<String, Object>> concurrentMap = Clazz.ofConcurrentHashMap(String.class, Object.class);
- * Class<BlockingQueue<String>> blockingQueue = Clazz.ofLinkedBlockingQueue(String.class);
+ * // Runtime identity is the raw container class; no element metadata is retained
+ * assert stringListType == (Class<?>) List.class;
  * }</pre>
  *
- * <p><b>Framework-Facing Class References:</b>
- * <pre>{@code
- * Class<List<Person>> peopleListClass = Clazz.ofList(Person.class);
- * Class<Map<String, Object>> propertiesClass = Clazz.PROPS_MAP;
- *
- * // These generic arguments help only at compile time. At runtime the first
- * // object is List.class; use Type or TypeReference when a framework must know Person.
- * }</pre>
- *
- * <p><b>Specialized Collection Support:</b>
- * <ul>
- *   <li><b>BiMap:</b> Bidirectional map collections with {@code ofBiMap()} methods</li>
- *   <li><b>Multiset:</b> Collections allowing duplicate elements with {@code ofMultiset()} methods</li>
- *   <li><b>Multimap:</b> Maps with multiple values per key via {@code ofListMultimap()} and {@code ofSetMultimap()}</li>
- *   <li><b>Concurrent Collections:</b> Thread-safe collections for concurrent programming</li>
- * </ul>
- *
- * <p><b>Type Parameter Documentation:</b>
- * <ul>
- *   <li>All methods accepting Class parameters use {@code @SuppressWarnings("unused")} annotations</li>
- *   <li>Element/key/value Class parameters serve purely as documentation and compile-time type inference</li>
- *   <li>Parameterized and no-argument collection factory variants return the same raw Class object</li>
- *   <li>{@link #of(Class)} is different: it returns the supplied Class reference, including {@code null}</li>
- *   <li>Method overloads exist for convenience - parameterized and non-parameterized versions</li>
- * </ul>
- *
- * <p><b>Performance Characteristics:</b>
- * <ul>
- *   <li><b>Creation Cost:</b> O(1) - Simple cast operations with no additional computation</li>
- *   <li><b>Memory Overhead:</b> Zero - Returns existing Class objects via type casting</li>
- *   <li><b>Runtime Impact:</b> Minimal - Equivalent to direct Class.class access</li>
- *   <li><b>Compile-Time Benefits:</b> Enhanced type safety and IDE support</li>
- * </ul>
- *
- * <p><b>Thread Safety:</b>
- * <ul>
- *   <li><b>Stateless Design:</b> All methods are static and stateless</li>
- *   <li><b>No Mutable State:</b> No instance variables or mutable static fields</li>
- *   <li><b>Class Object Safety:</b> Class objects are inherently thread-safe</li>
- *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
- * </ul>
- *
- * <p><b>Predefined Constants:</b>
- * <ul>
- *   <li><b>{@code PROPS_MAP}:</b> {@code Map<String, Object>} implemented as LinkedHashMap</li>
- *   <li><b>{@code STRING_LIST}:</b> {@code List<String>} for common string collections</li>
- *   <li><b>{@code STRING_SET}:</b> {@code Set<String>} for unique string collections</li>
- *   <li><b>{@code OBJECT_LIST}:</b> {@code List<Object>} for heterogeneous collections</li>
- * </ul>
- *
- * <p><b>Integration with Type System:</b>
- * <ul>
- *   <li><b>com.landawn.abacus.type.Type:</b> For full runtime type information including generics</li>
- *   <li><b>TypeReference:</b> For creating TypeToken objects with complete generic information</li>
- *   <li><b>Class Objects:</b> For basic type information and framework integration</li>
- *   <li><b>Reflection APIs:</b> Standard Java reflection works with returned Class objects</li>
- * </ul>
- *
- * <p><b>Best Practices:</b>
- * <ul>
- *   <li>Use this class for framework APIs that require Class parameters but need type hints</li>
- *   <li>Prefer predefined constants for common type combinations for brevity and consistency</li>
- *   <li>Use {@code Type.of()} or {@code TypeReference} when actual runtime generic information is needed</li>
- *   <li>Document the intended generic types clearly when using these Class objects</li>
- *   <li>Consider using parameterized method variants for better code documentation</li>
- *   <li>Cache frequently used Class references in static final fields</li>
- * </ul>
- *
- * <p><b>Common Anti-Patterns to Avoid:</b>
- * <ul>
- *   <li>Expecting runtime generic type information from returned Class objects</li>
- *   <li>Using this class when {@code Type} or {@code TypeReference} would be more appropriate</li>
- *   <li>Re-deriving common type combinations inline instead of using the predefined constants</li>
- *   <li>Assuming different parameterized versions return different Class objects</li>
- *   <li>Using for collections where raw types would be more appropriate</li>
- * </ul>
- *
- * <p><b>Comparison with Alternative Approaches:</b>
- * <ul>
- *   <li><b>vs. Raw Class.class:</b> Provides type safety and documentation vs. raw types</li>
- *   <li><b>vs. Type.of():</b> Simpler but no runtime generic info vs. complete type information</li>
- *   <li><b>vs. TypeReference:</b> Lighter weight but less powerful vs. full generic support</li>
- *   <li><b>vs. Manual Casting:</b> Type-safe and documented vs. error-prone manual casts</li>
- * </ul>
- *
- * <p><b>Error Handling:</b>
- * <ul>
- *   <li><b>No Runtime Exceptions:</b> All methods are guaranteed to succeed</li>
- *   <li><b>Compile-Time Safety:</b> Generic type constraints prevent most errors at compile time</li>
- *   <li><b>ClassCastException:</b> Potential only if returned Class is misused with incompatible types</li>
- *   <li><b>Parameter Validation:</b> Element/key/value hint parameters are ignored at runtime;
- *       {@link #of(Class)} returns the supplied reference rather than ignoring it</li>
- * </ul>
- *
- * <p><b>Use Cases and Applications:</b>
- * <ul>
- *   <li><b>JSON/XML Serialization:</b> Selecting a raw container class when element type metadata is not required</li>
- *   <li><b>Dependency Injection:</b> Documenting generic types in injection configurations</li>
- *   <li><b>ORM Frameworks:</b> Specifying collection types for database mapping</li>
- *   <li><b>Configuration Systems:</b> Type-safe configuration property handling</li>
- *   <li><b>API Documentation:</b> Clearly expressing intended generic types in method signatures</li>
- *   <li><b>Testing Frameworks:</b> Providing type information for mock object creation</li>
- * </ul>
- *
- * <p><b>Usage Examples: Configuration System Integration</b>
- * <pre>{@code
- * public class ConfigurationManager {
- *     private final Map<String, Object> properties;
- *
- *     public ConfigurationManager(Properties props) {
- *         // Using Clazz for type-safe conversion
- *         this.properties = convertProperties(props, Clazz.PROPS_MAP);
- *     }
- *
- *     @SuppressWarnings("unchecked")
- *     public <T> List<T> getListProperty(String key, Class<T> elementType) {
- *         Object value = properties.get(key);
- *         if (value instanceof String) {
- *             // Parse string to list using type information
- *             return parseStringToList((String) value, Clazz.ofList(elementType));
- *         }
- *         return (List<T>) value;
- *     }
- *
- *     public List<String> getStringList(String key) {
- *         return getListProperty(key, String.class);
- *     }
- *
- *     public Set<Integer> getIntegerSet(String key) {
- *         List<Integer> list = getListProperty(key, Integer.class);
- *         return new HashSet<>(list);
- *     }
- * }
- * }</pre>
- *
- * <p><b>Static Analysis and IDE Benefits:</b>
- * <ul>
- *   <li><b>Type Inference:</b> IDEs can provide better code completion and error detection</li>
- *   <li><b>Refactoring Support:</b> Type-safe refactoring across generic collection usage</li>
- *   <li><b>Documentation:</b> Clear intent expression in method signatures and variable declarations</li>
- *   <li><b>Code Navigation:</b> Better find-usages and dependency analysis</li>
- * </ul>
+ * <p>All methods are static, allocate nothing, and are safe to call concurrently. None of them throws.
  *
  * @see com.landawn.abacus.type.Type
  * @see TypeReference
@@ -274,94 +97,101 @@ import java.util.concurrent.LinkedBlockingQueue;
 public final class Clazz {
 
     /**
-     * A constant representing the class type for {@code Map<String, Object>} with LinkedHashMap implementation.
-     * Commonly used for properties or configuration maps.
+     * A constant for {@code LinkedHashMap.class}, typed as {@code Class<LinkedHashMap<String, Object>>}.
+     * Commonly used for properties or configuration maps, where insertion order matters.
+     *
+     * <p>Identical in value and type to {@link #LINKED_HASH_MAP}; the two names exist to let a call site say which
+     * of the two intents it has. Use {@link #MAP} when the {@code Map} interface, not this implementation, is what
+     * the receiving API should see.</p>
      */
-    @SuppressWarnings("rawtypes")
-    public static final Class<Map<String, Object>> PROPS_MAP = (Class) LinkedHashMap.class;
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static final Class<LinkedHashMap<String, Object>> PROPS_MAP = (Class) LinkedHashMap.class;
 
     /**
-     * A constant representing the class type for {@code Map<String, Object>}.
-     * This refers to the Map interface, not a specific implementation.
+     * A constant for {@code Map.class}, typed as {@code Class<Map<String, Object>>}.
+     * This refers to the {@code Map} interface, not a specific implementation, so the receiving API chooses the
+     * implementation. Use {@link #PROPS_MAP} or {@link #LINKED_HASH_MAP} to ask for a {@code LinkedHashMap}.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final Class<Map<String, Object>> MAP = (Class) Map.class;
 
     /**
-     * A constant representing the class type for {@code Map<String, Object>} with LinkedHashMap implementation.
-     * Useful when ordering of map entries needs to be preserved.
+     * A constant for {@code LinkedHashMap.class}, typed as {@code Class<LinkedHashMap<String, Object>>}.
+     * Useful when the ordering of map entries needs to be preserved.
+     *
+     * <p>Identical in value and type to {@link #PROPS_MAP}.</p>
      */
-    @SuppressWarnings("rawtypes")
-    public static final Class<Map<String, Object>> LINKED_HASH_MAP = (Class) LinkedHashMap.class;
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static final Class<LinkedHashMap<String, Object>> LINKED_HASH_MAP = (Class) LinkedHashMap.class;
 
     /**
      * A constant representing the class type for {@code List<String>}.
      * One of the most commonly used generic list types.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final Class<List<String>> STRING_LIST = (Class) List.class;
 
     /**
      * A constant representing the class type for {@code List<Integer>}.
      * Commonly used for lists of integer values.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final Class<List<Integer>> INTEGER_LIST = (Class) List.class;
 
     /**
      * A constant representing the class type for {@code List<Long>}.
      * Commonly used for lists of long integer values.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final Class<List<Long>> LONG_LIST = (Class) List.class;
 
     /**
      * A constant representing the class type for {@code List<Double>}.
      * Commonly used for lists of floating-point values.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final Class<List<Double>> DOUBLE_LIST = (Class) List.class;
 
     /**
      * A constant representing the class type for {@code List<Object>}.
      * Used for lists that can contain any type of objects.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final Class<List<Object>> OBJECT_LIST = (Class) List.class;
 
     /**
      * A constant representing the class type for {@code Set<String>}.
      * Commonly used for unique string collections.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final Class<Set<String>> STRING_SET = (Class) Set.class;
 
     /**
      * A constant representing the class type for {@code Set<Integer>}.
      * Commonly used for unique integer collections.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final Class<Set<Integer>> INTEGER_SET = (Class) Set.class;
 
     /**
      * A constant representing the class type for {@code Set<Long>}.
      * Commonly used for unique long integer collections.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final Class<Set<Long>> LONG_SET = (Class) Set.class;
 
     /**
      * A constant representing the class type for {@code Set<Double>}.
      * Commonly used for unique floating-point collections.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final Class<Set<Double>> DOUBLE_SET = (Class) Set.class;
 
     /**
      * A constant representing the class type for {@code Set<Object>}.
      * Used for sets that can contain any type of objects.
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static final Class<Set<Object>> OBJECT_SET = (Class) Set.class;
 
     /**
@@ -395,14 +225,26 @@ public final class Clazz {
      *     .deserialize("[\"alpha\", \"beta\"]", arrayListClass);
      * }</pre>
      *
+     * <p><b>&#9888;&#65039; Unsound by construction:</b> the {@code Class<? super T>} bound lets any
+     * supertype be presented as a {@code Class<T>}. {@code Class<String> c = Clazz.of(Object.class);}
+     * compiles, and {@code c} is really {@code Object.class}. That is inherent to what this method is
+     * for - handing a raw container class to an API that wants a typed one - but it means the returned
+     * reference must never be used for reflective instantiation or {@code cast}/{@code isInstance}
+     * checks unless the caller already knows the runtime class is right.</p>
+     *
+     * <p>Unlike every other method in this class, this one returns its argument rather than a fixed
+     * container class, so a {@code null} argument yields {@code null}.</p>
+     *
      * @param <T> the target type parameter.
-     * @param cls the class to cast.
-     * @return a typed Class reference whose generic type is present only in the compile-time signature.
+     * @param cls the class to cast; may be {@code null}.
+     * @return a typed Class reference whose generic type is present only in the compile-time signature;
+     *         {@code null} if {@code cls} is {@code null}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @MayReturnNull
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<T> of(final Class<? super T> cls) {
         return (Class) cls;
     }
@@ -424,7 +266,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<List<T>> ofList() {
         return (Class) List.class;
     }
@@ -460,7 +302,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#ofList(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<List<T>> ofList(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) List.class;
     }
@@ -473,7 +315,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<List<String>> linkedListClass = Clazz.ofLinkedList();
+     * Class<LinkedList<String>> linkedListClass = Clazz.ofLinkedList();
      * }</pre>
      *
      * @param <T> the element type of the list.
@@ -482,8 +324,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<List<T>> ofLinkedList() {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<LinkedList<T>> ofLinkedList() {
         return (Class) LinkedList.class;
     }
 
@@ -495,7 +337,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<List<String>> linkedListClass = Clazz.ofLinkedList(String.class);
+     * Class<LinkedList<String>> linkedListClass = Clazz.ofLinkedList(String.class);
      * }</pre>
      *
      * @param <T> the element type of the list.
@@ -505,8 +347,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<List<T>> ofLinkedList(@SuppressWarnings("unused") final Class<T> eleCls) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<LinkedList<T>> ofLinkedList(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) LinkedList.class;
     }
 
@@ -530,7 +372,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, V> Class<List<Map<K, V>>> ofListOfMap(@SuppressWarnings("unused") final Class<K> keyCls,
             @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) List.class;
@@ -556,7 +398,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, V> Class<Set<Map<K, V>>> ofSetOfMap(@SuppressWarnings("unused") final Class<K> keyCls,
             @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) Set.class;
@@ -579,7 +421,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<Set<T>> ofSet() {
         return (Class) Set.class;
     }
@@ -603,7 +445,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<Set<T>> ofSet(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) Set.class;
     }
@@ -616,7 +458,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<Set<String>> linkedHashSetClass = Clazz.ofLinkedHashSet();
+     * Class<LinkedHashSet<String>> linkedHashSetClass = Clazz.ofLinkedHashSet();
      * }</pre>
      *
      * @param <T> the element type of the set.
@@ -625,8 +467,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<Set<T>> ofLinkedHashSet() {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<LinkedHashSet<T>> ofLinkedHashSet() {
         return (Class) LinkedHashSet.class;
     }
 
@@ -638,7 +480,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<Set<String>> linkedHashSetClass = Clazz.ofLinkedHashSet(String.class);
+     * Class<LinkedHashSet<String>> linkedHashSetClass = Clazz.ofLinkedHashSet(String.class);
      * }</pre>
      *
      * @param <T> the element type of the set.
@@ -648,8 +490,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<Set<T>> ofLinkedHashSet(@SuppressWarnings("unused") final Class<T> eleCls) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<LinkedHashSet<T>> ofLinkedHashSet(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) LinkedHashSet.class;
     }
 
@@ -670,7 +512,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<SortedSet<T>> ofSortedSet() {
         return (Class) SortedSet.class;
     }
@@ -693,7 +535,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<SortedSet<T>> ofSortedSet(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) SortedSet.class;
     }
@@ -715,7 +557,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<NavigableSet<T>> ofNavigableSet() {
         return (Class) NavigableSet.class;
     }
@@ -738,7 +580,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<NavigableSet<T>> ofNavigableSet(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) NavigableSet.class;
     }
@@ -751,7 +593,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<NavigableSet<String>> treeSetClass = Clazz.ofTreeSet();
+     * Class<TreeSet<String>> treeSetClass = Clazz.ofTreeSet();
      * }</pre>
      *
      * @param <T> the element type of the tree set.
@@ -760,8 +602,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<NavigableSet<T>> ofTreeSet() {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<TreeSet<T>> ofTreeSet() {
         return (Class) TreeSet.class;
     }
 
@@ -786,7 +628,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<NavigableSet<String>> treeSetClass = Clazz.ofTreeSet(String.class);
+     * Class<TreeSet<String>> treeSetClass = Clazz.ofTreeSet(String.class);
      *
      * // Elements will be automatically sorted
      * NavigableSet<Integer> numbers = new TreeSet<>();
@@ -797,14 +639,14 @@ public final class Clazz {
      * @param <T> the element type of the tree set.
      * @param eleCls the class of elements (used only for type inference, not retained at runtime).
      * @return the Class object representing the {@code TreeSet} concrete class.
-     * @see #ofNavigableSet(Class) for the NavigableSet interface
-     * @see #ofSortedSet(Class) for the SortedSet interface
+     * @see #ofNavigableSet(Class)
+     * @see #ofSortedSet(Class)
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<NavigableSet<T>> ofTreeSet(@SuppressWarnings("unused") final Class<T> eleCls) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<TreeSet<T>> ofTreeSet(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) TreeSet.class;
     }
 
@@ -825,7 +667,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<Queue<T>> ofQueue() {
         return (Class) Queue.class;
     }
@@ -848,7 +690,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<Queue<T>> ofQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) Queue.class;
     }
@@ -870,7 +712,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<Deque<T>> ofDeque() {
         return (Class) Deque.class;
     }
@@ -893,7 +735,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<Deque<T>> ofDeque(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) Deque.class;
     }
@@ -906,7 +748,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<Deque<String>> arrayDequeClass = Clazz.ofArrayDeque();
+     * Class<ArrayDeque<String>> arrayDequeClass = Clazz.ofArrayDeque();
      * }</pre>
      *
      * @param <T> the element type of the array deque.
@@ -915,8 +757,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<Deque<T>> ofArrayDeque() {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<ArrayDeque<T>> ofArrayDeque() {
         return (Class) ArrayDeque.class;
     }
 
@@ -928,7 +770,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<Deque<String>> arrayDequeClass = Clazz.ofArrayDeque(String.class);
+     * Class<ArrayDeque<String>> arrayDequeClass = Clazz.ofArrayDeque(String.class);
      * }</pre>
      *
      * @param <T> the element type of the array deque.
@@ -938,8 +780,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<Deque<T>> ofArrayDeque(@SuppressWarnings("unused") final Class<T> eleCls) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<ArrayDeque<T>> ofArrayDeque(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) ArrayDeque.class;
     }
 
@@ -951,7 +793,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<Queue<String>> concurrentQueueClass = Clazz.ofConcurrentLinkedQueue();
+     * Class<ConcurrentLinkedQueue<String>> concurrentQueueClass = Clazz.ofConcurrentLinkedQueue();
      * }</pre>
      *
      * @param <T> the element type of the concurrent queue.
@@ -960,8 +802,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<Queue<T>> ofConcurrentLinkedQueue() {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<ConcurrentLinkedQueue<T>> ofConcurrentLinkedQueue() {
         return (Class) ConcurrentLinkedQueue.class;
     }
 
@@ -973,7 +815,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<Queue<Message>> messageQueueClass = Clazz.ofConcurrentLinkedQueue(Message.class);
+     * Class<ConcurrentLinkedQueue<Message>> messageQueueClass = Clazz.ofConcurrentLinkedQueue(Message.class);
      * }</pre>
      *
      * @param <T> the element type of the concurrent queue.
@@ -983,8 +825,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<Queue<T>> ofConcurrentLinkedQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<ConcurrentLinkedQueue<T>> ofConcurrentLinkedQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) ConcurrentLinkedQueue.class;
     }
 
@@ -996,7 +838,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<Queue<Task>> priorityQueueClass = Clazz.ofPriorityQueue();
+     * Class<PriorityQueue<Task>> priorityQueueClass = Clazz.ofPriorityQueue();
      * }</pre>
      *
      * @param <T> the element type of the priority queue.
@@ -1005,8 +847,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<Queue<T>> ofPriorityQueue() {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<PriorityQueue<T>> ofPriorityQueue() {
         return (Class) PriorityQueue.class;
     }
 
@@ -1018,7 +860,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<Queue<Integer>> intPriorityQueueClass = Clazz.ofPriorityQueue(Integer.class);
+     * Class<PriorityQueue<Integer>> intPriorityQueueClass = Clazz.ofPriorityQueue(Integer.class);
      * }</pre>
      *
      * @param <T> the element type of the priority queue.
@@ -1028,8 +870,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<Queue<T>> ofPriorityQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<PriorityQueue<T>> ofPriorityQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) PriorityQueue.class;
     }
 
@@ -1041,7 +883,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<BlockingQueue<String>> blockingQueueClass = Clazz.ofLinkedBlockingQueue();
+     * Class<LinkedBlockingQueue<String>> blockingQueueClass = Clazz.ofLinkedBlockingQueue();
      * }</pre>
      *
      * @param <T> the element type of the blocking queue.
@@ -1050,8 +892,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<BlockingQueue<T>> ofLinkedBlockingQueue() {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<LinkedBlockingQueue<T>> ofLinkedBlockingQueue() {
         return (Class) LinkedBlockingQueue.class;
     }
 
@@ -1078,7 +920,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<BlockingQueue<Task>> taskQueueClass = Clazz.ofLinkedBlockingQueue(Task.class);
+     * Class<LinkedBlockingQueue<Task>> taskQueueClass = Clazz.ofLinkedBlockingQueue(Task.class);
      *
      * // Producer-consumer pattern
      * BlockingQueue<Task> queue = new LinkedBlockingQueue<>(100);
@@ -1089,13 +931,13 @@ public final class Clazz {
      * @param <T> the element type of the blocking queue.
      * @param eleCls the class of elements (used only for type inference, not retained at runtime).
      * @return the Class object representing the {@code LinkedBlockingQueue} concrete class.
-     * @see #ofQueue(Class) for a non-blocking queue
+     * @see #ofQueue(Class)
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <T> Class<BlockingQueue<T>> ofLinkedBlockingQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> Class<LinkedBlockingQueue<T>> ofLinkedBlockingQueue(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) LinkedBlockingQueue.class;
     }
 
@@ -1116,7 +958,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<Collection<T>> ofCollection() {
         return (Class) Collection.class;
     }
@@ -1139,7 +981,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<Collection<T>> ofCollection(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) Collection.class;
     }
@@ -1162,7 +1004,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, V> Class<Map<K, V>> ofMap() {
         return (Class) Map.class;
     }
@@ -1188,7 +1030,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, V> Class<Map<K, V>> ofMap(@SuppressWarnings("unused") final Class<K> keyCls, @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) Map.class;
     }
@@ -1201,7 +1043,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<Map<String, Object>> linkedMapClass = Clazz.ofLinkedHashMap();
+     * Class<LinkedHashMap<String, Object>> linkedMapClass = Clazz.ofLinkedHashMap();
      * }</pre>
      *
      * @param <K> the key type of the map.
@@ -1211,8 +1053,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <K, V> Class<Map<K, V>> ofLinkedHashMap() {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <K, V> Class<LinkedHashMap<K, V>> ofLinkedHashMap() {
         return (Class) LinkedHashMap.class;
     }
 
@@ -1224,7 +1066,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<Map<String, Object>> propsMapClass = Clazz.ofLinkedHashMap(String.class, Object.class);
+     * Class<LinkedHashMap<String, Object>> propsMapClass = Clazz.ofLinkedHashMap(String.class, Object.class);
      * }</pre>
      *
      * @param <K> the key type of the map.
@@ -1236,8 +1078,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <K, V> Class<Map<K, V>> ofLinkedHashMap(@SuppressWarnings("unused") final Class<K> keyCls,
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <K, V> Class<LinkedHashMap<K, V>> ofLinkedHashMap(@SuppressWarnings("unused") final Class<K> keyCls,
             @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) LinkedHashMap.class;
     }
@@ -1260,7 +1102,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, V> Class<SortedMap<K, V>> ofSortedMap() {
         return (Class) SortedMap.class;
     }
@@ -1285,7 +1127,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, V> Class<SortedMap<K, V>> ofSortedMap(@SuppressWarnings("unused") final Class<K> keyCls,
             @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) SortedMap.class;
@@ -1309,7 +1151,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, V> Class<NavigableMap<K, V>> ofNavigableMap() {
         return (Class) NavigableMap.class;
     }
@@ -1334,7 +1176,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, V> Class<NavigableMap<K, V>> ofNavigableMap(@SuppressWarnings("unused") final Class<K> keyCls,
             @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) NavigableMap.class;
@@ -1348,7 +1190,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<NavigableMap<String, Integer>> treeMapClass = Clazz.ofTreeMap();
+     * Class<TreeMap<String, Integer>> treeMapClass = Clazz.ofTreeMap();
      * }</pre>
      *
      * @param <K> the key type of the tree map.
@@ -1358,8 +1200,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <K, V> Class<NavigableMap<K, V>> ofTreeMap() {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <K, V> Class<TreeMap<K, V>> ofTreeMap() {
         return (Class) TreeMap.class;
     }
 
@@ -1371,7 +1213,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<NavigableMap<String, Integer>> treeMapClass = Clazz.ofTreeMap(String.class, Integer.class);
+     * Class<TreeMap<String, Integer>> treeMapClass = Clazz.ofTreeMap(String.class, Integer.class);
      * }</pre>
      *
      * @param <K> the key type of the tree map.
@@ -1383,8 +1225,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <K, V> Class<NavigableMap<K, V>> ofTreeMap(@SuppressWarnings("unused") final Class<K> keyCls,
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <K, V> Class<TreeMap<K, V>> ofTreeMap(@SuppressWarnings("unused") final Class<K> keyCls,
             @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) TreeMap.class;
     }
@@ -1407,7 +1249,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentMap() {
         return (Class) ConcurrentMap.class;
     }
@@ -1432,7 +1274,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentMap(@SuppressWarnings("unused") final Class<K> keyCls,
             @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) ConcurrentMap.class;
@@ -1446,7 +1288,7 @@ public final class Clazz {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<ConcurrentMap<String, Object>> concurrentHashMapClass = Clazz.ofConcurrentHashMap();
+     * Class<ConcurrentHashMap<String, Object>> concurrentHashMapClass = Clazz.ofConcurrentHashMap();
      * }</pre>
      *
      * @param <K> the key type of the concurrent hash map.
@@ -1456,8 +1298,8 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentHashMap() {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <K, V> Class<ConcurrentHashMap<K, V>> ofConcurrentHashMap() {
         return (Class) ConcurrentHashMap.class;
     }
 
@@ -1480,12 +1322,12 @@ public final class Clazz {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // For thread-safe caching or shared state
-     * Class<ConcurrentMap<String, AtomicInteger>> counterMapClass =
+     * Class<ConcurrentHashMap<String, AtomicInteger>> counterMapClass =
      *     Clazz.ofConcurrentHashMap(String.class, AtomicInteger.class);
      *
      * // Common use case
      * ConcurrentMap<String, User> userCache = new ConcurrentHashMap<>();
-     * Class<ConcurrentMap<String, User>> cacheType = Clazz.ofConcurrentHashMap(String.class, User.class);
+     * Class<ConcurrentHashMap<String, User>> cacheType = Clazz.ofConcurrentHashMap(String.class, User.class);
      * }</pre>
      *
      * @param <K> the key type of the concurrent hash map.
@@ -1493,13 +1335,13 @@ public final class Clazz {
      * @param keyCls the class of map keys (used only for type inference, not retained at runtime).
      * @param valueCls the class of map values (used only for type inference, not retained at runtime).
      * @return the Class object representing the {@code ConcurrentHashMap} concrete class.
-     * @see #ofConcurrentMap(Class, Class) for the ConcurrentMap interface
+     * @see #ofConcurrentMap(Class, Class)
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
-    public static <K, V> Class<ConcurrentMap<K, V>> ofConcurrentHashMap(@SuppressWarnings("unused") final Class<K> keyCls,
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <K, V> Class<ConcurrentHashMap<K, V>> ofConcurrentHashMap(@SuppressWarnings("unused") final Class<K> keyCls,
             @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) ConcurrentHashMap.class;
     }
@@ -1522,7 +1364,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, V> Class<BiMap<K, V>> ofBiMap() {
         return (Class) BiMap.class;
     }
@@ -1571,7 +1413,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, V> Class<BiMap<K, V>> ofBiMap(@SuppressWarnings("unused") final Class<K> keyCls, @SuppressWarnings("unused") final Class<V> valueCls) {
         return (Class) BiMap.class;
     }
@@ -1593,7 +1435,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<Multiset<T>> ofMultiset() {
         return (Class) Multiset.class;
     }
@@ -1646,7 +1488,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> Class<Multiset<T>> ofMultiset(@SuppressWarnings("unused") final Class<T> eleCls) {
         return (Class) Multiset.class;
     }
@@ -1669,7 +1511,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, E> Class<ListMultimap<K, E>> ofListMultimap() {
         return (Class) ListMultimap.class;
     }
@@ -1695,7 +1537,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, E> Class<ListMultimap<K, E>> ofListMultimap(@SuppressWarnings("unused") final Class<K> keyCls,
             @SuppressWarnings("unused") final Class<E> valueEleCls) {
         return (Class) ListMultimap.class;
@@ -1719,7 +1561,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, E> Class<SetMultimap<K, E>> ofSetMultimap() {
         return (Class) SetMultimap.class;
     }
@@ -1745,7 +1587,7 @@ public final class Clazz {
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <K, E> Class<SetMultimap<K, E>> ofSetMultimap(@SuppressWarnings("unused") final Class<K> keyCls,
             @SuppressWarnings("unused") final Class<E> valueEleCls) {
         return (Class) SetMultimap.class;

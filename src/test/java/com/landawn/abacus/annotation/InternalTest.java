@@ -13,7 +13,7 @@ import com.landawn.abacus.TestBase;
 public class InternalTest extends TestBase {
 
     @Internal
-    static class TestInternalClass {
+    public static class TestInternalClass {
         @Internal
         private String field;
 

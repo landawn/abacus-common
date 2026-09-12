@@ -13,7 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
@@ -65,11 +66,11 @@ public interface IntConsumer extends Throwables.IntConsumer<RuntimeException>, j
      *
      * @param after the operation to perform after this operation.
      * @return a composed {@code IntConsumer} that performs in sequence this operation followed by the {@code after} operation
-     * @throws IllegalArgumentException if {@code after} is {@code null}.
+     * @throws NullPointerException if {@code after} is {@code null}.
      */
     @Override
-    default IntConsumer andThen(final java.util.function.IntConsumer after) throws IllegalArgumentException {
-        N.checkArgNotNull(after, cs.after);
+    default IntConsumer andThen(final java.util.function.IntConsumer after) throws NullPointerException {
+        Objects.requireNonNull(after, cs.after);
 
         return (final int value) -> {
             accept(value);

@@ -137,9 +137,9 @@ public class NameUtilTest extends TestBase {
 
     @Test
     public void testParsingMethodsRejectNullNames() {
-        Assertions.assertThrows(NullPointerException.class, () -> NameUtil.isCanonicalName(null, "a.b"));
-        Assertions.assertThrows(NullPointerException.class, () -> NameUtil.isCanonicalName("a", null));
-        Assertions.assertThrows(NullPointerException.class, () -> NameUtil.getSimpleName(null));
-        Assertions.assertThrows(NullPointerException.class, () -> NameUtil.getParentName(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NameUtil.isCanonicalName(null, "a.b"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NameUtil.isCanonicalName("a", null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NameUtil.getSimpleName(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NameUtil.getParentName(null));
     }
 }

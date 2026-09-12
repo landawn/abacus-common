@@ -938,4 +938,17 @@ public class ParallelIteratorShortStreamTest extends TestBase {
         assertEquals(Short.MIN_VALUE, result[0]);
         assertEquals(Short.MAX_VALUE, result[6]);
     }
+
+    @Test
+    public void testGroupToRejectsNullDownstreamBeforeMapFactory() {
+        final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();
+        final ShortStream source = ShortStream.of(com.landawn.abacus.util.ShortIterator.of(new short[] { 1, 2, 3 })).parallel(2);
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> source.groupTo(value -> 0, null, () -> {
+            mapCreated.set(true);
+            return new java.util.HashMap<Integer, Object>();
+        }));
+        org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
+    }
 }

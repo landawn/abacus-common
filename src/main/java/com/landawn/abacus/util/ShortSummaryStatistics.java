@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util;
 
+import java.util.Locale;
+
 import com.landawn.abacus.util.function.ShortConsumer;
 
 /**
@@ -83,7 +85,7 @@ public class ShortSummaryStatistics implements ShortConsumer {
      *         {@link Short#MAX_VALUE}, {@link Short#MIN_VALUE}, and zero for its min, max, and sum; or if a
      *         non-empty state has {@code min} greater than {@code max}.
      */
-    public ShortSummaryStatistics(final long count, final short min, final short max, final long sum) {
+    public ShortSummaryStatistics(final long count, final short min, final short max, final long sum) throws IllegalArgumentException {
         if (count < 0) {
             throw new IllegalArgumentException("count must be non-negative");
         }
@@ -115,12 +117,16 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * }</pre>
      *
      * @param value the input value to be recorded
+     * @throws ArithmeticException if the count or sum would overflow; this instance is unchanged
      * @see #combine(ShortSummaryStatistics)
      */
     @Override
-    public void accept(final short value) {
-        ++count;
-        sum += value;
+    public void accept(final short value) throws ArithmeticException {
+        // Calculate both totals first: a rejected update must not alter any statistic.
+        final long newCount = Math.addExact(count, 1L);
+        final long newSum = Math.addExact(sum, value);
+        count = newCount;
+        sum = newSum;
         min = N.min(min, value);
         max = N.max(max, value);
     }
@@ -146,11 +152,15 @@ public class ShortSummaryStatistics implements ShortConsumer {
      *
      * @param other another {@code ShortSummaryStatistics} to be combined with this one; must not be {@code null}
      * @throws NullPointerException if {@code other} is {@code null}
+     * @throws ArithmeticException if the combined count or sum would overflow; this instance is unchanged
      * @see #accept(short)
      */
-    public void combine(final ShortSummaryStatistics other) {
-        count += other.count;
-        sum += other.sum;
+    public void combine(final ShortSummaryStatistics other) throws NullPointerException, ArithmeticException {
+        // Snapshot the totals before assignment, including when other == this.
+        final long newCount = Math.addExact(count, other.count);
+        final long newSum = Math.addExact(sum, other.sum);
+        count = newCount;
+        sum = newSum;
         min = N.min(min, other.min);
         max = N.max(max, other.max);
     }
@@ -208,6 +218,8 @@ public class ShortSummaryStatistics implements ShortConsumer {
 
     /**
      * Returns the sum of values recorded.
+     * Updates that would overflow the {@code long} sum throw {@link ArithmeticException}
+     * without changing this instance.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -253,10 +265,13 @@ public class ShortSummaryStatistics implements ShortConsumer {
      * // text is "{min=10, max=50, count=5, sum=150, average=30.000000}"
      * }</pre>
      *
+     * <p>The text is rendered with {@link java.util.Locale#ROOT}, so the decimal separator and the digits are the
+     * same on every machine regardless of the default locale.</p>
+     *
      * @return a string representation of this object
      */
     @Override
     public String toString() {
-        return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());
+        return String.format(Locale.ROOT, "{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());
     }
 }

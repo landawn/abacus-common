@@ -28,6 +28,7 @@ import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -40,7 +41,7 @@ import com.landawn.abacus.util.Strings;
  * This class provides common functionality for handling {@code long} values,
  * including string/character-array parsing, conversion from date/time types
  * ({@link java.util.Date}, {@link java.util.Calendar}, {@link java.time.Instant},
- * {@link java.time.ZonedDateTime}, {@link java.time.LocalDateTime}),
+ * {@link java.time.ZonedDateTime}, {@link java.time.OffsetDateTime}, {@link java.time.LocalDateTime}),
  * JDBC read/write operations, and serialization.
  * This class uses {@code Number} as its generic type parameter so that both the primitive
  * {@code long} type and the {@code Long} wrapper type can share this implementation.
@@ -56,8 +57,9 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * Constructs an {@code AbstractLongType} with the specified type name.
      *
      * @param typeName the name of the long type (e.g., "Long", "long")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractLongType(final String typeName) {
+    protected AbstractLongType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
@@ -79,6 +81,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final Number x) {
         if (x == null) {
@@ -107,10 +110,12 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @param obj the object to convert, may be {@code null}
      * @return the {@code Long} value representing milliseconds for date/time types, or parsed value for others,
      *         or the default value if {@code obj} is {@code null}
+     * @throws ArithmeticException if an instant/date-time epoch-millisecond value or a parsed integer is outside the {@code long} range.
+     * @throws IllegalArgumentException if the value is a non-lenient calendar with invalid fields.
      * @throws NumberFormatException if a non-date/time object's string representation cannot be parsed as a {@code long}
      */
     @Override
-    public Long valueOf(final Object obj) {
+    public Long valueOf(final Object obj) throws ArithmeticException, IllegalArgumentException, NumberFormatException {
         if (obj == null) {
             return (Long) defaultValue();
         }
@@ -139,8 +144,11 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * </p>
      * <ul>
      *   <li>Empty or {@code null} strings return the default value.</li>
+     *   <li>Parsing follows {@link Numbers#toLong(String)}: decimal first; a {@code 0x}/{@code 0X}/{@code #} prefix
+     *       (optionally after a sign) selects hexadecimal.</li>
      *   <li>If parsing fails and the string ends with {@code 'l'}, {@code 'L'}, {@code 'f'},
      *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, the suffix is stripped and parsing is retried.</li>
+     *   <li>The string is not trimmed; surrounding whitespace is rejected (unlike the float/double types).</li>
      *   <li>Valid numeric strings are parsed to {@code Long} values.</li>
      * </ul>
      *
@@ -151,11 +159,12 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @param str the string to convert, may be {@code null}
      * @return the {@code Long} value, or the default value if {@code str} is empty or {@code null}
      * @throws NumberFormatException if the string cannot be parsed as a {@code long}
+     * @throws ArithmeticException if the string is a well-formed integer outside the {@code long} range
      * @see #valueOf(Object)
      * @see #stringOf(Number)
      */
     @Override
-    public Long valueOf(final String str) {
+    public Long valueOf(final String str) throws NumberFormatException, ArithmeticException {
         if (Strings.isEmpty(str)) {
             return (Long) defaultValue();
         }
@@ -177,17 +186,33 @@ public abstract class AbstractLongType extends NumberType<Number> {
 
     /**
      * Converts a character array to a {@code Long} value.
-     * Delegates to the {@link #parseLong(char[], int, int)} method for parsing.
+     * Delegates to the {@link #parseLong(char[], int, int)} method for parsing; a region that carries a radix prefix
+     * ({@code 0x}/{@code 0X}/{@code #}, optionally after a sign) is handed to {@link Numbers#toLong(String)} instead,
+     * so the region is accepted exactly as {@link #valueOf(String)} accepts the same text.
      *
      * @param cbuf the character array to convert, may be {@code null}
      * @param offset the starting position in the array (0-based)
      * @param len the number of characters to read
      * @return the {@code Long} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
+     * @throws IllegalArgumentException if {@code cbuf} is non-null, {@code len} is nonzero, and the decimal parsing path receives a negative offset or length.
      * @throws NumberFormatException if the character sequence cannot be parsed as a {@code long}
+     * @throws ArithmeticException if the region is a well-formed integer outside the {@code long} range
      */
     @Override
-    public Long valueOf(final char[] cbuf, final int offset, final int len) {
-        return ((cbuf == null) || (len == 0)) ? ((Long) defaultValue()) : (Long) parseLong(cbuf, offset, len);
+    public Long valueOf(final char[] cbuf, final int offset, final int len)
+            throws IndexOutOfBoundsException, IllegalArgumentException, NumberFormatException, ArithmeticException {
+        if ((cbuf == null) || (len == 0)) {
+            return (Long) defaultValue();
+        }
+
+        // See AbstractIntegerType.valueOf(char[]): the shared fast path cannot parse a hex token, and it must stay
+        // hex-blind because the date/time types run their millis guess through it.
+        if (AbstractIntegerType.hasRadixPrefix(cbuf, offset, len)) {
+            return Numbers.toLong(new String(cbuf, offset, len));
+        }
+
+        return parseLong(cbuf, offset, len);
     }
 
     /**
@@ -208,10 +233,11 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
      * @return the {@code long} value at the specified column, or {@code 0L} if SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Long get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Long get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getLong(columnIndex);
     }
 
@@ -223,10 +249,11 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
      * @return the {@code long} value at the specified column, or {@code 0L} if SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Long get(final ResultSet rs, final String columnName) throws SQLException {
+    public Long get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getLong(columnName);
     }
 
@@ -240,10 +267,11 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code Number} value to set as {@code long}, or {@code null} for SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.BIGINT);
         } else {
@@ -261,10 +289,11 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the {@code Number} value to set as {@code long}, or {@code null} for SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.BIGINT);
         } else {
@@ -282,7 +311,8 @@ public abstract class AbstractLongType extends NumberType<Number> {
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Number} value to append as {@code long}, may be {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -294,7 +324,7 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Number x) throws IOException {
+    public void appendTo(final Appendable appendable, final Number x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -322,10 +352,11 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Number} value to write as {@code long}, may be {@code null}
      * @param config the serialization configuration, may be {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, Number x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, Number x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         x = x == null && config != null && config.isWriteNullNumberAsZero() ? Numbers.LONG_ZERO : x;
 
         if (x == null) {

@@ -53,6 +53,7 @@ import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.MergeResult;
+import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
@@ -467,6 +468,43 @@ public class EntryStreamTest extends TestBase {
         List<Entry<String, Integer>> result = EntryStream.of(testMap).dropWhile(e -> e.getValue() < 3, e -> dropped.incrementAndGet()).toList();
         assertEquals(3, result.size());
         assertEquals(2, dropped.get());
+    }
+
+    @Test
+    public void testParallelPrefixOperationsRetainLaterMatchingEntries() {
+        final List<String> expectedKeys = Arrays.asList("c", "d", "e");
+        final List<String> droppedKeys = new ArrayList<>();
+
+        assertEquals(expectedKeys, EntryStream.of("a", 1, "b", 2, "c", 3, "d", 1, "e", 2)
+                .parallel(3)
+                .dropWhile(e -> e.getValue() < 3, e -> droppedKeys.add(e.getKey()))
+                .keys().sorted().toList());
+        assertEquals(Arrays.asList("a", "b"), droppedKeys);
+
+        assertEquals(expectedKeys, EntryStream.of("a", 1, "b", 2, "c", 3, "d", 1, "e", 2)
+                .parallel(3)
+                .dropWhile((k, v) -> v < 3)
+                .keys().sorted().toList());
+        assertEquals(expectedKeys, EntryStream.of("a", 1, "b", 2, "c", 3, "d", 1, "e", 2)
+                .parallel(3)
+                .skipUntil((k, v) -> v >= 3)
+                .keys().sorted().toList());
+    }
+
+    @Test
+    public void testFindLastCanStopBeforeEarlierNullEntry() {
+        final Entry<String, Integer> last = new AbstractMap.SimpleImmutableEntry<>("last", 2);
+        final EntryStream<String, Integer> source = EntryStream.of(Stream.<Entry<String, Integer>> of(null, last));
+
+        assertEquals(last, source.findLast((key, value) -> value % 2 == 0).get());
+    }
+
+    @Test
+    public void testMinByAndMaxByRetainEntryWhenAllSortKeysAreNull() {
+        final Entry<String, Integer> first = new AbstractMap.SimpleImmutableEntry<>("first", 1);
+
+        assertEquals(first, EntryStream.of("first", 1, "second", 2).minBy(entry -> null).get());
+        assertEquals(first, EntryStream.of("first", 1, "second", 2).maxBy(entry -> null).get());
     }
 
     @Test
@@ -5870,6 +5908,76 @@ public class EntryStreamTest extends TestBase {
 
         assertEquals("key1".hashCode() ^ "value1".hashCode(), entry.hashCode());
         assertThrows(IllegalStateException.class, () -> entry.set("key2", "value2"));
+    }
+
+    /**
+     * {@code EntryStream}'s class javadoc (239-243) promises {@code IllegalArgumentException} naming the
+     * parameter, and a closed stream, for a null argument - {@code collect} used to throw a raw NPE.
+     * It delegates to {@code Stream.collect}, so this is pinned here as well as on the Stream side.
+     */
+    @Test
+    public void testCollect_nullCollectorThrowsIae() {
+        assertThrows(IllegalArgumentException.class,
+                () -> EntryStream.of(N.asMap("a", 1)).collect((Collector<Map.Entry<String, Integer>, ?, ?>) null));
+    }
+
+    // ------------------------------------------------------------------------------------------------------
+    // Stream review 2026-09-09 (pass B) - selectByKey/selectByValue argument validation
+    // ------------------------------------------------------------------------------------------------------
+
+    /**
+     * {@code Fn.instanceOf(clazz)} was evaluated as the ARGUMENT to {@code filterByKey}/{@code filterByValue}, so a
+     * null class threw before the delegate's own closing {@code checkArgNotNull} ran, leaving the stream open.
+     * Every sibling ({@code filterByKey}, {@code filterByValue}, {@code mapKey}, ...) closes first.
+     * See also {@code testCollapseBy_nullCollectorIsRejectedAndTheStreamIsClosed} for the same shape.
+     */
+    @Test
+    public void testSelectByKeyValue_nullClassIsRejectedAndTheStreamIsClosed() {
+        final MutableBoolean closed = MutableBoolean.of(false);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> EntryStream.of("a", 1).onClose(closed::setTrue).selectByKey(null));
+        assertTrue(closed.isTrue(), "selectByKey(null) must close the stream before throwing");
+
+        closed.setFalse();
+        assertThrows(IllegalArgumentException.class,
+                () -> EntryStream.of("a", 1).onClose(closed::setTrue).selectByValue(null));
+        assertTrue(closed.isTrue(), "selectByValue(null) must close the stream before throwing");
+
+        // the ordinary paths are unaffected
+        assertEquals(1, EntryStream.of("a", 1).selectByKey(String.class).count());
+        assertEquals(0, EntryStream.of("a", 1).selectByKey(Integer.class).count());
+        assertEquals(1, EntryStream.of("a", 1).selectByValue(Integer.class).count());
+    }
+
+    /**
+     * r9502 added {@code checkArgNotNull(collector, cs.collector)} to both three-arg {@code collapseBy*}
+     * overloads; r9509 (a blank-message revert of that commit's EntryStream work) removed it and the matching
+     * {@code @throws} line, and nothing restored either. The collector was then only reached through
+     * {@code Collectors.mapping(mapper, collector)}, evaluated as an argument to {@code _stream.collapse(...)} -
+     * a static check that names {@code downstream} and has no stream to close.
+     *
+     * <p>Asserting only {@code IllegalArgumentException} would be vacuous: the unfixed code already threw one.
+     * The test has to pin the parameter name and the close.
+     */
+    @Test
+    public void testCollapseBy_nullCollectorIsRejectedAndTheStreamIsClosed() {
+        final MutableBoolean closed = MutableBoolean.of(false);
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> EntryStream.of("a", 1, "a", 2).onClose(closed::setTrue).collapseByKey((k1, k2) -> k1.equals(k2), Map.Entry::getValue, null));
+        assertTrue(e.getMessage().contains("collector"), "message must name the parameter, was: " + e.getMessage());
+        assertTrue(closed.isTrue(), "collapseByKey(.., null) must close the stream before throwing");
+
+        closed.setFalse();
+        e = assertThrows(IllegalArgumentException.class,
+                () -> EntryStream.of("a", 1, "b", 1).onClose(closed::setTrue).collapseByValue((v1, v2) -> v1.equals(v2), Map.Entry::getKey, null));
+        assertTrue(e.getMessage().contains("collector"), "message must name the parameter, was: " + e.getMessage());
+        assertTrue(closed.isTrue(), "collapseByValue(.., null) must close the stream before throwing");
+
+        // the ordinary paths are unaffected
+        assertEquals(N.asList(N.asList(1, 2)),
+                EntryStream.of("a", 1, "a", 2).collapseByKey((k1, k2) -> k1.equals(k2), Map.Entry::getValue, Collectors.toList()).toList());
     }
 
 }

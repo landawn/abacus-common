@@ -1,17 +1,31 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import javax.mail.Provider;
+import javax.mail.Session;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeUtility;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -29,7 +43,8 @@ public class EmailUtilTest extends TestBase {
     @BeforeEach
     public void setUp() throws IOException {
         props = new Properties();
-        props.put("mail.smtp.host", "localhost");
+        props.put("mail.transport.protocol.rfc822", "abacus-local");
+        props.put("mail.abacus-local.class", RecordingTransport.class.getName());
         props.put("mail.smtp.port", "25");
         props.put("mail.smtp.auth", "false");
         configureSmtpTimeouts(props);
@@ -48,32 +63,136 @@ public class EmailUtilTest extends TestBase {
     }
 
     @Test
-    public void test_sendEmail_singleRecipient() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "Test plain text content", "username", "password",
-                    props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
+    public void messageBodiesAndEnvelopeRoundTripWithoutSmtp() throws Exception {
+        final String[] recipients = { "user+tag@example.com", "user.name@example.co.uk" };
+        for (final boolean html : new boolean[] { false, true }) {
+            for (final String body : new String[] { null, "", "hello", "你好🙂 مرحبا", "<h1>A & B</h1>", "long content ".repeat(10000) }) {
+                final MimeMessage message = EmailUtil.createMessage(recipients, "sender@example.com", "Subject <>&\"' 你好🙂", body,
+                        null, html, null, null, props);
+                final MimeMessage parsed = roundTrip(message);
+                assertEquals("Subject <>&\"' 你好🙂", parsed.getSubject());
+                assertEquals("sender@example.com", ((InternetAddress) parsed.getFrom()[0]).getAddress());
+                assertEquals(2, parsed.getAllRecipients().length);
+                for (int i = 0; i < recipients.length; i++) {
+                    assertEquals(recipients[i], ((InternetAddress) parsed.getAllRecipients()[i]).getAddress());
+                }
+                final MimeMultipart parts = (MimeMultipart) parsed.getContent();
+                assertEquals(1, parts.getCount());
+                assertTrue(parts.getBodyPart(0).isMimeType(html ? "text/html" : "text/plain"));
+                assertEquals(body == null ? "" : body, parts.getBodyPart(0).getContent());
+            }
+        }
     }
 
     @Test
-    public void test_sendEmail_multipleRecipients() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmail(new String[] { "test1@example.com", "test2@example.com", "test3@example.com" }, "sender@example.com", "Test Subject",
-                    "Test plain text content for multiple recipients", "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-        assertTrue(exception.getMessage().contains("3 recipient(s)"));
+    public void attachmentsRoundTripWithExactNamesAndBytes() throws Exception {
+        final File unicode = new File(tempFile.getParentFile(), "附件-" + System.nanoTime() + ".txt");
+        java.nio.file.Files.writeString(unicode.toPath(), "附件🙂", StandardCharsets.UTF_8);
+        try {
+            for (final boolean html : new boolean[] { false, true }) {
+                for (final String[] files : new String[][] { null, {}, { tempFile.getPath() }, { tempFile.getPath(), unicode.getPath() } }) {
+                    final MimeMessage parsed = roundTrip(EmailUtil.createMessage(new String[] { "test@example.com" }, "sender@example.com",
+                            "", "body", files, html, null, null, props));
+                    final MimeMultipart parts = (MimeMultipart) parsed.getContent();
+                    assertEquals(1 + (files == null ? 0 : files.length), parts.getCount());
+                    assertEquals("body", parts.getBodyPart(0).getContent());
+                    for (int i = 0; files != null && i < files.length; i++) {
+                        final javax.mail.BodyPart part = parts.getBodyPart(i + 1);
+                        assertEquals(new File(files[i]).getName(), part.getFileName());
+                        try (java.io.InputStream input = part.getInputStream()) {
+                            org.junit.jupiter.api.Assertions.assertArrayEquals(java.nio.file.Files.readAllBytes(new File(files[i]).toPath()), input.readAllBytes());
+                        }
+                    }
+                }
+            }
+        } finally {
+            java.nio.file.Files.deleteIfExists(unicode.toPath());
+        }
     }
 
     @Test
-    public void test_sendEmail_emptyContent() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "Empty Content Test", "", "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
+    public void publicSendMethodsUseDeterministicLocalTransport() throws Exception {
+        props.put("mail.transport.protocol.rfc822", "abacus-local");
+        props.put("mail.abacus-local.class", RecordingTransport.class.getName());
+        try {
+            for (int variant = 0; variant < 4; variant++) {
+                RecordingTransport.sent.remove();
+                final String[] recipients = { "test@example.com" };
+                final String[] attachments = { tempFile.getPath() };
+                switch (variant) {
+                    case 0 -> EmailUtil.sendEmail(recipients, "sender@example.com", "subject", "body", null, null, props);
+                    case 1 -> EmailUtil.sendHtmlEmail(recipients, "sender@example.com", "subject", "<b>body</b>", null, null, props);
+                    case 2 -> EmailUtil.sendEmailWithAttachment(recipients, "sender@example.com", "subject", "body", attachments, null, null, props);
+                    default -> EmailUtil.sendHtmlEmailWithAttachment(recipients, "sender@example.com", "subject", "<b>body</b>", attachments, null, null, props);
+                }
+                final MimeMessage sent = RecordingTransport.sent.get();
+                org.junit.jupiter.api.Assertions.assertNotNull(sent);
+                final MimeMultipart parts = (MimeMultipart) sent.getContent();
+                assertEquals(variant < 2 ? 1 : 2, parts.getCount());
+                assertEquals(variant % 2 == 0 ? "body" : "<b>body</b>", parts.getBodyPart(0).getContent());
+            }
+            final javax.mail.MessagingException failure = new javax.mail.MessagingException("local transport failure");
+            RecordingTransport.failure.set(failure);
+            final RuntimeException wrapped = assertThrows(RuntimeException.class,
+                    () -> EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "subject", "body", null, null, props));
+            org.junit.jupiter.api.Assertions.assertSame(failure, wrapped.getCause());
+            assertTrue(wrapped.getMessage().contains("1 recipient(s)"));
+        } finally {
+            RecordingTransport.sent.remove();
+            RecordingTransport.failure.remove();
+        }
     }
 
+    @Test
+    public void publicSendValidatesRequiredArgumentsBeforeTransport() {
+        assertThrows(IllegalArgumentException.class, () -> EmailUtil.sendEmail(null, "sender@example.com", "", "", null, null, props));
+        assertThrows(IllegalArgumentException.class, () -> EmailUtil.sendEmail(new String[0], "sender@example.com", "", "", null, null, props));
+        assertThrows(IllegalArgumentException.class, () -> EmailUtil.sendEmail(new String[] { "test@example.com" }, null, "", "", null, null, props));
+        assertThrows(IllegalArgumentException.class, () -> EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "", "", null, null, null));
+    }
+
+    private static MimeMessage roundTrip(final MimeMessage message) throws Exception {
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        message.writeTo(output);
+        return new MimeMessage(Session.getInstance(new Properties()), new ByteArrayInputStream(output.toByteArray()));
+    }
+
+    /**
+     * JavaMail {@link java.util.ServiceLoader} entry so a new {@link Session} can resolve
+     * {@code abacus-local} without an SMTP server.
+     */
+    public static final class AbacusLocalProvider extends Provider {
+        public AbacusLocalProvider() {
+            super(Type.TRANSPORT, "abacus-local", RecordingTransport.class.getName(), "Abacus", "1.0");
+        }
+    }
+
+    /** Test-only provider; it never opens a socket or sends mail. */
+    public static final class RecordingTransport extends javax.mail.Transport {
+        private static final ThreadLocal<MimeMessage> sent = new ThreadLocal<>();
+        private static final ThreadLocal<javax.mail.MessagingException> failure = new ThreadLocal<>();
+
+        public RecordingTransport(final Session session, final javax.mail.URLName url) {
+            super(session, url);
+        }
+
+        @Override
+        protected boolean protocolConnect(final String host, final int port, final String user, final String password) {
+            return true;
+        }
+
+        @Override
+        public void sendMessage(final javax.mail.Message message, final javax.mail.Address[] addresses) throws javax.mail.MessagingException {
+            if (failure.get() != null) {
+                throw failure.get();
+            }
+            try {
+                sent.set(roundTrip((MimeMessage) message));
+            } catch (final Exception e) {
+                throw new javax.mail.MessagingException("Cannot serialize local message", e);
+            }
+        }
+    }
     @Test
     public void test_createMessage_nullContentIsSerializedAsEmptyBody() throws Exception {
         final ByteArrayOutputStream plainOutput = new ByteArrayOutputStream();
@@ -100,361 +219,106 @@ public class EmailUtilTest extends TestBase {
     }
 
     @Test
-    public void test_sendEmail_specialCharactersInSubject() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "Subject with special chars: <>&\"'", "Test content", "username",
-                    "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
+    public void test_createMessage_pinsUtf8OnSubjectSenderAndAttachmentName() throws Exception {
+        final String subject = "Bericht über Größe";
+        final String personal = "Grüße Sender";
+        final File attachment = new File(tempFile.getParentFile(), "Anhänge-" + System.nanoTime() + ".txt");
 
-    @Test
-    public void test_sendEmail_unicodeContent() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "Unicode Test", "Test with unicode: 你好世界 こんにちは مرحبا", "username",
-                    "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmail_withAuthenticationEnabled() {
-        Properties authProps = new Properties();
-        authProps.put("mail.smtp.host", "smtp.gmail.com");
-        authProps.put("mail.smtp.port", "587");
-        authProps.put("mail.smtp.auth", "true");
-        authProps.put("mail.smtp.starttls.enable", "true");
-        configureSmtpTimeouts(authProps);
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@gmail.com", "Test with Auth", "Testing SMTP authentication", "real_username",
-                    "real_password", authProps);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmail_withSSL() {
-        Properties sslProps = new Properties();
-        sslProps.put("mail.smtp.host", "smtp.gmail.com");
-        sslProps.put("mail.smtp.port", "465");
-        sslProps.put("mail.smtp.auth", "true");
-        sslProps.put("mail.smtp.socketFactory.port", "465");
-        sslProps.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        configureSmtpTimeouts(sslProps);
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@gmail.com", "Test with SSL", "Testing SSL connection", "username", "password",
-                    sslProps);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmail_veryLongContent() {
-        StringBuilder longContent = new StringBuilder();
-        for (int i = 0; i < 10000; i++) {
-            longContent.append("This is line ").append(i).append(". ");
+        try (FileOutputStream fos = new FileOutputStream(attachment)) {
+            fos.write("Test attachment content".getBytes(StandardCharsets.UTF_8));
         }
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "Very Long Email", longContent.toString(), "username", "password",
-                    props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmail_specialEmailAddresses() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmail(new String[] { "user+tag@example.com", "user.name@example.co.uk" }, "sender.name+tag@example.com", "Special Email Addresses",
-                    "Testing special characters in email addresses", "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void testSendEmail() {
         try {
-            EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "Test Content", "username", "password", props);
-        } catch (RuntimeException e) {
-            Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
-        }
-    }
+            final ByteArrayOutputStream output = new ByteArrayOutputStream();
+            EmailUtil.createMessage(new String[] { "test@example.com" }, "\"" + personal + "\" <sender@example.com>", subject, "body",
+                    new String[] { attachment.getPath() }, false, "username", "password", props).writeTo(output);
 
-    @Test
-    public void test_sendEmailWithAttachment_singleAttachment() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test with Attachment",
-                    "Please see the attached file.", new String[] { tempFile.getAbsolutePath() }, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
+            // Re-parse the serialized message: the headers must survive a round trip whatever the JVM's
+            // default charset is, and they must say UTF-8 rather than relying on the reader guessing.
+            final MimeMessage parsed = new MimeMessage(Session.getInstance(new Properties()), new ByteArrayInputStream(output.toByteArray()));
 
-    @Test
-    public void test_sendEmailWithAttachment_multipleAttachments() throws IOException {
-        File tempFile2 = File.createTempFile("email_test_2_", ".pdf");
-        try {
-            try (FileOutputStream fos = new FileOutputStream(tempFile2)) {
-                fos.write("Test PDF content".getBytes());
-            }
+            assertEquals(subject, parsed.getSubject());
+            assertTrue(parsed.getHeader("Subject")[0].toUpperCase().contains("UTF-8"), parsed.getHeader("Subject")[0]);
+            assertEquals(personal, ((InternetAddress) parsed.getFrom()[0]).getPersonal());
+            assertTrue(parsed.getHeader("From")[0].toUpperCase().contains("UTF-8"), parsed.getHeader("From")[0]);
 
-            RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-                EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test with Multiple Attachments",
-                        "Please see the attached files.", new String[] { tempFile.getAbsolutePath(), tempFile2.getAbsolutePath() }, "username", "password",
-                        props);
-            });
-            assertTrue(exception.getMessage().contains("Failed to send email"));
+            final MimeBodyPart attachmentPart = (MimeBodyPart) ((MimeMultipart) parsed.getContent()).getBodyPart(1);
+            final String disposition = attachmentPart.getHeader("Content-Disposition")[0];
+
+            // The file name must be an RFC 2231 parameter, not an RFC 2047 encoded word: an encoded word is
+            // invalid in a MIME parameter and is handed back to the recipient undecoded.
+            assertEquals(attachment.getName(), attachmentPart.getFileName());
+            assertTrue(disposition.contains("filename*"), disposition);
+            assertTrue(disposition.toUpperCase().contains("UTF-8"), disposition);
         } finally {
-            if (tempFile2.exists()) {
-                tempFile2.delete();
+            attachment.delete();
+        }
+    }
+
+    /**
+     * The attachment file name travels in two headers: the {@code Content-Disposition; filename} parameter
+     * written by this class, and the {@code Content-Type; name} copy that {@code MimeBodyPart.updateHeaders()}
+     * derives from it at write time. Only the first was pinned to UTF-8; the second was encoded with
+     * {@code mail.mime.charset} (the JVM default charset), so the two disagreed and, on a default charset that
+     * cannot represent the name, the copy older clients read degraded to {@code ?}.
+     */
+    @Test
+    public void test_createMessage_pinsUtf8OnTheContentTypeNameParameterToo() throws Exception {
+        final File attachment = new File(tempFile.getParentFile(), "Anhänge-" + System.nanoTime() + ".txt");
+
+        try (FileOutputStream fos = new FileOutputStream(attachment)) {
+            fos.write("Test attachment content".getBytes(StandardCharsets.UTF_8));
+        }
+
+        try {
+            assertAttachmentNameIsUtf8InBothHeaders(attachment);
+
+            // ... and again with the charset JavaMail would otherwise reach for forced to one that cannot
+            // represent the name at all: the Content-Type copy used to come out as "name*=Shift_JIS''Anh%3F..."
+            // while the disposition still said UTF-8.
+            final Field cachedMimeCharset = mimeUtilityDefaultCharsetField();
+            Assumptions.assumeTrue(cachedMimeCharset != null, "javax.mail no longer caches the default MIME charset in a settable field");
+
+            final Object previous = cachedMimeCharset.get(null);
+
+            try {
+                cachedMimeCharset.set(null, "Shift_JIS");
+                assertAttachmentNameIsUtf8InBothHeaders(attachment);
+            } finally {
+                cachedMimeCharset.set(null, previous);
             }
-        }
-    }
-
-    @Test
-    public void test_sendEmailWithAttachment_nullAttachments() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test without Attachments",
-                    "No attachments in this email.", null, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmailWithAttachment_emptyAttachmentsArray() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test with Empty Attachments Array",
-                    "Empty attachments array.", new String[] {}, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmailWithAttachment_windowsPath() throws IOException {
-        File windowsFile = new File("C:\\temp\\test.txt");
-        String windowsPath = windowsFile.getAbsolutePath();
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Windows Path", "Testing Windows path handling.",
-                    new String[] { windowsPath }, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmailWithAttachment_unixPath() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Unix Path", "Testing Unix path handling.",
-                    new String[] { "/tmp/test/file.txt" }, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmailWithAttachment_pathWithSpaces() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Path with Spaces", "Testing path with spaces.",
-                    new String[] { "C:\\Program Files\\My Documents\\test file.txt" }, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmailWithAttachment_filenameWithoutPath() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Simple Filename",
-                    "Testing filename without path", new String[] { "simple_file.txt" }, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmailWithAttachment_filenameExtractionWindows() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Filename Extraction",
-                    "Testing filename extraction from path", new String[] { "C:\\Users\\Documents\\My Files\\report.pdf" }, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendEmailWithAttachment_filenameExtractionUnix() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Filename Extraction Unix",
-                    "Testing filename extraction from Unix path", new String[] { "/home/user/documents/my files/report.pdf" }, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void testSendEmailWithAttachment() {
-        try {
-            EmailUtil.sendEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "Test Content",
-                    new String[] { "test.txt" }, "username", "password", props);
-        } catch (RuntimeException e) {
-            Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
-        }
-    }
-
-    @Test
-    public void test_sendHtmlEmail_basicHTML() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "HTML Email Test",
-                    "<h1>Hello</h1><p>This is an <strong>HTML</strong> email.</p>", "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendHtmlEmail_complexHTML() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            String htmlContent = "<html><body>" + "<h2>Welcome!</h2>" + "<table border='1'>" + "<tr><th>Name</th><th>Email</th></tr>"
-                    + "<tr><td>John</td><td>john@example.com</td></tr>" + "</table>" + "<a href='https://example.com'>Click here</a>" + "</body></html>";
-
-            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "Complex HTML Email", htmlContent, "username", "password",
-                    props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendHtmlEmail_multipleRecipients() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendHtmlEmail(new String[] { "test1@example.com", "test2@example.com" }, "sender@example.com", "HTML Email to Multiple Recipients",
-                    "<h1>Hello All</h1><p>This is a test.</p>", "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendHtmlEmail_withInlineCSS() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            String htmlWithCSS = "<html>" + "<head><style>body { font-family: Arial; } h1 { color: blue; }</style></head>"
-                    + "<body><h1>Styled Email</h1><p>With CSS</p></body>" + "</html>";
-
-            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "Styled HTML Email", htmlWithCSS, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendHtmlEmail_emptyHTML() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "Empty HTML", "", "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendHtmlEmail_scriptTags() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            String htmlWithScript = "<html><body>" + "<h1>Test</h1>" + "<script>alert('test');</script>" + "<p>Content</p>" + "</body></html>";
-
-            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "HTML with Script", htmlWithScript, "username", "password",
-                    props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void testSendHTMLEmail() {
-        try {
-            EmailUtil.sendHtmlEmail(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "<h1>Test HTML</h1>", "username", "password",
-                    props);
-        } catch (RuntimeException e) {
-            Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
-        }
-    }
-
-    @Test
-    public void test_sendHtmlEmailWithAttachment_singleAttachment() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendHtmlEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "HTML Email with Attachment",
-                    "<h1>Invoice</h1><p>Please find the invoice attached.</p>", new String[] { tempFile.getAbsolutePath() }, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendHtmlEmailWithAttachment_multipleAttachments() throws IOException {
-        File tempFile2 = File.createTempFile("email_test_3_", ".doc");
-        try {
-            try (FileOutputStream fos = new FileOutputStream(tempFile2)) {
-                fos.write("Test document content".getBytes());
-            }
-
-            RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-                EmailUtil.sendHtmlEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "HTML Email with Multiple Attachments",
-                        "<html><body><h2>Documents</h2><p>Please review the attached documents.</p></body></html>",
-                        new String[] { tempFile.getAbsolutePath(), tempFile2.getAbsolutePath() }, "username", "password", props);
-            });
-            assertTrue(exception.getMessage().contains("Failed to send email"));
         } finally {
-            if (tempFile2.exists()) {
-                tempFile2.delete();
-            }
+            attachment.delete();
         }
     }
 
-    @Test
-    public void test_sendHtmlEmailWithAttachment_nullAttachments() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendHtmlEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "HTML Email without Attachments",
-                    "<h1>Hello</h1><p>No attachments here.</p>", null, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
+    private void assertAttachmentNameIsUtf8InBothHeaders(final File attachment) throws Exception {
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        EmailUtil.createMessage(new String[] { "test@example.com" }, "sender@example.com", "subject", "body",
+                new String[] { attachment.getPath() }, false, "username", "password", props).writeTo(output);
+
+        final MimeMessage parsed = new MimeMessage(Session.getInstance(new Properties()), new ByteArrayInputStream(output.toByteArray()));
+        final MimeBodyPart attachmentPart = (MimeBodyPart) ((MimeMultipart) parsed.getContent()).getBodyPart(1);
+        final String contentType = attachmentPart.getHeader("Content-Type")[0];
+        final String disposition = attachmentPart.getHeader("Content-Disposition")[0];
+
+        assertTrue(contentType.contains("name*"), contentType);
+        assertTrue(contentType.toUpperCase().contains("UTF-8"), contentType);
+        assertEquals(attachment.getName(), new ContentType(contentType).getParameter("name"), contentType);
+
+        assertTrue(disposition.contains("filename*"), disposition);
+        assertTrue(disposition.toUpperCase().contains("UTF-8"), disposition);
+        assertEquals(attachment.getName(), attachmentPart.getFileName(), disposition);
     }
 
-    @Test
-    public void test_sendHtmlEmailWithAttachment_emptyAttachmentsArray() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            EmailUtil.sendHtmlEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "HTML Email with Empty Attachments",
-                    "<h1>Test</h1>", new String[] {}, "username", "password", props);
-        });
-        assertTrue(exception.getMessage().contains("Failed to send email"));
-    }
-
-    @Test
-    public void test_sendHtmlEmailWithAttachment_complexHTMLAndMultipleAttachments() throws IOException {
-        File pdfFile = File.createTempFile("report_", ".pdf");
-        File excelFile = File.createTempFile("data_", ".xlsx");
-
+    private static Field mimeUtilityDefaultCharsetField() {
         try {
-            try (FileOutputStream pdfFos = new FileOutputStream(pdfFile);
-                 FileOutputStream excelFos = new FileOutputStream(excelFile)) {
-                pdfFos.write("PDF report content".getBytes());
-                excelFos.write("Excel data content".getBytes());
-            }
+            final Field field = MimeUtility.class.getDeclaredField("defaultMIMECharset");
+            field.setAccessible(true);
 
-            RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-                String complexHTML = "<html><head><style>" + "body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }"
-                        + "table { border-collapse: collapse; width: 100%; }" + "th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }"
-                        + "th { background-color: #4CAF50; color: white; }" + "</style></head><body>" + "<h1>Monthly Report</h1>" + "<p>Dear Team,</p>"
-                        + "<p>Please find the monthly report and data files attached.</p>" + "<table>" + "<tr><th>Metric</th><th>Value</th></tr>"
-                        + "<tr><td>Revenue</td><td>$100,000</td></tr>" + "<tr><td>Growth</td><td>15%</td></tr>" + "</table>"
-                        + "<p>Best regards,<br>Management</p>" + "</body></html>";
-
-                EmailUtil.sendHtmlEmailWithAttachment(new String[] { "team@example.com", "manager@example.com" }, "reports@example.com",
-                        "Monthly Report - November 2025", complexHTML, new String[] { pdfFile.getAbsolutePath(), excelFile.getAbsolutePath() }, "report_user",
-                        "report_password", props);
-            });
-            assertTrue(exception.getMessage().contains("Failed to send email"));
-        } finally {
-            if (pdfFile.exists())
-                pdfFile.delete();
-            if (excelFile.exists())
-                excelFile.delete();
-        }
-    }
-
-    @Test
-    public void testSendHTMLEmailWithAttachment() {
-        try {
-            EmailUtil.sendHtmlEmailWithAttachment(new String[] { "test@example.com" }, "sender@example.com", "Test Subject", "<h1>Test HTML</h1>",
-                    new String[] { "test.txt" }, "username", "password", props);
-        } catch (RuntimeException e) {
-            Assertions.assertTrue(e.getMessage().contains("Failed to send email"));
+            return field;
+        } catch (final ReflectiveOperationException | RuntimeException e) {
+            return null;
         }
     }
 

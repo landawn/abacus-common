@@ -79,59 +79,6 @@ public class SuppliersTest extends TestBase {
     }
 
     @Test
-    public void testOfEmptyArrays() {
-        Assertions.assertArrayEquals(new boolean[0], Suppliers.ofEmptyBooleanArray().get());
-        Assertions.assertArrayEquals(new char[0], Suppliers.ofEmptyCharArray().get());
-        Assertions.assertArrayEquals(new byte[0], Suppliers.ofEmptyByteArray().get());
-        Assertions.assertArrayEquals(new short[0], Suppliers.ofEmptyShortArray().get());
-        Assertions.assertArrayEquals(new int[0], Suppliers.ofEmptyIntArray().get());
-        Assertions.assertArrayEquals(new long[0], Suppliers.ofEmptyLongArray().get());
-        Assertions.assertArrayEquals(new float[0], Suppliers.ofEmptyFloatArray().get(), 0.0f);
-        Assertions.assertArrayEquals(new double[0], Suppliers.ofEmptyDoubleArray().get(), 0.0);
-        Assertions.assertArrayEquals(new String[0], Suppliers.ofEmptyStringArray().get());
-        Assertions.assertArrayEquals(new Object[0], Suppliers.ofEmptyObjectArray().get());
-
-        Assertions.assertSame(Suppliers.ofEmptyIntArray().get(), Suppliers.ofEmptyIntArray().get());
-    }
-
-    @Test
-    public void testOfPrimitiveLists() {
-        BooleanList boolList = Suppliers.ofBooleanList().get();
-        Assertions.assertNotNull(boolList);
-        Assertions.assertTrue(boolList.isEmpty());
-
-        CharList charList = Suppliers.ofCharList().get();
-        Assertions.assertNotNull(charList);
-        Assertions.assertTrue(charList.isEmpty());
-
-        ByteList byteList = Suppliers.ofByteList().get();
-        Assertions.assertNotNull(byteList);
-        Assertions.assertTrue(byteList.isEmpty());
-
-        ShortList shortList = Suppliers.ofShortList().get();
-        Assertions.assertNotNull(shortList);
-        Assertions.assertTrue(shortList.isEmpty());
-
-        IntList intList = Suppliers.ofIntList().get();
-        Assertions.assertNotNull(intList);
-        Assertions.assertTrue(intList.isEmpty());
-
-        LongList longList = Suppliers.ofLongList().get();
-        Assertions.assertNotNull(longList);
-        Assertions.assertTrue(longList.isEmpty());
-
-        FloatList floatList = Suppliers.ofFloatList().get();
-        Assertions.assertNotNull(floatList);
-        Assertions.assertTrue(floatList.isEmpty());
-
-        DoubleList doubleList = Suppliers.ofDoubleList().get();
-        Assertions.assertNotNull(doubleList);
-        Assertions.assertTrue(doubleList.isEmpty());
-
-        Assertions.assertNotSame(Suppliers.ofIntList().get(), Suppliers.ofIntList().get());
-    }
-
-    @Test
     public void testOfCollections() {
         List<String> list = Suppliers.<String> ofList().get();
         Assertions.assertNotNull(list);
@@ -356,27 +303,6 @@ public class SuppliersTest extends TestBase {
     }
 
     @Test
-    public void testOfUuidWithoutHyphens_NoHyphens() {
-        Supplier<String> guidSupplier = Suppliers.ofUuidWithoutHyphens();
-        String guid = guidSupplier.get();
-        Assertions.assertFalse(guid.contains("-"));
-        Assertions.assertEquals(32, guid.length());
-    }
-
-    // --- ofUuidWithoutHyphens ---
-
-    @Test
-    public void testOfGUID() {
-        Supplier<String> guidSupplier = Suppliers.ofUuidWithoutHyphens();
-        String guid1 = guidSupplier.get();
-        String guid2 = guidSupplier.get();
-
-        Assertions.assertNotNull(guid1);
-        Assertions.assertNotNull(guid2);
-        Assertions.assertNotEquals(guid1, guid2);
-    }
-
-    @Test
     public void testOfUuidWithoutHyphens_Format() {
         Supplier<String> guidSupplier = Suppliers.ofUuidWithoutHyphens();
         String guid = guidSupplier.get();
@@ -456,14 +382,6 @@ public class SuppliersTest extends TestBase {
         Supplier<String> emptyStringSupplier = Suppliers.ofEmptyString();
         Assertions.assertEquals("", emptyStringSupplier.get());
         Assertions.assertSame(emptyStringSupplier.get(), emptyStringSupplier.get());
-    }
-
-    @Test
-    public void testOfEmptyString_ReturnsEmptyString() {
-        Supplier<String> supplier = Suppliers.ofEmptyString();
-        Assertions.assertEquals("", supplier.get());
-        // Should return same instance
-        Assertions.assertSame(supplier.get(), supplier.get());
     }
 
     @Test
@@ -1677,6 +1595,21 @@ public class SuppliersTest extends TestBase {
         Assertions.assertEquals(Map.of("key", 1), firstMap);
         Assertions.assertTrue(secondList.isEmpty());
         Assertions.assertNotSame(firstList, secondList);
+    }
+
+    @Test
+    public void testOfMapIsAnUncachedSharedConstant() {
+        // Doc pin: the no-arg ofMap() has no target class and no supplier cache, so the "Cached factories
+        // have the target class lifetime" note belongs only on ofMap(Class)/registerForMap.
+        final Supplier<Map<String, Integer>> first = Suppliers.ofMap();
+        final Supplier<Map<String, Integer>> second = Suppliers.ofMap();
+        Assertions.assertSame(first, second);
+
+        final Map<String, Integer> a = first.get();
+        final Map<String, Integer> b = first.get();
+        Assertions.assertNotSame(a, b);
+        Assertions.assertEquals(HashMap.class, a.getClass());
+        Assertions.assertTrue(a.isEmpty());
     }
 
     @Test

@@ -1,9 +1,7 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,6 +12,8 @@ import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,1050 +26,21 @@ import com.landawn.abacus.TestBase;
 public class TryTest extends TestBase {
 
     private static class TestCloseable implements AutoCloseable {
-        private boolean closed = false;
+        private boolean closed;
 
         public boolean isClosed() {
             return closed;
         }
 
         @Override
-        public void close() throws Exception {
+        public void close() {
             closed = true;
         }
     }
 
-    @Test
-    public void test_instance_run_cmd_resource_closed() {
-        TestCloseable closeable = new TestCloseable();
-        Try.with(closeable).run(c -> {
-            assertTrue(!c.isClosed());
-        });
-        assertTrue(closeable.isClosed());
-    }
-
-    @Test
-    public void test_instance_methods_withNullCallbacks() {
-        TestCloseable closeable = new TestCloseable();
-        Try<TestCloseable> tryInstance = Try.with(closeable);
-        Throwables.Function<TestCloseable, String, Exception> command = resource -> "result";
-        Predicate<Exception> predicate = error -> true;
-
-        assertThrows(IllegalArgumentException.class, () -> tryInstance.run((Throwables.Consumer<TestCloseable, Exception>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.run(resource -> {
-        }, (java.util.function.Consumer<Exception>) null));
-        assertThrows(IllegalArgumentException.class, () -> tryInstance.call((Throwables.Function<TestCloseable, String, Exception>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> tryInstance.call(command, (java.util.function.Function<Exception, String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> tryInstance.call(command, (java.util.function.Supplier<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> tryInstance.call((Throwables.Function<TestCloseable, String, Exception>) null, "default"));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> tryInstance.call(command, (Predicate<Exception>) null, (java.util.function.Supplier<String>) () -> "default"));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> tryInstance.call(command, predicate, (java.util.function.Supplier<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> tryInstance.call(command, (Predicate<Exception>) null, "default"));
-
-        assertFalse(closeable.isClosed(), "argument validation happens before the managed resource is closed");
-    }
-
-    @Test
-    public void test_instance_run_cmd_with_finalAction() {
-        AtomicBoolean finalActionRun = new AtomicBoolean(false);
-        Try.with(new ByteArrayInputStream("test".getBytes()), () -> finalActionRun.set(true)).run(stream -> {
-        });
-        assertTrue(finalActionRun.get());
-    }
-
-    @Test
-    public void test_instance_call_cmd_success() {
-        String result = Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> "result");
-        assertEquals("result", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_resource_closed() {
-        TestCloseable closeable = new TestCloseable();
-        Try.with(closeable).call(c -> {
-            assertTrue(!c.isClosed());
-            return "result";
-        });
-        assertTrue(closeable.isClosed());
-    }
-
-    @Test
-    public void test_instance_call_cmd_with_finalAction() {
-        AtomicBoolean finalActionRun = new AtomicBoolean(false);
-        String result = Try.with(new ByteArrayInputStream("test".getBytes()), () -> finalActionRun.set(true)).call(stream -> "result");
-        assertEquals("result", result);
-        assertTrue(finalActionRun.get());
-    }
-
-    @Test
-    public void test_instance_call_cmd_supplier_success() {
-        java.util.function.Supplier<String> supplier = () -> "default";
-        String result = Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> "result", supplier);
-        assertEquals("result", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_defaultValue_success() {
-        String result = Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> "result", "default");
-        assertEquals("result", result);
-    }
-
-    @Test
-    public void test_with_targetResource() {
-        InputStream stream = new ByteArrayInputStream("test".getBytes());
-        Try<InputStream> tryInstance = Try.with(stream);
-        assertNotNull(tryInstance);
-    }
-
-    @Test
-    public void test_with_targetResource_finalAction() {
-        InputStream stream = new ByteArrayInputStream("test".getBytes());
-        AtomicBoolean finalActionRun = new AtomicBoolean(false);
-        Try<InputStream> tryInstance = Try.with(stream, () -> finalActionRun.set(true));
-        assertNotNull(tryInstance);
-
-        tryInstance.run(s -> {
-        });
-
-        assertTrue(finalActionRun.get());
-    }
-
-    @Test
-    public void test_instance_run_cmd_success() {
-        AtomicBoolean executed = new AtomicBoolean(false);
-        Try.with(new ByteArrayInputStream("test".getBytes())).run(stream -> {
-            executed.set(true);
-            assertNotNull(stream);
-        });
-        assertTrue(executed.get());
-    }
-
-    @Test
-    public void test_multiple_operations_same_try() {
-        TestCloseable closeable1 = new TestCloseable();
-        Try<TestCloseable> tryInstance = Try.with(closeable1);
-
-        tryInstance.run(c -> {
-            assertTrue(!c.isClosed());
-        });
-        assertTrue(closeable1.isClosed());
-    }
-
-    @Test
-    public void test_with_targetResource_null() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Try.with((InputStream) null);
-        });
-    }
-
-    @Test
-    public void test_with_targetResource_finalAction_null_resource() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Try.with((InputStream) null, () -> {
-            });
-        });
-    }
-
-    @Test
-    public void test_with_targetResource_finalAction_null_action() {
-        InputStream stream = new ByteArrayInputStream("test".getBytes());
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.with(stream, (Runnable) null);
-        });
-    }
-
-    @Test
-    public void test_with_targetResourceSupplier() {
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        Try<InputStream> tryInstance = Try.with(supplier);
-        assertNotNull(tryInstance);
-    }
-
-    @Test
-    public void test_with_targetResourceSupplier_null() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.with((Throwables.Supplier<InputStream, Exception>) null);
-        });
-    }
-
-    @Test
-    public void test_with_targetResourceSupplier_finalAction() {
-        AtomicBoolean finalActionRun = new AtomicBoolean(false);
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        Try<InputStream> tryInstance = Try.with(supplier, () -> finalActionRun.set(true));
-        assertNotNull(tryInstance);
-
-        tryInstance.run(s -> {
-        });
-
-        assertTrue(finalActionRun.get());
-    }
-
-    @Test
-    public void test_with_targetResourceSupplier_finalAction_null_supplier() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.with((Throwables.Supplier<InputStream, Exception>) null, () -> {
-            });
-        });
-    }
-
-    @Test
-    public void test_with_targetResourceSupplier_finalAction_null_action() {
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.with(supplier, (Runnable) null);
-        });
-    }
-
-    @Test
-    public void test_instance_run_cmd_with_exception() {
-        assertThrows(RuntimeException.class, () -> {
-            Try.with(new ByteArrayInputStream("test".getBytes())).run(stream -> {
-                throw new IOException("Test exception");
-            });
-        });
-    }
-
-    @Test
-    public void test_instance_run_cmd_with_supplier() {
-        AtomicBoolean executed = new AtomicBoolean(false);
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        Try.with(supplier).run(stream -> {
-            executed.set(true);
-            assertNotNull(stream);
-        });
-        assertTrue(executed.get());
-    }
-
-    @Test
-    public void test_instance_run_cmd_actionOnError_success() {
-        AtomicBoolean executed = new AtomicBoolean(false);
-        AtomicBoolean errorHandled = new AtomicBoolean(false);
-        Try.with(new ByteArrayInputStream("test".getBytes())).run(stream -> executed.set(true), ex -> errorHandled.set(true));
-        assertTrue(executed.get());
-        assertTrue(!errorHandled.get());
-    }
-
-    @Test
-    public void test_instance_run_cmd_actionOnError_with_exception() {
-        AtomicBoolean errorHandled = new AtomicBoolean(false);
-        AtomicReference<Exception> caughtException = new AtomicReference<>();
-        Try.with(new ByteArrayInputStream("test".getBytes())).run(stream -> {
-            throw new IOException("Test exception");
-        }, ex -> {
-            errorHandled.set(true);
-            caughtException.set(ex);
-        });
-        assertTrue(errorHandled.get());
-        assertNotNull(caughtException.get());
-        assertTrue(caughtException.get() instanceof IOException);
-    }
-
-    @Test
-    public void test_instance_run_cmd_actionOnError_resource_closed() {
-        TestCloseable closeable = new TestCloseable();
-        Try.with(closeable).run(c -> {
-            throw new IOException("Test exception");
-        }, ex -> {
-        });
-        assertTrue(closeable.isClosed());
-    }
-
-    @Test
-    public void test_instance_run_cmd_actionOnError_with_finalAction() {
-        AtomicBoolean finalActionRun = new AtomicBoolean(false);
-        Try.with(new ByteArrayInputStream("test".getBytes()), () -> finalActionRun.set(true)).run(stream -> {
-            throw new IOException("Test exception");
-        }, ex -> {
-        });
-        assertTrue(finalActionRun.get());
-    }
-
-    @Test
-    public void test_instance_run_cmd_with_supplier_and_finalAction() {
-        AtomicBoolean finalActionRun = new AtomicBoolean(false);
-        AtomicBoolean executed = new AtomicBoolean(false);
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        Try.with(supplier, () -> finalActionRun.set(true)).run(stream -> {
-            executed.set(true);
-            assertNotNull(stream);
-        });
-        assertTrue(executed.get());
-        assertTrue(finalActionRun.get());
-    }
-
-    @Test
-    public void test_instance_run_cmd_with_supplier_exception() {
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        assertThrows(RuntimeException.class, () -> {
-            Try.with(supplier).run(stream -> {
-                throw new IOException("Test exception");
-            });
-        });
-    }
-
-    @Test
-    public void test_instance_run_cmd_actionOnError_with_supplier() {
-        AtomicBoolean errorHandled = new AtomicBoolean(false);
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        Try.with(supplier).run(stream -> {
-            throw new IOException("Test exception");
-        }, ex -> errorHandled.set(true));
-        assertTrue(errorHandled.get());
-    }
-
-    @Test
-    public void test_instance_run_cmd_actionOnError_with_supplier_and_finalAction() {
-        AtomicBoolean finalActionRun = new AtomicBoolean(false);
-        AtomicBoolean errorHandled = new AtomicBoolean(false);
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        Try.with(supplier, () -> finalActionRun.set(true)).run(stream -> {
-            throw new IOException("Test exception");
-        }, ex -> errorHandled.set(true));
-        assertTrue(errorHandled.get());
-        assertTrue(finalActionRun.get());
-    }
-
-    @Test
-    public void test_instance_call_cmd_with_exception() {
-        assertThrows(RuntimeException.class, () -> {
-            Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> {
-                throw new IOException("Test exception");
-            });
-        });
-    }
-
-    @Test
-    public void test_instance_call_cmd_with_supplier() {
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        String result = Try.with(supplier).call(stream -> "result");
-        assertEquals("result", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_function_success() {
-        java.util.function.Function<Exception, String> errorHandler = ex -> "error";
-        String result = Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> "result", errorHandler);
-        assertEquals("result", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_function_with_exception() {
-        java.util.function.Function<Exception, String> errorHandler = ex -> "error";
-        String result = Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> {
-            throw new IOException("Test exception");
-        }, errorHandler);
-        assertEquals("error", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_function_resource_closed() {
-        TestCloseable closeable = new TestCloseable();
-        java.util.function.Function<Exception, String> errorHandler = ex -> "error";
-        Try.with(closeable).call(c -> {
-            throw new IOException("Test exception");
-        }, errorHandler);
-        assertTrue(closeable.isClosed());
-    }
-
-    @Test
-    public void test_instance_call_cmd_function_with_finalAction() {
-        AtomicBoolean finalActionRun = new AtomicBoolean(false);
-        java.util.function.Function<Exception, String> errorHandler = ex -> "error";
-        String result = Try.with(new ByteArrayInputStream("test".getBytes()), () -> finalActionRun.set(true)).call(stream -> {
-            throw new IOException("Test exception");
-        }, errorHandler);
-        assertEquals("error", result);
-        assertTrue(finalActionRun.get());
-    }
-
-    @Test
-    public void test_instance_call_cmd_supplier_with_exception() {
-        java.util.function.Supplier<String> supplier = () -> "default";
-        String result = Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> {
-            throw new IOException("Test exception");
-        }, supplier);
-        assertEquals("default", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_supplier_resource_closed() {
-        TestCloseable closeable = new TestCloseable();
-        java.util.function.Supplier<String> supplier = () -> "default";
-        Try.with(closeable).call(c -> {
-            throw new IOException("Test exception");
-        }, supplier);
-        assertTrue(closeable.isClosed());
-    }
-
-    @Test
-    public void test_instance_call_cmd_supplier_with_finalAction() {
-        AtomicBoolean finalActionRun = new AtomicBoolean(false);
-        java.util.function.Supplier<String> supplier = () -> "default";
-        String result = Try.with(new ByteArrayInputStream("test".getBytes()), () -> finalActionRun.set(true)).call(stream -> {
-            throw new IOException("Test exception");
-        }, supplier);
-        assertEquals("default", result);
-        assertTrue(finalActionRun.get());
-    }
-
-    @Test
-    public void test_instance_call_cmd_defaultValue_with_exception() {
-        String result = Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> {
-            throw new IOException("Test exception");
-        }, "default");
-        assertEquals("default", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_defaultValue_resource_closed() {
-        TestCloseable closeable = new TestCloseable();
-        Try.with(closeable).call(c -> {
-            throw new IOException("Test exception");
-        }, "default");
-        assertTrue(closeable.isClosed());
-    }
-
-    @Test
-    public void test_instance_call_cmd_defaultValue_with_finalAction() {
-        AtomicBoolean finalActionRun = new AtomicBoolean(false);
-        String result = Try.with(new ByteArrayInputStream("test".getBytes()), () -> finalActionRun.set(true)).call(stream -> {
-            throw new IOException("Test exception");
-        }, "default");
-        assertEquals("default", result);
-        assertTrue(finalActionRun.get());
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_supplier_success() {
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof IOException;
-        java.util.function.Supplier<String> supplier = () -> "default";
-        String result = Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> "result", predicate, supplier);
-        assertEquals("result", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_supplier_matching_exception() {
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof IOException;
-        java.util.function.Supplier<String> supplier = () -> "default";
-        String result = Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> {
-            throw new IOException("Test exception");
-        }, predicate, supplier);
-        assertEquals("default", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_supplier_non_matching_exception() {
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof FileNotFoundException;
-        java.util.function.Supplier<String> supplier = () -> "default";
-        assertThrows(RuntimeException.class, () -> {
-            Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> {
-                throw new IOException("Test exception");
-            }, predicate, supplier);
-        });
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_supplier_resource_closed() {
-        TestCloseable closeable = new TestCloseable();
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof IOException;
-        java.util.function.Supplier<String> supplier = () -> "default";
-        Try.with(closeable).call(c -> {
-            throw new IOException("Test exception");
-        }, predicate, supplier);
-        assertTrue(closeable.isClosed());
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_supplier_with_finalAction() {
-        AtomicBoolean finalActionRun = new AtomicBoolean(false);
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof IOException;
-        java.util.function.Supplier<String> supplier = () -> "default";
-        String result = Try.with(new ByteArrayInputStream("test".getBytes()), () -> finalActionRun.set(true)).call(stream -> {
-            throw new IOException("Test exception");
-        }, predicate, supplier);
-        assertEquals("default", result);
-        assertTrue(finalActionRun.get());
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_defaultValue_success() {
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof IOException;
-        String result = Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> "result", predicate, "default");
-        assertEquals("result", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_defaultValue_matching_exception() {
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof IOException;
-        String result = Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> {
-            throw new IOException("Test exception");
-        }, predicate, "default");
-        assertEquals("default", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_defaultValue_non_matching_exception() {
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof FileNotFoundException;
-        assertThrows(RuntimeException.class, () -> {
-            Try.with(new ByteArrayInputStream("test".getBytes())).call(stream -> {
-                throw new IOException("Test exception");
-            }, predicate, "default");
-        });
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_defaultValue_resource_closed() {
-        TestCloseable closeable = new TestCloseable();
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof IOException;
-        Try.with(closeable).call(c -> {
-            throw new IOException("Test exception");
-        }, predicate, "default");
-        assertTrue(closeable.isClosed());
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_defaultValue_with_finalAction() {
-        AtomicBoolean finalActionRun = new AtomicBoolean(false);
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof IOException;
-        String result = Try.with(new ByteArrayInputStream("test".getBytes()), () -> finalActionRun.set(true)).call(stream -> {
-            throw new IOException("Test exception");
-        }, predicate, "default");
-        assertEquals("default", result);
-        assertTrue(finalActionRun.get());
-    }
-
-    @Test
-    public void test_instance_call_cmd_with_supplier_resource() {
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        String result = Try.with(supplier).call(stream -> {
-            assertNotNull(stream);
-            return "result";
-        });
-        assertEquals("result", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_function_with_supplier_resource() {
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        java.util.function.Function<Exception, String> errorHandler = ex -> "error";
-        String result = Try.with(supplier).call(stream -> {
-            throw new IOException("Test exception");
-        }, errorHandler);
-        assertEquals("error", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_supplier_with_supplier_resource() {
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        java.util.function.Supplier<String> fallback = () -> "default";
-        String result = Try.with(supplier).call(stream -> {
-            throw new IOException("Test exception");
-        }, fallback);
-        assertEquals("default", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_defaultValue_with_supplier_resource() {
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        String result = Try.with(supplier).call(stream -> {
-            throw new IOException("Test exception");
-        }, "default");
-        assertEquals("default", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_supplier_with_supplier_resource() {
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof IOException;
-        java.util.function.Supplier<String> fallback = () -> "default";
-        String result = Try.with(supplier).call(stream -> {
-            throw new IOException("Test exception");
-        }, predicate, fallback);
-        assertEquals("default", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_supplier_non_matching_with_supplier_resource() {
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof FileNotFoundException;
-        java.util.function.Supplier<String> fallback = () -> "default";
-        assertThrows(RuntimeException.class, () -> {
-            Try.with(supplier).call(stream -> {
-                throw new IOException("Test exception");
-            }, predicate, fallback);
-        });
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_defaultValue_with_supplier_resource() {
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof IOException;
-        String result = Try.with(supplier).call(stream -> {
-            throw new IOException("Test exception");
-        }, predicate, "default");
-        assertEquals("default", result);
-    }
-
-    @Test
-    public void test_instance_call_cmd_predicate_defaultValue_non_matching_with_supplier_resource() {
-        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("test".getBytes());
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof FileNotFoundException;
-        assertThrows(RuntimeException.class, () -> {
-            Try.with(supplier).call(stream -> {
-                throw new IOException("Test exception");
-            }, predicate, "default");
-        });
-    }
-
-    @Test
-    public void test_exception_in_finalAction() {
-        AtomicBoolean executed = new AtomicBoolean(false);
-        assertThrows(RuntimeException.class, () -> {
-            Try.with(new ByteArrayInputStream("test".getBytes()), () -> {
-                throw new RuntimeException("Final action exception");
-            }).run(stream -> executed.set(true));
-        });
-        assertTrue(executed.get());
-    }
-
-    @Test
-    public void test_resource_supplier_throws_exception() {
-        Throwables.Supplier<InputStream, Exception> supplier = () -> {
-            throw new IOException("Supplier exception");
-        };
-        assertThrows(RuntimeException.class, () -> {
-            Try.with(supplier).run(stream -> {
-                fail("Should not reach here");
-            });
-        });
-    }
-
-    @Test
-    public void test_run_cmd_success() {
-        AtomicBoolean executed = new AtomicBoolean(false);
-        Try.run(() -> executed.set(true));
-        assertTrue(executed.get());
-    }
-
-    @Test
-    public void test_run_cmd_with_exception() {
-        assertThrows(RuntimeException.class, () -> {
-            Try.run(() -> {
-                throw new IOException("Test exception");
-            });
-        });
-    }
-
-    @Test
-    public void test_run_cmd_restoresInterruptedStatusForNestedCause() {
-        Thread.interrupted();
-
-        try {
-            assertThrows(RuntimeException.class, () -> Try.run(() -> {
-                throw new IOException("outer", new InterruptedException("nested interruption"));
-            }));
-
-            assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            Thread.interrupted();
-        }
-    }
-
-    @Test
-    public void test_run_cmd_null() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Try.run((Throwables.Runnable<Exception>) null);
-        });
-    }
-
-    @Test
-    public void test_run_cmd_actionOnError_success() {
-        AtomicBoolean executed = new AtomicBoolean(false);
-        AtomicBoolean errorHandled = new AtomicBoolean(false);
-        Try.run(() -> executed.set(true), ex -> errorHandled.set(true));
-        assertTrue(executed.get());
-        assertTrue(!errorHandled.get());
-    }
-
-    @Test
-    public void test_run_cmd_actionOnError_with_exception() {
-        AtomicBoolean errorHandled = new AtomicBoolean(false);
-        AtomicReference<Exception> caughtException = new AtomicReference<>();
-        Try.run(() -> {
-            throw new IOException("Test exception");
-        }, ex -> {
-            errorHandled.set(true);
-            caughtException.set(ex);
-        });
-        assertTrue(errorHandled.get());
-        assertNotNull(caughtException.get());
-        assertTrue(caughtException.get() instanceof IOException);
-    }
-
-    @Test
-    public void test_run_actionOnErrorRestoresInterruptedStatus() {
-        Thread.interrupted();
-
-        try {
-            AtomicBoolean handlerSawInterruptedStatus = new AtomicBoolean();
-            Try.run(() -> {
-                throw new InterruptedException("stop");
-            }, ex -> handlerSawInterruptedStatus.set(Thread.currentThread().isInterrupted()));
-
-            assertTrue(handlerSawInterruptedStatus.get());
-            assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            Thread.interrupted();
-        }
-    }
-
-    @Test
-    public void test_resourceErrorHandlerRestoresInterruptedStatus() {
-        Thread.interrupted();
-
-        try {
-            AtomicBoolean handlerSawInterruptedStatus = new AtomicBoolean();
-            String result = Try.with(new TestCloseable()).call(closeable -> {
-                throw new InterruptedException("stop");
-            }, (java.util.function.Function<Exception, String>) ex -> {
-                handlerSawInterruptedStatus.set(Thread.currentThread().isInterrupted());
-                return "fallback";
-            });
-
-            assertEquals("fallback", result);
-            assertTrue(handlerSawInterruptedStatus.get());
-            assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            Thread.interrupted();
-        }
-    }
-
-    @Test
-    public void test_suppressedCloseInterruptionRestoresInterruptedStatus() {
-        Thread.interrupted();
-
-        try {
-            AutoCloseable closeable = () -> {
-                throw new InterruptedException("close interrupted");
-            };
-            AtomicBoolean handlerSawInterruptedStatus = new AtomicBoolean();
-
-            String result = Try.with(closeable).call(resource -> {
-                throw new IOException("primary failure");
-            }, (java.util.function.Function<Exception, String>) ex -> {
-                assertEquals(1, ex.getSuppressed().length);
-                assertTrue(ex.getSuppressed()[0] instanceof InterruptedException);
-                handlerSawInterruptedStatus.set(Thread.currentThread().isInterrupted());
-                return "fallback";
-            });
-
-            assertEquals("fallback", result);
-            assertTrue(handlerSawInterruptedStatus.get());
-            assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            Thread.interrupted();
-        }
-    }
-
-    @Test
-    public void test_suppressedCloseInterruptionOnErrorRestoresInterruptedStatus() {
-        Thread.interrupted();
-
-        try {
-            AutoCloseable closeable = () -> {
-                throw new InterruptedException("close interrupted");
-            };
-
-            AssertionError failure = assertThrows(AssertionError.class, () -> Try.with(closeable).run(resource -> {
-                throw new AssertionError("primary failure");
-            }));
-
-            assertEquals(1, failure.getSuppressed().length);
-            assertTrue(failure.getSuppressed()[0] instanceof InterruptedException);
-            assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            Thread.interrupted();
-        }
-    }
-
-    @Test
-    public void test_run_cmd_actionOnError_null_cmd() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.run((Throwables.Runnable<Exception>) null, ex -> {
-            });
-        });
-    }
-
-    @Test
-    public void test_run_cmd_actionOnError_null_action() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.run(() -> {
-            }, null);
-        });
-    }
-
-    @Test
-    public void test_call_cmd_success() {
-        String result = Try.call(() -> "test result");
-        assertEquals("test result", result);
-    }
-
-    @Test
-    public void test_call_cmd_supplier_success() {
-        java.util.function.Supplier<String> supplier = () -> "default result";
-        String result = Try.call(() -> "test result", supplier);
-        assertEquals("test result", result);
-    }
-
-    @Test
-    public void test_call_cmd_defaultValue_success() {
-        String result = Try.call(() -> "test result", "default result");
-        assertEquals("test result", result);
-    }
-
-    @Test
-    public void test_call_cmd_with_exception() {
-        assertThrows(RuntimeException.class, () -> {
-            Try.call(() -> {
-                throw new IOException("Test exception");
-            });
-        });
-    }
-
-    @Test
-    public void test_call_cmd_restoresInterruptedStatusForSuppressedFailure() {
-        Thread.interrupted();
-
-        try {
-            final IOException failure = new IOException("outer");
-            failure.addSuppressed(new InterruptedException("suppressed interruption"));
-
-            assertThrows(RuntimeException.class, () -> Try.call(() -> {
-                throw failure;
-            }));
-
-            assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            Thread.interrupted();
-        }
-    }
-
-    @Test
-    public void test_call_cmd_null() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Try.call((java.util.concurrent.Callable<String>) null);
-        });
-    }
-
-    @Test
-    public void test_call_cmd_function_success() {
-        java.util.function.Function<Exception, String> errorHandler = ex -> "error result";
-        String result = Try.call(() -> "test result", errorHandler);
-        assertEquals("test result", result);
-    }
-
-    @Test
-    public void test_call_cmd_function_with_exception() {
-        java.util.function.Function<Exception, String> errorHandler = ex -> "error result";
-        String result = Try.call(() -> {
-            throw new IOException("Test exception");
-        }, errorHandler);
-        assertEquals("error result", result);
-    }
-
-    @Test
-    public void test_call_cmd_function_null_cmd() {
-        java.util.function.Function<Exception, String> errorHandler = ex -> "error";
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.call((java.util.concurrent.Callable<String>) null, errorHandler);
-        });
-    }
-
-    @Test
-    public void test_call_cmd_function_null_function() {
-        java.util.concurrent.Callable<String> cmd = () -> "test";
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.call(cmd, (java.util.function.Function<Exception, String>) null);
-        });
-    }
-
-    @Test
-    public void test_call_cmd_supplier_with_exception() {
-        java.util.function.Supplier<String> supplier = () -> "default result";
-        String result = Try.call(() -> {
-            throw new IOException("Test exception");
-        }, supplier);
-        assertEquals("default result", result);
-    }
-
-    @Test
-    public void test_call_cmd_supplier_null_cmd() {
-        java.util.function.Supplier<String> supplier = () -> "default";
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.call((java.util.concurrent.Callable<String>) null, supplier);
-        });
-    }
-
-    @Test
-    public void test_call_cmd_supplier_null_supplier() {
-        java.util.concurrent.Callable<String> cmd = () -> "test";
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.call(cmd, (java.util.function.Supplier<String>) null);
-        });
-    }
-
-    @Test
-    public void test_call_cmd_defaultValue_with_exception() {
-        String result = Try.call(() -> {
-            throw new IOException("Test exception");
-        }, "default result");
-        assertEquals("default result", result);
-    }
-
-    @Test
-    public void test_call_cmd_defaultValue_null_cmd() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.call((java.util.concurrent.Callable<String>) null, "default");
-        });
-    }
-
-    @Test
-    public void test_call_cmd_defaultValue_null_default() {
-        String result = Try.call(() -> {
-            throw new IOException("Test exception");
-        }, (String) null);
-        assertNull(result);
-    }
-
-    @Test
-    public void test_call_cmd_predicate_supplier_success() {
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof IOException;
-        java.util.function.Supplier<String> supplier = () -> "default result";
-        String result = Try.call(() -> "test result", predicate, supplier);
-        assertEquals("test result", result);
-    }
-
-    @Test
-    public void test_call_cmd_predicate_supplier_matching_exception() {
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof IOException;
-        java.util.function.Supplier<String> supplier = () -> "default result";
-        String result = Try.call(() -> {
-            throw new IOException("Test exception");
-        }, predicate, supplier);
-        assertEquals("default result", result);
-    }
-
-    @Test
-    public void test_call_cmd_predicate_supplier_non_matching_exception() {
-        java.util.function.Predicate<Exception> predicate = ex -> ex instanceof FileNotFoundException;
-        java.util.function.Supplier<String> supplier = () -> "default result";
-        assertThrows(RuntimeException.class, () -> {
-            Try.call(() -> {
-                throw new IOException("Test exception");
-            }, predicate, supplier);
-        });
-    }
-
-    @Test
-    public void test_call_cmd_predicate_supplier_null_cmd() {
-        java.util.function.Predicate<Exception> predicate = ex -> true;
-        java.util.function.Supplier<String> supplier = () -> "default";
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.call((java.util.concurrent.Callable<String>) null, predicate, supplier);
-        });
-    }
-
-    @Test
-    public void test_call_cmd_predicate_supplier_null_predicate() {
-        java.util.concurrent.Callable<String> cmd = () -> "test";
-        java.util.function.Supplier<String> supplier = () -> "default";
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.call(cmd, (java.util.function.Predicate<Exception>) null, supplier);
-        });
-    }
-
-    @Test
-    public void test_call_cmd_predicate_supplier_null_supplier() {
-        java.util.concurrent.Callable<String> cmd = () -> "test";
-        java.util.function.Predicate<Exception> predicate = ex -> true;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.call(cmd, predicate, (java.util.function.Supplier<String>) null);
-        });
-    }
-
-    @Test
-    public void test_call_cmd_predicate_defaultValue_success() {
-        String result = Try.call(() -> "test result", ex -> ex instanceof IOException, "default result");
-        assertEquals("test result", result);
-    }
-
-    @Test
-    public void test_call_cmd_predicate_defaultValue_matching_exception() {
-        String result = Try.call(() -> {
-            throw new IOException("Test exception");
-        }, ex -> ex instanceof IOException, "default result");
-        assertEquals("default result", result);
-    }
-
-    @Test
-    public void test_call_cmd_predicate_defaultValue_non_matching_exception() {
-        assertThrows(RuntimeException.class, () -> {
-            Try.call(() -> {
-                throw new IOException("Test exception");
-            }, ex -> ex instanceof FileNotFoundException, "default result");
-        });
-    }
-
-    @Test
-    public void test_call_cmd_predicate_defaultValue_null_cmd() {
-        java.util.function.Predicate<Exception> predicate = ex -> true;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.call((java.util.concurrent.Callable<String>) null, predicate, "default");
-        });
-    }
-
-    @Test
-    public void test_call_cmd_predicate_defaultValue_null_predicate() {
-        java.util.concurrent.Callable<String> cmd = () -> "test";
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Try.call(cmd, (java.util.function.Predicate<Exception>) null, "default");
-        });
-    }
-
-    @Test
-    public void test_complex_exception_handling() {
-        AtomicInteger count = new AtomicInteger(0);
-
-        java.util.function.Function<Exception, String> errorHandler = ex -> {
-            if (ex instanceof IOException) {
-                count.incrementAndGet();
-                return "handled";
-            }
-            return "unhandled";
-        };
-
-        String result = Try.call(() -> {
-            count.incrementAndGet();
-            if (count.get() == 1) {
-                throw new IOException("First attempt");
-            }
-            return "success";
-        }, errorHandler);
-
-        assertEquals("handled", result);
-        assertEquals(2, count.get());
-    }
-
-    // ============== Suppressed-exception / close-in-finally semantics ==============
-
     private static class ThrowOnClose implements AutoCloseable {
         private final RuntimeException onClose;
-        private boolean closeCalled = false;
+        boolean closeCalled;
 
         ThrowOnClose(RuntimeException onClose) {
             this.onClose = onClose;
@@ -1085,89 +56,470 @@ public class TryTest extends TestBase {
     }
 
     @Test
-    public void test_with_run_propagatesBodyExceptionWithCloseSuppressed() {
-        // Verifies the try-with-resources wiring: the body's exception is the primary
-        // exception, and the close() exception is attached as a suppressed exception.
-        RuntimeException bodyEx = new RuntimeException("body-failure");
-        RuntimeException closeEx = new RuntimeException("close-failure");
-        ThrowOnClose closeable = new ThrowOnClose(closeEx);
+    public void testWith() {
+        TestCloseable c = new TestCloseable();
+        Try.with(c).run(r -> assertFalse(r.isClosed()));
+        assertTrue(c.isClosed());
 
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> Try.with(closeable).run(c -> {
-            throw bodyEx;
+        AtomicBoolean finalAction = new AtomicBoolean();
+        assertEquals("ok", Try.with(new ByteArrayInputStream("t".getBytes()), () -> finalAction.set(true)).call(s -> "ok"));
+        assertTrue(finalAction.get());
+
+        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("t".getBytes());
+        AtomicBoolean ran = new AtomicBoolean();
+        Try.with(supplier).run(s -> ran.set(true));
+        assertTrue(ran.get());
+        Try.with(supplier, () -> finalAction.set(true)).run(s -> {
+        });
+        assertTrue(finalAction.get());
+
+        assertThrows(IllegalArgumentException.class, () -> Try.with((InputStream) null));
+        assertThrows(IllegalArgumentException.class, () -> Try.with((InputStream) null, () -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Try.with(new ByteArrayInputStream("t".getBytes()), (Runnable) null));
+        assertThrows(IllegalArgumentException.class, () -> Try.with((Throwables.Supplier<InputStream, Exception>) null));
+        assertThrows(IllegalArgumentException.class, () -> Try.with((Throwables.Supplier<InputStream, Exception>) null, () -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Try.with(supplier, (Runnable) null));
+        assertThrows(RuntimeException.class, () -> Try.with((Throwables.Supplier<InputStream, Exception>) () -> {
+            throw new IOException("supplier");
+        }).run(s -> fail("must not run")));
+
+        AtomicBoolean bodyRan = new AtomicBoolean();
+        AtomicBoolean finalRan = new AtomicBoolean();
+        assertThrows(IllegalArgumentException.class,
+                () -> Try.with((Throwables.Supplier<AutoCloseable, Exception>) () -> null, () -> finalRan.set(true)).run(x -> bodyRan.set(true)));
+        assertFalse(bodyRan.get());
+        assertTrue(finalRan.get());
+    }
+
+    // Kept in its own test so the only assertion in this class that can go red against an unpatched build is
+    // not hidden behind a dozen unrelated assertThrows calls. @MayReturnNull says "this method may return
+    // null", which is meaningless on a void method and was rendered into the published signature; the
+    // annotation is RUNTIME-retained, so its absence is observable by reflection.
+    @Test
+    public void testVoidRunOverloadsAreNotAnnotatedMayReturnNull() throws Exception {
+        assertNull(Try.class.getMethod("run", Throwables.Consumer.class)
+                .getAnnotation(com.landawn.abacus.annotation.MayReturnNull.class));
+        assertNull(Try.class.getMethod("run", Throwables.Consumer.class, java.util.function.Consumer.class)
+                .getAnnotation(com.landawn.abacus.annotation.MayReturnNull.class));
+        // both really are void, which is why the annotation could never have been meaningful
+        assertSame(void.class, Try.class.getMethod("run", Throwables.Consumer.class).getReturnType());
+        assertSame(void.class, Try.class.getMethod("run", Throwables.Consumer.class, java.util.function.Consumer.class).getReturnType());
+    }
+
+    @Test
+    public void testInstanceRunAndCall() {
+        TestCloseable c = new TestCloseable();
+        Try<TestCloseable> t = Try.with(c);
+        Throwables.Function<TestCloseable, String, Exception> cmd = r -> "result";
+        assertThrows(IllegalArgumentException.class, () -> t.run((Throwables.Consumer<TestCloseable, Exception>) null));
+        assertThrows(IllegalArgumentException.class, () -> t.run(r -> {
+        }, (java.util.function.Consumer<Exception>) null));
+        assertThrows(IllegalArgumentException.class, () -> t.call((Throwables.Function<TestCloseable, String, Exception>) null));
+        assertThrows(IllegalArgumentException.class, () -> t.call(cmd, (java.util.function.Function<Exception, String>) null));
+        assertThrows(IllegalArgumentException.class, () -> t.call(cmd, (java.util.function.Supplier<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> t.call((Throwables.Function<TestCloseable, String, Exception>) null, "d"));
+        assertThrows(IllegalArgumentException.class, () -> t.call(cmd, (Predicate<Exception>) null, (java.util.function.Supplier<String>) () -> "d"));
+        assertThrows(IllegalArgumentException.class, () -> t.call(cmd, e -> true, (java.util.function.Supplier<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> t.call(cmd, (Predicate<Exception>) null, "d"));
+        assertFalse(c.isClosed());
+
+        AtomicBoolean executed = new AtomicBoolean();
+        Try.with(new ByteArrayInputStream("t".getBytes())).run(s -> executed.set(true));
+        assertTrue(executed.get());
+        assertThrows(RuntimeException.class, () -> Try.with(new ByteArrayInputStream("t".getBytes())).run(s -> {
+            throw new IOException("boom");
         }));
 
-        assertTrue(closeable.closeCalled, "close() must run even when the body throws");
-        // ExceptionUtil.toRuntimeException may wrap; the body exception (or the wrap of it)
-        // is the primary cause, and the close exception must appear as suppressed somewhere
-        // in the cause/suppressed chain.
+        AtomicBoolean handled = new AtomicBoolean();
+        Try.with(new ByteArrayInputStream("t".getBytes())).run(s -> executed.set(true), e -> handled.set(true));
+        assertFalse(handled.get());
+        Try.with(new ByteArrayInputStream("t".getBytes())).run(s -> {
+            throw new IOException("boom");
+        }, e -> handled.set(true));
+        assertTrue(handled.get());
+        TestCloseable closedOnError = new TestCloseable();
+        Try.with(closedOnError).run(r -> {
+            throw new IOException("boom");
+        }, e -> {
+        });
+        assertTrue(closedOnError.isClosed());
+
+        assertEquals("result", Try.with(new ByteArrayInputStream("t".getBytes())).call(s -> "result"));
+        assertEquals("result", Try.with(new ByteArrayInputStream("t".getBytes())).call(s -> "result", () -> "d"));
+        assertEquals("d", Try.with(new ByteArrayInputStream("t".getBytes())).call(s -> {
+            throw new IOException("boom");
+        }, () -> "d"));
+        assertEquals("result", Try.with(new ByteArrayInputStream("t".getBytes())).call(s -> "result", "d"));
+        assertEquals("d", Try.with(new ByteArrayInputStream("t".getBytes())).call(s -> {
+            throw new IOException("boom");
+        }, "d"));
+        assertEquals("error", Try.with(new ByteArrayInputStream("t".getBytes())).call(s -> {
+            throw new IOException("boom");
+        }, e -> "error"));
+        assertEquals("result", Try.with(new ByteArrayInputStream("t".getBytes())).call(s -> "result", e -> e instanceof IOException, () -> "d"));
+        assertEquals("d", Try.with(new ByteArrayInputStream("t".getBytes())).call(s -> {
+            throw new IOException("boom");
+        }, e -> e instanceof IOException, () -> "d"));
+        assertThrows(RuntimeException.class, () -> Try.with(new ByteArrayInputStream("t".getBytes())).call(s -> {
+            throw new IOException("boom");
+        }, e -> e instanceof FileNotFoundException, () -> "d"));
+        assertEquals("d", Try.with(new ByteArrayInputStream("t".getBytes())).call(s -> {
+            throw new IOException("boom");
+        }, e -> e instanceof IOException, "d"));
+
+        Throwables.Supplier<InputStream, Exception> supplier = () -> new ByteArrayInputStream("t".getBytes());
+        assertEquals("result", Try.with(supplier).call(s -> "result"));
+        assertEquals("error", Try.with(supplier).call(s -> {
+            throw new IOException("boom");
+        }, e -> "error"));
+        TestCloseable supplierClosed = new TestCloseable();
+        Try.with((Throwables.Supplier<TestCloseable, Exception>) () -> supplierClosed).call(r -> {
+            throw new IOException("boom");
+        }, () -> "d");
+        assertTrue(supplierClosed.isClosed());
+    }
+
+    @Test
+    public void testStaticRunAndCall() {
+        AtomicBoolean ran = new AtomicBoolean();
+        Try.run(() -> ran.set(true));
+        assertTrue(ran.get());
+        assertThrows(RuntimeException.class, () -> Try.run(() -> {
+            throw new IOException("boom");
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Try.run((Throwables.Runnable<Exception>) null));
+
+        AtomicBoolean handled = new AtomicBoolean();
+        Try.run(() -> ran.set(true), e -> handled.set(true));
+        assertFalse(handled.get());
+        AtomicReference<Exception> caught = new AtomicReference<>();
+        Try.run(() -> {
+            throw new IOException("boom");
+        }, e -> {
+            handled.set(true);
+            caught.set(e);
+        });
+        assertTrue(handled.get());
+        assertTrue(caught.get() instanceof IOException);
+        assertThrows(IllegalArgumentException.class, () -> Try.run((Throwables.Runnable<Exception>) null, e -> {
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Try.run(() -> {
+        }, null));
+
+        assertEquals("ok", Try.call(() -> "ok"));
+        assertThrows(RuntimeException.class, () -> Try.call(() -> {
+            throw new IOException("boom");
+        }));
+        assertThrows(IllegalArgumentException.class, () -> Try.call((java.util.concurrent.Callable<String>) null));
+        assertEquals("ok", Try.call(() -> "ok", e -> "err"));
+        assertEquals("err", Try.call(() -> {
+            throw new IOException("boom");
+        }, e -> "err"));
+        assertEquals("ok", Try.call(() -> "ok", () -> "d"));
+        assertEquals("d", Try.call(() -> {
+            throw new IOException("boom");
+        }, () -> "d"));
+        assertEquals("ok", Try.call(() -> "ok", "d"));
+        assertEquals("d", Try.call(() -> {
+            throw new IOException("boom");
+        }, "d"));
+        assertNull(Try.call(() -> {
+            throw new IOException("boom");
+        }, (String) null));
+        assertEquals("ok", Try.call(() -> "ok", e -> e instanceof IOException, () -> "d"));
+        assertEquals("d", Try.call(() -> {
+            throw new IOException("boom");
+        }, e -> e instanceof IOException, () -> "d"));
+        assertThrows(RuntimeException.class, () -> Try.call(() -> {
+            throw new IOException("boom");
+        }, e -> e instanceof FileNotFoundException, () -> "d"));
+        assertEquals("d", Try.call(() -> {
+            throw new IOException("boom");
+        }, e -> e instanceof IOException, "d"));
+        assertThrows(RuntimeException.class, () -> Try.call(() -> {
+            throw new IOException("boom");
+        }, e -> e instanceof FileNotFoundException, "d"));
+        assertThrows(IllegalArgumentException.class, () -> Try.call((java.util.concurrent.Callable<String>) null, e -> "d"));
+        assertThrows(IllegalArgumentException.class, () -> Try.call(() -> "ok", (java.util.function.Function<Exception, String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Try.call((java.util.concurrent.Callable<String>) null, () -> "d"));
+        assertThrows(IllegalArgumentException.class, () -> Try.call(() -> "ok", (java.util.function.Supplier<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Try.call((java.util.concurrent.Callable<String>) null, "d"));
+        assertThrows(IllegalArgumentException.class, () -> Try.call((java.util.concurrent.Callable<String>) null, e -> true, () -> "d"));
+        assertThrows(IllegalArgumentException.class, () -> Try.call(() -> "ok", (Predicate<Exception>) null, () -> "d"));
+        assertThrows(IllegalArgumentException.class, () -> Try.call(() -> "ok", e -> true, (java.util.function.Supplier<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Try.call((java.util.concurrent.Callable<String>) null, e -> true, "d"));
+        assertThrows(IllegalArgumentException.class, () -> Try.call(() -> "ok", (Predicate<Exception>) null, "d"));
+    }
+
+    @Test
+    public void testInterruptedStatusRestored() {
+        Thread.interrupted();
+        try {
+            assertThrows(RuntimeException.class, () -> Try.run(() -> {
+                throw new IOException("outer", new InterruptedException("nested"));
+            }));
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+
+        Thread.interrupted();
+        try {
+            AtomicBoolean saw = new AtomicBoolean();
+            Try.run(() -> {
+                throw new InterruptedException("stop");
+            }, e -> saw.set(Thread.currentThread().isInterrupted()));
+            assertTrue(saw.get());
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+
+        Thread.interrupted();
+        try {
+            AtomicBoolean saw = new AtomicBoolean();
+            assertEquals("fallback", Try.with(new TestCloseable()).call(c -> {
+                throw new InterruptedException("stop");
+            }, (java.util.function.Function<Exception, String>) e -> {
+                saw.set(Thread.currentThread().isInterrupted());
+                return "fallback";
+            }));
+            assertTrue(saw.get());
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+
+        Thread.interrupted();
+        try {
+            AutoCloseable closeable = () -> {
+                throw new InterruptedException("close");
+            };
+            AtomicBoolean saw = new AtomicBoolean();
+            assertEquals("fallback", Try.with(closeable).call(r -> {
+                throw new IOException("primary");
+            }, (java.util.function.Function<Exception, String>) e -> {
+                assertEquals(1, e.getSuppressed().length);
+                assertTrue(e.getSuppressed()[0] instanceof InterruptedException);
+                saw.set(Thread.currentThread().isInterrupted());
+                return "fallback";
+            }));
+            assertTrue(saw.get());
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+
+        Thread.interrupted();
+        try {
+            AutoCloseable closeable = () -> {
+                throw new InterruptedException("close");
+            };
+            AssertionError failure = assertThrows(AssertionError.class, () -> Try.with(closeable).run(r -> {
+                throw new AssertionError("primary");
+            }));
+            assertEquals(1, failure.getSuppressed().length);
+            assertTrue(failure.getSuppressed()[0] instanceof InterruptedException);
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+
+        Thread.interrupted();
+        try {
+            IOException failure = new IOException("outer");
+            failure.addSuppressed(new InterruptedException("suppressed"));
+            assertThrows(RuntimeException.class, () -> Try.call(() -> {
+                throw failure;
+            }));
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    public void testAnotherThreadsInterruptionIsNotRestoredOnThisThread() {
+        // Future.get()/CompletableFuture.join() report the *task's* failure. An InterruptedException under
+        // one of those wrappers belongs to the task's thread and must leave this thread alone.
+        Thread.interrupted();
+        try {
+            assertEquals("fallback", Try.call(() -> {
+                throw new ExecutionException(new InterruptedException("task"));
+            }, "fallback"));
+            assertFalse(Thread.currentThread().isInterrupted());
+
+            assertEquals("fallback", Try.call(() -> {
+                throw new CompletionException(new InterruptedException("task"));
+            }, "fallback"));
+            assertFalse(Thread.currentThread().isInterrupted());
+
+            assertThrows(RuntimeException.class, () -> Try.run(() -> {
+                throw new ExecutionException(new InterruptedException("task"));
+            }));
+            assertFalse(Thread.currentThread().isInterrupted());
+
+            // The resource overloads convert through ExceptionUtil.toRuntimeException(..), which unwraps the
+            // wrapper: the decision must already have been taken on the original exception.
+            assertThrows(RuntimeException.class, () -> Try.with(new TestCloseable()).run(c -> {
+                throw new ExecutionException(new InterruptedException("task"));
+            }));
+            assertFalse(Thread.currentThread().isInterrupted());
+
+            assertThrows(RuntimeException.class, () -> Try.with(new TestCloseable()).call(c -> {
+                throw new ExecutionException(new InterruptedException("task"));
+            }));
+            assertFalse(Thread.currentThread().isInterrupted());
+
+            // The rejected branch of the predicate overloads throws through executeWithFinalAction too.
+            assertThrows(RuntimeException.class, () -> Try.with(new TestCloseable()).call(c -> {
+                throw new ExecutionException(new InterruptedException("task"));
+            }, (Predicate<Exception>) e -> false, "fallback"));
+            assertFalse(Thread.currentThread().isInterrupted());
+
+            assertEquals("fallback", Try.with(new TestCloseable()).call(c -> {
+                throw new ExecutionException(new InterruptedException("task"));
+            }, (Predicate<Exception>) e -> true, "fallback"));
+            assertFalse(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+
+        // What is suppressed on the wrapper was attached on this thread, so it still restores the status.
+        Thread.interrupted();
+        try {
+            final ExecutionException wrapper = new ExecutionException(new InterruptedException("task"));
+            wrapper.addSuppressed(new InterruptedException("close"));
+            assertEquals("fallback", Try.call(() -> {
+                throw wrapper;
+            }, "fallback"));
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+
+        // The other half of the same call: future.get() throws InterruptedException *unwrapped* when this
+        // thread was interrupted while waiting, and that one must still restore the status.
+        Thread.interrupted();
+        try {
+            assertEquals("fallback", Try.call(() -> {
+                throw new InterruptedException("this thread was interrupted while waiting");
+            }, "fallback"));
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    public void testFinalActionAndSuppressed() {
+        AtomicBoolean ran = new AtomicBoolean();
+        TestCloseable c = new TestCloseable();
+        Try.with(c, () -> ran.set(true)).run(x -> {
+        });
+        assertTrue(c.isClosed());
+        assertTrue(ran.get());
+
+        ran.set(false);
+        TestCloseable c2 = new TestCloseable();
+        assertThrows(RuntimeException.class, () -> Try.with(c2, () -> ran.set(true)).run(x -> {
+            throw new RuntimeException("boom");
+        }));
+        assertTrue(c2.isClosed());
+        assertTrue(ran.get());
+
+        AtomicBoolean executed = new AtomicBoolean();
+        assertThrows(RuntimeException.class, () -> Try.with(new ByteArrayInputStream("t".getBytes()), () -> {
+            throw new RuntimeException("final");
+        }).run(s -> executed.set(true)));
+        assertTrue(executed.get());
+
+        RuntimeException body = new RuntimeException("body");
+        RuntimeException closeEx = new RuntimeException("close");
+        ThrowOnClose closeable = new ThrowOnClose(closeEx);
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> Try.with(closeable).run(x -> {
+            throw body;
+        }));
+        assertTrue(closeable.closeCalled);
         boolean foundClose = false;
-        Throwable t = thrown;
-        while (t != null && !foundClose) {
+        for (Throwable t = thrown; t != null && !foundClose; t = t.getCause()) {
             for (Throwable s : t.getSuppressed()) {
                 if (s == closeEx) {
                     foundClose = true;
                     break;
                 }
             }
-            t = t.getCause();
         }
-        assertTrue(foundClose, "close() exception must be attached as suppressed");
-    }
+        assertTrue(foundClose);
 
-    @Test
-    public void test_with_run_finalActionRunsOnSuccess() {
-        AtomicBoolean ran = new AtomicBoolean(false);
-        TestCloseable c = new TestCloseable();
-        Try.with(c, () -> ran.set(true)).run(x -> {
-            /* no-op */ });
-        assertTrue(c.isClosed());
-        assertTrue(ran.get());
-    }
-
-    @Test
-    public void test_with_run_finalActionRunsAfterBodyException() {
-        AtomicBoolean ran = new AtomicBoolean(false);
-        TestCloseable c = new TestCloseable();
-        assertThrows(RuntimeException.class, () -> Try.with(c, () -> ran.set(true)).run(x -> {
-            throw new RuntimeException("boom");
-        }));
-        assertTrue(c.isClosed(), "resource still closed when body throws");
-        assertTrue(ran.get(), "finalAction must run in finally even when body throws");
-    }
-
-    @Test
-    public void test_with_run_preservesBodyFailureWhenFinalActionAlsoFails() {
-        final RuntimeException bodyFailure = new RuntimeException("body");
-        final RuntimeException finalActionFailure = new RuntimeException("final-action");
-
-        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> Try.with(new TestCloseable(), () -> {
-            throw finalActionFailure;
-        }).run(resource -> {
+        RuntimeException bodyFailure = new RuntimeException("body");
+        RuntimeException finalFailure = new RuntimeException("final");
+        RuntimeException both = assertThrows(RuntimeException.class, () -> Try.with(new TestCloseable(), () -> {
+            throw finalFailure;
+        }).run(r -> {
             throw bodyFailure;
         }));
+        assertSame(bodyFailure, both);
+        assertEquals(1, both.getSuppressed().length);
+        assertSame(finalFailure, both.getSuppressed()[0]);
 
-        assertSame(bodyFailure, thrown);
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(finalActionFailure, thrown.getSuppressed()[0]);
+        AtomicInteger count = new AtomicInteger();
+        assertEquals("handled", Try.call(() -> {
+            count.incrementAndGet();
+            throw new IOException("first");
+        }, e -> {
+            count.incrementAndGet();
+            return "handled";
+        }));
+        assertEquals(2, count.get());
     }
 
+    // Pins the class-javadoc claim that a failing final action is NOT routed to a fallback: with no other
+    // failure left to propagate it reaches the caller and the fallback overload's result is discarded.
+    // Its own test so a regression names the contract it broke.
     @Test
-    public void test_with_supplier_run_supplierExceptionPropagates() {
-        // If the supplier throws, the failure must be propagated as a RuntimeException.
-        Throwables.Supplier<AutoCloseable, Exception> supplier = () -> {
-            throw new java.io.IOException("supplier-fail");
-        };
-        assertThrows(RuntimeException.class, () -> Try.with(supplier).run(c -> fail("must not reach body")));
+    public void testFinalActionFailureIsNotRoutedToAFallback() {
+        IllegalStateException finalBoom = new IllegalStateException("finalBoom");
+        IllegalStateException escaped = assertThrows(IllegalStateException.class, () -> Try.with(new TestCloseable(), () -> {
+            throw finalBoom;
+        }).call(x -> "body", "fallback"));
+        assertSame(finalBoom, escaped);
+        assertEquals(0, escaped.getSuppressed().length);
+
+        // ... and the same when the body itself failed and the fallback already absorbed that failure.
+        IllegalStateException finalBoom2 = new IllegalStateException("finalBoom2");
+        assertSame(finalBoom2, assertThrows(IllegalStateException.class, () -> Try.with(new TestCloseable(), () -> {
+            throw finalBoom2;
+        }).call(x -> {
+            throw new IOException("body");
+        }, "fallback")));
     }
 
+    // Pins the corrected class-javadoc sentence about a supplier that returns null: the IllegalArgumentException
+    // is an acquisition failure like any other, so only run(cmd) and call(cmd) let it reach the caller - every
+    // overload with error handling absorbs it.
     @Test
-    public void test_with_supplier_rejectsNullResourceBeforeRunningBody() {
-        final AtomicBoolean bodyRan = new AtomicBoolean(false);
-        final AtomicBoolean finalActionRan = new AtomicBoolean(false);
-        final Throwables.Supplier<AutoCloseable, Exception> supplier = () -> null;
+    public void testNullSuppliedResourceIsAnAcquisitionFailureLikeAnyOther() {
+        final Throwables.Supplier<AutoCloseable, Exception> nullSupplier = () -> null;
+        final Throwables.Function<AutoCloseable, String, Exception> body = x -> "bodyResult";
 
-        assertThrows(IllegalArgumentException.class, () -> Try.with(supplier, () -> finalActionRan.set(true)).run(c -> bodyRan.set(true)));
-        assertFalse(bodyRan.get());
-        assertTrue(finalActionRan.get(), "the final action must still run when acquisition returns null");
+        // no error handling -> the caller sees it
+        assertThrows(IllegalArgumentException.class, () -> Try.with(nullSupplier).run(x -> fail("body must not run")));
+        assertThrows(IllegalArgumentException.class, () -> Try.with(nullSupplier).call(body));
+
+        // every overload that offers error handling absorbs it instead
+        final AtomicReference<Exception> seen = new AtomicReference<>();
+        Try.with(nullSupplier).run(x -> fail("body must not run"), seen::set);
+        assertTrue(seen.get() instanceof IllegalArgumentException);
+
+        assertEquals("fb", Try.with(nullSupplier).call(body, "fb"));
+        assertEquals("fbSup", Try.with(nullSupplier).call(body, () -> "fbSup"));
+        assertEquals("fbFn", Try.with(nullSupplier).call(body, e -> {
+            assertTrue(e instanceof IllegalArgumentException);
+            return "fbFn";
+        }));
+        assertEquals("fbPred", Try.with(nullSupplier).call(body, e -> true, "fbPred"));
     }
 }

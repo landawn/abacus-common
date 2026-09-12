@@ -18,6 +18,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
@@ -68,13 +69,14 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Common Use Cases:</b>
  * <ul>
  *   <li><b>Logging &amp; Debug Output:</b> Formatted object representation for debugging</li>
- *   <li><b>CSV/TSV Generation:</b> Creating structured data files with custom delimiters</li>
- *   <li><b>SQL Query Building:</b> Concatenating parameter lists and conditions</li>
- *   <li><b>HTML/XML Generation:</b> Building markup with proper separators</li>
+ *   <li><b>Delimited Text:</b> Joining fields that are already quoted or escaped by a format-aware encoder</li>
+ *   <li><b>SQL Fragments:</b> Joining fixed identifiers or {@code ?} placeholders &mdash; never SQL values</li>
+ *   <li><b>Markup Fragments:</b> Joining already-encoded HTML/XML fragments</li>
  *   <li><b>Configuration Display:</b> Formatted key-value pair output</li>
  *   <li><b>Report Generation:</b> Structured text output with custom formatting</li>
- *   <li><b>API Response Formatting:</b> Creating formatted response strings</li>
  * </ul>
+ *
+ * <p>Each of those uses assumes the individual elements were encoded elsewhere; see <b>Escaping</b> above.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -98,11 +100,12 @@ import com.landawn.abacus.util.u.Optional;
  * // Result: "Scores: {Alice=95, Bob=87, Charlie=92}"
  *
  * // Null handling and trimming
+ * String missing = null;
  * String clean = Joiner.with(" | ")
  *                      .skipNulls()
  *                      .trimBeforeAppend()
  *                      .append("  hello  ")
- *                      .append(null)
+ *                      .append(missing)
  *                      .append("  world  ")
  *                      .toString();
  * // Result: "hello | world"
@@ -154,8 +157,8 @@ import com.landawn.abacus.util.u.Optional;
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li>Element appending: O(1) amortized time with StringBuilder backing</li>
- *   <li>Collection appending: O(n) where n is the number of elements</li>
+ *   <li>Element appending: amortized time proportional to the appended text and separator lengths, plus rendering costs</li>
+ *   <li>Collection appending: O(n + L), plus rendering costs, for n elements and L appended characters</li>
  *   <li>Memory usage: O(total content length) with optional buffer reuse</li>
  *   <li>Buffer management: Efficient reuse reduces garbage collection pressure</li>
  * </ul>
@@ -165,7 +168,8 @@ import com.landawn.abacus.util.u.Optional;
  * <ul>
  *   <li>Each thread should use separate Joiner instances</li>
  *   <li>Concurrent access requires external synchronization</li>
- *   <li>Only the {@link #close()} method is synchronized for resource cleanup</li>
+ *   <li>{@link #close()} and {@link #toString()} are synchronized so that racing them cannot return the pooled
+ *       buffer to the shared pool twice and corrupt unrelated code; appending is not synchronized and stays unsafe</li>
  *   <li>{@link #reuseBuffer()} returns builders to an internal pool after {@link #toString()} or {@link #close()}, but does not make instances thread-safe</li>
  * </ul>
  *
@@ -318,7 +322,8 @@ public final class Joiner implements Closeable {
      * @throws IllegalArgumentException if any of {@code prefix}, {@code separator}, {@code keyValueDelimiter}, or
      *         {@code suffix} is {@code null}.
      */
-    Joiner(final CharSequence separator, final CharSequence keyValueDelimiter, final CharSequence prefix, final CharSequence suffix) {
+    Joiner(final CharSequence separator, final CharSequence keyValueDelimiter, final CharSequence prefix, final CharSequence suffix)
+            throws IllegalArgumentException {
         N.checkArgNotNull(prefix, "The prefix must not be null");
         N.checkArgNotNull(separator, "The separator must not be null");
         N.checkArgNotNull(keyValueDelimiter, "The keyValueDelimiter must not be null");
@@ -330,8 +335,10 @@ public final class Joiner implements Closeable {
         this.keyValueDelimiter = keyValueDelimiter.toString();
         this.suffix = suffix.toString();
         emptyValue = this.prefix + this.suffix;
-        isEmptySeparator = Strings.isEmpty(separator);
-        isEmptyKeyValueDelimiter = Strings.isEmpty(keyValueDelimiter);
+        // Derive from the snapshotted fields, not from the caller's (possibly mutable) CharSequence arguments,
+        // so these flags can never disagree with the strings this Joiner actually uses.
+        isEmptySeparator = this.separator.isEmpty();
+        isEmptyKeyValueDelimiter = this.keyValueDelimiter.isEmpty();
     }
 
     /**
@@ -368,7 +375,7 @@ public final class Joiner implements Closeable {
      * @return a new Joiner instance with the specified separator.
      * @throws IllegalArgumentException if separator is {@code null}.
      */
-    public static Joiner with(final CharSequence separator) {
+    public static Joiner with(final CharSequence separator) throws IllegalArgumentException {
         return new Joiner(separator);
     }
 
@@ -387,7 +394,7 @@ public final class Joiner implements Closeable {
      * @return a new Joiner instance with the specified separators.
      * @throws IllegalArgumentException if separator or keyValueDelimiter is {@code null}.
      */
-    public static Joiner with(final CharSequence separator, final CharSequence keyValueDelimiter) {
+    public static Joiner with(final CharSequence separator, final CharSequence keyValueDelimiter) throws IllegalArgumentException {
         return new Joiner(separator, keyValueDelimiter);
     }
 
@@ -412,7 +419,7 @@ public final class Joiner implements Closeable {
      * @return a new Joiner instance with the specified separator, prefix, and suffix.
      * @throws IllegalArgumentException if any parameter is {@code null}.
      */
-    public static Joiner with(final CharSequence separator, final CharSequence prefix, final CharSequence suffix) {
+    public static Joiner with(final CharSequence separator, final CharSequence prefix, final CharSequence suffix) throws IllegalArgumentException {
         return new Joiner(separator, prefix, suffix);
     }
 
@@ -433,7 +440,8 @@ public final class Joiner implements Closeable {
      * @return a new Joiner instance with all specified formatting options.
      * @throws IllegalArgumentException if any parameter is {@code null}.
      */
-    public static Joiner with(final CharSequence separator, final CharSequence keyValueDelimiter, final CharSequence prefix, final CharSequence suffix) {
+    public static Joiner with(final CharSequence separator, final CharSequence keyValueDelimiter, final CharSequence prefix, final CharSequence suffix)
+            throws IllegalArgumentException {
         return new Joiner(separator, keyValueDelimiter, prefix, suffix);
     }
 
@@ -566,10 +574,14 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @return this Joiner instance for method chaining.
-     * @throws IllegalStateException if the buffer has already been created.
+     * @throws IllegalStateException if this Joiner has been closed, or if the buffer has already been created.
      */
     @Beta
-    public Joiner reuseBuffer() {
+    public Joiner reuseBuffer() throws IllegalStateException {
+        // A closed Joiner can never acquire another builder, so accepting the request would hand back a
+        // Joiner that reports buffer reuse as enabled and then throws on the very next append.
+        assertNotClosed();
+
         if (buffer != null) {
             throw new IllegalStateException("Can't enable buffer reuse because the buffer has already been created");
         }
@@ -590,8 +602,9 @@ public final class Joiner implements Closeable {
      *
      * @param element the boolean value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner append(final boolean element) {
+    public Joiner append(final boolean element) throws IllegalStateException {
         prepareBuilder().append(element);
         return this;
     }
@@ -606,8 +619,9 @@ public final class Joiner implements Closeable {
      *
      * @param element the char value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner append(final char element) {
+    public Joiner append(final char element) throws IllegalStateException {
         prepareBuilder().append(element);
         return this;
     }
@@ -622,8 +636,9 @@ public final class Joiner implements Closeable {
      *
      * @param element the int value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner append(final int element) {
+    public Joiner append(final int element) throws IllegalStateException {
         prepareBuilder().append(element);
         return this;
     }
@@ -638,8 +653,9 @@ public final class Joiner implements Closeable {
      *
      * @param element the long value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner append(final long element) {
+    public Joiner append(final long element) throws IllegalStateException {
         prepareBuilder().append(element);
         return this;
     }
@@ -654,8 +670,9 @@ public final class Joiner implements Closeable {
      *
      * @param element the float value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner append(final float element) {
+    public Joiner append(final float element) throws IllegalStateException {
         prepareBuilder().append(element);
         return this;
     }
@@ -670,8 +687,9 @@ public final class Joiner implements Closeable {
      *
      * @param element the double value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner append(final double element) {
+    public Joiner append(final double element) throws IllegalStateException {
         prepareBuilder().append(element);
         return this;
     }
@@ -681,16 +699,23 @@ public final class Joiner implements Closeable {
      * If the string is {@code null}, it will be handled according to the skipNulls and useForNull settings.
      * If trimBeforeAppend or stripBeforeAppend is enabled, the string will be processed before appending.
      *
+     * <p><b>Note:</b> a bare {@code null} literal cannot be passed to {@code append(...)}: neither
+     * {@link #append(String)} nor {@link #append(StringBuilder)} is more specific than the other, so the call is
+     * ambiguous and does not compile. Pass a typed {@code null} instead &mdash; a {@code String} variable, or
+     * {@code (String) null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").append("hello").append("world").toString();                    // returns: "hello, world"
-     * Joiner.with(", ").skipNulls().append("a").append(null).append("b").toString();   // returns: "a, b"
+     * String missing = null;
+     * Joiner.with(", ").append("hello").append("world").toString();                       // returns: "hello, world"
+     * Joiner.with(", ").skipNulls().append("a").append(missing).append("b").toString();   // returns: "a, b"
      * }</pre>
      *
      * @param element the String to append, may be null
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} {@code element} skipped by {@link #skipNulls()} is a no-op and does not check.
      */
-    public Joiner append(final String element) {
+    public Joiner append(final String element) throws IllegalStateException {
         if (element != null || !skipNulls) {
             prepareBuilder().append(format(element));
         }
@@ -711,10 +736,17 @@ public final class Joiner implements Closeable {
      *
      * @param element the CharSequence to append, may be null
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner append(final CharSequence element) {
+    public Joiner append(final CharSequence element) throws IllegalStateException {
+        assertNotClosed();
+
         if (element != null || !skipNulls) {
-            prepareBuilder().append(format(element));
+            // Render before prepareBuilder(): that call commits the element separator, and a foreign
+            // CharSequence's toString() may throw, which would leave a dangling separator behind.
+            final String rendered = format(element);
+
+            prepareBuilder().append(rendered);
         }
 
         return this;
@@ -731,21 +763,36 @@ public final class Joiner implements Closeable {
      * // Returns: "he, orl"
      * }</pre>
      *
+     * <p><b>Deliberate divergence from {@link Appendable#append(CharSequence, int, int)} for a {@code null}
+     * element.</b> {@code StringBuilder} substitutes the literal text {@code "null"} and then applies the range to
+     * it, so {@code append(null, 0, 2)} yields {@code "nu"} and an out-of-range index throws. This method instead
+     * appends the whole configured {@code null} text (see {@link #useForNull(String)}) and ignores {@code start}
+     * and {@code end} entirely, so no bounds check happens for a {@code null} element.</p>
+     *
      * @param element the CharSequence to append from, may be null
-     * @param start the start index (inclusive)
-     * @param end the end index (exclusive)
+     * @param start the start index (inclusive); ignored when {@code element} is {@code null}
+     * @param end the end index (exclusive); ignored when {@code element} is {@code null}
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked before range validation.
      * @throws IndexOutOfBoundsException if {@code element} is not {@code null} and {@code start} or {@code end} is out of range
-     * @see Appendable#append(CharSequence, int, int)
      */
-    public Joiner append(final CharSequence element, final int start, final int end) {
+    public Joiner append(final CharSequence element, final int start, final int end) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         if (element != null || !skipNulls) {
             if (element == null) {
                 prepareBuilder().append(nullText);
-            } else if (trimBeforeAppend || stripBeforeAppend) {
-                prepareBuilder().append(format(element.subSequence(start, end)));
             } else {
-                prepareBuilder().append(element, start, end);
+                // Validate AND materialize BEFORE prepareBuilder(): that call commits the element separator.
+                // Range validation alone is not enough - StringBuilder.append(CharSequence, int, int) pulls the
+                // characters through the foreign charAt(), so a CharSequence that throws mid-copy would leave the
+                // separator plus a partial element behind. Copying the sub-range first keeps the buffer consistent.
+                N.checkFromToIndex(start, end, element.length());
+
+                final CharSequence subSequence = element.subSequence(start, end);
+                final String rendered = trimBeforeAppend || stripBeforeAppend ? format(subSequence) : subSequence.toString();
+
+                prepareBuilder().append(rendered);
             }
         }
 
@@ -766,8 +813,9 @@ public final class Joiner implements Closeable {
      *
      * @param element the StringBuilder to append, may be null
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} {@code element} skipped by {@link #skipNulls()} is a no-op and does not check.
      */
-    public Joiner append(final StringBuilder element) {
+    public Joiner append(final StringBuilder element) throws IllegalStateException {
         if (element != null || !skipNulls) {
             if (element == null) {
                 prepareBuilder().append(nullText);
@@ -783,7 +831,10 @@ public final class Joiner implements Closeable {
 
     /**
      * Appends an Object to the joiner.
-     * The object will be converted to string using its toString() method.
+     * The object is rendered with {@link N#toString(Object)}, which is <i>not</i> the same as calling
+     * {@code toString()} on it: arrays are rendered element-wise ({@code new int[] {1, 2}} becomes
+     * {@code "[1, 2]"} rather than {@code "[I@1b6d3586"}) and a {@link java.util.Collection} is rendered as
+     * {@code "[a, b]"}. Every other type falls back to its own {@code toString()}.
      * If the object is {@code null}, it will be handled according to the skipNulls and useForNull settings.
      * If trimBeforeAppend or stripBeforeAppend is enabled, the string representation will be processed before appending.
      *
@@ -791,14 +842,24 @@ public final class Joiner implements Closeable {
      * <pre>{@code
      * Joiner.with(", ").append(123).append("text").append(new Date()).toString();
      * // Returns something like: "123, text, Mon Jan 01 00:00:00 UTC 2024"
+     *
+     * Joiner.with(", ").append((Object) new int[] { 1, 2 }).toString();   // returns: "[1, 2]"
      * }</pre>
      *
      * @param element the Object to append, may be null
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
+     * @see N#toString(Object)
      */
-    public Joiner append(final Object element) { // Note: DO NOT remove/update this method because it also protects append(boolean/char/byte/.../double) from NullPointerException.
+    public Joiner append(final Object element) throws IllegalStateException { // Note: DO NOT remove/update this method because it also protects append(boolean/char/int/long/float/double) from NullPointerException.
+        assertNotClosed();
+
         if (element != null || !skipNulls) {
-            prepareBuilder().append(toString(element));
+            // Render before prepareBuilder(): that call commits the element separator, and the element's own
+            // toString() may throw, which would leave a dangling separator behind.
+            final String rendered = toString(element);
+
+            prepareBuilder().append(rendered);
         }
 
         return this;
@@ -816,10 +877,16 @@ public final class Joiner implements Closeable {
      *
      * @param element the object to append if not null
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner appendIfNotNull(final Object element) {
+    public Joiner appendIfNotNull(final Object element) throws IllegalStateException {
+        assertNotClosed();
+
         if (element != null) {
-            prepareBuilder().append(toString(element));
+            // Render before prepareBuilder() - see append(Object).
+            final String rendered = toString(element);
+
+            prepareBuilder().append(rendered);
         }
 
         return this;
@@ -842,8 +909,9 @@ public final class Joiner implements Closeable {
      *        {@link #append(Object)}, so it is subject to the {@code skipNulls} and {@code useForNull} settings.
      * @return this Joiner instance for method chaining
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalStateException if this Joiner has been closed and {@code b} is {@code true}. Checked after argument validation.
      */
-    public Joiner appendIf(final boolean b, final Supplier<?> supplier) throws IllegalArgumentException {
+    public Joiner appendIf(final boolean b, final Supplier<?> supplier) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (b) {
@@ -866,8 +934,9 @@ public final class Joiner implements Closeable {
      *
      * @param a the boolean array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
      */
-    public Joiner appendAll(final boolean[] a) {
+    public Joiner appendAll(final boolean[] a) throws IllegalStateException {
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -889,9 +958,10 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public Joiner appendAll(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final boolean[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -927,8 +997,9 @@ public final class Joiner implements Closeable {
      *
      * @param a the char array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
      */
-    public Joiner appendAll(final char[] a) {
+    public Joiner appendAll(final char[] a) throws IllegalStateException {
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -950,9 +1021,10 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public Joiner appendAll(final char[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final char[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -988,8 +1060,9 @@ public final class Joiner implements Closeable {
      *
      * @param a the byte array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
      */
-    public Joiner appendAll(final byte[] a) {
+    public Joiner appendAll(final byte[] a) throws IllegalStateException {
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1011,9 +1084,10 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public Joiner appendAll(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final byte[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1049,8 +1123,9 @@ public final class Joiner implements Closeable {
      *
      * @param a the short array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
      */
-    public Joiner appendAll(final short[] a) {
+    public Joiner appendAll(final short[] a) throws IllegalStateException {
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1072,9 +1147,10 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public Joiner appendAll(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final short[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1110,8 +1186,9 @@ public final class Joiner implements Closeable {
      *
      * @param a the int array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
      */
-    public Joiner appendAll(final int[] a) {
+    public Joiner appendAll(final int[] a) throws IllegalStateException {
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1133,9 +1210,10 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public Joiner appendAll(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final int[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1171,8 +1249,9 @@ public final class Joiner implements Closeable {
      *
      * @param a the long array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
      */
-    public Joiner appendAll(final long[] a) {
+    public Joiner appendAll(final long[] a) throws IllegalStateException {
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1194,9 +1273,10 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public Joiner appendAll(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final long[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1232,8 +1312,9 @@ public final class Joiner implements Closeable {
      *
      * @param a the float array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
      */
-    public Joiner appendAll(final float[] a) {
+    public Joiner appendAll(final float[] a) throws IllegalStateException {
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1255,9 +1336,10 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public Joiner appendAll(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final float[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1293,8 +1375,9 @@ public final class Joiner implements Closeable {
      *
      * @param a the double array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
      */
-    public Joiner appendAll(final double[] a) {
+    public Joiner appendAll(final double[] a) throws IllegalStateException {
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1316,9 +1399,10 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public Joiner appendAll(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final double[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1355,8 +1439,9 @@ public final class Joiner implements Closeable {
      *
      * @param a the Object array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
      */
-    public Joiner appendAll(final Object[] a) {
+    public Joiner appendAll(final Object[] a) throws IllegalStateException {
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1379,9 +1464,10 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public Joiner appendAll(final Object[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final Object[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1392,15 +1478,7 @@ public final class Joiner implements Closeable {
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (a[i] != null || !skipNulls) {
-                if (sb == null) {
-                    sb = prepareBuilder().append(toString(a[i]));
-                } else {
-                    if (isEmptySeparator) {
-                        sb.append(toString(a[i]));
-                    } else {
-                        sb.append(separator).append(toString(a[i]));
-                    }
-                }
+                sb = appendRendered(sb, toString(a[i]));
             }
         }
 
@@ -1419,9 +1497,10 @@ public final class Joiner implements Closeable {
      *
      * @param c the BooleanList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final BooleanList c) {
+    public Joiner appendAll(final BooleanList c) throws IllegalStateException {
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1443,10 +1522,11 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final BooleanList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final BooleanList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1468,9 +1548,10 @@ public final class Joiner implements Closeable {
      *
      * @param c the CharList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final CharList c) {
+    public Joiner appendAll(final CharList c) throws IllegalStateException {
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1492,10 +1573,11 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final CharList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final CharList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1517,9 +1599,10 @@ public final class Joiner implements Closeable {
      *
      * @param c the ByteList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final ByteList c) {
+    public Joiner appendAll(final ByteList c) throws IllegalStateException {
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1541,10 +1624,11 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final ByteList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final ByteList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1566,9 +1650,10 @@ public final class Joiner implements Closeable {
      *
      * @param c the ShortList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final ShortList c) {
+    public Joiner appendAll(final ShortList c) throws IllegalStateException {
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1590,10 +1675,11 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final ShortList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final ShortList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1615,9 +1701,10 @@ public final class Joiner implements Closeable {
      *
      * @param c the IntList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final IntList c) {
+    public Joiner appendAll(final IntList c) throws IllegalStateException {
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1639,10 +1726,11 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final IntList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final IntList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1664,9 +1752,10 @@ public final class Joiner implements Closeable {
      *
      * @param c the LongList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final LongList c) {
+    public Joiner appendAll(final LongList c) throws IllegalStateException {
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1688,10 +1777,11 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final LongList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final LongList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1714,9 +1804,10 @@ public final class Joiner implements Closeable {
      *
      * @param c the FloatList to append; may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final FloatList c) {
+    public Joiner appendAll(final FloatList c) throws IllegalStateException {
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1739,10 +1830,11 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final FloatList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final FloatList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1765,9 +1857,10 @@ public final class Joiner implements Closeable {
      *
      * @param c the DoubleList to append; may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final DoubleList c) {
+    public Joiner appendAll(final DoubleList c) throws IllegalStateException {
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1790,10 +1883,11 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
     @SuppressWarnings("deprecation")
-    public Joiner appendAll(final DoubleList c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final DoubleList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1814,10 +1908,15 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendAll(list).toString();   // returns: "apple, banana, cherry"
      * }</pre>
      *
+     * <p><b>Note:</b> a bare {@code null} literal cannot be passed to {@code appendAll(...)}, because several
+     * unrelated overloads match it. Pass a typed {@code null} instead &mdash; for example
+     * {@code (Collection<?>) null}.</p>
+     *
      * @param c the Collection to append; may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
      */
-    public Joiner appendAll(final Collection<?> c) {
+    public Joiner appendAll(final Collection<?> c) throws IllegalStateException {
         if (N.notEmpty(c)) {
             return appendAll(c, 0, c.size());
         }
@@ -1830,6 +1929,10 @@ public final class Joiner implements Closeable {
      * Elements from index fromIndex (inclusive) to toIndex (exclusive) are appended.
      * Null elements are handled according to skipNulls and useForNull settings.
      *
+     * <p>The range is positional in the collection's <i>iteration order</i>, so for an unordered collection
+     * such as a {@link java.util.HashSet} it selects whichever elements that instance happens to iterate
+     * over in that window.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c", "d");
@@ -1840,9 +1943,10 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public Joiner appendAll(final Collection<?> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendAll(final Collection<?> c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1851,26 +1955,27 @@ public final class Joiner implements Closeable {
 
         StringBuilder sb = null;
 
-        int i = 0;
-        for (final Object e : c) {
-            if (i++ < fromIndex) {
-                continue;
+        final Iterator<?> iter;
+
+        if (c instanceof List) {
+            // Positioned directly: O(1) for a RandomAccess list, and LinkedList walks from the nearer end.
+            iter = ((List<?>) c).listIterator(fromIndex);
+        } else {
+            // A general Collection has no positional access, so the leading `fromIndex` elements must be walked over.
+            iter = c.iterator();
+
+            for (int i = 0; i < fromIndex && iter.hasNext(); i++) {
+                iter.next();
             }
+        }
+
+        // hasNext() is checked as well as the index: a weakly consistent iterator may yield fewer elements than
+        // size() reported, and that must end the loop rather than throw, as the previous for-each shape did.
+        for (int i = fromIndex; i < toIndex && iter.hasNext(); i++) {
+            final Object e = iter.next();
 
             if (e != null || !skipNulls) {
-                if (sb == null) {
-                    sb = prepareBuilder().append(toString(e));
-                } else {
-                    if (isEmptySeparator) {
-                        sb.append(toString(e));
-                    } else {
-                        sb.append(separator).append(toString(e));
-                    }
-                }
-            }
-
-            if (i >= toIndex) {
-                break;
+                sb = appendRendered(sb, toString(e));
             }
         }
 
@@ -1890,22 +1995,15 @@ public final class Joiner implements Closeable {
      *
      * @param c the Iterable to append; may be {@code null}
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
      */
-    public Joiner appendAll(final Iterable<?> c) {
+    public Joiner appendAll(final Iterable<?> c) throws IllegalStateException {
         if (c != null) {
             StringBuilder sb = null;
 
             for (final Object e : c) {
                 if (e != null || !skipNulls) {
-                    if (sb == null) {
-                        sb = prepareBuilder().append(toString(e));
-                    } else {
-                        if (isEmptySeparator) {
-                            sb.append(toString(e));
-                        } else {
-                            sb.append(separator).append(toString(e));
-                        }
-                    }
+                    sb = appendRendered(sb, toString(e));
                 }
             }
         }
@@ -1928,12 +2026,13 @@ public final class Joiner implements Closeable {
      * @param c the Iterable to append from
      * @param filter the predicate to test elements; only elements that pass are appended
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
-    public <T> Joiner appendAll(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalArgumentException {
-        N.checkArgNotNull(filter, cs.filter);
+    public <T> Joiner appendAll(final Iterable<? extends T> c, final Predicate<? super T> filter) throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
 
-        //NOSONAR
+        N.checkArgNotNull(filter, cs.filter);
 
         if (c != null) {
             StringBuilder sb = null;
@@ -1943,15 +2042,7 @@ public final class Joiner implements Closeable {
                     continue;
                 }
 
-                if (sb == null) {
-                    sb = prepareBuilder().append(toString(e));
-                } else {
-                    if (isEmptySeparator) {
-                        sb.append(toString(e));
-                    } else {
-                        sb.append(separator).append(toString(e));
-                    }
-                }
+                sb = appendRendered(sb, toString(e));
             }
         }
 
@@ -1971,8 +2062,9 @@ public final class Joiner implements Closeable {
      *
      * @param iter the Iterator to append from; may be {@code null}
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code iter} is a no-op and does not check.
      */
-    public Joiner appendAll(final Iterator<?> iter) {
+    public Joiner appendAll(final Iterator<?> iter) throws IllegalStateException {
         if (iter != null) {
             StringBuilder sb = null;
             Object e = null;
@@ -1981,15 +2073,7 @@ public final class Joiner implements Closeable {
                 e = iter.next();
 
                 if (e != null || !skipNulls) {
-                    if (sb == null) {
-                        sb = prepareBuilder().append(toString(e));
-                    } else {
-                        if (isEmptySeparator) {
-                            sb.append(toString(e));
-                        } else {
-                            sb.append(separator).append(toString(e));
-                        }
-                    }
+                    sb = appendRendered(sb, toString(e));
                 }
             }
         }
@@ -2012,9 +2096,12 @@ public final class Joiner implements Closeable {
      * @param iter the Iterator to append from
      * @param filter the predicate to test elements; only elements that pass are appended
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
-    public <T> Joiner appendAll(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalArgumentException {
+    public <T> Joiner appendAll(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
+
         N.checkArgNotNull(filter, cs.filter);
 
         if (iter != null) {
@@ -2028,15 +2115,7 @@ public final class Joiner implements Closeable {
                     continue;
                 }
 
-                if (sb == null) {
-                    sb = prepareBuilder().append(toString(e));
-                } else {
-                    if (isEmptySeparator) {
-                        sb.append(toString(e));
-                    } else {
-                        sb.append(separator).append(toString(e));
-                    }
-                }
+                sb = appendRendered(sb, toString(e));
             }
         }
 
@@ -2046,7 +2125,8 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a boolean value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The key is formatted according to the trimBeforeAppend or stripBeforeAppend setting.
+     * The key is formatted according to the trimBeforeAppend and stripBeforeAppend settings. A {@code null} key is
+     * rendered using the configured {@code null} text, never skipped.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2057,13 +2137,10 @@ public final class Joiner implements Closeable {
      * @param key the key to append
      * @param value the boolean value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner appendEntry(final String key, final boolean value) {
-        if (isEmptyKeyValueDelimiter) {
-            prepareBuilder().append(format(key)).append(value);
-        } else {
-            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
-        }
+    public Joiner appendEntry(final String key, final boolean value) throws IllegalStateException {
+        appendEntryPrefix(format(key)).append(value);
 
         return this;
     }
@@ -2071,7 +2148,8 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a char value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The key is formatted according to the trimBeforeAppend or stripBeforeAppend setting.
+     * The key is formatted according to the trimBeforeAppend and stripBeforeAppend settings. A {@code null} key is
+     * rendered using the configured {@code null} text, never skipped.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2082,13 +2160,10 @@ public final class Joiner implements Closeable {
      * @param key the key to append
      * @param value the char value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner appendEntry(final String key, final char value) {
-        if (isEmptyKeyValueDelimiter) {
-            prepareBuilder().append(format(key)).append(value);
-        } else {
-            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
-        }
+    public Joiner appendEntry(final String key, final char value) throws IllegalStateException {
+        appendEntryPrefix(format(key)).append(value);
 
         return this;
     }
@@ -2096,7 +2171,8 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with an int value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The key is formatted according to the trimBeforeAppend or stripBeforeAppend setting.
+     * The key is formatted according to the trimBeforeAppend and stripBeforeAppend settings. A {@code null} key is
+     * rendered using the configured {@code null} text, never skipped.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2107,13 +2183,10 @@ public final class Joiner implements Closeable {
      * @param key the key to append
      * @param value the int value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner appendEntry(final String key, final int value) {
-        if (isEmptyKeyValueDelimiter) {
-            prepareBuilder().append(format(key)).append(value);
-        } else {
-            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
-        }
+    public Joiner appendEntry(final String key, final int value) throws IllegalStateException {
+        appendEntryPrefix(format(key)).append(value);
 
         return this;
     }
@@ -2121,7 +2194,8 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a long value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The key is formatted according to the trimBeforeAppend or stripBeforeAppend setting.
+     * The key is formatted according to the trimBeforeAppend and stripBeforeAppend settings. A {@code null} key is
+     * rendered using the configured {@code null} text, never skipped.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2132,13 +2206,10 @@ public final class Joiner implements Closeable {
      * @param key the key to append
      * @param value the long value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner appendEntry(final String key, final long value) {
-        if (isEmptyKeyValueDelimiter) {
-            prepareBuilder().append(format(key)).append(value);
-        } else {
-            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
-        }
+    public Joiner appendEntry(final String key, final long value) throws IllegalStateException {
+        appendEntryPrefix(format(key)).append(value);
 
         return this;
     }
@@ -2146,7 +2217,8 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a float value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The key is formatted according to the trimBeforeAppend or stripBeforeAppend setting.
+     * The key is formatted according to the trimBeforeAppend and stripBeforeAppend settings. A {@code null} key is
+     * rendered using the configured {@code null} text, never skipped.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2157,13 +2229,10 @@ public final class Joiner implements Closeable {
      * @param key the key to append
      * @param value the float value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner appendEntry(final String key, final float value) {
-        if (isEmptyKeyValueDelimiter) {
-            prepareBuilder().append(format(key)).append(value);
-        } else {
-            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
-        }
+    public Joiner appendEntry(final String key, final float value) throws IllegalStateException {
+        appendEntryPrefix(format(key)).append(value);
 
         return this;
     }
@@ -2171,7 +2240,8 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with a double value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The key is formatted according to the trimBeforeAppend or stripBeforeAppend setting.
+     * The key is formatted according to the trimBeforeAppend and stripBeforeAppend settings. A {@code null} key is
+     * rendered using the configured {@code null} text, never skipped.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2182,13 +2252,10 @@ public final class Joiner implements Closeable {
      * @param key the key to append
      * @param value the double value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner appendEntry(final String key, final double value) {
-        if (isEmptyKeyValueDelimiter) {
-            prepareBuilder().append(format(key)).append(value);
-        } else {
-            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
-        }
+    public Joiner appendEntry(final String key, final double value) throws IllegalStateException {
+        appendEntryPrefix(format(key)).append(value);
 
         return this;
     }
@@ -2204,16 +2271,21 @@ public final class Joiner implements Closeable {
      * Joiner.with(", ").appendEntry("name", "John").toString();   // returns: "name=John"
      * }</pre>
      *
+     * <p><b>Note:</b> a bare {@code null} literal cannot be passed as the value: neither this overload nor
+     * {@link #appendEntry(String, StringBuilder)} is more specific than the other, so the call is ambiguous
+     * and does not compile. Pass a typed {@code null} instead &mdash; a {@code String} variable, or
+     * {@code (String) null}.</p>
+     *
      * @param key the key to append
      * @param value the String value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner appendEntry(final String key, final String value) {
-        if (isEmptyKeyValueDelimiter) {
-            prepareBuilder().append(format(key)).append(format(value));
-        } else {
-            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(format(value));
-        }
+    public Joiner appendEntry(final String key, final String value) throws IllegalStateException {
+        final String renderedKey = format(key);
+        final String renderedValue = format(value);
+
+        appendEntryPrefix(renderedKey).append(renderedValue);
 
         return this;
     }
@@ -2233,13 +2305,15 @@ public final class Joiner implements Closeable {
      * @param key the key to append
      * @param value the CharSequence value to append
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner appendEntry(final String key, final CharSequence value) {
-        if (isEmptyKeyValueDelimiter) {
-            prepareBuilder().append(format(key)).append(format(value));
-        } else {
-            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(format(value));
-        }
+    public Joiner appendEntry(final String key, final CharSequence value) throws IllegalStateException {
+        // Render both halves before prepareBuilder(): that call commits the element separator, and a foreign
+        // CharSequence's toString() may throw, which would leave "<separator><key><keyValueDelimiter>" behind.
+        final String renderedKey = format(key);
+        final String renderedValue = format(value);
+
+        appendEntryPrefix(renderedKey).append(renderedValue);
 
         return this;
     }
@@ -2259,28 +2333,21 @@ public final class Joiner implements Closeable {
      * @param key the key to append
      * @param value the StringBuilder value to append (can be null)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner appendEntry(final String key, final StringBuilder value) {
+    public Joiner appendEntry(final String key, final StringBuilder value) throws IllegalStateException {
+        final String renderedKey = format(key);
+
         if (value == null) {
-            if (isEmptyKeyValueDelimiter) {
-                prepareBuilder().append(format(key)).append(nullText);
-            } else {
-                prepareBuilder().append(format(key)).append(keyValueDelimiter).append(nullText);
-            }
+            appendEntryPrefix(renderedKey).append(nullText);
+        } else if (trimBeforeAppend || stripBeforeAppend) {
+            // Render before appendEntryPrefix() commits the element separator - see appendRendered(..).
+            final String renderedValue = format(value);
+
+            appendEntryPrefix(renderedKey).append(renderedValue);
         } else {
-            if (isEmptyKeyValueDelimiter) {
-                if (trimBeforeAppend || stripBeforeAppend) {
-                    prepareBuilder().append(format(key)).append(format(value));
-                } else {
-                    prepareBuilder().append(format(key)).append(value);
-                }
-            } else {
-                if (trimBeforeAppend || stripBeforeAppend) {
-                    prepareBuilder().append(format(key)).append(keyValueDelimiter).append(format(value));
-                } else {
-                    prepareBuilder().append(format(key)).append(keyValueDelimiter).append(value);
-                }
-            }
+            // No formatting to apply, so the value goes straight in without an intermediate String.
+            appendEntryPrefix(renderedKey).append(value);
         }
 
         return this;
@@ -2289,7 +2356,10 @@ public final class Joiner implements Closeable {
     /**
      * Appends a key-value pair with an Object value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
-     * The value is converted to string using its {@code toString()} method and formatted according to nullText settings.
+     * The value is rendered with {@link N#toString(Object)} (arrays and collections are rendered element-wise,
+     * not with {@code Object.toString()}) and formatted according to nullText settings.
+     * The key is formatted according to the trimBeforeAppend and stripBeforeAppend settings. A {@code null} key is
+     * rendered using the configured {@code null} text, never skipped.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2301,13 +2371,14 @@ public final class Joiner implements Closeable {
      * @param key the key to append
      * @param value the Object value to append; {@code null} is rendered using the configured {@code null} text
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner appendEntry(final String key, final Object value) {
-        if (isEmptyKeyValueDelimiter) {
-            prepareBuilder().append(format(key)).append(toString(value));
-        } else {
-            prepareBuilder().append(format(key)).append(keyValueDelimiter).append(toString(value));
-        }
+    public Joiner appendEntry(final String key, final Object value) throws IllegalStateException {
+        // Render both halves before prepareBuilder() - see appendEntry(String, CharSequence).
+        final String renderedKey = format(key);
+        final String renderedValue = toString(value);
+
+        appendEntryPrefix(renderedKey).append(renderedValue);
 
         return this;
     }
@@ -2327,18 +2398,19 @@ public final class Joiner implements Closeable {
      *
      * @param entry the {@code Map.Entry} to append; may be {@code null}
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner appendEntry(final Map.Entry<?, ?> entry) {
+    public Joiner appendEntry(final Map.Entry<?, ?> entry) throws IllegalStateException {
+        assertNotClosed();
+
         if (entry == null) {
             prepareBuilder().append(nullText);
         } else {
-            final StringBuilder sb = prepareBuilder().append(toString(entry.getKey()));
+            // Render both halves before prepareBuilder() - see appendEntry(String, CharSequence).
+            final String renderedKey = toString(entry.getKey());
+            final String renderedValue = toString(entry.getValue());
 
-            if (!isEmptyKeyValueDelimiter) {
-                sb.append(keyValueDelimiter);
-            }
-
-            sb.append(toString(entry.getValue()));
+            appendEntryPrefix(renderedKey).append(renderedValue);
         }
 
         return this;
@@ -2359,8 +2431,9 @@ public final class Joiner implements Closeable {
      *
      * @param m the map containing the entries to be appended; may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code m} is a no-op and does not check.
      */
-    public Joiner appendEntries(final Map<?, ?> m) {
+    public Joiner appendEntries(final Map<?, ?> m) throws IllegalStateException {
         if (N.notEmpty(m)) {
             return appendEntries(m, 0, m.size());
         }
@@ -2384,9 +2457,10 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
      * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
      */
-    public Joiner appendEntries(final Map<?, ?> m, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public Joiner appendEntries(final Map<?, ?> m, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, m == null ? 0 : m.size());
 
         if (N.isEmpty(m) || fromIndex == toIndex) {
@@ -2401,21 +2475,7 @@ public final class Joiner implements Closeable {
                 continue;
             }
 
-            if (sb == null) {
-                sb = prepareBuilder().append(toString(entry.getKey())).append(keyValueDelimiter).append(toString(entry.getValue()));
-            } else {
-                if (isEmptySeparator) {
-                    sb.append(toString(entry.getKey()));
-                } else {
-                    sb.append(separator).append(toString(entry.getKey()));
-                }
-
-                if (isEmptyKeyValueDelimiter) {
-                    sb.append(toString(entry.getValue()));
-                } else {
-                    sb.append(keyValueDelimiter).append(toString(entry.getValue()));
-                }
-            }
+            sb = appendRenderedEntry(sb, toString(entry.getKey()), toString(entry.getValue()));
 
             if (i >= toIndex) {
                 break;
@@ -2442,9 +2502,13 @@ public final class Joiner implements Closeable {
      * @param m the Map to append entries from
      * @param filter the predicate to test entries; only entries that pass are appended
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
-    public <K, V> Joiner appendEntries(final Map<K, V> m, final Predicate<? super Map.Entry<K, V>> filter) throws IllegalArgumentException {
+    public <K, V> Joiner appendEntries(final Map<K, V> m, final Predicate<? super Map.Entry<K, V>> filter)
+            throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
+
         N.checkArgNotNull(filter, cs.filter);
 
         if (N.isEmpty(m)) {
@@ -2458,21 +2522,7 @@ public final class Joiner implements Closeable {
                 continue;
             }
 
-            if (sb == null) {
-                sb = prepareBuilder().append(toString(entry.getKey())).append(keyValueDelimiter).append(toString(entry.getValue()));
-            } else {
-                if (isEmptySeparator) {
-                    sb.append(toString(entry.getKey()));
-                } else {
-                    sb.append(separator).append(toString(entry.getKey()));
-                }
-
-                if (isEmptyKeyValueDelimiter) {
-                    sb.append(toString(entry.getValue()));
-                } else {
-                    sb.append(keyValueDelimiter).append(toString(entry.getValue()));
-                }
-            }
+            sb = appendRenderedEntry(sb, toString(entry.getKey()), toString(entry.getValue()));
         }
 
         return this;
@@ -2495,9 +2545,13 @@ public final class Joiner implements Closeable {
      * @param m the Map to append entries from
      * @param filter the bi-predicate to test keys and values; only entries that pass are appended
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
-    public <K, V> Joiner appendEntries(final Map<K, V> m, final BiPredicate<? super K, ? super V> filter) throws IllegalArgumentException {
+    public <K, V> Joiner appendEntries(final Map<K, V> m, final BiPredicate<? super K, ? super V> filter)
+            throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
+
         N.checkArgNotNull(filter, cs.filter);
 
         if (N.isEmpty(m)) {
@@ -2511,21 +2565,7 @@ public final class Joiner implements Closeable {
                 continue;
             }
 
-            if (sb == null) {
-                sb = prepareBuilder().append(toString(entry.getKey())).append(keyValueDelimiter).append(toString(entry.getValue()));
-            } else {
-                if (isEmptySeparator) {
-                    sb.append(toString(entry.getKey()));
-                } else {
-                    sb.append(separator).append(toString(entry.getKey()));
-                }
-
-                if (isEmptyKeyValueDelimiter) {
-                    sb.append(toString(entry.getValue()));
-                } else {
-                    sb.append(keyValueDelimiter).append(toString(entry.getValue()));
-                }
-            }
+            sb = appendRenderedEntry(sb, toString(entry.getKey()), toString(entry.getValue()));
         }
 
         return this;
@@ -2551,10 +2591,13 @@ public final class Joiner implements Closeable {
      * @param keyExtractor the function to transform keys before appending
      * @param valueExtractor the function to transform values before appending
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code valueExtractor} is {@code null}.
      */
     public <K, V> Joiner appendEntries(final Map<K, V> m, final Function<? super K, ?> keyExtractor, final Function<? super V, ?> valueExtractor)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
+
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
         N.checkArgNotNull(valueExtractor, cs.valueExtractor);
 
@@ -2565,23 +2608,12 @@ public final class Joiner implements Closeable {
         StringBuilder sb = null;
 
         for (final Map.Entry<K, V> entry : m.entrySet()) {
-            if (sb == null) {
-                sb = prepareBuilder().append(toString(keyExtractor.apply(entry.getKey())))
-                        .append(keyValueDelimiter)
-                        .append(toString(valueExtractor.apply(entry.getValue())));
-            } else {
-                if (isEmptySeparator) {
-                    sb.append(toString(keyExtractor.apply(entry.getKey())));
-                } else {
-                    sb.append(separator).append(toString(keyExtractor.apply(entry.getKey())));
-                }
+            // Both extractors run before appendRenderedEntry() commits the separator, so an extractor that
+            // throws cannot leave a dangling separator (or a key without its value) in the buffer.
+            final String renderedKey = toString(keyExtractor.apply(entry.getKey()));
+            final String renderedValue = toString(valueExtractor.apply(entry.getValue()));
 
-                if (isEmptyKeyValueDelimiter) {
-                    sb.append(toString(valueExtractor.apply(entry.getValue())));
-                } else {
-                    sb.append(keyValueDelimiter).append(toString(valueExtractor.apply(entry.getValue())));
-                }
-            }
+            sb = appendRenderedEntry(sb, renderedKey, renderedValue);
         }
 
         return this;
@@ -2611,12 +2643,13 @@ public final class Joiner implements Closeable {
      *
      * @param bean the bean object whose properties to append; may be {@code null}
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean
      *         (i.e., does not have proper getter/setter methods).
      * @see #appendBean(Object, Collection)
      * @see #appendBean(Object, boolean, Set)
      */
-    public Joiner appendBean(final Object bean) {
+    public Joiner appendBean(final Object bean) throws IllegalStateException, IllegalArgumentException {
         return appendBean(bean, true, null);
     }
 
@@ -2659,16 +2692,35 @@ public final class Joiner implements Closeable {
      *     .toString();   // returns: "name:John | age:30"
      * }</pre>
      *
+     * <p><b>{@code null} property values are rendered, not skipped.</b> Unlike {@link #appendBean(Object)}, which
+     * omits properties whose value is {@code null}, an explicitly selected property is always appended &mdash; a
+     * {@code null} value becomes the configured {@code null} text (see {@link #useForNull(String)}). Selecting a
+     * property is taken as a request to see it. To omit null properties, use
+     * {@link #appendBean(Object, boolean, Set)} with {@code ignoreNullProperty = true}; that overload's
+     * set lists properties to exclude, rather than properties to select:</p>
+     * <pre>{@code
+     * // Person { name = "John", age = null, city = "NYC" }
+     * Joiner.with(", ").appendBean(person).toString();
+     * // "name=John, city=NYC"                      -- null age skipped
+     * Joiner.with(", ").appendBean(person, Arrays.asList("name", "age", "city")).toString();
+     * // "name=John, age=null, city=NYC"            -- null age rendered
+     * }</pre>
+     *
      * @param bean the bean object whose selected properties to append; may be {@code null}
      * @param selectPropNames collection of property names to include; if {@code null} or empty, no properties are
-     *            appended (an intentional "null = nothing" carve-out — see the note above)
+     *            appended (an intentional "null = nothing" carve-out — see the note above). Every name must be a
+     *            readable property of {@code bean}'s class.
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean
-     *         (i.e., doesn't have proper getter/setter methods).
+     *         (i.e., doesn't have proper getter/setter methods), or if {@code selectPropNames} contains a name that
+     *         is not a readable property of that class.
      * @see #appendBean(Object)
      * @see #appendBean(Object, boolean, Set)
      */
-    public Joiner appendBean(final Object bean, final Collection<String> selectPropNames) throws IllegalArgumentException {
+    public Joiner appendBean(final Object bean, final Collection<String> selectPropNames) throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
+
         if (bean == null || N.isEmpty(selectPropNames)) {
             return this;
         }
@@ -2685,21 +2737,7 @@ public final class Joiner implements Closeable {
         for (final String propName : selectPropNames) {
             propValue = beanInfo.getPropValue(bean, propName);
 
-            if (sb == null) {
-                sb = prepareBuilder().append(propName).append(keyValueDelimiter).append(toString(propValue));
-            } else {
-                if (isEmptySeparator) {
-                    sb.append(propName);
-                } else {
-                    sb.append(separator).append(propName);
-                }
-
-                if (isEmptyKeyValueDelimiter) {
-                    sb.append(toString(propValue));
-                } else {
-                    sb.append(keyValueDelimiter).append(toString(propValue));
-                }
-            }
+            sb = appendRenderedEntry(sb, propName, toString(propValue));
         }
 
         return this;
@@ -2737,12 +2775,16 @@ public final class Joiner implements Closeable {
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values are skipped
      * @param ignoredPropNames set of property names to exclude from appending; may be {@code null} or empty
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean with
      *         getter/setter methods.
      * @see #appendBean(Object)
      * @see #appendBean(Object, Collection)
      */
-    public Joiner appendBean(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames) throws IllegalArgumentException {
+    public Joiner appendBean(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames)
+            throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
+
         if (bean == null) {
             return this;
         }
@@ -2764,21 +2806,7 @@ public final class Joiner implements Closeable {
             propValue = beanInfo.getPropValue(bean, propName);
 
             if (propValue != null || !ignoreNullProperty) {
-                if (sb == null) {
-                    sb = prepareBuilder().append(propName).append(keyValueDelimiter).append(toString(propValue));
-                } else {
-                    if (isEmptySeparator) {
-                        sb.append(propName);
-                    } else {
-                        sb.append(separator).append(propName);
-                    }
-
-                    if (isEmptyKeyValueDelimiter) {
-                        sb.append(toString(propValue));
-                    } else {
-                        sb.append(keyValueDelimiter).append(toString(propValue));
-                    }
-                }
+                sb = appendRenderedEntry(sb, propName, toString(propValue));
             }
         }
 
@@ -2810,14 +2838,21 @@ public final class Joiner implements Closeable {
      *
      * <p>If {@code bean} is {@code null}, this Joiner is returned unchanged.</p>
      *
+     * <p>Property values are supplied to the filter as {@code Object}; cast inside the filter as the example
+     * above does. A lambda infers its value parameter as {@code Object} and needs no change.</p>
+     *
      * @param bean the bean object whose properties to append; may be {@code null}
      * @param filter the bi-predicate to test property names and values; only properties that pass are appended
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean with
      *         getter/setter methods, or if {@code filter} is {@code null}.
      * @see #appendBean(Object)
      */
-    public Joiner appendBean(final Object bean, final BiPredicate<? super String, ?> filter) throws IllegalArgumentException {
+    public Joiner appendBean(final Object bean, final BiPredicate<? super String, ? super Object> filter)
+            throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
+
         N.checkArgNotNull(filter, cs.filter);
 
         if (bean == null) {
@@ -2828,7 +2863,6 @@ public final class Joiner implements Closeable {
 
         N.checkArgument(Beans.isBeanClass(cls), "'bean' must be bean class with getter/setter methods");
 
-        final BiPredicate<? super String, Object> filterToUse = (BiPredicate<? super String, Object>) filter;
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         StringBuilder sb = null;
         Object propValue = null;
@@ -2836,25 +2870,11 @@ public final class Joiner implements Closeable {
         for (final String propName : Beans.getPropNameList(cls)) {
             propValue = beanInfo.getPropValue(bean, propName);
 
-            if (!filterToUse.test(propName, propValue)) {
+            if (!filter.test(propName, propValue)) {
                 continue;
             }
 
-            if (sb == null) {
-                sb = prepareBuilder().append(propName).append(keyValueDelimiter).append(toString(propValue));
-            } else {
-                if (isEmptySeparator) {
-                    sb.append(propName);
-                } else {
-                    sb.append(separator).append(propName);
-                }
-
-                if (isEmptyKeyValueDelimiter) {
-                    sb.append(toString(propValue));
-                } else {
-                    sb.append(keyValueDelimiter).append(toString(propValue));
-                }
-            }
+            sb = appendRenderedEntry(sb, propName, toString(propValue));
         }
 
         return this;
@@ -2865,24 +2885,37 @@ public final class Joiner implements Closeable {
      * Each repetition is separated by the configured separator.
      * If n is 0, nothing is appended.
      *
+     * <p>The string is rendered exactly as {@link #append(String)} renders it, so the
+     * {@link #trimBeforeAppend()} and {@link #stripBeforeAppend()} settings apply and are applied once, to
+     * every repetition alike. This method does <b>not</b> honor {@link #skipNulls()}: a {@code null} string
+     * is repeated as the configured {@code null} text (see {@link #useForNull(String)}).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").repeat("Hello", 3).toString();   // returns: "Hello, Hello, Hello"
+     * Joiner.with(", ").repeat("Hello", 3).toString();              // returns: "Hello, Hello, Hello"
+     * Joiner.with("-").trimBeforeAppend().repeat("  a  ", 3)
+     *       .toString();                                            // returns: "a-a-a"
+     * Joiner.with("-").useForNull("N/A").skipNulls()
+     *       .repeat((String) null, 2).toString();                   // returns: "N/A-N/A"
      * }</pre>
      *
      * @param str the string to repeat; {@code null} is rendered as the configured {@code null} text
      * @param n the number of times to repeat; must be non-negative
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if {@code n} is negative.
      */
-    public Joiner repeat(final String str, final int n) throws IllegalArgumentException {
+    public Joiner repeat(final String str, final int n) throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
+
         N.checkArgNotNegative(n, cs.n);
 
         if (n > 0) {
             // Format exactly once, as append(String) would. In particular, a configured null token
             // is literal text and must not be trimmed on one repeat path but preserved on another.
-            final String formatted = str == null ? nullText : format(str);
-            prepareBuilder().append(Strings.repeat(formatted, n, separator));
+            final String repeated = Strings.repeat(format(str), n, separator);
+
+            prepareBuilder().append(repeated);
         }
 
         return this;
@@ -2890,25 +2923,43 @@ public final class Joiner implements Closeable {
 
     /**
      * Repeats the specified object n times and appends to the joiner.
-     * The object is converted to string using its {@link Object#toString()} method.
      * Each repetition is separated by the configured separator.
+     * If n is 0, nothing is appended.
+     *
+     * <p>The object is rendered exactly as {@link #append(Object)} renders it &mdash; with
+     * {@link N#toString(Object)}, <i>not</i> with a bare {@code Object.toString()} &mdash; so arrays and
+     * collections are rendered element-wise, and the {@link #trimBeforeAppend()}, {@link #stripBeforeAppend()} and
+     * {@link #useForNull(String)} settings apply. This method does <b>not</b> honor {@link #skipNulls()}: a
+     * {@code null} object is repeated as the configured {@code null} text.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer num = 42;
-     * Joiner.with("-").repeat(num, 3).toString();   // returns: "42-42-42"
+     * Joiner.with("-").repeat(num, 3).toString();                    // returns: "42-42-42"
+     * Joiner.with("-").repeat((Object) new int[] { 1, 2 }, 2)
+     *       .toString();                                             // returns: "[1, 2]-[1, 2]"
+     * Joiner.with("-").useForNull("N/A").repeat((Object) null, 2)
+     *       .toString();                                             // returns: "N/A-N/A"
      * }</pre>
      *
      * @param obj the object to repeat; {@code null} is rendered as the configured {@code null} text
      * @param n the number of times to repeat; must be non-negative
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if {@code n} is negative.
+     * @see #append(Object)
+     * @see N#toString(Object)
      */
-    public Joiner repeat(final Object obj, final int n) {
+    public Joiner repeat(final Object obj, final int n) throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
+
         N.checkArgNotNegative(n, cs.n);
 
         if (n > 0) {
-            prepareBuilder().append(Strings.repeat(toString(obj), n, separator));
+            // Render before prepareBuilder() - see append(Object).
+            final String repeated = Strings.repeat(toString(obj), n, separator);
+
+            prepareBuilder().append(repeated);
         }
 
         return this;
@@ -2919,6 +2970,15 @@ public final class Joiner implements Closeable {
      * If the specified {@code Joiner} is empty, the call has no effect.
      * Only the content between prefix and suffix from the other Joiner is merged.
      *
+     * <p><b>What "empty" means here:</b> {@code other} is empty only when <i>no element has ever been appended
+     * to it</i>. A {@code Joiner} that was given an element which happens to render as the empty string is
+     * <i>not</i> empty &mdash; that element is merged like any other, so the merge does contribute a separator.
+     * This matches {@link java.util.StringJoiner#merge(java.util.StringJoiner)} exactly:</p>
+     * <pre>{@code
+     * Joiner.with(", ").append("a").merge(Joiner.with(", ")).toString();              // "a"    - other never appended to
+     * Joiner.with(", ").append("a").merge(Joiner.with(", ").append("")).toString();   // "a, "  - other holds one empty element
+     * }</pre>
+     *
      * <p>Remember to close {@code other} Joiner if {@code reuseBuffer} is set to {@code true}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2928,19 +2988,32 @@ public final class Joiner implements Closeable {
      * j1.merge(j2).toString();   // returns: "a, b, c, d"
      * }</pre>
      *
+     * <p>{@code other} may already be {@link #close() closed}; a closed {@code Joiner} stays readable and
+     * still contributes its content. This Joiner, the receiver, must not be closed.</p>
+     *
      * @param other the Joiner to merge content from
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if the specified Joiner {@code other} is {@code null}.
+     * @see java.util.StringJoiner#merge(java.util.StringJoiner)
      */
-    public Joiner merge(final Joiner other) throws IllegalArgumentException {
-        N.checkArgNotNull(other);
+    public Joiner merge(final Joiner other) throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
+
+        N.checkArgNotNull(other, cs.other);
+
+        // A merge writes to this Joiner, so a closed receiver must reject it even when `other` turns out to
+        // contribute nothing: prepareBuilder() is what normally performs that check, and neither branch below
+        // reaches it for an `other` that was never appended to. Reading `other` is deliberately NOT gated on
+        // `other` being open -- closing ends writing, not reading, and close() preserves the content.
 
         if (other.buffer != null) {
             final int length = other.buffer.length();
             final StringBuilder builder = prepareBuilder();
             builder.append(other.buffer, other.prefix.length(), length);
         } else if (other.latestToStringValue != null) {
-            // After a reuse-mode toString(), the other Joiner's content lives on in latestToStringValue.
+            // Once the other Joiner's pooled builder has been released -- by a reuse-mode toString(), or by
+            // close() -- its content lives on in latestToStringValue.
             prepareBuilder().append(other.latestToStringValue, other.prefix.length(), other.latestToStringValue.length());
         }
 
@@ -2996,10 +3069,10 @@ public final class Joiner implements Closeable {
      * @return the joined string with prefix and suffix
      */
     @Override
-    public String toString() {
+    public synchronized String toString() {
         if (buffer == null) {
-            // After a reuse-mode toString() the buffer is recycled but the content lives on in
-            // latestToStringValue (appending continues from it), so observers must report it too.
+            // Once the pooled builder has been released -- by an earlier reuse-mode toString(), or by close() --
+            // the content lives on in latestToStringValue (appending continues from it), so report that.
             if (latestToStringValue != null) {
                 return suffix.isEmpty() ? latestToStringValue : latestToStringValue + suffix;
             }
@@ -3007,23 +3080,13 @@ public final class Joiner implements Closeable {
             return emptyValue;
         } else {
             try {
-                String result = null;
+                // Snapshot the suffix-free content, then build the returned value from it. Appending the suffix
+                // to the buffer and rewinding it (the previous shape) could grow the buffer past the pool's
+                // size limit -- which silently stops it being recycled -- and briefly left the suffix inside a
+                // buffer that appending is supposed to continue from.
+                latestToStringValue = buffer.toString();
 
-                if (suffix.isEmpty()) {
-                    result = buffer.toString();
-                    latestToStringValue = result;
-                } else {
-                    final int initialLength = buffer.length();
-
-                    latestToStringValue = buffer.toString();
-
-                    result = buffer.append(suffix).toString();
-
-                    // reset value to pre-append initialLength
-                    buffer.setLength(initialLength);
-                }
-
-                return result;
+                return suffix.isEmpty() ? latestToStringValue : latestToStringValue.concat(suffix);
             } finally {
                 recycleBuffer();
             }
@@ -3048,12 +3111,18 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @param <A> the type of the {@code Appendable}
-     * @param appendable the {@code Appendable} to append the joined string to
+     * @param appendable the {@code Appendable} to append the joined string to; must not be {@code null}.
      * @return the same {@code Appendable} instance for method chaining
-     * @throws IOException if an I/O error occurs during appending
+     * @throws IllegalArgumentException if {@code appendable} is {@code null}.
+     * @throws IOException if appending the joined text to {@code appendable} fails
      * @see #toString()
      */
-    public <A extends Appendable> A appendTo(final A appendable) throws IOException {
+    public <A extends Appendable> A appendTo(final A appendable) throws IllegalArgumentException, IOException {
+        // Checked up front like every other collaborator this class takes (map/mapIfNotEmpty/merge/appendIf).
+        // Without it a null appendable was rejected or accepted depending on the Joiner's own state: a fresh
+        // Joiner with an empty emptyValue never touched it and quietly returned null.
+        N.checkArgNotNull(appendable, cs.appendable);
+
         // latestToStringValue carries the content after a reuse-mode toString(); route it through
         // toString() below instead of falling into the empty-value branch.
         if (buffer == null && latestToStringValue == null) {
@@ -3113,7 +3182,7 @@ public final class Joiner implements Closeable {
      * @throws NullPointerException if a {@code null} result is produced for a non-empty joiner
      */
     @Beta
-    public <T> Optional<T> mapIfNotEmpty(final Function<? super String, T> mapper) throws IllegalArgumentException {
+    public <T> Optional<T> mapIfNotEmpty(final Function<? super String, T> mapper) throws IllegalArgumentException, NullPointerException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         // latestToStringValue carries the content after a reuse-mode toString().
@@ -3123,10 +3192,19 @@ public final class Joiner implements Closeable {
     /**
      * Closes this Joiner and releases any system resources associated with it.
      * If the Joiner is already closed then invoking this method has no effect.
-     * After closing, no more content may be appended. Materialize the result before closing: when
-     * buffer reuse is enabled, closing releases any pooled builder and its unmaterialized content.
-     * Synchronization makes concurrent calls to {@code close()} idempotent; it does not make
-     * a {@code Joiner} safe to append to from multiple threads.
+     *
+     * <p><b>Closing ends writing, not reading.</b> Operations that append content throw
+     * {@link IllegalStateException} once this Joiner is closed. Some no-op paths, such as appending an
+     * empty array or a skipped null String, return unchanged; methods that check the closed state
+     * up front, including {@link #merge(Joiner)}, reject even a no-op. The
+     * content accumulated so far stays readable: {@link #toString()}, {@link #length()},
+     * {@link #appendTo(Appendable)}, {@link #map(Function)} and {@link #mapIfNotEmpty(Function)} keep
+     * reporting it, and another Joiner can still {@link #merge(Joiner) merge} this one. Closing therefore
+     * never silently turns accumulated content into the empty value.</p>
+     *
+     * <p>Synchronization makes concurrent calls to {@code close()} idempotent, and makes the buffer release atomic
+     * against a concurrent {@link #toString()} so the pooled builder cannot be handed back to the shared
+     * {@code Objectory} pool twice. It does not make a {@code Joiner} safe to append to from multiple threads.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3134,7 +3212,12 @@ public final class Joiner implements Closeable {
      *     j.append("a").append("b");
      *     System.out.println(j.toString());
      * }
+     *
+     * Joiner j2 = Joiner.with(", ").reuseBuffer().append("a").append("b");
+     * j2.close();
+     * j2.toString();   // still "a, b"
      * }</pre>
+     *
      */
     @Override
     public synchronized void close() {
@@ -3144,6 +3227,10 @@ public final class Joiner implements Closeable {
 
         isClosed = true;
 
+        if (reuseBuffer && buffer != null) {
+            latestToStringValue = buffer.toString();
+        }
+
         recycleBuffer();
     }
 
@@ -3151,12 +3238,84 @@ public final class Joiner implements Closeable {
         return text == null ? nullText : (stripBeforeAppend ? Strings.strip(text) : (trimBeforeAppend ? text.trim() : text));
     }
 
+    /**
+     * Renders a foreign {@code CharSequence}. A closed Joiner is rejected first: {@code text.toString()} is
+     * user code, and the bulk append/appendEntry paths render before they reach {@link #prepareBuilder()}, so
+     * without this check a closed Joiner would run one round of it before refusing the write.
+     */
     private String format(final CharSequence text) {
+        assertNotClosed();
+
         return text == null ? nullText : format(text.toString());
     }
 
+    /**
+     * Renders a foreign element/value. A closed Joiner is rejected first, for the reason given on
+     * {@link #format(CharSequence)}: this is the single rendering funnel every {@code append}, {@code appendAll},
+     * {@code appendEntry}, {@code appendEntries} and {@code appendBean} path goes through.
+     */
     private String toString(final Object obj) {
+        assertNotClosed();
+
         return obj == null ? nullText : format(N.toString(obj));
+    }
+
+    /**
+     * Appends one <i>already-rendered</i> element of a bulk operation, inserting the element separator when this is
+     * not the first element that operation contributes.
+     *
+     * <p>The caller must render {@code rendered} <b>before</b> calling this method. {@link #prepareBuilder()} and
+     * {@code sb.append(separator)} both commit the separator to the buffer, so evaluating a user-supplied
+     * {@code toString()}/extractor afterwards would leave a dangling separator behind if it threw.</p>
+     *
+     * @param sb the builder returned by a previous call for this same bulk operation, or {@code null} if no element
+     *        of this operation has been appended yet
+     * @param rendered the fully rendered element text
+     * @return the builder to pass to the next call
+     */
+    private StringBuilder appendRendered(final StringBuilder sb, final String rendered) {
+        assertNotClosed();
+        // Rendering can call this joiner's toString(), returning the cached builder to the pool.
+        // Only reuse it while this receiver still owns it; otherwise resume from its saved text.
+        if (sb == null || sb != buffer) {
+            return prepareBuilder().append(rendered);
+        }
+
+        return isEmptySeparator ? sb.append(rendered) : sb.append(separator).append(rendered);
+    }
+
+    /**
+     * Appends one <i>already-rendered</i> key/value pair of a bulk operation, inserting the element separator when
+     * this is not the first pair that operation contributes. Both {@code key} and {@code value} must be rendered
+     * before this call, for the reason given on {@link #appendRendered(StringBuilder, String)}.
+     *
+     * @param sb the builder returned by a previous call for this same bulk operation, or {@code null} if no entry of
+     *        this operation has been appended yet
+     * @param key the fully rendered key text
+     * @param value the fully rendered value text
+     * @return the builder to pass to the next call
+     */
+    private StringBuilder appendRenderedEntry(final StringBuilder sb, final String key, final String value) {
+        return appendKeyValueDelimiter(appendRendered(sb, key)).append(value);
+    }
+
+    /**
+     * Starts one key-value element: commits the element separator (through {@link #prepareBuilder()}), appends
+     * the already-rendered key and the key-value delimiter, and hands back the builder positioned for the value.
+     *
+     * <p>The caller then appends the value with whichever {@link StringBuilder} overload matches its static
+     * type, which keeps the primitive and {@code StringBuilder} paths free of an intermediate {@code String}.
+     * {@code renderedKey} must already be rendered, because this call commits the element separator.</p>
+     *
+     * @param renderedKey the fully rendered key text
+     * @return the builder to append the value to
+     */
+    private StringBuilder appendEntryPrefix(final String renderedKey) {
+        return appendKeyValueDelimiter(prepareBuilder().append(renderedKey));
+    }
+
+    private StringBuilder appendKeyValueDelimiter(final StringBuilder sb) {
+        return isEmptyKeyValueDelimiter ? sb : sb.append(keyValueDelimiter);
     }
 
     private StringBuilder prepareBuilder() {
@@ -3177,7 +3336,13 @@ public final class Joiner implements Closeable {
         return buffer;
     }
 
-    private void recycleBuffer() {
+    // Synchronized on the same monitor as close() and toString(). The check-and-release below must be atomic:
+    // otherwise a toString() racing a close() returns the SAME pooled StringBuilder to Objectory twice, and the
+    // next two Objectory borrowers anywhere in the JVM share one builder. That double release is the whole of
+    // what the monitor buys: append() is not synchronized, so an append() racing a close() can still hand the
+    // shared pool a builder that the appending thread is still writing into. Joiner remains not thread-safe and
+    // concurrent appending is still unsupported.
+    private synchronized void recycleBuffer() {
         if (reuseBuffer) {
             Objectory.recycle(buffer);
             buffer = null;
@@ -3187,7 +3352,10 @@ public final class Joiner implements Closeable {
         }
     }
 
-    private void assertNotClosed() {
+    /**
+     * @throws IllegalStateException if this Joiner has been closed.
+     */
+    private void assertNotClosed() throws IllegalStateException {
         if (isClosed) {
             throw new IllegalStateException("Joiner has been closed");
         }

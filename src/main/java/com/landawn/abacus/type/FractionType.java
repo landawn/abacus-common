@@ -136,32 +136,39 @@ public class FractionType extends AbstractType<Fraction> {
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
-     * @param str the string to parse; may be {@code null} or empty
+     * @param str the string to parse; may be {@code null} or empty. Leading and trailing whitespace is NOT
+     *            trimmed: a space is the mixed-number separator, so {@code " 1/2"} fails to parse
      * @return the parsed {@link Fraction}, or {@code null} if {@code str} is {@code null} or empty
      * @throws NumberFormatException if the string is non-empty but cannot be parsed as a fraction
+     * @throws ArithmeticException if the parsed fraction is invalid: a zero denominator, or terms outside the
+     *         {@code int} range after normalization (for example {@code "1/0"} or {@code "1/-2147483648"})
      * @see #valueOf(Object)
      * @see #stringOf(Fraction)
      */
     @Override
-    public Fraction valueOf(final String str) {
+    public Fraction valueOf(final String str) throws NumberFormatException, ArithmeticException {
         return Strings.isEmpty(str) ? null : Fraction.of(str);
     }
 
     /**
-     * Serializes a fraction using its string form. A {@code null} fraction is written as {@code 0} when
+     * Serializes a fraction using its string form. A {@code null} fraction is serialized as if it were
+     * {@link Fraction#ZERO} (that is, {@code "0/1"}, quoted exactly like any other fraction) when
      * {@code writeNullNumberAsZero} is enabled; otherwise it is written as {@code null}.
+     *
+     * <p>A fraction has no unquoted JSON number form - {@code 3/4} is not a JSON number - so the substituted zero
+     * is written through the same quoting path as a non-null value. Emitting a bare {@code 0} instead would flip
+     * the field between a JSON number and a JSON string depending on nullness.</p>
      *
      * @param writer the destination writer
      * @param x the fraction to serialize; may be {@code null}
      * @param config the serialization configuration; may be {@code null}
-     * @throws IOException if writing fails
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Fraction x, final JsonXmlSerConfig<?> config) throws IOException {
-        if (x == null && config != null && config.isWriteNullNumberAsZero()) {
-            writer.write('0');
-        } else {
-            super.serializeTo(writer, x, config);
-        }
+    public void serializeTo(final CharacterWriter writer, Fraction x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
+        x = x == null && config != null && config.isWriteNullNumberAsZero() ? Fraction.ZERO : x;
+
+        super.serializeTo(writer, x, config);
     }
 }

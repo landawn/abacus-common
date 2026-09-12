@@ -1,10 +1,20 @@
 package com.landawn.abacus.util;
 
-import java.util.NoSuchElementException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Assertions;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
+
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -13,843 +23,300 @@ import com.landawn.abacus.util.stream.Stream;
 public class BooleanIteratorTest extends TestBase {
 
     @Test
+    public void testShortCircuitStreamLeavesRemainingElements() {
+        final BooleanIterator iter = BooleanIterator.of(true, false, true);
+
+        assertEquals(1L, iter.stream().limit(1).count());
+        assertTrue(iter.hasNext());
+        assertEquals(List.of(false, true), iter.stream().toList());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
     public void testEmpty() {
         BooleanIterator iter = BooleanIterator.empty();
-        Assertions.assertNotNull(iter);
-        Assertions.assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextBoolean);
+        assertSame(BooleanIterator.EMPTY, BooleanIterator.empty());
+        assertEquals(0, iter.toArray().length);
+        assertTrue(iter.toList().isEmpty());
+        assertFalse(iter.indexed().hasNext());
     }
 
     @Test
-    public void testEmptyToArray() {
-        BooleanIterator iter = BooleanIterator.empty();
-        boolean[] array = iter.toArray();
-        Assertions.assertEquals(0, array.length);
-    }
-
-    @Test
-    public void testEmptyToList() {
-        BooleanIterator iter = BooleanIterator.empty();
-        BooleanList list = iter.toList();
-        Assertions.assertEquals(0, list.size());
-    }
-
-    @Test
-    public void testEmptyThrowsOnNext() {
-        BooleanIterator iter = BooleanIterator.empty();
-        Assertions.assertThrows(NoSuchElementException.class, iter::nextBoolean);
-    }
-
-    @Test
-    public void testOfVarargs() {
+    public void testOf() {
         BooleanIterator iter = BooleanIterator.of(true, false, true);
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertTrue(iter.nextBoolean());
-        Assertions.assertFalse(iter.nextBoolean());
-        Assertions.assertTrue(iter.nextBoolean());
-        Assertions.assertFalse(iter.hasNext());
+        assertTrue(iter.hasNext());
+        assertTrue(iter.hasNext());
+        assertTrue(iter.nextBoolean());
+        assertFalse(iter.nextBoolean());
+        assertTrue(iter.nextBoolean());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextBoolean);
+
+        assertFalse(BooleanIterator.of().hasNext());
+        assertFalse(BooleanIterator.of((boolean[]) null).hasNext());
+        assertTrue(BooleanIterator.of(true).nextBoolean());
+
+        BooleanIterator allTrue = BooleanIterator.of(true, true, true);
+        assertTrue(allTrue.nextBoolean());
+        assertTrue(allTrue.nextBoolean());
+        assertTrue(allTrue.nextBoolean());
+        assertFalse(allTrue.hasNext());
+
+        BooleanIterator allFalse = BooleanIterator.of(false, false, false);
+        assertFalse(allFalse.nextBoolean());
+        assertFalse(allFalse.nextBoolean());
+        assertFalse(allFalse.nextBoolean());
+        assertFalse(allFalse.hasNext());
     }
 
     @Test
-    public void testOfAllTrue() {
-        BooleanIterator iter = BooleanIterator.of(true, true, true);
-        for (int i = 0; i < 3; i++) {
-            Assertions.assertTrue(iter.nextBoolean());
-        }
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfAllFalse() {
-        BooleanIterator iter = BooleanIterator.of(false, false, false);
-        for (int i = 0; i < 3; i++) {
-            Assertions.assertFalse(iter.nextBoolean());
-        }
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfWithRange() {
+    public void testOf_Range() {
         boolean[] array = { true, false, true, false, true };
-        BooleanIterator iter = BooleanIterator.of(array, 1, 4);
-        Assertions.assertFalse(iter.nextBoolean());
-        Assertions.assertTrue(iter.nextBoolean());
-        Assertions.assertFalse(iter.nextBoolean());
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfWithRangeFullArray() {
-        boolean[] array = { true, false, true };
-        BooleanIterator iter = BooleanIterator.of(array, 0, 3);
-        Assertions.assertTrue(iter.nextBoolean());
-        Assertions.assertFalse(iter.nextBoolean());
-        Assertions.assertTrue(iter.nextBoolean());
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfWithRangeToArray() {
-        boolean[] array = { true, false, true, false, true };
-        BooleanIterator iter = BooleanIterator.of(array, 1, 4);
-        boolean[] result = iter.toArray();
-        Assertions.assertArrayEquals(new boolean[] { false, true, false }, result);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfWithRangeToList() {
-        boolean[] array = { true, false, true, false, true };
-        BooleanIterator iter = BooleanIterator.of(array, 1, 4);
-        BooleanList result = iter.toList();
-        Assertions.assertEquals(3, result.size());
-        Assertions.assertFalse(result.get(0));
-        Assertions.assertTrue(result.get(1));
-        Assertions.assertFalse(result.get(2));
-    }
-
-    @Test
-    public void testChainedOperations() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false, true, false);
-        boolean[] result = iter.skip(1).limit(4).filter(b -> b).toArray();
-        Assertions.assertArrayEquals(new boolean[] { true, true }, result);
-    }
-
-    @Test
-    public void testComplexChain() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false, true, false, true, false);
-        long count = iter.skip(1).limit(6).filter(b -> !b).stream().count();
-        Assertions.assertEquals(3, count);
-    }
-
-    @Test
-    public void testOfEmptyArray() {
-        BooleanIterator iter = BooleanIterator.of();
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfNullArray() {
-        boolean[] nullArray = null;
-        BooleanIterator iter = BooleanIterator.of(nullArray);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfSingleElement() {
-        BooleanIterator iter = BooleanIterator.of(true);
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertTrue(iter.nextBoolean());
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfWithRangeEmptyRange() {
-        boolean[] array = { true, false, true };
-        BooleanIterator iter = BooleanIterator.of(array, 1, 1);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfWithRangeNullArray() {
-        BooleanIterator iter = BooleanIterator.of(null, 0, 0);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testMultipleConsumptions() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true);
-        Assertions.assertTrue(iter.nextBoolean());
-        boolean[] remaining = iter.toArray();
-        Assertions.assertArrayEquals(new boolean[] { false, true }, remaining);
-    }
-
-    @Test
-    public void testHasNextMultipleCalls() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertTrue(iter.hasNext());
-        iter.nextBoolean();
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertTrue(iter.hasNext());
-        iter.nextBoolean();
-        Assertions.assertFalse(iter.hasNext());
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfWithRangeInvalidIndices() {
-        boolean[] array = { true, false, true };
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> BooleanIterator.of(array, -1, 2));
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> BooleanIterator.of(array, 0, 10));
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> BooleanIterator.of(array, 2, 1));
-    }
-
-    @Test
-    public void testOfWithInvalidRange() {
-        boolean[] array = { true, false, true };
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
-            BooleanIterator.of(array, 2, 5);
-        });
+        assertArrayEquals(new boolean[] { false, true, false }, BooleanIterator.of(array, 1, 4).toArray());
+        assertEquals(BooleanList.of(false, true, false), BooleanIterator.of(array, 1, 4).toList());
+        assertArrayEquals(array, BooleanIterator.of(array, 0, array.length).toArray());
+        assertFalse(BooleanIterator.of(array, 1, 1).hasNext());
+        assertFalse(BooleanIterator.of(null, 0, 0).hasNext());
+        assertThrows(IndexOutOfBoundsException.class, () -> BooleanIterator.of(array, -1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> BooleanIterator.of(array, 0, 10));
+        assertThrows(IndexOutOfBoundsException.class, () -> BooleanIterator.of(array, 2, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> BooleanIterator.of((boolean[]) null, 0, 1));
     }
 
     @Test
     public void testDefer() {
-        AtomicBoolean initialized = new AtomicBoolean(false);
+        AtomicInteger calls = new AtomicInteger();
         BooleanIterator iter = BooleanIterator.defer(() -> {
-            initialized.set(true);
+            calls.incrementAndGet();
             return BooleanIterator.of(true, false);
         });
+        assertEquals(0, calls.get());
+        assertTrue(iter.hasNext());
+        assertEquals(1, calls.get());
+        assertTrue(iter.nextBoolean());
+        assertFalse(iter.nextBoolean());
+        assertEquals(1, calls.get());
 
-        Assertions.assertFalse(initialized.get());
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertTrue(initialized.get());
-        Assertions.assertTrue(iter.nextBoolean());
-        Assertions.assertFalse(iter.nextBoolean());
-    }
-
-    @Test
-    public void testDeferInitOnce() {
-        AtomicInteger callCount = new AtomicInteger(0);
-        BooleanIterator iter = BooleanIterator.defer(() -> {
-            callCount.incrementAndGet();
+        boolean[] calledOnNext = { false };
+        BooleanIterator onNext = BooleanIterator.defer(() -> {
+            calledOnNext[0] = true;
             return BooleanIterator.of(true);
         });
+        assertTrue(onNext.nextBoolean());
+        assertTrue(calledOnNext[0]);
 
-        iter.hasNext();
-        iter.hasNext();
-        iter.nextBoolean();
-        Assertions.assertEquals(1, callCount.get());
-    }
-
-    @Test
-    public void testDeferWithEmptyIterator() {
-        BooleanIterator iter = BooleanIterator.defer(BooleanIterator::empty);
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testDeferNullResultFailureIsStable() {
-        int[] callCount = { 0 };
-        BooleanIterator iter = BooleanIterator.defer(() -> {
-            callCount[0]++;
+        int[] failCount = { 0 };
+        BooleanIterator failing = BooleanIterator.defer(() -> {
+            failCount[0]++;
             return null;
         });
-
-        Assertions.assertThrows(IllegalStateException.class, iter::hasNext);
-        Assertions.assertThrows(IllegalStateException.class, iter::hasNext);
-        Assertions.assertEquals(1, callCount[0]);
-    }
-
-    @Test
-    public void testDeferNullSupplier() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> BooleanIterator.defer(null));
-    }
-
-    @Test
-    public void testDeferWithNull() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            BooleanIterator.defer(null);
-        });
-    }
-
-    @Test
-    public void testGenerateInfinite() {
-        AtomicBoolean toggle = new AtomicBoolean(true);
-        BooleanIterator iter = BooleanIterator.generate(() -> toggle.getAndSet(!toggle.get()));
-
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertTrue(iter.nextBoolean());
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertFalse(iter.nextBoolean());
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertTrue(iter.nextBoolean());
-    }
-
-    @Test
-    public void testGenerateInfiniteAlwaysTrue() {
-        BooleanIterator iter = BooleanIterator.generate(() -> true);
-        for (int i = 0; i < 100; i++) {
-            Assertions.assertTrue(iter.hasNext());
-            Assertions.assertTrue(iter.nextBoolean());
-        }
-    }
-
-    @Test
-    public void testGenerateWithCondition() {
-        AtomicInteger counter = new AtomicInteger(0);
-        BooleanIterator iter = BooleanIterator.generate(() -> counter.get() < 3, () -> counter.getAndIncrement() % 2 == 0);
-
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertTrue(iter.nextBoolean());
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertFalse(iter.nextBoolean());
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertTrue(iter.nextBoolean());
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testGenerateWithConditionNoElements() {
-        BooleanIterator iter = BooleanIterator.generate(() -> false, () -> true);
-        Assertions.assertFalse(iter.hasNext());
+        assertThrows(IllegalStateException.class, failing::hasNext);
+        assertThrows(IllegalStateException.class, failing::hasNext);
+        assertEquals(1, failCount[0]);
+        assertFalse(BooleanIterator.defer(BooleanIterator::empty).hasNext());
+        assertThrows(IllegalArgumentException.class, () -> BooleanIterator.defer(null));
     }
 
     @Test
     public void testGenerate() {
-        int[] counter = { 0 };
-        BooleanIterator iter = BooleanIterator.generate(() -> counter[0]++ % 2 == 0);
-        Assertions.assertTrue(iter.nextBoolean());
-        Assertions.assertFalse(iter.nextBoolean());
-        Assertions.assertTrue(iter.nextBoolean());
+        AtomicInteger n = new AtomicInteger();
+        BooleanIterator infinite = BooleanIterator.generate(() -> n.getAndIncrement() % 2 == 0);
+        assertTrue(infinite.nextBoolean());
+        assertFalse(infinite.nextBoolean());
+        assertTrue(infinite.hasNext());
+
+        AtomicInteger counter = new AtomicInteger();
+        BooleanIterator finite = BooleanIterator.generate(() -> counter.get() < 3, () -> counter.getAndIncrement() % 2 == 0);
+        assertTrue(finite.nextBoolean());
+        assertFalse(finite.nextBoolean());
+        assertTrue(finite.nextBoolean());
+        assertFalse(finite.hasNext());
+        assertThrows(NoSuchElementException.class, finite::nextBoolean);
+        assertFalse(BooleanIterator.generate(() -> false, () -> true).hasNext());
+        assertThrows(IllegalArgumentException.class, () -> BooleanIterator.generate((BooleanSupplier) null));
+        assertThrows(IllegalArgumentException.class, () -> BooleanIterator.generate(null, () -> true));
+        assertThrows(IllegalArgumentException.class, () -> BooleanIterator.generate((BooleanSupplier) () -> true, null));
+
+        AtomicInteger budget = new AtomicInteger(3);
+        BooleanIterator cached = BooleanIterator.generate(() -> budget.getAndDecrement() > 0, () -> true);
+        assertTrue(cached.hasNext());
+        int count = 0;
+        while (cached.hasNext()) {
+            assertTrue(cached.nextBoolean());
+            count++;
+        }
+        assertEquals(3, count);
     }
 
     @Test
-    public void testGenerateWithHasNext() {
-        int[] counter = { 0 };
-        BooleanIterator iter = BooleanIterator.generate(() -> counter[0] < 3, () -> true);
-        Assertions.assertTrue(iter.nextBoolean());
-        counter[0]++;
-        Assertions.assertTrue(iter.nextBoolean());
-        counter[0]++;
-        Assertions.assertTrue(iter.nextBoolean());
-        counter[0]++;
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testGenerateInfiniteNullSupplier() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> BooleanIterator.generate((java.util.function.BooleanSupplier) null));
-    }
-
-    @Test
-    public void testGenerateWithConditionNullHasNext() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> BooleanIterator.generate(null, () -> true));
-    }
-
-    @Test
-    public void testGenerateWithConditionNullSupplier() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> BooleanIterator.generate(() -> true, null));
-    }
-
-    @Test
-    public void testGenerateWithConditionThrowsWhenExhausted() {
-        BooleanIterator iter = BooleanIterator.generate(() -> false, () -> true);
-        Assertions.assertFalse(iter.hasNext());
-        Assertions.assertThrows(NoSuchElementException.class, iter::nextBoolean);
-    }
-
-    @Test
-    public void testNextDeprecated() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        Assertions.assertEquals(Boolean.TRUE, iter.next());
-        Assertions.assertEquals(Boolean.FALSE, iter.next());
-    }
-
-    @Test
-    public void testNextDeprecatedBoxing() {
-        BooleanIterator iter = BooleanIterator.of(true);
-        Boolean result = iter.next();
-        Assertions.assertInstanceOf(Boolean.class, result);
-        Assertions.assertTrue(result);
-    }
-
-    @Test
+    @SuppressWarnings("deprecation")
     public void testNext() {
-        BooleanIterator iter = BooleanIterator.of(true);
-        Boolean value = iter.next();
-        Assertions.assertTrue(value);
-    }
-
-    @Test
-    public void testNextBoolean() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true);
-        Assertions.assertTrue(iter.nextBoolean());
-        Assertions.assertFalse(iter.nextBoolean());
-        Assertions.assertTrue(iter.nextBoolean());
-    }
-
-    @Test
-    public void testNextBooleanThrowsWhenEmpty() {
-        BooleanIterator iter = BooleanIterator.of(true);
-        iter.nextBoolean();
-        Assertions.assertThrows(NoSuchElementException.class, iter::nextBoolean);
+        BooleanIterator iter = BooleanIterator.of(true, false);
+        assertEquals(Boolean.TRUE, iter.next());
+        Boolean boxed = iter.next();
+        assertInstanceOf(Boolean.class, boxed);
+        assertFalse(boxed);
+        assertThrows(NoSuchElementException.class, iter::nextBoolean);
     }
 
     @Test
     public void testSkip() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false, true);
-        BooleanIterator skipped = iter.skip(2);
-        Assertions.assertTrue(skipped.nextBoolean());
-        Assertions.assertFalse(skipped.nextBoolean());
-        Assertions.assertTrue(skipped.nextBoolean());
-        Assertions.assertFalse(skipped.hasNext());
-    }
+        assertArrayEquals(new boolean[] { true, false, true }, BooleanIterator.of(true, false, true, false, true).skip(2).toArray());
+        assertFalse(BooleanIterator.of(true, false, true).skip(10).hasNext());
+        BooleanIterator original = BooleanIterator.of(true, false);
+        assertSame(original, original.skip(0));
+        assertThrows(IllegalArgumentException.class, () -> BooleanIterator.of(true).skip(-1));
+        assertThrows(NoSuchElementException.class, () -> BooleanIterator.of(true, false).skip(2).nextBoolean());
+        assertArrayEquals(new boolean[] { false, true, false }, BooleanIterator.of(true, false, true, false, true).skip(1).limit(3).toArray());
 
-    @Test
-    public void testSkipAll() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true);
-        BooleanIterator skipped = iter.skip(10);
-        Assertions.assertFalse(skipped.hasNext());
-    }
+        BooleanIterator source = new BooleanIterator() {
+            private int next;
+            private boolean failedOnce;
 
-    @Test
-    public void testSkipPartial() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false);
-        BooleanIterator skipped = iter.skip(2);
-        Assertions.assertTrue(skipped.hasNext());
-        boolean[] result = skipped.toArray();
-        Assertions.assertArrayEquals(new boolean[] { true, false }, result);
-    }
+            @Override
+            public boolean hasNext() {
+                return next < 4;
+            }
 
-    @Test
-    public void testSkipLazyEvaluation() {
-        AtomicBoolean skipped = new AtomicBoolean(false);
-        BooleanIterator iter = BooleanIterator.of(true, false, true);
-        BooleanIterator skippedIter = iter.skip(1);
-
-        Assertions.assertFalse(skipped.get());
-        skippedIter.hasNext();
-        Assertions.assertFalse(iter.hasNext() && iter.nextBoolean());
-    }
-
-    @Test
-    public void testSkipAndLimit() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false, true);
-        BooleanIterator modified = iter.skip(1).limit(3);
-        boolean[] result = modified.toArray();
-        Assertions.assertArrayEquals(new boolean[] { false, true, false }, result);
-    }
-
-    @Test
-    public void testSkipZero() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        BooleanIterator skipped = iter.skip(0);
-        Assertions.assertSame(iter, skipped);
-    }
-
-    @Test
-    public void testSkipNegative() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> iter.skip(-1));
+            @Override
+            public boolean nextBoolean() {
+                if (next == 1 && !failedOnce) {
+                    failedOnce = true;
+                    throw new IllegalStateException("transient failure");
+                }
+                return next++ % 2 == 0;
+            }
+        };
+        BooleanIterator skipped = source.skip(2);
+        assertThrows(IllegalStateException.class, skipped::hasNext);
+        assertTrue(skipped.hasNext());
+        assertTrue(skipped.nextBoolean());
     }
 
     @Test
     public void testLimit() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false, true);
-        BooleanIterator limited = iter.limit(3);
-        Assertions.assertTrue(limited.nextBoolean());
-        Assertions.assertFalse(limited.nextBoolean());
-        Assertions.assertTrue(limited.nextBoolean());
-        Assertions.assertFalse(limited.hasNext());
-    }
+        assertArrayEquals(new boolean[] { true, false, true }, BooleanIterator.of(true, false, true, false, true).limit(3).toArray());
+        assertArrayEquals(new boolean[] { true, false }, BooleanIterator.of(true, false).limit(10).toArray());
+        assertFalse(BooleanIterator.of(true, false).limit(0).hasNext());
+        assertThrows(IllegalArgumentException.class, () -> BooleanIterator.of(true).limit(-1));
 
-    @Test
-    public void testLimitMoreThanAvailable() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        BooleanIterator limited = iter.limit(10);
-        boolean[] result = limited.toArray();
-        Assertions.assertArrayEquals(new boolean[] { true, false }, result);
-    }
-
-    @Test
-    public void testLimitExact() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true);
-        BooleanIterator limited = iter.limit(3);
-        boolean[] result = limited.toArray();
-        Assertions.assertArrayEquals(new boolean[] { true, false, true }, result);
-    }
-
-    @Test
-    public void testLimitZero() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        BooleanIterator limited = iter.limit(0);
-        Assertions.assertFalse(limited.hasNext());
-    }
-
-    @Test
-    public void testLimitNegative() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> iter.limit(-1));
+        int[] attempts = { 0 };
+        BooleanIterator quota = BooleanIterator.generate(() -> {
+            if (attempts[0]++ == 0) {
+                throw new IllegalStateException("temporary failure");
+            }
+            return true;
+        }).limit(1);
+        assertThrows(IllegalStateException.class, quota::nextBoolean);
+        assertTrue(quota.hasNext());
+        assertTrue(quota.nextBoolean());
+        assertFalse(quota.hasNext());
+        assertEquals(2, attempts[0]);
     }
 
     @Test
     public void testFilter() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false, true);
-        BooleanIterator filtered = iter.filter(b -> b);
-        Assertions.assertTrue(filtered.nextBoolean());
-        Assertions.assertTrue(filtered.nextBoolean());
-        Assertions.assertTrue(filtered.nextBoolean());
-        Assertions.assertFalse(filtered.hasNext());
+        assertArrayEquals(new boolean[] { true, true, true }, BooleanIterator.of(true, false, true, false, true).filter(b -> b).toArray());
+        assertArrayEquals(new boolean[] { false, false, false }, BooleanIterator.of(true, false, true, false, false).filter(b -> !b).toArray());
+        BooleanIterator none = BooleanIterator.of(true, true, true).filter(b -> !b);
+        assertFalse(none.hasNext());
+        assertThrows(NoSuchElementException.class, none::nextBoolean);
+        assertThrows(IllegalArgumentException.class, () -> BooleanIterator.of(true).filter(null));
+        assertEquals(3, BooleanIterator.of(true, false, true, false, true, false, true, false).skip(1).limit(6).filter(b -> !b).stream().count());
     }
 
     @Test
-    public void testFilterAll() {
-        BooleanIterator iter = BooleanIterator.of(true, true, true);
-        BooleanIterator filtered = iter.filter(b -> b);
-        boolean[] result = filtered.toArray();
-        Assertions.assertArrayEquals(new boolean[] { true, true, true }, result);
-    }
-
-    @Test
-    public void testFilterFalseValues() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false, false);
-        BooleanIterator filtered = iter.filter(b -> !b);
-        boolean[] result = filtered.toArray();
-        Assertions.assertArrayEquals(new boolean[] { false, false, false }, result);
-    }
-
-    @Test
-    public void testFilterAlternating() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false);
-        AtomicBoolean toggle = new AtomicBoolean(true);
-        BooleanIterator filtered = iter.filter(b -> {
-            boolean result = toggle.get();
-            toggle.set(!toggle.get());
-            return result;
-        });
-        Assertions.assertTrue(filtered.nextBoolean());
-        Assertions.assertTrue(filtered.nextBoolean());
-        Assertions.assertFalse(filtered.hasNext());
-    }
-
-    @Test
-    public void testFilterAndLimit() {
-        BooleanIterator iter = BooleanIterator.of(true, true, false, true, false, true);
-        BooleanIterator modified = iter.filter(b -> b).limit(2);
-        boolean[] result = modified.toArray();
-        Assertions.assertArrayEquals(new boolean[] { true, true }, result);
-    }
-
-    @Test
-    public void testFilterNone() {
-        BooleanIterator iter = BooleanIterator.of(true, true, true);
-        BooleanIterator filtered = iter.filter(b -> !b);
-        Assertions.assertFalse(filtered.hasNext());
-    }
-
-    @Test
-    public void testFilterNullPredicate() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
-    }
-
-    @Test
-    public void testToArray() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true);
-        boolean[] array = iter.toArray();
-        Assertions.assertArrayEquals(new boolean[] { true, false, true }, array);
-    }
-
-    @Test
-    public void testToArrayConsumesIterator() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        iter.toArray();
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testToArrayAfterPartialConsumption() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false);
-        iter.nextBoolean();
-        iter.nextBoolean();
-        boolean[] array = iter.toArray();
-        Assertions.assertArrayEquals(new boolean[] { true, false }, array);
-    }
-
-    @Test
-    public void testToList() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true);
-        BooleanList list = iter.toList();
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertTrue(list.get(0));
-        Assertions.assertFalse(list.get(1));
-        Assertions.assertTrue(list.get(2));
-    }
-
-    @Test
-    public void testToListConsumesIterator() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        iter.toList();
-        Assertions.assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testToListAfterPartialConsumption() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false);
-        iter.nextBoolean();
-        BooleanList list = iter.toList();
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertFalse(list.get(0));
-        Assertions.assertTrue(list.get(1));
-        Assertions.assertFalse(list.get(2));
-    }
-
-    @Test
-    public void testStreamCollect() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true);
-        Stream<Boolean> stream = iter.stream();
-        java.util.List<Boolean> list = stream.toList();
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertTrue(list.get(0));
-        Assertions.assertFalse(list.get(1));
-        Assertions.assertTrue(list.get(2));
-    }
-
-    @Test
-    public void testStreamFromGenerated() {
-        AtomicInteger count = new AtomicInteger(0);
-        BooleanIterator iter = BooleanIterator.generate(() -> count.get() < 5, () -> count.getAndIncrement() % 2 == 0);
-        long trueCount = iter.stream().filter(b -> b).count();
-        Assertions.assertEquals(3, trueCount);
+    public void testToArrayAndToList() {
+        assertArrayEquals(new boolean[] { true, false, true }, BooleanIterator.of(true, false, true).toArray());
+        BooleanIterator partial = BooleanIterator.of(true, false, true, false);
+        partial.nextBoolean();
+        partial.nextBoolean();
+        assertArrayEquals(new boolean[] { true, false }, partial.toArray());
+        assertEquals(BooleanList.of(true, false, true), BooleanIterator.of(true, false, true).toList());
+        assertTrue(BooleanIterator.empty().toList().isEmpty());
+        BooleanIterator consumed = BooleanIterator.of(true, false);
+        consumed.toArray();
+        assertFalse(consumed.hasNext());
     }
 
     @Test
     public void testStream() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false);
-        Stream<Boolean> stream = iter.stream();
-        Assertions.assertNotNull(stream);
-        long trueCount = stream.filter(b -> b).count();
-        Assertions.assertEquals(2, trueCount);
-    }
-
-    @Test
-    public void testStreamEmpty() {
-        BooleanIterator iter = BooleanIterator.empty();
-        Stream<Boolean> stream = iter.stream();
-        Assertions.assertEquals(0, stream.count());
+        Stream<Boolean> stream = BooleanIterator.of(true, false, true, false).stream();
+        assertNotNull(stream);
+        assertEquals(2, stream.filter(b -> b).count());
+        assertEquals(0, BooleanIterator.empty().stream().count());
+        AtomicInteger count = new AtomicInteger();
+        assertEquals(3, BooleanIterator.generate(() -> count.get() < 5, () -> count.getAndIncrement() % 2 == 0).stream().filter(b -> b).count());
     }
 
     @Test
     public void testIndexed() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true);
-        ObjIterator<IndexedBoolean> indexed = iter.indexed();
+        ObjIterator<IndexedBoolean> indexed = BooleanIterator.of(true, false, true).indexed();
+        assertEquals(0, indexed.next().index());
+        assertFalse(indexed.next().value());
+        assertEquals(2, indexed.next().index());
+        assertFalse(indexed.hasNext());
+        assertEquals(100, BooleanIterator.of(true).indexed(100).next().index());
+        assertThrows(IllegalArgumentException.class, () -> BooleanIterator.of(true).indexed(-1));
 
-        Assertions.assertTrue(indexed.hasNext());
-        IndexedBoolean first = indexed.next();
-        Assertions.assertEquals(0, first.index());
-        Assertions.assertTrue(first.value());
+        BooleanIterator source = BooleanIterator.of(true, false);
+        ObjIterator<IndexedBoolean> overflowing = source.indexed(Long.MAX_VALUE);
+        assertEquals(Long.MAX_VALUE, overflowing.next().longIndex());
+        assertThrows(ArithmeticException.class, overflowing::next);
+        assertFalse(source.nextBoolean());
 
-        IndexedBoolean second = indexed.next();
-        Assertions.assertEquals(1, second.index());
-        Assertions.assertFalse(second.value());
-
-        IndexedBoolean third = indexed.next();
-        Assertions.assertEquals(2, third.index());
-        Assertions.assertTrue(third.value());
-
-        Assertions.assertFalse(indexed.hasNext());
+        ObjIterator<IndexedBoolean> max = BooleanIterator.of(true).indexed(Long.MAX_VALUE);
+        assertEquals(Long.MAX_VALUE, max.next().longIndex());
+        assertFalse(max.hasNext());
+        assertThrows(NoSuchElementException.class, max::next);
     }
 
     @Test
-    public void testIndexedWithStartIndex() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        ObjIterator<IndexedBoolean> indexed = iter.indexed(10);
-
-        IndexedBoolean first = indexed.next();
-        Assertions.assertEquals(10, first.index());
-        Assertions.assertTrue(first.value());
-
-        IndexedBoolean second = indexed.next();
-        Assertions.assertEquals(11, second.index());
-        Assertions.assertFalse(second.value());
-    }
-
-    @Test
-    public void testIndexedWithStartIndexLarge() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        ObjIterator<IndexedBoolean> indexed = iter.indexed(1000);
-        IndexedBoolean first = indexed.next();
-        Assertions.assertEquals(1000, first.index());
-        IndexedBoolean second = indexed.next();
-        Assertions.assertEquals(1001, second.index());
-    }
-
-    @Test
-    public void testIndexedAfterSkip() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false);
-        ObjIterator<IndexedBoolean> indexed = iter.skip(2).indexed(10);
-        IndexedBoolean first = indexed.next();
-        Assertions.assertEquals(10, first.index());
-        Assertions.assertTrue(first.value());
-    }
-
-    @Test
-    public void testIndexedEmpty() {
-        BooleanIterator iter = BooleanIterator.empty();
-        ObjIterator<IndexedBoolean> indexed = iter.indexed();
-        Assertions.assertFalse(indexed.hasNext());
-    }
-
-    @Test
-    public void testIndexedSingleElement() {
-        BooleanIterator iter = BooleanIterator.of(true);
-        ObjIterator<IndexedBoolean> indexed = iter.indexed();
-        IndexedBoolean first = indexed.next();
-        Assertions.assertEquals(0, first.index());
-        Assertions.assertTrue(first.value());
-    }
-
-    @Test
-    public void testIndexedWithStartIndexZero() {
-        BooleanIterator iter = BooleanIterator.of(true);
-        ObjIterator<IndexedBoolean> indexed = iter.indexed(0);
-        IndexedBoolean first = indexed.next();
-        Assertions.assertEquals(0, first.index());
-    }
-
-    @Test
-    public void testIndexedWithStartIndexNegative() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> iter.indexed(-1));
-    }
-
-    @Test
-    public void testIndexedWithStartIndexOverflow() {
-        ObjIterator<IndexedBoolean> indexed = BooleanIterator.of(true, false).indexed(Long.MAX_VALUE);
-
-        IndexedBoolean first = indexed.next();
-        Assertions.assertEquals(Long.MAX_VALUE, first.longIndex());
-        Assertions.assertTrue(first.value());
-        Assertions.assertTrue(indexed.hasNext());
-        Assertions.assertThrows(ArithmeticException.class, indexed::next);
-
-        ObjIterator<IndexedBoolean> exhausted = BooleanIterator.of(true).indexed(Long.MAX_VALUE);
-        exhausted.next();
-        Assertions.assertFalse(exhausted.hasNext());
-        Assertions.assertThrows(NoSuchElementException.class, exhausted::next);
-    }
-
-    @Test
-    public void testForEachRemainingDeprecated() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true);
-        java.util.List<Boolean> result = new java.util.ArrayList<>();
-        iter.forEachRemaining(result::add);
-        Assertions.assertEquals(3, result.size());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertFalse(result.get(1));
-        Assertions.assertTrue(result.get(2));
-    }
-
-    @Test
+    @SuppressWarnings("deprecation")
     public void testForeachRemaining() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false);
-        AtomicInteger trueCount = new AtomicInteger(0);
-        AtomicInteger falseCount = new AtomicInteger(0);
+        BooleanList boxed = new BooleanList();
+        BooleanIterator.of(true, false, true).forEachRemaining((Boolean b) -> boxed.add(b));
+        assertEquals(BooleanList.of(true, false, true), boxed);
 
-        iter.foreachRemaining(b -> {
-            if (b) {
-                trueCount.incrementAndGet();
-            } else {
-                falseCount.incrementAndGet();
-            }
-        });
+        BooleanList values = new BooleanList();
+        BooleanIterator.of(true, false, true, false).foreachRemaining(values::add);
+        assertEquals(BooleanList.of(true, false, true, false), values);
 
-        Assertions.assertEquals(2, trueCount.get());
-        Assertions.assertEquals(2, falseCount.get());
-    }
+        BooleanIterator partial = BooleanIterator.of(true, false, true, false);
+        partial.nextBoolean();
+        partial.nextBoolean();
+        BooleanList remaining = new BooleanList();
+        partial.foreachRemaining(remaining::add);
+        assertEquals(BooleanList.of(true, false), remaining);
+        assertThrows(IllegalArgumentException.class, () -> BooleanIterator.of(true).foreachRemaining(null));
 
-    @Test
-    public void testForeachRemainingAfterPartialConsumption() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false);
-        iter.nextBoolean();
-        iter.nextBoolean();
-
-        AtomicInteger count = new AtomicInteger(0);
-        iter.foreachRemaining(b -> count.incrementAndGet());
-        Assertions.assertEquals(2, count.get());
-    }
-
-    @Test
-    public void testForEachRemainingDeprecatedEmpty() {
-        BooleanIterator iter = BooleanIterator.empty();
-        AtomicInteger count = new AtomicInteger(0);
-        iter.forEachRemaining(b -> count.incrementAndGet());
-        Assertions.assertEquals(0, count.get());
-    }
-
-    @Test
-    public void testForeachRemainingEmpty() {
-        BooleanIterator iter = BooleanIterator.empty();
-        AtomicBoolean called = new AtomicBoolean(false);
-        iter.foreachRemaining(b -> called.set(true));
-        Assertions.assertFalse(called.get());
-    }
-
-    @Test
-    public void testForeachRemainingSingleElement() {
-        BooleanIterator iter = BooleanIterator.of(true);
-        AtomicBoolean result = new AtomicBoolean(false);
-        iter.foreachRemaining(b -> result.set(b));
-        Assertions.assertTrue(result.get());
-    }
-
-    @Test
-    public void testForeachRemainingNullAction() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> iter.foreachRemaining(null));
+        // forEachRemaining(Consumer) overrides Iterator.forEachRemaining, whose contract specifies NullPointerException.
+        assertThrows(NullPointerException.class, () -> BooleanIterator.of(true).forEachRemaining((java.util.function.Consumer<Boolean>) null));
+        assertThrows(NullPointerException.class, () -> BooleanIterator.empty().forEachRemaining((java.util.function.Consumer<Boolean>) null));
     }
 
     @Test
     public void testForeachIndexed() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true);
-        java.util.Map<Integer, Boolean> result = new java.util.HashMap<>();
-
-        iter.foreachIndexed((idx, value) -> result.put(idx, value));
-
-        Assertions.assertEquals(3, result.size());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertFalse(result.get(1));
-        Assertions.assertTrue(result.get(2));
-    }
-
-    @Test
-    public void testForeachIndexedAfterPartialConsumption() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false);
-        iter.nextBoolean();
-
-        java.util.List<Integer> indices = new java.util.ArrayList<>();
-        iter.foreachIndexed((idx, value) -> indices.add(idx));
-
-        Assertions.assertEquals(3, indices.size());
-        Assertions.assertEquals(0, indices.get(0));
-        Assertions.assertEquals(1, indices.get(1));
-        Assertions.assertEquals(2, indices.get(2));
-    }
-
-    @Test
-    public void testForeachIndexedOrder() {
-        BooleanIterator iter = BooleanIterator.of(true, false, true, false, true);
-        java.util.List<Integer> indices = new java.util.ArrayList<>();
-        java.util.List<Boolean> values = new java.util.ArrayList<>();
-
-        iter.foreachIndexed((idx, value) -> {
-            indices.add(idx);
+        List<Integer> indices = new ArrayList<>();
+        BooleanList values = new BooleanList();
+        BooleanIterator.of(true, false, true).foreachIndexed((index, value) -> {
+            indices.add(index);
             values.add(value);
         });
+        assertEquals(List.of(0, 1, 2), indices);
+        assertEquals(BooleanList.of(true, false, true), values);
 
-        for (int i = 0; i < 5; i++) {
-            Assertions.assertEquals(i, indices.get(i));
-        }
-        Assertions.assertTrue(values.get(0));
-        Assertions.assertFalse(values.get(1));
-        Assertions.assertTrue(values.get(2));
-        Assertions.assertFalse(values.get(3));
-        Assertions.assertTrue(values.get(4));
+        BooleanIterator partial = BooleanIterator.of(true, false, true, false);
+        partial.nextBoolean();
+        int[] firstIndex = { -1 };
+        partial.foreachIndexed((index, value) -> {
+            if (firstIndex[0] == -1) {
+                firstIndex[0] = index;
+            }
+        });
+        assertEquals(0, firstIndex[0]);
+        assertThrows(IllegalArgumentException.class, () -> BooleanIterator.of(true).foreachIndexed(null));
     }
-
-    @Test
-    public void testForeachIndexedEmpty() {
-        BooleanIterator iter = BooleanIterator.empty();
-        AtomicInteger count = new AtomicInteger(0);
-        iter.foreachIndexed((idx, value) -> count.incrementAndGet());
-        Assertions.assertEquals(0, count.get());
-    }
-
-    @Test
-    public void testForeachIndexedNullAction() {
-        BooleanIterator iter = BooleanIterator.of(true, false);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> iter.foreachIndexed(null));
-    }
-
 }

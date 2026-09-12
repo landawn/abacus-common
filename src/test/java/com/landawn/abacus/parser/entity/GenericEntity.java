@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.landawn.abacus.entity.extendDirty.basic.Account;
+import com.landawn.abacus.TestBase;
 
-public class GenericEntity {
+import testfixtures.entity.extendDirty.basic.Account;
+
+public class GenericEntity extends TestBase {
     private List<Boolean> booleanList;
     private List<Character> charList;
     private List<Integer> intList;

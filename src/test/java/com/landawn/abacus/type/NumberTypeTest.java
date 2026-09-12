@@ -21,6 +21,46 @@ import com.landawn.abacus.util.CharacterWriter;
 
 public class NumberTypeTest extends TestBase {
 
+    public static final class BoxedFactoryNumber extends Number {
+        private final int value;
+
+        private BoxedFactoryNumber(final int value) {
+            this.value = value;
+        }
+
+        public static BoxedFactoryNumber of(final Integer value) {
+            return new BoxedFactoryNumber(value);
+        }
+
+        @Override
+        public int intValue() {
+            return value;
+        }
+
+        @Override
+        public long longValue() {
+            return value;
+        }
+
+        @Override
+        public float floatValue() {
+            return value;
+        }
+
+        @Override
+        public double doubleValue() {
+            return value;
+        }
+    }
+
+    @Test
+    public void testFactoryAcceptsBoxedPrimitiveValue() {
+        final NumberType<BoxedFactoryNumber> type = new NumberType<>(BoxedFactoryNumber.class);
+        assertEquals(42, type.valueOf("42").intValue());
+        assertEquals(Integer.MIN_VALUE, type.valueOf(Integer.toString(Integer.MIN_VALUE)).intValue());
+        assertNull(type.valueOf((String) null));
+    }
+
     private NumberType<Integer> intNumberType;
     private NumberType<Double> doubleNumberType;
     private NumberType<Long> longNumberType;

@@ -167,4 +167,39 @@ public class UtfTest extends TestBase {
         mostlyValid[999] = (byte) 0xFF;
         Assertions.assertFalse(Utf8.isWellFormed(mostlyValid));
     }
+
+    // Doc-only contract pin: isWellFormed(byte[], int, int) validates through N.checkFromIndexSize, which
+    // rejects a negative size with IllegalArgumentException BEFORE any bounds test. A negative len is
+    // therefore an IllegalArgumentException, not the IndexOutOfBoundsException every other invalid range
+    // raises. Both are unchecked, so this pins behaviour that is unchanged by the javadoc/throws-clause fix.
+    @Test
+    public void testIsWellFormedRangeCheckExceptionTypes() {
+        byte[] buffer = "abc".getBytes(StandardCharsets.UTF_8);
+
+        IllegalArgumentException ex = Assertions.assertThrows(IllegalArgumentException.class, () -> Utf8.isWellFormed(buffer, 0, -1));
+        Assertions.assertEquals("negative size: -1", ex.getMessage());
+
+        ex = Assertions.assertThrows(IllegalArgumentException.class, () -> Utf8.isWellFormed(buffer, 0, Integer.MIN_VALUE));
+        Assertions.assertEquals("negative size: -2147483648", ex.getMessage());
+
+        // A negative size wins over a negative offset: the size test runs first.
+        ex = Assertions.assertThrows(IllegalArgumentException.class, () -> Utf8.isWellFormed(buffer, -1, -1));
+        Assertions.assertEquals("negative size: -1", ex.getMessage());
+
+        // Every other invalid range is still the documented IndexOutOfBoundsException.
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> Utf8.isWellFormed(buffer, -1, 1));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> Utf8.isWellFormed(buffer, 0, 4));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> Utf8.isWellFormed(buffer, 4, 0));
+
+        // A null array is an IllegalArgumentException before either range test, negative len included.
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Utf8.isWellFormed((byte[]) null, 0, 1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Utf8.isWellFormed((byte[]) null, 0, -1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Utf8.isWellFormed((byte[]) null));
+
+        // The whole-array overload passes its own length, so it can reach neither failure.
+        Assertions.assertTrue(Utf8.isWellFormed(buffer, 0, 3));
+        Assertions.assertTrue(Utf8.isWellFormed(buffer, 3, 0));
+        Assertions.assertTrue(Utf8.isWellFormed(buffer));
+        Assertions.assertTrue(Utf8.isWellFormed(new byte[0]));
+    }
 }

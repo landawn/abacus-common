@@ -99,7 +99,7 @@ public enum YesNo {
      * @return NO for 0, YES for 1
      * @throws IllegalArgumentException if the integer value is not 0 or 1.
      */
-    public static YesNo of(final int intValue) {
+    public static YesNo of(final int intValue) throws IllegalArgumentException {
         switch (intValue) {
             case 0:
                 return NO;

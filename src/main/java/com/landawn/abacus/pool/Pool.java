@@ -50,7 +50,8 @@ public interface Pool extends Serializable, AutoCloseable {
      * {@link #clear()}, this method does <em>not</em> throw {@link IllegalStateException} after the
      * pool has been {@link #close() closed}: capacity is an immutable configuration value fixed at
      * construction, so it remains readable for the life of the object. {@link #capacity()},
-     * {@link #isClosed()} and {@link #close()} are therefore the only members usable after close.
+     * {@link #isClosed()} and {@link #close()} remain usable after close. The generic implementations
+     * also support {@code equals}, {@code hashCode} and {@code toString} after close.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -80,7 +81,7 @@ public interface Pool extends Serializable, AutoCloseable {
      * @return the current number of objects in the pool
      * @throws IllegalStateException if the pool has been closed
      */
-    int size();
+    int size() throws IllegalStateException;
 
     /**
      * Checks whether this pool is empty.
@@ -97,7 +98,7 @@ public interface Pool extends Serializable, AutoCloseable {
      * @return {@code true} if the pool contains no objects, {@code false} otherwise
      * @throws IllegalStateException if the pool has been closed
      */
-    boolean isEmpty();
+    boolean isEmpty() throws IllegalStateException;
 
     /**
      * Removes a portion of objects from the pool to free up space, selecting victims according
@@ -122,17 +123,16 @@ public interface Pool extends Serializable, AutoCloseable {
      *
      * @throws IllegalStateException if the pool has been closed
      */
-    void evict();
+    void evict() throws IllegalStateException;
 
     /**
      * Removes all objects from this pool.
      *
-     * <p>All pooled objects will be destroyed according to their cleanup logic.
-     * After this method returns, the pool will be empty but still usable for
-     * storing new objects.
+     * <p>The current contents are detached atomically and then destroyed according to their
+     * cleanup logic. Destruction callbacks run outside the pool lock. A concurrent operation or
+     * callback may add new objects or close the pool before this method returns.
      *
-     * <p>This method differs from {@link #close()} in that the pool remains
-     * open and operational after clearing.
+     * <p>This method does not itself close the pool.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -143,7 +143,7 @@ public interface Pool extends Serializable, AutoCloseable {
      *
      * @throws IllegalStateException if the pool has been closed
      */
-    void clear();
+    void clear() throws IllegalStateException;
 
     /**
      * Returns a snapshot of statistics for this pool.
@@ -154,7 +154,9 @@ public interface Pool extends Serializable, AutoCloseable {
      *   <li>Number of put/add and get/poll operations (see {@link PoolStats} for naming)</li>
      *   <li>Hit and miss counts</li>
      *   <li>Number of evictions</li>
-     *   <li>Memory usage (if applicable)</li>
+     *   <li>Memory usage (if applicable): {@link PoolStats#maxMemory()} is {@code -1} unless a positive
+     *       memory limit is configured; {@link PoolStats#dataSize()} is {@code -1} only when no memory
+     *       measure is configured, so a pool with a measure but no limit still reports its data size</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -168,7 +170,7 @@ public interface Pool extends Serializable, AutoCloseable {
      * @return a PoolStats object containing current pool statistics
      * @throws IllegalStateException if the pool has been closed
      */
-    PoolStats stats();
+    PoolStats stats() throws IllegalStateException;
 
     /**
      * Closes this pool and releases all resources.
@@ -181,8 +183,10 @@ public interface Pool extends Serializable, AutoCloseable {
      *   <li>Releases any other resources held by the pool</li>
      * </ul>
      *
-     * <p>After calling this method, any attempt to use the pool will result in
-     * an {@link IllegalStateException}. A closed pool cannot be reopened.
+     * <p>After calling this method, operations requiring an open pool throw
+     * {@link IllegalStateException}. The configuration query {@link #capacity()}, lifecycle query
+     * {@link #isClosed()} and repeated {@code close()} calls remain available.
+     * A closed pool cannot be reopened.
      *
      * <p>This method is idempotent - calling it multiple times has no additional effect.
      *

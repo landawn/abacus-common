@@ -29,7 +29,9 @@ import java.nio.CharBuffer;
  * delegates to the underlying {@code Appendable} if it also implements
  * {@link AutoCloseable}.</p>
  *
- * <p>Once closed, any further write or flush call will throw {@link java.io.IOException}.</p>
+ * <p>Once closed, any further write or flush call on an {@code AppendableWriter} throws
+ * {@link java.io.IOException}. Its one permitted subclass relaxes this: {@link StringWriter} holds no
+ * resource to release, so its {@code close()} is a no-op and the writer stays usable.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -80,7 +82,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      *
      * @param c the character to append
      * @return this writer
-     * @throws IOException if an I/O error occurs or if the writer has been closed
+     * @throws IOException if this writer is closed, or appending the characters to the wrapped appendable fails
      */
     @Override
     public Writer append(final char c) throws IOException {
@@ -103,7 +105,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      *
      * @param csq the character sequence to append. If {@code csq} is {@code null}, then the four characters {@code "null"} are appended
      * @return this writer
-     * @throws IOException if an I/O error occurs or if the writer has been closed
+     * @throws IOException if this writer is closed, or appending the characters to the wrapped appendable fails
      */
     @Override
     public Writer append(final CharSequence csq) throws IOException {
@@ -127,12 +129,12 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * @param start the index of the first character in the subsequence
      * @param end the index of the character following the last character in the subsequence
      * @return this writer
-     * @throws IOException if an I/O error occurs or if the writer has been closed
+     * @throws IOException if this writer is closed, or appending the characters to the wrapped appendable fails
      * @throws IndexOutOfBoundsException if start or end are negative, or start is greater than end,
-     *         or end is greater than csq.length()
+     *         or end is greater than the effective sequence length (four when {@code csq} is {@code null})
      */
     @Override
-    public Writer append(final CharSequence csq, final int start, final int end) throws IOException {
+    public Writer append(final CharSequence csq, final int start, final int end) throws IOException, IndexOutOfBoundsException {
         checkNotClosed();
 
         appendable.append(csq, start, end);
@@ -150,7 +152,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * }</pre>
      *
      * @param c the int specifying a character to be written
-     * @throws IOException if an I/O error occurs or if the writer has been closed
+     * @throws IOException if this writer is closed, or appending the characters to the wrapped appendable fails
      */
     @Override
     public void write(final int c) throws IOException {
@@ -169,11 +171,11 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * }</pre>
      *
      * @param cbuf the array of characters to write; must not be {@code null}
-     * @throws IOException if an I/O error occurs or if the writer has been closed
+     * @throws IOException if this writer is closed, or appending the characters to the wrapped appendable fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
      */
     @Override
-    public void write(final char[] cbuf) throws IOException {
+    public void write(final char[] cbuf) throws IOException, NullPointerException {
         checkNotClosed();
 
         appendable.append(CharBuffer.wrap(cbuf));
@@ -191,13 +193,13 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * @param cbuf the array of characters; must not be {@code null}
      * @param off the offset from which to start writing characters
      * @param len the number of characters to write
-     * @throws IOException if an I/O error occurs or if the writer has been closed
+     * @throws IOException if this writer is closed, or appending the characters to the wrapped appendable fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
      * @throws IndexOutOfBoundsException if off is negative, or len is negative,
      *         or off+len is greater than the length of the given array
      */
     @Override
-    public void write(final char[] cbuf, final int off, final int len) throws IOException {
+    public void write(final char[] cbuf, final int off, final int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
         checkNotClosed();
 
         appendable.append(CharBuffer.wrap(cbuf), off, off + len);
@@ -213,7 +215,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      *
      * @param str the string to write; unlike {@code java.io.Writer}, a {@code null} string is
      *            accepted and written as the four characters {@code "null"} (Appendable semantics)
-     * @throws IOException if an I/O error occurs or if the writer has been closed
+     * @throws IOException if this writer is closed, or appending the characters to the wrapped appendable fails
      */
     @Override
     public void write(final String str) throws IOException {
@@ -234,12 +236,12 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      *            treated as the four characters {@code "null"} (Appendable semantics)
      * @param off the offset from which to start writing characters
      * @param len the number of characters to write
-     * @throws IOException if an I/O error occurs or if the writer has been closed
+     * @throws IOException if this writer is closed, or appending the characters to the wrapped appendable fails
      * @throws IndexOutOfBoundsException if off is negative, or len is negative,
-     *         or off+len is greater than the length of the given string
+     *         or off+len is greater than the effective sequence length (four when {@code str} is {@code null})
      */
     @Override
-    public void write(final String str, final int off, final int len) throws IOException {
+    public void write(final String str, final int off, final int len) throws IOException, IndexOutOfBoundsException {
         checkNotClosed();
 
         appendable.append(str, off, off + len);
@@ -257,7 +259,7 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * writer.flush();   // Ensures data is flushed if supported
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs or if the writer has been closed
+     * @throws IOException if this writer is closed, or flushing the wrapped appendable fails when it implements {@link Flushable}
      */
     @Override
     public void flush() throws IOException {
@@ -271,8 +273,9 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
     /**
      * Closes the stream, flushing it first.
      *
-     * <p>Once the stream has been closed, further {@code write()} or {@code flush()} invocations
-     * will cause an {@link java.io.IOException} to be thrown. Closing a previously closed stream
+     * <p>Once the stream has been closed, further {@code write()} or {@code flush()} invocations on an
+     * {@code AppendableWriter} cause an {@link java.io.IOException}; see {@link StringWriter#close()},
+     * which overrides this method and leaves the writer usable. Closing a previously closed stream
      * has no effect.</p>
      *
      * <p>If the underlying {@code Appendable} implements {@link AutoCloseable},
@@ -286,10 +289,12 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * }
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs while flushing or closing
+     * @throws IOException if the first failure while flushing or closing is an {@code IOException}
+     * @throws RuntimeException if the first failure while flushing or closing is a runtime exception,
+     *         or a non-I/O checked exception that is converted to a runtime exception
      */
     @Override
-    public void close() throws IOException {
+    public void close() throws IOException, RuntimeException {
         if (!closed) {
             // Mark closed first so a flush failure doesn't leave the stream
             // in a state where subsequent close() retries can leak the
@@ -335,6 +340,9 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
         }
     }
 
+    /**
+     * @throws IOException if this writer has been closed.
+     */
     private void checkNotClosed() throws IOException {
         if (closed) {
             throw new IOException("This Writer has been closed");

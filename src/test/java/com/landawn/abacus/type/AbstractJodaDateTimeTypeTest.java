@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -17,13 +18,17 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.chrono.BuddhistChronology;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
+import com.landawn.abacus.util.Objectory;
 
 public class AbstractJodaDateTimeTypeTest extends TestBase {
 
@@ -146,5 +151,63 @@ public class AbstractJodaDateTimeTypeTest extends TestBase {
 
         jodaDateTimeType.serializeTo(writer, dateTime, config);
         assertNotNull(unsupportedFormat);
+    }
+
+    // --- review fixes 2026-09-06 (T9-04 root cause, T9-05) ---
+
+    @Test
+    public void reviewFixes20260906_T904_formattersPrintIsoUtcForAnyChronology() throws IOException {
+        // the shared formatters pinned only the zone (withZoneUTC), so a BuddhistChronology value printed its
+        // Buddhist year ("2566-..Z"), which every parser reads as ISO year 2566 - 543 years off the real instant
+        final DateTime buddhist = new DateTime(1700000000123L, BuddhistChronology.getInstance(DateTimeZone.forID("Asia/Bangkok")));
+        final DateTime isoUtc = new DateTime(1700000000123L, DateTimeZone.UTC);
+
+        assertEquals("2023-11-14T22:13:20.123Z", jodaDateTimeType.stringOf(isoUtc));
+        assertEquals(jodaDateTimeType.stringOf(isoUtc), jodaDateTimeType.stringOf(buddhist));
+
+        final StringBuilder sb = new StringBuilder();
+        jodaDateTimeType.appendTo(sb, buddhist);
+        assertEquals("2023-11-14T22:13:20.123Z", sb.toString());
+
+        final JsonXmlSerConfig<?> cfg = mock(JsonXmlSerConfig.class);
+        when(cfg.getStringQuotation()).thenReturn((char) 0);
+
+        when(cfg.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_DATE_TIME);
+        BufferedJsonWriter real = Objectory.createBufferedJsonWriter();
+        jodaDateTimeType.serializeTo(real, buddhist, cfg);
+        assertEquals("2023-11-14T22:13:20Z", real.toString());
+
+        when(cfg.getDateTimeFormat()).thenReturn(DateTimeFormat.ISO_8601_TIMESTAMP);
+        real = Objectory.createBufferedJsonWriter();
+        jodaDateTimeType.serializeTo(real, buddhist, cfg);
+        assertEquals("2023-11-14T22:13:20.123Z", real.toString());
+
+        // the round trip now lands on the same instant (zone/chronology are re-defaulted by valueOf, as documented)
+        assertTrue(jodaDateTimeType.valueOf(jodaDateTimeType.stringOf(buddhist)).isEqual(buddhist));
+        assertEquals(1700000000123L, jodaDateTimeType.valueOf(jodaDateTimeType.stringOf(buddhist)).getMillis());
+
+        // a Kolkata (ISO) value: unchanged output, UTC wall time under the 'Z'
+        assertEquals("2023-11-14T22:13:20.123Z", jodaDateTimeType.stringOf(new DateTime(1700000000123L, DateTimeZone.forID("Asia/Kolkata"))));
+    }
+
+    @Test
+    public void reviewFixes20260906_T905_outOfRangeYearIsPrintedButNotReadBack() {
+        // documented: no year guard on the Joda side; a year of more than four digits, or a negative year, is
+        // rejected by the inverse parser
+        assertEquals("10000-01-01T00:00:00.000Z", jodaDateTimeType.stringOf(new DateTime(253402300800000L, DateTimeZone.UTC)));
+        assertThrows(IllegalArgumentException.class, () -> jodaDateTimeType.valueOf("10000-01-01T00:00:00.000Z"));
+
+        assertEquals("-0001-01-01T00:00:00.000Z", jodaDateTimeType.stringOf(new DateTime(-62198755200000L, DateTimeZone.UTC)));
+        assertThrows(IllegalArgumentException.class, () -> jodaDateTimeType.valueOf("-0001-01-01T00:00:00.000Z"));
+
+        // year 0000 is the documented exception: it prints AND reads back at the same instant (Joda accepts year
+        // zero, while the Date/Calendar handlers reject it)
+        assertEquals("0000-12-31T23:59:59.999Z", jodaDateTimeType.stringOf(new DateTime(-62135596800001L, DateTimeZone.UTC)));
+        assertEquals(-62135596800001L, jodaDateTimeType.valueOf("0000-12-31T23:59:59.999Z").getMillis());
+        assertThrows(IllegalArgumentException.class, () -> createType(java.sql.Timestamp.class).valueOf("0000-12-31T23:59:59.999Z"));
+
+        // the last in-range instant round-trips
+        assertEquals("9999-12-31T23:59:59.999Z", jodaDateTimeType.stringOf(new DateTime(253402300799999L, DateTimeZone.UTC)));
+        assertEquals(253402300799999L, jodaDateTimeType.valueOf("9999-12-31T23:59:59.999Z").getMillis());
     }
 }

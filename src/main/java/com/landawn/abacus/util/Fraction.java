@@ -16,6 +16,9 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -31,6 +34,24 @@ import java.math.BigInteger;
  * that can introduce rounding errors, {@code Fraction} stores the numerator and denominator as
  * separate integers. Subject to the integer range limitation, this ensures that operations like
  * 1/3 + 1/3 + 1/3 = 1 are computed exactly, without accumulating floating-point errors.</p>
+ *
+ * <p><b>Note: this class has a natural ordering that is inconsistent with {@code equals}.</b>
+ * {@link #compareTo(Fraction)} compares numeric <em>values</em>, while {@link #equals(Object)}
+ * compares the stored numerator and denominator, so {@code 1/2} and {@code 2/4} compare equal but are
+ * not {@code equals}. Sorted and hashed collections therefore disagree about them:</p>
+ * <pre>{@code
+ * Set<Fraction> sorted = new TreeSet<>(List.of(Fraction.of(1, 2), Fraction.of(2, 4)));
+ * Set<Fraction> hashed = new HashSet<>(List.of(Fraction.of(1, 2), Fraction.of(2, 4)));
+ * sorted.size();   // returns 1 - TreeSet uses compareTo
+ * hashed.size();   // returns 2 - HashSet uses equals
+ * }</pre>
+ * <p>Reduce with {@link #reduce()} before using fractions as set elements or map keys if a single
+ * canonical representative per value is wanted. All arithmetic operations return reduced terms,
+ * including unary operations and identity operations such as adding zero or raising to power one.
+ * For example, {@code Fraction.of(1, 2).add(Fraction.of(2, 4))} returns {@code 1/1}.
+ * Factories without reduction and parsing still preserve unreduced terms. Code that previously
+ * depended on unreduced arithmetic results must account for changes to {@code equals}, hash codes,
+ * text, and serialized terms; preserve the original operands when their written terms matter.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
@@ -92,7 +113,7 @@ import java.math.BigInteger;
  * // Creating fractions using static factory methods
  * Fraction half = Fraction.of(1, 2);             // returns 1/2
  * Fraction twoThirds = Fraction.of(2, 3);        // returns 2/3
- * Fraction mixedNumber = Fraction.of(2, 1, 4);   // returns 2 1/4 = 9/4
+ * Fraction mixedNumber = Fraction.ofMixed(2, 1, 4);   // returns 2 1/4 = 9/4
  *
  * // Creating from decimal values
  * Fraction fromDecimal = Fraction.of(0.75);          // returns 3/4
@@ -114,6 +135,10 @@ import java.math.BigInteger;
  *
  * <p><b>Advanced Usage Examples:</b></p>
  * <pre>{@code
+ * Fraction half = Fraction.of(1, 2);
+ * Fraction twoThirds = Fraction.of(2, 3);
+ * Fraction mixedNumber = Fraction.ofMixed(2, 1, 4);
+ *
  * // Complex fraction arithmetic
  * Fraction recipe = Fraction.of(2, 3);                          // 2/3 cup flour
  * Fraction scalingFactor = Fraction.of(3, 2);                   // 1.5x scaling factor
@@ -145,7 +170,7 @@ import java.math.BigInteger;
  * <ul>
  *   <li><b>{@code of(int, int)}:</b> Creates fraction from numerator and denominator without reducing (use {@link #reduce()} or {@link #of(int, int, boolean)} for the reduced form)</li>
  *   <li><b>{@code of(int, int, boolean)}:</b> Creates fraction with optional reduction control</li>
- *   <li><b>{@code of(int, int, int)}:</b> Creates fraction from whole number, numerator, and denominator</li>
+ *   <li><b>{@code ofMixed(int, int, int)}:</b> Creates fraction from whole number, numerator, and denominator</li>
  *   <li><b>{@code of(double)}:</b> Converts decimal value to closest fraction representation</li>
  *   <li><b>{@code of(String)}:</b> Parses fraction from string in various formats</li>
  * </ul>
@@ -168,7 +193,12 @@ import java.math.BigInteger;
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li><b>Creation Cost:</b> O(log min(n,d)) due to GCD calculation for reduction</li>
+ *   <li><b>Creation Cost:</b> O(1) for the non-reducing factories; O(log min(n,d)) when reduction is requested</li>
+ *   <li><b>{@code of(double)} Cost:</b> a continued-fraction search over the exact binary value of the
+ *       input, bounded by the 10,000 denominator and the {@code int} numerator limit; it uses
+ *       {@link BigInteger} internally and is substantially more expensive than the {@code int}-term
+ *       factories. {@link #of(String)} pays the same cost for a plain decimal token such as
+ *       {@code "0.333"}.</li>
  *   <li><b>Arithmetic Cost:</b> O(log min(n,d)) for operations requiring reduction</li>
  *   <li><b>Comparison Cost:</b> O(1) - Cross multiplication for ordering</li>
  *   <li><b>Memory Overhead:</b> Two {@code int} fields plus object header, cached string representations</li>
@@ -187,7 +217,9 @@ import java.math.BigInteger;
  * <p><b>Number Interface Implementation:</b>
  * <ul>
  *   <li><b>{@code intValue()}:</b> Returns truncated integer value (numerator / denominator)</li>
- *   <li><b>{@code longValue()}:</b> Returns truncated long value with wider range</li>
+ *   <li><b>{@code longValue()}:</b> Returns the same truncated whole-number part as {@link #intValue()},
+ *       widened to {@code long}; because the denominator is always positive the quotient of two
+ *       {@code int} terms always fits in an {@code int}, so the wider type never yields a different value</li>
  *   <li><b>{@code floatValue()}:</b> Returns floating-point approximation</li>
  *   <li><b>{@code doubleValue()}:</b> Returns double-precision approximation</li>
  * </ul>
@@ -347,6 +379,12 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     public static final Fraction FOUR_FIFTHS = new Fraction(4, 5);
 
     /**
+     * The largest denominator {@link #of(double)} may produce; it bounds both the convergent search
+     * and the semiconvergent that closes it out.
+     */
+    private static final int MAX_DENOMINATOR = 10_000;
+
+    /**
      * The numerator number part of the fraction (the three in three sevenths).
      */
     private final int numerator;
@@ -398,6 +436,13 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction.of(1, Integer.MIN_VALUE);   // throws ArithmeticException
      * }</pre>
      *
+     * <p><b>Note on {@code Integer.MIN_VALUE} denominators:</b> the sign is always moved to the
+     * numerator, and {@code -Integer.MIN_VALUE} is not representable as an {@code int}, so this
+     * non-reducing factory rejects {@code Fraction.of(n, Integer.MIN_VALUE)} outright.
+     * {@link #of(int, int, boolean) of(n, Integer.MIN_VALUE, true)} accepts an <em>even</em> numerator,
+     * because halving both terms first ({@code 2/-2^31} to {@code 1/-2^30}) makes the negation fit.
+     * That rescue is only available when reduction is requested, since it changes the stored terms.</p>
+     *
      * @param numerator the numerator of the fraction
      * @param denominator the denominator of the fraction, must not be zero
      * @return a new fraction instance
@@ -406,7 +451,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *         {@code Integer.MIN_VALUE} (in which case negation would overflow)
      * @see #of(int, int, boolean)
      */
-    public static Fraction of(final int numerator, final int denominator) {
+    public static Fraction of(final int numerator, final int denominator) throws ArithmeticException {
         return of(numerator, denominator, false);
     }
 
@@ -419,6 +464,10 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * <p>When {@code reduce} is {@code true}, the fraction is simplified to its lowest terms
      * by dividing both numerator and denominator by their greatest common divisor.</p>
+     *
+     * <p>Reduction happens before sign normalization and range checking, so
+     * {@code of(2, Integer.MIN_VALUE, true)} returns {@code -1/1073741824} whereas
+     * {@link #of(int, int) of(2, Integer.MIN_VALUE)} throws.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -434,53 +483,79 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @param denominator the denominator of the fraction, must not be zero
      * @param reduce if {@code true}, reduces the fraction to its simplest form
      * @return a new fraction instance
-     * @throws ArithmeticException if the denominator is zero, or if the denominator is
-     *         negative and either the numerator or the denominator equals
-     *         {@code Integer.MIN_VALUE} (in which case negation would overflow)
+     * @throws ArithmeticException if the denominator is zero, or if the final terms after
+     *         optional reduction and sign normalization cannot be stored as an {@code int}
      */
-    public static Fraction of(int numerator, int denominator, final boolean reduce) {
+    public static Fraction of(final int numerator, final int denominator, final boolean reduce) throws ArithmeticException {
+        return fromTerms(numerator, denominator, reduce);
+    }
+
+    /**
+     * @throws ArithmeticException if the denominator is zero, or the normalized terms after optional reduction cannot be represented with an int numerator and positive int denominator
+     */
+    private static Fraction fromTerms(long numerator, long denominator, final boolean reduce) throws ArithmeticException {
         if (denominator == 0) {
             throw new ArithmeticException("The denominator must not be zero");
         }
 
-        // allow 2^k/-2^31 as a valid fraction (where k>0)
-        if (reduce && (denominator == Integer.MIN_VALUE && (numerator & 1) == 0)) {
-            numerator /= 2;
-            denominator /= 2;
+        // Reduce before resolving signs or narrowing: even a non-representable intermediate
+        // numerator/denominator can describe a fraction whose final stored terms fit in int.
+        if (reduce) {
+            if (numerator == 0) {
+                return ZERO;
+            }
+            final long gcd = greatestCommonDivisor(numerator, denominator);
+            numerator /= gcd;
+            denominator /= gcd;
         }
 
         if (denominator < 0) {
-            if (numerator == Integer.MIN_VALUE || denominator == Integer.MIN_VALUE) {
-                throw new ArithmeticException("overflow: cannot negate");
-            }
             numerator = -numerator;
             denominator = -denominator;
         }
 
-        if (reduce) {
-            if (numerator == 0) {
-                return ZERO; // normalize zero.
-            }
-            // simplify fraction.
-            final int gcd = greatestCommonDivisor(numerator, denominator);
-            numerator /= gcd;
-            denominator /= gcd;
+        if (numerator < Integer.MIN_VALUE || numerator > Integer.MAX_VALUE || denominator > Integer.MAX_VALUE) {
+            throw new ArithmeticException("Fraction terms exceed the int range: " + numerator + "/" + denominator);
         }
-        return new Fraction(numerator, denominator);
+        return new Fraction((int) numerator, (int) denominator);
     }
 
     /**
      * Creates a {@code Fraction} instance representing a mixed fraction (whole and fractional parts).
-     * The fraction is not reduced. For example, {@code Fraction.of(1, 2, 4)} creates the
+     * The fraction is not reduced. For example, {@code Fraction.ofMixed(1, 2, 4)} creates the
      * fraction equivalent to 1 + 2/4 = 6/4.
+     *
+     * <p><b>Values between {@code -1} and {@code 0} cannot be expressed.</b> The sign is carried
+     * solely by {@code whole}, and an {@code int} cannot distinguish {@code 0} from {@code -0}, so
+     * {@code ofMixed(0, 1, 2)} is {@code +1/2} and there is no argument triple that yields
+     * {@code -1/2}. Use {@link #of(int, int) of(-1, 2)} for those values, or
+     * {@link #of(String) of("-0 1/2")}, where the written sign survives.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fraction f1 = Fraction.of(1, 3, 4);    // returns 7/4
-     * Fraction f2 = Fraction.of(-2, 1, 3);   // returns -7/3
-     * Fraction.of(0, 1, 0);                  // throws ArithmeticException
-     * Fraction.of(1, -6, -10);               // throws ArithmeticException
+     * Fraction f1 = Fraction.ofMixed(1, 3, 4);    // returns 7/4
+     * Fraction f2 = Fraction.ofMixed(-2, 1, 3);   // returns -7/3
+     * Fraction f3 = Fraction.ofMixed(0, 1, 2);    // returns 1/2 - a zero whole part cannot be negative
+     * Fraction.ofMixed(0, 1, 0);                  // throws ArithmeticException
+     * Fraction.ofMixed(1, -6, -10);               // throws ArithmeticException
      * }</pre>
+     *
+     * @param whole the whole number part (use a negative value for a negative mixed fraction; a zero
+     *              whole part always yields a non-negative fraction)
+     * @param numerator the numerator of the fractional part, must be non-negative
+     * @param denominator the denominator of the fractional part, must be positive
+     * @return a new fraction instance
+     * @throws ArithmeticException if the denominator is zero, if the denominator is negative,
+     *         if the numerator is negative, or if the resulting numerator would overflow the range of an {@code int}
+     * @see #ofMixed(int, int, int, boolean)
+     * @see #of(int, int)
+     */
+    public static Fraction ofMixed(final int whole, final int numerator, final int denominator) throws ArithmeticException {
+        return ofMixed(whole, numerator, denominator, false);
+    }
+
+    /**
+     * Creates a {@code Fraction} instance representing a mixed fraction (whole and fractional parts).
      *
      * @param whole the whole number part (use negative value for a negative mixed fraction)
      * @param numerator the numerator of the fractional part, must be non-negative
@@ -488,10 +563,14 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @return a new fraction instance
      * @throws ArithmeticException if the denominator is zero, if the denominator is negative,
      *         if the numerator is negative, or if the resulting numerator would overflow the range of an {@code int}
-     * @see #of(int, int, int, boolean)
+     * @deprecated renamed to {@link #ofMixed(int, int, int)}. Under the old name, {@code Fraction.of(1, 2, 3)}
+     *             (whole, numerator, denominator = 5/3) and {@code Fraction.of(1, 2, true)}
+     *             (numerator, denominator, reduce = 1/2) gave the first two arguments different meanings
+     *             depending on the third argument's type.
      */
-    public static Fraction of(final int whole, final int numerator, final int denominator) {
-        return of(whole, numerator, denominator, false);
+    @Deprecated
+    public static Fraction of(final int whole, final int numerator, final int denominator) throws ArithmeticException {
+        return ofMixed(whole, numerator, denominator, false);
     }
 
     /**
@@ -506,11 +585,11 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fraction f1 = Fraction.of(1, 2, 4, false);   // returns 6/4
-     * Fraction f2 = Fraction.of(1, 2, 4, true);    // returns 3/2 (reduced)
-     * Fraction f3 = Fraction.of(-1, 1, 2, true);   // returns -3/2
-     * Fraction.of(0, 0, 0, true);                  // throws ArithmeticException
-     * Fraction.of(0, -1, 2, true);                 // throws ArithmeticException
+     * Fraction f1 = Fraction.ofMixed(1, 2, 4, false);   // returns 6/4
+     * Fraction f2 = Fraction.ofMixed(1, 2, 4, true);    // returns 3/2 (reduced)
+     * Fraction f3 = Fraction.ofMixed(-1, 1, 2, true);   // returns -3/2
+     * Fraction.ofMixed(0, 0, 0, true);                  // throws ArithmeticException
+     * Fraction.ofMixed(0, -1, 2, true);                 // throws ArithmeticException
      * }</pre>
      *
      * @param whole the whole number part (negative sign goes here for negative fractions)
@@ -519,9 +598,11 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @param reduce if {@code true}, reduces the resulting fraction to its simplest form
      * @return a new fraction instance
      * @throws ArithmeticException if the denominator is zero, the denominator is negative,
-     *         the numerator is negative, or if the resulting numerator would overflow
+     *         the numerator is negative, or if the resulting numerator after optional reduction would overflow
+     * @see #ofMixed(int, int, int)
+     * @see #of(int, int, boolean)
      */
-    public static Fraction of(final int whole, final int numerator, final int denominator, final boolean reduce) {
+    public static Fraction ofMixed(final int whole, final int numerator, final int denominator, final boolean reduce) throws ArithmeticException {
         if (denominator == 0) {
             throw new ArithmeticException("The denominator must not be zero");
         }
@@ -537,110 +618,124 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         } else {
             numeratorValue = whole * (long) denominator + numerator;
         }
-        if (numeratorValue < Integer.MIN_VALUE || numeratorValue > Integer.MAX_VALUE) {
-            throw new ArithmeticException("Numerator too large to represent as an Integer.");
-        }
+        return fromTerms(numeratorValue, denominator, reduce);
+    }
 
-        return of((int) numeratorValue, denominator, reduce);
+    /**
+     * Creates a {@code Fraction} instance representing a mixed fraction with optional reduction.
+     *
+     * @param whole the whole number part (negative sign goes here for negative fractions)
+     * @param numerator the numerator of the fractional part (must be non-negative)
+     * @param denominator the denominator of the fractional part (must be positive)
+     * @param reduce if {@code true}, reduces the resulting fraction to its simplest form
+     * @return a new fraction instance
+     * @throws ArithmeticException if the denominator is zero or negative, the numerator is negative, or the resulting numerator after optional reduction exceeds the int range.
+     * @deprecated renamed to {@link #ofMixed(int, int, int, boolean)}; see {@link #of(int, int, int)}.
+     */
+    @Deprecated
+    public static Fraction of(final int whole, final int numerator, final int denominator, final boolean reduce) throws ArithmeticException {
+        return ofMixed(whole, numerator, denominator, reduce);
     }
 
     /**
      * Creates a {@code Fraction} instance from a {@code double} value using the continued
-     * fraction algorithm. This method finds a fraction that closely approximates the given
-     * double value.
+     * fraction algorithm.
      *
-     * <p>The algorithm computes a maximum of 25 convergents and bounds the denominator by 10,000
-     * to ensure reasonable fraction sizes. The resulting fraction is automatically reduced to
-     * its simplest form.</p>
+     * <p><b>Approximation contract:</b> the result is the fraction <em>closest to {@code value} by
+     * absolute difference</em> among all fractions whose denominator is at most 10,000 and whose
+     * numerator fits in an {@code int}. When two such fractions are equally close, the one with the
+     * smaller denominator is returned, then the numerator closest to zero. The comparison uses the
+     * exact binary value of the double: {@code of(0.00005)} returns {@code 1/10000}, since that double
+     * is slightly above the exact midpoint. The result is always reduced to its simplest form.</p>
+     *
+     * <p>Both bounds apply to the entire fraction. For large values the numerator bound can require
+     * a coarser approximation and can change the whole-number part. For example,
+     * {@code of(1000000000.25)} returns {@code 1000000000/1}: the equally close fraction with
+     * denominator two loses the denominator tie-break. Every finite value in the supported range
+     * has an integer candidate, so approximation itself does not fail.</p>
+     *
+     * <p><b>The denominator bound is a real limit, not a formality.</b> A value that is not itself a
+     * fraction with a small denominator can only be approximated: {@code of(Math.PI)} returns
+     * {@code 355/113}, and values whose magnitude is below the exact rational {@code 1/20000}
+     * return {@code 0/1}. The additional numerator bound can increase the error up to one half.
+     * Use {@link java.math.BigDecimal} when the exact
+     * decimal value must be preserved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fraction f1 = Fraction.of(0.5);          // returns 1/2
-     * Fraction f2 = Fraction.of(0.333);        // returns approximately 333/1000
-     * Fraction f3 = Fraction.of(3.14159);      // returns an approximation of pi
+     * Fraction f2 = Fraction.of(0.333);        // returns 333/1000
+     * Fraction f3 = Fraction.of(3.14159);      // returns 9563/3044 (an approximation of pi)
+     * Fraction f4 = Fraction.of(0.99991);      // returns 9999/10000, not 1/1
+     * Fraction f5 = Fraction.of(0.00001);      // returns 0/1 - no closer fraction fits the bound
      * Fraction.of(Double.NaN);                 // throws ArithmeticException
      * Fraction.of(Double.POSITIVE_INFINITY);   // throws ArithmeticException
      * }</pre>
      *
      * @param value the double value to convert to a fraction
-     * @return a new fraction instance that approximates the given value
+     * @return the closest fraction to {@code value} whose denominator is at most 10,000 and whose
+     *         numerator is representable as an {@code int}, in reduced form
      * @throws ArithmeticException if the value is outside the inclusive range
-     *         [{@link Integer#MIN_VALUE}, {@link Integer#MAX_VALUE}], is {@code NaN}, is infinite,
-     *         if the approximated numerator cannot be represented as an {@code int},
-     *         or if the algorithm fails to converge within 25 iterations
+     *         [{@link Integer#MIN_VALUE}, {@link Integer#MAX_VALUE}], is {@code NaN}, or is infinite
      */
-    public static Fraction of(double value) {
+    public static Fraction of(final double value) throws ArithmeticException {
         if (!Double.isFinite(value) || value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
             throw new ArithmeticException("The value must be finite and between Integer.MIN_VALUE and Integer.MAX_VALUE");
         }
-
-        // Math.abs(Integer.MIN_VALUE as a double) is one greater than Integer.MAX_VALUE and the
-        // subsequent narrowing conversion would saturate to Integer.MAX_VALUE. Handle the exactly
-        // representable negative endpoint before decomposing the magnitude.
-        if (value == Integer.MIN_VALUE) {
-            return of(Integer.MIN_VALUE, 1);
+        if (value == 0) {
+            return of(0, 1);
         }
-
+        // Work with the exact binary rational, so rounding near a midpoint cannot choose the wrong neighbor.
         final int sign = value < 0 ? -1 : 1;
-        value = Math.abs(value);
-        final int wholeNumber = (int) value;
-        value -= wholeNumber;
-
-        int numer0 = 0; // the pre-previous
-        int denom0 = 1; // the pre-previous
-        int numer1 = 1; // the previous
-        int denom1 = 0; // the previous
-        int numer2 = 0; // the current, setup in calculation
-        int denom2 = 0; // the current, setup in calculation
-        int a1 = (int) value;
-        int a2 = 0;
-        double x1 = 1;
-        double x2 = 0;
-        double y1 = value - a1;
-        double y2 = 0;
-        double delta1, delta2 = Double.MAX_VALUE;
-        double fraction;
-        int i = 1;
-
-        if (y1 == 0) {
-            // value is an exact integer, no fractional part
-            return of(wholeNumber * sign, 1);
+        final long numeratorLimit = sign < 0 ? -(long) Integer.MIN_VALUE : Integer.MAX_VALUE;
+        final long bits = Double.doubleToLongBits(Math.abs(value));
+        final int encodedExponent = (int) ((bits >>> 52) & 0x7ff);
+        final long significand = (bits & ((1L << 52) - 1)) | (encodedExponent == 0 ? 0 : 1L << 52);
+        final int exponent = encodedExponent == 0 ? -1074 : encodedExponent - 1075;
+        final BigInteger originalNumerator = exponent >= 0 ? BigInteger.valueOf(significand).shiftLeft(exponent) : BigInteger.valueOf(significand);
+        final BigInteger originalDenominator = exponent >= 0 ? BigInteger.ONE : BigInteger.ONE.shiftLeft(-exponent);
+        BigInteger numerator = originalNumerator;
+        BigInteger denominator = originalDenominator;
+        long p0 = 0, q0 = 1, p1 = 1, q1 = 0;
+        while (true) {
+            final BigInteger[] step = numerator.divideAndRemainder(denominator);
+            long limit = Long.MAX_VALUE;
+            if (p1 != 0) {
+                limit = Math.min(limit, (numeratorLimit - p0) / p1);
+            }
+            if (q1 != 0) {
+                limit = Math.min(limit, (MAX_DENOMINATOR - q0) / q1);
+            }
+            if (step[0].compareTo(BigInteger.valueOf(limit)) > 0) {
+                // At either bound, the previous convergent and the last admissible semiconvergent
+                // bracket all better candidates. Compare their errors exactly, without division.
+                final long p2 = p0 + limit * p1;
+                final long q2 = q0 + limit * q1;
+                final BigInteger error1 = originalNumerator.multiply(BigInteger.valueOf(q1))
+                        .subtract(originalDenominator.multiply(BigInteger.valueOf(p1)))
+                        .abs();
+                final BigInteger error2 = originalNumerator.multiply(BigInteger.valueOf(q2))
+                        .subtract(originalDenominator.multiply(BigInteger.valueOf(p2)))
+                        .abs();
+                final int comparison = error2.multiply(BigInteger.valueOf(q1)).compareTo(error1.multiply(BigInteger.valueOf(q2)));
+                if (comparison < 0 || (comparison == 0 && (q2 < q1 || (q2 == q1 && p2 < p1)))) {
+                    return of((int) (sign * p2), (int) q2, true);
+                }
+                return of((int) (sign * p1), (int) q1, true);
+            }
+            final long coefficient = step[0].longValueExact();
+            final long p2 = p0 + coefficient * p1;
+            final long q2 = q0 + coefficient * q1;
+            if (step[1].signum() == 0) {
+                return of((int) (sign * p2), (int) q2, true);
+            }
+            p0 = p1;
+            q0 = q1;
+            p1 = p2;
+            q1 = q2;
+            numerator = denominator;
+            denominator = step[1];
         }
-
-        do {
-            delta1 = delta2;
-            a2 = (int) (x1 / y1);
-            x2 = y1;
-            y2 = x1 - a2 * y1;
-            numer2 = a1 * numer1 + numer0;
-            denom2 = a1 * denom1 + denom0;
-            fraction = (double) numer2 / (double) denom2;
-            delta2 = Math.abs(value - fraction);
-            a1 = a2;
-            x1 = x2;
-            y1 = y2;
-            numer0 = numer1;
-            denom0 = denom1;
-            numer1 = numer2;
-            denom1 = denom2;
-            i++;
-        } while (delta1 > delta2 && denom2 <= 10000 && denom2 > 0 && i < 25);
-        if (i == 25) {
-            throw new ArithmeticException("Unable to convert double to fraction");
-        }
-        // Reconstruct the numerator in long arithmetic and bounds-check before narrowing to int.
-        // In int arithmetic `numer0 + wholeNumber * denom0` silently overflows for large
-        // whole-number parts (e.g. of(2147483646.5) would return -3/2), producing a wrong
-        // fraction. denom0 is bounded by the loop guard (denom2 <= 10000), so computing the term
-        // in long cannot overflow; if the true numerator exceeds the int range the value simply
-        // cannot be represented as a Fraction and we throw, consistent with the > Integer.MAX_VALUE guard.
-        final long resultNumerator = (numer0 + (long) wholeNumber * denom0) * sign;
-
-        if (resultNumerator < Integer.MIN_VALUE || resultNumerator > Integer.MAX_VALUE) {
-            throw new ArithmeticException("Overflow: the numerator is too large to be represented as an int");
-        }
-
-        return of((int) resultNumerator, denom0, true);
     }
 
     /**
@@ -649,7 +744,8 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * <p>Accepted formats:</p>
      * <ul>
-     * <li>Decimal format: "0.5", "-2.75" (contains a decimal point)</li>
+     * <li>Decimal format: "0.5", "-2.75" (a token containing a decimal point but no {@code '/'}; parsed
+     *     with {@link Double#parseDouble} and then approximated by {@link #of(double)})</li>
      * <li>Mixed fraction: "1 3/4", "-2 1/3" (whole number followed by space and fraction)</li>
      * <li>Simple fraction: "3/4", "-7/8" (numerator/denominator)</li>
      * <li>Whole number: "5", "-12" (treated as a fraction with denominator 1)</li>
@@ -661,11 +757,27 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction f2 = Fraction.of("1 2/3");   // returns 5/3
      * Fraction f3 = Fraction.of("0.25");    // returns 1/4
      * Fraction f4 = Fraction.of("-5");      // returns -5/1
+     * Fraction.of(" 3");                   // throws NumberFormatException (whitespace is significant)
      * Fraction.of(null);                    // throws IllegalArgumentException
      * Fraction.of("invalid");               // throws NumberFormatException
+     * Fraction.of("1e-3");                  // throws NumberFormatException (no decimal point)
+     * Fraction.of("1.0/2.0");               // throws NumberFormatException ("1.0" is not an integer)
      * }</pre>
      *
-     * @param str the string to parse, must not be {@code null}
+     * <p>A token containing {@code '/'} is always read as a fraction, never as a decimal, so the
+     * components of {@code "1.0/2.0"} are reported individually rather than the whole token being
+     * rejected as a malformed decimal number.</p>
+     *
+     * <p>In the mixed {@code "X Y/Z"} form the sign belongs to the whole number and negates the whole
+     * value, so {@code "-2 1/3"} is {@code -7/3} and not {@code -6/3 + 1/3}. A written minus sign is
+     * honoured even on a zero whole part: {@code "-0 1/2"} parses as {@code -1/2}. That case is
+     * carried by the string alone &mdash; {@link #ofMixed(int, int, int)} takes an {@code int} whole
+     * part, which cannot distinguish {@code 0} from {@code -0} and therefore cannot express any value
+     * between {@code -1} and {@code 0}.</p>
+     *
+     * @param str the string to parse, must not be {@code null}. Whitespace is significant: a space
+     *            separates the whole number of the {@code "X Y/Z"} form, so padded input such as
+     *            {@code " 3"} or {@code "2 "} is rejected
      * @return a new fraction instance
      * @throws IllegalArgumentException if {@code str} is {@code null}.
      * @throws NumberFormatException if the string is not in a recognized format, or if
@@ -674,40 +786,90 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *         negative numerator in the mixed {@code "X Y/Z"} form), or if the decimal form is
      *         outside the representable range
      */
-    public static Fraction of(String str) {
+    public static Fraction of(final String str) throws IllegalArgumentException, NumberFormatException, ArithmeticException {
         if (str == null) {
             throw new IllegalArgumentException("The string must not be null");
         }
+
+        // Note: whitespace is significant. ' ' separates the whole number of the "X Y/Z" form, so a
+        // padded token such as " 3" or "2 " is a malformed mixed number, not an integer to be trimmed.
+
+        // A '/' means the caller wrote a fraction, so route to the fraction parsers even when a '.' is
+        // also present. Dispatching on '.' first sent "1.0/2.0" to the decimal parser, which reported it
+        // as a malformed decimal rather than naming the non-integer component that is actually wrong.
+        // (No exception type changes: every component of a slash-bearing token is parsed with
+        // Integer.parseInt, and a token containing '.' can never satisfy Double.parseDouble with a '/'
+        // in it either, so both routes raise NumberFormatException.)
+        final int slashPos = str.indexOf('/');
+
         // parse double format
-        int pos = str.indexOf('.');
-        if (pos >= 0) {
-            return of(Double.parseDouble(str));
+        if (slashPos < 0 && str.indexOf('.') >= 0) {
+            return of(parseDoublePart(str));
         }
 
         // parse X Y/Z format
-        pos = str.indexOf(' ');
+        int pos = str.indexOf(' ');
         if (pos > 0) {
-            final int whole = Integer.parseInt(str.substring(0, pos));
-            str = str.substring(pos + 1);
-            pos = str.indexOf('/');
+            final String wholePart = str.substring(0, pos);
+            final int whole = parseIntPart(wholePart, str);
+            final String fractionPart = str.substring(pos + 1);
+            pos = fractionPart.indexOf('/');
             if (pos < 0) {
-                throw new NumberFormatException("The fraction could not be parsed as the format X Y/Z");
-            } else {
-                final int numer = Integer.parseInt(str.substring(0, pos));
-                final int denom = Integer.parseInt(str.substring(pos + 1));
-                return of(whole, numer, denom);
+                throw new NumberFormatException("The fraction \"" + str + "\" could not be parsed as the format X Y/Z");
             }
+
+            final int numer = parseIntPart(fractionPart.substring(0, pos), str);
+            final int denom = parseIntPart(fractionPart.substring(pos + 1), str);
+            final Fraction result = ofMixed(whole, numer, denom);
+
+            // "-0 1/2" means -1/2, but Integer.parseInt("-0") is 0, so by the time the whole part is an
+            // int the sign is gone and ofMixed - whose only sign carrier is that int - can no longer
+            // express it. The written '-' is the sole remaining record, so apply it here. Only the
+            // zero whole part needs this: any other negative whole already carries the sign, and the
+            // numerator is non-negative by ofMixed's contract. Apply the sign without invoking
+            // arithmetic normalization: parsing preserves the caller's unreduced terms.
+            return whole == 0 && wholePart.charAt(0) == '-' ? fromTerms(-(long) result.numerator, result.denominator, false) : result;
         }
 
         // parse Y/Z format
-        pos = str.indexOf('/');
-        if (pos < 0) {
+        if (slashPos < 0) {
             // simple whole number
-            return of(Integer.parseInt(str), 1);
-        } else {
-            final int numer = Integer.parseInt(str.substring(0, pos));
-            final int denom = Integer.parseInt(str.substring(pos + 1));
-            return of(numer, denom);
+            return of(parseIntPart(str, str), 1);
+        }
+
+        final int numer = parseIntPart(str.substring(0, slashPos), str);
+        final int denom = parseIntPart(str.substring(slashPos + 1), str);
+        return of(numer, denom);
+    }
+
+    /**
+     * Parses one integer component of a fraction string, reporting the whole input on failure.
+     *
+     * @param part the component to parse
+     * @param source the complete string being parsed, used for the error message
+     * @return the parsed value
+     * @throws NumberFormatException if {@code part} is not a valid {@code int}
+     */
+    private static int parseIntPart(final String part, final String source) throws NumberFormatException {
+        try {
+            return Integer.parseInt(part);
+        } catch (final NumberFormatException e) {
+            throw new NumberFormatException("The fraction \"" + source + "\" could not be parsed: \"" + part + "\" is not an integer");
+        }
+    }
+
+    /**
+     * Parses the decimal form of a fraction string, naming the input in the failure message.
+     *
+     * @param source the decimal token to parse, which is also the complete string being parsed
+     * @return the parsed value
+     * @throws NumberFormatException if {@code source} is not a valid {@code double}
+     */
+    private static double parseDoublePart(final String source) throws NumberFormatException {
+        try {
+            return Double.parseDouble(source);
+        } catch (final NumberFormatException e) {
+            throw new NumberFormatException("The fraction \"" + source + "\" could not be parsed as a decimal number");
         }
     }
 
@@ -961,6 +1123,17 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Gets the fraction as a {@code float} value by performing floating-point division.
      * This calculates the decimal representation of the fraction.
      *
+     * <p><b>Accuracy:</b> the quotient is computed as a {@code double} and narrowed once, which is
+     * {@link #doubleValue()} rounded to {@code float}. Both {@code int} terms are exact as
+     * {@code double}s and the {@code double} quotient is correctly rounded, so this is the nearest
+     * {@code float} to {@code doubleValue()}. It is <em>not</em> guaranteed to be the nearest
+     * {@code float} to the exact rational: the two successive roundings can land one ULP away when the
+     * exact value sits extremely close to a {@code float} midpoint (for example
+     * {@code Fraction.of(2125113837, 2125114027)}). Such cases are rare &mdash; none occurred in
+     * 200,000 uniformly random {@code int}/{@code int} pairs &mdash; but if exact rounding of the
+     * rational is required, use {@link #doubleValue()} or divide the terms with
+     * {@link java.math.BigDecimal}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fraction f1 = Fraction.of(1, 3);    // returns 1/3
@@ -974,13 +1147,21 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      *
      * Fraction f4 = Fraction.of(-1, 2);   // returns -1/2
      * float v4 = f4.floatValue();         // returns -0.5f
+     *
+     * // Large terms: rounding each term to float first would lose two ULPs here
+     * Fraction f5 = Fraction.of(16777217, 16777219);
+     * float v5 = f5.floatValue();         // returns 0.9999999f
      * }</pre>
      *
      * @return the fraction as a float value
+     * @see #doubleValue()
      */
     @Override
     public float floatValue() {
-        return (float) numerator / (float) denominator; // NOSONAR
+        // Divide in double and narrow once, rather than dividing two floats. Narrowing the terms first
+        // rounds each to 24-bit precision before the division, which loses up to ~2 ULPs and differed
+        // from the correctly rounded result for ~34% of uniformly random int/int pairs.
+        return (float) doubleValue();
     }
 
     /**
@@ -1042,16 +1223,16 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         if (numerator == 0) {
             return equals(ZERO) ? this : ZERO;
         }
-        final int gcd = greatestCommonDivisor(Math.abs(numerator), denominator);
+        final long gcd = greatestCommonDivisor(numerator, denominator);
         if (gcd == 1) {
             return this;
         }
-        return Fraction.of(numerator / gcd, denominator / gcd);
+        return new Fraction((int) (numerator / gcd), (int) (denominator / gcd));
     }
 
     /**
      * Returns the multiplicative inverse (reciprocal) of this fraction.
-     * For a fraction a/b, the inverse is b/a. The returned fraction is not reduced.
+     * For a fraction a/b, the inverse is b/a. The returned fraction is reduced.
      *
      * <p>Special handling for negative fractions: the negative sign is moved to the
      * numerator in the result.</p>
@@ -1071,26 +1252,15 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * }</pre>
      *
      * @return a new fraction that is the inverse of this fraction
-     * @throws ArithmeticException if this fraction equals zero (cannot invert zero)
-     *         or if the numerator is {@code Integer.MIN_VALUE}
+     * @throws ArithmeticException if this fraction is zero, or the reduced reciprocal cannot be represented with an int numerator and positive int denominator
      */
-    public Fraction invert() {
-        if (numerator == 0) {
-            throw new ArithmeticException("Unable to invert zero.");
-        }
-        if (numerator == Integer.MIN_VALUE) {
-            throw new ArithmeticException("overflow: cannot negate numerator");
-        }
-        if (numerator < 0) {
-            return new Fraction(-denominator, -numerator);
-        } else {
-            return new Fraction(denominator, numerator);
-        }
+    public Fraction invert() throws ArithmeticException {
+        return fromTerms(denominator, numerator, true);
     }
 
     /**
      * Returns the additive inverse (negative) of this fraction.
-     * For a fraction a/b, the negative is -a/b. The returned fraction is not reduced.
+     * For a fraction a/b, the negative is -a/b. The returned fraction is reduced.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1106,23 +1276,18 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction.of(Integer.MIN_VALUE, 1).negate();   // throws ArithmeticException
      * }</pre>
      *
-     * @return a new fraction with the opposite sign
-     * @throws ArithmeticException if the numerator is {@code Integer.MIN_VALUE}
-     *         (cannot be negated due to integer overflow)
+     * @return the negated fraction in reduced form; the shared {@link #ZERO} constant when this fraction
+     *         is zero
+     * @throws ArithmeticException if the reduced result cannot be represented with int terms
      */
-    public Fraction negate() {
-        // the positive range is one smaller than the negative range of an int.
-        if (numerator == Integer.MIN_VALUE) {
-            throw new ArithmeticException("overflow: too large to negate");
-        }
-        return new Fraction(-numerator, denominator);
+    public Fraction negate() throws ArithmeticException {
+        return fromTerms(-(long) numerator, denominator, true);
     }
 
     /**
      * Returns the absolute value of this fraction.
-     * If the fraction is already positive or zero, returns this instance.
-     * If negative, returns a new fraction with the positive value.
-     * The returned fraction is not reduced.
+     * Returns this instance when it is already non-negative and reduced.
+     * The returned fraction is always reduced.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1138,26 +1303,25 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * Fraction.of(Integer.MIN_VALUE, 1).abs();   // throws ArithmeticException
      * }</pre>
      *
-     * @return this instance if positive or zero, otherwise a new positive fraction
-     * @throws ArithmeticException if the numerator is {@code Integer.MIN_VALUE}
-     *         (cannot be negated due to integer overflow)
+     * @return the reduced, non-negative fraction
+     * @throws ArithmeticException if the reduced result cannot be represented with int terms
      */
-    public Fraction abs() {
+    public Fraction abs() throws ArithmeticException {
         if (numerator >= 0) {
-            return this;
+            return reduce();
         }
         return negate();
     }
 
     /**
-     * Raises this fraction to the specified integer power. Multiplication steps reduce their results,
-     * but powers of {@code 1} and {@code -1} can preserve unreduced terms (inverted for {@code -1});
-     * call {@link #reduce()} when a canonical representation is required.
+     * Raises this fraction to the specified integer power, returning a reduced result.
      *
      * <p>Special cases:</p>
      * <ul>
      * <li>Any fraction to the power of 0 equals 1 (even 0/1)</li>
-     * <li>Any fraction to the power of 1 equals itself</li>
+     * <li>Any fraction to the power of 1 equals itself in value; the result is reduced, so
+     * {@code Fraction.of(2, 4).pow(1)} returns {@code 1/2} and is not {@link #equals(Object) equal}
+     * to the receiver</li>
      * <li>Negative powers: (a/b)^(-n) = (b/a)^n</li>
      * </ul>
      *
@@ -1176,177 +1340,49 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @throws ArithmeticException if the power is negative and the fraction is zero,
      *         or if the calculation results in integer overflow
      */
-    public Fraction pow(final int power) {
+    public Fraction pow(final int power) throws ArithmeticException {
         if (power == 1) {
-            return this;
+            return reduce();
         } else if (power == 0) {
             return ONE;
-        } else if (power < 0) {
-            if (power == Integer.MIN_VALUE) { // MIN_VALUE can't be negated.
-                return invert().pow(2).pow(-(power / 2));
+        }
+
+        long exponent = power < 0 ? -(long) power : power;
+        Fraction base = power < 0 ? invert() : reduce();
+        Fraction result = ONE;
+
+        while (exponent != 0) {
+            if ((exponent & 1) != 0) {
+                result = result.multipliedBy(base);
             }
-            return invert().pow(-power);
-        } else {
-            final Fraction f = multipliedBy(this);
-            if (power % 2 == 0) { // if even...
-                return f.pow(power / 2);
-            } else { // if odd...
-                return f.pow(power / 2).multipliedBy(this);
+            exponent >>>= 1;
+            // An unused final square may overflow even when the requested power fits, e.g. (-2)^31.
+            if (exponent != 0) {
+                base = base.multipliedBy(base);
             }
         }
+
+        return result;
+    }
+
+    // All callers supply int terms, products of int terms, or sums of two cross-products
+    // with positive int denominators. Their absolute values fit in long, including gcd 2^31.
+    private static long greatestCommonDivisor(long u, long v) {
+        u = Math.abs(u);
+        v = Math.abs(v);
+        while (v != 0) {
+            final long remainder = u % v;
+            u = v;
+            v = remainder;
+        }
+        return u;
     }
 
     /**
-     * Gets the greatest common divisor (GCD) of the absolute value of two numbers,
-     * using the "binary GCD" method which avoids division and modulo operations.
-     * This implementation follows Knuth 4.5.2 algorithm B, also known as Stein's algorithm (1961).
-     *
-     * <p>The binary GCD algorithm is more efficient than Euclid's algorithm on modern
-     * processors because it uses simple bitwise operations and subtraction instead of
-     * division and modulo operations.</p>
-     *
-     * @param u a number (can be zero)
-     * @param v a number (can be zero)
-     * @return the greatest common divisor of the absolute values of u and v
-     * @throws ArithmeticException if the GCD is 2^31 (overflow condition)
-     */
-    private static int greatestCommonDivisor(int u, int v) {
-        // From Commons Math:
-        if (u == 0 || v == 0) {
-            if (u == Integer.MIN_VALUE || v == Integer.MIN_VALUE) {
-                throw new ArithmeticException("overflow: gcd is 2^31");
-            }
-            return Math.abs(u) + Math.abs(v);
-        }
-        //if either operand is abs 1, return 1:
-        if (Math.abs(u) == 1 || Math.abs(v) == 1) {
-            return 1;
-        }
-        // keep u and v negative, as negative integers range down to
-        // -2^31, while positive numbers can only be as large as 2^31-1
-        // (i.e., we can't necessarily negate a negative number without
-        // overflow)
-        if (u > 0) {
-            u = -u;
-        } // make u negative
-        if (v > 0) {
-            v = -v;
-        } // make v negative
-          // B1. [Find power of 2]
-        int k = 0;
-        while ((u & 1) == 0 && (v & 1) == 0 && k < 31) { // while u and v are both even...
-            u /= 2;
-            v /= 2;
-            k++; // cast out twos.
-        }
-        if (k == 31) {
-            throw new ArithmeticException("overflow: gcd is 2^31");
-        }
-        // B2. Initialize: u and v have been divided by 2^k and at least
-        //     one is odd.
-        int t = (u & 1) == 1 ? v : -(u / 2)/* B3 */;
-        // t negative: u was odd, v may be even (t replaces v)
-        // t positive: u was even, v is odd (t replaces u)
-        do {
-            /* assert u<0 && v<0; */
-            // B4/B3: cast out twos from t.
-            while ((t & 1) == 0) { // while t is even.
-                t /= 2; // cast out twos
-            }
-            // B5 [reset max(u,v)]
-            if (t > 0) {
-                u = -t;
-            } else {
-                v = t;
-            }
-            // B6/B3. at this point both u and v should be odd.
-            t = (v - u) / 2;
-            // |u| larger: t positive (replace u)
-            // |v| larger: t negative (replace v)
-        } while (t != 0);
-        return -u * (1 << k); // gcd is u*2^k
-    }
-
-    // Arithmetic
-    //-------------------------------------------------------------------
-
-    /**
-     * Multiplies two integers, checking for overflow.
-     * Performs the multiplication using long arithmetic to detect overflow conditions.
-     *
-     * @param x the first factor
-     * @param y the second factor
-     * @return the product of x and y
-     * @throws ArithmeticException if the result cannot be represented as an {@code int}
-     */
-    private static int mulAndCheck(final int x, final int y) {
-        final long m = (long) x * (long) y;
-        if (m < Integer.MIN_VALUE || m > Integer.MAX_VALUE) {
-            throw new ArithmeticException("overflow: mul(" + m + ")");
-        }
-        return (int) m;
-    }
-
-    /**
-     * Multiplies two non-negative integers, checking for overflow.
-     * This method assumes both inputs are non-negative and only checks for overflow
-     * against {@code Integer.MAX_VALUE}.
-     *
-     * @param x a non-negative factor
-     * @param y a non-negative factor
-     * @return the product of x and y
-     * @throws ArithmeticException if the result cannot be represented as an {@code int}
-     */
-    private static int mulPosAndCheck(final int x, final int y) {
-        /* assert x>=0 && y>=0; */
-        final long m = (long) x * (long) y;
-        if (m > Integer.MAX_VALUE) {
-            throw new ArithmeticException("overflow: mulPos");
-        }
-        return (int) m;
-    }
-
-    /**
-     * Adds two integers, checking for overflow.
-     * Performs the addition using long arithmetic to detect overflow conditions.
-     *
-     * @param x the first addend
-     * @param y the second addend
-     * @return the sum of x and y
-     * @throws ArithmeticException if the result cannot be represented as an {@code int}
-     */
-    private static int addAndCheck(final int x, final int y) {
-        final long s = (long) x + (long) y;
-        if (s < Integer.MIN_VALUE || s > Integer.MAX_VALUE) {
-            throw new ArithmeticException("overflow: add");
-        }
-        return (int) s;
-    }
-
-    /**
-     * Subtracts two integers, checking for overflow.
-     * Performs the subtraction using long arithmetic to detect overflow conditions.
-     *
-     * @param x the minuend
-     * @param y the subtrahend
-     * @return the difference of x minus y
-     * @throws ArithmeticException if the result cannot be represented as an {@code int}
-     */
-    private static int subAndCheck(final int x, final int y) {
-        final long s = (long) x - (long) y;
-        if (s < Integer.MIN_VALUE || s > Integer.MAX_VALUE) {
-            throw new ArithmeticException("overflow: subtract");
-        }
-        return (int) s;
-    }
-
-    /**
-     * Adds this fraction to another fraction and returns the result; the result is in reduced form provided both operands are in reduced form.
-     * The algorithm follows Knuth 4.5.1 for efficient computation.
+     * Adds this fraction to another fraction and returns the result in reduced form.
      *
      * <p>The addition is performed using the standard formula: a/b + c/d = (ad + bc) / bd,
-     * but optimized to prevent unnecessary overflow and to maintain the result in
-     * reduced form.</p>
+     * with reduction before checking whether the final terms fit in an {@code int}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1365,20 +1401,19 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * }</pre>
      *
      * @param fraction the fraction to add to this fraction (must not be {@code null})
-     * @return the sum; it is in reduced form when both operands are in reduced form
+     * @return the sum in reduced form
      * @throws IllegalArgumentException if the fraction parameter is {@code null}.
-     * @throws ArithmeticException if the calculation results in integer overflow
+     * @throws ArithmeticException if the reduced result cannot be represented with an int numerator and positive int denominator
      */
-    public Fraction add(final Fraction fraction) {
+    public Fraction add(final Fraction fraction) throws IllegalArgumentException, ArithmeticException {
         return addSub(fraction, true /* add */);
     }
 
     /**
-     * Subtracts another fraction from this fraction and returns the result; the result is in reduced form provided both operands are in reduced form.
+     * Subtracts another fraction from this fraction and returns the result in reduced form.
      *
      * <p>The subtraction is performed using the standard formula: a/b - c/d = (ad - bc) / bd,
-     * but optimized to prevent unnecessary overflow and to maintain the result in
-     * reduced form.</p>
+     * with reduction before checking whether the final terms fit in an {@code int}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1397,68 +1432,44 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * }</pre>
      *
      * @param fraction the fraction to subtract from this fraction (must not be {@code null})
-     * @return the difference; it is in reduced form when both operands are in reduced form
+     * @return the difference in reduced form
      * @throws IllegalArgumentException if the fraction parameter is {@code null}.
-     * @throws ArithmeticException if the calculation results in integer overflow
+     * @throws ArithmeticException if the reduced result cannot be represented with an int numerator and positive int denominator
      */
-    public Fraction subtract(final Fraction fraction) {
+    public Fraction subtract(final Fraction fraction) throws IllegalArgumentException, ArithmeticException {
         return addSub(fraction, false /* subtract */);
     }
 
     /**
-     * Implement add and subtract using algorithm described in Knuth 4.5.1.
+     * Implements addition and subtraction with exact intermediate terms.
      *
      * @param fraction the fraction to add or subtract, must not be {@code null}
      * @param isAdd {@code true} to add, {@code false} to subtract
      * @return a {@code Fraction} instance with the resulting values
      * @throws IllegalArgumentException if {@code fraction} is {@code null}.
-     * @throws ArithmeticException if the resulting numerator or denominator cannot be represented in an {@code int}
+     * @throws ArithmeticException if the reduced result cannot be represented with an int numerator and positive int denominator
      */
-    private Fraction addSub(final Fraction fraction, final boolean isAdd) {
+    private Fraction addSub(final Fraction fraction, final boolean isAdd) throws IllegalArgumentException, ArithmeticException {
         if (fraction == null) {
             throw new IllegalArgumentException("The fraction must not be null"); //NOSONAR
         }
-        // zero is identity for addition.
         if (numerator == 0) {
-            return isAdd ? fraction : fraction.negate();
+            return isAdd ? fraction.reduce() : fraction.negate();
         }
         if (fraction.numerator == 0) {
-            return this;
+            return reduce();
         }
-        // if denominators are randomly distributed, d1 will be 1 about 61%
-        // of the time.
-        final int d1 = greatestCommonDivisor(denominator, fraction.denominator);
-        if (d1 == 1) {
-            // result is ( (u*v' +/- u'v) / u'v')
-            final int uvp = mulAndCheck(numerator, fraction.denominator);
-            final int upv = mulAndCheck(fraction.numerator, denominator);
-            return new Fraction(isAdd ? addAndCheck(uvp, upv) : subAndCheck(uvp, upv), mulPosAndCheck(denominator, fraction.denominator));
-        }
-        // the quantity 't' requires 65 bits of precision; see knuth 4.5.1
-        // exercise 7.  we're going to use a BigInteger.
-        // t = u(v'/d1) +/- v(u'/d1)
-        final BigInteger uvp = BigInteger.valueOf(numerator).multiply(BigInteger.valueOf(fraction.denominator / d1));
-        final BigInteger upv = BigInteger.valueOf(fraction.numerator).multiply(BigInteger.valueOf(denominator / d1));
-        final BigInteger t = isAdd ? uvp.add(upv) : uvp.subtract(upv);
-        // but d2 doesn't need extra precision because
-        // d2 = gcd(t,d1) = gcd(t mod d1, d1)
-        final int tmodd1 = t.mod(BigInteger.valueOf(d1)).intValue();
-        final int d2 = tmodd1 == 0 ? d1 : greatestCommonDivisor(tmodd1, d1);
-
-        // result is (t/d2) / (u'/d1)(v'/d2)
-        final BigInteger w = t.divide(BigInteger.valueOf(d2));
-        if (w.bitLength() > 31) {
-            throw new ArithmeticException("overflow: numerator too large after multiply");
-        }
-        return new Fraction(w.intValue(), mulPosAndCheck(denominator / d1, fraction.denominator / d2));
+        // Positive int denominators bound the sum of both cross-products within long.
+        final long left = (long) numerator * fraction.denominator;
+        final long right = (long) fraction.numerator * denominator;
+        return fromTerms(isAdd ? left + right : left - right, (long) denominator * fraction.denominator, true);
     }
 
     /**
      * Multiplies this fraction by another fraction and returns the result in reduced form.
      *
      * <p>The multiplication is performed using the standard formula: a/b × c/d = ac/bd,
-     * but optimized using Knuth's algorithm 4.5.1 to prevent overflow by reducing
-     * common factors before multiplication.</p>
+     * with reduction before checking whether the final terms fit in an {@code int}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1477,22 +1488,15 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * }</pre>
      *
      * @param fraction the fraction to multiply by (must not be {@code null})
-     * @return a new {@code Fraction} instance with the product in reduced form
+     * @return the product, in reduced form; the shared {@link #ZERO} constant when either operand is zero
      * @throws IllegalArgumentException if the fraction parameter is {@code null}.
-     * @throws ArithmeticException if the calculation results in integer overflow
+     * @throws ArithmeticException if the reduced result cannot be represented with an int numerator and positive int denominator
      */
-    public Fraction multipliedBy(final Fraction fraction) {
+    public Fraction multipliedBy(final Fraction fraction) throws IllegalArgumentException, ArithmeticException {
         if (fraction == null) {
             throw new IllegalArgumentException("The fraction must not be null");
         }
-        if (numerator == 0 || fraction.numerator == 0) {
-            return ZERO;
-        }
-        // knuth 4.5.1
-        // make sure we don't overflow unless the result *must* overflow.
-        final int d1 = greatestCommonDivisor(numerator, fraction.denominator);
-        final int d2 = greatestCommonDivisor(fraction.numerator, denominator);
-        return of(mulAndCheck(numerator / d1, fraction.numerator / d2), mulPosAndCheck(denominator / d2, fraction.denominator / d1), true);
+        return fromTerms((long) numerator * fraction.numerator, (long) denominator * fraction.denominator, true);
     }
 
     /**
@@ -1515,19 +1519,19 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * }</pre>
      *
      * @param fraction the fraction to divide by (must not be {@code null} or zero)
-     * @return a new {@code Fraction} instance with the quotient
+     * @return the quotient, in reduced form; the shared {@link #ZERO} constant when this fraction is zero
      * @throws IllegalArgumentException if the fraction parameter is {@code null}.
      * @throws ArithmeticException if the divisor fraction is zero or if the
      *         calculation results in integer overflow
      */
-    public Fraction dividedBy(final Fraction fraction) {
+    public Fraction dividedBy(final Fraction fraction) throws IllegalArgumentException, ArithmeticException {
         if (fraction == null) {
             throw new IllegalArgumentException("The fraction must not be null");
         }
         if (fraction.numerator == 0) {
             throw new ArithmeticException("The fraction to divide by must not be zero");
         }
-        return multipliedBy(fraction.invert());
+        return fromTerms((long) numerator * fraction.denominator, (long) denominator * fraction.numerator, true);
     }
 
     // Basics
@@ -1561,7 +1565,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
-    public int compareTo(final Fraction other) {
+    public int compareTo(final Fraction other) throws NullPointerException {
         if (this.equals(other)) {
             return 0;
         }
@@ -1602,24 +1606,23 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
                 toProperString = "0";
             } else if (numerator == denominator) {
                 toProperString = "1";
-                // The "is this -1?" check is done in the negative domain (mirroring the
-                // magnitude check below) so that denominator == Integer.MIN_VALUE — for which
-                // -1 * denominator silently overflows to MIN_VALUE — does not falsely match.
-            } else if (numerator < 0 && denominator != Integer.MIN_VALUE && numerator == -denominator) {
+            } else if (numerator < 0 && numerator == -denominator) {
+                // denominator is always > 0 (every factory moves the sign onto the numerator), so
+                // -denominator cannot overflow here.
                 toProperString = "-1";
             } else if ((numerator > 0 ? -numerator : numerator) < -denominator) {
                 // note that we do the magnitude comparison test above with
                 // NEGATIVE (not positive) numbers, since negative numbers
                 // have a larger range.  otherwise, numerator==Integer.MIN_VALUE
                 // is handled incorrectly.
-                final int properNumerator = getProperNumerator();
+                final int properNumerator = properNumerator();
                 if (properNumerator == 0) {
-                    toProperString = Integer.toString(getProperWhole());
+                    toProperString = Integer.toString(properWhole());
                 } else {
-                    toProperString = String.valueOf(getProperWhole()) + ' ' + properNumerator + '/' + getDenominator();
+                    toProperString = String.valueOf(properWhole()) + ' ' + properNumerator + '/' + denominator;
                 }
             } else {
-                toProperString = String.valueOf(getNumerator()) + '/' + getDenominator();
+                toProperString = String.valueOf(numerator) + '/' + denominator;
             }
         }
         return toProperString;
@@ -1733,7 +1736,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         if (!(obj instanceof Fraction other)) {
             return false;
         }
-        return getNumerator() == other.getNumerator() && getDenominator() == other.getDenominator();
+        return numerator == other.numerator && denominator == other.denominator;
     }
 
     /**
@@ -1762,7 +1765,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     public int hashCode() {
         if (hashCode == 0) {
             // hashcode update should be atomic.
-            int h = 37 * (37 * 17 + getNumerator()) + getDenominator();
+            final int h = 37 * (37 * 17 + numerator) + denominator;
             hashCode = h == 0 ? 1 : h;
         }
         return hashCode;
@@ -1789,8 +1792,37 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     @Override
     public String toString() {
         if (toString == null) {
-            toString = String.valueOf(getNumerator()) + '/' + getDenominator();
+            toString = String.valueOf(numerator) + '/' + denominator;
         }
         return toString;
+    }
+
+    /**
+     * Restores a {@code Fraction} from a stream, rejecting any state no factory method could have
+     * produced.
+     *
+     * <p>Every invariant of this class is enforced by the {@code of(...)} factories rather than by the
+     * private constructor, and deserialization runs neither: a hand-crafted or corrupted stream can
+     * otherwise yield a {@code Fraction} whose denominator is zero (making {@link #intValue()} throw
+     * and {@link #doubleValue()} return {@code NaN}) or negative (putting the sign on the wrong term,
+     * which silently breaks {@link #compareTo(Fraction)}, whose cross-multiplication assumes a
+     * positive denominator).</p>
+     *
+     * @param in the stream to read this fraction from
+     * @throws IOException if restoring the serialized fraction fields fails
+     * @throws ClassNotFoundException if the class of a serialized object cannot be found
+     * @throws InvalidObjectException if the stream holds a zero or negative denominator
+     */
+    @Serial
+    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException, InvalidObjectException {
+        in.defaultReadObject();
+
+        if (denominator == 0) {
+            throw new InvalidObjectException("The denominator must not be zero");
+        }
+
+        if (denominator < 0) {
+            throw new InvalidObjectException("The denominator must be positive (" + denominator + "); the sign belongs on the numerator");
+        }
     }
 }

@@ -28,8 +28,9 @@ public class BooleanBiConsumerTest extends TestBase {
     public void testAcceptWithLambda() {
         AtomicInteger counter = new AtomicInteger(0);
         BooleanBiConsumer consumer = (t, u) -> {
-            if (t && u)
+            if (t && u) {
                 counter.incrementAndGet();
+            }
         };
 
         consumer.accept(true, true);
@@ -95,14 +96,18 @@ public class BooleanBiConsumerTest extends TestBase {
         AtomicInteger falseCount = new AtomicInteger(0);
 
         BooleanBiConsumer consumer = (t, u) -> {
-            if (t)
+            if (t) {
                 trueCount.incrementAndGet();
-            if (u)
+            }
+            if (u) {
                 trueCount.incrementAndGet();
-            if (!t)
+            }
+            if (!t) {
                 falseCount.incrementAndGet();
-            if (!u)
+            }
+            if (!u) {
                 falseCount.incrementAndGet();
+            }
         };
 
         consumer.accept(true, false);

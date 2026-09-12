@@ -16,6 +16,10 @@
 
 package com.landawn.abacus.util;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -117,7 +121,8 @@ import com.landawn.abacus.util.stream.ByteStream;
  *
  * <p><b>Memory Efficiency:</b>
  * <ul>
- *   <li><b>Storage:</b> 1 byte per element (8 bits) with no object overhead</li>
+ *   <li><b>Storage:</b> Each occupied array slot stores one 8-bit value; the list object and array still
+ *       have normal JVM overhead, and spare capacity is not counted by {@code size()}</li>
  *   <li><b>vs List&lt;Byte&gt;:</b> Avoids per-element references and boxing; actual memory savings are JVM-dependent</li>
  *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
  *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
@@ -161,12 +166,13 @@ import com.landawn.abacus.util.stream.ByteStream;
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access</li>
  *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
- *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ *   <li><b>Read-Only Access:</b> Concurrent reads require safe publication and no concurrent mutation</li>
  * </ul>
  *
  * <p><b>Capacity Management:</b>
  * <ul>
- *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Initial Capacity:</b> The no-argument constructor starts with shared zero-length storage;
+ *       first growth allocates at least 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
  *   <li><b>Manual Control:</b> specify the initial capacity via the {@code ByteList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
@@ -184,7 +190,9 @@ import com.landawn.abacus.util.stream.ByteStream;
  * <ul>
  *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
  *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
- *   <li><b>Efficient Format:</b> Optimized serialization of byte arrays</li>
+ *   <li><b>Serialized Form:</b> A custom {@code writeObject} writes only the elements in
+ *       {@code [0, size())}, so spare capacity is never emitted; {@code readObject} rejects a stream whose
+ *       {@code size} does not fit its {@code elementData}</li>
  *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
  * </ul>
  *
@@ -332,7 +340,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws IllegalArgumentException if the specified initial capacity is negative.
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
-    public ByteList(final int initialCapacity) throws IllegalArgumentException {
+    public ByteList(final int initialCapacity) throws IllegalArgumentException, OutOfMemoryError {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
 
         elementData = initialCapacity == 0 ? N.EMPTY_BYTE_ARRAY : new byte[initialCapacity];
@@ -355,14 +363,14 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * ByteList empty = new ByteList(new byte[0]);
      * empty.size();                  // returns 0
      *
-     * new ByteList((byte[]) null);   // throws NullPointerException
+     * new ByteList((byte[]) null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param a the array to be used as the backing array for this list; must not be {@code null}
-     * @throws NullPointerException if {@code a} is {@code null}
+     * @throws IllegalArgumentException if {@code a} is {@code null}
      */
-    public ByteList(final byte[] a) {
-        this(N.requireNonNull(a), a.length);
+    public ByteList(final byte[] a) throws IllegalArgumentException {
+        this(N.checkArgNotNull(a, cs.a), a.length);
     }
 
     /**
@@ -387,10 +395,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param a the array to be used as the backing array for this list; must not be {@code null}
      * @param size the number of elements from the array to be included in the list.
      *             Must be between 0 and a.length (inclusive).
-     * @throws NullPointerException if {@code a} is {@code null}
-     * @throws IndexOutOfBoundsException if size is negative or greater than a.length
+     * @throws IllegalArgumentException if {@code a} is {@code null}
+     *         or if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code size} is greater than the array length
      */
-    public ByteList(final byte[] a, final int size) throws IndexOutOfBoundsException {
+    public ByteList(final byte[] a, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(a, cs.a);
         N.checkFromIndexSize(0, size, a.length);
 
         elementData = a;
@@ -444,9 +454,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param size the number of elements from the array to include in the list.
      *             Must be between 0 and the array length (inclusive).
      * @return a new ByteList containing the first {@code size} elements of the specified array
-     * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
+     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code size} is greater than the array length
      */
-    public static ByteList of(final byte[] a, final int size) throws IndexOutOfBoundsException {
+    public static ByteList of(final byte[] a, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
 
         return new ByteList(N.nullToEmpty(a), size);
@@ -502,10 +513,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new ByteList containing a copy of the elements in the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
-     *                                   or {@code fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code a} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > a.length}
      */
-    public static ByteList copyOf(final byte[] a, final int fromIndex, final int toIndex) {
+    public static ByteList copyOf(final byte[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(a, cs.a);
+
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
@@ -557,7 +570,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return a new ByteList containing the sequential values with the specified step
      * @throws IllegalArgumentException if by is zero.
      */
-    public static ByteList range(final byte startInclusive, final byte endExclusive, final byte by) {
+    public static ByteList range(final byte startInclusive, final byte endExclusive, final byte by) throws IllegalArgumentException {
         return of(Array.range(startInclusive, endExclusive, by));
     }
 
@@ -611,7 +624,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return a new ByteList containing the sequential values with the specified step
      * @throws IllegalArgumentException if by is zero.
      */
-    public static ByteList rangeClosed(final byte startInclusive, final byte endInclusive, final byte by) {
+    public static ByteList rangeClosed(final byte startInclusive, final byte endInclusive, final byte by) throws IllegalArgumentException {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
     }
 
@@ -636,7 +649,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return a new ByteList containing {@code len} copies of the specified element
      * @throws IllegalArgumentException if {@code len} is negative.
      */
-    public static ByteList repeat(final byte element, final int len) {
+    public static ByteList repeat(final byte element, final int len) throws IllegalArgumentException {
         return of(Array.repeat(element, len));
     }
 
@@ -657,11 +670,16 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * ByteList.random(-1);   // throws NegativeArraySizeException
      * }</pre>
      *
+     * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
+     * deliberate, but it is roughly two orders of magnitude slower than
+     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
+     * and wrap it with {@code of(..)}.</p>
+     *
      * @param len the number of random byte values to generate. Must be non-negative.
      * @return a new ByteList containing {@code len} random byte values
      * @throws NegativeArraySizeException if {@code len} is negative
      */
-    public static ByteList random(final int len) {
+    public static ByteList random(final int len) throws NegativeArraySizeException {
         final byte[] a = new byte[len];
 
         // Keep consistent with ByteStream/ShortList/ShortStream/CharList/CharStream.
@@ -711,7 +729,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
-    public byte get(final int index) {
+    public byte get(final int index) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         return elementData[index];
@@ -734,7 +752,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
-    public byte set(final int index, final byte e) {
+    public byte set(final int index, final byte e) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         final byte oldValue = elementData[index];
@@ -763,8 +781,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }</pre>
      *
      * @param e the byte value to be appended to this list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void add(final byte e) {
+    public void add(final byte e) throws OutOfMemoryError {
         ensureCapacity(size + 1);
 
         elementData[size++] = e;
@@ -795,8 +814,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param e the byte value to be inserted
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void add(final int index, final byte e) {
+    public void add(final int index, final byte e) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         ensureCapacity(size + 1);
@@ -819,9 +839,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param c the ByteList containing elements to be added to this list. Can be {@code null}.
      * @return {@code true} if this list changed as a result of the call (i.e., if any elements were added)
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final ByteList c) {
+    public boolean addAll(final ByteList c) throws OutOfMemoryError {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -848,9 +869,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param c the ByteList containing elements to be inserted into this list. Can be {@code null}.
      * @return {@code true} if this list changed as a result of the call (i.e., if any elements were added)
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final int index, final ByteList c) {
+    public boolean addAll(final int index, final ByteList c) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(c)) {
@@ -881,9 +903,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param a the array containing elements to be added to this list. Can be {@code null}.
      * @return {@code true} if this list changed as a result of the call (i.e., if any elements were added)
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final byte[] a) {
+    public boolean addAll(final byte[] a) throws OutOfMemoryError {
         return addAll(size(), a);
     }
 
@@ -898,9 +921,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param a the array containing elements to be inserted into this list. Can be {@code null}.
      * @return {@code true} if this list changed as a result of the call (i.e., if any elements were added)
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final int index, final byte[] a) {
+    public boolean addAll(final int index, final byte[] a) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(a)) {
@@ -929,9 +953,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * For add operations, the valid range includes size() to allow appending at the end.
      *
      * @param index the index to check
-     * @throws IndexOutOfBoundsException if index &gt; size || index &lt; 0
+     * @throws IndexOutOfBoundsException if {@code index < 0} or {@code index > size()}
      */
-    private void rangeCheckForAdd(final int index) {
+    private void rangeCheckForAdd(final int index) throws IndexOutOfBoundsException {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -1020,7 +1044,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             N.copy(elementData, index + 1, elementData, index, numMoved);
         }
 
-        elementData[--size] = 0; // clear to let GC do its work
+        elementData[--size] = 0; // keep the unused tail deterministic; it is reachable via internalArray()
     }
 
     /**
@@ -1028,7 +1052,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * After this call returns, this list will contain no elements in common with the specified list.
      * The order of the remaining elements is preserved.
      *
-     * @param c the ByteList containing elements to be removed from this list. Can be {@code null}.
+     * @param c the ByteList containing elements to be removed from this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list changed as a result of the call
      */
     @Override
@@ -1045,7 +1070,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * After this call returns, this list will contain no elements present in the specified array.
      * The order of the remaining elements is preserved.
      *
-     * @param a the array containing elements to be removed from this list. Can be {@code null}.
+     * @param a the array containing elements to be removed from this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list changed as a result of the call
      */
     @Override
@@ -1072,6 +1098,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // list now contains: [1, 3, 5]
      * }</pre>
      *
+     * <p>The list is left unchanged if {@code p} throws: no element is moved until every
+     * {@code p.test(..)} call has returned. Nothing is allocated when no element matches.</p>
+     *
      * @param p the predicate which returns {@code true} for elements to be removed
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
      * @throws IllegalArgumentException if {@code p} is {@code null}.
@@ -1079,21 +1108,39 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     public boolean removeIf(final BytePredicate p) throws IllegalArgumentException {
         N.checkArgNotNull(p, cs.p);
 
-        final ByteList tmp = new ByteList(size());
+        // Split into locate-then-compact so the list is left untouched if the predicate throws:
+        // no element is moved until every p.test(..) call has returned. Nothing is allocated
+        // unless at least one element matches, and the marker set costs one bit per element.
+        int first = 0;
 
-        for (int i = 0; i < size; i++) {
-            if (!p.test(elementData[i])) {
-                tmp.add(elementData[i]);
-            }
+        while (first < size && !p.test(elementData[first])) {
+            first++;
         }
 
-        if (tmp.size() == size()) {
+        if (first == size) {
             return false;
         }
 
-        N.copy(tmp.elementData, 0, elementData, 0, tmp.size());
-        N.fill(elementData, tmp.size(), size, (byte) 0);
-        size = tmp.size;
+        // bit k of removed[] corresponds to element (first + k); bit 0 is the match just found
+        final long[] removed = new long[((size - first) >> 6) + 1];
+        removed[0] |= 1L;
+
+        for (int i = first + 1; i < size; i++) {
+            if (p.test(elementData[i])) {
+                removed[(i - first) >> 6] |= 1L << (i - first);
+            }
+        }
+
+        int w = first;
+
+        for (int i = first + 1; i < size; i++) {
+            if ((removed[(i - first) >> 6] & (1L << (i - first))) == 0) {
+                elementData[w++] = elementData[i];
+            }
+        }
+
+        N.fill(elementData, w, size, (byte) 0);
+        size = w;
 
         return true;
     }
@@ -1147,7 +1194,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * In other words, removes from this list all elements that are not contained in the specified list.
      * The order of the retained elements is preserved.
      *
-     * @param c the ByteList containing elements to be retained in this list. Can be {@code null}.
+     * <p><b>Note:</b> If {@code c} is {@code null} or empty, all elements of this list are removed
+     * (the list is cleared), because no elements can be retained. This is the opposite of
+     * {@link #removeAll(ByteList)}, which leaves this list unchanged for a {@code null} or empty
+     * argument.</p>
+     *
+     * @param c the ByteList containing elements to be retained in this list.
+     *          If {@code null} or empty, all elements of this list are removed
      * @return {@code true} if this list changed as a result of the call
      */
     @Override
@@ -1166,7 +1219,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * In other words, removes from this list all elements that are not contained in the specified array.
      * The order of the retained elements is preserved.
      *
-     * @param a the array containing elements to be retained in this list. Can be {@code null}.
+     * <p><b>Note:</b> If {@code a} is {@code null} or empty, all elements of this list are removed
+     * (the list is cleared), because no elements can be retained. This is the opposite of
+     * {@link #removeAll(byte[])}, which leaves this list unchanged for a {@code null} or empty
+     * argument.</p>
+     *
+     * @param a the array containing elements to be retained in this list.
+     *          If {@code null} or empty, all elements of this list are removed
      * @return {@code true} if this list changed as a result of the call
      */
     @Override
@@ -1193,7 +1252,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
         int w = 0;
 
-        if (c.size() > 3 && size() > 9) {
+        // Compaction must not change membership when another list wraps the same array.
+        if (elementData == c.elementData || needToSet(size(), c.size())) {
             final Set<Byte> set = c.toSet();
 
             for (int i = 0; i < size; i++) {
@@ -1243,7 +1303,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      * @see #removeAllAt(int...)
      */
-    public byte removeAt(final int index) {
+    public byte removeAt(final int index) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         final byte oldValue = elementData[index];
@@ -1276,7 +1336,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @see #removeAt(int)
      */
     @Override
-    public void removeAllAt(final int... indices) {
+    public void removeAllAt(final int... indices) throws IndexOutOfBoundsException {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -1293,8 +1353,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param fromIndex the index of the first element to be removed (inclusive)
      * @param toIndex the index after the last element to be removed (exclusive)
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds,
-     *         or if fromIndex &gt; toIndex
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public void removeRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1346,7 +1405,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
 
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
@@ -1362,12 +1421,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param toIndex the index after the last element to be replaced (exclusive)
      * @param replacement the ByteList containing elements to insert. Can be {@code null} or empty,
      *                    in which case the range is simply removed.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds,
-     *         or if fromIndex &gt; toIndex
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
-    public void replaceRange(final int fromIndex, final int toIndex, final ByteList replacement) throws IndexOutOfBoundsException {
+    public void replaceRange(final int fromIndex, final int toIndex, final ByteList replacement) throws IndexOutOfBoundsException, OutOfMemoryError {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
@@ -1380,13 +1438,15 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.size();
 
         if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError("Required capacity is too large: " + newSizeLong + " > " + MAX_ARRAY_SIZE);
         }
 
         final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
-            elementData = N.copyOf(elementData, newSize);
+            // Grow with the same amortized policy ensureCapacity uses. Sizing the array to exactly
+            // newSize would make a loop of growing replaceRange calls reallocate and copy every time.
+            elementData = N.copyOf(elementData, calNewCapacity(newSize, elementData.length));
         }
 
         if (toIndex - fromIndex != replacement.size() && toIndex != size) {
@@ -1412,12 +1472,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param toIndex the index after the last element to be replaced (exclusive)
      * @param replacement the array containing elements to insert. Can be {@code null} or empty,
      *                    in which case the range is simply removed.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds,
-     *         or if fromIndex &gt; toIndex
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
-    public void replaceRange(final int fromIndex, final int toIndex, final byte[] replacement) throws IndexOutOfBoundsException {
+    public void replaceRange(final int fromIndex, final int toIndex, final byte[] replacement) throws IndexOutOfBoundsException, OutOfMemoryError {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
@@ -1430,13 +1489,15 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.length;
 
         if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError("Required capacity is too large: " + newSizeLong + " > " + MAX_ARRAY_SIZE);
         }
 
         final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
-            elementData = N.copyOf(elementData, newSize);
+            // Grow with the same amortized policy ensureCapacity uses. Sizing the array to exactly
+            // newSize would make a loop of growing replaceRange calls reallocate and copy every time.
+            elementData = N.copyOf(elementData, calNewCapacity(newSize, elementData.length));
         }
 
         if (toIndex - fromIndex != replacement.length && toIndex != size) {
@@ -1584,8 +1645,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param fromIndex the index of the first element (inclusive) to be filled
      * @param toIndex the index after the last element (exclusive) to be filled
      * @param val the value to fill the range with
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds,
-     *         or if fromIndex &gt; toIndex
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public void fill(final int fromIndex, final int toIndex, final byte val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1913,9 +1973,20 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * // result: [(byte)1, (byte)1, (byte)3, (byte)4]
      * }</pre>
      *
+     * <p><b>Ordering of the second operand's contributions.</b> Occurrences of equal values are
+     * interchangeable, so when a value survives {@code n} times, those {@code n} occurrences are taken from
+     * that value's <i>earliest</i> positions in the second operand and emitted in index order. The portion emitted
+     * from the second operand is therefore a subsequence of it by value, but the complete result is not necessarily equal to
+     * {@code difference(b)}
+     * followed by {@code b.difference(this)} when the second operand holds duplicates of a partially
+     * cancelled value. For example {@code ByteList.of((byte) 2).symmetricDifference(ByteList.of((byte) 2, (byte) 1, (byte) 2))}
+     * returns {@code [2, 1]}, whereas concatenating the two differences would give {@code [1, 2]};
+     * both contain the same elements.</p>
+     *
      * @param b the list to compare with this list. Can be {@code null}.
      * @return a new ByteList containing elements that are in either list but not in both.
-     *         Returns a copy of this list if the specified list is {@code null} or empty.
+     *         Returns a copy of this list if the specified list is {@code null} or empty,
+     *         or a copy of the specified list if this list is empty.
      * @see #difference(ByteList)
      * @see #intersection(ByteList)
      */
@@ -1963,6 +2034,16 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * ByteList result = list.symmetricDifference(array);
      * // result: [(byte)1, (byte)1, (byte)3, (byte)4]
      * }</pre>
+     *
+     * <p><b>Ordering of the second operand's contributions.</b> Occurrences of equal values are
+     * interchangeable, so when a value survives {@code n} times, those {@code n} occurrences are taken from
+     * that value's <i>earliest</i> positions in the second operand and emitted in index order. The portion emitted
+     * from the second operand is therefore a subsequence of it by value, but the complete result is not necessarily equal to
+     * {@code difference(b)}
+     * followed by {@code b.difference(this)} when the second operand holds duplicates of a partially
+     * cancelled value. For example {@code ByteList.of((byte) 2).symmetricDifference(ByteList.of((byte) 2, (byte) 1, (byte) 2))}
+     * returns {@code [2, 1]}, whereas concatenating the two differences would give {@code [1, 2]};
+     * both contain the same elements.</p>
      *
      * @param b the array to compare with this list. Can be {@code null}.
      * @return a new ByteList containing elements that are in either this list or the array but not in both.
@@ -2155,8 +2236,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param toIndex the index after the last element (exclusive) to consider
      * @return an OptionalByte containing the minimum value in the range,
      *         or an empty OptionalByte if the range is empty
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds,
-     *         or if fromIndex &gt; toIndex
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public OptionalByte min(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2199,8 +2279,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param toIndex the index after the last element (exclusive) to consider
      * @return an OptionalByte containing the maximum value in the range,
      *         or an empty OptionalByte if the range is empty
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of bounds,
-     *         or if fromIndex &gt; toIndex
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public OptionalByte max(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2218,7 +2297,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)5, (byte)2, (byte)8, (byte)1, (byte)9);
-     * OptionalByte median = list.lowerMedian();  // returns sorted: [1, 2, 5, 8, 9]; median = OptionalByte[5]
+     * OptionalByte median = list.lowerMedian();  // sorted order would be [1, 2, 5, 8, 9], so median = OptionalByte[5]; the list is not reordered
      * }</pre>
      *
      * @return an OptionalByte containing the median value if the list is non-empty, or an empty OptionalByte if the list is empty
@@ -2243,7 +2322,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return an OptionalByte containing the median value if the range is non-empty, or an empty OptionalByte if the range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public OptionalByte lowerMedian(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2264,7 +2343,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }
      * }</pre>
      *
-     * @param action the action to be performed for each element;
+     * @param action the action to be performed for each element; must not be {@code null}.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final ByteConsumer action) throws IllegalArgumentException {
@@ -2293,10 +2372,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * list.forEach(5, -1, action);   // Backward: processes indices 5,4,3,2,1,0
      * }</pre>
      *
-     * @param fromIndex the starting index (inclusive)
+     * @param fromIndex the starting index (inclusive); for backward traversal, {@code size()} is
+     *        accepted and clamped to the last logical element
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
-     * @param action the action to be performed for each element;
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @param action the action to be performed for each element; must not be {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or {@code max(fromIndex, toIndex) > size()}; {@code toIndex == -1} selects reverse traversal through index zero.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final int fromIndex, final int toIndex, final ByteConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -2369,7 +2449,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param fromIndex the starting index (inclusive) of the range to process
      * @param toIndex the ending index (exclusive) of the range to process
      * @return a new ByteList containing only distinct elements from the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public ByteList distinct(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2554,7 +2634,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param toIndex the ending index (exclusive) of the range to search
      * @param valueToFind the byte value to search for
      * @return the index of the search key if found; otherwise, {@code (-(insertion point) - 1)}
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public int binarySearch(final int fromIndex, final int toIndex, final byte valueToFind) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2600,7 +2680,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to reverse
      * @param toIndex the ending index (exclusive) of the range to reverse
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2614,7 +2694,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Rotates all elements in this list by the specified distance.
      * After calling {@code rotate(distance)}, the element at index {@code i} will be moved to
-     * index {@code (i + distance) % size}.
+     * index {@code Math.floorMod((long) i + distance, size())} when the list is non-empty.
      *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).
@@ -2638,7 +2718,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Each possible permutation of the list has equal probability of being produced. The shuffle is
      * performed in-place using the Fisher-Yates algorithm, which runs in O(n) time.</p>
      *
-     * <p>The default source is the library's shared {@link java.security.SecureRandom} instance.</p>
+     * <p>The source is {@link java.util.concurrent.ThreadLocalRandom}, which is <b>not</b>
+     * cryptographically secure. Note that this is a <i>different</i> generator from the one the
+     * {@code random(..)} factories use; call {@link #shuffle(Random)} with a
+     * {@link java.security.SecureRandom} when the permutation must be unpredictable.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2704,7 +2787,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @throws IndexOutOfBoundsException if either index is out of range ({@code < 0 || >= size()})
      */
     @Override
-    public void swap(final int i, final int j) {
+    public void swap(final int i, final int j) throws IndexOutOfBoundsException {
         rangeCheck(i);
         rangeCheck(j);
 
@@ -2744,7 +2827,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param fromIndex the starting index (inclusive) of the range to copy
      * @param toIndex the ending index (exclusive) of the range to copy
      * @return a new ByteList containing the specified range of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public ByteList copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2778,16 +2861,21 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * list.copy(5, -1, -2);   // returns [5, 3, 1] (reverse, every other)
      * }</pre>
      *
-     * @param fromIndex the starting index (inclusive)
+     * <p>If the sign of {@code step} contradicts the direction of the range — a positive step with
+     * {@code fromIndex > toIndex}, or a negative step with {@code fromIndex < toIndex} — the result is an
+     * empty list rather than an exception. Only {@code step == 0} is rejected.</p>
+     *
+     * @param fromIndex the starting index (inclusive); for reverse traversal, {@code size()} is
+     *        accepted and clamped to the last logical element
      * @param toIndex the ending index (exclusive), or -1 for reverse iteration to start
      * @param step the step size (positive for forward, negative for backward)
      * @return a new ByteList containing the selected elements
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or {@code max(fromIndex, toIndex) > size()}; {@code toIndex == -1} is permitted for reverse traversal.
      * @throws IllegalArgumentException if step is 0.
      * @see N#copyOfRange(byte[], int, int, int)
      */
     @Override
-    public ByteList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
+    public ByteList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
         if (size == 0) {
@@ -2820,19 +2908,18 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param toIndex the ending index (exclusive) of the range to split
      * @param chunkSize the desired size of each chunk (must be positive)
      * @return a List of ByteList objects, each containing a chunk of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws IllegalArgumentException if {@code chunkSize <= 0}.
      */
     @Override
-    public List<ByteList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
+    public List<ByteList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final List<byte[]> list = N.split(elementData, fromIndex, toIndex, chunkSize);
-        @SuppressWarnings("rawtypes")
-        final List<ByteList> result = (List) list;
+        final List<byte[]> arrays = N.split(elementData, fromIndex, toIndex, chunkSize);
+        final List<ByteList> result = new ArrayList<>(arrays.size());
 
-        for (int i = 0, len = list.size(); i < len; i++) {
-            result.set(i, of(list.get(i)));
+        for (final byte[] array : arrays) {
+            result.add(of(array));
         }
 
         return result;
@@ -2852,6 +2939,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @return this ByteList instance (for method chaining)
      */
+    @Beta
     @Override
     public ByteList trimToSize() {
         if (elementData.length > size) {
@@ -2929,7 +3017,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param fromIndex the starting index (inclusive) of the range to box
      * @param toIndex the ending index (exclusive) of the range to box
      * @return a new List&lt;Byte&gt; containing boxed versions of the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public List<Byte> boxed(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -3002,12 +3090,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param toIndex the ending index (exclusive) of elements to include
      * @param supplier a function that creates a new Collection instance given the required size
      * @return a new Collection containing boxed elements from the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
+     * @throws UnsupportedOperationException if the selected range is non-empty and the supplied collection does not support adding elements
      */
     @Override
     public <C extends Collection<Byte>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, UnsupportedOperationException {
         checkFromToIndex(fromIndex, toIndex);
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -3029,8 +3118,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param toIndex the ending index (exclusive) of elements to include
      * @param supplier a function that creates a new Multiset instance given the required size
      * @return a new Multiset containing elements from the specified range with their counts
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}, or adding the selected elements would exceed {@link Integer#MAX_VALUE} occurrences for an element in the supplied multiset
      */
     @Override
     public Multiset<Byte> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Byte>> supplier)
@@ -3092,6 +3181,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *     .sum();   // returns 24 (3*2 + 4*2 + 5*2)
      * }</pre>
      *
+     * <p>The stream captures the backing array reference and the range endpoints when it is created,
+     * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured
+     * range can be observed by a stream that has not consumed those positions yet. Growing the list
+     * afterwards does not extend the stream, and any operation that reallocates the backing array leaves
+     * the stream reading the old one. Do not modify the list while a stream over it is in flight.</p>
+     *
      * @return a ByteStream over all elements in this list
      */
     public ByteStream stream() {
@@ -3114,10 +3209,16 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *     .count();   // Counts even numbers in elements [3, 4, 5], result is 1
      * }</pre>
      *
+     * <p>The stream captures the backing array reference and the range endpoints when it is created,
+     * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured
+     * range can be observed by a stream that has not consumed those positions yet. Growing the list
+     * afterwards does not extend the stream, and any operation that reallocates the backing array leaves
+     * the stream reading the old one. Do not modify the list while a stream over it is in flight.</p>
+     *
      * @param fromIndex the starting index (inclusive) for the stream
      * @param toIndex the ending index (exclusive) for the stream
      * @return a ByteStream over the specified range of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public ByteStream stream(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -3145,7 +3246,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @see #first()
      * @see #getLast()
      */
-    public byte getFirst() {
+    public byte getFirst() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return elementData[0];
@@ -3171,7 +3272,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @see #last()
      * @see #getFirst()
      */
-    public byte getLast() {
+    public byte getLast() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return elementData[size - 1];
@@ -3198,8 +3299,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }</pre>
      *
      * @param e the byte value to add at the beginning
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void addFirst(final byte e) {
+    public void addFirst(final byte e) throws OutOfMemoryError {
         add(0, e);
     }
 
@@ -3224,8 +3326,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }</pre>
      *
      * @param e the byte value to add at the end
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void addLast(final byte e) {
+    public void addLast(final byte e) throws OutOfMemoryError {
         add(e);
     }
 
@@ -3251,7 +3354,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return the byte value that was removed from the beginning
      * @throws NoSuchElementException if the list is empty
      */
-    public byte removeFirst() {
+    public byte removeFirst() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return removeAt(0);
@@ -3276,7 +3379,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @return the byte value that was removed from the end
      * @throws NoSuchElementException if the list is empty
      */
-    public byte removeLast() {
+    public byte removeLast() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return removeAt(size - 1);
@@ -3348,9 +3451,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         return size == 0 ? Strings.STR_FOR_EMPTY_ARRAY : N.toString(elementData, 0, size);
     }
 
-    private void ensureCapacity(final int minCapacity) {
+    /**
+     * @throws OutOfMemoryError if {@code minCapacity} is negative or exceeds the maximum supported array size, or the enlarged array cannot be allocated
+     */
+    private void ensureCapacity(final int minCapacity) throws OutOfMemoryError {
         if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError(
+                    "Required capacity is too large: " + (minCapacity < 0 ? "it overflowed the int range" : minCapacity + " > " + MAX_ARRAY_SIZE));
         }
 
         if (N.isEmpty(elementData)) {
@@ -3360,5 +3467,53 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
             elementData = Arrays.copyOf(elementData, newCapacity);
         }
+    }
+
+    /**
+     * Writes this list to the given stream using only the elements in {@code [0, size())}.
+     *
+     * <p>The default serialized form would emit the whole backing array. That is wasteful for a list
+     * whose capacity exceeds its size, and — because {@link #ByteList(byte[], int)} and
+     * {@code of(byte[], int)} adopt the caller's array without copying — it would also write out
+     * whatever the caller left beyond {@code size()}. This method writes the same two fields under the
+     * same names, so streams stay readable in both directions across this change.</p>
+     *
+     * @param os the stream to write to
+     * @throws IOException if writing the list fields or backing-array contents to {@code os} fails
+     */
+    @Serial
+    private void writeObject(final ObjectOutputStream os) throws IOException {
+        final ObjectOutputStream.PutField fields = os.putFields();
+
+        fields.put("elementData", size == elementData.length ? elementData : N.copyOfRange(elementData, 0, size));
+        fields.put("size", size);
+
+        os.writeFields();
+    }
+
+    /**
+     * Restores this list from the given stream, rejecting a stream whose {@code size} does not fit its
+     * {@code elementData}.
+     *
+     * <p>Without this check a corrupted or hand-crafted stream would deserialize successfully and then
+     * fail much later with an {@link IndexOutOfBoundsException} from an unrelated method.</p>
+     *
+     * @param is the stream to read from
+     * @throws IOException if reading the serialized fields fails, or the stored array is null, has the wrong primitive type, or is inconsistent with the stored size
+     * @throws ClassNotFoundException if a class needed to restore a serialized field cannot be resolved
+     */
+    @Serial
+    private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {
+        final ObjectInputStream.GetField fields = is.readFields();
+        final Object a = fields.get("elementData", null);
+        final int sz = fields.get("size", 0);
+
+        if (!(a instanceof byte[] array) || sz < 0 || sz > array.length) {
+            throw new InvalidObjectException(
+                    "Invalid serialized ByteList: size=" + sz + ", elementData=" + (a == null ? "null" : a.getClass().getSimpleName()));
+        }
+
+        elementData = array;
+        size = sz;
     }
 }

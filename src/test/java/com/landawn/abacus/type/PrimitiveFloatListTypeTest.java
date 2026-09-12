@@ -117,4 +117,15 @@ public class PrimitiveFloatListTypeTest extends TestBase {
         assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
+    // T8-13 (documented): blank input returns null like null/empty; "[ ]" is an empty list.
+    @Test
+    public void reviewFixes20260906_valueOfDocumentedFailureModesAndBlankInput() {
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("[x]"));
+        assertEquals(com.landawn.abacus.util.FloatList.of(1.5f, Float.NaN), type.valueOf("[1.5, NaN]"));
+
+        assertNull(type.valueOf("   "));
+        assertNull(type.valueOf(""));
+        org.junit.jupiter.api.Assertions.assertTrue(type.valueOf("[ ]").isEmpty());
+    }
+
 }

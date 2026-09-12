@@ -36,7 +36,7 @@ import com.landawn.abacus.util.N;
  * @see ByteIterator
  * @see IteratorEx
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 @Internal
 public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<Byte> {
 
@@ -48,11 +48,20 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
     }
 
     /**
+     * Internal opt-in for bulk advancement that consumes no logical elements if it throws.
+     * This describes failure recovery only; it does not imply thread safety.
+     * Unmarked iterators are advanced element by element when exact skip progress is required.
+     */
+    boolean supportsFailureAtomicAdvance() {
+        return false;
+    }
+
+    /**
      * An empty ByteIteratorEx instance that contains no elements.
      * Calling {@code hasNext()} always returns {@code false}, and calling {@code nextByte()}
      * throws a {@link NoSuchElementException}.
      */
-    @SuppressWarnings({ "java:S1845" })
+    @SuppressWarnings("java:S1845")
     public static final ByteIteratorEx EMPTY = new ByteIteratorEx() {
         @Override
         public boolean hasNext() {
@@ -60,8 +69,13 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
         }
 
         @Override
-        public byte nextByte() {
+        public byte nextByte() throws NoSuchElementException {
             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+        }
+
+        @Override
+        boolean supportsFailureAtomicAdvance() {
+            return true;
         }
 
         @Override
@@ -131,7 +145,7 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
      * @param toIndex the ending index (exclusive)
      * @return a ByteIteratorEx for the specified array range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length},
-     *         or {@code fromIndex > toIndex}
+     *         or {@code fromIndex > toIndex}; a {@code null} array is treated as having length zero
      */
     public static ByteIteratorEx of(final byte[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -149,12 +163,17 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return a[cursor++];
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
             }
 
             @Override
@@ -216,7 +235,7 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 return iter.nextByte();
             }
 
@@ -237,9 +256,11 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
      * ByteIteratorEx iterEx = ByteIteratorEx.from(iter);
      * }</pre>
      *
+     * <p>The returned iterator throws {@link NullPointerException} when a {@code null} element
+     * is unboxed by its next method.</p>
+     *
      * @param iter the Iterator of Byte objects (can be null)
      * @return a ByteIteratorEx unwrapping the given iterator, or empty iterator if iter is null
-     * @throws NullPointerException during iteration if any element returned by the source iterator is {@code null}
      */
     public static ByteIteratorEx from(final Iterator<Byte> iter) {
         if (iter == null) {
@@ -252,9 +273,20 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
                     return iteratorEx.hasNext();
                 }
 
+                /**
+                 * {@inheritDoc}
+                 *
+                 * @throws NoSuchElementException if the source iterator is exhausted
+                 * @throws NullPointerException if the source iterator returns {@code null}
+                 */
                 @Override
-                public byte nextByte() {
+                public byte nextByte() throws NoSuchElementException, NullPointerException {
                     return iteratorEx.next();
+                }
+
+                @Override
+                boolean supportsFailureAtomicAdvance() {
+                    return ObjIteratorEx.supportsFailureAtomicAdvance(iteratorEx);
                 }
 
                 @Override
@@ -283,8 +315,14 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
                     return iter.hasNext();
                 }
 
+                /**
+                 * {@inheritDoc}
+                 *
+                 * @throws NoSuchElementException if the source iterator is exhausted
+                 * @throws NullPointerException if the source iterator returns {@code null}
+                 */
                 @Override
-                public byte nextByte() {
+                public byte nextByte() throws NoSuchElementException, NullPointerException {
                     return iter.next();
                 }
 

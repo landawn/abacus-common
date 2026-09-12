@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class UnsupportedOperationTest extends TestBase {
-    static class TestClass {
+    public static class TestClass {
         @UnsupportedOperation
         public void unsupportedMethod() {
             throw new java.lang.UnsupportedOperationException();

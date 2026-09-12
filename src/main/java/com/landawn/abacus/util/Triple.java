@@ -118,6 +118,7 @@ public final class Triple<L, M, R> implements Mutable {
      * triple.setMiddle(42);
      * triple.setRight(true);
      * }</pre>
+     *
      */
     public Triple() {
     }
@@ -530,11 +531,11 @@ public final class Triple<L, M, R> implements Mutable {
      * @param newLeft the new value to assign to the left element if the predicate passes;
      *                may be {@code null}
      * @return {@code true} if the left element was updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setLeftIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final L newLeft)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (predicate.test(left, middle, right)) {
@@ -574,11 +575,11 @@ public final class Triple<L, M, R> implements Mutable {
      * @param newMiddle the new value to assign to the middle element if the predicate passes;
      *                  may be {@code null}
      * @return {@code true} if the middle element was updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setMiddleIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final M newMiddle)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (predicate.test(left, middle, right)) {
@@ -618,11 +619,11 @@ public final class Triple<L, M, R> implements Mutable {
      * @param newRight the new value to assign to the right element if the predicate passes;
      *                 may be {@code null}
      * @return {@code true} if the right element was updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setRightIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final R newRight)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (predicate.test(left, middle, right)) {
@@ -672,11 +673,11 @@ public final class Triple<L, M, R> implements Mutable {
      * @param newRight  the new value to assign to the right element if the predicate passes;
      *                  may be {@code null}
      * @return {@code true} if all three elements were updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setIf(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate, final L newLeft, final M newMiddle,
-            final R newRight) throws E, IllegalArgumentException {
+            final R newRight) throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (predicate.test(left, middle, right)) {
@@ -749,10 +750,9 @@ public final class Triple<L, M, R> implements Mutable {
      *          otherwise, a new array of the same runtime type is allocated
      * @return an array containing the three elements of this Triple.
      * @throws NullPointerException if {@code a} is {@code null}
-     * @throws ArrayStoreException if the runtime type of the specified array is not a
-     *         supertype of the runtime type of the elements in this Triple
+     * @throws ArrayStoreException if an element is incompatible with the runtime component type of {@code a}
      */
-    public <A> A[] toArray(A[] a) {
+    public <A> A[] toArray(A[] a) throws NullPointerException, ArrayStoreException {
         if (a.length < 3) {
             a = N.copyOf(a, 3);
         }
@@ -770,6 +770,10 @@ public final class Triple<L, M, R> implements Mutable {
      * left, middle, then right. This method is useful for performing the same operation
      * on all three elements.
      *
+     * <p>Because the three elements may have unrelated types, the consumer must accept {@code Object}.
+     * To process the triple with element-typed parameters, use
+     * {@link #accept(Throwables.TriConsumer)} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Triple<String, String, String> triple = Triple.of("one", "two", "three");
@@ -778,25 +782,25 @@ public final class Triple<L, M, R> implements Mutable {
      * // one
      * // two
      * // three
+     *
+     * // Element-typed processing goes through accept(TriConsumer):
+     * Triple<String, Integer, Boolean> mixed = Triple.of("a", 1, true);
+     * mixed.accept((l, m, r) -> System.out.println(l + m + r));
      * }</pre>
      *
      * @param <E> the type of exception that the consumer may throw.
-     * @param consumer the consumer function to apply to each element; must accept
-     *                 a common supertype of L, M, and R.
-     * @throws ClassCastException if the consumer's accepted type is not a common supertype of
-     *         the runtime types of all three elements
-     * @throws E if the consumer throws an exception.
+     * @param consumer the consumer function to apply to each element; must accept {@code Object},
+     *                 since the three elements may have unrelated types; must not be {@code null}.
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws E if the consumer throws an exception.
+     * @see #accept(Throwables.TriConsumer)
      */
-    @SuppressWarnings("unchecked")
-    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+    public <E extends Exception> void forEach(final Throwables.Consumer<? super Object, E> consumer) throws IllegalArgumentException, E {
         N.checkArgNotNull(consumer, cs.consumer);
 
-        final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
-
-        objConsumer.accept(left);
-        objConsumer.accept(middle);
-        objConsumer.accept(right);
+        consumer.accept(left);
+        consumer.accept(middle);
+        consumer.accept(right);
     }
 
     /**
@@ -813,12 +817,18 @@ public final class Triple<L, M, R> implements Mutable {
      * });
      * }</pre>
      *
+     * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is
+     * written out; a <em>method reference</em> may not. One whose target has both a one-argument
+     * and a multi-argument form fits this overload and {@link #accept(Throwables.Consumer)} equally, so the call is
+     * ambiguous and does not compile. Disambiguate with a cast, e.g.
+     * {@code (Throwables.TriConsumer<L, M, R, RuntimeException>) Foo::bar}.</p>
+     *
      * @param <E> the type of exception that the action may throw.
      * @param action the tri-consumer action to apply to the three elements.
-     * @throws E if the action throws an exception.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception.
      */
-    public <E extends Exception> void accept(final Throwables.TriConsumer<? super L, ? super M, ? super R, E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void accept(final Throwables.TriConsumer<? super L, ? super M, ? super R, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         action.accept(left, middle, right);
@@ -839,10 +849,10 @@ public final class Triple<L, M, R> implements Mutable {
      *
      * @param <E> the type of exception that the action may throw.
      * @param action the consumer action to apply to this Triple.
-     * @throws E if the action throws an exception.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception.
      */
-    public <E extends Exception> void accept(final Throwables.Consumer<? super Triple<L, M, R>, E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super Triple<L, M, R>, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         action.accept(this);
@@ -859,15 +869,21 @@ public final class Triple<L, M, R> implements Mutable {
      * // result is "Hello has 5 letters: true"
      * }</pre>
      *
+     * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is
+     * written out; a <em>method reference</em> may not. One whose target has both a one-argument
+     * and a multi-argument form fits this overload and {@link #map(Throwables.Function)} equally, so the call is
+     * ambiguous and does not compile. Disambiguate with a cast, e.g.
+     * {@code (Throwables.TriFunction<L, M, R, U, RuntimeException>) Foo::bar}.</p>
+     *
      * @param <U> the type of the result.
      * @param <E> the type of exception that the mapper may throw.
      * @param mapper the tri-function to apply to the three elements.
      * @return the result of applying the mapper function, may be {@code null}.
-     * @throws E if the mapper throws an exception.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws E if the mapper throws an exception.
      */
     public <U, E extends Exception> U map(final Throwables.TriFunction<? super L, ? super M, ? super R, ? extends U, E> mapper)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, cs.mapper);
 
         return mapper.apply(left, middle, right);
@@ -890,10 +906,10 @@ public final class Triple<L, M, R> implements Mutable {
      * @param <E> the type of exception that the mapper may throw.
      * @param mapper the function to apply to this Triple.
      * @return the result of applying the mapper function, may be {@code null}.
-     * @throws E if the mapper throws an exception.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws E if the mapper throws an exception.
      */
-    public <U, E extends Exception> U map(final Throwables.Function<? super Triple<L, M, R>, ? extends U, E> mapper) throws E, IllegalArgumentException {
+    public <U, E extends Exception> U map(final Throwables.Function<? super Triple<L, M, R>, ? extends U, E> mapper) throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, cs.mapper);
 
         return mapper.apply(this);
@@ -912,15 +928,21 @@ public final class Triple<L, M, R> implements Mutable {
      * // filtered contains the triple because all conditions are met
      * }</pre>
      *
+     * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is
+     * written out; a <em>method reference</em> may not. One whose target has both a one-argument
+     * and a multi-argument form fits this overload and {@link #filter(Throwables.Predicate)} equally, so the call is
+     * ambiguous and does not compile. Disambiguate with a cast, e.g.
+     * {@code (Throwables.TriPredicate<L, M, R, RuntimeException>) Foo::bar}.</p>
+     *
      * @param <E> the type of exception that the predicate may throw.
      * @param predicate the tri-predicate to test the three elements.
      * @return an Optional containing this Triple if the predicate returns {@code true},
      *         otherwise an empty Optional
-     * @throws E if the predicate throws an exception.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Optional<Triple<L, M, R>> filter(final Throwables.TriPredicate<? super L, ? super M, ? super R, E> predicate)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         return predicate.test(left, middle, right) ? Optional.of(this) : Optional.empty();
@@ -943,11 +965,11 @@ public final class Triple<L, M, R> implements Mutable {
      * @param predicate the predicate to test this Triple.
      * @return an Optional containing this Triple if the predicate returns {@code true},
      *         otherwise an empty Optional
-     * @throws E if the predicate throws an exception.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Optional<Triple<L, M, R>> filter(final Throwables.Predicate<? super Triple<L, M, R>, E> predicate)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         return predicate.test(this) ? Optional.of(this) : Optional.empty();
@@ -1001,9 +1023,9 @@ public final class Triple<L, M, R> implements Mutable {
      * Compares this Triple with the specified object for equality.
      * Returns {@code true} if and only if the specified object is also a Triple
      * and both Triples have equal left, middle, and right elements.
-     * Element equality is determined using the N.equals utility method,
-     * which handles {@code null} values correctly. Array-valued elements are compared
-     * recursively by content, with matching content-based hashing in {@link #hashCode()}.
+     * Element equality is determined using {@link N#equals(Object, Object)},
+     * which handles {@code null} values correctly. Array-valued elements use identity
+     * semantics, with matching identity-based hashing in {@link #hashCode()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

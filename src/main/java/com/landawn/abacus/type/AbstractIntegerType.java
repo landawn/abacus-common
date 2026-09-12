@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -46,8 +47,9 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * Constructs an {@code AbstractIntegerType} with the specified type name.
      *
      * @param typeName the name of the integer type (e.g., "Integer", "int")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractIntegerType(final String typeName) {
+    protected AbstractIntegerType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
@@ -69,6 +71,7 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final Number x) {
         if (x == null) {
@@ -85,8 +88,11 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * </p>
      * <ul>
      *   <li>Empty or {@code null} strings return the default value.</li>
+     *   <li>Parsing follows {@link Numbers#toInt(String)}: decimal first; a {@code 0x}/{@code 0X}/{@code #} prefix
+     *       (optionally after a sign) selects hexadecimal.</li>
      *   <li>If parsing fails and the string ends with {@code 'l'}, {@code 'L'}, {@code 'f'},
      *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, the suffix is stripped and parsing is retried.</li>
+     *   <li>The string is not trimmed; surrounding whitespace is rejected (unlike the float/double types).</li>
      *   <li>Valid numeric strings are parsed to {@code Integer} values.</li>
      * </ul>
      *
@@ -97,11 +103,12 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * @param str the string to convert, may be {@code null}
      * @return the {@code Integer} value, or the default value if {@code str} is empty or {@code null}
      * @throws NumberFormatException if the string cannot be parsed as an {@code int}
+     * @throws ArithmeticException if the string is a well-formed integer outside the {@code int} range
      * @see #valueOf(Object)
      * @see #stringOf(Number)
      */
     @Override
-    public Integer valueOf(final String str) {
+    public Integer valueOf(final String str) throws NumberFormatException, ArithmeticException {
         if (Strings.isEmpty(str)) {
             return (Integer) defaultValue();
         }
@@ -123,17 +130,58 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
 
     /**
      * Converts a character array to an {@code Integer} value.
-     * Delegates to the {@link #parseInt(char[], int, int)} method for parsing.
+     * Delegates to the {@link #parseInt(char[], int, int)} method for parsing; a region that carries a radix prefix
+     * ({@code 0x}/{@code 0X}/{@code #}, optionally after a sign) is handed to {@link Numbers#toInt(String)} instead,
+     * so the region is accepted exactly as {@link #valueOf(String)} accepts the same text.
      *
      * @param cbuf the character array to convert, may be {@code null}
      * @param offset the starting position in the array (0-based)
      * @param len the number of characters to read
      * @return the {@code Integer} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
+     * @throws IllegalArgumentException if {@code cbuf} is non-null, {@code len} is nonzero, and the decimal parsing path receives a negative offset or length.
      * @throws NumberFormatException if the character sequence cannot be parsed as an {@code int}
+     * @throws ArithmeticException if the region is a well-formed integer outside the {@code int} range
      */
     @Override
-    public Integer valueOf(final char[] cbuf, final int offset, final int len) {
-        return ((cbuf == null) || (len == 0)) ? ((Integer) defaultValue()) : (Integer) parseInt(cbuf, offset, len);
+    public Integer valueOf(final char[] cbuf, final int offset, final int len)
+            throws IndexOutOfBoundsException, IllegalArgumentException, NumberFormatException, ArithmeticException {
+        if ((cbuf == null) || (len == 0)) {
+            return (Integer) defaultValue();
+        }
+
+        // parseInt's digit-only fast path strips a trailing F/D as a type suffix and then rejects "0x1", so a
+        // hex token parsed from JSON (char[]) failed while the same text parsed from XML (String). Hand a
+        // radix-prefixed region to the single authority instead of teaching the shared helper about hex.
+        if (hasRadixPrefix(cbuf, offset, len)) {
+            return Numbers.toInt(new String(cbuf, offset, len));
+        }
+
+        return parseInt(cbuf, offset, len);
+    }
+
+    /**
+     * Tells whether the region starts with a hexadecimal radix prefix ({@code 0x}, {@code 0X} or {@code #}), optionally
+     * preceded by a sign, which the digit-only fast path of {@code parseInt}/{@code parseLong} does not understand.
+     * Shared by the byte, short, int and long types.
+     *
+     * @param cbuf the character array
+     * @param offset the starting position of the region
+     * @param len the length of the region
+     * @return {@code true} if the region begins with an (optionally signed) radix prefix followed by at least one more character
+     * @throws NullPointerException if {@code cbuf} is {@code null} and {@code len} exceeds one.
+     * @throws ArrayIndexOutOfBoundsException if checking the sign or radix prefix accesses an index outside {@code cbuf}.
+     */
+    static boolean hasRadixPrefix(final char[] cbuf, final int offset, final int len) throws NullPointerException, ArrayIndexOutOfBoundsException {
+        int i = offset;
+
+        if (len > 1 && (cbuf[i] == '-' || cbuf[i] == '+')) {
+            i++;
+        }
+
+        final int rest = len - (i - offset);
+
+        return rest > 1 && (cbuf[i] == '#' || (cbuf[i] == '0' && (cbuf[i + 1] == 'x' || cbuf[i + 1] == 'X')));
     }
 
     /**
@@ -154,10 +202,11 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
      * @return the {@code int} value at the specified column, or {@code 0} if SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Integer get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Integer get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getInt(columnIndex);
     }
 
@@ -169,10 +218,11 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
      * @return the {@code int} value at the specified column, or {@code 0} if SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Integer get(final ResultSet rs, final String columnName) throws SQLException {
+    public Integer get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getInt(columnName);
     }
 
@@ -186,10 +236,11 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code Number} value to set as {@code int}, or {@code null} for SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.INTEGER);
         } else {
@@ -207,10 +258,11 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the {@code Number} value to set as {@code int}, or {@code null} for SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.INTEGER);
         } else {
@@ -228,7 +280,8 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Number} value to append as {@code int}
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -240,7 +293,7 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Number x) throws IOException {
+    public void appendTo(final Appendable appendable, final Number x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -265,10 +318,11 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Number} value to write as {@code int}
      * @param config the serialization configuration, may be {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, Number x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, Number x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         x = x == null && config != null && config.isWriteNullNumberAsZero() ? Numbers.INTEGER_ZERO : x;
 
         if (x == null) {

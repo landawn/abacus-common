@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -21,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -122,6 +124,30 @@ public class XMLGregorianCalendarTypeTest extends TestBase {
     }
 
     @Test
+    public void testStringOfValueOfRoundTripPreservesOffsetAndFraction() throws Exception {
+        final XMLGregorianCalendar value = DatatypeFactory.newInstance().newXMLGregorianCalendar("2025-01-15T10:30:45.123+05:30");
+        final String text = xmlCalendarType.stringOf(value);
+
+        assertEquals("2025-01-15T10:30:45.123+05:30", text);
+        assertEquals(DatatypeConstants.EQUAL, value.compare(xmlCalendarType.valueOf(text)));
+    }
+
+    @Test
+    public void testStringOfPreservesUndefinedTimezoneButValueOfResolvesIt() throws Exception {
+        final XMLGregorianCalendar value = DatatypeFactory.newInstance().newXMLGregorianCalendar("2025-01-15T10:30:45.123");
+        final String text = xmlCalendarType.stringOf(value);
+        final XMLGregorianCalendar parsed = xmlCalendarType.valueOf(text);
+
+        assertEquals("2025-01-15T10:30:45.123", text);
+        assertEquals(DatatypeConstants.FIELD_UNDEFINED, value.getTimezone());
+        assertFalse(parsed.getTimezone() == DatatypeConstants.FIELD_UNDEFINED);
+        assertFalse(value.compare(parsed) == DatatypeConstants.EQUAL);
+
+        // The XML lexical parser is the exact inverse when an undefined timezone must remain undefined.
+        assertEquals(DatatypeConstants.EQUAL, value.compare(DatatypeFactory.newInstance().newXMLGregorianCalendar(text)));
+    }
+
+    @Test
     public void testStringOfNull() {
         String result = xmlCalendarType.stringOf(null);
         assertNull(result);
@@ -206,8 +232,8 @@ public class XMLGregorianCalendarTypeTest extends TestBase {
         StringWriter writer = new StringWriter();
         xmlCalendarType.appendTo(writer, testCalendar);
         String result = writer.toString();
-        assertNotNull(result);
-        assertFalse(result.equals("null"));
+        assertEquals(testCalendar.toXMLFormat(), result);
+        assertEquals(xmlCalendarType.stringOf(testCalendar), result);
     }
 
     @Test
@@ -280,5 +306,31 @@ public class XMLGregorianCalendarTypeTest extends TestBase {
         xmlCalendarType.serializeTo(writer, testCalendar, config);
 
         verify(writer, atLeast(2)).write('"');
+    }
+
+    // --- review fixes 2026-09-06 (T9-02, T9-03): the char[] fast path is a sibling of the ones pinned in
+    // DateTypeTest / CalendarTypeTest / TimestampTypeTest and carries the identical guard.
+
+    @Test
+    public void reviewFixes20260906_T902_T903_charArrayAgreesWithStringOverload() {
+        // a trailing type suffix used to be stripped by parseLong(char[]) only, so the two overloads disagreed
+        for (final String s : new String[] { "1700000000000L", "1700000000000d", "12345L" }) {
+            assertThrows(IllegalArgumentException.class, () -> xmlCalendarType.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> xmlCalendarType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        // overflowing text used to escape the char[] path as ArithmeticException("long overflow")
+        for (final String s : new String[] { "99999999999999999999", "9223372036854775808", "-9223372036854775809" }) {
+            assertThrows(IllegalArgumentException.class, () -> xmlCalendarType.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> xmlCalendarType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        for (final String s : new String[] { "1700000000000", "+1700000000000", "-1700000000000" }) {
+            assertEquals(Long.parseLong(s), xmlCalendarType.valueOf(s.toCharArray(), 0, s.length()).toGregorianCalendar().getTimeInMillis(), s);
+            assertEquals(Long.parseLong(s), xmlCalendarType.valueOf(s).toGregorianCalendar().getTimeInMillis(), s);
+        }
+
+        assertNull(xmlCalendarType.valueOf((char[]) null, 0, 0));
+        assertNull(xmlCalendarType.valueOf(new char[0], 0, 0));
     }
 }

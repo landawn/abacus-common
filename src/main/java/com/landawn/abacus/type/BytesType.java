@@ -33,7 +33,11 @@ import com.landawn.abacus.util.Strings;
  * {@link java.sql.ResultSet#getBytes}, which maps to SQL {@code BINARY} / {@code VARBINARY} /
  * {@code LONGVARBINARY} column types.</p>
  *
+ * <p>This handler is registered under the name {@code "Bytes"} (obtain it via {@code Type.of("Bytes")});
+ * {@code Type.of(byte[].class)} resolves to the list-formatted {@link PrimitiveByteArrayType} instead.</p>
+ *
  * @see Base64EncodedType
+ * @see PrimitiveByteArrayType
  */
 public class BytesType extends AbstractType<byte[]> {
 
@@ -92,12 +96,13 @@ public class BytesType extends AbstractType<byte[]> {
      *
      * @param str the Base64-encoded string to decode; may be {@code null}
      * @return the decoded byte array, or {@code null} if {@code str} is {@code null}
-     * @throws IllegalArgumentException if {@code str} contains characters outside the Base64 alphabet.
+     * @throws IllegalArgumentException if {@code str} is not valid Base64 (a character outside the
+     *         Base64 alphabet, or malformed padding such as {@code "AQID="})
      * @see #valueOf(Object)
      * @see #stringOf(byte[])
      */
     @Override
-    public byte[] valueOf(final String str) {
+    public byte[] valueOf(final String str) throws IllegalArgumentException {
         return (str == null) ? null : Strings.base64Decode(str);
     }
 
@@ -108,10 +113,11 @@ public class BytesType extends AbstractType<byte[]> {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the column containing the byte array
      * @return the {@code byte[]} value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public byte[] get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public byte[] get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getBytes(columnIndex);
     }
 
@@ -122,10 +128,11 @@ public class BytesType extends AbstractType<byte[]> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
      * @return the {@code byte[]} value in the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public byte[] get(final ResultSet rs, final String columnName) throws SQLException {
+    public byte[] get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getBytes(columnName);
     }
 
@@ -136,10 +143,11 @@ public class BytesType extends AbstractType<byte[]> {
      * @param stmt the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code byte[]} value to set; may be {@code null}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x) throws NullPointerException, SQLException {
         stmt.setBytes(columnIndex, x);
     }
 
@@ -150,10 +158,11 @@ public class BytesType extends AbstractType<byte[]> {
      * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code byte[]} value to set; may be {@code null}
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final byte[] x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final byte[] x) throws NullPointerException, SQLException {
         stmt.setBytes(parameterName, x);
     }
 }

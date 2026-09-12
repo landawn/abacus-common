@@ -95,4 +95,25 @@ public class JSONTypeTest extends TestBase {
         assertEquals(Long.class, parsed.get(0).getClass());
         assertEquals(List.of(1L, 2L), parsed);
     }
+
+    // ---- review fixes 2026-09-06, T2-07: blank input is null, like XMLType and the JSON-backed siblings ----
+
+    @Test
+    public void reviewFixes20260906_blankStringIsNull() {
+        // Before the fix "  " reached the parser and materialised an empty HashMap.
+        assertNull(jsonMapType.valueOf("  "));
+        assertNull(jsonMapType.valueOf("\t\n"));
+        assertNull(jsonListType.valueOf("  "));
+        assertNull(jsonCustomType.valueOf("   "));
+        // Non-blank input is still parsed.
+        assertEquals(1, jsonMapType.valueOf(" {\"a\": 1} ").size());
+    }
+
+    // ---- T2-12: the declaring name expands a raw Map argument ----
+
+    @Test
+    public void reviewFixes20260906_declaringNameExpandsRawMap() {
+        assertEquals("JSON<Map<Object, Object>>", jsonMapType.declaringName());
+        assertEquals("JSON<com.landawn.abacus.type.JSONTypeTest.TestClass>", jsonCustomType.declaringName());
+    }
 }

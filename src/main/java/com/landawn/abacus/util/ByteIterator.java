@@ -51,7 +51,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
     /**
@@ -74,8 +74,12 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if this iterator has no remaining element
+         */
         @Override
-        public byte nextByte() {
+        public byte nextByte() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
@@ -160,8 +164,12 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
                 return cursor < toIndex;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -200,9 +208,10 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * }
      * }</pre>
      *
+     * <p>The returned iterator initializes its source on its first traversal operation. If the supplier returns null, initialization throws IllegalStateException; a RuntimeException or Error from initialization is cached and rethrown by subsequent traversal operations.</p>
+     *
      * @param iteratorSupplier A Supplier that provides the ByteIterator when needed
      * @return A ByteIterator that is initialized on first use
-     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static ByteIterator defer(final Supplier<? extends ByteIterator> iteratorSupplier) throws IllegalArgumentException {
@@ -227,7 +236,10 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
                 return iter.nextByte();
             }
 
-            private void init() {
+            /**
+             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null}
+             */
+            private void init() throws IllegalStateException {
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
@@ -291,7 +303,9 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * Returns a {@code ByteIterator} that generates values using the provided supplier
      * while the hasNext condition returns {@code true}.
      * The {@code hasNext} supplier is called at most once per element; its result is cached
-     * until the next call to {@code nextByte()}.
+     * until the next call to {@code nextByte()}. Once {@code hasNext} has returned {@code false} the
+     * iterator is permanently exhausted: the condition is never re-evaluated, so the iterator does not
+     * resume even if the state it inspects changes later.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -325,8 +339,12 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
                 return hasNextValue;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -357,7 +375,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      */
     @Deprecated
     @Override
-    public Byte next() {
+    public Byte next() throws NoSuchElementException {
         return nextByte();
     }
 
@@ -374,7 +392,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * @return the next byte value
      * @throws NoSuchElementException if the iteration has no more elements
      */
-    public abstract byte nextByte();
+    public abstract byte nextByte() throws NoSuchElementException;
 
     /**
      * Returns a new {@code ByteIterator} that skips the first {@code n} elements of this iterator.
@@ -409,6 +427,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
 
         return new ByteIterator() {
             private boolean skipped = false;
+            private long remaining = n;
 
             @Override
             public boolean hasNext() {
@@ -419,8 +438,12 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -429,10 +452,9 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
             }
 
             private void skip() {
-                long idx = 0;
-
-                while (idx++ < n && iter.hasNext()) {
+                while (remaining > 0 && iter.hasNext()) {
                     iter.nextByte();
+                    remaining--;
                 }
 
                 skipped = true;
@@ -476,14 +498,19 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
                 return cnt > 0 && iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final byte result = iter.nextByte();
                 cnt--;
-                return iter.nextByte();
+                return result;
             }
         };
     }
@@ -531,8 +558,12 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
                 return hasNext;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -602,6 +633,11 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * stream can be used to perform various functional operations like filtering, mapping,
      * and reducing. The stream consumes elements from this iterator as needed.</p>
      *
+     * <p>The stream shares this iterator's traversal position and consumes elements as needed.
+     * Operations that consume all remaining elements exhaust this iterator; short-circuiting
+     * operations may leave elements unconsumed. Do not access this iterator independently
+     * while the stream is consuming it.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
@@ -659,10 +695,11 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * // second.index() = 101, second.value() = 20
      * }</pre>
      *
+     * <p>The returned iterator throws ArithmeticException when traversal would assign an index greater than Long.MAX_VALUE.</p>
+     *
      * @param startIndex the starting index value (must be non-negative)
      * @return an ObjIterator of IndexedByte elements with custom starting index
      * @throws IllegalArgumentException if startIndex is negative.
-     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
     public ObjIterator<IndexedByte> indexed(final long startIndex) throws IllegalArgumentException {
@@ -679,8 +716,13 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws ArithmeticException if an element remains after index {@link Long#MAX_VALUE} has already been assigned
+             * @throws NoSuchElementException if the source iterator has no remaining element
+             */
             @Override
-            public IndexedByte next() {
+            public IndexedByte next() throws ArithmeticException, NoSuchElementException {
                 if (indexOverflow) {
                     if (iter.hasNext()) {
                         throw new ArithmeticException("long overflow");
@@ -718,13 +760,13 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * }</pre>
      *
      * @param action the action to perform on each boxed element
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws NullPointerException if {@code action} is {@code null}, as specified by {@link java.util.Iterator#forEachRemaining(java.util.function.Consumer)}.
      * @deprecated use {@link #foreachRemaining(Throwables.ByteConsumer)} instead to avoid boxing
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Byte> action) throws IllegalArgumentException {
-        N.checkArgNotNull(action, cs.action);
+    public void forEachRemaining(final java.util.function.Consumer<? super Byte> action) throws NullPointerException {
+        N.requireNonNull(action, cs.action);
 
         super.forEachRemaining(action);
     }
@@ -745,10 +787,10 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each element
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.ByteConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachRemaining(final Throwables.ByteConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);//NOSONAR
 
         while (hasNext()) {
@@ -777,12 +819,12 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each element and its index
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
-     * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if {@code action} throws while processing a remaining element and its index
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntByteConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachIndexed(final Throwables.IntByteConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         N.checkArgNotNull(action, cs.action);
 
         int idx = 0;

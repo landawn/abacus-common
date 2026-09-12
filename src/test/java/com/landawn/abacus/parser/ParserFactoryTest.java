@@ -3,6 +3,7 @@ package com.landawn.abacus.parser;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -55,10 +56,9 @@ public class ParserFactoryTest extends TestBase {
         }
     }
 
-    // Simple Kryo Serializer for testing
     private static class TestStringSerializer extends Serializer<String> {
         TestStringSerializer() {
-            super(true, true); // accepts null, immutable
+            super(true, true);
         }
 
         @Override
@@ -73,309 +73,81 @@ public class ParserFactoryTest extends TestBase {
     }
 
     @Test
-    public void testIsAbacusXMLAvailable() {
-        boolean available = ParserFactory.isAbacusXmlParserAvailable();
-        assertTrue(available || !available);
-    }
+    public void testIsParserAvailable() {
+        assertDoesNotThrow(ParserFactory::isAbacusXmlParserAvailable);
+        assertDoesNotThrow(ParserFactory::isXmlParserAvailable);
+        assertDoesNotThrow(ParserFactory::isAvroParserAvailable);
+        assertDoesNotThrow(ParserFactory::isKryoParserAvailable);
 
-    // =====================================================================
-    // isAbacusXmlParserAvailable
-    // =====================================================================
-
-    @Test
-    public void test_isAbacusXmlParserAvailable() {
-        assertDoesNotThrow(() -> {
-            // Just verify the method can be called
-            ParserFactory.isAbacusXmlParserAvailable();
-        });
-    }
-
-    @Test
-    public void testIsXMLAvailable() {
-        boolean available = ParserFactory.isXmlParserAvailable();
-        assertTrue(available || !available);
-    }
-
-    // =====================================================================
-    // isXmlParserAvailable
-    // =====================================================================
-
-    @Test
-    public void test_isXmlParserAvailable() {
-        assertDoesNotThrow(() -> {
-            ParserFactory.isXmlParserAvailable();
-        });
-    }
-
-    @Test
-    public void testIsAvroAvailable() {
-        boolean available = ParserFactory.isAvroParserAvailable();
-        assertTrue(available || !available);
-    }
-
-    // =====================================================================
-    // isAvroParserAvailable
-    // =====================================================================
-
-    @Test
-    public void test_isAvroParserAvailable() {
-        assertDoesNotThrow(() -> {
-            ParserFactory.isAvroParserAvailable();
-        });
-    }
-
-    // =====================================================================
-    // isKryoParserAvailable
-    // =====================================================================
-
-    @Test
-    public void testIsKryoParserAvailable() {
-        boolean available = ParserFactory.isKryoParserAvailable();
-        assertTrue(available || !available);
-    }
-
-    // =====================================================================
-    // isJaxbParserAvailable
-    // =====================================================================
-
-    @Test
-    public void testIsJaxbParserAvailable_returnsConsistentValue() {
-        // Repeated calls must return the same cached value.
-        boolean first = ParserFactory.isJaxbParserAvailable();
-        boolean second = ParserFactory.isJaxbParserAvailable();
-        assertEquals(first, second);
-    }
-
-    @Test
-    public void testIsJaxbParserAvailable_matchesCreateJaxbParser() {
-        // The guard must agree with the actual create* behavior: when the guard reports available,
-        // createJaxbParser() must succeed; otherwise it is allowed to fail (NoClassDefFoundError, etc.).
-        if (ParserFactory.isJaxbParserAvailable()) {
-            XmlParser parser = ParserFactory.createJaxbParser();
-            assertNotNull(parser);
+        boolean jaxb = ParserFactory.isJaxbParserAvailable();
+        assertEquals(jaxb, ParserFactory.isJaxbParserAvailable());
+        if (jaxb) {
+            assertNotNull(ParserFactory.createJaxbParser());
         } else {
             assertThrows(Throwable.class, ParserFactory::createJaxbParser);
         }
     }
 
-    // =====================================================================
-    // createAvroParser
-    // =====================================================================
-
     @Test
-    public void test_createAvroParser() {
-        if (ParserFactory.isAvroParserAvailable()) {
-            AvroParser parser = ParserFactory.createAvroParser();
-            assertNotNull(parser);
+    public void testCreateAvroParser() {
+        if (!ParserFactory.isAvroParserAvailable()) {
+            return;
         }
+        AvroParser a1 = ParserFactory.createAvroParser();
+        AvroParser a2 = ParserFactory.createAvroParser();
+        assertNotNull(a1);
+        assertNotSame(a1, a2);
     }
 
     @Test
-    public void testCreateAvroParser_notNull() {
-        if (ParserFactory.isAvroParserAvailable()) {
-            AvroParser parser1 = ParserFactory.createAvroParser();
-            AvroParser parser2 = ParserFactory.createAvroParser();
-            assertNotNull(parser1);
-            assertNotNull(parser2);
-            assertTrue(parser1 != parser2);
+    public void testCreateKryoParser() {
+        if (!ParserFactory.isKryoParserAvailable()) {
+            return;
         }
-    }
-
-    // =====================================================================
-    // createKryoParser
-    // =====================================================================
-
-    @Test
-    public void test_createKryoParser() {
-        if (ParserFactory.isKryoParserAvailable()) {
-            KryoParser parser = ParserFactory.createKryoParser();
-            assertNotNull(parser);
-        }
+        KryoParser p1 = ParserFactory.createKryoParser();
+        KryoParser p2 = ParserFactory.createKryoParser();
+        assertNotNull(p1);
+        assertNotSame(p1, p2);
+        assertEquals("hello", p1.decode(p1.encode("hello")));
     }
 
     @Test
-    public void testCreateKryoParser_multipleInstances() {
-        if (ParserFactory.isKryoParserAvailable()) {
-            KryoParser parser1 = ParserFactory.createKryoParser();
-            KryoParser parser2 = ParserFactory.createKryoParser();
-            assertNotNull(parser1);
-            assertNotNull(parser2);
-            assertTrue(parser1 != parser2);
-        }
-    }
-
-    @Test
-    public void testCreateKryoParser_usable() {
-        if (ParserFactory.isKryoParserAvailable()) {
-            KryoParser parser = ParserFactory.createKryoParser();
-            byte[] encoded = parser.encode("hello");
-            assertNotNull(encoded);
-            String decoded = parser.decode(encoded);
-            assertEquals("hello", decoded);
-        }
-    }
-
-    // =====================================================================
-    // createJsonParser
-    // =====================================================================
-
-    @Test
-    public void test_createJsonParser() {
+    public void testCreateJsonParser() {
         JsonParser parser = ParserFactory.createJsonParser();
         assertNotNull(parser);
-    }
+        assertEquals("hello", parser.deserialize(parser.serialize("hello"), String.class));
 
-    // =====================================================================
-    // createJsonParser(JsonSerConfig, JsonDeserConfig)
-    // =====================================================================
-
-    @Test
-    public void test_createJsonParser_withConfig() {
-        JsonSerConfig jsc = new JsonSerConfig();
-        JsonDeserConfig jdc = new JsonDeserConfig();
-        JsonParser parser = ParserFactory.createJsonParser(jsc, jdc);
-        assertNotNull(parser);
-    }
-
-    @Test
-    public void testCreateJsonParser_withNullConfigs() {
-        JsonParser parser = ParserFactory.createJsonParser(null, null);
-        assertNotNull(parser);
-    }
-
-    @Test
-    public void testCreateJsonParser_usable() {
-        JsonParser parser = ParserFactory.createJsonParser();
-        String json = parser.serialize("hello");
-        assertNotNull(json);
-        String result = parser.deserialize(json, String.class);
-        assertEquals("hello", result);
-    }
-
-    @Test
-    public void testCreateJsonParser_withCustomConfig() {
         JsonSerConfig jsc = new JsonSerConfig().setPrettyFormat(true).setQuotePropName(true);
-        JsonDeserConfig jdc = new JsonDeserConfig();
-        JsonParser parser = ParserFactory.createJsonParser(jsc, jdc);
-
-        String json = parser.serialize("test");
-        assertNotNull(json);
+        JsonParser configured = ParserFactory.createJsonParser(jsc, new JsonDeserConfig());
+        assertNotNull(configured.serialize("test"));
+        assertNotNull(ParserFactory.createJsonParser(null, null));
     }
 
-    // =====================================================================
-    // createAbacusXmlParser
-    // =====================================================================
-
     @Test
-    public void test_createAbacusXmlParser() {
-        if (ParserFactory.isAbacusXmlParserAvailable()) {
-            XmlParser parser = ParserFactory.createAbacusXmlParser();
-            assertNotNull(parser);
+    public void testCreateAbacusXmlParser() {
+        if (!ParserFactory.isAbacusXmlParserAvailable()) {
+            return;
         }
+        assertNotNull(ParserFactory.createAbacusXmlParser());
+        assertNotNull(ParserFactory.createAbacusXmlParser(new XmlSerConfig(), new XmlDeserConfig()));
+        assertNotNull(ParserFactory.createAbacusXmlParser(null, null));
     }
 
-    // =====================================================================
-    // createAbacusXmlParser(XmlSerConfig, XmlDeserConfig)
-    // =====================================================================
-
     @Test
-    public void test_createAbacusXmlParser_withConfig() {
-        if (ParserFactory.isAbacusXmlParserAvailable()) {
-            XmlSerConfig xsc = new XmlSerConfig();
-            XmlDeserConfig xdc = new XmlDeserConfig();
-            XmlParser parser = ParserFactory.createAbacusXmlParser(xsc, xdc);
-            assertNotNull(parser);
+    public void testCreateXmlParser() {
+        if (!ParserFactory.isXmlParserAvailable()) {
+            return;
         }
+        assertNotNull(ParserFactory.createXmlParser());
+        assertNotNull(ParserFactory.createXmlParser(new XmlSerConfig(), new XmlDeserConfig()));
+        assertNotNull(ParserFactory.createXmlParser(null, null));
     }
 
     @Test
-    public void testCreateAbacusXmlParser_withNullConfigs() {
-        if (ParserFactory.isAbacusXmlParserAvailable()) {
-            XmlParser parser = ParserFactory.createAbacusXmlParser(null, null);
-            assertNotNull(parser);
-        }
-    }
-
-    // =====================================================================
-    // createXmlParser
-    // =====================================================================
-
-    @Test
-    public void test_createXmlParser() {
-        if (ParserFactory.isXmlParserAvailable()) {
-            XmlParser parser = ParserFactory.createXmlParser();
-            assertNotNull(parser);
-        }
-    }
-
-    // =====================================================================
-    // createXmlParser(XmlSerConfig, XmlDeserConfig)
-    // =====================================================================
-
-    @Test
-    public void test_createXmlParser_withConfig() {
-        if (ParserFactory.isXmlParserAvailable()) {
-            XmlSerConfig xsc = new XmlSerConfig();
-            XmlDeserConfig xdc = new XmlDeserConfig();
-            XmlParser parser = ParserFactory.createXmlParser(xsc, xdc);
-            assertNotNull(parser);
-        }
-    }
-
-    @Test
-    public void testCreateXmlParser_withNullConfigs() {
-        if (ParserFactory.isXmlParserAvailable()) {
-            XmlParser parser = ParserFactory.createXmlParser(null, null);
-            assertNotNull(parser);
-        }
-    }
-
-    // =====================================================================
-    // createJaxbParser
-    // =====================================================================
-
-    @Test
-    public void test_createJaxbParser() {
-        XmlParser parser = ParserFactory.createJaxbParser();
-        assertNotNull(parser);
-    }
-
-    // =====================================================================
-    // createJaxbParser(XmlSerConfig, XmlDeserConfig)
-    // =====================================================================
-
-    @Test
-    public void test_createJaxbParser_withConfig() {
-        XmlSerConfig xsc = new XmlSerConfig();
-        XmlDeserConfig xdc = new XmlDeserConfig();
-        XmlParser parser = ParserFactory.createJaxbParser(xsc, xdc);
-        assertNotNull(parser);
-    }
-
-    @Test
-    public void testCreateJaxbParser_withNullConfigs() {
-        XmlParser parser = ParserFactory.createJaxbParser(null, null);
-        assertNotNull(parser);
-    }
-
-    // =====================================================================
-    // registerKryo(Class)
-    // =====================================================================
-
-    @Test
-    public void test_registerKryo_class() {
-        try {
-            assertDoesNotThrow(() -> {
-                ParserFactory.registerKryo(String.class);
-            });
-        } finally {
-            unregisterKryoForTest(String.class);
-        }
-    }
-
-    @Test
-    public void test_registerKryo_class_null() {
-        assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(null));
+    public void testCreateJaxbParser() {
+        assertNotNull(ParserFactory.createJaxbParser());
+        assertNotNull(ParserFactory.createJaxbParser(new XmlSerConfig(), new XmlDeserConfig()));
+        assertNotNull(ParserFactory.createJaxbParser(null, null));
     }
 
     @Test
@@ -384,48 +156,37 @@ public class ParserFactoryTest extends TestBase {
             assertDoesNotThrow(() -> {
                 ParserFactory.registerKryo(String.class);
                 ParserFactory.registerKryo(Integer.class, 100);
+                ParserFactory.registerKryo(Double.class);
+                ParserFactory.registerKryo(Long.class, 1001);
+                ParserFactory.registerKryo(Float.class, new TestStringSerializer());
+                ParserFactory.registerKryo(Short.class, new TestStringSerializer(), 300);
             });
         } finally {
             unregisterKryoForTest(String.class);
             unregisterKryoForTest(Integer.class);
+            unregisterKryoForTest(Double.class);
+            unregisterKryoForTest(Long.class);
+            unregisterKryoForTest(Float.class);
+            unregisterKryoForTest(Short.class);
         }
     }
 
     @Test
-    public void testRegisterKryoWithNullClass() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            ParserFactory.registerKryo(null);
-        });
-    }
-
-    // =====================================================================
-    // registerKryo(Class, int)
-    // =====================================================================
-
-    @Test
-    public void test_registerKryo_classWithId() {
-        try {
-            assertDoesNotThrow(() -> {
-                ParserFactory.registerKryo(Integer.class, 100);
-            });
-        } finally {
-            unregisterKryoForTest(Integer.class);
-        }
-    }
-
-    @Test
-    public void test_registerKryo_classWithId_null() {
+    public void testRegisterKryo_EdgeCase() {
+        assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(null));
         assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(null, 100));
-    }
-
-    @Test
-    public void test_registerKryo_rejectsNegativeIdsImmediately() {
         assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(Integer.class, -1));
         assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(Integer.class, new TestStringSerializer(), -1));
+        assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(null, new TestStringSerializer()));
+        assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(String.class, (Serializer<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(String.class, null, 200));
+        assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(null, new TestStringSerializer(), 300));
+        assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(null, null, 300));
+        assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(String.class, (Serializer<?>) null, 400));
     }
 
     @Test
-    public void test_registerKryo_rejectsDuplicateExplicitIds() {
+    public void testRegisterKryo_rejectsDuplicateExplicitIds() {
         final int classRegistrationId = 1_900_001;
         final int serializerRegistrationId = 1_900_002;
         final int retainedClassRegistrationId = 1_900_003;
@@ -469,20 +230,16 @@ public class ParserFactoryTest extends TestBase {
     @Test
     public void testCreateKryoRejectsGlobalExplicitIdAlreadyAssignedImplicitly() {
         final KryoParser parser = new KryoParser();
-
         try {
             ParserFactory.registerKryo(ImplicitGlobalRegistrationTarget.class);
             final Kryo initialKryo = parser.createKryo();
             final int implicitId;
-
             try {
                 implicitId = initialKryo.getRegistration(ImplicitGlobalRegistrationTarget.class).getId();
             } finally {
                 parser.recycle(initialKryo);
             }
-
             ParserFactory.registerKryo(ExplicitGlobalRegistrationTarget.class, implicitId);
-
             assertThrows(IllegalArgumentException.class, parser::createKryo);
         } finally {
             unregisterKryoForTest(ImplicitGlobalRegistrationTarget.class);
@@ -493,75 +250,20 @@ public class ParserFactoryTest extends TestBase {
     @Test
     public void testCreateKryoRejectsGlobalExplicitSerializerIdAlreadyAssignedImplicitly() {
         final KryoParser parser = new KryoParser();
-
         try {
             ParserFactory.registerKryo(ImplicitGlobalSerializerTarget.class, new EmptySerializer<>());
             final Kryo initialKryo = parser.createKryo();
             final int implicitId;
-
             try {
                 implicitId = initialKryo.getRegistration(ImplicitGlobalSerializerTarget.class).getId();
             } finally {
                 parser.recycle(initialKryo);
             }
-
             ParserFactory.registerKryo(ExplicitGlobalSerializerTarget.class, new EmptySerializer<>(), implicitId);
-
             assertThrows(IllegalArgumentException.class, parser::createKryo);
         } finally {
             unregisterKryoForTest(ImplicitGlobalSerializerTarget.class);
             unregisterKryoForTest(ExplicitGlobalSerializerTarget.class);
-        }
-    }
-
-    @Test
-    public void testRegisterKryoWithIdAndNullClass() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            ParserFactory.registerKryo(null, 100);
-        });
-    }
-
-    // =====================================================================
-    // registerKryo(Class, Serializer)
-    // =====================================================================
-
-    @Test
-    public void testRegisterKryo_classWithSerializer() {
-        try {
-            assertDoesNotThrow(() -> {
-                ParserFactory.registerKryo(String.class, new TestStringSerializer());
-            });
-        } finally {
-            unregisterKryoForTest(String.class);
-        }
-    }
-
-    @Test
-    public void testRegisterKryo_classWithSerializer_nullClass() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            ParserFactory.registerKryo(null, new TestStringSerializer());
-        });
-    }
-
-    @Test
-    public void testRegisterKryo_classWithSerializer_nullSerializer() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            ParserFactory.registerKryo(String.class, (Serializer<?>) null);
-        });
-    }
-
-    // =====================================================================
-    // registerKryo(Class, Serializer, int)
-    // =====================================================================
-
-    @Test
-    public void testRegisterKryo_classWithSerializerAndId() {
-        try {
-            assertDoesNotThrow(() -> {
-                ParserFactory.registerKryo(String.class, new TestStringSerializer(), 300);
-            });
-        } finally {
-            unregisterKryoForTest(String.class);
         }
     }
 
@@ -581,68 +283,11 @@ public class ParserFactoryTest extends TestBase {
         try {
             ParserFactory.registerKryo(ReplacementRegistrationTarget.class, serializer, 990);
             ParserFactory.registerKryo(ReplacementRegistrationTarget.class, 991);
-
             assertEquals(991, ParserFactory._kryoClassIdMap.get(ReplacementRegistrationTarget.class).intValue());
             assertTrue(!ParserFactory._kryoClassSerializerIdMap.containsKey(ReplacementRegistrationTarget.class));
         } finally {
             unregisterKryoForTest(ReplacementRegistrationTarget.class);
         }
-    }
-
-    @Test
-    public void test_registerKryo_classWithSerializerAndId_nullSerializer() {
-        assertThrows(IllegalArgumentException.class, () -> ParserFactory.registerKryo(String.class, null, 200));
-    }
-
-    @Test
-    public void testRegisterKryo_classWithSerializerAndId_nullClass() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            ParserFactory.registerKryo(null, new TestStringSerializer(), 300);
-        });
-    }
-
-    @Test
-    public void testRegisterKryo_classWithSerializerAndId_nullBoth() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            ParserFactory.registerKryo(null, null, 300);
-        });
-    }
-
-    @Test
-    public void testRegisterKryo_multipleClasses() {
-        try {
-            assertDoesNotThrow(() -> {
-                ParserFactory.registerKryo(String.class);
-                ParserFactory.registerKryo(Integer.class);
-                ParserFactory.registerKryo(Double.class);
-            });
-        } finally {
-            unregisterKryoForTest(String.class);
-            unregisterKryoForTest(Integer.class);
-            unregisterKryoForTest(Double.class);
-        }
-    }
-
-    @Test
-    public void testRegisterKryo_classWithIdMultiple() {
-        try {
-            assertDoesNotThrow(() -> {
-                ParserFactory.registerKryo(String.class, 1000);
-                ParserFactory.registerKryo(Integer.class, 1001);
-                ParserFactory.registerKryo(Double.class, 1002);
-            });
-        } finally {
-            unregisterKryoForTest(String.class);
-            unregisterKryoForTest(Integer.class);
-            unregisterKryoForTest(Double.class);
-        }
-    }
-
-    @Test
-    public void testRegisterKryo_classWithSerializerAndNullSerializer() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            ParserFactory.registerKryo(String.class, (Serializer<?>) null, 400);
-        });
     }
 
     private static void unregisterKryoForTest(final Class<?> type) {
@@ -654,5 +299,4 @@ public class ParserFactoryTest extends TestBase {
             ParserFactory._kryoRegistrationVersion.incrementAndGet();
         }
     }
-
 }

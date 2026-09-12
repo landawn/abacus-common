@@ -20,15 +20,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for {@link NClob} (National Character Large Object) objects, providing
  * database interaction capabilities for handling large Unicode text data.
  * The {@link #stringOf(NClob)} method reads the entire NCLOB content into a {@link String}
  * and then frees the NCLOB; {@link #valueOf(String)} is not supported.
+ * {@link #valueOf(Object)} returns an object that already is an instance of the handled
+ * {@link NClob} class unchanged, maps {@code null} to {@code null}, and rejects everything else
+ * without touching it.
  */
+@SuppressWarnings("java:S2160")
 public class NClobType extends AbstractType<NClob> {
 
     /** The type name constant for NClob type identification, equal to {@code "NClob"}. */
@@ -73,12 +79,14 @@ public class NClobType extends AbstractType<NClob> {
      * for very large objects.
      *
      * @param x the {@code NClob} object to convert, may be {@code null}
-     * @return the string content of the {@code NClob}, or {@code null} if the input is {@code null}
-     * @throws UncheckedSQLException if a database access error occurs during extraction or freeing
+     * @return the string content of the {@code NClob}, an empty string if the NCLOB has zero length,
+     *         or {@code null} if the input is {@code null}
      * @throws UnsupportedOperationException if the NCLOB length exceeds {@link Integer#MAX_VALUE}
+     * @throws UncheckedSQLException if a database access error occurs during extraction or freeing
      */
+    @MayReturnNull
     @Override
-    public String stringOf(final NClob x) throws UnsupportedOperationException {
+    public String stringOf(final NClob x) throws UnsupportedOperationException, UncheckedSQLException {
         if (x == null) {
             return null;
         }
@@ -90,7 +98,10 @@ public class NClobType extends AbstractType<NClob> {
             if (len > Integer.MAX_VALUE) {
                 throw new UnsupportedOperationException("NClob too large to convert to String: " + len + " characters");
             }
-            return x.getSubString(1, (int) len);
+            // Position 1 does not exist in a zero-length lob, so getSubString(1, 0) is rejected by
+            // some implementations (e.g. javax.sql.rowset.serial.SerialClob). Stay inside the try so
+            // the finally still frees the locator.
+            return len == 0 ? Strings.EMPTY : x.getSubString(1, (int) len);
         } catch (final SQLException e) {
             final UncheckedSQLException uncheckedException = new UncheckedSQLException(e);
             primaryException = uncheckedException;
@@ -133,15 +144,41 @@ public class NClobType extends AbstractType<NClob> {
     }
 
     /**
+     * Returns {@code obj} unchanged if it already is an instance of the {@link NClob} class handled by
+     * this type; otherwise the conversion is not supported.
+     * Unlike the inherited default, this method never reads or frees the supplied object (including a
+     * plain {@link java.sql.Clob}, which is not an {@code NClob}): an NCLOB cannot be reconstructed
+     * from its string form, so converting through {@link #stringOf(NClob)} would only destroy the
+     * caller's locator before failing.
+     *
+     * @param obj the object to convert; may be {@code null}
+     * @return the same {@link NClob} instance if {@code obj} is an instance of {@link #javaType()},
+     *         or {@code null} if {@code obj} is {@code null}
+     * @throws UnsupportedOperationException if {@code obj} is non-null and not an instance of {@link #javaType()}
+     */
+    @MayReturnNull
+    @Override
+    public NClob valueOf(final Object obj) throws UnsupportedOperationException {
+        if (obj == null) {
+            return null; // NOSONAR
+        } else if (clazz.isInstance(obj)) {
+            return clazz.cast(obj);
+        }
+
+        throw new UnsupportedOperationException("NClob cannot be created from " + obj.getClass().getName());
+    }
+
+    /**
      * Retrieves an {@link NClob} value from the specified column in the {@link ResultSet}.
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the column to retrieve the {@code NClob} from
      * @return the {@code NClob} object, or {@code null} if the column value is SQL {@code NULL}
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
-    public NClob get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public NClob get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getNClob(columnIndex);
     }
 
@@ -151,10 +188,11 @@ public class NClobType extends AbstractType<NClob> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
      * @return the {@code NClob} object, or {@code null} if the column value is SQL {@code NULL}
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
-    public NClob get(final ResultSet rs, final String columnName) throws SQLException {
+    public NClob get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getNClob(columnName);
     }
 
@@ -164,10 +202,11 @@ public class NClobType extends AbstractType<NClob> {
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code NClob} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final NClob x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final NClob x) throws NullPointerException, SQLException {
         stmt.setNClob(columnIndex, x);
     }
 
@@ -177,10 +216,11 @@ public class NClobType extends AbstractType<NClob> {
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code NClob} value to set, or {@code null} to set SQL {@code NULL}
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final NClob x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final NClob x) throws NullPointerException, SQLException {
         stmt.setNClob(parameterName, x);
     }
 }

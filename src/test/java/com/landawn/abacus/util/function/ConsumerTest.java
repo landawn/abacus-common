@@ -106,7 +106,7 @@ public class ConsumerTest extends TestBase {
         Consumer<String> consumer = s -> {
         };
 
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> consumer.andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> consumer.andThen(null));
     }
 
     @Test
@@ -121,6 +121,6 @@ public class ConsumerTest extends TestBase {
     public void testAndThenRejectsNullImmediately() {
         Consumer<String> instance = a -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.Consumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.Consumer) null));
     }
 }

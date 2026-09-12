@@ -37,6 +37,32 @@ import com.landawn.abacus.util.u.OptionalFloat;
 
 public class AbstractFloatStreamTest extends TestBase {
 
+    @Test
+    public void testScanInitializesOnlyAfterSuccessfulSourceRead() {
+        final IllegalStateException failure = new IllegalStateException("first read failed");
+        final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger accumulatorCalls = new java.util.concurrent.atomic.AtomicInteger();
+
+        try (FloatStream stream = FloatStream.of(new float[] { 1, 2, 3 }).map(value -> {
+            if (attempts.getAndIncrement() == 0) {
+                throw failure;
+            }
+            return value;
+        }).scan((left, right) -> {
+            accumulatorCalls.incrementAndGet();
+            return (float) (left + right);
+        })) {
+            final com.landawn.abacus.util.FloatIterator iter = stream.iterator();
+            org.junit.jupiter.api.Assertions.assertSame(failure,
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextFloat));
+            org.junit.jupiter.api.Assertions.assertEquals((float) 2, iter.nextFloat());
+            org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
+            org.junit.jupiter.api.Assertions.assertEquals((float) 5, iter.nextFloat());
+            org.junit.jupiter.api.Assertions.assertEquals(1, accumulatorCalls.get());
+            org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+        }
+    }
+
     private FloatStream stream;
     private FloatStream stream2;
 

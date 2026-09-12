@@ -107,7 +107,10 @@ public class DurationType extends AbstractType<Duration> {
 
     /**
      * Parses a millisecond-count string back into a {@link Duration}.
-     * The string must contain a valid {@code long} value (e.g., {@code "5000"} for 5 seconds).
+     * The string must contain a valid {@code long} value (e.g., {@code "5000"} for 5 seconds), parsed with the
+     * {@link Numbers#toLong(String)} grammar: an optional sign, an optional trailing {@code L}/{@code l} suffix and
+     * {@code 0x}/{@code #} hexadecimal are accepted ({@code "1000L"} and {@code "0x3E8"} both yield one second);
+     * surrounding whitespace is not.
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
@@ -116,11 +119,12 @@ public class DurationType extends AbstractType<Duration> {
      * @param str the millisecond count as a string; may be {@code null} or empty
      * @return the corresponding {@link Duration}, or {@code null} if {@code str} is {@code null} or empty
      * @throws NumberFormatException if {@code str} is non-empty but does not contain a parsable {@code long}
+     * @throws ArithmeticException if the millisecond text is an integer outside the {@code long} range
      * @see #valueOf(Object)
      * @see #stringOf(Duration)
      */
     @Override
-    public Duration valueOf(final String str) {
+    public Duration valueOf(final String str) throws NumberFormatException, ArithmeticException {
         return Strings.isEmpty(str) ? null : Duration.ofMillis(Numbers.toLong(str));
     }
 
@@ -133,10 +137,11 @@ public class DurationType extends AbstractType<Duration> {
      * @param columnIndex the 1-based column index
      * @return a {@link Duration} created from the stored millisecond count,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Duration get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Duration get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final long millis = rs.getLong(columnIndex);
 
         return rs.wasNull() ? null : Duration.ofMillis(millis);
@@ -151,10 +156,11 @@ public class DurationType extends AbstractType<Duration> {
      * @param columnName the label of the column to retrieve
      * @return a {@link Duration} created from the stored millisecond count,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the column label is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Duration get(final ResultSet rs, final String columnName) throws SQLException {
+    public Duration get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final long millis = rs.getLong(columnName);
 
         return rs.wasNull() ? null : Duration.ofMillis(millis);
@@ -168,10 +174,11 @@ public class DurationType extends AbstractType<Duration> {
      * @param stmt        the {@link java.sql.PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x           the {@link Duration} to set; may be {@code null}
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Duration x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Duration x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.BIGINT);
         } else {
@@ -187,10 +194,11 @@ public class DurationType extends AbstractType<Duration> {
      * @param stmt          the {@link java.sql.CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x             the {@link Duration} to set; may be {@code null}
-     * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Duration x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Duration x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.BIGINT);
         } else {
@@ -208,7 +216,8 @@ public class DurationType extends AbstractType<Duration> {
      *
      * @param appendable the {@link Appendable} to write to
      * @param x          the {@link Duration} to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -220,7 +229,7 @@ public class DurationType extends AbstractType<Duration> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Duration x) throws IOException {
+    public void appendTo(final Appendable appendable, final Duration x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -243,10 +252,11 @@ public class DurationType extends AbstractType<Duration> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the {@link Duration} to write; may be {@code null}
      * @param config serialization configuration (not used for {@link Duration}); may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Duration x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Duration x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

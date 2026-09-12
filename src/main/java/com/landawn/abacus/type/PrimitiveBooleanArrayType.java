@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -96,6 +97,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final boolean[] x) {
         if (x == null) {
@@ -112,6 +114,12 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * Expected format: [true, false, true] or similar boolean value representations.
      * Returns {@code null} if input is {@code null}, empty, or blank, or an empty array if input is {@code "[]"}.
      *
+     * <p>Each element is parsed with the {@code boolean} element type's lenient rules: {@code true} (case-insensitive),
+     * {@code Y}, {@code y} and {@code 1} parse as {@code true}; any other token - including the literal
+     * {@code null} - parses as {@code false}, because a primitive array cannot hold {@code null}. This matches the
+     * JSON parser's null-to-default rule for primitive arrays. Use {@code Boolean[]} to preserve {@code null}
+     * elements. For example {@code "[1, null, yes]"} yields {@code {true, false, false}}.</p>
+     *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form produced by
      * {@code stringOf} back into a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the type's default). Strings produced by {@link Object#toString()} are not
      * guaranteed to be parseable in this way.</p>
@@ -119,12 +127,14 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * @param str the string to parse
      * @return the parsed boolean array; {@code null} if input is {@code null}, empty, or blank;
      *         or an empty array if input is {@code "[]"}
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
      * @see #valueOf(Object)
      * @see #stringOf(boolean[])
      */
+    @MayReturnNull
     @Override
-    public boolean[] valueOf(final String str) {
-        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
+    public boolean[] valueOf(final String str) throws IllegalArgumentException {
+        if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_BOOLEAN_ARRAY;
@@ -155,7 +165,8 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      *
      * @param appendable the Appendable to write to
      * @param x the boolean array to append
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -167,7 +178,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final boolean[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final boolean[] x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -202,10 +213,11 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * @param writer the CharacterWriter to write to
      * @param x the boolean array to write
      * @param config the serialization configuration (currently unused for boolean arrays)
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final boolean[] x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final boolean[] x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -230,9 +242,13 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      *
      * @param c the Collection of Boolean objects to convert
      * @return a boolean array containing the unboxed values, or {@code null} if input is null
+     * @throws ClassCastException if an element is not a {@code Boolean}.
+     * @throws NullPointerException if an element is {@code null} and cannot be unboxed.
+     * @throws ArrayIndexOutOfBoundsException if the collection supplies more elements during iteration than the size used to allocate the array.
      */
+    @MayReturnNull
     @Override
-    public boolean[] collectionToArray(final Collection<?> c) {
+    public boolean[] collectionToArray(final Collection<?> c) throws ClassCastException, NullPointerException, ArrayIndexOutOfBoundsException {
         if (c == null) {
             return null; // NOSONAR
         }
@@ -255,9 +271,14 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      *
      * @param x the boolean array to convert
      * @param output the Collection to add the boxed Boolean values to
+     * @throws NullPointerException if the input array is nonempty and {@code output} is {@code null}.
+     * @throws UnsupportedOperationException if the input array is nonempty and the output collection does not support adding elements.
+     * @throws ClassCastException if the output collection cannot accept Boolean objects
+     * @throws IllegalArgumentException if the output collection rejects an element for a restriction other than its type or nullness.
      */
     @Override
-    public void arrayToCollection(final boolean[] x, final Collection<?> output) {
+    public void arrayToCollection(final boolean[] x, final Collection<?> output)
+            throws NullPointerException, UnsupportedOperationException, ClassCastException, IllegalArgumentException {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 
@@ -272,7 +293,7 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * Uses the standard Arrays.hashCode algorithm for consistency.
      *
      * @param x the boolean array to hash
-     * @return the hash code of the array
+     * @return the hash code of the array, or 0 if the array is null
      */
     @Override
     public int hashCode(final boolean[] x) {

@@ -10,8 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Assertions;
@@ -304,4 +307,116 @@ public class JsonDeserConfigTest extends TestBase {
         assertEquals(Integer.class, config.getMapValueType().javaType());
     }
 
+    // ---------------------------------------------------------------------------------------------
+    // Review fixes 2026-09-06 (P8-08 copy() clones the handler map; P8-09 javadoc pin)
+    // ---------------------------------------------------------------------------------------------
+
+    @Test
+    public void reviewFixes20260906_copy_propHandlerMapIsNotSharedWithTheOriginal() {
+        final BiConsumer<Collection<Object>, Object> h1 = (c, e) -> c.add(e);
+        final BiConsumer<Collection<Object>, Object> h2 = (c, e) -> c.add(String.valueOf(e));
+        config.setPropHandler("h1", h1);
+
+        final JsonDeserConfig copy = config.copy();
+        assertNotSame(config, copy);
+        assertEquals(config, copy);
+        assertEquals(config.hashCode(), copy.hashCode());
+        // the handler instances are shared, the map is not
+        Assertions.assertSame(h1, copy.getPropHandler("h1"));
+
+        copy.setPropHandler("h2", h2);
+        Assertions.assertNull(config.getPropHandler("h2"));
+        Assertions.assertSame(h2, copy.getPropHandler("h2"));
+        assertNotEquals(config, copy);
+
+        config.setPropHandler("h3", h2);
+        Assertions.assertNull(copy.getPropHandler("h3"));
+        Assertions.assertSame(h2, config.getPropHandler("h3"));
+    }
+
+    @Test
+    public void reviewFixes20260906_copy_valueTypeMapIsNotSharedWithTheOriginal() {
+        config.setValueType("x", String.class);
+
+        final JsonDeserConfig copy = config.copy();
+        assertEquals(config, copy);
+        copy.setValueType("y", Integer.class);
+
+        Assertions.assertNull(config.getValueType("y"));
+        assertEquals(Integer.class, copy.getValueType("y").javaType());
+        assertEquals(String.class, copy.getValueType("x").javaType());
+        assertNotEquals(config, copy);
+    }
+
+    @Test
+    public void reviewFixes20260906_copy_withoutHandlers_copyStaysIndependent() {
+        final JsonDeserConfig copy = config.copy();
+        copy.setPropHandler("h", (c, e) -> c.add(e));
+        Assertions.assertNull(config.getPropHandler("h"));
+        assertNotNull(copy.getPropHandler("h"));
+        // the copy is a real JsonDeserConfig (covariant override) with all JSON-specific fields carried over
+        config.setIgnoreNullOrEmpty(true).setReadNullToEmpty(true).setMapInstanceType(LinkedHashMap.class);
+        final JsonDeserConfig copy2 = config.copy();
+        assertTrue(copy2.isIgnoreNullOrEmpty());
+        assertTrue(copy2.isReadNullToEmpty());
+        assertEquals(LinkedHashMap.class, copy2.getMapInstanceType());
+        assertEquals(config, copy2);
+    }
+
+    @Test
+    public void reviewFixes20260906_mapInstanceType_interfaceResolvedAtDeserializationTime_concreteTargetWins() {
+        final JsonParser jp = ParserFactory.createJsonParser();
+        final String json = "{\"b\":1,\"a\":2}";
+
+        // interface / abstract arguments are accepted here and resolved by Suppliers.ofMap when the map is created
+        assertEquals(SortedMap.class, new JsonDeserConfig().setMapInstanceType(SortedMap.class).getMapInstanceType());
+        assertEquals(TreeMap.class, jp.deserialize(json, new JsonDeserConfig().setMapInstanceType(SortedMap.class), Map.class).getClass());
+        assertEquals(HashMap.class, jp.deserialize(json, new JsonDeserConfig().setMapInstanceType(Map.class), Map.class).getClass());
+        assertEquals(TreeMap.class, jp.deserialize(json, new JsonDeserConfig().setMapInstanceType(TreeMap.class), Map.class).getClass());
+        assertEquals(LinkedHashMap.class, jp.deserialize(json, new JsonDeserConfig().setMapInstanceType(LinkedHashMap.class), Map.class).getClass());
+
+        // a concrete declared target type is instantiated as declared; the setting is ignored for it
+        assertEquals(HashMap.class, jp.deserialize(json, new JsonDeserConfig().setMapInstanceType(TreeMap.class), HashMap.class).getClass());
+        assertEquals(HashMap.class, jp.deserialize(json, new JsonDeserConfig().setMapInstanceType(SortedMap.class), HashMap.class).getClass());
+
+        // null is still the only value rejected by the setter
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new JsonDeserConfig().setMapInstanceType(null));
+    }
+
+
+    /**
+     * A subclass that narrows equality the way {@code AvroDeserConfig}/{@code KryoDeserConfig} do over
+     * {@code DeserializationConfig}: {@code instanceof <OwnType> && super.equals(obj)}.
+     */
+    static class NarrowingJsonDeserConfig extends JsonDeserConfig {
+        @Override
+        public boolean equals(final Object obj) {
+            return this == obj || (obj instanceof NarrowingJsonDeserConfig && super.equals(obj));
+        }
+
+        @Override
+        public int hashCode() {
+            return super.hashCode();
+        }
+    }
+
+    @Test
+    public void reviewFixes20260908_equalsIsSymmetricAgainstASubclassThatNarrowsEquality() {
+        final JsonDeserConfig base = new JsonDeserConfig();
+        final NarrowingJsonDeserConfig sub = new NarrowingJsonDeserConfig();
+
+        // Same settings, different classes. With the old `obj instanceof JsonDeserConfig` test base.equals(sub)
+        // was true while sub.equals(base) was false - the very asymmetry DeserializationConfig#equals documents
+        // its exact-class rule to prevent, and the one JsonSerConfig/XmlSerConfig were already corrected for.
+        assertEquals(base.equals(sub), sub.equals(base));
+        assertFalse(base.equals(sub));
+        assertFalse(sub.equals(base));
+
+        // Unchanged for everything else.
+        assertTrue(base.equals(new JsonDeserConfig()));
+        assertTrue(sub.equals(new NarrowingJsonDeserConfig()));
+        assertEquals(base.hashCode(), new JsonDeserConfig().hashCode());
+        assertFalse(base.equals(null));
+        assertFalse(base.equals("not a config"));
+    }
 }

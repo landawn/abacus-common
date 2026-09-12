@@ -14,18 +14,21 @@
 
 package com.landawn.abacus.type;
 
+import java.io.BufferedReader;
+import java.io.CharArrayReader;
+import java.io.FilterReader;
 import java.io.IOException;
+import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
 import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
@@ -85,10 +88,6 @@ public class ReaderType extends AbstractType<Reader> {
 
     private final Class<Reader> typeClass;
 
-    private final Constructor<?> stringConstructor;
-
-    private final Constructor<?> readerConstructor;
-
     /**
      * Constructs a new ReaderType instance for the base Reader class.
      * This constructor is package-private and intended to be called only by the TypeFactory.
@@ -108,13 +107,11 @@ public class ReaderType extends AbstractType<Reader> {
 
         typeClass = Reader.class;
 
-        stringConstructor = null;
-        readerConstructor = null;
     }
 
     /**
      * Constructs a new ReaderType for a specific Reader subclass.
-     * Attempts to locate constructors that accept String or Reader parameters for instantiation.
+     * Text construction is supported only for the content-preserving classes listed in {@link #valueOf(String)}.
      * This constructor is package-private and intended to be called only by the TypeFactory.
      *
      * @param cls the specific Reader subclass to create a type handler for
@@ -124,13 +121,6 @@ public class ReaderType extends AbstractType<Reader> {
 
         typeClass = cls;
 
-        if (Modifier.isAbstract(cls.getModifiers())) {
-            stringConstructor = null;
-            readerConstructor = null;
-        } else {
-            stringConstructor = ClassUtil.getDeclaredConstructor(cls, String.class);
-            readerConstructor = ClassUtil.getDeclaredConstructor(cls, Reader.class);
-        }
     }
 
     /**
@@ -184,26 +174,28 @@ public class ReaderType extends AbstractType<Reader> {
      * }</pre>
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is
-     * type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
+     * via {@link #valueOf(String)} for supported reader classes. Other subclasses can still be read, but require
+     * an explicitly registered type handler to reconstruct them from text. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
      * @param x the Reader to convert to string
      * @return the string containing all content read from the Reader, or {@code null} if the input is null
-     * @throws UncheckedIOException if an I/O error occurs while reading from the Reader
+     * @throws UncheckedIOException if reading the remaining characters of non-null {@code x} fails
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final Reader x) {
+    public String stringOf(final Reader x) throws UncheckedIOException {
         return x == null ? null : IOUtil.readAllToString(x);
     }
 
     /**
      * Creates a Reader instance from a string value.
-     * If the concrete Reader class has a constructor accepting String or Reader,
-     * it will be used. Otherwise, a StringReader is returned.
+     * Supports {@link Reader}, {@link StringReader}, {@link CharArrayReader}, {@link BufferedReader},
+     * {@link PushbackReader}, and {@link FilterReader} (using a pushback reader).
+     * Other subclasses are rejected: a String constructor may interpret its argument as a pathname,
+     * and a Reader constructor may transform rather than preserve content.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -222,29 +214,37 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * @param str the string to create a Reader from
      * @return a Reader containing the string content, or {@code null} if the input string is null
-     * @throws RuntimeException if the constructor invocation fails
+     * @throws UnsupportedOperationException if non-null text is supplied for an unsupported reader class
      * @see #valueOf(Object)
      * @see #stringOf(Reader)
      */
+    @MayReturnNull
     @Override
-    public Reader valueOf(final String str) {
+    public Reader valueOf(final String str) throws UnsupportedOperationException {
         if (str == null) {
             return null; // NOSONAR
         }
 
-        if (stringConstructor != null) {
-            return (Reader) ClassUtil.invokeConstructor(stringConstructor, str);
-        } else if (readerConstructor != null) {
-            return (Reader) ClassUtil.invokeConstructor(readerConstructor, new StringReader(str));
-        } else {
+        // Constructor signatures do not establish content semantics (notably FileReader(String)).
+        if (typeClass == (Class<?>) Reader.class || typeClass == (Class<?>) StringReader.class) {
             return new StringReader(str);
+        } else if (typeClass == (Class<?>) CharArrayReader.class) {
+            return new CharArrayReader(str.toCharArray());
+        } else if (typeClass == (Class<?>) BufferedReader.class) {
+            return new BufferedReader(new StringReader(str));
+        } else if (typeClass == (Class<?>) PushbackReader.class || typeClass == (Class<?>) FilterReader.class) {
+            return new PushbackReader(new StringReader(str));
         }
+
+        throw new UnsupportedOperationException("Text construction is not supported for reader class: " + typeClass.getName());
     }
 
     /**
      * Creates a Reader from various object types.
      * If the object is a Clob, its character stream is returned in an owning wrapper.
      * Closing the returned reader closes the character stream and releases the Clob locator.
+     * A {@code char[]} is read as its raw characters, in a reader of the handled class chosen by the
+     * same rule as {@link #valueOf(String)}.
      * Otherwise, the object is converted to string and then to a Reader.
      *
      * <p><b>Usage Examples:</b></p>
@@ -254,6 +254,10 @@ public class ReaderType extends AbstractType<Reader> {
      * // From an arbitrary object (converted to its string representation first)
      * Reader reader1 = type.valueOf((Object) "Hello");
      * System.out.println(IOUtil.readAllToString(reader1));   // Output: Hello
+     *
+     * // From a char[] (the characters themselves, not the array's list text)
+     * Reader reader3 = type.valueOf((Object) new char[] { 'H', 'i' });
+     * System.out.println(IOUtil.readAllToString(reader3));   // Output: Hi
      *
      * // From Clob (assuming clob is a valid SQL Clob object)
      * Reader reader2 = type.valueOf(clob);
@@ -267,10 +271,12 @@ public class ReaderType extends AbstractType<Reader> {
      * @return a Reader representation of the object, or {@code null} if the input is null;
      *         for a Clob, closing the returned reader also releases the locator
      * @throws UncheckedSQLException if accessing the Clob's character stream fails
+     * @throws UnsupportedOperationException if content is supplied for an unsupported reader class
      */
+    @MayReturnNull
     @SuppressFBWarnings
     @Override
-    public Reader valueOf(final Object obj) {
+    public Reader valueOf(final Object obj) throws UncheckedSQLException, UnsupportedOperationException {
         if (obj == null) {
             return null; // NOSONAR
         } else if (obj instanceof Clob clob) {
@@ -279,6 +285,9 @@ public class ReaderType extends AbstractType<Reader> {
             } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             }
+        } else if (obj instanceof char[] chars) {
+            // The string route would render the array as its list text ("['a', 'b']").
+            return valueOf(new String(chars));
         } else {
             return valueOf(Type.<Object> of(obj.getClass()).stringOf(obj));
         }
@@ -299,10 +308,11 @@ public class ReaderType extends AbstractType<Reader> {
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
      * @return the Reader for the specified column, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Reader get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getCharacterStream(columnIndex);
     }
 
@@ -321,10 +331,11 @@ public class ReaderType extends AbstractType<Reader> {
      * @param rs the ResultSet to read from
      * @param columnName the label of the column to retrieve (column name or alias)
      * @return the Reader for the specified column, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public Reader get(final ResultSet rs, final String columnName) throws SQLException {
+    public Reader get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getCharacterStream(columnName);
     }
 
@@ -344,10 +355,11 @@ public class ReaderType extends AbstractType<Reader> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the Reader to set as the parameter value
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws NullPointerException, SQLException {
         stmt.setCharacterStream(columnIndex, x);
     }
 
@@ -367,10 +379,11 @@ public class ReaderType extends AbstractType<Reader> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Reader to set as the parameter value
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws NullPointerException, SQLException {
         stmt.setCharacterStream(parameterName, x);
     }
 
@@ -392,10 +405,11 @@ public class ReaderType extends AbstractType<Reader> {
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the Reader to set as the parameter value
      * @param sqlTypeOrLength the length of the stream in characters
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
         stmt.setCharacterStream(columnIndex, x, sqlTypeOrLength);
     }
 
@@ -417,10 +431,12 @@ public class ReaderType extends AbstractType<Reader> {
      * @param parameterName the name of the parameter to set
      * @param x the Reader to set as the parameter value
      * @param sqlTypeOrLength the length of the stream in characters
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setCharacterStream(parameterName, x, sqlTypeOrLength);
     }
 
@@ -454,7 +470,8 @@ public class ReaderType extends AbstractType<Reader> {
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the Reader whose content should be appended; may be {@code null}, in which case
      *          the literal {@code "null"} is appended
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws IOException if appending to the destination fails, or reading {@code x} fails while copying directly to a {@code Writer}
+     * @throws UncheckedIOException if reading non-null {@code x} fails when {@code appendable} is not a {@code Writer}
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -466,7 +483,7 @@ public class ReaderType extends AbstractType<Reader> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Reader x) throws IOException {
+    public void appendTo(final Appendable appendable, final Reader x) throws IOException, UncheckedIOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -519,7 +536,8 @@ public class ReaderType extends AbstractType<Reader> {
      * @param x the Reader whose content should be written; may be {@code null}, in which case
      *          the literal {@code "null"} is written
      * @param config the serialization configuration that determines string quotation; may be {@code null}
-     * @throws IOException if an I/O error occurs while reading from {@code x} or writing to {@code writer}
+     * @throws IOException if reading characters from {@code x}, writing their escaped representation, or writing quotation marks or the
+     *         null literal to {@code writer} fails
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final Reader x, final JsonXmlSerConfig<?> config) throws IOException {
@@ -536,7 +554,7 @@ public class ReaderType extends AbstractType<Reader> {
                 int count = 0;
 
                 while (IOUtil.EOF != (count = IOUtil.read(x, buf, 0, buf.length))) {
-                    writer.writeCharacter(buf, 0, count);
+                    Utils.writeStringContent(writer, buf, 0, count, config == null ? 0 : config.getStringQuotation());
                 }
             } finally {
                 Objectory.recycle(buf);

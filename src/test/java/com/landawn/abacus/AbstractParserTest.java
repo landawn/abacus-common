@@ -9,21 +9,22 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.landawn.abacus.entity.BigXBean;
-import com.landawn.abacus.entity.PersonType;
-import com.landawn.abacus.entity.PersonsType;
-import com.landawn.abacus.entity.XBean;
 import com.landawn.abacus.parser.JsonParser;
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.XmlParser;
-import com.landawn.abacus.types.JAXBean;
-import com.landawn.abacus.types.WeekDay;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
+
+import testfixtures.entity.BigXBean;
+import testfixtures.entity.PersonType;
+import testfixtures.entity.PersonsType;
+import testfixtures.entity.XBean;
+import testfixtures.types.JAXBean;
+import testfixtures.types.WeekDay;
 
 public abstract class AbstractParserTest extends AbstractTest {
     protected static final JsonParser jsonParser = ParserFactory.createJsonParser();

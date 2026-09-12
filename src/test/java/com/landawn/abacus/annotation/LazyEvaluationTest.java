@@ -21,7 +21,7 @@ import com.landawn.abacus.TestBase;
 public class LazyEvaluationTest extends TestBase {
 
     @LazyEvaluation
-    static class TestLazyClass {
+    public static class TestLazyClass {
         @LazyEvaluation
         public String compute() {
             return "result";

@@ -68,7 +68,7 @@ public final class EscapeUtil {
      * as the foundation for a custom translator.
      */
     public static final CharSequenceTranslator ESCAPE_JAVA = new LookupTranslator(new String[][] { { "\"", "\\\"" }, { "\\", "\\\\" }, })
-            .with(new LookupTranslator(BeanArrays.javaCtrlCharsEscape()))
+            .with(new LookupTranslator(EntityArrays.javaCtrlCharsEscape()))
             .with(JavaUnicodeEscaper.outsideOf(32, 0x7f));
 
     /**
@@ -80,7 +80,7 @@ public final class EscapeUtil {
      */
     public static final CharSequenceTranslator ESCAPE_ECMASCRIPT = new AggregateTranslator(
             new LookupTranslator(new String[][] { { "'", "\\'" }, { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" } }),
-            new LookupTranslator(BeanArrays.javaCtrlCharsEscape()), JavaUnicodeEscaper.outsideOf(32, 0x7f));
+            new LookupTranslator(EntityArrays.javaCtrlCharsEscape()), JavaUnicodeEscaper.outsideOf(32, 0x7f));
 
     /**
      * Translator object for escaping JSON.
@@ -90,8 +90,8 @@ public final class EscapeUtil {
      * as the foundation for a custom translator.
      */
     public static final CharSequenceTranslator ESCAPE_JSON = new AggregateTranslator(
-            new LookupTranslator(new String[][] { { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" } }), new LookupTranslator(BeanArrays.javaCtrlCharsEscape()),
-            JavaUnicodeEscaper.outsideOf(32, 0x7f));
+            new LookupTranslator(new String[][] { { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" } }),
+            new LookupTranslator(EntityArrays.javaCtrlCharsEscape()), JavaUnicodeEscaper.outsideOf(32, 0x7f));
 
     /**
      * Translator object for escaping XML 1.0.
@@ -100,8 +100,8 @@ public final class EscapeUtil {
      * object allows the XML escaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator ESCAPE_XML10 = new AggregateTranslator(new LookupTranslator(BeanArrays.basicEscape()),
-            new LookupTranslator(BeanArrays.aposEscape()),
+    public static final CharSequenceTranslator ESCAPE_XML10 = new AggregateTranslator(new LookupTranslator(EntityArrays.basicEscape()),
+            new LookupTranslator(EntityArrays.aposEscape()),
             new LookupTranslator(new String[][] { { "\u0000", Strings.EMPTY }, { "\u0001", Strings.EMPTY }, { "\u0002", Strings.EMPTY },
                     { "\u0003", Strings.EMPTY }, { "\u0004", Strings.EMPTY }, { "\u0005", Strings.EMPTY }, { "\u0006", Strings.EMPTY },
                     { "\u0007", Strings.EMPTY }, { "\u0008", Strings.EMPTY }, { "\u000b", Strings.EMPTY }, { "\u000c", Strings.EMPTY },
@@ -110,7 +110,7 @@ public final class EscapeUtil {
                     { "\u0016", Strings.EMPTY }, { "\u0017", Strings.EMPTY }, { "\u0018", Strings.EMPTY }, { "\u0019", Strings.EMPTY },
                     { "\u001a", Strings.EMPTY }, { "\u001b", Strings.EMPTY }, { "\u001c", Strings.EMPTY }, { "\u001d", Strings.EMPTY },
                     { "\u001e", Strings.EMPTY }, { "\u001f", Strings.EMPTY }, { "\ufffe", Strings.EMPTY }, { "\uffff", Strings.EMPTY } }),
-            NumericBeanEscaper.between(0x7f, 0x84), NumericBeanEscaper.between(0x86, 0x9f), new UnicodeUnpairedSurrogateRemover());
+            NumericEntityEscaper.between(0x7f, 0x84), NumericEntityEscaper.between(0x86, 0x9f), new UnicodeUnpairedSurrogateRemover());
 
     /**
      * Translator object for escaping XML 1.1.
@@ -119,12 +119,12 @@ public final class EscapeUtil {
      * object allows the XML escaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator ESCAPE_XML11 = new AggregateTranslator(new LookupTranslator(BeanArrays.basicEscape()),
-            new LookupTranslator(BeanArrays.aposEscape()),
+    public static final CharSequenceTranslator ESCAPE_XML11 = new AggregateTranslator(new LookupTranslator(EntityArrays.basicEscape()),
+            new LookupTranslator(EntityArrays.aposEscape()),
             new LookupTranslator(new String[][] { { "\u0000", Strings.EMPTY }, { "\u000b", "&#11;" }, { "\u000c", "&#12;" }, { "\ufffe", Strings.EMPTY },
                     { "\uffff", Strings.EMPTY } }),
-            NumericBeanEscaper.between(0x1, 0x8), NumericBeanEscaper.between(0xe, 0x1f), NumericBeanEscaper.between(0x7f, 0x84),
-            NumericBeanEscaper.between(0x86, 0x9f), new UnicodeUnpairedSurrogateRemover());
+            NumericEntityEscaper.between(0x1, 0x8), NumericEntityEscaper.between(0xe, 0x1f), NumericEntityEscaper.between(0x7f, 0x84),
+            NumericEntityEscaper.between(0x86, 0x9f), new UnicodeUnpairedSurrogateRemover());
 
     /**
      * Translator object for escaping HTML version 3.0.
@@ -133,8 +133,8 @@ public final class EscapeUtil {
      * object allows the HTML escaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator ESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(BeanArrays.basicEscape()),
-            new LookupTranslator(BeanArrays.iso8859_1Escape()));
+    public static final CharSequenceTranslator ESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(EntityArrays.basicEscape()),
+            new LookupTranslator(EntityArrays.iso8859_1Escape()));
 
     /**
      * Translator object for escaping HTML version 4.0.
@@ -143,8 +143,8 @@ public final class EscapeUtil {
      * object allows the HTML escaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator ESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(BeanArrays.basicEscape()),
-            new LookupTranslator(BeanArrays.iso8859_1Escape()), new LookupTranslator(BeanArrays.html40ExtendedEscape()));
+    public static final CharSequenceTranslator ESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(EntityArrays.basicEscape()),
+            new LookupTranslator(EntityArrays.iso8859_1Escape()), new LookupTranslator(EntityArrays.html40ExtendedEscape()));
 
     /**
      * Translator object for escaping individual Comma Separated Values.
@@ -166,7 +166,7 @@ public final class EscapeUtil {
      */
     // TODO: throw "illegal character: \92" as an Exception if a \ on the end of the Java (as per the compiler)?
     public static final CharSequenceTranslator UNESCAPE_JAVA = new AggregateTranslator(new OctalUnescaper(), // .between('\1', '\377'),
-            new UnicodeUnescaper(), new LookupTranslator(BeanArrays.javaCtrlCharsUnescape()),
+            new UnicodeUnescaper(), new LookupTranslator(EntityArrays.javaCtrlCharsUnescape()),
             new LookupTranslator(new String[][] { { "\\\\", "\\" }, { "\\\"", "\"" }, { "\\'", "'" }, { "\\", "" } }));
 
     /**
@@ -194,8 +194,8 @@ public final class EscapeUtil {
      * object allows the HTML unescaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator UNESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(BeanArrays.basicUnescape()),
-            new LookupTranslator(BeanArrays.iso8859_1Unescape()), new NumericBeanUnescaper());
+    public static final CharSequenceTranslator UNESCAPE_HTML3 = new AggregateTranslator(new LookupTranslator(EntityArrays.basicUnescape()),
+            new LookupTranslator(EntityArrays.iso8859_1Unescape()), new NumericEntityUnescaper());
 
     /**
      * Translator object for unescaping escaped HTML 4.0.
@@ -204,8 +204,8 @@ public final class EscapeUtil {
      * object allows the HTML unescaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator UNESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(BeanArrays.basicUnescape()),
-            new LookupTranslator(BeanArrays.iso8859_1Unescape()), new LookupTranslator(BeanArrays.html40ExtendedUnescape()), new NumericBeanUnescaper());
+    public static final CharSequenceTranslator UNESCAPE_HTML4 = new AggregateTranslator(new LookupTranslator(EntityArrays.basicUnescape()),
+            new LookupTranslator(EntityArrays.iso8859_1Unescape()), new LookupTranslator(EntityArrays.html40ExtendedUnescape()), new NumericEntityUnescaper());
 
     /**
      * Translator object for unescaping escaped XML.
@@ -214,8 +214,8 @@ public final class EscapeUtil {
      * object allows the XML unescaping functionality to be used
      * as the foundation for a custom translator.
      */
-    public static final CharSequenceTranslator UNESCAPE_XML = new AggregateTranslator(new LookupTranslator(BeanArrays.basicUnescape()),
-            new LookupTranslator(BeanArrays.aposUnescape()), new NumericBeanUnescaper());
+    public static final CharSequenceTranslator UNESCAPE_XML = new AggregateTranslator(new LookupTranslator(EntityArrays.basicUnescape()),
+            new LookupTranslator(EntityArrays.aposUnescape()), new NumericEntityUnescaper());
 
     /**
      * Translator object for unescaping escaped Comma Separated Value entries.
@@ -344,7 +344,7 @@ public final class EscapeUtil {
      *         non-hex digits, after <code>&#92;u</code>).
      * @see #escapeJava(String)
      */
-    public static String unescapeJava(final String input) {
+    public static String unescapeJava(final String input) throws IllegalArgumentException {
         return UNESCAPE_JAVA.translate(input);
     }
 
@@ -370,7 +370,7 @@ public final class EscapeUtil {
      * @see #escapeEcmaScript(String)
      * @see #unescapeJava(String)
      */
-    public static String unescapeEcmaScript(final String input) {
+    public static String unescapeEcmaScript(final String input) throws IllegalArgumentException {
         return UNESCAPE_ECMASCRIPT.translate(input);
     }
 
@@ -399,7 +399,7 @@ public final class EscapeUtil {
      * @see #escapeJson(String)
      * @see #unescapeJava(String)
      */
-    public static String unescapeJson(final String input) {
+    public static String unescapeJson(final String input) throws IllegalArgumentException {
         return UNESCAPE_JSON.translate(input);
     }
 
@@ -418,6 +418,12 @@ public final class EscapeUtil {
      * For XML escaping that includes {@code &apos;}, use {@link #escapeXml10(String)} or
      * {@link #escapeXml11(String)}.</p>
      *
+     * <p><b>Not sufficient for every HTML context.</b> Because {@code '} is left as-is, the result is
+     * <i>not</i> safe to drop into a single-quoted or unquoted attribute value, where an apostrophe
+     * closes the attribute. It is also not safe inside {@code <script>}, {@code <style>}, a URL, or a
+     * comment, none of which are ordinary HTML text. Use a context-aware encoder for those; use this
+     * for element text and double-quoted attribute values.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String element = EscapeUtil.escapeHtml4("<p>Hello</p>");       // returns "&lt;p&gt;Hello&lt;/p&gt;"
@@ -427,7 +433,8 @@ public final class EscapeUtil {
      * }</pre>
      *
      * @param input the string to escape, which may be null
-     * @return the escaped string safe for use in HTML 4.0, or {@code null} if {@code null} input
+     * @return the escaped string, suitable as HTML 4.0 <i>element text</i>, or {@code null} if
+     *         {@code null} input
      * @see <a href="http://www.w3.org/TR/html401/charset.html#h-5.3">HTML 4.01 Character References</a>
      * @see #unescapeHtml4(String)
      * @see #escapeHtml3(String)
@@ -451,7 +458,8 @@ public final class EscapeUtil {
      * }</pre>
      *
      * @param input the string to escape, which may be null
-     * @return the escaped string safe for use in HTML 3.0, or {@code null} if {@code null} input
+     * @return the escaped string, suitable as HTML 3.0 <i>element text</i>, or {@code null} if
+     *         {@code null} input
      * @see #unescapeHtml3(String)
      * @see #escapeHtml4(String)
      */
@@ -488,9 +496,12 @@ public final class EscapeUtil {
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
      * @throws IllegalArgumentException if a numeric character reference parses above Unicode's maximum code point.
+     *         Note that a reference to a surrogate code point (for example {@code &#xD800;}) is <i>not</i>
+     *         rejected: it produces an unpaired surrogate, which is not a Unicode scalar value and which
+     *         strict encoders reject.
      * @see #escapeHtml4(String)
      */
-    public static String unescapeHtml4(final String input) {
+    public static String unescapeHtml4(final String input) throws IllegalArgumentException {
         return UNESCAPE_HTML4.translate(input);
     }
 
@@ -516,10 +527,13 @@ public final class EscapeUtil {
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
      * @throws IllegalArgumentException if a numeric character reference parses above Unicode's maximum code point.
+     *         Note that a reference to a surrogate code point (for example {@code &#xD800;}) is <i>not</i>
+     *         rejected: it produces an unpaired surrogate, which is not a Unicode scalar value and which
+     *         strict encoders reject.
      * @see #escapeHtml3(String)
      * @see #unescapeHtml4(String)
      */
-    public static String unescapeHtml3(final String input) {
+    public static String unescapeHtml3(final String input) throws IllegalArgumentException {
         return UNESCAPE_HTML3.translate(input);
     }
 
@@ -622,10 +636,13 @@ public final class EscapeUtil {
      * @param input the string to unescape, which may be null
      * @return the unescaped string, or {@code null} if {@code null} input
      * @throws IllegalArgumentException if a numeric character reference parses above Unicode's maximum code point.
+     *         Note that a reference to a surrogate code point (for example {@code &#xD800;}) is <i>not</i>
+     *         rejected: it produces an unpaired surrogate, which is not a Unicode scalar value and which
+     *         strict encoders reject.
      * @see #escapeXml10(String)
      * @see #escapeXml11(String)
      */
-    public static String unescapeXml(final String input) {
+    public static String unescapeXml(final String input) throws IllegalArgumentException {
         return UNESCAPE_XML.translate(input);
     }
 
@@ -664,28 +681,25 @@ public final class EscapeUtil {
      * Unescapes a CSV column value by removing surrounding double quotes and unescaping internal
      * double quotes according to RFC 4180 rules.
      *
-     * <p>If the input is enclosed in double quotes <i>and</i> the quoted content contains at least one CSV
-     * special character (comma, double quote, CR, or LF), the surrounding quotes are stripped and any
+     * <p>If the input is enclosed in double quotes, the surrounding quotes are stripped and any
      * escaped double quotes (represented as {@code ""}) within the value are converted back to single
      * double quotes ({@code "}).</p>
      *
-     * <p>If the input is not enclosed in double quotes, it is returned unchanged. Likewise, a value that is
-     * enclosed in double quotes but whose content contains no CSV special character is returned unchanged
-     * (with its surrounding quotes intact), e.g. {@code unescapeCsv("\"simple\"")} returns {@code "simple"}
-     * including the quotes.</p>
+     * <p>Quoted plain and empty fields are decoded too. Input without both enclosing quotes,
+     * including a lone double quote, is returned unchanged. Malformed internal quoting is not validated.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String simple = EscapeUtil.unescapeCsv("simple");                  // returns "simple"
-     * String quotedSimple = EscapeUtil.unescapeCsv("\"simple\"");        // remains quoted because no CSV special character is present
+     * String quotedSimple = EscapeUtil.unescapeCsv("\"simple\"");        // returns "simple"
      * String comma = EscapeUtil.unescapeCsv("\"hello,world\"");          // returns "hello,world"
      * String quote = EscapeUtil.unescapeCsv("\"say \"\"hi\"\"\"");       // returns "say \"hi\""
      * String absent = EscapeUtil.unescapeCsv(null);                      // returns null
      * }</pre>
      *
      * @param input the input CSV column String, which may be null
-     * @return the unescaped CSV string with surrounding quotes removed and internal quotes unescaped when
-     *         the quoted content contains a CSV special character; otherwise the input unchanged,
+     * @return the unescaped CSV string with surrounding quotes removed and doubled internal quotes unescaped;
+     *         otherwise the input unchanged,
      *         or {@code null} if {@code null} input
      * @see <a href="https://tools.ietf.org/html/rfc4180">RFC 4180</a>
      * @see <a href="http://en.wikipedia.org/wiki/Comma-separated_values">CSV on Wikipedia</a>
@@ -761,16 +775,17 @@ public final class EscapeUtil {
          *
          * @param input CharSequence to be translated, may be null
          * @return the translated String, or {@code null} if the input is {@code null}
-         * @throws RuntimeException if an {@link IOException} occurs during translation (this should never
-         *         happen when writing to a StringWriter, but is included for completeness)
+         * @throws RuntimeException if the selected translator rejects input; an IOException raised during translation is wrapped in a RuntimeException
          */
         @MayReturnNull
-        public final String translate(final CharSequence input) {
+        public final String translate(final CharSequence input) throws RuntimeException {
             if (input == null) {
                 return null;
             }
             try {
-                final StringWriter writer = new StringWriter(input.length() * 2);
+                // length() may be up to Integer.MAX_VALUE, where length() * 2 overflows to a negative capacity
+                // that StringWriter rejects outright, so the estimate is computed in long and clamped.
+                final StringWriter writer = new StringWriter((int) Math.min((long) input.length() * 2, Integer.MAX_VALUE - 8));
                 translate(input, writer);
                 return writer.toString();
             } catch (final IOException ioe) {
@@ -796,9 +811,9 @@ public final class EscapeUtil {
          * @param input the CharSequence to be translated; may be {@code null}, in which case nothing is written
          * @param out the Writer to translate the text to; must not be {@code null}
          * @throws IllegalArgumentException if {@code out} is {@code null}.
-         * @throws IOException if and only if the Writer produces an IOException
+         * @throws IOException if a translator or the output writer raises an I/O exception
          */
-        public final void translate(final CharSequence input, final Writer out) throws IOException {
+        public final void translate(final CharSequence input, final Writer out) throws IllegalArgumentException, IOException {
             if (out == null) {
                 throw new IllegalArgumentException("The Writer must not be null");
             }
@@ -848,8 +863,12 @@ public final class EscapeUtil {
          *
          * @param translators CharSequenceTranslator array of translators to merge with this one
          * @return CharSequenceTranslator merging this translator with the others
+         * @throws IllegalArgumentException if {@code translators} is {@code null}
          */
-        public final CharSequenceTranslator with(final CharSequenceTranslator... translators) {
+        @SafeVarargs
+        public final CharSequenceTranslator with(final CharSequenceTranslator... translators) throws IllegalArgumentException {
+            N.checkArgNotNull(translators, cs.translators);
+
             final CharSequenceTranslator[] newArray = new CharSequenceTranslator[translators.length + 1];
             newArray[0] = this;
             System.arraycopy(translators, 0, newArray, 1, translators.length);
@@ -873,6 +892,24 @@ public final class EscapeUtil {
         public static String hex(final int codepoint) {
             return Integer.toHexString(codepoint).toUpperCase(Locale.ENGLISH);
         }
+
+        /**
+         * Appends {@code \}{@code uXXXX} for one UTF-16 code unit, zero-padded to four hex digits.
+         *
+         * <p>{@link #hex(int)} is deliberately unpadded (it is public and documented that way), so a
+         * code unit below {@code 0x1000} formatted with it alone yields an invalid escape such as
+         * {@code \}{@code uA}.</p>
+         *
+         * @param sb the buffer to append to
+         * @param unit the UTF-16 code unit to escape
+         */
+        static void appendUnicodeEscape(final StringBuilder sb, final char unit) {
+            sb.append("\\u")
+                    .append(HEX_DIGITS[(unit >> 12) & 15])
+                    .append(HEX_DIGITS[(unit >> 8) & 15])
+                    .append(HEX_DIGITS[(unit >> 4) & 15])
+                    .append(HEX_DIGITS[unit & 15]);
+        }
     }
 
     /**
@@ -889,6 +926,7 @@ public final class EscapeUtil {
          *
          * @param translators CharSequenceTranslator array to aggregate
          */
+        @SafeVarargs
         public AggregateTranslator(final CharSequenceTranslator... translators) {
             this.translators = N.clone(translators);
         }
@@ -902,10 +940,11 @@ public final class EscapeUtil {
          * @param index the current index in the input sequence
          * @param out the destination writer for translated output
          * @return the number of code points consumed by the winning translator, or {@code 0} if none match
+         * @throws NullPointerException if the translator array or a reached translator is null
          * @throws IOException if writing translated output fails
          */
         @Override
-        public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
+        public int translate(final CharSequence input, final int index, final Writer out) throws NullPointerException, IOException {
             for (final CharSequenceTranslator translator : translators) {
                 final int consumed = translator.translate(input, index, out);
                 if (consumed != 0) {
@@ -987,22 +1026,32 @@ public final class EscapeUtil {
         }
 
         /**
-         * Converts the given codepoint to a hex string of the form {@code "\\uXXXX\\uXXXX"}.
+         * Converts the given codepoint to {@code "\\uXXXX"} for a BMP code point, or to the two
+         * surrogate escapes {@code "\\uXXXX\\uXXXX"} for a supplementary one. Every escape is
+         * zero-padded to four hex digits.
          *
          * @param codepoint a Unicode code point
          * @return the Unicode escape string representation of the codepoint
+         * @throws IllegalArgumentException if {@code codepoint} is outside the valid Unicode code-point range
          */
         @Override
-        protected String toUtf16Escape(final int codepoint) {
-            final char[] surrogatePair = Character.toChars(codepoint);
-            return "\\u" + hex(surrogatePair[0]) + "\\u" + hex(surrogatePair[1]);
+        protected String toUtf16Escape(final int codepoint) throws IllegalArgumentException {
+            // Character.toChars returns ONE char for a BMP code point; the previous version indexed
+            // [1] unconditionally and would have thrown for any such input reaching it.
+            final StringBuilder sb = new StringBuilder(12);
+
+            for (final char unit : Character.toChars(codepoint)) {
+                appendUnicodeEscape(sb, unit);
+            }
+
+            return sb.toString();
         }
     }
 
     /**
      * Translates codepoints to their XML numeric character reference.
      */
-    static class NumericBeanEscaper extends CodePointTranslator {
+    static class NumericEntityEscaper extends CodePointTranslator {
 
         /** Lower boundary of the codepoint range (inclusive when {@code between} is {@code true}). */
         private final int below;
@@ -1014,7 +1063,7 @@ public final class EscapeUtil {
         private final boolean between;
 
         /**
-         * <p>Constructs a {@code NumericBeanEscaper} for the specified range. This is
+         * <p>Constructs a {@code NumericEntityEscaper} for the specified range. This is
          * the underlying method for the other constructors/builders. The {@code below}
          * and {@code above} boundaries are inclusive when {@code between} is
          * {@code true} and exclusive when it is {@code false}. </p>
@@ -1023,59 +1072,59 @@ public final class EscapeUtil {
          * @param above int value representing the highest codepoint boundary
          * @param between whether to escape between the boundaries or outside them
          */
-        private NumericBeanEscaper(final int below, final int above, final boolean between) {
+        private NumericEntityEscaper(final int below, final int above, final boolean between) {
             this.below = below;
             this.above = above;
             this.between = between;
         }
 
         /**
-         * <p>Constructs a {@code NumericBeanEscaper} for all characters. </p>
+         * <p>Constructs a {@code NumericEntityEscaper} for all characters. </p>
          */
-        public NumericBeanEscaper() {
+        public NumericEntityEscaper() {
             this(0, Integer.MAX_VALUE, true);
         }
 
         /**
-         * <p>Constructs a {@code NumericBeanEscaper} below the specified value (exclusive). </p>
+         * <p>Constructs a {@code NumericEntityEscaper} below the specified value (exclusive). </p>
          *
          * @param codepoint below which to escape
-         * @return a {@code NumericBeanEscaper} that escapes all codepoints below the specified value
+         * @return a {@code NumericEntityEscaper} that escapes all codepoints below the specified value
          */
-        public static NumericBeanEscaper below(final int codepoint) {
+        public static NumericEntityEscaper below(final int codepoint) {
             return outsideOf(codepoint, Integer.MAX_VALUE);
         }
 
         /**
-         * <p>Constructs a {@code NumericBeanEscaper} above the specified value (exclusive). </p>
+         * <p>Constructs a {@code NumericEntityEscaper} above the specified value (exclusive). </p>
          *
          * @param codepoint above which to escape
-         * @return a {@code NumericBeanEscaper} that escapes all codepoints above the specified value
+         * @return a {@code NumericEntityEscaper} that escapes all codepoints above the specified value
          */
-        public static NumericBeanEscaper above(final int codepoint) {
+        public static NumericEntityEscaper above(final int codepoint) {
             return outsideOf(0, codepoint);
         }
 
         /**
-         * <p>Constructs a {@code NumericBeanEscaper} between the specified values (inclusive). </p>
+         * <p>Constructs a {@code NumericEntityEscaper} between the specified values (inclusive). </p>
          *
          * @param codepointLow the lower boundary (inclusive) of the codepoint range to escape
          * @param codepointHigh the upper boundary (inclusive) of the codepoint range to escape
-         * @return a {@code NumericBeanEscaper} that escapes all codepoints between the specified values (inclusive)
+         * @return a {@code NumericEntityEscaper} that escapes all codepoints between the specified values (inclusive)
          */
-        public static NumericBeanEscaper between(final int codepointLow, final int codepointHigh) {
-            return new NumericBeanEscaper(codepointLow, codepointHigh, true);
+        public static NumericEntityEscaper between(final int codepointLow, final int codepointHigh) {
+            return new NumericEntityEscaper(codepointLow, codepointHigh, true);
         }
 
         /**
-         * <p>Constructs a {@code NumericBeanEscaper} outside the specified values (exclusive). </p>
+         * <p>Constructs a {@code NumericEntityEscaper} outside the specified values (exclusive). </p>
          *
          * @param codepointLow below which to escape
          * @param codepointHigh above which to escape
-         * @return a {@code NumericBeanEscaper} that escapes all codepoints outside the specified range (exclusive)
+         * @return a {@code NumericEntityEscaper} that escapes all codepoints outside the specified range (exclusive)
          */
-        public static NumericBeanEscaper outsideOf(final int codepointLow, final int codepointHigh) {
-            return new NumericBeanEscaper(codepointLow, codepointHigh, false);
+        public static NumericEntityEscaper outsideOf(final int codepointLow, final int codepointHigh) {
+            return new NumericEntityEscaper(codepointLow, codepointHigh, false);
         }
 
         /**
@@ -1084,10 +1133,11 @@ public final class EscapeUtil {
          * @param codepoint the Unicode code point to evaluate and optionally escape
          * @param out the destination writer for escaped output
          * @return {@code true} if the code point is escaped; otherwise {@code false}
+         * @throws NullPointerException if {@code out} is null and the code point is selected for escaping
          * @throws IOException if writing escaped output fails
          */
         @Override
-        public boolean translate(final int codepoint, final Writer out) throws IOException {
+        public boolean translate(final int codepoint, final Writer out) throws NullPointerException, IOException {
             if (between) {
                 if (codepoint < below || codepoint > above) {
                     return false;
@@ -1127,6 +1177,9 @@ public final class EscapeUtil {
     /**
      * Translates escaped Unicode values of the form {@code \\u+\d\d\d\d} back to Unicode.
      * It supports multiple {@code 'u'} characters and will work with or without the {@code +}.
+     *
+     * <p>Only ASCII hex digits ({@code 0}-{@code 9}, {@code A}-{@code F}, {@code a}-{@code f}) are accepted,
+     * matching the Java Language Specification's own {@code \\u} escape.</p>
      */
     static class UnicodeUnescaper extends CharSequenceTranslator {
 
@@ -1137,12 +1190,15 @@ public final class EscapeUtil {
          * @param index the current index in the input sequence
          * @param out the destination writer for translated output
          * @return the number of consumed characters for a recognized unicode escape, or {@code 0} if no escape is found
+         * @throws NullPointerException if {@code input} is null, or {@code out} is null when this translator writes output
+         * @throws IndexOutOfBoundsException if {@code index} is outside the input character range
          * @throws IllegalArgumentException if a {@code \\u} prefix is found but is not followed by four valid hex
          *         digits, or if the sequence ends prematurely.
          * @throws IOException if writing translated output fails
          */
         @Override
-        public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
+        public int translate(final CharSequence input, final int index, final Writer out)
+                throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, IOException {
             if (input.charAt(index) == '\\' && index + 1 < input.length() && input.charAt(index + 1) == 'u') {
                 // consume optional additional 'u' chars
                 int i = 2;
@@ -1158,12 +1214,32 @@ public final class EscapeUtil {
                     // Get 4 hex digits
                     final CharSequence unicode = input.subSequence(index + i, index + i + 4);
 
-                    try {
-                        final int value = Integer.parseInt(unicode.toString(), 16);
-                        out.write((char) value);
-                    } catch (final NumberFormatException nfe) {
-                        throw new IllegalArgumentException("Unable to parse unicode value: " + unicode, nfe);
+                    // Deliberately not Integer#parseInt(CharSequence, int): it reads every character through
+                    // Character#digit, which accepts non-ASCII digits - "\\u0660\\u0660\\u0664\\u0661"
+                    // (Arabic-Indic 0041) and "\\uFF10\\uFF10\\uFF14\\uFF11" (fullwidth) both decoded to 'A' -
+                    // and a leading sign. The JLS's own \\u escape is ASCII-hex only, and so are Hex.toDigit and
+                    // IOUtil.hexDigit. The explicit scan below subsumes the previous +/- guard.
+                    int value = 0;
+
+                    for (int k = 0; k < 4; k++) {
+                        final char ch = unicode.charAt(k);
+                        final int digit;
+
+                        if (ch >= '0' && ch <= '9') {
+                            digit = ch - '0';
+                        } else if (ch >= 'A' && ch <= 'F') {
+                            digit = ch - 'A' + 10;
+                        } else if (ch >= 'a' && ch <= 'f') {
+                            digit = ch - 'a' + 10;
+                        } else {
+                            throw new IllegalArgumentException("Unable to parse unicode value: " + unicode);
+                        }
+
+                        value = (value << 4) + digit;
                     }
+
+                    out.write((char) value);
+
                     return i + 4;
                 }
                 throw new IllegalArgumentException(
@@ -1258,10 +1334,12 @@ public final class EscapeUtil {
          * @param codepoint the Unicode code point to evaluate and optionally escape
          * @param out the destination writer for escaped output
          * @return {@code true} if the code point is escaped; otherwise {@code false}
+         * @throws IllegalArgumentException if the code point is selected for escaping and exceeds the maximum Unicode code point
+         * @throws NullPointerException if {@code out} is null and the code point is selected for escaping
          * @throws IOException if writing escaped output fails
          */
         @Override
-        public boolean translate(final int codepoint, final Writer out) throws IOException {
+        public boolean translate(final int codepoint, final Writer out) throws IllegalArgumentException, NullPointerException, IOException {
             if (between) {
                 if (codepoint < below || codepoint > above) {
                     return false;
@@ -1293,14 +1371,18 @@ public final class EscapeUtil {
          *
          * @param codepoint a Unicode code point
          * @return the Unicode escape string representation of the codepoint
+         * @throws IllegalArgumentException if {@code codepoint} is outside the valid Unicode code-point range
          */
-        protected String toUtf16Escape(final int codepoint) {
-            if (codepoint > 0xFFFF) {
-                final char[] surrogatePair = Character.toChars(codepoint);
-                return "\\u" + hex(surrogatePair[0]) + "\\u" + hex(surrogatePair[1]);
+        protected String toUtf16Escape(final int codepoint) throws IllegalArgumentException {
+            // hex() is unpadded, so building the escape from it alone produced "\\uA" rather than
+            // "\\u000A" for code points below 0x1000, contradicting the contract just above.
+            final StringBuilder sb = new StringBuilder(12);
+
+            for (final char unit : Character.toChars(codepoint)) {
+                appendUnicodeEscape(sb, unit);
             }
 
-            return "\\u" + hex(codepoint);
+            return sb.toString();
         }
     }
 
@@ -1321,10 +1403,12 @@ public final class EscapeUtil {
          * @param index the current index in the input sequence
          * @param out the destination writer for translated output
          * @return the number of consumed characters for a recognized octal escape, or {@code 0} if no escape is found
+         * @throws NullPointerException if {@code input} is null, or {@code out} is null when this translator writes output
+         * @throws IndexOutOfBoundsException if {@code index} is outside the input character range
          * @throws IOException if writing translated output fails
          */
         @Override
-        public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
+        public int translate(final CharSequence input, final int index, final Writer out) throws NullPointerException, IndexOutOfBoundsException, IOException {
             final int remaining = input.length() - index - 1; // how many characters left, ignoring the first \
             final StringBuilder builder = new StringBuilder();
             if (input.charAt(index) == '\\' && remaining > 0 && isOctalDigit(input.charAt(index + 1))) {
@@ -1370,17 +1454,17 @@ public final class EscapeUtil {
     /**
      * Translates decimal references such as {@code &#65;} and hexadecimal references such as
      * {@code &#x41;} back to their corresponding code points. Whether the trailing semicolon is required, optional,
-     * or causes an error is controlled by the {@link NumericBeanUnescaper.OPTION} passed to
-     * the constructor; the default is {@link NumericBeanUnescaper.OPTION#semiColonRequired}.
+     * or causes an error is controlled by the {@link NumericEntityUnescaper.OPTION} passed to
+     * the constructor; the default is {@link NumericEntityUnescaper.OPTION#semiColonRequired}.
      */
-    static class NumericBeanUnescaper extends CharSequenceTranslator {
+    static class NumericEntityUnescaper extends CharSequenceTranslator {
 
         /**
          * Options controlling how a trailing semicolon on a numeric character entity is handled
          * during unescaping. One or more values are supplied to the enclosing unescaper's constructor
          * to select the semicolon-handling policy.
          *
-         * @see NumericBeanUnescaper#NumericBeanUnescaper(OPTION...)
+         * @see NumericEntityUnescaper#NumericEntityUnescaper(OPTION...)
          */
         public enum OPTION {
 
@@ -1397,7 +1481,7 @@ public final class EscapeUtil {
         private final EnumSet<OPTION> options;
 
         /**
-         * Creates a {@code NumericBeanUnescaper} with the specified options.
+         * Creates a {@code NumericEntityUnescaper} with the specified options.
          *
          * <p>The constructor takes a list of options controlling how the trailing semicolon
          * of a numeric entity is handled:</p>
@@ -1410,15 +1494,17 @@ public final class EscapeUtil {
          * <p>Example usage:</p>
          * <pre>{@code
          * // Support numeric entities without trailing ';'
-         * NumericBeanUnescaper optional = new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.semiColonOptional);
+         * NumericEntityUnescaper optional = new NumericEntityUnescaper(NumericEntityUnescaper.OPTION.semiColonOptional);
          * // Throw an exception when ';' is missing
-         * NumericBeanUnescaper strict = new NumericBeanUnescaper(NumericBeanUnescaper.OPTION.errorIfNoSemiColon);
+         * NumericEntityUnescaper strict = new NumericEntityUnescaper(NumericEntityUnescaper.OPTION.errorIfNoSemiColon);
          * }</pre>
          *
          * @param options the options to apply to this unescaper; if none are supplied,
          *                {@link OPTION#semiColonRequired} is used by default
+         * @throws NullPointerException if {@code options} is {@code null} or contains a null option
          */
-        public NumericBeanUnescaper(final OPTION... options) {
+        @SafeVarargs
+        public NumericEntityUnescaper(final OPTION... options) throws NullPointerException {
             if (options.length > 0) {
                 this.options = EnumSet.copyOf(Arrays.asList(options));
             } else {
@@ -1443,12 +1529,14 @@ public final class EscapeUtil {
          * @param index the current index in the input sequence
          * @param out the destination writer for translated output
          * @return the number of consumed characters for a recognized numeric entity, or {@code 0} if no entity is found
-         * @throws IllegalArgumentException if a numeric entity is missing its trailing {@code;} and this unescaper
-         *         was constructed with {@link OPTION#errorIfNoSemiColon}.
+         * @throws NullPointerException if {@code input} is null, or {@code out} is null when this translator writes output
+         * @throws IndexOutOfBoundsException if {@code index} is outside the input character range
+         * @throws IllegalArgumentException if a numeric entity parses above the maximum Unicode code point, or lacks a trailing semicolon when {@link OPTION#errorIfNoSemiColon} is enabled and {@link OPTION#semiColonRequired} is not enabled.
          * @throws IOException if writing translated output fails
          */
         @Override
-        public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
+        public int translate(final CharSequence input, final int index, final Writer out)
+                throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, IOException {
             final int seqEnd = input.length();
             // Uses -2 to ensure there is something after the &#
             if (input.charAt(index) == '&' && index < seqEnd - 2 && input.charAt(index + 1) == '#') {
@@ -1483,23 +1571,23 @@ public final class EscapeUtil {
                     }
                 }
 
-                int beanValue;
+                int entityValue;
                 try {
                     if (isHex) {
-                        beanValue = Integer.parseInt(input.subSequence(start, end).toString(), 16);
+                        entityValue = Integer.parseInt(input.subSequence(start, end).toString(), 16);
                     } else {
-                        beanValue = Integer.parseInt(input.subSequence(start, end).toString(), 10);
+                        entityValue = Integer.parseInt(input.subSequence(start, end).toString(), 10);
                     }
                 } catch (final NumberFormatException nfe) {
                     return 0;
                 }
 
-                if (beanValue > 0xFFFF) {
-                    final char[] chrs = Character.toChars(beanValue);
+                if (entityValue > 0xFFFF) {
+                    final char[] chrs = Character.toChars(entityValue);
                     out.write(chrs[0]);
                     out.write(chrs[1]);
                 } else {
-                    out.write(beanValue);
+                    out.write(entityValue);
                 }
 
                 return 2 + end - start + (isHex ? 1 : 0) + (semiNext ? 1 : 0);
@@ -1538,8 +1626,11 @@ public final class EscapeUtil {
          *               may be {@code null} or empty, producing a translator that never matches.
          *               Each row must have at least two non-{@code null} elements, and each key must
          *               be non-empty.
+         * @throws NullPointerException if a lookup entry or either of its first two elements is null
+         * @throws IndexOutOfBoundsException if a lookup entry has fewer than two elements or its search sequence is empty
          */
-        public LookupTranslator(final CharSequence[]... lookup) {
+        @SafeVarargs
+        public LookupTranslator(final CharSequence[]... lookup) throws NullPointerException, IndexOutOfBoundsException {
             lookupMap = new HashMap<>();
             prefixSet = N.newHashSet();
             int _shortest = Integer.MAX_VALUE; // NOSONAR
@@ -1568,10 +1659,12 @@ public final class EscapeUtil {
          * @param index the current index in the input sequence
          * @param out the destination writer for translated output
          * @return the number of consumed characters for the matched lookup key, or {@code 0} if no key matches
+         * @throws NullPointerException if {@code input} is null, or {@code out} is null when this translator writes output
+         * @throws IndexOutOfBoundsException if {@code index} is outside the input character range
          * @throws IOException if writing translated output fails
          */
         @Override
-        public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
+        public int translate(final CharSequence input, final int index, final Writer out) throws NullPointerException, IndexOutOfBoundsException, IOException {
             // check if translation exists for the input at position index
             if (prefixSet.contains(input.charAt(index))) {
                 int max = longest;
@@ -1613,10 +1706,13 @@ public final class EscapeUtil {
          * @param index the current index in the input sequence
          * @param out the destination writer for translated output
          * @return {@code 1} if translation occurs for the current code point; otherwise {@code 0}
+         * @throws NullPointerException if {@code input} is null, or {@code out} is null when this translator writes output
+         * @throws IndexOutOfBoundsException if {@code index} is outside the input character range
          * @throws IOException if writing translated output fails
          */
         @Override
-        public final int translate(final CharSequence input, final int index, final Writer out) throws IOException {
+        public final int translate(final CharSequence input, final int index, final Writer out)
+                throws NullPointerException, IndexOutOfBoundsException, IOException {
             final int codepoint = Character.codePointAt(input, index);
             final boolean consumed = translate(codepoint, out);
             return consumed ? 1 : 0;
@@ -1668,10 +1764,11 @@ public final class EscapeUtil {
          * @param out the Writer to write the escaped output to
          * @return the number of codepoints consumed (always the full length of {@code input})
          * @throws IllegalStateException if {@code index} is not {@code 0}
-         * @throws IOException if an I/O error occurs while writing to the output
+         * @throws NullPointerException if {@code input} or {@code out} is null and {@code index} is zero
+         * @throws IOException if writing escaped characters to the supplied output fails
          */
         @Override
-        public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
+        public int translate(final CharSequence input, final int index, final Writer out) throws IllegalStateException, NullPointerException, IOException {
 
             if (index != 0) {
                 throw new IllegalStateException("CsvEscaper should never reach the [1] index");
@@ -1690,14 +1787,11 @@ public final class EscapeUtil {
 
     /**
      * Translator backing {@link EscapeUtil#UNESCAPE_CSV}: strips the surrounding double quotes of a
-     * single CSV field and collapses doubled double quotes, but only when the quoted content itself
-     * contains a comma, a double quote, CR, or LF. Consumes the whole input in one pass, so it must
+     * single CSV field and collapses doubled double quotes, including plain and empty quoted fields.
+     * Consumes the whole input in one pass, so it must
      * be invoked with {@code index == 0}.
      */
     static class CsvUnescaper extends CharSequenceTranslator {
-
-        /** The Constant CSV_DELIMITER. */
-        private static final char CSV_DELIMITER = ',';
 
         /** The Constant CSV_QUOTE. */
         private static final char CSV_QUOTE = '"';
@@ -1705,13 +1799,10 @@ public final class EscapeUtil {
         /** The Constant CSV_QUOTE_STR. */
         private static final String CSV_QUOTE_STR = N.stringOf(CSV_QUOTE);
 
-        /** The Constant CSV_SEARCH_CHARS. */
-        private static final char[] CSV_SEARCH_CHARS = { CSV_DELIMITER, CSV_QUOTE, CR, LF };
-
         /**
          * Translates the entire input as a single CSV field, stripping surrounding double quotes
          * and unescaping doubled double quotes ({@code ""} to {@code "}) if the input is
-         * enclosed in double quotes and contains any CSV special characters. If the input is
+         * enclosed in double quotes. If the input is
          * not quoted, it is written to {@code out} unchanged. This translator always processes
          * the full input in one pass; {@code index} must be {@code 0}.
          *
@@ -1720,10 +1811,11 @@ public final class EscapeUtil {
          * @param out the Writer to write the unescaped output to
          * @return the number of codepoints consumed (always the full length of {@code input})
          * @throws IllegalStateException if {@code index} is not {@code 0}
-         * @throws IOException if an I/O error occurs while writing to the output
+         * @throws NullPointerException if {@code input} or {@code out} is null and {@code index} is zero
+         * @throws IOException if writing escaped characters to the supplied output fails
          */
         @Override
-        public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
+        public int translate(final CharSequence input, final int index, final Writer out) throws IllegalStateException, NullPointerException, IOException {
 
             if (index != 0) {
                 throw new IllegalStateException("CsvUnescaper should never reach the [1] index");
@@ -1739,12 +1831,8 @@ public final class EscapeUtil {
             // strip quotes
             final String quoteless = input.subSequence(1, input.length() - 1).toString();
 
-            if (Strings.containsAny(quoteless, CSV_SEARCH_CHARS)) {
-                // deal with escaped quotes; i.e., ""
-                out.write(Strings.replaceAll(quoteless, CSV_QUOTE_STR + CSV_QUOTE_STR, CSV_QUOTE_STR));
-            } else {
-                out.write(input.toString());
-            }
+            // CSV permits optional quoting even when the field contains no delimiter or escape.
+            out.write(Strings.replaceAll(quoteless, CSV_QUOTE_STR + CSV_QUOTE_STR, CSV_QUOTE_STR));
             return Character.codePointCount(input, 0, input.length());
         }
     }
@@ -1758,8 +1846,8 @@ public final class EscapeUtil {
      * two-element rows are shared with the internal constant table. Callers may reorder or drop
      * rows, but must not modify a row in place.</p>
      */
-    static class BeanArrays {
-        private BeanArrays() {
+    static class EntityArrays {
+        private EntityArrays() {
 
         }
 
@@ -2182,8 +2270,10 @@ public final class EscapeUtil {
          *
          * @param array the two-dimensional {@code String} array to invert; must not be {@code null}
          * @return a new {@code String[][]} where each entry has its key and value swapped
+         * @throws NullPointerException if {@code array} or one of its rows is null
+         * @throws ArrayIndexOutOfBoundsException if a row contains fewer than two elements
          */
-        public static String[][] invert(final String[][] array) {
+        public static String[][] invert(final String[][] array) throws NullPointerException, ArrayIndexOutOfBoundsException {
             final String[][] newarray = new String[array.length][2];
             for (int i = 0; i < array.length; i++) {
                 newarray[i][0] = array[i][1];

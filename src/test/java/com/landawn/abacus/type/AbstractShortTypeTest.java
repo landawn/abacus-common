@@ -75,11 +75,48 @@ public class AbstractShortTypeTest extends TestBase {
         char[] negChars = "-789".toCharArray();
         assertEquals((short) -789, shortType.valueOf(negChars, 0, 4));
 
+        // T4-02: out-of-range is an ArithmeticException on the char[] path too (unified overflow policy)
         char[] outOfRange = "40000".toCharArray();
-        assertThrows(NumberFormatException.class, () -> shortType.valueOf(outOfRange, 0, 5));
+        assertThrows(ArithmeticException.class, () -> shortType.valueOf(outOfRange, 0, 5));
 
         char[] negOutOfRange = "-40000".toCharArray();
-        assertThrows(NumberFormatException.class, () -> shortType.valueOf(negOutOfRange, 0, 6));
+        assertThrows(ArithmeticException.class, () -> shortType.valueOf(negOutOfRange, 0, 6));
+    }
+
+    // T4-02 / T4-01: the char[] path now reports overflow as ArithmeticException like the String path, keeps NFE for
+    // malformed text, and accepts a radix prefix exactly as Numbers.toShort does.
+    @Test
+    public void reviewFixes20260906_charArray_overflowIsArithmetic_malformedIsNfe_onBothPaths() {
+        for (String s : new String[] { "32768", "-32769", "40000", "2147483648", "0x8000", "0xFFFFFFFF" }) {
+            char[] cbuf = s.toCharArray();
+            assertThrows(ArithmeticException.class, () -> shortType.valueOf(cbuf, 0, cbuf.length), s);
+            assertThrows(ArithmeticException.class, () -> shortType.valueOf(s), s);
+        }
+
+        for (String s : new String[] { "12x", "L", " 1", "0x", "0x1G", "#" }) {
+            char[] cbuf = s.toCharArray();
+            assertThrows(NumberFormatException.class, () -> shortType.valueOf(cbuf, 0, cbuf.length), s);
+            assertThrows(NumberFormatException.class, () -> shortType.valueOf(s), s);
+        }
+
+        assertEquals((short) 32767, shortType.valueOf("32767".toCharArray(), 0, 5));
+        assertEquals((short) -32768, shortType.valueOf("-32768".toCharArray(), 0, 6));
+        assertEquals((short) 1, shortType.valueOf("1L".toCharArray(), 0, 2));
+    }
+
+    @Test
+    public void reviewFixes20260906_charArray_radixPrefix_matchesStringPath() {
+        for (String s : new String[] { "0x1F", "#1F", "-0x1F", "+0X1f", "0x7FFF", "-0x8000" }) {
+            char[] cbuf = s.toCharArray();
+            assertEquals(shortType.valueOf(s), shortType.valueOf(cbuf, 0, cbuf.length), s);
+        }
+
+        assertEquals((short) 31, shortType.valueOf("0x1F".toCharArray(), 0, 4));
+        assertEquals((short) 31, shortType.valueOf("#1F".toCharArray(), 0, 3));
+        assertEquals((short) -31, shortType.valueOf("-0x1F".toCharArray(), 0, 5));
+        assertEquals((short) 32767, shortType.valueOf("0x7FFF".toCharArray(), 0, 6));
+        assertEquals((short) -32768, shortType.valueOf("-0x8000".toCharArray(), 0, 7));
+        assertEquals((short) 31, shortType.valueOf("xx0x1Fyy".toCharArray(), 2, 4));
     }
 
     @Test

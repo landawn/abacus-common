@@ -18,6 +18,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -134,9 +135,11 @@ public final class Charsets {
     /**
      * The default charset of this Java virtual machine.
      *
-     * <p>The default charset is determined during virtual-machine startup
-     * and typically depends upon the locale and charset of the underlying
-     * operating system.</p>
+     * <p>The default charset is determined during virtual-machine startup. On JDK 18 and later it is
+     * UTF-8 regardless of the platform locale (JEP 400); on JDK 17 and earlier - and on any JDK started
+     * with {@code -Dfile.encoding=COMPAT} - it depends on the locale and charset of the underlying
+     * operating system. Code that needs a stable encoding should name one explicitly rather than rely
+     * on this constant.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -150,12 +153,10 @@ public final class Charsets {
     private static final Map<String, Charset> charsetPool = new ConcurrentCacheMap<>(128);
 
     static {
-        charsetPool.put(US_ASCII.name(), US_ASCII);
-        charsetPool.put(ISO_8859_1.name(), ISO_8859_1);
-        charsetPool.put(UTF_8.name(), UTF_8);
-        charsetPool.put(UTF_16BE.name(), UTF_16BE);
-        charsetPool.put(UTF_16LE.name(), UTF_16LE);
-        charsetPool.put(UTF_16.name(), UTF_16);
+        // Keys are upper-cased to match the folding done by get(String).
+        for (final Charset cs : new Charset[] { US_ASCII, ISO_8859_1, UTF_8, UTF_16BE, UTF_16LE, UTF_16 }) {
+            charsetPool.put(cs.name().toUpperCase(Locale.ROOT), cs);
+        }
     }
 
     private Charsets() {
@@ -168,8 +169,13 @@ public final class Charsets {
      * <p>Results for standard charsets ({@code US-ASCII}, {@code ISO-8859-1}, {@code UTF-8},
      * {@code UTF-16}, {@code UTF-16BE}, {@code UTF-16LE}) and previously resolved names are reused.
      * Unresolved names are looked up via {@link Charset#forName(String)} and then retained for later
-     * calls. Concurrent callers may race to resolve the same uncached name more than once; the
-     * returned charset for a given name is still a usable equivalent instance.</p>
+     * calls. Lookup is case-insensitive, matching {@link Charset#forName(String)}, so names differing
+     * only in case share one cache entry. Concurrent callers may race to resolve the same uncached
+     * name more than once; the returned charset for a given name is still a usable equivalent
+     * instance.</p>
+     *
+     * <p>The cache never evicts. Because entries are keyed case-insensitively it is bounded by the set
+     * of charset names and aliases the platform actually supports, whatever spellings callers use.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -189,8 +195,7 @@ public final class Charsets {
      * @param charsetName the name of the requested charset; may be either a canonical name
      *                    (e.g., {@code "UTF-8"}) or an alias (e.g., {@code "utf8"}); must not be {@code null}
      * @return a charset object for the named charset, either from cache or newly created
-     * @throws IllegalArgumentException if {@code charsetName} is {@code null} (propagated from
-     *         {@link Charset#forName(String)}).
+     * @throws IllegalArgumentException if {@code charsetName} is {@code null}
      * @throws IllegalCharsetNameException if the given charset name is illegal (as defined by
      *         {@link Charset#forName(String)})
      * @throws UnsupportedCharsetException if no support for the named charset is available
@@ -198,7 +203,17 @@ public final class Charsets {
      * @see Charset#forName(String)
      * @see StandardCharsets
      */
-    public static Charset get(final String charsetName) {
-        return charsetPool.computeIfAbsent(charsetName, Charset::forName);
+    public static Charset get(final String charsetName) throws IllegalArgumentException, IllegalCharsetNameException, UnsupportedCharsetException {
+        N.checkArgNotNull(charsetName, cs.charsetName);
+
+        // Validate before Unicode uppercasing can turn an illegal name into a cached ASCII alias.
+        for (int i = 0; i < charsetName.length(); i++) {
+            if (charsetName.charAt(i) > 0x7f) {
+                throw new IllegalCharsetNameException(charsetName);
+            }
+        }
+
+        // ASCII case folding shares cache entries without changing the original name's validity.
+        return charsetPool.computeIfAbsent(charsetName.toUpperCase(Locale.ROOT), name -> Charset.forName(charsetName));
     }
 }

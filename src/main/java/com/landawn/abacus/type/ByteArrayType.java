@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.CharacterWriter;
@@ -66,6 +67,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final Byte[] x) {
         if (x == null) {
@@ -88,15 +90,17 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse; may be {@code null}, empty, or blank
-     * @return the parsed {@code Byte[]} array
-     *         or {@code null} if {@code str} is {@code null}, empty, or blank
-     * @throws NumberFormatException if any {@code non-null} element cannot be parsed as a valid {@code byte}
+     * @return the parsed {@code Byte[]}, or {@code null} if {@code str} is {@code null}, empty, or blank
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
+     * @throws NumberFormatException if a non-{@code null} element is not a valid integer literal
+     * @throws ArithmeticException if an element is outside the {@code byte} range
      * @see #valueOf(Object)
      * @see #stringOf(Byte[])
      */
+    @MayReturnNull
     @Override
-    public Byte[] valueOf(final String str) {
-        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
+    public Byte[] valueOf(final String str) throws IllegalArgumentException, NumberFormatException, ArithmeticException {
+        if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_BYTE_OBJ_ARRAY;
@@ -126,10 +130,11 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the byte-array column
      * @return a boxed {@code Byte[]} array, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Byte[] get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Byte[] get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return Array.box(rs.getBytes(columnIndex));
     }
 
@@ -140,10 +145,11 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
      * @return a boxed {@code Byte[]} array, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Byte[] get(final ResultSet rs, final String columnName) throws SQLException {
+    public Byte[] get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return Array.box(rs.getBytes(columnName));
     }
 
@@ -154,10 +160,11 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @param stmt the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code Byte[]} value to set; may be {@code null}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Byte[] x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Byte[] x) throws NullPointerException, SQLException {
         stmt.setBytes(columnIndex, Array.unbox(x));
     }
 
@@ -168,10 +175,11 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code Byte[]} value to set; may be {@code null}
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Byte[] x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Byte[] x) throws NullPointerException, SQLException {
         stmt.setBytes(parameterName, Array.unbox(x));
     }
 
@@ -184,10 +192,11 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code Byte[]} value to set; may be {@code null}
      * @param sqlTypeOrLength ignored for byte arrays
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Byte[] x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Byte[] x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
         stmt.setBytes(columnIndex, Array.unbox(x));
     }
 
@@ -200,10 +209,12 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @param parameterName the name of the parameter to set
      * @param x the {@code Byte[]} value to set; may be {@code null}
      * @param sqlTypeOrLength ignored for byte arrays
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Byte[] x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Byte[] x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setBytes(parameterName, Array.unbox(x));
     }
 
@@ -220,7 +231,8 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      *
      * @param appendable the target {@code Appendable}
      * @param x the {@code Byte[]} array to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during appending
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -232,7 +244,7 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Byte[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final Byte[] x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -272,10 +284,11 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Byte[]} array to write; may be {@code null}
      * @param config the serialization configuration forwarded to each element; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Byte[] x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Byte[] x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

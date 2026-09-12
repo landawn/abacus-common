@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.type.TypeFactory;
 
 public class HttpResponseTest extends TestBase {
 
@@ -97,36 +96,6 @@ public class HttpResponseTest extends TestBase {
     }
 
     @Test
-    public void testIsSuccessfulWith200() {
-        HttpResponse response = createTestResponse(200, "OK", "success");
-        assertTrue(response.isSuccessful());
-    }
-
-    @Test
-    public void testIsSuccessfulWith201() {
-        HttpResponse response = createTestResponse(201, "Created", "success");
-        assertTrue(response.isSuccessful());
-    }
-
-    @Test
-    public void testIsSuccessfulWith299() {
-        HttpResponse response = createTestResponse(299, "Custom Success", "success");
-        assertTrue(response.isSuccessful());
-    }
-
-    @Test
-    public void testIsSuccessfulWith404() {
-        HttpResponse response = createTestResponse(404, "Not Found", "error");
-        assertFalse(response.isSuccessful());
-    }
-
-    @Test
-    public void testIsSuccessfulWith500() {
-        HttpResponse response = createTestResponse(500, "Internal Server Error", "error");
-        assertFalse(response.isSuccessful());
-    }
-
-    @Test
     public void testIsSuccessful() {
         HttpResponse response200 = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), "test".getBytes(), ContentFormat.JSON,
                 StandardCharsets.UTF_8);
@@ -187,26 +156,14 @@ public class HttpResponseTest extends TestBase {
 
     @Test
     public void testStatusCode() {
-        HttpResponse response = createTestResponse(200, "OK", "test");
-        assertEquals(200, response.statusCode());
-    }
-
-    @Test
-    public void testStatusCode404() {
-        HttpResponse response = createTestResponse(404, "Not Found", "error");
-        assertEquals(404, response.statusCode());
+        assertEquals(200, createTestResponse(200, "OK", "test").statusCode());
+        assertEquals(404, createTestResponse(404, "Not Found", "error").statusCode());
     }
 
     @Test
     public void testMessage() {
-        HttpResponse response = createTestResponse(200, "OK", "test");
-        assertEquals("OK", response.message());
-    }
-
-    @Test
-    public void testMessageNotFound() {
-        HttpResponse response = createTestResponse(404, "Not Found", "error");
-        assertEquals("Not Found", response.message());
+        assertEquals("OK", createTestResponse(200, "OK", "test").message());
+        assertEquals("Not Found", createTestResponse(404, "Not Found", "error").message());
     }
 
     @Test
@@ -217,15 +174,6 @@ public class HttpResponseTest extends TestBase {
         assertNotNull(headers);
         assertTrue(headers.containsKey("Content-Type"));
         assertEquals("application/json", headers.get("Content-Type").get(0));
-    }
-
-    @Test
-    public void testBodyAsString() {
-        String testBody = "test response body";
-        HttpResponse response = createTestResponse(200, "OK", testBody);
-
-        String body = response.body(String.class);
-        assertEquals(testBody, body);
     }
 
     @Test
@@ -240,10 +188,14 @@ public class HttpResponseTest extends TestBase {
 
     @Test
     public void testBody() {
-        byte[] body = "test body content".getBytes();
+        String testBody = "test body content";
+        byte[] body = testBody.getBytes(StandardCharsets.UTF_8);
         HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), body, ContentFormat.JSON,
                 StandardCharsets.UTF_8);
         assertArrayEquals(body, response.body());
+        assertEquals(testBody, response.body(String.class));
+        assertArrayEquals(body, response.body(byte[].class));
+        assertArrayEquals(body, response.body(Type.of(byte[].class)));
     }
 
     @Test
@@ -279,37 +231,6 @@ public class HttpResponseTest extends TestBase {
 
         assertEquals("café", byClass.get("name"));
         assertEquals("café", byType.get("name"));
-    }
-
-    @Test
-    public void testBodyRaw() {
-        String testBody = "test response body";
-        HttpResponse response = createTestResponse(200, "OK", testBody);
-
-        byte[] body = response.body();
-        assertNotNull(body);
-        assertArrayEquals(testBody.getBytes(StandardCharsets.UTF_8), body);
-    }
-
-    @Test
-    public void testBodyAsByteArray() {
-        String testBody = "test response body";
-        HttpResponse response = createTestResponse(200, "OK", testBody);
-
-        byte[] body = response.body(byte[].class);
-        assertNotNull(body);
-        assertArrayEquals(testBody.getBytes(StandardCharsets.UTF_8), body);
-    }
-
-    @Test
-    public void testBodyWithTypeByteArray() {
-        String testBody = "test response body";
-        HttpResponse response = createTestResponse(200, "OK", testBody);
-
-        Type<byte[]> byteArrayType = Type.of(byte[].class);
-        byte[] body = response.body(byteArrayType);
-        assertNotNull(body);
-        assertArrayEquals(testBody.getBytes(StandardCharsets.UTF_8), body);
     }
 
     @Test
@@ -386,17 +307,6 @@ public class HttpResponseTest extends TestBase {
     }
 
     @Test
-    public void testBodyWithTypeString() {
-        String content = "test content";
-        HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), content.getBytes(StandardCharsets.UTF_8),
-                ContentFormat.NONE, StandardCharsets.UTF_8);
-
-        Type<String> type = TypeFactory.getType("String");
-        String result = response.body(type);
-        assertEquals(content, result);
-    }
-
-    @Test
     public void testBodyWithXml() {
         String xml = "<user><name>John</name><age>30</age></user>";
         HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), xml.getBytes(StandardCharsets.UTF_8),
@@ -407,101 +317,16 @@ public class HttpResponseTest extends TestBase {
     }
 
     @Test
-    public void testBodyWithNullContentFormat() {
-        String content = "test content";
-        HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), content.getBytes(StandardCharsets.UTF_8), null,
-                StandardCharsets.UTF_8);
-
-        assertEquals(content, response.body(String.class));
-    }
-
-    @Test
-    public void testBodyWithNullClass() {
+    public void testBody_NullResultType() {
         HttpResponse response = createTestResponse(200, "OK", "test");
         assertThrows(IllegalArgumentException.class, () -> response.body((Class<?>) null));
-    }
-
-    @Test
-    public void testBodyWithNullType() {
-        HttpResponse response = createTestResponse(200, "OK", "test");
         assertThrows(IllegalArgumentException.class, () -> response.body((Type<?>) null));
     }
 
     @Test
-    public void testBodyWithNullResultClass() {
-        HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), "test".getBytes(), ContentFormat.JSON,
-                StandardCharsets.UTF_8);
-        assertThrows(IllegalArgumentException.class, () -> response.body((Class<?>) null));
-    }
-
-    @Test
-    public void testHashCodeConsistency() {
-        HttpResponse response = createTestResponse(200, "OK", "test");
-        int hashCode1 = response.hashCode();
-        int hashCode2 = response.hashCode();
-        assertEquals(hashCode1, hashCode2);
-    }
-
-    @Test
     public void testHashCode() {
-        HttpResponse response1 = createTestResponse(200, "OK", "test");
-        HttpResponse response2 = createTestResponse(200, "OK", "test");
-
-        assertNotNull(response1.hashCode());
-        assertNotNull(response2.hashCode());
-    }
-
-    @Test
-    public void testEqualsWithDifferentClass() {
         HttpResponse response = createTestResponse(200, "OK", "test");
-        assertFalse(response.equals("string"));
-    }
-
-    @Test
-    public void testEqualsDifferentStatusCode() {
-        HttpResponse response1 = createTestResponse(200, "OK", "test");
-        HttpResponse response2 = createTestResponse(404, "Not Found", "test");
-        assertFalse(response1.equals(response2));
-    }
-
-    @Test
-    public void testEqualsSameInstance() {
-        HttpResponse response = createTestResponse(200, "OK", "test");
-        assertTrue(response.equals(response));
-    }
-
-    @Test
-    public void testEqualsWithNull() {
-        HttpResponse response = createTestResponse(200, "OK", "test");
-        assertFalse(response.equals(null));
-    }
-
-    @Test
-    public void testEqualsDifferentMessage() {
-        Map<String, List<String>> headers = new HashMap<>();
-        headers.put("Content-Type", Collections.singletonList("application/json"));
-
-        HttpResponse response1 = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "OK", headers, "test".getBytes(StandardCharsets.UTF_8),
-                ContentFormat.JSON, StandardCharsets.UTF_8);
-
-        HttpResponse response2 = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "Success", headers,
-                "test".getBytes(StandardCharsets.UTF_8), ContentFormat.JSON, StandardCharsets.UTF_8);
-
-        assertFalse(response1.equals(response2));
-    }
-
-    @Test
-    public void testEqualsDifferentBody() {
-        Map<String, List<String>> headers = new HashMap<>();
-        headers.put("Content-Type", Collections.singletonList("application/json"));
-
-        HttpResponse response1 = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "OK", headers, "body1".getBytes(StandardCharsets.UTF_8),
-                ContentFormat.JSON, StandardCharsets.UTF_8);
-
-        HttpResponse response2 = new HttpResponse("https://api.example.com/test", 1000L, 2000L, 200, "OK", headers, "body2".getBytes(StandardCharsets.UTF_8),
-                ContentFormat.JSON, StandardCharsets.UTF_8);
-
-        assertFalse(response1.equals(response2));
+        assertEquals(response.hashCode(), response.hashCode());
     }
 
     @Test
@@ -592,20 +417,9 @@ public class HttpResponseTest extends TestBase {
 
         assertNotNull(str);
         assertTrue(str.contains("HttpResponse"));
-        assertTrue(str.contains("200"));
-        assertTrue(str.contains("OK"));
-        assertTrue(str.contains("https://api.example.com/test"));
+        assertTrue(str.contains("statusCode=200"));
+        assertTrue(str.contains("message=OK"));
+        assertTrue(str.contains("url=https://api.example.com/test"));
         assertTrue(str.contains("elapsedTime"));
     }
-
-    @Test
-    public void testToStringFormat() {
-        HttpResponse response = createTestResponse(404, "Not Found", "error");
-        String str = response.toString();
-
-        assertTrue(str.contains("statusCode=404"));
-        assertTrue(str.contains("message=Not Found"));
-        assertTrue(str.contains("url=https://api.example.com/test"));
-    }
-
 }

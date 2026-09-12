@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.Type;
 
-public class Entity_1 {
+public class Entity_1 extends TestBase {
 
     private String gui;
     private String firstName;

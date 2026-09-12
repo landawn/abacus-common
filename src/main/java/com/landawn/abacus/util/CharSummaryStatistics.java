@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util;
 
+import java.util.Locale;
+
 import com.landawn.abacus.util.function.CharConsumer;
 
 /**
@@ -82,7 +84,7 @@ public class CharSummaryStatistics implements CharConsumer {
      *         {@link Character#MAX_VALUE}, {@link Character#MIN_VALUE}, and zero for min, max, and sum; or if a
      *         non-empty state has {@code min} greater than {@code max}.
      */
-    public CharSummaryStatistics(final long count, final char min, final char max, final long sum) {
+    public CharSummaryStatistics(final long count, final char min, final char max, final long sum) throws IllegalArgumentException {
         if (count < 0) {
             throw new IllegalArgumentException("count must be non-negative");
         }
@@ -117,11 +119,15 @@ public class CharSummaryStatistics implements CharConsumer {
      * }</pre>
      *
      * @param value the char value to record
+     * @throws ArithmeticException if the count or sum would overflow; this instance is unchanged
      */
     @Override
-    public void accept(final char value) {
-        ++count;
-        sum += value;
+    public void accept(final char value) throws ArithmeticException {
+        // Calculate both totals first: a rejected update must not alter any statistic.
+        final long newCount = Math.addExact(count, 1L);
+        final long newSum = Math.addExact(sum, value);
+        count = newCount;
+        sum = newSum;
         min = N.min(min, value);
         max = N.max(max, value);
     }
@@ -151,10 +157,14 @@ public class CharSummaryStatistics implements CharConsumer {
      *
      * @param other another {@code CharSummaryStatistics} to combine with this one; must not be {@code null}
      * @throws NullPointerException if {@code other} is {@code null}
+     * @throws ArithmeticException if the combined count or sum would overflow; this instance is unchanged
      */
-    public void combine(final CharSummaryStatistics other) {
-        count += other.count;
-        sum += other.sum;
+    public void combine(final CharSummaryStatistics other) throws NullPointerException, ArithmeticException {
+        // Snapshot the totals before assignment, including when other == this.
+        final long newCount = Math.addExact(count, other.count);
+        final long newSum = Math.addExact(sum, other.sum);
+        count = newCount;
+        sum = newSum;
         min = N.min(min, other.min);
         max = N.max(max, other.max);
     }
@@ -218,7 +228,8 @@ public class CharSummaryStatistics implements CharConsumer {
     /**
      * Returns the sum of values recorded.
      *
-     * <p>Note that the sum is maintained as a {@code long} to avoid overflow.
+     * <p>The sum is maintained as a {@code long}; updates that would overflow it throw
+     * {@link ArithmeticException} without changing this instance.
      * The sum represents the total of the numeric UTF-16 code-unit values of all recorded chars.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -273,10 +284,13 @@ public class CharSummaryStatistics implements CharConsumer {
      * // {min=A, max=B, count=2, sum=131, average=65.500000}
      * }</pre>
      *
+     * <p>The text is rendered with {@link java.util.Locale#ROOT}, so the decimal separator and the digits are the
+     * same on every machine regardless of the default locale.</p>
+     *
      * @return a string representation of this summary
      */
     @Override
     public String toString() {
-        return String.format("{min=%c, max=%c, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());
+        return String.format(Locale.ROOT, "{min=%c, max=%c, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());
     }
 }

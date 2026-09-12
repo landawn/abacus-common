@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.HBaseColumn;
 import com.landawn.abacus.util.SK;
@@ -157,6 +158,7 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final HBaseColumn<T> x) {
         if (x == null) {
@@ -191,15 +193,15 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse in {@code "version:value"} format; may be {@code null} or empty
-     * @return the deserialized column value
-     *         or {@code null} if {@code str} is {@code null} or empty
+     * @return the deserialized column, or {@code null} if {@code str} is {@code null} or empty
      * @throws IllegalArgumentException if the string has no {@code ':'} separator.
      * @throws NumberFormatException if the version prefix before the first {@code ':'} is not a valid {@code long}
      * @see #valueOf(Object)
      * @see #stringOf(HBaseColumn)
      */
+    @MayReturnNull
     @Override
-    public HBaseColumn<T> valueOf(final String str) {
+    public HBaseColumn<T> valueOf(final String str) throws IllegalArgumentException, NumberFormatException {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }

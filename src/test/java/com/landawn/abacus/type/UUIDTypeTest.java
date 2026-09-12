@@ -85,4 +85,14 @@ public class UUIDTypeTest extends TestBase {
     public void testValueOfAcceptsCanonicalUpperCaseUUID() {
         assertEquals(testUUID, uuidType.valueOf("550E8400-E29B-41D4-A716-446655440000"));
     }
+
+    // ---- review fixes 2026-09-06, T2-10 (WONTFIX, documented): isImmutable is the inherited package default ----
+
+    @Test
+    public void reviewFixes20260906_isImmutableIsTheInheritedDefault() {
+        // Documented in the class javadoc: like the java.time/URI/URL handlers, UUIDType does not override the flag.
+        assertEquals(false, uuidType.isImmutable());
+        assertEquals(false, createType(java.net.URI.class).isImmutable());
+        assertEquals(true, uuidType.equals(testUUID, uuidType.valueOf(uuidType.stringOf(testUUID))));
+    }
 }

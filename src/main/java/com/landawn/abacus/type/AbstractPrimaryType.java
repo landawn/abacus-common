@@ -33,8 +33,9 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
      * Constructs an {@code AbstractPrimaryType} with the specified type name.
      *
      * @param typeName the name of the primary type (e.g., "Integer", "String", "Boolean")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractPrimaryType(final String typeName) {
+    protected AbstractPrimaryType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
@@ -75,9 +76,10 @@ public abstract class AbstractPrimaryType<T> extends AbstractType<T> {
      *
      * @param obj the object to convert, may be {@code null}
      * @return the converted primary type value, or the default value if {@code obj} is {@code null}
+     * @throws RuntimeException if the source type cannot produce its string representation or this type rejects that representation.
      */
     @Override
-    public T valueOf(final Object obj) {
+    public T valueOf(final Object obj) throws RuntimeException {
         if (obj == null) {
             return defaultValue();
         }

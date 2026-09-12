@@ -281,4 +281,64 @@ public class LongTypeTest extends TestBase {
         longType.serializeTo(writer, 42L, null);
         verify(writer).write(42L);
     }
+
+    // T4-01: valueOf(char[]) rejected every hex token up to 18 chars (the long fast path), valueOf(String) accepted them
+    @Test
+    public void reviewFixes20260906_valueOf_charArray_radixPrefix_matchesStringPath() {
+        for (String s : new String[] { "0x1F", "#1F", "-0x1F", "+0x1F", "0X1f", "0x1F000000", "0x7FFFFFFFFFFFFFFF", "-0x8000000000000000", "0xFFFFFFFF" }) {
+            char[] cbuf = s.toCharArray();
+            assertEquals(longType.valueOf(s), longType.valueOf(cbuf, 0, cbuf.length), s);
+        }
+
+        assertEquals(31L, longType.valueOf("0x1F".toCharArray(), 0, 4));
+        assertEquals(31L, longType.valueOf("#1F".toCharArray(), 0, 3));
+        assertEquals(-31L, longType.valueOf("-0x1F".toCharArray(), 0, 5));
+        assertEquals(520093696L, longType.valueOf("0x1F000000".toCharArray(), 0, 10));
+        assertEquals(Long.MAX_VALUE, longType.valueOf("0x7FFFFFFFFFFFFFFF".toCharArray(), 0, 18));
+        assertEquals(Long.MIN_VALUE, longType.valueOf("-0x8000000000000000".toCharArray(), 0, 19));
+        assertEquals(4294967295L, longType.valueOf("0xFFFFFFFF".toCharArray(), 0, 10));
+        assertEquals(31L, longType.valueOf("xx0x1Fyy".toCharArray(), 2, 4));
+        assertEquals(1L, longType.valueOf("1L".toCharArray(), 0, 2));
+    }
+
+    // T4-03: overflow is ArithmeticException (documented now), malformed text stays NumberFormatException, both paths
+    @Test
+    public void reviewFixes20260906_valueOf_overflowIsArithmetic_malformedIsNfe_onBothPaths() {
+        for (String s : new String[] { "9223372036854775808", "-9223372036854775809", "0x8000000000000000", "0xFFFFFFFFFFFFFFFF" }) {
+            char[] cbuf = s.toCharArray();
+            assertThrows(ArithmeticException.class, () -> longType.valueOf(s), s);
+            assertThrows(ArithmeticException.class, () -> longType.valueOf(cbuf, 0, cbuf.length), s);
+        }
+
+        for (String s : new String[] { "0x", "0x1G", "#", "12x", "L", " 1", "1 ", "1.0" }) {
+            char[] cbuf = s.toCharArray();
+            assertThrows(NumberFormatException.class, () -> longType.valueOf(s), s);
+            assertThrows(NumberFormatException.class, () -> longType.valueOf(cbuf, 0, cbuf.length), s);
+        }
+
+        assertEquals(Long.MAX_VALUE, longType.valueOf("9223372036854775807".toCharArray(), 0, 19));
+        assertEquals(Long.MIN_VALUE, longType.valueOf("-9223372036854775808".toCharArray(), 0, 20));
+        assertNull(longType.valueOf((char[]) null, 0, 0));
+        assertNull(longType.valueOf(new char[0], 0, 0));
+    }
+
+    // T4-06 (documented contract, not changed): empty string column -> 0 via Numbers.toLong(String); blank -> NFE
+    @Test
+    public void reviewFixes20260906_get_emptyStringColumnReadsAsZero() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getObject(1)).thenReturn("");
+        when(rs.getObject(2)).thenReturn(" ");
+        when(rs.getObject(3)).thenReturn("42");
+        when(rs.getObject("e")).thenReturn("");
+        when(rs.getObject("b")).thenReturn(" ");
+        when(rs.getObject("v")).thenReturn("42");
+
+        assertEquals(0L, longType.get(rs, 1));
+        assertThrows(NumberFormatException.class, () -> longType.get(rs, 2));
+        assertEquals(42L, longType.get(rs, 3));
+        assertEquals(0L, longType.get(rs, "e"));
+        assertThrows(NumberFormatException.class, () -> longType.get(rs, "b"));
+        assertEquals(42L, longType.get(rs, "v"));
+        assertNull(longType.valueOf(""));
+    }
 }

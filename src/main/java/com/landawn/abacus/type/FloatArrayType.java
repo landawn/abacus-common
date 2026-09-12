@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -63,6 +64,7 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final Float[] x) {
         if (x == null) {
@@ -91,13 +93,15 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      *
      * @param str the string to parse; may be {@code null}
      * @return the parsed {@code Float[]}, or {@code null} if {@code str} is {@code null} or blank
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
      * @throws NumberFormatException if any non-{@code null} value cannot be parsed as a {@code Float}
      * @see #valueOf(Object)
      * @see #stringOf(Float[])
      */
+    @MayReturnNull
     @Override
-    public Float[] valueOf(final String str) {
-        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
+    public Float[] valueOf(final String str) throws IllegalArgumentException, NumberFormatException {
+        if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_FLOAT_OBJ_ARRAY;
@@ -131,7 +135,8 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      *
      * @param appendable the {@link Appendable} to write to
      * @param x          the {@code Float[]} to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -143,7 +148,7 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Float[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final Float[] x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -181,10 +186,11 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the {@code Float[]} to write; may be {@code null}
      * @param config serialization configuration forwarded to each element; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Float[] x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Float[] x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

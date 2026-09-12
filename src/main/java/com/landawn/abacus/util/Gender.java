@@ -105,7 +105,7 @@ public enum Gender {
      * @return the corresponding Gender enum constant
      * @throws IllegalArgumentException if the intValue is not 0, 1, 2 or 3.
      */
-    public static Gender of(final int intValue) {
+    public static Gender of(final int intValue) throws IllegalArgumentException {
         switch (intValue) {
             case 0:
                 return BLANK;

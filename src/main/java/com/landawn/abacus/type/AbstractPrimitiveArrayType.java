@@ -33,8 +33,9 @@ public abstract class AbstractPrimitiveArrayType<T> extends AbstractArrayType<T>
      * Constructs an {@code AbstractPrimitiveArrayType} with the specified type name.
      *
      * @param typeName the name of the primitive array type (e.g., "int[]", "double[]")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractPrimitiveArrayType(final String typeName) {
+    protected AbstractPrimitiveArrayType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 

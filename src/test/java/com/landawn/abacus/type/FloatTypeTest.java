@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -180,5 +181,54 @@ public class FloatTypeTest extends TestBase {
         assertEquals(42.0f, type.valueOf("42L"));
         assertEquals(42.0f, type.valueOf("42l"));
         assertEquals(42.0f, type.valueOf("42D"));
+    }
+
+    // R-T02 (documented, not changed): stringOf is the argument's own toString, a foreign Number is not narrowed
+    @Test
+    public void reviewFixes20260906_stringOf_isArgumentsOwnToString() {
+        assertEquals("42", type.stringOf(Integer.valueOf(42)));
+        assertEquals("42", type.stringOf(Long.valueOf(42L)));
+        assertEquals("9223372036854775807", type.stringOf(Long.MAX_VALUE));
+        assertEquals("1.5", type.stringOf(1.5f));
+        assertEquals("1.5", type.stringOf(1.5d));
+        assertEquals("0.1", type.stringOf(0.1d));
+        assertEquals("-0.0", type.stringOf(-0.0f));
+        assertEquals("NaN", type.stringOf(Float.NaN));
+        assertNull(type.stringOf(null));
+        // and every such string is still accepted by valueOf(String)
+        assertEquals(42.0f, type.valueOf(type.stringOf(Integer.valueOf(42))));
+        assertEquals(9.223372E18f, type.valueOf(type.stringOf(Long.MAX_VALUE)));
+    }
+
+    // T4-10 (documented, not changed): only null and "" give the default; a blank string trims to "" and is rejected
+    @Test
+    public void reviewFixes20260906_valueOf_blankStringIsRejected() {
+        assertNull(type.valueOf((String) null));
+        assertNull(type.valueOf(""));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("  "));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("\t"));
+        assertEquals(42.0f, type.valueOf(" 42 "));
+    }
+
+    // T4-06 (documented contract, not changed): empty string column -> 0.0f via Numbers.toFloat(Object); blank -> NFE
+    @Test
+    public void reviewFixes20260906_get_emptyStringColumnReadsAsZero() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getObject(1)).thenReturn("");
+        when(rs.getObject(2)).thenReturn(" ");
+        when(rs.getObject(3)).thenReturn("42");
+        when(rs.getObject(4)).thenReturn(" 42 ");
+        when(rs.getObject("e")).thenReturn("");
+        when(rs.getObject("b")).thenReturn(" ");
+        when(rs.getObject("v")).thenReturn("42");
+
+        assertEquals(0.0f, type.get(rs, 1));
+        assertThrows(NumberFormatException.class, () -> type.get(rs, 2));
+        assertEquals(42.0f, type.get(rs, 3));
+        assertEquals(42.0f, type.get(rs, 4));
+        assertEquals(0.0f, type.get(rs, "e"));
+        assertThrows(NumberFormatException.class, () -> type.get(rs, "b"));
+        assertEquals(42.0f, type.get(rs, "v"));
+        assertNull(type.valueOf(""));
     }
 }

@@ -74,7 +74,7 @@ public class UncheckedIOException extends UncheckedException {
      * @param cause the {@link IOException} to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
-    public UncheckedIOException(final IOException cause) {
+    public UncheckedIOException(final IOException cause) throws IllegalArgumentException {
         super(cause);
     }
 
@@ -100,7 +100,7 @@ public class UncheckedIOException extends UncheckedException {
      * @param cause the {@link IOException} to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
-    public UncheckedIOException(final String message, final IOException cause) {
+    public UncheckedIOException(final String message, final IOException cause) throws IllegalArgumentException {
         super(message, cause);
     }
 

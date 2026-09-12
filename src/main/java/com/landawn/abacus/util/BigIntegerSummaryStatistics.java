@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.util.Locale;
 
 import com.landawn.abacus.util.function.Consumer;
 
@@ -101,7 +102,7 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      *         values or a nonzero sum; or if a non-empty state has a null min/max value or {@code min} is greater
      *         than {@code max}.
      */
-    public BigIntegerSummaryStatistics(final long count, final BigInteger min, final BigInteger max, final BigInteger sum) {
+    public BigIntegerSummaryStatistics(final long count, final BigInteger min, final BigInteger max, final BigInteger sum) throws IllegalArgumentException {
         if (count < 0) {
             throw new IllegalArgumentException("count must be non-negative");
         }
@@ -138,13 +139,18 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      *
      * @param value the input value to be recorded, must not be {@code null}
      * @throws IllegalArgumentException if {@code value} is {@code null}.
+     * @throws ArithmeticException if the observation count would overflow or the sum cannot be represented
+     *         by {@code BigInteger}; this instance is unchanged
      */
     @Override
-    public void accept(final BigInteger value) throws IllegalArgumentException {
+    public void accept(final BigInteger value) throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotNull(value, cs.value);
 
-        ++count;
-        sum = sum.add(value);
+        // Check the count and calculate the sum before publishing either total.
+        final long newCount = Math.addExact(count, 1L);
+        final BigInteger newSum = sum.add(value);
+        count = newCount;
+        sum = newSum;
         min = min == null ? value : min.compareTo(value) > 0 ? value : min;
         max = max == null ? value : max.compareTo(value) < 0 ? value : max;
     }
@@ -172,10 +178,15 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      *
      * @param other another {@code BigIntegerSummaryStatistics} to be combined with this one; must not be {@code null}
      * @throws NullPointerException if {@code other} is {@code null}
+     * @throws ArithmeticException if the combined observation count would overflow or the sum cannot be
+     *         represented by {@code BigInteger}; this instance is unchanged
      */
-    public void combine(final BigIntegerSummaryStatistics other) {
-        count += other.count;
-        sum = sum.add(other.sum);
+    public void combine(final BigIntegerSummaryStatistics other) throws NullPointerException, ArithmeticException {
+        // Read both source totals before assignment so self-combination is also safe.
+        final long newCount = Math.addExact(count, other.count);
+        final BigInteger newSum = sum.add(other.sum);
+        count = newCount;
+        sum = newSum;
         min = N.min(min, other.min);
         max = N.max(max, other.max);
     }
@@ -286,10 +297,13 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * {min=10, max=30, count=3, sum=60, average=20}
      * }</pre>
      *
+     * <p>The text is rendered with {@link java.util.Locale#ROOT}, so the count's digits are the same on every
+     * machine regardless of the default locale.</p>
+     *
      * @return a string representation of this summary statistics
      */
     @Override
     public String toString() {
-        return String.format("{min=%s, max=%s, count=%d, sum=%s, average=%s}", getMin(), getMax(), getCount(), getSum(), getAverage());
+        return String.format(Locale.ROOT, "{min=%s, max=%s, count=%d, sum=%s, average=%s}", getMin(), getMax(), getCount(), getSum(), getAverage());
     }
 }

@@ -2,6 +2,7 @@ package com.landawn.abacus.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -62,19 +63,13 @@ public class ParserTest extends TestBase {
 
         @Override
         public String serialize(Object obj) {
-            if (obj == null) {
-                return "null";
-            }
-            return obj.toString();
+            return obj == null ? "null" : obj.toString();
         }
 
         @Override
         public String serialize(Object obj, TestSerializationConfig config) {
             String result = serialize(obj);
-            if (config != null && config.isPrettyFormat()) {
-                result = "PRETTY:" + result;
-            }
-            return result;
+            return config != null && config.isPrettyFormat() ? "PRETTY:" + result : result;
         }
 
         @Override
@@ -99,8 +94,7 @@ public class ParserTest extends TestBase {
         @Override
         public void serialize(Object obj, TestSerializationConfig config, OutputStream output) throws UncheckedIOException {
             try {
-                String serialized = serialize(obj, config);
-                output.write(serialized.getBytes());
+                output.write(serialize(obj, config).getBytes());
                 output.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
@@ -115,8 +109,7 @@ public class ParserTest extends TestBase {
         @Override
         public void serialize(Object obj, TestSerializationConfig config, Writer output) throws UncheckedIOException {
             try {
-                String serialized = serialize(obj, config);
-                output.write(serialized);
+                output.write(serialize(obj, config));
                 output.flush();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
@@ -152,8 +145,7 @@ public class ParserTest extends TestBase {
         @Override
         public <T> T deserialize(File source, TestDeserializationConfig config, Class<? extends T> targetClass) throws UncheckedIOException {
             try {
-                String content = new String(java.nio.file.Files.readAllBytes(source.toPath()));
-                return deserialize(content, config, targetClass);
+                return deserialize(new String(java.nio.file.Files.readAllBytes(source.toPath())), config, targetClass);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -167,9 +159,7 @@ public class ParserTest extends TestBase {
         @Override
         public <T> T deserialize(InputStream source, TestDeserializationConfig config, Class<? extends T> targetClass) throws UncheckedIOException {
             try {
-                byte[] bytes = source.readAllBytes();
-                String content = new String(bytes);
-                return deserialize(content, config, targetClass);
+                return deserialize(new String(source.readAllBytes()), config, targetClass);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -197,7 +187,6 @@ public class ParserTest extends TestBase {
 
         @Override
         public <T> T deserialize(String source, Type<? extends T> targetType) {
-            // TODO Auto-generated method stub
             return null;
         }
 
@@ -270,175 +259,51 @@ public class ParserTest extends TestBase {
     }
 
     @Test
-    public void testSerializeToString() {
-        String result = parser.serialize(testObject);
-        assertEquals("testValue", result);
-    }
-
-    @Test
-    public void testSerializeToStringWithConfig() {
-        serConfig.setPrettyFormat(true);
-        String result = parser.serialize(testObject, serConfig);
-        assertEquals("PRETTY:testValue", result);
-    }
-
-    @Test
-    public void testSerializeToOutputStream() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        parser.serialize(testObject, baos);
-
-        assertEquals("testValue", baos.toString());
-    }
-
-    @Test
-    public void testSerializeToOutputStreamWithConfig() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        serConfig.setPrettyFormat(true);
-        parser.serialize(testObject, serConfig, baos);
-
-        assertEquals("PRETTY:testValue", baos.toString());
-    }
-
-    @Test
-    public void testSerializeToWriter() {
-        StringWriter writer = new StringWriter();
-        parser.serialize(testObject, writer);
-
-        assertEquals("testValue", writer.toString());
-    }
-
-    @Test
-    public void testSerializeToWriterWithConfig() {
-        StringWriter writer = new StringWriter();
-        serConfig.setPrettyFormat(true);
-        parser.serialize(testObject, serConfig, writer);
-
-        assertEquals("PRETTY:testValue", writer.toString());
-    }
-
-    @Test
-    public void testSerializeToStringWithNull() {
-        String result = parser.serialize(null);
-        assertEquals("null", result);
-    }
-
-    @Test
-    public void testSerializeToStringWithDifferentTypes() {
+    public void testSerialize() {
+        assertEquals("testValue", parser.serialize(testObject));
+        assertEquals("null", parser.serialize(null));
         assertEquals("123", parser.serialize(123));
         assertEquals("true", parser.serialize(true));
-
         List<String> list = new ArrayList<>();
         list.add("a");
         list.add("b");
-        String listResult = parser.serialize(list);
-        assertNotNull(listResult);
-        assertTrue(listResult.contains("a"));
-    }
+        assertTrue(parser.serialize(list).contains("a"));
 
-    @Test
-    public void testSerializeToStringWithConfigNull() {
-        String result = parser.serialize(testObject, (TestSerializationConfig) null);
-        assertEquals("testValue", result);
-    }
-
-    @Test
-    public void testSerializeToStringWithConfigAndNullObject() {
         serConfig.setPrettyFormat(true);
-        String result = parser.serialize(null, serConfig);
-        assertEquals("PRETTY:null", result);
-    }
+        assertEquals("PRETTY:testValue", parser.serialize(testObject, serConfig));
+        assertEquals("PRETTY:null", parser.serialize(null, serConfig));
+        assertEquals("testValue", parser.serialize(testObject, (TestSerializationConfig) null));
 
-    @Test
-    public void testSerializeToOutputStreamWithNull() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        parser.serialize(null, baos);
-
-        assertEquals("null", baos.toString());
-    }
-
-    @Test
-    public void testSerializeToOutputStreamMultipleTimes() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        parser.serialize(new TestObject("value1"), baos);
-        parser.serialize(new TestObject("value2"), baos);
-
-        assertEquals("value1value2", baos.toString());
-    }
-
-    @Test
-    public void testSerializeToOutputStreamWithConfigNull() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        parser.serialize(testObject, null, baos);
-
-        assertEquals("testValue", baos.toString());
-    }
-
-    @Test
-    public void testSerializeToWriterWithNull() {
-        StringWriter writer = new StringWriter();
-        parser.serialize(null, writer);
-
-        assertEquals("null", writer.toString());
-    }
-
-    @Test
-    public void testSerializeToWriterMultipleTimes() {
-        StringWriter writer = new StringWriter();
-        parser.serialize(new TestObject("value1"), writer);
-        parser.serialize(new TestObject("value2"), writer);
-
-        assertEquals("value1value2", writer.toString());
-    }
-
-    @Test
-    public void testSerializeToWriterWithConfigNull() {
-        StringWriter writer = new StringWriter();
-        parser.serialize(testObject, null, writer);
-
-        assertEquals("testValue", writer.toString());
-    }
-
-    @Test
-    public void testRoundTripSerializationDeserialization() {
-        String serialized = parser.serialize(testObject);
-        TestObject deserialized = parser.deserialize(serialized, TestObject.class);
-        assertNotNull(deserialized);
-        assertEquals(testObject.getValue(), deserialized.getValue());
-    }
-
-    @Test
-    public void testRoundTripWithConfig() {
-        serConfig.setPrettyFormat(true);
-        String serialized = parser.serialize(testObject, serConfig);
-        assertTrue(serialized.startsWith("PRETTY:"));
-
-        deserConfig.setIgnoreUnknownProperty(true);
-        TestObject deserialized = parser.deserialize(serialized, deserConfig, TestObject.class);
-        assertNotNull(deserialized);
-    }
-
-    @Test
-    public void testRoundTripViaStream() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         parser.serialize(testObject, baos);
+        assertEquals("testValue", baos.toString());
+        parser.serialize(null, baos);
+        parser.serialize(new TestObject("value1"), baos);
+        parser.serialize(new TestObject("value2"), baos);
+        assertEquals("testValuenullvalue1value2", baos.toString());
+        baos.reset();
+        parser.serialize(testObject, serConfig, baos);
+        assertEquals("PRETTY:testValue", baos.toString());
+        baos.reset();
+        parser.serialize(testObject, null, baos);
+        assertEquals("testValue", baos.toString());
 
-        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-        TestObject deserialized = parser.deserialize(bais, TestObject.class);
-
-        assertNotNull(deserialized);
-        assertEquals(testObject.getValue(), deserialized.getValue());
-    }
-
-    @Test
-    public void testRoundTripViaWriterReader() {
         StringWriter writer = new StringWriter();
         parser.serialize(testObject, writer);
-
-        StringReader reader = new StringReader(writer.toString());
-        TestObject deserialized = parser.deserialize(reader, TestObject.class);
-
-        assertNotNull(deserialized);
-        assertEquals(testObject.getValue(), deserialized.getValue());
+        assertEquals("testValue", writer.toString());
+        writer = new StringWriter();
+        parser.serialize(null, writer);
+        assertEquals("null", writer.toString());
+        writer = new StringWriter();
+        parser.serialize(new TestObject("value1"), writer);
+        parser.serialize(new TestObject("value2"), writer);
+        assertEquals("value1value2", writer.toString());
+        writer = new StringWriter();
+        parser.serialize(testObject, serConfig, writer);
+        assertEquals("PRETTY:testValue", writer.toString());
+        writer = new StringWriter();
+        parser.serialize(testObject, null, writer);
+        assertEquals("testValue", writer.toString());
     }
 
     @Test
@@ -447,255 +312,134 @@ public class ParserTest extends TestBase {
         tempFile.deleteOnExit();
 
         parser.serialize(testObject, tempFile);
-
-        String content = new String(java.nio.file.Files.readAllBytes(tempFile.toPath()));
-        assertEquals("testValue", content);
-    }
-
-    @Test
-    public void testSerializeToFileWithNull() throws IOException {
-        File tempFile = File.createTempFile("parser124test", ".txt");
-        tempFile.deleteOnExit();
+        assertEquals("testValue", new String(java.nio.file.Files.readAllBytes(tempFile.toPath())));
 
         parser.serialize(null, tempFile);
-
-        String content = new String(java.nio.file.Files.readAllBytes(tempFile.toPath()));
-        assertEquals("null", content);
-    }
-
-    @Test
-    public void testSerializeToFileOverwritesExisting() throws IOException {
-        File tempFile = File.createTempFile("parser124test", ".txt");
-        tempFile.deleteOnExit();
+        assertEquals("null", new String(java.nio.file.Files.readAllBytes(tempFile.toPath())));
 
         parser.serialize(new TestObject("first"), tempFile);
         parser.serialize(new TestObject("second"), tempFile);
-
-        String content = new String(java.nio.file.Files.readAllBytes(tempFile.toPath()));
-        assertEquals("second", content);
-    }
-
-    @Test
-    public void testSerializeToFileWithConfig() throws IOException {
-        File tempFile = File.createTempFile("parser124test", ".txt");
-        tempFile.deleteOnExit();
+        assertEquals("second", new String(java.nio.file.Files.readAllBytes(tempFile.toPath())));
 
         serConfig.setPrettyFormat(true);
         parser.serialize(testObject, serConfig, tempFile);
-
-        String content = new String(java.nio.file.Files.readAllBytes(tempFile.toPath()));
-        assertEquals("PRETTY:testValue", content);
-    }
-
-    @Test
-    public void testSerializeToFileWithConfigNull() throws IOException {
-        File tempFile = File.createTempFile("parser124test", ".txt");
-        tempFile.deleteOnExit();
+        assertEquals("PRETTY:testValue", new String(java.nio.file.Files.readAllBytes(tempFile.toPath())));
 
         parser.serialize(testObject, null, tempFile);
-
-        String content = new String(java.nio.file.Files.readAllBytes(tempFile.toPath()));
-        assertEquals("testValue", content);
+        assertEquals("testValue", new String(java.nio.file.Files.readAllBytes(tempFile.toPath())));
     }
 
     @Test
-    public void testRoundTripViaFile() throws IOException {
-        File tempFile = File.createTempFile("parser124test", ".txt");
-        tempFile.deleteOnExit();
-
-        parser.serialize(testObject, tempFile);
-        TestObject deserialized = parser.deserialize(tempFile, TestObject.class);
-
-        assertNotNull(deserialized);
-        assertEquals(testObject.getValue(), deserialized.getValue());
-    }
-
-    @Test
-    public void testDeserializeFromStringToString() {
-        String result = parser.deserialize("testString", String.class);
-        assertEquals("testString", result);
-    }
-
-    @Test
-    public void testDeserializeFromStringWithConfigToString() {
+    public void testDeserialize() {
+        assertEquals("testString", parser.deserialize("testString", String.class));
         deserConfig.setIgnoreUnknownProperty(true);
-        String result = parser.deserialize("stringValue", deserConfig, String.class);
-        assertEquals("stringValue", result);
-    }
+        assertEquals("stringValue", parser.deserialize("stringValue", deserConfig, String.class));
+        assertEquals("readerString", parser.deserialize(new StringReader("readerString"), String.class));
 
-    @Test
-    public void testDeserializeFromReaderToString() {
-        StringReader reader = new StringReader("readerString");
-        String result = parser.deserialize(reader, String.class);
-        assertEquals("readerString", result);
-    }
-
-    @Test
-    public void testDeserializeFromString() {
         TestObject result = parser.deserialize("myValue", TestObject.class);
-        assertNotNull(result);
         assertEquals("myValue", result.getValue());
-    }
+        assertEquals("", parser.deserialize("", TestObject.class).getValue());
+        assertEquals("configValue", parser.deserialize("configValue", deserConfig, TestObject.class).getValue());
+        assertEquals("nullConfigValue", parser.deserialize("nullConfigValue", null, TestObject.class).getValue());
 
-    @Test
-    public void testDeserializeFromEmptyString() {
-        TestObject result = parser.deserialize("", TestObject.class);
-        assertNotNull(result);
-        assertEquals("", result.getValue());
-    }
+        assertEquals("streamValue", parser.deserialize(new ByteArrayInputStream("streamValue".getBytes()), TestObject.class).getValue());
+        assertEquals("", parser.deserialize(new ByteArrayInputStream("".getBytes()), TestObject.class).getValue());
+        assertEquals("streamString", parser.deserialize(new ByteArrayInputStream("streamString".getBytes()), String.class));
+        assertEquals("streamConfigValue",
+                parser.deserialize(new ByteArrayInputStream("streamConfigValue".getBytes()), deserConfig, TestObject.class).getValue());
+        assertEquals("streamNullConfig", parser.deserialize(new ByteArrayInputStream("streamNullConfig".getBytes()), null, TestObject.class).getValue());
 
-    @Test
-    public void testDeserializeFromStringWithConfig() {
-        deserConfig.setIgnoreUnknownProperty(true);
-        TestObject result = parser.deserialize("configValue", deserConfig, TestObject.class);
-        assertNotNull(result);
-        assertEquals("configValue", result.getValue());
-    }
-
-    @Test
-    public void testDeserializeFromStringWithConfigNull() {
-        TestObject result = parser.deserialize("nullConfigValue", null, TestObject.class);
-        assertNotNull(result);
-        assertEquals("nullConfigValue", result.getValue());
-    }
-
-    @Test
-    public void testDeserializeFromInputStream() {
-        ByteArrayInputStream bais = new ByteArrayInputStream("streamValue".getBytes());
-        TestObject result = parser.deserialize(bais, TestObject.class);
-        assertNotNull(result);
-        assertEquals("streamValue", result.getValue());
-    }
-
-    @Test
-    public void testDeserializeFromEmptyInputStream() {
-        ByteArrayInputStream bais = new ByteArrayInputStream("".getBytes());
-        TestObject result = parser.deserialize(bais, TestObject.class);
-        assertNotNull(result);
-        assertEquals("", result.getValue());
-    }
-
-    @Test
-    public void testDeserializeFromInputStreamToString() {
-        ByteArrayInputStream bais = new ByteArrayInputStream("streamString".getBytes());
-        String result = parser.deserialize(bais, String.class);
-        assertEquals("streamString", result);
-    }
-
-    @Test
-    public void testDeserializeFromInputStreamWithConfig() {
-        ByteArrayInputStream bais = new ByteArrayInputStream("streamConfigValue".getBytes());
-        deserConfig.setIgnoreUnknownProperty(true);
-        TestObject result = parser.deserialize(bais, deserConfig, TestObject.class);
-        assertNotNull(result);
-        assertEquals("streamConfigValue", result.getValue());
-    }
-
-    @Test
-    public void testDeserializeFromInputStreamWithConfigNull() {
-        ByteArrayInputStream bais = new ByteArrayInputStream("streamNullConfig".getBytes());
-        TestObject result = parser.deserialize(bais, null, TestObject.class);
-        assertNotNull(result);
-        assertEquals("streamNullConfig", result.getValue());
-    }
-
-    @Test
-    public void testDeserializeFromReader() {
-        StringReader reader = new StringReader("readerValue");
-        TestObject result = parser.deserialize(reader, TestObject.class);
-        assertNotNull(result);
-        assertEquals("readerValue", result.getValue());
-    }
-
-    @Test
-    public void testDeserializeFromEmptyReader() {
-        StringReader reader = new StringReader("");
-        TestObject result = parser.deserialize(reader, TestObject.class);
-        assertNotNull(result);
-        assertEquals("", result.getValue());
-    }
-
-    @Test
-    public void testDeserializeFromReaderWithLargeContent() {
-        StringBuilder largeContent = new StringBuilder();
+        assertEquals("readerValue", parser.deserialize(new StringReader("readerValue"), TestObject.class).getValue());
+        assertEquals("", parser.deserialize(new StringReader(""), TestObject.class).getValue());
+        StringBuilder large = new StringBuilder();
         for (int i = 0; i < 1000; i++) {
-            largeContent.append("x");
+            large.append("x");
         }
-        StringReader reader = new StringReader(largeContent.toString());
-        TestObject result = parser.deserialize(reader, TestObject.class);
-        assertNotNull(result);
-        assertEquals(1000, result.getValue().length());
-    }
-
-    @Test
-    public void testDeserializeFromReaderWithConfig() {
-        StringReader reader = new StringReader("readerConfigValue");
-        deserConfig.setIgnoreUnknownProperty(true);
-        TestObject result = parser.deserialize(reader, deserConfig, TestObject.class);
-        assertNotNull(result);
-        assertEquals("readerConfigValue", result.getValue());
-    }
-
-    @Test
-    public void testDeserializeFromReaderWithConfigNull() {
-        StringReader reader = new StringReader("readerNullConfig");
-        TestObject result = parser.deserialize(reader, null, TestObject.class);
-        assertNotNull(result);
-        assertEquals("readerNullConfig", result.getValue());
+        assertEquals(1000, parser.deserialize(new StringReader(large.toString()), TestObject.class).getValue().length());
+        assertEquals("readerConfigValue", parser.deserialize(new StringReader("readerConfigValue"), deserConfig, TestObject.class).getValue());
+        assertEquals("readerNullConfig", parser.deserialize(new StringReader("readerNullConfig"), null, TestObject.class).getValue());
     }
 
     @Test
     public void testDeserializeFromFile() throws IOException {
         File tempFile = File.createTempFile("parser124test", ".txt");
         tempFile.deleteOnExit();
+
         java.nio.file.Files.write(tempFile.toPath(), "fileValue".getBytes());
+        assertEquals("fileValue", parser.deserialize(tempFile, TestObject.class).getValue());
 
-        TestObject result = parser.deserialize(tempFile, TestObject.class);
-        assertNotNull(result);
-        assertEquals("fileValue", result.getValue());
-    }
-
-    @Test
-    public void testDeserializeFromEmptyFile() throws IOException {
-        File tempFile = File.createTempFile("parser124test", ".txt");
-        tempFile.deleteOnExit();
         java.nio.file.Files.write(tempFile.toPath(), "".getBytes());
+        assertEquals("", parser.deserialize(tempFile, TestObject.class).getValue());
 
-        TestObject result = parser.deserialize(tempFile, TestObject.class);
-        assertNotNull(result);
-        assertEquals("", result.getValue());
-    }
-
-    @Test
-    public void testDeserializeFromFileToString() throws IOException {
-        File tempFile = File.createTempFile("parser124test", ".txt");
-        tempFile.deleteOnExit();
         java.nio.file.Files.write(tempFile.toPath(), "stringFromFile".getBytes());
-
-        String result = parser.deserialize(tempFile, String.class);
-        assertEquals("stringFromFile", result);
-    }
-
-    @Test
-    public void testDeserializeFromFileWithConfig() throws IOException {
-        File tempFile = File.createTempFile("parser124test", ".txt");
-        tempFile.deleteOnExit();
-        java.nio.file.Files.write(tempFile.toPath(), "fileConfigValue".getBytes());
+        assertEquals("stringFromFile", parser.deserialize(tempFile, String.class));
 
         deserConfig.setIgnoreUnknownProperty(true);
-        TestObject result = parser.deserialize(tempFile, deserConfig, TestObject.class);
-        assertNotNull(result);
-        assertEquals("fileConfigValue", result.getValue());
+        java.nio.file.Files.write(tempFile.toPath(), "fileConfigValue".getBytes());
+        assertEquals("fileConfigValue", parser.deserialize(tempFile, deserConfig, TestObject.class).getValue());
+
+        java.nio.file.Files.write(tempFile.toPath(), "nullConfigFile".getBytes());
+        assertEquals("nullConfigFile", parser.deserialize(tempFile, null, TestObject.class).getValue());
     }
 
     @Test
-    public void testDeserializeFromFileWithConfigNull() throws IOException {
+    public void testRoundTrip() throws IOException {
+        TestObject deserialized = parser.deserialize(parser.serialize(testObject), TestObject.class);
+        assertEquals(testObject.getValue(), deserialized.getValue());
+
+        serConfig.setPrettyFormat(true);
+        String serialized = parser.serialize(testObject, serConfig);
+        assertTrue(serialized.startsWith("PRETTY:"));
+        deserConfig.setIgnoreUnknownProperty(true);
+        assertNotNull(parser.deserialize(serialized, deserConfig, TestObject.class));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        parser.serialize(testObject, baos);
+        assertEquals(testObject.getValue(), parser.deserialize(new ByteArrayInputStream(baos.toByteArray()), TestObject.class).getValue());
+
+        StringWriter writer = new StringWriter();
+        parser.serialize(testObject, writer);
+        assertEquals(testObject.getValue(), parser.deserialize(new StringReader(writer.toString()), TestObject.class).getValue());
+
         File tempFile = File.createTempFile("parser124test", ".txt");
         tempFile.deleteOnExit();
-        java.nio.file.Files.write(tempFile.toPath(), "nullConfigFile".getBytes());
-
-        TestObject result = parser.deserialize(tempFile, null, TestObject.class);
-        assertNotNull(result);
-        assertEquals("nullConfigFile", result.getValue());
+        parser.serialize(testObject, tempFile);
+        assertEquals(testObject.getValue(), parser.deserialize(tempFile, TestObject.class).getValue());
     }
+
+    // ---------------------------------------------------------------------------------------------
+    // Review fixes 2026-09-06, P7-06: the Parser javadoc promised NullPointerException for a null
+    // source/class; the implementations throw IllegalArgumentException (N.checkArgNotNull). Pin it.
+    // ---------------------------------------------------------------------------------------------
+
+    @Test
+    public void reviewFixes20260906_P7_06_nullSourceOrClassThrowsIllegalArgumentException() {
+        final JsonParser jsonParser = ParserFactory.createJsonParser();
+
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize((File) null, java.util.Map.class));
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize((InputStream) null, java.util.Map.class));
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize((Reader) null, java.util.Map.class));
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize((File) null, Type.of(java.util.Map.class)));
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize((InputStream) null, Type.of(java.util.Map.class)));
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize((Reader) null, Type.of(java.util.Map.class)));
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize((File) null, null, java.util.Map.class));
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize((InputStream) null, null, Type.of(java.util.Map.class)));
+
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize("{}", (Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize("{}", null, (Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize(new StringReader("{}"), (Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize(new ByteArrayInputStream(new byte[0]), (Class<?>) null));
+
+        // P2-15: a null Type is rejected the same way as a null Class
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize("{}", (Type<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> jsonParser.deserialize(new StringReader("{}"), (Type<?>) null));
+
+        final XmlParser xmlParser = ParserFactory.createXmlParser();
+
+        assertThrows(IllegalArgumentException.class, () -> xmlParser.deserialize((File) null, java.util.Map.class));
+        assertThrows(IllegalArgumentException.class, () -> xmlParser.deserialize((InputStream) null, java.util.Map.class));
+        assertThrows(IllegalArgumentException.class, () -> xmlParser.deserialize((File) null, Type.of(java.util.Map.class)));
+        assertThrows(IllegalArgumentException.class, () -> xmlParser.deserialize("<map></map>", (Class<?>) null));
+    }
+
 }

@@ -106,14 +106,6 @@ public class ImmutableNavigableSetTest extends TestBase {
         Assertions.assertNull(set.higher("elderberry"));
     }
 
-    //    @Test
-    //    public void testJust() {
-    //        ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.just(42);
-    //        Assertions.assertEquals(1, set.size());
-    //        Assertions.assertEquals(42, set.first());
-    //        Assertions.assertEquals(42, set.last());
-    //    }
-
     @Test
     public void testOf_SingleElement() {
         ImmutableNavigableSet<String> set = ImmutableNavigableSet.of("single");
@@ -352,6 +344,21 @@ public class ImmutableNavigableSetTest extends TestBase {
     }
 
     @Test
+    public void testDescendingIteratorPropagatesTheBackingSetsExhaustionException() {
+        // descendingIterator() goes through ObjIterator.of(..), which does NOT normalise exhaustion, so the
+        // backing TreeSet's own message-less NoSuchElementException reaches the caller rather than this
+        // library's standard message. Pinned because normalising it was tried and deliberately reverted.
+        ObjIterator<String> iter = ImmutableNavigableSet.of("a", "b").descendingIterator();
+        Assertions.assertEquals("b", iter.next());
+        Assertions.assertEquals("a", iter.next());
+        Assertions.assertFalse(iter.hasNext());
+
+        java.util.NoSuchElementException ex = Assertions.assertThrows(java.util.NoSuchElementException.class, iter::next);
+        Assertions.assertNotEquals(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX, ex.getMessage());
+        Assertions.assertNull(ex.getMessage());
+    }
+
+    @Test
     public void testSubSet_Inclusive() {
         ImmutableNavigableSet<Integer> set = ImmutableNavigableSet.of(1, 2, 3, 4, 5);
         ImmutableNavigableSet<Integer> sub = set.subSet(2, true, 4, false);
@@ -426,5 +433,178 @@ public class ImmutableNavigableSetTest extends TestBase {
         Assertions.assertTrue(tail.contains(4));
         Assertions.assertTrue(tail.contains(5));
         Assertions.assertFalse(tail.contains(3));
+    }
+
+    /** A key/element type that is deliberately NOT Comparable. */
+    private static final class NotComparableNS {
+        private final String s;
+
+        NotComparableNS(final String s) {
+            this.s = s;
+        }
+
+        @Override
+        public String toString() {
+            return s;
+        }
+    }
+
+    @Test
+    public void testOf_neverSilentlyFallsBackToAnUnsortedImmutableSet() {
+        // With a Comparable bound on of(...), a non-Comparable element selected the inherited
+        // ImmutableSet.of(...) instead and produced an UNSORTED set with no error at all.
+        Assertions.assertThrows(ClassCastException.class, () -> ImmutableNavigableSet.of(new NotComparableNS("z")));
+        Assertions.assertThrows(ClassCastException.class, () -> ImmutableNavigableSet.of(new NotComparableNS("z"), new NotComparableNS("a")));
+        Assertions.assertThrows(ClassCastException.class,
+                () -> ImmutableNavigableSet.of(new NotComparableNS("a"), new NotComparableNS("b"), new NotComparableNS("c")));
+    }
+
+    @Test
+    public void testCopyOfPreservesComparatorForNonComparableElements() {
+        final Comparator<NotComparableNS> comparator = Comparator.comparing(element -> element.s);
+        final SortedSet<NotComparableNS> source = new TreeSet<>(comparator);
+        final NotComparableNS first = new NotComparableNS("a");
+        final NotComparableNS last = new NotComparableNS("z");
+        source.add(last);
+        source.add(first);
+
+        final ImmutableNavigableSet<NotComparableNS> copy = ImmutableNavigableSet.copyOf(source);
+        Assertions.assertSame(comparator, copy.comparator());
+        Assertions.assertEquals(Arrays.asList(first, last), new ArrayList<>(copy));
+        Assertions.assertSame(last, copy.ceiling(new NotComparableNS("m")));
+        source.clear();
+        Assertions.assertEquals(2, copy.size());
+        Assertions.assertSame(comparator, ImmutableNavigableSet.copyOf(source).comparator());
+        Assertions.assertThrows(ClassCastException.class, () -> ImmutableNavigableSet.copyOf(Arrays.asList(first, last)));
+    }
+
+    @Test
+    public void testOf_isStillSortedForComparableElements() {
+        final ImmutableNavigableSet<String> s = ImmutableNavigableSet.of("c", "a", "b");
+
+        Assertions.assertEquals(java.util.Arrays.asList("a", "b", "c"), new java.util.ArrayList<>(s));
+        Assertions.assertEquals("a", s.first());
+        Assertions.assertEquals("c", s.last());
+        Assertions.assertNull(s.comparator());
+        // a null element still fails as NullPointerException (from TreeSet's natural ordering), not CCE
+        Assertions.assertThrows(NullPointerException.class, () -> ImmutableNavigableSet.of((String) null));
+    }
+
+    @Test
+    public void testBuilderIsBlocked() {
+        // ImmutableSet.builder() is inherited through this class's name and would silently build an
+        // unsorted ImmutableSet in insertion order.
+        Assertions.assertThrows(UnsupportedOperationException.class, ImmutableNavigableSet::builder);
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> ImmutableNavigableSet.builder(new java.util.TreeSet<String>()));
+    }
+
+    @Test
+    public void testCopyOf_copiesAWrappedView() {
+        final java.util.TreeSet<String> live = new java.util.TreeSet<>(java.util.List.of("a"));
+        final ImmutableNavigableSet<String> view = ImmutableNavigableSet.wrap(live);
+        final ImmutableNavigableSet<String> copy = ImmutableNavigableSet.copyOf(view);
+
+        Assertions.assertNotSame(view, copy);
+
+        live.add("b");
+
+        Assertions.assertEquals(2, view.size());
+        Assertions.assertEquals(1, copy.size());
+        Assertions.assertFalse(copy.contains("b"));
+    }
+
+    @Test
+    public void testRangeViewsInheritOwnership() {
+        final ImmutableNavigableSet<String> owned = ImmutableNavigableSet.of("a", "b", "c");
+        final ImmutableNavigableSet<String> ownedHead = owned.headSet("c", false);
+        Assertions.assertSame(ownedHead, ImmutableNavigableSet.copyOf(ownedHead));
+
+        final java.util.TreeSet<String> live = new java.util.TreeSet<>(java.util.List.of("a", "c"));
+        final ImmutableNavigableSet<String> viewHead = ImmutableNavigableSet.wrap(live).headSet("d", false);
+        final ImmutableNavigableSet<String> copy = ImmutableNavigableSet.copyOf(viewHead);
+        Assertions.assertNotSame(viewHead, copy);
+
+        live.add("b");
+        Assertions.assertEquals(3, viewHead.size());
+        Assertions.assertEquals(2, copy.size());
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> viewHead.add("z"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> ownedHead.add("z"));
+    }
+
+    @Test
+    public void testDescendingSetTraversesInDescendingOrder() {
+        // ImmutableCollection.spliterator()/forEach() delegate to the backing collection. For a descending
+        // set the backing collection IS the descending view, so every traversal must agree.
+        final ImmutableNavigableSet<String> descending = ImmutableNavigableSet.of("a", "b", "c").descendingSet();
+        final java.util.List<String> expected = java.util.Arrays.asList("c", "b", "a");
+
+        Assertions.assertEquals(expected, new java.util.ArrayList<>(descending));
+        Assertions.assertEquals(expected, descending.stream().toList());
+        Assertions.assertEquals(expected, descending.parallelStream().toList());
+        Assertions.assertEquals(expected, java.util.Arrays.asList(descending.toArray()));
+
+        final java.util.List<String> seen = new java.util.ArrayList<>();
+        descending.forEach(seen::add);
+        Assertions.assertEquals(expected, seen);
+
+        final java.util.List<String> spliterated = new java.util.ArrayList<>();
+        descending.spliterator().forEachRemaining(spliterated::add);
+        Assertions.assertEquals(expected, spliterated);
+
+        Assertions.assertEquals("c", descending.first());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> descending.add("z"));
+    }
+
+    @Test
+    public void reversed_isTheNarrowedDescendingSetView() {
+        final ImmutableNavigableSet<String> set = ImmutableNavigableSet.of("a", "b", "c");
+
+        // covariant re-override of ImmutableSortedSet.reversed(); its behaviour is that of descendingSet()
+        final ImmutableNavigableSet<String> reversed = set.reversed();
+        Assertions.assertEquals("[c, b, a]", reversed.toString());
+        Assertions.assertEquals(set.descendingSet().toString(), reversed.toString());
+        Assertions.assertTrue(reversed instanceof Immutable);
+        Assertions.assertEquals("c", reversed.first());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> reversed.add("z"));
+    }
+
+    @Test
+    public void copyOf_returnsEveryDerivedViewOfAnOwningSourceUnchanged() {
+        // pins the copyOf(Collection) memory note: every derived view of an owning source owns its backing
+        // storage too, so copyOf hands it straight back and the whole parent stays reachable.
+        final ImmutableNavigableSet<Integer> owning = ImmutableNavigableSet.of(1, 2, 3);
+
+        final ImmutableNavigableSet<Integer> descending = owning.descendingSet();
+        Assertions.assertSame(descending, ImmutableNavigableSet.copyOf(descending));
+        Assertions.assertSame(descending, ImmutableSortedSet.copyOf(descending));
+
+        // the remaining four views the same paragraph enumerates - subSet/headSet/tailSet/reversed
+        final ImmutableNavigableSet<Integer> sub = owning.subSet(1, 3);
+        Assertions.assertSame(sub, ImmutableNavigableSet.copyOf(sub));
+
+        final ImmutableNavigableSet<Integer> head = owning.headSet(3);
+        Assertions.assertSame(head, ImmutableNavigableSet.copyOf(head));
+
+        final ImmutableNavigableSet<Integer> tail = owning.tailSet(2);
+        Assertions.assertSame(tail, ImmutableNavigableSet.copyOf(tail));
+
+        final ImmutableNavigableSet<Integer> reversed = owning.reversed();
+        Assertions.assertSame(reversed, ImmutableNavigableSet.copyOf(reversed));
+        Assertions.assertSame(reversed, ImmutableSortedSet.copyOf(reversed));
+
+        // and the inclusive navigable forms
+        final ImmutableNavigableSet<Integer> subInclusive = owning.subSet(1, true, 3, true);
+        Assertions.assertSame(subInclusive, ImmutableNavigableSet.copyOf(subInclusive));
+
+        final ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(1, "a", 2, "b", 3, "c");
+
+        // a key-set view is handed back too, and it retains the parent MAP, its values included
+        final ImmutableNavigableSet<Integer> keys = map.navigableKeySet();
+        Assertions.assertSame(keys, ImmutableNavigableSet.copyOf(keys));
+        Assertions.assertSame(keys, ImmutableSortedSet.copyOf(keys));
+
+        final ImmutableNavigableSet<Integer> descendingKeys = map.descendingKeySet();
+        Assertions.assertSame(descendingKeys, ImmutableNavigableSet.copyOf(descendingKeys));
     }
 }

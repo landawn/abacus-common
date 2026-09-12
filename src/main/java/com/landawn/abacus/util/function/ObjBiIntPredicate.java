@@ -45,7 +45,7 @@ import com.landawn.abacus.util.cs;
  * @see java.util.function.BiPredicate
  */
 @FunctionalInterface
-public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, RuntimeException> { // NOSONAR
+public interface ObjBiIntPredicate<T> extends Throwables.ObjBiIntPredicate<T, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Evaluates this predicate on the given arguments.
      *

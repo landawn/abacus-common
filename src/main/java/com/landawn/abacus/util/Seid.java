@@ -78,8 +78,6 @@ public class Seid implements EntityId {
 
     private Map<String, Object> values = Collections.emptyMap();
 
-    private String strValue;
-
     /**
      * No-argument constructor required by Kryo serialization.
      * Not intended for direct use.
@@ -128,7 +126,7 @@ public class Seid implements EntityId {
      * @param propValue the property value
      * @throws IllegalArgumentException if {@code propName} is {@code null}.
      */
-    public Seid(final String propName, final Object propValue) {
+    public Seid(final String propName, final Object propValue) throws IllegalArgumentException {
         this(NameUtil.getParentName(N.checkArgNotNull(propName, cs.propName)));
 
         set(propName, propValue); // NOSONAR
@@ -150,14 +148,17 @@ public class Seid implements EntityId {
      * @throws IllegalArgumentException if {@code nameValues} is {@code null} or empty, or contains a {@code null}
      *         property name.
      */
-    public Seid(final Map<String, Object> nameValues) {
+    public Seid(final Map<String, Object> nameValues) throws IllegalArgumentException {
         this(extractEntityName(nameValues));
 
         set(nameValues); // NOSONAR
     }
 
-    private static String extractEntityName(final Map<String, Object> nameValues) {
-        N.checkArgNotEmpty(nameValues, "nameValues");
+    /**
+     * @throws IllegalArgumentException if {@code nameValues} is null or empty, or its first property name is null
+     */
+    private static String extractEntityName(final Map<String, Object> nameValues) throws IllegalArgumentException {
+        N.checkArgNotEmpty(nameValues, cs.nameValues);
 
         return NameUtil.getParentName(N.checkArgNotNull(nameValues.keySet().iterator().next(), cs.propName));
     }
@@ -197,7 +198,7 @@ public class Seid implements EntityId {
      * @return a new Seid instance
      * @throws IllegalArgumentException if {@code propName} is {@code null}.
      */
-    public static Seid of(final String propName, final Object propValue) {
+    public static Seid of(final String propName, final Object propValue) throws IllegalArgumentException {
         return new Seid(propName, propValue);
     }
 
@@ -217,7 +218,7 @@ public class Seid implements EntityId {
      * @return a new Seid instance
      * @throws IllegalArgumentException if {@code propName1} or {@code propName2} is {@code null}.
      */
-    public static Seid of(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
+    public static Seid of(final String propName1, final Object propValue1, final String propName2, final Object propValue2) throws IllegalArgumentException {
         final Seid result = new Seid(propName1, propValue1);
         result.set(propName2, propValue2);
         return result;
@@ -243,7 +244,7 @@ public class Seid implements EntityId {
      *         {@code null}.
      */
     public static Seid of(final String propName1, final Object propValue1, final String propName2, final Object propValue2, final String propName3,
-            final Object propValue3) {
+            final Object propValue3) throws IllegalArgumentException {
         final Seid result = new Seid(propName1, propValue1);
         result.set(propName2, propValue2);
         result.set(propName3, propValue3);
@@ -266,14 +267,17 @@ public class Seid implements EntityId {
      *         property name.
      */
     public static Seid create(final Map<String, Object> nameValues) throws IllegalArgumentException {
-        N.checkArgNotEmpty(nameValues, "nameValues");
+        N.checkArgNotEmpty(nameValues, cs.nameValues);
 
         return new Seid(nameValues);
     }
 
     /**
      * Creates a new Seid from an entity object by extracting its ID properties.
-     * The entity class must have properties annotated as ID fields.
+     * The entity class must declare at least one id property: a property annotated as an id (for example
+     * {@code @Id}, {@code @ReadOnlyId}, or a JPA {@code @Id}), or - when no property is annotated - a property
+     * named {@code id} whose declared type is {@code int}, {@code Integer}, {@code long}, {@code Long},
+     * {@code String}, {@code java.sql.Timestamp} or {@code java.util.UUID}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -298,10 +302,11 @@ public class Seid implements EntityId {
      *
      * @param entity the entity object to extract ID from; must not be {@code null}
      * @return a new Seid containing the entity's ID properties
-     * @throws IllegalArgumentException if no ID properties are defined in the entity class.
-     * @throws NullPointerException if {@code entity} is {@code null}
+     * @throws IllegalArgumentException if {@code entity} is {@code null}, or if no ID properties are defined in the entity class.
      */
-    public static Seid create(final Object entity) {
+    public static Seid create(final Object entity) throws IllegalArgumentException {
+        N.checkArgNotNull(entity, cs.entity);
+
         final List<String> idPropNames = Seid.getIdFieldNames(entity.getClass());
 
         if (N.isEmpty(idPropNames)) {
@@ -325,11 +330,12 @@ public class Seid implements EntityId {
      * @param entity the entity object to extract values from; must not be {@code null}
      * @param idPropNames the simple names of properties to use as ID; must not be {@code null} or empty
      * @return a new Seid containing the specified properties and their values from the entity
-     * @throws IllegalArgumentException if {@code idPropNames} is {@code null} or empty, or if a named property does
-     *         not exist on the entity type.
-     * @throws NullPointerException if {@code entity} is {@code null}
+     * @throws IllegalArgumentException if {@code entity} is {@code null}, {@code idPropNames} is {@code null}
+     *         or empty, or a named property does not exist on the entity type.
      */
-    public static Seid create(final Object entity, final Collection<String> idPropNames) {
+    public static Seid create(final Object entity, final Collection<String> idPropNames) throws IllegalArgumentException {
+        N.checkArgNotNull(entity, cs.entity);
+
         if (N.isEmpty(idPropNames)) {
             throw new IllegalArgumentException("Id property names cannot be null or empty");
         }
@@ -385,7 +391,7 @@ public class Seid implements EntityId {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T get(final String propName) {
+    public <T> T get(final String propName) throws IllegalArgumentException {
         final String checkedPropName = N.checkArgNotNull(propName, cs.propName);
 
         if (NameUtil.isCanonicalName(entityName, checkedPropName)) {
@@ -409,9 +415,10 @@ public class Seid implements EntityId {
      * @param propName the property name
      * @return the property value as an int, or {@code 0} if the property is absent or {@code null}
      * @throws IllegalArgumentException if {@code propName} is {@code null}.
+     * @throws RuntimeException if the stored value cannot be converted to the requested numeric type.
      */
     @Override
-    public int getInt(final String propName) {
+    public int getInt(final String propName) throws IllegalArgumentException, RuntimeException {
         final Object value = get(propName);
         return value instanceof Number ? ((Number) value).intValue() : N.convert(value, int.class);
     }
@@ -431,9 +438,10 @@ public class Seid implements EntityId {
      * @param propName the property name
      * @return the property value as a long, or {@code 0L} if the property is absent or {@code null}
      * @throws IllegalArgumentException if {@code propName} is {@code null}.
+     * @throws RuntimeException if the stored value cannot be converted to the requested numeric type.
      */
     @Override
-    public long getLong(final String propName) {
+    public long getLong(final String propName) throws IllegalArgumentException, RuntimeException {
         final Object value = get(propName);
         return value instanceof Number ? ((Number) value).longValue() : N.convert(value, long.class);
     }
@@ -457,9 +465,10 @@ public class Seid implements EntityId {
      * @return the property value converted to the target type, or the target type's default value
      *         (which is {@code null} for reference types) if the property is absent or its value is {@code null}
      * @throws IllegalArgumentException if {@code propName} or {@code targetType} is {@code null}.
+     * @throws RuntimeException if the stored value cannot be converted to {@code targetType}.
      */
     @Override
-    public <T> T get(final String propName, final Class<? extends T> targetType) {
+    public <T> T get(final String propName, final Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
         Object propValue = get(propName);
 
@@ -493,7 +502,7 @@ public class Seid implements EntityId {
      */
     @Deprecated
     @Internal
-    public Seid set(final String propName, final Object propValue) {
+    public Seid set(final String propName, final Object propValue) throws IllegalArgumentException {
         final String checkedPropName = N.checkArgNotNull(propName, cs.propName);
         final String simplePropName = NameUtil.isCanonicalName(entityName, checkedPropName) ? NameUtil.getSimpleName(checkedPropName) : checkedPropName;
 
@@ -506,8 +515,6 @@ public class Seid implements EntityId {
 
             values.put(simplePropName, propValue);
         }
-
-        strValue = null;
 
         return this;
     }
@@ -540,7 +547,7 @@ public class Seid implements EntityId {
      */
     @Deprecated
     @Internal
-    public void set(final Map<String, Object> nameValues) {
+    public void set(final Map<String, Object> nameValues) throws IllegalArgumentException {
         if (N.isEmpty(nameValues)) {
             return;
         }
@@ -556,7 +563,6 @@ public class Seid implements EntityId {
 
         values = newValues.size() == 1 ? Collections.singletonMap(newValues.firstEntry().getKey(), newValues.firstEntry().getValue()) : newValues;
 
-        strValue = null;
     }
 
     /**
@@ -575,7 +581,7 @@ public class Seid implements EntityId {
      * @throws IllegalArgumentException if {@code propName} is {@code null}.
      */
     @Override
-    public boolean containsKey(final String propName) {
+    public boolean containsKey(final String propName) throws IllegalArgumentException {
         final String checkedPropName = N.checkArgNotNull(propName, cs.propName);
 
         if (values.isEmpty()) {
@@ -685,7 +691,6 @@ public class Seid implements EntityId {
     public void clear() {
         values = Collections.emptyMap();
 
-        strValue = null;
     }
 
     /**
@@ -712,7 +717,6 @@ public class Seid implements EntityId {
         final Seid copy = new Seid(entityName);
 
         copy.set(values);
-        copy.strValue = strValue;
 
         return copy;
     }
@@ -729,6 +733,10 @@ public class Seid implements EntityId {
      * boolean equal = seid1.equals(seid2);   // returns true
      * }</pre>
      *
+     * <p>Property values are compared <i>deeply</i>: an array-valued id property (for example a
+     * {@code byte[]} key) compares by content, not by reference the way {@link java.util.Map#equals(Object)}
+     * would.</p>
+     *
      * @param obj the object to compare with
      * @return {@code true} if {@code obj} is a {@code Seid} with the same entity name and the same
      *         property name/value pairs (compared by value and type), {@code false} otherwise
@@ -742,22 +750,52 @@ public class Seid implements EntityId {
         // Compare structurally (entity name + property map) rather than by toString(): the rendered
         // string is ambiguous — a single value containing ", "/"=" collides with a two-property id,
         // and 123 renders identically to "123" despite being a different value.
-        return obj instanceof Seid other && entityName.equals(other.entityName) && values.equals(other.values);
+        // The entries are walked in the shape of AbstractMap.equals but with N.deepEquals, because
+        // Map.equals compares an array-valued property by reference, contradicting the contract above.
+        if (!(obj instanceof final Seid other) || !entityName.equals(other.entityName) || values.size() != other.values.size()) {
+            return false;
+        }
+
+        for (final Entry<String, Object> entry : values.entrySet()) {
+            final String propName = entry.getKey();
+            final Object propValue = entry.getValue();
+
+            if (propValue == null) {
+                if (other.values.get(propName) != null || !other.values.containsKey(propName)) {
+                    return false;
+                }
+            } else if (!N.deepEquals(propValue, other.values.get(propName))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
      * Returns a hash code value for this Seid, derived from its entity name and property name/value pairs
      * (consistent with {@link #equals(Object)}).
      *
+     * <p>Array-valued properties contribute their <i>content</i> hash, mirroring the deep comparison
+     * performed by {@link #equals(Object)}.</p>
+     *
      * @return a hash code value
      */
     @Override
     public int hashCode() {
-        return 31 * entityName.hashCode() + values.hashCode();
+        // Same shape as Map.hashCode() (an order-independent sum of entry hashes) but with
+        // N.deepHashCode, so that it stays consistent with the deep equals(Object) above.
+        int valuesHash = 0;
+
+        for (final Entry<String, Object> entry : values.entrySet()) {
+            valuesHash += entry.getKey().hashCode() ^ N.deepHashCode(entry.getValue());
+        }
+
+        return 31 * entityName.hashCode() + valuesHash;
     }
 
     /**
-     * Returns a string representation of this Seid.
+     * Returns a string representation of this Seid using the current property values on each call.
      * The format is: "EntityName: {prop1=value1, prop2=value2, ...}"
      * Properties are sorted by name for consistent representation.
      *
@@ -775,46 +813,48 @@ public class Seid implements EntityId {
     }
 
     private String stringValue() {
-        if (strValue == null) {
+        // Values are shallow references and may mutate without going through this identifier.
+        final String strValue;
 
-            final Set<Map.Entry<String, Object>> entrySet = values.entrySet();
+        final Set<Map.Entry<String, Object>> entrySet = values.entrySet();
 
-            switch (values.size()) {
-                case 0: {
-                    strValue = entityName + ": {}";
+        switch (values.size()) {
+            case 0: {
+                strValue = entityName + ": {}";
 
-                    break;
-                }
+                break;
+            }
 
-                case 1: {
-                    final Map.Entry<String, Object> entry = entrySet.iterator().next();
-                    final String propName = NameUtil.isCanonicalName(entityName, entry.getKey()) ? NameUtil.getSimpleName(entry.getKey()) : entry.getKey();
+            case 1: {
+                final Map.Entry<String, Object> entry = entrySet.iterator().next();
+                final String propName = NameUtil.isCanonicalName(entityName, entry.getKey()) ? NameUtil.getSimpleName(entry.getKey()) : entry.getKey();
 
-                    strValue = entityName + ": {" + propName + "=" + N.stringOf(entry.getValue()) + "}";
+                strValue = entityName + ": {" + propName + "=" + N.stringOf(entry.getValue()) + "}";
 
-                    break;
-                }
+                break;
+            }
 
-                case 2: {
-                    final Iterator<Map.Entry<String, Object>> it = entrySet.iterator();
-                    final Map.Entry<String, Object> entry1 = it.next();
-                    final String propName1 = NameUtil.isCanonicalName(entityName, entry1.getKey()) ? NameUtil.getSimpleName(entry1.getKey()) : entry1.getKey();
-                    final Map.Entry<String, Object> entry2 = it.next();
-                    final String propName2 = NameUtil.isCanonicalName(entityName, entry2.getKey()) ? NameUtil.getSimpleName(entry2.getKey()) : entry2.getKey();
+            case 2: {
+                final Iterator<Map.Entry<String, Object>> it = entrySet.iterator();
+                final Map.Entry<String, Object> entry1 = it.next();
+                final String propName1 = NameUtil.isCanonicalName(entityName, entry1.getKey()) ? NameUtil.getSimpleName(entry1.getKey()) : entry1.getKey();
+                final Map.Entry<String, Object> entry2 = it.next();
+                final String propName2 = NameUtil.isCanonicalName(entityName, entry2.getKey()) ? NameUtil.getSimpleName(entry2.getKey()) : entry2.getKey();
 
-                    strValue = entityName + ": {" + propName1 + "=" + N.stringOf(entry1.getValue()) + Strings.ELEMENT_SEPARATOR + propName2 + "="
-                            + N.stringOf(entry2.getValue()) + "}";
+                strValue = entityName + ": {" + propName1 + "=" + N.stringOf(entry1.getValue()) + Strings.ELEMENT_SEPARATOR + propName2 + "="
+                        + N.stringOf(entry2.getValue()) + "}";
 
-                    break;
-                }
+                break;
+            }
 
-                default: {
+            default: {
 
-                    final List<String> keys = new ArrayList<>(values.keySet());
-                    N.sort(keys);
+                final List<String> keys = new ArrayList<>(values.keySet());
+                N.sort(keys);
 
-                    final StringBuilder sb = Objectory.createStringBuilder();
+                final StringBuilder sb = Objectory.createStringBuilder();
 
+                try {
                     sb.append(entityName);
                     sb.append(": {");
 
@@ -835,7 +875,9 @@ public class Seid implements EntityId {
                     sb.append('}');
 
                     strValue = sb.toString();
-
+                } finally {
+                    // A property value's toString() may throw; hand the pooled buffer back either way, so that
+                    // repeated failures do not drain the pool.
                     Objectory.recycle(sb);
                 }
             }
@@ -846,7 +888,9 @@ public class Seid implements EntityId {
 
     /**
      * Returns the ID field names declared on the specified class.
-     * The names are derived from properties annotated as ID fields in the class's bean metadata.
+     * The names are the bean's id properties: those annotated as ids, or, when no property is annotated, a
+     * property named {@code id} whose declared type is one of the recognised id types (see
+     * {@link #create(Object)}).
      * This method is for internal use only.
      *
      * @param targetClass the class whose ID field names are to be retrieved; must not be {@code null}

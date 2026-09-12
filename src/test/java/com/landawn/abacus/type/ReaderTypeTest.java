@@ -14,7 +14,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.BufferedReader;
+import java.io.CharArrayReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -30,6 +34,8 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.N;
 
 public class ReaderTypeTest extends TestBase {
 
@@ -287,6 +293,60 @@ public class ReaderTypeTest extends TestBase {
     public void test_name() {
         assertNotNull(readerType.name());
         assertFalse(readerType.name().isEmpty());
+    }
+
+    // ---- review fixes 2026-09-06: T3-05 valueOf(Object) with a char[] reads the raw characters ----
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectCharArrayReadsRawCharacters() throws IOException {
+        assertEquals("ab", IOUtil.readAllToString(readerType.valueOf((Object) new char[] { 'a', 'b' })));
+        assertEquals("", IOUtil.readAllToString(readerType.valueOf((Object) new char[0])));
+        // surrogate pair and non-Latin text survive
+        assertEquals("中😀", IOUtil.readAllToString(readerType.valueOf((Object) "中😀".toCharArray())));
+        // the list text is exactly what a char[] used to become
+        assertEquals("['a', 'b']", Type.of(char[].class).stringOf(new char[] { 'a', 'b' }));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectCharArrayHonoursTheHandledReaderClass() throws IOException {
+        final char[] chars = { 'a', 'b' };
+
+        final Reader sr = Type.of(StringReader.class).valueOf((Object) chars);
+        assertTrue(sr instanceof StringReader);
+        assertEquals("ab", IOUtil.readAllToString(sr));
+
+        final Reader car = Type.of(CharArrayReader.class).valueOf((Object) chars);
+        assertTrue(car instanceof CharArrayReader);
+        assertEquals("ab", IOUtil.readAllToString(car));
+
+        final Reader br = Type.of(BufferedReader.class).valueOf((Object) chars);
+        assertTrue(br instanceof BufferedReader);
+        assertEquals("ab", IOUtil.readAllToString(br));
+
+        final Reader pr = Type.of(PushbackReader.class).valueOf((Object) chars);
+        assertTrue(pr instanceof PushbackReader);
+        assertEquals("ab", IOUtil.readAllToString(pr));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectCharArrayUnsupportedReaderClassStillThrows() {
+        assertThrows(UnsupportedOperationException.class, () -> Type.of(FileReader.class).valueOf((Object) new char[] { 'a' }));
+        assertThrows(UnsupportedOperationException.class, () -> Type.of(FileReader.class).valueOf("x"));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectOtherRoutesUnchanged() throws IOException {
+        assertEquals("sb", IOUtil.readAllToString(readerType.valueOf((Object) new StringBuilder("sb"))));
+        assertEquals("7", IOUtil.readAllToString(readerType.valueOf((Object) 7)));
+        // a byte[] is NOT decoded with an assumed charset: it still takes the string route
+        assertEquals("[1, 2]", IOUtil.readAllToString(readerType.valueOf((Object) new byte[] { 1, 2 })));
+        assertNull(readerType.valueOf((Object) null));
+    }
+
+    @Test
+    public void reviewFixes20260906_convertCharArrayToReader() throws IOException {
+        assertEquals("ab", IOUtil.readAllToString(N.convert(new char[] { 'a', 'b' }, Reader.class)));
+        assertEquals("ab", IOUtil.readAllToString(N.convert(new char[] { 'a', 'b' }, StringReader.class)));
     }
 
 }

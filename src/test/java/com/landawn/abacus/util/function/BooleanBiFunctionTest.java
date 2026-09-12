@@ -46,12 +46,15 @@ public class BooleanBiFunctionTest extends TestBase {
     @Test
     public void testComplexLogic() {
         BooleanBiFunction<String> function = (t, u) -> {
-            if (t && u)
+            if (t && u) {
                 return "BOTH";
-            if (t)
+            }
+            if (t) {
                 return "FIRST";
-            if (u)
+            }
+            if (u) {
                 return "SECOND";
+            }
             return "NEITHER";
         };
 

@@ -21,7 +21,6 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -45,7 +44,7 @@ import java.util.concurrent.TimeUnit;
  * doSomething();
  * stopwatch.stop();   // stops timing
  *
- * Duration duration = stopwatch.elapsed();
+ * java.time.Duration duration = stopwatch.elapsed();
  *
  * log.info("time: " + stopwatch);   // logs formatted string like "12.30 ms"
  * }</pre>
@@ -58,6 +57,14 @@ import java.util.concurrent.TimeUnit;
  * behavior of the stopwatch.
  *
  * <p><b>Note:</b> This class is not thread-safe.
+ *
+ * <p><b>⚠️ {@code elapsed()} returns {@link java.time.Duration}, not
+ * {@link com.landawn.abacus.util.Duration}.</b> Both types are named {@code Duration} and this class
+ * lives in the same package as the Abacus one, so a caller with {@code import
+ * com.landawn.abacus.util.*;} will not compile {@code Duration d = stopwatch.elapsed();}. Either
+ * import {@code java.time.Duration} explicitly, or convert with
+ * {@code com.landawn.abacus.util.Duration.ofMillis(stopwatch.elapsed(TimeUnit.MILLISECONDS))} &mdash;
+ * which discards the sub-millisecond part that this stopwatch measures.
  *
  * <p><b>Warning for Android users:</b> a stopwatch with default behavior may not continue to keep
  * time while the device is asleep. Instead, create one like this:
@@ -91,7 +98,7 @@ public final class Stopwatch {
      * Stopwatch sw = Stopwatch.createUnstarted();   // returns Stopwatch, not running
      * sw.isRunning();                               // returns false
      * sw.elapsed(TimeUnit.NANOSECONDS);             // returns 0
-     * sw.elapsed();                                 // returns Duration.ZERO
+     * sw.elapsed();                                 // returns java.time.Duration.ZERO
      *
      * sw.start();
      * doSomething();
@@ -141,7 +148,7 @@ public final class Stopwatch {
      * @return a new stopwatch instance that is not running
      * @throws IllegalArgumentException if {@code ticker} is {@code null}.
      */
-    public static Stopwatch createUnstarted(final Ticker ticker) {
+    public static Stopwatch createUnstarted(final Ticker ticker) throws IllegalArgumentException {
         return new Stopwatch(ticker);
     }
 
@@ -157,7 +164,7 @@ public final class Stopwatch {
      * sw.elapsed(TimeUnit.MILLISECONDS);                   // returns elapsed time
      *
      * sw.stop();
-     * sw.elapsed();                        // returns Duration of elapsed time
+     * sw.elapsed();                        // returns a java.time.Duration of the elapsed time
      *
      * sw.start();                          // resumes accumulation after stop (no reset needed)
      *
@@ -201,7 +208,7 @@ public final class Stopwatch {
      * @return a new stopwatch instance that is already running
      * @throws IllegalArgumentException if {@code ticker} is {@code null}.
      */
-    public static Stopwatch createStarted(final Ticker ticker) {
+    public static Stopwatch createStarted(final Ticker ticker) throws IllegalArgumentException {
         return new Stopwatch(ticker).start();
     }
 
@@ -218,7 +225,7 @@ public final class Stopwatch {
      * @param ticker the time source to use
      * @throws IllegalArgumentException if {@code ticker} is {@code null}.
      */
-    Stopwatch(final Ticker ticker) {
+    Stopwatch(final Ticker ticker) throws IllegalArgumentException {
         this.ticker = N.checkArgNotNull(ticker, cs.ticker);
     }
 
@@ -275,7 +282,7 @@ public final class Stopwatch {
      * @see #stop()
      * @see #isRunning()
      */
-    public Stopwatch start() {
+    public Stopwatch start() throws IllegalStateException {
         N.checkState(!isRunning, "This stopwatch is already running.");
         final long tick = ticker.read();
 
@@ -310,11 +317,11 @@ public final class Stopwatch {
      * @return this {@code Stopwatch} instance for method chaining
      * @throws IllegalStateException if the stopwatch is already stopped
      * @throws ArithmeticException if adding this interval would overflow the signed
-     *         {@code long} nanosecond representation; in that case the stopwatch remains running
+     * {@code long} nanosecond representation; in that case the stopwatch remains running
      * @see #start()
      * @see #isRunning()
      */
-    public Stopwatch stop() {
+    public Stopwatch stop() throws IllegalStateException, ArithmeticException {
         N.checkState(isRunning, "This stopwatch is already stopped.");
         final long tick = ticker.read();
         final long newElapsedNanos = Math.addExact(elapsedNanos, tick - startTick);
@@ -370,7 +377,7 @@ public final class Stopwatch {
      *
      * <p>It is generally not a good idea to use an ambiguous, unitless {@code long} to represent
      * elapsed time. Therefore, we recommend using {@link #elapsed()} instead, which returns a
-     * strongly-typed {@link Duration} instance.</p>
+     * strongly-typed {@link java.time.Duration} instance.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -382,48 +389,53 @@ public final class Stopwatch {
      *
      * Stopwatch.createUnstarted().elapsed(TimeUnit.MILLISECONDS);   // returns 0 (never started)
      *
-     * sw.elapsed((TimeUnit) null);                                  // throws NullPointerException
+     * sw.elapsed((TimeUnit) null);                                  // throws IllegalArgumentException
      * }</pre>
      *
      * @param desiredUnit the unit of time to express the elapsed time in; must not be {@code null}
      * @return the elapsed time in the specified unit, rounded down
-     * @throws NullPointerException if {@code desiredUnit} is {@code null}
+     * @throws IllegalArgumentException if {@code desiredUnit} is {@code null}
      * @throws ArithmeticException if the accumulated running time cannot be represented as a
      *         signed {@code long} number of nanoseconds
      * @see #elapsed()
      */
-    public long elapsed(final TimeUnit desiredUnit) {
+    public long elapsed(final TimeUnit desiredUnit) throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(desiredUnit, cs.desiredUnit);
+
         return desiredUnit.convert(elapsedNanos(), NANOSECONDS);
     }
 
     /**
-     * Returns the current elapsed time shown on this stopwatch as a {@link Duration}.
-     * Unlike {@link #elapsed(TimeUnit)}, this method returns a strongly-typed {@code Duration}
-     * instance that preserves nanosecond precision.
+     * Returns the current elapsed time shown on this stopwatch as a {@link java.time.Duration}.
+     * Unlike {@link #elapsed(TimeUnit)}, this method returns a strongly-typed
+     * {@code java.time.Duration} instance that preserves nanosecond precision.
+     *
+     * <p><b>Note the type:</b> this is {@code java.time.Duration}, <em>not</em> the same-named
+     * {@link com.landawn.abacus.util.Duration} declared in this package.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stopwatch sw = Stopwatch.createStarted();
      * doSomething();
-     * Duration d = sw.elapsed();               // returns Duration with nanosecond precision
+     * java.time.Duration d = sw.elapsed();     // nanosecond precision
      * d.toNanos();                             // returns total nanoseconds
      * d.toMillis();                            // returns total milliseconds
      *
-     * Duration d2 = sw.elapsed();              // returns updated Duration if still running
+     * java.time.Duration d2 = sw.elapsed();    // returns an updated value if still running
      *
-     * Stopwatch.createUnstarted().elapsed();   // returns Duration.ZERO
+     * Stopwatch.createUnstarted().elapsed();   // returns java.time.Duration.ZERO
      *
-     * if (d.compareTo(Duration.ofSeconds(5)) > 0) {
+     * if (d.compareTo(java.time.Duration.ofSeconds(5)) > 0) {
      *     System.out.println("Took more than 5 seconds");
      * }
      * }</pre>
      *
-     * @return a {@code Duration} representing the elapsed time
+     * @return a {@code java.time.Duration} representing the elapsed time
      * @throws ArithmeticException if the accumulated running time cannot be represented as a
      *         signed {@code long} number of nanoseconds
      */
-    public Duration elapsed() {
-        return Duration.ofNanos(elapsedNanos());
+    public java.time.Duration elapsed() throws ArithmeticException {
+        return java.time.Duration.ofNanos(elapsedNanos());
     }
 
     /**
@@ -460,7 +472,7 @@ public final class Stopwatch {
      *         signed {@code long} number of nanoseconds
      */
     @Override
-    public String toString() {
+    public String toString() throws ArithmeticException {
         final long nanos = elapsedNanos();
 
         final TimeUnit unit = chooseUnit(nanos);

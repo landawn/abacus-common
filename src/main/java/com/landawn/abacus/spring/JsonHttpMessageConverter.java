@@ -14,20 +14,42 @@
 
 package com.landawn.abacus.spring;
 
+import java.io.IOException;
+import java.io.PushbackReader;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.AbstractJsonHttpMessageConverter;
 
+import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonSerConfig;
+import com.landawn.abacus.type.EnumType;
+import com.landawn.abacus.type.ImmutableMapEntryType;
+import com.landawn.abacus.type.IndexedType;
+import com.landawn.abacus.type.MapEntryType;
+import com.landawn.abacus.type.ObjectType;
+import com.landawn.abacus.type.PairType;
+import com.landawn.abacus.type.TimedType;
+import com.landawn.abacus.type.TripleType;
 import com.landawn.abacus.type.TypeFactory;
+import com.landawn.abacus.util.BufferedJsonWriter;
+import com.landawn.abacus.util.Holder;
+import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.cs;
+import com.landawn.abacus.util.u.Nullable;
+import com.landawn.abacus.util.u.Optional;
 
 /**
  * Spring HTTP message converter for JSON serialization and deserialization using abacus-common JSON utilities.
@@ -41,6 +63,17 @@ import com.landawn.abacus.util.cs;
  * <p>The converter supports reading JSON from HTTP requests and writing JSON to HTTP responses,
  * handling all standard Java types as well as custom POJOs. It automatically handles content type
  * negotiation for "application/json" and related media types.</p>
+ *
+ * <p>Root JDK and Abacus {@code Optional} values and Abacus {@code Nullable} values use the JSON
+ * representation of their contained value, including arrays and objects. Reading retains the
+ * declared generic element type. Empty wrappers and present-null {@code Nullable} values write
+ * JSON {@code null}; reading that token produces an empty outer wrapper.</p>
+ *
+ * <p>{@code Holder} roots likewise use their contained value; JSON {@code null} reads as a holder
+ * containing null. Entries, pairs, tuples, indexed/timed values, primitive lists and custom value
+ * objects retain their type handler's structured representation and conversion rules. Their nested
+ * configuration behavior is the same as direct Abacus parser use. Custom value accessors should be
+ * side-effect-free: detecting a custom structured representation can invoke an accessor twice.</p>
  *
  * <p><b>Usage Examples in Spring Configuration:</b></p>
  * <pre>{@code
@@ -79,11 +112,24 @@ import com.landawn.abacus.util.cs;
  * configurations, and inherited converter settings such as supported media types, are not mutated
  * concurrently with request processing.</p>
  *
+ * <p>Scalar roots use JSON value syntax: strings are quoted and escaped, and {@code null} is written
+ * as the JSON literal. Scalar input must contain one valid JSON value; empty bodies and nonstandard
+ * scalar syntax are rejected. Scalar serialization settings must also produce valid JSON (for example,
+ * nonfinite numbers are rejected).</p>
+ *
+ * <p><b>Serialization settings that cannot produce JSON are rejected outright</b>, so a bean, map or
+ * collection root obeys the same "emit valid JSON" rule as a scalar root rather than quietly writing
+ * something no JSON parser accepts. A {@link JsonSerConfig} whose string or char quotation is not
+ * {@code '"'}, or which has {@code quotePropName}, {@code quoteMapKey} or {@code bracketRootValue}
+ * turned off, is refused with an {@link IllegalArgumentException} - by the constructors, and again on
+ * each write, because the configuration is mutable and is retained by reference.</p>
+ *
  * <p><b>Supported media types:</b> by default the converter handles the media types inherited from
  * {@link AbstractJsonHttpMessageConverter} (typically {@code application/json} and
- * {@code application/*+json}). To register additional media types (e.g. a vendor {@code +json} type
- * or {@code text/json}) at construction time, use one of the constructors that accept
- * {@link MediaType} values. The supported media types may also be changed after construction via the
+ * {@code application/*+json}). Constructors accepting {@link MediaType} values replace those defaults
+ * when given a non-empty list or array; include the default types explicitly to retain them alongside
+ * custom types such as {@code text/json}. A {@code null} or empty list or array retains the defaults.
+ * The supported media types may also be changed after construction via the
  * inherited {@code setSupportedMediaTypes(List)} method.</p>
  *
  * <p><b>Note on naming:</b> the class is intentionally named {@code JsonHttpMessageConverter} (without
@@ -97,6 +143,8 @@ import com.landawn.abacus.util.cs;
  * @see JsonDeserConfig
  */
 public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
+
+    private static final Pattern JSON_NUMBER = Pattern.compile("-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?");
 
     private final JsonSerConfig jsc;
     private final JsonDeserConfig jdc;
@@ -165,7 +213,9 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *            Must not be {@code null}. Use {@link JsonDeserConfig} to customize deserialization behavior.
      *            Both configuration objects are retained by reference and should not be mutated while
      *            the converter is serving concurrent requests.
-     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}.
+     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}, or if {@code jsc} cannot
+     *         produce valid JSON (a string or char quotation other than {@code '"'}, or
+     *         {@code quotePropName}/{@code quoteMapKey}/{@code bracketRootValue} turned off).
      * @see JsonSerConfig
      * @see JsonDeserConfig
      * @see com.landawn.abacus.parser.Exclusion
@@ -173,6 +223,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
     public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc) throws IllegalArgumentException {
         N.checkArgNotNull(jsc, cs.jsc);
         N.checkArgNotNull(jdc, cs.jdc);
+        checkJsonCapable(jsc);
 
         this.jsc = jsc;
         this.jdc = jdc;
@@ -186,8 +237,8 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * when the converter must advertise additional or non-standard JSON media types (for example a
      * vendor {@code +json} type such as {@code application/vnd.api+json}, or {@code text/json}).
      *
-     * <p>If no media types are supplied (an empty {@code supportedMediaTypes} argument), the parent's
-     * default media types are retained.</p>
+     * <p>A non-empty {@code supportedMediaTypes} array replaces the parent's default media types.
+     * If the array is {@code null} or empty, those defaults are retained.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -196,10 +247,11 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *     new MediaType("application", "vnd.api+json"));
      * }</pre>
      *
-     * @param supportedMediaTypes the media types this converter should support. If none are supplied,
+     * @param supportedMediaTypes the media types this converter should support. If {@code null} or empty,
      *                            the inherited default media types are kept unchanged.
      * @see #JsonHttpMessageConverter(JsonSerConfig, JsonDeserConfig, MediaType...)
      */
+    @SafeVarargs
     public JsonHttpMessageConverter(final MediaType... supportedMediaTypes) {
         this(new JsonSerConfig(), new JsonDeserConfig(), supportedMediaTypes);
     }
@@ -210,8 +262,8 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * This constructor combines full control over JSON processing behavior with control over the
      * media types the converter advertises, all at construction time.
      *
-     * <p>If no media types are supplied (an empty {@code supportedMediaTypes} argument), the parent's
-     * default media types are retained.</p>
+     * <p>A non-empty {@code supportedMediaTypes} array replaces the parent's default media types.
+     * If the array is {@code null} or empty, those defaults are retained.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -226,16 +278,20 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *
      * @param jsc the serialization configuration controlling how Java objects are converted to JSON. Must not be {@code null}.
      * @param jdc the deserialization configuration controlling how JSON is converted to Java objects. Must not be {@code null}.
-     * @param supportedMediaTypes the media types this converter should support. If none are supplied,
+     * @param supportedMediaTypes the media types this converter should support. If {@code null} or empty,
      *                            the inherited default media types are kept unchanged.
-     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}.
+     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}, or if {@code jsc} cannot
+     *         produce valid JSON (a string or char quotation other than {@code '"'}, or
+     *         {@code quotePropName}/{@code quoteMapKey}/{@code bracketRootValue} turned off).
      * @see JsonSerConfig
      * @see JsonDeserConfig
      */
+    @SafeVarargs
     public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc, final MediaType... supportedMediaTypes)
             throws IllegalArgumentException {
         N.checkArgNotNull(jsc, cs.jsc);
         N.checkArgNotNull(jdc, cs.jdc);
+        checkJsonCapable(jsc);
 
         this.jsc = jsc;
         this.jdc = jdc;
@@ -251,14 +307,16 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * This {@link List}-based overload behaves identically to
      * {@link #JsonHttpMessageConverter(JsonSerConfig, JsonDeserConfig, MediaType...)}.
      *
-     * <p>If {@code supportedMediaTypes} is {@code null} or empty, the parent's default media types
-     * are retained.</p>
+     * <p>A non-empty {@code supportedMediaTypes} list replaces the parent's default media types.
+     * If the list is {@code null} or empty, those defaults are retained.</p>
      *
      * @param jsc the serialization configuration controlling how Java objects are converted to JSON. Must not be {@code null}.
      * @param jdc the deserialization configuration controlling how JSON is converted to Java objects. Must not be {@code null}.
      * @param supportedMediaTypes the media types this converter should support. If {@code null} or empty,
      *                            the inherited default media types are kept unchanged.
-     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}.
+     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}, or if {@code jsc} cannot
+     *         produce valid JSON (a string or char quotation other than {@code '"'}, or
+     *         {@code quotePropName}/{@code quoteMapKey}/{@code bracketRootValue} turned off).
      * @see JsonSerConfig
      * @see JsonDeserConfig
      */
@@ -266,6 +324,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
             throws IllegalArgumentException {
         N.checkArgNotNull(jsc, cs.jsc);
         N.checkArgNotNull(jdc, cs.jdc);
+        checkJsonCapable(jsc);
 
         this.jsc = jsc;
         this.jdc = jdc;
@@ -313,18 +372,159 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * }
      * }</pre>
      *
+     * <p><b>Shape leniency:</b> a JSON object body read into a {@code List<T>} target is handed to the
+     * abacus parser unchanged, which yields a one-element list whose element is a {@code Map} - the
+     * declared element type is not enforced. Callers that need strictness must validate the result.
+     * Spring's {@code read(...)} wraps every exception thrown here in
+     * {@code org.springframework.http.converter.HttpMessageNotReadableException}, keeping the original as
+     * its cause.</p>
+     *
      * @param resolvedType the target type to deserialize the JSON into, including generic type information.
      *                     This is the actual runtime type resolved from the method signature or type parameter.
-     * @param reader the Reader containing the JSON content to be deserialized. The Reader is managed by
-     *               Spring's framework and will be closed automatically after this method returns.
+     * @param reader the Reader containing the JSON content to be deserialized. This method leaves it
+     *               open; the caller or HTTP infrastructure retains responsibility for the input resource.
      * @return the deserialized object of the specified type
-     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while reading from the Reader
-     * @throws IllegalArgumentException if the JSON content cannot be mapped to the target type due to type mismatch.
-     * @throws RuntimeException if JSON parsing fails due to malformed JSON or other parsing errors
+     * @throws ParsingException if the content is not one JSON value of the
+     *         required shape (for example an array body for a bean target, or an empty body for a scalar target)
+     * @throws UncheckedIOException if reading JSON characters from {@code reader} fails while converting the HTTP message body
+     * @throws RuntimeException (for example {@link NumberFormatException}) if a JSON token cannot be
+     *         converted to the target or element type, or if the JSON is otherwise malformed
      */
     @Override
-    protected Object readInternal(final Type resolvedType, final Reader reader) {
-        return N.fromJson(reader, jdc, TypeFactory.getType(resolvedType));
+    protected Object readInternal(final Type resolvedType, final Reader reader) throws ParsingException, UncheckedIOException, RuntimeException {
+        return readJson(TypeFactory.getType(resolvedType), reader);
+    }
+
+    /**
+     * @throws UncheckedIOException if reading from the request reader fails
+     * @throws ParsingException if the request does not contain exactly one JSON value compatible with the target type
+     */
+    private Object readJson(final com.landawn.abacus.type.Type<?> targetType, final Reader reader) throws UncheckedIOException, ParsingException {
+        try {
+            final PushbackReader input = new PushbackReader(reader);
+            int first;
+
+            do {
+                first = input.read();
+            } while (isJsonWhitespace(first));
+
+            if (first != -1) {
+                input.unread(first);
+            }
+
+            final Class<?> targetClass = targetType.javaType();
+            if ((targetClass == java.util.Optional.class || targetClass == Optional.class || targetClass == Nullable.class || targetClass == Holder.class)
+                    && first != 'n' && first != -1) {
+                // Generic wrappers can contain any JSON shape. Decode their declared element type;
+                // keep literal null on the strict wrapper path below so the outer wrapper stays empty,
+                // including nested wrappers and configurations that read null strings as empty strings.
+                final Object value = readJson(targetType.elementType(), input);
+                if (targetClass == Holder.class) {
+                    return Holder.of(value);
+                }
+                if (targetClass == java.util.Optional.class) {
+                    return java.util.Optional.ofNullable(value);
+                }
+                return targetClass == Optional.class ? Optional.ofNullable(value) : Nullable.of(value);
+            }
+
+            if (first == '{' || first == '[') {
+                if (!usesDirectValueConversion(targetType)) {
+                    return N.fromJson(input, jdc, targetType);
+                }
+                if (isStructuredValueType(targetType) || isCustomValueType(targetType)) {
+                    final String json = IOUtil.readAllToString(input);
+                    // Direct type conversion consumes raw text and bypasses the parser's EOF check.
+                    // Validate a complete root independently before applying its declared generic type.
+                    N.fromJson(json, new JsonDeserConfig(), Object.class);
+                    return N.fromJson(json, jdc, targetType);
+                }
+            } else if (!usesDirectValueConversion(targetType) && first == -1 && !targetType.isObject()) {
+                return N.fromJson(input, jdc, targetType);
+            }
+
+            final String source = IOUtil.readAllToString(input);
+            int end = source.length();
+            while (end > 0 && isJsonWhitespace(source.charAt(end - 1))) {
+                end--;
+            }
+            final String scalar = source.substring(0, end);
+            if (!isJsonScalar(scalar) || (!targetType.isObject() && !usesDirectValueConversion(targetType) && !"null".equals(scalar))) {
+                throw new ParsingException("Expected one JSON scalar value");
+            }
+            if (targetClass == Holder.class && "null".equals(scalar)) {
+                return Holder.of(null);
+            }
+
+            // The parser's root scalar shortcut converts raw text. A singleton array selects its
+            // JSON token conversion instead. Disable filtering only on this private scalar wrapper
+            // so null/empty values retain their slot, without changing the caller's configuration.
+            final JsonDeserConfig scalarConfig = jdc.copy().setElementType(targetType).setIgnoreNullOrEmpty(false);
+            final Object[] values = N.fromJson("[" + scalar + "]", scalarConfig, Object[].class);
+            if (values.length != 1) {
+                throw new ParsingException("Expected one JSON scalar value");
+            }
+            return values[0];
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static boolean usesDirectValueConversion(final com.landawn.abacus.type.Type<?> type) {
+        return type.isSerializable() && !type.isArray() && !type.isCollection();
+    }
+
+    private static boolean isStructuredValueType(final com.landawn.abacus.type.Type<?> type) {
+        // These direct handlers encode containers despite reporting neither isArray nor isCollection.
+        // Keep their root parser path: erased element handlers can otherwise quote nested JSON values.
+        return type.isPrimitiveList() || type instanceof MapEntryType<?, ?> || type instanceof ImmutableMapEntryType<?, ?> || type instanceof TimedType<?>
+                || type instanceof IndexedType<?> || type instanceof PairType<?, ?> || type instanceof TripleType<?, ?, ?>
+                || Tuple.class.isAssignableFrom(type.javaType());
+    }
+
+    private static boolean isCustomValueType(final com.landawn.abacus.type.Type<?> type) {
+        return type instanceof ObjectType<?> || type instanceof EnumType<?>;
+    }
+
+    private static boolean isJsonWhitespace(final int ch) {
+        return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
+    }
+
+    private static boolean isJsonScalar(final String value) {
+        if (value.isEmpty()) {
+            return false;
+        }
+        if (value.charAt(0) != '"') {
+            return "null".equals(value) || "true".equals(value) || "false".equals(value) || JSON_NUMBER.matcher(value).matches();
+        }
+
+        // Scan strings iteratively: a repeated regex alternative can overflow the stack on large
+        // HTTP values. Validate escapes before using the parser, which also accepts non-JSON syntax.
+        for (int i = 1; i < value.length(); i++) {
+            final char ch = value.charAt(i);
+            if (ch == '"') {
+                return i == value.length() - 1;
+            }
+            if (ch < 0x20) {
+                return false;
+            }
+            if (ch == '\\') {
+                if (++i >= value.length()) {
+                    return false;
+                }
+                final char escape = value.charAt(i);
+                if (escape == 'u') {
+                    for (int digit = 0; digit < 4; digit++) {
+                        if (++i >= value.length() || "0123456789abcdefABCDEF".indexOf(value.charAt(i)) < 0) {
+                            return false;
+                        }
+                    }
+                } else if ("\"\\/bfnrt".indexOf(escape) < 0) {
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -383,18 +583,145 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * }
      * }</pre>
      *
-     * @param obj the object to serialize to JSON. Can be {@code null}, in which case nothing is written to the output.
+     * @param obj the object to serialize to JSON. Can be {@code null}, in which case the JSON literal {@code null} is written.
      *            Can be any Java object including primitives, collections, maps, POJOs, or complex nested structures.
      * @param type the declared return type from the controller method, provided by Spring's framework.
      *             <b>Currently unused</b> by this implementation as Abacus can infer types from the object.
      *             Kept for interface compliance and potential future use. May be {@code null}.
-     * @param writer the Writer to write the JSON output to. The Writer is managed by Spring's framework
-     *               and will be flushed and closed automatically after this method returns.
-     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while writing to the Writer
+     * @param writer the Writer to write the JSON output to. This method leaves it open. When invoked
+     *               through the Spring 7 superclass's HTTP write path, that superclass closes the Writer
+     *               after successful serialization; a direct caller remains responsible for closing it.
+     * @throws IllegalArgumentException if the serialization configuration can no longer produce valid JSON (it is retained by reference and may
+     *         have been mutated since construction)
+     * @throws ParsingException if unwrapping the root value encounters a circular reference, or its value cannot be
+     *         serialized as JSON
      * @throws RuntimeException if JSON serialization fails due to unsupported types or serialization errors
+     * @throws UncheckedIOException if writing the JSON message body to {@code writer}, or reading a resource-backed value during its
+     *         serialization, fails
      */
     @Override
-    protected void writeInternal(final Object obj, final Type type, final Writer writer) {
-        N.toJson(obj, jsc, writer);
+    protected void writeInternal(final Object obj, final Type type, final Writer writer)
+            throws IllegalArgumentException, ParsingException, RuntimeException, UncheckedIOException {
+        // Re-checked per write: the configuration is retained by reference and is mutable, and the scalar
+        // validation below only guards the scalar half - a bean/map/collection root goes straight to the
+        // parser, so an unquoted property name or map key would otherwise leave the converter here.
+        checkJsonCapable(jsc);
+
+        Object value = obj;
+        IdentityHashMap<Object, Boolean> holders = null;
+        // Erased optional type handlers see Object as their element type and can quote a collection
+        // as text. Unwrap before selecting the runtime JSON shape; nested empty wrappers become null.
+        while (true) {
+            if (value instanceof java.util.Optional<?> optional) {
+                value = optional.orElse(null);
+            } else if (value instanceof Optional<?> optional) {
+                value = optional.orElse(null);
+            } else if (value instanceof Nullable<?> nullable) {
+                value = nullable.orElse(null);
+            } else if (value instanceof Holder<?> holder) {
+                if (holders == null) {
+                    holders = new IdentityHashMap<>();
+                }
+                if (holders.put(holder, Boolean.TRUE) != null) {
+                    throw new ParsingException("Circular reference in root value holders");
+                }
+                value = holder.value();
+            } else {
+                break;
+            }
+        }
+        final com.landawn.abacus.type.Type<Object> valueType = value == null ? null : TypeFactory.getType(value.getClass());
+        if (value != null && !usesDirectValueConversion(valueType)) {
+            N.toJson(value, jsc, writer);
+            return;
+        }
+        if (value != null && isStructuredValueType(valueType)) {
+            writeStructuredValue(value, writer);
+            return;
+        }
+
+        final BufferedJsonWriter buffer = Objectory.createBufferedJsonWriter();
+        try {
+            // serializeTo supplies JSON quoting/configuration that the parser's raw root shortcut
+            // omits. Validate before writing so invalid scalar settings cannot emit a partial value.
+            if (value == null) {
+                buffer.write("null");
+            } else {
+                valueType.serializeTo(buffer, value, jsc);
+            }
+            final String json = buffer.toString();
+            if (isCustomValueType(valueType) && (json.startsWith("[") || json.startsWith("{"))) {
+                // No public metadata exposes a custom handler's JSON shape. Probe it once, then use
+                // the root conversion to preserve nested runtime types (e.g. a Pair-backed value).
+                writeStructuredValue(value, writer);
+                return;
+            }
+            if (!isJsonScalar(json)) {
+                throw new ParsingException("Scalar serialization did not produce a valid JSON value");
+            }
+            writer.write(json);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            Objectory.recycle(buffer);
+        }
+    }
+
+    /**
+     * Rejects a serialization configuration that cannot produce valid JSON, whatever the root's shape is.
+     *
+     * <p>The per-response {@code isJsonScalar} check only sees a scalar root; a bean, map or collection root
+     * is handed to the parser directly. Checking the configuration instead applies one rule to both halves,
+     * and it fails where the mistake was made rather than mid-response.</p>
+     *
+     * @param config the serialization configuration to validate
+     * @throws IllegalArgumentException if the configuration would emit unquoted strings, chars, property
+     *         names or map keys, or a structured root without its enclosing brackets
+     */
+    private static void checkJsonCapable(final JsonSerConfig config) throws IllegalArgumentException {
+        if (!config.isBracketRootValue()) {
+            // The response body is a single document: without the root brackets a bean writes
+            // "id": 1, "name": "w" and a list writes "a", "b" - neither is a JSON value.
+            throw new IllegalArgumentException("JsonSerConfig.bracketRootValue must be true to emit valid JSON");
+        }
+
+        if (config.getStringQuotation() != '"') {
+            throw new IllegalArgumentException(
+                    "JsonSerConfig.stringQuotation must be '\"' to emit valid JSON, but is: " + quotationOf(config.getStringQuotation()));
+        }
+
+        if (config.getCharQuotation() != '"') {
+            throw new IllegalArgumentException(
+                    "JsonSerConfig.charQuotation must be '\"' to emit valid JSON, but is: " + quotationOf(config.getCharQuotation()));
+        }
+
+        if (!config.isQuotePropName()) {
+            throw new IllegalArgumentException("JsonSerConfig.quotePropName must be true to emit valid JSON");
+        }
+
+        if (!config.isQuoteMapKey()) {
+            throw new IllegalArgumentException("JsonSerConfig.quoteMapKey must be true to emit valid JSON");
+        }
+    }
+
+    private static String quotationOf(final char quotation) {
+        // 0 means "no quotation" and must not be put into the message as a raw NUL character.
+        return quotation == 0 ? "none" : "'" + quotation + "'";
+    }
+
+    /**
+     * @throws ParsingException if serialization produces text that is not a valid JSON value
+     * @throws UncheckedIOException if writing the serialized JSON to the response writer fails
+     */
+    private void writeStructuredValue(final Object value, final Writer writer) throws ParsingException, UncheckedIOException {
+        final StringWriter buffer = new StringWriter();
+        N.toJson(value, jsc, buffer);
+        final String json = buffer.toString();
+        N.fromJson(json, new JsonDeserConfig(), Object.class);
+        try {
+            writer.write(json);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }

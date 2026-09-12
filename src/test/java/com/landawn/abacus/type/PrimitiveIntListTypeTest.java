@@ -117,4 +117,19 @@ public class PrimitiveIntListTypeTest extends TestBase {
         assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
+    // T8-09 / T8-13 (documented): overflow is an ArithmeticException (not NumberFormatException); blank input is null.
+    @Test
+    public void reviewFixes20260906_valueOfDocumentedFailureModesAndBlankInput() {
+        org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> type.valueOf("[2147483648]"));
+        org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> type.valueOf("[-2147483649]"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("[abc]"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,,2]"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1, ]"));
+        assertEquals(IntList.of(Integer.MAX_VALUE, Integer.MIN_VALUE), type.valueOf("[2147483647, -2147483648]"));
+
+        assertNull(type.valueOf("   "));
+        assertNull(type.valueOf(""));
+        org.junit.jupiter.api.Assertions.assertTrue(type.valueOf("[ ]").isEmpty());
+    }
+
 }

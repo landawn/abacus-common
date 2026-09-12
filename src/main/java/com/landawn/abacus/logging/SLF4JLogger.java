@@ -28,7 +28,7 @@ import org.slf4j.spi.LocationAwareLogger;
  *
  * <p>This implementation provides a bridge to SLF4J, allowing the use of any SLF4J-compatible
  * logging backend (Logback, Log4j, etc.). It supports location-aware logging when the underlying
- * SLF4J implementation provides it, ensuring accurate caller location information in log output.</p>
+ * SLF4J implementation provides it, including calls through inherited template and supplier overloads.</p>
  *
  * <p>Key features:</p>
  * <ul>
@@ -58,6 +58,31 @@ class SLF4JLogger extends AbstractLogger {
 
     private final LocationAwareLogger locationAwareLogger;
 
+    @Override
+    void log(final LogLevel level, final String message) {
+        if (locationAwareLogger == null) {
+            super.log(level, message);
+        } else {
+            log(level, message, null);
+        }
+    }
+
+    @Override
+    void log(final LogLevel level, final String message, final Throwable throwable) {
+        if (locationAwareLogger == null) {
+            super.log(level, message, throwable);
+        } else {
+            final int backendLevel = switch (level) {
+                case TRACE -> TRACE_INT;
+                case DEBUG -> DEBUG_INT;
+                case INFO -> INFO_INT;
+                case WARN -> WARN_INT;
+                case ERROR -> ERROR_INT;
+            };
+            locationAwareLogger.log(null, AbstractLogger.class.getName(), backendLevel, message, null, throwable);
+        }
+    }
+
     /**
      * Constructs a SLF4JLogger with the specified name.
      *
@@ -83,7 +108,7 @@ class SLF4JLogger extends AbstractLogger {
      * @param name the name of the logger
      * @throws RuntimeException if SLF4J is not properly initialized
      */
-    public SLF4JLogger(final String name) {
+    public SLF4JLogger(final String name) throws RuntimeException {
         super(name);
         if (org.slf4j.LoggerFactory.getILoggerFactory() instanceof NOPLoggerFactory) {
             throw new RuntimeException("Failed to initialize SLF4J Logger Factory");

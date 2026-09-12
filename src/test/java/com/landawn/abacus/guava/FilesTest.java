@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,32 +12,36 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
+import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.google.common.base.Predicate;
-import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
-import com.google.common.io.CharSink;
 import com.google.common.io.CharSource;
 import com.google.common.io.FileWriteMode;
+import com.google.common.io.InsecureRecursiveDeleteException;
 import com.google.common.io.RecursiveDeleteOption;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ImmutableList;
@@ -56,1193 +59,703 @@ public class FilesTest extends TestBase {
     public void setUp() throws IOException {
         testFile = tempDir.resolve("test.txt").toFile();
         testPath = testFile.toPath();
-
-        // Create test file with sample content
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(testFile))) {
-            writer.write("Line 1\n");
-            writer.write("Line 2\n");
-            writer.write("Line 3");
-        }
+        Files.writeString(testFile, "Line 1\nLine 2\nLine 3");
     }
 
-    @AfterEach
-    public void tearDown() {
-        // Cleanup is handled by JUnit's @TempDir
+    private File file(String name) {
+        return tempDir.resolve(name).toFile();
     }
 
-    // Tests for memory-mapped files
-
-    @Test
-    @DisplayName("Test map File read-only")
-    public void testMapFileReadOnly() throws IOException {
-        MappedByteBuffer buffer = Files.map(testFile);
-        assertNotNull(buffer);
-        assertTrue(buffer.capacity() > 0);
-
-        // Read first byte
-        byte firstByte = buffer.get(0);
-        assertEquals('L', (char) firstByte);
-
-        unmap(buffer);
+    private Path path(String name) {
+        return tempDir.resolve(name);
     }
 
-    // Tests for newReader methods
-
-    @Test
-    @DisplayName("Test newReader with File and Charset")
-    public void testNewReaderFileCharset() throws IOException {
-        try (BufferedReader reader = Files.newReader(testFile, StandardCharsets.UTF_8)) {
-            assertNotNull(reader);
-            assertEquals("Line 1", reader.readLine());
-            assertEquals("Line 2", reader.readLine());
-            assertEquals("Line 3", reader.readLine());
-            assertNull(reader.readLine());
-        }
+    private File writeRawBytes(String name, byte[] bytes) throws IOException {
+        File f = file(name);
+        java.nio.file.Files.write(f.toPath(), bytes);
+        return f;
     }
 
-    @Test
-    @DisplayName("Test newReader with non-existent file")
-    public void testNewReaderFileNotFound() {
-        File nonExistentFile = new File(tempDir.toFile(), "nonexistent.txt");
-        assertThrows(FileNotFoundException.class, () -> Files.newReader(nonExistentFile, StandardCharsets.UTF_8));
+    private static boolean isWindows() {
+        return System.getProperty("os.name", "").toLowerCase().contains("win");
     }
 
     @Test
     public void testNewReader() throws IOException {
-        File file = new File(tempDir.toFile(), "test.txt");
-        Files.write("Hello World".getBytes(StandardCharsets.UTF_8), file);
-
-        try (BufferedReader reader = Files.newReader(file, StandardCharsets.UTF_8)) {
-            assertEquals("Hello World", reader.readLine());
-        }
-    }
-
-    @Test
-    public void testNewReader_FileNotFound() {
-        File file = new File(tempDir.toFile(), "nonexistent.txt");
-        assertThrows(FileNotFoundException.class, () -> {
-            Files.newReader(file, StandardCharsets.UTF_8);
-        });
-    }
-
-    // Edge cases and error conditions
-
-    @Test
-    @DisplayName("Test operations with null parameters")
-    public void testNullParameters() {
-        assertThrows(NullPointerException.class, () -> Files.newReader(null, StandardCharsets.UTF_8));
-
-        assertThrows(NullPointerException.class, () -> Files.toByteArray(null));
-    }
-
-    // Tests for newWriter methods
-
-    @Test
-    @DisplayName("Test newWriter with File and Charset")
-    public void testNewWriterFileCharset() throws IOException {
-        File outputFile = tempDir.resolve("output.txt").toFile();
-
-        try (BufferedWriter writer = Files.newWriter(outputFile, StandardCharsets.UTF_8)) {
-            assertNotNull(writer);
-            writer.write("Test content");
-            writer.newLine();
-            writer.write("Second line");
+        try (BufferedReader reader = Files.newReader(testFile, StandardCharsets.UTF_8)) {
+            assertEquals("Line 1", reader.readLine());
+            assertEquals("Line 2", reader.readLine());
+            assertEquals("Line 3", reader.readLine());
+            assertEquals(null, reader.readLine());
         }
 
-        // Verify content was written
-        List<String> lines = java.nio.file.Files.readAllLines(outputFile.toPath());
-        assertEquals(2, lines.size());
-        assertEquals("Test content", lines.get(0));
-        assertEquals("Second line", lines.get(1));
+        File empty = file("empty.txt");
+        Files.write(new byte[0], empty);
+        try (BufferedReader reader = Files.newReader(empty, StandardCharsets.UTF_8)) {
+            assertEquals(null, reader.readLine());
+        }
+
+        File latin = writeRawBytes("latin.txt", "café".getBytes(StandardCharsets.ISO_8859_1));
+        try (BufferedReader reader = Files.newReader(latin, StandardCharsets.ISO_8859_1)) {
+            assertEquals("café", reader.readLine());
+        }
+
+        assertThrows(FileNotFoundException.class, () -> Files.newReader(file("missing.txt"), StandardCharsets.UTF_8));
+        File dir = path("reader-dir").toFile();
+        assertTrue(dir.mkdir());
+        assertThrows(FileNotFoundException.class, () -> Files.newReader(dir, StandardCharsets.UTF_8));
     }
 
     @Test
     public void testNewWriter() throws IOException {
-        File file = new File(tempDir.toFile(), "output.txt");
+        File file = file("writer.txt");
+        try (BufferedWriter writer = Files.newWriter(file, StandardCharsets.UTF_8)) {
+            writer.write("Hello");
+        }
+        assertEquals("Hello", Files.readString(file));
 
         try (BufferedWriter writer = Files.newWriter(file, StandardCharsets.UTF_8)) {
-            writer.write("Test output");
+            writer.write("Replaced");
         }
+        assertEquals("Replaced", Files.readString(file));
 
-        assertEquals("Test output", Files.readString(file));
-    }
-
-    // Tests for ByteSource methods
-
-    @Test
-    @DisplayName("Test asByteSource with File")
-    public void testAsByteSourceFile() throws IOException {
-        ByteSource source = Files.asByteSource(testFile);
-        assertNotNull(source);
-
-        byte[] bytes = source.read();
-        String content = new String(bytes, StandardCharsets.UTF_8);
-        assertTrue(content.contains("Line 1"));
-    }
-
-    @Test
-    public void testAsByteSource_File() throws IOException {
-        File file = new File(tempDir.toFile(), "test.txt");
-        Files.write("Test content".getBytes(), file);
-
-        ByteSource source = Files.asByteSource(file);
-        byte[] bytes = source.read();
-        assertEquals("Test content", new String(bytes, StandardCharsets.UTF_8));
-    }
-
-    @Test
-    @DisplayName("Test asByteSource with Path and options")
-    public void testAsByteSourcePathOptions() throws IOException {
-        ByteSource source = Files.asByteSource(testPath, StandardOpenOption.READ);
-        assertNotNull(source);
-
-        assertTrue(source.size() > 0);
-    }
-
-    // Additional tests for missing coverage
-
-    @Test
-    public void testAsByteSourcePath_NoOptions() throws IOException {
-        ByteSource source = Files.asByteSource(testPath);
-        assertNotNull(source);
-        byte[] bytes = source.read();
-        String content = new String(bytes, StandardCharsets.UTF_8);
-        assertTrue(content.contains("Line 1"));
-    }
-
-    // Tests for ByteSink methods
-
-    @Test
-    @DisplayName("Test asByteSink with File")
-    public void testAsByteSinkFile() throws IOException {
-        File outputFile = tempDir.resolve("sink.txt").toFile();
-        ByteSink sink = Files.asByteSink(outputFile);
-        assertNotNull(sink);
-
-        byte[] data = "Test data".getBytes(StandardCharsets.UTF_8);
-        sink.write(data);
-
-        // Verify content
-        byte[] readData = java.nio.file.Files.readAllBytes(outputFile.toPath());
-        assertArrayEquals(data, readData);
-    }
-
-    @Test
-    @DisplayName("Test asByteSink with File and APPEND mode")
-    public void testAsByteSinkFileAppend() throws IOException {
-        ByteSink sink = Files.asByteSink(testFile, FileWriteMode.APPEND);
-        assertNotNull(sink);
-
-        sink.write("\nAppended".getBytes(StandardCharsets.UTF_8));
-
-        List<String> lines = java.nio.file.Files.readAllLines(testPath);
-        assertEquals(4, lines.size());
-        assertEquals("Appended", lines.get(3));
-    }
-
-    @Test
-    public void testAsByteSink_File() throws IOException {
-        File file = new File(tempDir.toFile(), "output.txt");
-
-        ByteSink sink = Files.asByteSink(file);
-        sink.write("Written content".getBytes(StandardCharsets.UTF_8));
-
-        assertEquals("Written content", Files.readString(file));
-    }
-
-    @Test
-    public void testAsByteSink_FileAppend() throws IOException {
-        File file = new File(tempDir.toFile(), "append.txt");
-        Files.write("Initial".getBytes(), file);
-
-        ByteSink sink = Files.asByteSink(file, FileWriteMode.APPEND);
-        sink.write(" Appended".getBytes(StandardCharsets.UTF_8));
-
-        assertEquals("Initial Appended", Files.readString(file));
-    }
-
-    @Test
-    @DisplayName("Test asByteSink with Path and options")
-    public void testAsByteSinkPathOptions() throws IOException {
-        Path outputPath = tempDir.resolve("sink2.txt");
-        ByteSink sink = Files.asByteSink(outputPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-        assertNotNull(sink);
-
-        sink.write("Path sink test".getBytes());
-        assertTrue(java.nio.file.Files.exists(outputPath));
-    }
-
-    @Test
-    public void testAsByteSinkPathWithCreateAndAppend() throws IOException {
-        Path outPath = tempDir.resolve("sink_path_append.txt");
-        ByteSink createSink = Files.asByteSink(outPath, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-        createSink.write("First".getBytes());
-
-        ByteSink appendSink = Files.asByteSink(outPath, StandardOpenOption.APPEND);
-        appendSink.write(" Second".getBytes());
-
-        String content = new String(java.nio.file.Files.readAllBytes(outPath));
-        assertEquals("First Second", content);
-    }
-
-    // Tests for CharSource methods
-
-    @Test
-    @DisplayName("Test asCharSource with File")
-    public void testAsCharSourceFile() throws IOException {
-        CharSource source = Files.asCharSource(testFile, StandardCharsets.UTF_8);
-        assertNotNull(source);
-
-        String content = source.read();
-        assertTrue(content.contains("Line 1"));
-
-        List<String> lines = source.readLines();
-        assertEquals(3, lines.size());
-    }
-
-    @Test
-    public void testAsCharSource_File() throws IOException {
-        File file = new File(tempDir.toFile(), "test.txt");
-        Files.write("Character content".getBytes(StandardCharsets.UTF_8), file);
-
-        CharSource source = Files.asCharSource(file, StandardCharsets.UTF_8);
-        String content = source.read();
-        assertEquals("Character content", content);
-    }
-
-    @Test
-    @DisplayName("Test asCharSource with Path and options")
-    public void testAsCharSourcePathOptions() throws IOException {
-        CharSource source = Files.asCharSource(testPath, StandardCharsets.UTF_8, StandardOpenOption.READ);
-        assertNotNull(source);
-
-        try (BufferedReader reader = source.openBufferedStream()) {
-            assertNotNull(reader.readLine());
+        File latin = file("writer-latin.txt");
+        try (BufferedWriter writer = Files.newWriter(latin, StandardCharsets.ISO_8859_1)) {
+            writer.write("café");
         }
-    }
+        assertEquals("café", Files.readString(latin, StandardCharsets.ISO_8859_1));
 
-    // Tests for CharSink methods
-
-    @Test
-    @DisplayName("Test asCharSink with File")
-    public void testAsCharSinkFile() throws IOException {
-        File outputFile = tempDir.resolve("charsink.txt").toFile();
-        CharSink sink = Files.asCharSink(outputFile, StandardCharsets.UTF_8);
-        assertNotNull(sink);
-
-        sink.write("Character sink test");
-
-        String content = new String(java.nio.file.Files.readAllBytes(outputFile.toPath()));
-        assertEquals("Character sink test", content);
+        File dir = path("writer-dir").toFile();
+        assertTrue(dir.mkdir());
+        assertThrows(FileNotFoundException.class, () -> Files.newWriter(dir, StandardCharsets.UTF_8));
     }
 
     @Test
-    public void testAsCharSink_File() throws IOException {
-        File file = new File(tempDir.toFile(), "output.txt");
+    public void testAsByteSource() throws IOException {
+        ByteSource fromFile = Files.asByteSource(testFile);
+        ByteSource fromPath = Files.asByteSource(testPath, StandardOpenOption.READ);
+        ByteSource fromPathNoOptions = Files.asByteSource(testPath);
 
-        CharSink sink = Files.asCharSink(file, StandardCharsets.UTF_8);
-        sink.write("Character output");
+        byte[] expected = java.nio.file.Files.readAllBytes(testPath);
+        assertArrayEquals(expected, fromFile.read());
+        assertArrayEquals(expected, fromPath.read());
+        assertArrayEquals(expected, fromPathNoOptions.read());
+        assertEquals(expected.length, fromFile.size());
 
-        assertEquals("Character output", Files.readString(file));
+        File empty = file("empty.bin");
+        Files.write(new byte[0], empty);
+        assertEquals(0, Files.asByteSource(empty).size());
+        assertArrayEquals(new byte[0], Files.asByteSource(empty).read());
     }
 
     @Test
-    @DisplayName("Test asCharSink with File and APPEND mode")
-    public void testAsCharSinkFileAppend() throws IOException {
-        File outputFile = tempDir.resolve("charsinkappend.txt").toFile();
-        // Write initial content
-        CharSink initialSink = Files.asCharSink(outputFile, StandardCharsets.UTF_8);
-        initialSink.write("Initial");
+    public void testAsByteSink() throws IOException {
+        File file = file("bytes.bin");
+        Path path = path("bytes-path.bin");
+        byte[] data = { 1, 2, 3, 4 };
 
-        // Append more content
-        CharSink appendSink = Files.asCharSink(outputFile, StandardCharsets.UTF_8, FileWriteMode.APPEND);
-        appendSink.write(" Appended");
+        Files.asByteSink(file).write(data);
+        Files.asByteSink(path).write(data);
+        assertArrayEquals(data, java.nio.file.Files.readAllBytes(file.toPath()));
+        assertArrayEquals(data, java.nio.file.Files.readAllBytes(path));
 
-        String content = new String(java.nio.file.Files.readAllBytes(outputFile.toPath()), StandardCharsets.UTF_8);
-        assertEquals("Initial Appended", content);
+        Files.asByteSink(file, FileWriteMode.APPEND).write(new byte[] { 5 });
+        Files.asByteSink(path, StandardOpenOption.APPEND, StandardOpenOption.WRITE).write(new byte[] { 5 });
+        assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, java.nio.file.Files.readAllBytes(file.toPath()));
+        assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, java.nio.file.Files.readAllBytes(path));
+
+        Files.asByteSink(file).write(new byte[] { 9 });
+        assertArrayEquals(new byte[] { 9 }, java.nio.file.Files.readAllBytes(file.toPath()));
     }
 
     @Test
-    @DisplayName("Test asCharSink with Path and options")
-    public void testAsCharSinkPathOptions() throws IOException {
-        Path outputPath = tempDir.resolve("charsink2.txt");
-        CharSink sink = Files.asCharSink(outputPath, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-        assertNotNull(sink);
+    public void testAsCharSource() throws IOException {
+        CharSource fromFile = Files.asCharSource(testFile, StandardCharsets.UTF_8);
+        CharSource fromPath = Files.asCharSource(testPath, StandardCharsets.UTF_8, StandardOpenOption.READ);
+        CharSource fromPathNoOptions = Files.asCharSource(testPath, StandardCharsets.UTF_8);
 
-        sink.writeLines(Arrays.asList("Line A", "Line B"));
+        assertEquals("Line 1\nLine 2\nLine 3", fromFile.read());
+        assertEquals(fromFile.read(), fromPath.read());
+        assertEquals(fromFile.read(), fromPathNoOptions.read());
+        assertEquals(Arrays.asList("Line 1", "Line 2", "Line 3"), fromFile.readLines());
 
-        List<String> lines = java.nio.file.Files.readAllLines(outputPath);
-        assertEquals(2, lines.size());
+        File latin = writeRawBytes("chars-latin.txt", "áéíóú".getBytes(StandardCharsets.ISO_8859_1));
+        assertEquals("áéíóú", Files.asCharSource(latin, StandardCharsets.ISO_8859_1).read());
+
+        File empty = file("empty-chars.txt");
+        Files.write(new byte[0], empty);
+        assertEquals("", Files.asCharSource(empty, StandardCharsets.UTF_8).read());
     }
 
     @Test
-    public void testAsCharSinkFile_NoModes() throws IOException {
-        File outputFile = tempDir.resolve("charsink_nomodes.txt").toFile();
-        CharSink sink = Files.asCharSink(outputFile, StandardCharsets.UTF_8);
-        sink.write("No mode test");
-        assertEquals("No mode test", Files.readString(outputFile));
+    public void testAsCharSink() throws IOException {
+        File file = file("chars.txt");
+        Path path = path("chars-path.txt");
+
+        Files.asCharSink(file, StandardCharsets.UTF_8).write("Hello");
+        Files.asCharSink(path, StandardCharsets.UTF_8).write("Hello");
+        assertEquals("Hello", Files.readString(file));
+        assertEquals("Hello", new String(java.nio.file.Files.readAllBytes(path), StandardCharsets.UTF_8));
+
+        Files.asCharSink(file, StandardCharsets.UTF_8, FileWriteMode.APPEND).write(" World");
+        Files.asCharSink(path, StandardCharsets.UTF_8, StandardOpenOption.APPEND, StandardOpenOption.WRITE).write(" World");
+        assertEquals("Hello World", Files.readString(file));
+        assertEquals("Hello World", new String(java.nio.file.Files.readAllBytes(path), StandardCharsets.UTF_8));
+
+        Files.asCharSink(file, StandardCharsets.UTF_8).writeLines(Arrays.asList("A", "B"));
+        String lines = Files.readString(file);
+        assertTrue(lines.contains("A"));
+        assertTrue(lines.contains("B"));
     }
 
-    // Tests for byte array operations
-
     @Test
-    @DisplayName("Test toByteArray")
     public void testToByteArray() throws IOException {
-        byte[] bytes = Files.toByteArray(testFile);
-        assertNotNull(bytes);
-        assertTrue(bytes.length > 0);
+        byte[] data = "Byte array content".getBytes(StandardCharsets.UTF_8);
+        File file = file("bytes.txt");
+        Files.write(data, file);
+        assertArrayEquals(data, Files.toByteArray(file));
 
-        String content = new String(bytes, StandardCharsets.UTF_8);
-        assertTrue(content.contains("Line 1"));
-    }
-
-    @Test
-    @DisplayName("Test operations with empty files")
-    public void testEmptyFile() throws IOException {
-        File emptyFile = tempDir.resolve("empty.txt").toFile();
-        emptyFile.createNewFile();
-
-        byte[] bytes = Files.toByteArray(emptyFile);
-        assertNotNull(bytes);
-        assertEquals(0, bytes.length);
-
-        List<String> lines = Files.readLines(emptyFile, StandardCharsets.UTF_8);
-        assertNotNull(lines);
-        assertEquals(0, lines.size());
+        File empty = file("empty-bytes.txt");
+        Files.write(new byte[0], empty);
+        assertArrayEquals(new byte[0], Files.toByteArray(empty));
+        assertThrows(FileNotFoundException.class, () -> Files.toByteArray(file("missing.bin")));
     }
 
     @Test
     public void testWrite() throws IOException {
-        File file = new File(tempDir.toFile(), "write.txt");
-        byte[] bytes = "Written bytes".getBytes(StandardCharsets.UTF_8);
+        File file = file("write.bin");
+        byte[] data = { 1, 2, 3, 100, -50 };
+        Files.write(data, file);
+        assertArrayEquals(data, java.nio.file.Files.readAllBytes(file.toPath()));
 
-        Files.write(bytes, file);
+        Files.write(new byte[] { 4, 5, 6 }, file);
+        assertArrayEquals(new byte[] { 4, 5, 6 }, java.nio.file.Files.readAllBytes(file.toPath()));
 
-        assertArrayEquals(bytes, Files.toByteArray(file));
-    }
-
-    @Test
-    @DisplayName("Test write byte array to file")
-    public void testWriteByteArray() throws IOException {
-        File outputFile = tempDir.resolve("bytewrite.txt").toFile();
-        byte[] data = "Byte array data".getBytes(StandardCharsets.UTF_8);
-
-        Files.createParentDirs(outputFile);
-        Files.write(data, outputFile);
-
-        byte[] readData = java.nio.file.Files.readAllBytes(outputFile.toPath());
-        assertArrayEquals(data, readData);
-    }
-
-    @Test
-    @DisplayName("Test file operations with special characters in name")
-    public void testSpecialCharacterFilenames() throws IOException {
-        File specialFile = tempDir.resolve("file with spaces.txt").toFile();
-        byte[] data = "Special file content".getBytes();
-
-        Files.write(data, specialFile);
-        assertTrue(specialFile.exists());
-
-        byte[] readData = Files.toByteArray(specialFile);
-        assertArrayEquals(data, readData);
-    }
-
-    @Test
-    @DisplayName("Test large file handling")
-    public void testLargeFileHandling() throws IOException {
-        File largeFile = tempDir.resolve("large.txt").toFile();
-
-        // Create a file with multiple lines
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(largeFile))) {
-            for (int i = 0; i < 1000; i++) {
-                writer.write("Line " + i + "\n");
-            }
-        }
-
-        List<String> lines = Files.readLines(largeFile, StandardCharsets.UTF_8);
-        assertEquals(1000, lines.size());
-        assertEquals("Line 0", lines.get(0));
-        assertEquals("Line 999", lines.get(999));
-    }
-
-    @Test
-    public void testWriteAndReadLargeByteArray() throws IOException {
-        File largeFile = tempDir.resolve("large_bytes.bin").toFile();
-        byte[] data = new byte[10000];
-        Arrays.fill(data, (byte) 42);
-
-        Files.write(data, largeFile);
-        byte[] readBack = Files.toByteArray(largeFile);
-        assertArrayEquals(data, readBack);
-    }
-
-    // Tests for file comparison
-
-    @Test
-    @DisplayName("Test equal with identical files")
-    public void testEqualFilesIdentical() throws IOException {
-        File file1 = tempDir.resolve("file1.txt").toFile();
-        File file2 = tempDir.resolve("file2.txt").toFile();
-
-        byte[] data = "Same content".getBytes();
-        java.nio.file.Files.write(file1.toPath(), data);
-        java.nio.file.Files.write(file2.toPath(), data);
-
-        assertTrue(Files.equal(file1, file2));
-    }
-
-    @Test
-    @DisplayName("Test equal with different files")
-    public void testEqualFilesDifferent() throws IOException {
-        File file1 = tempDir.resolve("file1.txt").toFile();
-        File file2 = tempDir.resolve("file2.txt").toFile();
-
-        java.nio.file.Files.write(file1.toPath(), "Content 1".getBytes());
-        java.nio.file.Files.write(file2.toPath(), "Content 2".getBytes());
-
-        assertFalse(Files.equal(file1, file2));
-    }
-
-    @Test
-    @DisplayName("Test equal with Paths")
-    public void testEqualPaths() throws IOException {
-        Path path1 = tempDir.resolve("path1.txt");
-        Path path2 = tempDir.resolve("path2.txt");
-
-        byte[] data = "Path content".getBytes();
-        java.nio.file.Files.write(path1, data);
-        java.nio.file.Files.write(path2, data);
-
-        assertTrue(Files.equal(path1, path2));
-    }
-
-    @Test
-    public void testEqual_Files() throws IOException {
-        File file1 = new File(tempDir.toFile(), "file1.txt");
-        File file2 = new File(tempDir.toFile(), "file2.txt");
-        File file3 = new File(tempDir.toFile(), "file3.txt");
-
-        Files.write("Same content".getBytes(), file1);
-        Files.write("Same content".getBytes(), file2);
-        Files.write("Different content".getBytes(), file3);
-
-        assertTrue(Files.equal(file1, file2));
-        assertFalse(Files.equal(file1, file3));
-        assertTrue(Files.equal(file1, file1));
-    }
-
-    @Test
-    @DisplayName("Test equal with Paths having different content")
-    public void testEqualPaths_DifferentContent() throws IOException {
-        Path path1 = tempDir.resolve("pathA.txt");
-        Path path2 = tempDir.resolve("pathB.txt");
-
-        java.nio.file.Files.write(path1, "Content A".getBytes());
-        java.nio.file.Files.write(path2, "Content B".getBytes());
-
-        assertFalse(Files.equal(path1, path2));
-    }
-
-    @Test
-    public void testEqualSameFile() throws IOException {
-        assertTrue(Files.equal(testFile, testFile));
-    }
-
-    @Test
-    public void testEqualPathsSame() throws IOException {
-        assertTrue(Files.equal(testPath, testPath));
-    }
-
-    // Tests for touch operations
-
-    @Test
-    @DisplayName("Test touch with File")
-    public void testTouchFile() throws IOException {
-        File newFile = tempDir.resolve("touched.txt").toFile();
-        assertFalse(newFile.exists());
-
-        Files.touch(newFile);
-        assertTrue(newFile.exists());
-        assertEquals(0, newFile.length());
-
-        // Touch existing file updates timestamp
-        long initialTime = newFile.lastModified();
-        try {
-            Thread.sleep(10); // Small delay to ensure time difference
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        Files.touch(newFile);
-        assertTrue(newFile.lastModified() >= initialTime);
-    }
-
-    @Test
-    public void testTouch_File() throws IOException, InterruptedException {
-        File file = new File(tempDir.toFile(), "touch.txt");
-        assertFalse(file.exists());
-
-        Files.touch(file);
-        assertTrue(file.exists());
+        Files.write(new byte[0], file);
         assertEquals(0, file.length());
 
-        long firstModified = file.lastModified();
+        File nested = new File(tempDir.toFile(), "missing-parent/file.bin");
+        assertThrows(FileNotFoundException.class, () -> Files.write("x".getBytes(), nested));
+    }
+
+    @Test
+    public void testEqual() throws IOException {
+        File a = file("eq-a.txt");
+        File b = file("eq-b.txt");
+        File c = file("eq-c.txt");
+        Files.writeString(a, "abc");
+        Files.writeString(b, "abc");
+        Files.writeString(c, "def");
+        File empty1 = file("eq-empty-1.txt");
+        File empty2 = file("eq-empty-2.txt");
+        Files.write(new byte[0], empty1);
+        Files.write(new byte[0], empty2);
+
+        assertTrue(Files.equal(a, b));
+        assertFalse(Files.equal(a, c));
+        assertTrue(Files.equal(empty1, empty2));
+        assertFalse(Files.equal(a, empty1));
+        assertTrue(Files.equal(a, a));
+
+        Path pa = path("eq-pa.txt");
+        Path pb = path("eq-pb.txt");
+        Path pc = path("eq-pc.txt");
+        java.nio.file.Files.write(pa, "xyz".getBytes(StandardCharsets.UTF_8));
+        java.nio.file.Files.write(pb, "xyz".getBytes(StandardCharsets.UTF_8));
+        java.nio.file.Files.write(pc, "123".getBytes(StandardCharsets.UTF_8));
+        assertTrue(Files.equal(pa, pb));
+        assertFalse(Files.equal(pa, pc));
+
+        File dir = path("eq-dir").toFile();
+        assertTrue(dir.mkdir());
+        assertThrows(FileNotFoundException.class, () -> Files.equal(a, dir));
+        assertThrows(NoSuchFileException.class, () -> Files.equal(pa, path("missing-eq.txt")));
+    }
+
+    @Test
+    public void testTouch() throws IOException, InterruptedException {
+        File created = file("touch-new.txt");
+        Path createdPath = path("touch-new-path.txt");
+        assertFalse(created.exists());
+        Files.touch(created);
+        Files.touch(createdPath);
+        assertTrue(created.exists());
+        assertTrue(java.nio.file.Files.exists(createdPath));
+        assertEquals(0, created.length());
+
+        Files.writeString(created, "keep");
+        long before = created.lastModified();
         Thread.sleep(10);
-        Files.touch(file);
-        assertTrue(file.lastModified() >= firstModified);
+        Files.touch(created);
+        Files.touch(created.toPath());
+        assertTrue(created.lastModified() >= before);
+        assertEquals("keep", Files.readString(created));
     }
 
     @Test
-    @DisplayName("Test touch with Path")
-    public void testTouchPath() throws IOException {
-        Path newPath = tempDir.resolve("touched2.txt");
-        assertFalse(java.nio.file.Files.exists(newPath));
-
-        Files.touch(newPath);
-        assertTrue(java.nio.file.Files.exists(newPath));
-    }
-
-    @Test
-    public void testTouchExistingFile() throws IOException {
-        Path existingFile = tempDir.resolve("existing_touch.txt");
-        java.nio.file.Files.write(existingFile, "content".getBytes());
-        long sizeBefore = java.nio.file.Files.size(existingFile);
-
-        Files.touch(existingFile);
-        long sizeAfter = java.nio.file.Files.size(existingFile);
-        assertEquals(sizeBefore, sizeAfter);
-    }
-
-    // Tests for temporary directory creation
-
-    @Test
-    @DisplayName("Test createTempDir")
     @SuppressWarnings("deprecation")
-    public void testCreateTempDir() {
-        File tempDir = Files.createTempDir();
-        assertNotNull(tempDir);
-        assertTrue(tempDir.exists());
-        assertTrue(tempDir.isDirectory());
-
-        // Clean up
-        tempDir.delete();
+    public void testCreateTempDir() throws IOException {
+        File dir = Files.createTempDir();
+        assertTrue(dir.isDirectory());
+        assertTrue(dir.getAbsolutePath().startsWith(System.getProperty("java.io.tmpdir")));
+        File nested = new File(dir, "child.txt");
+        Files.touch(nested);
+        assertTrue(nested.exists());
+        assertTrue(nested.delete());
+        assertTrue(dir.delete());
     }
 
-    // Tests for parent directory creation
-
     @Test
-    @DisplayName("Test createParentDirs")
     public void testCreateParentDirs() throws IOException {
-        File deepFile = new File(tempDir.toFile(), "a/b/c/d/file.txt");
-        assertFalse(deepFile.getParentFile().exists());
+        File nested = new File(tempDir.toFile(), "a/b/c/file.txt");
+        assertFalse(nested.getParentFile().exists());
+        Files.createParentDirs(nested);
+        assertTrue(nested.getParentFile().isDirectory());
+        Files.createParentDirs(nested);
 
-        Files.createParentDirs(deepFile);
-        assertTrue(deepFile.getParentFile().exists());
+        Path nestedPath = tempDir.resolve("p/q/r/file.txt");
+        Files.createParentDirectories(nestedPath);
+        assertTrue(java.nio.file.Files.isDirectory(nestedPath.getParent()));
+
+        File noParent = new File("orphan.txt");
+        Files.createParentDirs(noParent);
     }
 
     @Test
-    public void testCreateParentDirsWithExistingParent() throws IOException {
-        File fileInExistingDir = new File(tempDir.toFile(), "existing_parent.txt");
-        Files.createParentDirs(fileInExistingDir);
-        assertTrue(fileInExistingDir.getParentFile().exists());
+    public void testCreateParentDirectories_PosixAttributes() throws IOException {
+        Assumptions.assumeFalse(isWindows());
+        Path child = tempDir.resolve("posix/file.txt");
+        FileAttribute<?> dirPerms = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---"));
+        Files.createParentDirectories(child, dirPerms);
+        Set<PosixFilePermission> perms = java.nio.file.Files.getPosixFilePermissions(child.getParent());
+        assertTrue(perms.contains(PosixFilePermission.OWNER_EXECUTE));
+        assertFalse(perms.contains(PosixFilePermission.OTHERS_READ));
     }
 
     @Test
-    @DisplayName("Test createParentDirectories with Path")
-    public void testCreateParentDirectoriesPath() throws IOException {
-        Path deepPath = tempDir.resolve("x/y/z/file.txt");
-        assertFalse(java.nio.file.Files.exists(deepPath.getParent()));
-
-        Files.createParentDirectories(deepPath);
-        assertTrue(java.nio.file.Files.exists(deepPath.getParent()));
-    }
-
-    // Tests for copy operations
-
-    @Test
-    @DisplayName("Test copy File to OutputStream")
-    public void testCopyFileToOutputStream() throws IOException {
+    public void testCopy() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Files.copy(testFile, out);
+        assertEquals("Line 1\nLine 2\nLine 3", out.toString(StandardCharsets.UTF_8));
 
-        String content = out.toString(StandardCharsets.UTF_8.name());
-        assertTrue(content.contains("Line 1"));
-    }
+        File dest = file("copy-dest.txt");
+        Files.copy(testFile, dest);
+        assertTrue(Files.equal(testFile, dest));
+        Files.writeString(testFile, "overwritten-source");
+        Files.copy(testFile, dest);
+        assertEquals("overwritten-source", Files.readString(dest));
 
-    @Test
-    @DisplayName("Test copy File to File")
-    public void testCopyFileToFile() throws IOException {
-        File destFile = tempDir.resolve("copy.txt").toFile();
-        Files.copy(testFile, destFile);
+        File empty = file("copy-empty.txt");
+        Files.write(new byte[0], empty);
+        ByteArrayOutputStream emptyOut = new ByteArrayOutputStream();
+        Files.copy(empty, emptyOut);
+        assertEquals(0, emptyOut.size());
 
-        assertTrue(destFile.exists());
-        assertTrue(Files.equal(testFile, destFile));
-    }
-
-    @Test
-    public void testCopy_FileToOutputStream() throws IOException {
-        File file = new File(tempDir.toFile(), "source.txt");
-        Files.write("Copy this content".getBytes(), file);
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        Files.copy(file, baos);
-
-        assertEquals("Copy this content", baos.toString());
-    }
-
-    @Test
-    public void testCopy_FileToFile() throws IOException {
-        File source = new File(tempDir.toFile(), "source.txt");
-        File dest = new File(tempDir.toFile(), "dest.txt");
-
-        Files.write("Content to copy".getBytes(), source);
-        Files.copy(source, dest);
-
-        assertTrue(Files.equal(source, dest));
-    }
-
-    @Test
-    @DisplayName("Test copy with same source and destination throws exception")
-    public void testCopySameFile() {
         assertThrows(IllegalArgumentException.class, () -> Files.copy(testFile, testFile));
-    }
-
-    @Test
-    public void testCopyFileToCharSink() throws IOException {
-        File outputFile = tempDir.resolve("copy_charsink.txt").toFile();
-        CharSink sink = Files.asCharSink(outputFile, StandardCharsets.UTF_8);
-        CharSource source = Files.asCharSource(testFile, StandardCharsets.UTF_8);
-
-        sink.write(source.read());
-        assertTrue(outputFile.exists());
-        assertTrue(Files.readString(outputFile).contains("Line 1"));
-    }
-
-    // Tests for move operation
-
-    @Test
-    @DisplayName("Test move File")
-    public void testMoveFile() throws IOException {
-        File sourceFile = tempDir.resolve("source.txt").toFile();
-        File destFile = tempDir.resolve("dest.txt").toFile();
-
-        java.nio.file.Files.write(sourceFile.toPath(), "Move test".getBytes());
-
-        Files.move(sourceFile, destFile);
-
-        assertFalse(sourceFile.exists());
-        assertTrue(destFile.exists());
-        assertEquals("Move test", new String(java.nio.file.Files.readAllBytes(destFile.toPath())));
+        File missingParent = new File(tempDir.toFile(), "no-such-dir/dest.txt");
+        assertThrows(FileNotFoundException.class, () -> Files.copy(testFile, missingParent));
     }
 
     @Test
     public void testMove() throws IOException {
-        File source = new File(tempDir.toFile(), "source.txt");
-        File dest = new File(tempDir.toFile(), "dest.txt");
-
-        Files.write("Content to move".getBytes(), source);
+        File source = file("move-src.txt");
+        File dest = file("move-dest.txt");
+        Files.writeString(source, "relocated");
         Files.move(source, dest);
-
         assertFalse(source.exists());
-        assertTrue(dest.exists());
-        assertEquals("Content to move", Files.readString(dest));
+        assertEquals("relocated", Files.readString(dest));
+
+        File renamed = file("moved-name.txt");
+        Files.move(dest, renamed);
+        assertEquals("relocated", Files.readString(renamed));
+        assertThrows(IllegalArgumentException.class, () -> Files.move(renamed, renamed));
     }
 
     @Test
-    public void testMoveWithSameFile() {
-        assertThrows(IllegalArgumentException.class, () -> Files.move(testFile, testFile));
-    }
-
-    // Tests for readLines
-
-    @Test
-    @DisplayName("Test readLines")
     public void testReadLines() throws IOException {
         List<String> lines = Files.readLines(testFile, StandardCharsets.UTF_8);
+        assertEquals(Arrays.asList("Line 1", "Line 2", "Line 3"), lines);
+        lines.add("Line 4");
+        assertEquals(4, lines.size());
 
-        assertNotNull(lines);
-        assertEquals(3, lines.size());
-        assertEquals("Line 1", lines.get(0));
-        assertEquals("Line 2", lines.get(1));
-        assertEquals("Line 3", lines.get(2));
+        File empty = file("read-empty.txt");
+        Files.write(new byte[0], empty);
+        assertTrue(Files.readLines(empty, StandardCharsets.UTF_8).isEmpty());
+
+        File latin = writeRawBytes("read-latin.txt", "Línea 1\nLínea 2".getBytes(StandardCharsets.ISO_8859_1));
+        assertEquals(Arrays.asList("Línea 1", "Línea 2"), Files.readLines(latin, StandardCharsets.ISO_8859_1));
     }
 
     @Test
-    public void testReadLinesEmptyFile() throws IOException {
-        File emptyFile = tempDir.resolve("empty_lines.txt").toFile();
-        emptyFile.createNewFile();
-        List<String> lines = Files.readLines(emptyFile, StandardCharsets.UTF_8);
-        assertEquals(0, lines.size());
+    public void testMap() throws IOException {
+        File file = file("map.dat");
+        byte[] data = "0123456789".getBytes(StandardCharsets.US_ASCII);
+        Files.write(data, file);
+
+        MappedByteBuffer readOnly = Files.map(file);
+        byte[] read = new byte[data.length];
+        readOnly.get(read);
+        assertArrayEquals(data, read);
+        unmap(readOnly);
+
+        MappedByteBuffer readWrite = Files.map(file, MapMode.READ_WRITE);
+        readWrite.put(0, (byte) 'X');
+        readWrite.force();
+        unmap(readWrite);
+        assertEquals((byte) 'X', java.nio.file.Files.readAllBytes(file.toPath())[0]);
+
+        File sized = file("map-sized.dat");
+        MappedByteBuffer sizedBuffer = Files.map(sized, MapMode.READ_WRITE, 20);
+        assertEquals(20, sized.length());
+        assertEquals(20, sizedBuffer.capacity());
+        unmap(sizedBuffer);
+
+        assertThrows(FileNotFoundException.class, () -> Files.map(file("missing-map.dat")));
+        assertThrows(IllegalArgumentException.class, () -> Files.map(file, MapMode.READ_WRITE, -1));
+        assertThrows(IllegalArgumentException.class, () -> Files.map(file, MapMode.READ_ONLY, Integer.MAX_VALUE + 1L));
+        assertThrows(NullPointerException.class, () -> Files.map(file, null));
     }
 
     @Test
-    @DisplayName("Test map File with MapMode")
-    public void testMapFileWithMode() throws IOException {
-        File mapFile = tempDir.resolve("map.txt").toFile();
-        java.nio.file.Files.write(mapFile.toPath(), "Mapped".getBytes());
+    public void testMap_MissingFile() throws IOException {
+        File missingRw = file("missing-rw.bin");
+        MappedByteBuffer rw = Files.map(missingRw, MapMode.READ_WRITE);
+        assertEquals(0, rw.capacity());
+        assertTrue(missingRw.exists());
 
-        MappedByteBuffer buffer = Files.map(mapFile, FileChannel.MapMode.READ_ONLY);
-        assertNotNull(buffer);
-        assertEquals(6, buffer.capacity());
+        File missingPrivate = file("missing-private.bin");
+        MappedByteBuffer priv = Files.map(missingPrivate, MapMode.PRIVATE);
+        assertEquals(0, priv.capacity());
+        assertTrue(missingPrivate.exists());
 
+        File missingRo = file("missing-ro.bin");
+        assertThrows(FileNotFoundException.class, () -> Files.map(missingRo, MapMode.READ_ONLY));
+        assertThrows(FileNotFoundException.class, () -> Files.map(missingRo, MapMode.READ_ONLY, 10));
+        assertFalse(missingRo.exists());
+    }
+
+    @Test
+    public void testMap_SizeBeyondLength() throws IOException {
+        File file = file("extend.bin");
+        Files.write(new byte[] { 1, 2, 3 }, file);
+        long len = file.length();
+        IOException ex = assertThrows(IOException.class, () -> Files.map(file, MapMode.READ_ONLY, len + 1));
+        assertFalse(ex instanceof FileNotFoundException);
+        assertEquals(len, file.length());
+
+        MappedByteBuffer buffer = Files.map(file, MapMode.READ_WRITE, 10);
+        assertEquals(10, buffer.capacity());
+        assertEquals(10L, file.length());
         unmap(buffer);
     }
 
     @Test
-    @DisplayName("Test map with non-existent file")
-    public void testMapFileNonExistent() {
-        File nonExistentFile = new File(tempDir.toFile(), "nonexistent_map.txt");
-        assertThrows(Exception.class, () -> Files.map(nonExistentFile));
-    }
-
-    @Test
-    @DisplayName("Test map File with size")
-    public void testMapFileWithSize() throws IOException {
-        File mapFile = tempDir.resolve("mapsize.txt").toFile();
-        mapFile.createNewFile();
-
-        MappedByteBuffer buffer = Files.map(mapFile, FileChannel.MapMode.READ_WRITE, 1024);
-        assertNotNull(buffer);
-        assertEquals(1024, buffer.capacity());
-
-        // Write and read data
-        buffer.put(0, (byte) 'X');
-        assertEquals('X', (char) buffer.get(0));
-
-        unmap(buffer);
-    }
-
-    @Test
-    public void testMapFileWithModeAndSize() throws IOException {
-        File mapFile = tempDir.resolve("map_mode_size.txt").toFile();
-        mapFile.createNewFile();
-
-        MappedByteBuffer buffer = Files.map(mapFile, FileChannel.MapMode.READ_WRITE, 512);
-        assertNotNull(buffer);
-        assertEquals(512, buffer.capacity());
-
-        buffer.put(0, (byte) 'A');
-        buffer.put(1, (byte) 'B');
-        assertEquals('A', (char) buffer.get(0));
-        assertEquals('B', (char) buffer.get(1));
-
-        unmap(buffer);
-    }
-
-    // Tests for path operations
-
-    @Test
-    @DisplayName("Test simplifyPath")
     public void testSimplifyPath() {
         assertEquals(".", Files.simplifyPath(""));
         assertEquals(".", Files.simplifyPath("."));
-        assertEquals("foo/baz", Files.simplifyPath("foo//bar/../baz/./"));
-        assertEquals("/foo/baz", Files.simplifyPath("/foo//bar/../baz/./"));
-        assertEquals("../foo", Files.simplifyPath("../foo"));
+        assertEquals(".", Files.simplifyPath("./"));
+        assertEquals("b", Files.simplifyPath("a/../b"));
+        assertEquals("/b", Files.simplifyPath("/a/../b"));
         assertEquals("/", Files.simplifyPath("/"));
-        assertEquals("/", Files.simplifyPath("//"));
-        assertEquals("foo", Files.simplifyPath("foo/"));
+        assertEquals("/", Files.simplifyPath("///"));
+        assertEquals("a/b", Files.simplifyPath("a//b"));
+        assertEquals("a/b", Files.simplifyPath("a/./b/../b"));
+        assertEquals("/c", Files.simplifyPath("/a/b/../../c"));
+        assertEquals("../b/c", Files.simplifyPath("a/../../b/c"));
     }
 
     @Test
-    public void testSimplifyPathEdgeCases() {
-        assertEquals("a/b", Files.simplifyPath("a/b"));
-        assertEquals("/a", Files.simplifyPath("/a/b/.."));
-        assertEquals("/", Files.simplifyPath("/.."));
-        assertEquals(".", Files.simplifyPath(""));
-    }
-
-    @Test
-    @DisplayName("Test getNameWithoutExtension String")
-    public void testGetNameWithoutExtensionString() {
-        assertEquals("document", Files.getNameWithoutExtension("document.pdf"));
-        assertEquals("document", Files.getNameWithoutExtension("/home/user/document.pdf"));
+    public void testGetNameWithoutExtension() {
+        assertEquals("file", Files.getNameWithoutExtension("file.txt"));
+        assertEquals("file", Files.getNameWithoutExtension("/path/to/file.txt"));
         assertEquals("archive.tar", Files.getNameWithoutExtension("archive.tar.gz"));
-        assertEquals("README", Files.getNameWithoutExtension("README"));
+        assertEquals("file", Files.getNameWithoutExtension("file"));
         assertEquals("", Files.getNameWithoutExtension(".hidden"));
-        assertEquals("", Files.getNameWithoutExtension(".txt"));
+        assertEquals("file", Files.getNameWithoutExtension(Paths.get("file.txt")));
+        assertEquals("file.tar", Files.getNameWithoutExtension(Paths.get("some/file.tar.gz")));
+        assertEquals("nodots", Files.getNameWithoutExtension(Paths.get("nodots")));
     }
 
     @Test
-    public void testGetNameWithoutExtension_String() {
-        assertEquals("document", Files.getNameWithoutExtension("document.pdf"));
-        assertEquals("archive.tar", Files.getNameWithoutExtension("archive.tar.gz"));
-        assertEquals("README", Files.getNameWithoutExtension("README"));
-        assertEquals("document", Files.getNameWithoutExtension("/path/to/document.pdf"));
-        assertEquals("", Files.getNameWithoutExtension(".hidden"));
-        assertEquals(".hidden", Files.getNameWithoutExtension(".hidden.txt"));
-    }
-
-    @Test
-    @DisplayName("Test getNameWithoutExtension Path")
-    public void testGetNameWithoutExtensionPath() {
-        assertEquals("document", Files.getNameWithoutExtension(Paths.get("document.pdf")));
-        assertEquals("document", Files.getNameWithoutExtension(Paths.get("/home/user/document.pdf")));
-    }
-
-    @Test
-    public void testGetNameWithoutExtensionNoExtension() {
-        assertEquals("Makefile", Files.getNameWithoutExtension("Makefile"));
-        assertEquals("Makefile", Files.getNameWithoutExtension(Paths.get("Makefile")));
-    }
-
-    @Test
-    @DisplayName("Test getFileExtension String")
-    public void testGetFileExtensionString() {
-        assertEquals("pdf", Files.getFileExtension("document.pdf"));
-        assertEquals("pdf", Files.getFileExtension("/home/user/document.pdf"));
-        assertEquals("gz", Files.getFileExtension("archive.tar.gz"));
-        assertEquals("", Files.getFileExtension("README"));
-        assertEquals("hidden", Files.getFileExtension(".hidden"));
-        assertEquals("txt", Files.getFileExtension(".txt"));
-    }
-
-    @Test
-    public void testGetFileExtension_String() {
-        assertEquals("pdf", Files.getFileExtension("document.pdf"));
-        assertEquals("gz", Files.getFileExtension("archive.tar.gz"));
-        assertEquals("", Files.getFileExtension("README"));
+    public void testGetFileExtension() {
+        assertEquals("txt", Files.getFileExtension("file.txt"));
         assertEquals("txt", Files.getFileExtension("/path/to/file.txt"));
+        assertEquals("gz", Files.getFileExtension("archive.tar.gz"));
+        assertEquals("", Files.getFileExtension("file"));
         assertEquals("hidden", Files.getFileExtension(".hidden"));
-        assertEquals("txt", Files.getFileExtension(".hidden.txt"));
+        assertEquals("", Files.getFileExtension("file."));
+        assertEquals("gz", Files.getFileExtension(Paths.get("some/file.tar.gz")));
+        assertEquals("jpeg", Files.getFileExtension(Paths.get("image.jpeg")));
+        assertEquals("", Files.getFileExtension(Paths.get("nodots")));
     }
 
     @Test
-    @DisplayName("Test getFileExtension Path")
-    public void testGetFileExtensionPath() {
-        assertEquals("pdf", Files.getFileExtension(Paths.get("document.pdf")));
-        assertEquals("", Files.getFileExtension(Paths.get("README")));
-    }
-
-    @Test
-    public void testGetFileExtensionNoExtension() {
-        assertEquals("", Files.getFileExtension("Makefile"));
-        assertEquals("", Files.getFileExtension(Paths.get("Makefile")));
-    }
-
-    // Tests for traversers
-
-    @Test
-    @DisplayName("Test fileTraverser")
     public void testFileTraverser() throws IOException {
-        // Create directory structure
-        File dir1 = new File(tempDir.toFile(), "dir1");
-        File dir2 = new File(dir1, "dir2");
-        File file1 = new File(dir1, "file1.txt");
-        File file2 = new File(dir2, "file2.txt");
-
-        dir1.mkdir();
-        dir2.mkdir();
-        file1.createNewFile();
-        file2.createNewFile();
+        File base = path("traverse").toFile();
+        assertTrue(base.mkdir());
+        File f1 = new File(base, "f1.txt");
+        File d1 = new File(base, "d1");
+        File f2 = new File(d1, "f2.txt");
+        Files.touch(f1);
+        assertTrue(d1.mkdir());
+        Files.touch(f2);
 
         Traverser<File> traverser = Files.fileTraverser();
-        assertNotNull(traverser);
-
-        // Test breadth-first traversal
-        List<File> files = traverser.breadthFirst(dir1).toList();
-
-        assertTrue(files.size() >= 4); // dir1, dir2, file1, file2
-        assertTrue(files.contains(dir1));
-        assertTrue(files.contains(file1));
+        List<File> breadth = traverser.breadthFirst(base).toList();
+        List<File> depth = traverser.depthFirstPreOrder(base).toList();
+        assertEquals(4, breadth.size());
+        assertEquals(4, depth.size());
+        assertTrue(breadth.contains(base));
+        assertTrue(breadth.contains(f1));
+        assertTrue(breadth.contains(d1));
+        assertTrue(breadth.contains(f2));
+        assertEquals(List.of(f1), traverser.breadthFirst(f1).toList());
     }
 
     @Test
-    @DisplayName("Test pathTraverser")
     public void testPathTraverser() throws IOException {
-        // Create directory structure
-        Path dir1 = tempDir.resolve("pdir1");
-        Path dir2 = dir1.resolve("pdir2");
-        Path file1 = dir1.resolve("pfile1.txt");
-
-        java.nio.file.Files.createDirectory(dir1);
-        java.nio.file.Files.createDirectory(dir2);
-        java.nio.file.Files.createFile(file1);
+        Path base = path("traverse-path");
+        java.nio.file.Files.createDirectory(base);
+        Path f1 = java.nio.file.Files.createFile(base.resolve("pf1.txt"));
+        Path d1 = java.nio.file.Files.createDirectory(base.resolve("pd1"));
+        Path f2 = java.nio.file.Files.createFile(d1.resolve("pf2.txt"));
 
         Traverser<Path> traverser = Files.pathTraverser();
-        assertNotNull(traverser);
-
-        List<Path> paths = traverser.depthFirstPreOrder(dir1).toList();
-
-        assertTrue(paths.contains(dir1));
-        assertTrue(paths.contains(file1));
+        List<Path> visited = traverser.breadthFirst(base).toList();
+        assertEquals(4, visited.size());
+        assertTrue(visited.contains(base));
+        assertTrue(visited.contains(f1));
+        assertTrue(visited.contains(d1));
+        assertTrue(visited.contains(f2));
+        assertEquals(1, traverser.depthFirstPreOrder(f1).toList().size());
     }
 
-    // Tests for listFiles
-
     @Test
-    @DisplayName("Test listFiles")
     public void testListFiles() throws IOException {
-        // Create some files
-        Path file1 = tempDir.resolve("list1.txt");
-        Path file2 = tempDir.resolve("list2.txt");
-        Path subDir = tempDir.resolve("subdir");
-
-        java.nio.file.Files.createFile(file1);
-        java.nio.file.Files.createFile(file2);
-        java.nio.file.Files.createDirectory(subDir);
-
-        ImmutableList<Path> files = Files.listFiles(tempDir);
-        assertNotNull(files);
-        assertTrue(files.size() >= 2);
-
-        // Should contain files but not necessarily in any order
-        List<String> fileNames = files.stream().map(p -> p.getFileName().toString()).collect(Collectors.toList());
-
-        assertTrue(fileNames.contains("list1.txt"));
-        assertTrue(fileNames.contains("list2.txt"));
-    }
-
-    @Test
-    @DisplayName("Test listFiles with non-existent directory")
-    public void testListFilesNonExistent() {
-        Path nonExistent = tempDir.resolve("nonexistent");
-        assertThrows(NoSuchFileException.class, () -> Files.listFiles(nonExistent));
-    }
-
-    @Test
-    @DisplayName("Test listFiles with regular file instead of directory")
-    public void testListFilesWithRegularFile() throws IOException {
-        Path regularFile = tempDir.resolve("regularfile.txt");
-        java.nio.file.Files.createFile(regularFile);
-
-        assertThrows(Exception.class, () -> Files.listFiles(regularFile));
-    }
-
-    // Tests for delete operations
-
-    @Test
-    @DisplayName("Test deleteRecursively")
-    public void testDeleteRecursively() throws IOException {
-        // Create directory structure
-        Path rootDir = tempDir.resolve("delete_root");
-        Path subDir = rootDir.resolve("sub");
-        Path file = subDir.resolve("file.txt");
-
-        java.nio.file.Files.createDirectory(rootDir);
-        java.nio.file.Files.createDirectory(subDir);
-        java.nio.file.Files.write(file, "content".getBytes());
-
-        assertTrue(java.nio.file.Files.exists(rootDir));
-
-        Files.deleteRecursively(rootDir, RecursiveDeleteOption.ALLOW_INSECURE);
-
-        assertFalse(java.nio.file.Files.exists(rootDir));
-        assertFalse(java.nio.file.Files.exists(subDir));
-        assertFalse(java.nio.file.Files.exists(file));
-    }
-
-    @Test
-    public void testDeleteRecursivelyEmptyDir() throws IOException {
-        Path emptyDir = tempDir.resolve("empty_dir_delete");
-        java.nio.file.Files.createDirectory(emptyDir);
-        assertTrue(java.nio.file.Files.exists(emptyDir));
-
-        Files.deleteRecursively(emptyDir, RecursiveDeleteOption.ALLOW_INSECURE);
-        assertFalse(java.nio.file.Files.exists(emptyDir));
-    }
-
-    @Test
-    @DisplayName("Test deleteDirectoryContents")
-    public void testDeleteDirectoryContents() throws IOException {
-        // Create directory structure
-        Path rootDir = tempDir.resolve("content_delete");
-        Path file1 = rootDir.resolve("file1.txt");
-        Path file2 = rootDir.resolve("file2.txt");
-        Path subDir = rootDir.resolve("sub");
-
-        java.nio.file.Files.createDirectory(rootDir);
-        java.nio.file.Files.write(file1, "content1".getBytes());
-        java.nio.file.Files.write(file2, "content2".getBytes());
-        java.nio.file.Files.createDirectory(subDir);
-
-        Files.deleteDirectoryContents(rootDir, RecursiveDeleteOption.ALLOW_INSECURE);
-
-        assertTrue(java.nio.file.Files.exists(rootDir)); // Directory itself remains
-        assertFalse(java.nio.file.Files.exists(file1));
-        assertFalse(java.nio.file.Files.exists(file2));
-        assertFalse(java.nio.file.Files.exists(subDir));
-    }
-
-    @Test
-    public void testDeleteDirectoryContentsEmpty() throws IOException {
-        Path emptyDir = tempDir.resolve("empty_dir_contents");
-        java.nio.file.Files.createDirectory(emptyDir);
-
-        Files.deleteDirectoryContents(emptyDir, RecursiveDeleteOption.ALLOW_INSECURE);
-        assertTrue(java.nio.file.Files.exists(emptyDir));
-    }
-
-    // Tests for predicates
-
-    @Test
-    @DisplayName("Test isDirectory predicate")
-    public void testIsDirectoryPredicate() throws IOException {
-        Path dir = tempDir.resolve("testdir");
-        Path file = tempDir.resolve("testfile.txt");
-
+        Path dir = path("list");
         java.nio.file.Files.createDirectory(dir);
-        java.nio.file.Files.createFile(file);
+        Path f1 = java.nio.file.Files.createFile(dir.resolve("file1.tmp"));
+        Path d1 = java.nio.file.Files.createDirectory(dir.resolve("subdir.tmp"));
 
-        Predicate<Path> isDir = Files.isDirectory();
+        ImmutableList<Path> listed = Files.listFiles(dir);
+        assertEquals(2, listed.size());
+        assertTrue(listed.contains(f1));
+        assertTrue(listed.contains(d1));
+        assertTrue(Files.listFiles(java.nio.file.Files.createDirectory(path("list-empty"))).isEmpty());
+        assertThrows(NotDirectoryException.class, () -> Files.listFiles(f1));
+        assertThrows(NoSuchFileException.class, () -> Files.listFiles(dir.resolve("missing")));
+    }
 
-        assertTrue(isDir.apply(dir));
-        assertFalse(isDir.apply(file));
+    @Test
+    public void testDeleteRecursively() throws IOException {
+        Path base = path("del-rec");
+        java.nio.file.Files.createDirectory(base);
+        java.nio.file.Files.createFile(base.resolve("f1.txt"));
+        Path d1 = java.nio.file.Files.createDirectory(base.resolve("d1"));
+        java.nio.file.Files.createFile(d1.resolve("f2.txt"));
 
-        // Test with NOFOLLOW_LINKS
-        Predicate<Path> isDirNoFollow = Files.isDirectory(LinkOption.NOFOLLOW_LINKS);
-        assertTrue(isDirNoFollow.apply(dir));
+        Files.deleteRecursively(base, RecursiveDeleteOption.ALLOW_INSECURE);
+        assertFalse(java.nio.file.Files.exists(base));
+
+        Path empty = java.nio.file.Files.createDirectory(path("del-empty"));
+        Files.deleteRecursively(empty, RecursiveDeleteOption.ALLOW_INSECURE);
+        assertFalse(java.nio.file.Files.exists(empty));
+
+        Path single = java.nio.file.Files.createFile(path("del-single.txt"));
+        Files.deleteRecursively(single, RecursiveDeleteOption.ALLOW_INSECURE);
+        assertFalse(java.nio.file.Files.exists(single));
+
+        assertThrows(NoSuchFileException.class, () -> Files.deleteRecursively(path("del-missing"), RecursiveDeleteOption.ALLOW_INSECURE));
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS)
+    public void testDeleteRecursively_insecure() throws IOException {
+        Path base = path("del-insecure");
+        java.nio.file.Files.createDirectory(base);
+        java.nio.file.Files.createFile(base.resolve("f1.txt"));
+        try {
+            Files.deleteRecursively(base);
+            assertFalse(java.nio.file.Files.exists(base));
+        } catch (InsecureRecursiveDeleteException e) {
+            Files.deleteRecursively(base, RecursiveDeleteOption.ALLOW_INSECURE);
+            assertFalse(java.nio.file.Files.exists(base));
+        }
+    }
+
+    @Test
+    public void testDeleteRecursively_NoOption_OnWindows() throws IOException {
+        Assumptions.assumeTrue(isWindows());
+        Path missing = path("does-not-exist");
+        assertThrows(InsecureRecursiveDeleteException.class, () -> Files.deleteRecursively(missing));
+
+        Path dir = java.nio.file.Files.createDirectory(path("dir-no-option"));
+        java.nio.file.Files.write(dir.resolve("child.txt"), new byte[] { 1 });
+        assertThrows(InsecureRecursiveDeleteException.class, () -> Files.deleteRecursively(testPath));
+        assertThrows(InsecureRecursiveDeleteException.class, () -> Files.deleteRecursively(dir));
+        assertThrows(InsecureRecursiveDeleteException.class, () -> Files.deleteDirectoryContents(dir));
+        assertTrue(java.nio.file.Files.exists(testPath));
+        assertTrue(java.nio.file.Files.exists(dir.resolve("child.txt")));
+    }
+
+    @Test
+    public void testDeleteDirectoryContents() throws IOException {
+        Path base = java.nio.file.Files.createDirectory(path("del-contents"));
+        java.nio.file.Files.createFile(base.resolve("f1.txt"));
+        Path d1 = java.nio.file.Files.createDirectory(base.resolve("d1"));
+        java.nio.file.Files.createFile(d1.resolve("f2.txt"));
+
+        Files.deleteDirectoryContents(base, RecursiveDeleteOption.ALLOW_INSECURE);
+        assertTrue(java.nio.file.Files.exists(base));
+        try (var stream = java.nio.file.Files.list(base)) {
+            assertEquals(0, stream.count());
+        }
+
+        Path empty = java.nio.file.Files.createDirectory(path("del-contents-empty"));
+        Files.deleteDirectoryContents(empty, RecursiveDeleteOption.ALLOW_INSECURE);
+        assertTrue(java.nio.file.Files.exists(empty));
+
+        assertThrows(NoSuchFileException.class, () -> Files.deleteDirectoryContents(path("del-contents-missing")));
+        assertThrows(NoSuchFileException.class, () -> Files.deleteDirectoryContents(path("del-contents-missing-2"), RecursiveDeleteOption.ALLOW_INSECURE));
+        assertThrows(NotDirectoryException.class, () -> Files.deleteDirectoryContents(testPath, RecursiveDeleteOption.ALLOW_INSECURE));
+        assertTrue(java.nio.file.Files.exists(testPath));
     }
 
     @Test
     public void testIsDirectory() throws IOException {
-        Path dir = tempDir.resolve("testdir");
-        Path file = tempDir.resolve("testfile.txt");
-        java.nio.file.Files.createDirectory(dir);
-        java.nio.file.Files.createFile(file);
-
-        Predicate<Path> isDirPredicate = Files.isDirectory();
-        assertTrue(isDirPredicate.apply(dir));
-        assertFalse(isDirPredicate.apply(file));
-    }
-
-    @Test
-    @DisplayName("Test isRegularFile predicate")
-    public void testIsRegularFilePredicate() throws IOException {
-        Path dir = tempDir.resolve("testdir2");
-        Path file = tempDir.resolve("testfile2.txt");
-
-        java.nio.file.Files.createDirectory(dir);
-        java.nio.file.Files.createFile(file);
-
-        Predicate<Path> isFile = Files.isRegularFile();
-
-        assertFalse(isFile.apply(dir));
-        assertTrue(isFile.apply(file));
-
-        // Test with NOFOLLOW_LINKS
-        Predicate<Path> isFileNoFollow = Files.isRegularFile(LinkOption.NOFOLLOW_LINKS);
-        assertTrue(isFileNoFollow.apply(file));
+        Path dir = java.nio.file.Files.createDirectory(path("is-dir"));
+        Predicate<Path> isDir = Files.isDirectory();
+        Predicate<Path> noFollow = Files.isDirectory(LinkOption.NOFOLLOW_LINKS);
+        assertTrue(isDir.apply(dir));
+        assertTrue(noFollow.apply(dir));
+        assertFalse(isDir.apply(testPath));
+        assertFalse(isDir.apply(path("missing-dir")));
     }
 
     @Test
     public void testIsRegularFile() throws IOException {
-        Path dir = tempDir.resolve("testdir");
-        Path file = tempDir.resolve("testfile.txt");
-        java.nio.file.Files.createDirectory(dir);
-        java.nio.file.Files.createFile(file);
-
-        Predicate<Path> isFilePredicate = Files.isRegularFile();
-        assertFalse(isFilePredicate.apply(dir));
-        assertTrue(isFilePredicate.apply(file));
+        Path dir = java.nio.file.Files.createDirectory(path("is-file-dir"));
+        Predicate<Path> isReg = Files.isRegularFile();
+        Predicate<Path> noFollow = Files.isRegularFile(LinkOption.NOFOLLOW_LINKS);
+        assertTrue(isReg.apply(testPath));
+        assertTrue(noFollow.apply(testPath));
+        assertFalse(isReg.apply(dir));
+        assertFalse(isReg.apply(path("missing-file.txt")));
     }
 
-    // Tests for readAllBytes
-
     @Test
-    @DisplayName("Test readAllBytes")
     public void testReadAllBytes() throws IOException {
-        byte[] bytes = Files.readAllBytes(testFile);
-        assertNotNull(bytes);
-        assertTrue(bytes.length > 0);
+        byte[] data = "hello".getBytes(StandardCharsets.UTF_8);
+        File file = file("all-bytes.bin");
+        Files.write(data, file);
+        assertArrayEquals(data, Files.readAllBytes(file));
 
-        String content = new String(bytes, StandardCharsets.UTF_8);
-        assertTrue(content.contains("Line 1"));
-        assertTrue(content.contains("Line 2"));
-        assertTrue(content.contains("Line 3"));
+        File empty = file("all-bytes-empty.bin");
+        Files.write(new byte[0], empty);
+        assertArrayEquals(new byte[0], Files.readAllBytes(empty));
     }
 
     @Test
-    public void testReadAllBytesPath() throws IOException {
-        byte[] bytes = Files.readAllBytes(testFile);
-        byte[] pathBytes = java.nio.file.Files.readAllBytes(testPath);
-        assertArrayEquals(pathBytes, bytes);
-    }
+    public void testReadString() throws IOException {
+        assertEquals("Line 1\nLine 2\nLine 3", Files.readString(testFile));
+        assertEquals("Line 1\nLine 2\nLine 3", Files.readString(testFile, StandardCharsets.UTF_8));
 
-    // Tests for readString
+        File empty = file("read-string-empty.txt");
+        Files.write(new byte[0], empty);
+        assertEquals("", Files.readString(empty));
 
-    @Test
-    @DisplayName("Test readString with default charset")
-    public void testReadStringDefault() throws IOException {
-        String content = Files.readString(testFile);
-        assertNotNull(content);
-        assertTrue(content.contains("Line 1"));
-        assertTrue(content.contains("Line 2"));
-        assertTrue(content.contains("Line 3"));
+        File latin = writeRawBytes("read-string-latin.txt", "Línea".getBytes(StandardCharsets.ISO_8859_1));
+        assertEquals("Línea", Files.readString(latin, StandardCharsets.ISO_8859_1));
     }
 
     @Test
-    public void testReadString_Default() throws IOException {
-        File file = new File(tempDir.toFile(), "string.txt");
-        Files.write("UTF-8 content".getBytes(StandardCharsets.UTF_8), file);
+    public void testReadAllLines() throws IOException {
+        assertEquals(Arrays.asList("Line 1", "Line 2", "Line 3"), Files.readAllLines(testFile));
+        assertEquals(Arrays.asList("Line 1", "Line 2", "Line 3"), Files.readAllLines(testFile, StandardCharsets.UTF_8));
 
-        String content = Files.readString(file);
-        assertEquals("UTF-8 content", content);
+        File empty = file("all-lines-empty.txt");
+        Files.write(new byte[0], empty);
+        assertTrue(Files.readAllLines(empty).isEmpty());
+
+        File blank = writeRawBytes("blank-lines.txt", "A\n\nC".getBytes(StandardCharsets.UTF_8));
+        assertEquals(Arrays.asList("A", "", "C"), Files.readAllLines(blank));
     }
 
     @Test
-    @DisplayName("Test readString with specific charset")
-    public void testReadStringWithCharset() throws IOException {
-        String content = Files.readString(testFile, StandardCharsets.UTF_8);
-        assertNotNull(content);
-        assertTrue(content.contains("Line 1"));
+    public void testWriteString() throws IOException {
+        File file = file("write-string.txt");
+        Files.writeString(file, "smile 😀 and 日本 and é");
+        assertEquals("smile 😀 and 日本 and é", Files.readString(file));
+
+        Files.writeString(file, "日本", StandardCharsets.ISO_8859_1);
+        assertArrayEquals(new byte[] { '?', '?' }, Files.readAllBytes(file));
+
+        assertThrows(NullPointerException.class, () -> Files.writeString(file, null));
+        assertThrows(NullPointerException.class, () -> Files.writeString(file, "x", null));
+        assertThrows(NullPointerException.class, () -> Files.writeString(null, "x"));
     }
 
     @Test
-    public void testReadString_WithCharset() throws IOException {
-        File file = new File(tempDir.toFile(), "string.txt");
-        String content = "ISO-8859-1 content: áéíóú";
-        Files.write(content.getBytes(StandardCharsets.ISO_8859_1), file);
+    public void testRead_MalformedUtf8() throws IOException {
+        File bad = writeRawBytes("bad.txt", new byte[] { 'a', (byte) 0xFF, 'b', '\n', 'c' });
+        assertEquals(Arrays.asList("a�b", "c"), Files.readLines(bad, StandardCharsets.UTF_8));
+        assertThrows(MalformedInputException.class, () -> Files.readAllLines(bad));
+        assertThrows(MalformedInputException.class, () -> Files.readAllLines(bad, StandardCharsets.UTF_8));
+        assertThrows(MalformedInputException.class, () -> Files.readString(bad));
+        assertThrows(MalformedInputException.class, () -> Files.readString(bad, StandardCharsets.UTF_8));
 
-        String read = Files.readString(file, StandardCharsets.ISO_8859_1);
-        assertEquals(content, read);
-    }
-
-    // Tests for readAllLines
-
-    @Test
-    @DisplayName("Test readAllLines with default charset")
-    public void testReadAllLinesDefault() throws IOException {
-        List<String> lines = Files.readAllLines(testFile);
-        assertNotNull(lines);
-        assertEquals(3, lines.size());
-        assertEquals("Line 1", lines.get(0));
-        assertEquals("Line 2", lines.get(1));
-        assertEquals("Line 3", lines.get(2));
+        File latin = writeRawBytes("latin1.txt", "Línea 1\nLínea 2".getBytes(StandardCharsets.ISO_8859_1));
+        assertThrows(MalformedInputException.class, () -> Files.readString(latin));
+        assertEquals("Línea 1\nLínea 2", Files.readString(latin, StandardCharsets.ISO_8859_1));
     }
 
     @Test
-    public void testReadAllLines_Default() throws IOException {
-        File file = new File(tempDir.toFile(), "lines.txt");
-        Files.write("Line 1\nLine 2\nLine 3".getBytes(StandardCharsets.UTF_8), file);
-
-        List<String> lines = Files.readAllLines(file);
-        assertEquals(3, lines.size());
-        assertEquals("Line 1", lines.get(0));
-        assertEquals("Line 2", lines.get(1));
-        assertEquals("Line 3", lines.get(2));
+    public void testReadAllLines_Utf8Bom_IsKeptByBothPaths() throws IOException {
+        byte[] bom = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
+        byte[] body = "x\ny".getBytes(StandardCharsets.UTF_8);
+        byte[] all = new byte[bom.length + body.length];
+        System.arraycopy(bom, 0, all, 0, bom.length);
+        System.arraycopy(body, 0, all, bom.length, body.length);
+        File f = writeRawBytes("bom.txt", all);
+        assertEquals(Arrays.asList("\uFEFFx", "y"), Files.readAllLines(f));
+        assertEquals(Arrays.asList("\uFEFFx", "y"), Files.readLines(f, StandardCharsets.UTF_8));
+        assertEquals("\uFEFFx\ny", Files.readString(f));
     }
 
     @Test
-    @DisplayName("Test readAllLines with specific charset")
-    public void testReadAllLinesWithCharset() throws IOException {
-        List<String> lines = Files.readAllLines(testFile, StandardCharsets.UTF_8);
-        assertNotNull(lines);
-        assertEquals(3, lines.size());
-    }
-
-    @Test
-    public void testReadAllLines_WithCharset() throws IOException {
-        File file = new File(tempDir.toFile(), "lines.txt");
-        Files.write("Línea 1\nLínea 2".getBytes(StandardCharsets.ISO_8859_1), file);
-
-        List<String> lines = Files.readAllLines(file, StandardCharsets.ISO_8859_1);
-        assertEquals(2, lines.size());
-        assertEquals("Línea 1", lines.get(0));
-        assertEquals("Línea 2", lines.get(1));
-    }
-
-    @Test
-    public void testMoreFilesClassIsSubclassOfFiles() {
+    public void testMoreFiles_ExtendsFiles() {
         assertTrue(Files.class.isAssignableFrom(Files.MoreFiles.class));
+    }
+
+    @Test
+    public void testNullArguments_AreRejectedWithNullPointerException() {
+        assertThrows(NullPointerException.class, () -> Files.readString((File) null));
+        assertThrows(NullPointerException.class, () -> Files.readAllLines((File) null));
+        assertThrows(NullPointerException.class, () -> Files.readAllBytes(null));
+        assertThrows(NullPointerException.class, () -> Files.readLines(null, StandardCharsets.UTF_8));
+        assertThrows(NullPointerException.class, () -> Files.readLines(testFile, null));
+        assertThrows(NullPointerException.class, () -> Files.simplifyPath(null));
+        assertThrows(NullPointerException.class, () -> Files.getFileExtension((String) null));
+        assertThrows(NullPointerException.class, () -> Files.getNameWithoutExtension((String) null));
+        assertThrows(NullPointerException.class, () -> Files.listFiles(null));
+        assertThrows(NullPointerException.class, () -> Files.asByteSource((File) null));
+        assertThrows(NullPointerException.class, () -> Files.asCharSource((File) null, StandardCharsets.UTF_8));
+        assertThrows(NullPointerException.class, () -> Files.touch((File) null));
+        assertThrows(NullPointerException.class, () -> Files.touch((Path) null));
+        assertThrows(NullPointerException.class, () -> Files.copy((File) null, testFile));
+        assertThrows(NullPointerException.class, () -> Files.equal((File) null, testFile));
+        assertThrows(NullPointerException.class, () -> Files.deleteRecursively(null, RecursiveDeleteOption.ALLOW_INSECURE));
+        assertThrows(NullPointerException.class, () -> Files.newReader(null, StandardCharsets.UTF_8));
+        assertThrows(NullPointerException.class, () -> Files.newWriter(null, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void testSpecialCharacterFilenames() throws IOException {
+        for (String name : new String[] { "file with spaces.txt", "file-with-dashes.txt", "file_with_underscores.txt", "file.multiple.dots.txt" }) {
+            File special = file(name);
+            Files.touch(special);
+            assertTrue(special.exists());
+            assertNotNull(Files.getFileExtension(name));
+        }
     }
 }

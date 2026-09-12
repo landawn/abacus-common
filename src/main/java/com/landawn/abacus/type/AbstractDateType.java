@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.Date;
 
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -86,11 +87,13 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
      *
      * @param x the {@code Date} value to convert
      * @return the formatted string representation of the date, or {@code null} if input is {@code null}
+     * @throws IllegalArgumentException if the instant lies outside Common Era years 0001 through 9999, the range the
+     *         default ISO 8601 format supports (see {@link Dates#format(Date)})
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final T x) {
+    public String stringOf(final T x) throws IllegalArgumentException {
         return (x == null) ? null : Dates.format(x);
     }
 
@@ -107,7 +110,12 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Date} value to append
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code x} and {@code appendable} are both null
+     * @throws IOException if appending the null literal fails
+     * @throws IllegalArgumentException if {@code x} is non-null and {@code appendable} is null, or the instant lies outside Common Era years
+     *         0001 through 9999, the range the default ISO 8601 format
+     *         supports (see {@link Dates#format(Date)})
+     * @throws UncheckedIOException if appending a non-null value through {@link Dates#formatTo(Date, Appendable)} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -119,7 +127,7 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws NullPointerException, IOException, IllegalArgumentException, UncheckedIOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -154,12 +162,17 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Date} value to write
      * @param config the serialization configuration, may be {@code null}
-     * @throws IOException if an I/O error occurs
-     * @throws RuntimeException if an unsupported {@code DateTimeFormat} is specified
+     * @throws NullPointerException if {@code writer} is null when writing the null literal, a quotation mark or the LONG representation
+     * @throws IOException if directly writing the null literal, a quotation mark or the LONG representation fails
+     * @throws IllegalArgumentException if {@code writer} is null when formatting a non-null value without quotation, or the instant lies outside
+     *         Common Era years 0001 through 9999 and a text format is in effect (the default
+     *         or an {@code ISO_8601_*} format); {@link DateTimeFormat#LONG} writes any instant
+     * @throws UncheckedIOException if writing a non-null value through {@code Dates.formatTo} fails
      */
     @SuppressWarnings("null")
     @Override
-    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, IllegalArgumentException, UncheckedIOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

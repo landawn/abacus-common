@@ -65,23 +65,30 @@ public @interface JsonXmlConfig {
     NamingPolicy namingPolicy() default NamingPolicy.CAMEL_CASE;
 
     /**
-     * Specifies fields to ignore during serialization/deserialization.
-     * Values can be exact field names or regular expressions for pattern matching.
+     * Specifies fields to omit from serialized JSON/XML output.
+     * Values can be exact field names or regular expressions matched with {@link String#matches(String)}.
      *
-     * <p>This is useful for excluding sensitive data, computed fields, or fields
-     * that should not be persisted.</p>
+     * <p><b>Serialization only:</b> a matching property is still populated when input containing it is
+     * deserialized (and is not reported as an unknown property). To drop a property from input, mark it
+     * {@link Transient @Transient} or configure the parser with
+     * {@code DeserializationConfig.setIgnoredPropNames(Class, Set)}. A matching field must keep
+     * {@link JsonXmlField#direction()} at its default; any other direction is rejected with an
+     * {@code IllegalArgumentException} when the bean is first introspected.</p>
+     *
+     * <p>This is useful for keeping sensitive or computed values out of serialized output.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlConfig(ignoredFields = {"password", "internal.*"})
      * public class User {
-     *     private String password;       // password is ignored
-     *     private String internalToken;  // internalToken is ignored (matches "internal.*")
+     *     private String password;       // password is omitted from output
+     *     private String internalToken;  // internalToken is omitted from output (matches "internal.*")
      * }
      * }</pre>
      *
      * @return an array of field names or regex patterns to exclude from serialization
      * @see String#matches(String)
+     * @see JsonXmlField#ignore()
      */
     String[] ignoredFields() default {};
 
@@ -118,6 +125,11 @@ public @interface JsonXmlConfig {
      *
      * <p>This ensures consistent date/time representation across different environments.
      * Common practice is to use UTC for storing and transmitting dates.</p>
+     *
+     * <p>The ID is trimmed and resolved with {@link java.util.TimeZone#getTimeZone(String)} when the bean
+     * is first introspected. <b>An unrecognised ID (a typo such as {@code "America/New York"} or
+     * {@code "UTC+1"}) is not rejected - it silently resolves to GMT</b>, shifting every formatted instant
+     * without an error; custom offsets must use the form {@code "GMT+02:00"}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <ul>
@@ -165,6 +177,12 @@ public @interface JsonXmlConfig {
      *
      * <p><b>Recommendation:</b> {@code EnumType.NAME} is more readable and resilient to enum
      * reordering; {@code EnumType.ORDINAL} and {@code EnumType.CODE} are compact but require stable ordering or codes.</p>
+     *
+     * <p><b>Per-field overrides:</b> a field-level {@link JsonXmlField#enumerated()} of {@code ORDINAL}
+     * or {@code CODE} overrides this setting, but a field-level {@code NAME} is indistinguishable from
+     * the default and does <i>not</i> override a class-level {@code ORDINAL} or {@code CODE}; neither
+     * does {@link Type#enumerated() @Type(enumerated = ...)} for JSON/XML. To force names for one field
+     * in such a class, spell the type out with {@code @JsonXmlField(type = "com.example.Status(NAME)")}.</p>
      *
      * @return the enum serialization strategy
      */

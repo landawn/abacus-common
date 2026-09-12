@@ -133,13 +133,57 @@ public class AbstractByteTypeTest extends TestBase {
         assertThrows(ArithmeticException.class, () -> type.valueOf("256"));
     }
 
+    // T4-02: a well-formed but out-of-range token is an ArithmeticException on every path (unified overflow policy,
+    // as Numbers.toByte throws on the String path four lines above); NumberFormatException is for malformed text.
     @Test
     public void testValueOf_CharArray_OutOfRange() {
         char[] cbuf = "128".toCharArray();
-        assertThrows(NumberFormatException.class, () -> type.valueOf(cbuf, 0, 3));
+        assertThrows(ArithmeticException.class, () -> type.valueOf(cbuf, 0, 3));
 
         char[] cbuf2 = "-129".toCharArray();
-        assertThrows(NumberFormatException.class, () -> type.valueOf(cbuf2, 0, 4));
+        assertThrows(ArithmeticException.class, () -> type.valueOf(cbuf2, 0, 4));
+    }
+
+    @Test
+    public void reviewFixes20260906_charArray_overflowIsArithmetic_malformedIsNfe_onBothPaths() {
+        for (String s : new String[] { "128", "-129", "256", "2147483648", "0x80", "-0x81", "0xFFFFFFFF" }) {
+            char[] cbuf = s.toCharArray();
+            assertThrows(ArithmeticException.class, () -> type.valueOf(cbuf, 0, cbuf.length), s);
+            assertThrows(ArithmeticException.class, () -> type.valueOf(s), s);
+        }
+
+        for (String s : new String[] { "12x", "L", " 1", "1 ", "0x", "0x1G", "#", "1.0" }) {
+            char[] cbuf = s.toCharArray();
+            assertThrows(NumberFormatException.class, () -> type.valueOf(cbuf, 0, cbuf.length), s);
+            assertThrows(NumberFormatException.class, () -> type.valueOf(s), s);
+        }
+
+        assertEquals(Byte.valueOf((byte) 127), type.valueOf("127".toCharArray(), 0, 3));
+        assertEquals(Byte.valueOf((byte) -128), type.valueOf("-128".toCharArray(), 0, 4));
+        assertEquals(Byte.valueOf((byte) 1), type.valueOf("1L".toCharArray(), 0, 2));
+        assertEquals(Byte.valueOf((byte) 0), type.valueOf("-0".toCharArray(), 0, 2));
+        assertNull(type.valueOf((char[]) null, 0, 0));
+        assertNull(type.valueOf(new char[0], 0, 0));
+    }
+
+    // T4-01: the shared digit-only fast path rejected a hex token ("0x1F" -> NFE("0x1") after stripping the F as a
+    // suffix) while valueOf(String) delegates to Numbers.toByte, which accepts it.
+    @Test
+    public void reviewFixes20260906_charArray_radixPrefix_matchesStringPath() {
+        for (String s : new String[] { "0x1F", "#1F", "-0x1F", "+0X1f", "0x7F", "-0x80", "-#1F" }) {
+            char[] cbuf = s.toCharArray();
+            assertEquals(type.valueOf(s), type.valueOf(cbuf, 0, cbuf.length), s);
+        }
+
+        assertEquals(Byte.valueOf((byte) 31), type.valueOf("0x1F".toCharArray(), 0, 4));
+        assertEquals(Byte.valueOf((byte) 31), type.valueOf("#1F".toCharArray(), 0, 3));
+        assertEquals(Byte.valueOf((byte) -31), type.valueOf("-0x1F".toCharArray(), 0, 5));
+        assertEquals(Byte.valueOf((byte) 127), type.valueOf("0x7F".toCharArray(), 0, 4));
+        assertEquals(Byte.valueOf((byte) -128), type.valueOf("-0x80".toCharArray(), 0, 5));
+        assertEquals(Byte.valueOf((byte) 31), type.valueOf("xx0x1Fyy".toCharArray(), 2, 4));
+        // a bare "0" or "0x" is not a prefix
+        assertEquals(Byte.valueOf((byte) 0), type.valueOf("0".toCharArray(), 0, 1));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("0x".toCharArray(), 0, 2));
     }
 
     @Test

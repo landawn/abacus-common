@@ -46,7 +46,7 @@ public class User extends org.apache.avro.specific.SpecificRecordBase implements
     }
 
     @Override
-    @SuppressWarnings(value = "unchecked")
+    @SuppressWarnings("unchecked")
     public void put(int field$, java.lang.Object value$) {
         switch (field$) {
             case 0:

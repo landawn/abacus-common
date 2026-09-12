@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import java.sql.CallableStatement;
@@ -180,4 +181,61 @@ public class ClazzTypeTest extends TestBase {
         assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
+    // ---- review fixes 2026-09-06, T2-06: a Class handed to valueOf(Object) is returned as is ----
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectAcceptsAClassInstance() {
+        // Before the fix: IllegalArgumentException "No class found by name: class java.lang.Integer".
+        assertEquals(Integer.class, type.valueOf((Object) Integer.class));
+        assertEquals(int[].class, type.valueOf((Object) int[].class));
+        assertEquals(java.util.Map.Entry.class, type.valueOf((Object) java.util.Map.Entry.class));
+        // Non-Class arguments still go through the string form.
+        assertEquals(int[].class, type.valueOf((Object) "int[]"));
+        Assertions.assertNull(type.valueOf((Object) null));
+        // The pool-registered handler behaves the same.
+        assertEquals(Integer.class, ((Type<Class>) createType("Clazz<Object>")).valueOf((Object) Integer.class));
+    }
+
+    // ---- T2-13: documented limits of the class-name round trip ----
+
+    @Test
+    public void reviewFixes20260906_voidAndHiddenClassNamesDoNotRoundTrip() {
+        assertEquals("void", type.stringOf(void.class));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("void"));
+
+        final Runnable lambda = () -> {
+        };
+        final String hiddenName = type.stringOf(lambda.getClass());
+        Assertions.assertNotNull(hiddenName);
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(hiddenName));
+    }
+
+    // ---- F117 review fix 2026-09-08: an unresolvable type argument must not degrade to Object ----
+
+    @Test
+    public void reviewFixes20260908_unresolvableTypeArgumentIsRejectedAtConstruction() {
+        // TypeFactory answers an unknown class token with an ObjectType over Object.class, so this used to
+        // construct silently and parameterClass() returned Object.class - which the method's javadoc
+        // ("the parameter class of this Clazz<T> type") does not admit.
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("Clazz<com.nosuch.Missing>"));
+        Assertions.assertTrue(e.getMessage().contains("com.nosuch.Missing"), e.getMessage());
+        assertThrows(IllegalArgumentException.class, () -> new ClazzType("com.nosuch.Missing"));
+    }
+
+    @Test
+    public void reviewFixes20260908_typeArgumentsThatDoResolveToObjectAreStillAccepted() {
+        // The unbounded wildcards are mapped to Object.class by TypeFactory on purpose, and "Object" itself
+        // resolves normally; neither may be caught by the unresolvable-name guard.
+        assertEquals(Object.class, ((ClazzType) createType("Clazz<?>")).parameterClass());
+        assertEquals(Object.class, ((ClazzType) createType("Clazz<? super java.lang.Integer>")).parameterClass());
+        assertEquals(Object.class, ((ClazzType) createType("Clazz<Object>")).parameterClass());
+        assertEquals(Object.class, ((ClazzType) createType("Clazz<java.lang.Object>")).parameterClass());
+
+        // ... and the resolvable arguments keep reporting the class they resolved to.
+        assertEquals(Integer.class, ((ClazzType) createType("Clazz<java.lang.Integer>")).parameterClass());
+        assertEquals(Integer.class, ((ClazzType) createType("Clazz<? extends java.lang.Integer>")).parameterClass());
+        assertEquals(int.class, ((ClazzType) createType("Clazz<int>")).parameterClass());
+        assertEquals(java.util.List.class, ((ClazzType) createType("Clazz<List<String>>")).parameterClass());
+        assertEquals(String.class, type.parameterClass());
+    }
 }

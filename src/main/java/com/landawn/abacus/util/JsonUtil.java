@@ -55,9 +55,42 @@ import com.landawn.abacus.type.Type;
  * <p><b>Exception handling:</b> Methods throw {@link JSONException} when org.json encounters an
  * error, and {@link IllegalArgumentException} when an unsupported target type is requested.
  *
- * <p><b>Circular references:</b> Cyclic object graphs are unsupported. Depending on where the
- * cycle occurs, conversion can fail with a recursion error or an org.json nesting-depth error.
- * Callers must ensure the object graph is acyclic.
+ * <p><b>{@code null} inputs are not treated uniformly across the {@code wrap} overloads.</b>
+ * {@link #wrap(Map)}, {@link #wrap(Object)} and {@link #wrap(Collection)} accept {@code null} and produce an
+ * empty {@link JSONObject} / {@link JSONArray}. The nine array overloads ({@code boolean[]} through
+ * {@code double[]}, plus {@link #wrap(Object[])}) reject {@code null} with a {@link NullPointerException}.
+ * The {@code unwrap} and {@code toList} methods reject a {@code null} source or target type with an
+ * {@link IllegalArgumentException}.
+ *
+ * <p><b>Key order is undefined.</b> {@link JSONObject} stores its entries in a {@link java.util.HashMap}, so it
+ * has no insertion or sorted order to preserve, and the {@code Map} returned by {@link #unwrap(JSONObject)} is
+ * likewise unordered. Request an ordered map explicitly - for example
+ * {@code unwrap(jsonObject, LinkedHashMap.class)} or {@code unwrap(jsonObject, TreeMap.class)} - if you need a
+ * deterministic iteration order; note that {@link java.util.LinkedHashMap} only freezes whatever order the
+ * source {@code JSONObject} happened to have.
+ *
+ * <p><b>Nested JSON-to-Java conversion:</b> Explicit map, collection and array targets are reconstructed
+ * recursively, including ordinary Java containers stored inside JSON nodes. Declared nested element
+ * types and the JSON null sentinel are honored. Ordinary Java values requested as {@code Object}
+ * remain identical and opaque; native JSON nodes are still adapted. Container factories must return
+ * fresh, empty, correctly typed storage, independent of every input and earlier output. Converted
+ * map-key collisions and cycles actually traversed during conversion raise {@link IllegalArgumentException}.
+ * Opaque Object leaves may contain cycles.</p>
+ *
+ * <p><b>Circular references during Java-to-JSON wrapping:</b> Cyclic object graphs are unsupported, and how the failure surfaces depends
+ * on where the cycle is:
+ * <ul>
+ *   <li>A bean that reaches itself through bean properties only (directly or mutually) is <i>detected</i>:
+ *       {@link #wrap(Object)} throws {@link IllegalArgumentException} with the message
+ *       "Cyclic bean reference cannot be converted to a map".</li>
+ *   <li>A {@link Collection} or {@link Map} that contains itself hits org.json's own guard and throws
+ *       {@link JSONException} ("has reached recursion depth limit of 512").</li>
+ *   <li>A cycle that runs <i>through</i> a collection or array on its way back to a bean - a bean holding a
+ *       {@code List} that contains the bean, or an {@code Object[]} containing itself - is <b>not</b>
+ *       detected and overflows the stack with a {@link StackOverflowError}. That is an {@link Error}, not an
+ *       exception: a {@code catch (Exception)} around the call will not stop it.</li>
+ * </ul>
+ * Callers must ensure the object graph is acyclic rather than relying on any of these.
  *
  * <p><b>Usage examples:</b>
  * <pre>{@code
@@ -115,9 +148,10 @@ public final class JsonUtil {
      *
      * @param map the map to convert; may be {@code null}; keys must be non-null {@link String}s
      * @return a new {@link JSONObject} containing the non-null-valued entries from the input map
-     * @throws JSONException if any value in the map cannot be represented as a valid JSON type
+     * @throws NullPointerException if {@code map} contains a null key
+     * @throws JSONException if a value is a non-finite number, or wrapping nested values exceeds the JSON nesting limit or detects a recursive bean property
      */
-    public static JSONObject wrap(final Map<String, ?> map) {
+    public static JSONObject wrap(final Map<String, ?> map) throws NullPointerException, JSONException {
         return new JSONObject(map);
     }
 
@@ -142,12 +176,25 @@ public final class JsonUtil {
      * JSONObject json2 = JsonUtil.wrap((Object) map);
      * }</pre>
      *
+     * <p><b>Only {@link Map} and JavaBean arguments are supported.</b> Anything else - a {@link String}, a boxed
+     * primitive, an array, or a {@link Collection} - has no bean properties and is rejected with an
+     * {@link IllegalArgumentException}. This is easy to hit by accident: a variable whose <i>static</i> type is
+     * {@link Object} binds to this overload even when it holds a {@link Collection} or an array, so
+     * {@link #wrap(Collection)} / {@link #wrap(Object[])} are not selected. Cast to the intended parameter type
+     * when the static type is {@link Object}.
+     *
      * @param bean the object to convert; may be {@code null}, a {@link Map}, or any JavaBean with accessible properties
      * @return a new {@link JSONObject} representing the input object; an empty {@link JSONObject} if {@code bean} is {@code null}
-     * @throws JSONException if any property value cannot be converted to a valid JSON type
+     * @throws IllegalArgumentException if {@code bean} is neither {@code null}, a {@link Map}, nor a type with
+     *         accessible bean properties
+     * @throws NullPointerException if the input is a map containing a null key
+     * @throws JSONException if any property value cannot be converted to a valid JSON type - in particular a
+     *         {@code NaN} or infinite {@link Double}/{@link Float} property, which the JSON specification does
+     *         not support and this class rejects outright.
+     * @throws RuntimeException if reading bean metadata or a property fails during conversion
      */
     @SuppressWarnings("unchecked")
-    public static JSONObject wrap(final Object bean) {
+    public static JSONObject wrap(final Object bean) throws IllegalArgumentException, NullPointerException, JSONException, RuntimeException {
         return new JSONObject(bean instanceof Map ? (Map<String, Object>) bean : Beans.deepBeanToMap(bean, true));
     }
 
@@ -165,10 +212,11 @@ public final class JsonUtil {
      *
      * @param array the non-null boolean array to convert
      * @return a new {@link JSONArray} containing all elements from the input array
-     * @throws JSONException if an error occurs during conversion
-     * @throws NullPointerException if {@code array} is {@code null}
+     * @throws IllegalArgumentException if {@code array} is {@code null}
      */
-    public static JSONArray wrap(final boolean[] array) throws JSONException {
+    public static JSONArray wrap(final boolean[] array) throws IllegalArgumentException {
+        N.checkArgNotNull(array, cs.array);
+
         return new JSONArray(array);
     }
 
@@ -188,10 +236,11 @@ public final class JsonUtil {
      *
      * @param array the non-null character array to convert
      * @return a new {@link JSONArray} containing the characters from the input array
-     * @throws JSONException if an error occurs during conversion
-     * @throws NullPointerException if {@code array} is {@code null}
+     * @throws IllegalArgumentException if {@code array} is {@code null}
      */
-    public static JSONArray wrap(final char[] array) throws JSONException {
+    public static JSONArray wrap(final char[] array) throws IllegalArgumentException {
+        N.checkArgNotNull(array, cs.array);
+
         return new JSONArray(array);
     }
 
@@ -209,10 +258,11 @@ public final class JsonUtil {
      *
      * @param array the non-null byte array to convert
      * @return a new {@link JSONArray} containing all byte values from the input array as numbers
-     * @throws JSONException if an error occurs during conversion
-     * @throws NullPointerException if {@code array} is {@code null}
+     * @throws IllegalArgumentException if {@code array} is {@code null}
      */
-    public static JSONArray wrap(final byte[] array) throws JSONException {
+    public static JSONArray wrap(final byte[] array) throws IllegalArgumentException {
+        N.checkArgNotNull(array, cs.array);
+
         return new JSONArray(array);
     }
 
@@ -230,10 +280,11 @@ public final class JsonUtil {
      *
      * @param array the non-null short array to convert
      * @return a new {@link JSONArray} containing all short values from the input array as numbers
-     * @throws JSONException if an error occurs during conversion
-     * @throws NullPointerException if {@code array} is {@code null}
+     * @throws IllegalArgumentException if {@code array} is {@code null}
      */
-    public static JSONArray wrap(final short[] array) throws JSONException {
+    public static JSONArray wrap(final short[] array) throws IllegalArgumentException {
+        N.checkArgNotNull(array, cs.array);
+
         return new JSONArray(array);
     }
 
@@ -251,10 +302,11 @@ public final class JsonUtil {
      *
      * @param array the non-null integer array to convert
      * @return a new {@link JSONArray} containing all integer values from the input array
-     * @throws JSONException if an error occurs during conversion
-     * @throws NullPointerException if {@code array} is {@code null}
+     * @throws IllegalArgumentException if {@code array} is {@code null}
      */
-    public static JSONArray wrap(final int[] array) throws JSONException {
+    public static JSONArray wrap(final int[] array) throws IllegalArgumentException {
+        N.checkArgNotNull(array, cs.array);
+
         return new JSONArray(array);
     }
 
@@ -274,10 +326,11 @@ public final class JsonUtil {
      *
      * @param array the non-null long array to convert
      * @return a new {@link JSONArray} containing all long values from the input array
-     * @throws JSONException if an error occurs during conversion
-     * @throws NullPointerException if {@code array} is {@code null}
+     * @throws IllegalArgumentException if {@code array} is {@code null}
      */
-    public static JSONArray wrap(final long[] array) throws JSONException {
+    public static JSONArray wrap(final long[] array) throws IllegalArgumentException {
+        N.checkArgNotNull(array, cs.array);
+
         return new JSONArray(array);
     }
 
@@ -297,11 +350,12 @@ public final class JsonUtil {
      *
      * @param array the non-null float array to convert
      * @return a new {@link JSONArray} containing all float values from the input array
-     * @throws JSONException if an error occurs during conversion, or if the array contains
-     *         {@code NaN} or {@code Infinity}
-     * @throws NullPointerException if {@code array} is {@code null}
+     * @throws IllegalArgumentException if {@code array} is {@code null}
+     * @throws JSONException if an array element is NaN or infinite
      */
-    public static JSONArray wrap(final float[] array) throws JSONException {
+    public static JSONArray wrap(final float[] array) throws IllegalArgumentException, JSONException {
+        N.checkArgNotNull(array, cs.array);
+
         return new JSONArray(array);
     }
 
@@ -321,11 +375,12 @@ public final class JsonUtil {
      *
      * @param array the non-null double array to convert
      * @return a new {@link JSONArray} containing all double values from the input array
-     * @throws JSONException if an error occurs during conversion, or if the array contains
-     *         {@code NaN} or {@code Infinity}
-     * @throws NullPointerException if {@code array} is {@code null}
+     * @throws IllegalArgumentException if {@code array} is {@code null}
+     * @throws JSONException if an array element is NaN or infinite
      */
-    public static JSONArray wrap(final double[] array) throws JSONException {
+    public static JSONArray wrap(final double[] array) throws IllegalArgumentException, JSONException {
+        N.checkArgNotNull(array, cs.array);
+
         return new JSONArray(array);
     }
 
@@ -351,10 +406,12 @@ public final class JsonUtil {
      *
      * @param array the non-null object array to convert
      * @return a new {@link JSONArray} containing all elements from the input array
-     * @throws JSONException if an error occurs during conversion
-     * @throws NullPointerException if {@code array} is {@code null}
+     * @throws IllegalArgumentException if {@code array} is {@code null}
+     * @throws JSONException if a value is a non-finite number, or wrapping a nested container or bean exceeds the JSON nesting limit or detects a recursive bean property
      */
-    public static JSONArray wrap(final Object[] array) throws JSONException {
+    public static JSONArray wrap(final Object[] array) throws IllegalArgumentException, JSONException {
+        N.checkArgNotNull(array, cs.array);
+
         return new JSONArray(array);
     }
 
@@ -377,9 +434,9 @@ public final class JsonUtil {
      *
      * @param coll the collection to convert; may be {@code null}
      * @return a new {@link JSONArray} containing all elements from the collection in iteration order
-     * @throws JSONException if an error occurs during conversion
+     * @throws JSONException if a value is a non-finite number, or wrapping a nested container or bean exceeds the JSON nesting limit or detects a recursive bean property
      */
-    public static JSONArray wrap(final Collection<?> coll) {
+    public static JSONArray wrap(final Collection<?> coll) throws JSONException {
         return new JSONArray(coll);
     }
 
@@ -388,9 +445,22 @@ public final class JsonUtil {
      *
      * <p>Convenience overload equivalent to {@link #unwrap(JSONObject, Class) unwrap(jsonObject, Map.class)}.
      * Values in the returned map are converted to the most appropriate Java types
-     * (e.g., JSON numbers to {@link Integer}/{@link Long}/{@link Double}, JSON booleans to
-     * {@link Boolean}, nested JSON objects to {@code Map<String, Object>},
+     * (e.g., JSON booleans to {@link Boolean}, nested JSON objects to {@code Map<String, Object>},
      * nested JSON arrays to {@code List<Object>}).
+     *
+     * <p><b>Numbers.</b> A <i>parsed</i> number literal becomes {@link Integer} or {@link Long} when it is an
+     * integer that fits, {@link java.math.BigInteger} when it does not, and {@link java.math.BigDecimal} - not
+     * {@link Double} - when it is written in decimal or exponent notation. The exceptions are the literals
+     * {@code BigDecimal} itself cannot parse, which org.json falls back to {@code Double} for: a negative literal
+     * whose value is zero ({@code -0}, {@code -0.0}, {@code -0e5}) and a negative exponent past
+     * {@code BigDecimal}'s {@code int} scale ({@code 1e-2147483648}). A value that was <i>put</i> into the
+     * {@link JSONObject} programmatically is returned unchanged, keeping whatever box type the caller used, so a
+     * value stored as a Java {@code Double} comes back as a {@code Double} and one stored as a {@link Float} comes
+     * back as a {@code Float}, while the same number parsed from JSON text comes back as a {@code BigDecimal}. To get a
+     * specific box type, use {@link #unwrap(JSONObject, Type)} with a parameterised map type (for example
+     * {@code Type.of("Map<String, Double>")}), or {@link #unwrap(JSONObject, Class)} with a bean class whose
+     * property has that type; {@code unwrap(jsonObject, Map.class)} leaves the box types as they are, because the
+     * value type of a raw {@code Map} is {@code Object}.
      *
      * <p><b>Usage example:</b>
      * <pre>{@code
@@ -401,12 +471,13 @@ public final class JsonUtil {
      *
      * @param jsonObject the {@link JSONObject} to convert
      * @return a {@code Map<String, Object>} containing all key-value pairs from the {@link JSONObject}
-     * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if {@code jsonObject} is {@code null}.
+     * @throws IllegalArgumentException if {@code jsonObject} is null, a traversed JSON-container conversion is cyclic, or a container factory fails to supply a fresh empty instance of the requested type.
+     * @throws JSONException if reading a JSONObject member or JSONArray element fails during traversal
+     * @throws RuntimeException if a container factory or an operation on a resulting container throws an unchecked exception.
      * @see #unwrap(JSONObject, Class)
      * @see #unwrap(JSONObject, Type)
      */
-    public static Map<String, Object> unwrap(final JSONObject jsonObject) throws JSONException {
+    public static Map<String, Object> unwrap(final JSONObject jsonObject) throws IllegalArgumentException, JSONException, RuntimeException {
         return unwrap(jsonObject, Map.class);
     }
 
@@ -417,7 +488,8 @@ public final class JsonUtil {
      * <ul>
      *   <li>{@link Map} implementations ({@link java.util.HashMap},
      *       {@link java.util.LinkedHashMap}, {@link java.util.TreeMap}, etc.)</li>
-     *   <li>JavaBean classes with accessible properties</li>
+     *   <li>JavaBean classes with accessible properties, including supported records and immutable beans;
+     *       incompatible scalar values are converted to the declared property type before construction</li>
      * </ul>
      *
      * <p><b>Usage example:</b>
@@ -431,11 +503,12 @@ public final class JsonUtil {
      * @param jsonObject the {@link JSONObject} to convert
      * @param targetType the class of the object to create
      * @return an instance of {@code targetType} populated with data from the {@link JSONObject}
-     * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not a
-     *         {@link Map} or bean type.
+     * @throws IllegalArgumentException if {@code jsonObject} or {@code targetType} is null, a requested target kind is incompatible with the source, a conversion encounters cyclic containers or colliding map keys, a container factory fails to supply a fresh empty instance of the requested type, or a selected converter rejects an argument.
+     * @throws JSONException if reading a JSONObject member or JSONArray element fails during traversal
+     * @throws RuntimeException if construction, property access, a target container operation, or a type-specific conversion fails; the concrete exception depends on that operation
      */
-    public static <T> T unwrap(final JSONObject jsonObject, final Class<? extends T> targetType) throws JSONException {
+    public static <T> T unwrap(final JSONObject jsonObject, final Class<? extends T> targetType)
+            throws IllegalArgumentException, JSONException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         return unwrap(jsonObject, Type.of(targetType));
@@ -475,12 +548,22 @@ public final class JsonUtil {
      * @param targetType the {@link Type} describing the target object
      * @return an instance of the type described by {@code targetType}, populated with data
      *         from the {@link JSONObject}
-     * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not a
-     *         {@link Map} or bean type.
+     * @throws IllegalArgumentException if {@code jsonObject} or {@code targetType} is null, a requested target kind is incompatible with the source, a conversion encounters cyclic containers or colliding map keys, a container factory fails to supply a fresh empty instance of the requested type, or a selected converter rejects an argument.
+     * @throws JSONException if reading a JSONObject member or JSONArray element fails during traversal
+     * @throws RuntimeException if construction, property access, a target container operation, or a type-specific conversion fails; the concrete exception depends on that operation
      */
     @SuppressWarnings("unchecked")
-    public static <T> T unwrap(final JSONObject jsonObject, Type<? extends T> targetType) throws JSONException {
+    public static <T> T unwrap(final JSONObject jsonObject, Type<? extends T> targetType) throws IllegalArgumentException, JSONException, RuntimeException {
+        return unwrap(jsonObject, targetType, new JsonConversionContext());
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code jsonObject} or {@code targetType} is null, a requested target kind is incompatible with the source, a conversion encounters cyclic containers or colliding map keys, a container factory fails to supply a fresh empty instance of the requested type, or a selected converter rejects an argument.
+     * @throws JSONException if reading a JSONObject member or JSONArray element fails during traversal
+     * @throws RuntimeException if construction, property access, a target container operation, or a type-specific conversion fails; the concrete exception depends on that operation
+     */
+    private static <T> T unwrap(final JSONObject jsonObject, Type<? extends T> targetType, final JsonConversionContext active)
+            throws IllegalArgumentException, JSONException, RuntimeException {
         N.checkArgNotNull(jsonObject, cs.jsonObject);
         N.checkArgNotNull(targetType, cs.targetType);
 
@@ -489,71 +572,96 @@ public final class JsonUtil {
         }
 
         targetType = targetType.isObject() ? Type.of("Map<String, Object>") : targetType;
-        final Class<?> cls = targetType.javaType();
+        enterJsonConversion(jsonObject, active);
+        try {
+            final Class<?> cls = targetType.javaType();
 
-        if (targetType.isMap()) {
-            @SuppressWarnings("rawtypes")
-            final Map<Object, Object> map = N.newMap((Class<Map>) cls, jsonObject.keySet().size());
-            final Iterator<String> iter = jsonObject.keys();
-            final Type<?> keyType = targetType.parameterTypes().get(0);
-            final Type<?> valueType = targetType.parameterTypes().get(1);
-            String key = null;
-            Object convertedKey = null;
-            Object value = null;
+            if (targetType.isMap()) {
+                @SuppressWarnings("rawtypes")
+                final Map<Object, Object> map = N.newMap((Class<Map>) cls, jsonObject.keySet().size());
+                validateJsonOutput(map, targetType, active);
+                final Iterator<String> iter = jsonObject.keys();
+                final Type<?> keyType = targetType.parameterTypes().get(0);
+                final Type<?> valueType = targetType.parameterTypes().get(1);
+                String key = null;
+                Object convertedKey = null;
+                Object value = null;
 
-            while (iter.hasNext()) {
-                key = iter.next();
-                convertedKey = keyType.javaType().isAssignableFrom(String.class) ? key : keyType.valueOf(key);
-                value = jsonObject.get(key);
+                while (iter.hasNext()) {
+                    key = iter.next();
+                    convertedKey = keyType.javaType().isAssignableFrom(String.class) ? key : keyType.valueOf(key);
+                    value = jsonObject.get(key);
 
-                if (value == JSONObject.NULL) {
-                    value = null;
-                } else if (value != null) {
-                    if (value instanceof JSONObject) {
-                        value = unwrap((JSONObject) value, valueType);
-                    } else if (value instanceof JSONArray) {
-                        value = unwrap((JSONArray) value, valueType);
-                    } else if (!valueType.javaType().isAssignableFrom(value.getClass())) {
-                        value = valueType.valueOf(value);
-                    }
-                }
-
-                map.put(convertedKey, value);
-            }
-
-            return (T) map;
-        } else if (targetType.isBean()) {
-            final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.reflectType());
-            final Object result = beanInfo.createBeanResult();
-            final Iterator<String> iter = jsonObject.keys();
-            String key = null;
-            Object value = null;
-            PropInfo propInfo = null;
-
-            while (iter.hasNext()) {
-                key = iter.next();
-                value = jsonObject.get(key);
-
-                propInfo = beanInfo.getPropInfo(key);
-
-                if (propInfo != null) {
                     if (value == JSONObject.NULL) {
                         value = null;
                     } else if (value != null) {
                         if (value instanceof JSONObject) {
-                            value = unwrap((JSONObject) value, propInfo.jsonXmlType);
+                            value = unwrap((JSONObject) value, valueType, active);
                         } else if (value instanceof JSONArray) {
-                            value = unwrap((JSONArray) value, propInfo.jsonXmlType);
+                            value = unwrap((JSONArray) value, valueType, active);
+                        } else if (canConvertJavaContainer(value, valueType)) {
+                            value = convertJavaContainer(value, valueType, active);
+                        } else if (!valueType.javaType().isAssignableFrom(value.getClass())) {
+                            rejectJsonCycles(value, active);
+                            value = valueType.valueOf(value);
                         }
                     }
 
-                    propInfo.setPropValue(result, value);
+                    if (map.containsKey(convertedKey)) {
+                        throw new IllegalArgumentException("Converted map keys collide");
+                    }
+                    map.put(convertedKey, value);
                 }
+
+                return (T) map;
+            } else if (targetType.isBean()) {
+                final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.reflectType());
+                final Object result = beanInfo.createBeanResult();
+                final Iterator<String> iter = jsonObject.keys();
+                String key = null;
+                Object value = null;
+                PropInfo propInfo = null;
+
+                while (iter.hasNext()) {
+                    key = iter.next();
+                    value = jsonObject.get(key);
+
+                    propInfo = beanInfo.getPropInfo(key);
+
+                    if (propInfo != null) {
+                        if (value == JSONObject.NULL) {
+                            value = null;
+                        } else if (value != null) {
+                            if (value instanceof JSONObject) {
+                                value = unwrap((JSONObject) value, propInfo.jsonXmlType, active);
+                            } else if (value instanceof JSONArray) {
+                                value = unwrap((JSONArray) value, propInfo.jsonXmlType, active);
+                            } else if (canConvertJavaContainer(value, propInfo.jsonXmlType)) {
+                                value = convertJavaContainer(value, propInfo.jsonXmlType, active);
+                            } else if (!propInfo.jsonXmlType.javaType().isInstance(value)) {
+                                // Bean setters may convert incompatible containers to scalar text.
+                                rejectJsonCycles(value, active);
+                            }
+                        }
+
+                        propInfo.setPropValue(result, value);
+                        if (beanInfo.isImmutable && result instanceof Object[]) {
+                            // Constructor arguments are stored without the scalar conversion performed by setters.
+                            final Object storedValue = propInfo.getPropValue(result);
+                            if (storedValue != null && !propInfo.jsonXmlType.javaType().isInstance(storedValue)) {
+                                propInfo.setPropValue(result, N.convert(storedValue, propInfo.jsonXmlType.javaType()));
+                            }
+                        }
+                    }
+                }
+
+                return beanInfo.finishBeanResult(result);
+            } else {
+                throw new IllegalArgumentException(targetType.name() + " is not a map or bean type");
             }
 
-            return beanInfo.finishBeanResult(result);
-        } else {
-            throw new IllegalArgumentException(targetType.name() + " is not a map or bean type");
+        } finally {
+            active.activeContainers.remove(jsonObject);
         }
     }
 
@@ -563,7 +671,16 @@ public final class JsonUtil {
      * <p>Convenience overload equivalent to {@link #toList(JSONArray, Class) toList(jsonArray, Object.class)}.
      * JSON values are mapped to Java types as follows:
      * <ul>
-     *   <li>JSON numbers &rarr; {@link Integer}, {@link Long}, or {@link Double} depending on value</li>
+     *   <li>JSON numbers &rarr; {@link Integer} or {@link Long} for an integer literal that fits,
+     *       {@link java.math.BigInteger} for one that does not, and {@link java.math.BigDecimal} - not
+     *       {@link Double} - for a decimal or exponent literal; the exceptions are the literals
+     *       {@code BigDecimal} itself cannot parse, which org.json falls back to {@code Double} for - a negative
+     *       literal whose value is zero ({@code -0}, {@code -0.0}, {@code -0e5}) and a negative exponent past
+     *       {@code BigDecimal}'s {@code int} scale ({@code 1e-2147483648}). A number that was
+     *       put into the {@link JSONArray} programmatically is returned unchanged, so {@code Double},
+     *       {@link Float} and other box types are possible too; use
+     *       {@link #toList(JSONArray, Class) toList(jsonArray, Double.class)} when a specific box type is
+     *       required</li>
      *   <li>JSON strings &rarr; {@link String}</li>
      *   <li>JSON booleans &rarr; {@link Boolean}</li>
      *   <li>JSON {@code null} &rarr; {@code null}</li>
@@ -578,16 +695,19 @@ public final class JsonUtil {
      * // list -> ["text", 123, true, null]
      * }</pre>
      *
-     * @param <T> the unchecked element type of the returned list
+     * <p>The returned list is a {@code List<Object>} because the element types are decided by the JSON, not by
+     * the caller. Use {@link #toList(JSONArray, Class)} or {@link #unwrap(JSONArray, Type)} when you need a
+     * list with a checked element type.
+     *
      * @param jsonArray the {@link JSONArray} to convert
      * @return a {@link java.util.List} containing all elements from the {@link JSONArray}
-     * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if {@code jsonArray} is {@code null}.
+     * @throws IllegalArgumentException if {@code jsonArray} is null, a traversed JSON-container conversion is cyclic, or a container factory fails to supply a fresh empty instance of the requested type.
+     * @throws JSONException if reading a JSONObject member or JSONArray element fails during traversal
+     * @throws RuntimeException if a container factory or an operation on a resulting container throws an unchecked exception.
      * @see #toList(JSONArray, Class)
      */
-    @SuppressWarnings("unchecked")
-    public static <T> List<T> unwrap(final JSONArray jsonArray) throws JSONException {
-        return (List<T>) toList(jsonArray, Object.class);
+    public static List<Object> unwrap(final JSONArray jsonArray) throws IllegalArgumentException, JSONException, RuntimeException {
+        return toList(jsonArray, Object.class);
     }
 
     /**
@@ -610,11 +730,12 @@ public final class JsonUtil {
      * @param jsonArray the {@link JSONArray} to convert
      * @param targetType the class of the object to create
      * @return an instance of {@code targetType} populated with data from the {@link JSONArray}
-     * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not a
-     *         collection or array type.
+     * @throws IllegalArgumentException if {@code jsonArray} or {@code targetType} is null, a requested target kind is incompatible with the source, a conversion encounters cyclic containers or colliding map keys, a container factory fails to supply a fresh empty instance of the requested type, or a selected converter rejects an argument.
+     * @throws JSONException if reading a JSONObject member or JSONArray element fails during traversal
+     * @throws RuntimeException if construction, property access, a target container operation, or a type-specific conversion fails; the concrete exception depends on that operation
      */
-    public static <T> T unwrap(final JSONArray jsonArray, final Class<? extends T> targetType) throws JSONException {
+    public static <T> T unwrap(final JSONArray jsonArray, final Class<? extends T> targetType)
+            throws IllegalArgumentException, JSONException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         return unwrap(jsonArray, Type.of(targetType));
@@ -654,12 +775,22 @@ public final class JsonUtil {
      * @param targetType the {@link Type} describing the target object
      * @return an instance of the type described by {@code targetType}, populated with data
      *         from the {@link JSONArray}
-     * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if either argument is {@code null}, or if {@code targetType} is not an array
-     *         or collection type.
+     * @throws IllegalArgumentException if {@code jsonArray} or {@code targetType} is null, a requested target kind is incompatible with the source, a conversion encounters cyclic containers or colliding map keys, a container factory fails to supply a fresh empty instance of the requested type, or a selected converter rejects an argument.
+     * @throws JSONException if reading a JSONObject member or JSONArray element fails during traversal
+     * @throws RuntimeException if construction, property access, a target container operation, or a type-specific conversion fails; the concrete exception depends on that operation
      */
     @SuppressWarnings("unchecked")
-    public static <T> T unwrap(final JSONArray jsonArray, Type<? extends T> targetType) throws JSONException {
+    public static <T> T unwrap(final JSONArray jsonArray, Type<? extends T> targetType) throws IllegalArgumentException, JSONException, RuntimeException {
+        return unwrap(jsonArray, targetType, new JsonConversionContext());
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code jsonArray} or {@code targetType} is null, a requested target kind is incompatible with the source, a conversion encounters cyclic containers or colliding map keys, a container factory fails to supply a fresh empty instance of the requested type, or a selected converter rejects an argument.
+     * @throws JSONException if reading a JSONObject member or JSONArray element fails during traversal
+     * @throws RuntimeException if construction, property access, a target container operation, or a type-specific conversion fails; the concrete exception depends on that operation
+     */
+    private static <T> T unwrap(final JSONArray jsonArray, Type<? extends T> targetType, final JsonConversionContext active)
+            throws IllegalArgumentException, JSONException, RuntimeException {
         N.checkArgNotNull(jsonArray, cs.jsonArray);
         N.checkArgNotNull(targetType, cs.targetType);
 
@@ -668,83 +799,97 @@ public final class JsonUtil {
         }
 
         targetType = targetType.isObject() ? Type.of("List<Object>") : targetType;
-        final int len = jsonArray.length();
+        enterJsonConversion(jsonArray, active);
+        try {
+            final int len = jsonArray.length();
 
-        if (targetType.isCollection()) {
-            @SuppressWarnings("rawtypes")
-            final Collection<Object> coll = N.newCollection((Class<Collection>) targetType.javaType(), len);
-            final Type<?> elementType = targetType.elementType();
-            Object element = null;
+            if (targetType.isCollection()) {
+                @SuppressWarnings("rawtypes")
+                final Collection<Object> coll = N.newCollection((Class<Collection>) targetType.javaType(), len);
+                validateJsonOutput(coll, targetType, active);
+                final Type<?> elementType = targetType.elementType();
+                Object element = null;
 
-            for (int i = 0; i < len; i++) {
-                element = jsonArray.get(i);
+                for (int i = 0; i < len; i++) {
+                    element = jsonArray.get(i);
 
-                if (element == JSONObject.NULL) {
-                    element = null;
-                } else if (element != null) {
-                    if (element instanceof JSONObject) {
-                        element = unwrap((JSONObject) element, elementType);
-                    } else if (element instanceof JSONArray) {
-                        element = unwrap((JSONArray) element, elementType);
-                    } else if (!elementType.javaType().isAssignableFrom(element.getClass())) {
+                    if (element == JSONObject.NULL) {
+                        element = null;
+                    } else if (element != null) {
+                        if (element instanceof JSONObject) {
+                            element = unwrap((JSONObject) element, elementType, active);
+                        } else if (element instanceof JSONArray) {
+                            element = unwrap((JSONArray) element, elementType, active);
+                        } else if (canConvertJavaContainer(element, elementType)) {
+                            element = convertJavaContainer(element, elementType, active);
+                        } else if (!elementType.javaType().isAssignableFrom(element.getClass())) {
+                            rejectJsonCycles(element, active);
+                            element = elementType.valueOf(element);
+                        }
+                    }
+
+                    coll.add(element);
+                }
+
+                return (T) coll;
+            } else if (targetType.isPrimitiveArray()) {
+                final Type<?> elementType = targetType.elementType();
+                final Object array = N.newArray(elementType.javaType(), jsonArray.length());
+                Object element = null;
+
+                for (int i = 0; i < len; i++) {
+                    element = jsonArray.get(i);
+
+                    if (element == JSONObject.NULL) {
+                        element = null;
+                    }
+
+                    if (element == null) {
+                        element = elementType.defaultValue();
+                    } else {
+                        rejectJsonCycles(element, active);
                         element = elementType.valueOf(element);
                     }
+
+                    Array.set(array, i, element);
                 }
 
-                coll.add(element);
-            }
+                return (T) array;
+            } else if (targetType.isArray()) {
+                final Object[] array = N.newArray(targetType.elementType().javaType(), jsonArray.length());
+                final Type<?> elementType = targetType.elementType();
+                Object element = null;
 
-            return (T) coll;
-        } else if (targetType.isPrimitiveArray()) {
-            final Type<?> elementType = targetType.elementType();
-            final Object array = N.newArray(elementType.javaType(), jsonArray.length());
-            Object element = null;
+                for (int i = 0; i < len; i++) {
+                    element = jsonArray.get(i);
 
-            for (int i = 0; i < len; i++) {
-                element = jsonArray.get(i);
-
-                if (element == JSONObject.NULL) {
-                    element = null;
-                }
-
-                if (element == null) {
-                    element = elementType.defaultValue();
-                } else {
-                    element = elementType.valueOf(element);
-                }
-
-                Array.set(array, i, element);
-            }
-
-            return (T) array;
-        } else if (targetType.isArray()) {
-            final Object[] array = N.newArray(targetType.elementType().javaType(), jsonArray.length());
-            final Type<?> elementType = targetType.elementType();
-            Object element = null;
-
-            for (int i = 0; i < len; i++) {
-                element = jsonArray.get(i);
-
-                if (element == JSONObject.NULL) {
-                    element = null;
-                } else if (element != null) {
-                    if (element instanceof JSONObject) {
-                        element = unwrap((JSONObject) element, elementType);
-                    } else if (element instanceof JSONArray) {
-                        element = unwrap((JSONArray) element, elementType);
-                    } else if (!elementType.javaType().isAssignableFrom(element.getClass())) {
-                        element = elementType.valueOf(element);
+                    if (element == JSONObject.NULL) {
+                        element = null;
+                    } else if (element != null) {
+                        if (element instanceof JSONObject) {
+                            element = unwrap((JSONObject) element, elementType, active);
+                        } else if (element instanceof JSONArray) {
+                            element = unwrap((JSONArray) element, elementType, active);
+                        } else if (canConvertJavaContainer(element, elementType)) {
+                            element = convertJavaContainer(element, elementType, active);
+                        } else if (!elementType.javaType().isAssignableFrom(element.getClass())) {
+                            rejectJsonCycles(element, active);
+                            element = elementType.valueOf(element);
+                        }
                     }
+
+                    array[i] = element;
                 }
 
-                array[i] = element;
+                return (T) array;
+            } else {
+                // A type assignable from JSONArray is impossible here: such types already returned
+                // from the guard at the top of the method.
+                throw new IllegalArgumentException(targetType.name() + " is not an array or collection type");
             }
 
-            return (T) array;
-        } else {
-            // A type assignable from JSONArray is impossible here: such types already returned
-            // from the guard at the top of the method.
-            throw new IllegalArgumentException(targetType.name() + " is not an array or collection type");
+        } finally {
+            active.activeContainers.remove(jsonArray);
         }
     }
 
@@ -766,10 +911,12 @@ public final class JsonUtil {
      * @param jsonArray the {@link JSONArray} to convert
      * @param elementClass the class of elements in the list
      * @return a {@link java.util.List} containing elements converted to {@code elementClass}
-     * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if either argument is {@code null}.
+     * @throws IllegalArgumentException if {@code jsonArray} or {@code elementClass} is null, a requested target kind is incompatible with the source, a conversion encounters cyclic containers or colliding map keys, a container factory fails to supply a fresh empty instance of the requested type, or a selected converter rejects an argument.
+     * @throws JSONException if reading a JSONObject member or JSONArray element fails during traversal
+     * @throws RuntimeException if construction, property access, a target container operation, or a type-specific conversion fails; the concrete exception depends on that operation
      */
-    public static <T> List<T> toList(final JSONArray jsonArray, final Class<? extends T> elementClass) throws JSONException {
+    public static <T> List<T> toList(final JSONArray jsonArray, final Class<? extends T> elementClass)
+            throws IllegalArgumentException, JSONException, RuntimeException {
         N.checkArgNotNull(elementClass, cs.elementClass);
 
         return toList(jsonArray, Type.of(elementClass));
@@ -794,13 +941,16 @@ public final class JsonUtil {
      * @param jsonArray the {@link JSONArray} to convert
      * @param elementType the {@link Type} of each element
      * @return a {@link java.util.List} containing elements converted to the specified type
-     * @throws JSONException if an error occurs during conversion
-     * @throws IllegalArgumentException if either argument is {@code null}.
+     * @throws IllegalArgumentException if {@code jsonArray} or {@code elementType} is null, a requested target kind is incompatible with the source, a conversion encounters cyclic containers or colliding map keys, a container factory fails to supply a fresh empty instance of the requested type, or a selected converter rejects an argument.
+     * @throws JSONException if reading a JSONObject member or JSONArray element fails during traversal
+     * @throws RuntimeException if construction, property access, a target container operation, or a type-specific conversion fails; the concrete exception depends on that operation
      */
-    public static <T> List<T> toList(final JSONArray jsonArray, final Type<T> elementType) throws JSONException {
+    public static <T> List<T> toList(final JSONArray jsonArray, final Type<T> elementType) throws IllegalArgumentException, JSONException, RuntimeException {
         N.checkArgNotNull(jsonArray, cs.jsonArray);
         N.checkArgNotNull(elementType, cs.elementType);
 
+        final JsonConversionContext active = new JsonConversionContext();
+        indexJsonGraph(jsonArray, active);
         final int len = jsonArray.length();
         final List<Object> coll = new ArrayList<>(len);
 
@@ -813,10 +963,13 @@ public final class JsonUtil {
                 element = null;
             } else if (element != null) {
                 if (element instanceof JSONObject) {
-                    element = unwrap((JSONObject) element, elementType);
+                    element = unwrap((JSONObject) element, elementType, active);
                 } else if (element instanceof JSONArray) {
-                    element = unwrap((JSONArray) element, elementType);
+                    element = unwrap((JSONArray) element, elementType, active);
+                } else if (canConvertJavaContainer(element, elementType)) {
+                    element = convertJavaContainer(element, elementType, active);
                 } else if (!elementType.javaType().isAssignableFrom(element.getClass())) {
+                    rejectJsonCycles(element, active);
                     element = elementType.valueOf(element);
                 }
             }
@@ -825,5 +978,198 @@ public final class JsonUtil {
         }
 
         return (List<T>) coll;
+    }
+
+    /**
+     * @throws JSONException if reading JSON graph contents fails
+     * @throws IllegalArgumentException if {@code value} is already being converted on the active recursion path
+     */
+    private static void enterJsonConversion(final Object value, final JsonConversionContext context) throws JSONException, IllegalArgumentException {
+        indexJsonGraph(value, context);
+        if (context.activeContainers.put(value, Boolean.TRUE) != null) {
+            throw new IllegalArgumentException("Cyclic JSON container conversion");
+        }
+    }
+
+    private static boolean canConvertJavaContainer(final Object value, final Type<?> target) {
+        return value instanceof Map && target.isMap()
+                || (value instanceof Collection || value.getClass().isArray()) && (target.isCollection() || target.isArray());
+    }
+
+    /**
+     * @throws IllegalArgumentException if a requested target kind is incompatible with the source, a conversion encounters cyclic containers or colliding map keys, a container factory fails to supply a fresh empty instance of the requested type, or a selected converter rejects an argument.
+     * @throws JSONException if reading a JSONObject member or JSONArray element fails during traversal
+     * @throws RuntimeException if construction, property access, a target container operation, or a type-specific conversion fails; the concrete exception depends on that operation
+     */
+    private static Object convertJavaElement(final Object value, final Type<?> target, final JsonConversionContext context)
+            throws IllegalArgumentException, JSONException, RuntimeException {
+        if (value == null || value == JSONObject.NULL) {
+            return target.defaultValue();
+        }
+        if (value instanceof JSONObject object) {
+            return unwrap(object, target, context);
+        }
+        if (value instanceof JSONArray array) {
+            return unwrap(array, target, context);
+        }
+        if (canConvertJavaContainer(value, target)) {
+            return convertJavaContainer(value, target, context);
+        }
+        // Ordinary Object leaves remain opaque, even if they contain cycles. Native JSON was handled above.
+        if (target.javaType().isInstance(value)) {
+            return value;
+        }
+        rejectJsonCycles(value, context);
+        return target.valueOf(value);
+    }
+
+    /**
+     * @throws IllegalArgumentException if a requested target kind is incompatible with the source, a conversion encounters cyclic containers or colliding map keys, a container factory fails to supply a fresh empty instance of the requested type, or a selected converter rejects an argument.
+     * @throws JSONException if reading a JSONObject member or JSONArray element fails during traversal
+     * @throws RuntimeException if construction, property access, a target container operation, or a type-specific conversion fails; the concrete exception depends on that operation
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static Object convertJavaContainer(final Object value, final Type<?> target, final JsonConversionContext context)
+            throws IllegalArgumentException, JSONException, RuntimeException {
+        enterJsonConversion(value, context);
+        try {
+            if (target.isMap()) {
+                final Map<?, ?> source = (Map<?, ?>) value;
+                final Map output = N.newMap((Class) target.javaType(), source.size());
+                validateJsonOutput(output, target, context);
+                for (final Map.Entry<?, ?> entry : source.entrySet()) {
+                    final Object key = convertJavaElement(entry.getKey(), target.parameterTypes().get(0), context);
+                    if (output.containsKey(key)) {
+                        throw new IllegalArgumentException("Converted map keys collide");
+                    }
+                    output.put(key, convertJavaElement(entry.getValue(), target.parameterTypes().get(1), context));
+                }
+                return output;
+            }
+            final Collection<?> source = value instanceof Collection ? (Collection<?>) value : null;
+            final int length = source == null ? Array.getLength(value) : source.size();
+            final Iterator<?> iterator = source == null ? null : source.iterator();
+            final Type<?> elementType = target.elementType();
+            if (target.isArray()) {
+                final Object output = Array.newInstance(target.javaType().getComponentType(), length);
+                for (int i = 0; i < length; i++) {
+                    Array.set(output, i, convertJavaElement(iterator == null ? Array.get(value, i) : iterator.next(), elementType, context));
+                }
+                return output;
+            }
+            final Collection output = N.newCollection((Class) target.javaType(), length);
+            validateJsonOutput(output, target, context);
+            for (int i = 0; i < length; i++) {
+                output.add(convertJavaElement(iterator == null ? Array.get(value, i) : iterator.next(), elementType, context));
+            }
+            return output;
+        } finally {
+            context.activeContainers.remove(value);
+        }
+    }
+
+    private static final class JsonConversionContext {
+        final java.util.IdentityHashMap<Object, Boolean> activeContainers = new java.util.IdentityHashMap<>();
+        final java.util.IdentityHashMap<Object, Boolean> sourceAndOutputContainers = new java.util.IdentityHashMap<>();
+        final java.util.IdentityHashMap<Object, Boolean> acyclicContainers = new java.util.IdentityHashMap<>();
+    }
+
+    private record JsonVisit(Object value, boolean finished) {
+    }
+
+    private static boolean isJsonGraphNode(final Object value) {
+        return value instanceof JSONObject || value instanceof JSONArray || value instanceof Map || value instanceof Collection || value instanceof Object[];
+    }
+
+    // Index the full input before any factory runs, including empty siblings reached later in conversion.
+    // Merely indexing an opaque Object leaf does not reject its internal cycles.
+    /**
+     * @throws JSONException if reading JSON graph contents fails
+     */
+    private static void indexJsonGraph(final Object root, final JsonConversionContext context) throws JSONException {
+        visitJsonGraph(root, context.sourceAndOutputContainers, false);
+    }
+
+    /**
+     * @throws JSONException if reading JSON graph contents fails
+     * @throws IllegalArgumentException if the value graph contains a cycle
+     */
+    private static void rejectJsonCycles(final Object root, final JsonConversionContext context) throws JSONException, IllegalArgumentException {
+        // Scalar converters may recursively format Java containers, bypassing the typed-container traversal.
+        visitJsonGraph(root, context.acyclicContainers, true);
+    }
+
+    /**
+     * @throws JSONException if reading JSON graph contents fails
+     * @throws IllegalArgumentException if {@code rejectCycles} is true and the graph contains a cycle
+     */
+    private static void visitJsonGraph(final Object root, final java.util.IdentityHashMap<Object, Boolean> visited, final boolean rejectCycles)
+            throws JSONException, IllegalArgumentException {
+        if (!isJsonGraphNode(root) || visited.containsKey(root)) {
+            return;
+        }
+        final java.util.ArrayDeque<JsonVisit> pending = new java.util.ArrayDeque<>();
+        final java.util.IdentityHashMap<Object, Boolean> visiting = new java.util.IdentityHashMap<>();
+        pending.push(new JsonVisit(root, false));
+        while (!pending.isEmpty()) {
+            final JsonVisit visit = pending.pop();
+            final Object value = visit.value();
+            if (!isJsonGraphNode(value) || visited.containsKey(value)) {
+                continue;
+            }
+            if (visit.finished()) {
+                visited.put(value, Boolean.TRUE);
+                visiting.remove(value);
+                continue;
+            }
+            if (visiting.put(value, Boolean.TRUE) != null) {
+                if (rejectCycles) {
+                    throw new IllegalArgumentException("Cyclic JSON container conversion");
+                }
+                continue;
+            }
+            pending.push(new JsonVisit(value, true));
+            if (value instanceof JSONObject object) {
+                for (final String key : object.keySet()) {
+                    pushJsonGraphNode(pending, object.get(key));
+                }
+            } else if (value instanceof JSONArray array) {
+                for (int i = 0; i < array.length(); i++) {
+                    pushJsonGraphNode(pending, array.get(i));
+                }
+            } else if (value instanceof Map<?, ?> map) {
+                for (final Map.Entry<?, ?> entry : map.entrySet()) {
+                    pushJsonGraphNode(pending, entry.getKey());
+                    pushJsonGraphNode(pending, entry.getValue());
+                }
+            } else if (value instanceof Collection<?> collection) {
+                for (final Object element : collection) {
+                    pushJsonGraphNode(pending, element);
+                }
+            } else {
+                for (final Object element : (Object[]) value) {
+                    pushJsonGraphNode(pending, element);
+                }
+            }
+        }
+    }
+
+    // Only container nodes need a stack entry: a scalar leaf is discarded on pop anyway, and a JSON document
+    // is mostly scalars, so filtering here keeps the walk from allocating a JsonVisit per leaf.
+    private static void pushJsonGraphNode(final java.util.ArrayDeque<JsonVisit> pending, final Object value) {
+        if (isJsonGraphNode(value)) {
+            pending.push(new JsonVisit(value, false));
+        }
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code output} is not an instance of the requested type, is a non-empty container, or is a source or previously produced container
+     */
+    private static void validateJsonOutput(final Object output, final Type<?> target, final JsonConversionContext context) throws IllegalArgumentException {
+        if (!target.javaType().isInstance(output) || context.sourceAndOutputContainers.containsKey(output)
+                || output instanceof Collection<?> collection && !collection.isEmpty() || output instanceof Map<?, ?> map && !map.isEmpty()) {
+            throw new IllegalArgumentException("Container factory must create a fresh empty " + target.name());
+        }
+        context.sourceAndOutputContainers.put(output, Boolean.TRUE);
     }
 }

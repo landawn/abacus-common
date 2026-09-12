@@ -59,7 +59,7 @@ public final class SnappyOutputStream extends OutputStream {
      * @param os the underlying output stream to write compressed data to; must not be {@code null}
      * @throws IllegalArgumentException if {@code os} is {@code null}.
      */
-    public SnappyOutputStream(final OutputStream os) {
+    public SnappyOutputStream(final OutputStream os) throws IllegalArgumentException {
         N.checkArgNotNull(os, cs.os);
         underlying = os;
         out = new org.xerial.snappy.SnappyOutputStream(os);
@@ -84,7 +84,7 @@ public final class SnappyOutputStream extends OutputStream {
      * @throws IllegalArgumentException if {@code os} is {@code null}, or if {@code bufferSize} is outside the
      *         supported range.
      */
-    public SnappyOutputStream(final OutputStream os, final int bufferSize) {
+    public SnappyOutputStream(final OutputStream os, final int bufferSize) throws IllegalArgumentException {
         N.checkArgNotNull(os, cs.os);
 
         if (bufferSize < org.xerial.snappy.SnappyOutputStream.MIN_BLOCK_SIZE || bufferSize > org.xerial.snappy.SnappyOutputStream.MAX_BLOCK_SIZE) {
@@ -109,7 +109,7 @@ public final class SnappyOutputStream extends OutputStream {
      * }</pre>
      *
      * @param b the byte to write (as an integer, where only the low-order byte is used)
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if compressing the bytes or writing compressed data to the underlying stream fails
      */
     @Override
     public void write(final int b) throws IOException {
@@ -127,12 +127,12 @@ public final class SnappyOutputStream extends OutputStream {
      * }</pre>
      *
      * @param b the byte array to write
-     * @throws IOException if an I/O error occurs
      * @throws NullPointerException if {@code b} is {@code null}
+     * @throws IOException if compressing the bytes or writing compressed data to the underlying stream fails
      * @see #write(byte[], int, int)
      */
     @Override
-    public void write(final byte[] b) throws IOException {
+    public void write(final byte[] b) throws NullPointerException, IOException {
         out.write(b);
     }
 
@@ -152,13 +152,13 @@ public final class SnappyOutputStream extends OutputStream {
      * @param b the byte array containing data to write
      * @param off the start offset in the array
      * @param len the number of bytes to write
-     * @throws IOException if an I/O error occurs
      * @throws NullPointerException if {@code b} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
      *         or {@code len} is greater than {@code b.length - off}
+     * @throws IOException if compressing the bytes or writing compressed data to the underlying stream fails
      */
     @Override
-    public void write(final byte[] b, final int off, final int len) throws IOException {
+    public void write(final byte[] b, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException, IOException {
         // Enforce OutputStream.write(byte[], int, int) contract: org.xerial.snappy.SnappyOutputStream
         // does not validate bounds and silently no-ops for negative len, so we validate here.
         if (off < 0 || len < 0 || len > b.length - off) {
@@ -182,7 +182,7 @@ public final class SnappyOutputStream extends OutputStream {
      * snappyOut.flush();   // Force compression and output
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if compressing buffered bytes or flushing the underlying stream fails
      */
     @Override
     public void flush() throws IOException {
@@ -213,7 +213,7 @@ public final class SnappyOutputStream extends OutputStream {
      * underlying stream. A cleanup failure is attached to the primary failure as a suppressed
      * exception.</p>
      *
-     * @throws IOException if an I/O error occurs during closing
+     * @throws IOException if compressing or writing the final block, or flushing or closing the underlying stream fails
      */
     @Override
     public void close() throws IOException {

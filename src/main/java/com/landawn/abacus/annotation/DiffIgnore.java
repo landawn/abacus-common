@@ -44,9 +44,14 @@ import java.lang.annotation.Target;
  *
  * <p><b>Important caveat:</b> {@code @DiffIgnore} is consulted only when
  * {@link com.landawn.abacus.util.Difference.BeanDifference#of(Object, Object)} compares
- * <i>all</i> properties of the two beans. When an explicit {@code propNamesToCompare} collection
- * is passed to {@code BeanDifference.of(bean1, bean2, propNamesToCompare)}, the annotation is
- * ignored — the caller has stated which properties to compare, and that list wins.</p>
+ * <i>all</i> properties of the two beans. When an explicit <i>non-empty</i> {@code propNamesToCompare}
+ * collection is passed to {@code BeanDifference.of(bean1, bean2, propNamesToCompare)}, the annotation is
+ * ignored — the caller has stated which properties to compare, and that list wins. A {@code null} or
+ * empty collection selects the all-properties path and honours the annotation.</p>
+ *
+ * <p>Any field annotation whose simple name is {@code DiffIgnore} or {@code DifferenceIgnore}
+ * (case-insensitive), from any package, is honoured in the same way as this annotation (see
+ * {@link com.landawn.abacus.util.Beans#getIgnoredPropNamesForDiff(Class)}).</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -76,8 +81,11 @@ import java.lang.annotation.Target;
  * diff.common();          // {id=42, username=..., ...}
  * diff.differentValues(); // {email=Pair.of("old@example.com", "new@example.com")}
  *
- * // Explicit property list: @DiffIgnore is NOT honored here.
+ * // Explicit non-empty property list: @DiffIgnore is NOT honored here.
  * Difference.BeanDifference.of(user1, user2, List.of("email", "lastModified"));
+ *
+ * // Empty list: same as of(user1, user2) - every property except the @DiffIgnore ones.
+ * Difference.BeanDifference.of(user1, user2, List.of());
  * }</pre>
  *
  * @see com.landawn.abacus.util.Difference.BeanDifference

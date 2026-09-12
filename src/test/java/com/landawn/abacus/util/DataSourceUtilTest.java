@@ -340,26 +340,51 @@ public class DataSourceUtilTest extends TestBase {
 
     @Test
     public void testCloseQuietlyResultSetWithStatementException() throws SQLException {
-        ResultSet mockRs = mock(ResultSet.class);
-        when(mockRs.getStatement()).thenThrow(new SQLException("Test exception"));
+        for (Exception failure : new Exception[] { new SQLException("Test exception"), new IllegalStateException("Lookup failed") }) {
+            ResultSet mockRs = mock(ResultSet.class);
+            when(mockRs.getStatement()).thenThrow(failure);
 
-        DataSourceUtil.closeQuietly(mockRs, true);
+            assertDoesNotThrow(() -> DataSourceUtil.closeQuietly(mockRs, true));
 
-        verify(mockRs).close();
+            verify(mockRs).close();
+        }
     }
 
     @Test
     public void testCloseQuietlyResultSetWithConnectionException() throws SQLException {
-        ResultSet mockRs = mock(ResultSet.class);
-        Statement mockStmt = mock(Statement.class);
+        for (Exception failure : new Exception[] { new SQLException("Test exception"), new IllegalStateException("Lookup failed") }) {
+            ResultSet mockRs = mock(ResultSet.class);
+            Statement mockStmt = mock(Statement.class);
 
-        when(mockRs.getStatement()).thenReturn(mockStmt);
-        when(mockStmt.getConnection()).thenThrow(new SQLException("Test exception"));
+            when(mockRs.getStatement()).thenReturn(mockStmt);
+            when(mockStmt.getConnection()).thenThrow(failure);
 
-        DataSourceUtil.closeQuietly(mockRs, true, true);
+            assertDoesNotThrow(() -> DataSourceUtil.closeQuietly(mockRs, true, true));
 
-        verify(mockRs).close();
-        verify(mockStmt).close();
+            verify(mockRs).close();
+            verify(mockStmt).close();
+        }
+    }
+
+    @Test
+    public void testCloseQuietlyLookupErrorsStillPropagateAfterCleanup() throws SQLException {
+        for (boolean failConnectionLookup : new boolean[] { false, true }) {
+            ResultSet mockRs = mock(ResultSet.class);
+            Statement mockStmt = mock(Statement.class);
+            AssertionError failure = new AssertionError("Lookup error");
+            if (failConnectionLookup) {
+                when(mockRs.getStatement()).thenReturn(mockStmt);
+                when(mockStmt.getConnection()).thenThrow(failure);
+            } else {
+                when(mockRs.getStatement()).thenThrow(failure);
+            }
+
+            assertSame(failure, assertThrows(AssertionError.class, () -> DataSourceUtil.closeQuietly(mockRs, true, true)));
+            verify(mockRs).close();
+            if (failConnectionLookup) {
+                verify(mockStmt).close();
+            }
+        }
     }
 
     @Test

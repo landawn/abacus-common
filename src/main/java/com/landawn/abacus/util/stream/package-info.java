@@ -13,18 +13,37 @@
  */
 
 /**
- * Sequential and parallel stream processing for object and primitive values.
+ * Sequential and parallel streams for object and primitive values, plus entry streams and collectors.
  *
- * <p>The package provides {@link com.landawn.abacus.util.stream.Stream}, primitive stream variants,
- * {@link com.landawn.abacus.util.stream.EntryStream}, collectors, extended iterators, and internal
- * stream implementations. Streams support lazy intermediate operations and single-use terminal
- * consumption with explicit resource-closing behavior.</p>
+ * <p>{@link Stream} is the object stream. Primitive specializations avoid boxing:
+ * {@link ByteStream}, {@link CharStream}, {@link ShortStream}, {@link IntStream}, {@link LongStream},
+ * {@link FloatStream}, and {@link DoubleStream}. {@link EntryStream} is a key/value pipeline over
+ * {@link java.util.Map.Entry}. All of them implement {@link BaseStream} ({@link AutoCloseable}):
+ * intermediate operations are lazy; a terminal operation consumes the pipeline once and closes it.</p>
  *
- * <p><b>Shared naming with {@link com.landawn.abacus.util.Seq Seq}:</b> pipeline operation names
- * (including the intentional {@code flatMap}/{@code flatmap}/{@code flattMap}/{@code flatMapArray}
- * casing, first/last/find* terminals, and boolean match terminals such as
- * {@code hasMatchCountBetween}) are documented in the canonical glossary on
- * {@link com.landawn.abacus.util.stream.Stream} &mdash; see that class's
- * <i>Shared pipeline naming</i> section ({@code Stream.html#shared-pipeline-naming}).</p>
+ * <p>{@link Collectors} (and nested {@code MoreCollectors}) accumulate streams into lists, sets, maps,
+ * multimaps, primitive lists, immutable collections, and statistical summaries. Extended iterators
+ * ({@link IteratorEx}, {@link ObjIteratorEx}, and the primitive {@code *IteratorEx} types) back the
+ * stream implementations.</p>
+ *
+ * <h2>{@code Stream} versus {@link com.landawn.abacus.util.Seq Seq}</h2>
+ * <ul>
+ *   <li>Prefer {@link Stream} for in-memory work that does not throw checked exceptions, for
+ *       parallelism, and for primitive or {@link EntryStream} pipelines.</li>
+ *   <li>Prefer {@code Seq} when per-element work throws checked exceptions (I/O, JDBC, parsing) or
+ *       when the source is a resource that should close after the terminal operation.</li>
+ * </ul>
+ * <p>The two interoperate: {@code seq.stream()} yields a {@link Stream}. Pipelines share operation
+ * names; the canonical glossary &mdash; including the intentional
+ * {@code flatMap}/{@code flatmap}/{@code flattMap}/{@code flatMapArray} casing, first/last/find*
+ * terminals, and boolean match terminals such as {@code hasMatchCountBetween} &mdash; is the
+ * <i>Shared pipeline naming</i> section on {@link Stream}
+ * ({@code Stream.html#shared-pipeline-naming}).</p>
+ *
+ * @see Stream
+ * @see EntryStream
+ * @see Collectors
+ * @see BaseStream
+ * @see com.landawn.abacus.util.Seq
  */
 package com.landawn.abacus.util.stream;

@@ -75,10 +75,11 @@ public final class ShortType extends AbstractShortType {
      * @param rs the ResultSet containing the data, must not be {@code null}
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return the Short value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Short get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Short get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final short value = rs.getShort(columnIndex);
 
         return rs.wasNull() ? null : value;
@@ -99,10 +100,11 @@ public final class ShortType extends AbstractShortType {
      * @param rs the ResultSet containing the data, must not be {@code null}
      * @param columnName the label of the column to retrieve the value from, must not be {@code null}
      * @return the Short value in the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Short get(final ResultSet rs, final String columnName) throws SQLException {
+    public Short get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final short value = rs.getShort(columnName);
 
         return rs.wasNull() ? null : value;

@@ -28,7 +28,8 @@ public class DoubleNFunctionTest extends TestBase {
     public void testApply_WithAnonymousClass() {
         DoubleNFunction<String> function = new DoubleNFunction<>() {
             @Override
-            public String apply(double... args) {
+            @SafeVarargs
+            public final String apply(double... args) {
                 double product = 1.0;
                 for (double arg : args) {
                     product *= arg;

@@ -102,7 +102,8 @@ public class NConsumerTest extends TestBase {
         final List<String> result = new ArrayList<>();
         NConsumer<String> consumer = new NConsumer<>() {
             @Override
-            public void accept(String... args) {
+            @SafeVarargs
+            public final void accept(String... args) {
                 for (String s : args) {
                     result.add(s.toUpperCase());
                 }

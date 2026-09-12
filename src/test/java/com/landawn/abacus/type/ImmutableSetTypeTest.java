@@ -129,4 +129,20 @@ public class ImmutableSetTypeTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertEquals(Integer.valueOf(3), ns.last());
     }
 
+    // T8-03 / R-T04: isImmutable() answered false for a type whose values are immutable by construction.
+    @Test
+    public void reviewFixes20260906_isImmutableIsTrue() {
+        assertTrue(type.isImmutable());
+        assertTrue(TypeFactory.getType("ImmutableSet<Integer>").isImmutable());
+        assertTrue(TypeFactory.getType("ImmutableSortedSet<Integer>").isImmutable());
+        assertTrue(TypeFactory.getType("ImmutableNavigableSet<Integer>").isImmutable());
+
+        assertFalse(TypeFactory.getType("Set<String>").isImmutable());
+        assertFalse(TypeFactory.getType("SortedSet<String>").isImmutable());
+
+        final ImmutableSet<String> parsed = (ImmutableSet<String>) type.valueOf("[\"a\", \"中\"]");
+        org.junit.jupiter.api.Assertions.assertThrows(UnsupportedOperationException.class, () -> parsed.add("b"));
+        assertNull(type.valueOf("   "));
+    }
+
 }

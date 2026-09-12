@@ -1,8 +1,11 @@
 package com.landawn.abacus.util;
 
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -12,12 +15,12 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,18 +29,20 @@ import java.util.Map;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.landawn.abacus.TestBase;
 
@@ -57,12 +62,12 @@ public class XmlMappersTest extends TestBase {
         public Person() {
         }
 
-        public Person(String name, int age) {
+        public Person(final String name, final int age) {
             this.name = name;
             this.age = age;
         }
 
-        public Person(String name, int age, String city) {
+        public Person(final String name, final int age, final String city) {
             this.name = name;
             this.age = age;
             this.city = city;
@@ -89,6 +94,47 @@ public class XmlMappersTest extends TestBase {
         String value() {
             return value;
         }
+    }
+
+    @JsonPropertyOrder({ "value", "missing" })
+    public static class InclusionBean {
+        public String value = "x";
+        public String missing = null;
+
+        public String getValue() {
+            return value;
+        }
+
+        public String getMissing() {
+            return missing;
+        }
+    }
+
+    // Jackson caches a serializer per concrete type, so every entry point under test needs a type of its own
+    // whose serializer is built after the mutation - a type already serialized keeps its old serializer.
+    public static class InclusionBeanPlain extends InclusionBean {
+    }
+
+    public static class InclusionBeanPretty extends InclusionBean {
+    }
+
+    public static class InclusionBeanNullConfig extends InclusionBean {
+    }
+
+    public static class InclusionBeanFeature extends InclusionBean {
+    }
+
+    public static class InclusionBeanOwnConfig extends InclusionBean {
+    }
+
+    private static XmlMappers.One one() {
+        return XmlMappers.wrap(new XmlMapper());
+    }
+
+    private File xmlFile(final String name, final Object value) throws IOException {
+        final File file = new File(tempDir, name);
+        XmlMappers.toXml(value, file);
+        return file;
     }
 
     @Test
@@ -119,1564 +165,420 @@ public class XmlMappersTest extends TestBase {
     }
 
     @Test
-    public void test_toXml_object() {
-        Person person = new Person("John", 30);
-        String xml = XmlMappers.toXml(person);
-        assertNotNull(xml);
+    public void testCreateSerializationConfigDoesNotShareMutableStateWithDefaultMapper() {
+        final SerializationConfig mine = XmlMappers.createSerializationConfig();
+        final SerializationConfig other = XmlMappers.createSerializationConfig();
+        final JsonInclude.Value nonNull = JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL);
+
+        try {
+            // withPropertyInclusion(..) is the one Jackson config method that writes through the config's
+            // ConfigOverrides in place and returns the receiver instead of a copy.
+            assertSame(mine, mine.withPropertyInclusion(nonNull));
+
+            // none of the entry points backed by this class's own mapper may see that mutation
+            assertEquals("<InclusionBeanPlain><value>x</value><missing/></InclusionBeanPlain>", XmlMappers.toXml(new InclusionBeanPlain()));
+            assertEquals("<InclusionBeanPretty><value>x</value><missing/></InclusionBeanPretty>",
+                    XmlMappers.toXml(new InclusionBeanPretty(), true).replaceAll("\\s", ""));
+            assertEquals("<InclusionBeanNullConfig><value>x</value><missing/></InclusionBeanNullConfig>",
+                    XmlMappers.toXml(new InclusionBeanNullConfig(), (SerializationConfig) null));
+            assertEquals("<InclusionBeanFeature><value>x</value><missing/></InclusionBeanFeature>",
+                    XmlMappers.toXml(new InclusionBeanFeature(), SerializationFeature.WRITE_ENUMS_USING_TO_STRING));
+
+            // nor may any other config handed out by the factories, before or after the mutation
+            assertEquals(JsonInclude.Include.NON_NULL, mine.getDefaultPropertyInclusion().getValueInclusion());
+            assertEquals(JsonInclude.Include.USE_DEFAULTS, other.getDefaultPropertyInclusion().getValueInclusion());
+            assertEquals(JsonInclude.Include.USE_DEFAULTS, XmlMappers.createSerializationConfig().getDefaultPropertyInclusion().getValueInclusion());
+            assertEquals(JsonInclude.Include.USE_DEFAULTS, XmlMappers.createDeserializationConfig().getDefaultPropertyInclusion().getValueInclusion());
+
+            // the caller that asked for NON_NULL still gets exactly what it asked for
+            assertEquals("<InclusionBeanOwnConfig><value>x</value></InclusionBeanOwnConfig>", XmlMappers.toXml(new InclusionBeanOwnConfig(), mine));
+        } finally {
+            // an unfixed build shares this object with the default mapper: put it back rather than leaving
+            // the rest of the suite to run against a mutated default inclusion
+            mine.withPropertyInclusion(JsonInclude.Value.empty());
+        }
+    }
+
+    @Test
+    public void testCreateConfigHandsOutSharedJacksonObjectsByReference() {
+        // The flip side of the isolation above, and the reason createSerializationConfig()'s javadoc must not
+        // promise that a returned config shares NO mutable state: its own ConfigOverrides is copied, but what it
+        // hands out is not. Identity only - mutating any of these really would change toXml(..) for callers that
+        // never touched this config, which is exactly why no test may do it.
+        final SerializationConfig ser = XmlMappers.createSerializationConfig();
+        final DeserializationConfig deser = XmlMappers.createDeserializationConfig();
+        final XmlMapper untouched = new XmlMapper();
+
+        // the pretty printer and the date format are Jackson's JVM-wide defaults
+        assertSame(ser.getDefaultPrettyPrinter(), XmlMappers.createSerializationConfig().getDefaultPrettyPrinter());
+        assertSame(ser.getDefaultPrettyPrinter(), untouched.getSerializationConfig().getDefaultPrettyPrinter());
+        assertSame(ser.getDateFormat(), deser.getDateFormat());
+        assertSame(ser.getDateFormat(), untouched.getSerializationConfig().getDateFormat());
+
+        // the annotation introspector is NOT JVM-wide here: an XmlMapper builds its own XML-aware pair, so this
+        // one is shared among this class's configurations but differs from a brand-new XmlMapper's
+        assertSame(ser.getAnnotationIntrospector(), XmlMappers.createSerializationConfig().getAnnotationIntrospector());
+        assertNotSame(ser.getAnnotationIntrospector(), untouched.getSerializationConfig().getAnnotationIntrospector());
+        assertTrue(ser.getAnnotationIntrospector().allIntrospectors().containsAll(deser.getAnnotationIntrospector().allIntrospectors()));
+    }
+
+    @Test
+    public void testToXml() {
+        final Person person = new Person("John", 30);
+        final String xml = XmlMappers.toXml(person);
         assertTrue(xml.contains("John"));
         assertTrue(xml.contains("30"));
+        assertEquals(person, XmlMappers.fromXml(xml, Person.class));
+
+        final Map<String, List<Person>> data = new HashMap<>();
+        final List<Person> persons = new ArrayList<>();
+        persons.add(new Person("Alice", 30, "NYC"));
+        persons.add(new Person("Bob", 25, "LA"));
+        data.put("people", persons);
+        final String nested = XmlMappers.toXml(data);
+        assertTrue(nested.contains("Alice"));
+        assertTrue(nested.contains("Bob"));
     }
 
     @Test
-    public void test_toXml_object_prettyFormat() {
-        Person person = new Person("Jane", 25);
-        String xml = XmlMappers.toXml(person, true);
-        assertNotNull(xml);
-        assertTrue(xml.contains("Jane"));
-        assertTrue(xml.contains("25"));
-
-        String xmlNonPretty = XmlMappers.toXml(person, false);
-        assertNotNull(xmlNonPretty);
-        assertTrue(xmlNonPretty.contains("Jane"));
+    public void testToXml_PrettyFormat() {
+        final Person person = new Person("Jane", 25);
+        final String pretty = XmlMappers.toXml(person, true);
+        final String compact = XmlMappers.toXml(person, false);
+        assertTrue(pretty.contains("Jane"));
+        assertTrue(pretty.contains("\n"));
+        assertFalse(compact.contains("\n"));
     }
 
     @Test
-    public void test_toXml_object_serializationFeatures() {
-        Person person = new Person("Bob", 40);
-        String xml = XmlMappers.toXml(person, SerializationFeature.INDENT_OUTPUT);
-        assertNotNull(xml);
+    public void testToXml_SerializationFeatures() {
+        final String xml = XmlMappers.toXml(new Person("Bob", 40), SerializationFeature.INDENT_OUTPUT);
         assertTrue(xml.contains("Bob"));
         assertTrue(xml.contains("40"));
     }
 
     @Test
-    public void test_toXml_object_serializationConfig() {
-        Person person = new Person("Alice", 35);
-        SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-        String xml = XmlMappers.toXml(person, config);
-        assertNotNull(xml);
+    public void testToXml_SerializationConfig() {
+        final SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
+        final String xml = XmlMappers.toXml(new Person("Alice", 35), config);
         assertTrue(xml.contains("Alice"));
-        assertTrue(xml.contains("35"));
+        assertTrue(XmlMappers.toXml(new Person("Test", 25), (SerializationConfig) null).contains("Test"));
     }
 
     @Test
-    public void test_toXml_null_config() {
-        Person person = new Person("Test", 25);
-        String xml = XmlMappers.toXml(person, (SerializationConfig) null);
-        assertNotNull(xml);
-        assertTrue(xml.contains("Test"));
-    }
-
-    @Test
-    public void test_complex_nested_object() {
-        Map<String, List<Person>> data = new HashMap<>();
-        List<Person> persons = new ArrayList<>();
-        persons.add(new Person("Alice", 30, "NYC"));
-        persons.add(new Person("Bob", 25, "LA"));
-        data.put("people", persons);
-
-        String xml = XmlMappers.toXml(data);
-        assertNotNull(xml);
-        assertTrue(xml.contains("Alice"));
-        assertTrue(xml.contains("Bob"));
-    }
-
-    @Test
-    public void testToXmlWithPrettyFormat() {
-        Person person = new Person("John", 30);
-
-        String prettyXml = XmlMappers.toXml(person, true);
-        String compactXml = XmlMappers.toXml(person, false);
-
-        Assertions.assertNotNull(prettyXml);
-        Assertions.assertNotNull(compactXml);
-        Assertions.assertTrue(prettyXml.contains("\n"));
-        Assertions.assertFalse(compactXml.contains("\n"));
-    }
-
-    @Test
-    public void testToXmlWithSerializationFeatures() {
-        Person person = new Person("John", 0, null);
-
-        String xml = XmlMappers.toXml(person, SerializationFeature.WRITE_NULL_MAP_VALUES, SerializationFeature.INDENT_OUTPUT);
-
-        Assertions.assertNotNull(xml);
-        Assertions.assertTrue(xml.contains("John"));
-    }
-
-    @Test
-    public void testToXmlWithSerializationConfig() {
-        Person person = new Person("John", 30);
-        SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.WRAP_ROOT_VALUE).with(SerializationFeature.INDENT_OUTPUT);
-
-        String xml = XmlMappers.toXml(person, config);
-
-        Assertions.assertNotNull(xml);
-        Assertions.assertTrue(xml.contains("John"));
-    }
-
-    @Test
-    public void test_toXml_object_file() throws IOException {
-        Person person = new Person("Charlie", 28);
-        File file = new File(tempDir, "test_toXml.xml");
-        XmlMappers.toXml(person, file);
-        assertTrue(file.exists());
+    public void testToXml_File() throws IOException {
+        final File file = new File(tempDir, "person.xml");
+        XmlMappers.toXml(new Person("Charlie", 28), file);
         assertTrue(file.length() > 0);
+
+        final File configured = new File(tempDir, "person-config.xml");
+        XmlMappers.toXml(new Person("David", 33), configured, XmlMappers.createSerializationConfig());
+        assertTrue(configured.length() > 0);
     }
 
     @Test
-    public void test_toXml_object_file_config() throws IOException {
-        Person person = new Person("David", 33);
-        File file = new File(tempDir, "test_toXml_config.xml");
-        SerializationConfig config = XmlMappers.createSerializationConfig();
-        XmlMappers.toXml(person, file, config);
-        assertTrue(file.exists());
-        assertTrue(file.length() > 0);
-    }
-
-    @Test
-    public void test_toXml_object_outputStream() throws IOException {
-        Person person = new Person("Eve", 27);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        XmlMappers.toXml(person, baos);
-        assertTrue(baos.size() > 0);
-        String xml = baos.toString();
-        assertTrue(xml.contains("Eve"));
-    }
-
-    @Test
-    public void test_toXml_object_outputStream_config() throws IOException {
-        Person person = new Person("Frank", 45);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        SerializationConfig config = XmlMappers.createSerializationConfig();
-        XmlMappers.toXml(person, baos, config);
-        assertTrue(baos.size() > 0);
-    }
-
-    @Test
-    public void test_toXml_outputStream_closedByDefaultAutoClose() {
+    public void testToXml_OutputStream() throws IOException {
         final boolean[] closed = { false };
-        ByteArrayOutputStream baos = new ByteArrayOutputStream() {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream() {
             @Override
             public void close() throws IOException {
                 closed[0] = true;
                 super.close();
             }
         };
-
         XmlMappers.toXml(new Person("AutoClose", 1), baos);
-
-        // Jackson's JsonGenerator.Feature.AUTO_CLOSE_TARGET is enabled by default,
-        // so the stream is closed after writing (as documented).
         assertTrue(closed[0]);
         assertTrue(baos.toString().contains("AutoClose"));
+
+        final ByteArrayOutputStream configured = new ByteArrayOutputStream();
+        XmlMappers.toXml(new Person("Frank", 45), configured, XmlMappers.createSerializationConfig());
+        assertTrue(configured.toString().contains("Frank"));
     }
 
     @Test
-    public void test_fromXml_inputStream_closedByDefaultAutoClose() {
+    public void testToXml_Writer() throws IOException {
+        final StringWriter writer = new StringWriter();
+        XmlMappers.toXml(new Person("Grace", 29), writer);
+        assertTrue(writer.toString().contains("Grace"));
+
+        final StringWriter configured = new StringWriter();
+        XmlMappers.toXml(new Person("Henry", 38), configured, XmlMappers.createSerializationConfig());
+        assertTrue(configured.toString().contains("Henry"));
+    }
+
+    @Test
+    public void testConfiguredOutputAutoCloseCanBeDisabled() {
+        final SerializationConfig config = XmlMappers.createSerializationConfig().without(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+        final boolean[] closed = { false, false };
+        final ByteArrayOutputStream output = new ByteArrayOutputStream() {
+            @Override
+            public void close() {
+                closed[0] = true;
+            }
+        };
+        final StringWriter writer = new StringWriter() {
+            @Override
+            public void close() {
+                closed[1] = true;
+            }
+        };
+
+        final Person person = new Person("Still open", 17);
+        XmlMappers.toXml(person, output, config);
+        XmlMappers.toXml(person, writer, config);
+
+        assertFalse(closed[0]);
+        assertFalse(closed[1]);
+        assertEquals(person, XmlMappers.fromXml(output.toByteArray(), Person.class));
+        assertEquals(person, XmlMappers.fromXml(writer.toString(), Person.class));
+    }
+
+    @Test
+    public void testConfiguredInputAutoCloseCanBeDisabled() {
+        final DeserializationConfig config = XmlMappers.createDeserializationConfig().without(JsonParser.Feature.AUTO_CLOSE_SOURCE);
+        final Person person = new Person("Still open", 17);
+        final String xml = XmlMappers.toXml(person);
+        final TypeReference<Person> type = new TypeReference<>() {
+        };
+
+        for (final boolean generic : new boolean[] { false, true }) {
+            final boolean[] closed = { false, false };
+            final ByteArrayInputStream input = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)) {
+                @Override
+                public void close() {
+                    closed[0] = true;
+                }
+            };
+            final StringReader reader = new StringReader(xml) {
+                @Override
+                public void close() {
+                    closed[1] = true;
+                }
+            };
+
+            assertEquals(person, generic ? XmlMappers.fromXml(input, type, config) : XmlMappers.fromXml(input, Person.class, config));
+            assertEquals(person, generic ? XmlMappers.fromXml(reader, type, config) : XmlMappers.fromXml(reader, Person.class, config));
+            assertFalse(closed[0]);
+            assertFalse(closed[1]);
+        }
+    }
+
+    @Test
+    public void testToXml_DataOutput() throws IOException {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        XmlMappers.toXml(new Person("Ivy", 26), (DataOutput) new DataOutputStream(baos));
+        assertTrue(baos.toString().contains("Ivy"));
+
+        final ByteArrayOutputStream configured = new ByteArrayOutputStream();
+        XmlMappers.toXml(new Person("Jack", 42), (DataOutput) new DataOutputStream(configured), XmlMappers.createSerializationConfig());
+        assertTrue(configured.size() > 0);
+    }
+
+    @Test
+    public void testFromXml() {
+        final Person person = new Person("Eve", 27);
+        final String xml = XmlMappers.toXml(person);
+        assertEquals(person, XmlMappers.fromXml(xml, Person.class));
+        assertEquals(person, XmlMappers.fromXml(xml.getBytes(StandardCharsets.UTF_8), Person.class));
+        assertEquals(person, XmlMappers.fromXml(xml.getBytes(StandardCharsets.UTF_8), 0, xml.getBytes(StandardCharsets.UTF_8).length, Person.class));
+        assertEquals(person, XmlMappers.fromXml(xml, Person.class, XmlMappers.createDeserializationConfig()));
+        assertEquals(person, XmlMappers.fromXml(xml, Person.class, (DeserializationConfig) null));
+    }
+
+    @Test
+    public void testFromXml_ByteArrayOffset() {
+        final Person person = new Person("Frank", 45);
+        final String xml = XmlMappers.toXml(person);
+        final byte[] buffered = ("xxx" + xml + "yyy").getBytes(StandardCharsets.UTF_8);
+        assertEquals(person, XmlMappers.fromXml(buffered, 3, xml.getBytes(StandardCharsets.UTF_8).length, Person.class));
+    }
+
+    @Test
+    public void testFromXml_DeserializationFeatures() {
+        final String xml = "<Person><name>John</name><unknownField>value</unknownField><age>30</age></Person>";
+        assertThrows(RuntimeException.class, () -> XmlMappers.fromXml(xml, Person.class, DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+    }
+
+    @Test
+    public void testFromXml_TypeReference() {
+        final List<String> list = CommonUtil.toList("a", "b", "c");
+        final String xml = XmlMappers.toXml(list);
+        final TypeReference<List<String>> type = new TypeReference<>() {
+        };
+        assertEquals(3, XmlMappers.fromXml(xml, type).size());
+        assertEquals(3, XmlMappers.fromXml(xml.getBytes(StandardCharsets.UTF_8), type).size());
+        assertEquals(3, XmlMappers.fromXml(xml.getBytes(StandardCharsets.UTF_8), 0, xml.getBytes(StandardCharsets.UTF_8).length, type).size());
+        assertEquals(3, XmlMappers.fromXml(xml, type, XmlMappers.createDeserializationConfig()).size());
+        assertEquals(3, XmlMappers.fromXml(xml, type, DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS).size());
+    }
+
+    @Test
+    public void testFromXml_Sources() throws IOException {
+        final Person person = new Person("Henry", 38);
+        final File file = xmlFile("fromXml.xml", person);
+        assertEquals(person, XmlMappers.fromXml(file, Person.class));
+        assertEquals(person, XmlMappers.fromXml(file, Person.class, XmlMappers.createDeserializationConfig()));
+
+        final String xml = XmlMappers.toXml(person);
         final boolean[] closed = { false };
-        String xml = XmlMappers.toXml(new Person("AutoClose", 2));
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes()) {
+        final ByteArrayInputStream autoClose = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)) {
             @Override
             public void close() throws IOException {
                 closed[0] = true;
                 super.close();
             }
         };
-
-        Person person = XmlMappers.fromXml(bais, Person.class);
-
-        // Jackson's JsonParser.Feature.AUTO_CLOSE_SOURCE is enabled by default,
-        // so the source stream is closed after reading (as documented).
+        assertEquals(person, XmlMappers.fromXml(autoClose, Person.class));
         assertTrue(closed[0]);
-        assertEquals("AutoClose", person.getName());
-    }
-
-    @Test
-    public void test_toXml_object_writer() throws IOException {
-        Person person = new Person("Grace", 29);
-        StringWriter writer = new StringWriter();
-        XmlMappers.toXml(person, writer);
-        String xml = writer.toString();
-        assertTrue(xml.contains("Grace"));
-        assertTrue(xml.contains("29"));
-    }
-
-    @Test
-    public void test_toXml_object_writer_config() throws IOException {
-        Person person = new Person("Henry", 38);
-        StringWriter writer = new StringWriter();
-        SerializationConfig config = XmlMappers.createSerializationConfig();
-        XmlMappers.toXml(person, writer, config);
-        String xml = writer.toString();
-        assertTrue(xml.contains("Henry"));
-    }
-
-    @Test
-    public void test_toXml_object_dataOutput() throws IOException {
-        Person person = new Person("Ivy", 26);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutput dos = new DataOutputStream(baos);
-        XmlMappers.toXml(person, dos);
-        assertTrue(baos.size() > 0);
-    }
-
-    @Test
-    public void test_toXml_object_dataOutput_config() throws IOException {
-        Person person = new Person("Jack", 42);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutput dos = new DataOutputStream(baos);
-        SerializationConfig config = XmlMappers.createSerializationConfig();
-        XmlMappers.toXml(person, dos, config);
-        assertTrue(baos.size() > 0);
-    }
-
-    @Test
-    public void testToXmlToFile() throws Exception {
-        Person person = new Person("John", 30);
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-
-        XmlMappers.toXml(person, tempFile);
-
-        Assertions.assertTrue(tempFile.exists());
-        Assertions.assertTrue(tempFile.length() > 0);
-    }
-
-    @Test
-    public void testToXmlToFileWithConfig() throws Exception {
-        Person person = new Person("John", 30);
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-        SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-
-        XmlMappers.toXml(person, tempFile, config);
-
-        Assertions.assertTrue(tempFile.exists());
-        Assertions.assertTrue(tempFile.length() > 0);
-    }
-
-    @Test
-    public void testToXmlToOutputStream() throws Exception {
-        Person person = new Person("John", 30);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        XmlMappers.toXml(person, os);
-
-        String xml = os.toString();
-        Assertions.assertTrue(xml.contains("John"));
-        Assertions.assertTrue(xml.contains("30"));
-    }
-
-    @Test
-    public void testToXmlToOutputStreamWithConfig() throws Exception {
-        Person person = new Person("John", 30);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-
-        XmlMappers.toXml(person, os, config);
-
-        String xml = os.toString();
-        Assertions.assertTrue(xml.contains("John"));
-    }
-
-    @Test
-    public void testToXmlToWriter() throws Exception {
-        Person person = new Person("John", 30);
-        StringWriter writer = new StringWriter();
-
-        XmlMappers.toXml(person, writer);
-
-        String xml = writer.toString();
-        Assertions.assertTrue(xml.contains("John"));
-        Assertions.assertTrue(xml.contains("30"));
-    }
-
-    @Test
-    public void testToXmlToWriterWithConfig() throws Exception {
-        Person person = new Person("John", 30);
-        StringWriter writer = new StringWriter();
-        SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-
-        XmlMappers.toXml(person, writer, config);
-
-        String xml = writer.toString();
-        Assertions.assertTrue(xml.contains("John"));
-    }
-
-    @Test
-    public void testToXmlToDataOutput() throws Exception {
-        Person person = new Person("John", 30);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
-
-        XmlMappers.toXml(person, (DataOutput) dos);
-
-        String xml = baos.toString();
-        Assertions.assertTrue(xml.contains("John"));
-    }
-
-    @Test
-    public void testToXmlToDataOutputWithConfig() throws Exception {
-        Person person = new Person("John", 30);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
-        SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-
-        XmlMappers.toXml(person, (DataOutput) dos, config);
-
-        String xml = baos.toString();
-        Assertions.assertTrue(xml.contains("John"));
-    }
-
-    @Test
-    public void test_fromXml_bytes_class() {
-        Person person = new Person("Kate", 31);
-        String xml = XmlMappers.toXml(person);
-        byte[] bytes = xml.getBytes();
-        Person result = XmlMappers.fromXml(bytes, Person.class);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_fromXml_bytes_offset_len_class() {
-        Person person = new Person("Leo", 34);
-        String xml = XmlMappers.toXml(person);
-        byte[] bytes = xml.getBytes();
-        Person result = XmlMappers.fromXml(bytes, 0, bytes.length, Person.class);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_fromXml_string_class() {
-        Person person = new Person("Mary", 29);
-        String xml = XmlMappers.toXml(person);
-        Person result = XmlMappers.fromXml(xml, Person.class);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_fromXml_string_class_deserializationFeatures() {
-        Person person = new Person("Nancy", 36);
-        String xml = XmlMappers.toXml(person);
-        Person result = XmlMappers.fromXml(xml, Person.class, DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_fromXml_bytes_typeReference() {
-        List<String> list = N.toList("apple", "banana", "cherry");
-        String xml = XmlMappers.toXml(list);
-        byte[] bytes = xml.getBytes();
-        List<String> result = XmlMappers.fromXml(bytes, new TypeReference<List<String>>() {
-        });
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_fromXml_bytes_offset_len_typeReference() {
-        List<String> list = N.toList("dog", "cat", "bird");
-        String xml = XmlMappers.toXml(list);
-        byte[] bytes = xml.getBytes();
-        List<String> result = XmlMappers.fromXml(bytes, 0, bytes.length, new TypeReference<List<String>>() {
-        });
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_fromXml_string_typeReference_config() {
-        List<Integer> list = N.toList(10, 20, 30);
-        String xml = XmlMappers.toXml(list);
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-        List<Integer> result = XmlMappers.fromXml(xml, new TypeReference<List<Integer>>() {
-        }, config);
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_fromXml_string_class_config() {
-        Person person = new Person("Oscar", 41);
-        String xml = XmlMappers.toXml(person);
-        DeserializationConfig config = XmlMappers.createDeserializationConfig().with(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
-        Person result = XmlMappers.fromXml(xml, Person.class, config);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_fromXml_string_typeReference() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("one", 1);
-        map.put("two", 2);
-        String xml = XmlMappers.toXml(map);
-        Map<String, Integer> result = XmlMappers.fromXml(xml, new TypeReference<Map<String, Integer>>() {
-        });
-        assertNotNull(result);
-    }
-
-    @Test
-    public void test_fromXml_string_typeReference_features() {
-        List<String> list = N.toList("red", "green", "blue");
-        String xml = XmlMappers.toXml(list);
-        List<String> result = XmlMappers.fromXml(xml, new TypeReference<List<String>>() {
-        }, DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_fromXml_null_config() {
-        Person person = new Person("Test", 25);
-        String xml = XmlMappers.toXml(person);
-        Person result = XmlMappers.fromXml(xml, Person.class, (DeserializationConfig) null);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void testFromXmlByteArray() {
-        byte[] xmlBytes = "<Person><name>John</name><age>30</age></Person>".getBytes();
-
-        Person person = XmlMappers.fromXml(xmlBytes, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-        Assertions.assertEquals(30, person.getAge());
-    }
-
-    @Test
-    public void testFromXmlByteArrayPartial() {
-        byte[] xmlBytes = "xxx<Person><name>John</name><age>30</age></Person>yyy".getBytes();
-
-        Person person = XmlMappers.fromXml(xmlBytes, 3, xmlBytes.length - 6, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-        Assertions.assertEquals(30, person.getAge());
-    }
-
-    @Test
-    public void testFromXmlString() {
-        String xml = "<Person><name>John</name><age>30</age></Person>";
-
-        Person person = XmlMappers.fromXml(xml, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-        Assertions.assertEquals(30, person.getAge());
-    }
-
-    @Test
-    public void testFromXmlStringWithConfig() {
-        String xml = "<Person><name>John</name><age>30</age></Person>";
-        DeserializationConfig config = XmlMappers.createDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-
-        Person person = XmlMappers.fromXml(xml, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromXmlWithTypeReferenceByteArray() {
-        String xml = "<ArrayList><item>a</item><item>b</item><item>c</item></ArrayList>";
-        byte[] xmlBytes = xml.getBytes();
-
-        List<String> list = XmlMappers.fromXml(xmlBytes, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertEquals("a", list.get(0));
-    }
-
-    @Test
-    public void testFromXmlWithTypeReferenceByteArrayPartial() {
-        String xml = "xxx<ArrayList><item>a</item><item>b</item></ArrayList>yyy";
-        byte[] xmlBytes = xml.getBytes();
-
-        List<String> list = XmlMappers.fromXml(xmlBytes, 3, xmlBytes.length - 6, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromXmlWithTypeReferenceString() {
-        String xml = "<LinkedHashMap><key1>value1</key1><key2>value2</key2></LinkedHashMap>";
-
-        Map<String, String> map = XmlMappers.fromXml(xml, new TypeReference<Map<String, String>>() {
-        });
-
-        Assertions.assertNotNull(map);
-        Assertions.assertEquals("value1", map.get("key1"));
-        Assertions.assertEquals("value2", map.get("key2"));
-    }
-
-    @Test
-    public void testFromXmlWithTypeReferenceStringWithFeatures() {
-        String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
-
-        List<String> list = XmlMappers.fromXml(xml, new TypeReference<List<String>>() {
-        }, DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromXmlWithTypeReferenceStringWithConfig() {
-        String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-
-        List<String> list = XmlMappers.fromXml(xml, new TypeReference<List<String>>() {
-        }, config);
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void test_fromXml_file_class() throws IOException {
-        Person person = new Person("Paul", 37);
-        File file = new File(tempDir, "test_fromXml.xml");
-        XmlMappers.toXml(person, file);
-        Person result = XmlMappers.fromXml(file, Person.class);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_fromXml_file_class_config() throws IOException {
-        Person person = new Person("Quinn", 39);
-        File file = new File(tempDir, "test_fromXml_config.xml");
-        XmlMappers.toXml(person, file);
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-        Person result = XmlMappers.fromXml(file, Person.class, config);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_fromXml_inputStream_class() throws IOException {
-        Person person = new Person("Rachel", 32);
-        String xml = XmlMappers.toXml(person);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        Person result = XmlMappers.fromXml(bais, Person.class);
-        assertEquals(person, result);
-    }
 
-    @Test
-    public void test_fromXml_inputStream_class_config() throws IOException {
-        Person person = new Person("Sam", 43);
-        String xml = XmlMappers.toXml(person);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-        Person result = XmlMappers.fromXml(bais, Person.class, config);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_fromXml_reader_class() throws IOException {
-        Person person = new Person("Tina", 28);
-        String xml = XmlMappers.toXml(person);
-        StringReader reader = new StringReader(xml);
-        Person result = XmlMappers.fromXml(reader, Person.class);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_fromXml_reader_class_config() throws IOException {
-        Person person = new Person("Uma", 35);
-        String xml = XmlMappers.toXml(person);
-        StringReader reader = new StringReader(xml);
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-        Person result = XmlMappers.fromXml(reader, Person.class, config);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_fromXml_url_class() throws IOException {
-        Person person = new Person("Victor", 44);
-        File file = new File(tempDir, "test_url.xml");
-        XmlMappers.toXml(person, file);
-        URL url = file.toURI().toURL();
-        Person result = XmlMappers.fromXml(url, Person.class);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_fromXml_url_class_config() throws IOException {
-        Person person = new Person("Wendy", 30);
-        File file = new File(tempDir, "test_url_config.xml");
-        XmlMappers.toXml(person, file);
-        URL url = file.toURI().toURL();
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-        Person result = XmlMappers.fromXml(url, Person.class, config);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_fromXml_dataInput_class() throws IOException {
-        Person person = new Person("Victor", 44);
-        String xml = XmlMappers.toXml(person);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        DataInput dis = new DataInputStream(bais);
-        assertThrows(UnsupportedOperationException.class, () -> XmlMappers.fromXml(dis, Person.class));
-    }
-
-    @Test
-    public void test_fromXml_dataInput_class_config() throws IOException {
-        Person person = new Person("Wendy", 30);
-        String xml = XmlMappers.toXml(person);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        DataInput dis = new DataInputStream(bais);
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-        assertThrows(UnsupportedOperationException.class, () -> XmlMappers.fromXml(dis, Person.class, config));
-    }
-
-    @Test
-    public void test_fromXml_file_typeReference() throws IOException {
-        List<String> list = N.toList("alpha", "beta", "gamma");
-        File file = new File(tempDir, "test_typeRef.xml");
-        XmlMappers.toXml(list, file);
-        List<String> result = XmlMappers.fromXml(file, new TypeReference<List<String>>() {
-        });
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_fromXml_file_typeReference_config() throws IOException {
-        List<String> list = N.toList("x", "y", "z");
-        File file = new File(tempDir, "test_typeRef_config.xml");
-        XmlMappers.toXml(list, file);
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-        List<String> result = XmlMappers.fromXml(file, new TypeReference<List<String>>() {
-        }, config);
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_fromXml_inputStream_typeReference() throws IOException {
-        List<String> list = N.toList("sun", "moon", "stars");
-        String xml = XmlMappers.toXml(list);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        List<String> result = XmlMappers.fromXml(bais, new TypeReference<List<String>>() {
-        });
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_fromXml_inputStream_typeReference_config() throws IOException {
-        List<String> list = N.toList("earth", "mars", "venus");
-        String xml = XmlMappers.toXml(list);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-        List<String> result = XmlMappers.fromXml(bais, new TypeReference<List<String>>() {
-        }, config);
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_fromXml_reader_typeReference() throws IOException {
-        List<String> list = N.toList("north", "south", "east", "west");
-        String xml = XmlMappers.toXml(list);
-        StringReader reader = new StringReader(xml);
-        List<String> result = XmlMappers.fromXml(reader, new TypeReference<List<String>>() {
-        });
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_fromXml_reader_typeReference_config() throws IOException {
-        List<String> list = N.toList("spring", "summer", "fall", "winter");
-        String xml = XmlMappers.toXml(list);
-        StringReader reader = new StringReader(xml);
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-        List<String> result = XmlMappers.fromXml(reader, new TypeReference<List<String>>() {
-        }, config);
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_fromXml_url_typeReference() throws IOException {
-        List<String> list = N.toList("url", "test", "data");
-        File file = new File(tempDir, "test_url_typeref.xml");
-        XmlMappers.toXml(list, file);
-        URL url = file.toURI().toURL();
-        List<String> result = XmlMappers.fromXml(url, new TypeReference<List<String>>() {
-        });
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_fromXml_url_typeReference_config() throws IOException {
-        List<String> list = N.toList("url", "config", "test");
-        File file = new File(tempDir, "test_url_typeref_config.xml");
-        XmlMappers.toXml(list, file);
-        URL url = file.toURI().toURL();
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-        List<String> result = XmlMappers.fromXml(url, new TypeReference<List<String>>() {
-        }, config);
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_fromXml_dataInput_typeReference() throws IOException {
-        List<String> list = N.toList("monday", "tuesday", "wednesday");
-        String xml = XmlMappers.toXml(list);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        DataInput dis = new DataInputStream(bais);
-        assertThrows(UnsupportedOperationException.class, () -> XmlMappers.fromXml(dis, new TypeReference<List<String>>() {
-        }));
-    }
-
-    @Test
-    public void test_fromXml_dataInput_typeReference_config() throws IOException {
-        List<String> list = N.toList("january", "february", "march");
-        String xml = XmlMappers.toXml(list);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        DataInput dis = new DataInputStream(bais);
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-        assertThrows(UnsupportedOperationException.class, () -> XmlMappers.fromXml(dis, new TypeReference<List<String>>() {
-        }, config));
-    }
-
-    @Test
-    public void testFromXmlStringWithFeatures() {
-        String xml = "<Person><name>John</name><unknownField>value</unknownField><age>30</age></Person>";
-
-        DeserializationFeature failOnUnknownProperties = DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            XmlMappers.fromXml(xml, Person.class, failOnUnknownProperties);
-        });
-    }
-
-    @Test
-    public void testFromXmlFile() throws Exception {
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("<Person><name>John</name><age>30</age></Person>");
-        }
-
-        Person person = XmlMappers.fromXml(tempFile, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromXmlFileWithConfig() throws Exception {
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("<Person><name>John</name><age>30</age></Person>");
-        }
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-
-        Person person = XmlMappers.fromXml(tempFile, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromXmlInputStream() throws Exception {
-        String xml = "<Person><name>John</name><age>30</age></Person>";
-        ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes());
-
-        Person person = XmlMappers.fromXml(is, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromXmlInputStreamWithConfig() throws Exception {
-        String xml = "<Person><name>John</name><age>30</age></Person>";
-        ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes());
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-
-        Person person = XmlMappers.fromXml(is, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromXmlReader() throws Exception {
-        String xml = "<Person><name>John</name><age>30</age></Person>";
-        StringReader reader = new StringReader(xml);
-
-        Person person = XmlMappers.fromXml(reader, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromXmlReaderWithConfig() throws Exception {
-        String xml = "<Person><name>John</name><age>30</age></Person>";
-        StringReader reader = new StringReader(xml);
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-
-        Person person = XmlMappers.fromXml(reader, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromXmlURL() throws Exception {
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("<Person><name>John</name><age>30</age></Person>");
-        }
-        URL url = tempFile.toURI().toURL();
-
-        Person person = XmlMappers.fromXml(url, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromXmlURLWithConfig() throws Exception {
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("<Person><name>John</name><age>30</age></Person>");
-        }
-        URL url = tempFile.toURI().toURL();
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-
-        Person person = XmlMappers.fromXml(url, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromXmlWithTypeReferenceFile() throws Exception {
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("<ArrayList><item>a</item><item>b</item></ArrayList>");
-        }
-
-        List<String> list = XmlMappers.fromXml(tempFile, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromXmlWithTypeReferenceFileWithConfig() throws Exception {
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("<ArrayList><item>a</item><item>b</item></ArrayList>");
-        }
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-
-        List<String> list = XmlMappers.fromXml(tempFile, new TypeReference<List<String>>() {
-        }, config);
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromXmlWithTypeReferenceInputStream() throws Exception {
-        String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
-        ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes());
-
-        List<String> list = XmlMappers.fromXml(is, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromXmlWithTypeReferenceInputStreamWithConfig() throws Exception {
-        String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
-        ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes());
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-
-        List<String> list = XmlMappers.fromXml(is, new TypeReference<List<String>>() {
-        }, config);
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromXmlWithTypeReferenceReader() throws Exception {
-        String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
-        StringReader reader = new StringReader(xml);
-
-        List<String> list = XmlMappers.fromXml(reader, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromXmlWithTypeReferenceReaderWithConfig() throws Exception {
-        String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
-        StringReader reader = new StringReader(xml);
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-
-        List<String> list = XmlMappers.fromXml(reader, new TypeReference<List<String>>() {
-        }, config);
+        assertEquals(person,
+                XmlMappers.fromXml(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), Person.class, XmlMappers.createDeserializationConfig()));
+        assertEquals(person, XmlMappers.fromXml(new StringReader(xml), Person.class));
+        assertEquals(person, XmlMappers.fromXml(new StringReader(xml), Person.class, XmlMappers.createDeserializationConfig()));
 
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
+        final URL url = file.toURI().toURL();
+        assertEquals(person, XmlMappers.fromXml(url, Person.class));
+        assertEquals(person, XmlMappers.fromXml(url, Person.class, XmlMappers.createDeserializationConfig()));
     }
 
     @Test
-    public void testFromXmlWithTypeReferenceURL() throws Exception {
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("<ArrayList><item>a</item><item>b</item></ArrayList>");
-        }
-        URL url = tempFile.toURI().toURL();
+    public void testFromXml_Sources_TypeReference() throws IOException {
+        final List<String> list = CommonUtil.toList("alpha", "beta", "gamma");
+        final TypeReference<List<String>> type = new TypeReference<>() {
+        };
+        final File file = xmlFile("typeRef.xml", list);
+        assertEquals(3, XmlMappers.fromXml(file, type).size());
+        assertEquals(3, XmlMappers.fromXml(file, type, XmlMappers.createDeserializationConfig()).size());
 
-        List<String> list = XmlMappers.fromXml(url, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromXmlWithTypeReferenceURLWithConfig() throws Exception {
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("<ArrayList><item>a</item><item>b</item></ArrayList>");
-        }
-        URL url = tempFile.toURI().toURL();
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-
-        List<String> list = XmlMappers.fromXml(url, new TypeReference<List<String>>() {
-        }, config);
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void test_createSerializationConfig() {
-        SerializationConfig config = XmlMappers.createSerializationConfig();
-        assertNotNull(config);
+        final String xml = XmlMappers.toXml(list);
+        assertEquals(3, XmlMappers.fromXml(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), type).size());
+        assertEquals(3,
+                XmlMappers.fromXml(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), type, XmlMappers.createDeserializationConfig()).size());
+        assertEquals(3, XmlMappers.fromXml(new StringReader(xml), type).size());
+        assertEquals(3, XmlMappers.fromXml(new StringReader(xml), type, XmlMappers.createDeserializationConfig()).size());
+        assertEquals(3, XmlMappers.fromXml(file.toURI().toURL(), type).size());
+        assertEquals(3, XmlMappers.fromXml(file.toURI().toURL(), type, XmlMappers.createDeserializationConfig()).size());
     }
 
     @Test
-    public void test_createDeserializationConfig() {
-        DeserializationConfig config = XmlMappers.createDeserializationConfig();
-        assertNotNull(config);
-    }
-
-    @Test
-    public void test_One_fromXml_bytes_class() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("Eve", 27);
-        String xml = wrapper.toXml(person);
-        byte[] bytes = xml.getBytes();
-        Person result = wrapper.fromXml(bytes, Person.class);
-        assertEquals(person, result);
-    }
+    public void testFromXml_DataInput_Unsupported() throws IOException {
+        final String xml = XmlMappers.toXml(new Person("Victor", 44));
+        final DataInput classInput = new DataInputStream(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
+        assertThrows(UnsupportedOperationException.class, () -> XmlMappers.fromXml(classInput, Person.class));
 
-    @Test
-    public void test_One_fromXml_bytes_offset_len_class() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("Frank", 45);
-        String xml = wrapper.toXml(person);
-        byte[] bytes = xml.getBytes();
-        Person result = wrapper.fromXml(bytes, 0, bytes.length, Person.class);
-        assertEquals(person, result);
-    }
+        final DataInput classConfig = new DataInputStream(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
+        assertThrows(UnsupportedOperationException.class, () -> XmlMappers.fromXml(classConfig, Person.class, XmlMappers.createDeserializationConfig()));
 
-    @Test
-    public void test_One_fromXml_string_class() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("Grace", 29);
-        String xml = wrapper.toXml(person);
-        Person result = wrapper.fromXml(xml, Person.class);
-        assertEquals(person, result);
-    }
+        final TypeReference<List<String>> type = new TypeReference<>() {
+        };
+        final String listXml = XmlMappers.toXml(CommonUtil.toList("monday", "tuesday"));
+        final DataInput typeInput = new DataInputStream(new ByteArrayInputStream(listXml.getBytes(StandardCharsets.UTF_8)));
+        assertThrows(UnsupportedOperationException.class, () -> XmlMappers.fromXml(typeInput, type));
 
-    @Test
-    public void test_One_fromXml_bytes_typeReference() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = N.toList("a", "b", "c");
-        String xml = wrapper.toXml(list);
-        byte[] bytes = xml.getBytes();
-        List<String> result = wrapper.fromXml(bytes, new TypeReference<List<String>>() {
-        });
-        assertEquals(list.size(), result.size());
+        final DataInput typeConfig = new DataInputStream(new ByteArrayInputStream(listXml.getBytes(StandardCharsets.UTF_8)));
+        assertThrows(UnsupportedOperationException.class, () -> XmlMappers.fromXml(typeConfig, type, XmlMappers.createDeserializationConfig()));
     }
 
     @Test
-    public void test_One_fromXml_bytes_offset_len_typeReference() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = N.toList("d", "e", "f");
-        String xml = wrapper.toXml(list);
-        byte[] bytes = xml.getBytes();
-        List<String> result = wrapper.fromXml(bytes, 0, bytes.length, new TypeReference<List<String>>() {
-        });
-        assertEquals(list.size(), result.size());
+    public void testCreateSerializationConfig() {
+        final SerializationConfig config = XmlMappers.createSerializationConfig();
+        assertNotSame(config, XmlMappers.createSerializationConfig());
+        assertSame(config, config.with(SerializationFeature.FAIL_ON_EMPTY_BEANS));
+        assertNotSame(config, config.with(SerializationFeature.INDENT_OUTPUT));
     }
 
     @Test
-    public void test_One_fromXml_string_typeReference() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = N.toList("g", "h", "i");
-        String xml = wrapper.toXml(list);
-        List<String> result = wrapper.fromXml(xml, new TypeReference<List<String>>() {
-        });
-        assertEquals(list.size(), result.size());
+    public void testCreateDeserializationConfig() {
+        final DeserializationConfig config = XmlMappers.createDeserializationConfig();
+        assertNotSame(config, XmlMappers.createDeserializationConfig());
+        assertSame(config, config.with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+        assertNotSame(config, config.with(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY));
     }
 
     @Test
-    public void test_wrap() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        assertNotNull(wrapper);
+    public void testWrap() {
+        assertNotNull(XmlMappers.wrap(new XmlMapper()));
     }
 
     @Test
-    public void test_One_toXml_object() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("John", 30);
-        String xml = wrapper.toXml(person);
-        assertNotNull(xml);
+    public void testOne_ToXml() throws IOException {
+        final XmlMappers.One wrapper = one();
+        final Person person = new Person("John", 30);
+        final String xml = wrapper.toXml(person);
         assertTrue(xml.contains("John"));
-    }
 
-    @Test
-    public void test_One_toXml_object_prettyFormat() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("Jane", 25);
-        String xml = wrapper.toXml(person, true);
-        assertNotNull(xml);
-        assertTrue(xml.contains("Jane"));
+        final String pretty = wrapper.toXml(person, true);
+        final String compact = wrapper.toXml(person, false);
+        assertTrue(pretty.contains("\n"));
+        assertFalse(compact.contains("\n"));
 
-        String xmlNonPretty = wrapper.toXml(person, false);
-        assertNotNull(xmlNonPretty);
-    }
-
-    @Test
-    public void testOneToXmlPretty() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("John", 30);
-
-        String prettyXml = wrapper.toXml(person, true);
-        String compactXml = wrapper.toXml(person, false);
-
-        Assertions.assertNotNull(prettyXml);
-        Assertions.assertNotNull(compactXml);
-        Assertions.assertTrue(prettyXml.contains("\n"));
-        Assertions.assertFalse(compactXml.contains("\n"));
-    }
-
-    @Test
-    public void testOneFromXmlByteArray() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        byte[] xmlBytes = "<Person><name>John</name><age>30</age></Person>".getBytes();
-
-        Person person = wrapper.fromXml(xmlBytes, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromXmlByteArrayPartial() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        byte[] xmlBytes = "xxx<Person><name>John</name><age>30</age></Person>yyy".getBytes();
-
-        Person person = wrapper.fromXml(xmlBytes, 3, xmlBytes.length - 6, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromXmlString() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        String xml = "<Person><name>John</name><age>30</age></Person>";
-
-        Person person = wrapper.fromXml(xml, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromXmlWithTypeReferenceByteArray() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
-        byte[] xmlBytes = xml.getBytes();
-
-        List<String> list = wrapper.fromXml(xmlBytes, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOneFromXmlWithTypeReferenceByteArrayPartial() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        String xml = "xxx<ArrayList><item>a</item><item>b</item></ArrayList>yyy";
-        byte[] xmlBytes = xml.getBytes();
-
-        List<String> list = wrapper.fromXml(xmlBytes, 3, xmlBytes.length - 6, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOneFromXmlWithTypeReferenceString() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
-
-        List<String> list = wrapper.fromXml(xml, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOneToXml() {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("Alice", 28);
-        String xml = wrapper.toXml(person);
-        Assertions.assertNotNull(xml);
-        Assertions.assertTrue(xml.contains("Alice"));
-        Assertions.assertTrue(xml.contains("28"));
-    }
-
-    @Test
-    public void testOneToXml_PrettyFormat() {
-        XmlMappers.One wrapper = XmlMappers.wrap(new XmlMapper());
-        String xml = wrapper.toXml(new Person("Pretty", 31), true);
-
-        Assertions.assertNotNull(xml);
-        Assertions.assertTrue(xml.contains("Pretty"));
-        Assertions.assertTrue(xml.contains("\n"));
-    }
-
-    @Test
-    public void test_One_toXml_object_file() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("Bob", 40);
-        File file = new File(tempDir, "test_One_toXml.xml");
+        final File file = new File(tempDir, "one.xml");
         wrapper.toXml(person, file);
-        assertTrue(file.exists());
         assertTrue(file.length() > 0);
-    }
 
-    @Test
-    public void test_One_toXml_object_outputStream() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("Alice", 35);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         wrapper.toXml(person, baos);
-        assertTrue(baos.size() > 0);
-    }
+        assertTrue(baos.toString().contains("John"));
 
-    @Test
-    public void test_One_toXml_object_writer() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("Charlie", 28);
-        StringWriter writer = new StringWriter();
+        final StringWriter writer = new StringWriter();
         wrapper.toXml(person, writer);
-        String xml = writer.toString();
-        assertTrue(xml.contains("Charlie"));
+        assertTrue(writer.toString().contains("John"));
+
+        final ByteArrayOutputStream data = new ByteArrayOutputStream();
+        wrapper.toXml(person, (DataOutput) new DataOutputStream(data));
+        assertTrue(data.toString().contains("John"));
     }
 
     @Test
-    public void test_One_toXml_object_dataOutput() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("David", 33);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutput dos = new DataOutputStream(baos);
-        wrapper.toXml(person, dos);
-        assertTrue(baos.size() > 0);
+    public void testOne_FromXml() throws IOException {
+        final XmlMappers.One wrapper = one();
+        final Person person = new Person("Eve", 27);
+        final String xml = wrapper.toXml(person);
+        assertEquals(person, wrapper.fromXml(xml, Person.class));
+        assertEquals(person, wrapper.fromXml(xml.getBytes(StandardCharsets.UTF_8), Person.class));
+        assertEquals(person, wrapper.fromXml(xml.getBytes(StandardCharsets.UTF_8), 0, xml.getBytes(StandardCharsets.UTF_8).length, Person.class));
+
+        final byte[] buffered = ("xxx" + xml + "yyy").getBytes(StandardCharsets.UTF_8);
+        assertEquals(person, wrapper.fromXml(buffered, 3, xml.getBytes(StandardCharsets.UTF_8).length, Person.class));
+
+        final File file = xmlFile("one-from.xml", person);
+        assertEquals(person, wrapper.fromXml(file, Person.class));
+        assertEquals(person, wrapper.fromXml(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), Person.class));
+        assertEquals(person, wrapper.fromXml(new StringReader(xml), Person.class));
+        assertEquals(person, wrapper.fromXml(file.toURI().toURL(), Person.class));
+
+        final List<String> list = CommonUtil.toList("a", "b", "c");
+        final TypeReference<List<String>> type = new TypeReference<>() {
+        };
+        final String listXml = wrapper.toXml(list);
+        assertEquals(3, wrapper.fromXml(listXml, type).size());
+        assertEquals(3, wrapper.fromXml(listXml.getBytes(StandardCharsets.UTF_8), type).size());
+        assertEquals(3, wrapper.fromXml(listXml.getBytes(StandardCharsets.UTF_8), 0, listXml.getBytes(StandardCharsets.UTF_8).length, type).size());
+        final File listFile = xmlFile("one-typeRef.xml", list);
+        assertEquals(3, wrapper.fromXml(listFile, type).size());
+        assertEquals(3, wrapper.fromXml(new ByteArrayInputStream(listXml.getBytes(StandardCharsets.UTF_8)), type).size());
+        assertEquals(3, wrapper.fromXml(new StringReader(listXml), type).size());
+        assertEquals(3, wrapper.fromXml(listFile.toURI().toURL(), type).size());
+
+        final DataInput classInput = new DataInputStream(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
+        assertThrows(UnsupportedOperationException.class, () -> wrapper.fromXml(classInput, Person.class));
+        final DataInput typeInput = new DataInputStream(new ByteArrayInputStream(listXml.getBytes(StandardCharsets.UTF_8)));
+        assertThrows(UnsupportedOperationException.class, () -> wrapper.fromXml(typeInput, type));
     }
 
-    @Test
-    public void test_One_fromXml_file_class() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("Henry", 38);
-        File file = new File(tempDir, "test_One_fromXml.xml");
-        wrapper.toXml(person, file);
-        Person result = wrapper.fromXml(file, Person.class);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_One_fromXml_inputStream_class() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("Ivy", 26);
-        String xml = wrapper.toXml(person);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        Person result = wrapper.fromXml(bais, Person.class);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_One_fromXml_reader_class() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("Jack", 42);
-        String xml = wrapper.toXml(person);
-        StringReader reader = new StringReader(xml);
-        Person result = wrapper.fromXml(reader, Person.class);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_One_fromXml_url_class() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("UrlTest", 50);
-        File file = new File(tempDir, "test_One_url.xml");
-        wrapper.toXml(person, file);
-        URL url = file.toURI().toURL();
-        Person result = wrapper.fromXml(url, Person.class);
-        assertEquals(person, result);
-    }
-
-    @Test
-    public void test_One_fromXml_dataInput_class() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("Kate", 31);
-        String xml = wrapper.toXml(person);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        DataInput dis = new DataInputStream(bais);
-        assertThrows(UnsupportedOperationException.class, () -> wrapper.fromXml(dis, Person.class));
-    }
-
-    @Test
-    public void test_One_fromXml_file_typeReference() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = N.toList("j", "k", "l");
-        File file = new File(tempDir, "test_One_typeRef.xml");
-        wrapper.toXml(list, file);
-        List<String> result = wrapper.fromXml(file, new TypeReference<List<String>>() {
-        });
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_One_fromXml_inputStream_typeReference() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = N.toList("m", "n", "o");
-        String xml = wrapper.toXml(list);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        List<String> result = wrapper.fromXml(bais, new TypeReference<List<String>>() {
-        });
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_One_fromXml_reader_typeReference() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = N.toList("p", "q", "r");
-        String xml = wrapper.toXml(list);
-        StringReader reader = new StringReader(xml);
-        List<String> result = wrapper.fromXml(reader, new TypeReference<List<String>>() {
-        });
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_One_fromXml_url_typeReference() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = N.toList("one", "url", "test");
-        File file = new File(tempDir, "test_One_url_typeref.xml");
-        wrapper.toXml(list, file);
-        URL url = file.toURI().toURL();
-        List<String> result = wrapper.fromXml(url, new TypeReference<List<String>>() {
-        });
-        assertEquals(list.size(), result.size());
-    }
-
-    @Test
-    public void test_One_fromXml_dataInput_typeReference() throws IOException {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = N.toList("s", "t", "u");
-        String xml = wrapper.toXml(list);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        DataInput dis = new DataInputStream(bais);
-        assertThrows(UnsupportedOperationException.class, () -> wrapper.fromXml(dis, new TypeReference<List<String>>() {
-        }));
-    }
-
-    @Test
-    public void testOneToXmlFile() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("John", 30);
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-
-        wrapper.toXml(person, tempFile);
-
-        Assertions.assertTrue(tempFile.exists());
-        Assertions.assertTrue(tempFile.length() > 0);
-    }
-
-    @Test
-    public void testOneToXmlOutputStream() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("John", 30);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        wrapper.toXml(person, os);
-
-        String xml = os.toString();
-        Assertions.assertTrue(xml.contains("John"));
-    }
-
-    @Test
-    public void testOneToXmlWriter() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("John", 30);
-        StringWriter writer = new StringWriter();
-
-        wrapper.toXml(person, writer);
-
-        String xml = writer.toString();
-        Assertions.assertTrue(xml.contains("John"));
-    }
-
-    @Test
-    public void testOneToXmlDataOutput() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("John", 30);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
-
-        wrapper.toXml(person, (DataOutput) dos);
-
-        String xml = baos.toString();
-        Assertions.assertTrue(xml.contains("John"));
-    }
-
-    @Test
-    public void testOneFromXmlFile() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("<Person><name>John</name><age>30</age></Person>");
-        }
-
-        Person person = wrapper.fromXml(tempFile, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromXmlInputStream() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        String xml = "<Person><name>John</name><age>30</age></Person>";
-        ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes());
-
-        Person person = wrapper.fromXml(is, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromXmlReader() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        String xml = "<Person><name>John</name><age>30</age></Person>";
-        StringReader reader = new StringReader(xml);
-
-        Person person = wrapper.fromXml(reader, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromXmlURL() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("<Person><name>John</name><age>30</age></Person>");
-        }
-        URL url = tempFile.toURI().toURL();
-
-        Person person = wrapper.fromXml(url, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromXmlWithTypeReferenceFile() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("<ArrayList><item>a</item><item>b</item></ArrayList>");
-        }
-
-        List<String> list = wrapper.fromXml(tempFile, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOneFromXmlWithTypeReferenceInputStream() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
-        ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes());
-
-        List<String> list = wrapper.fromXml(is, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOneFromXmlWithTypeReferenceReader() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        String xml = "<ArrayList><item>a</item><item>b</item></ArrayList>";
-        StringReader reader = new StringReader(xml);
-
-        List<String> list = wrapper.fromXml(reader, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOneFromXmlWithTypeReferenceURL() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        File tempFile = File.createTempFile("test", ".xml");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("<ArrayList><item>a</item><item>b</item></ArrayList>");
-        }
-        URL url = tempFile.toURI().toURL();
-
-        List<String> list = wrapper.fromXml(url, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOneFromXmlDataInput() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        Person person = new Person("Bob", 35);
-        String xml = wrapper.toXml(person);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        DataInput dis = new DataInputStream(bais);
-        assertThrows(UnsupportedOperationException.class, () -> wrapper.fromXml(dis, Person.class));
-    }
-
-    @Test
-    public void testOneFromXmlWithTypeReferenceDataInput() throws Exception {
-        XmlMapper mapper = new XmlMapper();
-        XmlMappers.One wrapper = XmlMappers.wrap(mapper);
-        List<String> list = new ArrayList<>();
-        list.add("x");
-        list.add("y");
-        String xml = wrapper.toXml(list);
-        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-        DataInput dis = new DataInputStream(bais);
-        assertThrows(UnsupportedOperationException.class, () -> wrapper.fromXml(dis, new TypeReference<List<String>>() {
-        }));
-    }
-
-    @Test
-    public void testOneToXml_DataOutput() throws Exception {
-        XmlMappers.One wrapper = XmlMappers.wrap(new XmlMapper());
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutput output = new DataOutputStream(baos);
-
-        wrapper.toXml(new Person("DataOutput", 29), output);
-
-        String xml = baos.toString();
-        Assertions.assertTrue(xml.contains("DataOutput"));
-    }
-
-    /** Regression: null configurations must keep using the shared default without adding it to a custom-config cache. */
     @Test
     @SuppressWarnings("unchecked")
-    public void testRecycle_doesNotPoolSharedDefaultMapper_onNullConfig() throws Exception {
-        java.lang.reflect.Field serializationPoolField = XmlMappers.class.getDeclaredField("serializationMapperPool");
-        java.lang.reflect.Field deserializationPoolField = XmlMappers.class.getDeclaredField("deserializationMapperPool");
+    public void testRecycle_DoesNotPoolSharedDefaultMapperOnNullConfig() throws Exception {
+        final java.lang.reflect.Field serializationPoolField = XmlMappers.class.getDeclaredField("serializationMapperPool");
+        final java.lang.reflect.Field deserializationPoolField = XmlMappers.class.getDeclaredField("deserializationMapperPool");
         serializationPoolField.setAccessible(true);
         deserializationPoolField.setAccessible(true);
-        java.lang.reflect.Field defField = XmlMappers.class.getDeclaredField("defaultXmlMapper");
+        final java.lang.reflect.Field defField = XmlMappers.class.getDeclaredField("defaultXmlMapper");
         defField.setAccessible(true);
 
-        Map<SerializationConfig, XmlMapper> serializationPool = (Map<SerializationConfig, XmlMapper>) serializationPoolField.get(null);
-        Map<DeserializationConfig, XmlMapper> deserializationPool = (Map<DeserializationConfig, XmlMapper>) deserializationPoolField.get(null);
-        XmlMapper sharedDefault = (XmlMapper) defField.get(null);
+        final Map<SerializationConfig, XmlMapper> serializationPool = (Map<SerializationConfig, XmlMapper>) serializationPoolField.get(null);
+        final Map<DeserializationConfig, XmlMapper> deserializationPool = (Map<DeserializationConfig, XmlMapper>) deserializationPoolField.get(null);
+        final XmlMapper sharedDefault = (XmlMapper) defField.get(null);
 
         synchronized (serializationPool) {
             serializationPool.clear();
@@ -1688,75 +590,89 @@ public class XmlMappersTest extends TestBase {
         XmlMappers.toXml(new Person("Pooling", 1), (SerializationConfig) null);
 
         synchronized (serializationPool) {
-            Assertions.assertTrue(serializationPool.isEmpty());
-            Assertions.assertFalse(serializationPool.containsValue(sharedDefault));
+            assertTrue(serializationPool.isEmpty());
+            assertFalse(serializationPool.containsValue(sharedDefault));
         }
         synchronized (deserializationPool) {
-            Assertions.assertTrue(deserializationPool.isEmpty());
-            Assertions.assertFalse(deserializationPool.containsValue(sharedDefault));
+            assertTrue(deserializationPool.isEmpty());
+            assertFalse(deserializationPool.containsValue(sharedDefault));
         }
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void testLibraryOwnedXmlMappersUseHardenedInputFactories() throws Exception {
-        java.lang.reflect.Field defaultField = XmlMappers.class.getDeclaredField("defaultXmlMapper");
-        java.lang.reflect.Field prettyField = XmlMappers.class.getDeclaredField("defaultXmlMapperForPretty");
-        java.lang.reflect.Field poolField = XmlMappers.class.getDeclaredField("deserializationMapperPool");
+        final java.lang.reflect.Field defaultField = XmlMappers.class.getDeclaredField("defaultXmlMapper");
+        final java.lang.reflect.Field poolField = XmlMappers.class.getDeclaredField("deserializationMapperPool");
         defaultField.setAccessible(true);
-        prettyField.setAccessible(true);
         poolField.setAccessible(true);
 
-        assertSecureXmlInputFactory((XmlMapper) defaultField.get(null));
-        assertSecureXmlInputFactory((XmlMapper) prettyField.get(null));
+        final XmlMapper sharedDefault = (XmlMapper) defaultField.get(null);
+        assertSecureXmlInputFactory(sharedDefault);
 
-        Map<DeserializationConfig, XmlMapper> pool = (Map<DeserializationConfig, XmlMapper>) poolField.get(null);
+        assertThrows(NoSuchFieldException.class, () -> XmlMappers.class.getDeclaredField("defaultXmlMapperForPretty"));
+        final java.lang.reflect.Field prettyWriterField = XmlMappers.class.getDeclaredField("defaultXmlWriterForPretty");
+        prettyWriterField.setAccessible(true);
+        assertNotNull(prettyWriterField.get(null));
+
+        final Map<DeserializationConfig, XmlMapper> pool = (Map<DeserializationConfig, XmlMapper>) poolField.get(null);
         synchronized (pool) {
             pool.clear();
         }
 
-        DeserializationConfig config = XmlMappers.createDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        final DeserializationConfig config = XmlMappers.createDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         XmlMappers.fromXml("<Person><name>safe</name><age>1</age></Person>", Person.class, config);
 
         synchronized (pool) {
-            Assertions.assertEquals(1, pool.size());
-            assertSecureXmlInputFactory(pool.values().iterator().next());
+            assertEquals(1, pool.size());
+            final XmlMapper pooled = pool.values().iterator().next();
+            assertSecureXmlInputFactory(pooled);
+            assertSame(sharedDefault.getFactory().getXMLInputFactory(), pooled.getFactory().getXMLInputFactory());
         }
     }
 
     @Test
+    public void testDisabledDtdProcessingDoesNotRejectPlainDoctype() {
+        final String xml = "<!DOCTYPE Person><Person><name>safe</name><age>1</age></Person>";
+        final Person person = new Person("safe", 1);
+
+        assertEquals(person, XmlMappers.fromXml(xml, Person.class));
+        assertEquals(person, XmlMappers.fromXml(xml, Person.class, XmlMappers.createDeserializationConfig()));
+        assertEquals(person, XmlMappers.fromXml(xml, Person.class, DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+    }
+
+    @Test
     public void testLibraryOwnedXmlMappersRejectExternalEntityPayloads() {
-        String hostileXml = "<!DOCTYPE Person [<!ENTITY xxe SYSTEM \"file:///definitely-not-readable-abacus-xxe\">]>"
+        final String hostileXml = "<!DOCTYPE Person [<!ENTITY xxe SYSTEM \"file:///definitely-not-readable-abacus-xxe\">]>"
                 + "<Person><name>&xxe;</name><age>1</age></Person>";
 
         assertThrows(RuntimeException.class, () -> XmlMappers.fromXml(hostileXml, Person.class));
 
-        DeserializationConfig config = XmlMappers.createDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        final DeserializationConfig config = XmlMappers.createDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         assertThrows(RuntimeException.class, () -> XmlMappers.fromXml(hostileXml, Person.class, config));
     }
 
     @Test
     public void testWrapDoesNotMutateCallerOwnedXmlInputFactory() {
-        XMLInputFactory callerFactory = XMLInputFactory.newFactory();
+        final XMLInputFactory callerFactory = XMLInputFactory.newFactory();
         callerFactory.setProperty(XMLInputFactory.SUPPORT_DTD, true);
-        XmlMapper callerMapper = new XmlMapper(callerFactory);
+        final XmlMapper callerMapper = new XmlMapper(callerFactory);
 
         XmlMappers.wrap(callerMapper);
 
-        Assertions.assertSame(callerFactory, ((XmlFactory) callerMapper.getFactory()).getXMLInputFactory());
-        Assertions.assertEquals(Boolean.TRUE, callerFactory.getProperty(XMLInputFactory.SUPPORT_DTD));
+        assertSame(callerFactory, callerMapper.getFactory().getXMLInputFactory());
+        assertEquals(Boolean.TRUE, callerFactory.getProperty(XMLInputFactory.SUPPORT_DTD));
     }
 
     @Test
     public void testRecycleIsPrivateSoCallerOwnedMappersCannotPoisonPool() throws Exception {
-        Assertions.assertTrue(Modifier.isPrivate(XmlMappers.class.getDeclaredMethod("recycle", XmlMapper.class).getModifiers()));
+        assertTrue(Modifier.isPrivate(XmlMappers.class.getDeclaredMethod("recycle", XmlMapper.class).getModifiers()));
     }
 
     private static void assertSecureXmlInputFactory(final XmlMapper mapper) throws XMLStreamException {
-        XMLInputFactory factory = ((XmlFactory) mapper.getFactory()).getXMLInputFactory();
-        Assertions.assertEquals(Boolean.FALSE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
-        Assertions.assertEquals(Boolean.FALSE, factory.getProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES));
+        final XMLInputFactory factory = mapper.getFactory().getXMLInputFactory();
+        assertEquals(Boolean.FALSE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
+        assertEquals(Boolean.FALSE, factory.getProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES));
         assertThrows(XMLStreamException.class, () -> factory.getXMLResolver().resolveEntity("public", "system", "base", "namespace"));
     }
-
 }

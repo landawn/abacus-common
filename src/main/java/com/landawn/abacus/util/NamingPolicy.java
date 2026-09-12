@@ -19,46 +19,66 @@ import java.util.function.Function;
 import com.landawn.abacus.annotation.Beta;
 
 /**
- * An enumeration representing different naming conventions for string transformation.
+ * An enumeration of naming conventions used to transform identifier strings.
  *
- * <p>This enum provides a set of predefined naming policies that can be used to convert
- * strings between different naming conventions commonly used in programming. Each policy
- * encapsulates a transformation function that converts a string according to its rules.</p>
+ * <p>Each constant other than {@link #NO_CHANGE} delegates to the matching {@link Strings}
+ * converter. Those converters detect word boundaries at underscores, hyphens, whitespace, and
+ * case transitions (an uppercase or titlecase letter that is preceded or followed by a lowercase
+ * letter). {@code null} and {@code ""} are returned unchanged.</p>
+ *
+ * <p>The conversions are not inverses. Camel-case policies remove and collapse separators
+ * (leading and trailing separators disappear), so {@code CAMEL_CASE.convert("a__b")} is
+ * {@code "aB"}. Snake- and kebab-case policies collapse any adjacent internal run of {@code '_'},
+ * {@code '-'}, and/or whitespace to a single output delimiter and drop leading/trailing runs
+ * ({@code SNAKE_CASE.convert("a__b")} is {@code "a_b"};
+ * {@code SNAKE_CASE.convert("_first__name_")} is {@code "first_name"}).</p>
+ *
+ * <p>The camel-case policies are also not idempotent: {@code UPPER_CAMEL_CASE.convert("a__b")} is
+ * {@code "AB"}, but converting that result again yields {@code "Ab"} — the separator that created
+ * the word boundary is gone, so {@code "AB"} reads as a single all-caps word. Apply a camel-case
+ * policy to an original identifier once; do not re-apply it to its own output. {@link #SNAKE_CASE},
+ * {@link #SCREAMING_SNAKE_CASE}, {@link #KEBAB_CASE} and {@link #NO_CHANGE} are idempotent.</p>
  *
  * <p>The available naming policies are:</p>
  * <ul>
- *   <li>{@link #CAMEL_CASE} - Converts to camelCase (e.g., "myVariableName")</li>
- *   <li>{@link #UPPER_CAMEL_CASE} - Converts to UpperCamelCase (e.g., "MyVariableName")</li>
- *   <li>{@link #SNAKE_CASE} - Converts to lower_case_with_underscore (e.g., "my_variable_name")</li>
- *   <li>{@link #SCREAMING_SNAKE_CASE} - Converts to SCREAMING_SNAKE_CASE (e.g., "MY_VARIABLE_NAME")</li>
- *   <li>{@link #KEBAB_CASE} - Converts to kebab-case (e.g., "my-variable-name")</li>
- *   <li>{@link #NO_CHANGE} - Leaves the string unchanged</li>
+ *   <li>{@link #CAMEL_CASE} — camelCase (e.g. {@code "myVariableName"})</li>
+ *   <li>{@link #UPPER_CAMEL_CASE} — UpperCamelCase (e.g. {@code "MyVariableName"})</li>
+ *   <li>{@link #SNAKE_CASE} — snake_case (e.g. {@code "my_variable_name"})</li>
+ *   <li>{@link #SCREAMING_SNAKE_CASE} — SCREAMING_SNAKE_CASE (e.g. {@code "MY_VARIABLE_NAME"})</li>
+ *   <li>{@link #KEBAB_CASE} — kebab-case (e.g. {@code "my-variable-name"})</li>
+ *   <li>{@link #NO_CHANGE} — the input is returned as-is</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * String camelCase = NamingPolicy.CAMEL_CASE.convert("user-name");   // "userName"
- * String snakeCase = NamingPolicy.SNAKE_CASE.convert("userName");    // "user_name"
+ * NamingPolicy.CAMEL_CASE.convert("user-name");          // "userName"
+ * NamingPolicy.SNAKE_CASE.convert("userName");           // "user_name"
+ * NamingPolicy.SNAKE_CASE.convert(" first-name ");       // "first_name"
+ * NamingPolicy.KEBAB_CASE.convert(" _first_name_ ");     // "first-name"
  * }</pre>
  *
  * @see Strings#toCamelCase(String)
+ * @see Strings#toUpperCamelCase(String)
  * @see Strings#toSnakeCase(String)
  * @see Strings#toScreamingSnakeCase(String)
+ * @see Strings#toKebabCase(String)
  */
 public enum NamingPolicy {
 
     /**
-     * Lower camel case naming policy (e.g., "myVariableName").
+     * Lower camel case (e.g. {@code "myVariableName"}).
      *
-     * <p>This policy converts strings to camelCase format where the first word
-     * starts with a lowercase letter and subsequent words start with uppercase letters.
-     * Words are joined without any separators.</p>
+     * <p>Delegates to {@link Strings#toCamelCase(String)}. The first word is lowercased; each later
+     * word is capitalized. Separators are removed and collapsed, so leading and trailing
+     * {@code '_'}, {@code '-'}, and whitespace disappear, and {@code "a__b"} becomes {@code "aB"}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result1 = NamingPolicy.CAMEL_CASE.convert("user_name");     // "userName"
-     * String result2 = NamingPolicy.CAMEL_CASE.convert("first-name");    // "firstName"
-     * String result3 = NamingPolicy.CAMEL_CASE.convert("MY_CONSTANT");   // "myConstant"
+     * NamingPolicy.CAMEL_CASE.convert("user_name");     // "userName"
+     * NamingPolicy.CAMEL_CASE.convert("first-name");    // "firstName"
+     * NamingPolicy.CAMEL_CASE.convert("MY_CONSTANT");   // "myConstant"
+     * NamingPolicy.CAMEL_CASE.convert("XMLParser");     // "xmlParser"
+     * NamingPolicy.CAMEL_CASE.convert("_helloWorld");   // "helloWorld"
      * }</pre>
      *
      * @see #convert(String)
@@ -67,17 +87,17 @@ public enum NamingPolicy {
     CAMEL_CASE(Strings::toCamelCase),
 
     /**
-     * Upper camel case naming policy (e.g., "MyVariableName").
+     * Upper camel case / PascalCase (e.g. {@code "MyVariableName"}).
      *
-     * <p>This policy converts strings to UpperCamelCase format where each word starts
-     * with an uppercase letter and words are joined without any separators. This is
-     * commonly used in Java class names.</p>
+     * <p>Delegates to {@link Strings#toUpperCamelCase(String)}. Same word-boundary and separator
+     * rules as {@link #CAMEL_CASE}, except every word — including the first — is capitalized.
+     * {@code "XMLParser"} becomes {@code "XmlParser"}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result1 = NamingPolicy.UPPER_CAMEL_CASE.convert("user_name");     // "UserName"
-     * String result2 = NamingPolicy.UPPER_CAMEL_CASE.convert("first-name");    // "FirstName"
-     * String result3 = NamingPolicy.UPPER_CAMEL_CASE.convert("my_constant");   // "MyConstant"
+     * NamingPolicy.UPPER_CAMEL_CASE.convert("user_name");     // "UserName"
+     * NamingPolicy.UPPER_CAMEL_CASE.convert("first-name");    // "FirstName"
+     * NamingPolicy.UPPER_CAMEL_CASE.convert("XMLParser");     // "XmlParser"
      * }</pre>
      *
      * @see #convert(String)
@@ -86,17 +106,21 @@ public enum NamingPolicy {
     UPPER_CAMEL_CASE(Strings::toUpperCamelCase),
 
     /**
-     * Lower case with underscores naming policy (e.g., "my_variable_name").
+     * Lower case with underscores (e.g. {@code "my_variable_name"}).
      *
-     * <p>This policy converts strings to snake_case format where all letters are
-     * lowercase and words are separated by underscores. This is commonly used in
-     * Python, Ruby, and database column names.</p>
+     * <p>Delegates to {@link Strings#toSnakeCase(String)}. Case boundaries become {@code '_'}.
+     * Any adjacent internal run of {@code '_'}, {@code '-'}, and/or whitespace collapses to a single
+     * underscore; leading and trailing runs are dropped: {@code "a__b"} and {@code "a-_b"} become
+     * {@code "a_b"}; {@code "_first__name_"} becomes {@code "first_name"}; {@code "-a-"} becomes
+     * {@code "a"}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result1 = NamingPolicy.SNAKE_CASE.convert("userName");     // "user_name"
-     * String result2 = NamingPolicy.SNAKE_CASE.convert("FirstName");    // "first_name"
-     * String result3 = NamingPolicy.SNAKE_CASE.convert("myConstant");   // "my_constant"
+     * NamingPolicy.SNAKE_CASE.convert("userName");      // "user_name"
+     * NamingPolicy.SNAKE_CASE.convert("first-name");    // "first_name"
+     * NamingPolicy.SNAKE_CASE.convert("first name");    // "first_name"
+     * NamingPolicy.SNAKE_CASE.convert("a__b");          // "a_b"
+     * NamingPolicy.SNAKE_CASE.convert(" -hello- ");     // "hello"
      * }</pre>
      *
      * @see #convert(String)
@@ -105,17 +129,17 @@ public enum NamingPolicy {
     SNAKE_CASE(Strings::toSnakeCase),
 
     /**
-     * Upper case with underscores naming policy (e.g., "MY_VARIABLE_NAME").
+     * Upper case with underscores (e.g. {@code "MY_VARIABLE_NAME"}).
      *
-     * <p>This policy converts strings to SCREAMING_SNAKE_CASE format (also known as
-     * UPPER_SNAKE_CASE) where all letters are uppercase and words are separated by
-     * underscores. This is commonly used for constants and configuration keys.</p>
+     * <p>Delegates to {@link Strings#toScreamingSnakeCase(String)}. Same delimiter rules as
+     * {@link #SNAKE_CASE}: any adjacent internal run of {@code '_'}, {@code '-'}, and/or whitespace
+     * collapses to a single underscore; leading and trailing runs are dropped.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result1 = NamingPolicy.SCREAMING_SNAKE_CASE.convert("userName");     // "USER_NAME"
-     * String result2 = NamingPolicy.SCREAMING_SNAKE_CASE.convert("firstName");    // "FIRST_NAME"
-     * String result3 = NamingPolicy.SCREAMING_SNAKE_CASE.convert("myConstant");   // "MY_CONSTANT"
+     * NamingPolicy.SCREAMING_SNAKE_CASE.convert("userName");      // "USER_NAME"
+     * NamingPolicy.SCREAMING_SNAKE_CASE.convert("first-name");    // "FIRST_NAME"
+     * NamingPolicy.SCREAMING_SNAKE_CASE.convert(" -hello- ");     // "HELLO"
      * }</pre>
      *
      * @see #convert(String)
@@ -124,16 +148,19 @@ public enum NamingPolicy {
     SCREAMING_SNAKE_CASE(Strings::toScreamingSnakeCase),
 
     /**
-     * Lower case with hyphens naming policy (e.g., "my-variable-name").
+     * Lower case with hyphens (e.g. {@code "my-variable-name"}).
      *
-     * <p>This policy converts strings to kebab-case format where all letters are
-     * lowercase and words are separated by hyphens.</p>
+     * <p>Delegates to {@link Strings#toKebabCase(String)}. Case boundaries become {@code '-'}.
+     * Any adjacent internal run of {@code '_'}, {@code '-'}, and/or whitespace collapses to a single
+     * hyphen; leading and trailing runs are dropped: {@code " _a_ "} and {@code "-a-"} become
+     * {@code "a"}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result1 = NamingPolicy.KEBAB_CASE.convert("userName");     // "user-name"
-     * String result2 = NamingPolicy.KEBAB_CASE.convert("FirstName");    // "first-name"
-     * String result3 = NamingPolicy.KEBAB_CASE.convert("myConstant");   // "my-constant"
+     * NamingPolicy.KEBAB_CASE.convert("userName");      // "user-name"
+     * NamingPolicy.KEBAB_CASE.convert("first_name");    // "first-name"
+     * NamingPolicy.KEBAB_CASE.convert("first name");    // "first-name"
+     * NamingPolicy.KEBAB_CASE.convert(" _hello_ ");     // "hello"
      * }</pre>
      *
      * @see #convert(String)
@@ -142,17 +169,13 @@ public enum NamingPolicy {
     KEBAB_CASE(Strings::toKebabCase),
 
     /**
-     * No change naming policy - returns the string as-is.
-     *
-     * <p>This policy performs no transformation and returns the input string unchanged.
-     * It can be useful when you need a policy object but don't want any transformation
-     * to occur.</p>
+     * Identity policy: the input is returned unchanged, including {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result1 = NamingPolicy.NO_CHANGE.convert("any-String_123");   // "any-String_123"
-     * String result2 = NamingPolicy.NO_CHANGE.convert("MixedCase");        // "MixedCase"
-     * String result3 = NamingPolicy.NO_CHANGE.convert("UPPER_CASE");       // "UPPER_CASE"
+     * NamingPolicy.NO_CHANGE.convert("any-String_123");   // "any-String_123"
+     * NamingPolicy.NO_CHANGE.convert("MixedCase");        // "MixedCase"
+     * NamingPolicy.NO_CHANGE.convert(null);               // null
      * }</pre>
      *
      * @see #convert(String)
@@ -172,49 +195,49 @@ public enum NamingPolicy {
     }
 
     /**
-     * Converts the specified string according to this naming policy's transformation rules.
+     * Converts {@code str} according to this policy. Delegates to the corresponding {@link Strings}
+     * method except for {@link #NO_CHANGE}, which returns the input unchanged.
      *
-     * <p>This method applies the transformation function associated with this naming policy
-     * to convert the input string to the desired format. The exact transformation depends on
-     * which naming policy constant is used (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE, etc.).</p>
+     * <p>Every converting policy splits on {@code '_'}, {@code '-'}, whitespace, and case transitions
+     * (an uppercase or titlecase letter that is preceded or followed by a lowercase letter). The
+     * remainder of each word is then cased for the target style. {@code CAMEL_CASE.convert("helloWorldAPI")}
+     * is {@code "helloWorldApi"}; {@code UPPER_CAMEL_CASE.convert("XMLParser")} is {@code "XmlParser"}.</p>
      *
-     * <p>How word boundaries are detected depends on the target policy. The camel-case policies
-     * ({@link #CAMEL_CASE} and {@link #UPPER_CAMEL_CASE}) split the input on the following separators:</p>
-     * <ul>
-     *   <li>Underscores (_)</li>
-     *   <li>Hyphens (-)</li>
-     *   <li>Whitespace</li>
-     *   <li>Case transitions (an upper-case letter that is preceded or followed by a lower-case letter)</li>
-     * </ul>
-     * <p>Because the camel-case policies also split on case transitions, the remainder of each detected
-     * word is lower-cased. For example {@code CAMEL_CASE.convert("helloWorldAPI")} yields
-     * {@code "helloWorldApi"} and {@code UPPER_CAMEL_CASE.convert("XMLParser")} yields {@code "XmlParser"}.</p>
-     * <p>The {@link #SNAKE_CASE}, {@link #SCREAMING_SNAKE_CASE}, and {@link #KEBAB_CASE} policies insert
-     * their separator at case transitions and also normalize any existing underscores, hyphens, or whitespace
-     * to that separator (for example {@code SNAKE_CASE.convert("first-name")} yields {@code "first_name"}, and
-     * {@code KEBAB_CASE} normalizes underscores to hyphens). The {@link #NO_CHANGE} policy performs no
-     * transformation at all.</p>
+     * <p>{@link #SNAKE_CASE} and {@link #SCREAMING_SNAKE_CASE} insert {@code '_'} at case boundaries
+     * and collapse any adjacent internal run of {@code '_'}, {@code '-'}, and/or whitespace to a
+     * single underscore; leading and trailing runs are dropped.
+     * {@link #KEBAB_CASE} inserts {@code '-'} at case boundaries and collapses the same separator
+     * set to a single hyphen.</p>
+     *
+     * <p>These conversions are not inverses. Camel-case policies remove and collapse separators, so
+     * {@code CAMEL_CASE.convert("_helloWorld")} is {@code "helloWorld"} and
+     * {@code CAMEL_CASE.convert("a__b")} is {@code "aB"}, while
+     * {@code SNAKE_CASE.convert("a__b")} is {@code "a_b"}.</p>
+     *
+     * <p>The camel-case policies are also not idempotent: {@code UPPER_CAMEL_CASE.convert("a__b")} is
+     * {@code "AB"}, but converting that result again yields {@code "Ab"} — the separator that
+     * created the word boundary is gone, so {@code "AB"} reads as a single all-caps word. Apply a
+     * camel-case policy to an original identifier once; do not re-apply it to its own output.
+     * {@link #SNAKE_CASE}, {@link #SCREAMING_SNAKE_CASE}, {@link #KEBAB_CASE} and {@link #NO_CHANGE}
+     * are idempotent.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Convert to lower camel case
-     * String result1 = NamingPolicy.CAMEL_CASE.convert("user-name");   // "userName"
-     * String result2 = NamingPolicy.CAMEL_CASE.convert("USER_NAME");   // "userName"
-     *
-     * // Convert to snake case
-     * String result3 = NamingPolicy.SNAKE_CASE.convert("userName");    // "user_name"
-     *
-     * // Null and empty string handling
-     * String result4 = NamingPolicy.CAMEL_CASE.convert(null);          // null
-     * String result5 = NamingPolicy.CAMEL_CASE.convert("");            // ""
+     * NamingPolicy.CAMEL_CASE.convert("user-name");    // "userName"
+     * NamingPolicy.CAMEL_CASE.convert("USER_NAME");    // "userName"
+     * NamingPolicy.SNAKE_CASE.convert("userName");     // "user_name"
+     * NamingPolicy.SNAKE_CASE.convert(" first-name "); // "first_name"
+     * NamingPolicy.CAMEL_CASE.convert(null);           // null
+     * NamingPolicy.CAMEL_CASE.convert("");             // ""
      * }</pre>
      *
-     * @param str the string to convert; may be {@code null}, empty, or contain various separators
-     *            (underscores, hyphens, spaces) or be in camelCase/UpperCamelCase format
-     * @return the converted string according to this naming policy's rules; returns {@code null} if
-     *         the input is {@code null}, returns an empty string if the input is empty, otherwise
-     *         returns the result of applying the policy's transformation function to the input string
+     * @param str the string to convert; may be {@code null} or empty
+     * @return the converted string; {@code null} if {@code str} is {@code null}, {@code ""} if
+     *         {@code str} is empty
      * @see #asFunction()
+     * @see Strings#toCamelCase(String)
+     * @see Strings#toSnakeCase(String)
+     * @see Strings#toKebabCase(String)
      */
     public String convert(final String str) {
         return converter.apply(str);

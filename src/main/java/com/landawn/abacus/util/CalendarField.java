@@ -22,8 +22,9 @@ import java.util.Map;
  * An enumeration representing the various calendar fields used for date and time manipulation.
  *
  * <p>This enum provides a type-safe way to work with calendar fields, mapping directly
- * to the corresponding {@link Calendar} field constants. Each enum value has the same
- * integer value as its corresponding Calendar constant, ensuring compatibility.</p>
+ * to the corresponding {@link Calendar} field constants. Each constant's {@link #value()} returns
+ * the integer of its corresponding {@code Calendar} field constant (note that {@link Enum#ordinal()}
+ * does <i>not</i>), so {@code value()} can be passed straight to the {@code Calendar} methods.</p>
  *
  * <p><b>Note on {@code SEMI_MONTH}:</b> this enum intentionally has no {@code SEMI_MONTH} constant.
  * {@code SEMI_MONTH} ({@code Dates.SEMI_MONTH = 1001}) is an Apache-Commons-Lang-compatible extension
@@ -219,7 +220,7 @@ public enum CalendarField {
      * @see #value()
      * @see #valueOf(int)
      */
-    public static CalendarField of(final int intValue) {
+    public static CalendarField of(final int intValue) throws IllegalArgumentException {
         final CalendarField result = m.get(intValue);
 
         if (result == null) {
@@ -252,7 +253,7 @@ public enum CalendarField {
      * @see #of(int)
      */
     @Deprecated
-    public static CalendarField valueOf(final int intValue) {
+    public static CalendarField valueOf(final int intValue) throws IllegalArgumentException {
         return of(intValue);
     }
 

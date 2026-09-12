@@ -47,6 +47,17 @@ import com.landawn.abacus.util.Strings;
  * JDBC persistence and streaming JSON/XML output; {@link #stringOf(Enum)} itself returns the constant name
  * unless a JSON value accessor is configured.</p>
  *
+ * <p>An enum annotated with a {@code @JsonXmlValue}/{@code @JsonXmlCreator} (or Jackson {@code @JsonValue}/
+ * {@code @JsonCreator}) pair is written and read through those members and the pair takes precedence over the
+ * configured representation, even {@code ORDINAL} or {@code CODE}. An enum carrying only a Jackson
+ * {@code @JsonValue} (no creator) is also supported: its constants' values form a reverse map, so
+ * {@link #valueOf(String)} and the {@code ResultSet} reads accept the value string first and the constant name
+ * as a fallback. Two constants with the same value are rejected when the handler is built.</p>
+ *
+ * <p>The handler always describes the enum class itself: asking for the runtime class of a constant with a body
+ * ({@code E.X.getClass()} when {@code X { ... }} overrides a method) yields a handler named after and equal to
+ * {@code Type.of(E.class)}, not one named after the synthetic {@code E$1} class.</p>
+ *
  * @param <T> the enum type, must extend {@code Enum<T>}
  */
 @SuppressWarnings("java:S2160")
@@ -60,7 +71,21 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     private final Map<String, T> jsonXmlNameEnumMap;
     private final com.landawn.abacus.util.EnumType enumRepresentation;
 
+    /**
+     * Reverse map {@code jsonValueType.stringOf(value) -> constant} for an enum with a Jackson {@code @JsonValue}
+     * but no creator; {@code null} for every other enum (those with a creator read through it).
+     */
+    private final Map<String, T> jsonValueEnumMap;
+
     private boolean hasNull = false;
+
+    /**
+     * {@code true} if some constant's annotated JSON value is the literal string {@code "null"}; always
+     * {@code false} for an enum with no annotated value member. Unlike {@link #hasNull} (which asks for a
+     * constant <i>named</i> {@code "null"}, impossible for a Java-compiled enum), this can actually be true,
+     * and it is what lets such a constant win over the literal-null rule in {@link #valueOf(String)}.
+     */
+    private boolean hasNullValue = false;
 
     /**
      * Package-private constructor for EnumType using the default NAME representation.
@@ -76,20 +101,22 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * Package-private constructor for EnumType with the specified enum representation.
      * This constructor is called by the TypeFactory to create enum type instances.
      *
-     * @param className the fully qualified class name of the enum type
+     * @param className the fully qualified class name of the enum type, or of a constant's body class (which
+     *                  resolves to, and is named after, its enclosing enum)
      * @param enumRepresentation the representation strategy to use ({@code NAME}, {@code ORDINAL}, or {@code CODE});
      *                           if {@code null}, defaults to {@code NAME}
-     * @throws IllegalArgumentException if numeric codes or JSON/XML names are ambiguous between constants.
      * @throws RuntimeException if {@code CODE} representation is configured but the enum class has no
      *         public {@code int code()} or {@code int intValue()} method.
+     * @throws IllegalArgumentException if numeric codes, JSON/XML names or creator-less {@code @JsonValue} values
+     *         are ambiguous between constants.
      */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
-    EnumType(final String className, final com.landawn.abacus.util.EnumType enumRepresentation) {
-        super(enumRepresentation == null ? className + "(NAME)" : className + "(" + enumRepresentation.name() + ")",
-                (Class<T>) getEnumClass(ClassUtil.forName(className)));
+    EnumType(final String className, final com.landawn.abacus.util.EnumType enumRepresentation) throws RuntimeException, IllegalArgumentException {
+        super(enumTypeName(className, enumRepresentation), (Class<T>) getEnumClass(ClassUtil.forName(className)));
 
         enumJsonXmlNameMap = new EnumMap<>(typeClass);
         jsonXmlNameEnumMap = new HashMap<>();
+        jsonValueEnumMap = jsonValueType != null && jsonCreatorMethod == null ? new HashMap<>() : null;
 
         if (enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
             // Prefer a public int code() accessor. Fall back to public int intValue(): the numeric enums in
@@ -128,6 +155,30 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
                 final String jsonXmlName = getJsonXmlName(enumConstant);
                 registerJsonXmlNames(enumConstant, jsonXmlName);
+            }
+        }
+
+        if (jsonValueType != null) {
+            // The annotated value accessor is read once per constant here. It also answers whether some
+            // constant claims the literal "null" as its value: 'null' is a reserved word and can never be a
+            // constant NAME, so hasNull below cannot cover that case, and without this flag the literal-null
+            // shortcut in valueOf(String) would hide such a constant from the creator.
+            for (final T enumConstant : typeClass.getEnumConstants()) {
+                final String valueStr = super.stringOf(enumConstant);
+
+                if (NULL.equals(valueStr)) {
+                    hasNullValue = true;
+                }
+
+                if (jsonValueEnumMap != null) {
+                    // Lone Jackson @JsonValue: the constants' values are the only way back, so they must be unambiguous.
+                    final T previous = jsonValueEnumMap.putIfAbsent(valueStr, enumConstant);
+
+                    if (previous != null) {
+                        throw new IllegalArgumentException("Duplicate 'JsonValue' value '" + valueStr + "' in enum class "
+                                + ClassUtil.getCanonicalClassName(typeClass) + ": " + previous.name() + " and " + enumConstant.name());
+                    }
+                }
             }
         }
 
@@ -208,9 +259,21 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * Converts a string representation back to an enum value.
      * Supports enum names, JSON/XML field names from annotations, and numeric strings.
      * Numeric strings are interpreted as ordinals (or codes when CODE is configured) unless the
-     * same string is defined as a JSON/XML name.
-     * Empty strings return {@code null}. The literal string {@code "null"} returns {@code null}
-     * when the enum does not define a constant named {@code "null"}.
+     * same string is defined as a JSON/XML name; a numeric string outside the {@code int} range matches
+     * no constant.
+     * Empty strings return {@code null}. The literal string {@code "null"} returns {@code null} unless some
+     * constant claims it - as its name, its JSON/XML name, or its annotated JSON value - in which case that
+     * constant is returned instead.
+     *
+     * <p>For an enum with a {@code @JsonValue}/{@code @JsonCreator} pair the (non-empty) string is converted to the
+     * value type and handed to the creator; whatever the creator throws is propagated unwrapped. The literal-null
+     * rule is applied before the creator, but only while no constant's annotated value is {@code "null"}; when one
+     * is, {@code "null"} reaches the creator like any other value. For an enum with a
+     * lone Jackson {@code @JsonValue} the string is looked up in the reverse map of the constants' values, then
+     * matched against the constant names (and JSON/XML names) as a fallback; as in the name-based branch, a constant
+     * that claims the value {@code "null"} wins over the literal-null rule.</p>
+     *
+     * <p>An <i>empty</i> string always yields {@code null}, in every branch: a constant cannot claim {@code ""}.</p>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
@@ -218,17 +281,19 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      *
      * @param str the string to convert; may be {@code null} or empty
      * @return the enum value corresponding to the string, or {@code null} if input is null/empty
-     * @throws IllegalArgumentException if the string doesn't match any enum value.
+     * @throws IllegalArgumentException if the string matches no constant (name, JSON/XML name, ordinal/code or
+     *         annotated value); for an enum with an annotated creator, whatever that creator throws is propagated
+     *         unwrapped instead
      * @see #valueOf(Object)
      * @see #stringOf(Enum)
      */
     @Override
-    public T valueOf(final String str) {
-        if (jsonValueType == null) {
-            if (Strings.isEmpty(str)) {
-                return null; // NOSONAR
-            }
+    public T valueOf(final String str) throws IllegalArgumentException {
+        if (Strings.isEmpty(str)) {
+            return null; // NOSONAR
+        }
 
+        if (jsonValueType == null) {
             final T value = jsonXmlNameEnumMap.get(str);
 
             if (value != null) {
@@ -238,11 +303,41 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
             }
 
             if (Strings.isAsciiInteger(str)) {
-                return valueOf(Numbers.toInt(str));
+                final int intValue;
+
+                try {
+                    intValue = Numbers.toInt(str);
+                } catch (final ArithmeticException e) {
+                    // "99999999999" is "no such constant", not an arithmetic failure.
+                    throw new IllegalArgumentException("No " + typeClass.getName() + " for value: " + str, e);
+                }
+
+                return valueOf(intValue);
             } else {
                 // 'value' is guaranteed null here (the non-null case already returned above).
                 return Enum.valueOf(typeClass, str);
             }
+        } else if (jsonValueEnumMap != null) {
+            T value = jsonValueEnumMap.get(str);
+
+            if (value == null) {
+                value = jsonXmlNameEnumMap.get(str);
+            }
+
+            if (value != null) {
+                return value;
+            }
+
+            // Same precedence as the name-based branch above: a constant claiming "null" wins over the literal-null rule.
+            if (!hasNull && NULL.equals(str)) {
+                return null; // NOSONAR
+            }
+
+            throw new IllegalArgumentException("No " + typeClass.getName() + " for value: " + str);
+        } else if (!hasNull && !hasNullValue && NULL.equals(str)) {
+            // Same precedence as the two branches above: a constant claiming "null" wins over the
+            // literal-null rule, here by letting the creator see the string.
+            return null; // NOSONAR
         } else {
             return super.valueOf(str);
         }
@@ -267,7 +362,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @throws IllegalArgumentException if no enum constant exists with the given value (and the value is not
      *         {@code 0}).
      */
-    public T valueOf(final int value) {
+    public T valueOf(final int value) throws IllegalArgumentException {
         final T result = numberEnum.get(value);
 
         if ((result == null) && (value != 0)) {
@@ -283,15 +378,22 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * <ul>
      *   <li>ORDINAL or CODE: reads the column as an integer and maps it to the enum constant</li>
      *   <li>NAME: reads the column as a string and maps it to the enum constant by name</li>
+     *   <li>annotated value member: reads the column as the value type and maps it through the creator, or
+     *       through the reverse map of the constants' values when the enum has no creator</li>
      * </ul>
      *
      * @param rs          the {@link ResultSet} containing the data
      * @param columnIndex the 1-based column index of the enum value
      * @return the enum value at the specified column, or {@code null} if the column value is SQL {@code NULL}
+     * @throws NullPointerException if {@code rs} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs or the column index is invalid
+     * @throws NumberFormatException if an ORDINAL or CODE column value cannot be parsed as an integer
+     * @throws ArithmeticException if an ORDINAL or CODE column value cannot be represented exactly as an int
+     * @throws IllegalArgumentException if the stored name, ordinal, code or annotated value has no matching enum constant
      */
     @Override
-    public T get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public T get(final ResultSet rs, final int columnIndex)
+            throws NullPointerException, SQLException, NumberFormatException, ArithmeticException, IllegalArgumentException {
         if (jsonValueType == null) {
             if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
                 final Object intValue = rs.getObject(columnIndex);
@@ -299,6 +401,9 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
             } else {
                 return valueOf(rs.getString(columnIndex));
             }
+        } else if (jsonValueEnumMap != null) {
+            // The reverse map is keyed by the value's stringOf form, which is what getString yields for a numeric column too.
+            return valueOf(rs.getString(columnIndex));
         } else {
             return super.get(rs, columnIndex);
         }
@@ -310,15 +415,22 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * <ul>
      *   <li>ORDINAL or CODE: reads the column as an integer and maps it to the enum constant</li>
      *   <li>NAME: reads the column as a string and maps it to the enum constant by name</li>
+     *   <li>annotated value member: reads the column as the value type and maps it through the creator, or
+     *       through the reverse map of the constants' values when the enum has no creator</li>
      * </ul>
      *
      * @param rs         the {@link ResultSet} containing the data
      * @param columnName the label of the column containing the enum value
      * @return the enum value in the specified column, or {@code null} if the column value is SQL {@code NULL}
+     * @throws NullPointerException if {@code rs} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs or the column label is not found
+     * @throws NumberFormatException if an ORDINAL or CODE column value cannot be parsed as an integer
+     * @throws ArithmeticException if an ORDINAL or CODE column value cannot be represented exactly as an int
+     * @throws IllegalArgumentException if the stored name, ordinal, code or annotated value has no matching enum constant
      */
     @Override
-    public T get(final ResultSet rs, final String columnName) throws SQLException {
+    public T get(final ResultSet rs, final String columnName)
+            throws NullPointerException, SQLException, NumberFormatException, ArithmeticException, IllegalArgumentException {
         if (jsonValueType == null) {
             if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
                 final Object intValue = rs.getObject(columnName);
@@ -326,6 +438,8 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
             } else {
                 return valueOf(rs.getString(columnName));
             }
+        } else if (jsonValueEnumMap != null) {
+            return valueOf(rs.getString(columnName));
         } else {
             return super.get(rs, columnName);
         }
@@ -342,10 +456,11 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @param stmt        the {@link PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x           the enum value to set; may be {@code null}
+     * @throws NullPointerException if {@code stmt} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws NullPointerException, SQLException {
         if (jsonValueType == null) {
             if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
                 if (x == null) {
@@ -372,10 +487,11 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @param stmt          the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x             the enum value to set; may be {@code null}
+     * @throws NullPointerException if {@code stmt} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final T x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final T x) throws NullPointerException, SQLException {
         if (jsonValueType == null) {
             if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
                 if (x == null) {
@@ -412,7 +528,8 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the enum value to write; may be {@code null}
      * @param config the serialization configuration for quotation settings; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws IOException if writing the enum name, ordinal, code, annotated value, quotation marks or null literal to {@code writer}
+     *         fails
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
@@ -426,10 +543,10 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                     final char ch = config == null ? 0 : config.getStringQuotation();
 
                     if (ch == 0) {
-                        writer.writeCharacter(enumJsonXmlNameMap.get(x));
+                        Utils.writeStringContent(writer, enumJsonXmlNameMap.get(x), ch);
                     } else {
                         writer.write(ch);
-                        writer.writeCharacter(enumJsonXmlNameMap.get(x));
+                        Utils.writeStringContent(writer, enumJsonXmlNameMap.get(x), ch);
                         writer.write(ch);
                     }
                 }
@@ -437,6 +554,18 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                 super.serializeTo(writer, x, config);
             }
         }
+    }
+
+    /**
+     * Builds the handler name from the RESOLVED enum class: a constant body class ({@code E$1}) must not leak its
+     * synthetic binary name into the type name, or two handlers for the same enum compare unequal.
+     */
+    private static String enumTypeName(final String className, final com.landawn.abacus.util.EnumType enumRepresentation) {
+        final Class<?> requested = ClassUtil.forName(className);
+        final Class<?> enumClass = getEnumClass(requested);
+        final String baseName = enumClass == requested ? className : ClassUtil.getCanonicalClassName(enumClass);
+
+        return baseName + "(" + (enumRepresentation == null ? com.landawn.abacus.util.EnumType.NAME : enumRepresentation).name() + ")";
     }
 
     private static Method getPublicIntMethod(final Class<?> enumClass, final String methodName) {
@@ -496,7 +625,10 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         registerJsonXmlName(enumConstant.name(), enumConstant);
     }
 
-    private void registerJsonXmlName(final String name, final T enumConstant) {
+    /**
+     * @throws IllegalArgumentException if another constant in the enum already uses the supplied JSON/XML name
+     */
+    private void registerJsonXmlName(final String name, final T enumConstant) throws IllegalArgumentException {
         final T previous = jsonXmlNameEnumMap.putIfAbsent(name, enumConstant);
 
         if (previous != null && previous != enumConstant) {
@@ -515,7 +647,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @return the enum class
      * @throws IllegalArgumentException if {@code clazz} is not an enum and has no enclosing enum class.
      */
-    private static Class<?> getEnumClass(final Class<?> clazz) {
+    private static Class<?> getEnumClass(final Class<?> clazz) throws IllegalArgumentException {
         if (clazz.isEnum()) {
             return clazz;
         }

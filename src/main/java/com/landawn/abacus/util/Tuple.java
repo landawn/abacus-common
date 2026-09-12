@@ -77,11 +77,17 @@ import com.landawn.abacus.util.u.Optional;
  *
  * <p><b>Tuple Hierarchy and Specializations:</b>
  * <ul>
- *   <li><b>{@link Tuple0}:</b> Empty tuple with no elements (unit type)</li>
+ *   <li><b>{@link Tuple0}:</b> the empty tuple (unit type). It has no public factory &mdash; a shared
+ *       instance is produced by {@link #fromArray(Object[])} / {@link #fromCollection(Collection)} for
+ *       empty input &mdash; but the type is public so that a {@code switch} over this
+ *       {@code sealed} hierarchy can be exhaustive</li>
  *   <li><b>{@link Tuple1}:</b> Single element tuple, equivalent to a typed container</li>
  *   <li><b>{@link Tuple2}:</b> Two-element tuple, similar to {@link Pair} but with numbered access</li>
  *   <li><b>{@link Tuple3}:</b> Three-element tuple, similar to {@link Triple} but with numbered access</li>
- *   <li><b>{@link Tuple4} - {@link Tuple7}:</b> Standard multi-element tuples for common use cases</li>
+ *   <li><b>{@link Tuple4} - {@link Tuple7}:</b> Standard multi-element tuples for common use cases.
+ *       These arities offer only the whole-tuple {@code accept}/{@code map}/{@code filter} inherited
+ *       from {@code Tuple}; element-wise overloads exist only for {@link Tuple2} (bi-) and
+ *       {@link Tuple3} (tri-)</li>
  *   <li><b>{@link Tuple8} - {@link Tuple9}:</b> Large tuples whose factory methods are deprecated; consider using custom classes</li>
  * </ul>
  *
@@ -147,9 +153,9 @@ import com.landawn.abacus.util.u.Optional;
  *     .map(Tuple::from)
  *     .collect(Collectors.toList());
  *
- * // Beta feature: Creating from arrays
+ * // Beta feature: creating from an array (arity is only known at runtime)
  * Object[] array = {"hello", 42, true};
- * Tuple3<String, Integer, Boolean> fromArray = Tuple.from(array);
+ * Tuple3<String, Integer, Boolean> t3 = (Tuple3<String, Integer, Boolean>) Tuple.fromArray(array);
  * }</pre>
  *
  * <p><b>Nested Tuple Operations (Beta):</b>
@@ -176,8 +182,12 @@ import com.landawn.abacus.util.u.Optional;
  * </ul>
  *
  * <p><b>Equality:</b> Tuple elements are compared with {@link N#equals(Object, Object)} and
- * hashed with {@link N#hashCode(Object)}. Array-valued elements therefore use recursive
- * content equality and content hashing rather than the identity semantics of ordinary arrays.</p>
+ * hashed with {@link N#hashCode(Object)} ({@link java.util.Objects#equals}/{@code hashCode}).
+ * Array-valued elements therefore use identity semantics, not content equality. Note that
+ * {@code toString()} does not follow suit: it renders an array element by its <em>contents</em>, so
+ * two tuples holding distinct but equal-content arrays print identically while comparing unequal.
+ * Wrap array elements in a list, or compare them with {@link N#deepEquals(Object, Object)}, when
+ * content equality is wanted.</p>
  *
  * <p><b>Thread Safety:</b>
  * <ul>
@@ -363,7 +373,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * Returns an array containing all elements of this tuple in their positional order.
      *
      * <p>For non-empty tuples, the returned array is a new instance and modifications to the
-     * array itself do not affect the tuple. {@link Tuple0} may return a shared zero-length array.
+     * array itself do not affect the tuple. The arity-0 tuple may return a shared zero-length array.
      * In every case the array length equals the arity and element references are copied shallowly.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -373,7 +383,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * }</pre>
      *
      * @return an Object array containing all tuple elements in order; non-empty tuples return a
-     *         new array, while {@link Tuple0} returns a shared empty array
+     *         new array, while the arity-0 tuple returns a shared empty array
      */
     public abstract Object[] toArray();
 
@@ -399,19 +409,21 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param a the array into which the elements of this tuple are to be stored, if it is big enough;
      *          otherwise, a new array of the same runtime type is allocated for this purpose.
      * @return an array containing all elements of this tuple.
+     * @throws NullPointerException if the specified array is {@code null}.
      * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
      *         of the runtime type of every element in this tuple.
-     * @throws NullPointerException if the specified array is {@code null}.
      * @see #toArray()
      */
-    public abstract <A> A[] toArray(A[] a);
+    public abstract <A> A[] toArray(A[] a) throws NullPointerException, ArrayStoreException;
 
     /**
      * Performs the given action for each element of this tuple in order.
      *
      * <p>Elements are passed to the consumer one by one from first to last position. Because tuple
-     * positions may have different types, the consumer must accept a common supertype of every
-     * element it will receive.</p>
+     * positions may have unrelated types, the consumer must accept {@code Object}. For element-typed
+     * processing use {@link Tuple2#accept(Throwables.BiConsumer)} or
+     * {@link Tuple3#accept(Throwables.TriConsumer)}, or read the {@code _1}, {@code _2}, ... fields
+     * directly.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -424,12 +436,11 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * }</pre>
      *
      * @param <E> the type of exception that the consumer may throw.
-     * @param consumer the action to be performed for each element.
-     * @throws E if the consumer throws an exception.
+     * @param consumer the action to be performed for each element; must accept {@code Object}.
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
-     * @throws ClassCastException if the consumer cannot accept the runtime type of an element
+     * @throws E if the consumer throws an exception.
      */
-    public abstract <E extends Exception> void forEach(Throwables.Consumer<?, E> consumer) throws E;
+    public abstract <E extends Exception> void forEach(Throwables.Consumer<? super Object, E> consumer) throws IllegalArgumentException, E;
 
     /**
      * Performs the given action on this tuple as a whole.
@@ -446,11 +457,11 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <E> the type of exception that the action may throw.
      * @param action the action to be performed on this tuple.
-     * @throws E if the action throws an exception.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception.
      */
     @SuppressWarnings("unchecked")
-    public <E extends Exception> void accept(final Throwables.Consumer<? super TP, E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super TP, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         action.accept((TP) this);
@@ -476,11 +487,11 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <E> the type of exception that the mapper may throw.
      * @param mapper the mapping function to apply to this tuple.
      * @return the result of applying the mapping function to this tuple.
-     * @throws E if the mapper throws an exception.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws E if the mapper throws an exception.
      */
     @SuppressWarnings("unchecked")
-    public <R, E extends Exception> R map(final Throwables.Function<? super TP, R, E> mapper) throws E, IllegalArgumentException {
+    public <R, E extends Exception> R map(final Throwables.Function<? super TP, ? extends R, E> mapper) throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, cs.mapper);
 
         return mapper.apply((TP) this);
@@ -507,12 +518,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <E> the type of exception that the predicate may throw.
      * @param predicate the predicate to test this tuple against.
      * @return an Optional containing this tuple if the predicate returns {@code true}, otherwise an empty Optional.
-     * @throws E if the predicate throws an exception.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception.
      */
     @Beta
     @SuppressWarnings("unchecked")
-    public <E extends Exception> Optional<TP> filter(final Throwables.Predicate<? super TP, E> predicate) throws E, IllegalArgumentException {
+    public <E extends Exception> Optional<TP> filter(final Throwables.Predicate<? super TP, E> predicate) throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         return predicate.test((TP) this) ? Optional.of((TP) this) : Optional.empty();
@@ -810,41 +821,49 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <V> the value type of the map entry.
      * @param entry the map entry to convert to a tuple, must not be {@code null}.
      * @return a new {@code Tuple2} containing the entry's key as {@code _1} and its value as {@code _2}.
-     * @throws NullPointerException if {@code entry} is {@code null}.
+     * @throws IllegalArgumentException if {@code entry} is {@code null}.
      */
     @Beta
-    public static <K, V> Tuple2<K, V> from(final Map.Entry<K, V> entry) {
+    public static <K, V> Tuple2<K, V> from(final Map.Entry<K, V> entry) throws IllegalArgumentException {
+        N.checkArgNotNull(entry, cs.entry);
+
         return new Tuple2<>(entry.getKey(), entry.getValue());
     }
 
     /**
      * Creates a tuple from an array of objects.
      *
-     * <p>The arity of the returned tuple matches the length of the array.
-     * The array must contain between 0 and 9 elements. The generic return type is unchecked and is
-     * inferred from the assignment context; callers are responsible for matching both the tuple
-     * arity and each positional element type to the source array.</p>
+     * <p>The arity of the returned tuple matches the length of the array, so it is only known at
+     * runtime. The declared return type is therefore {@code Tuple<?>}: cast it to the concrete arity
+     * you expect, which makes the assumption &mdash; and any {@link ClassCastException} &mdash; visible
+     * at the call site.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object[] data = {"hello", 42, true};
-     * Tuple3<String, Integer, Boolean> t = Tuple.from(data);
+     * Tuple3<String, Integer, Boolean> t = (Tuple3<String, Integer, Boolean>) Tuple.fromArray(data);
+     *
+     * Tuple<?> any = Tuple.fromArray(data);
+     * any.arity();                              // returns 3
      * }</pre>
      *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <TP> the type of tuple to create.
      * @param a the array of objects to convert to a tuple, may be {@code null} or empty.
-     * @return a tuple containing the array elements in order, or {@code Tuple0.EMPTY} if the array is {@code null} or empty.
+     * @return a tuple containing the array elements in order, or the shared empty tuple (arity 0)
+     *         if the array is {@code null} or empty; never {@code null}
      * @throws IllegalArgumentException if the array contains more than 9 elements.
+     * @implNote An 8- or 9-element array produces a {@link Tuple8} / {@link Tuple9}. The matching
+     *           {@code Tuple.of(...)} factories for those arities are deprecated in favour of a record
+     *           or a dedicated class; prefer one of those for 8+ values.
+     * @see #fromCollection(Collection)
      */
     @Beta
-    @SuppressWarnings("unchecked")
-    public static <TP extends Tuple<TP>> TP from(final Object[] a) {
+    public static Tuple<?> fromArray(final Object[] a) throws IllegalArgumentException {
         final int len = a == null ? 0 : a.length;
 
         if (len == 0) {
-            return (TP) Tuple0.EMPTY;
+            return Tuple0.EMPTY;
         }
 
         Tuple<?> result = null;
@@ -890,38 +909,43 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
                 throw new IllegalArgumentException("Too many elements (" + a.length + ") to fill in Tuple.");
         }
 
-        return (TP) result;
+        return result;
     }
 
     /**
      * Creates a tuple from a collection of objects.
      *
-     * <p>The arity of the returned tuple matches the size of the collection.
-     * Elements are added to the tuple in the order returned by the collection's iterator.
-     * The collection must contain between 0 and 9 elements. The generic return type is unchecked and
-     * is inferred from the assignment context; callers are responsible for matching both the tuple
-     * arity and each positional element type to the collection's iteration order.</p>
+     * <p>The arity of the returned tuple matches the size of the collection and elements are taken in
+     * the order returned by its iterator, so the arity is only known at runtime. The declared return
+     * type is therefore {@code Tuple<?>}: cast it to the concrete arity you expect, which makes the
+     * assumption &mdash; and any {@link ClassCastException} &mdash; visible at the call site.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Object> list = Arrays.asList("a", 1, true);
-     * Tuple3<String, Integer, Boolean> t = Tuple.from(list);
+     * Tuple3<String, Integer, Boolean> t = (Tuple3<String, Integer, Boolean>) Tuple.fromCollection(list);
+     *
+     * Tuple<?> any = Tuple.fromCollection(list);
+     * any.arity();                                // returns 3
      * }</pre>
      *
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
-     * @param <TP> the type of tuple to create.
      * @param c the collection of objects to convert to a tuple, may be {@code null} or empty.
-     * @return a tuple containing the collection elements in iteration order, or {@code Tuple0.EMPTY} if the collection is {@code null} or empty.
+     * @return a tuple containing the collection elements in iteration order, or the shared empty tuple
+     *         (arity 0) if the collection is {@code null} or empty; never {@code null}
      * @throws IllegalArgumentException if the collection contains more than 9 elements.
+     * @implNote An 8- or 9-element collection produces a {@link Tuple8} / {@link Tuple9}. The matching
+     *           {@code Tuple.of(...)} factories for those arities are deprecated in favour of a record
+     *           or a dedicated class; prefer one of those for 8+ values.
+     * @see #fromArray(Object[])
      */
     @Beta
-    @SuppressWarnings("unchecked")
-    public static <TP extends Tuple<TP>> TP from(final Collection<?> c) {
+    public static Tuple<?> fromCollection(final Collection<?> c) throws IllegalArgumentException {
         final int len = c == null ? 0 : c.size();
 
         if (len == 0) {
-            return (TP) Tuple0.EMPTY;
+            return Tuple0.EMPTY;
         }
 
         final Iterator<?> iter = c.iterator();
@@ -969,7 +993,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
                 throw new IllegalArgumentException("Too many elements (" + c.size() + ") to fill in Tuple.");
         }
 
-        return (TP) result;
+        return result;
     }
 
     /**
@@ -985,11 +1009,14 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <T> the type of the element in the tuple.
      * @param tp the Tuple1 to convert to a list, must not be {@code null}.
-     * @return a List containing the single element from the tuple.
-     * @throws NullPointerException if {@code tp} is {@code null}.
+     * @return a new mutable {@code List} holding the single element; it is a snapshot, not a view -
+     *         changing it does not affect the tuple
+     * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple1<? extends T> tp) {
+    public static <T> List<T> toList(final Tuple1<? extends T> tp) throws IllegalArgumentException {
+        N.checkArgNotNull(tp, cs.tp);
+
         return N.toList(tp._1);
     }
 
@@ -1008,11 +1035,14 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple2 to convert to a list, must not be {@code null}.
-     * @return a List containing the two elements from the tuple in order.
-     * @throws NullPointerException if {@code tp} is {@code null}.
+     * @return a new mutable {@code List} holding the two elements, in order; it is a snapshot, not a view -
+     *         changing it does not affect the tuple
+     * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple2<? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple2<? extends T, ? extends T> tp) throws IllegalArgumentException {
+        N.checkArgNotNull(tp, cs.tp);
+
         return N.toList(tp._1, tp._2);
     }
 
@@ -1031,11 +1061,14 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple3 to convert to a list, must not be {@code null}.
-     * @return a List containing the three elements from the tuple in order.
-     * @throws NullPointerException if {@code tp} is {@code null}.
+     * @return a new mutable {@code List} holding the three elements, in order; it is a snapshot, not a view -
+     *         changing it does not affect the tuple
+     * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple3<? extends T, ? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple3<? extends T, ? extends T, ? extends T> tp) throws IllegalArgumentException {
+        N.checkArgNotNull(tp, cs.tp);
+
         return N.toList(tp._1, tp._2, tp._3);
     }
 
@@ -1054,11 +1087,14 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple4 to convert to a list, must not be {@code null}.
-     * @return a List containing the four elements from the tuple in order.
-     * @throws NullPointerException if {@code tp} is {@code null}.
+     * @return a new mutable {@code List} holding the four elements, in order; it is a snapshot, not a view -
+     *         changing it does not affect the tuple
+     * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple4<? extends T, ? extends T, ? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple4<? extends T, ? extends T, ? extends T, ? extends T> tp) throws IllegalArgumentException {
+        N.checkArgNotNull(tp, cs.tp);
+
         return N.toList(tp._1, tp._2, tp._3, tp._4);
     }
 
@@ -1078,11 +1114,14 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple5 to convert to a list, must not be {@code null}.
-     * @return a List containing the five elements from the tuple in order.
-     * @throws NullPointerException if {@code tp} is {@code null}.
+     * @return a new mutable {@code List} holding the five elements, in order; it is a snapshot, not a view -
+     *         changing it does not affect the tuple
+     * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple5<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple5<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) throws IllegalArgumentException {
+        N.checkArgNotNull(tp, cs.tp);
+
         return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5);
     }
 
@@ -1102,11 +1141,15 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple6 to convert to a list, must not be {@code null}.
-     * @return a List containing the six elements from the tuple in order.
-     * @throws NullPointerException if {@code tp} is {@code null}.
+     * @return a new mutable {@code List} holding the six elements, in order; it is a snapshot, not a view -
+     *         changing it does not affect the tuple
+     * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple6<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple6<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(tp, cs.tp);
+
         return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6);
     }
 
@@ -1126,11 +1169,15 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple7 to convert to a list, must not be {@code null}.
-     * @return a List containing the seven elements from the tuple in order.
-     * @throws NullPointerException if {@code tp} is {@code null}.
+     * @return a new mutable {@code List} holding the seven elements, in order; it is a snapshot, not a view -
+     *         changing it does not affect the tuple
+     * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple7<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple7<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(tp, cs.tp);
+
         return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7);
     }
 
@@ -1151,11 +1198,15 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple8 to convert to a list, must not be {@code null}.
-     * @return a List containing the eight elements from the tuple in order.
-     * @throws NullPointerException if {@code tp} is {@code null}.
+     * @return a new mutable {@code List} holding the eight elements, in order; it is a snapshot, not a view -
+     *         changing it does not affect the tuple
+     * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple8<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+    public static <T> List<T> toList(final Tuple8<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(tp, cs.tp);
+
         return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8);
     }
 
@@ -1176,12 +1227,16 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      *
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple9 to convert to a list, must not be {@code null}.
-     * @return a List containing the nine elements from the tuple in order.
-     * @throws NullPointerException if {@code tp} is {@code null}.
+     * @return a new mutable {@code List} holding the nine elements, in order; it is a snapshot, not a view -
+     *         changing it does not affect the tuple
+     * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
     public static <T> List<T> toList(
-            final Tuple9<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) {
+            final Tuple9<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(tp, cs.tp);
+
         return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8, tp._9);
     }
 
@@ -1206,10 +1261,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <T3> the type of the third element (second element of the outer tuple).
      * @param tp the nested tuple structure to flatten, must not be {@code null}.
      * @return a new {@code Tuple3} containing {@code tp._1._1}, {@code tp._1._2}, and {@code tp._2} in order.
-     * @throws NullPointerException if {@code tp} or its first element ({@code tp._1}) is {@code null}.
+     * @throws IllegalArgumentException if {@code tp} is {@code null}.
+     * @throws NullPointerException if the first element ({@code tp._1}) is {@code null}.
      */
     @Beta
-    public static <T1, T2, T3> Tuple3<T1, T2, T3> flatten(final Tuple2<Tuple2<T1, T2>, T3> tp) {
+    public static <T1, T2, T3> Tuple3<T1, T2, T3> flatten(final Tuple2<Tuple2<T1, T2>, T3> tp) throws IllegalArgumentException, NullPointerException {
+        N.checkArgNotNull(tp, cs.tp);
+
         return new Tuple3<>(tp._1._1, tp._1._2, tp._2);
     }
 
@@ -1236,24 +1294,51 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <T5> the type of the fifth element (third element of the outer tuple).
      * @param tp the nested tuple structure to flatten, must not be {@code null}.
      * @return a new {@code Tuple5} containing {@code tp._1._1}, {@code tp._1._2}, {@code tp._1._3}, {@code tp._2}, and {@code tp._3} in order.
-     * @throws NullPointerException if {@code tp} or its first element ({@code tp._1}) is {@code null}.
+     * @throws IllegalArgumentException if {@code tp} is {@code null}.
+     * @throws NullPointerException if the first element ({@code tp._1}) is {@code null}.
      */
     @Beta
-    public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> flatten(final Tuple3<Tuple3<T1, T2, T3>, T4, T5> tp) {
+    public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> flatten(final Tuple3<Tuple3<T1, T2, T3>, T4, T5> tp)
+            throws IllegalArgumentException, NullPointerException {
+        N.checkArgNotNull(tp, cs.tp);
+
         return new Tuple5<>(tp._1._1, tp._1._2, tp._1._3, tp._2, tp._3);
     }
 
     /**
-     * Represents an empty tuple with no elements.
+     * Represents an empty tuple with no elements &mdash; the arity-0 member of the {@link Tuple}
+     * hierarchy.
      *
-     * <p>This internal class is used to represent the absence of values in a tuple context.
-     * The singleton instance {@code EMPTY} is returned by factory methods when creating
-     * tuples from empty collections or arrays.</p>
+     * <p>Instances are not created directly; a shared singleton is returned by
+     * {@link Tuple#fromArray(Object[])} and {@link Tuple#fromCollection(Collection)} when the input is
+     * {@code null} or empty. The type is nevertheless {@code public} so that it can be <i>named</i>:
+     * {@code Tuple} is a {@code sealed} hierarchy, and a {@code switch} over a {@code Tuple<?>} can
+     * only be exhaustive - and so omit a {@code default} branch - if every permitted subclass is
+     * accessible to the caller.</p>
      *
-     * <p><b>Note:</b> This class is marked as {@link Beta} and is primarily for internal use.</p>
+     * <pre>{@code
+     * class TupleArity {
+     *     static int arityOf(Tuple<?> t) {
+     *         return switch (t) {                        // exhaustive: no default branch needed
+     *             case Tuple.Tuple0 unused -> 0;         // reachable: Tuple.fromArray(new Object[0])
+     *             case Tuple.Tuple1<?> unused -> 1;
+     *             case Tuple.Tuple2<?, ?> unused -> 2;
+     *             case Tuple.Tuple3<?, ?, ?> unused -> 3;
+     *             case Tuple.Tuple4<?, ?, ?, ?> unused -> 4;
+     *             case Tuple.Tuple5<?, ?, ?, ?, ?> unused -> 5;
+     *             case Tuple.Tuple6<?, ?, ?, ?, ?, ?> unused -> 6;
+     *             case Tuple.Tuple7<?, ?, ?, ?, ?, ?, ?> unused -> 7;
+     *             case Tuple.Tuple8<?, ?, ?, ?, ?, ?, ?, ?> unused -> 8;
+     *             case Tuple.Tuple9<?, ?, ?, ?, ?, ?, ?, ?, ?> unused -> 9;
+     *         };
+     *     }
+     * }
+     * }</pre>
+     *
+     * <p><b>Note:</b> This class is marked as {@link Beta}.</p>
      */
     @Beta
-    static final class Tuple0 extends Tuple<Tuple0> {
+    public static final class Tuple0 extends Tuple<Tuple0> {
 
         private static final Tuple0 EMPTY = new Tuple0();
 
@@ -1271,7 +1356,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple<?> empty = Tuple.from(new Object[0]);
+         * Tuple<?> empty = Tuple.fromArray(new Object[0]);
          * int arity = empty.arity();   // returns 0
          * }</pre>
          *
@@ -1289,7 +1374,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple<?> empty = Tuple.from(new Object[0]);
+         * Tuple<?> empty = Tuple.fromArray(new Object[0]);
          * boolean hasNull = empty.anyNull();   // returns false
          * }</pre>
          *
@@ -1308,7 +1393,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple<?> empty = Tuple.from(new Object[0]);
+         * Tuple<?> empty = Tuple.fromArray(new Object[0]);
          * boolean allNull = empty.allNull();   // returns true
          * }</pre>
          *
@@ -1326,7 +1411,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple<?> empty = Tuple.from(new Object[0]);
+         * Tuple<?> empty = Tuple.fromArray(new Object[0]);
          * boolean found = empty.contains("hello");   // returns false
          * }</pre>
          *
@@ -1345,7 +1430,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple<?> empty = Tuple.from(new Object[0]);
+         * Tuple<?> empty = Tuple.fromArray(new Object[0]);
          * Object[] array = empty.toArray();   // returns an empty Object[]
          * }</pre>
          *
@@ -1366,7 +1451,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple<?> empty = Tuple.from(new Object[0]);
+         * Tuple<?> empty = Tuple.fromArray(new Object[0]);
          * String[] arr = empty.toArray(new String[5]);   // returns the same array, all elements untouched
          * }</pre>
          *
@@ -1376,10 +1461,10 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @throws NullPointerException if the specified array is {@code null}.
          */
         @Override
-        public <A> A[] toArray(final A[] a) {
+        public <A> A[] toArray(final A[] a) throws NullPointerException {
             // Tuple0 has no elements to store; per Tuple#toArray(A[]) the supplied array is returned
             // unchanged. requireNonNull preserves the NullPointerException-on-null contract shared with Tuple1..Tuple9.
-            return java.util.Objects.requireNonNull(a);
+            return N.requireNonNull(a);
         }
 
         /**
@@ -1390,17 +1475,17 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple<?> empty = Tuple.from(new Object[0]);
+         * Tuple<?> empty = Tuple.fromArray(new Object[0]);
          * empty.forEach(System.out::println);   // Does nothing (no elements)
          * }</pre>
          *
          * @param <E> the type of exception that the consumer may throw.
          * @param consumer the action to be performed for each element.
-         * @throws E if the consumer throws an exception.
          * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         * @throws E if the consumer throws an exception.
          */
         @Override
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+        public <E extends Exception> void forEach(final Throwables.Consumer<? super Object, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer, cs.consumer);
 
             // do nothing.
@@ -1435,7 +1520,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Tuple<?> empty = Tuple.from(new Object[0]);
+         * Tuple<?> empty = Tuple.fromArray(new Object[0]);
          * String str = empty.toString();   // returns "()"
          * }</pre>
          *
@@ -1465,6 +1550,13 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * // Converting to array
      * Object[] array = message.toArray();   // returns ["Hello"]
      * }</pre>
+     *
+     * <p><b>No element-wise {@code accept}/{@code map}/{@code filter}:</b> unlike {@link Tuple2} and
+     * {@link Tuple3}, {@code Tuple1} cannot offer single-element overloads. An
+     * {@code accept(Consumer<? super T1>)} would erase to the same signature as the inherited
+     * {@link Tuple#accept(Throwables.Consumer)}, whose parameter is
+     * {@code Consumer<? super Tuple1<T1>>}. Use the inherited whole-tuple methods, or read
+     * {@link #_1} directly.</p>
      *
      * @param <T1> the type of the single element in this tuple.
      */
@@ -1591,12 +1683,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param a the array into which the element is to be stored, if it is big enough;
          *          otherwise a new array of the same runtime type is allocated.
          * @return an array containing the single tuple element.
+         * @throws NullPointerException if the specified array is {@code null}.
          * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
          *         of the runtime type of the element in this tuple.
-         * @throws NullPointerException if the specified array is {@code null}.
          */
         @Override
-        public <A> A[] toArray(A[] a) {
+        public <A> A[] toArray(A[] a) throws NullPointerException, ArrayStoreException {
             if (a.length < 1) {
                 a = N.copyOf(a, 1);
             }
@@ -1618,17 +1710,14 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that the consumer may throw.
          * @param consumer the action to be performed on the element.
-         * @throws E if the consumer throws an exception.
          * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         * @throws E if the consumer throws an exception.
          */
         @Override
-        @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+        public <E extends Exception> void forEach(final Throwables.Consumer<? super Object, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer, cs.consumer);
 
-            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
-
-            objConsumer.accept(_1);
+            consumer.accept(_1);
         }
 
         /**
@@ -1918,12 +2007,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param a the array into which the elements are to be stored, if it is big enough;
          *          otherwise a new array of the same runtime type is allocated.
          * @return an array containing the two tuple elements in order.
+         * @throws NullPointerException if the specified array is {@code null}.
          * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
          *         of the runtime type of every element in this tuple.
-         * @throws NullPointerException if the specified array is {@code null}.
          */
         @Override
-        public <A> A[] toArray(A[] a) {
+        public <A> A[] toArray(A[] a) throws NullPointerException, ArrayStoreException {
             if (a.length < 2) {
                 a = N.copyOf(a, 2);
             }
@@ -2008,18 +2097,15 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that the consumer may throw.
          * @param consumer the action to be performed for each element.
-         * @throws E if the consumer throws an exception.
          * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         * @throws E if the consumer throws an exception.
          */
         @Override
-        @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+        public <E extends Exception> void forEach(final Throwables.Consumer<? super Object, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer, cs.consumer);
 
-            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
-
-            objConsumer.accept(_1);
-            objConsumer.accept(_2);
+            consumer.accept(_1);
+            consumer.accept(_2);
         }
 
         /**
@@ -2035,12 +2121,18 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *     System.out.println(name + " is " + age + " years old"));
          * }</pre>
          *
+         * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is
+         * written out; a <em>method reference</em> may not. One whose target has both a one-argument
+         * and a multi-argument form fits this overload and {@link Tuple#accept(Throwables.Consumer)} equally, so the call is
+         * ambiguous and does not compile. Disambiguate with a cast, e.g.
+         * {@code (Throwables.BiConsumer<T1, T2, RuntimeException>) Foo::bar}.</p>
+         *
          * @param <E> the type of exception that the action may throw.
          * @param action the bi-consumer action to be performed on the tuple elements.
-         * @throws E if the action throws an exception.
          * @throws IllegalArgumentException if {@code action} is {@code null}.
+         * @throws E if the action throws an exception.
          */
-        public <E extends Exception> void accept(final Throwables.BiConsumer<? super T1, ? super T2, E> action) throws E, IllegalArgumentException {
+        public <E extends Exception> void accept(final Throwables.BiConsumer<? super T1, ? super T2, E> action) throws IllegalArgumentException, E {
             N.checkArgNotNull(action, cs.action);
 
             action.accept(_1, _2);
@@ -2061,14 +2153,20 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * String fullName = names.map((first, last) -> first + " " + last);
          * }</pre>
          *
+         * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is
+         * written out; a <em>method reference</em> may not. One whose target has both a one-argument
+         * and a multi-argument form fits this overload and {@link Tuple#map(Throwables.Function)} equally, so the call is
+         * ambiguous and does not compile. Disambiguate with a cast, e.g.
+         * {@code (Throwables.BiFunction<T1, T2, R, RuntimeException>) Foo::bar}.</p>
+         *
          * @param <R> the type of the result of the bi-function.
          * @param <E> the type of exception that the mapper may throw.
          * @param mapper the bi-function to apply to the tuple elements.
          * @return the result of applying the bi-function to this tuple's elements.
-         * @throws E if the mapper throws an exception.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+         * @throws E if the mapper throws an exception.
          */
-        public <R, E extends Exception> R map(final Throwables.BiFunction<? super T1, ? super T2, ? extends R, E> mapper) throws E, IllegalArgumentException {
+        public <R, E extends Exception> R map(final Throwables.BiFunction<? super T1, ? super T2, ? extends R, E> mapper) throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             return mapper.apply(_1, _2);
@@ -2090,14 +2188,20 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * // Returns empty Optional
          * }</pre>
          *
+         * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is
+         * written out; a <em>method reference</em> may not. One whose target has both a one-argument
+         * and a multi-argument form fits this overload and {@link Tuple#filter(Throwables.Predicate)} equally, so the call is
+         * ambiguous and does not compile. Disambiguate with a cast, e.g.
+         * {@code (Throwables.BiPredicate<T1, T2, RuntimeException>) Foo::bar}.</p>
+         *
          * @param <E> the type of exception that the predicate may throw.
          * @param predicate the bi-predicate to test the tuple elements against.
          * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise.
-         * @throws E if the predicate throws an exception.
          * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+         * @throws E if the predicate throws an exception.
          */
         public <E extends Exception> Optional<Tuple2<T1, T2>> filter(final Throwables.BiPredicate<? super T1, ? super T2, E> predicate)
-                throws E, IllegalArgumentException {
+                throws IllegalArgumentException, E {
             N.checkArgNotNull(predicate, cs.predicate);
 
             return predicate.test(_1, _2) ? Optional.of(this) : Optional.empty();
@@ -2403,19 +2507,16 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that may be thrown.
          * @param consumer the consumer to apply.
-         * @throws E if the consumer throws an exception.
          * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         * @throws E if the consumer throws an exception.
          */
         @Override
-        @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+        public <E extends Exception> void forEach(final Throwables.Consumer<? super Object, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer, cs.consumer);
 
-            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
-
-            objConsumer.accept(_1);
-            objConsumer.accept(_2);
-            objConsumer.accept(_3);
+            consumer.accept(_1);
+            consumer.accept(_2);
+            consumer.accept(_3);
         }
 
         /**
@@ -2430,13 +2531,19 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *     System.out.println(name + " is " + age + " years old"));
          * }</pre>
          *
+         * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is
+         * written out; a <em>method reference</em> may not. One whose target has both a one-argument
+         * and a multi-argument form fits this overload and {@link Tuple#accept(Throwables.Consumer)} equally, so the call is
+         * ambiguous and does not compile. Disambiguate with a cast, e.g.
+         * {@code (Throwables.TriConsumer<T1, T2, T3, RuntimeException>) Foo::bar}.</p>
+         *
          * @param <E> the type of exception that the action may throw.
          * @param action the tri-consumer action to be performed on the tuple elements.
-         * @throws E if the action throws an exception.
          * @throws IllegalArgumentException if {@code action} is {@code null}.
+         * @throws E if the action throws an exception.
          */
         public <E extends Exception> void accept(final Throwables.TriConsumer<? super T1, ? super T2, ? super T3, E> action)
-                throws E, IllegalArgumentException {
+                throws IllegalArgumentException, E {
             N.checkArgNotNull(action, cs.action);
 
             action.accept(_1, _2, _3);
@@ -2455,15 +2562,21 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * // hex = "#FF8040"
          * }</pre>
          *
+         * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is
+         * written out; a <em>method reference</em> may not. One whose target has both a one-argument
+         * and a multi-argument form fits this overload and {@link Tuple#map(Throwables.Function)} equally, so the call is
+         * ambiguous and does not compile. Disambiguate with a cast, e.g.
+         * {@code (Throwables.TriFunction<T1, T2, T3, R, RuntimeException>) Foo::bar}.</p>
+         *
          * @param <R> the type of the result of the tri-function.
          * @param <E> the type of exception that the mapper may throw.
          * @param mapper the tri-function to apply to the tuple elements.
          * @return the result of applying the tri-function to this tuple's elements.
-         * @throws E if the mapper throws an exception.
          * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+         * @throws E if the mapper throws an exception.
          */
         public <R, E extends Exception> R map(final Throwables.TriFunction<? super T1, ? super T2, ? super T3, ? extends R, E> mapper)
-                throws E, IllegalArgumentException {
+                throws IllegalArgumentException, E {
             N.checkArgNotNull(mapper, cs.mapper);
 
             return mapper.apply(_1, _2, _3);
@@ -2481,14 +2594,20 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * // rightTriangle.isPresent() == true
          * }</pre>
          *
+         * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is
+         * written out; a <em>method reference</em> may not. One whose target has both a one-argument
+         * and a multi-argument form fits this overload and {@link Tuple#filter(Throwables.Predicate)} equally, so the call is
+         * ambiguous and does not compile. Disambiguate with a cast, e.g.
+         * {@code (Throwables.TriPredicate<T1, T2, T3, RuntimeException>) Foo::bar}.</p>
+         *
          * @param <E> the type of exception that the predicate may throw.
          * @param predicate the tri-predicate to test the tuple elements against.
          * @return an Optional containing this tuple if the predicate returns {@code true}, empty Optional otherwise.
-         * @throws E if the predicate throws an exception.
          * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+         * @throws E if the predicate throws an exception.
          */
         public <E extends Exception> Optional<Tuple3<T1, T2, T3>> filter(final Throwables.TriPredicate<? super T1, ? super T2, ? super T3, E> predicate)
-                throws E, IllegalArgumentException {
+                throws IllegalArgumentException, E {
             N.checkArgNotNull(predicate, cs.predicate);
 
             return predicate.test(_1, _2, _3) ? Optional.of(this) : Optional.empty();
@@ -2700,20 +2819,17 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that may be thrown.
          * @param consumer the consumer to apply.
-         * @throws E if the consumer throws an exception.
          * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         * @throws E if the consumer throws an exception.
          */
         @Override
-        @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+        public <E extends Exception> void forEach(final Throwables.Consumer<? super Object, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer, cs.consumer);
 
-            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
-
-            objConsumer.accept(_1);
-            objConsumer.accept(_2);
-            objConsumer.accept(_3);
-            objConsumer.accept(_4);
+            consumer.accept(_1);
+            consumer.accept(_2);
+            consumer.accept(_3);
+            consumer.accept(_4);
         }
 
         /**
@@ -2927,21 +3043,18 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that may be thrown.
          * @param consumer the consumer to apply.
-         * @throws E if the consumer throws an exception.
          * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         * @throws E if the consumer throws an exception.
          */
         @Override
-        @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+        public <E extends Exception> void forEach(final Throwables.Consumer<? super Object, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer, cs.consumer);
 
-            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
-
-            objConsumer.accept(_1);
-            objConsumer.accept(_2);
-            objConsumer.accept(_3);
-            objConsumer.accept(_4);
-            objConsumer.accept(_5);
+            consumer.accept(_1);
+            consumer.accept(_2);
+            consumer.accept(_3);
+            consumer.accept(_4);
+            consumer.accept(_5);
         }
 
         /**
@@ -3161,22 +3274,19 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that may be thrown.
          * @param consumer the consumer to apply.
-         * @throws E if the consumer throws an exception.
          * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         * @throws E if the consumer throws an exception.
          */
         @Override
-        @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+        public <E extends Exception> void forEach(final Throwables.Consumer<? super Object, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer, cs.consumer);
 
-            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
-
-            objConsumer.accept(_1);
-            objConsumer.accept(_2);
-            objConsumer.accept(_3);
-            objConsumer.accept(_4);
-            objConsumer.accept(_5);
-            objConsumer.accept(_6);
+            consumer.accept(_1);
+            consumer.accept(_2);
+            consumer.accept(_3);
+            consumer.accept(_4);
+            consumer.accept(_5);
+            consumer.accept(_6);
         }
 
         /**
@@ -3405,23 +3515,20 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that may be thrown.
          * @param consumer the consumer to apply.
-         * @throws E if the consumer throws an exception.
          * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         * @throws E if the consumer throws an exception.
          */
         @Override
-        @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+        public <E extends Exception> void forEach(final Throwables.Consumer<? super Object, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer, cs.consumer);
 
-            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
-
-            objConsumer.accept(_1);
-            objConsumer.accept(_2);
-            objConsumer.accept(_3);
-            objConsumer.accept(_4);
-            objConsumer.accept(_5);
-            objConsumer.accept(_6);
-            objConsumer.accept(_7);
+            consumer.accept(_1);
+            consumer.accept(_2);
+            consumer.accept(_3);
+            consumer.accept(_4);
+            consumer.accept(_5);
+            consumer.accept(_6);
+            consumer.accept(_7);
         }
 
         /**
@@ -3659,24 +3766,21 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that may be thrown.
          * @param consumer the consumer to apply.
-         * @throws E if the consumer throws an exception.
          * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         * @throws E if the consumer throws an exception.
          */
         @Override
-        @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+        public <E extends Exception> void forEach(final Throwables.Consumer<? super Object, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer, cs.consumer);
 
-            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
-
-            objConsumer.accept(_1);
-            objConsumer.accept(_2);
-            objConsumer.accept(_3);
-            objConsumer.accept(_4);
-            objConsumer.accept(_5);
-            objConsumer.accept(_6);
-            objConsumer.accept(_7);
-            objConsumer.accept(_8);
+            consumer.accept(_1);
+            consumer.accept(_2);
+            consumer.accept(_3);
+            consumer.accept(_4);
+            consumer.accept(_5);
+            consumer.accept(_6);
+            consumer.accept(_7);
+            consumer.accept(_8);
         }
 
         /**
@@ -3979,11 +4083,11 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <A> the component type of the array.
          * @param a the array to fill, or whose runtime type to use for creating a new array.
          * @return an array containing all 9 elements of this tuple.
-         * @throws ArrayStoreException if any tuple element cannot be stored in the array due to type mismatch.
          * @throws NullPointerException if the specified array is {@code null}.
+         * @throws ArrayStoreException if any tuple element cannot be stored in the array due to type mismatch.
          */
         @Override
-        public <A> A[] toArray(A[] a) {
+        public <A> A[] toArray(A[] a) throws NullPointerException, ArrayStoreException {
             if (a.length < 9) {
                 a = N.copyOf(a, 9);
             }
@@ -4052,25 +4156,22 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          *
          * @param <E> the type of exception that the consumer may throw.
          * @param consumer the action to perform on each element.
-         * @throws E if the consumer throws an exception.
          * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         * @throws E if the consumer throws an exception.
          */
         @Override
-        @SuppressWarnings("unchecked")
-        public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+        public <E extends Exception> void forEach(final Throwables.Consumer<? super Object, E> consumer) throws IllegalArgumentException, E {
             N.checkArgNotNull(consumer, cs.consumer);
 
-            final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
-
-            objConsumer.accept(_1);
-            objConsumer.accept(_2);
-            objConsumer.accept(_3);
-            objConsumer.accept(_4);
-            objConsumer.accept(_5);
-            objConsumer.accept(_6);
-            objConsumer.accept(_7);
-            objConsumer.accept(_8);
-            objConsumer.accept(_9);
+            consumer.accept(_1);
+            consumer.accept(_2);
+            consumer.accept(_3);
+            consumer.accept(_4);
+            consumer.accept(_5);
+            consumer.accept(_6);
+            consumer.accept(_7);
+            consumer.accept(_8);
+            consumer.accept(_9);
         }
 
         /**

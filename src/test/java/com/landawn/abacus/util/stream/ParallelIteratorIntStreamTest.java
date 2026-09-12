@@ -1176,4 +1176,17 @@ public class ParallelIteratorIntStreamTest extends TestBase {
         assertEquals(Arrays.asList(2, 4), grouped.get(true));
     }
 
+
+    @Test
+    public void testGroupToRejectsNullDownstreamBeforeMapFactory() {
+        final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();
+        final IntStream source = IntStream.of(com.landawn.abacus.util.IntIterator.of(new int[] { 1, 2, 3 })).parallel(2);
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> source.groupTo(value -> 0, null, () -> {
+            mapCreated.set(true);
+            return new java.util.HashMap<Integer, Object>();
+        }));
+        org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
+    }
 }

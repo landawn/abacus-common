@@ -29,8 +29,14 @@ import com.landawn.abacus.util.u.Nullable;
  * holding {@code null}, not to {@link Nullable#empty()}.
  * <p>
  * This type handler supports generic type parameters of the form {@code Nullable<T>}.
- * {@link #stringOf(Nullable)} and {@link #valueOf(String)} use the declared element type so they remain
- * symmetric; streaming append/serialization methods use the contained value's runtime type.
+ * {@link #stringOf(Nullable)}, {@link #valueOf(String)}, {@link #appendTo(Appendable, Nullable)} and
+ * {@link #serializeTo(CharacterWriter, Nullable, JsonXmlSerConfig)} all use the declared
+ * {@linkplain #elementType() element type}, so a registered single-value subtype is formatted as its declared base
+ * type. {@code appendTo} and {@code serializeTo} both fall back to the value's runtime class when the declared element
+ * type is {@code Object}; {@code serializeTo} also writes a structured element - one whose handler is not
+ * {@linkplain Type#isSerializable() serializable}, such as a bean, a map or a {@code List<Object>} - as embedded JSON,
+ * and the JSON serializer takes that element's shape from its runtime class exactly as it does for a bare property of
+ * the same declared type.
  *
  * @param <T> the type of value wrapped by the {@code Nullable}
  */
@@ -51,8 +57,9 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * This constructor initializes the type handler for {@code Nullable} wrapper objects with a specific element type.
      *
      * @param parameterTypeName the fully qualified or simple name of the element type contained in the Nullable
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    protected NullableType(final String parameterTypeName) {
+    protected NullableType(final String parameterTypeName) throws IllegalArgumentException {
         super(NULLABLE + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + SK.GREATER_THAN);
 
         declaringName = NULLABLE + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
@@ -140,11 +147,12 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      *
      * @param x the {@code Nullable} object to convert
      * @return the string representation of the contained value, or {@code null} if empty or null-valued
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its type handler fails to produce a string.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final Nullable<T> x) {
+    public String stringOf(final Nullable<T> x) throws RuntimeException {
         return (x == null || x.isNull()) ? null : elementType.stringOf(x.get());
     }
 
@@ -152,17 +160,25 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * Converts a string representation to a {@link Nullable} object.
      * If the string is {@code null}, returns an empty {@code Nullable}. Otherwise,
      * delegates to the element type's valueOf method and wraps the result.
+     * <p>
+     * A {@code non-null} string is always wrapped with {@link Nullable#of(Object)}: if the element type parses it to
+     * {@code null} (for example {@code ""} for a {@code Nullable<Integer>}, whose element handler answers {@code null}
+     * for an empty string) the result is a <i>present</i> {@code Nullable} holding {@code null}
+     * ({@code isPresent() == true}, {@code isNull() == true}), unlike {@link OptionalType} and {@link JdkOptionalType}
+     * which return an empty optional for the same input.
      *
      * <p>This method round-trips {@code non-null} values written by {@code stringOf}. Strings produced by
      * {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to convert
-     * @return a {@code Nullable} containing the parsed value, or empty {@code Nullable} if input is null
+     * @return a {@code Nullable} containing the parsed value (possibly a present {@code null}), or an empty
+     *         {@code Nullable} if {@code str} is {@code null}
+     * @throws RuntimeException if the declared element type rejects the non-null input during conversion.
      * @see #valueOf(Object)
      * @see #stringOf(Nullable)
      */
     @Override
-    public Nullable<T> valueOf(final String str) {
+    public Nullable<T> valueOf(final String str) throws RuntimeException {
         return str == null ? (Nullable<T>) Nullable.empty() : Nullable.of(elementType.valueOf(str));
     }
 
@@ -173,13 +189,17 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the column to retrieve
      * @return a {@code Nullable} containing the retrieved value (which may hold {@code null} if the column is SQL {@code NULL})
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code rs} is {@code null} and the selected type handler accesses it.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws RuntimeException if the declared element type cannot convert the column value.
      */
     @Override
-    public Nullable<T> get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final T result = getColumnValue(rs, columnIndex, elementType.javaType());
+    public Nullable<T> get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, RuntimeException {
+        // Use the declared handler to retain nested generic metadata. Primitive JDBC getters return
+        // default values for SQL NULL, so inspect wasNull before wrapping that value.
+        final T result = elementType.get(rs, columnIndex);
 
-        return result == null ? Nullable.of((T) null)
+        return result == null || rs.wasNull() ? Nullable.of((T) null)
                 : Nullable.of(elementType.javaType().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
     }
 
@@ -190,13 +210,17 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
      * @return a {@code Nullable} containing the retrieved value (which may hold {@code null} if the column is SQL {@code NULL})
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null} and the selected type handler accesses it.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws RuntimeException if the declared element type cannot convert the column value.
      */
     @Override
-    public Nullable<T> get(final ResultSet rs, final String columnName) throws SQLException {
-        final T result = getColumnValue(rs, columnName, elementType.javaType());
+    public Nullable<T> get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, RuntimeException {
+        // Use the declared handler to retain nested generic metadata. Primitive JDBC getters return
+        // default values for SQL NULL, so inspect wasNull before wrapping that value.
+        final T result = elementType.get(rs, columnName);
 
-        return result == null ? Nullable.of((T) null)
+        return result == null || rs.wasNull() ? Nullable.of((T) null)
                 : Nullable.of(elementType.javaType().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
     }
 
@@ -204,42 +228,55 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * Sets a parameter in a {@link PreparedStatement} at the specified index to the value contained
      * in a {@link Nullable}. If {@code x} is {@code null} or wraps a {@code null} value, SQL {@code NULL} is set.
      *
+     * <p>The declared element handler performs the binding, including its null mapping and JDBC representation.</p>
+     *
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code Nullable} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null} and the selected type handler accesses it.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
+     * @throws RuntimeException if the declared element type rejects or cannot convert the contained value for JDBC binding.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Nullable<T> x) throws SQLException {
-        stmt.setObject(columnIndex, (x == null || x.isNull()) ? null : x.get());
+    public void set(final PreparedStatement stmt, final int columnIndex, final Nullable<T> x) throws NullPointerException, SQLException, RuntimeException {
+        elementType.set(stmt, columnIndex, (x == null || x.isNull()) ? null : x.get());
     }
 
     /**
      * Sets a parameter in a {@link CallableStatement} by name to the value contained in a {@link Nullable}.
      * If {@code x} is {@code null} or wraps a {@code null} value, SQL {@code NULL} is set.
      *
+     * <p>The declared element handler performs the binding, including its null mapping and JDBC representation.</p>
+     *
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code Nullable} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null} and the selected type handler accesses it.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
+     * @throws RuntimeException if the declared element type rejects or cannot convert the contained value for JDBC binding.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Nullable<T> x) throws SQLException {
-        stmt.setObject(parameterName, (x == null || x.isNull()) ? null : x.get());
+    public void set(final CallableStatement stmt, final String parameterName, final Nullable<T> x) throws NullPointerException, SQLException, RuntimeException {
+        elementType.set(stmt, parameterName, (x == null || x.isNull()) ? null : x.get());
     }
 
     /**
      * Appends the string representation of a {@link Nullable} to an {@link Appendable}.
      * Writes {@code "null"} if {@code x} is {@code null} or wraps a {@code null} value;
-     * otherwise delegates to the runtime type handler of the contained value.
+     * otherwise delegates to the declared element type handler; when the declared element type is {@code Object} the
+     * handler of the value's runtime class is used instead, exactly as
+     * {@link #serializeTo(CharacterWriter, Nullable, JsonXmlSerConfig)} does, so a map, collection or bean element
+     * keeps the {@code toString()}-style form rather than falling back to {@code ObjectType}'s JSON {@code stringOf}.
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes the JSON/XML
-     * serialized form by delegating to the contained value's runtime type handler with the supplied config.
+     * serialized form by delegating to the declared element type handler with the supplied config.
      *
      * @param appendable the target to write to
      * @param x the {@code Nullable} value to append, may be {@code null}
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -250,37 +287,54 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public void appendTo(final Appendable appendable, final Nullable<T> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Nullable<T> x) throws NullPointerException, IOException, RuntimeException {
         if (x == null || x.isNull()) {
             appendable.append(NULL_STRING);
         } else {
-            elementType.appendTo(appendable, x.get());
+            final Object value = x.get();
+            // An Object slot has no usable declared handler (ObjectType has no appendTo of its own, so it falls back
+            // to stringOf, i.e. the JSON form); dispatch on the runtime class the way serializeTo does.
+            final Type type = elementType.isObject() ? TypeFactory.getType(value.getClass()) : elementType;
+
+            type.appendTo(appendable, value);
         }
     }
 
     /**
      * Writes the character representation of a {@link Nullable} to a {@link CharacterWriter}.
-     * Writes {@code NULL_CHAR_ARRAY} if {@code x} is {@code null} or wraps a {@code null} value;
-     * otherwise delegates to the runtime type handler of the contained value.
+     * This method is specifically designed for JSON/XML serialization.
      * <p>
-     * This method is specifically designed for JSON/XML serialization: it writes {@code null} for an empty or null-valued
-     * {@code Nullable}, or delegates the contained value to its runtime type handler with the supplied serialization config.
+     * A {@code null} {@code Nullable}, an empty one and one holding {@code null} are all written by the declared
+     * element type handler as a {@code null} value, so that handler's null-substitution flags apply:
+     * {@code Nullable<Integer>} honours {@code config.isWriteNullNumberAsZero()} (written as {@code 0}),
+     * {@code Nullable<Boolean>} honours {@code writeNullBooleanAsFalse} ({@code false}) and {@code Nullable<String>}
+     * honours {@code writeNullStringAsEmpty} ({@code ""}); without such a flag the literal {@code null} is written.
+     * A substituted value reads back as a {@code Nullable} holding that value. The XML serializers represent an empty
+     * or null-holding {@code Nullable} property with the {@code isNull="true"} attribute form rather than with the
+     * text written here.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML using the contained
-     * value's serializer, whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering.
+     * A present {@code non-null} value is written by the declared element type handler. When the declared element
+     * type is {@code Object} the handler of the value's runtime class is used instead, so {@code Nullable.of(1)} inside
+     * a {@code List<Object>} is written as {@code 1}, not {@code "1"}. A value whose handler is not
+     * {@linkplain Type#isSerializable() serializable} - a bean, a map, a {@code List<Object>} - is written as embedded
+     * JSON when {@code config} is a {@code JsonSerConfig}, and as its escaped {@code stringOf} text under any other
+     * config. The output therefore matches what the JSON serializer writes for the bare value.
+     * <p>
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML using the element
+     * type's serializer, whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering.
      *
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Nullable} value to write, may be {@code null}
-     * @param config the serialization configuration
-     * @throws IOException if an I/O error occurs during the write operation
+     * @param config the serialization configuration, may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Nullable<T> x, final JsonXmlSerConfig<?> config) throws IOException {
-        if (x == null || x.isNull()) {
-            writer.write(NULL_CHAR_ARRAY);
-        } else {
-            elementType.serializeTo(writer, x.get(), config);
-        }
+    public void serializeTo(final CharacterWriter writer, final Nullable<T> x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, RuntimeException {
+        AbstractTupleType.serializeSlot(writer, elementType, (x == null || x.isNull()) ? null : x.get(), config);
     }
 }

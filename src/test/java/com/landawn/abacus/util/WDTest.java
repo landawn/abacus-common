@@ -2,6 +2,13 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
@@ -232,5 +239,33 @@ public class WDTest extends TestBase {
     public void testIntegration_CSVFormat() {
         String csv = "John" + SK.COMMA_SPACE + "Doe" + SK.COMMA_SPACE + "30";
         assertEquals("John, Doe, 30", csv);
+    }
+
+    @Test
+    public void testCountAllIsLowerCase() throws Exception {
+        assertEquals("count(*)", SK.COUNT_ALL);
+
+        // SK.COUNT_ALL's javadoc claims it is the ONLY constant in the class whose value is not upper case.
+        // Asserting the literal value cannot catch a future constant falsifying the "only", so walk every
+        // public static String field instead. SK is final with no supertype and no nested types, so
+        // getDeclaredFields() is exhaustive.
+        final List<String> notUpperCase = new ArrayList<>();
+        int inspected = 0;
+
+        for (final Field f : SK.class.getDeclaredFields()) {
+            if (!Modifier.isPublic(f.getModifiers()) || !Modifier.isStatic(f.getModifiers()) || f.getType() != String.class) {
+                continue;
+            }
+
+            inspected++;
+            final String v = (String) f.get(null);
+
+            if (v != null && !v.equals(v.toUpperCase(Locale.ROOT))) {
+                notUpperCase.add(f.getName());
+            }
+        }
+
+        assertTrue(inspected > 150, "expected SK to expose a large body of String constants, saw " + inspected);
+        assertEquals(List.of("COUNT_ALL"), notUpperCase, "SK javadoc claims COUNT_ALL is the only non-upper-case constant");
     }
 }

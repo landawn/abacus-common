@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class TerminalOpTriggeredTest extends TestBase {
-    static class TestStream {
+    public static class TestStream {
         @TerminalOpTriggered
         public TestStream sorted() {
             return this;

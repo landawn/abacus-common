@@ -21,9 +21,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Numbers;
 
 /**
  * Type handler for {@link java.time.LocalDate} values.
@@ -33,6 +34,11 @@ import com.landawn.abacus.util.Numbers;
  * <p>String representations follow the ISO-8601 standard ({@code yyyy-MM-dd}, e.g., {@code "2024-03-15"}).
  * Database columns are read and written using JDBC's native {@code LocalDate} support with a
  * {@link java.sql.Date} fallback for older drivers.</p>
+ *
+ * <p>The serialization {@link com.landawn.abacus.util.DateTimeFormat} of a {@code JsonXmlSerConfig} does not apply
+ * to this type: a {@code LocalDate} carries no instant, so {@code serializeTo} always writes the ISO-8601 text
+ * (quoted per the config), whatever {@code LONG}/{@code ISO_8601_*} setting is in effect; a field-level
+ * {@code @JsonXmlField(dateFormat = "long")} is not supported for {@code LocalDate} and throws.</p>
  *
  * @see AbstractTemporalType
  * @see java.time.LocalDate
@@ -96,8 +102,10 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
     /**
      * Converts an Object to a LocalDate.
      * If the object is a Number, it is treated as milliseconds since epoch and converted to LocalDate using the default zone ID.
-     * A {@link java.util.Date} (including its SQL subclasses) or {@link java.util.Calendar} is converted the same
-     * way from its epoch-millisecond value.
+     * A {@link java.util.Date} (including its SQL subclasses) is converted the same way from its
+     * epoch-millisecond value.
+     * A {@link java.util.Calendar} keeps the zone attached to it, so the returned value carries the calendar's own
+     * displayed fields (a calendar with no zone falls back to the default zone).
      * Otherwise, the object is converted to a string and parsed.
      *
      * <p><b>Usage Examples:</b></p>
@@ -110,15 +118,24 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      *
      * @param obj The object to convert to LocalDate
      * @return The LocalDate representation of the object, or {@code null} if the input is null
+     * @throws IllegalArgumentException if the input is a non-lenient calendar containing invalid field values.
+     * @throws DateTimeParseException if the text representation is neither a supported millisecond value nor a valid ISO-8601
+     *         LocalDate.
      */
     @Override
-    public LocalDate valueOf(final Object obj) {
+    public LocalDate valueOf(final Object obj) throws IllegalArgumentException, DateTimeParseException {
         if (obj instanceof Number) {
             return LocalDate.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
         } else if (obj instanceof java.util.Date) {
             return LocalDate.ofInstant(Instant.ofEpochMilli(((java.util.Date) obj).getTime()), DEFAULT_ZONE_ID);
-        } else if (obj instanceof java.util.Calendar) {
-            return LocalDate.ofInstant(Instant.ofEpochMilli(((java.util.Calendar) obj).getTimeInMillis()), DEFAULT_ZONE_ID);
+        } else if (obj instanceof java.util.Calendar cal) {
+            // Keep the zone the caller attached to the Calendar: a Calendar's displayed fields are stated in its own
+            // zone, and a LocalDate is nothing but displayed fields, so rebuilding in the JVM default zone would
+            // silently shift them. Matches GregorianCalendar.toZonedDateTime().toLocalDate() and the Calendar branch of
+            // ZonedDateTimeType/OffsetDateTimeType.
+            final java.util.TimeZone tz = cal.getTimeZone();
+
+            return LocalDate.ofInstant(Instant.ofEpochMilli(cal.getTimeInMillis()), tz == null ? DEFAULT_ZONE_ID : tz.toZoneId());
         }
 
         return obj == null ? null : valueOf(N.stringOf(obj));
@@ -130,7 +147,10 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * <ul>
      *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive) returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current {@code LocalDate}</li>
-     *   <li>Numeric strings are treated as milliseconds since the epoch</li>
+     *   <li>Numeric strings of more than four characters (an optional sign followed by decimal digits only, as
+     *       accepted by {@link Long#parseLong(String)}; no {@code 0x} hex, no {@code L} suffix) are treated as
+     *       milliseconds since the epoch, interpreted in the system default zone (shorter numeric strings such as
+     *       {@code "1234"} are handed to the ISO parser and rejected)</li>
      *   <li>ISO-8601 formatted strings are parsed directly via {@link LocalDate#parse(CharSequence)}</li>
      * </ul>
      *
@@ -152,13 +172,14 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      *
      * @param str the string to parse
      * @return the parsed {@code LocalDate} object, or {@code null} if the input is {@code null}, empty, or the literal {@code "null"}
-     * @throws java.time.format.DateTimeParseException if the string is not a valid millisecond
-     *         number nor an ISO-8601 {@code LocalDate} representation
+     * @throws DateTimeParseException if the string is neither a millisecond number of more than
+     *         four characters (within the {@code long} range) nor an ISO-8601 {@code LocalDate} representation
      * @see #valueOf(Object)
      * @see #stringOf(LocalDate)
      */
+    @MayReturnNull
     @Override
-    public LocalDate valueOf(final String str) {
+    public LocalDate valueOf(final String str) throws DateTimeParseException {
         if (isNullDateTime(str)) {
             return null; // NOSONAR
         }
@@ -169,8 +190,12 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
 
         if (isPossibleMillis(str)) {
             try {
-                return LocalDate.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
-            } catch (final NumberFormatException e) {
+                // Long.parseLong, not Numbers.toLong: epoch text is decimal digits only, like the java.util.Date /
+                // Calendar handlers ("0x1F4A0" must not become 128160 ms). Overflow is reported as NFE here; the
+                // ArithmeticException arm keeps the shape of the sibling handlers, whose char[] fast path reports it
+                // that way. Either exception falls through to the ISO parser's documented DateTimeParseException.
+                return LocalDate.ofInstant(Instant.ofEpochMilli(Long.parseLong(str)), DEFAULT_ZONE_ID);
+            } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
@@ -193,9 +218,12 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * @param offset The starting position in the character array
      * @param len The number of characters to use
      * @return The parsed LocalDate object, or {@code null} if the input is {@code null} or empty
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
+     * @throws DateTimeParseException if the text representation is neither a supported millisecond value nor a valid ISO-8601 LocalDate.
      */
+    @MayReturnNull
     @Override
-    public LocalDate valueOf(final char[] cbuf, final int offset, final int len) {
+    public LocalDate valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, DateTimeParseException {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
@@ -221,10 +249,11 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * @param rs The ResultSet containing the data
      * @param columnIndex The column index (1-based) to retrieve the value from
      * @return The LocalDate value from the ResultSet, or {@code null} if the database value is NULL
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fallback fails.
      */
     @Override
-    public LocalDate get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public LocalDate get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         try {
             return rs.getObject(columnIndex, LocalDate.class);
         } catch (final SQLException e) {
@@ -252,10 +281,11 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * @param rs The ResultSet containing the data
      * @param columnName the column label (or name if no label was specified) to retrieve the value from
      * @return The LocalDate value from the ResultSet, or {@code null} if the database value is NULL
-     * @throws SQLException if a database access error occurs or the column name is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fallback fails.
      */
     @Override
-    public LocalDate get(final ResultSet rs, final String columnName) throws SQLException {
+    public LocalDate get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         try {
             return rs.getObject(columnName, LocalDate.class);
         } catch (final SQLException e) {
@@ -283,10 +313,11 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * @param stmt The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
      * @param x The LocalDate value to set, or {@code null} to set SQL NULL
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fallback fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final LocalDate x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final LocalDate x) throws NullPointerException, SQLException {
         try {
             stmt.setObject(columnIndex, x);
         } catch (final SQLException e) {
@@ -312,10 +343,11 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * @param stmt The CallableStatement to set the parameter on
      * @param parameterName The name of the parameter to set
      * @param x The LocalDate value to set, or {@code null} to set SQL NULL
-     * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fallback fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final LocalDate x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final LocalDate x) throws NullPointerException, SQLException {
         try {
             stmt.setObject(parameterName, x);
         } catch (final SQLException e) {

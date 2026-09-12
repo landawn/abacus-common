@@ -22,7 +22,8 @@ import org.apache.logging.log4j.spi.ExtendedLogger;
  *
  * <p>This implementation provides a bridge to Log4j 2, leveraging its {@link ExtendedLogger}
  * interface for optimal performance and accurate caller location information. The logger
- * uses the {@code logIfEnabled} methods which provide efficient level checking.</p>
+ * uses the {@code logIfEnabled} methods which provide efficient level checking. Caller locations
+ * identify application code for direct calls and inherited template/supplier overloads alike.</p>
  *
  * <p>Key features:</p>
  * <ul>
@@ -53,6 +54,29 @@ class Log4Jv2Logger extends AbstractLogger {
     static final String FQCN = Log4Jv2Logger.class.getName();
 
     private final ExtendedLogger loggerImpl;
+
+    /**
+     * @throws NullPointerException if {@code level} is {@code null}.
+     */
+    @Override
+    void log(final LogLevel level, final String message) throws NullPointerException {
+        log(level, message, null);
+    }
+
+    /**
+     * @throws NullPointerException if {@code level} is {@code null}.
+     */
+    @Override
+    void log(final LogLevel level, final String message, final Throwable throwable) throws NullPointerException {
+        final Level backendLevel = switch (level) {
+            case TRACE -> Level.TRACE;
+            case DEBUG -> Level.DEBUG;
+            case INFO -> Level.INFO;
+            case WARN -> Level.WARN;
+            case ERROR -> Level.ERROR;
+        };
+        loggerImpl.logIfEnabled(AbstractLogger.class.getName(), backendLevel, null, message, throwable);
+    }
 
     /**
      * Constructs a {@code Log4Jv2Logger} with the specified name.

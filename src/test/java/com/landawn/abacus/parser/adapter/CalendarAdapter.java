@@ -15,6 +15,6 @@ public class CalendarAdapter extends XmlAdapter<String, Calendar> {
 
     @Override
     public Calendar unmarshal(String v) throws Exception {
-        return Dates.parseCalendar(v);
+        return Dates.parseToCalendar(v);
     }
 }

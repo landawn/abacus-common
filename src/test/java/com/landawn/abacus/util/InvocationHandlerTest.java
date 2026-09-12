@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-class InvocationHandlerTest extends TestBase {
+public class InvocationHandlerTest extends TestBase {
 
     @Test
     public void test() {
@@ -45,9 +45,9 @@ class InvocationHandlerTest extends TestBase {
     }
 
     public interface MyClassInterface {
-        void method1();
+        public void method1();
 
-        void method2();
+        public void method2();
     }
 
     public static class MyClass implements MyClassInterface {

@@ -28,7 +28,10 @@ import com.landawn.abacus.util.cs;
  * the abacus-common hashing API and the underlying Guava implementation.
  *
  * <p>This class is immutable and thread-safe, as it delegates all operations to the
- * wrapped Guava hash function which maintains these properties.
+ * wrapped Guava hash function which maintains these properties. {@code equals}, {@code hashCode} and
+ * {@code toString} are delegated too, so a wrapper compares and prints exactly as the Guava hash function
+ * it wraps does - which is value-based for some algorithms and identity-based for others; see
+ * {@link #equals(Object)}.
  *
  * <p><b>Implementation Note:</b> This class is not intended for direct use by clients.
  * Use the factory methods in {@link Hashing} to obtain hash function instances.
@@ -50,7 +53,7 @@ final class GuavaHashFunction implements HashFunction {
      * @param gHashFunction the Guava hash function to wrap, must not be {@code null}
      * @throws NullPointerException if {@code gHashFunction} is {@code null}
      */
-    GuavaHashFunction(final com.google.common.hash.HashFunction gHashFunction) {
+    GuavaHashFunction(final com.google.common.hash.HashFunction gHashFunction) throws NullPointerException {
         N.requireNonNull(gHashFunction, "gHashFunction");
         this.gHashFunction = gHashFunction;
     }
@@ -77,7 +80,7 @@ final class GuavaHashFunction implements HashFunction {
      * @return a new GuavaHashFunction instance wrapping the given function
      * @throws NullPointerException if {@code gHashFunction} is {@code null}
      */
-    static GuavaHashFunction wrap(final com.google.common.hash.HashFunction gHashFunction) {
+    static GuavaHashFunction wrap(final com.google.common.hash.HashFunction gHashFunction) throws NullPointerException {
         return new GuavaHashFunction(gHashFunction);
     }
 
@@ -104,9 +107,10 @@ final class GuavaHashFunction implements HashFunction {
      *
      * @param expectedInputSize the expected number of bytes to be hashed
      * @return a new hasher backed by the wrapped Guava hash function
+     * @throws IllegalArgumentException if {@code expectedInputSize} is negative.
      */
     @Override
-    public Hasher newHasher(final int expectedInputSize) {
+    public Hasher newHasher(final int expectedInputSize) throws IllegalArgumentException {
         return GuavaHasher.wrap(gHashFunction.newHasher(expectedInputSize));
     }
 
@@ -146,9 +150,10 @@ final class GuavaHashFunction implements HashFunction {
      *
      * @param input the byte array to hash
      * @return the hash code for the supplied bytes
+     * @throws NullPointerException if {@code input} is {@code null}.
      */
     @Override
-    public HashCode hash(final byte[] input) {
+    public HashCode hash(final byte[] input) throws NullPointerException {
         return gHashFunction.hashBytes(input);
     }
 
@@ -162,9 +167,11 @@ final class GuavaHashFunction implements HashFunction {
      * @param off the start offset in the array
      * @param len the number of bytes to hash
      * @return the hash code for the requested byte range
+     * @throws NullPointerException if {@code input} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds {@code input.length}.
      */
     @Override
-    public HashCode hash(final byte[] input, final int off, final int len) {
+    public HashCode hash(final byte[] input, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException {
         return gHashFunction.hashBytes(input, off, len);
     }
 
@@ -176,9 +183,10 @@ final class GuavaHashFunction implements HashFunction {
      *
      * @param input the character sequence to hash
      * @return the hash code for the supplied character sequence
+     * @throws NullPointerException if {@code input} is {@code null}.
      */
     @Override
-    public HashCode hash(final CharSequence input) {
+    public HashCode hash(final CharSequence input) throws NullPointerException {
         return gHashFunction.hashUnencodedChars(input);
     }
 
@@ -191,9 +199,10 @@ final class GuavaHashFunction implements HashFunction {
      * @param input the character sequence to hash
      * @param charset the charset used to encode the characters before hashing
      * @return the hash code for the supplied encoded character sequence
+     * @throws NullPointerException if {@code input} or {@code charset} is {@code null}.
      */
     @Override
-    public HashCode hash(final CharSequence input, final Charset charset) {
+    public HashCode hash(final CharSequence input, final Charset charset) throws NullPointerException {
         return gHashFunction.hashString(input, charset);
     }
 
@@ -227,5 +236,46 @@ final class GuavaHashFunction implements HashFunction {
     @Override
     public int bits() {
         return gHashFunction.bits();
+    }
+
+    /**
+     * Compares two wrappers by the Guava hash function they delegate to.
+     *
+     * <p>Equality is whatever the wrapped Guava function defines. Seeded {@code murmur3_32(seed)} /
+     * {@code murmur3_128(seed)}, {@code sipHash24(k0, k1)}, {@code goodFastHash(n)} and {@code concatenating(...)}
+     * results are value-equal, so {@code Hashing.murmur3_128(42)} equals another {@code Hashing.murmur3_128(42)}.
+     * The singleton factories ({@code sha256()}, {@code md5()}, {@code crc32()}, {@code farmHashFingerprint64()},
+     * ...) are equal because the same instance is returned each time. The {@code hmac*} functions are
+     * identity-equal: two calls with the same key are NOT equal, so they do not work as map keys across calls.
+     * Without this override the wrapper inherited identity equality from {@link Object} for every function.</p>
+     *
+     * @param obj the object to compare with
+     * @return {@code true} if {@code obj} is a wrapper over an equal Guava hash function
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        return obj instanceof GuavaHashFunction other && gHashFunction.equals(other.gHashFunction);
+    }
+
+    /**
+     * @return the wrapped Guava hash function's hash code, keeping this consistent with {@link #equals(Object)}
+     */
+    @Override
+    public int hashCode() {
+        return gHashFunction.hashCode();
+    }
+
+    /**
+     * Returns the wrapped function's own description, for example {@code "Hashing.murmur3_128(42)"}. Without
+     * this the wrapper printed {@code GuavaHashFunction@1b6d3586}, naming neither the algorithm nor the seed.
+     * Functions whose Guava implementation does not override {@code toString} (notably the result of
+     * {@code concatenating(...)}) still print in Guava's identity form, e.g.
+     * {@code com.google.common.hash.Hashing$ConcatenatedHashFunction@88ade00b}.
+     *
+     * @return the wrapped Guava hash function's string representation
+     */
+    @Override
+    public String toString() {
+        return gHashFunction.toString();
     }
 }

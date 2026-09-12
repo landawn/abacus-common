@@ -2,8 +2,10 @@ package com.landawn.abacus.spring;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -24,8 +26,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonSerConfig;
 
@@ -343,7 +347,7 @@ public class JsonHttpMessageConverterTest extends TestBase {
         converter.writeInternal(null, Object.class, writer);
 
         String json = writer.toString();
-        assertEquals("", json);
+        assertEquals("null", json);
     }
 
     @Test
@@ -481,5 +485,97 @@ public class JsonHttpMessageConverterTest extends TestBase {
         JsonHttpMessageConverter c = new JsonHttpMessageConverter(new JsonSerConfig(), new JsonDeserConfig(), (List<MediaType>) null);
 
         assertTrue(c.getSupportedMediaTypes().contains(MediaType.APPLICATION_JSON));
+    }
+
+    // a14 F-3: type mismatches surface through Spring's read(...) as HttpMessageNotReadableException; the cause is
+    // whatever the abacus parser threw (never IllegalArgumentException), and an object body read into a List<T>
+    // is lenient. These tests pin the documented contract.
+    private static MockHttpInputMessage jsonMessage(String json) {
+        MockHttpInputMessage message = new MockHttpInputMessage(json);
+        message.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        return message;
+    }
+
+    @Test
+    public void testRead_scalarTypeMismatch_wrappedWithNumberFormatExceptionCause() {
+        HttpMessageNotReadableException e = assertThrows(HttpMessageNotReadableException.class,
+                () -> converter.read(Integer.class, null, jsonMessage("\"abc\"")));
+        // Exactly NumberFormatException (an IllegalArgumentException subclass), not a bare IllegalArgumentException.
+        assertEquals(NumberFormatException.class, e.getCause().getClass(), String.valueOf(e.getCause()));
+    }
+
+    @Test
+    public void testRead_arrayBodyForBeanTarget_wrappedWithParsingExceptionCause() {
+        HttpMessageNotReadableException e = assertThrows(HttpMessageNotReadableException.class,
+                () -> converter.read(TestPerson.class, null, jsonMessage("[1,2]")));
+        assertInstanceOf(ParsingException.class, e.getCause(), String.valueOf(e.getCause()));
+    }
+
+    @Test
+    public void testRead_propertyTypeMismatch_wrappedWithNumberFormatExceptionCause() {
+        HttpMessageNotReadableException e = assertThrows(HttpMessageNotReadableException.class,
+                () -> converter.read(TestPerson.class, null, jsonMessage("{\"age\":\"x\"}")));
+        assertInstanceOf(NumberFormatException.class, e.getCause(), String.valueOf(e.getCause()));
+        // The plain Class overload takes the same path.
+        assertThrows(HttpMessageNotReadableException.class, () -> converter.read(TestPerson.class, jsonMessage("{\"age\":\"λ\"}")));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testRead_objectBodyIntoListTarget_isLenientOneElementMap() throws IOException {
+        Type listOfString = new ParameterizedType() {
+            @Override
+            public Type[] getActualTypeArguments() {
+                return new Type[] { String.class };
+            }
+
+            @Override
+            public Type getRawType() {
+                return List.class;
+            }
+
+            @Override
+            public Type getOwnerType() {
+                return null;
+            }
+        };
+
+        Object result = converter.read(listOfString, null, jsonMessage("{\"a\":1}"));
+
+        // An object body is still accepted for a List target and still yields exactly one element. The element type
+        // declared by the target is now honoured: it used to be read as a Map whatever the declaration said (the same
+        // defect gave a HashMap[] for a String[] target), so a List<String> now receives the value's JSON text.
+        assertInstanceOf(List.class, result);
+        List<Object> list = (List<Object>) result;
+        assertEquals(1, list.size());
+        assertInstanceOf(String.class, list.get(0), String.valueOf(list.get(0)));
+        assertEquals("{\"a\": 1}", list.get(0));
+
+        // ... and an Object element type still receives the Map, which is what an untyped body means.
+        Type listOfObject = new ParameterizedType() {
+            @Override
+            public Type[] getActualTypeArguments() {
+                return new Type[] { Object.class };
+            }
+
+            @Override
+            public Type getRawType() {
+                return List.class;
+            }
+
+            @Override
+            public Type getOwnerType() {
+                return null;
+            }
+        };
+
+        List<Object> untyped = (List<Object>) converter.read(listOfObject, null, jsonMessage("{\"a\":1}"));
+        assertEquals(1, untyped.size());
+        assertInstanceOf(Map.class, untyped.get(0), String.valueOf(untyped.get(0)));
+        assertEquals(1, ((Map<String, Object>) untyped.get(0)).get("a"));
+
+        // Regression guard: a genuine array body still yields the declared element type.
+        List<Object> proper = (List<Object>) converter.read(listOfString, null, jsonMessage("[\"x\",\"λ\"]"));
+        assertEquals(List.of("x", "λ"), proper);
     }
 }

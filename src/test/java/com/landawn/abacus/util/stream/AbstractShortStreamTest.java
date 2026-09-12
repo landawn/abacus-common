@@ -40,6 +40,32 @@ import com.landawn.abacus.util.u.OptionalShort;
 
 public class AbstractShortStreamTest extends TestBase {
 
+    @Test
+    public void testScanInitializesOnlyAfterSuccessfulSourceRead() {
+        final IllegalStateException failure = new IllegalStateException("first read failed");
+        final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger accumulatorCalls = new java.util.concurrent.atomic.AtomicInteger();
+
+        try (ShortStream stream = ShortStream.of(new short[] { 1, 2, 3 }).map(value -> {
+            if (attempts.getAndIncrement() == 0) {
+                throw failure;
+            }
+            return value;
+        }).scan((left, right) -> {
+            accumulatorCalls.incrementAndGet();
+            return (short) (left + right);
+        })) {
+            final com.landawn.abacus.util.ShortIterator iter = stream.iterator();
+            org.junit.jupiter.api.Assertions.assertSame(failure,
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextShort));
+            org.junit.jupiter.api.Assertions.assertEquals((short) 2, iter.nextShort());
+            org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
+            org.junit.jupiter.api.Assertions.assertEquals((short) 5, iter.nextShort());
+            org.junit.jupiter.api.Assertions.assertEquals(1, accumulatorCalls.get());
+            org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+        }
+    }
+
     private ShortStream stream;
     private ShortStream stream2;
 

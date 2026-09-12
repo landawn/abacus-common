@@ -16,7 +16,9 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.util.BufferedXmlWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.EscapeUtil;
 import com.landawn.abacus.util.N;
@@ -29,9 +31,11 @@ import com.landawn.abacus.util.Strings;
  * This class provides serialization, deserialization, and output operations for {@code Character[]} arrays.
  *
  * <p>The canonical string format is a bracket-enclosed, comma-separated list where each non-null
- * character element is wrapped in single quotes (e.g., {@code ['a', 'b', null, 'z']}) and
- * quotes, backslashes, and control characters are backslash-escaped,
- * and {@code null} elements are written as the literal {@code null}.</p>
+ * character element is wrapped in single quotes (e.g., {@code ['a', 'b', null, 'z']}) and escaped with
+ * {@link EscapeUtil#escapeEcmaScript(String)}: quotes, backslashes and {@code /} get a backslash, the C0 control
+ * characters use {@code \n}-style or <code>&#92;uXXXX</code> escapes, and every character outside U+0020..U+007F is written
+ * as <code>&#92;uXXXX</code> (U+007F itself is written as-is); {@code null} elements are written as the literal
+ * {@code null}.</p>
  *
  * @see ObjectArrayType
  */
@@ -48,7 +52,12 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
     /**
      * Converts a {@code Character[]} to its canonical string representation.
      * The output format is a bracket-enclosed, comma-separated list.
-     * Each {@code non-null} character is wrapped in single quotes and escaped when necessary;
+     * Each {@code non-null} character is wrapped in single quotes and escaped with
+     * {@link EscapeUtil#escapeEcmaScript(String)}: quotes, backslashes and {@code /} get a backslash (a single quote
+     * is written as <code>'\''</code>), the C0 control characters use {@code \n}-style or <code>&#92;uXXXX</code> escapes
+     * (a newline is written as <code>'\n'</code>), and every character outside U+0020..U+007F is written as
+     * <code>&#92;uXXXX</code> (for example U+00E9, Latin small letter e with acute, becomes
+     * <code>'&#92;u00E9'</code>); U+007F is written as-is.
      * {@code null} elements are written as {@code null}.
      *
      * <p>Examples:</p>
@@ -69,6 +78,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final Character[] x) {
         if (x == null) {
@@ -78,29 +88,30 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
         }
 
         final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 5));
-        sb.append(SK._BRACKET_L);
 
-        for (int i = 0, len = x.length; i < len; i++) {
-            if (i > 0) {
-                sb.append(ELEMENT_SEPARATOR);
+        try {
+            sb.append(SK._BRACKET_L);
+
+            for (int i = 0, len = x.length; i < len; i++) {
+                if (i > 0) {
+                    sb.append(ELEMENT_SEPARATOR);
+                }
+
+                if (x[i] == null) {
+                    sb.append(NULL_CHAR_ARRAY);
+                } else {
+                    sb.append(SK.SINGLE_QUOTE);
+                    sb.append(EscapeUtil.escapeEcmaScript(String.valueOf(x[i])));
+                    sb.append(SK.SINGLE_QUOTE);
+                }
             }
 
-            if (x[i] == null) {
-                sb.append(NULL_CHAR_ARRAY);
-            } else {
-                sb.append(SK.SINGLE_QUOTE);
-                sb.append(EscapeUtil.escapeEcmaScript(String.valueOf(x[i])));
-                sb.append(SK.SINGLE_QUOTE);
-            }
+            sb.append(SK._BRACKET_R);
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
         }
-
-        sb.append(SK._BRACKET_R);
-
-        final String str = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return str;
     }
 
     /**
@@ -108,6 +119,8 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * The expected format is a bracket-enclosed, comma-separated list as produced by {@link #stringOf}.
      * Elements may be enclosed in single or double quotes; backslash escape sequences inside quoted
      * elements are decoded. The literal {@code null} (4 characters) is converted to a {@code null} array element.
+     * Whitespace outside quoted elements is ignored; quote a space character as {@code ' '}.
+     * Brackets containing only whitespace represent an empty array.
      *
      * <p>Special cases:</p>
      * <ul>
@@ -121,12 +134,16 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      *
      * @param str the string to parse; may be {@code null}
      * @return the parsed {@code Character[]}, or {@code null} if {@code str} is {@code null} or blank
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only, or a numeric character code is outside the char range; or
+     *         a quoted element contains a malformed Unicode escape.
+     * @throws NumberFormatException if an element has multiple characters after removing quotes and escapes and is not an integer character code.
      * @see #valueOf(Object)
      * @see #stringOf(Character[])
      */
+    @MayReturnNull
     @Override
-    public Character[] valueOf(final String str) {
-        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
+    public Character[] valueOf(final String str) throws IllegalArgumentException, NumberFormatException {
+        if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_CHAR_OBJ_ARRAY;
@@ -172,7 +189,8 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      *
      * @param appendable the {@link Appendable} to write to
      * @param x          the {@code Character[]} to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -184,7 +202,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Character[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final Character[] x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -216,10 +234,12 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      *   <li>Null elements are always written as {@code null}, without quotes.</li>
      *   <li>If {@code x} is {@code null}, the literal {@code null} is written.</li>
      * </ul>
+     * <p>XML writers always use the quoted, escaped array text from {@link #stringOf(Character[])},
+     * independently of {@code charQuotation}, so delimiters and XML control characters round-trip.</p>
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * config (a {@code null} config means no surrounding quotation for non-XML writers). It is the streaming counterpart of {@code stringOf}
      * and is invoked by the JSON/XML serializers.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
@@ -229,12 +249,16 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the {@code Character[]} to write; may be {@code null}
      * @param config serialization configuration controlling quotation; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Character[] x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Character[] x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
+        } else if (writer instanceof BufferedXmlWriter) {
+            // XML text must preserve array delimiters and controls until valueOf decodes them.
+            writer.writeCharacter(stringOf(x));
         } else {
             writer.write(SK._BRACKET_L);
 
@@ -285,6 +309,7 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
      * @param x the {@code Character[]} to convert; may be {@code null}
      * @return a string representation of the array, or {@code null} if {@code x} is {@code null}
      */
+    @MayReturnNull
     @Override
     public String toString(final Character[] x) {
         if (x == null) {

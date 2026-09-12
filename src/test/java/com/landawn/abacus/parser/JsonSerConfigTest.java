@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,13 +19,14 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.DateTimeFormat;
+import com.landawn.abacus.util.N;
 
 public class JsonSerConfigTest extends TestBase {
 
     private JsonSerConfig config;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         config = JsonSerConfig.create();
     }
 
@@ -569,6 +572,179 @@ public class JsonSerConfigTest extends TestBase {
         Assertions.assertFalse(c.isQuoteMapKey());
         Assertions.assertFalse(c.isBracketRootValue());
         Assertions.assertTrue(c.isWrapRootValue());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // Review fixes 2026-09-06 (P8-05 / P8-06 javadoc pins; P8-14 toString without raw NUL)
+    // ---------------------------------------------------------------------------------------------
+
+    public static class NullPropsBean {
+        private String s;
+        private List<String> l;
+        private Map<String, Integer> m;
+        private Integer i;
+        private Boolean b;
+        private NullPropsBean nested;
+        private int d = 0;
+
+        public String getS() {
+            return s;
+        }
+
+        public void setS(final String s) {
+            this.s = s;
+        }
+
+        public List<String> getL() {
+            return l;
+        }
+
+        public void setL(final List<String> l) {
+            this.l = l;
+        }
+
+        public Map<String, Integer> getM() {
+            return m;
+        }
+
+        public void setM(final Map<String, Integer> m) {
+            this.m = m;
+        }
+
+        public Integer getI() {
+            return i;
+        }
+
+        public void setI(final Integer i) {
+            this.i = i;
+        }
+
+        public Boolean getB() {
+            return b;
+        }
+
+        public void setB(final Boolean b) {
+            this.b = b;
+        }
+
+        public NullPropsBean getNested() {
+            return nested;
+        }
+
+        public void setNested(final NullPropsBean nested) {
+            this.nested = nested;
+        }
+
+        public int getD() {
+            return d;
+        }
+
+        public void setD(final int d) {
+            this.d = d;
+        }
+    }
+
+    @Test
+    public void reviewFixes20260906_writeNullToEmpty_needsExclusionNone_andOnlyEmptiesStringCollectionMap() {
+        final JsonParser jp = ParserFactory.createJsonParser();
+        final NullPropsBean bean = new NullPropsBean();
+
+        // default exclusion (NULL) drops the null properties before the flag is consulted
+        assertEquals("{\"d\": 0}", jp.serialize(bean, new JsonSerConfig().setWriteNullToEmpty(true)));
+
+        // Exclusion.NONE: CharSequence -> "", collection -> [], map -> {}; number / boolean / nested bean stay null
+        assertEquals("{\"s\": \"\", \"l\": [], \"m\": {}, \"i\": null, \"b\": null, \"nested\": null, \"d\": 0}",
+                jp.serialize(bean, new JsonSerConfig().setWriteNullToEmpty(true).setExclusion(Exclusion.NONE)));
+
+        // without the flag every surviving null is written as null
+        assertEquals("{\"s\": null, \"l\": null, \"m\": null, \"i\": null, \"b\": null, \"nested\": null, \"d\": 0}",
+                jp.serialize(bean, new JsonSerConfig().setExclusion(Exclusion.NONE)));
+    }
+
+    @Test
+    public void reviewFixes20260906_writeNullToEmpty_mapValuesAndCollectionElementsUnaffected() {
+        final JsonParser jp = ParserFactory.createJsonParser();
+        final JsonSerConfig cfg = new JsonSerConfig().setWriteNullToEmpty(true).setExclusion(Exclusion.NONE);
+
+        final Map<String, Object> m = new LinkedHashMap<>();
+        m.put("x", null);
+        m.put("y", "");
+        assertEquals("{\"x\": null, \"y\": \"\"}", jp.serialize(m, cfg));
+        assertEquals("[\"a\", null]", jp.serialize(N.asList("a", null), cfg));
+    }
+
+    @Test
+    public void reviewFixes20260906_quoteMapKey_false_unquotesOnlyNumberBooleanAndNullKeys() {
+        final JsonParser jp = ParserFactory.createJsonParser();
+        final Map<Object, Object> map = new LinkedHashMap<>();
+        map.put("str", 1);
+        map.put(2, 2);
+        map.put(true, 3);
+        map.put(null, 4);
+
+        assertEquals("{\"str\": 1, 2: 2, true: 3, null: 4}", jp.serialize(map, new JsonSerConfig().setQuoteMapKey(false)));
+        assertEquals("{\"str\": 1, \"2\": 2, \"true\": 3, \"null\": 4}", jp.serialize(map, new JsonSerConfig().setQuoteMapKey(true)));
+        assertEquals("{\"str\": 1, \"2\": 2, \"true\": 3, \"null\": 4}", jp.serialize(map, new JsonSerConfig()));
+
+        // String keys stay quoted even when property names are un-quoted too, so the output still parses
+        final Map<String, Object> strKeys = new LinkedHashMap<>();
+        strKeys.put("a b", 1);
+        final String json = jp.serialize(strKeys, new JsonSerConfig().setQuoteMapKey(false).setQuotePropName(false));
+        assertEquals("{\"a b\": 1}", json);
+        assertEquals(strKeys, jp.deserialize(json, Map.class));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void reviewFixes20260906_toString_disabledQuotationRenderedAsEscapeText_noRawNul() {
+        final String dflt = new JsonSerConfig().toString();
+        assertTrue(dflt.indexOf('\0') < 0, dflt);
+        assertTrue(dflt.contains("charQuotation=\", stringQuotation=\","), dflt);
+
+        final String none = new JsonSerConfig().noQuotation().toString();
+        assertTrue(none.indexOf('\0') < 0, none);
+        assertTrue(none.contains("charQuotation=\\u0000, stringQuotation=\\u0000,"), none);
+
+        final String single = new JsonSerConfig().setCharQuotation('\'').noStringQuotation().toString();
+        assertTrue(single.indexOf('\0') < 0, single);
+        assertTrue(single.contains("charQuotation=', stringQuotation=\\u0000,"), single);
+    }
+
+
+    /**
+     * A subclass that narrows equality the way {@code AvroSerConfig}/{@code KryoSerConfig} do over
+     * {@code SerializationConfig}: {@code instanceof <OwnType> && super.equals(obj)}.
+     */
+    static class NarrowingJsonSerConfig extends JsonSerConfig {
+        @Override
+        public boolean equals(final Object obj) {
+            return this == obj || (obj instanceof NarrowingJsonSerConfig && super.equals(obj));
+        }
+
+        @Override
+        public int hashCode() {
+            return super.hashCode();
+        }
+    }
+
+    @Test
+    public void reviewFixes20260908_equalsIsSymmetricAgainstASubclassThatNarrowsEquality() {
+        final JsonSerConfig base = new JsonSerConfig();
+        final NarrowingJsonSerConfig sub = new NarrowingJsonSerConfig();
+
+        // Same settings, different classes. With the old `obj instanceof JsonSerConfig` test base.equals(sub)
+        // was true while sub.equals(base) was false, the very asymmetry SerializationConfig#equals documents
+        // its exact-class rule to prevent.
+        assertEquals(base.equals(sub), sub.equals(base));
+        assertFalse(base.equals(sub));
+        assertFalse(sub.equals(base));
+
+        // Unchanged for everything else.
+        assertTrue(base.equals(new JsonSerConfig()));
+        assertTrue(sub.equals(new NarrowingJsonSerConfig()));
+        assertEquals(base.hashCode(), new JsonSerConfig().hashCode());
+        assertFalse(base.equals(null));
+        assertFalse(base.equals("not a config"));
     }
 
 }

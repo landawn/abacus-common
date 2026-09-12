@@ -18,7 +18,7 @@ import com.landawn.abacus.TestBase;
 
 public class JsonXmlCreatorTest extends TestBase {
 
-    static class TestClass {
+    public static class TestClass {
         public TestClass() {
         }
 

@@ -1,6 +1,7 @@
 package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -151,6 +152,20 @@ public class PrimitiveDoubleTypeTest extends TestBase {
     @Test
     public void test_isComparable() {
         assertTrue(type.isComparable());
+    }
+
+    // T4-09 (documented contract, WONTFIX behaviour): isDefaultValue is equals-based, so -0.0d is not the default
+    @Test
+    public void reviewFixes20260906_isDefaultValue_isEqualsBased() {
+        assertTrue(type.isDefaultValue(0.0d));
+        assertTrue(type.isDefaultValue(Double.valueOf(0.0d)));
+        assertFalse(type.isDefaultValue(-0.0d));
+        assertFalse(type.isDefaultValue(null));
+        assertFalse(type.isDefaultValue(Double.MIN_VALUE));
+        assertFalse(type.isDefaultValue(Double.NaN));
+        // consistent with the wrapper's equals, which the contract names
+        assertEquals(type.defaultValue().equals(-0.0d), type.isDefaultValue(-0.0d));
+        assertTrue(0.0d == -0.0d);
     }
 
 }

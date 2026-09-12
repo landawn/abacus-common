@@ -222,12 +222,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new stream consisting of the elements that match the given predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#filter(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract FloatStream filter(final FloatPredicate predicate);
+    public abstract FloatStream filter(final FloatPredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the longest prefix of elements from this stream
@@ -243,7 +244,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * individually satisfy the predicate.<br>
      * There is no guarantee of encounter-order prefix semantics in parallel streams.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
+     * <p>Parallel-stream behavior of these related operations:</p>
      * <pre>
      * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
      * │     Method      │        Boundary         │                            Warning                             │
@@ -251,11 +252,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
      * │                 │ (predicate false)       │ individually satisfy the predicate                             │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * │ dropWhile (+    │ first unmatched         │ prefix boundary is preserved: only the leading run is          │
+     * │ onDrop)         │ (predicate false)       │ dropped (predicate checks are serialized). Downstream          │
+     * │                 │                         │ encounter order is unspecified                                 │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * │ skipUntil       │ first matched           │ prefix boundary is preserved: only the leading run is          │
+     * │                 │ (predicate true)        │ skipped (it is dropWhile(not predicate)). Downstream           │
+     * │                 │                         │ encounter order is unspecified                                 │
      * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
      * </pre>
      *
@@ -277,12 +280,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new stream consisting of elements from this stream until an element is encountered that doesn't match the predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#takeWhile(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract FloatStream takeWhile(final FloatPredicate predicate);
+    public abstract FloatStream takeWhile(final FloatPredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the remaining elements of this stream after
@@ -294,28 +298,25 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * returns {@code false}, effectively performing a "drop while condition is true"
      * operation that preserves encounter order in sequential streams.
      *
-     * <p><b>Notes on parallel streams:</b><br>
-     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
-     * the predicate returns {@code false}) may still be processed and dropped if they individually
-     * satisfy the predicate.<br>
-     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
-     * is no guarantee of encounter-order prefix/suffix semantics.
+     * <p><b>Notes on parallel streams:</b> The initial matching prefix is determined in the order this
+     * operation's <i>immediate upstream</i> hands it elements: the predicate checks are serialized under
+     * the source iterator's lock, so exactly the leading run of that arrival order is dropped. That is
+     * source encounter order only when no parallel stage precedes this one. An upstream parallel stage
+     * merges its workers' output in completion order, so the prefix dropped here can differ from the
+     * source-order prefix, and elements that follow the source-order boundary can be dropped with it.
+     * Once the predicate first returns {@code false}, that element and all later elements are retained
+     * without further predicate checks. Parallel downstream processing may reorder the retained elements.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
-     * <pre>
-     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
-     * │     Method      │        Boundary         │                            Warning                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
-     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
-     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
-     * </pre>
+     * <p>Parallel-stream behavior of these related operations:</p>
+     * <ul>
+     *   <li>{@code takeWhile}: elements after the first predicate failure may still be included
+     *       if they individually satisfy the predicate.</li>
+     *   <li>{@code dropWhile}, including the {@code onDrop} overload: drops only the initial
+     *       matching prefix; the first nonmatching element and all later elements are retained.</li>
+     *   <li>{@code skipUntil}: skips only the initial nonmatching prefix; the first matching
+     *       element and all later elements are retained.</li>
+     * </ul>
+     * <p>Parallel processing does not guarantee the encounter order of the retained elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -336,12 +337,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#dropWhile(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract FloatStream dropWhile(final FloatPredicate predicate);
+    public abstract FloatStream dropWhile(final FloatPredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a FloatStream consisting of the results of applying the given function to the elements of this stream.
@@ -370,11 +372,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to float
      * @return a new FloatStream consisting of the results of applying the mapper function to each element
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see Stream#map(Function)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream map(FloatUnaryOperator mapper);
+    public abstract FloatStream map(FloatUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an IntStream consisting of the results of applying the given
@@ -409,12 +412,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to int
      * @return a new IntStream consisting of the results of applying the mapper function to each element
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(FloatUnaryOperator)
      * @see #mapToObj(FloatFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream mapToInt(FloatToIntFunction mapper);
+    public abstract IntStream mapToInt(FloatToIntFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a LongStream consisting of the results of applying the given
@@ -444,12 +448,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to long
      * @return a new LongStream consisting of the results of applying the mapper function to each element
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(FloatUnaryOperator)
      * @see #mapToDouble(FloatToDoubleFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream mapToLong(FloatToLongFunction mapper);
+    public abstract LongStream mapToLong(FloatToLongFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a DoubleStream consisting of the results of applying the given
@@ -479,12 +484,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to double
      * @return a new DoubleStream consisting of the results of applying the mapper function to each element
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(FloatUnaryOperator)
      * @see #mapToLong(FloatToLongFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream mapToDouble(FloatToDoubleFunction mapper);
+    public abstract DoubleStream mapToDouble(FloatToDoubleFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an object-valued Stream consisting of the results of applying the
@@ -515,12 +521,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to T
      * @return a new Stream of objects resulting from applying the mapper function to each element
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(FloatUnaryOperator)
      * @see #mapToInt(FloatToIntFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> mapToObj(FloatFunction<? extends T> mapper);
+    public abstract <T> Stream<T> mapToObj(FloatFunction<? extends T> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of replacing each element of
@@ -549,11 +556,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to FloatStream
      * @return a new {@link FloatStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see Stream#flatMap(Function)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream flatMap(FloatFunction<? extends FloatStream> mapper);
+    public abstract FloatStream flatMap(FloatFunction<? extends FloatStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of replacing each element of this stream with the contents
@@ -597,6 +605,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to {@code Collection<Float>}
      * @return a new {@code FloatStream} consisting of the flattened contents of the collections produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(FloatFunction)
      * @see #flatMapArray(FloatFunction)
      * @see Stream#flatmap(java.util.function.Function)
@@ -604,7 +613,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     // @ai-ignore flatmap/flatMap naming - intentional: flatMap maps to FloatStream, flatmap maps to Collection<Float>, flatMapArray maps to float[]. Do not suggest renaming.
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream flatmap(FloatFunction<? extends Collection<Float>> mapper); //NOSONAR
+    public abstract FloatStream flatmap(FloatFunction<? extends Collection<Float>> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns a stream consisting of the results of replacing each element of this stream with the contents
@@ -633,6 +642,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to float[]
      * @return a new {@code FloatStream} consisting of the flattened contents of the arrays produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(FloatFunction)
      * @see #flatMapToInt(FloatFunction)
      * @see #flatMapToObj(FloatFunction)
@@ -640,7 +650,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     // @ai-ignore flatMapArray/flatMap naming - intentional: flatMap maps to FloatStream, flatMapArray maps to float[]. Do not suggest renaming.
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream flatMapArray(FloatFunction<float[]> mapper); //NOSONAR
+    public abstract FloatStream flatMapArray(FloatFunction<float[]> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns an IntStream consisting of the results of replacing each element of
@@ -669,10 +679,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to IntStream
      * @return a new {@link IntStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream flatMapToInt(FloatFunction<? extends IntStream> mapper);
+    public abstract IntStream flatMapToInt(FloatFunction<? extends IntStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a LongStream consisting of the results of replacing each element of
@@ -701,10 +712,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to LongStream
      * @return a new {@link LongStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream flatMapToLong(FloatFunction<? extends LongStream> mapper);
+    public abstract LongStream flatMapToLong(FloatFunction<? extends LongStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a DoubleStream consisting of the results of replacing each element of
@@ -733,10 +745,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to DoubleStream
      * @return a new {@link DoubleStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream flatMapToDouble(FloatFunction<? extends DoubleStream> mapper);
+    public abstract DoubleStream flatMapToDouble(FloatFunction<? extends DoubleStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of
@@ -766,10 +779,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to Stream
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatMapToObj(FloatFunction<? extends Stream<? extends T>> mapper); //NOSONAR
+    public abstract <T> Stream<T> flatMapToObj(FloatFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of
@@ -797,10 +811,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to Collection
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the collections produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatmapToObj(FloatFunction<? extends Collection<? extends T>> mapper); //NOSONAR
+    public abstract <T> Stream<T> flatmapToObj(FloatFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of
@@ -828,11 +843,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a non-interfering, stateless function that transforms each element from float to T[]
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the arrays produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatMapArrayToObj(FloatFunction<T[]> mapper);
+    public abstract <T> Stream<T> flatMapArrayToObj(FloatFunction<T[]> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given mapper function to the elements of this stream, where the mapper function returns an OptionalFloat.
@@ -856,11 +872,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a function to apply to each element which produces an OptionalFloat
      * @return a new FloatStream with the non-empty mapped elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream mapPartial(FloatFunction<OptionalFloat> mapper);
+    public abstract FloatStream mapPartial(FloatFunction<OptionalFloat> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given mapper function to the first and last element of the ranges in this stream,
@@ -885,17 +902,23 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
      *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output element
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code sameRange}, {@code mapper} is {@code null}
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract FloatStream rangeMap(final FloatBiPredicate sameRange, final FloatBinaryOperator mapper);
+    public abstract FloatStream rangeMap(final FloatBiPredicate sameRange, final FloatBinaryOperator mapper)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given mapper function to the first and last element of the ranges in this stream,
@@ -923,6 +946,10 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param <T> the element type of the new stream
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
@@ -930,11 +957,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapper a function that maps a range (defined by its first and last element) to an output object of type T
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code sameRange}, {@code mapper} is {@code null}
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract <T> Stream<T> rangeMapToObj(final FloatBiPredicate sameRange, final FloatBiFunction<? extends T> mapper);
+    public abstract <T> Stream<T> rangeMapToObj(final FloatBiPredicate sameRange, final FloatBiFunction<? extends T> mapper)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream into groups based on a predicate.
@@ -956,17 +985,22 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *     // returns Stream of [[1.0, 1.0], [2.0, 2.0, 2.0], [3.0]]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers each consecutive group in a list before emitting it.
+     *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
      * @return a stream of lists, each containing a sequence of consecutive elements that are collapsible with each other
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code collapsible} is {@code null}
      * @see Stream#collapse(BiPredicate)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<FloatList> collapse(final FloatBiPredicate collapsible);
+    public abstract Stream<FloatList> collapse(final FloatBiPredicate collapsible) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream by applying a merge function when elements are collapsible.
@@ -990,16 +1024,22 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
      * @param mergeFunction a function to merge two collapsible elements into one
      * @return a stream of merged elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code collapsible}, {@code mergeFunction} is {@code null}
      * @see Stream#collapse(BiPredicate, BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract FloatStream collapse(final FloatBiPredicate collapsible, final FloatBinaryOperator mergeFunction);
+    public abstract FloatStream collapse(final FloatBiPredicate collapsible, final FloatBinaryOperator mergeFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream by applying a merge function when elements are collapsible.
@@ -1024,16 +1064,22 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param collapsible a predicate that determines if the next element from this stream should be collapsed with the first and last elements of current group
      *          The collapsible predicate takes three elements: the first and last elements of current group, and the next element to check.
      * @param mergeFunction a function to merge two collapsible elements into one
      * @return a stream of merged elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code collapsible}, {@code mergeFunction} is {@code null}
      * @see Stream#collapse(com.landawn.abacus.util.function.TriPredicate, BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract FloatStream collapse(final FloatTriPredicate collapsible, final FloatBinaryOperator mergeFunction);
+    public abstract FloatStream collapse(final FloatTriPredicate collapsible, final FloatBinaryOperator mergeFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -1063,14 +1109,17 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>The first successfully read source element initializes the result without invoking the accumulator.</p>
+     *
      * @param accumulator a {@code FloatBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code FloatStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract FloatStream scan(final FloatBinaryOperator accumulator);
+    public abstract FloatStream scan(final FloatBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -1104,11 +1153,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param accumulator a {@code FloatBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code FloatStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(Object, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract FloatStream scan(final float init, final FloatBinaryOperator accumulator);
+    public abstract FloatStream scan(final float init, final FloatBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -1140,11 +1190,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param accumulator a {@code FloatBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code FloatStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(Object, boolean, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract FloatStream scan(final float init, final boolean initIncluded, final FloatBinaryOperator accumulator);
+    public abstract FloatStream scan(final float init, final boolean initIncluded, final FloatBinaryOperator accumulator)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the specified elements followed by the elements of this stream.
@@ -1170,7 +1222,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract FloatStream prepend(final float... a);
+    public abstract FloatStream prepend(final float... a) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of the elements of this stream with the specified elements appended.
@@ -1196,7 +1248,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract FloatStream append(final float... a);
+    public abstract FloatStream append(final float... a) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of this stream's elements when it is non-empty, or the specified elements when it is empty.
@@ -1227,7 +1279,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract FloatStream appendIfEmpty(final float... a);
+    public abstract FloatStream appendIfEmpty(final float... a) throws IllegalStateException;
 
     /**
      * Returns a FloatStream consisting of the top n elements of this stream, according to the natural order of the elements.
@@ -1262,7 +1314,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract FloatStream top(int n);
+    public abstract FloatStream top(int n) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a FloatStream consisting of the top n elements of this stream compared by the provided Comparator.
@@ -1298,7 +1350,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract FloatStream top(final int n, Comparator<? super Float> comparator);
+    public abstract FloatStream top(final int n, Comparator<? super Float> comparator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a FloatList containing all the elements of this stream.
@@ -1322,7 +1374,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract FloatList toFloatList();
+    public abstract FloatList toFloatList() throws IllegalStateException;
 
     /**
      * Returns a Map where keys are generated by the keyMapper function and values are generated by the valueMapper function.
@@ -1352,6 +1404,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param valueMapper a function to produce values for the map
      * @return a Map containing the mapped key-value pairs
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper} is {@code null}
      * @throws E if the keyMapper throws an exception
      * @throws E2 if the valueMapper throws an exception
      * @see Collectors#toMap(Function, Function)
@@ -1359,7 +1412,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Throwables.FloatFunction<? extends K, E> keyMapper,
-            Throwables.FloatFunction<? extends V, E2> valueMapper) throws E, E2;
+            Throwables.FloatFunction<? extends V, E2> valueMapper) throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a Map where keys are generated by the keyMapper function and values are generated by the valueMapper function, using the provided map factory.
@@ -1371,11 +1424,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LinkedHashMap<Integer, String> orderedMap = FloatStream.of(3.5f, 1.2f, 2.8f)
-     *     .toMap(f -> (int)f, f -> String.valueOf(f), LinkedHashMap::new);
+     *     .toMap(f -> (int)f, f -> String.valueOf(f), () -> new LinkedHashMap<Integer, String>());
      *     // returns LinkedHashMap preserving insertion order: {3="3.5", 1="1.2", 2="2.8"}
      *
      * TreeMap<Integer, Double> sortedMap = FloatStream.of(5.5f, 2.2f, 8.8f)
-     *     .toMap(f -> (int)f, f -> (double)f, TreeMap::new);
+     *     .toMap(f -> (int)f, f -> (double)f, Suppliers.ofTreeMap());
      *     // returns TreeMap with sorted keys: {2=2.2, 5=5.5, 8=8.8}
      * }</pre>
      *
@@ -1391,6 +1444,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapFactory a supplier providing a new Map into which the results will be inserted
      * @return a Map containing the mapped key-value pairs
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is {@code null}
      * @throws E if the keyMapper throws an exception
      * @throws E2 if the valueMapper throws an exception
      * @see Collectors#toMap(Function, Function, Supplier)
@@ -1398,7 +1452,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.FloatFunction<? extends K, E> keyMapper,
-            Throwables.FloatFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory) throws E, E2;
+            Throwables.FloatFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a Map where keys are generated by the keyMapper function and values are generated by the valueMapper function, with a merge function to handle duplicate keys.
@@ -1427,6 +1482,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mergeFunction a function to resolve collisions between values associated with the same key
      * @return a Map containing the mapped key-value pairs
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction} is {@code null}
      * @throws E if the keyMapper throws an exception
      * @throws E2 if the valueMapper throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator)
@@ -1434,7 +1490,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Throwables.FloatFunction<? extends K, E> keyMapper,
-            Throwables.FloatFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction) throws E, E2;
+            Throwables.FloatFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a Map where keys are generated by the keyMapper function and values are generated by the valueMapper function, with a merge function to handle duplicate keys, using the provided map factory.
@@ -1443,12 +1500,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <pre>{@code
      * // Sum values for duplicate keys in a TreeMap
      * TreeMap<Integer, Integer> sortedSummed = FloatStream.of(3.5f, 1.7f, 2.3f, 3.8f, 1.2f)
-     *     .toMap(f -> (int)f, f -> (int)(f * 10), Integer::sum, TreeMap::new);
+     *     .toMap(f -> (int)f, f -> (int)(f * 10), Integer::sum, Suppliers.ofTreeMap());
      *     // returns TreeMap {1=29, 2=23, 3=73}
      *
      * // Keep first occurrence for duplicate keys in LinkedHashMap
      * LinkedHashMap<Integer, Float> firstValues = FloatStream.of(1.5f, 2.3f, 1.9f, 2.1f)
-     *     .toMap(f -> (int)f, f -> f, (v1, v2) -> v1, LinkedHashMap::new);
+     *     .toMap(f -> (int)f, f -> f, (v1, v2) -> v1, () -> new LinkedHashMap<Integer, Float>());
      *     // returns LinkedHashMap {1=1.5f, 2=2.3f}
      * }</pre>
      *
@@ -1465,6 +1522,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapFactory a supplier providing a new Map into which the results will be inserted
      * @return a Map containing the mapped key-value pairs
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, {@code mapFactory} is {@code null}
      * @throws E if the keyMapper throws an exception
      * @throws E2 if the valueMapper throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -1472,7 +1530,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.FloatFunction<? extends K, E> keyMapper,
-            Throwables.FloatFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory) throws E, E2;
+            Throwables.FloatFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Groups the elements of this stream by a classifier function and collects them using the specified downstream collector.
@@ -1491,7 +1550,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *     // returns {"low"=[0.5, 1.5], "mid"=[2.5, 3.5], "high"=[4.5]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported};
+     * maintains a downstream accumulation result for each key; additional buffering depends on the collector.
      *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
@@ -1500,13 +1560,14 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param downstream a Collector implementing the downstream reduction
      * @return a Map containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code downstream} is {@code null}
      * @throws E if the keyMapper throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, E extends Exception> Map<K, D> groupTo(Throwables.FloatFunction<? extends K, E> keyMapper,
-            final Collector<? super Float, ?, D> downstream) throws E;
+            final Collector<? super Float, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Groups the elements of this stream by a classifier function and collects them using the specified downstream collector and map factory.
@@ -1517,18 +1578,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * TreeMap<Integer, Double> sortedSums = FloatStream.of(1.2f, 2.8f, 1.7f, 2.3f)
      *     .groupTo(f -> (int)f,
      *              Collectors.summingDouble(Float::doubleValue),
-     *              TreeMap::new);
+     *              Suppliers.ofTreeMap());
      *     // returns TreeMap {1=2.9, 2=5.1}
      *
      * // Group into LinkedHashMap preserving encounter order
      * LinkedHashMap<String, Set<Float>> orderedGroups = FloatStream.of(1.1f, 2.2f, 1.5f, 2.8f)
      *     .groupTo(f -> f < 2 ? "small" : "large",
      *              Collectors.mapping(Float::valueOf, Collectors.toSet()),
-     *              LinkedHashMap::new);
+     *              () -> new LinkedHashMap<String, Set<Float>>());
      *     // returns LinkedHashMap {"small"=[1.1, 1.5], "large"=[2.2, 2.8]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported};
+     * maintains a downstream accumulation result for each key; additional buffering depends on the collector.
      *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
@@ -1539,13 +1601,14 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param mapFactory a supplier providing a new Map into which the results will be inserted
      * @return a Map containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}
      * @throws E if the keyMapper throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, M extends Map<K, D>, E extends Exception> M groupTo(Throwables.FloatFunction<? extends K, E> keyMapper,
-            final Collector<? super Float, ?, D> downstream, final Supplier<? extends M> mapFactory) throws E;
+            final Collector<? super Float, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Performs a reduction on the elements of this stream, using the provided identity value and
@@ -1581,11 +1644,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param accumulator the function for combining the current accumulated value and the current stream element
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#reduce(Object, BinaryOperator)
      */
     @ParallelSupported
     @TerminalOp
-    public abstract float reduce(float identity, FloatBinaryOperator accumulator);
+    public abstract float reduce(float identity, FloatBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a reduction on the elements of this stream, using the provided accumulator function, and returns the reduced value.
@@ -1611,11 +1675,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param accumulator the function for combining the current reduced value and the current stream element
      * @return an OptionalFloat describing the result of the reduction. If the stream is empty, an empty {@code OptionalFloat} is returned.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#reduce(BinaryOperator)
      */
     @ParallelSupported
     @TerminalOp
-    public abstract OptionalFloat reduce(FloatBinaryOperator accumulator);
+    public abstract OptionalFloat reduce(FloatBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream using a supplier, accumulator, and combiner.
@@ -1643,13 +1708,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *                It is unnecessary to specify {@code combiner} if {@code R} is a {@code Map/Collection/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code combiner} is {@code null}
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see BiConsumers#ofAddAll()
      * @see BiConsumers#ofPutAll()
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <R> R collect(Supplier<R> supplier, ObjFloatConsumer<? super R> accumulator, BiConsumer<R, R> combiner);
+    public abstract <R> R collect(Supplier<R> supplier, ObjFloatConsumer<? super R> accumulator, BiConsumer<R, R> combiner)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream using a supplier and accumulator.
@@ -1677,6 +1744,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a result.
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator} is {@code null}
      * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of: {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
      *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
      * @see #collect(Supplier, ObjFloatConsumer, BiConsumer)
@@ -1685,7 +1753,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <R> R collect(Supplier<R> supplier, ObjFloatConsumer<? super R> accumulator);
+    public abstract <R> R collect(Supplier<R> supplier, ObjFloatConsumer<? super R> accumulator)
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Performs an action for each element of this stream.
@@ -1714,11 +1783,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param <E> the type of exception that the action may throw
      * @param action a non-interfering action to perform on the elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEach(final Throwables.FloatConsumer<E> action) throws E;
+    public abstract <E extends Exception> void forEach(final Throwables.FloatConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Performs an action for each element of this stream, passing the element's index as well.
@@ -1744,12 +1814,16 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param <E> the type of exception that the action may throw
      * @param action a non-interfering action to perform on the elements, taking both index and value
+     *        &#9888;&#65039; On a parallel stream that index is an invocation counter shared by the
+     *        workers, not the element's position; only sequential execution pairs an element with its
+     *        true index. It is an {@code int} and wraps past {@code Integer.MAX_VALUE}.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEachIndexed(Throwables.IntFloatConsumer<E> action) throws E;
+    public abstract <E extends Exception> void forEachIndexed(Throwables.IntFloatConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether any elements of this stream match the provided predicate.
@@ -1780,11 +1854,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return {@code true} if any elements of the stream match the provided predicate,
      *         otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean anyMatch(final Throwables.FloatPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean anyMatch(final Throwables.FloatPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether all elements of this stream match the provided predicate.
@@ -1816,11 +1892,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return {@code true} if either all elements of the stream match the provided predicate or
      *         the stream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean allMatch(final Throwables.FloatPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean allMatch(final Throwables.FloatPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether no elements of this stream match the provided predicate.
@@ -1852,19 +1930,23 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return {@code true} if either no elements of the stream match the provided predicate or
      *         the stream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean noneMatch(final Throwables.FloatPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean noneMatch(final Throwables.FloatPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns the first element of this stream wrapped in an {@code OptionalFloat}, or an empty
      * {@code OptionalFloat} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is a deterministic alias of {@link #first()}: it always returns the first element
-     * in encounter order, even for parallel streams. The {@code findFirst} name is kept to align with
+     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it
+     * deterministically returns the first element in encounter order. In a <b>parallel</b> stream the
+     * first element to reach the terminal operation wins, so the result is <b>not</b> guaranteed to be
+     * first in encounter order and may differ between runs. The {@code findFirst} name is kept to align with
      * the standard {@link java.util.stream.Stream#findFirst()} API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1885,7 +1967,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @ParallelSupported
     @TerminalOp
-    public OptionalFloat findFirst() {
+    public OptionalFloat findFirst() throws IllegalStateException {
         assertNotClosed();
 
         return first();
@@ -1896,10 +1978,10 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * {@code OptionalFloat} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>Despite the name, this method is deterministic: unlike {@link java.util.stream.Stream#findAny()}, which may return
-     * an arbitrary element (especially for parallel streams), this method is an alias of
-     * {@link #first()} and always returns the first element in encounter order, even for parallel
-     * streams. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
+     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it returns the first element in encounter order.
+     * In a <b>parallel</b> stream, exactly as for {@code findFirst}, the first element to reach the
+     * terminal operation wins, so the result is <b>not</b> guaranteed to be first in encounter
+     * order and may differ between runs. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1919,7 +2001,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @ParallelSupported
     @TerminalOp
-    public OptionalFloat findAny() {
+    public OptionalFloat findAny() throws IllegalStateException {
         assertNotClosed();
 
         return first();
@@ -1948,6 +2030,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalFloat} containing the first element that matches the predicate, or an empty {@code OptionalFloat} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findAny(Throwables.FloatPredicate)
      * @see #findLast(Throwables.FloatPredicate)
@@ -1955,7 +2038,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalFloat findFirst(final Throwables.FloatPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalFloat findFirst(final Throwables.FloatPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns any element of this stream that matches the given {@code predicate}, wrapped in an
@@ -1966,7 +2050,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * streams there is no ordering guarantee: the matching element found first by any worker thread is
      * returned, so the result may differ between runs — which is what can make it faster than
      * {@link #findFirst(Throwables.FloatPredicate)} in parallel. (Note the contrast with the no-arg {@link #findAny()},
-     * which is a deterministic alias of {@link #first()}.)</p>
+     * which is an alias of {@link #first()}.)</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1982,6 +2066,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalFloat} containing a matching element, or an empty {@code OptionalFloat} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.FloatPredicate)
      * @see #findLast(Throwables.FloatPredicate)
@@ -1989,17 +2074,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalFloat findAny(final Throwables.FloatPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalFloat findAny(final Throwables.FloatPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns the last element of this stream that matches the given {@code predicate}, wrapped in an
      * {@code OptionalFloat}, or an empty {@code OptionalFloat} if no element matches. This is a terminal
      * operation, and the stream is then closed.
      *
-     * <p>Unlike {@link #findFirst(Throwables.FloatPredicate)}, this operation cannot short-circuit: every element
-     * must be tested, because a later element is always a better candidate. The result is deterministic
-     * even for parallel streams: when several elements match, the one at the largest encounter-order
-     * index wins.</p>
+     * <p>Finding the last match generally requires traversing the source. Array-backed streams may
+     * instead search backwards and stop at the first matching element. When several elements match,
+     * the one at the largest encounter-order index in the current pipeline wins. Parallel
+     * intermediate operations may already have reordered the original source.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2015,6 +2101,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalFloat} containing the last element that matches the predicate, or an empty {@code OptionalFloat} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.FloatPredicate)
      * @see #findAny(Throwables.FloatPredicate)
@@ -2023,7 +2110,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     @Beta
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalFloat findLast(final Throwables.FloatPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalFloat findLast(final Throwables.FloatPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns an OptionalFloat describing the minimum element of this stream, or an empty {@code OptionalFloat} if the stream is empty.
@@ -2055,7 +2143,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalFloat min();
+    public abstract OptionalFloat min() throws IllegalStateException;
 
     /**
      * Returns an OptionalFloat describing the maximum element of this stream, or an empty {@code OptionalFloat} if the stream is empty.
@@ -2087,7 +2175,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalFloat max();
+    public abstract OptionalFloat max() throws IllegalStateException;
 
     /**
      * Returns the <i>k-th</i> largest element in the stream, using natural ordering consistent
@@ -2119,7 +2207,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalFloat kthLargest(int k);
+    public abstract OptionalFloat kthLargest(int k) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns the sum of all elements in this stream as a double. This is a terminal operation.
@@ -2160,7 +2248,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract double sum();
+    public abstract double sum() throws IllegalStateException;
 
     /**
      * Returns an OptionalDouble describing the arithmetic mean of elements of this stream,
@@ -2198,7 +2286,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalDouble average();
+    public abstract OptionalDouble average() throws IllegalStateException;
 
     /**
      * Returns statistics about the elements of this stream.
@@ -2221,7 +2309,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract FloatSummaryStatistics summaryStatistics();
+    public abstract FloatSummaryStatistics summaryStatistics() throws IllegalStateException;
 
     /**
      * Returns a pair consisting of FloatSummaryStatistics for the elements of this stream,
@@ -2255,7 +2343,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract Pair<FloatSummaryStatistics, Optional<Map<Percentage, Float>>> summaryStatisticsAndPercentiles();
+    public abstract Pair<FloatSummaryStatistics, Optional<Map<Percentage, Float>>> summaryStatisticsAndPercentiles() throws IllegalStateException;
 
     /**
      * Merges this stream with another FloatStream based on the provided selector function.
@@ -2282,10 +2370,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a new FloatStream containing the merged elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract FloatStream mergeWith(final FloatStream b, final FloatBiFunction<MergeResult> nextSelector);
+    public abstract FloatStream mergeWith(final FloatStream b, final FloatBiFunction<MergeResult> nextSelector)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with the given stream using the provided zip function.
@@ -2309,11 +2399,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param zipFunction a FloatBinaryOperator that determines the combination of elements in the combined FloatStream.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      * @see #zipWith(FloatStream, float, float, FloatBinaryOperator)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream zipWith(FloatStream b, FloatBinaryOperator zipFunction);
+    public abstract FloatStream zipWith(FloatStream b, FloatBinaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with two other streams using the provided zip function.
@@ -2337,11 +2428,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param zipFunction a FloatTernaryOperator that determines the combination of elements in the combined FloatStream.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStreams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      * @see #zipWith(FloatStream, FloatStream, float, float, float, FloatTernaryOperator)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream zipWith(FloatStream b, FloatStream c, FloatTernaryOperator zipFunction);
+    public abstract FloatStream zipWith(FloatStream b, FloatStream c, FloatTernaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with the given stream using the provided zip function, with default values for missing elements.
@@ -2365,10 +2457,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param zipFunction a FloatBinaryOperator that determines the combination of elements in the combined FloatStream.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream zipWith(FloatStream b, float valueForNoneA, float valueForNoneB, FloatBinaryOperator zipFunction);
+    public abstract FloatStream zipWith(FloatStream b, float valueForNoneA, float valueForNoneB, FloatBinaryOperator zipFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with two other streams using the provided zip function, with default values for missing elements.
@@ -2396,11 +2490,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param zipFunction a FloatTernaryOperator that determines the combination of elements in the combined FloatStream.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStreams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
     public abstract FloatStream zipWith(FloatStream b, FloatStream c, float valueForNoneA, float valueForNoneB, float valueForNoneC,
-            FloatTernaryOperator zipFunction);
+            FloatTernaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Converts this FloatStream to a DoubleStream.
@@ -2410,7 +2505,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleStream doubleStream = FloatStream.of(1.1f, 2.2f, 3.3f)
-     *     .asDoubleStream();   // returns DoubleStream of [1.1, 2.2, 3.3] (as doubles)
+     *     .asDoubleStream();   // returns [1.100000023841858, 2.200000047683716, 3.299999952316284]:
+     *                          // widening exposes the float value exactly, it does not round to 1.1
      *
      * double sum = FloatStream.of(1f, 2f, 3f)
      *     .asDoubleStream()
@@ -2428,7 +2524,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream asDoubleStream();
+    public abstract DoubleStream asDoubleStream() throws IllegalStateException;
 
     /**
      * Returns a Stream consisting of the elements of this stream, each boxed to a Float.
@@ -2456,9 +2552,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<Float> boxed();
+    public abstract Stream<Float> boxed() throws IllegalStateException;
 
-    abstract FloatIteratorEx iteratorEx();
+    /**
+     * @throws IllegalStateException if the stream is already closed.
+     */
+    abstract FloatIteratorEx iteratorEx() throws IllegalStateException;
 
     // private static final FloatStream EMPTY_STREAM = new ArrayFloatStream(N.EMPTY_FLOAT_ARRAY, true, null);
 
@@ -2595,7 +2694,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *         the array length, or {@code fromIndex} is greater than {@code toIndex}
      */
-    public static FloatStream of(final float[] a, final int fromIndex, final int toIndex) {
+    public static FloatStream of(final float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return isEmptyRange(N.len(a), fromIndex, toIndex) ? empty() : new ArrayFloatStream(a, fromIndex, toIndex);
     }
 
@@ -2609,7 +2708,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * // Note: null values are unboxed to 0f
      *
      * Float[] numbers = {10.5f, 20.3f, 30.8f};
-     * double sum = FloatStream.of(numbers).sum();   // returns 61.6
+     * double sum = FloatStream.of(numbers).sum();   // returns 61.599998474121094, not exactly 61.6
      * }</pre>
      *
      * @param a the Float array to create a stream from
@@ -2638,7 +2737,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return a FloatStream containing the specified range of unboxed elements
      * @throws IndexOutOfBoundsException if the indices are out of range
      */
-    public static FloatStream of(final Float[] a, final int fromIndex, final int toIndex) {
+    public static FloatStream of(final Float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return Stream.of(a, fromIndex, toIndex).mapToFloat(FF.unbox());
     }
 
@@ -3005,6 +3104,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0) {
                     return;
@@ -3020,8 +3124,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
                 return ret;
             }
 
+            /**
+             * @throws IllegalStateException if the number of remaining elements exceeds {@link Integer#MAX_VALUE}.
+             */
             @Override
-            public float[] toArray() {
+            public float[] toArray() throws IllegalStateException {
                 if (cnt > Integer.MAX_VALUE) {
                     throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + cnt);
                 }
@@ -3223,15 +3330,28 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
             private boolean isFirst = true;
             private boolean hasMore = true;
             private boolean hasNextVal = false;
+            private float pending;
+            private boolean hasPending = false;
 
             @Override
             public boolean hasNext() {
                 if (!hasNextVal && hasMore) {
                     if (isFirst) {
-                        isFirst = false;
-                        hasNextVal = hasNext.test(cur = init);
+                        hasNextVal = hasNext.test(init);
+                        if (hasNextVal) {
+                            isFirst = false;
+                            cur = init;
+                        }
                     } else {
-                        hasNextVal = hasNext.test(cur = f.applyAsFloat(cur));
+                        if (!hasPending) {
+                            pending = f.applyAsFloat(cur);
+                            hasPending = true;
+                        }
+                        hasNextVal = hasNext.test(pending);
+                        hasPending = false;
+                        if (hasNextVal) {
+                            cur = pending;
+                        }
                     }
 
                     if (!hasNextVal) {
@@ -3372,6 +3492,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return a FloatStream containing all the floats from the input arrays
      * @see Stream#concat(Object[][])
      */
+    @SafeVarargs
     public static FloatStream concat(final float[]... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -3401,6 +3522,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return a FloatStream containing all the floats from the input FloatIterators in order
      * @see Stream#concat(Iterator[])
      */
+    @SafeVarargs
     public static FloatStream concat(final FloatIterator... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -3430,6 +3552,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return a FloatStream containing all the floats from the input FloatStreams in order
      * @see Stream#concat(Stream[])
      */
+    @SafeVarargs
     public static FloatStream concat(final FloatStream... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -3807,7 +3930,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     public static FloatStream zip(final FloatStream a, final FloatStream b, final FloatBinaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), zipFunction).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> zip(ia, ib, zipFunction).onClose(newCloseHandler(a, b)));
     }
 
     /**
@@ -3836,7 +3959,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
             throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), iterate(c), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
+        return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
+                (ia, ib, ic) -> zip(ia, ib, ic, zipFunction).onClose(newCloseHandler(Array.asList(a, b, c))));
     }
 
     /**
@@ -4106,7 +4230,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
             final FloatBinaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b),
+                (ia, ib) -> zip(ia, ib, valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b)));
     }
 
     /**
@@ -4139,8 +4264,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
             final float valueForNoneC, final FloatTernaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(Array.asList(a, b, c)));
+        return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
+                (ia, ib, ic) -> zip(ia, ib, ic, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction).onClose(newCloseHandler(Array.asList(a, b, c))));
     }
 
     /**
@@ -4313,46 +4438,29 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
 
             @Override
             public float nextFloat() {
-                if (hasNextA) {
-                    if (iterB.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = iterB.nextFloat())) == MergeResult.TAKE_FIRST) {
-                            hasNextA = false;
-                            hasNextB = true;
-                            return nextA;
-                        } else {
-                            return nextB;
-                        }
-                    } else {
+                if (!hasNextA && iterA.hasNext()) {
+                    nextA = iterA.nextFloat();
+                    hasNextA = true;
+                }
+                if (!hasNextB && iterB.hasNext()) {
+                    nextB = iterB.nextFloat();
+                    hasNextB = true;
+                }
+
+                if (hasNextA && hasNextB) {
+                    if (nextSelector.apply(nextA, nextB) == MergeResult.TAKE_FIRST) {
                         hasNextA = false;
                         return nextA;
-                    }
-                } else if (hasNextB) {
-                    if (iterA.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.nextFloat()), nextB) == MergeResult.TAKE_FIRST) {
-                            return nextA;
-                        } else {
-                            hasNextA = true;
-                            hasNextB = false;
-                            return nextB;
-                        }
                     } else {
                         hasNextB = false;
                         return nextB;
                     }
-                } else if (iterA.hasNext()) {
-                    if (iterB.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.nextFloat()), (nextB = iterB.nextFloat())) == MergeResult.TAKE_FIRST) {
-                            hasNextB = true;
-                            return nextA;
-                        } else {
-                            hasNextA = true;
-                            return nextB;
-                        }
-                    } else {
-                        return iterA.nextFloat();
-                    }
-                } else if (iterB.hasNext()) {
-                    return iterB.nextFloat();
+                } else if (hasNextA) {
+                    hasNextA = false;
+                    return nextA;
+                } else if (hasNextB) {
+                    hasNextB = false;
+                    return nextB;
                 } else {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4421,7 +4529,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
-        return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> merge(ia, ib, nextSelector).onClose(newCloseHandler(a, b)));
     }
 
     /**

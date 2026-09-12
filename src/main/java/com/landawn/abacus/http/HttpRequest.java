@@ -23,10 +23,12 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 
 import javax.net.ssl.SSLSocketFactory;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.exception.HttpResponseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.N;
@@ -39,11 +41,30 @@ import com.landawn.abacus.util.cs;
  * This class provides a builder-style interface for configuring HTTP requests with various options
  * such as headers, authentication, timeouts, and request bodies.
  *
- * <p>{@code HttpRequest} is designed for single-use scenarios. The static {@code url(...)} factories
- * create a new dedicated {@link HttpClient} that is automatically closed after the request completes;
- * the {@link #create(HttpClient)} factory instead reuses a caller-supplied client. For multiple
- * requests to the same endpoint, prefer reusing a long-lived {@link HttpClient} via
- * {@link #create(HttpClient)}.</p>
+ * <p>The static {@code url(...)} factories create a new dedicated {@link HttpClient} per request;
+ * {@link #create(HttpClient)} instead reuses a caller-supplied client. An {@code HttpClient} holds no
+ * pooled resources of its own (socket reuse is handled by the JDK's keep-alive cache), so a
+ * discarded one needs no cleanup. Reusing a long-lived client via {@link #create(HttpClient)} still
+ * avoids re-validating the URL on every request.</p>
+ *
+ * <p>A configured {@code HttpRequest} may be executed more than once; each execution re-sends the
+ * currently configured payload, headers and settings. A request built by a {@code url(...)} factory
+ * admits <b>one</b> in-flight execution at a time: a second {@code async*} execution started before
+ * the first has completed fails with a {@link java.util.concurrent.RejectedExecutionException}
+ * (delivered through its future). Use {@link #create(HttpClient)} with a client whose
+ * {@code maxConnection} allows it for concurrent executions.</p>
+ *
+ * <p><b>Payload routing:</b> {@link #query(Map)}/{@link #query(String)} append to the URL and are
+ * valid for methods that take no body; {@link #body(Object)} and the {@code *Body} helpers send a
+ * request body and are valid for POST, PUT, DELETE and OPTIONS. Mixing the two is rejected with an
+ * {@link IllegalStateException} at execution time rather than silently dropping the payload.</p>
+ *
+ * <p><b>Asynchronous execution:</b> the {@code async*} methods validate their own arguments
+ * synchronously ({@code null} method, executor or output) but perform every other check when the
+ * task runs, so an unsupported {@link HttpMethod#PATCH} ({@link UnsupportedOperationException}), a
+ * payload/method mismatch ({@link IllegalStateException}) and the in-flight limit
+ * ({@link java.util.concurrent.RejectedExecutionException}) are reported through the returned
+ * future rather than thrown to the caller.</p>
  *
  * <p><b>Thread Safety:</b> Instances of this class are <i>not</i> thread-safe. Build and execute
  * each request on a single thread.</p>
@@ -67,16 +88,19 @@ import com.landawn.abacus.util.cs;
  *     .asyncGet(String.class);
  * }</pre>
  *
+ * <p>Unlike {@link HttpClient#get()}, which returns the response body as a {@code String}, the
+ * no-argument accessors here ({@link #get()}, {@link #post()}, ...) return the full
+ * {@link HttpResponse}. Pass an explicit result class when you want a deserialized body.</p>
+ *
  * @see HttpClient
  * @see HttpResponse
+ * @see HttpResponseException
  * @see HttpHeaders
  * @see HttpSettings
  * @see URLEncodedUtil
  * @see com.landawn.abacus.http.v2.HttpRequest
  */
 public final class HttpRequest {
-
-    private static final String HTTP_METHOD_STR = "httpMethod";
 
     private enum RequestTarget {
         NONE, QUERY, BODY
@@ -90,18 +114,14 @@ public final class HttpRequest {
 
     private RequestTarget requestTarget = RequestTarget.NONE;
 
-    private boolean closeHttpClientAfterExecution = false;
-
     /**
-     * Constructs an {@code HttpRequest} bound to the given client.
-     * The client is <i>not</i> closed after execution unless
-     * {@link #closeHttpClientAfterExecution(boolean)} is set; this constructor is package-private,
-     * so use {@link #create(HttpClient)} or one of the {@code url(...)} factories.
+     * Constructs an {@code HttpRequest} bound to the given client. This constructor is
+     * package-private, so use {@link #create(HttpClient)} or one of the {@code url(...)} factories.
      *
      * @param httpClient the client used to execute this request; must not be {@code null}
      * @throws IllegalArgumentException if {@code httpClient} is {@code null}.
      */
-    HttpRequest(final HttpClient httpClient) {
+    HttpRequest(final HttpClient httpClient) throws IllegalArgumentException {
         this.httpClient = N.checkArgNotNull(httpClient, cs.httpClient);
     }
 
@@ -120,13 +140,17 @@ public final class HttpRequest {
      * @return a new HttpRequest instance
      * @throws IllegalArgumentException if {@code httpClient} is {@code null}.
      */
-    public static HttpRequest create(final HttpClient httpClient) {
+    public static HttpRequest create(final HttpClient httpClient) throws IllegalArgumentException {
         return new HttpRequest(httpClient);
     }
 
     /**
      * Creates an HttpRequest for the specified URL with default connection and read timeouts.
-     * A new HttpClient will be created internally and closed after the request execution.
+     * A new HttpClient is created internally for this request; it owns no pooled resources, so
+     * nothing has to be released afterwards. That client admits <b>one</b> in-flight execution at a
+     * time: a second concurrent {@code async*} execution of the same request fails with a
+     * {@link java.util.concurrent.RejectedExecutionException} delivered through its future. For
+     * concurrent executions use {@link #create(HttpClient)} with a client sized accordingly.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -138,13 +162,17 @@ public final class HttpRequest {
      * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or its scheme is not {@code http} or
      *         {@code https}.
      */
-    public static HttpRequest url(final String url) {
+    public static HttpRequest url(final String url) throws IllegalArgumentException {
         return url(url, HttpClient.DEFAULT_CONNECTION_TIMEOUT, HttpClient.DEFAULT_READ_TIMEOUT);
     }
 
     /**
      * Creates an HttpRequest for the specified URL with custom timeouts.
-     * A new HttpClient will be created internally and closed after the request execution.
+     * A new HttpClient is created internally for this request; it owns no pooled resources, so
+     * nothing has to be released afterwards. That client admits <b>one</b> in-flight execution at a
+     * time: a second concurrent {@code async*} execution of the same request fails with a
+     * {@link java.util.concurrent.RejectedExecutionException} delivered through its future. For
+     * concurrent executions use {@link #create(HttpClient)} with a client sized accordingly.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -158,13 +186,17 @@ public final class HttpRequest {
      * @throws IllegalArgumentException if {@code url} is {@code null} or empty, its scheme is not {@code http} or
      *         {@code https}, or either timeout is negative.
      */
-    public static HttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
-        return new HttpRequest(HttpClient.create(url, 1, connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
+    public static HttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
+        return new HttpRequest(HttpClient.create(url, 1, connectTimeoutInMillis, readTimeoutInMillis));
     }
 
     /**
      * Creates an HttpRequest for the specified URL with default connection and read timeouts.
-     * A new HttpClient will be created internally and closed after the request execution.
+     * A new HttpClient is created internally for this request; it owns no pooled resources, so
+     * nothing has to be released afterwards. That client admits <b>one</b> in-flight execution at a
+     * time: a second concurrent {@code async*} execution of the same request fails with a
+     * {@link java.util.concurrent.RejectedExecutionException} delivered through its future. For
+     * concurrent executions use {@link #create(HttpClient)} with a client sized accordingly.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -178,13 +210,17 @@ public final class HttpRequest {
      * @throws IllegalArgumentException if {@code url} is {@code null}, or its scheme is not {@code http} or
      *         {@code https}.
      */
-    public static HttpRequest url(final URL url) {
+    public static HttpRequest url(final URL url) throws IllegalArgumentException {
         return url(url, HttpClient.DEFAULT_CONNECTION_TIMEOUT, HttpClient.DEFAULT_READ_TIMEOUT);
     }
 
     /**
      * Creates an HttpRequest for the specified URL with custom timeouts.
-     * A new HttpClient will be created internally and closed after the request execution.
+     * A new HttpClient is created internally for this request; it owns no pooled resources, so
+     * nothing has to be released afterwards. That client admits <b>one</b> in-flight execution at a
+     * time: a second concurrent {@code async*} execution of the same request fails with a
+     * {@link java.util.concurrent.RejectedExecutionException} delivered through its future. For
+     * concurrent executions use {@link #create(HttpClient)} with a client sized accordingly.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -200,30 +236,23 @@ public final class HttpRequest {
      * @throws IllegalArgumentException if {@code url} is {@code null}, its scheme is not {@code http} or
      *         {@code https}, or either timeout is negative.
      */
-    public static HttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
-        return new HttpRequest(HttpClient.create(url, 1, connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
+    public static HttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
+        return new HttpRequest(HttpClient.create(url, 1, connectTimeoutInMillis, readTimeoutInMillis));
     }
 
     /**
-     * Sets whether the underlying {@link HttpClient} is closed once this request has been executed.
-     * The {@code url(...)} factories enable this because they create a dedicated client;
-     * {@link #create(HttpClient)} leaves it disabled so a caller-supplied client stays usable.
+     * Replaces this request's scalar settings with those of {@code httpSettings} and merges its
+     * headers in.
      *
-     * @param shouldClose {@code true} to close the client after execution
-     * @return This HttpRequest instance for method chaining
-     */
-    HttpRequest closeHttpClientAfterExecution(final boolean shouldClose) {
-        closeHttpClientAfterExecution = shouldClose;
-
-        return this;
-    }
-
-    /**
-     * Merges the provided HTTP settings with existing settings on this request.
-     * This method allows you to apply pre-configured settings to a request. All scalar settings
-     * (timeouts, SSL factory, proxy, flags, content format) are overwritten with the provided
-     * settings' current values — including their defaults — while headers are merged, with
-     * same-named provided headers replacing existing ones.
+     * <p>Timeouts, SSL factory, proxy, content format and the connection flags are <b>overwritten</b>
+     * with the provided settings' current state, so anything configured earlier on this request —
+     * a {@link #connectTimeout(long)} set before this call, for example — is discarded. Headers are
+     * merged, with same-named provided headers replacing existing ones. Connection flags the
+     * provided settings never set stay unset, so they keep falling back to the client-level
+     * defaults. The content format is copied exactly as it was configured on the provided settings:
+     * a format that is merely <i>derived</i> from their {@code Content-Type} header is not frozen
+     * into this request, so a later {@link #formBody(Object)} or {@code Content-Type} header change
+     * still selects the serializer. The provided settings are not modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -235,7 +264,7 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param httpSettings The HTTP settings to merge. If {@code null}, this method has no effect.
+     * @param httpSettings The HTTP settings to apply. If {@code null}, this method has no effect.
      * @return This HttpRequest instance for method chaining
      * @see HttpSettings
      */
@@ -248,17 +277,28 @@ public final class HttpRequest {
             // HttpHeaders instance into this request (later per-request headers such as basicAuth
             // credentials leaked back into the shared settings object) and injected null-valued
             // Content-Type/Content-Encoding header entries via the synthetic bean properties.
+            // The RAW format is copied (as copy() does), not getContentFormat(): that accessor derives
+            // JSON from a template's Content-Type header, and freezing the derived value into this
+            // request's field made a later formBody(..)/header("Content-Type", ..) change the label
+            // on the wire but not the serializer. The merged headers carry the derivation instead.
             settings.setConnectTimeout(httpSettings.getConnectTimeout())
                     .setReadTimeout(httpSettings.getReadTimeout())
                     .setSSLSocketFactory(httpSettings.getSSLSocketFactory())
                     .setProxy(httpSettings.getProxy())
-                    .useCaches(httpSettings.useCaches())
-                    .doInput(httpSettings.doInput())
-                    .doOutput(httpSettings.doOutput())
-                    .setOneWayRequest(httpSettings.isOneWayRequest())
-                    .setContentFormat(httpSettings.getContentFormat());
+                    .setContentFormat(httpSettings.contentFormatOrNull());
 
-            settings.headers().setAll(httpSettings.headers().toMap());
+            // Copied as tri-state rather than through the boolean setters: materializing the
+            // defaults here would mark every flag "explicitly set" and stop it falling back to the
+            // client-level HttpSettings.
+            settings.copyConnectionFlagsFrom(httpSettings);
+
+            // The source is read-only input: headers() would create an empty HttpHeaders on the
+            // caller's template and flip its getContentFormat() from null to NONE.
+            final HttpHeaders sourceHeaders = httpSettings.headersOrNull();
+
+            if (sourceHeaders != null) {
+                settings.headers().setAll(sourceHeaders.toMap());
+            }
         }
 
         return this;
@@ -310,7 +350,7 @@ public final class HttpRequest {
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
      */
-    public HttpRequest header(final String name, final Object value) {
+    public HttpRequest header(final String name, final Object value) throws IllegalArgumentException {
         checkSettings();
 
         settings.header(name, value);
@@ -341,7 +381,7 @@ public final class HttpRequest {
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
      */
-    public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2) {
+    public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2) throws IllegalArgumentException {
         checkSettings();
 
         settings.headers(name1, value1, name2, value2);
@@ -375,7 +415,8 @@ public final class HttpRequest {
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
      */
-    public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
+    public HttpRequest headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3)
+            throws IllegalArgumentException {
         checkSettings();
 
         settings.headers(name1, value1, name2, value2, name3, value3);
@@ -401,19 +442,23 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param headers A map containing header names and values; must not be {@code null}
+     * @param headers A map containing header names and values; {@code null} is ignored (no-op),
+     *        like the sibling header setters
      * @return This HttpRequest instance for method chaining
-     * @throws NullPointerException if {@code headers} is {@code null}
      * @throws IllegalArgumentException if any key in {@code headers} is {@code null}.
      * @see #setHeaders(HttpHeaders)
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
      */
-    public HttpRequest headers(final Map<String, ?> headers) {
+    public HttpRequest headers(final Map<String, ?> headers) throws IllegalArgumentException {
         checkSettings();
 
-        settings.headers(headers);
+        // Null-tolerant like the sibling setters (setHeaders, query, settings): adding
+        // "no headers" is a no-op rather than an NPE from the underlying map iteration.
+        if (headers != null) {
+            settings.headers(headers);
+        }
 
         return this;
     }
@@ -466,7 +511,7 @@ public final class HttpRequest {
      * @return This HttpRequest instance for method chaining
      * @throws IllegalArgumentException if {@code connectTimeout} is negative.
      */
-    public HttpRequest connectTimeout(final long connectTimeout) {
+    public HttpRequest connectTimeout(final long connectTimeout) throws IllegalArgumentException {
         checkSettings();
 
         settings.setConnectTimeout(connectTimeout);
@@ -487,10 +532,10 @@ public final class HttpRequest {
      * @param connectTimeout The connection timeout as a Duration; must not be {@code null} and must
      *        not be negative. Sub-millisecond precision is truncated.
      * @return This HttpRequest instance for method chaining
-     * @throws NullPointerException if {@code connectTimeout} is {@code null}
-     * @throws IllegalArgumentException if {@code connectTimeout} is negative.
+     * @throws IllegalArgumentException if {@code connectTimeout} is {@code null} or negative.
      */
-    public HttpRequest connectTimeout(final Duration connectTimeout) {
+    public HttpRequest connectTimeout(final Duration connectTimeout) throws IllegalArgumentException {
+        N.checkArgNotNull(connectTimeout, cs.connectTimeout);
         checkSettings();
 
         if (connectTimeout.isNegative()) {
@@ -519,7 +564,7 @@ public final class HttpRequest {
      * @return This HttpRequest instance for method chaining
      * @throws IllegalArgumentException if {@code readTimeout} is negative.
      */
-    public HttpRequest readTimeout(final long readTimeout) {
+    public HttpRequest readTimeout(final long readTimeout) throws IllegalArgumentException {
         checkSettings();
 
         settings.setReadTimeout(readTimeout);
@@ -540,10 +585,10 @@ public final class HttpRequest {
      * @param readTimeout The read timeout as a Duration; must not be {@code null} and must not be
      *        negative. Sub-millisecond precision is truncated.
      * @return This HttpRequest instance for method chaining
-     * @throws NullPointerException if {@code readTimeout} is {@code null}
-     * @throws IllegalArgumentException if {@code readTimeout} is negative.
+     * @throws IllegalArgumentException if {@code readTimeout} is {@code null} or negative.
      */
-    public HttpRequest readTimeout(final Duration readTimeout) {
+    public HttpRequest readTimeout(final Duration readTimeout) throws IllegalArgumentException {
+        N.checkArgNotNull(readTimeout, cs.readTimeout);
         checkSettings();
 
         if (readTimeout.isNegative()) {
@@ -629,7 +674,7 @@ public final class HttpRequest {
     }
 
     /**
-     * Sets query parameters for GET or DELETE requests as a raw query string.
+     * Sets query parameters for body-less requests (GET, DELETE, HEAD, ...) as a raw query string.
      * Passing {@code null} or an empty string clears any previously configured query/body.
      *
      * <p><b>Usage Examples:</b></p>
@@ -655,7 +700,7 @@ public final class HttpRequest {
     }
 
     /**
-     * Sets query parameters for GET or DELETE requests from a map.
+     * Sets query parameters for body-less requests (GET, DELETE, HEAD, ...) from a map.
      * The entries are URL-encoded and appended to the URL when the request is executed.
      * A {@code null} or empty map clears any previously configured query/body.
      *
@@ -868,9 +913,10 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return The HttpResponse object containing status, headers, and body
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws IllegalStateException if a request body was configured for a method that does not permit one
+     * @throws UncheckedIOException if sending the request or reading the response fails with an I/O exception
      */
-    public HttpResponse get() throws UncheckedIOException {
+    public HttpResponse get() throws IllegalStateException, UncheckedIOException {
         return get(HttpResponse.class);
     }
 
@@ -886,9 +932,10 @@ public final class HttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws IllegalStateException if a request body was configured for a method that does not permit one
+     * @throws UncheckedIOException if sending the request or reading the response fails with an I/O exception
      */
-    public <T> T get(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T get(final Class<T> resultClass) throws IllegalStateException, UncheckedIOException {
         return execute(HttpMethod.GET, resultClass);
     }
 
@@ -904,9 +951,10 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return The HttpResponse object containing status code, headers, and response body
-     * @throws UncheckedIOException if an I/O error occurs during the request
+     * @throws IllegalStateException if query parameters were configured for this body-based request
+     * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
      */
-    public HttpResponse post() throws UncheckedIOException {
+    public HttpResponse post() throws IllegalStateException, UncheckedIOException {
         return post(HttpResponse.class);
     }
 
@@ -924,9 +972,10 @@ public final class HttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws IllegalStateException if query parameters were configured for this body-based request
+     * @throws UncheckedIOException if sending the request or reading the response fails with an I/O exception
      */
-    public <T> T post(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T post(final Class<T> resultClass) throws IllegalStateException, UncheckedIOException {
         return execute(HttpMethod.POST, resultClass);
     }
 
@@ -942,9 +991,10 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return The HttpResponse object containing status code, headers, and response body
-     * @throws UncheckedIOException if an I/O error occurs during the request
+     * @throws IllegalStateException if query parameters were configured for this body-based request
+     * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
      */
-    public HttpResponse put() throws UncheckedIOException {
+    public HttpResponse put() throws IllegalStateException, UncheckedIOException {
         return put(HttpResponse.class);
     }
 
@@ -962,9 +1012,10 @@ public final class HttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs during the request
+     * @throws IllegalStateException if query parameters were configured for this body-based request
+     * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
      */
-    public <T> T put(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T put(final Class<T> resultClass) throws IllegalStateException, UncheckedIOException {
         return execute(HttpMethod.PUT, resultClass);
     }
 
@@ -979,7 +1030,7 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return The HttpResponse object containing status code, headers, and response body
-     * @throws UncheckedIOException if an I/O error occurs during the request
+     * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
      */
     public HttpResponse delete() throws UncheckedIOException {
         return delete(HttpResponse.class);
@@ -998,7 +1049,7 @@ public final class HttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs during the request
+     * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
      */
     public <T> T delete(final Class<T> resultClass) throws UncheckedIOException {
         return execute(HttpMethod.DELETE, resultClass);
@@ -1017,9 +1068,10 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return The HttpResponse object containing status code and headers (body will be empty)
-     * @throws UncheckedIOException if an I/O error occurs during the request
+     * @throws IllegalStateException if a request body was configured for a method that does not permit one
+     * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
      */
-    public HttpResponse head() throws UncheckedIOException {
+    public HttpResponse head() throws IllegalStateException, UncheckedIOException {
         return head(HttpResponse.class);
     }
 
@@ -1033,9 +1085,10 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object
      * @return The response object — a populated {@link HttpResponse} when {@code resultClass} is {@link HttpResponse},
      *         otherwise the result of deserializing the empty body (e.g. an empty string for {@code String.class})
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws IllegalStateException if a request body was configured for a method that does not permit one
+     * @throws UncheckedIOException if sending the request or reading the response fails with an I/O exception
      */
-    public <T> T head(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T head(final Class<T> resultClass) throws IllegalStateException, UncheckedIOException {
         return execute(HttpMethod.HEAD, resultClass);
     }
 
@@ -1051,11 +1104,14 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @return The HttpResponse object containing status code, headers, and response body
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
-     * @throws UncheckedIOException if an I/O error occurs during the request
+     * @throws IllegalStateException if the configured query or body is incompatible with {@code httpMethod}; see {@link #execute(HttpMethod, Class)}
+     * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
      */
     @Beta
-    public HttpResponse execute(final HttpMethod httpMethod) throws UncheckedIOException {
+    public HttpResponse execute(final HttpMethod httpMethod)
+            throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, UncheckedIOException {
         return execute(httpMethod, HttpResponse.class);
     }
 
@@ -1075,23 +1131,20 @@ public final class HttpRequest {
      * @return The deserialized response object
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
-     * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
-     *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
-     *         {@code POST}/{@code PUT}/{@code PATCH}/{@code DELETE}/{@code OPTIONS}
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws IllegalStateException if {@link #query(String)}/{@link #query(Map)} was set but the method is {@code POST}/{@code PUT}/{@code PATCH}/{@code OPTIONS}
+     *         (a body method), or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not {@code POST}/{@code PUT}/{@code DELETE}/{@code OPTIONS}
+     * @throws UncheckedIOException if sending the request or reading the response fails with an I/O exception
      */
     @Beta
-    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass)
+            throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, UncheckedIOException {
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
         checkSupportedMethod(httpMethod);
 
-        try {
-            final Object requestData = requestFor(httpMethod);
-            return requestTarget == RequestTarget.BODY ? httpClient.executeRequestBody(httpMethod, requestData, checkSettings(), resultClass)
-                    : httpClient.execute(httpMethod, requestData, checkSettings(), resultClass);
-        } finally {
-            doAfterExecution();
-        }
+        final Object requestData = requestFor(httpMethod);
+
+        return requestTarget == RequestTarget.BODY ? httpClient.executeRequestBody(httpMethod, requestData, checkSettings(), resultClass)
+                : httpClient.execute(httpMethod, requestData, checkSettings(), resultClass);
     }
 
     /**
@@ -1107,28 +1160,25 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The file to write the response body to. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code output} is {@code null}
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
-     * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
-     *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
-     *         {@code POST}/{@code PUT}/{@code PATCH}/{@code DELETE}/{@code OPTIONS}
-     * @throws UncheckedIOException if an I/O error occurs during the request or file writing
+     * @throws IllegalStateException if {@link #query(String)}/{@link #query(Map)} was set but the method is {@code POST}/{@code PUT}/{@code PATCH}/{@code OPTIONS}
+     *         (a body method), or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not {@code POST}/{@code PUT}/{@code DELETE}/{@code OPTIONS}
+     * @throws UncheckedIOException if sending the HTTP request, reading its response, or opening, writing or closing {@code output}
+     *         fails
      */
     @Beta
-    public void execute(final HttpMethod httpMethod, final File output) throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+    public void execute(final HttpMethod httpMethod, final File output)
+            throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, UncheckedIOException {
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
         checkSupportedMethod(httpMethod);
 
-        try {
-            final Object requestData = requestFor(httpMethod);
+        final Object requestData = requestFor(httpMethod);
 
-            if (requestTarget == RequestTarget.BODY) {
-                httpClient.executeRequestBody(httpMethod, requestData, checkSettings(), output);
-            } else {
-                httpClient.execute(httpMethod, requestData, checkSettings(), output);
-            }
-        } finally {
-            doAfterExecution();
+        if (requestTarget == RequestTarget.BODY) {
+            httpClient.executeRequestBody(httpMethod, requestData, checkSettings(), output);
+        } else {
+            httpClient.execute(httpMethod, requestData, checkSettings(), output);
         }
     }
 
@@ -1146,28 +1196,26 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The output stream to write the response body to. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code output} is {@code null}.
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
-     * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
-     *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
-     *         {@code POST}/{@code PUT}/{@code PATCH}/{@code DELETE}/{@code OPTIONS}
-     * @throws UncheckedIOException if an I/O error occurs during the request or stream writing
+     * @throws IllegalStateException if {@link #query(String)}/{@link #query(Map)} was set but the method is
+     *         {@code POST}/{@code PUT}/{@code PATCH}/{@code OPTIONS} (a body method), or
+     *         {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
+     *         {@code POST}/{@code PUT}/{@code DELETE}/{@code OPTIONS}
+     * @throws UncheckedIOException if sending the HTTP request, reading its response or writing the response to {@code output} fails
      */
     @Beta
-    public void execute(final HttpMethod httpMethod, final OutputStream output) throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+    public void execute(final HttpMethod httpMethod, final OutputStream output)
+            throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, UncheckedIOException {
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
         checkSupportedMethod(httpMethod);
 
-        try {
-            final Object requestData = requestFor(httpMethod);
+        final Object requestData = requestFor(httpMethod);
 
-            if (requestTarget == RequestTarget.BODY) {
-                httpClient.executeRequestBody(httpMethod, requestData, checkSettings(), output);
-            } else {
-                httpClient.execute(httpMethod, requestData, checkSettings(), output);
-            }
-        } finally {
-            doAfterExecution();
+        if (requestTarget == RequestTarget.BODY) {
+            httpClient.executeRequestBody(httpMethod, requestData, checkSettings(), output);
+        } else {
+            httpClient.execute(httpMethod, requestData, checkSettings(), output);
         }
     }
 
@@ -1185,63 +1233,65 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The writer to write the response body to. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code output} is {@code null}.
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
-     * @throws IllegalStateException if {@link #query(String)} was set but the method is not {@code GET}/{@code DELETE},
-     *         or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
-     *         {@code POST}/{@code PUT}/{@code PATCH}/{@code DELETE}/{@code OPTIONS}
-     * @throws UncheckedIOException if an I/O error occurs during the request or writing
+     * @throws IllegalStateException if {@link #query(String)}/{@link #query(Map)} was set but the method is
+     *         {@code POST}/{@code PUT}/{@code PATCH}/{@code OPTIONS} (a body method), or
+     *         {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
+     *         {@code POST}/{@code PUT}/{@code DELETE}/{@code OPTIONS}
+     * @throws UncheckedIOException if sending the HTTP request, reading its response or writing the response to {@code output} fails
      */
     @Beta
-    public void execute(final HttpMethod httpMethod, final Writer output) throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+    public void execute(final HttpMethod httpMethod, final Writer output)
+            throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, UncheckedIOException {
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
         checkSupportedMethod(httpMethod);
 
-        try {
-            final Object requestData = requestFor(httpMethod);
+        final Object requestData = requestFor(httpMethod);
 
-            if (requestTarget == RequestTarget.BODY) {
-                httpClient.executeRequestBody(httpMethod, requestData, checkSettings(), output);
-            } else {
-                httpClient.execute(httpMethod, requestData, checkSettings(), output);
-            }
-        } finally {
-            doAfterExecution();
+        if (requestTarget == RequestTarget.BODY) {
+            httpClient.executeRequestBody(httpMethod, requestData, checkSettings(), output);
+        } else {
+            httpClient.execute(httpMethod, requestData, checkSettings(), output);
         }
     }
 
-    private static void checkSupportedMethod(final HttpMethod httpMethod) {
+    /**
+     * @throws UnsupportedOperationException if the requested method is PATCH, which HttpURLConnection does not support
+     */
+    private static void checkSupportedMethod(final HttpMethod httpMethod) throws UnsupportedOperationException {
         if (httpMethod == HttpMethod.PATCH) {
             throw new UnsupportedOperationException(
                     "HttpMethod.PATCH is not supported by the underlying java.net.HttpURLConnection; see HttpMethod#PATCH for workarounds");
         }
     }
 
-    private Object requestFor(final HttpMethod httpMethod) {
+    /**
+     * @throws IllegalStateException if query parameters are configured for a body-only request or a body is configured for a method that does not support it
+     */
+    private Object requestFor(final HttpMethod httpMethod) throws IllegalStateException {
         if (request == null || requestTarget == RequestTarget.NONE) {
             return null;
         }
 
         if (requestTarget == RequestTarget.QUERY) {
-            if (httpMethod == HttpMethod.GET || httpMethod == HttpMethod.DELETE) {
+            // Query parameters are a URL feature, so they are valid for every method that does not
+            // carry a request body; only a body method would have to choose between the two. The
+            // excluded set mirrors HttpClient's routing table, PATCH included, even though
+            // checkSupportedMethod(..) rejects PATCH before this point.
+            if (httpMethod != HttpMethod.POST && httpMethod != HttpMethod.PUT && httpMethod != HttpMethod.PATCH && httpMethod != HttpMethod.OPTIONS) {
                 return request;
             }
 
-            throw new IllegalStateException("query(...) is only supported for GET and DELETE requests");
+            throw new IllegalStateException("query(...) is not supported for " + httpMethod + " requests; use body(...) instead");
         }
 
-        if (httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT || httpMethod == HttpMethod.PATCH || httpMethod == HttpMethod.DELETE
-                || httpMethod == HttpMethod.OPTIONS) {
+        if (httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT || httpMethod == HttpMethod.DELETE || httpMethod == HttpMethod.OPTIONS) {
             return request;
         }
 
-        throw new IllegalStateException("body(...) is only supported for POST, PUT, PATCH, DELETE, and OPTIONS requests");
-    }
-
-    void doAfterExecution() {
-        if (closeHttpClientAfterExecution) {
-            httpClient.close();
-        }
+        // PATCH is deliberately absent: checkSupportedMethod(..) has already rejected it.
+        throw new IllegalStateException("body(...) is only supported for POST, PUT, DELETE, and OPTIONS requests, but was: " + httpMethod);
     }
 
     /**
@@ -1714,12 +1764,14 @@ public final class HttpRequest {
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param resultClass The class of the expected response object. Must not be {@code null}.
-     * @return A ContinuableFuture that will complete with the deserialized response
+     * @return A ContinuableFuture that will complete with the deserialized response; an unsupported
+     *         {@link HttpMethod#PATCH} ({@link UnsupportedOperationException}) or a payload/method
+     *         mismatch ({@link IllegalStateException}) fails the future instead of throwing here
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException {
-        N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
 
         final Callable<T> cmd = () -> execute(httpMethod, resultClass);
         return httpClient._asyncExecutor.execute(cmd);
@@ -1748,7 +1800,7 @@ public final class HttpRequest {
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor)
             throws IllegalArgumentException {
-        N.checkArgNotNull(httpMethod, HTTP_METHOD_STR);
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(executor, cs.executor);
 
         final Callable<T> cmd = () -> execute(httpMethod, resultClass);
@@ -1769,10 +1821,15 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The file to write the response body to. Must not be {@code null}.
-     * @return a ContinuableFuture that completes after the response has been written to the file
+     * @return a ContinuableFuture that completes after the response has been written to the file;
+     *         a {@code null} output, an unsupported {@link HttpMethod#PATCH} or a payload/method
+     *         mismatch fails the future instead of throwing here
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
      */
     @Beta
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output) {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output) throws IllegalArgumentException {
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
+
         final Callable<Void> cmd = () -> {
             execute(httpMethod, output);
 
@@ -1803,6 +1860,7 @@ public final class HttpRequest {
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(executor, cs.executor);
 
         final Callable<Void> cmd = () -> {
@@ -1828,10 +1886,15 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The output stream to write the response body to. Must not be {@code null}.
-     * @return a ContinuableFuture that completes after the response has been written to the stream
+     * @return a ContinuableFuture that completes after the response has been written to the stream;
+     *         a {@code null} output, an unsupported {@link HttpMethod#PATCH} or a payload/method
+     *         mismatch fails the future instead of throwing here
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
      */
     @Beta
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final OutputStream output) {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final OutputStream output) throws IllegalArgumentException {
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
+
         final Callable<Void> cmd = () -> {
             execute(httpMethod, output);
 
@@ -1863,6 +1926,7 @@ public final class HttpRequest {
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final OutputStream output, final Executor executor)
             throws IllegalArgumentException {
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(executor, cs.executor);
 
         final Callable<Void> cmd = () -> {
@@ -1888,10 +1952,15 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The writer to write the response body to. Must not be {@code null}.
-     * @return a ContinuableFuture that completes after the response has been written to the writer
+     * @return a ContinuableFuture that completes after the response has been written to the writer;
+     *         a {@code null} output, an unsupported {@link HttpMethod#PATCH} or a payload/method
+     *         mismatch fails the future instead of throwing here
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
      */
     @Beta
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output) {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output) throws IllegalArgumentException {
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
+
         final Callable<Void> cmd = () -> {
             execute(httpMethod, output);
 
@@ -1922,6 +1991,7 @@ public final class HttpRequest {
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output, final Executor executor) throws IllegalArgumentException {
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(executor, cs.executor);
 
         final Callable<Void> cmd = () -> {
@@ -1940,8 +2010,10 @@ public final class HttpRequest {
      * @param cmd The callable command to execute
      * @param executor The executor to use
      * @return A ContinuableFuture that will complete with the result of the callable
+     * @throws IllegalArgumentException if {@code cmd} or {@code executor} is {@code null}
+     * @throws RejectedExecutionException if the executor refuses to accept the task
      */
-    <R> ContinuableFuture<R> execute(final Callable<? extends R> cmd, final Executor executor) {
+    <R> ContinuableFuture<R> execute(final Callable<? extends R> cmd, final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return N.asyncExecute(cmd, executor);

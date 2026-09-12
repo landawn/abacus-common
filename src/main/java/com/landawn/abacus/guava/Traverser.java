@@ -27,7 +27,18 @@ import com.landawn.abacus.util.stream.Stream;
  * This class wraps Google Guava's Traverser functionality and adapts it to work with
  * the abacus-common Stream API for more convenient iteration.
  *
- * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
+ * <p>Note: this class delegates to Google Guava's {@code com.google.common.graph.Traverser} (Apache License 2.0);
+ * the traversal semantics documented here are Guava's.</p>
+ *
+ * <p><b>Eager start-node validation.</b> Traversal is lazy <i>beyond the start nodes</i>: Guava validates the
+ * start nodes up front by calling the successor function once for each of them when a traversal method
+ * ({@code breadthFirst}, {@code depthFirstPreOrder}, {@code depthFirstPostOrder}) is invoked - the result is
+ * discarded and the function is called again during traversal - so an exception thrown by the successor
+ * function for a start node propagates from the traversal method itself, not from the returned stream,
+ * and the start nodes' children are computed twice. For {@link #PATHS} this means every start directory is
+ * listed at call time (a {@link DirectoryIteratorException} for the start path is thrown by the traversal
+ * method) and listed again when the stream is consumed. A {@code null} <i>return</i> from the successor
+ * function is not detected by the validation; it fails only during consumption.</p>
  *
  * <p>This class supports two main types of graph structures:
  * <ul>
@@ -121,8 +132,11 @@ public final class Traverser<T> {
      *     .forEach(System.out::println);
      * }</pre>
      *
-     * <p><b>Note:</b> {@link DirectoryIteratorException} may be thrown while consuming the returned
-     * stream if an {@link java.io.IOException} occurs while reading a directory's contents.
+     * <p><b>Note:</b> a {@link DirectoryIteratorException} (wrapping the {@link java.io.IOException})
+     * is thrown if a directory's contents cannot be read. For the start path itself it is thrown by
+     * the traversal method (see the class note on eager start-node validation); for a descendant
+     * directory it is thrown while consuming the returned stream. By contrast {@link #FILES} treats an
+     * unreadable directory as having no children.
      *
      * @see #FILES
      */
@@ -241,7 +255,9 @@ public final class Traverser<T> {
      *
      * <p><b>Note:</b> the successor function must not return {@code null}; return an empty
      * {@link Iterable} for leaf nodes. A {@code null} return is not guarded here and causes a
-     * {@link NullPointerException} during stream consumption, not at factory-creation time.
+     * {@link NullPointerException} during stream consumption, not at factory-creation time. The
+     * function itself is first invoked when a traversal method is called (once per start node, see
+     * the class note), so an exception it <i>throws</i> for a start node propagates from that call.
      *
      * @param <T> the type of nodes in the tree
      * @param tree {@link Function} representing a directed acyclic graph that has at most
@@ -297,7 +313,9 @@ public final class Traverser<T> {
      * <p><b>Note:</b> the successor function must not return {@code null}; return an empty
      * {@link Iterable} for nodes with no successors. A {@code null} return is not guarded here
      * and causes a {@link NullPointerException} during stream consumption, not at
-     * factory-creation time.
+     * factory-creation time. The function itself is first invoked when a traversal method is called
+     * (once per start node, see the class note), so an exception it <i>throws</i> for a start node
+     * propagates from that call.
      *
      * @param <T> the type of nodes in the graph
      * @param graph {@link Function} representing a general graph that may have cycles.
@@ -337,9 +355,10 @@ public final class Traverser<T> {
      * <p>The behavior of this method is undefined if the nodes, or the topology of the graph, change
      * while iteration is in progress.
      *
-     * <p>The returned {@code Stream} is lazily evaluated, meaning traversal happens as elements
-     * are consumed from the stream. This allows for efficient operations like limiting the
-     * number of nodes traversed:
+     * <p>The returned {@code Stream} is lazily evaluated beyond the start-node validation described
+     * in the class documentation (the successor function is called once for {@code startNode} by this
+     * method), meaning traversal happens as elements are consumed from the stream. This allows for
+     * efficient operations like limiting the number of nodes traversed:
      *
      * <pre>{@code
      * // Only traverse the first 100 nodes
@@ -355,11 +374,13 @@ public final class Traverser<T> {
      *
      * @param startNode the node to start traversal from
      * @return a Stream of nodes in breadth-first order
+     * @throws NullPointerException if {@code startNode} is {@code null}
+     * @throws IllegalArgumentException if the successor function rejects a starting node as not belonging to the graph.
      * @see #breadthFirst(Iterable)
      * @see #depthFirstPreOrder(Object)
      * @see #depthFirstPostOrder(Object)
      */
-    public Stream<T> breadthFirst(final T startNode) {
+    public Stream<T> breadthFirst(final T startNode) throws NullPointerException, IllegalArgumentException {
         return Stream.of(gTraverser.breadthFirst(startNode).iterator());
     }
 
@@ -371,21 +392,29 @@ public final class Traverser<T> {
      * {@code startNodes} themselves are visited in the order they are provided (all at depth 0),
      * before their successors.
      *
+     * <p>Duplicate ({@code equals}) start nodes are collapsed to one. For a {@link #forTree(Function)}
+     * traverser, a start node that is also reachable from an earlier start node is visited again
+     * (there is no visited-set), so {@code [a, b]} with {@code b} a child of {@code a} yields
+     * {@code [a, b, b]}; a {@link #forGraph(Function)} traverser visits each node once.
+     *
      * <p>This is useful for traversing a forest of trees, or a graph from a set of seed nodes.</p>
      *
      * <p>The behavior of this method is undefined if the nodes, or the topology of the graph, change
      * while iteration is in progress.
      *
-     * <p>The returned {@code Stream} is lazily evaluated, meaning traversal happens as elements
-     * are consumed from the stream.
+     * <p>The returned {@code Stream} is lazily evaluated beyond the start-node validation described
+     * in the class documentation (the successor function is called once per start node by this
+     * method), meaning traversal happens as elements are consumed from the stream.
      *
      * @param startNodes the nodes to start traversal from
      * @return a Stream of nodes in breadth-first order
+     * @throws NullPointerException if {@code startNodes} is {@code null} or contains a {@code null} element
+     * @throws IllegalArgumentException if the successor function rejects a starting node as not belonging to the graph.
      * @see #breadthFirst(Object)
      * @see #depthFirstPreOrder(Iterable)
      * @see #depthFirstPostOrder(Iterable)
      */
-    public Stream<T> breadthFirst(final Iterable<? extends T> startNodes) {
+    public Stream<T> breadthFirst(final Iterable<? extends T> startNodes) throws NullPointerException, IllegalArgumentException {
         return Stream.of(gTraverser.breadthFirst(startNodes).iterator());
     }
 
@@ -415,7 +444,9 @@ public final class Traverser<T> {
      * <p>The behavior of this method is undefined if the nodes, or the topology of the graph, change
      * while iteration is in progress.
      *
-     * <p>The returned {@code Stream} is lazily evaluated, allowing for efficient operations:
+     * <p>The returned {@code Stream} is lazily evaluated beyond the start-node validation described
+     * in the class documentation (the successor function is called once for {@code startNode} by this
+     * method), allowing for efficient operations:
      *
      * <pre>{@code
      * // Find the first node matching a condition
@@ -430,11 +461,13 @@ public final class Traverser<T> {
      *
      * @param startNode the node to start traversal from
      * @return a Stream of nodes in depth-first pre-order
+     * @throws NullPointerException if {@code startNode} is {@code null}
+     * @throws IllegalArgumentException if the successor function rejects a starting node as not belonging to the graph.
      * @see #depthFirstPreOrder(Iterable)
      * @see #breadthFirst(Object)
      * @see #depthFirstPostOrder(Object)
      */
-    public Stream<T> depthFirstPreOrder(final T startNode) {
+    public Stream<T> depthFirstPreOrder(final T startNode) throws NullPointerException, IllegalArgumentException {
         return Stream.of(gTraverser.depthFirstPreOrder(startNode).iterator());
     }
 
@@ -446,20 +479,27 @@ public final class Traverser<T> {
      * {@code startNode}'s subtree is fully visited (pre-order) before moving on to the next
      * {@code startNode}.
      *
+     * <p>Duplicate ({@code equals}) start nodes are collapsed to one. For a {@link #forTree(Function)}
+     * traverser, a start node that is also reachable from an earlier start node is visited again
+     * (there is no visited-set); a {@link #forGraph(Function)} traverser visits each node once.
+     *
      * <p>This is useful for traversing a forest of trees, or a graph from a set of seed nodes.</p>
      *
      * <p>The behavior of this method is undefined if the nodes, or the topology of the graph, change
      * while iteration is in progress.
      *
-     * <p>The returned {@code Stream} is lazily evaluated.
+     * <p>The returned {@code Stream} is lazily evaluated beyond the start-node validation described
+     * in the class documentation (the successor function is called once per start node by this method).
      *
      * @param startNodes the nodes to start traversal from
      * @return a Stream of nodes in depth-first pre-order
+     * @throws NullPointerException if {@code startNodes} is {@code null} or contains a {@code null} element
+     * @throws IllegalArgumentException if the successor function rejects a starting node as not belonging to the graph.
      * @see #depthFirstPreOrder(Object)
      * @see #breadthFirst(Iterable)
      * @see #depthFirstPostOrder(Iterable)
      */
-    public Stream<T> depthFirstPreOrder(final Iterable<? extends T> startNodes) {
+    public Stream<T> depthFirstPreOrder(final Iterable<? extends T> startNodes) throws NullPointerException, IllegalArgumentException {
         return Stream.of(gTraverser.depthFirstPreOrder(startNodes).iterator());
     }
 
@@ -488,7 +528,9 @@ public final class Traverser<T> {
      * <p>The behavior of this method is undefined if the nodes, or the topology of the graph, change
      * while iteration is in progress.
      *
-     * <p>The returned {@code Stream} is lazily evaluated. Common use cases include:
+     * <p>The returned {@code Stream} is lazily evaluated beyond the start-node validation described
+     * in the class documentation (the successor function is called once for {@code startNode} by this
+     * method). Common use cases include:
      *
      * <pre>{@code
      * // Calculate sizes of all subtrees
@@ -508,11 +550,13 @@ public final class Traverser<T> {
      *
      * @param startNode the node to start traversal from
      * @return a Stream of nodes in depth-first post-order
+     * @throws NullPointerException if {@code startNode} is {@code null}
+     * @throws IllegalArgumentException if the successor function rejects a starting node as not belonging to the graph.
      * @see #depthFirstPostOrder(Iterable)
      * @see #breadthFirst(Object)
      * @see #depthFirstPreOrder(Object)
      */
-    public Stream<T> depthFirstPostOrder(final T startNode) {
+    public Stream<T> depthFirstPostOrder(final T startNode) throws NullPointerException, IllegalArgumentException {
         return Stream.of(gTraverser.depthFirstPostOrder(startNode).iterator());
     }
 
@@ -524,20 +568,27 @@ public final class Traverser<T> {
      * {@code startNode}'s subtree is fully visited (post-order, so descendants precede the
      * {@code startNode}) before moving on to the next {@code startNode}.
      *
+     * <p>Duplicate ({@code equals}) start nodes are collapsed to one. For a {@link #forTree(Function)}
+     * traverser, a start node that is also reachable from an earlier start node is visited again
+     * (there is no visited-set); a {@link #forGraph(Function)} traverser visits each node once.
+     *
      * <p>This is useful for traversing a forest of trees, or a graph from a set of seed nodes.</p>
      *
      * <p>The behavior of this method is undefined if the nodes, or the topology of the graph, change
      * while iteration is in progress.
      *
-     * <p>The returned {@code Stream} is lazily evaluated.
+     * <p>The returned {@code Stream} is lazily evaluated beyond the start-node validation described
+     * in the class documentation (the successor function is called once per start node by this method).
      *
      * @param startNodes the nodes to start traversal from
      * @return a Stream of nodes in depth-first post-order
+     * @throws NullPointerException if {@code startNodes} is {@code null} or contains a {@code null} element
+     * @throws IllegalArgumentException if the successor function rejects a starting node as not belonging to the graph.
      * @see #depthFirstPostOrder(Object)
      * @see #breadthFirst(Iterable)
      * @see #depthFirstPreOrder(Iterable)
      */
-    public Stream<T> depthFirstPostOrder(final Iterable<? extends T> startNodes) {
+    public Stream<T> depthFirstPostOrder(final Iterable<? extends T> startNodes) throws NullPointerException, IllegalArgumentException {
         return Stream.of(gTraverser.depthFirstPostOrder(startNodes).iterator());
     }
 }

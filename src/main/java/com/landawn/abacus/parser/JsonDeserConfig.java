@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
@@ -192,13 +193,24 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      * Sets the Map implementation class to use when deserializing to Map instances.
      *
      * <p>This allows control over the concrete Map type created during deserialization.
-     * The specified class must be a concrete implementation of Map with a no-argument
-     * constructor. Common use cases include:</p>
+     * Common use cases include:</p>
      * <ul>
      *   <li>Using {@link java.util.LinkedHashMap} to preserve insertion order</li>
      *   <li>Using {@link java.util.TreeMap} for sorted keys</li>
      *   <li>Using {@link java.util.concurrent.ConcurrentHashMap} for thread-safe operations</li>
      * </ul>
+     *
+     * <p><b>Scope:</b> the setting is used wherever the declared target type is the {@code Map}
+     * <i>interface</i> - the root target {@code Map.class}, {@code Map}-typed bean properties, and nested
+     * map values/elements whose declared type is {@code Map}. A concrete declared type (root
+     * {@code HashMap.class}, a {@code TreeMap}-typed property) is instantiated as declared and this
+     * setting is ignored for it.</p>
+     *
+     * <p><b>Argument validation:</b> only {@code null} is rejected here. An interface or abstract class is
+     * accepted and resolved at deserialization time by {@link com.landawn.abacus.util.Suppliers#ofMap(Class)}
+     * (e.g. {@code Map}/{@code AbstractMap} -> {@code HashMap}, {@code SortedMap} -> {@code TreeMap},
+     * {@code EnumMap} -> {@code HashMap}); an unsupported abstract class fails when the first map is created,
+     * not in this setter. A concrete class must have a public no-argument constructor.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -207,9 +219,11 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      *
      * config.setMapInstanceType(TreeMap.class);
      * // Maps will be created as TreeMap for sorted keys
+     * parser.deserialize(json, config, Map.class);       // -> TreeMap
+     * parser.deserialize(json, config, HashMap.class);   // -> HashMap (declared concrete type wins)
      * }</pre>
      *
-     * @param mapInstanceType the Map implementation class to use (must not be {@code null})
+     * @param mapInstanceType the Map implementation class to use (must not be {@code null}); interfaces/abstract classes are resolved by {@code Suppliers.ofMap} at deserialization time
      * @return {@code this} instance for method chaining
      * @throws IllegalArgumentException if {@code mapInstanceType} is {@code null}.
      */
@@ -298,7 +312,8 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      * @throws IllegalArgumentException if {@code propName} is empty.
      * @see #setPropHandler(String, BiConsumer)
      */
-    public BiConsumer<? super Collection<Object>, ?> getPropHandler(final String propName) { //NOSONAR
+    @MayReturnNull
+    public BiConsumer<? super Collection<Object>, ?> getPropHandler(final String propName) throws IllegalArgumentException { //NOSONAR
         N.checkArgNotEmpty(propName, cs.propName);
 
         if (propHandlerMap == null) {
@@ -343,8 +358,8 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
     /**
      * Compares this configuration with another object for equality.
      *
-     * <p>Two JsonDeserConfig objects are considered equal if all their settings match,
-     * including:</p>
+     * <p>Two JsonDeserConfig objects are considered equal if they are of exactly the same class and all
+     * their settings match, including:</p>
      * <ul>
      *   <li>All inherited settings from {@link DeserializationConfig}</li>
      *   <li>ignoreNullOrEmpty setting</li>
@@ -363,7 +378,12 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
             return true;
         }
 
-        if (obj instanceof JsonDeserConfig other) {
+        // Require exact same class to keep equals symmetric, the same rule DeserializationConfig#equals
+        // applies: a subclass narrowing equality with its own `instanceof <OwnType>` test would otherwise be
+        // equal to a plain JsonDeserConfig in one direction only. Mirrors JsonSerConfig/XmlSerConfig.
+        if (obj != null && obj.getClass() == getClass()) {
+            final JsonDeserConfig other = (JsonDeserConfig) obj;
+
             return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty) //NOSONAR
                     && N.equals(ignoreNullOrEmpty, other.ignoreNullOrEmpty) && N.equals(readNullToEmpty, other.readNullToEmpty)
                     && N.equals(elementType, other.elementType) && N.equals(mapKeyType, other.mapKeyType) && N.equals(mapValueType, other.mapValueType)
@@ -390,6 +410,34 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
                 + N.toString(elementType) + ", mapKeyType=" + N.toString(mapKeyType) + ", mapValueType=" + N.toString(mapValueType) + ", valueTypeMap="
                 + N.toString(valueTypeMap) + ", beanInfoForValueTypes=" + N.toString(beanInfoForValueTypes) + ", mapInstanceType=" + N.toString(mapInstanceType)
                 + ", propHandlerMap=" + N.toString(propHandlerMap) + "}";
+    }
+
+    /**
+     * Creates a copy of this configuration.
+     *
+     * <p>In addition to the value-type map copied by {@link DeserializationConfig#copy()}, the
+     * property-handler map is copied as well, so {@link #setPropHandler(String, BiConsumer)} on the copy
+     * never affects the original (and vice versa). The handler instances themselves are shared. The
+     * ignored-property map is copied by {@link ParserConfig#copy()}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JsonDeserConfig original = new JsonDeserConfig().setPropHandler("items", (c, e) -> c.add(e));
+     * JsonDeserConfig copy = original.copy().setPropHandler("tags", (c, e) -> c.add(e));
+     * original.getPropHandler("tags");   // returns null - the original is untouched
+     * }</pre>
+     *
+     * @return a copy of this configuration with its own property-handler map
+     */
+    @Override
+    public JsonDeserConfig copy() {
+        final JsonDeserConfig copy = super.copy();
+
+        if (propHandlerMap != null) {
+            copy.propHandlerMap = new HashMap<>(propHandlerMap);
+        }
+
+        return copy;
     }
 
     /**

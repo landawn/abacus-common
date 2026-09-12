@@ -536,4 +536,100 @@ public class XmlSerConfigTest extends TestBase {
         assertEquals(SK.CHAR_ZERO, config.getStringQuotation());
     }
 
+    // ---------------------------------------------------------------------------------------------
+    // Review fixes 2026-09-06 (P8-14 toString without raw NUL; P8-16 javadoc pin)
+    // ---------------------------------------------------------------------------------------------
+
+    public static class TagBean {
+        private String firstName = "a";
+        private int age = 1;
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(final String firstName) {
+            this.firstName = firstName;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(final int age) {
+            this.age = age;
+        }
+    }
+
+    @Test
+    public void reviewFixes20260906_toString_containsNoRawNul() {
+        final String str = new XmlSerConfig().toString();
+        assertTrue(str.indexOf('\0') < 0, "toString must not embed U+0000: " + str);
+        assertEquals(-1, str.indexOf(SK.CHAR_ZERO));
+        assertTrue(str.contains("charQuotation=\\u0000, stringQuotation=\\u0000, dateTimeFormat=LONG"), str);
+        // still starts and ends like a config dump and keeps the other fields
+        assertTrue(str.startsWith("{ignoredPropNames=null, charQuotation="), str);
+        assertTrue(str.endsWith(", tagByPropertyName=true, writeTypeInfo=false}"), str);
+        // a copy renders identically
+        assertEquals(str, new XmlSerConfig().copy().toString());
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void reviewFixes20260906_toString_nonZeroQuotationRenderedAsTheCharItself() {
+        final String str = new XmlSerConfig().setCharQuotation('\'').setStringQuotation('"').toString();
+        assertTrue(str.indexOf('\0') < 0, str);
+        assertTrue(str.contains("charQuotation=', stringQuotation=\","), str);
+    }
+
+    @Test
+    public void reviewFixes20260906_tagByPropertyName_falseWritesGenericPropertyElements() {
+        final XmlParser xp = ParserFactory.createXmlParser();
+        final XmlParser axp = ParserFactory.createAbacusXmlParser();
+
+        assertEquals("<tagBean><firstName>a</firstName><age>1</age></tagBean>", xp.serialize(new TagBean(), new XmlSerConfig().setTagByPropertyName(true)));
+        assertEquals("<tagBean><firstName>a</firstName><age>1</age></tagBean>", xp.serialize(new TagBean(), new XmlSerConfig()));
+        assertEquals("<bean name=\"tagBean\"><property name=\"firstName\">a</property><property name=\"age\">1</property></bean>",
+                xp.serialize(new TagBean(), new XmlSerConfig().setTagByPropertyName(false)));
+        assertEquals("<bean name=\"tagBean\"><property name=\"firstName\">a</property><property name=\"age\">1</property></bean>",
+                axp.serialize(new TagBean(), new XmlSerConfig().setTagByPropertyName(false)));
+    }
+
+
+    /**
+     * A subclass that narrows equality the way {@code AvroSerConfig}/{@code KryoSerConfig} do over
+     * {@code SerializationConfig}: {@code instanceof <OwnType> && super.equals(obj)}.
+     */
+    static class NarrowingXmlSerConfig extends XmlSerConfig {
+        @Override
+        public boolean equals(final Object obj) {
+            return this == obj || (obj instanceof NarrowingXmlSerConfig && super.equals(obj));
+        }
+
+        @Override
+        public int hashCode() {
+            return super.hashCode();
+        }
+    }
+
+    @Test
+    public void reviewFixes20260908_equalsIsSymmetricAgainstASubclassThatNarrowsEquality() {
+        final XmlSerConfig base = new XmlSerConfig();
+        final NarrowingXmlSerConfig sub = new NarrowingXmlSerConfig();
+
+        // Same settings, different classes. With the old `obj instanceof XmlSerConfig` test base.equals(sub)
+        // was true while sub.equals(base) was false, the very asymmetry SerializationConfig#equals documents
+        // its exact-class rule to prevent.
+        assertEquals(base.equals(sub), sub.equals(base));
+        assertFalse(base.equals(sub));
+        assertFalse(sub.equals(base));
+
+        // Unchanged for everything else.
+        assertTrue(base.equals(new XmlSerConfig()));
+        assertTrue(sub.equals(new NarrowingXmlSerConfig()));
+        assertEquals(base.hashCode(), new XmlSerConfig().hashCode());
+        assertFalse(base.equals(null));
+        assertFalse(base.equals("not a config"));
+    }
+
 }

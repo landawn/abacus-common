@@ -1,11 +1,10 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -34,17 +32,203 @@ public class WrapperTest extends TestBase {
     }
 
     @Test
-    public void test_emptyArrayPool_concurrentFirstAccessReturnsSameInstance() throws Exception {
+    public void testOf() {
+        int[] array = { 1, 2, 3 };
+        Wrapper<int[]> wrapper = Wrapper.of(array);
+        assertSame(array, wrapper.value());
+        assertEquals(wrapper, Wrapper.of(new int[] { 1, 2, 3 }));
+        assertNotEquals(wrapper, Wrapper.of(new int[] { 1, 2, 4 }));
+
+        String value = "hello";
+        Wrapper<String> nonArray = Wrapper.of(value);
+        assertSame(value, nonArray.value());
+        assertEquals(nonArray, Wrapper.of("hello"));
+        assertEquals(nonArray.hashCode(), Wrapper.of("hello").hashCode());
+
+        Wrapper<int[]> n1 = Wrapper.of(null);
+        Wrapper<int[]> n2 = Wrapper.of(null);
+        assertSame(n1, n2);
+        assertEquals(null, n1.value());
+        assertEquals(n1.hashCode(), n2.hashCode());
+        assertTrue(n1.equals(n2));
+        assertTrue(n1.toString().contains("Wrapper["));
+    }
+
+    @Test
+    public void testOf_Arrays() {
+        assertEquals(Wrapper.of(new int[] { 1, 2, 3 }), Wrapper.of(new int[] { 1, 2, 3 }));
+        assertEquals(Wrapper.of(new byte[] { 1, 2, 3 }), Wrapper.of(new byte[] { 1, 2, 3 }));
+        assertEquals(Wrapper.of(new short[] { 1, 2, 3 }), Wrapper.of(new short[] { 1, 2, 3 }));
+        assertEquals(Wrapper.of(new long[] { 1L, 2L, 3L }), Wrapper.of(new long[] { 1L, 2L, 3L }));
+        assertEquals(Wrapper.of(new float[] { 1.0f, 2.0f, 3.0f }), Wrapper.of(new float[] { 1.0f, 2.0f, 3.0f }));
+        assertEquals(Wrapper.of(new double[] { 1.0, 2.0, 3.0 }), Wrapper.of(new double[] { 1.0, 2.0, 3.0 }));
+        assertEquals(Wrapper.of(new char[] { 'a', 'b', 'c' }), Wrapper.of(new char[] { 'a', 'b', 'c' }));
+        assertEquals(Wrapper.of(new boolean[] { true, false, true }), Wrapper.of(new boolean[] { true, false, true }));
+        assertEquals(Wrapper.of(new String[] { "a", "b", "c" }), Wrapper.of(new String[] { "a", "b", "c" }));
+        assertNotEquals(Wrapper.of(new String[] { "a", "b", "c" }), Wrapper.of(new String[] { "a", "b", "d" }));
+
+        int[][] matrix = { { 1, 2 }, { 3, 4 } };
+        assertEquals(Wrapper.of(matrix), Wrapper.of(new int[][] { { 1, 2 }, { 3, 4 } }));
+        assertNotEquals(Wrapper.of(matrix), Wrapper.of(new int[][] { { 1, 2 }, { 3, 5 } }));
+        assertEquals(Wrapper.of(matrix).hashCode(), Wrapper.of(new int[][] { { 1, 2 }, { 3, 4 } }).hashCode());
+
+        int[][][] cube = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+        assertEquals(Wrapper.of(cube), Wrapper.of(new int[][][] { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } }));
+        assertNotEquals(Wrapper.of(cube), Wrapper.of(new int[][][] { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 9 } } }));
+
+        assertNotEquals(Wrapper.of(new int[0]), Wrapper.of(new long[0]));
+        assertNotEquals(Wrapper.of(new int[0]), Wrapper.of(new String[0]));
+        assertNotEquals(Wrapper.of(new long[0]), Wrapper.of(new String[0]));
+    }
+
+    @Test
+    public void testOf_EmptyArrayCaching() {
+        assertSame(Wrapper.of(new boolean[0]), Wrapper.of(new boolean[0]));
+        assertSame(Wrapper.of(new int[0]), Wrapper.of(new int[0]));
+        assertSame(Wrapper.of(new String[0]), Wrapper.of(new String[0]));
+        assertSame(Wrapper.of(new double[0]), Wrapper.of(new double[0]));
+        assertSame(Wrapper.of(new char[0]), Wrapper.of(new char[0]));
+        assertSame(Wrapper.of(new float[0]), Wrapper.of(new float[0]));
+    }
+
+    @Test
+    public void testOf_Custom() {
+        ToIntFunction<String> firstCharHash = s -> s.charAt(0);
+        BiPredicate<String, String> firstCharEq = (s1, s2) -> s1.charAt(0) == s2.charAt(0);
+        Wrapper<String> apple = Wrapper.of("apple", firstCharHash, firstCharEq);
+        assertEquals(apple, Wrapper.of("apricot", firstCharHash, firstCharEq));
+        assertEquals(apple.hashCode(), Wrapper.of("apricot", firstCharHash, firstCharEq).hashCode());
+        assertNotEquals(apple, Wrapper.of("banana", firstCharHash, firstCharEq));
+
+        ToIntFunction<String> lengthHash = String::length;
+        BiPredicate<String, String> ignoreCase = String::equalsIgnoreCase;
+        Wrapper<String> custom = Wrapper.of("TEST", lengthHash, ignoreCase);
+        assertEquals("TEST", custom.value());
+        assertEquals(4, custom.hashCode());
+        assertEquals(custom, Wrapper.of("test", lengthHash, ignoreCase));
+        assertNotEquals(custom, Wrapper.of("other", lengthHash, ignoreCase));
+
+        Function<String, String> branded = s -> "CUSTOM[" + s + "]";
+        assertEquals("Wrapper[CUSTOM[test]]", Wrapper.of("test", String::hashCode, String::equals, branded).toString());
+        assertEquals("Wrapper[***hello***]", Wrapper.of("hello", String::hashCode, String::equals, s -> "***" + s + "***").toString());
+        assertTrue(Wrapper.of("test", String::hashCode, String::equals, s -> "Value is: " + s).toString().contains("Value is: test"));
+
+        ToIntFunction<String> nullSafeHash = s -> s == null ? 0 : s.hashCode();
+        BiPredicate<String, String> nullSafeEq = (s1, s2) -> s1 == null ? s2 == null : s1.equals(s2);
+        Wrapper<String> nullCustom = Wrapper.of(null, nullSafeHash, nullSafeEq);
+        assertEquals(null, nullCustom.value());
+        assertEquals(0, nullCustom.hashCode());
+        assertEquals("Wrapper[NULL]", Wrapper.of(null, nullSafeHash, nullSafeEq, s -> s == null ? "NULL" : s).toString());
+
+        assertThrows(IllegalArgumentException.class, () -> Wrapper.of("test", null, String::equals));
+        assertThrows(IllegalArgumentException.class, () -> Wrapper.of("test", String::hashCode, null));
+        assertThrows(IllegalArgumentException.class, () -> Wrapper.of("test", null, String::equals, String::toUpperCase));
+        assertThrows(IllegalArgumentException.class, () -> Wrapper.of("test", String::hashCode, null, String::toUpperCase));
+        assertThrows(IllegalArgumentException.class, () -> Wrapper.of("test", String::hashCode, String::equals, null));
+    }
+
+    @Test
+    public void testEqualsHashCodeToString() {
+        int[] a = { 1, 2, 3 };
+        int[] b = { 1, 2, 3 };
+        Wrapper<int[]> wa = Wrapper.of(a);
+        Wrapper<int[]> wb = Wrapper.of(b);
+        Wrapper<int[]> wc = Wrapper.of(new int[] { 1, 2, 4 });
+        assertTrue(a != b);
+        assertEquals(wa, wa);
+        assertEquals(wa, wb);
+        assertEquals(wb, wa);
+        assertNotEquals(wa, wc);
+        assertFalse(wa.equals(null));
+        assertFalse(wa.equals("not a wrapper"));
+        assertEquals(wa.hashCode(), wb.hashCode());
+        assertNotEquals(0, wa.hashCode());
+        assertEquals(wa.hashCode(), wa.hashCode());
+        assertTrue(wa.toString().startsWith("Wrapper["));
+        assertTrue(wa.toString().contains("[1, 2, 3]"));
+
+        Wrapper<int[]> w1 = Wrapper.of(a);
+        Wrapper<int[]> w2 = Wrapper.of(b);
+        Wrapper<int[]> w3 = Wrapper.of(new int[] { 1, 2, 3 });
+        assertTrue(w1.equals(w2) && w2.equals(w3) && w1.equals(w3));
+
+        ToIntFunction<String> constantHashFn = s -> 42;
+        Wrapper<String> constantHash = Wrapper.of("hello", constantHashFn, String::equals);
+        assertEquals(42, constantHash.hashCode());
+        assertEquals(42, Wrapper.of("world", constantHashFn, String::equals).hashCode());
+
+        ToIntFunction<String> lengthHash = String::length;
+        BiPredicate<String, String> equalByLength = (s1, s2) -> s1.length() == s2.length();
+        Wrapper<String> byLength = Wrapper.of("abc", lengthHash, equalByLength);
+        assertTrue(byLength.equals(Wrapper.of("xyz", lengthHash, equalByLength)));
+        assertFalse(byLength.equals(Wrapper.of("abcd", lengthHash, equalByLength)));
+    }
+
+    @Test
+    public void testEquals_EdgeCase() {
+        Wrapper<String> deep = Wrapper.of("value");
+        Wrapper<String> customRejecting = Wrapper.of("value", String::hashCode, (left, right) -> false);
+        Wrapper<String> customAcceptingWithDifferentHash = Wrapper.of("value", value -> 7, String::equals);
+        assertFalse(deep.equals(customRejecting));
+        assertFalse(customRejecting.equals(deep));
+        assertFalse(deep.equals(customAcceptingWithDifferentHash));
+        assertFalse(customAcceptingWithDifferentHash.equals(deep));
+
+        Wrapper<String> oneWay = Wrapper.of("left", value -> 0, (left, right) -> true);
+        Wrapper<String> reverseRejecting = Wrapper.of("right", value -> 0, (left, right) -> false);
+        assertFalse(oneWay.equals(reverseRejecting));
+        assertFalse(reverseRejecting.equals(oneWay));
+
+        ToIntFunction<String> hashByLengthA = String::length;
+        ToIntFunction<String> hashByLengthB = String::length;
+        BiPredicate<String, String> equalByLengthA = (left, right) -> left.length() == right.length();
+        BiPredicate<String, String> equalByLengthB = (left, right) -> left.length() == right.length();
+        Wrapper<String> strategyA = Wrapper.of("one", hashByLengthA, equalByLengthA);
+        Wrapper<String> strategyB = Wrapper.of("two", hashByLengthB, equalByLengthB);
+        assertFalse(strategyA.equals(strategyB));
+        assertFalse(strategyB.equals(strategyA));
+
+        Object o1 = new Object();
+        Object o2 = new Object();
+        ToIntFunction<Object> idHash = System::identityHashCode;
+        BiPredicate<Object, Object> idEq = (x, y) -> x == y;
+        Wrapper<Object> w1 = Wrapper.of(o1, idHash, idEq);
+        assertTrue(w1.equals(Wrapper.of(o1, idHash, idEq)));
+        assertEquals(w1.hashCode(), Wrapper.of(o1, idHash, idEq).hashCode());
+        assertFalse(w1.equals(Wrapper.of(o2, idHash, idEq)));
+    }
+
+    @Test
+    public void testCollections() {
+        Map<Wrapper<int[]>, String> map = new HashMap<>();
+        map.put(Wrapper.of(new int[] { 1, 2, 3 }), "value1");
+        map.put(Wrapper.of(new int[] { 4, 5, 6 }), "value3");
+        assertEquals("value1", map.get(Wrapper.of(new int[] { 1, 2, 3 })));
+        assertEquals("value3", map.get(Wrapper.of(new int[] { 4, 5, 6 })));
+        assertEquals(null, map.get(Wrapper.of(new int[] { 9, 9, 9 })));
+
+        Set<Wrapper<int[]>> intSet = new HashSet<>();
+        intSet.add(Wrapper.of(new int[] { 1, 2, 3 }));
+        assertTrue(intSet.contains(Wrapper.of(new int[] { 1, 2, 3 })));
+
+        Set<Wrapper<String[]>> set = new HashSet<>();
+        set.add(Wrapper.of(new String[] { "a", "b", "c" }));
+        set.add(Wrapper.of(new String[] { "a", "b", "c" }));
+        set.add(Wrapper.of(new String[] { "x", "y", "z" }));
+        assertEquals(2, set.size());
+        assertTrue(set.contains(Wrapper.of(new String[] { "a", "b", "c" })));
+    }
+
+    @Test
+    public void testEmptyArrayPool_Concurrent() throws Exception {
         Wrapper.ArrayWrapper.WRAPPER_POOL.remove(EmptyArrayComponent.class);
 
         int threadCount = 24;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         CountDownLatch ready = new CountDownLatch(threadCount);
         CountDownLatch start = new CountDownLatch(1);
-
         try {
             List<Future<Wrapper<EmptyArrayComponent[]>>> futures = new ArrayList<>(threadCount);
-
             for (int i = 0; i < threadCount; i++) {
                 futures.add(executor.submit(() -> {
                     ready.countDown();
@@ -52,11 +236,9 @@ public class WrapperTest extends TestBase {
                     return Wrapper.of(new EmptyArrayComponent[0]);
                 }));
             }
-
             assertTrue(ready.await(10, TimeUnit.SECONDS));
             start.countDown();
             Wrapper<EmptyArrayComponent[]> expected = futures.get(0).get();
-
             for (Future<Wrapper<EmptyArrayComponent[]>> future : futures) {
                 assertSame(expected, future.get());
             }
@@ -65,718 +247,4 @@ public class WrapperTest extends TestBase {
             executor.shutdownNow();
         }
     }
-
-    @Test
-    public void test_wrapperPool_differentTypes() {
-        int[] intArr = new int[0];
-        long[] longArr = new long[0];
-        String[] strArr = new String[0];
-
-        Wrapper<int[]> intWrapper = Wrapper.of(intArr);
-        Wrapper<long[]> longWrapper = Wrapper.of(longArr);
-        Wrapper<String[]> strWrapper = Wrapper.of(strArr);
-
-        assertNotEquals(intWrapper, longWrapper);
-        assertNotEquals(intWrapper, strWrapper);
-        assertNotEquals(longWrapper, strWrapper);
-    }
-
-    @Test
-    public void test_of_multiDimensionalArrays() {
-        int[][] matrix1 = { { 1, 2 }, { 3, 4 } };
-        int[][] matrix2 = { { 1, 2 }, { 3, 4 } };
-        int[][] matrix3 = { { 1, 2 }, { 3, 5 } };
-
-        Wrapper<int[][]> wrapper1 = Wrapper.of(matrix1);
-        Wrapper<int[][]> wrapper2 = Wrapper.of(matrix2);
-        Wrapper<int[][]> wrapper3 = Wrapper.of(matrix3);
-
-        assertEquals(wrapper1, wrapper2);
-        assertNotEquals(wrapper1, wrapper3);
-        assertEquals(wrapper1.hashCode(), wrapper2.hashCode());
-    }
-
-    @Test
-    public void test_of_objectArrays() {
-        String[] arr1 = { "a", "b", "c" };
-        String[] arr2 = { "a", "b", "c" };
-        String[] arr3 = { "a", "b", "d" };
-
-        Wrapper<String[]> wrapper1 = Wrapper.of(arr1);
-        Wrapper<String[]> wrapper2 = Wrapper.of(arr2);
-        Wrapper<String[]> wrapper3 = Wrapper.of(arr3);
-
-        assertEquals(wrapper1, wrapper2);
-        assertNotEquals(wrapper1, wrapper3);
-        assertEquals(wrapper1.hashCode(), wrapper2.hashCode());
-    }
-
-    @Test
-    public void test_of_arrayInHashMap() {
-        int[] key1 = { 1, 2, 3 };
-        int[] key2 = { 1, 2, 3 };
-
-        Map<Wrapper<int[]>, String> map = new HashMap<>();
-        map.put(Wrapper.of(key1), "value1");
-
-        assertEquals("value1", map.get(Wrapper.of(key2)));
-    }
-
-    @Test
-    public void test_of_arrayInHashSet() {
-        int[] arr1 = { 1, 2, 3 };
-        int[] arr2 = { 1, 2, 3 };
-
-        Set<Wrapper<int[]>> set = new HashSet<>();
-        set.add(Wrapper.of(arr1));
-
-        assertTrue(set.contains(Wrapper.of(arr2)));
-    }
-
-    @Test
-    public void test_of_withCustomFunctions() {
-        String str1 = "apple";
-        String str2 = "apricot";
-        String str3 = "banana";
-
-        ToIntFunction<String> hashFunc = s -> s.charAt(0);
-        BiPredicate<String, String> equalsFunc = (s1, s2) -> s1.charAt(0) == s2.charAt(0);
-
-        Wrapper<String> wrapper1 = Wrapper.of(str1, hashFunc, equalsFunc);
-        Wrapper<String> wrapper2 = Wrapper.of(str2, hashFunc, equalsFunc);
-        Wrapper<String> wrapper3 = Wrapper.of(str3, hashFunc, equalsFunc);
-
-        assertEquals(wrapper1, wrapper2);
-        assertEquals(wrapper1.hashCode(), wrapper2.hashCode());
-
-        assertNotEquals(wrapper1, wrapper3);
-    }
-
-    @Test
-    public void test_of_withToString() {
-        String value = "test";
-        ToIntFunction<String> hashFunc = String::hashCode;
-        BiPredicate<String, String> equalsFunc = String::equals;
-        Function<String, String> toStringFunc = s -> "CUSTOM[" + s + "]";
-
-        Wrapper<String> wrapper = Wrapper.of(value, hashFunc, equalsFunc, toStringFunc);
-
-        assertEquals("test", wrapper.value());
-        assertEquals("Wrapper[CUSTOM[test]]", wrapper.toString());
-    }
-
-    @Test
-    public void test_toString_arrayWrapper() {
-        int[] arr = { 1, 2, 3 };
-        Wrapper<int[]> wrapper = Wrapper.of(arr);
-
-        String str = wrapper.toString();
-        assertTrue(str.startsWith("Wrapper["));
-        assertTrue(str.contains("1"));
-        assertTrue(str.contains("2"));
-        assertTrue(str.contains("3"));
-    }
-
-    @Test
-    public void test_toString_customWrapper() {
-        Function<String, String> toStringFunc = s -> "***" + s + "***";
-        Wrapper<String> wrapper = Wrapper.of("hello", String::hashCode, String::equals, toStringFunc);
-
-        assertEquals("Wrapper[***hello***]", wrapper.toString());
-    }
-
-    @Test
-    public void test_differentPrimitiveTypes() {
-        byte[] byteArr1 = { 1, 2, 3 };
-        byte[] byteArr2 = { 1, 2, 3 };
-        assertEquals(Wrapper.of(byteArr1), Wrapper.of(byteArr2));
-
-        short[] shortArr1 = { 1, 2, 3 };
-        short[] shortArr2 = { 1, 2, 3 };
-        assertEquals(Wrapper.of(shortArr1), Wrapper.of(shortArr2));
-
-        long[] longArr1 = { 1L, 2L, 3L };
-        long[] longArr2 = { 1L, 2L, 3L };
-        assertEquals(Wrapper.of(longArr1), Wrapper.of(longArr2));
-
-        float[] floatArr1 = { 1.0f, 2.0f, 3.0f };
-        float[] floatArr2 = { 1.0f, 2.0f, 3.0f };
-        assertEquals(Wrapper.of(floatArr1), Wrapper.of(floatArr2));
-
-        double[] doubleArr1 = { 1.0, 2.0, 3.0 };
-        double[] doubleArr2 = { 1.0, 2.0, 3.0 };
-        assertEquals(Wrapper.of(doubleArr1), Wrapper.of(doubleArr2));
-
-        char[] charArr1 = { 'a', 'b', 'c' };
-        char[] charArr2 = { 'a', 'b', 'c' };
-        assertEquals(Wrapper.of(charArr1), Wrapper.of(charArr2));
-
-        boolean[] boolArr1 = { true, false, true };
-        boolean[] boolArr2 = { true, false, true };
-        assertEquals(Wrapper.of(boolArr1), Wrapper.of(boolArr2));
-    }
-
-    @Test
-    public void testToString() {
-        int[] array = { 1, 2, 3 };
-        Wrapper<int[]> wrapper = Wrapper.of(array);
-
-        String str = wrapper.toString();
-        Assertions.assertTrue(str.contains("Wrapper"));
-        Assertions.assertTrue(str.contains("[1, 2, 3]"));
-    }
-
-    @Test
-    public void testToStringCustom() {
-        Function<String, String> toStringFunction = s -> "Value is: " + s;
-        Wrapper<String> wrapper = Wrapper.of("test", String::hashCode, String::equals, toStringFunction);
-
-        String str = wrapper.toString();
-        Assertions.assertTrue(str.contains("Value is: test"));
-    }
-
-    @Test
-    public void test_of_nullArray() {
-        Wrapper<int[]> wrapper = Wrapper.of(null);
-        assertNotNull(wrapper);
-        assertEquals(null, wrapper.value());
-    }
-
-    @Test
-    public void test_of_zeroLengthPrimitiveArrays() {
-        boolean[] boolArray = new boolean[0];
-        Wrapper<boolean[]> boolWrapper1 = Wrapper.of(boolArray);
-        Wrapper<boolean[]> boolWrapper2 = Wrapper.of(new boolean[0]);
-        assertSame(boolWrapper1, boolWrapper2);
-
-        int[] intArray = new int[0];
-        Wrapper<int[]> intWrapper1 = Wrapper.of(intArray);
-        Wrapper<int[]> intWrapper2 = Wrapper.of(new int[0]);
-        assertSame(intWrapper1, intWrapper2);
-
-        String[] strArray = new String[0];
-        Wrapper<String[]> strWrapper1 = Wrapper.of(strArray);
-        Wrapper<String[]> strWrapper2 = Wrapper.of(new String[0]);
-        assertSame(strWrapper1, strWrapper2);
-    }
-
-    @Test
-    public void test_of_primitiveArrays() {
-        int[] arr1 = { 1, 2, 3 };
-        int[] arr2 = { 1, 2, 3 };
-        int[] arr3 = { 1, 2, 4 };
-
-        Wrapper<int[]> wrapper1 = Wrapper.of(arr1);
-        Wrapper<int[]> wrapper2 = Wrapper.of(arr2);
-        Wrapper<int[]> wrapper3 = Wrapper.of(arr3);
-
-        assertNotNull(wrapper1);
-        assertSame(arr1, wrapper1.value());
-
-        assertEquals(wrapper1, wrapper2);
-        assertNotEquals(wrapper1, wrapper3);
-
-        assertEquals(wrapper1.hashCode(), wrapper2.hashCode());
-    }
-
-    @Test
-    public void test_of_withCustomFunctions_nullValue() {
-        ToIntFunction<String> hashFunc = s -> s == null ? 0 : s.hashCode();
-        BiPredicate<String, String> equalsFunc = (s1, s2) -> {
-            if (s1 == null && s2 == null)
-                return true;
-            if (s1 == null || s2 == null)
-                return false;
-            return s1.equals(s2);
-        };
-
-        Wrapper<String> wrapper = Wrapper.of(null, hashFunc, equalsFunc);
-        assertNotNull(wrapper);
-        assertEquals(null, wrapper.value());
-        assertEquals(0, wrapper.hashCode());
-    }
-
-    @Test
-    public void test_of_withToString_nullValue() {
-        ToIntFunction<String> hashFunc = s -> s == null ? 0 : s.hashCode();
-        BiPredicate<String, String> equalsFunc = (s1, s2) -> {
-            if (s1 == null && s2 == null)
-                return true;
-            if (s1 == null || s2 == null)
-                return false;
-            return s1.equals(s2);
-        };
-        Function<String, String> toStringFunc = s -> s == null ? "NULL" : s;
-
-        Wrapper<String> wrapper = Wrapper.of(null, hashFunc, equalsFunc, toStringFunc);
-        assertEquals("Wrapper[NULL]", wrapper.toString());
-    }
-
-    @Test
-    public void test_nestedArrays() {
-        int[][][] arr1 = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
-        int[][][] arr2 = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
-        int[][][] arr3 = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 9 } } };
-
-        Wrapper<int[][][]> wrapper1 = Wrapper.of(arr1);
-        Wrapper<int[][][]> wrapper2 = Wrapper.of(arr2);
-        Wrapper<int[][][]> wrapper3 = Wrapper.of(arr3);
-
-        assertEquals(wrapper1, wrapper2);
-        assertNotEquals(wrapper1, wrapper3);
-    }
-
-    @Test
-    public void test_of_nonArrayValue() {
-        // Wrapper.of(T) with a non-array value should still work via ArrayWrapper
-        String value = "hello";
-        Wrapper<String> wrapper = Wrapper.of(value);
-        assertNotNull(wrapper);
-        assertSame(value, wrapper.value());
-
-        // Two wrappers of equal non-array values should be equal
-        Wrapper<String> wrapper2 = Wrapper.of("hello");
-        assertEquals(wrapper, wrapper2);
-        assertEquals(wrapper.hashCode(), wrapper2.hashCode());
-    }
-
-    @Test
-    public void test_of_nullArray_hashCodeAndEquals() {
-        Wrapper<int[]> w1 = Wrapper.of(null);
-        Wrapper<int[]> w2 = Wrapper.of(null);
-
-        assertSame(w1, w2); // should return the same cached instance
-        assertEquals(w1.hashCode(), w2.hashCode());
-        assertTrue(w1.equals(w2));
-    }
-
-    @Test
-    public void test_toString_nullArrayWrapper() {
-        Wrapper<int[]> wrapper = Wrapper.of(null);
-        String str = wrapper.toString();
-        assertNotNull(str);
-        assertTrue(str.contains("Wrapper["));
-    }
-
-    @Test
-    public void test_of_zeroLengthArrayCaching() {
-        // Verify caching for various zero-length array types
-        double[] emptyDoubleArr = new double[0];
-        Wrapper<double[]> dw1 = Wrapper.of(emptyDoubleArr);
-        Wrapper<double[]> dw2 = Wrapper.of(new double[0]);
-        assertSame(dw1, dw2);
-
-        char[] emptyCharArr = new char[0];
-        Wrapper<char[]> cw1 = Wrapper.of(emptyCharArr);
-        Wrapper<char[]> cw2 = Wrapper.of(new char[0]);
-        assertSame(cw1, cw2);
-
-        float[] emptyFloatArr = new float[0];
-        Wrapper<float[]> fw1 = Wrapper.of(emptyFloatArr);
-        Wrapper<float[]> fw2 = Wrapper.of(new float[0]);
-        assertSame(fw1, fw2);
-    }
-
-    @Test
-    public void testOfArray() {
-        int[] array = { 1, 2, 3 };
-        Wrapper<int[]> wrapper = Wrapper.of(array);
-
-        Assertions.assertNotNull(wrapper);
-        Assertions.assertArrayEquals(array, wrapper.value());
-    }
-
-    @Test
-    public void testOfNullArray() {
-        Wrapper<Object> wrapper = Wrapper.of(null);
-        Assertions.assertNotNull(wrapper);
-        Assertions.assertNull(wrapper.value());
-    }
-
-    @Test
-    public void testOfEmptyArray() {
-        int[] emptyArray = new int[0];
-        Wrapper<int[]> wrapper1 = Wrapper.of(emptyArray);
-        Wrapper<int[]> wrapper2 = Wrapper.of(new int[0]);
-
-        Assertions.assertSame(wrapper1, wrapper2);
-    }
-
-    @Test
-    public void testOfWithCustomFunctions() {
-        String value = "test";
-        ToIntFunction<String> hashFunction = String::length;
-        BiPredicate<String, String> equalsFunction = String::equalsIgnoreCase;
-
-        Wrapper<String> wrapper = Wrapper.of(value, hashFunction, equalsFunction);
-
-        Assertions.assertEquals(value, wrapper.value());
-        Assertions.assertEquals(4, wrapper.hashCode());
-    }
-
-    @Test
-    public void testOfWithAllFunctions() {
-        String value = "test";
-        ToIntFunction<String> hashFunction = String::length;
-        BiPredicate<String, String> equalsFunction = String::equalsIgnoreCase;
-        Function<String, String> toStringFunction = s -> "Custom: " + s;
-
-        Wrapper<String> wrapper = Wrapper.of(value, hashFunction, equalsFunction, toStringFunction);
-
-        Assertions.assertEquals(value, wrapper.value());
-        Assertions.assertTrue(wrapper.toString().contains("Custom: test"));
-    }
-
-    @Test
-    public void test_of_withCustomFunctions_nullHashFunction() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Wrapper.of("test", null, (s1, s2) -> s1.equals(s2));
-        });
-    }
-
-    @Test
-    public void test_of_withCustomFunctions_nullEqualsFunction() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Wrapper.of("test", String::hashCode, null);
-        });
-    }
-
-    @Test
-    public void test_of_withToString_nullHashFunction() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Wrapper.of("test", null, (s1, s2) -> s1.equals(s2), String::toUpperCase);
-        });
-    }
-
-    @Test
-    public void test_of_withToString_nullEqualsFunction() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Wrapper.of("test", String::hashCode, null, String::toUpperCase);
-        });
-    }
-
-    @Test
-    public void test_of_withToString_nullToStringFunction() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Wrapper.of("test", String::hashCode, String::equals, null);
-        });
-    }
-
-    @Test
-    public void testOfWithNullFunctions() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Wrapper.of("test", null, (a, b) -> true);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Wrapper.of("test", String::hashCode, null);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Wrapper.of("test", String::hashCode, String::equals, null);
-        });
-    }
-
-    @Test
-    public void testValue() {
-        String value = "test";
-        Wrapper<String> wrapper = Wrapper.of(value, String::hashCode, String::equals);
-
-        Assertions.assertEquals(value, wrapper.value());
-    }
-
-    @Test
-    public void test_value() {
-        int[] array = { 1, 2, 3 };
-        Wrapper<int[]> wrapper = Wrapper.of(array);
-
-        assertSame(array, wrapper.value());
-    }
-
-    @Test
-    public void test_value_withCustomWrapper() {
-        String str = "hello";
-        Wrapper<String> wrapper = Wrapper.of(str, String::hashCode, String::equals);
-
-        assertSame(str, wrapper.value());
-    }
-
-    @Test
-    public void test_value_null() {
-        Wrapper<int[]> wrapper = Wrapper.of(null);
-        assertEquals(null, wrapper.value());
-    }
-
-    @Test
-    public void test_hashCode_arrays() {
-        int[] arr1 = { 1, 2, 3 };
-        int[] arr2 = { 1, 2, 3 };
-        int[] arr3 = { 3, 2, 1 };
-
-        Wrapper<int[]> wrapper1 = Wrapper.of(arr1);
-        Wrapper<int[]> wrapper2 = Wrapper.of(arr2);
-        Wrapper<int[]> wrapper3 = Wrapper.of(arr3);
-
-        assertEquals(wrapper1.hashCode(), wrapper2.hashCode());
-
-        assertNotEquals(0, wrapper1.hashCode());
-    }
-
-    @Test
-    public void test_hashCode_customFunction() {
-        ToIntFunction<String> hashFunc = s -> 42;
-        BiPredicate<String, String> equalsFunc = String::equals;
-
-        Wrapper<String> wrapper1 = Wrapper.of("hello", hashFunc, equalsFunc);
-        Wrapper<String> wrapper2 = Wrapper.of("world", hashFunc, equalsFunc);
-
-        assertEquals(42, wrapper1.hashCode());
-        assertEquals(42, wrapper2.hashCode());
-    }
-
-    @Test
-    public void test_hashCode_consistency() {
-        int[] arr = { 1, 2, 3 };
-        Wrapper<int[]> wrapper = Wrapper.of(arr);
-
-        int hash1 = wrapper.hashCode();
-        int hash2 = wrapper.hashCode();
-
-        assertEquals(hash1, hash2);
-    }
-
-    @Test
-    public void testHashCodeArray() {
-        int[] array1 = { 1, 2, 3 };
-        int[] array2 = { 1, 2, 3 };
-
-        Wrapper<int[]> wrapper1 = Wrapper.of(array1);
-        Wrapper<int[]> wrapper2 = Wrapper.of(array2);
-
-        Assertions.assertEquals(wrapper1.hashCode(), wrapper2.hashCode());
-    }
-
-    @Test
-    public void testHashCodeCustom() {
-        String value = "test";
-        ToIntFunction<String> hashFunction = s -> 42;
-        BiPredicate<String, String> equalsFunction = String::equals;
-
-        Wrapper<String> wrapper = Wrapper.of(value, hashFunction, equalsFunction);
-
-        Assertions.assertEquals(42, wrapper.hashCode());
-    }
-
-    @Test
-    public void test_hashCode_nullWrapper() {
-        Wrapper<Object> wrapper = Wrapper.of(null);
-        // Should not throw, should return consistent hash code
-        int hash1 = wrapper.hashCode();
-        int hash2 = wrapper.hashCode();
-        assertEquals(hash1, hash2);
-    }
-
-    @Test
-    public void test_equals_differentType() {
-        int[] arr = { 1, 2, 3 };
-        Wrapper<int[]> wrapper = Wrapper.of(arr);
-
-        assertFalse(wrapper.equals("not a wrapper"));
-    }
-
-    @Test
-    public void test_equals_arrays() {
-        int[] arr1 = { 1, 2, 3 };
-        int[] arr2 = { 1, 2, 3 };
-        int[] arr3 = { 1, 2, 4 };
-
-        Wrapper<int[]> wrapper1 = Wrapper.of(arr1);
-        Wrapper<int[]> wrapper2 = Wrapper.of(arr2);
-        Wrapper<int[]> wrapper3 = Wrapper.of(arr3);
-
-        assertTrue(wrapper1.equals(wrapper2));
-        assertFalse(wrapper1.equals(wrapper3));
-    }
-
-    @Test
-    public void test_equals_customFunction() {
-        BiPredicate<String, String> equalsFunc = (s1, s2) -> s1.length() == s2.length();
-        ToIntFunction<String> hashFunc = String::length;
-
-        Wrapper<String> wrapper1 = Wrapper.of("abc", hashFunc, equalsFunc);
-        Wrapper<String> wrapper2 = Wrapper.of("xyz", hashFunc, equalsFunc);
-        Wrapper<String> wrapper3 = Wrapper.of("abcd", hashFunc, equalsFunc);
-
-        assertTrue(wrapper1.equals(wrapper2));
-        assertFalse(wrapper1.equals(wrapper3));
-    }
-
-    @Test
-    public void test_equals_symmetry() {
-        int[] arr1 = { 1, 2, 3 };
-        int[] arr2 = { 1, 2, 3 };
-
-        Wrapper<int[]> wrapper1 = Wrapper.of(arr1);
-        Wrapper<int[]> wrapper2 = Wrapper.of(arr2);
-
-        assertTrue(wrapper1.equals(wrapper2));
-        assertTrue(wrapper2.equals(wrapper1));
-    }
-
-    @Test
-    public void test_equals_symmetryAcrossDifferentStrategies() {
-        Wrapper<String> deep = Wrapper.of("value");
-        Wrapper<String> customRejecting = Wrapper.of("value", String::hashCode, (left, right) -> false);
-        Wrapper<String> customAcceptingWithDifferentHash = Wrapper.of("value", value -> 7, String::equals);
-
-        assertFalse(deep.equals(customRejecting));
-        assertFalse(customRejecting.equals(deep));
-        assertFalse(deep.equals(customAcceptingWithDifferentHash));
-        assertFalse(customAcceptingWithDifferentHash.equals(deep));
-
-        Wrapper<String> oneWay = Wrapper.of("left", value -> 0, (left, right) -> true);
-        Wrapper<String> reverseRejecting = Wrapper.of("right", value -> 0, (left, right) -> false);
-
-        assertFalse(oneWay.equals(reverseRejecting));
-        assertFalse(reverseRejecting.equals(oneWay));
-
-        ToIntFunction<String> hashByLengthA = String::length;
-        ToIntFunction<String> hashByLengthB = String::length;
-        BiPredicate<String, String> equalByLengthA = (left, right) -> left.length() == right.length();
-        BiPredicate<String, String> equalByLengthB = (left, right) -> left.length() == right.length();
-
-        Wrapper<String> strategyA = Wrapper.of("one", hashByLengthA, equalByLengthA);
-        Wrapper<String> strategyB = Wrapper.of("two", hashByLengthB, equalByLengthB);
-        assertFalse(strategyA.equals(strategyB));
-        assertFalse(strategyB.equals(strategyA));
-    }
-
-    @Test
-    public void test_equals_transitivity() {
-        int[] arr1 = { 1, 2, 3 };
-        int[] arr2 = { 1, 2, 3 };
-        int[] arr3 = { 1, 2, 3 };
-
-        Wrapper<int[]> wrapper1 = Wrapper.of(arr1);
-        Wrapper<int[]> wrapper2 = Wrapper.of(arr2);
-        Wrapper<int[]> wrapper3 = Wrapper.of(arr3);
-
-        assertTrue(wrapper1.equals(wrapper2));
-        assertTrue(wrapper2.equals(wrapper3));
-        assertTrue(wrapper1.equals(wrapper3));
-    }
-
-    @Test
-    public void test_equals_sameInstance() {
-        int[] arr = { 1, 2, 3 };
-        Wrapper<int[]> wrapper = Wrapper.of(arr);
-
-        assertTrue(wrapper.equals(wrapper));
-    }
-
-    @Test
-    public void test_equals_nullObject() {
-        int[] arr = { 1, 2, 3 };
-        Wrapper<int[]> wrapper = Wrapper.of(arr);
-
-        assertFalse(wrapper.equals(null));
-    }
-
-    @Test
-    public void testEqualsArray() {
-        int[] array1 = { 1, 2, 3 };
-        int[] array2 = { 1, 2, 3 };
-        int[] array3 = { 1, 2, 4 };
-
-        Wrapper<int[]> wrapper1 = Wrapper.of(array1);
-        Wrapper<int[]> wrapper2 = Wrapper.of(array2);
-        Wrapper<int[]> wrapper3 = Wrapper.of(array3);
-
-        Assertions.assertEquals(wrapper1, wrapper2);
-        Assertions.assertNotEquals(wrapper1, wrapper3);
-        Assertions.assertEquals(wrapper1, wrapper1);
-        Assertions.assertNotEquals(wrapper1, null);
-        Assertions.assertNotEquals(wrapper1, "string");
-    }
-
-    @Test
-    public void testEqualsCustom() {
-        ToIntFunction<String> hashFunction = String::length;
-        BiPredicate<String, String> equalsFunction = String::equalsIgnoreCase;
-
-        Wrapper<String> wrapper1 = Wrapper.of("TEST", hashFunction, equalsFunction);
-        Wrapper<String> wrapper2 = Wrapper.of("test", hashFunction, equalsFunction);
-        Wrapper<String> wrapper3 = Wrapper.of("other", hashFunction, equalsFunction);
-
-        Assertions.assertEquals(wrapper1, wrapper2);
-        Assertions.assertNotEquals(wrapper1, wrapper3);
-    }
-
-    @Test
-    public void test_integration_hashSet() {
-        Set<Wrapper<String[]>> set = new HashSet<>();
-
-        String[] arr1 = { "a", "b", "c" };
-        String[] arr2 = { "a", "b", "c" };
-        String[] arr3 = { "x", "y", "z" };
-
-        set.add(Wrapper.of(arr1));
-        set.add(Wrapper.of(arr2));
-        set.add(Wrapper.of(arr3));
-
-        assertEquals(2, set.size());
-        assertTrue(set.contains(Wrapper.of(new String[] { "a", "b", "c" })));
-        assertTrue(set.contains(Wrapper.of(arr3)));
-    }
-
-    @Test
-    public void test_integration_hashMap() {
-        Map<Wrapper<int[]>, String> map = new HashMap<>();
-
-        int[] key1 = { 1, 2, 3 };
-        int[] key2 = { 1, 2, 3 };
-        int[] key3 = { 4, 5, 6 };
-
-        map.put(Wrapper.of(key1), "value1");
-        map.put(Wrapper.of(key3), "value3");
-
-        assertEquals("value1", map.get(Wrapper.of(key2)));
-        assertEquals("value3", map.get(Wrapper.of(key3)));
-        assertEquals(null, map.get(Wrapper.of(new int[] { 9, 9, 9 })));
-    }
-
-    @Test
-    public void test_arrayWrapper_equals_arrayContent_notIdentity() {
-        // Two distinct array instances with identical contents must be equal under
-        // Wrapper.of(Object) (deep array semantics).
-        int[] a = { 1, 2, 3 };
-        int[] b = { 1, 2, 3 };
-        assertNotNull(a);
-        assertTrue(a != b); // distinct references
-        Wrapper<int[]> wa = Wrapper.of(a);
-        Wrapper<int[]> wb = Wrapper.of(b);
-        assertTrue(wa.equals(wb));
-        assertTrue(wb.equals(wa));
-        assertEquals(wa.hashCode(), wb.hashCode());
-    }
-
-    @Test
-    public void test_customWrapper_identitySemantics_viaCustomFunctions() {
-        // Identity-style wrapper using System.identityHashCode + reference equality.
-        Object o1 = new Object();
-        Object o2 = new Object();
-        ToIntFunction<Object> idHash = System::identityHashCode;
-        BiPredicate<Object, Object> idEq = (x, y) -> x == y;
-
-        Wrapper<Object> w1 = Wrapper.of(o1, idHash, idEq);
-        Wrapper<Object> w1Same = Wrapper.of(o1, idHash, idEq);
-        Wrapper<Object> w2 = Wrapper.of(o2, idHash, idEq);
-
-        // Same wrapped reference => equal
-        assertTrue(w1.equals(w1Same));
-        assertEquals(w1.hashCode(), w1Same.hashCode());
-        // Distinct references => not equal even though both Object's default equals is identity
-        assertFalse(w1.equals(w2));
-    }
-
 }

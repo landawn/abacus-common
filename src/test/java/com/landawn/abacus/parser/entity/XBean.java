@@ -7,20 +7,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.adapter.DateAdapter;
 import com.landawn.abacus.parser.adapter.SqlDateAdapter;
 import com.landawn.abacus.parser.adapter.SqlTimestampAdapter;
-import com.landawn.abacus.types.WeekDay;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import testfixtures.types.WeekDay;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
-public class XBean {
+public class XBean extends TestBase {
     @XmlElement(name = "typeBoolean")
     private boolean typeBoolean;
     @XmlElement(name = "typeBoolean2")
@@ -259,19 +260,7 @@ public class XBean {
             return false;
         }
 
-        if (typeInt != other.typeInt) {
-            return false;
-        }
-
-        if (typeLong != other.typeLong) {
-            return false;
-        }
-
-        if (!Objects.equals(typeLong2, other.typeLong2)) {
-            return false;
-        }
-
-        if (typeShort != other.typeShort) {
+        if ((typeInt != other.typeInt) || (typeLong != other.typeLong) || !Objects.equals(typeLong2, other.typeLong2) || (typeShort != other.typeShort)) {
             return false;
         }
 

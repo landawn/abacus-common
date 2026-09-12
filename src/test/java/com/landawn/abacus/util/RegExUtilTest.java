@@ -1,7 +1,6 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -9,13 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -61,6 +58,18 @@ public class RegExUtilTest extends AbstractTest {
         assertTrue(RegExUtil.NUMBER_FINDER.matcher("100.").find());
         assertTrue(RegExUtil.NUMBER_FINDER.matcher(".25").find());
         assertFalse(RegExUtil.NUMBER_FINDER.matcher("abc").find());
+
+        Matcher leading = RegExUtil.NUMBER_FINDER.matcher(".25");
+        assertTrue(leading.find());
+        assertEquals(".25", leading.group(1));
+
+        Matcher signedLeading = RegExUtil.NUMBER_FINDER.matcher("-.5");
+        assertTrue(signedLeading.find());
+        assertEquals("-.5", signedLeading.group(1));
+
+        Matcher trailing = RegExUtil.NUMBER_FINDER.matcher("100.");
+        assertTrue(trailing.find());
+        assertEquals("100.", trailing.group(1));
     }
 
     @Test
@@ -71,6 +80,14 @@ public class RegExUtilTest extends AbstractTest {
         assertTrue(RegExUtil.SCIENTIFIC_NUMBER_FINDER.matcher("+6.022e23").find());
         assertTrue(RegExUtil.SCIENTIFIC_NUMBER_FINDER.matcher("42").find());
         assertFalse(RegExUtil.SCIENTIFIC_NUMBER_FINDER.matcher("abc").find());
+
+        Matcher leadingSci = RegExUtil.SCIENTIFIC_NUMBER_FINDER.matcher(".5e2");
+        assertTrue(leadingSci.find());
+        assertEquals(".5e2", leadingSci.group(1));
+
+        Matcher signedLeadingSci = RegExUtil.SCIENTIFIC_NUMBER_FINDER.matcher("-.5e2");
+        assertTrue(signedLeadingSci.find());
+        assertEquals("-.5e2", signedLeadingSci.group(1));
     }
 
     @Test
@@ -144,6 +161,12 @@ public class RegExUtilTest extends AbstractTest {
         assertTrue(RegExUtil.HTTP_URL_MATCHER.matcher("https://example.com?view=compact#summary").matches());
         assertTrue(RegExUtil.HTTP_URL_MATCHER.matcher("https://example.com#summary").matches());
         assertTrue(RegExUtil.HTTP_URL_FINDER.matcher("HTTP://EXAMPLE.COM").find());
+        assertTrue(RegExUtil.HTTP_URL_MATCHER.matcher("https://example.com/foo-bar").matches());
+        assertTrue(RegExUtil.HTTP_URL_MATCHER.matcher("https://example.com/search?q=hello+world").matches());
+        assertTrue(RegExUtil.HTTP_URL_MATCHER.matcher("https://example.com/a%20b").matches());
+        assertTrue(RegExUtil.HTTP_URL_MATCHER.matcher("https://example.com/~user").matches());
+        assertEquals("https://example.com/foo-bar", RegExUtil.findFirst("Visit https://example.com/foo-bar today", RegExUtil.HTTP_URL_FINDER));
+        assertFalse(RegExUtil.HTTP_URL_MATCHER.matcher("http://.").matches());
         assertFalse(RegExUtil.HTTP_URL_FINDER.matcher("ftp://example.com").find());
     }
 
@@ -270,21 +293,21 @@ public class RegExUtilTest extends AbstractTest {
     @Test
     @DisplayName("Test find(String, String) with valid regex")
     public void testFindWithRegex() {
+        Pattern digits = Pattern.compile("\\d+");
         assertTrue(RegExUtil.find("Hello123World", "\\d+"));
+        assertTrue(RegExUtil.find("Hello123World", digits));
         assertTrue(RegExUtil.find("test@example.com", "\\w+@\\w+\\.\\w+"));
         assertFalse(RegExUtil.find("Hello World", "\\d+"));
+        assertFalse(RegExUtil.find("Hello World", digits));
         assertFalse(RegExUtil.find(null, "\\d+"));
+        assertFalse(RegExUtil.find(null, digits));
         assertFalse(RegExUtil.find("", "\\d+"));
-    }
-
-    @Test
-    @DisplayName("Test find(String, Pattern) with valid pattern")
-    public void testFindWithPattern() {
-        Pattern pattern = Pattern.compile("\\d+");
-        assertTrue(RegExUtil.find("Hello123World", pattern));
-        assertFalse(RegExUtil.find("Hello World", pattern));
-        assertFalse(RegExUtil.find(null, pattern));
-        assertFalse(RegExUtil.find("", pattern));
+        assertFalse(RegExUtil.find("", digits));
+        assertTrue(RegExUtil.find("Hello World", "World"));
+        assertTrue(RegExUtil.find("Price: $99.99", "\\$\\d+\\.\\d+"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.find("test", (String) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.find("test", ""));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.find("test", (Pattern) null));
     }
 
     @Test
@@ -324,42 +347,6 @@ public class RegExUtilTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test find(String, String) with null/empty regex throws exception")
-    public void testFindWithNullRegex() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.find("test", (String) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.find("test", ""));
-    }
-
-    @Test
-    @DisplayName("Test find(String, Pattern) with null pattern throws exception")
-    public void testFindWithNullPattern() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.find("test", (Pattern) null));
-    }
-
-    @Test
-    public void testFindWithString() {
-        Assertions.assertTrue(RegExUtil.find("Hello World", "World"));
-        Assertions.assertFalse(RegExUtil.find("Hello World", "world"));
-        Assertions.assertTrue(RegExUtil.find("Hello World", "\\w+"));
-        Assertions.assertFalse(RegExUtil.find("Hello World", "\\d+"));
-
-        Assertions.assertTrue(RegExUtil.find("Contact: john@example.com", "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}"));
-
-        Assertions.assertFalse(RegExUtil.find("", "test"));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.find("test", ""));
-
-        Assertions.assertTrue(RegExUtil.find("Price: $99.99", "\\$\\d+\\.\\d+"));
-    }
-
-    @Test
-    public void testFindInvalidInput() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.find("test", (String) null));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.find("test", ""));
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.find("test", (Pattern) null));
-    }
-
-    @Test
     @DisplayName("Test INTEGER_MATCHER pattern")
     public void testIntegerMatcher() {
         assertTrue(RegExUtil.INTEGER_MATCHER.matcher("123").matches());
@@ -373,7 +360,12 @@ public class RegExUtilTest extends AbstractTest {
     public void testNumberMatcher() {
         assertTrue(RegExUtil.NUMBER_MATCHER.matcher("123").matches());
         assertTrue(RegExUtil.NUMBER_MATCHER.matcher("123.45").matches());
+        assertTrue(RegExUtil.NUMBER_MATCHER.matcher(".5").matches());
+        assertTrue(RegExUtil.NUMBER_MATCHER.matcher("-.5").matches());
+        assertTrue(RegExUtil.NUMBER_MATCHER.matcher("1.").matches());
         assertFalse(RegExUtil.NUMBER_MATCHER.matcher("abc123").matches());
+        assertTrue(RegExUtil.SCIENTIFIC_NUMBER_MATCHER.matcher(".5e2").matches());
+        assertTrue(RegExUtil.SCIENTIFIC_NUMBER_MATCHER.matcher("-.5e2").matches());
     }
 
     @Test
@@ -395,44 +387,19 @@ public class RegExUtilTest extends AbstractTest {
     @Test
     @DisplayName("Test matches(String, String) with valid regex")
     public void testMatchesWithRegex() {
+        Pattern digits = Pattern.compile("\\d+");
         assertTrue(RegExUtil.matches("123", "\\d+"));
+        assertTrue(RegExUtil.matches("123", digits));
         assertTrue(RegExUtil.matches("abc", "[a-z]+"));
         assertFalse(RegExUtil.matches("abc123", "\\d+"));
+        assertFalse(RegExUtil.matches("abc123", digits));
         assertFalse(RegExUtil.matches(null, "\\d+"));
+        assertFalse(RegExUtil.matches(null, digits));
         assertFalse(RegExUtil.matches("", "\\d+"));
-    }
-
-    @Test
-    @DisplayName("Test matches(String, Pattern) with valid pattern")
-    public void testMatchesWithPattern() {
-        Pattern pattern = Pattern.compile("\\d+");
-        assertTrue(RegExUtil.matches("123", pattern));
-        assertFalse(RegExUtil.matches("abc123", pattern));
-        assertFalse(RegExUtil.matches(null, pattern));
-        assertFalse(RegExUtil.matches("", pattern));
-    }
-
-    @Test
-    @DisplayName("Test matches(String, String) with null/empty regex throws exception")
-    public void testMatchesWithNullRegex() {
+        assertTrue(RegExUtil.matches("hello@example.com", "[a-z]+@[a-z]+\\.[a-z]+"));
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.matches("test", (String) null));
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.matches("test", ""));
-    }
-
-    @Test
-    @DisplayName("Test matches(String, Pattern) with null pattern throws exception")
-    public void testMatchesWithNullPattern() {
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.matches("test", (Pattern) null));
-    }
-
-    @Test
-    public void testMatchesWithString() {
-        Assertions.assertTrue(RegExUtil.matches("123", "\\d+"));
-        Assertions.assertFalse(RegExUtil.matches("abc123", "\\d+"));
-        Assertions.assertTrue(RegExUtil.matches("hello@example.com", "[a-z]+@[a-z]+\\.[a-z]+"));
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.matches("", ""));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> RegExUtil.matches("test", ""));
     }
 
     @Test
@@ -679,8 +646,11 @@ public class RegExUtilTest extends AbstractTest {
         Pattern pattern = Pattern.compile("\\d+");
         assertNull(RegExUtil.findFirst(null, pattern));
 
-        // Verify null is converted to empty string internally
-        assertEquals(RegExUtil.findFirst("", pattern), RegExUtil.findFirst(null, pattern));
+        // A null source is NOT normalized to "": it is never handed to a matcher, so even a pattern that can
+        // match the empty string finds nothing in it - while an empty source is matched normally.
+        final Pattern zeroWidth = Pattern.compile("\\d*");
+        assertNull(RegExUtil.findFirst(null, zeroWidth));
+        assertEquals("", RegExUtil.findFirst("", zeroWidth));
     }
 
     @Test
@@ -803,49 +773,6 @@ public class RegExUtilTest extends AbstractTest {
         assertEquals("dog dog", RegExUtil.findLast("the the cat cat dog dog", backrefPattern));
     }
 
-    // ===========================================
-    // Tests for findFirst(String, String) and findLast(String, String) methods
-    // ===========================================
-
-    @Test
-    @DisplayName("Test findFirst(String, String) with single match")
-    public void testFindFirstStringRegexWithSingleMatch() {
-        assertEquals("123", RegExUtil.findFirst("abc123def", "\\d+"));
-        assertEquals("test", RegExUtil.findFirst("This is a test string", "test"));
-        assertEquals("World", RegExUtil.findFirst("Hello World", "World"));
-    }
-
-    @Test
-    @DisplayName("Test findFirst(String, String) with multiple matches returns first")
-    public void testFindFirstStringRegexWithMultipleMatches() {
-        assertEquals("123", RegExUtil.findFirst("abc123def456ghi789", "\\d+"));
-        assertEquals("cat", RegExUtil.findFirst("The cat and the cat again", "cat"));
-        assertEquals("10", RegExUtil.findFirst("Price: 10.99 and 20.50", "\\d+"));
-    }
-
-    @Test
-    @DisplayName("Test findFirst(String, String) with no match returns null")
-    public void testFindFirstStringRegexWithNoMatch() {
-        assertNull(RegExUtil.findFirst("abc def ghi", "\\d+"));
-        assertNull(RegExUtil.findFirst("Hello World", "xyz"));
-        assertNull(RegExUtil.findFirst("no numbers", "[0-9]+"));
-    }
-
-    @Test
-    @DisplayName("Test findFirst(String, String) with null source returns null")
-    public void testFindFirstStringRegexWithNullSource() {
-        assertNull(RegExUtil.findFirst(null, "\\d+"));
-        assertNull(RegExUtil.findFirst(null, "test"));
-    }
-
-    @Test
-    @DisplayName("Test findFirst(String, String) with empty source returns null")
-    public void testFindFirstStringRegexWithEmptySource() {
-        assertNull(RegExUtil.findFirst("", "\\d+"));
-        assertNull(RegExUtil.findFirst("", "test"));
-        assertEquals("", RegExUtil.findFirst("", ".*")); // Pattern matches empty string
-    }
-
     @Test
     @DisplayName("Test findFirst(String, String) with common patterns")
     public void testFindFirstStringRegexWithCommonPatterns() {
@@ -946,20 +873,11 @@ public class RegExUtilTest extends AbstractTest {
     public void testFindFirstWithNullPattern() {
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.findFirst("test", (Pattern) null));
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.findFirst(null, (Pattern) null));
-    }
-
-    @Test
-    @DisplayName("Test findFirst(String, String) with null regex throws exception")
-    public void testFindFirstStringRegexWithNullRegex() {
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.findFirst("test", (String) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.findFirst(null, (String) null));
-    }
-
-    @Test
-    @DisplayName("Test findFirst(String, String) with empty regex throws exception")
-    public void testFindFirstStringRegexWithEmptyRegex() {
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.findFirst("test", ""));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.findFirst("", ""));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.findLast("test", (String) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.findLast("test", ""));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.findLast("test", (Pattern) null));
     }
 
     @Test
@@ -1069,8 +987,11 @@ public class RegExUtilTest extends AbstractTest {
         Pattern pattern = Pattern.compile("\\d+");
         assertNull(RegExUtil.findLast(null, pattern));
 
-        // Verify null is converted to empty string internally
-        assertEquals(RegExUtil.findLast("", pattern), RegExUtil.findLast(null, pattern));
+        // A null source is NOT normalized to "": it is never handed to a matcher, so even a pattern that can
+        // match the empty string finds nothing in it - while an empty source is matched normally.
+        final Pattern zeroWidth = Pattern.compile("\\d*");
+        assertNull(RegExUtil.findLast(null, zeroWidth));
+        assertEquals("", RegExUtil.findLast("", zeroWidth));
     }
 
     @Test
@@ -1147,45 +1068,6 @@ public class RegExUtilTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test findLast(String, String) with single match")
-    public void testFindLastStringRegexWithSingleMatch() {
-        assertEquals("123", RegExUtil.findLast("abc123def", "\\d+"));
-        assertEquals("test", RegExUtil.findLast("This is a test string", "test"));
-        assertEquals("World", RegExUtil.findLast("Hello World", "World"));
-    }
-
-    @Test
-    @DisplayName("Test findLast(String, String) with multiple matches returns last")
-    public void testFindLastStringRegexWithMultipleMatches() {
-        assertEquals("789", RegExUtil.findLast("abc123def456ghi789", "\\d+"));
-        assertEquals("cat", RegExUtil.findLast("The cat and the cat again", "cat"));
-        assertEquals("50", RegExUtil.findLast("Price: 10.99 and 20.50", "\\d+"));
-    }
-
-    @Test
-    @DisplayName("Test findLast(String, String) with no match returns null")
-    public void testFindLastStringRegexWithNoMatch() {
-        assertNull(RegExUtil.findLast("abc def ghi", "\\d+"));
-        assertNull(RegExUtil.findLast("Hello World", "xyz"));
-        assertNull(RegExUtil.findLast("no numbers", "[0-9]+"));
-    }
-
-    @Test
-    @DisplayName("Test findLast(String, String) with null source returns null")
-    public void testFindLastStringRegexWithNullSource() {
-        assertNull(RegExUtil.findLast(null, "\\d+"));
-        assertNull(RegExUtil.findLast(null, "test"));
-    }
-
-    @Test
-    @DisplayName("Test findLast(String, String) with empty source returns null")
-    public void testFindLastStringRegexWithEmptySource() {
-        assertNull(RegExUtil.findLast("", "\\d+"));
-        assertNull(RegExUtil.findLast("", "test"));
-        assertEquals("", RegExUtil.findLast("", ".*")); // Pattern matches empty string
-    }
-
-    @Test
     @DisplayName("Test findLast(String, String) with common patterns")
     public void testFindLastStringRegexWithCommonPatterns() {
         // Email pattern
@@ -1238,105 +1120,34 @@ public class RegExUtilTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test findLast with null pattern throws exception")
-    public void testFindLastWithNullPattern() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.findLast("test", (Pattern) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.findLast(null, (Pattern) null));
-    }
-
-    @Test
-    @DisplayName("Test findLast(String, String) with null regex throws exception")
-    public void testFindLastStringRegexWithNullRegex() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.findLast("test", (String) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.findLast(null, (String) null));
-    }
-
-    @Test
-    @DisplayName("Test findLast(String, String) with empty regex throws exception")
-    public void testFindLastStringRegexWithEmptyRegex() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.findLast("test", ""));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.findLast("", ""));
-    }
-
-    @Test
     @DisplayName("Test removeFirst(String, String) with valid regex")
     public void testRemoveFirstWithRegex() {
+        Pattern digits = Pattern.compile("\\d+");
         assertEquals("HelloWorld456", RegExUtil.removeFirst("Hello123World456", "\\d+"));
+        assertEquals("HelloWorld456", RegExUtil.removeFirst("Hello123World456", digits));
         assertEquals("", RegExUtil.removeFirst(null, "\\d+"));
+        assertEquals("", RegExUtil.removeFirst(null, digits));
         assertEquals("", RegExUtil.removeFirst("", "\\d+"));
         assertEquals("abc", RegExUtil.removeFirst("abc", "\\d+"));
-    }
-
-    @Test
-    @DisplayName("Test removeFirst(String, Pattern) with valid pattern")
-    public void testRemoveFirstWithPattern() {
-        Pattern pattern = Pattern.compile("\\d+");
-        assertEquals("HelloWorld456", RegExUtil.removeFirst("Hello123World456", pattern));
-        assertEquals("", RegExUtil.removeFirst(null, pattern));
-        assertEquals("", RegExUtil.removeFirst("", pattern));
-    }
-
-    @Test
-    public void testRemoveFirst() {
-        Assertions.assertEquals("HelloWorld456", RegExUtil.removeFirst("Hello123World456", "\\d+"));
-        Assertions.assertEquals("Hello   World", RegExUtil.removeFirst("Hello   World   !", "\\s+!"));
-
-        Assertions.assertEquals("Hello", RegExUtil.removeFirst("Hello", "\\d+"));
-
-        Assertions.assertEquals("", RegExUtil.removeFirst(null, "\\d+"));
-    }
-
-    @Test
-    @DisplayName("Test removeFirst(String, String) with null/empty regex throws exception")
-    public void testRemoveFirstWithNullRegex() {
+        assertEquals("Hello   World", RegExUtil.removeFirst("Hello   World   !", "\\s+!"));
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.removeFirst("test", (String) null));
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.removeFirst("test", ""));
-    }
-
-    @Test
-    @DisplayName("Test removeFirst(String, Pattern) with null pattern throws exception")
-    public void testRemoveFirstWithNullPattern() {
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.removeFirst("test", (Pattern) null));
     }
 
     @Test
     @DisplayName("Test removeLast(String, String) with valid regex")
     public void testRemoveLastWithRegex() {
+        Pattern digits = Pattern.compile("\\d+");
         assertEquals("Hello123World", RegExUtil.removeLast("Hello123World456", "\\d+"));
+        assertEquals("Hello123World", RegExUtil.removeLast("Hello123World456", digits));
         assertEquals("", RegExUtil.removeLast(null, "\\d+"));
+        assertEquals("", RegExUtil.removeLast(null, digits));
         assertEquals("", RegExUtil.removeLast("", "\\d+"));
         assertEquals("abc", RegExUtil.removeLast("abc", "\\d+"));
-    }
-
-    @Test
-    @DisplayName("Test removeLast(String, Pattern) with valid pattern")
-    public void testRemoveLastWithPattern() {
-        Pattern pattern = Pattern.compile("\\d+");
-        assertEquals("Hello123World", RegExUtil.removeLast("Hello123World456", pattern));
-        assertEquals("", RegExUtil.removeLast(null, pattern));
-        assertEquals("", RegExUtil.removeLast("", pattern));
-    }
-
-    @Test
-    public void testRemoveLast() {
-        Assertions.assertEquals("Hello123World", RegExUtil.removeLast("Hello123World456", "\\d+"));
-        Assertions.assertEquals("Hello   World", RegExUtil.removeLast("Hello   World   !", "\\s+!"));
-
-        Assertions.assertEquals("Hello", RegExUtil.removeLast("Hello", "\\d+"));
-
-        Assertions.assertEquals("", RegExUtil.removeLast(null, "\\d+"));
-    }
-
-    @Test
-    @DisplayName("Test removeLast(String, String) with null/empty regex throws exception")
-    public void testRemoveLastWithNullRegex() {
+        assertEquals("Hello   World", RegExUtil.removeLast("Hello   World   !", "\\s+!"));
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.removeLast("test", (String) null));
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.removeLast("test", ""));
-    }
-
-    @Test
-    @DisplayName("Test removeLast(String, Pattern) with null pattern throws exception")
-    public void testRemoveLastWithNullPattern() {
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.removeLast("test", (Pattern) null));
     }
 
@@ -1345,12 +1156,10 @@ public class RegExUtilTest extends AbstractTest {
         String text = "This is a string  with spaces,\ttabs,\nand newlines.";
 
         String ret = RegExUtil.removeAll(text, RegExUtil.WHITESPACE_FINDER);
-        N.println(ret);
 
         assertEquals("Thisisastringwithspaces,tabs,andnewlines.", ret);
 
         ret = RegExUtil.replaceAll(text, RegExUtil.WHITESPACE_FINDER, " ");
-        N.println(ret);
 
         assertEquals("This is a string with spaces, tabs, and newlines.", ret);
 
@@ -1360,91 +1169,72 @@ public class RegExUtilTest extends AbstractTest {
         assertFalse(RegExUtil.matches(text, RegExUtil.WHITESPACE_MATCHER));
         assertFalse(RegExUtil.find(text, RegExUtil.WHITESPACE_MATCHER));
 
-        N.println("a b c".split(" "));
-        assertTrue(N.equals(new String[] { "a", "b", "c" }, "a b c".split(" ")));
-        assertTrue(N.equals(new String[] { "a", "b", "c" }, "a b c".split(" ", 0)));
-        assertTrue(N.equals(new String[] { "a", "b", "c" }, "a b c".split(" ", -1)));
-        assertTrue(N.equals(new String[] { "a b c" }, "a b c".split(" ", 1)));
-        assertTrue(N.equals(new String[] { "a", "b c" }, "a b c".split(" ", 2)));
-        assertTrue(N.equals(new String[] { "a", "b", "c" }, "a b c".split(RegExUtil.WHITESPACE_FINDER.pattern())));
-        assertTrue(N.equals(new String[] { "a b c" }, "a b c".split(RegExUtil.WHITESPACE_MATCHER.pattern())));
-        assertTrue(N.equals(new String[] { "" }, "".split(" ")));
-        assertTrue(N.equals(new String[] { "" }, "".split(RegExUtil.WHITESPACE_FINDER.pattern())));
-        assertTrue(N.equals(new String[] { "" }, "".split(RegExUtil.WHITESPACE_MATCHER.pattern())));
+        assertTrue(CommonUtil.equals(new String[] { "a", "b", "c" }, "a b c".split(" ")));
+        assertTrue(CommonUtil.equals(new String[] { "a", "b", "c" }, "a b c".split(" ", 0)));
+        assertTrue(CommonUtil.equals(new String[] { "a", "b", "c" }, "a b c".split(" ", -1)));
+        assertTrue(CommonUtil.equals(new String[] { "a b c" }, "a b c".split(" ", 1)));
+        assertTrue(CommonUtil.equals(new String[] { "a", "b c" }, "a b c".split(" ", 2)));
+        assertTrue(CommonUtil.equals(new String[] { "a", "b", "c" }, "a b c".split(RegExUtil.WHITESPACE_FINDER.pattern())));
+        assertTrue(CommonUtil.equals(new String[] { "a b c" }, "a b c".split(RegExUtil.WHITESPACE_MATCHER.pattern())));
+        assertTrue(CommonUtil.equals(new String[] { "" }, "".split(" ")));
+        assertTrue(CommonUtil.equals(new String[] { "" }, "".split(RegExUtil.WHITESPACE_FINDER.pattern())));
+        assertTrue(CommonUtil.equals(new String[] { "" }, "".split(RegExUtil.WHITESPACE_MATCHER.pattern())));
 
-        assertTrue(N.equals(new String[] { "" }, RegExUtil.split("", " ")));
-        assertTrue(N.equals(new String[] { "" }, RegExUtil.split("", RegExUtil.WHITESPACE_FINDER.pattern())));
-        assertTrue(N.equals(new String[] { "" }, RegExUtil.split("", RegExUtil.WHITESPACE_MATCHER.pattern())));
-        assertTrue(N.equals(N.EMPTY_STRING_ARRAY, RegExUtil.split(null, " ")));
-        assertTrue(N.equals(N.EMPTY_STRING_ARRAY, RegExUtil.split(null, RegExUtil.WHITESPACE_FINDER.pattern())));
-        assertTrue(N.equals(N.EMPTY_STRING_ARRAY, RegExUtil.split(null, RegExUtil.WHITESPACE_MATCHER.pattern())));
+        assertTrue(CommonUtil.equals(new String[] { "" }, RegExUtil.split("", " ")));
+        assertTrue(CommonUtil.equals(new String[] { "" }, RegExUtil.split("", RegExUtil.WHITESPACE_FINDER.pattern())));
+        assertTrue(CommonUtil.equals(new String[] { "" }, RegExUtil.split("", RegExUtil.WHITESPACE_MATCHER.pattern())));
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, RegExUtil.split(null, " ")));
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, RegExUtil.split(null, RegExUtil.WHITESPACE_FINDER.pattern())));
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, RegExUtil.split(null, RegExUtil.WHITESPACE_MATCHER.pattern())));
 
-        assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Splitter.with(" ").splitToArray(null)));
-        assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Splitter.with(RegExUtil.WHITESPACE_FINDER).splitToArray(null)));
-        assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Splitter.with(RegExUtil.WHITESPACE_MATCHER).splitToArray(null)));
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Splitter.with(" ").splitToArray(null)));
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Splitter.with(RegExUtil.WHITESPACE_FINDER).splitToArray(null)));
+        assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Splitter.with(RegExUtil.WHITESPACE_MATCHER).splitToArray(null)));
 
-        assertTrue(N.equals(new String[] { "" }, Splitter.with(" ").splitToArray("")));
-        assertTrue(N.equals(new String[] { "" }, Splitter.with(RegExUtil.WHITESPACE_FINDER).splitToArray("")));
-        assertTrue(N.equals(new String[] { "" }, Splitter.with(RegExUtil.WHITESPACE_MATCHER).splitToArray("")));
+        assertTrue(CommonUtil.equals(new String[] { "" }, Splitter.with(" ").splitToArray("")));
+        assertTrue(CommonUtil.equals(new String[] { "" }, Splitter.with(RegExUtil.WHITESPACE_FINDER).splitToArray("")));
+        assertTrue(CommonUtil.equals(new String[] { "" }, Splitter.with(RegExUtil.WHITESPACE_MATCHER).splitToArray("")));
     }
 
     @Test
     @DisplayName("Test removeAll(String, String) with valid regex")
     public void testRemoveAllWithRegex() {
+        Pattern digits = Pattern.compile("\\d+");
         assertEquals("HelloWorld", RegExUtil.removeAll("Hello123World456", "\\d+"));
+        assertEquals("HelloWorld", RegExUtil.removeAll("Hello123World456", digits));
         assertEquals("", RegExUtil.removeAll("123456", "\\d+"));
         assertEquals("HelloWorld", RegExUtil.removeAll("Hello   World", "\\s+"));
         assertEquals("", RegExUtil.removeAll(null, "\\d+"));
+        assertEquals("", RegExUtil.removeAll(null, digits));
         assertEquals("", RegExUtil.removeAll("", "\\d+"));
         assertEquals("abc", RegExUtil.removeAll("abc", "\\d+"));
-    }
-
-    @Test
-    @DisplayName("Test removeAll(String, Pattern) with valid pattern")
-    public void testRemoveAllWithPattern() {
-        Pattern pattern = Pattern.compile("\\d+");
-        assertEquals("HelloWorld", RegExUtil.removeAll("Hello123World456", pattern));
-        assertEquals("", RegExUtil.removeAll(null, pattern));
-        assertEquals("", RegExUtil.removeAll("", pattern));
-    }
-
-    @Test
-    public void testRemoveAll() {
-        Assertions.assertEquals("HelloWorld", RegExUtil.removeAll("Hello123World456", "\\d+"));
-        Assertions.assertEquals("", RegExUtil.removeAll("12345", "\\d+"));
-        Assertions.assertEquals("test", RegExUtil.removeAll("test", "\\d+"));
-
-        Assertions.assertEquals("HelloWorld", RegExUtil.removeAll("Hello   World", "\\s+"));
-
-        Assertions.assertEquals("", RegExUtil.removeAll(null, "\\d+"));
-    }
-
-    @Test
-    @DisplayName("Test removeAll(String, String) with null/empty regex throws exception")
-    public void testRemoveAllWithNullRegex() {
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.removeAll("test", (String) null));
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.removeAll("test", ""));
-    }
-
-    @Test
-    @DisplayName("Test removeAll(String, Pattern) with null pattern throws exception")
-    public void testRemoveAllWithNullPattern() {
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.removeAll("test", (Pattern) null));
     }
 
     @Test
     @DisplayName("Test replaceFirst(String, String, String) with valid regex")
     public void testReplaceFirstWithRegex() {
+        Pattern digits = Pattern.compile("\\d+");
         assertEquals("HelloXXXWorld456", RegExUtil.replaceFirst("Hello123World456", "\\d+", "XXX"));
+        assertEquals("HelloXXXWorld456", RegExUtil.replaceFirst("Hello123World456", digits, "XXX"));
         assertEquals("", RegExUtil.replaceFirst(null, "\\d+", "XXX"));
+        assertEquals("", RegExUtil.replaceFirst(null, digits, "XXX"));
         assertEquals("", RegExUtil.replaceFirst("", "\\d+", "XXX"));
         assertEquals("abc", RegExUtil.replaceFirst("abc", "\\d+", "XXX"));
+        assertEquals("Hello_World", RegExUtil.replaceFirst("Hello   World", "\\s+", "_"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("test", (String) null, "X"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("test", "", "X"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("test", (Pattern) null, "X"));
     }
 
     @Test
     @DisplayName("Test replaceFirst(String, String, Function) with function replacer")
     public void testReplaceFirstWithRegexAndFunction() {
+        Pattern word = Pattern.compile("\\b\\w");
         assertEquals("Hello world", RegExUtil.replaceFirst("hello world", "\\b\\w", match -> match.toUpperCase()));
+        assertEquals("Hello world", RegExUtil.replaceFirst("hello world", word, match -> match.toUpperCase()));
         assertEquals("", RegExUtil.replaceFirst(null, "\\d+", match -> "X"));
         assertEquals("", RegExUtil.replaceFirst("", "\\d+", match -> "X"));
     }
@@ -1452,75 +1242,11 @@ public class RegExUtilTest extends AbstractTest {
     @Test
     @DisplayName("Test replaceFirst(String, String, IntBiFunction) with function replacer")
     public void testReplaceFirstWithRegexAndIntBiFunction() {
+        Pattern digits = Pattern.compile("\\d+");
         assertEquals("abc[3-6]def456", RegExUtil.replaceFirst("abc123def456", "\\d+", (start, end) -> "[" + start + "-" + end + "]"));
+        assertEquals("abc[3-6]def456", RegExUtil.replaceFirst("abc123def456", digits, (start, end) -> "[" + start + "-" + end + "]"));
         assertEquals("", RegExUtil.replaceFirst(null, "\\d+", (start, end) -> "X"));
         assertEquals("", RegExUtil.replaceFirst("", "\\d+", (start, end) -> "X"));
-    }
-
-    @Test
-    @DisplayName("Test replaceFirst(String, Pattern, String) with valid pattern")
-    public void testReplaceFirstWithPattern() {
-        Pattern pattern = Pattern.compile("\\d+");
-        assertEquals("HelloXXXWorld456", RegExUtil.replaceFirst("Hello123World456", pattern, "XXX"));
-        assertEquals("", RegExUtil.replaceFirst(null, pattern, "XXX"));
-        assertEquals("", RegExUtil.replaceFirst("", pattern, "XXX"));
-    }
-
-    @Test
-    @DisplayName("Test replaceFirst(String, Pattern, Function) with function replacer")
-    public void testReplaceFirstWithPatternAndFunction() {
-        Pattern pattern = Pattern.compile("\\b\\w");
-        assertEquals("Hello world", RegExUtil.replaceFirst("hello world", pattern, match -> match.toUpperCase()));
-        assertEquals("", RegExUtil.replaceFirst(null, pattern, match -> "X"));
-        assertEquals("", RegExUtil.replaceFirst("", pattern, match -> "X"));
-    }
-
-    @Test
-    @DisplayName("Test replaceFirst(String, Pattern, IntBiFunction) with function replacer")
-    public void testReplaceFirstWithPatternAndIntBiFunction() {
-        Pattern pattern = Pattern.compile("\\d+");
-        assertEquals("abc[3-6]def456", RegExUtil.replaceFirst("abc123def456", pattern, (start, end) -> "[" + start + "-" + end + "]"));
-        assertEquals("", RegExUtil.replaceFirst(null, pattern, (start, end) -> "X"));
-        assertEquals("", RegExUtil.replaceFirst("", pattern, (start, end) -> "X"));
-    }
-
-    @Test
-    public void testReplaceFirst() {
-        Assertions.assertEquals("HelloXXXWorld456", RegExUtil.replaceFirst("Hello123World456", "\\d+", "XXX"));
-        Assertions.assertEquals("Hello_World", RegExUtil.replaceFirst("Hello   World", "\\s+", "_"));
-
-        Assertions.assertEquals("Hello", RegExUtil.replaceFirst("Hello", "\\d+", "X"));
-
-        Assertions.assertEquals("", RegExUtil.replaceFirst(null, "\\d+", "X"));
-    }
-
-    @Test
-    public void testReplaceFirstWithFunction() {
-        String result = RegExUtil.replaceFirst("hello world", "\\b\\w", match -> match.toUpperCase());
-        Assertions.assertEquals("Hello world", result);
-
-        Assertions.assertEquals("", RegExUtil.replaceFirst(null, "\\d+", match -> "X"));
-    }
-
-    @Test
-    public void testReplaceFirstWithIntBiFunction() {
-        String result = RegExUtil.replaceFirst("abc123def456", "\\d+", (start, end) -> "[" + start + "-" + end + "]");
-        Assertions.assertEquals("abc[3-6]def456", result);
-
-        Assertions.assertEquals("", RegExUtil.replaceFirst(null, "\\d+", (start, end) -> "X"));
-    }
-
-    @Test
-    @DisplayName("Test replaceFirst(String, String, String) with null/empty regex throws exception")
-    public void testReplaceFirstWithNullRegex() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("test", (String) null, "X"));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("test", "", "X"));
-    }
-
-    @Test
-    @DisplayName("Test replaceFirst(String, Pattern, String) with null pattern throws exception")
-    public void testReplaceFirstWithNullPattern() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("test", (Pattern) null, "X"));
     }
 
     @Test
@@ -1532,16 +1258,24 @@ public class RegExUtilTest extends AbstractTest {
     @Test
     @DisplayName("Test replaceLast(String, String, String) with valid regex")
     public void testReplaceLastWithRegex() {
+        Pattern digits = Pattern.compile("\\d+");
         assertEquals("Hello123WorldXXX", RegExUtil.replaceLast("Hello123World456", "\\d+", "XXX"));
+        assertEquals("Hello123WorldXXX", RegExUtil.replaceLast("Hello123World456", digits, "XXX"));
         assertEquals("", RegExUtil.replaceLast(null, "\\d+", "XXX"));
         assertEquals("", RegExUtil.replaceLast("", "\\d+", "XXX"));
         assertEquals("abc", RegExUtil.replaceLast("abc", "\\d+", "XXX"));
+        assertEquals("Hello   World_!", RegExUtil.replaceLast("Hello   World   !", "\\s+", "_"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("test", (String) null, "X"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("test", "", "X"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("test", (Pattern) null, "X"));
     }
 
     @Test
     @DisplayName("Test replaceLast(String, String, Function) with function replacer")
     public void testReplaceLastWithRegexAndFunction() {
+        Pattern hello = Pattern.compile("hello");
         assertEquals("hello world HELLO", RegExUtil.replaceLast("hello world hello", "hello", match -> match.toUpperCase()));
+        assertEquals("hello world HELLO", RegExUtil.replaceLast("hello world hello", hello, match -> match.toUpperCase()));
         assertEquals("", RegExUtil.replaceLast(null, "\\d+", match -> "X"));
         assertEquals("", RegExUtil.replaceLast("", "\\d+", match -> "X"));
     }
@@ -1549,81 +1283,17 @@ public class RegExUtilTest extends AbstractTest {
     @Test
     @DisplayName("Test replaceLast(String, String, IntBiFunction) with function replacer")
     public void testReplaceLastWithRegexAndIntBiFunction() {
+        Pattern digits = Pattern.compile("\\d+");
         assertEquals("abc123def[9-12]", RegExUtil.replaceLast("abc123def456", "\\d+", (start, end) -> "[" + start + "-" + end + "]"));
+        assertEquals("abc123def[9-12]", RegExUtil.replaceLast("abc123def456", digits, (start, end) -> "[" + start + "-" + end + "]"));
         assertEquals("", RegExUtil.replaceLast(null, "\\d+", (start, end) -> "X"));
         assertEquals("", RegExUtil.replaceLast("", "\\d+", (start, end) -> "X"));
-    }
-
-    @Test
-    @DisplayName("Test replaceLast(String, Pattern, String) with valid pattern")
-    public void testReplaceLastWithPattern() {
-        Pattern pattern = Pattern.compile("\\d+");
-        assertEquals("Hello123WorldXXX", RegExUtil.replaceLast("Hello123World456", pattern, "XXX"));
-        assertEquals("", RegExUtil.replaceLast(null, pattern, "XXX"));
-        assertEquals("", RegExUtil.replaceLast("", pattern, "XXX"));
-    }
-
-    @Test
-    @DisplayName("Test replaceLast(String, Pattern, Function) with function replacer")
-    public void testReplaceLastWithPatternAndFunction() {
-        Pattern pattern = Pattern.compile("hello");
-        assertEquals("hello world HELLO", RegExUtil.replaceLast("hello world hello", pattern, match -> match.toUpperCase()));
-        assertEquals("", RegExUtil.replaceLast(null, pattern, match -> "X"));
-        assertEquals("", RegExUtil.replaceLast("", pattern, match -> "X"));
-    }
-
-    @Test
-    @DisplayName("Test replaceLast(String, Pattern, IntBiFunction) with function replacer")
-    public void testReplaceLastWithPatternAndIntBiFunction() {
-        Pattern pattern = Pattern.compile("\\d+");
-        assertEquals("abc123def[9-12]", RegExUtil.replaceLast("abc123def456", pattern, (start, end) -> "[" + start + "-" + end + "]"));
-        assertEquals("", RegExUtil.replaceLast(null, pattern, (start, end) -> "X"));
-        assertEquals("", RegExUtil.replaceLast("", pattern, (start, end) -> "X"));
     }
 
     @Test
     @DisplayName("Test replaceLast with single match")
     public void testReplaceLastWithSingleMatch() {
         assertEquals("HelloXXXWorld", RegExUtil.replaceLast("Hello123World", "\\d+", "XXX"));
-    }
-
-    @Test
-    public void testReplaceLast() {
-        Assertions.assertEquals("Hello123WorldXXX", RegExUtil.replaceLast("Hello123World456", "\\d+", "XXX"));
-        Assertions.assertEquals("Hello   World_!", RegExUtil.replaceLast("Hello   World   !", "\\s+", "_"));
-
-        Assertions.assertEquals("Hello", RegExUtil.replaceLast("Hello", "\\d+", "X"));
-
-        Assertions.assertEquals("", RegExUtil.replaceLast(null, "\\d+", "X"));
-    }
-
-    @Test
-    public void testReplaceLastWithFunction() {
-        String result = RegExUtil.replaceLast("hello world hello", "hello", match -> match.toUpperCase());
-        Assertions.assertEquals("hello world HELLO", result);
-
-        Assertions.assertEquals("", RegExUtil.replaceLast(null, "\\d+", match -> "X"));
-    }
-
-    @Test
-    public void testReplaceLastWithIntBiFunction() {
-        String result = RegExUtil.replaceLast("abc123def456", "\\d+", (start, end) -> "[" + start + "-" + end + "]");
-        Assertions.assertEquals("abc123def[9-12]", result);
-
-        Assertions.assertEquals("", RegExUtil.replaceLast(null, "\\d+", (start, end) -> "X"));
-    }
-
-    @Test
-    @DisplayName("Test replaceLast(String, String, String) with null/empty regex throws exception")
-    public void testReplaceLastWithNullRegex() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("test", (String) null, "X"));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("test", "", "X"));
-    }
-
-    @Test
-    @DisplayName("Test replaceLast(String, Pattern, String) with null pattern throws exception")
-    public void testReplaceLastWithNullPattern() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceLast("test", (Pattern) null, "X"));
     }
 
     @Test
@@ -1636,18 +1306,27 @@ public class RegExUtilTest extends AbstractTest {
     @Test
     @DisplayName("Test replaceAll(String, String, String) with valid regex")
     public void testReplaceAllWithRegex() {
+        Pattern spaces = Pattern.compile("\\s+");
         assertEquals("Hello World", RegExUtil.replaceAll("Hello   World", "\\s+", " "));
+        assertEquals("Hello World", RegExUtil.replaceAll("Hello   World", spaces, " "));
         assertEquals("HelloXXXWorldXXX", RegExUtil.replaceAll("Hello123World456", "\\d+", "XXX"));
+        assertEquals("X-X-X", RegExUtil.replaceAll("123-456-789", "\\d+", "X"));
         assertEquals("", RegExUtil.replaceAll(null, "\\d+", "XXX"));
         assertEquals("", RegExUtil.replaceAll("", "\\d+", "XXX"));
         assertEquals("abc", RegExUtil.replaceAll("abc", "\\d+", "XXX"));
         assertEquals("HelloWorld", RegExUtil.replaceAll("Hello123World", "\\d+", (String) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("test", (String) null, "X"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("test", "", "X"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("test", (Pattern) null, "X"));
     }
 
     @Test
     @DisplayName("Test replaceAll(String, String, Function) with function replacer")
     public void testReplaceAllWithRegexAndFunction() {
+        Pattern word = Pattern.compile("\\b\\w");
         assertEquals("Hello World", RegExUtil.replaceAll("hello world", "\\b\\w", match -> match.toUpperCase()));
+        assertEquals("Hello World", RegExUtil.replaceAll("hello world", word, match -> match.toUpperCase()));
+        assertEquals("2 4 6", RegExUtil.replaceAll("1 2 3", "\\d", match -> String.valueOf(Integer.parseInt(match) * 2)));
         assertEquals("", RegExUtil.replaceAll(null, "\\d+", match -> "X"));
         assertEquals("", RegExUtil.replaceAll("", "\\d+", match -> "X"));
     }
@@ -1655,36 +1334,12 @@ public class RegExUtilTest extends AbstractTest {
     @Test
     @DisplayName("Test replaceAll(String, String, IntBiFunction) with function replacer")
     public void testReplaceAllWithRegexAndIntBiFunction() {
+        Pattern digits = Pattern.compile("\\d+");
         assertEquals("abc[3-6]def", RegExUtil.replaceAll("abc123def", "\\d+", (start, end) -> "[" + start + "-" + end + "]"));
+        assertEquals("abc[3-6]def", RegExUtil.replaceAll("abc123def", digits, (start, end) -> "[" + start + "-" + end + "]"));
+        assertEquals("a{1}b{3}c{5}", RegExUtil.replaceAll("a1b2c3", "\\d", (start, end) -> "{" + start + "}"));
         assertEquals("", RegExUtil.replaceAll(null, "\\d+", (start, end) -> "X"));
         assertEquals("", RegExUtil.replaceAll("", "\\d+", (start, end) -> "X"));
-    }
-
-    @Test
-    @DisplayName("Test replaceAll(String, Pattern, String) with valid pattern")
-    public void testReplaceAllWithPattern() {
-        Pattern pattern = Pattern.compile("\\s+");
-        assertEquals("Hello World", RegExUtil.replaceAll("Hello   World", pattern, " "));
-        assertEquals("", RegExUtil.replaceAll(null, pattern, " "));
-        assertEquals("", RegExUtil.replaceAll("", pattern, " "));
-    }
-
-    @Test
-    @DisplayName("Test replaceAll(String, Pattern, Function) with function replacer")
-    public void testReplaceAllWithPatternAndFunction() {
-        Pattern pattern = Pattern.compile("\\b\\w");
-        assertEquals("Hello World", RegExUtil.replaceAll("hello world", pattern, match -> match.toUpperCase()));
-        assertEquals("", RegExUtil.replaceAll(null, pattern, match -> "X"));
-        assertEquals("", RegExUtil.replaceAll("", pattern, match -> "X"));
-    }
-
-    @Test
-    @DisplayName("Test replaceAll(String, Pattern, IntBiFunction) with function replacer")
-    public void testReplaceAllWithPatternAndIntBiFunction() {
-        Pattern pattern = Pattern.compile("\\d+");
-        assertEquals("abc[3-6]def", RegExUtil.replaceAll("abc123def", pattern, (start, end) -> "[" + start + "-" + end + "]"));
-        assertEquals("", RegExUtil.replaceAll(null, pattern, (start, end) -> "X"));
-        assertEquals("", RegExUtil.replaceAll("", pattern, (start, end) -> "X"));
     }
 
     @Test
@@ -1708,51 +1363,6 @@ public class RegExUtilTest extends AbstractTest {
     }
 
     @Test
-    public void testReplaceAll() {
-        Assertions.assertEquals("Hello World", RegExUtil.replaceAll("Hello   World", "\\s+", " "));
-        Assertions.assertEquals("X-X-X", RegExUtil.replaceAll("123-456-789", "\\d+", "X"));
-
-        Assertions.assertEquals("HelloWorld", RegExUtil.replaceAll("Hello123World", "\\d+", (String) null));
-
-        Assertions.assertEquals("", RegExUtil.replaceAll(null, "\\d+", "X"));
-    }
-
-    @Test
-    public void testReplaceAllWithFunction() {
-        String result = RegExUtil.replaceAll("hello world", "\\b\\w", match -> match.toUpperCase());
-        Assertions.assertEquals("Hello World", result);
-
-        result = RegExUtil.replaceAll("1 2 3", "\\d", match -> String.valueOf(Integer.parseInt(match) * 2));
-        Assertions.assertEquals("2 4 6", result);
-
-        Assertions.assertEquals("", RegExUtil.replaceAll(null, "\\d+", match -> "X"));
-    }
-
-    @Test
-    public void testReplaceAllWithIntBiFunction() {
-        String result = RegExUtil.replaceAll("abc123def", "\\d+", (start, end) -> "[" + start + "-" + end + "]");
-        Assertions.assertEquals("abc[3-6]def", result);
-
-        result = RegExUtil.replaceAll("a1b2c3", "\\d", (start, end) -> "{" + start + "}");
-        Assertions.assertEquals("a{1}b{3}c{5}", result);
-
-        Assertions.assertEquals("", RegExUtil.replaceAll(null, "\\d+", (start, end) -> "X"));
-    }
-
-    @Test
-    @DisplayName("Test replaceAll(String, String, String) with null/empty regex throws exception")
-    public void testReplaceAllWithNullRegex() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("test", (String) null, "X"));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("test", "", "X"));
-    }
-
-    @Test
-    @DisplayName("Test replaceAll(String, Pattern, String) with null pattern throws exception")
-    public void testReplaceAllWithNullPattern() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("test", (Pattern) null, "X"));
-    }
-
-    @Test
     @DisplayName("Test overlapping patterns")
     public void testOverlappingPatterns() {
         String text = "aaaa";
@@ -1763,42 +1373,16 @@ public class RegExUtilTest extends AbstractTest {
     @Test
     @DisplayName("Test countMatches(String, String) with valid regex")
     public void testCountMatchesWithRegex() {
+        Pattern digits = Pattern.compile("\\d+");
         assertEquals(3, RegExUtil.countMatches("Hello World", "l"));
         assertEquals(2, RegExUtil.countMatches("abc123def456", "\\d+"));
+        assertEquals(3, RegExUtil.countMatches("abc123def456ghi789", digits));
         assertEquals(0, RegExUtil.countMatches("abc", "\\d+"));
         assertEquals(0, RegExUtil.countMatches(null, "\\d+"));
+        assertEquals(0, RegExUtil.countMatches(null, digits));
         assertEquals(0, RegExUtil.countMatches("", "\\d+"));
-    }
-
-    @Test
-    @DisplayName("Test countMatches(String, Pattern) with valid pattern")
-    public void testCountMatchesWithPattern() {
-        Pattern pattern = Pattern.compile("\\d+");
-        assertEquals(3, RegExUtil.countMatches("abc123def456ghi789", pattern));
-        assertEquals(0, RegExUtil.countMatches(null, pattern));
-        assertEquals(0, RegExUtil.countMatches("", pattern));
-    }
-
-    @Test
-    public void testCountMatches() {
-        Assertions.assertEquals(3, RegExUtil.countMatches("Hello World", "l"));
-        Assertions.assertEquals(2, RegExUtil.countMatches("abc123def456", "\\d+"));
-        Assertions.assertEquals(0, RegExUtil.countMatches("Hello", "\\d"));
-
-        Assertions.assertEquals(0, RegExUtil.countMatches("", "test"));
-        Assertions.assertEquals(0, RegExUtil.countMatches(null, "test"));
-    }
-
-    @Test
-    @DisplayName("Test countMatches(String, String) with null/empty regex throws exception")
-    public void testCountMatchesWithNullRegex() {
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.countMatches("test", (String) null));
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.countMatches("test", ""));
-    }
-
-    @Test
-    @DisplayName("Test countMatches(String, Pattern) with null pattern throws exception")
-    public void testCountMatchesWithNullPattern() {
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.countMatches("test", (Pattern) null));
     }
 
@@ -1816,51 +1400,11 @@ public class RegExUtilTest extends AbstractTest {
         matches = RegExUtil.matchResults("", "\\d+");
         assertNotNull(matches);
         assertEquals(0, matches.count());
-    }
 
-    @Test
-    @DisplayName("Test matchResults(String, Pattern) with valid pattern")
-    public void testMatchResultsWithPattern() {
-        Pattern pattern = Pattern.compile("\\d+");
-        Stream<MatchResult> matches = RegExUtil.matchResults("abc123def456", pattern);
-        assertNotNull(matches);
-        assertEquals(2, matches.count());
-
-        matches = RegExUtil.matchResults(null, pattern);
-        assertNotNull(matches);
-        assertEquals(0, matches.count());
-
-        matches = RegExUtil.matchResults("", pattern);
-        assertNotNull(matches);
-        assertEquals(0, matches.count());
-    }
-
-    @Test
-    public void testMatchResults() {
-        Stream<MatchResult> matches = RegExUtil.matchResults("abc123def456", "\\d+");
-        List<String> results = matches.map(MatchResult::group).collect(Collectors.toList());
-        Assertions.assertEquals(Arrays.asList("123", "456"), results);
-
-        matches = RegExUtil.matchResults("no numbers", "\\d+");
-        Assertions.assertEquals(0, matches.count());
-
-        matches = RegExUtil.matchResults(null, "\\d+");
-        Assertions.assertEquals(0, matches.count());
-
-        matches = RegExUtil.matchResults("", "\\d+");
-        Assertions.assertEquals(0, matches.count());
-    }
-
-    @Test
-    @DisplayName("Test matchResults(String, String) with null/empty regex throws exception")
-    public void testMatchResultsWithNullRegex() {
+        Pattern digits = Pattern.compile("\\d+");
+        assertEquals(2, RegExUtil.matchResults("abc123def456", digits).count());
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.matchResults("test", (String) null));
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.matchResults("test", ""));
-    }
-
-    @Test
-    @DisplayName("Test matchResults(String, Pattern) with null pattern throws exception")
-    public void testMatchResultsWithNullPattern() {
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.matchResults("test", (Pattern) null));
     }
 
@@ -1869,20 +1413,6 @@ public class RegExUtilTest extends AbstractTest {
     public void testMatchIndicesWithNoMatches() {
         IntStream indices = RegExUtil.matchIndices("abc", "\\d+");
         assertEquals(0, indices.count());
-    }
-
-    @Test
-    public void testMatchIndices() {
-        IntStream indices = RegExUtil.matchIndices("Hello World", "l");
-        int[] indicesArray = indices.toArray();
-        Assertions.assertArrayEquals(new int[] { 2, 3, 9 }, indicesArray);
-
-        indices = RegExUtil.matchIndices("abc123def456ghi", "\\d+");
-        indicesArray = indices.toArray();
-        Assertions.assertArrayEquals(new int[] { 3, 9 }, indicesArray);
-
-        indices = RegExUtil.matchIndices("no matches", "\\d+");
-        Assertions.assertEquals(0, indices.count());
     }
 
     @Test
@@ -1899,35 +1429,11 @@ public class RegExUtilTest extends AbstractTest {
         indices = RegExUtil.matchIndices("", "\\d+");
         assertNotNull(indices);
         assertEquals(0, indices.count());
-    }
 
-    @Test
-    @DisplayName("Test matchIndices(String, Pattern) with valid pattern")
-    public void testMatchIndicesWithPattern() {
-        Pattern pattern = Pattern.compile("\\d+");
-        IntStream indices = RegExUtil.matchIndices("abc123def456ghi", pattern);
-        assertNotNull(indices);
-        assertArrayEquals(new int[] { 3, 9 }, indices.toArray());
-
-        indices = RegExUtil.matchIndices(null, pattern);
-        assertNotNull(indices);
-        assertEquals(0, indices.count());
-
-        indices = RegExUtil.matchIndices("", pattern);
-        assertNotNull(indices);
-        assertEquals(0, indices.count());
-    }
-
-    @Test
-    @DisplayName("Test matchIndices(String, String) with null/empty regex throws exception")
-    public void testMatchIndicesWithNullRegex() {
+        Pattern ell = Pattern.compile("l");
+        assertArrayEquals(new int[] { 2, 3, 9 }, RegExUtil.matchIndices("Hello World", ell).toArray());
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.matchIndices("test", (String) null));
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.matchIndices("test", ""));
-    }
-
-    @Test
-    @DisplayName("Test matchIndices(String, Pattern) with null pattern throws exception")
-    public void testMatchIndicesWithNullPattern() {
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.matchIndices("test", (Pattern) null));
     }
 
@@ -1947,10 +1453,20 @@ public class RegExUtilTest extends AbstractTest {
     @Test
     @DisplayName("Test split(String, String) with valid regex")
     public void testSplitWithRegex() {
+        Pattern comma = Pattern.compile(",");
         assertArrayEquals(new String[] { "one", "two", "three" }, RegExUtil.split("one,two,three", ","));
+        assertArrayEquals(new String[] { "one", "two", "three" }, RegExUtil.split("one,two,three", comma));
         assertArrayEquals(new String[] { "Hello", "World" }, RegExUtil.split("Hello   World", "\\s+"));
         assertArrayEquals(new String[0], RegExUtil.split(null, ","));
+        assertArrayEquals(new String[0], RegExUtil.split(null, comma));
         assertArrayEquals(new String[] { "" }, RegExUtil.split("", ","));
+        assertArrayEquals(new String[] { "one", "two", "three,four" }, RegExUtil.split("one,two,three,four", comma, 3));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.split("test", (String) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.split("test", ""));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.split("test", (Pattern) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.split("test", (Pattern) null, 3));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.split("test", (String) null, 3));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.split("test", "", 3));
     }
 
     @Test
@@ -1964,41 +1480,6 @@ public class RegExUtilTest extends AbstractTest {
     }
 
     @Test
-    @DisplayName("Test split(String, Pattern) with valid pattern")
-    public void testSplitWithPattern() {
-        Pattern pattern = Pattern.compile("\\s+");
-        assertArrayEquals(new String[] { "Hello", "World", "Java" }, RegExUtil.split("Hello   World   Java", pattern));
-        assertArrayEquals(new String[0], RegExUtil.split(null, pattern));
-        assertArrayEquals(new String[] { "" }, RegExUtil.split("", pattern));
-    }
-
-    @Test
-    @DisplayName("Test split(String, Pattern, int) with limit")
-    public void testSplitWithPatternAndLimit() {
-        Pattern pattern = Pattern.compile(",");
-        assertArrayEquals(new String[] { "a", "b", "c,d" }, RegExUtil.split("a,b,c,d", pattern, 3));
-        assertArrayEquals(new String[] { "a", "b" }, RegExUtil.split("a,b,,", pattern, 0));
-        assertArrayEquals(new String[] { "a", "b", "", "" }, RegExUtil.split("a,b,,", pattern, -1));
-        assertArrayEquals(new String[0], RegExUtil.split(null, pattern, 3));
-        assertArrayEquals(new String[] { "" }, RegExUtil.split("", pattern, 3));
-    }
-
-    @Test
-    public void testSplit() {
-        String[] parts = RegExUtil.split("one,two,three", ",");
-        Assertions.assertArrayEquals(new String[] { "one", "two", "three" }, parts);
-
-        parts = RegExUtil.split("Hello   World", "\\s+");
-        Assertions.assertArrayEquals(new String[] { "Hello", "World" }, parts);
-
-        parts = RegExUtil.split(null, ",");
-        Assertions.assertArrayEquals(new String[0], parts);
-
-        parts = RegExUtil.split("", ",");
-        Assertions.assertArrayEquals(new String[] { "" }, parts);
-    }
-
-    @Test
     public void testSplitWithLimit() {
         String[] parts = RegExUtil.split("one,two,three,four", ",", 3);
         Assertions.assertArrayEquals(new String[] { "one", "two", "three,four" }, parts);
@@ -2008,32 +1489,6 @@ public class RegExUtilTest extends AbstractTest {
 
         parts = RegExUtil.split(null, ",", 2);
         Assertions.assertArrayEquals(new String[0], parts);
-    }
-
-    @Test
-    @DisplayName("Test split(String, String) with null/empty regex throws exception")
-    public void testSplitWithNullRegex() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.split("test", (String) null));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.split("test", ""));
-    }
-
-    @Test
-    @DisplayName("Test split(String, String, int) with null/empty regex throws exception")
-    public void testSplitWithRegexAndLimitNullRegex() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.split("test", (String) null, 3));
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.split("test", "", 3));
-    }
-
-    @Test
-    @DisplayName("Test split(String, Pattern) with null pattern throws exception")
-    public void testSplitWithNullPattern() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.split("test", (Pattern) null));
-    }
-
-    @Test
-    @DisplayName("Test split(String, Pattern, int) with null pattern throws exception")
-    public void testSplitWithPatternAndLimitNullPattern() {
-        assertThrows(IllegalArgumentException.class, () -> RegExUtil.split("test", (Pattern) null, 3));
     }
 
     @Test
@@ -2215,4 +1670,377 @@ public class RegExUtilTest extends AbstractTest {
         assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("a1", digit, nullIntBiFunction));
     }
 
+    // -------- 2026-09-06 review fixes --------
+
+    @Test
+    @DisplayName("replaceFirst/replaceAll interpret the replacement as a template; replaceLast and the functional overloads do not")
+    public void reviewFixes20260906_templateVsLiteralReplacementSplit() {
+        final Pattern b = Pattern.compile("b");
+
+        // template: $0 is the whole match, and a lone backslash escapes the next char away
+        assertEquals("abbc", RegExUtil.replaceAll("abc", "b", "$0$0"));
+        assertEquals("abbc", RegExUtil.replaceAll("abc", b, "$0$0"));
+        assertEquals("abbc", RegExUtil.replaceFirst("abc", "b", "$0$0"));
+        assertEquals("abbc", RegExUtil.replaceFirst("abc", b, "$0$0"));
+        assertEquals("aC:xc", RegExUtil.replaceAll("abc", "b", "C:\\x"));
+        assertEquals("aC:xc", RegExUtil.replaceFirst("abc", "b", "C:\\x"));
+        assertEquals("a[1]b[2]", RegExUtil.replaceAll("a1b2", "(\\d)", "[$1]"));
+
+        // template: a reference to a group the regex does not have is an IndexOutOfBoundsException, not a literal
+        assertThrows(IndexOutOfBoundsException.class, () -> RegExUtil.replaceAll("abc", "b", "$1"));
+        assertThrows(IndexOutOfBoundsException.class, () -> RegExUtil.replaceAll("abc", b, "$1"));
+        assertThrows(IndexOutOfBoundsException.class, () -> RegExUtil.replaceFirst("abc", "b", "$1"));
+        assertThrows(IndexOutOfBoundsException.class, () -> RegExUtil.replaceFirst("abc", b, "$1"));
+
+        // literal: replaceLast splices the string in verbatim
+        assertEquals("a$0$0c", RegExUtil.replaceLast("abc", "b", "$0$0"));
+        assertEquals("a$1c", RegExUtil.replaceLast("abc", "b", "$1"));
+        assertEquals("aC:\\xc", RegExUtil.replaceLast("abc", "b", "C:\\x"));
+
+        // literal: every functional overload quotes the replacer's result (Matcher.quoteReplacement)
+        assertEquals("a$0$0c", RegExUtil.replaceAll("abc", "b", match -> "$0$0"));
+        assertEquals("a$0$0c", RegExUtil.replaceAll("abc", "b", (start, end) -> "$0$0"));
+        assertEquals("a$0$0c", RegExUtil.replaceFirst("abc", "b", match -> "$0$0"));
+        assertEquals("a$0$0c", RegExUtil.replaceFirst("abc", "b", (start, end) -> "$0$0"));
+        assertEquals("a$0$0c", RegExUtil.replaceLast("abc", "b", match -> "$0$0"));
+        assertEquals("a$0$0c", RegExUtil.replaceLast("abc", "b", (start, end) -> "$0$0"));
+        assertEquals("aC:\\xc", RegExUtil.replaceAll("abc", "b", match -> "C:\\x"));
+        assertEquals("aC:\\xc", RegExUtil.replaceAll("abc", b, (start, end) -> "C:\\x"));
+
+        // control: a replacement with neither $ nor \ behaves the same in all three families
+        assertEquals("aXc", RegExUtil.replaceAll("abc", "b", "X"));
+        assertEquals("aXc", RegExUtil.replaceFirst("abc", "b", "X"));
+        assertEquals("aXc", RegExUtil.replaceLast("abc", "b", "X"));
+    }
+
+    @Test
+    @DisplayName("PHONE_NUMBER_WITH_CODE needs eleven [\\\\d\\\\s] characters, so a bare 10-digit number does not match")
+    public void reviewFixes20260906_phoneNumberWithCodeNeedsElevenCharacters() {
+        assertFalse(RegExUtil.PHONE_NUMBER_WITH_CODE_MATCHER.matcher("5551234567").matches());
+        assertFalse(RegExUtil.PHONE_NUMBER_WITH_CODE_FINDER.matcher("5551234567").find());
+
+        // one more character - a digit or a separator - is enough
+        assertTrue(RegExUtil.PHONE_NUMBER_WITH_CODE_MATCHER.matcher("55512345678").matches());
+        assertTrue(RegExUtil.PHONE_NUMBER_WITH_CODE_MATCHER.matcher("555 123 4567").matches());
+
+        // control: the documented example matches must keep matching
+        assertTrue(RegExUtil.PHONE_NUMBER_WITH_CODE_MATCHER.matcher("+1 234 567 8900").matches());
+        assertTrue(RegExUtil.PHONE_NUMBER_WITH_CODE_MATCHER.matcher("+44 20 1234 5678").matches());
+        assertFalse(RegExUtil.PHONE_NUMBER_WITH_CODE_MATCHER.matcher("(123) 456 7890").matches());
+        assertFalse(RegExUtil.PHONE_NUMBER_WITH_CODE_MATCHER.matcher("+1-234-567-8900").matches());
+    }
+
+    @Test
+    @DisplayName("NUMBER_* accepts a trailing dot; POSITIVE_/NEGATIVE_NUMBER_* deliberately does not")
+    public void reviewFixes20260906_trailingDotSplitsTheNumberFamilies() {
+        assertTrue(RegExUtil.NUMBER_MATCHER.matcher("-100.").matches());
+        assertTrue(RegExUtil.NUMBER_MATCHER.matcher("1.").matches());
+        assertFalse(RegExUtil.NEGATIVE_NUMBER_MATCHER.matcher("-100.").matches());
+        assertFalse(RegExUtil.POSITIVE_NUMBER_MATCHER.matcher("100.").matches());
+
+        // the finders stop at the last digit
+        assertEquals(CommonUtil.asList("-100"), RegExUtil.findAll("-100.", RegExUtil.NEGATIVE_NUMBER_FINDER));
+        assertEquals(CommonUtil.asList("100"), RegExUtil.findAll("100.", RegExUtil.POSITIVE_NUMBER_FINDER));
+        assertEquals(CommonUtil.asList("-100."), RegExUtil.findAll("-100.", RegExUtil.NUMBER_FINDER));
+
+        // control: the documented example matches are unaffected
+        assertTrue(RegExUtil.NEGATIVE_NUMBER_MATCHER.matcher("-.25").matches());
+        assertTrue(RegExUtil.NEGATIVE_NUMBER_MATCHER.matcher("-3.14").matches());
+        assertTrue(RegExUtil.POSITIVE_NUMBER_MATCHER.matcher(".25").matches());
+        assertTrue(RegExUtil.POSITIVE_NUMBER_MATCHER.matcher("3.14").matches());
+    }
+
+    @Test
+    @DisplayName("the no-limit split/splitToLines overloads discard trailing empty results")
+    public void reviewFixes20260906_noLimitSplitDiscardsTrailingEmpties() {
+        final Pattern comma = Pattern.compile(",");
+
+        assertArrayEquals(new String[] { "a", "b" }, RegExUtil.split("a,b,,", ","));
+        assertArrayEquals(new String[] { "a", "b" }, RegExUtil.split("a,b,,", comma));
+        assertArrayEquals(new String[] { "a", "b", "", "" }, RegExUtil.split("a,b,,", ",", -1));
+        assertArrayEquals(new String[] { "a", "b", "", "" }, RegExUtil.split("a,b,,", comma, -1));
+
+        // a source made only of line terminators splits to a ZERO-length array, not to one empty line
+        assertEquals(0, RegExUtil.splitToLines("\n").length);
+        assertArrayEquals(new String[] { "a", "b" }, RegExUtil.splitToLines("a\nb\n"));
+        assertArrayEquals(new String[] { "a", "b", "" }, RegExUtil.splitToLines("a\nb\n", -1));
+
+        // control: the documented null/empty short-circuits are unchanged
+        assertArrayEquals(new String[0], RegExUtil.split(null, ","));
+        assertArrayEquals(new String[] { "" }, RegExUtil.split("", ","));
+        assertArrayEquals(new String[0], RegExUtil.splitToLines(null));
+        assertArrayEquals(new String[] { "" }, RegExUtil.splitToLines(""));
+    }
+
+    @Test
+    @DisplayName("a null source never matches, in every method (F77)")
+    public void reviewFixes20260908_nullSourceNeverMatchesInAnyMethod() {
+        final Pattern aStar = Pattern.compile("a*");
+
+        // find/matches/findFirst/findLast used to normalize null to "" and match it, so find(null, "a*")
+        // answered true while findAll/countMatches/matchResults/matchIndices answered "no match".
+        assertFalse(RegExUtil.find(null, "a*"));
+        assertFalse(RegExUtil.find(null, aStar));
+        assertFalse(RegExUtil.matches(null, "a*"));
+        assertFalse(RegExUtil.matches(null, aStar));
+        assertNull(RegExUtil.findFirst(null, "a*"));
+        assertNull(RegExUtil.findFirst(null, aStar));
+        assertNull(RegExUtil.findLast(null, "a*"));
+        assertNull(RegExUtil.findLast(null, aStar));
+
+        // ... and the rest of the class already answered that way; now the whole class agrees.
+        assertEquals(CommonUtil.asList(), RegExUtil.findAll(null, aStar));
+        assertEquals(0, RegExUtil.countMatches(null, aStar));
+        assertEquals(0, RegExUtil.matchResults(null, aStar).count());
+        assertEquals(0, RegExUtil.matchIndices(null, aStar).count());
+        assertEquals("", RegExUtil.replaceAll(null, aStar, "X"));
+        assertEquals(0, RegExUtil.split(null, aStar).length);
+
+        // An EMPTY (non-null) source is still matched normally by every method.
+        assertTrue(RegExUtil.find("", aStar));
+        assertTrue(RegExUtil.matches("", aStar));
+        assertEquals("", RegExUtil.findFirst("", aStar));
+        assertEquals("", RegExUtil.findLast("", aStar));
+        assertEquals(1, RegExUtil.countMatches("", aStar));
+
+        // A String regex is still compiled (and so validated) before the null source short-circuits.
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.find(null, "["));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.matches(null, "["));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.findFirst(null, "["));
+        assertThrows(PatternSyntaxException.class, () -> RegExUtil.findLast(null, "["));
+
+        // ... and the argument checks still run first.
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.find(null, (String) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.matches(null, (Pattern) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.findFirst(null, (Pattern) null));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.findLast(null, (Pattern) null));
+    }
+
+    /**
+     * Counts every {@code charAt} the regex engine performs, which makes backtracking blow-up observable
+     * without timing anything.
+     */
+    private static final class CountingCharSequence implements CharSequence {
+        private final String text;
+        private long reads;
+
+        CountingCharSequence(final String text) {
+            this.text = text;
+        }
+
+        @Override
+        public char charAt(final int index) {
+            reads++;
+            return text.charAt(index);
+        }
+
+        @Override
+        public int length() {
+            return text.length();
+        }
+
+        @Override
+        public CharSequence subSequence(final int start, final int end) {
+            return text.subSequence(start, end);
+        }
+
+        @Override
+        public String toString() {
+            return text;
+        }
+    }
+
+    @Test
+    @DisplayName("POSITIVE_/NEGATIVE_NUMBER_MATCHER reject a long non-number in linear time, not quadratic")
+    public void reviewFixes20260911_numberMatchersAreLinearNotQuadratic() {
+        // \d*\.?\d+ put two overlapping \d quantifiers around an OPTIONAL \., so every one of the n+1
+        // split points for \d* was retried against the whole remaining suffix: ~n*n/2 steps to reject.
+        final int n = 2000;
+        final long linearBudget = 20L * n;
+
+        final CountingCharSequence positive = new CountingCharSequence("9".repeat(n) + "x");
+        assertFalse(RegExUtil.POSITIVE_NUMBER_MATCHER.matcher(positive).matches());
+        assertTrue(positive.reads <= linearBudget, "POSITIVE_NUMBER_MATCHER read " + positive.reads + " characters for a " + n + "-character input");
+
+        // the documented rejection case ("100." must not match) is the same shape
+        final CountingCharSequence trailingDot = new CountingCharSequence("9".repeat(n) + ".");
+        assertFalse(RegExUtil.POSITIVE_NUMBER_MATCHER.matcher(trailingDot).matches());
+        assertTrue(trailingDot.reads <= linearBudget, "POSITIVE_NUMBER_MATCHER read " + trailingDot.reads + " characters for a trailing-dot input");
+
+        final CountingCharSequence negative = new CountingCharSequence("-" + "9".repeat(n) + "x");
+        assertFalse(RegExUtil.NEGATIVE_NUMBER_MATCHER.matcher(negative).matches());
+        assertTrue(negative.reads <= linearBudget, "NEGATIVE_NUMBER_MATCHER read " + negative.reads + " characters for a " + n + "-character input");
+
+        // control: the linear siblings were always this cheap, and still are
+        final CountingCharSequence number = new CountingCharSequence("9".repeat(n) + "x");
+        assertFalse(RegExUtil.NUMBER_MATCHER.matcher(number).matches());
+        assertTrue(number.reads <= linearBudget);
+    }
+
+    @Test
+    @DisplayName("the two PHONE_NUMBER_* constants are still quadratic, exactly as their Performance warning says")
+    public void reviewFixes20260911_phoneFindersAreQuadraticAsDocumented() {
+        // Characterisation, not an aspiration: these two patterns are PRE-EXISTING and were deliberately not
+        // rewritten, only documented. If a later change makes one of them linear, this test goes red - and the
+        // <b>Performance:</b> paragraph on that constant must be removed in the same change.
+        final int n = 400;
+        final long linearBudget = 20L * n;
+
+        // the lookahead re-runs from its own start at every candidate position
+        final CountingCharSequence phone = new CountingCharSequence(" ".repeat(n) + "x");
+        assertFalse(RegExUtil.PHONE_NUMBER_FINDER.matcher(phone).find());
+        assertTrue(phone.reads > linearBudget,
+                "PHONE_NUMBER_FINDER is no longer superlinear (" + phone.reads + " reads): drop its Performance warning");
+
+        final CountingCharSequence withCode = new CountingCharSequence(" ".repeat(n) + "x");
+        assertFalse(RegExUtil.PHONE_NUMBER_WITH_CODE_FINDER.matcher(withCode).find());
+        assertTrue(withCode.reads > linearBudget,
+                "PHONE_NUMBER_WITH_CODE_FINDER is no longer superlinear (" + withCode.reads + " reads): drop its Performance warning");
+
+        // the second shape: [\d\s]+ and [\d\s]{10,} draw from the same class, so a failing whole-string match
+        // has to try every split of the run between them
+        final CountingCharSequence split = new CountingCharSequence("1".repeat(n) + "x");
+        assertFalse(RegExUtil.PHONE_NUMBER_WITH_CODE_MATCHER.matcher(split).matches());
+        assertTrue(split.reads > linearBudget,
+                "PHONE_NUMBER_WITH_CODE_MATCHER no longer retries every split (" + split.reads + " reads)");
+
+        // control: the anchored PHONE_NUMBER_MATCHER has one start position and IS linear, as documented
+        final CountingCharSequence anchored = new CountingCharSequence("1".repeat(n) + "x");
+        assertFalse(RegExUtil.PHONE_NUMBER_MATCHER.matcher(anchored).matches());
+        assertTrue(anchored.reads <= linearBudget, "PHONE_NUMBER_MATCHER read " + anchored.reads + " characters");
+
+        // both patterns still do their documented job on real input
+        assertTrue(RegExUtil.PHONE_NUMBER_FINDER.matcher("123 456 7890").find());
+        assertTrue(RegExUtil.PHONE_NUMBER_WITH_CODE_FINDER.matcher("+1 234 567 8900").find());
+    }
+
+    @Test
+    @DisplayName("the rewritten POSITIVE_/NEGATIVE_NUMBER bodies still describe exactly the same language")
+    public void reviewFixes20260911_numberPatternsKeepTheirLanguage() {
+        // every documented example match
+        for (final String s : new String[] { "42", "3.14", "0.99", ".25" }) {
+            assertTrue(RegExUtil.POSITIVE_NUMBER_MATCHER.matcher(s).matches(), s);
+            assertFalse(RegExUtil.NEGATIVE_NUMBER_MATCHER.matcher(s).matches(), s);
+        }
+        for (final String s : new String[] { "-7", "-3.14", "-0.99", "-.25" }) {
+            assertTrue(RegExUtil.NEGATIVE_NUMBER_MATCHER.matcher(s).matches(), s);
+            assertFalse(RegExUtil.POSITIVE_NUMBER_MATCHER.matcher(s).matches(), s);
+        }
+
+        // the documented non-matches, including the trailing-dot split
+        for (final String s : new String[] { "", ".", "-", "-.", "abc", "100.", "-100.", "1.2.3", "1..2", "..1", "--1", "+1" }) {
+            assertFalse(RegExUtil.POSITIVE_NUMBER_MATCHER.matcher(s).matches(), s);
+            assertFalse(RegExUtil.NEGATIVE_NUMBER_MATCHER.matcher(s).matches(), s);
+        }
+
+        // find() mode keeps the same offsets and the same matched text
+        assertEquals(CommonUtil.asList("100"), RegExUtil.findAll("100.", RegExUtil.POSITIVE_NUMBER_FINDER));
+        assertEquals(CommonUtil.asList("-100"), RegExUtil.findAll("-100.", RegExUtil.NEGATIVE_NUMBER_FINDER));
+        assertEquals(CommonUtil.asList("1", "2", "3"), RegExUtil.findAll("1.x2.y3", RegExUtil.POSITIVE_NUMBER_FINDER));
+        assertEquals(CommonUtil.asList("12.5"), RegExUtil.findAll("a12.5b", RegExUtil.POSITIVE_NUMBER_FINDER));
+        assertEquals(CommonUtil.asList("-5.5"), RegExUtil.findAll("Temperature: -5.5", RegExUtil.NEGATIVE_NUMBER_FINDER));
+        assertEquals(".25", RegExUtil.findFirst("x=.25", RegExUtil.POSITIVE_NUMBER_FINDER));
+
+        // neither body may introduce a capturing group, and neither may change meaning when spliced into a
+        // larger expression - RegExUtil itself splices a FINDER body (see DUPLICATES_MATCHER).
+        assertEquals(0, RegExUtil.POSITIVE_NUMBER_FINDER.matcher("").groupCount());
+        assertEquals(0, RegExUtil.NEGATIVE_NUMBER_FINDER.matcher("").groupCount());
+        assertTrue(Pattern.compile("x" + RegExUtil.POSITIVE_NUMBER_FINDER.pattern() + "y").matcher("x12.5y").matches());
+        assertTrue(Pattern.compile("x" + RegExUtil.NEGATIVE_NUMBER_FINDER.pattern() + "y").matcher("x-12.5y").matches());
+    }
+
+    @Test
+    @DisplayName("JAVA_IDENTIFIER_* is syntactic: a Java keyword MATCHES it")
+    public void reviewFixes20260911_javaIdentifierAcceptsKeywords() {
+        // "class" was listed under the javadoc's "Example non-matches" although the bullet itself said it matches.
+        assertTrue(RegExUtil.JAVA_IDENTIFIER_MATCHER.matcher("class").matches());
+        assertTrue(RegExUtil.JAVA_IDENTIFIER_MATCHER.matcher("int").matches());
+        assertEquals("class", RegExUtil.findFirst("class", RegExUtil.JAVA_IDENTIFIER_FINDER));
+
+        // the two genuine whole-token non-matches it is listed beside
+        assertFalse(RegExUtil.JAVA_IDENTIFIER_MATCHER.matcher("123invalid").matches());
+        assertEquals("invalid", RegExUtil.findFirst("123invalid", RegExUtil.JAVA_IDENTIFIER_FINDER));
+        assertFalse(RegExUtil.JAVA_IDENTIFIER_MATCHER.matcher("my-variable").matches());
+        assertEquals(CommonUtil.asList("my", "variable"), RegExUtil.findAll("my-variable", RegExUtil.JAVA_IDENTIFIER_FINDER));
+    }
+
+    @Test
+    @DisplayName("WHITESPACE_* and ALPHANUMERIC_SPACE_* are ASCII-only, unlike the Unicode-aware LINE_SEPARATOR")
+    public void reviewFixes20260911_whitespaceFinderIsAsciiOnly() {
+        // \s without UNICODE_CHARACTER_CLASS is exactly [ \t\n\x0B\f\r]
+        for (final String s : new String[] { " ", "\t", "\n", "\u000B", "\f", "\r", "  \t\r\n" }) {
+            assertTrue(RegExUtil.WHITESPACE_MATCHER.matcher(s).matches(), "expected ASCII whitespace: " + s);
+        }
+        for (final String s : new String[] { "\u00A0", "\u2028", "\u2029", "\u0085", "\u2003", "\u3000" }) {
+            assertFalse(RegExUtil.WHITESPACE_MATCHER.matcher(s).matches(), "expected NOT matched: " + s);
+            assertFalse(RegExUtil.WHITESPACE_FINDER.matcher(s).find(), "expected NOT found: " + s);
+            assertFalse(RegExUtil.ALPHANUMERIC_SPACE_MATCHER.matcher("a" + s + "b").matches(), "expected NOT matched: " + s);
+        }
+
+        // ... so a WHITESPACE_FINDER normalisation leaves them untouched
+        assertEquals("a\u00A0b", RegExUtil.replaceAll("a\u00A0b", RegExUtil.WHITESPACE_FINDER, " "));
+        assertEquals("a b", RegExUtil.replaceAll("a\t\tb", RegExUtil.WHITESPACE_FINDER, " "));
+
+        // ... and the remedy the javadoc prescribes really is a remedy: UNICODE_CHARACTER_CLASS matches them.
+        // U+200B/U+FEFF stay unmatched on purpose - neither is a Unicode space separator.
+        final Pattern unicodeWhitespace = Pattern.compile("\\s+", Pattern.UNICODE_CHARACTER_CLASS);
+
+        for (final String s : new String[] { "\u00A0", "\u2028", "\u2029", "\u0085", "\u2003", "\u202F", "\u3000" }) {
+            assertTrue(unicodeWhitespace.matcher(s).matches(), "expected UNICODE_CHARACTER_CLASS match: " + s);
+        }
+
+        assertFalse(unicodeWhitespace.matcher("\u200B").matches());
+        assertFalse(unicodeWhitespace.matcher("\uFEFF").matches());
+
+        // ... while LINE_SEPARATOR (\R) IS Unicode-aware, which is the contrast the javadoc now names
+        assertTrue(RegExUtil.LINE_SEPARATOR.matcher("\u2028").find());
+        assertTrue(RegExUtil.LINE_SEPARATOR.matcher("\u0085").find());
+        assertArrayEquals(new String[] { "a", "b" }, RegExUtil.splitToLines("a\u2028b"));
+    }
+
+    @Test
+    @DisplayName("a malformed $ in a String replacement raises IllegalArgumentException, not IndexOutOfBounds")
+    public void reviewFixes20260911_malformedGroupReferenceRaisesIllegalArgument() {
+        // a trailing $ / a $ not followed by a digit - IllegalArgumentException out of Matcher's replacement parser
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("ab", "a", "c$"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("ab", Pattern.compile("a"), "c$"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("ab", "a", "c$"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("ab", Pattern.compile("a"), "c$"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("ab", "a", "c$x"));
+
+        // ... whereas a WELL-FORMED reference to a group the pattern does not have is IndexOutOfBoundsException
+        assertThrows(IndexOutOfBoundsException.class, () -> RegExUtil.replaceAll("ab", "a", "$1"));
+        assertThrows(IndexOutOfBoundsException.class, () -> RegExUtil.replaceFirst("ab", "a", "$1"));
+
+        // a ${name} reference is a $ NOT followed by a digit, and is perfectly legal when the group exists -
+        // which is why the @throws wording says "neither a digit nor a well-formed {name}" rather than "not a digit"
+        assertEquals("[a]b", RegExUtil.replaceAll("ab", "(?<g>a)", "[${g}]"));
+        assertEquals("[a]b", RegExUtil.replaceAll("ab", Pattern.compile("(?<g>a)"), "[${g}]"));
+        assertEquals("[a]b", RegExUtil.replaceFirst("ab", "(?<g>a)", "[${g}]"));
+        assertEquals("[a]b", RegExUtil.replaceFirst("ab", Pattern.compile("(?<g>a)"), "[${g}]"));
+
+        // ... but a ${name} for a group the pattern does not declare is IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("ab", "(?<g>a)", "${nope}"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("ab", "(a)", "${g}"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("ab", "(?<g>a)", "${}"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("ab", "(?<g>a)", "${g_1}"));
+
+        // a trailing backslash comes out of the same replacement parser as the same IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceAll("ab", "a", "c\\"));
+        assertThrows(IllegalArgumentException.class, () -> RegExUtil.replaceFirst("ab", "a", "c\\"));
+        assertEquals("c$b", RegExUtil.replaceAll("ab", "a", "c\\$"));
+
+        // the replacement is parsed ONLY when a match is found, which is why the tag is qualified "if a match is
+        // found": every malformed replacement above returns the source unchanged against a non-matching source
+        assertEquals("zzz", RegExUtil.replaceAll("zzz", "(a)", "c$"));
+        assertEquals("zzz", RegExUtil.replaceFirst("zzz", "(a)", "c$"));
+        assertEquals("zzz", RegExUtil.replaceAll("zzz", "a", "c\\"));
+        assertEquals("zzz", RegExUtil.replaceAll("zzz", "(?<g>a)", "${nope}"));
+        assertEquals("zzz", RegExUtil.replaceFirst("zzz", "a", "$1"));
+        assertEquals("", RegExUtil.replaceAll(null, "(a)", "c$"));
+
+        // control: the functional overloads quote the replacer's output, so neither can be raised there
+        assertEquals("c$b", RegExUtil.replaceAll("ab", "a", match -> "c$"));
+        assertEquals("$1b", RegExUtil.replaceAll("ab", "(a)", match -> "$1"));
+    }
 }

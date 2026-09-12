@@ -38,6 +38,8 @@ import java.util.concurrent.TimeUnit;
  * <p>This class provides static utility methods for querying file system
  * free space by invoking native operating system commands. It supports
  * Windows, Unix, and POSIX-compliant systems.</p>
+ * <p>Paths are interpreted literally: environment-variable syntax in a Windows path is not expanded,
+ * and relative Unix paths are made absolute before invoking the command.</p>
  *
  * <p>The class works by executing platform-specific commands:</p>
  * <ul>
@@ -66,7 +68,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @version $Id: FileSystemUtils.java 1642799 2014-12-02 02:55:39Z sebb $
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 final class FileSystemUtil {
 
     /** Singleton instance, used mainly for testing. */
@@ -154,12 +156,14 @@ final class FileSystemUtil {
      *
      * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @return the amount of free space in kilobytes
-     * @throws IOException if an error occurs when finding the free space
      * @throws IllegalArgumentException if {@code path} is {@code null}, is empty on a Unix-like system, or contains
-     *         a double-quote character on Windows.
+     *         a null byte or double-quote character on Windows
      * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
+     * @throws IOException if a Windows path cannot be normalized, the disk-space command cannot start,
+     *         its output cannot be read or parsed as a non-negative long,
+     *         it exits unsuccessfully, or the wait is interrupted
      */
-    public static long freeSpaceKb(final String path) throws IOException {
+    public static long freeSpaceKb(final String path) throws IllegalArgumentException, IllegalStateException, IOException {
         return freeSpaceKb(path, -1);
     }
 
@@ -185,13 +189,14 @@ final class FileSystemUtil {
      * @param path the path to get free space for, not {@code null}, not empty on Unix
      * @param timeout the timeout in milliseconds, or 0 or negative for no timeout
      * @return the amount of free space in kilobytes
-     * @throws IOException if an error occurs when finding the free space, or the command exceeds a
-     *         positive {@code timeout}
      * @throws IllegalArgumentException if {@code path} is {@code null}, is empty on a Unix-like system, or contains
-     *         a double-quote character on Windows.
+     *         a null byte or double-quote character on Windows
      * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
+     * @throws IOException if a Windows path cannot be normalized, the disk-space command cannot start,
+     *         its output cannot be read or parsed as a non-negative long,
+     *         it exits unsuccessfully, the wait is interrupted, or a positive timeout expires
      */
-    public static long freeSpaceKb(final String path, final long timeout) throws IOException {
+    public static long freeSpaceKb(final String path, final long timeout) throws IllegalArgumentException, IllegalStateException, IOException {
         return INSTANCE.freeSpaceOS(path, OS, true, timeout);
     }
 
@@ -210,10 +215,11 @@ final class FileSystemUtil {
      * }</pre>
      *
      * @return the amount of free space in the current directory in kilobytes
-     * @throws IOException if an error occurs when finding the free space
      * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
+     * @throws IOException if the disk-space command cannot start, its output cannot be read or parsed as a non-negative long,
+     *         it exits unsuccessfully, or the wait is interrupted
      */
-    public static long freeSpaceKb() throws IOException {
+    public static long freeSpaceKb() throws IllegalStateException, IOException {
         return freeSpaceKb(-1);
     }
 
@@ -233,10 +239,11 @@ final class FileSystemUtil {
      *
      * @param timeout the timeout in milliseconds, or 0 or negative for no timeout
      * @return the amount of free space in the current directory in kilobytes
-     * @throws IOException if an error occurs when finding the free space
      * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
+     * @throws IOException if the disk-space command cannot start, its output cannot be read or parsed as a non-negative long,
+     *         it exits unsuccessfully, the wait is interrupted, or a positive timeout expires
      */
-    public static long freeSpaceKb(final long timeout) throws IOException {
+    public static long freeSpaceKb(final long timeout) throws IllegalStateException, IOException {
         return freeSpaceKb(new File(".").getAbsolutePath(), timeout);
     }
 
@@ -259,14 +266,18 @@ final class FileSystemUtil {
      * @param os the operating system code
      * @param kb whether to normalize to kilobytes
      * @param timeout the timeout amount in milliseconds or no timeout if the value
-     *  is zero or less
+     *  is zero or less; a positive timeout covers both process exit and reading its output
      * @return the amount of free space in kilobytes if {@code kb} is {@code true}; otherwise in bytes on Windows, or in the df command's default block units on Unix
-     * @throws IOException if an error occurs when finding the free space
-     * @throws IllegalArgumentException if {@code path} is {@code null}.
+     * @throws IllegalArgumentException if {@code path} is {@code null}, is empty on a Unix-like system, or contains
+     *         a null byte or double-quote character on Windows
      * @throws IllegalStateException if the operating system is unsupported, or if an error
      *         occurred during initialization of the OS detection
+     * @throws IOException if a Windows path cannot be normalized, the disk-space command cannot start,
+     *         its output cannot be read or parsed as a non-negative long,
+     *         it exits unsuccessfully, the wait is interrupted, or a positive timeout expires
      */
-    long freeSpaceOS(final String path, final int os, final boolean kb, final long timeout) throws IOException {
+    long freeSpaceOS(final String path, final int os, final boolean kb, final long timeout)
+            throws IllegalArgumentException, IllegalStateException, IOException {
         if (path == null) {
             throw new IllegalArgumentException("Path must not be null");
         }
@@ -293,11 +304,11 @@ final class FileSystemUtil {
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return the amount of free disk space in bytes
-     * @throws IllegalArgumentException if {@code path} contains a double-quote character.
-     * @throws IOException if the path cannot be normalized, an error occurs, or the command exceeds
-     *         a positive {@code timeout}
+     * @throws IllegalArgumentException if {@code path} contains a null byte or double-quote character
+     * @throws IOException if {@code path} cannot be normalized, the command cannot start, its output cannot be read
+     *         or parsed as a non-negative long, it exits unsuccessfully, the wait is interrupted, or a positive timeout expires
      */
-    long freeSpaceWindows(String path, final long timeout) throws IOException {
+    long freeSpaceWindows(String path, final long timeout) throws IllegalArgumentException, IOException {
         path = FilenameUtil.normalize(path, false);
 
         if (path == null) {
@@ -308,15 +319,11 @@ final class FileSystemUtil {
             throw new IllegalArgumentException("Path must not contain quote characters: " + path);
         }
 
-        if (!path.isEmpty()) {
-            path = "\"" + path + "\"";
-        }
-
-        // build and run the 'dir' command
-        final String[] cmdAttrs = { "cmd.exe", "/C", "dir /a /-c " + path };
+        // Expand one child-process variable inside quotes. Its value is not recursively expanded by cmd.
+        final String[] cmdAttrs = { "cmd.exe", "/d", "/v:off", "/C", path.isEmpty() ? "dir /a /-c" : "dir /a /-c \"%ABACUS_FREE_SPACE_PATH%\"" };
 
         // read in the output of the command to an ArrayList
-        final List<String> lines = performCommand(cmdAttrs, Integer.MAX_VALUE, timeout);
+        final List<String> lines = performCommand(cmdAttrs, Integer.MAX_VALUE, timeout, java.util.Map.of("ABACUS_FREE_SPACE_PATH", path));
 
         // now iterate over the lines we just read and find the LAST
         // non-empty line (the free space bytes should be in the last element
@@ -338,9 +345,10 @@ final class FileSystemUtil {
      * @param line the line to parse
      * @param path the path that was sent
      * @return the amount of free disk space in bytes extracted from the dir command output
-     * @throws IOException if an error occurs
+     * @throws NullPointerException if {@code line} is {@code null}
+     * @throws IOException if the output contains no digits, or the extracted byte count is not a non-negative long
      */
-    long parseDir(final String line, final String path) throws IOException {
+    long parseDir(final String line, final String path) throws NullPointerException, IOException {
         // read from the end of the line to find the last numeric
         // character on the line, then continue until we find the first
         // non-numeric character, and everything between that and the last
@@ -398,10 +406,13 @@ final class FileSystemUtil {
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return the amount of free space in kilobytes if {@code kb} is {@code true}, otherwise in the df command's default block units
+     * @throws NullPointerException if {@code path} is {@code null}
      * @throws IllegalArgumentException if the path is empty.
-     * @throws IOException if an error occurs
+     * @throws IOException if the command cannot start, its output cannot be read or does not contain a non-negative long
+     *         free-space count, it exits unsuccessfully, the wait is interrupted, or a positive timeout expires
      */
-    long freeSpaceUnix(final String path, final boolean kb, final boolean posix, final long timeout) throws IOException {
+    long freeSpaceUnix(final String path, final boolean kb, final boolean posix, final long timeout)
+            throws NullPointerException, IllegalArgumentException, IOException {
         if (path.isEmpty()) {
             throw new IllegalArgumentException("Path must not be empty");
         }
@@ -414,7 +425,9 @@ final class FileSystemUtil {
         if (posix) {
             flags += "P";
         }
-        final String[] cmdAttrs = flags.length() > 1 ? new String[] { DF, flags, path } : new String[] { DF, path };
+        // An absolute operand cannot be mistaken for a df option, even if the supplied name starts with '-'.
+        final String operand = new File(path).getAbsolutePath();
+        final String[] cmdAttrs = flags.length() > 1 ? new String[] { DF, flags, operand } : new String[] { DF, operand };
 
         // perform the command, asking for up to 3 lines (header, interesting, overflow)
         final List<String> lines = performCommand(cmdAttrs, 3, timeout);
@@ -482,10 +495,18 @@ final class FileSystemUtil {
      * @param timeout the timeout amount in milliseconds or no timeout if the value
      *  is zero or less
      * @return a list of output lines from the executed command
-     * @throws IOException if an error occurs or the command exceeds a positive {@code timeout}
+     * @throws IOException if the command cannot start, its output cannot be read or is empty, it exits unsuccessfully,
+     *         the wait is interrupted, or a positive {@code timeout} expires before the process and output readers finish
      */
     List<String> performCommand(final String[] cmdAttrs, final int max, final long timeout) throws IOException {
+        return performCommand(cmdAttrs, max, timeout, null);
+    }
 
+    private List<String> performCommand(final String[] cmdAttrs, final int max, final long timeout, final java.util.Map<String, String> environment)
+            throws IOException {
+
+        final long startNanos = System.nanoTime();
+        final long timeoutNanos = timeout > 0 ? TimeUnit.MILLISECONDS.toNanos(timeout) : 0;
         final List<String> lines = new ArrayList<>(20);
         Process proc = null;
         InputStream in = null;
@@ -494,7 +515,13 @@ final class FileSystemUtil {
         Thread outputGobbler = null;
         Thread errorGobbler = null;
         try { //NOSONAR
-            proc = openProcess(cmdAttrs);
+            if (environment == null) {
+                proc = openProcess(cmdAttrs);
+            } else {
+                final ProcessBuilder builder = new ProcessBuilder(cmdAttrs);
+                builder.environment().putAll(environment);
+                proc = builder.start();
+            }
             in = proc.getInputStream();
             out = proc.getOutputStream();
             err = proc.getErrorStream();
@@ -535,7 +562,8 @@ final class FileSystemUtil {
 
             final boolean finished;
             if (timeout > 0) {
-                finished = proc.waitFor(timeout, TimeUnit.MILLISECONDS);
+                final long remainingNanos = timeoutNanos - (System.nanoTime() - startNanos);
+                finished = remainingNanos > 0 && proc.waitFor(remainingNanos, TimeUnit.NANOSECONDS);
             } else {
                 proc.waitFor();
                 finished = true;
@@ -545,8 +573,10 @@ final class FileSystemUtil {
                 throw new IOException("Command line timed out after " + timeout + " ms for command " + Arrays.asList(cmdAttrs));
             }
 
-            outputGobbler.join();
-            errorGobbler.join();
+            // A descendant may inherit either pipe and keep it open after the direct process exits.
+            // Both readers share the process deadline instead of receiving fresh timeout budgets.
+            joinGobbler(outputGobbler, startNanos, timeoutNanos, timeout, cmdAttrs);
+            joinGobbler(errorGobbler, startNanos, timeoutNanos, timeout, cmdAttrs);
 
             if (outputFailure[0] != null) {
                 throw outputFailure[0];
@@ -566,24 +596,57 @@ final class FileSystemUtil {
             Thread.currentThread().interrupt();
             throw new IOException("Command line threw an InterruptedException " + "for command " + Arrays.asList(cmdAttrs) + " timeout=" + timeout, ex);
         } finally {
-            if (proc != null) {
-                if (proc.isAlive()) {
-                    proc.destroyForcibly();
-                } else {
-                    proc.destroy();
-                }
-            }
-            // On Windows, closing a process pipe while another thread is blocked in a read can
-            // itself block. Terminate the process first so its native pipe endpoints are closed.
-            IOUtil.closeQuietly(in);
-            IOUtil.closeQuietly(out);
-            IOUtil.closeQuietly(err);
-            if (outputGobbler != null && outputGobbler.isAlive()) {
+            final boolean outputReaderAlive = outputGobbler != null && outputGobbler.isAlive();
+            final boolean errorReaderAlive = errorGobbler != null && errorGobbler.isAlive();
+            if (outputReaderAlive) {
                 outputGobbler.interrupt();
             }
-            if (errorGobbler != null && errorGobbler.isAlive()) {
+            if (errorReaderAlive) {
                 errorGobbler.interrupt();
             }
+
+            final Process processToClose = proc;
+            final InputStream outputToClose = in;
+            final OutputStream inputToClose = out;
+            final InputStream errorToClose = err;
+            final Runnable cleanup = () -> {
+                if (processToClose != null) {
+                    if (processToClose.isAlive()) {
+                        processToClose.destroyForcibly();
+                    } else {
+                        processToClose.destroy();
+                    }
+                }
+                IOUtil.closeQuietly(outputToClose);
+                IOUtil.closeQuietly(inputToClose);
+                IOUtil.closeQuietly(errorToClose);
+            };
+
+            if (outputReaderAlive || errorReaderAlive) {
+                // Closing a native pipe (including inside Process.destroy) can block behind a read
+                // held open by an inherited child handle. Cleanup must not undo timeout/interruption.
+                final Thread cleanupThread = new Thread(cleanup, FileSystemUtil.class.getSimpleName() + "-cleanup");
+                cleanupThread.setDaemon(true);
+                cleanupThread.start();
+            } else {
+                cleanup.run();
+            }
+        }
+    }
+
+    private void joinGobbler(final Thread gobbler, final long startNanos, final long timeoutNanos, final long timeout, final String[] cmdAttrs)
+            throws InterruptedException, IOException {
+        if (timeout <= 0) {
+            gobbler.join();
+            return;
+        }
+
+        while (gobbler.isAlive()) {
+            final long remainingNanos = timeoutNanos - (System.nanoTime() - startNanos);
+            if (remainingNanos <= 0) {
+                throw new IOException("Command line timed out after " + timeout + " ms for command " + Arrays.asList(cmdAttrs));
+            }
+            TimeUnit.NANOSECONDS.timedJoin(gobbler, remainingNanos);
         }
     }
 
@@ -592,7 +655,7 @@ final class FileSystemUtil {
      *
      * @param cmdAttrs the command line parameters
      * @return the newly created Process
-     * @throws IOException if an error occurs
+     * @throws IOException if the executable cannot be found or the operating-system process cannot be started
      */
     Process openProcess(final String[] cmdAttrs) throws IOException {
         return Runtime.getRuntime().exec(cmdAttrs);

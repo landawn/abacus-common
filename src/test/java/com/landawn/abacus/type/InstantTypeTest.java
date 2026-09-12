@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -18,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -54,7 +56,7 @@ public class InstantTypeTest extends TestBase {
     public void testStringOf_ValidInstant() {
         Instant instant = Instant.parse("2023-12-25T10:30:45.123456789Z");
         String result = instantType.stringOf(instant);
-        assertEquals("2023-12-25T10:30:45.123Z", result);
+        assertEquals("2023-12-25T10:30:45.123456789Z", result);
     }
 
     @Test
@@ -81,7 +83,7 @@ public class InstantTypeTest extends TestBase {
     @Test
     public void testValueOf_Object_Instant_preservesNanos() {
         Instant nanos = Instant.parse("2023-12-25T10:30:45.123456789Z");
-        Instant result = instantType.valueOf((Object) nanos);
+        Instant result = instantType.valueOf(nanos);
         assertEquals(nanos, result);
         assertEquals(123456789, result.getNano());
     }
@@ -348,5 +350,56 @@ public class InstantTypeTest extends TestBase {
         instantType.serializeTo(characterWriter, instant, config);
         verify(characterWriter, times(2)).write('"');
         verify(characterWriter).write(anyString());
+    }
+
+    // --- review fixes 2026-09-06 (T10-01, T10-02, T10-03) ---
+
+    @Test
+    public void reviewFixes20260906_T1001_fastPathRejectsImpossibleCalendarValues() {
+        // the 20/24-char 'Z' fast path resolved with SMART and silently moved Feb 30 -> Feb 28 etc.
+        for (final String s : new String[] { "2023-02-30T10:30:45Z", "2023-02-30T10:30:45.123Z", "2023-04-31T10:30:45Z", "2023-02-29T00:00:00Z",
+                "2023-02-29T00:00:00.000Z" }) {
+            assertThrows(DateTimeParseException.class, () -> instantType.valueOf(s), s);
+            assertThrows(DateTimeParseException.class, () -> instantType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        // same exception type for the 25-char form that always went to the general parser
+        assertThrows(DateTimeParseException.class, () -> instantType.valueOf("2023-02-30T10:30:45+00:00"));
+
+        // JDK design, pinned: the STRICT fast path rejects 24:00 but Instant.parse (ISO_INSTANT) accepts it as
+        // next-day midnight, so an Instant (unlike OffsetDateTime/ZonedDateTime) still yields a value here
+        assertEquals(Instant.parse("2023-10-16T00:00:00Z"), instantType.valueOf("2023-10-15T24:00:00Z"));
+        assertEquals(Instant.parse("2023-10-16T00:00:00Z"), instantType.valueOf("2023-10-15T24:00:00.000Z"));
+
+        // valid forms unchanged and equal to the JDK parser
+        for (final String s : new String[] { "2024-02-29T00:00:00Z", "2024-02-29T00:00:00.000Z", "0000-02-29T00:00:00Z", "0001-01-01T00:00:00.000Z",
+                "9999-12-31T23:59:59.999Z", "2023-10-15T10:30:45.12Z", "2023-10-15T10:30:45.123456789Z", "2023-10-15t10:30:45z" }) {
+            assertEquals(Instant.parse(s), instantType.valueOf(s), s);
+            assertEquals(Instant.parse(s), instantType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        final Instant x = Instant.parse("2024-02-29T12:34:56.789Z");
+        assertEquals(x, instantType.valueOf(instantType.stringOf(x)));
+    }
+
+    @Test
+    public void reviewFixes20260906_T1002_T1003_numericGrammarAndOverflow() {
+        // overflow used to escape as ArithmeticException; hex / type suffix were accepted (Numbers.toLong grammar)
+        for (final String s : new String[] { "170000000000000000000", "9223372036854775808", "-9223372036854775809", "0x1F4A0", "1700000000000L",
+                "1700000000000d", "12345L" }) {
+            assertThrows(DateTimeParseException.class, () -> instantType.valueOf(s), s);
+            assertThrows(DateTimeParseException.class, () -> instantType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        for (final String s : new String[] { "1700000000000", "+1700000000000", "-1700000000000", "9223372036854775807" }) {
+            final Instant expected = Instant.ofEpochMilli(Long.parseLong(s));
+            assertEquals(expected, instantType.valueOf(s), s);
+            assertEquals(expected, instantType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        // T10-03: numeric text is epoch millis only when longer than four characters
+        assertEquals(Instant.ofEpochMilli(12345L), instantType.valueOf("12345"));
+        assertThrows(DateTimeParseException.class, () -> instantType.valueOf("1234"));
+        assertThrows(DateTimeParseException.class, () -> instantType.valueOf("0"));
     }
 }

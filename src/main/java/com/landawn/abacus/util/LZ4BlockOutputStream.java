@@ -67,7 +67,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * @param os the output stream to write compressed data to; must not be {@code null}
      * @throws IllegalArgumentException if {@code os} is {@code null}.
      */
-    public LZ4BlockOutputStream(final OutputStream os) {
+    public LZ4BlockOutputStream(final OutputStream os) throws IllegalArgumentException {
         N.checkArgNotNull(os, cs.os);
         underlying = os;
         out = new net.jpountz.lz4.LZ4BlockOutputStream(os);
@@ -96,7 +96,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * @throws IllegalArgumentException if {@code os} is {@code null}, or if {@code blockSize} is less than 64 or
      *         greater than 32 MB.
      */
-    public LZ4BlockOutputStream(final OutputStream os, final int blockSize) {
+    public LZ4BlockOutputStream(final OutputStream os, final int blockSize) throws IllegalArgumentException {
         N.checkArgNotNull(os, cs.os);
         underlying = os;
         out = new net.jpountz.lz4.LZ4BlockOutputStream(os, blockSize);
@@ -113,11 +113,11 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * }</pre>
      *
      * @param b the byte to write (the 8 low-order bits are written)
-     * @throws IOException if an I/O error occurs
      * @throws IllegalStateException if this stream has already been finished or closed
+     * @throws IOException if writing a compressed block to the underlying output stream fails
      */
     @Override
-    public void write(final int b) throws IOException {
+    public void write(final int b) throws IllegalStateException, IOException {
         out.write(b);
     }
 
@@ -132,12 +132,12 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * }</pre>
      *
      * @param b the byte array to write
-     * @throws IOException if an I/O error occurs
-     * @throws NullPointerException if {@code b} is {@code null}
      * @throws IllegalStateException if this stream has already been finished or closed
+     * @throws NullPointerException if {@code b} is {@code null}
+     * @throws IOException if writing a compressed block to the underlying output stream fails
      */
     @Override
-    public void write(final byte[] b) throws IOException {
+    public void write(final byte[] b) throws IllegalStateException, NullPointerException, IOException {
         out.write(b);
     }
 
@@ -156,15 +156,23 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * @param b the byte array containing the data to write
      * @param off the start offset in the data
      * @param len the number of bytes to write
-     * @throws IOException if an I/O error occurs
+     *
      * @throws NullPointerException if {@code b} is {@code null}
-     * @throws IllegalArgumentException if {@code len} is negative.
-     * @throws IndexOutOfBoundsException if {@code off} is negative or
-     *         {@code off + len} is greater than {@code b.length}
+     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
+     *         or {@code len} is greater than {@code b.length - off}
      * @throws IllegalStateException if this stream has already been finished or closed
+     * @throws IOException if writing a compressed block to the underlying output stream fails
      */
     @Override
-    public void write(final byte[] b, final int off, final int len) throws IOException {
+    public void write(final byte[] b, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException, IllegalStateException, IOException {
+        // Enforce OutputStream.write(byte[], int, int) contract: net.jpountz.lz4.LZ4BlockOutputStream reports a
+        // negative length as IllegalArgumentException and skips the range check entirely when len == 0, so we
+        // validate here. Subtraction, not off + len, so a length near Integer.MAX_VALUE cannot overflow into a
+        // passing check.
+        if (off < 0 || len < 0 || len > b.length - off) {
+            throw new IndexOutOfBoundsException("off: " + off + ", len: " + len + ", length: " + b.length);
+        }
+
         out.write(b, off, len);
     }
 
@@ -183,7 +191,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * lz4Out.flush();   // Flush underlying stream (data still buffered until finish())
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if flushing the underlying output stream fails
      */
     @Override
     public void flush() throws IOException {
@@ -208,10 +216,11 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * // The underlying stream is still open for other uses
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs
+     *
      * @throws IllegalStateException if this stream has already been finished or closed
+     * @throws IOException if writing the final compressed block or end marker, or flushing the underlying stream fails
      */
-    public void finish() throws IOException {
+    public void finish() throws IllegalStateException, IOException {
         out.finish();
     }
 
@@ -224,7 +233,13 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * invocations throw an {@link IllegalStateException}. Calling
      * {@link #flush()} after the stream is closed has no effect.</p>
      *
-     * <p>Closing a previously closed stream has no effect.</p>
+     * <p>Closing a stream that was already closed <i>successfully</i> has no effect. A close that <i>failed</i>
+     * is different: the end marker was never written, so the stream is still unfinished and
+     * {@link #write(int) write} is still accepted rather than rejected with an
+     * {@link IllegalStateException}. A subsequent close retries the finish, but the first failure already
+     * closed the underlying stream, so the retry normally fails with that stream's closed-stream error
+     * rather than with the original one; it repeats the original error only for a sink that still fails the
+     * same way once closed. Either way a failed close cannot be recovered from - do not loop on it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -236,7 +251,7 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * }
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if finishing compressed output or closing the underlying output stream fails
      */
     @Override
     public void close() throws IOException {

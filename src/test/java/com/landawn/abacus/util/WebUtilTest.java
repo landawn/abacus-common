@@ -114,7 +114,8 @@ public class WebUtilTest extends TestBase {
         String result = WebUtil.curlToHttpRequestCode(curl);
 
         Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.contains("HttpMethod.HEAD") || result.contains("execute"));
+        // HEAD renders as .head(), consistent with get()/post()/put()/delete().
+        Assertions.assertTrue(result.contains(".head();"));
     }
 
     @Test
@@ -288,7 +289,7 @@ public class WebUtilTest extends TestBase {
         String result = WebUtil.curlToOkHttpRequestCode(curl);
 
         Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.contains("HttpMethod.HEAD") || result.contains("execute"));
+        Assertions.assertTrue(result.contains(".head();"));
     }
 
     @Test
@@ -592,18 +593,11 @@ public class WebUtilTest extends TestBase {
 
     @Test
     public void testCurl2HttpRequest_CaseInsensitiveCurlKeyword() {
-        String curl = "CURL https://api.example.com";
-        String result = WebUtil.curlToHttpRequestCode(curl);
-
-        Assertions.assertNotNull(result);
-    }
-
-    @Test
-    public void testCurl2HttpRequest_MixedCaseCurlKeyword() {
-        String curl = "CuRl https://api.example.com";
-        String result = WebUtil.curlToHttpRequestCode(curl);
-
-        Assertions.assertNotNull(result);
+        for (String curl : new String[] { "CURL https://api.example.com", "CuRl https://api.example.com" }) {
+            String result = WebUtil.curlToHttpRequestCode(curl);
+            Assertions.assertTrue(result.contains("HttpRequest.url(\"https://api.example.com\")"));
+            Assertions.assertTrue(result.contains(".get();"));
+        }
     }
 
     @Test
@@ -627,7 +621,10 @@ public class WebUtilTest extends TestBase {
         String result = WebUtil.buildCurl(HttpMethod.HEAD, "https://api.example.com/users", null, null, null, '\'');
 
         Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.contains("curl -X HEAD"));
+        // curl needs -I for HEAD: "-X HEAD" changes the method without telling curl to expect no
+        // response body, so it can hang, time out, or report a truncated response.
+        Assertions.assertTrue(result.contains("curl -I "));
+        Assertions.assertFalse(result.contains("-X HEAD"));
     }
 
     @Test

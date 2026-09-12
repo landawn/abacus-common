@@ -508,4 +508,144 @@ public class ImmutableNavigableMapTest extends TestBase {
         treeMap.put(2, "two");
         Assertions.assertEquals(map1.hashCode(), treeMap.hashCode());
     }
+
+    /** A key type that is deliberately NOT Comparable. */
+    private static final class NotComparableNM {
+        private final String s;
+
+        NotComparableNM(final String s) {
+            this.s = s;
+        }
+
+        @Override
+        public String toString() {
+            return s;
+        }
+    }
+
+    @Test
+    public void testOf_neverSilentlyFallsBackToAnUnsortedMap() {
+        Assertions.assertThrows(ClassCastException.class, () -> ImmutableNavigableMap.of(new NotComparableNM("z"), 1));
+        Assertions.assertThrows(ClassCastException.class, () -> ImmutableNavigableMap.of(new NotComparableNM("z"), 1, new NotComparableNM("a"), 2));
+    }
+
+    @Test
+    public void testOf_isStillSortedForComparableKeys() {
+        final ImmutableNavigableMap<String, Integer> m = ImmutableNavigableMap.of("c", 3, "a", 1, "b", 2);
+
+        Assertions.assertEquals(java.util.Arrays.asList("a", "b", "c"), new java.util.ArrayList<>(m.keySet()));
+        Assertions.assertEquals("a", m.firstKey());
+        Assertions.assertEquals("c", m.lastKey());
+    }
+
+    @Test
+    public void testBuilderIsBlocked() {
+        Assertions.assertThrows(UnsupportedOperationException.class, ImmutableNavigableMap::builder);
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> ImmutableSortedMap.builder(new java.util.TreeMap<String, Integer>()));
+    }
+
+    @Test
+    public void testCopyOf_copiesAWrappedView() {
+        final java.util.TreeMap<String, Integer> live = new java.util.TreeMap<>();
+        live.put("a", 1);
+
+        final ImmutableNavigableMap<String, Integer> view = ImmutableNavigableMap.wrap(live);
+        final ImmutableNavigableMap<String, Integer> copy = ImmutableNavigableMap.copyOf(view);
+
+        Assertions.assertNotSame(view, copy);
+
+        live.put("b", 2);
+
+        Assertions.assertEquals(2, view.size());
+        Assertions.assertEquals(1, copy.size());
+    }
+
+    @Test
+    public void testDescendingMapTraversesInDescendingOrder() {
+        // Same reason as ImmutableNavigableSet.descendingSet(): AbstractImmutableMap.forEach() delegates to
+        // the backing map, which for this view is already the descending one.
+        final ImmutableNavigableMap<String, Integer> descending = ImmutableNavigableMap.of("a", 1, "b", 2, "c", 3).descendingMap();
+        final java.util.List<String> expected = java.util.Arrays.asList("c", "b", "a");
+
+        Assertions.assertEquals(expected, new java.util.ArrayList<>(descending.keySet()));
+        Assertions.assertEquals(java.util.Arrays.asList(3, 2, 1), new java.util.ArrayList<>(descending.values()));
+
+        final java.util.List<String> seen = new java.util.ArrayList<>();
+        descending.forEach((k, v) -> seen.add(k));
+        Assertions.assertEquals(expected, seen);
+
+        Assertions.assertEquals("c", descending.firstKey());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> descending.put("z", 9));
+    }
+
+    @Test
+    public void testRangeViewsInheritOwnership() {
+        final ImmutableNavigableMap<String, Integer> owned = ImmutableNavigableMap.of("a", 1, "b", 2, "c", 3);
+        final ImmutableNavigableMap<String, Integer> ownedHead = owned.headMap("c", false);
+        Assertions.assertSame(ownedHead, ImmutableNavigableMap.copyOf(ownedHead));
+
+        final java.util.TreeMap<String, Integer> live = new java.util.TreeMap<>();
+        live.put("a", 1);
+        live.put("c", 3);
+
+        final ImmutableNavigableMap<String, Integer> viewHead = ImmutableNavigableMap.wrap(live).headMap("d", false);
+        final ImmutableNavigableMap<String, Integer> copy = ImmutableNavigableMap.copyOf(viewHead);
+        Assertions.assertNotSame(viewHead, copy);
+
+        live.put("b", 2);
+        Assertions.assertEquals(3, viewHead.size());
+        Assertions.assertEquals(2, copy.size());
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> viewHead.put("z", 9));
+    }
+
+    @Test
+    public void inclusiveRangeViews_throwWhenEndpointOutsideRestrictedParent() {
+        final ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(1, "a", 3, "c", 5, "e");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> map.headMap(3, true).subMap(1, true, 5, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> map.headMap(3, true).tailMap(5, true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> map.tailMap(3, true).headMap(1, true));
+    }
+
+    @Test
+    public void reversed_isTheNarrowedDescendingMapView() {
+        final ImmutableNavigableMap<Integer, String> map = ImmutableNavigableMap.of(1, "a", 2, "b", 3, "c");
+
+        // covariant re-override of ImmutableSortedMap.reversed(); its behaviour is that of descendingMap()
+        final ImmutableNavigableMap<Integer, String> reversed = map.reversed();
+        Assertions.assertEquals("{3=c, 2=b, 1=a}", reversed.toString());
+        Assertions.assertEquals(map.descendingMap().toString(), reversed.toString());
+        Assertions.assertTrue(reversed instanceof Immutable);
+        Assertions.assertEquals(Integer.valueOf(3), reversed.firstKey());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> reversed.put(9, "z"));
+    }
+
+    @Test
+    public void copyOf_returnsEveryDerivedViewOfAnOwningSourceUnchanged() {
+        // pins the copyOf(Map) memory note: every derived view of an owning map owns its backing storage
+        // too, so copyOf hands it straight back and the whole parent map stays reachable.
+        final ImmutableNavigableMap<Integer, String> owning = ImmutableNavigableMap.of(1, "a", 2, "b", 3, "c");
+
+        final ImmutableNavigableMap<Integer, String> descending = owning.descendingMap();
+        Assertions.assertSame(descending, ImmutableNavigableMap.copyOf(descending));
+        Assertions.assertSame(descending, ImmutableSortedMap.copyOf(descending));
+
+        final ImmutableNavigableMap<Integer, String> head = owning.headMap(3);
+        Assertions.assertSame(head, ImmutableNavigableMap.copyOf(head));
+
+        // the remaining three views the same paragraph enumerates - subMap/tailMap/reversed
+        final ImmutableNavigableMap<Integer, String> sub = owning.subMap(1, 3);
+        Assertions.assertSame(sub, ImmutableNavigableMap.copyOf(sub));
+
+        final ImmutableNavigableMap<Integer, String> tail = owning.tailMap(2);
+        Assertions.assertSame(tail, ImmutableNavigableMap.copyOf(tail));
+
+        final ImmutableNavigableMap<Integer, String> reversed = owning.reversed();
+        Assertions.assertSame(reversed, ImmutableNavigableMap.copyOf(reversed));
+        Assertions.assertSame(reversed, ImmutableSortedMap.copyOf(reversed));
+
+        // and the inclusive navigable form
+        final ImmutableNavigableMap<Integer, String> subInclusive = owning.subMap(1, true, 3, true);
+        Assertions.assertSame(subInclusive, ImmutableNavigableMap.copyOf(subInclusive));
+    }
 }

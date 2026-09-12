@@ -21,7 +21,7 @@ import com.landawn.abacus.TestBase;
 public class AccessFieldByMethodTest extends TestBase {
 
     @AccessFieldByMethod
-    static class TestClassWithAnnotation {
+    public static class TestClassWithAnnotation {
         @AccessFieldByMethod("customValue")
         private String field1;
 

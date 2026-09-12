@@ -302,4 +302,110 @@ public class ByteSummaryStatisticsTest extends TestBase {
         assertTrue(str.contains("average="));
     }
 
+
+    // FINDING 27: toString() must render the same text on every machine. Byte/Char/Short built their text with the
+    // default locale, so the average printed as "15,000000" under a comma-decimal locale and the integral
+    // conversions used the locale's own zero digit, while FloatSummaryStatistics already pinned Locale.ROOT - one
+    // family, two renderings.
+    @Test
+    public void reviewFixes20260908_toStringRendersWithLocaleRootWhateverTheDefaultLocaleIs() {
+        final ByteSummaryStatistics stats = new ByteSummaryStatistics();
+        stats.accept((byte) 10);
+        stats.accept((byte) 20);
+
+        final String expected = "{min=10, max=20, count=2, sum=30, average=15.000000}";
+        assertEquals(expected, stats.toString());
+
+        final java.util.Locale prev = java.util.Locale.getDefault();
+
+        try {
+            for (final String tag : new String[] { "de-DE", "fr-FR", "hi-IN-u-nu-deva", "ar-EG-u-nu-arab" }) {
+                java.util.Locale.setDefault(java.util.Locale.forLanguageTag(tag));
+                assertEquals(expected, stats.toString(), tag);
+            }
+        } finally {
+            java.util.Locale.setDefault(prev);
+        }
+    }
+
+    // Doc pin for the class-javadoc paragraph added on 2026-09-11: bytes are aggregated as SIGNED values, so
+    // accept((byte) 200) records -56. getMin()/getMax() are bytes, and on the accept() path the average stays
+    // inside -128..127 too, but getSum() is a long running total and routinely leaves that interval - the reason
+    // the text does NOT claim getSum() is bounded by it. The average bound is accept()/combine()-only; the
+    // four-argument constructor escapes it, which is pinned by
+    // reviewFixes20260911_fourArgConstructorDoesNotCrossCheckSumSoAverageIsUnbounded below.
+    @Test
+    public void reviewFixes20260911_valuesAreAggregatedAsSignedBytesAndTheSumIsNotBoundedByTheByteRange() {
+        final ByteSummaryStatistics signed = new ByteSummaryStatistics();
+        signed.accept((byte) 200);
+        signed.accept((byte) 5);
+        signed.accept((byte) 128);
+
+        assertEquals((byte) -128, signed.getMin());
+        assertEquals((byte) 5, signed.getMax());
+        assertEquals(-179L, signed.getSum());
+        assertEquals(-59.666666666666664d, signed.getAverage());
+        assertEquals("{min=-128, max=5, count=3, sum=-179, average=-59.666667}", signed.toString());
+
+        final ByteSummaryStatistics one = new ByteSummaryStatistics();
+        one.accept((byte) 200);
+        assertEquals(-56L, one.getSum(), "accept((byte) 200) records -56");
+        assertEquals((byte) -56, one.getMin());
+
+        // getSum() is a long accumulator: it is NOT confined to -128..127.
+        final ByteSummaryStatistics high = new ByteSummaryStatistics();
+        for (int i = 0; i < 5; i++) {
+            high.accept((byte) 127);
+        }
+        assertEquals(635L, high.getSum());
+        assertEquals(127.0d, high.getAverage());
+
+        final ByteSummaryStatistics low = new ByteSummaryStatistics();
+        for (int i = 0; i < 3; i++) {
+            low.accept((byte) -128);
+        }
+        assertEquals(-384L, low.getSum());
+        assertEquals(-128.0d, low.getAverage());
+
+        // The documented unsigned workaround: widen with b & 0xFF and accumulate elsewhere.
+        final java.util.IntSummaryStatistics unsigned = new java.util.IntSummaryStatistics();
+        for (final byte b : new byte[] { (byte) 200, (byte) 5, (byte) 128 }) {
+            unsigned.accept(b & 0xFF);
+        }
+        assertEquals(5, unsigned.getMin());
+        assertEquals(200, unsigned.getMax());
+        assertEquals(333L, unsigned.getSum());
+        assertEquals(111.0d, unsigned.getAverage());
+    }
+
+    // Doc pin for the 2026-09-11 narrowing of that same paragraph, which at first claimed getAverage() "ranges
+    // over -128..127" unconditionally. The public four-argument constructor validates exactly three things -
+    // count >= 0, the canonical empty state, and min <= max - and never cross-checks sum against count/min/max,
+    // so a statistic built that way (or combined with one) reports an average bounded by nothing. Deliberately
+    // NOT fixed in code: the obvious count * min <= sum <= count * max guard overflows, and would reject the
+    // legal state asserted on the last line here.
+    @Test
+    public void reviewFixes20260911_fourArgConstructorDoesNotCrossCheckSumSoAverageIsUnbounded() {
+        // The constructor example shape from the javadoc, with count 5 -> 1: the average escapes [min, max].
+        assertEquals(150.0d, new ByteSummaryStatistics(1L, (byte) 10, (byte) 50, 150L).getAverage());
+        // min == max does not save it either.
+        assertEquals(999.0d, new ByteSummaryStatistics(1L, (byte) 7, (byte) 7, 999L).getAverage());
+        assertEquals((double) Long.MAX_VALUE / 2, new ByteSummaryStatistics(2L, (byte) -128, (byte) 127, Long.MAX_VALUE).getAverage());
+
+        // combine() does not restore the bound: an accept()-built receiver inherits the other side's sum.
+        final ByteSummaryStatistics accepted = new ByteSummaryStatistics();
+        accepted.accept((byte) 1);
+        accepted.combine(new ByteSummaryStatistics(1L, (byte) 0, (byte) 0, 5000L));
+        assertEquals(2L, accepted.getCount());
+        assertEquals(2500.5d, accepted.getAverage());
+
+        // The three validations that DO exist still fire, so the constructor's @throws list stays accurate.
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> new ByteSummaryStatistics(-1L, (byte) 0, (byte) 0, 0L));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> new ByteSummaryStatistics(0L, (byte) 0, (byte) 0, 0L));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> new ByteSummaryStatistics(2L, (byte) 50, (byte) 10, 60L));
+
+        // A legal state (Long.MAX_VALUE values in -1..10 summing to 0) that a count * min bound would wrongly
+        // reject, because count * min overflows. This is why the fix is a doc narrowing and not a new check.
+        assertEquals(0.0d, new ByteSummaryStatistics(Long.MAX_VALUE, (byte) -1, (byte) 10, 0L).getAverage());
+    }
 }

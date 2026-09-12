@@ -22,8 +22,11 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserConfig;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
@@ -84,8 +87,9 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      *
      * @param typeClass         the concrete or interface collection class to handle
      * @param parameterTypeName the name of the element type (e.g., {@code "String"} or {@code "java.lang.Integer"})
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    CollectionType(final Class<T> typeClass, final String parameterTypeName) {
+    CollectionType(final Class<T> typeClass, final String parameterTypeName) throws IllegalArgumentException {
         super(getTypeName(typeClass, parameterTypeName, false));
 
         String declaringNameValue;
@@ -249,11 +253,15 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      *
      * @param x the collection to serialize; may be {@code null}
      * @return the JSON array string, or {@code null} if {@code x} is {@code null}
+     * @throws ClassCastException if an element is not compatible with the declared element type (each element is         written by the declared element type's writer, e.g. a {@code String} or a {@code Map} element inside a         {@code List<Integer>}; a {@code Long} or {@code Double} inside a {@code List<Integer>} is narrowed instead)
+     * @throws UncheckedIOException if the declared element serializer throws an I/O exception while producing the string.
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
-    public String stringOf(final T x) {
+    public String stringOf(final T x) throws ClassCastException, UncheckedIOException, RuntimeException {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.isEmpty()) {
@@ -312,11 +320,16 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      *
      * @param str the JSON array string to parse; may be {@code null}
      * @return a new collection containing the parsed elements, or {@code null} if {@code str} is {@code null} or blank
+     * @throws ParsingException if {@code str} is not a well-formed JSON array text
+     * @throws IllegalArgumentException if the collection class cannot be instantiated (an interface without a known implementation, an abstract
+     *         class, or a class without an accessible no-arg constructor)
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(Collection)
      */
+    @MayReturnNull
     @Override
-    public T valueOf(final String str) {
+    public T valueOf(final String str) throws ParsingException, IllegalArgumentException, RuntimeException {
         if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
@@ -331,6 +344,14 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * When the {@link Appendable} is a {@link java.io.Writer}, a buffered wrapper is used for
      * better I/O performance. If {@code x} is {@code null}, the literal {@code null} is appended.
      * <p>
+     * Each element is appended by the declared element type's handler. When that declared type is {@code Object} the
+     * handler of the element's runtime class is used instead, exactly as {@code AbstractTupleType.appendElement} -
+     * the slot writer the Pair/Triple/Tuple, {@code Map.Entry} and optional handlers use - resolves a slot:
+     * {@code ObjectType} has no {@code appendTo} of its own, so it would otherwise fall back to {@code stringOf}, i.e.
+     * the JSON form. A map, collection or bean element therefore keeps the {@code toString()}-style form
+     * ({@code [{k:1}]}, not {@code [{"k": 1}]}), matching what the same value appends as when it is not in a container.
+     * A {@code null} element is appended as the literal {@code null}.
+     * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
      * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
@@ -338,7 +359,10 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      *
      * @param appendable the {@link Appendable} to write to
      * @param x          the collection to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws ClassCastException if an element is not compatible with the declared element type (each element is         written by the declared element type's writer; a declared {@code Object} element type dispatches on the         element's runtime class instead, which by construction matches)
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -350,7 +374,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws NullPointerException, IOException, ClassCastException, RuntimeException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -371,7 +395,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                         if (element == null) {
                             bw.write(NULL_CHAR_ARRAY);
                         } else {
-                            elementType.appendTo(bw, element);
+                            AbstractTupleType.appendElement(bw, elementType, element);
                         }
                     }
 
@@ -400,7 +424,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                     if (element == null) {
                         appendable.append(NULL_STRING);
                     } else {
-                        elementType.appendTo(appendable, element);
+                        AbstractTupleType.appendElement(appendable, elementType, element);
                     }
                 }
 
@@ -411,9 +435,22 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
 
     /**
      * Writes the JSON array representation of a collection to a {@link CharacterWriter}.
-     * Each element &mdash; including a {@code null} element &mdash; is written using its own type's
+     * Each element &mdash; including a {@code null} element &mdash; is written using the declared element type's
      * {@code serializeTo} method, so element-level quotation and escaping are applied correctly.
      * If {@code x} itself is {@code null}, the literal {@code null} is written.
+     * <p>
+     * When the declared element type is not serializable ({@code Object}, a bean, a nested container...) and
+     * {@code config} is not {@code null}, the collection is rendered the way {@link #stringOf(Collection)} renders it,
+     * so each element is emitted in its structural JSON form ({@code [1, "a", null, 2.5, {"name": "x"}]}) rather than
+     * as a quoted {@code stringOf} string per element ({@code ["1", "a", ...]}). Under a {@link JsonSerConfig} the JSON
+     * parser writes that form, handed the {@code writer} directly only when it is a JSON writer; on any other writer
+     * (XML, CSV) the JSON text is written as escaped character content instead of raw JSON. Under any other
+     * configuration &mdash; an XML configuration in practice &mdash; the {@code stringOf} text of the whole collection
+     * is written as escaped character content, which is what {@code Object[]} already does and the only form
+     * {@link #valueOf(String)} can read back. That embedded JSON is always written compactly: {@code prettyFormat} is
+     * not propagated to it, because this handler is not told the caller's current indentation and a pretty embedded
+     * collection would restart at the left margin. With no config at all the elements are written element by element
+     * without quotation, as before.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
@@ -427,12 +464,38 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the collection to write; may be {@code null}
      * @param config serialization configuration forwarded to each element's writer; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws ClassCastException if an element is not compatible with the declared element type (each element is         written by the declared element type's writer)
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, ClassCastException, RuntimeException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
+        } else if (!isSerializable() && config != null) {
+            // A non-serializable element type (Object, beans, ...) has no typed writer: elementType.serializeTo would
+            // quote stringOf(element) and emit ["1", "a", ...] (read back as Strings), and under an XmlSerConfig it
+            // would drop the quoting altogether. Write the whole structure the way stringOf() does instead, as
+            // ObjectArrayType does for the same shape.
+            if (config instanceof JsonSerConfig jsc) {
+                // Pretty format is deliberately not propagated to the embedded write: this handler is not told the
+                // caller's current indentation, so a pretty embedded collection would restart at the left margin and
+                // mis-align every one of its lines. Same rule as AbstractTupleType.serializeSlot.
+                final JsonSerConfig embeddedConfig = jsc.isPrettyFormat() ? jsc.copy().setPrettyFormat(false) : jsc;
+
+                if (writer instanceof BufferedJsonWriter) {
+                    Utils.jsonParser.serialize(x, embeddedConfig, writer);
+                } else {
+                    // A JSON config can still arrive on an XML or CSV writer (Type.serializeTo is public API): the
+                    // parser would write raw JSON - unescaped ", < and & - into that format. Emit the text through
+                    // writeCharacter so it is escaped for the target format, as ObjectArrayType does.
+                    writer.writeCharacter(Utils.jsonParser.serialize(x, embeddedConfig));
+                }
+            } else {
+                writer.writeCharacter(stringOf(x));
+            }
         } else {
             writer.write(SK._BRACKET_L);
 
@@ -459,8 +522,10 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      *                          (e.g., {@code "List<String>"}); {@code false} for the fully qualified
      *                          form (e.g., {@code "java.util.List<java.lang.String>"})
      * @return the formatted type name
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName)
+            throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         } else {

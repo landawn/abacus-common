@@ -5,21 +5,32 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.JsonSerConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
+import com.landawn.abacus.util.DateTimeFormat;
+import com.landawn.abacus.util.Objectory;
 
 public class CalendarTypeTest extends TestBase {
 
@@ -237,6 +248,75 @@ public class CalendarTypeTest extends TestBase {
         CallableStatement stmt = mock(CallableStatement.class);
         // Basic set test - actual implementation will vary by type
         assertDoesNotThrow(() -> type.set(stmt, "param", null));
+    }
+
+    // --- review fixes 2026-09-06 (T9-02, T9-03, T9-06, T9-09) ---
+
+    @Test
+    public void reviewFixes20260906_T902_T903_charArrayAgreesWithStringOverload() {
+        for (final String s : new String[] { "1700000000000L", "1700000000000f", "12345L" }) {
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        for (final String s : new String[] { "99999999999999999999", "9223372036854775808", "-9223372036854775809" }) {
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        for (final String s : new String[] { "1700000000000", "+1700000000000", "-1700000000000", "9223372036854775807" }) {
+            final long expected = Long.parseLong(s);
+            assertEquals(expected, type.valueOf(s).getTimeInMillis(), s);
+            assertEquals(expected, type.valueOf(s.toCharArray(), 0, s.length()).getTimeInMillis(), s);
+        }
+    }
+
+    @Test
+    public void reviewFixes20260906_T906_textFormsRejectYearsOutsideCommonEra0001To9999() throws IOException {
+        final Calendar max = Calendar.getInstance();
+        max.setTimeInMillis(Long.MAX_VALUE);
+        assertThrows(IllegalArgumentException.class, () -> type.stringOf(max));
+        assertThrows(IllegalArgumentException.class, () -> type.appendTo(new StringBuilder(), max));
+
+        // the check applies to the calendar's own zone: 0001-01-01T00:00Z is still year 0000 west of Greenwich
+        final Calendar yearOneUtc = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        yearOneUtc.setTimeInMillis(-62135596800000L);
+        assertTrue(type.stringOf(yearOneUtc).startsWith("0001-01-01T00:00:00Z"));
+
+        final Calendar yearOneWest = Calendar.getInstance(TimeZone.getTimeZone("America/Los_Angeles"));
+        yearOneWest.setTimeInMillis(-62135596800000L);
+        assertThrows(IllegalArgumentException.class, () -> type.stringOf(yearOneWest));
+
+        // serializeTo: the default format measures the range in the calendar's own zone, ISO_8601_* in UTC,
+        // and LONG writes any instant (the three cases the @throws now names)
+        assertThrows(IllegalArgumentException.class, () -> type.serializeTo(Objectory.createBufferedJsonWriter(), yearOneWest, null));
+        assertThrows(IllegalArgumentException.class, () -> type.serializeTo(Objectory.createBufferedJsonWriter(), max,
+                JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)));
+
+        final BufferedJsonWriter isoWriter = Objectory.createBufferedJsonWriter();
+        type.serializeTo(isoWriter, yearOneWest, JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP));
+        assertEquals("\"0001-01-01T00:00:00.000Z\"", isoWriter.toString());
+
+        final BufferedJsonWriter longWriter = Objectory.createBufferedJsonWriter();
+        type.serializeTo(longWriter, max, JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.LONG));
+        assertEquals(String.valueOf(Long.MAX_VALUE), longWriter.toString());
+
+        assertNull(type.stringOf(null));
+    }
+
+    @Test
+    public void reviewFixes20260906_T909_calendarArgumentIsRebuiltAsGregorianAtSameInstantAndZone() {
+        // a Buddhist calendar is NOT cloned: the result is a GregorianCalendar at the same instant and zone
+        final Calendar buddhist = Calendar.getInstance(TimeZone.getTimeZone("Asia/Bangkok"), new Locale("th", "TH"));
+        buddhist.setTimeInMillis(1700000000123L);
+        assertEquals(2566, buddhist.get(Calendar.YEAR)); // Buddhist era year - precondition for the test
+
+        final Calendar result = type.valueOf((Object) buddhist);
+        assertNotSame(buddhist, result);
+        assertEquals(GregorianCalendar.class, result.getClass());
+        assertEquals(1700000000123L, result.getTimeInMillis());
+        assertEquals("Asia/Bangkok", result.getTimeZone().getID());
+        assertEquals(2023, result.get(Calendar.YEAR));
     }
 
 }

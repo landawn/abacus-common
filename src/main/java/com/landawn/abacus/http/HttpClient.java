@@ -32,15 +32,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.landawn.abacus.exception.HttpResponseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.http.HttpHeaders.Names;
-import com.landawn.abacus.logging.Logger;
-import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ContinuableFuture;
@@ -53,368 +53,125 @@ import com.landawn.abacus.util.URLEncodedUtil;
 import com.landawn.abacus.util.cs;
 
 /**
- * A comprehensive, thread-safe HTTP client implementation built on Java's {@link HttpURLConnection} foundation,
- * providing high-performance, feature-rich capabilities for modern web service integration and API communication.
- * This class offers an intuitive fluent API for executing HTTP requests with advanced features including automatic
- * content serialization, connection pooling, compression support, SSL/TLS configuration, and asynchronous execution
- * patterns optimized for enterprise-grade applications.
+ * A thread-safe HTTP client built on {@link HttpURLConnection}, with automatic serialization of
+ * request bodies, automatic deserialization of responses, optional compression, SSL/TLS and proxy
+ * configuration, and asynchronous execution through {@link ContinuableFuture}.
  *
- * <p>The {@code HttpClient} serves as a robust alternative to heavyweight HTTP libraries, focusing on simplicity
- * without sacrificing functionality. It provides seamless integration with Java object models through automatic
- * serialization/deserialization, comprehensive error handling, and efficient resource management suitable for
- * high-throughput scenarios in microservice architectures, REST API clients, and web service integrations.</p>
+ * <p><b>Thread safety:</b> instances are immutable after construction (URL, timeouts, default
+ * {@link HttpSettings}) and every request opens its own connection, so a single client can be
+ * shared across threads without external synchronization.</p>
  *
- * <p><b>Thread Safety Guarantee:</b>
- * This class is designed to be thread-safe and can be safely shared across multiple threads
- * without external synchronization. Configuration state (URL, timeouts, default {@link HttpSettings})
- * is fixed at construction time and the per-request execution path uses independent connections,
- * making instances suitable for concurrent usage in multi-threaded applications and web servers.</p>
+ * <p><b>Supported methods:</b> GET, POST, PUT, DELETE, HEAD, OPTIONS and TRACE.
+ * {@link HttpURLConnection} cannot issue {@link HttpMethod#PATCH} or {@link HttpMethod#CONNECT} at all, so
+ * every {@code execute}/{@code asyncExecute}/{@code openConnection} overload rejects those two with an
+ * {@link UnsupportedOperationException} before a connection is opened, instead of letting them surface as a
+ * {@code java.net.ProtocolException} wrapped in an {@link UncheckedIOException};
+ * see {@link HttpMethod#PATCH} for workarounds.</p>
  *
- * <p><b>Key Features and Capabilities:</b>
- * <ul>
- *   <li><b>HTTP Method Support:</b> Support for GET, POST, PUT, DELETE, HEAD, and OPTIONS methods.
- *       PATCH is accepted by the API but is not supported by the underlying {@link HttpURLConnection};
- *       see {@link HttpMethod#PATCH} for details and workarounds</li>
- *   <li><b>Content Serialization:</b> Automatic JSON, XML, Kryo, and form URL-encoded content handling</li>
- *   <li><b>Compression Support:</b> Built-in GZIP, LZ4 and Snappy compression/decompression; Brotli is supported for response decompression only (request bodies with *_BR formats are rejected)</li>
- *   <li><b>Asynchronous Execution:</b> Non-blocking operations with {@link ContinuableFuture} integration</li>
- *   <li><b>Connection Management:</b> Intelligent connection pooling and timeout configuration</li>
- *   <li><b>SSL/TLS Support:</b> Custom SSL socket factories and certificate handling</li>
- *   <li><b>Proxy Integration:</b> Comprehensive proxy server support with authentication</li>
- *   <li><b>Error Handling:</b> Robust exception management with detailed error reporting</li>
- * </ul>
- *
- * <p><b>Design Philosophy:</b>
- * <ul>
- *   <li><b>Simplicity First:</b> Intuitive API that handles complex HTTP scenarios transparently</li>
- *   <li><b>Performance Optimized:</b> Efficient resource utilization with minimal overhead</li>
- *   <li><b>Type Safety:</b> Strong generic typing for request/response object handling</li>
- *   <li><b>Standards Compliance:</b> Full HTTP/1.1 specification compliance with modern extensions</li>
- *   <li><b>Enterprise Ready:</b> Production-grade reliability with comprehensive configuration options</li>
- * </ul>
- *
- * <p><b>Supported Content Types and Serialization:</b>
+ * <p><b>How the {@code request} argument is used</b> — this is decided by the HTTP method, not by
+ * the argument type:</p>
  * <table border="1" style="border-collapse: collapse;">
- *   <caption><b>Content Type Support Matrix</b></caption>
- *   <tr style="background-color: #f2f2f2;">
- *     <th>Content Type</th>
- *     <th>Media Type</th>
- *     <th>Serialization Method</th>
- *     <th>Compression Support</th>
- *   </tr>
- *   <tr>
- *     <td>JSON</td>
- *     <td>application/json</td>
- *     <td>abacus internal JSON parser ({@link com.landawn.abacus.parser.ParserFactory#createJsonParser})</td>
- *     <td>GZIP, LZ4, Snappy (Brotli: response decompression only)</td>
- *   </tr>
- *   <tr>
- *     <td>XML</td>
- *     <td>application/xml</td>
- *     <td>abacus internal XML parser ({@link com.landawn.abacus.parser.ParserFactory#createXmlParser}, when available)</td>
- *     <td>GZIP, LZ4, Snappy (Brotli: response decompression only)</td>
- *   </tr>
- *   <tr>
- *     <td>Form URL-encoded</td>
- *     <td>application/x-www-form-urlencoded</td>
- *     <td>URLEncodedUtil conversion</td>
- *     <td>None ({@link ContentFormat#FORM_URL_ENCODED} has no compression variant)</td>
- *   </tr>
- *   <tr>
- *     <td>Kryo Binary</td>
- *     <td>application/kryo (recognized on responses; outgoing requests send {@code Content-Encoding: kryo} and no Content-Type)</td>
- *     <td>Kryo serialization</td>
- *     <td>None (kryo encoding only)</td>
- *   </tr>
- *   <tr>
- *     <td>Plain Text</td>
- *     <td>text/plain</td>
- *     <td>String encoding</td>
- *     <td>GZIP (Brotli: response decompression only)</td>
- *   </tr>
- *   <tr>
- *     <td>Binary</td>
- *     <td>application/octet-stream</td>
- *     <td>Raw byte arrays</td>
- *     <td>GZIP, LZ4, Snappy (Brotli: response decompression only)</td>
- *   </tr>
+ *   <caption><b>Request payload routing</b></caption>
+ *   <tr><th>Method</th><th>Meaning of {@code request}</th></tr>
+ *   <tr><td>POST, PUT, PATCH, OPTIONS</td><td>the request <b>body</b>, serialized as described below</td></tr>
+ *   <tr><td>GET, DELETE, HEAD, TRACE, CONNECT</td><td><b>query parameters</b> appended to the URL
+ *       (a raw pre-encoded query {@code String}, a {@code Map}, or a bean), UTF-8 percent-encoded</td></tr>
  * </table>
  *
- * <p><b>HTTP Method Support:</b>
- * <ul>
- *   <li><b>GET:</b> {@code get()}, {@code asyncGet()} - Resource retrieval with optional query parameters</li>
- *   <li><b>POST:</b> {@code post()}, {@code asyncPost()} - Resource creation with request body support</li>
- *   <li><b>PUT:</b> {@code put()}, {@code asyncPut()} - Resource replacement with full entity updates</li>
- *   <li><b>DELETE:</b> {@code delete()}, {@code asyncDelete()} - Resource deletion operations</li>
- *   <li><b>HEAD:</b> {@code head()}, {@code asyncHead()} - Metadata retrieval without response body</li>
- *   <li><b>OPTIONS:</b> Available via {@link #execute(HttpMethod, Object, HttpSettings, Class)} and
- *       {@link #asyncExecute(HttpMethod, Object, HttpSettings, Class)} with {@link HttpMethod#OPTIONS}</li>
- *   <li><b>PATCH:</b> Accepted via {@link #execute(HttpMethod, Object, HttpSettings, Class)} with
- *       {@link HttpMethod#PATCH}, but rejected by {@link HttpURLConnection} at request time;
- *       see {@link HttpMethod#PATCH} for workarounds</li>
- * </ul>
+ * <p>To send a body with a method that normally takes query parameters (for example a DELETE with a
+ * payload), use {@link HttpRequest#body(Object)}, which tracks that distinction explicitly.</p>
  *
- * <p><b>Usage Examples:</b>
+ * <p><b>Request body serialization and {@code Content-Type}:</b> the {@code Content-Type} placed on
+ * the wire always describes the bytes actually written. When neither the client-level nor the
+ * per-request {@link HttpSettings} declares one, it is derived from the payload:</p>
+ * <table border="1" style="border-collapse: collapse;">
+ *   <caption><b>Default request Content-Type</b></caption>
+ *   <tr><th>Payload</th><th>Written as</th><th>Default {@code Content-Type}</th></tr>
+ *   <tr><td>{@code String}, {@link Reader}</td><td>raw characters in the request charset</td><td>{@code text/plain; charset=...}</td></tr>
+ *   <tr><td>{@code byte[]}, {@link File}, {@link InputStream}</td><td>raw bytes</td><td>{@code application/octet-stream}</td></tr>
+ *   <tr><td>any other object</td><td>serialized with the parser for the active {@link ContentFormat}
+ *       (JSON when none is configured)</td><td>the format's media type, e.g. {@code application/json}</td></tr>
+ * </table>
+ *
+ * <p><b>Compression:</b> GZIP, LZ4 and Snappy are applied to request bodies and decoded from
+ * responses; Brotli is decode-only. Compression is selected by the active {@link ContentFormat} (or
+ * equivalently by a {@code Content-Encoding} header, from which the format is derived). Because the
+ * client performs the compression, a body must <i>not</i> be pre-compressed by the caller; a
+ * {@code Content-Encoding} that contradicts the active format is rejected with an
+ * {@link IllegalArgumentException} rather than silently mislabelling the body.</p>
+ *
+ * <p><b>Error handling:</b> a non-2xx status raises an {@link HttpResponseException} (a subclass of
+ * {@link UncheckedIOException}) that carries the status code, status message, response headers and a
+ * bounded prefix of the error body — unless the requested result type is {@link HttpResponse}, in
+ * which case the response is returned as-is for the caller to inspect (a request marked one-way via
+ * {@link HttpSettings#setOneWayRequest(boolean)} still returns {@code null}, {@code HttpResponse}
+ * and {@code head()} included, because its body is never read). Other I/O failures are
+ * wrapped in {@link UncheckedIOException}. If an error body cannot be opened or decoded, the
+ * status exception carries an empty body. The {@code async*} variants never throw these
+ * synchronously; the same failures are delivered through the returned {@link ContinuableFuture}.</p>
+ *
+ * <p><b>Concurrency limit:</b> {@code maxConnection} caps the number of <i>concurrent in-flight
+ * requests</i> for this client (or for the group of clients sharing an
+ * {@link AtomicInteger} counter). It is not a connection-pool size, and it does not queue: a request
+ * that would exceed the limit fails immediately with a {@link RejectedExecutionException}. Socket
+ * reuse is handled by the JDK's own keep-alive cache.</p>
+ *
+ * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Basic client creation with configuration
- * HttpSettings settings = HttpSettings.create()
- *     .setContentType("application/json")
- *     .setContentEncoding("gzip");
- * HttpClient userClient = HttpClient.create("http://localhost:18080/users/123",
- *     16, 5000, 30000, settings);
+ * // Reuse one client per endpoint; it is thread-safe.
+ * HttpClient client = HttpClient.create("http://localhost:18080/users", 16, 5000, 30000);
  *
- * // Simple GET request with automatic deserialization
- * User user = userClient.get(User.class);
+ * // GET with query parameters, deserialized into a bean.
+ * User user = client.get(Map.of("id", 123), User.class);
  *
- * // POST request with automatic serialization
- * HttpClient usersClient = HttpClient.create("http://localhost:18080/users",
- *     16, 5000, 30000, settings);
- * CreateUserRequest request = new CreateUserRequest("John", "Doe", "john@example.com");
- * User createdUser = usersClient.post(request, User.class);
+ * // POST a bean; the body is serialized as JSON and labelled application/json.
+ * User created = client.post(new CreateUserRequest("John", "Doe"), User.class);
  *
- * // Asynchronous operations with error handling
- * ContinuableFuture<UserList> usersFuture = usersClient.asyncGet(UserList.class)
- *     .thenCallAsync((userList, exception) -> {
- *         if (exception != null) {
- *             logger.error("Failed to fetch users", exception);
- *             return new UserList();
- *         }
- *         return userList;
- *     });
- *
- * // Form data submission with custom settings
- * Map<String, String> formData = Map.of("username", "john", "password", "secret");
- * HttpSettings formSettings = HttpSettings.create()
- *     .setContentType("application/x-www-form-urlencoded");
- * HttpClient loginClient = HttpClient.create("http://localhost:18080/login",
- *     16, 5000, 30000, formSettings);
- * String response = loginClient.post(formData, formSettings, String.class);
- * }</pre>
- *
- * <p><b>Advanced Configuration and Customization:</b>
- * <pre>{@code
- * // SSL/TLS configuration with custom certificates
- * javax.net.ssl.SSLSocketFactory sslFactory =
- *     (javax.net.ssl.SSLSocketFactory) javax.net.ssl.SSLSocketFactory.getDefault();
- * HttpSettings secureSettings = HttpSettings.create()
- *     .setSSLSocketFactory(sslFactory);
- * HttpClient secureClient = HttpClient.create("https://localhost:18080",
- *     16, 5000, 30000, secureSettings);
- *
- * // Proxy configuration with authentication
- * Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("proxy.company.com", 8080));
- * HttpSettings proxySettings = HttpSettings.create()
- *     .setProxy(proxy)
- *     .header("Proxy-Authorization", "Basic " + Strings.base64Encode("user:pass".getBytes()));
- * HttpClient proxyClient = HttpClient.create("http://localhost:18080",
- *     16, 5000, 30000, proxySettings);
- *
- * // Custom headers and authentication
- * String accessToken = "token123";
- * HttpSettings authSettings = HttpSettings.create()
- *     .header(HttpHeaders.Names.AUTHORIZATION, "Bearer " + accessToken)
- *     .header(HttpHeaders.Names.USER_AGENT, "MyApp/1.0")
- *     .header("X-API-Version", "v2");
- * HttpClient authClient = HttpClient.create("http://localhost:18080",
- *     16, 5000, 30000, authSettings);
- *
- * // Connection pooling and timeout tuning
- * HttpClient optimizedClient = HttpClient.create("https://high-throughput-api.com",
- *     50,       // 50 maximum concurrent connections
- *     2000,     // 2 seconds connection timeout
- *     15000);   // 15 seconds read timeout
- * }</pre>
- *
- * <p><b>Asynchronous Execution and Future Composition:</b>
- * <ul>
- *   <li><b>Non-blocking Operations:</b> All async methods return {@link ContinuableFuture} for non-blocking execution</li>
- *   <li><b>Executor Integration:</b> Custom {@link Executor} support for thread pool management</li>
- *   <li><b>Future Composition:</b> Chainable operations with map, flatMap, and handle methods</li>
- *   <li><b>Error Propagation:</b> Automatic exception propagation through future chains</li>
- *   <li><b>Timeout Support:</b> Configurable timeouts for async operations with cancellation</li>
- * </ul>
- *
- * <p><b>Connection Management and Pooling:</b>
- * <ul>
- *   <li><b>Connection Reuse:</b> Automatic HTTP connection pooling for improved performance</li>
- *   <li><b>Keep-Alive Support:</b> HTTP/1.1 persistent connection management</li>
- *   <li><b>Timeout Configuration:</b> Separate connection and read timeout settings</li>
- *   <li><b>Resource Cleanup:</b> Automatic resource management and connection cleanup</li>
- *   <li><b>Concurrent Limits:</b> Configurable maximum concurrent connection limits</li>
- * </ul>
- *
- * <p><b>Error Handling and Exception Management:</b>
- * <ul>
- *   <li><b>UncheckedIOException:</b> Wraps {@link IOException} for runtime exception handling, including
- *       HTTP error status codes (4xx, 5xx) when the result type is not {@link HttpResponse}</li>
- *   <li><b>Timeout Exceptions:</b> Specific exceptions for connection and read timeouts</li>
- *   <li><b>SSL Exceptions:</b> Detailed SSL/TLS handshake and certificate validation errors</li>
- *   <li><b>Serialization Errors:</b> Content serialization/deserialization exception handling</li>
- * </ul>
- *
- * <p><b>Compression and Content Encoding:</b>
- * <ul>
- *   <li><b>GZIP:</b> Standard HTTP compression for request and response bodies</li>
- *   <li><b>Brotli:</b> Response decompression only ({@code *_BR}/{@link ContentFormat#BR} request bodies are rejected; there is no bundled Brotli encoder)</li>
- *   <li><b>LZ4:</b> Fast compression for JSON, XML, and raw bodies ({@link ContentFormat} does not combine Kryo with LZ4)</li>
- *   <li><b>Snappy:</b> High-speed compression/decompression for JSON, XML, and raw bodies</li>
- *   <li><b>Automatic Detection:</b> Compression/decompression is selected from the active {@link ContentFormat} / {@code Content-Encoding} (not from {@code Content-Type} alone)</li>
- * </ul>
- *
- * <p><b>Performance Characteristics:</b>
- * <ul>
- *   <li><b>Request Overhead:</b> Minimal per-request overhead comparable to raw HttpURLConnection</li>
- *   <li><b>Memory Usage:</b> Efficient streaming for large request/response bodies</li>
- *   <li><b>Serialization Cost:</b> Optimized object serialization with caching mechanisms</li>
- *   <li><b>Connection Reuse:</b> Significant performance gains through connection pooling</li>
- *   <li><b>Compression Benefits:</b> Reduced bandwidth usage with automatic compression</li>
- * </ul>
- *
- * <p><b>Thread Safety and Concurrency:</b>
- * <ul>
- *   <li><b>Effectively Immutable Configuration:</b> URL, timeouts, default {@link HttpSettings},
- *       and the connection counter are fixed at construction time</li>
- *   <li><b>Thread-Safe Operations:</b> All request methods can be safely called from multiple threads</li>
- *   <li><b>Connection Isolation:</b> Each request opens and uses its own {@link HttpURLConnection}</li>
- *   <li><b>Async Execution:</b> Non-blocking operations with proper thread isolation</li>
- *   <li><b>Resource Management:</b> Per-request stream cleanup and shared connection-counter accounting</li>
- * </ul>
- *
- * <p><b>Integration with Frameworks and Libraries:</b>
- * <ul>
- *   <li><b>Spring Integration:</b> Compatible with Spring's RestTemplate patterns and dependency injection</li>
- *   <li><b>JAX-RS Client:</b> Alternative to JAX-RS client implementations</li>
- *   <li><b>Microservice Architecture:</b> Optimized for service-to-service communication</li>
- *   <li><b>Jackson/JSON-B:</b> Seamless integration with popular JSON processing libraries</li>
- *   <li><b>Reactive Streams:</b> Compatible with reactive programming patterns via ContinuableFuture</li>
- * </ul>
- *
- * <p><b>Static Factory Methods:</b>
- * <ul>
- *   <li><b>{@code create(String, ...)}:</b> Create a client from a string base URL, with optional
- *       max-connection, timeout, {@link HttpSettings}, shared connection counter, and {@link Executor} overloads</li>
- *   <li><b>{@code create(URL, ...)}:</b> Create a client from a {@link URL} object, with the same set of optional overloads</li>
- * </ul>
- *
- * <p><b>Best Practices and Recommendations:</b>
- * <ul>
- *   <li>Reuse HttpClient instances across multiple requests for connection pooling benefits</li>
- *   <li>Configure appropriate timeouts based on expected response times and network conditions</li>
- *   <li>Use async methods for non-blocking operations in high-concurrency scenarios</li>
- *   <li>Enable compression for APIs that support it to reduce bandwidth usage</li>
- *   <li>Handle exceptions appropriately with retry logic for transient failures</li>
- *   <li>Use strongly-typed objects instead of raw strings for request/response bodies</li>
- *   <li>Configure SSL/TLS properly for production environments with certificate validation</li>
- *   <li>Monitor connection pool usage in high-throughput applications</li>
- * </ul>
- *
- * <p><b>Common Anti-Patterns to Avoid:</b>
- * <ul>
- *   <li>Creating new HttpClient instances for each request (defeats connection pooling)</li>
- *   <li>Ignoring HTTP status codes and error responses</li>
- *   <li>Using blocking operations in async contexts (causes thread pool exhaustion)</li>
- *   <li>Not configuring appropriate timeouts (can cause indefinite blocking)</li>
- *   <li>Hardcoding URLs instead of composing paths from a base URL</li>
- *   <li>Not handling SSL certificate validation in production environments</li>
- *   <li>Ignoring content encoding headers when manually processing responses</li>
- * </ul>
- *
- * <p><b>Security Considerations:</b>
- * <ul>
- *   <li><b>SSL/TLS Validation:</b> Always validate certificates in production environments</li>
- *   <li><b>Authentication Headers:</b> Secure handling of API keys and authentication tokens</li>
- *   <li><b>Proxy Security:</b> Proper authentication and encryption for proxy connections</li>
- *   <li><b>Input Validation:</b> Validate all input data before serialization</li>
- *   <li><b>Error Information:</b> Avoid exposing sensitive information in error messages</li>
- * </ul>
- *
- * <p><b>Usage Examples: Microservice Client Implementation</b>
- * <pre>{@code
- * public class UserServiceClient {
- *     private final String baseUrl;
- *     private final int timeoutMs;
- *     private final HttpSettings settings;
- *
- *     public UserServiceClient(String baseUrl, int timeoutMs) {
- *         this.baseUrl = baseUrl;
- *         this.timeoutMs = timeoutMs;
- *         this.settings = HttpSettings.create()
- *             .setContentType("application/json")
- *             .setContentEncoding("gzip")
- *             .header(HttpHeaders.Names.USER_AGENT, "UserServiceClient/1.0");
- *     }
- *
- *     private HttpClient clientFor(String path) {
- *         return HttpClient.create(baseUrl + path, 16, timeoutMs, timeoutMs * 2, settings);
- *     }
- *
- *     public User findById(Long userId) {
- *         return clientFor("/users/" + userId).get(User.class);
- *     }
- *
- *     public ContinuableFuture<User> createUserAsync(CreateUserRequest request) {
- *         return clientFor("/users").asyncPost(request, User.class);
- *     }
- *
- *     public UserList searchUsers(UserSearchCriteria criteria) {
- *         String path = "/users/search?" + URLEncodedUtil.encode(criteria);
- *         return clientFor(path).get(UserList.class);
- *     }
- *
- *     public void updateUserAsync(Long userId, UpdateUserRequest request,
- *                               Consumer<User> onSuccess, Consumer<Exception> onError) {
- *         clientFor("/users/" + userId).asyncPut(request, User.class)
- *             .thenRunAsync((user, exception) -> {
- *                 if (exception != null) {
- *                     onError.accept(exception);
- *                 } else {
- *                     onSuccess.accept(user);
- *                 }
- *             });
- *     }
+ * // Inspect the raw response instead of letting a non-2xx status throw.
+ * HttpResponse response = client.get(HttpResponse.class);
+ * if (!response.isSuccessful()) {
+ *     logger.warn("failed: {} {}", response.statusCode(), response.message());
  * }
+ *
+ * // Asynchronous execution.
+ * ContinuableFuture<User> future = client.asyncGet(User.class);
  * }</pre>
  *
- * <p><b>Comparison with Alternative HTTP Clients:</b>
- * <ul>
- *   <li><b>vs. Apache HttpClient:</b> Simpler API vs. comprehensive but complex feature set</li>
- *   <li><b>vs. OkHttp:</b> Java-native vs. modern design with different dependency requirements</li>
- *   <li><b>vs. java.net.http.HttpClient:</b> Works with older Java versions vs. Java 11+ requirement</li>
- *   <li><b>vs. Spring RestTemplate:</b> Standalone utility vs. Spring Framework integration</li>
- * </ul>
+ * <p><b>Per-request settings:</b> a {@link HttpSettings} passed to an individual call is layered on
+ * top of the client's defaults rather than replacing them — headers are merged (same-named request
+ * headers win), and timeouts, proxy, SSL factory, content metadata and the connection flags fall
+ * back to the client-level value when the request settings do not specify one. For each timeout,
+ * a positive request setting takes precedence over a positive client-level setting, followed by
+ * the timeout passed to {@code create}; the resolved value is capped at {@link Integer#MAX_VALUE}.</p>
  *
- * <p><b>Monitoring and Debugging:</b>
- * <ul>
- *   <li><b>Error Diagnostics:</b> Detailed exception messages with request context (status code, response message and error body)</li>
- *   <li><b>Network Troubleshooting:</b> Support for network-level debugging and analysis</li>
- * </ul>
+ * <p><b>Relationship to {@link HttpRequest}:</b> {@code HttpRequest} is a fluent builder over this
+ * class. Note that their no-argument accessors differ by design: {@code HttpClient.get()} returns the
+ * response body as a {@code String}, while {@code HttpRequest.get()} returns the full
+ * {@link HttpResponse}. Pass an explicit result class to either when the distinction matters.</p>
  *
  * @see HttpSettings
  * @see HttpRequest
  * @see HttpResponse
+ * @see HttpResponseException
  * @see HttpURLConnection
  * @see ContinuableFuture
  * @see URLEncodedUtil
- * @see com.landawn.abacus.util.AsyncExecutor
  * @see <a href="https://tools.ietf.org/html/rfc7231">RFC 7231: HTTP/1.1 Semantics and Content</a>
  */
 public final class HttpClient implements AutoCloseable {
 
-    static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
-
-    static {
-        if (IOUtil.IS_PLATFORM_ANDROID) {
-            // ignore
-        } else {
-            final int maxConnections = IOUtil.CPU_CORES * 16;
-
-            System.setProperty("http.keepAlive", "true");
-            System.setProperty("http.maxConnections", String.valueOf(maxConnections));
-        }
-    }
+    // Loading this class deliberately does NOT set the JVM-global "http.keepAlive" /
+    // "http.maxConnections" system properties. Overwriting them silently replaced whatever the
+    // hosting application had configured, and "http.maxConnections" is read once by the JDK's
+    // keep-alive cache anyway, so setting it at an arbitrary class-loading moment was unreliable.
+    // Configure them with -D flags if the JDK defaults are not wanted.
 
     // Default client limits and timeouts.
-    /** Default maximum number of concurrent connections per HttpClient instance. */
+    /**
+     * Default cap on concurrent in-flight requests per {@code HttpClient} instance ({@value}).
+     *
+     * @see #create(String, int, long, long)
+     */
     public static final int DEFAULT_MAX_CONNECTION = 16;
 
     /** Default connection timeout in milliseconds (8 seconds). */
@@ -461,16 +218,17 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param netUrl the pre-parsed URL, or {@code null} to derive from {@code url}
      * @param url the request URL as a string
-     * @param maxConnection the maximum number of concurrently tracked connections
+     * @param maxConnection the maximum number of concurrent in-flight requests
      * @param connectTimeoutInMillis the connection timeout in milliseconds
      * @param readTimeoutInMillis the read timeout in milliseconds
      * @param settings the default HTTP settings for requests made by this client
-     * @param sharedActiveConnectionCounter the shared counter used to enforce connection limits
+     * @param sharedActiveConnectionCounter the shared counter used to enforce the in-flight limit
      * @param executor the executor used for asynchronous operations, or {@code null} to use the default
-     * @throws IllegalArgumentException if URL/protocol is invalid or timeout/connection limits are negative.
+     * @throws IllegalArgumentException if the URL is invalid, is not valid URI syntax, uses an
+     *         unsupported protocol, or a timeout/limit is negative.
      */
     private HttpClient(final URL netUrl, final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
-            final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) {
+            final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) throws IllegalArgumentException {
         N.checkArgument(netUrl != null || Strings.isNotEmpty(url), "url cannot be null or empty");
 
         if ((maxConnection < 0) || (connectTimeoutInMillis < 0) || (readTimeoutInMillis < 0)) {
@@ -482,6 +240,17 @@ public final class HttpClient implements AutoCloseable {
         checkSupportedProtocol(_netURL);
 
         _url = Strings.isEmpty(url) ? _netURL.toString() : url;
+
+        if (netUrl != null) {
+            // A URL accepted by java.net.URL is not necessarily valid URI syntax (a space in the
+            // path, for example). Appending query parameters re-parses the URL through URI, so
+            // accepting such a URL used to defer the failure to the first request that carried query
+            // parameters. Reject it up front instead; the URL is never silently re-encoded, which
+            // could change what it addresses. The string form needs no check here: createNetUrl(..)
+            // has already parsed exactly this string through URI.
+            checkValidUriSyntax(_url);
+        }
+
         _maxConnection = (maxConnection == 0) ? DEFAULT_MAX_CONNECTION : maxConnection;
         _connectTimeoutInMillis = (connectTimeoutInMillis == 0) ? DEFAULT_CONNECTION_TIMEOUT : connectTimeoutInMillis;
         _readTimeoutInMillis = (readTimeoutInMillis == 0) ? DEFAULT_READ_TIMEOUT : readTimeoutInMillis;
@@ -497,11 +266,23 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param url the URL string to parse
      * @return the parsed URL
-     * @throws IllegalArgumentException if URL is {@code null} or uses an unsupported protocol.
+     * @throws IllegalArgumentException if URL is {@code null}, is not valid URI syntax, or uses an
+     *         unsupported protocol.
      */
-    private static URL createNetUrl(final String url) {
+    private static URL createNetUrl(final String url) throws IllegalArgumentException {
+        N.checkArgNotNull(url, cs.url);
+
+        final URI uri;
+
         try {
-            final URL netUrl = URI.create(N.checkArgNotNull(url, cs.url)).toURL();
+            uri = URI.create(url);
+        } catch (final IllegalArgumentException e) {
+            // Reported exactly like the URL-object path, which validates the same thing.
+            throw new IllegalArgumentException("Invalid URI syntax in url: " + url + ". " + e.getMessage(), e);
+        }
+
+        try {
+            final URL netUrl = uri.toURL();
             checkSupportedProtocol(netUrl);
 
             return netUrl;
@@ -516,11 +297,25 @@ public final class HttpClient implements AutoCloseable {
      * @param netUrl the URL to validate
      * @throws IllegalArgumentException if protocol is not HTTP/HTTPS.
      */
-    private static void checkSupportedProtocol(final URL netUrl) {
+    private static void checkSupportedProtocol(final URL netUrl) throws IllegalArgumentException {
         final String protocol = netUrl == null ? null : netUrl.getProtocol();
 
         if (!"http".equalsIgnoreCase(protocol) && !"https".equalsIgnoreCase(protocol)) {
             throw new IllegalArgumentException("Only HTTP/HTTPS protocol is supported, but got: " + protocol);
+        }
+    }
+
+    /**
+     * Validates that the URL is also valid URI syntax, which the query-parameter path requires.
+     *
+     * @param url the URL string to validate
+     * @throws IllegalArgumentException if the URL cannot be parsed as a {@link URI}.
+     */
+    private static void checkValidUriSyntax(final String url) throws IllegalArgumentException {
+        try {
+            URI.create(url);
+        } catch (final IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid URI syntax in url: " + url + ". " + e.getMessage(), e);
         }
     }
 
@@ -550,10 +345,10 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param url The base URL for the HTTP client
      * @return A new HttpClient instance
-     * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if url is {@code null} or empty, or uses an unsupported protocol.
+     * @throws IllegalArgumentException if url is {@code null}, empty, not valid URI syntax, or uses an
+     *         unsupported protocol.
      */
-    public static HttpClient create(final String url) {
+    public static HttpClient create(final String url) throws IllegalArgumentException {
         return create(url, DEFAULT_MAX_CONNECTION);
     }
 
@@ -567,13 +362,14 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client
-     * @param maxConnection Maximum number of concurrent connections
+     * @param maxConnection Maximum number of concurrent in-flight requests for this client;
+     *        {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}. This is not a connection-pool size:
+     *        a request that would exceed it fails immediately with a {@link RejectedExecutionException}
      * @return A new HttpClient instance
-     * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or
-     *         maxConnection is negative.
+     * @throws IllegalArgumentException if url is {@code null}, empty, not valid URI syntax, uses an
+     *         unsupported protocol, or maxConnection is negative.
      */
-    public static HttpClient create(final String url, final int maxConnection) {
+    public static HttpClient create(final String url, final int maxConnection) throws IllegalArgumentException {
         return create(url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
     }
 
@@ -587,14 +383,15 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client
-     * @param connectTimeoutInMillis Connection timeout in milliseconds
-     * @param readTimeoutInMillis Read timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @return A new HttpClient instance
-     * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or timeouts are
-     *         negative.
+     * @throws IllegalArgumentException if url is {@code null}, empty, not valid URI syntax, uses an
+     *         unsupported protocol, or a timeout is negative.
      */
-    public static HttpClient create(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+    public static HttpClient create(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
         return create(url, DEFAULT_MAX_CONNECTION, connectTimeoutInMillis, readTimeoutInMillis);
     }
 
@@ -607,15 +404,19 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client
-     * @param maxConnection Maximum number of concurrent connections
-     * @param connectTimeoutInMillis Connection timeout in milliseconds
-     * @param readTimeoutInMillis Read timeout in milliseconds
+     * @param maxConnection Maximum number of concurrent in-flight requests for this client;
+     *        {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}. This is not a connection-pool size:
+     *        a request that would exceed it fails immediately with a {@link RejectedExecutionException}
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @return A new HttpClient instance
-     * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or any numeric
-     *         parameter is negative.
+     * @throws IllegalArgumentException if url is {@code null}, empty, not valid URI syntax, uses an
+     *         unsupported protocol, or any numeric parameter is negative.
      */
-    public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+    public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis)
+            throws IllegalArgumentException {
         return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, (HttpSettings) null);
     }
 
@@ -631,17 +432,20 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client
-     * @param maxConnection Maximum number of concurrent connections
-     * @param connectTimeoutInMillis Connection timeout in milliseconds
-     * @param readTimeoutInMillis Read timeout in milliseconds
+     * @param maxConnection Maximum number of concurrent in-flight requests for this client;
+     *        {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}. This is not a connection-pool size:
+     *        a request that would exceed it fails immediately with a {@link RejectedExecutionException}
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @param settings Additional HTTP settings (headers, content type, etc.)
      * @return A new HttpClient instance
-     * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or any numeric
-     *         parameter is negative.
+     * @throws IllegalArgumentException if url is {@code null}, empty, not valid URI syntax, uses an
+     *         unsupported protocol, or any numeric parameter is negative.
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
-            final HttpSettings settings) throws UncheckedIOException {
+            final HttpSettings settings) throws IllegalArgumentException {
         return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0));
     }
 
@@ -659,18 +463,22 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client
-     * @param maxConnection Maximum number of concurrent connections
-     * @param connectTimeoutInMillis Connection timeout in milliseconds
-     * @param readTimeoutInMillis Read timeout in milliseconds
+     * @param maxConnection Maximum number of concurrent in-flight requests for this client;
+     *        {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}. This is not a connection-pool size:
+     *        a request that would exceed it fails immediately with a {@link RejectedExecutionException}
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @param settings Additional HTTP settings
-     * @param sharedActiveConnectionCounter Shared counter for active connections across multiple HttpClient instances
+     * @param sharedActiveConnectionCounter Shared counter for active connections across multiple HttpClient instances; must not be {@code null}
      * @return A new HttpClient instance
-     * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if url is {@code null} or empty, uses an unsupported protocol, or any numeric
-     *         parameter is negative.
+     * @throws IllegalArgumentException if url is {@code null}, empty, not valid URI syntax, uses an
+     *         unsupported protocol, any numeric parameter is negative, or
+     *         {@code sharedActiveConnectionCounter} is {@code null}.
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
-            final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter) {
+            final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter) throws IllegalArgumentException {
         return new HttpClient(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, null);
     }
 
@@ -686,14 +494,17 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client
-     * @param maxConnection Maximum number of concurrent connections
-     * @param connectTimeoutInMillis Connection timeout in milliseconds
-     * @param readTimeoutInMillis Read timeout in milliseconds
+     * @param maxConnection Maximum number of concurrent in-flight requests for this client;
+     *        {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}. This is not a connection-pool size:
+     *        a request that would exceed it fails immediately with a {@link RejectedExecutionException}
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
-     * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, or url is {@code null} or empty, uses an
-     *         unsupported protocol, or any numeric parameter is negative.
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, or url is {@code null}, empty,
+     *         not valid URI syntax, uses an unsupported protocol, or any numeric parameter is negative.
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final Executor executor) throws IllegalArgumentException {
@@ -716,18 +527,21 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client
-     * @param maxConnection Maximum number of concurrent connections
-     * @param connectTimeoutInMillis Connection timeout in milliseconds
-     * @param readTimeoutInMillis Read timeout in milliseconds
+     * @param maxConnection Maximum number of concurrent in-flight requests for this client;
+     *        {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}. This is not a connection-pool size:
+     *        a request that would exceed it fails immediately with a {@link RejectedExecutionException}
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
-     * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, or url is {@code null} or empty, uses an
-     *         unsupported protocol, or any numeric parameter is negative.
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, or url is {@code null}, empty,
+     *         not valid URI syntax, uses an unsupported protocol, or any numeric parameter is negative.
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
-            final HttpSettings settings, final Executor executor) throws IllegalArgumentException, UncheckedIOException {
+            final HttpSettings settings, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
         return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0), executor);
@@ -748,16 +562,19 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client
-     * @param maxConnection Maximum number of concurrent connections per client
-     * @param connectTimeoutInMillis Connection timeout in milliseconds (0 uses default)
-     * @param readTimeoutInMillis Read timeout in milliseconds (0 uses default)
+     * @param maxConnection Maximum number of concurrent in-flight requests sharing
+     *        {@code sharedActiveConnectionCounter}; {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
-     * @param sharedActiveConnectionCounter Shared counter for managing active connections across multiple clients
+     * @param sharedActiveConnectionCounter Shared counter for managing active connections across multiple clients; must not be {@code null}
      * @param executor Custom executor for asynchronous operations; must not be {@code null}
      * @return A new HttpClient instance
-     * @throws UncheckedIOException if the URL string cannot be parsed (for example, a {@link java.net.MalformedURLException})
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, or url is {@code null} or empty, uses an
-     *         unsupported protocol, or any numeric parameter is negative.
+     * @throws IllegalArgumentException if {@code executor} or {@code sharedActiveConnectionCounter} is {@code null},
+     *         or url is {@code null}, empty, not valid URI syntax, uses an unsupported protocol, or any
+     *         numeric parameter is negative.
      */
     public static HttpClient create(final String url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) throws IllegalArgumentException {
@@ -778,9 +595,10 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is {@code null} or uses an unsupported protocol.
+     * @throws IllegalArgumentException if url is {@code null}, is not valid URI syntax, or uses an
+     *         unsupported protocol.
      */
-    public static HttpClient create(final URL url) {
+    public static HttpClient create(final URL url) throws IllegalArgumentException {
         return create(url, DEFAULT_MAX_CONNECTION);
     }
 
@@ -795,12 +613,14 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
-     * @param maxConnection Maximum number of concurrent connections
+     * @param maxConnection Maximum number of concurrent in-flight requests for this client;
+     *        {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}. This is not a connection-pool size:
+     *        a request that would exceed it fails immediately with a {@link RejectedExecutionException}
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or maxConnection is
-     *         negative.
+     * @throws IllegalArgumentException if url is {@code null}, is not valid URI syntax, uses an
+     *         unsupported protocol, or maxConnection is negative.
      */
-    public static HttpClient create(final URL url, final int maxConnection) {
+    public static HttpClient create(final URL url, final int maxConnection) throws IllegalArgumentException {
         return create(url, maxConnection, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_READ_TIMEOUT);
     }
 
@@ -815,13 +635,15 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
-     * @param connectTimeoutInMillis Connection timeout in milliseconds
-     * @param readTimeoutInMillis Read timeout in milliseconds
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or timeouts are
-     *         negative.
+     * @throws IllegalArgumentException if url is {@code null}, is not valid URI syntax, uses an
+     *         unsupported protocol, or a timeout is negative.
      */
-    public static HttpClient create(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+    public static HttpClient create(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
         return create(url, DEFAULT_MAX_CONNECTION, connectTimeoutInMillis, readTimeoutInMillis);
     }
 
@@ -835,14 +657,19 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
-     * @param maxConnection Maximum number of concurrent connections
-     * @param connectTimeoutInMillis Connection timeout in milliseconds
-     * @param readTimeoutInMillis Read timeout in milliseconds
+     * @param maxConnection Maximum number of concurrent in-flight requests for this client;
+     *        {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}. This is not a connection-pool size:
+     *        a request that would exceed it fails immediately with a {@link RejectedExecutionException}
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or any numeric
-     *         parameter is negative.
+     * @throws IllegalArgumentException if url is {@code null}, is not valid URI syntax, uses an
+     *         unsupported protocol, or any numeric parameter is negative.
      */
-    public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
+    public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis)
+            throws IllegalArgumentException {
         return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, (HttpSettings) null);
     }
 
@@ -859,16 +686,20 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
-     * @param maxConnection Maximum number of concurrent connections
-     * @param connectTimeoutInMillis Connection timeout in milliseconds
-     * @param readTimeoutInMillis Read timeout in milliseconds
+     * @param maxConnection Maximum number of concurrent in-flight requests for this client;
+     *        {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}. This is not a connection-pool size:
+     *        a request that would exceed it fails immediately with a {@link RejectedExecutionException}
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or any numeric
-     *         parameter is negative.
+     * @throws IllegalArgumentException if url is {@code null}, is not valid URI syntax, uses an
+     *         unsupported protocol, or any numeric parameter is negative.
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
-            final HttpSettings settings) throws UncheckedIOException {
+            final HttpSettings settings) throws IllegalArgumentException {
         return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0));
     }
 
@@ -887,17 +718,22 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
-     * @param maxConnection Maximum number of concurrent connections
-     * @param connectTimeoutInMillis Connection timeout in milliseconds
-     * @param readTimeoutInMillis Read timeout in milliseconds
+     * @param maxConnection Maximum number of concurrent in-flight requests for this client;
+     *        {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}. This is not a connection-pool size:
+     *        a request that would exceed it fails immediately with a {@link RejectedExecutionException}
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
-     * @param sharedActiveConnectionCounter Shared counter for active connections across multiple clients
+     * @param sharedActiveConnectionCounter Shared counter for active connections across multiple clients; must not be {@code null}
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if url is {@code null}, uses an unsupported protocol, or any numeric
-     *         parameter is negative.
+     * @throws IllegalArgumentException if url is {@code null}, is not valid URI syntax, uses an
+     *         unsupported protocol, any numeric parameter is negative, or
+     *         {@code sharedActiveConnectionCounter} is {@code null}.
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
-            final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter) {
+            final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter) throws IllegalArgumentException {
         return new HttpClient(url, null, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, sharedActiveConnectionCounter, null);
     }
 
@@ -914,13 +750,17 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
-     * @param maxConnection Maximum number of concurrent connections
-     * @param connectTimeoutInMillis Connection timeout in milliseconds
-     * @param readTimeoutInMillis Read timeout in milliseconds
+     * @param maxConnection Maximum number of concurrent in-flight requests for this client;
+     *        {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}. This is not a connection-pool size:
+     *        a request that would exceed it fails immediately with a {@link RejectedExecutionException}
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, url is {@code null}, uses an
-     *         unsupported protocol, or any numeric parameter is negative.
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, url is {@code null}, is not
+     *         valid URI syntax, uses an unsupported protocol, or any numeric parameter is negative.
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final Executor executor) throws IllegalArgumentException {
@@ -944,17 +784,21 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
-     * @param maxConnection Maximum number of concurrent connections
-     * @param connectTimeoutInMillis Connection timeout in milliseconds
-     * @param readTimeoutInMillis Read timeout in milliseconds
+     * @param maxConnection Maximum number of concurrent in-flight requests for this client;
+     *        {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}. This is not a connection-pool size:
+     *        a request that would exceed it fails immediately with a {@link RejectedExecutionException}
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
      * @param executor Custom executor for asynchronous operations
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, url is {@code null}, uses an
-     *         unsupported protocol, or any numeric parameter is negative.
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, url is {@code null}, is not
+     *         valid URI syntax, uses an unsupported protocol, or any numeric parameter is negative.
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
-            final HttpSettings settings, final Executor executor) throws IllegalArgumentException, UncheckedIOException {
+            final HttpSettings settings, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
         return create(url, maxConnection, connectTimeoutInMillis, readTimeoutInMillis, settings, new AtomicInteger(0), executor);
@@ -976,15 +820,20 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param url The base URL for the HTTP client (as a java.net.URL object)
-     * @param maxConnection Maximum number of concurrent connections
-     * @param connectTimeoutInMillis Connection timeout in milliseconds (0 uses default)
-     * @param readTimeoutInMillis Read timeout in milliseconds (0 uses default)
+     * @param maxConnection Maximum number of concurrent in-flight requests for this client;
+     *        {@code 0} selects {@link #DEFAULT_MAX_CONNECTION}. This is not a connection-pool size:
+     *        a request that would exceed it fails immediately with a {@link RejectedExecutionException}
+     * @param connectTimeoutInMillis Connection timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_CONNECTION_TIMEOUT} (it does <i>not</i> mean "no timeout")
+     * @param readTimeoutInMillis Read timeout in milliseconds; {@code 0} selects
+     *        {@link #DEFAULT_READ_TIMEOUT} (it does <i>not</i> mean "no timeout")
      * @param settings Additional HTTP settings (headers, content type, proxy, SSL, etc.)
-     * @param sharedActiveConnectionCounter Shared counter for managing active connections across multiple clients
+     * @param sharedActiveConnectionCounter Shared counter for managing active connections across multiple clients; must not be {@code null}
      * @param executor Custom executor for asynchronous operations; must not be {@code null}
      * @return A new HttpClient instance
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, url is {@code null}, uses an
-     *         unsupported protocol, or any numeric parameter is negative.
+     * @throws IllegalArgumentException if {@code executor} or {@code sharedActiveConnectionCounter} is {@code null},
+     *         url is {@code null}, is not valid URI syntax, uses an unsupported protocol, or any numeric
+     *         parameter is negative.
      */
     public static HttpClient create(final URL url, final int maxConnection, final long connectTimeoutInMillis, final long readTimeoutInMillis,
             final HttpSettings settings, final AtomicInteger sharedActiveConnectionCounter, final Executor executor) throws IllegalArgumentException {
@@ -1003,9 +852,11 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String get() throws UncheckedIOException {
+    public String get() throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return get(String.class);
     }
 
@@ -1021,9 +872,11 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String get(final HttpSettings settings) throws UncheckedIOException {
+    public String get(final HttpSettings settings) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return get(settings, String.class);
     }
 
@@ -1036,11 +889,14 @@ public final class HttpClient implements AutoCloseable {
      * String response = client.get(params);
      * }</pre>
      *
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String get(final Object queryParameters) throws UncheckedIOException {
+    public String get(final Object queryParameters) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return get(queryParameters, String.class);
     }
 
@@ -1054,12 +910,16 @@ public final class HttpClient implements AutoCloseable {
      * String response = client.get(params, settings);
      * }</pre>
      *
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String get(final Object queryParameters, final HttpSettings settings) throws UncheckedIOException {
+    public String get(final Object queryParameters, final HttpSettings settings)
+            throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return get(queryParameters, settings, String.class);
     }
 
@@ -1074,9 +934,12 @@ public final class HttpClient implements AutoCloseable {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
-    public <T> T get(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T get(final Class<T> resultClass) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return get(null, _settings, resultClass);
     }
 
@@ -1093,9 +956,12 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
-    public <T> T get(final HttpSettings settings, final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T get(final HttpSettings settings, final Class<T> resultClass) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return get(null, settings, resultClass);
     }
 
@@ -1109,12 +975,16 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
-    public <T> T get(final Object queryParameters, final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T get(final Object queryParameters, final Class<T> resultClass) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return get(queryParameters, _settings, resultClass);
     }
 
@@ -1129,13 +999,18 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
-    public <T> T get(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T get(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass)
+            throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.GET, queryParameters, settings, resultClass);
     }
 
@@ -1148,9 +1023,11 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String delete() throws UncheckedIOException {
+    public String delete() throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return delete(String.class);
     }
 
@@ -1165,9 +1042,11 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String delete(final HttpSettings settings) throws UncheckedIOException {
+    public String delete(final HttpSettings settings) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return delete(settings, String.class);
     }
 
@@ -1180,11 +1059,14 @@ public final class HttpClient implements AutoCloseable {
      * String response = client.delete(params);
      * }</pre>
      *
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String delete(final Object queryParameters) throws UncheckedIOException {
+    public String delete(final Object queryParameters) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return delete(queryParameters, String.class);
     }
 
@@ -1198,12 +1080,16 @@ public final class HttpClient implements AutoCloseable {
      * String response = client.delete(params, settings);
      * }</pre>
      *
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String delete(final Object queryParameters, final HttpSettings settings) throws UncheckedIOException {
+    public String delete(final Object queryParameters, final HttpSettings settings)
+            throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return delete(queryParameters, settings, String.class);
     }
 
@@ -1218,9 +1104,12 @@ public final class HttpClient implements AutoCloseable {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
-    public <T> T delete(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T delete(final Class<T> resultClass) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return delete(null, _settings, resultClass);
     }
 
@@ -1237,9 +1126,13 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
-    public <T> T delete(final HttpSettings settings, final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T delete(final HttpSettings settings, final Class<T> resultClass)
+            throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return delete(null, settings, resultClass);
     }
 
@@ -1253,12 +1146,17 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
-    public <T> T delete(final Object queryParameters, final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T delete(final Object queryParameters, final Class<T> resultClass)
+            throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return delete(queryParameters, _settings, resultClass);
     }
 
@@ -1273,13 +1171,18 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
-    public <T> T delete(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T delete(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass)
+            throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.DELETE, queryParameters, settings, resultClass);
     }
 
@@ -1294,9 +1197,11 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for JSON/XML serialization)
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String post(final Object request) throws UncheckedIOException {
+    public String post(final Object request) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return post(request, String.class);
     }
 
@@ -1313,9 +1218,12 @@ public final class HttpClient implements AutoCloseable {
      * @param request The request body
      * @param resultClass The class of the expected response object
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
-    public <T> T post(final Object request, final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T post(final Object request, final Class<T> resultClass) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return post(request, _settings, resultClass);
     }
 
@@ -1332,9 +1240,11 @@ public final class HttpClient implements AutoCloseable {
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String post(final Object request, final HttpSettings settings) throws UncheckedIOException {
+    public String post(final Object request, final HttpSettings settings) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return post(request, settings, String.class);
     }
 
@@ -1353,9 +1263,13 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
-    public <T> T post(final Object request, final HttpSettings settings, final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T post(final Object request, final HttpSettings settings, final Class<T> resultClass)
+            throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.POST, request, settings, resultClass);
     }
 
@@ -1370,9 +1284,11 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param request The request body
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String put(final Object request) throws UncheckedIOException {
+    public String put(final Object request) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return put(request, String.class);
     }
 
@@ -1389,9 +1305,12 @@ public final class HttpClient implements AutoCloseable {
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
-    public <T> T put(final Object request, final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T put(final Object request, final Class<T> resultClass) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return put(request, _settings, resultClass);
     }
 
@@ -1408,9 +1327,11 @@ public final class HttpClient implements AutoCloseable {
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String put(final Object request, final HttpSettings settings) throws UncheckedIOException {
+    public String put(final Object request, final HttpSettings settings) throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return put(request, settings, String.class);
     }
 
@@ -1429,9 +1350,13 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
-    public <T> T put(final Object request, final HttpSettings settings, final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T put(final Object request, final HttpSettings settings, final Class<T> resultClass)
+            throws RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.PUT, request, settings, resultClass);
     }
 
@@ -1442,13 +1367,18 @@ public final class HttpClient implements AutoCloseable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpResponse response = client.head();
-     * String contentLength = response.headers().get("Content-Length").get(0);
+     * // headers() is keyed exactly as the server sent them and also contains a null key for the
+     * // status line, so look values up defensively rather than dereferencing get(name) directly.
+     * List<String> contentLength = response.headers().getOrDefault("Content-Length", List.of());
      * }</pre>
      *
-     * @return The {@link HttpResponse} containing the status code and headers (the body is empty for HEAD)
-     * @throws UncheckedIOException if an I/O error occurs
+     * @return The {@link HttpResponse} containing the status code and headers (the body is empty for HEAD),
+     *         or {@code null} when the client-level settings mark requests as one-way
+     *         ({@link HttpSettings#setOneWayRequest(boolean)})
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      */
-    public HttpResponse head() throws UncheckedIOException {
+    public HttpResponse head() throws RejectedExecutionException, UncheckedIOException {
         return head(_settings);
     }
 
@@ -1463,10 +1393,13 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
-     * @return The {@link HttpResponse} containing the status code and headers (the body is empty for HEAD)
-     * @throws UncheckedIOException if an I/O error occurs
+     * @return The {@link HttpResponse} containing the status code and headers (the body is empty for HEAD),
+     *         or {@code null} when the effective settings mark the request as one-way
+     *         ({@link HttpSettings#setOneWayRequest(boolean)})
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      */
-    public HttpResponse head(final HttpSettings settings) throws UncheckedIOException {
+    public HttpResponse head(final HttpSettings settings) throws RejectedExecutionException, UncheckedIOException {
         return execute(HttpMethod.HEAD, null, settings, HttpResponse.class);
     }
 
@@ -1479,11 +1412,18 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
+     *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String execute(final HttpMethod httpMethod, final Object request) throws UncheckedIOException {
+    public String execute(final HttpMethod httpMethod, final Object request)
+            throws UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return execute(httpMethod, request, String.class);
     }
 
@@ -1499,12 +1439,20 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @param resultClass The class of the expected response object (for deserialization)
      * @return The deserialized response object
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
+     *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
-    public <T> T execute(final HttpMethod httpMethod, final Object request, final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T execute(final HttpMethod httpMethod, final Object request, final Class<T> resultClass)
+            throws UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return execute(httpMethod, request, _settings, resultClass);
     }
 
@@ -1520,12 +1468,19 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return The response body as a String
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
+     *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws UncheckedIOException {
+    public String execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings)
+            throws UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return execute(httpMethod, request, settings, String.class);
     }
 
@@ -1543,25 +1498,43 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
-     * @return The deserialized response object, or {@code null} if resultClass is Void
-     * @throws UncheckedIOException if an I/O error occurs
+     * @return The deserialized response object, or {@code null} if {@code resultClass} is {@code Void}
+     *         or the effective settings mark the request as one-way
+     *         ({@link HttpSettings#setOneWayRequest(boolean)}) - this applies even when
+     *         {@code resultClass} is {@link HttpResponse}
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, or the payload is routed
+     *         to the URL and cannot be encoded as a query (a pre-encoded {@code String} that is not
+     *         valid URI syntax, or a {@code Map} with a {@code null} key); the in-flight slot is not consumed
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
+     *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
+     *         is not {@link HttpResponse}
      */
     public <T> T execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass)
-            throws UncheckedIOException {
-        return execute(httpMethod, request, settings, resultClass, null, null);
+            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+        return execute(httpMethod, request, settings, resultClass, null, null, null, false);
     }
 
     /**
      * Executes an HTTP request whose payload is explicitly a request body. This disambiguates a
      * DELETE body from the query parameters accepted by the public DELETE convenience methods.
      * Package-private for {@link HttpRequest}, which tracks that distinction explicitly.
+     * @throws IllegalArgumentException if the HTTP method is null or the request content encoding conflicts with its content format
+     * @throws UnsupportedOperationException if the method is PATCH or CONNECT, which HttpURLConnection does not support
+     * @throws RejectedExecutionException if the maximum number of concurrent in-flight requests has been reached
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status is not 2xx and the requested result type is not HttpResponse
      */
     <T> T executeRequestBody(final HttpMethod httpMethod, final Object requestBody, final HttpSettings settings, final Class<T> resultClass)
-            throws UncheckedIOException {
-        return execute(httpMethod, requestBody, settings, resultClass, null, null, true);
+            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+        return execute(httpMethod, requestBody, settings, resultClass, null, null, null, true);
     }
 
     /**
@@ -1574,31 +1547,39 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @param settings Additional HTTP settings for this request
-     * @param output The file to write the response to
-     * @throws UncheckedIOException if an I/O error occurs
+     * @param output The file to write the response to. It is created (and an existing file
+     *        truncated) only once a successful response has been received, so a failed request
+     *        leaves an existing file untouched
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
+     *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public void execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final File output) throws UncheckedIOException {
-        OutputStream os = null;
+    public void execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final File output)
+            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+        N.checkArgNotNull(output, cs.output);
 
-        try {
-            os = IOUtil.newFileOutputStream(output);
-            execute(httpMethod, request, settings, os);
-        } finally {
-            IOUtil.close(os);
-        }
+        execute(httpMethod, request, settings, null, output, null, null, false);
     }
 
-    void executeRequestBody(final HttpMethod httpMethod, final Object requestBody, final HttpSettings settings, final File output) throws UncheckedIOException {
-        OutputStream os = null;
+    /**
+     * @throws IllegalArgumentException if output or the HTTP method is null, or the request content encoding conflicts with its content format
+     * @throws UnsupportedOperationException if the method is PATCH or CONNECT, which HttpURLConnection does not support
+     * @throws RejectedExecutionException if the maximum number of concurrent in-flight requests has been reached
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status is not 2xx
+     */
+    void executeRequestBody(final HttpMethod httpMethod, final Object requestBody, final HttpSettings settings, final File output)
+            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+        N.checkArgNotNull(output, cs.output);
 
-        try {
-            os = IOUtil.newFileOutputStream(output);
-            executeRequestBody(httpMethod, requestBody, settings, os);
-        } finally {
-            IOUtil.close(os);
-        }
+        execute(httpMethod, requestBody, settings, null, output, null, null, true);
     }
 
     /**
@@ -1615,18 +1596,37 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The output stream to write the response to
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
+     *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public void execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final OutputStream output) throws UncheckedIOException {
-        execute(httpMethod, request, settings, null, output, null);
+    public void execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final OutputStream output)
+            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+        N.checkArgNotNull(output, cs.output);
+
+        execute(httpMethod, request, settings, null, null, output, null, false);
     }
 
+    /**
+     * @throws IllegalArgumentException if output or the HTTP method is null, or the request content encoding conflicts with its content format
+     * @throws UnsupportedOperationException if the method is PATCH or CONNECT, which HttpURLConnection does not support
+     * @throws RejectedExecutionException if the maximum number of concurrent in-flight requests has been reached
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status is not 2xx
+     */
     void executeRequestBody(final HttpMethod httpMethod, final Object requestBody, final HttpSettings settings, final OutputStream output)
-            throws UncheckedIOException {
-        execute(httpMethod, requestBody, settings, null, output, null, true);
+            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+        N.checkArgNotNull(output, cs.output);
+
+        execute(httpMethod, requestBody, settings, null, null, output, null, true);
     }
 
     /**
@@ -1643,18 +1643,37 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The writer to write the response to
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
+     *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
+     * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
-    public void execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Writer output) throws UncheckedIOException {
-        execute(httpMethod, request, settings, null, null, output);
+    public void execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Writer output)
+            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+        N.checkArgNotNull(output, cs.output);
+
+        execute(httpMethod, request, settings, null, null, null, output, false);
     }
 
+    /**
+     * @throws IllegalArgumentException if output or the HTTP method is null, or the request content encoding conflicts with its content format
+     * @throws UnsupportedOperationException if the method is PATCH or CONNECT, which HttpURLConnection does not support
+     * @throws RejectedExecutionException if the maximum number of concurrent in-flight requests has been reached
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status is not 2xx
+     */
     void executeRequestBody(final HttpMethod httpMethod, final Object requestBody, final HttpSettings settings, final Writer output)
-            throws UncheckedIOException {
-        execute(httpMethod, requestBody, settings, null, null, output, true);
+            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+        N.checkArgNotNull(output, cs.output);
+
+        execute(httpMethod, requestBody, settings, null, null, null, output, true);
     }
 
     /**
@@ -1662,36 +1681,64 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param <T> the response type.
      * @param httpMethod the HTTP method to use.
-     * @param request the request body.
+     * @param request the query parameters or the request body, depending on {@code httpMethod}.
      * @param settings the HTTP settings.
      * @param resultClass the expected response type.
+     * @param outputFile the file to write the response to, or {@code null}. It is opened only after a
+     *        successful response, so a failed request never truncates it.
      * @param outputStream the output stream to write response to, or {@code null}.
      * @param outputWriter the writer to write response to, or {@code null}.
+     * @param requestIsBody whether {@code request} is a request body rather than query parameters.
      * @return the response parsed as the specified result class, or {@code null} for one-way
-     *         requests or when the response is written to {@code outputStream}/{@code outputWriter}.
-     * @throws UncheckedIOException if an I/O error occurs.
+     *         requests or when the response is written to an output target.
+     * @throws IllegalArgumentException if the HTTP method is null, query parameters cannot be encoded in the URL, or request content encoding conflicts with its content format
+     * @throws UnsupportedOperationException if the method is PATCH or CONNECT, which HttpURLConnection does not support
+     * @throws RejectedExecutionException if the maximum number of concurrent in-flight requests has been reached
+     * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
+     * @throws HttpResponseException if the response status is not 2xx and the requested result type is not HttpResponse
      */
-    private <T> T execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass,
-            final OutputStream outputStream, final Writer outputWriter) throws UncheckedIOException {
-        return execute(httpMethod, request, settings, resultClass, outputStream, outputWriter, false);
-    }
+    private <T> T execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass, final File outputFile,
+            final OutputStream outputStream, final Writer outputWriter, final boolean requestIsBody)
+            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
 
-    private <T> T execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass,
-            final OutputStream outputStream, final Writer outputWriter, final boolean requestIsBody) throws UncheckedIOException {
-        final Charset requestCharset = getRequestCharset(settings);
+        // The payload is routed by HTTP method, not by argument type: body methods take it as a
+        // request body, every other method appends it to the URL as query parameters. Previously
+        // anything that was neither (HEAD/TRACE/CONNECT) was silently discarded.
+        final boolean payloadIsBody = requestIsBody || isRequestBodyMethod(httpMethod);
+        final Object queryParameters = payloadIsBody ? null : request;
+        final boolean doOutput = request != null && payloadIsBody;
+
+        final String settingsContentType = getContentType(settings);
+        final Charset requestCharset = HttpUtil.getCharset(settingsContentType);
         final ContentFormat requestContentFormat = getContentFormat(settings);
-        final boolean doOutput = request != null && (requestIsBody || requireBody(httpMethod));
+        final String requestContentEncoding = doOutput ? getContentEncoding(settings) : null;
 
-        final HttpURLConnection connection = openConnection(httpMethod, requestIsBody ? null : request, settings, doOutput, resultClass, true);
+        if (doOutput) {
+            // Validated before a connection is opened, so a contradictory configuration fails
+            // without consuming an in-flight slot or touching the network.
+            checkRequestContentEncoding(requestContentFormat, settingsContentType, requestContentEncoding);
+        }
+
+        final HttpURLConnection connection = openConnection(httpMethod, queryParameters, settings, doOutput, true);
         final long sentRequestAtMillis = System.currentTimeMillis();
         InputStream is = null;
         OutputStream os = null;
 
         try { //NOSONAR
-            if (request != null && (requestIsBody || requireBody(httpMethod)) && connection.getDoOutput()) {
-                os = HttpUtil.getOutputStream(connection, requestContentFormat, getContentType(settings), getContentEncoding(settings));
-
+            if (doOutput && connection.getDoOutput()) {
                 final Type<Object> type = Type.of(request.getClass());
+                final boolean isRawText = request instanceof String || type.isReader();
+                final boolean isRawBinary = request instanceof File || request.getClass().equals(byte[].class) || type.isInputStream();
+
+                // The Content-Type on the wire must describe the bytes that are actually written.
+                // With nothing declaring one, HttpURLConnection supplies its legacy
+                // "application/x-www-form-urlencoded" default while the body is serialized as JSON.
+                final String requestContentType = Strings.isEmpty(settingsContentType)
+                        ? defaultRequestContentType(requestContentFormat, isRawText, isRawBinary, requestCharset)
+                        : settingsContentType;
+
+                os = HttpUtil.getOutputStream(connection, requestContentFormat, requestContentType, requestContentEncoding);
 
                 if (request instanceof File fileRequest) {
                     try (InputStream fileInputStream = IOUtil.newFileInputStream(fileRequest)) {
@@ -1741,14 +1788,40 @@ public final class HttpClient implements AutoCloseable {
             final Charset respCharset = HttpUtil.getResponseCharset(respHeaders, requestCharset);
             final ContentFormat respContentFormat = HttpUtil.getResponseContentFormat(respHeaders, requestContentFormat);
 
-            is = HttpUtil.getInputStream(connection, respContentFormat);
-
             if (!HttpUtil.isSuccessfulResponseCode(statusCode) && (resultClass == null || !resultClass.equals(HttpResponse.class))) {
-                throw new UncheckedIOException(
-                        new IOException(statusCode + ": " + connection.getResponseMessage() + ". " + IOUtil.readAllToString(is, respCharset)));
+                String errorBody = Strings.EMPTY;
+                try {
+                    if (HttpUtil.hasResponseBody(httpMethod.name(), statusCode)) {
+                        is = connection.getErrorStream();
+                        if (is == null) {
+                            is = connection.getInputStream();
+                        }
+                        // Keep the raw stream in 'is' until wrapping succeeds, so the outer finally
+                        // still closes it if a malformed compression header prevents construction.
+                        is = HttpUtil.wrapInputStream(is, respContentFormat);
+                        errorBody = readBoundedErrorBody(is, respCharset);
+                    }
+                } catch (final IOException | RuntimeException e) {
+                    // Once a non-success status is known, body acquisition/decoding failures must
+                    // not replace its diagnostics. Successful and raw-response reads stay strict.
+                }
+                throw new HttpResponseException(connection.getURL().toString(), statusCode, connection.getResponseMessage(), respHeaders, errorBody);
             }
 
-            if (isOneWayRequest(settings, resultClass, outputStream, outputWriter)) {
+            // HEAD and these status codes have no response body, even when representation headers
+            // describe compressed content. Opening a decompressor would fail on the empty stream.
+            is = HttpUtil.hasResponseBody(httpMethod.name(), statusCode) ? HttpUtil.getInputStream(connection, respContentFormat) : N.emptyInputStream();
+
+            if (isOneWayRequest(settings, resultClass, outputFile, outputStream, outputWriter)) {
+                return null;
+            } else if (outputFile != null) {
+                // Created here rather than before the request: opening it up front truncated an
+                // existing file even when the request then failed with a 4xx/5xx, silently
+                // destroying the caller's data.
+                try (OutputStream fileOutput = IOUtil.newFileOutputStream(outputFile)) {
+                    IOUtil.write(is, fileOutput, true);
+                }
+
                 return null;
             } else if (outputStream != null) {
                 IOUtil.write(is, outputStream, true);
@@ -1798,17 +1871,104 @@ public final class HttpClient implements AutoCloseable {
     }
 
     /**
+     * Reads at most {@link HttpUtil#MAX_ERROR_BODY_SIZE} bytes of an error response body.
+     *
+     * @param is the (already decompressed) error body stream
+     * @param charset the charset to decode the captured bytes with
+     * @return the decoded prefix of the error body; never {@code null}, empty if it cannot be read.
+     *         The cut is made on a byte boundary, so a multi-byte character straddling the limit is
+     *         decoded as a replacement character
+     */
+    private static String readBoundedErrorBody(final InputStream is, final Charset charset) {
+        try {
+            return new String(is.readNBytes(HttpUtil.MAX_ERROR_BODY_SIZE), charset);
+        } catch (final IOException | RuntimeException e) {
+            // The status code is what matters here; a failure to read the error body must never
+            // replace the HttpResponseException that is about to be thrown.
+            return Strings.EMPTY;
+        }
+    }
+
+    /**
+     * Resolves the {@code Content-Type} to send when neither the client-level nor the per-request
+     * settings declare one, so that it matches how the body is actually written.
+     *
+     * @param contentFormat the active content format, or {@code null} when none is configured
+     * @param isRawText {@code true} for a {@code String}/{@link Reader} payload written verbatim
+     * @param isRawBinary {@code true} for a {@code byte[]}/{@link File}/{@link InputStream} payload
+     * @param charset the charset the request body is written with
+     * @return a non-empty media type
+     */
+    private static String defaultRequestContentType(final ContentFormat contentFormat, final boolean isRawText, final boolean isRawBinary,
+            final Charset charset) {
+        final String derived = HttpUtil.getContentType(contentFormat);
+
+        if (Strings.isNotEmpty(derived)) {
+            return derived;
+        }
+
+        if (contentFormat == ContentFormat.KRYO) {
+            // ContentFormat.KRYO carries its identity in Content-Encoding and declares no media type
+            // of its own, but the payload is still application/kryo on the wire.
+            return HttpHeaders.Values.APPLICATION_KRYO;
+        }
+
+        if (isRawText) {
+            return HttpHeaders.Values.TEXT_PLAIN + "; charset=" + charset.name();
+        }
+
+        if (isRawBinary) {
+            return HttpHeaders.Values.APPLICATION_OCTET_STREAM;
+        }
+
+        // Compression-only formats (and no format at all) serialize through the parser for
+        // HttpUtil.DEFAULT_CONTENT_FORMAT, so the media type must be that format's.
+        return HttpUtil.getContentType(HttpUtil.DEFAULT_CONTENT_FORMAT);
+    }
+
+    /**
+     * Rejects a {@code Content-Encoding} that contradicts the compression the active
+     * {@link ContentFormat} actually applies, instead of shipping a body whose declared encoding
+     * does not match its bytes. An encoding this client does not implement (for example
+     * {@code identity} or {@code deflate}) is passed through untouched and is never rejected.
+     *
+     * @param contentFormat the active content format, which decides the compression applied
+     * @param contentType the resolved request content type, used to interpret the declared encoding
+     * @param declaredEncoding the {@code Content-Encoding} resolved from the settings, may be empty
+     * @throws IllegalArgumentException if the declared encoding names a supported compression that
+     *         differs from the one the content format applies.
+     */
+    private static void checkRequestContentEncoding(final ContentFormat contentFormat, final String contentType, final String declaredEncoding)
+            throws IllegalArgumentException {
+        if (Strings.isEmpty(declaredEncoding)) {
+            return;
+        }
+
+        final String appliedEncoding = HttpUtil.getContentEncoding(contentFormat);
+        final String declaredCompression = HttpUtil.getContentEncoding(HttpUtil.getContentFormat(contentType, declaredEncoding));
+
+        if (!declaredCompression.equalsIgnoreCase(appliedEncoding)) {
+            throw new IllegalArgumentException("Content-Encoding: " + declaredEncoding + " conflicts with content format " + contentFormat + ", which applies "
+                    + (Strings.isEmpty(appliedEncoding) ? "no compression" : appliedEncoding)
+                    + ". Use a content format whose encoding matches, or remove the Content-Encoding header;"
+                    + " the request body must not be pre-compressed by the caller.");
+        }
+    }
+
+    /**
      * Determines whether the request should be treated as one-way and skip response body processing.
      *
      * @param settings the per-request settings, or {@code null} to use client defaults
      * @param resultClass the expected result type
+     * @param outputFile the target file for response forwarding
      * @param outputStream the target output stream for response forwarding
      * @param outputWriter the target writer for response forwarding
      * @return {@code true} if no response body should be read into a return value
      */
-    boolean isOneWayRequest(final HttpSettings settings, final Class<?> resultClass, final OutputStream outputStream, final Writer outputWriter) {
-        return (resultClass == null || Void.class.equals(resultClass) || (settings == null ? _settings.isOneWayRequest() : settings.isOneWayRequest()))
-                && outputStream == null && outputWriter == null;
+    boolean isOneWayRequest(final HttpSettings settings, final Class<?> resultClass, final File outputFile, final OutputStream outputStream,
+            final Writer outputWriter) {
+        return (resultClass == null || Void.class.equals(resultClass) || resolveFlag(settings == null ? null : settings.isOneWayRequestOrNull(),
+                _settings.isOneWayRequestOrNull(), HttpSettings.DEFAULT_ONE_WAY_REQUEST)) && outputFile == null && outputStream == null && outputWriter == null;
     }
 
     /**
@@ -1857,6 +2017,9 @@ public final class HttpClient implements AutoCloseable {
      * HttpSettings)} applies both sets of headers, with the per-request content type overriding only
      * when it is actually present.
      *
+     * <p>The request path resolves the content type once and derives the charset from it directly;
+     * this accessor exists so the layering rule can be asserted on its own.</p>
+     *
      * @param settings the per-request settings, or {@code null} to use client defaults
      * @return the charset declared by the effective content type, or UTF-8 when none is declared
      */
@@ -1867,6 +2030,14 @@ public final class HttpClient implements AutoCloseable {
     /**
      * Resolves the effective content encoding, preferring per-request settings over client defaults.
      *
+     * <p>When the per-request settings supply the content format (explicitly or derived from their
+     * own {@code Content-Type}), that format is authoritative for the compression as well: a
+     * non-compressing request format must be able to opt out of a compressing client-level default.
+     * Only the client's <i>explicit</i> {@code Content-Encoding} header is still imported in that
+     * case - {@link #setHttpProperties(HttpURLConnection, HttpSettings)} copies it onto the
+     * connection regardless, so it has to be validated against the request format rather than
+     * silently sent over an uncompressed body.</p>
+     *
      * @param settings the per-request settings, or {@code null} to use client defaults
      * @return the resolved content encoding
      */
@@ -1875,6 +2046,17 @@ public final class HttpClient implements AutoCloseable {
 
         if (settings != null) {
             contentEncoding = settings.getContentEncoding();
+
+            if (Strings.isEmpty(contentEncoding)) {
+                final ContentFormat requestContentFormat = settings.getContentFormat();
+
+                if (requestContentFormat != null && requestContentFormat != ContentFormat.NONE) {
+                    // The request chose the format, and with it the compression. Do not pull in the
+                    // client's format-derived encoding (e.g. gzip from JSON_GZIP); a literal client
+                    // header still goes on the wire via setHttpProperties, so keep it for the check.
+                    return HttpUtil.getContentEncoding(_settings.headersOrNull());
+                }
+            }
         }
 
         if (Strings.isEmpty(contentEncoding)) {
@@ -1886,22 +2068,43 @@ public final class HttpClient implements AutoCloseable {
 
     /**
      * Checks whether the generic execution API treats its request argument as a request body.
+     * Every other method receives it as query parameters instead.
      *
      * @param httpMethod the HTTP method to evaluate
      * @return {@code true} for POST/PUT/PATCH/OPTIONS; otherwise {@code false}
      */
-    private boolean requireBody(final HttpMethod httpMethod) {
+    private static boolean isRequestBodyMethod(final HttpMethod httpMethod) {
         return httpMethod == HttpMethod.POST || httpMethod == HttpMethod.PUT || httpMethod == HttpMethod.PATCH || httpMethod == HttpMethod.OPTIONS;
+    }
+
+    /**
+     * Rejects the HTTP methods {@link HttpURLConnection} cannot issue at all. Without this guard they reach
+     * {@link HttpURLConnection#setRequestMethod(String)}, whose {@code java.net.ProtocolException} is wrapped
+     * into an {@link UncheckedIOException} and reads like an I/O failure rather than the documented
+     * limitation it is. {@link HttpRequest} applies the same guard - with the same message - to PATCH at its
+     * own entry points, so both routes report the same exception; CONNECT is caught only here, which is why
+     * this check sits on the shared choke point every request funnels through rather than in the builders.
+     *
+     * @param httpMethod the HTTP method to evaluate
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
+     *         {@link HttpMethod#CONNECT}
+     */
+    private static void checkSupportedMethod(final HttpMethod httpMethod) throws UnsupportedOperationException {
+        if (httpMethod == HttpMethod.PATCH || httpMethod == HttpMethod.CONNECT) {
+            throw new UnsupportedOperationException(
+                    "HttpMethod." + httpMethod.name() + " is not supported by the underlying java.net.HttpURLConnection; see HttpMethod#PATCH for workarounds");
+        }
     }
 
     /**
      * Opens a new HTTP connection with the specified method and settings.
      * This method is primarily for advanced use cases where direct control over the connection is needed.
-     * The returned connection is caller-managed and does not consume the client's max-connection quota.
+     * The returned connection is caller-managed and does not count against this client's in-flight
+     * request limit.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpURLConnection conn = client.openConnection(HttpMethod.GET, settings, false, String.class);
+     * HttpURLConnection conn = client.openConnection(HttpMethod.GET, settings, false);
      * // Manually configure and use the connection
      * conn.connect();
      * }</pre>
@@ -1909,90 +2112,104 @@ public final class HttpClient implements AutoCloseable {
      * @param httpMethod The HTTP method to use
      * @param settings Additional HTTP settings for the connection
      * @param doOutput Whether the connection will send a request body
-     * @param resultClass The expected result class; currently not used when configuring the connection
      * @return A configured HttpURLConnection ready for use
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
+     *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
+     * @throws UncheckedIOException if creating the connection or configuring its request method fails
      */
-    public HttpURLConnection openConnection(final HttpMethod httpMethod, final HttpSettings settings, final boolean doOutput, final Class<?> resultClass)
-            throws UncheckedIOException {
-        return openConnection(httpMethod, null, settings, doOutput, resultClass, false);
+    public HttpURLConnection openConnection(final HttpMethod httpMethod, final HttpSettings settings, final boolean doOutput)
+            throws IllegalArgumentException, UnsupportedOperationException, UncheckedIOException {
+        return openConnection(httpMethod, null, settings, doOutput, false);
     }
 
     /**
      * Opens a new HTTP connection with query parameters and the specified settings.
      * This method is primarily for advanced use cases where direct control over the connection is needed.
-     * The returned connection is caller-managed and does not consume the client's max-connection quota.
+     * The returned connection is caller-managed and does not count against this client's in-flight
+     * request limit.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> params = Map.of("id", 123);
-     * HttpURLConnection conn = client.openConnection(HttpMethod.GET, params, settings, false, User.class);
+     * HttpURLConnection conn = client.openConnection(HttpMethod.GET, params, settings, false);
      * }</pre>
      *
      * @param httpMethod The HTTP method to use
-     * @param queryParameters Query parameters for GET/DELETE requests (can be String, Map, or Bean)
+     * @param queryParameters Query parameters appended to this client's URL (a pre-encoded query
+     *        {@code String}, a {@code Map} or a bean), or {@code null} for none. They are applied for
+     *        every HTTP method
      * @param settings Additional HTTP settings for the connection
      * @param doOutput Whether the connection will send a request body
-     * @param resultClass The expected result class; currently not used when configuring the connection
      * @return A configured HttpURLConnection ready for use
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, or {@code queryParameters}
+     *         cannot be encoded as a query (a pre-encoded {@code String} that is not valid URI
+     *         syntax, or a {@code Map} with a {@code null} key). The same applies to every
+     *         {@code get}/{@code delete}/{@code execute} overload that takes query parameters.
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
+     *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
+     * @throws UncheckedIOException if creating the connection or configuring its request method fails
      */
-    @SuppressWarnings("unused")
-    public HttpURLConnection openConnection(final HttpMethod httpMethod, final Object queryParameters, final HttpSettings settings, final boolean doOutput,
-            final Class<?> resultClass) throws UncheckedIOException {
-        return openConnection(httpMethod, queryParameters, settings, doOutput, resultClass, false);
+    public HttpURLConnection openConnection(final HttpMethod httpMethod, final Object queryParameters, final HttpSettings settings, final boolean doOutput)
+            throws IllegalArgumentException, UnsupportedOperationException, UncheckedIOException {
+        return openConnection(httpMethod, queryParameters, settings, doOutput, false);
     }
 
     /**
-     * Internal connection factory with optional connection-limit tracking.
+     * Internal connection factory with optional in-flight request tracking.
      *
      * @param httpMethod the HTTP method to use
-     * @param queryParameters query parameters for GET/DELETE requests
+     * @param queryParameters query parameters to append to the URL, or {@code null} for none
      * @param settings the per-request settings, or {@code null} to use client defaults
      * @param doOutput whether request-body output should be enabled
-     * @param resultClass the expected response type
-     * @param trackConnectionLimit whether to enforce/decrement the active connection counter
+     * @param trackConnectionLimit whether to enforce/decrement the in-flight request counter
      * @return a configured HTTP connection
-     * @throws RuntimeException if {@code trackConnectionLimit} is {@code true} and the maximum
-     *         connection limit has been exceeded
-     * @throws UncheckedIOException if an I/O error occurs while opening/configuring the connection
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
+     *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
+     * @throws RejectedExecutionException if {@code trackConnectionLimit} is {@code true} and the
+     *         in-flight request limit has been reached
+     * @throws UncheckedIOException if creating the connection or configuring its request method fails
      */
-    @SuppressWarnings("unused")
     private HttpURLConnection openConnection(final HttpMethod httpMethod, final Object queryParameters, final HttpSettings settings, final boolean doOutput,
-            final Class<?> resultClass, final boolean trackConnectionLimit) throws UncheckedIOException {
+            final boolean trackConnectionLimit)
+            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException {
+        N.checkArgNotNull(httpMethod, cs.httpMethod);
+        // Validated before the in-flight slot is taken, so a method this client can never issue costs
+        // neither a slot nor a socket. Every execute/asyncExecute route funnels through here.
+        checkSupportedMethod(httpMethod);
+
         if (trackConnectionLimit && _activeConnectionCounter.incrementAndGet() > _maxConnection) {
             _activeConnectionCounter.decrementAndGet();
-            throw new RuntimeException("Cannot create connection: exceeded maximum connection limit of " + _maxConnection);
+            throw new RejectedExecutionException("Cannot execute request: " + _maxConnection + " concurrent in-flight requests already active for: " + _url);
         }
 
         HttpURLConnection connection = null;
         boolean success = false;
 
         try {
-            synchronized (_netURL) {
-                URL netURL = _netURL;
+            URL netURL = _netURL;
 
-                if (queryParameters != null && (httpMethod == HttpMethod.GET || httpMethod == HttpMethod.DELETE)) {
-                    // Explicit UTF-8 (like the form-body path): the 2-arg overload uses the
-                    // PLATFORM default charset, mis-encoding non-ASCII query values on non-UTF-8 JVMs.
-                    netURL = URI.create(URLEncodedUtil.encode(_url, queryParameters, HttpUtil.DEFAULT_CHARSET)).toURL();
-                }
+            if (queryParameters != null) {
+                // Explicit UTF-8 (like the form-body path): the 2-arg overload uses the
+                // PLATFORM default charset, mis-encoding non-ASCII query values on non-UTF-8 JVMs.
+                netURL = URI.create(URLEncodedUtil.encode(_url, queryParameters, HttpUtil.DEFAULT_CHARSET)).toURL();
+            }
 
-                // Per-request settings are layered on top of the client's defaults (the same
-                // rule used for headers, timeouts and content metadata). A request settings
-                // object created only to add a header therefore must not silently disable the
-                // client-level proxy. Proxy.NO_PROXY remains available for an explicit bypass.
-                Proxy proxy = settings == null ? null : settings.getProxy();
+            // Per-request settings are layered on top of the client's defaults (the same
+            // rule used for headers, timeouts and content metadata). A request settings
+            // object created only to add a header therefore must not silently disable the
+            // client-level proxy. Proxy.NO_PROXY remains available for an explicit bypass.
+            Proxy proxy = settings == null ? null : settings.getProxy();
 
-                if (proxy == null) {
-                    proxy = _settings.getProxy();
-                }
+            if (proxy == null) {
+                proxy = _settings.getProxy();
+            }
 
-                if (proxy == null) {
-                    connection = (HttpURLConnection) netURL.openConnection();
-                } else {
-                    connection = (HttpURLConnection) netURL.openConnection(proxy);
-                }
+            if (proxy == null) {
+                connection = (HttpURLConnection) netURL.openConnection();
+            } else {
+                connection = (HttpURLConnection) netURL.openConnection(proxy);
             }
 
             if (connection instanceof HttpsURLConnection) {
@@ -2010,41 +2227,21 @@ public final class HttpClient implements AutoCloseable {
                 }
             }
 
-            int connectTimeoutInMillis = _connectTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _connectTimeoutInMillis;
+            connection.setConnectTimeout(
+                    resolveTimeout(settings == null ? 0 : settings.getConnectTimeout(), _settings.getConnectTimeout(), _connectTimeoutInMillis));
+            connection.setReadTimeout(resolveTimeout(settings == null ? 0 : settings.getReadTimeout(), _settings.getReadTimeout(), _readTimeoutInMillis));
 
-            if (settings != null && settings.getConnectTimeout() > 0) {
-                // HttpURLConnection stores timeouts as ints. Client-level long values are
-                // already saturated above; apply the same rule to request-level values instead
-                // of unexpectedly throwing ArithmeticException for an otherwise valid long.
-                connectTimeoutInMillis = settings.getConnectTimeout() > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) settings.getConnectTimeout();
-            }
+            // The connection flags are layered exactly like the proxy/SSL/content settings above.
+            // They used to be read only from whichever of the two settings objects was reachable on
+            // the current branch, so a per-request HttpSettings created just to add a header reset
+            // them to their defaults - and a null one ignored the client-level values entirely.
+            connection.setDoInput(resolveFlag(settings == null ? null : settings.doInputOrNull(), _settings.doInputOrNull(), HttpSettings.DEFAULT_DO_INPUT));
+            connection.setDoOutput(
+                    doOutput && resolveFlag(settings == null ? null : settings.doOutputOrNull(), _settings.doOutputOrNull(), HttpSettings.DEFAULT_DO_OUTPUT));
+            connection.setUseCaches(
+                    resolveFlag(settings == null ? null : settings.useCachesOrNull(), _settings.useCachesOrNull(), HttpSettings.DEFAULT_USE_CACHES));
 
-            if (connectTimeoutInMillis > 0) {
-                connection.setConnectTimeout(connectTimeoutInMillis);
-            }
-
-            int readTimeoutInMillis = _readTimeoutInMillis > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) _readTimeoutInMillis;
-
-            if (settings != null && settings.getReadTimeout() > 0) {
-                readTimeoutInMillis = settings.getReadTimeout() > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) settings.getReadTimeout();
-            }
-
-            if (readTimeoutInMillis > 0) {
-                connection.setReadTimeout(readTimeoutInMillis);
-            }
-
-            if (settings != null) {
-                connection.setDoInput(settings.doInput());
-                connection.setDoOutput(doOutput && settings.doOutput());
-            } else if (doOutput) {
-                connection.setDoOutput(true);
-            }
-
-            connection.setUseCaches(settings != null ? settings.useCaches() : (_settings != null && _settings.useCaches()));
-
-            if (_settings != null) {
-                setHttpProperties(connection, _settings);
-            }
+            setHttpProperties(connection, _settings);
 
             if (settings != null && settings != _settings) {
                 setHttpProperties(connection, settings);
@@ -2064,16 +2261,44 @@ public final class HttpClient implements AutoCloseable {
     }
 
     /**
+     * Resolves a tri-state connection flag: the per-request value wins, then the client-level value,
+     * then the built-in default.
+     *
+     * @param requestValue the per-request value, or {@code null} if not set
+     * @param clientValue the client-level value, or {@code null} if not set
+     * @param defaultValue the value to use when neither is set
+     * @return the effective flag value
+     */
+    private static boolean resolveFlag(final Boolean requestValue, final Boolean clientValue, final boolean defaultValue) {
+        if (requestValue != null) {
+            return requestValue;
+        }
+
+        return clientValue == null ? defaultValue : clientValue;
+    }
+
+    private static int resolveTimeout(final long requestValue, final long clientValue, final long constructorValue) {
+        // Zero means unspecified at either settings layer. Resolve before narrowing so even
+        // very large inherited values retain the same saturation rule as explicit overrides.
+        final long value = requestValue > 0 ? requestValue : clientValue > 0 ? clientValue : constructorValue;
+        return value > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) value;
+    }
+
+    /**
      * Applies the HTTP header properties from the given settings to the specified connection.
      * Iterates over all header names in the settings and sets them as request properties on the
      * connection. Content-Encoding headers are skipped when the connection is not configured for output,
      * to avoid errors on the server side when no body is being sent.
      *
+     * <p>Each value is rendered with {@link HttpHeaders#valueOf(String, Object)}, the field-aware form, so a
+     * {@code Collection} on a field with its own list grammar - {@code Cookie}, whose cookie-pairs RFC 6265
+     * &sect;5.4 separates with {@code "; "} - is not comma-joined into a malformed header line.</p>
+     *
      * @param connection the HTTP URL connection to configure
      * @param settings the HTTP settings whose headers are to be applied
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws IllegalStateException if a request header is applied after the connection has already connected
      */
-    void setHttpProperties(final HttpURLConnection connection, final HttpSettings settings) throws UncheckedIOException {
+    void setHttpProperties(final HttpURLConnection connection, final HttpSettings settings) throws IllegalStateException {
         final HttpHeaders headers = settings.headers();
 
         if (headers != null) {
@@ -2090,13 +2315,13 @@ public final class HttpClient implements AutoCloseable {
 
                 headerValue = headers.get(headerName);
 
-                connection.setRequestProperty(headerName, HttpHeaders.valueOf(headerValue));
+                connection.setRequestProperty(headerName, HttpHeaders.valueOf(headerName, headerValue));
             }
         }
     }
 
     /**
-     * Closes request/response streams and updates active connection tracking.
+     * Closes request/response streams and releases this request's slot in the in-flight counter.
      *
      * @param os the request output stream to close
      * @param is the response input stream to close
@@ -2166,7 +2391,8 @@ public final class HttpClient implements AutoCloseable {
      *     .thenRunAsync(response -> System.out.println("Response: " + response));
      * }</pre>
      *
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncGet(final Object queryParameters) {
@@ -2186,7 +2412,8 @@ public final class HttpClient implements AutoCloseable {
      *     .thenRunAsync(response -> System.out.println("Response: " + response));
      * }</pre>
      *
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return A ContinuableFuture that will complete with the response body as a String
      */
@@ -2243,7 +2470,8 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
      */
@@ -2267,7 +2495,8 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response
@@ -2319,7 +2548,8 @@ public final class HttpClient implements AutoCloseable {
      *     .thenRunAsync(response -> System.out.println("Deleted: " + response));
      * }</pre>
      *
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncDelete(final Object queryParameters) {
@@ -2338,7 +2568,8 @@ public final class HttpClient implements AutoCloseable {
      * // future completes with the response body as a String (when executed)
      * }</pre>
      *
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param settings Additional HTTP settings for this request
      * @return A ContinuableFuture that will complete with the response body as a String
      */
@@ -2396,7 +2627,8 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
      */
@@ -2417,7 +2649,8 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param <T> The type of the response object
-     * @param queryParameters Query parameters as a String, Map, or Bean object (will be URL-encoded)
+     * @param queryParameters Query parameters appended to the URL: a pre-encoded query
+     *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
@@ -2593,13 +2826,15 @@ public final class HttpClient implements AutoCloseable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpClient client = HttpClient.create("https://example.com/api/status");
-     * ContinuableFuture<Void> future = client.asyncHead();
-     * // future completes (with a null result) once the headers are retrieved (when executed)
+     * ContinuableFuture<HttpResponse> future = client.asyncHead();
+     * int statusCode = future.get().statusCode();
      * }</pre>
      *
-     * @return A ContinuableFuture that will complete when the request finishes
+     * @return A ContinuableFuture that will complete with the {@link HttpResponse} containing the
+     *         status code and headers (the body is empty for HEAD), or with {@code null} when the
+     *         client-level settings mark requests as one-way ({@link HttpSettings#setOneWayRequest(boolean)})
      */
-    public ContinuableFuture<Void> asyncHead() {
+    public ContinuableFuture<HttpResponse> asyncHead() {
         return asyncHead(_settings);
     }
 
@@ -2610,15 +2845,17 @@ public final class HttpClient implements AutoCloseable {
      * <pre>{@code
      * HttpClient client = HttpClient.create("https://example.com/api/status");
      * HttpSettings settings = HttpSettings.create().header("Authorization", "Bearer token123");
-     * ContinuableFuture<Void> future = client.asyncHead(settings);
-     * // future completes (with a null result) once the headers are retrieved (when executed)
+     * ContinuableFuture<HttpResponse> future = client.asyncHead(settings);
+     * String contentLength = future.get().headers().getOrDefault("Content-Length", List.of()).stream().findFirst().orElse(null);
      * }</pre>
      *
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
-     * @return A ContinuableFuture that will complete when the request finishes
+     * @return A ContinuableFuture that will complete with the {@link HttpResponse} containing the
+     *         status code and headers (the body is empty for HEAD), or with {@code null} when the
+     *         effective settings mark the request as one-way ({@link HttpSettings#setOneWayRequest(boolean)})
      */
-    public ContinuableFuture<Void> asyncHead(final HttpSettings settings) {
-        return asyncExecute(HttpMethod.HEAD, null, settings, Void.class);
+    public ContinuableFuture<HttpResponse> asyncHead(final HttpSettings settings) {
+        return asyncExecute(HttpMethod.HEAD, null, settings, HttpResponse.class);
     }
 
     /**
@@ -2633,7 +2870,9 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @return A ContinuableFuture that will complete with the response body as a String
      */
     public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request) {
@@ -2653,7 +2892,9 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response
      */
@@ -2675,7 +2916,9 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return A ContinuableFuture that will complete with the response body as a String
      */
@@ -2698,7 +2941,9 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param <T> The type of the response object
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response
@@ -2723,7 +2968,9 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The file to write the response to
      * @return a ContinuableFuture that completes after the response has been written to the file
@@ -2752,7 +2999,9 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The output stream to write the response to
      * @return a ContinuableFuture that completes after the response has been written to the stream
@@ -2780,7 +3029,9 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.)
-     * @param request The request body (can be {@code null} for GET/DELETE)
+     * @param request The payload: the request body for POST/PUT/PATCH/OPTIONS, or query
+     *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
+     *        every other method. May be {@code null} for no payload
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The writer to write the response to
      * @return a ContinuableFuture that completes after the response has been written to the writer
@@ -2818,7 +3069,7 @@ public final class HttpClient implements AutoCloseable {
      *
      */
     @Override
-    public synchronized void close() {
+    public void close() {
         // No owned resources. HttpURLConnection instances are closed per request and injected
         // executors remain caller-owned.
     }

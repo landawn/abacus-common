@@ -49,6 +49,32 @@ import com.landawn.abacus.util.function.CharTriPredicate;
 
 public class AbstractCharStreamTest extends TestBase {
 
+    @Test
+    public void testScanInitializesOnlyAfterSuccessfulSourceRead() {
+        final IllegalStateException failure = new IllegalStateException("first read failed");
+        final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger accumulatorCalls = new java.util.concurrent.atomic.AtomicInteger();
+
+        try (CharStream stream = CharStream.of(new char[] { 1, 2, 3 }).map(value -> {
+            if (attempts.getAndIncrement() == 0) {
+                throw failure;
+            }
+            return value;
+        }).scan((left, right) -> {
+            accumulatorCalls.incrementAndGet();
+            return (char) (left + right);
+        })) {
+            final com.landawn.abacus.util.CharIterator iter = stream.iterator();
+            org.junit.jupiter.api.Assertions.assertSame(failure,
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextChar));
+            org.junit.jupiter.api.Assertions.assertEquals((char) 2, iter.nextChar());
+            org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
+            org.junit.jupiter.api.Assertions.assertEquals((char) 5, iter.nextChar());
+            org.junit.jupiter.api.Assertions.assertEquals(1, accumulatorCalls.get());
+            org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+        }
+    }
+
     private static final char[] TEST_ARRAY = new char[] { 'a', 'b', 'c', 'd', 'e' };
     private CharStream stream;
     private CharStream stream2;

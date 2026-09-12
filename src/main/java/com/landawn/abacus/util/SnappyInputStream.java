@@ -61,9 +61,9 @@ public final class SnappyInputStream extends InputStream {
      *
      * @param is the input stream containing Snappy-compressed data; must not be {@code null}
      * @throws IllegalArgumentException if {@code is} is {@code null}.
-     * @throws IOException if an I/O error occurs during initialization
+     * @throws IOException if the compressed header is invalid or reading {@code is} fails during initialization
      */
-    public SnappyInputStream(final InputStream is) throws IOException {
+    public SnappyInputStream(final InputStream is) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(is, cs.is);
         in = new org.xerial.snappy.SnappyInputStream(is);
     }
@@ -87,7 +87,7 @@ public final class SnappyInputStream extends InputStream {
      * }</pre>
      *
      * @return the next byte of data, or -1 if the end of the stream is reached
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this stream is closed, the compressed data is invalid, or reading the underlying stream fails
      */
     @Override
     public int read() throws IOException {
@@ -108,12 +108,12 @@ public final class SnappyInputStream extends InputStream {
      * @param b the buffer into which the data is read
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
      *         because the end of the stream has been reached
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this stream is closed, the compressed data is invalid, or reading the underlying stream fails
      * @throws NullPointerException if {@code b} is {@code null}
      * @see #read(byte[], int, int)
      */
     @Override
-    public int read(final byte[] b) throws IOException {
+    public int read(final byte[] b) throws IOException, NullPointerException {
         ensureOpen();
         return in.read(b);
     }
@@ -133,13 +133,13 @@ public final class SnappyInputStream extends InputStream {
      * @param len the maximum number of bytes to read
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
      *         because the end of the stream has been reached
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this stream is closed, the compressed data is invalid, or reading the underlying stream fails
      * @throws NullPointerException if {@code b} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
      *         or {@code len} is greater than {@code b.length - off}
      */
     @Override
-    public int read(final byte[] b, final int off, final int len) throws IOException {
+    public int read(final byte[] b, final int off, final int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
 
         // Enforce InputStream.read(byte[], int, int) contract: org.xerial.snappy.SnappyInputStream
@@ -163,11 +163,11 @@ public final class SnappyInputStream extends InputStream {
      *
      * @param n the number of bytes to be skipped
      * @return the actual number of bytes skipped
+     * @throws IOException if this stream is closed, the compressed data is invalid, or reading the underlying stream fails
      * @throws IllegalArgumentException if {@code n} is negative.
-     * @throws IOException if an I/O error occurs
      */
     @Override
-    public long skip(final long n) throws IllegalArgumentException, IOException {
+    public long skip(final long n) throws IOException, IllegalArgumentException {
         ensureOpen();
         N.checkArgNotNegative(n, cs.n);
 
@@ -192,7 +192,7 @@ public final class SnappyInputStream extends InputStream {
      * }</pre>
      *
      * @return an estimate of the number of bytes that can be read without blocking
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this stream is closed, the next compressed chunk is invalid, or reading that chunk fails
      */
     @Override
     public int available() throws IOException {
@@ -206,6 +206,11 @@ public final class SnappyInputStream extends InputStream {
      * <p>This call is delegated to the underlying Xerial Snappy input stream; its effect (and whether
      * a subsequent {@link #reset()} succeeds) depends on whether that stream supports mark/reset.
      * See {@link #markSupported()}.</p>
+     *
+     * <p>Unlike the read-side operations on this stream, neither this method nor {@link #markSupported()}
+     * checks whether the stream is already closed - neither signature can report an {@link IOException}. So
+     * after {@link #close()} this method neither throws nor has any effect, and {@link #markSupported()}
+     * still answers instead of throwing, while {@link #reset()} does throw.</p>
      *
      * @param readLimit the maximum limit of bytes that can be read before the mark position becomes invalid
      * @see #reset()
@@ -223,7 +228,7 @@ public final class SnappyInputStream extends InputStream {
      * <p>This call is delegated to the underlying Xerial Snappy input stream. If that stream does not
      * support mark/reset, or no valid mark is set, it throws an {@link IOException}.</p>
      *
-     * @throws IOException if the underlying stream does not support mark/reset or the mark is invalid
+     * @throws IOException if this stream is closed, the underlying stream does not support mark/reset, or the mark is invalid
      * @see #mark(int)
      * @see #markSupported()
      */
@@ -263,7 +268,7 @@ public final class SnappyInputStream extends InputStream {
      * }
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if closing the underlying stream fails
      */
     @Override
     public synchronized void close() throws IOException {

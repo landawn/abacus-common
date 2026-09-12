@@ -1,15 +1,11 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,1133 +18,66 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NavigableSet;
-import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Predicate;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
-import com.landawn.abacus.AbstractTest;
 import com.landawn.abacus.util.u.Nullable;
-import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.u.OptionalByte;
-import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.u.OptionalDouble;
-import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.u.OptionalLong;
-import com.landawn.abacus.util.u.OptionalShort;
-import com.landawn.abacus.util.function.Function;
-import com.landawn.abacus.util.function.Supplier;
-import com.landawn.abacus.util.function.ToDoubleFunction;
-import com.landawn.abacus.util.function.ToIntFunction;
-import com.landawn.abacus.util.function.ToLongFunction;
 
-public class IterablesTest extends AbstractTest {
-
-    private static final Comparator<Integer> REVERSE_ORDER_NULLS_FIRST = Comparator.nullsFirst(Comparator.reverseOrder());
-    private static final Comparator<Integer> REVERSE_ORDER_NULLS_LAST = Comparator.nullsLast(Comparator.reverseOrder());
-
-    private List<Integer> intList;
-    private List<String> stringList;
-    private List<Double> doubleList;
-    private List<BigInteger> bigIntList;
-    private List<BigDecimal> bigDecimalList;
-
-    @BeforeEach
-    public void setUp() {
-        intList = Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6);
-        stringList = Arrays.asList("apple", "banana", "cherry", "date");
-        doubleList = Arrays.asList(3.14, 2.71, 1.41, 1.73);
-        bigIntList = Arrays.asList(BigInteger.valueOf(100), BigInteger.valueOf(200), BigInteger.valueOf(300));
-        bigDecimalList = Arrays.asList(BigDecimal.valueOf(10.5), BigDecimal.valueOf(20.5), BigDecimal.valueOf(30.5));
+public class IterablesTest extends IterablesTestSupport {
+    @Test
+    public void testNaturalMinMaxWithOnlyNaNAndNull() {
+        final Double[] values = { null, Double.NaN, null };
+        assertTrue(Iterables.min(values).get().isNaN());
+        assertTrue(Iterables.min(Arrays.asList(values)).get().isNaN());
+        assertTrue(Iterables.min(Arrays.asList(values).iterator()).get().isNaN());
+        assertTrue(Iterables.minMax(values).get().left().isNaN());
+        assertTrue(Iterables.minMax(values).get().right().isNaN());
+        assertTrue(Iterables.minMax(Arrays.asList(values)).get().left().isNaN());
+        assertTrue(Iterables.minMax(Arrays.asList(values).iterator()).get().left().isNaN());
+        assertTrue(Iterables.minMax(new Float[] { Float.NaN, null }).get().left().isNaN());
+        assertEquals(1.0, Iterables.minMax(new Double[] { null, Double.NaN, 1.0 }).get().left());
     }
 
-    @SafeVarargs
-    private static <T> List<T> list(T... elements) {
-        return new ArrayList<>(Arrays.asList(elements));
+    @Test
+    public void testNullExtremeShortCircuitConsumesInitialComparison() {
+        final Iterator<Integer> minimum = Arrays.asList((Integer) null, 1, 2).iterator();
+        assertTrue(Iterables.min(minimum, Comparators.nullsFirst()).isNull());
+        assertEquals(Integer.valueOf(2), minimum.next());
+
+        final Iterator<Integer> maximum = Arrays.asList((Integer) null, 1, 2).iterator();
+        assertTrue(Iterables.max(maximum, Comparators.nullsLast()).isNull());
+        assertEquals(Integer.valueOf(2), maximum.next());
     }
 
-    private static class TestObject implements Comparable<TestObject> {
-        final int id;
-        final String value;
-
-        TestObject(int id, String value) {
-            this.id = id;
-            this.value = value;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        @Override
-        public int compareTo(TestObject o) {
-            return Integer.compare(this.id, o.id);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
+    @Test
+    public void testFillExtensionDoesNotRequireSet() {
+        final List<String> values = new ArrayList<>(Arrays.asList("original"));
+        final List<String> appendable = new java.util.AbstractList<>() {
+            @Override
+            public String get(final int index) {
+                return values.get(index);
             }
 
-            if (o == null || getClass() != o.getClass()) {
-                return false;
+            @Override
+            public int size() {
+                return values.size();
             }
 
-            TestObject that = (TestObject) o;
-            return id == that.id && Objects.equals(value, that.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id, value);
-        }
-
-        @Override
-        public String toString() {
-            return "TestObject{id=" + id + ", value='" + value + "'}";
-        }
-    }
-
-    @Test
-    public void testFirstNonNullTwoArgs() {
-        assertEquals("a", Nulls.firstNonNull("a", "b"));
-        assertEquals("b", Nulls.firstNonNull(null, "b"));
-        assertEquals("a", Nulls.firstNonNull("a", null));
-        assertNull(Nulls.firstNonNull(null, null));
-    }
-
-    @Test
-    public void testFirstNonNullThreeArgs() {
-        assertEquals("a", Nulls.firstNonNull("a", "b", "c"));
-        assertEquals("b", Nulls.firstNonNull(null, "b", "c"));
-        assertEquals("c", Nulls.firstNonNull(null, null, "c"));
-        assertNull(Nulls.firstNonNull(null, null, null));
-    }
-
-    @Test
-    public void testFirstNonNullVarArgs() {
-        String[] arr = { null, null, "found", "second" };
-        assertEquals("found", Nulls.firstNonNull(arr));
-
-        String[] allNull = { null, null, null };
-        assertNull(Nulls.firstNonNull(allNull));
-
-        assertNull(Nulls.firstNonNull((String[]) null));
-        assertNull(Nulls.firstNonNull(new String[0]));
-    }
-
-    @Test
-    public void testFirstNonNullIterable() {
-        List<String> list = Arrays.asList(null, null, "found", "second");
-        assertEquals("found", Nulls.firstNonNull(list));
-
-        List<String> allNull = Arrays.asList(null, null, null);
-        assertNull(Nulls.firstNonNull(allNull));
-
-        assertNull(Nulls.firstNonNull((Iterable<String>) null));
-        assertNull(Nulls.firstNonNull(new ArrayList<String>()));
-    }
-
-    @Test
-    public void testFirstNonNullIterator() {
-        List<String> list = Arrays.asList(null, null, "found", "second");
-        assertEquals("found", Nulls.firstNonNull(list.iterator()));
-
-        List<String> allNull = Arrays.asList(null, null, null);
-        assertNull(Nulls.firstNonNull(allNull.iterator()));
-
-        assertNull(Nulls.firstNonNull((Iterator<String>) null));
-    }
-
-    @Test
-    public void testFirstNonNullOrDefaultIterable() {
-        List<String> list = Arrays.asList(null, null, "found", "second");
-        assertEquals("found", N.firstNonNullOrDefault(list, "default"));
-
-        List<String> allNull = Arrays.asList(null, null, null);
-        assertEquals("default", N.firstNonNullOrDefault(allNull, "default"));
-
-        assertEquals("default", N.firstNonNullOrDefault((Iterable<String>) null, "default"));
-        assertEquals("default", N.firstNonNullOrDefault(new ArrayList<String>(), "default"));
-    }
-
-    @Test
-    public void testFirstNonNullOrDefaultIterator() {
-        List<String> list = Arrays.asList(null, null, "found", "second");
-        assertEquals("found", N.firstNonNullOrDefault(list.iterator(), "default"));
-
-        List<String> allNull = Arrays.asList(null, null, null);
-        assertEquals("default", N.firstNonNullOrDefault(allNull.iterator(), "default"));
-
-        assertEquals("default", N.firstNonNullOrDefault((Iterator<String>) null, "default"));
-    }
-
-    @Test
-    public void testFirstNonNull_TwoParams_BothNull() {
-        String result = Nulls.firstNonNull(null, null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testFirstNonNull_TwoParams_FirstNonNull() {
-        String result = Nulls.firstNonNull("first", null);
-        Assertions.assertEquals("first", result);
-    }
-
-    @Test
-    public void testFirstNonNull_TwoParams_SecondNonNull() {
-        String result = Nulls.firstNonNull(null, "second");
-        Assertions.assertEquals("second", result);
-    }
-
-    @Test
-    public void testFirstNonNull_TwoParams_BothNonNull() {
-        String result = Nulls.firstNonNull("first", "second");
-        Assertions.assertEquals("first", result);
-    }
-
-    @Test
-    public void testFirstNonNull_ThreeParams_AllNull() {
-        String result = Nulls.firstNonNull(null, null, null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testFirstNonNull_ThreeParams_FirstNonNull() {
-        String result = Nulls.firstNonNull("first", null, null);
-        Assertions.assertEquals("first", result);
-    }
-
-    @Test
-    public void testFirstNonNull_ThreeParams_SecondNonNull() {
-        String result = Nulls.firstNonNull(null, "second", null);
-        Assertions.assertEquals("second", result);
-    }
-
-    @Test
-    public void testFirstNonNull_ThreeParams_ThirdNonNull() {
-        String result = Nulls.firstNonNull(null, null, "third");
-        Assertions.assertEquals("third", result);
-    }
-
-    @Test
-    public void testFirstNonNull_ThreeParams_AllNonNull() {
-        String result = Nulls.firstNonNull("first", "second", "third");
-        Assertions.assertEquals("first", result);
-    }
-
-    @Test
-    public void testFirstNonNull_ThreeParams_SecondAndThirdNonNull() {
-        String result = Nulls.firstNonNull(null, "second", "third");
-        Assertions.assertEquals("second", result);
-    }
-
-    @Test
-    public void testFirstNonNull_Varargs_NullArray() {
-        String result = Nulls.firstNonNull((String[]) null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testFirstNonNull_Varargs_EmptyArray() {
-        String result = Nulls.firstNonNull(new String[0]);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testFirstNonNull_Varargs_AllNull() {
-        String result = Nulls.firstNonNull(null, null, null, null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testFirstNonNull_Varargs_MiddleNonNull() {
-        String result = Nulls.firstNonNull(null, null, "middle", null, null);
-        Assertions.assertEquals("middle", result);
-    }
-
-    @Test
-    public void testFirstNonNull_Varargs_LastNonNull() {
-        String result = Nulls.firstNonNull(null, null, null, "last");
-        Assertions.assertEquals("last", result);
-    }
-
-    @Test
-    public void testFirstNonNull_Varargs_MultipleNonNull() {
-        String result = Nulls.firstNonNull(null, "first", "second", null, "third");
-        Assertions.assertEquals("first", result);
-    }
-
-    @Test
-    public void testFirstNonNull_Iterable_Null() {
-        String result = Nulls.firstNonNull((Iterable<String>) null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testFirstNonNull_Iterable_Empty() {
-        List<String> list = Collections.emptyList();
-        String result = Nulls.firstNonNull(list);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testFirstNonNull_Iterable_AllNull() {
-        List<String> list = Arrays.asList(null, null, null);
-        String result = Nulls.firstNonNull(list);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testFirstNonNull_Iterable_FirstNonNull() {
-        List<String> list = Arrays.asList("first", null, null);
-        String result = Nulls.firstNonNull(list);
-        Assertions.assertEquals("first", result);
-    }
-
-    @Test
-    public void testFirstNonNull_Iterable_MiddleNonNull() {
-        List<String> list = Arrays.asList(null, null, "middle", null);
-        String result = Nulls.firstNonNull(list);
-        Assertions.assertEquals("middle", result);
-    }
-
-    @Test
-    public void testFirstNonNull_Iterable_MultipleNonNull() {
-        List<String> list = Arrays.asList(null, "first", "second", null);
-        String result = Nulls.firstNonNull(list);
-        Assertions.assertEquals("first", result);
-    }
-
-    @Test
-    public void testFirstNonNull_Iterator_Null() {
-        String result = Nulls.firstNonNull((Iterator<String>) null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testFirstNonNull_Iterator_Empty() {
-        Iterator<String> iter = Collections.<String> emptyList().iterator();
-        String result = Nulls.firstNonNull(iter);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testFirstNonNull_Iterator_AllNull() {
-        Iterator<String> iter = Arrays.asList((String) null, (String) null, (String) null).iterator();
-        String result = Nulls.firstNonNull(iter);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testFirstNonNull_Iterator_FirstNonNull() {
-        Iterator<String> iter = Arrays.asList("first", null, null).iterator();
-        String result = Nulls.firstNonNull(iter);
-        Assertions.assertEquals("first", result);
-    }
-
-    @Test
-    public void testFirstNonNull_Iterator_MiddleNonNull() {
-        Iterator<String> iter = Arrays.asList(null, null, "middle", null).iterator();
-        String result = Nulls.firstNonNull(iter);
-        Assertions.assertEquals("middle", result);
-    }
-
-    @Test
-    public void testFirstNonNull_Iterator_MultipleNonNull() {
-        Iterator<String> iter = Arrays.asList(null, "first", "second", null).iterator();
-        String result = Nulls.firstNonNull(iter);
-        Assertions.assertEquals("first", result);
-    }
-
-    @Test
-    public void testFirstNonNullOrDefault_Iterable_NullIterableReturnsDefault() {
-        String result = N.firstNonNullOrDefault((Iterable<String>) null, "default");
-        Assertions.assertEquals("default", result);
-    }
-
-    @Test
-    public void testFirstNonNullOrDefault_Iterable_EmptyReturnsDefault() {
-        List<String> list = Collections.emptyList();
-        String result = N.firstNonNullOrDefault(list, "default");
-        Assertions.assertEquals("default", result);
-    }
-
-    @Test
-    public void testFirstNonNullOrDefault_Iterable_AllNullReturnsDefault() {
-        List<String> list = Arrays.asList(null, null, null);
-        String result = N.firstNonNullOrDefault(list, "default");
-        Assertions.assertEquals("default", result);
-    }
-
-    @Test
-    public void testFirstNonNullOrDefault_Iterable_FirstNonNull() {
-        List<String> list = Arrays.asList("first", null, null);
-        String result = N.firstNonNullOrDefault(list, "default");
-        Assertions.assertEquals("first", result);
-    }
-
-    @Test
-    public void testFirstNonNullOrDefault_Iterable_MiddleNonNull() {
-        List<String> list = Arrays.asList(null, null, "middle", null);
-        String result = N.firstNonNullOrDefault(list, "default");
-        Assertions.assertEquals("middle", result);
-    }
-
-    @Test
-    public void testFirstNonNullOrDefault_Iterator_NullIteratorReturnsDefault() {
-        String result = N.firstNonNullOrDefault((Iterator<String>) null, "default");
-        Assertions.assertEquals("default", result);
-    }
-
-    @Test
-    public void testFirstNonNullOrDefault_Iterator_EmptyReturnsDefault() {
-        Iterator<String> iter = Collections.<String> emptyList().iterator();
-        String result = N.firstNonNullOrDefault(iter, "default");
-        Assertions.assertEquals("default", result);
-    }
-
-    @Test
-    public void testFirstNonNullOrDefault_Iterator_AllNullReturnsDefault() {
-        Iterator<String> iter = Arrays.asList((String) null, (String) null, (String) null).iterator();
-        String result = N.firstNonNullOrDefault(iter, "default");
-        Assertions.assertEquals("default", result);
-    }
-
-    @Test
-    public void testFirstNonNullOrDefault_Iterator_FirstNonNull() {
-        Iterator<String> iter = Arrays.asList("first", null, null).iterator();
-        String result = N.firstNonNullOrDefault(iter, "default");
-        Assertions.assertEquals("first", result);
-    }
-
-    @Test
-    public void testFirstNonNullOrDefault_Iterator_MiddleNonNull() {
-        Iterator<String> iter = Arrays.asList(null, null, "middle", null).iterator();
-        String result = N.firstNonNullOrDefault(iter, "default");
-        Assertions.assertEquals("middle", result);
-    }
-
-    @Test
-    public void testFirstNonNull_WithIntegers() {
-        Integer result = Nulls.firstNonNull(null, 42, 100);
-        Assertions.assertEquals(42, result);
-    }
-
-    @Test
-    public void testFirstNonNull_WithCustomObjects() {
-        Object obj1 = new Object();
-        Object obj2 = new Object();
-        Object result = Nulls.firstNonNull(null, obj1, obj2);
-        Assertions.assertSame(obj1, result);
-    }
-
-    // ===================== firstNonNull / lastNonNull edge cases =====================
-
-    @Test
-    public void testFirstNonNull_SingleElement() {
-        assertEquals("a", Nulls.firstNonNull(new String[] { "a" }));
-        assertNull(Nulls.firstNonNull(new String[] { null }));
-    }
-
-    // ===================== firstNonNull / lastNonNull error paths =====================
-
-    @Test
-    public void testFirstNonNull_AllNull_TwoArgs() {
-        assertNull(Nulls.firstNonNull(null, null));
-    }
-
-    @Test
-    public void testFirstNonNull_AllNull_ThreeArgs() {
-        assertNull(Nulls.firstNonNull(null, null, null));
-    }
-
-    @Test
-    public void testFirstNonNullOrDefault_Iterable_NullDefaultThrowsException() {
-        List<String> list = Arrays.asList("test");
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            N.firstNonNullOrDefault(list, null);
-        });
-    }
-
-    @Test
-    public void testFirstNonNullOrDefault_Iterator_NullDefaultThrowsException() {
-        Iterator<String> iter = Arrays.asList("test").iterator();
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            N.firstNonNullOrDefault(iter, null);
-        });
-    }
-
-    @Test
-    public void testLastNonNullTwoArgs() {
-        assertEquals("b", Nulls.lastNonNull("a", "b"));
-        assertEquals("a", Nulls.lastNonNull("a", null));
-        assertEquals("b", Nulls.lastNonNull(null, "b"));
-        assertNull(Nulls.lastNonNull(null, null));
-    }
-
-    @Test
-    public void testLastNonNullThreeArgs() {
-        assertEquals("c", Nulls.lastNonNull("a", "b", "c"));
-        assertEquals("b", Nulls.lastNonNull("a", "b", null));
-        assertEquals("a", Nulls.lastNonNull("a", null, null));
-        assertNull(Nulls.lastNonNull(null, null, null));
-    }
-
-    @Test
-    public void testLastNonNullVarArgs() {
-        String[] arr = { "first", "second", null, null };
-        assertEquals("second", Nulls.lastNonNull(arr));
-
-        String[] allNull = { null, null, null };
-        assertNull(Nulls.lastNonNull(allNull));
-
-        assertNull(Nulls.lastNonNull((String[]) null));
-        assertNull(Nulls.lastNonNull(new String[0]));
-    }
-
-    @Test
-    public void testLastNonNullIterable() {
-        List<String> list = Arrays.asList("first", "second", null, null);
-        assertEquals("second", Nulls.lastNonNull(list));
-
-        List<String> allNull = Arrays.asList(null, null, null);
-        assertNull(Nulls.lastNonNull(allNull));
-
-        assertNull(Nulls.lastNonNull((Iterable<String>) null));
-        assertNull(Nulls.lastNonNull(new ArrayList<String>()));
-    }
-
-    @Test
-    public void testLastNonNullIterator() {
-        List<String> list = Arrays.asList("first", "second", null, null);
-        assertEquals("second", Nulls.lastNonNull(list.iterator()));
-
-        List<String> allNull = Arrays.asList(null, null, null);
-        assertNull(Nulls.lastNonNull(allNull.iterator()));
-
-        assertNull(Nulls.lastNonNull((Iterator<String>) null));
-    }
-
-    @Test
-    public void testLastNonNullOrDefaultIterable() {
-        List<String> list = Arrays.asList("first", "second", null, null);
-        assertEquals("second", N.lastNonNullOrDefault(list, "default"));
-
-        List<String> allNull = Arrays.asList(null, null, null);
-        assertEquals("default", N.lastNonNullOrDefault(allNull, "default"));
-
-        assertEquals("default", N.lastNonNullOrDefault((Iterable<String>) null, "default"));
-        assertEquals("default", N.lastNonNullOrDefault(new ArrayList<String>(), "default"));
-    }
-
-    @Test
-    public void testLastNonNullOrDefaultIterator() {
-        List<String> list = Arrays.asList("first", "second", null, null);
-        assertEquals("second", N.lastNonNullOrDefault(list.iterator(), "default"));
-
-        List<String> allNull = Arrays.asList(null, null, null);
-        assertEquals("default", N.lastNonNullOrDefault(allNull.iterator(), "default"));
-
-        assertEquals("default", N.lastNonNullOrDefault((Iterator<String>) null, "default"));
-    }
-
-    @Test
-    public void testLastNonNull_TwoParams_BothNull() {
-        String result = Nulls.lastNonNull(null, null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testLastNonNull_TwoParams_FirstNonNull() {
-        String result = Nulls.lastNonNull("first", null);
-        Assertions.assertEquals("first", result);
-    }
-
-    @Test
-    public void testLastNonNull_TwoParams_SecondNonNull() {
-        String result = Nulls.lastNonNull(null, "second");
-        Assertions.assertEquals("second", result);
-    }
-
-    @Test
-    public void testLastNonNull_TwoParams_BothNonNull() {
-        String result = Nulls.lastNonNull("first", "second");
-        Assertions.assertEquals("second", result);
-    }
-
-    @Test
-    public void testLastNonNull_ThreeParams_AllNull() {
-        String result = Nulls.lastNonNull(null, null, null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testLastNonNull_ThreeParams_FirstNonNull() {
-        String result = Nulls.lastNonNull("first", null, null);
-        Assertions.assertEquals("first", result);
-    }
-
-    @Test
-    public void testLastNonNull_ThreeParams_SecondNonNull() {
-        String result = Nulls.lastNonNull(null, "second", null);
-        Assertions.assertEquals("second", result);
-    }
-
-    @Test
-    public void testLastNonNull_ThreeParams_ThirdNonNull() {
-        String result = Nulls.lastNonNull(null, null, "third");
-        Assertions.assertEquals("third", result);
-    }
-
-    @Test
-    public void testLastNonNull_ThreeParams_AllNonNull() {
-        String result = Nulls.lastNonNull("first", "second", "third");
-        Assertions.assertEquals("third", result);
-    }
-
-    @Test
-    public void testLastNonNull_ThreeParams_FirstAndSecondNonNull() {
-        String result = Nulls.lastNonNull("first", "second", null);
-        Assertions.assertEquals("second", result);
-    }
-
-    @Test
-    public void testLastNonNull_Varargs_NullArray() {
-        String result = Nulls.lastNonNull((String[]) null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testLastNonNull_Varargs_EmptyArray() {
-        String result = Nulls.lastNonNull(new String[0]);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testLastNonNull_Varargs_AllNull() {
-        String result = Nulls.lastNonNull(null, null, null, null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testLastNonNull_Varargs_MiddleNonNull() {
-        String result = Nulls.lastNonNull(null, null, "middle", null, null);
-        Assertions.assertEquals("middle", result);
-    }
-
-    @Test
-    public void testLastNonNull_Varargs_LastNonNull() {
-        String result = Nulls.lastNonNull(null, null, null, "last");
-        Assertions.assertEquals("last", result);
-    }
-
-    @Test
-    public void testLastNonNull_Varargs_MultipleNonNull() {
-        String result = Nulls.lastNonNull(null, "first", "second", null, "third");
-        Assertions.assertEquals("third", result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterable_Null() {
-        String result = Nulls.lastNonNull((Iterable<String>) null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterable_Empty() {
-        List<String> list = Collections.emptyList();
-        String result = Nulls.lastNonNull(list);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterable_AllNull() {
-        List<String> list = Arrays.asList(null, null, null);
-        String result = Nulls.lastNonNull(list);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterable_LastNonNull() {
-        List<String> list = Arrays.asList(null, null, "last");
-        String result = Nulls.lastNonNull(list);
-        Assertions.assertEquals("last", result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterable_MiddleNonNull() {
-        List<String> list = Arrays.asList(null, "middle", null, null);
-        String result = Nulls.lastNonNull(list);
-        Assertions.assertEquals("middle", result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterable_MultipleNonNull() {
-        List<String> list = Arrays.asList(null, "first", "second", null);
-        String result = Nulls.lastNonNull(list);
-        Assertions.assertEquals("second", result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterable_RandomAccessList() {
-        ArrayList<String> list = new ArrayList<>();
-        list.add(null);
-        list.add("first");
-        list.add(null);
-        list.add("last");
-        list.add(null);
-        String result = Nulls.lastNonNull(list);
-        Assertions.assertEquals("last", result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterable_NonRandomAccessList() {
-        List<String> list = new LinkedList<>();
-        list.add(null);
-        list.add("first");
-        list.add(null);
-        list.add("last");
-        list.add(null);
-        String result = Nulls.lastNonNull(list);
-        Assertions.assertEquals("last", result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterator_Null() {
-        String result = Nulls.lastNonNull((Iterator<String>) null);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterator_Empty() {
-        Iterator<String> iter = Collections.<String> emptyList().iterator();
-        String result = Nulls.lastNonNull(iter);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterator_AllNull() {
-        Iterator<String> iter = Arrays.asList((String) null, (String) null, (String) null).iterator();
-        String result = Nulls.lastNonNull(iter);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterator_LastNonNull() {
-        Iterator<String> iter = Arrays.asList(null, null, "last").iterator();
-        String result = Nulls.lastNonNull(iter);
-        Assertions.assertEquals("last", result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterator_MiddleNonNull() {
-        Iterator<String> iter = Arrays.asList(null, "middle", null, null).iterator();
-        String result = Nulls.lastNonNull(iter);
-        Assertions.assertEquals("middle", result);
-    }
-
-    @Test
-    public void testLastNonNull_Iterator_MultipleNonNull() {
-        Iterator<String> iter = Arrays.asList(null, "first", "second", null, "third").iterator();
-        String result = Nulls.lastNonNull(iter);
-        Assertions.assertEquals("third", result);
-    }
-
-    @Test
-    public void testLastNonNullOrDefault_Iterable_NullIterableReturnsDefault() {
-        String result = N.lastNonNullOrDefault((Iterable<String>) null, "default");
-        Assertions.assertEquals("default", result);
-    }
-
-    @Test
-    public void testLastNonNullOrDefault_Iterable_EmptyReturnsDefault() {
-        List<String> list = Collections.emptyList();
-        String result = N.lastNonNullOrDefault(list, "default");
-        Assertions.assertEquals("default", result);
-    }
-
-    @Test
-    public void testLastNonNullOrDefault_Iterable_AllNullReturnsDefault() {
-        List<String> list = Arrays.asList(null, null, null);
-        String result = N.lastNonNullOrDefault(list, "default");
-        Assertions.assertEquals("default", result);
-    }
-
-    @Test
-    public void testLastNonNullOrDefault_Iterable_LastNonNull() {
-        List<String> list = Arrays.asList(null, null, "last");
-        String result = N.lastNonNullOrDefault(list, "default");
-        Assertions.assertEquals("last", result);
-    }
-
-    @Test
-    public void testLastNonNullOrDefault_Iterable_MiddleNonNull() {
-        List<String> list = Arrays.asList(null, "middle", null, null);
-        String result = N.lastNonNullOrDefault(list, "default");
-        Assertions.assertEquals("middle", result);
-    }
-
-    @Test
-    public void testLastNonNullOrDefault_Iterator_NullIteratorReturnsDefault() {
-        String result = N.lastNonNullOrDefault((Iterator<String>) null, "default");
-        Assertions.assertEquals("default", result);
-    }
-
-    @Test
-    public void testLastNonNullOrDefault_Iterator_EmptyReturnsDefault() {
-        Iterator<String> iter = Collections.<String> emptyList().iterator();
-        String result = N.lastNonNullOrDefault(iter, "default");
-        Assertions.assertEquals("default", result);
-    }
-
-    @Test
-    public void testLastNonNullOrDefault_Iterator_AllNullReturnsDefault() {
-        Iterator<String> iter = Arrays.asList((String) null, (String) null, (String) null).iterator();
-        String result = N.lastNonNullOrDefault(iter, "default");
-        Assertions.assertEquals("default", result);
-    }
-
-    @Test
-    public void testLastNonNullOrDefault_Iterator_LastNonNull() {
-        Iterator<String> iter = Arrays.asList(null, null, "last").iterator();
-        String result = N.lastNonNullOrDefault(iter, "default");
-        Assertions.assertEquals("last", result);
-    }
-
-    @Test
-    public void testLastNonNullOrDefault_Iterator_MiddleNonNull() {
-        Iterator<String> iter = Arrays.asList(null, "middle", null, null).iterator();
-        String result = N.lastNonNullOrDefault(iter, "default");
-        Assertions.assertEquals("middle", result);
-    }
-
-    @Test
-    public void testLastNonNull_WithIntegers() {
-        Integer result = Nulls.lastNonNull(10, null, 42);
-        Assertions.assertEquals(42, result);
-    }
-
-    @Test
-    public void testLastNonNull_WithCustomObjects() {
-        Object obj1 = new Object();
-        Object obj2 = new Object();
-        Object result = Nulls.lastNonNull(obj1, null, obj2);
-        Assertions.assertSame(obj2, result);
-    }
-
-    @Test
-    public void testLastNonNull_SingleElement() {
-        assertEquals("a", Nulls.lastNonNull(new String[] { "a" }));
-        assertNull(Nulls.lastNonNull(new String[] { null }));
-    }
-
-    @Test
-    public void testLastNonNull_AllNull_TwoArgs() {
-        assertNull(Nulls.lastNonNull(null, null));
-    }
-
-    @Test
-    public void testLastNonNull_AllNull_ThreeArgs() {
-        assertNull(Nulls.lastNonNull(null, null, null));
-    }
-
-    @Test
-    public void testLastNonNull_Iterable_NonList() {
-        // Use a LinkedList (Iterable but not RandomAccess-List)
-        java.util.LinkedList<String> linked = new java.util.LinkedList<>(Arrays.asList("a", null, "b", null));
-        assertEquals("b", Nulls.lastNonNull(linked));
-    }
-
-    @Test
-    public void testLastNonNull_Iterable_AllNull_NonList() {
-        java.util.LinkedList<String> linked = new java.util.LinkedList<>(Arrays.asList((String) null, null));
-        assertNull(Nulls.lastNonNull(linked));
-    }
-
-    @Test
-    public void testLastNonNullOrDefault_Iterable_NullDefaultThrowsException() {
-        List<String> list = Arrays.asList("test");
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            N.lastNonNullOrDefault(list, null);
-        });
-    }
-
-    @Test
-    public void testLastNonNullOrDefault_Iterator_NullDefaultThrowsException() {
-        Iterator<String> iter = Arrays.asList("test").iterator();
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            N.lastNonNullOrDefault(iter, null);
-        });
-    }
-
-    @Test
-    public void testMinCharArray() {
-        char[] arr = { 'd', 'a', 'c', 'b' };
-        OptionalChar result = Iterables.min(arr);
-        assertTrue(result.isPresent());
-        assertEquals('a', result.get());
-
-        assertFalse(Iterables.min((char[]) null).isPresent());
-        assertFalse(Iterables.min(new char[0]).isPresent());
-    }
-
-    @Test
-    public void testMinByteArray() {
-        byte[] arr = { 5, 2, 8, 1, 9 };
-        OptionalByte result = Iterables.min(arr);
-        assertTrue(result.isPresent());
-        assertEquals((byte) 1, result.get());
-
-        assertFalse(Iterables.min((byte[]) null).isPresent());
-        assertFalse(Iterables.min(new byte[0]).isPresent());
-    }
-
-    @Test
-    public void testMinShortArray() {
-        short[] arr = { 100, 50, 200, 25 };
-        OptionalShort result = Iterables.min(arr);
-        assertTrue(result.isPresent());
-        assertEquals((short) 25, result.get());
-
-        assertFalse(Iterables.min((short[]) null).isPresent());
-        assertFalse(Iterables.min(new short[0]).isPresent());
-    }
-
-    @Test
-    public void testMinFloatArray() {
-        float[] arr = { 3.14f, 1.41f, 2.71f };
-        OptionalFloat result = Iterables.min(arr);
-        assertTrue(result.isPresent());
-        assertEquals(1.41f, result.get(), 0.001f);
-
-        assertFalse(Iterables.min((float[]) null).isPresent());
-        assertFalse(Iterables.min(new float[0]).isPresent());
-    }
-
-    @Test
-    public void testMinObjectArray() {
-        Integer[] arr = { 3, 1, 4, 1, 5, 9 };
-        Nullable<Integer> result = Iterables.min(arr);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(1), result.get());
-
-        assertTrue(Iterables.min(new Integer[0]).isEmpty());
-        assertTrue(Iterables.min((Integer[]) null).isEmpty());
-    }
-
-    @Test
-    public void testMinObjectArrayWithComparator() {
-        String[] arr = { "apple", "banana", "cherry" };
-        Comparator<String> lengthComparator = Comparator.comparingInt(String::length);
-        Nullable<String> result = Iterables.min(arr, lengthComparator);
-        assertTrue(result.isPresent());
-        assertEquals("apple", result.get());
-
-        assertTrue(Iterables.min(new String[0], lengthComparator).isEmpty());
-        assertTrue(Iterables.min((String[]) null, lengthComparator).isEmpty());
-    }
-
-    @Test
-    public void testMinIterable() {
-        Nullable<Integer> result = Iterables.min(intList);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(1), result.get());
-
-        assertTrue(Iterables.min((Iterable<Integer>) null).isEmpty());
-        assertTrue(Iterables.min(new ArrayList<Integer>()).isEmpty());
-    }
-
-    @Test
-    public void testMinIterableWithComparator() {
-        Comparator<String> reverseComparator = Comparator.reverseOrder();
-        Nullable<String> result = Iterables.min(stringList, reverseComparator);
-        assertTrue(result.isPresent());
-        assertEquals("date", result.get());
-
-        assertTrue(Iterables.min((Iterable<String>) null, reverseComparator).isEmpty());
-    }
-
-    @Test
-    public void testMinIterator() {
-        Nullable<Integer> result = Iterables.min(intList.iterator());
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(1), result.get());
-
-        assertTrue(Iterables.min((Iterator<Integer>) null).isEmpty());
-    }
-
-    @Test
-    public void testMinIteratorWithComparator() {
-        Comparator<Integer> reverseComparator = Comparator.reverseOrder();
-        Nullable<Integer> result = Iterables.min(intList.iterator(), reverseComparator);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(9), result.get());
-    }
-
-    @Test
-    public void testMinGenericArray() {
-        assertTrue(Iterables.min((Integer[]) null).isEmpty());
-        assertTrue(Iterables.min(new Integer[0]).isEmpty());
-        assertEquals(1, Iterables.min(new Integer[] { 3, 1, 2 }).orElse(null));
-        assertEquals(1, Iterables.min(new Integer[] { null, 3, 1, 2 }).orElse(null));
-    }
-
-    @Test
-    public void testMinGenericArrayWithComparator() {
-        assertTrue(Iterables.min((Integer[]) null, REVERSE_ORDER_NULLS_LAST).isEmpty());
-        assertTrue(Iterables.min(new Integer[0], REVERSE_ORDER_NULLS_LAST).isEmpty());
-        assertEquals(3, Iterables.min(new Integer[] { 3, 1, 2 }, REVERSE_ORDER_NULLS_LAST).orElse(null));
-        assertEquals(3, Iterables.min(new Integer[] { null, 3, 1, 2 }, REVERSE_ORDER_NULLS_LAST).orElse(null));
-        assertNull(Iterables.min(new Integer[] { null, 3, 1, 2 }, REVERSE_ORDER_NULLS_FIRST).orElse(Integer.MAX_VALUE));
-    }
-
-    @Test
-    public void testMinGenericArrayComparable() {
-        assertTrue(Iterables.min((String[]) null).isEmpty());
-        assertTrue(Iterables.min(new String[0]).isEmpty());
-        assertEquals("a", Iterables.min(new String[] { "a", "b", "c" }).get());
-        assertEquals("a", Iterables.min(new String[] { "c", "b", "a" }).get());
-        assertEquals("a", Iterables.min(new String[] { "a", null, "c" }).get());
-        assertEquals("a", Iterables.min(new String[] { null, "a", "c" }).get());
-    }
-
-    @Test
-    public void testMinGenericArrayComparator() {
-        Comparator<String> reverseOrder = Comparator.reverseOrder();
-        assertTrue(Iterables.min((String[]) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.min(new String[0], reverseOrder).isEmpty());
-        assertEquals("c", Iterables.min(new String[] { "a", "b", "c" }, reverseOrder).get());
-        assertEquals("a", Iterables.min(new String[] { "a", "b", "c" }, Comparator.naturalOrder()).get());
-        assertEquals("a", Iterables.min(new String[] { "a", null, "c" }, Comparators.nullsLast(Comparator.<String> naturalOrder())).get());
-    }
-
-    @Test
-    public void testMinIterableComparable() {
-        assertTrue(Iterables.min((Iterable<String>) null).isEmpty());
-        assertTrue(Iterables.min(list()).isEmpty());
-        assertEquals("a", Iterables.min(list("a", "b", "c")).get());
-        assertEquals("a", Iterables.min(list("c", "b", "a")).get());
-        assertEquals("a", Iterables.min(list("a", null, "c")).get());
-    }
-
-    @Test
-    public void testMinIterableComparator() {
-        Comparator<String> reverseOrder = Comparator.reverseOrder();
-        assertTrue(Iterables.min((Iterable<String>) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.min(list(), reverseOrder).isEmpty());
-        assertEquals("c", Iterables.min(list("a", "b", "c"), reverseOrder).get());
-        assertEquals("a", Iterables.min(list("a", "b", "c"), Comparator.naturalOrder()).get());
-        assertEquals("a", Iterables.min(list("a", null, "c"), Comparator.nullsLast(Comparator.naturalOrder())).get());
-        assertNull(Iterables.min(list("a", null, "c"), Comparator.nullsFirst(Comparator.naturalOrder())).get());
-    }
-
-    @Test
-    public void testMinIteratorComparable() {
-        assertTrue(Iterables.min((Iterator<String>) null).isEmpty());
-        assertTrue(Iterables.min(list(N.EMPTY_STRING_ARRAY).iterator()).isEmpty());
-        assertEquals("a", Iterables.min(list("a", "b", "c").iterator()).get());
-        assertEquals("a", Iterables.min(list("c", "b", "a").iterator()).get());
-        assertEquals("a", Iterables.min(list("a", null, "c").iterator()).get());
-    }
-
-    @Test
-    public void testMinIteratorComparator() {
-        Comparator<String> reverseOrder = Comparator.reverseOrder();
-        assertTrue(Iterables.min((Iterator<String>) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.min(list(N.EMPTY_STRING_ARRAY).iterator(), reverseOrder).isEmpty());
-        assertEquals("c", Iterables.min(list("a", "b", "c").iterator(), reverseOrder).get());
-        assertEquals("a", Iterables.min(list("a", "b", "c").iterator(), Comparator.naturalOrder()).get());
-        assertEquals("a", Iterables.min(list("a", null, "c").iterator(), Comparator.nullsLast(Comparator.naturalOrder())).get());
-        assertNull(Iterables.min(list("a", null, "c").iterator(), Comparator.nullsFirst(Comparator.naturalOrder())).get());
-    }
-
-    @Test
-    public void testMinChar() {
-        char[] array = { 'c', 'a', 'b' };
-        OptionalChar result = Iterables.min(array);
-        assertTrue(result.isPresent());
-        assertEquals('a', result.get());
-
-        OptionalChar nullResult = Iterables.min((char[]) null);
-        assertFalse(nullResult.isPresent());
-
-        OptionalChar emptyResult = Iterables.min(new char[0]);
-        assertFalse(emptyResult.isPresent());
-    }
-
-    @Test
-    public void testMinByte() {
-        byte[] array = { 3, 1, 2 };
-        OptionalByte result = Iterables.min(array);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.get());
-
-        assertFalse(Iterables.min((byte[]) null).isPresent());
-        assertFalse(Iterables.min(new byte[0]).isPresent());
-    }
-
-    @Test
-    public void testMinShort() {
-        short[] array = { 30, 10, 20 };
-        OptionalShort result = Iterables.min(array);
-        assertTrue(result.isPresent());
-        assertEquals(10, result.get());
-
-        assertFalse(Iterables.min((short[]) null).isPresent());
-        assertFalse(Iterables.min(new short[0]).isPresent());
-    }
-
-    @Test
-    public void testMinFloat() {
-        float[] array = { 3.0f, 1.0f, 2.0f };
-        OptionalFloat result = Iterables.min(array);
-        assertTrue(result.isPresent());
-        assertEquals(1.0f, result.get());
-
-        assertFalse(Iterables.min((float[]) null).isPresent());
-        assertFalse(Iterables.min(new float[0]).isPresent());
-    }
-
-    @Test
-    public void testMinComparableArray() {
-        String[] array = { "c", "a", "b" };
-        Nullable<String> result = Iterables.min(array);
-        assertTrue(result.isPresent());
-        assertEquals("a", result.get());
-
-        String[] arrayWithNulls = { "c", null, "a" };
-        Nullable<String> resultWithNulls = Iterables.min(arrayWithNulls);
-        assertTrue(resultWithNulls.isPresent());
-        assertEquals("a", resultWithNulls.get());
-
-        assertFalse(Iterables.min((String[]) null).isPresent());
-        assertFalse(Iterables.min(new String[0]).isPresent());
-    }
-
-    @Test
-    public void testMinArrayWithComparator() {
-        String[] array = { "aaa", "bb", "c" };
-        Comparator<String> lengthComparator = Comparator.comparing(String::length);
-
-        Nullable<String> result = Iterables.min(array, lengthComparator);
-        assertTrue(result.isPresent());
-        assertEquals("c", result.get());
-
-        assertFalse(Iterables.min((String[]) null, lengthComparator).isPresent());
-        assertFalse(Iterables.min(new String[0], lengthComparator).isPresent());
+            @Override
+            public boolean add(final String value) {
+                return values.add(value);
+            }
+        };
+        Iterables.fill(appendable, 2, 4, () -> "new");
+        assertEquals(Arrays.asList("original", null, "new", "new"), values);
+        assertThrows(UnsupportedOperationException.class, () -> Iterables.fill(appendable, 0, 1, () -> "replacement"));
     }
 
     @Test
@@ -1246,1522 +175,6 @@ public class IterablesTest extends AbstractTest {
         Nullable<Integer> max = Iterables.max(arrWithNulls);
         assertTrue(max.isPresent());
         assertEquals(Integer.valueOf(4), max.get());
-    }
-
-    // ===================== min primitive overloads =====================
-
-    @Test
-    public void testMinChar_Present() {
-        OptionalChar result = Iterables.min('b', 'a', 'c');
-        assertTrue(result.isPresent());
-        assertEquals('a', result.get());
-    }
-
-    @Test
-    public void testMinByte_Present() {
-        OptionalByte result = Iterables.min((byte) 3, (byte) 1, (byte) 2);
-        assertTrue(result.isPresent());
-        assertEquals((byte) 1, result.get());
-    }
-
-    @Test
-    public void testMinShort_Present() {
-        OptionalShort result = Iterables.min((short) 3, (short) 1, (short) 2);
-        assertTrue(result.isPresent());
-        assertEquals((short) 1, result.get());
-    }
-
-    @Test
-    public void testMinFloat_Present() {
-        OptionalFloat result = Iterables.min(3.0f, 1.0f, 2.0f);
-        assertTrue(result.isPresent());
-        assertEquals(1.0f, result.get());
-    }
-
-    // ===================== min/max empty array overloads =====================
-
-    @Test
-    public void testMinChar_Empty() {
-        assertFalse(Iterables.min(new char[0]).isPresent());
-        assertFalse(Iterables.min((char[]) null).isPresent());
-    }
-
-    @Test
-    public void testMinByte_Empty() {
-        assertFalse(Iterables.min(new byte[0]).isPresent());
-        assertFalse(Iterables.min((byte[]) null).isPresent());
-    }
-
-    @Test
-    public void testMinShort_Empty() {
-        assertFalse(Iterables.min(new short[0]).isPresent());
-        assertFalse(Iterables.min((short[]) null).isPresent());
-    }
-
-    @Test
-    public void testMinFloat_Empty() {
-        assertFalse(Iterables.min(new float[0]).isPresent());
-        assertFalse(Iterables.min((float[]) null).isPresent());
-    }
-
-    // ===================== min/max with Iterator and Comparator =====================
-
-    @Test
-    public void testMinIteratorWithComparator_Dedicated() {
-        Nullable<Integer> result = Iterables.min(Arrays.asList(3, 1, 4, 1, 5).iterator(), Comparator.reverseOrder());
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(5), result.get());
-    }
-
-    // ===================== min/max with Iterator Comparable =====================
-
-    @Test
-    public void testMinIterator_Dedicated() {
-        Nullable<Integer> result = Iterables.min(Arrays.asList(3, 1, 4, 1, 5).iterator());
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(1), result.get());
-    }
-
-    @Test
-    public void testMinIterator_Empty() {
-        Nullable<Integer> result = Iterables.min(Collections.<Integer> emptyList().iterator());
-        assertFalse(result.isPresent());
-    }
-
-    // ===================== min/max with null elements =====================
-
-    @Test
-    public void testMinBy_NullArray() {
-        Nullable<String> result = Iterables.minBy((String[]) null, String::length);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testMin_Iterator_RejectsNullComparator() {
-        List<Integer> list = Arrays.asList(3, 1, 4, 1, 5);
-        assertThrows(IllegalArgumentException.class, () -> Iterables.min(list.iterator(), (Comparator<Integer>) null));
-    }
-
-    @Test
-    public void testMin_Iterator_Empty() {
-        Iterator<Integer> emptyIter = Collections.<Integer> emptyList().iterator();
-        assertTrue(Iterables.min(emptyIter, Comparator.naturalOrder()).isEmpty());
-    }
-
-    @Test
-    public void testMinByArray() {
-        String[] arr = { "cat", "elephant", "dog", "bird" };
-        Function<String, Integer> lengthExtractor = String::length;
-
-        Nullable<String> result = Iterables.minBy(arr, lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals("cat", result.get());
-
-        assertTrue(Iterables.minBy(new String[0], lengthExtractor).isEmpty());
-        assertTrue(Iterables.minBy((String[]) null, lengthExtractor).isEmpty());
-    }
-
-    @Test
-    public void testMinByIterable() {
-        String[] arr = { "cat", "elephant", "dog", "bird" };
-        Function<String, Integer> lengthExtractor = String::length;
-
-        Nullable<String> result = Iterables.minBy(Arrays.asList(arr), lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals("cat", result.get());
-
-        assertTrue(Iterables.minBy((Iterable<String>) null, lengthExtractor).isEmpty());
-    }
-
-    @Test
-    public void testMinByIterator() {
-        String[] arr = { "cat", "elephant", "dog", "bird" };
-        Function<String, Integer> lengthExtractor = String::length;
-
-        Nullable<String> result = Iterables.minBy(Arrays.asList(arr).iterator(), lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals("cat", result.get());
-
-        assertTrue(Iterables.minBy((Iterator<String>) null, lengthExtractor).isEmpty());
-    }
-
-    @Test
-    public void testMinBy() {
-        List<String> list = Arrays.asList("aaa", "bb", "c");
-        Function<String, Integer> lengthExtractor = String::length;
-
-        Nullable<String> result = Iterables.minBy(list, lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals("c", result.get());
-
-        String[] array = { "aaa", "bb", "c" };
-        Nullable<String> arrayResult = Iterables.minBy(array, lengthExtractor);
-        assertTrue(arrayResult.isPresent());
-        assertEquals("c", arrayResult.get());
-    }
-
-    // ===================== minBy/maxBy with Iterator =====================
-
-    @Test
-    public void testMinByIterator_Dedicated() {
-        Nullable<String> result = Iterables.minBy(Arrays.asList("apple", "banana", "cherry").iterator(), String::length);
-        assertTrue(result.isPresent());
-        assertEquals("apple", result.get());
-    }
-
-    @Test
-    public void testMinByIterator_Empty() {
-        Nullable<String> result = Iterables.minBy(Collections.<String> emptyList().iterator(), String::length);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testMinBy_EmptyArray() {
-        Nullable<String> result = Iterables.minBy(new String[0], String::length);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testMinIntArray() {
-        int[] arr = { 3, 1, 4, 1, 5, 9 };
-        OptionalInt result = Iterables.min(arr);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        assertFalse(Iterables.min((int[]) null).isPresent());
-        assertFalse(Iterables.min(new int[0]).isPresent());
-    }
-
-    @Test
-    public void testMinIntArrayWithFunction() {
-        ToIntFunction<String> lengthFunction = String::length;
-        String[] arr = { "hi", "hello", "world" };
-
-        OptionalInt result = Iterables.minInt(arr, lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(2, result.getAsInt());
-
-        assertFalse(Iterables.minInt(new String[0], lengthFunction).isPresent());
-        assertFalse(Iterables.minInt((String[]) null, lengthFunction).isPresent());
-    }
-
-    @Test
-    public void testMinIntIterable() {
-        ToIntFunction<String> lengthFunction = String::length;
-        String[] arr = { "hi", "hello", "world" };
-
-        OptionalInt result = Iterables.minInt(Arrays.asList(arr), lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(2, result.getAsInt());
-
-        assertFalse(Iterables.minInt((Iterable<String>) null, lengthFunction).isPresent());
-    }
-
-    @Test
-    public void testMinIntIterator() {
-        ToIntFunction<String> lengthFunction = String::length;
-        String[] arr = { "hi", "hello", "world" };
-
-        OptionalInt result = Iterables.minInt(Arrays.asList(arr).iterator(), lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(2, result.getAsInt());
-
-        assertFalse(Iterables.minInt((Iterator<String>) null, lengthFunction).isPresent());
-    }
-
-    @Test
-    public void testMinIntArrayExtractor() {
-        assertTrue(Iterables.minInt((String[]) null, String::length).isEmpty());
-        assertTrue(Iterables.minInt(new String[0], String::length).isEmpty());
-        assertEquals(1, Iterables.minInt(new String[] { "aaa", "a", "bb" }, String::length).get());
-        assertEquals(3, Iterables.minInt(new String[] { "aaa" }, String::length).get());
-    }
-
-    @Test
-    public void testMinIntIterableExtractor() {
-        assertTrue(Iterables.minInt((List<String>) null, String::length).isEmpty());
-        assertTrue(Iterables.minInt(list(), String::length).isEmpty());
-        assertEquals(1, Iterables.minInt(list("aaa", "a", "bb"), String::length).get());
-    }
-
-    @Test
-    public void testMinIntIteratorExtractor() {
-        assertTrue(Iterables.minInt((Iterator<String>) null, String::length).isEmpty());
-        assertTrue(Iterables.minInt(list(N.EMPTY_STRING_ARRAY).iterator(), String::length).isEmpty());
-        assertEquals(1, Iterables.minInt(list("aaa", "a", "bb").iterator(), String::length).get());
-    }
-
-    @Test
-    public void testMinInt() {
-        int[] array = { 30, 10, 20 };
-        OptionalInt result = Iterables.min(array);
-        assertTrue(result.isPresent());
-        assertEquals(10, result.get());
-
-        assertFalse(Iterables.min((int[]) null).isPresent());
-        assertFalse(Iterables.min(new int[0]).isPresent());
-    }
-
-    @Test
-    public void testMinInt_valueExtractor() {
-        List<String> list = Arrays.asList("aaa", "bb", "c");
-        ToIntFunction<String> lengthExtractor = String::length;
-
-        OptionalInt result = Iterables.minInt(list, lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.get());
-
-        assertFalse(Iterables.minInt((Iterable<String>) null, lengthExtractor).isPresent());
-        assertFalse(Iterables.minInt(Collections.emptyList(), lengthExtractor).isPresent());
-    }
-
-    @Test
-    public void testMinInt_Present() {
-        OptionalInt result = Iterables.min(3, 1, 2);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.get());
-    }
-
-    @Test
-    public void testMinInt_Empty() {
-        assertFalse(Iterables.min(new int[0]).isPresent());
-        assertFalse(Iterables.min((int[]) null).isPresent());
-    }
-
-    @Test
-    public void testMinIntArrayWithValueExtractor() {
-        TestObject[] arr = { new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b") };
-        assertTrue(Iterables.minInt((TestObject[]) null, TestObject::getId).isEmpty());
-        assertTrue(Iterables.minInt(new TestObject[0], TestObject::getId).isEmpty());
-        assertEquals(1, Iterables.minInt(arr, TestObject::getId).orElseThrow());
-    }
-
-    @Test
-    public void testMinIntIterableWithValueExtractor() {
-        List<TestObject> list = Arrays.asList(new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b"));
-        assertTrue(Iterables.minInt((List<TestObject>) null, TestObject::getId).isEmpty());
-        assertTrue(Iterables.minInt(Collections.<TestObject> emptyList(), TestObject::getId).isEmpty());
-        assertEquals(1, Iterables.minInt(list, TestObject::getId).orElseThrow());
-    }
-
-    @Test
-    public void testMinIntIteratorWithValueExtractor() {
-        List<TestObject> list = Arrays.asList(new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b"));
-        assertTrue(Iterables.minInt((Iterator<TestObject>) null, TestObject::getId).isEmpty());
-        assertTrue(Iterables.minInt(Collections.<TestObject> emptyList().iterator(), TestObject::getId).isEmpty());
-        assertEquals(1, Iterables.minInt(list.iterator(), TestObject::getId).orElseThrow());
-    }
-
-    @Test
-    public void testMinLongArray() {
-        long[] arr = { 100L, 50L, 200L, 25L };
-        OptionalLong result = Iterables.min(arr);
-        assertTrue(result.isPresent());
-        assertEquals(25L, result.getAsLong());
-
-        assertFalse(Iterables.min((long[]) null).isPresent());
-        assertFalse(Iterables.min(new long[0]).isPresent());
-    }
-
-    @Test
-    public void testMinLongArrayWithFunction() {
-        ToLongFunction<Integer> toLong = i -> i.longValue();
-        Integer[] arr = { 5, 2, 8, 1 };
-
-        OptionalLong result = Iterables.minLong(arr, toLong);
-        assertTrue(result.isPresent());
-        assertEquals(1L, result.getAsLong());
-
-        assertFalse(Iterables.minLong(new Integer[0], toLong).isPresent());
-        assertFalse(Iterables.minLong((Integer[]) null, toLong).isPresent());
-    }
-
-    @Test
-    public void testMinLongIterable() {
-        ToLongFunction<Integer> toLong = i -> i.longValue();
-
-        OptionalLong result = Iterables.minLong(intList, toLong);
-        assertTrue(result.isPresent());
-        assertEquals(1L, result.getAsLong());
-
-        assertFalse(Iterables.minLong((Iterable<Integer>) null, toLong).isPresent());
-    }
-
-    @Test
-    public void testMinLongIterator() {
-        ToLongFunction<Integer> toLong = i -> i.longValue();
-
-        OptionalLong result = Iterables.minLong(intList.iterator(), toLong);
-        assertTrue(result.isPresent());
-        assertEquals(1L, result.getAsLong());
-
-        assertFalse(Iterables.minLong((Iterator<Integer>) null, toLong).isPresent());
-    }
-
-    @Test
-    public void testMinLongArrayExtractor() {
-        ToIntFunction<String> lengthToInt = String::length;
-        ToLongFunction<String> lengthToLong = s -> (long) lengthToInt.applyAsInt(s);
-        assertTrue(Iterables.minLong((String[]) null, lengthToLong).isEmpty());
-        assertTrue(Iterables.minLong(new String[0], lengthToLong).isEmpty());
-        assertEquals(1L, Iterables.minLong(new String[] { "aaa", "a", "bb" }, lengthToLong).get());
-    }
-
-    @Test
-    public void testMinLongIterableExtractor() {
-        ToLongFunction<String> lengthToLong = s -> (long) s.length();
-        assertTrue(Iterables.minLong((List<String>) null, lengthToLong).isEmpty());
-        assertTrue(Iterables.minLong(list(), lengthToLong).isEmpty());
-        assertEquals(1L, Iterables.minLong(list("aaa", "a", "bb"), lengthToLong).get());
-    }
-
-    @Test
-    public void testMinLongIteratorExtractor() {
-        ToLongFunction<String> lengthToLong = s -> (long) s.length();
-        assertTrue(Iterables.minLong((Iterator<String>) null, lengthToLong).isEmpty());
-        assertTrue(Iterables.minLong(list(N.EMPTY_STRING_ARRAY).iterator(), lengthToLong).isEmpty());
-        assertEquals(1L, Iterables.minLong(list("aaa", "a", "bb").iterator(), lengthToLong).get());
-    }
-
-    @Test
-    public void testMinLong() {
-        long[] array = { 30L, 10L, 20L };
-        OptionalLong result = Iterables.min(array);
-        assertTrue(result.isPresent());
-        assertEquals(10L, result.get());
-
-        assertFalse(Iterables.min((long[]) null).isPresent());
-        assertFalse(Iterables.min(new long[0]).isPresent());
-    }
-
-    @Test
-    public void testMinLong_valueExtractor() {
-        List<String> list = Arrays.asList("aaa", "bb", "c");
-        ToLongFunction<String> lengthExtractor = s -> (long) s.length();
-
-        OptionalLong result = Iterables.minLong(list, lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals(1L, result.get());
-    }
-
-    @Test
-    public void testMinLong_Present() {
-        OptionalLong result = Iterables.min(3L, 1L, 2L);
-        assertTrue(result.isPresent());
-        assertEquals(1L, result.get());
-    }
-
-    @Test
-    public void testMinLong_Empty() {
-        assertFalse(Iterables.min(new long[0]).isPresent());
-        assertFalse(Iterables.min((long[]) null).isPresent());
-    }
-
-    @Test
-    public void testMinLongIterator_Dedicated() {
-        OptionalLong result = Iterables.minLong(Arrays.asList("a", "bb", "ccc").iterator(),
-                (com.landawn.abacus.util.function.ToLongFunction<String>) s -> (long) s.length());
-        assertTrue(result.isPresent());
-        assertEquals(1L, result.get());
-    }
-
-    @Test
-    public void testMinLongArrayWithValueExtractor() {
-        TestObject[] arr = { new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b") };
-        ToLongFunction<TestObject> extractor = obj -> (long) obj.getId();
-        assertTrue(Iterables.minLong((TestObject[]) null, extractor).isEmpty());
-        assertTrue(Iterables.minLong(new TestObject[0], extractor).isEmpty());
-        assertEquals(1L, Iterables.minLong(arr, extractor).orElseThrow());
-    }
-
-    @Test
-    public void testMinLongIterableWithValueExtractor() {
-        List<TestObject> list = Arrays.asList(new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b"));
-        ToLongFunction<TestObject> extractor = obj -> (long) obj.getId();
-        assertTrue(Iterables.minLong((List<TestObject>) null, extractor).isEmpty());
-        assertTrue(Iterables.minLong(Collections.emptyList(), extractor).isEmpty());
-        assertEquals(1L, Iterables.minLong(list, extractor).orElseThrow());
-    }
-
-    @Test
-    public void testMinLongIteratorWithValueExtractor() {
-        List<TestObject> list = Arrays.asList(new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b"));
-        ToLongFunction<TestObject> extractor = obj -> (long) obj.getId();
-        assertTrue(Iterables.minLong((Iterator<TestObject>) null, extractor).isEmpty());
-        assertTrue(Iterables.minLong(Collections.<TestObject> emptyList().iterator(), extractor).isEmpty());
-        assertEquals(1L, Iterables.minLong(list.iterator(), extractor).orElseThrow());
-    }
-
-    @Test
-    public void testMinDoubleArray() {
-        double[] arr = { 3.14, 1.41, 2.71 };
-        OptionalDouble result = Iterables.min(arr);
-        assertTrue(result.isPresent());
-        assertEquals(1.41, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.min((double[]) null).isPresent());
-        assertFalse(Iterables.min(new double[0]).isPresent());
-    }
-
-    @Test
-    public void testMinDoubleArrayWithFunction() {
-        ToDoubleFunction<Integer> toDouble = i -> i.doubleValue();
-        Integer[] arr = { 5, 2, 8, 1 };
-
-        OptionalDouble result = Iterables.minDouble(arr, toDouble);
-        assertTrue(result.isPresent());
-        assertEquals(1.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.minDouble(new Integer[0], toDouble).isPresent());
-        assertFalse(Iterables.minDouble((Integer[]) null, toDouble).isPresent());
-    }
-
-    @Test
-    public void testMinDoubleIterable() {
-        ToDoubleFunction<Integer> toDouble = i -> i.doubleValue();
-
-        OptionalDouble result = Iterables.minDouble(intList, toDouble);
-        assertTrue(result.isPresent());
-        assertEquals(1.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.minDouble((Iterable<Integer>) null, toDouble).isPresent());
-    }
-
-    @Test
-    public void testMinDoubleIterator() {
-        ToDoubleFunction<Integer> toDouble = i -> i.doubleValue();
-
-        OptionalDouble result = Iterables.minDouble(intList.iterator(), toDouble);
-        assertTrue(result.isPresent());
-        assertEquals(1.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.minDouble((Iterator<Integer>) null, toDouble).isPresent());
-    }
-
-    @Test
-    public void testMinDoubleArrayExtractor() {
-        ToDoubleFunction<String> lengthToDouble = s -> (double) s.length();
-        assertTrue(Iterables.minDouble((String[]) null, lengthToDouble).isEmpty());
-        assertTrue(Iterables.minDouble(new String[0], lengthToDouble).isEmpty());
-        assertEquals(1.0, Iterables.minDouble(new String[] { "aaa", "a", "bb" }, lengthToDouble).get());
-    }
-
-    @Test
-    public void testMinDoubleIterableExtractor() {
-        ToDoubleFunction<String> lengthToDouble = s -> (double) s.length();
-        assertTrue(Iterables.minDouble((List<String>) null, lengthToDouble).isEmpty());
-        assertTrue(Iterables.minDouble(list(), lengthToDouble).isEmpty());
-        assertEquals(1.0, Iterables.minDouble(list("aaa", "a", "bb"), lengthToDouble).get());
-    }
-
-    @Test
-    public void testMinDoubleIteratorExtractor() {
-        ToDoubleFunction<String> lengthToDouble = s -> (double) s.length();
-        assertTrue(Iterables.minDouble((Iterator<String>) null, lengthToDouble).isEmpty());
-        assertTrue(Iterables.minDouble(list(N.EMPTY_STRING_ARRAY).iterator(), lengthToDouble).isEmpty());
-        assertEquals(1.0, Iterables.minDouble(list("aaa", "a", "bb").iterator(), lengthToDouble).get());
-    }
-
-    @Test
-    public void testMinDouble() {
-        double[] array = { 3.0, 1.0, 2.0 };
-        OptionalDouble result = Iterables.min(array);
-        assertTrue(result.isPresent());
-        assertEquals(1.0, result.get());
-
-        assertFalse(Iterables.min((double[]) null).isPresent());
-        assertFalse(Iterables.min(new double[0]).isPresent());
-    }
-
-    @Test
-    public void testMinDouble_valueExtractor() {
-        List<String> list = Arrays.asList("aaa", "bb", "c");
-        ToDoubleFunction<String> lengthExtractor = s -> (double) s.length();
-
-        OptionalDouble result = Iterables.minDouble(list, lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals(1.0, result.get());
-    }
-
-    @Test
-    public void testMinDouble_Present() {
-        OptionalDouble result = Iterables.min(3.0, 1.0, 2.0);
-        assertTrue(result.isPresent());
-        assertEquals(1.0, result.get());
-    }
-
-    @Test
-    public void testMinDouble_Empty() {
-        assertFalse(Iterables.min(new double[0]).isPresent());
-        assertFalse(Iterables.min((double[]) null).isPresent());
-    }
-
-    // ===================== minInt/maxInt/minLong/maxLong/minDouble/maxDouble Iterator overloads =====================
-
-    @Test
-    public void testMinIntIterator_Dedicated() {
-        OptionalInt result = Iterables.minInt(Arrays.asList("a", "bb", "ccc").iterator(),
-                (com.landawn.abacus.util.function.ToIntFunction<String>) String::length);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.get());
-    }
-
-    @Test
-    public void testMinDoubleIterator_Dedicated() {
-        OptionalDouble result = Iterables.minDouble(Arrays.asList("a", "bb", "ccc").iterator(),
-                (com.landawn.abacus.util.function.ToDoubleFunction<String>) s -> (double) s.length());
-        assertTrue(result.isPresent());
-        assertEquals(1.0, result.get());
-    }
-
-    @Test
-    public void testMinDoubleArrayWithValueExtractor() {
-        TestObject[] arr = { new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b") };
-        ToDoubleFunction<TestObject> extractor = obj -> (double) obj.getId();
-        assertTrue(Iterables.minDouble((TestObject[]) null, extractor).isEmpty());
-        assertTrue(Iterables.minDouble(new TestObject[0], extractor).isEmpty());
-        assertEquals(1.0, Iterables.minDouble(arr, extractor).orElseThrow(), 0.0);
-    }
-
-    @Test
-    public void testMinDoubleIterableWithValueExtractor() {
-        List<TestObject> list = Arrays.asList(new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b"));
-        ToDoubleFunction<TestObject> extractor = obj -> (double) obj.getId();
-        assertTrue(Iterables.minDouble((List<TestObject>) null, extractor).isEmpty());
-        assertTrue(Iterables.minDouble(Collections.emptyList(), extractor).isEmpty());
-        assertEquals(1.0, Iterables.minDouble(list, extractor).orElseThrow(), 0.0);
-    }
-
-    @Test
-    public void testMinDoubleIteratorWithValueExtractor() {
-        List<TestObject> list = Arrays.asList(new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b"));
-        ToDoubleFunction<TestObject> extractor = obj -> (double) obj.getId();
-        assertTrue(Iterables.minDouble((Iterator<TestObject>) null, extractor).isEmpty());
-        assertTrue(Iterables.minDouble(Collections.<TestObject> emptyList().iterator(), extractor).isEmpty());
-        assertEquals(1.0, Iterables.minDouble(list.iterator(), extractor).orElseThrow(), 0.0);
-    }
-
-    @Test
-    public void testMaxCharArray() {
-        char[] arr = { 'd', 'a', 'c', 'b' };
-        OptionalChar result = Iterables.max(arr);
-        assertTrue(result.isPresent());
-        assertEquals('d', result.get());
-
-        assertFalse(Iterables.max((char[]) null).isPresent());
-        assertFalse(Iterables.max(new char[0]).isPresent());
-    }
-
-    @Test
-    public void testMaxByteArray() {
-        byte[] arr = { 5, 2, 8, 1, 9 };
-        OptionalByte result = Iterables.max(arr);
-        assertTrue(result.isPresent());
-        assertEquals((byte) 9, result.get());
-
-        assertFalse(Iterables.max((byte[]) null).isPresent());
-        assertFalse(Iterables.max(new byte[0]).isPresent());
-    }
-
-    @Test
-    public void testMaxShortArray() {
-        short[] arr = { 100, 50, 200, 25 };
-        OptionalShort result = Iterables.max(arr);
-        assertTrue(result.isPresent());
-        assertEquals((short) 200, result.get());
-
-        assertFalse(Iterables.max((short[]) null).isPresent());
-        assertFalse(Iterables.max(new short[0]).isPresent());
-    }
-
-    @Test
-    public void testMaxFloatArray() {
-        float[] arr = { 3.14f, 1.41f, 2.71f };
-        OptionalFloat result = Iterables.max(arr);
-        assertTrue(result.isPresent());
-        assertEquals(3.14f, result.get(), 0.001f);
-
-        assertFalse(Iterables.max((float[]) null).isPresent());
-        assertFalse(Iterables.max(new float[0]).isPresent());
-    }
-
-    @Test
-    public void testMaxObjectArray() {
-        Integer[] arr = { 3, 1, 4, 1, 5, 9 };
-        Nullable<Integer> result = Iterables.max(arr);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(9), result.get());
-
-        assertTrue(Iterables.max(new Integer[0]).isEmpty());
-        assertTrue(Iterables.max((Integer[]) null).isEmpty());
-    }
-
-    @Test
-    public void testMaxObjectArrayWithComparator() {
-        String[] arr = { "apple", "banana", "cherry" };
-        Comparator<String> lengthComparator = Comparator.comparingInt(String::length);
-        Nullable<String> result = Iterables.max(arr, lengthComparator);
-        assertTrue(result.isPresent());
-        assertEquals("banana", result.get());
-
-        assertTrue(Iterables.max(new String[0], lengthComparator).isEmpty());
-        assertTrue(Iterables.max((String[]) null, lengthComparator).isEmpty());
-    }
-
-    @Test
-    public void testMaxIterable() {
-        Nullable<Integer> result = Iterables.max(intList);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(9), result.get());
-
-        assertTrue(Iterables.max((Iterable<Integer>) null).isEmpty());
-        assertTrue(Iterables.max(new ArrayList<Integer>()).isEmpty());
-    }
-
-    @Test
-    public void testMaxIterableWithComparator() {
-        Comparator<String> reverseComparator = Comparator.reverseOrder();
-        Nullable<String> result = Iterables.max(stringList, reverseComparator);
-        assertTrue(result.isPresent());
-        assertEquals("apple", result.get());
-
-        assertTrue(Iterables.max((Iterable<String>) null, reverseComparator).isEmpty());
-    }
-
-    @Test
-    public void testMaxIterator() {
-        Nullable<Integer> result = Iterables.max(intList.iterator());
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(9), result.get());
-
-        assertTrue(Iterables.max((Iterator<Integer>) null).isEmpty());
-    }
-
-    @Test
-    public void testMaxIteratorWithComparator() {
-        Comparator<Integer> reverseComparator = Comparator.reverseOrder();
-        Nullable<Integer> result = Iterables.max(intList.iterator(), reverseComparator);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(1), result.get());
-    }
-
-    @Test
-    public void testMaxGenericArray() {
-        assertTrue(Iterables.max((Integer[]) null).isEmpty());
-        assertTrue(Iterables.max(new Integer[0]).isEmpty());
-        assertEquals(3, Iterables.max(new Integer[] { 3, 1, 2 }).orElse(null));
-        assertEquals(3, Iterables.max(new Integer[] { null, 3, 1, 2 }).orElse(null));
-    }
-
-    @Test
-    public void testMaxGenericArrayWithComparator() {
-        assertTrue(Iterables.max((Integer[]) null, Comparator.naturalOrder()).isEmpty());
-        assertTrue(Iterables.max(new Integer[0], Comparator.naturalOrder()).isEmpty());
-        assertEquals(1, Iterables.max(new Integer[] { 3, 1, 2 }, REVERSE_ORDER_NULLS_FIRST).orElse(null));
-        assertNull(Iterables.max(new Integer[] { null, 3, 1, 2 }, REVERSE_ORDER_NULLS_LAST).orElse(Integer.MAX_VALUE));
-        assertEquals(1, Iterables.max(new Integer[] { null, 3, 1, 2 }, REVERSE_ORDER_NULLS_FIRST).orElse(null));
-    }
-
-    @Test
-    public void testMaxGenericArrayComparable() {
-        assertTrue(Iterables.max((String[]) null).isEmpty());
-        assertTrue(Iterables.max(new String[0]).isEmpty());
-        assertEquals("c", Iterables.max(new String[] { "a", "b", "c" }).get());
-        assertEquals("c", Iterables.max(new String[] { "a", null, "c" }).get());
-        assertNull(Iterables.max(new String[] { null, null }).get());
-    }
-
-    @Test
-    public void testMaxGenericArrayComparator() {
-        Comparator<String> reverseOrder = Comparator.reverseOrder();
-        assertTrue(Iterables.max((String[]) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.max(new String[0], reverseOrder).isEmpty());
-        assertEquals("a", Iterables.max(new String[] { "a", "b", "c" }, reverseOrder).get());
-        assertEquals("c", Iterables.max(new String[] { "a", "b", "c" }, Comparator.naturalOrder()).get());
-        assertEquals("c", Iterables.max(new String[] { "a", null, "c" }, Comparator.nullsFirst(Comparator.naturalOrder())).get());
-        assertNull(Iterables.max(new String[] { "a", null, "c" }, Comparator.nullsLast(Comparator.naturalOrder())).get());
-    }
-
-    @Test
-    public void testMaxIterableComparable() {
-        assertTrue(Iterables.max((Iterable<String>) null).isEmpty());
-        assertTrue(Iterables.max(list()).isEmpty());
-        assertEquals("c", Iterables.max(list("a", "b", "c")).get());
-        assertEquals("c", Iterables.max(list("a", null, "c")).get());
-    }
-
-    @Test
-    public void testMaxIterableComparator() {
-        Comparator<String> reverseOrder = Comparator.reverseOrder();
-        assertTrue(Iterables.max((Iterable<String>) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.max(list(), reverseOrder).isEmpty());
-        assertEquals("a", Iterables.max(list("a", "b", "c"), reverseOrder).get());
-        assertEquals("c", Iterables.max(list("a", "b", "c"), Comparator.naturalOrder()).get());
-        assertEquals("c", Iterables.max(list("a", null, "c"), Comparator.nullsFirst(Comparator.naturalOrder())).get());
-        assertNull(Iterables.max(list("a", null, "c"), Comparator.nullsLast(Comparator.naturalOrder())).get());
-    }
-
-    @Test
-    public void testMaxIteratorComparable() {
-        assertTrue(Iterables.max((Iterator<String>) null).isEmpty());
-        assertTrue(Iterables.max(list(N.EMPTY_STRING_ARRAY).iterator()).isEmpty());
-        assertEquals("c", Iterables.max(list("a", "b", "c").iterator()).get());
-        assertEquals("c", Iterables.max(list("a", null, "c").iterator()).get());
-    }
-
-    @Test
-    public void testMaxIteratorComparator() {
-        Comparator<String> reverseOrder = Comparator.reverseOrder();
-        assertTrue(Iterables.max((Iterator<String>) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.max(list(N.EMPTY_STRING_ARRAY).iterator(), reverseOrder).isEmpty());
-        assertEquals("a", Iterables.max(list("a", "b", "c").iterator(), reverseOrder).get());
-        assertEquals("c", Iterables.max(list("a", "b", "c").iterator(), Comparator.naturalOrder()).get());
-        assertEquals("c", Iterables.max(list("a", null, "c").iterator(), Comparator.nullsFirst(Comparator.naturalOrder())).get());
-        assertNull(Iterables.max(list("a", null, "c").iterator(), Comparator.nullsLast(Comparator.naturalOrder())).get());
-    }
-
-    @Test
-    public void testMaxChar() {
-        char[] array = { 'c', 'a', 'b' };
-        OptionalChar result = Iterables.max(array);
-        assertTrue(result.isPresent());
-        assertEquals('c', result.get());
-
-        assertFalse(Iterables.max((char[]) null).isPresent());
-        assertFalse(Iterables.max(new char[0]).isPresent());
-    }
-
-    @Test
-    public void testMaxComparableArray() {
-        String[] array = { "c", "a", "b" };
-        Nullable<String> result = Iterables.max(array);
-        assertTrue(result.isPresent());
-        assertEquals("c", result.get());
-
-        String[] arrayWithNulls = { "c", null, "a" };
-        Nullable<String> resultWithNulls = Iterables.max(arrayWithNulls);
-        assertTrue(resultWithNulls.isPresent());
-        assertEquals("c", resultWithNulls.get());
-    }
-
-    // ===================== max primitive overloads =====================
-
-    @Test
-    public void testMaxChar_Present() {
-        OptionalChar result = Iterables.max('b', 'a', 'c');
-        assertTrue(result.isPresent());
-        assertEquals('c', result.get());
-    }
-
-    @Test
-    public void testMaxByte_Present() {
-        OptionalByte result = Iterables.max((byte) 3, (byte) 1, (byte) 2);
-        assertTrue(result.isPresent());
-        assertEquals((byte) 3, result.get());
-    }
-
-    @Test
-    public void testMaxShort_Present() {
-        OptionalShort result = Iterables.max((short) 3, (short) 1, (short) 2);
-        assertTrue(result.isPresent());
-        assertEquals((short) 3, result.get());
-    }
-
-    @Test
-    public void testMaxFloat_Present() {
-        OptionalFloat result = Iterables.max(3.0f, 1.0f, 2.0f);
-        assertTrue(result.isPresent());
-        assertEquals(3.0f, result.get());
-    }
-
-    @Test
-    public void testMaxChar_Empty() {
-        assertFalse(Iterables.max(new char[0]).isPresent());
-        assertFalse(Iterables.max((char[]) null).isPresent());
-    }
-
-    @Test
-    public void testMaxByte_Empty() {
-        assertFalse(Iterables.max(new byte[0]).isPresent());
-        assertFalse(Iterables.max((byte[]) null).isPresent());
-    }
-
-    @Test
-    public void testMaxShort_Empty() {
-        assertFalse(Iterables.max(new short[0]).isPresent());
-        assertFalse(Iterables.max((short[]) null).isPresent());
-    }
-
-    @Test
-    public void testMaxFloat_Empty() {
-        assertFalse(Iterables.max(new float[0]).isPresent());
-        assertFalse(Iterables.max((float[]) null).isPresent());
-    }
-
-    @Test
-    public void testMaxIteratorWithComparator_Dedicated() {
-        Nullable<Integer> result = Iterables.max(Arrays.asList(3, 1, 4, 1, 5).iterator(), Comparator.reverseOrder());
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(1), result.get());
-    }
-
-    @Test
-    public void testMaxIterator_Dedicated() {
-        Nullable<Integer> result = Iterables.max(Arrays.asList(3, 1, 4, 1, 5).iterator());
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(5), result.get());
-    }
-
-    @Test
-    public void testMaxIterator_Empty() {
-        Nullable<Integer> result = Iterables.max(Collections.<Integer> emptyList().iterator());
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testMax_Iterator_RejectsNullComparator() {
-        List<Integer> list = Arrays.asList(3, 1, 4, 1, 5);
-        assertThrows(IllegalArgumentException.class, () -> Iterables.max(list.iterator(), (Comparator<Integer>) null));
-    }
-
-    @Test
-    public void testMax_Iterator_Empty() {
-        Iterator<Integer> emptyIter = Collections.<Integer> emptyList().iterator();
-        assertTrue(Iterables.max(emptyIter, Comparator.naturalOrder()).isEmpty());
-    }
-
-    @Test
-    public void testMaxByArray() {
-        String[] arr = { "cat", "elephant", "dog", "bird" };
-        Function<String, Integer> lengthExtractor = String::length;
-
-        Nullable<String> result = Iterables.maxBy(arr, lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals("elephant", result.get());
-
-        assertTrue(Iterables.maxBy(new String[0], lengthExtractor).isEmpty());
-        assertTrue(Iterables.maxBy((String[]) null, lengthExtractor).isEmpty());
-    }
-
-    @Test
-    public void testMaxByIterable() {
-        String[] arr = { "cat", "elephant", "dog", "bird" };
-        Function<String, Integer> lengthExtractor = String::length;
-
-        Nullable<String> result = Iterables.maxBy(Arrays.asList(arr), lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals("elephant", result.get());
-
-        assertTrue(Iterables.maxBy((Iterable<String>) null, lengthExtractor).isEmpty());
-    }
-
-    @Test
-    public void testMaxByIterator() {
-        String[] arr = { "cat", "elephant", "dog", "bird" };
-        Function<String, Integer> lengthExtractor = String::length;
-
-        Nullable<String> result = Iterables.maxBy(Arrays.asList(arr).iterator(), lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals("elephant", result.get());
-
-        assertTrue(Iterables.maxBy((Iterator<String>) null, lengthExtractor).isEmpty());
-    }
-
-    @Test
-    public void testMaxBy() {
-        List<String> list = Arrays.asList("a", "bb", "ccc");
-        Function<String, Integer> lengthExtractor = String::length;
-
-        Nullable<String> result = Iterables.maxBy(list, lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals("ccc", result.get());
-    }
-
-    @Test
-    public void testMaxByIterator_Dedicated() {
-        Nullable<String> result = Iterables.maxBy(Arrays.asList("apple", "banana", "cherry").iterator(), String::length);
-        assertTrue(result.isPresent());
-        assertEquals("banana", result.get());
-    }
-
-    @Test
-    public void testMaxByIterator_Empty() {
-        Nullable<String> result = Iterables.maxBy(Collections.<String> emptyList().iterator(), String::length);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testMaxBy_NullArray() {
-        Nullable<String> result = Iterables.maxBy((String[]) null, String::length);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testMaxBy_EmptyArray() {
-        Nullable<String> result = Iterables.maxBy(new String[0], String::length);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testMaxIntArray() {
-        int[] arr = { 3, 1, 4, 1, 5, 9 };
-        OptionalInt result = Iterables.max(arr);
-        assertTrue(result.isPresent());
-        assertEquals(9, result.getAsInt());
-
-        assertFalse(Iterables.max((int[]) null).isPresent());
-        assertFalse(Iterables.max(new int[0]).isPresent());
-    }
-
-    @Test
-    public void testMaxIntArrayWithFunction() {
-        ToIntFunction<String> lengthFunction = String::length;
-        String[] arr = { "hi", "hello", "world" };
-
-        OptionalInt result = Iterables.maxInt(arr, lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(5, result.getAsInt());
-
-        assertFalse(Iterables.maxInt(new String[0], lengthFunction).isPresent());
-        assertFalse(Iterables.maxInt((String[]) null, lengthFunction).isPresent());
-    }
-
-    @Test
-    public void testMaxIntIterable() {
-        ToIntFunction<String> lengthFunction = String::length;
-        String[] arr = { "hi", "hello", "world" };
-
-        OptionalInt result = Iterables.maxInt(Arrays.asList(arr), lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(5, result.getAsInt());
-
-        assertFalse(Iterables.maxInt((Iterable<String>) null, lengthFunction).isPresent());
-    }
-
-    @Test
-    public void testMaxIntIterator() {
-        ToIntFunction<String> lengthFunction = String::length;
-        String[] arr = { "hi", "hello", "world" };
-
-        OptionalInt result = Iterables.maxInt(Arrays.asList(arr).iterator(), lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(5, result.getAsInt());
-
-        assertFalse(Iterables.maxInt((Iterator<String>) null, lengthFunction).isPresent());
-    }
-
-    @Test
-    public void testMaxIntArrayExtractor() {
-        assertTrue(Iterables.maxInt((String[]) null, String::length).isEmpty());
-        assertTrue(Iterables.maxInt(new String[0], String::length).isEmpty());
-        assertEquals(3, Iterables.maxInt(new String[] { "aaa", "a", "bb" }, String::length).get());
-    }
-
-    @Test
-    public void testMaxIntIterableExtractor() {
-        assertTrue(Iterables.maxInt((List<String>) null, String::length).isEmpty());
-        assertTrue(Iterables.maxInt(list(), String::length).isEmpty());
-        assertEquals(3, Iterables.maxInt(list("aaa", "a", "bb"), String::length).get());
-    }
-
-    @Test
-    public void testMaxIntIteratorExtractor() {
-        assertTrue(Iterables.maxInt((Iterator<String>) null, String::length).isEmpty());
-        assertTrue(Iterables.maxInt(list(N.EMPTY_STRING_ARRAY).iterator(), String::length).isEmpty());
-        assertEquals(3, Iterables.maxInt(list("aaa", "a", "bb").iterator(), String::length).get());
-    }
-
-    @Test
-    public void testMaxInt() {
-        int[] array = { 30, 10, 20 };
-        OptionalInt result = Iterables.max(array);
-        assertTrue(result.isPresent());
-        assertEquals(30, result.get());
-    }
-
-    @Test
-    public void testMaxInt_valueExtractor() {
-        List<String> list = Arrays.asList("a", "bb", "ccc");
-        ToIntFunction<String> lengthExtractor = String::length;
-
-        OptionalInt result = Iterables.maxInt(list, lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testMaxInt_Present() {
-        OptionalInt result = Iterables.max(3, 1, 2);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testMaxInt_Empty() {
-        assertFalse(Iterables.max(new int[0]).isPresent());
-        assertFalse(Iterables.max((int[]) null).isPresent());
-    }
-
-    @Test
-    public void testMaxIntIterator_Dedicated() {
-        OptionalInt result = Iterables.maxInt(Arrays.asList("a", "bb", "ccc").iterator(),
-                (com.landawn.abacus.util.function.ToIntFunction<String>) String::length);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.get());
-    }
-
-    @Test
-    public void testMaxIntArrayWithValueExtractor() {
-        TestObject[] arr = { new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b") };
-        assertTrue(Iterables.maxInt((TestObject[]) null, TestObject::getId).isEmpty());
-        assertTrue(Iterables.maxInt(new TestObject[0], TestObject::getId).isEmpty());
-        assertEquals(3, Iterables.maxInt(arr, TestObject::getId).orElseThrow());
-    }
-
-    @Test
-    public void testMaxIntIterableWithValueExtractor() {
-        List<TestObject> list = Arrays.asList(new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b"));
-        assertTrue(Iterables.maxInt((List<TestObject>) null, TestObject::getId).isEmpty());
-        assertTrue(Iterables.maxInt(Collections.<TestObject> emptyList(), TestObject::getId).isEmpty());
-        assertEquals(3, Iterables.maxInt(list, TestObject::getId).orElseThrow());
-    }
-
-    @Test
-    public void testMaxIntIteratorWithValueExtractor() {
-        List<TestObject> list = Arrays.asList(new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b"));
-        assertTrue(Iterables.maxInt((Iterator<TestObject>) null, TestObject::getId).isEmpty());
-        assertTrue(Iterables.maxInt(Collections.<TestObject> emptyList().iterator(), TestObject::getId).isEmpty());
-        assertEquals(3, Iterables.maxInt(list.iterator(), TestObject::getId).orElseThrow());
-    }
-
-    @Test
-    public void testMaxLongArray() {
-        long[] arr = { 100L, 50L, 200L, 25L };
-        OptionalLong result = Iterables.max(arr);
-        assertTrue(result.isPresent());
-        assertEquals(200L, result.getAsLong());
-
-        assertFalse(Iterables.max((long[]) null).isPresent());
-        assertFalse(Iterables.max(new long[0]).isPresent());
-    }
-
-    @Test
-    public void testMaxLongArrayWithFunction() {
-        ToLongFunction<Integer> toLong = i -> i.longValue();
-        Integer[] arr = { 5, 2, 8, 1 };
-
-        OptionalLong result = Iterables.maxLong(arr, toLong);
-        assertTrue(result.isPresent());
-        assertEquals(8L, result.getAsLong());
-
-        assertFalse(Iterables.maxLong(new Integer[0], toLong).isPresent());
-        assertFalse(Iterables.maxLong((Integer[]) null, toLong).isPresent());
-    }
-
-    @Test
-    public void testMaxLongIterable() {
-        ToLongFunction<Integer> toLong = i -> i.longValue();
-
-        OptionalLong result = Iterables.maxLong(intList, toLong);
-        assertTrue(result.isPresent());
-        assertEquals(9L, result.getAsLong());
-
-        assertFalse(Iterables.maxLong((Iterable<Integer>) null, toLong).isPresent());
-    }
-
-    @Test
-    public void testMaxLongIterator() {
-        ToLongFunction<Integer> toLong = i -> i.longValue();
-
-        OptionalLong result = Iterables.maxLong(intList.iterator(), toLong);
-        assertTrue(result.isPresent());
-        assertEquals(9L, result.getAsLong());
-
-        assertFalse(Iterables.maxLong((Iterator<Integer>) null, toLong).isPresent());
-    }
-
-    @Test
-    public void testMaxLongArrayExtractor() {
-        ToLongFunction<String> lengthToLong = s -> (long) s.length();
-        assertTrue(Iterables.maxLong((String[]) null, lengthToLong).isEmpty());
-        assertTrue(Iterables.maxLong(new String[0], lengthToLong).isEmpty());
-        assertEquals(3L, Iterables.maxLong(new String[] { "aaa", "a", "bb" }, lengthToLong).get());
-    }
-
-    @Test
-    public void testMaxLongIterableExtractor() {
-        ToLongFunction<String> lengthToLong = s -> (long) s.length();
-        assertTrue(Iterables.maxLong((List<String>) null, lengthToLong).isEmpty());
-        assertTrue(Iterables.maxLong(list(), lengthToLong).isEmpty());
-        assertEquals(3L, Iterables.maxLong(list("aaa", "a", "bb"), lengthToLong).get());
-    }
-
-    @Test
-    public void testMaxLongIteratorExtractor() {
-        ToLongFunction<String> lengthToLong = s -> (long) s.length();
-        assertTrue(Iterables.maxLong((Iterator<String>) null, lengthToLong).isEmpty());
-        assertTrue(Iterables.maxLong(list(N.EMPTY_STRING_ARRAY).iterator(), lengthToLong).isEmpty());
-        assertEquals(3L, Iterables.maxLong(list("aaa", "a", "bb").iterator(), lengthToLong).get());
-    }
-
-    @Test
-    public void testMaxLong_Present() {
-        OptionalLong result = Iterables.max(3L, 1L, 2L);
-        assertTrue(result.isPresent());
-        assertEquals(3L, result.get());
-    }
-
-    @Test
-    public void testMaxLong_Empty() {
-        assertFalse(Iterables.max(new long[0]).isPresent());
-        assertFalse(Iterables.max((long[]) null).isPresent());
-    }
-
-    @Test
-    public void testMaxLongIterator_Dedicated() {
-        OptionalLong result = Iterables.maxLong(Arrays.asList("a", "bb", "ccc").iterator(),
-                (com.landawn.abacus.util.function.ToLongFunction<String>) s -> (long) s.length());
-        assertTrue(result.isPresent());
-        assertEquals(3L, result.get());
-    }
-
-    @Test
-    public void testMaxLongArrayWithValueExtractor() {
-        TestObject[] arr = { new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b") };
-        ToLongFunction<TestObject> extractor = obj -> (long) obj.getId();
-        assertTrue(Iterables.maxLong((TestObject[]) null, extractor).isEmpty());
-        assertTrue(Iterables.maxLong(new TestObject[0], extractor).isEmpty());
-        assertEquals(3L, Iterables.maxLong(arr, extractor).orElseThrow());
-    }
-
-    @Test
-    public void testMaxLongIterableWithValueExtractor() {
-        List<TestObject> list = Arrays.asList(new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b"));
-        ToLongFunction<TestObject> extractor = obj -> (long) obj.getId();
-        assertTrue(Iterables.maxLong((List<TestObject>) null, extractor).isEmpty());
-        assertTrue(Iterables.maxLong(Collections.emptyList(), extractor).isEmpty());
-        assertEquals(3L, Iterables.maxLong(list, extractor).orElseThrow());
-    }
-
-    @Test
-    public void testMaxLongIteratorWithValueExtractor() {
-        List<TestObject> list = Arrays.asList(new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b"));
-        ToLongFunction<TestObject> extractor = obj -> (long) obj.getId();
-        assertTrue(Iterables.maxLong((Iterator<TestObject>) null, extractor).isEmpty());
-        assertTrue(Iterables.maxLong(Collections.<TestObject> emptyList().iterator(), extractor).isEmpty());
-        assertEquals(3L, Iterables.maxLong(list.iterator(), extractor).orElseThrow());
-    }
-
-    @Test
-    public void testMaxDoubleArray() {
-        double[] arr = { 3.14, 1.41, 2.71 };
-        OptionalDouble result = Iterables.max(arr);
-        assertTrue(result.isPresent());
-        assertEquals(3.14, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.max((double[]) null).isPresent());
-        assertFalse(Iterables.max(new double[0]).isPresent());
-    }
-
-    @Test
-    public void testMaxDoubleArrayWithFunction() {
-        ToDoubleFunction<Integer> toDouble = i -> i.doubleValue();
-        Integer[] arr = { 5, 2, 8, 1 };
-
-        OptionalDouble result = Iterables.maxDouble(arr, toDouble);
-        assertTrue(result.isPresent());
-        assertEquals(8.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.maxDouble(new Integer[0], toDouble).isPresent());
-        assertFalse(Iterables.maxDouble((Integer[]) null, toDouble).isPresent());
-    }
-
-    @Test
-    public void testMaxDoubleIterable() {
-        ToDoubleFunction<Integer> toDouble = i -> i.doubleValue();
-
-        OptionalDouble result = Iterables.maxDouble(intList, toDouble);
-        assertTrue(result.isPresent());
-        assertEquals(9.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.maxDouble((Iterable<Integer>) null, toDouble).isPresent());
-    }
-
-    @Test
-    public void testMaxDoubleIterator() {
-        ToDoubleFunction<Integer> toDouble = i -> i.doubleValue();
-
-        OptionalDouble result = Iterables.maxDouble(intList.iterator(), toDouble);
-        assertTrue(result.isPresent());
-        assertEquals(9.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.maxDouble((Iterator<Integer>) null, toDouble).isPresent());
-    }
-
-    @Test
-    public void testMaxDoubleArrayExtractor() {
-        ToDoubleFunction<String> lengthToDouble = s -> (double) s.length();
-        assertTrue(Iterables.maxDouble((String[]) null, lengthToDouble).isEmpty());
-        assertTrue(Iterables.maxDouble(new String[0], lengthToDouble).isEmpty());
-        assertEquals(3.0, Iterables.maxDouble(new String[] { "aaa", "a", "bb" }, lengthToDouble).get());
-    }
-
-    @Test
-    public void testMaxDoubleIterableExtractor() {
-        ToDoubleFunction<String> lengthToDouble = s -> (double) s.length();
-        assertTrue(Iterables.maxDouble((List<String>) null, lengthToDouble).isEmpty());
-        assertTrue(Iterables.maxDouble(list(), lengthToDouble).isEmpty());
-        assertEquals(3.0, Iterables.maxDouble(list("aaa", "a", "bb"), lengthToDouble).get());
-    }
-
-    @Test
-    public void testMaxDoubleIteratorExtractor() {
-        ToDoubleFunction<String> lengthToDouble = s -> (double) s.length();
-        assertTrue(Iterables.maxDouble((Iterator<String>) null, lengthToDouble).isEmpty());
-        assertTrue(Iterables.maxDouble(list(N.EMPTY_STRING_ARRAY).iterator(), lengthToDouble).isEmpty());
-        assertEquals(3.0, Iterables.maxDouble(list("aaa", "a", "bb").iterator(), lengthToDouble).get());
-    }
-
-    @Test
-    public void testMaxDouble_Present() {
-        OptionalDouble result = Iterables.max(3.0, 1.0, 2.0);
-        assertTrue(result.isPresent());
-        assertEquals(3.0, result.get());
-    }
-
-    @Test
-    public void testMaxDouble_Empty() {
-        assertFalse(Iterables.max(new double[0]).isPresent());
-        assertFalse(Iterables.max((double[]) null).isPresent());
-    }
-
-    @Test
-    public void testMaxDoubleIterator_Dedicated() {
-        OptionalDouble result = Iterables.maxDouble(Arrays.asList("a", "bb", "ccc").iterator(),
-                (com.landawn.abacus.util.function.ToDoubleFunction<String>) s -> (double) s.length());
-        assertTrue(result.isPresent());
-        assertEquals(3.0, result.get());
-    }
-
-    @Test
-    public void testMaxDoubleArrayWithValueExtractor() {
-        TestObject[] arr = { new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b") };
-        ToDoubleFunction<TestObject> extractor = obj -> (double) obj.getId();
-        assertTrue(Iterables.maxDouble((TestObject[]) null, extractor).isEmpty());
-        assertTrue(Iterables.maxDouble(new TestObject[0], extractor).isEmpty());
-        assertEquals(3.0, Iterables.maxDouble(arr, extractor).orElseThrow(), 0.0);
-    }
-
-    @Test
-    public void testMaxDoubleIterableWithValueExtractor() {
-        List<TestObject> list = Arrays.asList(new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b"));
-        ToDoubleFunction<TestObject> extractor = obj -> (double) obj.getId();
-        assertTrue(Iterables.maxDouble((List<TestObject>) null, extractor).isEmpty());
-        assertTrue(Iterables.maxDouble(Collections.emptyList(), extractor).isEmpty());
-        assertEquals(3.0, Iterables.maxDouble(list, extractor).orElseThrow(), 0.0);
-    }
-
-    @Test
-    public void testMaxDoubleIteratorWithValueExtractor() {
-        List<TestObject> list = Arrays.asList(new TestObject(3, "c"), new TestObject(1, "a"), new TestObject(2, "b"));
-        ToDoubleFunction<TestObject> extractor = obj -> (double) obj.getId();
-        assertTrue(Iterables.maxDouble((Iterator<TestObject>) null, extractor).isEmpty());
-        assertTrue(Iterables.maxDouble(Collections.<TestObject> emptyList().iterator(), extractor).isEmpty());
-        assertEquals(3.0, Iterables.maxDouble(list.iterator(), extractor).orElseThrow(), 0.0);
-    }
-
-    @Test
-    public void testMinMaxArray() {
-        Integer[] arr = { 3, 1, 4, 1, 5, 9 };
-        Optional<Pair<Integer, Integer>> result = Iterables.minMax(arr);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(1), result.get().left());
-        assertEquals(Integer.valueOf(9), result.get().right());
-
-        assertFalse(Iterables.minMax(new Integer[0]).isPresent());
-        assertFalse(Iterables.minMax((Integer[]) null).isPresent());
-    }
-
-    @Test
-    public void testMinMaxArrayWithComparator() {
-        String[] arr = { "apple", "banana", "cherry" };
-        Comparator<String> lengthComparator = Comparator.comparingInt(String::length);
-        Optional<Pair<String, String>> result = Iterables.minMax(arr, lengthComparator);
-        assertTrue(result.isPresent());
-        assertEquals("apple", result.get().left());
-        assertEquals("banana", result.get().right());
-
-        assertFalse(Iterables.minMax(new String[0], lengthComparator).isPresent());
-    }
-
-    @Test
-    public void testMinMaxIterable() {
-        Optional<Pair<Integer, Integer>> result = Iterables.minMax(intList);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(1), result.get().left());
-        assertEquals(Integer.valueOf(9), result.get().right());
-
-        assertFalse(Iterables.minMax((Iterable<Integer>) null).isPresent());
-        assertFalse(Iterables.minMax(new ArrayList<Integer>()).isPresent());
-    }
-
-    @Test
-    public void testMinMaxIterableWithComparator() {
-        Comparator<String> lengthComparator = Comparator.comparingInt(String::length);
-        Optional<Pair<String, String>> result = Iterables.minMax(stringList, lengthComparator);
-        assertTrue(result.isPresent());
-        assertEquals("date", result.get().left());
-        assertEquals("banana", result.get().right());
-    }
-
-    @Test
-    public void testMinMaxIterator() {
-        Optional<Pair<Integer, Integer>> result = Iterables.minMax(intList.iterator());
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(1), result.get().left());
-        assertEquals(Integer.valueOf(9), result.get().right());
-
-        assertFalse(Iterables.minMax((Iterator<Integer>) null).isPresent());
-    }
-
-    @Test
-    public void testMinMaxIteratorWithComparator() {
-        Comparator<Integer> reverseComparator = Comparator.reverseOrder();
-        Optional<Pair<Integer, Integer>> result = Iterables.minMax(intList.iterator(), reverseComparator);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(9), result.get().left());
-        assertEquals(Integer.valueOf(1), result.get().right());
-    }
-
-    @Test
-    public void testMinMaxArrayComparable() {
-        assertTrue(Iterables.minMax((String[]) null).isEmpty());
-        assertTrue(Iterables.minMax(new String[0]).isEmpty());
-        Pair<String, String> result = Iterables.minMax(new String[] { "b", "a", "c" }).get();
-        assertEquals("a", result.left());
-        assertEquals("c", result.right());
-        result = Iterables.minMax(new String[] { "a" }).get();
-        assertEquals("a", result.left());
-        assertEquals("a", result.right());
-        result = Iterables.minMax(new String[] { "b", null, "a", "c" }).get();
-        assertEquals("a", result.left());
-        assertEquals("c", result.right());
-    }
-
-    @Test
-    public void testMinMaxArrayComparator() {
-        Comparator<String> reverseOrder = Comparator.reverseOrder();
-        assertTrue(Iterables.minMax((String[]) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.minMax(new String[0], reverseOrder).isEmpty());
-        Pair<String, String> result = Iterables.minMax(new String[] { "b", "a", "c" }, reverseOrder).get();
-        assertEquals("c", result.left());
-        assertEquals("a", result.right());
-    }
-
-    @Test
-    public void testMinMaxIterableComparable() {
-        assertTrue(Iterables.minMax((Iterable<String>) null).isEmpty());
-        assertTrue(Iterables.minMax(list()).isEmpty());
-        Pair<String, String> result = Iterables.minMax(list("b", "a", "c")).get();
-        assertEquals("a", result.left());
-        assertEquals("c", result.right());
-    }
-
-    @Test
-    public void testMinMaxIterableComparator() {
-        Comparator<String> reverseOrder = Comparator.reverseOrder();
-        assertTrue(Iterables.minMax((Iterable<String>) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.minMax(list(), reverseOrder).isEmpty());
-        Pair<String, String> result = Iterables.minMax(list("b", "a", "c"), reverseOrder).get();
-        assertEquals("c", result.left());
-        assertEquals("a", result.right());
-    }
-
-    @Test
-    public void testMinMaxIteratorComparable() {
-        assertTrue(Iterables.minMax((Iterator<String>) null).isEmpty());
-        assertTrue(Iterables.minMax(list(N.EMPTY_STRING_ARRAY).iterator()).isEmpty());
-        Pair<String, String> result = Iterables.minMax(list("b", "a", "c").iterator()).get();
-        assertEquals("a", result.left());
-        assertEquals("c", result.right());
-    }
-
-    @Test
-    public void testMinMaxIteratorComparator() {
-        Comparator<String> reverseOrder = Comparator.reverseOrder();
-        assertTrue(Iterables.minMax((Iterator<String>) null, reverseOrder).isEmpty());
-        assertTrue(Iterables.minMax(list(N.EMPTY_STRING_ARRAY).iterator(), reverseOrder).isEmpty());
-        Pair<String, String> result = Iterables.minMax(list("b", "a", "c").iterator(), reverseOrder).get();
-        assertEquals("c", result.left());
-        assertEquals("a", result.right());
-    }
-
-    @Test
-    public void testMinMaxWithComparator() {
-        List<String> list = Arrays.asList("a", "bb", "ccc");
-        Comparator<String> lengthComparator = Comparator.comparing(String::length);
-
-        Optional<Pair<String, String>> result = Iterables.minMax(list, lengthComparator);
-        assertTrue(result.isPresent());
-        assertEquals("a", result.get().left());
-        assertEquals("ccc", result.get().right());
-    }
-
-    @Test
-    public void testMinMax() {
-        Integer[] arr = { 3, 1, 4, 1, 5, 9 };
-        Optional<Pair<Integer, Integer>> result = Iterables.minMax(arr);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(1), result.get().left());
-        assertEquals(Integer.valueOf(9), result.get().right());
-
-        assertFalse(Iterables.minMax(new Integer[0]).isPresent());
-    }
-
-    // ===================== minMax Iterator overloads =====================
-
-    @Test
-    public void testMinMaxIterator_Dedicated() {
-        u.Optional<Pair<Integer, Integer>> result = Iterables.minMax(Arrays.asList(3, 1, 4, 1, 5).iterator());
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(1), result.get().left());
-        assertEquals(Integer.valueOf(5), result.get().right());
-    }
-
-    @Test
-    public void testMinMaxIterator_Empty() {
-        u.Optional<Pair<Integer, Integer>> result = Iterables.minMax(Collections.<Integer> emptyList().iterator());
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testMinMaxIteratorWithComparator_Dedicated() {
-        u.Optional<Pair<Integer, Integer>> result = Iterables.minMax(Arrays.asList(3, 1, 4).iterator(), Comparator.reverseOrder());
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(4), result.get().left());
-        assertEquals(Integer.valueOf(1), result.get().right());
-    }
-
-    // ===================== minMax edge cases =====================
-
-    @Test
-    public void testMinMax_SingleElement() {
-        Optional<Pair<Integer, Integer>> result = Iterables.minMax(new Integer[] { 42 });
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(42), result.get().left());
-        assertEquals(Integer.valueOf(42), result.get().right());
-    }
-
-    @Test
-    public void testMinMax_NullArray() {
-        Optional<Pair<Integer, Integer>> result = Iterables.minMax((Integer[]) null);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testMinMax_EmptyIterator() {
-        Optional<Pair<Integer, Integer>> result = Iterables.minMax(Collections.<Integer> emptyList().iterator());
-        assertFalse(result.isPresent());
     }
 
     @Test
@@ -2863,8 +276,6 @@ public class IterablesTest extends AbstractTest {
         assertFalse(Iterables.lowerMedian(Collections.<Integer> emptyList()).isPresent());
     }
 
-    // ===================== median edge cases =====================
-
     @Test
     public void testMedian_SingleElement() {
         Nullable<Integer> result = Iterables.lowerMedian(new Integer[] { 42 });
@@ -2963,16 +374,6 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
-    public void testKthLargestWithComparator() {
-        List<String> list = Arrays.asList("a", "bb", "ccc", "dddd");
-        Comparator<String> lengthComparator = Comparator.comparing(String::length);
-
-        Nullable<String> result = Iterables.kthLargest(list, 2);
-        assertTrue(result.isPresent());
-        assertEquals("ccc", result.get());
-    }
-
-    @Test
     public void testKthLargest() {
         Integer[] arr = { 3, 1, 4, 1, 5, 9 };
         Nullable<Integer> result = Iterables.kthLargest(arr, 2);
@@ -2982,8 +383,6 @@ public class IterablesTest extends AbstractTest {
         assertTrue(Iterables.kthLargest(arr, 10).isEmpty());
         assertTrue(Iterables.kthLargest(new Integer[0], 1).isEmpty());
     }
-
-    // ===================== median / kthLargest empty inputs =====================
 
     @Test
     public void testMedian_EmptyArray() {
@@ -2999,8 +398,6 @@ public class IterablesTest extends AbstractTest {
     public void testKthLargest_EmptyCollection() {
         assertFalse(Iterables.kthLargest(Collections.<Integer> emptyList(), 1).isPresent());
     }
-
-    // ===================== kthLargest edge cases =====================
 
     @Test
     public void testKthLargest_KEqualsSize() {
@@ -3029,64 +426,6 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
-    public void testSumIntIterable() {
-        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
-        OptionalInt result = Iterables.sumInt(numbers);
-        assertTrue(result.isPresent());
-        assertEquals(15, result.getAsInt());
-
-        assertFalse(Iterables.sumInt((Iterable<Integer>) null).isPresent());
-        assertFalse(Iterables.sumInt(new ArrayList<Integer>()).isPresent());
-    }
-
-    @Test
-    public void testSumIntIterableWithFunction() {
-        ToIntFunction<String> lengthFunction = String::length;
-        OptionalInt result = Iterables.sumInt(stringList, lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(21, result.getAsInt());
-
-        assertFalse(Iterables.sumInt((Iterable<String>) null, lengthFunction).isPresent());
-    }
-
-    @Test
-    public void testSumIntIterableNumber() {
-        assertTrue(Iterables.sumInt((Iterable<Integer>) null).isEmpty());
-        assertTrue(Iterables.sumInt(list()).isEmpty());
-        assertEquals(6, Iterables.sumInt(list(1, 2, 3)).get());
-        assertEquals(0, Iterables.sumInt(list(1, -1, 0)).get());
-    }
-
-    @Test
-    public void testSumIntIterableExtractor() {
-        ToIntFunction<String> len = String::length;
-        assertTrue(Iterables.sumInt((Iterable<String>) null, len).isEmpty());
-        assertTrue(Iterables.sumInt(list(), len).isEmpty());
-        assertEquals(6, Iterables.sumInt(list("a", "bb", "ccc"), len).get());
-    }
-
-    @Test
-    public void testSumInt() {
-        List<Integer> list = Arrays.asList(1, 2, 3);
-        OptionalInt result = Iterables.sumInt(list);
-        assertTrue(result.isPresent());
-        assertEquals(6, result.get());
-
-        assertFalse(Iterables.sumInt((Iterable<Integer>) null).isPresent());
-        assertFalse(Iterables.sumInt(Collections.emptyList()).isPresent());
-    }
-
-    @Test
-    public void testSumIntWithFunction() {
-        List<String> list = Arrays.asList("a", "bb", "ccc");
-        ToIntFunction<String> lengthExtractor = String::length;
-
-        OptionalInt result = Iterables.sumInt(list, lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals(6, result.get());
-    }
-
-    @Test
     public void testNumberTypeConversions() {
         List<Number> mixedNumbers = Arrays.asList((byte) 1, (short) 2, 3, 4L, 5.0f, 6.0);
 
@@ -3103,533 +442,6 @@ public class IterablesTest extends AbstractTest {
         assertEquals(21.0, sumDouble.getAsDouble(), 0.001);
     }
 
-    // ===================== sum with single element =====================
-
-    @Test
-    public void testSumInt_SingleElement() {
-        OptionalInt result = Iterables.sumInt(Arrays.asList(42));
-        assertTrue(result.isPresent());
-        assertEquals(42, result.getAsInt());
-    }
-
-    @Test
-    public void testSumIntToLongIterable() {
-        List<Integer> largeNumbers = Arrays.asList(Integer.MAX_VALUE, 1);
-        OptionalLong result = Iterables.sumIntToLong(largeNumbers);
-        assertTrue(result.isPresent());
-        assertEquals((long) Integer.MAX_VALUE + 1, result.getAsLong());
-
-        assertFalse(Iterables.sumIntToLong((Iterable<Integer>) null).isPresent());
-        assertFalse(Iterables.sumIntToLong(new ArrayList<Integer>()).isPresent());
-    }
-
-    @Test
-    public void testSumIntToLongIterableWithFunction() {
-        ToIntFunction<String> lengthFunction = String::length;
-        OptionalLong result = Iterables.sumIntToLong(stringList, lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(21L, result.getAsLong());
-
-        assertFalse(Iterables.sumIntToLong((Iterable<String>) null, lengthFunction).isPresent());
-    }
-
-    @Test
-    public void testSumIntToLongIterableNumber() {
-        assertTrue(Iterables.sumIntToLong((Iterable<Integer>) null).isEmpty());
-        assertTrue(Iterables.sumIntToLong(list()).isEmpty());
-        assertEquals(6L, Iterables.sumIntToLong(list(1, 2, 3)).get());
-        assertEquals(2L * Integer.MAX_VALUE, Iterables.sumIntToLong(list(Integer.MAX_VALUE, Integer.MAX_VALUE)).get());
-    }
-
-    @Test
-    public void testSumIntToLongIterableExtractor() {
-        ToIntFunction<String> len = String::length;
-        assertTrue(Iterables.sumIntToLong((Iterable<String>) null, len).isEmpty());
-        assertTrue(Iterables.sumIntToLong(list(), len).isEmpty());
-        assertEquals(6L, Iterables.sumIntToLong(list("a", "bb", "ccc"), len).get());
-    }
-
-    @Test
-    public void testSumIntToLong() {
-        List<Integer> list = Arrays.asList(1, 2, 3);
-        OptionalLong result = Iterables.sumIntToLong(list);
-        assertTrue(result.isPresent());
-        assertEquals(6L, result.get());
-    }
-
-    @Test
-    public void testSumIntToLong_EmptyIterable() {
-        assertFalse(Iterables.sumIntToLong(Collections.<Integer> emptyList()).isPresent());
-    }
-
-    @Test
-    public void testSumLong() {
-        List<Long> list = Arrays.asList(1L, 2L, 3L);
-        OptionalLong result = Iterables.sumLong(list);
-        assertTrue(result.isPresent());
-        assertEquals(6L, result.get());
-    }
-
-    @Test
-    public void testSumLongIterable() {
-        List<Long> numbers = Arrays.asList(1L, 2L, 3L, 4L, 5L);
-        OptionalLong result = Iterables.sumLong(numbers);
-        assertTrue(result.isPresent());
-        assertEquals(15L, result.getAsLong());
-
-        assertFalse(Iterables.sumLong((Iterable<Long>) null).isPresent());
-        assertFalse(Iterables.sumLong(new ArrayList<Long>()).isPresent());
-    }
-
-    @Test
-    public void testSumLongIterableWithFunction() {
-        ToLongFunction<Integer> toLong = i -> i.longValue();
-        OptionalLong result = Iterables.sumLong(intList, toLong);
-        assertTrue(result.isPresent());
-        assertEquals(31L, result.getAsLong());
-
-        assertFalse(Iterables.sumLong((Iterable<Integer>) null, toLong).isPresent());
-    }
-
-    @Test
-    public void testSumLongIterableNumber() {
-        assertTrue(Iterables.sumLong((Iterable<Long>) null).isEmpty());
-        assertTrue(Iterables.sumLong(list()).isEmpty());
-        assertEquals(6L, Iterables.sumLong(list(1L, 2L, 3L)).get());
-    }
-
-    @Test
-    public void testSumLongIterableExtractor() {
-        ToLongFunction<String> len = s -> (long) s.length();
-        assertTrue(Iterables.sumLong((Iterable<String>) null, len).isEmpty());
-        assertTrue(Iterables.sumLong(list(), len).isEmpty());
-        assertEquals(6L, Iterables.sumLong(list("a", "bb", "ccc"), len).get());
-    }
-
-    @Test
-    public void testSumLong_EmptyIterable() {
-        assertFalse(Iterables.sumLong(Collections.<Long> emptyList()).isPresent());
-    }
-
-    @Test
-    public void testSumLong_SingleElement() {
-        OptionalLong result = Iterables.sumLong(Arrays.asList(42L));
-        assertTrue(result.isPresent());
-        assertEquals(42L, result.getAsLong());
-    }
-
-    @Test
-    public void testSumDouble() {
-        List<Double> list = Arrays.asList(1.0, 2.0, 3.0);
-        OptionalDouble result = Iterables.sumDouble(list);
-        assertTrue(result.isPresent());
-        assertEquals(6.0, result.get());
-    }
-
-    @Test
-    public void testSumDoubleIterable() {
-        OptionalDouble result = Iterables.sumDouble(doubleList);
-        assertTrue(result.isPresent());
-        assertEquals(8.99, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.sumDouble((Iterable<Double>) null).isPresent());
-        assertFalse(Iterables.sumDouble(new ArrayList<Double>()).isPresent());
-    }
-
-    @Test
-    public void testSumDoubleIterableWithFunction() {
-        ToDoubleFunction<Integer> toDouble = i -> i.doubleValue();
-        OptionalDouble result = Iterables.sumDouble(intList, toDouble);
-        assertTrue(result.isPresent());
-        assertEquals(31.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.sumDouble((Iterable<Integer>) null, toDouble).isPresent());
-    }
-
-    @Test
-    public void testSumDoubleIterableNumber() {
-        assertTrue(Iterables.sumDouble((Iterable<Double>) null).isEmpty());
-        assertTrue(Iterables.sumDouble(list()).isEmpty());
-        assertEquals(6.0, Iterables.sumDouble(list(1.0, 2.5, 2.5)).get(), 0.001);
-    }
-
-    @Test
-    public void testSumDoubleIterableExtractor() {
-        ToDoubleFunction<String> len = s -> (double) s.length();
-        assertTrue(Iterables.sumDouble((Iterable<String>) null, len).isEmpty());
-        assertTrue(Iterables.sumDouble(list(), len).isEmpty());
-        assertEquals(6.0, Iterables.sumDouble(list("a", "bb", "ccc"), len).get(), 0.001);
-    }
-
-    // ===================== sumInt / sumLong / sumDouble empty iterable =====================
-
-    @Test
-    public void testSumInt_EmptyIterable() {
-        assertFalse(Iterables.sumInt(Collections.<Integer> emptyList()).isPresent());
-    }
-
-    @Test
-    public void testSumDouble_EmptyIterable() {
-        assertFalse(Iterables.sumDouble(Collections.<Double> emptyList()).isPresent());
-    }
-
-    @Test
-    public void testSumDouble_SingleElement() {
-        OptionalDouble result = Iterables.sumDouble(Arrays.asList(3.14));
-        assertTrue(result.isPresent());
-        assertEquals(3.14, result.getAsDouble(), 0.001);
-    }
-
-    // ===================== sumBigInteger / sumBigDecimal with function =====================
-
-    @Test
-    public void testSumBigIntegerWithFunction_Dedicated() {
-        u.Optional<BigInteger> result = Iterables.sumBigInteger(Arrays.asList("10", "20", "30"), s -> new BigInteger(s));
-        assertTrue(result.isPresent());
-        assertEquals(BigInteger.valueOf(60), result.get());
-    }
-
-    @Test
-    public void testSumBigIntegerIterable() {
-        Optional<BigInteger> result = Iterables.sumBigInteger(bigIntList);
-        assertTrue(result.isPresent());
-        assertEquals(BigInteger.valueOf(600), result.get());
-
-        assertFalse(Iterables.sumBigInteger((Iterable<BigInteger>) null).isPresent());
-        assertFalse(Iterables.sumBigInteger(new ArrayList<>()).isPresent());
-    }
-
-    @Test
-    public void testSumBigIntegerIterableWithFunction() {
-        Function<Integer, BigInteger> toBigInt = i -> BigInteger.valueOf(i.longValue());
-        Optional<BigInteger> result = Iterables.sumBigInteger(intList, toBigInt);
-        assertTrue(result.isPresent());
-        assertEquals(BigInteger.valueOf(31), result.get());
-
-        assertFalse(Iterables.sumBigInteger((Iterable<Integer>) null, toBigInt).isPresent());
-    }
-
-    @Test
-    public void testSumBigIntegerIterableExtractor() {
-        Function<String, BigInteger> lenToBi = s -> BigInteger.valueOf(s.length());
-        assertTrue(Iterables.sumBigInteger((Iterable<String>) null, lenToBi).isEmpty());
-        assertTrue(Iterables.sumBigInteger(list(), lenToBi).isEmpty());
-        assertEquals(new BigInteger("6"), Iterables.sumBigInteger(list("a", "bb", "ccc"), lenToBi).get());
-    }
-
-    @Test
-    public void testSumBigInteger() {
-        List<BigInteger> list = Arrays.asList(BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3));
-        Optional<BigInteger> result = Iterables.sumBigInteger(list);
-        assertTrue(result.isPresent());
-        assertEquals(BigInteger.valueOf(6), result.get());
-
-        assertFalse(Iterables.sumBigInteger((Iterable<BigInteger>) null).isPresent());
-        assertFalse(Iterables.sumBigInteger(Collections.emptyList()).isPresent());
-    }
-
-    @Test
-    public void testSumBigIntegerWithFunction_Empty() {
-        u.Optional<BigInteger> result = Iterables.sumBigInteger(Collections.<String> emptyList(), s -> new BigInteger(s));
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testSumBigInteger_EmptyIterable() {
-        assertFalse(Iterables.sumBigInteger(Collections.<BigInteger> emptyList()).isPresent());
-    }
-
-    @Test
-    public void testSumBigDecimal() {
-        List<BigDecimal> list = Arrays.asList(BigDecimal.valueOf(1.0), BigDecimal.valueOf(2.0), BigDecimal.valueOf(3.0));
-        Optional<BigDecimal> result = Iterables.sumBigDecimal(list);
-        assertTrue(result.isPresent());
-        assertEquals(BigDecimal.valueOf(6.0), result.get());
-    }
-
-    @Test
-    public void testSumBigDecimalWithFunction_Dedicated() {
-        u.Optional<BigDecimal> result = Iterables.sumBigDecimal(Arrays.asList("10.5", "20.5"), s -> new BigDecimal(s));
-        assertTrue(result.isPresent());
-        assertEquals(new BigDecimal("31.0"), result.get());
-    }
-
-    @Test
-    public void testSumBigDecimalIterable() {
-        Optional<BigDecimal> result = Iterables.sumBigDecimal(bigDecimalList);
-        assertTrue(result.isPresent());
-        assertEquals(BigDecimal.valueOf(61.5), result.get());
-
-        assertFalse(Iterables.sumBigDecimal((Iterable<BigDecimal>) null).isPresent());
-        assertFalse(Iterables.sumBigDecimal(new ArrayList<>()).isPresent());
-    }
-
-    @Test
-    public void testSumBigDecimalIterableWithFunction() {
-        Function<Integer, BigDecimal> toBigDec = i -> BigDecimal.valueOf(i.longValue());
-        Optional<BigDecimal> result = Iterables.sumBigDecimal(intList, toBigDec);
-        assertTrue(result.isPresent());
-        assertEquals(BigDecimal.valueOf(31), result.get());
-
-        assertFalse(Iterables.sumBigDecimal((Iterable<Integer>) null, toBigDec).isPresent());
-    }
-
-    @Test
-    public void testSumBigDecimalIterableExtractor() {
-        Function<String, BigDecimal> lenToBd = s -> BigDecimal.valueOf(s.length());
-        assertTrue(Iterables.sumBigDecimal((Iterable<String>) null, lenToBd).isEmpty());
-        assertTrue(Iterables.sumBigDecimal(list(), lenToBd).isEmpty());
-        assertEquals(new BigDecimal("6"), Iterables.sumBigDecimal(list("a", "bb", "ccc"), lenToBd).get());
-    }
-
-    @Test
-    public void testSumBigDecimalWithFunction_Empty() {
-        u.Optional<BigDecimal> result = Iterables.sumBigDecimal(Collections.<String> emptyList(), s -> new BigDecimal(s));
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testSumBigDecimal_EmptyIterable() {
-        assertFalse(Iterables.sumBigDecimal(Collections.<BigDecimal> emptyList()).isPresent());
-    }
-
-    @Test
-    public void testAverageIntArrayWithRange() {
-        Integer[] arr = { 2, 4, 6, 8, 10 };
-        OptionalDouble result = Iterables.averageInt(arr, 1, 4);
-        assertTrue(result.isPresent());
-        assertEquals(6.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageInt(arr, 2, 2).isPresent());
-    }
-
-    @Test
-    public void testAverageIntArrayWithFunction() {
-        ToIntFunction<String> lengthFunction = String::length;
-        String[] arr = { "hi", "hello", "world" };
-        OptionalDouble result = Iterables.averageInt(arr, lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(4.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageInt(new String[0], lengthFunction).isPresent());
-    }
-
-    @Test
-    public void testAverageIntArrayWithRangeAndFunction() {
-        ToIntFunction<String> lengthFunction = String::length;
-        String[] arr = { "a", "hi", "hello", "world", "x" };
-        OptionalDouble result = Iterables.averageInt(arr, 1, 4, lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(4.0, result.getAsDouble(), 0.001);
-    }
-
-    @Test
-    public void testAverageIntCollectionWithRange() {
-        List<Integer> list = Arrays.asList(2, 4, 6, 8, 10);
-        OptionalDouble result = Iterables.averageInt(list, 1, 4);
-        assertTrue(result.isPresent());
-        assertEquals(6.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageInt(list, 2, 2).isPresent());
-    }
-
-    @Test
-    public void testAverageIntCollectionWithRangeAndFunction() {
-        ToIntFunction<String> lengthFunction = String::length;
-        List<String> list = Arrays.asList("a", "hi", "hello", "world", "x");
-        OptionalDouble result = Iterables.averageInt(list, 1, 4, lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(4.0, result.getAsDouble(), 0.001);
-    }
-
-    @Test
-    public void testAverageIntArrayNoArgs() {
-        Integer[] arr = { 2, 4, 6, 8 };
-        OptionalDouble result = Iterables.averageInt(arr);
-        assertTrue(result.isPresent());
-        assertEquals(5.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageInt(new Integer[0]).isPresent());
-    }
-
-    @Test
-    public void testAverageIntCollectionRangeExtractor() {
-        List<String> coll = list("a", "bb", "ccc", "dddd", "eeeee");
-        ToIntFunction<String> len = String::length;
-        assertEquals(3.0, Iterables.averageInt(coll, 0, 5, len).get(), 0.001);
-        assertEquals(2.0, Iterables.averageInt(coll, 0, 3, len).get(), 0.001);
-    }
-
-    @Test
-    public void testAverageIntWithFunction() {
-        List<String> list = Arrays.asList("a", "bb", "ccc");
-        ToIntFunction<String> lengthExtractor = String::length;
-
-        OptionalDouble result = Iterables.averageInt(list, lengthExtractor);
-        assertTrue(result.isPresent());
-        assertEquals(2.0, result.get());
-    }
-
-    @Test
-    public void testAverageIntArray() {
-        Integer[] arr = { 2, 4, 6, 8 };
-        OptionalDouble result = Iterables.averageInt(arr);
-        assertTrue(result.isPresent());
-        assertEquals(5.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageInt(new Integer[0]).isPresent());
-        assertFalse(Iterables.averageInt((Integer[]) null).isPresent());
-    }
-
-    @Test
-    public void testAverageIntIterableWithFunction() {
-        ToIntFunction<String> lengthFunction = String::length;
-        OptionalDouble result = Iterables.averageInt(stringList, lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(5.25, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageInt((Iterable<String>) null, lengthFunction).isPresent());
-    }
-
-    @Test
-    public void testAverageIntIterableNoArgs() {
-        List<Integer> list = Arrays.asList(2, 4, 6, 8);
-        OptionalDouble result = Iterables.averageInt(list);
-        assertTrue(result.isPresent());
-        assertEquals(5.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageInt((Iterable<Integer>) null).isPresent());
-    }
-
-    @Test
-    public void testAverageIntArrayNumber() {
-        assertTrue(Iterables.averageInt((Integer[]) null).isEmpty());
-        assertTrue(Iterables.averageInt(new Integer[0]).isEmpty());
-        assertEquals(2.0, Iterables.averageInt(new Integer[] { 1, 2, 3 }).get(), 0.001);
-    }
-
-    @Test
-    public void testAverageIntArrayExtractor() {
-        ToIntFunction<String> len = String::length;
-        assertTrue(Iterables.averageInt((String[]) null, len).isEmpty());
-        assertTrue(Iterables.averageInt(new String[0], len).isEmpty());
-        assertEquals(2.0, Iterables.averageInt(new String[] { "a", "bb", "ccc" }, len).get(), 0.001);
-    }
-
-    @Test
-    public void testAverageIntArrayRangeExtractor() {
-        String[] arr = { "a", "bb", "ccc", "dddd", "eeeee" };
-        ToIntFunction<String> len = String::length;
-        assertEquals(3.0, Iterables.averageInt(arr, 0, 5, len).get(), 0.001);
-        assertEquals(2.0, Iterables.averageInt(arr, 0, 3, len).get(), 0.001);
-        assertTrue(Iterables.averageInt(arr, 1, 1, len).isEmpty());
-    }
-
-    @Test
-    public void testAverageIntCollectionRangeNumber() {
-        List<Integer> coll = list(1, 2, 3, 4, 5);
-        assertEquals(3.0, Iterables.averageInt(coll, 0, 5).get(), 0.001);
-        assertEquals(2.0, Iterables.averageInt(coll, 0, 3).get(), 0.001);
-        assertTrue(Iterables.averageInt(coll, 1, 1).isEmpty());
-    }
-
-    @Test
-    public void testAverageIntIterableNumber() {
-        assertTrue(Iterables.averageInt((Iterable<Integer>) null).isEmpty());
-        assertTrue(Iterables.averageInt(list()).isEmpty());
-        assertEquals(2.0, Iterables.averageInt(list(1, 2, 3)).get(), 0.001);
-    }
-
-    @Test
-    public void testAverageIntIterableExtractor() {
-        ToIntFunction<String> len = String::length;
-        assertTrue(Iterables.averageInt((Iterable<String>) null, len).isEmpty());
-        assertTrue(Iterables.averageInt(list(), len).isEmpty());
-        assertEquals(2.0, Iterables.averageInt(list("a", "bb", "ccc"), len).get(), 0.001);
-    }
-
-    @Test
-    public void testAverageInt() {
-        Integer[] array = { 1, 2, 3 };
-        OptionalDouble result = Iterables.averageInt(array);
-        assertTrue(result.isPresent());
-        assertEquals(2.0, result.get());
-
-        assertFalse(Iterables.averageInt((Integer[]) null).isPresent());
-        assertFalse(Iterables.averageInt(new Integer[0]).isPresent());
-    }
-
-    @Test
-    public void testAverageIntWithRange() {
-        Integer[] array = { 1, 2, 3, 4, 5 };
-        OptionalDouble result = Iterables.averageInt(array, 1, 4);
-        assertTrue(result.isPresent());
-        assertEquals(3.0, result.get());
-
-        OptionalDouble emptyResult = Iterables.averageInt(array, 2, 2);
-        assertFalse(emptyResult.isPresent());
-    }
-
-    @Test
-    public void testAverageInt_EmptyIterable_2() {
-        assertFalse(Iterables.averageInt(Collections.<Integer> emptyList()).isPresent());
-    }
-
-    @Test
-    public void testAverageIntArrayFromTo() {
-        Integer[] arr = { 1, 2, 3, 4, 5 };
-        assertTrue(Iterables.averageInt(arr, 1, 1).isEmpty());
-        assertEquals(3.0, Iterables.averageInt(arr, 1, 4).orElseThrow(), 0.0);
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(arr, -1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(arr, 0, 6));
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(arr, 3, 2));
-    }
-
-    @Test
-    public void testAverageIntArrayFromToWithFunction() {
-        TestObject[] arr = { new TestObject(1, ""), new TestObject(2, ""), new TestObject(3, ""), new TestObject(4, ""), new TestObject(5, "") };
-        ToIntFunction<TestObject> extractor = TestObject::getId;
-        assertTrue(Iterables.averageInt(arr, 1, 1, extractor).isEmpty());
-        assertEquals(3.0, Iterables.averageInt(arr, 1, 4, extractor).orElseThrow(), 0.0);
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(arr, -1, 2, extractor));
-    }
-
-    @Test
-    public void testAverageIntCollectionFromTo() {
-        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
-        assertTrue(Iterables.averageInt(list, 1, 1).isEmpty());
-        assertEquals(3.0, Iterables.averageInt(list, 1, 4).orElseThrow(), 0.0);
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(list, 0, 6));
-    }
-
-    @Test
-    public void testAverageIntCollectionFromToWithFunction() {
-        List<TestObject> list = Arrays.asList(new TestObject(1, ""), new TestObject(2, ""), new TestObject(3, ""), new TestObject(4, ""),
-                new TestObject(5, ""));
-        ToIntFunction<TestObject> extractor = TestObject::getId;
-        assertTrue(Iterables.averageInt(list, 1, 1, extractor).isEmpty());
-        assertEquals(3.0, Iterables.averageInt(list, 1, 4, extractor).orElseThrow(), 0.0);
-    }
-
-    @Test
-    public void testAverageIntIterable() {
-        assertTrue(Iterables.averageInt((Iterable<Integer>) null).isEmpty());
-        assertTrue(Iterables.averageInt(Collections.<Integer> emptyList()).isEmpty());
-        assertEquals(3.0, Iterables.averageInt(Arrays.asList(1, 2, 3, 4, 5)).orElseThrow(), 0.0);
-    }
-
-    @Test
-    public void testAverageIntArrayRangeNumber() {
-        Integer[] arr = { 1, 2, 3, 4, 5 };
-        assertEquals(3.0, Iterables.averageInt(arr, 0, 5).get(), 0.001);
-        assertEquals(2.0, Iterables.averageInt(arr, 0, 3).get(), 0.001);
-        assertEquals(4.0, Iterables.averageInt(arr, 2, 5).get(), 0.001);
-        assertTrue(Iterables.averageInt(arr, 1, 1).isEmpty());
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(arr, -1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(arr, 0, 6));
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(arr, 3, 2));
-    }
-
     @Test
     public void testRangeValidation() {
         Integer[] array = { 1, 2, 3, 4, 5 };
@@ -3639,448 +451,6 @@ public class IterablesTest extends AbstractTest {
         assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(array, -1, 3));
         assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(array, 2, 6));
         assertThrows(IndexOutOfBoundsException.class, () -> Iterables.averageInt(array, 3, 2));
-    }
-
-    @Test
-    public void testAverageLongArrayWithRange() {
-        Long[] arr = { 2L, 4L, 6L, 8L, 10L };
-        OptionalDouble result = Iterables.averageLong(arr, 1, 4);
-        assertTrue(result.isPresent());
-        assertEquals(6.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageLong(arr, 2, 2).isPresent());
-    }
-
-    @Test
-    public void testAverageLongArrayWithFunction() {
-        ToLongFunction<Integer> toLong = i -> i.longValue();
-        Integer[] arr = { 2, 4, 6, 8 };
-        OptionalDouble result = Iterables.averageLong(arr, toLong);
-        assertTrue(result.isPresent());
-        assertEquals(5.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageLong(new Integer[0], toLong).isPresent());
-    }
-
-    @Test
-    public void testAverageLongArrayWithRangeAndFunction() {
-        ToLongFunction<Integer> toLong = i -> i.longValue();
-        Integer[] arr = { 1, 2, 4, 6, 8 };
-        OptionalDouble result = Iterables.averageLong(arr, 1, 4, toLong);
-        assertTrue(result.isPresent());
-        assertEquals(4.0, result.getAsDouble(), 0.001);
-    }
-
-    @Test
-    public void testAverageLongCollectionWithRange() {
-        List<Long> list = Arrays.asList(2L, 4L, 6L, 8L, 10L);
-        OptionalDouble result = Iterables.averageLong(list, 1, 4);
-        assertTrue(result.isPresent());
-        assertEquals(6.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageLong(list, 2, 2).isPresent());
-    }
-
-    @Test
-    public void testAverageLongCollectionWithRangeAndFunction() {
-        ToLongFunction<Integer> toLong = i -> i.longValue();
-        List<Integer> list = Arrays.asList(1, 2, 4, 6, 8);
-        OptionalDouble result = Iterables.averageLong(list, 1, 4, toLong);
-        assertTrue(result.isPresent());
-        assertEquals(4.0, result.getAsDouble(), 0.001);
-    }
-
-    @Test
-    public void testAverageLongArrayNoArgs() {
-        Long[] arr = { 2L, 4L, 6L, 8L };
-        OptionalDouble result = Iterables.averageLong(arr);
-        assertTrue(result.isPresent());
-        assertEquals(5.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageLong(new Long[0]).isPresent());
-    }
-
-    @Test
-    public void testAverageLong() {
-        Long[] array = { 1L, 2L, 3L };
-        OptionalDouble result = Iterables.averageLong(array);
-        assertTrue(result.isPresent());
-        assertEquals(2.0, result.get());
-    }
-
-    @Test
-    public void testAverageLongArray() {
-        Long[] arr = { 2L, 4L, 6L, 8L };
-        OptionalDouble result = Iterables.averageLong(arr);
-        assertTrue(result.isPresent());
-        assertEquals(5.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageLong(new Long[0]).isPresent());
-        assertFalse(Iterables.averageLong((Long[]) null).isPresent());
-    }
-
-    @Test
-    public void testAverageLongIterableWithFunction() {
-        ToLongFunction<Integer> toLong = i -> i.longValue();
-        OptionalDouble result = Iterables.averageLong(intList, toLong);
-        assertTrue(result.isPresent());
-        assertEquals(3.875, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageLong((Iterable<Integer>) null, toLong).isPresent());
-    }
-
-    @Test
-    public void testAverageLongIterableNoArgs() {
-        List<Long> list = Arrays.asList(2L, 4L, 6L, 8L);
-        OptionalDouble result = Iterables.averageLong(list);
-        assertTrue(result.isPresent());
-        assertEquals(5.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageLong((Iterable<Long>) null).isPresent());
-    }
-
-    @Test
-    public void testAverageLong_EmptyArray() {
-        assertFalse(Iterables.averageLong(new Long[0]).isPresent());
-    }
-
-    @Test
-    public void testAverageLong_EmptyIterable() {
-        assertFalse(Iterables.averageLong(Collections.<Long> emptyList()).isPresent());
-    }
-
-    @Test
-    public void testAverageLongArrayFromTo() {
-        Long[] arr = { 1L, 2L, 3L, 4L, 5L };
-        assertTrue(Iterables.averageLong(arr, 1, 1).isEmpty());
-        assertEquals(3.0, Iterables.averageLong(arr, 1, 4).orElseThrow(), 0.0);
-    }
-
-    @Test
-    public void testAverageLongArrayFromToWithFunction() {
-        TestObject[] arr = { new TestObject(1, ""), new TestObject(2, ""), new TestObject(3, ""), new TestObject(4, ""), new TestObject(5, "") };
-        ToLongFunction<TestObject> extractor = obj -> (long) obj.getId();
-        assertTrue(Iterables.averageLong(arr, 1, 1, extractor).isEmpty());
-        assertEquals(3.0, Iterables.averageLong(arr, 1, 4, extractor).orElseThrow(), 0.0);
-    }
-
-    @Test
-    public void testAverageLongCollectionFromTo() {
-        List<Long> list = Arrays.asList(1L, 2L, 3L, 4L, 5L);
-        assertTrue(Iterables.averageLong(list, 1, 1).isEmpty());
-        assertEquals(3.0, Iterables.averageLong(list, 1, 4).orElseThrow(), 0.0);
-    }
-
-    @Test
-    public void testAverageLongCollectionFromToWithFunction() {
-        List<TestObject> list = Arrays.asList(new TestObject(1, ""), new TestObject(2, ""), new TestObject(3, ""), new TestObject(4, ""),
-                new TestObject(5, ""));
-        ToLongFunction<TestObject> extractor = obj -> (long) obj.getId();
-        assertTrue(Iterables.averageLong(list, 1, 1, extractor).isEmpty());
-        assertEquals(3.0, Iterables.averageLong(list, 1, 4, extractor).orElseThrow(), 0.0);
-    }
-
-    @Test
-    public void testAverageLongIterable() {
-        assertTrue(Iterables.averageLong((Iterable<Long>) null).isEmpty());
-        assertTrue(Iterables.averageLong(Collections.<Long> emptyList()).isEmpty());
-        assertEquals(3.0, Iterables.averageLong(Arrays.asList(1L, 2L, 3L, 4L, 5L)).orElseThrow(), 0.0);
-    }
-
-    @Test
-    public void testAverageDoubleArrayWithRange() {
-        Double[] arr = { 1.0, 2.5, 3.5, 4.5, 6.0 };
-        OptionalDouble result = Iterables.averageDouble(arr, 1, 4);
-        assertTrue(result.isPresent());
-        assertEquals(3.5, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageDouble(arr, 2, 2).isPresent());
-    }
-
-    @Test
-    public void testAverageDoubleArrayWithFunction() {
-        ToDoubleFunction<Integer> toDouble = i -> i.doubleValue();
-        Integer[] arr = { 2, 4, 6, 8 };
-        OptionalDouble result = Iterables.averageDouble(arr, toDouble);
-        assertTrue(result.isPresent());
-        assertEquals(5.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageDouble(new Integer[0], toDouble).isPresent());
-    }
-
-    @Test
-    public void testAverageDoubleArrayWithRangeAndFunction() {
-        ToDoubleFunction<Integer> toDouble = i -> i.doubleValue();
-        Integer[] arr = { 1, 2, 4, 6, 8 };
-        OptionalDouble result = Iterables.averageDouble(arr, 1, 4, toDouble);
-        assertTrue(result.isPresent());
-        assertEquals(4.0, result.getAsDouble(), 0.001);
-    }
-
-    @Test
-    public void testAverageDoubleCollectionWithRange() {
-        List<Double> list = Arrays.asList(1.0, 2.5, 3.5, 4.5, 6.0);
-        OptionalDouble result = Iterables.averageDouble(list, 1, 4);
-        assertTrue(result.isPresent());
-        assertEquals(3.5, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageDouble(list, 2, 2).isPresent());
-    }
-
-    @Test
-    public void testAverageDoubleCollectionWithRangeAndFunction() {
-        ToDoubleFunction<Integer> toDouble = i -> i.doubleValue();
-        List<Integer> list = Arrays.asList(1, 2, 4, 6, 8);
-        OptionalDouble result = Iterables.averageDouble(list, 1, 4, toDouble);
-        assertTrue(result.isPresent());
-        assertEquals(4.0, result.getAsDouble(), 0.001);
-    }
-
-    @Test
-    public void testAverageDoubleArrayNoArgs() {
-        Double[] arr = { 2.0, 4.0, 6.0, 8.0 };
-        OptionalDouble result = Iterables.averageDouble(arr);
-        assertTrue(result.isPresent());
-        assertEquals(5.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageDouble(new Double[0]).isPresent());
-    }
-
-    @Test
-    public void testAverageDouble() {
-        Double[] array = { 1.0, 2.0, 3.0 };
-        OptionalDouble result = Iterables.averageDouble(array);
-        assertTrue(result.isPresent());
-        assertEquals(2.0, result.get());
-    }
-
-    @Test
-    public void testAverageDouble_NonListRandomAccess() {
-        // Use a non-RandomAccess collection by wrapping the list
-        List<Double> list = Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0);
-        OptionalDouble result = Iterables.averageDouble(list, 1, 4, d -> d);
-        assertTrue(result.isPresent());
-        assertEquals((2.0 + 3.0 + 4.0) / 3.0, result.getAsDouble(), 1e-10);
-    }
-
-    @Test
-    public void testAverageDoubleArray() {
-        Double[] arr = { 2.5, 3.5, 4.5 };
-        OptionalDouble result = Iterables.averageDouble(arr);
-        assertTrue(result.isPresent());
-        assertEquals(3.5, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageDouble(new Double[0]).isPresent());
-        assertFalse(Iterables.averageDouble((Double[]) null).isPresent());
-    }
-
-    @Test
-    public void testAverageDoubleIterable() {
-        OptionalDouble result = Iterables.averageDouble(doubleList);
-        assertTrue(result.isPresent());
-        assertEquals(2.2475, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageDouble((Iterable<Double>) null).isPresent());
-    }
-
-    @Test
-    public void testAverageDoubleIterableWithFunction() {
-        ToDoubleFunction<Integer> toDouble = i -> i.doubleValue();
-        OptionalDouble result = Iterables.averageDouble(intList, toDouble);
-        assertTrue(result.isPresent());
-        assertEquals(3.875, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageDouble((Iterable<Integer>) null, toDouble).isPresent());
-    }
-
-    @Test
-    public void testAverageDoubleIterableNoArgs() {
-        List<Double> list = Arrays.asList(2.0, 4.0, 6.0, 8.0);
-        OptionalDouble result = Iterables.averageDouble(list);
-        assertTrue(result.isPresent());
-        assertEquals(5.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.averageDouble((Iterable<Double>) null).isPresent());
-    }
-
-    @Test
-    public void testAverageDoubleArrayExtractor() {
-        ToDoubleFunction<String> len = s -> (double) s.length();
-        assertTrue(Iterables.averageDouble((String[]) null, len).isEmpty());
-        assertTrue(Iterables.averageDouble(new String[0], len).isEmpty());
-        assertEquals(2.0, Iterables.averageDouble(new String[] { "a", "bb", "ccc" }, len).get(), 0.001);
-    }
-
-    @Test
-    public void testAverageDoubleIterableExtractor() {
-        ToDoubleFunction<String> len = s -> (double) s.length();
-        assertTrue(Iterables.averageDouble((Iterable<String>) null, len).isEmpty());
-        assertTrue(Iterables.averageDouble(list(), len).isEmpty());
-        assertEquals(2.0, Iterables.averageDouble(list("a", "bb", "ccc"), len).get(), 0.001);
-        List<Double> doubles = new ArrayList<>();
-        doubles.add(1.0e100);
-        doubles.add(1.0);
-        doubles.add(-1.0e100);
-        assertEquals(0.0 / 3.0, Iterables.averageDouble(doubles, d -> d).get(), 1e-15);
-
-        doubles = new ArrayList<>();
-        doubles.add(1.0e10);
-        doubles.add(1.0);
-        doubles.add(-1.0e10);
-        assertEquals(1.0 / 3.0, Iterables.averageDouble(doubles, d -> d).get(), 1e-15);
-    }
-
-    @Test
-    public void testAverageDoubleCollectionRangeExtractor() {
-        List<String> coll = list("a", "bb", "ccc", "dddd", "eeeee");
-        ToDoubleFunction<String> len = s -> (double) s.length();
-        assertEquals(3.0, Iterables.averageDouble(coll, 0, 5, len).get(), 0.001);
-        assertEquals(2.0, Iterables.averageDouble(coll, 0, 3, len).get(), 0.001);
-        assertTrue(Iterables.averageDouble(coll, 1, 1, len).isEmpty());
-
-        LinkedList<String> linkedList = new LinkedList<>(coll);
-        assertEquals(3.0, Iterables.averageDouble(linkedList, 0, 5, len).get(), 0.001);
-        assertEquals(4.0, Iterables.averageDouble(linkedList, 2, 5, len).get(), 0.001);
-    }
-
-    // ===================== averageInt / averageLong / averageDouble empty inputs =====================
-
-    @Test
-    public void testAverageInt_EmptyArray() {
-        assertFalse(Iterables.averageInt(new Integer[0]).isPresent());
-    }
-
-    @Test
-    public void testAverageDouble_EmptyArray() {
-        assertFalse(Iterables.averageDouble(new Double[0]).isPresent());
-    }
-
-    @Test
-    public void testAverageDouble_EmptyIterable() {
-        assertFalse(Iterables.averageDouble(Collections.<Double> emptyList()).isPresent());
-    }
-
-    @Test
-    public void testAverageDoubleArrayFromTo() {
-        Double[] arr = { 1.1, 2.2, 3.3, 4.4, 5.5 };
-        assertTrue(Iterables.averageDouble(arr, 1, 1).isEmpty());
-        assertEquals(3.3, Iterables.averageDouble(arr, 1, 4).orElseThrow(), 0.00001);
-    }
-
-    @Test
-    public void testAverageDoubleArrayFromToWithFunction() {
-        TestObject[] arr = { new TestObject(1, ""), new TestObject(2, ""), new TestObject(3, ""), new TestObject(4, ""), new TestObject(5, "") };
-        ToDoubleFunction<TestObject> extractor = obj -> obj.getId() + 0.1;
-        assertTrue(Iterables.averageDouble(arr, 1, 1, extractor).isEmpty());
-        assertEquals(3.1, Iterables.averageDouble(arr, 1, 4, extractor).orElseThrow(), 0.00001);
-    }
-
-    @Test
-    public void testAverageDoubleCollectionFromTo() {
-        List<Double> list = Arrays.asList(1.1, 2.2, 3.3, 4.4, 5.5);
-        assertTrue(Iterables.averageDouble(list, 1, 1).isEmpty());
-        assertEquals(3.3, Iterables.averageDouble(list, 1, 4).orElseThrow(), 0.00001);
-    }
-
-    @Test
-    public void testAverageDoubleCollectionFromToWithFunction() {
-        List<TestObject> list = Arrays.asList(new TestObject(1, ""), new TestObject(2, ""), new TestObject(3, ""), new TestObject(4, ""),
-                new TestObject(5, ""));
-        ToDoubleFunction<TestObject> extractor = obj -> obj.getId() + 0.1;
-        assertTrue(Iterables.averageDouble(list, 1, 1, extractor).isEmpty());
-        assertEquals(3.1, Iterables.averageDouble(list, 1, 4, extractor).orElseThrow(), 0.00001);
-    }
-
-    @Test
-    public void testAverageBigInteger() {
-        List<BigInteger> list = Arrays.asList(BigInteger.valueOf(2), BigInteger.valueOf(4), BigInteger.valueOf(6));
-        Optional<BigDecimal> result = Iterables.averageBigInteger(list);
-        assertTrue(result.isPresent());
-        assertEquals(BigDecimal.valueOf(4), result.get());
-    }
-
-    // ===================== averageBigInteger / averageBigDecimal with function =====================
-
-    @Test
-    public void testAverageBigIntegerWithFunction_Dedicated() {
-        u.Optional<BigDecimal> result = Iterables.averageBigInteger(Arrays.asList("10", "20", "30"), s -> new BigInteger(s));
-        assertTrue(result.isPresent());
-    }
-
-    @Test
-    public void testAverageBigIntegerIterable() {
-        Optional<BigDecimal> result = Iterables.averageBigInteger(bigIntList);
-        assertTrue(result.isPresent());
-        assertEquals(BigDecimal.valueOf(200), result.get());
-
-        assertFalse(Iterables.averageBigInteger((Iterable<BigInteger>) null).isPresent());
-        assertFalse(Iterables.averageBigInteger(new ArrayList<>()).isPresent());
-    }
-
-    @Test
-    public void testAverageBigIntegerIterableWithFunction() {
-        Function<Integer, BigInteger> toBigInt = i -> BigInteger.valueOf(i.longValue());
-        Optional<BigDecimal> result = Iterables.averageBigInteger(intList, toBigInt);
-        assertTrue(result.isPresent());
-        assertEquals(new BigDecimal("3.875"), result.get());
-
-        assertFalse(Iterables.averageBigInteger((Iterable<Integer>) null, toBigInt).isPresent());
-    }
-
-    @Test
-    public void testAverageBigIntegerWithFunction_Empty() {
-        u.Optional<BigDecimal> result = Iterables.averageBigInteger(Collections.<String> emptyList(), s -> new BigInteger(s));
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testAverageBigInteger_EmptyIterable() {
-        assertFalse(Iterables.averageBigInteger(Collections.<BigInteger> emptyList()).isPresent());
-    }
-
-    @Test
-    public void testAverageBigDecimal() {
-        List<BigDecimal> list = Arrays.asList(BigDecimal.valueOf(2.0), BigDecimal.valueOf(4.0), BigDecimal.valueOf(6.0));
-        Optional<BigDecimal> result = Iterables.averageBigDecimal(list);
-        assertTrue(result.isPresent());
-        assertEquals(BigDecimal.valueOf(4.0), result.get());
-    }
-
-    @Test
-    public void testAverageBigDecimalWithFunction_Dedicated() {
-        u.Optional<BigDecimal> result = Iterables.averageBigDecimal(Arrays.asList("10.0", "20.0"), s -> new BigDecimal(s));
-        assertTrue(result.isPresent());
-    }
-
-    @Test
-    public void testAverageBigDecimalIterable() {
-        Optional<BigDecimal> result = Iterables.averageBigDecimal(bigDecimalList);
-        assertTrue(result.isPresent());
-        assertEquals(new BigDecimal("20.5"), result.get());
-
-        assertFalse(Iterables.averageBigDecimal((Iterable<BigDecimal>) null).isPresent());
-        assertFalse(Iterables.averageBigDecimal(new ArrayList<>()).isPresent());
-    }
-
-    @Test
-    public void testAverageBigDecimalIterableWithFunction() {
-        Function<Integer, BigDecimal> toBigDec = i -> BigDecimal.valueOf(i.longValue());
-        Optional<BigDecimal> result = Iterables.averageBigDecimal(intList, toBigDec);
-        assertTrue(result.isPresent());
-        assertEquals(new BigDecimal("3.875"), result.get());
-
-        assertFalse(Iterables.averageBigDecimal((Iterable<Integer>) null, toBigDec).isPresent());
-    }
-
-    @Test
-    public void testAverageBigDecimalWithFunction_Empty() {
-        u.Optional<BigDecimal> result = Iterables.averageBigDecimal(Collections.<String> emptyList(), s -> new BigDecimal(s));
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testAverageBigDecimal_EmptyIterable() {
-        assertFalse(Iterables.averageBigDecimal(Collections.<BigDecimal> emptyList()).isPresent());
     }
 
     @Test
@@ -4145,39 +515,11 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
-    public void testLastIndexOf() {
-        Object[] array = { "a", "b", "c", "b" };
-        OptionalInt result = Iterables.lastIndexOf(array, "b");
-        assertTrue(result.isPresent());
-        assertEquals(3, result.get());
-
-        OptionalInt notFound = Iterables.lastIndexOf(array, "d");
-        assertFalse(notFound.isPresent());
-    }
-
-    // ===================== indexOf / lastIndexOf Array overloads =====================
-
-    @Test
     public void testIndexOfArray_Dedicated() {
         OptionalInt result = Iterables.indexOf(new Object[] { "a", "b", "c" }, "b");
         assertTrue(result.isPresent());
         assertEquals(1, result.get());
     }
-
-    @Test
-    public void testLastIndexOfArray_Dedicated() {
-        OptionalInt result = Iterables.lastIndexOf(new Object[] { "a", "b", "a", "c" }, "a");
-        assertTrue(result.isPresent());
-        assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testLastIndexOfArray_NotFound() {
-        OptionalInt result = Iterables.lastIndexOf(new Object[] { "a", "b", "c" }, "z");
-        assertFalse(result.isPresent());
-    }
-
-    // ===================== indexOf / lastIndexOf Collection overloads =====================
 
     @Test
     public void testIndexOfCollection_Dedicated() {
@@ -4187,871 +529,9 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
-    public void testLastIndexOfCollection_Dedicated() {
-        OptionalInt result = Iterables.lastIndexOf(Arrays.asList("a", "b", "a", "c"), "a");
-        assertTrue(result.isPresent());
-        assertEquals(2, result.get());
-    }
-
-    @Test
-    public void testLastIndexOfCollection_NotFound() {
-        OptionalInt result = Iterables.lastIndexOf(Arrays.asList("a", "b", "c"), "z");
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testLastIndexOfArray() {
-        Integer[] arr = { 1, 2, 3, 2, 4 };
-        OptionalInt result = Iterables.lastIndexOf(arr, 2);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
-
-        assertFalse(Iterables.lastIndexOf(arr, 5).isPresent());
-        assertFalse(Iterables.lastIndexOf((Object[]) null, 1).isPresent());
-    }
-
-    @Test
-    public void testLastIndexOfCollection() {
-        List<Integer> list = Arrays.asList(1, 2, 3, 2, 4);
-        OptionalInt result = Iterables.lastIndexOf(list, 2);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
-
-        assertFalse(Iterables.lastIndexOf(list, 5).isPresent());
-        assertFalse(Iterables.lastIndexOf((Collection<?>) null, 1).isPresent());
-    }
-
-    // ===================== indexOf / lastIndexOf edge cases =====================
-
-    @Test
     public void testIndexOf_NullArray() {
         OptionalInt result = Iterables.indexOf((Object[]) null, "x");
         assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testLastIndexOf_NullArray() {
-        OptionalInt result = Iterables.lastIndexOf((Object[]) null, "x");
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testLastIndexOf_NullCollection() {
-        OptionalInt result = Iterables.lastIndexOf((Collection<?>) null, "x");
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testLastIndexOf_FindNull() {
-        OptionalInt result = Iterables.lastIndexOf(new Object[] { "a", null, "b", null }, null);
-        assertTrue(result.isPresent());
-        assertEquals(3, result.getAsInt());
-    }
-
-    @Test
-    public void testFindFirstOrLastArray() {
-        Integer[] arr = { 1, 2, 3, 4, 5 };
-        Predicate<Integer> isEven = n -> n % 2 == 0;
-        Predicate<Integer> isOdd = n -> n % 2 == 1;
-
-        Nullable<Integer> result = Iterables.findFirstOrLast(arr, isEven, isOdd);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(2), result.get());
-
-        Predicate<Integer> isGreaterThan10 = n -> n > 10;
-        result = Iterables.findFirstOrLast(arr, isGreaterThan10, isOdd);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(5), result.get());
-
-        assertTrue(Iterables.findFirstOrLast((Integer[]) null, isEven, isOdd).isEmpty());
-    }
-
-    @Test
-    public void testFindFirstOrLastCollection() {
-        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
-        Predicate<Integer> isEven = n -> n % 2 == 0;
-        Predicate<Integer> isOdd = n -> n % 2 == 1;
-
-        Nullable<Integer> result = Iterables.findFirstOrLast(list, isEven, isOdd);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(2), result.get());
-
-        assertTrue(Iterables.findFirstOrLast((Collection<Integer>) null, isEven, isOdd).isEmpty());
-    }
-
-    @Test
-    public void testFindFirstOrLast() {
-        String[] array = { "a", "bb", "ccc", "dd" };
-
-        Nullable<String> result = Iterables.findFirstOrLast(array, s -> s.length() > 2, s -> s.length() == 2);
-        assertTrue(result.isPresent());
-        assertEquals("ccc", result.get());
-
-        Nullable<String> fallbackResult = Iterables.findFirstOrLast(array, s -> s.length() > 10, s -> s.length() == 2);
-        assertTrue(fallbackResult.isPresent());
-        assertEquals("dd", fallbackResult.get());
-    }
-
-    // ===================== findFirstOrLast Array/Collection =====================
-
-    @Test
-    public void testFindFirstOrLastArray_Dedicated() {
-        Nullable<Integer> result = Iterables.findFirstOrLast(new Integer[] { 1, 2, 3, 4, 5 }, i -> i > 10, i -> i < 3);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(2), result.get());
-    }
-
-    @Test
-    public void testFindFirstOrLastArray_FirstFound() {
-        Nullable<Integer> result = Iterables.findFirstOrLast(new Integer[] { 1, 2, 3, 4, 5 }, i -> i > 3, i -> i < 3);
-        assertTrue(result.isPresent());
-        assertEquals(Integer.valueOf(4), result.get());
-    }
-
-    @Test
-    public void testFindFirstOrLastArray_NoneFound() {
-        Nullable<Integer> result = Iterables.findFirstOrLast(new Integer[] { 1, 2, 3 }, i -> i > 10, i -> i > 10);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testFindFirstOrLast_Collection_NoneMatch() {
-        List<Integer> list = Arrays.asList(1, 3, 5, 7);
-        Predicate<Integer> isEven = x -> x % 2 == 0;
-        Predicate<Integer> isGreaterThan10 = x -> x > 10;
-        assertTrue(Iterables.findFirstOrLast(list, isEven, isGreaterThan10).isEmpty());
-    }
-
-    @Test
-    public void testFindFirstOrLastIndex() {
-        String[] array = { "a", "bb", "ccc", "dd" };
-
-        OptionalInt result = Iterables.findFirstOrLastIndex(array, s -> s.length() > 2, s -> s.length() == 2);
-        assertTrue(result.isPresent());
-        assertEquals(2, result.get());
-    }
-
-    // ===================== findFirstOrLastIndex Array/Collection =====================
-
-    @Test
-    public void testFindFirstOrLastIndexArray_Dedicated() {
-        OptionalInt result = Iterables.findFirstOrLastIndex(new Integer[] { 1, 2, 3, 4, 5 }, i -> i > 10, i -> i < 3);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.get());
-    }
-
-    @Test
-    public void testFindFirstOrLastIndex_Collection_OnlyLastMatches() {
-        List<Integer> list = Arrays.asList(1, 3, 5, 7, 9);
-        Predicate<Integer> isEven = x -> x % 2 == 0;
-        Predicate<Integer> isGreaterThan4 = x -> x > 4;
-        OptionalInt idx = Iterables.findFirstOrLastIndex(list, isEven, isGreaterThan4);
-        assertTrue(idx.isPresent());
-        assertEquals(4, idx.getAsInt()); // index of 9
-    }
-
-    @Test
-    public void testFindFirstOrLastIndexArray() {
-        Integer[] arr = { 1, 2, 3, 4, 5 };
-        Predicate<Integer> isEven = n -> n % 2 == 0;
-        Predicate<Integer> isOdd = n -> n % 2 == 1;
-
-        OptionalInt result = Iterables.findFirstOrLastIndex(arr, isEven, isOdd);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        Predicate<Integer> isGreaterThan10 = n -> n > 10;
-        result = Iterables.findFirstOrLastIndex(arr, isGreaterThan10, isOdd);
-        assertTrue(result.isPresent());
-        assertEquals(4, result.getAsInt());
-
-        assertFalse(Iterables.findFirstOrLastIndex((Integer[]) null, isEven, isOdd).isPresent());
-    }
-
-    @Test
-    public void testFindFirstOrLastIndexCollection() {
-        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
-        Predicate<Integer> isEven = n -> n % 2 == 0;
-        Predicate<Integer> isOdd = n -> n % 2 == 1;
-
-        OptionalInt result = Iterables.findFirstOrLastIndex(list, isEven, isOdd);
-        assertTrue(result.isPresent());
-        assertEquals(1, result.getAsInt());
-
-        assertFalse(Iterables.findFirstOrLastIndex((Collection<Integer>) null, isEven, isOdd).isPresent());
-    }
-
-    @Test
-    public void testFindFirstOrLastIndexArray_NoneFound() {
-        OptionalInt result = Iterables.findFirstOrLastIndex(new Integer[] { 1, 2, 3 }, i -> i > 10, i -> i > 10);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testFindFirstAndLastArraySinglePredicate() {
-        Integer[] arr = { 1, 2, 3, 4, 5 };
-        Predicate<Integer> isEven = n -> n % 2 == 0;
-
-        Pair<Nullable<Integer>, Nullable<Integer>> result = Iterables.findFirstAndLast(arr, isEven);
-        assertTrue(result.left().isPresent());
-        assertTrue(result.right().isPresent());
-        assertEquals(Integer.valueOf(2), result.left().get());
-        assertEquals(Integer.valueOf(4), result.right().get());
-
-        Pair<Nullable<Integer>, Nullable<Integer>> emptyResult = Iterables.findFirstAndLast((Integer[]) null, isEven);
-        assertFalse(emptyResult.left().isPresent());
-        assertFalse(emptyResult.right().isPresent());
-    }
-
-    @Test
-    public void testFindFirstAndLastArrayTwoPredicates() {
-        Integer[] arr = { 1, 2, 3, 4, 5, 6 };
-        Predicate<Integer> isEven = n -> n % 2 == 0;
-        Predicate<Integer> greaterThan3 = n -> n > 3;
-
-        Pair<Nullable<Integer>, Nullable<Integer>> result = Iterables.findFirstAndLast(arr, isEven, greaterThan3);
-        assertTrue(result.left().isPresent());
-        assertTrue(result.right().isPresent());
-        assertEquals(Integer.valueOf(2), result.left().get());
-        assertEquals(Integer.valueOf(6), result.right().get());
-    }
-
-    @Test
-    public void testFindFirstAndLastCollectionSinglePredicate() {
-        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
-        Predicate<Integer> isEven = n -> n % 2 == 0;
-
-        Pair<Nullable<Integer>, Nullable<Integer>> result = Iterables.findFirstAndLast(list, isEven);
-        assertTrue(result.left().isPresent());
-        assertTrue(result.right().isPresent());
-        assertEquals(Integer.valueOf(2), result.left().get());
-        assertEquals(Integer.valueOf(4), result.right().get());
-
-        Pair<Nullable<Integer>, Nullable<Integer>> emptyResult = Iterables.findFirstAndLast((Collection<Integer>) null, isEven);
-        assertFalse(emptyResult.left().isPresent());
-        assertFalse(emptyResult.right().isPresent());
-    }
-
-    @Test
-    public void testFindFirstAndLastCollectionTwoPredicates() {
-        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6);
-        Predicate<Integer> isEven = n -> n % 2 == 0;
-        Predicate<Integer> greaterThan3 = n -> n > 3;
-
-        Pair<Nullable<Integer>, Nullable<Integer>> result = Iterables.findFirstAndLast(list, isEven, greaterThan3);
-        assertTrue(result.left().isPresent());
-        assertTrue(result.right().isPresent());
-        assertEquals(Integer.valueOf(2), result.left().get());
-        assertEquals(Integer.valueOf(6), result.right().get());
-    }
-
-    @Test
-    public void testFindFirstAndLastArray() {
-        Predicate<Integer> isEven = x -> x != null && x % 2 == 0;
-        Pair<Nullable<Integer>, Nullable<Integer>> result;
-
-        result = Iterables.findFirstAndLast((Integer[]) null, isEven);
-        assertTrue(result.left().isEmpty() && result.right().isEmpty());
-
-        result = Iterables.findFirstAndLast(new Integer[0], isEven);
-        assertTrue(result.left().isEmpty() && result.right().isEmpty());
-
-        result = Iterables.findFirstAndLast(new Integer[] { 1, 2, 3, 4, 5, 6 }, isEven);
-        assertEquals(2, result.left().orElse(null));
-        assertEquals(6, result.right().orElse(null));
-
-        result = Iterables.findFirstAndLast(new Integer[] { 1, 3, 5 }, isEven);
-        assertTrue(result.left().isEmpty() && result.right().isEmpty());
-    }
-
-    @Test
-    public void testFindFirstAndLastArrayWithTwoPredicates() {
-        Predicate<Integer> isSmallEven = x -> x != null && x % 2 == 0 && x < 5;
-        Predicate<Integer> isLargeOdd = x -> x != null && x % 2 != 0 && x > 3;
-        Pair<Nullable<Integer>, Nullable<Integer>> result;
-
-        result = Iterables.findFirstAndLast(new Integer[] { 1, 2, 3, 4, 5, 6 }, isSmallEven, isLargeOdd);
-        assertEquals(2, result.left().orElse(null));
-        assertEquals(5, result.right().orElse(null));
-    }
-
-    @Test
-    public void testFindFirstAndLastCollection() {
-        Predicate<Integer> isEven = x -> x != null && x % 2 == 0;
-        Pair<Nullable<Integer>, Nullable<Integer>> result;
-
-        result = Iterables.findFirstAndLast((Collection<Integer>) null, isEven);
-        assertTrue(result.left().isEmpty() && result.right().isEmpty());
-
-        result = Iterables.findFirstAndLast(Collections.emptyList(), isEven);
-        assertTrue(result.left().isEmpty() && result.right().isEmpty());
-
-        result = Iterables.findFirstAndLast(Arrays.asList(1, 2, 3, 4, 5, 6), isEven);
-        assertEquals(2, result.left().orElse(null));
-        assertEquals(6, result.right().orElse(null));
-    }
-
-    @Test
-    public void testFindFirstAndLastCollectionWithTwoPredicates() {
-        Predicate<Integer> isSmallEven = x -> x != null && x % 2 == 0 && x < 5;
-        Predicate<Integer> isLargeOdd = x -> x != null && x % 2 != 0 && x > 3;
-        Pair<Nullable<Integer>, Nullable<Integer>> result;
-
-        result = Iterables.findFirstAndLast(Arrays.asList(1, 2, 3, 4, 5, 6), isSmallEven, isLargeOdd);
-        assertEquals(2, result.left().orElse(null));
-        assertEquals(5, result.right().orElse(null));
-    }
-
-    @Test
-    public void testFindFirstAndLastArrayDifferentPredicates() {
-        Predicate<String> startsA = s -> s.startsWith("a");
-        Predicate<String> endsO = s -> s.endsWith("o");
-        Pair<Nullable<String>, Nullable<String>> result = Iterables.findFirstAndLast(new String[] { "apple", "avocado", "banana", "mango", "orange" }, startsA,
-                endsO);
-        assertEquals("apple", result.left().get());
-        assertEquals("mango", result.right().get());
-
-        result = Iterables.findFirstAndLast(new String[] { "apple", "avocado" }, s -> s.startsWith("x"), endsO);
-        assertTrue(result.left().isEmpty());
-        assertEquals("avocado", result.right().get());
-    }
-
-    @Test
-    public void testFindFirstAndLast() {
-        String[] array = { "a", "bb", "ccc", "dd", "eee" };
-
-        Pair<Nullable<String>, Nullable<String>> result = Iterables.findFirstAndLast(array, s -> s.length() >= 2);
-
-        assertTrue(result.left().isPresent());
-        assertTrue(result.right().isPresent());
-        assertEquals("bb", result.left().get());
-        assertEquals("eee", result.right().get());
-    }
-
-    @Test
-    public void testFindFirstAndLastWithDifferentPredicates() {
-        String[] array = { "a", "bb", "ccc", "dd", "eee" };
-
-        Pair<Nullable<String>, Nullable<String>> result = Iterables.findFirstAndLast(array, s -> s.length() == 2, s -> s.length() == 3);
-
-        assertTrue(result.left().isPresent());
-        assertTrue(result.right().isPresent());
-        assertEquals("bb", result.left().get());
-        assertEquals("eee", result.right().get());
-    }
-
-    // ===================== findFirstAndLast =====================
-
-    @Test
-    public void testFindFirstAndLastArray_SinglePredicate_Dedicated() {
-        Pair<Nullable<Integer>, Nullable<Integer>> result = Iterables.findFirstAndLast(new Integer[] { 1, 2, 3, 4, 5 }, i -> i % 2 == 0);
-        assertTrue(result.left().isPresent());
-        assertEquals(Integer.valueOf(2), result.left().get());
-        assertTrue(result.right().isPresent());
-        assertEquals(Integer.valueOf(4), result.right().get());
-    }
-
-    @Test
-    public void testFindFirstAndLastArray_TwoPredicates_Dedicated() {
-        Pair<Nullable<Integer>, Nullable<Integer>> result = Iterables.findFirstAndLast(new Integer[] { 1, 2, 3, 4, 5 }, i -> i > 3, i -> i < 3);
-        assertTrue(result.left().isPresent());
-        assertEquals(Integer.valueOf(4), result.left().get());
-        assertTrue(result.right().isPresent());
-        assertEquals(Integer.valueOf(2), result.right().get());
-    }
-
-    @Test
-    public void testFindFirstAndLastIndexArrayTwoPredicates() {
-        Integer[] arr = { 1, 2, 3, 4, 5, 6 };
-        Predicate<Integer> isEven = n -> n % 2 == 0;
-        Predicate<Integer> greaterThan3 = n -> n > 3;
-
-        Pair<OptionalInt, OptionalInt> result = Iterables.findFirstAndLastIndex(arr, isEven, greaterThan3);
-        assertTrue(result.left().isPresent());
-        assertTrue(result.right().isPresent());
-        assertEquals(1, result.left().getAsInt());
-        assertEquals(5, result.right().getAsInt());
-    }
-
-    @Test
-    public void testFindFirstAndLastIndexCollectionTwoPredicates() {
-        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6);
-        Predicate<Integer> isEven = n -> n % 2 == 0;
-        Predicate<Integer> greaterThan3 = n -> n > 3;
-
-        Pair<OptionalInt, OptionalInt> result = Iterables.findFirstAndLastIndex(list, isEven, greaterThan3);
-        assertTrue(result.left().isPresent());
-        assertTrue(result.right().isPresent());
-        assertEquals(1, result.left().getAsInt());
-        assertEquals(5, result.right().getAsInt());
-    }
-
-    @Test
-    public void testFindFirstAndLastIndex() {
-        String[] array = { "a", "bb", "ccc", "dd", "eee" };
-
-        Pair<OptionalInt, OptionalInt> result = Iterables.findFirstAndLastIndex(array, s -> s.length() >= 2);
-
-        assertTrue(result.left().isPresent());
-        assertTrue(result.right().isPresent());
-        assertEquals(1, result.left().get());
-        assertEquals(4, result.right().get());
-    }
-
-    @Test
-    public void testFindFirstAndLastIndexArraySinglePredicate() {
-        Integer[] arr = { 1, 2, 3, 4, 5 };
-        Predicate<Integer> isEven = n -> n % 2 == 0;
-
-        Pair<OptionalInt, OptionalInt> result = Iterables.findFirstAndLastIndex(arr, isEven);
-        assertTrue(result.left().isPresent());
-        assertTrue(result.right().isPresent());
-        assertEquals(1, result.left().getAsInt());
-        assertEquals(3, result.right().getAsInt());
-
-        Pair<OptionalInt, OptionalInt> emptyResult = Iterables.findFirstAndLastIndex((Integer[]) null, isEven);
-        assertFalse(emptyResult.left().isPresent());
-        assertFalse(emptyResult.right().isPresent());
-    }
-
-    @Test
-    public void testFindFirstAndLastIndexCollectionSinglePredicate() {
-        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
-        Predicate<Integer> isEven = n -> n % 2 == 0;
-
-        Pair<OptionalInt, OptionalInt> result = Iterables.findFirstAndLastIndex(list, isEven);
-        assertTrue(result.left().isPresent());
-        assertTrue(result.right().isPresent());
-        assertEquals(1, result.left().getAsInt());
-        assertEquals(3, result.right().getAsInt());
-
-        Pair<OptionalInt, OptionalInt> emptyResult = Iterables.findFirstAndLastIndex((Collection<Integer>) null, isEven);
-        assertFalse(emptyResult.left().isPresent());
-        assertFalse(emptyResult.right().isPresent());
-    }
-
-    @Test
-    public void testFindFirstAndLastIndexArray() {
-        Predicate<Integer> isEven = x -> x != null && x % 2 == 0;
-        Pair<OptionalInt, OptionalInt> result;
-
-        result = Iterables.findFirstAndLastIndex((Integer[]) null, isEven);
-        assertTrue(result.left().isEmpty() && result.right().isEmpty());
-
-        result = Iterables.findFirstAndLastIndex(new Integer[0], isEven);
-        assertTrue(result.left().isEmpty() && result.right().isEmpty());
-
-        result = Iterables.findFirstAndLastIndex(new Integer[] { 1, 2, 3, 4, 5, 6 }, isEven);
-        assertEquals(1, result.left().orElse(-1));
-        assertEquals(5, result.right().orElse(-1));
-
-        result = Iterables.findFirstAndLastIndex(new Integer[] { 1, 3, 5 }, isEven);
-        assertTrue(result.left().isEmpty() && result.right().isEmpty());
-    }
-
-    @Test
-    public void testFindFirstAndLastIndexArrayWithTwoPredicates() {
-        Predicate<Integer> isSmallEven = x -> x != null && x % 2 == 0 && x < 5;
-        Predicate<Integer> isLargeOdd = x -> x != null && x % 2 != 0 && x > 3;
-        Pair<OptionalInt, OptionalInt> result;
-
-        result = Iterables.findFirstAndLastIndex(new Integer[] { 1, 2, 3, 4, 5, 6 }, isSmallEven, isLargeOdd);
-        assertEquals(1, result.left().orElse(-1));
-        assertEquals(4, result.right().orElse(-1));
-    }
-
-    @Test
-    public void testFindFirstAndLastIndexCollection() {
-        Predicate<Integer> isEven = x -> x != null && x % 2 == 0;
-        Pair<OptionalInt, OptionalInt> result;
-
-        result = Iterables.findFirstAndLastIndex((Collection<Integer>) null, isEven);
-        assertTrue(result.left().isEmpty() && result.right().isEmpty());
-
-        result = Iterables.findFirstAndLastIndex(Collections.emptyList(), isEven);
-        assertTrue(result.left().isEmpty() && result.right().isEmpty());
-
-        result = Iterables.findFirstAndLastIndex(Arrays.asList(1, 2, 3, 4, 5, 6), isEven);
-        assertEquals(1, result.left().orElse(-1));
-        assertEquals(5, result.right().orElse(-1));
-    }
-
-    @Test
-    public void testFindFirstAndLastIndexCollectionWithTwoPredicates() {
-        Predicate<Integer> isSmallEven = x -> x != null && x % 2 == 0 && x < 5;
-        Predicate<Integer> isLargeOdd = x -> x != null && x % 2 != 0 && x > 3;
-        Pair<OptionalInt, OptionalInt> result;
-
-        result = Iterables.findFirstAndLastIndex(Arrays.asList(1, 2, 3, 4, 5, 6), isSmallEven, isLargeOdd);
-        assertEquals(1, result.left().orElse(-1));
-        assertEquals(4, result.right().orElse(-1));
-    }
-
-    // ===================== findFirstAndLastIndex =====================
-
-    @Test
-    public void testFindFirstAndLastIndexArray_SinglePredicate_Dedicated() {
-        Pair<OptionalInt, OptionalInt> result = Iterables.findFirstAndLastIndex(new Integer[] { 1, 2, 3, 4, 5 }, i -> i % 2 == 0);
-        assertTrue(result.left().isPresent());
-        assertEquals(1, result.left().get());
-        assertTrue(result.right().isPresent());
-        assertEquals(3, result.right().get());
-    }
-
-    @Test
-    public void testFindFirstAndLastIndexCollection_SinglePredicate_Dedicated() {
-        Pair<OptionalInt, OptionalInt> result = Iterables.findFirstAndLastIndex(Arrays.asList(1, 2, 3, 4, 5), i -> i % 2 == 0);
-        assertTrue(result.left().isPresent());
-        assertEquals(1, result.left().get());
-        assertTrue(result.right().isPresent());
-        assertEquals(3, result.right().get());
-    }
-
-    @Test
-    public void testFillArray() {
-        String[] arr = new String[5];
-        Supplier<String> supplier = () -> "test";
-
-        Iterables.fill(arr, supplier);
-
-        for (String s : arr) {
-            assertEquals("test", s);
-        }
-    }
-
-    @Test
-    public void testFillListWithRange() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        Supplier<String> supplier = () -> "X";
-
-        Iterables.fill(list, 1, 4, supplier);
-
-        assertEquals("a", list.get(0));
-        assertEquals("X", list.get(1));
-        assertEquals("X", list.get(2));
-        assertEquals("X", list.get(3));
-        assertEquals("e", list.get(4));
-    }
-
-    @Test
-    public void testFillArrayRangeWithSupplier() {
-        String[] array = new String[5];
-        Arrays.fill(array, "initial");
-        Supplier<String> supplier = () -> "test";
-
-        Iterables.fill(array, 1, 4, supplier);
-
-        assertArrayEquals(new String[] { "initial", "test", "test", "test", "initial" }, array);
-    }
-
-    @Test
-    public void testFillListRangeWithSupplier() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        Supplier<String> supplier = () -> "test";
-
-        Iterables.fill(list, 1, 4, supplier);
-
-        assertEquals(Arrays.asList("a", "test", "test", "test", "e"), list);
-    }
-
-    @Test
-    public void testFillListExtension() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b"));
-        Supplier<String> supplier = () -> "test";
-
-        Iterables.fill(list, 0, 5, supplier);
-
-        assertEquals(5, list.size());
-        assertEquals(Arrays.asList("test", "test", "test", "test", "test"), list);
-    }
-
-    // ===================== fill Array/List overloads =====================
-
-    @Test
-    public void testFillArray_Dedicated() {
-        String[] arr = new String[3];
-        Iterables.fill(arr, () -> "x");
-        assertArrayEquals(new String[] { "x", "x", "x" }, arr);
-    }
-
-    @Test
-    public void testFillList_Dedicated() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
-        Iterables.fill(list, () -> "z");
-        assertEquals(Arrays.asList("z", "z", "z"), list);
-    }
-
-    @Test
-    public void testFillListRange_Dedicated() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
-        Iterables.fill(list, 1, 3, () -> "z");
-        assertEquals(Arrays.asList("a", "z", "z", "d"), list);
-    }
-
-    @Test
-    public void testFill_ListWithSupplier_ExtendsExistingList() {
-        List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3));
-        Supplier<Integer> supplier = () -> 99;
-        Iterables.fill(list, 1, 5, supplier);
-        assertEquals(5, list.size());
-        assertEquals(Integer.valueOf(1), list.get(0));
-        assertEquals(Integer.valueOf(99), list.get(1));
-        assertEquals(Integer.valueOf(99), list.get(4));
-    }
-
-    @Test
-    public void testFill_ListWithSupplier_ExistingRange() {
-        List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
-        Supplier<Integer> supplier = () -> 0;
-        Iterables.fill(list, 1, 3, supplier);
-        assertEquals(5, list.size());
-        assertEquals(Integer.valueOf(1), list.get(0));
-        assertEquals(Integer.valueOf(0), list.get(1));
-        assertEquals(Integer.valueOf(0), list.get(2));
-        assertEquals(Integer.valueOf(4), list.get(3));
-    }
-
-    @Test
-    public void testFillArrayWithRange() {
-        String[] arr = new String[5];
-        Supplier<String> supplier = () -> "test";
-
-        Iterables.fill(arr, 1, 4, supplier);
-
-        assertNull(arr[0]);
-        assertEquals("test", arr[1]);
-        assertEquals("test", arr[2]);
-        assertEquals("test", arr[3]);
-        assertNull(arr[4]);
-    }
-
-    @Test
-    public void testFillList() {
-        List<String> list = new ArrayList<>(Arrays.asList(null, null, null));
-        Supplier<String> supplier = () -> "filled";
-
-        Iterables.fill(list, supplier);
-
-        for (String s : list) {
-            assertEquals("filled", s);
-        }
-    }
-
-    @Test
-    public void testFillArrayWithSupplier() {
-        Iterables.fill((String[]) null, () -> "a");
-
-        String[] arrEmpty = new String[0];
-        Iterables.fill(arrEmpty, () -> "a");
-        assertEquals(0, arrEmpty.length);
-
-        String[] arr = new String[3];
-        Iterables.fill(arr, () -> "filled");
-        assertArrayEquals(new String[] { "filled", "filled", "filled" }, arr);
-
-        final int[] counter = { 0 };
-        Supplier<Integer> supplier = () -> counter[0]++;
-        Integer[] arrInt = new Integer[3];
-        Iterables.fill(arrInt, supplier);
-        assertArrayEquals(new Integer[] { 0, 1, 2 }, arrInt);
-    }
-
-    @Test
-    public void testFillArraySupplier() {
-        String[] arr = new String[3];
-        Supplier<String> supplier = () -> "test";
-        Iterables.fill(arr, supplier);
-        assertArrayEquals(new String[] { "test", "test", "test" }, arr);
-
-        Iterables.fill((String[]) null, supplier);
-        Iterables.fill(new String[0], supplier);
-    }
-
-    @Test
-    public void testFillArrayRange_Dedicated() {
-        String[] arr = new String[5];
-        Iterables.fill(arr, 1, 4, () -> "y");
-        assertNull(arr[0]);
-        assertEquals("y", arr[1]);
-        assertEquals("y", arr[2]);
-        assertEquals("y", arr[3]);
-        assertNull(arr[4]);
-    }
-
-    @Test
-    public void testFill_ListWithSupplier_EmptyAndGap() {
-        List<Integer> list = new ArrayList<>();
-        Supplier<Integer> supplier = () -> 7;
-        // fromIndex > size: the gap [size, fromIndex) is padded with null (aligned with N.fill),
-        // only [fromIndex, toIndex) is populated from the supplier.
-        Iterables.fill(list, 2, 4, supplier);
-        assertEquals(4, list.size());
-        assertNull(list.get(0));
-        assertNull(list.get(1));
-        assertEquals(Integer.valueOf(7), list.get(2));
-        assertEquals(Integer.valueOf(7), list.get(3));
-    }
-
-    @Test
-    public void testFillArrayFromToWithSupplier() {
-        Iterables.fill((String[]) null, 0, 0, () -> "a");
-
-        String[] arr = new String[5];
-        Arrays.fill(arr, "original");
-        Iterables.fill(arr, 1, 4, () -> "filled");
-        assertArrayEquals(new String[] { "original", "filled", "filled", "filled", "original" }, arr);
-
-        Iterables.fill(arr, 1, 1, () -> "no-fill");
-        assertArrayEquals(new String[] { "original", "filled", "filled", "filled", "original" }, arr);
-
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, -1, 2, () -> "fail"));
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, 0, 6, () -> "fail"));
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, 3, 2, () -> "fail"));
-    }
-
-    @Test
-    public void testFillListWithSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<String>) null, () -> "a"));
-
-        List<String> listEmpty = new ArrayList<>();
-        Iterables.fill(listEmpty, () -> "a");
-        assertTrue(listEmpty.isEmpty());
-
-        List<String> list = new ArrayList<>(Arrays.asList("x", "y", "z"));
-        Iterables.fill(list, () -> "filled");
-        assertEquals(Arrays.asList("filled", "filled", "filled"), list);
-
-        final int[] counter = { 0 };
-        Supplier<Integer> supplier = () -> counter[0]++;
-        List<Integer> listInt = new ArrayList<>(Arrays.asList(0, 0, 0));
-        Iterables.fill(listInt, supplier);
-        assertEquals(Arrays.asList(0, 1, 2), listInt);
-    }
-
-    @Test
-    public void testFillListFromToWithSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<String>) null, 0, 0, () -> "a"));
-
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        Iterables.fill(list, 1, 4, () -> "filled");
-        assertEquals(Arrays.asList("a", "filled", "filled", "filled", "e"), list);
-
-        List<String> shortList = new ArrayList<>(Arrays.asList("a"));
-        Iterables.fill(shortList, 0, 3, () -> "new");
-        assertEquals(Arrays.asList("new", "new", "new"), shortList);
-        assertEquals(3, shortList.size());
-
-        List<String> listToExtend = new ArrayList<>(Arrays.asList("a", "b"));
-        Iterables.fill(listToExtend, 1, 4, () -> "Z");
-        assertEquals(Arrays.asList("a", "Z", "Z", "Z"), listToExtend);
-
-        List<Integer> listInt = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
-        final int[] counter = { 10 };
-        Supplier<Integer> supplier = () -> counter[0]++;
-        Iterables.fill(listInt, 2, 5, supplier);
-        assertEquals(Arrays.asList(1, 2, 10, 11, 12), listInt);
-
-        List<Integer> listFillAndExtend = new ArrayList<>(Arrays.asList(1, 2));
-        final int[] counter2 = { 100 };
-        Supplier<Integer> supplier2 = () -> counter2[0]++;
-        Iterables.fill(listFillAndExtend, 1, 4, supplier2);
-        assertEquals(Arrays.asList(1, 100, 101, 102), listFillAndExtend);
-
-        List<Integer> listFillFromSize = new ArrayList<>(Arrays.asList(1, 2));
-        final int[] counter3 = { 200 };
-        Supplier<Integer> supplier3 = () -> counter3[0]++;
-        Iterables.fill(listFillFromSize, 2, 4, supplier3);
-        assertEquals(Arrays.asList(1, 2, 200, 201), listFillFromSize);
-
-        List<Integer> listFillFromSize2 = new ArrayList<>(Arrays.asList(1, 2));
-        final int[] counter4 = { 300 };
-        Supplier<Integer> supplier4 = () -> counter4[0]++;
-        Iterables.fill(listFillFromSize2, 3, 5, supplier4);
-        // Gap [size, fromIndex) is padded with null (aligned with N.fill); only [fromIndex, toIndex) uses the supplier.
-        assertEquals(Arrays.asList(1, 2, null, 300, 301), listFillFromSize2);
-
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(list, -1, 2, () -> "fail"));
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(list, 3, 2, () -> "fail"));
-
-    }
-
-    @Test
-    public void testFillArrayRangeSupplier() {
-        String[] arr = { "a", "b", "c", "d" };
-        Supplier<String> supplier = () -> "x";
-        Iterables.fill(arr, 1, 3, supplier);
-        assertArrayEquals(new String[] { "a", "x", "x", "d" }, arr);
-
-        Iterables.fill(arr, 1, 1, supplier);
-        assertArrayEquals(new String[] { "a", "x", "x", "d" }, arr);
-
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, 0, 5, supplier));
-    }
-
-    @Test
-    public void testFillListSupplier() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
-        Supplier<String> supplier = () -> "test";
-        Iterables.fill(list, supplier);
-        assertEquals(list("test", "test", "test"), list);
-
-        List<String> emptyList = new ArrayList<>();
-        Iterables.fill(emptyList, supplier);
-        assertTrue(emptyList.isEmpty());
-
-        assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<String>) null, supplier));
-    }
-
-    @Test
-    public void testFillListRangeSupplier() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
-        Supplier<String> supplier = () -> "x";
-        Iterables.fill(list, 1, 3, supplier);
-        assertEquals(list("a", "x", "x", "d"), list);
-
-        List<String> shortList = new ArrayList<>(Arrays.asList("a"));
-        Iterables.fill(shortList, 0, 3, supplier);
-        assertEquals(list("x", "x", "x"), shortList);
-
-        List<String> shortList2 = new ArrayList<>(Arrays.asList("a"));
-        Iterables.fill(shortList2, 2, 4, supplier);
-        // Gap [size, fromIndex) is padded with null (aligned with N.fill); only [fromIndex, toIndex) uses the supplier.
-        assertEquals(Arrays.asList("a", null, "x", "x"), shortList2);
-        Iterables.fill(list, 0, 5, supplier);
-        assertEquals(list("x", "x", "x", "x", "x"), list);
-
-        assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<String>) null, 0, 1, supplier));
-    }
-
-    @Test
-    public void testFillNullArray() {
-        assertDoesNotThrow(() -> Iterables.fill((String[]) null, () -> "test"));
-    }
-
-    @Test
-    public void testFillNullList() {
-        assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<String>) null, () -> "test"));
-    }
-
-    // ===================== fill edge cases =====================
-
-    @Test
-    public void testFillArrayRange_NullArray() {
-        assertDoesNotThrow(() -> Iterables.fill((String[]) null, 0, 0, () -> "x"));
-    }
-
-    @Test
-    public void testFill_ListWithSupplier_NullList_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<Integer>) null, 0, 2, () -> 1));
-    }
-
-    @Test
-    public void testFill_NullSupplierNotEvaluatedForEmptyTargetsAndRanges() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], (Supplier<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], 0, 0, (Supplier<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new ArrayList<String>(), (Supplier<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> Iterables.fill(new ArrayList<String>(), 0, 0, (Supplier<String>) null));
     }
 
     @Test
@@ -5096,8 +576,6 @@ public class IterablesTest extends AbstractTest {
         assertEquals("d", dest.get(4));
         assertEquals("6", dest.get(5));
     }
-
-    // ===================== copyInto =====================
 
     @Test
     public void testCopyInto_Dedicated() {
@@ -5146,8 +624,6 @@ public class IterablesTest extends AbstractTest {
         assertEquals(Integer.valueOf(30), dest.get(2));
     }
 
-    // ===================== copyInto edge cases =====================
-
     @Test
     public void testCopyRange_ZeroLength() {
         List<String> src = list("a", "b", "c");
@@ -5188,39 +664,39 @@ public class IterablesTest extends AbstractTest {
     public void test_reverse() {
 
         {
-            final List<Integer> list = N.toList(1, 2, 3, 4, 5);
+            final List<Integer> list = CommonUtil.toList(1, 2, 3, 4, 5);
             final List<Integer> reversed = Iterables.asReversed(list);
-            assertEquals(N.toList(5, 4, 3, 2, 1), reversed);
+            assertEquals(CommonUtil.toList(5, 4, 3, 2, 1), reversed);
 
             reversed.add(6);
-            assertEquals(N.toList(6, 1, 2, 3, 4, 5), list);
+            assertEquals(CommonUtil.toList(6, 1, 2, 3, 4, 5), list);
 
             list.remove(1);
-            assertEquals(N.toList(5, 4, 3, 2, 6), reversed);
+            assertEquals(CommonUtil.toList(5, 4, 3, 2, 6), reversed);
         }
 
         {
-            final List<Integer> list = N.toList(1, 2, 3, 4, 5);
+            final List<Integer> list = CommonUtil.toList(1, 2, 3, 4, 5);
             final List<Integer> reversed = Lists.reverse(list);
-            assertEquals(N.toList(5, 4, 3, 2, 1), reversed);
+            assertEquals(CommonUtil.toList(5, 4, 3, 2, 1), reversed);
 
             reversed.add(6);
-            assertEquals(N.toList(6, 1, 2, 3, 4, 5), list);
+            assertEquals(CommonUtil.toList(6, 1, 2, 3, 4, 5), list);
 
             list.remove(1);
-            assertEquals(N.toList(5, 4, 3, 2, 6), reversed);
+            assertEquals(CommonUtil.toList(5, 4, 3, 2, 6), reversed);
         }
 
         {
-            final List<Integer> list = N.toList(1, 2, 3, 4, 5);
-            final List<Integer> reversed = N.toReversedList(list);
-            assertEquals(N.toList(5, 4, 3, 2, 1), reversed);
+            final List<Integer> list = CommonUtil.toList(1, 2, 3, 4, 5);
+            final List<Integer> reversed = CommonUtil.toReversedList(list);
+            assertEquals(CommonUtil.toList(5, 4, 3, 2, 1), reversed);
         }
 
         {
-            final Collection<Integer> c = N.toLinkedHashSet(1, 2, 3, 4, 5);
-            N.reverse(c);
-            assertEquals(N.toLinkedHashSet(5, 4, 3, 2, 1), c);
+            final Collection<Integer> c = CommonUtil.toLinkedHashSet(1, 2, 3, 4, 5);
+            CommonUtil.reverse(c);
+            assertEquals(CommonUtil.toLinkedHashSet(5, 4, 3, 2, 1), c);
         }
     }
 
@@ -5286,16 +762,12 @@ public class IterablesTest extends AbstractTest {
         assertEquals(list, doubleReversed);
     }
 
-    // ===================== asReversed =====================
-
     @Test
     public void testAsReversed_Dedicated() {
         List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
         List<Integer> reversed = Iterables.asReversed(list);
         assertEquals(Arrays.asList(5, 4, 3, 2, 1), reversed);
     }
-
-    // ===================== asReversed - remove / subList / clear =====================
 
     @Test
     public void testAsReversed_Remove() {
@@ -5364,8 +836,6 @@ public class IterablesTest extends AbstractTest {
         // double reverse should return the original forward list
         assertEquals(list(1, 2, 3), doubleReversed);
     }
-
-    // --- Additional coverage tests ---
 
     @Test
     public void testAsReversed_ImmutableList() {
@@ -5501,6 +971,11 @@ public class IterablesTest extends AbstractTest {
 
         assertEquals(4, result.size());
         assertTrue(result.containsAll(Arrays.asList("a", "b", "c", "d")));
+
+        final Set<String> populated = new HashSet<>(Arrays.asList("existing"));
+        assertEquals(populated, union.copyInto(populated));
+        assertEquals(5, populated.size());
+        assertTrue(populated.contains("existing"));
     }
 
     @Test
@@ -5517,8 +992,6 @@ public class IterablesTest extends AbstractTest {
         Iterables.SetView<String> union3 = Iterables.union(emptySet, emptySet);
         assertTrue(union3.isEmpty());
     }
-
-    // ===================== SetView immutability =====================
 
     @Test
     public void testUnion_ImmutableView() {
@@ -5643,8 +1116,6 @@ public class IterablesTest extends AbstractTest {
         assertFalse(symDiff.contains(4));
     }
 
-    // ===================== union / intersection / difference / symmetricDifference =====================
-
     @Test
     public void testUnion_Dedicated() {
         Set<Integer> s1 = new HashSet<>(Arrays.asList(1, 2, 3));
@@ -5693,14 +1164,14 @@ public class IterablesTest extends AbstractTest {
         final Iterables.SetView<Integer> union = Iterables.union(unionLeft, unionRight);
         unionLeft.add(1);
         unionRight.add(2);
-        assertEquals(N.asSet(1, 2), union.copyInto(new HashSet<>()));
+        assertEquals(CommonUtil.asSet(1, 2), union.copyInto(new HashSet<>()));
 
         final Set<Integer> intersectionLeft = new HashSet<>();
         final Set<Integer> intersectionRight = new HashSet<>();
         final Iterables.SetView<Integer> intersection = Iterables.intersection(intersectionLeft, intersectionRight);
         intersectionLeft.add(3);
         intersectionRight.add(3);
-        assertEquals(N.asSet(3), intersection.copyInto(new HashSet<>()));
+        assertEquals(CommonUtil.asSet(3), intersection.copyInto(new HashSet<>()));
 
         final Set<Integer> differenceLeft = new HashSet<>();
         final Set<Integer> differenceRight = new HashSet<>();
@@ -5747,8 +1218,6 @@ public class IterablesTest extends AbstractTest {
         assertFalse(subset.contains(5));
     }
 
-    // ===================== subSet =====================
-
     @Test
     public void testSubSet_Dedicated() {
         NavigableSet<Integer> set = new TreeSet<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
@@ -5782,7 +1251,7 @@ public class IterablesTest extends AbstractTest {
     public void testSubSetNavigableSet() {
         NavigableSet<Integer> set = new TreeSet<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
 
-        assertTrue(Iterables.subSet(N.emptyNavigableSet(), Range.closed(1, 5)).isEmpty());
+        assertTrue(Iterables.subSet(CommonUtil.emptyNavigableSet(), Range.closed(1, 5)).isEmpty());
 
         Range<Integer> r1 = Range.closedOpen(3, 7);
         NavigableSet<Integer> sub1 = Iterables.subSet(set, r1);
@@ -5861,8 +1330,6 @@ public class IterablesTest extends AbstractTest {
         assertEquals(4, allSubsets.size());
     }
 
-    // ===================== powerSet =====================
-
     @Test
     public void testPowerSet_Dedicated() {
         Set<Set<Integer>> result = Iterables.powerSet(new HashSet<>(Arrays.asList(1, 2)));
@@ -5877,27 +1344,6 @@ public class IterablesTest extends AbstractTest {
         assertFalse(result.contains(new HashSet<>(Arrays.asList(3))));
         assertFalse(result.contains("not a set"));
     }
-
-    @Test
-    public void testPowerSetEmpty() {
-        Set<Integer> input = new HashSet<>();
-        Set<Set<Integer>> powerSet = Iterables.powerSet(input);
-
-        assertEquals(1, powerSet.size());
-        assertTrue(powerSet.contains(new HashSet<>()));
-    }
-
-    @Test
-    public void testPowerSetSingleElement() {
-        Set<String> singleElementSet = Collections.singleton("a");
-        Set<Set<String>> powerSet = Iterables.powerSet(singleElementSet);
-
-        assertEquals(2, powerSet.size());
-        assertTrue(powerSet.contains(Collections.emptySet()));
-        assertTrue(powerSet.contains(Collections.singleton("a")));
-    }
-
-    // ===================== powerSet edge cases =====================
 
     @Test
     public void testPowerSet_SingleElement() {
@@ -5929,8 +1375,6 @@ public class IterablesTest extends AbstractTest {
         assertEquals(Arrays.asList("a", "b", "c"), rollup.get(3));
     }
 
-    // ===================== rollup =====================
-
     @Test
     public void testRollup_Dedicated() {
         List<List<Integer>> result = Iterables.rollup(Arrays.asList(1, 2, 3));
@@ -5942,33 +1386,12 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
-    public void testRollupEmpty() {
-        List<String> input = new ArrayList<>();
-        List<List<String>> rollup = Iterables.rollup(input);
-
-        assertEquals(1, rollup.size());
-        assertEquals(Arrays.asList(), rollup.get(0));
-    }
-
-    @Test
     public void testRollupNull() {
         List<List<String>> rollup = Iterables.rollup(null);
 
         assertEquals(1, rollup.size());
         assertEquals(Collections.emptyList(), rollup.get(0));
     }
-
-    @Test
-    public void testRollupSingleElement() {
-        List<String> singleElement = Arrays.asList("a");
-        List<List<String>> rollup = Iterables.rollup(singleElement);
-
-        assertEquals(2, rollup.size());
-        assertEquals(Collections.emptyList(), rollup.get(0));
-        assertEquals(Arrays.asList("a"), rollup.get(1));
-    }
-
-    // ===================== rollup edge cases =====================
 
     @Test
     public void testRollup_SingleElement() {
@@ -6015,8 +1438,6 @@ public class IterablesTest extends AbstractTest {
         assertFalse(perms.contains(Arrays.asList("c", "d")));
     }
 
-    // ===================== permutations =====================
-
     @Test
     public void testPermutations_Dedicated() {
         Collection<List<Integer>> result = Iterables.permutations(Arrays.asList(1, 2, 3));
@@ -6032,26 +1453,6 @@ public class IterablesTest extends AbstractTest {
         assertFalse(perms.contains(new LinkedHashSet<>(Arrays.asList(1, 2))));
         assertFalse(perms.contains("not a list"));
     }
-
-    @Test
-    public void testPermutationsEmpty() {
-        List<Integer> input = new ArrayList<>();
-        Collection<List<Integer>> perms = Iterables.permutations(input);
-
-        assertEquals(1, perms.size());
-        assertTrue(perms.iterator().next().isEmpty());
-    }
-
-    @Test
-    public void testPermutationsSingleElement() {
-        List<String> singleElement = Arrays.asList("a");
-        Collection<List<String>> perms = Iterables.permutations(singleElement);
-
-        assertEquals(1, perms.size());
-        assertEquals(Arrays.asList("a"), perms.iterator().next());
-    }
-
-    // ===================== permutations edge cases =====================
 
     @Test
     public void testPermutations_SingleElement() {
@@ -6092,8 +1493,6 @@ public class IterablesTest extends AbstractTest {
         Set<List<Integer>> uniquePerms = new HashSet<>(perms);
         assertEquals(3, uniquePerms.size());
     }
-
-    // ===================== orderedPermutations =====================
 
     @Test
     public void testOrderedPermutations_Dedicated() {
@@ -6169,413 +1568,6 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
-    public void testCartesianProductVarargs() {
-        List<List<Integer>> product = Iterables.cartesianProduct(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6));
-
-        assertEquals(8, product.size());
-
-        assertEquals(Arrays.asList(1, 3, 5), product.get(0));
-        assertEquals(Arrays.asList(2, 4, 6), product.get(7));
-    }
-
-    @Test
-    public void testCartesianProductCollection() {
-        Collection<Collection<Integer>> collections = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6));
-        List<List<Integer>> product = Iterables.cartesianProduct(collections);
-
-        assertEquals(8, product.size());
-
-        assertEquals(Arrays.asList(1, 3, 5), product.get(0));
-        assertEquals(Arrays.asList(2, 4, 6), product.get(7));
-    }
-
-    @Test
-    public void testCartesianProductThreeSets() {
-        List<String> list1 = Arrays.asList("a", "b");
-        List<String> list2 = Arrays.asList("1", "2");
-        List<String> list3 = Arrays.asList("x", "y");
-
-        List<List<String>> product = Iterables.cartesianProduct(list1, list2, list3);
-
-        assertEquals(8, product.size());
-        assertEquals(Arrays.asList("a", "1", "x"), product.get(0));
-        assertEquals(Arrays.asList("b", "2", "y"), product.get(7));
-    }
-
-    @Test
-    public void testCartesianProductContains() {
-        List<String> list1 = Arrays.asList("a", "b");
-        List<String> list2 = Arrays.asList("1", "2");
-
-        List<List<String>> product = Iterables.cartesianProduct(list1, list2);
-
-        assertTrue(product.contains(Arrays.asList("a", "1")));
-        assertTrue(product.contains(Arrays.asList("b", "2")));
-        assertFalse(product.contains(Arrays.asList("c", "1")));
-        assertFalse(product.contains(Arrays.asList("a", "1", "extra")));
-        assertFalse(product.contains("not a list"));
-    }
-
-    @Test
-    public void testCartesianProductRandomAccess() {
-        List<String> list1 = Arrays.asList("a", "b");
-        List<String> list2 = Arrays.asList("1", "2");
-
-        List<List<String>> product = Iterables.cartesianProduct(list1, list2);
-
-        assertTrue(product instanceof RandomAccess);
-
-        assertEquals(Arrays.asList("b", "1"), product.get(2));
-        assertEquals(Arrays.asList("a", "2"), product.get(1));
-    }
-
-    // ===================== cartesianProduct =====================
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void testCartesianProduct_Dedicated() {
-        List<List<Integer>> result = Iterables.cartesianProduct(Arrays.asList(1, 2), Arrays.asList(3, 4));
-        assertEquals(4, result.size());
-        assertTrue(result.contains(Arrays.asList(1, 3)));
-        assertTrue(result.contains(Arrays.asList(1, 4)));
-        assertTrue(result.contains(Arrays.asList(2, 3)));
-        assertTrue(result.contains(Arrays.asList(2, 4)));
-    }
-
-    @Test
-    public void testCartesianProductCollection_Dedicated() {
-        List<Collection<Integer>> collections = new ArrayList<>();
-        collections.add(Arrays.asList(1, 2));
-        collections.add(Arrays.asList(3, 4));
-        List<List<Integer>> result = Iterables.cartesianProduct(collections);
-        assertEquals(4, result.size());
-    }
-
-    // ===================== cartesianProduct edge cases =====================
-
-    @Test
-    public void testCartesianProduct_ContainsCheck() {
-        List<List<Integer>> product = Iterables.cartesianProduct(Arrays.asList(1, 2), Arrays.asList(3, 4));
-        assertTrue(product.contains(list(1, 3)));
-        assertTrue(product.contains(list(2, 4)));
-        assertFalse(product.contains(list(1, 5)));
-        assertFalse(product.contains("not a list"));
-    }
-
-    @Test
-    public void testCartesianProductWithEmptyList() {
-        List<List<Integer>> product = Iterables.cartesianProduct(Arrays.asList(1, 2), Arrays.asList(), Arrays.asList(5, 6));
-
-        assertEquals(0, product.size());
-    }
-
-    @Test
-    public void testCartesianProductNoLists() {
-        List<List<Integer>> product = Iterables.cartesianProduct(new ArrayList<Collection<Integer>>());
-
-        assertEquals(1, product.size());
-        assertTrue(product.get(0).isEmpty());
-    }
-
-    @Test
-    public void testCartesianProductSingleList() {
-        List<List<Integer>> product = Iterables.cartesianProduct(Arrays.asList(Arrays.asList(1, 2, 3)));
-
-        assertEquals(3, product.size());
-        assertEquals(Arrays.asList(1), product.get(0));
-        assertEquals(Arrays.asList(2), product.get(1));
-        assertEquals(Arrays.asList(3), product.get(2));
-    }
-
-    @Test
-    public void testCartesianProductCollectionOfCollections() {
-        List<Collection<?>> listOfColls = new ArrayList<>();
-        List<List<Object>> cpEmptyOuter = Iterables.cartesianProduct(listOfColls);
-        assertEquals(1, cpEmptyOuter.size());
-        assertTrue(cpEmptyOuter.get(0).isEmpty());
-
-        listOfColls.add(Arrays.asList(1, 2));
-        List<List<Object>> cpOneList = Iterables.cartesianProduct(listOfColls);
-        assertEquals(2, cpOneList.size());
-        assertEquals(Collections.singletonList(1), cpOneList.get(0));
-        assertEquals(Collections.singletonList(2), cpOneList.get(1));
-
-        listOfColls.add(Arrays.asList("A", "B"));
-        List<List<Object>> cpTwoLists = Iterables.cartesianProduct(listOfColls);
-        assertEquals(4, cpTwoLists.size());
-        assertEquals(Arrays.asList(1, "A"), cpTwoLists.get(0));
-        assertEquals(Arrays.asList(1, "B"), cpTwoLists.get(1));
-        assertEquals(Arrays.asList(2, "A"), cpTwoLists.get(2));
-        assertEquals(Arrays.asList(2, "B"), cpTwoLists.get(3));
-
-        List<List<Object>> cpNullInput = Iterables.cartesianProduct((Collection<? extends Collection<?>>) null);
-        assertEquals(1, cpNullInput.size());
-        assertTrue(cpNullInput.get(0).isEmpty());
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void testCartesianProductVarArgs() {
-        List<List<Integer>> cp = Iterables.cartesianProduct(list(1, 2), list(3, 4));
-        assertEquals(4, cp.size());
-        assertTrue(cp.contains(list(1, 3)));
-        assertTrue(cp.contains(list(1, 4)));
-        assertTrue(cp.contains(list(2, 3)));
-        assertTrue(cp.contains(list(2, 4)));
-        assertEquals(list(1, 3), cp.get(0));
-        assertEquals(list(1, 4), cp.get(1));
-        assertEquals(list(2, 3), cp.get(2));
-        assertEquals(list(2, 4), cp.get(3));
-
-        List<List<Object>> cpMixed = Iterables.cartesianProduct(list(1, 2), list("a"), list(true, false));
-        assertEquals(4, cpMixed.size());
-        assertTrue(cpMixed.contains(list(1, "a", true)));
-        assertTrue(cpMixed.contains(list(2, "a", false)));
-        assertEquals(list(1, "a", true), cpMixed.get(0));
-
-        List<List<Integer>> cpEmptyList = Iterables.cartesianProduct(list(1, 2), list());
-        assertTrue(cpEmptyList.isEmpty());
-
-        List<List<Integer>> cpNoLists = Iterables.cartesianProduct();
-        assertEquals(1, cpNoLists.size());
-        assertTrue(cpNoLists.get(0).isEmpty());
-    }
-
-    @Test
-    public void testCartesianProductWithEmptySet() {
-        List<String> list1 = Arrays.asList("a", "b");
-        List<String> emptyList = Collections.emptyList();
-
-        List<List<String>> product = Iterables.cartesianProduct(list1, emptyList);
-
-        assertTrue(product.isEmpty());
-    }
-
-    @Test
-    public void testCartesianProductEmpty() {
-        List<Collection<String>> emptyCollections = Collections.emptyList();
-        List<List<String>> product = Iterables.cartesianProduct(emptyCollections);
-
-        assertEquals(1, product.size());
-        assertEquals(Collections.emptyList(), product.get(0));
-    }
-
-    @Test
-    public void testCartesianProductSingleElement() {
-        List<String> singleList = Arrays.asList("a");
-        List<List<String>> product = Iterables.cartesianProduct(singleList);
-
-        assertEquals(1, product.size());
-        assertEquals(Arrays.asList("a"), product.get(0));
-    }
-
-    @Test
-    public void testCartesianProductIndexOutOfBounds() {
-        List<String> list1 = Arrays.asList("a");
-        List<String> list2 = Arrays.asList("1");
-
-        List<List<String>> product = Iterables.cartesianProduct(list1, list2);
-
-        assertThrows(IndexOutOfBoundsException.class, () -> product.get(1));
-        assertThrows(IndexOutOfBoundsException.class, () -> product.get(-1));
-
-        List<List<String>> product2 = Lists.cartesianProduct(list1, list2);
-
-        assertThrows(IndexOutOfBoundsException.class, () -> product2.get(1));
-        assertThrows(IndexOutOfBoundsException.class, () -> product2.get(-1));
-    }
-
-    // ============================================================
-    // Tests for Iterables.Slice inner class
-    // ============================================================
-
-    @Test
-    public void testSlice_FromList() {
-        List<String> list = Arrays.asList("a", "b", "c", "d", "e");
-        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 1, 4);
-        assertEquals(3, slice.size());
-        assertFalse(slice.isEmpty());
-        assertTrue(slice.contains("b"));
-        assertTrue(slice.contains("c"));
-        assertTrue(slice.contains("d"));
-        assertFalse(slice.contains("a"));
-        assertFalse(slice.contains("e"));
-    }
-
-    @Test
-    public void testSlice_FromArray() {
-        String[] array = { "x", "y", "z", "w" };
-        Iterables.Slice<String> slice = new Iterables.Slice<>(array, 0, 3);
-        assertEquals(3, slice.size());
-        assertTrue(slice.contains("x"));
-        assertTrue(slice.contains("y"));
-        assertTrue(slice.contains("z"));
-        assertFalse(slice.contains("w"));
-    }
-
-    @Test
-    public void testSlice_FromCollection_NonList() {
-        // Use HashSet (non-List) with known contents
-        TreeSet<String> set = new TreeSet<>(Arrays.asList("a", "b", "c", "d", "e"));
-        Iterables.Slice<String> slice = new Iterables.Slice<>(set, 1, 4);
-        assertEquals(3, slice.size());
-        assertFalse(slice.isEmpty());
-    }
-
-    @Test
-    public void testSlice_IsEmpty_EmptySlice() {
-        List<String> list = Arrays.asList("a", "b", "c");
-        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 1, 1);
-        assertTrue(slice.isEmpty());
-        assertEquals(0, slice.size());
-    }
-
-    @Test
-    public void testSlice_ContainsAll() {
-        List<String> list = Arrays.asList("a", "b", "c", "d");
-        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 1, 3);
-        assertTrue(slice.containsAll(Arrays.asList("b", "c")));
-        assertFalse(slice.containsAll(Arrays.asList("b", "c", "d")));
-        assertTrue(slice.containsAll(Arrays.asList()));
-    }
-
-    @Test
-    public void testSlice_Iterator() {
-        List<String> list = Arrays.asList("a", "b", "c", "d");
-        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 1, 3);
-        Iterator<String> iter = slice.iterator();
-        assertTrue(iter.hasNext());
-        assertEquals("b", iter.next());
-        assertEquals("c", iter.next());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testSlice_Iterator_Empty() {
-        List<String> list = Arrays.asList("a", "b", "c");
-        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 2, 2);
-        Iterator<String> iter = slice.iterator();
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testSlice_ToArray() {
-        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
-        Iterables.Slice<Integer> slice = new Iterables.Slice<>(list, 1, 4);
-        Object[] arr = slice.toArray();
-        assertEquals(3, arr.length);
-        assertEquals(2, arr[0]);
-        assertEquals(3, arr[1]);
-        assertEquals(4, arr[2]);
-    }
-
-    @Test
-    public void testSlice_ToArray_Typed() {
-        List<String> list = Arrays.asList("a", "b", "c", "d");
-        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 0, 3);
-        String[] arr = slice.toArray(new String[0]);
-        assertEquals(3, arr.length);
-        assertEquals("a", arr[0]);
-        assertEquals("b", arr[1]);
-        assertEquals("c", arr[2]);
-    }
-
-    @Test
-    public void testSlice_ToArray_Typed_LargerArray() {
-        List<String> list = Arrays.asList("a", "b", "c");
-        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 0, 2);
-        String[] arr = slice.toArray(new String[5]);
-        // arr[2] should be null sentinel
-        assertNull(arr[2]);
-    }
-
-    @Test
-    public void testSlice_FullList() {
-        List<Integer> list = Arrays.asList(10, 20, 30);
-        Iterables.Slice<Integer> slice = new Iterables.Slice<>(list, 0, 3);
-        assertEquals(3, slice.size());
-        Object[] arr = slice.toArray();
-        assertEquals(10, arr[0]);
-        assertEquals(20, arr[1]);
-        assertEquals(30, arr[2]);
-    }
-
-    @Test
-    public void testSlice_FromTail() {
-        List<String> list = Arrays.asList("a", "b", "c", "d", "e");
-        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 3, 5);
-        assertEquals(2, slice.size());
-        assertTrue(slice.contains("d"));
-        assertTrue(slice.contains("e"));
-        assertFalse(slice.contains("c"));
-    }
-
-    // ===================== Bug-fix regression: single-use Iterable averages =====================
-
-    /**
-     * Single-use {@code Iterable} backed by an iterator. Calling {@code iterator()} more than once
-     * returns the already-consumed iterator, which would cause a double-iteration bug to drop data.
-     */
-    private static <T> Iterable<T> singleUseIterable(final List<T> source) {
-        final Iterator<T> it = source.iterator();
-        return () -> it;
-    }
-
-    @Test
-    public void testAverageInt_SingleUseIterable() {
-        Iterable<Integer> single = singleUseIterable(Arrays.asList(1, 2, 3, 4, 5));
-        OptionalDouble result = Iterables.averageInt(single);
-        assertTrue(result.isPresent());
-        assertEquals(3.0, result.getAsDouble(), 1e-9);
-    }
-
-    @Test
-    public void testAverageInt_SingleUseIterable_WithFunc() {
-        Iterable<String> single = singleUseIterable(Arrays.asList("a", "bb", "ccc"));
-        OptionalDouble result = Iterables.averageInt(single, String::length);
-        assertTrue(result.isPresent());
-        assertEquals(2.0, result.getAsDouble(), 1e-9);
-    }
-
-    @Test
-    public void testAverageLong_SingleUseIterable() {
-        Iterable<Long> single = singleUseIterable(Arrays.asList(10L, 20L, 30L));
-        OptionalDouble result = Iterables.averageLong(single);
-        assertTrue(result.isPresent());
-        assertEquals(20.0, result.getAsDouble(), 1e-9);
-    }
-
-    @Test
-    public void testAverageBigInteger_SingleUseIterable() {
-        Iterable<BigInteger> single = singleUseIterable(Arrays.asList(BigInteger.valueOf(10), BigInteger.valueOf(20), BigInteger.valueOf(30)));
-        Optional<BigDecimal> result = Iterables.averageBigInteger(single);
-        assertTrue(result.isPresent());
-        assertEquals(0, new BigDecimal("20").compareTo(result.get()));
-    }
-
-    @Test
-    public void testAverageBigDecimal_SingleUseIterable() {
-        Iterable<BigDecimal> single = singleUseIterable(Arrays.asList(new BigDecimal("1.5"), new BigDecimal("2.5"), new BigDecimal("3.5")));
-        Optional<BigDecimal> result = Iterables.averageBigDecimal(single);
-        assertTrue(result.isPresent());
-        assertEquals(0, new BigDecimal("2.5").compareTo(result.get()));
-    }
-
-    @Test
-    public void testAverageInt_EmptyIterable() {
-        assertFalse(Iterables.averageInt((Iterable<Integer>) null).isPresent());
-        assertFalse(Iterables.averageInt(Collections.<Integer> emptyList()).isPresent());
-    }
-
-    @Test
-    public void testAverageBigInteger_EmptyAndNull() {
-        assertFalse(Iterables.averageBigInteger(null).isPresent());
-        assertFalse(Iterables.averageBigInteger(Collections.<BigInteger> emptyList()).isPresent());
-    }
-
-    // ===================== powerSet / permutations / cartesianProduct edge cases =====================
-
-    @Test
     public void testPowerSet_Empty() {
         Set<Set<Integer>> ps = Iterables.powerSet(Collections.<Integer> emptySet());
         assertEquals(1, ps.size());
@@ -6627,76 +1619,17 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
-    public void testCartesianProduct_EmptyInput() {
-        // Counter-intuitive but mathematically consistent: zero axes -> one empty tuple.
-        List<List<Object>> r = Iterables.cartesianProduct();
-        assertEquals(1, r.size());
-        assertTrue(r.get(0).isEmpty());
-    }
-
-    @Test
-    public void testCartesianProduct_OneEmptyAxis() {
-        List<List<Integer>> r = Iterables.cartesianProduct(Arrays.asList(1, 2), Collections.<Integer> emptyList());
-        assertEquals(0, r.size());
-    }
-
-    @Test
-    public void testCartesianProduct_Sizes() {
-        List<List<Integer>> r = Iterables.cartesianProduct(Arrays.asList(1, 2, 3), Arrays.asList(10, 20));
-        assertEquals(6, r.size());
-        assertEquals(Arrays.asList(1, 10), r.get(0));
-        assertEquals(Arrays.asList(3, 20), r.get(5));
-        assertFalse(r.contains(new LinkedHashSet<>(Arrays.asList(1, 10))));
-    }
-
-    @Test
     public void testRollup_Empty() {
         List<List<Object>> r = Iterables.rollup(Collections.emptyList());
         assertEquals(1, r.size());
         assertTrue(r.get(0).isEmpty());
     }
 
-    // ===================== min/max NULL_MIN_COMPARATOR short-circuit =====================
-
-    @Test
-    public void testMin_NullsFirstShortCircuits() {
-        Iterator<String> it = Arrays.asList("b", null, "a").iterator();
-        Nullable<String> r = Iterables.min(it, Comparator.nullsFirst(Comparator.<String> naturalOrder()));
-        assertTrue(r.isPresent());
-        assertNull(r.get());
-    }
-
-    // --- regression tests for 2026-06-10 deep-review fixes ---
-
-    @Test
-    public void testSumIntThrowsOnOverflowLikeNSumInt() {
-        // regression: sumInt accumulated in int and silently wrapped, while N.sumInt throws
-        org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> Iterables.sumInt(Arrays.asList(Integer.MAX_VALUE, 1)));
-        assertEquals(3, Iterables.sumInt(Arrays.asList(1, 2)).orElseThrow());
-    }
-
-    @Test
-    public void testSumDoubleUsesCompensatedSummation() {
-        // regression: naive accumulation made sumDouble disagree with averageDouble in this class
-        assertEquals(1.0d, Iterables.sumDouble(java.util.Collections.nCopies(10, 0.1d)).orElseThrow(), 0.0d);
-    }
-
-    @Test
-    public void testFirstLastNonNullSupportSingleUseIterables() {
-        // regression: N.isEmpty consumed the iterator of single-use iterables, and the body then
-        // requested a second iterator -> IllegalStateException for stream::iterator
-        final Iterable<String> it1 = java.util.stream.Stream.of(null, "a")::iterator;
-        assertEquals("a", Nulls.firstNonNull(it1));
-
-        final Iterable<String> it2 = java.util.stream.Stream.of("b", null)::iterator;
-        assertEquals("b", Nulls.lastNonNull(it2));
-    }
-
     @Test
     public void testUnionCopyIntoWithNullInput() {
         // regression: copyInto called set.addAll(null) for the documented-legal null input
-        final Set<Integer> result = Iterables.union(null, N.asSet(1, 2)).copyInto(new HashSet<>());
-        assertEquals(N.asSet(1, 2), result);
+        final Set<Integer> result = Iterables.union(null, CommonUtil.asSet(1, 2)).copyInto(new HashSet<>());
+        assertEquals(CommonUtil.asSet(1, 2), result);
     }
 
     @Test
@@ -6708,53 +1641,6 @@ public class IterablesTest extends AbstractTest {
 
         assertEquals(pa, pb);
         assertEquals(pa.hashCode(), pb.hashCode());
-    }
-
-    // --- pins for javadoc-documented behavior (2026-06-12 review) ---
-
-    @Test
-    public void testMinMaxNaturalOrderingIgnoresNullWhenNonNullExists() {
-        final List<Integer> withNull = Arrays.asList(3, null, 1, 2);
-
-        final Optional<Pair<Integer, Integer>> mm = Iterables.minMax(withNull);
-        assertTrue(mm.isPresent());
-        assertEquals(Integer.valueOf(1), mm.get().left());
-        assertEquals(Integer.valueOf(3), mm.get().right());
-
-        assertEquals(Integer.valueOf(1), Iterables.min(withNull).get());
-
-        final Optional<Pair<Integer, Integer>> allNull = Iterables.minMax(new Integer[] { null, null });
-        assertTrue(allNull.isPresent());
-        assertEquals(Pair.of(null, null), allNull.get());
-    }
-
-    @Test
-    public void testAverageDoubleFloatWideningExampleValue() {
-        // pins the javadoc example: Float -> double conversion goes through Numbers.toDouble
-        // (decimal string based), so each element converts to its exact decimal value and the
-        // average is the plain double result 2.1999999999999997, not the float-bit-pattern value.
-        final OptionalDouble avg = Iterables.averageDouble(Arrays.asList(1.1f, 2.2f, 3.3f));
-        assertTrue(avg.isPresent());
-        assertEquals(2.1999999999999997d, avg.getAsDouble(), 0.0d);
-    }
-
-    @Test
-    public void testAverageLongDoesNotOverflowLargeValues() {
-        final OptionalDouble avg = Iterables.averageLong(Arrays.asList(Long.MAX_VALUE, Long.MAX_VALUE), v -> v);
-
-        assertTrue(avg.isPresent());
-        assertEquals((double) Long.MAX_VALUE, avg.getAsDouble(), 0.0d);
-
-        final OptionalDouble oppositeExtremes = Iterables.averageLong(Arrays.asList(Long.MIN_VALUE, Long.MAX_VALUE), v -> v);
-        assertTrue(oppositeExtremes.isPresent());
-        assertEquals(-0.5d, oppositeExtremes.getAsDouble(), 0.0d);
-    }
-
-    @Test
-    public void testCartesianProductNullAxisIsEmpty() {
-        final List<Collection<? extends Integer>> axes = Arrays.asList(Arrays.asList(1), null);
-
-        assertTrue(Iterables.cartesianProduct(axes).isEmpty());
     }
 
     @Test
@@ -6852,15 +1738,499 @@ public class IterablesTest extends AbstractTest {
     }
 
     @Test
-    public void testAverageBigInteger_AllNullValues_ReturnsZero() {
-        // documented quirk: a non-empty iterable whose extracted values are all null -> Optional[0]
-        final Optional<BigDecimal> avgInt = Iterables.averageBigInteger(Arrays.asList("a", "b"), s -> null);
-        assertTrue(avgInt.isPresent());
-        assertEquals(BigDecimal.ZERO, avgInt.get());
-
-        final Optional<BigDecimal> avgDec = Iterables.averageBigDecimal(Arrays.asList("a", "b"), s -> null);
-        assertTrue(avgDec.isPresent());
-        assertEquals(BigDecimal.ZERO, avgDec.get());
+    public void testPowerSet_toString_rendersElementsNotIndexMap() {
+        assertEquals("powerSet([1, 2, 3])", Iterables.powerSet(new LinkedHashSet<>(Arrays.asList(1, 2, 3))).toString());
+        assertEquals("powerSet([])", Iterables.powerSet(new LinkedHashSet<String>()).toString());
+        assertEquals("powerSet([a])", Iterables.powerSet(new LinkedHashSet<>(Arrays.asList("a"))).toString());
     }
 
+    @Test
+    public void testAsReversed_nullList_hasANamedMessage() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Iterables.asReversed(null));
+        assertEquals("'list' cannot be null", e.getMessage());
+    }
+
+    @Test
+    public void testAsReversed_listIteratorSetWithoutNext_hasAMessage() {
+        final List<Integer> reversed = Iterables.asReversed(new ArrayList<>(Arrays.asList(1, 2, 3)));
+
+        final IllegalStateException e = assertThrows(IllegalStateException.class, () -> reversed.listIterator().set(9));
+        assertEquals("no calls to next() or previous() since the last call to remove() or add()", e.getMessage());
+
+        final IllegalStateException onRemove = assertThrows(IllegalStateException.class, () -> reversed.listIterator().remove());
+        assertEquals("no calls to next() or previous() since the last call to remove() or add()", onRemove.getMessage(),
+                "remove() and set() guard the same flag - which previous() and add() also touch - so they share one message");
+    }
+
+    @Test
+    public void testAsReversed_listIteratorSetAfterNextStillWorks() {
+        final List<Integer> forward = new ArrayList<>(Arrays.asList(1, 2, 3));
+        final List<Integer> reversed = Iterables.asReversed(forward);
+        final ListIterator<Integer> iter = reversed.listIterator();
+
+        iter.next();
+        iter.set(99);
+
+        assertEquals(Arrays.asList(99, 2, 1), reversed);
+        assertEquals(Arrays.asList(1, 2, 99), forward);
+    }
+
+    @Test
+    public void testPermutations_contains_multisetSemantics() {
+        final Collection<List<Integer>> perms = Iterables.permutations(Arrays.asList(1, 1, 2));
+
+        assertTrue(perms.contains(Arrays.asList(1, 1, 2)));
+        assertTrue(perms.contains(Arrays.asList(1, 2, 1)));
+        assertTrue(perms.contains(Arrays.asList(2, 1, 1)));
+        assertFalse(perms.contains(Arrays.asList(1, 1, 1)), "wrong multiplicity must not match");
+        assertFalse(perms.contains(Arrays.asList(2, 2, 1)), "wrong multiplicity must not match");
+        assertFalse(perms.contains(Arrays.asList(1, 2, 3)));
+        assertFalse(perms.contains(Arrays.asList(1, 2)), "a shorter list must not match");
+        assertFalse(perms.contains(Arrays.asList(1, 1, 2, 2)), "a longer list must not match");
+        assertFalse(perms.contains("not a list"));
+    }
+
+    @Test
+    public void testPermutations_contains_withNullElements() {
+        final Collection<List<String>> perms = Iterables.permutations(Arrays.asList("a", null));
+
+        assertTrue(perms.contains(Arrays.asList("a", null)));
+        assertTrue(perms.contains(Arrays.asList(null, "a")));
+        assertFalse(perms.contains(Arrays.asList("a", "a")));
+        assertFalse(perms.contains(Arrays.asList(null, null)));
+    }
+
+    @Test
+    public void testPermutations_contains_emptyAndOrdered() {
+        assertTrue(Iterables.permutations(new ArrayList<Integer>()).contains(new ArrayList<>()));
+
+        final Collection<List<Integer>> ordered = Iterables.orderedPermutations(Arrays.asList(1, 1, 2));
+        assertTrue(ordered.contains(Arrays.asList(2, 1, 1)));
+        assertFalse(ordered.contains(Arrays.asList(2, 2, 1)));
+    }
+
+    @Test
+    public void testPermutations_contains_agreesWithEnumeration() {
+        final List<Integer> input = Arrays.asList(1, 2, 2, 3);
+        final Collection<List<Integer>> perms = Iterables.permutations(input);
+        final Set<List<Integer>> enumerated = new HashSet<>();
+        perms.forEach(enumerated::add);
+
+        for (final List<Integer> candidate : enumerated) {
+            assertTrue(perms.contains(candidate));
+        }
+
+        assertFalse(perms.contains(Arrays.asList(1, 2, 3, 3)));
+        assertFalse(perms.contains(Arrays.asList(2, 2, 2, 3)));
+    }
+
+    @Test
+    public void testSetView_isConcrete() {
+        assertFalse(java.lang.reflect.Modifier.isAbstract(Iterables.SetView.class.getModifiers()));
+    }
+
+    @Test
+    public void testSetViews_stillUnmodifiableAndCorrect() {
+        final Set<Integer> set1 = new LinkedHashSet<>(Arrays.asList(1, 2, 3));
+        final Set<Integer> set2 = new LinkedHashSet<>(Arrays.asList(3, 4));
+
+        assertEquals(Arrays.asList(1, 2, 3, 4), new ArrayList<>(Iterables.union(set1, set2)));
+        assertEquals(Arrays.asList(3), new ArrayList<>(Iterables.intersection(set1, set2)));
+        assertEquals(Arrays.asList(1, 2), new ArrayList<>(Iterables.difference(set1, set2)));
+        assertEquals(Arrays.asList(1, 2, 4), new ArrayList<>(Iterables.symmetricDifference(set1, set2)));
+
+        assertThrows(UnsupportedOperationException.class, () -> Iterables.union(set1, set2).add(9));
+        assertThrows(UnsupportedOperationException.class, () -> Iterables.intersection(set1, set2).clear());
+        assertThrows(UnsupportedOperationException.class, () -> Iterables.difference(set1, set2).remove(1));
+        assertThrows(UnsupportedOperationException.class, () -> Iterables.symmetricDifference(set1, set2).removeIf(x -> true));
+
+        final Iterator<Integer> iter = Iterables.union(set1, set2).iterator();
+        iter.next();
+        assertThrows(UnsupportedOperationException.class, iter::remove);
+
+        assertEquals(new LinkedHashSet<>(Arrays.asList(1, 2, 3, 4)), Iterables.union(set1, set2).copyInto(new LinkedHashSet<>()));
+        assertEquals(new LinkedHashSet<>(Arrays.asList(1, 2)), Iterables.difference(set1, set2).copyInto(new LinkedHashSet<>()));
+    }
+
+    @Test
+    public void testLowerMedian_nullSortsAsMinimum() {
+        assertEquals(Nullable.of(1), Iterables.lowerMedian(new Integer[] { 3, null, 1 }));
+        assertEquals(Nullable.of((Integer) null), Iterables.lowerMedian(new Integer[] { null, null, 5 }));
+        assertEquals(Nullable.of(1), Iterables.lowerMedian(Arrays.asList(3, null, 1)));
+        assertEquals(Nullable.of((Integer) null), Iterables.lowerMedian(Arrays.asList(null, null, 5)));
+    }
+
+    @Test
+    public void testKthLargest_nullSortsAsMinimum() {
+        assertEquals(Nullable.of(3), Iterables.kthLargest(new Integer[] { 3, null, 1 }, 1));
+        assertEquals(Nullable.of(1), Iterables.kthLargest(new Integer[] { 3, null, 1 }, 2));
+        assertEquals(Nullable.of((Integer) null), Iterables.kthLargest(new Integer[] { 3, null, 1 }, 3));
+        assertEquals(Nullable.of(3), Iterables.kthLargest(Arrays.asList(3, null, 1), 1));
+        assertEquals(Nullable.of((Integer) null), Iterables.kthLargest(Arrays.asList(3, null, 1), 3));
+    }
+
+    @Test
+    public void testNullOrdering_lowerMedianAndKthLargestDifferFromMin() {
+        final Integer[] a = { 3, null, 1 };
+
+        // min() documents null as the MAXIMUM; max() and the median/kth family treat it as the MINIMUM
+        assertEquals(Nullable.of(1), Iterables.min(a));
+        assertEquals(Nullable.of(3), Iterables.max(a));
+        assertEquals(Nullable.of((Integer) null), Iterables.kthLargest(a, 3));
+    }
+
+    @Test
+    public void testPermutations_sizeSaturatesBeyondTwelveElements() {
+        final List<Integer> twelve = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            twelve.add(i);
+        }
+        assertEquals(479001600, Iterables.permutations(twelve).size(), "12! still fits an int");
+
+        final List<Integer> thirteen = new ArrayList<>(twelve);
+        thirteen.add(12);
+        assertEquals(Integer.MAX_VALUE, Iterables.permutations(thirteen).size(), "13! saturates - documented");
+
+        // stream().count() short-circuits on the SIZED spliterator, so it reports the saturated size
+        // rather than the true 6227020800 - documented on the method.
+        assertEquals(Integer.MAX_VALUE, Iterables.permutations(thirteen).stream().count());
+    }
+
+    @Test
+    public void testSubSet_nullSetReturnsAnImmutableEmptySet() {
+        final NavigableSet<Integer> view = Iterables.subSet(null, Range.closed(2, 4));
+
+        assertTrue(view.isEmpty());
+        assertThrows(UnsupportedOperationException.class, () -> view.add(1));
+    }
+
+    @Test
+    public void testSubSet_nonNullSetIsAMutableLiveView() {
+        final NavigableSet<Integer> backing = new TreeSet<>(Arrays.asList(1, 2, 3, 4, 5));
+        final NavigableSet<Integer> view = Iterables.subSet(backing, Range.closedOpen(2, 4));
+
+        assertEquals(Arrays.asList(2, 3), new ArrayList<>(view));
+        backing.remove(3);
+        assertEquals(Arrays.asList(2), new ArrayList<>(view), "the view must read through to the backing set");
+    }
+
+    @Test
+    public void testOrderedPermutations_containsRejectsArrangementsItNeverYields() {
+        // Under CASE_INSENSITIVE_ORDER "a" and "A" compare equal, so they are never swapped: the collection holds
+        // exactly one arrangement. contains() used to answer with an equals-based multiset test, which accepted the
+        // arrangement that is never yielded.
+        final Collection<List<String>> perms = Iterables.orderedPermutations(Arrays.asList("a", "A"), String.CASE_INSENSITIVE_ORDER);
+
+        assertEquals(1, perms.size());
+
+        final List<List<String>> yielded = new ArrayList<>(perms);
+        assertEquals(1, yielded.size());
+
+        final List<String> theOnlyMember = yielded.get(0);
+        final List<String> reversed = new ArrayList<>(theOnlyMember);
+        Collections.reverse(reversed);
+
+        assertTrue(perms.contains(theOnlyMember));
+        assertFalse(perms.contains(reversed), "an arrangement the collection never yields must not be reported as contained");
+    }
+
+    @Test
+    public void testOrderedPermutations_containsStillAcceptsEveryYieldedPermutation() {
+        // the ordinary cases must be unaffected: every element of the collection is contained in it
+        for (final List<Integer> input : Arrays.asList(Arrays.asList(3, 1, 2), Arrays.asList(1, 1, 2), Arrays.<Integer> asList())) {
+            final Collection<List<Integer>> perms = Iterables.orderedPermutations(input);
+
+            for (final List<Integer> perm : perms) {
+                assertTrue(perms.contains(perm), perm + " must be contained in " + input);
+                assertTrue(perms.contains(new ArrayList<>(perm)), "membership must not depend on the List implementation");
+            }
+
+            assertFalse(perms.contains(Arrays.asList(9, 9, 9, 9)));
+            assertFalse(perms.contains("not a list"));
+        }
+
+        // PermutationCollection permutes by position and does yield every arrangement, so it keeps the equals-based test
+        final Collection<List<String>> plain = Iterables.permutations(Arrays.asList("a", "A"));
+        assertEquals(2, plain.size());
+        assertTrue(plain.contains(Arrays.asList("a", "A")));
+        assertTrue(plain.contains(Arrays.asList("A", "a")));
+    }
+
+    @Test
+    public void testOrderedPermutationsMembershipMatchesEmittedTieRepresentatives() {
+        for (final List<String> input : Arrays.asList(Arrays.asList("a", "A", "b"), Arrays.asList("a", "A", "b", "B"))) {
+            final Collection<List<String>> permutations = Iterables.orderedPermutations(input, String.CASE_INSENSITIVE_ORDER);
+            final List<List<String>> emitted = new ArrayList<>(permutations);
+
+            for (final List<String> candidate : Iterables.permutations(input)) {
+                assertEquals(emitted.contains(candidate), permutations.contains(candidate), "membership for " + candidate);
+                assertEquals(emitted.contains(candidate), permutations.contains(new LinkedList<>(candidate)));
+            }
+
+            assertFalse(permutations.contains(Collections.nCopies(input.size(), "foreign")));
+        }
+    }
+
+    @Test
+    public void testOrderedPermutations_containsAnswersInsteadOfThrowingForForeignElements() {
+        final Collection<List<Integer>> perms = Iterables.orderedPermutations(Arrays.asList(1, 2));
+
+        assertFalse(perms.contains(Arrays.asList("x", "y")), "elements the comparator cannot order are simply absent");
+        assertFalse(perms.contains(Arrays.asList(null, null)));
+        assertFalse(perms.contains(Arrays.asList(1, 2, 3)), "a different size is never a permutation");
+    }
+
+    @Test
+    public void testCopyInto_zeroLengthIsAlwaysANoOp() {
+        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.copyInto(null, 1, null, 0, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.copyInto(null, 0, null, 1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.copyInto(Arrays.asList("a"), 2, null, 0, 0));
+        assertDoesNotThrow(() -> Iterables.copyInto(null, 0, null, 0, 0));
+        assertDoesNotThrow(() -> Iterables.copyInto(Arrays.asList("a"), 0, null, 0, 0));
+        assertDoesNotThrow(() -> Iterables.copyInto(null, 0, new ArrayList<String>(), 0, 0));
+        assertDoesNotThrow(() -> Iterables.copyInto(Arrays.asList("a"), 1, new ArrayList<>(Arrays.asList("z")), 1, 0));
+
+        final List<String> dest = new ArrayList<>(Arrays.asList("x", "y"));
+        Iterables.copyInto(Arrays.asList("a", "b"), 0, dest, 0, 0);
+        assertEquals(Arrays.asList("x", "y"), dest, "a zero-length copy must not touch the destination");
+    }
+
+    @Test
+    public void testCopyInto_negativeLengthNamesTheOffendingParameter() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> Iterables.copyInto(Arrays.asList(1, 2), 0, new ArrayList<>(Arrays.asList(1, 2)), 0, -1));
+        assertTrue(e.getMessage().contains("length"), "message should name 'length', was: " + e.getMessage());
+    }
+
+    @Test
+    public void testCopyInto_destTooSmallMessageNamesBothSizes() {
+        final IndexOutOfBoundsException e = assertThrows(IndexOutOfBoundsException.class,
+                () -> Iterables.copyInto(Arrays.asList(1, 2, 3), new ArrayList<>(Arrays.asList(1))));
+        assertTrue(e.getMessage().contains("3") && e.getMessage().contains("1"), "message should name both sizes, was: " + e.getMessage());
+    }
+
+    @Test
+    public void testCopyInto_nonRandomAccessListsStillCopyTheRightRange() {
+        // the positioned listIterator(int) rewrite must not change behaviour on non-RandomAccess lists
+        final List<String> src = new LinkedList<>(Arrays.asList("a", "b", "c", "d", "e"));
+        final List<String> dest = new LinkedList<>(Arrays.asList("x", "y", "z", "w", "v"));
+
+        Iterables.copyInto(src, 1, dest, 2, 3);
+
+        assertEquals(Arrays.asList("x", "y", "b", "c", "d"), dest);
+        assertEquals(Arrays.asList("a", "b", "c", "d", "e"), src, "the source must not be modified");
+    }
+
+    @Test
+    public void testCopyInto_overlappingSelfCopyStillBehavesAsIfSnapshotted() {
+        final List<Integer> forward = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5));
+        Iterables.copyInto(forward, 1, forward, 3, 3); // destPos > srcPos: needs the snapshot
+        assertEquals(Arrays.asList(0, 1, 2, 1, 2, 3), forward);
+
+        final List<Integer> backward = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5));
+        Iterables.copyInto(backward, 3, backward, 1, 3); // destPos < srcPos: a forward copy is already safe
+        assertEquals(Arrays.asList(0, 3, 4, 5, 4, 5), backward);
+    }
+
+    @Test
+    public void testCombinatorialCollections_toStringNamesTheFactoryAndStaysLazy() {
+        assertEquals("permutations([3, 1, 2])", Iterables.permutations(Arrays.asList(3, 1, 2)).toString());
+        assertEquals("orderedPermutations([1, 2, 3])", Iterables.orderedPermutations(Arrays.asList(3, 1, 2)).toString());
+        assertEquals("powerSet([1, 2])", Iterables.powerSet(new LinkedHashSet<>(Arrays.asList(1, 2))).toString());
+        assertEquals("cartesianProduct([[1, 2], [A, B]])", Iterables.cartesianProduct(Arrays.asList(1, 2), Arrays.asList("A", "B")).toString());
+
+        assertEquals("cartesianProduct([])", Iterables.cartesianProduct(Collections.<Collection<Object>> emptyList()).toString());
+        assertEquals("cartesianProduct([[], [A]])", Iterables.cartesianProduct(Collections.<String> emptyList(), Arrays.asList("A")).toString());
+
+        // the tuples themselves are still one wrapper away
+        assertEquals("[[1, A], [1, B], [2, A], [2, B]]", new ArrayList<>(Iterables.cartesianProduct(Arrays.asList(1, 2), Arrays.asList("A", "B"))).toString());
+    }
+
+    @Test
+    public void testPowerSet_rejectsMoreThan30ElementsBeforeMaterialising() {
+        final Set<Integer> tooBig = new LinkedHashSet<>();
+
+        for (int i = 0; i < 31; i++) {
+            tooBig.add(i);
+        }
+
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Iterables.powerSet(tooBig));
+        assertTrue(e.getMessage().contains("31") && e.getMessage().contains("30"), e.getMessage());
+
+        // 30 is still accepted, and still reports 2^30
+        final Set<Integer> atTheLimit = new LinkedHashSet<>();
+
+        for (int i = 0; i < 30; i++) {
+            atTheLimit.add(i);
+        }
+
+        assertEquals(1 << 30, Iterables.powerSet(atTheLimit).size());
+    }
+
+    @Test
+    public void testAsReversed_listIteratorStateMessagesMentionPreviousAndAdd() {
+        final ListIterator<Integer> iter = Iterables.asReversed(new ArrayList<>(Arrays.asList(1, 2, 3))).listIterator();
+
+        final String expected = "no calls to next() or previous() since the last call to remove() or add()";
+        assertEquals(expected, assertThrows(IllegalStateException.class, iter::remove).getMessage());
+        assertEquals(expected, assertThrows(IllegalStateException.class, () -> iter.set(9)).getMessage());
+
+        // previous() also arms both operations, which is why the message names it
+        final List<Integer> reversed = Iterables.asReversed(new ArrayList<>(Arrays.asList(1, 2, 3)));
+        final ListIterator<Integer> atEnd = reversed.listIterator(3);
+        assertEquals(1, atEnd.previous());
+        assertDoesNotThrow(() -> atEnd.set(9));
+        assertDoesNotThrow(atEnd::remove);
+    }
+
+    @Test
+    public void testSetView_copyIntoRejectsNullTarget() {
+        assertThrows(IllegalArgumentException.class, () -> Iterables.intersection(CommonUtil.asSet(1), CommonUtil.asSet(1)).copyInto(null));
+        assertThrows(IllegalArgumentException.class, () -> Iterables.difference(CommonUtil.asSet(1), CommonUtil.asSet(2)).copyInto(null));
+        assertThrows(IllegalArgumentException.class, () -> Iterables.symmetricDifference(CommonUtil.asSet(1), CommonUtil.asSet(2)).copyInto(null));
+        assertThrows(IllegalArgumentException.class, () -> Iterables.union(CommonUtil.asSet(1), CommonUtil.asSet(2)).copyInto(null));
+
+        // union's override skips both addAll calls when both inputs are empty, so it used to return null here
+        assertThrows(IllegalArgumentException.class, () -> Iterables.union(new LinkedHashSet<Integer>(), new LinkedHashSet<Integer>()).copyInto(null));
+
+        // the happy path is unchanged
+        assertEquals(new LinkedHashSet<>(Arrays.asList(1, 2, 3, 4)),
+                Iterables.union(new LinkedHashSet<>(Arrays.asList(1, 2, 3)), new LinkedHashSet<>(Arrays.asList(3, 4))).copyInto(new LinkedHashSet<>()));
+    }
+
+    @Test
+    public void testIterateNonEmpty() {
+        assertEquals("'c' cannot be null or empty", assertThrows(IllegalArgumentException.class, () -> Iterables.iterateNonEmpty(null, "c")).getMessage());
+        assertEquals("custom message here",
+                assertThrows(IllegalArgumentException.class, () -> Iterables.iterateNonEmpty(null, "custom message here")).getMessage());
+        assertThrows(IllegalArgumentException.class, () -> Iterables.iterateNonEmpty(new ArrayList<String>(), "c"));
+
+        assertEquals(Arrays.asList(1, 2, 3), CommonUtil.toList(Iterables.iterateNonEmpty(Arrays.asList(1, 2, 3), "c")),
+                "the returned iterator must not have been consumed");
+
+        // a non-Collection Iterable is probed with hasNext(), which must not swallow the first element either
+        final Iterable<Integer> iterable = () -> Arrays.asList(7, 8).iterator();
+        assertEquals(Arrays.asList(7, 8), CommonUtil.toList(Iterables.iterateNonEmpty(iterable, "c")));
+
+        final Iterable<Integer> emptyIterable = Collections::emptyIterator;
+        assertThrows(IllegalArgumentException.class, () -> Iterables.iterateNonEmpty(emptyIterable, "c"));
+    }
+
+    @Test
+    public void reviewFixes20260906_cartesianProductAndPowerSetTrustTheIterator() {
+        final java.util.List<java.util.Collection<?>> real = java.util.Arrays.asList(java.util.Arrays.asList(1, 2), java.util.Arrays.asList("a", "b"));
+
+        // CartesianList sized its axis array from cs.size() but filled it from cs.iterator() - two independent
+        // reads. An under-reported size silently truncated the product; an over-reported one threw an
+        // undocumented NoSuchElementException.
+        final java.util.List<java.util.List<Object>> expected = Iterables.cartesianProduct(real);
+
+        assertEquals(expected, Iterables.cartesianProduct(new java.util.AbstractCollection<java.util.Collection<?>>() {
+            @Override
+            public java.util.Iterator<java.util.Collection<?>> iterator() {
+                return real.iterator();
+            }
+
+            @Override
+            public int size() {
+                return 1;
+            }
+        }));
+
+        assertEquals(expected, Iterables.cartesianProduct(new java.util.AbstractCollection<java.util.Collection<?>>() {
+            @Override
+            public java.util.Iterator<java.util.Collection<?>> iterator() {
+                return real.iterator();
+            }
+
+            @Override
+            public int size() {
+                return 3;
+            }
+        }));
+
+        assertEquals(4, expected.size());
+
+        // PowerSet checked input.size() but shifted by the count indexMap() actually saw. A Set that
+        // under-reported slipped through and made size() return 1 << 31 == Integer.MIN_VALUE, so the power set
+        // iterated as empty and toArray() threw NegativeArraySizeException.
+        final java.util.LinkedHashSet<Integer> backing = new java.util.LinkedHashSet<>();
+
+        for (int i = 0; i < 31; i++) {
+            backing.add(i);
+        }
+
+        final java.util.Set<Integer> lying = new java.util.AbstractSet<>() {
+            @Override
+            public java.util.Iterator<Integer> iterator() {
+                return backing.iterator();
+            }
+
+            @Override
+            public int size() {
+                return 30;
+            }
+        };
+
+        assertThrows(IllegalArgumentException.class, () -> Iterables.powerSet(lying));
+        assertThrows(IllegalArgumentException.class, () -> Iterables.powerSet(backing));
+
+        // An honest set still works, and duplicates still collapse before the limit is applied.
+        assertEquals(8, Iterables.powerSet(new java.util.LinkedHashSet<>(CommonUtil.asList(1, 2, 3))).size());
+    }
+
+    @Test
+    public void reviewFixes20260906_powerSetAndCartesianProductAreUnmodifiable() {
+        // permutations/orderedPermutations promise "an unmodifiable Collection"; powerSet and cartesianProduct are
+        // just as unmodifiable (AbstractSet/AbstractList with no mutator overridden) but did not say so.
+        final Set<Set<Integer>> ps = Iterables.powerSet(new LinkedHashSet<>(CommonUtil.asList(1, 2)));
+        assertThrows(UnsupportedOperationException.class, () -> ps.add(new LinkedHashSet<>(CommonUtil.asList(9))));
+        assertThrows(UnsupportedOperationException.class, () -> ps.remove(new LinkedHashSet<>(CommonUtil.asList(1))));
+        assertThrows(UnsupportedOperationException.class, ps::clear);
+        assertThrows(UnsupportedOperationException.class, () -> ps.removeIf(s -> true));
+
+        final Iterator<Set<Integer>> psIter = ps.iterator();
+        psIter.next();
+        assertThrows(UnsupportedOperationException.class, psIter::remove);
+
+        final List<List<Integer>> cp = Iterables.cartesianProduct(CommonUtil.asList(1, 2), CommonUtil.asList(3));
+        assertThrows(UnsupportedOperationException.class, () -> cp.set(0, CommonUtil.asList(9, 9)));
+        assertThrows(UnsupportedOperationException.class, () -> cp.add(CommonUtil.asList(9, 9)));
+        assertThrows(UnsupportedOperationException.class, () -> cp.remove(0));
+        assertThrows(UnsupportedOperationException.class, cp::clear);
+        assertThrows(UnsupportedOperationException.class, () -> cp.removeIf(x -> true));
+
+        // ... and none of that disturbed either result.
+        assertEquals(4, ps.size());
+        assertEquals(CommonUtil.asList(CommonUtil.asList(1, 3), CommonUtil.asList(2, 3)), cp);
+    }
+
+    /**
+     * Pins the documented exception to "random-access in, random-access out": the reversed <i>view</i> of an
+     * {@link ImmutableList} deliberately drops the {@link RandomAccess} marker, while a zero-/one-element
+     * {@code ImmutableList} that owns its backing storage is returned unchanged and keeps it.
+     */
+    @Test
+    public void testAsReversed_ImmutableListViewIsNotRandomAccess() {
+        final ImmutableList<Integer> source = ImmutableList.of(1, 2, 3);
+        assertTrue(source instanceof RandomAccess);
+
+        final List<Integer> reversed = Iterables.asReversed(source);
+        assertFalse(reversed instanceof RandomAccess, "the reversed view of an ImmutableList drops the marker");
+        assertEquals(3, reversed.size());
+        assertEquals(Integer.valueOf(3), reversed.get(0));
+        assertEquals(Integer.valueOf(1), reversed.get(2));
+
+        // A one-element ImmutableList that does NOT own its backing storage is a view too, so it drops it as well.
+        final ImmutableList<Integer> wrapped = ImmutableList.wrap(new ArrayList<>(Arrays.asList(1)));
+        assertTrue(wrapped instanceof RandomAccess);
+        assertFalse(Iterables.asReversed(wrapped) instanceof RandomAccess);
+
+        // The zero-/one-element lists that own their backing are returned unchanged, marker included.
+        assertTrue(Iterables.asReversed(ImmutableList.of(1)) instanceof RandomAccess);
+        assertTrue(Iterables.asReversed(ImmutableList.<Integer> empty()) instanceof RandomAccess);
+
+        // Every other random-access input still honours the unqualified promise.
+        assertTrue(Iterables.asReversed(Arrays.asList(1, 2, 3)) instanceof RandomAccess);
+    }
 }

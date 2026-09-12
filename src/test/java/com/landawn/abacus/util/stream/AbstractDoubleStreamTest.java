@@ -15,6 +15,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -25,6 +26,7 @@ import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.IndexedDouble;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.MergeResult;
+import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.RateLimiter;
@@ -33,6 +35,32 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 
 public class AbstractDoubleStreamTest extends TestBase {
+
+    @Test
+    public void testScanInitializesOnlyAfterSuccessfulSourceRead() {
+        final IllegalStateException failure = new IllegalStateException("first read failed");
+        final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger accumulatorCalls = new java.util.concurrent.atomic.AtomicInteger();
+
+        try (DoubleStream stream = DoubleStream.of(new double[] { 1, 2, 3 }).map(value -> {
+            if (attempts.getAndIncrement() == 0) {
+                throw failure;
+            }
+            return value;
+        }).scan((left, right) -> {
+            accumulatorCalls.incrementAndGet();
+            return (double) (left + right);
+        })) {
+            final com.landawn.abacus.util.DoubleIterator iter = stream.iterator();
+            org.junit.jupiter.api.Assertions.assertSame(failure,
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextDouble));
+            org.junit.jupiter.api.Assertions.assertEquals((double) 2, iter.nextDouble());
+            org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
+            org.junit.jupiter.api.Assertions.assertEquals((double) 5, iter.nextDouble());
+            org.junit.jupiter.api.Assertions.assertEquals(1, accumulatorCalls.get());
+            org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+        }
+    }
 
     private DoubleStream stream;
     private DoubleStream stream2;
@@ -927,4 +955,25 @@ public class AbstractDoubleStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> createDoubleStream(new double[] { 1.0, 2.0, 3.0 }).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
     }
+    // ------------------------------------------------------------------------------------------------------
+    // Stream review 2026-09-09 (pass B) - prepend/append(OptionalDouble) argument validation
+    // ------------------------------------------------------------------------------------------------------
+
+    /** Sibling of {@code AbstractIntStreamTest}'s check: the same gap existed in all seven primitive types. */
+    @Test
+    public void testPrependAppendOptional_nullIsRejectedAndTheStreamIsClosed() {
+        final MutableBoolean closed = MutableBoolean.of(false);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> DoubleStream.of(1d, 2d).onClose(closed::setTrue).prepend((OptionalDouble) null));
+        assertTrue(closed.isTrue(), "prepend(null) must close the stream before throwing");
+
+        closed.setFalse();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> DoubleStream.of(1d, 2d).onClose(closed::setTrue).append((OptionalDouble) null));
+        assertTrue(closed.isTrue(), "append(null) must close the stream before throwing");
+
+        assertArrayEquals(new double[] { 9d, 1d, 2d }, DoubleStream.of(1d, 2d).prepend(OptionalDouble.of(9d)).toArray(), 0.0);
+        assertArrayEquals(new double[] { 1d, 2d, 9d }, DoubleStream.of(1d, 2d).append(OptionalDouble.of(9d)).toArray(), 0.0);
+    }
+
 }

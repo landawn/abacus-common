@@ -169,6 +169,13 @@ public @interface Type {
      * Specifies how enum values should be represented during conversion.
      * This affects both serialization and persistence operations.
      *
+     * <p><b>Precedence for JSON/XML:</b> when the field also carries {@link JsonXmlField @JsonXmlField}, or
+     * its class carries {@link JsonXmlConfig @JsonXmlConfig}, the JSON/XML serializers take the enum
+     * representation from those annotations (see {@link JsonXmlField#enumerated()}) and this element is
+     * not consulted for JSON/XML output - a class-level {@code @JsonXmlConfig(enumerated = ORDINAL)} wins
+     * over {@code @Type(enumerated = NAME)}. This element always governs the property's general and
+     * database conversions ({@code PropInfo.type}/{@code dbType}).</p>
+     *
      * <p>{@link EnumType#NAME} (default):</p>
      * <ul>
      *   <li>Uses the enum constant name as a string</li>

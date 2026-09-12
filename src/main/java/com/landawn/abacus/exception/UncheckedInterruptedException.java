@@ -88,7 +88,7 @@ public class UncheckedInterruptedException extends UncheckedException {
      * @param cause the {@link InterruptedException} to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
-    public UncheckedInterruptedException(final InterruptedException cause) {
+    public UncheckedInterruptedException(final InterruptedException cause) throws IllegalArgumentException {
         super(cause);
     }
 
@@ -117,7 +117,7 @@ public class UncheckedInterruptedException extends UncheckedException {
      * @param cause the {@link InterruptedException} to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
-    public UncheckedInterruptedException(final String message, final InterruptedException cause) {
+    public UncheckedInterruptedException(final String message, final InterruptedException cause) throws IllegalArgumentException {
         super(message, cause);
     }
 

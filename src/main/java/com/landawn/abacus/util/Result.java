@@ -55,7 +55,8 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Design Philosophy:</b>
  * <ul>
  *   <li><b>Explicit Over Implicit:</b> Makes error states visible and forces explicit handling</li>
- *   <li><b>Composition Over Control Flow:</b> Enables functional composition instead of imperative error handling</li>
+ *   <li><b>Branch Over Transform:</b> Callers branch on the state explicitly; there are no
+ *       value-transforming combinators to hide the failure path</li>
  *   <li><b>Type Safety Over Runtime Errors:</b> Uses generic constraints to prevent type-related runtime issues</li>
  *   <li><b>Predictability Over Convenience:</b> Ensures predictable behavior even at the cost of some verbosity</li>
  *   <li><b>Immutability Over Performance:</b> Prioritizes correctness and thread safety over minimal performance gains</li>
@@ -99,10 +100,8 @@ import com.landawn.abacus.util.u.Optional;
  * String computedDefault = result.orElseGetIfFailure(() -> computeDefault());
  *
  * // Exception transformation and re-throwing
- * String value = result.orElseThrow(
- *     (Function<IOException, RuntimeException>) ex -> new RuntimeException("Operation failed", ex));
- * String value2 = result.orElseThrow(
- *     (Supplier<CustomException>) () -> new CustomException("Operation failed"));
+ * String value = result.orElseThrow(ex -> new RuntimeException("Operation failed", ex));
+ * String value2 = result.orElseThrow(() -> new CustomException("Operation failed"));
  * }</pre>
  *
  * <p><b>Advanced Error Handling Patterns:</b>
@@ -118,10 +117,7 @@ import com.landawn.abacus.util.u.Optional;
  *
  * // Convert exception to different type and re-throw
  * public String fetchData(Result<String, SQLException> dbResult) throws ServiceException {
- *     return dbResult.orElseThrow(
- *         (Function<SQLException, ServiceException>) sqlEx ->
- *             new ServiceException("Database operation failed", sqlEx)
- *     );
+ *     return dbResult.orElseThrow(sqlEx -> new ServiceException("Database operation failed", sqlEx));
  * }
  *
  * // Handle multiple results with fallback values
@@ -164,17 +160,16 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Convenience Subclass:</b> Specialized for {@code RuntimeException} to reduce generic verbosity</li>
  *   <li><b>Use Case:</b> Avoids repeating the {@code RuntimeException} type argument</li>
  *   <li><b>Simplified API:</b> {@code Result.RR<T>} instead of {@code Result<T, RuntimeException>}</li>
+ *   <li><b>Create With {@code RR.of(...)}:</b> {@code RR} inherits the static {@link #success(Object)}
+ *       and {@link #failure(Throwable)} factories, but they return {@code Result}, <em>not</em>
+ *       {@code RR} &mdash; see {@link RR}</li>
  *   <li><b>Beta Feature:</b> Subject to API refinement based on usage feedback</li>
  * </ul>
  *
- * <p><b>Performance Characteristics:</b>
- * <ul>
- *   <li><b>Creation Cost:</b> O(1) - Simple object allocation with two field assignments</li>
- *   <li><b>Memory Overhead:</b> Minimal - Only two object references plus standard object header</li>
- *   <li><b>Method Calls:</b> O(1) - All operations are simple field access or condition checks</li>
- *   <li><b>Thread Contention:</b> Container reads do not synchronize; callbacks may have their own
- *       synchronization or side effects</li>
- * </ul>
+ * <p>Construction and direct state access are O(1): construction stores two references and each
+ * accessor is a field read or a {@code null} check. Equality, hashing, and string conversion depend
+ * on the contained values, and callback operations include the cost of the supplied callbacks.
+ * Reads are unsynchronized; callbacks and operations on the contained values may have side effects.</p>
  *
  * <p><b>Thread Safety:</b>
  * <ul>
@@ -184,19 +179,13 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Contained Objects:</b> Mutable values or exceptions may still require synchronization</li>
  * </ul>
  *
- * <p><b>Memory Management:</b>
- * <ul>
- *   <li><b>Efficient Allocation:</b> Small object size minimizes allocation overhead</li>
- *   <li><b>GC Optimization:</b> Immutable objects can be allocated in young generation for faster collection</li>
- *   <li><b>Reference Cleanup:</b> No circular references or complex cleanup required</li>
- * </ul>
- *
  * <p><b>Error Handling Philosophy:</b>
  * <ul>
  *   <li><b>Explicit Failures:</b> All potential failures are represented explicitly in the type system</li>
  *   <li><b>Explicit Stored Failures:</b> The stored failure is visible in the result type; supplied
  *       callbacks and exception factories may themselves throw</li>
- *   <li><b>Composable Errors:</b> Error handling can be composed and chained functionally</li>
+ *   <li><b>Handled At The Call Site:</b> A failure is inspected, replaced with a fallback, or
+ *       rethrown where it is unwrapped &mdash; not carried through a transformation chain</li>
  *   <li><b>Type-Safe Recovery:</b> Recovery strategies are enforced by the type system</li>
  * </ul>
  *
@@ -206,7 +195,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li>Use {@code orElseThrow()} when propagating the stored failure is the desired policy</li>
  *   <li>Prefer {@code ifSuccess()} and {@code ifFailure()} for conditional execution</li>
  *   <li>Use {@code orElseIfFailure()} with meaningful default values</li>
- *   <li>Leverage functional composition to build error-handling pipelines</li>
+ *   <li>Branch with {@code ifSuccessOrElse()} rather than unwrapping and re-wrapping by hand</li>
  *   <li>Document which exceptions your methods can produce in their Result types</li>
  *   <li>Use appropriate exception types in the generic parameter {@code E}</li>
  * </ul>
@@ -675,14 +664,16 @@ public class Result<T, E extends Throwable> implements Immutable {
      * }</pre>
      *
      * @param <E2> the type of exception that the action might throw.
-     * @param actionOnFailure the action to execute if this Result contains an exception,
-     * @throws E2 if {@code actionOnFailure} is executed and throws an exception of type {@code E2}.
+     * @param actionOnFailure the action to execute if this Result contains an exception, must not be {@code null}.
      * @throws IllegalArgumentException if {@code actionOnFailure} is {@code null}.
+     * @throws E2 if {@code actionOnFailure} is executed and throws an exception of type {@code E2}.
      */
-    public <E2 extends Throwable> void ifFailure(final Throwables.Consumer<? super E, E2> actionOnFailure) throws E2, IllegalArgumentException {
+    public <E2 extends Throwable> void ifFailure(final Throwables.Consumer<? super E, E2> actionOnFailure) throws IllegalArgumentException, E2 {
         N.checkArgNotNull(actionOnFailure, cs.actionOnFailure);
 
-        ifFailureOrElse(actionOnFailure, Fn.emptyConsumer());
+        if (exception != null) {
+            actionOnFailure.accept(exception);
+        }
     }
 
     /**
@@ -690,6 +681,13 @@ public class Result<T, E extends Throwable> implements Immutable {
      * If the Result contains an exception, actionOnFailure is executed with the exception.
      * If the Result is successful, actionOnSuccess is executed with the value.
      * Exactly one action will be executed.
+     *
+     * <p><b>⚠️ The failure handler comes first here, and second in
+     * {@link #ifSuccessOrElse(Throwables.Consumer, Throwables.Consumer)}.</b> Both parameters are
+     * {@code Throwables.Consumer}, so whenever {@code T} is a supertype of {@code E} &mdash; which it
+     * is for the common {@code Result<Object, ...>} and {@code Result<Serializable, ...>} &mdash;
+     * passing the two handlers in the wrong order still compiles, and the wrong one silently runs
+     * against the wrong argument. Prefer {@code ifSuccessOrElse} so that only one order is in play.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -701,14 +699,22 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * @param <E2> the type of exception that {@code actionOnFailure} might throw.
      * @param <E3> the type of exception that {@code actionOnSuccess} might throw.
-     * @param actionOnFailure the action to execute if this Result contains an exception,
-     * @param actionOnSuccess the action to execute if this Result is successful,
+     * @param actionOnFailure the action to execute if this Result contains an exception, must not be {@code null}.
+     * @param actionOnSuccess the action to execute if this Result is successful, must not be {@code null}.
+     * @throws IllegalArgumentException if any of {@code actionOnFailure}, {@code actionOnSuccess} is {@code null}.
      * @throws E2 if {@code actionOnFailure} is executed and throws an exception of type {@code E2}.
      * @throws E3 if {@code actionOnSuccess} is executed and throws an exception of type {@code E3}.
-     * @throws IllegalArgumentException if any of {@code actionOnFailure}, {@code actionOnSuccess} is {@code null}.
+     * @deprecated use {@link #ifSuccessOrElse(Throwables.Consumer, Throwables.Consumer)} instead, which
+     *             takes the same two handlers in the opposite order. Having both orders available under
+     *             two names is the hazard: the parameters are indistinguishable to overload resolution
+     *             whenever {@code T} is a supertype of {@code E}, so a swap is a silent runtime bug
+     *             rather than a compile error. Migration is a straight swap of the two arguments -
+     *             {@code r.ifFailureOrElse(f, s)} becomes {@code r.ifSuccessOrElse(s, f)}. This method's
+     *             own behaviour is unchanged and will not be reordered.
      */
+    @Deprecated
     public <E2 extends Throwable, E3 extends Throwable> void ifFailureOrElse(final Throwables.Consumer<? super E, E2> actionOnFailure,
-            final Throwables.Consumer<? super T, E3> actionOnSuccess) throws E2, E3, IllegalArgumentException {
+            final Throwables.Consumer<? super T, E3> actionOnSuccess) throws IllegalArgumentException, E2, E3 {
         N.checkArgNotNull(actionOnFailure, cs.actionOnFailure);
         N.checkArgNotNull(actionOnSuccess, cs.actionOnSuccess);
 
@@ -730,14 +736,16 @@ public class Result<T, E extends Throwable> implements Immutable {
      * }</pre>
      *
      * @param <E2> the type of exception that the action might throw.
-     * @param actionOnSuccess the action to execute if this Result is successful,
-     * @throws E2 if {@code actionOnSuccess} is executed and throws an exception of type {@code E2}.
+     * @param actionOnSuccess the action to execute if this Result is successful, must not be {@code null}.
      * @throws IllegalArgumentException if {@code actionOnSuccess} is {@code null}.
+     * @throws E2 if {@code actionOnSuccess} is executed and throws an exception of type {@code E2}.
      */
-    public <E2 extends Throwable> void ifSuccess(final Throwables.Consumer<? super T, E2> actionOnSuccess) throws E2, IllegalArgumentException {
+    public <E2 extends Throwable> void ifSuccess(final Throwables.Consumer<? super T, E2> actionOnSuccess) throws IllegalArgumentException, E2 {
         N.checkArgNotNull(actionOnSuccess, cs.actionOnSuccess);
 
-        ifSuccessOrElse(actionOnSuccess, Fn.emptyConsumer());
+        if (exception == null) {
+            actionOnSuccess.accept(value);
+        }
     }
 
     /**
@@ -745,6 +753,12 @@ public class Result<T, E extends Throwable> implements Immutable {
      * If the Result is successful, actionOnSuccess is executed with the value.
      * If the Result contains an exception, actionOnFailure is executed with the exception.
      * Exactly one action will be executed.
+     *
+     * <p><b>The success handler comes first.</b> Both parameters are {@code Throwables.Consumer}, so
+     * when {@code T} is a supertype of {@code E} the compiler cannot catch a swapped pair; this is the
+     * preferred of the two orderings, and
+     * {@link #ifFailureOrElse(Throwables.Consumer, Throwables.Consumer)} is deprecated for offering
+     * the other one.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -756,14 +770,14 @@ public class Result<T, E extends Throwable> implements Immutable {
      *
      * @param <E2> the type of exception that {@code actionOnSuccess} might throw.
      * @param <E3> the type of exception that {@code actionOnFailure} might throw.
-     * @param actionOnSuccess the action to execute if this Result is successful,
-     * @param actionOnFailure the action to execute if this Result contains an exception,
+     * @param actionOnSuccess the action to execute if this Result is successful, must not be {@code null}.
+     * @param actionOnFailure the action to execute if this Result contains an exception, must not be {@code null}.
+     * @throws IllegalArgumentException if any of {@code actionOnSuccess}, {@code actionOnFailure} is {@code null}.
      * @throws E2 if {@code actionOnSuccess} is executed and throws an exception of type {@code E2}.
      * @throws E3 if {@code actionOnFailure} is executed and throws an exception of type {@code E3}.
-     * @throws IllegalArgumentException if any of {@code actionOnSuccess}, {@code actionOnFailure} is {@code null}.
      */
     public <E2 extends Throwable, E3 extends Throwable> void ifSuccessOrElse(final Throwables.Consumer<? super T, E2> actionOnSuccess,
-            final Throwables.Consumer<? super E, E3> actionOnFailure) throws E2, E3, IllegalArgumentException {
+            final Throwables.Consumer<? super E, E3> actionOnFailure) throws IllegalArgumentException, E2, E3 {
         N.checkArgNotNull(actionOnSuccess, cs.actionOnSuccess);
         N.checkArgNotNull(actionOnFailure, cs.actionOnFailure);
 
@@ -804,7 +818,7 @@ public class Result<T, E extends Throwable> implements Immutable {
      * String value = result.orElseGetIfFailure(() -> computeDefault());
      * }</pre>
      *
-     * @param otherIfErrorOccurred the supplier that provides the value to return if this Result contains an exception,
+     * @param otherIfErrorOccurred the supplier that provides the value to return if this Result contains an exception, must not be {@code null}.
      * @return the value contained in this Result if successful, otherwise the value provided by the supplier.
      * @throws IllegalArgumentException if {@code otherIfErrorOccurred} is {@code null}.
      */
@@ -842,28 +856,36 @@ public class Result<T, E extends Throwable> implements Immutable {
      * Returns the value if this Result is successful, otherwise throws an exception created by applying
      * the contained exception to the provided exception mapper function.
      * This method allows transforming the original exception into a different exception type.
-     * The explicit {@link Function} target type shown below disambiguates this overload from the
-     * deprecated overload that accepts an exception instance directly.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String value = result.orElseThrow(
-     *     (Function<IOException, RuntimeException>) ex -> new RuntimeException("Failed", ex));
+     * String value = result.orElseThrow(ex -> new RuntimeException("Failed", ex));
      * }</pre>
      *
+     * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is written
+     * out, and so does a constructor reference whose target has only one applicable arity. A reference
+     * such as {@code RuntimeException::new}, whose target has both a no-arg and a cause-taking
+     * constructor, fits this overload and {@link #orElseThrow(Supplier)} equally and must be
+     * disambiguated with a cast.</p>
+     *
      * @param <E2> the type of exception to be thrown.
-     * @param exceptionSupplierIfErrorOccurred the function that maps the contained exception to a new exception to be thrown,
+     * @param exceptionMapper the function that maps the contained exception to a new exception to be thrown, must not be {@code null}.
      * @return the value contained in this Result if successful.
-     * @throws E2 if this Result is a failure; the exception is produced by applying {@code exceptionSupplierIfErrorOccurred} to the contained exception.
-     * @throws IllegalArgumentException if {@code exceptionSupplierIfErrorOccurred} is {@code null}.
+     * @throws IllegalArgumentException if {@code exceptionMapper} is {@code null}.
+     * @throws NullPointerException if this Result is a failure and {@code exceptionMapper} returns
+     *         {@code null}; the {@code null} is thrown, which the JVM turns into a
+     *         {@code NullPointerException} at the {@code throw} site.
+     * @throws E2 if this Result is a failure; the exception is produced by applying {@code exceptionMapper} to the contained exception.
+     * @see #orElseThrow(Supplier)
+     * @see #orElseThrow()
      */
-    public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionSupplierIfErrorOccurred) throws E2, IllegalArgumentException {
-        N.checkArgNotNull(exceptionSupplierIfErrorOccurred, cs.exceptionSupplierIfErrorOccurred);
+    public <E2 extends Throwable> T orElseThrow(final Function<? super E, E2> exceptionMapper) throws IllegalArgumentException, NullPointerException, E2 {
+        N.checkArgNotNull(exceptionMapper, cs.exceptionMapper);
 
         if (exception == null) {
             return value;
         } else {
-            throw exceptionSupplierIfErrorOccurred.apply(exception);
+            throw exceptionMapper.apply(exception);
         }
     }
 
@@ -871,22 +893,30 @@ public class Result<T, E extends Throwable> implements Immutable {
      * Returns the value if this Result is successful, otherwise throws an exception supplied by the given supplier.
      * This method provides a way to throw a custom exception when the Result represents a failure.
      * The supplier is only invoked if this Result contains an exception.
-     * The explicit {@link Supplier} target type shown below disambiguates this overload from the
-     * deprecated overload that accepts an exception instance directly.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String value = result.orElseThrow(
-     *     (Supplier<IllegalStateException>) () -> new IllegalStateException("Failed"));
+     * String value = result.orElseThrow(() -> new IllegalStateException("Failed"));
      * }</pre>
      *
+     * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is written
+     * out, and so does a constructor reference whose target has only one applicable arity. A reference
+     * such as {@code RuntimeException::new}, whose target has both a no-arg and a cause-taking
+     * constructor, fits this overload and {@link #orElseThrow(Function)} equally and must be
+     * disambiguated with a cast.</p>
+     *
      * @param <E2> the type of exception to be thrown.
-     * @param exceptionSupplier the supplier that provides the exception to throw if this Result contains an exception,
+     * @param exceptionSupplier the supplier that provides the exception to throw if this Result contains an exception, must not be {@code null}.
      * @return the value contained in this Result if successful.
-     * @throws E2 if this Result is a failure; the exception is obtained from {@code exceptionSupplier}.
      * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
+     * @throws NullPointerException if this Result is a failure and {@code exceptionSupplier} returns
+     *         {@code null}; the {@code null} is thrown, which the JVM turns into a
+     *         {@code NullPointerException} at the {@code throw} site.
+     * @throws E2 if this Result is a failure; the exception is obtained from {@code exceptionSupplier}.
+     * @see #orElseThrow(Function)
+     * @see #orElseThrow()
      */
-    public <E2 extends Throwable> T orElseThrow(final Supplier<? extends E2> exceptionSupplier) throws E2, IllegalArgumentException {
+    public <E2 extends Throwable> T orElseThrow(final Supplier<? extends E2> exceptionSupplier) throws IllegalArgumentException, NullPointerException, E2 {
         N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
         if (exception == null) {
@@ -897,40 +927,7 @@ public class Result<T, E extends Throwable> implements Immutable {
     }
 
     /**
-     * Returns the value if this Result is successful, otherwise throws the specified exception.
-     * This method provides a way to throw a pre-created exception when the Result represents a failure.
-     *
-     * <p><b>Note:</b> This method is deprecated because it requires creating the exception object
-     * eagerly even if the Result is successful. Use {@link #orElseThrow(Supplier)} instead for
-     * better performance.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * String value = result.orElseThrow(new IllegalStateException("Failed"));
-     * }</pre>
-     *
-     * @param <E2> the type of exception to be thrown.
-     * @param exception the exception to throw if this Result contains an exception. If
-     *                  {@code null} is supplied and this Result is a failure, a
-     *                  {@link NullPointerException} will be thrown by the JVM at the
-     *                  {@code throw} site.
-     * @return the value contained in this Result if successful.
-     * @throws E2 the provided exception if this Result contains an exception.
-     * @throws NullPointerException if {@code exception} is {@code null} and this Result is a failure.
-     * @deprecated Use {@link #orElseThrow(Supplier)} instead for better performance (avoids creating exception if not needed).
-     */
-    @Deprecated
-    public <E2 extends Throwable> T orElseThrow(final E2 exception) throws E2 {
-        if (this.exception == null) {
-            return value;
-        } else {
-            throw exception;
-        }
-    }
-
-    /**
      * Returns the exception contained in this Result, or {@code null} if the Result is successful.
-     * This method provides direct access to the exception without wrapping it in an Optional.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -945,34 +942,6 @@ public class Result<T, E extends Throwable> implements Immutable {
     @Beta
     public E getException() {
         return exception;
-    }
-
-    /**
-     * Returns an Optional containing the exception if this Result represents a failure,
-     * or an empty Optional if the Result is successful.
-     * This method provides a safe way to access the exception with Optional semantics.
-     *
-     * <p><b>Note:</b> This method is deprecated in favor of {@link #getException()} which provides
-     * direct access to the exception without the Optional wrapper overhead.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Result<String, IOException> success = Result.of("ok", null);
-     * success.getExceptionIfPresent().isPresent();   // returns false (empty Optional for a success)
-     *
-     * IOException ex = new IOException("error");
-     * Result<String, IOException> failure = Result.of(null, ex);
-     * failure.getExceptionIfPresent().isPresent();   // returns true (failure carries an exception)
-     * failure.getExceptionIfPresent().get();         // returns the original IOException instance
-     * }</pre>
-     *
-     * @return an Optional containing the exception if present, otherwise an empty Optional.
-     * @deprecated Use {@link #getException()} instead for direct access to the exception.
-     */
-    @Deprecated
-    @Beta
-    public Optional<E> getExceptionIfPresent() {
-        return Optional.ofNullable(exception);
     }
 
     /**
@@ -1013,13 +982,16 @@ public class Result<T, E extends Throwable> implements Immutable {
 
     /**
      * Returns a hash code value for this Result.
-     * The hash code is computed based on the exception if present, otherwise based on the value.
-     * This ensures that Results with the same exception or value will have the same hash code.
-     * This method is consistent with the {@link #equals(Object)} implementation.
+     * The hash code is the exception's hash code when an exception is present, and the value's hash code
+     * otherwise. It is therefore consistent with {@link #equals(Object)}: equal Results always hash equally.
      *
-     * <p><b>Implementation Note:</b> The hash code prioritizes the exception over the value,
-     * meaning if an exception is present, its hash code is returned regardless of the value's
-     * hash code. This aligns with the failure-first semantics of the Result class.
+     * <p><b>Implementation Note:</b> the exception takes priority, so the value contributes nothing once
+     * an exception is present. Two failures carrying the same exception but different values hash the same
+     * while comparing unequal &mdash; a legal collision, not an inconsistency. Conversely, two Results with
+     * the same value but different exceptions are not required to hash the same, so "same value implies
+     * same hash" holds only among successes. Note that {@link Throwable} does not override
+     * {@code hashCode}, so a failure's hash is the identity hash of its exception instance and is not
+     * stable across JVM runs.
      *
      * @return the hash code of the exception if present, otherwise the hash code of the value.
      */
@@ -1101,7 +1073,21 @@ public class Result<T, E extends Throwable> implements Immutable {
      * This class provides a more convenient way to work with Results that may contain RuntimeExceptions,
      * which don't need to be declared in method signatures.
      *
+     * <p><b>Always create instances with {@link #of(Object, RuntimeException)}.</b> {@code RR} also
+     * inherits the static factories {@link Result#success(Object)} and {@link Result#failure(Throwable)},
+     * but a static method cannot be narrowed by a subclass: {@code Result.RR.success("x")} compiles and
+     * returns a plain {@code Result<String, RuntimeException>}, never an {@code RR<String>}. Assigning
+     * it to an {@code RR} variable is a compile error, so the mistake is caught, but the call reads as
+     * though it produced an {@code RR}.</p>
+     *
+     * <pre>{@code
+     * Result.RR<String> ok  = Result.RR.of("value", null);              // RR
+     * Result.RR<String> bad = Result.RR.success("value");               // does NOT compile
+     * Result<String, RuntimeException> r = Result.RR.success("value");  // plain Result
+     * }</pre>
+     *
      * @param <T> the type of the result value
+     * @see #of(Object, RuntimeException)
      */
     @Beta
     public static class RR<T> extends Result<T, RuntimeException> {

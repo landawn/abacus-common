@@ -1,5 +1,6 @@
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -21,13 +22,28 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.parser.JsonParser;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.parser.ParserFactory;
+import com.landawn.abacus.parser.XmlParser;
+import com.landawn.abacus.parser.XmlSerConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
+import com.landawn.abacus.util.BufferedXmlWriter;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.Pair;
+import com.landawn.abacus.util.Tuple;
+import com.landawn.abacus.util.Tuple.Tuple2;
+import com.landawn.abacus.util.u.Optional;
 
 public class ObjectArrayTypeTest extends TestBase {
 
@@ -352,5 +368,341 @@ public class ObjectArrayTypeTest extends TestBase {
         assertTrue(result.contains("b"));
         assertTrue(result.contains("1"));
         assertTrue(result.contains("2"));
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+    // Review fixes 2026-09-06: T7-01 (serializeTo of non-serializable element types), T7-02 (no runtime-class
+    // array from the parser), T7-07 (Unicode structural whitespace around the array).
+    // ---------------------------------------------------------------------------------------------------------------
+
+    public static class ReviewBean {
+        private String name;
+        private int age;
+
+        public ReviewBean() {
+        }
+
+        public ReviewBean(final String name, final int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(final int age) {
+            this.age = age;
+        }
+    }
+
+    public static class ReviewHolder {
+        private Optional<Object[]> optObj;
+        private Optional<ReviewBean[]> optBean;
+        private Tuple2<Object[], String> tup;
+        private Pair<Object[], String> pair;
+        private Object[] plain;
+
+        public Optional<Object[]> getOptObj() {
+            return optObj;
+        }
+
+        public void setOptObj(final Optional<Object[]> optObj) {
+            this.optObj = optObj;
+        }
+
+        public Optional<ReviewBean[]> getOptBean() {
+            return optBean;
+        }
+
+        public void setOptBean(final Optional<ReviewBean[]> optBean) {
+            this.optBean = optBean;
+        }
+
+        public Tuple2<Object[], String> getTup() {
+            return tup;
+        }
+
+        public void setTup(final Tuple2<Object[], String> tup) {
+            this.tup = tup;
+        }
+
+        public Pair<Object[], String> getPair() {
+            return pair;
+        }
+
+        public void setPair(final Pair<Object[], String> pair) {
+            this.pair = pair;
+        }
+
+        public Object[] getPlain() {
+            return plain;
+        }
+
+        public void setPlain(final Object[] plain) {
+            this.plain = plain;
+        }
+    }
+
+    private static String serializeToJsonWriter(final Type<?> type, final Object value, final JsonXmlSerConfig<?> cfg) throws IOException {
+        final BufferedJsonWriter w = Objectory.createBufferedJsonWriter();
+
+        try {
+            ((Type<Object>) type).serializeTo(w, value, cfg);
+            return w.toString();
+        } finally {
+            Objectory.recycle(w);
+        }
+    }
+
+    private static String serializeToXmlWriter(final Type<?> type, final Object value, final JsonXmlSerConfig<?> cfg) throws IOException {
+        final BufferedXmlWriter w = Objectory.createBufferedXmlWriter();
+
+        try {
+            ((Type<Object>) type).serializeTo(w, value, cfg);
+            return w.toString();
+        } finally {
+            Objectory.recycle(w);
+        }
+    }
+
+    private static void assertHeterogeneousElements(final Object[] a, final String label) {
+        assertEquals(6, a.length, label);
+        assertEquals(Integer.valueOf(1), a[0], label);
+        assertEquals("a", a[1], label);
+        assertNull(a[2], label);
+        assertEquals(Double.valueOf(2.5), a[3], label);
+        assertEquals(Boolean.TRUE, a[4], label);
+        assertTrue(a[5] instanceof Map, label + ": " + a[5].getClass());
+        assertEquals("z", ((Map<?, ?>) a[5]).get("name"), label);
+        assertEquals(3, ((Number) ((Map<?, ?>) a[5]).get("age")).intValue(), label);
+    }
+
+    @Test
+    public void reviewFixes20260906_serializeToWithJsonConfigWritesRealJsonForNonSerializableElementTypes() throws IOException {
+        final Object[] het = { 1, "a", null, 2.5, true, new ReviewBean("z", 3) };
+        final JsonSerConfig jsc = JsonSerConfig.create();
+
+        // Before the fix every element went through SingleValueType.serializeTo: ["1", "a", null, "2.5", "true", "{\"name\"...}"]
+        final String expected = "[1, \"a\", null, 2.5, true, {\"name\": \"z\", \"age\": 3}]";
+        assertEquals(expected, serializeToJsonWriter(objectArrayType, het, jsc));
+        assertEquals(Utils.jsonParser.serialize(het, jsc), serializeToJsonWriter(objectArrayType, het, jsc));
+        assertEquals(objectArrayType.stringOf(het), serializeToJsonWriter(objectArrayType, het, jsc));
+
+        final Type<ReviewBean[]> beanArrayType = TypeFactory.getType(ReviewBean[].class);
+        assertEquals("[{\"name\": \"q\", \"age\": 1}, null]", serializeToJsonWriter(beanArrayType, new ReviewBean[] { new ReviewBean("q", 1), null }, jsc));
+
+        final Type<Object[][]> nestedType = TypeFactory.getType(Object[][].class);
+        assertEquals("[[1, \"a\"], null]", serializeToJsonWriter(nestedType, new Object[][] { { 1, "a" }, null }, jsc));
+
+        assertEquals("[]", serializeToJsonWriter(objectArrayType, new Object[0], jsc));
+        assertEquals("null", serializeToJsonWriter(objectArrayType, null, jsc));
+
+        // serializable element types keep the element-by-element path
+        assertEquals("[\"a\", null]", serializeToJsonWriter(stringArrayType, new String[] { "a", null }, jsc));
+        assertEquals("[1, null]", serializeToJsonWriter(intArrayType, new Integer[] { 1, null }, jsc));
+        assertEquals("[\"a\", \"\"]", serializeToJsonWriter(stringArrayType, new String[] { "a", null }, JsonSerConfig.create().setWriteNullStringAsEmpty(true)));
+    }
+
+    @Test
+    public void reviewFixes20260906_serializeToWithNullConfigKeepsElementByElementForm() throws IOException {
+        final Object[] het = { 1, "a", null, 2.5, true, new ReviewBean("z", 3) };
+
+        assertEquals("[1, a, null, 2.5, true, {\\\"name\\\": \\\"z\\\", \\\"age\\\": 3}]", serializeToJsonWriter(objectArrayType, het, null));
+        assertEquals("null", serializeToJsonWriter(objectArrayType, null, null));
+        assertEquals("[]", serializeToJsonWriter(objectArrayType, new Object[0], null));
+    }
+
+    @Test
+    public void reviewFixes20260906_serializeToWithXmlConfigWritesEscapedJsonTextNeverRawJson() throws IOException {
+        final Object[] het = { 1, "a\"b", null, "x<y&z", new ReviewBean("z", 3) };
+
+        // the JSON text of stringOf(x), escaped for XML character content (no raw ", < or &)
+        final String expected = "[1, &quot;a\\&quot;b&quot;, null, &quot;x&lt;y&amp;z&quot;, {&quot;name&quot;: &quot;z&quot;, &quot;age&quot;: 3}]";
+        assertEquals(expected, serializeToXmlWriter(objectArrayType, het, XmlSerConfig.create()));
+
+        // a JSON config on a non-JSON writer must also go through writeCharacter (never hand an XML writer to the JSON parser)
+        assertEquals(expected, serializeToXmlWriter(objectArrayType, het, JsonSerConfig.create()));
+
+        assertEquals("null", serializeToXmlWriter(objectArrayType, null, XmlSerConfig.create()));
+        assertEquals("[]", serializeToXmlWriter(objectArrayType, new Object[0], XmlSerConfig.create()));
+    }
+
+    @Test
+    public void reviewFixes20260906_jsonParserRoundTripsWrapperPropertiesWithTypedElements() {
+        final JsonParser jp = ParserFactory.createJsonParser();
+        final Object[] het = { 1, "a", null, 2.5, true, new ReviewBean("z", 3) };
+        final ReviewHolder h = new ReviewHolder();
+        h.setOptObj(Optional.of(het));
+        h.setOptBean(Optional.of(new ReviewBean[] { new ReviewBean("q", 1), null }));
+        h.setTup(Tuple.of(het, "x"));
+        h.setPair(Pair.of(het, "x"));
+        h.setPlain(het);
+
+        final String hetJson = "[1, \"a\", null, 2.5, true, {\"name\": \"z\", \"age\": 3}]";
+        final String json = jp.serialize(h);
+        assertEquals("{\"optObj\": " + hetJson + ", \"optBean\": [{\"name\": \"q\", \"age\": 1}, null], \"tup\": [" + hetJson + ", \"x\"], \"pair\": [" + hetJson
+                + ", \"x\"], \"plain\": " + hetJson + "}", json);
+
+        final ReviewHolder back = jp.deserialize(json, ReviewHolder.class);
+        assertHeterogeneousElements(back.getOptObj().get(), "optObj");
+        assertHeterogeneousElements(back.getTup()._1, "tup");
+        assertHeterogeneousElements(back.getPair().left(), "pair");
+        assertHeterogeneousElements(back.getPlain(), "plain");
+        assertEquals("x", back.getTup()._2);
+        assertEquals("x", back.getPair().right());
+        assertEquals(2, back.getOptBean().get().length);
+        assertEquals("q", back.getOptBean().get()[0].getName());
+        assertEquals(1, back.getOptBean().get()[0].getAge());
+        assertNull(back.getOptBean().get()[1]);
+
+        // pretty format: the nested array is still real JSON and parses back with the same element classes
+        final ReviewHolder pretty = jp.deserialize(jp.serialize(h, JsonSerConfig.create().setPrettyFormat(true)), ReviewHolder.class);
+        assertHeterogeneousElements(pretty.getOptObj().get(), "pretty optObj");
+        assertHeterogeneousElements(pretty.getPair().left(), "pretty pair");
+
+        // empty / absent wrappers
+        final ReviewHolder edge = new ReviewHolder();
+        edge.setOptObj(Optional.of(new Object[0]));
+        edge.setOptBean(Optional.empty());
+        assertEquals("{\"optObj\": [], \"optBean\": null}", jp.serialize(edge));
+        assertEquals(0, jp.deserialize("{\"optObj\": []}", ReviewHolder.class).getOptObj().get().length);
+    }
+
+    @Test
+    public void reviewFixes20260906_xmlParserRoundTripsWrapperPropertiesIncludingQuotedAndCommaStrings() {
+        final XmlParser xp = ParserFactory.createXmlParser();
+        final Object[] het = { 1, "a\"b", null, 2.5, true, "x<y&z", "p,q", new ReviewBean("z", 3) };
+        final ReviewHolder h = new ReviewHolder();
+        h.setOptObj(Optional.of(het));
+        h.setOptBean(Optional.of(new ReviewBean[] { new ReviewBean("q", 1), null }));
+
+        final String xml = xp.serialize(h);
+        // escaped JSON text (a string element is quoted, so ", < & and , survive the round trip); the bean-array text is unchanged
+        assertTrue(xml.contains("<optObj>[1, &quot;a\\&quot;b&quot;, null, 2.5, true, &quot;x&lt;y&amp;z&quot;, &quot;p,q&quot;, {&quot;name&quot;: &quot;z&quot;, &quot;age&quot;: 3}]</optObj>"), xml);
+        assertTrue(xml.contains("<optBean>[{&quot;name&quot;: &quot;q&quot;, &quot;age&quot;: 1}, null]</optBean>"), xml);
+
+        final ReviewHolder back = xp.deserialize(xml, ReviewHolder.class);
+        final Object[] a = back.getOptObj().get();
+        assertEquals(8, a.length);
+        assertEquals(Integer.valueOf(1), a[0]);
+        assertEquals("a\"b", a[1]);
+        assertNull(a[2]);
+        assertEquals(Double.valueOf(2.5), a[3]);
+        assertEquals(Boolean.TRUE, a[4]);
+        assertEquals("x<y&z", a[5]);
+        assertEquals("p,q", a[6]);
+        assertEquals("z", ((Map<?, ?>) a[7]).get("name"));
+        assertEquals("q", back.getOptBean().get()[0].getName());
+        assertNull(back.getOptBean().get()[1]);
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfRejectsElementsThatCannotBeStoredInTheDeclaredArray() {
+        final JsonParser jp = ParserFactory.createJsonParser();
+
+        // Before the fixes an ArrayList[] / HashMap[] came back (ClassCastException at the caller) or ArrayStoreException.
+        // The JSON reader now hands a scalar slot the raw text of a nested value, so the result is a real String[]
+        // holding that text (the parser-side collectionToArray guard is pinned by the XML test below).
+        final String[][] cases = { { "[[1]]", "[1]" }, { "[{}]", "{}" }, { "[{\"a\": 1}]", "{\"a\": 1}" }, { "[a, [1]]", "a", "[1]" }, { "[[1], a]", "[1]", "a" },
+                { "[null, [1]]", null, "[1]" }, { "[[]]", "[]" } };
+
+        for (final String[] c : cases) {
+            final String[] expected = Arrays.copyOfRange(c, 1, c.length);
+            final String[] viaType = stringArrayType.valueOf(c[0]);
+            assertEquals(String[].class, viaType.getClass(), c[0]);
+            assertArrayEquals(expected, viaType, c[0]);
+            assertArrayEquals(expected, jp.deserialize(c[0], String[].class), c[0]);
+        }
+
+        // valid inputs and assignable element types are unchanged
+        assertArrayEquals(new String[] { "a", null }, stringArrayType.valueOf("[\"a\", null]"));
+        assertEquals(0, stringArrayType.valueOf("[]").length);
+
+        final Object[] objects = objectArrayType.valueOf("[[1], {}, \"s\", 2]");
+        assertTrue(objects[0] instanceof List, String.valueOf(objects[0]));
+        assertEquals(1, ((List<?>) objects[0]).get(0));
+        assertTrue(objects[1] instanceof Map, String.valueOf(objects[1]));
+        assertEquals("s", objects[2]);
+        assertEquals(2, objects[3]);
+
+        final Type<java.io.Serializable[]> serializableArrayType = TypeFactory.getType(java.io.Serializable[].class);
+        final java.io.Serializable[] mixed = serializableArrayType.valueOf("[1, \"a\", null]");
+        assertEquals(Integer.valueOf(1), mixed[0]);
+        assertEquals("a", mixed[1]);
+        assertNull(mixed[2]);
+
+        assertThrows(NumberFormatException.class, () -> intArrayType.valueOf("[[1]]"));
+    }
+
+    @Test
+    public void reviewFixes20260906_xmlParserRejectsNestedElementInStringArray() {
+        final XmlParser xp = ParserFactory.createXmlParser();
+
+        // Before the fix a HashMap[] came back for a String[] target (heap pollution: ClassCastException at the
+        // caller). The declared element type is now honoured on the XML path too - a nested element is read as its
+        // text content, exactly as the JSON path reads a nested value into a String element.
+        final String[] nested = xp.deserialize("<array><e><list><e>1</e></list></e></array>", String[].class);
+        assertArrayEquals(new String[] { "1" }, nested);
+        assertEquals(String.class, nested.getClass().getComponentType());
+        assertArrayEquals(new String[] { "a", "b" }, xp.deserialize("<array><e>a</e><e>b</e></array>", String[].class));
+
+        assertArrayEquals(new String[] { "a", "b" }, xp.deserialize(xp.serialize(new String[] { "a", "b" }), String[].class));
+        assertArrayEquals(new String[] { "a", null }, xp.deserialize(xp.serialize(new String[] { "a", null }), String[].class));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfIgnoresUnicodeStructuralWhitespaceAroundTheArray() {
+        // U+2003 EM SPACE and U+3000 IDEOGRAPHIC SPACE are Character.isWhitespace and were rejected only by ObjectArrayType
+        assertArrayEquals(new String[] { "a", "b" }, stringArrayType.valueOf("\u2003[\"a\", \"b\"]\u3000"));
+        assertArrayEquals(new Integer[] { 1, 2 }, intArrayType.valueOf("\u3000[1, 2]\u2003"));
+        assertArrayEquals(new Integer[] { 1, 2 }, intArrayType.valueOf(" \t[1, 2]\n"));
+        assertArrayEquals(new Object[] { 1, "a" }, objectArrayType.valueOf("\u2003 [1, \"a\"] \u2003\n"));
+
+        final UUID u = UUID.randomUUID();
+        final Type<UUID[]> uuidArrayType = TypeFactory.getType(UUID[].class);
+        assertArrayEquals(new UUID[] { u }, uuidArrayType.valueOf("\u3000[\"" + u + "\"]\n"));
+
+        assertEquals(0, stringArrayType.valueOf("\u3000[]\u2003").length);
+        assertEquals(0, stringArrayType.valueOf(" [] ").length);
+        assertNull(stringArrayType.valueOf("\u3000"));
+        assertNull(stringArrayType.valueOf(" \t\n"));
+
+        // U+00A0 NO-BREAK SPACE is not Character.isWhitespace: still rejected, as it is by the primitive array types
+        assertThrows(ParsingException.class, () -> stringArrayType.valueOf("[\"a\"]\u00A0"));
+        assertThrows(NumberFormatException.class, () -> TypeFactory.getType(int[].class).valueOf("\u00A0[1]"));
+    }
+
+    @Test
+    public void reviewFixes20260908_serializeToWritesTheEmbeddedJsonCompactlyEvenUnderAPrettyConfig() throws IOException {
+        final Object[] het = { 1, "a", null, new ReviewBean("z", 3) };
+        final JsonSerConfig compact = JsonSerConfig.create();
+        final JsonSerConfig pretty = JsonSerConfig.create().setPrettyFormat(true);
+
+        // serializeTo is not told the caller's current indentation, so a pretty embedded array would restart at the
+        // left margin and mis-align every one of its lines - the same rule AbstractTupleType.serializeSlot applies.
+        final String expected = "[1, \"a\", null, {\"name\": \"z\", \"age\": 3}]";
+        assertEquals(expected, serializeToJsonWriter(objectArrayType, het, compact));
+        assertEquals(expected, serializeToJsonWriter(objectArrayType, het, pretty));
+        assertFalse(serializeToJsonWriter(objectArrayType, het, pretty).contains("\n"));
+
+        // the escaped-text form written to a non-JSON writer must not carry the line breaks either
+        assertEquals(serializeToXmlWriter(objectArrayType, het, compact), serializeToXmlWriter(objectArrayType, het, pretty));
+        assertFalse(serializeToXmlWriter(objectArrayType, het, pretty).contains("&#xa;"));
+
+        // the caller's config is copied, never mutated
+        assertTrue(pretty.isPrettyFormat());
+
+        final Type<ReviewBean[]> beanArrayType = TypeFactory.getType(ReviewBean[].class);
+        assertEquals("[{\"name\": \"q\", \"age\": 1}, null]",
+                serializeToJsonWriter(beanArrayType, new ReviewBean[] { new ReviewBean("q", 1), null }, pretty));
     }
 }

@@ -3,7 +3,9 @@ package com.landawn.abacus.util;
 import java.util.Map;
 import java.util.UUID;
 
-public class Users {
+import com.landawn.abacus.TestBase;
+
+public class Users extends TestBase {
     private UUID id;
     private Name name;
     private Map<String, Address> addresses;

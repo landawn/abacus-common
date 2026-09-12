@@ -16,6 +16,9 @@
  */
 package com.landawn.abacus.util;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
@@ -41,6 +44,32 @@ import com.landawn.abacus.util.u.Optional;
  * thread-safe (or are not mutated after the range is created). There is no custom-comparator
  * option; ordering always follows each element's {@code compareTo}.</p>
  *
+ * <p><b>Ordering vs. equality:</b> every membership and boundary decision
+ * ({@link #contains}, {@link #overlaps}, {@link #intersection}, {@link #span}, {@link #isEmpty})
+ * is made with {@code T.compareTo}, but {@link #equals(Object)} and {@link #hashCode()} compare the
+ * endpoint <em>objects</em> with {@code equals}. When {@code T}'s {@code compareTo} is inconsistent
+ * with its {@code equals}, the two views diverge:</p>
+ * <pre>{@code
+ * Range<BigDecimal> a = Range.closed(new BigDecimal("5.0"),  new BigDecimal("6.0"));
+ * Range<BigDecimal> b = Range.closed(new BigDecimal("5.00"), new BigDecimal("6.00"));
+ * a.equals(b);                       // false - the endpoint objects are not equal
+ * a.contains(new BigDecimal("5.5")); // true, and so does b - the same interval
+ * a.span(b);                         // [5.0, 6.0]   - keeps this range's endpoint objects
+ * b.span(a);                         // [5.00, 6.00] - keeps b's, so span is not `equals`-commutative
+ * }</pre>
+ * <p>The results always describe the same interval; only which equal-by-{@code compareTo} endpoint
+ * object is retained differs, and no canonical choice exists for a general {@code Comparable}. The same
+ * applies to {@link #intersection(Range)}. Prefer a {@code T} whose {@code compareTo} is consistent with
+ * {@code equals} when ranges are used as map keys or compared with {@code equals}.</p>
+ *
+ * <p><b>Natural ordering of floating-point endpoints:</b> {@code Double}/{@code Float} endpoints follow
+ * {@link Double#compareTo(Double)}, not {@code ==}. {@code NaN} therefore sorts above every other value,
+ * so {@code Range.closed(1.0, Double.NaN)} is a valid range containing every value numerically
+ * {@code >= 1.0}, positive infinity, and {@code NaN} itself. Negative infinity is excluded (while {@code Range.closed(Double.NaN, 1.0)}
+ * is rejected as {@code min > max}); and {@code -0.0} sorts below {@code 0.0}, so
+ * {@code Range.just(0.0).contains(-0.0)} is {@code false}. Screen out {@code NaN} before constructing a
+ * range if that is not the intent.</p>
+ *
  * <p><b>Key Features:</b>
  * <ul>
  *   <li><b>Immutable Design:</b> All instances are immutable, ensuring thread safety and preventing accidental modification</li>
@@ -50,7 +79,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Null Safety:</b> Proper handling of {@code null} values with clear semantics</li>
  *   <li><b>Performance Optimized:</b> Efficient algorithms for range operations and comparisons</li>
  *   <li><b>Serializable:</b> Supports Java serialization for persistence and distributed systems</li>
- *   <li><b>Functional Programming:</b> Map operations for range transformation</li>
+ *   <li><b>Endpoint Mapping:</b> {@link #mapEndpoints(Function)} rebuilds a range from transformed endpoints</li>
  * </ul>
  *
  * <p><b>⚠️ IMPORTANT - Immutable Design:</b>
@@ -119,7 +148,7 @@ import com.landawn.abacus.util.u.Optional;
  *
  * // Functional transformation
  * Range<Integer> intRange = Range.closed(1, 5);
- * Range<String> stringRange = intRange.map(String::valueOf);   // returns ["1", "5"]
+ * Range<String> stringRange = intRange.mapEndpoints(String::valueOf);   // maps the endpoints only: ["1", "5"]
  *
  * // Collection containment
  * List<Integer> values = Arrays.asList(2, 3, 4);
@@ -138,11 +167,14 @@ import com.landawn.abacus.util.u.Optional;
  *
  * <p><b>Endpoint System Design:</b>
  * <ul>
- *   <li><b>{@link LowerEndpoint}:</b> Represents the lower boundary with inclusion/exclusion semantics</li>
- *   <li><b>{@link UpperEndpoint}:</b> Represents the upper boundary with inclusion/exclusion semantics</li>
+ *   <li><b>Lower endpoint:</b> the lower boundary value plus its inclusion/exclusion flag</li>
+ *   <li><b>Upper endpoint:</b> the upper boundary value plus its inclusion/exclusion flag</li>
  *   <li><b>Endpoint Abstraction:</b> Common behavior for boundary value handling and comparison</li>
  *   <li><b>Type Safety:</b> Endpoint types ensure proper boundary semantics are maintained</li>
  * </ul>
+ * <p>The endpoint classes themselves are an implementation detail and are not part of the public API;
+ * read the boundary values with {@link #lowerEndpoint()} / {@link #upperEndpoint()} and their
+ * inclusion flags with {@link #boundType()}.</p>
  *
  * <p><b>BoundType Enumeration:</b>
  * <ul>
@@ -177,6 +209,37 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Compatibility:</b> Maintains serialization compatibility across versions</li>
  * </ul>
  *
+ * <p><b>Empty Ranges:</b>
+ * <ul>
+ *   <li>A range is {@linkplain #isEmpty() empty} when its endpoints are equal and at least one bound
+ *       is open, e.g. {@code (5, 5)}, {@code [5, 5)}, {@code (5, 5]}</li>
+ *   <li>{@link #contains} is {@code false} for every element, and {@link #overlaps} is {@code false}
+ *       against every range, including itself</li>
+ *   <li>{@link #containsRange} returns {@code true} for an empty argument, and {@link #span} ignores
+ *       an empty operand &mdash; the empty set is a subset of every set and contributes no values</li>
+ *   <li>{@link #isBefore} and {@link #isAfter} still answer from the endpoints, so away from the
+ *       shared endpoint value exactly one of them is {@code true} &mdash; they do <em>not</em> both
+ *       report {@code true} for every element. At the shared endpoint value itself the answer depends
+ *       on the bound types: {@code (5, 5)} reports {@code true} from both, {@code [5, 5)} only from
+ *       {@link #isBefore}, and {@code (5, 5]} only from {@link #isAfter}</li>
+ *   <li>{@link #elementCompareTo} nevertheless rejects an empty range for <em>every</em> element: its
+ *       {@code 0} result means "this range contains the element", which an empty range can never do,
+ *       and the three-valued result has no fourth value left for "not contained, on neither side". Use
+ *       {@link #isBefore} / {@link #isAfter} directly when a side is all that is needed</li>
+ *   <li>{@link #isBeforeRange} and {@link #isAfterRange} likewise answer from the endpoints and never
+ *       consult {@link #isEmpty()}, so an empty operand still takes a side: {@code [1, 2]} is before
+ *       {@code [100, 100)} and after {@code [0, 0)}. Only where an empty range is compared at its own
+ *       value &mdash; most visibly against itself &mdash; do both report {@code true}</li>
+ * </ul>
+ *
+ * <p><b>Endpoints, not elements:</b> a range is defined by its two ordered endpoints and their
+ * inclusivity, and has no notion of a successor, so it cannot recognise that a discrete domain has no
+ * value inside it. {@code Range.open(5, 6)} over {@code Integer} contains no {@code Integer}, yet it
+ * is not {@linkplain #isEmpty() degenerate} and it {@linkplain #overlaps overlaps} itself. Every
+ * relation on this class &mdash; {@link #overlaps}, {@link #intersection}, {@link #span},
+ * {@link #containsRange}, {@link #isBeforeRange}, {@link #isAfterRange} &mdash; is interval algebra on
+ * endpoints; only {@link #contains}, {@link #containsAll} and {@link #containsAny} test actual values.
+ *
  * <p><b>Mathematical Operations:</b>
  * <ul>
  *   <li><b>Intersection:</b> Returns the overlapping portion of two ranges, or empty if no overlap</li>
@@ -189,12 +252,16 @@ import com.landawn.abacus.util.u.Optional;
  * <ul>
  *   <li><b>Null Endpoints:</b> Endpoint values must not be {@code null}; all factory methods throw {@code IllegalArgumentException} if either endpoint is {@code null}</li>
  *   <li><b>Query Arguments:</b> Methods such as {@link #contains}, {@link #isStartedBy}, and {@link #isAfter} accept {@code null} query arguments and return {@code false} rather than throwing</li>
+ *   <li><b>Deliberate Divergence:</b> {@link #elementCompareTo} rejects a {@code null} element with
+ *       {@code IllegalArgumentException} and {@link #span(Range)} rejects a {@code null} range with
+ *       {@code NullPointerException}, because for those two operations there is no sensible
+ *       "not found" answer to return</li>
  *   <li><b>Range Arguments:</b> Methods such as {@link #containsRange} and {@link #overlaps} accept a {@code null} range argument and return {@code false}</li>
  * </ul>
  *
  * <p><b>Error Handling:</b>
  * <ul>
- *   <li><b>IllegalArgumentException:</b> Thrown when an endpoint is {@code null} or {@code min > max} during construction, or when {@code positionOf} receives a {@code null} element</li>
+ *   <li><b>IllegalArgumentException:</b> Thrown when an endpoint is {@code null} or {@code min > max} during construction, or when {@code elementCompareTo} receives a {@code null} element</li>
  *   <li><b>NullPointerException:</b> Thrown by {@link #span(Range)} if {@code other} is {@code null}</li>
  *   <li><b>ClassCastException:</b> Thrown when elements are not properly comparable</li>
  *   <li><b>Validation:</b> Comprehensive validation of range parameters during construction</li>
@@ -232,7 +299,7 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Integration with Other Utilities:</b>
  * <ul>
  *   <li><b>{@link Optional}:</b> Used for intersection results that may not exist</li>
- *   <li><b>{@link Function}:</b> Used for range transformation via map operations</li>
+ *   <li><b>{@link Function}:</b> Used for endpoint transformation via {@link #mapEndpoints(Function)}</li>
  *   <li><b>{@link Collection}:</b> Support for testing containment of multiple elements</li>
  *   <li><b>{@link Comparable}:</b> Foundation for all range element comparison operations</li>
  * </ul>
@@ -277,8 +344,6 @@ import com.landawn.abacus.util.u.Optional;
  * @see Function
  * @see Collection
  * @see BoundType
- * @see LowerEndpoint
- * @see UpperEndpoint
  */
 @com.landawn.abacus.annotation.Immutable
 public final class Range<T extends Comparable<? super T>> implements Serializable, Immutable {
@@ -331,6 +396,10 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @see #closed(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Range<T> just(final T element) throws IllegalArgumentException {
+        if (element == null) {
+            throw new IllegalArgumentException("'element' cannot be null");
+        }
+
         return closed(element, element);
     }
 
@@ -357,11 +426,31 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @see #closedOpen(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Range<T> open(final T min, final T max) throws IllegalArgumentException {
-        if (min == null || max == null || min.compareTo(max) > 0) {
-            throw new IllegalArgumentException("'min' and 'max' cannot be null, or min > max");//NOSONAR
-        }
+        checkBounds(min, max);
 
         return new Range<>(new LowerEndpoint<>(min, false), new UpperEndpoint<>(max, false), BoundType.OPEN_OPEN);
+    }
+
+    /**
+     * Validates the endpoints shared by all two-argument factory methods.
+     *
+     * @param <T> the endpoint type
+     * @param min the lower bound
+     * @param max the upper bound
+     * @throws IllegalArgumentException if either bound is {@code null}, or {@code min > max}
+     */
+    private static <T extends Comparable<? super T>> void checkBounds(final T min, final T max) throws IllegalArgumentException {
+        if (min == null) {
+            throw new IllegalArgumentException("'min' cannot be null");//NOSONAR
+        }
+
+        if (max == null) {
+            throw new IllegalArgumentException("'max' cannot be null");
+        }
+
+        if (min.compareTo(max) > 0) {
+            throw new IllegalArgumentException("'min' (" + min + ") must not be greater than 'max' (" + max + ")");
+        }
     }
 
     /**
@@ -388,9 +477,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @see #closedOpen(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Range<T> openClosed(final T min, final T max) throws IllegalArgumentException {
-        if (min == null || max == null || min.compareTo(max) > 0) {
-            throw new IllegalArgumentException("'min' and 'max' cannot be null, or min > max");
-        }
+        checkBounds(min, max);
 
         return new Range<>(new LowerEndpoint<>(min, false), new UpperEndpoint<>(max, true), BoundType.OPEN_CLOSED);
     }
@@ -419,9 +506,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @see #openClosed(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> Range<T> closedOpen(final T min, final T max) throws IllegalArgumentException {
-        if (min == null || max == null || min.compareTo(max) > 0) {
-            throw new IllegalArgumentException("'min' and 'max' cannot be null, or min > max");
-        }
+        checkBounds(min, max);
 
         return new Range<>(new LowerEndpoint<>(min, true), new UpperEndpoint<>(max, false), BoundType.CLOSED_OPEN);
     }
@@ -450,35 +535,47 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @see #just(Comparable)
      */
     public static <T extends Comparable<? super T>> Range<T> closed(final T min, final T max) throws IllegalArgumentException {
-        if (min == null || max == null || min.compareTo(max) > 0) {
-            throw new IllegalArgumentException("'min' and 'max' cannot be null, or min > max");
-        }
+        checkBounds(min, max);
 
         return new Range<>(new LowerEndpoint<>(min, true), new UpperEndpoint<>(max, true), BoundType.CLOSED_CLOSED);
     }
 
     /**
-     * Transforms this range by applying the given mapping function to both endpoints.
-     * The resulting range maintains the same bound types (open/closed) as the original range.
-     * The mapper function is applied to both the lower and upper endpoints to create a new
-     * range with potentially different element types.
+     * Builds a new range by applying the given function to <b>this range's two endpoints only</b>,
+     * keeping each endpoint's bound type (open/closed) unchanged. The mapper is invoked exactly twice
+     * &mdash; once for the lower endpoint value and once for the upper endpoint value.
+     *
+     * <p><b>The result is only meaningful for an order-preserving (monotonically non-decreasing)
+     * mapper.</b> This method maps endpoints, not members: it cannot compute the image of the values
+     * between them. If {@code mapper} does not preserve order, the returned range still satisfies
+     * {@code lower <= upper} (otherwise an {@code IllegalArgumentException} is thrown) but it will not
+     * describe the image of this range:</p>
+     * <pre>{@code
+     * Range.closed(2, 10).mapEndpoints(v -> v % 7);   // returns [2, 3] - NOT the image of [2, 10]
+     * }</pre>
+     *
+     * <p>The same caution applies when the mapping changes the ordering in use, for example mapping
+     * numbers to their decimal strings switches from numeric to lexicographic order.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> intRange = Range.closed(1, 5);
-     * Range<String> strRange = intRange.map(String::valueOf);
+     * Range<String> strRange = intRange.mapEndpoints(String::valueOf);
      * // Creates range ["1", "5"]
+     *
+     * Range<Long> millis = Range.closedOpen(1L, 5L);
+     * Range<Long> micros = millis.mapEndpoints(v -> v * 1_000L);   // [1000, 5000) - bound types kept
      * }</pre>
      *
      * @param <U> the type of elements in the resulting range, must implement {@code Comparable}.
-     * @param mapper the function to apply to both endpoints; it must not be {@code null} and must not return
-     *        {@code null} for either endpoint.
+     * @param mapper an order-preserving function applied to both endpoints; it must not be {@code null}
+     *        and must not return {@code null} for either endpoint.
      * @return a new {@code Range<U>} with transformed endpoints maintaining the same bound types.
      * @throws IllegalArgumentException if {@code mapper} is {@code null} or returns {@code null} for either endpoint,
      *         or if the mapped lower endpoint is greater than the mapped upper endpoint.
      * @see #boundType()
      */
-    public <U extends Comparable<? super U>> Range<U> map(final Function<? super T, ? extends U> mapper) throws IllegalArgumentException {
+    public <U extends Comparable<? super U>> Range<U> mapEndpoints(final Function<? super T, ? extends U> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         final U newLower = N.checkArgNotNull(mapper.apply(lowerEndpoint.value), "mapper returned null for the lower endpoint");
@@ -490,6 +587,23 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         }
 
         return new Range<>(new LowerEndpoint<>(newLower, lowerEndpoint.isClosed), new UpperEndpoint<>(newUpper, upperEndpoint.isClosed), boundType);
+    }
+
+    /**
+     * Builds a new range by applying the given function to this range's two endpoints.
+     *
+     * @param <U> the type of elements in the resulting range, must implement {@code Comparable}.
+     * @param mapper an order-preserving function applied to both endpoints; it must not be {@code null}
+     *        and must not return {@code null} for either endpoint.
+     * @return a new {@code Range<U>} with transformed endpoints maintaining the same bound types.
+     * @throws IllegalArgumentException if {@code mapper} is {@code null} or returns {@code null} for either endpoint,
+     *         or if the mapped lower endpoint is greater than the mapped upper endpoint.
+     * @deprecated renamed to {@link #mapEndpoints(Function)}, which states that only the two endpoints
+     *             are mapped and that the mapper must preserve order.
+     */
+    @Deprecated
+    public <U extends Comparable<? super U>> Range<U> map(final Function<? super T, ? extends U> mapper) throws IllegalArgumentException {
+        return mapEndpoints(mapper);
     }
 
     /**
@@ -691,7 +805,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
             return false;
         }
 
-        return lowerEndpoint.isClosed && lowerEndpoint.compareTo(element) == 0;
+        return lowerEndpoint.isClosed && lowerEndpoint.compareToValue(element) == 0;
     }
 
     /**
@@ -717,7 +831,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
             return false;
         }
 
-        return upperEndpoint.isClosed && upperEndpoint.compareTo(element) == 0;
+        return upperEndpoint.isClosed && upperEndpoint.compareToValue(element) == 0;
     }
 
     /**
@@ -738,8 +852,19 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * openRange.isAfter(5);   // returns true (5 is excluded by the open lower bound)
      * }</pre>
      *
+     * <p><b>Empty ranges:</b> this method answers from the lower endpoint alone, so it keeps working on
+     * an {@linkplain #isEmpty() empty} range such as {@code (5, 5)}: it returns {@code true} for every
+     * element below the shared endpoint value and {@code false} for every element above it. At the
+     * shared value itself the open/closed lower bound decides &mdash; {@code (5, 5).isAfter(5)} and
+     * {@code (5, 5].isAfter(5)} are {@code true} (the lower bound excludes 5), while
+     * {@code [5, 5).isAfter(5)} is {@code false}. Only for {@code (x, x)} at {@code x} do this method
+     * and {@link #isBefore} both report {@code true}. {@link #elementCompareTo(Comparable)} rejects
+     * empty ranges outright, because its {@code 0} result would claim containment.</p>
+     *
      * @param element the element to check, {@code null} returns false
      * @return {@code true} if this entire range is after (greater than) the specified element
+     * @see #isBefore(Comparable)
+     * @see #elementCompareTo(Comparable)
      */
     public boolean isAfter(final T element) {
         if (element == null) {
@@ -767,8 +892,19 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * openRange.isBefore(10);   // returns true (10 is excluded by the open upper bound)
      * }</pre>
      *
+     * <p><b>Empty ranges:</b> this method answers from the upper endpoint alone, so it keeps working on
+     * an {@linkplain #isEmpty() empty} range such as {@code (5, 5)}: it returns {@code true} for every
+     * element above the shared endpoint value and {@code false} for every element below it. At the
+     * shared value itself the open/closed upper bound decides &mdash; {@code (5, 5).isBefore(5)} and
+     * {@code [5, 5).isBefore(5)} are {@code true} (the upper bound excludes 5), while
+     * {@code (5, 5].isBefore(5)} is {@code false}. Only for {@code (x, x)} at {@code x} do this method
+     * and {@link #isAfter} both report {@code true}. {@link #elementCompareTo(Comparable)} rejects
+     * empty ranges outright, because its {@code 0} result would claim containment.</p>
+     *
      * @param element the element to check, {@code null} returns false
      * @return {@code true} if this entire range is before (less than) the specified element
+     * @see #isAfter(Comparable)
+     * @see #elementCompareTo(Comparable)
      */
     public boolean isBefore(final T element) {
         if (element == null) {
@@ -803,7 +939,18 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * @see #isBefore(Comparable)
      * @see #isAfter(Comparable)
      * @see #contains(Comparable)
+     * @deprecated the returned sign is the position of the <em>range</em> relative to the element, which is
+     *             the inverse of Apache Commons Lang's {@code Range.elementCompareTo(T)} and of
+     *             {@link Comparable#compareTo}. Use {@link #elementCompareTo(Comparable)}, which returns
+     *             {@code -1} for an element below the range and {@code 1} for one above it.
+     *             <p><b>Two differences when migrating, not just the sign:</b> negate the result, and note
+     *             that this method stays total on an {@linkplain #isEmpty() empty} range (it returns
+     *             {@code -1} or {@code 1} from the endpoints) whereas {@code elementCompareTo}
+     *             <em>throws</em> {@link IllegalStateException} for an empty range. Guard with
+     *             {@link #isEmpty()}, or use {@link #isBefore(Comparable)} / {@link #isAfter(Comparable)},
+     *             if empty ranges can reach the call site.</p>
      */
+    @Deprecated
     public int positionOf(final T element) throws IllegalArgumentException {
         if (element == null) {
             // Library convention: reject null with IllegalArgumentException (not the NPE Comparable would imply)
@@ -813,6 +960,66 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         if (isBefore(element)) {
             return -1;
         } else if (isAfter(element)) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Compares the specified element to this range, using the same sign convention as
+     * {@link Comparable#compareTo}: negative when the element lies <em>below</em> this range, zero when
+     * this range contains it, and positive when it lies <em>above</em> this range.
+     *
+     * <p>Returns:</p>
+     * <ul>
+     *   <li>{@code -1} if the element is below this range (this range is entirely after it)</li>
+     *   <li>{@code 0} if the element is contained in this range</li>
+     *   <li>{@code 1} if the element is above this range (this range is entirely before it)</li>
+     * </ul>
+     *
+     * <p>This matches Apache Commons Lang's {@code Range.elementCompareTo(T)}. It is the sign-inverse of
+     * the deprecated {@link #positionOf(Comparable)}, which reports the position of the <em>range</em>
+     * relative to the element rather than the position of the element.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Range<Integer> range = Range.closed(5, 10);
+     * range.elementCompareTo(3);    // returns -1 (3 is below the range)
+     * range.elementCompareTo(7);    // returns 0  (7 is within the range)
+     * range.elementCompareTo(12);   // returns 1  (12 is above the range)
+     * }</pre>
+     *
+     * @param element the element to compare against this range, must not be {@code null}
+     * @return {@code -1} if the element is below this range, {@code 0} if it is contained in this
+     *         range, or {@code 1} if it is above this range
+     * @throws IllegalArgumentException if {@code element} is {@code null}
+     * @throws IllegalStateException if this range is {@linkplain #isEmpty() empty}, for <em>every</em>
+     *         element: a {@code 0} result asserts containment, which an empty range can never satisfy,
+     *         and the three-valued result has no way to say "not contained, on neither side". Call
+     *         {@link #isBefore(Comparable)} / {@link #isAfter(Comparable)} instead when only a side is
+     *         needed &mdash; those keep working on an empty range
+     * @see #contains(Comparable)
+     * @see #isBefore(Comparable)
+     * @see #isAfter(Comparable)
+     */
+    public int elementCompareTo(final T element) throws IllegalArgumentException, IllegalStateException {
+        if (element == null) {
+            // Library convention: reject null with IllegalArgumentException (not the NPE Comparable would imply)
+            throw new IllegalArgumentException("'element' cannot be null");
+        }
+
+        // An empty range contains nothing, so the 0 result -- which means "this range contains the
+        // element" -- can never be correct for it, and the three-valued return has no fourth value
+        // left to say "not contained, on neither side". Fail loudly rather than pick a side.
+        // (isBefore/isAfter remain usable on an empty range; they answer from a single endpoint.)
+        if (isEmpty()) {
+            throw new IllegalStateException("Cannot compare an element to the empty range " + this);
+        }
+
+        if (isAfter(element)) {
+            return -1;
+        } else if (isBefore(element)) {
             return 1;
         } else {
             return 0;
@@ -897,6 +1104,14 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * (inclusive), this range must start strictly above that value; if it is open (exclusive),
      * this range may start at the same value.</p>
      *
+     * <p><b>Degenerate ranges are ordered by their endpoints, not treated as absent.</b> This method
+     * and {@link #isBeforeRange(Range)} compare endpoints and never consult {@link #isEmpty()}, so a
+     * {@linkplain #isEmpty() degenerate} operand still takes a side: {@code [1, 2]} is before
+     * {@code [100, 100)} and after {@code [0, 0)}. Where a degenerate range sits at the same value it
+     * is compared against &mdash; most visibly a degenerate range against itself &mdash; both
+     * predicates report {@code true}, because a range with no values is trivially on both sides of
+     * itself. Guard with {@link #isEmpty()} if the two predicates must be mutually exclusive.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range1 = Range.closed(10, 15);
@@ -909,18 +1124,23 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Range<Integer> range4 = Range.closed(10, 15);
      * Range<Integer> range5 = Range.open(1, 10);   // upper bound 10 is exclusive
      * range4.isAfterRange(range5);                 // returns true  (range5 excludes 10, range4 starts at 10)
+     *
+     * Range<Integer> empty = Range.closedOpen(5, 5);
+     * empty.isAfterRange(empty);                   // returns true, and so does isBeforeRange
+     * Range.closed(1, 2).isAfterRange(empty);      // returns false - [1, 2] sits below 5
      * }</pre>
      *
      * @param other the range to compare against, {@code null} returns {@code false}
      * @return {@code true} if this range is completely after the specified range with no shared elements
      * @see #isBeforeRange(Range)
      * @see #overlaps(Range)
+     * @see #isEmpty()
      */
     public boolean isAfterRange(final Range<T> other) {
         if (other == null) {
             return false;
         }
-        return other.upperEndpoint.isClosed ? isAfter(other.upperEndpoint.value) : lowerEndpoint.compareTo(other.upperEndpoint.value) >= 0;
+        return other.upperEndpoint.isClosed ? isAfter(other.upperEndpoint.value) : lowerEndpoint.compareToValue(other.upperEndpoint.value) >= 0;
     }
 
     /**
@@ -930,6 +1150,10 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * <p>The check accounts for bound types: if the other range's lower endpoint is closed
      * (inclusive), this range must end strictly below that value; if it is open (exclusive),
      * this range may end at the same value.</p>
+     *
+     * <p><b>Degenerate ranges are ordered by their endpoints, not treated as absent</b> &mdash; see
+     * {@link #isAfterRange(Range)} for the full rule and examples. In particular a
+     * {@linkplain #isEmpty() degenerate} range is reported both before and after itself.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -943,19 +1167,24 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Range<Integer> range4 = Range.closed(1, 5);
      * Range<Integer> range5 = Range.open(5, 10);   // lower bound 5 is exclusive
      * range4.isBeforeRange(range5);                // returns true  (range5 excludes 5, range4 ends at 5)
+     *
+     * Range<Integer> empty = Range.closedOpen(5, 5);
+     * empty.isBeforeRange(empty);                  // returns true, and so does isAfterRange
+     * Range.closed(1, 2).isBeforeRange(empty);     // returns true - [1, 2] sits below 5
      * }</pre>
      *
      * @param other the range to compare against, {@code null} returns {@code false}
      * @return {@code true} if this range is completely before the specified range with no shared elements
      * @see #isAfterRange(Range)
      * @see #overlaps(Range)
+     * @see #isEmpty()
      */
     public boolean isBeforeRange(final Range<T> other) {
         if (other == null) {
             return false;
         }
 
-        return other.lowerEndpoint.isClosed ? isBefore(other.lowerEndpoint.value) : upperEndpoint.compareTo(other.lowerEndpoint.value) <= 0;
+        return other.lowerEndpoint.isClosed ? isBefore(other.lowerEndpoint.value) : upperEndpoint.compareToValue(other.lowerEndpoint.value) <= 0;
     }
 
     /**
@@ -978,7 +1207,6 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      * @param other the range to test for overlap, {@code null} returns false
      * @return {@code true} if the specified range overlaps with this range; otherwise, false
-     * @see #overlaps(Range)
      * @see #intersection(Range)
      * @see #isBeforeRange(Range)
      * @see #isAfterRange(Range)
@@ -993,17 +1221,33 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Checks whether this range overlaps with the specified range.
      * This is the canonical overlap operation for ranges.
      *
+     * <p>Two ranges overlap when neither is {@linkplain #isEmpty() degenerate} and their
+     * endpoint-delimited intervals intersect: this range's lower endpoint must not lie above the
+     * other's upper endpoint, nor the other's lower endpoint above this one's upper endpoint. Where
+     * the two touch at a single shared value, that value counts only if <em>both</em> of the bounds
+     * meeting there are closed &mdash; so {@code [1, 5]} overlaps {@code [5, 10]} but not
+     * {@code (5, 10]}, and {@code [5, 5]} overlaps itself.</p>
+     *
+     * <p><b>This is interval algebra on the endpoints, not a search for a shared element.</b> A
+     * {@code Range} has no notion of a successor, so it cannot see that two ranges over a discrete
+     * domain share no value: {@code Range.open(5, 6)} over {@code Integer} overlaps itself even though
+     * {@link #contains(Comparable)} is {@code false} for every {@code Integer}. See {@link #isEmpty()}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range = Range.closed(1, 5);
-     * range.overlaps(Range.closed(3, 8));    // returns true
-     * range.overlaps(Range.closed(6, 10));   // returns false
-     * range.overlaps(null);                  // returns false
+     * range.overlaps(Range.closed(3, 8));      // returns true
+     * range.overlaps(Range.closed(6, 10));     // returns false
+     * range.overlaps(Range.closed(5, 10));     // returns true  - both bounds at 5 are closed
+     * range.overlaps(Range.openClosed(5, 10)); // returns false - the other excludes 5
+     * range.overlaps(Range.open(3, 3));        // returns false - the other is degenerate
+     * range.overlaps(null);                    // returns false
      * }</pre>
      *
      * @param other the range to test for overlap, {@code null} returns false
      * @return {@code true} if the specified range overlaps with this range; otherwise, false
      * @see #intersection(Range)
+     * @see #isEmpty()
      */
     public boolean overlaps(final Range<T> other) {
         //NOSONAR
@@ -1052,15 +1296,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         final LowerEndpoint<T> newLowerEndpoint = lowerEndpoint.includes(other.lowerEndpoint.value) ? other.lowerEndpoint : lowerEndpoint;
         final UpperEndpoint<T> newUpperEndpoint = upperEndpoint.includes(other.upperEndpoint.value) ? other.upperEndpoint : upperEndpoint;
 
-        BoundType boundType = null;//NOSONAR
+        final BoundType newBoundType = BoundType.of(newLowerEndpoint.isClosed, newUpperEndpoint.isClosed);
 
-        if (newLowerEndpoint.isClosed) {
-            boundType = newUpperEndpoint.isClosed ? BoundType.CLOSED_CLOSED : BoundType.CLOSED_OPEN;
-        } else {
-            boundType = newUpperEndpoint.isClosed ? BoundType.OPEN_CLOSED : BoundType.OPEN_OPEN;
-        }
-
-        return Optional.of(new Range<>(newLowerEndpoint, newUpperEndpoint, boundType));
+        return Optional.of(new Range<>(newLowerEndpoint, newUpperEndpoint, newBoundType));
     }
 
     /**
@@ -1075,7 +1313,12 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * operand contributes no values, so spanning a non-empty range with an empty range returns
      * the non-empty operand unchanged.</p>
      *
-     * <p>This operation is commutative, associative, and idempotent.</p>
+     * <p>This operation is commutative, associative, and idempotent <em>up to the equivalence induced by
+     * {@code compareTo}</em>. When {@code T}'s {@code compareTo} is inconsistent with its {@code equals}
+     * (as for {@link java.math.BigDecimal}), {@code a.span(b)} and {@code b.span(a)} can select different
+     * &mdash; but numerically equal &mdash; endpoint objects, so the two results describe the same
+     * interval yet are not {@link #equals(Object) equal}. See <b>Ordering vs. equality</b> in the class
+     * documentation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1092,11 +1335,11 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      *
      * @param other the range to span with this range, must not be {@code null}
      * @return the minimal range that contains all values from both input ranges
-     * @throws NullPointerException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      * @see #intersection(Range)
      */
-    public Range<T> span(final Range<T> other) {
-        N.requireNonNull(other, "other");
+    public Range<T> span(final Range<T> other) throws IllegalArgumentException {
+        N.checkArgNotNull(other, cs.other);
 
         if (isEmpty()) {
             if (!other.isEmpty()) {
@@ -1104,7 +1347,9 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
             }
 
             // Every empty range represents the same empty set, but Range equality also records
-            // endpoints and bound types. Select one deterministically so span remains commutative.
+            // endpoints and bound types. Select one deterministically so span is commutative whenever
+            // compareTo agrees with equals; when it does not, the two orders can still yield equal-but-
+            // not-`equals` results (see the "Ordering vs. equality" note in the class documentation).
             final int emptyCmp = lowerEndpoint.value.compareTo(other.lowerEndpoint.value);
             return emptyCmp < 0 || (emptyCmp == 0 && boundType.ordinal() <= other.boundType.ordinal()) ? this : other;
         } else if (other.isEmpty()) {
@@ -1133,21 +1378,22 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
             newUpperEndpoint = upperEndpoint.isClosed ? upperEndpoint : other.upperEndpoint;
         }
 
-        BoundType boundType = null;//NOSONAR
+        final BoundType newBoundType = BoundType.of(newLowerEndpoint.isClosed, newUpperEndpoint.isClosed);
 
-        if (newLowerEndpoint.isClosed) {
-            boundType = newUpperEndpoint.isClosed ? BoundType.CLOSED_CLOSED : BoundType.CLOSED_OPEN;
-        } else {
-            boundType = newUpperEndpoint.isClosed ? BoundType.OPEN_CLOSED : BoundType.OPEN_OPEN;
-        }
-
-        return new Range<>(newLowerEndpoint, newUpperEndpoint, boundType);
+        return new Range<>(newLowerEndpoint, newUpperEndpoint, newBoundType);
     }
 
     /**
-     * Checks if this range is empty. A range is empty if both endpoints are the same
-     * value and at least one endpoint is open. Only a closed range with equal endpoints
-     * contains that single endpoint value.
+     * Checks whether this range is <i>degenerate</i>: its two endpoints are equal and at least one of
+     * them is exclusive, so no value can satisfy both bounds. Only a closed range with equal
+     * endpoints, such as {@code [5, 5]}, contains its single endpoint value.
+     *
+     * <p><b>This is a test on the endpoints, not on the elements of a discrete domain.</b> A
+     * {@code Range} is defined purely by its ordered endpoints and their inclusivity; it has no notion
+     * of a successor, so it cannot tell that {@code Range.open(5, 6)} holds no {@code Integer}. That
+     * range reports {@code false} here, and {@link #contains(Comparable)} returns {@code false} for
+     * every {@code Integer}. Check emptiness in a discrete domain by testing the values you care
+     * about, not with this method.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1164,11 +1410,13 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * normalRange.isEmpty();   // returns false
      * }</pre>
      *
-     * @return {@code true} if this range contains no values, {@code false} otherwise
+     * @return {@code true} if this range is degenerate - equal endpoints with at least one exclusive
+     *         bound - and therefore contains no value of any domain; {@code false} otherwise, which
+     *         does <em>not</em> guarantee that a discrete domain has a value inside it
      */
     public boolean isEmpty() {
         //NOSONAR
-        return (!lowerEndpoint.isClosed || !upperEndpoint.isClosed) && lowerEndpoint.compareTo(upperEndpoint.value) == 0;
+        return (!lowerEndpoint.isClosed || !upperEndpoint.isClosed) && lowerEndpoint.compareToValue(upperEndpoint.value) == 0;
     }
 
     // Basics
@@ -1198,8 +1446,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
             return true;
         }
 
-        if (obj instanceof Range) {
-            final Range<T> other = (Range<T>) obj;
+        if (obj instanceof final Range<?> other) {
             return N.equals(lowerEndpoint, other.lowerEndpoint) && N.equals(upperEndpoint, other.upperEndpoint);
         }
 
@@ -1207,9 +1454,13 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     }
 
     /**
-     * Returns a hash code value for this range. The hash code is computed based on
-     * the class, lower endpoint, and upper endpoint. Equal ranges will have equal
-     * hash codes.
+     * Returns a hash code value for this range, derived from both endpoint values and their
+     * inclusiveness. Equal ranges (see {@link #equals(Object)}) have equal hash codes; ranges that
+     * differ only in bound type generally do not.
+     *
+     * <p>As always, the hash code is only as stable as the endpoints' own {@code hashCode()}: for
+     * endpoint types whose hash is not value-based (or not stable across JVM runs), neither is this
+     * one.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1227,9 +1478,11 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      */
     @Override
     public int hashCode() {
+        // No getClass() term: Range is final, so it would distinguish nothing, and Class does not
+        // override hashCode() - mixing in its identity hash made equal ranges hash differently from
+        // one JVM run to the next.
         int result = 17;
 
-        result = 37 * result + getClass().hashCode();
         result = 37 * result + lowerEndpoint.hashCode();
         return 37 * result + upperEndpoint.hashCode();
     }
@@ -1265,6 +1518,54 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
     }
 
     /**
+     * Restores a {@code Range} from a stream, rejecting any state no factory method could have
+     * produced.
+     *
+     * <p>The bounds are validated by the {@code open}/{@code closed}/{@code just} factories, not by
+     * this class's private constructor, and deserialization runs neither. Without this check a
+     * hand-crafted or corrupted stream could yield a reversed range such as {@code [3, 2]}, which
+     * {@link #contains(Comparable)} rejects for every value while {@link #isEmpty()} reports
+     * {@code false}, or a range whose {@link BoundType} disagrees with its own endpoints.</p>
+     *
+     * @param in the stream to read this range from
+     * @throws ClassNotFoundException if the class of a serialized object cannot be found
+     * @throws IOException if reading from the stream fails
+     * @throws InvalidObjectException if an endpoint or the bound type is missing, if the endpoint
+     *         values are not mutually comparable, if the lower endpoint value is greater than the
+     *         upper endpoint value, or if the bound type does not match the endpoints' inclusivity
+     */
+    @Serial
+    private void readObject(final ObjectInputStream in) throws ClassNotFoundException, IOException, InvalidObjectException {
+        in.defaultReadObject();
+
+        if (lowerEndpoint == null || upperEndpoint == null || boundType == null) {
+            throw new InvalidObjectException("A Range must have a lower endpoint, an upper endpoint and a bound type");
+        }
+
+        if (lowerEndpoint.value == null || upperEndpoint.value == null) {
+            throw new InvalidObjectException("Range endpoint values must not be null");
+        }
+
+        // A stream can also pair endpoints of unrelated types, which surfaces here as a
+        // ClassCastException from compareTo. Report that as the same rejection rather than letting an
+        // implementation detail of the comparison escape.
+        try {
+            if (lowerEndpoint.value.compareTo(upperEndpoint.value) > 0) {
+                throw new InvalidObjectException("'min' (" + lowerEndpoint.value + ") must not be greater than 'max' (" + upperEndpoint.value + ")");
+            }
+        } catch (final ClassCastException e) {
+            final InvalidObjectException ioe = new InvalidObjectException(
+                    "Range endpoint values are not mutually comparable: " + lowerEndpoint.value + " and " + upperEndpoint.value);
+            ioe.initCause(e);
+            throw ioe;
+        }
+
+        if (boundType != BoundType.of(lowerEndpoint.isClosed, upperEndpoint.isClosed)) {
+            throw new InvalidObjectException("The bound type " + boundType + " does not match the endpoints " + this);
+        }
+    }
+
+    /**
      * Enumerates the four possible combinations of lower and upper boundary inclusiveness
      * for a {@link Range}. A <em>closed</em> bound includes its endpoint value while an
      * <em>open</em> bound excludes it.
@@ -1291,7 +1592,28 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         /**
          * Both bounds are closed (inclusive). Represents range [a, b] where both a and b are included.
          */
-        CLOSED_CLOSED
+        CLOSED_CLOSED;
+
+        /**
+         * Returns the {@code BoundType} for the given endpoint inclusiveness flags.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * BoundType.of(true, false);    // returns CLOSED_OPEN
+         * BoundType.of(false, false);   // returns OPEN_OPEN
+         * }</pre>
+         *
+         * @param lowerClosed {@code true} if the lower bound is closed (inclusive)
+         * @param upperClosed {@code true} if the upper bound is closed (inclusive)
+         * @return the matching {@code BoundType}, never {@code null}
+         */
+        public static BoundType of(final boolean lowerClosed, final boolean upperClosed) {
+            if (lowerClosed) {
+                return upperClosed ? CLOSED_CLOSED : CLOSED_OPEN;
+            }
+
+            return upperClosed ? OPEN_CLOSED : OPEN_OPEN;
+        }
     }
 
     /**
@@ -1341,8 +1663,45 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
          * @param value the value to compare against this endpoint
          * @return a negative integer, zero, or a positive integer if this endpoint value is less than, equal to, or greater than the specified value
          */
-        public int compareTo(final T value) {
+        public int compareToValue(final T value) {
             return N.compare(this.value, value);
+        }
+
+        /**
+         * Returns a hash code derived from this endpoint's value and its closed/open flag.
+         *
+         * @return a hash code value for this endpoint
+         */
+        @Override
+        public int hashCode() {
+            final int result = isClosed ? 0 : 1;
+            return 37 * result + N.hashCode(value);
+        }
+
+        /**
+         * Compares this endpoint to another object for equality. Two endpoints are equal when they are
+         * of the same concrete endpoint class (lower vs. upper) and hold the same boundary value with
+         * the same closed/open flag.
+         *
+         * @param obj the reference object with which to compare
+         * @return {@code true} if {@code obj} is an endpoint of the same side with the same value and
+         *         closed/open flag; {@code false} otherwise
+         */
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+
+            // getClass() rather than instanceof: a LowerEndpoint and an UpperEndpoint holding the same
+            // value and flag must not compare equal, since [x, ... and ...,x] mean different things.
+            if (obj == null || !getClass().equals(obj.getClass())) {
+                return false;
+            }
+
+            final Endpoint<?> other = (Endpoint<?>) obj;
+
+            return isClosed == other.isClosed && N.equals(value, other.value);
         }
 
         /**
@@ -1406,51 +1765,6 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         }
 
         /**
-         * Returns a hash code value for this lower endpoint based on its value and closed/open flag.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * // Two LowerEndpoint instances with same value and closed flag have equal hash codes
-         * // Used internally for Map key hashing
-         * }</pre>
-         *
-         * @return a hash code value for this object
-         */
-        @Override
-        public int hashCode() {
-            final int result = isClosed ? 0 : 1;
-            return 37 * result + N.hashCode(value);
-        }
-
-        /**
-         * Compares this lower endpoint to another object for equality.
-         * Two lower endpoints are equal if they have the same boundary value and the same closed/open flag.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * // Two LowerEndpoint instances with same value=1 and isClosed=true are equal
-         * // A LowerEndpoint(value=1, isClosed=true) is not equal to LowerEndpoint(value=1, isClosed=false)
-         * }</pre>
-         *
-         * @param obj the reference object with which to compare
-         * @return {@code true} if {@code obj} is a {@code LowerEndpoint} with the same value and closed/open flag; {@code false} otherwise
-         */
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-
-            if (obj instanceof LowerEndpoint) {
-                final LowerEndpoint<T> other = (LowerEndpoint<T>) obj;
-
-                return N.equals(isClosed, other.isClosed) && N.equals(value, other.value);
-            }
-
-            return false;
-        }
-
-        /**
          * Returns a string representation of this lower endpoint.
          * Closed endpoints are formatted as {@code [value}, open endpoints as {@code (value}.
          *
@@ -1508,51 +1822,6 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
         @Override
         public boolean includes(final T value) {
             return isClosed ? N.compare(value, this.value) <= 0 : N.compare(value, this.value) < 0;
-        }
-
-        /**
-         * Returns a hash code value for this upper endpoint based on its value and closed/open flag.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * // Two UpperEndpoint instances with same value and closed flag have equal hash codes
-         * // Used internally for Map key hashing
-         * }</pre>
-         *
-         * @return a hash code value for this object
-         */
-        @Override
-        public int hashCode() {
-            final int result = isClosed ? 0 : 1;
-            return 37 * result + N.hashCode(value);
-        }
-
-        /**
-         * Compares this upper endpoint to another object for equality.
-         * Two upper endpoints are equal if they have the same boundary value and the same closed/open flag.
-         *
-         * <p><b>Usage Examples:</b></p>
-         * <pre>{@code
-         * // Two UpperEndpoint instances with same value=5 and isClosed=true are equal
-         * // An UpperEndpoint(value=5, isClosed=true) is not equal to UpperEndpoint(value=5, isClosed=false)
-         * }</pre>
-         *
-         * @param obj the reference object with which to compare
-         * @return {@code true} if {@code obj} is an {@code UpperEndpoint} with the same value and closed/open flag; {@code false} otherwise
-         */
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-
-            if (obj instanceof UpperEndpoint) {
-                final UpperEndpoint<T> other = (UpperEndpoint<T>) obj;
-
-                return N.equals(isClosed, other.isClosed) && N.equals(value, other.value);
-            }
-
-            return false;
         }
 
         /**

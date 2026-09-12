@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class ReadOnlyTest extends TestBase {
-    static class TestEntity {
+    public static class TestEntity {
         @ReadOnly
         private String field;
     }

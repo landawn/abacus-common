@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.ByteArrayInputStream;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,10 +26,13 @@ import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.entity.PersonType;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
+import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.ImmutableMap;
+import com.landawn.abacus.util.MapEntity;
+import com.landawn.abacus.util.MutableInt;
 import com.landawn.abacus.util.XmlUtil;
 
-import untrusted.abacus.UntrustedXmlType;
+import testfixtures.types.UntrustedXmlType;
 
 public abstract class AbstractXmlParserTest extends AbstractParserTest {
     private static final String UNTRUSTED_INITIALIZED_PROPERTY = "com.landawn.abacus.test.untrustedXmlTypeInitialized";
@@ -127,7 +132,7 @@ public abstract class AbstractXmlParserTest extends AbstractParserTest {
         try {
             System.setProperty(property, "true");
 
-            final String legacyTypeName = "untrusted.abacus.LegacyXmlType";
+            final String legacyTypeName = "testfixtures.types.LegacyXmlType";
             final DocumentBuilder parser = XmlUtil.createDOMParser(false, false);
             final Node legacyNode = parser.parse(new InputSource(new StringReader("<value type=\"" + legacyTypeName + "\"/>"))).getDocumentElement();
             assertEquals(legacyTypeName, AbstractXmlParser.getAttributeTypeClass(legacyNode).getName());
@@ -146,6 +151,88 @@ public abstract class AbstractXmlParserTest extends AbstractParserTest {
             } else {
                 System.setProperty(property, previousValue);
             }
+        }
+    }
+
+    /**
+     * G11-9 (2026-09-08): the writers emit {@link com.landawn.abacus.type.Type#xmlName()}, which is
+     * {@code Type.name()}, and many built-ins register under the simple name of their class. Accepting only canonical
+     * class names therefore rejected this parser's own output; the rule now also accepts a registered type's own
+     * simple name, while a registration alias - which is also its type's {@code name()} - stays rejected.
+     */
+    @Test
+    public void testWriterEmittedIntrinsicTypeNamesAreAccepted() {
+        final String property = AbstractXmlParser.XML_TYPE_CLASS_FOR_NAME_PROPERTY;
+        final String previousValue = System.getProperty(property);
+
+        try {
+            System.clearProperty(property);
+
+            assertEquals("MapEntity", Type.of(MapEntity.class).xmlName());
+            assertSame(MapEntity.class, AbstractXmlParser.resolveTypeAttribute(Type.of(MapEntity.class).xmlName()).javaType());
+            assertSame(MapEntity.class, AbstractXmlParser.resolveTypeAttribute(MapEntity.class.getCanonicalName()).javaType());
+            assertSame(MutableInt.class, AbstractXmlParser.resolveTypeAttribute(Type.of(MutableInt.class).xmlName()).javaType());
+            assertSame(Dataset.class, AbstractXmlParser.resolveTypeAttribute("Dataset").javaType());
+            assertSame(List.class, AbstractXmlParser.resolveTypeAttribute("List<MutableInt>").javaType());
+
+            final Node mapEntityNode = XmlUtil.createDOMParser(false, false).parse(new InputSource(new StringReader("<value type=\"MapEntity\"/>")))
+                    .getDocumentElement();
+            assertSame(MapEntity.class, AbstractXmlParser.getAttributeTypeClass(mapEntityNode));
+
+            // A registration alias is its OWN Type.name(), so the name() test alone would have readmitted it. Only a
+            // name the class itself supplies - its canonical or simple name - is accepted.
+            final String alias = "untrusted.abacus.IntrinsicNameAliasForTest";
+
+            if (TypeFactory.getTypeIfPresent(alias) == null) {
+                TypeFactory.registerType(alias, UntrustedXmlType.class, String::valueOf, value -> null);
+            }
+
+            assertEquals(alias, TypeFactory.getTypeIfPresent(alias).name());
+            assertNull(AbstractXmlParser.resolveTypeAttribute(alias));
+            assertNull(AbstractXmlParser.resolveTypeAttribute("List<" + alias + ">"));
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (previousValue == null) {
+                System.clearProperty(property);
+            } else {
+                System.setProperty(property, previousValue);
+            }
+        }
+    }
+
+    /**
+     * G11-51 (2026-09-08): a processing instruction is not character data, so the text-coalescing loop every StAX
+     * backend runs stopped at it and dropped everything before it. The filter that hides it lives on the base stream
+     * reader factories, so both StAX backends - and all three source shapes - coalesce {@code a<?pi x?>b} to "ab".
+     */
+    @Test
+    public void testStreamReaderCoalescesTextAcrossAProcessingInstruction() {
+        final String xml = "<piTextBean><raw>a<?pi x?>b</raw></piTextBean>";
+
+        for (final XmlParserType parserType : XmlParserType.values()) {
+            assertEquals("ab", new AbacusXmlParserImpl(parserType).deserialize(xml, null, PiTextBean.class).getRaw(), "AbacusXmlParserImpl " + parserType);
+        }
+
+        final AbacusXmlParserImpl staxParser = new AbacusXmlParserImpl(XmlParserType.StAX);
+        assertEquals("ab", staxParser.deserialize(new StringReader(xml), null, PiTextBean.class).getRaw());
+        assertEquals("ab", staxParser.deserialize(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), null, PiTextBean.class).getRaw());
+
+        // A comment in the same position was already coalesced, and the two StAX backends must not disagree.
+        assertEquals("ab", staxParser.deserialize("<piTextBean><raw>a<!--c-->b</raw></piTextBean>", null, PiTextBean.class).getRaw());
+        assertEquals("ab", new XmlParserImpl(XmlParserType.StAX).deserialize(xml, null, PiTextBean.class).getRaw());
+        assertEquals("ab", new XmlParserImpl(XmlParserType.DOM).deserialize(xml, null, PiTextBean.class).getRaw());
+    }
+
+    public static class PiTextBean {
+        private String raw;
+
+        public String getRaw() {
+            return raw;
+        }
+
+        public void setRaw(final String raw) {
+            this.raw = raw;
         }
     }
 

@@ -176,4 +176,72 @@ public class TimedTypeTest extends TestBase {
         assertTrue(declaringName.contains("Timed"));
         assertTrue(declaringName.contains("String"));
     }
+
+    @SuppressWarnings("unchecked")
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+        final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            ((Type<Object>) type).serializeTo(jsonWriter, value, config);
+            return jsonWriter.toString();
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(jsonWriter);
+        }
+    }
+
+    // T6-04 (2026-09-06): the timestamp slot ignored writeLongAsString.
+    @Test
+    public void reviewFixes20260906_timestampSlotHonoursWriteLongAsString() throws IOException {
+        final com.landawn.abacus.parser.JsonSerConfig las = com.landawn.abacus.parser.JsonSerConfig.create().setWriteLongAsString(true);
+
+        assertEquals("[\"5\", \"v\"]", reviewFixes20260906_ser(timedType, Timed.of("v", 5L), las));
+        assertEquals("[5, \"v\"]", reviewFixes20260906_ser(timedType, Timed.of("v", 5L), com.landawn.abacus.parser.JsonSerConfig.create()));
+        assertEquals("[5, v]", reviewFixes20260906_ser(timedType, Timed.of("v", 5L), null));
+        assertEquals("[5, v]", reviewFixes20260906_ser(timedType, Timed.of("v", 5L), com.landawn.abacus.parser.XmlSerConfig.create().setWriteLongAsString(true)));
+        assertEquals("[\"-9223372036854775808\", \"v\"]", reviewFixes20260906_ser(timedType, Timed.of("v", Long.MIN_VALUE), las));
+        assertEquals("[\"9223372036854775807\", \"v\"]", reviewFixes20260906_ser(timedType, Timed.of("v", Long.MAX_VALUE), las));
+        assertEquals("[\"7\", \"5\"]", reviewFixes20260906_ser(Type.of("Timed<Long>"), Timed.of(5L, 7L), las));
+        assertEquals("[7, 5]", reviewFixes20260906_ser(Type.of("Timed<Long>"), Timed.of(5L, 7L), null));
+        assertEquals("null", reviewFixes20260906_ser(timedType, null, las));
+
+        // the quoted form round-trips through valueOf and through the real parser into a bean field
+        final Timed<String> back = timedType.valueOf(reviewFixes20260906_ser(timedType, Timed.of("v", Long.MIN_VALUE), las));
+        assertEquals(Long.MIN_VALUE, back.timestamp());
+        assertEquals("v", back.value());
+        final String json = com.landawn.abacus.util.N.toJson(new ReviewFixesTimedBean(), las);
+        assertEquals("{\"tm\": [\"9223372036854775807\", \"v\"]}", json);
+        assertEquals(Long.MAX_VALUE, com.landawn.abacus.util.N.fromJson(json, ReviewFixesTimedBean.class).tm.timestamp());
+        assertEquals("[[\"7\", \"5\"]]", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(Timed.of(5L, 7L)), las));
+    }
+
+    // T6-01 (2026-09-06): an Object value slot dispatches on the runtime class.
+    @Test
+    public void reviewFixes20260906_objectValueSlotUsesRuntimeType() throws IOException {
+        final Type<?> type = Type.of("Timed<Object>");
+        final com.landawn.abacus.parser.JsonSerConfig jsc = com.landawn.abacus.parser.JsonSerConfig.create();
+
+        assertEquals("[5, 1]", reviewFixes20260906_ser(type, Timed.of(1, 5L), jsc));
+        assertEquals("[5, [1]]", reviewFixes20260906_ser(type, Timed.of(com.landawn.abacus.util.N.asList(1), 5L), jsc));
+        assertEquals("[5, {\"k\": 1}]", reviewFixes20260906_ser(type, Timed.of(com.landawn.abacus.util.N.asMap("k", 1), 5L), jsc));
+        assertEquals("[5, \"s\"]", reviewFixes20260906_ser(type, Timed.of("s", 5L), jsc));
+        assertEquals("[5, null]", reviewFixes20260906_ser(type, Timed.of(null, 5L), jsc));
+        assertEquals("[[5, 1]]", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(Timed.of(1, 5L))));
+    }
+
+    // T6-07 (2026-09-06): documented exception types of valueOf; negative timestamps are accepted.
+    @Test
+    public void reviewFixes20260906_valueOfExceptionTypes() {
+        assertNull(timedType.valueOf(""));
+        assertEquals(-1L, timedType.valueOf("[-1, \"a\"]").timestamp());
+        assertThrows(IllegalArgumentException.class, () -> timedType.valueOf(" "));
+        assertThrows(IllegalArgumentException.class, () -> timedType.valueOf("[1]"));
+        assertThrows(NumberFormatException.class, () -> timedType.valueOf("[1.5, \"a\"]"));
+        assertThrows(NumberFormatException.class, () -> timedType.valueOf("[1e2, \"a\"]"));
+        assertThrows(ArithmeticException.class, () -> timedType.valueOf("[9223372036854775808, \"a\"]"));
+        assertEquals(5L, timedType.valueOf("[\"5\", \"a\"]").timestamp());
+    }
+
+    public static class ReviewFixesTimedBean {
+        public Timed<String> tm = Timed.of("v", Long.MAX_VALUE);
+    }
 }

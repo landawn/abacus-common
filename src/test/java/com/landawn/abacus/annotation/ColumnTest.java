@@ -20,7 +20,7 @@ import com.landawn.abacus.TestBase;
 
 public class ColumnTest extends TestBase {
 
-    static class TestEntity {
+    public static class TestEntity {
         @Column
         private String field1;
 

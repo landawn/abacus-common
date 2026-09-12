@@ -21,13 +21,13 @@ import com.landawn.abacus.TestBase;
 public class IdTest extends TestBase {
 
     @Id
-    static class TestEntity1 {
+    public static class TestEntity1 {
         @Id
         private Long id;
     }
 
     @Id({ "company_id", "employee_id" })
-    static class TestEntity2 {
+    public static class TestEntity2 {
         @Id({ "user_id" })
         private Long userId;
     }

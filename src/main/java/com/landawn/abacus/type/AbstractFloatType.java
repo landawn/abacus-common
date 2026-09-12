@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
@@ -47,15 +48,22 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * Constructs an {@code AbstractFloatType} with the specified type name.
      *
      * @param typeName the name of the float type (e.g., "Float", "float")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractFloatType(final String typeName) {
+    protected AbstractFloatType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
     /**
-     * Converts a {@code Number} value to its string representation as a {@code float}.
+     * Converts a {@code Number} value to its string representation.
      * Returns {@code null} if the input is {@code null}, otherwise returns
-     * the string representation obtained from the {@code Number}'s {@code toString()} method.
+     * the string representation obtained from the {@code Number}'s own {@code toString()} method.
+     * <p>
+     * The argument is <i>not</i> narrowed to {@code float} first: a {@code Float} yields its float text
+     * ({@code 1.5f} -> {@code "1.5"}), but any other {@code Number} yields that number's text unchanged
+     * ({@code Integer 42} -> {@code "42"}, not {@code "42.0"}; {@code Long.MAX_VALUE} -> {@code "9223372036854775807"}).
+     * Every such string is still accepted by {@link #valueOf(String)}.
+     * </p>
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
      * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is
@@ -64,10 +72,11 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * into the original value.</p>
      *
      * @param x the {@code Number} value to convert
-     * @return the string representation of the {@code float} value, or {@code null} if input is {@code null}
+     * @return {@code x.toString()}, or {@code null} if input is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final Number x) {
         if (x == null) {
@@ -83,8 +92,10 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * This method handles various string formats:
      * </p>
      * <ul>
-     *   <li>Empty or {@code null} strings return the default value.</li>
-     *   <li>The string is trimmed of leading and trailing whitespace before parsing.</li>
+     *   <li>Only {@code null} and the empty string return the default value.</li>
+     *   <li>Any other string is trimmed of leading and trailing whitespace before parsing; a whitespace-only string
+     *       therefore trims to empty and is rejected with {@code NumberFormatException} (it does not yield the
+     *       default value).</li>
      *   <li>If parsing fails and the trimmed string ends with {@code 'l'}, {@code 'L'}, {@code 'f'},
      *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, the suffix is stripped and parsing is retried.</li>
      *   <li>Valid numeric strings are parsed to {@code Float} values.</li>
@@ -101,7 +112,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @see #stringOf(Number)
      */
     @Override
-    public Float valueOf(final String str) {
+    public Float valueOf(final String str) throws NumberFormatException {
         if (Strings.isEmpty(str)) {
             return (Float) defaultValue();
         }
@@ -140,10 +151,11 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
      * @return the {@code float} value at the specified column, or {@code 0.0f} if SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Float get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Float get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getFloat(columnIndex);
     }
 
@@ -155,10 +167,11 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
      * @return the {@code float} value at the specified column, or {@code 0.0f} if SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Float get(final ResultSet rs, final String columnName) throws SQLException {
+    public Float get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getFloat(columnName);
     }
 
@@ -172,10 +185,11 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code Number} value to set as {@code float}, or {@code null} for SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.REAL);
         } else {
@@ -193,10 +207,11 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the {@code Number} value to set as {@code float}, or {@code null} for SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.REAL);
         } else {
@@ -215,7 +230,8 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Number} value to append as {@code float}
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -227,7 +243,7 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Number x) throws IOException {
+    public void appendTo(final Appendable appendable, final Number x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -253,10 +269,13 @@ public abstract class AbstractFloatType extends NumberType<Number> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Number} value to write as {@code float}
      * @param config the serialization configuration, may be {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null} and the value is written as the null literal.
+     * @throws IllegalArgumentException if {@code writer} is {@code null} and a numeric value is passed to {@code IOUtil.write}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, Number x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, Number x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IllegalArgumentException, IOException {
         x = x == null && config != null && config.isWriteNullNumberAsZero() ? Numbers.FLOAT_ZERO : x;
 
         if (x == null) {

@@ -36,6 +36,7 @@ import com.landawn.abacus.util.cs;
 public interface CharTriFunction<R> extends Throwables.CharTriFunction<R, RuntimeException> { //NOSONAR
     /**
      * Applies this function to the given char arguments.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharTriFunction<String> concat = (c1, c2, c3) -> "" + c1 + c2 + c3;

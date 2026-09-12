@@ -15,14 +15,15 @@ import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.landawn.abacus.AbstractParserTest;
-import com.landawn.abacus.entity.BigXBean;
-import com.landawn.abacus.entity.XBean;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Profiler;
+
+import testfixtures.entity.BigXBean;
+import testfixtures.entity.XBean;
 
 public class JsonBindingTest extends AbstractParserTest {
 
@@ -52,21 +53,21 @@ public class JsonBindingTest extends AbstractParserTest {
         });
     }
 
-    void executeByFastJSON2WithSimpleBean() {
+    public void executeByFastJSON2WithSimpleBean() {
         String str = com.alibaba.fastjson2.JSON.toJSONString(simpleBean);
 
         JSON.parseObject(str, XBean.class);
 
     }
 
-    void executeByFastJSON2WithBigBean() {
+    public void executeByFastJSON2WithBigBean() {
         String str = com.alibaba.fastjson2.JSON.toJSONString(bigBean);
 
         JSON.parseObject(str, BigXBean.class);
 
     }
 
-    void executeByJacksonWithSimpleBean() throws Exception {
+    public void executeByJacksonWithSimpleBean() throws Exception {
         ObjectMapper objectMapper = getObjectMapper();
         String str = objectMapper.writeValueAsString(simpleBean);
 
@@ -75,7 +76,7 @@ public class JsonBindingTest extends AbstractParserTest {
         recycle(objectMapper);
     }
 
-    void executeByJacksonWithBigBean() throws Exception {
+    public void executeByJacksonWithBigBean() throws Exception {
         ObjectMapper objectMapper = getObjectMapper();
         String str = objectMapper.writeValueAsString(bigBean);
 
@@ -85,7 +86,7 @@ public class JsonBindingTest extends AbstractParserTest {
 
     }
 
-    void executeByGSONWithSimpleBean() {
+    public void executeByGSONWithSimpleBean() {
         Gson gson = getGson();
         String str = gson.toJson(simpleBean);
         gson.fromJson(str, XBean.class);
@@ -93,7 +94,7 @@ public class JsonBindingTest extends AbstractParserTest {
 
     }
 
-    void executeByGSONWithBigBean() {
+    public void executeByGSONWithBigBean() {
         Gson gson = getGson();
         String st = gson.toJson(bigBean);
         gson.fromJson(st, BigXBean.class);
@@ -101,44 +102,44 @@ public class JsonBindingTest extends AbstractParserTest {
 
     }
 
-    void executeByKRYOWithSimpleBean() {
+    public void executeByKRYOWithSimpleBean() {
         kryoParser.deserialize(kryoParser.serialize(simpleBean), XBean.class);
 
     }
 
-    void executeByKRYOWithBigBean() {
+    public void executeByKRYOWithBigBean() {
         String st = kryoParser.serialize(bigBean);
         kryoParser.deserialize(st, BigXBean.class);
 
     }
 
-    void executeByAbacusJSONWithSimpleBean() {
+    public void executeByAbacusJSONWithSimpleBean() {
         String str = jsonParser.serialize(simpleBean, jsc);
 
         jsonParser.deserialize(str, XBean.class);
 
     }
 
-    void executeByAbacusJSONWithSimpleBeanMap() {
+    public void executeByAbacusJSONWithSimpleBeanMap() {
         String json = jsonParser.serialize(simpleBean, jsc);
         jsonParser.deserialize(json, Map.class);
     }
 
-    void executeByAbacusJSONWithBigBean() {
+    public void executeByAbacusJSONWithBigBean() {
         String str = jsonParser.serialize(bigBean, jsc);
 
         jsonParser.deserialize(str, BigXBean.class);
 
     }
 
-    void executeByAbacusJSONWithBigBeanMap() {
+    public void executeByAbacusJSONWithBigBeanMap() {
         String json = jsonParser.serialize(bigBean, jsc);
 
         jsonParser.deserialize(json, Map.class);
 
     }
 
-    void executeByJsonReaderWithSimpleBean() throws IOException {
+    public void executeByJsonReaderWithSimpleBean() throws IOException {
         String json = jsonParser.serialize(simpleBean, jsc);
 
         final char[] cbuf = Objectory.createCharArrayBuffer();
@@ -156,7 +157,7 @@ public class JsonBindingTest extends AbstractParserTest {
         }
     }
 
-    void executeByJsonReaderWithBigBean() throws IOException {
+    public void executeByJsonReaderWithBigBean() throws IOException {
         String json = jsonParser.serialize(bigBean, jsc);
 
         final char[] cbuf = Objectory.createCharArrayBuffer();
@@ -173,23 +174,23 @@ public class JsonBindingTest extends AbstractParserTest {
         }
     }
 
-    void executeByXMLWithSimpleBean() {
+    public void executeByXMLWithSimpleBean() {
         xmlParser.deserialize(xmlParser.serialize(simpleBean), XBean.class);
 
     }
 
-    void executeByXMLWithBigBean() {
+    public void executeByXMLWithBigBean() {
         String st = xmlParser.serialize(bigBean);
         xmlParser.deserialize(st, BigXBean.class);
 
     }
 
-    void executeByAbacusXMLWithSimpleBean() {
+    public void executeByAbacusXMLWithSimpleBean() {
         abacusXmlParser.deserialize(abacusXmlParser.serialize(simpleBean), XBean.class);
 
     }
 
-    void executeByAbacusXMLWithBigBean() {
+    public void executeByAbacusXMLWithBigBean() {
         String st = abacusXmlParser.serialize(bigBean);
         abacusXmlParser.deserialize(st, BigXBean.class);
 

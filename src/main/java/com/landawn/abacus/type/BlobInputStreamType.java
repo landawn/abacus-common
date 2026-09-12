@@ -59,10 +59,11 @@ public class BlobInputStreamType extends InputStreamType {
      * @param columnIndex the 1-based index of the BLOB column
      * @return an {@code InputStream} for reading the BLOB's binary content; closing it also releases the Blob locator,
      *         or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public InputStream get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final Blob blob = rs.getBlob(columnIndex);
         return blobToInputStream(blob);
     }
@@ -76,10 +77,11 @@ public class BlobInputStreamType extends InputStreamType {
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
      * @return an {@code InputStream} for reading the BLOB's binary content; closing it also releases the Blob locator,
      *         or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public InputStream get(final ResultSet rs, final String columnName) throws SQLException {
+    public InputStream get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return blobToInputStream(rs.getBlob(columnName));
     }
 
@@ -92,10 +94,11 @@ public class BlobInputStreamType extends InputStreamType {
      * @param stmt the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code InputStream} containing binary BLOB data; may be {@code null}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws NullPointerException, SQLException {
         stmt.setBlob(columnIndex, x);
     }
 
@@ -107,10 +110,11 @@ public class BlobInputStreamType extends InputStreamType {
      * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code InputStream} containing binary BLOB data; may be {@code null}
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws NullPointerException, SQLException {
         stmt.setBlob(parameterName, x);
     }
 
@@ -123,10 +127,12 @@ public class BlobInputStreamType extends InputStreamType {
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code InputStream} containing binary BLOB data; may be {@code null}
      * @param sqlTypeOrLength the number of bytes in the stream
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setBlob(columnIndex, x, sqlTypeOrLength);
     }
 
@@ -139,10 +145,12 @@ public class BlobInputStreamType extends InputStreamType {
      * @param parameterName the name of the parameter to set
      * @param x the {@code InputStream} containing binary BLOB data; may be {@code null}
      * @param sqlTypeOrLength the number of bytes in the stream
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setBlob(parameterName, x, sqlTypeOrLength);
     }
 

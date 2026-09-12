@@ -108,7 +108,7 @@ public class UncheckedReflectiveOperationException extends UncheckedException {
      *              {@code ClassNotFoundException}, {@code NoSuchMethodException}, {@code IllegalAccessException}, etc.
      * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
-    public UncheckedReflectiveOperationException(final ReflectiveOperationException cause) {
+    public UncheckedReflectiveOperationException(final ReflectiveOperationException cause) throws IllegalArgumentException {
         super(cause);
     }
 
@@ -138,7 +138,7 @@ public class UncheckedReflectiveOperationException extends UncheckedException {
      *              This can be any subclass of {@code ReflectiveOperationException}.
      * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
-    public UncheckedReflectiveOperationException(final String message, final ReflectiveOperationException cause) {
+    public UncheckedReflectiveOperationException(final String message, final ReflectiveOperationException cause) throws IllegalArgumentException {
         super(message, cause);
     }
 

@@ -74,8 +74,9 @@ public class PasswordType extends AbstractStringType {
     /**
      * Constructs a new PasswordType with the default SHA-256 hashing algorithm.
      * This constructor is package-private and intended to be called only by the TypeFactory.
+     * @throws RuntimeException if no registered security provider supplies the default digest algorithm.
      */
-    PasswordType() {
+    PasswordType() throws RuntimeException {
         this(DEFAULT_ALGORITHM);
     }
 
@@ -85,8 +86,12 @@ public class PasswordType extends AbstractStringType {
      * while maintaining controlled instantiation through the TypeFactory.
      *
      * @param algorithm the message-digest algorithm to use for password hashing (e.g., "SHA-256", "MD5")
+     * @throws IllegalArgumentException if {@code algorithm} is {@code null}
+     * @throws RuntimeException wrapping {@link java.security.NoSuchAlgorithmException} if the specified algorithm
+     *         is not available from any registered security provider
+     * @see Password#Password(String)
      */
-    protected PasswordType(final String algorithm) {
+    protected PasswordType(final String algorithm) throws IllegalArgumentException, RuntimeException {
         super(PASSWORD);
         password = new Password(algorithm);
     }
@@ -98,10 +103,11 @@ public class PasswordType extends AbstractStringType {
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
      * @return the password string from the database, or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public String get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public String get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getString(columnIndex);
     }
 
@@ -112,10 +118,11 @@ public class PasswordType extends AbstractStringType {
      * @param rs the ResultSet to read from
      * @param columnName the column label/name
      * @return the password string from the database, or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public String get(final ResultSet rs, final String columnName) throws SQLException {
+    public String get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getString(columnName);
     }
 
@@ -126,10 +133,12 @@ public class PasswordType extends AbstractStringType {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the plain-text password to hash and set
-     * @throws SQLException if a database access error occurs
+     * @throws IllegalArgumentException if {@code x} contains an unpaired UTF-16 surrogate.
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or binding the password digest fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws IllegalArgumentException, NullPointerException, SQLException {
         stmt.setString(columnIndex, password.digest(x));
     }
 
@@ -140,10 +149,13 @@ public class PasswordType extends AbstractStringType {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter
      * @param x the plain-text password to hash and set
-     * @throws SQLException if a database access error occurs
+     * @throws IllegalArgumentException if {@code x} contains an unpaired UTF-16 surrogate.
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or binding the password digest fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final String x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final String x)
+            throws IllegalArgumentException, NullPointerException, SQLException {
         stmt.setString(parameterName, password.digest(x));
     }
 }

@@ -205,7 +205,7 @@ public class LongUnaryOperatorTest extends TestBase {
     @Test
     public void testComposeRejectsNullImmediately() {
         LongUnaryOperator instance = a -> 0L;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.compose((java.util.function.LongUnaryOperator) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.LongUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.compose((java.util.function.LongUnaryOperator) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.LongUnaryOperator) null));
     }
 }

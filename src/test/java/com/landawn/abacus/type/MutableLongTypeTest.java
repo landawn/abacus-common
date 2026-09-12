@@ -168,4 +168,15 @@ public class MutableLongTypeTest extends TestBase {
             mutableLongType.serializeTo(characterWriter, MutableLong.of(123456L), null);
         });
     }
+
+    // T5-03 (2026-09-06): out-of-range text throws ArithmeticException (Numbers.toXxx contract), not NumberFormatException.
+    @Test
+    public void reviewFixes20260906_valueOfOutOfRangeThrowsArithmeticException() {
+        Assertions.assertThrows(ArithmeticException.class, () -> mutableLongType.valueOf("9223372036854775808"));
+        Assertions.assertThrows(ArithmeticException.class, () -> mutableLongType.valueOf("-9223372036854775809"));
+        Assertions.assertThrows(NumberFormatException.class, () -> mutableLongType.valueOf("abc"));
+        Assertions.assertThrows(NumberFormatException.class, () -> mutableLongType.valueOf(" "));
+        assertEquals(Long.MAX_VALUE, mutableLongType.valueOf("9223372036854775807").value());
+        Assertions.assertNull(mutableLongType.valueOf(""));
+    }
 }

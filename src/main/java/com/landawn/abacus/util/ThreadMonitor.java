@@ -81,8 +81,11 @@ final class ThreadMonitor implements Runnable {
      * Starts monitoring the specified thread with the given timeout.
      *
      * <p>Creates a daemon monitor thread that will sleep for the specified timeout duration
-     * and then interrupt the target thread if it's still running. If the target thread completes
-     * its work before the timeout, it should call {@link #stop(Thread)} to terminate the monitor.</p>
+     * and then interrupt the target thread unless the monitor has been cancelled. The monitor does not
+     * check whether the target is still doing the monitored work, so a caller that omits
+     * {@link #stop(Thread)} can have the interrupt delivered later, while the target is doing something
+     * else. If the target thread completes its work before the timeout, it should call
+     * {@link #stop(Thread)} to terminate the monitor.</p>
      *
      * <p>The monitor thread is set as a daemon thread, so it won't prevent JVM shutdown.</p>
      *

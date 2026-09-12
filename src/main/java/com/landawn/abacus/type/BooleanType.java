@@ -79,10 +79,11 @@ public final class BooleanType extends AbstractBooleanType {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the column containing the boolean value
      * @return the {@code Boolean} value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Boolean get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final Object result = rs.getObject(columnIndex);
 
         if (result == null || result instanceof Boolean) {
@@ -101,10 +102,11 @@ public final class BooleanType extends AbstractBooleanType {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
      * @return the {@code Boolean} value in the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Boolean get(final ResultSet rs, final String columnName) throws SQLException {
+    public Boolean get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final Object result = rs.getObject(columnName);
 
         if (result == null || result instanceof Boolean) {

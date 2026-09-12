@@ -738,6 +738,17 @@ public class ImmutableCollectionTest extends TestBase {
     }
 
     @Test
+    public void test_equals_listVsBaseWrap_isSymmetric() {
+        ImmutableList<String> list = ImmutableList.of("a", "b");
+        ImmutableCollection<String> wrap = ImmutableCollection.wrap(Arrays.asList("a", "b"));
+
+        Assertions.assertFalse(list.equals(wrap));
+        Assertions.assertFalse(wrap.equals(list));
+        Assertions.assertEquals(Arrays.asList("a", "b").hashCode(), list.hashCode());
+        Assertions.assertEquals(System.identityHashCode(wrap), wrap.hashCode());
+    }
+
+    @Test
     public void test_hashCode_consistency() {
         ImmutableCollection<String> collection = ImmutableCollection.wrap(Arrays.asList("a", "b", "c"));
 
@@ -860,4 +871,85 @@ public class ImmutableCollectionTest extends TestBase {
         Assertions.assertTrue(str.contains("42"));
     }
 
+    @Test
+    public void testSpliteratorDelegatesToTheBackingCollection() {
+        final ImmutableCollection<String> list = ImmutableList.of("a", "b", "c");
+        Assertions.assertTrue(list.spliterator().hasCharacteristics(java.util.Spliterator.ORDERED));
+        Assertions.assertTrue(list.spliterator().hasCharacteristics(java.util.Spliterator.SIZED));
+        Assertions.assertEquals(3, list.spliterator().getExactSizeIfKnown());
+
+        final ImmutableCollection<String> set = ImmutableSet.of("a", "b", "c");
+        Assertions.assertTrue(set.spliterator().hasCharacteristics(java.util.Spliterator.DISTINCT));
+
+        final ImmutableCollection<String> wrapped = ImmutableCollection.wrap(new ArrayList<>(Arrays.asList("a", "b")));
+        Assertions.assertEquals(2, wrapped.spliterator().getExactSizeIfKnown());
+        Assertions.assertEquals(Arrays.asList("a", "b"), wrapped.stream().toList());
+    }
+
+    @Test
+    public void testForEachDelegatesAndRejectsNull() {
+        final List<String> seen = new ArrayList<>();
+        final ImmutableCollection<String> c = ImmutableCollection.wrap(Arrays.asList("a", "b", "c"));
+
+        c.forEach(seen::add);
+
+        Assertions.assertEquals(Arrays.asList("a", "b", "c"), seen);
+        Assertions.assertThrows(NullPointerException.class, () -> c.forEach(null));
+        Assertions.assertThrows(NullPointerException.class, () -> ImmutableCollection.wrap(new ArrayList<String>()).forEach(null));
+    }
+
+    @Test
+    public void testBaseWrapperUsesIdentityEquality() {
+        final List<String> source = Arrays.asList("a", "b");
+        final ImmutableCollection<String> base1 = ImmutableCollection.wrap(source);
+        final ImmutableCollection<String> base2 = ImmutableCollection.wrap(source);
+
+        // documented on wrap(Collection)/equals(Object): a plain ImmutableCollection has no value-equality.
+        // assertEquals here really does invoke base1.equals(base1) - JUnit does not short-circuit on
+        // identity - so this exercises the reflexive `this == obj` branch rather than being vacuous.
+        Assertions.assertEquals(base1, base1);
+        Assertions.assertNotEquals(base1, base2);
+        Assertions.assertNotEquals(base1, source);
+        Assertions.assertNotEquals(source, base1);
+        Assertions.assertEquals(base1.hashCode(), base1.hashCode());
+
+        // ... whereas the List/Set implementations do
+        Assertions.assertEquals(ImmutableList.of("a", "b"), ImmutableList.of("a", "b"));
+    }
+
+    @Test
+    public void testIteratorPropagatesTheBackingIteratorsExhaustionException() {
+        // iterator() delegates to ObjIterator.of(..), which does NOT normalise exhaustion: the backing
+        // iterator's source-specific exception surfaces unchanged, and for an ArrayList that is a message-less
+        // NoSuchElementException. Pinned because normalising it was tried and deliberately reverted.
+        final ObjIterator<String> iter = ImmutableCollection.wrap(new ArrayList<>(Arrays.asList("a"))).iterator();
+        Assertions.assertEquals("a", iter.next());
+        Assertions.assertFalse(iter.hasNext());
+
+        final java.util.NoSuchElementException e = Assertions.assertThrows(java.util.NoSuchElementException.class, iter::next);
+        Assertions.assertNotEquals(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX, e.getMessage());
+        Assertions.assertNull(e.getMessage());
+
+        final ObjIterator<String> empty = ImmutableCollection.wrap(Collections.<String> emptyList()).iterator();
+        Assertions.assertNull(Assertions.assertThrows(java.util.NoSuchElementException.class, empty::next).getMessage());
+    }
+
+    @Test
+    public void testReorderedViewsCompareAndHashInTheirOwnOrder() {
+        // isReorderedView() only keeps such a view from being unwrapped when it is the ARGUMENT to another
+        // ImmutableCollection's equals; equals()/hashCode() here read the backing collection directly, so a
+        // reordered view has to override both - as ImmutableList.reversed() does.
+        final ImmutableList<Integer> forward = ImmutableList.of(1, 2, 3);
+        final ImmutableList<Integer> reversed = forward.reversed();
+
+        Assertions.assertTrue(reversed.equals(Arrays.asList(3, 2, 1)));
+        Assertions.assertTrue(Arrays.asList(3, 2, 1).equals(reversed));
+        Assertions.assertEquals(Arrays.asList(3, 2, 1).hashCode(), reversed.hashCode());
+        Assertions.assertEquals("[3, 2, 1]", reversed.toString());
+
+        Assertions.assertFalse(reversed.equals(forward));
+        Assertions.assertFalse(forward.equals(reversed));
+        Assertions.assertFalse(reversed.equals(Arrays.asList(1, 2, 3)));
+        Assertions.assertFalse(Arrays.asList(1, 2, 3).equals(reversed));
+    }
 }

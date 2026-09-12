@@ -1124,39 +1124,6 @@ public class DoubleStreamTest extends TestBase {
         assertEquals(3, jdkStream.count());
     }
 
-    // TODO: filter(DoublePredicate) is abstract - tested via concrete implementations above
-    // TODO: takeWhile(DoublePredicate) is abstract - tested via concrete implementations above
-    // TODO: dropWhile(DoublePredicate) is abstract - tested via concrete implementations above
-    // TODO: map(DoubleUnaryOperator) is abstract - tested via concrete implementations above
-    // TODO: mapToInt(DoubleToIntFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToLong(DoubleToLongFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToFloat(DoubleToFloatFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToObj(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMap(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapArray(DoubleFunction<double[]>) is abstract - tested via concrete implementations above
-    // TODO: flattMap(DoubleFunction<JDK DoubleStream>) is abstract - tested via concrete implementations above
-    // TODO: flatMapToInt(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToLong(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToFloat(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToObj(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: flatmapToObj(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: mapMulti(DoubleMapMultiConsumer) is abstract - tested via concrete implementations above
-    // TODO: mapPartial(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: mapPartialJdk(DoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: rangeMap(DoubleBiPredicate, DoubleBinaryOperator) is abstract - tested via concrete implementations above
-    // TODO: rangeMapToObj(DoubleBiPredicate, DoubleBiFunction) is abstract - tested via concrete implementations above
-    // TODO: collapse(...) overloads are abstract - tested via concrete implementations above
-    // TODO: scan(...) overloads are abstract - tested via concrete implementations above
-    // TODO: prepend/append/appendIfEmpty are abstract - tested via concrete implementations above
-    // TODO: top(...) overloads are abstract - tested via concrete implementations above
-    // TODO: toDoubleList() is abstract - tested via concrete implementations above
-    // TODO: toMap/groupTo/reduce/collect overloads are abstract - tested via concrete implementations above
-    // TODO: forEach/forEachIndexed/anyMatch/allMatch/noneMatch are abstract - tested via concrete implementations above
-    // TODO: findFirst/findAny/findLast with predicate are abstract - tested via concrete implementations above
-    // TODO: min/max/kthLargest/sum/average/summaryStatistics are abstract - tested via concrete implementations above
-    // TODO: mergeWith/zipWith overloads are abstract - tested via concrete implementations above
-    // TODO: boxed/toJdkStream are abstract - tested via concrete implementations above
-
     @Test
     public void testFlatMapArrayToObj() {
         List<String> result = createDoubleStream(1.0, 2.0, 3.0).flatMapArrayToObj(d -> new String[] { "A" + d, "B" + d }).toList();

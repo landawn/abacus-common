@@ -2,6 +2,8 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -82,5 +84,25 @@ public class SQLArrayTypeTest extends TestBase {
 
         sqlArrayType.set(stmt, "param", array);
         verify(stmt).setObject("param", array);
+    }
+
+    // FINDING R04-6 (2026-09-08): BlobType/ClobType/NClobType were given a valueOf(Object) identity/null override;
+    // SQLArrayType was not, so both null and a genuine Array fell through to AbstractType.valueOf(Object), which
+    // renders the value with the handler of its own runtime class and feeds the text to the always-throwing
+    // valueOf(String).
+    @Test
+    public void reviewFixes20260908_valueOfObjectReturnsSameInstanceOrNull() {
+        final Array value = mock(Array.class);
+
+        assertSame(value, sqlArrayType.valueOf((Object) value));
+        assertNull(sqlArrayType.valueOf((Object) null));
+    }
+
+    @Test
+    public void reviewFixes20260908_valueOfObjectRejectsForeignValues() {
+        assertThrows(UnsupportedOperationException.class, () -> sqlArrayType.valueOf((Object) "x"));
+        assertThrows(UnsupportedOperationException.class, () -> sqlArrayType.valueOf((Object) 42));
+        // the String overload is unchanged
+        assertThrows(UnsupportedOperationException.class, () -> sqlArrayType.valueOf("x"));
     }
 }

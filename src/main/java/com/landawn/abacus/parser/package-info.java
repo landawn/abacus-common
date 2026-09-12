@@ -13,10 +13,44 @@
  */
 
 /**
- * Serialization and deserialization APIs for structured data formats.
+ * Serialization and deserialization for JSON, XML, Avro, Kryo, and JAXB.
  *
- * <p>The package defines parser contracts and format-specific configuration for JSON, XML, Avro,
- * Kryo, and JAXB. {@link com.landawn.abacus.parser.ParserFactory} is the main entry point for parser
- * creation and reports whether parsers backed by optional dependencies are available.</p>
+ * <p>{@link ParserFactory} is the entry point. JSON is always available.
+ * XML (standard and Abacus), Avro, Kryo, and JAXB are optional: call
+ * {@code isXmlParserAvailable()}, {@code isAbacusXmlParserAvailable()},
+ * {@code isAvroParserAvailable()}, {@code isKryoParserAvailable()}, or
+ * {@code isJaxbParserAvailable()} before creating those parsers. Kryo classes can be
+ * registered on the factory for stable IDs and custom serializers.</p>
+ *
+ * <h2>Contracts</h2>
+ * <ul>
+ *   <li>{@link Parser} &mdash; thread-safe serialize / deserialize to String, File, stream, and reader/writer.
+ *       Implementations honor {@link com.landawn.abacus.annotation.JsonXmlField} and
+ *       {@link com.landawn.abacus.annotation.JsonXmlConfig}.</li>
+ *   <li>{@link JsonParser} &mdash; JSON with {@code parse} (String convenience, including unbracketed
+ *       array-like input), {@code deserialize} (String/File/stream/reader), {@code stream} for large
+ *       arrays, and {@code parseInto} overloads that populate a caller-supplied array, collection, or map.</li>
+ *   <li>{@link XmlParser} &mdash; XML including DOM {@link org.w3c.dom.Node} input. JAXB is exposed as
+ *       an {@code XmlParser} from {@link ParserFactory#createJaxbParser()}.</li>
+ *   <li>{@link AvroParser} / {@link KryoParser} &mdash; binary formats, created only when their
+ *       libraries are present.</li>
+ * </ul>
+ *
+ * <h2>Configuration</h2>
+ * <p>{@link ParserConfig} is the shared base. {@link SerializationConfig} and
+ * {@link DeserializationConfig} add ser/deser options; {@link JsonXmlSerConfig} is the JSON/XML
+ * serialization branch. Concrete types are {@link JsonSerConfig}, {@link JsonDeserConfig},
+ * {@link XmlSerConfig}, {@link XmlDeserConfig}, {@link AvroSerConfig}, {@link AvroDeserConfig},
+ * {@link KryoSerConfig}, and {@link KryoDeserConfig}. {@link Exclusion} controls whether
+ * {@code null} and default property values are omitted during serialization.</p>
+ *
+ * <p>{@link ParserUtil} exposes bean and property metadata ({@code BeanInfo}, {@code PropInfo}) used
+ * by the parsers; it is marked {@link com.landawn.abacus.annotation.Internal}.
+ * {@link XmlConstants} holds shared XML names.</p>
+ *
+ * @see ParserFactory
+ * @see Parser
+ * @see JsonParser
+ * @see XmlParser
  */
 package com.landawn.abacus.parser;

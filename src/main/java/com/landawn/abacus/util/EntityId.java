@@ -66,7 +66,7 @@ public interface EntityId {
      * @return a new EntityId instance
      * @throws IllegalArgumentException if {@code propName} is {@code null}.
      */
-    static EntityId of(final String propName, final Object propValue) {
+    static EntityId of(final String propName, final Object propValue) throws IllegalArgumentException {
         return Seid.of(propName, propValue);
     }
 
@@ -85,7 +85,7 @@ public interface EntityId {
      * @throws IllegalArgumentException if {@code propName} is {@code null}.
      */
     @SuppressWarnings("deprecation")
-    static EntityId of(final String entityName, final String propName, final Object propValue) {
+    static EntityId of(final String entityName, final String propName, final Object propValue) throws IllegalArgumentException {
         return Seid.of(entityName).set(propName, propValue);
     }
 
@@ -105,7 +105,7 @@ public interface EntityId {
      * @return a new EntityId instance
      * @throws IllegalArgumentException if {@code propName1} or {@code propName2} is {@code null}.
      */
-    static EntityId of(final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
+    static EntityId of(final String propName1, final Object propValue1, final String propName2, final Object propValue2) throws IllegalArgumentException {
         return Seid.of(propName1, propValue1, propName2, propValue2);
     }
 
@@ -126,7 +126,8 @@ public interface EntityId {
      * @throws IllegalArgumentException if {@code propName1} or {@code propName2} is {@code null}.
      */
     @SuppressWarnings("deprecation")
-    static EntityId of(final String entityName, final String propName1, final Object propValue1, final String propName2, final Object propValue2) {
+    static EntityId of(final String entityName, final String propName1, final Object propValue1, final String propName2, final Object propValue2)
+            throws IllegalArgumentException {
         return Seid.of(entityName).set(propName1, propValue1).set(propName2, propValue2);
     }
 
@@ -154,7 +155,7 @@ public interface EntityId {
      *         {@code null}.
      */
     static EntityId of(final String propName1, final Object propValue1, final String propName2, final Object propValue2, final String propName3,
-            final Object propValue3) {
+            final Object propValue3) throws IllegalArgumentException {
         return Seid.of(propName1, propValue1, propName2, propValue2, propName3, propValue3);
     }
 
@@ -183,20 +184,23 @@ public interface EntityId {
      */
     @SuppressWarnings("deprecation")
     static EntityId of(final String entityName, final String propName1, final Object propValue1, final String propName2, final Object propValue2,
-            final String propName3, final Object propValue3) {
+            final String propName3, final Object propValue3) throws IllegalArgumentException {
         return Seid.of(entityName).set(propName1, propValue1).set(propName2, propValue2).set(propName3, propValue3);
     }
 
     /**
      * Creates an EntityId from a map of property names to values.
-     * The entity name is inferred from the property names if they contain dots.
+     * The entity name is taken from the parent portion of the <i>first</i> property name in the map's iteration
+     * order - an empty entity name when that name has no dot, or begins with one. Only names canonical against
+     * that entity name are shortened to their simple form; a dotted name belonging to a different parent is kept
+     * verbatim. Pass an ordered map, or use {@link #create(String, Map)}, when the entity name matters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Object> props = new HashMap<>();
      * props.put("customerId", 1000);
      * props.put("orderDate", LocalDate.now());
-     * EntityId id = EntityId.create(props);
+     * EntityId id = EntityId.create(props);   // no dotted name -> entityName is "" and both keys stay as-is
      * }</pre>
      *
      * @param nameValues a map of property names to their values
@@ -204,7 +208,7 @@ public interface EntityId {
      * @throws IllegalArgumentException if {@code nameValues} is {@code null} or empty, or contains a {@code null}
      *         property name.
      */
-    static EntityId create(final Map<String, Object> nameValues) {
+    static EntityId create(final Map<String, Object> nameValues) throws IllegalArgumentException {
         return Seid.create(nameValues);
     }
 
@@ -224,12 +228,14 @@ public interface EntityId {
      * and yields an empty {@code EntityId} carrying only the entity name.</p>
      *
      * @param entityName the name of the entity; if {@code null}, an empty entity name is used
-     * @param nameValues a map of property names to their values; may be {@code null} or empty
+     * @param nameValues a map of property names to their values; may be {@code null} or empty - a literal
+     *         {@code null} must be cast, as in {@code create("Person", (Map<String, Object>) null)}, because an
+     *         uncast {@code null} is ambiguous with {@link #create(Object, Collection)}
      * @return a new EntityId instance
      * @throws IllegalArgumentException if {@code nameValues} contains a {@code null} property name.
      */
     @SuppressWarnings("deprecation")
-    static EntityId create(final String entityName, final Map<String, Object> nameValues) {
+    static EntityId create(final String entityName, final Map<String, Object> nameValues) throws IllegalArgumentException {
         final Seid seid = Seid.of(entityName);
         seid.set(nameValues);
         return seid;
@@ -249,10 +255,13 @@ public interface EntityId {
      *
      * @param entity the entity object to extract ID from; must not be {@code null}
      * @return a new EntityId instance
-     * @throws IllegalArgumentException if no ID property is defined in the entity class.
-     * @throws NullPointerException if {@code entity} is {@code null}
+     * @throws IllegalArgumentException if {@code entity} is {@code null}
+     *         or if no ID property is defined in the entity class.
+     * @throws RuntimeException if entity metadata or an ID property cannot be read; reflection and getter failures are propagated as unchecked exceptions
      */
-    static EntityId create(final Object entity) {
+    static EntityId create(final Object entity) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(entity, cs.entity);
+
         return Seid.create(entity);
     }
 
@@ -274,10 +283,13 @@ public interface EntityId {
      * @param idPropNames the collection of property names to use as ID
      * @return a new EntityId instance
      * @throws IllegalArgumentException if {@code idPropNames} is {@code null} or empty, or if a named property does
-     *         not exist on the entity type.
-     * @throws NullPointerException if {@code entity} is {@code null}
+     *         not exist on the entity type
+     *         or if {@code entity} is {@code null}
+     * @throws RuntimeException if entity metadata or an ID property cannot be read; reflection and getter failures are propagated as unchecked exceptions
      */
-    static EntityId create(final Object entity, final Collection<String> idPropNames) {
+    static EntityId create(final Object entity, final Collection<String> idPropNames) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(entity, cs.entity);
+
         return Seid.create(entity, idPropNames);
     }
 
@@ -309,7 +321,7 @@ public interface EntityId {
      * @throws IllegalArgumentException if {@code propName} is {@code null}.
      */
     @MayReturnNull
-    <T> T get(String propName);
+    <T> T get(String propName) throws IllegalArgumentException;
 
     /**
      * Gets the value of a property as an {@code int}.
@@ -326,8 +338,9 @@ public interface EntityId {
      * @param propName the property name
      * @return the property value as an {@code int}, or {@code 0} if the property is absent or {@code null}
      * @throws IllegalArgumentException if {@code propName} is {@code null}.
+     * @throws RuntimeException if the stored value cannot be converted to the requested type; the concrete exception depends on the selected converter
      */
-    int getInt(String propName);
+    int getInt(String propName) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Gets the value of a property as a {@code long}.
@@ -344,8 +357,9 @@ public interface EntityId {
      * @param propName the property name
      * @return the property value as a {@code long}, or {@code 0L} if the property is absent or {@code null}
      * @throws IllegalArgumentException if {@code propName} is {@code null}.
+     * @throws RuntimeException if the stored value cannot be converted to the requested type; the concrete exception depends on the selected converter
      */
-    long getLong(String propName);
+    long getLong(String propName) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Gets the value of a property and converts it to the specified type.
@@ -367,9 +381,10 @@ public interface EntityId {
      *         default value (which is {@code null} for reference types) if the property
      *         is absent or its value is {@code null}
      * @throws IllegalArgumentException if {@code propName} or {@code targetType} is {@code null}.
+     * @throws RuntimeException if the stored value cannot be converted to the requested type; the concrete exception depends on the selected converter
      */
     @MayReturnNull
-    <T> T get(String propName, Class<? extends T> targetType);
+    <T> T get(String propName, Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException;
 
     /**
      * Checks if this EntityId contains a property with the given name.
@@ -385,7 +400,7 @@ public interface EntityId {
      * @return {@code true} if the property exists, {@code false} otherwise
      * @throws IllegalArgumentException if {@code propName} is {@code null}.
      */
-    boolean containsKey(String propName);
+    boolean containsKey(String propName) throws IllegalArgumentException;
 
     /**
      * Returns an unmodifiable set of all property names in this EntityId.
@@ -524,9 +539,10 @@ public interface EntityId {
          *        name such as {@code "Entity.property"})
          * @param idPropVal the value to associate with the property
          * @return this builder for method chaining
+         * @throws IllegalArgumentException if {@code idPropName} is {@code null}
          */
         @SuppressWarnings("deprecation")
-        public EntityIdBuilder put(final String idPropName, final Object idPropVal) {
+        public EntityIdBuilder put(final String idPropName, final Object idPropVal) throws IllegalArgumentException {
             if (entityId == null) {
                 entityId = new Seid(idPropName, idPropVal);
             } else {

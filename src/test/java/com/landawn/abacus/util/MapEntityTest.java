@@ -502,4 +502,82 @@ public class MapEntityTest extends TestBase {
         assertNotEquals((Object) user.get("name"), (Object) copy.get("name"));
     }
 
+    @Test
+    public void testNullPropNameRejectedWhetherOrNotTheEntityIsEmpty() {
+        final MapEntity empty = new MapEntity("User");
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> empty.containsKey(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> empty.remove(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> empty.get(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> empty.set(null, "x"));
+
+        final MapEntity filled = new MapEntity("User").set("age", "25");
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> filled.containsKey(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> filled.remove(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> filled.get(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> filled.set(null, "x"));
+
+        // A non-null name on an empty entity still answers rather than throwing.
+        assertFalse(empty.containsKey("age"));
+        assertNull(empty.remove("age"));
+        assertFalse(empty.containsKey("User.age"));
+        assertNull(empty.remove("User.age"));
+        assertNull(empty.get("age"));
+        assertEquals(0, empty.size());
+
+        // ... and the canonical-name handling is unchanged on a non-empty entity.
+        assertTrue(filled.containsKey("User.age"));
+        assertEquals("25", filled.remove("User.age"));
+        assertFalse(filled.containsKey("age"));
+
+        // the four container-taking entry points funnel a property name into the same NameUtil check, so a null
+        // element/key raises the same IllegalArgumentException. removeAll on an EMPTY entity reached remove(String)'s
+        // isEmpty() short-circuit and used to return quietly.
+        final Map<String, Object> nullKeyed = new HashMap<>();
+        nullKeyed.put(null, 1);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new MapEntity("User", nullKeyed));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new MapEntity("User").set(nullKeyed));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new MapEntity("User").removeAll(Arrays.asList((String) null)));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new MapEntity("User").set("age", "25").removeAll(Arrays.asList((String) null)));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> MapEntity.builder("User").put(null, 1));
+    }
+
+    @Test
+    public void testGetWithTargetTypeFailureModes() {
+        final MapEntity entity = new MapEntity("U").set("k", "abc");
+
+        Assertions.assertThrows(NumberFormatException.class, () -> entity.get("k", Integer.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> entity.get("k", null));
+        // the targetType == null clause holds on the absent-property branch too
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new MapEntity("U").get("absent", null));
+
+        // The conversion failure is whatever N.convert raises, which is why the tag is @throws RuntimeException:
+        // DateTimeParseException, UnsupportedOperationException, ParsingException and ArithmeticException are all
+        // outside the IllegalArgumentException family, so neither tag the pass first wrote covered them.
+        Assertions.assertThrows(java.time.format.DateTimeParseException.class, () -> entity.get("k", java.time.LocalDate.class));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> entity.get("k", Number.class));
+        Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> entity.get("k", Map.class));
+        Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> entity.get("k", java.io.File.class));
+        // an integral overflow is an ArithmeticException even though the stored value IS a String and the target IS numeric
+        Assertions.assertThrows(ArithmeticException.class, () -> new MapEntity("U").set("k", "99999999999999999999").get("k", int.class));
+        Assertions.assertThrows(ArithmeticException.class, () -> new MapEntity("U").set("k", Long.MAX_VALUE).get("k", Integer.class));
+
+        for (final Class<?> target : new Class<?>[] { java.time.LocalDate.class, Number.class, Map.class, java.io.File.class }) {
+            final RuntimeException failure = Assertions.assertThrows(RuntimeException.class, () -> entity.get("k", target));
+            assertFalse(failure instanceof IllegalArgumentException, target.getName() + " -> " + failure.getClass().getName());
+        }
+
+        // ... while these targets really are IllegalArgumentException
+        Assertions.assertThrows(IllegalArgumentException.class, () -> entity.get("k", java.util.UUID.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> entity.get("k", java.util.Date.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> entity.get("k", java.time.DayOfWeek.class));
+
+        // An absent property yields the target type's default, which is null for reference types.
+        assertEquals(0, (int) (Integer) new MapEntity("U").get("absent", int.class));
+        assertNull(new MapEntity("U").get("absent", Integer.class));
+        assertNull(new MapEntity("U").get("absent", String.class));
+    }
+
 }

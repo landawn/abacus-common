@@ -1,14 +1,26 @@
 package com.landawn.abacus.util;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,7 +38,6 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.util.StreamReaderDelegate;
 import javax.xml.transform.Transformer;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -74,12 +85,14 @@ public class XmlUtilTest extends TestBase {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null || getClass() != obj.getClass())
+            }
+            if (obj == null || getClass() != obj.getClass()) {
                 return false;
+            }
             Person person = (Person) obj;
-            return age == person.age && N.equals(name, person.name);
+            return age == person.age && CommonUtil.equals(name, person.name);
         }
 
         @Override
@@ -88,375 +101,207 @@ public class XmlUtilTest extends TestBase {
         }
     }
 
+    private static Element parse(String xml) throws Exception {
+        return XmlUtil.createDOMParser().parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8))).getDocumentElement();
+    }
+
+    private static XMLStreamReader trackingReader(String xml, AtomicBoolean closed) {
+        return new StreamReaderDelegate(XmlUtil.createXMLStreamReader(new StringReader(xml))) {
+            @Override
+            public void close() throws XMLStreamException {
+                closed.set(true);
+                super.close();
+            }
+        };
+    }
+
     @Test
-    public void testMarshalUnmarshalRoundTrip() {
-        Person original = new Person("Alice", 25);
+    public void testMarshalUnmarshal() {
+        Person original = new Person("John", 30);
         String xml = XmlUtil.marshal(original);
-        Person restored = XmlUtil.unmarshal(Person.class, xml);
+        assertNotNull(xml);
+        assertTrue(xml.contains("<person>") && xml.contains("<name>John</name>") && xml.contains("<age>30</age>") && xml.contains("</person>"));
+        assertEquals(original, XmlUtil.unmarshal(Person.class, xml));
 
-        Assertions.assertEquals(original, restored);
+        Person alice = new Person("Alice", 25);
+        assertEquals(alice, XmlUtil.unmarshal(Person.class, XmlUtil.marshal(alice)));
+
+        Person nonAscii = new Person("Café 中文", 42);
+        String nonAsciiXml = XmlUtil.marshal(nonAscii);
+        assertTrue(nonAsciiXml.contains("Café 中文"));
+        assertEquals(nonAscii, XmlUtil.unmarshal(Person.class, nonAsciiXml));
+
+        Person fromLiteral = XmlUtil.unmarshal(Person.class,
+                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><person><age>30</age><name>John</name></person>");
+        assertEquals("John", fromLiteral.getName());
+        assertEquals(30, fromLiteral.getAge());
     }
 
     @Test
-    public void testMarshal() {
-        Person person = new Person("John", 30);
-        String xml = XmlUtil.marshal(person);
-
-        Assertions.assertNotNull(xml);
-        Assertions.assertTrue(xml.contains("<person>"));
-        Assertions.assertTrue(xml.contains("<name>John</name>"));
-        Assertions.assertTrue(xml.contains("<age>30</age>"));
-        Assertions.assertTrue(xml.contains("</person>"));
-    }
-
-    @Test
-    public void testMarshal_nonAscii_roundTrip() {
-        // regression: marshal() decoded JAXB's UTF-8 output bytes with the platform default
-        // charset, corrupting non-ASCII content on JVMs whose default charset is not UTF-8
-        Person original = new Person("Café 中文", 42);
-        String xml = XmlUtil.marshal(original);
-
-        Assertions.assertTrue(xml.contains("Café 中文"));
-
-        Person restored = XmlUtil.unmarshal(Person.class, xml);
-        Assertions.assertEquals(original, restored);
-    }
-
-    @Test
-    public void testUnmarshal() {
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><person><age>30</age><name>John</name></person>";
-        Person person = XmlUtil.unmarshal(Person.class, xml);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-        Assertions.assertEquals(30, person.getAge());
-    }
-
-    @Test
-    public void testUnmarshal_ClassAndString() {
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" + "<person><name>Alice</name><age>30</age></person>";
-        Person p = XmlUtil.unmarshal(Person.class, xml);
-        Assertions.assertNotNull(p);
-        Assertions.assertEquals("Alice", p.getName());
-        Assertions.assertEquals(30, p.getAge());
-    }
-
-    @Test
-    public void testUnmarshalPublicEntryPointDoesNotResolveExternalEntities() throws Exception {
-        final String marker = "XXE_PUBLIC_UNMARSHAL_MARKER_2026";
-        final File externalEntityFile = File.createTempFile("xmlutil-unmarshal-xxe-", ".txt");
-
+    public void testUnmarshal_EdgeCase() throws Exception {
+        File externalEntityFile = File.createTempFile("xmlutil-unmarshal-xxe-", ".txt");
         try {
-            Files.write(externalEntityFile.toPath(), marker.getBytes(Charsets.UTF_8));
-
-            final String maliciousXml = "<?xml version=\"1.0\"?>" + "<!DOCTYPE person [<!ENTITY xxe SYSTEM \"" + externalEntityFile.toURI() + "\">]>"
-                    + "<person><name>&xxe;</name><age>25</age></person>";
-            Assertions.assertThrows(RuntimeException.class, () -> XmlUtil.unmarshal(Person.class, maliciousXml));
+            Files.write(externalEntityFile.toPath(), "XXE_PUBLIC_UNMARSHAL_MARKER_2026".getBytes(Charsets.UTF_8));
+            String maliciousXml = "<?xml version=\"1.0\"?><!DOCTYPE person [<!ENTITY xxe SYSTEM \"" + externalEntityFile.toURI()
+                    + "\">]><person><name>&xxe;</name><age>25</age></person>";
+            assertThrows(RuntimeException.class, () -> XmlUtil.unmarshal(Person.class, maliciousXml));
         } finally {
-            //noinspection ResultOfMethodCallIgnored
             externalEntityFile.delete();
         }
+
+        AtomicBoolean closedOnFailure = new AtomicBoolean();
+        assertThrows(RuntimeException.class, () -> XmlUtil.unmarshalAndClose(Person.class, trackingReader("<person><name>Alice</person>", closedOnFailure)));
+        assertTrue(closedOnFailure.get());
+
+        AtomicBoolean closedOnSuccess = new AtomicBoolean();
+        assertEquals(new Person("Alice", 25),
+                XmlUtil.unmarshalAndClose(Person.class, trackingReader("<person><name>Alice</name><age>25</age></person>", closedOnSuccess)));
+        assertTrue(closedOnSuccess.get());
     }
 
     @Test
-    public void testUnmarshal_malformedXmlClosesReaderAndPreservesParsingFailure() {
-        final AtomicBoolean closed = new AtomicBoolean();
-        final XMLStreamReader delegate = XmlUtil.createXMLStreamReader(new StringReader("<person><name>Alice</person>"));
-        final XMLStreamReader trackingReader = new StreamReaderDelegate(delegate) {
-            @Override
-            public void close() throws XMLStreamException {
-                closed.set(true);
-                super.close();
-            }
-        };
-
-        Assertions.assertThrows(RuntimeException.class, () -> XmlUtil.unmarshalAndClose(Person.class, trackingReader));
-        Assertions.assertTrue(closed.get());
-    }
-
-    @Test
-    public void testUnmarshal_closesReaderAfterSuccess() {
-        final AtomicBoolean closed = new AtomicBoolean();
-        final XMLStreamReader delegate = XmlUtil.createXMLStreamReader(new StringReader("<person><name>Alice</name><age>25</age></person>"));
-        final XMLStreamReader trackingReader = new StreamReaderDelegate(delegate) {
-            @Override
-            public void close() throws XMLStreamException {
-                closed.set(true);
-                super.close();
-            }
-        };
-
-        Assertions.assertEquals(new Person("Alice", 25), XmlUtil.unmarshalAndClose(Person.class, trackingReader));
-        Assertions.assertTrue(closed.get());
-    }
-
-    @Test
-    public void testCreateMarshallerWithClass() {
-        Marshaller marshaller = XmlUtil.createMarshaller(Person.class);
-        Assertions.assertNotNull(marshaller);
-    }
-
-    @Test
-    public void testMarshallerCaching() {
+    public void testCreateMarshallerAndUnmarshaller() {
         Marshaller m1 = XmlUtil.createMarshaller(Person.class);
         Marshaller m2 = XmlUtil.createMarshaller(Person.class);
-
-        Assertions.assertNotNull(m1);
-        Assertions.assertNotNull(m2);
-    }
-
-    @Test
-    public void testCreateMarshaller_usingClass_cached() {
-        // Test cache hit path - call twice with same class
-        Marshaller m1 = XmlUtil.createMarshaller(Person.class);
-        Assertions.assertNotNull(m1);
-        Marshaller m2 = XmlUtil.createMarshaller(Person.class);
-        Assertions.assertNotNull(m2);
-    }
-
-    @Test
-    public void testCreateMarshallerWithContextPath() {
+        assertNotNull(m1);
+        assertNotNull(m2);
         assertThrows(UncheckedException.class, () -> XmlUtil.createMarshaller("com.landawn.abacus.util"));
-    }
 
-    @Test
-    public void testCreateUnmarshallerWithClass() {
-        Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(Person.class);
-        Assertions.assertNotNull(unmarshaller);
-    }
-
-    @Test
-    public void testUnmarshallerCaching() {
         Unmarshaller u1 = XmlUtil.createUnmarshaller(Person.class);
         Unmarshaller u2 = XmlUtil.createUnmarshaller(Person.class);
-
-        Assertions.assertNotNull(u1);
-        Assertions.assertNotNull(u2);
-    }
-
-    @Test
-    public void testCreateUnmarshaller_usingClass_cached() {
-        // Test cache hit path - call twice with same class
-        Unmarshaller u1 = XmlUtil.createUnmarshaller(Person.class);
-        Assertions.assertNotNull(u1);
-        Unmarshaller u2 = XmlUtil.createUnmarshaller(Person.class);
-        Assertions.assertNotNull(u2);
-    }
-
-    @Test
-    public void testCreateUnmarshallerWithContextPath() {
+        assertNotNull(u1);
+        assertNotNull(u2);
         assertThrows(UncheckedException.class, () -> XmlUtil.createUnmarshaller("com.landawn.abacus.util"));
     }
 
     @Test
     public void testCreateDOMParser() {
-        DocumentBuilder parser = XmlUtil.createDOMParser();
-        Assertions.assertNotNull(parser);
-    }
-
-    @Test
-    public void testCreateDOMParserWithOptions() {
-        DocumentBuilder parser = XmlUtil.createDOMParser(true, true);
-        Assertions.assertNotNull(parser);
-
-        DocumentBuilder parser2 = XmlUtil.createDOMParser(false, false);
-        Assertions.assertNotNull(parser2);
-    }
-
-    @Test
-    public void testCreateContentParser() {
-        DocumentBuilder parser = XmlUtil.createContentParser();
-        Assertions.assertNotNull(parser);
-    }
-
-    @Test
-    public void testContentParserPooling() {
-        DocumentBuilder parser1 = XmlUtil.createContentParser();
-        DocumentBuilder parser2 = XmlUtil.createContentParser();
-
-        Assertions.assertNotNull(parser1);
-        Assertions.assertNotNull(parser2);
-
-        XmlUtil.recycleContentParser(parser1);
-        XmlUtil.recycleContentParser(parser2);
-
-        DocumentBuilder parser3 = XmlUtil.createContentParser();
-        Assertions.assertNotNull(parser3);
-    }
-
-    @Test
-    public void testRecycleContentParser() {
-        DocumentBuilder parser = XmlUtil.createContentParser();
-        Assertions.assertNotNull(parser);
-
-        XmlUtil.recycleContentParser(parser);
-
-        XmlUtil.recycleContentParser(null);
-    }
-
-    @Test
-    public void testRecycleContentParser_pool() {
-        // Recycle multiple parsers to test pool logic
-        DocumentBuilder p1 = XmlUtil.createContentParser();
-        DocumentBuilder p2 = XmlUtil.createContentParser();
-        XmlUtil.recycleContentParser(p1);
-        XmlUtil.recycleContentParser(p2);
-        // Pool should accept both
-        Assertions.assertNotNull(XmlUtil.createContentParser());
+        assertNotNull(XmlUtil.createDOMParser());
+        assertNotNull(XmlUtil.createDOMParser(true, true));
+        assertNotNull(XmlUtil.createDOMParser(false, false));
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testRecycleContentParserRejectsForeignAndDuplicateInstances() throws Exception {
+    public void testContentParserPool() throws Exception {
+        DocumentBuilder p1 = XmlUtil.createContentParser();
+        DocumentBuilder p2 = XmlUtil.createContentParser();
+        assertNotNull(p1);
+        assertNotNull(p2);
+        XmlUtil.recycleContentParser(p1);
+        XmlUtil.recycleContentParser(p2);
+        XmlUtil.recycleContentParser(null);
+        assertNotNull(XmlUtil.createContentParser());
+
         java.lang.reflect.Field poolField = XmlUtil.class.getDeclaredField("contentDocBuilderPool");
         poolField.setAccessible(true);
         Queue<DocumentBuilder> pool = (Queue<DocumentBuilder>) poolField.get(null);
+
+        java.lang.reflect.Field pooledField = XmlUtil.class.getDeclaredField("pooledContentParsers");
+        pooledField.setAccessible(true);
+        Map<DocumentBuilder, Boolean> pooled = (Map<DocumentBuilder, Boolean>) pooledField.get(null);
+
         synchronized (pool) {
+            // pooledContentParsers mirrors the queue, so both have to be cleared together. Clearing only the
+            // queue would strand a strong entry for a builder that is no longer pooled, and
+            // recycleContentParser would then refuse that live builder as a duplicate for the rest of the JVM.
             pool.clear();
+            pooled.clear();
         }
-
-        DocumentBuilder foreign = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        XmlUtil.recycleContentParser(foreign);
+        XmlUtil.recycleContentParser(DocumentBuilderFactory.newInstance().newDocumentBuilder());
         synchronized (pool) {
-            Assertions.assertTrue(pool.isEmpty(), "A caller-supplied parser must not enter the hardened pool");
+            assertTrue(pool.isEmpty());
+            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
         }
-
         DocumentBuilder owned = XmlUtil.createContentParser();
         XmlUtil.recycleContentParser(owned);
         XmlUtil.recycleContentParser(owned);
         synchronized (pool) {
-            Assertions.assertEquals(1, pool.size(), "The same non-thread-safe parser must not be pooled twice");
+            assertEquals(1, pool.size());
+            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
             pool.clear();
+            pooled.clear();
+            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
         }
-    }
-
-    @Test
-    public void testCreateSAXParser() {
-        SAXParser parser = XmlUtil.createSAXParser();
-        Assertions.assertNotNull(parser);
-    }
-
-    @Test
-    public void testSAXParserPooling() {
-        SAXParser parser1 = XmlUtil.createSAXParser();
-        SAXParser parser2 = XmlUtil.createSAXParser();
-
-        Assertions.assertNotNull(parser1);
-        Assertions.assertNotNull(parser2);
-
-        XmlUtil.recycleSAXParser(parser1);
-        XmlUtil.recycleSAXParser(parser2);
-
-        SAXParser parser3 = XmlUtil.createSAXParser();
-        Assertions.assertNotNull(parser3);
-    }
-
-    @Test
-    public void testRecycleSAXParser() {
-        SAXParser parser = XmlUtil.createSAXParser();
-        Assertions.assertNotNull(parser);
-
-        XmlUtil.recycleSAXParser(parser);
-
-        XmlUtil.recycleSAXParser(null);
-    }
-
-    @Test
-    public void testRecycleSAXParser_pool() {
-        SAXParser sp1 = XmlUtil.createSAXParser();
-        SAXParser sp2 = XmlUtil.createSAXParser();
-        XmlUtil.recycleSAXParser(sp1);
-        XmlUtil.recycleSAXParser(sp2);
-        Assertions.assertNotNull(XmlUtil.createSAXParser());
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testRecycleSAXParserRejectsForeignAndDuplicateInstances() throws Exception {
+    public void testSAXParserPool() throws Exception {
+        SAXParser s1 = XmlUtil.createSAXParser();
+        SAXParser s2 = XmlUtil.createSAXParser();
+        assertNotNull(s1);
+        assertNotNull(s2);
+        XmlUtil.recycleSAXParser(s1);
+        XmlUtil.recycleSAXParser(s2);
+        XmlUtil.recycleSAXParser(null);
+        assertNotNull(XmlUtil.createSAXParser());
+
         java.lang.reflect.Field poolField = XmlUtil.class.getDeclaredField("saxParserPool");
         poolField.setAccessible(true);
         Queue<SAXParser> pool = (Queue<SAXParser>) poolField.get(null);
+
+        java.lang.reflect.Field pooledField = XmlUtil.class.getDeclaredField("pooledSaxParsers");
+        pooledField.setAccessible(true);
+        Map<SAXParser, Boolean> pooled = (Map<SAXParser, Boolean>) pooledField.get(null);
+
         synchronized (pool) {
+            // See the DocumentBuilder twin: the queue and its membership map must be cleared together, or a
+            // live owned parser stays in the map and recycleSAXParser refuses it as a duplicate forever.
             pool.clear();
+            pooled.clear();
         }
-
-        SAXParser foreign = SAXParserFactory.newInstance().newSAXParser();
-        XmlUtil.recycleSAXParser(foreign);
+        XmlUtil.recycleSAXParser(SAXParserFactory.newInstance().newSAXParser());
         synchronized (pool) {
-            Assertions.assertTrue(pool.isEmpty(), "A caller-supplied parser must not enter the hardened pool");
+            assertTrue(pool.isEmpty());
+            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
         }
-
         SAXParser owned = XmlUtil.createSAXParser();
         XmlUtil.recycleSAXParser(owned);
         XmlUtil.recycleSAXParser(owned);
         synchronized (pool) {
-            Assertions.assertEquals(1, pool.size(), "The same non-thread-safe parser must not be pooled twice");
+            assertEquals(1, pool.size());
+            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
             pool.clear();
+            pooled.clear();
+            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
         }
     }
 
     @Test
     public void testDomAndSaxParsersRejectDoctype() throws Exception {
         byte[] hostileXml = "<!DOCTYPE root [<!ENTITY xxe SYSTEM \"file:///definitely-not-readable-abacus-xxe\">]><root>&xxe;</root>".getBytes(Charsets.UTF_8);
-
         DocumentBuilder documentBuilder = XmlUtil.createContentParser();
         try {
-            Assertions.assertThrows(Exception.class, () -> documentBuilder.parse(new ByteArrayInputStream(hostileXml)));
+            assertThrows(Exception.class, () -> documentBuilder.parse(new ByteArrayInputStream(hostileXml)));
         } finally {
             XmlUtil.recycleContentParser(documentBuilder);
         }
-
         SAXParser saxParser = XmlUtil.createSAXParser();
         try {
-            Assertions.assertThrows(Exception.class, () -> saxParser.parse(new ByteArrayInputStream(hostileXml), new DefaultHandler()));
+            assertThrows(Exception.class, () -> saxParser.parse(new ByteArrayInputStream(hostileXml), new DefaultHandler()));
         } finally {
             XmlUtil.recycleSAXParser(saxParser);
         }
     }
 
     @Test
-    public void testCreateXMLStreamReaderFromReader() {
+    public void testCreateXMLStreamReader() throws Exception {
         String xml = "<?xml version=\"1.0\"?><root><item>test</item></root>";
-        StringReader reader = new StringReader(xml);
-        XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(reader);
+        assertNotNull(XmlUtil.createXMLStreamReader(new StringReader(xml)));
+        try (InputStream is = new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8))) {
+            assertNotNull(XmlUtil.createXMLStreamReader(is));
+        }
+        try (InputStream is = new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8))) {
+            assertNotNull(XmlUtil.createXMLStreamReader(is, "UTF-8"));
+        }
 
-        Assertions.assertNotNull(xmlReader);
-    }
-
-    @Test
-    public void testCreateXMLStreamReaderFromInputStream() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root><item>test</item></root>";
-        InputStream is = new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8));
-        XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(is);
-
-        Assertions.assertNotNull(xmlReader);
-        is.close();
-    }
-
-    @Test
-    public void testCreateXMLStreamReaderWithEncoding() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root><item>test</item></root>";
-        InputStream is = new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8));
-        XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(is, "UTF-8");
-
-        Assertions.assertNotNull(xmlReader);
-        is.close();
-    }
-
-    @Test
-    public void testCreateXMLStreamReader_doesNotResolveExternalEntities() throws Exception {
-        final String marker = "XXE_MARKER_2026";
-        final File externalEntityFile = File.createTempFile("xmlutil-xxe-", ".txt");
-
+        File externalEntityFile = File.createTempFile("xmlutil-xxe-", ".txt");
         try {
-            Files.write(externalEntityFile.toPath(), marker.getBytes(Charsets.UTF_8));
-
-            final String maliciousXml = "<?xml version=\"1.0\"?>" + "<!DOCTYPE root [<!ENTITY xxe SYSTEM \"" + externalEntityFile.toURI() + "\">]>"
-                    + "<root>&xxe;</root>";
-
-            Assertions.assertThrows(Exception.class, () -> {
-                final XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(new StringReader(maliciousXml));
-
+            Files.write(externalEntityFile.toPath(), "XXE_MARKER_2026".getBytes(Charsets.UTF_8));
+            String maliciousXml = "<?xml version=\"1.0\"?><!DOCTYPE root [<!ENTITY xxe SYSTEM \"" + externalEntityFile.toURI() + "\">]><root>&xxe;</root>";
+            assertThrows(Exception.class, () -> {
+                XMLStreamReader xmlReader = XmlUtil.createXMLStreamReader(new StringReader(maliciousXml));
                 try {
                     while (xmlReader.hasNext()) {
                         xmlReader.next();
@@ -466,56 +311,39 @@ public class XmlUtilTest extends TestBase {
                 }
             });
         } finally {
-            //noinspection ResultOfMethodCallIgnored
             externalEntityFile.delete();
         }
     }
 
     @Test
     public void testCreateFilteredStreamReader() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root><item>test</item></root>";
-        StringReader reader = new StringReader(xml);
-        XMLStreamReader source = XmlUtil.createXMLStreamReader(reader);
+        XMLStreamReader source = XmlUtil.createXMLStreamReader(new StringReader("<?xml version=\"1.0\"?><root><item>test</item></root>"));
+        assertNotNull(XmlUtil.createFilteredStreamReader(source, r -> r.isStartElement() || r.isEndElement()));
 
-        XMLStreamReader filtered = XmlUtil.createFilteredStreamReader(source, r -> r.isStartElement() || r.isEndElement());
-
-        Assertions.assertNotNull(filtered);
+        XMLStreamReader nullFilterSource = XmlUtil.createXMLStreamReader(new StringReader("<root/>"));
+        try {
+            assertThrows(IllegalArgumentException.class, () -> XmlUtil.createFilteredStreamReader(nullFilterSource, null));
+        } finally {
+            nullFilterSource.close();
+        }
     }
 
     @Test
-    public void testCreateXMLStreamWriterFromWriter() {
-        StringWriter writer = new StringWriter();
-        XMLStreamWriter xmlWriter = XmlUtil.createXMLStreamWriter(writer);
-
-        Assertions.assertNotNull(xmlWriter);
-    }
-
-    @Test
-    public void testCreateXMLStreamWriterFromOutputStream() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        XMLStreamWriter xmlWriter = XmlUtil.createXMLStreamWriter(baos);
-
-        Assertions.assertNotNull(xmlWriter);
-    }
-
-    @Test
-    public void testCreateXMLStreamWriterWithEncoding() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        XMLStreamWriter xmlWriter = XmlUtil.createXMLStreamWriter(baos, "UTF-8");
-
-        Assertions.assertNotNull(xmlWriter);
+    public void testCreateXMLStreamWriter() {
+        assertNotNull(XmlUtil.createXMLStreamWriter(new StringWriter()));
+        assertNotNull(XmlUtil.createXMLStreamWriter(new ByteArrayOutputStream()));
+        assertNotNull(XmlUtil.createXMLStreamWriter(new ByteArrayOutputStream(), "UTF-8"));
     }
 
     @Test
     public void testConcurrentStaxReaderAndWriterCreation() {
-        Assertions.assertDoesNotThrow(() -> java.util.stream.IntStream.range(0, 200).parallel().forEach(i -> {
+        assertDoesNotThrow(() -> java.util.stream.IntStream.range(0, 200).parallel().forEach(i -> {
             XMLStreamReader reader = null;
             XMLStreamWriter writer = null;
-
             try {
                 reader = XmlUtil.createXMLStreamReader(new StringReader("<root><value>" + i + "</value></root>"));
                 writer = XmlUtil.createXMLStreamWriter(new StringWriter());
-                Assertions.assertEquals(XMLStreamConstants.START_DOCUMENT, reader.getEventType());
+                assertEquals(XMLStreamConstants.START_DOCUMENT, reader.getEventType());
                 writer.writeStartDocument();
                 writer.writeEmptyElement("root");
                 writer.writeEndDocument();
@@ -526,7 +354,6 @@ public class XmlUtilTest extends TestBase {
                     if (reader != null) {
                         reader.close();
                     }
-
                     if (writer != null) {
                         writer.close();
                     }
@@ -540,11 +367,11 @@ public class XmlUtilTest extends TestBase {
     @Test
     public void testCreateXMLTransformer() {
         Transformer transformer = XmlUtil.createXMLTransformer();
-        Assertions.assertNotNull(transformer);
+        assertNotNull(transformer);
     }
 
     @Test
-    public void testTransformToFile() throws Exception {
+    public void testTransform() throws Exception {
         DocumentBuilder builder = XmlUtil.createDOMParser();
         Document doc = builder.newDocument();
         Element root = doc.createElement("root");
@@ -552,268 +379,151 @@ public class XmlUtilTest extends TestBase {
 
         File tempFile = File.createTempFile("xmlutil-test", ".xml");
         tempFile.deleteOnExit();
+        try {
+            XmlUtil.transform(doc, tempFile);
+            assertTrue(tempFile.exists() && tempFile.length() > 0);
+            assertTrue(new String(Files.readAllBytes(tempFile.toPath())).contains("<root"));
+        } finally {
+            tempFile.delete();
+        }
 
-        XmlUtil.transform(doc, tempFile);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        XmlUtil.transform(doc, baos);
+        assertTrue(baos.toString().contains("<root"));
 
-        Assertions.assertTrue(tempFile.exists());
-        Assertions.assertTrue(tempFile.length() > 0);
-
-        String content = new String(Files.readAllBytes(tempFile.toPath()));
-        Assertions.assertTrue(content.contains("<root"));
-
-        tempFile.delete();
+        StringWriter writer = new StringWriter();
+        XmlUtil.transform(doc, writer);
+        assertTrue(writer.toString().contains("<root"));
     }
 
     @Test
-    public void testTransformToFile_nonAsciiContent() throws Exception {
-        // regression: transform(Document, File) wrote characters through a platform-default
-        // charset FileWriter while the XML declaration claimed UTF-8, so non-ASCII content
-        // produced an unparseable file on JVMs whose default charset is not UTF-8
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.newDocument();
+    public void testTransform_EdgeCase() throws Exception {
+        Document doc = XmlUtil.createDOMParser().newDocument();
         Element root = doc.createElement("root");
         root.setTextContent("Café 中文");
         doc.appendChild(root);
 
         File tempFile = File.createTempFile("xmlutil-utf8", ".xml");
         tempFile.deleteOnExit();
-
         try {
             XmlUtil.transform(doc, tempFile);
-
-            // The bytes on disk must be valid UTF-8, matching the declared encoding.
             String content = new String(Files.readAllBytes(tempFile.toPath()), Charsets.UTF_8);
-            Assertions.assertTrue(content.contains("Café 中文"));
-
-            // And a conforming parser must read the text back unchanged.
-            Document parsed = XmlUtil.createDOMParser().parse(tempFile);
-            Assertions.assertEquals("Café 中文", parsed.getDocumentElement().getTextContent());
+            assertTrue(content.contains("Café 中文"));
+            assertEquals("Café 中文", XmlUtil.createDOMParser().parse(tempFile).getDocumentElement().getTextContent());
         } finally {
             tempFile.delete();
         }
     }
 
     @Test
-    public void testTransformToOutputStream() throws Exception {
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.newDocument();
-        Element root = doc.createElement("root");
-        doc.appendChild(root);
+    public void testTransformRejectsNullBeforeWriting() throws Exception {
+        File existingFile = File.createTempFile("xmlutil-null-source-", ".xml");
+        java.nio.file.Path directory = Files.createTempDirectory("xmlutil-null-source-");
+        File missingFile = directory.resolve("missing.xml").toFile();
+        try {
+            Files.writeString(existingFile.toPath(), "original content", Charsets.UTF_8);
+            assertThrows(IllegalArgumentException.class, () -> XmlUtil.transform(null, existingFile));
+            assertEquals("original content", Files.readString(existingFile.toPath(), Charsets.UTF_8));
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        XmlUtil.transform(doc, baos);
+            assertThrows(IllegalArgumentException.class, () -> XmlUtil.transform(null, missingFile));
+            assertFalse(missingFile.exists());
 
-        String result = baos.toString();
-        Assertions.assertTrue(result.contains("<root"));
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            output.write("original content".getBytes(Charsets.UTF_8));
+            assertThrows(IllegalArgumentException.class, () -> XmlUtil.transform(null, output));
+            assertEquals("original content", output.toString(Charsets.UTF_8));
+
+            StringWriter writer = new StringWriter();
+            writer.write("original content");
+            assertThrows(IllegalArgumentException.class, () -> XmlUtil.transform(null, writer));
+            assertEquals("original content", writer.toString());
+
+            Document document = parse("<root/>").getOwnerDocument();
+            assertThrows(IllegalArgumentException.class, () -> XmlUtil.transform(document, (File) null));
+            assertThrows(IllegalArgumentException.class, () -> XmlUtil.transform(document, (java.io.OutputStream) null));
+            assertThrows(IllegalArgumentException.class, () -> XmlUtil.transform(document, (java.io.Writer) null));
+        } finally {
+            Files.deleteIfExists(existingFile.toPath());
+            Files.deleteIfExists(missingFile.toPath());
+            Files.deleteIfExists(directory);
+        }
     }
 
     @Test
-    public void testTransformToWriter() throws Exception {
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.newDocument();
-        Element root = doc.createElement("root");
-        doc.appendChild(root);
-
-        StringWriter writer = new StringWriter();
-        XmlUtil.transform(doc, writer);
-
-        String result = writer.toString();
-        Assertions.assertTrue(result.contains("<root"));
+    public void testXmlEncodeDecode_disabledByDefault() {
+        assertThrows(UnsupportedOperationException.class, () -> XmlUtil.xmlEncode(new Person("Bob", 35)));
+        assertThrows(UnsupportedOperationException.class, () -> XmlUtil.xmlDecode("<?xml ?><void/>"));
     }
 
     @Test
-    public void testXmlEncode_disabledByDefault() {
-        // C1: xmlEncode is disabled by default because XMLDecoder is an unsafe-deserialization
-        // primitive (CVE-2017-3506 etc). Opt in with -Dabacus.xml.allowXmlEncoderDecoder=true.
-        Person person = new Person("Bob", 35);
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> XmlUtil.xmlEncode(person));
-    }
-
-    @Test
-    public void testXmlDecode_disabledByDefault() {
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> XmlUtil.xmlDecode("<?xml ?><void/>"));
-    }
-
-    @Test
-    public void testGetElementsByTagName() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root><child>1</child><child>2</child><other><child>3</child></other></root>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
-
+    public void testGetElementsAndNodesByName() throws Exception {
+        Element root = parse("<?xml version=\"1.0\"?><root><child>1</child><child>2</child><other><child>3</child></other></root>");
         List<Element> children = XmlUtil.getElementsByTagName(root, "child");
+        assertEquals(2, children.size());
+        assertEquals("1", children.get(0).getTextContent());
+        assertEquals("2", children.get(1).getTextContent());
+        List<Element> allDirect = XmlUtil.getElementsByTagName(root, "*");
+        assertEquals(3, allDirect.size());
+        assertEquals(List.of("child", "child", "other"), allDirect.stream().map(Element::getTagName).toList());
 
-        Assertions.assertNotNull(children);
-        Assertions.assertEquals(2, children.size());
-        Assertions.assertEquals("1", children.get(0).getTextContent());
-        Assertions.assertEquals("2", children.get(1).getTextContent());
+        Document doc = root.getOwnerDocument();
+        List<Node> items = XmlUtil
+                .getNodesByName(parse("<?xml version=\"1.0\"?><root><item>1</item><container><item>2</item></container></root>").getOwnerDocument(), "item");
+        assertEquals(2, items.size());
 
-        List<Element> allDirectChildren = XmlUtil.getElementsByTagName(root, "*");
-        Assertions.assertEquals(3, allDirectChildren.size());
-        Assertions.assertEquals(List.of("child", "child", "other"), allDirectChildren.stream().map(Element::getTagName).toList());
+        Node found = XmlUtil.getNextNodeByName(parse("<?xml version=\"1.0\"?><root><item>1</item><other>2</other><item>3</item></root>").getOwnerDocument(),
+                "item");
+        assertEquals("item", found.getNodeName());
+        assertNull(XmlUtil.getNextNodeByName(doc, "nonexistent"));
+
+        Element itemRoot = parse("<?xml version=\"1.0\"?><item>value</item>");
+        assertEquals("item", XmlUtil.getNextNodeByName(itemRoot, "item").getNodeName());
     }
 
     @Test
-    public void testGetNodesByName() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root><item>1</item><container><item>2</item></container></root>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-
-        List<Node> nodes = XmlUtil.getNodesByName(doc, "item");
-
-        Assertions.assertNotNull(nodes);
-        Assertions.assertEquals(2, nodes.size());
-    }
-
-    @Test
-    public void testGetNextNodeByName() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root><item>1</item><other>2</other><item>3</item></root>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-
-        Node node = XmlUtil.getNextNodeByName(doc, "item");
-
-        Assertions.assertNotNull(node);
-        Assertions.assertEquals("item", node.getNodeName());
-    }
-
-    @Test
-    public void testGetNextNodeByNameNotFound() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root><item>1</item></root>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-
-        Node node = XmlUtil.getNextNodeByName(doc, "nonexistent");
-
-        Assertions.assertNull(node);
-    }
-
-    @Test
-    public void testGetNextNodeByName_matchesRoot() throws Exception {
-        // getNextNodeByName when the document root itself matches the name
-        String xml = "<?xml version=\"1.0\"?><item>value</item>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
-
-        // Pass the element itself — it should return itself
-        Node result = XmlUtil.getNextNodeByName(root, "item");
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals("item", result.getNodeName());
-    }
-
-    @Test
-    public void testGetAttribute() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root id=\"123\" name=\"test\"/>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
-
-        String id = XmlUtil.getAttribute(root, "id");
-        String name = XmlUtil.getAttribute(root, "name");
-        String missing = XmlUtil.getAttribute(root, "missing");
-
-        Assertions.assertEquals("123", id);
-        Assertions.assertEquals("test", name);
-        Assertions.assertNull(missing);
-    }
-
-    @Test
-    public void testReadAttributes() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root id=\"123\" name=\"test\" value=\"abc\"/>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
+    public void testGetAttributeAndReadAttributes() throws Exception {
+        Element root = parse("<?xml version=\"1.0\"?><root id=\"123\" name=\"test\" value=\"abc\"/>");
+        assertEquals("123", XmlUtil.getAttribute(root, "id"));
+        assertEquals("test", XmlUtil.getAttribute(root, "name"));
+        assertNull(XmlUtil.getAttribute(root, "missing"));
 
         Map<String, String> attrs = XmlUtil.readAttributes(root);
+        assertEquals("123", attrs.get("id"));
+        assertEquals("test", attrs.get("name"));
+        assertEquals("abc", attrs.get("value"));
 
-        Assertions.assertNotNull(attrs);
-        Assertions.assertEquals("123", attrs.get("id"));
-        Assertions.assertEquals("test", attrs.get("name"));
-        Assertions.assertEquals("abc", attrs.get("value"));
-    }
+        Element withClass = parse("<?xml version=\"1.0\"?><root id=\"42\" class=\"test\"/>");
+        Map<String, String> classAttrs = XmlUtil.readAttributes(withClass);
+        assertEquals("42", classAttrs.get("id"));
+        assertEquals("test", classAttrs.get("class"));
 
-    // ==================== readAttributes with nested parent node name ====================
-
-    @Test
-    public void testReadElement_isTextElement_rootLevel() throws Exception {
-        // Test that readElement for a text root element stores the key as nodeName (not parentNode.nodeName)
-        String xml = "<?xml version=\"1.0\"?><name>John</name>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
-
-        Map<String, String> data = XmlUtil.readElement(root);
-        Assertions.assertNotNull(data);
-        // The root-level text element key should not have a dot prefix
-        Assertions.assertTrue(data.containsKey("name") || data.containsKey("name.name"));
-    }
-
-    @Test
-    public void testReadAttributes_elementWithAttributes() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root id=\"42\" class=\"test\"/>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
-
-        Map<String, String> attrs = XmlUtil.readAttributes(root);
-        Assertions.assertNotNull(attrs);
-        Assertions.assertEquals("42", attrs.get("id"));
-        Assertions.assertEquals("test", attrs.get("class"));
-    }
-
-    @Test
-    public void testReadAttributes_noAttributes() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root/>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
-
-        Map<String, String> attrs = XmlUtil.readAttributes(root);
-        Assertions.assertNotNull(attrs);
-        Assertions.assertTrue(attrs.isEmpty());
+        assertTrue(XmlUtil.readAttributes(parse("<?xml version=\"1.0\"?><root/>")).isEmpty());
     }
 
     @Test
     public void testReadElement() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><person age=\"30\"><name>John</name><city>NYC</city></person>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
+        Map<String, String> textRoot = XmlUtil.readElement(parse("<?xml version=\"1.0\"?><name>John</name>"));
+        assertTrue(textRoot.containsKey("name") || textRoot.containsKey("name.name"));
 
-        Map<String, String> data = XmlUtil.readElement(root);
+        Map<String, String> person = XmlUtil.readElement(parse("<?xml version=\"1.0\"?><person age=\"30\"><name>John</name><city>NYC</city></person>"));
+        assertEquals("30", person.get("age"));
+        assertTrue(person.containsKey("person.name"));
+        assertTrue(person.containsKey("person.city"));
 
-        Assertions.assertNotNull(data);
-        Assertions.assertEquals("30", data.get("age"));
-        Assertions.assertTrue(data.containsKey("person.name"));
-        Assertions.assertTrue(data.containsKey("person.city"));
-    }
-
-    @Test
-    public void testReadElement_qualifiesNestedAttributesWithElementPath() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><person id=\"7\"><home zip=\"10001\"/><work zip=\"94105\"/></person>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-
-        Map<String, String> data = XmlUtil.readElement(doc.getDocumentElement());
-
-        Assertions.assertEquals("7", data.get("id"));
-        Assertions.assertEquals("10001", data.get("person.home.zip"));
-        Assertions.assertEquals("94105", data.get("person.work.zip"));
-        Assertions.assertFalse(data.containsKey("person.zip"));
+        Map<String, String> nested = XmlUtil.readElement(parse("<?xml version=\"1.0\"?><person id=\"7\"><home zip=\"10001\"/><work zip=\"94105\"/></person>"));
+        assertEquals("7", nested.get("id"));
+        assertEquals("10001", nested.get("person.home.zip"));
+        assertEquals("94105", nested.get("person.work.zip"));
+        assertFalse(nested.containsKey("person.zip"));
     }
 
     @Test
     public void testIsTextElement() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root><text>value</text><parent><child>nested</child></parent></root>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
-
+        Element root = parse("<?xml version=\"1.0\"?><root><text>value</text><parent><child>nested</child></parent><empty/></root>");
         NodeList children = root.getChildNodes();
         Element textElem = null;
         Element parentElem = null;
-
+        Element empty = null;
         for (int i = 0; i < children.getLength(); i++) {
             Node node = children.item(i);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -821,447 +531,590 @@ public class XmlUtilTest extends TestBase {
                     textElem = (Element) node;
                 } else if ("parent".equals(node.getNodeName())) {
                     parentElem = (Element) node;
+                } else if ("empty".equals(node.getNodeName())) {
+                    empty = (Element) node;
                 }
             }
         }
-
-        Assertions.assertNotNull(textElem);
-        Assertions.assertNotNull(parentElem);
-        Assertions.assertTrue(XmlUtil.isTextElement(textElem));
-        Assertions.assertFalse(XmlUtil.isTextElement(parentElem));
-    }
-
-    @Test
-    public void testIsTextElement_emptyElement() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root><empty/></root>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
-        NodeList children = root.getChildNodes();
-        Element empty = null;
-        for (int i = 0; i < children.getLength(); i++) {
-            if (children.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                empty = (Element) children.item(i);
-            }
-        }
-        Assertions.assertNotNull(empty);
-        // An empty element with no children is a text element (returns true)
-        Assertions.assertTrue(XmlUtil.isTextElement(empty));
+        assertTrue(XmlUtil.isTextElement(textElem));
+        assertFalse(XmlUtil.isTextElement(parentElem));
+        assertTrue(XmlUtil.isTextElement(empty));
     }
 
     @Test
     public void testGetTextContent() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root>  Hello World  </root>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
+        assertEquals("  Hello World  ", XmlUtil.getTextContent(parse("<?xml version=\"1.0\"?><root>  Hello World  </root>")));
+        assertEquals("", XmlUtil.getTextContent(parse("<?xml version=\"1.0\"?><root></root>")));
 
-        String content = XmlUtil.getTextContent(root);
+        Element ws = parse("<?xml version=\"1.0\"?><root>  Hello\n\tWorld  </root>");
+        assertEquals("Hello World", XmlUtil.getTextContent(ws, true));
+        assertTrue(XmlUtil.getTextContent(ws, false).contains("\n") || XmlUtil.getTextContent(ws, false).contains("\t"));
+        assertEquals("", XmlUtil.getTextContent(parse("<?xml version=\"1.0\"?><root></root>"), true));
 
-        Assertions.assertNotNull(content);
-        Assertions.assertEquals("  Hello World  ", content);
-    }
-
-    @Test
-    public void testGetTextContentWithWhitespaceHandling() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root>  Hello\n\tWorld  </root>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
-
-        String content = XmlUtil.getTextContent(root, true);
-
-        Assertions.assertNotNull(content);
-        Assertions.assertEquals("Hello World", content);
-
-        String contentRaw = XmlUtil.getTextContent(root, false);
-        Assertions.assertTrue(contentRaw.contains("\n") || contentRaw.contains("\t"));
-    }
-
-    @Test
-    public void testGetTextContent_withIgnoreWhiteChar() throws Exception {
-        String xmlContent = "<root>  Hello\n\tWorld  </root>";
         DocumentBuilder db = XmlUtil.createContentParser();
-        Document doc = db.parse(new ByteArrayInputStream(xmlContent.getBytes("UTF-8")));
-        XmlUtil.recycleContentParser(db);
-        Node root = doc.getDocumentElement();
-        String result = XmlUtil.getTextContent(root, true);
-        Assertions.assertNotNull(result);
-        // Whitespace should be normalized
-        Assertions.assertFalse(result.startsWith(" "));
-        Assertions.assertFalse(result.endsWith(" "));
+        try {
+            Node contentRoot = db.parse(new ByteArrayInputStream("<root>  Hello\n\tWorld  </root>".getBytes("UTF-8"))).getDocumentElement();
+            String normalized = XmlUtil.getTextContent(contentRoot, true);
+            assertFalse(normalized.startsWith(" "));
+            assertFalse(normalized.endsWith(" "));
+            assertEquals("  Hello World  ",
+                    XmlUtil.getTextContent(db.parse(new ByteArrayInputStream("<root>  Hello World  </root>".getBytes("UTF-8"))).getDocumentElement(), false));
+        } finally {
+            XmlUtil.recycleContentParser(db);
+        }
+
+        String trailing = XmlUtil.getTextContent(parse("<root>hello\t</root>"), true);
+        assertTrue(trailing.endsWith("hello") || trailing.equals("hello"));
     }
 
     @Test
-    public void testGetTextContent_withoutIgnoreWhiteChar() throws Exception {
-        String xmlContent = "<root>  Hello World  </root>";
-        DocumentBuilder db = XmlUtil.createContentParser();
-        Document doc = db.parse(new ByteArrayInputStream(xmlContent.getBytes("UTF-8")));
-        XmlUtil.recycleContentParser(db);
-        Node root = doc.getDocumentElement();
-        String result = XmlUtil.getTextContent(root, false);
-        Assertions.assertEquals("  Hello World  ", result);
-    }
-
-    @Test
-    public void testGetTextContent_emptyElement() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root></root>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
-
-        String content = XmlUtil.getTextContent(root);
-        Assertions.assertNotNull(content);
-        Assertions.assertEquals("", content);
-    }
-
-    @Test
-    public void testGetTextContent_withIgnoreWhiteChar_trueOnEmptyString() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root></root>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Element root = doc.getDocumentElement();
-
-        String content = XmlUtil.getTextContent(root, true);
-        Assertions.assertNotNull(content);
-        Assertions.assertEquals("", content);
-    }
-
-    @Test
-    public void testGetTextContent_withIgnoreWhiteChar_trailingSpace() throws Exception {
-        // Content with trailing tab should be trimmed when ignoreWhiteChar=true
-        String xml = "<root>hello\t</root>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes("UTF-8")));
-        Element root = doc.getDocumentElement();
-
-        String content = XmlUtil.getTextContent(root, true);
-        Assertions.assertNotNull(content);
-        Assertions.assertTrue(content.endsWith("hello") || content.equals("hello"));
-    }
-
-    @Test
-    public void testWriteCharactersCharArrayToStringBuilder() throws Exception {
-        char[] chars = "<hello> & \"world\"".toCharArray();
+    public void testWriteCharacters() throws Exception {
         StringBuilder sb = new StringBuilder();
+        XmlUtil.writeCharacters("<hello> & \"world\"".toCharArray(), sb);
+        assertTrue(sb.toString().contains("&lt;") && sb.toString().contains("&gt;") && sb.toString().contains("&amp;") && sb.toString().contains("&quot;"));
 
-        XmlUtil.writeCharacters(chars, sb);
+        sb = new StringBuilder();
+        XmlUtil.writeCharacters("prefix <tag> suffix".toCharArray(), 7, 5, sb);
+        assertTrue(sb.toString().contains("&lt;tag&gt;"));
 
-        String result = sb.toString();
-        Assertions.assertTrue(result.contains("&lt;"));
-        Assertions.assertTrue(result.contains("&gt;"));
-        Assertions.assertTrue(result.contains("&amp;"));
-        Assertions.assertTrue(result.contains("&quot;"));
-    }
+        sb = new StringBuilder();
+        XmlUtil.writeCharacters("<data> & 'value'", sb);
+        assertTrue(sb.toString().contains("&lt;") && sb.toString().contains("&amp;") && sb.toString().contains("&apos;"));
 
-    @Test
-    public void testWriteCharactersCharArrayWithOffsetToStringBuilder() throws Exception {
-        char[] chars = "prefix <tag> suffix".toCharArray();
-        StringBuilder sb = new StringBuilder();
+        sb = new StringBuilder();
+        XmlUtil.writeCharacters("prefix <tag> suffix", 7, 5, sb);
+        assertTrue(sb.toString().contains("&lt;tag&gt;"));
 
-        XmlUtil.writeCharacters(chars, 7, 5, sb);
-
-        String result = sb.toString();
-        Assertions.assertTrue(result.contains("&lt;tag&gt;"));
-    }
-
-    @Test
-    public void testWriteCharactersStringToStringBuilder() throws Exception {
-        String str = "<data> & 'value'";
-        StringBuilder sb = new StringBuilder();
-
-        XmlUtil.writeCharacters(str, sb);
-
-        String result = sb.toString();
-        Assertions.assertTrue(result.contains("&lt;"));
-        Assertions.assertTrue(result.contains("&amp;"));
-        Assertions.assertTrue(result.contains("&apos;"));
-    }
-
-    @Test
-    public void testWriteCharactersStringWithOffsetToStringBuilder() throws Exception {
-        String str = "prefix <tag> suffix";
-        StringBuilder sb = new StringBuilder();
-
-        XmlUtil.writeCharacters(str, 7, 5, sb);
-
-        String result = sb.toString();
-        Assertions.assertTrue(result.contains("&lt;tag&gt;"));
-    }
-
-    @Test
-    public void testWriteCharactersCharArrayToOutputStream() throws Exception {
-        char[] chars = "<test>".toCharArray();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        XmlUtil.writeCharacters(chars, baos);
-
-        String result = baos.toString();
-        Assertions.assertTrue(result.contains("&lt;test&gt;"));
-    }
-
-    @Test
-    public void testWriteCharactersCharArrayWithOffsetToOutputStream() throws Exception {
-        char[] chars = "prefix <tag> suffix".toCharArray();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        XmlUtil.writeCharacters(chars, 7, 5, baos);
-
-        String result = baos.toString();
-        Assertions.assertTrue(result.contains("&lt;tag&gt;"));
-    }
-
-    @Test
-    public void testWriteCharactersStringToOutputStream() throws Exception {
-        String str = "<data> & value";
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        XmlUtil.writeCharacters(str, baos);
-
-        String result = baos.toString();
-        Assertions.assertTrue(result.contains("&lt;"));
-        Assertions.assertTrue(result.contains("&amp;"));
-    }
-
-    @Test
-    public void testWriteCharactersStringWithOffsetToOutputStream() throws Exception {
-        String str = "prefix <tag> suffix";
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        XmlUtil.writeCharacters(str, 7, 5, baos);
-
-        String result = baos.toString();
-        Assertions.assertTrue(result.contains("&lt;tag&gt;"));
-    }
-
-    @Test
-    public void testWriteCharactersCharArrayToWriter() throws Exception {
-        char[] chars = "<element>".toCharArray();
-        StringWriter writer = new StringWriter();
-
-        XmlUtil.writeCharacters(chars, writer);
-
-        String result = writer.toString();
-        Assertions.assertTrue(result.contains("&lt;element&gt;"));
-    }
-
-    @Test
-    public void testWriteCharactersCharArrayWithOffsetToWriter() throws Exception {
-        char[] chars = "prefix <tag> suffix".toCharArray();
-        StringWriter writer = new StringWriter();
-
-        XmlUtil.writeCharacters(chars, 7, 5, writer);
-
-        String result = writer.toString();
-        Assertions.assertTrue(result.contains("&lt;tag&gt;"));
-    }
-
-    @Test
-    public void testWriteCharactersStringToWriter() throws Exception {
-        String str = "<root> & \"data\"";
-        StringWriter writer = new StringWriter();
-
-        XmlUtil.writeCharacters(str, writer);
-
-        String result = writer.toString();
-        Assertions.assertTrue(result.contains("&lt;"));
-        Assertions.assertTrue(result.contains("&amp;"));
-        Assertions.assertTrue(result.contains("&quot;"));
-    }
-
-    @Test
-    public void testWriteCharactersStringWithOffsetToWriter() throws Exception {
-        String str = "prefix <tag> suffix";
-        StringWriter writer = new StringWriter();
-
-        XmlUtil.writeCharacters(str, 7, 5, writer);
-
-        String result = writer.toString();
-        Assertions.assertTrue(result.contains("&lt;tag&gt;"));
-    }
-
-    @Test
-    public void testWriteCharactersNullString() throws Exception {
-        StringBuilder sb = new StringBuilder();
-
+        sb = new StringBuilder();
         XmlUtil.writeCharacters((String) null, sb);
+        assertEquals("null", sb.toString());
 
-        String result = sb.toString();
-        Assertions.assertEquals("null", result);
-    }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        XmlUtil.writeCharacters("<test>".toCharArray(), baos);
+        assertTrue(baos.toString().contains("&lt;test&gt;"));
+        baos.reset();
+        XmlUtil.writeCharacters("prefix <tag> suffix".toCharArray(), 7, 5, baos);
+        assertTrue(baos.toString().contains("&lt;tag&gt;"));
+        baos.reset();
+        XmlUtil.writeCharacters("<data> & value", baos);
+        assertTrue(baos.toString().contains("&lt;") && baos.toString().contains("&amp;"));
+        baos.reset();
+        XmlUtil.writeCharacters("prefix <tag> suffix", 7, 5, baos);
+        assertTrue(baos.toString().contains("&lt;tag&gt;"));
 
-    // ==================== Package-private static helpers ====================
-
-    @Test
-    public void testGetAttributeTypeClass_knownType() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root type=\"int\"/>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Node root = doc.getDocumentElement();
-
-        Class<?> result = XmlUtil.getAttributeTypeClass(root);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(int.class, result);
-    }
-
-    @Test
-    public void testGetAttributeTypeClass_noTypeAttr() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root/>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Node root = doc.getDocumentElement();
-
-        Class<?> result = XmlUtil.getAttributeTypeClass(root);
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void testGetAttributeTypeClass_stringType() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root type=\"String\"/>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Node root = doc.getDocumentElement();
-
-        Class<?> result = XmlUtil.getAttributeTypeClass(root);
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(String.class, result);
+        StringWriter writer = new StringWriter();
+        XmlUtil.writeCharacters("<element>".toCharArray(), writer);
+        assertTrue(writer.toString().contains("&lt;element&gt;"));
+        writer = new StringWriter();
+        XmlUtil.writeCharacters("prefix <tag> suffix".toCharArray(), 7, 5, writer);
+        assertTrue(writer.toString().contains("&lt;tag&gt;"));
+        writer = new StringWriter();
+        XmlUtil.writeCharacters("<root> & \"data\"", writer);
+        assertTrue(writer.toString().contains("&lt;") && writer.toString().contains("&amp;") && writer.toString().contains("&quot;"));
+        writer = new StringWriter();
+        XmlUtil.writeCharacters("prefix <tag> suffix", 7, 5, writer);
+        assertTrue(writer.toString().contains("&lt;tag&gt;"));
     }
 
     @Test
-    public void testGetAttributeTypeClass_unknownType() throws Exception {
-        // An unknown type attribute in a non-JDK package — security gate refuses to resolve it.
-        // Pre-fix: returned a class via Type.of's auto-load (gadget-chain primitive).
-        // Post-fix (without the opt-in system property): returns null.
-        String xml = "<?xml version=\"1.0\"?><root type=\"com.unknown.NonExistentClass12345XYZ\"/>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Node root = doc.getDocumentElement();
+    public void testWriteCharactersPreservesWriterFailuresWithoutRetrying() {
+        for (boolean arrayInput : new boolean[] { false, true }) {
+            for (boolean failOnFlush : new boolean[] { false, true }) {
+                IOException failure = new IOException("original writer failure");
+                int[] calls = new int[3];
+                Writer output = new Writer() {
+                    @Override
+                    public void write(char[] buffer, int offset, int length) throws IOException {
+                        calls[0]++;
+                        if (!failOnFlush) {
+                            throw failure;
+                        }
+                    }
 
-        Class<?> result = XmlUtil.getAttributeTypeClass(root);
-        Assertions.assertNull(result);
+                    @Override
+                    public void flush() throws IOException {
+                        calls[1]++;
+                        if (failOnFlush) {
+                            throw failure;
+                        }
+                    }
+
+                    @Override
+                    public void close() {
+                        calls[2]++;
+                    }
+                };
+                IOException actual = assertThrows(IOException.class, () -> {
+                    if (arrayInput) {
+                        XmlUtil.writeCharacters("x<&>y".toCharArray(), 1, 3, output);
+                    } else {
+                        XmlUtil.writeCharacters("x<&>y", 1, 3, output);
+                    }
+                });
+                assertSame(failure, actual);
+                assertEquals(1, calls[0]);
+                assertEquals(failOnFlush ? 1 : 0, calls[1]);
+                assertEquals(0, calls[2]);
+            }
+        }
     }
 
     @Test
-    public void testGetAttributeTypeClass_JavaUtilClassName() throws Exception {
-        String xml = "<root type=\"java.util.LinkedHashMap\"/>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
+    public void testWriteCharactersPreservesOutputStreamFailuresWithoutRetrying() {
+        for (boolean arrayInput : new boolean[] { false, true }) {
+            for (boolean failOnFlush : new boolean[] { false, true }) {
+                IOException failure = new IOException("original stream failure");
+                int[] calls = new int[3];
+                OutputStream output = new OutputStream() {
+                    @Override
+                    public void write(int value) throws IOException {
+                        write(new byte[] { (byte) value }, 0, 1);
+                    }
 
-        Assertions.assertEquals(java.util.LinkedHashMap.class, XmlUtil.getAttributeTypeClass(doc.getDocumentElement()));
+                    @Override
+                    public void write(byte[] buffer, int offset, int length) throws IOException {
+                        calls[0]++;
+                        if (!failOnFlush) {
+                            throw failure;
+                        }
+                    }
+
+                    @Override
+                    public void flush() throws IOException {
+                        calls[1]++;
+                        if (failOnFlush) {
+                            throw failure;
+                        }
+                    }
+
+                    @Override
+                    public void close() {
+                        calls[2]++;
+                    }
+                };
+                IOException actual = assertThrows(IOException.class, () -> {
+                    if (arrayInput) {
+                        XmlUtil.writeCharacters("x<&>y".toCharArray(), 1, 3, output);
+                    } else {
+                        XmlUtil.writeCharacters("x<&>y", 1, 3, output);
+                    }
+                });
+                assertSame(failure, actual);
+                assertEquals(1, calls[0]);
+                assertEquals(failOnFlush ? 1 : 0, calls[1]);
+                assertEquals(0, calls[2]);
+            }
+        }
     }
 
     @Test
-    public void testGetAttributeTypeClass_rejectsUnlistedJdkClass() throws Exception {
-        String xml = "<root type=\"java.lang.Runtime\"/>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-
-        Assertions.assertNull(XmlUtil.getAttributeTypeClass(doc.getDocumentElement()));
+    public void testGetAttributeTypeClass() throws Exception {
+        assertEquals(int.class, XmlUtil.getAttributeTypeClass(parse("<?xml version=\"1.0\"?><root type=\"int\"/>")));
+        assertNull(XmlUtil.getAttributeTypeClass(parse("<?xml version=\"1.0\"?><root/>")));
+        assertEquals(String.class, XmlUtil.getAttributeTypeClass(parse("<?xml version=\"1.0\"?><root type=\"String\"/>")));
+        assertNull(XmlUtil.getAttributeTypeClass(parse("<?xml version=\"1.0\"?><root type=\"com.unknown.NonExistentClass12345XYZ\"/>")));
+        assertEquals(java.util.LinkedHashMap.class, XmlUtil.getAttributeTypeClass(parse("<root type=\"java.util.LinkedHashMap\"/>")));
+        assertNull(XmlUtil.getAttributeTypeClass(parse("<root type=\"java.lang.Runtime\"/>")));
+        assertNull(XmlUtil.getAttributeTypeClass(parse("<root type=\"java.util.List&lt;java.lang.Runtime&gt;\"/>")));
+        assertEquals(String[][].class, XmlUtil.getAttributeTypeClass(parse("<root type=\"java.lang.String[][]\"/>")));
     }
 
     @Test
-    public void testGetAttributeTypeClass_rejectsGenericExpression() throws Exception {
-        String xml = "<root type=\"java.util.List&lt;java.lang.Runtime&gt;\"/>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-
-        Assertions.assertNull(XmlUtil.getAttributeTypeClass(doc.getDocumentElement()));
+    public void testGetConcreteClass() throws Exception {
+        assertEquals(String.class, XmlUtil.getConcreteClass(Object.class, String.class));
+        assertEquals(Integer.class, XmlUtil.getConcreteClass(Integer.class, String.class));
+        assertEquals(String.class, XmlUtil.getConcreteClass(String.class, (Class<?>) null));
+        assertEquals(String.class, XmlUtil.getConcreteClass(null, String.class));
+        assertEquals(String.class, XmlUtil.getConcreteClass(String.class, (Node) null));
+        assertNotNull(XmlUtil.getConcreteClass(Object.class, parse("<?xml version=\"1.0\"?><root type=\"int\"/>")));
     }
 
     @Test
-    public void testGetAttributeTypeClass_allowsSafeArray() throws Exception {
-        String xml = "<root type=\"java.lang.String[][]\"/>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-
-        Assertions.assertEquals(String[][].class, XmlUtil.getAttributeTypeClass(doc.getDocumentElement()));
+    public void testGetNodeType() {
+        assertEquals(XmlUtil.NodeType.PROPERTY, XmlUtil.getNodeType("anything", XmlUtil.NodeType.ENTITY));
+        assertEquals(XmlUtil.NodeType.ARRAY, XmlUtil.getNodeType("array", XmlUtil.NodeType.PROPERTY));
+        assertEquals(XmlUtil.NodeType.ENTITY, XmlUtil.getNodeType("unknownTag", XmlUtil.NodeType.PROPERTY));
+        assertEquals(XmlUtil.NodeType.COLLECTION, XmlUtil.getNodeType("list", XmlUtil.NodeType.PROPERTY));
+        assertEquals(XmlUtil.NodeType.MAP, XmlUtil.getNodeType("map", XmlUtil.NodeType.PROPERTY));
     }
 
-    @Test
-    public void testGetConcreteClass_typeClassAndTargetClass() {
-        // typeClass is assignable from targetClass — should return typeClass
-        Class<?> result = XmlUtil.getConcreteClass(Object.class, String.class);
-        Assertions.assertEquals(String.class, result);
+    /**
+     * An exception whose cause chain loops back on itself, without touching any JDK internals: {@code getCause()}
+     * is overridden to return a target set after construction.
+     */
+    private static final class LoopingCauseException extends Exception {
+        private static final long serialVersionUID = 1L;
+
+        private transient Throwable target;
+
+        LoopingCauseException(final String message) {
+            super(message);
+        }
+
+        void pointAt(final Throwable t) {
+            target = t;
+        }
+
+        @Override
+        public synchronized Throwable getCause() {
+            return target;
+        }
     }
 
+    /**
+     * A cyclic cause chain must not make the {@code IOException} search loop forever.
+     *
+     * <p>Guarded by a preemptive timeout on purpose: the defect was an unbounded walk, and it ran inside
+     * {@code synchronized (xmlInputFactory)}, so without the timeout a regression would wedge the whole suite.</p>
+     */
     @Test
-    public void testGetConcreteClass_incompatibleClasses() {
-        // typeClass not assignable from targetClass — should return targetClass
-        Class<?> result = XmlUtil.getConcreteClass(Integer.class, String.class);
-        Assertions.assertEquals(Integer.class, result);
+    public void testToRuntimeException_CyclicCauseChainTerminates() throws Exception {
+        final LoopingCauseException loop = new LoopingCauseException("loop");
+        final XMLStreamException top = new XMLStreamException("top", loop);
+        loop.pointAt(top);
+
+        // Reflection, not a widened modifier: the same test then exercises the pre-fix build too, so its
+        // RED-on-base result is the unbounded walk itself rather than an access error.
+        assertTimeoutPreemptively(Duration.ofSeconds(10), () -> assertNotNull(invokeToRuntimeException(top)));
     }
 
+    /** An {@code IOException} anywhere in an acyclic chain is still unwrapped. */
     @Test
-    public void testGetConcreteClass_nullTypeClass() {
-        // typeClass is null — should return targetClass
-        Class<?> result = XmlUtil.getConcreteClass(String.class, (Class<?>) null);
-        Assertions.assertEquals(String.class, result);
+    public void testToRuntimeException_UnwrapsIOExceptionFromNestedCause() throws Exception {
+        final java.io.IOException io = new java.io.IOException("disk");
+        final XMLStreamException top = new XMLStreamException("top", new IllegalStateException("mid", io));
+
+        assertTrue(invokeToRuntimeException(top) instanceof com.landawn.abacus.exception.UncheckedIOException);
     }
 
-    @Test
-    public void testGetConcreteClass_nullTargetClass() {
-        // targetClass is null, typeClass is non-null — should return typeClass
-        Class<?> result = XmlUtil.getConcreteClass(null, String.class);
-        Assertions.assertEquals(String.class, result);
-    }
-
-    @Test
-    public void testGetConcreteClass_withNode_nullNode() {
-        Class<?> result = XmlUtil.getConcreteClass(String.class, (Node) null);
-        Assertions.assertEquals(String.class, result);
-    }
-
-    @Test
-    public void testGetConcreteClass_withNode_hasTypeAttr() throws Exception {
-        String xml = "<?xml version=\"1.0\"?><root type=\"int\"/>";
-        DocumentBuilder builder = XmlUtil.createDOMParser();
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)));
-        Node root = doc.getDocumentElement();
-
-        // targetClass is Object, typeClass from attribute is int.class
-        Class<?> result = XmlUtil.getConcreteClass(Object.class, root);
-        Assertions.assertNotNull(result);
-    }
-
-    @Test
-    public void testGetNodeType_entityPrevious_returnsProperty() {
-        XmlUtil.NodeType result = XmlUtil.getNodeType("anything", XmlUtil.NodeType.ENTITY);
-        Assertions.assertEquals(XmlUtil.NodeType.PROPERTY, result);
-    }
-
-    @Test
-    public void testGetNodeType_knownName_returnsNodeType() {
-        // "array" maps to NodeType.ARRAY
-        XmlUtil.NodeType result = XmlUtil.getNodeType("array", XmlUtil.NodeType.PROPERTY);
-        Assertions.assertEquals(XmlUtil.NodeType.ARRAY, result);
-    }
-
-    @Test
-    public void testGetNodeType_unknownName_returnsEntity() {
-        XmlUtil.NodeType result = XmlUtil.getNodeType("unknownTag", XmlUtil.NodeType.PROPERTY);
-        Assertions.assertEquals(XmlUtil.NodeType.ENTITY, result);
-    }
-
-    @Test
-    public void testGetNodeType_listName() {
-        XmlUtil.NodeType result = XmlUtil.getNodeType("list", XmlUtil.NodeType.PROPERTY);
-        Assertions.assertEquals(XmlUtil.NodeType.COLLECTION, result);
-    }
-
-    @Test
-    public void testGetNodeType_mapName() {
-        XmlUtil.NodeType result = XmlUtil.getNodeType("map", XmlUtil.NodeType.PROPERTY);
-        Assertions.assertEquals(XmlUtil.NodeType.MAP, result);
-    }
-
-    @Test
-    public void testCreateFilteredStreamReaderRejectsNullFilter() throws XMLStreamException {
-        final XMLStreamReader source = XmlUtil.createXMLStreamReader(new StringReader("<root/>"));
+    private static RuntimeException invokeToRuntimeException(final XMLStreamException e) throws Exception {
+        final java.lang.reflect.Method m = XmlUtil.class.getDeclaredMethod("toRuntimeException", XMLStreamException.class);
+        m.setAccessible(true);
 
         try {
-            Assertions.assertThrows(IllegalArgumentException.class, () -> XmlUtil.createFilteredStreamReader(source, null));
-        } finally {
-            source.close();
+            return (RuntimeException) m.invoke(null, e);
+        } catch (final java.lang.reflect.InvocationTargetException ite) {
+            final Throwable cause = ite.getCause();
+
+            if (cause instanceof RuntimeException) {
+                throw (RuntimeException) cause;
+            } else if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+
+            throw new AssertionError("unexpected checked exception from toRuntimeException", cause);
         }
+    }
+
+    /**
+     * The container element names the abacus XML writers really emit must map to {@code COLLECTION}, matching the
+     * authoritative table in {@code AbacusXmlParserImpl}.
+     */
+    @Test
+    public void testGetNodeType_SetAndCollectionAreContainerNames() {
+        assertEquals(XmlUtil.NodeType.COLLECTION, XmlUtil.getNodeType("set", XmlUtil.NodeType.PROPERTY));
+        assertEquals(XmlUtil.NodeType.COLLECTION, XmlUtil.getNodeType("collection", XmlUtil.NodeType.PROPERTY));
+        assertEquals(XmlUtil.NodeType.COLLECTION, XmlUtil.getNodeType("list", XmlUtil.NodeType.PROPERTY));
+        assertEquals(XmlUtil.NodeType.ARRAY, XmlUtil.getNodeType("array", XmlUtil.NodeType.PROPERTY));
+        assertEquals(XmlUtil.NodeType.ENTITY, XmlUtil.getNodeType("unknownTag", XmlUtil.NodeType.PROPERTY));
+    }
+
+    /** Contract pin for the documented {@code NullPointerException} of the four JAXB factory methods. */
+    @Test
+    public void testCreateMarshallerAndUnmarshaller_NullArgument() {
+        assertThrows(IllegalArgumentException.class, () -> XmlUtil.createMarshaller((String) null));
+        assertThrows(IllegalArgumentException.class, () -> XmlUtil.createMarshaller((Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> XmlUtil.createUnmarshaller((String) null));
+        assertThrows(IllegalArgumentException.class, () -> XmlUtil.createUnmarshaller((Class<?>) null));
+    }
+
+    /**
+     * Contract pin: a non-null node can still have no DOM text content. {@code Document} and
+     * {@code DocumentType} nodes report {@code null}, which both {@code getTextContent} overloads pass through.
+     */
+    @Test
+    public void testGetTextContent_NodeTypesWithoutTextContent() throws Exception {
+        DocumentBuilder builder = XmlUtil.createDOMParser();
+        Document doc = builder.parse(new ByteArrayInputStream("<root>hello</root>".getBytes(Charsets.UTF_8)));
+
+        assertEquals(Node.DOCUMENT_NODE, doc.getNodeType());
+        assertNull(XmlUtil.getTextContent(doc));
+        assertNull(XmlUtil.getTextContent(doc, true));
+        assertNull(XmlUtil.getTextContent(doc, false));
+
+        // The factory disallows DOCTYPE, so build the document-type node through the DOM implementation.
+        org.w3c.dom.DocumentType docType = builder.getDOMImplementation().createDocumentType("qname", "publicId", "systemId");
+
+        assertEquals(Node.DOCUMENT_TYPE_NODE, docType.getNodeType());
+        assertNull(XmlUtil.getTextContent(docType));
+        assertNull(XmlUtil.getTextContent(docType, true));
+        assertNull(XmlUtil.getTextContent(docType, false));
+
+        assertEquals("hello", XmlUtil.getTextContent(doc.getDocumentElement()));
+        assertEquals("hello", XmlUtil.getTextContent(doc.getDocumentElement(), true));
+    }
+
+    /**
+     * The writer-side predicate must answer exactly what the reader does, including for values with surrounding
+     * whitespace: without the reader's {@code trim()} a trailing space defeated the {@code "[]"} suffix stripping.
+     */
+    @Test
+    public void testIsResolvableXmlTypeAttributeName_AgreesWithReaderOnPaddedNames() throws Exception {
+        assertTrue(XmlUtil.isResolvableXmlTypeAttributeName(" java.util.List[] "));
+        assertNotNull(XmlUtil.getAttributeType(parse("<root type=\" java.util.List[] \"/>")));
+
+        assertTrue(XmlUtil.isResolvableXmlTypeAttributeName(" int[] "));
+        assertNotNull(XmlUtil.getAttributeType(parse("<root type=\" int[] \"/>")));
+
+        assertTrue(XmlUtil.isResolvableXmlTypeAttributeName(" java.util.List "));
+        assertNotNull(XmlUtil.getAttributeType(parse("<root type=\" java.util.List \"/>")));
+
+        assertFalse(XmlUtil.isResolvableXmlTypeAttributeName(" "));
+        assertNull(XmlUtil.getAttributeType(parse("<root type=\" \"/>")));
+
+        assertFalse(XmlUtil.isResolvableXmlTypeAttributeName("\t"));
+        assertFalse(XmlUtil.isResolvableXmlTypeAttributeName(""));
+        assertFalse(XmlUtil.isResolvableXmlTypeAttributeName(null));
+
+        assertFalse(XmlUtil.isResolvableXmlTypeAttributeName(" java.lang.Runtime "));
+        assertNull(XmlUtil.getAttributeType(parse("<root type=\" java.lang.Runtime \"/>")));
+
+        assertTrue(XmlUtil.isResolvableXmlTypeAttributeName("java.util.List[]"));
+        assertNotNull(XmlUtil.getAttributeType(parse("<root type=\"java.util.List[]\"/>")));
+    }
+
+    /**
+     * Contract pin for the documented {@code IndexOutOfBoundsException} of the six bounded
+     * {@code writeCharacters} overloads. The exception is not an {@code IOException}, so the StringBuilder
+     * overloads do not convert it either.
+     */
+    @Test
+    public void testWriteCharacters_OutOfRangeOffsetOrLength() {
+        char[] cbuf = "abc".toCharArray();
+
+        assertThrows(IndexOutOfBoundsException.class, () -> XmlUtil.writeCharacters(cbuf, 2, 5, new StringBuilder()));
+        assertThrows(IndexOutOfBoundsException.class, () -> XmlUtil.writeCharacters(cbuf, -1, 1, new StringBuilder()));
+        assertThrows(IndexOutOfBoundsException.class, () -> XmlUtil.writeCharacters("abc", 2, 5, new StringBuilder()));
+        assertThrows(IndexOutOfBoundsException.class, () -> XmlUtil.writeCharacters("abc", 0, -1, new StringBuilder()));
+        assertThrows(IndexOutOfBoundsException.class, () -> XmlUtil.writeCharacters((String) null, 0, 9, new StringBuilder()));
+
+        assertThrows(IndexOutOfBoundsException.class, () -> XmlUtil.writeCharacters(cbuf, 2, 5, new ByteArrayOutputStream()));
+        assertThrows(IndexOutOfBoundsException.class, () -> XmlUtil.writeCharacters("abc", 2, 5, new ByteArrayOutputStream()));
+        assertThrows(IndexOutOfBoundsException.class, () -> XmlUtil.writeCharacters(cbuf, 2, 5, new StringWriter()));
+        assertThrows(IndexOutOfBoundsException.class, () -> XmlUtil.writeCharacters("abc", 2, 5, new StringWriter()));
+
+        // The documented null-String behaviour: off/len select a slice of the literal "null".
+        StringBuilder sb = new StringBuilder();
+        XmlUtil.writeCharacters((String) null, 1, 3, sb);
+        assertEquals("ull", sb.toString());
+    }
+
+    /** A {@code DocumentBuilder} whose {@code reset()} is unsupported, which JAXP explicitly permits. */
+    private static final class ResetUnsupportedDocumentBuilder extends DocumentBuilder {
+        @Override
+        public Document parse(final org.xml.sax.InputSource is) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isNamespaceAware() {
+            return true;
+        }
+
+        @Override
+        public boolean isValidating() {
+            return false;
+        }
+
+        @Override
+        public void setEntityResolver(final org.xml.sax.EntityResolver er) {
+            // no-op
+        }
+
+        @Override
+        public void setErrorHandler(final org.xml.sax.ErrorHandler eh) {
+            // no-op
+        }
+
+        @Override
+        public Document newDocument() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public org.w3c.dom.DOMImplementation getDOMImplementation() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * Contract pin for the two documented silent drops: an owned, not-yet-pooled parser is discarded (without
+     * an exception) when the pool is at capacity, and likewise when the provider's {@code reset()} throws.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testRecycleContentParserDropsWhenPoolIsFullOrResetFails() throws Exception {
+        java.lang.reflect.Field poolField = XmlUtil.class.getDeclaredField("contentDocBuilderPool");
+        poolField.setAccessible(true);
+        Queue<DocumentBuilder> pool = (Queue<DocumentBuilder>) poolField.get(null);
+
+        java.lang.reflect.Field pooledField = XmlUtil.class.getDeclaredField("pooledContentParsers");
+        pooledField.setAccessible(true);
+        Map<DocumentBuilder, Boolean> pooled = (Map<DocumentBuilder, Boolean>) pooledField.get(null);
+
+        java.lang.reflect.Field poolSizeField = XmlUtil.class.getDeclaredField("POOL_SIZE");
+        poolSizeField.setAccessible(true);
+        int poolSize = (Integer) poolSizeField.get(null);
+
+        DocumentBuilder victim = XmlUtil.createContentParser();
+
+        synchronized (pool) {
+            // pooledContentParsers mirrors the queue, so both have to be rewritten together. Clearing only
+            // the queue would strand a strong entry for a builder that is no longer pooled, and
+            // recycleContentParser would then refuse that live builder as a duplicate for the rest of the JVM.
+            pool.clear();
+            pooled.clear();
+
+            for (int i = 0; i < poolSize; i++) {
+                DocumentBuilder filler = new ResetUnsupportedDocumentBuilder();
+                pool.add(filler);
+                pooled.put(filler, Boolean.TRUE);
+            }
+        }
+
+        assertDoesNotThrow(() -> XmlUtil.recycleContentParser(victim));
+
+        synchronized (pool) {
+            assertEquals(poolSize, pool.size());
+            assertFalse(pooled.containsKey(victim));
+            pool.clear();
+            pooled.clear();
+        }
+
+        java.lang.reflect.Field ownedField = XmlUtil.class.getDeclaredField("ownedContentParsers");
+        ownedField.setAccessible(true);
+        Object owned = ownedField.get(null);
+        java.lang.reflect.Method add = owned.getClass().getDeclaredMethod("add", Object.class);
+        add.setAccessible(true);
+
+        DocumentBuilder resetFails = new ResetUnsupportedDocumentBuilder();
+        assertThrows(UnsupportedOperationException.class, resetFails::reset);
+        add.invoke(owned, resetFails);
+
+        assertDoesNotThrow(() -> XmlUtil.recycleContentParser(resetFails));
+
+        synchronized (pool) {
+            assertEquals(0, pool.size());
+            assertFalse(pooled.containsKey(resetFails));
+            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
+        }
+    }
+
+    /** A {@code SAXParser} whose {@code reset()} is unsupported, which JAXP explicitly permits. */
+    private static final class ResetUnsupportedSaxParser extends SAXParser {
+        @Override
+        @SuppressWarnings("deprecation")
+        public org.xml.sax.Parser getParser() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public org.xml.sax.XMLReader getXMLReader() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isNamespaceAware() {
+            return true;
+        }
+
+        @Override
+        public boolean isValidating() {
+            return false;
+        }
+
+        @Override
+        public void setProperty(final String name, final Object value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Object getProperty(final String name) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * The SAX sibling of {@link #testRecycleContentParserDropsWhenPoolIsFullOrResetFails()}: the same two
+     * silent drops are documented on {@code recycleSAXParser}, so they are pinned the same way.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testRecycleSaxParserDropsWhenPoolIsFullOrResetFails() throws Exception {
+        java.lang.reflect.Field poolField = XmlUtil.class.getDeclaredField("saxParserPool");
+        poolField.setAccessible(true);
+        Queue<SAXParser> pool = (Queue<SAXParser>) poolField.get(null);
+
+        java.lang.reflect.Field pooledField = XmlUtil.class.getDeclaredField("pooledSaxParsers");
+        pooledField.setAccessible(true);
+        Map<SAXParser, Boolean> pooled = (Map<SAXParser, Boolean>) pooledField.get(null);
+
+        java.lang.reflect.Field poolSizeField = XmlUtil.class.getDeclaredField("POOL_SIZE");
+        poolSizeField.setAccessible(true);
+        int poolSize = (Integer) poolSizeField.get(null);
+
+        SAXParser victim = XmlUtil.createSAXParser();
+
+        synchronized (pool) {
+            // See the DocumentBuilder twin: the queue and its membership map must be rewritten together.
+            pool.clear();
+            pooled.clear();
+
+            for (int i = 0; i < poolSize; i++) {
+                SAXParser filler = new ResetUnsupportedSaxParser();
+                pool.add(filler);
+                pooled.put(filler, Boolean.TRUE);
+            }
+        }
+
+        assertDoesNotThrow(() -> XmlUtil.recycleSAXParser(victim));
+
+        synchronized (pool) {
+            assertEquals(poolSize, pool.size());
+            assertFalse(pooled.containsKey(victim));
+            pool.clear();
+            pooled.clear();
+        }
+
+        java.lang.reflect.Field ownedField = XmlUtil.class.getDeclaredField("ownedSaxParsers");
+        ownedField.setAccessible(true);
+        Object owned = ownedField.get(null);
+        java.lang.reflect.Method add = owned.getClass().getDeclaredMethod("add", Object.class);
+        add.setAccessible(true);
+
+        SAXParser resetFails = new ResetUnsupportedSaxParser();
+        assertThrows(UnsupportedOperationException.class, resetFails::reset);
+        add.invoke(owned, resetFails);
+
+        assertDoesNotThrow(() -> XmlUtil.recycleSAXParser(resetFails));
+
+        synchronized (pool) {
+            assertEquals(0, pool.size());
+            assertFalse(pooled.containsKey(resetFails));
+            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
+        }
+    }
+
+    /**
+     * The writer factories must unwrap an {@code IOException} cause the same way their
+     * {@code createXMLStreamReader} siblings do. An unsupported encoding name is the reachable case: the
+     * provider reports it as an {@code XMLStreamException} wrapping an {@code UnsupportedEncodingException}.
+     */
+    @Test
+    public void testCreateXMLStreamWriterUnwrapsIOExceptionCause() {
+        com.landawn.abacus.exception.UncheckedIOException thrown = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
+                () -> XmlUtil.createXMLStreamWriter(new ByteArrayOutputStream(), "no-such-charset-xyz"));
+
+        assertTrue(thrown.getCause() instanceof java.io.UnsupportedEncodingException);
     }
 }

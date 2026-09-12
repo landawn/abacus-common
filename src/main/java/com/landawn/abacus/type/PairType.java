@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -70,8 +72,9 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      *
      * @param leftTypeName the type name for the left element of the pair
      * @param rightTypeName the type name for the right element of the pair
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    PairType(final String leftTypeName, final String rightTypeName) {
+    PairType(final String leftTypeName, final String rightTypeName) throws IllegalArgumentException {
         super(getTypeName(leftTypeName, rightTypeName, false));
 
         declaringName = getTypeName(leftTypeName, rightTypeName, true);
@@ -136,11 +139,12 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      *
      * @param x the Pair object to convert to string
      * @return a JSON string representation of the pair, or {@code null} if the input is null
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final Pair<L, R> x) {
+    public String stringOf(final Pair<L, R> x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.left(), x.right()), Utils.jsc);
     }
 
@@ -153,27 +157,33 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
+     * <p>Each slot is parsed directly from its JSON token using the declared type, preserving decimal
+     * precision and scale for decimal types, including nested generic values. Numeric slots follow the
+     * JSON parser's conversion rules: for an integral target, unquoted decimals such as {@code 1.5}
+     * may truncate toward zero, whereas quoted fractions are rejected. Scientific notation and decimal
+     * tokens that the parser cannot convert numerically are passed to the declared type's text parser.</p>
+     *
      * @param str the string to parse, expected to be a JSON array with exactly two elements
-     * @return a Pair object created from the parsed values, or {@code null} if the input is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed array is {@code null} or does not have exactly 2 elements.
+     * @return a Pair object created from the parsed values, or {@code null} if the input is {@code null} or empty (a
+     *         blank, non-empty string is not treated as empty and is rejected)
+     * @throws IllegalArgumentException if the parsed value is not an array with exactly 2 elements (this includes a         blank string, unbalanced brackets and trailing text)
+     * @throws ParsingException if an element token is not valid JSON for its declared element type
+     * @throws NumberFormatException if a numeric element token cannot be converted to the declared element type
+     * @throws ArithmeticException if a numeric element is outside the range accepted by its declared type.
      * @see #valueOf(Object)
      * @see #stringOf(Pair)
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public Pair<L, R> valueOf(final String str) {
+    public Pair<L, R> valueOf(final String str) throws IllegalArgumentException, ParsingException, NumberFormatException, ArithmeticException {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
 
-        final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
-
-        if (a == null || a.length != 2) {
-            throw new IllegalArgumentException("Invalid Pair format. Expected an array with exactly 2 elements [left, right] but got: " + str);
-        }
-
-        final L left = (L) convertTupleElement(a[0], leftType);
-        final R right = (R) convertTupleElement(a[1], rightType);
+        final Object[] a = Utils.parseTupleElements(str, name(), parameterTypes);
+        final L left = (L) a[0];
+        final R right = (R) a[1];
 
         return Pair.of(left, right);
     }
@@ -183,6 +193,11 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * The pair is formatted as [leftValue, rightValue] with appropriate element separation.
      * If the pair is {@code null}, appends "null". Handles Writer instances with buffering optimization.
      * <p>
+     * Each element is appended by its declared element type handler. When that declared type is {@code Object} the
+     * handler of the element's runtime class is used instead, exactly as
+     * {@link #serializeTo(CharacterWriter, Pair, JsonXmlSerConfig)} does, so a map, collection or bean element keeps
+     * the {@code toString()}-style form rather than falling back to {@code ObjectType}'s JSON {@code stringOf}.
+     * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
      * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
@@ -190,7 +205,9 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      *
      * @param appendable the Appendable to write to
      * @param x the Pair object to append
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -202,7 +219,7 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Pair<L, R> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Pair<L, R> x) throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -214,9 +231,9 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
                 try {
                     bw.write(SK._BRACKET_L);
 
-                    leftType.appendTo(bw, x.left());
+                    AbstractTupleType.appendElement(bw, leftType, x.left());
                     bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                    rightType.appendTo(bw, x.right());
+                    AbstractTupleType.appendElement(bw, rightType, x.right());
 
                     bw.write(SK._BRACKET_R);
 
@@ -234,9 +251,9 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
             } else {
                 appendable.append(SK._BRACKET_L);
 
-                leftType.appendTo(appendable, x.left());
+                AbstractTupleType.appendElement(appendable, leftType, x.left());
                 appendable.append(ELEMENT_SEPARATOR);
-                rightType.appendTo(appendable, x.right());
+                AbstractTupleType.appendElement(appendable, rightType, x.right());
 
                 appendable.append(SK._BRACKET_R);
             }
@@ -253,25 +270,37 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
      * and is invoked by the JSON/XML serializers.
      * <p>
+     * Each element is written by its declared element type handler. When the declared element type is {@code Object}
+     * the handler of the element's runtime class is used instead, so a {@code Pair<Object, Object>} holding {@code 1}
+     * and {@code "a"} is written as {@code [1, "a"]} rather than {@code ["1", "a"]}. An element whose (declared or
+     * runtime) handler is not {@linkplain Type#isSerializable() serializable} - a bean, a map, a {@code List<Object>} -
+     * is written as embedded JSON (not as a quoted JSON string) when {@code config} is a {@code JsonSerConfig}; under any
+     * other config its {@code stringOf} text is written with the writer's character escaping. A {@code null} element is
+     * written by its declared handler, so that handler's null-substitution flags apply. The result matches
+     * {@link #stringOf(Pair)} for every element shape.
+     * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
      * quoting or escaping.
      *
      * @param writer the CharacterWriter to write to
      * @param x the Pair object to write
-     * @param config the serialization configuration to use
-     * @throws IOException if an I/O error occurs during writing
+     * @param config the serialization configuration to use, may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Pair<L, R> x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Pair<L, R> x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             writer.write(SK._BRACKET_L);
 
-            leftType.serializeTo(writer, x.left(), config);
+            AbstractTupleType.serializeSlot(writer, leftType, x.left(), config);
             writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-            rightType.serializeTo(writer, x.right(), config);
+            AbstractTupleType.serializeSlot(writer, rightType, x.right(), config);
 
             writer.write(SK._BRACKET_R);
         }
@@ -284,8 +313,9 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * @param rightTypeName the name of the right type
      * @param isDeclaringName if {@code true}, uses simple class names; if {@code false}, uses canonical class names
      * @return the generated type name string
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    protected static String getTypeName(final String leftTypeName, final String rightTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final String leftTypeName, final String rightTypeName, final boolean isDeclaringName) throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(Pair.class) + SK.LESS_THAN + TypeFactory.getType(leftTypeName).declaringName() + SK.COMMA_SPACE
                     + TypeFactory.getType(rightTypeName).declaringName() + SK.GREATER_THAN;

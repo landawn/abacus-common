@@ -412,7 +412,7 @@ public class ImmutableSortedMapTest extends TestBase {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> map.put("c", 3));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> map.remove("a"));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> map.clear());
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.putAll(N.asMap("d", 4)));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> map.putAll(CommonUtil.asMap("d", 4)));
     }
 
     @Test
@@ -812,4 +812,172 @@ public class ImmutableSortedMapTest extends TestBase {
         });
     }
 
+    /** A key type that is deliberately NOT Comparable. */
+    private static final class NotComparable {
+        private final String s;
+
+        NotComparable(final String s) {
+            this.s = s;
+        }
+
+        @Override
+        public String toString() {
+            return s;
+        }
+    }
+
+    @Test
+    public void testOf_neverSilentlyFallsBackToAnUnsortedImmutableMap() {
+        // With a Comparable bound on of(...), a non-Comparable key selected the inherited
+        // ImmutableMap.of(...) instead and produced an UNSORTED map with no error at all.
+        assertThrows(ClassCastException.class, () -> ImmutableSortedMap.of(new NotComparable("z"), 1, new NotComparable("a"), 2));
+        assertThrows(ClassCastException.class, () -> ImmutableSortedMap.of(new NotComparable("z"), 1));
+        assertThrows(ClassCastException.class, () -> ImmutableSortedMap.of(new NotComparable("a"), 1, new NotComparable("b"), 2, new NotComparable("c"), 3));
+    }
+
+    @Test
+    public void testOf_isStillSortedForComparableKeys() {
+        final ImmutableSortedMap<String, Integer> m = ImmutableSortedMap.of("b", 2, "a", 1, "c", 3);
+
+        assertEquals(java.util.Arrays.asList("a", "b", "c"), new java.util.ArrayList<>(m.keySet()));
+        assertEquals("a", m.firstKey());
+        assertEquals("c", m.lastKey());
+        assertNull(m.comparator());
+        assertThrows(NullPointerException.class, () -> ImmutableSortedMap.of((String) null, 1));
+    }
+
+    @Test
+    public void testBuilderIsBlocked() {
+        // ImmutableMap.builder() is inherited through this class's name and would silently build an
+        // unsorted ImmutableMap in insertion order.
+        assertThrows(UnsupportedOperationException.class, ImmutableSortedMap::builder);
+        assertThrows(UnsupportedOperationException.class, () -> ImmutableSortedMap.builder(new TreeMap<String, Integer>()));
+    }
+
+    @Test
+    public void testCopyOf_copiesAWrappedView() {
+        final SortedMap<String, Integer> live = new TreeMap<>();
+        live.put("a", 1);
+
+        final ImmutableSortedMap<String, Integer> view = ImmutableSortedMap.wrap(live);
+        final ImmutableSortedMap<String, Integer> copy = ImmutableSortedMap.copyOf(view);
+
+        assertNotSame(view, copy);
+
+        live.put("b", 2);
+
+        assertEquals(2, view.size());
+        assertEquals(1, copy.size());
+        assertFalse(copy.containsKey("b"));
+    }
+
+    @Test
+    public void testCopyOf_returnsSameInstanceForAnOwningMap() {
+        final ImmutableSortedMap<String, Integer> owned = ImmutableSortedMap.of("a", 1);
+        assertSame(owned, ImmutableSortedMap.copyOf(owned));
+
+        final ImmutableSortedMap<String, Integer> copied = ImmutableSortedMap.copyOf(new TreeMap<>(Map.of("a", 1)));
+        assertSame(copied, ImmutableSortedMap.copyOf(copied));
+    }
+
+    @Test
+    public void testRangeViewsInheritOwnership() {
+        final ImmutableSortedMap<String, Integer> owned = ImmutableSortedMap.of("a", 1, "b", 2, "c", 3);
+        final ImmutableSortedMap<String, Integer> ownedSub = owned.subMap("a", "c");
+        final ImmutableSortedMap<String, Integer> ownedHead = owned.headMap("c");
+        final ImmutableSortedMap<String, Integer> ownedTail = owned.tailMap("b");
+        assertSame(ownedSub, ImmutableSortedMap.copyOf(ownedSub));
+        assertSame(ownedHead, ImmutableSortedMap.copyOf(ownedHead));
+        assertSame(ownedTail, ImmutableSortedMap.copyOf(ownedTail));
+
+        final SortedMap<String, Integer> live = new TreeMap<>(Map.of("a", 1, "c", 3));
+        final ImmutableSortedMap<String, Integer> viewSub = ImmutableSortedMap.wrap(live).subMap("a", "d");
+        final ImmutableSortedMap<String, Integer> copy = ImmutableSortedMap.copyOf(viewSub);
+        assertNotSame(viewSub, copy);
+
+        live.put("b", 2);
+        assertEquals(3, viewSub.size());
+        assertEquals(2, copy.size());
+
+        // the range views stay read-only
+        assertThrows(UnsupportedOperationException.class, () -> viewSub.put("z", 9));
+        assertThrows(UnsupportedOperationException.class, () -> ownedSub.put("z", 9));
+    }
+
+    @Test
+    public void testCopyOfRetainsComparatorAndCopyIsIndependent() {
+        final SortedMap<String, Integer> src = new TreeMap<>(Comparator.reverseOrder());
+        src.put("a", 1);
+        src.put("b", 2);
+
+        final ImmutableSortedMap<String, Integer> copy = ImmutableSortedMap.copyOf(src);
+        src.put("c", 3);
+
+        assertEquals(2, copy.size());
+        assertEquals(java.util.Arrays.asList("b", "a"), new java.util.ArrayList<>(copy.keySet()));
+        // the source's comparator is carried into the copy, not merely "some" comparator
+        assertSame(Comparator.reverseOrder(), copy.comparator());
+        assertEquals("b", copy.firstKey());
+    }
+
+    @Test
+    public void testPollFirstEntryAndPollLastEntryThrowEvenOnAnEmptyMap() {
+        // The inherited SortedMap defaults only reject the call because entrySet().iterator().remove()
+        // does: on an EMPTY map they never reach the removal and silently return null. The overrides
+        // must reject it for both shapes - the empty one is the case the overrides exist for.
+        final ImmutableSortedMap<String, Integer> empty = ImmutableSortedMap.empty();
+        assertTrue(empty.isEmpty());
+        assertThrows(UnsupportedOperationException.class, () -> empty.pollFirstEntry());
+        assertThrows(UnsupportedOperationException.class, () -> empty.pollLastEntry());
+
+        final ImmutableSortedMap<String, Integer> filled = ImmutableSortedMap.of("a", 1, "b", 2);
+        assertThrows(UnsupportedOperationException.class, () -> filled.pollFirstEntry());
+        assertThrows(UnsupportedOperationException.class, () -> filled.pollLastEntry());
+
+        // a range view is an ImmutableSortedMap as well, and an empty range is the easiest way to land
+        // on the silent no-op by accident
+        final ImmutableSortedMap<String, Integer> emptyRange = filled.subMap("c", "d");
+        assertTrue(emptyRange.isEmpty());
+        assertThrows(UnsupportedOperationException.class, () -> emptyRange.pollFirstEntry());
+        assertThrows(UnsupportedOperationException.class, () -> emptyRange.pollLastEntry());
+    }
+
+    @Test
+    public void test_reversed_isNarrowedToAnImmutableSortedMap() {
+        // Called through the SortedMap interface so the assertion is about the runtime answer, not the
+        // compiled descriptor: the SortedMap.reversed() default hands back a java.util.ReverseOrderSortedMapView,
+        // which is neither an ImmutableSortedMap nor an Immutable.
+        final SortedMap<String, Integer> source = ImmutableSortedMap.of("a", 1, "b", 2, "c", 3);
+        final SortedMap<String, Integer> reversed = source.reversed();
+
+        assertTrue(reversed instanceof ImmutableSortedMap, "reversed() returned " + reversed.getClass().getName());
+        assertTrue(reversed instanceof Immutable, "reversed() returned " + reversed.getClass().getName());
+        assertEquals("{c=3, b=2, a=1}", reversed.toString());
+        assertEquals("c", reversed.firstKey());
+        assertEquals("a", reversed.lastKey());
+
+        final ImmutableSortedMap<String, Integer> narrowed = ImmutableSortedMap.of("a", 1, "b", 2).reversed();
+        assertEquals("{b=2, a=1}", narrowed.toString());
+        assertThrows(UnsupportedOperationException.class, () -> narrowed.put("c", 3));
+    }
+
+    @Test
+    public void test_reversed_propagatesOwnershipAndIsEqualAfterDoubleReverse() {
+        final ImmutableSortedMap<String, Integer> owning = ImmutableSortedMap.of("a", 1, "b", 2);
+        final ImmutableSortedMap<String, Integer> reversed = owning.reversed();
+
+        // an owning parent yields an owning view, exactly like headMap/tailMap/subMap
+        assertSame(reversed, ImmutableSortedMap.copyOf(reversed));
+
+        // reversed().reversed() is equal but NOT the same instance - the rule descendingMap() already follows
+        assertEquals(owning, reversed.reversed());
+        assertNotSame(owning, reversed.reversed());
+
+        final TreeMap<String, Integer> live = new TreeMap<>();
+        live.put("a", 1);
+        final ImmutableSortedMap<String, Integer> wrapped = ImmutableSortedMap.wrap(live).reversed();
+        live.put("b", 2);
+        assertEquals("{b=2, a=1}", wrapped.toString());
+        assertNotSame(wrapped, ImmutableSortedMap.copyOf(wrapped));
+    }
 }

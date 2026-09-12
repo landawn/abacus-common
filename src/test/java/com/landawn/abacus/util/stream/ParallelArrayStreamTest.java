@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -447,17 +448,6 @@ public class ParallelArrayStreamTest extends TestBase {
         assertEquals(Integer.valueOf(2), result.get(1));
         assertEquals(Integer.valueOf(50), result.get(4));
     }
-
-    //    @Test
-    //    @DisplayName("takeWhile() should keep prefix semantics for parallel array splitStrategy")
-    //    public void testTakeWhilePreservesPrefixForArraySplitStrategy() {
-    //        final Integer[] source = new Integer[] { 3, 1, 2 };
-    //
-    //        try (Stream<Integer> local = Stream.of(source).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(testMaxThreadNum).build())) {
-    //            List<Integer> result = local.takeWhile(x -> x < 3).toList();
-    //            assertEquals(Collections.emptyList(), result);
-    //        }
-    //    }
 
     //
 
@@ -2893,4 +2883,170 @@ public class ParallelArrayStreamTest extends TestBase {
         }
     }
 
+    /**
+     * {@code dropWhile} must drop only the <b>leading</b> prefix, even in parallel.
+     *
+     * <p>The predicate used here is deliberately <b>non-monotone</b>: true for 0, false for 1 (the
+     * boundary), then true again for every element from 2 up. A monotone predicate - which is what every
+     * other {@code dropWhile} test in this tree uses - cannot expose the defect at all, because the set of
+     * elements failing the predicate is then exactly the trailing suffix and any interleaving is correct.
+     *
+     * <p>Sleeping on the boundary element only lets the other workers race ahead while {@code dropped} is
+     * still false. Before r9446 was completed for this class the predicate was evaluated outside the
+     * {@code elements} monitor, so those workers consumed and silently discarded elements 2..39:
+     * <b>38 of 39 elements lost, reproducibly</b>. The sleep has no cross-thread dependency, so it cannot
+     * deadlock now that the predicate is evaluated under the lock.
+     */
+    @Test
+    @DisplayName("dropWhile() should drop only the leading prefix, never a later matching element")
+    public void testDropWhile_dropsOnlyTheLeadingPrefix() {
+        final Integer[] values = new Integer[40];
+
+        for (int i = 0; i < values.length; i++) {
+            values[i] = i;
+        }
+
+        final List<Integer> result = Stream.of(values).parallel(4).dropWhile(x -> {
+            if (x == 1) {
+                try {
+                    Thread.sleep(200);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+
+            return x != 1;
+        }).sorted().toList();
+
+        final List<Integer> expected = new ArrayList<>();
+
+        for (int i = 1; i < values.length; i++) {
+            expected.add(i);
+        }
+
+        assertEquals(expected, result);
+    }
+
+    /**
+     * {@code zipWith} must run the zip function on the caller-supplied {@code Executor}.
+     *
+     * <p>All four {@code zipWith} overloads used to route through {@code Stream.parallelZip(...)}, which
+     * hard-coded {@code DEFAULT_ASYNC_EXECUTOR} in two places, so a stream built with
+     * {@code parallel(n, myPool)} ran {@code map}/{@code filter} on {@code myPool} but every zip callback
+     * on the shared default pool - measured 0 of 64 on the caller's pool.
+     */
+    @Test
+    @DisplayName("zipWith() should run the zip function on the caller-supplied Executor")
+    public void testZipWith_usesTheCallerSuppliedExecutor() throws Exception {
+        final ExecutorService pool = Executors.newFixedThreadPool(32, r -> {
+            final Thread t = new Thread(r, "zipExecTest-pool");
+            t.setDaemon(true);
+            return t;
+        });
+
+        try {
+            final List<Integer> left = new ArrayList<>();
+            final List<Integer> right = new ArrayList<>();
+
+            for (int i = 0; i < 64; i++) {
+                left.add(i);
+                right.add(i * 10);
+            }
+
+            final AtomicInteger onCallerPool = new AtomicInteger();
+            final AtomicInteger elsewhere = new AtomicInteger();
+
+            final List<Integer> result = Stream.of(left.toArray(new Integer[0])).parallel(4, pool).zipWith(Stream.of(right), (a, b) -> {
+                if (Thread.currentThread().getName().startsWith("zipExecTest-pool")) {
+                    onCallerPool.incrementAndGet();
+                } else {
+                    elsewhere.incrementAndGet();
+                }
+
+                return a + b;
+            }).sorted().toList();
+
+            assertEquals(64, result.size());
+            assertEquals(Integer.valueOf(0), result.get(0));
+            assertEquals(Integer.valueOf(63 * 11), result.get(63));
+
+            assertEquals(0, elsewhere.get(), "the zip function must not run on the shared default executor");
+            assertEquals(64, onCallerPool.get(), "every zip callback should run on the caller-supplied pool");
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    /**
+     * With an {@code Executor} supplied, {@code maxThreadNum} must not be re-capped at
+     * {@code min(64, cpu_cores * 8)} - {@code parallel(int, Executor)} documents that explicitly.
+     * {@code parallelZip} used to re-cap it by calling {@code checkMaxThreadNum(n, DEFAULT_ASYNC_EXECUTOR)},
+     * so {@code parallel(100, pool).zipWith(..)} reached only 64 distinct threads.
+     */
+    @Test
+    @DisplayName("zipWith() should not re-cap maxThreadNum when an Executor is supplied")
+    public void testZipWith_doesNotReCapThreadNumWhenExecutorSupplied() throws Exception {
+        final int requested = 100;
+        final ExecutorService pool = Executors.newFixedThreadPool(300, r -> {
+            final Thread t = new Thread(r, "zipCapTest-pool");
+            t.setDaemon(true);
+            return t;
+        });
+
+        try {
+            final List<Integer> left = new ArrayList<>();
+            final List<Integer> right = new ArrayList<>();
+
+            for (int i = 0; i < 4000; i++) {
+                left.add(i);
+                right.add(i);
+            }
+
+            final Set<Long> threadIds = ConcurrentHashMap.newKeySet();
+
+            Stream.of(left.toArray(new Integer[0])).parallel(requested, pool).zipWith(Stream.of(right), (a, b) -> {
+                threadIds.add(Thread.currentThread().threadId());
+
+                try {
+                    Thread.sleep(1);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                return a + b;
+            }).toList();
+
+            // was capped at min(64, cpu_cores * 8) = 64 before the fix
+            assertTrue(threadIds.size() > 64, "expected more than 64 zip threads, got " + threadIds.size());
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+
+    @Test
+    public void testGroupToRejectsNullDownstreamBeforeMapFactory() {
+        final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();
+        final Stream<Integer> source = Stream.of(1, 2, 3).parallel(2);
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> source.groupTo(value -> 0, value -> value, null, () -> {
+            mapCreated.set(true);
+            return new java.util.HashMap<Integer, Object>();
+        }));
+        org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
+    }
+
+    @Test
+    public void testFlatGroupToRejectsNullDownstreamBeforeMapFactory() {
+        final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();
+        final Stream<Integer> source = Stream.of(1, 2, 3).parallel(2);
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> source.flatGroupTo(value -> java.util.Arrays.asList(0), (key, value) -> value, null, () -> {
+            mapCreated.set(true);
+            return new java.util.HashMap<Integer, Object>();
+        }));
+        org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
+    }
 }

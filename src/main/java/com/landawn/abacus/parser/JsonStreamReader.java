@@ -16,6 +16,7 @@ package com.landawn.abacus.parser;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.math.BigDecimal;
 
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -42,7 +43,7 @@ class JsonStreamReader extends JsonStringReader {
      * @throws IllegalArgumentException if {@code reader} or either buffer is {@code null}, or if {@code rbuf} is
      *         empty.
      */
-    JsonStreamReader(final Reader reader, final char[] rbuf, final char[] cbuf) {
+    JsonStreamReader(final Reader reader, final char[] rbuf, final char[] cbuf) throws IllegalArgumentException {
         super(checkReadBuffer(rbuf), 0, 0, checkTokenBuffer(cbuf), checkReader(reader));
     }
 
@@ -57,11 +58,14 @@ class JsonStreamReader extends JsonStringReader {
      * @throws IllegalArgumentException if {@code reader} or either buffer is {@code null}, if {@code rbuf} is empty,
      *         or if the specified range is invalid.
      */
-    JsonStreamReader(final Reader reader, final char[] rbuf, final int beginIndex, final int toIndex, final char[] cbuf) {
+    JsonStreamReader(final Reader reader, final char[] rbuf, final int beginIndex, final int toIndex, final char[] cbuf) throws IllegalArgumentException {
         super(checkReadBuffer(rbuf), beginIndex, toIndex, checkTokenBuffer(cbuf), checkReader(reader));
     }
 
-    private static Reader checkReader(final Reader reader) {
+    /**
+     * @throws IllegalArgumentException if the reader is null
+     */
+    private static Reader checkReader(final Reader reader) throws IllegalArgumentException {
         if (reader == null) {
             throw new IllegalArgumentException("reader cannot be null");
         }
@@ -69,7 +73,10 @@ class JsonStreamReader extends JsonStringReader {
         return reader;
     }
 
-    private static char[] checkReadBuffer(final char[] rbuf) {
+    /**
+     * @throws IllegalArgumentException if the read buffer is null or empty
+     */
+    private static char[] checkReadBuffer(final char[] rbuf) throws IllegalArgumentException {
         if (rbuf == null || rbuf.length == 0) {
             throw new IllegalArgumentException("rbuf cannot be null or empty");
         }
@@ -77,7 +84,10 @@ class JsonStreamReader extends JsonStringReader {
         return rbuf;
     }
 
-    private static char[] checkTokenBuffer(final char[] cbuf) {
+    /**
+     * @throws IllegalArgumentException if the token buffer is null
+     */
+    private static char[] checkTokenBuffer(final char[] cbuf) throws IllegalArgumentException {
         if (cbuf == null) {
             throw new IllegalArgumentException("cbuf cannot be null");
         }
@@ -110,7 +120,7 @@ class JsonStreamReader extends JsonStringReader {
      * @throws IllegalArgumentException if {@code reader} or either buffer is {@code null}, or if {@code rbuf} is
      *         empty.
      */
-    public static JsonReader parse(final Reader reader, final char[] rbuf, final char[] cbuf) {
+    public static JsonReader parse(final Reader reader, final char[] rbuf, final char[] cbuf) throws IllegalArgumentException {
 
         return new JsonStreamReader(reader, rbuf, cbuf);
     }
@@ -131,10 +141,11 @@ class JsonStreamReader extends JsonStringReader {
      *
      * @param nextTokenValueType the expected type of the next token value
      * @return the token identifier, or -1 if no next token is found
-     * @throws UncheckedIOException if an I/O error occurs during reading
+     * @throws UncheckedIOException if reading from the underlying character stream fails
+     * @throws ParsingException if a quoted string is unterminated, an escape sequence is malformed, or unquoted token text contains unexpected whitespace
      */
     @Override
-    public int nextToken(final Type<?> nextTokenValueType) throws UncheckedIOException {
+    public int nextToken(final Type<?> nextTokenValueType) throws UncheckedIOException, ParsingException {
         if (strBeginIndex >= strEndIndex) {
             refill();
         }
@@ -199,15 +210,15 @@ class JsonStreamReader extends JsonStringReader {
                         boolean isNumber = false;
 
                         if (nextEvent == 'f') { // false
-                            if (saveChar(nextChar()) == 'a' && saveChar(nextChar()) == 'l' && saveChar(nextChar()) == 's' && saveChar(nextChar()) == 'e') {
+                            if (matchLiteralChar('a') && matchLiteralChar('l') && matchLiteralChar('s') && matchLiteralChar('e')) {
                                 text = FALSE;
                             }
                         } else if (nextEvent == 't') { // true
-                            if (saveChar(nextChar()) == 'r' && saveChar(nextChar()) == 'u' && saveChar(nextChar()) == 'e') {
+                            if (matchLiteralChar('r') && matchLiteralChar('u') && matchLiteralChar('e')) {
                                 text = TRUE;
                             }
                         } else if (nextEvent == 'n') { // null
-                            if (saveChar(nextChar()) == 'u' && saveChar(nextChar()) == 'l' && saveChar(nextChar()) == 'l') { //NOSONAR
+                            if (matchLiteralChar('u') && matchLiteralChar('l') && matchLiteralChar('l')) { //NOSONAR
                                 text = NULL;
                             }
                         } else if ((nextEvent >= '0' && nextEvent <= '9') || nextEvent == '-' || nextEvent == '+') { // number.
@@ -360,7 +371,8 @@ class JsonStreamReader extends JsonStringReader {
             if (nextTokenValueType != null && (nextTokenValueType.isNumber() || typeFlag > 0)) {
                 if (pointPosition > 0) {
                     if (nextTokenValueType.isFloat() || typeFlag == 'f' || typeFlag == 'F') {
-                        numValue = (float) (((double) ret) / POWERS_OF_TEN[digitCount - pointPosition]);
+                        // Round the exact decimal once, avoiding a double-to-float midpoint rounding error.
+                        numValue = BigDecimal.valueOf(ret, digitCount - pointPosition).floatValue();
                     } else { // ignore 'l' or 'L' if it's specified.
                         numValue = ((double) ret) / POWERS_OF_TEN[digitCount - pointPosition];
                     }
@@ -397,11 +409,28 @@ class JsonStreamReader extends JsonStringReader {
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>Tops the read buffer up first, so a literal split across two reads is still matched (the already
+     * consumed prefix is copied into {@code cbuf} by {@link #refill()}). {@code nextChar()} cannot be used
+     * here because it consumes the character before it can be classified.</p>
+     */
+    @Override
+    protected boolean matchLiteralChar(final char expected) {
+        if (strBeginIndex >= strEndIndex) {
+            refill();
+        }
+
+        return super.matchLiteralChar(expected);
+    }
+
+    /**
      * Reads the next character from the input source, refilling the buffer if necessary.
      *
      * @return the next character, or {@code -1} if the end of the input is reached
+     * @throws UncheckedIOException if refilling the input buffer from the underlying reader fails
      */
-    protected int nextChar() {
+    protected int nextChar() throws UncheckedIOException {
         if (strBeginIndex >= strEndIndex) {
             refill();
         }
@@ -413,8 +442,12 @@ class JsonStreamReader extends JsonStringReader {
         return strValue[strBeginIndex++];
     }
 
+    /**
+     * @throws UncheckedIOException if refilling the input buffer from the underlying reader fails
+     * @throws ParsingException if an escape sequence is incomplete or a Unicode escape does not contain four hexadecimal digits
+     */
     @Override
-    protected char readEscapeCharacter() {
+    protected char readEscapeCharacter() throws UncheckedIOException, ParsingException {
         if (strBeginIndex >= strEndIndex) {
             refill();
             if (strBeginIndex >= strEndIndex) {
@@ -483,9 +516,14 @@ class JsonStreamReader extends JsonStringReader {
     /**
      * Refills the internal read buffer from the underlying reader.
      *
-     * @throws UncheckedIOException if an I/O error occurs
+     * <p>Any pending zero-copy text (the range {@code [startIndexForText, strBeginIndex)}) is
+     * copied into {@code cbuf} first, so a token split across two reads is still contiguous.
+     * When there is no pending text and the read returns nothing (end of input), the text range
+     * is left as it is: it stays empty, so {@link #hasText()} is {@code false} at EOF.</p>
+     *
+     * @throws UncheckedIOException if refilling the input buffer from the underlying reader fails
      */
-    protected void refill() {
+    protected void refill() throws UncheckedIOException {
         if (strBeginIndex >= strEndIndex) {
             if (nextChar == 0) {
                 endIndexForText = strBeginIndex;
@@ -500,8 +538,6 @@ class JsonStreamReader extends JsonStringReader {
 
                     N.copy(strValue, startIndexForText, cbuf, 0, copyLen);
                     nextChar = copyLen;
-                } else {
-                    startIndexForText = 0;
                 }
             }
 
@@ -511,6 +547,14 @@ class JsonStreamReader extends JsonStringReader {
                 if (n > 0) {
                     strBeginIndex = 0;
                     strEndIndex = n;
+
+                    // Rebase the (empty) zero-copy text range onto the new buffer only when the
+                    // buffer really was replaced. Doing it before the read left, at EOF,
+                    // startIndexForText == 0 < strBeginIndex == old end, and hasText() then
+                    // reported the stale buffer tail ("[1]\n") as text after trailing whitespace.
+                    if (nextChar == 0) {
+                        startIndexForText = 0;
+                    }
                 }
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);

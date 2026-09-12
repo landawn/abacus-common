@@ -8,12 +8,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -30,6 +37,62 @@ public class EventBusTest extends TestBase {
 
     private EventBus eventBus;
 
+    @Test
+    public void testUnregisterWaitsForConcurrentRegistrationToUpdateBothIndexes() throws Exception {
+        final TestHandler subscriber = new TestHandler();
+        final java.lang.reflect.Field indexField = EventBus.class.getDeclaredField("registeredEventIdSubMap");
+        indexField.setAccessible(true);
+        final Object eventIdIndex = indexField.get(eventBus);
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        final Thread registering = new Thread(() -> {
+            try {
+                eventBus.register(subscriber, "concurrent");
+            } catch (Throwable e) {
+                failure.compareAndSet(null, e);
+            }
+        });
+        final Thread unregistering = new Thread(() -> {
+            try {
+                eventBus.unregister(subscriber);
+            } catch (Throwable e) {
+                failure.compareAndSet(null, e);
+            }
+        });
+
+        try {
+            synchronized (eventIdIndex) {
+                // Pause registration after its main-registry update, before its event-ID update.
+                registering.start();
+                awaitBlockedReviewThread(registering);
+                assertEquals(List.of(subscriber), eventBus.allSubscribers());
+
+                unregistering.start();
+                awaitBlockedReviewThread(unregistering);
+                // Removal must wait for the pending registration transaction, otherwise its
+                // later event-ID insertion can leave an unlisted subscriber receiving events.
+                assertEquals(List.of(subscriber), eventBus.allSubscribers());
+            }
+        } finally {
+            registering.join(5000);
+            unregistering.join(5000);
+        }
+
+        assertFalse(registering.isAlive());
+        assertFalse(unregistering.isAlive());
+        assertNull(failure.get());
+        assertTrue(eventBus.allSubscribers().isEmpty());
+        eventBus.post("concurrent", "after removal");
+        assertNull(subscriber.lastEvent);
+    }
+
+    private static void awaitBlockedReviewThread(final Thread thread) throws InterruptedException {
+        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        while (thread.getState() != Thread.State.BLOCKED && thread.isAlive() && System.nanoTime() < deadline) {
+            Thread.sleep(1);
+        }
+        assertEquals(Thread.State.BLOCKED, thread.getState());
+    }
+
     @BeforeEach
     public void setUp() {
         eventBus = EventBus.create();
@@ -42,7 +105,7 @@ public class EventBusTest extends TestBase {
         }
     }
 
-    static class TestHandler {
+    public static class TestHandler {
         String lastEvent;
 
         @Subscribe
@@ -75,7 +138,7 @@ public class EventBusTest extends TestBase {
         }
     }
 
-    static class BaseOverrideSubscriber {
+    public static class BaseOverrideSubscriber {
         @Subscribe(eventId = "base")
         public void onEvent(String event) {
             throw new AssertionError("Base subscriber metadata should be overridden");
@@ -92,7 +155,7 @@ public class EventBusTest extends TestBase {
         }
     }
 
-    static class TestSubscriber {
+    public static class TestSubscriber {
         final List<String> receivedEvents = new ArrayList<>();
 
         @Subscribe
@@ -101,7 +164,7 @@ public class EventBusTest extends TestBase {
         }
     }
 
-    static class TestStickySubscriber {
+    public static class TestStickySubscriber {
         final List<String> receivedEvents = new ArrayList<>();
 
         @Subscribe(sticky = true)
@@ -110,14 +173,14 @@ public class EventBusTest extends TestBase {
         }
     }
 
-    static class StaticAnnotatedSubscriber {
+    public static class StaticAnnotatedSubscriber {
         @Subscribe
         public static void onEvent(String event) {
             // static method - should be rejected
         }
     }
 
-    static class InheritedSubscriberParent {
+    public static class InheritedSubscriberParent {
         final List<String> receivedEvents = new ArrayList<>();
 
         @Subscribe
@@ -126,10 +189,10 @@ public class EventBusTest extends TestBase {
         }
     }
 
-    static class InheritedSubscriberChild extends InheritedSubscriberParent {
+    public static class InheritedSubscriberChild extends InheritedSubscriberParent {
     }
 
-    static class MultiMethodSubscriber {
+    public static class MultiMethodSubscriber {
         int stringCount;
         int integerCount;
         int doubleCount;
@@ -150,16 +213,16 @@ public class EventBusTest extends TestBase {
         }
     }
 
-    static class BaseEvent {
+    public static class BaseEvent {
     }
 
-    static class SubEvent extends BaseEvent {
+    public static class SubEvent extends BaseEvent {
     }
 
-    static class SubSubEvent extends SubEvent {
+    public static class SubSubEvent extends SubEvent {
     }
 
-    static class HierarchySubscriber {
+    public static class HierarchySubscriber {
         int baseEventCount;
         int subEventCount;
         int subSubEventCount;
@@ -183,26 +246,11 @@ public class EventBusTest extends TestBase {
     // ---- getDefault ----
 
     @Test
-    public void testGetDefaultInstance() {
+    public void testGetDefault() {
         EventBus defaultBus = EventBus.getDefault();
         assertNotNull(defaultBus);
         assertEquals("default", defaultBus.identifier());
-    }
-
-    @Test
-    public void testGetDefault() {
-        EventBus defaultBus = EventBus.getDefault();
-        Assertions.assertNotNull(defaultBus);
-        Assertions.assertEquals("default", defaultBus.identifier());
-
-        EventBus anotherDefault = EventBus.getDefault();
-        Assertions.assertSame(defaultBus, anotherDefault);
-    }
-
-    @Test
-    public void testConstructorWithIdentifier() {
-        EventBus bus = EventBus.create("testBus");
-        assertEquals("testBus", bus.identifier());
+        Assertions.assertSame(defaultBus, EventBus.getDefault());
     }
 
     @Test
@@ -431,17 +479,6 @@ public class EventBusTest extends TestBase {
         assertEquals("msg2", subscriber.receivedEvents.get(0));
 
         eventBus.unregister(subscriber);
-    }
-
-    @Test
-    public void testRegisterAndPost() {
-        AtomicReference<String> result = new AtomicReference<>();
-        Subscriber<String> subscriber = event -> result.set(event);
-
-        eventBus.register(subscriber, "testId");
-        eventBus.post("testId", "hello");
-
-        assertEquals("hello", result.get());
     }
 
     // ---- register(Subscriber, String) ----
@@ -783,29 +820,6 @@ public class EventBusTest extends TestBase {
     }
 
     @Test
-    public void testThreadMode() throws InterruptedException {
-        AtomicReference<String> result = new AtomicReference<>();
-        AtomicReference<String> threadName = new AtomicReference<>();
-
-        Object handler = new Object() {
-            @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
-            public void handle(String event) {
-                result.set(event);
-                threadName.set(Thread.currentThread().getName());
-            }
-        };
-
-        eventBus.register(handler);
-        eventBus.post("async event");
-
-        Thread.sleep(100); // Wait for async execution
-        assertEquals("async event", result.get());
-        assertNotEquals(Thread.currentThread().getName(), threadName.get());
-
-        eventBus.unregister(handler);
-    }
-
-    @Test
     public void testThreadPoolExecutorMode() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Thread> eventThread = new AtomicReference<>();
@@ -1007,24 +1021,6 @@ public class EventBusTest extends TestBase {
     }
 
     @Test
-    public void testStickyEvent() {
-        eventBus.postSticky("sticky message");
-
-        AtomicReference<String> result = new AtomicReference<>();
-        Object handler = new Object() {
-            @Subscribe(sticky = true)
-            public void handle(String event) {
-                result.set(event);
-            }
-        };
-
-        eventBus.register(handler);
-        assertEquals("sticky message", result.get());
-
-        eventBus.unregister(handler);
-    }
-
-    @Test
     public void testStickyPostThenRegister_deliveredExactlyOnce() {
         // Event already recorded before the subscriber registers: delivered once via register's replay.
         TestStickySubscriber sub = new TestStickySubscriber();
@@ -1058,24 +1054,6 @@ public class EventBusTest extends TestBase {
 
         Assertions.assertEquals(1, subscriber.receivedEvents.size());
         Assertions.assertEquals("Sticky Message", subscriber.receivedEvents.get(0));
-    }
-
-    @Test
-    public void testPostSticky_ThenRegisterWithMatchingEventId() {
-        eventBus.postSticky("myId", "sticky value");
-
-        AtomicReference<String> received = new AtomicReference<>();
-        Object subscriber = new Object() {
-            @Subscribe(sticky = true)
-            public void onEvent(String event) {
-                received.set(event);
-            }
-        };
-
-        eventBus.register(subscriber, "myId");
-        assertEquals("sticky value", received.get());
-
-        eventBus.unregister(subscriber);
     }
 
     @Test
@@ -1250,22 +1228,7 @@ public class EventBusTest extends TestBase {
 
         List<?> remaining = eventBus.stickyEvents("id1", String.class);
         Assertions.assertEquals(0, remaining.size());
-
-        remaining = eventBus.stickyEvents("id2", String.class);
-        Assertions.assertEquals(1, remaining.size());
-    }
-
-    @Test
-    public void testRemoveStickyEventsWithEventId_1() {
-        eventBus.postSticky("id1", "Event 1");
-        eventBus.postSticky("id2", "Event 2");
-        eventBus.postSticky("id1", "Event 1");
-
-        boolean removed = eventBus.removeStickyEvents("id1", String.class);
-        Assertions.assertTrue(removed);
-
-        List<?> remaining = eventBus.stickyEvents("id1", String.class);
-        Assertions.assertEquals(0, remaining.size());
+        Assertions.assertEquals(1, eventBus.stickyEvents("id1", Integer.class).size());
 
         remaining = eventBus.stickyEvents("id2", String.class);
         Assertions.assertEquals(1, remaining.size());
@@ -1557,6 +1520,390 @@ public class EventBusTest extends TestBase {
 
         eventBus.unregister(warmupSubscriber);
         eventBus.unregister(lateSubscriber);
+    }
+
+    // ---- review fixes 2026-09-06 (a12 F-1): default executor runs on daemon threads ----
+
+    @Test
+    public void testDefaultExecutorDeliversOnDaemonNormalPriorityThread() throws InterruptedException {
+        final EventBus bus = EventBus.create();
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<Thread> eventThread = new AtomicReference<>();
+        final Object subscriber = new Object() {
+            @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
+            public void onEvent(String event) {
+                eventThread.set(Thread.currentThread());
+                latch.countDown();
+            }
+        };
+
+        bus.register(subscriber);
+        bus.post("daemon-check \u03bb");
+
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
+        final Thread worker = eventThread.get();
+        assertNotNull(worker);
+        assertNotEquals(Thread.currentThread(), worker);
+        assertTrue(worker.isDaemon(), "default executor worker must be a daemon thread: " + worker.getName());
+        assertEquals(Thread.NORM_PRIORITY, worker.getPriority());
+        bus.unregister(subscriber);
+    }
+
+    @Test
+    public void testDefaultBusAsyncDeliveryUsesDaemonThreadAndSyncDeliveryStaysOnCaller() throws InterruptedException {
+        final EventBus bus = EventBus.getDefault();
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<Thread> asyncThread = new AtomicReference<>();
+        final AtomicReference<Thread> syncThread = new AtomicReference<>();
+        final Object subscriber = new Object() {
+            @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR, eventId = "daemon-async")
+            public void onAsync(String event) {
+                asyncThread.set(Thread.currentThread());
+                latch.countDown();
+            }
+
+            @Subscribe(eventId = "daemon-sync")
+            public void onSync(String event) {
+                syncThread.set(Thread.currentThread());
+            }
+        };
+
+        try {
+            bus.register(subscriber);
+            bus.post("daemon-sync", "s");
+            bus.post("daemon-async", "a");
+
+            assertTrue(latch.await(5, TimeUnit.SECONDS));
+            assertTrue(asyncThread.get().isDaemon());
+            // Regression guard: DEFAULT mode is unaffected by the executor change.
+            assertEquals(Thread.currentThread(), syncThread.get());
+        } finally {
+            bus.unregister(subscriber);
+        }
+    }
+
+    // ---- review fixes 2026-09-06 (a12 F-2): one process-wide shutdown hook over a weak registry ----
+
+    private static int applicationShutdownHookCount() throws Exception {
+        final Class<?> hooksClass = Class.forName("java.lang.ApplicationShutdownHooks");
+        final java.lang.reflect.Field hooksField = hooksClass.getDeclaredField("hooks");
+        hooksField.setAccessible(true);
+        synchronized (hooksClass) {
+            return ((Map<?, ?>) hooksField.get(null)).size();
+        }
+    }
+
+    @Test
+    public void testManyBusesOverOneExecutorServiceRegisterAtMostOneShutdownHook() throws Exception {
+        final ExecutorService shared = Executors.newSingleThreadExecutor();
+        final ExecutorService other = Executors.newSingleThreadExecutor();
+        try {
+            // Installs the single process-wide hook if this JVM has not done so yet.
+            EventBus.create("hook-warmup", shared);
+            final int before = applicationShutdownHookCount();
+
+            for (int i = 0; i < 25; i++) {
+                EventBus.create("hook-" + i, shared);
+            }
+
+            assertEquals(before, applicationShutdownHookCount(), "one process-wide hook, not one hook per bus");
+
+            // A second, distinct executor service joins the same hook.
+            EventBus.create("hook-other", other);
+            assertEquals(before, applicationShutdownHookCount());
+        } finally {
+            shared.shutdownNow();
+            other.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testPlainExecutorAndDefaultExecutorRegisterNoShutdownHookAndNullExecutorStillRejected() throws Exception {
+        final int before = applicationShutdownHookCount();
+
+        EventBus.create("plain-executor", Runnable::run);
+        EventBus.create("plain-executor-2", (Executor) Runnable::run);
+        EventBus.create();
+        EventBus.create("default-executor");
+
+        assertEquals(before, applicationShutdownHookCount());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> EventBus.create("null-executor", null));
+    }
+
+    private static WeakReference<ExecutorService> createBusOverUnreferencedExecutorAndDropIt() {
+        final ExecutorService executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        EventBus.create("discarded-" + System.nanoTime(), executor);
+        return new WeakReference<>(executor);
+    }
+
+    @Test
+    public void testDiscardedBusDoesNotPinItsExecutorService() throws Exception {
+        final WeakReference<ExecutorService> ref = createBusOverUnreferencedExecutorAndDropIt();
+
+        for (int i = 0; i < 100 && ref.get() != null; i++) {
+            System.gc();
+            Thread.sleep(50);
+        }
+
+        assertNull(ref.get(), "the executor of a discarded bus must become unreachable (no strong capture by a per-bus hook)");
+    }
+
+    // ---- review fixes 2026-09-06 (a12 F-3): async throttle/dedup decided at post time ----
+
+    public static class AsyncThrottledSubscriber {
+        final List<String> received = Collections.synchronizedList(new ArrayList<>());
+        final CountDownLatch latch;
+
+        AsyncThrottledSubscriber(final int expected) {
+            latch = new CountDownLatch(expected);
+        }
+
+        @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR, intervalMillis = 200)
+        public void onEvent(String event) {
+            received.add(event);
+            latch.countDown();
+        }
+    }
+
+    public static class AsyncDedupSubscriber {
+        final List<String> received = Collections.synchronizedList(new ArrayList<>());
+
+        @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR, deduplicate = true)
+        public void onEvent(String event) {
+            received.add(event);
+        }
+    }
+
+    public static class AsyncUnfilteredSubscriber {
+        final List<String> received = Collections.synchronizedList(new ArrayList<>());
+
+        @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR, intervalMillis = -1)
+        public void onEvent(String event) {
+            received.add(event);
+        }
+    }
+
+    private static Executor countingInlineExecutor(final AtomicInteger tasks) {
+        return task -> {
+            tasks.incrementAndGet();
+            task.run();
+        };
+    }
+
+    @Test
+    public void testAsyncIntervalIsMeasuredAtPostTimeNotAtExecutionTime() throws Exception {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final CountDownLatch gate = new CountDownLatch(1);
+        try {
+            // Block the only worker so all three posts are queued before any of them runs.
+            executor.execute(() -> {
+                try {
+                    gate.await(10, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+
+            final EventBus bus = EventBus.create("async-interval", executor);
+            final AsyncThrottledSubscriber subscriber = new AsyncThrottledSubscriber(3);
+            bus.register(subscriber);
+
+            bus.post("e1");
+            Thread.sleep(300);
+            bus.post("e2");
+            Thread.sleep(300);
+            bus.post("e3");
+            gate.countDown();
+
+            assertTrue(subscriber.latch.await(5, TimeUnit.SECONDS),
+                    "posts spaced 300 ms apart with intervalMillis=200 must all be delivered; got " + subscriber.received);
+            assertEquals(List.of("e1", "e2", "e3"), subscriber.received);
+        } finally {
+            gate.countDown();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testAsyncIntervalSuppressedEventIsNeverHandedToTheExecutor() {
+        final AtomicInteger tasks = new AtomicInteger();
+        final EventBus bus = EventBus.create("async-suppressed", countingInlineExecutor(tasks));
+        final AsyncThrottledSubscriber subscriber = new AsyncThrottledSubscriber(1);
+        bus.register(subscriber);
+
+        bus.post("e1");
+        bus.post("e2"); // within 200 ms of e1
+
+        assertEquals(1, tasks.get(), "a throttled event must not be enqueued");
+        assertEquals(List.of("e1"), subscriber.received);
+    }
+
+    @Test
+    public void testAsyncDeduplicateIsDecidedAtPostTime() {
+        final AtomicInteger tasks = new AtomicInteger();
+        final EventBus bus = EventBus.create("async-dedup", countingInlineExecutor(tasks));
+        final AsyncDedupSubscriber subscriber = new AsyncDedupSubscriber();
+        bus.register(subscriber);
+
+        bus.post("same");
+        bus.post("same");
+
+        assertEquals(1, tasks.get(), "a consecutive duplicate must not be enqueued");
+        assertEquals(List.of("same"), subscriber.received);
+
+        // Regression guard: a non-consecutive repeat is still delivered.
+        bus.post("other");
+        bus.post("same");
+        assertEquals(3, tasks.get());
+        assertEquals(List.of("same", "other", "same"), subscriber.received);
+
+        // Unicode / empty events participate in equals() like any other.
+        bus.post("\u03bb");
+        bus.post("\u03bb");
+        bus.post("");
+        bus.post("");
+        assertEquals(List.of("same", "other", "same", "\u03bb", ""), subscriber.received);
+    }
+
+    @Test
+    public void testAsyncWithoutIntervalOrDeduplicateEnqueuesEveryPost() {
+        final AtomicInteger tasks = new AtomicInteger();
+        final EventBus bus = EventBus.create("async-unfiltered", countingInlineExecutor(tasks));
+        final AsyncUnfilteredSubscriber subscriber = new AsyncUnfilteredSubscriber();
+        bus.register(subscriber);
+
+        bus.post("same");
+        bus.post("same");
+        bus.post("same");
+
+        assertEquals(3, tasks.get());
+        assertEquals(3, subscriber.received.size());
+    }
+
+    @Test
+    public void testRejectedAsyncSubmissionReleasesItsThrottleReservation() {
+        final AtomicInteger offered = new AtomicInteger();
+        final Executor rejecting = task -> {
+            offered.incrementAndGet();
+            throw new RejectedExecutionException("expected rejection");
+        };
+        final EventBus bus = EventBus.create("async-rejected", rejecting);
+        final AsyncThrottledSubscriber subscriber = new AsyncThrottledSubscriber(1);
+        bus.register(subscriber);
+
+        assertDoesNotThrow(() -> bus.post("e1"));
+        assertDoesNotThrow(() -> bus.post("e2"));
+
+        assertEquals(2, offered.get(), "e1 was never delivered, so the interval slot it reserved must be given back to e2");
+        assertEquals(0, subscriber.received.size());
+    }
+
+    @Test
+    public void testRejectedAsyncSubmissionReleasesItsDeduplicationReservation() {
+        final AtomicInteger offered = new AtomicInteger();
+        final Executor rejectingFirstTask = task -> {
+            if (offered.getAndIncrement() == 0) {
+                throw new RejectedExecutionException("expected rejection");
+            }
+
+            task.run();
+        };
+        final EventBus bus = EventBus.create("async-rejected-dedup", rejectingFirstTask);
+        final AsyncDedupSubscriber subscriber = new AsyncDedupSubscriber();
+        bus.register(subscriber);
+
+        assertDoesNotThrow(() -> bus.post("same"));
+        bus.post("same");
+
+        assertEquals(2, offered.get(), "the rejected event was never delivered, so it must not become the previous event");
+        assertEquals(List.of("same"), subscriber.received);
+    }
+
+    // ---- review fixes 2026-09-06 (a12 F-4): documented registration edge cases ----
+
+    public static class NamedObjectSubscriber implements Subscriber<Object> {
+        final List<Object> received = new ArrayList<>();
+
+        @Override
+        public void on(Object event) {
+            received.add(event);
+        }
+    }
+
+    public static class PrivateStaticAnnotatedSubscriber {
+        @Subscribe
+        private static void onEvent(String event) {
+        }
+    }
+
+    public static class PrivateOnlyAnnotatedSubscriber {
+        @Subscribe
+        private void onEvent(String event) {
+        }
+    }
+
+    @Test
+    public void testNamedSubscriberOfObjectRequiresEventIdLikeALambda() {
+        final NamedObjectSubscriber subscriber = new NamedObjectSubscriber();
+
+        Assertions.assertThrows(IllegalStateException.class, () -> eventBus.register(subscriber));
+
+        eventBus.register(subscriber, "named-object");
+        eventBus.post("named-object", "hello");
+        eventBus.post("hello-without-id");
+
+        assertEquals(List.of("hello"), subscriber.received);
+        eventBus.unregister(subscriber);
+    }
+
+    @Test
+    public void testPrivateStaticAnnotatedMethodIsRejectedNotIgnored() {
+        final RuntimeException e = Assertions.assertThrows(RuntimeException.class, () -> eventBus.register(new PrivateStaticAnnotatedSubscriber()));
+        assertTrue(e.getMessage().contains("must not be static"), e.getMessage());
+    }
+
+    @Test
+    public void testPrivateAnnotatedMethodAloneIsIgnoredSoNoSubscriberMethodIsFound() {
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> eventBus.register(new PrivateOnlyAnnotatedSubscriber()));
+        assertTrue(e.getMessage().startsWith("No subscriber method found"), e.getMessage());
+    }
+
+    @Test
+    public void testRegisterPostStickyAndDeduplicateSmoke() {
+        final Object strSubscriber_1 = new Subscriber<String>() {
+            @Override
+            public void on(String event) {
+                // smoke: registration + post
+            }
+        };
+
+        final Object anySubscriber_2 = new Object() {
+            @Subscribe(threadMode = ThreadMode.DEFAULT, intervalMillis = 1000)
+            public void anyMethod(Object event) {
+            }
+        };
+
+        final Object anySubscriber_3 = new Object() {
+            @Subscribe(threadMode = ThreadMode.DEFAULT, sticky = true, deduplicate = true)
+            public void anyMethod(Object event) {
+            }
+        };
+
+        final EventBus bus = EventBus.getDefault();
+        bus.register(strSubscriber_1);
+        bus.register(strSubscriber_1);
+        bus.register(anySubscriber_2, "eventId_2");
+        bus.post("abc");
+        bus.postSticky("sticky");
+        bus.post("eventId_2", "abc");
+        bus.post(123);
+        bus.post("eventId_2", 123);
+        bus.register(anySubscriber_3);
+        bus.post("sticky1");
+        bus.post("sticky");
+        bus.post("sticky");
+        assertNotNull(bus);
     }
 
 }

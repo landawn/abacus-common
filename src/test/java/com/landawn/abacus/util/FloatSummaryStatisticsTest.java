@@ -237,4 +237,42 @@ public class FloatSummaryStatisticsTest extends TestBase {
         assertEquals("{min=1.000000, max=2.000000, count=2, sum=3.000000, average=1.500000}", str);
     }
 
+
+    // FINDING 27: FloatSummaryStatistics was the only member of the family pinned to Locale.ROOT; the guarantee was
+    // neither documented nor tested, and Byte/Char/Short still used the default locale. All four now render the same
+    // text on every machine, and each toString() javadoc says so.
+    @Test
+    public void reviewFixes20260908_theWholeFamilyRendersWithLocaleRootWhateverTheDefaultLocaleIs() {
+        final FloatSummaryStatistics floatStats = new FloatSummaryStatistics();
+        floatStats.accept(1.0f);
+        floatStats.accept(2.0f);
+
+        final ByteSummaryStatistics byteStats = new ByteSummaryStatistics();
+        byteStats.accept((byte) 10);
+        byteStats.accept((byte) 20);
+
+        final CharSummaryStatistics charStats = new CharSummaryStatistics();
+        charStats.accept('A');
+        charStats.accept('B');
+
+        final ShortSummaryStatistics shortStats = new ShortSummaryStatistics();
+        shortStats.accept((short) 10);
+        shortStats.accept((short) 20);
+
+        final java.util.Locale prev = java.util.Locale.getDefault();
+
+        try {
+            for (final String tag : new String[] { "und", "de-DE", "fr-FR", "hi-IN-u-nu-deva", "ar-EG-u-nu-arab" }) {
+                java.util.Locale.setDefault(java.util.Locale.forLanguageTag(tag));
+
+                assertEquals("{min=1.000000, max=2.000000, count=2, sum=3.000000, average=1.500000}", floatStats.toString(), tag);
+                assertEquals("{min=10, max=20, count=2, sum=30, average=15.000000}", byteStats.toString(), tag);
+                assertEquals("{min=A, max=B, count=2, sum=131, average=65.500000}", charStats.toString(), tag);
+                assertEquals("{min=10, max=20, count=2, sum=30, average=15.000000}", shortStats.toString(), tag);
+            }
+        } finally {
+            java.util.Locale.setDefault(prev);
+        }
+    }
+
 }

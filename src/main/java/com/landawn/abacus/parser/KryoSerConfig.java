@@ -83,7 +83,7 @@ public class KryoSerConfig extends SerializationConfig<KryoSerConfig> {
      * Sets whether class metadata should be written with the object during serialization.
      *
      * <p>When {@code true} (or when the object is {@code null}), {@link KryoParser} writes both
-     * class and object so the stream can be read without supplying a target class. When {@code false}
+     * class and object so deserialization must use a null {@code Class} target to read that format. When {@code false}
      * (default), only the object is written and deserialization must supply the target type.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -108,25 +108,22 @@ public class KryoSerConfig extends SerializationConfig<KryoSerConfig> {
     /**
      * Computes a hash code for this configuration based on its settings.
      *
-     * <p>The hash code includes the {@code writeClass} setting in addition to settings
-     * inherited from the parent class.</p>
+     * <p>The hash code combines the {@code writeClass} setting with the hash code of the
+     * settings inherited from the parent class.</p>
      *
      * @return a hash code value for this configuration
      */
     @Override
     public int hashCode() {
-        int h = 17;
-        h = 31 * h + N.hashCode(getIgnoredPropNames());
-        h = 31 * h + N.hashCode(getExclusion());
-        h = 31 * h + N.hashCode(isSkipTransientField());
-        return 31 * h + N.hashCode(writeClass);
+        return 31 * super.hashCode() + N.hashCode(writeClass);
     }
 
     /**
      * Determines whether this configuration is equal to another object.
      *
-     * <p>Two {@code KryoSerConfig} instances are considered equal if they have
-     * the same {@code writeClass} setting and all inherited settings are equal.</p>
+     * <p>Two {@code KryoSerConfig} instances are considered equal if they are of exactly the same
+     * class, all inherited settings are equal (see {@link SerializationConfig#equals(Object)}), and
+     * they have the same {@code writeClass} setting.</p>
      *
      * @param obj the object to compare with
      * @return {@code true} if the configurations are equal, {@code false} otherwise
@@ -134,16 +131,7 @@ public class KryoSerConfig extends SerializationConfig<KryoSerConfig> {
     @SuppressFBWarnings
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj instanceof KryoSerConfig other) { //NOSONAR
-            return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion()) //NOSONAR
-                    && N.equals(isSkipTransientField(), other.isSkipTransientField()) && N.equals(writeClass, other.writeClass);
-        }
-
-        return false;
+        return this == obj || (obj instanceof KryoSerConfig other && super.equals(obj) && writeClass == other.writeClass);
     }
 
     /**

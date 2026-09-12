@@ -100,4 +100,57 @@ public class MultisetTypeTest extends TestBase {
         assertEquals(3, result.count("banana"));
     }
 
+    // T8-05: {"a": null} threw an unboxing NullPointerException; now the element is simply not added (like a 0 count).
+    @Test
+    public void reviewFixes20260906_valueOfNullOrZeroCountAddsNothing() {
+        final Multiset<String> ms = multisetType.valueOf("{\"a\": null, \"b\": 1, \"c\": 0}");
+
+        assertEquals(0, ms.count("a"));
+        Assertions.assertFalse(ms.contains("a"));
+        assertEquals(1, ms.count("b"));
+        Assertions.assertFalse(ms.contains("c"));
+        assertEquals(1, ms.size());
+
+        Assertions.assertTrue(multisetType.valueOf("{}").isEmpty());
+        Assertions.assertTrue(multisetType.valueOf("{\"a\": null}").isEmpty());
+
+        // Unicode elements
+        assertEquals(2, multisetType.valueOf("{\"中\": 2, \"😀\": null}").count("中"));
+
+        // documented failure modes
+        Assertions.assertThrows(IllegalArgumentException.class, () -> multisetType.valueOf("{\"a\": -1}"));
+        Assertions.assertThrows(NumberFormatException.class, () -> multisetType.valueOf("{\"a\": \"x\"}"));
+        Assertions.assertThrows(ArithmeticException.class, () -> multisetType.valueOf("{\"a\": 2147483648}"));
+        Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> multisetType.valueOf("{\"a\": 1"));
+    }
+
+    public static class MultisetBean {
+        private Multiset<String> ms;
+
+        public Multiset<String> getMs() {
+            return ms;
+        }
+
+        public void setMs(final Multiset<String> ms) {
+            this.ms = ms;
+        }
+    }
+
+    // T8-04 (documented contract, not a behaviour change): a nested multiset is written as a quoted JSON string.
+    @Test
+    public void reviewFixes20260906_nestedMultisetIsWrittenAsQuotedJsonString() {
+        final MultisetBean bean = new MultisetBean();
+        bean.setMs(N.newMultiset());
+        bean.getMs().add("x", 2);
+
+        final String json = N.toJson(bean);
+
+        assertEquals("{\"ms\": \"{\\\"x\\\": 2}\"}", json);
+        assertEquals(bean.getMs(), N.fromJson(json, MultisetBean.class).getMs());
+
+        final String xml = N.toXml(bean);
+        Assertions.assertTrue(xml.contains("<ms>{&quot;x&quot;: 2}</ms>"), xml);
+        assertEquals(bean.getMs(), N.fromXml(xml, MultisetBean.class).getMs());
+    }
+
 }

@@ -1,8 +1,10 @@
 package com.landawn.abacus.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -10,8 +12,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -35,6 +41,7 @@ import org.w3c.dom.Node;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.XmlUtil;
@@ -88,10 +95,12 @@ public class JaxbParserTest extends TestBase {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o)
+            if (this == o) {
                 return true;
-            if (o == null || getClass() != o.getClass())
+            }
+            if (o == null || getClass() != o.getClass()) {
                 return false;
+            }
             Person person = (Person) o;
             return age == person.age && Objects.equals(name, person.name);
         }
@@ -162,8 +171,7 @@ public class JaxbParserTest extends TestBase {
         XmlDeserConfig xdc = new XmlDeserConfig().setIgnoredPropNames(Map.of(Person.class, Set.of("age")));
         JaxbParser parserWithConfig = new JaxbParser(null, xdc);
 
-        assertThrows(ParsingException.class,
-                () -> parserWithConfig.deserialize("<person><name>Test</name><age>30</age></person>", null, Person.class));
+        assertThrows(ParsingException.class, () -> parserWithConfig.deserialize("<person><name>Test</name><age>30</age></person>", null, Person.class));
         assertThrows(ParsingException.class, () -> parserWithConfig.deserialize("", null, Person.class));
 
         XmlDeserConfig perCallConfig = new XmlDeserConfig().setIgnoredPropNames(Map.of(Person.class, Set.of("age")));
@@ -460,4 +468,299 @@ public class JaxbParserTest extends TestBase {
         assertThrows(UnsupportedOperationException.class, () -> parser.deserialize((Node) null, null, nodeClasses));
     }
 
+    // ---------------------------------------------------------------------------------------------
+    // reviewFixes20260906: P6-04 (caller's stream/reader not closed), P6-08 (I/O failure while
+    // marshalling -> UncheckedIOException).
+    // ---------------------------------------------------------------------------------------------
+
+    private static final String PERSON_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><person><name>Ines</name><age>31</age></person>";
+
+    private static final String MALFORMED_XML = "<person><name>Ines</name><age>31</person>";
+
+    private static final String DOCTYPE_XML = "<!DOCTYPE person [<!ENTITY x \"boom\">]><person><name>&x;</name><age>1</age></person>";
+
+    private static final class CloseTrackingInputStream extends ByteArrayInputStream {
+        int closeCalls;
+
+        CloseTrackingInputStream(final String xml) {
+            super(xml.getBytes(StandardCharsets.UTF_8));
+        }
+
+        @Override
+        public void close() throws IOException {
+            closeCalls++;
+            super.close();
+        }
+    }
+
+    private static final class CloseTrackingReader extends StringReader {
+        int closeCalls;
+
+        CloseTrackingReader(final String xml) {
+            super(xml);
+        }
+
+        @Override
+        public void close() {
+            closeCalls++;
+            super.close();
+        }
+    }
+
+    @Test
+    public void reviewFixes20260906_deserializeFromInputStreamDoesNotCloseCallerStream() {
+        CloseTrackingInputStream in = new CloseTrackingInputStream(PERSON_XML);
+        Person person = parser.deserialize(in, null, Person.class);
+        assertEquals("Ines", person.getName());
+        assertEquals(31, person.getAge());
+        assertEquals(0, in.closeCalls);
+        // Consumed to the end of the document, but still usable by the caller.
+        assertEquals(-1, in.read());
+        in.reset();
+        assertEquals("Ines", parser.deserialize(in, null, Person.class).getName());
+        assertEquals(0, in.closeCalls);
+
+        in = new CloseTrackingInputStream(PERSON_XML);
+        assertEquals(31, parser.deserialize(in, null, Type.of(Person.class)).getAge());
+        assertEquals(0, in.closeCalls);
+
+        final CloseTrackingInputStream malformed = new CloseTrackingInputStream(MALFORMED_XML);
+        assertThrows(ParsingException.class, () -> parser.deserialize(malformed, null, Person.class));
+        assertEquals(0, malformed.closeCalls);
+
+        final CloseTrackingInputStream doctype = new CloseTrackingInputStream(DOCTYPE_XML);
+        assertThrows(ParsingException.class, () -> parser.deserialize(doctype, null, Person.class));
+        assertEquals(0, doctype.closeCalls);
+
+        // Unicode through the wrapper, UTF-8 and UTF-16 alike.
+        final String unicode = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><person><name>é中😀</name><age>2</age></person>";
+        assertEquals("é中😀", parser.deserialize(new CloseTrackingInputStream(unicode), null, Person.class).getName());
+        final String utf16 = "<?xml version=\"1.0\" encoding=\"UTF-16\"?><person><name>你好</name><age>3</age></person>";
+        assertEquals("你好", parser.deserialize(new ByteArrayInputStream(utf16.getBytes(StandardCharsets.UTF_16)), null, Person.class).getName());
+    }
+
+    @Test
+    public void reviewFixes20260906_deserializeFromReaderDoesNotCloseCallerReader() throws IOException {
+        CloseTrackingReader reader = new CloseTrackingReader(PERSON_XML);
+        Person person = parser.deserialize(reader, null, Person.class);
+        assertEquals("Ines", person.getName());
+        assertEquals(0, reader.closeCalls);
+        assertEquals(-1, reader.read());
+        reader.reset();
+        assertEquals(31, parser.deserialize(reader, null, Person.class).getAge());
+        assertEquals(0, reader.closeCalls);
+
+        reader = new CloseTrackingReader(PERSON_XML);
+        assertEquals("Ines", parser.deserialize(reader, null, Type.of(Person.class)).getName());
+        assertEquals(0, reader.closeCalls);
+
+        final CloseTrackingReader malformed = new CloseTrackingReader(MALFORMED_XML);
+        assertThrows(ParsingException.class, () -> parser.deserialize(malformed, null, Person.class));
+        assertEquals(0, malformed.closeCalls);
+
+        final CloseTrackingReader doctype = new CloseTrackingReader(DOCTYPE_XML);
+        assertThrows(ParsingException.class, () -> parser.deserialize(doctype, null, Person.class));
+        assertEquals(0, doctype.closeCalls);
+
+        final CloseTrackingReader unicode = new CloseTrackingReader("<person><name>é中😀</name><age>2</age></person>");
+        assertEquals("é中😀", parser.deserialize(unicode, null, Person.class).getName());
+        assertEquals(0, unicode.closeCalls);
+    }
+
+    @Test
+    public void reviewFixes20260906_deserializeFromFileStillClosesItsOwnStream() throws IOException {
+        final File file = tempDir.resolve("own-stream.xml").toFile();
+        IOUtil.write(PERSON_XML, file);
+
+        assertEquals("Ines", parser.deserialize(file, null, Person.class).getName());
+
+        // On Windows an open handle would make the delete fail.
+        Files.delete(file.toPath());
+        assertFalse(file.exists());
+    }
+
+    private static final class FailingOutputStream extends OutputStream {
+        private final IOException failure;
+        private final boolean failOnWrite;
+
+        FailingOutputStream(final IOException failure, final boolean failOnWrite) {
+            this.failure = failure;
+            this.failOnWrite = failOnWrite;
+        }
+
+        @Override
+        public void write(final int b) throws IOException {
+            if (failOnWrite) {
+                throw failure;
+            }
+        }
+
+        @Override
+        public void flush() throws IOException {
+            throw failure;
+        }
+    }
+
+    public static class NotAnXmlRoot {
+        private String value = "v";
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+    }
+
+    @Test
+    public void reviewFixes20260906_serializeToFailingOutputStreamThrowsUncheckedIOException() throws IOException {
+        final IOException disk = new IOException("disk full");
+        final Person person = new Person("Io", 5);
+
+        UncheckedIOException thrown = assertThrows(UncheckedIOException.class, () -> parser.serialize(person, null, new FailingOutputStream(disk, true)));
+        assertSame(disk, thrown.getCause());
+
+        thrown = assertThrows(UncheckedIOException.class, () -> parser.serialize(person, null, new FailingOutputStream(disk, false)));
+        assertSame(disk, thrown.getCause());
+
+        // A null object writes nothing but still flushes the stream.
+        thrown = assertThrows(UncheckedIOException.class, () -> parser.serialize(null, null, new FailingOutputStream(disk, true)));
+        assertSame(disk, thrown.getCause());
+
+        // Writer overload: a failure inside JAXB's own write loop (large payload) is an I/O failure too.
+        final Writer failingWriter = new Writer() {
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) throws IOException {
+                throw disk;
+            }
+
+            @Override
+            public void flush() throws IOException {
+                throw disk;
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        final Person big = new Person("x".repeat(100_000), 1);
+        thrown = assertThrows(UncheckedIOException.class, () -> parser.serialize(big, null, failingWriter));
+        assertSame(disk, thrown.getCause());
+
+        // A marshalling failure without an I/O cause is still a ParsingException.
+        final ParsingException parsing = assertThrows(ParsingException.class, () -> parser.serialize(new NotAnXmlRoot(), null, new ByteArrayOutputStream()));
+        assertFalse(UncheckedIOException.class.isInstance(parsing));
+        assertThrows(ParsingException.class, () -> parser.serialize(new NotAnXmlRoot(), null, new StringWriter()));
+
+        // And the parser still works afterwards.
+        final ByteArrayOutputStream ok = new ByteArrayOutputStream();
+        parser.serialize(person, null, ok);
+        assertTrue(ok.toString(StandardCharsets.UTF_8).contains("<name>Io</name>"));
+    }
+
+    @Test
+    public void reviewFixes20260907_jaxbParserDoesNotDependOnTheOptionalAvroClasses() throws IOException {
+        // Avro and the JAXB runtime are independent `provided`-scope dependencies, so a deployment may
+        // carry one without the other. Borrowing AvroParser's non-closing wrapper (the first shape of the
+        // P6-04 fix) made deserialize(InputStream, ..) fail on a JAXB-but-no-Avro classpath with
+        // NoClassDefFoundError: org/apache/avro/io/DatumReader. The class file is the only place this can
+        // be pinned without rebuilding the classpath, so assert JaxbParser's constant pool names no Avro type.
+        final byte[] classFile;
+
+        try (java.io.InputStream in = JaxbParser.class.getResourceAsStream("JaxbParser.class")) {
+            assertNotNull(in, "JaxbParser.class must be readable as a resource");
+            classFile = in.readAllBytes();
+        }
+
+        final String constantPool = new String(classFile, StandardCharsets.ISO_8859_1);
+        assertFalse(constantPool.contains("org/apache/avro"), "JaxbParser must not reference Apache Avro");
+        assertFalse(constantPool.contains("parser/AvroParser"), "JaxbParser must not reference AvroParser");
+
+        // ... while the stream overload keeps the behaviour that motivated the shared wrapper.
+        final CloseTrackingInputStream in = new CloseTrackingInputStream(PERSON_XML);
+        assertEquals("Ines", parser.deserialize(in, null, Person.class).getName());
+        assertEquals(0, in.closeCalls);
+    }
+
+    @Test
+    public void reviewFixes20260908_deserializeFromFailingSourceThrowsUncheckedIOException() {
+        // JAXB wraps a failing source's IOException in an UnmarshalException. Parser documents
+        // UncheckedIOException for the stream/reader deserialize overloads, so the unmarshal path must
+        // unwrap it exactly as the marshal path already does - not report it as a ParsingException.
+        final IOException boom = new IOException("boom-read");
+
+        final InputStream failingStream = new InputStream() {
+            @Override
+            public int read() throws IOException {
+                throw boom;
+            }
+
+            @Override
+            public int read(final byte[] b, final int off, final int len) throws IOException {
+                throw boom;
+            }
+        };
+
+        UncheckedIOException thrown = assertThrows(UncheckedIOException.class, () -> parser.deserialize(failingStream, null, Person.class));
+        assertSame(boom, thrown.getCause());
+
+        final Reader failingReader = new Reader() {
+            @Override
+            public int read(final char[] cbuf, final int off, final int len) throws IOException {
+                throw boom;
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+
+        thrown = assertThrows(UncheckedIOException.class, () -> parser.deserialize(failingReader, null, Person.class));
+        assertSame(boom, thrown.getCause());
+
+        // A malformed document has no I/O cause, so it stays a ParsingException.
+        final ParsingException parsing = assertThrows(ParsingException.class,
+                () -> parser.deserialize(new ByteArrayInputStream("<person><name>".getBytes(StandardCharsets.UTF_8)), null, Person.class));
+        assertFalse(UncheckedIOException.class.isInstance(parsing));
+        assertThrows(ParsingException.class, () -> parser.deserialize(new StringReader("<person><name>"), null, Person.class));
+
+        // And the parser still works afterwards.
+        assertEquals("Ines", parser.deserialize(new StringReader(PERSON_XML), null, Person.class).getName());
+    }
+
+
+    // R03: mapping every IOException in the JAXB cause chain to UncheckedIOException also caught the one that
+    // is not an I/O failure at all - Xerces reports undecodable bytes with MalformedByteSequenceException, a
+    // CharConversionException. Nothing failed to arrive; the document cannot be decoded, which is what r9503
+    // and every other XML backend in this package report as a ParsingException.
+    @Test
+    public void reviewFixes20260908_undecodableBytesAreAParsingFailureNotAnIoFailure() {
+        // <person><name>?</name></person> with an invalid 2-byte UTF-8 sequence inside the text
+        final byte[] undecodable = { 60, 112, 101, 114, 115, 111, 110, 62, 60, 110, 97, 109, 101, 62, (byte) 0xC3, (byte) 0x28, 60, 47, 110, 97, 109, 101, 62,
+                60, 47, 112, 101, 114, 115, 111, 110, 62 };
+
+        final ParsingException fromStream = assertThrows(ParsingException.class,
+                () -> parser.deserialize(new ByteArrayInputStream(undecodable), null, Person.class));
+        assertFalse(UncheckedIOException.class.isInstance(fromStream));
+
+        // a source that genuinely fails is still an UncheckedIOException, so the carve-out is not a blanket one
+        final IOException boom = new IOException("boom-read");
+        final InputStream failingStream = new InputStream() {
+            @Override
+            public int read() throws IOException {
+                throw boom;
+            }
+
+            @Override
+            public int read(final byte[] b, final int off, final int len) throws IOException {
+                throw boom;
+            }
+        };
+
+        assertSame(boom, assertThrows(UncheckedIOException.class, () -> parser.deserialize(failingStream, null, Person.class)).getCause());
+
+        // and the parser still works afterwards
+        assertEquals("Ines", parser.deserialize(new StringReader(PERSON_XML), null, Person.class).getName());
+    }
 }

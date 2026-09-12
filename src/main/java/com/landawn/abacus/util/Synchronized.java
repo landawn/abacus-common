@@ -36,6 +36,21 @@ import com.landawn.abacus.annotation.Beta;
  * intrinsically thread-safe. Because the mutex is externally accessible, callers should also avoid
  * lock-order inversions with other monitors.
  *
+ * <p><b>&#9888;&#65039; Choose the mutex carefully.</b> Any non-{@code null} object is accepted, which
+ * makes it easy to lock on something that is shared far more widely than intended, so that unrelated
+ * code contends on - or deadlocks against - the same monitor:
+ * <ul>
+ *   <li><b>String literals and interned strings</b> ({@code Synchronized.on("lock")}) are shared across
+ *       the whole JVM, including other libraries.</li>
+ *   <li><b>Boxed primitives</b> in the cache range ({@code Integer.valueOf(1)}, {@code Boolean.TRUE},
+ *       small {@code Character}/{@code Byte}/{@code Short}/{@code Long} values) are also shared
+ *       instances - and autoboxing produces them silently.</li>
+ *   <li><b>{@code Class} objects</b> are shared with every {@code synchronized static} method of that
+ *       class.</li>
+ *   <li>Any object your callers can reach can be locked by them too.</li>
+ * </ul>
+ * Prefer a dedicated, privately held object as the mutex.
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Static usage
@@ -62,8 +77,8 @@ public final class Synchronized<T> {
      * @param mutex the object to synchronize on; must not be {@code null}
      * @throws IllegalArgumentException if {@code mutex} is {@code null}.
      */
-    Synchronized(final T mutex) {
-        N.checkArgNotNull(mutex);
+    Synchronized(final T mutex) throws IllegalArgumentException {
+        N.checkArgNotNull(mutex, cs.mutex);
 
         this.mutex = mutex;
     }
@@ -92,8 +107,6 @@ public final class Synchronized<T> {
      * @see #call(Object, Throwables.Callable)
      */
     public static <T> Synchronized<T> on(final T mutex) throws IllegalArgumentException {
-        N.checkArgNotNull(mutex);
-
         return new Synchronized<>(mutex);
     }
 
@@ -123,7 +136,7 @@ public final class Synchronized<T> {
      * @throws E if the command throws an exception of type E.
      */
     public static <T, E extends Throwable> void run(final T mutex, final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
-        N.checkArgNotNull(mutex);
+        N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(cmd, cs.cmd);
 
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -161,7 +174,7 @@ public final class Synchronized<T> {
      * @throws E if the callable throws an exception of type E.
      */
     public static <T, R, E extends Throwable> R call(final T mutex, final Throwables.Callable<? extends R, E> cmd) throws IllegalArgumentException, E {
-        N.checkArgNotNull(mutex);
+        N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(cmd, cs.cmd);
 
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -194,7 +207,7 @@ public final class Synchronized<T> {
      * @throws E if the predicate throws an exception of type E.
      */
     public static <T, E extends Throwable> boolean test(final T mutex, final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
-        N.checkArgNotNull(mutex);
+        N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(predicate, cs.predicate);
 
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -231,7 +244,7 @@ public final class Synchronized<T> {
      */
     public static <T, U, E extends Throwable> boolean test(final T mutex, final U u, final Throwables.BiPredicate<? super T, ? super U, E> predicate)
             throws IllegalArgumentException, E {
-        N.checkArgNotNull(mutex);
+        N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(predicate, cs.predicate);
 
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -261,7 +274,7 @@ public final class Synchronized<T> {
      * @throws E if the consumer throws an exception of type E.
      */
     public static <T, E extends Throwable> void accept(final T mutex, final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException, E {
-        N.checkArgNotNull(mutex);
+        N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(consumer, cs.consumer);
 
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -294,7 +307,7 @@ public final class Synchronized<T> {
      */
     public static <T, U, E extends Throwable> void accept(final T mutex, final U u, final Throwables.BiConsumer<? super T, ? super U, E> consumer)
             throws IllegalArgumentException, E {
-        N.checkArgNotNull(mutex);
+        N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(consumer, cs.consumer);
 
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -327,7 +340,7 @@ public final class Synchronized<T> {
      */
     public static <T, R, E extends Throwable> R apply(final T mutex, final Throwables.Function<? super T, ? extends R, E> function)
             throws IllegalArgumentException, E {
-        N.checkArgNotNull(mutex);
+        N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(function, cs.function);
 
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -364,7 +377,7 @@ public final class Synchronized<T> {
      */
     public static <T, U, R, E extends Throwable> R apply(final T mutex, final U u, final Throwables.BiFunction<? super T, ? super U, ? extends R, E> function)
             throws IllegalArgumentException, E {
-        N.checkArgNotNull(mutex);
+        N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(function, cs.function);
 
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
@@ -392,10 +405,10 @@ public final class Synchronized<T> {
      *
      * @param <E> the type of exception that the command might throw.
      * @param cmd the runnable command to execute.
-     * @throws E if the command throws an exception of type E.
      * @throws IllegalArgumentException if {@code cmd} is {@code null}.
+     * @throws E if the command throws an exception of type E.
      */
-    public <E extends Throwable> void run(final Throwables.Runnable<E> cmd) throws E, IllegalArgumentException {
+    public <E extends Throwable> void run(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(cmd, cs.cmd);
 
         synchronized (mutex) {
@@ -421,10 +434,10 @@ public final class Synchronized<T> {
      * @param <E> the type of exception that the callable might throw.
      * @param cmd the callable command to execute.
      * @return the result of the callable command.
-     * @throws E if the callable throws an exception of type E.
      * @throws IllegalArgumentException if {@code cmd} is {@code null}.
+     * @throws E if the callable throws an exception of type E.
      */
-    public <R, E extends Throwable> R call(final Throwables.Callable<? extends R, E> cmd) throws E, IllegalArgumentException {
+    public <R, E extends Throwable> R call(final Throwables.Callable<? extends R, E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(cmd, cs.cmd);
 
         synchronized (mutex) {
@@ -449,10 +462,10 @@ public final class Synchronized<T> {
      * @param <E> the type of exception that the predicate might throw.
      * @param predicate the predicate to test with the mutex as argument.
      * @return the boolean result of the predicate.
-     * @throws E if the predicate throws an exception of type E.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception of type E.
      */
-    public <E extends Throwable> boolean test(final Throwables.Predicate<? super T, E> predicate) throws E, IllegalArgumentException {
+    public <E extends Throwable> boolean test(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         synchronized (mutex) {
@@ -476,10 +489,10 @@ public final class Synchronized<T> {
      *
      * @param <E> the type of exception that the consumer might throw.
      * @param consumer the consumer to execute with the mutex as argument.
-     * @throws E if the consumer throws an exception of type E.
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws E if the consumer throws an exception of type E.
      */
-    public <E extends Throwable> void accept(final Throwables.Consumer<? super T, E> consumer) throws E, IllegalArgumentException {
+    public <E extends Throwable> void accept(final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException, E {
         N.checkArgNotNull(consumer, cs.consumer);
 
         synchronized (mutex) {
@@ -505,10 +518,10 @@ public final class Synchronized<T> {
      * @param <E> the type of exception that the function might throw.
      * @param function the function to apply with the mutex as argument.
      * @return the result of applying the function.
-     * @throws E if the function throws an exception of type E.
      * @throws IllegalArgumentException if {@code function} is {@code null}.
+     * @throws E if the function throws an exception of type E.
      */
-    public <R, E extends Throwable> R apply(final Throwables.Function<? super T, ? extends R, E> function) throws E, IllegalArgumentException {
+    public <R, E extends Throwable> R apply(final Throwables.Function<? super T, ? extends R, E> function) throws IllegalArgumentException, E {
         N.checkArgNotNull(function, cs.function);
 
         synchronized (mutex) {

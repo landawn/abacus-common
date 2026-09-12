@@ -22,6 +22,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.Strings;
 
@@ -138,14 +140,17 @@ public class URLType extends AbstractType<URL> {
      *
      * @param str the string to convert to a URL
      * @return a URL instance created from the string, or {@code null} if the string is {@code null} or empty
-     * @throws IllegalArgumentException if the string is not a valid URI (thrown by {@link URI#create(String)}).
-     * @throws com.landawn.abacus.exception.UncheckedIOException if the URI cannot be converted to a URL
+     * @throws IllegalArgumentException if the string is not a valid URI (thrown by {@link URI#create(String)}),
+     *         or is a valid but non-absolute URI with no scheme, such as {@code "example.com/path"}
+     *         (thrown by {@link URI#toURL()})
+     * @throws UncheckedIOException if the URI cannot be converted to a URL
      *         (wraps the thrown {@link MalformedURLException})
      * @see #valueOf(Object)
      * @see #stringOf(URL)
      */
+    @MayReturnNull
     @Override
-    public URL valueOf(final String str) {
+    public URL valueOf(final String str) throws IllegalArgumentException, UncheckedIOException {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
@@ -174,10 +179,11 @@ public class URLType extends AbstractType<URL> {
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) of the URL value
      * @return the URL value, or {@code null} if the database value is NULL
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public URL get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public URL get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getURL(columnIndex);
     }
 
@@ -198,10 +204,11 @@ public class URLType extends AbstractType<URL> {
      * @param rs the ResultSet to read from
      * @param columnName the label of the column containing the URL value
      * @return the URL value, or {@code null} if the database value is NULL
-     * @throws SQLException if a database access error occurs or the column label is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public URL get(final ResultSet rs, final String columnName) throws SQLException {
+    public URL get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getURL(columnName);
     }
 
@@ -222,10 +229,11 @@ public class URLType extends AbstractType<URL> {
      * @param stmt the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the URL value
      * @param x the URL value to set, or {@code null} for SQL NULL
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final URL x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final URL x) throws NullPointerException, SQLException {
         stmt.setURL(columnIndex, x);
     }
 
@@ -246,10 +254,11 @@ public class URLType extends AbstractType<URL> {
      * @param stmt the CallableStatement to set the value in
      * @param parameterName the name of the parameter where to set the URL value
      * @param x the URL value to set, or {@code null} for SQL NULL
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final URL x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final URL x) throws NullPointerException, SQLException {
         stmt.setURL(parameterName, x);
     }
 }

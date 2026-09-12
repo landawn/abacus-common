@@ -36,7 +36,7 @@ public class MathsTest extends TestBase {
             N.println(Long.MIN_VALUE + Long.MAX_VALUE);
 
             N.println(Math.pow(2, 2));
-            N.println(Numbers.pow(2, 2));
+            N.println(Numbers.powExact(2, 2));
 
             N.println(Math.sqrt(2));
             N.println(Numbers.sqrt(9, RoundingMode.UNNECESSARY));

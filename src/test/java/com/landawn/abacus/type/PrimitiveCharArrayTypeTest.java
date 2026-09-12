@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
+import javax.sql.rowset.serial.SerialClob;
 
 import org.junit.jupiter.api.Test;
 
@@ -407,13 +410,62 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOfLegacyAppendToSpecialCharacters() throws IOException {
+    public void testValueOfSerializedSpecialCharacters() throws IOException {
         final char[] chars = new char[] { '\r', '\t', '"', '\'', ' ', ',', ' ', ',' };
         final StringBuilder sb = new StringBuilder();
 
         type.appendTo(sb, chars);
 
-        assertArrayEquals(chars, type.valueOf(sb.toString()));
+        assertArrayEquals(chars, type.valueOf(type.stringOf(chars)));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(sb.toString()));
     }
 
+
+    @Test
+    public void reviewFixes20260906_stringOfEscapesNonAsciiAndSlashButNotDel() {
+        // T7-06: what the javadoc now says: a backslash-u escape for everything outside U+0020..U+007F, \/ for the slash, DEL as-is
+        final char[] array = { '\u00E9', '\u4E2D', '/', '~', '\u007F', '\u0080', ' ', '\u2028' };
+
+        final String str = type.stringOf(array);
+
+        assertEquals("['\\u00E9', '\\u4E2D', '\\/', '~', '\u007F', '\\u0080', ' ', '\\u2028']", str);
+        assertArrayEquals(array, type.valueOf(str));
+    }
+
+    @Test
+    public void reviewFixes20260906_stringOfRoundTripsOnPooledAndUnpooledBuilders() {
+        // T7-08 / R-T03: the pooled StringBuilder is now recycled in a finally block; behaviour must be byte-identical
+        final char[] small = { 'a', '\'', 'b' };
+        assertEquals("['a', '\\'', 'b']", type.stringOf(small));
+
+        for (int i = 0; i < 5; i++) {
+            assertArrayEquals(small, type.valueOf(type.stringOf(small)));
+        }
+
+        final char[] large = new char[4000];
+
+        for (int i = 0; i < large.length; i++) {
+            large[i] = (char) ('a' + i % 26);
+        }
+
+        final String str = type.stringOf(large);
+        assertEquals(2 + 3 * large.length + 2 * (large.length - 1), str.length());
+        assertArrayEquals(large, type.valueOf(str));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfZeroLengthClobReturnsEmptyArrayAndFrees() throws SQLException {
+        final Clob clob = mock(Clob.class);
+        when(clob.length()).thenReturn(0L);
+
+        final char[] result = type.valueOf((Object) clob);
+
+        assertEquals(0, result.length);
+        verify(clob, never()).getSubString(1L, 0);
+        verify(clob).free();
+
+        // SerialClob rejects getSubString(1, 0) on a zero-length lob; the guard returns the empty array instead
+        assertEquals(0, type.valueOf((Object) new SerialClob(new char[0])).length);
+        assertArrayEquals(new char[] { 'a', 'b' }, type.valueOf((Object) new SerialClob(new char[] { 'a', 'b' })));
+    }
 }

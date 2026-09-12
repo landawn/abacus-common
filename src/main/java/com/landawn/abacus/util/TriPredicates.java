@@ -20,6 +20,18 @@ import com.landawn.abacus.util.function.TriPredicate;
 /**
  * Utility class providing various TriPredicate implementations and factory methods.
  * This class contains predefined TriPredicates for common operations.
+ *
+ * <p>This class is a top-level sibling of {@link Fn}, not a nested type. Use {@link Fn} for the
+ * general functional-interface factory and {@link Fnn} for {@link Throwables} variants that can
+ * declare checked exceptions. For one- and two-argument predicates see {@link Predicates} and
+ * {@link BiPredicates}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see Predicates
+ * @see BiPredicates
+ * @see TriConsumers
+ * @see TriFunctions
  */
 public final class TriPredicates {
 
@@ -28,7 +40,7 @@ public final class TriPredicates {
     private static final TriPredicate ALWAYS_TRUE = (a, b, c) -> true;
 
     /** The Constant ALWAYS_FALSE. */
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings("rawtypes")
     private static final TriPredicate ALWAYS_FALSE = (a, b, c) -> false;
 
     private TriPredicates() {

@@ -107,4 +107,31 @@ public class XMLTypeTest extends TestBase {
         assertEquals(Long.class, parsed.get(0).getClass());
         assertEquals(source, parsed);
     }
+
+    // ---- review fixes 2026-09-06, T2-07: blank input is null instead of a StAX "Unexpected EOF in prolog" ----
+
+    @Test
+    public void reviewFixes20260906_blankStringIsNull() {
+        assertNull(xmlMapType.valueOf("  "));
+        assertNull(xmlMapType.valueOf("\t\n"));
+        assertNull(xmlBeanType.valueOf("   "));
+        // Consistent with JSONType for the same target.
+        assertNull(createType("JSON<Map>").valueOf("  "));
+    }
+
+    // ---- T2-12: the declaring name expands a raw Map argument ----
+
+    @Test
+    public void reviewFixes20260906_declaringNameExpandsRawMap() {
+        assertEquals("XML<Map<Object, Object>>", xmlMapType.declaringName());
+        assertEquals("XML<com.landawn.abacus.type.XMLTypeTest.TestBean>", xmlBeanType.declaringName());
+    }
+
+    // ---- T2-14: the parser is present in this build; the null-parser guard is only reachable without StAX ----
+
+    @Test
+    public void reviewFixes20260906_parserPresentSoNoUnsupportedOperation() {
+        assertTrue(com.landawn.abacus.parser.ParserFactory.isXmlParserAvailable());
+        assertNotNull(xmlMapType.stringOf(new HashMap<>(Map.of("a", 1))));
+    }
 }

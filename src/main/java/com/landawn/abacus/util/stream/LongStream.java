@@ -214,8 +214,17 @@ import com.landawn.abacus.util.function.ToLongFunction;
  *       <td><b><i>abacus</i></b>: returns {@code u.OptionalLong} (and {@code u.OptionalDouble} for {@code average()}) &middot; &#9888;&#65039; <b><i>JDK</i></b>: returns {@code java.util.OptionalLong}/{@code OptionalDouble}</td>
  *     </tr>
  *     <tr>
+ *       <td><b>null arguments</b> to any operation</td>
+ *       <td><b><i>abacus</i></b>: throws {@link IllegalArgumentException} (via {@code checkArgNotNull}),
+ *           and the stream is <b>closed</b> before the exception propagates &middot; &#9888;&#65039;
+ *           <b><i>JDK</i></b>: throws {@link NullPointerException} and leaves the stream open.
+ *           This applies throughout: a {@code null} mapper, predicate, comparator, collector,
+ *           supplier or action is rejected with {@code IllegalArgumentException} naming the
+ *           parameter, whether or not the individual method's javadoc repeats it.</td>
+ *     </tr>
+ *     <tr>
  *       <td>{@code count()}</td>
- *       <td><b><i>abacus</i></b>: always traverses the pipeline, so an upstream {@code peek}/{@code filter} still runs &middot; &#9888;&#65039; <b><i>JDK</i></b> (9+): may return the count without traversal when the element count is already known</td>
+ *       <td><b><i>abacus</i></b>: traverses the pipeline, so an upstream {@code peek}/{@code filter} still runs. The one exception is a stream created by {@code from(java.util.stream.*)} with no abacus operation after it: that delegates {@code count()} straight to the wrapped JDK stream, which may skip its own {@code peek} &middot; &#9888;&#65039; <b><i>JDK</i></b> (9+): may return the count without traversal when the element count is already known</td>
  *     </tr>
  *     <tr>
  *       <td>{@code peek}/{@code onEach}</td>
@@ -298,12 +307,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new stream consisting of the elements that match the given predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#filter(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract LongStream filter(final LongPredicate predicate);
+    public abstract LongStream filter(final LongPredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the longest prefix of elements from this stream
@@ -319,21 +329,16 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * individually satisfy the predicate.<br>
      * There is no guarantee of encounter-order prefix semantics in parallel streams.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
-     * <pre>
-     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
-     * │     Method      │        Boundary         │                            Warning                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
-     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
-     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
-     * </pre>
+     * <p>Parallel-stream behavior of these related operations:</p>
+     * <ul>
+     *   <li>{@code takeWhile}: elements after the first predicate failure may still be included
+     *       if they individually satisfy the predicate.</li>
+     *   <li>{@code dropWhile}, including the {@code onDrop} overload: drops only the initial
+     *       matching prefix; the first nonmatching element and all later elements are retained.</li>
+     *   <li>{@code skipUntil}: skips only the initial nonmatching prefix; the first matching
+     *       element and all later elements are retained.</li>
+     * </ul>
+     * <p>Parallel processing does not guarantee the encounter order of the retained elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -347,12 +352,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new stream consisting of elements from this stream until an element is encountered that doesn't match the predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#takeWhile(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract LongStream takeWhile(final LongPredicate predicate);
+    public abstract LongStream takeWhile(final LongPredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the remaining elements of this stream after
@@ -364,28 +370,25 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * returns {@code false}, effectively performing a "drop while condition is true"
      * operation that preserves encounter order in sequential streams.
      *
-     * <p><b>Notes on parallel streams:</b><br>
-     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
-     * the predicate returns {@code false}) may still be processed and dropped if they individually
-     * satisfy the predicate.<br>
-     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
-     * is no guarantee of encounter-order prefix/suffix semantics.
+     * <p><b>Notes on parallel streams:</b> The initial matching prefix is determined in the order this
+     * operation's <i>immediate upstream</i> hands it elements: the predicate checks are serialized under
+     * the source iterator's lock, so exactly the leading run of that arrival order is dropped. That is
+     * source encounter order only when no parallel stage precedes this one. An upstream parallel stage
+     * merges its workers' output in completion order, so the prefix dropped here can differ from the
+     * source-order prefix, and elements that follow the source-order boundary can be dropped with it.
+     * Once the predicate first returns {@code false}, that element and all later elements are retained
+     * without further predicate checks. Parallel downstream processing may reorder the retained elements.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
-     * <pre>
-     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
-     * │     Method      │        Boundary         │                            Warning                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
-     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
-     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
-     * </pre>
+     * <p>Parallel-stream behavior of these related operations:</p>
+     * <ul>
+     *   <li>{@code takeWhile}: elements after the first predicate failure may still be included
+     *       if they individually satisfy the predicate.</li>
+     *   <li>{@code dropWhile}, including the {@code onDrop} overload: drops only the initial
+     *       matching prefix; the first nonmatching element and all later elements are retained.</li>
+     *   <li>{@code skipUntil}: skips only the initial nonmatching prefix; the first matching
+     *       element and all later elements are retained.</li>
+     * </ul>
+     * <p>Parallel processing does not guarantee the encounter order of the retained elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -400,12 +403,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#dropWhile(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract LongStream dropWhile(final LongPredicate predicate);
+    public abstract LongStream dropWhile(final LongPredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a LongStream consisting of the results of applying the given function to the elements of this stream.
@@ -428,11 +432,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to long
      * @return a new LongStream consisting of the results of applying the mapper function to each element
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see Stream#map(Function)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream map(LongUnaryOperator mapper);
+    public abstract LongStream map(LongUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an IntStream consisting of the results of applying the given
@@ -462,12 +467,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to int
      * @return a new IntStream consisting of the results of applying the mapper function to each element of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(LongUnaryOperator)
      * @see #mapToObj(LongFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream mapToInt(LongToIntFunction mapper);
+    public abstract IntStream mapToInt(LongToIntFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a FloatStream consisting of the results of applying the given
@@ -497,12 +503,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to float
      * @return a new FloatStream consisting of the results of applying the mapper function to each element of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(LongUnaryOperator)
      * @see #mapToDouble(LongToDoubleFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream mapToFloat(LongToFloatFunction mapper);
+    public abstract FloatStream mapToFloat(LongToFloatFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a DoubleStream consisting of the results of applying the given
@@ -532,13 +539,14 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to double
      * @return a new DoubleStream consisting of the results of applying the mapper function to each element of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(LongUnaryOperator)
      * @see #mapToFloat(LongToFloatFunction)
      * @see java.util.stream.LongStream#mapToDouble(LongToDoubleFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream mapToDouble(LongToDoubleFunction mapper);
+    public abstract DoubleStream mapToDouble(LongToDoubleFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an object-valued Stream consisting of the results of applying the
@@ -569,12 +577,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to T
      * @return a new Stream of objects resulting from applying the mapper function to each element of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(LongUnaryOperator)
      * @see java.util.stream.LongStream#mapToObj(LongFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> mapToObj(LongFunction<? extends T> mapper);
+    public abstract <T> Stream<T> mapToObj(LongFunction<? extends T> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of replacing each element of
@@ -603,11 +612,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to LongStream
      * @return a new {@link LongStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see Stream#flatMap(Function)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream flatMap(LongFunction<? extends LongStream> mapper);
+    public abstract LongStream flatMap(LongFunction<? extends LongStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     // public abstract LongStream flatmap(LongFunction<LongIterator> mapper);
 
@@ -653,6 +663,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to {@code Collection<Long>}
      * @return a new {@code LongStream} consisting of the flattened contents of the collections produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(LongFunction)
      * @see #flatMapArray(LongFunction)
      * @see Stream#flatmap(java.util.function.Function)
@@ -660,7 +671,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     // @ai-ignore flatmap/flatMap naming - intentional: flatMap maps to LongStream, flatmap maps to Collection<Long>, flatMapArray maps to long[]. Do not suggest renaming.
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream flatmap(LongFunction<? extends Collection<Long>> mapper); //NOSONAR
+    public abstract LongStream flatmap(LongFunction<? extends Collection<Long>> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns a stream consisting of the results of replacing each element of this stream with the contents
@@ -689,6 +700,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to long[]
      * @return a new {@code LongStream} consisting of the flattened contents of the arrays produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(LongFunction)
      * @see #flattMap(LongFunction)
      * @see #flatMapToInt(LongFunction)
@@ -697,7 +709,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     // @ai-ignore flatMapArray/flatMap/flattMap naming - intentional: flatMap maps to LongStream, flatMapArray maps to long[], flattMap maps to JDK java.util.stream.LongStream. Do not suggest renaming.
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream flatMapArray(LongFunction<long[]> mapper); //NOSONAR
+    public abstract LongStream flatMapArray(LongFunction<long[]> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * This method is deprecated and not supported.
@@ -711,14 +723,15 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *               (parameter is not used as this method always throws)
      * @return the new stream (this method never returns as it always throws)
      * @throws IllegalStateException if the stream is already closed
-     * @throws UnsupportedOperationException always thrown as this method is not supported
+     * @throws UnsupportedOperationException if the stream is open; this method is not supported.
      * @deprecated This method is not supported. Use {@link #flatmap(LongFunction)} instead
      * @see #flatmap(LongFunction)
      */
     @Deprecated
     @ParallelSupported
     @IntermediateOp
-    LongStream flattmap(@SuppressWarnings("unused") final LongFunction<? extends Collection<Long>> mapper) throws UnsupportedOperationException { // NOSONAR
+    LongStream flattmap(@SuppressWarnings("unused") final LongFunction<? extends Collection<Long>> mapper)
+            throws IllegalStateException, UnsupportedOperationException { // NOSONAR
         assertNotClosed();
 
         throw new UnsupportedOperationException("Method 'flattmap' is deprecated and unsupported; use 'flatmap' or 'flatMap' instead");
@@ -752,6 +765,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to java.util.stream.LongStream
      * @return a new {@code LongStream} consisting of the flattened contents of the mapped JDK {@code LongStream} instances
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(LongFunction)
      * @see #flatMapArray(LongFunction)
      */
@@ -759,7 +773,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream flattMap(LongFunction<? extends java.util.stream.LongStream> mapper); //NOSONAR
+    public abstract LongStream flattMap(LongFunction<? extends java.util.stream.LongStream> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Alias for {@link #flattMap(LongFunction)}.
@@ -789,7 +803,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public LongStream flatMapJdkStream(final LongFunction<? extends java.util.stream.LongStream> mapper) throws IllegalArgumentException {
+    public LongStream flatMapJdkStream(final LongFunction<? extends java.util.stream.LongStream> mapper)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -825,10 +840,11 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to IntStream
      * @return a new {@link IntStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream flatMapToInt(LongFunction<? extends IntStream> mapper);
+    public abstract IntStream flatMapToInt(LongFunction<? extends IntStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a {@code FloatStream} consisting of the results of replacing each element of
@@ -857,10 +873,11 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to FloatStream
      * @return a new {@link FloatStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream flatMapToFloat(LongFunction<? extends FloatStream> mapper);
+    public abstract FloatStream flatMapToFloat(LongFunction<? extends FloatStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a {@code DoubleStream} consisting of the results of replacing each element of
@@ -889,10 +906,11 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to DoubleStream
      * @return a new {@link DoubleStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream flatMapToDouble(LongFunction<? extends DoubleStream> mapper);
+    public abstract DoubleStream flatMapToDouble(LongFunction<? extends DoubleStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of this stream
@@ -924,12 +942,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to Stream of T
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(LongFunction)
      * @see #flatmapToObj(LongFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatMapToObj(LongFunction<? extends Stream<? extends T>> mapper);
+    public abstract <T> Stream<T> flatMapToObj(LongFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of this stream
@@ -959,12 +978,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to Collection of T
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the collections produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMapToObj(LongFunction)
      * @see #flatMapArrayToObj(LongFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatmapToObj(LongFunction<? extends Collection<? extends T>> mapper); //NOSONAR
+    public abstract <T> Stream<T> flatmapToObj(LongFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of this stream
@@ -994,13 +1014,14 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that transforms each element from long to T[]
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the arrays produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMapToObj(LongFunction)
      * @see #flatmapToObj(LongFunction)
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatMapArrayToObj(LongFunction<T[]> mapper);
+    public abstract <T> Stream<T> flatMapArrayToObj(LongFunction<T[]> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given multi-mapping function to each element.
@@ -1034,10 +1055,11 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function that generates replacement elements
      * @return a new {@link LongStream} consisting of the elements generated by applying the mapper to each element of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream mapMulti(LongMapMultiConsumer mapper);
+    public abstract LongStream mapMulti(LongMapMultiConsumer mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given function to the elements of this stream, where the function returns an {@code OptionalLong}.
@@ -1064,11 +1086,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function to apply to each element which returns an {@code OptionalLong}
      * @return a new {@link LongStream} consisting of the present values from the non-empty {@code OptionalLong} results produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream mapPartial(LongFunction<OptionalLong> mapper);
+    public abstract LongStream mapPartial(LongFunction<OptionalLong> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given function to the elements of this stream, where the function returns a {@code java.util.OptionalLong}.
@@ -1095,11 +1118,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a non-interfering, stateless function to apply to each element which returns a {@code java.util.OptionalLong}
      * @return a new {@link LongStream} consisting of the present values from the non-empty {@code java.util.OptionalLong} results produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream mapPartialJdk(LongFunction<java.util.OptionalLong> mapper);
+    public abstract LongStream mapPartialJdk(LongFunction<java.util.OptionalLong> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given mapper function to the first and last element of the ranges in this stream,
@@ -1126,17 +1150,23 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
      *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output element
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code sameRange}, {@code mapper} is {@code null}
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract LongStream rangeMap(final LongBiPredicate sameRange, final LongBinaryOperator mapper);
+    public abstract LongStream rangeMap(final LongBiPredicate sameRange, final LongBinaryOperator mapper)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given mapper function to the first and last element of the ranges in this stream,
@@ -1166,6 +1196,10 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param <T> the element type of the new stream
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
@@ -1173,11 +1207,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapper a function that maps a range (defined by its first and last element) to an output object of type T
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code sameRange}, {@code mapper} is {@code null}
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract <T> Stream<T> rangeMapToObj(final LongBiPredicate sameRange, final LongBiFunction<? extends T> mapper);
+    public abstract <T> Stream<T> rangeMapToObj(final LongBiPredicate sameRange, final LongBiFunction<? extends T> mapper)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream into groups based on a predicate.
@@ -1206,15 +1242,20 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential};
      * buffers the current group in a {@link LongList}.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
      * @return a stream of lists, each containing a sequence of consecutive elements that are collapsible with each other
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code collapsible} is {@code null}
      * @see Stream#collapse(BiPredicate)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<LongList> collapse(final LongBiPredicate collapsible);
+    public abstract Stream<LongList> collapse(final LongBiPredicate collapsible) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream by applying a merge function when elements are collapsible.
@@ -1240,16 +1281,22 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
      * @param mergeFunction a function to merge two collapsible elements into one
      * @return a stream of merged elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code collapsible}, {@code mergeFunction} is {@code null}
      * @see Stream#collapse(BiPredicate, BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract LongStream collapse(final LongBiPredicate collapsible, final LongBinaryOperator mergeFunction);
+    public abstract LongStream collapse(final LongBiPredicate collapsible, final LongBinaryOperator mergeFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream by applying a merge function when elements are collapsible.
@@ -1276,16 +1323,22 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param collapsible a predicate that determines if the next element should be collapsed with the first and last elements of the group.
      *          The collapsible predicate takes three elements: the first and last elements of the group, and the next element in the stream.
      * @param mergeFunction a function to merge two collapsible elements into one
      * @return a stream of merged elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code collapsible}, {@code mergeFunction} is {@code null}
      * @see Stream#collapse(TriPredicate, BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract LongStream collapse(final LongTriPredicate collapsible, final LongBinaryOperator mergeFunction);
+    public abstract LongStream collapse(final LongTriPredicate collapsible, final LongBinaryOperator mergeFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -1318,14 +1371,17 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>The first successfully read source element initializes the result without invoking the accumulator.</p>
+     *
      * @param accumulator a {@code LongBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code LongStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract LongStream scan(final LongBinaryOperator accumulator);
+    public abstract LongStream scan(final LongBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -1357,11 +1413,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param accumulator a {@code LongBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code LongStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(Object, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract LongStream scan(final long init, final LongBinaryOperator accumulator);
+    public abstract LongStream scan(final long init, final LongBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -1391,11 +1448,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param accumulator a {@code LongBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code LongStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(Object, boolean, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract LongStream scan(final long init, final boolean initIncluded, final LongBinaryOperator accumulator);
+    public abstract LongStream scan(final long init, final boolean initIncluded, final LongBinaryOperator accumulator)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the specified elements followed by the elements of this stream.
@@ -1423,7 +1482,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract LongStream prepend(final long... a);
+    public abstract LongStream prepend(final long... a) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of the elements of this stream with the specified elements appended.
@@ -1451,7 +1510,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract LongStream append(final long... a);
+    public abstract LongStream append(final long... a) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of this stream's elements when it is non-empty, or the specified elements when it is empty.
@@ -1479,7 +1538,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract LongStream appendIfEmpty(final long... a);
+    public abstract LongStream appendIfEmpty(final long... a) throws IllegalStateException;
 
     /**
      * Returns a LongStream consisting of the top n elements of this stream, according to the natural order of the elements.
@@ -1513,7 +1572,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract LongStream top(int n);
+    public abstract LongStream top(int n) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a LongStream consisting of the top n elements of this stream compared by the provided Comparator.
@@ -1548,7 +1607,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract LongStream top(final int n, Comparator<? super Long> comparator);
+    public abstract LongStream top(final int n, Comparator<? super Long> comparator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a {@code LongList} containing the elements of this stream.
@@ -1568,7 +1627,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract LongList toLongList();
+    public abstract LongList toLongList() throws IllegalStateException;
 
     /**
      * Returns a {@code Map} whose keys and values are the result of applying the provided mapping functions to the input elements.
@@ -1595,6 +1654,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param valueMapper a non-interfering, stateless function to apply to each element to get the values
      * @return a {@code Map} whose keys and values are the result of applying the mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper} is {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function)
@@ -1602,7 +1662,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Throwables.LongFunction<? extends K, E> keyMapper,
-            Throwables.LongFunction<? extends V, E2> valueMapper) throws E, E2;
+            Throwables.LongFunction<? extends V, E2> valueMapper) throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a {@code Map} whose keys and values are the result of applying the provided mapping functions to the input elements.
@@ -1611,13 +1671,19 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongStream.of(3L, 1L, 2L)
-     *     .toMap(n -> n, n -> "value" + n, LinkedHashMap::new);
+     *     .toMap(n -> n, n -> "value" + n, () -> new LinkedHashMap<Long, String>());
      *     // Result: LinkedHashMap {3="value3", 1="value1", 2="value2"} (insertion order preserved)
      *
      * LongStream.of(5L, 3L, 8L)
-     *     .toMap(n -> n, n -> n * n, TreeMap::new);
+     *     .toMap(n -> n, n -> n * n, () -> new TreeMap<Long, Long>());
      *     // Result: TreeMap {3=9, 5=25, 8=64} (sorted by keys)
      * }</pre>
+     *
+     * <p><b>Note:</b> supply {@code mapFactory} as a lambda, not as a constructor reference. A
+     * constructor reference such as {@code LinkedHashMap::new} is <i>inexact</i>, so the compiler
+     * cannot choose between this overload and
+     * {@link #toMap(Throwables.LongFunction, Throwables.LongFunction, BinaryOperator)} and reports
+     * {@code reference to toMap is ambiguous}.
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
@@ -1631,6 +1697,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} whose keys and values are the result of applying the mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, Supplier)
@@ -1638,7 +1705,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.LongFunction<? extends K, E> keyMapper,
-            Throwables.LongFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory) throws E, E2;
+            Throwables.LongFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a {@code Map} whose keys and values are the result of applying the provided mapping functions to the input elements.
@@ -1668,6 +1736,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mergeFunction a merge function, used to resolve collisions between values associated with the same key
      * @return a {@code Map} whose keys and values are the result of applying the mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction} is {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator)
@@ -1675,7 +1744,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Throwables.LongFunction<? extends K, E> keyMapper,
-            Throwables.LongFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction) throws E, E2;
+            Throwables.LongFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a {@code Map} whose keys and values are the result of applying the provided mapping functions to the input elements.
@@ -1686,11 +1756,11 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongStream.of(10L, 20L, 30L, 15L, 25L)
-     *     .toMap(n -> n / 10, n -> n, Long::min, TreeMap::new);
+     *     .toMap(n -> n / 10, n -> n, Long::min, Suppliers.ofTreeMap());
      *     // Result: TreeMap {1=10, 2=20, 3=30} (sorted keys, min values for duplicates)
      *
      * LongStream.of(100L, 200L, 150L)
-     *     .toMap(n -> n / 100, n -> String.valueOf(n), (a, b) -> a + "," + b, LinkedHashMap::new);
+     *     .toMap(n -> n / 100, n -> String.valueOf(n), (a, b) -> a + "," + b, Suppliers.ofLinkedHashMap());
      *     // Result: LinkedHashMap {1="100,150", 2="200"} (concatenated values in insertion order)
      * }</pre>
      *
@@ -1707,6 +1777,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} whose keys and values are the result of applying the mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, {@code mapFactory} is {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -1714,7 +1785,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.LongFunction<? extends K, E> keyMapper,
-            Throwables.LongFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory) throws E, E2;
+            Throwables.LongFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Groups the elements of this stream according to a classification function, and performs a reduction operation on the values associated with each key.
@@ -1731,7 +1803,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     // Result: {0=5, 1=25, 2=45} (sum of elements in each group)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported};
+     * maintains a downstream accumulation result for each key; additional buffering depends on the collector.
      *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
@@ -1740,13 +1813,14 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @return a {@code Map} containing the results of the reduction operation on the values associated with each key
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code downstream} is {@code null}
      * @throws E if the classification function throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, E extends Exception> Map<K, D> groupTo(Throwables.LongFunction<? extends K, E> keyMapper,
-            final Collector<? super Long, ?, D> downstream) throws E;
+            final Collector<? super Long, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Groups the elements of this stream according to a classification function, and performs a reduction operation on the values associated with each key.
@@ -1756,15 +1830,16 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongStream.of(8L, 3L, 5L, 18L, 13L, 15L)
-     *     .groupTo(n -> n / 10, Collectors.toList(), TreeMap::new);
+     *     .groupTo(n -> n / 10, Collectors.toList(), Suppliers.ofTreeMap());
      *     // Result: TreeMap {0=[8, 3, 5], 1=[18, 13, 15]} (sorted keys, values in encounter order)
      *
      * LongStream.of(100L, 200L, 150L, 250L)
-     *     .groupTo(n -> n / 100, Collectors.averagingLong(Long::longValue), LinkedHashMap::new);
+     *     .groupTo(n -> n / 100, Collectors.averagingLong(Long::longValue), Suppliers.ofLinkedHashMap());
      *     // Result: LinkedHashMap {1=125.0, 2=225.0} (insertion order preserved)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported};
+     * maintains a downstream accumulation result for each key; additional buffering depends on the collector.
      *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
@@ -1775,13 +1850,14 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} containing the results of the reduction operation on the values associated with each key
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}
      * @throws E if the classification function throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, M extends Map<K, D>, E extends Exception> M groupTo(Throwables.LongFunction<? extends K, E> keyMapper,
-            final Collector<? super Long, ?, D> downstream, final Supplier<? extends M> mapFactory) throws E;
+            final Collector<? super Long, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Performs a reduction on the elements of this stream, using the provided identity value and an associative accumulation function, and returns the reduced value.
@@ -1808,11 +1884,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#reduce(Object, BinaryOperator)
      */
     @ParallelSupported
     @TerminalOp
-    public abstract long reduce(long identity, LongBinaryOperator accumulator);
+    public abstract long reduce(long identity, LongBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a reduction on the elements of this stream, using an associative accumulation function, and returns an {@code OptionalLong} describing the reduced value, if any.
@@ -1838,11 +1915,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@code OptionalLong} describing the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#reduce(BinaryOperator)
      */
     @ParallelSupported
     @TerminalOp
-    public abstract OptionalLong reduce(LongBinaryOperator accumulator);
+    public abstract OptionalLong reduce(LongBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream.
@@ -1870,13 +1948,15 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *                It is unnecessary to specify {@code combiner} if {@code R} is a {@code Map/Collection/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code combiner} is {@code null}
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see BiConsumers#ofAddAll()
      * @see BiConsumers#ofPutAll()
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <R> R collect(Supplier<R> supplier, ObjLongConsumer<? super R> accumulator, BiConsumer<R, R> combiner);
+    public abstract <R> R collect(Supplier<R> supplier, ObjLongConsumer<? super R> accumulator, BiConsumer<R, R> combiner)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream.
@@ -1902,6 +1982,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a result.
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator} is {@code null}
      * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of: {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
      *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
      * @see #collect(Supplier, ObjLongConsumer, BiConsumer)
@@ -1910,7 +1991,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <R> R collect(Supplier<R> supplier, ObjLongConsumer<? super R> accumulator);
+    public abstract <R> R collect(Supplier<R> supplier, ObjLongConsumer<? super R> accumulator)
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Performs an action for each element of this stream.
@@ -1938,7 +2020,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @ParallelSupported
     @TerminalOp
-    public void foreach(final LongConsumer action) throws IllegalArgumentException { // NOSONAR
+    public void foreach(final LongConsumer action) throws IllegalStateException, IllegalArgumentException { // NOSONAR
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -1967,11 +2049,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEach(final Throwables.LongConsumer<E> action) throws E;
+    public abstract <E extends Exception> void forEach(final Throwables.LongConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Performs an action for each element of this stream, passing the element index as the first parameter to the action.
@@ -1997,12 +2080,16 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements, where the first parameter is the element index and the second is the element value
+     *        &#9888;&#65039; On a parallel stream that index is an invocation counter shared by the
+     *        workers, not the element's position; only sequential execution pairs an element with its
+     *        true index. It is an {@code int} and wraps past {@code Integer.MAX_VALUE}.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEachIndexed(Throwables.IntLongConsumer<E> action) throws E;
+    public abstract <E extends Exception> void forEachIndexed(Throwables.IntLongConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether any elements of this stream match the provided predicate.
@@ -2026,11 +2113,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if any elements of the stream match the provided predicate, otherwise {@code false}. Returns {@code false} if the stream is empty.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean anyMatch(final Throwables.LongPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean anyMatch(final Throwables.LongPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether all elements of this stream match the provided predicate.
@@ -2058,11 +2147,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either all elements of the stream match the provided predicate or the stream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean allMatch(final Throwables.LongPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean allMatch(final Throwables.LongPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether no elements of this stream match the provided predicate.
@@ -2090,19 +2181,23 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either no elements of the stream match the provided predicate or the stream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean noneMatch(final Throwables.LongPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean noneMatch(final Throwables.LongPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns the first element of this stream wrapped in an {@code OptionalLong}, or an empty
      * {@code OptionalLong} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is a deterministic alias of {@link #first()}: it always returns the first element
-     * in encounter order, even for parallel streams. The {@code findFirst} name is kept to align with
+     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it
+     * deterministically returns the first element in encounter order. In a <b>parallel</b> stream the
+     * first element to reach the terminal operation wins, so the result is <b>not</b> guaranteed to be
+     * first in encounter order and may differ between runs. The {@code findFirst} name is kept to align with
      * the standard {@link java.util.stream.LongStream#findFirst()} API.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2123,7 +2218,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @ParallelSupported
     @TerminalOp
-    public OptionalLong findFirst() {
+    public OptionalLong findFirst() throws IllegalStateException {
         assertNotClosed();
 
         return first();
@@ -2134,10 +2229,10 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * {@code OptionalLong} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>Despite the name, this method is deterministic: unlike {@link java.util.stream.LongStream#findAny()},
-     * which may return an arbitrary element (especially for parallel streams), this method is an alias of
-     * {@link #first()} and always returns the first element in encounter order, even for parallel
-     * streams. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
+     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it returns the first element in encounter order.
+     * In a <b>parallel</b> stream, exactly as for {@code findFirst}, the first element to reach the
+     * terminal operation wins, so the result is <b>not</b> guaranteed to be first in encounter
+     * order and may differ between runs. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2157,7 +2252,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @ParallelSupported
     @TerminalOp
-    public OptionalLong findAny() {
+    public OptionalLong findAny() throws IllegalStateException {
         assertNotClosed();
 
         return first();
@@ -2184,6 +2279,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalLong} containing the first element that matches the predicate, or an empty {@code OptionalLong} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findAny(Throwables.LongPredicate)
      * @see #findLast(Throwables.LongPredicate)
@@ -2191,7 +2287,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalLong findFirst(final Throwables.LongPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalLong findFirst(final Throwables.LongPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns any element of this stream that matches the given {@code predicate}, wrapped in an
@@ -2202,7 +2299,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * parallel streams there is no ordering guarantee: the matching element found first by any worker thread
      * is returned, so the result may differ between runs — which is what can make it faster than
      * {@link #findFirst(Throwables.LongPredicate)} in parallel. (Note the contrast with the no-arg
-     * {@link #findAny()}, which is a deterministic alias of {@link #first()}.)</p>
+     * {@link #findAny()}, which is an alias of {@link #first()}.)</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2217,6 +2314,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalLong} containing a matching element, or an empty {@code OptionalLong} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.LongPredicate)
      * @see #findLast(Throwables.LongPredicate)
@@ -2224,17 +2322,18 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalLong findAny(final Throwables.LongPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalLong findAny(final Throwables.LongPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns the last element of this stream that matches the given {@code predicate}, wrapped in an
      * {@code OptionalLong}, or an empty {@code OptionalLong} if no element matches. This is a terminal
      * operation, and the stream is then closed.
      *
-     * <p>Unlike {@link #findFirst(Throwables.LongPredicate)}, this operation cannot short-circuit: every
-     * element must be tested, because a later element is always a better candidate. The result is
-     * deterministic even for parallel streams: when several elements match, the one at the largest
-     * encounter-order index wins.</p>
+     * <p>Finding the last match generally requires traversing the source. Array-backed streams may
+     * instead search backwards and stop at the first matching element. When several elements match,
+     * the one at the largest encounter-order index in the current pipeline wins. Parallel
+     * intermediate operations may already have reordered the original source.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2248,6 +2347,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalLong} containing the last element that matches the predicate, or an empty {@code OptionalLong} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.LongPredicate)
      * @see #findAny(Throwables.LongPredicate)
@@ -2256,7 +2356,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @Beta
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalLong findLast(final Throwables.LongPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalLong findLast(final Throwables.LongPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns an {@code OptionalLong} describing the minimum element of this stream, or an empty optional if this stream is empty.
@@ -2279,7 +2380,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalLong min();
+    public abstract OptionalLong min() throws IllegalStateException;
 
     /**
      * Returns an {@code OptionalLong} describing the maximum element of this stream, or an empty optional if this stream is empty.
@@ -2302,7 +2403,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalLong max();
+    public abstract OptionalLong max() throws IllegalStateException;
 
     /**
      * Returns the <i>k-th</i> largest element in the stream.
@@ -2329,7 +2430,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalLong kthLargest(int k);
+    public abstract OptionalLong kthLargest(int k) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns the sum of all elements in this stream. This is a terminal operation.
@@ -2368,7 +2469,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract long sum();
+    public abstract long sum() throws IllegalStateException;
 
     /**
      * Returns an OptionalDouble describing the arithmetic mean of elements of this stream,
@@ -2400,7 +2501,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalDouble average();
+    public abstract OptionalDouble average() throws IllegalStateException;
 
     /**
      * Returns statistics about the elements of this stream.
@@ -2424,7 +2525,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract LongSummaryStatistics summaryStatistics();
+    public abstract LongSummaryStatistics summaryStatistics() throws IllegalStateException;
 
     /**
      * Returns a pair consisting of LongSummaryStatistics for the elements of this stream,
@@ -2457,7 +2558,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @TerminalOp
-    public abstract Pair<LongSummaryStatistics, Optional<Map<Percentage, Long>>> summaryStatisticsAndPercentiles();
+    public abstract Pair<LongSummaryStatistics, Optional<Map<Percentage, Long>>> summaryStatisticsAndPercentiles() throws IllegalStateException;
 
     /**
      * Merges this stream with another stream, selecting elements based on the given selector function.
@@ -2485,10 +2586,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return the new merged stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract LongStream mergeWith(final LongStream b, final LongBiFunction<MergeResult> nextSelector);
+    public abstract LongStream mergeWith(final LongStream b, final LongBiFunction<MergeResult> nextSelector)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with the given stream using the provided zip function.
@@ -2512,11 +2615,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param zipFunction a LongBinaryOperator that determines the combination of elements in the combined LongStream.
      * @return a new LongStream that is the result of combining the current LongStream with the given LongStream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      * @see #zipWith(LongStream, long, long, LongBinaryOperator)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream zipWith(LongStream b, LongBinaryOperator zipFunction);
+    public abstract LongStream zipWith(LongStream b, LongBinaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with two other streams using the provided zip function.
@@ -2540,11 +2644,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param zipFunction a LongTernaryOperator that determines the combination of elements in the combined LongStream.
      * @return a new LongStream that is the result of combining the current LongStream with the given LongStreams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      * @see #zipWith(LongStream, LongStream, long, long, long, LongTernaryOperator)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream zipWith(LongStream b, LongStream c, LongTernaryOperator zipFunction);
+    public abstract LongStream zipWith(LongStream b, LongStream c, LongTernaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with the given stream using the provided zip function, with default values for missing elements.
@@ -2568,10 +2673,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param zipFunction a LongBinaryOperator that determines the combination of elements in the combined LongStream.
      * @return a new LongStream that is the result of combining the current LongStream with the given LongStream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream zipWith(LongStream b, long valueForNoneA, long valueForNoneB, LongBinaryOperator zipFunction);
+    public abstract LongStream zipWith(LongStream b, long valueForNoneA, long valueForNoneB, LongBinaryOperator zipFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with two other streams using the provided zip function, with default values for missing elements.
@@ -2599,10 +2706,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param zipFunction a LongTernaryOperator that determines the combination of elements in the combined LongStream.
      * @return a new LongStream that is the result of combining the current LongStream with the given LongStreams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream zipWith(LongStream b, LongStream c, long valueForNoneA, long valueForNoneB, long valueForNoneC, LongTernaryOperator zipFunction);
+    public abstract LongStream zipWith(LongStream b, LongStream c, long valueForNoneA, long valueForNoneB, long valueForNoneC, LongTernaryOperator zipFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Converts this LongStream to a FloatStream by casting each long value to float.
@@ -2675,7 +2784,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @SequentialOnly
     @IntermediateOp
     @Deprecated
-    public abstract FloatStream asFloatStream();
+    public abstract FloatStream asFloatStream() throws IllegalStateException;
 
     /**
      * Converts this LongStream to a DoubleStream by casting each long value to double.
@@ -2707,7 +2816,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream asDoubleStream();
+    public abstract DoubleStream asDoubleStream() throws IllegalStateException;
 
     /**
      * Returns a Stream consisting of the elements of this stream, each boxed to a Long.
@@ -2728,7 +2837,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<Long> boxed();
+    public abstract Stream<Long> boxed() throws IllegalStateException;
 
     /**
      * Converts this stream to a {@code java.util.stream.LongStream}.
@@ -2752,7 +2861,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract java.util.stream.LongStream toJdkStream();
+    public abstract java.util.stream.LongStream toJdkStream() throws IllegalStateException;
 
     /**
      * Transforms this stream using the provided transfer function.
@@ -2782,7 +2891,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @SequentialOnly
     @IntermediateOp
     public LongStream transformViaJdkStream(final Function<? super java.util.stream.LongStream, ? extends java.util.stream.LongStream> transfer)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(transfer, cs.transfer);
@@ -2819,20 +2928,23 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     @SequentialOnly
     @IntermediateOp
     public LongStream transformViaJdkStream(final Function<? super java.util.stream.LongStream, ? extends java.util.stream.LongStream> transfer,
-            final boolean deferred) throws IllegalArgumentException {
+            final boolean deferred) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(transfer, cs.transfer);
 
         if (deferred) {
             final Supplier<LongStream> delayInitializer = () -> LongStream.from(transfer.apply(toJdkStream()));
-            return LongStream.defer(delayInitializer);
+            return LongStream.defer(delayInitializer).onClose(this::close);
         } else {
-            return LongStream.from(transfer.apply(toJdkStream()));
+            return LongStream.from(transfer.apply(toJdkStream())).onClose(this::close);
         }
     }
 
-    abstract LongIteratorEx iteratorEx();
+    /**
+     * @throws IllegalStateException if the stream is already closed.
+     */
+    abstract LongIteratorEx iteratorEx() throws IllegalStateException;
 
     // private static final LongStream EMPTY_STREAM = new ArrayLongStream(N.EMPTY_LONG_ARRAY, true, null);
 
@@ -3191,7 +3303,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @see #of(long...)
      * @see #of(Long[], int, int)
      */
-    public static LongStream of(final long[] a, final int fromIndex, final int toIndex) {
+    public static LongStream of(final long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return isEmptyRange(N.len(a), fromIndex, toIndex) ? empty() : new ArrayLongStream(a, fromIndex, toIndex);
     }
 
@@ -3277,7 +3389,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @see #of(Long[])
      * @see #of(long[], int, int)
      */
-    public static LongStream of(final Long[] a, final int fromIndex, final int toIndex) {
+    public static LongStream of(final Long[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return Stream.of(a, fromIndex, toIndex).mapToLong(FL.unbox());
     }
 
@@ -3907,70 +4019,11 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     public static LongStream range(final long startInclusive, final long endExclusive) {
         if (startInclusive >= endExclusive) {
             return empty();
-        } else if (endExclusive - startInclusive < 0) {
-            final long m = BigInteger.valueOf(endExclusive).subtract(BigInteger.valueOf(startInclusive)).divide(BigInteger.valueOf(3)).longValue();
-            return concat(range(startInclusive, startInclusive + m), range(startInclusive + m, (startInclusive + m) + m),
-                    range((startInclusive + m) + m, endExclusive));
         }
 
-        return new IteratorLongStream(new LongIteratorEx() {
-            private long next = startInclusive;
-            private long cnt = endExclusive - startInclusive;
-
-            @Override
-            public boolean hasNext() {
-                return cnt > 0;
-            }
-
-            @Override
-            public long nextLong() {
-                if (cnt <= 0) {
-                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-                }
-
-                cnt--;
-                return next++;
-            }
-
-            @Override
-            public void advance(final long n) {
-                if (n <= 0) {
-                    return;
-                }
-
-                if (n >= cnt) {
-                    cnt = 0;
-                    return;
-                }
-
-                cnt -= n;
-                next += n;
-            }
-
-            @Override
-            public long count() {
-                final long ret = cnt;
-                cnt = 0;
-                return ret;
-            }
-
-            @Override
-            public long[] toArray() {
-                if (cnt > Integer.MAX_VALUE) {
-                    throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + cnt);
-                }
-
-                final long[] result = new long[(int) cnt];
-
-                for (int i = 0; i < cnt; i++) {
-                    result[i] = next++;
-                }
-
-                cnt = 0;
-
-                return result;
-            }
-        });
+        // endExclusive - startInclusive is the element count as an UNSIGNED long (it wraps negative for spans of
+        // 2^63 or more, e.g. range(Long.MIN_VALUE, Long.MAX_VALUE)); the shared iterator treats it as unsigned.
+        return rangeStream(startInclusive, 1, endExclusive - startInclusive, false);
     }
 
     /**
@@ -3994,7 +4047,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @return a LongStream of values with the specified step
      * @throws IllegalArgumentException if by is zero.
      */
-    public static LongStream range(final long startInclusive, final long endExclusive, final long by) {
+    public static LongStream range(final long startInclusive, final long endExclusive, final long by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("'by' cannot be zero");
         }
@@ -4003,82 +4056,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             return empty();
         }
 
-        if (startInclusive + by == endExclusive) {
-            return of(startInclusive);
-        }
+        // |span| and |by| as unsigned longs (Math.abs(Long.MIN_VALUE) is 2^63 when read unsigned), so the step
+        // count ceil(|span| / |by|) is exact for every span up to 2^64 - 1.
+        final long span = by > 0 ? endExclusive - startInclusive : startInclusive - endExclusive;
+        final long steps = Long.divideUnsigned(span - 1, Math.abs(by)) + 1;
 
-        if ((by > 0 && endExclusive - startInclusive < 0) || (by < 0 && startInclusive - endExclusive < 0)) {
-            long m = BigInteger.valueOf(endExclusive).subtract(BigInteger.valueOf(startInclusive)).divide(BigInteger.valueOf(3)).longValue();
-
-            if ((by > 0 && by > m) || (by < 0 && by < m)) {
-                return concat(range(startInclusive, startInclusive + by, by), range(startInclusive + by, endExclusive, by));
-            } else {
-                m -= m % by; // round m toward zero to an exact multiple of by (m % by carries the sign of m), so the split points stay on the step grid.
-                return concat(range(startInclusive, startInclusive + m, by), range(startInclusive + m, (startInclusive + m) + m, by),
-                        range((startInclusive + m) + m, endExclusive, by));
-            }
-        }
-
-        return new IteratorLongStream(new LongIteratorEx() {
-            private long next = startInclusive;
-            private long cnt = (endExclusive - startInclusive) / by + ((endExclusive - startInclusive) % by == 0 ? 0 : 1);
-
-            @Override
-            public boolean hasNext() {
-                return cnt > 0;
-            }
-
-            @Override
-            public long nextLong() {
-                if (cnt <= 0) {
-                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-                }
-
-                cnt--;
-                final long result = next;
-                next += by;
-                return result;
-            }
-
-            @Override
-            public void advance(final long n) {
-                if (n <= 0) {
-                    return;
-                }
-
-                if (n >= cnt) {
-                    cnt = 0;
-                    return;
-                }
-
-                cnt -= n;
-                next = Math.addExact(next, Math.multiplyExact(n, by));
-            }
-
-            @Override
-            public long count() {
-                final long ret = cnt;
-                cnt = 0;
-                return ret;
-            }
-
-            @Override
-            public long[] toArray() {
-                if (cnt > Integer.MAX_VALUE) {
-                    throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + cnt);
-                }
-
-                final long[] result = new long[(int) cnt];
-
-                for (int i = 0; i < cnt; i++, next += by) {
-                    result[i] = next;
-                }
-
-                cnt = 0;
-
-                return result;
-            }
-        });
+        return rangeStream(startInclusive, by, steps, false);
     }
 
     /**
@@ -4100,72 +4083,11 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     public static LongStream rangeClosed(final long startInclusive, final long endInclusive) {
         if (startInclusive > endInclusive) {
             return empty();
-        } else if (startInclusive == endInclusive) {
-            return of(startInclusive);
-        } else if (endInclusive - startInclusive + 1 <= 0) {
-            final long m = BigInteger.valueOf(endInclusive).subtract(BigInteger.valueOf(startInclusive)).divide(BigInteger.valueOf(3)).longValue();
-            return concat(range(startInclusive, startInclusive + m), range(startInclusive + m, (startInclusive + m) + m),
-                    rangeClosed((startInclusive + m) + m, endInclusive));
         }
 
-        return new IteratorLongStream(new LongIteratorEx() {
-            private long next = startInclusive;
-            private long cnt = endInclusive - startInclusive + 1;
-
-            @Override
-            public boolean hasNext() {
-                return cnt > 0;
-            }
-
-            @Override
-            public long nextLong() {
-                if (cnt <= 0) {
-                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
-                }
-
-                cnt--;
-                return next++;
-            }
-
-            @Override
-            public void advance(final long n) {
-                if (n <= 0) {
-                    return;
-                }
-
-                if (n >= cnt) {
-                    cnt = 0;
-                    return;
-                }
-
-                cnt -= n;
-                next += n;
-            }
-
-            @Override
-            public long count() {
-                final long ret = cnt;
-                cnt = 0;
-                return ret;
-            }
-
-            @Override
-            public long[] toArray() {
-                if (cnt > Integer.MAX_VALUE) {
-                    throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + cnt);
-                }
-
-                final long[] result = new long[(int) cnt];
-
-                for (int i = 0; i < cnt; i++) {
-                    result[i] = next++;
-                }
-
-                cnt = 0;
-
-                return result;
-            }
-        });
+        // endInclusive - startInclusive (unsigned) elements plus the end itself; rangeClosed(MIN_VALUE, MAX_VALUE)
+        // has 2^64 elements, which even an unsigned long cannot hold, hence the separate "plus one" flag.
+        return rangeStream(startInclusive, 1, endInclusive - startInclusive, true);
     }
 
     /**
@@ -4186,7 +4108,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @return a LongStream of values with the specified step
      * @throws IllegalArgumentException if by is zero.
      */
-    public static LongStream rangeClosed(final long startInclusive, final long endInclusive, final long by) {
+    public static LongStream rangeClosed(final long startInclusive, final long endInclusive, final long by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("'by' cannot be zero");
         }
@@ -4197,37 +4119,60 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             return empty();
         }
 
-        if ((by > 0 && endInclusive - startInclusive < 0) || (by < 0 && startInclusive - endInclusive < 0) || ((endInclusive - startInclusive) / by + 1 <= 0)) {
-            long m = BigInteger.valueOf(endInclusive).subtract(BigInteger.valueOf(startInclusive)).divide(BigInteger.valueOf(3)).longValue();
+        // floor(|span| / |by|) steps after the start, plus the start itself (unsigned arithmetic, see range(long, long, long)).
+        final long span = by > 0 ? endInclusive - startInclusive : startInclusive - endInclusive;
 
-            if ((by > 0 && by > m) || (by < 0 && by < m)) {
-                return concat(range(startInclusive, startInclusive + by, by), rangeClosed(startInclusive + by, endInclusive, by));
-            } else {
-                m -= m % by; // round m toward zero to an exact multiple of by (m % by carries the sign of m), so the split points stay on the step grid.
-                return concat(range(startInclusive, startInclusive + m, by), range(startInclusive + m, (startInclusive + m) + m, by),
-                        rangeClosed((startInclusive + m) + m, endInclusive, by));
-            }
-        }
+        return rangeStream(startInclusive, by, Long.divideUnsigned(span, Math.abs(by)), true);
+    }
+
+    /**
+     * Backs every {@code range}/{@code rangeClosed} overload with a single iterator whose remaining element count
+     * is kept as an <b>unsigned</b> long, so that spans of {@code 2^63} elements or more (for example
+     * {@code range(Long.MIN_VALUE, Long.MAX_VALUE)}) support constant-time {@code advance} and {@code count}, with immediate rejection of oversized
+     * {@code toArray} requests. Creating an array still takes time proportional to the remaining element count.
+     *
+     * @param start the first element
+     * @param by the step, never zero
+     * @param count the number of elements, read as an unsigned long
+     * @param plusOne {@code true} to emit one more element after {@code count} steps (the {@code rangeClosed} end);
+     *                needed because {@code rangeClosed(Long.MIN_VALUE, Long.MAX_VALUE)} has {@code 2^64} elements
+     * @return the stream
+     */
+    private static LongStream rangeStream(final long start, final long by, final long count, final boolean plusOne) {
+        // Fold the extra element into the count whenever the sum still fits in an unsigned long.
+        final long cnt0 = plusOne && count != -1L ? count + 1 : count;
+        final boolean extra0 = plusOne && count == -1L;
 
         return new IteratorLongStream(new LongIteratorEx() {
-            private long next = startInclusive;
-            private long cnt = (endInclusive - startInclusive) / by + 1;
+            private long next = start;
+            private long cnt = cnt0; // unsigned
+            private boolean extra = extra0;
 
             @Override
             public boolean hasNext() {
-                return cnt > 0;
+                return cnt != 0 || extra;
             }
 
             @Override
             public long nextLong() {
-                if (cnt <= 0) {
-                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                if (cnt == 0) {
+                    if (!extra) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    extra = false;
+                } else {
+                    cnt--;
                 }
 
-                cnt--;
                 final long result = next;
                 next += by;
                 return result;
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
             }
 
             @Override
@@ -4236,35 +4181,55 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                     return;
                 }
 
-                if (n >= cnt) {
+                // Modular arithmetic is exact here: the target position is an element of the range (or its end),
+                // so the true value of next + n * by always fits in a long.
+                if (Long.compareUnsigned(n, cnt) < 0) {
+                    cnt -= n;
+                    next += n * by;
+                } else if (extra && n == cnt) {
+                    next += n * by;
                     cnt = 0;
-                    return;
+                } else {
+                    cnt = 0;
+                    extra = false;
                 }
-
-                cnt -= n;
-                next = Math.addExact(next, Math.multiplyExact(n, by));
             }
 
+            /**
+             * @throws ArithmeticException if the number of remaining elements exceeds {@link Long#MAX_VALUE}.
+             */
             @Override
-            public long count() {
-                final long ret = cnt;
+            public long count() throws ArithmeticException {
+                // remaining = cnt (unsigned) + (extra ? 1 : 0); representable iff it is at most Long.MAX_VALUE
+                if (cnt < 0 || (extra && cnt == Long.MAX_VALUE)) {
+                    throw new ArithmeticException(
+                            "The number of remaining elements exceeds Long.MAX_VALUE: " + Long.toUnsignedString(cnt) + (extra ? " + 1" : ""));
+                }
+
+                final long ret = extra ? cnt + 1 : cnt;
                 cnt = 0;
+                extra = false;
                 return ret;
             }
 
+            /**
+             * @throws IllegalStateException if the number of remaining elements exceeds {@link Integer#MAX_VALUE}.
+             */
             @Override
-            public long[] toArray() {
-                if (cnt > Integer.MAX_VALUE) {
-                    throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + cnt);
+            public long[] toArray() throws IllegalStateException {
+                // remaining = cnt (unsigned) + (extra ? 1 : 0) must fit an int array
+                if (Long.compareUnsigned(cnt, extra ? Integer.MAX_VALUE - 1 : Integer.MAX_VALUE) > 0) {
+                    throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + Long.toUnsignedString(cnt) + (extra ? " + 1" : ""));
                 }
 
-                final long[] result = new long[(int) cnt];
+                final long[] result = new long[(int) cnt + (extra ? 1 : 0)];
 
-                for (int i = 0; i < cnt; i++, next += by) {
+                for (int i = 0; i < result.length; i++, next += by) {
                     result[i] = next;
                 }
 
                 cnt = 0;
+                extra = false;
 
                 return result;
             }
@@ -4347,6 +4312,11 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0) {
                     return;
@@ -4362,8 +4332,11 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                 return ret;
             }
 
+            /**
+             * @throws IllegalStateException if the number of remaining elements exceeds {@link Integer#MAX_VALUE}.
+             */
             @Override
-            public long[] toArray() {
+            public long[] toArray() throws IllegalStateException {
                 if (cnt > Integer.MAX_VALUE) {
                     throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + cnt);
                 }
@@ -4476,7 +4449,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @see System#currentTimeMillis()
      */
     @Beta
-    public static LongStream interval(final long intervalInMillis) {
+    public static LongStream interval(final long intervalInMillis) throws IllegalArgumentException {
         return interval(0, intervalInMillis);
     }
 
@@ -4506,7 +4479,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @see System#currentTimeMillis()
      */
     @Beta
-    public static LongStream interval(final long delayInMillis, final long intervalInMillis) {
+    public static LongStream interval(final long delayInMillis, final long intervalInMillis) throws IllegalArgumentException {
         return interval(delayInMillis, intervalInMillis, TimeUnit.MILLISECONDS);
     }
 
@@ -4564,13 +4537,13 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * </ul>
      *
      * @param delay the initial delay before the first emission
-     * @param interval the time interval between subsequent emissions
+     * @param interval the time interval between subsequent emissions; both values are converted to whole
+     *                 milliseconds and any sub-millisecond remainder is truncated (for example
+     *                 {@code 1999 MICROSECONDS} schedules emissions 1 ms apart)
      * @param unit the time unit for both delay and interval parameters
      * @return an infinite LongStream that emits timestamp values at the specified intervals
-     * @throws NullPointerException if unit is null
-     * @throws IllegalArgumentException if {@code delay} is negative, {@code interval} is not positive, or a positive
+     * @throws IllegalArgumentException if {@code unit} is {@code null}, {@code delay} is negative, {@code interval} is not positive, or a positive
      *         interval is shorter than one millisecond after conversion.
-     *
      * @see #interval(long)
      * @see #interval(long, long)
      * @see N#sleepUninterruptibly(long)
@@ -4578,7 +4551,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @Beta
     public static LongStream interval(final long delay, final long interval, final TimeUnit unit) throws IllegalArgumentException {
-        N.requireNonNull(unit, cs.unit);
+        N.checkArgNotNull(unit, cs.unit);
         N.checkArgNotNegative(delay, cs.delay);
         N.checkArgPositive(interval, cs.interval);
 
@@ -4817,15 +4790,28 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             private boolean isFirst = true;
             private boolean hasMore = true;
             private boolean hasNextVal = false;
+            private long pending;
+            private boolean hasPending = false;
 
             @Override
             public boolean hasNext() {
                 if (!hasNextVal && hasMore) {
                     if (isFirst) {
+                        hasNextVal = hasNext.test(init);
+                        if (hasNextVal) {
+                            cur = init;
+                        }
                         isFirst = false;
-                        hasNextVal = hasNext.test(cur = init);
                     } else {
-                        hasNextVal = hasNext.test(cur = f.applyAsLong(cur));
+                        if (!hasPending) {
+                            pending = f.applyAsLong(cur);
+                            hasPending = true;
+                        }
+                        hasNextVal = hasNext.test(pending);
+                        hasPending = false;
+                        if (hasNextVal) {
+                            cur = pending;
+                        }
                     }
 
                     if (!hasNextVal) {
@@ -5112,6 +5098,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @see #concat(LongStream...)
      * @see #concat(List)
      */
+    @SafeVarargs
     public static LongStream concat(final long[]... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -5143,6 +5130,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @return a LongStream containing all the longs from the input iterators in order
      * @see Stream#concat(Iterator[])
      */
+    @SafeVarargs
     public static LongStream concat(final LongIterator... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -5174,6 +5162,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @return a LongStream containing all the longs from the input streams in order
      * @see Stream#concat(Stream[])
      */
+    @SafeVarargs
     public static LongStream concat(final LongStream... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -5192,7 +5181,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     .toArray();   // returns [1L, 2L, 3L, 4L, 5L]
      *
      * // Empty list returns empty stream
-     * LongStream.concat(Collections.emptyList())
+     * LongStream.concat(Collections.<long[]> emptyList())
      *     .count();   // returns 0
      *
      * // List with empty arrays
@@ -5253,7 +5242,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     .toArray();   // returns [1L, 2L, 3L, 4L, 5L]
      *
      * // Empty collection returns empty stream
-     * LongStream.concat(Collections.emptyList())
+     * LongStream.concat(Collections.<LongStream> emptyList())
      *     .count();   // returns 0
      *
      * // Collection with empty stream
@@ -5567,7 +5556,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     public static LongStream zip(final LongStream a, final LongStream b, final LongBinaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), zipFunction).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> zip(ia, ib, zipFunction).onClose(newCloseHandler(a, b)));
     }
 
     /**
@@ -5597,7 +5586,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), iterate(c), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
+        return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
+                (ia, ib, ic) -> zip(ia, ib, ic, zipFunction).onClose(newCloseHandler(Array.asList(a, b, c))));
     }
 
     /**
@@ -5625,7 +5615,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * {@link LongTernaryOperator} and avoid boxing).
      *
      * @param streams the collection of long streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
-     * @param zipFunction the function to combine arrays of values from the streams.
+     * @param zipFunction the function to combine arrays of values from the streams; a {@code null} result is unboxed as {@code 0L}
      * @return a stream of combined values. Empty if the collection is empty
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      */
@@ -5879,7 +5869,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             final LongBinaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b),
+                (ia, ib) -> zip(ia, ib, valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b)));
     }
 
     /**
@@ -5913,8 +5904,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             final long valueForNoneC, final LongTernaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(Array.asList(a, b, c)));
+        return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
+                (ia, ib, ic) -> zip(ia, ib, ic, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction).onClose(newCloseHandler(Array.asList(a, b, c))));
     }
 
     /**
@@ -5945,7 +5936,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * @param streams the collection of long streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone array of default values, must have same size as streams collection
-     * @param zipFunction the function to combine arrays of values from the streams.
+     * @param zipFunction the function to combine arrays of values from the streams; a {@code null} result is unboxed as {@code 0L}
      * @return a stream of combined values that will close all input streams when closed
      * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of streams collection, or
      *         if {@code zipFunction} is {@code null}.
@@ -6109,46 +6100,29 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
 
             @Override
             public long nextLong() {
-                if (hasNextA) {
-                    if (iterB.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = iterB.nextLong())) == MergeResult.TAKE_FIRST) {
-                            hasNextA = false;
-                            hasNextB = true;
-                            return nextA;
-                        } else {
-                            return nextB;
-                        }
-                    } else {
+                if (!hasNextA && iterA.hasNext()) {
+                    nextA = iterA.nextLong();
+                    hasNextA = true;
+                }
+                if (!hasNextB && iterB.hasNext()) {
+                    nextB = iterB.nextLong();
+                    hasNextB = true;
+                }
+
+                if (hasNextA && hasNextB) {
+                    if (nextSelector.apply(nextA, nextB) == MergeResult.TAKE_FIRST) {
                         hasNextA = false;
                         return nextA;
-                    }
-                } else if (hasNextB) {
-                    if (iterA.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.nextLong()), nextB) == MergeResult.TAKE_FIRST) {
-                            return nextA;
-                        } else {
-                            hasNextA = true;
-                            hasNextB = false;
-                            return nextB;
-                        }
                     } else {
                         hasNextB = false;
                         return nextB;
                     }
-                } else if (iterA.hasNext()) {
-                    if (iterB.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.nextLong()), (nextB = iterB.nextLong())) == MergeResult.TAKE_FIRST) {
-                            hasNextB = true;
-                            return nextA;
-                        } else {
-                            hasNextA = true;
-                            return nextB;
-                        }
-                    } else {
-                        return iterA.nextLong();
-                    }
-                } else if (iterB.hasNext()) {
-                    return iterB.nextLong();
+                } else if (hasNextA) {
+                    hasNextA = false;
+                    return nextA;
+                } else if (hasNextB) {
+                    hasNextB = false;
+                    return nextB;
                 } else {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -6214,7 +6188,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     public static LongStream merge(final LongStream a, final LongStream b, final LongBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
-        return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> merge(ia, ib, nextSelector).onClose(newCloseHandler(a, b)));
     }
 
     /**

@@ -1,16 +1,11 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,39 +19,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.function.ToIntFunction;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.util.Multiset.Entry;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.IntBiFunction;
-import com.landawn.abacus.util.function.ObjIntFunction;
-import com.landawn.abacus.util.function.ObjIntPredicate;
 import com.landawn.abacus.util.stream.Stream;
 
-public class MultisetTest extends AbstractTest {
-
-    private Multiset<String> multiset;
-    private Multiset<Integer> intMultiset;
-
-    @BeforeEach
-    public void setUp() {
-        multiset = new Multiset<>();
-        intMultiset = new Multiset<>();
-    }
-
+public class MultisetTest extends MultisetTestSupport {
     @Test
     public void testMultisetIterator_remove() {
         Multiset<String> multiset = Multiset.of("a", "b", "a");
@@ -232,8 +209,9 @@ public class MultisetTest extends AbstractTest {
         List<String> list = new ArrayList<>();
         for (int i = 0; i < Integer.MAX_VALUE; i++) {
             list.add("a");
-            if (i > 100)
+            if (i > 100) {
                 break;
+            }
         }
         Iterator<String> iter = list.iterator();
         Multiset<String> ms = Multiset.create(iter);
@@ -299,7 +277,7 @@ public class MultisetTest extends AbstractTest {
         min = multiset.minOccurrences();
         assertTrue(min.isPresent());
         assertEquals(1, min.get().left().intValue());
-        assertTrue(N.toSet("b", "d").contains(min.get().right()));
+        assertTrue(CommonUtil.toSet("b", "d").contains(min.get().right()));
 
         multiset.clear();
         multiset.add("x", 5);
@@ -349,7 +327,7 @@ public class MultisetTest extends AbstractTest {
         max = multiset.maxOccurrences();
         assertTrue(max.isPresent());
         assertEquals(3, max.get().left().intValue());
-        assertTrue(N.toSet("c", "d").contains(max.get().right()));
+        assertTrue(CommonUtil.toSet("c", "d").contains(max.get().right()));
 
         multiset.clear();
         multiset.add("y", 2);
@@ -398,7 +376,7 @@ public class MultisetTest extends AbstractTest {
         Optional<Pair<Integer, List<String>>> allMin = multiset.allMinOccurrences();
         assertTrue(allMin.isPresent());
         assertEquals(1, allMin.get().left().intValue());
-        assertEquals(N.toSet("b", "d"), new HashSet<>(allMin.get().right()));
+        assertEquals(CommonUtil.toSet("b", "d"), new HashSet<>(allMin.get().right()));
 
         multiset.clear();
         multiset.add("x", 5);
@@ -406,7 +384,7 @@ public class MultisetTest extends AbstractTest {
         allMin = multiset.allMinOccurrences();
         assertTrue(allMin.isPresent());
         assertEquals(5, allMin.get().left().intValue());
-        assertEquals(N.toSet("x", "y"), new HashSet<>(allMin.get().right()));
+        assertEquals(CommonUtil.toSet("x", "y"), new HashSet<>(allMin.get().right()));
     }
 
     @Test
@@ -467,7 +445,7 @@ public class MultisetTest extends AbstractTest {
         Optional<Pair<Integer, List<String>>> allMax = multiset.allMaxOccurrences();
         assertTrue(allMax.isPresent());
         assertEquals(3, allMax.get().left().intValue());
-        assertEquals(N.toSet("a", "d"), new HashSet<>(allMax.get().right()));
+        assertEquals(CommonUtil.toSet("a", "d"), new HashSet<>(allMax.get().right()));
 
         multiset.clear();
         multiset.add("x", 1);
@@ -475,7 +453,7 @@ public class MultisetTest extends AbstractTest {
         allMax = multiset.allMaxOccurrences();
         assertTrue(allMax.isPresent());
         assertEquals(1, allMax.get().left().intValue());
-        assertEquals(N.toSet("x", "y"), new HashSet<>(allMax.get().right()));
+        assertEquals(CommonUtil.toSet("x", "y"), new HashSet<>(allMax.get().right()));
     }
 
     @Test
@@ -512,12 +490,6 @@ public class MultisetTest extends AbstractTest {
     @Test
     public void testAverageOfOccurrences_Empty() {
         assertFalse(multiset.averageOfOccurrences().isPresent());
-    }
-
-    @Test
-    public void testEntry_Count() {
-        Multiset.Entry<String> entry = new Multiset.ImmutableEntry<>("test", 5);
-        assertEquals(5, entry.count());
     }
 
     @Test
@@ -575,12 +547,10 @@ public class MultisetTest extends AbstractTest {
         multiset.add("apple", 3);
         assertEquals(3, multiset.getCount("apple"));
         assertEquals(0, multiset.getCount("banana"));
-    }
+        assertEquals(0, multiset.getCount("nonexistent"));
 
-    @Test
-    public void testGetCount_Existing() {
-        multiset.add("apple", 5);
-        assertEquals(5, multiset.getCount("apple"));
+        multiset.add(null, 3);
+        assertEquals(3, multiset.getCount(null));
     }
 
     @Test
@@ -593,12 +563,10 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void test_01() {
-        Multiset<String> set = N.toMultiset("a", "b", "c", "C");
-        N.println(set);
+        Multiset<String> set = CommonUtil.toMultiset("a", "b", "c", "C");
         set.add("a");
 
         assertEquals(2, set.getCount("a"));
-        N.println(set);
         set.remove("a");
 
         assertEquals(1, set.getCount("a"));
@@ -606,29 +574,13 @@ public class MultisetTest extends AbstractTest {
         set.remove("b", 90);
 
         assertEquals(11, set.getCount("b"));
-        N.println(set);
         set.remove("b", 11);
         assertEquals(0, set.getCount("b"));
 
         set.add("C");
-        N.println(set);
-        N.println(set.toMapSortedByOccurrences());
-        N.println(set.toMapSortedBy((a, b) -> a.getKey().compareTo(b.getKey())));
-        N.println(set.maxOccurrences());
-        N.println(set.minOccurrences());
-        N.println(set.sumOfOccurrences());
-        N.println(set.averageOfOccurrences());
-    }
-
-    @Test
-    public void testGetCount_NonExistent() {
-        assertEquals(0, multiset.getCount("nonexistent"));
-    }
-
-    @Test
-    public void testGetCount_Null() {
-        multiset.add(null, 3);
-        assertEquals(3, multiset.getCount(null));
+        assertEquals(2, set.getCount("C"));
+        assertEquals(1, set.getCount("a"));
+        assertEquals(1, set.getCount("c"));
     }
 
     @Test
@@ -810,57 +762,30 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void test_02() {
-        Multiset<String> set = N.toMultiset("a", "b", "c");
-        N.println(set);
-
+        Multiset<String> set = CommonUtil.toMultiset("a", "b", "c");
         set.setCount("a", 0);
         set.setCount("a", 3);
         assertEquals(3, set.getCount("a"));
 
-        set.entrySet().forEach(Fn.println());
-
-        set.entrySet().forEach(Fn.println());
-
-        try {
-            set.setCount("a", -1);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-
-        }
+        assertThrows(IllegalArgumentException.class, () -> set.setCount("a", -1));
 
         assertEquals(3, set.maxOccurrences().get().left().intValue());
 
-        try {
-            set.add("a", -1);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-
-        }
-
-        try {
-            set.add("a", Integer.MAX_VALUE);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-
-        }
+        assertThrows(IllegalArgumentException.class, () -> set.add("a", -1));
+        assertThrows(IllegalArgumentException.class, () -> set.add("a", Integer.MAX_VALUE));
 
         assertEquals(3, set.getCount("a"));
 
         assertTrue(set.contains("a"));
         assertFalse(set.contains("e"));
 
-        assertTrue(set.containsAll(N.toList("a", "b")));
-        assertFalse(set.contains(N.toList("b", "e")));
+        assertTrue(set.containsAll(CommonUtil.toList("a", "b")));
+        assertFalse(set.contains(CommonUtil.toList("b", "e")));
 
-        assertTrue(set.containsAll(N.toList("a")));
-        assertFalse(set.contains(N.toList("e")));
+        assertTrue(set.containsAll(CommonUtil.toList("a")));
+        assertFalse(set.contains(CommonUtil.toList("e")));
 
-        try {
-            set.remove("a", -1);
-            fail("Should throw IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-
-        }
+        assertThrows(IllegalArgumentException.class, () -> set.remove("a", -1));
 
         set.remove("a", 2);
         assertEquals(1, set.getCount("a"));
@@ -871,27 +796,27 @@ public class MultisetTest extends AbstractTest {
         set.add("a", 3);
         assertEquals(3, set.getCount("a"));
 
-        N.toList("a").forEach(e -> set.remove(e));
+        CommonUtil.toList("a").forEach(e -> set.remove(e));
         assertEquals(2, set.getCount("a"));
         assertEquals(1, set.getCount("b"));
 
-        N.toList("a", "b", "e").forEach(e -> set.remove(e, 2));
+        CommonUtil.toList("a", "b", "e").forEach(e -> set.remove(e, 2));
         assertEquals(0, set.getCount("a"));
         assertEquals(0, set.getCount("b"));
 
         set.add("a", 3);
         set.add("b", 3);
 
-        set.retainAll(N.toList("a", "b", "e"));
+        set.retainAll(CommonUtil.toList("a", "b", "e"));
 
         assertEquals(3, set.getCount("a"));
         assertEquals(3, set.getCount("b"));
 
-        Multiset<String> set2 = N.toMultiset();
+        Multiset<String> set2 = CommonUtil.toMultiset();
         set2.setCount("a", 3);
         set2.setCount("b", 3);
 
-        assertTrue(N.toSet(set).contains(set2));
+        assertTrue(CommonUtil.toSet(set).contains(set2));
 
         set.clear();
         assertTrue(set.isEmpty());
@@ -900,6 +825,7 @@ public class MultisetTest extends AbstractTest {
     @Test
     public void testSetCount_Negative() {
         assertThrows(IllegalArgumentException.class, () -> multiset.setCount("apple", -1));
+        assertThrows(IllegalArgumentException.class, () -> new Multiset<String>().setCount("a", -1));
     }
 
     @Test
@@ -918,12 +844,6 @@ public class MultisetTest extends AbstractTest {
     @Test
     public void testSetCount_Conditional_NegativeNew() {
         assertThrows(IllegalArgumentException.class, () -> multiset.setCount("apple", 2, -1));
-    }
-
-    @Test
-    public void testSetCount_negative() {
-        Multiset<String> multiset = new Multiset<>();
-        assertThrows(IllegalArgumentException.class, () -> multiset.setCount("a", -1));
     }
 
     @Test
@@ -959,240 +879,6 @@ public class MultisetTest extends AbstractTest {
     }
 
     @Test
-    public void testAdd_IncrementExisting() {
-        multiset.add("apple", 2);
-        int oldCount = multiset.add("apple", 3);
-        assertEquals(2, oldCount);
-        assertEquals(5, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testAddElementWithOccurrences() {
-        Multiset<String> multiset = new Multiset<>();
-        assertEquals(0, multiset.add("a", 3));
-        assertEquals(3, multiset.getCount("a"));
-        assertEquals(3, multiset.size());
-
-        assertEquals(3, multiset.add("a", 2));
-        assertEquals(5, multiset.getCount("a"));
-        assertEquals(5, multiset.size());
-
-        assertEquals(0, multiset.add("b", 0));
-        assertEquals(0, multiset.getCount("b"));
-        assertEquals(5, multiset.size());
-
-        assertEquals(0, multiset.add("c", 1));
-        assertEquals(1, multiset.getCount("c"));
-        assertEquals(6, multiset.size());
-    }
-
-    @Test
-    public void testAdd() {
-        assertTrue(multiset.add("apple"));
-        assertEquals(1, multiset.getCount("apple"));
-        assertEquals(1, multiset.size());
-
-        assertTrue(multiset.add("apple"));
-        assertEquals(2, multiset.getCount("apple"));
-        assertEquals(2, multiset.size());
-    }
-
-    @Test
-    public void testAdd_SingleOccurrence() {
-        assertTrue(multiset.add("apple"));
-        assertEquals(1, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testAdd_MultipleOccurrences() {
-        int oldCount = multiset.add("apple", 3);
-        assertEquals(0, oldCount);
-        assertEquals(3, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testAdd_ZeroOccurrences() {
-        int oldCount = multiset.add("apple", 0);
-        assertEquals(0, oldCount);
-        assertEquals(0, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testAdd_Null() {
-        assertTrue(multiset.add(null));
-        assertEquals(1, multiset.getCount(null));
-    }
-
-    @Test
-    public void testAddSingleElement() {
-        Multiset<String> multiset = new Multiset<>();
-        assertTrue(multiset.add("a"));
-        assertEquals(1, multiset.getCount("a"));
-        assertEquals(1, multiset.size());
-
-        assertTrue(multiset.add("a"));
-        assertEquals(2, multiset.getCount("a"));
-        assertEquals(2, multiset.size());
-
-        assertTrue(multiset.add("b"));
-        assertEquals(1, multiset.getCount("b"));
-        assertEquals(3, multiset.size());
-    }
-
-    @Test
-    public void testAddSingleElement_nullNotPermittedByDefaultMap() {
-        Multiset<String> multiset = new Multiset<>();
-        assertTrue(multiset.add(null));
-        assertEquals(1, multiset.getCount(null));
-        assertTrue(multiset.add(null));
-        assertEquals(2, multiset.getCount(null));
-    }
-
-    @Test
-    @DisplayName("Test add() single element")
-    public void testAddSingle() {
-        assertTrue(multiset.add("apple"));
-        assertEquals(1, multiset.getCount("apple"));
-
-        assertTrue(multiset.add("apple"));
-        assertEquals(2, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testAdd_NegativeOccurrences() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.add("apple", -1));
-    }
-
-    @Test
-    public void testAdd_Overflow() {
-        multiset.add("apple", Integer.MAX_VALUE);
-        assertThrows(IllegalArgumentException.class, () -> multiset.add("apple", 1));
-    }
-
-    @Test
-    public void testAddSingleElement_maxOccurrences() {
-        Multiset<String> multiset = new Multiset<>();
-        multiset.setCount("a", Integer.MAX_VALUE);
-        assertThrows(IllegalArgumentException.class, () -> multiset.add("a"));
-    }
-
-    @Test
-    public void testAddElementWithOccurrences_negative() {
-        Multiset<String> multiset = new Multiset<>();
-        assertThrows(IllegalArgumentException.class, () -> multiset.add("a", -1));
-    }
-
-    @Test
-    public void testAddElementWithOccurrences_overflow() {
-        Multiset<String> multiset = new Multiset<>();
-        multiset.add("a", Integer.MAX_VALUE - 1);
-        assertThrows(IllegalArgumentException.class, () -> multiset.add("a", 2));
-
-        assertEquals(Integer.MAX_VALUE - 1, multiset.getCount("a"));
-
-        Multiset<String> multiset2 = new Multiset<>();
-
-        multiset2.add("b", 10);
-        multiset2.add("b", Integer.MAX_VALUE - 10);
-        assertEquals(Integer.MAX_VALUE, multiset2.getCount("b"));
-
-    }
-
-    @Test
-    public void testAddWithOccurrences() {
-        assertEquals(0, multiset.add("apple", 3));
-        assertEquals(3, multiset.getCount("apple"));
-
-        assertEquals(3, multiset.add("apple", 2));
-        assertEquals(5, multiset.getCount("apple"));
-
-        assertEquals(0, multiset.add("banana", 0));
-        assertEquals(0, multiset.getCount("banana"));
-
-        assertThrows(IllegalArgumentException.class, () -> multiset.add("test", -1));
-
-        multiset.add("overflow", Integer.MAX_VALUE);
-        assertThrows(IllegalArgumentException.class, () -> multiset.add("overflow", 1));
-    }
-
-    @Test
-    public void testAddAndGetCount_NewElement() {
-        int newCount = multiset.addAndGetCount("apple", 3);
-        assertEquals(3, newCount);
-        assertEquals(3, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testAddAndGetCount_ExistingElement() {
-        multiset.add("apple", 2);
-        int newCount = multiset.addAndGetCount("apple", 3);
-        assertEquals(5, newCount);
-        assertEquals(5, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testAddAndGetCount() {
-        Multiset<String> multiset = new Multiset<>();
-        assertEquals(3, multiset.addAndGetCount("a", 3));
-        assertEquals(3, multiset.getCount("a"));
-
-        assertEquals(5, multiset.addAndGetCount("a", 2));
-        assertEquals(5, multiset.getCount("a"));
-
-        assertEquals(0, multiset.addAndGetCount("b", 0));
-        assertEquals(0, multiset.getCount("b"));
-
-        assertEquals(5, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testAddAndGetCount_Zero() {
-        multiset.add("apple", 5);
-        int newCount = multiset.addAndGetCount("apple", 0);
-        assertEquals(5, newCount);
-    }
-
-    @Test
-    public void testAddAndGetCount_ZeroOnNewElement() {
-        int newCount = multiset.addAndGetCount("apple", 0);
-        assertEquals(0, newCount);
-        assertEquals(0, multiset.getCount("apple"));
-        assertFalse(multiset.contains("apple"));
-    }
-
-    @Test
-    public void testAddAndGetCount_MultipleAdds() {
-        assertEquals(3, multiset.addAndGetCount("a", 3));
-        assertEquals(5, multiset.addAndGetCount("a", 2));
-        assertEquals(5, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testAddAndGetCount_Negative() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.addAndGetCount("apple", -1));
-    }
-
-    @Test
-    public void testAddAndGetCount_Overflow() {
-        multiset.add("apple", Integer.MAX_VALUE);
-        assertThrows(IllegalArgumentException.class, () -> multiset.addAndGetCount("apple", 1));
-    }
-
-    @Test
-    public void testAddAndGetCount_negative() {
-        Multiset<String> multiset = new Multiset<>();
-        assertThrows(IllegalArgumentException.class, () -> multiset.addAndGetCount("a", -1));
-    }
-
-    @Test
-    public void testAddAndGetCount_overflow() {
-        Multiset<String> multiset = new Multiset<>();
-        multiset.setCount("a", Integer.MAX_VALUE - 1);
-        assertThrows(IllegalArgumentException.class, () -> multiset.addAndGetCount("a", 2));
-        assertEquals(Integer.MAX_VALUE - 1, multiset.getCount("a"));
-    }
-
-    @Test
     @DisplayName("Test integer overflow protection")
     public void testIntegerOverflowProtection() {
         intMultiset.add(1, Integer.MAX_VALUE);
@@ -1200,670 +886,6 @@ public class MultisetTest extends AbstractTest {
         assertThrows(IllegalArgumentException.class, () -> intMultiset.add(1, 1));
 
         assertThrows(IllegalArgumentException.class, () -> intMultiset.addAndGetCount(1, 1));
-    }
-
-    @Test
-    public void testAddAll() {
-        List<String> list = Arrays.asList("a", "b", "a");
-        assertTrue(multiset.addAll(list));
-        assertEquals(2, multiset.getCount("a"));
-        assertEquals(1, multiset.getCount("b"));
-    }
-
-    @Test
-    public void testAddAll_WithOccurrences() {
-        List<String> list = Arrays.asList("a", "b");
-        assertTrue(multiset.addAll(list, 3));
-        assertEquals(3, multiset.getCount("a"));
-        assertEquals(3, multiset.getCount("b"));
-    }
-
-    @Test
-    public void testAddAllCollection() {
-        Multiset<String> multiset = new Multiset<>();
-        multiset.add("a");
-        Collection<String> toAdd = Arrays.asList("a", "b", "c", "b");
-
-        assertTrue(multiset.addAll(toAdd));
-        assertEquals(2, multiset.getCount("a"));
-        assertEquals(2, multiset.getCount("b"));
-        assertEquals(1, multiset.getCount("c"));
-        assertEquals(1 + 4, multiset.size());
-    }
-
-    @Test
-    public void testAddAllCollectionWithOccurrences() {
-        Multiset<String> multiset = new Multiset<>();
-        multiset.add("a", 1);
-        Collection<String> toAdd = Arrays.asList("a", "b");
-
-        assertTrue(multiset.addAll(toAdd, 2));
-        assertEquals(1 + 2, multiset.getCount("a"));
-        assertEquals(2, multiset.getCount("b"));
-        assertEquals(1 + 2 + 2, multiset.size());
-    }
-
-    @Test
-    public void testAddAll_Empty() {
-        assertFalse(multiset.addAll(new ArrayList<>()));
-    }
-
-    @Test
-    public void testAddAll_Null() {
-        assertFalse(multiset.addAll(null));
-    }
-
-    @Test
-    public void testAddAll_WithOccurrences_Zero() {
-        List<String> list = Arrays.asList("a", "b");
-        assertFalse(multiset.addAll(list, 0));
-        assertEquals(0, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testAddAllCollection_empty() {
-        Multiset<String> multiset = Multiset.of("a");
-        assertFalse(multiset.addAll(Collections.emptyList()));
-        assertEquals(1, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testAddAllCollection_null() {
-        Multiset<String> multiset = Multiset.of("a");
-        assertFalse(multiset.addAll(null));
-        assertEquals(1, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testAddAllCollectionWithOccurrences_zero() {
-        Multiset<String> multiset = Multiset.of("a", "b");
-        Collection<String> toAdd = Arrays.asList("a", "c");
-        assertFalse(multiset.addAll(toAdd, 0));
-        assertEquals(1, multiset.getCount("a"));
-        assertEquals(1, multiset.getCount("b"));
-        assertEquals(0, multiset.getCount("c"));
-    }
-
-    @Test
-    public void testAddAllCollectionWithOccurrences_emptyCollection() {
-        Multiset<String> multiset = Multiset.of("a");
-        assertFalse(multiset.addAll(Collections.emptyList(), 2));
-        assertEquals(1, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testAddAllCollectionWithOccurrences_nullCollection() {
-        Multiset<String> multiset = Multiset.of("a");
-        assertFalse(multiset.addAll(null, 2));
-        assertEquals(1, multiset.getCount("a"));
-    }
-
-    @Test
-    @DisplayName("Test addAll() empty collection")
-    public void testAddAllEmptyCollection() {
-        assertFalse(multiset.addAll(Collections.emptyList()));
-        assertTrue(multiset.isEmpty());
-    }
-
-    @Test
-    public void testAddAll_WithOccurrences_Negative() {
-        List<String> list = Arrays.asList("a", "b");
-        assertThrows(IllegalArgumentException.class, () -> multiset.addAll(list, -1));
-    }
-
-    @Test
-    public void testAddAllCollectionWithOccurrences_negative() {
-        Multiset<String> multiset = new Multiset<>();
-        Collection<String> toAdd = Arrays.asList("a", "b");
-        assertThrows(IllegalArgumentException.class, () -> multiset.addAll(toAdd, -1));
-    }
-
-    @Test
-    public void testAddAllWithOccurrences() {
-        List<String> list = Arrays.asList("a", "b");
-        assertTrue(multiset.addAll(list, 3));
-        assertEquals(3, multiset.getCount("a"));
-        assertEquals(3, multiset.getCount("b"));
-
-        assertFalse(multiset.addAll(list, 0));
-        assertFalse(multiset.addAll(Collections.emptyList(), 5));
-        assertFalse(multiset.addAll(null, 5));
-
-        assertThrows(IllegalArgumentException.class, () -> multiset.addAll(list, -1));
-    }
-
-    @Test
-    public void testRemove_LastOccurrence() {
-        multiset.add("apple");
-        assertTrue(multiset.remove("apple"));
-        assertEquals(0, multiset.getCount("apple"));
-        assertFalse(multiset.contains("apple"));
-    }
-
-    @Test
-    public void testRemove_MoreThanExists() {
-        multiset.add("apple", 3);
-        int oldCount = multiset.remove("apple", 5);
-        assertEquals(3, oldCount);
-        assertEquals(0, multiset.getCount("apple"));
-        assertFalse(multiset.contains("apple"));
-    }
-
-    @Test
-    public void testRemoveElementWithOccurrences() {
-        Multiset<String> multiset = Multiset.of("a", "a", "a", "a", "b", "b");
-        assertEquals(4, multiset.remove("a", 2));
-        assertEquals(2, multiset.getCount("a"));
-        assertEquals(4, multiset.size());
-
-        assertEquals(2, multiset.remove("a", 3));
-        assertEquals(0, multiset.getCount("a"));
-        assertEquals(2, multiset.size());
-
-        assertEquals(0, multiset.remove("c", 1));
-        assertEquals(0, multiset.getCount("c"));
-        assertEquals(2, multiset.size());
-
-        assertEquals(2, multiset.remove("b", 0));
-        assertEquals(2, multiset.getCount("b"));
-        assertEquals(2, multiset.size());
-    }
-
-    @Test
-    public void testRemove() {
-        multiset.add("apple", 3);
-
-        assertTrue(multiset.remove("apple"));
-        assertEquals(2, multiset.getCount("apple"));
-
-        assertTrue(multiset.remove("apple"));
-        assertEquals(1, multiset.getCount("apple"));
-
-        assertTrue(multiset.remove("apple"));
-        assertEquals(0, multiset.getCount("apple"));
-        assertFalse(multiset.contains("apple"));
-
-        assertFalse(multiset.remove("banana"));
-    }
-
-    @Test
-    public void testRemove_SingleOccurrence() {
-        multiset.add("apple", 3);
-        assertTrue(multiset.remove("apple"));
-        assertEquals(2, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testRemove_NonExistent() {
-        assertFalse(multiset.remove("nonexistent"));
-    }
-
-    @Test
-    public void testRemove_MultipleOccurrences() {
-        multiset.add("apple", 5);
-        int oldCount = multiset.remove("apple", 2);
-        assertEquals(5, oldCount);
-        assertEquals(3, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testRemove_Zero() {
-        multiset.add("apple", 3);
-        int oldCount = multiset.remove("apple", 0);
-        assertEquals(3, oldCount);
-        assertEquals(3, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testRemoveSingleElement() {
-        Multiset<String> multiset = Multiset.of("a", "a", "b");
-        assertTrue(multiset.remove("a"));
-        assertEquals(1, multiset.getCount("a"));
-        assertEquals(2, multiset.size());
-
-        assertTrue(multiset.remove("a"));
-        assertEquals(0, multiset.getCount("a"));
-        assertEquals(1, multiset.size());
-
-        assertFalse(multiset.remove("a"));
-        assertEquals(0, multiset.getCount("a"));
-        assertEquals(1, multiset.size());
-
-        assertTrue(multiset.remove("b"));
-        assertEquals(0, multiset.getCount("b"));
-        assertTrue(multiset.isEmpty());
-
-        assertFalse(multiset.remove("c"));
-    }
-
-    @Test
-    @DisplayName("Test remove() single occurrence")
-    public void testRemoveSingle() {
-        multiset.add("apple", 3);
-
-        assertTrue(multiset.remove("apple"));
-        assertEquals(2, multiset.getCount("apple"));
-
-        assertFalse(multiset.remove("banana"));
-    }
-
-    @Test
-    public void testRemove_Negative() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.remove("apple", -1));
-    }
-
-    @Test
-    public void testRemoveElementWithOccurrences_negative() {
-        Multiset<String> multiset = new Multiset<>();
-        assertThrows(IllegalArgumentException.class, () -> multiset.remove("a", -1));
-    }
-
-    @Test
-    public void testRemoveWithOccurrences() {
-        multiset.add("apple", 5);
-
-        assertEquals(5, multiset.remove("apple", 2));
-        assertEquals(3, multiset.getCount("apple"));
-
-        assertEquals(3, multiset.remove("apple", 10));
-        assertEquals(0, multiset.getCount("apple"));
-        assertFalse(multiset.contains("apple"));
-
-        assertEquals(0, multiset.remove("banana", 5));
-
-        assertThrows(IllegalArgumentException.class, () -> multiset.remove("test", -1));
-    }
-
-    @Test
-    public void testRemoveAndGetCount() {
-        multiset.add("apple", 5);
-        int newCount = multiset.removeAndGetCount("apple", 2);
-        assertEquals(3, newCount);
-        assertEquals(3, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testRemoveAndGetCount_AllOccurrences() {
-        multiset.add("apple", 3);
-        int newCount = multiset.removeAndGetCount("apple", 5);
-        assertEquals(0, newCount);
-        assertFalse(multiset.contains("apple"));
-    }
-
-    @Test
-    public void testRemoveAndGetCount_PartialRemoval() {
-        multiset.add("a", 5);
-        assertEquals(3, multiset.removeAndGetCount("a", 2));
-        assertEquals(3, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testRemoveAndGetCount_NonExistent() {
-        int newCount = multiset.removeAndGetCount("apple", 2);
-        assertEquals(0, newCount);
-    }
-
-    @Test
-    public void testRemoveAndGetCount_Zero() {
-        multiset.add("apple", 5);
-        int newCount = multiset.removeAndGetCount("apple", 0);
-        assertEquals(5, newCount);
-    }
-
-    @Test
-    public void testRemoveAndGetCount_Negative() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.removeAndGetCount("apple", -1));
-    }
-
-    @Test
-    public void testRemoveAndGetCount_negative() {
-        Multiset<String> multiset = new Multiset<>();
-        assertThrows(IllegalArgumentException.class, () -> multiset.removeAndGetCount("a", -1));
-    }
-
-    @Test
-    public void testRemoveAll() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        multiset.add("c", 1);
-        assertTrue(multiset.removeAll(Arrays.asList("a", "b")));
-        assertFalse(multiset.contains("a"));
-        assertFalse(multiset.contains("b"));
-        assertTrue(multiset.contains("c"));
-    }
-
-    @Test
-    public void testRemoveAll_WithOccurrences() {
-        multiset.add("a", 5);
-        multiset.add("b", 3);
-        assertTrue(multiset.removeAll(Arrays.asList("a", "b"), 2));
-        assertEquals(3, multiset.getCount("a"));
-        assertEquals(1, multiset.getCount("b"));
-    }
-
-    @Test
-    public void testRemoveAll_Collection_WithOccurrences() {
-        Multiset<String> multiset = Multiset.of("a", "a", "a", "b", "b", "b", "c");
-        Collection<String> toRemove = Arrays.asList("a", "b", "d");
-
-        assertTrue(multiset.removeAll(toRemove, 2));
-        assertEquals(1, multiset.getCount("a"));
-        assertEquals(1, multiset.getCount("b"));
-        assertEquals(1, multiset.getCount("c"));
-        assertEquals(0, multiset.getCount("d"));
-        assertEquals(3, multiset.size());
-
-        assertTrue(multiset.removeAll(Arrays.asList("a", "b"), 2));
-        assertEquals(0, multiset.getCount("a"));
-        assertEquals(0, multiset.getCount("b"));
-        assertEquals(1, multiset.getCount("c"));
-        assertEquals(1, multiset.size());
-    }
-
-    @Test
-    @DisplayName("Test removeAll() collection")
-    public void testRemoveAllCollection() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        multiset.add("c", 1);
-
-        assertTrue(multiset.removeAll(Arrays.asList("a", "c")));
-        assertEquals(2, multiset.size());
-        assertEquals(2, multiset.getCount("b"));
-        assertFalse(multiset.contains("a"));
-        assertFalse(multiset.contains("c"));
-    }
-
-    @Test
-    public void testRemoveAll_Empty() {
-        multiset.add("a", 3);
-        assertFalse(multiset.removeAll(new ArrayList<>()));
-        assertEquals(3, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testRemoveAll_Null() {
-        multiset.add("a", 3);
-        assertFalse(multiset.removeAll(null));
-        assertEquals(3, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testRemoveAll_WithOccurrences_Zero() {
-        multiset.add("a", 3);
-        assertFalse(multiset.removeAll(Arrays.asList("a"), 0));
-        assertEquals(3, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testRemoveAll_Collection_WithOccurrences_zero() {
-        Multiset<String> multiset = Multiset.of("a", "a", "b");
-        assertFalse(multiset.removeAll(Arrays.asList("a", "c"), 0));
-        assertEquals(2, multiset.getCount("a"));
-        assertEquals(1, multiset.getCount("b"));
-    }
-
-    @Test
-    public void testRemoveAll_Collection_WithOccurrences_emptyCollection() {
-        Multiset<String> multiset = Multiset.of("a");
-        assertFalse(multiset.removeAll(Collections.emptyList(), 1));
-        assertEquals(1, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testRemoveAll_Collection_WithOccurrences_nullCollection() {
-        Multiset<String> multiset = Multiset.of("a");
-        assertFalse(multiset.removeAll(null, 1));
-        assertEquals(1, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testRemoveAll_WithOccurrences_Negative() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.removeAll(Arrays.asList("a"), -1));
-    }
-
-    @Test
-    public void testRemoveAll_Collection_WithOccurrences_negative() {
-        Multiset<String> multiset = new Multiset<>();
-        Collection<String> toRemove = Arrays.asList("a");
-        assertThrows(IllegalArgumentException.class, () -> multiset.removeAll(toRemove, -1));
-    }
-
-    @Test
-    public void testRemoveAllWithOccurrences() {
-        multiset.add("a", 5);
-        multiset.add("b", 3);
-        multiset.add("c", 1);
-
-        List<String> toRemove = Arrays.asList("a", "b");
-        assertTrue(multiset.removeAll(toRemove, 2));
-        assertEquals(3, multiset.getCount("a"));
-        assertEquals(1, multiset.getCount("b"));
-        assertEquals(1, multiset.getCount("c"));
-
-        assertFalse(multiset.removeAll(toRemove, 0));
-        assertFalse(multiset.removeAll(Collections.emptyList(), 5));
-        assertFalse(multiset.removeAll(null, 5));
-
-        assertThrows(IllegalArgumentException.class, () -> multiset.removeAll(toRemove, -1));
-    }
-
-    @Test
-    public void testRemoveAllOccurrences_Element() {
-        multiset.add("apple", 5);
-        int removed = multiset.removeAllOccurrencesOf("apple");
-        assertEquals(5, removed);
-        assertFalse(multiset.contains("apple"));
-    }
-
-    @Test
-    public void testRemoveAllOccurrences_Collection() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        multiset.add("c", 1);
-        assertTrue(multiset.removeAllOccurrencesOf(Arrays.asList("a", "c")));
-        assertFalse(multiset.contains("a"));
-        assertTrue(multiset.contains("b"));
-        assertFalse(multiset.contains("c"));
-    }
-
-    @Test
-    public void testRemoveAllOccurrences_Object() {
-        Multiset<String> multiset = Multiset.of("a", "a", "a", "b");
-        assertEquals(3, multiset.removeAllOccurrencesOf("a"));
-        assertEquals(0, multiset.getCount("a"));
-        assertEquals(1, multiset.getCount("b"));
-        assertEquals(1, multiset.size());
-
-        assertEquals(0, multiset.removeAllOccurrencesOf("c"));
-        assertEquals(1, multiset.getCount("b"));
-    }
-
-    @Test
-    public void testRemoveAllOccurrences() {
-        multiset.add("apple", 5);
-        multiset.add("banana", 3);
-
-        assertEquals(5, multiset.removeAllOccurrencesOf("apple"));
-        assertFalse(multiset.contains("apple"));
-        assertEquals(3, multiset.getCount("banana"));
-
-        assertEquals(0, multiset.removeAllOccurrencesOf("cherry"));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesCollection() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        multiset.add("c", 1);
-
-        List<String> toRemove = Arrays.asList("a", "b");
-        assertTrue(multiset.removeAllOccurrencesOf(toRemove));
-        assertFalse(multiset.contains("a"));
-        assertFalse(multiset.contains("b"));
-        assertTrue(multiset.contains("c"));
-    }
-
-    @Test
-    public void testRemoveAllOccurrences_NonExistent() {
-        int removed = multiset.removeAllOccurrencesOf("nonexistent");
-        assertEquals(0, removed);
-    }
-
-    @Test
-    @DisplayName("Test removeAllOccurrences() single element")
-    public void testRemoveAllOccurrencesSingle() {
-        multiset.add("apple", 5);
-
-        assertEquals(5, multiset.removeAllOccurrencesOf("apple"));
-        assertFalse(multiset.contains("apple"));
-
-        assertEquals(0, multiset.removeAllOccurrencesOf("banana"));
-    }
-
-    @Test
-    public void testRemoveAllOccurrences_EmptyCollection() {
-        multiset.add("a", 3);
-        assertFalse(multiset.removeAllOccurrencesOf(Collections.emptyList()));
-        assertEquals(3, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesIf_Predicate() {
-        multiset.add("apple", 3);
-        multiset.add("banana", 2);
-        multiset.add("cherry", 1);
-        assertTrue(multiset.removeAllOccurrencesIf(s -> s.startsWith("a")));
-        assertFalse(multiset.contains("apple"));
-        assertTrue(multiset.contains("banana"));
-        assertTrue(multiset.contains("cherry"));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesIf_Predicate_NoMatch() {
-        multiset.add("apple", 3);
-        assertFalse(multiset.removeAllOccurrencesIf(s -> s.startsWith("z")));
-        assertTrue(multiset.contains("apple"));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesIf_ObjIntPredicate() {
-        multiset.add("a", 1);
-        multiset.add("b", 3);
-        multiset.add("c", 5);
-        assertTrue(multiset.removeAllOccurrencesIf((element, count) -> count >= 3));
-        assertTrue(multiset.contains("a"));
-        assertFalse(multiset.contains("b"));
-        assertFalse(multiset.contains("c"));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesIf_ObjIntPredicate_NoMatch() {
-        multiset.add("a", 1);
-        assertFalse(multiset.removeAllOccurrencesIf((element, count) -> count > 10));
-        assertTrue(multiset.contains("a"));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesIf_Predicate_noMatch() {
-        Multiset<String> multiset = Multiset.of("apple", "banana");
-        assertFalse(multiset.removeAllOccurrencesIf(s -> s.startsWith("z")));
-        assertEquals(1, multiset.getCount("apple"));
-        assertEquals(1, multiset.getCount("banana"));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesIf_ObjIntPredicate_noMatch() {
-        Multiset<String> multiset = Multiset.of("a", "b");
-        assertFalse(multiset.removeAllOccurrencesIf((s, count) -> count > 1));
-        assertEquals(1, multiset.getCount("a"));
-        assertEquals(1, multiset.getCount("b"));
-    }
-
-    @Test
-    @DisplayName("Test removeAllOccurrencesIf() with predicate")
-    public void testRemoveAllOccurrencesIfPredicate() {
-        multiset.add("apple", 3);
-        multiset.add("apricot", 2);
-        multiset.add("banana", 1);
-
-        assertTrue(multiset.removeAllOccurrencesIf(s -> s.startsWith("ap")));
-        assertEquals(1, multiset.size());
-        assertEquals(1, multiset.getCount("banana"));
-    }
-
-    @Test
-    @DisplayName("Test removeAllOccurrencesIf() with ObjIntPredicate")
-    public void testRemoveAllOccurrencesIfObjIntPredicate() {
-        multiset.add("a", 1);
-        multiset.add("b", 2);
-        multiset.add("c", 3);
-        multiset.add("d", 4);
-
-        assertTrue(multiset.removeAllOccurrencesIf((element, count) -> count >= 3));
-        assertEquals(3, multiset.size());
-        assertTrue(multiset.contains("a"));
-        assertTrue(multiset.contains("b"));
-        assertFalse(multiset.contains("c"));
-        assertFalse(multiset.contains("d"));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesIf_Predicate_Null() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> multiset.removeAllOccurrencesIf((java.util.function.Predicate<String>) null));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesIf_ObjIntPredicate_Null() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> multiset.removeAllOccurrencesIf((com.landawn.abacus.util.function.ObjIntPredicate<String>) null));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesIf_Predicate_null() {
-        Multiset<String> multiset = new Multiset<>();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((Predicate<String>) null));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesIf_ObjIntPredicate_null() {
-        Multiset<String> multiset = new Multiset<>();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((ObjIntPredicate<String>) null));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesIf() {
-        multiset.add("apple", 3);
-        multiset.add("banana", 2);
-        multiset.add("cherry", 1);
-
-        Predicate<String> startsWithA = s -> s.startsWith("a");
-        assertTrue(multiset.removeAllOccurrencesIf(startsWithA));
-        assertFalse(multiset.contains("apple"));
-        assertTrue(multiset.contains("banana"));
-        assertTrue(multiset.contains("cherry"));
-
-        assertFalse(multiset.removeAllOccurrencesIf(startsWithA));
-
-        assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((Predicate) null));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesIfObjInt() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        multiset.add("c", 1);
-
-        ObjIntPredicate<String> countGreaterThan2 = (element, count) -> count > 2;
-        assertTrue(multiset.removeAllOccurrencesIf(countGreaterThan2));
-        assertFalse(multiset.contains("a"));
-        assertTrue(multiset.contains("b"));
-        assertTrue(multiset.contains("c"));
-
-        assertFalse(multiset.removeAllOccurrencesIf(countGreaterThan2));
-
-        assertThrows(IllegalArgumentException.class, () -> multiset.removeAllOccurrencesIf((ObjIntPredicate<String>) null));
     }
 
     @Test
@@ -1944,209 +966,6 @@ public class MultisetTest extends AbstractTest {
     public void testUpdateAllOccurrences_nullFunction() {
         Multiset<String> multiset = new Multiset<>();
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.updateAllOccurrences(null));
-    }
-
-    @Test
-    public void testComputeIfAbsent_Absent() {
-        int count = multiset.computeIfAbsent("apple", e -> 5);
-        assertEquals(5, count);
-        assertEquals(5, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testComputeIfAbsent_Present() {
-        multiset.add("apple", 3);
-        int count = multiset.computeIfAbsent("apple", e -> 10);
-        assertEquals(3, count);
-        assertEquals(3, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testComputeIfAbsent_ZeroValue() {
-        int count = multiset.computeIfAbsent("apple", e -> 0);
-        assertEquals(0, count);
-        assertEquals(0, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testComputeIfAbsent_NegativeValue() {
-        int count = multiset.computeIfAbsent("apple", e -> -1);
-        assertEquals(0, count);
-        assertEquals(0, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testComputeIfAbsent() {
-        Multiset<String> multiset = new Multiset<>();
-        ToIntFunction<String> computer = s -> s.length();
-
-        assertEquals(1, multiset.computeIfAbsent("a", computer));
-        assertEquals(1, multiset.getCount("a"));
-
-        assertEquals(1, multiset.computeIfAbsent("a", computer));
-        assertEquals(1, multiset.getCount("a"));
-
-        assertEquals(3, multiset.computeIfAbsent("xyz", computer));
-        assertEquals(3, multiset.getCount("xyz"));
-
-        assertEquals(0, multiset.computeIfAbsent("zero", s -> 0));
-        assertEquals(0, multiset.getCount("zero"));
-
-    }
-
-    @Test
-    public void testComputeIfAbsent_ReturnZero() {
-        int result = multiset.computeIfAbsent("a", e -> 0);
-        assertEquals(0, result);
-        assertFalse(multiset.contains("a"));
-    }
-
-    @Test
-    public void testComputeIfAbsent_Null() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.computeIfAbsent("apple", null));
-    }
-
-    @Test
-    public void testComputeIfAbsent_nullFunction() {
-        Multiset<String> multiset = new Multiset<>();
-        assertThrows(IllegalArgumentException.class, () -> multiset.computeIfAbsent("a", null));
-    }
-
-    @Test
-    public void testComputeIfPresent_Present() {
-        multiset.add("apple", 3);
-        int newCount = multiset.computeIfPresent("apple", (e, count) -> count * 2);
-        assertEquals(6, newCount);
-        assertEquals(6, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testComputeIfPresent_Absent() {
-        int newCount = multiset.computeIfPresent("apple", (e, count) -> 10);
-        assertEquals(0, newCount);
-        assertEquals(0, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testComputeIfPresent() {
-        Multiset<String> multiset = Multiset.of("a", "a", "b");
-        ObjIntFunction<String, Integer> remapper = (s, count) -> s.equals("a") ? count + 1 : 0;
-
-        assertEquals(3, multiset.computeIfPresent("a", remapper));
-        assertEquals(3, multiset.getCount("a"));
-
-        assertEquals(0, multiset.computeIfPresent("b", remapper));
-        assertEquals(0, multiset.getCount("b"));
-
-        assertEquals(0, multiset.computeIfPresent("c", remapper));
-        assertEquals(0, multiset.getCount("c"));
-        assertEquals(3, multiset.getCount("a"));
-    }
-
-    @Test
-    public void testComputeIfPresent_ToZero() {
-        multiset.add("apple", 3);
-        int newCount = multiset.computeIfPresent("apple", (e, count) -> 0);
-        assertEquals(0, newCount);
-        assertFalse(multiset.contains("apple"));
-    }
-
-    @Test
-    public void testComputeIfPresent_ReturnZero() {
-        multiset.add("a", 3);
-        int result = multiset.computeIfPresent("a", (e, count) -> 0);
-        assertEquals(0, result);
-        assertFalse(multiset.contains("a"));
-    }
-
-    @Test
-    public void testComputeIfPresent_Null() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.computeIfPresent("apple", null));
-    }
-
-    @Test
-    public void testComputeIfPresent_nullFunction() {
-        Multiset<String> multiset = Multiset.of("a");
-        assertThrows(IllegalArgumentException.class, () -> multiset.computeIfPresent("a", null));
-    }
-
-    @Test
-    public void testCompute_Absent() {
-        int newCount = multiset.compute("apple", (e, count) -> count + 5);
-        assertEquals(5, newCount);
-        assertEquals(5, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testCompute_Present() {
-        multiset.add("apple", 3);
-        int newCount = multiset.compute("apple", (e, count) -> count + 2);
-        assertEquals(5, newCount);
-        assertEquals(5, multiset.getCount("apple"));
-    }
-
-    @Test
-    public void testCompute() {
-        Multiset<String> multiset = new Multiset<>();
-        ObjIntFunction<String, Integer> computer = (s, oldCount) -> {
-            if (s.equals("add"))
-                return oldCount + 2;
-            if (s.equals("set"))
-                return 5;
-            if (s.equals("remove"))
-                return 0;
-            if (s.equals("no_change_if_present"))
-                return oldCount > 0 ? oldCount : 0;
-            if (s.equals("add_if_absent"))
-                return oldCount == 0 ? 1 : oldCount;
-            return 0;
-        };
-
-        assertEquals(2, multiset.compute("add", computer));
-        assertEquals(2, multiset.getCount("add"));
-
-        assertEquals(4, multiset.compute("add", computer));
-        assertEquals(4, multiset.getCount("add"));
-
-        assertEquals(5, multiset.compute("set", computer));
-        assertEquals(5, multiset.getCount("set"));
-
-        assertEquals(5, multiset.compute("set", computer));
-        assertEquals(5, multiset.getCount("set"));
-
-        multiset.setCount("remove_target", 3);
-        assertEquals(0, multiset.compute("remove_target", computer));
-        assertEquals(0, multiset.getCount("remove_target"));
-
-        assertEquals(0, multiset.compute("remove_absent", computer));
-        assertEquals(0, multiset.getCount("remove_absent"));
-    }
-
-    @Test
-    public void testCompute_ToZero() {
-        multiset.add("apple", 3);
-        int newCount = multiset.compute("apple", (e, count) -> 0);
-        assertEquals(0, newCount);
-        assertFalse(multiset.contains("apple"));
-    }
-
-    @Test
-    public void testCompute_ReturnZero() {
-        multiset.add("a", 3);
-        int result = multiset.compute("a", (e, count) -> 0);
-        assertEquals(0, result);
-        assertFalse(multiset.contains("a"));
-    }
-
-    @Test
-    public void testCompute_Null() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.compute("apple", null));
-    }
-
-    @Test
-    public void testCompute_nullFunction() {
-        Multiset<String> multiset = new Multiset<>();
-        assertThrows(IllegalArgumentException.class, () -> multiset.compute("a", null));
     }
 
     @Test
@@ -2260,15 +1079,17 @@ public class MultisetTest extends AbstractTest {
     @Test
     public void testRetainAll_Null() {
         multiset.add("a", 3);
-        assertTrue(multiset.retainAll(null));
-        assertTrue(multiset.isEmpty());
+        // Collection.retainAll requires NullPointerException for a null argument; treating it as an empty
+        // collection (the old behaviour) silently discarded every element.
+        assertThrows(NullPointerException.class, () -> multiset.retainAll(null));
+        assertEquals(3, multiset.getCount("a"));
     }
 
     @Test
     public void testRetainAll_nullCollection() {
         Multiset<String> multiset = Multiset.of("a", "b");
-        assertTrue(multiset.retainAll(null));
-        assertTrue(multiset.isEmpty());
+        assertThrows(NullPointerException.class, () -> multiset.retainAll(null));
+        assertEquals(2, multiset.size());
     }
 
     @Test
@@ -2452,194 +1273,6 @@ public class MultisetTest extends AbstractTest {
     }
 
     @Test
-    public void testEntrySet() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        Set<Multiset.Entry<String>> entries = multiset.entrySet();
-        assertEquals(2, entries.size());
-
-        boolean foundA = false;
-        boolean foundB = false;
-        for (Multiset.Entry<String> entry : entries) {
-            if (entry.element().equals("a") && entry.count() == 3) {
-                foundA = true;
-            }
-            if (entry.element().equals("b") && entry.count() == 2) {
-                foundB = true;
-            }
-        }
-        assertTrue(foundA);
-        assertTrue(foundB);
-    }
-
-    @Test
-    public void testEntrySet_Contains() {
-        multiset.add("a", 3);
-        Set<Multiset.Entry<String>> entries = multiset.entrySet();
-
-        Multiset.Entry<String> entry = new Multiset.ImmutableEntry<>("a", 3);
-        assertTrue(entries.contains(entry));
-
-        Multiset.Entry<String> wrongCount = new Multiset.ImmutableEntry<>("a", 2);
-        assertFalse(entries.contains(wrongCount));
-    }
-
-    @Test
-    public void testEntrySet_Size() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        assertEquals(2, multiset.entrySet().size());
-    }
-
-    @Test
-    @DisplayName("Test entrySet() contains")
-    public void testEntrySetContains() {
-        multiset.add("a", 3);
-
-        Set<Multiset.Entry<String>> entries = multiset.entrySet();
-
-        Multiset.Entry<String> testEntry = new Multiset.Entry<>() {
-            @Override
-            public String element() {
-                return "a";
-            }
-
-            @Override
-            public int count() {
-                return 3;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (o instanceof Multiset.Entry<?> e) {
-                    return count() == e.count() && Objects.equals(element(), e.element());
-                }
-                return false;
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hashCode(element()) ^ count();
-            }
-
-            @Override
-            public String toString() {
-                return element() + " x " + count();
-            }
-        };
-
-        assertTrue(entries.contains(testEntry));
-    }
-
-    @Test
-    public void testEntrySet_removeObject() {
-        Multiset<String> multiset = Multiset.of("a", "b", "a");
-        Set<Multiset.Entry<String>> entrySet = multiset.entrySet();
-
-        Multiset.Entry<String> entryOfA = null;
-        for (Multiset.Entry<String> entry : entrySet) {
-            if (entry.element().equals("a")) {
-                entryOfA = entry;
-                break;
-            }
-        }
-        assertNotNull(entryOfA);
-        assertEquals("a", entryOfA.element());
-        assertEquals(2, entryOfA.count());
-
-    }
-
-    @Test
-    @DisplayName("Test Entry interface")
-    public void testEntryInterface() {
-        multiset.add("test", 5);
-
-        Multiset.Entry<String> entry = multiset.entrySet().iterator().next();
-
-        assertEquals("test", entry.element());
-        assertEquals(5, entry.count());
-
-        assertEquals("test x 5", entry.toString());
-
-        Multiset.Entry<String> sameEntry = new Multiset.Entry<>() {
-            @Override
-            public String element() {
-                return "test";
-            }
-
-            @Override
-            public int count() {
-                return 5;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (o instanceof Multiset.Entry<?> e) {
-                    return count() == e.count() && Objects.equals(element(), e.element());
-                }
-                return false;
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hashCode(element()) ^ count();
-            }
-
-            @Override
-            public String toString() {
-                return element() + " x " + count();
-            }
-        };
-
-        assertEquals(entry, sameEntry);
-        assertEquals(entry.hashCode(), sameEntry.hashCode());
-    }
-
-    @Test
-    @DisplayName("Test Entry with count 1")
-    public void testEntryCountOne() {
-        multiset.add("single");
-
-        Multiset.Entry<String> entry = multiset.entrySet().iterator().next();
-        assertEquals("single", entry.toString());
-    }
-
-    @Test
-    public void testEntrySetIterator() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        Set<Multiset.Entry<String>> entrySet = multiset.entrySet();
-        int count = 0;
-        for (Entry<String> entry : entrySet) {
-            assertNotNull(entry.element());
-            assertTrue(entry.count() > 0);
-            count++;
-        }
-        assertEquals(2, count);
-    }
-
-    @Test
-    public void testEntrySet_iterator_next_without_hasNext() {
-        Multiset<String> multiset = Multiset.of("a");
-        Iterator<Multiset.Entry<String>> it = multiset.entrySet().iterator();
-        assertNotNull(it.next());
-        assertThrows(NoSuchElementException.class, it::next);
-    }
-
-    @Test
-    public void testEntrySetIterator_remove() {
-        Multiset<String> multiset = Multiset.of("a", "b");
-        Set<Multiset.Entry<String>> entrySet = multiset.entrySet();
-        Iterator<Multiset.Entry<String>> it = entrySet.iterator();
-
-        assertTrue(it.hasNext());
-        it.next();
-
-        assertThrows(UnsupportedOperationException.class, it::remove,
-                "entrySet().iterator().remove() should throw UnsupportedOperationException if not implemented.");
-    }
-
-    @Test
     public void testIterator() {
         multiset.add("a", 2);
         multiset.add("b", 1);
@@ -2745,7 +1378,7 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void testConstructorWithSetCollection() {
-        Set<String> initialElements = N.toSet("a", "b", "c");
+        Set<String> initialElements = CommonUtil.toSet("a", "b", "c");
         Multiset<String> multiset = new Multiset<>(initialElements);
         assertEquals(3, multiset.size());
         assertEquals(1, multiset.getCount("a"));
@@ -2924,7 +1557,7 @@ public class MultisetTest extends AbstractTest {
         Multiset<String> ms = new Multiset<>(LinkedHashMap.class);
         assertTrue(ms.isEmpty());
 
-        assertThrows(NullPointerException.class, () -> new Multiset<>((Class<? extends Map>) null));
+        assertThrows(IllegalArgumentException.class, () -> new Multiset<>((Class<? extends Map>) null));
     }
 
     @Test
@@ -2953,338 +1586,6 @@ public class MultisetTest extends AbstractTest {
 
         assertFalse(multiset.minOccurrences().isPresent());
         assertFalse(multiset.maxOccurrences().isPresent());
-    }
-
-    @Test
-    public void testToArray() {
-        multiset.add("a", 2);
-        multiset.add("b", 1);
-        Object[] array = multiset.toArray();
-        assertEquals(3, array.length);
-    }
-
-    @Test
-    public void testToArray_Typed() {
-        multiset.add("a", 2);
-        multiset.add("b", 1);
-        String[] array = multiset.toArray(new String[0]);
-        assertEquals(3, array.length);
-    }
-
-    @Test
-    public void testToArray_Typed_ExactSize() {
-        multiset.add("a", 2);
-        String[] array = new String[2];
-        String[] result = multiset.toArray(array);
-        assertEquals(array, result);
-        assertEquals(2, result.length);
-    }
-
-    @Test
-    public void testToArray_Empty() {
-        Object[] array = multiset.toArray();
-        assertEquals(0, array.length);
-    }
-
-    @Test
-    public void testToArray_empty() {
-        Multiset<String> multiset = new Multiset<>();
-        Object[] array = multiset.toArray();
-        assertEquals(0, array.length);
-    }
-
-    @Test
-    public void testToArray_Generic() {
-        Multiset<String> multiset = Multiset.of("a", "b", "a", "c");
-
-        String[] arraySmall = new String[2];
-        String[] resultSmall = multiset.toArray(arraySmall);
-        assertNotSame(arraySmall, resultSmall);
-        assertEquals(4, resultSmall.length);
-        List<String> listSmall = Arrays.asList(resultSmall);
-        assertEquals(2, Collections.frequency(listSmall, "a"));
-        assertEquals(1, Collections.frequency(listSmall, "b"));
-        assertEquals(1, Collections.frequency(listSmall, "c"));
-
-        String[] arrayExact = new String[4];
-        String[] resultExact = multiset.toArray(arrayExact);
-        assertSame(arrayExact, resultExact);
-        List<String> listExact = Arrays.asList(resultExact);
-        assertEquals(2, Collections.frequency(listExact, "a"));
-        assertEquals(1, Collections.frequency(listExact, "b"));
-        assertEquals(1, Collections.frequency(listExact, "c"));
-
-        String[] arrayLarge = new String[6];
-        String[] resultLarge = multiset.toArray(arrayLarge);
-        assertSame(arrayLarge, resultLarge);
-        List<String> listLarge = Arrays.asList(resultLarge);
-        assertEquals(2, Collections.frequency(listLarge.subList(0, 4), "a"));
-        assertEquals(1, Collections.frequency(listLarge.subList(0, 4), "b"));
-        assertEquals(1, Collections.frequency(listLarge.subList(0, 4), "c"));
-        if (arrayLarge.length > multiset.size()) {
-            Arrays.fill(arrayLarge, null);
-            multiset.toArray(arrayLarge);
-            assertNull(arrayLarge[4]);
-            assertNull(arrayLarge[5]);
-        }
-    }
-
-    @Test
-    public void testToArray_Generic_emptyMultiset() {
-        Multiset<String> multiset = new Multiset<>();
-        String[] a = new String[0];
-        String[] result = multiset.toArray(a);
-        assertSame(a, result);
-        assertEquals(0, result.length);
-
-        String[] b = new String[5];
-        Arrays.fill(b, "test");
-        String[] resultB = multiset.toArray(b);
-        assertSame(b, resultB);
-        assertNull(b[0]);
-    }
-
-    @Test
-    public void testToArray_Typed_Null() {
-        assertThrows(IllegalArgumentException.class, () -> multiset.toArray((String[]) null));
-    }
-
-    @Test
-    public void testToArray_Generic_nullArray() {
-        Multiset<String> multiset = Multiset.of("a");
-        assertThrows(IllegalArgumentException.class, () -> multiset.toArray((String[]) null));
-    }
-
-    @Test
-    public void testToArrayTyped() {
-        multiset.add("a", 2);
-        multiset.add("b", 1);
-
-        String[] array = multiset.toArray(new String[0]);
-        assertEquals(3, array.length);
-
-        List<String> arrayList = Arrays.asList(array);
-        assertEquals(2, Collections.frequency(arrayList, "a"));
-        assertEquals(1, Collections.frequency(arrayList, "b"));
-
-        String[] largeArray = multiset.toArray(new String[10]);
-        assertEquals(10, largeArray.length);
-        assertNull(largeArray[3]);
-
-        assertThrows(IllegalArgumentException.class, () -> multiset.toArray((String[]) null));
-    }
-
-    @Test
-    public void testToMap() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        Map<String, Integer> map = multiset.toMap();
-        assertEquals(2, map.size());
-        assertEquals(Integer.valueOf(3), map.get("a"));
-        assertEquals(Integer.valueOf(2), map.get("b"));
-    }
-
-    @Test
-    public void testToMap_WithSupplier() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        Map<String, Integer> map = multiset.toMap(HashMap::new);
-        assertEquals(2, map.size());
-        assertTrue(map instanceof HashMap);
-    }
-
-    @Test
-    public void testToMapWithSupplier() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-
-        TreeMap<String, Integer> map = multiset.toMap(size -> new TreeMap<>());
-        assertEquals(2, map.size());
-        assertEquals(Integer.valueOf(3), map.get("a"));
-        assertEquals(Integer.valueOf(2), map.get("b"));
-    }
-
-    @Test
-    public void testToMap_WithLinkedHashMapSupplier() {
-        multiset.add("b", 2);
-        multiset.add("a", 3);
-        Map<String, Integer> map = multiset.toMap(LinkedHashMap::new);
-        assertEquals(2, map.size());
-        assertTrue(map instanceof LinkedHashMap);
-    }
-
-    @Test
-    public void testToMap_Empty() {
-        Map<String, Integer> map = multiset.toMap();
-        assertTrue(map.isEmpty());
-    }
-
-    @Test
-    public void testToMap_empty() {
-        Multiset<String> multiset = new Multiset<>();
-        Map<String, Integer> map = multiset.toMap();
-        assertTrue(map.isEmpty());
-    }
-
-    @Test
-    public void testToMapSortedByOccurrences() {
-        multiset.add("a", 3);
-        multiset.add("b", 1);
-        multiset.add("c", 2);
-        Map<String, Integer> map = multiset.toMapSortedByOccurrences();
-
-        List<String> keys = new ArrayList<>(map.keySet());
-        assertEquals("b", keys.get(0));
-        assertEquals("c", keys.get(1));
-        assertEquals("a", keys.get(2));
-    }
-
-    @Test
-    public void testToMapSortedByOccurrences_WithComparator() {
-        multiset.add("a", 3);
-        multiset.add("b", 1);
-        multiset.add("c", 2);
-        Map<String, Integer> map = multiset.toMapSortedByOccurrences((i1, i2) -> i2.compareTo(i1));
-
-        List<String> keys = new ArrayList<>(map.keySet());
-        assertEquals("a", keys.get(0));
-        assertEquals("c", keys.get(1));
-        assertEquals("b", keys.get(2));
-    }
-
-    @Test
-    public void testToMapSortedByOccurrences_Comparator() {
-        Multiset<String> multiset = new Multiset<>();
-        multiset.add("c", 3);
-        multiset.add("a", 1);
-        multiset.add("b", 2);
-
-        Map<String, Integer> sortedMapDesc = multiset.toMapSortedByOccurrences(Comparator.reverseOrder());
-        Iterator<Map.Entry<String, Integer>> itDesc = sortedMapDesc.entrySet().iterator();
-        assertEquals("c", itDesc.next().getKey());
-        assertEquals("b", itDesc.next().getKey());
-        assertEquals("a", itDesc.next().getKey());
-        assertFalse(itDesc.hasNext());
-    }
-
-    @Test
-    public void testToMapSortedByOccurrencesWithComparator() {
-        multiset.add("a", 1);
-        multiset.add("b", 3);
-        multiset.add("c", 2);
-
-        Map<String, Integer> sorted = multiset.toMapSortedByOccurrences(Comparator.reverseOrder());
-        List<Map.Entry<String, Integer>> entries = new ArrayList<>(sorted.entrySet());
-
-        assertEquals(3, entries.get(0).getValue().intValue());
-        assertEquals(2, entries.get(1).getValue().intValue());
-        assertEquals(1, entries.get(2).getValue().intValue());
-    }
-
-    @Test
-    public void testToMapSortedByOccurrences_AscendingOrder() {
-        multiset.add("a", 3);
-        multiset.add("b", 1);
-        multiset.add("c", 2);
-        Map<String, Integer> map = multiset.toMapSortedByOccurrences(Comparator.naturalOrder());
-        List<Integer> values = new ArrayList<>(map.values());
-        assertEquals(Integer.valueOf(1), values.get(0));
-        assertEquals(Integer.valueOf(2), values.get(1));
-        assertEquals(Integer.valueOf(3), values.get(2));
-    }
-
-    @Test
-    public void testToMapSortedByOccurrences_DescendingOrder() {
-        multiset.add("a", 3);
-        multiset.add("b", 1);
-        multiset.add("c", 2);
-        Map<String, Integer> map = multiset.toMapSortedByOccurrences(Comparator.reverseOrder());
-        List<Integer> values = new ArrayList<>(map.values());
-        assertEquals(Integer.valueOf(3), values.get(0));
-        assertEquals(Integer.valueOf(2), values.get(1));
-        assertEquals(Integer.valueOf(1), values.get(2));
-    }
-
-    @Test
-    public void testToMapSortedByOccurrences_empty() {
-        Multiset<String> multiset = new Multiset<>();
-        Map<String, Integer> map = multiset.toMapSortedByOccurrences();
-        assertTrue(map.isEmpty());
-        assertTrue(map instanceof LinkedHashMap);
-    }
-
-    @Test
-    public void testToMapSortedByKey() {
-        multiset.add("c", 1);
-        multiset.add("a", 1);
-        multiset.add("b", 1);
-        Map<String, Integer> map = multiset.toMapSortedByKey(String::compareTo);
-
-        List<String> keys = new ArrayList<>(map.keySet());
-        assertEquals("a", keys.get(0));
-        assertEquals("b", keys.get(1));
-        assertEquals("c", keys.get(2));
-    }
-
-    // Additional tests for missing coverage
-
-    @Test
-    public void testToMapSortedByKey_ReverseOrder() {
-        multiset.add("c", 1);
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        Map<String, Integer> map = multiset.toMapSortedByKey(Comparator.reverseOrder());
-        List<String> keys = new ArrayList<>(map.keySet());
-        assertEquals("c", keys.get(0));
-        assertEquals("b", keys.get(1));
-        assertEquals("a", keys.get(2));
-    }
-
-    @Test
-    public void testToMapSortedByKey_Empty() {
-        Map<String, Integer> map = multiset.toMapSortedByKey(String::compareTo);
-        assertTrue(map.isEmpty());
-    }
-
-    @Test
-    public void testToImmutableMap() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        ImmutableMap<String, Integer> map = multiset.toImmutableMap();
-        assertEquals(2, map.size());
-        assertEquals(Integer.valueOf(3), map.get("a"));
-    }
-
-    @Test
-    public void testToImmutableMap_WithSupplier() {
-        multiset.add("a", 3);
-        ImmutableMap<String, Integer> map = multiset.toImmutableMap(HashMap::new);
-        assertEquals(1, map.size());
-    }
-
-    @Test
-    public void testToImmutableMapWithSupplier() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-
-        ImmutableMap<String, Integer> immutableMap = multiset.toImmutableMap(HashMap::new);
-        assertEquals(2, immutableMap.size());
-        assertEquals(Integer.valueOf(3), immutableMap.get("a"));
-        assertEquals(Integer.valueOf(2), immutableMap.get("b"));
-    }
-
-    @Test
-    public void testToImmutableMap_Empty() {
-        ImmutableMap<String, Integer> map = multiset.toImmutableMap();
-        assertTrue(map.isEmpty());
-    }
-
-    @Test
-    public void testToImmutableMapIsUnmodifiable() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        ImmutableMap<String, Integer> map = multiset.toImmutableMap();
-        assertThrows(UnsupportedOperationException.class, () -> map.put("c", 1));
     }
 
     @Test
@@ -3355,7 +1656,7 @@ public class MultisetTest extends AbstractTest {
 
     @Test
     public void testForEach_Null() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.forEach((java.util.function.Consumer<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> multiset.forEach((java.util.function.Consumer<String>) null));
     }
 
     @Test
@@ -3367,7 +1668,8 @@ public class MultisetTest extends AbstractTest {
     @Test
     public void testForEach_Consumer_nullAction() {
         Multiset<String> multiset = new Multiset<>();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> multiset.forEach((Consumer<String>) null));
+        // Iterable.forEach specifies NullPointerException.
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> multiset.forEach((Consumer<String>) null));
     }
 
     @Test
@@ -3573,20 +1875,6 @@ public class MultisetTest extends AbstractTest {
     }
 
     @Test
-    public void testEntry_HashCode() {
-        Multiset.Entry<String> entry = new Multiset.ImmutableEntry<>("test", 5);
-        int expectedHashCode = "test".hashCode() ^ 5;
-        assertEquals(expectedHashCode, entry.hashCode());
-    }
-
-    @Test
-    public void testEntry_HashCode_NullElement() {
-        Multiset.Entry<String> entry = new Multiset.ImmutableEntry<>(null, 5);
-        int expectedHashCode = 0 ^ 5;
-        assertEquals(expectedHashCode, entry.hashCode());
-    }
-
-    @Test
     public void testEquals_Equal() {
         multiset.add("a", 3);
         multiset.add("b", 2);
@@ -3624,33 +1912,6 @@ public class MultisetTest extends AbstractTest {
     }
 
     @Test
-    public void testEntry_Equals_True() {
-        Multiset.Entry<String> entry1 = new Multiset.ImmutableEntry<>("test", 5);
-        Multiset.Entry<String> entry2 = new Multiset.ImmutableEntry<>("test", 5);
-        assertTrue(entry1.equals(entry2));
-    }
-
-    @Test
-    public void testEntry_Equals_DifferentCount() {
-        Multiset.Entry<String> entry1 = new Multiset.ImmutableEntry<>("test", 5);
-        Multiset.Entry<String> entry2 = new Multiset.ImmutableEntry<>("test", 3);
-        assertFalse(entry1.equals(entry2));
-    }
-
-    @Test
-    public void testEntry_Equals_DifferentElement() {
-        Multiset.Entry<String> entry1 = new Multiset.ImmutableEntry<>("test", 5);
-        Multiset.Entry<String> entry2 = new Multiset.ImmutableEntry<>("other", 5);
-        assertFalse(entry1.equals(entry2));
-    }
-
-    @Test
-    public void testEntry_Equals_NotEntry() {
-        Multiset.Entry<String> entry = new Multiset.ImmutableEntry<>("test", 5);
-        assertFalse(entry.equals("not an entry"));
-    }
-
-    @Test
     public void testEquals_SameInstance() {
         assertTrue(multiset.equals(multiset));
     }
@@ -3658,19 +1919,6 @@ public class MultisetTest extends AbstractTest {
     @Test
     public void testEquals_Null() {
         assertFalse(multiset.equals(null));
-    }
-
-    @Test
-    public void testEntry_Equals_Null() {
-        Multiset.Entry<String> entry = new Multiset.ImmutableEntry<>("test", 5);
-        assertFalse(entry.equals(null));
-    }
-
-    @Test
-    public void testEntry_Equals_NullElement() {
-        Multiset.Entry<String> entry1 = new Multiset.ImmutableEntry<>(null, 5);
-        Multiset.Entry<String> entry2 = new Multiset.ImmutableEntry<>(null, 5);
-        assertTrue(entry1.equals(entry2));
     }
 
     @Test
@@ -3704,47 +1952,13 @@ public class MultisetTest extends AbstractTest {
     }
 
     @Test
-    public void testEntry_ToString_CountOne() {
-        Multiset.Entry<String> entry = new Multiset.ImmutableEntry<>("test", 1);
-        assertEquals("test", entry.toString());
-    }
-
-    @Test
-    public void testToString() {
-        multiset.add("a", 3);
-        multiset.add("b", 2);
-        String str = multiset.toString();
-        assertNotNull(str);
-        assertTrue(str.contains("a"));
-        assertTrue(str.contains("b"));
-    }
-
-    @Test
-    public void testToString_Empty() {
-        String str = multiset.toString();
-        assertNotNull(str);
-    }
-
-    @Test
-    public void testEntry_ToString_CountMultiple() {
-        Multiset.Entry<String> entry = new Multiset.ImmutableEntry<>("test", 5);
-        assertEquals("test x 5", entry.toString());
-    }
-
-    @Test
     public void testConstructorWithInitialCapacity_Negative() {
         assertThrows(IllegalArgumentException.class, () -> new Multiset<>(-1));
     }
 
     @Test
-    public void testEntry_Element() {
-        Multiset.Entry<String> entry = new Multiset.ImmutableEntry<>("test", 5);
-        assertEquals("test", entry.element());
-    }
-
-    @Test
     public void testConstructorWithValueMapType_null() {
-        assertThrows(NullPointerException.class, () -> new Multiset<>((Class<? extends Map>) null));
+        assertThrows(IllegalArgumentException.class, () -> new Multiset<>((Class<? extends Map>) null));
     }
 
     @Test
@@ -3763,79 +1977,6 @@ public class MultisetTest extends AbstractTest {
     }
 
     @Test
-    public void testRemoveAllSelfClearsWithoutConcurrentModification() {
-        Multiset<String> set = Multiset.of("a", "a", "b");
-
-        assertTrue(set.removeAll(set));
-        assertTrue(set.isEmpty());
-
-        assertFalse(set.removeAll(set));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesSelfClearsWithoutConcurrentModification() {
-        Multiset<String> set = Multiset.of("a", "a", "b");
-
-        assertTrue(set.removeAllOccurrencesOf(set));
-        assertTrue(set.isEmpty());
-    }
-
-    @Test
-    public void testRemoveOccurrencesSelfClearsWithoutConcurrentModification() {
-        Multiset<String> set = Multiset.of("a", "a", "b");
-
-        assertTrue(set.removeOccurrences(set, 1));
-        assertTrue(set.isEmpty());
-
-        assertFalse(set.removeOccurrences(set, 1));
-    }
-
-    @Test
-    public void testComputeMethodsReturnZeroWhenNonPositiveResultRemovesEntry() {
-        Multiset<String> set = Multiset.of("a", "a");
-
-        assertEquals(0, set.computeIfPresent("a", (e, count) -> -1));
-        assertEquals(0, set.getCount("a"));
-
-        set = Multiset.of("a", "a");
-        assertEquals(0, set.compute("a", (e, count) -> -1));
-        assertEquals(0, set.getCount("a"));
-
-        set = Multiset.of("a", "a");
-        assertEquals(0, set.merge("a", 1, (oldCount, value) -> -1));
-        assertEquals(0, set.getCount("a"));
-    }
-
-    @Test
-    public void testRemoveAllElementSetViewClearsWithoutConcurrentModification() {
-        final Multiset<String> set = Multiset.of("a", "a", "b");
-
-        assertTrue(set.removeAll(set.elementSet()));
-        assertTrue(set.isEmpty());
-    }
-
-    @Test
-    public void testToMapSortedByOccurrencesRejectsNullComparatorWhenEmpty() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> new Multiset<String>().toMapSortedByOccurrences(null));
-    }
-
-    @Test
-    public void testRemoveAllOccurrencesOf_multisetSourceUsesDistinctKeys() {
-        // High counts must not force materializing every occurrence via Multiset.toArray().
-        final Multiset<String> target = Multiset.of("a", "a", "b", "c");
-        final Multiset<String> source = new Multiset<>();
-        source.setCount("a", 1_000_000);
-        source.setCount("c", 2_000_000);
-        source.setCount("z", 5_000_000);
-
-        assertTrue(target.removeAllOccurrencesOf(source));
-        assertEquals(0, target.getCount("a"));
-        assertEquals(1, target.getCount("b"));
-        assertEquals(0, target.getCount("c"));
-        assertEquals(1, target.size());
-    }
-
-    @Test
     public void testMerge_rejectsNegativeValue() {
         final Multiset<String> multiset = Multiset.of("a");
         assertThrows(IllegalArgumentException.class, () -> multiset.merge("a", -1, (oldCount, value) -> oldCount + value));
@@ -3844,45 +1985,74 @@ public class MultisetTest extends AbstractTest {
     }
 
     @Test
-    public void testToArray_rejectsUnrepresentableOccurrenceCountBeforeAllocation() {
-        final Multiset<String> multiset = new Multiset<>();
-        multiset.setCount("a", Integer.MAX_VALUE);
-        multiset.setCount("b", 1);
+    @DisplayName("addAll rejects a count overflow, and the elements accepted before it stay added")
+    public void reviewFixes20260906_addAllRejectsCountOverflow() {
+        final Multiset<String> one = new Multiset<>();
+        one.add("a", Integer.MAX_VALUE);
+        final IllegalArgumentException e1 = assertThrows(IllegalArgumentException.class, () -> one.addAll(Arrays.asList("a")));
+        assertTrue(e1.getMessage().contains("out of the bound of int"), e1.getMessage());
+        assertEquals(Integer.MAX_VALUE, one.getCount("a"));
 
-        assertThrows(IllegalStateException.class, multiset::toArray);
-        assertThrows(IllegalStateException.class, () -> multiset.toArray(new String[0]));
+        final Multiset<String> two = new Multiset<>();
+        two.add("a", Integer.MAX_VALUE);
+        assertThrows(IllegalArgumentException.class, () -> two.addAll(Arrays.asList("a"), 1));
+        assertEquals(Integer.MAX_VALUE, two.getCount("a"));
+
+        // add(e, MAX_VALUE) twice throws the same way
+        final Multiset<String> twice = new Multiset<>();
+        twice.add("a", Integer.MAX_VALUE);
+        assertThrows(IllegalArgumentException.class, () -> twice.add("a", Integer.MAX_VALUE));
+        assertEquals(Integer.MAX_VALUE, twice.getCount("a"));
+
+        // addAll is not atomic: "y" is already in when "z" overflows - the javadoc now says so
+        final Multiset<String> partial = new Multiset<>();
+        partial.add("z", Integer.MAX_VALUE);
+        assertThrows(IllegalArgumentException.class, () -> partial.addAll(Arrays.asList("y", "z")));
+        assertEquals(1, partial.getCount("y"));
+        assertEquals(Integer.MAX_VALUE, partial.getCount("z"));
+
+        // Control: an addAll that lands exactly on MAX_VALUE is fine
+        final Multiset<String> edge = new Multiset<>();
+        edge.add("a", Integer.MAX_VALUE - 1);
+        assertTrue(edge.addAll(Arrays.asList("a")));
+        assertEquals(Integer.MAX_VALUE, edge.getCount("a"));
     }
 
-    /**
-     * Collection.removeIf must remove matching elements. Pre-fix: iterator() had no remove(),
-     * so the JDK default removeIf threw UnsupportedOperationException on the first match.
-     */
     @Test
-    public void testRemoveIf_removesMatchingElements() {
-        final Multiset<String> multiset = Multiset.of("a", "a", "b", "c", "c");
-        assertTrue(multiset.removeIf(s -> s.equals("a") || s.equals("c")));
-        assertEquals(0, multiset.getCount("a"));
-        assertEquals(0, multiset.getCount("c"));
-        assertEquals(1, multiset.getCount("b"));
-        assertEquals(1, multiset.size());
+    @DisplayName("an EMPTY comparator-less TreeMap backing still throws ClassCastException for a non-Comparable key")
+    public void reviewFixes20260906_emptySortedBackingWithForeignKey() {
+        final Multiset<Integer> emptyTree = new Multiset<>(TreeMap.class);
 
-        assertFalse(multiset.removeIf(s -> s.equals("a")));
-        assertEquals(1, multiset.getCount("b"));
+        // TreeMap.getEntry casts the key to Comparable BEFORE it looks at the root, so "empty never compares"
+        // does not save a comparator-less tree.
+        assertThrows(ClassCastException.class, () -> emptyTree.contains(new Object()));
+        assertThrows(ClassCastException.class, () -> emptyTree.getCount(new Object()));
+        assertThrows(ClassCastException.class, () -> emptyTree.remove(new Object(), 1));
+        assertThrows(ClassCastException.class, () -> emptyTree.removeAllOccurrencesOf(new Object()));
+
+        // A foreign key that IS Comparable passes the cast, so the empty tree reports "absent".
+        assertFalse(emptyTree.contains("not an Integer"));
+
+        // An explicitly comparator-based empty tree never casts at all.
+        final Multiset<Integer> emptyComparatorTree = new Multiset<>(() -> new TreeMap<Integer, Object>(Comparator.<Integer> naturalOrder()));
+        assertFalse(emptyComparatorTree.contains(new Object()));
+
+        // Control: the non-empty cases and the HashMap backing are unchanged.
+        final Multiset<Integer> nonEmptyTree = new Multiset<>(TreeMap.class);
+        nonEmptyTree.add(1);
+        assertThrows(ClassCastException.class, () -> nonEmptyTree.contains(new Object()));
+        assertFalse(new Multiset<Integer>().contains(new Object()));
     }
 
     @Test
-    public void testRemoveIf_evaluatesOncePerDistinctElement() {
-        final Multiset<String> multiset = Multiset.of("a", "a", "a", "b", "b");
-        final int[] invocationCount = { 0 };
+    public void testApplyIfNotEmptyReturnsAnEmptyOptionalForANullResult() {
+        // an empty Optional does not imply an empty multiset: the function's own null result produces one too
+        final Multiset<String> multiset = Multiset.of("x");
+        assertFalse(multiset.isEmpty());
+        assertFalse(multiset.applyIfNotEmpty(ms -> (String) null).isPresent());
+        assertEquals(Optional.empty(), multiset.applyIfNotEmpty(ms -> (String) null));
 
-        assertTrue(multiset.removeIf(s -> {
-            invocationCount[0]++;
-            return s.equals("a");
-        }));
-
-        assertEquals(2, invocationCount[0]);
-        assertEquals(0, multiset.getCount("a"));
-        assertEquals(2, multiset.getCount("b"));
-        assertThrows(NullPointerException.class, () -> multiset.removeIf(null));
+        assertEquals(Optional.empty(), new Multiset<String>().applyIfNotEmpty(ms -> "value"));
+        assertEquals(Optional.of(1), multiset.applyIfNotEmpty(Multiset::size));
     }
 }

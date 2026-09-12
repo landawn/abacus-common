@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -107,5 +108,31 @@ public class GregorianCalendarTypeTest extends TestBase {
 
         when(resultSet.getTimestamp("nullColumn")).thenReturn(null);
         assertNull(gregorianCalendarType.get(resultSet, "nullColumn"));
+    }
+
+    // --- review fixes 2026-09-06 (T9-02, T9-03): the char[] fast path is a sibling of the ones pinned in
+    // DateTypeTest / CalendarTypeTest / TimestampTypeTest and carries the identical guard.
+
+    @Test
+    public void reviewFixes20260906_T902_T903_charArrayAgreesWithStringOverload() {
+        // a trailing type suffix used to be stripped by parseLong(char[]) only, so the two overloads disagreed
+        for (final String s : new String[] { "1700000000000L", "1700000000000d", "12345L" }) {
+            assertThrows(IllegalArgumentException.class, () -> gregorianCalendarType.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> gregorianCalendarType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        // overflowing text used to escape the char[] path as ArithmeticException("long overflow")
+        for (final String s : new String[] { "99999999999999999999", "9223372036854775808", "-9223372036854775809" }) {
+            assertThrows(IllegalArgumentException.class, () -> gregorianCalendarType.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> gregorianCalendarType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        for (final String s : new String[] { "1700000000000", "+1700000000000", "-1700000000000" }) {
+            assertEquals(Long.parseLong(s), gregorianCalendarType.valueOf(s.toCharArray(), 0, s.length()).getTimeInMillis(), s);
+            assertEquals(Long.parseLong(s), gregorianCalendarType.valueOf(s).getTimeInMillis(), s);
+        }
+
+        assertNull(gregorianCalendarType.valueOf((char[]) null, 0, 0));
+        assertNull(gregorianCalendarType.valueOf(new char[0], 0, 0));
     }
 }

@@ -2,7 +2,9 @@ package com.landawn.abacus.util;
 
 import java.util.Objects;
 
-public class MyEntity_1 {
+import com.landawn.abacus.TestBase;
+
+public class MyEntity_1 extends TestBase {
     private Range<Float> range;
 
     public Range<Float> getRange() {

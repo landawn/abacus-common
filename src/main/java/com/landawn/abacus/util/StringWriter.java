@@ -76,7 +76,7 @@ public final class StringWriter extends AppendableWriter {
      * @see #StringWriter()
      * @see #StringWriter(StringBuilder)
      */
-    public StringWriter(final int initialSize) {
+    public StringWriter(final int initialSize) throws NegativeArraySizeException {
         this(new StringBuilder(initialSize));
     }
 
@@ -97,7 +97,7 @@ public final class StringWriter extends AppendableWriter {
      * @throws IllegalArgumentException if {@code sb} is {@code null}.
      * @see #stringBuilder()
      */
-    public StringWriter(final StringBuilder sb) {
+    public StringWriter(final StringBuilder sb) throws IllegalArgumentException {
         super(sb);
         buf = sb;
         lock = buf;
@@ -182,7 +182,7 @@ public final class StringWriter extends AppendableWriter {
      *         the effective sequence length (four when {@code csq} is {@code null})
      */
     @Override
-    public StringWriter append(final CharSequence csq, final int start, final int end) {
+    public StringWriter append(final CharSequence csq, final int start, final int end) throws IndexOutOfBoundsException {
         buf.append(csq, start, end);
 
         return this;
@@ -220,7 +220,7 @@ public final class StringWriter extends AppendableWriter {
      * @throws NullPointerException if {@code cbuf} is {@code null}
      */
     @Override
-    public void write(final char[] cbuf) {
+    public void write(final char[] cbuf) throws NullPointerException {
         buf.append(cbuf);
     }
 
@@ -238,12 +238,12 @@ public final class StringWriter extends AppendableWriter {
      * @param cbuf the character array containing data to write
      * @param off the index of the first character in {@code cbuf} to write
      * @param len the number of characters to write
+     * @throws NullPointerException if {@code cbuf} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
      *         or {@code off + len} is greater than {@code cbuf.length}
-     * @throws NullPointerException if {@code cbuf} is {@code null}
      */
     @Override
-    public void write(final char[] cbuf, final int off, final int len) {
+    public void write(final char[] cbuf, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException {
         buf.append(cbuf, off, len);
     }
 
@@ -283,7 +283,7 @@ public final class StringWriter extends AppendableWriter {
      *         {@code str} is {@code null})
      */
     @Override
-    public void write(final String str, final int off, final int len) {
+    public void write(final String str, final int off, final int len) throws IndexOutOfBoundsException {
         buf.append(str, off, off + len);
     }
 

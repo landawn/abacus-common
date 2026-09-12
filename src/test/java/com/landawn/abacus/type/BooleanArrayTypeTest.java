@@ -1,5 +1,6 @@
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -241,4 +242,14 @@ public class BooleanArrayTypeTest extends TestBase {
         assertTrue(type.isObjectArray());
     }
 
+
+    @Test
+    public void reviewFixes20260906_valueOfKeepsNullElementsAndMapsUnknownTokensToFalse() {
+        // the boxed twin of T7-05: the 4-character literal null is a null element, other unknown tokens are false
+        assertArrayEquals(new Boolean[] { true, null }, type.valueOf("[true, null]"));
+        assertArrayEquals(new Boolean[] { null }, type.valueOf("[null]"));
+        assertArrayEquals(new Boolean[] { false, false, true, null }, type.valueOf("[NULL, yes, 1, null]"));
+        assertArrayEquals(new Boolean[] { true, null }, type.valueOf(type.stringOf(new Boolean[] { true, null })));
+        assertEquals(0, type.valueOf("[]").length);
+    }
 }

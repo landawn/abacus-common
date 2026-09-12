@@ -17,6 +17,23 @@ import com.landawn.abacus.TestBase;
 public class IdentityHashSetTest extends TestBase {
 
     @Test
+    public void testRemoveAllWithLiveViewPreservesIdentityMembership() {
+        String first = new String("same");
+        String second = new String("same");
+        IdentityHashSet<String> set = new IdentityHashSet<>(Arrays.asList(first, second, null));
+
+        Assertions.assertTrue(set.removeAll(Collections.unmodifiableSet(set)));
+        Assertions.assertTrue(set.isEmpty());
+        Assertions.assertFalse(set.removeAll(Collections.unmodifiableSet(set)));
+
+        set.add(first);
+        set.add(second);
+        Assertions.assertTrue(set.removeAll(Arrays.asList(first, first, new String("same"))));
+        Assertions.assertEquals(1, set.size());
+        Assertions.assertTrue(set.contains(second));
+    }
+
+    @Test
     public void testAdd() {
         IdentityHashSet<String> set = new IdentityHashSet<>();
         String s1 = new String("hello");

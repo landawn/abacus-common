@@ -41,8 +41,9 @@ public class BooleanConsumerTest extends TestBase {
     public void testAcceptWithCounter() {
         AtomicInteger trueCount = new AtomicInteger(0);
         BooleanConsumer consumer = value -> {
-            if (value)
+            if (value) {
                 trueCount.incrementAndGet();
+            }
         };
 
         consumer.accept(true);

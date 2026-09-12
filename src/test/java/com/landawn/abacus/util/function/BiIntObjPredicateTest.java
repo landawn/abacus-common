@@ -82,8 +82,9 @@ public class BiIntObjPredicateTest extends TestBase {
     @Test
     public void testComplexCondition() {
         BiIntObjPredicate<String> predicate = (i, j, s) -> {
-            if ((s == null) || i < 0 || j < 0)
+            if ((s == null) || i < 0 || j < 0) {
                 return false;
+            }
             return s.length() >= i && s.length() <= j;
         };
 

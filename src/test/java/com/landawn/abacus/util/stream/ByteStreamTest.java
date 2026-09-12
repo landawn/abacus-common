@@ -3898,15 +3898,6 @@ public class ByteStreamTest extends TestBase {
         assertArrayEquals(new byte[] { 2, 4, 6, 8, 10 }, result.sorted().toArray());
     }
 
-    //    @Test
-    //    public void testDoubleUnderscore() {
-    //        ByteStream stream = createByteStream((byte) 1, (byte) 2, (byte) 3);
-    //
-    //        IntStream intStream = stream.__(s -> s.mapToInt(b -> b * 10));
-    //
-    //        assertArrayEquals(new int[] { 10, 20, 30 }, intStream.toArray());
-    //    }
-
     @Test
     public void testWithCloseHandlerInConstructor() {
         AtomicInteger closeCount = new AtomicInteger(0);

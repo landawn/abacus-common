@@ -11,165 +11,19 @@ import com.landawn.abacus.TestBase;
 public class HttpMethodTest extends TestBase {
 
     @Test
-    public void testEnumValues() {
+    public void testValues() {
         HttpMethod[] values = HttpMethod.values();
         assertNotNull(values);
         assertEquals(9, values.length);
-    }
-
-    @Test
-    public void testValueOfGET() {
-        assertEquals(HttpMethod.GET, HttpMethod.valueOf("GET"));
-    }
-
-    @Test
-    public void testValueOfPOST() {
-        assertEquals(HttpMethod.POST, HttpMethod.valueOf("POST"));
-    }
-
-    @Test
-    public void testValueOfPUT() {
-        assertEquals(HttpMethod.PUT, HttpMethod.valueOf("PUT"));
-    }
-
-    @Test
-    public void testValueOfDELETE() {
-        assertEquals(HttpMethod.DELETE, HttpMethod.valueOf("DELETE"));
-    }
-
-    @Test
-    public void testValueOfHEAD() {
-        assertEquals(HttpMethod.HEAD, HttpMethod.valueOf("HEAD"));
-    }
-
-    @Test
-    public void testValueOfOPTIONS() {
-        assertEquals(HttpMethod.OPTIONS, HttpMethod.valueOf("OPTIONS"));
-    }
-
-    @Test
-    public void testValueOfTRACE() {
-        assertEquals(HttpMethod.TRACE, HttpMethod.valueOf("TRACE"));
-    }
-
-    @Test
-    public void testValueOfCONNECT() {
-        assertEquals(HttpMethod.CONNECT, HttpMethod.valueOf("CONNECT"));
-    }
-
-    @Test
-    public void testValueOfPATCH() {
-        assertEquals(HttpMethod.PATCH, HttpMethod.valueOf("PATCH"));
-    }
-
-    @Test
-    public void testNameGET() {
-        assertEquals("GET", HttpMethod.GET.name());
-    }
-
-    @Test
-    public void testNamePOST() {
-        assertEquals("POST", HttpMethod.POST.name());
-    }
-
-    @Test
-    public void testNamePUT() {
-        assertEquals("PUT", HttpMethod.PUT.name());
-    }
-
-    @Test
-    public void testNameDELETE() {
-        assertEquals("DELETE", HttpMethod.DELETE.name());
-    }
-
-    @Test
-    public void testNameHEAD() {
-        assertEquals("HEAD", HttpMethod.HEAD.name());
-    }
-
-    @Test
-    public void testNameOPTIONS() {
-        assertEquals("OPTIONS", HttpMethod.OPTIONS.name());
-    }
-
-    @Test
-    public void testNameTRACE() {
-        assertEquals("TRACE", HttpMethod.TRACE.name());
-    }
-
-    @Test
-    public void testNameCONNECT() {
-        assertEquals("CONNECT", HttpMethod.CONNECT.name());
-    }
-
-    @Test
-    public void testNamePATCH() {
-        assertEquals("PATCH", HttpMethod.PATCH.name());
-    }
-
-    @Test
-    public void testToStringGET() {
-        assertEquals("GET", HttpMethod.GET.toString());
-    }
-
-    @Test
-    public void testToStringPOST() {
-        assertEquals("POST", HttpMethod.POST.toString());
-    }
-
-    @Test
-    public void testToStringPUT() {
-        assertEquals("PUT", HttpMethod.PUT.toString());
-    }
-
-    @Test
-    public void testToStringDELETE() {
-        assertEquals("DELETE", HttpMethod.DELETE.toString());
-    }
-
-    @Test
-    public void testOrdinalGET() {
-        assertEquals(0, HttpMethod.GET.ordinal());
-    }
-
-    @Test
-    public void testOrdinalPOST() {
-        assertEquals(1, HttpMethod.POST.ordinal());
-    }
-
-    @Test
-    public void testOrdinalPUT() {
-        assertEquals(2, HttpMethod.PUT.ordinal());
-    }
-
-    @Test
-    public void testOrdinalDELETE() {
-        assertEquals(3, HttpMethod.DELETE.ordinal());
-    }
-
-    @Test
-    public void testOrdinalHEAD() {
-        assertEquals(4, HttpMethod.HEAD.ordinal());
-    }
-
-    @Test
-    public void testOrdinalOPTIONS() {
-        assertEquals(5, HttpMethod.OPTIONS.ordinal());
-    }
-
-    @Test
-    public void testOrdinalTRACE() {
-        assertEquals(6, HttpMethod.TRACE.ordinal());
-    }
-
-    @Test
-    public void testOrdinalCONNECT() {
-        assertEquals(7, HttpMethod.CONNECT.ordinal());
-    }
-
-    @Test
-    public void testOrdinalPATCH() {
-        assertEquals(8, HttpMethod.PATCH.ordinal());
+        assertEquals(HttpMethod.GET, values[0]);
+        assertEquals(HttpMethod.POST, values[1]);
+        assertEquals(HttpMethod.PUT, values[2]);
+        assertEquals(HttpMethod.DELETE, values[3]);
+        assertEquals(HttpMethod.HEAD, values[4]);
+        assertEquals(HttpMethod.OPTIONS, values[5]);
+        assertEquals(HttpMethod.TRACE, values[6]);
+        assertEquals(HttpMethod.CONNECT, values[7]);
+        assertEquals(HttpMethod.PATCH, values[8]);
     }
 
     @Test
@@ -186,7 +40,7 @@ public class HttpMethodTest extends TestBase {
     }
 
     @Test
-    public void testValueOfInvalid() {
+    public void testValueOf_Invalid() {
         assertThrows(IllegalArgumentException.class, () -> HttpMethod.valueOf("INVALID"));
         assertThrows(IllegalArgumentException.class, () -> HttpMethod.valueOf("get"));
         assertThrows(NullPointerException.class, () -> HttpMethod.valueOf(null));
@@ -206,6 +60,19 @@ public class HttpMethodTest extends TestBase {
     }
 
     @Test
+    public void testToString() {
+        assertEquals("GET", HttpMethod.GET.toString());
+        assertEquals("POST", HttpMethod.POST.toString());
+        assertEquals("PUT", HttpMethod.PUT.toString());
+        assertEquals("DELETE", HttpMethod.DELETE.toString());
+        assertEquals("HEAD", HttpMethod.HEAD.toString());
+        assertEquals("OPTIONS", HttpMethod.OPTIONS.toString());
+        assertEquals("TRACE", HttpMethod.TRACE.toString());
+        assertEquals("CONNECT", HttpMethod.CONNECT.toString());
+        assertEquals("PATCH", HttpMethod.PATCH.toString());
+    }
+
+    @Test
     public void testOrdinal() {
         assertEquals(0, HttpMethod.GET.ordinal());
         assertEquals(1, HttpMethod.POST.ordinal());
@@ -217,5 +84,4 @@ public class HttpMethodTest extends TestBase {
         assertEquals(7, HttpMethod.CONNECT.ordinal());
         assertEquals(8, HttpMethod.PATCH.ordinal());
     }
-
 }

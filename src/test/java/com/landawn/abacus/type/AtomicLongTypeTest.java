@@ -128,4 +128,28 @@ public class AtomicLongTypeTest extends TestBase {
     public void test_name() {
         assertEquals("AtomicLong", type.name());
     }
+
+    // T5-07 (2026-09-06): Integer.parseInt/Long.parseLong accepted non-ASCII digits that IntegerType/MutableIntType reject.
+    @Test
+    public void reviewFixes20260906_valueOfUsesNumbersGrammarLikeIntegerType() {
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("\u0661\u0662\u0663"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> Type.of(Long.class).valueOf("\u0661\u0662\u0663"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("\uFF11\uFF12"));
+        assertEquals(42, type.valueOf(" 42 ").get());
+        assertEquals(-7, type.valueOf("-7").get());
+        assertEquals(16, type.valueOf("0x10").get());
+        assertEquals(16, type.valueOf("#10").get());
+        assertEquals(10, type.valueOf("010").get()); // R9: a leading zero is decimal padding, never octal
+        assertEquals(10L, Type.of(Long.class).valueOf("010").longValue());
+        assertEquals(1, type.valueOf("1L").get());
+        assertEquals(Long.MAX_VALUE, type.valueOf("9223372036854775807").get());
+        assertEquals(Long.MIN_VALUE, type.valueOf("-9223372036854775808").get());
+        assertNull(type.valueOf(""));
+        assertNull(type.valueOf((String) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf(" "));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("\t"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("abc"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("1.5"));
+        org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> type.valueOf("9223372036854775808"));
+    }
 }

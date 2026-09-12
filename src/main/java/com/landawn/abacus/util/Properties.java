@@ -17,7 +17,6 @@ package com.landawn.abacus.util;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -86,10 +85,10 @@ public class Properties<K, V> implements Map<K, V> {
      * Subsequent changes made through either this instance or the supplied map are visible to both.
      *
      * @param valueMap the map to use as the backing storage; must not be {@code null}
-     * @throws NullPointerException if {@code valueMap} is {@code null}
+     * @throws IllegalArgumentException if {@code valueMap} is {@code null}
      */
-    Properties(final Map<K, V> valueMap) {
-        values = Objects.requireNonNull(valueMap, "valueMap");
+    Properties(final Map<K, V> valueMap) throws IllegalArgumentException {
+        values = N.checkArgNotNull(valueMap, cs.valueMap);
     }
 
     /**
@@ -110,9 +109,11 @@ public class Properties<K, V> implements Map<K, V> {
      * @param <V> the value type
      * @param map the map from which to create the Properties instance
      * @return a new Properties instance containing a copy of the entries from the specified map
-     * @throws NullPointerException if the specified map is {@code null}
+     * @throws IllegalArgumentException if the specified map is {@code null}
      */
-    public static <K, V> Properties<K, V> create(final Map<? extends K, ? extends V> map) {
+    public static <K, V> Properties<K, V> create(final Map<? extends K, ? extends V> map) throws IllegalArgumentException {
+        N.checkArgNotNull(map, cs.map);
+
         return new Properties<>(new LinkedHashMap<>(map));
     }
 
@@ -161,17 +162,19 @@ public class Properties<K, V> implements Map<K, V> {
      * @return the value associated with the specified property name, converted to the specified target type;
      *         if the property is not found or its value is {@code null}, returns the default value of {@code targetType}
      *         (e.g. {@code 0} for primitive numeric types, {@code false} for {@code boolean}, {@code null} for reference types)
-     * @throws ArithmeticException if a numeric value overflows the requested integer type
-     * @throws IllegalArgumentException if the stored value cannot be converted to {@code targetType}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null} or the stored value cannot be converted to it
      * @throws NumberFormatException if the stored value is a string that cannot be parsed to the target numeric type
-     * @throws NullPointerException if {@code targetType} is {@code null}
+     * @throws ArithmeticException if a numeric value overflows the requested integer type
      * @throws RuntimeException if another conversion error occurs
      * @see N#convert(Object, Class)
      * @see #get(Object)
      * @see #getOrDefault(Object, Object)
      * @see #getOrDefault(Object, Object, Class)
      */
-    public <T> T get(final Object propName, final Class<? extends T> targetType) {
+    public <T> T get(final Object propName, final Class<? extends T> targetType)
+            throws IllegalArgumentException, NumberFormatException, ArithmeticException, RuntimeException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         //noinspection SuspiciousMethodCalls
         return N.convert(values.get(propName), targetType);
     }
@@ -223,18 +226,18 @@ public class Properties<K, V> implements Map<K, V> {
      * @param targetType the class of the type to which a found, non-{@code null} value should be converted
      * @return the value associated with the specified property name, converted to the specified target type;
      *         or {@code defaultValue} (returned as-is, without conversion) if the property is not found or its value is {@code null}
-     * @throws ArithmeticException if a found numeric value overflows the requested integer type
-     * @throws IllegalArgumentException if a found, non-{@code null} value cannot be converted to {@code targetType}.
+     * @throws IllegalArgumentException if a non-{@code null} stored value must be converted and {@code targetType} is {@code null},
+     *         or the value cannot be converted to that type
      * @throws NumberFormatException if a found value is a string that cannot be parsed to the target numeric type
-     * @throws NullPointerException if {@code targetType} is {@code null} and a non-{@code null}
-     *         stored value must be converted
+     * @throws ArithmeticException if a found numeric value overflows the requested integer type
      * @throws RuntimeException if another conversion error occurs
      * @see N#convert(Object, Class)
      * @see #get(Object)
      * @see #get(Object, Class)
      * @see #getOrDefault(Object, Object)
      */
-    public <T> T getOrDefault(final Object propName, final T defaultValue, final Class<? extends T> targetType) {
+    public <T> T getOrDefault(final Object propName, final T defaultValue, final Class<? extends T> targetType)
+            throws IllegalArgumentException, NumberFormatException, ArithmeticException, RuntimeException {
         @SuppressWarnings("SuspiciousMethodCalls")
         final Object result = values.get(propName);
 
@@ -242,6 +245,7 @@ public class Properties<K, V> implements Map<K, V> {
             return defaultValue;
         }
 
+        N.checkArgNotNull(targetType, cs.targetType);
         return N.convert(result, targetType);
     }
 
@@ -585,6 +589,10 @@ public class Properties<K, V> implements Map<K, V> {
      * backed by a new {@link LinkedHashMap} regardless of the backing map of this instance,
      * so modifications to either instance do not affect the other.
      *
+     * <p><b>Subclasses:</b> the result is always a plain {@code Properties}, never the runtime type of
+     * this instance, and subclass state declared outside the map is not carried over. A subclass that
+     * needs a copy of its own type must override this method.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> original = new Properties<>();
@@ -619,7 +627,7 @@ public class Properties<K, V> implements Map<K, V> {
      */
     @Override
     public int hashCode() {
-        return values == null ? 0 : values.hashCode();
+        return values.hashCode();
     }
 
     /**
@@ -647,7 +655,7 @@ public class Properties<K, V> implements Map<K, V> {
 
     /**
      * Returns a string representation of this Properties object.
-     * The string representation consists of the string representation of the underlying map.
+     * Entries follow iteration order. Direct self-references use {@code (this Map)}; indirect cycles are not detected.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -661,7 +669,19 @@ public class Properties<K, V> implements Map<K, V> {
      */
     @Override
     public String toString() {
-        return values.toString();
+        final StringBuilder text = new StringBuilder("{");
+        final var entries = values.entrySet().iterator();
+        while (entries.hasNext()) {
+            final var entry = entries.next();
+            // The backing map cannot recognize a reference to its public wrapper as self-reference.
+            text.append(entry.getKey() == this ? "(this Map)" : entry.getKey());
+            text.append('=');
+            text.append(entry.getValue() == this ? "(this Map)" : entry.getValue());
+            if (entries.hasNext()) {
+                text.append(", ");
+            }
+        }
+        return text.append('}').toString();
     }
 
     /**
@@ -670,9 +690,9 @@ public class Properties<K, V> implements Map<K, V> {
      * map directly; existing collection views continue to refer to the previous map.
      *
      * @param newValues the new map to use as the internal storage
-     * @throws NullPointerException if {@code newValues} is {@code null}
+     * @throws IllegalArgumentException if {@code newValues} is {@code null}
      */
-    void reset(final Map<K, V> newValues) {
-        values = Objects.requireNonNull(newValues, "newValues");
+    void reset(final Map<K, V> newValues) throws IllegalArgumentException {
+        values = N.checkArgNotNull(newValues, cs.newValues);
     }
 }

@@ -16,7 +16,6 @@ package com.landawn.abacus.util.stream;
 
 import java.io.Serial;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.security.SecureRandom;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ import java.util.Spliterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -39,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -95,6 +94,7 @@ import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.Wrapper;
 import com.landawn.abacus.util.cs;
+import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.u.Optional;
 
 /**
@@ -131,7 +131,7 @@ import com.landawn.abacus.util.u.Optional;
  * @param <ITER> the type of iterator returned by {@code iterator()} method
  * @param <S> the specific stream implementation type (self-type for fluent API)
  */
-@SuppressWarnings({ "java:S6539" })
+@SuppressWarnings("java:S6539")
 @LazyEvaluation
 abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extends BaseStream<T, A, P, C, OT, IT, ITER, S>>
         implements BaseStream<T, A, P, C, OT, IT, ITER, S> {
@@ -259,6 +259,9 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     static final int RESERVED_POOL_SIZE = CORE_THREAD_POOL_SIZE / 16; // To reduce the chance of deadlock.
 
+    /** Keep-alive for a temporary fallback pool. Inert while core == max; it only bounds excess threads. */
+    static final long TEMP_EXECUTOR_KEEP_ALIVE_SECONDS = 180L;
+
     // static final long MAX_WAIT_TO_BREAK_FOR_DEAD_LOCK = 6 * 60 * 1000; // 6 minutes
 
     static final SplitStrategy DEFAULT_SPLIT_STRATEGY = SplitStrategy.ITERATOR;
@@ -283,10 +286,15 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
         // final ThreadPoolExecutor threadPoolExecutor = Executors.newFixedThreadPool(CORE_THREAD_POOL_SIZE);
 
+        final AtomicInteger poolThreadCount = new AtomicInteger();
         final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(//
                 CORE_THREAD_POOL_SIZE, // coreThreadPoolSize
                 CORE_THREAD_POOL_SIZE, // maxThreadPoolSize
-                180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+                180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), r -> {
+                    final Thread thread = new Thread(r, "abacus-stream-" + poolThreadCount.incrementAndGet());
+                    thread.setDaemon(true);
+                    return thread;
+                });
 
         threadPoolExecutor.setRejectedExecutionHandler((r, executor) -> {
             //    // This should not be called.
@@ -444,25 +452,6 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     };
 
-    static volatile boolean isListElementDataFieldGettable = true;
-    static final Field listElementDataField;
-
-    static {
-        Field tmp = null;
-
-        try {
-            tmp = ArrayList.class.getDeclaredField("elementData");
-        } catch (final Throwable e) { // NOSONAR
-            // ignore.
-        }
-
-        listElementDataField = tmp != null && tmp.getType().equals(Object[].class) ? tmp : null;
-
-        if (listElementDataField != null) {
-            ClassUtil.setAccessibleQuietly(listElementDataField, true);
-        }
-    }
-
     private final boolean sorted;
     private final Comparator<? super T> cmp;
     private Deque<LocalRunnable> closeHandlers;
@@ -494,8 +483,15 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return rateLimited(com.landawn.abacus.util.RateLimiter.create(permitsPerSecond));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalStateException if this stream is already closed
+     * @throws ArithmeticException if the duration cannot be represented as a long number of milliseconds
+     * @throws IllegalArgumentException if the duration is null
+     */
     @Override
-    public S delay(final java.time.Duration duration) throws IllegalStateException, IllegalArgumentException {
+    public S delay(final java.time.Duration duration) throws IllegalStateException, ArithmeticException, IllegalArgumentException {
         assertNotClosed();
 
         final com.landawn.abacus.util.Duration durationToUse = duration == null ? null : com.landawn.abacus.util.Duration.ofMillis(duration.toMillis());
@@ -514,7 +510,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @see #shuffled(Random)
      */
     @Override
-    public S shuffled() {
+    public S shuffled() throws IllegalStateException {
         assertNotClosed();
 
         return shuffled(RAND);
@@ -539,7 +535,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @throws IllegalArgumentException if {@code offset} or {@code maxSize} is negative.
      */
     @Override
-    public S skipAndLimit(final long offset, final long maxSize) throws IllegalArgumentException, IllegalStateException {
+    public S skipAndLimit(final long offset, final long maxSize) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
         checkArgNotNegative(offset, cs.offset);
         checkArgNotNegative(maxSize, cs.maxSize);
@@ -588,7 +584,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    public ImmutableList<T> toImmutableList() {
+    public ImmutableList<T> toImmutableList() throws IllegalStateException {
         assertNotClosed();
 
         return ImmutableList.wrap(toList());
@@ -605,7 +601,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    public ImmutableSet<T> toImmutableSet() {
+    public ImmutableSet<T> toImmutableSet() throws IllegalStateException {
         assertNotClosed();
 
         return ImmutableSet.wrap(toSet());
@@ -620,7 +616,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    public A toArray() {
+    public A toArray() throws IllegalStateException {
         assertNotClosed();
 
         return toArray(true);
@@ -633,8 +629,9 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param closeStream {@code true} to close this stream once the array has been filled,
      *        {@code false} to leave it open for a follow-up intermediate operation
      * @return a new array holding the remaining elements in encounter order
+     * @throws IllegalStateException if the stream is already closed.
      */
-    protected abstract A toArray(boolean closeStream);
+    protected abstract A toArray(boolean closeStream) throws IllegalStateException;
 
     /**
      * Drains this stream into an array for use by an intermediate operation that needs the whole
@@ -658,7 +655,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @throws IllegalStateException if the stream is already closed
      */
     // Try to avoid unnecessary copy of an array if possible
-    protected Tuple3<A, Integer, Integer> arrayForIntermediateOp() {
+    protected Tuple3<A, Integer, Integer> arrayForIntermediateOp() throws IllegalStateException {
         assertNotClosed();
 
         // final A a = toArray(false);
@@ -688,7 +685,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @see #throwIfEmpty(Supplier)
      */
     @Override
-    public S throwIfEmpty() {
+    public S throwIfEmpty() throws IllegalStateException {
         assertNotClosed();
 
         return throwIfEmpty(Suppliers.newNoSuchElementException());
@@ -708,7 +705,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
      */
     @Override
-    public S throwIfEmpty(final Supplier<? extends RuntimeException> exceptionSupplier) throws IllegalArgumentException {
+    public S throwIfEmpty(final Supplier<? extends RuntimeException> exceptionSupplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
@@ -735,12 +732,12 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @return an Optional containing the result of applying {@code func} to this stream,
      *         or an empty Optional if the stream is empty or the function returns {@code null}
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the function throws a checked exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if the function throws a checked exception
      */
     @Override
     public <R, E extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super S, ? extends R, E> func)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(func, cs.func);
@@ -773,12 +770,12 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @return {@link OrElse#TRUE} if the stream was non-empty and the action was executed,
      *         {@link OrElse#FALSE} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the action throws a checked exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws a checked exception
      */
     @Override
     public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super S, E> action)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -807,7 +804,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    public void println() {
+    public void println() throws IllegalStateException {
         assertNotClosed();
 
         final List<T> list = sequential().limit(MAX_SIZE_FOR_PRINTLN + 1).toList();
@@ -838,7 +835,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    public S sequential() {
+    public S sequential() throws IllegalStateException {
         assertNotClosed();
 
         return (S) this;
@@ -853,7 +850,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @see #parallel(Executor)
      */
     @Override
-    public S parallel() {
+    public S parallel() throws IllegalStateException {
         assertNotClosed();
 
         return parallel(DEFAULT_MAX_THREAD_NUM);
@@ -870,7 +867,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @throws IllegalArgumentException if {@code maxThreadNum} is negative.
      */
     @Override
-    public S parallel(final int maxThreadNum) {
+    public S parallel(final int maxThreadNum) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNegative(maxThreadNum, cs.maxThreadNum);
@@ -888,7 +885,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
     @Override
-    public S parallel(final Executor executor) throws IllegalArgumentException {
+    public S parallel(final Executor executor) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(executor, cs.executor);
@@ -908,7 +905,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @throws IllegalArgumentException if {@code maxThreadNum} is negative, or if {@code executor} is {@code null}.
      */
     @Override
-    public S parallel(final int maxThreadNum, final Executor executor) throws IllegalArgumentException {
+    public S parallel(final int maxThreadNum, final Executor executor) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNegative(maxThreadNum, cs.maxThreadNum);
@@ -932,7 +929,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      */
     @SuppressWarnings("deprecation")
     @Override
-    public S parallel(final ParallelSettings ps) throws IllegalArgumentException {
+    public S parallel(final ParallelSettings ps) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(ps, cs.ps);
@@ -958,9 +955,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param cancelUncompletedThreads whether a short-circuiting terminal operation should try to
      *        cancel the workers that are still running
      * @return an equivalent parallel stream
+     * @throws IllegalStateException if the stream is already closed.
      */
     protected abstract S parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
-            final boolean cancelUncompletedThreads);
+            final boolean cancelUncompletedThreads) throws IllegalStateException;
 
     // protected abstract S parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads);
 
@@ -1013,15 +1011,15 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public <SS extends BaseStream> SS sps(final Function<? super S, ? extends SS> ops) throws IllegalArgumentException, IllegalStateException {
+    public <SS extends BaseStream> SS sps(final Function<? super S, ? extends SS> ops) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(ops, cs.ops);
 
         if (isParallel()) {
-            return (SS) ops.apply((S) this).sequential();
+            return linkCloseToThis((SS) ops.apply((S) this).sequential());
         } else {
-            return (SS) ops.apply(this.parallel()).sequential();
+            return linkCloseToThis((SS) ops.apply(this.parallel()).sequential());
         }
     }
 
@@ -1038,22 +1036,22 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code maxThreadNum} is negative, or if {@code ops} is {@code null}.
      */
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings("rawtypes")
     @Override
     public <SS extends BaseStream> SS sps(final int maxThreadNum, final Function<? super S, ? extends SS> ops)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNegative(maxThreadNum, cs.maxThreadNum);
         checkArgNotNull(ops, cs.ops);
 
         if (isParallel() && maxThreadNum == maxThreadNum()) {
-            return (SS) ops.apply((S) this).sequential();
+            return linkCloseToThis((SS) ops.apply((S) this).sequential());
         } else {
             final int checkedMaxThreadNum = checkMaxThreadNum(maxThreadNum, asyncExecutor());
             // final int checkedVirtualTaskNum = checkExecutorNumForVirtualThread(checkedMaxThreadNum);
 
-            return (SS) ops.apply(parallel(checkedMaxThreadNum, splitStrategy(), asyncExecutor(), cancelUncompletedThreads())).sequential();
+            return linkCloseToThis((SS) ops.apply(parallel(checkedMaxThreadNum, splitStrategy(), asyncExecutor(), cancelUncompletedThreads())).sequential());
         }
     }
 
@@ -1075,7 +1073,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
     @SuppressWarnings("rawtypes")
     @Override
     public <SS extends BaseStream> SS sps(final int maxThreadNum, final Executor executor, final Function<? super S, ? extends SS> ops)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNegative(maxThreadNum, cs.maxThreadNum);
@@ -1084,9 +1082,9 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
         final AsyncExecutor asyncExecutor = createAsyncExecutor(executor);
 
-        return (SS) ops.apply(parallel(checkMaxThreadNum(maxThreadNum, asyncExecutor), splitStrategy(), asyncExecutor, cancelUncompletedThreads()))
-                .sequential();
-
+        return linkCloseToThis(
+                (SS) ops.apply(parallel(checkMaxThreadNum(maxThreadNum, asyncExecutor), splitStrategy(), asyncExecutor, cancelUncompletedThreads()))
+                        .sequential());
     }
 
     /**
@@ -1105,15 +1103,16 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public <SS extends BaseStream> SS psp(final Function<? super S, ? extends SS> ops) throws IllegalArgumentException, IllegalStateException {
+    public <SS extends BaseStream> SS psp(final Function<? super S, ? extends SS> ops) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(ops, cs.ops);
 
         if (isParallel()) {
-            return (SS) ((StreamBase) ops.apply(this.sequential())).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
+            return linkCloseToThis(
+                    (SS) ((StreamBase) ops.apply(this.sequential())).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads()));
         } else {
-            return (SS) ops.apply((S) this).parallel();
+            return linkCloseToThis((SS) ops.apply((S) this).parallel());
         }
     }
 
@@ -1133,7 +1132,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public <RS extends BaseStream> RS transform(final Function<? super S, ? extends RS> transfer) throws IllegalArgumentException, IllegalStateException {
+    public <RS extends BaseStream> RS transform(final Function<? super S, ? extends RS> transfer) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(transfer, cs.transfer);
@@ -1142,7 +1141,35 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         //
         // Stream.defer(delayInitializer)... to RS
 
-        return transfer.apply((S) this); // TODO not lazy evaluation?
+        return linkCloseToThis(transfer.apply((S) this)); // TODO not lazy evaluation?
+    }
+
+    /**
+     * Registers this stream's {@code close()} on {@code result}, so that closing the stream returned by a
+     * "hand the pipeline to a function" operation also releases this one.
+     *
+     * <p>Without this, an {@code ops}/{@code transfer} function that ignores its input - or builds its result
+     * from another source - leaves this stream, and any file or JDBC handle behind it, open forever. When the
+     * function does consume its input the link is redundant but harmless: {@link #close()} is idempotent.
+     *
+     * @param <RS> the returned stream type
+     * @param result the stream produced by the caller-supplied function; may be {@code null}
+     * @return {@code result}, linked to this stream's lifecycle
+     */
+    @SuppressWarnings("rawtypes")
+    <RS extends BaseStream> RS linkCloseToThis(final RS result) {
+        if (result == null) {
+            // A function that returns null cannot be chained; still release this stream rather than leak it.
+            close();
+
+            return null;
+        }
+
+        if (result == this) {
+            return result;
+        }
+
+        return (RS) result.onClose(this::close);
     }
 
     /**
@@ -1391,13 +1418,19 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void assertNotClosed() {
+    /**
+     * @throws IllegalStateException if the stream has already been terminated.
+     */
+    final void assertNotClosed() throws IllegalStateException {
         if (isClosed()) {
             throw new IllegalStateException("This stream is already terminated.");
         }
     }
 
-    final void checkIndex(final int index, final int length) {
+    /**
+     * @throws IndexOutOfBoundsException if {@code index} is negative or not less than {@code length}.
+     */
+    final void checkIndex(final int index, final int length) throws IndexOutOfBoundsException {
         if (index < 0 || index >= length) {
             try {
                 N.checkElementIndex(index, length);
@@ -1407,7 +1440,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkFromToIndex(final int fromIndex, final int toIndex, final int length) {
+    /**
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > length}.
+     */
+    final void checkFromToIndex(final int fromIndex, final int toIndex, final int length) throws IndexOutOfBoundsException {
         if (fromIndex < 0 || fromIndex > toIndex || toIndex > length) {
             try {
                 N.checkFromToIndex(fromIndex, toIndex, length);
@@ -1417,7 +1453,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkFromIndexSize(final int fromIndex, final int size, final int length) {
+    /**
+     * @throws IndexOutOfBoundsException if the range starting at {@code fromIndex} with {@code size} elements is outside {@code [0, length)}.
+     */
+    final void checkFromIndexSize(final int fromIndex, final int size, final int length) throws IndexOutOfBoundsException {
         if ((length | fromIndex | size) < 0 || size > length - fromIndex) {
             try {
                 N.checkFromIndexSize(fromIndex, size, length);
@@ -1427,7 +1466,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkArgPositive(final int arg, final String argNameOrErrorMsg) {
+    /**
+     * @throws IllegalArgumentException if {@code arg} is zero or negative.
+     */
+    final void checkArgPositive(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             try {
                 N.checkArgPositive(arg, argNameOrErrorMsg);
@@ -1437,7 +1479,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkArgPositive(final long arg, final String argNameOrErrorMsg) {
+    /**
+     * @throws IllegalArgumentException if {@code arg} is zero or negative.
+     */
+    final void checkArgPositive(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg <= 0) {
             try {
                 N.checkArgPositive(arg, argNameOrErrorMsg);
@@ -1447,7 +1492,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkArgNotNegative(final int arg, final String argNameOrErrorMsg) {
+    /**
+     * @throws IllegalArgumentException if {@code arg} is negative.
+     */
+    final void checkArgNotNegative(final int arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             try {
                 N.checkArgNotNegative(arg, argNameOrErrorMsg);
@@ -1457,7 +1505,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkArgNotNegative(final long arg, final String argNameOrErrorMsg) {
+    /**
+     * @throws IllegalArgumentException if {@code arg} is negative.
+     */
+    final void checkArgNotNegative(final long arg, final String argNameOrErrorMsg) throws IllegalArgumentException {
         if (arg < 0) {
             try {
                 N.checkArgNotNegative(arg, argNameOrErrorMsg);
@@ -1467,8 +1518,11 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
+    /**
+     * @throws IllegalArgumentException if {@code obj} is {@code null}.
+     */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
-    final <ARG> ARG checkArgNotNull(final ARG obj) {
+    final <ARG> ARG checkArgNotNull(final ARG obj) throws IllegalArgumentException {
         if (obj == null) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1481,8 +1535,11 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return obj;
     }
 
+    /**
+     * @throws IllegalArgumentException if {@code obj} is {@code null}.
+     */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
-    final <ARG> ARG checkArgNotNull(final ARG obj, final String errorMessage) {
+    final <ARG> ARG checkArgNotNull(final ARG obj, final String errorMessage) throws IllegalArgumentException {
         if (obj == null) {
             try {
                 //noinspection ConstantValue
@@ -1495,7 +1552,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return obj;
     }
 
-    final void checkArgNotEmpty(final Collection<?> c, final String errorMessage) {
+    /**
+     * @throws IllegalArgumentException if {@code c} is {@code null} or empty.
+     */
+    final void checkArgNotEmpty(final Collection<?> c, final String errorMessage) throws IllegalArgumentException {
         if (c == null || c.size() == 0) {
             try {
                 N.checkArgNotEmpty(c, errorMessage);
@@ -1505,7 +1565,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkArgument(final boolean b, final String errorMessage) {
+    /**
+     * @throws IllegalArgumentException if {@code b} is {@code false}.
+     */
+    final void checkArgument(final boolean b, final String errorMessage) throws IllegalArgumentException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1516,7 +1579,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkArgument(final boolean b, final String errorMessageTemplate, final int p1) {
+    /**
+     * @throws IllegalArgumentException if {@code b} is {@code false}.
+     */
+    final void checkArgument(final boolean b, final String errorMessageTemplate, final int p1) throws IllegalArgumentException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1527,7 +1593,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkArgument(final boolean b, final String errorMessageTemplate, final long p1) {
+    /**
+     * @throws IllegalArgumentException if {@code b} is {@code false}.
+     */
+    final void checkArgument(final boolean b, final String errorMessageTemplate, final long p1) throws IllegalArgumentException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1538,7 +1607,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1) {
+    /**
+     * @throws IllegalArgumentException if {@code b} is {@code false}.
+     */
+    final void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1) throws IllegalArgumentException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1549,7 +1621,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final int p2) {
+    /**
+     * @throws IllegalArgumentException if {@code b} is {@code false}.
+     */
+    final void checkArgument(final boolean b, final String errorMessageTemplate, final int p1, final int p2) throws IllegalArgumentException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1560,7 +1635,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final long p2) {
+    /**
+     * @throws IllegalArgumentException if {@code b} is {@code false}.
+     */
+    final void checkArgument(final boolean b, final String errorMessageTemplate, final long p1, final long p2) throws IllegalArgumentException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1571,7 +1649,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) {
+    /**
+     * @throws IllegalArgumentException if {@code b} is {@code false}.
+     */
+    final void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) throws IllegalArgumentException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1582,7 +1663,11 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3) {
+    /**
+     * @throws IllegalArgumentException if {@code b} is {@code false}.
+     */
+    final void checkArgument(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3)
+            throws IllegalArgumentException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -2226,17 +2311,6 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return newStreamWithTransferredCloseHandlers(a, fromIndex, toIndex, sorted, comparator, closeHandlersForNewStream(closeHandlers));
     }
 
-    final <E> Stream<E> newStreamWithTransferredCloseHandlers(final E[] a, final int fromIndex, final int toIndex, final boolean sorted,
-            final Comparator<? super E> comparator, final Deque<LocalRunnable> closeHandlers) {
-
-        if (isParallel()) {
-            return new ParallelArrayStream<>(a, fromIndex, toIndex, sorted, comparator, maxThreadNum(), splitStrategy(), asyncExecutor(),
-                    cancelUncompletedThreads(), closeHandlers);
-        } else {
-            return new ArrayStream<>(a, fromIndex, toIndex, sorted, comparator, closeHandlers);
-        }
-    }
-
     <E> Stream<E> newStream(final Iterator<E> iter) {
         return newStream(iter, false, null);
     }
@@ -2247,23 +2321,6 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     <E> Stream<E> newStream(final Iterator<E> iter, final boolean sorted, final Comparator<? super E> comparator, final Deque<LocalRunnable> closeHandlers) {
         return newStreamWithTransferredCloseHandlers(iter, sorted, comparator, closeHandlersForNewStream(closeHandlers));
-    }
-
-    /**
-     * Creates a stream whose supplied handlers already express the complete ownership policy.
-     * This is reserved for operations such as {@code splitAt} that may transfer the source resource
-     * to an emitted inner stream; unconditionally linking the outer stream back to its parent would
-     * close that resource before the inner stream is consumed.
-     */
-    final <E> Stream<E> newStreamWithTransferredCloseHandlers(final Iterator<E> iter, final boolean sorted, final Comparator<? super E> comparator,
-            final Deque<LocalRunnable> closeHandlers) {
-
-        if (isParallel()) {
-            return new ParallelIteratorStream<>(iter, sorted, comparator, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
-                    closeHandlers);
-        } else {
-            return new IteratorStream<>(iter, sorted, comparator, closeHandlers);
-        }
     }
 
     <E> Stream<E> newStream(final Stream<E> s) {
@@ -2284,7 +2341,38 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    static boolean isEmptyRange(final int arrayLength, final int fromIndex, final int toIndex) {
+    final <E> Stream<E> newStreamWithTransferredCloseHandlers(final E[] a, final int fromIndex, final int toIndex, final boolean sorted,
+            final Comparator<? super E> comparator, final Deque<LocalRunnable> closeHandlers) {
+
+        if (isParallel()) {
+            return new ParallelArrayStream<>(a, fromIndex, toIndex, sorted, comparator, maxThreadNum(), splitStrategy(), asyncExecutor(),
+                    cancelUncompletedThreads(), closeHandlers);
+        } else {
+            return new ArrayStream<>(a, fromIndex, toIndex, sorted, comparator, closeHandlers);
+        }
+    }
+
+    /**
+     * Creates a stream whose supplied handlers already express the complete ownership policy.
+     * This is reserved for operations such as {@code splitAt} that may transfer the source resource
+     * to an emitted inner stream; unconditionally linking the outer stream back to its parent would
+     * close that resource before the inner stream is consumed.
+     */
+    final <E> Stream<E> newStreamWithTransferredCloseHandlers(final Iterator<E> iter, final boolean sorted, final Comparator<? super E> comparator,
+            final Deque<LocalRunnable> closeHandlers) {
+
+        if (isParallel()) {
+            return new ParallelIteratorStream<>(iter, sorted, comparator, maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads(),
+                    closeHandlers);
+        } else {
+            return new IteratorStream<>(iter, sorted, comparator, closeHandlers);
+        }
+    }
+
+    /**
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > arrayLength}.
+     */
+    static boolean isEmptyRange(final int arrayLength, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, arrayLength);
 
         return fromIndex == toIndex;
@@ -2328,12 +2416,32 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
 
         final List<ObjIteratorEx<T>> result = new ArrayList<>(streams.size());
+        int opened = 0;
 
-        for (final Stream<? extends T> s : streams) {
-            result.add(s == null ? ObjIteratorEx.empty() : (ObjIteratorEx<T>) s.iteratorEx());
+        try {
+            for (final Stream<? extends T> s : streams) {
+                result.add(s == null ? ObjIteratorEx.empty() : (ObjIteratorEx<T>) s.iteratorEx());
+                opened++;
+            }
+
+            return result;
+        } catch (final RuntimeException | Error e) {
+            // Close only streams whose iteratorEx() succeeded; the unopened suffix stays usable.
+            int i = 0;
+            for (final Stream<? extends T> s : streams) {
+                if (i++ >= opened) {
+                    break;
+                }
+                if (s != null) {
+                    try {
+                        s.close();
+                    } catch (final Exception ce) {
+                        e.addSuppressed(ce);
+                    }
+                }
+            }
+            throw e;
         }
-
-        return result;
     }
 
     static CharIteratorEx charIterator(final ObjIteratorEx<Character> iter) {
@@ -2362,6 +2470,87 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     static DoubleIteratorEx doubleIterator(final ObjIteratorEx<Double> iter) {
         return DoubleIteratorEx.from(iter);
+    }
+
+    static void closeOpenedSource(final AutoCloseable source, final Throwable e) {
+        if (source != null) {
+            try {
+                source.close();
+            } catch (final Exception ce) {
+                e.addSuppressed(ce);
+            }
+        }
+    }
+
+    /**
+     * Opens {@code a} then {@code b}. If a later open or the zipper throws, only sources whose
+     * iterate supplier returned are closed so an unopened sibling stays usable.
+     */
+    static <IA, IB, RS> RS closingOpenedSources(final AutoCloseable a, final AutoCloseable b, final Supplier<IA> iterateA, final Supplier<IB> iterateB,
+            final BiFunction<? super IA, ? super IB, RS> zipper) {
+        IA ia = null;
+        IB ib = null;
+        // Track "the supplier returned" separately from "the iterator is non-null": a source that has
+        // been opened must be closed even if its iterate() happened to hand back null.
+        boolean openedA = false;
+        boolean openedB = false;
+
+        try {
+            ia = iterateA.get();
+            openedA = true;
+            ib = iterateB.get();
+            openedB = true;
+            return zipper.apply(ia, ib);
+        } catch (final RuntimeException | Error e) {
+            if (openedA) {
+                closeOpenedSource(a, e);
+            }
+
+            if (openedB) {
+                closeOpenedSource(b, e);
+            }
+
+            throw e;
+        }
+    }
+
+    /**
+     * Opens {@code a}, {@code b}, then {@code c}. If a later open or the zipper throws, only sources
+     * whose iterate supplier returned are closed so an unopened sibling stays usable.
+     */
+    static <IA, IB, IC, RS> RS closingOpenedSources(final AutoCloseable a, final AutoCloseable b, final AutoCloseable c, final Supplier<IA> iterateA,
+            final Supplier<IB> iterateB, final Supplier<IC> iterateC, final TriFunction<? super IA, ? super IB, ? super IC, RS> zipper) {
+        IA ia = null;
+        IB ib = null;
+        IC ic = null;
+        // See the two-source overload: opened-ness is tracked separately from iterator nullness.
+        boolean openedA = false;
+        boolean openedB = false;
+        boolean openedC = false;
+
+        try {
+            ia = iterateA.get();
+            openedA = true;
+            ib = iterateB.get();
+            openedB = true;
+            ic = iterateC.get();
+            openedC = true;
+            return zipper.apply(ia, ib, ic);
+        } catch (final RuntimeException | Error e) {
+            if (openedA) {
+                closeOpenedSource(a, e);
+            }
+
+            if (openedB) {
+                closeOpenedSource(b, e);
+            }
+
+            if (openedC) {
+                closeOpenedSource(c, e);
+            }
+
+            throw e;
+        }
     }
 
     /**
@@ -2671,11 +2860,12 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param specifiedAsyncExecutor the caller-supplied executor, which must not be shut down
      * @param asyncExecutorToUse the executor actually used for the tasks
      * @return the finished result
-     * @throws RuntimeException if task completion, result assembly, or cleanup fails
+     * @throws RuntimeException if a worker, result finisher, executor shutdown, or stream close throws a runtime exception,
+     *         or waiting for a task is interrupted or fails
      */
     static <R, U> U completeAndFinishResults(final List<ContinuableFuture<R>> futureList, final Holder<Throwable> eHolder,
             final Throwables.Function<? super List<R>, ? extends U, RuntimeException> finisher, @SuppressWarnings("rawtypes") final BaseStream stream,
-            final AsyncExecutor specifiedAsyncExecutor, final AsyncExecutor asyncExecutorToUse) {
+            final AsyncExecutor specifiedAsyncExecutor, final AsyncExecutor asyncExecutorToUse) throws RuntimeException {
         return completeAndFinishResults(futureList, eHolder, finisher, stream, specifiedAsyncExecutor, asyncExecutorToUse, (RuntimeException) null);
     }
 
@@ -2695,13 +2885,14 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param asyncExecutorToUse the executor actually used for the tasks
      * @param throwableTypeToNotUse an unused type token for checked-exception inference
      * @return the finished result
+     * @throws RuntimeException if a worker, result finisher, executor shutdown, or stream close throws a runtime exception,
+     *         or waiting for a task is interrupted or fails
      * @throws E if a worker or the finisher reports a checked exception
-     * @throws RuntimeException if task completion or cleanup fails
      */
     static <R, U, E extends Exception> U completeAndFinishResults(final List<ContinuableFuture<R>> futureList, final Holder<Throwable> eHolder,
             final Throwables.Function<? super List<R>, ? extends U, E> finisher, @SuppressWarnings("rawtypes") final BaseStream stream,
             final AsyncExecutor specifiedAsyncExecutor, final AsyncExecutor asyncExecutorToUse, @SuppressWarnings("unused") final E throwableTypeToNotUse)
-            throws E {
+            throws RuntimeException, E {
         final List<R> results = new ArrayList<>(futureList.size());
         Throwable completionFailure = null;
         Throwable finisherFailure = null;
@@ -2879,7 +3070,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (errorHolder) { //NOSONAR
             if (errorHolder.value() != null) {
-                throw toRuntimeException(errorHolder.getAndSet(null), false);
+                throw toRuntimeException(errorHolder.getAndSet(null), true);
             }
         }
     }
@@ -2913,7 +3104,11 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
     }
 
     static RuntimeException toRuntimeException(final Throwable e) {
-        return ExceptionUtil.toRuntimeException(e, true);
+        // throwIfItIsError = true: an Error (AssertionError, OutOfMemoryError, ...) raised by user code in a
+        // worker must reach the caller AS an Error. Wrapping it in a RuntimeException lets an ordinary
+        // `catch (Exception)` swallow it and silently truncate the stream. ExceptionUtil's 2-arg overload
+        // defaults this to false, so it has to be spelled out here.
+        return ExceptionUtil.toRuntimeException(e, true, true);
     }
 
     static RuntimeException toRuntimeException(final Throwable e, final boolean throwIfItIsError) {
@@ -2937,20 +3132,8 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
     }
 
     static <T> T[] toArray(final Collection<T> c) {
-        if (isListElementDataFieldGettable && listElementDataField != null && c.getClass().equals(ArrayList.class)) {
-            try {
-                final T[] a = (T[]) listElementDataField.get(c);
-
-                if (a != null) {
-                    final int size = c.size();
-                    return a.length == size ? a : N.copyOf(a, size);
-                }
-            } catch (final Throwable e) { // NOSONAR
-                // ignore;
-                isListElementDataFieldGettable = false;
-            }
-        }
-
+        // Always a fresh copy. The former reflective ArrayList fast path returned the elementData array of the list
+        // itself whenever it was exactly full, so callers could alias (and corrupt) the storage of the list.
         return c.toArray((T[]) new Object[c.size()]);
     }
 
@@ -2985,7 +3168,12 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
             logActiveThreads(activeCount);
 
-            asyncExecutor = new AsyncExecutor(Executors.newFixedThreadPool(threadNum + 1)); // + 1, just in case.
+            // The owning AsyncExecutor(core, max, keepAlive, unit) constructor is required here: the
+            // AsyncExecutor(Executor) constructor records ownsExecutor=false, so shutdownTempExecutor()
+            // would never shut the wrapped pool down, and Executors.newFixedThreadPool's threads are
+            // NON-DAEMON with no core timeout - the JVM could then never exit. core == max keeps the
+            // scheduling identical to a fixed pool (keepAliveTime is inert with no excess threads).
+            asyncExecutor = new AsyncExecutor(threadNum + 1, threadNum + 1, TEMP_EXECUTOR_KEEP_ALIVE_SECONDS, TimeUnit.SECONDS); // + 1, just in case.
         }
 
         return asyncExecutor;
@@ -3030,7 +3218,13 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
             logActiveThreads(activeCount);
 
-            asyncExecutorToUse = new AsyncExecutor(Executors.newFixedThreadPool(maxThreadNum - taskIndex + 1)); // + 1, just in case.
+            // The owning AsyncExecutor(core, max, keepAlive, unit) constructor is required here: the
+            // AsyncExecutor(Executor) constructor records ownsExecutor=false, so shutdownTempExecutor()
+            // would never shut the wrapped pool down, and Executors.newFixedThreadPool's threads are
+            // NON-DAEMON with no core timeout - the JVM could then never exit. core == max keeps the
+            // scheduling identical to a fixed pool (keepAliveTime is inert with no excess threads).
+            asyncExecutorToUse = new AsyncExecutor(maxThreadNum - taskIndex + 1, maxThreadNum - taskIndex + 1, TEMP_EXECUTOR_KEEP_ALIVE_SECONDS,
+                    TimeUnit.SECONDS); // + 1, just in case.
         }
 
         if (futureList == null) {
@@ -3040,6 +3234,37 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
 
         return asyncExecutorToUse;
+    }
+
+    protected static AsyncExecutor execute(final AsyncExecutor asyncExecutorToUse, final int maxThreadNum, final int taskIndex,
+            final List<ContinuableFuture<Void>> futureList, final Holder<Throwable> eHolder, final Runnable cmd) {
+        return execute(asyncExecutorToUse, maxThreadNum, taskIndex, futureList, eHolder, Fn.r2c(cmd));
+    }
+
+    protected static <R> AsyncExecutor execute(final AsyncExecutor asyncExecutorToUse, final int maxThreadNum, final int taskIndex,
+            final List<ContinuableFuture<R>> futureList, final Holder<Throwable> eHolder, final Callable<? extends R> cmd) {
+        if (eHolder.value() != null) {
+            return asyncExecutorToUse;
+        }
+
+        try {
+            return execute(asyncExecutorToUse, maxThreadNum, taskIndex, futureList, () -> callWithErrorCapture(cmd, eHolder));
+        } catch (final Throwable e) { // NOSONAR: any failure to SUBMIT must go through eHolder, not escape
+            // Let accepted workers stop and the terminal completion helper close the stream before rethrowing.
+            // An Error still reaches the caller as itself - throwException() rethrows Error unwrapped.
+            setError(eHolder, e);
+            return asyncExecutorToUse;
+        }
+    }
+
+    static <R> R callWithErrorCapture(final Callable<? extends R> cmd, final Holder<Throwable> eHolder) {
+        try {
+            return cmd.call();
+        } catch (final Throwable e) { // NOSONAR
+            // Setup such as a collector supplier or the first iterator read can also fail before a worker's traversal loop.
+            setError(eHolder, e);
+            return null;
+        }
     }
 
     static void shutdownTempExecutor(final AsyncExecutor asyncExecutorToUse) {
@@ -3052,6 +3277,60 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         } else {
 
             asyncExecutorToUse.shutdown();
+        }
+    }
+
+    /**
+     * Owns the sub-stream a parallel {@code flatMap} worker is currently draining, so that adopting a newly
+     * mapped stream and closing the one being held cannot interleave.
+     *
+     * <p>Without it a worker sitting inside {@code mapper.apply(...)} - where the previous sub-stream has
+     * already been closed and the field cleared - stores its freshly opened sub-stream <i>after</i> the
+     * pipeline's close handler has run, and nothing ever closes it. The race window is as wide as the mapper
+     * call, so a mapper that opens a real resource leaks on almost every early close while a trivial one
+     * almost never does. The field cannot be plain either: workers write it and the closing thread reads it.
+     *
+     * <p>{@code iteratorEx()} and {@code close()} are deliberately left outside the monitor - holding it
+     * across foreign code would turn a close that never blocks into one that can.
+     */
+    static final class MappedStreamHolder {
+        private BaseStream<?, ?, ?, ?, ?, ?, ?, ?> current;
+        private boolean closed;
+
+        /**
+         * Takes ownership of {@code mapped}.
+         *
+         * @return {@code false} if this holder is already closed, in which case {@code mapped} belongs to the
+         *         caller, who must close it and stop iterating
+         */
+        synchronized boolean adopt(final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> mapped) {
+            if (closed) {
+                return false;
+            }
+
+            current = mapped;
+            return true;
+        }
+
+        /**
+         * Hands back the stream being held, if any, for the caller to close outside the monitor.
+         *
+         * <p>Note what this deliberately does <i>not</i> do: it never clears the caller's {@code cur}
+         * iterator field. Only the worker that owns an iterator may write {@code cur} - {@code closeResource()}
+         * runs on whichever thread called {@code close()}, and clearing {@code cur} from there would be a
+         * cross-thread write that the worker double-reads in {@code hasNext()}/{@code next()}. It is also
+         * unnecessary: after {@code detach(true)} the next {@code adopt} fails, and that is what stops the worker.
+         *
+         * @param noMoreAdoptions {@code true} when the owning iterator is being closed for good
+         */
+        synchronized BaseStream<?, ?, ?, ?, ?, ?, ?, ?> detach(final boolean noMoreAdoptions) {
+            if (noMoreAdoptions) {
+                closed = true;
+            }
+
+            final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = current;
+            current = null;
+            return tmp;
         }
     }
 
@@ -3198,7 +3477,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
          * @param c the collection whose elements are to be placed into the deque
          * @throws NullPointerException if the specified collection is null
          */
-        public LocalArrayDeque(final Collection<? extends T> c) {
+        public LocalArrayDeque(final Collection<? extends T> c) throws NullPointerException {
             super(c);
         }
     }

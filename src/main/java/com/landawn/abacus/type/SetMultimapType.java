@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.Strings;
@@ -86,19 +88,22 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      *
      * @param x the SetMultimap to convert to string
      * @return the JSON string representation of the multimap, or {@code null} if the input is null
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final SetMultimap<K, E> x) {
+    public String stringOf(final SetMultimap<K, E> x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
 
     /**
      * Parses a JSON string representation and returns the corresponding SetMultimap.
      * The string should represent a map where each key maps to a collection of values.
-     * The resulting SetMultimap is backed by a {@code LinkedHashMap}, so keys keep their insertion
-     * order; each key's values are stored in a {@code HashSet} (unique but unordered).
+     * The resulting SetMultimap is backed by a {@code LinkedHashMap}, so keys keep the order of the JSON
+     * document; each key's values are stored in a {@code LinkedHashSet} (unique, in the order of their JSON array).
+     * A key whose value is {@code null} or an empty array is dropped (a multimap never holds a key without values);
+     * a duplicate key keeps the position of its first occurrence and the values of its last one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -121,13 +126,15 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      *
      * @param str the JSON string to parse
      * @return the parsed SetMultimap, or {@code null} if the input string is {@code null}, empty, or blank
-     * @throws com.landawn.abacus.exception.ParsingException if the JSON string is malformed
+     * @throws ParsingException if the JSON string is malformed
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(SetMultimap)
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public SetMultimap<K, E> valueOf(final String str) {
+    public SetMultimap<K, E> valueOf(final String str) throws ParsingException, RuntimeException {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         }

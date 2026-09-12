@@ -44,8 +44,9 @@ public abstract class MutableType<T extends Mutable> extends AbstractType<T> {
      * This constructor is used by subclasses to initialize the type handler with a custom type name.
      *
      * @param typeName the name of the type, typically the simple class name of the mutable type
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected MutableType(final String typeName) {
+    protected MutableType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 }

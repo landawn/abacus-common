@@ -13,10 +13,27 @@
  */
 
 /**
- * A logging facade with adapters for commonly used logging frameworks.
+ * A logging facade with automatic backend detection.
  *
- * <p>{@link com.landawn.abacus.logging.LoggerFactory} detects an available backend and creates cached
- * {@link com.landawn.abacus.logging.Logger} instances. Supported backends include SLF4J, Log4j 2,
- * and {@link java.util.logging}, with platform-specific logging available through optional modules.</p>
+ * <p>{@link LoggerFactory#getLogger(Class)} and {@link LoggerFactory#getLogger(String)} return cached
+ * {@link Logger} instances. The factory detects a backend once, in this order:</p>
+ * <ol>
+ *   <li>Android logger, loaded reflectively from a separate module when running on an Android JVM</li>
+ *   <li>SLF4J</li>
+ *   <li>Log4j 2</li>
+ *   <li>{@link java.util.logging.Logger JDK java.util.logging} (always available fallback)</li>
+ * </ol>
+ *
+ * <p>Failure to initialize an optional backend causes the factory to try the next one.
+ * {@link VirtualMachineError} and {@link ThreadDeath} are propagated rather than treated as a
+ * logging fallback. Application code uses {@link Logger}; {@link AbstractLogger} is the base class
+ * for backend adapters and is not the usual extension point.</p>
+ *
+ * <p>{@link Logger} supports TRACE through ERROR, SLF4J-style {@code {}} and printf {@code %s}
+ * placeholders, up to seven substitution arguments, {@link java.util.function.Supplier}-based lazy
+ * messages, and both {@code (Throwable, String)} and {@code (String, Throwable)} parameter orders.</p>
+ *
+ * @see LoggerFactory
+ * @see Logger
  */
 package com.landawn.abacus.logging;

@@ -68,6 +68,12 @@ import java.lang.annotation.Target;
  * implementer) of an {@code @Entity}-annotated type is still treated as an entity even though the
  * marker is not declared {@code @Inherited}.</p>
  *
+ * <p>This supertype walk is specific to {@code ParserUtil.BeanInfo} ({@code isMarkedAsBean}) and still
+ * requires the subclass to expose at least one property.
+ * {@link com.landawn.abacus.util.Beans#isBeanClass(Class)} looks for the marker on the class itself
+ * only and otherwise relies on property discovery, so a subclass that neither declares nor inherits any
+ * property is not a bean class for {@code Beans} even though its superclass is annotated.</p>
+ *
  * @see Table
  * @see Column
  * @see Id
@@ -99,8 +105,9 @@ public @interface Entity {
      * </ul>
      *
      * <p><b>Note:</b> {@code abacus-core} itself only tests for the <i>presence</i> of
-     * {@code @Entity} (that is how {@link com.landawn.abacus.util.Beans#isBeanClass(Class)} and the
-     * parser's bean introspection recognize an entity class); it never reads this element. Table-name
+     * {@code @Entity} (that is how {@link com.landawn.abacus.util.Beans#isBeanClass(Class)} - on the
+     * class itself - and the parser's bean introspection - through the supertype walk described above -
+     * recognize an entity class); it never reads this element. Table-name
      * resolution inside {@code abacus-core} is driven by {@link Table} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>

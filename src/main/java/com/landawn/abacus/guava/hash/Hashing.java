@@ -142,15 +142,22 @@ public final class Hashing {
      *
      * @param minimumBits a positive integer specifying the minimum number of bits the
      *                    hash code should have (the actual number of bits may be higher;
-     *                    currently 32 bits, or the next multiple of 128 bits)
+     *                    currently 32 bits, or the next multiple of 128 bits). Must not exceed
+     *                    {@code Integer.MAX_VALUE - 127}, the largest value whose rounding to a
+     *                    multiple of 128 still fits in an {@code int}.
      * @return a hash function that produces hash codes of length {@code minimumBits} or greater
-     * @throws IllegalArgumentException if {@code minimumBits} is not positive.
+     * @throws IllegalArgumentException if {@code minimumBits} is not positive or is greater than
+     *         {@code Integer.MAX_VALUE - 127}.
      * @see #murmur3_128()
      * @see #murmur3_32()
      * @see #sha256()
      * @see #sipHash24(long, long)
      */
-    public static HashFunction goodFastHash(final int minimumBits) {
+    public static HashFunction goodFastHash(final int minimumBits) throws IllegalArgumentException {
+        // Guava's rounding-up-to-a-multiple-of-128 overflows above this bound (MAX_VALUE -> a 128-bit function,
+        // MAX_VALUE - 40 -> NegativeArraySizeException), silently breaking the "minimumBits or greater" contract.
+        N.checkArgument(minimumBits > 0 && minimumBits <= Integer.MAX_VALUE - 127, "minimumBits must be in [1, %s]: %s", Integer.MAX_VALUE - 127, minimumBits);
+
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.goodFastHash(minimumBits));
     }
 
@@ -397,11 +404,13 @@ public final class Hashing {
      *
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-MD5 with the given key
-     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC (e.g., wrong
-     *         algorithm).
+     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC (e.g., a key
+     *         that is not a raw secret key, such as an RSA public key). Note that the key's algorithm name is
+     *         not checked against the MAC algorithm, so a {@code SecretKeySpec} labelled {@code "HmacSHA256"} is
+     *         accepted by this method and yields the same MAC as {@link #hmacMd5(byte[])} over its raw bytes.
      * @throws NullPointerException if {@code key} is {@code null}
      */
-    public static HashFunction hmacMd5(final Key key) {
+    public static HashFunction hmacMd5(final Key key) throws IllegalArgumentException, NullPointerException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
     }
 
@@ -422,7 +431,7 @@ public final class Hashing {
      * @throws IllegalArgumentException if {@code key} is empty.
      * @throws NullPointerException if {@code key} is {@code null}
      */
-    public static HashFunction hmacMd5(final byte[] key) {
+    public static HashFunction hmacMd5(final byte[] key) throws IllegalArgumentException, NullPointerException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
     }
 
@@ -439,10 +448,11 @@ public final class Hashing {
      *
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-SHA1 with the given key
-     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC.
+     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC (e.g., a key
+     *         that is not a raw secret key); the key's algorithm name is not checked against the MAC algorithm.
      * @throws NullPointerException if {@code key} is {@code null}
      */
-    public static HashFunction hmacSha1(final Key key) {
+    public static HashFunction hmacSha1(final Key key) throws IllegalArgumentException, NullPointerException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
     }
 
@@ -461,7 +471,7 @@ public final class Hashing {
      * @throws IllegalArgumentException if {@code key} is empty.
      * @throws NullPointerException if {@code key} is {@code null}
      */
-    public static HashFunction hmacSha1(final byte[] key) {
+    public static HashFunction hmacSha1(final byte[] key) throws IllegalArgumentException, NullPointerException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
     }
 
@@ -479,10 +489,11 @@ public final class Hashing {
      *
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-SHA256 with the given key
-     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC.
+     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC (e.g., a key
+     *         that is not a raw secret key); the key's algorithm name is not checked against the MAC algorithm.
      * @throws NullPointerException if {@code key} is {@code null}
      */
-    public static HashFunction hmacSha256(final Key key) {
+    public static HashFunction hmacSha256(final Key key) throws IllegalArgumentException, NullPointerException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
     }
 
@@ -502,7 +513,7 @@ public final class Hashing {
      * @throws IllegalArgumentException if {@code key} is empty.
      * @throws NullPointerException if {@code key} is {@code null}
      */
-    public static HashFunction hmacSha256(final byte[] key) {
+    public static HashFunction hmacSha256(final byte[] key) throws IllegalArgumentException, NullPointerException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
     }
 
@@ -520,10 +531,11 @@ public final class Hashing {
      *
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-SHA512 with the given key
-     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC.
+     * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC (e.g., a key
+     *         that is not a raw secret key); the key's algorithm name is not checked against the MAC algorithm.
      * @throws NullPointerException if {@code key} is {@code null}
      */
-    public static HashFunction hmacSha512(final Key key) {
+    public static HashFunction hmacSha512(final Key key) throws IllegalArgumentException, NullPointerException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));
     }
 
@@ -544,7 +556,7 @@ public final class Hashing {
      * @throws IllegalArgumentException if {@code key} is empty.
      * @throws NullPointerException if {@code key} is {@code null}
      */
-    public static HashFunction hmacSha512(final byte[] key) {
+    public static HashFunction hmacSha512(final byte[] key) throws IllegalArgumentException, NullPointerException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));
     }
 
@@ -647,21 +659,29 @@ public final class Hashing {
      * <p>The resulting hash function will have a bit length equal to the sum of the bit
      * lengths of the input functions.
      *
+     * <p><b>&#9888;&#65039; Both functions see the same input</b>, so concatenating a function with
+     * itself merely repeats its output: {@code concatenating(sha256(), sha256())} does produce 512
+     * output bits, but they are {@code SHA256(x)} written twice - no extra independent bits and no
+     * extra collision resistance. Concatenate <i>different</i> functions (or the same algorithm with
+     * different seeds) if the added width is meant to carry added information.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create a 512-bit hash function by combining two SHA-256 functions
-     * HashFunction hash512 = Hashing.concatenating(
+     * // 768 bits from two different algorithms
+     * HashFunction hash768 = Hashing.concatenating(
      *     Hashing.sha256(),
-     *     Hashing.sha256()
+     *     Hashing.sha512()
      * );
      * }</pre>
      *
      * @param first the first hash function
      * @param second the second hash function
      * @return a hash function that concatenates the results of the two input functions
+     * @throws IllegalArgumentException if either function is {@code null} or is not a {@code HashFunction} obtained
+     *         from the factory methods of this class.
      * @see #concatenating(Iterable)
      */
-    public static HashFunction concatenating(final HashFunction first, final HashFunction second) {
+    public static HashFunction concatenating(final HashFunction first, final HashFunction second) throws IllegalArgumentException {
         return concatenating(N.asList(first, second));
     }
 
@@ -683,9 +703,11 @@ public final class Hashing {
      * @param second the second hash function
      * @param third the third hash function
      * @return a hash function that concatenates the results of the three input functions
+     * @throws IllegalArgumentException if any function is {@code null} or is not a {@code HashFunction} obtained
+     *         from the factory methods of this class.
      * @see #concatenating(Iterable)
      */
-    public static HashFunction concatenating(final HashFunction first, final HashFunction second, final HashFunction third) {
+    public static HashFunction concatenating(final HashFunction first, final HashFunction second, final HashFunction third) throws IllegalArgumentException {
         return concatenating(N.asList(first, second, third));
     }
 
@@ -698,22 +720,28 @@ public final class Hashing {
      * lengths of all input functions. The hash codes are concatenated in the order the
      * functions appear in the iterable.
      *
+     * <p><b>&#9888;&#65039;</b> Every function receives the same input, so listing one function twice
+     * only repeats its output; see {@link #concatenating(HashFunction, HashFunction)}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create a 1024-bit hash function
+     * // 384 bits from three independently seeded Murmur3 functions
      * List<HashFunction> functions = Arrays.asList(
-     *     Hashing.sha512(),  // 512 bits
-     *     Hashing.sha512()   // 512 bits
+     *     Hashing.murmur3_128(),      // 128 bits
+     *     Hashing.murmur3_128(42),    // 128 bits
+     *     Hashing.murmur3_128(123)    // 128 bits
      * );
-     * HashFunction hash1024 = Hashing.concatenating(functions);
+     * HashFunction hash384 = Hashing.concatenating(functions);
      * }</pre>
      *
      * @param hashFunctions an iterable of hash functions to concatenate (must not be empty)
      * @return a hash function that concatenates the results of all input functions
+     * @throws NullPointerException if {@code hashFunctions} itself is {@code null} (a {@code null} element is an
+     *         {@code IllegalArgumentException}, see below)
      * @throws IllegalArgumentException if {@code hashFunctions} is empty, or if any element is {@code null} or is not
      *         a {@code HashFunction} obtained from the factory methods of this class.
      */
-    public static HashFunction concatenating(final Iterable<HashFunction> hashFunctions) {
+    public static HashFunction concatenating(final Iterable<HashFunction> hashFunctions) throws NullPointerException, IllegalArgumentException {
         final List<com.google.common.hash.HashFunction> guavaHashFunctions = new ArrayList<>();
 
         for (final HashFunction hashFunction : hashFunctions) {
@@ -743,10 +771,11 @@ public final class Hashing {
      * @param first the first hash code to combine
      * @param second the second hash code to combine
      * @return a hash code combining the input hash codes in order
+     * @throws NullPointerException if either hash code is {@code null}
      * @throws IllegalArgumentException if the hash codes have different bit lengths.
      * @see #combineOrdered(Iterable)
      */
-    public static HashCode combineOrdered(final HashCode first, final HashCode second) {
+    public static HashCode combineOrdered(final HashCode first, final HashCode second) throws NullPointerException, IllegalArgumentException {
         return combineOrdered(Arrays.asList(first, second));
     }
 
@@ -766,10 +795,12 @@ public final class Hashing {
      * @param second the second hash code to combine
      * @param third the third hash code to combine
      * @return a hash code combining the input hash codes in order
+     * @throws NullPointerException if any hash code is {@code null}
      * @throws IllegalArgumentException if the hash codes have different bit lengths.
      * @see #combineOrdered(Iterable)
      */
-    public static HashCode combineOrdered(final HashCode first, final HashCode second, final HashCode third) {
+    public static HashCode combineOrdered(final HashCode first, final HashCode second, final HashCode third)
+            throws NullPointerException, IllegalArgumentException {
         return combineOrdered(Arrays.asList(first, second, third));
     }
 
@@ -794,10 +825,11 @@ public final class Hashing {
      *
      * @param hashCodes an iterable of hash codes to combine
      * @return a hash code combining all input hash codes in order
+     * @throws NullPointerException if {@code hashCodes} or any of its elements is {@code null}
      * @throws IllegalArgumentException if {@code hashCodes} is empty or if the hash codes do not all have the same
      *         bit length.
      */
-    public static HashCode combineOrdered(final Iterable<HashCode> hashCodes) {
+    public static HashCode combineOrdered(final Iterable<HashCode> hashCodes) throws NullPointerException, IllegalArgumentException {
         return com.google.common.hash.Hashing.combineOrdered(hashCodes);
     }
 
@@ -816,10 +848,11 @@ public final class Hashing {
      * @param first the first hash code to combine
      * @param second the second hash code to combine
      * @return a hash code combining the input hash codes without regard to order
+     * @throws NullPointerException if either hash code is {@code null}
      * @throws IllegalArgumentException if the hash codes have different bit lengths.
      * @see #combineUnordered(Iterable)
      */
-    public static HashCode combineUnordered(final HashCode first, final HashCode second) {
+    public static HashCode combineUnordered(final HashCode first, final HashCode second) throws NullPointerException, IllegalArgumentException {
         return combineUnordered(Arrays.asList(first, second));
     }
 
@@ -839,10 +872,12 @@ public final class Hashing {
      * @param second the second hash code to combine
      * @param third the third hash code to combine
      * @return a hash code combining the input hash codes without regard to order
+     * @throws NullPointerException if any hash code is {@code null}
      * @throws IllegalArgumentException if the hash codes have different bit lengths.
      * @see #combineUnordered(Iterable)
      */
-    public static HashCode combineUnordered(final HashCode first, final HashCode second, final HashCode third) {
+    public static HashCode combineUnordered(final HashCode first, final HashCode second, final HashCode third)
+            throws NullPointerException, IllegalArgumentException {
         return combineUnordered(Arrays.asList(first, second, third));
     }
 
@@ -868,10 +903,11 @@ public final class Hashing {
      *
      * @param hashCodes an iterable of hash codes to combine
      * @return a hash code combining all input hash codes without regard to order
+     * @throws NullPointerException if {@code hashCodes} or any of its elements is {@code null}
      * @throws IllegalArgumentException if {@code hashCodes} is empty or if the hash codes do not all have the same
      *         bit length.
      */
-    public static HashCode combineUnordered(final Iterable<HashCode> hashCodes) {
+    public static HashCode combineUnordered(final Iterable<HashCode> hashCodes) throws NullPointerException, IllegalArgumentException {
         return com.google.common.hash.Hashing.combineUnordered(hashCodes);
     }
 
@@ -905,10 +941,11 @@ public final class Hashing {
      * @param hashCode the hash code to assign to a bucket
      * @param buckets the number of buckets available (must be positive)
      * @return a bucket index in the range {@code [0, buckets)}
+     * @throws NullPointerException if {@code hashCode} is {@code null}
      * @throws IllegalArgumentException if {@code buckets} is not positive.
      * @see <a href="http://en.wikipedia.org/wiki/Consistent_hashing">Consistent hashing on Wikipedia</a>
      */
-    public static int consistentHash(final HashCode hashCode, final int buckets) {
+    public static int consistentHash(final HashCode hashCode, final int buckets) throws NullPointerException, IllegalArgumentException {
         return com.google.common.hash.Hashing.consistentHash(hashCode, buckets);
     }
 
@@ -935,7 +972,7 @@ public final class Hashing {
      * @throws IllegalArgumentException if {@code buckets} is not positive.
      * @see #consistentHash(HashCode, int)
      */
-    public static int consistentHash(final long input, final int buckets) {
+    public static int consistentHash(final long input, final int buckets) throws IllegalArgumentException {
         return com.google.common.hash.Hashing.consistentHash(input, buckets);
     }
 

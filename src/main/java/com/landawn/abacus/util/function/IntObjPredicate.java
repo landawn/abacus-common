@@ -33,7 +33,7 @@ import com.landawn.abacus.util.cs;
  * @see IntPredicate
  */
 @FunctionalInterface
-public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, RuntimeException> { // NOSONAR
+public interface IntObjPredicate<T> extends Throwables.IntObjPredicate<T, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Evaluates this predicate on the given arguments.
      *

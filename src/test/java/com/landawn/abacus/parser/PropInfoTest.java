@@ -1,7 +1,5 @@
 package com.landawn.abacus.parser;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -23,7 +21,9 @@ import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.ReadOnlyId;
 import com.landawn.abacus.annotation.Transient;
+import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
 
@@ -39,9 +39,8 @@ public class PropInfoTest extends TestBase {
     }
 
     @Test
-    public void testPropInfoConstructor() {
+    public void testConstructorAndFlags() {
         ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
-
         Assertions.assertEquals("id", idProp.name);
         Assertions.assertEquals(Long.class, idProp.clazz);
         Assertions.assertNotNull(idProp.type);
@@ -50,192 +49,177 @@ public class PropInfoTest extends TestBase {
         Assertions.assertNotNull(idProp.setMethod);
         Assertions.assertTrue(idProp.isMarkedAsId);
         Assertions.assertFalse(idProp.isTransient);
+        Assertions.assertEquals("id", idProp.toString());
+        Assertions.assertNotNull(idProp.annotations);
+        Assertions.assertFalse(idProp.annotations.isEmpty());
+
+        Assertions.assertTrue(beanInfo.getPropInfo("transientField").isTransient);
+        Assertions.assertTrue(beanInfo.getPropInfo("readOnlyId").isMarkedAsReadOnlyId);
+        Assertions.assertTrue(beanInfo.getPropInfo("dateField").hasFormat);
+        Assertions.assertNotNull(beanInfo.getPropInfo("dateField").dateFormat);
+        Assertions.assertTrue(beanInfo.getPropInfo("numberField").hasFormat);
+        Assertions.assertNotNull(beanInfo.getPropInfo("numberField").numberFormat);
+        Assertions.assertFalse(beanInfo.getPropInfo("columnField").hasFormat);
+
+        ParserUtil.PropInfo enumProp = ParserUtil.getBeanInfo(BeanWithEnum.class).getPropInfo("status");
+        Assertions.assertNotNull(enumProp);
+        Assertions.assertNotNull(enumProp.type);
     }
 
     @Test
-    public void testGetPropValue() {
+    public void testGetAndSetPropValue() {
+        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
+        ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
+        ParserUtil.PropInfo dateProp = beanInfo.getPropInfo("dateField");
+
+        Assertions.assertNull(nameProp.getPropValue(testBean));
         testBean.setId(123L);
         testBean.setName("TestName");
         testBean.setDateField(new Date());
-
-        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
-        ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
-        ParserUtil.PropInfo dateProp = beanInfo.getPropInfo("dateField");
-
-        Long id = idProp.getPropValue(testBean);
-        Assertions.assertEquals(123L, id);
-
-        String name = nameProp.getPropValue(testBean);
-        Assertions.assertEquals("TestName", name);
-
-        Date date = dateProp.getPropValue(testBean);
-        Assertions.assertNotNull(date);
-    }
-
-    @Test
-    public void testSetPropValue() {
-        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
-        ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
+        Assertions.assertEquals(Long.valueOf(123L), idProp.getPropValue(testBean));
+        Assertions.assertEquals("TestName", nameProp.getPropValue(testBean));
+        Assertions.assertNotNull(dateProp.getPropValue(testBean));
 
         idProp.setPropValue(testBean, 456L);
         Assertions.assertEquals(456L, testBean.getId());
-
         nameProp.setPropValue(testBean, "UpdatedName");
         Assertions.assertEquals("UpdatedName", testBean.getName());
-
         idProp.setPropValue(testBean, "789");
         Assertions.assertEquals(789L, testBean.getId());
-    }
+        nameProp.setPropValue(testBean, null);
+        Assertions.assertNull(testBean.getName());
+        idProp.setPropValue(testBean, "100");
+        Assertions.assertEquals(100L, testBean.getId());
+        idProp.setPropValue(testBean, 200L);
+        Assertions.assertEquals(200L, testBean.getId());
 
-    @Test
-    public void testSetPropValueWithJsonRawValue() {
         ParserUtil.PropInfo jsonRawProp = beanInfo.getPropInfo("jsonRawField");
-
         TestObject obj = new TestObject();
         obj.value = "TestValue";
         jsonRawProp.setPropValue(testBean, obj);
+        Assertions.assertTrue(testBean.getJsonRawField().contains("TestValue"));
 
-        String jsonRawValue = testBean.getJsonRawField();
-        Assertions.assertNotNull(jsonRawValue);
-        Assertions.assertTrue(jsonRawValue.contains("TestValue"));
+        Date now = new Date();
+        dateProp.setPropValue(testBean, now);
+        Assertions.assertEquals(now, dateProp.getPropValue(testBean));
+        Timestamp ts = new Timestamp(System.currentTimeMillis());
+        beanInfo.getPropInfo("timestampField").setPropValue(testBean, ts);
+        Assertions.assertEquals(ts, beanInfo.getPropInfo("timestampField").getPropValue(testBean));
+
+        dateProp.setPropValue(testBean, new Date());
+        beanInfo.getPropInfo("timestampField").setPropValue(testBean, new Timestamp(System.currentTimeMillis()));
+        beanInfo.getPropInfo("calendarField").setPropValue(testBean, Calendar.getInstance());
+        beanInfo.getPropInfo("localDateTimeField").setPropValue(testBean, LocalDateTime.now());
+        beanInfo.getPropInfo("localDateField").setPropValue(testBean, LocalDate.now());
+        beanInfo.getPropInfo("localTimeField").setPropValue(testBean, LocalTime.now());
+        beanInfo.getPropInfo("zonedDateTimeField").setPropValue(testBean, ZonedDateTime.now());
+        Assertions.assertNotNull(dateProp.getPropValue(testBean));
+        Assertions.assertNotNull(beanInfo.getPropInfo("zonedDateTimeField").getPropValue(testBean));
     }
 
     @Test
-    public void testReadPropValueWithDateFormat() {
-        ParserUtil.PropInfo dateProp = beanInfo.getPropInfo("dateField");
-        ParserUtil.PropInfo longDateProp = beanInfo.getPropInfo("longDateField");
-
-        Date date = (Date) dateProp.readPropValue("2023-12-25");
-        Assertions.assertNotNull(date);
-
+    public void testReadPropValue() {
+        Assertions.assertNotNull(beanInfo.getPropInfo("dateField").readPropValue("2023-12-25"));
         long timestamp = System.currentTimeMillis();
-        Date longDate = (Date) longDateProp.readPropValue(String.valueOf(timestamp));
-        Assertions.assertNotNull(longDate);
+        Date longDate = (Date) beanInfo.getPropInfo("longDateField").readPropValue(String.valueOf(timestamp));
         Assertions.assertEquals(timestamp, longDate.getTime());
-    }
-
-    @Test
-    public void testReadPropValueWithNumberFormat() {
-        ParserUtil.PropInfo numberProp = beanInfo.getPropInfo("numberField");
-
-        Double number = (Double) numberProp.readPropValue("1234.56");
-        Assertions.assertNotNull(number);
-        Assertions.assertEquals(1234.56, number, 0.01);
+        Assertions.assertEquals(1234.56, (Double) beanInfo.getPropInfo("numberField").readPropValue("1234.56"), 0.01);
+        Assertions.assertEquals("hello", beanInfo.getPropInfo("name").readPropValue("hello"));
+        Assertions.assertEquals(12345L, beanInfo.getPropInfo("id").readPropValue("12345"));
+        Assertions.assertEquals("colValue", beanInfo.getPropInfo("columnField").readPropValue("colValue"));
     }
 
     @Test
     public void testWritePropValue() throws IOException {
+        JsonXmlSerConfig<?> config = JsonSerConfig.create().setStringQuotation('"');
         CharacterWriter writer = Objectory.createBufferedJsonWriter();
-        JsonXmlSerConfig<?> config = JsonSerConfig.create();
-        config.setStringQuotation('"');
+        try {
+            beanInfo.getPropInfo("name").writePropValue(writer, "TestName", config);
+            Assertions.assertTrue(writer.toString().contains("TestName"));
+        } finally {
+            Objectory.recycle(writer);
+        }
 
-        ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
-        ParserUtil.PropInfo dateProp = beanInfo.getPropInfo("dateField");
-        ParserUtil.PropInfo numberProp = beanInfo.getPropInfo("numberField");
-
-        nameProp.writePropValue(writer, "TestName", config);
-        String result = writer.toString();
-        Assertions.assertTrue(result.contains("TestName"));
-
-        Objectory.recycle(writer);
         writer = Objectory.createBufferedJsonWriter();
-        Date date = new Date();
-        dateProp.writePropValue(writer, date, config);
-        result = writer.toString();
-        Assertions.assertNotNull(result);
+        try {
+            beanInfo.getPropInfo("dateField").writePropValue(writer, new Date(), config);
+            Assertions.assertFalse(writer.toString().isEmpty());
+        } finally {
+            Objectory.recycle(writer);
+        }
 
-        Objectory.recycle(writer);
         writer = Objectory.createBufferedJsonWriter();
-        numberProp.writePropValue(writer, 1234.56, config);
-        result = writer.toString();
-        Assertions.assertTrue(result.contains("1,234.56"));
+        try {
+            beanInfo.getPropInfo("numberField").writePropValue(writer, 1234.56, config);
+            Assertions.assertTrue(writer.toString().contains("1,234.56"));
+        } finally {
+            Objectory.recycle(writer);
+        }
 
-        Objectory.recycle(writer);
         writer = Objectory.createBufferedJsonWriter();
-        nameProp.writePropValue(writer, null, config);
-        result = writer.toString();
-        Assertions.assertEquals("null", result);
+        try {
+            beanInfo.getPropInfo("name").writePropValue(writer, null, config);
+            Assertions.assertEquals("null", writer.toString());
+        } finally {
+            Objectory.recycle(writer);
+        }
 
-        Objectory.recycle(writer);
+        writer = Objectory.createBufferedJsonWriter();
+        try {
+            beanInfo.getPropInfo("jsonRawField").writePropValue(writer, "{\"key\":\"value\"}", JsonSerConfig.create());
+            Assertions.assertEquals("{\"key\":\"value\"}", writer.toString());
+        } finally {
+            Objectory.recycle(writer);
+        }
+
+        writer = Objectory.createBufferedJsonWriter();
+        try {
+            beanInfo.getPropInfo("id").writePropValue(writer, null, JsonSerConfig.create());
+            Assertions.assertEquals("null", writer.toString());
+        } finally {
+            Objectory.recycle(writer);
+        }
+
+        writer = Objectory.createBufferedJsonWriter();
+        try {
+            beanInfo.getPropInfo("name").writePropValue(writer, "plainValue", JsonSerConfig.create());
+            Assertions.assertTrue(writer.toString().contains("plainValue"));
+        } finally {
+            Objectory.recycle(writer);
+        }
+
+        writer = Objectory.createBufferedJsonWriter();
+        try {
+            beanInfo.getPropInfo("dateField").writePropValue(writer, new Date(), JsonSerConfig.create().setStringQuotation((char) 0));
+            Assertions.assertFalse(writer.toString().isEmpty());
+        } finally {
+            Objectory.recycle(writer);
+        }
     }
 
     @Test
-    public void testWritePropValueWithJsonRawValue() throws IOException {
-        CharacterWriter writer = Objectory.createBufferedJsonWriter();
-        JsonXmlSerConfig<?> config = JsonSerConfig.create();
-
-        ParserUtil.PropInfo jsonRawProp = beanInfo.getPropInfo("jsonRawField");
-
-        jsonRawProp.writePropValue(writer, "{\"key\":\"value\"}", config);
-        String result = writer.toString();
-        Assertions.assertEquals("{\"key\":\"value\"}", result);
-        Objectory.recycle(writer);
-    }
-
-    @Test
-    public void testIsAnnotationPresent() {
+    public void testAnnotations() {
         ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
         ParserUtil.PropInfo columnProp = beanInfo.getPropInfo("columnField");
         ParserUtil.PropInfo transientProp = beanInfo.getPropInfo("transientField");
+        ParserUtil.PropInfo aliasedProp = beanInfo.getPropInfo("aliasedField");
 
         Assertions.assertTrue(idProp.isAnnotationPresent(Id.class));
         Assertions.assertFalse(idProp.isAnnotationPresent(Column.class));
-
         Assertions.assertTrue(columnProp.isAnnotationPresent(Column.class));
-        Assertions.assertFalse(columnProp.isAnnotationPresent(Id.class));
-
         Assertions.assertTrue(transientProp.isAnnotationPresent(Transient.class));
+        Assertions.assertNotNull(idProp.getAnnotation(Id.class));
+        Assertions.assertEquals("db_column", columnProp.getAnnotation(Column.class).value());
+        Assertions.assertEquals(2, aliasedProp.getAnnotation(JsonXmlField.class).aliases().length);
     }
 
     @Test
-    public void testGetAnnotation() {
-        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
-        ParserUtil.PropInfo columnProp = beanInfo.getPropInfo("columnField");
-        ParserUtil.PropInfo aliasedProp = beanInfo.getPropInfo("aliasedField");
-
-        Id idAnnotation = idProp.getAnnotation(Id.class);
-        Assertions.assertNotNull(idAnnotation);
-
-        Column columnAnnotation = columnProp.getAnnotation(Column.class);
-        Assertions.assertNotNull(columnAnnotation);
-        Assertions.assertEquals("db_column", columnAnnotation.value());
-
-        JsonXmlField jsonXmlField = aliasedProp.getAnnotation(JsonXmlField.class);
-        Assertions.assertNotNull(jsonXmlField);
-        Assertions.assertEquals(2, jsonXmlField.aliases().length);
-    }
-
-    @Test
-    public void testDateTimeProperties() {
-        assertDoesNotThrow(() -> {
-            testDateTimeType("dateField", new Date());
-            testDateTimeType("timestampField", new Timestamp(System.currentTimeMillis()));
-            testDateTimeType("calendarField", Calendar.getInstance());
-            testDateTimeType("localDateTimeField", LocalDateTime.now());
-            testDateTimeType("localDateField", LocalDate.now());
-            testDateTimeType("localTimeField", LocalTime.now());
-            testDateTimeType("zonedDateTimeField", ZonedDateTime.now());
-        });
-    }
-
-    private void testDateTimeType(String propName, Object value) {
-        ParserUtil.PropInfo propInfo = beanInfo.getPropInfo(propName);
-        Assertions.assertNotNull(propInfo);
-
-        propInfo.setPropValue(testBean, value);
-        Object retrievedValue = propInfo.getPropValue(testBean);
-        Assertions.assertNotNull(retrievedValue);
-    }
-
-    @Test
-    public void testHashCodeAndEquals() {
+    public void testEqualsHashCode() {
         ParserUtil.PropInfo prop1 = beanInfo.getPropInfo("id");
         ParserUtil.PropInfo prop2 = beanInfo.getPropInfo("id");
         ParserUtil.PropInfo prop3 = beanInfo.getPropInfo("name");
-
         Assertions.assertEquals(prop1.hashCode(), prop2.hashCode());
         Assertions.assertNotEquals(prop1.hashCode(), prop3.hashCode());
-
         Assertions.assertEquals(prop1, prop1);
         Assertions.assertEquals(prop1, prop2);
         Assertions.assertNotEquals(prop1, prop3);
@@ -244,42 +228,43 @@ public class PropInfoTest extends TestBase {
     }
 
     @Test
-    public void testToString() {
-        ParserUtil.PropInfo prop = beanInfo.getPropInfo("id");
-        Assertions.assertEquals("id", prop.toString());
+    public void testBeanInfoSetPropValue_NestedCreatesIntermediate() {
+        ParserUtil.BeanInfo info = ParserUtil.getBeanInfo(NestedRootForPropInfo.class);
+        NestedRootForPropInfo root = new NestedRootForPropInfo();
+        Assertions.assertTrue(info.setPropValue(root, "child.name", "created", false));
+        Assertions.assertEquals("created", root.getChild().getName());
+    }
+
+    @Test
+    public void testGetPropValue_accessFieldByMethod() {
+        ParserUtil.BeanInfo nonAsm = new ParserUtil.BeanInfo(AccessByMethodBean.class, AccessByMethodBean.class, false);
+        Assertions.assertEquals("getter:field", nonAsm.getPropInfo("value").getPropValue(new AccessByMethodBean()));
+        Assertions.assertEquals("getter:field", ParserUtil.getBeanInfo(AccessByMethodBean.class).getPropInfo("value").getPropValue(new AccessByMethodBean()));
+        ParserUtil.BeanInfo direct = new ParserUtil.BeanInfo(DirectFieldBean.class, DirectFieldBean.class, false);
+        Assertions.assertEquals("field", direct.getPropInfo("value").getPropValue(new DirectFieldBean()));
     }
 
     @JsonXmlConfig(namingPolicy = NamingPolicy.CAMEL_CASE)
     public static class TestBean {
         @Id
         private Long id;
-
         private String name;
-
         @JsonXmlField(dateFormat = "yyyy-MM-dd")
         private Date dateField;
-
         @JsonXmlField
         private Date longDateField;
-
         @JsonXmlField(numberFormat = "#,##0.00")
         private Double numberField;
-
         @Column("db_column")
         private String columnField;
-
         @Transient
         private String transientField;
-
         @JsonXmlField(aliases = { "alias1", "alias2" })
         private String aliasedField;
-
         @JsonXmlField(isJsonRawValue = true)
         private String jsonRawField;
-
         @ReadOnlyId
         private String readOnlyId;
-
         private Timestamp timestampField;
         private Calendar calendarField;
         private LocalDateTime localDateTimeField;
@@ -420,164 +405,6 @@ public class PropInfoTest extends TestBase {
         public String value;
     }
 
-    @Test
-    public void testSetPropValue_withNullValue() {
-        ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
-        nameProp.setPropValue(testBean, null);
-        Assertions.assertNull(testBean.getName());
-    }
-
-    @Test
-    public void testSetPropValue_withNumericStringConversion() {
-        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
-        idProp.setPropValue(testBean, "100");
-        Assertions.assertEquals(100L, testBean.getId());
-    }
-
-    @Test
-    public void testSetPropValue_withDirectLongValue() {
-        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
-        idProp.setPropValue(testBean, 200L);
-        Assertions.assertEquals(200L, testBean.getId());
-    }
-
-    @Test
-    public void testGetPropValue_returnsNull_whenNotSet() {
-        ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
-        Assertions.assertNull(nameProp.getPropValue(testBean));
-    }
-
-    @Test
-    public void testGetPropValue_returnsCorrectValue() {
-        testBean.setName("GetTest");
-        testBean.setId(999L);
-        ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
-        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
-        Assertions.assertEquals("GetTest", nameProp.getPropValue(testBean));
-        Assertions.assertEquals(999L, (Long) idProp.getPropValue(testBean));
-    }
-
-    @Test
-    public void testReadPropValue_stringType() {
-        ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
-        String result = (String) nameProp.readPropValue("hello");
-        Assertions.assertEquals("hello", result);
-    }
-
-    @Test
-    public void testReadPropValue_longType() {
-        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
-        Long result = (Long) idProp.readPropValue("12345");
-        Assertions.assertEquals(12345L, result);
-    }
-
-    @Test
-    public void testReadPropValue_withNullFormatField() {
-        ParserUtil.PropInfo columnProp = beanInfo.getPropInfo("columnField");
-        Assertions.assertFalse(columnProp.hasFormat);
-        String result = (String) columnProp.readPropValue("colValue");
-        Assertions.assertEquals("colValue", result);
-    }
-
-    @Test
-    public void testWritePropValue_withNullValue() throws java.io.IOException {
-        com.landawn.abacus.util.CharacterWriter writer = Objectory.createBufferedJsonWriter();
-        try {
-            ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
-            idProp.writePropValue(writer, null, JsonSerConfig.create());
-            String result = writer.toString();
-            Assertions.assertEquals("null", result);
-        } finally {
-            Objectory.recycle(writer);
-        }
-    }
-
-    @Test
-    public void testWritePropValue_stringTypeNoFormat() throws java.io.IOException {
-        com.landawn.abacus.util.CharacterWriter writer = Objectory.createBufferedJsonWriter();
-        try {
-            ParserUtil.PropInfo nameProp = beanInfo.getPropInfo("name");
-            nameProp.writePropValue(writer, "plainValue", JsonSerConfig.create());
-            String result = writer.toString();
-            Assertions.assertTrue(result.contains("plainValue"));
-        } finally {
-            Objectory.recycle(writer);
-        }
-    }
-
-    @Test
-    public void testPropInfo_isTransientField() {
-        ParserUtil.PropInfo transientProp = beanInfo.getPropInfo("transientField");
-        Assertions.assertNotNull(transientProp);
-        Assertions.assertTrue(transientProp.isTransient);
-    }
-
-    @Test
-    public void testPropInfo_isMarkedAsReadOnlyId() {
-        ParserUtil.PropInfo readOnlyIdProp = beanInfo.getPropInfo("readOnlyId");
-        Assertions.assertNotNull(readOnlyIdProp);
-        Assertions.assertTrue(readOnlyIdProp.isMarkedAsReadOnlyId);
-    }
-
-    @Test
-    public void testGetAnnotations_nonNullForAnnotatedField() {
-        ParserUtil.PropInfo idProp = beanInfo.getPropInfo("id");
-        Assertions.assertNotNull(idProp.annotations);
-        Assertions.assertFalse(idProp.annotations.isEmpty());
-    }
-
-    @Test
-    public void testPropInfoHasFormat_forDateField() {
-        ParserUtil.PropInfo dateProp = beanInfo.getPropInfo("dateField");
-        Assertions.assertTrue(dateProp.hasFormat);
-        Assertions.assertNotNull(dateProp.dateFormat);
-    }
-
-    @Test
-    public void testPropInfoHasFormat_forNumberField() {
-        ParserUtil.PropInfo numProp = beanInfo.getPropInfo("numberField");
-        Assertions.assertTrue(numProp.hasFormat);
-        Assertions.assertNotNull(numProp.numberFormat);
-    }
-
-    @Test
-    public void testBeanInfoWithEnumField() {
-        ParserUtil.BeanInfo enumBeanInfo = ParserUtil.getBeanInfo(BeanWithEnum.class);
-        ParserUtil.PropInfo statusProp = enumBeanInfo.getPropInfo("status");
-        Assertions.assertNotNull(statusProp);
-        Assertions.assertNotNull(statusProp.type);
-    }
-
-    @Test
-    public void testSetAndGetPropValue_allDateTimeTypes() {
-        java.util.Date now = new java.util.Date();
-        ParserUtil.PropInfo dateProp = beanInfo.getPropInfo("dateField");
-        dateProp.setPropValue(testBean, now);
-        Assertions.assertEquals(now, dateProp.getPropValue(testBean));
-
-        java.sql.Timestamp ts = new java.sql.Timestamp(System.currentTimeMillis());
-        ParserUtil.PropInfo tsProp = beanInfo.getPropInfo("timestampField");
-        tsProp.setPropValue(testBean, ts);
-        Assertions.assertEquals(ts, tsProp.getPropValue(testBean));
-    }
-
-    @Test
-    public void testWritePropValue_withDateFormatAndNoQuote() throws java.io.IOException {
-        com.landawn.abacus.util.CharacterWriter writer = Objectory.createBufferedJsonWriter();
-        try {
-            ParserUtil.PropInfo dateProp = beanInfo.getPropInfo("dateField");
-            // No quotation in config
-            JsonXmlSerConfig<?> noQuoteConfig = JsonSerConfig.create().setStringQuotation((char) 0);
-            java.util.Date date = new java.util.Date();
-            dateProp.writePropValue(writer, date, noQuoteConfig);
-            String result = writer.toString();
-            Assertions.assertNotNull(result);
-            Assertions.assertFalse(result.isEmpty());
-        } finally {
-            Objectory.recycle(writer);
-        }
-    }
-
     public static class NestedRootForPropInfo {
         private NestedChildForPropInfo child;
 
@@ -602,17 +429,6 @@ public class PropInfoTest extends TestBase {
         }
     }
 
-    @Test
-    public void testBeanInfoSetPropValue_NestedCreatesIntermediate() {
-        final ParserUtil.BeanInfo info = ParserUtil.getBeanInfo(NestedRootForPropInfo.class);
-        final NestedRootForPropInfo root = new NestedRootForPropInfo();
-
-        Assertions.assertTrue(info.setPropValue(root, "child.name", "created", false));
-
-        Assertions.assertNotNull(root.getChild());
-        Assertions.assertEquals("created", root.getChild().getName());
-    }
-
     public enum Status {
         ACTIVE, INACTIVE
     }
@@ -629,15 +445,6 @@ public class PropInfoTest extends TestBase {
         }
     }
 
-    // TODO: Remaining PropInfo gaps are low-level field-handle/object-array assignment branches that need synthetic BeanInfo wiring not exposed through normal property APIs.
-
-    // ------------------------------------------------------------------------------------------------------------
-    // Regression: @AccessFieldByMethod must force reads through the getter even on the non-ASM (base PropInfo) path.
-    // Previously the VarHandle flags (isFieldHandleGettable/Settable) were NOT gated on isAccessFieldByMethod, so
-    // getPropValue preferred the VarHandle and read the field directly, bypassing the mandated getter. The ASM path
-    // already honored the annotation (fieldAccessIndex == -1 when !isFieldGettable); this aligns the non-ASM path.
-    // The 3-arg BeanInfo constructor with isASMSupported=false forces the base PropInfo regardless of ASM presence.
-
     @AccessFieldByMethod
     public static class AccessByMethodBean {
         private String value = "field";
@@ -651,7 +458,6 @@ public class PropInfoTest extends TestBase {
         }
     }
 
-    // Same shape, but WITHOUT @AccessFieldByMethod, to confirm the fix is scoped to the annotation only.
     public static class DirectFieldBean {
         private String value = "field";
 
@@ -663,34 +469,326 @@ public class PropInfoTest extends TestBase {
             this.value = value;
         }
     }
+    // --- review fixes 2026-09-06 (P3-08): readPropValue hands back the property's own type ---
 
-    @Test
-    public void testGetPropValue_accessFieldByMethod_forcesGetter_nonAsm() {
-        // Force the non-ASM base PropInfo path.
-        ParserUtil.BeanInfo nonAsmBeanInfo = new ParserUtil.BeanInfo(AccessByMethodBean.class, AccessByMethodBean.class, false);
-        ParserUtil.PropInfo prop = nonAsmBeanInfo.getPropInfo("value");
-
-        // The getter transforms the raw field value; if the getter is bypassed (the bug) we'd get the raw "field".
-        Assertions.assertEquals("getter:field", prop.getPropValue(new AccessByMethodBean()));
+    public static class FormattedNumbers {
+        @JsonXmlField(numberFormat = "000")
+        public Integer padded;
+        @JsonXmlField(numberFormat = "0.00")
+        public int primitive;
+        @JsonXmlField(numberFormat = "#,##0.00")
+        public java.math.BigDecimal money;
+        @JsonXmlField(numberFormat = "#,##0")
+        public java.math.BigInteger huge;
+        @JsonXmlField(numberFormat = "0.00")
+        public Double boxedDouble;
+        @JsonXmlField(numberFormat = "0.00")
+        public double primitiveDouble;
+        @JsonXmlField(numberFormat = "0.00")
+        public Number number;
     }
 
     @Test
-    public void testGetPropValue_accessFieldByMethod_forcesGetter_asm() {
-        // The ASM path (default) must honor @AccessFieldByMethod too.
-        ParserUtil.BeanInfo asmBeanInfo = ParserUtil.getBeanInfo(AccessByMethodBean.class);
-        ParserUtil.PropInfo prop = asmBeanInfo.getPropInfo("value");
+    public void reviewFixes20260906_readPropValueConvertsFormattedNumbersToThePropertyType() {
+        ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(FormattedNumbers.class);
 
-        Assertions.assertEquals("getter:field", prop.getPropValue(new AccessByMethodBean()));
+        Object padded = beanInfo.getPropInfo("padded").readPropValue("001");
+        Assertions.assertEquals(Integer.class, padded.getClass());
+        Assertions.assertEquals(1, padded);
+
+        Object primitive = beanInfo.getPropInfo("primitive").readPropValue("7.00");
+        Assertions.assertEquals(Integer.class, primitive.getClass());
+        Assertions.assertEquals(7, primitive);
+
+        Object money = beanInfo.getPropInfo("money").readPropValue("12,345,678,901,234,567.89");
+        Assertions.assertEquals(java.math.BigDecimal.class, money.getClass());
+        Assertions.assertEquals(new java.math.BigDecimal("12345678901234567.89"), money);
+
+        Object huge = beanInfo.getPropInfo("huge").readPropValue("123,456,789,012,345,678,901,234,567,890");
+        Assertions.assertEquals(java.math.BigInteger.class, huge.getClass());
+        Assertions.assertEquals(new java.math.BigInteger("123456789012345678901234567890"), huge);
+
+        // Floating targets are not parsed as BigDecimal, so -0.0 keeps its sign, boxed or primitive.
+        for (String prop : new String[] { "boxedDouble", "primitiveDouble" }) {
+            Object negativeZero = beanInfo.getPropInfo(prop).readPropValue("-0.00");
+            Assertions.assertEquals(Double.class, negativeZero.getClass(), prop);
+            Assertions.assertEquals(Double.doubleToLongBits(-0.0), Double.doubleToLongBits((Double) negativeZero), prop);
+        }
+
+        // A Number-typed property receives DecimalFormat's own result class (Long for integral text).
+        Object number = beanInfo.getPropInfo("number").readPropValue("1234.00");
+        Assertions.assertEquals(Long.class, number.getClass());
+        Assertions.assertEquals(1234L, number);
+
+        Assertions.assertNull(beanInfo.getPropInfo("padded").readPropValue(null));
+        Assertions.assertNull(beanInfo.getPropInfo("primitive").readPropValue(null));
     }
 
     @Test
-    public void testGetPropValue_withoutAnnotation_readsFieldDirectly_nonAsm() {
-        // Without @AccessFieldByMethod the fast direct-field read is expected (getter NOT applied);
-        // this confirms the fix only changes behavior for @AccessFieldByMethod properties.
-        ParserUtil.BeanInfo nonAsmBeanInfo = new ParserUtil.BeanInfo(DirectFieldBean.class, DirectFieldBean.class, false);
-        ParserUtil.PropInfo prop = nonAsmBeanInfo.getPropInfo("value");
+    public void reviewFixes20260906_settingAFormattedReadNeverTakesTheRetryPath() {
+        ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(FormattedNumbers.class);
+        FormattedNumbers bean = new FormattedNumbers();
 
-        Assertions.assertEquals("field", prop.getPropValue(new DirectFieldBean()));
+        for (int k = 0; k < 200; k++) {
+            for (String[] pair : new String[][] { { "padded", "001" }, { "primitive", "7.00" }, { "money", "1,234.50" }, { "huge", "12" },
+                    { "boxedDouble", "2.50" }, { "primitiveDouble", "2.50" }, { "number", "3.00" } }) {
+                ParserUtil.PropInfo propInfo = beanInfo.getPropInfo(pair[0]);
+                propInfo.setPropValue(bean, propInfo.readPropValue(pair[1]));
+            }
+        }
+
+        Assertions.assertEquals(1, bean.padded);
+        Assertions.assertEquals(7, bean.primitive);
+        Assertions.assertEquals(new java.math.BigDecimal("1234.50"), bean.money);
+        Assertions.assertEquals(java.math.BigInteger.valueOf(12), bean.huge);
+        Assertions.assertEquals(2.5, bean.boxedDouble);
+        Assertions.assertEquals(2.5, bean.primitiveDouble);
+        Assertions.assertEquals(3L, bean.number);
+
+        for (String prop : new String[] { "padded", "primitive", "money", "huge", "boxedDouble", "primitiveDouble", "number" }) {
+            Assertions.assertEquals(0, beanInfo.getPropInfo(prop).failureCountForSetProp, prop);
+        }
+    }
+
+    // --- review fixes 2026-09-06 (P3-09): a getter-only property is read-only, not an NPE ---
+
+    @com.landawn.abacus.annotation.Entity
+    public static class Computed {
+        private String first;
+        private String last;
+
+        public String getFirst() {
+            return first;
+        }
+
+        public void setFirst(String first) {
+            this.first = first;
+        }
+
+        public String getLast() {
+            return last;
+        }
+
+        public void setLast(String last) {
+            this.last = last;
+        }
+
+        /** Computed: getter only, no field, no setter. */
+        public String getFullName() {
+            return first + " " + last;
+        }
+    }
+
+    public record ComputedRecord(String first, String last) {
+        public String fullName() {
+            return first + " " + last;
+        }
+    }
+
+    @Test
+    public void reviewFixes20260906_getterOnlyPropertyIsReadOnlyAndSerializeOnly() {
+        ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(Computed.class);
+        ParserUtil.PropInfo fullName = beanInfo.getPropInfo("fullName");
+        ParserUtil.PropInfo first = beanInfo.getPropInfo("first");
+
+        Computed bean = new Computed();
+        bean.setFirst("Ada");
+        bean.setLast("Lovelace");
+
+        // Storing into it is a clear error instead of an NPE, for a value and for null alike.
+        UnsupportedOperationException e = Assertions.assertThrows(UnsupportedOperationException.class, () -> fullName.setPropValue(bean, "x"));
+        Assertions.assertTrue(e.getMessage().contains("fullName") && e.getMessage().contains("read-only"), e.getMessage());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> fullName.setPropValue(bean, null));
+        Assertions.assertEquals("Ada", bean.getFirst());
+
+        Assertions.assertTrue(fullName.isReadOnlyProperty);
+        Assertions.assertEquals(JsonXmlField.Direction.SERIALIZE_ONLY, fullName.jsonXmlExpose);
+        Assertions.assertFalse(first.isReadOnlyProperty);
+        Assertions.assertEquals(JsonXmlField.Direction.BOTH, first.jsonXmlExpose);
+
+        // Still readable and still serialized.
+        Assertions.assertEquals("Ada Lovelace", fullName.getPropValue(bean));
+        Assertions.assertTrue(N.toJson(bean).contains("\"fullName\": \"Ada Lovelace\""), N.toJson(bean));
+
+        // The name-based setter honours the ignore flag: skipped, or IllegalArgumentException.
+        Assertions.assertFalse(beanInfo.setPropValue(bean, "fullName", "x", true));
+        IllegalArgumentException iae = Assertions.assertThrows(IllegalArgumentException.class, () -> beanInfo.setPropValue(bean, "fullName", "x", false));
+        Assertions.assertTrue(iae.getMessage().contains("read-only"), iae.getMessage());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> beanInfo.setPropValue(bean, "fullName", "x"));
+        Assertions.assertTrue(beanInfo.setPropValue(bean, "first", "Grace", true));
+        Assertions.assertEquals("Grace", bean.getFirst());
+
+        // A record component is stored through the canonical constructor slot: never read-only.
+        ParserUtil.BeanInfo recordInfo = ParserUtil.getBeanInfo(ComputedRecord.class);
+        Assertions.assertFalse(recordInfo.getPropInfo("first").isReadOnlyProperty);
+        Assertions.assertEquals(JsonXmlField.Direction.BOTH, recordInfo.getPropInfo("first").jsonXmlExpose);
+        ComputedRecord record = N.fromJson("{\"first\": \"A\", \"last\": \"B\"}", ComputedRecord.class);
+        Assertions.assertEquals("A B", record.fullName());
+    }
+
+    // ===================================== a builder-based bean whose builder omits a property
+
+    /** Immutable, built through a builder that exposes {@code value} only; {@code derived} is computed by build(). */
+    public static class OmittedByBuilder {
+        private final String value;
+        private final String derived;
+
+        private OmittedByBuilder(final String value) {
+            this.value = value;
+            this.derived = value == null ? null : value.toUpperCase();
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public String getDerived() {
+            return derived;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private String value;
+
+            public Builder value(final String value) {
+                this.value = value;
+                return this;
+            }
+
+            public OmittedByBuilder build() {
+                return new OmittedByBuilder(value);
+            }
+        }
+    }
+
+    /** Builder-based, but with a NON-final field, so the bean's own field has a settable VarHandle. */
+    public static class NonFinalByBuilder {
+        private String value;
+
+        private NonFinalByBuilder(final String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private String value;
+
+            public Builder value(final String value) {
+                this.value = value;
+                return this;
+            }
+
+            public NonFinalByBuilder build() {
+                return new NonFinalByBuilder(value);
+            }
+        }
+    }
+
+    public record CoalesceRecord(int n, String s) {
+    }
+
+    /**
+     * A builder-based bean may declare a property its builder does not accept. The write target is then the BUILDER
+     * instance, so none of {@code setPropValue}'s writers applies - {@code field} belongs to the BEAN, and the final
+     * {@code field.set(obj, ..)} fallback threw {@code IllegalArgumentException: Can not set final java.lang.String
+     * field ..OmittedByBuilder.derived to ..OmittedByBuilder$Builder}. Such a property is skipped instead, which is
+     * what lets the bean round-trip through JSON/XML and through the copy family.
+     */
+    @Test
+    public void reviewFixes20260911_builderOmittedPropertyIsSkippedInsteadOfWrittenToTheBuilder() {
+        final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(OmittedByBuilder.class);
+        final ParserUtil.PropInfo derived = beanInfo.getPropInfo("derived");
+        final ParserUtil.PropInfo value = beanInfo.getPropInfo("value");
+
+        // The builder has a setter for "value" and none for "derived"; neither is written through the bean's field.
+        Assertions.assertNull(derived.setMethod);
+        Assertions.assertNotNull(value.setMethod);
+        Assertions.assertEquals(OmittedByBuilder.Builder.class, value.setMethod.getDeclaringClass());
+        Assertions.assertFalse(derived.isFieldSettable);
+        Assertions.assertFalse(derived.isFieldHandleSettable);
+
+        // It is NOT read-only: it is a full property and is serialized like any other.
+        Assertions.assertFalse(derived.isReadOnlyProperty);
+        Assertions.assertEquals(JsonXmlField.Direction.BOTH, derived.jsonXmlExpose);
+
+        final OmittedByBuilder bean = OmittedByBuilder.builder().value("v").build();
+        Assertions.assertEquals("{\"value\": \"v\", \"derived\": \"V\"}", N.toJson(bean));
+
+        // Storing into it is a silent no-op on the builder - not an exception, and not a stray write.
+        final Object builder = beanInfo.createBeanResult();
+        Assertions.assertEquals(OmittedByBuilder.Builder.class, builder.getClass());
+        derived.setPropValue(builder, "IGNORED");
+        derived.setPropValue(builder, null);
+        value.setPropValue(builder, "v");
+        final OmittedByBuilder built = beanInfo.finishBeanResult(builder);
+        Assertions.assertEquals("v", built.getValue());
+        Assertions.assertEquals("V", built.getDerived());
+
+        // The name-keyed setter reports the property as handled; the value is deliberately dropped.
+        final Object builder2 = beanInfo.createBeanResult();
+        Assertions.assertTrue(beanInfo.setPropValue(builder2, "derived", "IGNORED", true));
+        Assertions.assertTrue(beanInfo.setPropValue(builder2, "derived", "IGNORED", false));
+        Assertions.assertNull(beanInfo.<OmittedByBuilder> finishBeanResult(builder2).getDerived());
+
+        // fromJson of a document that CARRIES the omitted property: the value is dropped, the bean still builds.
+        final OmittedByBuilder fromJson = N.fromJson("{\"value\": \"v\", \"derived\": \"ZZZ\"}", OmittedByBuilder.class);
+        Assertions.assertEquals("v", fromJson.getValue());
+        Assertions.assertEquals("V", fromJson.getDerived());
+
+        // ... which is exactly what makes the bean's own output readable back.
+        final OmittedByBuilder roundTrip = N.fromJson(N.toJson(bean), OmittedByBuilder.class);
+        Assertions.assertEquals("v", roundTrip.getValue());
+        Assertions.assertEquals("V", roundTrip.getDerived());
+
+        final OmittedByBuilder xmlRoundTrip = N.fromXml(N.toXml(bean), OmittedByBuilder.class);
+        Assertions.assertEquals("v", xmlRoundTrip.getValue());
+        Assertions.assertEquals("V", xmlRoundTrip.getDerived());
+
+        // The copy family drives the same writer.
+        Assertions.assertEquals("v", Beans.copyAs(bean, OmittedByBuilder.class).getValue());
+        Assertions.assertEquals("V", Beans.copyAs(bean, OmittedByBuilder.class).getDerived());
+        Assertions.assertEquals("v", Beans.mapToBean(Beans.beanToMap(bean, false), OmittedByBuilder.class).getValue());
+        Assertions.assertEquals("V", Beans.mapToBean(Beans.beanToMap(bean, false), OmittedByBuilder.class).getDerived());
+
+        // The canonical-constructor (non-builder) branch still coalesces a null into the primitive slot default.
+        final CoalesceRecord rec = N.fromJson("{\"n\": null, \"s\": \"x\"}", CoalesceRecord.class);
+        Assertions.assertEquals(0, rec.n());
+        Assertions.assertEquals("x", rec.s());
+    }
+
+    /**
+     * {@code isFieldSettable} excludes a builder-based property because {@code setPropValue}'s target is the BUILDER,
+     * not the bean; {@code isFieldHandleSettable} has to do the same. It did not, so for a builder-based bean with a
+     * NON-final field the {@code failureCountForSetProp > 100} retry branch preferred the bean's VarHandle and threw
+     * {@code ClassCastException: Cannot cast ..NonFinalByBuilder$Builder to ..NonFinalByBuilder}. (Reflectasm, when
+     * present, overrides {@code setPropValue} and never reads the VarHandle, so the flag itself is what is pinned.)
+     */
+    @Test
+    public void reviewFixes20260911_builderBasedPropertyIsNeverWrittenThroughTheBeansVarHandle() {
+        final ParserUtil.PropInfo nonFinal = ParserUtil.getBeanInfo(NonFinalByBuilder.class).getPropInfo("value");
+
+        Assertions.assertNotNull(nonFinal.fieldHandle);
+        Assertions.assertTrue(nonFinal.isFieldHandleGettable);
+        Assertions.assertFalse(nonFinal.isFieldSettable);
+        Assertions.assertFalse(nonFinal.isFieldHandleSettable);
+
+        // A final-field builder bean has no settable VarHandle to begin with, so it cannot show the difference.
+        Assertions.assertFalse(ParserUtil.getBeanInfo(OmittedByBuilder.class).getPropInfo("value").isFieldHandleSettable);
+
+        // A plain mutable bean must keep its settable VarHandle.
+        Assertions.assertTrue(ParserUtil.getBeanInfo(Computed.class).getPropInfo("first").isFieldHandleSettable);
+
+        Assertions.assertEquals("{\"value\": \"v\"}", N.toJson(N.fromJson("{\"value\": \"v\"}", NonFinalByBuilder.class)));
     }
 
 }

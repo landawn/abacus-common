@@ -13,7 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
@@ -79,12 +80,12 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      *
      * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the {@code before} operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is {@code null}.
+     * @throws NullPointerException if {@code before} is {@code null}.
      * @see #andThen(java.util.function.DoubleUnaryOperator)
      */
     @Override
-    default DoubleUnaryOperator compose(final java.util.function.DoubleUnaryOperator before) throws IllegalArgumentException {
-        N.checkArgNotNull(before, cs.before);
+    default DoubleUnaryOperator compose(final java.util.function.DoubleUnaryOperator before) throws NullPointerException {
+        Objects.requireNonNull(before, cs.before);
 
         return (final double v) -> applyAsDouble(before.applyAsDouble(v));
     }
@@ -109,12 +110,12 @@ public interface DoubleUnaryOperator extends Throwables.DoubleUnaryOperator<Runt
      *
      * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then applies the {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is {@code null}.
+     * @throws NullPointerException if {@code after} is {@code null}.
      * @see #compose(java.util.function.DoubleUnaryOperator)
      */
     @Override
-    default DoubleUnaryOperator andThen(final java.util.function.DoubleUnaryOperator after) throws IllegalArgumentException {
-        N.checkArgNotNull(after, cs.after);
+    default DoubleUnaryOperator andThen(final java.util.function.DoubleUnaryOperator after) throws NullPointerException {
+        Objects.requireNonNull(after, cs.after);
 
         return (final double t) -> after.applyAsDouble(applyAsDouble(t));
     }

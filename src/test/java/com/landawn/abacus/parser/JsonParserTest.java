@@ -1,7 +1,9 @@
 package com.landawn.abacus.parser;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -65,15 +67,10 @@ import com.google.gson.reflect.TypeToken;
 import com.landawn.abacus.annotation.JsonXmlCreator;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.JsonXmlValue;
-import com.landawn.abacus.entity.extendDirty.basic.Account;
-import com.landawn.abacus.entity.extendDirty.basic.AccountContact;
-import com.landawn.abacus.entity.extendDirty.basic.AccountDevice;
-import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPNL;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.entity.TypeBean;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
-import com.landawn.abacus.types.WeekDay;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Dates;
@@ -95,6 +92,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import testfixtures.entity.extendDirty.basic.Account;
+import testfixtures.entity.extendDirty.basic.AccountContact;
+import testfixtures.entity.extendDirty.basic.AccountDevice;
+import testfixtures.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPNL;
+import testfixtures.types.WeekDay;
 
 public class JsonParserTest extends AbstractJsonParserTest {
     private static final String bigBeanStr = jsonParser.serialize(bigXBean);
@@ -259,7 +261,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         }
     }
 
-    static class Parent {
+    public static class Parent {
         protected String status;
         private String _status;
 
@@ -272,7 +274,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         }
     }
 
-    static class Son extends Parent {
+    public static class Son extends Parent {
 
         public String getStatus() {
             return status;
@@ -488,7 +490,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void test_parse_toArray() {
         String json = "[1,2,3,4,5]";
         Integer[] array = new Integer[5];
-        parser.parse(json, array);
+        parser.parseInto(json, array);
 
         Assertions.assertEquals(1, array[0]);
         Assertions.assertEquals(2, array[1]);
@@ -498,7 +500,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
 
         String strJson = "[\"a\",\"b\",\"c\"]";
         String[] strArray = new String[3];
-        parser.parse(strJson, strArray);
+        parser.parseInto(strJson, strArray);
         Assertions.assertEquals("a", strArray[0]);
         Assertions.assertEquals("b", strArray[1]);
         Assertions.assertEquals("c", strArray[2]);
@@ -508,7 +510,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void test_parse_toCollection() {
         String json = "[1,2,3,4]";
         List<Integer> list = new ArrayList<>();
-        parser.parse(json, list);
+        parser.parseInto(json, list);
 
         Assertions.assertEquals(4, list.size());
         Assertions.assertEquals(1, list.get(0));
@@ -518,7 +520,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
 
         List<Integer> list2 = new ArrayList<>();
         list2.add(999);
-        parser.parse(json, list2);
+        parser.parseInto(json, list2);
         Assertions.assertEquals(5, list2.size());
         Assertions.assertEquals(999, list2.get(0));
     }
@@ -527,7 +529,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void test_parse_toMap() {
         String json = "{\"key1\":\"value1\",\"key2\":\"value2\",\"key3\":\"value3\"}";
         Map<String, String> map = new HashMap<>();
-        parser.parse(json, map);
+        parser.parseInto(json, map);
 
         Assertions.assertEquals(3, map.size());
         Assertions.assertEquals("value1", map.get("key1"));
@@ -536,7 +538,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
 
         Map<String, String> map2 = new HashMap<>();
         map2.put("old", "data");
-        parser.parse(json, map2);
+        parser.parseInto(json, map2);
         Assertions.assertEquals(4, map2.size());
         Assertions.assertEquals("data", map2.get("old"));
     }
@@ -545,7 +547,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void testparseToArray() {
         String json = "[1,2,3]";
         Integer[] array = new Integer[3];
-        parser.parse(json, array);
+        parser.parseInto(json, array);
         Assertions.assertEquals(1, array[0]);
         Assertions.assertEquals(2, array[1]);
         Assertions.assertEquals(3, array[2]);
@@ -555,7 +557,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void testparseToCollection() {
         String json = "[1,2,3]";
         List<Integer> list = new ArrayList<>();
-        parser.parse(json, list);
+        parser.parseInto(json, list);
         Assertions.assertEquals(3, list.size());
         Assertions.assertEquals(1, list.get(0));
         Assertions.assertEquals(2, list.get(1));
@@ -566,7 +568,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void testparseToMap() {
         String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
         Map<String, String> map = new HashMap<>();
-        parser.parse(json, map);
+        parser.parseInto(json, map);
         Assertions.assertEquals("value1", map.get("key1"));
         Assertions.assertEquals("value2", map.get("key2"));
     }
@@ -618,13 +620,13 @@ public class JsonParserTest extends AbstractJsonParserTest {
         Integer[] array = new Integer[3];
         JsonDeserConfig config = new JsonDeserConfig();
 
-        parser.parse(json, config, array);
+        parser.parseInto(json, config, array);
         Assertions.assertEquals(10, array[0]);
         Assertions.assertEquals(20, array[1]);
         Assertions.assertEquals(30, array[2]);
 
         Integer[] array2 = new Integer[3];
-        parser.parse(json, null, array2);
+        parser.parseInto(json, null, array2);
         Assertions.assertEquals(10, array2[0]);
         Assertions.assertEquals(20, array2[1]);
         Assertions.assertEquals(30, array2[2]);
@@ -636,14 +638,14 @@ public class JsonParserTest extends AbstractJsonParserTest {
         List<String> list = new ArrayList<>();
         JsonDeserConfig config = new JsonDeserConfig();
 
-        parser.parse(json, config, list);
+        parser.parseInto(json, config, list);
         Assertions.assertEquals(3, list.size());
         Assertions.assertEquals("x", list.get(0));
         Assertions.assertEquals("y", list.get(1));
         Assertions.assertEquals("z", list.get(2));
 
         List<String> list2 = new ArrayList<>();
-        parser.parse(json, null, list2);
+        parser.parseInto(json, null, list2);
         Assertions.assertEquals(3, list2.size());
     }
 
@@ -653,14 +655,14 @@ public class JsonParserTest extends AbstractJsonParserTest {
         Map<String, Integer> map = new LinkedHashMap<>();
         JsonDeserConfig config = new JsonDeserConfig();
 
-        parser.parse(json, config, map);
+        parser.parseInto(json, config, map);
         Assertions.assertEquals(3, map.size());
         Assertions.assertEquals(1, map.get("a"));
         Assertions.assertEquals(2, map.get("b"));
         Assertions.assertEquals(3, map.get("c"));
 
         Map<String, Integer> map2 = new HashMap<>();
-        parser.parse(json, null, map2);
+        parser.parseInto(json, null, map2);
         Assertions.assertEquals(3, map2.size());
     }
 
@@ -668,7 +670,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void test_edgeCases_emptyArray() {
         String json = "[]";
         List<Integer> list = new ArrayList<>();
-        parser.parse(json, list);
+        parser.parseInto(json, list);
         Assertions.assertEquals(0, list.size());
     }
 
@@ -676,7 +678,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void test_edgeCases_emptyMap() {
         String json = "{}";
         Map<String, Object> map = new HashMap<>();
-        parser.parse(json, map);
+        parser.parseInto(json, map);
         Assertions.assertEquals(0, map.size());
     }
 
@@ -722,7 +724,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void testparseToArrayWithConfig() {
         String json = "[\"a\",\"b\",\"c\"]";
         String[] array = new String[3];
-        parser.parse(json, null, array);
+        parser.parseInto(json, null, array);
         Assertions.assertEquals("a", array[0]);
         Assertions.assertEquals("b", array[1]);
         Assertions.assertEquals("c", array[2]);
@@ -732,7 +734,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void testparseToCollectionWithConfig() {
         String json = "[\"x\",\"y\",\"z\"]";
         List<String> list = new ArrayList<>();
-        parser.parse(json, null, list);
+        parser.parseInto(json, null, list);
         Assertions.assertEquals(3, list.size());
         Assertions.assertEquals("x", list.get(0));
         Assertions.assertEquals("y", list.get(1));
@@ -743,7 +745,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void testparseToMapWithConfig() {
         String json = "{\"a\":1,\"b\":2}";
         Map<String, Integer> map = new HashMap<>();
-        parser.parse(json, null, map);
+        parser.parseInto(json, null, map);
         Assertions.assertEquals(1, map.get("a"));
         Assertions.assertEquals(2, map.get("b"));
     }
@@ -845,11 +847,10 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void testSerialize_map() {
         Map<String, Object> m = N.asMap("firstName", "fn", "lastName", "ln", "birthday", "2003-08-08");
         String str = jsonParser.serialize(m, JsonSerConfig.create().setQuotePropName(false).setQuoteMapKey(false));
-        N.println(str);
+        assertTrue(str.contains("firstName"));
+        assertFalse(str.trim().startsWith("\""));
 
         Map<String, Object> m2 = jsonParser.deserialize(str, Map.class);
-
-        N.println(m2);
         assertEquals(m, m2);
     }
 
@@ -863,10 +864,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
                 "‰β,『�?★业€ > \\n sfd \\r ds \\' f d // \\\\  \\\\\\\\ /// /////// \\\\\\\\\\\\\\\\  \\\\\\\\\\\\\\\\n \\\\\\\\\\\\\\\\r  \\t sd \\\" fe stri‰β,『�?★业€ ng黎< > </ <//、\\n");
 
         String st = jsonParser.serialize(xBean);
-        println(st);
-
         XBean xBean2 = jsonParser.deserialize(st, XBean.class);
-        println(xBean2);
         assertEquals(xBean, xBean2);
 
         Bean bean = new Bean();
@@ -876,8 +874,6 @@ public class JsonParserTest extends AbstractJsonParserTest {
         bean.setChars2(new Character[] { '\r', '\t', '\"', '\'', ' ', ',', ' ', ',' });
 
         String jsonStr = jsonParser.serialize(bean);
-        println(jsonStr);
-
         Bean xmlBean = jsonParser.deserialize(jsonStr, Bean.class);
         assertEquals(bean, xmlBean);
     }
@@ -1024,38 +1020,15 @@ public class JsonParserTest extends AbstractJsonParserTest {
         account.setId(100);
 
         String str = jsonParser.serialize(account);
-        println(str);
-
-        println(jsonParser.deserialize(str, Account.class));
-
-        str = "{\r\n" + "    \"id\": 100,\r\n" + "    \"gui\": \"d670ced631a14cf2820296263e2364f0\",\r\n"
-                + "    \"emailAddress\": \"1e7cd28a386d47058a593d0dae386394@earth.com\",\r\n" + "    \"firstName\": \"firstName\",\r\n"
-                + "    \"middleName\": \"MN\",\r\n" + "    \"lastName\": \"lastName\",\r\n" + "    \"birthDate\": 1394842092851,\r\n"
-                + "    \"lastUpdateTime\": 1394842092851,\r\n" + "    \"createdTime\": 1394842092851\\r\\n" + "}";
-
-        println(jsonParser.deserialize(str, Account.class));
+        assertEquals(account, jsonParser.deserialize(str, Account.class));
 
         str = "{id:100,gui:\"5197aaf659794f1784fd45570ada3d62\",\"unknownProperty1\":null, emailAddress:\"13f6a5129c274c758a6eddf40fd825c6@earth.com\",firstName:\"firstName\",middleName:\"MN\",lastName:\"lastName\",birthDate:1399943675943,lastUpdateTime:1399943675943,createdTime:1399943675943,\"unknownProperty2\":1}";
-        println(jsonParser.deserialize(str, Account.class));
-        println(jsonParser.deserialize(str, Map.class));
-        assertNotNull(str);
-    }
-
-    @Test
-    public void testSerialize0() {
-        Account account = createAccount(Account.class);
-        account.setId(100);
-
-        String st = jsonParser.serialize(account);
-        println(st);
-
-        println(jsonParser.deserialize(st, Account.class));
-
-        st = jsonParser.serialize(account);
-        println(st);
-
-        println(jsonParser.deserialize(st, Account.class));
-        assertNotNull(st);
+        Account fromUnquoted = jsonParser.deserialize(str, Account.class);
+        assertEquals(100, fromUnquoted.getId());
+        assertEquals("firstName", fromUnquoted.getFirstName());
+        Map<?, ?> asMap = jsonParser.deserialize(str, Map.class);
+        assertEquals(100, asMap.get("id"));
+        assertTrue(asMap.containsKey("unknownProperty1"));
     }
 
     @Test
@@ -1073,32 +1046,20 @@ public class JsonParserTest extends AbstractJsonParserTest {
         bean.setChars(new char[] { '\r', '\t', '\"', '\'', ' ', ',', ' ', ',' });
 
         String jsonStr = jsonParser.serialize(bean);
-        println(jsonStr);
-
         Bean xmlBean = jsonParser.deserialize(jsonStr, Bean.class);
-        N.println(bean);
-        N.println(xmlBean);
-        N.println(jsonParser.serialize(bean));
-        N.println(jsonParser.serialize(xmlBean));
-        N.println(N.stringOf(bean));
-        N.println(N.stringOf(xmlBean));
-        N.println(jsonParser.serialize(bean));
-        N.println(jsonParser.serialize(xmlBean));
-
-        N.println(jsonParser.deserialize(jsonParser.serialize(bean), Bean.class));
-        N.println(jsonParser.deserialize(jsonParser.serialize(xmlBean), Bean.class));
-        assertNotNull(xmlBean);
+        assertArrayEquals(bean.getBytes(), xmlBean.getBytes());
+        assertArrayEquals(bean.getStrings(), xmlBean.getStrings());
+        assertArrayEquals(bean.getChars(), xmlBean.getChars());
+        assertEquals(bean.getTypeList().size(), xmlBean.getTypeList().size());
+        assertEquals(jsonParser.serialize(bean), jsonParser.serialize(xmlBean));
     }
 
     @Test
     public void testSerialize2() {
-        println(String.valueOf((char) 0));
-
         Account account = createAccount(Account.class);
         AccountContact contact = createAccountContact(AccountContact.class);
         account.setContact(contact);
-
-        N.println(jsonParser.serialize(account));
+        assertEquals(account, jsonParser.deserialize(jsonParser.serialize(account), Account.class));
 
         XBean xBean = new XBean();
         xBean.setTypeBoolean(true);
@@ -1130,28 +1091,10 @@ public class JsonParserTest extends AbstractJsonParserTest {
         xBean.setWeekDay(WeekDay.THURSDAY);
 
         String jsonStr = jsonParser.serialize(xBean);
-        println(jsonStr);
-
-        String st = N.stringOf(xBean);
-        println(st);
-
         XBean xmlBean = jsonParser.deserialize(jsonStr, XBean.class);
-        N.println(xBean);
-        N.println(xmlBean);
-        N.println(jsonParser.serialize(xBean));
-        N.println(jsonParser.serialize(xmlBean));
-        N.println(N.stringOf(xBean));
-        N.println(N.stringOf(xmlBean));
         assertEquals(jsonParser.deserialize(jsonParser.serialize(xBean), XBean.class), jsonParser.deserialize(jsonParser.serialize(xmlBean), XBean.class));
-
-        N.println(jsonParser.serialize(xBean));
-        N.println(jsonParser.serialize(xmlBean));
-
-        N.println(jsonParser.deserialize(jsonParser.serialize(xBean), XBean.class));
-        N.println(jsonParser.deserialize(jsonParser.serialize(xmlBean), XBean.class));
-
-        N.println(jsonParser.deserialize(jsonParser.serialize(xBean), Map.class));
-        N.println(jsonParser.deserialize(jsonParser.serialize(xmlBean), Map.class));
+        assertEquals(WeekDay.THURSDAY, xmlBean.getWeekDay());
+        assertNotNull(jsonParser.deserialize(jsonStr, Map.class));
     }
 
     @Test
@@ -1166,9 +1109,9 @@ public class JsonParserTest extends AbstractJsonParserTest {
         xBean.setTypeGenericSet(N.toSet(1L, 2L));
 
         String jsonStr = jsonParser.serialize(xBean);
-        println(jsonStr);
-        println(jsonParser.serialize(jsonParser.deserialize(jsonStr, XBean.class)));
-        assertNotNull(jsonStr);
+        XBean roundTrip = jsonParser.deserialize(jsonStr, XBean.class);
+        assertEquals(xBean.getTypeGenericSet(), roundTrip.getTypeGenericSet());
+        assertEquals(jsonParser.serialize(xBean), jsonParser.serialize(roundTrip));
     }
 
     @Test
@@ -1199,36 +1142,27 @@ public class JsonParserTest extends AbstractJsonParserTest {
         xBean.setTypeGenericMap4(typeGenericMap4);
 
         String xml = jsonParser.serialize(xBean);
-        println(xml);
-
-        String st = N.stringOf(xBean);
-        println(st);
-
-        jsonParser.deserialize(xml, XBean.class);
-        assertNotNull(st);
+        XBean roundTrip = jsonParser.deserialize(xml, XBean.class);
+        assertEquals("", roundTrip.getTypeString());
+        assertNotNull(roundTrip.getTypeDate());
+        assertEquals(1, roundTrip.getTypeGenericMap4().size());
+        assertEquals("", roundTrip.getTypeGenericMap4().get("aaabbbccc"));
     }
 
     @Test
     public void testSerialize5() {
         List<Account> accounts = createAccountWithContact(Account.class, 100);
         String xml = jsonParser.serialize(accounts);
-        println(xml);
-
         List<Account> xmlAccounts = jsonParser.deserialize(xml, List.class);
-
-        N.println(N.stringOf(accounts));
-        N.println(N.stringOf(xmlAccounts));
-        assertNotNull(xmlAccounts);
+        assertEquals(accounts.size(), xmlAccounts.size());
+        assertEquals(accounts.get(0).getId(), jsonParser.deserialize(jsonParser.serialize(accounts.get(0)), Account.class).getId());
     }
 
     @Test
     public void testSerialize6() {
         Account account = createAccountWithContact(Account.class);
         String xml = jsonParser.serialize(account);
-        println(xml);
-
-        jsonParser.deserialize(xml, com.landawn.abacus.entity.extendDirty.basic.Account.class);
-        assertNotNull(xml);
+        assertEquals(account, jsonParser.deserialize(xml, testfixtures.entity.extendDirty.basic.Account.class));
     }
 
     @Test
@@ -1242,18 +1176,9 @@ public class JsonParserTest extends AbstractJsonParserTest {
         bean.setTypeChar('0');
 
         String xml = jsonParser.serialize(bean);
-        println(xml);
-
         XBean xmlBean = jsonParser.deserialize(xml, XBean.class);
-        N.println(bean);
-        N.println(xmlBean);
-        N.println(jsonParser.serialize(bean));
-        N.println(jsonParser.serialize(xmlBean));
-        N.println(N.stringOf(bean));
-        N.println(N.stringOf(xmlBean));
         assertEquals(bean, xmlBean);
         assertEquals(jsonParser.deserialize(jsonParser.serialize(bean), XBean.class), jsonParser.deserialize(jsonParser.serialize(xmlBean), XBean.class));
-
     }
 
     @Test
@@ -1265,53 +1190,19 @@ public class JsonParserTest extends AbstractJsonParserTest {
             IOUtil.deleteRecursivelyIfExists(file);
         }
 
-        OutputStream os = new FileOutputStream(file);
-        jsonParser.serialize(account, os);
-        IOUtil.close(os);
+        try {
+            OutputStream os = new FileOutputStream(file);
+            jsonParser.serialize(account, os);
+            IOUtil.close(os);
+            assertEquals(account, jsonParser.deserialize(file, Account.class));
 
-        String str = IOUtil.readAllToString(file);
-        N.println(str);
-
-        Account account2 = jsonParser.deserialize(file, Account.class);
-
-        assertEquals(account, account2);
-
-        file.delete();
-
-        Writer writer = new FileWriter(file);
-        jsonParser.serialize(account, writer);
-        IOUtil.close(writer);
-
-        str = IOUtil.readAllToString(file);
-        N.println(str);
-
-        account2 = jsonParser.deserialize(file, Account.class);
-
-        assertEquals(account, account2);
-
-        IOUtil.deleteIfExists(file);
-    }
-
-    @Test
-    public void test_parser_2() throws Exception {
-        Account account = createAccount(Account.class);
-        File file = new File("./src/test/resources/json.txt");
-
-        if (file.exists()) {
-            IOUtil.deleteRecursivelyIfExists(file);
+            Writer writer = new FileWriter(file);
+            jsonParser.serialize(account, writer);
+            IOUtil.close(writer);
+            assertEquals(account, jsonParser.deserialize(file, Account.class));
+        } finally {
+            IOUtil.deleteIfExists(file);
         }
-
-        Writer writer = new FileWriter(file);
-        jsonParser.serialize(account, writer);
-        IOUtil.close(writer);
-
-        String str = IOUtil.readAllToString(file);
-        N.println(str);
-
-        Account account2 = jsonParser.deserialize(file, Account.class);
-
-        assertEquals(account, account2);
-        IOUtil.deleteIfExists(file);
     }
 
     @Test
@@ -1353,12 +1244,6 @@ public class JsonParserTest extends AbstractJsonParserTest {
             Assertions.assertEquals(2, list.size());
         }
     }
-
-    //
-    //    @Test
-    //    public void testDeserializeRejectsTrailingTokensAfterList() {
-    //        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1,2] true", List.class));
-    //    }
 
     //
     //
@@ -1527,12 +1412,9 @@ public class JsonParserTest extends AbstractJsonParserTest {
         accountList.add(0, null);
 
         String json = jsonParser.serialize(accountList);
-
-        N.println(json);
+        assertTrue(json.startsWith("["));
 
         final String str = jsonParser.stream(json, Type.of(Account.class)).skip(2).filter(it -> it.getId() >= 0).map(Account::getId).limit(3).join(", ");
-
-        N.println(str);
 
         assertEquals("0, 0, 0", str);
 
@@ -1591,24 +1473,21 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final Map<String, Object> map = new HashMap<>();
         map.put("fieldA", Timestamp.valueOf(now).getTime());
         final String json = N.toJson(map);
-
-        N.println(json);
+        assertTrue(json.contains("fieldA"));
 
         final Bean2817 fromJson = N.fromJson(json, Bean2817.class);
-
-        N.println(fromJson);
+        assertNotNull(fromJson.getFieldA());
 
         final Map<String, BigDecimal> m = N.fromJson("{\"token\": 2.105465717176397390012604E+2043348}", Type.ofMap(String.class, BigDecimal.class));
-        N.println(m);
+        assertTrue(m.get("token").compareTo(BigDecimal.ZERO) > 0);
 
         final Map<String, Double> m2 = N.fromJson("{\"token\": 2.105465717176397390012604E+2043348}", Type.ofMap(String.class, Double.class));
-        N.println(m2);
-        assertNotNull(m2);
+        assertTrue(Double.isInfinite(m2.get("token")) || m2.get("token") > 0);
     }
 
     @Test
     public void test_2958() throws Exception {
-        N.println(TypeFactory.getType(AtomicDouble.class));
+        assertEquals(AtomicDouble.class, TypeFactory.getType(AtomicDouble.class).javaType());
 
         final UnsignedInteger unsignedInteger = UnsignedInteger.valueOf(String.valueOf(Integer.MIN_VALUE).replace("-", ""));
         final UnsignedLong unsignedLong = UnsignedLong.valueOf(String.valueOf(Long.MIN_VALUE).replace("-", ""));
@@ -1626,16 +1505,10 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final Map<String, Object> map = new HashMap<>();
         map.put("count", unsignedLong);
 
-        System.out.println("fastjson2:  " + JSONObject.toJSONString(map));
-
-        final ObjectMapper objectMapper = new ObjectMapper();
-        System.out.println("jackson:  " + objectMapper.writeValueAsString(map));
-
-        final Gson gson = new GsonBuilder().create();
-        System.out.println("gson:  " + gson.toJson(map));
-
-        N.println(N.toJson(map));
-        N.println(N.toJson(bean));
+        assertNotNull(JSONObject.toJSONString(map));
+        assertNotNull(new ObjectMapper().writeValueAsString(map));
+        assertNotNull(new GsonBuilder().create().toJson(map));
+        assertTrue(N.toJson(map).contains("count"));
         assertEquals(
                 "{\"count0\": 2147483648, \"count\": 9223372036854775808, \"countA\": 10, \"countB\": 9223372036854775807, \"countC\": 100.0, \"countD\": 100.0, \"fieldA\": true, \"fieldB\": \"a\"}",
                 N.toJson(bean));
@@ -1648,11 +1521,11 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final Object obj = new Object();
         final SerializationConfig serializationConfig = JsonMappers.createSerializationConfig().without(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         String json = JsonMappers.toJson(obj, serializationConfig);
-        N.println(json);
+        assertNotNull(json);
         json = JsonMappers.toJson(N.asMap("key1", obj, "key2", "ddd"), serializationConfig);
-        N.println(json);
+        assertTrue(json.contains("key2"));
         json = JsonMappers.toJson(N.toList("key1", obj, "key2", "ddd"), serializationConfig);
-        N.println(json);
+        assertTrue(json.contains("key2"));
 
         try {
             json = N.toJson(obj);
@@ -1664,11 +1537,11 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final JsonSerConfig jsc = JsonSerConfig.create().setFailOnEmptyBean(false);
 
         json = N.toJson(obj, jsc);
-        N.println(json);
+        assertEquals("{}", json);
         json = N.toJson(N.asMap("key1", obj, "key2", "ddd"), jsc);
-        N.println(json);
+        assertTrue(json.contains("key2"));
         json = N.toJson(N.toList("key1", obj, "key2", "ddd"), jsc);
-        N.println(json);
+        assertTrue(json.contains("key2"));
     }
 
     @Test
@@ -1679,59 +1552,54 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final Map<String, Object> map = N.toMap("a", "va", "b", 123);
         map.put("c", map);
 
-        // Strict mode (default) now correctly detects the cycle and throws a friendly
-        // ParsingException instead of letting the JVM hit StackOverflowError.
+        // Strict mode (default) tracks no object identities; the cycle is caught by the bounded
+        // serialization depth and reported as a friendly ParsingException instead of letting the
+        // JVM hit StackOverflowError (review fix 2026-09-06, R-P01).
         try {
             N.toJson(list);
-            fail("Should throw StackOverflowError");
-        } catch (final StackOverflowError e) {
-            // expected
+            fail("Should throw ParsingException");
+        } catch (final ParsingException e) {
+            assertTrue(e.getMessage().contains("circular"), e.getMessage());
         }
 
         try {
             N.toJson(map);
             fail("Should throw ParsingException");
-        } catch (final StackOverflowError e) {
-            // expected
+        } catch (final ParsingException e) {
+            assertTrue(e.getMessage().contains("circular"), e.getMessage());
         }
 
         final JsonSerConfig jsc = JsonSerConfig.create().setCircularReferenceSupported(true);
 
         String json = N.toJson(list, jsc);
-        N.println(json);
-
+        assertTrue(json.contains("a"));
         json = N.toJson(map, jsc);
-        N.println(json);
+        assertTrue(json.contains("va"));
     }
 
     @Test
     public void test_Map() {
         final Map<Object, Object> map = N.asMap(1, "a", "b", 2, 3, 3, "d", "d", 10, "x");
         final String json = N.toJson(map);
-        N.println(json);
-
         final Map map2 = N.fromJson(json, Map.class);
-        N.println(map2);
-        assertNotNull(map2);
+        assertEquals(map.size(), map2.size());
+        assertTrue(json.contains("\"a\""));
     }
 
     @Test
     public void test_PropHandler() {
 
         final Account account = Beans.newRandomBean(Account.class);
-        N.println(account);
-
         account.setDevices(Beans.newRandomBeanList(AccountDevice.class, 10));
 
         final String json = N.toJson(account);
         assertEquals(account, N.fromJson(json, Account.class));
 
-        final Account account2 = N.fromJson(json, JsonDeserConfig.create().setPropHandler("devices", (c, e) -> {
-            N.println(e);
-        }), Account.class);
+        final List<Object> handled = new ArrayList<>();
+        final Account account2 = N.fromJson(json, JsonDeserConfig.create().setPropHandler("devices", (c, e) -> handled.add(e)), Account.class);
 
         assertEquals(0, account2.getDevices().size());
-
+        assertFalse(handled.isEmpty());
     }
 
     @Test
@@ -1740,19 +1608,17 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final String str = "\\uXYZ";
 
         final String result = N.fromJson(str, String.class);
-
-        N.println(result);
         assertNotNull(result);
+        assertTrue(result.contains("uXYZ") || result.contains("\\u"));
     }
 
     @Test
     public void test_escape() {
         final Map<String, Object> map = N.asMap("a", "kdafs'ksfkd\"", "b", "\"", "c", '\'');
-
-        N.println(N.toJson(map, true));
-
-        N.println(JSON.toJSONString(map));
-        assertNotNull(map);
+        final String json = N.toJson(map, true);
+        assertTrue(json.contains("kdafs"));
+        assertTrue(json.contains("\\\"") || json.contains("\""));
+        assertNotNull(JSON.toJSONString(map));
     }
 
     @Test
@@ -1767,18 +1633,12 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final java.lang.reflect.Type type = new TypeToken<Map<RoomIdentifier, String>>() {
         }.getType();
         final Map<RoomIdentifier, String> slotsDeserialized = gson.fromJson(strSerialized, type);
+        assertEquals("ROOM_NAME_TEST", slotsDeserialized.get(RoomIdentifier.ROOM_NAME));
+        assertNotNull(gson.toJson(id));
 
-        System.out.println(gson.toJson(id));
-        System.out.println(strSerialized);
-        System.out.println(slotsDeserialized);
-
-        N.println(Strings.repeat('=', 80));
-
-        N.println(N.toJson(id));
         final String json = N.toJson(slots);
-        N.println(json);
         assertEquals("{\"MARKER_NAME\": \"ROOM_NAME_TEST\"}", json);
-        N.println(N.fromJson(json, new TypeReference<Map<RoomIdentifier, String>>() {
+        assertEquals(slots, N.fromJson(json, new TypeReference<Map<RoomIdentifier, String>>() {
         }.type()));
         assertEquals(slots, N.fromJson(json, new TypeReference.TypeToken<Map<RoomIdentifier, String>>() {
         }.type()));
@@ -1789,13 +1649,12 @@ public class JsonParserTest extends AbstractJsonParserTest {
         final Account account = createAccount(Account.class);
 
         final String json = N.toJson(account, JsonSerConfig.create().setIgnoredPropNames(N.toSet("firstName")));
-
-        N.println(json);
+        assertFalse(json.contains("\"firstName\""));
 
         final Account account2 = N.fromJson(json, JsonDeserConfig.create().setIgnoredPropNames(N.toSet("lastName")), Account.class);
-
-        N.println(account2);
-        assertNotNull(account2);
+        assertNull(account2.getFirstName());
+        assertNull(account2.getLastName());
+        assertEquals(account.getId(), account2.getId());
     }
 
     @Test
@@ -1803,21 +1662,17 @@ public class JsonParserTest extends AbstractJsonParserTest {
         {
             final LongEnum[] a = { LongEnum.TWO, LongEnum.ONE };
             final String json = N.toJson(a);
-            N.println(json);
-
-            final LongEnum[] b = N.fromJson(json, LongEnum[].class);
-
-            assertTrue(N.equals(a, b));
+            assertTrue(json.contains("2"));
+            assertTrue(json.contains("1"));
+            assertTrue(N.equals(a, N.fromJson(json, LongEnum[].class)));
         }
 
         {
             final SingleValueObject[] a = { SingleValueObject.from("abc"), SingleValueObject.from("123") };
             final String json = N.toJson(a);
-            N.println(json);
-
-            final SingleValueObject[] b = N.fromJson(json, SingleValueObject[].class);
-
-            assertTrue(N.equals(a, b));
+            assertTrue(json.contains("abc"));
+            assertTrue(json.contains("123"));
+            assertTrue(N.equals(a, N.fromJson(json, SingleValueObject[].class)));
         }
     }
 
@@ -1838,10 +1693,14 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void test_3083() {
         final String s = "{'is_subscribe':1,'subscribe':3,'isHave':5}";
         final TestBean b = JSON.parseObject(s, TestBean.class);
-        println(b.is_subscribe + "--" + b.subscribe + "--" + b.isHave);
+        assertEquals(1, b.is_subscribe);
+        assertEquals(3, b.subscribe);
+        assertEquals(5, b.isHave);
 
-        N.println(N.stringOf(N.fromJson(s, TestBean.class)));
-        assertNotNull(b);
+        final TestBean fromN = N.fromJson(s, TestBean.class);
+        assertEquals(1, fromN.is_subscribe);
+        assertEquals(3, fromN.subscribe);
+        assertEquals(5, fromN.isHave);
     }
 
     @Test
@@ -1859,9 +1718,11 @@ public class JsonParserTest extends AbstractJsonParserTest {
         map.put("11", demoList);
         demo.setMap(map);
 
-        N.println(JSON.toJSONString(demo));
-        N.println(N.toJson(demo));
-        assertNotNull(map);
+        String json = N.toJson(demo);
+        assertTrue(json.contains("15566667777"));
+        TestDemo roundTrip = N.fromJson(json, TestDemo.class);
+        assertEquals(demo, roundTrip);
+        assertNotNull(JSON.toJSONString(demo));
     }
 
     @Test
@@ -1879,33 +1740,25 @@ public class JsonParserTest extends AbstractJsonParserTest {
                 .build();
 
         String json = N.toJson(bean);
-
-        N.println(json);
-
-        N.println(objMapper.writeValueAsString(bean));
+        assertTrue(json.contains(gui));
+        assertNotNull(objMapper.writeValueAsString(bean));
 
         BeanF bean2 = N.fromJson(json, BeanF.class);
-
-        N.println(bean);
-        N.println(bean2);
-
         assertNotSame(bean, bean2);
-
         bean2.setGui(bean.getGui());
-        N.println(bean2);
-
         assertEquals(bean, bean2);
     }
 
     @Test
-    public void test_writeLongAsString() throws Exception {
-        assertDoesNotThrow(() -> {
-            Map<String, Object> map = N.asMap("key1", Long.valueOf(123), "Long.MAX_VALUE", Long.MAX_VALUE, "Integer.MAX_VALUE", Integer.MAX_VALUE,
-                    "Integer.MIN_VALUE", Integer.MIN_VALUE);
-            N.println(N.toJson(map));
+    public void test_writeLongAsString() {
+        Map<String, Object> map = N.asMap("key1", Long.valueOf(123), "Long.MAX_VALUE", Long.MAX_VALUE, "Integer.MAX_VALUE", Integer.MAX_VALUE,
+                "Integer.MIN_VALUE", Integer.MIN_VALUE);
+        String json = N.toJson(map);
+        assertTrue(json.contains("9223372036854775807"));
 
-            N.println(N.toJson(map, JsonSerConfig.create().setWriteLongAsString(true)));
-        });
+        String asString = N.toJson(map, JsonSerConfig.create().setWriteLongAsString(true));
+        assertTrue(asString.contains("\"9223372036854775807\""));
+        assertTrue(asString.contains("\"123\""));
     }
 
     @Test
@@ -1915,12 +1768,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
         {
             Map map = N.asMap("key", new BigDecimal(bigNum));
             String json = N.toJson(map);
-
-            N.println(json);
-
             Map map01 = N.fromJson(json, Map.class);
-            N.println(map01);
-
             assertEquals(map, map01);
         }
     }
@@ -1929,30 +1777,21 @@ public class JsonParserTest extends AbstractJsonParserTest {
     public void test_02() {
         Object obj = N.toList(N.asMap("key", "value", "key2", "value2", "num1", 1, "num2", "92390asdflkj"));
         String json = N.toJson(obj);
-        N.println(json);
-
-        N.println(N.fromJson(json, Object.class));
-
-        N.println(N.formatJson(json));
+        assertEquals(obj, N.fromJson(json, Object.class));
+        assertTrue(N.formatJson(json).contains("\n"));
 
         json = "[{\"key2\":\"value2\", \"num2\":92390aef, \"num1\":1, \"key\":\"value\"}]";
-
-        N.println(N.fromJson(json, Object.class));
-
-        N.println(N.formatJson(json));
-        assertNotNull(json);
+        Object parsed = N.fromJson(json, Object.class);
+        assertNotNull(parsed);
+        assertTrue(N.formatJson(json).contains("key2"));
     }
 
     @Test
     public void test_01() {
         Object obj = N.toList(N.asMap("key", "value", "key2", "value2"));
         String json = N.toJson(obj);
-        N.println(json);
-
-        N.println(N.fromJson(json, Object.class));
-
-        N.println(N.formatJson(json));
-        assertNotNull(json);
+        assertEquals(obj, N.fromJson(json, Object.class));
+        assertTrue(N.formatJson(json).contains("\n"));
     }
 
     @Test
@@ -1962,55 +1801,25 @@ public class JsonParserTest extends AbstractJsonParserTest {
 
         JsonSerConfig config = JsonSerConfig.create().setQuotePropName(true).setQuoteMapKey(true).setPrettyFormat(true).setIndentation("    ");
 
-        String str = jsonParser.serialize(account, config);
-        N.println("============account=====================================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
+        String accountJson = jsonParser.serialize(account, config);
+        assertTrue(accountJson.contains("\n"));
+        assertTrue(accountJson.contains("    "));
+        assertEquals(100, jsonParser.deserialize(accountJson, Account.class).getId());
 
-        str = jsonParser.serialize(N.asArray(account, account), config);
-        N.println("============Array.of(account, account)=================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
+        String arrayJson = jsonParser.serialize(N.asArray(account, account), config);
+        assertTrue(arrayJson.startsWith("["));
+        assertTrue(arrayJson.contains("\n"));
+        assertEquals(2, jsonParser.deserialize(arrayJson, Account[].class).length);
 
-        str = jsonParser.serialize(N.toList(account, account), config);
-        N.println("============N.toList(account, account)===================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
+        String listJson = jsonParser.serialize(N.toList(account, account), config);
+        assertEquals(2, jsonParser.deserialize(listJson, List.class).size());
 
-        str = jsonParser.serialize(Beans.deepBeanToMap(account), config);
-        N.println("============(N.deepBeanToMap(account)==================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
+        String mapJson = jsonParser.serialize(Beans.deepBeanToMap(account), config);
+        assertTrue(mapJson.contains("\"id\""));
 
-        str = jsonParser.serialize(new Object[] { Beans.deepBeanToMap(account), account }, config);
-        N.println("============Array.of(N.deepBeanToMap(account), account)===============================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(N.toList(Beans.deepBeanToMap(account), account), config);
-        N.println("============N.toList(N.deepBeanToMap(account), account)================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(new Object[] { new Object[] { account, account }, N.toList(account, account) }, config);
-        N.println("============Array.of(Array.of(account, account), N.toList(account, account))==========================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(N.toList(N.asArray(account, account), N.toList(account, account)), config);
-        N.println("============N.toList(Array.of(account, account), N.toList(account, account))===========================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(Seid.of(AccountPNL.ID, "abc123"), config);
-        N.println("============Seid.valueOf(Account.ID, \"abc123\")========================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = jsonParser.serialize(Seid.of(AccountPNL.ID, "abc123", AccountPNL.LAST_NAME, "lastName"), config);
-        N.println("============Seid.valueOf(Account.ID, \"abc123\", Account.LAST_NAME, \"lastName\")=======================================");
-        N.println(str);
-        N.println("========================================================================================================================");
+        String seidJson = jsonParser.serialize(Seid.of(AccountPNL.ID, "abc123", AccountPNL.LAST_NAME, "lastName"), config);
+        assertTrue(seidJson.contains("abc123"));
+        assertTrue(seidJson.contains("lastName"));
 
         XBean xBean = new XBean();
         xBean.setTypeBoolean(true);
@@ -2024,29 +1833,14 @@ public class JsonParserTest extends AbstractJsonParserTest {
         xBean.setTypeLong2((long) 5);
         xBean.setTypeFloat(1.01f);
         xBean.setTypeDouble(2.3134454d);
-
         xBean.setTypeString(">string黎< > </ <//、");
-
-        List<Object> typeList = new ArrayList<>();
-        typeList.add(account.getFirstName());
-        typeList.add(account);
-        typeList.add(account.getContact());
-        typeList.add(account);
-        typeList.add(null);
-        typeList.add(null);
-        typeList.add(new HashMap<>());
-        typeList.add(new ArrayList<>());
-        typeList.add(new HashSet<>());
-        xBean.setTypeList(typeList);
-
         xBean.setWeekDay(WeekDay.THURSDAY);
 
-        str = jsonParser.serialize(xBean, config);
-
-        N.println("============xBean=======================================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-        assertNotNull(str);
+        String xBeanJson = jsonParser.serialize(xBean, config);
+        XBean roundTrip = jsonParser.deserialize(xBeanJson, XBean.class);
+        assertEquals(WeekDay.THURSDAY, roundTrip.getWeekDay());
+        assertEquals('黎', roundTrip.getTypeChar());
+        assertEquals(xBean.getTypeString(), roundTrip.getTypeString());
     }
 
     @Test

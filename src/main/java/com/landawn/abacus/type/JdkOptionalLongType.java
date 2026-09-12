@@ -24,6 +24,10 @@ import com.landawn.abacus.util.Strings;
  * a {@code long} value; this handler unboxes the underlying primitive on read/write.
  * Empty optionals (and {@code null} references) are represented as {@code null} in serialized form
  * and as SQL {@code NULL} in database form.
+ *
+ * <p>JDBC numeric coercion truncates finite fractional values toward zero, then checks the target range.
+ * NaN, infinities and out-of-range integer parts throw {@link ArithmeticException}; no wraparound occurs.</p>
+ *
  */
 public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
@@ -137,12 +141,13 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      *
      * @param str the string to parse
      * @return OptionalLong.empty() if the string is {@code null} or empty, otherwise OptionalLong containing the parsed value
-     * @throws NumberFormatException if a non-empty string cannot be parsed as a {@code long}
+     * @throws NumberFormatException if a non-empty string is not a valid integer token
+     * @throws ArithmeticException if the string is a well-formed integer outside the {@code long} range
      * @see #valueOf(Object)
      * @see #stringOf(OptionalLong)
      */
     @Override
-    public OptionalLong valueOf(final String str) {
+    public OptionalLong valueOf(final String str) throws NumberFormatException, ArithmeticException {
         return Strings.isEmpty(str) ? OptionalLong.empty() : OptionalLong.of(Numbers.toLong(str));
     }
 
@@ -153,15 +158,20 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
-     * @return OptionalLong.empty() if the column is {@code null}, otherwise OptionalLong containing the value
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @return OptionalLong.empty() if the column is {@code null}, otherwise OptionalLong containing the value. A
+     *         non-{@code Number} column value is coerced with {@link Numbers#toLong(Object)}, so an empty string yields a
+     *         <i>present</i> zero (the same answer {@code LongType.get} gives), unlike {@link #valueOf(String)} which
+     *         answers empty for {@code ""}
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string         included)
+     * @throws ArithmeticException if the numeric value is nonfinite or its integer part is out of range
      */
     @Override
-    public OptionalLong get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public OptionalLong get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, NumberFormatException, ArithmeticException {
         final Object result = rs.getObject(columnIndex);
 
-        return result == null ? OptionalLong.empty()
-                : OptionalLong.of(result instanceof Long num ? num : (result instanceof Number num ? num.longValue() : Numbers.toLong(result.toString())));
+        return result == null ? OptionalLong.empty() : OptionalLong.of(Numbers.toLong(result));
     }
 
     /**
@@ -171,15 +181,20 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      *
      * @param rs the ResultSet to read from
      * @param columnName the label of the column to read
-     * @return OptionalLong.empty() if the column is {@code null}, otherwise OptionalLong containing the value
-     * @throws SQLException if a database access error occurs or the columnName is not found
+     * @return OptionalLong.empty() if the column is {@code null}, otherwise OptionalLong containing the value. A
+     *         non-{@code Number} column value is coerced with {@link Numbers#toLong(Object)}, so an empty string yields a
+     *         <i>present</i> zero (the same answer {@code LongType.get} gives), unlike {@link #valueOf(String)} which
+     *         answers empty for {@code ""}
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string         included)
+     * @throws ArithmeticException if the numeric value is nonfinite or its integer part is out of range
      */
     @Override
-    public OptionalLong get(final ResultSet rs, final String columnName) throws SQLException {
+    public OptionalLong get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, NumberFormatException, ArithmeticException {
         final Object result = rs.getObject(columnName);
 
-        return result == null ? OptionalLong.empty()
-                : OptionalLong.of(result instanceof Long num ? num : (result instanceof Number num ? num.longValue() : Numbers.toLong(result.toString())));
+        return result == null ? OptionalLong.empty() : OptionalLong.of(Numbers.toLong(result));
     }
 
     /**
@@ -190,10 +205,11 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)
      * @param x the OptionalLong to set
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalLong x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalLong x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.BIGINT);
         } else {
@@ -209,10 +225,11 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OptionalLong to set
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final OptionalLong x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final OptionalLong x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.BIGINT);
         } else {
@@ -230,7 +247,8 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      *
      * @param appendable the Appendable to write to
      * @param x the OptionalLong to append
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -242,7 +260,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final OptionalLong x) throws IOException {
+    public void appendTo(final Appendable appendable, final OptionalLong x) throws NullPointerException, IOException {
         if (x == null || x.isEmpty()) {
             appendable.append(NULL_STRING);
         } else {
@@ -252,7 +270,12 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
 
     /**
      * Writes the character representation of an OptionalLong to a CharacterWriter.
-     * Empty optionals are written as {@code null}. Otherwise, the contained long value is written via the
+     * A {@code null} or empty optional is written as {@code null} unless {@code config.isWriteNullNumberAsZero()} is
+     * set, in which case {@code 0} is written (quoted as {@code "0"} when {@code writeLongAsString} also applies) - the
+     * same substitution {@code LongType} applies to a {@code null} value; a substituted zero reads back as a
+     * <i>present</i> {@code OptionalLong.of(0L)}, which is what the flag asks for. The XML serializers represent an
+     * empty optional property with the {@code isNull="true"} attribute form rather than with the text written here.
+     * Otherwise, the contained long value is written via the
      * writer's optimized {@code write(long)} method; when {@code config.isWriteLongAsString()} is set with a
      * non-zero {@code stringQuotation}, the value is wrapped in that quotation character.
      * <p>
@@ -265,15 +288,19 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      *
      * @param writer the CharacterWriter to write to
      * @param x the OptionalLong to write
-     * @param config the serialization configuration (honors {@code writeLongAsString}/{@code stringQuotation}); may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @param config the serialization configuration (honors {@code writeNullNumberAsZero} and
+     *        {@code writeLongAsString}/{@code stringQuotation}); may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final OptionalLong x, final JsonXmlSerConfig<?> config) throws IOException {
-        if (x == null || x.isEmpty()) {
+    public void serializeTo(final CharacterWriter writer, final OptionalLong x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
+        final boolean absent = x == null || x.isEmpty();
+
+        if (absent && !(config != null && config.isWriteNullNumberAsZero())) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            final long value = x.getAsLong();
+            final long value = absent ? 0L : x.getAsLong();
 
             if (config != null && config.isWriteLongAsString() && config.getStringQuotation() != 0) {
                 final char quotation = config.getStringQuotation();

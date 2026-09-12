@@ -33,6 +33,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -61,6 +62,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
@@ -97,6 +99,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -353,6 +356,12 @@ import com.landawn.abacus.util.u.OptionalShort;
  *       {@link java.lang.reflect.Type}</li>
  * </ul>
  *
+ * <p>Metadata derived from caller-supplied classes is computed lazily and retained through {@link ClassValue};
+ * these caches do not independently keep a disposable class loader alive. Successful reflection lookups retain
+ * their members and copied signatures with the owning class; failed signatures are not cached. Name-based
+ * {@link #forName(String)} resolution uses this library's defining loader and a separate strong name cache.
+ * Registrations and caches maintained by other utilities are outside this lifetime guarantee.</p>
+ *
  * <p><b>Attribution:</b>
  * This class includes code adapted from Apache Commons Lang under the Apache License 2.0.
  * Methods from these libraries may have been modified for consistency, performance optimization, and null-safety enhancement.
@@ -367,7 +376,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  * @see <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/reflect/package-summary.html">Java Reflection API</a>
  * @see <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/invoke/MethodHandle.html">Method Handles</a>
  */
-@SuppressWarnings({ "java:S1942" })
+@SuppressWarnings("java:S1942")
 public final class ClassUtil {
 
     private ClassUtil() {
@@ -418,7 +427,8 @@ public final class ClassUtil {
 
     private static final String CLASS_POSTFIX = ".class";
 
-    // Shared capacity for the bounded reflection metadata pools.
+    // Initial-capacity hint, not a bound, for the name/alias maps. forName uses this library's defining
+    // loader and retains its resolved names. Caller-supplied Class metadata is scoped by ClassValue below.
     @SuppressWarnings("deprecation")
     private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
 
@@ -578,6 +588,12 @@ public final class ClassUtil {
         BUILT_IN_TYPE.put(ImmutableList.class.getCanonicalName(), ImmutableList.class);
         BUILT_IN_TYPE.put(ImmutableSet.class.getCanonicalName(), ImmutableSet.class);
         BUILT_IN_TYPE.put(ImmutableMap.class.getCanonicalName(), ImmutableMap.class);
+        BUILT_IN_TYPE.put(ImmutableCollection.class.getCanonicalName(), ImmutableCollection.class);
+        BUILT_IN_TYPE.put(ImmutableSortedSet.class.getCanonicalName(), ImmutableSortedSet.class);
+        BUILT_IN_TYPE.put(ImmutableNavigableSet.class.getCanonicalName(), ImmutableNavigableSet.class);
+        BUILT_IN_TYPE.put(ImmutableSortedMap.class.getCanonicalName(), ImmutableSortedMap.class);
+        BUILT_IN_TYPE.put(ImmutableNavigableMap.class.getCanonicalName(), ImmutableNavigableMap.class);
+        BUILT_IN_TYPE.put(ImmutableBiMap.class.getCanonicalName(), ImmutableBiMap.class);
 
         BUILT_IN_TYPE.put(Type.class.getCanonicalName(), Type.class);
         BUILT_IN_TYPE.put(Dataset.class.getCanonicalName(), Dataset.class);
@@ -682,6 +698,10 @@ public final class ClassUtil {
         builtinTypeNameMap.put(Object.class.getName(), "Object");
     }
 
+    // Matches a complete "java.lang." token that is followed by a class name (uppercase). Hoisted out of
+    // formatParameterizedTypeName, which used String.replaceAll and so recompiled it on every call.
+    private static final Pattern JAVA_LANG_PREFIX = Pattern.compile("(?<![\\w.$])java\\.lang\\.(?=[A-Z])");
+
     private static final Map<String, String> SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME = new HashMap<>();
 
     static {
@@ -695,27 +715,40 @@ public final class ClassUtil {
         SYMBOL_OF_PRIMITIVE_ARRAY_CLASS_NAME.put(double.class.getName(), "D");
     }
 
-    private static final Map<Class<?>, Package> packagePool = new ConcurrentCacheMap<>(POOL_SIZE);
-
-    private static final Map<Class<?>, String> packageNamePool = new ConcurrentCacheMap<>(POOL_SIZE);
-
     private static final Map<String, Class<?>> clsNamePool = new ConcurrentCacheMap<>(POOL_SIZE);
 
-    private static final Map<Class<?>, String> simpleClassNamePool = new ConcurrentCacheMap<>(POOL_SIZE);
+    // Separate lazy values avoid resolving unrelated reflection metadata during a simple name lookup.
+    // ClassValue permits the class and metadata referencing it to be collected together.
+    private static final ClassValue<Package> packagePool = classValue(Class::getPackage);
 
-    private static final Map<Class<?>, String> fullClassNamePool = new ConcurrentCacheMap<>(POOL_SIZE);
+    private static final ClassValue<String> packageNamePool = classValue(cls -> {
+        final Package pkg = getPackage(cls);
+        return pkg == null ? "" : pkg.getName();
+    });
 
-    private static final Map<Class<?>, String> canonicalClassNamePool = new ConcurrentCacheMap<>(POOL_SIZE);
+    private static final ClassValue<String> simpleClassNamePool = classValue(Class::getSimpleName);
 
-    private static final Map<Class<?>, Class<?>> enclosingClassPool = new ConcurrentCacheMap<>(POOL_SIZE);
+    private static final ClassValue<String> canonicalClassNamePool = classValue(cls -> {
+        final String name = cls.getCanonicalName();
+        return name == null ? cls.getName() : name;
+    });
 
-    private static final Map<Class<?>, Constructor<?>> classNoArgDeclaredConstructorPool = new ConcurrentCacheMap<>(POOL_SIZE);
+    private static final ClassValue<Class<?>> enclosingClassPool = classValue(Class::getEnclosingClass);
 
-    private static final Map<Class<?>, Map<List<Class<?>>, Constructor<?>>> classDeclaredConstructorPool = new ConcurrentCacheMap<>(POOL_SIZE);
+    private static final ClassValue<Map<List<Class<?>>, Constructor<?>>> classDeclaredConstructorPool = classValue(cls -> new ConcurrentHashMap<>());
 
-    private static final Map<Class<?>, Map<String, Method>> classNoArgDeclaredMethodPool = new ConcurrentCacheMap<>(POOL_SIZE);
+    private static final ClassValue<Map<String, Method>> classNoArgDeclaredMethodPool = classValue(cls -> new ConcurrentHashMap<>());
 
-    private static final Map<Class<?>, Map<String, Map<List<Class<?>>, Method>>> classDeclaredMethodPool = new ConcurrentCacheMap<>(POOL_SIZE);
+    private static final ClassValue<Map<String, Map<List<Class<?>>, Method>>> classDeclaredMethodPool = classValue(cls -> new ConcurrentHashMap<>());
+
+    private static <V> ClassValue<V> classValue(final java.util.function.Function<Class<?>, V> factory) {
+        return new ClassValue<>() {
+            @Override
+            protected V computeValue(final Class<?> type) {
+                return factory.apply(type);
+            }
+        };
+    }
 
     // Superclasses/Superinterfaces. Copied from Apache Commons Lang under Apache License v2.
     // ----------------------------------------------------------------------
@@ -723,7 +756,9 @@ public final class ClassUtil {
     /**
      * Gets the code-source location of the specified class.
      * This method returns the file system path (classes directory or JAR) where the class was loaded from.
-     * URLs with %20 encoding for spaces are automatically decoded.
+     * The whole path is percent-decoded as UTF-8 - every {@code %XX} escape, not only {@code %20} - so the
+     * returned string names the file on disk; a literal {@code '+'} is left alone, and a {@code '%'} that is not
+     * followed by two ASCII hexadecimal digits is kept verbatim.
      * Returns {@code null} if the code source or location is unavailable.
      *
      * <p><b>Usage Examples:</b></p>
@@ -735,14 +770,116 @@ public final class ClassUtil {
      * @param clazz the class whose source code location is to be retrieved
      * @return the file system path of the class's code source (classes directory or JAR file),
      *         or {@code null} if unavailable
-     * @throws NullPointerException if {@code clazz} is {@code null}
+     * @throws IllegalArgumentException if {@code clazz} is {@code null}
      */
-    public static String getClassLocation(final Class<?> clazz) {
+    @MayReturnNull
+    public static String getClassLocation(final Class<?> clazz) throws IllegalArgumentException {
+        N.checkArgNotNull(clazz, cs.clazz);
+
         final CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
         if (codeSource == null || codeSource.getLocation() == null) {
             return null;
         }
-        return codeSource.getLocation().getPath().replace("%20", " "); //NOSONAR
+        return decodeUrlPath(codeSource.getLocation().getPath()); //NOSONAR
+    }
+
+    /**
+     * Percent-decodes the path component of a {@code file:}/{@code jar:} URL, leaving the path's shape
+     * (leading {@code '/'}, {@code '/'} separators, {@code jar:} {@code '!'} marker) untouched.
+     *
+     * <p>Two things this deliberately does <b>not</b> do:</p>
+     * <ul>
+     *   <li>It does not use {@link java.net.URLDecoder}: that applies
+     *       {@code application/x-www-form-urlencoded} rules, so a literal {@code '+'} in a directory
+     *       name would silently become a space.</li>
+     *   <li>It does not decode only {@code "%20"}, which is what this used to do: {@code '#'}
+     *       ({@code %23}), {@code '+'} ({@code %2B}) and every non-ASCII character stayed escaped, so
+     *       the returned path did not name an existing file.</li>
+     * </ul>
+     *
+     * <p>Escape sequences are decoded as UTF-8, matching how the JDK's class loaders encode
+     * classpath URLs. Nothing here throws - this is a diagnostic/scanning path where a best-effort answer
+     * beats a failure - but the two malformed cases are handled differently:</p>
+     * <ul>
+     *   <li>A malformed <i>escape</i> - a {@code '%'} not followed by two ASCII hexadecimal digits - is left
+     *       <b>verbatim</b>: {@code "/bad%ZZ"} decodes to {@code "/bad%ZZ"}.</li>
+     *   <li>A well-formed escape run whose <i>bytes</i> are not valid UTF-8 is decoded with the JDK's
+     *       replacement policy, so those bytes become {@code U+FFFD} and the original values are lost:
+     *       {@code "/opt/caf%E9/app.jar"} (an ISO-8859-1 {@code e} with an acute accent) decodes to
+     *       {@code "/opt/caf�/app.jar"}. Such a path names no existing file, which is the intended
+     *       outcome for a scan - it is simply skipped.</li>
+     * </ul>
+     *
+     * @param path the raw (still percent-encoded) path component of a URL
+     * @return the decoded path
+     */
+    private static String decodeUrlPath(final String path) {
+        if (path == null || path.indexOf('%') < 0) {
+            return path;
+        }
+
+        final int len = path.length();
+        final StringBuilder sb = new StringBuilder(len);
+        final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+        for (int i = 0; i < len;) {
+            final char ch = path.charAt(i);
+
+            if (ch != '%') {
+                sb.append(ch);
+                i++;
+                continue;
+            }
+
+            // Collect the whole run of escapes so a multi-byte UTF-8 character decodes as one unit.
+            bytes.reset();
+            int j = i;
+
+            while (j + 2 < len && path.charAt(j) == '%') {
+                final int hi = hexDigit(path.charAt(j + 1));
+                final int lo = hexDigit(path.charAt(j + 2));
+
+                if (hi < 0 || lo < 0) {
+                    break;
+                }
+
+                bytes.write((hi << 4) + lo);
+                j += 3;
+            }
+
+            if (j == i) { // '%' not followed by two hex digits: keep it verbatim.
+                sb.append(ch);
+                i++;
+            } else {
+                sb.append(bytes.toString(Charsets.UTF_8));
+                i = j;
+            }
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Returns the numeric value of a single ASCII hexadecimal digit, or {@code -1} if {@code c} is not one.
+     *
+     * <p>Deliberately not {@link Character#digit(char, int)}: that also accepts non-ASCII digits (Arabic-Indic
+     * and friends), which are not legal in a percent-encoded octet - such an escape has to stay verbatim rather
+     * than decode to a byte. {@code IOUtil} keeps its own copy of this helper for the same reason; it is not
+     * shared, so that this low-level path does not have to run {@code IOUtil}'s class initializer.
+     *
+     * @param c the character to decode
+     * @return the value {@code 0}..{@code 15}, or {@code -1} if {@code c} is not an ASCII hexadecimal digit
+     */
+    private static int hexDigit(final char c) {
+        if (c >= '0' && c <= '9') {
+            return c - '0';
+        } else if (c >= 'A' && c <= 'F') {
+            return c - 'A' + 10;
+        } else if (c >= 'a' && c <= 'f') {
+            return c - 'a' + 10;
+        }
+
+        return -1;
     }
 
     /**
@@ -768,10 +905,12 @@ public final class ClassUtil {
      * @param <T> the type the returned {@code Class} object is parameterized to (the caller-expected type)
      * @param clsName the fully qualified name of the desired class; must not be {@code null}
      * @return the Class object for the class with the specified name
-     * @throws IllegalArgumentException if the class cannot be located by the specified name.
-     * @throws NullPointerException if {@code clsName} is {@code null}
+     * @throws IllegalArgumentException if {@code clsName} is {@code null}
+     *         or if the class cannot be located by the specified name.
      */
     public static <T> Class<T> forName(final String clsName) throws IllegalArgumentException {
+        N.checkArgNotNull(clsName, cs.clsName);
+
         return forName(clsName, true);
     }
 
@@ -907,10 +1046,12 @@ public final class ClassUtil {
      *
      * @param type the type whose name is to be retrieved
      * @return the formatted name of the specified type
-     * @throws NullPointerException if {@code type} is {@code null}
+     * @throws IllegalArgumentException if {@code type} is {@code null}
      * @see #formatParameterizedTypeName(String)
      */
-    public static String getTypeName(final java.lang.reflect.Type type) {
+    public static String getTypeName(final java.lang.reflect.Type type) throws IllegalArgumentException {
+        N.checkArgNotNull(type, cs.type);
+
         return formatParameterizedTypeName(type.getTypeName());
     }
 
@@ -925,23 +1066,13 @@ public final class ClassUtil {
      *
      * @param cls the class whose canonical name is to be retrieved
      * @return the canonical name of the class, or the class name if the canonical name is not available
-     * @throws NullPointerException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      * @see Class#getCanonicalName()
      */
-    public static String getCanonicalClassName(final Class<?> cls) {
-        String clsName = canonicalClassNamePool.get(cls);
+    public static String getCanonicalClassName(final Class<?> cls) throws IllegalArgumentException {
+        N.checkArgNotNull(cls, cs.cls);
 
-        if (clsName == null) {
-            clsName = cls.getCanonicalName();
-
-            if (clsName == null) {
-                clsName = cls.getName();
-            }
-
-            canonicalClassNamePool.put(cls, clsName);
-        }
-
-        return clsName;
+        return canonicalClassNamePool.get(cls);
     }
 
     /**
@@ -955,11 +1086,12 @@ public final class ClassUtil {
      *
      * @param cls the class whose name is to be retrieved
      * @return the fully qualified name of the class
-     * @throws NullPointerException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
-    public static String getClassName(final Class<?> cls) {
+    public static String getClassName(final Class<?> cls) throws IllegalArgumentException {
+        N.checkArgNotNull(cls, cs.cls);
 
-        return fullClassNamePool.computeIfAbsent(cls, k -> cls.getName());
+        return cls.getName();
     }
 
     /**
@@ -973,11 +1105,12 @@ public final class ClassUtil {
      *
      * @param cls the class whose simple name is to be retrieved
      * @return the simple name of the class
-     * @throws NullPointerException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
-    public static String getSimpleClassName(final Class<?> cls) {
+    public static String getSimpleClassName(final Class<?> cls) throws IllegalArgumentException {
+        N.checkArgNotNull(cls, cs.cls);
 
-        return simpleClassNamePool.computeIfAbsent(cls, k -> cls.getSimpleName());
+        return simpleClassNamePool.get(cls);
     }
 
     /**
@@ -994,22 +1127,10 @@ public final class ClassUtil {
      * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
     @MayReturnNull
-    public static Package getPackage(final Class<?> cls) {
-        Package pkg = packagePool.get(cls);
+    public static Package getPackage(final Class<?> cls) throws IllegalArgumentException {
+        N.checkArgNotNull(cls, cs.cls);
 
-        if (pkg == null) {
-            if (ClassUtil.isPrimitiveType(cls)) {
-                return null;
-            }
-
-            pkg = cls.getPackage();
-
-            if (pkg != null) {
-                packagePool.put(cls, pkg);
-            }
-        }
-
-        return pkg;
+        return packagePool.get(cls);
     }
 
     /**
@@ -1025,16 +1146,10 @@ public final class ClassUtil {
      * @return the package name of the class, or an empty string if the class is a primitive type or no package is defined
      * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
-    public static String getPackageName(final Class<?> cls) {
-        String pkgName = packageNamePool.get(cls);
+    public static String getPackageName(final Class<?> cls) throws IllegalArgumentException {
+        N.checkArgNotNull(cls, cs.cls);
 
-        if (pkgName == null) {
-            final Package pkg = ClassUtil.getPackage(cls);
-            pkgName = pkg == null ? "" : pkg.getName();
-            packageNamePool.put(cls, pkgName);
-        }
-
-        return pkgName;
+        return packageNamePool.get(cls);
     }
 
     /**
@@ -1051,14 +1166,17 @@ public final class ClassUtil {
      * @param pkgName the name of the package to search for classes
      * @param isRecursive if {@code true}, searches recursively in sub-packages
      * @param skipClassLoadingException if {@code true}, skips classes that cannot be loaded and continues scanning
-     * @return a list of classes in the specified package
-     * @throws IllegalArgumentException if no resources are found for the specified package (e.g., package does not
-     *         exist or JDK packages).
-     * @throws UncheckedIOException if an I/O error occurs during package scanning
+     * @return a list of classes in the specified package. The classes are loaded but NOT initialized.
+     *         Classes with no canonical name - anonymous and local classes, any class nested inside one of
+     *         those, and hidden classes - are excluded, exactly as in
+     *         {@link #findClassesInPackage(String, boolean, boolean, Predicate)}.
+     * @throws IllegalArgumentException if {@code pkgName} is null or empty, or no resources can be found for the specified package.
+     * @throws UncheckedIOException if enumerating package resources or reading a classpath JAR fails
+     * @throws IllegalStateException if a discovered class cannot be loaded and {@code skipClassLoadingException} is {@code false}.
      * @see #findClassesInPackage(String, boolean, boolean, Predicate)
      */
     public static List<Class<?>> findClassesInPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException)
-            throws IllegalArgumentException, UncheckedIOException {
+            throws IllegalArgumentException, UncheckedIOException, IllegalStateException {
         return findClassesInPackage(pkgName, isRecursive, skipClassLoadingException, Fn.alwaysTrue());
     }
 
@@ -1172,11 +1290,17 @@ public final class ClassUtil {
      * );
      * }</pre>
      *
+     * <p><b>Discovered classes are loaded but NOT initialized.</b> Their static initializers do not run as a
+     * result of scanning; initialization happens when the caller first uses the returned {@link Class}. Scanning
+     * a package therefore has no side effects of its own, and a class whose {@code <clinit>} would fail (or block)
+     * in this environment is still discoverable.</p>
+     *
      * <p><b>Error Handling Strategies:</b>
      * <ul>
      *   <li><b>Skip Loading Errors (skipClassLoadingException = true):</b>
      *       <ul>
-     *         <li>Continues scanning when individual classes fail to load</li>
+     *         <li>Continues scanning when individual classes fail to load (a missing dependency of a scanned
+     *             class surfaces as {@code ClassNotFoundException} or a {@link LinkageError})</li>
      *         <li>Logs warnings for failed class loading attempts</li>
      *         <li>Suitable for exploratory scanning and plugin discovery</li>
      *         <li>Prevents single malformed class from stopping entire scan</li>
@@ -1230,24 +1354,22 @@ public final class ClassUtil {
      * @return a list containing all classes found in the specified package that satisfy the predicate filter.
      *         Returns an empty list if no matching classes are found. The list is modifiable and preserves
      *         discovery order; duplicate classes may appear if multiple resources overlap.
+     *         Classes with no canonical name are excluded: a class whose {@link Class#getCanonicalName()} is
+     *         {@code null} - anonymous and local classes, any class nested inside one of those, and hidden
+     *         classes - is skipped before {@code predicate} is applied, so the predicate never sees it.
      * @throws IllegalArgumentException if {@code pkgName} is {@code null} or empty, or if no resources are found for
      *         the specified package (e.g., the package does not exist or is a JDK package), or if {@code predicate}
      *         is {@code null}.
-     * @throws UncheckedIOException if an I/O error occurs during classpath scanning, JAR file reading, or
-     *                              resource enumeration. This typically indicates file system issues, corrupted
-     *                              JAR files, or insufficient permissions for accessing classpath resources.
-     * @throws RuntimeException if {@code skipClassLoadingException} is {@code false} and any class loading
-     *                         operation fails. The exception will contain details about the specific class
-     *                         that failed to load and the underlying cause of the failure.
-     *
+     * @throws UncheckedIOException if enumerating package resources or opening a classpath JAR fails
+     * @throws IllegalStateException if a discovered class cannot be loaded and {@code skipClassLoadingException} is {@code false}.
      * @see #findClassesInPackage(String, boolean, boolean)
      * @see java.lang.ClassLoader#getResources(String)
      * @see java.util.function.Predicate
      * @see java.util.jar.JarFile
      */
     public static List<Class<?>> findClassesInPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException,
-            final Predicate<? super Class<?>> predicate) throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgNotEmpty(pkgName, "pkgName");
+            final Predicate<? super Class<?>> predicate) throws IllegalArgumentException, UncheckedIOException, IllegalStateException {
+        N.checkArgNotEmpty(pkgName, cs.pkgName);
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (logger.isDebugEnabled()) {
@@ -1265,7 +1387,20 @@ public final class ClassUtil {
         final List<Class<?>> classes = new ArrayList<>();
         for (final URL resource : resourceList) {
             // Get a File object for the package
-            final String fullPath = resource.getPath().replace("%20", " ").replaceFirst("[.]jar[!].*", JAR_POSTFIX).replaceFirst("file:", "");//NOSONAR
+            // Percent-decode properly (see decodeUrlPath), reduce a "jar:file:/x.jar!/pkg" URL to the
+            // archive itself, and strip a leading "file:" scheme. The scheme was previously removed with
+            // String.replaceFirst("file:", ""), i.e. a REGEX matching the first occurrence ANYWHERE in the
+            // string - a directory named e.g. "profile:1" further along the path was mangled instead.
+            String fullPath = decodeUrlPath(resource.getPath());
+            final int jarMarker = fullPath.indexOf(JAR_POSTFIX + "!");
+
+            if (jarMarker >= 0) {
+                fullPath = fullPath.substring(0, jarMarker + JAR_POSTFIX.length());
+            }
+
+            if (fullPath.startsWith("file:")) {
+                fullPath = fullPath.substring("file:".length());
+            }
 
             if (logger.isDebugEnabled()) {
                 logger.debug("ClassDiscovery: FullPath = " + fullPath);
@@ -1291,20 +1426,12 @@ public final class ClassUtil {
                         // removes the .class extension
                         final String className = pkgName + '.' + file2.getName().substring(0, file2.getName().length() - CLASS_POSTFIX.length());
 
-                        try {
-                            final Class<?> clazz = ClassUtil.forName(className, false);
+                        final Class<?> clazz = loadForDiscovery(className, skipClassLoadingException);
 
-                            if (clazz.getCanonicalName() != null && predicate.test(clazz)) {
-                                classes.add(clazz);
-                            }
-                        } catch (final Throwable e) {
-                            if (logger.isWarnEnabled()) {
-                                logger.warn("Failed to load class: " + className, e);
-                            }
-
-                            if (!skipClassLoadingException) {
-                                throw new RuntimeException("ClassNotFoundException loading " + className, e); //NOSONAR
-                            }
+                        // Outside the try: a failure thrown by the caller's predicate is the caller's, and must
+                        // not be swallowed by skipClassLoadingException or relabelled as a class-loading failure.
+                        if (clazz != null && clazz.getCanonicalName() != null && predicate.test(clazz)) {
+                            classes.add(clazz);
                         }
                     } else if (file2.isDirectory() && isRecursive) {
                         final String subPkgName = pkgName + SK._PERIOD + file2.getName();
@@ -1337,20 +1464,11 @@ public final class ClassUtil {
                             // name would also hit package segments named "class*" (e.g. com.example.classes).
                             final String className = filePathToPackageName(entryName.substring(0, entryName.length() - CLASS_POSTFIX.length()));
 
-                            try { //NOSONAR
-                                final Class<?> clazz = ClassUtil.forName(className, false);
+                            final Class<?> clazz = loadForDiscovery(className, skipClassLoadingException);
 
-                                if (clazz.getCanonicalName() != null && predicate.test(clazz)) {
-                                    classes.add(clazz);
-                                }
-                            } catch (final Throwable e) {
-                                if (logger.isWarnEnabled()) {
-                                    logger.warn("ClassNotFoundException loading " + className, e);
-                                }
-
-                                if (!skipClassLoadingException) {
-                                    throw new RuntimeException("ClassNotFoundException loading " + className, e);
-                                }
+                            // See the directory branch: the predicate is evaluated outside the load's try block.
+                            if (clazz != null && clazz.getCanonicalName() != null && predicate.test(clazz)) {
+                                classes.add(clazz);
                             }
                         }
                     }
@@ -1366,7 +1484,44 @@ public final class ClassUtil {
         return classes;
     }
 
-    private static List<URL> getResources(final String pkgName) {
+    /**
+     * Loads a class found by package scanning, WITHOUT running its static initializer.
+     *
+     * <p>Package scanning enumerates classes; it must not execute them. {@code Class.forName(String)} - which
+     * {@link #forName(String)} uses - initializes the class it resolves, so scanning a package used to run every
+     * discovered class's {@code <clinit>}: arbitrary side effects, and a hard failure (or a deadlock) for any class
+     * whose static initializer needs an environment the scanner does not provide. Initialization is left to
+     * whoever actually uses the returned {@link Class}.</p>
+     *
+     * @param className the binary name of the class to load
+     * @param skipClassLoadingException {@code true} to log and return {@code null} instead of throwing
+     * @return the loaded (uninitialized) class, or {@code null} if it could not be loaded and failures are skipped
+     * @throws IllegalStateException if the class cannot be found or linked and {@code skipClassLoadingException} is {@code false}.
+     */
+    @MayReturnNull
+    private static Class<?> loadForDiscovery(final String className, final boolean skipClassLoadingException) throws IllegalStateException {
+        try {
+            return Class.forName(className, false, ClassUtil.class.getClassLoader()); // NOSONAR
+        } catch (final ClassNotFoundException | LinkageError e) {
+            // Narrow on purpose: only failures of the LOAD itself are eligible to be skipped. A LinkageError
+            // (NoClassDefFoundError, UnsupportedClassVersionError, ...) is the normal outcome for a class whose
+            // dependencies are absent from the scanned classpath, which is exactly what this flag is for.
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed to load class: " + className, e);
+            }
+
+            if (!skipClassLoadingException) {
+                throw new IllegalStateException("Failed to load class: " + className, e);
+            }
+
+            return null;
+        }
+    }
+
+    /**
+     * @throws UncheckedIOException if a class loader fails to enumerate resources for the package.
+     */
+    private static List<URL> getResources(final String pkgName) throws UncheckedIOException {
         final List<URL> resourceList = new ArrayList<>();
         final String pkgPath = packageNameToFilePath(pkgName);
         final ClassLoader localClassLoader = ClassUtil.class.getClassLoader(); // NOSONAR
@@ -1436,7 +1591,7 @@ public final class ClassUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<Class<?>> interfaces = ClassUtil.getAllInterfaces(ArrayList.class);
-     * // Returns: List, Collection, Iterable, RandomAccess, Cloneable, Serializable
+     * // Returns: List, SequencedCollection, Collection, Iterable, RandomAccess, Cloneable, Serializable
      * }</pre>
      *
      * @param cls the class to look up
@@ -1465,11 +1620,13 @@ public final class ClassUtil {
      *
      * @param cls the class to look up
      * @return a list of all superclasses, excluding {@code Object.class}
-     * @throws NullPointerException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      * @see #getAllInterfaces(Class)
      * @see #getAllSuperTypes(Class)
      */
-    public static List<Class<?>> getAllSuperclasses(final Class<?> cls) {
+    public static List<Class<?>> getAllSuperclasses(final Class<?> cls) throws IllegalArgumentException {
+        N.checkArgNotNull(cls, cs.cls);
+
         final List<Class<?>> classes = new ArrayList<>();
         Class<?> superclass = cls.getSuperclass();
 
@@ -1490,7 +1647,7 @@ public final class ClassUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Set<Class<?>> superTypes = ClassUtil.getAllSuperTypes(ArrayList.class);
-     * // Returns: List, Collection, Iterable, RandomAccess, Cloneable, Serializable, AbstractList, AbstractCollection
+     * // Returns: List, SequencedCollection, Collection, Iterable, RandomAccess, Cloneable, Serializable, AbstractList, AbstractCollection
      * }</pre>
      *
      * @param cls the class to look up
@@ -1546,7 +1703,8 @@ public final class ClassUtil {
 
     /**
      * Retrieves the enclosing class of the specified class.
-     * Returns {@code null} if the class is not an inner class or has no enclosing class.
+     * Static nested classes also have an enclosing class. Returns {@code null} when there is no
+     * enclosing class, such as for a top-level class, primitive type, or array type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1557,24 +1715,14 @@ public final class ClassUtil {
      * }</pre>
      *
      * @param cls the class whose enclosing class is to be retrieved
-     * @return the enclosing class of the specified class, or {@code null} if the class is not an inner class
-     * @throws NullPointerException if {@code cls} is {@code null}
+     * @return the enclosing class of the specified class, or {@code null} if it has no enclosing class
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
     @MayReturnNull
-    public static Class<?> getEnclosingClass(final Class<?> cls) {
-        Class<?> enclosingClass = enclosingClassPool.get(cls);
+    public static Class<?> getEnclosingClass(final Class<?> cls) throws IllegalArgumentException {
+        N.checkArgNotNull(cls, cs.cls);
 
-        if (enclosingClass == null) {
-            enclosingClass = cls.getEnclosingClass();
-
-            if (enclosingClass == null) {
-                enclosingClass = SENTINEL_CLASS;
-            }
-
-            enclosingClassPool.put(cls, enclosingClass);
-        }
-
-        return (enclosingClass == SENTINEL_CLASS) ? null : enclosingClass;
+        return enclosingClassPool.get(cls);
     }
 
     /**
@@ -1591,56 +1739,32 @@ public final class ClassUtil {
      * @param cls the class object
      * @param parameterTypes the parameter types of the constructor; may be empty for the no-arg constructor
      * @return the constructor declared in the specified class with the specified parameter types, or {@code null} if no constructor is found
-     * @throws NullPointerException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      * @see #getDeclaredMethod(Class, String, Class...)
      */
     @MayReturnNull
-    public static <T> Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>... parameterTypes) {
-        Constructor<?> constructor = null;
+    @SafeVarargs
+    public static <T> Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>... parameterTypes) throws IllegalArgumentException {
+        N.checkArgNotNull(cls, cs.cls);
 
-        if (parameterTypes == null || parameterTypes.length == 0) {
-            constructor = classNoArgDeclaredConstructorPool.get(cls);
+        final List<Class<?>> signature = parameterTypes == null ? Collections.emptyList() : Array.asList(parameterTypes);
+        final Map<List<Class<?>>, Constructor<?>> constructors = classDeclaredConstructorPool.get(cls);
+        Constructor<?> constructor = constructors.get(signature);
 
-            if (constructor == null) {
-                try {
-                    constructor = cls.getDeclaredConstructor(parameterTypes);
-
-                    // SHOULD NOT set it true here.
-                    // ClassUtil.setAccessible(constructor, true);
-                } catch (final NoSuchMethodException e) {
-                    // ignore.
-                }
-
-                if (constructor != null) {
-                    classNoArgDeclaredConstructorPool.put(cls, constructor);
-                }
-            }
-        } else {
-            final List<Class<?>> parameterTypeList = Array.asList(parameterTypes);
-
-            Map<List<Class<?>>, Constructor<?>> constructorPool = classDeclaredConstructorPool.get(cls);
-
-            if (constructorPool != null) {
-                constructor = constructorPool.get(parameterTypeList);
+        if (constructor == null) {
+            try {
+                constructor = cls.getDeclaredConstructor(parameterTypes);
+            } catch (final NoSuchMethodException e) {
+                return null;
             }
 
-            if (constructor == null) {
-                try {
-                    constructor = cls.getDeclaredConstructor(parameterTypes);
-
-                    // SHOULD NOT set it true here.
-                    // ClassUtil.setAccessible(constructor, true);
-                } catch (final NoSuchMethodException e) {
-                    // ignore.
-                }
-
-                if (constructor != null) {
-                    constructorPool = classDeclaredConstructorPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
-
-                    constructorPool.put(Array.asList(parameterTypes.clone()), constructor);
-                }
+            // Cache successes only: a missing signature on a long-lived owner must not retain child-loader classes.
+            // Keep accessibility unchanged, and never retain the caller's mutable parameter array.
+            final List<Class<?>> key = parameterTypes == null ? Collections.emptyList() : Array.asList(parameterTypes.clone());
+            final Constructor<?> existing = constructors.putIfAbsent(key, constructor);
+            if (existing != null) {
+                constructor = existing;
             }
-
         }
 
         return (Constructor<T>) constructor;
@@ -1661,18 +1785,22 @@ public final class ClassUtil {
      *
      * @param cls the class object
      * @param methodName the name of the method to retrieve
-     * @param parameterTypes the parameter types of the method; may be empty for a no-arg method
+     * @param parameterTypes the parameter types of the method; may be {@code null} or empty for a no-arg method
      * @return the method declared in the specified class with the specified name and parameter types, or {@code null} if no method is found
-     * @throws NullPointerException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} or {@code methodName} is {@code null}.
      * @see #getDeclaredConstructor(Class, Class...)
      */
     @MayReturnNull
-    public static Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>... parameterTypes) {
+    @SafeVarargs
+    public static Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>... parameterTypes) throws IllegalArgumentException {
+        N.checkArgNotNull(cls, cs.cls);
+        N.checkArgNotNull(methodName, cs.methodName);
+
         Method method = null;
 
         if (parameterTypes == null || parameterTypes.length == 0) {
-            Map<String, Method> methodNamePool = classNoArgDeclaredMethodPool.get(cls);
-            method = methodNamePool == null ? null : methodNamePool.get(methodName);
+            final Map<String, Method> methodNamePool = classNoArgDeclaredMethodPool.get(cls);
+            method = methodNamePool.get(methodName);
 
             if (method == null) {
                 method = lookupDeclaredMethod(cls, methodName, parameterTypes);
@@ -1683,15 +1811,16 @@ public final class ClassUtil {
                 // }
 
                 if (method != null) {
-                    methodNamePool = classNoArgDeclaredMethodPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
-
-                    methodNamePool.put(methodName, method);
+                    final Method existing = methodNamePool.putIfAbsent(methodName, method);
+                    if (existing != null) {
+                        method = existing;
+                    }
                 }
             }
         } else {
             final List<Class<?>> parameterTypeList = Array.asList(parameterTypes);
-            Map<String, Map<List<Class<?>>, Method>> methodNamePool = classDeclaredMethodPool.get(cls);
-            Map<List<Class<?>>, Method> methodPool = methodNamePool == null ? null : methodNamePool.get(methodName);
+            final Map<String, Map<List<Class<?>>, Method>> methodNamePool = classDeclaredMethodPool.get(cls);
+            Map<List<Class<?>>, Method> methodPool = methodNamePool.get(methodName);
 
             if (methodPool != null) {
                 method = methodPool.get(parameterTypeList);
@@ -1706,10 +1835,13 @@ public final class ClassUtil {
                 // }
 
                 if (method != null) {
-                    methodNamePool = classDeclaredMethodPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
                     methodPool = methodNamePool.computeIfAbsent(methodName, k -> new ConcurrentHashMap<>());
 
-                    methodPool.put(Array.asList(parameterTypes.clone()), method);
+                    // Missing signatures are deliberately not retained, especially child types queried on parent classes.
+                    final Method existing = methodPool.putIfAbsent(Array.asList(parameterTypes.clone()), method);
+                    if (existing != null) {
+                        method = existing;
+                    }
                 }
             }
         }
@@ -1733,10 +1865,12 @@ public final class ClassUtil {
      *
      * @param field the field whose parameterized type name is to be retrieved
      * @return the parameterized type name of the field, including generic type information if available
-     * @throws NullPointerException if {@code field} is {@code null}
+     * @throws IllegalArgumentException if {@code field} is {@code null}
      * @see #getParameterizedTypeNameByMethod(Method)
      */
-    public static String getParameterizedTypeNameByField(final Field field) {
+    public static String getParameterizedTypeNameByField(final Field field) throws IllegalArgumentException {
+        N.checkArgNotNull(field, cs.field);
+
         final String typeName = formatParameterizedTypeName(field.getGenericType().getTypeName());
 
         if (Strings.isNotEmpty(typeName) && typeName.indexOf('<') > 0 && typeName.indexOf('>') > 0) { // NOSONAR
@@ -1771,10 +1905,12 @@ public final class ClassUtil {
      *
      * @param method the method whose parameterized type name is to be retrieved
      * @return the parameterized type name of the method's parameter or return type, including generic type information if available
-     * @throws NullPointerException if {@code method} is {@code null}
+     * @throws IllegalArgumentException if {@code method} is {@code null}
      * @see #getParameterizedTypeNameByField(Field)
      */
-    public static String getParameterizedTypeNameByMethod(final Method method) {
+    public static String getParameterizedTypeNameByMethod(final Method method) throws IllegalArgumentException {
+        N.checkArgNotNull(method, cs.method);
+
         String typeName = null;
 
         final java.lang.reflect.Type[] genericParameterTypes = method.getGenericParameterTypes();
@@ -1828,7 +1964,10 @@ public final class ClassUtil {
      *   <li><b>Built-in Type Mapping:</b> Removes "java.lang." from jdk built-in types</li>
      *   <li><b>Prefix Removal:</b> Removes "class " and "interface " prefixes from type names</li>
      *   <li><b>Array Type Handling:</b> Transforms array notation from internal format to readable format</li>
-     *   <li><b>Duplicated Owner Cleanup:</b> Collapses duplicated owner-type prefixes preceding '$' (the '$' separator itself is preserved)</li>
+     *   <li><b>Duplicated Owner Cleanup:</b> Collapses duplicated owner-type prefixes preceding '$' (the '$' separator itself is preserved).
+     *       The test is structural - a segment of the form {@code P + P} or {@code P + "." + P} is collapsed to
+     *       {@code P} - so it also fires on a genuine {@code package.Class} whose two halves coincide, e.g.
+     *       {@code "a.a$B"} formats as {@code "a$B"}. Use {@link Class#getName()} when an exact binary name matters.</li>
      *   <li><b>Generic Type Cleanup:</b> Normalizes generic type parameter representations</li>
      *   <li><b>Package Path Optimization:</b> Handles fully qualified names with appropriate formatting</li>
      * </ul>
@@ -1977,45 +2116,85 @@ public final class ClassUtil {
 
         // Strip a complete "java.lang." token only when a class name follows (uppercase): subpackages such as
         // java.lang.reflect and user packages containing that segment must keep their full name.
-        res = res.replaceAll("(?<![\\w.$])java\\.lang\\.(?=[A-Z])", "").replace("class ", "").replace("interface ", ""); //NOSONAR
+        res = JAVA_LANG_PREFIX.matcher(res).replaceAll("").replace("class ", "").replace("interface ", ""); //NOSONAR
 
-        final int idx = res.lastIndexOf('$');
-
-        if (idx > 0) {
-            final StringBuilder sb = new StringBuilder();
-
-            for (int len = res.length(), i = len - 1; i >= 0; i--) {
-                final char ch = res.charAt(i);
-                sb.append(ch);
-
-                if (ch == '$') {
-                    final int j = i;
-                    char x = 0;
-                    //noinspection StatementWithEmptyBody
-                    while (--i >= 0 && (Character.isLetterOrDigit(x = res.charAt(i)) || x == '_' || x == '.')) {
-                        // continue
-                    }
-
-                    final String tmp = res.substring(i + 1, j);
-
-                    final int half = tmp.length() / 2;
-
-                    if (tmp.length() > 1 && tmp.substring(0, half).equals(tmp.substring(half))) {
-                        sb.append(Strings.reverse(tmp.substring(0, half)));
-                    } else if (tmp.length() > 2 && tmp.length() % 2 != 0 && tmp.substring(0, half).equals(tmp.substring(half + 1))) {
-                        sb.append(Strings.reverse(tmp.substring(0, half)));
-                    } else {
-                        sb.append(Strings.reverse(tmp));
-                    }
-
-                    i++;
-                }
-            }
-
-            res = sb.reverse().toString();
+        if (res.indexOf('$') > 0) {
+            res = collapseDuplicatedOwnerPrefixes(res);
         }
 
         return res;
+    }
+
+    /**
+     * Collapses a duplicated owner-type prefix in front of each {@code '$'} separator, turning
+     * {@code "com.x.Outer.com.x.Outer$Inner"} into {@code "com.x.Outer$Inner"}. The {@code '$'} itself is kept.
+     *
+     * @param typeName the already prefix-stripped type name
+     * @return {@code typeName} with any duplicated owner prefix removed, or {@code typeName} itself if there is none
+     */
+    private static String collapseDuplicatedOwnerPrefixes(final String typeName) {
+        StringBuilder sb = null;
+        int copiedUpTo = 0;
+
+        for (int i = 0, len = typeName.length(); i < len; i++) {
+            if (typeName.charAt(i) != '$') {
+                continue;
+            }
+
+            // Walk back over the identifier segment that precedes this '$'.
+            int start = i;
+            char ch = 0;
+
+            while (start > 0 && (Character.isLetterOrDigit(ch = typeName.charAt(start - 1)) || ch == '_' || ch == '.')) {
+                start--;
+            }
+
+            final String owner = duplicatedOwnerOf(typeName.substring(start, i));
+
+            if (owner != null) {
+                if (sb == null) {
+                    sb = new StringBuilder(len);
+                }
+
+                sb.append(typeName, copiedUpTo, start).append(owner);
+                copiedUpTo = i;
+            }
+        }
+
+        return sb == null ? typeName : sb.append(typeName, copiedUpTo, typeName.length()).toString();
+    }
+
+    /**
+     * Returns {@code P} when {@code segment} is {@code P + P} or {@code P + "." + P}, and {@code null} otherwise.
+     *
+     * <p>The odd-length form additionally requires the middle character to be a {@code '.'}; the previous
+     * implementation accepted any separator, so {@code "FooXFoo"} collapsed to {@code "Foo"} as well.</p>
+     *
+     * <p>The test is deliberately purely structural, so it cannot distinguish a repeated owner from an ordinary
+     * {@code package.Class} whose two halves happen to match: {@code "a.a$B"} - class {@code B} nested in class
+     * {@code a} of package {@code a} - is collapsed to {@code "a$B"} just like {@code "Foo.Foo$Inner"} is. That
+     * ambiguity is inherent to the rule and is covered by
+     * {@code ClassUtilTest#testFormatParameterizedTypeName_oddLengthDuplicateWithSeparator}; callers that need a
+     * faithful binary name should use {@link Class#getName()} rather than this display formatter.</p>
+     *
+     * @param segment the identifier segment immediately preceding a {@code '$'}
+     * @return the single owner name if {@code segment} is that owner repeated, otherwise {@code null}
+     */
+    private static String duplicatedOwnerOf(final String segment) {
+        final int len = segment.length();
+        final int half = len / 2;
+
+        if (half == 0) {
+            return null;
+        }
+
+        final String first = segment.substring(0, half);
+
+        if (len % 2 == 0) {
+            return first.equals(segment.substring(half)) ? first : null;
+        }
+
+        return segment.charAt(half) == '.' && first.equals(segment.substring(half + 1)) ? first : null;
     }
 
     /**
@@ -2091,7 +2270,7 @@ public final class ClassUtil {
      * ObjIterator<Class<?>> iter = ClassUtil.hierarchy(ArrayList.class, true);
      * while (iter.hasNext()) {
      *     System.out.println(iter.next());
-     *     // Prints: ArrayList, List, Collection, Iterable, RandomAccess, Cloneable, Serializable,
+     *     // Prints: ArrayList, List, SequencedCollection, Collection, Iterable, RandomAccess, Cloneable, Serializable,
      *     //         AbstractList, AbstractCollection, Object
      * }
      * }</pre>
@@ -2110,8 +2289,12 @@ public final class ClassUtil {
                 return next.value() != null;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if the class hierarchy iterator has no next element.
+             */
             @Override
-            public Class<?> next() {
+            public Class<?> next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException();
                 }
@@ -2135,8 +2318,12 @@ public final class ClassUtil {
                 return interfacesIter.hasNext() || superClassesIter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if the class hierarchy iterator has no next element.
+             */
             @Override
-            public Class<?> next() {
+            public Class<?> next() throws NoSuchElementException {
                 if (interfacesIter.hasNext()) {
                     final Class<?> nextInterface = interfacesIter.next();
                     seenInterfaces.add(nextInterface);
@@ -2155,11 +2342,11 @@ public final class ClassUtil {
 
             private void walkInterfaces(final Set<Class<?>> addTo, final Class<?> c) {
                 for (final Class<?> cls : c.getInterfaces()) {
-                    if (!seenInterfaces.contains(cls)) {
-                        addTo.add(cls);
+                    // Each discovered interface has already contributed all of its ancestors. Rewalking
+                    // shared diamond branches would multiply work without adding any new output.
+                    if (!seenInterfaces.contains(cls) && addTo.add(cls)) {
+                        walkInterfaces(addTo, cls);
                     }
-
-                    walkInterfaces(addTo, cls);
                 }
             }
         };
@@ -2178,7 +2365,8 @@ public final class ClassUtil {
             final Method[] methods = cls.getDeclaredMethods();
 
             for (final Method m : methods) {
-                if (m.getName().equalsIgnoreCase(methodName) && N.equals(parameterTypes, m.getParameterTypes())) {
+                if (m.getName().equalsIgnoreCase(methodName)
+                        && (parameterTypes == null ? m.getParameterCount() == 0 : N.equals(parameterTypes, m.getParameterTypes()))) {
                     method = m;
 
                     break;
@@ -2202,11 +2390,12 @@ public final class ClassUtil {
      * @param constructor the constructor to be invoked
      * @param args the arguments to be passed to the constructor
      * @return the newly created object
-     * @throws NullPointerException if {@code constructor} is {@code null}
-     * @throws RuntimeException if the class that declares the underlying constructor represents an abstract class,
-     *         or the underlying constructor is inaccessible, or the underlying constructor throws an exception
+     * @throws IllegalArgumentException if {@code constructor} is {@code null}, or the arguments have an incompatible count or type.
+     * @throws RuntimeException if the declaring class is abstract, the constructor is inaccessible, or the constructor throws an exception.
      */
-    public static <T> T invokeConstructor(final Constructor<T> constructor, final Object... args) {
+    public static <T> T invokeConstructor(final Constructor<T> constructor, final Object... args) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(constructor, cs.constructor);
+
         try {
             return constructor.newInstance(args);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -2228,12 +2417,12 @@ public final class ClassUtil {
      * @param method the static method to be invoked
      * @param args the arguments to be passed to the method
      * @return the result of invoking the method
-     * @throws NullPointerException if {@code method} is {@code null}
-     * @throws RuntimeException if the underlying method is inaccessible, the method is invoked with incorrect arguments,
-     *         or the underlying method throws an exception
+     * @throws IllegalArgumentException if {@code method} is {@code null}, or the arguments have an incompatible count or type.
+     * @throws NullPointerException if the method is not static and no instance is supplied.
+     * @throws RuntimeException if the underlying method is inaccessible or throws an exception
      * @see #invokeMethod(Object, Method, Object...)
      */
-    public static <T> T invokeMethod(final Method method, final Object... args) {
+    public static <T> T invokeMethod(final Method method, final Object... args) throws IllegalArgumentException, NullPointerException, RuntimeException {
         return invokeMethod(null, method, args);
     }
 
@@ -2253,12 +2442,16 @@ public final class ClassUtil {
      * @param method the method to be invoked
      * @param args the arguments to be passed to the method
      * @return the result of invoking the method
-     * @throws NullPointerException if {@code method} is {@code null}
-     * @throws RuntimeException if the underlying method is inaccessible, the method is invoked with incorrect arguments,
-     *         or the underlying method throws an exception
+     * @throws IllegalArgumentException if {@code method} is {@code null}, a non-static method receives an instance of an incompatible class,
+     *         or the arguments have an incompatible count or type.
+     * @throws NullPointerException if a non-static method is invoked with a {@code null} instance.
+     * @throws RuntimeException if the underlying method is inaccessible or throws an exception
      * @see #invokeMethod(Method, Object...)
      */
-    public static <T> T invokeMethod(final Object instance, final Method method, final Object... args) {
+    public static <T> T invokeMethod(final Object instance, final Method method, final Object... args)
+            throws IllegalArgumentException, NullPointerException, RuntimeException {
+        N.checkArgNotNull(method, cs.method);
+
         try {
             return (T) method.invoke(instance, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -2266,16 +2459,20 @@ public final class ClassUtil {
         }
     }
 
-    static String makeFolderForPackage(String srcPath, final String pkgName) {
+    /**
+     * @throws NullPointerException if {@code srcPath} is {@code null}.
+     * @throws IllegalStateException if the package directory does not exist and cannot be created.
+     */
+    static String makeFolderForPackage(String srcPath, final String pkgName) throws NullPointerException, IllegalStateException {
         srcPath = (srcPath.endsWith("/") || srcPath.endsWith("\\")) ? srcPath : (srcPath + File.separator);
 
         final String classFilePath = (pkgName == null) ? srcPath : (srcPath + pkgName.replace('.', File.separatorChar) + File.separator);
         final File classFileFolder = new File(classFilePath);
 
-        if (!classFileFolder.exists()) {
-            if (!classFileFolder.mkdirs()) {
-                throw new RuntimeException("Failed to create folder: " + classFileFolder);
-            }
+        // mkdirs() returns false both when creation failed and when a concurrent caller won the race, so the
+        // directory's existence - not the return value - is what decides success here.
+        if (!classFileFolder.exists() && !classFileFolder.mkdirs() && !classFileFolder.isDirectory()) {
+            throw new IllegalStateException("Failed to create folder: " + classFileFolder);
         }
 
         return classFilePath;
@@ -2295,9 +2492,10 @@ public final class ClassUtil {
      * @param accessibleObject the object whose accessibility is to be set; does nothing if {@code null}
      * @param flag the new accessibility flag ({@code true} to make accessible, {@code false} otherwise)
      * @throws SecurityException if a security manager is present and denies the access request
+     * @throws InaccessibleObjectException if {@code flag} is true and module access rules prevent enabling access to the member.
      */
     @SuppressWarnings("deprecation")
-    public static void setAccessible(final AccessibleObject accessibleObject, final boolean flag) {
+    public static void setAccessible(final AccessibleObject accessibleObject, final boolean flag) throws SecurityException, InaccessibleObjectException {
         if (accessibleObject != null && accessibleObject.isAccessible() != flag) {
             accessibleObject.setAccessible(flag);
         }
@@ -2389,10 +2587,6 @@ public final class ClassUtil {
         return Beans.isRecordClass(cls);
     }
 
-    private static final Map<Class<?>, Boolean> anonymousClassMap = new ConcurrentHashMap<>();
-
-    private static final Map<Class<?>, Boolean> memberClassMap = new ConcurrentHashMap<>();
-
     /**
      * Checks if the specified class is an anonymous class.
      * An anonymous class is a local class without a name that is defined and instantiated in a single expression.
@@ -2407,11 +2601,12 @@ public final class ClassUtil {
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is an anonymous class, {@code false} otherwise
-     * @throws NullPointerException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
-    public static boolean isAnonymousClass(final Class<?> cls) {
+    public static boolean isAnonymousClass(final Class<?> cls) throws IllegalArgumentException {
+        N.checkArgNotNull(cls, cs.cls);
 
-        return anonymousClassMap.computeIfAbsent(cls, k -> cls.isAnonymousClass());
+        return cls.isAnonymousClass();
     }
 
     /**
@@ -2428,11 +2623,12 @@ public final class ClassUtil {
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is a member class, {@code false} otherwise
-     * @throws NullPointerException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
-    public static boolean isMemberClass(final Class<?> cls) {
+    public static boolean isMemberClass(final Class<?> cls) throws IllegalArgumentException {
+        N.checkArgNotNull(cls, cs.cls);
 
-        return memberClassMap.computeIfAbsent(cls, k -> cls.isMemberClass());
+        return cls.isMemberClass();
     }
 
     /**
@@ -2454,17 +2650,12 @@ public final class ClassUtil {
      *
      * @param cls the class to be checked
      * @return {@code true} if the specified class is either an anonymous class or a member class, {@code false} otherwise
-     * @throws NullPointerException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      */
-    public static boolean isAnonymousOrMemberClass(final Class<?> cls) {
-        Boolean v = anonymousClassMap.computeIfAbsent(cls, k -> cls.isAnonymousClass());
+    public static boolean isAnonymousOrMemberClass(final Class<?> cls) throws IllegalArgumentException {
+        N.checkArgNotNull(cls, cs.cls);
 
-        if (!v) {
-            v = memberClassMap.computeIfAbsent(cls, k -> cls.isMemberClass());
-
-        }
-
-        return v;
+        return cls.isAnonymousClass() || cls.isMemberClass();
     }
 
     /**
@@ -2486,7 +2677,11 @@ public final class ClassUtil {
     public static boolean isPrimitiveType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
-        return Type.of(cls).isPrimitive();
+        // Answer from the Class itself rather than Type.of(cls): Type.of registers a Type in a global,
+        // process-lifetime cache for whatever class it is handed, which is a lot of machinery to answer a
+        // boolean - and getPackage(Class) routes every class through here. void is excluded deliberately:
+        // Class.isPrimitive() reports void as primitive, this method never has.
+        return cls.isPrimitive() && cls != void.class;
     }
 
     /**
@@ -2508,7 +2703,9 @@ public final class ClassUtil {
     public static boolean isPrimitiveWrapper(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
-        return Type.of(cls).isPrimitiveWrapper();
+        // See isPrimitiveType(Class). PRIMITIVE_2_WRAPPER also holds the array pairs (int[] -> Integer[]),
+        // so an array type has to be excluded explicitly to keep Integer[] from counting as a wrapper.
+        return !cls.isArray() && PRIMITIVE_2_WRAPPER.containsValue(cls);
     }
 
     /**
@@ -2530,7 +2727,8 @@ public final class ClassUtil {
     public static boolean isPrimitiveArrayType(final Class<?> cls) throws IllegalArgumentException {
         N.checkArgNotNull(cls, cs.cls);
 
-        return Type.of(cls).isPrimitiveArray();
+        // See isPrimitiveType(Class). Only one dimension counts: int[][] has component type int[], not a primitive.
+        return cls.isArray() && cls.getComponentType().isPrimitive();
     }
 
     // Bidirectional lookup between primitive types and their wrapper classes.
@@ -2560,6 +2758,9 @@ public final class ClassUtil {
      * Returns the corresponding wrapper type of the specified class if it is a primitive type; otherwise returns the class itself.
      * This method also handles primitive array types, converting them to their wrapper array equivalents.
      *
+     * <p>Only <i>one-dimensional</i> primitive arrays are mapped: {@code int[]} becomes {@code Integer[]}, but
+     * {@code int[][]} is returned unchanged because its component type is {@code int[]}, not a primitive.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Class<?> wrapped = ClassUtil.wrap(int.class);        // returns Integer.class
@@ -2584,6 +2785,9 @@ public final class ClassUtil {
     /**
      * Returns the corresponding primitive type of the specified class if it is a wrapper type; otherwise returns the class itself.
      * This method also handles wrapper array types, converting them to their primitive array equivalents.
+     *
+     * <p>Only <i>one-dimensional</i> wrapper arrays are mapped: {@code Integer[]} becomes {@code int[]}, but
+     * {@code Integer[][]} is returned unchanged.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2622,11 +2826,13 @@ public final class ClassUtil {
      *
      * @param method the method for which the MethodHandle is to be created
      * @return the MethodHandle for the specified method
-     * @throws NullPointerException if {@code method} is {@code null}
-     * @throws UnsupportedOperationException if the MethodHandle cannot be created
+     * @throws IllegalArgumentException if {@code method} is {@code null}
+     * @throws UnsupportedOperationException if every supported lookup strategy fails to create a method handle for {@code method}.
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    public static MethodHandle createMethodHandle(final Method method) {
+    public static MethodHandle createMethodHandle(final Method method) throws IllegalArgumentException, UnsupportedOperationException {
+        N.checkArgNotNull(method, cs.method);
+
         final Class<?> declaringClass = method.getDeclaringClass();
         MethodHandles.Lookup lookup = null;
 

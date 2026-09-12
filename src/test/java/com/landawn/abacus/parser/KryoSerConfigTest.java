@@ -25,7 +25,7 @@ public class KryoSerConfigTest extends TestBase {
     private KryoSerConfig config;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         config = new KryoSerConfig();
     }
 
@@ -380,6 +380,63 @@ public class KryoSerConfigTest extends TestBase {
         ignoredProps.add("password");
         config.setIgnoredPropNames(String.class, ignoredProps);
         assertEquals(ignoredProps, config.getIgnoredPropNames(String.class));
+    }
+
+    // reviewFixes20260906 (P6-13): equals/hashCode delegate to SerializationConfig.
+    @Test
+    public void reviewFixes20260906_equalsAndHashCodeDelegateToParent() {
+        final KryoSerConfig a = KryoSerConfig.create().setWriteClass(true).setExclusion(Exclusion.NULL).setSkipTransientField(false);
+        a.setIgnoredPropNames(String.class, new HashSet<>(Arrays.asList("p")));
+
+        final KryoSerConfig copy = a.copy();
+        assertNotSame(a, copy);
+        assertEquals(a, copy);
+        assertEquals(copy, a);
+        assertEquals(a.hashCode(), copy.hashCode());
+        assertEquals(a, a);
+
+        final KryoSerConfig b = KryoSerConfig.create().setWriteClass(true).setExclusion(Exclusion.NULL).setSkipTransientField(false);
+        b.setIgnoredPropNames(String.class, new HashSet<>(Arrays.asList("p")));
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
+
+        // Every inherited setting and writeClass take part.
+        b.setWriteClass(false);
+        assertNotEquals(a, b);
+        b.setWriteClass(true);
+        assertEquals(a, b);
+
+        b.setSkipTransientField(true);
+        assertNotEquals(a, b);
+        b.setSkipTransientField(false);
+        assertEquals(a, b);
+
+        b.setExclusion(Exclusion.DEFAULT);
+        assertNotEquals(a, b);
+        b.setExclusion(Exclusion.NULL);
+        assertEquals(a, b);
+
+        b.setIgnoredPropNames(String.class, new HashSet<>(Arrays.asList("q")));
+        assertNotEquals(a, b);
+        b.setIgnoredPropNames(String.class, new HashSet<>(Arrays.asList("p")));
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
+
+        assertFalse(a.equals(null));
+        assertFalse(a.equals("not a config"));
+        assertFalse(a.equals(AvroSerConfig.create()));
+
+        // The parent requires the exact same class, so an anonymous subclass is unequal in BOTH directions
+        // (previously true in both; the instanceof-only shape would be asymmetric against the parent).
+        final KryoSerConfig anonymous = new KryoSerConfig() {
+        };
+        anonymous.setWriteClass(true).setExclusion(Exclusion.NULL).setSkipTransientField(false);
+        anonymous.setIgnoredPropNames(String.class, new HashSet<>(Arrays.asList("p")));
+        assertEquals(anonymous.equals(a), a.equals(anonymous));
+        assertFalse(a.equals(anonymous));
+
+        assertTrue(a.toString().contains("writeClass=true"));
+        assertTrue(a.toString().contains("exclusion=NULL"));
     }
 
 }

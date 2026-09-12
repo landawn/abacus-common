@@ -13,7 +13,7 @@ import com.landawn.abacus.TestBase;
 public class BetaTest extends TestBase {
 
     @Beta
-    static class TestClassWithBeta {
+    public static class TestClassWithBeta {
         @Beta
         private String field;
 

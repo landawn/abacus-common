@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -82,15 +84,6 @@ public class ListMultimapTest extends TestBase {
         Assertions.assertEquals(7, map.totalValueCount());
         Assertions.assertTrue(map.get("g").contains(7));
     }
-
-    //
-    //
-    //
-    //    @Test
-    //    public void testGetFirstOrDefault_EmptyMultimap() {
-    //        ListMultimap<String, Integer> multimap = new ListMultimap<>();
-    //        Assertions.assertEquals(99, multimap.getFirstOrDefault("a", 99));
-    //    }
 
     //
     //
@@ -422,7 +415,7 @@ public class ListMultimapTest extends TestBase {
     public void testForEach_biConsumer() {
         ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "a", 2, "b", 3);
         AtomicInteger counter = new AtomicInteger(0);
-        multimap.forEach((k, v) -> counter.incrementAndGet());
+        multimap.forEachKeyValue((k, v) -> counter.incrementAndGet());
         Assertions.assertEquals(3, counter.get());
     }
 
@@ -1068,13 +1061,6 @@ public class ListMultimapTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> multimap.toImmutableMap(size -> null));
     }
 
-    //
-    //
-    //
-    //
-    //
-    //
-    //
     @Test
     public void testToImmutableMap() {
         ListMultimap<String, Integer> multimap = ListMultimap.of("a", 1, "a", 2, "b", 3);
@@ -1398,6 +1384,87 @@ public class ListMultimapTest extends TestBase {
 
         Assertions.assertEquals(Arrays.asList("a", "b"), inverted.get(1));
         Assertions.assertTrue(inverted.get(1) instanceof ArrayList);
+    }
+
+    @Test
+    public void testInvertReplacesASortedOrIdentityBackingWithEncounterOrder() {
+        ListMultimap<String, Integer> sorted = new ListMultimap<>(() -> new TreeMap<>(Comparator.<String> reverseOrder()), ArrayList::new);
+        sorted.put("a", 1);
+        sorted.put("b", 2);
+        sorted.put("c", 3);
+        Assertions.assertEquals(Arrays.asList("c", "b", "a"), new ArrayList<>(sorted.keySet()));
+
+        // copy() reuses this multimap's map supplier, so it stays sorted by the original comparator ...
+        Assertions.assertEquals(Arrays.asList("c", "b", "a"), new ArrayList<>(sorted.copy().keySet()));
+
+        // ... but invert() cannot, because that comparator applies to the ORIGINAL keys. The result is a
+        // LinkedHashMap carrying this multimap's encounter order, not a multimap sorted by the new keys.
+        ListMultimap<Integer, String> inverted = sorted.invert();
+        Assertions.assertEquals(Arrays.asList(3, 2, 1), new ArrayList<>(inverted.keySet()));
+
+        // An IdentityHashMap backing is replaced for the same reason, so equal inverted keys collapse into one entry.
+        String k1 = new String("k");
+        String k2 = new String("k");
+        ListMultimap<String, String> identity = new ListMultimap<>(IdentityHashMap::new, ArrayList::new);
+        identity.put(k1, "v");
+        identity.put(k2, "v");
+        Assertions.assertEquals(2, identity.keySet().size());
+
+        ListMultimap<String, String> identityInverted = identity.invert();
+        Assertions.assertEquals(1, identityInverted.keySet().size());
+        Assertions.assertEquals(Arrays.asList("k", "k"), identityInverted.get("v"));
+    }
+
+    @Test
+    public void test_merge_threeMaps_bareNullLiteralIsAmbiguousForTheThirdArgument() throws Exception {
+        // the 3-arg merge javadoc documents that a bare `null` literal cannot be passed for `c`: the inherited
+        // instance method Multimap.merge(K, E, BiFunction) is also applicable to such a call, so it is ambiguous
+        Assertions.assertFalse(mergeCallCompiles("ListMultimap.merge(m1, m2, null);"));
+        // ... while `a` and `b` accept a bare null literal, and a cast resolves the third position
+        Assertions.assertTrue(mergeCallCompiles("ListMultimap.merge(null, m2, (Map<String, Integer>) null);"));
+        Assertions.assertTrue(mergeCallCompiles("ListMultimap.merge(m1, null, m3);"));
+        Assertions.assertTrue(mergeCallCompiles("ListMultimap.merge(m1, m2, (Map<String, Integer>) null);"));
+
+        // the documented cast form behaves exactly as the usage example says
+        final Map<String, Integer> map2 = CommonUtil.asMap("b", 2);
+        final ListMultimap<String, Integer> r = ListMultimap.merge(null, map2, (Map<String, Integer>) null);
+        Assertions.assertEquals(Arrays.asList(2), r.get("b"));
+    }
+
+    private static boolean mergeCallCompiles(final String statement) throws Exception {
+        final java.nio.file.Path dir = java.nio.file.Files.createTempDirectory("listmultimap-merge");
+
+        try {
+            final java.nio.file.Path source = dir.resolve("MergeProbe.java");
+            java.nio.file.Files.writeString(source,
+                    "import java.util.Map;\nimport com.landawn.abacus.util.ListMultimap;\n" + "class MergeProbe {\n"
+                            + "  static Map<String, Integer> m1 = Map.of(\"a\", 1);\n" + "  static Map<String, Integer> m2 = Map.of(\"b\", 2);\n"
+                            + "  static Map<String, Integer> m3 = Map.of(\"c\", 3);\n" + "  static void check() { " + statement + " }\n}\n",
+                    java.nio.charset.StandardCharsets.UTF_8);
+
+            final javax.tools.JavaCompiler compiler = javax.tools.ToolProvider.getSystemJavaCompiler();
+            final javax.tools.DiagnosticCollector<javax.tools.JavaFileObject> diagnostics = new javax.tools.DiagnosticCollector<>();
+
+            try (javax.tools.StandardJavaFileManager files = compiler.getStandardFileManager(diagnostics, null,
+                    java.nio.charset.StandardCharsets.UTF_8)) {
+                final String classpath = System.getProperty("surefire.test.class.path", System.getProperty("java.class.path"));
+
+                return compiler
+                        .getTask(null, files, diagnostics, List.of("-classpath", classpath, "-d", dir.toString(), "-nowarn"), null,
+                                files.getJavaFileObjects(source))
+                        .call();
+            }
+        } finally {
+            final java.io.File[] generated = dir.toFile().listFiles();
+
+            if (generated != null) {
+                for (final java.io.File file : generated) {
+                    file.delete();
+                }
+            }
+
+            dir.toFile().delete();
+        }
     }
 
 }

@@ -96,7 +96,7 @@ public class PredicateTest extends TestBase {
     @Test
     public void testAndRejectsNullPredicateAtComposition() {
         Predicate<Integer> positive = n -> n > 0;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> positive.and(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> positive.and(null));
     }
 
     @Test
@@ -130,7 +130,7 @@ public class PredicateTest extends TestBase {
     @Test
     public void testOrRejectsNullPredicateAtComposition() {
         Predicate<Integer> negative = n -> n < 0;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> negative.or(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> negative.or(null));
     }
 
     @Test
@@ -143,6 +143,6 @@ public class PredicateTest extends TestBase {
     @Test
     public void testAndRejectsNullImmediately() {
         Predicate<String> instance = a -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((java.util.function.Predicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((java.util.function.Predicate) null));
     }
 }

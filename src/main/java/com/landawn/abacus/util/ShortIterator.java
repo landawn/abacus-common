@@ -24,7 +24,8 @@ import com.landawn.abacus.util.function.ShortSupplier;
 import com.landawn.abacus.util.stream.ShortStream;
 
 /**
- * A specialized iterator for primitive {@code short} values that extends {@link ImmutableIterator}.
+ * A specialized iterator for primitive {@code short} values that does not support element removal
+ * ({@link #remove()} always throws {@link UnsupportedOperationException}).
  * This class provides various factory methods and operations for creating and manipulating
  * iterators over {@code short} values without the overhead of boxing/unboxing.
  *
@@ -50,7 +51,7 @@ import com.landawn.abacus.util.stream.ShortStream;
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 public abstract class ShortIterator extends ImmutableIterator<Short> {
 
     /**
@@ -195,9 +196,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // The expensive computation is not performed until iter.hasNext() or iter.nextShort() is called
      * }</pre>
      *
+     * <p>Initialization happens on the returned iterator. Its access methods throw {@link IllegalStateException} if the supplier returns {@code null}; supplier runtime exceptions and errors are cached and rethrown on later access.</p>
+     *
      * @param iteratorSupplier a {@link Supplier} that provides the {@code ShortIterator} when needed
      * @return a lazily initialized {@code ShortIterator}
-     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static ShortIterator defer(final Supplier<? extends ShortIterator> iteratorSupplier) throws IllegalArgumentException {
@@ -287,7 +289,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * This allows for creating finite iterators with custom termination conditions.
      *
      * <p>The {@code hasNext} supplier is called at most once per element; its result is cached
-     * until the next call to {@code nextShort()}.</p>
+     * until the next call to {@code nextShort()}. Once {@code hasNext} has returned {@code false} the
+     * iterator is permanently exhausted: the condition is never re-evaluated, so the iterator does not
+     * resume even if the state it inspects changes later.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -351,7 +355,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      */
     @Deprecated
     @Override
-    public Short next() {
+    public Short next() throws NoSuchElementException {
         return nextShort();
     }
 
@@ -368,7 +372,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * @return the next {@code short} value
      * @throws NoSuchElementException if the iteration has no more elements
      */
-    public abstract short nextShort();
+    public abstract short nextShort() throws NoSuchElementException;
 
     /**
      * Returns a new {@code ShortIterator} that skips the first {@code n} elements.
@@ -397,6 +401,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
 
         return new ShortIterator() {
             private boolean skipped = false;
+            private long remaining = n;
 
             @Override
             public boolean hasNext() {
@@ -417,10 +422,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
             }
 
             private void skip() {
-                long idx = 0;
-
-                while (idx++ < n && iter.hasNext()) {
+                while (remaining > 0 && iter.hasNext()) {
                     iter.nextShort();
+                    remaining--;
                 }
 
                 skipped = true;
@@ -468,8 +472,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final short result = iter.nextShort();
                 cnt--;
-                return iter.nextShort();
+                return result;
             }
         };
     }
@@ -583,6 +588,11 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * Converts this iterator to a {@code ShortStream}.
      * This provides access to stream operations like map, filter, reduce, etc.
      *
+     * <p>The stream shares this iterator's traversal position and consumes elements as needed.
+     * Operations that consume all remaining elements exhaust this iterator; short-circuiting
+     * operations may leave elements unconsumed. Do not access this iterator independently
+     * while the stream is consuming it.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double average = ShortIterator.of(new short[] {1, 2, 3, 4, 5})
@@ -626,10 +636,11 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // Produces: IndexedShort(index=100, value=10), IndexedShort(index=101, value=20), IndexedShort(index=102, value=30)
      * }</pre>
      *
+     * <p>The returned iterator throws {@link ArithmeticException} from {@code next()} if another element would require an index greater than {@link Long#MAX_VALUE}.</p>
+     *
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedShort} objects with indices starting at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative.
-     * @throws ArithmeticException if the source has another element after the index reaches {@link Long#MAX_VALUE}
      * @see #indexed()
      */
     @Beta
@@ -682,13 +693,13 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * }</pre>
      *
      * @param action the action to perform on each element
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws NullPointerException if {@code action} is {@code null}, as specified by {@link java.util.Iterator#forEachRemaining(java.util.function.Consumer)}.
      * @deprecated use {@link #foreachRemaining(Throwables.ShortConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Short> action) throws IllegalArgumentException {
-        N.checkArgNotNull(action, cs.action);
+    public void forEachRemaining(final java.util.function.Consumer<? super Short> action) throws NullPointerException {
+        N.requireNonNull(action, cs.action);
 
         super.forEachRemaining(action);
     }
@@ -705,10 +716,10 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each element
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.ShortConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachRemaining(final Throwables.ShortConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);//NOSONAR
 
         while (hasNext()) {
@@ -732,12 +743,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each (index, value) pair
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
      * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntShortConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachIndexed(final Throwables.IntShortConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         N.checkArgNotNull(action, cs.action);
 
         int idx = 0;

@@ -235,4 +235,55 @@ public class MutableBooleanTypeTest extends TestBase {
         Assertions.assertTrue(mutableBooleanType.valueOf(" true ").getValue());
         Assertions.assertFalse(mutableBooleanType.valueOf(" false ").getValue());
     }
+
+    // Finding 120 (2026-09-08): the blank guard is Strings.isBlank (Character.isWhitespace) but the padding was
+    // removed with String.trim (characters <= ' ' only), so an IDEOGRAPHIC SPACE followed by "true" reached
+    // Boolean.valueOf with its padding still attached and came back false. parseBoolean now strips with both
+    // definitions, so the guard and the strip finally agree.
+    @Test
+    public void reviewFixes20260908_valueOfStripsUnicodeWhitespaceLikeIsBlank() {
+        // U+3000 IDEOGRAPHIC SPACE: Unicode whitespace, but above ' ', so String.trim() used to keep it.
+        final String wide = String.valueOf((char) 0x3000);
+        // U+0001 START OF HEADING: below ' ', but not Unicode whitespace, so String.trim() used to drop it.
+        final String ctrl = String.valueOf((char) 0x0001);
+
+        Assertions.assertNull(mutableBooleanType.valueOf(wide));
+        Assertions.assertNull(mutableBooleanType.valueOf(wide + wide));
+
+        Assertions.assertTrue(mutableBooleanType.valueOf(wide + "true").getValue());
+        Assertions.assertTrue(mutableBooleanType.valueOf(wide + "true" + wide).getValue());
+        Assertions.assertTrue(mutableBooleanType.valueOf(wide + "Y").getValue());
+        Assertions.assertTrue(mutableBooleanType.valueOf(wide + "1" + wide).getValue());
+        Assertions.assertFalse(mutableBooleanType.valueOf(wide + "false" + wide).getValue());
+
+        // Control-character padding keeps working: dropping it is what String.trim() did, and parseBoolean still does.
+        Assertions.assertTrue(mutableBooleanType.valueOf(ctrl + "true" + ctrl).getValue());
+        Assertions.assertFalse(mutableBooleanType.valueOf(ctrl).getValue());
+
+        // The plain Boolean handler reads the same text the same way.
+        assertEquals(Boolean.TRUE, Type.of(Boolean.class).valueOf(wide + "true"));
+    }
+
+    // T5-02 / R-T05 (2026-09-06): MutableBoolean was the only boolean handler that quoted its CSV value.
+    @Test
+    public void reviewFixes20260906_csvQuoteNotRequiredLikeBoolean() throws IOException {
+        Assertions.assertFalse(mutableBooleanType.isCsvQuoteRequired());
+        assertEquals(Type.of(Boolean.class).isCsvQuoteRequired(), mutableBooleanType.isCsvQuoteRequired());
+        assertEquals(Type.of("OptionalBoolean").isCsvQuoteRequired(), mutableBooleanType.isCsvQuoteRequired());
+
+        final com.landawn.abacus.util.BufferedCsvWriter csvWriter = com.landawn.abacus.util.Objectory.createBufferedCsvWriter();
+
+        try {
+            com.landawn.abacus.util.CsvUtil.writeField(csvWriter, null, MutableBoolean.of(true));
+            csvWriter.write(',');
+            com.landawn.abacus.util.CsvUtil.writeField(csvWriter, null, Boolean.TRUE);
+            csvWriter.write(',');
+            com.landawn.abacus.util.CsvUtil.writeField(csvWriter, null, MutableBoolean.of(false));
+            csvWriter.write(',');
+            com.landawn.abacus.util.CsvUtil.writeField(csvWriter, null, null);
+            assertEquals("true,true,false,null", csvWriter.toString());
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(csvWriter);
+        }
+    }
 }

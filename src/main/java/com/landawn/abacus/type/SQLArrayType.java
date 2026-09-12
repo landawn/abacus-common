@@ -20,12 +20,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * Type handler for {@link java.sql.Array} objects, used primarily for JDBC operations that read
  * SQL ARRAY values from a {@link ResultSet} and bind them to {@link PreparedStatement}/{@link CallableStatement}
  * parameters. SQL Arrays are database-specific structures and cannot be meaningfully serialized to or
  * deserialized from a string; {@link #stringOf(Array)} and {@link #valueOf(String)} therefore throw
- * {@link UnsupportedOperationException}.
+ * {@link UnsupportedOperationException}, while {@link #valueOf(Object)} returns an object that already is an
+ * {@link Array} unchanged, maps {@code null} to {@code null}, and rejects everything else without touching it.
  *
  * <p>Note: {@link Array} instances are bound to the active database connection. Callers are
  * responsible for invoking {@link Array#free()} when the array is no longer needed; this type
@@ -122,6 +125,29 @@ public class SQLArrayType extends AbstractType<Array> {
     }
 
     /**
+     * Returns {@code obj} unchanged if it already is an {@link Array}; otherwise the conversion is not supported.
+     * Unlike the inherited default, this method never serializes the value: {@code AbstractType.valueOf(Object)}
+     * renders {@code obj} with the handler registered for its own runtime class and feeds that text to
+     * {@link #valueOf(String)}, which always throws - so the caller's locator would be read for nothing.
+     *
+     * @param obj the object to convert; may be {@code null}
+     * @return the same {@link Array} instance if {@code obj} is an {@link Array}, or {@code null} if {@code obj} is
+     *         {@code null}
+     * @throws UnsupportedOperationException if {@code obj} is non-null and not an {@link Array}
+     */
+    @MayReturnNull
+    @Override
+    public Array valueOf(final Object obj) throws UnsupportedOperationException {
+        if (obj == null) {
+            return null; // NOSONAR
+        } else if (obj instanceof Array value) {
+            return value;
+        }
+
+        throw new UnsupportedOperationException("SQL Array cannot be created from " + obj.getClass().getName());
+    }
+
+    /**
      * Retrieves a SQL ARRAY value from the specified column in the ResultSet.
      * A SQL ARRAY represents an array value in the database.
      *
@@ -135,10 +161,11 @@ public class SQLArrayType extends AbstractType<Array> {
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
      * @return the Array value from the specified column, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    public Array get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Array get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getArray(columnIndex);
     }
 
@@ -156,10 +183,11 @@ public class SQLArrayType extends AbstractType<Array> {
      * @param rs the ResultSet to read from
      * @param columnName the label of the column to retrieve (column name or alias)
      * @return the Array value from the specified column, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public Array get(final ResultSet rs, final String columnName) throws SQLException {
+    public Array get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getArray(columnName);
     }
 
@@ -177,10 +205,11 @@ public class SQLArrayType extends AbstractType<Array> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the Array value to set as the parameter
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Array x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Array x) throws NullPointerException, SQLException {
         stmt.setArray(columnIndex, x);
     }
 
@@ -199,10 +228,11 @@ public class SQLArrayType extends AbstractType<Array> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Array value to set as the parameter
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Array x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Array x) throws NullPointerException, SQLException {
         // stmt.setArray(parameterName, x);
 
         stmt.setObject(parameterName, x);

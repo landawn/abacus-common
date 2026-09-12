@@ -19,7 +19,6 @@ package com.landawn.abacus.util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Stack;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 
@@ -41,6 +40,17 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * </ul>
  *
  * <p>Most methods work with both Unix and Windows separators and prefixes.</p>
+ *
+ * <p><b>The six components do not always partition the input.</b> {@link #getName(String)} and
+ * {@link #getBaseName(String)} are defined purely as the text after the last separator, while
+ * {@link #getPrefix(String)} and {@link #getFullPath(String)} understand prefixes. When a prefix does
+ * not itself end in a separator the two overlap, so {@code getFullPath(f) + getName(f)} reconstructs
+ * {@code f} only when the prefix is separator-terminated:</p>
+ * <pre>{@code
+ * FilenameUtil.getFullPath("a/b.txt");   // "a/"      + getName "b.txt"  -> "a/b.txt"   (reconstructs)
+ * FilenameUtil.getFullPath("C:a");       // "C:"      + getName "C:a"    -> "C:C:a"     (does not)
+ * FilenameUtil.getFullPath("~user");     // "~user/"  + getName "~user"  -> "~user/~user" (does not)
+ * }</pre>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -123,10 +133,28 @@ public final class FilenameUtil {
      * The output will contain separators in the format of the system.</p>
      *
      * <p>A trailing slash will be retained.
-     * A double slash will be merged to a single slash (but UNC names are handled).
+     * A double slash <i>inside</i> a path will be merged to a single slash.
      * A single dot path segment will be removed.
      * A double dot will cause that path segment and the one before to be removed.
      * If the double dot has no parent path segment, {@code null} is returned.</p>
+     *
+     * <p>A <b>leading</b> double slash is not merged: it is treated as a Windows UNC prefix, so
+     * {@code "//server/share/x"} keeps its {@code //}. A UNC prefix that names no share, or whose host
+     * component is {@code "."} or {@code ".."}, is rejected: {@code normalize("//foo")},
+     * {@code normalize("///foo")} and {@code normalize("//../foo")} all return {@code null}. This also
+     * applies on Unix, where {@code "//foo"} would otherwise be an ordinary absolute path.</p>
+     *
+     * <p><b>Not idempotent in general.</b> The prefix is decided from the <i>first</i> characters of the
+     * input, so removing a leading {@code "./"} can expose a prefix that was not there before, and
+     * normalizing the result again gives a different answer:</p>
+     * <ul>
+     *   <li>{@code normalize("./~user")} is {@code "~user"}, but {@code normalize("~user")} is
+     *       {@code "~user/"} — once {@code ~} is first it becomes a home-directory prefix, and a prefix
+     *       always ends with a separator (see {@link #getPrefixLength(String)}).</li>
+     *   <li>{@code normalize("./:")} is {@code ":"}, but {@code normalize(":")} is {@code null} — a
+     *       leading {@code ':'} is not a legal prefix, even though it is a legal file name on Unix.</li>
+     * </ul>
+     * <p>Feed user input through this method once; do not treat its output as a fixed point.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -139,6 +167,11 @@ public final class FilenameUtil {
      * FilenameUtil.normalize("/foo/../bar/../baz");   // returns "/baz"
      * FilenameUtil.normalize("/../");                 // returns null
      * FilenameUtil.normalize("C:\\foo\\..\\bar");     // returns "C:\\bar" on Windows
+     *
+     * // A doubled separator is merged wherever it occurs, including immediately after the prefix,
+     * // so it cannot hide a ".." that escapes the root:
+     * FilenameUtil.normalize("C://a");                // returns "C:/a"
+     * FilenameUtil.normalize("C://../a");             // returns null, exactly like "C:/../a"
      * }</pre>
      *
      * @param filename the filename to normalize, {@code null} returns {@code null}
@@ -147,7 +180,7 @@ public final class FilenameUtil {
      * @see IOUtil#simplifyPath(String)
      */
     @MayReturnNull
-    public static String normalize(final String filename) {
+    public static String normalize(final String filename) throws IllegalArgumentException {
         return doNormalize(filename, SYSTEM_SEPARATOR, true);
     }
 
@@ -175,7 +208,7 @@ public final class FilenameUtil {
      * @see IOUtil#simplifyPath(String)
      */
     @MayReturnNull
-    public static String normalize(final String filename, final boolean unixSeparator) {
+    public static String normalize(final String filename, final boolean unixSeparator) throws IllegalArgumentException {
         final char separator = unixSeparator ? UNIX_SEPARATOR : WINDOWS_SEPARATOR;
         return doNormalize(filename, separator, true);
     }
@@ -204,7 +237,7 @@ public final class FilenameUtil {
      * @throws IllegalArgumentException if the filename contains a {@code null} byte.
      */
     @MayReturnNull
-    public static String normalizeNoEndSeparator(final String filename) {
+    public static String normalizeNoEndSeparator(final String filename) throws IllegalArgumentException {
         return doNormalize(filename, SYSTEM_SEPARATOR, false);
     }
 
@@ -224,7 +257,7 @@ public final class FilenameUtil {
      * @throws IllegalArgumentException if the filename contains a {@code null} byte.
      */
     @MayReturnNull
-    public static String normalizeNoEndSeparator(final String filename, final boolean unixSeparator) {
+    public static String normalizeNoEndSeparator(final String filename, final boolean unixSeparator) throws IllegalArgumentException {
         final char separator = unixSeparator ? UNIX_SEPARATOR : WINDOWS_SEPARATOR;
         return doNormalize(filename, separator, false);
     }
@@ -263,8 +296,13 @@ public final class FilenameUtil {
             lastIsDirectory = false;
         }
 
-        // adjoining slashes
-        for (int i = prefix + 1; i < size; i++) {
+        // adjoining slashes.
+        // This loop tests the pair (i-1, i), so it must start at `prefix` - the first character of the first
+        // segment - and not at prefix + 1, which skips the pair (prefix-1, prefix): a separator-terminated prefix
+        // ("C:/", "~/", "//host/") followed by another separator. That left normalize("C://a") with both slashes,
+        // and let normalize("C://../a") absorb a ".." that normalize("C:/../a") correctly rejects as a root
+        // escape. max(prefix, 1) keeps i-1 in bounds for a relative path, where prefix is 0.
+        for (int i = Math.max(prefix, 1); i < size; i++) {
             if (array[i] == separator && array[i - 1] == separator) {
                 System.arraycopy(array, i, array, i - 1, size - i);
                 size--;
@@ -346,10 +384,11 @@ public final class FilenameUtil {
      *        {@code null} unless {@code fullFilenameToAdd} already has an absolute/prefixed path
      * @param fullFilenameToAdd the filename (or path) to attach to the base, {@code null} returns {@code null}
      * @return the concatenated and normalized path, or {@code null} if the result is invalid
-     * @throws IllegalArgumentException if either argument contains a {@code null} byte.
+     * @throws IllegalArgumentException if the path selected for normalization contains a null byte; {@code basePath} is ignored
+     *         when {@code fullFilenameToAdd} already has a prefix
      */
     @MayReturnNull
-    public static String concat(final String basePath, final String fullFilenameToAdd) {
+    public static String concat(final String basePath, final String fullFilenameToAdd) throws IllegalArgumentException {
         final int prefix = getPrefixLength(fullFilenameToAdd);
         if (prefix < 0) {
             return null;
@@ -375,13 +414,22 @@ public final class FilenameUtil {
     /**
      * Determines whether the parent directory contains the child element (a file or directory).
      *
-     * <p>The file names are expected to be normalized.</p>
+     * <p><b>This is a purely lexical string test, not a filesystem test.</b> Nothing is normalized,
+     * canonicalized or resolved here, and symbolic links are not followed, so the caller must pass
+     * already-canonical paths (for example from {@link java.io.File#getCanonicalPath()}) - hence the
+     * parameter names. Passing raw user input makes this unsafe as a containment/security check:
+     * {@code directoryContains("/home/a", "/home/a/../b")} returns {@code true}.</p>
+     *
+     * <p>Comparison uses {@link IOCase#SYSTEM}, so it is case-sensitive on Unix and case-insensitive
+     * on Windows. Only platform-valid separators delimit descendants: {@code /} on Unix,
+     * and either {@code /} or {@code \} on Windows.</p>
      *
      * <p>Edge cases:</p>
      * <ul>
      * <li>A directory must not be null: if {@code null}, throws IllegalArgumentException</li>
      * <li>A directory does not contain itself: returns false</li>
      * <li>A {@code null} child file is not contained in any parent: returns false</li>
+     * <li>An <b>empty</b> parent is treated as containing every non-empty child: returns true</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -396,7 +444,7 @@ public final class FilenameUtil {
      * @return {@code true} if the child is under the parent directory, {@code false} otherwise
      * @throws IllegalArgumentException if canonicalParent is {@code null}.
      */
-    public static boolean directoryContains(final String canonicalParent, final String canonicalChild) {
+    public static boolean directoryContains(final String canonicalParent, final String canonicalChild) throws IllegalArgumentException {
 
         // Fail fast against NullPointerException
         if (canonicalParent == null) {
@@ -413,11 +461,16 @@ public final class FilenameUtil {
         }
 
         final char lastParentChar = canonicalParent.charAt(canonicalParent.length() - 1);
-        if (isSeparator(lastParentChar)) {
+        // Canonical Unix paths may contain literal backslashes, which must not create a boundary.
+        if (lastParentChar == '/' || lastParentChar == File.separatorChar) {
             return true;
         }
 
-        return canonicalChild.length() > canonicalParent.length() && isSeparator(canonicalChild.charAt(canonicalParent.length()));
+        if (canonicalChild.length() <= canonicalParent.length()) {
+            return false;
+        }
+        final char boundary = canonicalChild.charAt(canonicalParent.length());
+        return boundary == '/' || boundary == File.separatorChar;
     }
 
     //-----------------------------------------------------------------------
@@ -511,16 +564,29 @@ public final class FilenameUtil {
      * C:a\b\c.txt         → 2     (drive relative)
      * C:\a\b\c.txt        → 3     (absolute)
      * \\server\a\b\c.txt  → 9     (UNC)
+     * \\.\a\b\c.txt       → -1    (invalid: "." is not a UNC hostname)
+     * \\..\a\b\c.txt      → -1    (invalid: ".." is not a UNC hostname)
      *
      * Unix:
      * a/b/c.txt           → 0     (relative)
      * /a/b/c.txt          → 1     (absolute)
      * ~/a/b/c.txt         → 2     (current user)
      * ~user/a/b/c.txt     → 6     (named user)
+     * //../a/b/c.txt      → -1    (invalid: ".." is not a UNC hostname)
      * }</pre>
      *
      * @param filename the filename to find the prefix in, {@code null} returns -1
-     * @return the length of the prefix, -1 if invalid or {@code null}
+     * @return the length of the prefix, -1 if {@code null} or invalid. A filename is invalid if it begins with
+     *         {@code ':'}, if its drive designator is not a letter (for example {@code "1:\a"}), or if it is a UNC
+     *         path whose hostname component is {@code "."} or {@code ".."} - those are path-traversal segments
+     *         rather than hosts, so {@code "//../foo"} and {@code "\\.\foo"} return -1. Other hostname components
+     *         are not otherwise validated.
+     *         A leading separator followed by {@code ':'} (for example {@code "/:a"} or {@code "\:a"}) is not
+     *         a drive designator at all: it is an ordinary absolute path of prefix length 1, and both
+     *         separator spellings answer alike. This deliberately diverges from Apache Commons IO, which answers 1
+     *         for {@code "/:a"} but -1 for {@code "\:a"}: normalization reads the prefix length from the raw text
+     *         before it rewrites one separator into the other, so disagreeing verdicts let it turn an accepted
+     *         path into a rejected one, and made {@link #equalsNormalized(String, String)} throw for that pair.
      */
     public static int getPrefixLength(final String filename) {
         if (filename == null) {
@@ -558,7 +624,9 @@ public final class FilenameUtil {
                         return 2;
                     }
                     return 3;
-                } else if (ch0 == UNIX_SEPARATOR) {
+                } else if (isSeparator(ch0)) {
+                    // doNormalize() takes the prefix length from the RAW text, before it rewrites one
+                    // separator into the other, so both spellings must answer alike here.
                     return 1;
                 }
                 return NOT_FOUND;
@@ -631,7 +699,7 @@ public final class FilenameUtil {
      * @return the index of the last extension separator character, or -1 if there is no such character or if {@code null}
      * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte.
      */
-    public static int indexOfExtension(final String filename) {
+    public static int indexOfExtension(final String filename) throws IllegalArgumentException {
         if (filename == null) {
             return NOT_FOUND;
         }
@@ -663,7 +731,7 @@ public final class FilenameUtil {
      * @throws IllegalArgumentException if the resolved full path contains a {@code null} byte.
      */
     @MayReturnNull
-    public static String getPrefix(final String filename) {
+    public static String getPrefix(final String filename) throws IllegalArgumentException {
         if (filename == null) {
             return null;
         }
@@ -700,7 +768,7 @@ public final class FilenameUtil {
      * @see #getFullPath(String)
      */
     @MayReturnNull
-    public static String getPath(final String filename) {
+    public static String getPath(final String filename) throws IllegalArgumentException {
         return doGetPath(filename, 1);
     }
 
@@ -722,7 +790,7 @@ public final class FilenameUtil {
      * @see #getFullPathNoEndSeparator(String)
      */
     @MayReturnNull
-    public static String getPathNoEndSeparator(final String filename) {
+    public static String getPathNoEndSeparator(final String filename) throws IllegalArgumentException {
         return doGetPath(filename, 0);
     }
 
@@ -760,10 +828,10 @@ public final class FilenameUtil {
      * @param filename the filename to query, {@code null} returns {@code null}
      * @return the full path of the file, an empty string if none exists, or {@code null} if the
      *         filename is {@code null} or invalid
-     * @throws IllegalArgumentException if the resolved prefix contains a {@code null} byte.
+     * @throws IllegalArgumentException if the resolved full path contains a null byte
      */
     @MayReturnNull
-    public static String getFullPath(final String filename) {
+    public static String getFullPath(final String filename) throws IllegalArgumentException {
         return doGetFullPath(filename, true);
     }
 
@@ -779,6 +847,17 @@ public final class FilenameUtil {
      * FilenameUtil.getFullPathNoEndSeparator("C:\\");              // returns "C:\\"
      * }</pre>
      *
+     * <p>When the filename has a name part and its last separator is the one that terminates the prefix, that
+     * separator is removed like any other trailing separator, so the result is the prefix <i>without</i> its
+     * root separator: {@code getFullPathNoEndSeparator("C:\\a")} is {@code "C:"} (drive-relative, not the drive
+     * root {@code "C:\\"}), {@code getFullPathNoEndSeparator("~/a")} is {@code "~"}, and
+     * {@code getFullPathNoEndSeparator("//host/a")} is {@code "//host"} - which is not itself a valid filename
+     * per {@link #getPrefixLength(String)}. The sole exception among those is a single leading separator, where
+     * {@code "/a"} yields {@code "/"}. A filename that is <i>nothing but</i> a prefix has no name part and is
+     * returned unchanged, separator and all: {@code "C:\\"}, {@code "~/"} and {@code "//host/"} each answer
+     * themselves, as the {@code "C:\\"} example above shows. Use {@link #getFullPath(String)} when the root
+     * separator must be kept. This matches Apache Commons IO.</p>
+     *
      * @param filename the filename to query, {@code null} returns {@code null}
      * @return the full path of the file without trailing separator, an empty string if none exists,
      *         or {@code null} if the filename is {@code null} or invalid
@@ -786,7 +865,7 @@ public final class FilenameUtil {
      * @see #getFullPath(String)
      */
     @MayReturnNull
-    public static String getFullPathNoEndSeparator(final String filename) {
+    public static String getFullPathNoEndSeparator(final String filename) throws IllegalArgumentException {
         return doGetFullPath(filename, false);
     }
 
@@ -824,7 +903,10 @@ public final class FilenameUtil {
     /**
      * Gets the name minus the path from a full filename.
      *
-     * <p>This method returns the text after the last forward or backslash.</p>
+     * <p>This method returns the text after the last forward or backslash. It does <b>not</b> understand
+     * prefixes: when the filename has a prefix that is not separator-terminated, that prefix is part of
+     * the result ({@code getName("C:a")} is {@code "C:a"}, {@code getName("~user")} is {@code "~user"}).
+     * Use {@link #getPrefix(String)} to strip it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -832,6 +914,7 @@ public final class FilenameUtil {
      * FilenameUtil.getName("a.txt");       // returns "a.txt"
      * FilenameUtil.getName("a/b/c");       // returns "c"
      * FilenameUtil.getName("a/b/c/");      // returns ""
+     * FilenameUtil.getName("C:a");         // returns "C:a" (the drive prefix is not removed)
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns {@code null}
@@ -840,7 +923,7 @@ public final class FilenameUtil {
      * @throws IllegalArgumentException if the supplied filename contains a {@code null} byte.
      */
     @MayReturnNull
-    public static String getName(final String filename) {
+    public static String getName(final String filename) throws IllegalArgumentException {
         if (filename == null) {
             return null;
         }
@@ -858,7 +941,7 @@ public final class FilenameUtil {
      * @param path the path to check, must not be {@code null}
      * @throws IllegalArgumentException if {@code path} contains a {@code null} byte.
      */
-    private static void failIfNullBytePresent(final String path) {
+    private static void failIfNullBytePresent(final String path) throws IllegalArgumentException {
         final int len = path.length();
         for (int i = 0; i < len; i++) {
             if (path.charAt(i) == 0) {
@@ -871,7 +954,9 @@ public final class FilenameUtil {
     /**
      * Gets the base name minus the full path and extension from a full filename.
      *
-     * <p>This method returns the text after the last separator and before the last dot.</p>
+     * <p>This method returns the text after the last separator and before the last dot. Like
+     * {@link #getName(String)} it does not understand prefixes, so {@code getBaseName("C:a.txt")} is
+     * {@code "C:a"}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -890,7 +975,7 @@ public final class FilenameUtil {
      * @see #removeExtension(String)
      */
     @MayReturnNull
-    public static String getBaseName(final String filename) {
+    public static String getBaseName(final String filename) throws IllegalArgumentException {
         return removeExtension(getName(filename));
     }
 
@@ -915,7 +1000,7 @@ public final class FilenameUtil {
      * @see #removeExtension(String)
      */
     @MayReturnNull
-    public static String getExtension(final String filename) {
+    public static String getExtension(final String filename) throws IllegalArgumentException {
         if (filename == null) {
             return null;
         }
@@ -952,7 +1037,7 @@ public final class FilenameUtil {
      * @see #getExtension(String)
      */
     @MayReturnNull
-    public static String removeExtension(final String filename) {
+    public static String removeExtension(final String filename) throws IllegalArgumentException {
         if (filename == null) {
             return null;
         }
@@ -993,7 +1078,7 @@ public final class FilenameUtil {
      * @see #getExtension(String)
      */
     @MayReturnNull
-    public static String changeExtension(final String filename, final String extension) {
+    public static String changeExtension(final String filename, final String extension) throws IllegalArgumentException {
         if (filename == null) {
             return null;
         }
@@ -1077,9 +1162,10 @@ public final class FilenameUtil {
      * @param filename1 the first filename to query, {@code null} is allowed
      * @param filename2 the second filename to query, {@code null} is allowed
      * @return {@code true} if the filenames are equal after normalization; two {@code null} values are considered equal
+     * @throws IllegalArgumentException if both filenames are non-null and either contains a null byte or cannot be normalized to a valid path
      * @see IOCase#SENSITIVE
      */
-    public static boolean equalsNormalized(final String filename1, final String filename2) {
+    public static boolean equalsNormalized(final String filename1, final String filename2) throws IllegalArgumentException {
         return equals(filename1, filename2, true, IOCase.SENSITIVE);
     }
 
@@ -1100,9 +1186,10 @@ public final class FilenameUtil {
      * @param filename1 the first filename to query, {@code null} is allowed
      * @param filename2 the second filename to query, {@code null} is allowed
      * @return {@code true} if the filenames are equal after normalization; two {@code null} values are considered equal
+     * @throws IllegalArgumentException if both filenames are non-null and either contains a null byte or cannot be normalized to a valid path
      * @see IOCase#SYSTEM
      */
-    public static boolean equalsNormalizedOnSystem(final String filename1, final String filename2) {
+    public static boolean equalsNormalizedOnSystem(final String filename1, final String filename2) throws IllegalArgumentException {
         return equals(filename1, filename2, true, IOCase.SYSTEM);
     }
 
@@ -1127,10 +1214,10 @@ public final class FilenameUtil {
      * @param normalized whether to normalize the filenames before comparison
      * @param caseSensitivity what case sensitivity rule to use, {@code null} means case-sensitive
      * @return {@code true} if the filenames are equal; two {@code null} values are considered equal
-     * @throws IllegalArgumentException if normalization produces an invalid result (when {@code normalized} is
-     *         {@code true}).
+     * @throws IllegalArgumentException if both filenames are non-null, {@code normalized} is {@code true}, and either filename
+     *         contains a null byte or cannot be normalized to a valid path
      */
-    public static boolean equals(String filename1, String filename2, final boolean normalized, IOCase caseSensitivity) {
+    public static boolean equals(String filename1, String filename2, final boolean normalized, IOCase caseSensitivity) throws IllegalArgumentException {
         if (filename1 == null || filename2 == null) {
             return filename1 == null && filename2 == null;
         }
@@ -1160,7 +1247,7 @@ public final class FilenameUtil {
      * FilenameUtil.isExtension("file.txt", "txt");   // returns true
      * FilenameUtil.isExtension("file.txt", "TXT");   // returns false
      * FilenameUtil.isExtension("file", "");          // returns true
-     * FilenameUtil.isExtension("file.txt", null);    // returns false
+     * FilenameUtil.isExtension("file.txt", (String) null);   // returns false
      * }</pre>
      *
      * @param filename the filename to query, {@code null} returns {@code false}
@@ -1168,7 +1255,7 @@ public final class FilenameUtil {
      * @return {@code true} if the filename has the specified extension
      * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes.
      */
-    public static boolean isExtension(final String filename, final String extension) {
+    public static boolean isExtension(final String filename, final String extension) throws IllegalArgumentException {
         if (filename == null) {
             return false;
         }
@@ -1198,7 +1285,7 @@ public final class FilenameUtil {
      * @return {@code true} if the filename has one of the specified extensions
      * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes.
      */
-    public static boolean isExtension(final String filename, final String[] extensions) {
+    public static boolean isExtension(final String filename, final String[] extensions) throws IllegalArgumentException {
         if (filename == null) {
             return false;
         }
@@ -1233,7 +1320,7 @@ public final class FilenameUtil {
      * @return {@code true} if the filename has one of the specified extensions
      * @throws IllegalArgumentException if the supplied filename contains {@code null} bytes.
      */
-    public static boolean isExtension(final String filename, final Collection<String> extensions) {
+    public static boolean isExtension(final String filename, final Collection<String> extensions) throws IllegalArgumentException {
         if (filename == null) {
             return false;
         }
@@ -1337,74 +1424,59 @@ public final class FilenameUtil {
         if (caseSensitivity == null) {
             caseSensitivity = IOCase.SENSITIVE;
         }
+
         final String[] wcs = splitOnTokens(wildcardMatcher);
-        boolean anyChars = false;
+        final int textLen = filename.length();
+
         int textIdx = 0;
         int wcsIdx = 0;
-        final Stack<int[]> backtrack = new Stack<>(); //NOSONAR
+        int starWcsIdx = NOT_FOUND; // token index just after the last '*' seen, or -1 if none
+        int starTextIdx = 0; // text position that last '*' is currently assumed to consume up to
 
-        // loop around a backtrack stack, to handle complex * matching
-        do {
-            if (backtrack.size() > 0) {
-                final int[] array = backtrack.pop();
-                wcsIdx = array[0];
-                textIdx = array[1];
-                anyChars = true;
-            }
+        while (textIdx <= textLen) {
+            if (wcsIdx < wcs.length) {
+                final String token = wcs[wcsIdx];
 
-            // loop whilst tokens and text left to process
-            while (wcsIdx < wcs.length) {
+                if ("*".equals(token)) {
+                    // Record the resume point and first try to consume nothing.
+                    starWcsIdx = ++wcsIdx;
+                    starTextIdx = textIdx;
 
-                if (wcs[wcsIdx].equals("?")) {
-                    // ? so move to next text char
-                    textIdx++;
-                    if (textIdx > filename.length()) {
-                        break;
-                    }
-                    anyChars = false;
-
-                } else if (wcs[wcsIdx].equals("*")) {
-                    // set any chars status
-                    anyChars = true;
-                    if (wcsIdx == wcs.length - 1) {
-                        textIdx = filename.length();
+                    if (wcsIdx == wcs.length) {
+                        // A trailing '*' absorbs whatever is left, however long.
+                        return true;
                     }
 
-                } else {
-                    // matching text token
-                    if (anyChars) {
-                        // any chars then try to locate text token
-                        textIdx = caseSensitivity.checkIndexOf(filename, textIdx, wcs[wcsIdx]);
-                        if (textIdx == NOT_FOUND) {
-                            // token not found
-                            break;
-                        }
-                        final int repeat = caseSensitivity.checkIndexOf(filename, textIdx + 1, wcs[wcsIdx]);
-                        if (repeat >= 0) {
-                            backtrack.push(new int[] { wcsIdx, repeat });
-                        }
-                    } else {
-                        // matching from current position
-                        if (!caseSensitivity.checkRegionMatches(filename, textIdx, wcs[wcsIdx])) {
-                            // couldn't match token
-                            break;
-                        }
-                    }
-
-                    // matched text token, move text index to the end of matched token
-                    textIdx += wcs[wcsIdx].length();
-                    anyChars = false;
+                    continue;
                 }
 
-                wcsIdx++;
-            }
-
-            // full match
-            if (wcsIdx == wcs.length && textIdx == filename.length()) {
+                if ("?".equals(token)) {
+                    if (textIdx < textLen) {
+                        textIdx++;
+                        wcsIdx++;
+                        continue;
+                    }
+                } else if (token.length() <= textLen - textIdx && caseSensitivity.checkRegionMatches(filename, textIdx, token)) {
+                    textIdx += token.length();
+                    wcsIdx++;
+                    continue;
+                }
+            } else if (textIdx == textLen) {
                 return true;
             }
 
-        } while (backtrack.size() > 0);
+            if (starWcsIdx == NOT_FOUND) {
+                return false;
+            }
+
+            // Let the last '*' swallow one more character and retry the tokens that follow it.
+            if (starTextIdx >= textLen) {
+                return false;
+            }
+
+            wcsIdx = starWcsIdx;
+            textIdx = ++starTextIdx;
+        }
 
         return false;
     }

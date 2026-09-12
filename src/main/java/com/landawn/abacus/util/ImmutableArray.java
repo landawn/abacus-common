@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import com.landawn.abacus.annotation.Beta;
@@ -306,13 +307,12 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * }</pre>
      *
      * @param <T> the type of the elements
-     * @param elements the array whose elements are to be copied
-     * @return an {@code ImmutableArray} containing a copy of the specified array's elements,
-     *         or an empty {@code ImmutableArray} if the input is {@code null}
+     * @param elements the array whose elements are to be copied; may be {@code null} or empty
+     * @return an {@code ImmutableArray} containing a copy of the specified array's elements; the shared
+     *         {@link #empty()} instance if {@code elements} is {@code null}, and a new empty
+     *         {@code ImmutableArray} if {@code elements} is a zero-length array
      */
     public static <T> ImmutableArray<T> copyOf(final T[] elements) {
-        // Keep the runtime component type even for an empty input. Collapsing String[0], for
-        // example, into the shared Object[]-backed singleton makes copy(0, 0) fail its T[] contract.
         return elements == null ? empty() : new ImmutableArray<>(elements.clone());
     }
 
@@ -341,6 +341,10 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     @Deprecated
     @Beta
     public static <T> ImmutableArray<T> wrap(final T[] elements) {
+        if (elements == null) {
+            return empty();
+        }
+
         return new ImmutableArray<>(elements);
     }
 
@@ -389,7 +393,7 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      *         ({@code index < 0 || index >= length()})
      * @see #length()
      */
-    public T get(final int index) {
+    public T get(final int index) throws ArrayIndexOutOfBoundsException {
         return elements[index];
     }
 
@@ -449,32 +453,6 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
     }
 
     /**
-     * Returns a new array containing the elements from the specified range of this immutable array.
-     * The range is half-open: [fromIndex, toIndex).
-     *
-     * <p>The returned array is a defensive copy and is not backed by this {@code ImmutableArray}.
-     * Modifications to the returned array do not affect this {@code ImmutableArray}.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c", "d", "e");
-     * String[] subArray = array.copy(1, 4);   // contains ["b", "c", "d"]
-     * subArray[0] = "x";                      // does not affect 'array'
-     * }</pre>
-     *
-     * @param fromIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return a new array containing the specified range of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > length()},
-     *         or {@code fromIndex > toIndex}
-     */
-    public T[] copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-        N.checkFromToIndex(fromIndex, toIndex, length);
-
-        return N.copyOfRange(elements, fromIndex, toIndex);
-    }
-
-    /**
      * Returns an immutable view of this array as a list. The returned list is backed
      * by this array, so it reflects the array's contents but cannot be modified.
      *
@@ -485,10 +463,11 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * // list.size() == 3, list.get(0).equals("a")
      * }</pre>
      *
-     * @return an ImmutableList view of this array
+     * @return an ImmutableList view of this array, or {@link ImmutableList#empty()} if this array is empty
      */
     public ImmutableList<T> asList() {
-        return ImmutableList.wrap(Array.asList(elements));
+        // A zero-length array can never gain elements, so the shared empty list is a faithful view of it.
+        return length == 0 ? ImmutableList.empty() : ImmutableList.wrap(Array.asList(elements));
     }
 
     /**
@@ -545,11 +524,12 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * }</pre>
      *
      * @param consumer the action to be performed for each element
-     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws NullPointerException if {@code consumer} is {@code null}
      */
     @Override
-    public void forEach(final Consumer<? super T> consumer) throws IllegalArgumentException {
-        N.checkArgNotNull(consumer, cs.consumer);
+    public void forEach(final Consumer<? super T> consumer) throws NullPointerException {
+        // Iterable.forEach specifies NullPointerException; N.checkArgNotNull throws IAE.
+        Objects.requireNonNull(consumer);
 
         for (int i = 0; i < length; i++) {
             consumer.accept(elements[i]);
@@ -571,11 +551,11 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      *
      * @param <E> the type of exception that the consumer may throw
      * @param consumer the action to be performed for each element
-     * @throws E if the consumer throws an exception
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws E if the consumer throws an exception
      */
     @Beta
-    public <E extends Exception> void foreach(final Throwables.Consumer<? super T, E> consumer) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreach(final Throwables.Consumer<? super T, E> consumer) throws IllegalArgumentException, E {
         N.checkArgNotNull(consumer, cs.consumer); // NOSONAR
         // NOSONAR
 
@@ -603,11 +583,11 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      *
      * @param <E> the type of exception that the consumer may throw
      * @param consumer an IntObjConsumer that accepts the index and the element
-     * @throws E if the consumer throws an exception
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws E if the consumer throws an exception
      */
     @Beta
-    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> consumer) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> consumer) throws IllegalArgumentException, E {
         N.checkArgNotNull(consumer, cs.consumer); // NOSONAR
         // NOSONAR
 

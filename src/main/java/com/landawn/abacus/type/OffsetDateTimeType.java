@@ -24,11 +24,11 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Numbers;
 
 /**
  * Type handler for {@link OffsetDateTime} objects, providing serialization, deserialization,
@@ -60,33 +60,37 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
     /**
      * Converts an {@link OffsetDateTime} object to its ISO-8601 timestamp string representation.
-     * Uses a fixed-millisecond ISO format (e.g., {@code "2011-12-03T10:15:30.000+01:00"}),
-     * preserving the OffsetDateTime's UTC offset while truncating sub-millisecond precision.
+     * Uses {@link OffsetDateTime#toString()}, preserving nanoseconds and the full UTC offset,
+     * including an offset expressed in seconds.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}; millisecond-aligned values round-trip exactly. This
+     * via {@link #valueOf(String)}; all supported values round-trip exactly. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
      * @param x the OffsetDateTime object to convert
-     * @return the fixed-millisecond ISO-8601 formatted string, or {@code null} if the input is null
+     * @return the full-precision ISO-8601 formatted string, or {@code null} if the input is null
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final OffsetDateTime x) {
-        return (x == null) ? null : iso8601TimestampDTF.format(x);
+        return (x == null) ? null : x.toString();
     }
 
     /**
      * Converts an object to an {@link OffsetDateTime}.
-     * An {@code OffsetDateTime} is returned unchanged. A {@link Number}, {@link java.util.Date}, or
-     * {@link java.util.Calendar} is converted from epoch milliseconds in the default zone. Any
+     * An {@code OffsetDateTime} is returned unchanged. A {@link Number} or {@link java.util.Date} is
+     * converted from epoch milliseconds in the default zone. A {@link java.util.Calendar} is converted
+     * from epoch milliseconds in the calendar's own {@linkplain java.util.Calendar#getTimeZone() time zone}
+     * (the default zone if it has none), so the offset the caller supplied survives the conversion. Any
      * other non-null object is converted to a string and parsed by {@link #valueOf(String)}.
+     * {@link Timestamp} inputs preserve nanoseconds when converted in the default zone.
      *
      * @param obj the object to convert
      * @return the OffsetDateTime value, or {@code null} if the input is null
      */
+    @MayReturnNull
     @Override
     public OffsetDateTime valueOf(final Object obj) {
         if (obj == null) {
@@ -95,10 +99,16 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
             return offsetDateTime;
         } else if (obj instanceof Number) {
             return OffsetDateTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
+        } else if (obj instanceof Timestamp timestamp) {
+            return OffsetDateTime.ofInstant(timestamp.toInstant(), DEFAULT_ZONE_ID);
         } else if (obj instanceof java.util.Date date) {
             return OffsetDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), DEFAULT_ZONE_ID);
         } else if (obj instanceof java.util.Calendar cal) {
-            return OffsetDateTime.ofInstant(Instant.ofEpochMilli(cal.getTimeInMillis()), DEFAULT_ZONE_ID);
+            // Keep the zone the caller attached to the Calendar - this type exists to carry its offset. Matches
+            // GregorianCalendar.toZonedDateTime().toOffsetDateTime() for every Calendar subclass, not just Gregorian.
+            final java.util.TimeZone tz = cal.getTimeZone();
+
+            return OffsetDateTime.ofInstant(Instant.ofEpochMilli(cal.getTimeInMillis()), tz == null ? DEFAULT_ZONE_ID : tz.toZoneId());
         }
 
         return valueOf(N.stringOf(obj));
@@ -110,11 +120,16 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * <ul>
      *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive) returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current {@code OffsetDateTime}</li>
-     *   <li>Numeric strings are treated as milliseconds since the epoch</li>
+     *   <li>Numeric strings of more than four characters (an optional sign followed by decimal digits only, as
+     *       accepted by {@link Long#parseLong(String)}; no {@code 0x} hex, no {@code L} suffix) are treated as
+     *       milliseconds since the epoch, interpreted in the system default zone (shorter numeric strings such as
+     *       {@code "1234"} are handed to the ISO parser and rejected)</li>
      *   <li>ISO-8601 date-time format (20 characters ending with {@code 'Z'})</li>
      *   <li>ISO-8601 timestamp format (24 characters ending with {@code 'Z'})</li>
      *   <li>Any other value is parsed with the default {@link OffsetDateTime#parse(CharSequence)} parser</li>
      * </ul>
+     * Invalid calendar values ({@code 2023-02-30}, {@code 2023-04-31}, {@code 2023-02-29}, {@code 24:00}) are
+     * rejected on every path, the two fixed-length forms included.
      *
      * <p>Every string produced by {@link OffsetDateTime#toString()} can be parsed back into an equivalent value,
      * including:</p>
@@ -124,17 +139,19 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      *   <li>numeric UTC offsets, with optional offset-seconds (e.g. {@code "2023-10-15T10:30:45+05:30:15"})</li>
      * </ul>
      *
-     * <p>This method parses the fixed-millisecond string produced by {@code stringOf}. It also accepts the more
+     * <p>This method parses the full-precision string produced by {@code stringOf}. It also accepts the more
      * general {@link OffsetDateTime#toString()} representation, including nanoseconds and offsets with seconds.</p>
      *
      * @param str the string to parse
      * @return the parsed OffsetDateTime, or {@code null} if the input is {@code null} or represents a {@code null} date-time
-     * @throws DateTimeParseException if the string cannot be parsed as an OffsetDateTime
+     * @throws DateTimeParseException if the string is neither a millisecond number of more than four characters
+     *         (within the {@code long} range) nor a valid ISO-8601 {@code OffsetDateTime} representation
      * @see #valueOf(Object)
      * @see #stringOf(OffsetDateTime)
      */
+    @MayReturnNull
     @Override
-    public OffsetDateTime valueOf(final String str) {
+    public OffsetDateTime valueOf(final String str) throws DateTimeParseException {
         if (isNullDateTime(str)) {
             return null; // NOSONAR
         }
@@ -145,8 +162,11 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
         if (isPossibleMillis(str)) {
             try {
-                return OffsetDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
-            } catch (final NumberFormatException e) {
+                // Long.parseLong, not Numbers.toLong: epoch text is decimal digits only, like the java.util.Date /
+                // Calendar handlers ("0x1F4A0" must not become 128160 ms). Overflow is reported as NFE here; the
+                // ArithmeticException arm mirrors the char[] overload so both paths end in DateTimeParseException.
+                return OffsetDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(str)), DEFAULT_ZONE_ID);
+            } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
@@ -172,25 +192,33 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
     /**
      * Converts a character array to an {@link OffsetDateTime} object.
-     * This method first checks if the character array represents a long value (epoch milliseconds).
-     * If so, it creates an OffsetDateTime from that timestamp. Otherwise, it converts the
-     * character array to a string and delegates to {@link #valueOf(String)}.
+     * This method first checks if the character array represents a long value (epoch milliseconds: digits ending in
+     * a digit, so a trailing {@code L}/{@code d}/{@code f} type suffix is not accepted). If so, it creates an
+     * OffsetDateTime from that timestamp. Otherwise, it converts the character array to a string and delegates to
+     * {@link #valueOf(String)}, so both overloads give the same answer for the same text.
      *
      * @param cbuf the character array containing the date-time string
      * @param offset the offset in the array where the date-time string starts
      * @param len the length of the date-time string
      * @return the parsed OffsetDateTime, or {@code null} if the input is {@code null} or empty
+     * @throws DateTimeParseException if the text is neither a millisecond number nor a valid ISO-8601 representation
+     *         (see {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
+    @MayReturnNull
     @Override
-    public OffsetDateTime valueOf(final char[] cbuf, final int offset, final int len) {
+    public OffsetDateTime valueOf(final char[] cbuf, final int offset, final int len) throws DateTimeParseException {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
 
+        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
+        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
+        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
+        // DateTimeParseException.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return OffsetDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_ZONE_ID);
-            } catch (final NumberFormatException e) {
+            } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
@@ -205,10 +233,11 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return an OffsetDateTime representing the timestamp, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
-    public OffsetDateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public OffsetDateTime get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
         return ts == null ? null : OffsetDateTime.ofInstant(ts.toInstant(), DEFAULT_ZONE_ID);
@@ -221,10 +250,11 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * @param rs the ResultSet to read from
      * @param columnName the label for the column specified with the SQL AS clause
      * @return an OffsetDateTime representing the timestamp, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the columnName is invalid
      */
     @Override
-    public OffsetDateTime get(final ResultSet rs, final String columnName) throws SQLException {
+    public OffsetDateTime get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final Timestamp ts = rs.getTimestamp(columnName);
 
         return ts == null ? null : OffsetDateTime.ofInstant(ts.toInstant(), DEFAULT_ZONE_ID);
@@ -237,10 +267,13 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the OffsetDateTime value to set, or {@code null} to set SQL NULL
+     * @throws IllegalArgumentException if a non-null value cannot be converted to a {@code Timestamp} because its epoch-millisecond value overflows
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final OffsetDateTime x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final OffsetDateTime x)
+            throws IllegalArgumentException, NullPointerException, SQLException {
         stmt.setTimestamp(columnIndex, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
@@ -251,10 +284,13 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OffsetDateTime value to set, or {@code null} to set SQL NULL
+     * @throws IllegalArgumentException if a non-null value cannot be converted to a {@code Timestamp} because its epoch-millisecond value overflows
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final OffsetDateTime x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final OffsetDateTime x)
+            throws IllegalArgumentException, NullPointerException, SQLException {
         stmt.setTimestamp(parameterName, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
@@ -268,7 +304,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      *
      * @param appendable the Appendable to write to
      * @param x the OffsetDateTime value to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws IOException if appending the formatted date/time text or null literal to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -299,6 +335,8 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * </ul>
      * When the format is not {@code LONG} and the config specifies a string quotation character,
      * the formatted value is wrapped in that quotation character.
+     * The parser configuration defaults to {@code LONG}; set its date-time format to {@code null}
+     * to preserve nanoseconds and offset seconds. Explicit second/millisecond formats reduce precision.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
@@ -312,12 +350,12 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * @param writer the CharacterWriter to write to
      * @param x the OffsetDateTime value to write; if {@code null}, writes the literal {@code "null"}
      * @param config the serialization configuration specifying format and quoting; may be {@code null}
-     * @throws IOException if an I/O error occurs during the write operation
-     * @throws RuntimeException if an unsupported {@code DateTimeFormat} is specified
+     * @throws IOException if writing the selected date/time representation, quotation marks or null literal to {@code writer} fails
+     * @throws ArithmeticException if the LONG format is selected and the epoch-millisecond value overflows a long
      */
     @SuppressWarnings("null")
     @Override
-    public void serializeTo(final CharacterWriter writer, final OffsetDateTime x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final OffsetDateTime x, final JsonXmlSerConfig<?> config) throws IOException, ArithmeticException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

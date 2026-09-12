@@ -1,8 +1,10 @@
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -286,4 +288,21 @@ public class ByteArrayTypeTest extends TestBase {
         assertNotNull(type.name());
     }
 
+
+    @Test
+    public void reviewFixes20260906_valueOfExceptionTypesForOverflowEmptyAndInvalidElements() {
+        assertArrayEquals(new Byte[] { 127, null, -128 }, type.valueOf("[127, null, -128]"));
+
+        // one past the range is ArithmeticException (not NumberFormatException, which is what the javadoc used to claim)
+        assertThrows(ArithmeticException.class, () -> type.valueOf("[128]"));
+        assertThrows(ArithmeticException.class, () -> type.valueOf("[-129]"));
+        assertThrows(ArithmeticException.class, () -> type.valueOf("[null, 128]"));
+
+        // an empty / whitespace-only element is IllegalArgumentException from split (exact class, not a subclass)
+        assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,,2]")).getClass());
+        assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1, ]")).getClass());
+
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[x]"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[NULL]"));
+    }
 }

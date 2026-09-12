@@ -27,6 +27,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Immutable;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Generic type handler for {@link Number} subclasses, providing common functionality
@@ -46,6 +47,7 @@ import com.landawn.abacus.util.N;
  *
  * @param <T> the specific {@code Number} subclass this type handler manages
  */
+@SuppressWarnings("java:S2160")
 public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
 
     private final Class<T> typeClass;
@@ -58,8 +60,9 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * typically only used by subclasses that override the conversion methods.
      *
      * @param typeName the registered name of this number type
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected NumberType(final String typeName) {
+    protected NumberType(final String typeName) throws IllegalArgumentException {
         this(typeName, Number.class);
     }
 
@@ -68,8 +71,9 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * The type name is derived from the canonical class name.
      *
      * @param typeClass the class of the number type
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}.
      */
-    protected NumberType(final Class<?> typeClass) {
+    protected NumberType(final Class<?> typeClass) throws IllegalArgumentException {
         this(ClassUtil.getCanonicalClassName(typeClass), typeClass);
     }
 
@@ -80,10 +84,13 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      *
      * @param typeName the name of the number type
      * @param typeClass the class of the number type
+     * @throws IllegalArgumentException if {@code typeClass} or {@code typeName} is {@code null}.
      */
     @SuppressFBWarnings({ "REC_CATCH_EXCEPTION", "DE_MIGHT_IGNORE" })
-    protected NumberType(final String typeName, final Class<?> typeClass) {
+    protected NumberType(final String typeName, final Class<?> typeClass) throws IllegalArgumentException {
         super(typeName);
+        N.checkArgNotNull(typeClass, cs.typeClass);
+
         this.typeClass = (Class<T>) typeClass;
 
         final Field[] fields = typeClass.getDeclaredFields();
@@ -121,7 +128,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
                         && Modifier.isStatic(it.getModifiers()) //
                         && typeClass.isAssignableFrom(it.getReturnType()) //
                         && it.getParameterCount() == 1 //
-                        && (valueType.isAssignableFrom(it.getParameterTypes()[0]))).orElse(null);
+                        && ClassUtil.wrap(valueType).isAssignableFrom(ClassUtil.wrap(it.getParameterTypes()[0]))).orElse(null);
             } catch (final Exception e) {
                 // ignore
             }
@@ -226,13 +233,14 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      *
      * @param str the string to convert, may be {@code null} or empty
      * @return an instance of the number type, or {@code null} if the input string is {@code null} or empty
-     * @throws NumberFormatException if the string cannot be parsed as the target number type
-     * @throws UnsupportedOperationException if no suitable factory method or constructor was found
+     * @throws UnsupportedOperationException if {@code str} is nonempty and no suitable public factory method or constructor exists.
+     * @throws NumberFormatException if the selected creator parameter type cannot parse the nonempty input as a number.
+     * @throws RuntimeException if conversion of the creator argument or invocation of the selected factory method or constructor fails.
      * @see #valueOf(Object)
      * @see #stringOf(Number)
      */
     @Override
-    public T valueOf(final String str) {
+    public T valueOf(final String str) throws UnsupportedOperationException, NumberFormatException, RuntimeException {
         return N.isEmpty(str) ? null : creator.apply(str);
     }
 
@@ -263,7 +271,8 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      *
      * @param appendable the target to write to
      * @param x the number value to append, may be {@code null}
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -275,7 +284,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -298,10 +307,11 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the number value to write, may be {@code null}
      * @param config the serialization configuration controlling null-number substitution; may be {@code null}
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null && config != null && config.isWriteNullNumberAsZero()) {
             writer.write('0');
         } else {

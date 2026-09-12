@@ -16,6 +16,10 @@
 
 package com.landawn.abacus.util;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -188,7 +192,8 @@ import com.landawn.abacus.util.stream.CharStream;
  *
  * <p><b>Capacity Management:</b>
  * <ul>
- *   <li><b>Initial Capacity:</b> Default capacity of 10 elements</li>
+ *   <li><b>Initial Capacity:</b> The no-argument constructor starts with shared zero-length storage;
+ *       first growth allocates at least 10 elements</li>
  *   <li><b>Growth Strategy:</b> 1.75x expansion when capacity exceeded</li>
  *   <li><b>Manual Control:</b> specify the initial capacity via the {@code CharList(int)} constructor</li>
  *   <li><b>Trimming:</b> {@code trimToSize()} to reduce memory footprint</li>
@@ -206,7 +211,9 @@ import com.landawn.abacus.util.stream.CharStream;
  * <ul>
  *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
  *   <li><b>Version Compatibility:</b> Stable serialVersionUID for version compatibility</li>
- *   <li><b>Efficient Format:</b> Optimized serialization of char arrays</li>
+ *   <li><b>Serialized Form:</b> A custom {@code writeObject} writes only the elements in
+ *       {@code [0, size())}, so spare capacity is never emitted; {@code readObject} rejects a stream whose
+ *       {@code size} does not fit its {@code elementData}</li>
  *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
  * </ul>
  *
@@ -372,7 +379,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws IllegalArgumentException if the specified initial capacity is negative.
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
-    public CharList(final int initialCapacity) throws IllegalArgumentException {
+    public CharList(final int initialCapacity) throws IllegalArgumentException, OutOfMemoryError {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
 
         elementData = initialCapacity == 0 ? N.EMPTY_CHAR_ARRAY : new char[initialCapacity];
@@ -388,14 +395,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * char[] arr = {'a', 'b', 'c'};
      * CharList list = new CharList(arr);   // list is ['a', 'b', 'c'], backed by arr
      * arr[0] = 'x';                        // list is now ['x', 'b', 'c'] (shares array)
-     * new CharList((char[]) null);         // throws NullPointerException
+     * new CharList((char[]) null);         // throws IllegalArgumentException
      * }</pre>
      *
      * @param a the array whose elements are to be used as the backing array for this list; must not be {@code null}
-     * @throws NullPointerException if the specified array is {@code null}
+     * @throws IllegalArgumentException if the specified array is {@code null}
      */
-    public CharList(final char[] a) {
-        this(N.requireNonNull(a), a.length);
+    public CharList(final char[] a) throws IllegalArgumentException {
+        this(N.checkArgNotNull(a, cs.a), a.length);
     }
 
     /**
@@ -411,11 +418,14 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * new CharList(arr, 5);                   // throws IndexOutOfBoundsException (5 > arr.length)
      * }</pre>
      *
-     * @param a the array to be used as the element array for this list
+     * @param a the array to be used as the element array for this list; must not be {@code null}
      * @param size the number of elements in the list
-     * @throws IndexOutOfBoundsException if the specified size is negative or greater than the array length
+     * @throws IllegalArgumentException if {@code a} is {@code null}
+     *         or if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code size} is greater than the array length
      */
-    public CharList(final char[] a, final int size) throws IndexOutOfBoundsException {
+    public CharList(final char[] a, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(a, cs.a);
         N.checkFromIndexSize(0, size, a.length);
 
         elementData = a;
@@ -458,9 +468,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param size the number of elements from the array to include in the list.
      *             Must be between 0 and the array length (inclusive).
      * @return a new CharList containing the first {@code size} elements of the specified array
-     * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
+     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code size} is greater than the array length
      */
-    public static CharList of(final char[] a, final int size) throws IndexOutOfBoundsException {
+    public static CharList of(final char[] a, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
 
         return new CharList(N.nullToEmpty(a), size);
@@ -508,10 +519,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new CharList containing a copy of the elements in the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
-     *                                   or {@code fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code a} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > a.length}
      */
-    public static CharList copyOf(final char[] a, final int fromIndex, final int toIndex) {
+    public static CharList copyOf(final char[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(a, cs.a);
+
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
@@ -554,7 +567,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return a new CharList containing the range of values
      * @throws IllegalArgumentException if {@code by} is zero.
      */
-    public static CharList range(final char startInclusive, final char endExclusive, final int by) {
+    public static CharList range(final char startInclusive, final char endExclusive, final int by) throws IllegalArgumentException {
         return of(Array.range(startInclusive, endExclusive, by));
     }
 
@@ -597,7 +610,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return a new CharList containing the range of values
      * @throws IllegalArgumentException if {@code by} is zero.
      */
-    public static CharList rangeClosed(final char startInclusive, final char endInclusive, final int by) {
+    public static CharList rangeClosed(final char startInclusive, final char endInclusive, final int by) throws IllegalArgumentException {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
     }
 
@@ -618,7 +631,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return a new CharList containing the repeated element
      * @throws IllegalArgumentException if {@code len} is negative.
      */
-    public static CharList repeat(final char element, final int len) {
+    public static CharList repeat(final char element, final int len) throws IllegalArgumentException {
         return of(Array.repeat(element, len));
     }
 
@@ -633,11 +646,16 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * CharList.random(-1);                   // throws NegativeArraySizeException
      * }</pre>
      *
+     * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
+     * deliberate, but it is roughly two orders of magnitude slower than
+     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
+     * and wrap it with {@code of(..)}.</p>
+     *
      * @param len the length of the list to create
      * @return a new CharList containing random char values
      * @throws NegativeArraySizeException if {@code len} is negative
      */
-    public static CharList random(final int len) {
+    public static CharList random(final int len) throws NegativeArraySizeException {
         final char[] a = new char[len];
 
         for (int i = 0; i < len; i++) {
@@ -658,6 +676,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * CharList.random('z', 'a', 3);                    // throws IllegalArgumentException (start >= end)
      * }</pre>
      *
+     * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
+     * deliberate, but it is roughly two orders of magnitude slower than
+     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
+     * and wrap it with {@code of(..)}.</p>
+     *
      * @param startInclusive the minimum value (inclusive)
      * @param endExclusive the maximum value (exclusive)
      * @param len the length of the list to create
@@ -665,7 +688,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws IllegalArgumentException if {@code startInclusive >= endExclusive}.
      * @throws NegativeArraySizeException if {@code len} is negative
      */
-    public static CharList random(final char startInclusive, final char endExclusive, final int len) {
+    public static CharList random(final char startInclusive, final char endExclusive, final int len)
+            throws IllegalArgumentException, NegativeArraySizeException {
         if (startInclusive >= endExclusive) {
             throw new IllegalArgumentException("'startInclusive' (" + startInclusive + ") must be less than 'endExclusive' (" + endExclusive + ")");
         }
@@ -692,6 +716,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * CharList.random(new char[0], 3);                   // throws IllegalArgumentException (empty candidates)
      * }</pre>
      *
+     * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
+     * deliberate, but it is roughly two orders of magnitude slower than
+     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
+     * and wrap it with {@code of(..)}.</p>
+     *
      * @param candidates the array of candidate chars to choose from; must not be {@code null}, empty,
      *                   or of length {@code Integer.MAX_VALUE}
      * @param len the length of the list to create
@@ -700,10 +729,20 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *         {@code Integer.MAX_VALUE} elements.
      * @throws NegativeArraySizeException if {@code len} is negative
      */
-    public static CharList random(final char[] candidates, final int len) {
-        if (N.isEmpty(candidates) || candidates.length == Integer.MAX_VALUE) {
-            throw new IllegalArgumentException();
+    public static CharList random(final char[] candidates, final int len) throws IllegalArgumentException, NegativeArraySizeException {
+        if (N.isEmpty(candidates)) {
+            throw new IllegalArgumentException("'candidates' cannot be null or empty");
+        } else if (candidates.length == Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("'candidates' cannot have exactly Integer.MAX_VALUE elements");
         } else if (candidates.length == 1) {
+            // Validate len BEFORE the shortcut: Array.repeat rejects a negative length with
+            // IllegalArgumentException, so without this the exception type depended on how many candidates
+            // were supplied - one candidate gave IllegalArgumentException, two or more the documented
+            // NegativeArraySizeException that the random(int) and random(char, char, int) siblings throw.
+            if (len < 0) {
+                throw new NegativeArraySizeException(String.valueOf(len));
+            }
+
             return repeat(candidates[0], len);
         }
 
@@ -755,7 +794,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
-    public char get(final int index) {
+    public char get(final int index) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         return elementData[index];
@@ -776,7 +815,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
-    public char set(final int index, final char e) {
+    public char set(final int index, final char e) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         final char oldValue = elementData[index];
@@ -801,8 +840,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * }</pre>
      *
      * @param e the element to be appended to this list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void add(final char e) {
+    public void add(final char e) throws OutOfMemoryError {
         ensureCapacity(size + 1);
 
         elementData[size++] = e;
@@ -828,8 +868,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param e the element to be inserted
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void add(final int index, final char e) {
+    public void add(final int index, final char e) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         ensureCapacity(size + 1);
@@ -851,9 +892,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param c the CharList containing elements to be added to this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if {@code c} was not empty)
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final CharList c) {
+    public boolean addAll(final CharList c) throws OutOfMemoryError {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -878,9 +920,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param c the CharList containing elements to be inserted into this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if {@code c} was not empty)
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final int index, final CharList c) {
+    public boolean addAll(final int index, final CharList c) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(c)) {
@@ -910,9 +953,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param a the array containing elements to be added to this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty)
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final char[] a) {
+    public boolean addAll(final char[] a) throws OutOfMemoryError {
         return addAll(size(), a);
     }
 
@@ -925,9 +969,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param a the array containing elements to be inserted into this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty)
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final int index, final char[] a) {
+    public boolean addAll(final int index, final char[] a) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(a)) {
@@ -951,7 +996,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return true;
     }
 
-    private void rangeCheckForAdd(final int index) {
+    /**
+     * @throws IndexOutOfBoundsException if {@code index < 0} or {@code index > size()}
+     */
+    private void rangeCheckForAdd(final int index) throws IndexOutOfBoundsException {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -1034,7 +1082,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             N.copy(elementData, index + 1, elementData, index, numMoved);
         }
 
-        elementData[--size] = 0; // clear to let GC do its work
+        elementData[--size] = 0; // keep the unused tail deterministic; it is reachable via internalArray()
     }
 
     /**
@@ -1081,28 +1129,49 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * boolean noChange = list.removeIf(c -> c > 'z');   // returns false, list unchanged
      * }</pre>
      *
-     * @param p a predicate which returns {@code true} for elements to be removed;
+     * <p>The list is left unchanged if {@code p} throws: no element is moved until every
+     * {@code p.test(..)} call has returned. Nothing is allocated when no element matches.</p>
+     *
+     * @param p a predicate which returns {@code true} for elements to be removed; must not be {@code null}.
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
      * @throws IllegalArgumentException if {@code p} is {@code null}.
      */
     public boolean removeIf(final CharPredicate p) throws IllegalArgumentException {
         N.checkArgNotNull(p, cs.p);
 
-        final CharList tmp = new CharList(size());
+        // Split into locate-then-compact so the list is left untouched if the predicate throws:
+        // no element is moved until every p.test(..) call has returned. Nothing is allocated
+        // unless at least one element matches, and the marker set costs one bit per element.
+        int first = 0;
 
-        for (int i = 0; i < size; i++) {
-            if (!p.test(elementData[i])) {
-                tmp.add(elementData[i]);
-            }
+        while (first < size && !p.test(elementData[first])) {
+            first++;
         }
 
-        if (tmp.size() == size()) {
+        if (first == size) {
             return false;
         }
 
-        N.copy(tmp.elementData, 0, elementData, 0, tmp.size());
-        N.fill(elementData, tmp.size(), size, (char) 0);
-        size = tmp.size;
+        // bit k of removed[] corresponds to element (first + k); bit 0 is the match just found
+        final long[] removed = new long[((size - first) >> 6) + 1];
+        removed[0] |= 1L;
+
+        for (int i = first + 1; i < size; i++) {
+            if (p.test(elementData[i])) {
+                removed[(i - first) >> 6] |= 1L << (i - first);
+            }
+        }
+
+        int w = first;
+
+        for (int i = first + 1; i < size; i++) {
+            if ((removed[(i - first) >> 6] & (1L << (i - first))) == 0) {
+                elementData[w++] = elementData[i];
+            }
+        }
+
+        N.fill(elementData, w, size, (char) 0);
+        size = w;
 
         return true;
     }
@@ -1164,7 +1233,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>If the specified list is {@code null} or empty, all elements are removed from this list.</p>
      *
-     * @param c the CharList containing elements to be retained in this list
+     * @param c the CharList containing elements to be retained in this list.
+     *          If {@code null} or empty, all elements of this list are removed
      * @return {@code true} if this list was modified as a result of the call
      */
     @Override
@@ -1185,7 +1255,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * <p>If the specified array is {@code null} or empty, all elements are removed from this list.</p>
      *
-     * @param a the array containing elements to be retained in this list
+     * @param a the array containing elements to be retained in this list.
+     *          If {@code null} or empty, all elements of this list are removed
      * @return {@code true} if this list was modified as a result of the call
      */
     @Override
@@ -1211,7 +1282,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
         int w = 0;
 
-        if (c.size() > 3 && size() > 9) {
+        // Compaction must not change membership when another list wraps the same array.
+        if (elementData == c.elementData || needToSet(size(), c.size())) {
             final Set<Character> set = c.toSet();
 
             for (int i = 0; i < size; i++) {
@@ -1259,7 +1331,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      * @see #removeAllAt(int...)
      */
-    public char removeAt(final int index) {
+    public char removeAt(final int index) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         final char oldValue = elementData[index];
@@ -1288,7 +1360,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @see #removeAt(int)
      */
     @Override
-    public void removeAllAt(final int... indices) {
+    public void removeAllAt(final int... indices) throws IndexOutOfBoundsException {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -1312,8 +1384,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param fromIndex the index of the first element to be removed
      * @param toIndex the index after the last element to be removed
-     * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range
-     *         ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public void removeRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1355,7 +1426,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *         {@code newPositionAfterMove} would cause elements to be moved outside the list
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
 
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
@@ -1380,11 +1451,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param toIndex the ending index (exclusive) of the range to replace
      * @param replacement the CharList whose elements will replace the specified range. If {@code null} or empty,
      *        the range is simply removed (no elements are inserted)
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
-    public void replaceRange(final int fromIndex, final int toIndex, final CharList replacement) throws IndexOutOfBoundsException {
+    public void replaceRange(final int fromIndex, final int toIndex, final CharList replacement) throws IndexOutOfBoundsException, OutOfMemoryError {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
@@ -1397,13 +1468,15 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.size();
 
         if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError("Required capacity is too large: " + newSizeLong + " > " + MAX_ARRAY_SIZE);
         }
 
         final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
-            elementData = N.copyOf(elementData, newSize);
+            // Grow with the same amortized policy ensureCapacity uses. Sizing the array to exactly
+            // newSize would make a loop of growing replaceRange calls reallocate and copy every time.
+            elementData = N.copyOf(elementData, calNewCapacity(newSize, elementData.length));
         }
 
         if (toIndex - fromIndex != replacement.size() && toIndex != size) {
@@ -1438,11 +1511,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param toIndex the ending index (exclusive) of the range to replace
      * @param replacement the array whose elements will replace the specified range. If {@code null} or empty,
      *        the range is simply removed (no elements are inserted)
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
-    public void replaceRange(final int fromIndex, final int toIndex, final char[] replacement) throws IndexOutOfBoundsException {
+    public void replaceRange(final int fromIndex, final int toIndex, final char[] replacement) throws IndexOutOfBoundsException, OutOfMemoryError {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
@@ -1455,13 +1528,15 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.length;
 
         if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError("Required capacity is too large: " + newSizeLong + " > " + MAX_ARRAY_SIZE);
         }
 
         final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
-            elementData = N.copyOf(elementData, newSize);
+            // Grow with the same amortized policy ensureCapacity uses. Sizing the array to exactly
+            // newSize would make a loop of growing replaceRange calls reallocate and copy every time.
+            elementData = N.copyOf(elementData, calNewCapacity(newSize, elementData.length));
         }
 
         if (toIndex - fromIndex != replacement.length && toIndex != size) {
@@ -1519,7 +1594,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * new CharList().replaceAll(c -> c);                // empty list unchanged
      * }</pre>
      *
-     * @param operator the operator to apply to each element;
+     * @param operator the operator to apply to each element; must not be {@code null}.
      * @throws IllegalArgumentException if {@code operator} is {@code null}.
      */
     public void replaceAll(final CharUnaryOperator operator) throws IllegalArgumentException {
@@ -1540,7 +1615,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * boolean noChange = list.replaceIf(c -> c > 'z', 'x');   // returns false, list unchanged
      * }</pre>
      *
-     * @param predicate the predicate to test elements;
+     * @param predicate the predicate to test elements; must not be {@code null}.
      * @param newValue the value to replace matching elements with
      * @return {@code true} if any elements were replaced
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
@@ -1591,7 +1666,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param fromIndex the index of the first element (inclusive) to be filled with the specified value
      * @param toIndex the index after the last element (exclusive) to be filled with the specified value
      * @param val the value to be stored in the specified range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public void fill(final int fromIndex, final int toIndex, final char val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1630,7 +1705,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * boolean none = list.containsAny(CharList.of('x', 'z'));   // returns false
      * }</pre>
      *
-     * @param c the CharList to check for common elements
+     * @param c the CharList to check for common elements.
+     *          If {@code null} or empty, {@code false} is returned
      * @return {@code true} if this list contains at least one element from the specified CharList
      */
     @Override
@@ -1652,7 +1728,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * boolean none = list.containsAny(new char[] {'x', 'z'});   // returns false
      * }</pre>
      *
-     * @param a the array to check for common elements
+     * @param a the array to check for common elements.
+     *          If {@code null} or empty, {@code false} is returned
      * @return {@code true} if this list contains at least one element from the specified array
      */
     @Override
@@ -1675,7 +1752,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * boolean empty = list.containsAll(new CharList());           // returns true (empty is always contained)
      * }</pre>
      *
-     * @param c the CharList to be checked for containment in this list
+     * @param c the CharList to be checked for containment in this list.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list contains all of the elements in the specified CharList
      */
     @Override
@@ -1716,7 +1794,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * boolean empty = list.containsAll(new char[0]);              // returns true (empty is always contained)
      * }</pre>
      *
-     * @param a the array to be checked for containment in this list
+     * @param a the array to be checked for containment in this list.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list contains all of the elements in the specified array
      */
     @Override
@@ -1734,7 +1813,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * Returns {@code true} if this list has no elements in common with the specified CharList.
      * Two lists are disjoint if they have no elements in common.
      *
-     * @param c the CharList to check for common elements
+     * @param c the CharList to check for common elements.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if the two lists have no elements in common
      */
     @Override
@@ -1765,7 +1845,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Returns {@code true} if this list has no elements in common with the specified array.
      *
-     * @param b the array to check for common elements
+     * @param b the array to check for common elements.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list and the array have no elements in common
      */
     @Override
@@ -1797,7 +1878,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param b the list to find common elements with this list
      * @return a new CharList containing elements present in both this list and the specified list,
      *         considering the minimum number of occurrences in either list.
-     *         Returns an empty list if either list is empty.
+     *         Returns an empty list if the specified list is {@code null} or empty, or if this list is empty.
      * @see #intersection(char[])
      * @see #difference(CharList)
      * @see #symmetricDifference(CharList)
@@ -1877,6 +1958,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param b the list to compare against this list
      * @return a new CharList containing the elements that are present in this list but not in the specified list,
      *         considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty.
      * @see #difference(char[])
      * @see #symmetricDifference(CharList)
      * @see #intersection(CharList)
@@ -1948,9 +2030,20 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * CharList result = list1.symmetricDifference(list2);   // result will be ['a', 'd']
      * }</pre>
      *
+     * <p><b>Ordering of the second operand's contributions.</b> Occurrences of equal values are
+     * interchangeable, so when a value survives {@code n} times, those {@code n} occurrences are taken from
+     * that value's <i>earliest</i> positions in the second operand and emitted in index order. The suffix
+     * contributed by the second operand is therefore a subsequence of it by value. The whole result is not necessarily equal to
+     * {@code difference(b)}
+     * followed by {@code b.difference(this)} when the second operand holds duplicates of a partially
+     * cancelled value. For example {@code CharList.of('b').symmetricDifference(CharList.of('b', 'a', 'b'))}
+     * returns {@code [b, a]}, whereas concatenating the two differences would give {@code [a, b]};
+     * both contain the same elements.</p>
+     *
      * @param b the CharList to find the symmetric difference with
      * @return a new CharList containing elements that are in either list but not in both,
-     *         considering the number of occurrences
+     *         considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty
      * @see #symmetricDifference(char[])
      * @see #difference(CharList)
      * @see #intersection(CharList)
@@ -1997,9 +2090,20 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * CharList all = list.symmetricDifference(new char[0]);                     // returns ['a', 'b', 'c'] (copy)
      * }</pre>
      *
+     * <p><b>Ordering of the second operand's contributions.</b> Occurrences of equal values are
+     * interchangeable, so when a value survives {@code n} times, those {@code n} occurrences are taken from
+     * that value's <i>earliest</i> positions in the second operand and emitted in index order. The suffix
+     * contributed by the second operand is therefore a subsequence of it by value. The whole result is not necessarily equal to
+     * {@code difference(b)}
+     * followed by {@code b.difference(this)} when the second operand holds duplicates of a partially
+     * cancelled value. For example {@code CharList.of('b').symmetricDifference(CharList.of('b', 'a', 'b'))}
+     * returns {@code [b, a]}, whereas concatenating the two differences would give {@code [a, b]};
+     * both contain the same elements.</p>
+     *
      * @param b the array to find the symmetric difference with
      * @return a new CharList containing elements that are in either the list or array but not in both,
-     *         considering the number of occurrences
+     *         considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty
      * @see #symmetricDifference(CharList)
      * @see #difference(char[])
      * @see #intersection(char[])
@@ -2173,7 +2277,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param toIndex the ending index (exclusive) of the range to search
      * @return an OptionalChar containing the minimum element in the specified range,
      *         or an empty OptionalChar if the range is empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public OptionalChar min(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2210,7 +2314,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param toIndex the ending index (exclusive) of the range to search
      * @return an OptionalChar containing the maximum element in the specified range,
      *         or an empty OptionalChar if the range is empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public OptionalChar max(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2253,7 +2357,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return an OptionalChar containing the median value if the range is non-empty, or an empty OptionalChar if the range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public OptionalChar lowerMedian(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2271,7 +2375,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * list.forEach(sb::append);   // sb is now "abc"
      * }</pre>
      *
-     * @param action the action to be performed for each element;
+     * @param action the action to be performed for each element; must not be {@code null}.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final CharConsumer action) throws IllegalArgumentException {
@@ -2287,7 +2391,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * {@code fromIndex} and {@code toIndex}:</p>
      * <ul>
      *   <li>If {@code fromIndex <= toIndex}: iterates forward from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive)</li>
-     *   <li>If {@code fromIndex > toIndex}: iterates backward from {@code fromIndex} (inclusive) to {@code toIndex} (exclusive)</li>
+     *   <li>If {@code fromIndex > toIndex}: iterates backward from {@code min(fromIndex, size() - 1)} (inclusive)
+     *       to {@code toIndex} (exclusive); {@code fromIndex == size()} starts at the last element</li>
      *   <li>If {@code toIndex == -1}: treated as backward iteration from {@code fromIndex} to the beginning of the list</li>
      * </ul>
      *
@@ -2302,8 +2407,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or {@code -1} for backward iteration to the start
-     * @param action the action to be performed for each element;
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds
+     * @param action the action to be performed for each element; must not be {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or {@code max(fromIndex, toIndex) > size()}; {@code toIndex == -1} selects reverse traversal through index zero.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final int fromIndex, final int toIndex, final CharConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -2371,7 +2476,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param fromIndex the index of the first element (inclusive) to include
      * @param toIndex the index after the last element (exclusive) to include
      * @return a new CharList containing distinct elements from the specified range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public CharList distinct(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2521,8 +2626,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return the index of the search key if it is contained in the specified range;
      *         otherwise, {@code (-(insertion point) - 1)}. The insertion point is defined
      *         as the point at which the key would be inserted into the range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > size()},
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public int binarySearch(final int fromIndex, final int toIndex, final char valueToFind) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2564,8 +2668,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @param fromIndex the starting index (inclusive) of the range to reverse
      * @param toIndex the ending index (exclusive) of the range to reverse
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > size()},
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2579,7 +2682,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Rotates all elements in this list by the specified distance.
      * After calling rotate(distance), the element at index i will be moved to
-     * index (i + distance) % size.
+     * index {@code Math.floorMod((long) i + distance, size())} when the list is non-empty.
      *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).
@@ -2616,6 +2719,11 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * list.shuffle();        // elements are reordered randomly; size() is still 4
      * // the same chars remain, only their order changes
      * }</pre>
+     *
+     * <p>The source is {@link java.util.concurrent.ThreadLocalRandom}, which is <b>not</b>
+     * cryptographically secure. Note that this is a <i>different</i> generator from the one the
+     * {@code random(..)} factories use; call {@link #shuffle(Random)} with a
+     * {@link java.security.SecureRandom} when the permutation must be unpredictable.</p>
      *
      */
     @Override
@@ -2665,7 +2773,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *         ({@code i < 0 || i >= size()} or {@code j < 0 || j >= size()})
      */
     @Override
-    public void swap(final int i, final int j) {
+    public void swap(final int i, final int j) throws IndexOutOfBoundsException {
         rangeCheck(i);
         rangeCheck(j);
 
@@ -2706,8 +2814,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param fromIndex the starting index (inclusive) of the range to copy
      * @param toIndex the ending index (exclusive) of the range to copy
      * @return a new CharList containing the elements in the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > size()},
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public CharList copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2736,16 +2843,23 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * <li>{@code copy(9, -1, -2)} returns elements at indices 9, 7, 5, 3, 1</li>
      * </ul>
      *
+     * <p>If the sign of {@code step} contradicts the direction of the range — a positive step with
+     * {@code fromIndex > toIndex}, or a negative step with {@code fromIndex < toIndex} — the result is an
+     * empty list rather than an exception. Only {@code step == 0} is rejected.</p>
+     *
+     * <p>For a descending range, {@code fromIndex == size()} starts at the last logical element,
+     * even when the backing array has spare capacity.</p>
+     *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive) of the range to copy; use {@code -1} for backward iteration to index 0
      * @param step the step size between selected elements
      * @return a new CharList containing the selected elements
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or {@code max(fromIndex, toIndex) > size()}; {@code toIndex == -1} is permitted for reverse traversal.
      * @throws IllegalArgumentException if {@code step} is 0.
      * @see N#copyOfRange(char[], int, int, int)
      */
     @Override
-    public CharList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
+    public CharList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
         if (size == 0) {
@@ -2773,20 +2887,18 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param toIndex the index after the last element (exclusive) to be included
      * @param chunkSize the desired size of each sublist (must be positive)
      * @return a List containing the sublists, each of type CharList
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws IllegalArgumentException if {@code chunkSize <= 0}.
      */
     @Override
-    public List<CharList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
+    public List<CharList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final List<char[]> list = N.split(elementData, fromIndex, toIndex, chunkSize);
-        @SuppressWarnings("rawtypes")
-        final List<CharList> result = (List) list;
+        final List<char[]> arrays = N.split(elementData, fromIndex, toIndex, chunkSize);
+        final List<CharList> result = new ArrayList<>(arrays.size());
 
-        for (int i = 0, len = list.size(); i < len; i++) {
-            result.set(i, of(list.get(i)));
+        for (final char[] array : arrays) {
+            result.add(of(array));
         }
 
         return result;
@@ -2802,6 +2914,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *
      * @return this CharList instance (for method chaining)
      */
+    @Beta
     @Override
     public CharList trimToSize() {
         if (elementData.length > size) {
@@ -2883,8 +2996,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param fromIndex the starting index (inclusive) of the range to box
      * @param toIndex the ending index (exclusive) of the range to box
      * @return a new List&lt;Character&gt; containing elements from the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > size()},
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public List<Character> boxed(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2949,13 +3061,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param toIndex the index after the last element (exclusive) to include
      * @param supplier a function which produces a new collection of the desired type
      * @return a collection containing the specified range of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
+     * @throws UnsupportedOperationException if the selected range is non-empty and the supplied collection does not support adding elements
      */
     @Override
     public <C extends Collection<Character>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, UnsupportedOperationException {
         checkFromToIndex(fromIndex, toIndex);
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -2977,9 +3089,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @param toIndex the index after the last element (exclusive) to include
      * @param supplier a function which produces a new Multiset of the desired type
      * @return a Multiset containing the specified range of elements with their counts
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}, or adding the selected elements would exceed {@link Integer#MAX_VALUE} occurrences for an element in the supplied multiset
      */
     @Override
     public Multiset<Character> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Character>> supplier)
@@ -3034,6 +3145,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      *     .forEach(System.out::print);   // prints "AB"
      * }</pre>
      *
+     * <p>The stream captures the backing array reference and the range endpoints when it is created,
+     * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured
+     * range can be observed by a stream that has not consumed those positions yet. Growing the list
+     * afterwards does not extend the stream, and any operation that reallocates the backing array leaves
+     * the stream reading the old one. Do not modify the list while a stream over it is in flight.</p>
+     *
      * @return a CharStream over all elements in this list
      */
     public CharStream stream() {
@@ -3053,11 +3170,16 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * long count = list.stream(1, 3).count();   // returns 2 (elements at indices 1,2)
      * }</pre>
      *
+     * <p>The stream captures the backing array reference and the range endpoints when it is created,
+     * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured
+     * range can be observed by a stream that has not consumed those positions yet. Growing the list
+     * afterwards does not extend the stream, and any operation that reallocates the backing array leaves
+     * the stream reading the old one. Do not modify the list while a stream over it is in flight.</p>
+     *
      * @param fromIndex the index of the first element (inclusive) to include in the stream
      * @param toIndex the index after the last element (exclusive) to include in the stream
      * @return a CharStream over the specified range of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public CharStream stream(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -3083,7 +3205,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @see #first()
      * @see #getLast()
      */
-    public char getFirst() {
+    public char getFirst() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return elementData[0];
@@ -3107,7 +3229,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @see #last()
      * @see #getFirst()
      */
-    public char getLast() {
+    public char getLast() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return elementData[size - 1];
@@ -3129,8 +3251,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * }</pre>
      *
      * @param e the char element to add at the beginning of the list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void addFirst(final char e) {
+    public void addFirst(final char e) throws OutOfMemoryError {
         add(0, e);
     }
 
@@ -3150,9 +3273,10 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * }</pre>
      *
      * @param e the char element to append to the list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void addLast(final char e) {
-        add(size, e);
+    public void addLast(final char e) throws OutOfMemoryError {
+        add(e);
     }
 
     /**
@@ -3172,7 +3296,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return the first char value that was removed from the list
      * @throws NoSuchElementException if the list is empty
      */
-    public char removeFirst() {
+    public char removeFirst() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return removeAt(0);
@@ -3194,7 +3318,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * @return the last char value that was removed from the list
      * @throws NoSuchElementException if the list is empty
      */
-    public char removeLast() {
+    public char removeLast() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return removeAt(size - 1);
@@ -3255,9 +3379,13 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
         return size == 0 ? Strings.STR_FOR_EMPTY_ARRAY : N.toString(elementData, 0, size);
     }
 
-    private void ensureCapacity(final int minCapacity) {
+    /**
+     * @throws OutOfMemoryError if {@code minCapacity} is negative or exceeds the maximum supported array size, or the enlarged array cannot be allocated
+     */
+    private void ensureCapacity(final int minCapacity) throws OutOfMemoryError {
         if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError(
+                    "Required capacity is too large: " + (minCapacity < 0 ? "it overflowed the int range" : minCapacity + " > " + MAX_ARRAY_SIZE));
         }
 
         if (N.isEmpty(elementData)) {
@@ -3267,5 +3395,53 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
             elementData = Arrays.copyOf(elementData, newCapacity);
         }
+    }
+
+    /**
+     * Writes this list to the given stream using only the elements in {@code [0, size())}.
+     *
+     * <p>The default serialized form would emit the whole backing array. That is wasteful for a list
+     * whose capacity exceeds its size, and — because {@link #CharList(char[], int)} and
+     * {@code of(char[], int)} adopt the caller's array without copying — it would also write out
+     * whatever the caller left beyond {@code size()}. This method writes the same two fields under the
+     * same names, so streams stay readable in both directions across this change.</p>
+     *
+     * @param os the stream to write to
+     * @throws IOException if writing the list fields or backing-array contents to {@code os} fails
+     */
+    @Serial
+    private void writeObject(final ObjectOutputStream os) throws IOException {
+        final ObjectOutputStream.PutField fields = os.putFields();
+
+        fields.put("elementData", size == elementData.length ? elementData : N.copyOfRange(elementData, 0, size));
+        fields.put("size", size);
+
+        os.writeFields();
+    }
+
+    /**
+     * Restores this list from the given stream, rejecting a stream whose {@code size} does not fit its
+     * {@code elementData}.
+     *
+     * <p>Without this check a corrupted or hand-crafted stream would deserialize successfully and then
+     * fail much later with an {@link IndexOutOfBoundsException} from an unrelated method.</p>
+     *
+     * @param is the stream to read from
+     * @throws IOException if reading the serialized fields fails, or the stored array is null, has the wrong primitive type, or is inconsistent with the stored size
+     * @throws ClassNotFoundException if a class needed to restore a serialized field cannot be resolved
+     */
+    @Serial
+    private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {
+        final ObjectInputStream.GetField fields = is.readFields();
+        final Object a = fields.get("elementData", null);
+        final int sz = fields.get("size", 0);
+
+        if (!(a instanceof char[] array) || sz < 0 || sz > array.length) {
+            throw new InvalidObjectException(
+                    "Invalid serialized CharList: size=" + sz + ", elementData=" + (a == null ? "null" : a.getClass().getSimpleName()));
+        }
+
+        elementData = array;
+        size = sz;
     }
 }

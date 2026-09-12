@@ -4,10 +4,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.type.TypeFactory;
 
 public class TypeAttrParserTest extends TestBase {
 
-    static class SingleArrayArg {
+    public static class SingleArrayArg {
         final String[] values;
 
         SingleArrayArg(final String[] values) {
@@ -15,7 +16,7 @@ public class TypeAttrParserTest extends TestBase {
         }
     }
 
-    static class PrefixedSingleArrayArg {
+    public static class PrefixedSingleArrayArg {
         final int prefix;
         final String[] values;
 
@@ -27,10 +28,10 @@ public class TypeAttrParserTest extends TestBase {
 
     @Test
     public void testNewInstanceRejectsNullVarargsClearly() {
-        final NullPointerException exception = Assertions.assertThrows(NullPointerException.class,
+        final IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
                 () -> TypeAttrParser.newInstance(SingleArrayArg.class, "SingleArrayArg(alpha)", (Object[]) null));
 
-        Assertions.assertEquals("args", exception.getMessage());
+        Assertions.assertEquals("'args' cannot be null", exception.getMessage());
     }
 
     @Test
@@ -140,6 +141,19 @@ public class TypeAttrParserTest extends TestBase {
     }
 
     @Test
+    public void testParseCommaParameterIsTheOnlySpecialCasedAllEmptyArgumentList() {
+        // documents the exception to "the argument list is parsed as CSV": an argument list that is a lone comma
+        // once trimmed is the delimiter itself, not two empty fields, so a comma delimiter needs no quoting.
+        // Nothing else is special-cased.
+        Assertions.assertArrayEquals(new String[] { "," }, TypeAttrParser.parse("StringJoiner(,)").getParameters());
+        Assertions.assertArrayEquals(new String[] { "," }, TypeAttrParser.parse("StringJoiner( , )").getParameters());
+        Assertions.assertArrayEquals(new String[] { "," }, TypeAttrParser.parse("StringJoiner(\",\")").getParameters());
+
+        Assertions.assertArrayEquals(new String[] { "", "" }, new CsvParser(',', '"', '\\').parseLineToArray(","));
+        Assertions.assertArrayEquals(new String[] { "", "", "" }, TypeAttrParser.parse("StringJoiner(,,)").getParameters());
+    }
+
+    @Test
     public void testParseQuotedParameters() {
         TypeAttrParser parser = TypeAttrParser.parse("StringBuilder(\"Hello, World\")");
 
@@ -163,6 +177,28 @@ public class TypeAttrParserTest extends TestBase {
 
         Assertions.assertEquals("List", parser.getClassName());
         Assertions.assertArrayEquals(new String[] { "String[]" }, parser.getTypeParameters());
+    }
+
+    @Test
+    public void testParseParameterizedArrayTypes() {
+        TypeAttrParser parser = TypeAttrParser.parse("List<String>[]");
+        Assertions.assertEquals("List[]", parser.getClassName());
+        Assertions.assertArrayEquals(new String[] { "String" }, parser.getTypeParameters());
+        Assertions.assertArrayEquals(new String[0], parser.getParameters());
+
+        parser = TypeAttrParser.parse("Map<String, List<Integer>[][]>");
+        Assertions.assertEquals("Map", parser.getClassName());
+        Assertions.assertArrayEquals(new String[] { "String", "List<Integer>[][]" }, parser.getTypeParameters());
+
+        parser = TypeAttrParser.parse("  Owner<Long>.Member<String>[][]  ");
+        Assertions.assertEquals("Owner.Member[][]", parser.getClassName());
+        Assertions.assertArrayEquals(new String[] { "String" }, parser.getTypeParameters());
+        Assertions.assertEquals("String[][]", TypeAttrParser.parse("String[][]").getClassName());
+
+        for (final String malformed : new String[] { "List<String>[]junk", "List<String>[3]", "List<String>[", "List<String>[]>", "List<>[]",
+                "List<Map<String,>[]>", "[]", "Factory(value)[]" }) {
+            Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse(malformed), malformed);
+        }
     }
 
     @Test
@@ -395,5 +431,131 @@ public class TypeAttrParserTest extends TestBase {
         Assertions.assertTrue(str.contains("className=HashMap"));
         Assertions.assertTrue(str.contains("typeParameters=[String, Integer]"));
         Assertions.assertTrue(str.contains("parameters=[16, 0.75f]"));
+    }
+
+    @Test
+    public void testParseReportsMalformedQuotedArgumentAsIllegalArgument() {
+        // The delimiter scanner opens a quoted region on ANY '"', while the CSV dialect treats a '"' inside an
+        // unquoted field as data, so a substring the scanner accepted can still be malformed CSV. That used to
+        // escape as com.landawn.abacus.exception.ParsingException, which parse() does not document.
+        for (final String malformed : new String[] { "Foo(a\",\")", "(a\",\")", "Foo(x,a\",\")", "Foo<String>(a\",\")",
+                "Map<String, Foo(a\",\")>" }) {
+            final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse(malformed),
+                    malformed);
+            Assertions.assertTrue(e.getMessage().startsWith("Malformed type attribute: malformed quoted constructor argument in: "),
+                    e.getMessage());
+        }
+
+        // the same escape reached the IAE-documented public entry points
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("List(a\",\")"));
+
+        // the accept/reject split itself is deliberately unchanged: an even number of embedded quotes parses,
+        // an odd number does not.
+        Assertions.assertArrayEquals(new String[] { "bc\"d\"ef" }, TypeAttrParser.parse("Foo(bc\"d\"ef)").getParameters());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Foo(a\"b)"));
+    }
+
+    @Test
+    public void testParseRejectsArrayBracketsWithoutComponentType() {
+        // "[]" was rejected only when the brackets ended the string; once generics or constructor parentheses
+        // followed, the brackets were absorbed into the class name and parse() returned className "[]".
+        for (final String malformed : new String[] { "[]", "[][]", "[]()", "[] ()", "[](1)", "[]<A>", "[]<A>(1)", " []()", "[][]()",
+                "[]<A>[]" }) {
+            final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse(malformed),
+                    malformed);
+            Assertions.assertTrue(e.getMessage().startsWith("Malformed type attribute: missing class name in: "), malformed + " -> " + e.getMessage());
+        }
+
+        Assertions.assertEquals("Foo[]", TypeAttrParser.parse("Foo[]").getClassName());
+        Assertions.assertEquals("Foo[]", TypeAttrParser.parse("Foo[]()").getClassName());
+        Assertions.assertEquals("Foo[]", TypeAttrParser.parse("Foo[]<A>").getClassName());
+        Assertions.assertEquals("String[][]", TypeAttrParser.parse("String[][]").getClassName());
+        Assertions.assertEquals("List[]", TypeAttrParser.parse("List<String>[]").getClassName());
+    }
+
+    @Test
+    public void testParseRejectsPathologicallyDeepNestingInsteadOfOverflowingTheStack() {
+        // the cap counts parse() re-entries, so a pure generic ladder costs one level each: 64 passes, 65 fails
+        Assertions.assertEquals("A", TypeAttrParser.parse("A<".repeat(64) + "B" + ">".repeat(64)).getClassName());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("A<".repeat(65) + "B" + ">".repeat(65)));
+
+        final String tooDeep = "A<".repeat(200) + "B" + ">".repeat(200);
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse(tooDeep));
+        // the message must name the declaration the caller passed: the fragment the recursion had reached when the
+        // guard tripped is a leaf ("B" here, "String" for the Map ladder below) and is plainly not 64 levels deep
+        Assertions.assertEquals("Malformed type attribute: nesting deeper than 64 levels in: " + tooDeep, e.getMessage());
+
+        final String tooDeepMap = "Map<String, ".repeat(65) + "Integer" + ">".repeat(65);
+        final IllegalArgumentException mapFailure = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> TypeAttrParser.parse(tooDeepMap));
+        Assertions.assertEquals("Malformed type attribute: nesting deeper than 64 levels in: " + tooDeepMap, mapFailure.getMessage());
+
+        // an array-of-generic suffix and a parameterized qualified-member segment each cost a second level, so
+        // those two shapes reach the same cap at half the textual depth: 32 passes, 33 fails
+        String arrayOfGeneric = "B";
+        String memberChain = "M";
+
+        for (int i = 0; i < 32; i++) {
+            arrayOfGeneric = "A<" + arrayOfGeneric + ">[]";
+            memberChain = "O<" + memberChain + ">.M";
+        }
+
+        Assertions.assertEquals("A[]", TypeAttrParser.parse(arrayOfGeneric).getClassName());
+        Assertions.assertEquals("O.M", TypeAttrParser.parse(memberChain).getClassName());
+
+        final String arrayOfGeneric33 = "A<" + arrayOfGeneric + ">[]";
+        final String memberChain33 = "O<" + memberChain + ">.M";
+
+        Assertions.assertEquals("Malformed type attribute: nesting deeper than 64 levels in: " + arrayOfGeneric33,
+                Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse(arrayOfGeneric33)).getMessage());
+        Assertions.assertEquals("Malformed type attribute: nesting deeper than 64 levels in: " + memberChain33,
+                Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse(memberChain33)).getMessage());
+
+        // array dimensions never recursed per dimension and must keep working at any count
+        Assertions.assertEquals("int" + "[]".repeat(500), TypeAttrParser.parse("int" + "[]".repeat(500)).getClassName());
+    }
+
+    @Test
+    public void reviewFixes20260911_arraySuffixScanStripsUnicodeWhitespace() {
+        // The array-suffix scan uses Character.isWhitespace, so a trailing U+3000 (whitespace, but > 0x20 and
+        // therefore NOT removed by String#trim) is padding and the array token still resolves. If the scan used
+        // the String#trim predicate instead, the character would survive into the class name and
+        // TypeFactory.getType would reject the token as misplaced brackets.
+        Assertions.assertEquals("int[]", TypeAttrParser.parse("int[]\u3000").getClassName());
+        Assertions.assertEquals("int[][]", TypeAttrParser.parse("int[]\u3000[]").getClassName());
+        Assertions.assertEquals("int[]", TypeAttrParser.parse("int[] \u3000").getClassName());
+        Assertions.assertEquals("List[]", TypeAttrParser.parse("List<String>[]\u3000").getClassName());
+        Assertions.assertEquals("int[]", TypeFactory.getType("int[]\u3000").name());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("List<String>\u3000"));
+
+        // a bare (non-array) name still keeps it, because the class-name trims use String#trim semantics
+        Assertions.assertEquals("Foo\u3000", TypeAttrParser.parse("Foo\u3000").getClassName());
+
+        // ASCII padding is still stripped on every path
+        Assertions.assertEquals("int[]", TypeAttrParser.parse("  int[]  ").getClassName());
+        Assertions.assertEquals("Foo", TypeAttrParser.parse("  Foo  ").getClassName());
+        Assertions.assertEquals("List[]", TypeAttrParser.parse("  List<String>[]  ").getClassName());
+    }
+
+    @Test
+    public void testNewInstanceFailureNamesBothCandidateSignatures() {
+        // the String[] fallback used to overwrite the primary signature, so the message named only the fallback
+        final IllegalArgumentException primaryAndFallback = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> TypeAttrParser.newInstance(StringBuilder.class, "StringBuilder(a, b, c, d, e)"));
+        Assertions.assertEquals(
+                "No constructor found with parameters: [class java.lang.String, class java.lang.String, class java.lang.String,"
+                        + " class java.lang.String, class java.lang.String] or [class [Ljava.lang.String;]. in class: java.lang.StringBuilder",
+                primaryAndFallback.getMessage());
+
+        final IllegalArgumentException withPairs = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> TypeAttrParser.newInstance(StringBuilder.class, "StringBuilder(x)", Integer.class, 1));
+        Assertions.assertEquals("No constructor found with parameters: [class java.lang.Integer, class java.lang.String]"
+                + " or [class java.lang.Integer, class [Ljava.lang.String;]. in class: java.lang.StringBuilder", withPairs.getMessage());
+
+        // no constructor parameters means no fallback was tried, so only one signature is reported
+        final IllegalArgumentException noFallback = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> TypeAttrParser.newInstance(java.util.ArrayList.class, "ArrayList<X>"));
+        Assertions.assertEquals("No constructor found with parameters: [class java.lang.String]. in class: java.util.ArrayList",
+                noFallback.getMessage());
     }
 }

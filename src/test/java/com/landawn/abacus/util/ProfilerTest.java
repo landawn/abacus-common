@@ -62,7 +62,7 @@ public class ProfilerTest extends AbstractTest {
     }
 
     Object error(Object obj) {
-        throw new RuntimeException(N.toString(obj));
+        throw new RuntimeException(CommonUtil.toString(obj));
     }
 
     // ============================================================
@@ -109,7 +109,7 @@ public class ProfilerTest extends AbstractTest {
             final Thread renderingThread = new Thread(() -> {
                 final Profiler.SingleLoopStatistics loop = new Profiler.SingleLoopStatistics();
                 loop.addMethodStatistics(new Profiler.MethodStatistics("sample", 0, 1, 0, 1_500_000));
-                final Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 1, 0, 1_500_000, 1, N.asList(loop));
+                final Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 1, 0, 1_500_000, 1, CommonUtil.asList(loop));
                 final StringWriter writer = new StringWriter();
                 stats.writeXmlResult(writer);
                 xml.set(writer.toString());
@@ -217,32 +217,6 @@ public class ProfilerTest extends AbstractTest {
     // ============================================================
 
     @Test
-    public void testWriteResultOutputStream() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "osTest", () -> {
-        });
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        stats.writeResult(baos);
-        String output = baos.toString();
-        assertTrue(output.contains("osTest"));
-    }
-
-    // ============================================================
-    // Tests for MultiLoopsStatistics.writeResult(Writer) — source line ~2044
-    // ============================================================
-
-    @Test
-    public void testWriteResultWriter() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "writerTest", () -> {
-        });
-
-        StringWriter sw = new StringWriter();
-        stats.writeResult(sw);
-        String output = sw.toString();
-        assertTrue(output.contains("writerTest"));
-    }
-
-    @Test
     public void testWriteResult() {
         Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "writeTest", () -> doWork());
 
@@ -262,34 +236,6 @@ public class ProfilerTest extends AbstractTest {
     // ============================================================
     // Tests for MultiLoopsStatistics.writeHtmlResult(OutputStream) — source line ~2160
     // ============================================================
-
-    @Test
-    public void testWriteHtmlResultOutputStream() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "htmlOsTest", () -> {
-        });
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        stats.writeHtmlResult(baos);
-        String output = baos.toString();
-        assertTrue(output.contains("<table"));
-        assertTrue(output.contains("htmlOsTest"));
-    }
-
-    // ============================================================
-    // Tests for MultiLoopsStatistics.writeHtmlResult(Writer) — source line ~2254
-    // ============================================================
-
-    @Test
-    public void testWriteHtmlResultWriter() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "htmlWriterTest", () -> {
-        });
-
-        StringWriter sw = new StringWriter();
-        stats.writeHtmlResult(sw);
-        String output = sw.toString();
-        assertTrue(output.contains("<table"));
-        assertTrue(output.contains("htmlWriterTest"));
-    }
 
     @Test
     public void testWriteHtmlResult() {
@@ -312,34 +258,6 @@ public class ProfilerTest extends AbstractTest {
     // ============================================================
     // Tests for MultiLoopsStatistics.writeXmlResult(OutputStream) — source line ~2374
     // ============================================================
-
-    @Test
-    public void testWriteXmlResultOutputStream() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "xmlOsTest", () -> {
-        });
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        stats.writeXmlResult(baos);
-        String output = baos.toString();
-        assertTrue(output.contains("<result>"));
-        assertTrue(output.contains("xmlOsTest"));
-    }
-
-    // ============================================================
-    // Tests for MultiLoopsStatistics.writeXmlResult(Writer) — source line ~2504
-    // ============================================================
-
-    @Test
-    public void testWriteXmlResultWriter() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 1, "xmlWriterTest", () -> {
-        });
-
-        StringWriter sw = new StringWriter();
-        stats.writeXmlResult(sw);
-        String output = sw.toString();
-        assertTrue(output.contains("<result>"));
-        assertTrue(output.contains("xmlWriterTest"));
-    }
 
     @Test
     public void testWriteXmlResult() {
@@ -461,14 +379,6 @@ public class ProfilerTest extends AbstractTest {
 
     @Test
     public void testRunWithRunnableAndLabel_NullLabel() {
-        // label can be null; method should still execute
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 3, 1, (String) null, () -> {
-        });
-        assertNotNull(stats);
-    }
-
-    @Test
-    public void testRunWithRunnableAndLabel_NullLabel_ResultIsQueryableAndPrintable() {
         // A null label is normalized to the string "null" so statistics queries and
         // report rendering must work without NullPointerException.
         Profiler.MultiLoopsStatistics stats = Profiler.run(1, 3, 1, (String) null, () -> {
@@ -526,15 +436,8 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testRunWithMethodObject() {
         Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, 1, 2, 1);
-        assertNotNull(stats);
-    }
-
-    @Test
-    public void testRunWithMethodObject_MultipleRounds() {
-        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, 1, 2, 2);
-        assertNotNull(stats);
+        assertNotNull(Profiler.run(this, method, 1, 2, 1));
+        assertNotNull(Profiler.run(this, method, 1, 2, 2));
     }
 
     @Test
@@ -560,32 +463,30 @@ public class ProfilerTest extends AbstractTest {
     // ============================================================
 
     @Test
-    public void test_normal() {
+    public void testRunWithMethodReflection_Reports() {
         Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
-        Profiler.run(this, method, null, 2, 2, 1).printResult();
-        Profiler.run(this, method, null, 2, 2, 1).printResult();
-        Profiler.run(this, method, null, 2, 2, 1).writeHtmlResult(System.out);
-        Profiler.run(this, method, new ArrayList<>(), 2, 2, 1).writeXmlResult(System.out);
-        Profiler.run(this, method, new ArrayList<>(), 2, 2, 1).writeResult(System.out);
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, null, 2, 2, 1);
         assertEquals(String.class, method.getReturnType());
-
-        Profiler.run(this, "normal", 2, 2, 1).printResult();
-        Profiler.run(this, "normal", 2, 2, 1).printResult();
-    }
-
-    @Test
-    public void testRunWithMethodReflection() {
-        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, null, 1, 2, 1);
         assertNotNull(stats);
         assertTrue(stats.getElapsedTimeInMillis() > 0);
-    }
 
-    @Test
-    public void testRunWithMethodReflection_EmptyArgsList() {
-        Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "normal");
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, new ArrayList<>(), 1, 2, 1);
-        assertNotNull(stats);
+        StringWriter text = new StringWriter();
+        stats.writeResult(text);
+        assertTrue(text.toString().contains("normal"));
+
+        StringWriter html = new StringWriter();
+        stats.writeHtmlResult(html);
+        assertTrue(html.toString().contains("<table"));
+
+        StringWriter xml = new StringWriter();
+        Profiler.run(this, method, new ArrayList<>(), 2, 2, 1).writeXmlResult(xml);
+        assertTrue(xml.toString().contains("<result>"));
+
+        Profiler.MultiLoopsStatistics byName = Profiler.run(this, "normal", 2, 2, 1);
+        assertNotNull(byName);
+        assertTrue(byName.getElapsedTimeInMillis() > 0);
+
+        assertNotNull(Profiler.run(this, method, new ArrayList<>(), 1, 2, 1));
     }
 
     // ============================================================
@@ -803,17 +704,10 @@ public class ProfilerTest extends AbstractTest {
     @Test
     public void testRunMultipleRounds() {
         Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 3, "multiRound", () -> doWork());
-
         assertNotNull(stats);
         assertTrue(stats.getElapsedTimeInMillis() > 0);
-    }
-
-    @Test
-    public void testRunWithMultipleRounds() {
-        Profiler.MultiLoopsStatistics stats = Profiler.run(1, 5, 2, "multiRound2", () -> {
-        });
-        assertNotNull(stats);
         assertEquals(1, stats.getMethodNameList().size());
+        assertEquals("multiRound", stats.getMethodNameList().get(0));
     }
 
     @Test
@@ -1023,20 +917,28 @@ public class ProfilerTest extends AbstractTest {
     }
 
     @Test
-    public void test_error() {
+    public void testRunWithMethodReflection_ErrorReports() {
         Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "error", Object.class);
-        Profiler.run(this, method, N.toList("a", "b"), 2, 2, 1).printResult();
-        Profiler.run(this, method, null, 2, 2, 1).printResult();
-        Profiler.run(this, method, null, 2, 2, 1).writeHtmlResult(System.out);
-        Profiler.run(this, method, new ArrayList<>(), 2, 2, 1).writeXmlResult(System.out);
-        Profiler.run(this, method, new ArrayList<>(), 2, 2, 1).writeResult(System.out);
-        assertNotNull(method);
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, CommonUtil.toList("a", "b"), 2, 2, 1);
+        assertTrue(stats.getAllFailedMethodStatisticsList().size() > 0);
+
+        StringWriter text = new StringWriter();
+        stats.writeResult(text);
+        assertTrue(text.toString().contains("error"));
+
+        StringWriter html = new StringWriter();
+        Profiler.run(this, method, null, 2, 2, 1).writeHtmlResult(html);
+        assertTrue(html.toString().contains("<table"));
+
+        StringWriter xml = new StringWriter();
+        Profiler.run(this, method, new ArrayList<>(), 2, 2, 1).writeXmlResult(xml);
+        assertTrue(xml.toString().contains("<result>"));
     }
 
     @Test
     public void testRunWithMethodReflectionAndArgs() {
         Method method = ClassUtil.getDeclaredMethod(ProfilerTest.class, "error", Object.class);
-        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, N.toList("testArg"), 1, 2, 1);
+        Profiler.MultiLoopsStatistics stats = Profiler.run(this, method, CommonUtil.toList("testArg"), 1, 2, 1);
         assertNotNull(stats);
         // Method throws, so there should be failed stats
         assertTrue(stats.getAllFailedMethodStatisticsList().size() > 0);
@@ -1737,8 +1639,10 @@ public class ProfilerTest extends AbstractTest {
     public void testMultiLoopsStatisticsGetMethodNameListEmpty() {
         Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1);
         stats.setLoopStatisticsList(null);
-        // When loopStatisticsList is null, should return empty list
-        List<String> names = stats.getMethodNameList();
+        // setLoopStatisticsList(null) substitutes an empty list, so the field is never null.
+        assertNotNull(stats.getLoopStatisticsList());
+        assertTrue(stats.getLoopStatisticsList().isEmpty());
+        final List<String> names = stats.getMethodNameList();
         assertNotNull(names);
         assertTrue(names.isEmpty());
     }
@@ -2190,7 +2094,9 @@ public class ProfilerTest extends AbstractTest {
 
         StringWriter output = new StringWriter();
         stats.writeResult(output);
-        assertTrue(output.toString().contains("Errors:1 (50.0%)"), output.toString());
+        // The failure rate is rendered through a dedicated locale-stable percentage format now; the
+        // point of this test is the DENOMINATOR (invocation count, not loop count).
+        assertTrue(output.toString().contains("Errors:1 (50.00%)"), output.toString());
     }
 
     @Test
@@ -2217,5 +2123,4 @@ public class ProfilerTest extends AbstractTest {
         assertTrue(xml.contains("failure &lt;&amp;&gt;"), xml);
         assertFalse(xml.contains("<method name=\"" + methodName + "\">"), xml);
     }
-
 }

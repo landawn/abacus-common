@@ -174,7 +174,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public ByteStream filter(final BytePredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream filter(final BytePredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -223,7 +223,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public ByteStream takeWhile(final BytePredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream takeWhile(final BytePredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -273,7 +273,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public ByteStream dropWhile(final BytePredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream dropWhile(final BytePredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -287,8 +287,6 @@ class IteratorByteStream extends AbstractByteStream {
             public boolean hasNext() {
                 if (!hasNext) {
                     if (!dropped) {
-                        dropped = true;
-
                         while (elements.hasNext()) {
                             next = elements.nextByte();
 
@@ -297,6 +295,7 @@ class IteratorByteStream extends AbstractByteStream {
                                 break;
                             }
                         }
+                        dropped = true;
                     } else if (elements.hasNext()) {
                         next = elements.nextByte();
                         hasNext = true;
@@ -330,7 +329,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public ByteStream map(final ByteUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream map(final ByteUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -359,7 +358,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public IntStream mapToInt(final ByteToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream mapToInt(final ByteToIntFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -389,7 +388,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> mapToObj(final ByteFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> mapToObj(final ByteFunction<? extends T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -419,7 +418,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public ByteStream flatMap(final ByteFunction<? extends ByteStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream flatMap(final ByteFunction<? extends ByteStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -487,7 +486,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public ByteStream flatmap(final ByteFunction<? extends Collection<Byte>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream flatmap(final ByteFunction<? extends Collection<Byte>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -529,7 +528,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public ByteStream flatMapArray(final ByteFunction<byte[]> mapper) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream flatMapArray(final ByteFunction<byte[]> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -581,7 +580,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public IntStream flatMapToInt(final ByteFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream flatMapToInt(final ByteFunction<? extends IntStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -651,7 +650,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> flatMapToObj(final ByteFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatMapToObj(final ByteFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -721,7 +720,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> flatmapToObj(final ByteFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final ByteFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -839,13 +838,24 @@ class IteratorByteStream extends AbstractByteStream {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final byte next = elements.nextByte();
                 cnt++;
-                return elements.nextByte();
+                return next;
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return cnt >= maxSize || elements.supportsFailureAtomicAdvance();
             }
 
             @Override
             public void advance(final long n) {
-                if (n <= 0) {
+                if (n <= 0 || cnt >= maxSize) {
+                    return;
+                }
+
+                if (!elements.supportsFailureAtomicAdvance()) {
+                    super.advance(n);
                     return;
                 }
 
@@ -880,36 +890,46 @@ class IteratorByteStream extends AbstractByteStream {
         }
 
         return newStream(new ByteIteratorEx() { //NOSONAR
-            private boolean skipped = false;
+            private long remainingToSkip = n;
+
+            private void skipElements() {
+                if (remainingToSkip > 0) {
+                    if (elements.supportsFailureAtomicAdvance()) {
+                        elements.advance(remainingToSkip);
+                    } else {
+                        while (remainingToSkip > 0 && elements.hasNext()) {
+                            elements.nextByte();
+                            remainingToSkip--;
+                        }
+                    }
+                    remainingToSkip = 0;
+                }
+            }
 
             @Override
             public boolean hasNext() {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 return elements.hasNext();
             }
 
             @Override
             public byte nextByte() {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 return elements.nextByte();
             }
 
             @Override
             public long count() {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 return elements.count();
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return elements.supportsFailureAtomicAdvance();
             }
 
             @Override
@@ -918,20 +938,14 @@ class IteratorByteStream extends AbstractByteStream {
                     return;
                 }
 
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 elements.advance(n2);
             }
 
             @Override
             public byte[] toArray() {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 return elements.toArray();
             }
@@ -949,7 +963,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
-    public ByteStream onEach(final ByteConsumer action) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream onEach(final ByteConsumer action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -977,11 +991,11 @@ class IteratorByteStream extends AbstractByteStream {
      * @param <E> the type of exception the action may throw
      * @param action the non-interfering action to perform on each element
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      */
     @Override
-    public <E extends Exception> void forEach(final Throwables.ByteConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> void forEach(final Throwables.ByteConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -1004,7 +1018,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    protected byte[] toArray(final boolean closeStream) {
+    protected byte[] toArray(final boolean closeStream) throws IllegalStateException {
         assertNotClosed();
 
         try {
@@ -1071,7 +1085,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
-    public <C extends Collection<Byte>> C toCollection(final Supplier<? extends C> supplier) throws IllegalArgumentException, IllegalStateException {
+    public <C extends Collection<Byte>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1112,7 +1126,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
-    public Multiset<Byte> toMultiset(final Supplier<? extends Multiset<Byte>> supplier) throws IllegalArgumentException, IllegalStateException {
+    public Multiset<Byte> toMultiset(final Supplier<? extends Multiset<Byte>> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1146,15 +1160,15 @@ class IteratorByteStream extends AbstractByteStream {
      * @param mapFactory supplier that creates a new, empty map of the desired type
      * @return a map containing the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if {@code keyMapper} throws
-     * @throws E2 if {@code valueMapper} throws
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws E if {@code keyMapper} throws
+     * @throws E2 if {@code valueMapper} throws
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.ByteFunction<? extends K, E> keyMapper,
             final Throwables.ByteFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalArgumentException, IllegalStateException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1192,8 +1206,8 @@ class IteratorByteStream extends AbstractByteStream {
      * @param mapFactory supplier that creates a new, empty map of the desired type
      * @return a map from group key to downstream collection result
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} returns a {@code null} key, or if {@code keyMapper} or
-     *         {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream} or {@code mapFactory} is {@code null}, or
+     *         {@code keyMapper} returns a {@code null} key.
      * @throws E if {@code keyMapper} throws
      */
     @Override
@@ -1202,6 +1216,7 @@ class IteratorByteStream extends AbstractByteStream {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
@@ -1250,7 +1265,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
-    public byte reduce(final byte identity, final ByteBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public byte reduce(final byte identity, final ByteBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -1279,7 +1294,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
-    public OptionalByte reduce(final ByteBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public OptionalByte reduce(final ByteBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -1316,7 +1331,7 @@ class IteratorByteStream extends AbstractByteStream {
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjByteConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1480,7 +1495,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws ArithmeticException if the sum overflows an {@code int}
      */
     @Override
-    public int sum() throws IllegalStateException {
+    public int sum() throws IllegalStateException, ArithmeticException {
         assertNotClosed();
 
         try {
@@ -1576,11 +1591,11 @@ class IteratorByteStream extends AbstractByteStream {
      * @param predicate the predicate to apply to elements
      * @return {@code true} if at least one element matches, {@code false} otherwise (including empty stream)
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.BytePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1607,11 +1622,11 @@ class IteratorByteStream extends AbstractByteStream {
      * @param predicate the predicate to apply to elements
      * @return {@code true} if all elements match (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.BytePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1638,11 +1653,11 @@ class IteratorByteStream extends AbstractByteStream {
      * @param predicate the predicate to apply to elements
      * @return {@code true} if no elements match (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.BytePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1669,11 +1684,11 @@ class IteratorByteStream extends AbstractByteStream {
      * @param predicate the predicate to apply to elements
      * @return an {@code OptionalByte} with the first matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
-    public <E extends Exception> OptionalByte findFirst(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> OptionalByte findFirst(final Throwables.BytePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1702,11 +1717,11 @@ class IteratorByteStream extends AbstractByteStream {
      * @param predicate the predicate to apply to elements
      * @return an {@code OptionalByte} with the last matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
-    public <E extends Exception> OptionalByte findLast(final Throwables.BytePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> OptionalByte findLast(final Throwables.BytePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1764,6 +1779,11 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return elements.supportsFailureAtomicAdvance();
+            }
+
+            @Override
             public void advance(final long n) {
                 elements.advance(n);
             }
@@ -1778,7 +1798,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    ByteIteratorEx iteratorEx() {
+    ByteIteratorEx iteratorEx() throws IllegalStateException {
         assertNotClosed();
 
         return elements;
@@ -1795,7 +1815,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
-    public ByteStream appendIfEmpty(final Supplier<? extends ByteStream> supplier) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream appendIfEmpty(final Supplier<? extends ByteStream> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1850,9 +1870,21 @@ class IteratorByteStream extends AbstractByteStream {
                     if (elements.hasNext()) {
                         iter = elements;
                     } else {
+                        @SuppressWarnings("resource")
                         final ByteStream s = supplier.get();
-                        holder.setValue(s);
-                        iter = s.iteratorEx();
+                        try {
+                            iter = s == null ? ByteIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
+                            holder.setValue(s);
+                        } catch (final RuntimeException | Error e) {
+                            if (s != null) {
+                                try {
+                                    s.close();
+                                } catch (final RuntimeException ce) {
+                                    e.addSuppressed(ce);
+                                }
+                            }
+                            throw e;
+                        }
                     }
                 }
             }
@@ -1870,7 +1902,7 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
-    public ByteStream ifEmpty(final Runnable action) throws IllegalArgumentException, IllegalStateException {
+    public ByteStream ifEmpty(final Runnable action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -1920,9 +1952,10 @@ class IteratorByteStream extends AbstractByteStream {
 
             private void init() {
                 if (iter == null) {
+                    final boolean empty = !elements.hasNext();
                     iter = elements;
 
-                    if (!iter.hasNext()) {
+                    if (empty) {
                         action.run();
                     }
                 }
@@ -1943,7 +1976,7 @@ class IteratorByteStream extends AbstractByteStream {
      */
     @Override
     protected ByteStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
-            final boolean cancelUncompletedThreads) {
+            final boolean cancelUncompletedThreads) throws IllegalStateException {
         assertNotClosed();
 
         return new ParallelIteratorByteStream(elements, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,

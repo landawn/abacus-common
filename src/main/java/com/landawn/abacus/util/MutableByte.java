@@ -209,10 +209,10 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * @param predicate the predicate to test the current value
      * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
-    public <E extends Exception> boolean setIf(final Throwables.BytePredicate<E> predicate, final byte newValue) throws E, IllegalArgumentException {
+    public <E extends Exception> boolean setIf(final Throwables.BytePredicate<E> predicate, final byte newValue) throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (predicate.test(value)) {
@@ -524,7 +524,7 @@ public final class MutableByte extends Number implements Comparable<MutableByte>
      * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
-    public int compareTo(final MutableByte other) {
+    public int compareTo(final MutableByte other) throws NullPointerException {
         return Byte.compare(value, other.value);
     }
 

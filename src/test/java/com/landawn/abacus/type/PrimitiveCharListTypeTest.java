@@ -148,4 +148,21 @@ public class PrimitiveCharListTypeTest extends TestBase {
         assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
 
+    // T8-09 / T8-13 (documented): a multi-character unquoted token must be a numeric code; blank input is null.
+    @Test
+    public void reviewFixes20260906_valueOfDocumentedFailureModesAndBlankInput() {
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("[abc]"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("[65536]"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("[-1]"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,,2]"));
+        assertEquals(CharList.of('A'), type.valueOf("[65]"));
+        assertEquals(CharList.of('a', '中'), type.valueOf("[a, 中]"));
+        final CharList special = CharList.of('a', '\'', ',', ' ', '"');
+        assertEquals(special, type.valueOf(type.stringOf(special)));
+
+        assertNull(type.valueOf("   "));
+        assertNull(type.valueOf(""));
+        org.junit.jupiter.api.Assertions.assertTrue(type.valueOf("[ ]").isEmpty());
+    }
+
 }

@@ -156,7 +156,7 @@ public interface Paginated<T> extends Iterable<T> {
      * @throws IllegalArgumentException if {@code pageNum} is negative or greater than or equal to
      *         {@link #totalPages()}.
      */
-    T getPage(int pageNum);
+    T getPage(int pageNum) throws IllegalArgumentException;
 
     /**
      * Returns the size of each page in the paginated data.

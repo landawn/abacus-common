@@ -36,7 +36,7 @@ import com.landawn.abacus.util.N;
  * @see IntIterator
  * @see IteratorEx
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 @Internal
 public abstract class IntIteratorEx extends IntIterator implements IteratorEx<Integer> {
 
@@ -48,11 +48,20 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
     }
 
     /**
+     * Internal opt-in for bulk advancement that consumes no logical elements if it throws.
+     * This describes failure recovery only; it does not imply thread safety.
+     * Unmarked iterators are advanced element by element when exact skip progress is required.
+     */
+    boolean supportsFailureAtomicAdvance() {
+        return false;
+    }
+
+    /**
      * An empty IntIteratorEx instance that contains no elements.
      * Calling {@code hasNext()} always returns {@code false}, and calling {@code nextInt()}
      * throws a {@link NoSuchElementException}.
      */
-    @SuppressWarnings({ "java:S1845" })
+    @SuppressWarnings("java:S1845")
     public static final IntIteratorEx EMPTY = new IntIteratorEx() {
         @Override
         public boolean hasNext() {
@@ -60,8 +69,13 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
         }
 
         @Override
-        public int nextInt() {
+        public int nextInt() throws NoSuchElementException {
             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+        }
+
+        @Override
+        boolean supportsFailureAtomicAdvance() {
+            return true;
         }
 
         @Override
@@ -131,7 +145,7 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
      * @param toIndex the ending index (exclusive)
      * @return an IntIteratorEx for the specified array range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length},
-     *         or {@code fromIndex > toIndex}
+     *         or {@code fromIndex > toIndex}; a {@code null} array is treated as having length zero
      */
     public static IntIteratorEx of(final int[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -149,12 +163,17 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return a[cursor++];
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
             }
 
             @Override
@@ -217,7 +236,7 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 return iter.nextInt();
             }
 
@@ -238,9 +257,11 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
      * IntIteratorEx iterEx = IntIteratorEx.from(iter);
      * }</pre>
      *
+     * <p>The returned iterator throws {@link NullPointerException} when a {@code null} element
+     * is unboxed by its next method.</p>
+     *
      * @param iter the Iterator of Integer objects (can be null)
      * @return an IntIteratorEx unwrapping the given iterator, or empty iterator if iter is null
-     * @throws NullPointerException during iteration if any element returned by the source iterator is {@code null}
      */
     public static IntIteratorEx from(final Iterator<Integer> iter) {
         if (iter == null) {
@@ -253,9 +274,20 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
                     return iteratorEx.hasNext();
                 }
 
+                /**
+                 * {@inheritDoc}
+                 *
+                 * @throws NoSuchElementException if the source iterator is exhausted
+                 * @throws NullPointerException if the source iterator returns {@code null}
+                 */
                 @Override
-                public int nextInt() {
+                public int nextInt() throws NoSuchElementException, NullPointerException {
                     return iteratorEx.next();
+                }
+
+                @Override
+                boolean supportsFailureAtomicAdvance() {
+                    return ObjIteratorEx.supportsFailureAtomicAdvance(iteratorEx);
                 }
 
                 @Override
@@ -284,8 +316,14 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
                     return iter.hasNext();
                 }
 
+                /**
+                 * {@inheritDoc}
+                 *
+                 * @throws NoSuchElementException if the source iterator is exhausted
+                 * @throws NullPointerException if the source iterator returns {@code null}
+                 */
                 @Override
-                public int nextInt() {
+                public int nextInt() throws NoSuchElementException, NullPointerException {
                     return iter.next();
                 }
 

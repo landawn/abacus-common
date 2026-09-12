@@ -2,7 +2,9 @@ package com.landawn.abacus.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -167,6 +169,10 @@ public class JavaVersionTest extends TestBase {
         assertEquals(JavaVersion.JAVA_RECENT, JavaVersion.of("50"));
         assertEquals(JavaVersion.JAVA_RECENT, JavaVersion.of("100"));
 
+        // JAVA_RECENT must compare as newer than the last named constant, even on older JVMs.
+        assertTrue(JavaVersion.of("50").atLeast(JavaVersion.JAVA_39));
+        assertTrue(JavaVersion.JAVA_39.atMost(JavaVersion.JAVA_RECENT));
+
         assertEquals(JavaVersion.JAVA_1_5, JavaVersion.of("5"));
         assertEquals(JavaVersion.JAVA_1_6, JavaVersion.of("6"));
         assertEquals(JavaVersion.JAVA_1_7, JavaVersion.of("7"));
@@ -287,4 +293,125 @@ public class JavaVersionTest extends TestBase {
         assertEquals(JavaVersion.JAVA_21, JavaVersion.valueOf("JAVA_21"));
         assertEquals(JavaVersion.JAVA_RECENT, JavaVersion.valueOf("JAVA_RECENT"));
     }
+
+    /**
+     * {@code of}/{@code get} used to hand the remaining token straight to {@code Float.parseFloat}, whose grammar
+     * is far wider than a version number: it trims surrounding whitespace and accepts {@code "Infinity"},
+     * exponents, hex floats and {@code f}/{@code d} type suffixes. Every spelling below therefore cleared the
+     * {@code > 39} test and resolved to {@link JavaVersion#JAVA_RECENT}, while the very same spellings at or below
+     * 39 ({@code " 25 "}, {@code "25f"}) were rejected - a self-inconsistency, and a way for a vendor
+     * {@code java.version} string to be silently accepted instead of falling through to the next property.
+     */
+    @Test
+    public void testOfRejectsNonVersionStringsThatFloatParsingWouldAccept() {
+        for (final String bogus : new String[] { "Infinity", "1e9", "4e1", "40f", "40F", "40d", " 40 ", "\t40\n", "0x1p10", "40e0" }) {
+            assertThrows("of(\"" + bogus + "\") must be rejected", IllegalArgumentException.class, () -> JavaVersion.of(bogus));
+            assertThrows("get(\"" + bogus + "\") must be rejected", IllegalArgumentException.class, () -> JavaVersion.get(bogus));
+        }
+
+        // The rejection reports the caller's own string.
+        assertEquals("Invalid Java version:  40 ", assertThrows(IllegalArgumentException.class, () -> JavaVersion.of(" 40 ")).getMessage());
+
+        // ... and every genuine numeric version above 39 still resolves.
+        assertEquals(JavaVersion.JAVA_RECENT, JavaVersion.of("40"));
+        assertEquals(JavaVersion.JAVA_RECENT, JavaVersion.of("50"));
+        assertEquals(JavaVersion.JAVA_RECENT, JavaVersion.of("99"));
+        assertEquals(JavaVersion.JAVA_RECENT, JavaVersion.of("999"));
+        assertEquals(JavaVersion.JAVA_RECENT, JavaVersion.of("40.0.1"));
+        assertEquals(JavaVersion.JAVA_RECENT, JavaVersion.get("40"));
+        assertEquals(JavaVersion.JAVA_RECENT, JavaVersion.get("999"));
+
+        // ... as does everything below 39, including the suffixed JEP 223 spellings.
+        assertEquals(JavaVersion.JAVA_1_8, JavaVersion.of("1.8.0_271"));
+        assertEquals(JavaVersion.JAVA_25, JavaVersion.of("25-ea"));
+        assertEquals(JavaVersion.JAVA_21, JavaVersion.of("21+35"));
+        assertEquals(JavaVersion.JAVA_17, JavaVersion.of("17.0.9+9"));
+    }
+
+    /**
+     * Pins what "a run of ASCII decimal digits" in {@code of}'s javadoc means, and the matching comment in
+     * {@code get}: the guard is {@link Strings#isAsciiNumeric(CharSequence)}, NOT
+     * {@link Strings#isNumeric(CharSequence)} ({@link Character#isDigit(int)}), so a decimal digit from another
+     * script is stopped BY the guard.
+     *
+     * <p>It used to pass the guard and be rejected only incidentally, one step later: {@code Numbers.toFloat}
+     * raises {@link NumberFormatException} for a token {@code Float.parseFloat} cannot read and
+     * {@code toFloatVersion} rethrows that as {@link IllegalArgumentException}, so the {@code > 39} test named in
+     * the old comment was never reached at all. The exception TYPE is the same either way, which is why the cause
+     * is asserted here: the guard reports without one, a parse failure carries the {@code NumberFormatException}.
+     */
+    @Test
+    public void testNonAsciiDecimalDigitsAreRejectedByTheNumericGuard() {
+        // Arabic-Indic "40", Devanagari "20", fullwidth "40" - written as escapes to keep this file ASCII.
+        for (final String digits : new String[] { "\u0664\u0660", "\u0968\u0966", "\uff14\uff10" }) {
+            assertTrue("Strings.isNumeric accepts Unicode decimal digits: " + digits, Strings.isNumeric(digits));
+            assertFalse("... but they are not ASCII digits, which is what the guard tests: " + digits, Strings.isAsciiNumeric(digits));
+
+            final IllegalArgumentException fromOf = assertThrows("of(\"" + digits + "\") must be rejected", IllegalArgumentException.class,
+                    () -> JavaVersion.of(digits));
+            assertEquals("Invalid Java version: " + digits, fromOf.getMessage());
+            assertNull("rejected by the guard, so there is no parse failure to report as a cause", fromOf.getCause());
+
+            final IllegalArgumentException fromGet = assertThrows("get(\"" + digits + "\") must be rejected", IllegalArgumentException.class,
+                    () -> JavaVersion.get(digits));
+            assertEquals("Invalid Java version: " + digits, fromGet.getMessage());
+            assertNull("rejected by the guard, so there is no parse failure to report as a cause", fromGet.getCause());
+        }
+    }
+
+    /**
+     * {@link JavaVersion#JAVA_RECENT}'s display name is the current {@code java.specification.version} rendered as
+     * a {@code float} ({@code "25.0"} on a Java 25 JVM), not the raw property value - and it comes from the
+     * <em>spec</em> version, not from the comparison value, which is what proves the two-argument constructor is
+     * the one in use.
+     */
+    @Test
+    public void testJavaRecentDisplayNameIsTheSpecVersionRenderedAsAFloat() {
+        final String spec = System.getProperty("java.specification.version");
+        assertNotNull(spec);
+
+        final float specValue = Float.parseFloat(spec);
+
+        assertEquals(Float.toString(specValue), JavaVersion.JAVA_RECENT.toString());
+        assertTrue("a float rendering always carries a dot", JavaVersion.JAVA_RECENT.toString().indexOf('.') > 0);
+
+        // Had JAVA_RECENT been built by the single-argument constructor its name would have been derived from the
+        // COMPARISON value instead, which is floored at 40.
+        if (specValue < 40.0f) {
+            assertNotEquals(Float.toString(Math.max(specValue, 40.0f)), JavaVersion.JAVA_RECENT.toString());
+        }
+
+        // The rendered name is a version string in its own right, so it parses - but not back to JAVA_RECENT on a
+        // JVM below 40.
+        assertEquals(JavaVersion.of(spec), JavaVersion.of(JavaVersion.JAVA_RECENT.toString()));
+    }
+
+    /**
+     * {@code JAVA_ANDROID_0_9} carries the value {@code 1.5f} but is declared first, so the enum's natural order
+     * disagrees with {@code atLeast}/{@code atMost}, and it ties with {@code JAVA_1_5} so neither is a strict
+     * predecessor of the other. Both facts are now called out in the class javadoc.
+     */
+    @Test
+    public void testAndroidConstantBreaksTheNaturalEnumOrder() {
+        assertTrue(JavaVersion.JAVA_ANDROID_0_9.compareTo(JavaVersion.JAVA_1_1) < 0);
+        assertTrue(JavaVersion.JAVA_ANDROID_0_9.atLeast(JavaVersion.JAVA_1_1));
+
+        assertTrue(JavaVersion.JAVA_ANDROID_0_9.atLeast(JavaVersion.JAVA_1_5));
+        assertTrue(JavaVersion.JAVA_ANDROID_0_9.atMost(JavaVersion.JAVA_1_5));
+        assertTrue(JavaVersion.JAVA_1_5.atLeast(JavaVersion.JAVA_ANDROID_0_9));
+        assertTrue(JavaVersion.JAVA_1_5.atMost(JavaVersion.JAVA_ANDROID_0_9));
+
+        int inversions = 0;
+        final JavaVersion[] all = JavaVersion.values();
+
+        for (int i = 0; i + 1 < all.length; i++) {
+            if (!all[i + 1].atLeast(all[i])) {
+                assertEquals(JavaVersion.JAVA_ANDROID_0_9, all[i]);
+                inversions++;
+            }
+        }
+
+        assertEquals("JAVA_ANDROID_0_9 is the only declaration-order inversion", 1, inversions);
+    }
+
 }

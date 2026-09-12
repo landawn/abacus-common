@@ -51,7 +51,8 @@ public class ShortNFunctionTest extends TestBase {
     public void test_apply_anonymousClass() {
         ShortNFunction<Double> average = new ShortNFunction<>() {
             @Override
-            public Double apply(short... args) {
+            @SafeVarargs
+            public final Double apply(short... args) {
                 if (args.length == 0) {
                     return 0.0;
                 }

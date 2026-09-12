@@ -1,6 +1,7 @@
 package com.landawn.abacus.util.stream;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.IntList;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.MergeResult;
+import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.RateLimiter;
@@ -33,6 +35,32 @@ import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalInt;
 
 public class AbstractIntStreamTest extends TestBase {
+
+    @Test
+    public void testScanInitializesOnlyAfterSuccessfulSourceRead() {
+        final IllegalStateException failure = new IllegalStateException("first read failed");
+        final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger accumulatorCalls = new java.util.concurrent.atomic.AtomicInteger();
+
+        try (IntStream stream = IntStream.of(new int[] { 1, 2, 3 }).map(value -> {
+            if (attempts.getAndIncrement() == 0) {
+                throw failure;
+            }
+            return value;
+        }).scan((left, right) -> {
+            accumulatorCalls.incrementAndGet();
+            return (int) (left + right);
+        })) {
+            final com.landawn.abacus.util.IntIterator iter = stream.iterator();
+            org.junit.jupiter.api.Assertions.assertSame(failure,
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextInt));
+            org.junit.jupiter.api.Assertions.assertEquals((int) 2, iter.nextInt());
+            org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
+            org.junit.jupiter.api.Assertions.assertEquals((int) 5, iter.nextInt());
+            org.junit.jupiter.api.Assertions.assertEquals(1, accumulatorCalls.get());
+            org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+        }
+    }
 
     private IntStream stream;
 
@@ -777,4 +805,33 @@ public class AbstractIntStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> createIntStream(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
     }
+    // ------------------------------------------------------------------------------------------------------
+    // Stream review 2026-09-09 (pass B) - prepend/append(OptionalInt) argument validation
+    // ------------------------------------------------------------------------------------------------------
+
+    /**
+     * r9509 dropped {@code checkArgNotNull(op, cs.op)} from {@code prepend}/{@code append(OptionalXxx)} in all
+     * seven primitive {@code Abstract*Stream}s while leaving it on the object {@code Stream}
+     * ({@code AbstractStream.append(Optional)}). A null argument therefore threw a raw {@code NullPointerException}
+     * and left the stream open, against the package contract at {@code Stream.java:327-336}.
+     */
+    @Test
+    public void testPrependAppendOptional_nullIsRejectedAndTheStreamIsClosed() {
+        final MutableBoolean closed = MutableBoolean.of(false);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> IntStream.of(1, 2).onClose(closed::setTrue).prepend((OptionalInt) null));
+        Assertions.assertTrue(closed.isTrue(), "prepend(null) must close the stream before throwing");
+
+        closed.setFalse();
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> IntStream.of(1, 2).onClose(closed::setTrue).append((OptionalInt) null));
+        Assertions.assertTrue(closed.isTrue(), "append(null) must close the stream before throwing");
+
+        // the ordinary paths are unaffected
+        assertArrayEquals(new int[] { 9, 1, 2 }, IntStream.of(1, 2).prepend(OptionalInt.of(9)).toArray());
+        assertArrayEquals(new int[] { 1, 2 }, IntStream.of(1, 2).prepend(OptionalInt.empty()).toArray());
+        assertArrayEquals(new int[] { 1, 2, 9 }, IntStream.of(1, 2).append(OptionalInt.of(9)).toArray());
+        assertArrayEquals(new int[] { 1, 2 }, IntStream.of(1, 2).append(OptionalInt.empty()).toArray());
+    }
+
 }

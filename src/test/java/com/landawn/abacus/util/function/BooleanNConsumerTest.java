@@ -35,7 +35,8 @@ public class BooleanNConsumerTest extends TestBase {
         List<Integer> results = new ArrayList<>();
         BooleanNConsumer consumer = new BooleanNConsumer() {
             @Override
-            public void accept(boolean... args) {
+            @SafeVarargs
+            public final void accept(boolean... args) {
                 results.add(args.length);
             }
         };
@@ -114,8 +115,9 @@ public class BooleanNConsumerTest extends TestBase {
         AtomicInteger trueCount = new AtomicInteger(0);
         BooleanNConsumer consumer = args -> {
             for (boolean arg : args) {
-                if (arg)
+                if (arg) {
                     trueCount.incrementAndGet();
+                }
             }
         };
 

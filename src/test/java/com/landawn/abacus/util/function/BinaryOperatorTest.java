@@ -1,6 +1,5 @@
 package com.landawn.abacus.util.function;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -109,12 +108,15 @@ public class BinaryOperatorTest extends TestBase {
     @Test
     public void testWithNullValues() {
         BinaryOperator<String> operator = (s1, s2) -> {
-            if (s1 == null && s2 == null)
+            if (s1 == null && s2 == null) {
                 return "both null";
-            if (s1 == null)
+            }
+            if (s1 == null) {
                 return "first null";
-            if (s2 == null)
+            }
+            if (s2 == null) {
                 return "second null";
+            }
             return s1 + s2;
         };
 
@@ -154,6 +156,6 @@ public class BinaryOperatorTest extends TestBase {
     public void testAndThenRejectsNullImmediately() {
         BinaryOperator<Integer> operator = Integer::sum;
 
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> operator.andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> operator.andThen(null));
     }
 }

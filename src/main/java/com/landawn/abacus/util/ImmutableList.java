@@ -21,6 +21,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.RandomAccess;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 import com.landawn.abacus.annotation.Beta;
@@ -30,8 +36,14 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * A read-only implementation of the {@link List} interface.
  * Its contents cannot be modified through the {@code ImmutableList} API.
  * All mutating operations (add, remove, set, sort, etc.) will throw {@link UnsupportedOperationException}.
- * Instances created by copying are immutable and thread-safe. An instance created by {@link #wrap(List)}
- * reflects external changes to its backing list and has the backing list's thread-safety characteristics.
+ *
+ * <p>Instances that own their backing storage - those from {@link #of(Object)}, {@link #copyOf(Collection)},
+ * {@link #copyOf(Object[])}, {@link #empty()}, a consumed no-argument {@link #builder()} and
+ * {@code toImmutableList()} on an {@link ObjIterator} (or on any other iterator type in this package), plus
+ * the {@link #subList(int, int)} and {@link #reversed()} views of such a list - are immutable and thread-safe. Instances created by
+ * {@link #wrap(List)} or by a {@link Builder} over a caller-supplied holder are read-only <i>views</i>: they
+ * reflect external changes to the backing list and have that list's thread-safety characteristics. {@link #copyOf(Collection)} always
+ * returns an owning instance, so it turns a view into an independent value.
  *
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
@@ -69,7 +81,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  *     .build();
  *
  * // Use reverse view
- * ImmutableList<Integer> reversedView = ImmutableList.of(1, 2, 3).reversed();
+ * List<Integer> reversedView = ImmutableList.of(1, 2, 3).reversed();
  * // reversedView contains [3, 2, 1]
  * }</pre>
  *
@@ -77,12 +89,19 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * @see List
  * @see ImmutableCollection
  */
+@com.landawn.abacus.annotation.Immutable
 @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
 @SuppressWarnings("java:S2160")
-public sealed class ImmutableList<E> extends ImmutableCollection<E> implements List<E> permits ImmutableList.ReverseImmutableList {
+public sealed class ImmutableList<E> extends ImmutableCollection<E> implements List<E>
+        permits ImmutableList.ReverseImmutableList, ImmutableList.RandomAccessImmutableList {
 
+    // Collections.emptyList()'s spliterator is Spliterators.emptySpliterator(), which reports only
+    // SIZED|SUBSIZED and so drops the ORDERED that List.spliterator() promises; an operator that intersects
+    // characteristics (Stream.concat) then yields an unordered stream, making a later findFirst() on a
+    // parallel stream non-deterministic. Do NOT "simplify" this to List.of(): its contains(null) and
+    // indexOf(null) throw NullPointerException, which this empty list must not.
     @SuppressWarnings("rawtypes")
-    private static final ImmutableList EMPTY = new ImmutableList(N.emptyList(), false);
+    private static final ImmutableList EMPTY = create(Collections.unmodifiableList(new ArrayList<>(0)), true, true);
 
     /**
      * The unmodifiable {@code List} view that backs this instance; the same object the
@@ -92,14 +111,36 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
     final List<E> list;
 
     /**
-     * Constructs an ImmutableList backed by the provided list.
+     * Constructs a non-owning ImmutableList backed by the provided list.
      * The backing list is always exposed through an unmodifiable view; its concrete class name
      * is not treated as evidence that it is immutable.
      *
      * @param list the list of elements to be included in this ImmutableList.
+     * @throws NullPointerException if {@code list} is {@code null}
      */
-    ImmutableList(final List<? extends E> list) {
-        this(list, false);
+    ImmutableList(final List<? extends E> list) throws NullPointerException {
+        this(list, false, false);
+    }
+
+    /**
+     * Constructs a non-owning ImmutableList backed by the provided list.
+     * If {@code isUnmodifiable} is {@code false}, the list is wrapped in an unmodifiable view.
+     *
+     * <p><b>The flag is {@code isUnmodifiable}, not ownership.</b> The sorted members of this family
+     * ({@code ImmutableSortedSet}, {@code ImmutableSortedMap}, {@code ImmutableNavigableMap},
+     * {@code ImmutableNavigableSet}, {@code ImmutableBiMap}) spell their two-argument constructor
+     * {@code (backing, ownsBacking)} instead, so the same call shape means the opposite thing there. This
+     * overload is safe only because {@code ImmutableList} is {@code sealed} and neither permitted subclass
+     * declares a two-argument constructor; {@code ImmutableSet}, {@code ImmutableMap} and
+     * {@code AbstractImmutableMap} deliberately have no two-argument form for that reason. Pass all three
+     * arguments explicitly in any new code.</p>
+     *
+     * @param list the list of elements to be included in this ImmutableList.
+     * @param isUnmodifiable {@code true} if the provided list is already unmodifiable and does not need wrapping.
+     * @throws NullPointerException if {@code list} is {@code null} and {@code isUnmodifiable} is false
+     */
+    ImmutableList(final List<? extends E> list, final boolean isUnmodifiable) throws NullPointerException {
+        this(list, isUnmodifiable, false);
     }
 
     /**
@@ -108,11 +149,36 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *
      * @param list the list of elements to be included in this ImmutableList.
      * @param isUnmodifiable {@code true} if the provided list is already unmodifiable and does not need wrapping.
+     * @param ownsBacking {@code true} only if no other modifiable reference to {@code list} survives this call;
+     *        see {@link ImmutableCollection#ownsBacking}.
+     * @throws NullPointerException if {@code list} is {@code null} and {@code isUnmodifiable} is false
      */
     @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION")
-    ImmutableList(final List<? extends E> list, final boolean isUnmodifiable) {
-        super(isUnmodifiable ? list : Collections.unmodifiableList(list));
+    ImmutableList(final List<? extends E> list, final boolean isUnmodifiable, final boolean ownsBacking) throws NullPointerException {
+        super(isUnmodifiable ? list : Collections.unmodifiableList(list), ownsBacking);
         this.list = (List<E>) coll;
+    }
+
+    /**
+     * Creates an {@code ImmutableList} over the given backing list, choosing the
+     * {@link RandomAccess}-implementing variant when the backing list itself is {@code RandomAccess}.
+     *
+     * <p>{@code Collections.unmodifiableList} already preserves {@code RandomAccess}, so the marker is
+     * checked on the supplied list. Keeping the marker matters because JDK algorithms
+     * ({@code Collections.binarySearch}, {@code Collections.indexOfSubList}, ...) and the widespread
+     * {@code if (list instanceof RandomAccess)} idiom otherwise fall back to their linear
+     * iterator-based paths on a list that is really array-backed.</p>
+     *
+     * @param <E> the element type
+     * @param list the backing list
+     * @param isUnmodifiable {@code true} if {@code list} is already unmodifiable
+     * @param ownsBacking see {@link ImmutableCollection#ownsBacking}
+     * @return a new {@code ImmutableList} over {@code list}
+     * @throws NullPointerException if {@code list} is {@code null} and {@code isUnmodifiable} is false
+     */
+    static <E> ImmutableList<E> create(final List<? extends E> list, final boolean isUnmodifiable, final boolean ownsBacking) throws NullPointerException {
+        return list instanceof RandomAccess ? new RandomAccessImmutableList<>(list, isUnmodifiable, ownsBacking)
+                : new ImmutableList<>(list, isUnmodifiable, ownsBacking);
     }
 
     /**
@@ -148,7 +214,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @return an ImmutableList containing only the specified element.
      */
     public static <E> ImmutableList<E> of(final E e1) {
-        return new ImmutableList<>(Array.asList(e1), false);
+        return create(Array.asList(e1), false, true);
     }
 
     /**
@@ -166,7 +232,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2) {
-        return new ImmutableList<>(Array.asList(e1, e2), false);
+        return create(Array.asList(e1, e2), false, true);
     }
 
     /**
@@ -185,7 +251,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3) {
-        return new ImmutableList<>(Array.asList(e1, e2, e3), false);
+        return create(Array.asList(e1, e2, e3), false, true);
     }
 
     /**
@@ -205,7 +271,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4) {
-        return new ImmutableList<>(Array.asList(e1, e2, e3, e4), false);
+        return create(Array.asList(e1, e2, e3, e4), false, true);
     }
 
     /**
@@ -226,7 +292,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
-        return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5), false);
+        return create(Array.asList(e1, e2, e3, e4, e5), false, true);
     }
 
     /**
@@ -248,7 +314,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
-        return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6), false);
+        return create(Array.asList(e1, e2, e3, e4, e5, e6), false, true);
     }
 
     /**
@@ -271,7 +337,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7) {
-        return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7), false);
+        return create(Array.asList(e1, e2, e3, e4, e5, e6, e7), false, true);
     }
 
     /**
@@ -295,7 +361,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8) {
-        return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8), false);
+        return create(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8), false, true);
     }
 
     /**
@@ -320,7 +386,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @return an ImmutableList containing the specified elements in order.
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9) {
-        return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9), false);
+        return create(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9), false, true);
     }
 
     /**
@@ -347,7 +413,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      */
     public static <E> ImmutableList<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
             final E e10) {
-        return new ImmutableList<>(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), false);
+        return create(Array.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), false, true);
     }
 
     /**
@@ -380,39 +446,61 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         } else if (elements.length == 1) {
             return of(elements[0]);
         } else {
-            return copyOf(N.toList(elements));
+            // The clone is the defensive copy this method promises, and nothing else can reach it, so the
+            // Arrays.asList view over it is owned storage. Routing through copyOf(Collection) instead would
+            // build an intermediate ArrayList and then copy that a second time.
+            return create(Array.asList(elements.clone()), false, true);
         }
     }
 
     /**
      * Returns an ImmutableList containing all elements from the provided collection.
-     * If the provided collection is already an ImmutableList, it is returned directly without copying.
      * If the collection is {@code null} or empty, an empty ImmutableList is returned.
      * Otherwise, a new ImmutableList is created with a defensive copy of the collection's elements.
      * The order of elements is preserved as provided by the collection's iterator.
+     *
+     * <p>The copy is skipped only when {@code c} is an {@code ImmutableList} that already owns its
+     * backing storage - that is, one produced by {@code of(...)}, {@code copyOf(...)}, {@link #empty()},
+     * by a consumed no-argument {@link #builder()}, by {@code toImmutableList()} on an {@link ObjIterator}
+     * (or on any other iterator type in this package), or by {@link #subList(int, int)} or
+     * {@link #reversed()} over such a list. An {@code ImmutableList} produced by
+     * {@link #wrap(List)} or {@link #builder(List)} is a live view over
+     * storage its creator may still modify, so it is copied like any other collection. The returned list
+     * is therefore always an independent, stable value.</p>
+     *
+     * <p><b>Note:</b> "independent" means independent of further <i>modification</i>, not of the source's
+     * <i>memory</i>. A sub-range of an owning list ({@link #subList(int, int)}) owns its backing storage too,
+     * so it is returned unchanged - and, like every {@code List} sub-view, it keeps the whole parent list
+     * reachable. Wrap the range in a fresh collection ({@code ImmutableList.copyOf(new ArrayList<>(sub))})
+     * when a small range of a large list must stop retaining it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> mutable = new ArrayList<>(Arrays.asList(1, 2, 3));
      * ImmutableList<Integer> immutable = ImmutableList.copyOf(mutable);
      * mutable.add(4);   // Does not affect immutable
+     *
+     * ImmutableList<Integer> view = ImmutableList.wrap(mutable);
+     * ImmutableList<Integer> copy = ImmutableList.copyOf(view);
+     * mutable.add(5);   // Visible through view, but NOT through copy
      * }</pre>
      *
      * @param <E> the type of elements in the collection.
      * @param c the collection whose elements are to be placed into the {@code ImmutableList};
      *        may be {@code null} or empty.
-     * @return the same instance if {@code c} is already an {@code ImmutableList};
+     * @return the same instance if {@code c} is already an {@code ImmutableList} that owns its backing storage;
      *         an empty {@code ImmutableList} if {@code c} is {@code null} or empty;
      *         otherwise a new {@code ImmutableList} containing a defensive copy of the collection's elements.
      * @see #copyOf(Object[])
+     * @see #wrap(List)
      */
     public static <E> ImmutableList<E> copyOf(final Collection<? extends E> c) {
-        if (c instanceof ImmutableList) {
+        if (c instanceof ImmutableList && ((ImmutableList<E>) c).ownsBacking) {
             return (ImmutableList<E>) c;
         } else if (N.isEmpty(c)) {
             return empty();
         } else {
-            return new ImmutableList<>(new ArrayList<>(c), false);
+            return create(new ArrayList<>(c), false, true);
         }
     }
 
@@ -450,7 +538,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         } else if (list == null) {
             return empty();
         } else {
-            return new ImmutableList<>(list);
+            return create(list, false, false);
         }
     }
 
@@ -491,7 +579,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @see List#get(int)
      */
     @Override
-    public E get(final int index) {
+    public E get(final int index) throws IndexOutOfBoundsException {
         return list.get(index);
     }
 
@@ -584,7 +672,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @see List#listIterator(int)
      */
     @Override
-    public ImmutableListIterator<E> listIterator(final int index) {
+    public ImmutableListIterator<E> listIterator(final int index) throws IndexOutOfBoundsException {
         return ImmutableListIterator.of(list.listIterator(index));
     }
 
@@ -597,6 +685,13 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p>The semantics of the sublist are consistent with List.subList(), including
      * the behavior when fromIndex equals toIndex (returns an empty list).
      *
+     * <p><b>Note:</b> like every {@code List} sub-view, the returned list is only valid while the list it
+     * was taken from is not structurally modified through any other route. That cannot happen for a list
+     * that owns its backing storage, but a {@link #wrap(List)}-backed list can be resized by whoever still
+     * holds the wrapped list, and the sublist's behaviour is then undefined - the usual {@code ArrayList}
+     * backing raises {@link java.util.ConcurrentModificationException} on the next access. Take the sublist
+     * of a {@link #copyOf(Collection)} when the source may still change.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
@@ -607,14 +702,50 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * @param fromIndex the low endpoint (inclusive) of the subList.
      * @param toIndex the high endpoint (exclusive) of the subList.
      * @return an immutable view of the specified range within this list.
-     * @throws IndexOutOfBoundsException for an illegal endpoint index value
+     * @throws IndexOutOfBoundsException for an out-of-range endpoint index
      *         (fromIndex &lt; 0 || toIndex &gt; size).
      * @throws IllegalArgumentException if {@code fromIndex > toIndex}.
      * @see List#subList(int, int)
      */
     @Override
-    public ImmutableList<E> subList(final int fromIndex, final int toIndex) {
-        return ImmutableList.wrap(list.subList(fromIndex, toIndex));
+    public ImmutableList<E> subList(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
+        // Range-check here rather than leaving it to the backing list. java.util.List.subList specifies
+        // IndexOutOfBoundsException for an inverted range, while every AbstractList-derived implementation
+        // in the JDK actually raises IllegalArgumentException (Collections.subListRangeCheck). wrap() accepts
+        // any List, so without this the exception type would depend on what the caller happened to wrap, and
+        // would disagree with ReverseImmutableList.subList(), which performs exactly this check.
+        checkSubListRange(fromIndex, toIndex, size());
+
+        // A sub-view is a window onto this list's own backing storage, so it is exactly as stable as this
+        // list is: an owning parent yields an owning sublist, a wrap()-backed parent yields a live one.
+        return create(list.subList(fromIndex, toIndex), false, ownsBacking);
+    }
+
+    /**
+     * Reproduces {@code java.util.AbstractList.subListRangeCheck} exactly, including its order: an
+     * out-of-range endpoint is an {@link IndexOutOfBoundsException} while an inverted range is an
+     * {@link IllegalArgumentException}. Shared by {@link #subList(int, int)} and
+     * {@link ReverseImmutableList#subList(int, int)} so that both directions of a list agree on which
+     * exception a bad range raises.
+     *
+     * @param fromIndex the low endpoint (inclusive) of the requested range
+     * @param toIndex the high endpoint (exclusive) of the requested range
+     * @param size the size of the list the range is taken from
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size}
+     * @throws IllegalArgumentException if {@code fromIndex > toIndex}
+     */
+    static void checkSubListRange(final int fromIndex, final int toIndex, final int size) throws IndexOutOfBoundsException, IllegalArgumentException {
+        if (fromIndex < 0) {
+            throw new IndexOutOfBoundsException("fromIndex = " + fromIndex);
+        }
+
+        if (toIndex > size) {
+            throw new IndexOutOfBoundsException("toIndex = " + toIndex);
+        }
+
+        if (fromIndex > toIndex) {
+            throw new IllegalArgumentException("fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
+        }
     }
 
     /**
@@ -683,16 +814,13 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * This operation is not supported by ImmutableList.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param operator ignored.
+     * @param operator ignored, and may be {@code null}.
      * @throws UnsupportedOperationException always.
-     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      * @deprecated ImmutableList does not support modification operations.
      */
     @Deprecated
     @Override
-    public void replaceAll(final UnaryOperator<E> operator) throws UnsupportedOperationException, IllegalArgumentException {
-        N.checkArgNotNull(operator, cs.operator);
-
+    public void replaceAll(final UnaryOperator<E> operator) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -700,16 +828,96 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * This operation is not supported by ImmutableList.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
-     * @param c ignored.
+     * @param c ignored. A {@code null} comparator is accepted here as it is by
+     *        {@link List#sort(Comparator)}, where it means the natural ordering.
      * @throws UnsupportedOperationException always.
-     * @throws IllegalArgumentException if {@code c} is {@code null}.
      * @deprecated ImmutableList does not support modification operations.
      */
     @Deprecated
     @Override
-    public void sort(final Comparator<? super E> c) throws UnsupportedOperationException, IllegalArgumentException {
-        N.checkArgNotNull(c, cs.c);
+    public void sort(final Comparator<? super E> c) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
 
+    /**
+     * This operation is not supported by ImmutableList.
+     * Attempting to call this method will always throw an UnsupportedOperationException,
+     * including on an empty list.
+     *
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableList does not support modification operations.
+     */
+    // Overrides List.removeFirst(), whose default checks isEmpty() BEFORE delegating to remove(0) and so
+    // raises NoSuchElementException on an empty list instead of reporting that the list is read-only.
+    // java.util.List.of() blocks it unconditionally for the same reason; this matches that.
+    /**
+     * {@inheritDoc}
+     * @throws UnsupportedOperationException always, because this object does not support this mutation
+     */
+    @Deprecated
+    @Override
+    public E removeFirst() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * This operation is not supported by ImmutableList.
+     * Attempting to call this method will always throw an UnsupportedOperationException,
+     * including on an empty list.
+     *
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableList does not support modification operations.
+     */
+    // See removeFirst(): the inherited List default raises NoSuchElementException on an empty list.
+    /**
+     * {@inheritDoc}
+     * @throws UnsupportedOperationException always, because this object does not support this mutation
+     */
+    @Deprecated
+    @Override
+    public E removeLast() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * This operation is not supported by ImmutableList.
+     * Attempting to call this method will always throw an UnsupportedOperationException.
+     *
+     * @param e ignored; this list cannot be modified.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableList does not support modification operations.
+     */
+    // Overridden only so that a call is flagged at compile time like every other mutator on this class; the
+    // inherited List.addFirst(E) default already fails at run time by delegating to add(0, e).
+    /**
+     * {@inheritDoc}
+     * @throws UnsupportedOperationException always, because this object does not support this mutation
+     */
+    @Deprecated
+    @Override
+    public void addFirst(final E e) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * This operation is not supported by ImmutableList.
+     * Attempting to call this method will always throw an UnsupportedOperationException.
+     *
+     * @param e ignored; this list cannot be modified.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableList does not support modification operations.
+     */
+    // See addFirst(E): the inherited List.addLast(E) default delegates to add(e) and so is already blocked
+    // at run time; this override adds the missing compile-time deprecation warning.
+    /**
+     * {@inheritDoc}
+     * @throws UnsupportedOperationException always, because this object does not support this mutation
+     */
+    @Deprecated
+    @Override
+    public void addLast(final E e) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -717,28 +925,34 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Returns a view of this immutable list in reverse order. For example,
      * {@code ImmutableList.of(1, 2, 3).reversed()} returns a list containing {@code [3, 2, 1]}.
      * The returned list is backed by this list, so it's still immutable. The reverse operation
-     * is efficient and does not copy elements. Note that the view's size is captured when this
-     * method is called; for a list created via {@link #wrap(List)} whose backing list is later
-     * resized, the behavior of the reversed view is undefined.
+     * is efficient and does not copy elements: the view reads the backing list's current size on
+     * each new operation, so for a list created via {@link #wrap(List)} whose backing list is later
+     * resized, the view keeps presenting the current contents in reverse order.
+     * Iterators retain the backing iterator's modification behavior (for example, fail-fast or
+     * snapshot iteration). Traversal uses a backing list iterator and is linear for linked lists.
      *
-     * <p>If this list has one or zero elements, this same instance is returned.
+     * <p>If this list owns its backing storage (it came from {@code of(...)}, {@code copyOf(...)},
+     * {@link #empty()}, a consumed no-argument {@link #builder()}, {@code toImmutableList()} on an
+     * {@link ObjIterator}, or {@link #subList(int, int)} over such a list) and has one or zero elements,
+     * this same instance is returned, because such a
+     * list can never differ from its own reverse. A {@link #wrap(List)}-backed list always gets a real
+     * reversed view, since its backing list may still grow.
      * Calling reversed() on an already reversed list returns the original list.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ImmutableList<String> original = ImmutableList.of("a", "b", "c");
-     * ImmutableList<String> reversed = original.reversed();
+     * List<String> reversed = ImmutableList.of("a", "b", "c").reversed();
      * // reversed contains ["c", "b", "a"]
-     *
-     * ImmutableList<String> backToOriginal = reversed.reversed();
-     * // backToOriginal is the same instance as original
      * }</pre>
      *
-     * @return an immutable view of this list with elements in reverse order;
-     *         this same instance if this list has zero or one element.
+     * @return an immutable view of this list with elements in reverse order; this same instance if this
+     *         list owns its backing storage and has zero or one element.
      */
+    @Override
     public ImmutableList<E> reversed() {
-        return (size() <= 1) ? this : new ReverseImmutableList<>(this);
+        // The identity shortcut is only sound for a stable backing list: a wrap()-backed singleton can
+        // grow to two elements, at which point "this" would no longer be a reversed view of itself.
+        return (ownsBacking && size() <= 1) ? this : new ReverseImmutableList<>(this);
     }
 
     /**
@@ -746,22 +960,30 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * Instances are created by {@link ImmutableList#reversed()} and are themselves immutable.
      * All mutating operations throw {@link UnsupportedOperationException}.
      *
+     * <p>New operations read the forward list's current size, so the view tracks a
+     * {@link ImmutableList#wrap(List)}-backed list that is resized after the view was created.
+     * Iterators follow the backing iterator's modification behavior.</p>
+     *
+     * <p>Unlike {@link RandomAccessImmutableList}, this class never implements {@link RandomAccess}, even
+     * over a random-access forward list. Positional access is still constant-time whenever the forward
+     * list's is; only the marker interface (and the iterator-versus-index choice some algorithms make
+     * from it) is absent.</p>
+     *
      * @param <E> the type of elements in this list
      */
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     static final class ReverseImmutableList<E> extends ImmutableList<E> {
         private final ImmutableList<E> forwardList;
-        private final int size;
 
         /**
          * Constructs a reversed view of the given immutable list.
          *
          * @param backingList the list whose elements this view presents in reverse order
+         * @throws NullPointerException if {@code backingList} is {@code null}
          */
-        ReverseImmutableList(final ImmutableList<E> backingList) {
-            super(backingList.list, true);
+        ReverseImmutableList(final ImmutableList<E> backingList) throws NullPointerException {
+            super(backingList.list, true, backingList.ownsBacking);
             forwardList = backingList;
-            size = forwardList.size();
         }
 
         /**
@@ -799,8 +1021,9 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         public int indexOf(final Object object) {
             @SuppressWarnings("SuspiciousMethodCalls")
             final int index = forwardList.lastIndexOf(object);
+            final int size = size();
 
-            return (index >= 0) ? reverseIndex(index) : -1;
+            return (index >= 0 && index < size) ? reverseIndex(index, size) : -1;
         }
 
         /**
@@ -816,8 +1039,9 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         public int lastIndexOf(final Object object) {
             @SuppressWarnings("SuspiciousMethodCalls")
             final int index = forwardList.indexOf(object);
+            final int size = size();
 
-            return (index >= 0) ? reverseIndex(index) : -1;
+            return (index >= 0 && index < size) ? reverseIndex(index, size) : -1;
         }
 
         /**
@@ -827,13 +1051,18 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * @param fromIndex low endpoint (inclusive) of the sublist
          * @param toIndex high endpoint (exclusive) of the sublist
          * @return an immutable reversed view of the specified range
-         * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex}
+         * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
+         * @throws IllegalArgumentException if {@code fromIndex > toIndex}
          */
         @Override
-        public ImmutableList<E> subList(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
-            N.checkFromToIndex(fromIndex, toIndex, size());
+        public ImmutableList<E> subList(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
+            final int size = size();
 
-            return forwardList.subList(reversePosition(toIndex), reversePosition(fromIndex)).reversed();
+            // ImmutableList.subList() applies the same check, so both directions of a list agree on which
+            // exception a bad range raises.
+            checkSubListRange(fromIndex, toIndex, size);
+
+            return forwardList.subList(reversePosition(toIndex, size), reversePosition(fromIndex, size)).reversed();
         }
 
         /**
@@ -845,18 +1074,27 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
          */
         @Override
-        public E get(final int index) {
-            return forwardList.get(reverseIndex(index));
+        public E get(final int index) throws IndexOutOfBoundsException {
+            final int size = size();
+
+            if (index < 0 || index >= size) {
+                throw new IndexOutOfBoundsException("Index " + index + " out of bounds for length " + size);
+            }
+
+            return forwardList.get(reverseIndex(index, size));
         }
 
         /**
-         * Returns the number of elements in this list.
+         * Returns the number of elements in this list, which is the current size of the forward list.
          *
          * @return the number of elements
          */
         @Override
         public int size() {
-            return size;
+            // Read through instead of caching at construction: a wrap()-backed forward list can be
+            // resized after this view is created, and a stale size would silently truncate (or over-run)
+            // every operation here. Callers below snapshot this once so a single call stays consistent.
+            return forwardList.size();
         }
 
         /**
@@ -867,22 +1105,7 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          */
         @Override
         public ObjIterator<E> iterator() {
-            return new ObjIterator<>() {
-                private int index = 0;
-
-                @Override
-                public boolean hasNext() {
-                    return index < size;
-                }
-
-                @Override
-                public E next() {
-                    if (!hasNext()) {
-                        throw new java.util.NoSuchElementException();
-                    }
-                    return forwardList.get(reverseIndex(index++));
-                }
-            };
+            return listIterator(0);
         }
 
         /**
@@ -905,62 +1128,110 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          */
         @Override
         public ImmutableListIterator<E> listIterator(final int index) throws IndexOutOfBoundsException {
-            N.checkFromIndexSize(index, 0, size);
+            final int size = size();
+
+            // Reported the way the forward list reports it (AbstractList.rangeCheckForAdd): a zero-length
+            // *range* check would describe a bad index as "Start Index i with size 0", which no caller asked for.
+            if (index < 0 || index > size) {
+                throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+            }
+
+            final ImmutableListIterator<E> forward = forwardList.listIterator(reversePosition(index, size));
 
             return ImmutableListIterator.of(new java.util.ListIterator<>() {
-                private int cursor = index;
-
                 @Override
                 public boolean hasNext() {
-                    return cursor < size;
+                    return forward.hasPrevious();
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws NoSuchElementException if no next element remains in this iterator
+                 */
                 @Override
-                public E next() {
-                    if (!hasNext()) {
-                        throw new java.util.NoSuchElementException();
-                    }
-                    return forwardList.get(reverseIndex(cursor++));
+                public E next() throws NoSuchElementException {
+                    return forward.previous();
                 }
 
                 @Override
                 public boolean hasPrevious() {
-                    return cursor > 0;
+                    return forward.hasNext();
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws NoSuchElementException if no previous element remains in this iterator
+                 */
                 @Override
-                public E previous() {
-                    if (!hasPrevious()) {
-                        throw new java.util.NoSuchElementException();
-                    }
-                    return forwardList.get(reverseIndex(--cursor));
+                public E previous() throws NoSuchElementException {
+                    return forward.next();
                 }
 
                 @Override
                 public int nextIndex() {
-                    return cursor;
+                    return size - forward.nextIndex();
                 }
 
                 @Override
                 public int previousIndex() {
-                    return cursor - 1;
+                    return nextIndex() - 1;
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws UnsupportedOperationException always, because this object does not support this mutation
+                 */
                 @Override
-                public void remove() {
+                public void remove() throws UnsupportedOperationException {
                     throw new UnsupportedOperationException();
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws UnsupportedOperationException always, because this object does not support this mutation
+                 */
                 @Override
-                public void set(final E e) {
+                public void set(final E e) throws UnsupportedOperationException {
                     throw new UnsupportedOperationException();
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws UnsupportedOperationException always, because this object does not support this mutation
+                 */
                 @Override
-                public void add(final E e) {
+                public void add(final E e) throws UnsupportedOperationException {
                     throw new UnsupportedOperationException();
                 }
             });
+        }
+
+        /**
+         * Returns a {@link Spliterator} over the elements of this reversed list, in reversed order.
+         *
+         * @return a {@code Spliterator} over the elements of this list in reversed order
+         */
+        @Override
+        public Spliterator<E> spliterator() {
+            // ImmutableCollection.spliterator() delegates to the backing collection, which for this view
+            // is the FORWARD list; inheriting it would silently traverse the wrong order (and so would
+            // every stream() built on it). Use the iterator-based spliterator, which goes through the
+            // reversed iterator() above.
+            return Spliterators.spliterator(this, Spliterator.ORDERED);
+        }
+
+        /**
+         * Performs the given action for each element of this reversed list, in reversed order.
+         *
+         * @param action the action to be performed for each element
+         * @throws NullPointerException if {@code action} is {@code null}
+         */
+        @Override
+        public void forEach(final Consumer<? super E> action) throws NullPointerException {
+            // Same reason as spliterator(): the inherited implementation would traverse the forward list.
+            Objects.requireNonNull(action);
+
+            iterator().forEachRemaining(action);
         }
 
         /**
@@ -970,10 +1241,14 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          */
         @Override
         public Object[] toArray() {
+            final int size = size();
             final Object[] result = new Object[size];
+            final Iterator<E> iter = iterator();
+
             for (int i = 0; i < size; i++) {
-                result[i] = forwardList.get(reverseIndex(i));
+                result[i] = iter.next();
             }
+
             return result;
         }
 
@@ -989,20 +1264,24 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * @param a the array into which the elements are stored, if large enough; otherwise
          *        a new array of the same runtime type is allocated for this purpose
          * @return an array containing all elements of this reversed list
-         * @throws ArrayStoreException if the runtime type of {@code a} is not a supertype of the
-         *         runtime type of every element in this list
          * @throws NullPointerException if {@code a} is {@code null}
+         * @throws ArrayStoreException if an element is incompatible with the runtime component type of {@code a}
          */
         @SuppressWarnings("unchecked")
         @Override
-        public <T> T[] toArray(final T[] a) {
+        public <T> T[] toArray(final T[] a) throws NullPointerException, ArrayStoreException {
+            final int size = size();
             final T[] result = a.length >= size ? a : (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
+            final Iterator<E> iter = iterator();
+
             for (int i = 0; i < size; i++) {
-                result[i] = (T) forwardList.get(reverseIndex(i));
+                result[i] = (T) iter.next();
             }
+
             if (result.length > size) {
                 result[size] = null;
             }
+
             return result;
         }
 
@@ -1024,14 +1303,17 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
                 return false;
             }
 
+            final int size = size();
+
             if (other.size() != size) {
                 return false;
             }
 
             final Iterator<?> otherItr = other.iterator();
+            final Iterator<E> iter = iterator();
 
             for (int i = 0; i < size; i++) {
-                if (!N.equals(forwardList.get(reverseIndex(i)), otherItr.next())) {
+                if (!N.equals(iter.next(), otherItr.next())) {
                     return false;
                 }
             }
@@ -1049,8 +1331,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         public int hashCode() {
             int hashCode = 1;
 
-            for (int i = 0; i < size; i++) {
-                hashCode = 31 * hashCode + N.hashCode(forwardList.get(reverseIndex(i)));
+            for (final E element : this) {
+                hashCode = 31 * hashCode + N.hashCode(element);
             }
 
             return hashCode;
@@ -1074,25 +1356,38 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          */
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("[");
-
-            for (int i = 0; i < size; i++) {
-                if (i > 0) {
-                    sb.append(", ");
-                }
-
-                sb.append(forwardList.get(reverseIndex(i)));
-            }
-
-            return sb.append(']').toString();
+            return super.toString();
         }
 
-        private int reverseIndex(final int index) {
+        private static int reverseIndex(final int index, final int size) {
             return (size - 1) - index;
         }
 
-        private int reversePosition(final int index) {
+        private static int reversePosition(final int index, final int size) {
             return size - index;
+        }
+    }
+
+    /**
+     * An {@link ImmutableList} whose backing list is {@link RandomAccess}, so this view is marked
+     * {@code RandomAccess} too. Instances are produced by {@link ImmutableList#create(List, boolean, boolean)};
+     * the class adds no state and no behaviour beyond the marker interface.
+     *
+     * @param <E> the type of elements in this list
+     */
+    @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
+    static final class RandomAccessImmutableList<E> extends ImmutableList<E> implements RandomAccess {
+
+        /**
+         * Constructs a {@code RandomAccess} immutable list over the given backing list.
+         *
+         * @param list the backing list, which must itself be {@link RandomAccess}
+         * @param isUnmodifiable {@code true} if {@code list} is already unmodifiable
+         * @param ownsBacking see {@link ImmutableCollection#ownsBacking}
+         * @throws NullPointerException if {@code list} is {@code null} and {@code isUnmodifiable} is false
+         */
+        RandomAccessImmutableList(final List<? extends E> list, final boolean isUnmodifiable, final boolean ownsBacking) throws NullPointerException {
+            super(list, isUnmodifiable, ownsBacking);
         }
     }
 
@@ -1110,11 +1405,14 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *     .build();
      * }</pre>
      *
+     * <p>The builder uses its own private storage, so the list returned by {@link Builder#build()} is an
+     * independent, stable value once the builder has been consumed.</p>
+     *
      * @param <E> the type of elements to be maintained by the list.
      * @return a new Builder instance for creating an ImmutableList.
      */
     public static <E> Builder<E> builder() {
-        return new Builder<>(new ArrayList<>());
+        return new Builder<>(new ArrayList<>(), true);
     }
 
     /**
@@ -1132,15 +1430,20 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      *     .build();
      * }</pre>
      *
+     * <p><b>Warning:</b> the caller keeps a reference to {@code holder}, so the list returned by
+     * {@link Builder#build()} is a live view over storage the caller can still modify. It is treated as
+     * such: {@link #copyOf(Collection)} will copy it rather than return it unchanged. Use the no-arg
+     * {@link #builder()} when an independent value is wanted.</p>
+     *
      * @param <E> the type of elements to be maintained by the list.
      * @param holder the list to be used as the backing storage for the Builder; must not be {@code null}.
      * @return a new Builder instance that will use the provided list.
      * @throws IllegalArgumentException if holder is {@code null}.
      */
     public static <E> Builder<E> builder(final List<E> holder) throws IllegalArgumentException {
-        N.checkArgNotNull(holder);
+        N.checkArgNotNull(holder, cs.holder);
 
-        return new Builder<>(holder);
+        return new Builder<>(holder, false);
     }
 
     /**
@@ -1163,13 +1466,30 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
     public static final class Builder<E> {
         private final List<E> list;
 
+        /** Whether {@link #list} is the builder's own storage, unreachable to any caller. */
+        private final boolean ownsStorage;
+
+        /** Set by {@link #build()}; further element additions are rejected from then on. */
+        private boolean built;
+
         /**
          * Constructs a {@code Builder} that uses the given list as its backing storage.
          *
          * @param holder the list to accumulate elements into
+         * @param ownsStorage {@code true} if {@code holder} was created by this class and no caller can reach it
          */
-        Builder(final List<E> holder) {
+        Builder(final List<E> holder, final boolean ownsStorage) {
             list = holder;
+            this.ownsStorage = ownsStorage;
+        }
+
+        /**
+         * @throws IllegalStateException if this builder has already been consumed by {@code build()}
+         */
+        private void assertNotBuilt() throws IllegalStateException {
+            if (built) {
+                throw new IllegalStateException("This builder has already been consumed by build() and cannot be modified");
+            }
         }
 
         /**
@@ -1183,8 +1503,11 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          *
          * @param element the element to add, may be {@code null}.
          * @return this builder instance for method chaining.
+         * @throws IllegalStateException if {@link #build()} has already been called on this builder.
          */
-        public Builder<E> add(final E element) {
+        public Builder<E> add(final E element) throws IllegalStateException {
+            assertNotBuilt();
+
             list.add(element);
 
             return this;
@@ -1202,9 +1525,12 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          *
          * @param elements the elements to add, may be {@code null} or empty.
          * @return this builder instance for method chaining.
+         * @throws IllegalStateException if {@link #build()} has already been called on this builder.
          */
         @SafeVarargs
-        public final Builder<E> add(final E... elements) {
+        public final Builder<E> add(final E... elements) throws IllegalStateException {
+            assertNotBuilt();
+
             if (N.notEmpty(elements)) {
                 list.addAll(Arrays.asList(elements));
             }
@@ -1225,8 +1551,11 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          *
          * @param c the collection containing elements to add, may be {@code null} or empty.
          * @return this builder instance for method chaining.
+         * @throws IllegalStateException if {@link #build()} has already been called on this builder.
          */
-        public Builder<E> addAll(final Collection<? extends E> c) {
+        public Builder<E> addAll(final Collection<? extends E> c) throws IllegalStateException {
+            assertNotBuilt();
+
             if (N.notEmpty(c)) {
                 list.addAll(c);
             }
@@ -1242,14 +1571,18 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String> iter = someCollection.iterator();
+         * List<String> source = Arrays.asList("six", "seven");
+         * Iterator<String> iter = source.iterator();
          * builder.addAll(iter);
          * }</pre>
          *
          * @param iter the iterator over elements to add, may be {@code null}.
          * @return this builder instance for method chaining.
+         * @throws IllegalStateException if {@link #build()} has already been called on this builder.
          */
-        public Builder<E> addAll(final Iterator<? extends E> iter) {
+        public Builder<E> addAll(final Iterator<? extends E> iter) throws IllegalStateException {
+            assertNotBuilt();
+
             if (iter != null) {
                 while (iter.hasNext()) {
                     list.add(iter.next());
@@ -1261,22 +1594,30 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
 
         /**
          * Builds and returns an ImmutableList containing all elements added to this builder.
-         * After calling this method, the builder should not be used further as the created
-         * ImmutableList may be backed by the builder's internal storage.
+         * The returned list is backed by the builder's storage rather than by a copy, so this method
+         * consumes the builder: any subsequent {@code add}/{@code addAll} call throws
+         * {@link IllegalStateException}. {@code build()} itself may be called more than once and
+         * returns an equal list each time.
          *
          * <p>The returned list is immutable and will throw UnsupportedOperationException
-         * for any modification attempts.
+         * for any modification attempts. When the builder was created by {@link ImmutableList#builder()}
+         * its storage is private and the result is an independent value; when it was created by
+         * {@link ImmutableList#builder(List)} the caller can still modify the holder it supplied, so the
+         * result stays a live view and {@link ImmutableList#copyOf(Collection)} will copy it.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ImmutableList<String> finalList = builder.build();
          * System.out.println(finalList.size());   // prints the number of elements added
+         * // builder.add("more");   // throws IllegalStateException
          * }</pre>
          *
          * @return a new ImmutableList containing all added elements in the order they were added.
          */
         public ImmutableList<E> build() {
-            return new ImmutableList<>(list);
+            built = true;
+
+            return create(list, false, ownsStorage);
         }
     }
 }

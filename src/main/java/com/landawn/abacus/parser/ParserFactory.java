@@ -308,7 +308,7 @@ public final class ParserFactory {
      * @return a new {@code AvroParser} instance
      * @throws NoClassDefFoundError if Avro library is not available
      */
-    public static AvroParser createAvroParser() {
+    public static AvroParser createAvroParser() throws NoClassDefFoundError {
         return new AvroParser();
     }
 
@@ -327,7 +327,7 @@ public final class ParserFactory {
      * @return a new {@code KryoParser} instance
      * @throws NoClassDefFoundError if Kryo library is not available
      */
-    public static KryoParser createKryoParser() {
+    public static KryoParser createKryoParser() throws NoClassDefFoundError {
         return new KryoParser();
     }
 
@@ -385,7 +385,7 @@ public final class ParserFactory {
      * @return a new abacus-common {@code XmlParser} instance
      * @throws NoClassDefFoundError if abacus-common XML support is not available
      */
-    public static XmlParser createAbacusXmlParser() {
+    public static XmlParser createAbacusXmlParser() throws NoClassDefFoundError {
         return new AbacusXmlParserImpl(XmlParserType.StAX);
     }
 
@@ -408,7 +408,7 @@ public final class ParserFactory {
      * @return a new abacus-common {@code XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if abacus-common XML support is not available
      */
-    public static XmlParser createAbacusXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) {
+    public static XmlParser createAbacusXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) throws NoClassDefFoundError {
         return new AbacusXmlParserImpl(XmlParserType.StAX, xsc, xdc);
     }
 
@@ -457,7 +457,7 @@ public final class ParserFactory {
      * @return a new standard {@code XmlParser} instance
      * @throws NoClassDefFoundError if XML support is not available
      */
-    public static XmlParser createXmlParser() {
+    public static XmlParser createXmlParser() throws NoClassDefFoundError {
         return new XmlParserImpl(XmlParserType.StAX);
     }
 
@@ -479,7 +479,7 @@ public final class ParserFactory {
      * @return a new standard {@code XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if XML support is not available
      */
-    public static XmlParser createXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) {
+    public static XmlParser createXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) throws NoClassDefFoundError {
         return new XmlParserImpl(XmlParserType.StAX, xsc, xdc);
     }
 
@@ -516,7 +516,7 @@ public final class ParserFactory {
      * @return a new JAXB {@code XmlParser} instance
      * @throws NoClassDefFoundError if JAXB implementation is not available
      */
-    public static XmlParser createJaxbParser() {
+    public static XmlParser createJaxbParser() throws NoClassDefFoundError {
         return new JaxbParser();
     }
 
@@ -539,7 +539,7 @@ public final class ParserFactory {
      * @return a new JAXB {@code XmlParser} instance with the specified configurations
      * @throws NoClassDefFoundError if JAXB implementation is not available
      */
-    public static XmlParser createJaxbParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) {
+    public static XmlParser createJaxbParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) throws NoClassDefFoundError {
         return new JaxbParser(xsc, xdc);
     }
 
@@ -589,7 +589,7 @@ public final class ParserFactory {
      */
     public static void registerKryo(final Class<?> type, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
-        N.checkArgNotNegative(id, "id");
+        N.checkArgNotNegative(id, cs.id);
 
         synchronized (_kryoRegistrationLock) {
             checkKryoRegistrationIdAvailable(type, id);
@@ -647,7 +647,7 @@ public final class ParserFactory {
     public static void registerKryo(final Class<?> type, final Serializer<?> serializer, final int id) throws IllegalArgumentException {
         N.checkArgNotNull(type, cs.type);
         N.checkArgNotNull(serializer, cs.serializer);
-        N.checkArgNotNegative(id, "id");
+        N.checkArgNotNegative(id, cs.id);
 
         synchronized (_kryoRegistrationLock) {
             checkKryoRegistrationIdAvailable(type, id);
@@ -657,7 +657,10 @@ public final class ParserFactory {
         }
     }
 
-    private static void checkKryoRegistrationIdAvailable(final Class<?> type, final int id) {
+    /**
+     * @throws IllegalArgumentException if the registration ID is already assigned to a different class
+     */
+    private static void checkKryoRegistrationIdAvailable(final Class<?> type, final int id) throws IllegalArgumentException {
         for (final Map.Entry<Class<?>, Integer> entry : _kryoClassIdMap.entrySet()) {
             if (entry.getValue().intValue() == id && entry.getKey() != type) {
                 throw new IllegalArgumentException("Kryo registration ID " + id + " is already assigned to " + entry.getKey().getName());

@@ -9,8 +9,9 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Node;
 
-import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.type.Type;
+
+import testfixtures.entity.extendDirty.basic.Account;
 
 public class JaxbXmlParserTest extends AbstractXmlParserTest {
     @Override

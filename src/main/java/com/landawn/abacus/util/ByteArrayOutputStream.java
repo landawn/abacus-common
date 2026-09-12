@@ -80,7 +80,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * @param initCapacity the initial capacity of the buffer
      * @throws IllegalArgumentException if initCapacity is negative.
      */
-    public ByteArrayOutputStream(final int initCapacity) {
+    public ByteArrayOutputStream(final int initCapacity) throws IllegalArgumentException {
         if (initCapacity < 0) {
             throw new IllegalArgumentException("Negative initial size: " + initCapacity);
         }
@@ -102,9 +102,10 @@ public final class ByteArrayOutputStream extends OutputStream {
      * }</pre>
      *
      * @param b the byte to write (as an int)
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or an enlarged buffer cannot be allocated
      */
     @Override
-    public void write(final int b) {
+    public void write(final int b) throws OutOfMemoryError {
         ensureCapacity(count + 1);
         buf[count] = (byte) b;
         count += 1;
@@ -126,9 +127,10 @@ public final class ByteArrayOutputStream extends OutputStream {
      * @throws NullPointerException if {@code b} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
      *         or {@code off + len} is greater than the length of the array {@code b}
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or an enlarged buffer cannot be allocated
      */
     @Override
-    public void write(final byte[] b, final int off, final int len) {
+    public void write(final byte[] b, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException, OutOfMemoryError {
         if ((off < 0) || (off > b.length) || (len < 0) || (len > b.length - off)) {
             throw new IndexOutOfBoundsException();
         }
@@ -150,8 +152,9 @@ public final class ByteArrayOutputStream extends OutputStream {
      * }</pre>
      *
      * @param b the byte to write
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or an enlarged buffer cannot be allocated
      */
-    public void write(final byte b) {
+    public void write(final byte b) throws OutOfMemoryError {
         ensureCapacity(count + 1);
         buf[count] = b;
         count += 1;
@@ -175,9 +178,9 @@ public final class ByteArrayOutputStream extends OutputStream {
      *
      * @param out the output stream to write to
      * @throws NullPointerException if {@code out} is {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing the accumulated bytes to {@code out} fails
      */
-    public void writeTo(final OutputStream out) throws IOException {
+    public void writeTo(final OutputStream out) throws NullPointerException, IOException {
         out.write(buf, 0, count);
     }
 
@@ -311,9 +314,10 @@ public final class ByteArrayOutputStream extends OutputStream {
      *
      * @param charsetName the name of the charset to use for decoding
      * @return a String decoded from the buffer contents
+     * @throws NullPointerException if {@code charsetName} is {@code null}
      * @throws UnsupportedEncodingException if the named charset is not supported
      */
-    public String toString(final String charsetName) throws UnsupportedEncodingException {
+    public String toString(final String charsetName) throws NullPointerException, UnsupportedEncodingException {
         return new String(buf, 0, count, charsetName);
     }
 
@@ -331,7 +335,7 @@ public final class ByteArrayOutputStream extends OutputStream {
      * @return a String decoded from the buffer contents
      * @throws NullPointerException if {@code charset} is {@code null}
      */
-    public String toString(final Charset charset) {
+    public String toString(final Charset charset) throws NullPointerException {
         return new String(buf, 0, count, charset);
     }
 
@@ -349,7 +353,10 @@ public final class ByteArrayOutputStream extends OutputStream {
         // Do nothing.
     }
 
-    private void ensureCapacity(final int minCapacity) {
+    /**
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or an enlarged buffer cannot be allocated
+     */
+    private void ensureCapacity(final int minCapacity) throws OutOfMemoryError {
         if (minCapacity < 0 || minCapacity > N.MAX_ARRAY_SIZE) {
             throw new OutOfMemoryError();
         }

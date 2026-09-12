@@ -31,7 +31,7 @@ import com.landawn.abacus.util.cs;
  * @see java.util.function.IntPredicate
  */
 @FunctionalInterface
-public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, RuntimeException> { // NOSONAR
+public interface ObjIntPredicate<T> extends Throwables.ObjIntPredicate<T, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Evaluates this predicate on the given arguments.
      *

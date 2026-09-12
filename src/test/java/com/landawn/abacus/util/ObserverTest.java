@@ -1,7 +1,5 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,6 +20,22 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class ObserverTest extends TestBase {
+
+    @Test
+    public void testSubscriptionActionRunsOnlyAfterSubscription() throws InterruptedException {
+        Observer<Integer> observer = Observer.of(List.of(1));
+        AtomicInteger initialized = new AtomicInteger();
+        CountDownLatch completed = new CountDownLatch(1);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> observer.addSubscriptionAction(null));
+        observer.addSubscriptionAction(initialized::incrementAndGet);
+        Assertions.assertEquals(0, initialized.get());
+
+        observer.observe(value -> Assertions.assertEquals(1, initialized.get()), error -> Assertions.fail(error), completed::countDown);
+
+        Assertions.assertTrue(completed.await(5, TimeUnit.SECONDS));
+        Assertions.assertEquals(1, initialized.get());
+        Assertions.assertThrows(IllegalStateException.class, () -> observer.addSubscriptionAction(initialized::incrementAndGet));
+    }
 
     // ==================== complete(BlockingQueue) ====================
 
@@ -97,62 +111,10 @@ public class ObserverTest extends TestBase {
 
     @Test
     public void testOfCollection() throws InterruptedException {
-        Collection<Integer> collection = Arrays.asList(1, 2, 3);
-        Observer<Integer> observer = Observer.of(collection);
-        Assertions.assertNotNull(observer);
-
-        List<Integer> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        observer.observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        Assertions.assertTrue(completed);
-        Assertions.assertEquals(Arrays.asList(1, 2, 3), results);
-    }
-
-    @Test
-    public void testOfCollection_Empty() throws InterruptedException {
-        Collection<String> collection = Collections.emptyList();
-        Observer<String> observer = Observer.of(collection);
-        Assertions.assertNotNull(observer);
-
-        List<String> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        observer.observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        Assertions.assertTrue(completed);
-        Assertions.assertTrue(results.isEmpty());
-    }
-
-    @Test
-    public void testOfCollection_Null() throws InterruptedException {
-        Observer<String> observer = Observer.of((Collection<String>) null);
-        Assertions.assertNotNull(observer);
-
-        List<String> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        observer.observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        Assertions.assertTrue(completed);
-        Assertions.assertTrue(results.isEmpty());
-    }
-
-    @Test
-    public void testOfCollection_SingleElement() throws InterruptedException {
-        Observer<String> observer = Observer.of(Collections.singletonList("only"));
-        List<String> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        observer.observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        Assertions.assertTrue(completed);
-        Assertions.assertEquals(Arrays.asList("only"), results);
+        Assertions.assertEquals(Arrays.asList(1, 2, 3), collect(Observer.of(Arrays.asList(1, 2, 3))));
+        Assertions.assertTrue(collect(Observer.of(Collections.emptyList())).isEmpty());
+        Assertions.assertTrue(collect(Observer.of((Collection<String>) null)).isEmpty());
+        Assertions.assertEquals(Collections.singletonList("only"), collect(Observer.of(Collections.singletonList("only"))));
     }
 
     // ==================== of(Iterator) ====================
@@ -304,42 +266,52 @@ public class ObserverTest extends TestBase {
     // ==================== legacy test ====================
 
     @Test
-    public void test_0() {
-        BlockingQueue<String> queue = new ArrayBlockingQueue<>(100);
-        Observer.of(queue).observe(Fn.println(), Exception::printStackTrace, () -> N.println("completed"));
+    public void test_0() throws InterruptedException {
+        final BlockingQueue<String> queue = new ArrayBlockingQueue<>(100);
+        final List<String> queueResults = new ArrayList<>();
+        final List<Throwable> errors = Collections.synchronizedList(new ArrayList<>());
+        final CountDownLatch queueCompleted = new CountDownLatch(1);
+        Observer.of(queue).observe(queueResults::add, e -> {
+            errors.add(e);
+            queueCompleted.countDown();
+        }, queueCompleted::countDown);
 
         queue.add("ab");
         queue.add("cc");
         queue.add("dd");
+        Observer.complete(queue);
 
-        Observer.timer(10).observe(Fn.println(), Exception::printStackTrace, () -> N.println("completed"));
+        Assertions.assertTrue(queueCompleted.await(5, TimeUnit.SECONDS));
+        Assertions.assertEquals(Arrays.asList("ab", "cc", "dd"), queueResults);
 
-        Observer.interval(100).observe(Fn.println(), Exception::printStackTrace, () -> N.println("completed"));
+        final List<Long> timerResults = new ArrayList<>();
+        final CountDownLatch timerCompleted = new CountDownLatch(1);
+        Observer.timer(10).observe(timerResults::add, e -> {
+            errors.add(e);
+            timerCompleted.countDown();
+        }, timerCompleted::countDown);
 
-        N.sleep(3000);
-        assertNotNull(queue);
+        Assertions.assertTrue(timerCompleted.await(5, TimeUnit.SECONDS));
+        Assertions.assertEquals(Collections.singletonList(0L), timerResults);
+
+        final List<Long> intervalResults = new ArrayList<>();
+        final CountDownLatch intervalCompleted = new CountDownLatch(1);
+        Observer.interval(100).limit(3).observe(intervalResults::add, e -> {
+            errors.add(e);
+            intervalCompleted.countDown();
+        }, intervalCompleted::countDown);
+
+        Assertions.assertTrue(intervalCompleted.await(5, TimeUnit.SECONDS));
+        Assertions.assertEquals(Arrays.asList(0L, 1L, 2L), intervalResults);
+        Assertions.assertTrue(errors.isEmpty(), errors::toString);
     }
 
-    // ==================== timer(long) ====================
+    // ==================== timer(long) / timer(long, TimeUnit) ====================
 
     @Test
-    public void testTimerMillis() throws InterruptedException {
-        Observer<Long> observer = Observer.timer(100);
-        Assertions.assertNotNull(observer);
-
-        List<Long> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        long startTime = System.currentTimeMillis();
-        observer.observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        long elapsedTime = System.currentTimeMillis() - startTime;
-
-        Assertions.assertTrue(completed);
-        Assertions.assertEquals(1, results.size());
-        Assertions.assertEquals(0L, results.get(0));
-        Assertions.assertTrue(elapsedTime >= 100);
+    public void testTimer() throws InterruptedException {
+        assertTimerEmitsZeroAfterDelay(Observer.timer(100), 100);
+        assertTimerEmitsZeroAfterDelay(Observer.timer(200, TimeUnit.MILLISECONDS), 200);
     }
 
     @Test
@@ -378,47 +350,6 @@ public class ObserverTest extends TestBase {
 
         Assertions.assertTrue(completed.await(5, TimeUnit.SECONDS));
         Assertions.assertTrue(results.isEmpty());
-    }
-
-    // ==================== timer(long, TimeUnit) ====================
-
-    @Test
-    public void testTimerWithUnit() throws InterruptedException {
-        Observer<Long> observer = Observer.timer(200, TimeUnit.MILLISECONDS);
-        Assertions.assertNotNull(observer);
-
-        List<Long> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        long startTime = System.currentTimeMillis();
-        observer.observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        long elapsedTime = System.currentTimeMillis() - startTime;
-
-        Assertions.assertTrue(completed);
-        Assertions.assertEquals(1, results.size());
-        Assertions.assertEquals(0L, results.get(0));
-        Assertions.assertTrue(elapsedTime >= 200);
-    }
-
-    @Test
-    public void testTimerWithUnit_Seconds() throws InterruptedException {
-        Observer<Long> observer = Observer.timer(1, TimeUnit.SECONDS);
-        Assertions.assertNotNull(observer);
-
-        List<Long> results = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1);
-
-        long startTime = System.currentTimeMillis();
-        observer.observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
-
-        boolean completed = latch.await(5, TimeUnit.SECONDS);
-        long elapsedTime = System.currentTimeMillis() - startTime;
-
-        Assertions.assertTrue(completed);
-        Assertions.assertEquals(1, results.size());
-        Assertions.assertTrue(elapsedTime >= 1000);
     }
 
     @Test
@@ -1480,10 +1411,12 @@ public class ObserverTest extends TestBase {
     public void testFlatMap_MixedSizes() throws InterruptedException {
         Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3));
         Observer<Integer> flatMapped = observer.flatMap(i -> {
-            if (i == 1)
+            if (i == 1) {
                 return Arrays.asList(10);
-            if (i == 2)
+            }
+            if (i == 2) {
                 return Arrays.asList(20, 21, 22);
+            }
             return Collections.emptyList();
         });
 
@@ -1529,6 +1462,17 @@ public class ObserverTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.buffer(0, TimeUnit.MILLISECONDS));
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.buffer(-1, TimeUnit.MILLISECONDS));
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.buffer(100, null));
+    }
+
+    @Test
+    public void testBufferDoesNotScheduleUntilSubscribed() {
+        final int scheduledTaskCount = Observer.schedulerForIntermediateOp.getQueue().size();
+        final Observer<List<Integer>> fixed = Observer.of(Arrays.asList(1, 2, 3)).buffer(1, TimeUnit.DAYS);
+        final Observer<List<Integer>> sliding = Observer.of(Arrays.asList(1, 2, 3)).buffer(1, 1, TimeUnit.DAYS);
+
+        Assertions.assertTrue(fixed.scheduledFutures.isEmpty());
+        Assertions.assertTrue(sliding.scheduledFutures.isEmpty());
+        Assertions.assertEquals(scheduledTaskCount, Observer.schedulerForIntermediateOp.getQueue().size());
     }
 
     // ==================== buffer(long, TimeUnit, int) ====================
@@ -1640,7 +1584,7 @@ public class ObserverTest extends TestBase {
         CountDownLatch latch = new CountDownLatch(2);
         AtomicInteger count = new AtomicInteger(0);
 
-        buffered.observe(list -> {
+        buffered.limit(2).observe(list -> {
             results.add(new ArrayList<>(list));
             if (count.incrementAndGet() >= 2) {
                 latch.countDown();
@@ -1683,6 +1627,55 @@ public class ObserverTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> observer.buffer(100, 200, null));
     }
 
+    @Test
+    public void testOverlappingBufferWindowsCompleteByIdentity() throws Exception {
+        final Observer<Integer> source = Observer.of(Collections.<Integer> emptyList());
+        final Observer<List<Integer>> observer = source.buffer(1, 1, TimeUnit.DAYS);
+        final List<List<Integer>> results = new ArrayList<>();
+        observer.dispatcher.append(new Observer.Dispatcher<>() {
+            @Override
+            public void onNext(final Object value) {
+                results.add(new ArrayList<>((List<Integer>) value));
+            }
+        });
+
+        final Object buffer = observer.dispatcher.downDispatcher;
+        final java.lang.reflect.Method startWindow = buffer.getClass().getDeclaredMethod("startWindow");
+        final java.lang.reflect.Method emitWindow = buffer.getClass().getDeclaredMethod("emitWindow", List.class);
+        final java.lang.reflect.Field windowsField = buffer.getClass().getDeclaredField("windows");
+        final java.lang.reflect.Field futuresField = buffer.getClass().getDeclaredField("windowFutures");
+        startWindow.setAccessible(true);
+        emitWindow.setAccessible(true);
+        windowsField.setAccessible(true);
+        futuresField.setAccessible(true);
+        final List<java.util.concurrent.ScheduledFuture<?>> futures = new ArrayList<>();
+
+        try {
+            source.startSubscriptionActions();
+            startWindow.invoke(buffer);
+            final List<List<Integer>> windows = (List<List<Integer>>) windowsField.get(buffer);
+            final List<Integer> firstWindow = windows.get(0);
+            final List<Integer> secondWindow = windows.get(1);
+            futures.addAll(((java.util.Map<List<Integer>, java.util.concurrent.ScheduledFuture<?>>) futuresField.get(buffer)).values());
+
+            observer.dispatcher.onNext(1);
+            // Scheduler threads can finish a newer window before an older thread acquires the window lock.
+            emitWindow.invoke(buffer, secondWindow);
+            // A stale callback must neither emit twice nor remove the still-active equal-content window.
+            emitWindow.invoke(buffer, secondWindow);
+            observer.dispatcher.onNext(2);
+            emitWindow.invoke(buffer, firstWindow);
+
+            Assertions.assertEquals(Arrays.asList(Arrays.asList(1), Arrays.asList(1, 2)), results);
+        } finally {
+            observer.dispatcher.onComplete();
+            source.cancelScheduledFutures();
+            for (final java.util.concurrent.ScheduledFuture<?> future : futures) {
+                future.cancel(false);
+            }
+        }
+    }
+
     // ==================== buffer(long, long, TimeUnit, int) ====================
 
     @Test
@@ -1695,7 +1688,7 @@ public class ObserverTest extends TestBase {
         CountDownLatch latch = new CountDownLatch(2);
         AtomicInteger count = new AtomicInteger(0);
 
-        buffered.observe(list -> {
+        buffered.limit(2).observe(list -> {
             results.add(new ArrayList<>(list));
             if (count.incrementAndGet() >= 2) {
                 latch.countDown();
@@ -1935,5 +1928,143 @@ public class ObserverTest extends TestBase {
         Assertions.assertThrows(IllegalStateException.class, () -> observer.observe(value -> {
         }, Assertions::fail, () -> {
         }));
+    }
+
+    @Test
+    public void testFlatMapStopsAccessingMappedIteratorAtDownstreamLimit() throws InterruptedException {
+        final Collection<Integer> mapped = singleReadMappedCollection();
+        assertFlattenedValues(Observer.of(List.of(1)).flatMap(value -> mapped).limit(1), List.of(10));
+    }
+
+    @Test
+    public void testFlatMapStopsAtDownstreamLimitDuringBufferCompletion() throws InterruptedException {
+        assertFlattenedValues(Observer.of(List.of(1, 2)).limit(1).buffer(1, TimeUnit.DAYS).flatMap(value -> singleReadMappedCollection()).limit(1),
+                List.of(10));
+    }
+
+    @Test
+    public void testFlatMapEmitsAllAcceptedValuesAfterUpstreamLimit() throws InterruptedException {
+        assertFlattenedValues(Observer.of(List.of(1, 2)).limit(1).flatMap(value -> List.of(10, 20, 30)), List.of(10, 20, 30));
+        assertFlattenedValues(Observer.of(List.of(1, 2, 3)).limit(2).buffer(1, TimeUnit.DAYS).flatMap(value -> value), List.of(1, 2));
+    }
+
+    @Test
+    public void testFlatMapSkipsPendingWindowMappersAfterDownstreamLimit() throws Exception {
+        final AtomicInteger mappedWindows = new AtomicInteger();
+        final Observer<Integer> observer = Observer.of(Collections.<Integer> emptyList()).buffer(1, 1, TimeUnit.DAYS).flatMap(window -> {
+            if (mappedWindows.incrementAndGet() > 1) {
+                throw new IllegalStateException("Mapped a pending window after the downstream limit was reached");
+            }
+            return window;
+        }).limit(1);
+        final List<Integer> actual = new ArrayList<>();
+        final List<Exception> errors = new ArrayList<>();
+        final AtomicInteger completions = new AtomicInteger();
+        observer.dispatcher.append(new Observer.Dispatcher<>() {
+            @Override
+            public void onNext(final Object value) {
+                actual.add((Integer) value);
+            }
+
+            @Override
+            public void onError(final Exception error) {
+                errors.add(error);
+            }
+
+            @Override
+            public void onComplete() {
+                completions.incrementAndGet();
+            }
+        });
+
+        final Object buffer = observer.dispatcher.downDispatcher;
+        final java.lang.reflect.Method startWindow = buffer.getClass().getDeclaredMethod("startWindow");
+        startWindow.setAccessible(true);
+
+        try {
+            observer.startSubscriptionActions();
+            startWindow.invoke(buffer);
+            observer.dispatcher.onNext(10);
+            observer.dispatcher.onComplete();
+
+            Assertions.assertEquals(List.of(10), actual);
+            Assertions.assertEquals(1, mappedWindows.get());
+            Assertions.assertTrue(errors.isEmpty(), () -> "Unexpected errors: " + errors);
+            Assertions.assertEquals(1, completions.get());
+        } finally {
+            observer.dispatcher.onComplete();
+            observer.cancelScheduledFutures();
+        }
+    }
+
+    private static Collection<Integer> singleReadMappedCollection() {
+        return new java.util.AbstractCollection<>() {
+            @Override
+            public int size() {
+                return 2;
+            }
+
+            @Override
+            public Iterator<Integer> iterator() {
+                return new Iterator<>() {
+                    private boolean consumed;
+
+                    @Override
+                    public boolean hasNext() {
+                        if (consumed) {
+                            throw new IllegalStateException("Mapped iterator inspected after the downstream limit was reached");
+                        }
+                        return true;
+                    }
+
+                    @Override
+                    public Integer next() {
+                        if (consumed) {
+                            throw new IllegalStateException("Mapped iterator consumed after the downstream limit was reached");
+                        }
+                        consumed = true;
+                        return 10;
+                    }
+                };
+            }
+        };
+    }
+
+    private static <T> List<T> collect(final Observer<T> observer) throws InterruptedException {
+        final List<T> results = new ArrayList<>();
+        final CountDownLatch latch = new CountDownLatch(1);
+        observer.observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
+        Assertions.assertTrue(latch.await(5, TimeUnit.SECONDS));
+        return results;
+    }
+
+    private static void assertTimerEmitsZeroAfterDelay(final Observer<Long> observer, final long minElapsedMillis) throws InterruptedException {
+        Assertions.assertNotNull(observer);
+        final List<Long> results = new ArrayList<>();
+        final CountDownLatch latch = new CountDownLatch(1);
+        final long startTime = System.currentTimeMillis();
+        observer.observe(results::add, e -> Assertions.fail("Unexpected error: " + e), latch::countDown);
+        Assertions.assertTrue(latch.await(5, TimeUnit.SECONDS));
+        Assertions.assertEquals(Collections.singletonList(0L), results);
+        Assertions.assertTrue(System.currentTimeMillis() - startTime >= minElapsedMillis);
+    }
+
+    private static void assertFlattenedValues(final Observer<Integer> observer, final List<Integer> expected) throws InterruptedException {
+        final List<Integer> actual = new ArrayList<>();
+        final List<Exception> errors = new ArrayList<>();
+        final CountDownLatch finished = new CountDownLatch(1);
+        final AtomicInteger completions = new AtomicInteger();
+        observer.observe(actual::add, error -> {
+            errors.add(error);
+            finished.countDown();
+        }, () -> {
+            completions.incrementAndGet();
+            finished.countDown();
+        });
+
+        Assertions.assertTrue(finished.await(5, TimeUnit.SECONDS), "Observer did not terminate");
+        Assertions.assertTrue(errors.isEmpty(), () -> "Unexpected errors: " + errors);
+        Assertions.assertEquals(1, completions.get());
+        Assertions.assertEquals(expected, actual);
     }
 }

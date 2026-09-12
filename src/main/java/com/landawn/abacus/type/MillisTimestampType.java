@@ -64,10 +64,11 @@ public class MillisTimestampType extends TimestampType {
      * @param columnIndex the 1-based index of the column to retrieve
      * @return a {@code Timestamp} created from the stored millisecond value,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Timestamp get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Timestamp get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final long lng = rs.getLong(columnIndex);
 
         return (lng == 0 && rs.wasNull()) ? null : Dates.createTimestamp(lng);
@@ -83,10 +84,11 @@ public class MillisTimestampType extends TimestampType {
      * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
      * @return a {@code Timestamp} created from the stored millisecond value,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Timestamp get(final ResultSet rs, final String columnName) throws SQLException {
+    public Timestamp get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final long lng = rs.getLong(columnName);
 
         return (lng == 0 && rs.wasNull()) ? null : Dates.createTimestamp(lng);
@@ -100,10 +102,11 @@ public class MillisTimestampType extends TimestampType {
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code Timestamp} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Timestamp x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Timestamp x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.BIGINT);
         } else {
@@ -119,10 +122,11 @@ public class MillisTimestampType extends TimestampType {
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code Timestamp} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Timestamp x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Timestamp x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.BIGINT);
         } else {

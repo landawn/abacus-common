@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
+import javax.sql.rowset.serial.SerialBlob;
 
 import org.junit.jupiter.api.Test;
 
@@ -438,4 +441,37 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
         assertTrue(type.isPrimitiveArray());
     }
 
+
+    @Test
+    public void reviewFixes20260906_valueOfExceptionTypesForOverflowEmptyAndInvalidElements() {
+        assertArrayEquals(new byte[] { 127, -128, 0 }, type.valueOf("[127, -128, 0]"));
+
+        // one past the range is ArithmeticException (not NumberFormatException, which is what the javadoc used to claim)
+        assertThrows(ArithmeticException.class, () -> type.valueOf("[128]"));
+        assertThrows(ArithmeticException.class, () -> type.valueOf("[-129]"));
+        assertThrows(ArithmeticException.class, () -> type.valueOf("[1, 128]"));
+
+        // an empty / whitespace-only element is IllegalArgumentException from split (exact class, not a subclass)
+        assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,,2]")).getClass());
+        assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1, ]")).getClass());
+
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[x]"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[1, null]"));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfZeroLengthBlobReturnsEmptyArrayAndFrees() throws SQLException {
+        final Blob blob = mock(Blob.class);
+        when(blob.length()).thenReturn(0L);
+
+        final byte[] result = type.valueOf((Object) blob);
+
+        assertEquals(0, result.length);
+        verify(blob, never()).getBytes(1L, 0);
+        verify(blob).free();
+
+        // SerialBlob rejects getBytes(1, 0) on a zero-length lob; the guard returns the empty array instead
+        assertEquals(0, type.valueOf((Object) new SerialBlob(new byte[0])).length);
+        assertArrayEquals(new byte[] { 1, 2 }, type.valueOf((Object) new SerialBlob(new byte[] { 1, 2 })));
+    }
 }

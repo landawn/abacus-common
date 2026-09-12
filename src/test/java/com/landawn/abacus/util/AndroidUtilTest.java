@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -93,6 +95,31 @@ public class AndroidUtilTest extends TestBase {
 
         Assertions.assertTrue(serialDaemon.get(2, TimeUnit.SECONDS));
         Assertions.assertTrue(poolDaemon.get(2, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void reviewFixes20260908_fallbackWorkersComeFromOneSharedDefaultThreadFactory() throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeFalse(IOUtil.IS_PLATFORM_ANDROID);
+
+        CompletableFuture<String> serialThread = new CompletableFuture<>();
+        CompletableFuture<String> poolThread = new CompletableFuture<>();
+        AndroidUtil.getSerialExecutor().execute(() -> serialThread.complete(Thread.currentThread().getName()));
+        AndroidUtil.getThreadPoolExecutor().execute(() -> poolThread.complete(Thread.currentThread().getName()));
+
+        String serialName = serialThread.get(5, TimeUnit.SECONDS);
+        String poolName = poolThread.get(5, TimeUnit.SECONDS);
+
+        // Executors.defaultThreadFactory() allocates a fresh factory on every call - a new JVM-wide pool number
+        // and its own thread counter - so calling it inside newThread() named every worker "pool-N-thread-1"
+        // under a different N and burned a pool number per thread. One hoisted delegate gives all the fallback
+        // workers a single pool number and a distinct thread index.
+        Pattern naming = Pattern.compile("pool-(\\d+)-thread-(\\d+)");
+        Matcher serial = naming.matcher(serialName);
+        Matcher pool = naming.matcher(poolName);
+        Assertions.assertTrue(serial.matches(), serialName);
+        Assertions.assertTrue(pool.matches(), poolName);
+        Assertions.assertEquals(serial.group(1), pool.group(1), "one pool number expected, got " + serialName + " and " + poolName);
+        Assertions.assertNotEquals(serial.group(2), pool.group(2), "distinct thread indexes expected, got " + serialName + " and " + poolName);
     }
 
 }

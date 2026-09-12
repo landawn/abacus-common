@@ -25,6 +25,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -55,8 +56,30 @@ import java.util.function.Predicate;
  *     .observe(System.out::println);
  * }</pre>
  *
- * <p>Intermediate operator methods append to this instance's internal dispatcher chain and return
- * {@code this} for fluent chaining. The pipeline is therefore mutable while it is being built.</p>
+ * <p>The pipeline is mutable and construction is not thread-safe. Same-type operators return the
+ * current stage; type-changing operators return a new typed stage and invalidate previous handles.
+ * Continue and subscribe through the returned stage. Stale handles and all operators after subscription
+ * throw {@link IllegalStateException}, including no-op operators. Invalid arguments preserve the current
+ * stage; an unexpected failure while appending a type-changing operator seals the pipeline.</p>
+ *
+ * <p>Custom sources must use the protected subscription and dispatcher hooks and deliver terminal values
+ * generically. Typed stages forward subscription to the source owner with authorization limited to the
+ * calling thread and cleared on return. Intermediate operators on a typed stage use private owner
+ * implementations; custom public operator overrides on the original source are not reinvoked.</p>
+ *
+ * <p>Source and timed operator callbacks are serialized for each subscription. Reaching a limit or
+ * encountering an exception stops source scheduling, wakes a pending queue poll, releases timed
+ * operator state, and delivers at most one terminal callback. Normal completion flushes downstream
+ * buffers within their limits; errors discard pending values. Caller-owned queues are not closed.
+ * Already-running caller code, including iterator methods and callbacks, must return cooperatively.</p>
+ * <p>A fatal {@link Error} also stops the subscription and releases timed state, then propagates
+ * unchanged from the failing task. It does not invoke an additional terminal callback. Failures
+ * while submitting or starting source work likewise release resources before propagating.</p>
+ *
+ * <p>Every thread an observer runs on is a daemon thread, and the shared pools are stopped without waiting
+ * when the JVM exits: a subscription that is still running is interrupted, receives no terminal callback,
+ * and does not delay the exit. Complete a queue source with {@link #complete(BlockingQueue)}, or bound the
+ * subscription with {@link #limit(long)}, when a subscriber has to finish before the JVM goes away.</p>
  *
  * @param <T> the type of elements emitted by this Observer
  * @see Timed
@@ -95,6 +118,13 @@ public abstract class Observer<T> {
      */
     protected static final Executor asyncExecutor;
 
+    /**
+     * Set by the shutdown hook installed by {@link #stopOnJvmExit(ExecutorService)} immediately before the pool
+     * threads are interrupted, so that the interrupt is recognised as a library-initiated stop rather than a
+     * failure of the source being observed.
+     */
+    private static volatile boolean jvmShuttingDown = false;
+
     static {
         if (IOUtil.IS_PLATFORM_ANDROID) {
             asyncExecutor = AndroidUtil.getThreadPoolExecutor();
@@ -106,7 +136,7 @@ public abstract class Observer<T> {
 
             asyncExecutor = threadPoolExecutor;
 
-            MoreExecutors.addDelayedShutdownHook(threadPoolExecutor, 120, TimeUnit.SECONDS);
+            stopOnJvmExit(threadPoolExecutor);
         }
     }
 
@@ -130,8 +160,27 @@ public abstract class Observer<T> {
         schedulerForIntermediateOp.setRemoveOnCancelPolicy(true);
         schedulerForObserveOp.setRemoveOnCancelPolicy(true);
 
-        MoreExecutors.addDelayedShutdownHook(schedulerForIntermediateOp, 120, TimeUnit.SECONDS);
-        MoreExecutors.addDelayedShutdownHook(schedulerForObserveOp, 120, TimeUnit.SECONDS);
+        stopOnJvmExit(schedulerForIntermediateOp);
+        stopOnJvmExit(schedulerForObserveOp);
+    }
+
+    /**
+     * Registers a JVM shutdown hook that stops the specified observer pool without waiting for its tasks.
+     *
+     * @param pool the observer pool to stop when the JVM exits
+     */
+    private static void stopOnJvmExit(final ExecutorService pool) {
+        // A delayed hook (shutdown() then awaitTermination) cannot end these tasks, so it burned its whole
+        // timeout on every exit: shutdown() interrupts only IDLE workers, so an emission parked in
+        // pollSource(BlockingQueue) keeps running, and it keeps pending one-shot tasks, so a timer() with a
+        // long delay keeps its scheduler alive too. Every thread these pools create is a daemon, so no
+        // graceful window is needed here: interrupt whatever is still running, wait for nothing, and let the
+        // JVM exit at once.
+        MoreExecutors.addShutdownHook(MoreExecutors.newThread("abacus-observer-shutdown-hook", () -> {
+            jvmShuttingDown = true;
+
+            pool.shutdownNow();
+        }));
     }
 
     private static ThreadFactory daemonThreadFactory(final String namePrefix) {
@@ -161,6 +210,269 @@ public abstract class Observer<T> {
     /** Guards the single-use subscription contract. Access is synchronized by {@link #beginSubscription}. */
     private boolean subscribed;
 
+    // Always acquire this gate before an operator's local lock, including in scheduled callbacks.
+    private final Object eventGate = new Object();
+    private boolean lifecycleFinished;
+    private boolean terminalDelivered;
+    private Exception terminalFailure;
+    private final List<Runnable> terminationActions = new ArrayList<>();
+    private final Object waitGate = new Object();
+    private Thread pollingThread;
+    private boolean internalWakeup;
+    private ScheduledFuture<?> sourceFuture;
+
+    private void runEvent(final Runnable action) {
+        synchronized (eventGate) {
+            if (lifecycleFinished) {
+                return;
+            }
+            try {
+                action.run();
+            } catch (final Error fatal) {
+                abortSubscription(fatal);
+                throw fatal;
+            } catch (final Exception e) {
+                if (terminalDelivered) {
+                    throw e;
+                }
+                finishSubscription(e);
+                return;
+            } finally {
+                if (!hasMore && !lifecycleFinished) {
+                    finishSubscription(terminalFailure);
+                }
+            }
+        }
+    }
+
+    private void emitSource(final Object value) {
+        runEvent(() -> {
+            if (hasMore) {
+                dispatcher.onNext(value);
+            }
+        });
+    }
+
+    private void finishSubscription(final Exception error) {
+        synchronized (eventGate) {
+            if (lifecycleFinished) {
+                return;
+            }
+            // Close the lifecycle before flushing: a downstream limit can reenter the terminal path.
+            lifecycleFinished = true;
+            hasMore = false;
+            try {
+                stopSource();
+                if (!terminalDelivered) {
+                    if (error == null) {
+                        dispatcher.onComplete();
+                    } else {
+                        dispatcher.onError(error);
+                    }
+                }
+            } catch (final RuntimeException | Error failure) {
+                abortSubscription(failure);
+                throw failure;
+            } finally {
+                try {
+                    for (final Runnable cleanup : terminationActions) {
+                        cleanup.run();
+                    }
+                    terminationActions.clear();
+                    cancelScheduledFutures();
+                } catch (final RuntimeException | Error failure) {
+                    abortSubscription(failure);
+                    throw failure;
+                }
+            }
+        }
+    }
+
+    // Abort does not emit an Exception-valued terminal signal. Continue cleanup even if one
+    // action fails, preserving the original failure rather than replacing it with cleanup errors.
+    private void abortSubscription(final Throwable failure) {
+        synchronized (eventGate) {
+            lifecycleFinished = true;
+            hasMore = false;
+            try {
+                stopSource();
+            } catch (final Throwable cleanupFailure) {
+                if (cleanupFailure != failure) {
+                    failure.addSuppressed(cleanupFailure);
+                }
+            }
+            // A terminal callback may fail after lifecycleFinished was set, so do not return early.
+            for (final Runnable cleanup : terminationActions) {
+                try {
+                    cleanup.run();
+                } catch (final Throwable cleanupFailure) {
+                    if (cleanupFailure != failure) {
+                        failure.addSuppressed(cleanupFailure);
+                    }
+                }
+            }
+            terminationActions.clear();
+            try {
+                cancelScheduledFutures();
+            } catch (final Throwable cleanupFailure) {
+                if (cleanupFailure != failure) {
+                    failure.addSuppressed(cleanupFailure);
+                }
+            }
+        }
+    }
+
+    private void startSource(final Runnable submission) {
+        try {
+            submission.run();
+        } catch (final RuntimeException | Error failure) {
+            abortSubscription(failure);
+            throw failure;
+        }
+    }
+
+    private void stopSource() {
+        if (sourceFuture != null) {
+            sourceFuture.cancel(false);
+        }
+        // Register and interrupt only the queue-polling region, never the user's onNext callback.
+        synchronized (waitGate) {
+            if (pollingThread != null && pollingThread != Thread.currentThread()) {
+                internalWakeup = true;
+                pollingThread.interrupt();
+            }
+        }
+    }
+
+    private void reportSourceFailure(final Exception error) {
+        // The interrupt sent by the shutdown hook is a library-initiated stop, not a failure of the source:
+        // delivering it would run a terminal callback while the JVM is exiting and, with no onError supplied,
+        // ON_ERROR_MISSING would rethrow it out of a pool thread and print an uncaught stack trace at exit.
+        if (jvmShuttingDown && error instanceof InterruptedException) {
+            return;
+        }
+
+        synchronized (eventGate) {
+            if (terminalDelivered) {
+                throw ExceptionUtil.toRuntimeException(error, true);
+            }
+            finishSubscription(error);
+        }
+    }
+
+    private void publishSourceFuture(final ScheduledFuture<?> future) {
+        synchronized (eventGate) {
+            sourceFuture = future;
+            // A zero-delay invocation can finish before schedule() returns its future.
+            if (lifecycleFinished) {
+                future.cancel(false);
+            }
+        }
+    }
+
+    private <E> E pollSource(final BlockingQueue<E> queue) throws InterruptedException {
+        synchronized (waitGate) {
+            if (!hasMore) {
+                return null;
+            }
+            pollingThread = Thread.currentThread();
+        }
+        try {
+            return queue.poll(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        } catch (final InterruptedException e) {
+            synchronized (waitGate) {
+                if (!internalWakeup) {
+                    throw e;
+                }
+            }
+            return null;
+        } finally {
+            synchronized (waitGate) {
+                pollingThread = null;
+                if (internalWakeup) {
+                    Thread.interrupted();
+                    internalWakeup = false;
+                }
+            }
+        }
+    }
+
+    private void deliverError(final Consumer<? super Exception> callback, final Exception error) {
+        if (terminalDelivered) {
+            return;
+        }
+        terminalDelivered = true;
+        terminalFailure = error;
+        hasMore = false;
+        stopSource();
+        callback.accept(error);
+    }
+
+    private void deliverComplete(final Runnable callback) {
+        if (terminalDelivered) {
+            return;
+        }
+        terminalDelivered = true;
+        callback.run();
+    }
+
+    /** Deferred initializers for timed intermediate operators. They run only after a terminal dispatcher is installed. */
+    private final List<Runnable> subscriptionActions = new ArrayList<>();
+
+    // One owner holds all source/lifecycle state. Facades change only the element type advertised to
+    // callers; the current-stage guard prevents a retained earlier type from reaching the new tail.
+    private final Observer<?> pipelineOwner;
+    private Observer<?> currentStage = this;
+    private final ThreadLocal<Observer<?>> subscriptionDelegate = new ThreadLocal<>();
+
+    private Observer(final Observer<?> owner) {
+        dispatcher = owner.dispatcher;
+        pipelineOwner = owner;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Observer<T> ownerForStage() {
+        return (Observer<T>) pipelineOwner;
+    }
+
+    private void checkCurrentStage() {
+        N.checkState(pipelineOwner.currentStage == this, "This Observer stage was replaced by a type-changing operator");
+        N.checkState(!pipelineOwner.subscribed, "This Observer has already been subscribed");
+    }
+
+    private <R> Observer<R> nextStage(final Runnable mutation) {
+        final Observer<R> next = new TypedStage<>(pipelineOwner);
+        // Allocate first, then seal during mutation. A partial append must never resurrect the old type.
+        pipelineOwner.currentStage = null;
+        mutation.run();
+        pipelineOwner.currentStage = next;
+        return next;
+    }
+
+    private static final class TypedStage<R> extends Observer<R> {
+        private TypedStage(final Observer<?> owner) {
+            super(owner);
+        }
+
+        @SuppressWarnings("rawtypes")
+        @Override
+        public void observe(final Consumer<? super R> action, final Consumer<? super Exception> onError, final Runnable onComplete) {
+            final Observer<?> self = this;
+            self.checkCurrentStage();
+            N.checkArgNotNull(action, cs.action);
+            N.checkArgNotNull(onError, cs.onError);
+            N.checkArgNotNull(onComplete, cs.onComplete);
+            final Observer<?> owner = self.pipelineOwner;
+            owner.subscriptionDelegate.set(this);
+            // Do not hold the owner monitor across user source startup or callbacks.
+            try {
+                ((Observer) owner).observe(action, onError, onComplete);
+            } finally {
+                owner.subscriptionDelegate.remove();
+            }
+        }
+    }
+
     /** Creates a new Observer with a fresh, empty {@link Dispatcher} chain. */
     protected Observer() {
         this(new Dispatcher<>());
@@ -172,8 +484,9 @@ public abstract class Observer<T> {
      * @param dispatcher the head dispatcher for this Observer's pipeline; must not be {@code null}
      * @throws IllegalArgumentException if {@code dispatcher} is {@code null}.
      */
-    protected Observer(final Dispatcher<Object> dispatcher) {
+    protected Observer(final Dispatcher<Object> dispatcher) throws IllegalArgumentException {
         this.dispatcher = N.checkArgNotNull(dispatcher, cs.dispatcher);
+        pipelineOwner = this;
     }
 
     /**
@@ -182,14 +495,60 @@ public abstract class Observer<T> {
      * @param action the action to invoke for each emitted item
      * @param onError the action to invoke when observation fails
      * @param onComplete the action to invoke when observation completes
-     * @throws IllegalStateException if this observer has already been subscribed
+     * @throws IllegalStateException if this observer has already been subscribed or this source is
+     *         a stale stage being subscribed without current-stage forwarding authorization
      */
     @SuppressWarnings("unused")
-    protected final synchronized void beginSubscription(final Consumer<? super T> action, final Consumer<? super Exception> onError,
-            final Runnable onComplete) {
+    protected final synchronized void beginSubscription(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
+            throws IllegalStateException {
+        N.checkState(currentStage == this || (currentStage != null && subscriptionDelegate.get() == currentStage), "This Observer stage was replaced");
         N.checkState(!subscribed, "This Observer has already been subscribed");
-
         subscribed = true;
+    }
+
+    /**
+     * Registers work that must not start until this pipeline is subscribed. Custom sources may call
+     * this during authorized forwarded startup, before {@link #beginSubscription}; stale direct calls
+     * and calls after subscription are rejected.
+     *
+     * @param action work to run when the subscription starts; must not be {@code null}
+     * @throws IllegalStateException if this stage is stale or the pipeline has already been subscribed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
+     */
+    protected final synchronized void addSubscriptionAction(final Runnable action) throws IllegalStateException, IllegalArgumentException {
+        N.checkState(
+                pipelineOwner.currentStage == this
+                        || (pipelineOwner.currentStage != null && pipelineOwner.subscriptionDelegate.get() == pipelineOwner.currentStage),
+                "This Observer stage was replaced");
+        addSubscriptionActionInternal(action);
+    }
+
+    private synchronized void addSubscriptionActionInternal(final Runnable action) {
+        N.checkState(!subscribed, "This Observer has already been subscribed");
+        subscriptionActions.add(N.checkArgNotNull(action, cs.action));
+    }
+
+    /** Starts deferred intermediate work after the terminal dispatcher has been appended. */
+    protected final void startSubscriptionActions() {
+        final List<Runnable> actions;
+
+        synchronized (this) {
+            actions = new ArrayList<>(subscriptionActions);
+            subscriptionActions.clear();
+        }
+
+        try {
+            for (final Runnable action : actions) {
+                synchronized (eventGate) {
+                    if (!lifecycleFinished && hasMore) {
+                        action.run();
+                    }
+                }
+            }
+        } catch (final RuntimeException | Error e) {
+            abortSubscription(e);
+            throw e;
+        }
     }
 
     /**
@@ -215,7 +574,7 @@ public abstract class Observer<T> {
      *         the completion flag into a full queue
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static void complete(final BlockingQueue<?> queue) {
+    public static void complete(final BlockingQueue<?> queue) throws IllegalArgumentException, ClassCastException, RuntimeException {
         N.checkArgNotNull(queue, cs.queue);
 
         if (!((Queue) queue).offer(COMPLETE_FLAG)) {
@@ -316,7 +675,7 @@ public abstract class Observer<T> {
      * @see #timer(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#timer(long,%20java.util.concurrent.TimeUnit)">RxJava#timer</a>
      */
-    public static Observer<Long> timer(final long delayInMillis) {
+    public static Observer<Long> timer(final long delayInMillis) throws IllegalArgumentException {
         return timer(delayInMillis, TimeUnit.MILLISECONDS);
     }
 
@@ -362,7 +721,7 @@ public abstract class Observer<T> {
      * @see #interval(long, long)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
-    public static Observer<Long> interval(final long periodInMillis) {
+    public static Observer<Long> interval(final long periodInMillis) throws IllegalArgumentException {
         return interval(0, periodInMillis, TimeUnit.MILLISECONDS);
     }
 
@@ -386,7 +745,7 @@ public abstract class Observer<T> {
      * @see #interval(long)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
-    public static Observer<Long> interval(final long initialDelayInMillis, final long periodInMillis) {
+    public static Observer<Long> interval(final long initialDelayInMillis, final long periodInMillis) throws IllegalArgumentException {
         return interval(initialDelayInMillis, periodInMillis, TimeUnit.MILLISECONDS);
     }
 
@@ -408,7 +767,7 @@ public abstract class Observer<T> {
      * @see #interval(long, long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#interval(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#interval</a>
      */
-    public static Observer<Long> interval(final long period, final TimeUnit unit) {
+    public static Observer<Long> interval(final long period, final TimeUnit unit) throws IllegalArgumentException {
         return interval(0, period, unit);
     }
 
@@ -458,8 +817,14 @@ public abstract class Observer<T> {
      * @see #debounce(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#debounce(long,%20java.util.concurrent.TimeUnit,%20io.reactivex.Scheduler)">RxJava#debounce</a>
      */
-    public Observer<T> debounce(final long intervalDurationInMillis) {
-        return debounce(intervalDurationInMillis, TimeUnit.MILLISECONDS);
+    public Observer<T> debounce(final long intervalDurationInMillis) throws IllegalArgumentException {
+        checkCurrentStage();
+        ownerForStage().debounceInternal(intervalDurationInMillis);
+        return this;
+    }
+
+    private Observer<T> debounceInternal(final long intervalDurationInMillis) {
+        return debounceInternal(intervalDurationInMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -483,6 +848,12 @@ public abstract class Observer<T> {
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#debounce(long,%20java.util.concurrent.TimeUnit,%20io.reactivex.Scheduler)">RxJava#debounce</a>
      */
     public Observer<T> debounce(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
+        checkCurrentStage();
+        ownerForStage().debounceInternal(intervalDuration, unit);
+        return this;
+    }
+
+    private Observer<T> debounceInternal(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(intervalDuration >= 0, "Interval cannot be negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
 
@@ -494,6 +865,9 @@ public abstract class Observer<T> {
 
         dispatcher.append(new Dispatcher<>() {
             private final Object terminalSignal = new Object();
+            { //NOSONAR
+                terminationActions.add(() -> terminate(false));
+            }
             private ScheduledFuture<?> future;
             private long generation = 0;
             private boolean terminated = false;
@@ -516,7 +890,8 @@ public abstract class Observer<T> {
                     final long scheduledGeneration = ++generation;
 
                     try {
-                        future = schedulerForIntermediateOp.schedule(() -> emitPending(scheduledGeneration), intervalDurationInNanos, TimeUnit.NANOSECONDS);
+                        future = schedulerForIntermediateOp.schedule(() -> runEvent(() -> emitPending(scheduledGeneration)), intervalDurationInNanos,
+                                TimeUnit.NANOSECONDS);
                     } catch (final Exception e) {
                         terminated = true;
                         holder.setValue(NONE);
@@ -545,7 +920,7 @@ public abstract class Observer<T> {
                     return;
                 }
 
-                if (pending != NONE && downDispatcher != null) {
+                if (pending != NONE && downDispatcher != null && !isLimitReached()) {
                     try {
                         downDispatcher.onNext(pending);
                     } catch (final Exception e) {
@@ -569,7 +944,7 @@ public abstract class Observer<T> {
                     holder.setValue(NONE);
                     future = null;
 
-                    if (pending != NONE && downDispatcher != null) {
+                    if (pending != NONE && downDispatcher != null && !isLimitReached()) {
                         try {
                             // Keep the state lock while delivering so a terminal signal cannot
                             // overtake this scheduled onNext.
@@ -645,8 +1020,14 @@ public abstract class Observer<T> {
      * @see #throttleFirst(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleFirst(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleFirst</a>
      */
-    public Observer<T> throttleFirst(final long intervalDurationInMillis) {
-        return throttleFirst(intervalDurationInMillis, TimeUnit.MILLISECONDS);
+    public Observer<T> throttleFirst(final long intervalDurationInMillis) throws IllegalArgumentException {
+        checkCurrentStage();
+        ownerForStage().throttleFirstInternal(intervalDurationInMillis);
+        return this;
+    }
+
+    private Observer<T> throttleFirstInternal(final long intervalDurationInMillis) {
+        return throttleFirstInternal(intervalDurationInMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -669,6 +1050,12 @@ public abstract class Observer<T> {
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleFirst(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleFirst</a>
      */
     public Observer<T> throttleFirst(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
+        checkCurrentStage();
+        ownerForStage().throttleFirstInternal(intervalDuration, unit);
+        return this;
+    }
+
+    private Observer<T> throttleFirstInternal(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(intervalDuration >= 0, "Interval cannot be negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
 
@@ -753,8 +1140,14 @@ public abstract class Observer<T> {
      * @see #throttleLast(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleLast(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleLast</a>
      */
-    public Observer<T> throttleLast(final long intervalDurationInMillis) {
-        return throttleLast(intervalDurationInMillis, TimeUnit.MILLISECONDS);
+    public Observer<T> throttleLast(final long intervalDurationInMillis) throws IllegalArgumentException {
+        checkCurrentStage();
+        ownerForStage().throttleLastInternal(intervalDurationInMillis);
+        return this;
+    }
+
+    private Observer<T> throttleLastInternal(final long intervalDurationInMillis) {
+        return throttleLastInternal(intervalDurationInMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -777,6 +1170,12 @@ public abstract class Observer<T> {
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleLast(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleLast</a>
      */
     public Observer<T> throttleLast(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
+        checkCurrentStage();
+        ownerForStage().throttleLastInternal(intervalDuration, unit);
+        return this;
+    }
+
+    private Observer<T> throttleLastInternal(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(intervalDuration >= 0, "Interval cannot be negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
 
@@ -787,6 +1186,9 @@ public abstract class Observer<T> {
         final long intervalDurationInNanos = unit.toNanos(intervalDuration);
 
         dispatcher.append(new Dispatcher<>() {
+            { //NOSONAR
+                terminationActions.add(this::terminate);
+            }
             private ScheduledFuture<?> future;
             private boolean terminated = false;
 
@@ -801,7 +1203,7 @@ public abstract class Observer<T> {
 
                     if (holder.value() == NONE) {
                         try {
-                            future = schedulerForIntermediateOp.schedule(this::emitPending, intervalDurationInNanos, TimeUnit.NANOSECONDS);
+                            future = schedulerForIntermediateOp.schedule(() -> runEvent(this::emitPending), intervalDurationInNanos, TimeUnit.NANOSECONDS);
                         } catch (final Exception e) {
                             terminated = true;
                             hasMore = false;
@@ -845,7 +1247,7 @@ public abstract class Observer<T> {
                     holder.setValue(NONE);
                     future = null;
 
-                    if (pending != NONE && downDispatcher != null) {
+                    if (pending != NONE && downDispatcher != null && !isLimitReached()) {
                         try {
                             // Serialize delivery with terminal signals.
                             downDispatcher.onNext(pending);
@@ -903,8 +1305,14 @@ public abstract class Observer<T> {
      * @see #delay(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#delay(long,%20java.util.concurrent.TimeUnit)">RxJava#delay</a>
      */
-    public Observer<T> delay(final long delayInMillis) {
-        return delay(delayInMillis, TimeUnit.MILLISECONDS);
+    public Observer<T> delay(final long delayInMillis) throws IllegalArgumentException {
+        checkCurrentStage();
+        ownerForStage().delayInternal(delayInMillis);
+        return this;
+    }
+
+    private Observer<T> delayInternal(final long delayInMillis) {
+        return delayInternal(delayInMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -927,6 +1335,12 @@ public abstract class Observer<T> {
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#delay(long,%20java.util.concurrent.TimeUnit)">RxJava#delay</a>
      */
     public Observer<T> delay(final long delay, final TimeUnit unit) throws IllegalArgumentException {
+        checkCurrentStage();
+        ownerForStage().delayInternal(delay, unit);
+        return this;
+    }
+
+    private Observer<T> delayInternal(final long delay, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(delay >= 0, "Delay cannot be negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
 
@@ -975,7 +1389,7 @@ public abstract class Observer<T> {
      *                                          ", Interval: " + timed.timestamp() + "ms"));
      * }</pre>
      *
-     * @return this Observer instance (re-typed) emitting {@code Timed<T>} objects whose
+     * @return a new current typed stage, invalidating prior handles, emitting {@code Timed<T>} objects whose
      *         timestamp field holds the elapsed interval in milliseconds since the previous
      *         emission
      * @see Timed
@@ -983,6 +1397,11 @@ public abstract class Observer<T> {
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Observable.html#timeInterval()">RxJava#timeInterval</a>
      */
     public Observer<Timed<T>> timeInterval() {
+        checkCurrentStage();
+        return nextStage(() -> ownerForStage().timeIntervalInternal());
+    }
+
+    private Observer<Timed<T>> timeIntervalInternal() {
         dispatcher.append(new Dispatcher<>() {
             private long startTimeInNanos = System.nanoTime();
 
@@ -1013,13 +1432,18 @@ public abstract class Observer<T> {
      *                                          " at " + new Date(timed.timestamp())));
      * }</pre>
      *
-     * @return this Observer instance (re-typed) emitting {@code Timed<T>} objects whose
+     * @return a new current typed stage, invalidating prior handles, emitting {@code Timed<T>} objects whose
      *         timestamp field holds the emission time in milliseconds since the epoch
      * @see Timed
      * @see #timeInterval()
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Observable.html#timestamp()">RxJava#timestamp</a>
      */
     public Observer<Timed<T>> timestamp() {
+        checkCurrentStage();
+        return nextStage(() -> ownerForStage().timestampInternal());
+    }
+
+    private Observer<Timed<T>> timestampInternal() {
         dispatcher.append(new Dispatcher<>() {
             @Override
             public void onNext(final Object param) {
@@ -1048,6 +1472,15 @@ public abstract class Observer<T> {
      * @throws IllegalArgumentException if {@code n} is negative.
      */
     public Observer<T> skip(final long n) throws IllegalArgumentException {
+        checkCurrentStage();
+        ownerForStage().skipInternal(n);
+        return this;
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code n} is negative
+     */
+    private Observer<T> skipInternal(final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
         if (n > 0) {
@@ -1083,6 +1516,15 @@ public abstract class Observer<T> {
      * @throws IllegalArgumentException if {@code maxSize} is negative.
      */
     public Observer<T> limit(final long maxSize) throws IllegalArgumentException {
+        checkCurrentStage();
+        ownerForStage().limitInternal(maxSize);
+        return this;
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code maxSize} is negative
+     */
+    private Observer<T> limitInternal(final long maxSize) throws IllegalArgumentException {
         N.checkArgNotNegative(maxSize, cs.maxSize);
 
         if (maxSize == 0) {
@@ -1092,6 +1534,11 @@ public abstract class Observer<T> {
 
         dispatcher.append(new Dispatcher<>() {
             private final AtomicLong counter = new AtomicLong();
+
+            @Override
+            boolean isLimitReached() {
+                return counter.get() >= maxSize || super.isLimitReached();
+            }
 
             @Override
             public void onNext(final Object param) {
@@ -1132,6 +1579,12 @@ public abstract class Observer<T> {
      * @see #distinctBy(Function)
      */
     public Observer<T> distinct() {
+        checkCurrentStage();
+        ownerForStage().distinctInternal();
+        return this;
+    }
+
+    private Observer<T> distinctInternal() {
         dispatcher.append(new Dispatcher<>() {
             private final Set<T> set = N.newHashSet();
 
@@ -1164,6 +1617,15 @@ public abstract class Observer<T> {
      * @see #distinct()
      */
     public Observer<T> distinctBy(final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
+        checkCurrentStage();
+        ownerForStage().distinctByInternal(keyExtractor);
+        return this;
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}
+     */
+    private Observer<T> distinctByInternal(final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         dispatcher.append(new Dispatcher<>() {
@@ -1196,6 +1658,15 @@ public abstract class Observer<T> {
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
     public Observer<T> filter(final Predicate<? super T> filter) throws IllegalArgumentException {
+        checkCurrentStage();
+        ownerForStage().filterInternal(filter);
+        return this;
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code filter} is {@code null}
+     */
+    private Observer<T> filterInternal(final Predicate<? super T> filter) throws IllegalArgumentException {
         N.checkArgNotNull(filter, cs.filter);
 
         dispatcher.append(new Dispatcher<>() {
@@ -1222,12 +1693,21 @@ public abstract class Observer<T> {
      *
      * @param <R> the type of items emitted after transformation
      * @param mapper the function to transform each item
-     * @return this Observer instance, re-typed as {@code Observer<R>}, emitting the
+     * @return a new current {@code Observer<R>} stage, invalidating prior handles, emitting the
      *         transformed items
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #flatMap(Function)
      */
     public <R> Observer<R> map(final Function<? super T, R> mapper) throws IllegalArgumentException {
+        checkCurrentStage();
+        N.checkArgNotNull(mapper, cs.mapper);
+        return nextStage(() -> ownerForStage().mapInternal(mapper));
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     */
+    private <R> Observer<R> mapInternal(final Function<? super T, R> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         dispatcher.append(new Dispatcher<>() {
@@ -1245,6 +1725,10 @@ public abstract class Observer<T> {
     /**
      * Transforms each item into a collection and flattens the results into a single sequence.
      * This is useful for one-to-many transformations.
+     * Traversal of a mapped collection stops when a downstream {@link #limit(long)} is reached,
+     * and subsequent inputs are not passed to the mapper.
+     * An upstream limit still allows all mapped items from each accepted input to be emitted,
+     * including inputs emitted by a buffer during normal completion.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1256,23 +1740,34 @@ public abstract class Observer<T> {
      * @param <R> the type of items in the flattened sequence
      * @param mapper function that transforms each item into a collection; if it returns
      *        {@code null} or an empty collection, no items are emitted for that input
-     * @return this Observer instance, re-typed as {@code Observer<R>}, emitting the
+     * @return a new current {@code Observer<R>} stage, invalidating prior handles, emitting the
      *         flattened items
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #map(Function)
      */
     public <R> Observer<R> flatMap(final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalArgumentException {
+        checkCurrentStage();
+        N.checkArgNotNull(mapper, cs.mapper);
+        return nextStage(() -> ownerForStage().flatMapInternal(mapper));
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
+     */
+    private <R> Observer<R> flatMapInternal(final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         dispatcher.append(new Dispatcher<>() {
             @Override
             public void onNext(final Object param) {
-                if (downDispatcher != null) {
-                    final Collection<? extends R> c = mapper.apply((T) param); // onError if map.apply throws exception?
+                if (downDispatcher != null && !downDispatcher.isLimitReached()) {
+                    final Collection<? extends R> c = mapper.apply((T) param);
 
                     if (N.notEmpty(c)) {
-                        for (final R u : c) {
-                            downDispatcher.onNext(u);
+                        final Iterator<? extends R> iter = c.iterator();
+
+                        while (!downDispatcher.isLimitReached() && iter.hasNext()) {
+                            downDispatcher.onNext(iter.next());
                         }
                     }
                 }
@@ -1287,6 +1782,10 @@ public abstract class Observer<T> {
      * every timespan period. Normal completion emits a final non-empty partial
      * buffer; an error discards it.
      *
+     * <p>A window that expires with no items buffered still emits an empty list; the periodic emission is
+     * never suppressed. Only the final partial buffer delivered on normal completion is suppressed when it
+     * is empty.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * eventObserver
@@ -1296,19 +1795,30 @@ public abstract class Observer<T> {
      *
      * @param timespan the time window duration
      * @param unit the time unit of the timespan
-     * @return this Observer instance (re-typed) emitting {@code List<T>} buffers of items
+     * @return a new current typed stage, invalidating prior handles, emitting {@code List<T>} buffers of items
      * @throws IllegalArgumentException if {@code timespan} is zero or negative or {@code unit} is {@code null}.
      * @see #buffer(long, TimeUnit, int)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20java.util.concurrent.TimeUnit)">RxJava#buffer(long, java.util.concurrent.TimeUnit)</a>
      */
-    public Observer<List<T>> buffer(final long timespan, final TimeUnit unit) {
-        return buffer(timespan, unit, Integer.MAX_VALUE);
+    public Observer<List<T>> buffer(final long timespan, final TimeUnit unit) throws IllegalArgumentException {
+        checkCurrentStage();
+        N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
+        N.checkArgNotNull(unit, "Time unit cannot be null");
+        return nextStage(() -> ownerForStage().bufferInternal(timespan, unit));
+    }
+
+    private Observer<List<T>> bufferInternal(final long timespan, final TimeUnit unit) {
+        return bufferInternal(timespan, unit, Integer.MAX_VALUE);
     }
 
     /**
      * Buffers items into lists based on time windows or item count, whichever occurs first.
      * Emits when either the time window expires or the buffer reaches the specified count.
      * Normal completion emits a final non-empty partial buffer; an error discards it.
+     *
+     * <p>A window that expires with no items buffered still emits an empty list; the periodic emission is
+     * never suppressed. Only the final partial buffer delivered on normal completion is suppressed when it
+     * is empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1320,12 +1830,20 @@ public abstract class Observer<T> {
      * @param timespan the time window duration
      * @param unit the time unit of the timespan
      * @param count the maximum number of items per buffer
-     * @return this Observer instance (re-typed) emitting {@code List<T>} buffers of items
+     * @return a new current typed stage, invalidating prior handles, emitting {@code List<T>} buffers of items
      * @throws IllegalArgumentException if {@code timespan} or {@code count} is zero or negative, or {@code unit} is
      *         {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20java.util.concurrent.TimeUnit,%20int)">RxJava#buffer(long, java.util.concurrent.TimeUnit, int)</a>
      */
     public Observer<List<T>> buffer(final long timespan, final TimeUnit unit, final int count) throws IllegalArgumentException {
+        checkCurrentStage();
+        N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
+        N.checkArgNotNull(unit, "Time unit cannot be null");
+        N.checkArgument(count > 0, "count cannot be 0 or negative");
+        return nextStage(() -> ownerForStage().bufferInternal(timespan, unit, count));
+    }
+
+    private Observer<List<T>> bufferInternal(final long timespan, final TimeUnit unit, final int count) throws IllegalArgumentException {
         N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
         N.checkArgument(count > 0, "count cannot be 0 or negative");
@@ -1336,7 +1854,13 @@ public abstract class Observer<T> {
             private boolean terminated = false;
 
             { //NOSONAR
-                final ScheduledFuture<?> future = schedulerForIntermediateOp.scheduleAtFixedRate(this::emitPeriodically, timespan, timespan, unit);
+                addSubscriptionActionInternal(this::startScheduling);
+                terminationActions.add(() -> terminate(false));
+            }
+
+            private void startScheduling() {
+                final ScheduledFuture<?> future = schedulerForIntermediateOp.scheduleAtFixedRate(() -> runEvent(this::emitPeriodically), timespan, timespan,
+                        unit);
                 scheduledFuture = future;
                 scheduledFutures.put(future, Math.max(1L, unit.toMillis(timespan)));
             }
@@ -1377,7 +1901,7 @@ public abstract class Observer<T> {
                     return;
                 }
 
-                if (N.notEmpty(pending) && downDispatcher != null) {
+                if (N.notEmpty(pending) && downDispatcher != null && !isLimitReached()) {
                     try {
                         downDispatcher.onNext(pending);
                     } catch (final Exception e) {
@@ -1453,6 +1977,10 @@ public abstract class Observer<T> {
      * gapped windows based on the timespan and timeskip parameters. Normal completion
      * emits each active non-empty partial window; an error discards active windows.
      *
+     * <p>A window that expires with no items buffered still emits an empty list; the periodic emission is
+     * never suppressed. Only the active partial windows delivered on normal completion are suppressed when
+     * they are empty.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Overlapping windows: every 3 seconds, emit items from last 5 seconds
@@ -1463,14 +1991,22 @@ public abstract class Observer<T> {
      * @param timespan the duration of each buffer window
      * @param timeskip the interval between starting new buffers
      * @param unit the time unit for both timespan and timeskip
-     * @return this Observer instance (re-typed) emitting {@code List<T>} buffers of items
+     * @return a new current typed stage, invalidating prior handles, emitting {@code List<T>} buffers of items
      * @throws IllegalArgumentException if {@code timespan} or {@code timeskip} is zero or negative, or {@code unit}
      *         is {@code null}.
      * @see #buffer(long, long, TimeUnit, int)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#buffer(long, long, java.util.concurrent.TimeUnit)</a>
      */
-    public Observer<List<T>> buffer(final long timespan, final long timeskip, final TimeUnit unit) {
-        return buffer(timespan, timeskip, unit, Integer.MAX_VALUE);
+    public Observer<List<T>> buffer(final long timespan, final long timeskip, final TimeUnit unit) throws IllegalArgumentException {
+        checkCurrentStage();
+        N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
+        N.checkArgNotNull(unit, "Time unit cannot be null");
+        N.checkArgument(timeskip > 0, "timeskip cannot be 0 or negative");
+        return nextStage(() -> ownerForStage().bufferInternal(timespan, timeskip, unit));
+    }
+
+    private Observer<List<T>> bufferInternal(final long timespan, final long timeskip, final TimeUnit unit) {
+        return bufferInternal(timespan, timeskip, unit, Integer.MAX_VALUE);
     }
 
     /**
@@ -1478,6 +2014,10 @@ public abstract class Observer<T> {
      * Creates overlapping or gapped windows that emit when either the window duration
      * expires or the count is reached. Normal completion emits each active non-empty partial
      * window; an error discards active windows.
+     *
+     * <p>A window that expires with no items buffered still emits an empty list; the periodic emission is
+     * never suppressed. Only the active partial windows delivered on normal completion are suppressed when
+     * they are empty.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1490,12 +2030,21 @@ public abstract class Observer<T> {
      * @param timeskip the interval between starting new buffers
      * @param unit the time unit for both timespan and timeskip
      * @param count the maximum number of items per buffer
-     * @return this Observer instance (re-typed) emitting {@code List<T>} buffers of items
+     * @return a new current typed stage, invalidating prior handles, emitting {@code List<T>} buffers of items
      * @throws IllegalArgumentException if {@code timespan}, {@code timeskip}, or {@code count} is zero or negative,
      *         or {@code unit} is {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#buffer(long, long, java.util.concurrent.TimeUnit)</a>
      */
     public Observer<List<T>> buffer(final long timespan, final long timeskip, final TimeUnit unit, final int count) throws IllegalArgumentException {
+        checkCurrentStage();
+        N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
+        N.checkArgNotNull(unit, "Time unit cannot be null");
+        N.checkArgument(timeskip > 0, "timeskip cannot be 0 or negative");
+        N.checkArgument(count > 0, "count cannot be 0 or negative");
+        return nextStage(() -> ownerForStage().bufferInternal(timespan, timeskip, unit, count));
+    }
+
+    private Observer<List<T>> bufferInternal(final long timespan, final long timeskip, final TimeUnit unit, final int count) throws IllegalArgumentException {
         N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
         N.checkArgument(timeskip > 0, "timeskip cannot be 0 or negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
@@ -1509,13 +2058,27 @@ public abstract class Observer<T> {
             private boolean terminated = false;
 
             { //NOSONAR
-                final List<T> initialWindow = new ArrayList<>();
-                windows.add(initialWindow);
-                windowFutures.put(initialWindow, schedulerForIntermediateOp.schedule(() -> emitWindow(initialWindow), timespan, unit));
+                addSubscriptionActionInternal(this::startScheduling);
+                terminationActions.add(() -> terminate(false));
+            }
 
-                final ScheduledFuture<?> future = schedulerForIntermediateOp.scheduleAtFixedRate(this::startWindow, timeskip, timeskip, unit);
-                windowStarter = future;
-                scheduledFutures.put(future, Math.max(1L, unit.toMillis(timeskip)));
+            private void startScheduling() {
+                synchronized (windows) {
+                    final List<T> initialWindow = new ArrayList<>();
+                    windows.add(initialWindow);
+
+                    try {
+                        windowFutures.put(initialWindow, schedulerForIntermediateOp.schedule(() -> runEvent(() -> emitWindow(initialWindow)), timespan, unit));
+
+                        final ScheduledFuture<?> future = schedulerForIntermediateOp.scheduleAtFixedRate(() -> runEvent(this::startWindow), timeskip, timeskip,
+                                unit);
+                        windowStarter = future;
+                        scheduledFutures.put(future, Math.max(1L, unit.toMillis(timeskip)));
+                    } catch (final RuntimeException | Error e) {
+                        terminateLocked();
+                        throw e;
+                    }
+                }
             }
 
             @Override
@@ -1575,6 +2138,9 @@ public abstract class Observer<T> {
                 if (downDispatcher != null) {
                     try {
                         for (final List<T> window : pending) {
+                            if (isLimitReached()) {
+                                break;
+                            }
                             downDispatcher.onNext(window);
                         }
                     } catch (final Exception e) {
@@ -1598,7 +2164,7 @@ public abstract class Observer<T> {
                     windows.add(window);
 
                     try {
-                        windowFutures.put(window, schedulerForIntermediateOp.schedule(() -> emitWindow(window), timespan, unit));
+                        windowFutures.put(window, schedulerForIntermediateOp.schedule(() -> runEvent(() -> emitWindow(window)), timespan, unit));
                     } catch (final Exception e) {
                         windows.remove(window);
                         hasMore = false;
@@ -1616,7 +2182,8 @@ public abstract class Observer<T> {
                 Exception failure = null;
 
                 synchronized (windows) {
-                    if (terminated || !windows.remove(window)) {
+                    // Equal contents do not identify the same overlapping window or scheduled callback.
+                    if (terminated || !windows.removeIf(activeWindow -> activeWindow == window)) {
                         return;
                     }
 
@@ -1694,12 +2261,12 @@ public abstract class Observer<T> {
      * }</pre>
      *
      * @param action the action to perform on each item
-     * @throws IllegalStateException if this Observer has already been subscribed
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalStateException if this stage has been replaced or this Observer has already been subscribed
      * @see #observe(Consumer, Consumer)
      * @see #observe(Consumer, Consumer, Runnable)
      */
-    public void observe(final Consumer<? super T> action) throws IllegalArgumentException {
+    public void observe(final Consumer<? super T> action) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(action, cs.action);
 
         observe(action, ON_ERROR_MISSING);
@@ -1720,11 +2287,11 @@ public abstract class Observer<T> {
      *
      * @param action the action to perform on each item
      * @param onError the action to perform on error
-     * @throws IllegalStateException if this Observer has already been subscribed
      * @throws IllegalArgumentException if any of {@code action}, {@code onError} is {@code null}.
+     * @throws IllegalStateException if this stage has been replaced or this Observer has already been subscribed
      * @see #observe(Consumer, Consumer, Runnable)
      */
-    public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError) throws IllegalArgumentException {
+    public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(action, cs.action);
         N.checkArgNotNull(onError, cs.onError);
 
@@ -1750,9 +2317,10 @@ public abstract class Observer<T> {
      * @param onError the action to perform on error
      * @param onComplete the action to perform on completion
      * @throws IllegalArgumentException if any callback is {@code null}.
-     * @throws IllegalStateException if this Observer has already been subscribed
+     * @throws IllegalStateException if this stage has been replaced or this Observer has already been subscribed
      */
-    public abstract void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete);
+    public abstract void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
+            throws IllegalArgumentException, IllegalStateException;
 
     /** Cancels and forgets all periodic intermediate-operation tasks associated with this Observer. */
     void cancelScheduledFutures() {
@@ -1783,6 +2351,12 @@ public abstract class Observer<T> {
 
         /** The next dispatcher in the chain, or {@code null} if this is the last dispatcher. */
         protected Dispatcher<T> downDispatcher;
+
+        // Only limits later in the pipeline constrain this dispatcher's output. The observer's
+        // hasMore flag also represents upstream completion and cannot distinguish that case.
+        boolean isLimitReached() {
+            return downDispatcher != null && downDispatcher.isLimitReached();
+        }
 
         /**
          * Propagates an item to the next dispatcher in the chain.
@@ -1822,7 +2396,7 @@ public abstract class Observer<T> {
          * @param downDispatcher the dispatcher to append; must not be {@code null}
          * @throws IllegalArgumentException if {@code downDispatcher} is {@code null}.
          */
-        public void append(final Dispatcher<T> downDispatcher) {
+        public void append(final Dispatcher<T> downDispatcher) throws IllegalArgumentException {
             N.checkArgNotNull(downDispatcher, cs.downDispatcher);
 
             Dispatcher<T> tmp = this;
@@ -1854,8 +2428,11 @@ public abstract class Observer<T> {
          *
          * @param onError the consumer to invoke when an error is signalled
          * @param onComplete the runnable to invoke when the stream completes
+         * @throws IllegalArgumentException if {@code onError} or {@code onComplete} is {@code null}
          */
-        protected DispatcherBase(final Consumer<? super Exception> onError, final Runnable onComplete) {
+        protected DispatcherBase(final Consumer<? super Exception> onError, final Runnable onComplete) throws IllegalArgumentException {
+            N.checkArgNotNull(onError, cs.onError);
+            N.checkArgNotNull(onComplete, cs.onComplete);
 
             this.onError = onError;
             this.onComplete = onComplete;
@@ -1923,39 +2500,34 @@ public abstract class Observer<T> {
 
             beginSubscription(action, onError, onComplete);
 
-            dispatcher.append(new DispatcherBase<>(onError, onComplete) {
+            dispatcher.append(new DispatcherBase<>(e -> ((Observer<?>) this).deliverError(onError, e), () -> ((Observer<?>) this).deliverComplete(onComplete)) {
                 @Override
                 public void onNext(final Object param) {
                     action.accept((T) param);
                 }
             });
 
-            asyncExecutor.execute(() -> {
-                T next = null;
-                // isOnError stays true for the whole emission (queue.poll in the loop condition + dispatch)
-                // so an exception from polling or the action is delivered to onError; it is cleared only
-                // just before onComplete, whose failures propagate instead. (Previously it was reset false
-                // after each dispatch, so a mid-stream poll() failure was rethrown rather than routed.)
-                boolean isOnError = true;
+            startSubscriptionActions();
 
+            ((Observer<?>) this).startSource(() -> asyncExecutor.execute(() -> {
                 try {
-                    while (hasMore && (next = queue.poll(Long.MAX_VALUE, TimeUnit.MILLISECONDS)) != COMPLETE_FLAG) {
-                        dispatcher.onNext(next);
+                    while (hasMore) {
+                        final T next = ((Observer<?>) this).pollSource(queue);
+                        if (!hasMore || next == COMPLETE_FLAG) {
+                            break;
+                        }
+                        if (next != null) {
+                            ((Observer<?>) this).emitSource(next);
+                        }
                     }
-
-                    isOnError = false;
-
-                    dispatcher.onComplete();
+                    ((Observer<?>) this).finishSubscription(null);
+                } catch (final Error fatal) {
+                    ((Observer<?>) this).abortSubscription(fatal);
+                    throw fatal;
                 } catch (final Exception e) {
-                    if (isOnError) {
-                        dispatcher.onError(e);
-                    } else {
-                        throw ExceptionUtil.toRuntimeException(e, true);
-                    }
-                } finally {
-                    cancelScheduledFutures();
+                    ((Observer<?>) this).reportSourceFailure(e);
                 }
-            });
+            }));
         }
     }
 
@@ -1994,38 +2566,31 @@ public abstract class Observer<T> {
 
             beginSubscription(action, onError, onComplete);
 
-            dispatcher.append(new DispatcherBase<>(onError, onComplete) {
+            dispatcher.append(new DispatcherBase<>(e -> ((Observer<?>) this).deliverError(onError, e), () -> ((Observer<?>) this).deliverComplete(onComplete)) {
                 @Override
                 public void onNext(final Object param) {
                     action.accept((T) param);
                 }
             });
 
-            asyncExecutor.execute(() -> {
-                // isOnError stays true for the whole emission (iter.hasNext()/next() in the loop condition +
-                // dispatch) so an exception from advancing the iterator or the action is delivered to onError;
-                // it is cleared only just before onComplete, whose failures propagate instead. (Previously it
-                // was reset false after each dispatch, so a mid-stream hasNext() failure was rethrown.)
-                boolean isOnError = true;
+            startSubscriptionActions();
 
+            ((Observer<?>) this).startSource(() -> asyncExecutor.execute(() -> {
                 try {
                     while (hasMore && iter.hasNext()) {
-                        dispatcher.onNext(iter.next());
+                        if (!hasMore) {
+                            break;
+                        }
+                        ((Observer<?>) this).emitSource(iter.next());
                     }
-
-                    isOnError = false;
-
-                    dispatcher.onComplete();
+                    ((Observer<?>) this).finishSubscription(null);
+                } catch (final Error fatal) {
+                    ((Observer<?>) this).abortSubscription(fatal);
+                    throw fatal;
                 } catch (final Exception e) {
-                    if (isOnError) {
-                        dispatcher.onError(e);
-                    } else {
-                        throw ExceptionUtil.toRuntimeException(e, true);
-                    }
-                } finally {
-                    cancelScheduledFutures();
+                    ((Observer<?>) this).reportSourceFailure(e);
                 }
-            });
+            }));
         }
 
     }
@@ -2071,33 +2636,26 @@ public abstract class Observer<T> {
 
             beginSubscription(action, onError, onComplete);
 
-            dispatcher.append(new DispatcherBase<>(onError, onComplete) {
+            dispatcher.append(new DispatcherBase<>(e -> ((Observer<?>) this).deliverError(onError, e), () -> ((Observer<?>) this).deliverComplete(onComplete)) {
                 @Override
                 public void onNext(final Object param) {
                     action.accept((T) param);
                 }
             });
 
+            startSubscriptionActions();
+
             final Runnable task = () -> {
-                try {
-                    if (hasMore) {
-                        dispatcher.onNext(0L);
-                    }
-
-                    dispatcher.onComplete();
-                } catch (final Exception e) {
-                    dispatcher.onError(e);
-                } finally {
-                    cancelScheduledFutures();
-                }
+                ((Observer<?>) this).emitSource(0L);
+                ((Observer<?>) this).finishSubscription(null);
             };
-
-            if (hasMore) {
-                schedulerForObserveOp.schedule(task, delay, unit);
-            } else {
-                // observe(...) is documented as asynchronous even when no values can be emitted.
-                asyncExecutor.execute(task);
-            }
+            ((Observer<?>) this).startSource(() -> {
+                if (hasMore) {
+                    ((Observer<?>) this).publishSourceFuture(schedulerForObserveOp.schedule(task, delay, unit));
+                } else {
+                    asyncExecutor.execute(task);
+                }
+            });
         }
     }
 
@@ -2117,12 +2675,6 @@ public abstract class Observer<T> {
 
         /** The time unit for {@link #initialDelay} and {@link #period}. */
         private final TimeUnit unit;
-
-        /** The scheduled future for the fixed-rate task; cancelled when {@link #hasMore} becomes {@code false}. */
-        private volatile ScheduledFuture<?> future = null;
-
-        /** Ensures that exactly one terminal signal is delivered. */
-        private volatile boolean terminated = false;
 
         IntervalObserver(final long initialDelay, final long period, final TimeUnit unit) {
             this.initialDelay = initialDelay;
@@ -2153,89 +2705,26 @@ public abstract class Observer<T> {
 
             beginSubscription(action, onError, onComplete);
 
-            dispatcher.append(new DispatcherBase<>(onError, onComplete) {
+            dispatcher.append(new DispatcherBase<>(e -> ((Observer<?>) this).deliverError(onError, e), () -> ((Observer<?>) this).deliverComplete(onComplete)) {
                 @Override
                 public void onNext(final Object param) {
                     action.accept((T) param);
                 }
             });
 
-            if (!hasMore) {
-                asyncExecutor.execute(this::terminateNormally);
-                return;
-            }
+            startSubscriptionActions();
 
-            final ScheduledFuture<?> scheduledFuture = schedulerForObserveOp.scheduleAtFixedRate(new Runnable() {
-                private long val = 0;
-
-                @Override
-                public void run() {
-                    if (!hasMore) {
-                        terminateNormally();
-                    } else {
-                        try {
-                            dispatcher.onNext(val++);
-                        } catch (final Exception e) {
-                            terminateWithError(e);
-                            return;
-                        }
-
-                        // A downstream limit may stop the source while processing this item. Complete now
-                        // instead of waiting for the next period, which may be arbitrarily far in the future.
-                        if (!hasMore) {
-                            terminateNormally();
-                        }
-                    }
+            ((Observer<?>) this).startSource(() -> {
+                if (!hasMore) {
+                    asyncExecutor.execute(() -> ((Observer<?>) this).finishSubscription(null));
+                    return;
                 }
-            }, initialDelay, period, unit);
-
-            future = scheduledFuture;
-
-            // With a zero initial delay, the first invocation can terminate before scheduleAtFixedRate
-            // returns and before the field assignment above. Cancel the now-published future in that case.
-            if (terminated) {
-                scheduledFuture.cancel(true);
-            }
+                final AtomicLong value = new AtomicLong();
+                final ScheduledFuture<?> task = schedulerForObserveOp.scheduleAtFixedRate(() -> ((Observer<?>) this).emitSource(value.getAndIncrement()),
+                        initialDelay, period, unit);
+                ((Observer<?>) this).publishSourceFuture(task);
+            });
         }
 
-        private void terminateNormally() {
-            if (terminated) {
-                return;
-            }
-
-            terminated = true;
-
-            try {
-                dispatcher.onComplete();
-            } catch (final Exception e) {
-                dispatcher.onError(e);
-            } finally {
-                cancelFutureAndIntermediateTasks();
-            }
-        }
-
-        private void terminateWithError(final Exception error) {
-            if (terminated) {
-                return;
-            }
-
-            terminated = true;
-
-            try {
-                dispatcher.onError(error);
-            } finally {
-                cancelFutureAndIntermediateTasks();
-            }
-        }
-
-        private void cancelFutureAndIntermediateTasks() {
-            final ScheduledFuture<?> scheduledFuture = future;
-
-            if (scheduledFuture != null) {
-                scheduledFuture.cancel(true);
-            }
-
-            cancelScheduledFutures();
-        }
     }
 }

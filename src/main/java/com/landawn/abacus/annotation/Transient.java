@@ -47,7 +47,16 @@ import java.lang.annotation.Target;
  *       when the bean is first introspected. To include transient fields in serialized output,
  *       configure the serializer with {@code setSkipTransientField(false)}.</li>
  *   <li>To exclude a non-transient field from serialization only, prefer
- *       {@link JsonXmlField#ignore() @JsonXmlField(ignore = true)} rather than {@code @Transient}.</li>
+ *       {@link JsonXmlField#direction() @JsonXmlField(direction = Direction.DESERIALIZE_ONLY)}.
+ *       {@code @JsonXmlField(ignore = true)} and {@code @JsonXmlConfig(ignoredFields = ...)} also omit the
+ *       property from serialized output but, despite the name, do not block deserialization either: a
+ *       matching value in JSON/XML input is still applied. {@code @Transient} (or the {@code transient}
+ *       modifier) is the annotation-level way to keep a property out of both directions; alternatively
+ *       configure the parser with {@code DeserializationConfig.setIgnoredPropNames(Class, Set)}.</li>
+ *   <li>Any field annotation whose simple name is {@code Transient} - for example
+ *       {@code jakarta.persistence.Transient}, {@code javax.persistence.Transient} or Spring Data's
+ *       {@code org.springframework.data.annotation.Transient} - is treated exactly like this annotation
+ *       by the reflection layer, so a JPA-annotated bean needs no second marker.</li>
  * </ul>
  *
  * <p><b>Important notes:</b></p>

@@ -270,4 +270,23 @@ public class OptionalCharTypeTest extends TestBase {
         verify(writer).write('\\');
         verify(writer).writeCharacter('\'');
     }
+
+    // T5-05 (2026-09-06): only the first character of a longer column value is kept (documented now).
+    @Test
+    public void reviewFixes20260906_getMultiCharStringKeepsFirstChar() throws SQLException {
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getString(1)).thenReturn("AB");
+        when(rs.getString("c")).thenReturn("AB");
+        when(rs.getString(2)).thenReturn("\uD83D\uDE00");
+        when(rs.getString(3)).thenReturn("\u0000x");
+        when(rs.getString(4)).thenReturn("");
+        when(rs.getString(5)).thenReturn(null);
+
+        assertEquals('A', optionalCharType.get(rs, 1).get());
+        assertEquals('A', optionalCharType.get(rs, "c").get());
+        assertEquals('\uD83D', optionalCharType.get(rs, 2).get());
+        assertEquals('\u0000', optionalCharType.get(rs, 3).get());
+        assertTrue(optionalCharType.get(rs, 4).isEmpty());
+        assertTrue(optionalCharType.get(rs, 5).isEmpty());
+    }
 }

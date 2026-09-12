@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.CharacterWriter;
@@ -115,7 +116,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
     /**
      * Parses a string representation and creates a ByteList.
      * The string is first parsed as a byte array, then wrapped in a ByteList.
-     * Returns {@code null} if the input string is {@code null} or empty.
+     * Returns {@code null} if the input string is {@code null}, empty or blank.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -129,13 +130,16 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
-     * @return a ByteList created from the parsed values, or {@code null} if input is {@code null} or empty
-     * @throws NumberFormatException if any element in the string cannot be parsed as a byte
+     * @return a ByteList created from the parsed values, or {@code null} if input is {@code null}, empty or blank
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
+     * @throws NumberFormatException if an element is not a valid integer literal
+     * @throws ArithmeticException if an element is out of the {@code byte} range (e.g. {@code 128})
      * @see #valueOf(Object)
      * @see #stringOf(ByteList)
      */
+    @MayReturnNull
     @Override
-    public ByteList valueOf(final String str) {
+    public ByteList valueOf(final String str) throws IllegalArgumentException, NumberFormatException, ArithmeticException {
         if (Strings.isEmpty(str)) {
             return null;
         }
@@ -151,10 +155,11 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
      * @return a ByteList containing the bytes from the database, or {@code null} if the column value is null
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public ByteList get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public ByteList get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final byte[] bytes = rs.getBytes(columnIndex);
         return bytes == null ? null : ByteList.of(bytes);
     }
@@ -166,10 +171,11 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @param rs the ResultSet to read from
      * @param columnName the column label/name
      * @return a ByteList containing the bytes from the database, or {@code null} if the column value is null
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public ByteList get(final ResultSet rs, final String columnName) throws SQLException {
+    public ByteList get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final byte[] bytes = rs.getBytes(columnName);
         return bytes == null ? null : ByteList.of(bytes);
     }
@@ -181,10 +187,11 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the ByteList to set, or null
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final ByteList x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final ByteList x) throws NullPointerException, SQLException {
         stmt.setBytes(columnIndex, x == null ? null : x.toArray());
     }
 
@@ -195,10 +202,11 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter
      * @param x the ByteList to set, or null
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final ByteList x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final ByteList x) throws NullPointerException, SQLException {
         stmt.setBytes(parameterName, x == null ? null : x.toArray());
     }
 
@@ -211,10 +219,12 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @param columnIndex the parameter index (1-based)
      * @param x the ByteList to set, or null
      * @param sqlTypeOrLength the SQL type or length (ignored for byte arrays)
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final ByteList x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final ByteList x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setBytes(columnIndex, x == null ? null : x.toArray());
     }
 
@@ -227,10 +237,12 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @param parameterName the name of the parameter
      * @param x the ByteList to set, or null
      * @param sqlTypeOrLength the SQL type or length (ignored for byte arrays)
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final ByteList x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final ByteList x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setBytes(parameterName, x == null ? null : x.toArray());
     }
 
@@ -246,7 +258,8 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      *
      * @param appendable the Appendable to write to
      * @param x the ByteList to append
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -258,7 +271,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final ByteList x) throws IOException {
+    public void appendTo(final Appendable appendable, final ByteList x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -283,10 +296,11 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @param writer the CharacterWriter to write to
      * @param x the ByteList to write
      * @param config the serialization configuration
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final ByteList x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final ByteList x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

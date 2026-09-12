@@ -153,7 +153,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * @see #stringOf(OptionalDouble)
      */
     @Override
-    public OptionalDouble valueOf(final String str) {
+    public OptionalDouble valueOf(final String str) throws NumberFormatException {
         return Strings.isEmpty(str) ? OptionalDouble.empty() : OptionalDouble.of(Numbers.toDouble(str));
     }
 
@@ -179,11 +179,16 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return an OptionalDouble containing the double value, or empty if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @return an OptionalDouble containing the double value, or empty if the column value is SQL NULL. A
+     *         non-{@code Number} column value is parsed with {@link Numbers#toDouble(String)}, so an empty string yields
+     *         a <i>present</i> zero (the same answer {@code DoubleType.get} gives), unlike {@link #valueOf(String)}
+     *         which answers empty for {@code ""}
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string         included)
      */
     @Override
-    public OptionalDouble get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public OptionalDouble get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, NumberFormatException {
         final Object result = rs.getObject(columnIndex);
 
         return result == null ? OptionalDouble.empty()
@@ -213,11 +218,16 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      *
      * @param rs the ResultSet to read from
      * @param columnName the label for the column specified with the SQL AS clause
-     * @return an OptionalDouble containing the double value, or empty if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @return an OptionalDouble containing the double value, or empty if the column value is SQL NULL. A
+     *         non-{@code Number} column value is parsed with {@link Numbers#toDouble(String)}, so an empty string yields
+     *         a <i>present</i> zero (the same answer {@code DoubleType.get} gives), unlike {@link #valueOf(String)}
+     *         which answers empty for {@code ""}
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string         included)
      */
     @Override
-    public OptionalDouble get(final ResultSet rs, final String columnName) throws SQLException {
+    public OptionalDouble get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, NumberFormatException {
         final Object result = rs.getObject(columnName);
 
         return result == null ? OptionalDouble.empty()
@@ -246,10 +256,11 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the OptionalDouble value to set
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalDouble x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalDouble x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.DOUBLE);
         } else {
@@ -278,10 +289,11 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OptionalDouble value to set
-     * @throws SQLException if a database access error occurs or the parameterName is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final OptionalDouble x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final OptionalDouble x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.DOUBLE);
         } else {
@@ -298,7 +310,8 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      *
      * @param appendable the Appendable to write to
      * @param x the OptionalDouble value to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -310,7 +323,7 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final OptionalDouble x) throws IOException {
+    public void appendTo(final Appendable appendable, final OptionalDouble x) throws NullPointerException, IOException {
         if (x == null || x.isEmpty()) {
             appendable.append(NULL_STRING);
         } else {
@@ -322,6 +335,12 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      * Writes the character representation of an {@link OptionalDouble} to a CharacterWriter.
      * This method is typically used for JSON/XML serialization.
      * <p>
+     * A {@code null} or empty optional is written as {@code null} unless {@code config.isWriteNullNumberAsZero()} is
+     * set, in which case {@code 0.0} is written - the same substitution {@code DoubleType} and {@code MutableDoubleType}
+     * apply to a {@code null} value. A substituted zero reads back as a <i>present</i> {@code OptionalDouble.of(0.0d)},
+     * which is what the flag asks for. The XML serializers represent an empty optional property with the
+     * {@code isNull="true"} attribute form rather than with the text written here.
+     * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
      * {@code CharacterWriter}. String quotation/escaping config is ignored.
      * <p>
@@ -331,13 +350,18 @@ public class OptionalDoubleType extends AbstractOptionalType<OptionalDouble> {
      *
      * @param writer the CharacterWriter to write to
      * @param x the OptionalDouble value to write
-     * @param config the serialization configuration
-     * @throws IOException if an I/O error occurs during the write operation
+     * @param config the serialization configuration; only {@code writeNullNumberAsZero} is consulted, may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final OptionalDouble x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final OptionalDouble x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null || x.isEmpty()) {
-            writer.write(NULL_CHAR_ARRAY);
+            if (config != null && config.isWriteNullNumberAsZero()) {
+                writer.write(0.0d);
+            } else {
+                writer.write(NULL_CHAR_ARRAY);
+            }
         } else {
             writer.write(x.get());
         }

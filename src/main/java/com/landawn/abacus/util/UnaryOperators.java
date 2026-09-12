@@ -20,6 +20,17 @@ import com.landawn.abacus.util.function.UnaryOperator;
 /**
  * Utility class providing various UnaryOperator implementations and factory methods.
  * This class contains the identity operator.
+ *
+ * <p>This class is a top-level sibling of {@link Fn} (formerly nested as {@code Fn.UnaryOperators}),
+ * not a nested type. Use {@link Fn} for the general functional-interface factory and {@link Fnn}
+ * for {@link Throwables} variants that can declare checked exceptions. For one-argument functions
+ * that may return a different type see {@link Functions}; for two-argument operators see
+ * {@link BinaryOperators}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see Functions
+ * @see BinaryOperators
  */
 public final class UnaryOperators {
 

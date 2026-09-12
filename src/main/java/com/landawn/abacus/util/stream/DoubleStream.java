@@ -88,12 +88,25 @@ import com.landawn.abacus.util.function.TriFunction;
  *
  * <p><b>Floating-point special values:</b> Elements may include {@link Double#NaN},
  * {@link Double#POSITIVE_INFINITY}, {@link Double#NEGATIVE_INFINITY}, and negative zero ({@code -0.0}).
- * Aggregate operations such as {@link #sum()}, {@link #average()}, {@link #min()}, and {@link #max()}
- * follow IEEE 754 semantics: any {@code NaN} element propagates to the result as {@code NaN}
+ * Aggregate operations such as {@link #sum()}, {@link #min()}, and {@link #max()} follow IEEE 754
+ * semantics: any {@code NaN} element propagates to the result as {@code NaN}
  * (because {@link #min()}/{@link #max()} use {@link Math#min(double, double)}/{@link Math#max(double, double)}).
+ *
+ * <p>&#9888;&#65039; {@link #average()} is the exception: it uses compensated (Kahan) summation with an
+ * overflow-safe mean, so it deliberately does <b>not</b> follow IEEE 754 on finite overflow. For
+ * {@code DoubleStream.of(Double.MAX_VALUE, Double.MAX_VALUE)}, {@code sum()} is
+ * {@code +Infinity} but {@code average()} is {@code Double.MAX_VALUE}; the JDK returns
+ * {@code Infinity} for both. {@link #summaryStatistics()} uses the plain accumulator, so
+ * {@code summaryStatistics().getAverage()} and {@code average()} can differ for the same stream.
  * Ordering operations (such as {@link #sorted()}, {@link #kthLargest(int)}, and {@link #top(int)}) instead use
  * {@link Double#compare(double, double)}, which treats {@code NaN} as greater than any
  * other value (including positive infinity) and considers {@code -0.0} less than {@code +0.0}.
+ *
+ * <p>Write any selector or comparator you pass to {@code merge(...)} in those same terms:
+ * {@code Double.compare(x, y) <= 0}, not {@code x <= y}. The two disagree on {@code NaN} and on
+ * signed zero, and a {@code <=} selector silently produces an unsorted result when merging sorted
+ * inputs &mdash; for example merging {@code [2.0, 3.0]} with {@code [1.0, NaN]} yields
+ * {@code [1.0, NaN, 2.0, 3.0]}, because every comparison against {@code NaN} is {@code false}.
  *
  * <p><b>Key Features:</b>
  * <ul>
@@ -220,8 +233,17 @@ import com.landawn.abacus.util.function.TriFunction;
  *       <td><b><i>abacus</i></b>: returns {@code u.OptionalDouble} &middot; &#9888;&#65039; <b><i>JDK</i></b>: returns {@code java.util.OptionalDouble}</td>
  *     </tr>
  *     <tr>
+ *       <td><b>null arguments</b> to any operation</td>
+ *       <td><b><i>abacus</i></b>: throws {@link IllegalArgumentException} (via {@code checkArgNotNull}),
+ *           and the stream is <b>closed</b> before the exception propagates &middot; &#9888;&#65039;
+ *           <b><i>JDK</i></b>: throws {@link NullPointerException} and leaves the stream open.
+ *           This applies throughout: a {@code null} mapper, predicate, comparator, collector,
+ *           supplier or action is rejected with {@code IllegalArgumentException} naming the
+ *           parameter, whether or not the individual method's javadoc repeats it.</td>
+ *     </tr>
+ *     <tr>
  *       <td>{@code count()}</td>
- *       <td><b><i>abacus</i></b>: always traverses the pipeline, so an upstream {@code peek}/{@code filter} still runs &middot; &#9888;&#65039; <b><i>JDK</i></b> (9+): may return the count without traversal when the element count is already known</td>
+ *       <td><b><i>abacus</i></b>: traverses the pipeline, so an upstream {@code peek}/{@code filter} still runs. The one exception is a stream created by {@code from(java.util.stream.*)} with no abacus operation after it: that delegates {@code count()} straight to the wrapped JDK stream, which may skip its own {@code peek} &middot; &#9888;&#65039; <b><i>JDK</i></b> (9+): may return the count without traversal when the element count is already known</td>
  *     </tr>
  *     <tr>
  *       <td>{@code peek}/{@code onEach}</td>
@@ -302,12 +324,13 @@ public abstract class DoubleStream
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new stream consisting of the elements that match the given predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#filter(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract DoubleStream filter(final DoublePredicate predicate);
+    public abstract DoubleStream filter(final DoublePredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the longest prefix of elements from this stream
@@ -323,7 +346,7 @@ public abstract class DoubleStream
      * individually satisfy the predicate.<br>
      * There is no guarantee of encounter-order prefix semantics in parallel streams.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
+     * <p>Parallel-stream behavior of these related operations:</p>
      * <pre>
      * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
      * │     Method      │        Boundary         │                            Warning                             │
@@ -331,11 +354,13 @@ public abstract class DoubleStream
      * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
      * │                 │ (predicate false)       │ individually satisfy the predicate                             │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * │ dropWhile (+    │ first unmatched         │ prefix boundary is preserved: only the leading run is          │
+     * │ onDrop)         │ (predicate false)       │ dropped (predicate checks are serialized). Downstream          │
+     * │                 │                         │ encounter order is unspecified                                 │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * │ skipUntil       │ first matched           │ prefix boundary is preserved: only the leading run is          │
+     * │                 │ (predicate true)        │ skipped (it is dropWhile(not predicate)). Downstream           │
+     * │                 │                         │ encounter order is unspecified                                 │
      * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
      * </pre>
      *
@@ -357,12 +382,13 @@ public abstract class DoubleStream
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new stream consisting of elements from this stream until an element is encountered that doesn't match the predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#takeWhile(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract DoubleStream takeWhile(final DoublePredicate predicate);
+    public abstract DoubleStream takeWhile(final DoublePredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the remaining elements of this stream after
@@ -374,28 +400,25 @@ public abstract class DoubleStream
      * returns {@code false}, effectively performing a "drop while condition is true"
      * operation that preserves encounter order in sequential streams.
      *
-     * <p><b>Notes on parallel streams:</b><br>
-     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
-     * the predicate returns {@code false}) may still be processed and dropped if they individually
-     * satisfy the predicate.<br>
-     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
-     * is no guarantee of encounter-order prefix/suffix semantics.
+     * <p><b>Notes on parallel streams:</b> The initial matching prefix is determined in the order this
+     * operation's <i>immediate upstream</i> hands it elements: the predicate checks are serialized under
+     * the source iterator's lock, so exactly the leading run of that arrival order is dropped. That is
+     * source encounter order only when no parallel stage precedes this one. An upstream parallel stage
+     * merges its workers' output in completion order, so the prefix dropped here can differ from the
+     * source-order prefix, and elements that follow the source-order boundary can be dropped with it.
+     * Once the predicate first returns {@code false}, that element and all later elements are retained
+     * without further predicate checks. Parallel downstream processing may reorder the retained elements.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
-     * <pre>
-     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
-     * │     Method      │        Boundary         │                            Warning                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
-     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
-     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
-     * </pre>
+     * <p>Parallel-stream behavior of these related operations:</p>
+     * <ul>
+     *   <li>{@code takeWhile}: elements after the first predicate failure may still be included
+     *       if they individually satisfy the predicate.</li>
+     *   <li>{@code dropWhile}, including the {@code onDrop} overload: drops only the initial
+     *       matching prefix; the first nonmatching element and all later elements are retained.</li>
+     *   <li>{@code skipUntil}: skips only the initial nonmatching prefix; the first matching
+     *       element and all later elements are retained.</li>
+     * </ul>
+     * <p>Parallel processing does not guarantee the encounter order of the retained elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -419,12 +442,13 @@ public abstract class DoubleStream
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#dropWhile(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract DoubleStream dropWhile(final DoublePredicate predicate);
+    public abstract DoubleStream dropWhile(final DoublePredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a DoubleStream consisting of the results of applying the given function to the elements of this stream.
@@ -460,11 +484,12 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element from double to double
      * @return a new DoubleStream consisting of the results of applying the mapper function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see Stream#map(Function)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream map(DoubleUnaryOperator mapper);
+    public abstract DoubleStream map(DoubleUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an {@code IntStream} consisting of the results of applying the given function to the elements of this stream.
@@ -492,13 +517,14 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element from double to int
      * @return a new IntStream consisting of the results of applying the mapper function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #mapToLong(DoubleToLongFunction)
      * @see #mapToFloat(DoubleToFloatFunction)
      * @see #mapToObj(DoubleFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream mapToInt(DoubleToIntFunction mapper);
+    public abstract IntStream mapToInt(DoubleToIntFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a {@code LongStream} consisting of the results of applying the given function to the elements of this stream.
@@ -526,13 +552,14 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element from double to long
      * @return a new LongStream consisting of the results of applying the mapper function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #mapToInt(DoubleToIntFunction)
      * @see #mapToFloat(DoubleToFloatFunction)
      * @see #mapToObj(DoubleFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream mapToLong(DoubleToLongFunction mapper);
+    public abstract LongStream mapToLong(DoubleToLongFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a {@code FloatStream} consisting of the results of applying the given function to the elements of this stream.
@@ -560,13 +587,14 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element from double to float
      * @return a new FloatStream consisting of the results of applying the mapper function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #mapToInt(DoubleToIntFunction)
      * @see #mapToLong(DoubleToLongFunction)
      * @see #mapToObj(DoubleFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream mapToFloat(DoubleToFloatFunction mapper);
+    public abstract FloatStream mapToFloat(DoubleToFloatFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an object-valued {@code Stream} consisting of the results of applying the given function to the elements of this stream.
@@ -595,6 +623,7 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element from double to T
      * @return a new Stream consisting of the results of applying the mapper function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #mapToInt(DoubleToIntFunction)
      * @see #mapToLong(DoubleToLongFunction)
      * @see #mapToFloat(DoubleToFloatFunction)
@@ -602,7 +631,7 @@ public abstract class DoubleStream
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> mapToObj(DoubleFunction<? extends T> mapper);
+    public abstract <T> Stream<T> mapToObj(DoubleFunction<? extends T> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of replacing each element of this stream with the contents of
@@ -632,6 +661,7 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element to a DoubleStream
      * @return a new DoubleStream consisting of the flattened contents of all mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMapArray(DoubleFunction)
      * @see #flatMapToInt(DoubleFunction)
      * @see #flatMapToLong(DoubleFunction)
@@ -639,7 +669,7 @@ public abstract class DoubleStream
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream flatMap(DoubleFunction<? extends DoubleStream> mapper);
+    public abstract DoubleStream flatMap(DoubleFunction<? extends DoubleStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     // public abstract DoubleStream flatmap(DoubleFunction<DoubleIterator> mapper);
 
@@ -685,6 +715,7 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element from double to {@code Collection<Double>}
      * @return a new {@code DoubleStream} consisting of the flattened contents of the collections produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(DoubleFunction)
      * @see #flatMapArray(DoubleFunction)
      * @see Stream#flatmap(java.util.function.Function)
@@ -692,7 +723,7 @@ public abstract class DoubleStream
     // @ai-ignore flatmap/flatMap naming - intentional: flatMap maps to DoubleStream, flatmap maps to Collection<Double>, flatMapArray maps to double[]. Do not suggest renaming.
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream flatmap(DoubleFunction<? extends Collection<Double>> mapper); //NOSONAR
+    public abstract DoubleStream flatmap(DoubleFunction<? extends Collection<Double>> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns a stream consisting of the results of replacing each element of this stream with the contents
@@ -720,6 +751,7 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element to a double array
      * @return a new DoubleStream consisting of the flattened contents of all mapped arrays
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(DoubleFunction)
      * @see #flatMapToInt(DoubleFunction)
      * @see #flatMapToLong(DoubleFunction)
@@ -727,7 +759,7 @@ public abstract class DoubleStream
     // @ai-ignore flatMapArray/flatMap/flattMap naming - intentional: flatMap maps to DoubleStream, flatMapArray maps to double[], flattMap maps to JDK java.util.stream.DoubleStream. Do not suggest renaming.
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream flatMapArray(DoubleFunction<double[]> mapper); //NOSONAR
+    public abstract DoubleStream flatMapArray(DoubleFunction<double[]> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns a stream consisting of the results of replacing each element of this stream with the contents
@@ -759,6 +791,7 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element to a JDK DoubleStream
      * @return a new DoubleStream consisting of the flattened contents of all mapped JDK streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(DoubleFunction)
      * @see #flatMapArray(DoubleFunction)
      */
@@ -766,7 +799,8 @@ public abstract class DoubleStream
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream flattMap(DoubleFunction<? extends java.util.stream.DoubleStream> mapper); //NOSONAR
+    public abstract DoubleStream flattMap(DoubleFunction<? extends java.util.stream.DoubleStream> mapper)
+            throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Alias for {@link #flattMap(DoubleFunction)}.
@@ -796,7 +830,8 @@ public abstract class DoubleStream
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public DoubleStream flatMapJdkStream(final DoubleFunction<? extends java.util.stream.DoubleStream> mapper) throws IllegalArgumentException {
+    public DoubleStream flatMapJdkStream(final DoubleFunction<? extends java.util.stream.DoubleStream> mapper)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -833,13 +868,14 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element to an IntStream
      * @return a new IntStream consisting of the flattened contents of all mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMapToLong(DoubleFunction)
      * @see #flatMapToFloat(DoubleFunction)
      * @see #flatMapToObj(DoubleFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream flatMapToInt(DoubleFunction<? extends IntStream> mapper);
+    public abstract IntStream flatMapToInt(DoubleFunction<? extends IntStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a {@code LongStream} consisting of the results of replacing each element of this stream with the contents
@@ -870,13 +906,14 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element to a LongStream
      * @return a new LongStream consisting of the flattened contents of all mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMapToInt(DoubleFunction)
      * @see #flatMapToFloat(DoubleFunction)
      * @see #flatMapToObj(DoubleFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract LongStream flatMapToLong(DoubleFunction<? extends LongStream> mapper);
+    public abstract LongStream flatMapToLong(DoubleFunction<? extends LongStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a {@code FloatStream} consisting of the results of replacing each element of this stream with the contents
@@ -907,13 +944,14 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element to a FloatStream
      * @return a new FloatStream consisting of the flattened contents of all mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMapToInt(DoubleFunction)
      * @see #flatMapToLong(DoubleFunction)
      * @see #flatMapToObj(DoubleFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract FloatStream flatMapToFloat(DoubleFunction<? extends FloatStream> mapper);
+    public abstract FloatStream flatMapToFloat(DoubleFunction<? extends FloatStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an object-valued {@code Stream} consisting of the results of replacing each element of this stream
@@ -947,6 +985,7 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element to a Stream
      * @return a new Stream consisting of the flattened contents of all mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMapToInt(DoubleFunction)
      * @see #flatMapToLong(DoubleFunction)
      * @see #flatmapToObj(DoubleFunction)
@@ -954,7 +993,7 @@ public abstract class DoubleStream
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatMapToObj(DoubleFunction<? extends Stream<? extends T>> mapper);
+    public abstract <T> Stream<T> flatMapToObj(DoubleFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an object-valued {@code Stream} consisting of the results of replacing each element of this stream
@@ -985,13 +1024,14 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element to a Collection
      * @return a new Stream consisting of the flattened contents of all mapped collections
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMapToObj(DoubleFunction)
      * @see #flatMapArrayToObj(DoubleFunction)
      * @see #mapToObj(DoubleFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatmapToObj(DoubleFunction<? extends Collection<? extends T>> mapper); //NOSONAR
+    public abstract <T> Stream<T> flatmapToObj(DoubleFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns an object-valued {@code Stream} consisting of the results of replacing each element of this stream
@@ -1022,6 +1062,7 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element to a {@code T[]}
      * @return a new Stream consisting of the flattened contents of all mapped arrays
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMapToObj(DoubleFunction)
      * @see #flatmapToObj(DoubleFunction)
      * @see #mapToObj(DoubleFunction)
@@ -1029,7 +1070,7 @@ public abstract class DoubleStream
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatMapArrayToObj(DoubleFunction<T[]> mapper);
+    public abstract <T> Stream<T> flatMapArrayToObj(DoubleFunction<T[]> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given multi-mapping function to the elements of this stream.
@@ -1065,12 +1106,13 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that generates zero or more output values for each input value
      * @return a new DoubleStream consisting of the results of applying the mapper function
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(DoubleFunction)
      * @see #flatMapArray(DoubleFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream mapMulti(DoubleMapMultiConsumer mapper);
+    public abstract DoubleStream mapMulti(DoubleMapMultiConsumer mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the non-empty results of applying the given function to the elements of this stream.
@@ -1098,11 +1140,12 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element to an OptionalDouble
      * @return a new stream containing only the values from non-empty OptionalDoubles
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream mapPartial(DoubleFunction<OptionalDouble> mapper);
+    public abstract DoubleStream mapPartial(DoubleFunction<OptionalDouble> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the non-empty results of applying the given function to the elements of this stream.
@@ -1130,11 +1173,12 @@ public abstract class DoubleStream
      * @param mapper a non-interfering, stateless function that transforms each element to a JDK {@code java.util.OptionalDouble}
      * @return a new stream containing only the values from non-empty {@code java.util.OptionalDouble}s
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream mapPartialJdk(DoubleFunction<java.util.OptionalDouble> mapper);
+    public abstract DoubleStream mapPartialJdk(DoubleFunction<java.util.OptionalDouble> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given mapper function to the first and last element of the ranges in this stream,
@@ -1161,17 +1205,23 @@ public abstract class DoubleStream
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
      *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output element
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code sameRange}, {@code mapper} is {@code null}
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream rangeMap(final DoubleBiPredicate sameRange, final DoubleBinaryOperator mapper);
+    public abstract DoubleStream rangeMap(final DoubleBiPredicate sameRange, final DoubleBinaryOperator mapper)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given mapper function to the first and last element of the ranges in this stream,
@@ -1195,11 +1245,15 @@ public abstract class DoubleStream
      * // Create custom objects from ranges
      * DoubleStream.of(1.5, 2.5, 5.0, 6.0, 10.0)
      *       .rangeMapToObj((first, next) -> next - first <= 1.5,
-     *                      (first, last) -> new Range(first, last))
+     *                      (first, last) -> Range.closed(first, last))
      *       .forEach(System.out::println);
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
      *
      * @param <T> the element type of the new stream
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
@@ -1208,11 +1262,13 @@ public abstract class DoubleStream
      * @param mapper a function that maps a range (defined by its first and last element) to an output object of type T
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code sameRange}, {@code mapper} is {@code null}
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract <T> Stream<T> rangeMapToObj(final DoubleBiPredicate sameRange, final DoubleBiFunction<? extends T> mapper);
+    public abstract <T> Stream<T> rangeMapToObj(final DoubleBiPredicate sameRange, final DoubleBiFunction<? extends T> mapper)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream into groups based on a predicate.
@@ -1238,17 +1294,22 @@ public abstract class DoubleStream
      *       .forEach(System.out::println);   // prints average of each group
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers each consecutive group in a list before emitting it.
+     *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
      *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
      * @return a stream of lists, each containing a sequence of consecutive elements that are collapsible with each other
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code collapsible} is {@code null}
      * @see Stream#collapse(BiPredicate)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<DoubleList> collapse(final DoubleBiPredicate collapsible);
+    public abstract Stream<DoubleList> collapse(final DoubleBiPredicate collapsible) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream by applying a merge function when elements are collapsible.
@@ -1279,16 +1340,22 @@ public abstract class DoubleStream
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last(not the first) element of the current group, and the second parameter is the next element to check.
      * @param mergeFunction a function to merge two collapsible elements into one
      * @return a stream of merged elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code collapsible}, {@code mergeFunction} is {@code null}
      * @see Stream#collapse(BiPredicate, BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream collapse(final DoubleBiPredicate collapsible, final DoubleBinaryOperator mergeFunction);
+    public abstract DoubleStream collapse(final DoubleBiPredicate collapsible, final DoubleBinaryOperator mergeFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream by applying a merge function when elements are collapsible.
@@ -1315,16 +1382,22 @@ public abstract class DoubleStream
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param collapsible a predicate that determines if the next element from this stream should be collapsed with the first and last elements of current group
      *          The collapsible predicate takes three elements: the first and last elements of current group, and the next element to check.
      * @param mergeFunction a function to merge two collapsible elements into one
      * @return a stream of merged elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code collapsible}, {@code mergeFunction} is {@code null}
      * @see Stream#collapse(com.landawn.abacus.util.function.TriPredicate, BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream collapse(final DoubleTriPredicate collapsible, final DoubleBinaryOperator mergeFunction);
+    public abstract DoubleStream collapse(final DoubleTriPredicate collapsible, final DoubleBinaryOperator mergeFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -1357,14 +1430,17 @@ public abstract class DoubleStream
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>The first successfully read source element initializes the result without invoking the accumulator.</p>
+     *
      * @param accumulator a {@code DoubleBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code DoubleStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream scan(final DoubleBinaryOperator accumulator);
+    public abstract DoubleStream scan(final DoubleBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -1401,11 +1477,12 @@ public abstract class DoubleStream
      * @param accumulator a {@code DoubleBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code DoubleStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(Object, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream scan(final double init, final DoubleBinaryOperator accumulator);
+    public abstract DoubleStream scan(final double init, final DoubleBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -1440,11 +1517,13 @@ public abstract class DoubleStream
      * @param accumulator a {@code DoubleBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code DoubleStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(Object, boolean, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream scan(final double init, final boolean initIncluded, final DoubleBinaryOperator accumulator);
+    public abstract DoubleStream scan(final double init, final boolean initIncluded, final DoubleBinaryOperator accumulator)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the specified elements followed by the elements of this stream.
@@ -1471,7 +1550,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream prepend(final double... a);
+    public abstract DoubleStream prepend(final double... a) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of the elements of this stream with the specified elements appended.
@@ -1498,7 +1577,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream append(final double... a);
+    public abstract DoubleStream append(final double... a) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of this stream's elements when it is non-empty, or the specified elements when it is empty.
@@ -1532,7 +1611,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream appendIfEmpty(final double... a);
+    public abstract DoubleStream appendIfEmpty(final double... a) throws IllegalStateException;
 
     /**
      * Returns a DoubleStream consisting of the top n elements of this stream, according to the natural order of the elements.
@@ -1565,7 +1644,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream top(int n);
+    public abstract DoubleStream top(int n) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a DoubleStream consisting of the top n elements of this stream compared by the provided Comparator.
@@ -1600,7 +1679,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream top(final int n, Comparator<? super Double> comparator);
+    public abstract DoubleStream top(final int n, Comparator<? super Double> comparator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a {@code DoubleList} containing all the elements of this stream.
@@ -1627,7 +1706,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @TerminalOp
-    public abstract DoubleList toDoubleList();
+    public abstract DoubleList toDoubleList() throws IllegalStateException;
 
     /**
      * Returns a {@code Map} where the keys and values are the results of applying the provided
@@ -1661,6 +1740,7 @@ public abstract class DoubleStream
      * @param valueMapper a non-interfering, stateless function to apply to each element to derive the value
      * @return a {@code Map} whose keys and values are the results of applying the mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper} is {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function)
@@ -1668,7 +1748,7 @@ public abstract class DoubleStream
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Throwables.DoubleFunction<? extends K, E> keyMapper,
-            Throwables.DoubleFunction<? extends V, E2> valueMapper) throws E, E2;
+            Throwables.DoubleFunction<? extends V, E2> valueMapper) throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a {@code Map} where the keys and values are the results of applying the provided
@@ -1684,14 +1764,20 @@ public abstract class DoubleStream
      * <pre>{@code
      * // Create LinkedHashMap to maintain insertion order
      * LinkedHashMap<Integer, String> orderedMap = DoubleStream.of(3.5, 1.2, 2.7)
-     *       .toMap(d -> (int) d, d -> "Value: " + d, LinkedHashMap::new);
+     *       .toMap(d -> (int) d, d -> "Value: " + d, () -> new LinkedHashMap<Integer, String>());
      * // Result: {3=Value: 3.5, 1=Value: 1.2, 2=Value: 2.7} (insertion order preserved)
      *
      * // Create TreeMap for sorted keys
      * TreeMap<String, Double> sortedMap = DoubleStream.of(85.5, 92.3, 78.9)
-     *       .toMap(d -> "Score-" + (int) d, d -> d, TreeMap::new);
+     *       .toMap(d -> "Score-" + (int) d, d -> d, () -> new TreeMap<String, Double>());
      * // Keys sorted alphabetically: Score-78, Score-85, Score-92
      * }</pre>
+     *
+     * <p><b>Note:</b> supply {@code mapFactory} as a lambda, not as a constructor reference. A
+     * constructor reference such as {@code LinkedHashMap::new} is <i>inexact</i>, so the compiler
+     * cannot choose between this overload and
+     * {@link #toMap(Throwables.DoubleFunction, Throwables.DoubleFunction, BinaryOperator)} and
+     * reports {@code reference to toMap is ambiguous}.
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
      *
@@ -1705,6 +1791,7 @@ public abstract class DoubleStream
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} whose keys and values are the results of applying the mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, Supplier)
@@ -1712,7 +1799,8 @@ public abstract class DoubleStream
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.DoubleFunction<? extends K, E> keyMapper,
-            Throwables.DoubleFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory) throws E, E2;
+            Throwables.DoubleFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a {@code Map} where the keys and values are the results of applying the provided
@@ -1752,6 +1840,7 @@ public abstract class DoubleStream
      * @param mergeFunction a merge function, used to resolve collisions between values associated with the same key
      * @return a {@code Map} whose keys and values are the results of applying the mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction} is {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator)
@@ -1759,7 +1848,8 @@ public abstract class DoubleStream
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Throwables.DoubleFunction<? extends K, E> keyMapper,
-            Throwables.DoubleFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction) throws E, E2;
+            Throwables.DoubleFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a {@code Map} where the keys and values are the results of applying the provided
@@ -1774,7 +1864,7 @@ public abstract class DoubleStream
      * <pre>{@code
      * // Create sorted map with duplicate handling
      * TreeMap<Integer, Double> sortedSums = DoubleStream.of(1.5, 1.7, 2.3, 2.8, 3.1)
-     *       .toMap(d -> (int) d, d -> d, Double::sum, TreeMap::new);
+     *       .toMap(d -> (int) d, d -> d, Double::sum, Suppliers.ofTreeMap());
      * // Result: TreeMap with sorted keys {1=3.2, 2=5.1, 3=3.1}
      *
      * // Create LinkedHashMap maintaining insertion order with max values
@@ -1782,13 +1872,13 @@ public abstract class DoubleStream
      *       .toMap(d -> "Range-" + ((int) d / 10) * 10,
      *              d -> d,
      *              Math::max,
-     *              LinkedHashMap::new);
+     *              () -> new LinkedHashMap<String, Double>());
      * // Result: {Range-80=85.7, Range-90=92.8, Range-70=78.9} (insertion order preserved)
      *
      * // Create concurrent map for parallel processing
      * ConcurrentHashMap<Integer, Double> concurrentSums = DoubleStream.of(1.5, 1.7, 2.3, 2.8)
      *       .parallel()
-     *       .toMap(d -> (int) d, d -> d, Double::sum, ConcurrentHashMap::new);
+     *       .toMap(d -> (int) d, d -> d, Double::sum, Suppliers.ofConcurrentHashMap());
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
@@ -1804,6 +1894,7 @@ public abstract class DoubleStream
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} whose keys and values are the results of applying the mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, {@code mapFactory} is {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -1811,7 +1902,8 @@ public abstract class DoubleStream
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.DoubleFunction<? extends K, E> keyMapper,
-            Throwables.DoubleFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory) throws E, E2;
+            Throwables.DoubleFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Groups the elements of this stream according to a classification function and collects the results
@@ -1838,7 +1930,8 @@ public abstract class DoubleStream
      * // Result: {A=93.7, B=87.1, C=78.9}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported};
+     * maintains a downstream accumulation result for each key; additional buffering depends on the collector.
      *
      * @param <K> the type of keys
      * @param <D> the result type of the downstream reduction
@@ -1847,13 +1940,14 @@ public abstract class DoubleStream
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @return a {@code Map} containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code downstream} is {@code null}
      * @throws E if the classification function throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, E extends Exception> Map<K, D> groupTo(Throwables.DoubleFunction<? extends K, E> keyMapper,
-            final Collector<? super Double, ?, D> downstream) throws E;
+            final Collector<? super Double, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Groups the elements of this stream according to a classification function and collects the results
@@ -1865,23 +1959,24 @@ public abstract class DoubleStream
      * <pre>{@code
      * // Group into sorted TreeMap with lists
      * TreeMap<Integer, List<Double>> sortedGroups = DoubleStream.of(1.5, 2.7, 1.9, 3.2, 2.1)
-     *       .groupTo(d -> (int) d, Collectors.toList(), TreeMap::new);
+     *       .groupTo(d -> (int) d, Collectors.toList(), Suppliers.ofTreeMap());
      * // Result: TreeMap with sorted keys {1=[1.5, 1.9], 2=[2.7, 2.1], 3=[3.2]}
      *
      * // Group into LinkedHashMap preserving insertion order with sums
      * LinkedHashMap<String, Double> orderedSums = DoubleStream.of(85.5, 92.3, 78.9, 88.7)
      *       .groupTo(d -> d >= 90 ? "Excellent" : (d >= 80 ? "Good" : "Fair"),
      *                Collectors.summingDouble(Double::doubleValue),
-     *                LinkedHashMap::new);
+     *                () -> new LinkedHashMap<String, Double>());
      * // Result: {Good=174.2, Excellent=92.3, Fair=78.9} (insertion order preserved)
      *
      * // Group with concurrent map for parallel processing
      * ConcurrentHashMap<Integer, Long> concurrentCounts = DoubleStream.of(1.5, 2.7, 1.9, 2.1)
      *       .parallel()
-     *       .groupTo(d -> (int) d, Collectors.counting(), ConcurrentHashMap::new);
+     *       .groupTo(d -> (int) d, Collectors.counting(), Suppliers.ofConcurrentHashMap());
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported};
+     * maintains a downstream accumulation result for each key; additional buffering depends on the collector.
      *
      * @param <K> the type of keys
      * @param <D> the result type of the downstream reduction
@@ -1892,13 +1987,14 @@ public abstract class DoubleStream
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}
      * @throws E if the classification function throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, M extends Map<K, D>, E extends Exception> M groupTo(Throwables.DoubleFunction<? extends K, E> keyMapper,
-            final Collector<? super Double, ?, D> downstream, final Supplier<? extends M> mapFactory) throws E;
+            final Collector<? super Double, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Performs a reduction on the elements of this stream, using the provided identity value and
@@ -1937,11 +2033,12 @@ public abstract class DoubleStream
      * @param accumulator the function for combining the current accumulated value and the current stream element
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#reduce(Object, BinaryOperator)
      */
     @ParallelSupported
     @TerminalOp
-    public abstract double reduce(double identity, DoubleBinaryOperator accumulator);
+    public abstract double reduce(double identity, DoubleBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a reduction on the elements of this stream, using the provided accumulator function, and returns the reduced value.
@@ -1971,11 +2068,12 @@ public abstract class DoubleStream
      * @param accumulator the function for combining the current reduced value and the current stream element
      * @return an OptionalDouble describing the result of the reduction. If the stream is empty, an empty {@code OptionalDouble} is returned.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#reduce(BinaryOperator)
      */
     @ParallelSupported
     @TerminalOp
-    public abstract OptionalDouble reduce(DoubleBinaryOperator accumulator);
+    public abstract OptionalDouble reduce(DoubleBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream using the provided supplier, accumulator, and combiner.
@@ -2016,13 +2114,15 @@ public abstract class DoubleStream
      *                It is unnecessary to specify {@code combiner} if {@code R} is a {@code Map/Collection/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code combiner} is {@code null}
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see BiConsumers#ofAddAll()
      * @see BiConsumers#ofPutAll()
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <R> R collect(Supplier<R> supplier, ObjDoubleConsumer<? super R> accumulator, BiConsumer<R, R> combiner);
+    public abstract <R> R collect(Supplier<R> supplier, ObjDoubleConsumer<? super R> accumulator, BiConsumer<R, R> combiner)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream using the provided supplier and accumulator.
@@ -2061,6 +2161,7 @@ public abstract class DoubleStream
      * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a result.
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator} is {@code null}
      * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of: {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
      *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
      * @see #collect(Supplier, ObjDoubleConsumer, BiConsumer)
@@ -2069,7 +2170,8 @@ public abstract class DoubleStream
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <R> R collect(Supplier<R> supplier, ObjDoubleConsumer<? super R> accumulator);
+    public abstract <R> R collect(Supplier<R> supplier, ObjDoubleConsumer<? super R> accumulator)
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Performs an action for each element of this stream.
@@ -2097,7 +2199,7 @@ public abstract class DoubleStream
      */
     @ParallelSupported
     @TerminalOp
-    public void foreach(final DoubleConsumer action) throws IllegalArgumentException { // NOSONAR
+    public void foreach(final DoubleConsumer action) throws IllegalStateException, IllegalArgumentException { // NOSONAR
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -2126,11 +2228,12 @@ public abstract class DoubleStream
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws E;
+    public abstract <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Performs an action for each element of this stream, providing access to both the element and its index.
@@ -2156,12 +2259,16 @@ public abstract class DoubleStream
      *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements, accepting the index and the element
+     *        &#9888;&#65039; On a parallel stream that index is an invocation counter shared by the
+     *        workers, not the element's position; only sequential execution pairs an element with its
+     *        true index. It is an {@code int} and wraps past {@code Integer.MAX_VALUE}.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEachIndexed(Throwables.IntDoubleConsumer<E> action) throws E;
+    public abstract <E extends Exception> void forEachIndexed(Throwables.IntDoubleConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether any elements of this stream match the provided predicate.
@@ -2195,11 +2302,13 @@ public abstract class DoubleStream
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if any elements of the stream match the provided predicate, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean anyMatch(final Throwables.DoublePredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean anyMatch(final Throwables.DoublePredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether all elements of this stream match the provided predicate.
@@ -2237,11 +2346,13 @@ public abstract class DoubleStream
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either all elements of the stream match the provided predicate or the stream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean allMatch(final Throwables.DoublePredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean allMatch(final Throwables.DoublePredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether no elements of this stream match the provided predicate.
@@ -2279,19 +2390,23 @@ public abstract class DoubleStream
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either no elements of the stream match the provided predicate or the stream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean noneMatch(final Throwables.DoublePredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean noneMatch(final Throwables.DoublePredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns the first element of this stream wrapped in an {@code OptionalDouble}, or an empty
      * {@code OptionalDouble} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is a deterministic alias of {@link #first()}: it always returns the first element
-     * in encounter order, even for parallel streams. The {@code findFirst} name is kept to align with
+     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it
+     * deterministically returns the first element in encounter order. In a <b>parallel</b> stream the
+     * first element to reach the terminal operation wins, so the result is <b>not</b> guaranteed to be
+     * first in encounter order and may differ between runs. The {@code findFirst} name is kept to align with
      * the standard {@link java.util.stream.DoubleStream#findFirst()} API.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2312,7 +2427,7 @@ public abstract class DoubleStream
      */
     @ParallelSupported
     @TerminalOp
-    public OptionalDouble findFirst() {
+    public OptionalDouble findFirst() throws IllegalStateException {
         assertNotClosed();
 
         return first();
@@ -2323,10 +2438,10 @@ public abstract class DoubleStream
      * {@code OptionalDouble} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>Despite the name, this method is deterministic: unlike {@link java.util.stream.DoubleStream#findAny()},
-     * which may return an arbitrary element (especially for parallel streams), this method is an alias of
-     * {@link #first()} and always returns the first element in encounter order, even for parallel
-     * streams. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
+     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it returns the first element in encounter order.
+     * In a <b>parallel</b> stream, exactly as for {@code findFirst}, the first element to reach the
+     * terminal operation wins, so the result is <b>not</b> guaranteed to be first in encounter
+     * order and may differ between runs. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2346,7 +2461,7 @@ public abstract class DoubleStream
      */
     @ParallelSupported
     @TerminalOp
-    public OptionalDouble findAny() {
+    public OptionalDouble findAny() throws IllegalStateException {
         assertNotClosed();
 
         return first();
@@ -2373,6 +2488,7 @@ public abstract class DoubleStream
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalDouble} containing the first element that matches the predicate, or an empty {@code OptionalDouble} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findAny(Throwables.DoublePredicate)
      * @see #findLast(Throwables.DoublePredicate)
@@ -2380,7 +2496,8 @@ public abstract class DoubleStream
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalDouble findFirst(final Throwables.DoublePredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalDouble findFirst(final Throwables.DoublePredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns any element of this stream that matches the given {@code predicate}, wrapped in an
@@ -2391,7 +2508,7 @@ public abstract class DoubleStream
      * parallel streams there is no ordering guarantee: the matching element found first by any worker thread
      * is returned, so the result may differ between runs — which is what can make it faster than
      * {@link #findFirst(Throwables.DoublePredicate)} in parallel. (Note the contrast with the no-arg
-     * {@link #findAny()}, which is a deterministic alias of {@link #first()}.)</p>
+     * {@link #findAny()}, which is an alias of {@link #first()}.)</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2406,6 +2523,7 @@ public abstract class DoubleStream
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalDouble} containing a matching element, or an empty {@code OptionalDouble} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.DoublePredicate)
      * @see #findLast(Throwables.DoublePredicate)
@@ -2413,17 +2531,18 @@ public abstract class DoubleStream
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalDouble findAny(final Throwables.DoublePredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalDouble findAny(final Throwables.DoublePredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns the last element of this stream that matches the given {@code predicate}, wrapped in an
      * {@code OptionalDouble}, or an empty {@code OptionalDouble} if no element matches. This is a terminal
      * operation, and the stream is then closed.
      *
-     * <p>Unlike {@link #findFirst(Throwables.DoublePredicate)}, this operation cannot short-circuit: every
-     * element must be tested, because a later element is always a better candidate. The result is
-     * deterministic even for parallel streams: when several elements match, the one at the largest
-     * encounter-order index wins.</p>
+     * <p>Finding the last match generally requires traversing the source. Array-backed streams may
+     * instead search backwards and stop at the first matching element. When several elements match,
+     * the one at the largest encounter-order index in the current pipeline wins. Parallel
+     * intermediate operations may already have reordered the original source.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2437,6 +2556,7 @@ public abstract class DoubleStream
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalDouble} containing the last element that matches the predicate, or an empty {@code OptionalDouble} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.DoublePredicate)
      * @see #findAny(Throwables.DoublePredicate)
@@ -2445,7 +2565,8 @@ public abstract class DoubleStream
     @Beta
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalDouble findLast(final Throwables.DoublePredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalDouble findLast(final Throwables.DoublePredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns an {@code OptionalDouble} describing the minimum element of this stream,
@@ -2480,7 +2601,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalDouble min();
+    public abstract OptionalDouble min() throws IllegalStateException;
 
     /**
      * Returns an {@code OptionalDouble} describing the maximum element of this stream,
@@ -2515,7 +2636,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalDouble max();
+    public abstract OptionalDouble max() throws IllegalStateException;
 
     /**
      * Returns the <i>k-th</i> largest element in the stream, using natural ordering consistent
@@ -2550,7 +2671,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalDouble kthLargest(int k);
+    public abstract OptionalDouble kthLargest(int k) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns the sum of elements in this stream.
@@ -2584,7 +2705,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @TerminalOp
-    public abstract double sum();
+    public abstract double sum() throws IllegalStateException;
 
     /**
      * Returns an OptionalDouble describing the arithmetic mean of elements of this stream,
@@ -2618,7 +2739,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalDouble average();
+    public abstract OptionalDouble average() throws IllegalStateException;
 
     /**
      * Returns a {@code DoubleSummaryStatistics} describing various summary data about the elements of this stream.
@@ -2651,7 +2772,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @TerminalOp
-    public abstract DoubleSummaryStatistics summaryStatistics();
+    public abstract DoubleSummaryStatistics summaryStatistics() throws IllegalStateException;
 
     /**
      * Returns a pair consisting of DoubleSummaryStatistics for the elements of this stream,
@@ -2687,7 +2808,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @TerminalOp
-    public abstract Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> summaryStatisticsAndPercentiles();
+    public abstract Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> summaryStatisticsAndPercentiles() throws IllegalStateException;
 
     /**
      * Merges this stream with another stream according to the provided {@code nextSelector} function.
@@ -2717,10 +2838,12 @@ public abstract class DoubleStream
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return the new merged stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract DoubleStream mergeWith(final DoubleStream b, final DoubleBiFunction<MergeResult> nextSelector);
+    public abstract DoubleStream mergeWith(final DoubleStream b, final DoubleBiFunction<MergeResult> nextSelector)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with the given stream using the provided zip function.
@@ -2744,11 +2867,12 @@ public abstract class DoubleStream
      * @param zipFunction a DoubleBinaryOperator that determines the combination of elements in the combined DoubleStream.
      * @return a new DoubleStream that is the result of combining the current DoubleStream with the given DoubleStream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      * @see #zipWith(DoubleStream, double, double, DoubleBinaryOperator)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream zipWith(DoubleStream b, DoubleBinaryOperator zipFunction);
+    public abstract DoubleStream zipWith(DoubleStream b, DoubleBinaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with two other streams using the provided zip function.
@@ -2772,12 +2896,14 @@ public abstract class DoubleStream
      * @param zipFunction a DoubleTernaryOperator that determines the combination of elements in the combined DoubleStream.
      * @return a new DoubleStream that is the result of combining the current DoubleStream with the given DoubleStreams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      * @see #zipWith(DoubleStream, DoubleStream, double, double, double, DoubleTernaryOperator)
      * @see #zipWith(DoubleStream, DoubleBinaryOperator)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream zipWith(DoubleStream b, DoubleStream c, DoubleTernaryOperator zipFunction);
+    public abstract DoubleStream zipWith(DoubleStream b, DoubleStream c, DoubleTernaryOperator zipFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with the given stream using the provided zip function, with default values for missing elements.
@@ -2801,10 +2927,12 @@ public abstract class DoubleStream
      * @param zipFunction a DoubleBinaryOperator that determines the combination of elements in the combined DoubleStream.
      * @return a new DoubleStream that is the result of combining the current DoubleStream with the given DoubleStream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract DoubleStream zipWith(DoubleStream b, double valueForNoneA, double valueForNoneB, DoubleBinaryOperator zipFunction);
+    public abstract DoubleStream zipWith(DoubleStream b, double valueForNoneA, double valueForNoneB, DoubleBinaryOperator zipFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with two other streams using the provided zip function, with default values for missing elements.
@@ -2832,11 +2960,12 @@ public abstract class DoubleStream
      * @param zipFunction a DoubleTernaryOperator that determines the combination of elements in the combined DoubleStream.
      * @return a new DoubleStream that is the result of combining the current DoubleStream with the given DoubleStreams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
     public abstract DoubleStream zipWith(DoubleStream b, DoubleStream c, double valueForNoneA, double valueForNoneB, double valueForNoneC,
-            DoubleTernaryOperator zipFunction);
+            DoubleTernaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a Stream consisting of the elements of this stream, each boxed to a Double.
@@ -2867,7 +2996,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<Double> boxed();
+    public abstract Stream<Double> boxed() throws IllegalStateException;
 
     /**
      * Converts this stream to a JDK {@code DoubleStream}.
@@ -2902,7 +3031,7 @@ public abstract class DoubleStream
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract java.util.stream.DoubleStream toJdkStream();
+    public abstract java.util.stream.DoubleStream toJdkStream() throws IllegalStateException;
 
     /**
      * Transforms this stream using the provided transfer function that operates on the JDK stream representation.
@@ -2937,7 +3066,7 @@ public abstract class DoubleStream
     @SequentialOnly
     @IntermediateOp
     public DoubleStream transformViaJdkStream(final Function<? super java.util.stream.DoubleStream, ? extends java.util.stream.DoubleStream> transfer)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(transfer, cs.transfer);
@@ -3001,20 +3130,23 @@ public abstract class DoubleStream
     @SequentialOnly
     @IntermediateOp
     public DoubleStream transformViaJdkStream(final Function<? super java.util.stream.DoubleStream, ? extends java.util.stream.DoubleStream> transfer,
-            final boolean deferred) throws IllegalArgumentException, IllegalStateException {
+            final boolean deferred) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(transfer, cs.transfer);
 
         if (deferred) {
             final Supplier<DoubleStream> delayInitializer = () -> DoubleStream.from(transfer.apply(toJdkStream()));
-            return DoubleStream.defer(delayInitializer);
+            return DoubleStream.defer(delayInitializer).onClose(this::close);
         } else {
-            return DoubleStream.from(transfer.apply(toJdkStream()));
+            return DoubleStream.from(transfer.apply(toJdkStream())).onClose(this::close);
         }
     }
 
-    abstract DoubleIteratorEx iteratorEx();
+    /**
+     * @throws IllegalStateException if the stream is already closed.
+     */
+    abstract DoubleIteratorEx iteratorEx() throws IllegalStateException;
 
     // private static final DoubleStream EMPTY_STREAM = new ArrayDoubleStream(N.EMPTY_DOUBLE_ARRAY, true, null);
 
@@ -3211,7 +3343,7 @@ public abstract class DoubleStream
      * // Create stream from array
      * double[] values = {10.5, 20.3, 30.1};
      * DoubleStream.of(values)
-     *     .sum();   // returns 60.9
+     *     .sum();   // returns 60.900000000000006 (binary floating-point, not exactly 60.9)
      *
      * // Empty array returns empty stream
      * DoubleStream.of()
@@ -3252,7 +3384,7 @@ public abstract class DoubleStream
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *         the array length, or {@code fromIndex} is greater than {@code toIndex}
      */
-    public static DoubleStream of(final double[] a, final int fromIndex, final int toIndex) {
+    public static DoubleStream of(final double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return isEmptyRange(N.len(a), fromIndex, toIndex) ? empty() : new ArrayDoubleStream(a, fromIndex, toIndex);
     }
 
@@ -3309,7 +3441,7 @@ public abstract class DoubleStream
      * @return a DoubleStream containing the unboxed elements from the specified range
      * @throws IndexOutOfBoundsException if the indices are out of range
      */
-    public static DoubleStream of(final Double[] a, final int fromIndex, final int toIndex) {
+    public static DoubleStream of(final Double[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return Stream.of(a, fromIndex, toIndex).mapToDouble(FD.unbox());
     }
 
@@ -3809,6 +3941,11 @@ public abstract class DoubleStream
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0) {
                     return;
@@ -3824,8 +3961,11 @@ public abstract class DoubleStream
                 return ret;
             }
 
+            /**
+             * @throws IllegalStateException if the number of remaining elements exceeds {@link Integer#MAX_VALUE}.
+             */
             @Override
-            public double[] toArray() {
+            public double[] toArray() throws IllegalStateException {
                 if (cnt > Integer.MAX_VALUE) {
                     throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + cnt);
                 }
@@ -4062,15 +4202,28 @@ public abstract class DoubleStream
             private boolean isFirst = true;
             private boolean hasMore = true;
             private boolean hasNextVal = false;
+            private double pending;
+            private boolean hasPending = false;
 
             @Override
             public boolean hasNext() {
                 if (!hasNextVal && hasMore) {
                     if (isFirst) {
-                        isFirst = false;
-                        hasNextVal = hasNext.test(cur = init);
+                        hasNextVal = hasNext.test(init);
+                        if (hasNextVal) {
+                            isFirst = false;
+                            cur = init;
+                        }
                     } else {
-                        hasNextVal = hasNext.test(cur = f.applyAsDouble(cur));
+                        if (!hasPending) {
+                            pending = f.applyAsDouble(cur);
+                            hasPending = true;
+                        }
+                        hasNextVal = hasNext.test(pending);
+                        hasPending = false;
+                        if (hasNextVal) {
+                            cur = pending;
+                        }
                     }
 
                     if (!hasNextVal) {
@@ -4233,6 +4386,7 @@ public abstract class DoubleStream
      * @return a DoubleStream containing all elements from the input arrays in order
      * @see Stream#concat(Object[][])
      */
+    @SafeVarargs
     public static DoubleStream concat(final double[]... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -4264,6 +4418,7 @@ public abstract class DoubleStream
      * @return a DoubleStream containing all elements from the input iterators in order
      * @see Stream#concat(Iterator[])
      */
+    @SafeVarargs
     public static DoubleStream concat(final DoubleIterator... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -4303,6 +4458,7 @@ public abstract class DoubleStream
      * @return a DoubleStream containing all elements from the input streams in order
      * @see Stream#concat(Stream[])
      */
+    @SafeVarargs
     public static DoubleStream concat(final DoubleStream... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -4707,7 +4863,7 @@ public abstract class DoubleStream
     public static DoubleStream zip(final DoubleStream a, final DoubleStream b, final DoubleBinaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), zipFunction).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> zip(ia, ib, zipFunction).onClose(newCloseHandler(a, b)));
     }
 
     /**
@@ -4738,7 +4894,8 @@ public abstract class DoubleStream
             throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), iterate(c), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
+        return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
+                (ia, ib, ic) -> zip(ia, ib, ic, zipFunction).onClose(newCloseHandler(Array.asList(a, b, c))));
     }
 
     /**
@@ -4764,7 +4921,7 @@ public abstract class DoubleStream
      * {@link DoubleTernaryOperator} and avoid boxing).
      *
      * @param streams the collection of double streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
-     * @param zipFunction the function to combine values from all the streams.
+     * @param zipFunction the function to combine values from all the streams; a {@code null} result is unboxed as {@code 0.0}
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Collection, Function)
@@ -5028,7 +5185,8 @@ public abstract class DoubleStream
             final DoubleBinaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b),
+                (ia, ib) -> zip(ia, ib, valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b)));
     }
 
     /**
@@ -5064,8 +5222,8 @@ public abstract class DoubleStream
             final double valueForNoneC, final DoubleTernaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(Array.asList(a, b, c)));
+        return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
+                (ia, ib, ic) -> zip(ia, ib, ic, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction).onClose(newCloseHandler(Array.asList(a, b, c))));
     }
 
     /**
@@ -5095,7 +5253,7 @@ public abstract class DoubleStream
      *
      * @param streams the collection of double streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone the array of default values to use when streams run out of values
-     * @param zipFunction the function to combine values from all the streams.
+     * @param zipFunction the function to combine values from all the streams; a {@code null} result is unboxed as {@code 0.0}
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Collection, List, Function)
@@ -5117,7 +5275,7 @@ public abstract class DoubleStream
      * // Merge two sorted arrays maintaining order
      * double[] a = {1.0, 3.0, 5.0};
      * double[] b = {2.0, 4.0, 6.0};
-     * DoubleStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * DoubleStream.merge(a, b, (x, y) -> Double.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
      *
      * // Alternate between arrays
@@ -5192,7 +5350,7 @@ public abstract class DoubleStream
      * double[] a = {1.0, 4.0, 7.0};
      * double[] b = {2.0, 5.0, 8.0};
      * double[] c = {3.0, 6.0, 9.0};
-     * DoubleStream.merge(a, b, c, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * DoubleStream.merge(a, b, c, (x, y) -> Double.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
      *
      * // Merge with custom selection logic
@@ -5230,7 +5388,7 @@ public abstract class DoubleStream
      * // Merge two iterators maintaining sorted order
      * DoubleIterator iter1 = DoubleIterator.of(1.0, 3.0, 5.0);
      * DoubleIterator iter2 = DoubleIterator.of(2.0, 4.0, 6.0);
-     * DoubleStream.merge(iter1, iter2, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * DoubleStream.merge(iter1, iter2, (x, y) -> Double.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
      *
      * // Merge from different sources
@@ -5270,46 +5428,29 @@ public abstract class DoubleStream
 
             @Override
             public double nextDouble() {
-                if (hasNextA) {
-                    if (iterB.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = iterB.nextDouble())) == MergeResult.TAKE_FIRST) {
-                            hasNextA = false;
-                            hasNextB = true;
-                            return nextA;
-                        } else {
-                            return nextB;
-                        }
-                    } else {
+                if (!hasNextA && iterA.hasNext()) {
+                    nextA = iterA.nextDouble();
+                    hasNextA = true;
+                }
+                if (!hasNextB && iterB.hasNext()) {
+                    nextB = iterB.nextDouble();
+                    hasNextB = true;
+                }
+
+                if (hasNextA && hasNextB) {
+                    if (nextSelector.apply(nextA, nextB) == MergeResult.TAKE_FIRST) {
                         hasNextA = false;
                         return nextA;
-                    }
-                } else if (hasNextB) {
-                    if (iterA.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.nextDouble()), nextB) == MergeResult.TAKE_FIRST) {
-                            return nextA;
-                        } else {
-                            hasNextA = true;
-                            hasNextB = false;
-                            return nextB;
-                        }
                     } else {
                         hasNextB = false;
                         return nextB;
                     }
-                } else if (iterA.hasNext()) {
-                    if (iterB.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.nextDouble()), (nextB = iterB.nextDouble())) == MergeResult.TAKE_FIRST) {
-                            hasNextB = true;
-                            return nextA;
-                        } else {
-                            hasNextA = true;
-                            return nextB;
-                        }
-                    } else {
-                        return iterA.nextDouble();
-                    }
-                } else if (iterB.hasNext()) {
-                    return iterB.nextDouble();
+                } else if (hasNextA) {
+                    hasNextA = false;
+                    return nextA;
+                } else if (hasNextB) {
+                    hasNextB = false;
+                    return nextB;
                 } else {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5327,7 +5468,7 @@ public abstract class DoubleStream
      * DoubleIterator iter1 = DoubleIterator.of(1.0, 4.0, 7.0);
      * DoubleIterator iter2 = DoubleIterator.of(2.0, 5.0, 8.0);
      * DoubleIterator iter3 = DoubleIterator.of(3.0, 6.0, 9.0);
-     * DoubleStream.merge(iter1, iter2, iter3, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * DoubleStream.merge(iter1, iter2, iter3, (x, y) -> Double.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
      * }</pre>
      *
@@ -5358,7 +5499,7 @@ public abstract class DoubleStream
      * // Merge two sorted streams
      * DoubleStream s1 = DoubleStream.of(1.0, 3.0, 5.0);
      * DoubleStream s2 = DoubleStream.of(2.0, 4.0, 6.0);
-     * DoubleStream.merge(s1, s2, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * DoubleStream.merge(s1, s2, (x, y) -> Double.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
      *
      * // Merge with complex selection logic
@@ -5380,7 +5521,7 @@ public abstract class DoubleStream
             throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
-        return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> merge(ia, ib, nextSelector).onClose(newCloseHandler(a, b)));
     }
 
     /**
@@ -5394,7 +5535,7 @@ public abstract class DoubleStream
      * DoubleStream s1 = DoubleStream.of(1.0, 4.0, 7.0);
      * DoubleStream s2 = DoubleStream.of(2.0, 5.0, 8.0);
      * DoubleStream s3 = DoubleStream.of(3.0, 6.0, 9.0);
-     * DoubleStream.merge(s1, s2, s3, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * DoubleStream.merge(s1, s2, s3, (x, y) -> Double.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
      * }</pre>
      *
@@ -5427,7 +5568,7 @@ public abstract class DoubleStream
      *     DoubleStream.of(2.0, 5.0, 8.0),
      *     DoubleStream.of(3.0, 6.0, 9.0)
      * );
-     * DoubleStream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * DoubleStream.merge(streams, (x, y) -> Double.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
      *
      * // Merge dynamically created streams

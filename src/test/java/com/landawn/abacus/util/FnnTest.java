@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
@@ -76,16 +77,24 @@ public class FnnTest extends TestBase {
     }
 
     @Test
+    public void testMemoizeWithExpirationRejectsNonPositiveDuration() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> Fnn.memoizeWithExpiration(() -> "x", Duration.ZERO));
+        assertThrows(IllegalArgumentException.class, () -> Fnn.memoizeWithExpiration(() -> "x", Duration.ofMillis(-1)));
+        final Throwables.Supplier<String, Exception> huge = Fnn.memoizeWithExpiration(() -> "x", Duration.ofMillis(Long.MAX_VALUE));
+        assertEquals("x", huge.get());
+    }
+
+    @Test
     public void testMemoizeWithExpiration_Duration() throws Exception {
         int[] callCount = { 0 };
         Throwables.Supplier<String, Exception> supplier = Fnn.memoizeWithExpiration(() -> {
             callCount[0]++;
             return "value";
-        }, java.time.Duration.ofHours(1));
+        }, Duration.ofHours(1));
         assertEquals("value", supplier.get());
         assertEquals("value", supplier.get()); // should be cached
         assertEquals(1, callCount[0]); // only called once
-        assertThrows(IllegalArgumentException.class, () -> Fnn.memoizeWithExpiration(() -> "x", (java.time.Duration) null));
+        assertThrows(IllegalArgumentException.class, () -> Fnn.memoizeWithExpiration(() -> "x", (Duration) null));
     }
 
     @Test
@@ -285,6 +294,16 @@ public class FnnTest extends TestBase {
         assertEquals("key", inverted.getValue());
     }
 
+    // invert() hands back the same ImmutableEntry type entry() does, so setValue is unsupported here too.
+    @Test
+    public void testInvert_returnsAnImmutableEntry() throws Exception {
+        final Map.Entry<Integer, String> inverted = Fnn.<String, Integer, Exception> invert()
+                .apply(new AbstractMap.SimpleEntry<>("key", 42));
+        assertEquals(ImmutableEntry.class, inverted.getClass());
+        assertThrows(UnsupportedOperationException.class, () -> inverted.setValue("other"));
+        assertEquals("key", inverted.getValue());
+    }
+
     // --- entry() ---
 
     @Test
@@ -303,6 +322,16 @@ public class FnnTest extends TestBase {
         Map.Entry<String, Integer> e = entryFn.apply("hello", 5);
         assertEquals("hello", e.getKey());
         assertEquals(5, (int) e.getValue());
+    }
+
+    // The factory hands back an ImmutableEntry, not a mutable AbstractMap.SimpleEntry: setValue is
+    // unsupported, which is what the javadoc's @see points at.
+    @Test
+    public void testEntry_returnsAnImmutableEntry() throws Exception {
+        final Map.Entry<String, Integer> entry = Fnn.<String, Integer, Exception> entry().apply("key", 42);
+        assertEquals(ImmutableEntry.class, entry.getClass());
+        assertThrows(UnsupportedOperationException.class, () -> entry.setValue(7));
+        assertEquals(Integer.valueOf(42), entry.getValue());
     }
 
     // --- pair() ---
@@ -514,6 +543,26 @@ public class FnnTest extends TestBase {
         assertTrue(closed[0]);
     }
 
+    // The five factories that fix the exception type outright instead of bounding <E>. Assigning each to an
+    // explicitly typed local is the pin: the class javadoc documents exactly these declared types.
+    @Test
+    public void testFactoriesThatHardWireTheExceptionType() {
+        final Throwables.Consumer<AutoCloseable, Exception> closer = Fnn.close();
+        final Throwables.Callable<String, Exception> callable = Fnn.jc2c(() -> "x");
+        final Throwables.Consumer<String, Exception> checked = Fnn.throwException("checked");
+        final Throwables.Consumer<String, IOException> io = Fnn.throwIOException("io");
+        final Throwables.Consumer<String, RuntimeException> unchecked = Fnn.throwRuntimeException("unchecked");
+
+        assertDoesNotThrow(() -> closer.accept(null));
+        assertEquals("x", assertDoesNotThrow(callable::call));
+
+        final Exception checkedEx = assertThrows(Exception.class, () -> checked.accept("a"));
+        assertEquals(Exception.class, checkedEx.getClass());
+        assertEquals("checked", checkedEx.getMessage());
+        assertEquals("io", assertThrows(IOException.class, () -> io.accept("a")).getMessage());
+        assertEquals("unchecked", assertThrows(RuntimeException.class, () -> unchecked.accept("a")).getMessage());
+    }
+
     // --- closeQuietly() ---
 
     @Test
@@ -568,6 +617,14 @@ public class FnnTest extends TestBase {
         assertFalse(pred.test(""));
     }
 
+    // isNull()/notNull() are @Beta only in this Throwables spelling; they delegate to the very same shared
+    // constants as the unmarked Fn twins, so the marker covers the declaration and not the behaviour.
+    @Test
+    public void testIsNullAndNotNull_shareFnsInstances() {
+        assertSame(Fn.isNull(), Fnn.<Object, Exception> isNull());
+        assertSame(Fn.notNull(), Fnn.<Object, Exception> notNull());
+    }
+
     // --- isEmpty() ---
 
     @Test
@@ -613,7 +670,7 @@ public class FnnTest extends TestBase {
         assertNotNull(pred);
         assertTrue(pred.test(null));
         assertTrue(pred.test(new ArrayList<>()));
-        assertFalse(pred.test(N.asList("a")));
+        assertFalse(pred.test(CommonUtil.asList("a")));
     }
 
     // --- isEmptyMap() ---
@@ -625,7 +682,7 @@ public class FnnTest extends TestBase {
         assertNotNull(pred);
         assertTrue(pred.test(null));
         assertTrue(pred.test(new HashMap<>()));
-        assertFalse(pred.test(N.asMap("k", "v")));
+        assertFalse(pred.test(CommonUtil.asMap("k", "v")));
     }
 
     // --- notNull() ---
@@ -685,7 +742,7 @@ public class FnnTest extends TestBase {
         assertNotNull(pred);
         assertFalse(pred.test(null));
         assertFalse(pred.test(new ArrayList<>()));
-        assertTrue(pred.test(N.asList("a")));
+        assertTrue(pred.test(CommonUtil.asList("a")));
     }
 
     // --- notEmptyMap() ---
@@ -697,7 +754,7 @@ public class FnnTest extends TestBase {
         assertNotNull(pred);
         assertFalse(pred.test(null));
         assertFalse(pred.test(new HashMap<>()));
-        assertTrue(pred.test(N.asMap("k", "v")));
+        assertTrue(pred.test(CommonUtil.asMap("k", "v")));
     }
 
     @Test
@@ -1118,6 +1175,65 @@ public class FnnTest extends TestBase {
     }
 
     @Test
+    public void testMemoizeFunction_swallowedRecursionDoesNotPoisonOtherKeys() throws Exception {
+        final AtomicInteger attempts = new AtomicInteger();
+        @SuppressWarnings("unchecked")
+        final Throwables.Function<String, String, Exception>[] holder = new Throwables.Function[1];
+
+        holder[0] = Fnn.memoize(key -> {
+            attempts.incrementAndGet();
+            if (!"outer".equals(key)) {
+                return "other-value";
+            }
+            try {
+                holder[0].apply("outer"); // same-key recursion: poisons "outer" only
+            } catch (final IllegalStateException ignored) {
+                // deliberately swallowed
+            }
+            // an unrelated key computed inside the poisoned call must still succeed and be cached
+            return "inner=" + holder[0].apply("other");
+        });
+
+        assertThrows(IllegalStateException.class, () -> holder[0].apply("outer"));
+        assertEquals(2, attempts.get());
+        assertEquals("other-value", holder[0].apply("other"));
+        assertEquals(2, attempts.get());
+    }
+
+    @Test
+    public void testMemoizeFunction_twoKeyCycleFailsOnlyTheReEnteredKey() throws Exception {
+        final List<String> log = new ArrayList<>();
+        @SuppressWarnings("unchecked")
+        final Throwables.Function<String, String, Exception>[] holder = new Throwables.Function[1];
+
+        holder[0] = Fnn.memoize(key -> {
+            log.add("compute " + key);
+            if ("A".equals(key)) {
+                return "A:" + holder[0].apply("B");
+            }
+            if ("B".equals(key)) {
+                try {
+                    holder[0].apply("A"); // cycle back into A, which is already in progress
+                } catch (final IllegalStateException ignored) {
+                    // deliberately swallowed, so only the poisoning of "A" can stop a value being published for it
+                }
+                return "B!";
+            }
+            return key;
+        });
+
+        // A is the re-entered key, so A fails - but B is computed and cached, which is what lets A succeed on retry.
+        assertThrows(IllegalStateException.class, () -> holder[0].apply("A"));
+        assertEquals(List.of("compute A", "compute B"), log);
+
+        assertEquals("B!", holder[0].apply("B"));
+        assertEquals(List.of("compute A", "compute B"), log); // B came from the cache
+
+        assertEquals("A:B!", holder[0].apply("A"));
+        assertEquals(List.of("compute A", "compute B", "compute A"), log);
+    }
+
+    @Test
     public void testMemoizeFunction_nullAndNonNullCrossCallsDoNotDeadlock() throws Exception {
         final CountDownLatch nullCallbackEntered = new CountDownLatch(1);
         final CountDownLatch nonNullWorkerStarted = new CountDownLatch(1);
@@ -1205,4 +1321,186 @@ public class FnnTest extends TestBase {
         assertSame(o, id.apply(o));
         assertNull(id.apply(null));
     }
+
+    //
+    // ============================ review fixes 2026-09-06 ============================
+    //
+
+    @Test
+    public void reviewFixes20260906_constantFactoriesStayExceptionBoundedWhileAdaptersAreThrowableBounded() throws Throwable {
+        // Fnn splits its exception bound on purpose: the constant factories are <E extends Exception>, the
+        // lambda adapters are <E extends Throwable>. Both halves are pinned here because this is a
+        // compile-time contract - flip either bound and this class stops compiling.
+        final Throwables.Function<Object, Object, Exception> id = Fnn.identity();
+        assertEquals("a", id.apply("a"));
+
+        final Throwables.Predicate<String, Exception> always = Fnn.alwaysTrue();
+        assertTrue(always.test("x"));
+
+        final Throwables.Consumer<String, Exception> nothing = Fnn.doNothing();
+        assertDoesNotThrow(() -> nothing.accept("x"));
+
+        final Throwables.BinaryOperator<String, Exception> merger = Fnn.replacingMerger();
+        assertEquals("b", merger.apply("a", "b"));
+
+        // The constant factories fit an Exception-bounded pipeline...
+        assertEquals(CommonUtil.asList("a", "b"),
+                Throwables.Iterator.<String, Exception> of(CommonUtil.asList("a", "b")).map(Fnn.<String, Exception> identity()).toList());
+
+        // ...and the Throwable-bounded adapters fit a Throwable-bounded one, which is how a caller reaches
+        // a Throwable pipeline with an Fnn factory at all.
+        final Throwables.Iterator<String, Throwable> wide = Throwables.Iterator.of(CommonUtil.asList("a", "b"));
+        assertEquals(CommonUtil.asList("a", "b"), wide.<String> map(Fnn.f(v -> v)).toList());
+        assertEquals(CommonUtil.asList("a"), Throwables.Iterator.<String, Throwable> of(CommonUtil.asList("a")).filter(Fnn.p(v -> true)).toList());
+
+        // Control: a receiver-position call has no target type, so E comes from the bound alone. That it
+        // resolves to Exception is exactly what keeps a `throws Exception` caller compiling - see the
+        // helper below, which is the shape that breaks if the bound is widened to Throwable.
+        exceptionBoundedReceiverCall();
+    }
+
+    private static void exceptionBoundedReceiverCall() throws Exception {
+        Fnn.doNothing().accept("x");
+        Fnn.<String, Exception> identity().apply("x");
+    }
+
+    @Test
+    public void testMinMax_NullHandlingConsistentWithFn() throws Exception {
+        final Throwables.BinaryOperator<String, RuntimeException> min = Fnn.min();
+        final Throwables.BinaryOperator<String, RuntimeException> max = Fnn.max();
+        assertEquals("test", min.apply("test", null));
+        assertEquals("test", min.apply(null, "test"));
+        assertNull(min.apply(null, null));
+        assertEquals("test", max.apply("test", null));
+        assertEquals("test", max.apply(null, "test"));
+        assertNull(max.apply(null, null));
+    }
+
+    // FINDING 28: memoize(Function) was moved onto a private resultMapLock, but memoizeWithExpiration still
+    // synchronized on `this` - the very object handed back to the caller - so caller code holding that monitor
+    // blocked every refresh (and could interleave with one).
+    @Test
+    public void reviewFixes20260908_memoizeWithExpirationDoesNotSynchronizeOnTheReturnedSupplier() throws Exception {
+        final AtomicInteger calls = new AtomicInteger();
+        final Throwables.Supplier<Integer, Exception> memo = Fnn.memoizeWithExpiration(calls::incrementAndGet, 1, TimeUnit.HOURS);
+
+        final CountDownLatch done = new CountDownLatch(1);
+        final AtomicReference<Object> result = new AtomicReference<>();
+        final Thread worker = new Thread(() -> {
+            try {
+                result.set(memo.get());
+            } catch (final Throwable e) { // NOSONAR - the failure has to reach the assertion below
+                result.set(e);
+            } finally {
+                done.countDown();
+            }
+        });
+        worker.setDaemon(true);
+
+        synchronized (memo) {
+            worker.start();
+            assertTrue(done.await(10, TimeUnit.SECONDS), "get() blocked on the caller-visible monitor of the returned supplier");
+        }
+
+        assertEquals(1, result.get());
+        assertEquals(1, calls.get());
+    }
+
+    // Doc-only contract pins for the re-entrancy sentence the Fn twins already carry and Fnn now states too:
+    // re-entering get() from inside the delegate throws IllegalStateException, that failure is not cached,
+    // and a later call succeeds once the recursive attempt has unwound. Behaviour is unchanged by the doc fix,
+    // so these pass on both sides by design.
+    @Test
+    public void testMemoize_SupplierRecursiveFailsFastAndRetries() throws Exception {
+        final AtomicInteger attempts = new AtomicInteger();
+        @SuppressWarnings("unchecked")
+        final Throwables.Supplier<String, Exception>[] holder = new Throwables.Supplier[1];
+        holder[0] = Fnn.memoize(() -> attempts.incrementAndGet() == 1 ? holder[0].get() : "v");
+
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, holder[0]::get);
+        assertEquals("Recursive initialization of deferred value", ex.getMessage());
+        assertEquals("v", holder[0].get());
+        assertEquals("v", holder[0].get());
+        assertEquals(2, attempts.get(), "the recursive failure must not be cached, and the retry must be the last call");
+    }
+
+    @Test
+    public void testMemoize_SupplierSwallowedRecursionIsNotPublished() throws Exception {
+        final AtomicInteger attempts = new AtomicInteger();
+        @SuppressWarnings("unchecked")
+        final Throwables.Supplier<String, Exception>[] holder = new Throwables.Supplier[1];
+        holder[0] = Fnn.memoize(() -> {
+            if (attempts.incrementAndGet() == 1) {
+                try {
+                    holder[0].get();
+                } catch (final IllegalStateException ignored) {
+                    // A delegate that swallows the failure still must not publish a value for that attempt.
+                }
+
+                return "must-not-be-cached";
+            }
+
+            return "v";
+        });
+
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, holder[0]::get);
+        assertEquals("Recursive initialization of deferred value", ex.getMessage());
+        assertEquals("v", holder[0].get());
+        assertEquals(2, attempts.get());
+    }
+
+    @Test
+    public void testMemoizeWithExpiration_RecursiveFailureIsNotCachedAndTheNextCallSucceeds() throws Exception {
+        final AtomicInteger attempts = new AtomicInteger();
+        @SuppressWarnings("unchecked")
+        final Throwables.Supplier<String, Exception>[] holder = new Throwables.Supplier[1];
+        holder[0] = Fnn.memoizeWithExpiration(() -> attempts.incrementAndGet() == 1 ? holder[0].get() : "v", 1, TimeUnit.HOURS);
+
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, holder[0]::get);
+        assertEquals("Recursive computation of memoized value", ex.getMessage());
+        assertEquals("v", holder[0].get());
+        assertEquals("v", holder[0].get());
+        assertEquals(2, attempts.get(), "the recursive failure must not be cached, and the retry must be the last call");
+    }
+
+    @Test
+    public void testMemoizeWithExpiration_SwallowedRecursionIsNotPublished() throws Exception {
+        final AtomicInteger attempts = new AtomicInteger();
+        @SuppressWarnings("unchecked")
+        final Throwables.Supplier<String, Exception>[] holder = new Throwables.Supplier[1];
+        holder[0] = Fnn.memoizeWithExpiration(() -> {
+            if (attempts.incrementAndGet() == 1) {
+                try {
+                    holder[0].get();
+                } catch (final IllegalStateException ignored) {
+                    // A delegate that swallows the failure still must not publish a value for that refresh.
+                }
+
+                return "must-not-be-cached";
+            }
+
+            return "v";
+        }, 1, TimeUnit.HOURS);
+
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, holder[0]::get);
+        assertEquals("Recursive computation of memoized value", ex.getMessage());
+        assertEquals("v", holder[0].get());
+        assertEquals(2, attempts.get());
+    }
+
+    // The Duration overload delegates to the (long, TimeUnit) one, so it hands back the very same object and
+    // inherits the contract by reference - which is why only the primary overload restates it.
+    @Test
+    public void testMemoizeWithExpiration_DurationRecursiveFailsFastAndRetries() throws Exception {
+        final AtomicInteger attempts = new AtomicInteger();
+        @SuppressWarnings("unchecked")
+        final Throwables.Supplier<String, Exception>[] holder = new Throwables.Supplier[1];
+        holder[0] = Fnn.memoizeWithExpiration(() -> attempts.incrementAndGet() == 1 ? holder[0].get() : "v", Duration.ofHours(1));
+
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, holder[0]::get);
+        assertEquals("Recursive computation of memoized value", ex.getMessage());
+        assertEquals("v", holder[0].get());
+        assertEquals(2, attempts.get());
+    }
+
 }

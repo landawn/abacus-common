@@ -33,6 +33,140 @@ import com.landawn.abacus.util.u.OptionalChar;
 import com.landawn.abacus.util.u.OptionalDouble;
 
 public class IteratorCharStreamTest extends TestBase {
+    @Test
+    public void testGroupToRejectsNullDownstreamBeforeInvokingMapFactory() {
+        for (final boolean arrayBacked : new boolean[] { true, false }) {
+            for (final boolean empty : new boolean[] { true, false }) {
+                final char[] values = empty ? new char[0] : new char[] { (char) 1 };
+                final java.util.concurrent.atomic.AtomicInteger factoryCalls = new java.util.concurrent.atomic.AtomicInteger();
+                try (final CharStream stream = arrayBacked ? CharStream.of(values)
+                        : CharStream.of(com.landawn.abacus.util.CharIterator.of(values))) {
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                            () -> stream.groupTo(value -> value, null, () -> {
+                                factoryCalls.incrementAndGet();
+                                return new java.util.HashMap<>();
+                            }));
+                    org.junit.jupiter.api.Assertions.assertEquals(0, factoryCalls.get());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testSkipPreservesProgressWhenSupplierFailsBeforeProducingValue() {
+        for (final int entryPoint : new int[] { 0, 1, 2, 3, 4 }) {
+            final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+            final java.util.concurrent.atomic.AtomicInteger delivered = new java.util.concurrent.atomic.AtomicInteger();
+            try (final CharStream stream = CharStream.generate(() -> {
+                if (attempts.getAndIncrement() == 1) {
+                    throw new IllegalStateException("second attempt");
+                }
+                return (char) delivered.getAndIncrement();
+            }).limit(4).skip(2)) {
+                final CharIteratorEx iterator = stream.iteratorEx();
+                assertThrows(IllegalStateException.class, () -> {
+                    switch (entryPoint) {
+                        case 0 -> iterator.hasNext();
+                        case 1 -> iterator.nextChar();
+                        case 2 -> iterator.count();
+                        case 3 -> iterator.advance(1);
+                        case 4 -> iterator.toArray();
+                        default -> throw new AssertionError();
+                    }
+                });
+                assertTrue(iterator.hasNext());
+                assertEquals((char) 2, iterator.nextChar());
+                assertEquals((char) 3, iterator.nextChar());
+                assertFalse(iterator.hasNext());
+                assertEquals(5, attempts.get());
+                assertEquals(4, delivered.get());
+            }
+        }
+    }
+
+    @Test
+    public void testLimitAdvancePreservesQuotaAfterSourceFailure() {
+        final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger delivered = new java.util.concurrent.atomic.AtomicInteger();
+        try (final CharStream stream = CharStream.generate(() -> {
+            if (attempts.getAndIncrement() == 1) {
+                throw new IllegalStateException("second attempt");
+            }
+            return (char) delivered.getAndIncrement();
+        }).limit(2)) {
+            final CharIteratorEx iterator = stream.iteratorEx();
+            assertThrows(IllegalStateException.class, () -> iterator.advance(2));
+            assertTrue(iterator.hasNext());
+            assertEquals((char) 1, iterator.nextChar());
+            assertFalse(iterator.hasNext());
+            assertThrows(java.util.NoSuchElementException.class, iterator::nextChar);
+            assertEquals(3, attempts.get());
+            assertEquals(2, delivered.get());
+        }
+    }
+
+    @Test
+    public void testSkipPreservesFastBulkAdvanceForHugeSources() {
+        final long size = Long.MAX_VALUE;
+        final char expected = 'x';
+        try (final CharStream source = CharStream.repeat('x', size)) {
+            final CharIteratorEx delegate = source.iteratorEx();
+            final long[] advanced = { 0 };
+            final CharIteratorEx guard = new CharIteratorEx() {
+                @Override
+                boolean supportsFailureAtomicAdvance() {
+                    return delegate.supportsFailureAtomicAdvance();
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return delegate.hasNext();
+                }
+
+                @Override
+                public char nextChar() {
+                    // Fail immediately if a regression tries to traverse the huge skipped prefix.
+                    assertEquals(size - 1, advanced[0]);
+                    return delegate.nextChar();
+                }
+
+                @Override
+                public void advance(final long n) {
+                    delegate.advance(n);
+                    advanced[0] += n;
+                }
+            };
+
+            try (final CharStream result = CharStream.of(guard).limit(size).skip(1).skip(size - 2)) {
+                final CharIteratorEx iterator = result.iteratorEx();
+                assertTrue(iterator.hasNext());
+                assertEquals(expected, iterator.nextChar());
+                assertFalse(iterator.hasNext());
+                assertEquals(size - 1, advanced[0]);
+            }
+        }
+    }
+
+    @Test
+    public void testLimitPreservesQuotaWhenSupplierFailsBeforeProducingValue() {
+        final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+        try (final CharStream stream = CharStream.of(CharIterator.generate(() -> {
+            if (attempts.getAndIncrement() == 0) {
+                throw new IllegalStateException("first attempt");
+            }
+            return 'x';
+        })).limit(1)) {
+            final CharIterator iterator = stream.iterator();
+            assertTrue(iterator.hasNext());
+            assertThrows(IllegalStateException.class, iterator::nextChar);
+            assertTrue(iterator.hasNext());
+            assertEquals('x', iterator.nextChar());
+            assertFalse(iterator.hasNext());
+            assertThrows(java.util.NoSuchElementException.class, iterator::nextChar);
+            assertEquals(2, attempts.get());
+        }
+    }
+
 
     private static final char[] TEST_ARRAY = new char[] { 'a', 'b', 'c', 'd', 'e' };
     private CharStream stream;

@@ -24,7 +24,7 @@ import com.landawn.abacus.util.ThreadMode;
 
 public class SubscribeTest extends TestBase {
 
-    static class TestHandler {
+    public static class TestHandler {
         @Subscribe
         public void handleDefault(String event) {
         }

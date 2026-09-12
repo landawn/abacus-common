@@ -28,10 +28,10 @@ import com.landawn.abacus.util.stream.FloatStream;
  * This abstract class provides a base implementation for iterating over float values
  * with additional functional operations like filtering, limiting, and skipping.
  *
- * <p>The iterator does not support element removal, but it is stateful and is consumed as values
- * are read. Transformation methods return wrappers over this same source iterator; consuming a
- * wrapper also advances the source. It extends {@code ImmutableIterator<Float>} to express the
- * unsupported mutation operation, and provides primitive-specific methods to avoid autoboxing.</p>
+ * <p>Element removal is not supported ({@link #remove()} always throws
+ * {@link UnsupportedOperationException}), but the iterator is stateful and is consumed as values are
+ * read. Transformation methods return wrappers over this same source iterator; consuming a wrapper
+ * also advances the source. Primitive-specific methods are provided to avoid autoboxing.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -50,7 +50,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 public abstract class FloatIterator extends ImmutableIterator<Float> {
 
     /**
@@ -73,8 +73,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if this iterator has no remaining element
+         */
         @Override
-        public float nextFloat() {
+        public float nextFloat() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
@@ -162,8 +166,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
                 return cursor < toIndex;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -201,9 +209,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * }
      * }</pre>
      *
+     * <p>The returned iterator initializes its source on its first traversal operation. If the supplier returns null, initialization throws IllegalStateException; a RuntimeException or Error from initialization is cached and rethrown by subsequent traversal operations.</p>
+     *
      * @param iteratorSupplier a supplier that provides the {@code FloatIterator} when first needed
      * @return a {@code FloatIterator} that is initialized on first use
-     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static FloatIterator defer(final Supplier<? extends FloatIterator> iteratorSupplier) throws IllegalArgumentException {
@@ -228,7 +237,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
                 return iter.nextFloat();
             }
 
-            private void init() {
+            /**
+             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null}
+             */
+            private void init() throws IllegalStateException {
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
@@ -298,7 +310,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * returns {@code false}.
      *
      * <p>The {@code hasNext} supplier is called at most once per element; its result is cached
-     * until the next call to {@code nextFloat()}.</p>
+     * until the next call to {@code nextFloat()}. Once {@code hasNext} has returned {@code false} the
+     * iterator is permanently exhausted: the condition is never re-evaluated, so the iterator does not
+     * resume even if the state it inspects changes later.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -332,8 +346,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
                 return hasNextValue;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -362,7 +380,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      */
     @Deprecated
     @Override
-    public Float next() {
+    public Float next() throws NoSuchElementException {
         return nextFloat();
     }
 
@@ -379,7 +397,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * @return the next float value
      * @throws NoSuchElementException if the iteration has no more elements
      */
-    public abstract float nextFloat();
+    public abstract float nextFloat() throws NoSuchElementException;
 
     /**
      * Returns a new {@code FloatIterator} that skips the first {@code n} elements of this iterator.
@@ -411,6 +429,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
 
         return new FloatIterator() {
             private boolean skipped = false;
+            private long remaining = n;
 
             @Override
             public boolean hasNext() {
@@ -421,8 +440,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -431,10 +454,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
             }
 
             private void skip() {
-                long idx = 0;
-
-                while (idx++ < n && iter.hasNext()) {
+                while (remaining > 0 && iter.hasNext()) {
                     iter.nextFloat();
+                    remaining--;
                 }
 
                 skipped = true;
@@ -476,14 +498,19 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
                 return cnt > 0 && iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final float result = iter.nextFloat();
                 cnt--;
-                return iter.nextFloat();
+                return result;
             }
         };
     }
@@ -528,8 +555,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
                 return hasNext;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -595,9 +626,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     /**
      * Converts this iterator to a {@link FloatStream} for use with the Stream API.
      *
-     * <p><b>Note:</b> The returned stream is backed by this iterator. Consuming the stream
-     * will consume the iterator, and vice versa. After the stream is consumed, this iterator
-     * will be exhausted.</p>
+     * <p>The stream shares this iterator's traversal position and consumes elements as needed.
+     * Operations that consume all remaining elements exhaust this iterator; short-circuiting
+     * operations may leave elements unconsumed. Do not access this iterator independently
+     * while the stream is consuming it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -643,10 +675,11 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * // Prints indices starting from 10, 11, 12...
      * }</pre>
      *
+     * <p>The returned iterator throws ArithmeticException when traversal would assign an index greater than Long.MAX_VALUE.</p>
+     *
      * @param startIndex the starting index value; must be non-negative
      * @return an {@code ObjIterator} of {@link IndexedFloat} objects with indices beginning at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative.
-     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
     public ObjIterator<IndexedFloat> indexed(final long startIndex) throws IllegalArgumentException {
@@ -663,8 +696,13 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws ArithmeticException if an element remains after index {@link Long#MAX_VALUE} has already been assigned
+             * @throws NoSuchElementException if the source iterator has no remaining element
+             */
             @Override
-            public IndexedFloat next() {
+            public IndexedFloat next() throws ArithmeticException, NoSuchElementException {
                 if (indexOverflow) {
                     if (iter.hasNext()) {
                         throw new ArithmeticException("long overflow");
@@ -700,13 +738,13 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * }</pre>
      *
      * @param action the action to be performed for each element
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws NullPointerException if {@code action} is {@code null}, as specified by {@link java.util.Iterator#forEachRemaining(java.util.function.Consumer)}.
      * @deprecated use {@link #foreachRemaining(Throwables.FloatConsumer)} instead to avoid boxing
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Float> action) throws IllegalArgumentException {
-        N.checkArgNotNull(action, cs.action);
+    public void forEachRemaining(final java.util.function.Consumer<? super Float> action) throws NullPointerException {
+        N.requireNonNull(action, cs.action);
 
         super.forEachRemaining(action);
     }
@@ -726,10 +764,10 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to be performed for each element
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.FloatConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachRemaining(final Throwables.FloatConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action); //NOSONAR
 
         while (hasNext()) {
@@ -754,12 +792,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to be performed for each element with its index
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
-     * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if {@code action} throws while processing a remaining element and its index
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntFloatConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachIndexed(final Throwables.IntFloatConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         N.checkArgNotNull(action, cs.action);
 
         int idx = 0;

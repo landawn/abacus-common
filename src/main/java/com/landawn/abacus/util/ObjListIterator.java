@@ -73,7 +73,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements ListIterator<T> {
 
     /**
@@ -284,6 +284,15 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * {@code set()} and {@code add()} operations even if the underlying
      * {@code ListIterator} does; they throw {@link UnsupportedOperationException}.</p>
      *
+     * <p>Exhaustion is deliberately <b>not</b> normalised: {@code next()} and {@code previous()} delegate
+     * straight to the wrapped list iterator, so whatever it raises at either end reaches the caller unchanged -
+     * a message-less {@link NoSuchElementException} from an {@link java.util.ArrayList} list iterator, one
+     * carrying an {@link IndexOutOfBoundsException} as its cause from an {@link java.util.AbstractList} one, or
+     * {@link java.util.ConcurrentModificationException} from a list iterator left stale by a structural change.
+     * Only the list iterators this class builds itself, {@link #empty()} among them, report
+     * {@code InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX}. Do not match on the message or cause of an exhausted
+     * wrapper; test {@code hasNext()} / {@code hasPrevious()} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListIterator<String> listIter = Arrays.asList("a", "b", "c").listIterator();
@@ -310,6 +319,8 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
             @Override
             public T next() {
+                // No hasNext() guard: exhaustion is reported by the wrapped list iterator, not normalised to
+                // ERROR_MSG_FOR_NO_SUCH_EX. Pinned by ObjListIteratorTest; see of(ListIterator) first.
                 return iter.next();
             }
 
@@ -320,6 +331,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
             @Override
             public T previous() {
+                // No hasPrevious() guard either - same reason as next() above.
                 return iter.previous();
             }
 
@@ -394,6 +406,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
         return new ObjListIterator<>() {
             private boolean skipped = false;
+            private long remaining = n;
 
             @Override
             public boolean hasNext() {
@@ -424,8 +437,8 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
             @Override
             public T previous() {
-                if (!skipped) {
-                    skip();
+                if (!hasPrevious()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return iter.previous();
@@ -476,10 +489,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
             }
 
             private void skip() {
-                long idx = 0;
-
-                while (idx++ < n && iter.hasNext()) {
+                while (remaining > 0 && iter.hasNext()) {
                     iter.next();
+                    remaining--;
                 }
 
                 skipped = true;
@@ -550,6 +562,10 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
 
             @Override
             public T previous() {
+                if (!hasPrevious()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 final T result = iter.previous();
                 position--;
                 return result;
@@ -665,9 +681,11 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * @param a the array into which the elements are stored, if it is big enough;
      *          otherwise a new array of the same runtime type is allocated
      * @return an array containing all remaining elements
-     * @throws NullPointerException if {@code a} is {@code null}
+     * @throws NullPointerException if {@code a} is {@code null}, before consuming any elements
+     * @throws ArrayStoreException if a remaining element is not assignable to the runtime component type of {@code a}
      */
-    public <A> A[] toArray(final A[] a) {
+    public <A> A[] toArray(final A[] a) throws NullPointerException, ArrayStoreException {
+        N.requireNonNull(a, "a");
         return toList().toArray(a);
     }
 
@@ -729,11 +747,11 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to perform for each remaining element
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      * @see #foreachIndexed(Throwables.IntObjConsumer)
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachRemaining(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         while (hasNext()) {
@@ -761,13 +779,14 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to perform for each element and its index
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws IllegalStateException if {@link #nextIndex()} returns a negative value because its
      *         index has overflowed
      * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #foreachRemaining(Throwables.Consumer)
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> action)
+            throws IllegalArgumentException, IllegalStateException, E {
         N.checkArgNotNull(action, cs.action);
 
         while (hasNext()) {

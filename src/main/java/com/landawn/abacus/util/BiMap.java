@@ -18,12 +18,18 @@ package com.landawn.abacus.util;
 
 import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.SortedMap;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.TreeMap;
+import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -146,12 +152,16 @@ import com.landawn.abacus.annotation.Internal;
  * </ul>
  *
  * <p><b>Collection Views:</b>
- * All collection views are read-only (live views backed by the BiMap that cannot be modified directly),
- * to maintain bijective integrity:
+ * All three collection views are live views backed by the BiMap that cannot be modified through the view,
+ * so bijective integrity is maintained. All three iterate the forward (key-to-value) backing map, so their
+ * iteration orders correspond entry for entry, as for any other {@link Map}:
  * <ul>
  *   <li>{@code keySet()} - Returns {@link ImmutableSet} of keys</li>
- *   <li>{@code values()} - Returns {@link ImmutableSet} of values</li>
- *   <li>{@code entrySet()} - Returns {@link ImmutableSet} of entries</li>
+ *   <li>{@code values()} - Returns {@link ImmutableSet} of values (a {@code Set}, not a {@code Collection},
+ *       because values are unique)</li>
+ *   <li>{@code entrySet()} - Returns {@link ImmutableSet} of entries. The set is live, but the entries it
+ *       yields are {@link ImmutableEntry} snapshots: {@code setValue} throws
+ *       {@link UnsupportedOperationException}, and an entry obtained before a change keeps its old value.</li>
  * </ul>
  *
  * <p><b>Performance Characteristics:</b>
@@ -173,9 +183,41 @@ import com.landawn.abacus.annotation.Internal;
  *       {@link Map} surface and cannot keep the dual key/value maps and inverse view consistent</li>
  * </ul>
  *
+ * <p><b>Backing-map equality:</b>
+ * Both backing maps must use an equality that is <i>consistent with {@code equals}</i>, the same requirement
+ * {@link java.util.SortedMap} states for itself. A {@code BiMap} answers key questions from the forward map and
+ * value questions ({@link #containsValue}, {@link #getByValue}, {@link #removeByValue}, {@link #values()}'s
+ * {@code contains}, and {@code put}'s uniqueness check) from the reverse map, so a backing map whose equivalence
+ * is coarser or finer than {@code equals} - a {@link java.util.TreeMap} with a case-insensitive or otherwise
+ * non-{@code equals}-consistent {@link Comparator}, or an {@link java.util.IdentityHashMap} - makes this
+ * {@code BiMap} violate the {@link Map} contract. For example, a case-insensitively ordered reverse map answers
+ * {@code containsValue("abc")} with {@code true} for a stored value of {@code "ABC"}, although no value in the
+ * map {@code equals} {@code "abc"}, while {@link #containsEntry(Object, Object)} and {@link #entrySet()}'s
+ * {@code contains} - which compare with {@code equals} - answer {@code false}. Such a configuration is outside
+ * this class's contract.
+ *
  * <p><b>Null Handling:</b>
  * <ul>
- *   <li>{@code null} keys and {@code null} values are not supported and will cause {@code IllegalArgumentException}</li>
+ *   <li>A BiMap never <i>stores</i> a {@code null} key or value: every insertion path
+ *       ({@link #put}, {@link #forcePut}, {@link #putIfAbsent}, {@link #putAll}, {@link #forcePutAll} and
+ *       the {@link Map} default remapping methods) rejects one with {@code IllegalArgumentException}.</li>
+ *   <li>The lookup and removal methods ({@link #get}, {@link #getByValue}, {@link #containsKey},
+ *       {@link #containsValue}, {@link #remove}, {@link #removeByValue}) simply pass {@code null} to the
+ *       backing maps: with the default {@link HashMap} backing they return {@code null}/{@code false},
+ *       while a backing map that rejects {@code null} keys (such as {@link java.util.TreeMap}) throws
+ *       {@link NullPointerException}.</li>
+ *   <li>{@link Map#merge(Object, Object, java.util.function.BiFunction)} throws
+ *       {@link NullPointerException} for a {@code null} value, as its own contract requires.</li>
+ *   <li>A BiMap's values are the keys of its reverse map, so a stored value must not be mutated in a way
+ *       that changes its equality, {@code hashCode} or ordering while it is in the map, exactly as for a
+ *       {@link HashMap} key, and a supplied backing map must not drop entries of its own accord (a
+ *       {@code LinkedHashMap} that overrides {@code removeEldestEntry}, for example). Such an entry
+ *       becomes unreachable through the reverse map, so {@link #getByValue} can no longer find it and the
+ *       forward and inverse views can report different sizes. When the old reverse lookup misses,
+ *       overwriting a surviving forward key with {@link #put} or {@link #forcePut} attempts to drop its
+ *       stale reverse entry and install the replacement. This is best-effort recovery, not support for
+ *       mutable map keys or self-evicting backing maps. A bare {@link #remove} cannot find an unreachable
+ *       reverse entry by value; {@link #clear}, if both backing maps accept it, empties both directions.</li>
  * </ul>
  *
  * <p><b>Error Conditions:</b>
@@ -183,7 +225,36 @@ import com.landawn.abacus.annotation.Internal;
  *   <li><b>Duplicate Values:</b> {@code put()} throws {@link IllegalArgumentException} if the value is already mapped to a different key (use {@link #forcePut} to override)</li>
  *   <li><b>Builder Validation:</b> Builder throws {@code IllegalArgumentException} for duplicates</li>
  *   <li><b>Null Arguments:</b> Factory methods validate {@code non-null} arguments</li>
+ *   <li><b>Backing-map write failures:</b> a mutator writes the forward and reverse maps in sequence. If a
+ *       user-supplied backing map rejects a write - a comparator-backed {@link java.util.TreeMap} that
+ *       cannot order a value, for example - {@link #put} and {@link #forcePut} attempt to restore every
+ *       affected mapping, including a write that changes its mapping before throwing. If the map was
+ *       consistent before the call and the restoring operations succeed, the original key and value
+ *       objects remain present when the exception propagates. The undo re-inserts
+ *       rather than rewinds, so an insertion-ordered backing map can iterate the restored entries in a
+ *       different order than before; and a backing map that rejects the restoring writes as well leaves the
+ *       undo incomplete - each such failure is reported on the propagating exception through
+ *       {@link Throwable#addSuppressed} - so even {@link #put} and {@link #forcePut} can then leave
+ *       {@code size()} and {@code inverse().size()} disagreeing. {@link #remove}, {@link #removeByValue},
+ *       {@link #clear} and {@link #replaceAll} do not undo at all, so the two backing maps can be left out
+ *       of step and {@code size()} and {@code inverse().size()} can disagree from then on. Re-binding the
+ *       affected key to its value with {@link #forcePut} can repair an orphaned binding; a plain
+ *       {@link #put} may reject it as a duplicate value. A successful {@link #clear} empties both directions.
+ *       Recovery cannot guarantee consistency if a backing map keeps rejecting operations, mutates
+ *       unrelated entries, or otherwise violates its {@link Map} contract.</li>
  * </ul>
+ *
+ * <p><b>Value uniqueness applies to every insertion, including the inherited {@link Map} defaults:</b>
+ * {@link Map#replace(Object, Object)}, {@link Map#replace(Object, Object, Object)},
+ * {@link Map#computeIfAbsent(Object, java.util.function.Function)},
+ * {@link Map#computeIfPresent(Object, java.util.function.BiFunction)},
+ * {@link Map#compute(Object, java.util.function.BiFunction)} and
+ * {@link Map#merge(Object, Object, java.util.function.BiFunction)} all store through {@link #put}, so each
+ * of them throws {@link IllegalArgumentException} when the value it would store is already bound to a
+ * different key. This is permitted by the {@code Map} contract - each of those methods declares
+ * {@code IllegalArgumentException} "if some property of the specified key or value prevents it from being
+ * stored" - and value uniqueness is exactly such a property. Use {@link #forcePut} to displace the
+ * conflicting entry instead.
  *
  * <p><b>Inverse View Behavior:</b>
  * <ul>
@@ -280,12 +351,6 @@ import com.landawn.abacus.annotation.Internal;
  */
 public final class BiMap<K, V> implements Map<K, V> {
     /**
-     * The maximum capacity, used if a higher value is implicitly specified by either of the constructors with
-     * arguments. MUST be a power of two &lt;= 1&lt;&lt;30.
-     */
-    static final int MAXIMUM_CAPACITY = 1 << 30;
-
-    /**
      * The default initial capacity - MUST be a power of two.
      */
     static final int DEFAULT_INITIAL_CAPACITY = 1 << 4; // aka 16
@@ -308,6 +373,14 @@ public final class BiMap<K, V> implements Map<K, V> {
     final Map<V, K> valueMap;
 
     private transient BiMap<V, K> invertedView; //NOSONAR
+
+    // The three collection views are stateless wrappers over the live backing maps, so - as in the JDK's
+    // own map implementations - one instance each is created lazily and reused.
+    private transient ImmutableSet<K> keySet; //NOSONAR
+
+    private transient ImmutableSet<V> values; //NOSONAR
+
+    private transient ImmutableSet<Map.Entry<K, V>> entrySet; //NOSONAR
 
     /**
      * Constructs a BiMap with the default initial capacity.
@@ -335,7 +408,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param initialCapacity the initial capacity of the BiMap
      * @throws IllegalArgumentException if {@code initialCapacity} is negative.
      */
-    public BiMap(final int initialCapacity) {
+    public BiMap(final int initialCapacity) throws IllegalArgumentException {
         this(initialCapacity, DEFAULT_LOAD_FACTOR);
     }
 
@@ -352,8 +425,21 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @throws IllegalArgumentException if {@code initialCapacity} is negative, or if {@code loadFactor} is not
      *         positive or is {@link Float#NaN}.
      */
-    public BiMap(final int initialCapacity, final float loadFactor) {
+    public BiMap(final int initialCapacity, final float loadFactor) throws IllegalArgumentException {
         this(new HashMap<>(initialCapacity, loadFactor), new HashMap<>(initialCapacity, loadFactor));
+    }
+
+    /**
+     * Converts an expected entry count into an initial capacity for the {@code of(...)} factories.
+     *
+     * <p>{@link #BiMap(int)} takes a <i>capacity</i>, so handing it the number of key-value pairs made
+     * {@code of(...)} resize its backing maps while it was still filling them for every arity above one.</p>
+     *
+     * @param pairCount the number of key-value pairs the factory will insert
+     * @return the initial capacity that holds them without a resize
+     */
+    private static int capacityFor(final int pairCount) {
+        return (int) (pairCount / DEFAULT_LOAD_FACTOR) + 1;
     }
 
     /**
@@ -368,10 +454,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param keyMapType the Class object representing the type of Map to be used for storing keys; must not be {@code null}
      * @param valueMapType the Class object representing the type of Map to be used for storing values; must not be {@code null}
-     * @throws IllegalArgumentException if either specified map type cannot be instantiated.
+     * @throws IllegalArgumentException if either map type is {@code null} or has no supported construction path, or the resulting suppliers return null, non-empty, or identical map instances
      */
     @SuppressWarnings("rawtypes")
-    public BiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) {
+    public BiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) throws IllegalArgumentException {
         this(Suppliers.ofMap(keyMapType), Suppliers.ofMap(valueMapType));
     }
 
@@ -395,10 +481,8 @@ public final class BiMap<K, V> implements Map<K, V> {
         N.checkArgNotNull(keyMapSupplier, cs.keyMapSupplier);
         N.checkArgNotNull(valueMapSupplier, cs.valueMapSupplier);
 
-        final Supplier<? extends Map<K, V>> checkedKeyMapSupplier = keyMapSupplier;
-        final Supplier<? extends Map<V, K>> checkedValueMapSupplier = valueMapSupplier;
-        final Map<K, V> suppliedKeyMap = N.checkArgNotNull(checkedKeyMapSupplier.get(), "keyMapSupplier.get()");
-        final Map<V, K> suppliedValueMap = N.checkArgNotNull(checkedValueMapSupplier.get(), "valueMapSupplier.get()");
+        final Map<K, V> suppliedKeyMap = N.checkArgNotNull(keyMapSupplier.get(), "keyMapSupplier.get()");
+        final Map<V, K> suppliedValueMap = N.checkArgNotNull(valueMapSupplier.get(), "valueMapSupplier.get()");
 
         if (suppliedKeyMap == suppliedValueMap) {
             throw new IllegalArgumentException("The suppliers must return distinct map instances");
@@ -408,8 +492,8 @@ public final class BiMap<K, V> implements Map<K, V> {
             throw new IllegalArgumentException("The supplied maps must be empty");
         }
 
-        this.keyMapSupplier = checkedKeyMapSupplier;
-        this.valueMapSupplier = checkedValueMapSupplier;
+        this.keyMapSupplier = keyMapSupplier;
+        this.valueMapSupplier = valueMapSupplier;
         keyMap = suppliedKeyMap;
         valueMap = suppliedValueMap;
     }
@@ -483,8 +567,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return a BiMap containing the specified key-value pair.
      * @throws IllegalArgumentException if {@code k1} or {@code v1} is {@code null}.
      */
-    public static <K, V> BiMap<K, V> of(final K k1, final V v1) {
-        final BiMap<K, V> map = new BiMap<>(1);
+    public static <K, V> BiMap<K, V> of(final K k1, final V v1) throws IllegalArgumentException {
+        final BiMap<K, V> map = new BiMap<>(capacityFor(1));
 
         map.put(k1, v1);
 
@@ -494,6 +578,11 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with two key-value pairs.
      * This method provides a convenient way to create a BiMap with two entries.
+     *
+     * <p>A key repeated in the argument list keeps only its last value, so the returned BiMap can contain
+     * fewer entries than pairs supplied. A <i>value</i> that is still bound when it is supplied again is
+     * rejected with {@link IllegalArgumentException} if it is bound to a different key; repeating the same
+     * key-value mapping is allowed. A value displaced earlier by a repeated key may be reused.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -506,12 +595,13 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param v1 the value to be associated with the first key in the BiMap.
      * @param k2 the second key to be inserted into the BiMap.
      * @param v2 the value to be associated with the second key in the BiMap.
-     * @return a BiMap containing the specified key-value pairs.
+     * @return a BiMap containing the specified key-value pairs; a key repeated in the argument list keeps
+     *         only its last value, so the result can contain fewer entries than pairs supplied.
      * @throws IllegalArgumentException if any key or value is {@code null}, or if a value is duplicated (bound to
      *         more than one key).
      */
-    public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2) {
-        final BiMap<K, V> map = new BiMap<>(2);
+    public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2) throws IllegalArgumentException {
+        final BiMap<K, V> map = new BiMap<>(capacityFor(2));
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -522,6 +612,11 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with three key-value pairs.
      * This method provides a convenient way to create a BiMap with three entries.
+     *
+     * <p>A key repeated in the argument list keeps only its last value, so the returned BiMap can contain
+     * fewer entries than pairs supplied. A <i>value</i> that is still bound when it is supplied again is
+     * rejected with {@link IllegalArgumentException} if it is bound to a different key; repeating the same
+     * key-value mapping is allowed. A value displaced earlier by a repeated key may be reused.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -536,12 +631,13 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param v2 the value to be associated with the second key in the BiMap.
      * @param k3 the third key to be inserted into the BiMap.
      * @param v3 the value to be associated with the third key in the BiMap.
-     * @return a BiMap containing the specified key-value pairs.
+     * @return a BiMap containing the specified key-value pairs; a key repeated in the argument list keeps
+     *         only its last value, so the result can contain fewer entries than pairs supplied.
      * @throws IllegalArgumentException if any key or value is {@code null}, or if a value is duplicated (bound to
      *         more than one key).
      */
-    public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) {
-        final BiMap<K, V> map = new BiMap<>(3);
+    public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3) throws IllegalArgumentException {
+        final BiMap<K, V> map = new BiMap<>(capacityFor(3));
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -553,6 +649,11 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with four key-value pairs.
      * This method provides a convenient way to create a BiMap with four entries.
+     *
+     * <p>A key repeated in the argument list keeps only its last value, so the returned BiMap can contain
+     * fewer entries than pairs supplied. A <i>value</i> that is still bound when it is supplied again is
+     * rejected with {@link IllegalArgumentException} if it is bound to a different key; repeating the same
+     * key-value mapping is allowed. A value displaced earlier by a repeated key may be reused.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -569,12 +670,14 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param v3 the value to be associated with the third key in the BiMap.
      * @param k4 the fourth key to be inserted into the BiMap.
      * @param v4 the value to be associated with the fourth key in the BiMap.
-     * @return a BiMap containing the specified key-value pairs.
+     * @return a BiMap containing the specified key-value pairs; a key repeated in the argument list keeps
+     *         only its last value, so the result can contain fewer entries than pairs supplied.
      * @throws IllegalArgumentException if any key or value is {@code null}, or if a value is duplicated (bound to
      *         more than one key).
      */
-    public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4) {
-        final BiMap<K, V> map = new BiMap<>(4);
+    public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4)
+            throws IllegalArgumentException {
+        final BiMap<K, V> map = new BiMap<>(capacityFor(4));
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -587,6 +690,11 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with five key-value pairs.
      * This method provides a convenient way to create a BiMap with five entries.
+     *
+     * <p>A key repeated in the argument list keeps only its last value, so the returned BiMap can contain
+     * fewer entries than pairs supplied. A <i>value</i> that is still bound when it is supplied again is
+     * rejected with {@link IllegalArgumentException} if it is bound to a different key; repeating the same
+     * key-value mapping is allowed. A value displaced earlier by a repeated key may be reused.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -605,13 +713,14 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param v4 the value to be associated with the fourth key in the BiMap.
      * @param k5 the fifth key to be inserted into the BiMap.
      * @param v5 the value to be associated with the fifth key in the BiMap.
-     * @return a BiMap containing the specified key-value pairs.
+     * @return a BiMap containing the specified key-value pairs; a key repeated in the argument list keeps
+     *         only its last value, so the result can contain fewer entries than pairs supplied.
      * @throws IllegalArgumentException if any key or value is {@code null}, or if a value is duplicated (bound to
      *         more than one key).
      */
-    public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
-            final V v5) {
-        final BiMap<K, V> map = new BiMap<>(5);
+    public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5)
+            throws IllegalArgumentException {
+        final BiMap<K, V> map = new BiMap<>(capacityFor(5));
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -625,6 +734,11 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with six key-value pairs.
      * This method provides a convenient way to create a BiMap with six entries.
+     *
+     * <p>A key repeated in the argument list keeps only its last value, so the returned BiMap can contain
+     * fewer entries than pairs supplied. A <i>value</i> that is still bound when it is supplied again is
+     * rejected with {@link IllegalArgumentException} if it is bound to a different key; repeating the same
+     * key-value mapping is allowed. A value displaced earlier by a repeated key may be reused.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -648,13 +762,14 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param v5 the value to be associated with the fifth key in the BiMap.
      * @param k6 the sixth key to be inserted into the BiMap.
      * @param v6 the value to be associated with the sixth key in the BiMap.
-     * @return a BiMap containing the specified key-value pairs.
+     * @return a BiMap containing the specified key-value pairs; a key repeated in the argument list keeps
+     *         only its last value, so the result can contain fewer entries than pairs supplied.
      * @throws IllegalArgumentException if any key or value is {@code null}, or if a value is duplicated (bound to
      *         more than one key).
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
-            final K k6, final V v6) {
-        final BiMap<K, V> map = new BiMap<>(6);
+            final K k6, final V v6) throws IllegalArgumentException {
+        final BiMap<K, V> map = new BiMap<>(capacityFor(6));
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -669,6 +784,11 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with seven key-value pairs.
      * This method provides a convenient way to create a BiMap with seven entries.
+     *
+     * <p>A key repeated in the argument list keeps only its last value, so the returned BiMap can contain
+     * fewer entries than pairs supplied. A <i>value</i> that is still bound when it is supplied again is
+     * rejected with {@link IllegalArgumentException} if it is bound to a different key; repeating the same
+     * key-value mapping is allowed. A value displaced earlier by a repeated key may be reused.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -695,13 +815,14 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param v6 the value to be associated with the sixth key in the BiMap.
      * @param k7 the seventh key to be inserted into the BiMap.
      * @param v7 the value to be associated with the seventh key in the BiMap.
-     * @return a BiMap containing the specified key-value pairs.
+     * @return a BiMap containing the specified key-value pairs; a key repeated in the argument list keeps
+     *         only its last value, so the result can contain fewer entries than pairs supplied.
      * @throws IllegalArgumentException if any key or value is {@code null}, or if a value is duplicated (bound to
      *         more than one key).
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
-            final K k6, final V v6, final K k7, final V v7) {
-        final BiMap<K, V> map = new BiMap<>(7);
+            final K k6, final V v6, final K k7, final V v7) throws IllegalArgumentException {
+        final BiMap<K, V> map = new BiMap<>(capacityFor(7));
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -717,6 +838,11 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with eight key-value pairs.
      * This method provides a convenient way to create a BiMap with eight entries.
+     *
+     * <p>A key repeated in the argument list keeps only its last value, so the returned BiMap can contain
+     * fewer entries than pairs supplied. A <i>value</i> that is still bound when it is supplied again is
+     * rejected with {@link IllegalArgumentException} if it is bound to a different key; repeating the same
+     * key-value mapping is allowed. A value displaced earlier by a repeated key may be reused.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -744,13 +870,14 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param v7 the value to be associated with the seventh key in the BiMap.
      * @param k8 the eighth key to be inserted into the BiMap.
      * @param v8 the value to be associated with the eighth key in the BiMap.
-     * @return a BiMap containing the specified key-value pairs.
+     * @return a BiMap containing the specified key-value pairs; a key repeated in the argument list keeps
+     *         only its last value, so the result can contain fewer entries than pairs supplied.
      * @throws IllegalArgumentException if any key or value is {@code null}, or if a value is duplicated (bound to
      *         more than one key).
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
-            final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) {
-        final BiMap<K, V> map = new BiMap<>(8);
+            final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) throws IllegalArgumentException {
+        final BiMap<K, V> map = new BiMap<>(capacityFor(8));
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -767,6 +894,11 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with nine key-value pairs.
      * This method provides a convenient way to create a BiMap with nine entries.
+     *
+     * <p>A key repeated in the argument list keeps only its last value, so the returned BiMap can contain
+     * fewer entries than pairs supplied. A <i>value</i> that is still bound when it is supplied again is
+     * rejected with {@link IllegalArgumentException} if it is bound to a different key; repeating the same
+     * key-value mapping is allowed. A value displaced earlier by a repeated key may be reused.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -797,13 +929,14 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param v8 the value to be associated with the eighth key in the BiMap.
      * @param k9 the ninth key to be inserted into the BiMap.
      * @param v9 the value to be associated with the ninth key in the BiMap.
-     * @return a BiMap containing the specified key-value pairs.
+     * @return a BiMap containing the specified key-value pairs; a key repeated in the argument list keeps
+     *         only its last value, so the result can contain fewer entries than pairs supplied.
      * @throws IllegalArgumentException if any key or value is {@code null}, or if a value is duplicated (bound to
      *         more than one key).
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
-            final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) {
-        final BiMap<K, V> map = new BiMap<>(9);
+            final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9) throws IllegalArgumentException {
+        final BiMap<K, V> map = new BiMap<>(capacityFor(9));
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -821,6 +954,11 @@ public final class BiMap<K, V> implements Map<K, V> {
     /**
      * Creates a new BiMap with ten key-value pairs.
      * This method provides a convenient way to create a BiMap with ten entries.
+     *
+     * <p>A key repeated in the argument list keeps only its last value, so the returned BiMap can contain
+     * fewer entries than pairs supplied. A <i>value</i> that is still bound when it is supplied again is
+     * rejected with {@link IllegalArgumentException} if it is bound to a different key; repeating the same
+     * key-value mapping is allowed. A value displaced earlier by a repeated key may be reused.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -852,13 +990,15 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param v9 the value to be associated with the ninth key in the BiMap.
      * @param k10 the tenth key to be inserted into the BiMap.
      * @param v10 the value to be associated with the tenth key in the BiMap.
-     * @return a BiMap containing the specified key-value pairs.
+     * @return a BiMap containing the specified key-value pairs; a key repeated in the argument list keeps
+     *         only its last value, so the result can contain fewer entries than pairs supplied.
      * @throws IllegalArgumentException if any key or value is {@code null}, or if a value is duplicated (bound to
      *         more than one key).
      */
     public static <K, V> BiMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5, final V v5,
-            final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10) {
-        final BiMap<K, V> map = new BiMap<>(10);
+            final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10)
+            throws IllegalArgumentException {
+        final BiMap<K, V> map = new BiMap<>(capacityFor(10));
 
         map.put(k1, v1);
         map.put(k2, v2);
@@ -886,23 +1026,52 @@ public final class BiMap<K, V> implements Map<K, V> {
      * BiMap<String, Integer> biMap = BiMap.copyOf(map);
      * }</pre>
      *
+     * <p>When {@code map} is itself a {@code BiMap}, this is equivalent to {@link #copy()} on it: the copy
+     * is built from that BiMap's own map suppliers, so a source backed by identity- or comparator-keyed
+     * maps is reproduced exactly rather than being rebuilt through {@link HashMap}.</p>
+     *
+     * <p><b>Iteration order is best-effort, not guaranteed.</b> For any other source this method mirrors the
+     * source's runtime map class, so a {@link java.util.LinkedHashMap} or {@link java.util.SortedMap} source
+     * does keep its order (a {@code SortedMap}'s comparator included). A source whose class cannot be
+     * instantiated reflectively - {@code Collections.unmodifiableMap(aLinkedHashMap)}, for instance - falls
+     * back to a {@link HashMap}, and its order is then lost. Use {@link #builder()} and insert the entries
+     * yourself, or supply explicit map suppliers to {@link #BiMap(Supplier, Supplier)}, when a particular
+     * iteration order must be guaranteed.</p>
+     *
      * @param <K> the type of the keys in the map.
      * @param <V> the type of the values in the map.
      * @param map the map whose entries are to be placed into the new BiMap, must not be {@code null}.
      * @return a new BiMap containing the same entries as the provided map.
-     * @throws NullPointerException if {@code map} itself is {@code null}.
-     * @throws IllegalArgumentException if any key or value in {@code map} is {@code null}, or if {@code map}
-     *         contains a duplicated value (bound to more than one key).
+     * @throws IllegalArgumentException if {@code map}, any key, or any value is {@code null}; if a value is
+     *         bound to more than one key; or if {@code map} is a {@code BiMap} whose map suppliers do not
+     *         return a new, empty, distinct map on each call, as required by the delegated {@link #copy()} operation.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <K, V> BiMap<K, V> copyOf(final Map<? extends K, ? extends V> map) {
+    public static <K, V> BiMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws IllegalArgumentException {
+        // Reject null up front, before allocating the
+        // two backing maps and their suppliers.
+        N.checkArgNotNull(map, cs.map);
+
+        if (map instanceof BiMap) {
+            // Mirroring the runtime class of a BiMap source would build a BiMap-backed BiMap (twice the
+            // maps, every put validated twice) AND, worse, would rebuild it through the plain HashMap that
+            // Suppliers.ofMap(BiMap.class) produces - silently discarding a source whose own backing maps
+            // key by identity or by a comparator. Two identity-distinct but equal keys then collapse into
+            // one, and two identity-distinct but equal values are rejected as a duplicate. The source's own
+            // copy() already reproduces it faithfully through its own suppliers.
+            return ((BiMap<K, V>) map).copy();
+        }
+
         final Map<K, V> keyMap = Maps.newTargetMap(map);
         final Map<V, K> valueMap = Maps.newOrderingMap(map);
 
         // Preserve a SortedMap's comparator in the key-map supplier: deriving the supplier from
         // keyMap.getClass() builds natural-order TreeMaps, so copy()/inverse().copy() of a BiMap
         // copied from a comparator-backed TreeMap would throw CCE for non-Comparable keys.
-        final Supplier<? extends Map<K, V>> keyMapSupplier = map instanceof SortedMap ? () -> new TreeMap(((SortedMap) map).comparator())
+        // Capture the comparator itself rather than `map`: the supplier outlives this call (it is held by
+        // the BiMap, its inverse and every copy), and capturing `map` would pin the whole source map.
+        final Comparator<?> sourceComparator = map instanceof SortedMap ? ((SortedMap<K, V>) map).comparator() : null;
+        final Supplier<? extends Map<K, V>> keyMapSupplier = map instanceof SortedMap ? () -> new TreeMap(sourceComparator)
                 : Suppliers.ofMap(keyMap.getClass());
         final Supplier<? extends Map<V, K>> valueMapSupplier = Suppliers.ofMap(valueMap.getClass());
 
@@ -929,6 +1098,32 @@ public final class BiMap<K, V> implements Map<K, V> {
     @Override
     public V get(final Object key) {
         return keyMap.get(key);
+    }
+
+    /**
+     * Returns the value to which the specified key is mapped, or {@code defaultValue} if this BiMap
+     * contains no mapping for the key.
+     *
+     * <p>Delegates to the forward backing map, so this is a single lookup. The inherited
+     * {@link Map#getOrDefault(Object, Object)} default would follow a missed {@code get} with a second
+     * {@code containsKey} probe, which a BiMap never needs: it stores no {@code null} value, so a
+     * {@code null} from {@code get} already means "absent".</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = BiMap.of("one", 1);
+     * map.getOrDefault("one", 0);   // returns 1
+     * map.getOrDefault("two", 0);   // returns 0
+     * }</pre>
+     *
+     * @param key the key whose associated value is to be returned.
+     * @param defaultValue the value to return if this BiMap contains no mapping for the key.
+     * @return the value to which the specified key is mapped, or {@code defaultValue} if there is no mapping for the key.
+     * @see #getByValueOrDefault(Object, Object)
+     */
+    @Override
+    public V getOrDefault(final Object key, final V defaultValue) {
+        return keyMap.getOrDefault(key, defaultValue);
     }
 
     /**
@@ -1006,7 +1201,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @see #forcePut(Object, Object)
      */
     @Override
-    public V put(final K key, final V value) {
+    public V put(final K key, final V value) throws IllegalArgumentException {
         return put(key, value, false);
     }
 
@@ -1033,7 +1228,9 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @see #put(Object, Object)
      */
     @Override
-    public void putAll(final Map<? extends K, ? extends V> m) {
+    public void putAll(final Map<? extends K, ? extends V> m) throws NullPointerException, IllegalArgumentException {
+        N.requireNonNull(m, "m");
+
         for (final Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
             put(e.getKey(), e.getValue());
         }
@@ -1091,11 +1288,14 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @throws IllegalArgumentException if the key or value is {@code null}.
      * @see #put(Object, Object)
      */
-    public V forcePut(final K key, final V value) {
+    public V forcePut(final K key, final V value) throws IllegalArgumentException {
         return put(key, value, true);
     }
 
-    private V put(final K key, final V value, final boolean isForce) {
+    /**
+     * @throws IllegalArgumentException if {@code key} or {@code value} is {@code null}, or {@code isForce} is false and the value is already bound to another key
+     */
+    private V put(final K key, final V value, final boolean isForce) throws IllegalArgumentException {
         if ((key == null) || (value == null)) {
             throw new IllegalArgumentException("Key and value cannot be null");
         }
@@ -1103,17 +1303,23 @@ public final class BiMap<K, V> implements Map<K, V> {
         final V oldValue = keyMap.get(key);
         final K keyForValue = valueMap.get(value);
         final K keyForOldValue = oldValue == null ? null : valueMap.get(oldValue);
-        final boolean sameMapping = oldValue != null && valueMap.containsKey(value) && keyForValue == keyForOldValue;
+        // No insertion path stores a null key or value, so valueMap never holds a null value: a non-null
+        // keyForValue is exactly valueMap.containsKey(value), and saves two more lookups on this hot path.
+        final boolean valueAlreadyBound = keyForValue != null;
+        final boolean sameMapping = oldValue != null && valueAlreadyBound && keyForValue == keyForOldValue;
         // Maps such as TreeMap and HashMap retain the stored key object when an equivalent key is
         // updated. Keep that canonical key in the inverse map as well; otherwise the two directions
-        // can expose different key objects after put(equivalentKey, newValue).
-        final K canonicalKey = oldValue == null ? key : keyForOldValue;
+        // can expose different key objects after put(equivalentKey, newValue). A missed reverse lookup
+        // (a value whose hashCode or ordering changed while it was stored, or a backing map that dropped
+        // the entry of its own accord) must NOT inject a null into valueMap: that falsifies the invariant
+        // stated above, which would silently disable the value-uniqueness check for that value.
+        K canonicalKey = oldValue == null || keyForOldValue == null ? key : keyForOldValue;
 
         // Compare the inverse entries, rather than K.equals/V.equals, so both backing maps' own
         // equality semantics are honored (including comparator-based TreeMaps). Two equivalent
         // lookups in valueMap return the same stored key reference.
-        if (!isForce && valueMap.containsKey(value) && !sameMapping) {
-            throw new IllegalArgumentException("Value already exists: " + value);
+        if (!isForce && valueAlreadyBound && !sameMapping) {
+            throw new IllegalArgumentException("Value already exists: " + value + " is already bound to key: " + keyForValue);
         }
 
         // No-op when the exact mapping already exists: documented for forcePut, and re-inserting
@@ -1123,22 +1329,145 @@ public final class BiMap<K, V> implements Map<K, V> {
             return oldValue;
         }
 
-        if (oldValue != null) {
-            valueMap.remove(oldValue);
+        // Both backing maps are written below. If either rejects a write - a comparator-backed TreeMap
+        // that cannot order the value, for example - undo whatever has already been written: a
+        // half-committed mutation leaves this BiMap permanently non-bijective, and the entry displaced
+        // by forcePut would otherwise be destroyed outright.
+        // Capture the displaced objects before removal. Restoring the incoming (merely equivalent) value
+        // would change the original mapping's object identity even when the rollback otherwise succeeds.
+        final K displacedKey = keyForValue;
+        final V displacedValue = displacedKey == null ? null : keyMap.get(displacedKey);
+        V displacedReverseValue = displacedValue;
+
+        if (displacedKey != null && (displacedValue == null || valueMap.get(displacedValue) != displacedKey)) {
+            // An orphaned reverse binding may have no matching forward entry. Preserve what was actually
+            // present rather than manufacturing a new forward mapping during rollback.
+            displacedReverseValue = value;
+
+            for (final Map.Entry<V, K> entry : valueMap.entrySet()) {
+                if (entry.getValue() == displacedKey) {
+                    displacedReverseValue = entry.getKey();
+                    break;
+                }
+            }
         }
 
-        final K oldKey = valueMap.remove(value);
+        boolean restoreOldReverse = false;
+        boolean displacedReverseRemovalAttempted = false;
+        boolean displacedForwardRemovalAttempted = false;
+        boolean forwardWriteAttempted = false;
+        boolean reverseWriteAttempted = false;
 
-        if (oldKey != null) {
-            keyMap.remove(oldKey);
+        try {
+            if (oldValue != null) {
+                // Mark a reachable binding before attempting removal: a custom map can throw after
+                // changing it. Rollback checks the current mapping and skips a write if it is intact.
+                restoreOldReverse = keyForOldValue != null;
+                if (valueMap.remove(oldValue) != null) {
+                    restoreOldReverse = true;
+                } else {
+                    // The old value can no longer be found by value, so its reverse entry would survive as
+                    // a stale duplicate and desynchronize the two maps. Drop it by key instead - but match
+                    // that key by identity against the object keyMap itself holds, because the forward map
+                    // decides what "the same key" means and it need not be equals() (an IdentityHashMap
+                    // keeps two equal keys apart; a comparator-keyed TreeMap merges two unequal ones). The
+                    // incumbent is the forward key bound to this very value object; values are unique, so
+                    // at most one entry matches. This scan runs only on that already inconsistent path,
+                    // never on the normal one.
+                    K incumbentKey = key;
+
+                    for (final Map.Entry<K, V> entry : keyMap.entrySet()) {
+                        if (entry.getValue() == oldValue) {
+                            incumbentKey = entry.getKey();
+                            break;
+                        }
+                    }
+
+                    final K staleKey = incumbentKey;
+                    // Only an entry that was really dropped may be restored below: re-inserting a reverse
+                    // entry that was never there can evict a live one from a bounded backing map.
+                    restoreOldReverse = valueMap.values().removeIf(storedKey -> storedKey == staleKey);
+                    canonicalKey = staleKey;
+                }
+            }
+
+            displacedReverseRemovalAttempted = displacedKey != null;
+            valueMap.remove(value);
+
+            if (displacedKey != null) {
+                displacedForwardRemovalAttempted = true;
+                keyMap.remove(displacedKey);
+            }
+
+            // put without a prior remove(key) so an existing key keeps its position in ordered backing
+            // maps (LinkedHashMap re-insertion would move it to the end).
+            forwardWriteAttempted = true;
+            keyMap.put(key, value);
+            reverseWriteAttempted = true;
+            valueMap.put(value, canonicalKey);
+        } catch (final RuntimeException | Error e) {
+            // Each undo is guarded on its own: a backing map that rejects one restoring write must not
+            // abandon the remaining ones, and the entry displaced by forcePut - restored last, because an
+            // inconsistent map can bind `value` to `key` itself, in which case the forward undo above must
+            // run first - is the one piece of state that is otherwise destroyed outright.
+            if (reverseWriteAttempted) {
+                // A put implementation may insert and then throw. Remove that new reverse binding before
+                // restoring either original one; otherwise a failed write can leave a phantom value.
+                restoreMapping(valueMap, value, null, e);
+            }
+
+            if (forwardWriteAttempted) {
+                restoreMapping(keyMap, canonicalKey, oldValue, e);
+            }
+
+            if (restoreOldReverse) {
+                restoreMapping(valueMap, oldValue, canonicalKey, e);
+            }
+
+            if (displacedForwardRemovalAttempted) {
+                restoreMapping(keyMap, displacedKey, displacedValue, e);
+            }
+
+            if (displacedReverseRemovalAttempted) {
+                // Its removal precedes the forward removal and can need undoing even if that removal
+                // failed. Guard each direction separately so one failed restore cannot skip the other.
+                restoreMapping(valueMap, displacedReverseValue, displacedKey, e);
+            }
+
+            throw e;
         }
-
-        // put without a prior remove(key) so an existing key keeps its position in ordered backing
-        // maps (LinkedHashMap re-insertion would move it to the end).
-        keyMap.put(key, value);
-        valueMap.put(value, canonicalKey);
 
         return oldValue;
+    }
+
+    /** Restores one original mapping (null means absent), without rewriting an already intact entry. */
+    private static <K, V> void restoreMapping(final Map<K, V> map, final K key, final V originalValue, final Throwable thrown) {
+        try {
+            if (map.get(key) != originalValue) {
+                if (originalValue == null) {
+                    map.remove(key);
+                } else {
+                    map.put(key, originalValue);
+                }
+            }
+        } catch (final RuntimeException | Error restoreFailed) {
+            addSuppressedRestoreFailure(thrown, restoreFailed);
+        }
+    }
+
+    /**
+     * Attaches a failed undo to the exception that is about to propagate, so a failing restore never hides
+     * why the mutation itself failed. A backing map that throws one cached exception instance would
+     * otherwise make {@code addSuppressed} raise {@code IllegalArgumentException: Self-suppression not
+     * permitted} - the very exception type {@link #put} documents for its own contract violations.
+     *
+     * @param thrown the exception the mutator is about to rethrow
+     * @param restoreFailed the exception a restoring write threw
+     */
+    private static void addSuppressedRestoreFailure(final Throwable thrown, final Throwable restoreFailed) {
+        if (restoreFailed != thrown) {
+            thrown.addSuppressed(restoreFailed);
+        }
     }
 
     /**
@@ -1157,12 +1486,14 @@ public final class BiMap<K, V> implements Map<K, V> {
      * }</pre>
      *
      * @param m the map whose entries are to be force-inserted into this BiMap, must not be {@code null}.
-     * @throws NullPointerException if {@code m} is {@code null}.
-     * @throws IllegalArgumentException if any key or value is {@code null}.
+     * @throws IllegalArgumentException if {@code m} is {@code null}
+     *         or if any key or value is {@code null}.
      * @see #forcePut(Object, Object)
      * @see #putAll(Map)
      */
-    public void forcePutAll(final Map<? extends K, ? extends V> m) {
+    public void forcePutAll(final Map<? extends K, ? extends V> m) throws IllegalArgumentException {
+        N.checkArgNotNull(m, cs.m);
+
         for (final Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
             forcePut(e.getKey(), e.getValue());
         }
@@ -1193,7 +1524,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @see #forcePut(Object, Object)
      */
     @Override
-    public V putIfAbsent(final K key, final V value) {
+    public V putIfAbsent(final K key, final V value) throws IllegalArgumentException {
         if ((key == null) || (value == null)) {
             throw new IllegalArgumentException("Key and value cannot be null");
         }
@@ -1324,17 +1655,26 @@ public final class BiMap<K, V> implements Map<K, V> {
      * The returned set is a view backed by the BiMap, so changes to the BiMap are reflected in the set,
      * but the set itself cannot be modified directly.
      *
+     * <p>This view, {@link #values()} and {@link #entrySet()} all iterate the forward (key-to-value)
+     * backing map, so their iteration orders correspond entry for entry.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2);
-     * Set<String> keys = map.keySet();   // returns ["one", "two"]
+     * Set<String> keys = map.keySet();   // contains "one" and "two" (iteration order follows the backing map)
      * }</pre>
      *
      * @return An immutable set of the keys contained in this BiMap.
      */
     @Override
     public ImmutableSet<K> keySet() {
-        return ImmutableSet.wrap(keyMap.keySet());
+        ImmutableSet<K> result = keySet;
+
+        if (result == null) {
+            keySet = result = ImmutableSet.wrap(keyMap.keySet());
+        }
+
+        return result;
     }
 
     /**
@@ -1343,24 +1683,72 @@ public final class BiMap<K, V> implements Map<K, V> {
      * The returned set is a view backed by the BiMap, so changes to the BiMap are reflected in the set,
      * but the set itself cannot be modified directly.
      *
+     * <p>The values are iterated in the order of the forward (key-to-value) backing map, so this view
+     * corresponds entry for entry with {@link #keySet()} and {@link #entrySet()}, exactly as for any other
+     * {@link Map}. It does <i>not</i> follow the reverse map's own order, which is unrelated: with ordered
+     * backing maps the two can differ, and with differently-typed backing maps (say a
+     * {@code LinkedHashMap} forward map and a {@code TreeMap} reverse map) they routinely do.</p>
+     *
+     * <p>{@code contains} is answered by the reverse map, so it stays a constant-time lookup.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiMap<String, Integer> map = BiMap.of("one", 1, "two", 2);
-     * Set<Integer> values = map.values();   // returns [1, 2]
+     * BiMap<String, Integer> map = new BiMap<>(LinkedHashMap::new, LinkedHashMap::new);
+     * map.put("a", 1);
+     * map.put("b", 2);
+     * map.put("a", 3);                      // "a" keeps its position, its value becomes 3
+     * System.out.println(map.keySet());     // prints [a, b]
+     * System.out.println(map.values());     // prints [3, 2]  - aligned with keySet()
+     * System.out.println(map.entrySet());   // prints [a=3, b=2]
      * }</pre>
      *
      * @return An immutable set of the values contained in this BiMap.
      */
     @Override
     public ImmutableSet<V> values() {
-        return ImmutableSet.wrap(valueMap.keySet());
+        ImmutableSet<V> result = values;
+
+        if (result == null) {
+            // Read the values off the FORWARD map so that keySet()/values()/entrySet() present the same
+            // entries in the same order; valueMap.keySet() holds the same elements but in the reverse
+            // map's own iteration order, which pairs values with the wrong keys positionally.
+            values = result = ImmutableSet.wrap(new AbstractSet<>() {
+                @Override
+                public Iterator<V> iterator() {
+                    return ObjIterator.of(keyMap.values().iterator());
+                }
+
+                @Override
+                public Spliterator<V> spliterator() {
+                    // Preserve the forward map's encounter order without claiming projected values are sorted.
+                    return Spliterators.spliterator(this, Spliterator.DISTINCT | (keyMap.entrySet().spliterator().characteristics() & Spliterator.ORDERED));
+                }
+
+                @Override
+                public int size() {
+                    return keyMap.size();
+                }
+
+                @Override
+                public boolean contains(final Object o) {
+                    // Keep the O(1) membership test that valueMap.keySet() provided.
+                    //noinspection SuspiciousMethodCalls
+                    return valueMap.containsKey(o);
+                }
+            });
+        }
+
+        return result;
     }
 
     /**
      * Returns an immutable set of the entries contained in this BiMap.
      * Each entry is a key-value pair from the BiMap.
-     * The returned set is a view backed by the BiMap, so changes to the BiMap are reflected in the set,
-     * but the set itself cannot be modified directly.
+     * The returned set is a live view backed by the BiMap, so changes to the BiMap are reflected in the
+     * set, but neither the set nor the entries it yields can be modified: the iterator returns
+     * {@link ImmutableEntry} snapshots, whose {@code setValue} throws
+     * {@link UnsupportedOperationException}. Iterating the set after the BiMap changes sees the new
+     * contents; an entry object obtained before the change keeps the value it was created with.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1372,29 +1760,81 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     @Override
     public ImmutableSet<Map.Entry<K, V>> entrySet() {
-        return ImmutableSet.wrap(new AbstractSet<>() {
-            @Override
-            public Iterator<Map.Entry<K, V>> iterator() {
-                return new ObjIterator<>() {
-                    private final Iterator<Map.Entry<K, V>> keyValueEntryIter = keyMap.entrySet().iterator();
+        ImmutableSet<Map.Entry<K, V>> result = entrySet;
 
-                    @Override
-                    public boolean hasNext() {
-                        return keyValueEntryIter.hasNext();
-                    }
+        if (result == null) {
+            entrySet = result = ImmutableSet.wrap(new AbstractSet<>() {
+                @Override
+                public Iterator<Map.Entry<K, V>> iterator() {
+                    return new ObjIterator<>() {
+                        private final Iterator<Map.Entry<K, V>> keyValueEntryIter = keyMap.entrySet().iterator();
 
-                    @Override
-                    public ImmutableEntry<K, V> next() {
-                        return ImmutableEntry.copyOf(keyValueEntryIter.next());
-                    }
-                };
-            }
+                        @Override
+                        public boolean hasNext() {
+                            return keyValueEntryIter.hasNext();
+                        }
 
-            @Override
-            public int size() {
-                return keyMap.size();
-            }
-        });
+                        /**
+                         * {@inheritDoc}
+                         * @throws NoSuchElementException if no entry remains in the backing-map iterator
+                         */
+                        @Override
+                        public ImmutableEntry<K, V> next() throws NoSuchElementException {
+                            return ImmutableEntry.copyOf(keyValueEntryIter.next());
+                        }
+                    };
+                }
+
+                @Override
+                public Spliterator<Map.Entry<K, V>> spliterator() {
+                    // Traverse this view so entries remain immutable snapshots, including in parallel streams.
+                    return Spliterators.spliterator(this, Spliterator.DISTINCT | (keyMap.entrySet().spliterator().characteristics() & Spliterator.ORDERED));
+                }
+
+                @Override
+                public int size() {
+                    return keyMap.size();
+                }
+
+                @Override
+                public boolean contains(final Object o) {
+                    // AbstractCollection.contains would scan linearly; the forward map answers directly.
+                    return o instanceof Map.Entry<?, ?> entry && containsEntry(entry.getKey(), entry.getValue());
+                }
+            });
+        }
+
+        return result;
+    }
+
+    /**
+     * Performs the given action for each entry in this BiMap until all entries have been processed or the
+     * action throws an exception.
+     *
+     * <p>Delegates to the forward backing map so that its optimized traversal is used. The inherited
+     * {@link Map#forEach(BiConsumer)} default iterates {@link #entrySet()}, which materializes one
+     * {@link ImmutableEntry} snapshot per entry purely to read the key and value back out of it.</p>
+     *
+     * <p>The action must not modify this BiMap; doing so has the same undefined effect as modifying the
+     * backing map during any other iteration.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * BiMap<String, Integer> map = new BiMap<>(LinkedHashMap::new, LinkedHashMap::new);
+     * map.put("one", 1);
+     * map.put("two", 2);
+     * map.forEach((k, v) -> System.out.println(k + "=" + v));   // prints one=1 then two=2
+     * }</pre>
+     *
+     * @param action the action to be performed for each entry; must not be {@code null}
+     * @throws NullPointerException if {@code action} is {@code null}
+     * @see Map#forEach(BiConsumer)
+     */
+    @Override
+    public void forEach(final BiConsumer<? super K, ? super V> action) throws NullPointerException {
+        Objects.requireNonNull(action);
+
+        keyMap.forEach(action);
     }
 
     /**
@@ -1419,12 +1859,12 @@ public final class BiMap<K, V> implements Map<K, V> {
      * </p>
      *
      * @param function the function to apply to each entry; must not be {@code null}
-     * @throws IllegalArgumentException if {@code function} is {@code null}, returns {@code null} for any
-     *         entry, or produces a replacement value equal to another entry's replacement value
+     * @throws NullPointerException if {@code function} is {@code null}, as {@link Map#replaceAll} specifies
+     * @throws IllegalArgumentException if a replacement value is null or duplicated, the staging suppliers return null, non-empty, or identical maps, or the staging key map collapses keys that are distinct in the live map.
      */
     @Override
-    public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) {
-        N.checkArgNotNull(function, cs.function);
+    public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws NullPointerException, IllegalArgumentException {
+        N.requireNonNull(function, cs.function);
 
         if (keyMap.isEmpty()) {
             return;
@@ -1513,9 +1953,20 @@ public final class BiMap<K, V> implements Map<K, V> {
      * }</pre>
      *
      * @return a new BiMap containing the same entries as the current BiMap.
+     * @throws IllegalArgumentException if this BiMap's map suppliers do not return a new, empty, distinct
+     *         map on each call - a supplier that hands out one shared instance, for example.
      */
-    public BiMap<K, V> copy() {
+    public BiMap<K, V> copy() throws IllegalArgumentException {
         final BiMap<K, V> copy = new BiMap<>(keyMapSupplier, valueMapSupplier);
+
+        // The constructor can only check that the supplied maps are empty and differ from each other at
+        // that moment. A supplier handing out one shared instance therefore passes construction whenever
+        // this BiMap is still empty, and the "copy" would then be an alias: writes to it would show up
+        // here. (Once this BiMap is non-empty, that constructor check already rejects it.)
+        // Either new direction can alias either original direction when K and V have the same type.
+        if (copy.keyMap == keyMap || copy.keyMap == valueMap || copy.valueMap == keyMap || copy.valueMap == valueMap) {
+            throw new IllegalArgumentException("The map suppliers returned this BiMap's own backing maps; they must return new empty maps on every call");
+        }
 
         copy.putAll(keyMap);
 
@@ -1574,10 +2025,6 @@ public final class BiMap<K, V> implements Map<K, V> {
         return keyMap.size();
     }
 
-    //    public Stream<Map.Entry<K, V>> stream() {
-    //        return Stream.of(keyMap.entrySet());
-    //    }
-
     /**
      * Returns the hash code value for this BiMap.
      * The hash code of a BiMap is defined to be the sum of the hash codes of each entry in the BiMap,
@@ -1595,6 +2042,13 @@ public final class BiMap<K, V> implements Map<K, V> {
      * Returns {@code true} if the given object is also a {@link Map} and the two represent the same key-value mappings.
      * The comparison is delegated to the underlying key-to-value map's {@code equals} method,
      * so any {@code Map} (not just a BiMap) with the same mappings is considered equal.
+     *
+     * <p><b>Equality is delegated to the key-to-value backing map, so it is only well defined against maps
+     * that share its key equivalence.</b> Compared with a map that judges keys differently - an
+     * {@link java.util.IdentityHashMap}, or a {@link java.util.TreeMap} whose comparator is inconsistent
+     * with {@code equals} - the comparison can succeed in one direction and fail in the other, and two
+     * maps that compare equal can report different hash codes. This is inherited from
+     * {@link Map#equals(Object)}, which probes the other map with its own lookup rules.</p>
      *
      * @param obj the object to be compared for equality with this BiMap.
      * @return {@code true} if the specified object is a Map equal to this BiMap, {@code false} otherwise.
@@ -1660,7 +2114,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      *         {@code null}, or if {@code map} contains duplicate values.
      */
     public static <K, V> Builder<K, V> builder(final Map<K, V> map) throws IllegalArgumentException {
-        N.checkArgNotNull(map);
+        N.checkArgNotNull(map, cs.map);
 
         return new Builder<>(map);
     }
@@ -1687,10 +2141,11 @@ public final class BiMap<K, V> implements Map<K, V> {
          * Creates a Builder backed by a new BiMap pre-populated with the entries of {@code backedMap}.
          *
          * @param backedMap the map whose entries seed the BiMap being built; it is copied, not wrapped.
+         * @throws NullPointerException if {@code backedMap} is {@code null}.
          * @throws IllegalArgumentException if any key or value in {@code backedMap} is {@code null}, or if
          *         {@code backedMap} contains a duplicated value (bound to more than one key).
          */
-        Builder(final Map<K, V> backedMap) {
+        Builder(final Map<K, V> backedMap) throws NullPointerException, IllegalArgumentException {
             biMap = BiMap.copyOf(backedMap);
         }
 
@@ -1714,7 +2169,7 @@ public final class BiMap<K, V> implements Map<K, V> {
          *         this event.
          * @see #forcePut(Object, Object)
          */
-        public Builder<K, V> put(final K key, final V value) {
+        public Builder<K, V> put(final K key, final V value) throws IllegalArgumentException {
             biMap.put(key, value);
 
             return this;
@@ -1745,7 +2200,7 @@ public final class BiMap<K, V> implements Map<K, V> {
          * @throws IllegalArgumentException if the key or value is {@code null}.
          * @see #put(Object, Object)
          */
-        public Builder<K, V> forcePut(final K key, final V value) {
+        public Builder<K, V> forcePut(final K key, final V value) throws IllegalArgumentException {
             biMap.forcePut(key, value);
 
             return this;
@@ -1772,7 +2227,7 @@ public final class BiMap<K, V> implements Map<K, V> {
          * @see #put(Object, Object)
          * @see #forcePut(Object, Object)
          */
-        public Builder<K, V> putAll(final Map<? extends K, ? extends V> m) {
+        public Builder<K, V> putAll(final Map<? extends K, ? extends V> m) throws IllegalArgumentException {
             if (N.notEmpty(m)) {
                 biMap.putAll(m);
             }

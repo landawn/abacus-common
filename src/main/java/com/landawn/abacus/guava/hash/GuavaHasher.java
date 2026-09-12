@@ -18,6 +18,7 @@ package com.landawn.abacus.guava.hash;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.Objects;
 
 import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
@@ -53,7 +54,7 @@ final class GuavaHasher implements Hasher {
      * @param gHasher the Guava hasher to wrap, must not be {@code null}
      * @throws NullPointerException if {@code gHasher} is {@code null}
      */
-    GuavaHasher(final com.google.common.hash.Hasher gHasher) {
+    GuavaHasher(final com.google.common.hash.Hasher gHasher) throws NullPointerException {
         N.requireNonNull(gHasher, "gHasher");
         this.gHasher = gHasher;
     }
@@ -80,7 +81,7 @@ final class GuavaHasher implements Hasher {
      * @return a new GuavaHasher instance wrapping the given hasher
      * @throws NullPointerException if {@code gHasher} is {@code null}
      */
-    static GuavaHasher wrap(final com.google.common.hash.Hasher gHasher) {
+    static GuavaHasher wrap(final com.google.common.hash.Hasher gHasher) throws NullPointerException {
         return new GuavaHasher(gHasher);
     }
 
@@ -105,9 +106,10 @@ final class GuavaHasher implements Hasher {
      *
      * @param bytes the bytes to add to the hash state
      * @return this hasher instance
+     * @throws NullPointerException if {@code bytes} is {@code null}.
      */
     @Override
-    public Hasher put(final byte[] bytes) {
+    public Hasher put(final byte[] bytes) throws NullPointerException {
         gHasher.putBytes(bytes);
         return this;
     }
@@ -115,16 +117,22 @@ final class GuavaHasher implements Hasher {
     /**
      * {@inheritDoc}
      *
-     * <p>Adds a portion of a byte array by delegating to the wrapped Guava hasher's
+     * <p>Validates the range up front with {@link Objects#checkFromIndexSize(int, int, int)} and then
+     * adds a portion of a byte array by delegating to the wrapped Guava hasher's
      * {@code putBytes(byte[], int, int)} method.
      *
      * @param bytes the source byte array
      * @param off the start offset in the array
      * @param len the number of bytes to add
      * @return this hasher instance
+     * @throws NullPointerException if {@code bytes} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or if {@code off + len > bytes.length}
      */
     @Override
-    public Hasher put(final byte[] bytes, final int off, final int len) {
+    public Hasher put(final byte[] bytes, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException {
+        // Guava's non-streaming hashers (farmHashFingerprint64) allocate `len` bytes BEFORE bounds-checking,
+        // so an oversized len became an OutOfMemoryError instead of the documented IndexOutOfBoundsException.
+        Objects.checkFromIndexSize(off, len, bytes.length);
         gHasher.putBytes(bytes, off, len);
         return this;
     }
@@ -137,9 +145,10 @@ final class GuavaHasher implements Hasher {
      *
      * @param bytes the buffer containing bytes to add
      * @return this hasher instance
+     * @throws NullPointerException if {@code bytes} is {@code null}.
      */
     @Override
-    public Hasher put(final ByteBuffer bytes) {
+    public Hasher put(final ByteBuffer bytes) throws NullPointerException {
         gHasher.putBytes(bytes);
         return this;
     }
@@ -273,10 +282,10 @@ final class GuavaHasher implements Hasher {
      * @param len the number of characters to add
      * @return this hasher instance
      * @throws IllegalArgumentException if {@code len} is negative.
-     * @throws IndexOutOfBoundsException if {@code off} is negative, or if {@code off + len > chars.length}
+     * @throws IndexOutOfBoundsException if {@code off} is negative or the requested range exceeds the array length, treating a {@code null} array as empty.
      */
     @Override
-    public Hasher put(final char[] chars, final int off, final int len) throws IndexOutOfBoundsException {
+    public Hasher put(final char[] chars, final int off, final int len) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(off, len, N.len(chars));
 
         for (int i = off, to = off + len; i < to; i++) {
@@ -294,9 +303,10 @@ final class GuavaHasher implements Hasher {
      *
      * @param charSequence the character sequence to add
      * @return this hasher instance
+     * @throws NullPointerException if {@code charSequence} is {@code null}.
      */
     @Override
-    public Hasher put(final CharSequence charSequence) {
+    public Hasher put(final CharSequence charSequence) throws NullPointerException {
         gHasher.putUnencodedChars(charSequence);
         return this;
     }
@@ -310,9 +320,10 @@ final class GuavaHasher implements Hasher {
      * @param charSequence the character sequence to add
      * @param charset the charset used to encode the characters
      * @return this hasher instance
+     * @throws NullPointerException if {@code charSequence} or {@code charset} is {@code null}.
      */
     @Override
-    public Hasher put(final CharSequence charSequence, final Charset charset) {
+    public Hasher put(final CharSequence charSequence, final Charset charset) throws NullPointerException {
         gHasher.putString(charSequence, charset);
         return this;
     }

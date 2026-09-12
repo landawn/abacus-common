@@ -1,20 +1,24 @@
 package com.landawn.abacus.logging;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
 public class AbstractLoggerTest extends TestBase {
+
+    private static final String[] LEVELS = { "TRACE", "DEBUG", "INFO", "WARN", "ERROR" };
 
     private TestLogger logger;
 
@@ -143,791 +147,501 @@ public class AbstractLoggerTest extends TestBase {
         logger = new TestLogger("test.logger");
     }
 
-    @Test
-    @DisplayName("Test getName method")
-    public void testGetName() {
-        assertEquals("test.logger", logger.getName());
+    private void setEnabled(String level, boolean enabled) {
+        switch (level) {
+            case "TRACE" -> logger.traceEnabled = enabled;
+            case "DEBUG" -> logger.debugEnabled = enabled;
+            case "INFO" -> logger.infoEnabled = enabled;
+            case "WARN" -> logger.warnEnabled = enabled;
+            case "ERROR" -> logger.errorEnabled = enabled;
+            default -> throw new AssertionError(level);
+        }
+    }
 
-        TestLogger logger2 = new TestLogger("another.logger");
-        assertEquals("another.logger", logger2.getName());
+    private void logTemplate(String level, String template, Object... args) {
+        int n = args.length;
+        if ("TRACE".equals(level)) {
+            if (n == 1) {
+                logger.trace(template, args[0]);
+            } else if (n == 2) {
+                logger.trace(template, args[0], args[1]);
+            } else if (n == 3) {
+                logger.trace(template, args[0], args[1], args[2]);
+            } else if (n == 4) {
+                logger.trace(template, args[0], args[1], args[2], args[3]);
+            } else if (n == 5) {
+                logger.trace(template, args[0], args[1], args[2], args[3], args[4]);
+            } else if (n == 6) {
+                logger.trace(template, args[0], args[1], args[2], args[3], args[4], args[5]);
+            } else if (n == 7) {
+                logger.trace(template, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+            } else {
+                logger.trace(template, args);
+            }
+        } else if ("DEBUG".equals(level)) {
+            if (n == 1) {
+                logger.debug(template, args[0]);
+            } else if (n == 2) {
+                logger.debug(template, args[0], args[1]);
+            } else if (n == 3) {
+                logger.debug(template, args[0], args[1], args[2]);
+            } else if (n == 4) {
+                logger.debug(template, args[0], args[1], args[2], args[3]);
+            } else if (n == 5) {
+                logger.debug(template, args[0], args[1], args[2], args[3], args[4]);
+            } else if (n == 6) {
+                logger.debug(template, args[0], args[1], args[2], args[3], args[4], args[5]);
+            } else if (n == 7) {
+                logger.debug(template, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+            } else {
+                logger.debug(template, args);
+            }
+        } else if ("INFO".equals(level)) {
+            if (n == 1) {
+                logger.info(template, args[0]);
+            } else if (n == 2) {
+                logger.info(template, args[0], args[1]);
+            } else if (n == 3) {
+                logger.info(template, args[0], args[1], args[2]);
+            } else if (n == 4) {
+                logger.info(template, args[0], args[1], args[2], args[3]);
+            } else if (n == 5) {
+                logger.info(template, args[0], args[1], args[2], args[3], args[4]);
+            } else if (n == 6) {
+                logger.info(template, args[0], args[1], args[2], args[3], args[4], args[5]);
+            } else if (n == 7) {
+                logger.info(template, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+            } else {
+                logger.info(template, args);
+            }
+        } else if ("WARN".equals(level)) {
+            if (n == 1) {
+                logger.warn(template, args[0]);
+            } else if (n == 2) {
+                logger.warn(template, args[0], args[1]);
+            } else if (n == 3) {
+                logger.warn(template, args[0], args[1], args[2]);
+            } else if (n == 4) {
+                logger.warn(template, args[0], args[1], args[2], args[3]);
+            } else if (n == 5) {
+                logger.warn(template, args[0], args[1], args[2], args[3], args[4]);
+            } else if (n == 6) {
+                logger.warn(template, args[0], args[1], args[2], args[3], args[4], args[5]);
+            } else if (n == 7) {
+                logger.warn(template, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+            } else {
+                logger.warn(template, args);
+            }
+        } else if ("ERROR".equals(level)) {
+            if (n == 1) {
+                logger.error(template, args[0]);
+            } else if (n == 2) {
+                logger.error(template, args[0], args[1]);
+            } else if (n == 3) {
+                logger.error(template, args[0], args[1], args[2]);
+            } else if (n == 4) {
+                logger.error(template, args[0], args[1], args[2], args[3]);
+            } else if (n == 5) {
+                logger.error(template, args[0], args[1], args[2], args[3], args[4]);
+            } else if (n == 6) {
+                logger.error(template, args[0], args[1], args[2], args[3], args[4], args[5]);
+            } else if (n == 7) {
+                logger.error(template, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+            } else {
+                logger.error(template, args);
+            }
+        } else {
+            throw new AssertionError(level);
+        }
+    }
+
+    private void logThrowable(String level, Throwable t, String template, Object... args) {
+        int n = args.length;
+        if ("TRACE".equals(level)) {
+            if (n == 0) {
+                logger.trace(t, template);
+            } else if (n == 1) {
+                logger.trace(t, template, args[0]);
+            } else if (n == 2) {
+                logger.trace(t, template, args[0], args[1]);
+            } else {
+                logger.trace(t, template, args[0], args[1], args[2]);
+            }
+        } else if ("DEBUG".equals(level)) {
+            if (n == 0) {
+                logger.debug(t, template);
+            } else if (n == 1) {
+                logger.debug(t, template, args[0]);
+            } else if (n == 2) {
+                logger.debug(t, template, args[0], args[1]);
+            } else {
+                logger.debug(t, template, args[0], args[1], args[2]);
+            }
+        } else if ("INFO".equals(level)) {
+            if (n == 0) {
+                logger.info(t, template);
+            } else if (n == 1) {
+                logger.info(t, template, args[0]);
+            } else if (n == 2) {
+                logger.info(t, template, args[0], args[1]);
+            } else {
+                logger.info(t, template, args[0], args[1], args[2]);
+            }
+        } else if ("WARN".equals(level)) {
+            if (n == 0) {
+                logger.warn(t, template);
+            } else if (n == 1) {
+                logger.warn(t, template, args[0]);
+            } else if (n == 2) {
+                logger.warn(t, template, args[0], args[1]);
+            } else {
+                logger.warn(t, template, args[0], args[1], args[2]);
+            }
+        } else if ("ERROR".equals(level)) {
+            if (n == 0) {
+                logger.error(t, template);
+            } else if (n == 1) {
+                logger.error(t, template, args[0]);
+            } else if (n == 2) {
+                logger.error(t, template, args[0], args[1]);
+            } else {
+                logger.error(t, template, args[0], args[1], args[2]);
+            }
+        } else {
+            throw new AssertionError(level);
+        }
+    }
+
+    private void logSupplier(String level, Supplier<String> supplier) {
+        switch (level) {
+            case "TRACE" -> logger.trace(supplier);
+            case "DEBUG" -> logger.debug(supplier);
+            case "INFO" -> logger.info(supplier);
+            case "WARN" -> logger.warn(supplier);
+            case "ERROR" -> logger.error(supplier);
+            default -> throw new AssertionError(level);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void logSupplierThrowable(String level, Supplier<String> supplier, Throwable t) {
+        switch (level) {
+            case "TRACE" -> logger.trace(supplier, t);
+            case "DEBUG" -> logger.debug(supplier, t);
+            case "INFO" -> logger.info(supplier, t);
+            case "WARN" -> logger.warn(supplier, t);
+            case "ERROR" -> logger.error(supplier, t);
+            default -> throw new AssertionError(level);
+        }
+    }
+
+    private void logThrowableSupplier(String level, Throwable t, Supplier<String> supplier) {
+        switch (level) {
+            case "TRACE" -> logger.trace(t, supplier);
+            case "DEBUG" -> logger.debug(t, supplier);
+            case "INFO" -> logger.info(t, supplier);
+            case "WARN" -> logger.warn(t, supplier);
+            case "ERROR" -> logger.error(t, supplier);
+            default -> throw new AssertionError(level);
+        }
     }
 
     @Test
-    @DisplayName("Test trace with template and one argument")
-    public void testTraceWithOneArg() {
-        logger.trace("Hello {}", "World");
-        assertEquals(1, logger.logs.size());
-        assertEquals("TRACE", logger.logs.get(0).level);
-        assertEquals("Hello World", logger.logs.get(0).message);
+    public void testGetName() {
+        assertEquals("test.logger", logger.getName());
+        assertEquals("another.logger", new TestLogger("another.logger").getName());
+    }
 
+    @Test
+    public void testTemplateOverloadsAtEveryLevel() {
+        for (String level : LEVELS) {
+            logger.logs.clear();
+            logTemplate(level, "Hello {}", "World");
+            assertEquals(level, logger.logs.get(0).level);
+            assertEquals("Hello World", logger.logs.get(0).message);
+
+            logger.logs.clear();
+            logTemplate(level, "User {} at {}", "john", "10:30");
+            assertEquals("User john at 10:30", logger.logs.get(0).message);
+
+            logger.logs.clear();
+            logTemplate(level, "{} {} {}", "a", "b", "c");
+            assertEquals("a b c", logger.logs.get(0).message);
+
+            logger.logs.clear();
+            logTemplate(level, "{} {} {} {}", "a", "b", "c", "d");
+            assertEquals("a b c d", logger.logs.get(0).message);
+
+            logger.logs.clear();
+            logTemplate(level, "{} {} {} {} {}", 1, 2, 3, 4, 5);
+            assertEquals("1 2 3 4 5", logger.logs.get(0).message);
+
+            logger.logs.clear();
+            logTemplate(level, "{} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
+            assertEquals("1 2 3 4 5 6", logger.logs.get(0).message);
+
+            logger.logs.clear();
+            logTemplate(level, "{} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
+            assertEquals("1 2 3 4 5 6 7", logger.logs.get(0).message);
+
+            logger.logs.clear();
+            logTemplate(level, "{} {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7, 8);
+            assertEquals("1 2 3 4 5 6 7 8", logger.logs.get(0).message);
+        }
         logger.logs.clear();
         logger.trace("Value: %s", 42);
         assertEquals("Value: 42", logger.logs.get(0).message);
     }
 
     @Test
-    @DisplayName("Test trace with template and two arguments")
-    public void testTraceWithTwoArgs() {
-        logger.trace("User {} logged in at {}", "john", "10:30");
-        assertEquals("User john logged in at 10:30", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test trace with template and three arguments")
-    public void testTraceWithThreeArgs() {
-        logger.trace("Processing {} records for user {} at {}", 100, "alice", "2023-01-01");
-        assertEquals("Processing 100 records for user alice at 2023-01-01", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test trace with template and four arguments")
-    public void testTraceWithFourArgs() {
-        logger.trace("{} {} {} {}", "a", "b", "c", "d");
-        assertEquals("a b c d", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test trace with template and five arguments")
-    public void testTraceWithFiveArgs() {
-        logger.trace("{} {} {} {} {}", 1, 2, 3, 4, 5);
-        assertEquals("1 2 3 4 5", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test trace with template and six arguments")
-    public void testTraceWithSixArgs() {
-        logger.trace("{} {} {} {} {} {}", "a", "b", "c", "d", "e", "f");
-        assertEquals("a b c d e f", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test trace with template and seven arguments")
-    public void testTraceWithSevenArgs() {
-        logger.trace("{} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        assertEquals("1 2 3 4 5 6 7", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test trace with varargs")
-    public void testTraceWithVarargs() {
-        logger.trace("Values: {} {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7, 8);
-        assertEquals("Values: 1 2 3 4 5 6 7 8", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test trace with Supplier")
-    public void testTraceWithSupplier() {
-        Supplier<String> supplier = () -> "Expensive message";
-        logger.trace(supplier);
-        assertEquals("Expensive message", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.traceEnabled = false;
-        boolean[] called = { false };
-        logger.trace(() -> {
-            called[0] = true;
-            return "Should not be called";
-        });
-        assertFalse(called[0]);
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test trace disabled skips templated logging")
-    public void testTraceDisabledSkipsTemplatedLogging() {
-        logger.traceEnabled = false;
-        logger.trace("Template {}", "arg1");
-        logger.trace("Template {} {}", "a", "b");
-        logger.trace("Template {} {} {}", "a", "b", "c");
-        logger.trace("Template {} {} {} {}", "a", "b", "c", "d");
-        logger.trace("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
-        logger.trace("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        logger.trace("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        logger.trace("Template", "a", "b", "c", "d", "e", "f", "g", "h");
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test trace with Throwable and message")
-    public void testTraceWithThrowableAndMessage() {
-        Exception ex = new Exception("Test exception");
-        logger.trace(ex, "Error occurred");
-        assertEquals("Error occurred", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test trace with Throwable and template")
-    public void testTraceWithThrowableAndTemplate() {
+    public void testDisabledLevelSkipsTemplatesSuppliersAndThrowables() {
         Exception ex = new Exception("Test");
-        logger.trace(ex, "Error in module {}", "core");
-        assertEquals("Error in module core", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test trace with Supplier and Throwable (deprecated)")
-    @SuppressWarnings("deprecation")
-    public void testTraceWithSupplierAndThrowable() {
-        Exception ex = new Exception("Test");
-        logger.trace(() -> "Message from supplier", ex);
-        assertEquals("Message from supplier", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test trace with Throwable and Supplier")
-    public void testTraceWithThrowableAndSupplier() {
-        Exception ex = new Exception("Test");
-        logger.trace(ex, () -> "Message from supplier");
-        assertEquals("Message from supplier", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test throwable+template disabled skips logging")
-    public void testThrowableTemplateDisabledSkipsLogging() {
-        Exception ex = new Exception("Test");
-
-        logger.traceEnabled = false;
-        logger.trace(ex, "msg");
-        logger.trace(ex, "T {}", "a");
-        logger.trace(ex, "T {} {}", "a", "b");
-        logger.trace(ex, "T {} {} {}", "a", "b", "c");
-
-        logger.debugEnabled = false;
-        logger.debug(ex, "msg");
-        logger.debug(ex, "T {}", "a");
-        logger.debug(ex, "T {} {}", "a", "b");
-        logger.debug(ex, "T {} {} {}", "a", "b", "c");
-
-        logger.infoEnabled = false;
-        logger.info(ex, "msg");
-        logger.info(ex, "T {}", "a");
-        logger.info(ex, "T {} {}", "a", "b");
-        logger.info(ex, "T {} {} {}", "a", "b", "c");
-
-        logger.warnEnabled = false;
-        logger.warn(ex, "msg");
-        logger.warn(ex, "T {}", "a");
-        logger.warn(ex, "T {} {}", "a", "b");
-        logger.warn(ex, "T {} {} {}", "a", "b", "c");
-
-        logger.errorEnabled = false;
-        logger.error(ex, "msg");
-        logger.error(ex, "T {}", "a");
-        logger.error(ex, "T {} {}", "a", "b");
-        logger.error(ex, "T {} {} {}", "a", "b", "c");
-
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test logging when levels are disabled")
-    public void testLoggingWhenDisabled() {
-        logger.traceEnabled = false;
-        logger.debugEnabled = false;
-        logger.infoEnabled = false;
-        logger.warnEnabled = false;
-        logger.errorEnabled = false;
-
+        for (String level : LEVELS) {
+            setEnabled(level, false);
+            boolean[] called = { false };
+            logTemplate(level, "Template {}", "arg1");
+            logTemplate(level, "T {} {}", "a", "b");
+            logTemplate(level, "T {} {} {}", "a", "b", "c");
+            logTemplate(level, "T {} {} {} {}", "a", "b", "c", "d");
+            logTemplate(level, "T {} {} {} {} {}", 1, 2, 3, 4, 5);
+            logTemplate(level, "T {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
+            logTemplate(level, "T {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
+            logTemplate(level, "Template", "a", "b", "c", "d", "e", "f", "g", "h");
+            logThrowable(level, ex, "msg");
+            logThrowable(level, ex, "T {}", "a");
+            logThrowable(level, ex, "T {} {}", "a", "b");
+            logThrowable(level, ex, "T {} {} {}", "a", "b", "c");
+            logSupplier(level, () -> {
+                called[0] = true;
+                return "nope";
+            });
+            assertFalse(called[0], level);
+        }
         logger.trace("trace");
         logger.debug("debug");
         logger.info("info");
         logger.warn("warn");
         logger.error("error");
-
-        assertEquals(0, logger.logs.size());
-
-        boolean[] called = { false };
-        Supplier<String> supplier = () -> {
-            called[0] = true;
-            return "message";
-        };
-
-        logger.trace(supplier);
-        logger.debug(supplier);
-        logger.info(supplier);
-        logger.warn(supplier);
-        logger.error(supplier);
-
-        assertFalse(called[0]);
-    }
-
-    @Test
-    @DisplayName("Test debug with template and arguments")
-    public void testDebugWithArguments() {
-        logger.debug("Debug: {}", "test");
-        assertEquals("DEBUG", logger.logs.get(0).level);
-        assertEquals("Debug: test", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.debug("{} + {} = {}", 1, 2, 3);
-        assertEquals("1 + 2 = 3", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test debug level disabled")
-    public void testDebugDisabled() {
-        logger.debugEnabled = false;
-        logger.debug("Should not log {}", "this");
         assertEquals(0, logger.logs.size());
     }
 
     @Test
-    @DisplayName("Test debug with template and all argument counts")
-    public void testDebugWithAllArgCounts() {
-        logger.debug("One: {}", "a");
-        assertEquals("DEBUG", logger.logs.get(0).level);
-        assertEquals("One: a", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.debug("{} {}", "a", "b");
-        assertEquals("a b", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.debug("{} {} {}", "a", "b", "c");
-        assertEquals("a b c", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.debug("{} {} {} {}", "a", "b", "c", "d");
-        assertEquals("a b c d", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.debug("{} {} {} {} {}", 1, 2, 3, 4, 5);
-        assertEquals("1 2 3 4 5", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.debug("{} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        assertEquals("1 2 3 4 5 6", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.debug("{} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        assertEquals("1 2 3 4 5 6 7", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.debug("{} {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7, 8);
-        assertEquals("1 2 3 4 5 6 7 8", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test debug with Supplier")
-    public void testDebugWithSupplier() {
-        Supplier<String> supplier = () -> "Debug supplier message";
-        logger.debug(supplier);
-        assertEquals("Debug supplier message", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.debugEnabled = false;
-        boolean[] called = { false };
-        logger.debug(() -> {
-            called[0] = true;
-            return "Should not be called";
-        });
-        assertFalse(called[0]);
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test debug disabled skips templated logging")
-    public void testDebugDisabledSkipsTemplatedLogging() {
-        logger.debugEnabled = false;
-        logger.debug("Template {}", "arg1");
-        logger.debug("Template {} {}", "a", "b");
-        logger.debug("Template {} {} {}", "a", "b", "c");
-        logger.debug("Template {} {} {} {}", "a", "b", "c", "d");
-        logger.debug("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
-        logger.debug("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        logger.debug("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        logger.debug("Template", "a", "b", "c", "d", "e", "f", "g", "h");
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test debug with Throwable and message")
-    public void testDebugWithThrowableAndMessage() {
+    public void testThrowableAndSupplierOverloadsAtEveryLevel() {
         Exception ex = new Exception("Test");
-        logger.debug(ex, "Error in debug");
-        assertEquals("Error in debug", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
+        for (String level : LEVELS) {
+            logger.logs.clear();
+            logThrowable(level, ex, "Error occurred");
+            assertEquals("Error occurred", logger.logs.get(0).message);
+            assertSame(ex, logger.logs.get(0).throwable);
 
-    @Test
-    @DisplayName("Test debug with Throwable and template")
-    public void testDebugWithThrowableAndTemplate() {
-        Exception ex = new Exception("Test");
-        logger.debug(ex, "Debug error in {}", "core");
-        assertEquals("Debug error in core", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
+            logger.logs.clear();
+            logThrowable(level, ex, "Error in {}", "core");
+            assertEquals("Error in core", logger.logs.get(0).message);
 
+            logger.logs.clear();
+            logThrowable(level, ex, "{} {}", "a", "b");
+            assertEquals("a b", logger.logs.get(0).message);
+
+            logger.logs.clear();
+            logThrowable(level, ex, "{} {} {}", "a", "b", "c");
+            assertEquals("a b c", logger.logs.get(0).message);
+
+            logger.logs.clear();
+            logSupplier(level, () -> "from supplier");
+            assertEquals("from supplier", logger.logs.get(0).message);
+
+            logger.logs.clear();
+            logSupplierThrowable(level, () -> "supplier+ex", ex);
+            assertEquals("supplier+ex", logger.logs.get(0).message);
+            assertSame(ex, logger.logs.get(0).throwable);
+
+            logger.logs.clear();
+            logThrowableSupplier(level, ex, () -> "ex+supplier");
+            assertEquals("ex+supplier", logger.logs.get(0).message);
+            assertSame(ex, logger.logs.get(0).throwable);
+        }
         logger.logs.clear();
-        logger.debug(ex, "Debug {} {}", "a", "b");
-        assertEquals("Debug a b", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-
-        logger.logs.clear();
-        logger.debug(ex, "Debug {} {} {}", "a", "b", "c");
-        assertEquals("Debug a b c", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test debug with Supplier and Throwable (deprecated)")
-    @SuppressWarnings("deprecation")
-    public void testDebugWithSupplierAndThrowable() {
-        Exception ex = new Exception("Test");
-        logger.debug(() -> "Debug supplier msg", ex);
-        assertEquals("Debug supplier msg", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test debug with Throwable and Supplier")
-    public void testDebugWithThrowableAndSupplier() {
-        Exception ex = new Exception("Test");
-        logger.debug(ex, () -> "Debug t+s msg");
-        assertEquals("Debug t+s msg", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test info with template and all argument counts")
-    public void testInfoWithAllArgCounts() {
-        logger.info("One: {}", "a");
-        assertEquals("INFO", logger.logs.get(0).level);
-        assertEquals("One: a", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.info("{} {}", "a", "b");
-        assertEquals("a b", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.info("{} {} {}", "a", "b", "c");
-        assertEquals("a b c", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.info("{} {} {} {}", "a", "b", "c", "d");
-        assertEquals("a b c d", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.info("{} {} {} {} {}", 1, 2, 3, 4, 5);
-        assertEquals("1 2 3 4 5", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.info("{} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        assertEquals("1 2 3 4 5 6", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.info("{} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        assertEquals("1 2 3 4 5 6 7", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.info("{} {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7, 8);
-        assertEquals("1 2 3 4 5 6 7 8", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test info with Supplier")
-    public void testInfoWithSupplier() {
-        Supplier<String> supplier = () -> "Info supplier message";
-        logger.info(supplier);
-        assertEquals("Info supplier message", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.infoEnabled = false;
-        boolean[] called = { false };
-        logger.info(() -> {
-            called[0] = true;
-            return "Should not be called";
-        });
-        assertFalse(called[0]);
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test info disabled skips templated logging")
-    public void testInfoDisabledSkipsTemplatedLogging() {
-        logger.infoEnabled = false;
-        logger.info("Template {}", "arg1");
-        logger.info("Template {} {}", "a", "b");
-        logger.info("Template {} {} {}", "a", "b", "c");
-        logger.info("Template {} {} {} {}", "a", "b", "c", "d");
-        logger.info("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
-        logger.info("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        logger.info("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        logger.info("Template", "a", "b", "c", "d", "e", "f", "g", "h");
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test info with various argument counts")
-    public void testInfoWithArguments() {
-        logger.info("Info message");
-        assertEquals("INFO", logger.logs.get(0).level);
-
-        logger.logs.clear();
-        logger.info("User: {}", "admin");
-        assertEquals("User: admin", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.info("{} {} {} {} {}", "a", "b", "c", "d", "e");
-        assertEquals("a b c d e", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test info with Throwable and message")
-    public void testInfoWithThrowableAndMessage() {
-        Exception ex = new Exception("Test");
-        logger.info(ex, "Info error");
-        assertEquals("Info error", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test info with Throwable and template")
-    public void testInfoWithThrowableAndTemplate() {
-        Exception ex = new Exception("Test");
-        logger.info(ex, "Info error in {}", "core");
-        assertEquals("Info error in core", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-
-        logger.logs.clear();
-        logger.info(ex, "Info {} {}", "a", "b");
-        assertEquals("Info a b", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.info(ex, "Info {} {} {}", "a", "b", "c");
-        assertEquals("Info a b c", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test info with Supplier and Throwable (deprecated)")
-    @SuppressWarnings("deprecation")
-    public void testInfoWithSupplierAndThrowable() {
-        Exception ex = new Exception("Test");
-        logger.info(() -> "Info supplier msg", ex);
-        assertEquals("Info supplier msg", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test info with Throwable and Supplier")
-    public void testInfoWithThrowableAndSupplier() {
-        Exception ex = new Exception("Test");
-        logger.info(ex, () -> "Info t+s msg");
-        assertEquals("Info t+s msg", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test warn with template and all argument counts")
-    public void testWarnWithAllArgCounts() {
-        logger.warn("One: {}", "a");
-        assertEquals("WARN", logger.logs.get(0).level);
-        assertEquals("One: a", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.warn("{} {}", "a", "b");
-        assertEquals("a b", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.warn("{} {} {}", "a", "b", "c");
-        assertEquals("a b c", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.warn("{} {} {} {}", "a", "b", "c", "d");
-        assertEquals("a b c d", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.warn("{} {} {} {} {}", 1, 2, 3, 4, 5);
-        assertEquals("1 2 3 4 5", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.warn("{} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        assertEquals("1 2 3 4 5 6", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.warn("{} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        assertEquals("1 2 3 4 5 6 7", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.warn("{} {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7, 8);
-        assertEquals("1 2 3 4 5 6 7 8", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test warn with Supplier")
-    public void testWarnWithSupplier() {
-        Supplier<String> supplier = () -> "Warn supplier message";
-        logger.warn(supplier);
-        assertEquals("Warn supplier message", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.warnEnabled = false;
-        boolean[] called = { false };
-        logger.warn(() -> {
-            called[0] = true;
-            return "Should not be called";
-        });
-        assertFalse(called[0]);
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test warn disabled skips templated logging")
-    public void testWarnDisabledSkipsTemplatedLogging() {
-        logger.warnEnabled = false;
-        logger.warn("Template {}", "arg1");
-        logger.warn("Template {} {}", "a", "b");
-        logger.warn("Template {} {} {}", "a", "b", "c");
-        logger.warn("Template {} {} {} {}", "a", "b", "c", "d");
-        logger.warn("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
-        logger.warn("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        logger.warn("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        logger.warn("Template", "a", "b", "c", "d", "e", "f", "g", "h");
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test warn with exception")
-    public void testWarnWithException() {
-        Exception ex = new Exception("Warning");
         logger.warn("Warning occurred", ex);
         assertEquals("WARN", logger.logs.get(0).level);
-        assertEquals("Warning occurred", logger.logs.get(0).message);
         assertSame(ex, logger.logs.get(0).throwable);
     }
 
     @Test
-    @DisplayName("Test warn with Throwable and message")
-    public void testWarnWithThrowableAndMessage() {
-        Exception ex = new Exception("Test");
-        logger.warn(ex, "Warn error");
-        assertEquals("Warn error", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test warn with Throwable and template")
-    public void testWarnWithThrowableAndTemplate() {
-        Exception ex = new Exception("Test");
-        logger.warn(ex, "Warn error in {}", "core");
-        assertEquals("Warn error in core", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-
-        logger.logs.clear();
-        logger.warn(ex, "Warn {} {}", "a", "b");
-        assertEquals("Warn a b", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.warn(ex, "Warn {} {} {}", "a", "b", "c");
-        assertEquals("Warn a b c", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test warn with Supplier and Throwable (deprecated)")
-    @SuppressWarnings("deprecation")
-    public void testWarnWithSupplierAndThrowable() {
-        Exception ex = new Exception("Test");
-        logger.warn(() -> "Warn supplier msg", ex);
-        assertEquals("Warn supplier msg", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test warn with Throwable and Supplier")
-    public void testWarnWithThrowableAndSupplier() {
-        Exception ex = new Exception("Test");
-        logger.warn(ex, () -> "Warn t+s msg");
-        assertEquals("Warn t+s msg", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test error with all argument variations")
-    public void testErrorWithAllVariations() {
-        logger.error("Error!");
-        assertEquals("ERROR", logger.logs.get(0).level);
-
-        logger.logs.clear();
-        logger.error("Error code: {}", 500);
-        assertEquals("Error code: 500", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.error(() -> "Error from supplier");
-        assertEquals("Error from supplier", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test error with template and all argument counts")
-    public void testErrorWithAllArgCounts() {
-        logger.error("One: {}", "a");
-        assertEquals("ERROR", logger.logs.get(0).level);
-        assertEquals("One: a", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.error("{} {}", "a", "b");
-        assertEquals("a b", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.error("{} {} {}", "a", "b", "c");
-        assertEquals("a b c", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.error("{} {} {} {}", "a", "b", "c", "d");
-        assertEquals("a b c d", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.error("{} {} {} {} {}", 1, 2, 3, 4, 5);
-        assertEquals("1 2 3 4 5", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.error("{} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        assertEquals("1 2 3 4 5 6", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.error("{} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        assertEquals("1 2 3 4 5 6 7", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.error("{} {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7, 8);
-        assertEquals("1 2 3 4 5 6 7 8", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test error with Throwable and message")
-    public void testErrorWithThrowableAndMessage() {
-        Exception ex = new Exception("Test");
-        logger.error(ex, "Error occurred");
-        assertEquals("Error occurred", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test error with Throwable and template")
-    public void testErrorWithThrowableAndTemplate() {
-        Exception ex = new Exception("Test");
-        logger.error(ex, "Error in {}", "core");
-        assertEquals("Error in core", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-
-        logger.logs.clear();
-        logger.error(ex, "Error {} {}", "a", "b");
-        assertEquals("Error a b", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.error(ex, "Error {} {} {}", "a", "b", "c");
-        assertEquals("Error a b c", logger.logs.get(0).message);
-    }
-
-    @Test
-    @DisplayName("Test error with Supplier")
-    public void testErrorWithSupplier() {
-        Supplier<String> supplier = () -> "Error supplier message";
-        logger.error(supplier);
-        assertEquals("Error supplier message", logger.logs.get(0).message);
-
-        logger.logs.clear();
-        logger.errorEnabled = false;
-        boolean[] called = { false };
-        logger.error(() -> {
-            called[0] = true;
-            return "Should not be called";
-        });
-        assertFalse(called[0]);
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test error with Supplier and Throwable (deprecated)")
-    @SuppressWarnings("deprecation")
-    public void testErrorWithSupplierAndThrowable() {
-        Exception ex = new Exception("Test");
-        logger.error(() -> "Error supplier msg", ex);
-        assertEquals("Error supplier msg", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test error with Throwable and Supplier")
-    public void testErrorWithThrowableAndSupplier() {
-        Exception ex = new Exception("Test");
-        logger.error(ex, () -> "Error t+s msg");
-        assertEquals("Error t+s msg", logger.logs.get(0).message);
-        assertSame(ex, logger.logs.get(0).throwable);
-    }
-
-    @Test
-    @DisplayName("Test error disabled skips templated logging")
-    public void testErrorDisabledSkipsTemplatedLogging() {
-        logger.errorEnabled = false;
-        logger.error("Template {}", "arg1");
-        logger.error("Template {} {}", "a", "b");
-        logger.error("Template {} {} {}", "a", "b", "c");
-        logger.error("Template {} {} {} {}", "a", "b", "c", "d");
-        logger.error("Template {} {} {} {} {}", 1, 2, 3, 4, 5);
-        logger.error("Template {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
-        logger.error("Template {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
-        logger.error("Template", "a", "b", "c", "d", "e", "f", "g", "h");
-        assertEquals(0, logger.logs.size());
-    }
-
-    @Test
-    @DisplayName("Test format with different argument counts")
-    public void testFormatWithDifferentArgCounts() {
-        assertEquals("Value: 42", AbstractLogger.format("Value: {}", 42));
-
-        assertEquals("x=10, y=20", AbstractLogger.format("x={}, y={}", 10, 20));
-
-        assertEquals("RGB: 255,128,0", AbstractLogger.format("RGB: {},{},{}", 255, 128, 0));
-
-        assertEquals("1-2-3-4", AbstractLogger.format("{}-{}-{}-{}", 1, 2, 3, 4));
-
-        assertEquals("a b c d e", AbstractLogger.format("{} {} {} {} {}", "a", "b", "c", "d", "e"));
-
-        assertEquals("1,2,3,4,5,6", AbstractLogger.format("{},{},{},{},{},{}", 1, 2, 3, 4, 5, 6));
-
-        assertEquals("Mon Tue Wed Thu Fri Sat Sun", AbstractLogger.format("{} {} {} {} {} {} {}", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"));
-    }
-
-    @Test
-    @DisplayName("Test format with no placeholders and no args")
-    public void testFormatWithNoPlaceholdersNoArgs() {
+    public void testFormatOverloads() {
         assertEquals("Hello World", AbstractLogger.format("Hello World"));
-    }
-
-    @Test
-    @DisplayName("Test format with placeholder in various positions")
-    public void testFormatWithPlaceholderPositions() {
+        assertEquals("Hello World", AbstractLogger.format("Hello {}", "World"));
+        assertEquals("x=10, y=20", AbstractLogger.format("x={}, y={}", 10, 20));
+        assertEquals("RGB: 255,128,0", AbstractLogger.format("RGB: {},{},{}", 255, 128, 0));
+        assertEquals("1-2-3-4", AbstractLogger.format("{}-{}-{}-{}", 1, 2, 3, 4));
+        assertEquals("a b c d e", AbstractLogger.format("{} {} {} {} {}", "a", "b", "c", "d", "e"));
+        assertEquals("1,2,3,4,5,6", AbstractLogger.format("{},{},{},{},{},{}", 1, 2, 3, 4, 5, 6));
+        assertEquals("Mon Tue Wed Thu Fri Sat Sun", AbstractLogger.format("{} {} {} {} {} {} {}", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"));
+        assertEquals("Hello World", AbstractLogger.format("Hello %s", "World"));
+        assertEquals("a b c", AbstractLogger.format("%s %s %s", "a", "b", "c"));
+        assertEquals("Hello [World]", AbstractLogger.format("Hello", "World"));
+        assertEquals("Value: null", AbstractLogger.format("Value: {}", (Object) null));
+        assertEquals("null [arg]", AbstractLogger.format(null, "arg"));
+        assertEquals("a b [c, d]", AbstractLogger.format("{} {}", "a", "b", "c", "d"));
+        assertEquals("1 2 3 4 5", AbstractLogger.format("{} {} {} {} {}", 1, 2, 3, 4, 5));
+        assertEquals("", AbstractLogger.format(""));
+        assertEquals(" [x]", AbstractLogger.format("", "x"));
         assertEquals("start x", AbstractLogger.format("{} x", "start"));
         assertEquals("x end", AbstractLogger.format("x {}", "end"));
         assertEquals("x middle y", AbstractLogger.format("x {} y", "middle"));
     }
 
-    @Test
-    @DisplayName("Test format method with various scenarios")
-    public void testFormatMethod() {
-        assertEquals("Hello World", AbstractLogger.format("Hello {}", "World"));
-        assertEquals("a b c", AbstractLogger.format("{} {} {}", "a", "b", "c"));
+    private static final class ThrowingToString {
+        @Override
+        public String toString() {
+            throw new IllegalStateException("boom");
+        }
+    }
 
-        assertEquals("Hello World", AbstractLogger.format("Hello %s", "World"));
-        assertEquals("a b c", AbstractLogger.format("%s %s %s", "a", "b", "c"));
+    private static final class CountingToString {
+        final AtomicInteger calls = new AtomicInteger();
 
-        assertEquals("Hello [World]", AbstractLogger.format("Hello", "World"));
+        @Override
+        public String toString() {
+            if (calls.incrementAndGet() > 1) {
+                throw new IllegalStateException("evaluated more than once");
+            }
+            return "once";
+        }
+    }
 
-        assertEquals("Value: null", AbstractLogger.format("Value: {}", (Object) null));
-        assertEquals("null [arg]", AbstractLogger.format(null, "arg"));
+    private static final class UnicodeToString {
+        @Override
+        public String toString() {
+            return "\u03bb";
+        }
+    }
 
-        assertEquals("a b [c, d]", AbstractLogger.format("{} {}", "a", "b", "c", "d"));
-
-        Object[] args = { 1, 2, 3, 4, 5 };
-        assertEquals("1 2 3 4 5", AbstractLogger.format("{} {} {} {} {}", args));
+    private static String failedMarker(final Object arg, final Class<? extends Throwable> failure) {
+        return "[FAILED toString() of " + arg.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(arg)) + ": " + failure.getName() + "]";
     }
 
     @Test
-    @DisplayName("Test format with empty string template")
-    public void testFormatWithEmptyTemplate() {
-        assertEquals("", AbstractLogger.format(""));
-        assertEquals(" [x]", AbstractLogger.format("", "x"));
+    public void testThrowingToStringIsRenderedAsMarkerInEveryFormatOverload() {
+        final ThrowingToString bad = new ThrowingToString();
+        final String marker = failedMarker(bad, IllegalStateException.class);
+
+        assertEquals("v " + marker, AbstractLogger.format("v {}", bad));
+        assertEquals("v " + marker, AbstractLogger.format("v %s", bad));
+        assertEquals("x [" + marker + "]", AbstractLogger.format("x", bad));
+        assertEquals("a " + marker + " b", AbstractLogger.format("a {} {}", bad, "b"));
+        assertEquals("a b [" + marker + "]", AbstractLogger.format("a {}", "b", bad));
+        assertEquals("x [" + marker + ", b]", AbstractLogger.format("x", bad, "b"));
+        assertEquals("1 " + marker + " 3", AbstractLogger.format("{} {} {}", 1, bad, 3));
+        assertEquals("1 [" + marker + ", 3]", AbstractLogger.format("{}", 1, bad, 3));
+        assertEquals("x [1, 2, " + marker + "]", AbstractLogger.format("x", 1, 2, bad));
+        assertEquals("1 2 3 " + marker, AbstractLogger.format("{} {} {} {}", 1, 2, 3, bad));
+        assertEquals("1 [2, " + marker + ", 4]", AbstractLogger.format("{}", 1, 2, bad, 4));
+    }
+
+    @Test
+    public void testThrowingToStringIsLoggedAtEnabledLevelWithThrowableStillAttached() {
+        final ThrowingToString bad = new ThrowingToString();
+        final String marker = failedMarker(bad, IllegalStateException.class);
+        final RuntimeException cause = new RuntimeException("cause");
+
+        assertDoesNotThrow(() -> logger.info("value {}", bad));
+        assertDoesNotThrow(() -> logger.warn(cause, "value {}", bad));
+        assertDoesNotThrow(() -> logger.error(cause, "{} {} {}", bad, bad, bad));
+        assertDoesNotThrow(() -> logger.debug("{} {} {} {}", 1, 2, 3, bad));
+        assertDoesNotThrow(() -> logger.trace(cause, "{} {}", "a", bad));
+
+        assertEquals(5, logger.logs.size());
+        assertEquals("value " + marker, logger.logs.get(0).message);
+        assertEquals("value " + marker, logger.logs.get(1).message);
+        assertSame(cause, logger.logs.get(1).throwable);
+        assertEquals(marker + " " + marker + " " + marker, logger.logs.get(2).message);
+        assertSame(cause, logger.logs.get(2).throwable);
+        assertEquals("1 2 3 " + marker, logger.logs.get(3).message);
+        assertEquals("a " + marker, logger.logs.get(4).message);
+        assertSame(cause, logger.logs.get(4).throwable);
+    }
+
+    @Test
+    public void testSelfReferentialCollectionAndArrayDoNotOverflowTheLogCall() {
+        final List<Object> list = new ArrayList<>();
+        list.add("x");
+        list.add(list);
+        final String rendered = assertDoesNotThrow(() -> AbstractLogger.format("{}", list));
+        assertEquals(failedMarker(list, StackOverflowError.class), rendered);
+
+        final Object[] array = new Object[2];
+        array[0] = "x";
+        array[1] = array;
+        assertEquals(failedMarker(array, StackOverflowError.class), assertDoesNotThrow(() -> AbstractLogger.format("{}", (Object) array)));
+
+        assertDoesNotThrow(() -> logger.info("{}", list));
+        assertEquals(1, logger.logs.size());
+        assertEquals(failedMarker(list, StackOverflowError.class), logger.logs.get(0).message);
+        assertEquals("[[1, 2], x]", AbstractLogger.format("{}", List.of(List.of(1, 2), "x")));
+    }
+
+    @Test
+    public void testNullAndUnicodeArgumentsStillRenderVerbatim() {
+        assertEquals("v null", AbstractLogger.format("v {}", (Object) null));
+        assertEquals("null null", AbstractLogger.format("{} {}", null, null));
+        assertEquals("v \u03bb", AbstractLogger.format("v {}", new UnicodeToString()));
+        assertEquals("\u03bb \u03bb \u03bb \u03bb", AbstractLogger.format("{} {} {} {}", "\u03bb", new UnicodeToString(), "\u03bb", new UnicodeToString()));
+        assertEquals("", AbstractLogger.format("{}", ""));
+    }
+
+    @Test
+    public void testEachArgumentIsEvaluatedExactlyOnce() {
+        final CountingToString c1 = new CountingToString();
+        assertEquals("once", AbstractLogger.format("{}", c1));
+        assertEquals(1, c1.calls.get());
+
+        final CountingToString c2 = new CountingToString();
+        final CountingToString c3 = new CountingToString();
+        assertEquals("once once", AbstractLogger.format("{} {}", c2, c3));
+        assertEquals(1, c2.calls.get());
+        assertEquals(1, c3.calls.get());
+
+        final CountingToString c4 = new CountingToString();
+        assertEquals("once [once, once]", AbstractLogger.format("{}", c4, new CountingToString(), new CountingToString()));
+        assertEquals(1, c4.calls.get());
+
+        final CountingToString c5 = new CountingToString();
+        assertEquals("a b c once", AbstractLogger.format("{} {} {} {}", "a", "b", "c", c5));
+        assertEquals(1, c5.calls.get());
+    }
+
+    @Test
+    public void testThrowingSupplierStillPropagatesAndDisabledLevelDoesNotRenderArguments() {
+        final IllegalStateException failure = new IllegalStateException("supplier");
+        assertSame(failure, assertThrows(IllegalStateException.class, () -> logger.info(() -> {
+            throw failure;
+        })));
+
+        logger.infoEnabled = false;
+        final CountingToString notEvaluated = new CountingToString();
+        logger.info("{}", notEvaluated);
+        assertEquals(0, notEvaluated.calls.get());
+        assertEquals(0, logger.logs.size());
+    }
+
+    @Test
+    public void testFormatLeavesUnmatchedPlaceholdersAndHasNoEscapeSequences() {
+        assertEquals("a {}", AbstractLogger.format("{} {}", "a"));
+        assertEquals("\\a {}", AbstractLogger.format("\\{} {}", "a"));
+        assertEquals("%d items [5]", AbstractLogger.format("%d items", 5));
+        assertEquals("100%a", AbstractLogger.format("100%%s", "a"));
+        assertEquals("{} b", AbstractLogger.format("{} {}", "{}", "b"));
+        assertEquals("Rate is 90Xure", AbstractLogger.format("Rate is 90%sure", "X"));
+        assertEquals("%s a", AbstractLogger.format("{} {}", "%s", "a"));
+    }
+
+    @Test
+    public void testSingleThrowableArgumentBindsToMessageThrowableOverload() {
+        final RuntimeException ex = new RuntimeException("x");
+        logger.error("Failed {}", ex);
+
+        assertEquals(1, logger.logs.size());
+        assertEquals("Failed {}", logger.logs.get(0).message);
+        assertSame(ex, logger.logs.get(0).throwable);
     }
 }

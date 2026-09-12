@@ -52,6 +52,32 @@ import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.stream.Collectors.MoreCollectors;
 
 public class MoreStreamTest extends TestBase {
+
+    @Test
+    public void testZipIteratorsTreatsNullAsEmptyOnDirectNext() {
+        for (final int nullIndex : new int[] { 0, 1 }) {
+            for (final boolean checkHasNext : new boolean[] { false, true }) {
+                final List<java.util.Iterator<Integer>> sources = new ArrayList<>();
+                sources.add(Collections.singletonList(1).iterator());
+                sources.add(Collections.singletonList(2).iterator());
+                sources.set(nullIndex, null);
+
+                try (Stream<Integer> stream = Stream.zipIterators(sources, values -> {
+                    fail("An empty input must prevent the zip function from being called");
+                    return 0;
+                })) {
+                    final com.landawn.abacus.util.ObjIterator<Integer> iter = stream.iterator();
+                    if (checkHasNext) {
+                        org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+                    }
+                    org.junit.jupiter.api.Assertions.assertThrows(java.util.NoSuchElementException.class, iter::next);
+                    org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+                    org.junit.jupiter.api.Assertions.assertThrows(java.util.NoSuchElementException.class, iter::next);
+                }
+            }
+        }
+    }
+
     static final int maxLen = 37;
     static final int repeatNum = 1;
 

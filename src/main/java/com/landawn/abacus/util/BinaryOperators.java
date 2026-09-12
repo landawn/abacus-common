@@ -25,6 +25,19 @@ import com.landawn.abacus.util.function.BinaryOperator;
 /**
  * Utility class providing various BinaryOperator implementations and factory methods.
  * This class contains predefined BinaryOperators for common merge and combination operations.
+ *
+ * <p>This class is a top-level sibling of {@link Fn} (formerly nested as {@code Fn.BinaryOperators}),
+ * not a nested type. Use {@link Fn} for the general functional-interface factory and {@link Fnn}
+ * for {@link Throwables} variants that can declare checked exceptions. For two-argument functions
+ * that may return a different type see {@link BiFunctions}; for one-argument operators see
+ * {@link UnaryOperators}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see UnaryOperators
+ * @see BiFunctions
+ * @see BiConsumers
+ * @see BiPredicates
  */
 public final class BinaryOperators {
 

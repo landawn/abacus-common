@@ -57,10 +57,11 @@ public class NClobReaderType extends ReaderType {
      * @param columnIndex the 1-based index of the column to retrieve the {@code NClob} from
      * @return a {@code Reader} for the {@code NClob} character stream; closing it also releases the NClob locator,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Reader get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final NClob clob = rs.getNClob(columnIndex);
         return clobToReader(clob);
     }
@@ -75,10 +76,11 @@ public class NClobReaderType extends ReaderType {
      * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
      * @return a {@code Reader} for the {@code NClob} character stream; closing it also releases the NClob locator,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Reader get(final ResultSet rs, final String columnName) throws SQLException {
+    public Reader get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return clobToReader(rs.getNClob(columnName));
     }
 
@@ -89,10 +91,11 @@ public class NClobReaderType extends ReaderType {
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws NullPointerException, SQLException {
         stmt.setNClob(columnIndex, x);
     }
 
@@ -103,10 +106,11 @@ public class NClobReaderType extends ReaderType {
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws NullPointerException, SQLException {
         stmt.setNClob(parameterName, x);
     }
 
@@ -118,10 +122,11 @@ public class NClobReaderType extends ReaderType {
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
      * @param sqlTypeOrLength the declared number of characters in the stream
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
         stmt.setNClob(columnIndex, x, sqlTypeOrLength);
     }
 
@@ -133,10 +138,12 @@ public class NClobReaderType extends ReaderType {
      * @param parameterName the name of the parameter to set
      * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
      * @param sqlTypeOrLength the declared number of characters in the stream
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setNClob(parameterName, x, sqlTypeOrLength);
     }
 

@@ -181,7 +181,7 @@ public enum MediaType {
      *         in the range 0-5).
      * @see #intValue()
      */
-    public static MediaType of(final int intValue) {
+    public static MediaType of(final int intValue) throws IllegalArgumentException {
         switch (intValue) {
             case 0:
                 return BINARY;

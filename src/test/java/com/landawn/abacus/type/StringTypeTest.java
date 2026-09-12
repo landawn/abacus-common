@@ -202,4 +202,24 @@ public class StringTypeTest extends TestBase {
         type.serializeTo(writer, null, null);
         verify(writer).write("null".toCharArray());
     }
+
+    // D-004: the class javadoc example (its try-with-resources header had a stray ')') -- pin the values it shows
+    // and the JDBC calls it makes.
+    @Test
+    public void reviewFixes20260906_classJavadocExample() throws SQLException {
+        Type<String> stringType = TypeFactory.getType(String.class);
+        assertEquals("hello", stringType.valueOf("hello"));
+        assertEquals("123", stringType.valueOf((Object) 123));
+        assertNull(stringType.valueOf((String) null));
+
+        PreparedStatement stmt = mock(PreparedStatement.class);
+        stringType.set(stmt, 1, "John Doe");
+        verify(stmt).setString(1, "John Doe");
+
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getString(1)).thenReturn("John Doe");
+        when(rs.getString("name")).thenReturn("John Doe");
+        assertEquals("John Doe", stringType.get(rs, 1));
+        assertEquals("John Doe", stringType.get(rs, "name"));
+    }
 }

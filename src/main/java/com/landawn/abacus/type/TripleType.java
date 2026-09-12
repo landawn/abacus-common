@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -61,8 +63,9 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * @param leftTypeName the name of the left element type
      * @param middleTypeName the name of the middle element type
      * @param rightTypeName the name of the right element type
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    TripleType(final String leftTypeName, final String middleTypeName, final String rightTypeName) {
+    TripleType(final String leftTypeName, final String middleTypeName, final String rightTypeName) throws IllegalArgumentException {
         super(getTypeName(leftTypeName, middleTypeName, rightTypeName, false));
 
         declaringName = getTypeName(leftTypeName, middleTypeName, rightTypeName, true);
@@ -147,11 +150,12 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      *
      * @param x the Triple object to convert, may be {@code null}
      * @return the JSON string representation, or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final Triple<L, M, R> x) {
+    public String stringOf(final Triple<L, M, R> x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.left(), x.middle(), x.right()), Utils.jsc);
     }
 
@@ -170,30 +174,34 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
+     * <p>Each slot is parsed directly from its JSON token using the declared type, preserving decimal
+     * precision and scale for decimal types, including nested generic values. Numeric slots follow the
+     * JSON parser's conversion rules: for an integral target, unquoted decimals such as {@code 1.5}
+     * may truncate toward zero, whereas quoted fractions are rejected. Scientific notation and decimal
+     * tokens that the parser cannot convert numerically are passed to the declared type's text parser.</p>
+     *
      * @param str the string to parse
-     * @return a Triple object containing the parsed values, or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed value is not an array containing exactly three elements.
+     * @return a Triple object containing the parsed values, or {@code null} if {@code str} is {@code null} or empty (a
+     *         blank, non-empty string is not treated as empty and is rejected)
+     * @throws IllegalArgumentException if the parsed value is not an array containing exactly three elements (this         includes a blank string, unbalanced brackets and trailing text)
+     * @throws ParsingException if an element token is not valid JSON for its declared element type
+     * @throws NumberFormatException if a numeric element token cannot be converted to the declared element type
+     * @throws ArithmeticException if a numeric element is outside the range accepted by its declared type.
      * @see #valueOf(Object)
      * @see #stringOf(Triple)
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public Triple<L, M, R> valueOf(final String str) {
+    public Triple<L, M, R> valueOf(final String str) throws IllegalArgumentException, ParsingException, NumberFormatException, ArithmeticException {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
 
-        final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
-
-        if (a == null || a.length != 3) {
-            throw new IllegalArgumentException("Invalid Triple format. Expected an array with exactly 3 elements [left, middle, right] but got: " + str);
-        }
-
-        // Parameterized slots are re-deserialized with their declared element types (see
-        // convertTupleElement): the untyped first-pass parse produced parser defaults.
-        final L left = (L) convertTupleElement(a[0], leftType);
-        final M middle = (M) convertTupleElement(a[1], middleType);
-        final R right = (R) convertTupleElement(a[2], rightType);
+        final Object[] a = Utils.parseTupleElements(str, name(), parameterTypes);
+        final L left = (L) a[0];
+        final M middle = (M) a[1];
+        final R right = (R) a[2];
 
         return Triple.of(left, middle, right);
     }
@@ -202,6 +210,11 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * Appends the string representation of a Triple object to the given Appendable.
      * Writes the format: [left, middle, right].
      * <p>
+     * Each element is appended by its declared element type handler. When that declared type is {@code Object} the
+     * handler of the element's runtime class is used instead, exactly as
+     * {@link #serializeTo(CharacterWriter, Triple, JsonXmlSerConfig)} does, so a map, collection or bean element keeps
+     * the {@code toString()}-style form rather than falling back to {@code ObjectType}'s JSON {@code stringOf}.
+     * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
      * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
@@ -209,7 +222,9 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      *
      * @param appendable the Appendable to write to
      * @param x the Triple object to append, may be {@code null}
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -221,7 +236,7 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Triple<L, M, R> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Triple<L, M, R> x) throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -233,11 +248,11 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
                 try {
                     bw.write(SK._BRACKET_L);
 
-                    leftType.appendTo(bw, x.left());
+                    AbstractTupleType.appendElement(bw, leftType, x.left());
                     bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                    middleType.appendTo(bw, x.middle());
+                    AbstractTupleType.appendElement(bw, middleType, x.middle());
                     bw.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-                    rightType.appendTo(bw, x.right());
+                    AbstractTupleType.appendElement(bw, rightType, x.right());
 
                     bw.write(SK._BRACKET_R);
 
@@ -255,11 +270,11 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
             } else {
                 appendable.append(SK._BRACKET_L);
 
-                leftType.appendTo(appendable, x.left());
+                AbstractTupleType.appendElement(appendable, leftType, x.left());
                 appendable.append(ELEMENT_SEPARATOR);
-                middleType.appendTo(appendable, x.middle());
+                AbstractTupleType.appendElement(appendable, middleType, x.middle());
                 appendable.append(ELEMENT_SEPARATOR);
-                rightType.appendTo(appendable, x.right());
+                AbstractTupleType.appendElement(appendable, rightType, x.right());
 
                 appendable.append(SK._BRACKET_R);
             }
@@ -275,6 +290,15 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
      * and is invoked by the JSON/XML serializers.
      * <p>
+     * Each element is written by its declared element type handler. When the declared element type is {@code Object}
+     * the handler of the element's runtime class is used instead, so an {@code Object} slot holding {@code 1} is
+     * written as {@code 1} rather than {@code "1"}. An element whose (declared or runtime) handler is not
+     * {@linkplain Type#isSerializable() serializable} - a bean, a map, a {@code List<Object>} - is written as embedded
+     * JSON (not as a quoted JSON string) when {@code config} is a {@code JsonSerConfig}; under any other config its
+     * {@code stringOf} text is written with the writer's character escaping. A {@code null} element is written by its
+     * declared handler, so that handler's null-substitution flags apply. The result matches {@link #stringOf(Triple)}
+     * for every element shape.
+     * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
      * quoting or escaping.
@@ -282,20 +306,23 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * @param writer the CharacterWriter to write to
      * @param x the Triple object to write, may be {@code null}
      * @param config the serialization configuration, may be {@code null}
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Triple<L, M, R> x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Triple<L, M, R> x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             writer.write(SK._BRACKET_L);
 
-            leftType.serializeTo(writer, x.left(), config);
+            AbstractTupleType.serializeSlot(writer, leftType, x.left(), config);
             writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-            middleType.serializeTo(writer, x.middle(), config);
+            AbstractTupleType.serializeSlot(writer, middleType, x.middle(), config);
             writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-            rightType.serializeTo(writer, x.right(), config);
+            AbstractTupleType.serializeSlot(writer, rightType, x.right(), config);
 
             writer.write(SK._BRACKET_R);
         }
@@ -309,8 +336,10 @@ public class TripleType<L, M, R> extends AbstractType<Triple<L, M, R>> {
      * @param rightTypeName the name of the right element type
      * @param isDeclaringName if {@code true}, uses simple class names; if {@code false}, uses canonical class names
      * @return the generated type name for Triple with the specified element types
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    protected static String getTypeName(final String leftTypeName, final String middleTypeName, final String rightTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final String leftTypeName, final String middleTypeName, final String rightTypeName, final boolean isDeclaringName)
+            throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(Triple.class) + SK.LESS_THAN + TypeFactory.getType(leftTypeName).declaringName() + SK.COMMA_SPACE
                     + TypeFactory.getType(middleTypeName).declaringName() + SK.COMMA_SPACE + TypeFactory.getType(rightTypeName).declaringName()

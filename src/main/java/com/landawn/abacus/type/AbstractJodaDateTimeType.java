@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 
 import org.joda.time.base.AbstractInstant;
+import org.joda.time.chrono.ISOChronology;
 import org.joda.time.format.DateTimeFormatter;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
@@ -40,15 +41,17 @@ import com.landawn.abacus.util.Dates;
 public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extends AbstractType<T> {
 
     /** Pre-configured Joda {@code DateTimeFormatter} for ISO 8601 date-time format */
-    // withZoneUTC: the pattern's 'Z' is a LITERAL, so without it printing used the value's
-    // chronology zone and parsing the JVM default zone - stringOf/valueOf round trips drifted by
-    // the JVM's UTC offset and the emitted wall time contradicted the 'Z' (UTC) suffix.
+    // withChronology(ISO UTC): the pattern's 'Z' is a LITERAL, so the formatter must not follow the value's own
+    // chronology. Pinning only the ZONE (withZoneUTC) fixed the wall-time drift but still printed the value's
+    // CALENDAR year - a BuddhistChronology DateTime came out as "2566-..Z", which every parser in the family reads
+    // as ISO year 2566, 543 years off the real instant. Pinning the whole chronology prints (and parses) ISO UTC
+    // for any input; for ISO-chronology values the output is byte-identical to the withZoneUTC form.
     protected static final DateTimeFormatter jodaISO8601DateTimeFT = org.joda.time.format.DateTimeFormat.forPattern(Dates.ISO_8601_DATE_TIME_FORMAT)
-            .withZoneUTC();
+            .withChronology(ISOChronology.getInstanceUTC());
 
     /** Pre-configured Joda {@code DateTimeFormatter} for ISO 8601 timestamp format */
     protected static final DateTimeFormatter jodaISO8601TimestampFT = org.joda.time.format.DateTimeFormat.forPattern(Dates.ISO_8601_TIMESTAMP_FORMAT)
-            .withZoneUTC();
+            .withChronology(ISOChronology.getInstanceUTC());
 
     /**
      * Constructs an {@code AbstractJodaDateTimeType} with the specified type name.
@@ -93,7 +96,9 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
     /**
      * Converts a Joda {@code DateTime} value to its string representation.
      * <p>
-     * Uses the ISO 8601 timestamp format for consistent serialization.
+     * Uses the ISO 8601 timestamp format for consistent serialization. The text is always the UTC wall time of the
+     * instant in the ISO chronology, whatever zone or chronology the value carries: a {@code DateTime} in a
+     * {@code BuddhistChronology} prints its ISO (Gregorian) year, not its Buddhist year.
      * </p>
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
@@ -101,6 +106,14 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
      * type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
+     *
+     * <p>Unlike the {@code java.util.Date}/{@code Calendar} handlers, no year-range check is applied here: an instant
+     * outside Common Era years 0001 through 9999 is printed as is, for example {@code "10000-01-01T00:00:00.000Z"},
+     * {@code "292278994-08-17T07:12:55.807Z"} or {@code "-0001-01-01T00:00:00.000Z"}. Text whose year has more than
+     * four digits or a leading {@code '-'} is rejected by the inverse parser ({@link #valueOf(String)}) and by every
+     * other date handler of this type system, so it does not round-trip. Year {@code 0000} is the one out-of-range
+     * value that does: {@code "0000-12-31T23:59:59.999Z"} is read back at the same instant here (Joda accepts year
+     * zero), although the {@code Date}/{@code Calendar} handlers reject it.</p>
      *
      * @param x the Joda {@code DateTime} instant value to convert
      * @return the ISO 8601 timestamp string representation, or {@code null} if input is {@code null}
@@ -125,7 +138,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the Joda {@code DateTime} instant value to append
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if appending the value to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -172,8 +185,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
      * @param writer the {@code CharacterWriter} to write to
      * @param x the Joda {@code DateTime} instant value to write
      * @param config the serialization configuration, may be {@code null}
-     * @throws IOException if an I/O error occurs
-     * @throws RuntimeException if an unsupported {@code DateTimeFormat} is specified
+     * @throws IOException if writing the serialized value to {@code writer} fails
      */
     @SuppressWarnings("null")
     @Override

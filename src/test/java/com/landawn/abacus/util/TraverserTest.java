@@ -25,7 +25,7 @@ import com.landawn.abacus.guava.Traverser;
 
 public class TraverserTest extends TestBase {
 
-    static class TreeNode {
+    public static class TreeNode {
         String value;
         List<TreeNode> children;
 
@@ -34,7 +34,7 @@ public class TraverserTest extends TestBase {
             this.children = new ArrayList<>();
         }
 
-        void addChild(TreeNode child) {
+        public void addChild(TreeNode child) {
             children.add(child);
         }
 
@@ -49,10 +49,12 @@ public class TraverserTest extends TestBase {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o)
+            if (this == o) {
                 return true;
-            if (o == null || getClass() != o.getClass())
+            }
+            if (o == null || getClass() != o.getClass()) {
                 return false;
+            }
             TreeNode treeNode = (TreeNode) o;
             return value.equals(treeNode.value);
         }
@@ -63,629 +65,277 @@ public class TraverserTest extends TestBase {
         }
     }
 
-    @Test
-    public void test_forTree_simpleTree() {
-        TreeNode root = new TreeNode("root");
-        TreeNode child1 = new TreeNode("child1");
-        TreeNode child2 = new TreeNode("child2");
-        root.addChild(child1);
-        root.addChild(child2);
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-        assertNotNull(traverser);
-
-        List<String> result = traverser.breadthFirst(root).map(TreeNode::toString).toList();
-
-        assertEquals(3, result.size());
-        assertTrue(result.contains("root"));
-        assertTrue(result.contains("child1"));
-        assertTrue(result.contains("child2"));
-    }
-
-    @Test
-    public void test_forTree_emptyChildren() {
-        TreeNode leaf = new TreeNode("leaf");
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        List<String> result = traverser.breadthFirst(leaf).map(TreeNode::toString).toList();
-
-        assertEquals(1, result.size());
-        assertEquals("leaf", result.get(0));
-    }
-
-    @Test
-    public void test_forTree_deepTree() {
-        TreeNode root = new TreeNode("root");
-        TreeNode child = new TreeNode("child");
-        TreeNode grandchild = new TreeNode("grandchild");
-        root.addChild(child);
-        child.addChild(grandchild);
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        List<String> result = traverser.depthFirstPreOrder(root).map(TreeNode::toString).toList();
-
-        assertEquals(Arrays.asList("root", "child", "grandchild"), result);
-    }
-
-    @Test
-    public void test_forTree_multipleChildren() {
-        TreeNode root = new TreeNode("root");
-        TreeNode c1 = new TreeNode("c1");
-        TreeNode c2 = new TreeNode("c2");
-        TreeNode c3 = new TreeNode("c3");
-        TreeNode gc1 = new TreeNode("gc1");
-        TreeNode gc2 = new TreeNode("gc2");
-
-        root.addChild(c1);
-        root.addChild(c2);
-        root.addChild(c3);
-        c1.addChild(gc1);
-        c2.addChild(gc2);
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        List<String> result = traverser.breadthFirst(root).map(TreeNode::toString).toList();
-
-        assertEquals(6, result.size());
-        assertEquals("root", result.get(0));
-        assertTrue(result.subList(1, 4).containsAll(Arrays.asList("c1", "c2", "c3")));
-    }
-
-    @Test
-    public void test_forTree_withNullChildrenFunction() {
-        TreeNode root = new TreeNode("root");
-
-        Traverser<TreeNode> traverser = Traverser.forTree(node -> {
-            if (node.getChildren().isEmpty()) {
-                return Collections.emptyList();
-            }
-            return node.getChildren();
-        });
-
-        List<String> result = traverser.breadthFirst(root).map(TreeNode::toString).toList();
-
-        assertEquals(1, result.size());
-    }
-
-    @Test
-    public void test_forGraph_simpleGraph() {
-        Map<String, List<String>> graph = new HashMap<>();
-        graph.put("A", Arrays.asList("B"));
-        graph.put("B", Arrays.asList("C"));
-        graph.put("C", Collections.emptyList());
-
-        Traverser<String> traverser = Traverser.forGraph(graph::get);
-
-        List<String> result = traverser.breadthFirst("A").toList();
-
-        assertEquals(Arrays.asList("A", "B", "C"), result);
-    }
-
-    @Test
-    public void test_forGraph_withCycles() {
-        Map<String, List<String>> graph = new HashMap<>();
-        graph.put("A", Arrays.asList("B"));
-        graph.put("B", Arrays.asList("C"));
-        graph.put("C", Arrays.asList("A"));
-
-        Traverser<String> traverser = Traverser.forGraph(graph::get);
-
-        List<String> result = traverser.breadthFirst("A").toList();
-
-        assertEquals(3, result.size());
-        assertTrue(result.containsAll(Arrays.asList("A", "B", "C")));
-    }
-
-    @Test
-    public void test_forGraph_multiplePathsToSameNode() {
-        Map<String, List<String>> graph = new HashMap<>();
-        graph.put("A", Arrays.asList("B", "C"));
-        graph.put("B", Arrays.asList("D"));
-        graph.put("C", Arrays.asList("D"));
-        graph.put("D", Collections.emptyList());
-
-        Traverser<String> traverser = Traverser.forGraph(graph::get);
-
-        List<String> result = traverser.breadthFirst("A").toList();
-
-        assertEquals(4, result.size());
-        assertEquals(1, result.stream().filter(s -> s.equals("D")).count());
-    }
-
-    @Test
-    public void test_forGraph_disconnectedNodes() {
-        Map<String, List<String>> graph = new HashMap<>();
-        graph.put("A", Arrays.asList("B"));
-        graph.put("B", Collections.emptyList());
-        graph.put("C", Arrays.asList("D"));
-        graph.put("D", Collections.emptyList());
-
-        Traverser<String> traverser = Traverser.forGraph(graph::get);
-
-        List<String> result = traverser.breadthFirst("A").toList();
-
-        assertEquals(2, result.size());
-        assertTrue(result.containsAll(Arrays.asList("A", "B")));
-        assertFalse(result.contains("C"));
-        assertFalse(result.contains("D"));
-    }
-
-    @Test
-    public void test_forGraph_selfLoop() {
-        Map<String, List<String>> graph = new HashMap<>();
-        graph.put("A", Arrays.asList("A", "B"));
-        graph.put("B", Collections.emptyList());
-
-        Traverser<String> traverser = Traverser.forGraph(graph::get);
-
-        List<String> result = traverser.breadthFirst("A").toList();
-
-        assertEquals(2, result.size());
-        assertEquals(1, result.stream().filter(s -> s.equals("A")).count());
-    }
-
-    @Test
-    public void test_forGraph_complexGraph() {
-        Map<String, List<String>> graph = new HashMap<>();
-        graph.put("A", Arrays.asList("B", "C"));
-        graph.put("B", Arrays.asList("D", "E"));
-        graph.put("C", Arrays.asList("F"));
-        graph.put("D", Collections.emptyList());
-        graph.put("E", Arrays.asList("F"));
-        graph.put("F", Collections.emptyList());
-
-        Traverser<String> traverser = Traverser.forGraph(graph::get);
-
-        List<String> result = traverser.breadthFirst("A").toList();
-
-        assertEquals(6, result.size());
-        assertTrue(result.containsAll(Arrays.asList("A", "B", "C", "D", "E", "F")));
-    }
-
-    @Test
-    public void test_breadthFirst_correctOrder() {
-        TreeNode root = new TreeNode("A");
+    private static TreeNode binaryTree() {
+        TreeNode a = new TreeNode("A");
         TreeNode b = new TreeNode("B");
         TreeNode c = new TreeNode("C");
         TreeNode d = new TreeNode("D");
         TreeNode e = new TreeNode("E");
         TreeNode f = new TreeNode("F");
-
-        root.addChild(b);
-        root.addChild(c);
-        b.addChild(d);
-        b.addChild(e);
-        c.addChild(f);
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        List<String> result = traverser.breadthFirst(root).map(TreeNode::toString).toList();
-
-        assertEquals("A", result.get(0));
-        assertTrue(result.subList(1, 3).containsAll(Arrays.asList("B", "C")));
-        assertTrue(result.subList(3, 6).containsAll(Arrays.asList("D", "E", "F")));
-    }
-
-    @Test
-    public void test_breadthFirst_singleNode() {
-        TreeNode single = new TreeNode("single");
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        List<String> result = traverser.breadthFirst(single).map(TreeNode::toString).toList();
-
-        assertEquals(1, result.size());
-        assertEquals("single", result.get(0));
-    }
-
-    @Test
-    public void test_breadthFirst_linearChain() {
-        TreeNode a = new TreeNode("A");
-        TreeNode b = new TreeNode("B");
-        TreeNode c = new TreeNode("C");
-        TreeNode d = new TreeNode("D");
-
-        a.addChild(b);
-        b.addChild(c);
-        c.addChild(d);
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        List<String> result = traverser.breadthFirst(a).map(TreeNode::toString).toList();
-
-        assertEquals(Arrays.asList("A", "B", "C", "D"), result);
-    }
-
-    @Test
-    public void test_breadthFirst_withStreamOperations() {
-        TreeNode root = new TreeNode("root");
-        TreeNode child1 = new TreeNode("child1");
-        TreeNode child2 = new TreeNode("child2");
-        root.addChild(child1);
-        root.addChild(child2);
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        List<String> limited = traverser.breadthFirst(root).limit(2).map(TreeNode::toString).toList();
-
-        assertEquals(2, limited.size());
-
-        List<String> filtered = traverser.breadthFirst(root).filter(node -> node.value.startsWith("child")).map(TreeNode::toString).toList();
-
-        assertEquals(2, filtered.size());
-    }
-
-    @Test
-    public void test_breadthFirst_largeTree() {
-        TreeNode root = new TreeNode("root");
-        for (int i = 0; i < 10; i++) {
-            TreeNode child = new TreeNode("level1_" + i);
-            root.addChild(child);
-            for (int j = 0; j < 5; j++) {
-                child.addChild(new TreeNode("level2_" + i + "_" + j));
-            }
-        }
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        List<String> result = traverser.breadthFirst(root).map(TreeNode::toString).toList();
-
-        assertEquals(61, result.size());
-    }
-
-    @Test
-    public void test_depthFirstPreOrder_correctOrder() {
-        TreeNode a = new TreeNode("A");
-        TreeNode b = new TreeNode("B");
-        TreeNode c = new TreeNode("C");
-        TreeNode d = new TreeNode("D");
-        TreeNode e = new TreeNode("E");
-
         a.addChild(b);
         a.addChild(c);
         b.addChild(d);
         b.addChild(e);
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        List<String> result = traverser.depthFirstPreOrder(a).map(TreeNode::toString).toList();
-
-        assertEquals("A", result.get(0));
-        assertEquals("B", result.get(1));
-        int cIndex = result.indexOf("C");
-        int dIndex = result.indexOf("D");
-        int eIndex = result.indexOf("E");
-        assertTrue(dIndex < cIndex);
-        assertTrue(eIndex < cIndex);
+        c.addChild(f);
+        return a;
     }
 
     @Test
-    public void test_depthFirstPreOrder_singleNode() {
-        TreeNode single = new TreeNode("single");
-
+    public void testForTree() {
         Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
+        TreeNode root = new TreeNode("root");
+        root.addChild(new TreeNode("child1"));
+        root.addChild(new TreeNode("child2"));
+        List<String> result = traverser.breadthFirst(root).map(TreeNode::toString).toList();
+        assertEquals(3, result.size());
+        assertTrue(result.containsAll(Arrays.asList("root", "child1", "child2")));
 
-        List<String> result = traverser.depthFirstPreOrder(single).map(TreeNode::toString).toList();
+        assertEquals(List.of("leaf"), traverser.breadthFirst(new TreeNode("leaf")).map(TreeNode::toString).toList());
 
-        assertEquals(1, result.size());
-        assertEquals("single", result.get(0));
+        TreeNode deep = new TreeNode("root");
+        TreeNode child = new TreeNode("child");
+        deep.addChild(child);
+        child.addChild(new TreeNode("grandchild"));
+        assertEquals(Arrays.asList("root", "child", "grandchild"), traverser.depthFirstPreOrder(deep).map(TreeNode::toString).toList());
+
+        TreeNode wide = new TreeNode("root");
+        TreeNode c1 = new TreeNode("c1");
+        TreeNode c2 = new TreeNode("c2");
+        TreeNode c3 = new TreeNode("c3");
+        wide.addChild(c1);
+        wide.addChild(c2);
+        wide.addChild(c3);
+        c1.addChild(new TreeNode("gc1"));
+        c2.addChild(new TreeNode("gc2"));
+        List<String> bfs = traverser.breadthFirst(wide).map(TreeNode::toString).toList();
+        assertEquals(6, bfs.size());
+        assertEquals("root", bfs.get(0));
+        assertTrue(bfs.subList(1, 4).containsAll(Arrays.asList("c1", "c2", "c3")));
+
+        Traverser<TreeNode> emptyChildren = Traverser.forTree(node -> node.getChildren().isEmpty() ? Collections.emptyList() : node.getChildren());
+        assertEquals(1, emptyChildren.breadthFirst(new TreeNode("root")).toList().size());
     }
 
     @Test
-    public void test_depthFirstPreOrder_binaryTree() {
+    public void testForGraph() {
+        Map<String, List<String>> linear = new HashMap<>();
+        linear.put("A", Arrays.asList("B"));
+        linear.put("B", Arrays.asList("C"));
+        linear.put("C", Collections.emptyList());
+        assertEquals(Arrays.asList("A", "B", "C"), Traverser.forGraph(linear::get).breadthFirst("A").toList());
+
+        Map<String, List<String>> cycle = new HashMap<>();
+        cycle.put("A", Arrays.asList("B"));
+        cycle.put("B", Arrays.asList("C"));
+        cycle.put("C", Arrays.asList("A"));
+        List<String> cycled = Traverser.forGraph(cycle::get).breadthFirst("A").toList();
+        assertEquals(3, cycled.size());
+        assertTrue(cycled.containsAll(Arrays.asList("A", "B", "C")));
+
+        Map<String, List<String>> diamond = new HashMap<>();
+        diamond.put("A", Arrays.asList("B", "C"));
+        diamond.put("B", Arrays.asList("D"));
+        diamond.put("C", Arrays.asList("D"));
+        diamond.put("D", Collections.emptyList());
+        List<String> diamondVisit = Traverser.forGraph(diamond::get).breadthFirst("A").toList();
+        assertEquals(4, diamondVisit.size());
+        assertEquals(1, diamondVisit.stream().filter("D"::equals).count());
+
+        Map<String, List<String>> disconnected = new HashMap<>();
+        disconnected.put("A", Arrays.asList("B"));
+        disconnected.put("B", Collections.emptyList());
+        disconnected.put("C", Arrays.asList("D"));
+        disconnected.put("D", Collections.emptyList());
+        List<String> fromA = Traverser.forGraph(disconnected::get).breadthFirst("A").toList();
+        assertEquals(Arrays.asList("A", "B"), fromA);
+        assertFalse(fromA.contains("C"));
+
+        Map<String, List<String>> selfLoop = new HashMap<>();
+        selfLoop.put("A", Arrays.asList("A", "B"));
+        selfLoop.put("B", Collections.emptyList());
+        List<String> looped = Traverser.forGraph(selfLoop::get).breadthFirst("A").toList();
+        assertEquals(2, looped.size());
+        assertEquals(1, looped.stream().filter("A"::equals).count());
+
+        Map<String, List<String>> complex = new HashMap<>();
+        complex.put("A", Arrays.asList("B", "C"));
+        complex.put("B", Arrays.asList("D", "E"));
+        complex.put("C", Arrays.asList("F"));
+        complex.put("D", Collections.emptyList());
+        complex.put("E", Arrays.asList("F"));
+        complex.put("F", Collections.emptyList());
+        assertEquals(6, Traverser.forGraph(complex::get).breadthFirst("A").toList().size());
+
+        Map<String, List<String>> empty = new HashMap<>();
+        empty.put("A", Collections.emptyList());
+        assertEquals(List.of("A"), Traverser.forGraph(empty::get).breadthFirst("A").toList());
+
+        Map<String, List<String>> nullSuccessors = new HashMap<>();
+        nullSuccessors.put("A", null);
+        assertEquals(1, Traverser.<String> forGraph(node -> {
+            List<String> successors = nullSuccessors.get(node);
+            return successors != null ? successors : Collections.emptyList();
+        }).breadthFirst("A").toList().size());
+    }
+
+    @Test
+    public void testBreadthFirst() {
+        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
+        List<String> bfs = traverser.breadthFirst(binaryTree()).map(TreeNode::toString).toList();
+        assertEquals("A", bfs.get(0));
+        assertTrue(bfs.subList(1, 3).containsAll(Arrays.asList("B", "C")));
+        assertTrue(bfs.subList(3, 6).containsAll(Arrays.asList("D", "E", "F")));
+        assertEquals(List.of("single"), traverser.breadthFirst(new TreeNode("single")).map(TreeNode::toString).toList());
+
+        TreeNode chain = new TreeNode("A");
+        TreeNode b = new TreeNode("B");
+        TreeNode c = new TreeNode("C");
+        chain.addChild(b);
+        b.addChild(c);
+        c.addChild(new TreeNode("D"));
+        assertEquals(Arrays.asList("A", "B", "C", "D"), traverser.breadthFirst(chain).map(TreeNode::toString).toList());
+
+        TreeNode root = new TreeNode("root");
+        root.addChild(new TreeNode("child1"));
+        root.addChild(new TreeNode("child2"));
+        assertEquals(2, traverser.breadthFirst(root).limit(2).toList().size());
+        assertEquals(2, traverser.breadthFirst(root).filter(node -> node.value.startsWith("child")).toList().size());
+
+        TreeNode large = new TreeNode("root");
+        for (int i = 0; i < 10; i++) {
+            TreeNode child = new TreeNode("level1_" + i);
+            large.addChild(child);
+            for (int j = 0; j < 5; j++) {
+                child.addChild(new TreeNode("level2_" + i + "_" + j));
+            }
+        }
+        assertEquals(61, traverser.breadthFirst(large).toList().size());
+        assertEquals(5, traverser.breadthFirst(large).limit(5).toList().size());
+    }
+
+    @Test
+    public void testDepthFirstPreOrder() {
+        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
+        TreeNode a = new TreeNode("A");
+        TreeNode b = new TreeNode("B");
+        TreeNode c = new TreeNode("C");
+        a.addChild(b);
+        a.addChild(c);
+        b.addChild(new TreeNode("D"));
+        b.addChild(new TreeNode("E"));
+        List<String> pre = traverser.depthFirstPreOrder(a).map(TreeNode::toString).toList();
+        assertEquals("A", pre.get(0));
+        assertEquals("B", pre.get(1));
+        assertTrue(pre.indexOf("D") < pre.indexOf("C"));
+        assertTrue(pre.indexOf("E") < pre.indexOf("C"));
+        assertEquals(List.of("single"), traverser.depthFirstPreOrder(new TreeNode("single")).map(TreeNode::toString).toList());
+
         TreeNode root = new TreeNode("1");
         TreeNode left = new TreeNode("2");
-        TreeNode right = new TreeNode("3");
-        TreeNode ll = new TreeNode("4");
-        TreeNode lr = new TreeNode("5");
-
         root.addChild(left);
-        root.addChild(right);
-        left.addChild(ll);
-        left.addChild(lr);
+        root.addChild(new TreeNode("3"));
+        left.addChild(new TreeNode("4"));
+        left.addChild(new TreeNode("5"));
+        List<String> binary = traverser.depthFirstPreOrder(root).map(TreeNode::toString).toList();
+        assertEquals("1", binary.get(0));
+        assertEquals("2", binary.get(1));
+        assertTrue(binary.indexOf("4") < binary.indexOf("3"));
 
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
+        Map<String, List<String>> cycle = new HashMap<>();
+        cycle.put("A", Arrays.asList("B"));
+        cycle.put("B", Arrays.asList("C"));
+        cycle.put("C", Arrays.asList("A"));
+        List<String> cycled = Traverser.forGraph(cycle::get).depthFirstPreOrder("A").toList();
+        assertEquals(3, cycled.size());
+        assertEquals("A", cycled.get(0));
 
-        List<String> result = traverser.depthFirstPreOrder(root).map(TreeNode::toString).toList();
-
-        assertEquals("1", result.get(0));
-        assertEquals("2", result.get(1));
-        assertTrue(result.indexOf("4") < result.indexOf("3"));
-        assertTrue(result.indexOf("5") < result.indexOf("3"));
-    }
-
-    @Test
-    public void test_depthFirstPreOrder_withGraphCycles() {
-        Map<String, List<String>> graph = new HashMap<>();
-        graph.put("A", Arrays.asList("B"));
-        graph.put("B", Arrays.asList("C"));
-        graph.put("C", Arrays.asList("A"));
-
-        Traverser<String> traverser = Traverser.forGraph(graph::get);
-
-        List<String> result = traverser.depthFirstPreOrder("A").toList();
-
-        assertEquals(3, result.size());
-        assertEquals("A", result.get(0));
-    }
-
-    @Test
-    public void test_depthFirstPreOrder_withStreamOperations() {
-        TreeNode root = new TreeNode("root");
-        TreeNode child1 = new TreeNode("child1");
-        TreeNode child2 = new TreeNode("child2");
-        root.addChild(child1);
-        root.addChild(child2);
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        String first = traverser.depthFirstPreOrder(root).filter(node -> node.value.contains("child")).map(TreeNode::toString).findFirst().orElse(null);
-
+        TreeNode filterRoot = new TreeNode("root");
+        filterRoot.addChild(new TreeNode("child1"));
+        filterRoot.addChild(new TreeNode("child2"));
+        String first = traverser.depthFirstPreOrder(filterRoot).filter(node -> node.value.contains("child")).map(TreeNode::toString).findFirst().orElse(null);
         assertNotNull(first);
         assertTrue(first.startsWith("child"));
     }
 
     @Test
-    public void test_depthFirstPostOrder_correctOrder() {
+    public void testDepthFirstPostOrder() {
+        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
         TreeNode a = new TreeNode("A");
         TreeNode b = new TreeNode("B");
         TreeNode c = new TreeNode("C");
-        TreeNode d = new TreeNode("D");
-        TreeNode e = new TreeNode("E");
-
         a.addChild(b);
         a.addChild(c);
-        b.addChild(d);
-        b.addChild(e);
+        b.addChild(new TreeNode("D"));
+        b.addChild(new TreeNode("E"));
+        List<String> post = traverser.depthFirstPostOrder(a).map(TreeNode::toString).toList();
+        assertEquals("A", post.get(post.size() - 1));
+        assertTrue(post.indexOf("D") < post.indexOf("B"));
+        assertTrue(post.indexOf("E") < post.indexOf("B"));
+        assertEquals(List.of("single"), traverser.depthFirstPostOrder(new TreeNode("single")).map(TreeNode::toString).toList());
 
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
+        TreeNode chain = new TreeNode("A");
+        TreeNode mid = new TreeNode("B");
+        chain.addChild(mid);
+        mid.addChild(new TreeNode("C"));
+        assertEquals(Arrays.asList("C", "B", "A"), traverser.depthFirstPostOrder(chain).map(TreeNode::toString).toList());
 
-        List<String> result = traverser.depthFirstPostOrder(a).map(TreeNode::toString).toList();
-
-        assertEquals("A", result.get(result.size() - 1));
-
-        int bIndex = result.indexOf("B");
-        int dIndex = result.indexOf("D");
-        int eIndex = result.indexOf("E");
-        assertTrue(dIndex < bIndex);
-        assertTrue(eIndex < bIndex);
-    }
-
-    @Test
-    public void test_depthFirstPostOrder_singleNode() {
-        TreeNode single = new TreeNode("single");
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        List<String> result = traverser.depthFirstPostOrder(single).map(TreeNode::toString).toList();
-
-        assertEquals(1, result.size());
-        assertEquals("single", result.get(0));
-    }
-
-    @Test
-    public void test_depthFirstPostOrder_linearChain() {
-        TreeNode a = new TreeNode("A");
-        TreeNode b = new TreeNode("B");
-        TreeNode c = new TreeNode("C");
-
-        a.addChild(b);
-        b.addChild(c);
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        List<String> result = traverser.depthFirstPostOrder(a).map(TreeNode::toString).toList();
-
-        assertEquals(Arrays.asList("C", "B", "A"), result);
-    }
-
-    @Test
-    public void test_depthFirstPostOrder_binaryTree() {
         TreeNode root = new TreeNode("1");
         TreeNode left = new TreeNode("2");
-        TreeNode right = new TreeNode("3");
-        TreeNode ll = new TreeNode("4");
-        TreeNode lr = new TreeNode("5");
-
         root.addChild(left);
-        root.addChild(right);
-        left.addChild(ll);
-        left.addChild(lr);
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        List<String> result = traverser.depthFirstPostOrder(root).map(TreeNode::toString).toList();
-
-        assertEquals("1", result.get(result.size() - 1));
-
-        assertTrue(result.indexOf("4") < result.indexOf("2"));
-        assertTrue(result.indexOf("5") < result.indexOf("2"));
+        root.addChild(new TreeNode("3"));
+        left.addChild(new TreeNode("4"));
+        left.addChild(new TreeNode("5"));
+        List<String> binary = traverser.depthFirstPostOrder(root).map(TreeNode::toString).toList();
+        assertEquals("1", binary.get(binary.size() - 1));
+        assertTrue(binary.indexOf("4") < binary.indexOf("2"));
+        assertEquals(5, traverser.depthFirstPostOrder(root).count());
     }
 
     @Test
-    public void test_depthFirstPostOrder_useCase_treeSize() {
-        TreeNode root = new TreeNode("root");
-        TreeNode c1 = new TreeNode("c1");
-        TreeNode c2 = new TreeNode("c2");
-        TreeNode gc1 = new TreeNode("gc1");
-
-        root.addChild(c1);
-        root.addChild(c2);
-        c1.addChild(gc1);
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        long count = traverser.depthFirstPostOrder(root).count();
-        assertEquals(4, count);
-    }
-
-    @Test
-    public void test_FILES_constant_exists() {
+    public void testFiles(@TempDir File tempDir) throws IOException {
         assertNotNull(Traverser.FILES);
-    }
+        assertEquals(List.of(tempDir), Traverser.FILES.breadthFirst(tempDir).toList());
 
-    @Test
-    public void test_FILES_traverseDirectory(@TempDir File tempDir) throws IOException {
         File subDir = new File(tempDir, "subdir");
         subDir.mkdir();
+        Files.write(new File(tempDir, "file1.txt").toPath(), "content1".getBytes());
+        Files.write(new File(subDir, "file2.txt").toPath(), "content2".getBytes());
+        Files.write(new File(tempDir, "Test.java").toPath(), "".getBytes());
+        Files.write(new File(tempDir, "readme.txt").toPath(), "".getBytes());
 
-        File file1 = new File(tempDir, "file1.txt");
-        File file2 = new File(subDir, "file2.txt");
-
-        Files.write(file1.toPath(), "content1".getBytes());
-        Files.write(file2.toPath(), "content2".getBytes());
-
-        List<File> result = Traverser.FILES.breadthFirst(tempDir).toList();
-
-        assertTrue(result.size() >= 3);
-        assertTrue(result.stream().anyMatch(f -> f.getName().equals("file1.txt")));
-    }
-
-    @Test
-    public void test_FILES_filterFiles(@TempDir File tempDir) throws IOException {
-        File javaFile = new File(tempDir, "Test.java");
-        File txtFile = new File(tempDir, "readme.txt");
-
-        Files.write(javaFile.toPath(), "".getBytes());
-        Files.write(txtFile.toPath(), "".getBytes());
-
+        List<File> bfs = Traverser.FILES.breadthFirst(tempDir).toList();
+        assertTrue(bfs.size() >= 3);
+        assertTrue(bfs.stream().anyMatch(f -> f.getName().equals("file1.txt")));
         List<File> javaFiles = Traverser.FILES.breadthFirst(tempDir).filter(f -> f.getName().endsWith(".java")).toList();
-
         assertEquals(1, javaFiles.size());
         assertEquals("Test.java", javaFiles.get(0).getName());
+
+        List<File> pre = Traverser.FILES.depthFirstPreOrder(tempDir).toList();
+        assertTrue(pre.size() >= 2);
+        assertTrue(pre.contains(tempDir));
+        List<File> post = Traverser.FILES.depthFirstPostOrder(tempDir).toList();
+        assertTrue(post.indexOf(subDir) < post.indexOf(tempDir));
     }
 
     @Test
-    public void test_FILES_depthFirstTraversal(@TempDir File tempDir) throws IOException {
-        File subDir = new File(tempDir, "sub");
-        subDir.mkdir();
-        File file = new File(subDir, "file.txt");
-        Files.write(file.toPath(), "".getBytes());
-
-        List<File> result = Traverser.FILES.depthFirstPreOrder(tempDir).toList();
-
-        assertTrue(result.size() >= 2);
-        assertTrue(result.contains(tempDir));
-    }
-
-    @Test
-    public void test_FILES_emptyDirectory(@TempDir File tempDir) {
-        List<File> result = Traverser.FILES.breadthFirst(tempDir).toList();
-
-        assertEquals(1, result.size());
-        assertEquals(tempDir, result.get(0));
-    }
-
-    @Test
-    public void test_FILES_postOrderTraversal(@TempDir File tempDir) throws IOException {
-        File subDir = new File(tempDir, "sub");
-        subDir.mkdir();
-        File file = new File(subDir, "file.txt");
-        Files.write(file.toPath(), "".getBytes());
-
-        List<File> result = Traverser.FILES.depthFirstPostOrder(tempDir).toList();
-
-        assertTrue(result.size() >= 2);
-        int tempDirIndex = result.indexOf(tempDir);
-        int subDirIndex = result.indexOf(subDir);
-        assertTrue(subDirIndex < tempDirIndex);
-    }
-
-    @Test
-    public void test_traversalComparison_sameNodes() {
-        TreeNode root = new TreeNode("root");
-        TreeNode c1 = new TreeNode("c1");
-        TreeNode c2 = new TreeNode("c2");
-        root.addChild(c1);
-        root.addChild(c2);
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        Set<String> bfs = traverser.breadthFirst(root).map(TreeNode::toString).collect(Collectors.toSet());
-
-        Set<String> dfsPreOrder = traverser.depthFirstPreOrder(root).map(TreeNode::toString).collect(Collectors.toSet());
-
-        Set<String> dfsPostOrder = traverser.depthFirstPostOrder(root).map(TreeNode::toString).collect(Collectors.toSet());
-
-        assertEquals(bfs, dfsPreOrder);
-        assertEquals(bfs, dfsPostOrder);
-    }
-
-    @Test
-    public void test_traversalOrdering_differences() {
+    public void testTraversalComparison() {
         TreeNode root = new TreeNode("A");
-        TreeNode b = new TreeNode("B");
-        TreeNode c = new TreeNode("C");
-        root.addChild(b);
-        root.addChild(c);
-
+        root.addChild(new TreeNode("B"));
+        root.addChild(new TreeNode("C"));
         Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
+        Set<String> bfs = traverser.breadthFirst(root).map(TreeNode::toString).collect(Collectors.toSet());
+        Set<String> pre = traverser.depthFirstPreOrder(root).map(TreeNode::toString).collect(Collectors.toSet());
+        Set<String> post = traverser.depthFirstPostOrder(root).map(TreeNode::toString).collect(Collectors.toSet());
+        assertEquals(bfs, pre);
+        assertEquals(bfs, post);
+        assertEquals("A", traverser.breadthFirst(root).map(TreeNode::toString).toList().get(0));
+        List<String> postOrder = traverser.depthFirstPostOrder(root).map(TreeNode::toString).toList();
+        assertEquals("A", postOrder.get(postOrder.size() - 1));
 
-        List<String> bfs = traverser.breadthFirst(root).map(TreeNode::toString).toList();
-
-        List<String> dfsPost = traverser.depthFirstPostOrder(root).map(TreeNode::toString).toList();
-
-        assertEquals("A", bfs.get(0));
-        assertEquals("A", dfsPost.get(dfsPost.size() - 1));
-    }
-
-    @Test
-    public void test_forTree_vs_forGraph_withTree() {
-        TreeNode root = new TreeNode("root");
         TreeNode child = new TreeNode("child");
-        root.addChild(child);
-
-        Traverser<TreeNode> treeTraverser = Traverser.forTree(TreeNode::getChildren);
-        Traverser<TreeNode> graphTraverser = Traverser.forGraph(TreeNode::getChildren);
-
-        List<String> treeResult = treeTraverser.breadthFirst(root).map(TreeNode::toString).toList();
-
-        List<String> graphResult = graphTraverser.breadthFirst(root).map(TreeNode::toString).toList();
-
-        assertEquals(treeResult, graphResult);
-    }
-
-    @Test
-    public void test_streamLaziness() {
-        TreeNode root = new TreeNode("root");
-        for (int i = 0; i < 1000; i++) {
-            root.addChild(new TreeNode("child" + i));
-        }
-
-        Traverser<TreeNode> traverser = Traverser.forTree(TreeNode::getChildren);
-
-        List<String> result = traverser.breadthFirst(root).limit(5).map(TreeNode::toString).toList();
-
-        assertEquals(5, result.size());
-    }
-
-    @Test
-    public void test_emptyGraph() {
-        Map<String, List<String>> graph = new HashMap<>();
-        graph.put("A", Collections.emptyList());
-
-        Traverser<String> traverser = Traverser.forGraph(graph::get);
-
-        List<String> result = traverser.breadthFirst("A").toList();
-
-        assertEquals(1, result.size());
-        assertEquals("A", result.get(0));
-    }
-
-    @Test
-    public void test_graphWithNullSuccessors() {
-        Map<String, List<String>> graph = new HashMap<>();
-        graph.put("A", null);
-
-        Traverser<String> traverser = Traverser.forGraph(node -> {
-            List<String> successors = graph.get(node);
-            return successors != null ? successors : Collections.emptyList();
-        });
-
-        List<String> result = traverser.breadthFirst("A").toList();
-
-        assertEquals(1, result.size());
+        TreeNode treeRoot = new TreeNode("root");
+        treeRoot.addChild(child);
+        assertEquals(Traverser.forTree(TreeNode::getChildren).breadthFirst(treeRoot).map(TreeNode::toString).toList(),
+                Traverser.forGraph(TreeNode::getChildren).breadthFirst(treeRoot).map(TreeNode::toString).toList());
     }
 }

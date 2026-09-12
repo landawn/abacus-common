@@ -29,20 +29,24 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.exception.UncheckedInterruptedException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
-import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.function.TriConsumer;
 import com.landawn.abacus.util.function.TriFunction;
 import com.landawn.abacus.util.stream.Stream;
+import com.landawn.abacus.util.u.Nullable;
 
 import lombok.Builder;
 import lombok.Value;
@@ -62,21 +66,31 @@ import lombok.experimental.Accessors;
  * <p><b>Key Features:</b>
  * <ul>
  *   <li><b>Iterator-Centric Design:</b> Optimized specifically for Iterator patterns and lazy evaluation</li>
- *   <li><b>Memory Efficient:</b> Minimal memory footprint with streaming operations</li>
- *   <li><b>Parallel Processing:</b> Support for concurrent iterator operations with ExecutorService</li>
+ *   <li><b>Memory Efficient:</b> Minimal memory footprint with streaming operations. The exceptions are
+ *       {@code distinct}/{@code distinctBy}, which retain every key seen, and the two {@code cycle(Iterable...)}
+ *       methods, which snapshot a source that is not a {@link Collection}; each says so on its own javadoc</li>
+ *   <li><b>Parallel Processing:</b> The {@code forEach} family can read from several iterators and invoke the
+ *       element consumer concurrently, configured through {@link IterateOptions}. The worker pool is created
+ *       and shut down internally; no method in this class accepts an {@link java.util.concurrent.Executor}.
+ *       To run on the library's shared executor, or one you supply, use
+ *       {@link N#forEachInParallel(Iterator, Throwables.Consumer, int)} instead</li>
  *   <li><b>Null-Safe Operations:</b> Graceful handling of {@code null} inputs and empty iterators</li>
  *   <li><b>Functional Programming:</b> Comprehensive support for map, filter, reduce, and functional patterns</li>
  *   <li><b>Type Safety:</b> Generic methods with compile-time type checking</li>
  *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
- *   <li><b>Stream Integration:</b> Seamless integration with Java Stream API and Abacus Stream utilities</li>
+ *   <li><b>Interoperability:</b> Every adapter returns a plain {@link java.util.Iterator} ({@link ObjIterator} or a
+ *       primitive {@code XxxIterator}), so results can be handed straight to
+ *       {@link com.landawn.abacus.util.stream.Stream#of(Iterator)}, {@link Seq#of(Iterator)} or any API that
+ *       accepts an {@code Iterator}. This class itself neither accepts nor returns a
+ *       {@link java.util.stream.Stream}</li>
  * </ul>
  *
  * <p><b>Core Functional Categories:</b>
  * <ul>
  *   <li><b>Access Operations:</b> {@code elementAt} with safe index handling</li>
  *   <li><b>Search Operations:</b> {@code indexOf}, {@code frequency}, {@code count} with predicate support</li>
- *   <li><b>Transformation Operations:</b> {@code map}, {@code flatMap}, {@code flatmap}, {@code filter}, {@code distinct}, {@code distinctBy}</li>
- *   <li><b>Slicing Operations:</b> {@code skip}, {@code limit}, {@code skipAndLimit}, {@code takeWhile}, {@code dropWhile}, {@code skipUntil}</li>
+ *   <li><b>Transformation Operations:</b> {@code map}, {@code flatMap}, {@code flatmap}, {@code filter}, {@code skipNulls}, {@code distinct}, {@code distinctBy}</li>
+ *   <li><b>Slicing Operations:</b> {@code skip}, {@code limit}, {@code skipAndLimit}, {@code takeWhile}, {@code takeWhileInclusive}, {@code dropWhile}, {@code skipUntil}</li>
  *   <li><b>Repetition Operations:</b> {@code repeat}, {@code repeatElements}, {@code cycle}, {@code cycleToSize}</li>
  *   <li><b>Parallel Operations:</b> {@code forEach} with multi-threaded reading/processing support</li>
  *   <li><b>Combination Operations:</b> {@code concat}, {@code merge}, {@code mergeSorted}, {@code zip}, {@code unzip} for iterator composition</li>
@@ -87,19 +101,28 @@ import lombok.experimental.Accessors;
  *   <li><b>Iterator First:</b> Methods are designed to work with Iterator types as primary input,
  *       promoting memory-efficient streaming operations over collection materialization</li>
  *   <li><b>Lazy Evaluation:</b> Operations are performed lazily when possible, allowing for efficient
- *       processing of large datasets without excessive memory consumption</li>
+ *       processing of large datasets without excessive memory consumption. Note that the {@code Iterable}-accepting
+ *       overloads call {@link Iterable#iterator()} <i>eagerly</i>, when the factory method is invoked, rather than
+ *       on the first {@code hasNext()}/{@code next()}; the elements themselves are still pulled on demand. The
+ *       multi-source forms {@code concat(Iterable...)}, {@link #concatIterables(Collection)} and
+ *       {@code concat(Map...)} are the exception: each source's iterator is obtained only once the previous
+ *       source has been exhausted. {@link #repeatElements(Iterable, long)} goes the other way and additionally
+ *       calls {@code hasNext()} on the iterator at construction to detect an empty source, so a source backed by
+ *       I/O performs one read before the caller asks for anything; {@link #cycle(Iterable)} probes the same way,
+ *       and so does {@link #cycle(Iterable, long)} for a source that is not a {@link Collection}</li>
  *   <li><b>Consuming Operations:</b> Methods do not call {@link Iterator#remove()}, but they advance
  *       and therefore consume the supplied iterators</li>
  *   <li><b>Exception Avoidance:</b> Methods avoid throwing unnecessary exceptions when contracts
  *       are not violated, preferring empty results over exceptions for edge cases</li>
- *   <li><b>Nullable Returns:</b> Many methods return {@code Nullable} types for null-safe value handling</li>
+ *   <li><b>Nullable Returns:</b> {@link #elementAt(Iterator, long)} returns a {@link Nullable} rather than
+ *       throwing on an out-of-bounds index; it is the only method here that returns {@code Nullable}</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Basic iterator access operations
  * Iterator<String> iter = Arrays.asList("A", "B", "C", "D").iterator();
- * Nullable<String> element = Iterators.elementAt(iter, 2);     // Nullable["C"]
+ * Nullable<String> element = Iterators.elementAt(iter, 2);     // Nullable[C]
  *
  * // Search operations
  * Iterator<String> letters = Arrays.asList("A", "B", "C", "B", "D").iterator();
@@ -122,7 +145,8 @@ import lombok.experimental.Accessors;
  *
  * // Parallel forEach processing of a collection of iterators
  * List<Iterator<String>> data = getDataIterators();
- * Iterators.forEach(data, 0, Long.MAX_VALUE, 2, 4, 100, item -> processItem(item));
+ * Iterators.forEach(data, IterateOptions.builder().readThreads(2).processThreads(4).queueSize(100).build(),
+ *     item -> processItem(item));
  * }</pre>
  *
  * <p><b>Iterator Access Patterns:</b>
@@ -136,80 +160,39 @@ import lombok.experimental.Accessors;
  * <p><b>Functional Transformations:</b>
  * <ul>
  *   <li><b>Mapping:</b> {@code map()}, {@code flatMap()}, {@code flatmap()}</li>
- *   <li><b>Filtering:</b> {@code filter()}, {@code distinct()}, {@code distinctBy()}, {@code limit()}</li>
- *   <li><b>Slicing:</b> {@code skip()}, {@code skipAndLimit()}, {@code takeWhile()}, {@code dropWhile()}, {@code skipUntil()}</li>
+ *   <li><b>Filtering:</b> {@code filter()}, {@code skipNulls()}, {@code distinct()}, {@code distinctBy()}, {@code limit()}</li>
+ *   <li><b>Slicing:</b> {@code skip()}, {@code skipAndLimit()}, {@code takeWhile()}, {@code takeWhileInclusive()}, {@code dropWhile()}, {@code skipUntil()}</li>
  *   <li><b>Composition:</b> {@code concat()}, {@code merge()}, {@code mergeSorted()}, {@code zip()}</li>
  * </ul>
  *
- * <p><b>Parallel Processing Support:</b>
+ * <p><b>Parallel Processing Support:</b> configured entirely through {@link IterateOptions}.
  * <ul>
- *   <li><b>Concurrent Operations:</b> Multi-threaded {@code forEach} with configurable read and process thread counts</li>
- *   <li><b>Coordinated Parallel Consumption:</b> The parallel {@code forEach} overloads coordinate
- *       access to their combined iterator; ordinary iterators returned by this class are not thread-safe</li>
- *   <li><b>Bounded Queue:</b> Configurable queue size for buffering elements before processing</li>
- *   <li><b>Exception Handling:</b> Proper exception propagation in parallel contexts</li>
+ *   <li><b>{@code readThreads}:</b> reads the supplied iterators concurrently. Only the
+ *       {@code Collection<Iterator>} overloads honour it. Single-iterator overloads ignore it; processing workers
+ *       serialize source reads when {@code processThreads > 0}. With more than one reader the iterators interleave nondeterministically, so
+ *       {@code offset}/{@code count} then select an unstable subset</li>
+ *   <li><b>{@code processThreads}:</b> invokes the element consumer concurrently on a pool of named daemon
+ *       threads created and shut down by the call. The order of consumer invocations is not guaranteed</li>
+ *   <li><b>{@code queueSize}:</b> bounds the hand-off buffer between the reader threads and the consumer. It has
+ *       no effect unless {@code readThreads > 0}; {@code 0} lets the implementation pick a size</li>
+ *   <li><b>Exception Handling:</b> the first failure cancels the remaining work; later failures are attached to it
+ *       with {@link Throwable#addSuppressed(Throwable)}. The first failure is then rethrown <i>as it is</i>, so
+ *       the declared {@code throws E}/{@code throws E2} holds whatever {@code processThreads} is set to -
+ *       a tuning change never moves an exception out of the {@code catch} clause that was matching it</li>
  * </ul>
  *
- * <p><b>Performance Characteristics:</b>
+ * <p><b>Thread Safety and Resource Ownership:</b>
  * <ul>
- *   <li><b>Memory Efficient:</b> Streaming operations with minimal memory footprint</li>
- *   <li><b>Lazy Evaluation:</b> Operations performed only when results are consumed</li>
- *   <li><b>Short-Circuit Operations:</b> Early termination for operations like takeWhile and limit</li>
- *   <li><b>Cache-Friendly:</b> Sequential access patterns optimized for CPU cache performance</li>
- *   <li><b>Scalable Parallel Processing:</b> Efficient utilization of multi-core systems</li>
- * </ul>
- *
- * <p><b>Thread Safety:</b>
- * <ul>
- *   <li><b>Static Design:</b> The utility methods do not retain caller data between invocations</li>
- *   <li><b>Single-use Results:</b> Adapter methods create new iterators that consume their input
- *       iterators and should normally be used by one thread</li>
- *   <li><b>Parallel Support:</b> Built-in support for concurrent processing with ExecutorService</li>
- *   <li><b>No Shared State:</b> No static mutable fields that could cause race conditions</li>
- * </ul>
- *
- * <p><b>Integration with Java Iterators:</b>
- * <ul>
- *   <li><b>Standard Iterator:</b> Full compatibility with java.util.Iterator</li>
- *   <li><b>Enhanced Iterators:</b> Integration with ObjIterator and specialized iterator types</li>
- *   <li><b>Stream Conversion:</b> Seamless conversion to/from Java 8+ Streams</li>
- *   <li><b>Collection Compatibility:</b> Works with iterators from all Java Collection types</li>
- * </ul>
- *
- * <p><b>Error Handling Strategy:</b>
- * <ul>
- *   <li><b>Graceful Degradation:</b> Methods handle edge cases without throwing exceptions</li>
- *   <li><b>Null Safety:</b> Comprehensive {@code null} input handling throughout the API</li>
- *   <li><b>Boundary Checking:</b> Safe index access with bounds validation</li>
- *   <li><b>Nullable Returns:</b> Use of {@code Nullable} types to avoid {@code null} return values</li>
- * </ul>
- *
- * <p><b>Memory Management:</b>
- * <ul>
- *   <li><b>Streaming Operations:</b> Process data without loading entire datasets into memory</li>
- *   <li><b>Iterator Chaining:</b> Compose operations without intermediate collection creation</li>
+ *   <li><b>No Shared State:</b> The utility methods retain no caller data between invocations and the class has
+ *       no mutable static fields</li>
+ *   <li><b>Single-use Results:</b> Adapter methods return new iterators that consume their input iterators;
+ *       they are not thread-safe and should be used by one thread at a time</li>
+ *   <li><b>Coordinated Parallel Consumption:</b> The parallel {@code forEach} overloads are the exception - they
+ *       coordinate access to their own combined iterator internally</li>
  *   <li><b>Resource Ownership:</b> Plain iterators have no close contract; callers remain responsible
- *       for closing any stream, reader, or other resource from which an iterator was obtained</li>
- *   <li><b>Garbage Collection Friendly:</b> Minimal object allocation and retention</li>
- * </ul>
- *
- * <p><b>Best Practices:</b>
- * <ul>
- *   <li>Use iterator-based operations for memory-efficient processing of large datasets</li>
- *   <li>Leverage parallel processing for CPU-intensive transformations</li>
- *   <li>Prefer lazy evaluation patterns for improved performance</li>
- *   <li>Use {@code Nullable} return types to avoid {@code null} pointer exceptions</li>
- *   <li>Chain operations efficiently to minimize intermediate collection creation</li>
- *   <li>Consider iterator consumption patterns (single-use vs. reusable)</li>
- * </ul>
- *
- * <p><b>Performance Tips:</b>
- * <ul>
- *   <li>Use streaming operations for large datasets to avoid memory overhead</li>
- *   <li>Leverage short-circuit operations for better performance</li>
- *   <li>Consider parallel processing for CPU-intensive operations</li>
- *   <li>Minimize iterator materialization until results are needed</li>
- *   <li>Use appropriate ExecutorService configurations for parallel operations</li>
+ *       for closing any stream, reader, or other resource from which an iterator was obtained. Note that
+ *       {@code forEach} reads source iterators on pool threads when either reading or processing is parallel,
+ *       so a source bound to the calling thread requires {@code readThreads == 0} and {@code processThreads == 0}</li>
  * </ul>
  *
  * <p><b>Common Patterns:</b>
@@ -325,6 +308,13 @@ public final class Iterators {
 
     private static final Logger logger = LoggerFactory.getLogger(Iterators.class);
 
+    /**
+     * How long the parallel {@code forEach} waits for its workers to stop after the calling thread has been
+     * interrupted, before it closes the source and rethrows. Bounded so that a consumer which ignores
+     * interruption cannot pin the caller here indefinitely.
+     */
+    private static final long CANCELLATION_TIMEOUT_IN_MILLIS = 1000;
+
     private Iterators() {
         // Utility class.
     }
@@ -393,10 +383,18 @@ public final class Iterators {
      * // nullCount => 2
      * }</pre>
      *
+     * <p><b>Comparison:</b> elements are compared with {@link java.util.Objects#equals(Object, Object)}, so array
+     * elements are matched by <i>identity</i>, not by content:
+     * {@code Iterators.frequency(ObjIterator.of(new int[][] { { 1, 2 } }), new int[] { 1, 2 })} returns {@code 0},
+     * while passing the <i>same</i> {@code int[]} reference as both the element and {@code valueToFind} returns
+     * {@code 1}. Use {@link N#deepEquals(Object, Object)} through {@link #count(Iterator, Predicate)} when
+     * array contents should match.</p>
+     *
      * @param iter the iterator to be searched, or {@code null} to return {@code 0}.
      * @param valueToFind the value to count occurrences of, or {@code null} to count {@code null} occurrences.
      * @return the number of occurrences of the value in the iterator, or {@code 0} if {@code iter} is {@code null}.
      * @see N#frequency(Iterator, Object)
+     * @see #count(Iterator, Predicate)
      */
     public static long frequency(final Iterator<?> iter, final Object valueToFind) {
         if (iter == null) {
@@ -486,8 +484,6 @@ public final class Iterators {
     public static <T> long count(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
-        //NOSONAR
-
         if (iter == null) {
             return 0;
         }
@@ -511,6 +507,9 @@ public final class Iterators {
      * ({@code long} because an iterator may yield more than {@code Integer.MAX_VALUE} elements);
      * {@link Iterables#indexOf(Collection, Object)} returns an {@code OptionalInt} that is empty when not found;
      * {@link N#indexOf(Iterator, Object)} returns an {@code int} with the same {@code -1} sentinel.</p>
+     *
+     * <p><b>Comparison:</b> elements are compared with {@link java.util.Objects#equals(Object, Object)}, so array
+     * elements are matched by <i>identity</i>, not by content.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -592,6 +591,10 @@ public final class Iterators {
      * <p>Note that this will modify the supplied iterators, since they will have been advanced some
      * number of elements forward.
      *
+     * <p><b>Comparison:</b> corresponding elements are compared with
+     * {@link java.util.Objects#equals(Object, Object)}, so array elements are compared by <i>identity</i>, not by
+     * content: two iterators each yielding an equal-but-distinct {@code int[]} are <b>not</b> equal in order.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<String> iter1 = Arrays.asList("A", "B", "C").iterator();
@@ -652,30 +655,9 @@ public final class Iterators {
      * @see #cycle(Object...)
      */
     public static <T> ObjIterator<T> repeat(final T e, final int n) throws IllegalArgumentException {
-        N.checkArgNotNegative(n, cs.n);
-
-        if (n == 0) {
-            return ObjIterator.empty();
-        }
-
-        return new ObjIterator<>() {
-            private int cnt = n;
-
-            @Override
-            public boolean hasNext() {
-                return cnt > 0;
-            }
-
-            @Override
-            public T next() {
-                if (cnt <= 0) {
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
-                }
-
-                cnt--;
-                return e;
-            }
-        };
+        // Behaviourally identical to the long overload - kept as its own public method because it has its own
+        // JVM descriptor (Object, int) that compiled callers are already bound to, but with no duplicated body.
+        return repeat(e, (long) n);
     }
 
     /**
@@ -714,8 +696,12 @@ public final class Iterators {
                 return cnt > 0;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -739,6 +725,10 @@ public final class Iterators {
      * ObjIterator<Integer> iter2 = Iterators.repeatElements(numbers, 3);
      * // Yields: 1, 1, 1, 2, 2, 2
      * }</pre>
+     *
+     * <p><b>Note:</b> {@code c.iterator()} is obtained eagerly, when this method is called, and {@code hasNext()} is
+     * called on it once to detect an empty source - so a source backed by I/O performs one read before the caller
+     * pulls anything.</p>
      *
      * @param <T> the type of elements in the iterable.
      * @param c the iterable whose elements are to be repeated, or {@code null}/empty to return an empty iterator.
@@ -772,8 +762,12 @@ public final class Iterators {
                 return cnt > 0 || iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -806,6 +800,18 @@ public final class Iterators {
      * // Yields: 1, 1, 1, 2, 2
      * }</pre>
      *
+     * <p><b>Live view:</b> {@code c.size()} is read when this method is called, to work out how many times each
+     * element must be repeated, but the elements themselves are pulled lazily from
+     * {@link Collection#iterator() c.iterator()}, which is obtained on the first call to {@code next()}. A
+     * modification made <i>before</i> that first {@code next()} raises nothing - the iterator is created after
+     * it - but the per-element repeat counts were already fixed from the original {@code c.size()}: a source
+     * that has grown is still truncated to {@code size}, and one that has shrunk produces fewer than
+     * {@code size} elements, with {@code hasNext()} simply reporting {@code false}. If {@code c} has been
+     * emptied, the first {@code next()} throws {@link NoSuchElementException} even though {@code hasNext()}
+     * reported {@code true}. A structural modification made <i>after</i> the first {@code next()} is governed
+     * by that collection's own iterator contract: a fail-fast collection raises
+     * {@link java.util.ConcurrentModificationException}.</p>
+     *
      * @param <T> the type of elements in the collection.
      * @param c the collection whose elements are to be repeated. Must not be empty or {@code null} if {@code size > 0}.
      * @param size the total number of elements the resulting iterator should produce. Must be non-negative.
@@ -832,28 +838,53 @@ public final class Iterators {
             private T next = null;
             private long cnt = mod-- > 0 ? n + 1 : n;
 
-            @Override
-            public boolean hasNext() {
-                return cnt > 0 || ((n > 0 || mod > 0) && (iter != null && iter.hasNext()));
-            }
+            // The per-element repeat counts above are fixed from c.size() when this iterator is constructed, but
+            // c.iterator() is only taken on the first next(). A source that GREW in between therefore offers more
+            // elements than those counts were divided among, and nothing else here bounds the total - the
+            // requested size is the one guarantee this method makes, so it is tracked explicitly. (A source that
+            // SHRANK is caught separately, by nextElement().)
+            private long remaining = size;
 
             @Override
-            public T next() {
+            public boolean hasNext() {
+                return remaining > 0 && (cnt > 0 || ((n > 0 || mod > 0) && (iter != null && iter.hasNext())));
+            }
+
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
+            @Override
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (iter == null) {
                     iter = c.iterator();
-                    next = iter.next();
+                    next = nextElement();
                 } else if (cnt <= 0) {
-                    next = iter.next();
+                    next = nextElement();
                     cnt = mod-- > 0 ? n + 1 : n;
                 }
 
                 cnt--;
+                remaining--;
 
                 return next;
+            }
+
+            /**
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
+            private T nextElement() throws NoSuchElementException {
+                if (!iter.hasNext()) {
+                    // The source shrank after this iterator was created, so the per-element repeat counts
+                    // computed from its original size can no longer add up to the requested total.
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return iter.next();
             }
         };
     }
@@ -870,6 +901,10 @@ public final class Iterators {
      * ObjIterator<Integer> numbers = Iterators.cycle(1, 2);
      * // Yields: 1, 2, 1, 2, 1, 2, ... (infinitely)
      * }</pre>
+     *
+     * <p><b>Live view vs. snapshot:</b> unlike {@link #cycle(Iterable)} over a {@link Collection}, the varargs array
+     * is <b>snapshotted</b> - it is copied when this method is called, so later writes to the caller's array are not
+     * observed. The element references themselves are shared, so mutating an element object still is.</p>
      *
      * @param <T> the type of elements in the array.
      * @param elements the array whose elements are to be cycled over.
@@ -921,8 +956,22 @@ public final class Iterators {
      * // Yields: 1, 2, 3, 1, 2, 3, ... (infinitely, in set iteration order)
      * }</pre>
      *
+     * <p><b>Live view vs. snapshot:</b> a {@link Collection} is cycled <i>in place</i> - the returned iterator
+     * simply calls {@link Collection#iterator()} again once the current one is exhausted. It therefore uses no
+     * extra memory and observes later changes to the source, exactly like {@link #cycleToSize(Collection, long)}.
+     * Structural modification of the source is governed by that collection's own iterator contract: a fail-fast
+     * collection raises {@link java.util.ConcurrentModificationException}, while one whose iterator does not fail
+     * fast simply picks up the change on the next round - and, if the source has been emptied, ends the cycle by
+     * reporting {@code hasNext() == false} rather than looping forever. Any other {@code Iterable} cannot be assumed to
+     * be re-iterable, so the first round is read through to the source and <b>snapshotted</b>: every element is
+     * retained for the lifetime of the returned iterator and later changes to the source are not visible.
+     * Do not call this on a non-{@code Collection} {@code Iterable} of unbounded size.</p>
+     *
+     * <p><b>Note:</b> {@code iterable.iterator()} is obtained eagerly, when this method is called, in order to
+     * detect an empty source.</p>
+     *
      * @param <T> the type of elements in the iterable.
-     * @param iterable the iterable whose elements are to be cycled over.
+     * @param iterable the iterable whose elements are to be cycled over, or {@code null} to return an empty iterator.
      * @return an infinite iterator cycling over the elements of the iterable, or an empty iterator if {@code iterable} is {@code null} or empty.
      * @see #cycle(Object...)
      * @see #cycle(Iterable, long)
@@ -933,6 +982,50 @@ public final class Iterators {
     public static <T> ObjIterator<T> cycle(final Iterable<? extends T> iterable) {
         if (N.isEmptyCollection(iterable)) {
             return ObjIterator.empty();
+        }
+
+        if (iterable instanceof Collection) {
+            // A Collection can be re-iterated, so cycle it in place rather than copying it into a private
+            // array: O(1) memory, and consistent with cycleToSize(Collection, long), which does the same.
+            final Collection<? extends T> c = (Collection<? extends T>) iterable;
+            final Iterator<? extends T> firstRound = c.iterator();
+
+            if (!firstRound.hasNext()) {
+                // size() said non-empty but the iterator is empty: a concurrent collection can be drained
+                // between the two calls. Report empty rather than an iterator whose next() always throws.
+                return ObjIterator.empty();
+            }
+
+            return new ObjIterator<>() {
+                private Iterator<? extends T> iter = firstRound;
+
+                @Override
+                public boolean hasNext() {
+                    if (iter.hasNext()) {
+                        return true;
+                    }
+
+                    iter = c.iterator();
+
+                    // A fresh iterator with no elements means the source has been emptied since this iterator was
+                    // created. Report that honestly instead of promising an element next() could not supply: a
+                    // constant true here made while (it.hasNext()) it.next() throw NoSuchElementException.
+                    return iter.hasNext();
+                }
+
+                /**
+                 * {@inheritDoc}
+                 * @throws NoSuchElementException if no next element is available from the source iteration.
+                 */
+                @Override
+                public T next() throws NoSuchElementException {
+                    if (!hasNext()) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return iter.next();
+                }
+            };
         }
 
         final Iterator<? extends T> iter = iterable.iterator();
@@ -946,7 +1039,6 @@ public final class Iterators {
             private T[] a;
             private int len;
             private int cursor = 0;
-            private T next = null;
 
             @Override
             public boolean hasNext() {
@@ -957,9 +1049,9 @@ public final class Iterators {
             public T next() {
                 if (a == null) {
                     if (iter.hasNext()) {
-                        next = iter.next();
-                        list.add(next);
-                        return next;
+                        final T e = iter.next();
+                        list.add(e);
+                        return e;
                     } else {
                         a = list.toArray((T[]) new Object[list.size()]);
                         len = a.length;
@@ -992,6 +1084,19 @@ public final class Iterators {
      * // Yields: 1, 2, 1, 2, 1, 2
      * }</pre>
      *
+     * <p><b>Live view vs. snapshot:</b> a {@link Collection} is cycled <i>in place</i> - the returned iterator
+     * simply calls {@link Collection#iterator()} again at the start of every round. It therefore uses no extra
+     * memory and observes later changes to the source. Structural modification of the source is governed by that
+     * collection's own iterator contract: a fail-fast collection raises
+     * {@link java.util.ConcurrentModificationException}, while one whose iterator does not fail fast picks up the
+     * change on the next round - and, if the source has been emptied, ends the iteration early instead of walking
+     * the remaining rounds. Any other {@code Iterable} cannot be assumed to be re-iterable, so the first round is
+     * read through to the source and <b>snapshotted</b>: every element is retained for the lifetime of the
+     * returned iterator and later changes to the source are not visible.</p>
+     *
+     * <p><b>Note:</b> {@code iterable.iterator()} is obtained eagerly, when this method is called, in order to
+     * detect an empty source.</p>
+     *
      * @param <T> the type of elements in the iterable.
      * @param iterable the iterable whose elements are to be cycled over, or {@code null} to return an empty iterator.
      * @param rounds the number of times to cycle over the iterable's elements. Must be non-negative.
@@ -1009,6 +1114,68 @@ public final class Iterators {
             return ObjIterator.empty();
         }
 
+        if (iterable instanceof Collection) {
+            // A Collection can be re-iterated, so cycle it in place rather than copying it into a private
+            // array: O(1) memory, and consistent with cycleToSize(Collection, long), which does the same.
+            final Collection<? extends T> c = (Collection<? extends T>) iterable;
+
+            if (rounds == 1) {
+                return ObjIterator.of(c.iterator());
+            }
+
+            return new ObjIterator<>() {
+                private Iterator<? extends T> iter = c.iterator();
+                private long round = 1;
+
+                // hasNext() has to stay a pure query. Without this latch, every call made while the source is
+                // momentarily empty would consume one of the requested rounds, so the number of elements this
+                // iterator yields would depend on how often hasNext() was called.
+                private boolean done = false;
+
+                @Override
+                public boolean hasNext() {
+                    if (done) {
+                        return false;
+                    }
+
+                    if (iter.hasNext()) {
+                        return true;
+                    }
+
+                    if (round >= rounds) {
+                        done = true;
+                        return false;
+                    }
+
+                    round++;
+                    iter = c.iterator();
+
+                    if (!iter.hasNext()) {
+                        // A fresh iterator with no elements means the source has been emptied since this
+                        // iterator was created. No later round can produce anything either, so end the
+                        // iteration here, as documented, rather than spinning through the remaining rounds.
+                        done = true;
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                /**
+                 * {@inheritDoc}
+                 * @throws NoSuchElementException if no next element is available from the source iteration.
+                 */
+                @Override
+                public T next() throws NoSuchElementException {
+                    if (!hasNext()) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return iter.next();
+                }
+            };
+        }
+
         final Iterator<? extends T> iter = iterable.iterator();
 
         if (!iter.hasNext()) {
@@ -1023,24 +1190,27 @@ public final class Iterators {
             private int len;
             private long m = 1;
             private int cursor = 0;
-            private T next = null;
 
             @Override
             public boolean hasNext() {
                 return m < rounds || (m == rounds && cursor < len);
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (a == null) {
                     if (iter.hasNext()) {
-                        next = iter.next();
-                        list.add(next);
-                        return next;
+                        final T e = iter.next();
+                        list.add(e);
+                        return e;
                     } else {
                         m++;
                         a = list.toArray((T[]) new Object[list.size()]);
@@ -1074,6 +1244,13 @@ public final class Iterators {
      * // Yields: 1, 2, 3, 1, 2, 3, 1
      * }</pre>
      *
+     * <p><b>Live view:</b> the collection is cycled <i>in place</i> - {@link Collection#iterator()} is called again
+     * at the start of every round - so no copy is made and later changes to the source are observed. Structural
+     * modification of the source is governed by that collection's own iterator contract: a fail-fast collection
+     * raises {@link java.util.ConcurrentModificationException}. If the source is emptied and its iterator does not
+     * fail fast, the next {@code next()} throws {@link NoSuchElementException} even though {@code hasNext()}
+     * reported {@code true}, because the requested {@code size} can no longer be produced.</p>
+     *
      * @param <T> the type of elements in the collection.
      * @param c the collection to be repeated. Must not be empty or {@code null} if {@code size > 0}.
      * @param size the total number of elements the resulting iterator should produce. Must be non-negative.
@@ -1102,14 +1279,23 @@ public final class Iterators {
                 return cnt > 0;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 if (iter == null || !iter.hasNext()) {
                     iter = c.iterator();
+
+                    if (!iter.hasNext()) {
+                        // The source was emptied after this iterator was created - nothing left to cycle.
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
                 }
 
                 cnt--;
@@ -1132,22 +1318,23 @@ public final class Iterators {
      * // iter.nextBoolean() => true
      * }</pre>
      *
-     * @param a the boolean arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @param a the boolean arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect; the supplied arrays themselves are <b>not</b> copied and are read lazily, so writing into one is visible to the returned iterator.
      * @return a BooleanIterator that will iterate over the elements of each provided boolean array in order, or {@code BooleanIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static BooleanIterator concat(final boolean[]... a) {
         if (N.isEmpty(a)) {
             return BooleanIterator.EMPTY;
         }
 
         return new BooleanIterator() {
-            private final Iterator<boolean[]> iter = Arrays.asList(a).iterator();
+            private final Iterator<boolean[]> iter = Arrays.asList(a.clone()).iterator();
             private boolean[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -1155,8 +1342,12 @@ public final class Iterators {
                 return cur != null && cursor < cur.length;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public boolean nextBoolean() {
+            public boolean nextBoolean() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1179,22 +1370,23 @@ public final class Iterators {
      * // iter.nextChar() => 'c'
      * }</pre>
      *
-     * @param a the char arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @param a the char arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect; the supplied arrays themselves are <b>not</b> copied and are read lazily, so writing into one is visible to the returned iterator.
      * @return a CharIterator that will iterate over the elements of each provided char array in order, or {@code CharIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static CharIterator concat(final char[]... a) {
         if (N.isEmpty(a)) {
             return CharIterator.EMPTY;
         }
 
         return new CharIterator() {
-            private final Iterator<char[]> iter = Arrays.asList(a).iterator();
+            private final Iterator<char[]> iter = Arrays.asList(a.clone()).iterator();
             private char[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -1202,8 +1394,12 @@ public final class Iterators {
                 return cur != null && cursor < cur.length;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1226,22 +1422,23 @@ public final class Iterators {
      * // iter.nextByte() => 3
      * }</pre>
      *
-     * @param a the byte arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @param a the byte arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect; the supplied arrays themselves are <b>not</b> copied and are read lazily, so writing into one is visible to the returned iterator.
      * @return a ByteIterator that will iterate over the elements of each provided byte array in order, or {@code ByteIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static ByteIterator concat(final byte[]... a) {
         if (N.isEmpty(a)) {
             return ByteIterator.EMPTY;
         }
 
         return new ByteIterator() {
-            private final Iterator<byte[]> iter = Arrays.asList(a).iterator();
+            private final Iterator<byte[]> iter = Arrays.asList(a.clone()).iterator();
             private byte[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -1249,8 +1446,12 @@ public final class Iterators {
                 return cur != null && cursor < cur.length;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1273,22 +1474,23 @@ public final class Iterators {
      * // iter.nextShort() => 30
      * }</pre>
      *
-     * @param a the short arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @param a the short arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect; the supplied arrays themselves are <b>not</b> copied and are read lazily, so writing into one is visible to the returned iterator.
      * @return a ShortIterator that will iterate over the elements of each provided short array in order, or {@code ShortIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static ShortIterator concat(final short[]... a) {
         if (N.isEmpty(a)) {
             return ShortIterator.EMPTY;
         }
 
         return new ShortIterator() {
-            private final Iterator<short[]> iter = Arrays.asList(a).iterator();
+            private final Iterator<short[]> iter = Arrays.asList(a.clone()).iterator();
             private short[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -1296,8 +1498,12 @@ public final class Iterators {
                 return cur != null && cursor < cur.length;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1321,22 +1527,23 @@ public final class Iterators {
      * // iter.nextInt() => 4
      * }</pre>
      *
-     * @param a the int arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @param a the int arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect; the supplied arrays themselves are <b>not</b> copied and are read lazily, so writing into one is visible to the returned iterator.
      * @return an IntIterator that will iterate over the elements of each provided int array in order, or {@code IntIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static IntIterator concat(final int[]... a) {
         if (N.isEmpty(a)) {
             return IntIterator.EMPTY;
         }
 
         return new IntIterator() {
-            private final Iterator<int[]> iter = Arrays.asList(a).iterator();
+            private final Iterator<int[]> iter = Arrays.asList(a.clone()).iterator();
             private int[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -1344,8 +1551,12 @@ public final class Iterators {
                 return cur != null && cursor < cur.length;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1368,22 +1579,23 @@ public final class Iterators {
      * // iter.nextLong() => 3L
      * }</pre>
      *
-     * @param a the long arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @param a the long arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect; the supplied arrays themselves are <b>not</b> copied and are read lazily, so writing into one is visible to the returned iterator.
      * @return a LongIterator that will iterate over the elements of each provided long array in order, or {@code LongIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static LongIterator concat(final long[]... a) {
         if (N.isEmpty(a)) {
             return LongIterator.EMPTY;
         }
 
         return new LongIterator() {
-            private final Iterator<long[]> iter = Arrays.asList(a).iterator();
+            private final Iterator<long[]> iter = Arrays.asList(a.clone()).iterator();
             private long[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -1391,8 +1603,12 @@ public final class Iterators {
                 return cur != null && cursor < cur.length;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1414,22 +1630,23 @@ public final class Iterators {
      * // iter.nextFloat() => 2.2f
      * }</pre>
      *
-     * @param a the float arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @param a the float arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect; the supplied arrays themselves are <b>not</b> copied and are read lazily, so writing into one is visible to the returned iterator.
      * @return a FloatIterator that will iterate over the elements of each provided float array in order, or {@code FloatIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static FloatIterator concat(final float[]... a) {
         if (N.isEmpty(a)) {
             return FloatIterator.EMPTY;
         }
 
         return new FloatIterator() {
-            private final Iterator<float[]> iter = Arrays.asList(a).iterator();
+            private final Iterator<float[]> iter = Arrays.asList(a.clone()).iterator();
             private float[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -1437,8 +1654,12 @@ public final class Iterators {
                 return cur != null && cursor < cur.length;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1461,22 +1682,23 @@ public final class Iterators {
      * // iter.nextDouble() => 3.3
      * }</pre>
      *
-     * @param a the double arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @param a the double arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect; the supplied arrays themselves are <b>not</b> copied and are read lazily, so writing into one is visible to the returned iterator.
      * @return a DoubleIterator that will iterate over the elements of each provided double array in order, or {@code DoubleIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static DoubleIterator concat(final double[]... a) {
         if (N.isEmpty(a)) {
             return DoubleIterator.EMPTY;
         }
 
         return new DoubleIterator() {
-            private final Iterator<double[]> iter = Arrays.asList(a).iterator();
+            private final Iterator<double[]> iter = Arrays.asList(a.clone()).iterator();
             private double[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((N.isEmpty(cur) || cursor >= cur.length) && iter.hasNext()) {
+                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
                     cur = iter.next();
                     cursor = 0;
                 }
@@ -1484,8 +1706,12 @@ public final class Iterators {
                 return cur != null && cursor < cur.length;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1508,16 +1734,17 @@ public final class Iterators {
      * // result.nextBoolean() => true
      * }</pre>
      *
-     * @param a the BooleanIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
+     * @param a the BooleanIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect on the returned iterator.
      * @return a BooleanIterator that will iterate over the elements of each provided BooleanIterator in order, or {@code BooleanIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static BooleanIterator concat(final BooleanIterator... a) {
         if (N.isEmpty(a)) {
             return BooleanIterator.EMPTY;
         }
 
         return new BooleanIterator() {
-            private final Iterator<BooleanIterator> iter = Arrays.asList(a).iterator();
+            private final Iterator<BooleanIterator> iter = Arrays.asList(a.clone()).iterator();
             private BooleanIterator cur;
 
             @Override
@@ -1529,8 +1756,12 @@ public final class Iterators {
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public boolean nextBoolean() {
+            public boolean nextBoolean() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1553,16 +1784,17 @@ public final class Iterators {
      * // result.nextChar() => 'c'
      * }</pre>
      *
-     * @param a the CharIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
+     * @param a the CharIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect on the returned iterator.
      * @return a CharIterator that will iterate over the elements of each provided CharIterator in order, or {@code CharIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static CharIterator concat(final CharIterator... a) {
         if (N.isEmpty(a)) {
             return CharIterator.EMPTY;
         }
 
         return new CharIterator() {
-            private final Iterator<CharIterator> iter = Arrays.asList(a).iterator();
+            private final Iterator<CharIterator> iter = Arrays.asList(a.clone()).iterator();
             private CharIterator cur;
 
             @Override
@@ -1574,8 +1806,12 @@ public final class Iterators {
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1598,16 +1834,17 @@ public final class Iterators {
      * // result.nextByte() => 3
      * }</pre>
      *
-     * @param a the ByteIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
+     * @param a the ByteIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect on the returned iterator.
      * @return a ByteIterator that will iterate over the elements of each provided ByteIterator in order, or {@code ByteIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static ByteIterator concat(final ByteIterator... a) {
         if (N.isEmpty(a)) {
             return ByteIterator.EMPTY;
         }
 
         return new ByteIterator() {
-            private final Iterator<ByteIterator> iter = Arrays.asList(a).iterator();
+            private final Iterator<ByteIterator> iter = Arrays.asList(a.clone()).iterator();
             private ByteIterator cur;
 
             @Override
@@ -1619,8 +1856,12 @@ public final class Iterators {
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1643,16 +1884,17 @@ public final class Iterators {
      * // result.nextShort() => 3
      * }</pre>
      *
-     * @param a the ShortIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
+     * @param a the ShortIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect on the returned iterator.
      * @return a ShortIterator that will iterate over the elements of each provided ShortIterator in order, or {@code ShortIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static ShortIterator concat(final ShortIterator... a) {
         if (N.isEmpty(a)) {
             return ShortIterator.EMPTY;
         }
 
         return new ShortIterator() {
-            private final Iterator<ShortIterator> iter = Arrays.asList(a).iterator();
+            private final Iterator<ShortIterator> iter = Arrays.asList(a.clone()).iterator();
             private ShortIterator cur;
 
             @Override
@@ -1664,8 +1906,12 @@ public final class Iterators {
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1688,16 +1934,17 @@ public final class Iterators {
      * // result.nextInt() => 3
      * }</pre>
      *
-     * @param a the IntIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
+     * @param a the IntIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect on the returned iterator.
      * @return an IntIterator that will iterate over the elements of each provided IntIterator in order, or {@code IntIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static IntIterator concat(final IntIterator... a) {
         if (N.isEmpty(a)) {
             return IntIterator.EMPTY;
         }
 
         return new IntIterator() {
-            private final Iterator<IntIterator> iter = Arrays.asList(a).iterator();
+            private final Iterator<IntIterator> iter = Arrays.asList(a.clone()).iterator();
             private IntIterator cur;
 
             @Override
@@ -1709,8 +1956,12 @@ public final class Iterators {
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1733,16 +1984,17 @@ public final class Iterators {
      * // result.nextLong() => 3L
      * }</pre>
      *
-     * @param a the LongIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
+     * @param a the LongIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect on the returned iterator.
      * @return a LongIterator that will iterate over the elements of each provided LongIterator in order, or {@code LongIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static LongIterator concat(final LongIterator... a) {
         if (N.isEmpty(a)) {
             return LongIterator.EMPTY;
         }
 
         return new LongIterator() {
-            private final Iterator<LongIterator> iter = Arrays.asList(a).iterator();
+            private final Iterator<LongIterator> iter = Arrays.asList(a.clone()).iterator();
             private LongIterator cur;
 
             @Override
@@ -1754,8 +2006,12 @@ public final class Iterators {
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1778,16 +2034,17 @@ public final class Iterators {
      * // result.nextFloat() => 3.3f
      * }</pre>
      *
-     * @param a the FloatIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
+     * @param a the FloatIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect on the returned iterator.
      * @return a FloatIterator that will iterate over the elements of each provided FloatIterator in order, or {@code FloatIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static FloatIterator concat(final FloatIterator... a) {
         if (N.isEmpty(a)) {
             return FloatIterator.EMPTY;
         }
 
         return new FloatIterator() {
-            private final Iterator<FloatIterator> iter = Arrays.asList(a).iterator();
+            private final Iterator<FloatIterator> iter = Arrays.asList(a.clone()).iterator();
             private FloatIterator cur;
 
             @Override
@@ -1799,8 +2056,12 @@ public final class Iterators {
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1823,16 +2084,17 @@ public final class Iterators {
      * // result.nextDouble() => 3.3
      * }</pre>
      *
-     * @param a the DoubleIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped.
+     * @param a the DoubleIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect on the returned iterator.
      * @return a DoubleIterator that will iterate over the elements of each provided DoubleIterator in order, or {@code DoubleIterator.EMPTY} if {@code a} is {@code null} or empty.
      */
+    @SafeVarargs
     public static DoubleIterator concat(final DoubleIterator... a) {
         if (N.isEmpty(a)) {
             return DoubleIterator.EMPTY;
         }
 
         return new DoubleIterator() {
-            private final Iterator<DoubleIterator> iter = Arrays.asList(a).iterator();
+            private final Iterator<DoubleIterator> iter = Arrays.asList(a.clone()).iterator();
             private DoubleIterator cur;
 
             @Override
@@ -1844,8 +2106,12 @@ public final class Iterators {
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1869,7 +2135,8 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the arrays.
-     * @param a the arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped.
+     * @param a the arrays to be concatenated. {@code null} or empty arrays within {@code a} are skipped. The supplied
+     *          arrays are <b>not</b> copied and are read lazily, so writing into one is visible to the returned iterator.
      * @return an ObjIterator that will iterate over the elements of each provided array in order, or an empty iterator if {@code a} is {@code null} or empty.
      */
     @SafeVarargs
@@ -1903,7 +2170,7 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the Iterators.
-     * @param a the Iterators to be concatenated.
+     * @param a the Iterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect on the returned iterator.
      * @return an ObjIterator that will iterate over the elements of each provided Iterator in order, or an empty iterator if {@code a} is {@code null} or empty.
      * @see N#concat(Iterator...)
      */
@@ -1913,7 +2180,7 @@ public final class Iterators {
             return ObjIterator.empty();
         }
 
-        return concat(Array.asList(a));
+        return concat(Arrays.asList(a.clone()));
     }
 
     /**
@@ -1934,7 +2201,7 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the Iterable objects.
-     * @param a the Iterable objects to be concatenated. {@code null} Iterable elements within {@code a} are treated as empty.
+     * @param a the Iterable objects to be concatenated. {@code null} Iterable elements within {@code a} are treated as empty. The varargs array is copied, so replacing one of its elements afterwards has no effect on the returned iterator.
      * @return an ObjIterator that will lazily obtain and iterate over each provided Iterable in order, or an empty iterator if {@code a} is {@code null} or empty.
      * @see N#concat(Iterable...)
      */
@@ -1944,11 +2211,13 @@ public final class Iterators {
             return ObjIterator.empty();
         }
 
-        return concatIterables(Arrays.asList(a));
+        return concatIterables(Arrays.asList(a.clone()));
     }
 
     /**
      * Concatenates multiple Maps into a single ObjIterator of Map.Entry.
+     * The entries retain each map's write-through behavior, so all maps must have the declared
+     * key and value types. Copy entries into wider-typed entries when widening is needed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1960,24 +2229,31 @@ public final class Iterators {
      *
      * @param <K> the type of keys in the Maps.
      * @param <V> the type of values in the Maps.
-     * @param a the Maps to be concatenated. {@code null} or empty Maps in the array are skipped.
+     * @param a the Maps to be concatenated. {@code null} Maps in the array are skipped; an empty one contributes
+     *          nothing. Each map's entry set is iterated lazily, when the previous map has been exhausted, so a map
+     *          modified before its own turn contributes its current entries rather than raising
+     *          {@link java.util.ConcurrentModificationException}.
      * @return an ObjIterator of Map.Entry that will iterate over the entries of each provided Map in order, or an empty iterator if {@code a} is {@code null} or empty.
      */
     @SafeVarargs
-    public static <K, V> ObjIterator<Map.Entry<K, V>> concat(final Map<? extends K, ? extends V>... a) {
+    public static <K, V> ObjIterator<Map.Entry<K, V>> concat(final Map<K, V>... a) {
         if (N.isEmpty(a)) {
             return ObjIterator.empty();
         }
 
-        final List<Iterator<Map.Entry<K, V>>> list = new ArrayList<>(a.length);
+        final List<Iterable<Map.Entry<K, V>>> list = new ArrayList<>(a.length);
 
-        for (final Map<? extends K, ? extends V> e : a) {
-            if (N.notEmpty(e)) {
-                list.add(((Map<K, V>) e).entrySet().iterator());
+        for (final Map<K, V> e : a) {
+            if (e != null) {
+                // Collect the entry *sets*, not their iterators: concatIterables calls iterator() only when the
+                // previous source runs out, matching concat(Iterable...). Grabbing every entrySet().iterator() up
+                // front used to make a later put() on any of these maps throw ConcurrentModificationException on
+                // the first next(), even for a map whose turn had not come yet.
+                list.add(e.entrySet());
             }
         }
 
-        return concat(list);
+        return concatIterables(list);
     }
 
     /**
@@ -1995,19 +2271,33 @@ public final class Iterators {
      * // result.next() => "c"
      * }</pre>
      *
+     * <p><b>Note:</b> {@code c.iterator()} is obtained eagerly, when this method is called, so structurally modifying
+     * {@code c} afterwards is governed by that collection's own iterator contract - a fail-fast collection raises
+     * {@link java.util.ConcurrentModificationException}. The iterators <i>inside</i> {@code c} are consumed lazily.</p>
+     *
      * @param <T> the type of elements in the Iterators.
      * @param c the collection of iterators to be concatenated, or {@code null}/empty to return an empty iterator.
+     *          {@code null} or exhausted iterators within {@code c} are skipped.
      * @return an ObjIterator that will iterate over the elements of each provided Iterator in order, or an empty iterator if {@code c} is {@code null} or empty.
      * @see #concat(Iterator...)
      * @see #concatIterables(Collection)
      */
     public static <T> ObjIterator<T> concat(final Collection<? extends Iterator<? extends T>> c) {
-        if (N.isEmpty(c)) {
+        if (c == null) {
+            return ObjIterator.empty();
+        }
+
+        // How many sources there are is decided by iterating c, never by Collection.isEmpty() - the same rule
+        // merge(Collection, ..) follows. A collection whose isEmpty() disagrees with its iterator used to make
+        // this method drop every source silently.
+        final Iterator<? extends Iterator<? extends T>> outer = c.iterator();
+
+        if (!outer.hasNext()) {
             return ObjIterator.empty();
         }
 
         return new ObjIterator<>() {
-            private final Iterator<? extends Iterator<? extends T>> iter = c.iterator();
+            private final Iterator<? extends Iterator<? extends T>> iter = outer;
             private Iterator<? extends T> cur;
 
             @Override
@@ -2019,8 +2309,12 @@ public final class Iterators {
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2045,19 +2339,32 @@ public final class Iterators {
      * // result.next() => "c"
      * }</pre>
      *
+     * <p><b>Note:</b> {@code c.iterator()} is obtained eagerly, when this method is called, so structurally modifying
+     * {@code c} afterwards is governed by that collection's own iterator contract - a fail-fast collection raises
+     * {@link java.util.ConcurrentModificationException}. Each {@code Iterable} <i>inside</i> {@code c} is iterated
+     * lazily, only once the previous one has been exhausted.</p>
+     *
      * @param <T> the type of elements in the Iterable objects.
      * @param c the collection of Iterable objects to be concatenated, or {@code null}/empty to return an empty iterator.
+     *          {@code null} or empty {@code Iterable}s within {@code c} are skipped.
      * @return an ObjIterator that will iterate over the elements of each provided Iterable, or an empty iterator if {@code c} is {@code null} or empty.
      * @see N#concat(Iterable...)
      * @see N#iterateEach(Collection)
      */
     public static <T> ObjIterator<T> concatIterables(final Collection<? extends Iterable<? extends T>> c) {
-        if (N.isEmpty(c)) {
+        if (c == null) {
+            return ObjIterator.empty();
+        }
+
+        // See concat(Collection): the source count comes from the iterator, not from Collection.isEmpty().
+        final Iterator<? extends Iterable<? extends T>> outer = c.iterator();
+
+        if (!outer.hasNext()) {
             return ObjIterator.empty();
         }
 
         return new ObjIterator<>() {
-            private final Iterator<? extends Iterable<? extends T>> iter = c.iterator();
+            private final Iterator<? extends Iterable<? extends T>> iter = outer;
             private Iterator<? extends T> cur;
 
             @Override
@@ -2069,8 +2376,12 @@ public final class Iterators {
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2088,13 +2399,13 @@ public final class Iterators {
      * BiIterator<String, Integer> iter1 = BiIterator.of(N.asMap("a", 1));
      * BiIterator<String, Integer> iter2 = BiIterator.of(N.asMap("b", 2));
      * BiIterator<String, Integer> result = Iterators.concat(iter1, iter2);
-     * // result.next() => Pair("a", 1)
-     * // result.next() => Pair("b", 2)
+     * // result.next() => (a, 1)
+     * // result.next() => (b, 2)
      * }</pre>
      *
      * @param <A> the type of the first element in the BiIterator.
      * @param <B> the type of the second element in the BiIterator.
-     * @param a the BiIterators to be concatenated.
+     * @param a the BiIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect on the returned iterator.
      * @return a BiIterator that will iterate over the elements of each provided BiIterator in order, or an empty BiIterator if {@code a} is {@code null} or empty.
      */
     @SafeVarargs
@@ -2104,7 +2415,7 @@ public final class Iterators {
         }
 
         return new BiIterator<>() {
-            private final Iterator<BiIterator<A, B>> iter = Arrays.asList(a).iterator();
+            private final Iterator<BiIterator<A, B>> iter = Arrays.asList(a.clone()).iterator();
             private BiIterator<A, B> cur;
 
             @Override
@@ -2116,8 +2427,12 @@ public final class Iterators {
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public Pair<A, B> next() {
+            public Pair<A, B> next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2125,8 +2440,15 @@ public final class Iterators {
                 return cur.next();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws IllegalArgumentException if {@code action} is {@code null}.
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             * @throws E if {@code action} throws while consuming an element.
+             */
             @Override
-            protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E {
+            protected <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action)
+                    throws IllegalArgumentException, NoSuchElementException, E {
                 N.checkArgNotNull(action, cs.action);
 
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
@@ -2136,10 +2458,9 @@ public final class Iterators {
                 cur.next(action);
             }
 
+            // Performs the given action for each remaining pair of elements from this concatenated iterator.
             /**
-             * Performs the given action for each remaining pair of elements from this concatenated iterator.
-             *
-             * @param action the action to perform on each remaining pair; must not be {@code null}
+             * {@inheritDoc}
              * @throws IllegalArgumentException if {@code action} is {@code null}.
              */
             @Override
@@ -2153,16 +2474,14 @@ public final class Iterators {
                 }
             }
 
+            // Performs the given action for each remaining pair of elements from this concatenated iterator.
             /**
-             * Performs the given action for each remaining pair of elements from this concatenated iterator.
-             *
-             * @param <E> the type of exception the action may throw
-             * @param action the action to perform on each remaining pair; must not be {@code null}
-             * @throws E if the action throws an exception
+             * {@inheritDoc}
              * @throws IllegalArgumentException if {@code action} is {@code null}.
+             * @throws E if {@code action} throws while consuming an element.
              */
             @Override
-            public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws E, IllegalArgumentException {
+            public <E extends Exception> void foreachRemaining(final Throwables.BiConsumer<? super A, ? super B, E> action) throws IllegalArgumentException, E {
                 N.checkArgNotNull(action, cs.action);
 
                 while (hasNext()) {
@@ -2170,12 +2489,9 @@ public final class Iterators {
                 }
             }
 
+            // Returns an iterator that applies the given mapping function to each remaining pair of elements.
             /**
-             * Returns an iterator that applies the given mapping function to each remaining pair of elements.
-             *
-             * @param <R> the type of elements returned by the mapped iterator
-             * @param mapper the function to apply to each pair; must not be {@code null}
-             * @return an iterator of mapped results
+             * {@inheritDoc}
              * @throws IllegalArgumentException if {@code mapper} is {@code null}.
              */
             @Override
@@ -2200,8 +2516,12 @@ public final class Iterators {
                         return mappedIter != null && mappedIter.hasNext();
                     }
 
+                    /**
+                     * {@inheritDoc}
+                     * @throws NoSuchElementException if no next element is available from the source iteration.
+                     */
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (!hasNext()) {
                             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2221,14 +2541,14 @@ public final class Iterators {
      * TriIterator<Integer, Integer, Integer> iter1 = TriIterator.generate(0, 1, (i, t) -> t.set(1, 2, 3));
      * TriIterator<Integer, Integer, Integer> iter2 = TriIterator.generate(0, 1, (i, t) -> t.set(4, 5, 6));
      * TriIterator<Integer, Integer, Integer> result = Iterators.concat(iter1, iter2);
-     * // result.next() => Triple(1, 2, 3)
-     * // result.next() => Triple(4, 5, 6)
+     * // result.next() => (1, 2, 3)
+     * // result.next() => (4, 5, 6)
      * }</pre>
      *
      * @param <A> the type of the first element in the TriIterator.
      * @param <B> the type of the second element in the TriIterator.
      * @param <C> the type of the third element in the TriIterator.
-     * @param a the TriIterators to be concatenated.
+     * @param a the TriIterators to be concatenated. {@code null} or exhausted iterators within {@code a} are skipped. The varargs array is copied, so replacing one of its elements afterwards has no effect on the returned iterator.
      * @return a TriIterator that will iterate over the elements of each provided TriIterator in order, or an empty TriIterator if {@code a} is {@code null} or empty.
      */
     @SafeVarargs
@@ -2238,7 +2558,7 @@ public final class Iterators {
         }
 
         return new TriIterator<>() {
-            private final Iterator<TriIterator<A, B, C>> iter = Arrays.asList(a).iterator();
+            private final Iterator<TriIterator<A, B, C>> iter = Arrays.asList(a.clone()).iterator();
             private TriIterator<A, B, C> cur;
 
             @Override
@@ -2250,8 +2570,12 @@ public final class Iterators {
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public Triple<A, B, C> next() {
+            public Triple<A, B, C> next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2259,9 +2583,15 @@ public final class Iterators {
                 return cur.next();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws IllegalArgumentException if {@code action} is {@code null}.
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             * @throws E if {@code action} throws while consuming an element.
+             */
             @Override
             protected <E extends Exception> void next(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
-                    throws NoSuchElementException, E {
+                    throws IllegalArgumentException, NoSuchElementException, E {
                 N.checkArgNotNull(action, cs.action);
 
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
@@ -2271,10 +2601,9 @@ public final class Iterators {
                 cur.next(action);
             }
 
+            // Performs the given action for each remaining triple of elements from this concatenated iterator.
             /**
-             * Performs the given action for each remaining triple of elements from this concatenated iterator.
-             *
-             * @param action the action to perform on each remaining triple; must not be {@code null}
+             * {@inheritDoc}
              * @throws IllegalArgumentException if {@code action} is {@code null}.
              */
             @Override
@@ -2286,17 +2615,15 @@ public final class Iterators {
                 }
             }
 
+            // Performs the given action for each remaining triple of elements from this concatenated iterator.
             /**
-             * Performs the given action for each remaining triple of elements from this concatenated iterator.
-             *
-             * @param <E> the type of exception the action may throw
-             * @param action the action to perform on each remaining triple; must not be {@code null}
-             * @throws E if the action throws an exception
+             * {@inheritDoc}
              * @throws IllegalArgumentException if {@code action} is {@code null}.
+             * @throws E if {@code action} throws while consuming an element.
              */
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
-                    throws E, IllegalArgumentException {
+                    throws IllegalArgumentException, E {
                 N.checkArgNotNull(action, cs.action);
 
                 while (hasNext()) {
@@ -2304,12 +2631,9 @@ public final class Iterators {
                 }
             }
 
+            // Returns an iterator that applies the given mapping function to each remaining triple of elements.
             /**
-             * Returns an iterator that applies the given mapping function to each remaining triple of elements.
-             *
-             * @param <R> the type of elements returned by the mapped iterator
-             * @param mapper the function to apply to each triple; must not be {@code null}
-             * @return an iterator of mapped results
+             * {@inheritDoc}
              * @throws IllegalArgumentException if {@code mapper} is {@code null}.
              */
             @Override
@@ -2334,8 +2658,12 @@ public final class Iterators {
                         return mappedIter != null && mappedIter.hasNext();
                     }
 
+                    /**
+                     * {@inheritDoc}
+                     * @throws NoSuchElementException if no next element is available from the source iteration.
+                     */
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (!hasNext()) {
                             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2356,7 +2684,7 @@ public final class Iterators {
      * Iterator<Integer> iter2 = Arrays.asList(2, 4, 6).iterator();
      * ObjIterator<Integer> result = Iterators.merge(iter1, iter2,
      *     (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
-     * // result => 1, 2, 3, 4, 5, 6
+     * // result => [1, 2, 3, 4, 5, 6]
      * }</pre>
      *
      * @param <T> the type of elements in the iterators.
@@ -2388,8 +2716,12 @@ public final class Iterators {
                 return hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (hasNextA) {
                     if (iterB.hasNext()) {
                         if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
@@ -2428,8 +2760,10 @@ public final class Iterators {
                     } else {
                         return iterA.next();
                     }
-                } else {
+                } else if (iterB.hasNext()) {
                     return iterB.next();
+                } else {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
             }
         };
@@ -2448,8 +2782,32 @@ public final class Iterators {
      * // Yields: 1, 2, 3, 4, 5, 6 (sorted merge)
      * }</pre>
      *
+     * <p><b>What {@code nextSelector} is handed for more than two iterators:</b> the merge is built by folding
+     * {@link #merge(Iterator, Iterator, BiFunction)} from the left, so for three or more iterators the <i>first</i>
+     * argument is the next element of the already-merged prefix rather than of any one fixed iterator, while the
+     * second is the next element of the iterator being folded in. For example, merging {@code [1, 4]},
+     * {@code [2, 5]} and {@code [3, 6]} with a min-first selector calls it with
+     * {@code (1,2) (1,3) (4,2) (2,3) (4,5) (4,3) (4,6) (5,6)}. Selectors that only compare their two arguments -
+     * such as {@link MergeResult#minFirst(Comparator)} - are unaffected; selectors that depend on <i>which</i>
+     * iterator an element came from are not meaningful here. The fold also makes this
+     * {@code O(n * c.size())} comparisons rather than {@code O(n log c.size())}.</p>
+     *
+     * <p>The fold is <i>executed</i> iteratively rather than as nested iterators, so {@code c} may hold any number
+     * of iterators without exhausting the call stack. The cost per element is unchanged in kind: it stays
+     * proportional to {@code c.size()}, as the comparison count above already was.</p>
+     *
+     * <p><b>How many sources there are is decided by iterating {@code c}, never by {@link Collection#size()} or
+     * {@link Collection#isEmpty()}</b>, so a collection whose {@code size()} disagrees with what its iterator
+     * yields - any weakly consistent or concurrently modified one - still merges exactly the iterators it hands
+     * out. The source references are collected eagerly, when this method is called; the elements themselves are
+     * still pulled on demand, because no source is asked for {@code hasNext()}/{@code next()} until the returned
+     * iterator is read.</p>
+     *
      * @param <T> the type of elements in the iterators.
      * @param c the collection of iterators to be merged, or {@code null}/empty which results in an empty iterator.
+     *          {@code null} iterators within {@code c} are treated as empty. Each element must be a <i>distinct</i>
+     *          iterator: every position of the fold advances its sources independently, so listing the same
+     *          {@code Iterator} instance twice gives an unspecified result.
      * @param nextSelector a {@code BiFunction} that determines the order of elements in the resulting iterator.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return an {@code ObjIterator} that will iterate over the elements of the provided iterators in the order determined by {@code nextSelector}, or an empty iterator if {@code c} is {@code null} or empty.
@@ -2460,23 +2818,251 @@ public final class Iterators {
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
-        if (N.isEmpty(c)) {
+        if (c == null) {
             return ObjIterator.empty();
-        } else if (c.size() == 1) {
-            return ObjIterator.of(c.iterator().next());
-        } else if (c.size() == 2) {
-            final Iterator<? extends Iterator<? extends T>> iter = c.iterator();
-            return merge(iter.next(), iter.next(), nextSelector);
         }
 
+        // The collection's ITERATOR, not its size()/isEmpty(), decides how many sources there are. A collection
+        // whose size() disagrees with what its iterator yields - a concurrently modified or loosely implemented
+        // one - used to lose sources silently: size() 0 dropped every source (via isEmpty()), size() 1 or 2 kept
+        // only that many and dropped the rest, and an over-reported size() ran the iterator off its end with a
+        // NoSuchElementException. Walking it directly also means the 0-, 1- and 2-source shapes allocate no list
+        // at all, and that no capacity is ever taken from a size() that could be bogus.
         final Iterator<? extends Iterator<? extends T>> iter = c.iterator();
-        ObjIterator<T> result = merge(iter.next(), iter.next(), nextSelector);
+
+        if (!iter.hasNext()) {
+            return ObjIterator.empty();
+        }
+
+        // merge(Iterator, Iterator, ..) maps a null iterator to an empty one; do the same up front so that
+        // neither the pair form nor the fold below has to special-case it.
+        final Iterator<? extends T> first = nullToEmptyIterator(iter.next());
+
+        if (!iter.hasNext()) {
+            return ObjIterator.of(first);
+        }
+
+        final Iterator<? extends T> second = nullToEmptyIterator(iter.next());
+
+        if (!iter.hasNext()) {
+            return merge(first, second, nextSelector);
+        }
+
+        final List<Iterator<? extends T>> sourceList = new ArrayList<>();
+        sourceList.add(first);
+        sourceList.add(second);
 
         while (iter.hasNext()) {
-            result = merge(result, iter.next(), nextSelector);
+            sourceList.add(nullToEmptyIterator(iter.next()));
         }
 
-        return result;
+        @SuppressWarnings("unchecked")
+        final Iterator<? extends T>[] sources = sourceList.toArray(new Iterator[0]);
+
+        return mergeLeftFold(sources, nextSelector);
+    }
+
+    private static <T> Iterator<? extends T> nullToEmptyIterator(final Iterator<? extends T> iter) {
+        return iter == null ? ObjIterator.<T> empty() : iter;
+    }
+
+    /**
+     * Executes the left fold of {@link #merge(Iterator, Iterator, BiFunction)} over {@code sources} - which must
+     * hold at least three iterators - without nesting one merge iterator inside the next.
+     *
+     * <p>Nesting made every {@code hasNext()}/{@code next()} recurse once per source, which overflowed the call
+     * stack at a few thousand sources. This keeps the same fold, and therefore the exact sequence of
+     * {@code nextSelector} calls documented on {@link #merge(Collection, BiFunction)}, by holding the state of
+     * each conceptual merge node in parallel arrays: node {@code j} merges the result of nodes {@code 0..j-1}
+     * (or {@code sources[0]} when {@code j == 0}) with {@code sources[j + 1]}.</p>
+     *
+     * <p>Each element is produced in two passes. Which nodes have to pull a value from their left side is decided
+     * by node state alone - {@code !hasNextA[j] && leftHasNext[j]} - so the first pass can walk <i>down</i> from
+     * the outermost node to the lowest node that must pull, consuming nothing; the second pass then walks back
+     * <i>up</i>, handing each node the value the node below it produced. Both passes are plain loops.</p>
+     *
+     * @param <T> the type of elements in the iterators.
+     * @param sources the non-{@code null}, pairwise distinct iterators to fold, in order; at least three.
+     * @param nextSelector the non-{@code null} selector applied at every node.
+     * @return an {@code ObjIterator} yielding exactly what the nested fold yielded - same elements, same
+     *         {@code nextSelector} calls in the same order - for any independently advanced sources. The one
+     *         input the two disagree on is the same {@code Iterator} instance listed more than once, where the
+     *         nested form tended to throw {@link NoSuchElementException}; both results are unspecified, and
+     *         {@link #merge(Collection, BiFunction)} documents the requirement.
+     */
+    private static <T> ObjIterator<T> mergeLeftFold(final Iterator<? extends T>[] sources, final BiFunction<? super T, ? super T, MergeResult> nextSelector) {
+        final int nodeCount = sources.length - 1;
+        final int top = nodeCount - 1;
+
+        return new ObjIterator<>() {
+            private final Object[] nextA = new Object[nodeCount];
+            private final Object[] nextB = new Object[nodeCount];
+            private final boolean[] hasNextA = new boolean[nodeCount];
+            private final boolean[] hasNextB = new boolean[nodeCount];
+
+            /** Scratch, refreshed by {@code refresh()}: does node {@code j}'s left side have a next element? */
+            private final boolean[] leftHasNext = new boolean[nodeCount];
+
+            /** Scratch, refreshed by {@code refresh()}: does node {@code j} itself have a next element? */
+            private final boolean[] nodeHasNext = new boolean[nodeCount];
+
+            @Override
+            public boolean hasNext() {
+                // Short-circuiting equivalent of refresh()'s nodeHasNext[top]. Expanding
+                //   nodeHasNext[j] = hasNextA[j] || hasNextB[j] || nodeHasNext[j - 1] || sources[j + 1].hasNext()
+                // down to node 0 leaves a plain OR over every node, so the first true answer wins and the nodes
+                // below it are never examined - the same early exit the nested merge iterators had. next() still
+                // needs the full bottom-up pass, because it reads leftHasNext[] for the descent.
+                for (int j = top; j >= 0; j--) {
+                    if (hasNextA[j] || hasNextB[j] || sources[j + 1].hasNext()) {
+                        return true;
+                    }
+                }
+
+                return sources[0].hasNext();
+            }
+
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
+            @Override
+            public T next() throws NoSuchElementException {
+                refresh();
+
+                if (!nodeHasNext[top]) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                int j = top;
+
+                while (j > 0 && needsValueFromLeft(j)) {
+                    j--;
+                }
+
+                T value = null;
+
+                for (int k = j; k <= top; k++) {
+                    value = produce(k, value, k > j);
+                }
+
+                return value;
+            }
+
+            /**
+             * Recomputes both scratch arrays bottom-up. A node's left side is the node below it, so one upward
+             * pass answers every "does this node have a next element?" question without recursing.
+             */
+            private void refresh() {
+                for (int j = 0; j < nodeCount; j++) {
+                    leftHasNext[j] = j == 0 ? sources[0].hasNext() : nodeHasNext[j - 1];
+                    nodeHasNext[j] = hasNextA[j] || hasNextB[j] || leftHasNext[j] || sources[j + 1].hasNext();
+                }
+            }
+
+            /**
+             * Mirrors the branch structure of {@code merge(A, B).next()}: the buffered-left branch answers from
+             * {@code nextA} without touching the left side, and every other branch pulls from the left exactly
+             * when the left side has an element.
+             */
+            private boolean needsValueFromLeft(final int k) {
+                return !hasNextA[k] && leftHasNext[k];
+            }
+
+            /**
+             * The element node {@code k} takes from its left side: the one node {@code k - 1} just produced, or -
+             * only for node 0, whose left side is the leaf {@code sources[0]} - one pulled from that leaf. The
+             * descent in {@code next()} stops at a node that does not pull from its left, so every node above the
+             * stopping point is handed a value; this guard makes that invariant fail loudly rather than silently
+             * consuming from the wrong source if the descent is ever changed.
+             * @throws IllegalStateException if a non-leaf merge node requires a left value but none was supplied.
+             * @throws NoSuchElementException if the leftmost source iterator is exhausted when its next value is requested.
+             */
+            private T leftElement(final int k, final T leftValue, final boolean leftValueSupplied) throws IllegalStateException, NoSuchElementException {
+                if (leftValueSupplied) {
+                    return leftValue;
+                }
+
+                if (k != 0) {
+                    throw new IllegalStateException("No left element was produced for merge node " + k);
+                }
+
+                return sources[0].next();
+            }
+
+            /**
+             * Produces node {@code k}'s next element, branch for branch as {@code merge(A, B).next()} does.
+             * {@code leftValue} is the element node {@code k - 1} just produced; it is supplied precisely when
+             * the descent decided this node pulls from its left side, so it is never dropped. Node 0's left side
+             * is the leaf {@code sources[0]}, which it pulls itself.
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
+            @SuppressWarnings("unchecked")
+            private T produce(final int k, final T leftValue, final boolean leftValueSupplied) throws NoSuchElementException {
+                final Iterator<? extends T> iterB = sources[k + 1];
+
+                if (hasNextA[k]) {
+                    if (iterB.hasNext()) {
+                        final T b = iterB.next();
+                        nextB[k] = b;
+
+                        if (nextSelector.apply((T) nextA[k], b) == MergeResult.TAKE_FIRST) {
+                            hasNextA[k] = false;
+                            hasNextB[k] = true;
+
+                            return (T) nextA[k];
+                        }
+
+                        return b;
+                    }
+
+                    hasNextA[k] = false;
+
+                    return (T) nextA[k];
+                } else if (hasNextB[k]) {
+                    if (leftHasNext[k]) {
+                        final T a = leftElement(k, leftValue, leftValueSupplied);
+                        nextA[k] = a;
+
+                        if (nextSelector.apply(a, (T) nextB[k]) == MergeResult.TAKE_FIRST) {
+                            return a;
+                        }
+
+                        hasNextA[k] = true;
+                        hasNextB[k] = false;
+
+                        return (T) nextB[k];
+                    }
+
+                    hasNextB[k] = false;
+
+                    return (T) nextB[k];
+                } else if (leftHasNext[k]) {
+                    if (iterB.hasNext()) {
+                        final T a = leftElement(k, leftValue, leftValueSupplied);
+                        final T b = iterB.next();
+                        nextA[k] = a;
+                        nextB[k] = b;
+
+                        if (nextSelector.apply(a, b) == MergeResult.TAKE_FIRST) {
+                            hasNextB[k] = true;
+
+                            return a;
+                        }
+
+                        hasNextA[k] = true;
+
+                        return b;
+                    }
+
+                    return leftElement(k, leftValue, leftValueSupplied);
+                } else if (iterB.hasNext()) {
+                    return iterB.next();
+                }
+
+                throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+            }
+        };
     }
 
     /**
@@ -2525,33 +3111,64 @@ public final class Iterators {
      * // Yields: 1, 2, 3, 4, 5, 6, 7, 8, 9 (sorted merge)
      * }</pre>
      *
+     * <p>For three or more inputs the merge is a left fold of pairwise merges; see
+     * {@link #merge(Collection, BiFunction)} for what {@code nextSelector} is handed and what it costs.</p>
+     *
+     * <p>As in {@link #merge(Collection, BiFunction)}, how many sources there are is decided by iterating
+     * {@code iterables}, never by {@link Collection#size()} or {@link Collection#isEmpty()}.</p>
+     *
      * @param <T> the type of elements in the {@code Iterable} objects.
      * @param iterables the collection of {@code Iterable} objects to be merged, or {@code null}/empty which results in an empty iterator.
+     *                  {@code null} {@code Iterable}s within {@code iterables} are treated as empty.
      * @param nextSelector a {@code BiFunction} that determines the order of elements in the resulting iterator.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return an {@code ObjIterator} that will iterate over the elements of the provided {@code Iterable} objects in the order determined by {@code nextSelector}, or an empty iterator if {@code iterables} is {@code null} or empty.
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @see #merge(Collection, BiFunction)
      */
     public static <T> ObjIterator<T> mergeIterables(final Collection<? extends Iterable<? extends T>> iterables,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
-        if (N.isEmpty(iterables)) {
+        if (iterables == null) {
             return ObjIterator.empty();
-        } else if (iterables.size() == 1) {
-            return ObjIterator.of(iterables.iterator().next());
-        } else if (iterables.size() == 2) {
-            final Iterator<? extends Iterable<? extends T>> iter = iterables.iterator();
-            return merge(iter.next(), iter.next(), nextSelector);
         }
 
-        final List<Iterator<? extends T>> iterList = new ArrayList<>(iterables.size());
+        // Walk the iterator, never size()/isEmpty() - see merge(Collection, ..) for why. Dispatched here rather
+        // than by handing a materialised list to merge(Collection, ..), which would scan it a second time.
+        // N.iterate maps a null Iterable to an empty iterator.
+        final Iterator<? extends Iterable<? extends T>> iter = iterables.iterator();
 
-        for (final Iterable<? extends T> e : iterables) {
-            iterList.add(N.iterate(e));
+        if (!iter.hasNext()) {
+            return ObjIterator.empty();
         }
 
-        return merge(iterList, nextSelector);
+        final Iterator<? extends T> first = N.iterate(iter.next());
+
+        if (!iter.hasNext()) {
+            return ObjIterator.of(first);
+        }
+
+        final Iterator<? extends T> second = N.iterate(iter.next());
+
+        if (!iter.hasNext()) {
+            return merge(first, second, nextSelector);
+        }
+
+        final List<Iterator<? extends T>> sourceList = new ArrayList<>();
+        sourceList.add(first);
+        sourceList.add(second);
+
+        while (iter.hasNext()) {
+            sourceList.add(N.iterate(iter.next()));
+        }
+
+        // Straight to the fold: N.iterate never returns null, so there is nothing left for merge(Collection, ..)
+        // to normalise, and routing through it would only re-scan the list just built.
+        @SuppressWarnings("unchecked")
+        final Iterator<? extends T>[] sources = sourceList.toArray(new Iterator[0]);
+
+        return mergeLeftFold(sources, nextSelector);
     }
 
     /**
@@ -2563,13 +3180,20 @@ public final class Iterators {
      * Iterator<Integer> iter1 = Arrays.asList(1, 3, 5).iterator();
      * Iterator<Integer> iter2 = Arrays.asList(2, 4, 6).iterator();
      * ObjIterator<Integer> result = Iterators.mergeSorted(iter1, iter2);
-     * // result => 1, 2, 3, 4, 5, 6
+     * // result => [1, 2, 3, 4, 5, 6]
      * }</pre>
      *
+     * <p><b>{@code null} elements:</b> the natural ordering used here is {@link Comparators#naturalOrder()}, which is
+     * null-friendly and sorts {@code null} <i>first</i>; it does not throw {@link NullPointerException} the way
+     * {@link Comparator#naturalOrder()} would. Both inputs must therefore be sorted nulls-first as well. Pass an
+     * explicit comparator to {@link #mergeSorted(Iterator, Iterator, Comparator)} for any other {@code null} policy.</p>
+     *
      * @param <T> the type of elements in the Iterators, which should implement the {@code Comparable} interface.
-     * @param sortedA the first Iterator to be merged. It should be in non-descending order.
-     * @param sortedB the second Iterator to be merged. It should be in non-descending order.
+     * @param sortedA the first Iterator to be merged. It should be in non-descending order, with {@code null}s first.
+     * @param sortedB the second Iterator to be merged. It should be in non-descending order, with {@code null}s first.
      * @return an ObjIterator that will iterate over the elements of the provided Iterators in a sorted order.
+     * @see #mergeSorted(Iterator, Iterator, Comparator)
+     * @see Comparators#naturalOrder()
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> ObjIterator<T> mergeSorted(final Iterator<? extends T> sortedA, final Iterator<? extends T> sortedB) {
@@ -2585,7 +3209,7 @@ public final class Iterators {
      * Iterator<Integer> iter1 = Arrays.asList(5, 3, 1).iterator();
      * Iterator<Integer> iter2 = Arrays.asList(6, 4, 2).iterator();
      * ObjIterator<Integer> result = Iterators.mergeSorted(iter1, iter2, Comparator.reverseOrder());
-     * // result => 6, 5, 4, 3, 2, 1
+     * // result => [6, 5, 4, 3, 2, 1]
      * }</pre>
      *
      * @param <T> the type of elements in the iterators.
@@ -2614,10 +3238,17 @@ public final class Iterators {
      * // Iterates through: 1, 2, 3, 4, 5, 6, 7, 8
      * }</pre>
      *
+     * <p><b>{@code null} elements:</b> the natural ordering used here is {@link Comparators#naturalOrder()}, which is
+     * null-friendly and sorts {@code null} <i>first</i>; it does not throw {@link NullPointerException} the way
+     * {@link Comparator#naturalOrder()} would. Both inputs must therefore be sorted nulls-first as well. Pass an
+     * explicit comparator to {@link #mergeSorted(Iterable, Iterable, Comparator)} for any other {@code null} policy.</p>
+     *
      * @param <T> the type of elements in the Iterable objects, which should implement the {@code Comparable} interface.
-     * @param sortedA the first Iterable object to be merged. It should be in non-descending order.
-     * @param sortedB the second Iterable object to be merged. It should be in non-descending order.
+     * @param sortedA the first Iterable object to be merged. It should be in non-descending order, with {@code null}s first.
+     * @param sortedB the second Iterable object to be merged. It should be in non-descending order, with {@code null}s first.
      * @return an ObjIterator that will iterate over the elements of the provided Iterable objects in a sorted order.
+     * @see #mergeSorted(Iterable, Iterable, Comparator)
+     * @see Comparators#naturalOrder()
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Comparable> ObjIterator<T> mergeSorted(final Iterable<? extends T> sortedA, final Iterable<? extends T> sortedB) {
@@ -2691,8 +3322,12 @@ public final class Iterators {
                 return iterA.hasNext() && iterB.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2777,8 +3412,12 @@ public final class Iterators {
                 return iterA.hasNext() && iterB.hasNext() && iterC.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2866,8 +3505,16 @@ public final class Iterators {
                 return iterA.hasNext() || iterB.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB);
                 } else {
@@ -2961,8 +3608,16 @@ public final class Iterators {
                 return iterA.hasNext() || iterB.hasNext() || iterC.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB, iterC.hasNext() ? iterC.next() : valueForNoneC);
                 } else if (iterB.hasNext()) {
@@ -2995,9 +3650,9 @@ public final class Iterators {
      * @param <B> the type of elements in the second Iterable.
      * @param <C> the type of elements in the third Iterable.
      * @param <R> the type of elements in the resulting ObjIterator.
-     * @param a the first Iterable to be zipped.
-     * @param b the second Iterable to be zipped.
-     * @param c the third Iterable to be zipped.
+     * @param a the first Iterable to be zipped, or {@code null} which is treated as empty.
+     * @param b the second Iterable to be zipped, or {@code null} which is treated as empty.
+     * @param c the third Iterable to be zipped, or {@code null} which is treated as empty.
      * @param valueForNoneA the default value to be used when the first Iterable is exhausted.
      * @param valueForNoneB the default value to be used when the second Iterable is exhausted.
      * @param valueForNoneC the default value to be used when the third Iterable is exhausted.
@@ -3032,16 +3687,16 @@ public final class Iterators {
      *     String[] parts = s.split(":");
      *     pair.set(parts[0], Integer.parseInt(parts[1]));
      * });
-     * // result.next() => Pair("a", 1)
-     * // result.next() => Pair("b", 2)
+     * // result.next() => (a, 1)
+     * // result.next() => (b, 2)
      * }</pre>
      *
      * @param <T> the type of elements in the original Iterator.
      * @param <A> the type of the first element in the resulting BiIterator.
      * @param <B> the type of the second element in the resulting BiIterator.
-     * @param iter the original Iterator to be unzipped.
+     * @param iter the original Iterator to be unzipped, or {@code null} to return an empty result.
      * @param unzip a BiConsumer that takes an element from the original Iterator and a Pair to be filled with the resulting elements for the BiIterator.
-     * @return a BiIterator that will iterate over the elements created by <i>unzip</i>.
+     * @return a BiIterator that will iterate over the elements created by <i>unzip</i>, or an empty one if {@code iter} is {@code null}.
      * @throws IllegalArgumentException if {@code unzip} is {@code null}.
      * @see BiIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#unzip(Iterator, BiConsumer)
@@ -3068,16 +3723,16 @@ public final class Iterators {
      *     String[] parts = s.split(":");
      *     pair.set(parts[0], Integer.parseInt(parts[1]));
      * });
-     * // result.next() => Pair("a", 1)
-     * // result.next() => Pair("b", 2)
+     * // result.next() => (a, 1)
+     * // result.next() => (b, 2)
      * }</pre>
      *
      * @param <T> the type of elements in the original Iterable.
      * @param <A> the type of the first element in the resulting BiIterator.
      * @param <B> the type of the second element in the resulting BiIterator.
-     * @param c the original Iterable to be unzipped.
+     * @param c the original Iterable to be unzipped, or {@code null} to return an empty result.
      * @param unzip a BiConsumer that takes an element from the original Iterable and a Pair to be filled with the resulting elements for the BiIterator.
-     * @return a BiIterator that will iterate over the elements created by <i>unzip</i>.
+     * @return a BiIterator that will iterate over the elements created by <i>unzip</i>, or an empty one if {@code c} is {@code null}.
      * @throws IllegalArgumentException if {@code unzip} is {@code null}.
      * @see BiIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#unzip(Iterator, BiConsumer)
@@ -3101,16 +3756,16 @@ public final class Iterators {
      *     String[] parts = s.split(":");
      *     triple.set(parts[0], Integer.parseInt(parts[1]), parts[2]);
      * });
-     * // Iterates through Triple("a", 1, "x"), Triple("b", 2, "y")
+     * // Iterates through (a, 1, x), (b, 2, y)
      * }</pre>
      *
      * @param <T> the type of elements in the original Iterator.
      * @param <A> the type of the first element in the resulting TriIterator.
      * @param <B> the type of the second element in the resulting TriIterator.
      * @param <C> the type of the third element in the resulting TriIterator.
-     * @param iter the original Iterator to be unzipped.
+     * @param iter the original Iterator to be unzipped, or {@code null} to return an empty result.
      * @param unzip a BiConsumer that takes an element from the original Iterator and a Triple to be filled with the resulting elements for the TriIterator.
-     * @return a TriIterator that will iterate over the elements created by <i>unzip</i>.
+     * @return a TriIterator that will iterate over the elements created by <i>unzip</i>, or an empty one if {@code iter} is {@code null}.
      * @throws IllegalArgumentException if {@code unzip} is {@code null}.
      * @deprecated replaced by {@link TriIterator#unzip(Iterator, BiConsumer)}
      * @see TriIterator#unzip(Iterator, BiConsumer)
@@ -3118,7 +3773,6 @@ public final class Iterators {
      * @see TriIterator#unzipToSets(Supplier)
      */
     @Deprecated
-    @Beta
     public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip)
             throws IllegalArgumentException {
         N.checkArgNotNull(unzip, cs.unzip);
@@ -3137,17 +3791,17 @@ public final class Iterators {
      *     String[] parts = s.split(":");
      *     triple.set(parts[0], Integer.parseInt(parts[1]), parts[2]);
      * });
-     * // result.next() => Triple("a", 1, "x")
-     * // result.next() => Triple("b", 2, "y")
+     * // result.next() => (a, 1, x)
+     * // result.next() => (b, 2, y)
      * }</pre>
      *
      * @param <T> the type of elements in the original Iterable.
      * @param <A> the type of the first element in the resulting TriIterator.
      * @param <B> the type of the second element in the resulting {@code TriIterator}.
      * @param <C> the type of the third element in the resulting {@code TriIterator}.
-     * @param c the original {@code Iterable} to be unzipped.
+     * @param c the original {@code Iterable} to be unzipped, or {@code null} to return an empty result.
      * @param unzip a {@code BiConsumer} that takes an element from the original {@code Iterable} and a {@code Triple} to be filled with the resulting elements for the {@code TriIterator}.
-     * @return a {@code TriIterator} that will iterate over the elements created by {@code unzip}.
+     * @return a {@code TriIterator} that will iterate over the elements created by {@code unzip}, or an empty one if {@code c} is {@code null}.
      * @throws IllegalArgumentException if {@code unzip} is {@code null}.
      * @deprecated replaced by {@link TriIterator#unzip(Iterable, BiConsumer)}
      * @see TriIterator#unzip(Iterable, BiConsumer)
@@ -3155,7 +3809,6 @@ public final class Iterators {
      * @see TriIterator#unzipToSets(Supplier)
      */
     @Deprecated
-    @Beta
     public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip)
             throws IllegalArgumentException {
         N.checkArgNotNull(unzip, cs.unzip);
@@ -3244,6 +3897,7 @@ public final class Iterators {
 
         return new ObjIterator<>() {
             private boolean skipped = false;
+            private long remaining = n;
 
             @Override
             public boolean hasNext() {
@@ -3254,8 +3908,12 @@ public final class Iterators {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3264,10 +3922,9 @@ public final class Iterators {
             }
 
             private void skip() {
-                long idx = 0;
-
-                while (idx++ < n && iter.hasNext()) {
+                while (remaining > 0 && iter.hasNext()) {
                     iter.next();
+                    remaining--;
                 }
 
                 skipped = true;
@@ -3312,14 +3969,19 @@ public final class Iterators {
                 return cnt > 0 && iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final T result = iter.next();
                 cnt--;
-                return iter.next();
+                return result;
             }
         };
     }
@@ -3327,6 +3989,8 @@ public final class Iterators {
     /**
      * Returns a new ObjIterator that starts from the specified offset and is limited to the specified count of elements from the original Iterator.
      * This method combines both {@link #skip(Iterator, long)} and {@link #limit(Iterator, long)} operations in a single call.
+     * A zero {@code count} returns an empty iterator without inspecting or consuming the source,
+     * regardless of {@code offset}.
      *
      * <p>This is a lazy evaluation operation. The {@code skip} action is only triggered when {@code Iterator.hasNext()} or {@code Iterator.next()} is called.
      *
@@ -3349,10 +4013,10 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @see N#slice(Iterator, int, int)
      */
-    public static <T> ObjIterator<T> skipAndLimit(final Iterator<? extends T> iter, final long offset, final long count) {
+    public static <T> ObjIterator<T> skipAndLimit(final Iterator<? extends T> iter, final long offset, final long count) throws IllegalArgumentException {
         checkOffsetCount(offset, count);
 
-        if (iter == null) {
+        if (iter == null || count == 0) {
             return ObjIterator.empty();
         }
 
@@ -3367,6 +4031,7 @@ public final class Iterators {
         return new ObjIterator<>() {
             private long cnt = count;
             private boolean skipped = false;
+            private long remainingToSkip = offset;
 
             @Override
             public boolean hasNext() {
@@ -3377,21 +4042,25 @@ public final class Iterators {
                 return cnt > 0 && iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final T result = iter.next();
                 cnt--;
-                return iter.next();
+                return result;
             }
 
             private void skip() {
-                long idx = 0;
-
-                while (idx++ < offset && iter.hasNext()) {
+                while (remainingToSkip > 0 && iter.hasNext()) {
                     iter.next();
+                    remainingToSkip--;
                 }
 
                 skipped = true;
@@ -3401,6 +4070,8 @@ public final class Iterators {
 
     /**
      * Returns an {@code ObjIterator} that starts from the specified offset and is limited to the specified count of elements from the original {@code Iterable}.
+     * For a non-null {@code iterable}, its iterator is obtained when this method is called;
+     * a zero {@code count} does not traverse that iterator.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3420,7 +4091,7 @@ public final class Iterators {
      * @return an {@code ObjIterator} that will iterate over up to {@code count} elements of the original {@code Iterable} starting from the (offset+1)th element.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
-    public static <T> ObjIterator<T> skipAndLimit(final Iterable<? extends T> iterable, final long offset, final long count) {
+    public static <T> ObjIterator<T> skipAndLimit(final Iterable<? extends T> iterable, final long offset, final long count) throws IllegalArgumentException {
         checkOffsetCount(offset, count);
 
         return iterable == null ? ObjIterator.empty() : skipAndLimit(iterable.iterator(), offset, count);
@@ -3445,7 +4116,6 @@ public final class Iterators {
      * @param c the iterable whose {@code null} elements should be skipped, or {@code null} to return an empty iterator.
      * @return an {@code ObjIterator} that iterates over only the {@code non-null} elements, or an empty iterator if {@code c} is {@code null}.
      */
-    @Beta
     public static <T> ObjIterator<T> skipNulls(final Iterable<? extends T> c) {
         return filter(c, Fn.notNull());
     }
@@ -3487,11 +4157,14 @@ public final class Iterators {
      * // Yields: 1, 2, 3, 4
      * }</pre>
      *
+     * <p><b>Memory:</b> every distinct element seen so far is retained in an internal {@link java.util.HashSet}
+     * for the lifetime of the returned iterator, so memory grows with the number of distinct elements. Do not
+     * run this to completion over an unbounded source.</p>
+     *
      * @param <T> the type of elements in the original Iterable.
      * @param c the original Iterable to be processed for distinct elements, or {@code null} to return an empty iterator.
      * @return a new ObjIterator that will iterate over the distinct elements of the original Iterable, or an empty iterator if {@code c} is {@code null}.
      */
-    @Beta
     public static <T> ObjIterator<T> distinct(final Iterable<? extends T> c) {
         if (c == null) {
             return ObjIterator.empty();
@@ -3514,6 +4187,10 @@ public final class Iterators {
      * // Yields: 1, 2, 3, 4
      * }</pre>
      *
+     * <p><b>Memory:</b> every distinct element seen so far is retained in an internal {@link java.util.HashSet}
+     * for the lifetime of the returned iterator, so memory grows with the number of distinct elements. Do not
+     * run this to completion over an unbounded source.</p>
+     *
      * @param <T> the type of elements in the original Iterator.
      * @param iter the original Iterator to be processed for distinct elements, or {@code null} to return an empty iterator.
      * @return a new ObjIterator that will iterate over the distinct elements of the original Iterator, or an empty iterator if {@code iter} is {@code null}.
@@ -3528,16 +4205,15 @@ public final class Iterators {
         return new ObjIterator<>() {
             private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
             private T next = NONE;
-            private T tmp = null;
 
             @Override
             public boolean hasNext() {
                 if (next == NONE) {
                     while (iter.hasNext()) {
-                        tmp = iter.next();
+                        final T e = iter.next();
 
-                        if (set.add(tmp)) {
-                            next = tmp;
+                        if (set.add(e)) {
+                            next = e;
                             break;
                         }
                     }
@@ -3546,15 +4222,19 @@ public final class Iterators {
                 return next != NONE;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                tmp = next;
+                final T result = next;
                 next = NONE;
-                return tmp;
+                return result;
             }
         };
     }
@@ -3578,13 +4258,16 @@ public final class Iterators {
      * // Yields: Person("Alice", 30), Person("Bob", 25)
      * }</pre>
      *
+     * <p><b>Memory:</b> every distinct key seen so far is retained in an internal {@link java.util.HashSet}
+     * for the lifetime of the returned iterator, so memory grows with the number of distinct keys. Do not run
+     * this to completion over an unbounded source.</p>
+     *
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param c the original {@code Iterable} to be processed for distinct elements, or {@code null} to return an empty iterator.
      * @param keyExtractor a {@code Function} that takes an element from the {@code Iterable} and returns a key. Elements with the same key are considered duplicates.
      * @return an {@code ObjIterator} that will iterate over the distinct elements of the original {@code Iterable} based on the keys derived from {@code keyExtractor}.
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    @Beta
     public static <T> ObjIterator<T> distinctBy(final Iterable<? extends T> c, final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
@@ -3610,6 +4293,10 @@ public final class Iterators {
      * // Yields: "Alice", "Bob" (distinct by length)
      * }</pre>
      *
+     * <p><b>Memory:</b> every distinct key seen so far is retained in an internal {@link java.util.HashSet}
+     * for the lifetime of the returned iterator, so memory grows with the number of distinct keys. Do not run
+     * this to completion over an unbounded source.</p>
+     *
      * @param <T> the type of elements in the original iterator.
      * @param iter the original iterator to be processed for distinct elements, or {@code null} to return an empty iterator.
      * @param keyExtractor a {@code Function} that takes an element from the iterator and returns a key. Elements with the same key are considered duplicates.
@@ -3628,16 +4315,15 @@ public final class Iterators {
         return new ObjIterator<>() {
             private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
             private T next = NONE;
-            private T tmp = null;
 
             @Override
             public boolean hasNext() {
                 if (next == NONE) {
                     while (iter.hasNext()) {
-                        tmp = iter.next();
+                        final T e = iter.next();
 
-                        if (set.add(keyExtractor.apply(tmp))) {
-                            next = tmp;
+                        if (set.add(keyExtractor.apply(e))) {
+                            next = e;
                             break;
                         }
                     }
@@ -3646,15 +4332,19 @@ public final class Iterators {
                 return next != NONE;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                tmp = next;
+                final T result = next;
                 next = NONE;
-                return tmp;
+                return result;
             }
         };
     }
@@ -3681,7 +4371,6 @@ public final class Iterators {
      * @see N#filter(Iterable, Predicate)
      * @see Maps#filter(Map, BiPredicate)
      */
-    @Beta
     public static <T> ObjIterator<T> filter(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
@@ -3724,16 +4413,15 @@ public final class Iterators {
         return new ObjIterator<>() {
             private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
             private T next = NONE;
-            private T tmp = null;
 
             @Override
             public boolean hasNext() {
                 if (next == NONE) {
                     while (iter.hasNext()) {
-                        tmp = iter.next();
+                        final T e = iter.next();
 
-                        if (predicate.test(tmp)) {
-                            next = tmp;
+                        if (predicate.test(e)) {
+                            next = e;
                             break;
                         }
                     }
@@ -3742,15 +4430,19 @@ public final class Iterators {
                 return next != NONE;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                tmp = next;
+                final T result = next;
                 next = NONE;
-                return tmp;
+                return result;
             }
         };
     }
@@ -3770,13 +4462,17 @@ public final class Iterators {
      * // Yields: "a", "ab", "abc" (stops at "b")
      * }</pre>
      *
+     * <p><b>The stopping element is consumed and discarded:</b> the element that first fails {@code predicate} has
+     * already been pulled from the source in order to test it, and it is not emitted, so it is lost to anyone who
+     * keeps using the source afterwards. Use {@link #takeWhileInclusive(Iterable, Predicate)} to emit it instead.</p>
+     *
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param c the original {@code Iterable} to be processed, or {@code null} to return an empty iterator.
      * @param predicate a {@code Predicate} that tests each element from the {@code Iterable}. The iteration continues as long as the {@code Predicate} returns {@code true}.
      * @return an {@code ObjIterator} that will iterate over the elements of the original {@code Iterable} as long as they satisfy the provided {@code Predicate}.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @see #takeWhileInclusive(Iterable, Predicate)
      */
-    @Beta
     public static <T> ObjIterator<T> takeWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
@@ -3802,11 +4498,24 @@ public final class Iterators {
      * // Yields: "short", "text" (stops at "verylongword")
      * }</pre>
      *
+     * <p><b>The stopping element is consumed and discarded:</b> the element that first fails {@code predicate} has
+     * already been pulled from {@code iter} in order to test it, and it is not emitted - so continuing to read
+     * {@code iter} afterwards resumes <i>after</i> that element. Use
+     * {@link #takeWhileInclusive(Iterator, Predicate)} to emit it instead.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Iterator<Integer> src = Arrays.asList(1, 2, 3, 4, 5).iterator();
+     * ObjIterator<Integer> taken = Iterators.takeWhile(src, n -> n < 3);
+     * // taken yields 1, 2 - and 3 has been consumed from src, which now continues at 4
+     * }</pre>
+     *
      * @param <T> the type of elements in the original iterator.
      * @param iter the original iterator to be processed, or {@code null} to return an empty iterator.
      * @param predicate a {@code Predicate} that tests each element from the iterator. The iteration continues as long as the {@code Predicate} returns {@code true}.
      * @return an {@code ObjIterator} that will iterate over the elements of the original iterator as long as they satisfy the provided {@code Predicate}.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @see #takeWhileInclusive(Iterator, Predicate)
      */
     public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
@@ -3818,16 +4527,15 @@ public final class Iterators {
         return new ObjIterator<>() {
             private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
             private T next = NONE;
-            private T tmp = null;
             private boolean hasMore = true;
 
             @Override
             public boolean hasNext() {
                 if (next == NONE && hasMore && iter.hasNext()) {
-                    tmp = iter.next();
+                    final T e = iter.next();
 
-                    if (predicate.test(tmp)) {
-                        next = tmp;
+                    if (predicate.test(e)) {
+                        next = e;
                     } else {
                         hasMore = false;
                     }
@@ -3836,15 +4544,19 @@ public final class Iterators {
                 return next != NONE;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                tmp = next;
+                final T result = next;
                 next = NONE;
-                return tmp;
+                return result;
             }
         };
     }
@@ -3870,7 +4582,6 @@ public final class Iterators {
      * @return an {@code ObjIterator} that will iterate over the elements of the original {@code Iterable} as long as they satisfy the provided {@code Predicate}, including the first element that does not satisfy the {@code Predicate}.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    @Beta
     public static <T> ObjIterator<T> takeWhileInclusive(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
@@ -3913,34 +4624,34 @@ public final class Iterators {
         return new ObjIterator<>() {
             private final T NONE = (T) N.NULL_SENTINEL; //NOSONAR
             private T next = NONE;
-            private T tmp = null;
             private boolean hasMore = true;
 
             @Override
             public boolean hasNext() {
                 if (next == NONE && hasMore && iter.hasNext()) {
-                    tmp = iter.next();
+                    final T e = iter.next();
 
-                    if (predicate.test(tmp)) {
-                        next = tmp;
-                    } else {
-                        next = tmp;
-                        hasMore = false;
-                    }
+                    next = e;
+                    // The first non-matching element is still emitted - it is simply the last one.
+                    hasMore = predicate.test(e);
                 }
 
                 return next != NONE;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                tmp = next;
+                final T result = next;
                 next = NONE;
-                return tmp;
+                return result;
             }
         };
     }
@@ -3969,7 +4680,6 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #skipUntil(Iterable, Predicate)
      */
-    @Beta
     public static <T> ObjIterator<T> dropWhile(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
@@ -4034,8 +4744,12 @@ public final class Iterators {
                 return next != NONE || iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4075,7 +4789,6 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #dropWhile(Iterable, Predicate)
      */
-    @Beta
     public static <T> ObjIterator<T> skipUntil(final Iterable<? extends T> c, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
@@ -4110,7 +4823,6 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #dropWhile(Iterator, Predicate)
      */
-    @Beta
     public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
@@ -4141,8 +4853,12 @@ public final class Iterators {
                 return next != NONE || iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4179,8 +4895,7 @@ public final class Iterators {
      * @return an {@code ObjIterator} that will iterate over the transformed elements of the original {@code Iterable}.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    @Beta
-    public static <T, U> ObjIterator<U> map(final Iterable<? extends T> c, final Function<? super T, U> mapper) throws IllegalArgumentException {
+    public static <T, U> ObjIterator<U> map(final Iterable<? extends T> c, final Function<? super T, ? extends U> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         if (c == null) {
@@ -4208,7 +4923,7 @@ public final class Iterators {
      * @return an {@code ObjIterator} that will iterate over the transformed elements of the original iterator.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, U> mapper) throws IllegalArgumentException {
+    public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, ? extends U> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         if (iter == null) {
@@ -4221,8 +4936,16 @@ public final class Iterators {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public U next() {
+            public U next() throws NoSuchElementException {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
                 return mapper.apply(iter.next());
             }
         };
@@ -4252,11 +4975,11 @@ public final class Iterators {
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param <U> the type of elements in the resulting {@code ObjIterator}.
      * @param c the original {@code Iterable} to be transformed, or {@code null} to return an empty iterator.
-     * @param mapper a {@code Function} that takes an element from the {@code Iterable} and returns an {@code Iterable} of transformed elements.
+     * @param mapper a {@code Function} that takes an element from the {@code Iterable} and returns an {@code Iterable} of
+     *               transformed elements; a {@code null} or empty result contributes nothing and is skipped.
      * @return an {@code ObjIterator} that will iterate over the transformed elements of the original {@code Iterable}.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    @Beta
     public static <T, U> ObjIterator<U> flatMap(final Iterable<? extends T> c, final Function<? super T, ? extends Iterable<? extends U>> mapper)
             throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
@@ -4283,7 +5006,8 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterator.
      * @param <U> the type of elements in the resulting {@code ObjIterator}.
      * @param iter the original iterator to be transformed, or {@code null} to return an empty iterator.
-     * @param mapper a {@code Function} that takes an element from the iterator and returns an {@code Iterable} of transformed elements.
+     * @param mapper a {@code Function} that takes an element from the iterator and returns an {@code Iterable} of
+     *               transformed elements; a {@code null} or empty result contributes nothing and is skipped.
      * @return an {@code ObjIterator} that will iterate over the transformed elements of the original iterator.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
@@ -4296,27 +5020,36 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private Iterable<? extends U> c = null;
             private Iterator<? extends U> cur = null;
 
             @Override
             public boolean hasNext() {
                 if (cur == null || !cur.hasNext()) {
                     while (iter.hasNext()) {
-                        c = mapper.apply(iter.next());
-                        cur = c == null ? null : c.iterator();
+                        final Iterable<? extends U> mapped = mapper.apply(iter.next());
+                        cur = mapped == null ? null : mapped.iterator();
 
                         if (cur != null && cur.hasNext()) {
                             break;
                         }
+                    }
+
+                    if (cur != null && !cur.hasNext()) {
+                        // Exhausted: drop the last mapped iterator so that an exhausted iterator which is still
+                        // referenced does not pin it, matching flatmap(Iterator, Function) below.
+                        cur = null;
                     }
                 }
 
                 return cur != null && cur.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public U next() {
+            public U next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4349,11 +5082,11 @@ public final class Iterators {
      * @param <T> the type of elements in the original {@code Iterable}.
      * @param <U> the type of elements in the resulting {@code ObjIterator}.
      * @param c the original {@code Iterable} to be transformed, or {@code null} to return an empty iterator.
-     * @param mapper a {@code Function} that takes an element from the {@code Iterable} and returns an array of transformed elements.
+     * @param mapper a {@code Function} that takes an element from the {@code Iterable} and returns an array of
+     *               transformed elements; a {@code null} or empty result contributes nothing and is skipped.
      * @return an {@code ObjIterator} that will iterate over the transformed elements of the original {@code Iterable}.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    @Beta
     public static <T, U> ObjIterator<U> flatmap(final Iterable<? extends T> c, final Function<? super T, ? extends U[]> mapper)
             throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper); //NOSONAR
@@ -4380,7 +5113,8 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterator.
      * @param <U> the type of elements in the resulting {@code ObjIterator}.
      * @param iter the original iterator to be transformed, or {@code null} to return an empty iterator.
-     * @param mapper a {@code Function} that takes an element from the iterator and returns an array of transformed elements.
+     * @param mapper a {@code Function} that takes an element from the iterator and returns an array of
+     *               transformed elements; a {@code null} or empty result contributes nothing and is skipped.
      * @return an {@code ObjIterator} that will iterate over the transformed elements of the original iterator.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
@@ -4409,13 +5143,24 @@ public final class Iterators {
                             break;
                         }
                     }
+
+                    if (cursor >= len) {
+                        // Exhausted: drop the last mapped array so that an exhausted iterator which is still
+                        // referenced does not pin it.
+                        a = null;
+                        len = 0;
+                    }
                 }
 
                 return cursor < len;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
             @Override
-            public U next() {
+            public U next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4438,13 +5183,13 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param iter the original iterator to be processed.
+     * @param iter the original iterator to be processed; {@code null} is treated as empty
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
-     * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
+     * @throws E if {@code elementConsumer} throws while processing a selected element.
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEach(iter, elementConsumer, Fn.emptyAction());
@@ -4464,15 +5209,16 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
-     * @param iter the original iterator to be processed.
+     * @param iter the original iterator to be processed; {@code null} is treated as empty, and
+     *        {@code onComplete} still runs.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterator have been processed.
-     * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws E2 if the {@code onComplete} action encounters an exception.
      * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
+     * @throws E if {@code elementConsumer} throws while processing a selected element.
+     * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2, IllegalArgumentException {
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws IllegalArgumentException, E, E2 {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
         N.checkArgNotNull(onComplete, cs.onComplete);
 
@@ -4491,16 +5237,16 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param iter the original iterator to be processed.
+     * @param iter the original iterator to be processed; {@code null} is treated as empty.
      * @param offset the starting point in the iterator from where elements will be processed. Must be non-negative.
      * @param count the maximum number of elements to be processed from the iterator. Must be non-negative.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code elementConsumer}
      *         is {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
+     * @throws E if {@code elementConsumer} throws while processing a selected element.
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
-            final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
+            final Throwables.Consumer<? super T, E> elementConsumer) throws IllegalArgumentException, E {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEach(iter, offset, count, elementConsumer, Fn.emptyAction());
@@ -4524,106 +5270,23 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
-     * @param iter the original iterator to be processed.
+     * @param iter the original iterator to be processed; {@code null} is treated as empty, and
+     *        {@code onComplete} still runs.
      * @param offset the starting point in the iterator from where elements will be processed. Must be non-negative.
      * @param count the maximum number of elements to be processed from the iterator. Must be non-negative.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterator have been processed.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if any of
      *         {@code elementConsumer}, {@code onComplete} is {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws E2 if the {@code onComplete} action encounters an exception.
+     * @throws E if {@code elementConsumer} throws while processing a selected element.
+     * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2, IllegalArgumentException {
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws IllegalArgumentException, E, E2 {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
         N.checkArgNotNull(onComplete, cs.onComplete);
 
-        forEach(iter, offset, count, 0, 0, elementConsumer, onComplete);
-    }
-
-    /**
-     * Performs an action for each element of the given iterator, starting from a specified offset and up to a specified count.
-     * This method also supports multi-threading with a specified number of threads and queue size.
-     *
-     * <p>When {@code processThreadNum > 0}, a new dedicated thread pool is created for this call and shut down before it returns;
-     * no shared executor is reused. To process an iterator on the library's shared executor (or a caller-supplied {@code Executor}),
-     * use {@link N#forEachInParallel(Iterator, Throwables.Consumer, int)} or its {@code Executor}-accepting overload instead.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Iterator<Integer> iter = IntStream.range(0, 100).iterator();
-     * Iterators.forEach(iter, 0, 100, 4, 10, i -> {
-     *     System.out.println("Processing " + i + " on thread " + Thread.currentThread().getName());
-     * });
-     * }</pre>
-     *
-     * @param <T> the type of elements in the original iterator.
-     * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param iter the original iterator to be processed.
-     * @param offset the starting point in the iterator from where elements will be processed. Must be non-negative.
-     * @param count the maximum number of elements to be processed from the iterator. Must be non-negative.
-     * @param processThreadNum the number of threads to be used for processing. Use {@code 0} for single-threaded (caller-thread) processing.
-     * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
-     * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code elementConsumer}
-     *         is {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
-     * @see #forEach(Iterator, IterateOptions, Throwables.Consumer)
-     * @deprecated Use {@link #forEach(Iterator, IterateOptions, Throwables.Consumer)} instead.
-     */
-    @Deprecated
-    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count, final int processThreadNum,
-            final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
-        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
-
-        forEach(iter, offset, count, processThreadNum, queueSize, elementConsumer, Fn.emptyAction());
-    }
-
-    /**
-     * Performs an action for each element of the given iterator, starting from a specified offset and up to a specified count.
-     * This method also supports multi-threading with a specified number of threads and queue size.
-     *
-     * <p>When {@code processThreadNum > 0}, a new dedicated thread pool is created for this call and shut down before it returns;
-     * no shared executor is reused. To process an iterator on the library's shared executor (or a caller-supplied {@code Executor}),
-     * use {@link N#forEachInParallel(Iterator, Throwables.Consumer, int)} or its {@code Executor}-accepting overload instead.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Iterator<Integer> iter = IntStream.range(0, 100).iterator();
-     * AtomicInteger sum = new AtomicInteger();
-     * Iterators.forEach(iter, 0, 100, 4, 10,
-     *     i -> sum.addAndGet(i),
-     *     () -> System.out.println("Total: " + sum.get())
-     * );
-     * // Processes all elements in parallel with 4 threads
-     * }</pre>
-     *
-     * @param <T> the type of elements in the original iterator.
-     * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
-     * @param iter the original iterator to be processed.
-     * @param offset the starting point in the iterator from where processing should begin. Must be non-negative.
-     * @param count the maximum number of elements to process. Must be non-negative.
-     * @param processThreadNum the number of threads to be used for processing. Use {@code 0} for single-threaded (caller-thread) processing.
-     * @param queueSize the size of the queue to hold the processing records. Use {@code 0} for a default calculated size.
-     * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
-     * @param onComplete a {@code Runnable} action to be performed once all elements have been processed.
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if any of
-     *         {@code elementConsumer}, {@code onComplete} is {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws E2 if the {@code onComplete} action encounters an exception.
-     * @see #forEach(Iterator, IterateOptions, Throwables.Consumer, Throwables.Runnable)
-     * @deprecated Use {@link #forEach(Iterator, IterateOptions, Throwables.Consumer, Throwables.Runnable)} instead.
-     */
-    @Deprecated
-    public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
-            throws E, E2, IllegalArgumentException {
-        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
-        N.checkArgNotNull(onComplete, cs.onComplete);
-
-        forEach(Array.asList(iter), offset, count, 0, processThreadNum, queueSize, elementConsumer, onComplete);
+        doForEach(iter, offset, count, 0, 0, elementConsumer, onComplete);
     }
 
     /**
@@ -4632,17 +5295,31 @@ public final class Iterators {
      *
      * <p>The iterator is consumed by this terminal operation. The effective input is first sliced by
      * {@code offset} and {@code count}, then each selected element is passed to {@code elementConsumer}.
-     * The {@code readThreads} option is ignored for this overload because
-     * a single iterator has only one source to read.</p>
+     * The {@code readThreads} and {@code queueSize} options are ignored for this overload: a single iterator has
+     * only one source and there is no reader hand-off to buffer. With {@code processThreads == 0}, the calling
+     * thread reads it; otherwise the processing workers serialize calls to its {@code hasNext()} and {@code next()}.</p>
      *
-     * <p>This is the readable alternative to the positional numeric overloads (for example
-     * {@link #forEach(Iterator, long, long, int, int, Throwables.Consumer)}): each tuning knob is named on the
-     * {@code options} object rather than identified by its position among a run of {@code long}/{@code int} arguments.</p>
+     * <p>This is also the only way to configure {@code processThreads}: the positional overloads cover slicing
+     * alone ({@link #forEach(Iterator, long, long, Throwables.Consumer)}), so each tuning knob is named on the
+     * {@code options} object rather than identified by its position in a run of numbers.</p>
      *
      * <p>When {@code processThreads > 0}, this method creates a new dedicated thread pool for this call and shuts it down
      * before returning. Element processing may then happen concurrently and the order of {@code elementConsumer} calls is
      * not guaranteed. To process an iterator on the library's shared executor (or a caller-supplied {@code Executor}), use
      * {@link N#forEachInParallel(Iterator, Throwables.Consumer, int)} or its {@code Executor}-accepting overload instead.</p>
+     *
+     * <p><b>Exception propagation is the same in both processing modes.</b> A checked exception from
+     * {@code elementConsumer} propagates as {@code E}, a {@code RuntimeException} is rethrown as-is and an
+     * {@code Error} as {@code Error} - whether the consumer ran on the calling thread
+     * ({@code processThreads == 0}) or on a worker ({@code processThreads > 0}). Changing {@code processThreads}
+     * is a tuning decision and therefore never changes which {@code catch} clause matches. When more than one
+     * worker fails, the first failure is thrown and the rest are attached to it with
+     * {@link Throwable#addSuppressed(Throwable)}.</p>
+     *
+     * <p>The one exception to that symmetry is <i>cancellation</i>: if the calling thread is interrupted while it
+     * waits for the workers, this method publishes the cancellation, interrupts them, waits up to one second for
+     * them to stop and then throws the {@link InterruptedException} wrapped in a {@code RuntimeException}. The
+     * wait is bounded so that a consumer which ignores interruption cannot pin the caller indefinitely.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4654,18 +5331,20 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param iter the iterator to consume.
+     * @param iter the iterator to consume; {@code null} is treated as empty.
      * @param options the slicing and processing configuration; {@code null} is treated as the default
-     *        {@link IterateOptions} (no slicing, caller-thread processing). The {@code readThreads} value is ignored.
+     *        {@link IterateOptions} (no slicing, caller-thread processing). The {@code readThreads} and
+     *        {@code queueSize} values are ignored.
      * @param elementConsumer the action to perform for each selected element.
-     * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative,
-     *         or if {@code elementConsumer} is {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
+     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}. Negative settings are rejected
+     *         earlier, by {@code IterateOptions.builder()...build()}.
+     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
+     * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @see IterateOptions
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final IterateOptions options,
-            final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
+            final Throwables.Consumer<? super T, E> elementConsumer) throws IllegalArgumentException, E, UncheckedInterruptedException {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEach(iter, options, elementConsumer, Fn.emptyAction());
@@ -4677,26 +5356,40 @@ public final class Iterators {
      *
      * <p>The iterator is consumed by this terminal operation. The effective input is first sliced by
      * {@code offset} and {@code count}, then each selected element is passed to {@code elementConsumer}.
-     * The {@code readThreads} option is ignored for this overload because
-     * a single iterator has only one source to read.</p>
+     * The {@code readThreads} and {@code queueSize} options are ignored for this overload: a single iterator has
+     * only one source and there is no reader hand-off to buffer. With {@code processThreads == 0}, the calling
+     * thread reads it; otherwise the processing workers serialize calls to its {@code hasNext()} and {@code next()}.</p>
      *
      * <p>{@code onComplete} is invoked at most once, after all selected elements have been processed successfully.
      * If {@code elementConsumer} throws, {@code onComplete} is not invoked.</p>
      *
-     * <p>This is the readable alternative to the positional numeric overloads (for example
-     * {@link #forEach(Iterator, long, long, int, int, Throwables.Consumer, Throwables.Runnable)}): each tuning knob is named on the
-     * {@code options} object rather than identified by its position among a run of {@code long}/{@code int} arguments.</p>
+     * <p>This is also the only way to configure {@code processThreads}: the positional overloads cover slicing
+     * alone ({@link #forEach(Iterator, long, long, Throwables.Consumer, Throwables.Runnable)}), so each tuning knob is
+     * named on the {@code options} object rather than identified by its position in a run of numbers.</p>
      *
      * <p>When {@code processThreads > 0}, this method creates a new dedicated thread pool for this call and shuts it down
      * before returning. Element processing may then happen concurrently and the order of {@code elementConsumer} calls is
      * not guaranteed. To process an iterator on the library's shared executor (or a caller-supplied {@code Executor}), use
      * {@link N#forEachInParallel(Iterator, Throwables.Consumer, int)} or its {@code Executor}-accepting overload instead.</p>
      *
+     * <p><b>Exception propagation is the same in both processing modes.</b> Checked exceptions from
+     * {@code elementConsumer} and {@code onComplete} propagate as {@code E} and {@code E2}, a
+     * {@code RuntimeException} is rethrown as-is and an {@code Error} as {@code Error} - whether the consumer ran
+     * on the calling thread ({@code processThreads == 0}) or on a worker ({@code processThreads > 0}). Changing
+     * {@code processThreads} is a tuning decision and therefore never changes which {@code catch} clause matches.
+     * When more than one worker fails, the first failure is thrown and the rest are attached to it with
+     * {@link Throwable#addSuppressed(Throwable)}. {@code onComplete} always runs on the calling thread.</p>
+     *
+     * <p>The one exception to that symmetry is <i>cancellation</i>: if the calling thread is interrupted while it
+     * waits for the workers, this method publishes the cancellation, interrupts them, waits up to one second for
+     * them to stop and then throws the {@link InterruptedException} wrapped in a {@code RuntimeException}. The
+     * wait is bounded so that a consumer which ignores interruption cannot pin the caller indefinitely.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<Integer> iter = IntStream.range(0, 100).iterator();
      * AtomicInteger sum = new AtomicInteger();
-     * Iterators.forEach(iter, IterateOptions.builder().processThreads(4).queueSize(10).build(),
+     * Iterators.forEach(iter, IterateOptions.builder().processThreads(4).build(),
      *     i -> sum.addAndGet(i),
      *     () -> System.out.println("Total: " + sum.get()));
      * }</pre>
@@ -4704,26 +5397,29 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
-     * @param iter the iterator to consume.
+     * @param iter the iterator to consume; {@code null} is treated as empty, and {@code onComplete} still runs.
      * @param options the slicing and processing configuration; {@code null} is treated as the default
-     *        {@link IterateOptions} (no slicing, caller-thread processing). The {@code readThreads} value is ignored.
+     *        {@link IterateOptions} (no slicing, caller-thread processing). The {@code readThreads} and
+     *        {@code queueSize} values are ignored.
      * @param elementConsumer the action to perform for each selected element.
      * @param onComplete the action invoked after all selected elements have been processed; must not be {@code null}.
-     * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative,
-     *         or if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws E2 if the {@code onComplete} action encounters an exception.
+     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
+     *         Negative settings are rejected earlier, by {@code IterateOptions.builder()...build()}.
+     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
+     * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
+     * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer)
      * @see IterateOptions
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final IterateOptions options,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2, IllegalArgumentException {
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
+            throws IllegalArgumentException, E, UncheckedInterruptedException, E2 {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
         N.checkArgNotNull(onComplete, cs.onComplete);
 
-        final IterateOptions opts = options == null ? IterateOptions.builder().build() : options;
+        final IterateOptions opts = options == null ? IterateOptions.DEFAULT : options;
 
-        forEach(iter, opts.offset(), opts.count(), opts.processThreads(), opts.queueSize(), elementConsumer, onComplete);
+        doForEach(iter, opts.offset(), opts.count(), opts.processThreads(), opts.queueSize(), elementConsumer, onComplete);
     }
 
     /**
@@ -4742,13 +5438,14 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param iterators the original collection of iterators to be processed.
+     * @param iterators the original collection of iterators to be processed; {@code null}/empty means no elements
+     *        are processed, and a {@code null} element inside is skipped.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
-     * @throws E if the {@code elementConsumer} encounters an exception.
      * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
+     * @throws E if {@code elementConsumer} throws while processing a selected element.
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
-            final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
+            final Throwables.Consumer<? super T, E> elementConsumer) throws IllegalArgumentException, E {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEach(iterators, elementConsumer, Fn.emptyAction());
@@ -4772,15 +5469,16 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
-     * @param iterators the original collection of iterators to be processed.
+     * @param iterators the original collection of iterators to be processed; {@code null}/empty means no elements
+     *        are processed and {@code onComplete} still runs, and a {@code null} element inside is skipped.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterators have been processed.
-     * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws E2 if the {@code onComplete} action encounters an exception.
      * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
+     * @throws E if {@code elementConsumer} throws while processing a selected element.
+     * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
-            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws E, E2, IllegalArgumentException {
+            final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws IllegalArgumentException, E, E2 {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
         N.checkArgNotNull(onComplete, cs.onComplete);
 
@@ -4790,10 +5488,8 @@ public final class Iterators {
     /**
      * Performs an action for each element of the given collection of iterators, starting from a specified offset and up to a specified count.
      *
-     * <p><b>Note:</b> the two leading {@code long} arguments of this overload are {@code offset}/{@code count} (slicing).
-     * Do not confuse it with {@link #forEach(Collection, int, int, int, Throwables.Consumer)}, whose three leading
-     * {@code int} arguments mean {@code readThreadNum}/{@code processThreadNum}/{@code queueSize} instead.
-     * For a self-documenting alternative that names each value, use the {@link IterateOptions} builder overload
+     * <p>The two leading {@code long} arguments are {@code offset}/{@code count} (slicing). To configure reading or
+     * processing threads as well, use the {@link IterateOptions} builder overload
      * {@link #forEach(Collection, IterateOptions, Throwables.Consumer)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -4809,16 +5505,17 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param iterators the original collection of iterators to be processed.
+     * @param iterators the original collection of iterators to be processed; {@code null}/empty means no elements
+     *        are processed, and a {@code null} element inside is skipped.
      * @param offset the starting point in the iterators from where elements will be processed. Must be non-negative.
      * @param count the maximum number of elements to be processed from the iterators. Must be non-negative.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code elementConsumer}
      *         is {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
+     * @throws E if {@code elementConsumer} throws while processing a selected element.
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
-            final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
+            final Throwables.Consumer<? super T, E> elementConsumer) throws IllegalArgumentException, E {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEach(iterators, offset, count, elementConsumer, Fn.emptyAction());
@@ -4828,10 +5525,8 @@ public final class Iterators {
      * Performs an action for each element of the given collection of iterators, starting from a specified offset and up to a specified count.
      * After all elements have been processed, a final action is executed.
      *
-     * <p><b>Note:</b> the two leading {@code long} arguments of this overload are {@code offset}/{@code count} (slicing).
-     * Do not confuse it with {@link #forEach(Collection, int, int, int, Throwables.Consumer, Throwables.Runnable)}, whose three leading
-     * {@code int} arguments mean {@code readThreadNum}/{@code processThreadNum}/{@code queueSize} instead.
-     * For a self-documenting alternative that names each value, use the {@link IterateOptions} builder overload
+     * <p>The two leading {@code long} arguments are {@code offset}/{@code count} (slicing). To configure reading or
+     * processing threads as well, use the {@link IterateOptions} builder overload
      * {@link #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -4848,330 +5543,24 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterators.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
-     * @param iterators the original collection of iterators to be processed.
+     * @param iterators the original collection of iterators to be processed; {@code null}/empty means no elements
+     *        are processed and {@code onComplete} still runs, and a {@code null} element inside is skipped.
      * @param offset the starting point in the iterators from where elements will be processed. Must be non-negative.
      * @param count the maximum number of elements to be processed from the iterators. Must be non-negative.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterators have been processed.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if any of
      *         {@code elementConsumer}, {@code onComplete} is {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws E2 if the {@code onComplete} action encounters an exception.
+     * @throws E if {@code elementConsumer} throws while processing a selected element.
+     * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
             final long count, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
-            throws E, E2, IllegalArgumentException {
+            throws IllegalArgumentException, E, E2 {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
         N.checkArgNotNull(onComplete, cs.onComplete);
 
-        forEach(iterators, offset, count, 0, 0, 0, elementConsumer, onComplete);
-    }
-
-    /**
-     * Performs an action for each element of the given collection of iterators.
-     * This method also supports multi-threading with a specified number of threads for reading and processing.
-     *
-     * <p><b>Note:</b> the three leading {@code int} arguments of this overload are {@code readThreadNum}/{@code processThreadNum}/{@code queueSize}
-     * — they are <i>not</i> {@code offset}/{@code count}. Do not confuse it with {@link #forEach(Collection, long, long, Throwables.Consumer)},
-     * whose two leading {@code long} arguments mean {@code offset}/{@code count} (slicing) instead.
-     * For a self-documenting alternative that names each value, use the {@link IterateOptions} builder overload
-     * {@link #forEach(Collection, IterateOptions, Throwables.Consumer)}.</p>
-     *
-     * <p>When {@code processThreadNum > 0}, a new dedicated thread pool is created for this call and shut down before it returns;
-     * no shared executor is reused. To process an iterator on the library's shared executor (or a caller-supplied {@code Executor}),
-     * use {@link N#forEachInParallel(Iterator, Throwables.Consumer, int)} or its {@code Executor}-accepting overload instead.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<Iterator<Integer>> iterators = Arrays.asList(
-     *     IntStream.range(0, 50).iterator(),
-     *     IntStream.range(50, 100).iterator()
-     * );
-     * AtomicInteger sum = new AtomicInteger();
-     * Iterators.forEach(iterators, 2, 4, 10, i -> sum.addAndGet(i));
-     * // Uses 2 threads to read and 4 threads to process in parallel
-     * }</pre>
-     *
-     * @param <T> the type of elements in the original iterators.
-     * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param iterators the original collection of iterators to be processed.
-     * @param readThreadNum the number of threads to be used for reading elements from the iterators. Use {@code 0} for single-threaded reading.
-     * @param processThreadNum the number of threads to be used for processing elements. Use {@code 0} for single-threaded (caller-thread) processing.
-     * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
-     * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
-     * @throws IllegalArgumentException if {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is
-     *         negative, or if {@code elementConsumer} is {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
-     * @see #forEach(Collection, IterateOptions, Throwables.Consumer)
-     * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer)} instead.
-     */
-    @Deprecated
-    public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
-            final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
-        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
-
-        forEach(iterators, readThreadNum, processThreadNum, queueSize, elementConsumer, Fn.emptyAction());
-    }
-
-    /**
-     * Performs an action for each element of the given collection of iterators.
-     * This method also supports multi-threading with a specified number of threads for reading and processing, and a queue for holding elements before processing.
-     * After all elements have been processed, a final action is executed.
-     *
-     * <p><b>Note:</b> the three leading {@code int} arguments of this overload are {@code readThreadNum}/{@code processThreadNum}/{@code queueSize}
-     * — they are <i>not</i> {@code offset}/{@code count}. Do not confuse it with {@link #forEach(Collection, long, long, Throwables.Consumer, Throwables.Runnable)},
-     * whose two leading {@code long} arguments mean {@code offset}/{@code count} (slicing) instead.
-     * For a self-documenting alternative that names each value, use the {@link IterateOptions} builder overload
-     * {@link #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)}.</p>
-     *
-     * <p>When {@code processThreadNum > 0}, a new dedicated thread pool is created for this call and shut down before it returns;
-     * no shared executor is reused. To process an iterator on the library's shared executor (or a caller-supplied {@code Executor}),
-     * use {@link N#forEachInParallel(Iterator, Throwables.Consumer, int)} or its {@code Executor}-accepting overload instead.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * try (java.util.stream.Stream<String> lines1 = Files.lines(Paths.get("file1.txt"));
-     *         java.util.stream.Stream<String> lines2 = Files.lines(Paths.get("file2.txt"))) {
-     *     List<Iterator<String>> iterators = Arrays.asList(lines1.iterator(), lines2.iterator());
-     *     AtomicInteger lineCount = new AtomicInteger();
-     *     Iterators.forEach(iterators, 2, 4, 100,
-     *         line -> lineCount.incrementAndGet(),
-     *         () -> System.out.println("Total lines: " + lineCount.get()));
-     * }
-     * // Reads from 2 files in parallel, processes with 4 threads
-     * }</pre>
-     *
-     * @param <T> the type of elements in the original iterators.
-     * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
-     * @param iterators the original collection of iterators to be processed.
-     * @param readThreadNum the number of threads to be used for reading elements from the iterators. Use {@code 0} for single-threaded reading.
-     * @param processThreadNum the number of threads to be used for processing elements. Use {@code 0} for single-threaded (caller-thread) processing.
-     * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
-     * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
-     * @param onComplete a {@code Runnable} action to be executed after all elements in the iterators have been processed.
-     * @throws IllegalArgumentException if {@code readThreadNum}, {@code processThreadNum}, or {@code queueSize} is
-     *         negative, or if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws E2 if the {@code onComplete} action encounters an exception.
-     * @see #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)
-     * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)} instead.
-     */
-    @Deprecated
-    public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
-            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer,
-            final Throwables.Runnable<E2> onComplete) throws E, E2, IllegalArgumentException {
-        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
-        N.checkArgNotNull(onComplete, cs.onComplete);
-
-        forEach(iterators, 0, Long.MAX_VALUE, readThreadNum, processThreadNum, queueSize, elementConsumer, onComplete);
-    }
-
-    /**
-     * Performs an action for each element of the given collection of iterators, starting from a specified offset and up to a specified count.
-     * This method also supports multi-threading with a specified number of threads for reading and processing, and a queue for holding elements before processing.
-     *
-     * <p>When {@code processThreadNum > 0}, a new dedicated thread pool is created for this call and shut down before it returns;
-     * no shared executor is reused. To process an iterator on the library's shared executor (or a caller-supplied {@code Executor}),
-     * use {@link N#forEachInParallel(Iterator, Throwables.Consumer, int)} or its {@code Executor}-accepting overload instead.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<Iterator<Integer>> iterators = Arrays.asList(
-     *     IntStream.range(0, 1000).iterator(),
-     *     IntStream.range(1000, 2000).iterator()
-     * );
-     * AtomicInteger sum = new AtomicInteger();
-     * Iterators.forEach(iterators, 100, 500, 2, 4, 50, i -> sum.addAndGet(i));
-     * // Skips first 100 elements, processes next 500 with 2 read threads and 4 process threads
-     * }</pre>
-     *
-     * @param <T> the type of elements in the original iterators.
-     * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param iterators the original collection of iterators to be processed.
-     * @param offset the starting point in the iterators from where elements will be processed. Must be non-negative.
-     * @param count the maximum number of elements to be processed from the iterators. Must be non-negative.
-     * @param readThreadNum the number of threads to be used for reading elements from the iterators. Use {@code 0} for single-threaded reading.
-     * @param processThreadNum the number of threads to be used for processing elements. Use {@code 0} for single-threaded (caller-thread) processing.
-     * @param queueSize the size of the queue for holding elements before processing. Use {@code 0} for a default calculated size.
-     * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
-     * @throws IllegalArgumentException if {@code offset}, {@code count}, {@code readThreadNum},
-     *         {@code processThreadNum}, or {@code queueSize} is negative, or if {@code elementConsumer} is
-     *         {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
-     * @see #forEach(Collection, IterateOptions, Throwables.Consumer)
-     * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer)} instead.
-     */
-    @Deprecated
-    public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
-            final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer)
-            throws E, IllegalArgumentException {
-        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
-
-        forEach(iterators, offset, count, readThreadNum, processThreadNum, queueSize, elementConsumer, Fn.emptyAction());
-    }
-
-    /**
-     * Performs an action for each element of the given collection of iterators, starting from a specified offset and up to a specified count.
-     * This method also supports multi-threading with a specified number of threads for reading and processing, and a queue size for holding the processing records.
-     *
-     * <p>When {@code processThreadNum > 0}, a new dedicated thread pool is created for this call and shut down before it returns;
-     * no shared executor is reused. To process an iterator on the library's shared executor (or a caller-supplied {@code Executor}),
-     * use {@link N#forEachInParallel(Iterator, Throwables.Consumer, int)} or its {@code Executor}-accepting overload instead.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * List<Iterator<Integer>> iterators = Arrays.asList(
-     *     Arrays.asList(1, 2).iterator(),
-     *     Arrays.asList(3, 4).iterator()
-     * );
-     *
-     * // Parallel processing with 2 read threads and 4 process threads
-     * Iterators.forEach(iterators, 0, Long.MAX_VALUE, 2, 4, 100,
-     *     item -> process(item),
-     *     () -> System.out.println("Done")
-     * );
-     * }</pre>
-     *
-     * @param <T> the type of elements in the original iterators.
-     * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
-     * @param iterators the original collection of iterators to be processed.
-     * @param offset the starting point in the iterators from where processing should begin. Must be non-negative.
-     * @param count the maximum number of elements to process. Must be non-negative.
-     * @param readThreadNum the number of threads to be used for reading from the iterators. Use {@code 0} for single-threaded reading.
-     * @param processThreadNum the number of threads to be used for processing elements. Use {@code 0} for single-threaded (caller-thread) processing.
-     * @param queueSize the size of the queue to hold elements between reading and processing. Use {@code 0} for a default calculated size.
-     * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterators.
-     * @param onComplete a {@code Runnable} action to be performed once all elements have been processed.
-     * @throws IllegalArgumentException if {@code offset}, {@code count}, {@code readThreadNum},
-     *         {@code processThreadNum}, or {@code queueSize} is negative, or if any of {@code elementConsumer},
-     *         {@code onComplete} is {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws E2 if the {@code onComplete} action encounters an exception.
-     * @throws Error if the {@code elementConsumer} throws an error.
-     * @see #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)
-     * @deprecated Use {@link #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)} instead.
-     */
-    @Deprecated
-    public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
-            final long count, final int readThreadNum, final int processThreadNum, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer,
-            final Throwables.Runnable<E2> onComplete) throws IllegalArgumentException, E, E2 {
-        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
-        N.checkArgument(readThreadNum >= 0 && processThreadNum >= 0 && queueSize >= 0,
-                "'readThreadNum'=%s, 'processThreadNum'=%s and 'queueSize'=%s cannot be negative", readThreadNum, processThreadNum, queueSize);
-        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
-        N.checkArgNotNull(onComplete, cs.onComplete);
-
-        if (N.isEmpty(iterators)) {
-            // onComplete is documented to run after all elements have been processed - vacuously
-            // true here; a collection of empty iterators runs it too, so the empty collection must.
-            onComplete.run();
-
-            return;
-        }
-
-        final long startTime = System.currentTimeMillis();
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Start processing: sizeOfIterators={}, offset={}, count={}, readThreadNum={}, processThreadNum={}, queueSize={}", iterators.size(),
-                    offset, count, readThreadNum, processThreadNum, queueSize);
-        }
-
-        final int readThreadNumToUse = readThreadNum == 0 ? 1 : readThreadNum;
-        try (final Stream<T> stream = ((readThreadNum > 0 || queueSize > 0)
-                ? Stream.parallelConcatIterators(iterators, readThreadNumToUse, (queueSize == 0 ? calculateBufferedSize(readThreadNumToUse) : queueSize))
-                : Stream.concatIterators(iterators))) {
-
-            final Iterator<? extends T> iteratorII = stream.skip(offset).limit(count).iterator();
-
-            if (processThreadNum == 0) {
-                while (iteratorII.hasNext()) {
-                    elementConsumer.accept(iteratorII.next());
-                }
-
-                onComplete.run();
-            } else {
-                final CountDownLatch countDownLatch = new CountDownLatch(processThreadNum);
-                final ExecutorService executorService = Executors.newFixedThreadPool(processThreadNum);
-                final Holder<Throwable> errorHolder = new Holder<>();
-
-                try {
-                    for (int i = 0; i < processThreadNum; i++) {
-                        executorService.execute(() -> {
-                            T element = null;
-                            try {
-                                while (errorHolder.value() == null) {
-                                    synchronized (iteratorII) {
-                                        if (errorHolder.value() != null) {
-                                            break;
-                                        }
-
-                                        if (iteratorII.hasNext()) {
-                                            element = iteratorII.next();
-                                        } else {
-                                            break;
-                                        }
-                                    }
-
-                                    elementConsumer.accept(element);
-                                }
-                            } catch (final Throwable e) {
-                                synchronized (errorHolder) {
-                                    if (errorHolder.value() == null) {
-                                        errorHolder.setValue(e);
-                                    } else if (errorHolder.value() != e) {
-                                        // A consumer is allowed to throw a cached exception instance.
-                                        // Throwable rejects suppressing an exception onto itself.
-                                        errorHolder.value().addSuppressed(e);
-                                    }
-                                }
-                            } finally {
-                                countDownLatch.countDown();
-                            }
-                        });
-                    }
-
-                    try {
-                        countDownLatch.await();
-                    } catch (final InterruptedException e) {
-                        // Publish cancellation before interrupting the workers. This stops workers
-                        // that finish (or ignore) their current consumer invocation from taking
-                        // another element, while shutdownNow wakes interruptible consumers.
-                        synchronized (errorHolder) {
-                            final Throwable priorFailure = errorHolder.value();
-                            errorHolder.setValue(e);
-
-                            if (priorFailure != null && priorFailure != e) {
-                                e.addSuppressed(priorFailure);
-                            }
-                        }
-
-                        executorService.shutdownNow();
-                        throw ExceptionUtil.toRuntimeException(e, true);
-                    }
-
-                    if (errorHolder.value() == null && onComplete != null) {
-                        //noinspection CatchMayIgnoreException
-                        try {
-                            onComplete.run();
-                        } catch (final Exception e) {
-                            errorHolder.setValue(e);
-                        }
-                    }
-
-                    if (errorHolder.value() != null) {
-                        throw ExceptionUtil.toRuntimeException(errorHolder.value(), true, true);
-                    }
-                } finally {
-                    executorService.shutdown();
-                }
-            }
-        } finally {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Finished processing. Elapsed time: {} ms", System.currentTimeMillis() - startTime);
-            }
-        }
+        doForEach(iterators, offset, count, 0, 0, 0, elementConsumer, onComplete);
     }
 
     /**
@@ -5180,17 +5569,37 @@ public final class Iterators {
      *
      * <p>Each iterator is consumed by this terminal operation. The combined iterator stream is first sliced by
      * {@code offset} and {@code count}, then each selected element is passed
-     * to {@code elementConsumer}. A {@code null} or empty {@code iterators} collection has no elements to process.</p>
+     * to {@code elementConsumer}. A {@code null} or empty {@code iterators} collection has no elements to process,
+     * and a {@code null} element inside {@code iterators} is skipped, whatever {@code readThreads} is set to.</p>
      *
-     * <p>This is the readable alternative to the positional numeric overloads (for example
-     * {@link #forEach(Collection, long, long, int, int, int, Throwables.Consumer)}): each tuning knob is named on the
-     * {@code options} object rather than identified by its position among a run of {@code long}/{@code int} arguments.</p>
+     * <p>This is also the only way to configure {@code readThreads}/{@code processThreads}/{@code queueSize}: the
+     * positional overloads cover slicing alone ({@link #forEach(Collection, long, long, Throwables.Consumer)}), so each
+     * tuning knob is named on the {@code options} object rather than identified by its position in a run of numbers.</p>
      *
      * <p>When {@code readThreads > 0}, iterator reading may happen concurrently. When {@code processThreads > 0},
      * this method creates a new dedicated thread pool for this call and shuts it down before returning.
      * Element processing may then happen concurrently and the order of {@code elementConsumer} calls is not guaranteed.
      * To process a single iterator on the library's shared executor (or a caller-supplied {@code Executor}), use
      * {@link N#forEachInParallel(Iterator, Throwables.Consumer, int)} or its {@code Executor}-accepting overload instead.</p>
+     *
+     * <p><b>{@code offset}/{@code count} are not a stable selection once {@code readThreads > 0}.</b> They count
+     * elements in the order the readers happen to deliver them, so with more than one iterator being read
+     * concurrently a given offset selects a different subset from run to run - the count is honoured, the
+     * <i>identity</i> of the selected elements is not. Slice with {@code readThreads == 0} whenever which
+     * elements are selected matters.</p>
+     *
+     * <p><b>Exception propagation is the same in both processing modes.</b> A checked exception from
+     * {@code elementConsumer} propagates as {@code E}, a {@code RuntimeException} is rethrown as-is and an
+     * {@code Error} as {@code Error} - whether the consumer ran on the calling thread
+     * ({@code processThreads == 0}) or on a worker ({@code processThreads > 0}). Changing {@code processThreads}
+     * is a tuning decision and therefore never changes which {@code catch} clause matches. When more than one
+     * worker fails, the first failure is thrown and the rest are attached to it with
+     * {@link Throwable#addSuppressed(Throwable)}.</p>
+     *
+     * <p>The one exception to that symmetry is <i>cancellation</i>: if the calling thread is interrupted while it
+     * waits for the workers, this method publishes the cancellation, interrupts them, waits up to one second for
+     * them to stop and then throws the {@link InterruptedException} wrapped in a {@code RuntimeException}. The
+     * wait is bounded so that a consumer which ignores interruption cannot pin the caller indefinitely.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5211,14 +5620,15 @@ public final class Iterators {
      * @param options the slicing, reading and processing configuration; {@code null} is treated as the default
      *        {@link IterateOptions} (no slicing, caller-thread reading and processing).
      * @param elementConsumer the action to perform for each selected element.
-     * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative,
-     *         or if {@code elementConsumer} is {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
+     * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}. Negative settings are rejected
+     *         earlier, by {@code IterateOptions.builder()...build()}.
+     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
+     * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @see IterateOptions
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final IterateOptions options,
-            final Throwables.Consumer<? super T, E> elementConsumer) throws E, IllegalArgumentException {
+            final Throwables.Consumer<? super T, E> elementConsumer) throws IllegalArgumentException, E, UncheckedInterruptedException {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEach(iterators, options, elementConsumer, Fn.emptyAction());
@@ -5232,20 +5642,40 @@ public final class Iterators {
      * <p>Each iterator is consumed by this terminal operation. The combined iterator stream is first sliced by
      * {@code offset} and {@code count}, then each selected element is passed
      * to {@code elementConsumer}. A {@code null} or empty {@code iterators} collection has no elements to process,
-     * but {@code onComplete} is still invoked.</p>
+     * but {@code onComplete} is still invoked. A {@code null} element inside {@code iterators} is skipped, whatever
+     * {@code readThreads} is set to.</p>
      *
      * <p>{@code onComplete} is invoked at most once, after all selected elements have been processed successfully.
      * If {@code elementConsumer} throws, {@code onComplete} is not invoked.</p>
      *
-     * <p>This is the readable alternative to the positional numeric overloads (for example
-     * {@link #forEach(Collection, long, long, int, int, int, Throwables.Consumer, Throwables.Runnable)}): each tuning knob is named on the
-     * {@code options} object rather than identified by its position among a run of {@code long}/{@code int} arguments.</p>
+     * <p>This is also the only way to configure {@code readThreads}/{@code processThreads}/{@code queueSize}: the
+     * positional overloads cover slicing alone ({@link #forEach(Collection, long, long, Throwables.Consumer, Throwables.Runnable)}),
+     * so each tuning knob is named on the {@code options} object rather than identified by its position in a run of numbers.</p>
      *
      * <p>When {@code readThreads > 0}, iterator reading may happen concurrently. When {@code processThreads > 0},
      * this method creates a new dedicated thread pool for this call and shuts it down before returning.
      * Element processing may then happen concurrently and the order of {@code elementConsumer} calls is not guaranteed.
      * To process a single iterator on the library's shared executor (or a caller-supplied {@code Executor}), use
      * {@link N#forEachInParallel(Iterator, Throwables.Consumer, int)} or its {@code Executor}-accepting overload instead.</p>
+     *
+     * <p><b>{@code offset}/{@code count} are not a stable selection once {@code readThreads > 0}.</b> They count
+     * elements in the order the readers happen to deliver them, so with more than one iterator being read
+     * concurrently a given offset selects a different subset from run to run - the count is honoured, the
+     * <i>identity</i> of the selected elements is not. Slice with {@code readThreads == 0} whenever which
+     * elements are selected matters.</p>
+     *
+     * <p><b>Exception propagation is the same in both processing modes.</b> Checked exceptions from
+     * {@code elementConsumer} and {@code onComplete} propagate as {@code E} and {@code E2}, a
+     * {@code RuntimeException} is rethrown as-is and an {@code Error} as {@code Error} - whether the consumer ran
+     * on the calling thread ({@code processThreads == 0}) or on a worker ({@code processThreads > 0}). Changing
+     * {@code processThreads} is a tuning decision and therefore never changes which {@code catch} clause matches.
+     * When more than one worker fails, the first failure is thrown and the rest are attached to it with
+     * {@link Throwable#addSuppressed(Throwable)}. {@code onComplete} always runs on the calling thread.</p>
+     *
+     * <p>The one exception to that symmetry is <i>cancellation</i>: if the calling thread is interrupted while it
+     * waits for the workers, this method publishes the cancellation, interrupts them, waits up to one second for
+     * them to stop and then throws the {@link InterruptedException} wrapped in a {@code RuntimeException}. The
+     * wait is bounded so that a consumer which ignores interruption cannot pin the caller indefinitely.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5268,22 +5698,23 @@ public final class Iterators {
      *        {@link IterateOptions} (no slicing, caller-thread reading and processing).
      * @param elementConsumer the action to perform for each selected element.
      * @param onComplete the action invoked after all selected elements have been processed; must not be {@code null}.
-     * @throws IllegalArgumentException if the {@code offset} or {@code count} carried by {@code options} is negative,
-     *         or if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
-     * @throws E if the {@code elementConsumer} encounters an exception.
-     * @throws E2 if the {@code onComplete} action encounters an exception.
+     * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
+     *         Negative settings are rejected earlier, by {@code IterateOptions.builder()...build()}.
+     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
+     * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
+     * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer)
      * @see IterateOptions
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
             final IterateOptions options, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
-            throws E, E2, IllegalArgumentException {
+            throws IllegalArgumentException, E, UncheckedInterruptedException, E2 {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
         N.checkArgNotNull(onComplete, cs.onComplete);
 
-        final IterateOptions opts = options == null ? IterateOptions.builder().build() : options;
+        final IterateOptions opts = options == null ? IterateOptions.DEFAULT : options;
 
-        forEach(iterators, opts.offset(), opts.count(), opts.readThreads(), opts.processThreads(), opts.queueSize(), elementConsumer, onComplete);
+        doForEach(iterators, opts.offset(), opts.count(), opts.readThreads(), opts.processThreads(), opts.queueSize(), elementConsumer, onComplete);
     }
 
     /**
@@ -5295,45 +5726,407 @@ public final class Iterators {
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      */
     static void checkOffsetCount(final long offset, final long count) throws IllegalArgumentException {
-        if (offset < 0 || count < 0) {
-            throw new IllegalArgumentException("offset: " + offset + " and count: " + count + " cannot be negative");
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
+    }
+
+    /**
+     * Returns {@code iterators} with every {@code null} element removed, or {@code iterators} itself when it has
+     * none (the common case, which then costs one scan and no allocation).
+     *
+     * @param <T> the element type.
+     * @param iterators the iterators to normalize; must not be {@code null}.
+     * @return a collection with no {@code null} elements.
+     */
+    private static <T> Collection<? extends Iterator<? extends T>> withoutNulls(final Collection<? extends Iterator<? extends T>> iterators) {
+        boolean hasNull = false;
+
+        for (final Iterator<? extends T> e : iterators) {
+            if (e == null) {
+                hasNull = true;
+                break;
+            }
+        }
+
+        if (!hasNull) {
+            return iterators;
+        }
+
+        final List<Iterator<? extends T>> result = new ArrayList<>(iterators.size());
+
+        for (final Iterator<? extends T> e : iterators) {
+            if (e != null) {
+                result.add(e);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Records {@code e} as the failure of a parallel {@code forEach}, keeping the first failure as the primary one
+     * and attaching every later failure to it with {@link Throwable#addSuppressed(Throwable)}.
+     *
+     * @param errorHolder where the primary failure is published; also the monitor that serialises the update.
+     * @param e the failure to record.
+     */
+    private static void recordFailure(final AtomicReference<Throwable> errorHolder, final Throwable e) {
+        synchronized (errorHolder) {
+            final Throwable primary = errorHolder.get();
+
+            if (primary == null) {
+                errorHolder.set(e);
+            } else if (primary != e) {
+                // A consumer is allowed to throw a cached exception instance, and Throwable rejects
+                // suppressing an exception onto itself.
+                primary.addSuppressed(e);
+            }
         }
     }
 
     /**
-     * Calculates an appropriate buffer size based on the number of read threads.
-     * This is a package-private utility method used internally to optimize buffer allocation.
-     * The buffer size is calculated as the minimum of 1024 and (readThreadNum * 64).
+     * Returns the thread factory for a parallel {@code forEach} worker pool.
      *
-     * @param readThreadNum the number of threads that will be reading.
-     * @return the calculated buffer size, capped at 1024.
+     * <p>The threads are <b>daemon</b> threads: the caller may abandon them after
+     * {@link #CANCELLATION_TIMEOUT_IN_MILLIS} when it is interrupted and a consumer ignores interruption, and
+     * non-daemon threads would then keep the JVM alive indefinitely. They are also named, because the default
+     * {@code Executors} names ({@code pool-7-thread-2}) cannot be attributed to a caller in a thread dump.</p>
+     *
+     * @param callId a discriminator that distinguishes concurrent {@code forEach} calls in a thread dump. Derived
+     *        from an object created for the call rather than from a counter, so that this class keeps its
+     *        documented "no mutable static fields" property.
+     * @return a thread factory producing named daemon threads.
      */
-    static int calculateBufferedSize(final int readThreadNum) {
-        return (int) N.min(1024L, (long) readThreadNum * 64);
+    private static ThreadFactory newForEachThreadFactory(final int callId) {
+        final String namePrefix = "Iterators-forEach-" + Integer.toHexString(callId) + "-";
+        final AtomicInteger threadCount = new AtomicInteger();
+
+        return r -> {
+            final Thread t = new Thread(r, namePrefix + threadCount.incrementAndGet());
+            t.setDaemon(true);
+            return t;
+        };
+    }
+
+    /**
+     * Throws {@code t} exactly as it is, while telling the compiler it is an {@code X}.
+     *
+     * <p>Used to carry a worker thread's failure back out of the parallel {@code forEach} under the {@code throws E}
+     * / {@code throws E2} the public methods already declare. The alternative - wrapping the checked exception in a
+     * {@code RuntimeException} - makes the declared exception type a lie on the parallel path, so a
+     * {@code catch (SomeCheckedException e)} that the compiler still requires stops matching.</p>
+     *
+     * <p>The declared {@code RuntimeException} return exists only so that call sites can write
+     * {@code throw sneakyThrow(t);} and have the compiler see the statement as terminating; this method never
+     * returns normally.</p>
+     *
+     * @param <X> the type the caller pretends {@code t} has; erased, so nothing is checked at run time.
+     * @param t the throwable to rethrow; must not be {@code null}.
+     * @return never returns.
+     * @throws X always - {@code t} itself.
+     */
+    @SuppressWarnings("unchecked")
+    private static <X extends Throwable> RuntimeException sneakyThrow(final Throwable t) throws X {
+        throw (X) t;
+    }
+
+    /**
+     * Shared implementation for the single-iterator {@code forEach} overloads. Kept private so that the public
+     * entry points do not have to route through one another.
+     *
+     * @param <T> the element type.
+     * @param <E> the exception type the element consumer may throw.
+     * @param <E2> the exception type the completion action may throw.
+     * @param iter the iterator to read from; {@code null} is treated as empty.
+     * @param offset the number of elements to skip.
+     * @param count the maximum number of elements to process after the offset.
+     * @param processThreads the number of worker threads; 0 processes on the calling thread.
+     * @param queueSize the size of the buffer between reading and processing; unused here, because a single
+     *        iterator is read directly by the calling thread or by serialized processing workers.
+     * @param elementConsumer the action to run for each selected element.
+     * @param onComplete the action to run once every element has been processed.
+     * @throws IllegalArgumentException if any numeric argument is negative, or either action is {@code null}.
+     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
+     * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
+     * @throws E2 if {@code onComplete} throws after iteration completes successfully.
+     */
+    private static <T, E extends Exception, E2 extends Exception> void doForEach(final Iterator<? extends T> iter, final long offset, final long count,
+            final int processThreads, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
+            throws IllegalArgumentException, E, UncheckedInterruptedException, E2 {
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
+        N.checkArgument(processThreads >= 0 && queueSize >= 0, "'processThreads'=%s and 'queueSize'=%s cannot be negative", processThreads, queueSize);
+
+        if (iter == null) {
+            onComplete.run();
+            return;
+        }
+
+        if (processThreads == 0) {
+            // Fast path for "walk this iterator on this thread", which is what every overload without
+            // IterateOptions asks for. Delegating to doForEach(Collection, ..) would wrap the source in a
+            // concat() view and a skipAndLimit() view - two extra virtual calls plus a few allocations per
+            // call - to drive machinery that a single-threaded walk never uses.
+            long idx = 0;
+
+            while (idx++ < offset && iter.hasNext()) {
+                iter.next();
+            }
+
+            long remaining = count;
+
+            while (remaining-- > 0 && iter.hasNext()) {
+                elementConsumer.accept(iter.next());
+            }
+
+            onComplete.run();
+
+            return;
+        }
+
+        doForEach(Array.asList(iter), offset, count, 0, processThreads, queueSize, elementConsumer, onComplete);
+    }
+
+    /**
+     * Shared implementation for the collection-of-iterators {@code forEach} overloads. Kept private so that the
+     * public entry points do not have to route through one another.
+     *
+     * @param <T> the element type.
+     * @param <E> the exception type the element consumer may throw.
+     * @param <E2> the exception type the completion action may throw.
+     * @param iterators the iterators to read from; {@code null} or empty processes nothing. {@code null} elements
+     *        are skipped.
+     * @param offset the number of elements to skip across the combined sequence.
+     * @param count the maximum number of elements to process after the offset.
+     * @param readThreads the number of reader threads; 0 reads directly on the calling thread or processing workers.
+     * @param processThreads the number of worker threads; 0 processes on the calling thread.
+     * @param queueSize the size of the buffer between reading and processing; only consulted when
+     *        {@code readThreads > 0}, and 0 lets the implementation pick a size.
+     * @param elementConsumer the action to run for each selected element.
+     * @param onComplete the action to run once every element has been processed.
+     * @throws IllegalArgumentException if any numeric argument is negative, or either action is {@code null}.
+     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
+     * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
+     * @throws E2 if {@code onComplete} throws after iteration completes successfully.
+     */
+    private static <T, E extends Exception, E2 extends Exception> void doForEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
+            final long count, final int readThreads, final int processThreads, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer,
+            final Throwables.Runnable<E2> onComplete) throws IllegalArgumentException, E, UncheckedInterruptedException, E2 {
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
+        N.checkArgument(readThreads >= 0 && processThreads >= 0 && queueSize >= 0,
+                "'readThreads'=%s, 'processThreads'=%s and 'queueSize'=%s cannot be negative", readThreads, processThreads, queueSize);
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgNotNull(onComplete, cs.onComplete);
+
+        // Stream.parallelConcatIterators dereferences every element and so throws NPE on a null one, while
+        // concat(Collection) skips it. Normalise up front so that the reading mode - a pure tuning choice -
+        // cannot decide whether a null iterator is an error or a no-op.
+        final Collection<? extends Iterator<? extends T>> iters = iterators == null ? null : withoutNulls(iterators);
+
+        // Emptiness is decided by the iterator, not by Collection.isEmpty() - see concat(Collection). Only
+        // iters.size() below is still a size() read, and it feeds a debug log line.
+        if (iters == null || !iters.iterator().hasNext()) {
+            // onComplete is documented to run after all elements have been processed - vacuously
+            // true here; a collection of empty iterators runs it too, so the empty collection must.
+            onComplete.run();
+
+            return;
+        }
+
+        final long startTime = System.currentTimeMillis();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Start processing: sizeOfIterators={}, offset={}, count={}, readThreads={}, processThreads={}, queueSize={}", iters.size(), offset,
+                    count, readThreads, processThreads, queueSize);
+        }
+
+        // Only concurrent reading needs a Stream; it owns the reader threads and is closed in the finally
+        // below. Sequential reading is a plain concatenate-then-slice, and doing it on the iterators directly
+        // avoids building a Stream pipeline whose derived stages each carry a parent-link close handler -
+        // which made Stream.iterator() log "Remember to close .. because it has close handlers" on every
+        // call, even though this method closes everything it opens.
+        @SuppressWarnings("resource")
+        Stream<T> stream = null;
+
+        try {
+            final Iterator<? extends T> iteratorII;
+
+            // Only readThreads starts dedicated readers. queueSize sizes the hand-off buffer between the
+            // readers and the consumer, so on its own it has nothing to buffer: honouring it here used to
+            // start a reader thread behind the caller's back, which breaks sources bound to the calling thread.
+            if (readThreads > 0) {
+                stream = queueSize == 0 ? Stream.parallelConcatIterators(iters, readThreads) : Stream.parallelConcatIterators(iters, readThreads, queueSize);
+
+                // Not stream.iterator(): that logs "Remember to close .. because it has close handlers" on every
+                // call, telling the caller to close a Stream they never see and which the finally below always
+                // closes. iteratorWithoutCloseWarning is the same iterator without the warning.
+                iteratorII = Stream.iteratorWithoutCloseWarning(stream.skip(offset).limit(count));
+            } else {
+                iteratorII = skipAndLimit(concat(iters), offset, count);
+            }
+
+            if (processThreads == 0) {
+                while (iteratorII.hasNext()) {
+                    elementConsumer.accept(iteratorII.next());
+                }
+
+                onComplete.run();
+            } else {
+                final CountDownLatch countDownLatch = new CountDownLatch(processThreads);
+                // AtomicReference, not Holder: every worker polls this on each iteration without
+                // synchronizing, and Holder's field is not volatile - so a worker could miss a sibling's
+                // failure entirely and keep consuming elements. recordFailure below still
+                // serializes "first failure wins, the rest are suppressed onto it".
+                final AtomicReference<Throwable> errorHolder = new AtomicReference<>();
+                final ExecutorService executorService = Executors.newFixedThreadPool(processThreads,
+                        newForEachThreadFactory(System.identityHashCode(errorHolder)));
+
+                try {
+                    // If execute() fails part-way - a rejected task, or OutOfMemoryError while creating a native
+                    // thread for a very large processThreads - the latch was sized for processThreads and can
+                    // never reach zero, so countDownLatch.await() below would block forever. Join on the pool
+                    // instead: publishing the failure first makes any worker that did start stop at its next
+                    // element, and waiting for them before unwinding keeps the finally block from closing the
+                    // stream while a worker is still reading it.
+                    try {
+                        for (int i = 0; i < processThreads; i++) {
+                            executorService.execute(() -> {
+                                T element = null;
+                                try {
+                                    while (errorHolder.get() == null) {
+                                        synchronized (iteratorII) {
+                                            if (errorHolder.get() != null) {
+                                                break;
+                                            }
+
+                                            if (iteratorII.hasNext()) {
+                                                element = iteratorII.next();
+                                            } else {
+                                                break;
+                                            }
+                                        }
+
+                                        elementConsumer.accept(element);
+                                    }
+                                } catch (final Throwable e) {
+                                    recordFailure(errorHolder, e);
+                                } finally {
+                                    countDownLatch.countDown();
+                                }
+                            });
+                        }
+                    } catch (final Throwable e) {
+                        recordFailure(errorHolder, e);
+
+                        executorService.shutdown();
+
+                        try {
+                            executorService.awaitTermination(CANCELLATION_TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS);
+                        } catch (final InterruptedException e2) {
+                            Thread.currentThread().interrupt();
+                        }
+
+                        throw sneakyThrow(errorHolder.get());
+                    }
+
+                    try {
+                        countDownLatch.await();
+                    } catch (final InterruptedException e) {
+                        // Publish cancellation before interrupting the workers. This stops workers
+                        // that finish (or ignore) their current consumer invocation from taking
+                        // another element, while shutdownNow wakes interruptible consumers.
+                        synchronized (errorHolder) {
+                            final Throwable priorFailure = errorHolder.get();
+                            errorHolder.set(e);
+
+                            if (priorFailure != null && priorFailure != e) {
+                                e.addSuppressed(priorFailure);
+                            }
+                        }
+
+                        executorService.shutdownNow();
+
+                        try {
+                            // Give the workers a bounded moment to notice the cancellation: the finally block
+                            // below closes the stream they read from, and a worker still inside
+                            // iteratorII.next() would then be reading a closed source. Bounded, because a
+                            // consumer that ignores interruption must not be able to pin the caller here.
+                            executorService.awaitTermination(CANCELLATION_TIMEOUT_IN_MILLIS, TimeUnit.MILLISECONDS);
+                        } catch (final InterruptedException e2) { // NOSONAR - re-asserted below by toRuntimeException(e, true)
+                            Thread.currentThread().interrupt();
+                        }
+
+                        throw ExceptionUtil.toRuntimeException(e, true);
+                    }
+
+                    final Throwable failure = errorHolder.get();
+
+                    if (failure != null) {
+                        // Rethrow the worker's exception unchanged, so that the declared `throws E` holds on this
+                        // path exactly as it does on the caller-thread path above. Wrapping it in a
+                        // RuntimeException used to make `catch (SomeCheckedException e)` - which the compiler
+                        // still demands, because E is inferred from the consumer - silently stop matching as soon
+                        // as a caller set processThreads > 0. Errors and RuntimeExceptions pass through unchanged
+                        // either way.
+                        throw sneakyThrow(failure);
+                    }
+
+                    // Runs on the calling thread, so it can simply throw E2 - no capture-and-wrap needed.
+                    onComplete.run();
+                } finally {
+                    executorService.shutdown();
+                }
+            }
+        } finally {
+            if (stream != null) {
+                stream.close();
+            }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Finished processing. Elapsed time: {} ms", System.currentTimeMillis() - startTime);
+            }
+        }
     }
 
     /**
      * Immutable options for the {@link Iterators#forEach(Iterator, IterateOptions, Throwables.Consumer)}
      * and {@link Iterators#forEach(Collection, IterateOptions, Throwables.Consumer)} overloads.
      *
-     * <p>This is the recommended way to configure sliced or multi-threaded {@code forEach} calls. The older
-     * positional overloads such as {@link Iterators#forEach(Collection, long, long, Throwables.Consumer)}
-     * and {@link Iterators#forEach(Collection, int, int, int, Throwables.Consumer)} take leading numbers whose
-     * meaning depends on their count and primitive width; the builder names each knob explicitly.</p>
+     * <p>This is the required way to configure multi-threaded {@code forEach} calls, and the recommended way to
+     * configure sliced ones. The positional overloads such as
+     * {@link Iterators#forEach(Collection, long, long, Throwables.Consumer)} cover {@code offset}/{@code count} only;
+     * the thread and queue settings live here, named rather than identified by position.</p>
      *
-     * <p>{@code offset} and {@code count} slice the combined element stream before processing. {@code readThreads}
-     * controls concurrent reading only for the collection-of-iterators overloads and is ignored by the single-iterator
-     * overloads. {@code processThreads} controls concurrent calls to the element consumer. {@code queueSize} controls
-     * the buffer between reading and processing; {@code 0} asks the implementation to choose a default size.</p>
+     * <p>{@code offset} and {@code count} slice the combined element stream before processing.
+     * {@code readThreads} reads the supplied iterators concurrently; it applies only to the
+     * collection-of-iterators overloads and is ignored by the single-iterator overloads.
+     * {@code processThreads} controls concurrent calls to the element consumer. With no dedicated readers,
+     * processing workers also serialize source reads; both thread counts must be zero to keep reads on the calling thread.
+     * {@code queueSize} sizes the hand-off buffer between the reader threads and the consumer, so it has no
+     * effect unless {@code readThreads > 0}; {@code 0} asks the implementation to choose a size.</p>
+     *
+     * <p><b>Thread budget:</b> {@code processThreads} maps one-to-one onto platform threads created for the call
+     * (daemon threads, named {@code Iterators-forEach-*}) and shut down before it returns, so keep it in the order
+     * of the available cores rather than the number of elements. {@code readThreads} is handed to
+     * {@link com.landawn.abacus.util.stream.Stream#parallelConcatIterators(Collection, int)}, which reads on the
+     * library's shared pool. Those pool threads are daemon threads, so they never hold the JVM open; they do stay
+     * alive for their keep-alive time (180 s) after the call, ready for the next caller. If the shared pool is
+     * saturated the read runs on a private pool instead, which this call shuts down before it returns.</p>
      *
      * <p>All values default to "no slicing, caller-thread reading and processing": {@code offset = 0},
-     * {@code count = Long.MAX_VALUE}, {@code readThreads = 0}, {@code processThreads = 0} and {@code queueSize = 0}.</p>
+     * {@code count = Long.MAX_VALUE}, {@code readThreads = 0}, {@code processThreads = 0} and {@code queueSize = 0}.
+     * None of them may be negative - {@code IterateOptions.builder()...build()} rejects a negative value rather than
+     * deferring the failure to the {@code forEach} call.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * List<String> first = Arrays.asList("a", "b", "c");
+     * List<String> second = Arrays.asList("d", "e", "f");
+     * List<Iterator<String>> iterators = Arrays.asList(first.iterator(), second.iterator());
+     *
      * Iterators.forEach(iterators,
-     *     IterateOptions.builder().offset(100).count(500).readThreads(2).processThreads(4).queueSize(50).build(),
-     *     item -> process(item));
+     *     Iterators.IterateOptions.builder().offset(1).count(4).readThreads(2).processThreads(4).queueSize(50).build(),
+     *     item -> System.out.println(item));
      * }</pre>
      *
      * @see Iterators#forEach(Iterator, IterateOptions, Throwables.Consumer)
@@ -5345,6 +6138,16 @@ public final class Iterators {
     @Value
     @Accessors(fluent = true)
     public static final class IterateOptions {
+
+        /**
+         * The default configuration: no slicing, caller-thread reading and processing - that is,
+         * {@code offset = 0}, {@code count = Long.MAX_VALUE} and {@code readThreads = processThreads = queueSize = 0}.
+         *
+         * <p>This is the instance a {@code forEach} overload uses when it is passed a {@code null} {@code options},
+         * and it is equal to {@code IterateOptions.builder().build()}. Being immutable, it is safe to share.</p>
+         */
+        public static final IterateOptions DEFAULT = IterateOptions.builder().build();
+
         @Builder.Default
         private long offset = 0;
 
@@ -5359,5 +6162,32 @@ public final class Iterators {
 
         @Builder.Default
         private int queueSize = 0;
+
+        /**
+         * Creates a validated instance. Declared explicitly so that {@code IterateOptions.builder()...build()}, which
+         * Lombok routes through this constructor, rejects a negative setting at the point where it was supplied
+         * instead of at the eventual {@code forEach} call.
+         *
+         * @param offset the number of elements to skip; must not be negative.
+         * @param count the maximum number of elements to process after the offset; must not be negative.
+         * @param readThreads the number of reader threads; must not be negative.
+         * @param processThreads the number of element-consumer threads; must not be negative.
+         * @param queueSize the size of the reader/consumer hand-off buffer; must not be negative.
+         * @throws IllegalArgumentException if any argument is negative.
+         */
+        IterateOptions(final long offset, final long count, final int readThreads, final int processThreads, final int queueSize)
+                throws IllegalArgumentException {
+            N.checkArgNotNegative(offset, cs.offset);
+            N.checkArgNotNegative(count, cs.count);
+            N.checkArgNotNegative(readThreads, cs.readThreads);
+            N.checkArgNotNegative(processThreads, cs.processThreads);
+            N.checkArgNotNegative(queueSize, cs.queueSize);
+
+            this.offset = offset;
+            this.count = count;
+            this.readThreads = readThreads;
+            this.processThreads = processThreads;
+            this.queueSize = queueSize;
+        }
     }
 }

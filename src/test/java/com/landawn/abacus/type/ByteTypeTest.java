@@ -227,9 +227,7 @@ public class ByteTypeTest extends TestBase {
         ResultSet rs = mock(ResultSet.class);
         when(rs.getObject("overflowCol")).thenReturn(256);
 
-        Byte result = type.get(rs, "overflowCol");
-
-        assertEquals(Byte.valueOf((byte) 0), result);
+        Assertions.assertThrows(ArithmeticException.class, () -> type.get(rs, "overflowCol"));
         verify(rs).getObject("overflowCol");
     }
 
@@ -328,6 +326,37 @@ public class ByteTypeTest extends TestBase {
         sw = new StringWriter();
         type.appendTo(sw, null);
         assertEquals("null", sw.toString());
+    }
+
+    // T4-06 (documented contract, not changed): empty string column -> 0 via Numbers.toByte(String); blank -> NFE
+    @Test
+    public void reviewFixes20260906_get_emptyStringColumnReadsAsZero() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getObject(1)).thenReturn("");
+        when(rs.getObject(2)).thenReturn(" ");
+        when(rs.getObject(3)).thenReturn("42");
+        when(rs.getObject("e")).thenReturn("");
+        when(rs.getObject("b")).thenReturn(" ");
+        when(rs.getObject("v")).thenReturn("42");
+
+        assertEquals(Byte.valueOf((byte) 0), type.get(rs, 1));
+        Assertions.assertThrows(NumberFormatException.class, () -> type.get(rs, 2));
+        assertEquals(Byte.valueOf((byte) 42), type.get(rs, 3));
+        assertEquals(Byte.valueOf((byte) 0), type.get(rs, "e"));
+        Assertions.assertThrows(NumberFormatException.class, () -> type.get(rs, "b"));
+        assertEquals(Byte.valueOf((byte) 42), type.get(rs, "v"));
+        assertNull(type.valueOf(""));
+    }
+
+    // T4-01 / T4-02 through the wrapper type
+    @Test
+    public void reviewFixes20260906_valueOf_charArray_radixPrefixAndOverflow() {
+        assertEquals(Byte.valueOf((byte) 31), type.valueOf("0x1F".toCharArray(), 0, 4));
+        assertEquals(Byte.valueOf((byte) -31), type.valueOf("-0x1F".toCharArray(), 0, 5));
+        assertEquals(type.valueOf("#7F"), type.valueOf("#7F".toCharArray(), 0, 3));
+        Assertions.assertThrows(ArithmeticException.class, () -> type.valueOf("128".toCharArray(), 0, 3));
+        Assertions.assertThrows(ArithmeticException.class, () -> type.valueOf("0x80".toCharArray(), 0, 4));
+        Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("12x".toCharArray(), 0, 3));
     }
 
 }

@@ -62,7 +62,8 @@ public class CharNConsumerTest extends TestBase {
         final List<String> result = new ArrayList<>();
         CharNConsumer consumer = new CharNConsumer() {
             @Override
-            public void accept(char... args) {
+            @SafeVarargs
+            public final void accept(char... args) {
                 StringBuilder sb = new StringBuilder();
                 for (char c : args) {
                     sb.append(Character.toUpperCase(c));

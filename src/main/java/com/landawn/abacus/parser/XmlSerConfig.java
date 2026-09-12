@@ -93,11 +93,12 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
      *
      * @param stringQuotation the character to use for quoting strings
      * @return this instance for method chaining
+     * @throws IllegalArgumentException if the quotation character is neither a single quote, a double quote, nor zero.
      * @deprecated this method should not be called as XML does not quote string values.
      */
     @Deprecated
     @Override
-    public XmlSerConfig setStringQuotation(final char stringQuotation) {
+    public XmlSerConfig setStringQuotation(final char stringQuotation) throws IllegalArgumentException {
         super.setStringQuotation(stringQuotation);
 
         return this;
@@ -109,11 +110,12 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
      *
      * @param charQuotation the character to use for quoting char values
      * @return this instance for method chaining
+     * @throws IllegalArgumentException if the quotation character is neither a single quote, a double quote, nor zero.
      * @deprecated this method should not be called as XML does not quote char values.
      */
     @Deprecated
     @Override
-    public XmlSerConfig setCharQuotation(final char charQuotation) {
+    public XmlSerConfig setCharQuotation(final char charQuotation) throws IllegalArgumentException {
         super.setCharQuotation(charQuotation);
 
         return this;
@@ -176,7 +178,8 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
      * boolean disabled = config.isTagByPropertyName(); // returns false
      * }</pre>
      *
-     * @return {@code true} if tags are named after properties, {@code false} otherwise
+     * @return {@code true} if each property is written as an element named after the property, {@code false} if generic {@code <property name="...">} elements are written
+     * @see #setTagByPropertyName(boolean)
      */
     public boolean isTagByPropertyName() {
         return tagByPropertyName;
@@ -185,17 +188,26 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
     /**
      * Sets whether XML tags should be named after property names.
      *
+     * <p>When {@code true} (default), every bean property is written as an element named after the
+     * property, e.g. {@code <bean><name>x</name><age>1</age></bean>}. When {@code false}, every property is
+     * written as a generic {@code <property name="...">} element and the bean element carries a
+     * {@code name} attribute instead, e.g.
+     * {@code <bean name="bean"><property name="name">x</property><property name="age">1</property></bean>}.
+     * Both XML parsers ({@code ParserFactory.createXmlParser()} and {@code createAbacusXmlParser()}) honour the flag.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XmlSerConfig config = new XmlSerConfig();
      * config.setTagByPropertyName(false);                // returns this (config)
      * boolean byProp = config.isTagByPropertyName();     // returns false
+     * // xmlParser.serialize(bean, config) -> <bean name="bean"><property name="name">x</property>...</bean>
      *
      * config.setTagByPropertyName(true);                 // returns this (config)
      * boolean restored = config.isTagByPropertyName();   // returns true (default)
+     * // xmlParser.serialize(bean, config) -> <bean><name>x</name>...</bean>
      * }</pre>
      *
-     * @param tagByPropertyName {@code true} to use property names as tags
+     * @param tagByPropertyName {@code true} to name each element after its property (default), {@code false} to write generic {@code <property name="...">} elements
      * @return this configuration instance for method chaining
      */
     public XmlSerConfig setTagByPropertyName(final boolean tagByPropertyName) {
@@ -276,8 +288,8 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
     /**
      * Determines whether this configuration is equal to another object.
      *
-     * <p>Two XmlSerConfig instances are considered equal if they have
-     * the same values for all configuration settings.</p>
+     * <p>Two XmlSerConfig instances are considered equal if they are of exactly the same class
+     * and have the same values for all configuration settings.</p>
      *
      * @param obj the object to compare with
      * @return {@code true} if the configurations are equal, {@code false} otherwise
@@ -289,7 +301,12 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
             return true;
         }
 
-        if (obj instanceof XmlSerConfig other) {
+        // Require exact same class to keep equals symmetric, the same rule SerializationConfig#equals applies: a
+        // subclass narrowing equality with its own `instanceof <OwnType>` test would otherwise be equal to a plain
+        // XmlSerConfig in one direction only. Mirrors AvroSerConfig/KryoSerConfig, which get it via super.equals.
+        if (obj != null && obj.getClass() == getClass()) {
+            final XmlSerConfig other = (XmlSerConfig) obj;
+
             return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getCharQuotation(), other.getCharQuotation()) //NOSONAR
                     && N.equals(getStringQuotation(), other.getStringQuotation()) && N.equals(getDateTimeFormat(), other.getDateTimeFormat())
                     && N.equals(getExclusion(), other.getExclusion()) && N.equals(isSkipTransientField(), other.isSkipTransientField())
@@ -308,13 +325,14 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
     /**
      * Returns a string representation of this configuration object.
      * The string contains all configuration settings in a readable format.
+     * The (always disabled) quotation chars are rendered as the text <code>&#92;u0000</code>, never as a raw NUL character.
      *
      * @return a string representation of this configuration
      */
     @Override
     public String toString() {
-        return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + N.toString(getCharQuotation()) + ", stringQuotation="
-                + N.toString(getStringQuotation()) + ", dateTimeFormat=" + N.toString(getDateTimeFormat()) + ", exclusion=" + N.toString(getExclusion())
+        return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", charQuotation=" + quotationToString(getCharQuotation()) + ", stringQuotation="
+                + quotationToString(getStringQuotation()) + ", dateTimeFormat=" + N.toString(getDateTimeFormat()) + ", exclusion=" + N.toString(getExclusion())
                 + ", skipTransientField=" + N.toString(isSkipTransientField()) + ", prettyFormat=" + N.toString(isPrettyFormat()) + ", writeLongAsString="
                 + N.toString(isWriteLongAsString()) + ", writeNullStringAsEmpty=" + N.toString(writeNullStringAsEmpty) + ", writeNullNumberAsZero="
                 + N.toString(writeNullNumberAsZero) + ", writeNullBooleanAsFalse=" + N.toString(writeNullBooleanAsFalse) + ", writeBigDecimalAsPlain="

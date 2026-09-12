@@ -2,6 +2,7 @@ package com.landawn.abacus.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
@@ -259,5 +260,95 @@ public class ImmutableListIteratorTest extends TestBase {
         ImmutableListIterator<String> iter = ImmutableListIterator.of(list.listIterator());
 
         Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.add("new"));
+    }
+
+    @Test
+    public void testWrappedIteratorPropagatesTheBackingIteratorsOwnExhaustionException() {
+        // of(ListIterator) forwards next()/previous() straight to the backing iterator, so exhaustion is NOT
+        // normalised to this library's message the way ObjIterator.of / ObjListIterator.of do it. Three distinct
+        // shapes therefore reach callers, and which one they see depends on the backing list. Pinned so the
+        // asymmetry with the ObjIterator adapters is recorded as intended rather than re-filed as a defect.
+
+        // (1) the shared empty() singleton has its own implementation, and DOES report the library message
+        Assertions.assertEquals(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX,
+                Assertions.assertThrows(NoSuchElementException.class, () -> ImmutableListIterator.empty().next()).getMessage());
+        Assertions.assertEquals(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX,
+                Assertions.assertThrows(NoSuchElementException.class, () -> ImmutableListIterator.empty().previous()).getMessage());
+
+        // (2) an ArrayList list iterator reports exhaustion with no message and no cause, at both ends, and
+        // traversal itself is unaffected
+        final ImmutableListIterator<String> overArrayList = ImmutableListIterator.of(new ArrayList<>(Arrays.asList("a")).listIterator());
+        Assertions.assertEquals("a", overArrayList.next());
+        final NoSuchElementException pastArrayListEnd = Assertions.assertThrows(NoSuchElementException.class, overArrayList::next);
+        Assertions.assertNull(pastArrayListEnd.getMessage());
+        Assertions.assertNull(pastArrayListEnd.getCause());
+        Assertions.assertEquals("a", overArrayList.previous());
+        Assertions.assertNull(Assertions.assertThrows(NoSuchElementException.class, overArrayList::previous).getMessage());
+
+        // (3) ImmutableList's own views are AbstractList-backed, so the NoSuchElementException carries the
+        // internal IndexOutOfBoundsException as its cause - the message is that exception's toString, so only
+        // the cause type is pinned here
+        final NoSuchElementException pastEnd = Assertions.assertThrows(NoSuchElementException.class,
+                () -> ImmutableList.of("a", "b").listIterator(2).next());
+        Assertions.assertInstanceOf(IndexOutOfBoundsException.class, pastEnd.getCause());
+
+        final NoSuchElementException beforeStart = Assertions.assertThrows(NoSuchElementException.class,
+                () -> ImmutableList.of("a", "b").listIterator(0).previous());
+        Assertions.assertInstanceOf(IndexOutOfBoundsException.class, beforeStart.getCause());
+
+        // the reversed view wraps the forward one, so it reports the same way from the opposite end
+        Assertions.assertInstanceOf(IndexOutOfBoundsException.class, Assertions
+                .assertThrows(NoSuchElementException.class, () -> ImmutableList.of("a", "b").reversed().listIterator(0).previous()).getCause());
+        Assertions.assertInstanceOf(IndexOutOfBoundsException.class,
+                Assertions.assertThrows(NoSuchElementException.class, () -> ImmutableList.of("a", "b").reversed().listIterator(2).next()).getCause());
+
+        // an empty ImmutableList wraps Collections' own empty list iterator: message-less and causeless
+        final NoSuchElementException fromEmptyList = Assertions.assertThrows(NoSuchElementException.class,
+                () -> ImmutableList.<String> empty().listIterator(0).next());
+        Assertions.assertNull(fromEmptyList.getMessage());
+        Assertions.assertNull(fromEmptyList.getCause());
+    }
+
+    @Test
+    public void testOneImmutableListReportsExhaustionInTwoDifferentShapes() {
+        // Neither traversal normalises, but they wrap different sources, so the SAME list still reports
+        // exhaustion two ways: iterator() wraps the backing collection's iterator (message-less) and
+        // listIterator() wraps its list iterator (IndexOutOfBoundsException as the cause). Neither is
+        // ERROR_MSG_FOR_NO_SUCH_EX. Pinned so callers are never told to match on either form.
+        final ImmutableList<String> list = ImmutableList.of("x");
+
+        final ObjIterator<String> viaIterator = list.iterator();
+        Assertions.assertEquals("x", viaIterator.next());
+        final NoSuchElementException fromIterator = Assertions.assertThrows(NoSuchElementException.class, viaIterator::next);
+        Assertions.assertNull(fromIterator.getMessage());
+        Assertions.assertNull(fromIterator.getCause());
+
+        final ImmutableListIterator<String> viaListIterator = list.listIterator();
+        Assertions.assertEquals("x", viaListIterator.next());
+        final NoSuchElementException fromListIterator = Assertions.assertThrows(NoSuchElementException.class, viaListIterator::next);
+        Assertions.assertNotEquals(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX, fromListIterator.getMessage());
+        Assertions.assertInstanceOf(IndexOutOfBoundsException.class, fromListIterator.getCause());
+    }
+
+    @Test
+    public void testStaleBackingIteratorPropagatesConcurrentModificationException() {
+        // of(ListIterator) does not guard with hasNext()/hasPrevious() either, so a wrap()-backed live view whose
+        // backing list was structurally modified reports the backing iterator's fail-fast
+        // ConcurrentModificationException rather than exhaustion - at both ends, and whether or not elements
+        // remain to visit. Reachable through wrap(List), and nothing else records it.
+        final ArrayList<String> emptied = new ArrayList<>(Arrays.asList("a"));
+        final ImmutableListIterator<String> forward = ImmutableList.wrap(emptied).listIterator();
+        emptied.remove(0);
+        Assertions.assertThrows(ConcurrentModificationException.class, forward::next);
+
+        final ArrayList<String> grown = new ArrayList<>(Arrays.asList("a"));
+        final ImmutableListIterator<String> backward = ImmutableList.wrap(grown).listIterator(0);
+        grown.add("b");
+        Assertions.assertThrows(ConcurrentModificationException.class, backward::previous);
+
+        final ArrayList<String> stillHasElements = new ArrayList<>(Arrays.asList("a", "b", "c"));
+        final ImmutableListIterator<String> stale = ImmutableList.wrap(stillHasElements).listIterator();
+        stillHasElements.remove(2);
+        Assertions.assertThrows(ConcurrentModificationException.class, stale::next);
     }
 }

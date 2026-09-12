@@ -27,6 +27,26 @@ import com.landawn.abacus.util.function.IntBiObjFunction;
 /**
  * Utility class providing various BiFunction implementations and factory methods.
  * This class contains predefined BiFunctions for common collection and map operations.
+ *
+ * <p>This class is a top-level sibling of {@link Fn} (formerly nested as {@code Fn.BiFunctions}),
+ * not a nested type. Use {@link Fn} for the general functional-interface factory and {@link Fnn}
+ * for {@link Throwables} variants that can declare checked exceptions. For one-argument functions
+ * see {@link Functions}; for three-argument functions see {@link TriFunctions}; for two-argument
+ * operators that return the same type see {@link BinaryOperators}.</p>
+ *
+ * <p>Note: the former {@code Fn.BiFunctions.ofAddAlll()} and {@code Fn.BiFunctions.ofRemoveAlll()}
+ * factories for {@link PrimitiveList} have been removed. {@code PrimitiveList} is not a
+ * {@link Collection}, so {@code ofAddAll()} / {@code ofRemoveAll()} cannot stand in for them;
+ * use a typed lambda instead, for example one that calls {@code a.addAll(b)} (or
+ * {@code a.removeAll(b)}) and then returns {@code a}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see Functions
+ * @see TriFunctions
+ * @see BinaryOperators
+ * @see BiConsumers
+ * @see BiPredicates
  */
 public final class BiFunctions {
 
@@ -48,13 +68,6 @@ public final class BiFunctions {
         return t;
     };
 
-    // /** The Constant ADD_ALL_2. */ // commented out with ofAddAlll (triple-l PrimitiveList marker)
-    // @SuppressWarnings("rawtypes")
-    // private static final BiFunction<PrimitiveList, PrimitiveList, PrimitiveList> ADD_ALL_2 = (t, u) -> {
-    //     t.addAll(u);
-    //     return t;
-    // };
-
     /** The Constant REMOVE. */
     private static final BiFunction<Collection<Object>, Object, Collection<Object>> REMOVE = (t, u) -> {
         t.remove(u);
@@ -66,13 +79,6 @@ public final class BiFunctions {
         t.removeAll(u);
         return t;
     };
-
-    // /** The Constant REMOVE_ALL_2. */ // commented out with ofRemoveAlll (triple-l PrimitiveList marker)
-    // @SuppressWarnings("rawtypes")
-    // private static final BiFunction<PrimitiveList, PrimitiveList, PrimitiveList> REMOVE_ALL_2 = (t, u) -> {
-    //     t.removeAll(u);
-    //     return t;
-    // };
 
     /** The Constant PUT. */
     private static final BiFunction<Map<Object, Object>, Map.Entry<Object, Object>, Map<Object, Object>> PUT = (t, u) -> {
@@ -169,24 +175,6 @@ public final class BiFunctions {
         return (BiFunction<C, C, C>) ADD_ALL;
     }
 
-    // /**
-    //  * Returns a BiFunction that adds all elements from one PrimitiveList to another and returns the target list.
-    //  * The BiFunction calls PrimitiveList.addAll(list) and returns the modified list.
-    //  *
-    //  * <p><b>Usage Examples:</b></p>
-    //  * <pre>{@code
-    //  * BiFunctions.ofAddAlll().apply(com.landawn.abacus.util.IntList.of(1, 2), com.landawn.abacus.util.IntList.of(3, 4));   // adds all primitives, returns the first list
-    //  * }</pre>
-    //  *
-    //  * @param <T> the type of PrimitiveList
-    //  * @return a BiFunction that adds all elements from the second PrimitiveList to the first and returns the first list
-    //  */
-    // @Beta
-    // @SuppressWarnings("rawtypes")
-    // public static <T extends PrimitiveList> BiFunction<T, T, T> ofAddAlll() {
-    //     return (BiFunction<T, T, T>) ADD_ALL_2;
-    // }
-
     /**
      * Returns a BiFunction that removes an element from a collection and returns the collection.
      * The BiFunction calls Collection.remove(element) and returns the modified collection.
@@ -220,24 +208,6 @@ public final class BiFunctions {
     public static <T, C extends Collection<T>> BiFunction<C, C, C> ofRemoveAll() {
         return (BiFunction<C, C, C>) REMOVE_ALL;
     }
-
-    // /**
-    //  * Returns a BiFunction that removes all elements of one PrimitiveList from another and returns the target list.
-    //  * The BiFunction calls PrimitiveList.removeAll(list) and returns the modified list.
-    //  *
-    //  * <p><b>Usage Examples:</b></p>
-    //  * <pre>{@code
-    //  * BiFunctions.ofRemoveAlll().apply(com.landawn.abacus.util.IntList.of(1, 2, 3), com.landawn.abacus.util.IntList.of(2));   // removes all primitives, returns the first list
-    //  * }</pre>
-    //  *
-    //  * @param <T> the type of PrimitiveList
-    //  * @return a BiFunction that removes all elements in the second PrimitiveList from the first and returns the first list
-    //  */
-    // @Beta
-    // @SuppressWarnings("rawtypes")
-    // public static <T extends PrimitiveList> BiFunction<T, T, T> ofRemoveAlll() {
-    //     return (BiFunction<T, T, T>) REMOVE_ALL_2;
-    // }
 
     /**
      * Returns a BiFunction that puts a Map.Entry into a Map and returns the map.
@@ -350,6 +320,10 @@ public final class BiFunctions {
      * // Output: "[1] Bob is 30 years old"
      * }</pre>
      *
+     * <p>The returned callback uses indices from zero through {@link Integer#MAX_VALUE}. Later calls
+     * throw {@link ArithmeticException} without invoking user code. An invocation consumes its index
+     * even when user code throws.</p>
+     *
      * @param <T> the type of the first argument to the function
      * @param <U> the type of the second argument to the function
      * @param <R> the type of the result of the function
@@ -364,11 +338,20 @@ public final class BiFunctions {
         N.checkArgNotNull(func, cs.func);
 
         return new BiFunction<>() {
-            private final MutableInt idx = new MutableInt(0);
+            private long idx;
 
+            /**
+             * {@inheritDoc}
+             * @throws ArithmeticException if all nonnegative {@code int} indices have already been used by prior invocations
+             */
             @Override
-            public R apply(final T t, final U u) {
-                return func.apply(idx.getAndIncrement(), t, u);
+            public R apply(final T t, final U u) throws ArithmeticException {
+                // Keep exhaustion representable and reject before invoking user code.
+                if (idx > Integer.MAX_VALUE) {
+                    throw new ArithmeticException("Index exceeds Integer.MAX_VALUE");
+                }
+
+                return func.apply((int) idx++, t, u);
             }
         };
     }

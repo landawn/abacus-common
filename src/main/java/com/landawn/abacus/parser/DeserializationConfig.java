@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.parser;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Abstract base configuration class for deserialization operations.
@@ -117,9 +119,10 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * This is useful when deserializing data that may contain extra fields not
      * present in the target class.
      *
-     * <p>When set to {@code false}, the parser will throw an exception (typically
-     * {@code IllegalArgumentException} or a parser-specific exception) when encountering
-     * properties in the source data that don't have corresponding fields in the target class.</p>
+     * <p>When set to {@code false}, the parser will throw a
+     * {@link com.landawn.abacus.exception.ParsingException} (e.g. {@code "Unknown property: zzz"}) when
+     * encountering properties in the source data that don't have corresponding fields in the target class.
+     * This applies to the JSON parser and to both XML parsers.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -129,7 +132,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * config.setIgnoreUnmatchedProperty(false);   // unknownField is rejected, causing an exception
      * }</pre>
      *
-     * @param ignoreUnmatchedProperty {@code true} to ignore unmatched properties, {@code false} to throw an exception
+     * @param ignoreUnmatchedProperty {@code true} to ignore unmatched properties, {@code false} to throw a {@code ParsingException}
      * @return this configuration instance for method chaining
      */
     public C setIgnoreUnmatchedProperty(final boolean ignoreUnmatchedProperty) {
@@ -174,8 +177,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      *
      * @param elementClass the class of collection/array elements
      * @return this configuration instance for method chaining
+     * @throws IllegalArgumentException if the supplied class is {@code null}.
      */
-    public C setElementType(final Class<?> elementClass) {
+    public C setElementType(final Class<?> elementClass) throws IllegalArgumentException {
         return setElementType(Type.of(elementClass));
     }
 
@@ -212,8 +216,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      *
      * @param type the type name string
      * @return this configuration instance for method chaining
+     * @throws IllegalArgumentException if the type name is {@code null}, blank, or structurally invalid.
      */
-    public C setElementType(final String type) {
+    public C setElementType(final String type) throws IllegalArgumentException {
         return setElementType(Type.of(type));
     }
 
@@ -253,8 +258,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      *
      * @param cls the class of map keys
      * @return this configuration instance for method chaining
+     * @throws IllegalArgumentException if the supplied class is {@code null}.
      */
-    public C setMapKeyType(final Class<?> cls) {
+    public C setMapKeyType(final Class<?> cls) throws IllegalArgumentException {
         return setMapKeyType(Type.of(cls));
     }
 
@@ -290,8 +296,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      *
      * @param keyType the key type name string
      * @return this configuration instance for method chaining
+     * @throws IllegalArgumentException if the type name is {@code null}, blank, or structurally invalid.
      */
-    public C setMapKeyType(final String keyType) {
+    public C setMapKeyType(final String keyType) throws IllegalArgumentException {
         return setMapKeyType(Type.of(keyType));
     }
 
@@ -332,8 +339,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      *
      * @param cls the class of map values
      * @return this configuration instance for method chaining
+     * @throws IllegalArgumentException if the supplied class is {@code null}.
      */
-    public C setMapValueType(final Class<?> cls) {
+    public C setMapValueType(final Class<?> cls) throws IllegalArgumentException {
         return setMapValueType(Type.of(cls));
     }
 
@@ -369,8 +377,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      *
      * @param valueType the value type name string
      * @return this configuration instance for method chaining
+     * @throws IllegalArgumentException if the type name is {@code null}, blank, or structurally invalid.
      */
-    public C setMapValueType(final String valueType) {
+    public C setMapValueType(final String valueType) throws IllegalArgumentException {
         return setMapValueType(Type.of(valueType));
     }
 
@@ -458,11 +467,13 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * config.setValueType("tags", Set.class); // matched as a literal key, not a nested path
      * }</pre>
      *
-     * @param keyName the property/key name as it appears at its nesting level during deserialization (dotted paths are matched only as literal key strings) - see class documentation
+     * @param keyName the property/key name as it appears at its nesting level during deserialization (dotted paths are matched only as literal key strings) - see class documentation; must not be {@code null} (the empty string is a legal key: it matches the empty JSON map key {@code ""})
      * @param typeClass the class to use for deserializing this property
      * @return this configuration instance for method chaining
+     * @throws IllegalArgumentException if {@code keyName} is {@code null} or {@code typeClass} is {@code null}.
+     * @throws UnsupportedOperationException if the previously supplied value-type map does not support replacing or adding the entry.
      */
-    public C setValueType(final String keyName, final Class<?> typeClass) {
+    public C setValueType(final String keyName, final Class<?> typeClass) throws IllegalArgumentException, UnsupportedOperationException {
         return setValueType(keyName, Type.of(typeClass));
     }
 
@@ -470,17 +481,27 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Sets the value type for a specific property using a Type.
      * This allows for complex type specifications including generics.
      *
+     * <p>The empty string is a legal key (it matches the empty JSON map key {@code ""}); {@code null} is not.
+     * A {@code null} type is rejected as well, so that a configured key always resolves to a type - as it
+     * already was for the {@link #setValueType(String, Class)} and {@link #setValueType(String, String)}
+     * overloads, which reject it inside {@code Type.of(..)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<List<String>> listType = Type.of("List<String>");
      * config.setValueType("tags", listType);
      * }</pre>
      *
-     * @param keyName the property/key name as it appears at its nesting level during deserialization (dotted paths are matched only as literal key strings) - see class documentation
-     * @param type the type to use for deserializing this property
+     * @param keyName the property/key name as it appears at its nesting level during deserialization (dotted paths are matched only as literal key strings) - see class documentation; must not be {@code null}
+     * @param type the type to use for deserializing this property; must not be {@code null}
      * @return this configuration instance for method chaining
+     * @throws IllegalArgumentException if {@code keyName} or {@code type} is {@code null}.
+     * @throws UnsupportedOperationException if the previously supplied value-type map does not support replacing or adding the entry.
      */
-    public C setValueType(final String keyName, final Type<?> type) {
+    public C setValueType(final String keyName, final Type<?> type) throws IllegalArgumentException, UnsupportedOperationException {
+        N.checkArgNotNull(keyName, cs.keyName);
+        N.checkArgNotNull(type, cs.type);
+
         if (valueTypeMap == null) {
             valueTypeMap = new HashMap<>();
         }
@@ -499,11 +520,13 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * config.setValueType("metadata", "Map<String, Object>");
      * }</pre>
      *
-     * @param keyName the property/key name as it appears at its nesting level during deserialization (dotted paths are matched only as literal key strings) - see class documentation
+     * @param keyName the property/key name as it appears at its nesting level during deserialization (dotted paths are matched only as literal key strings) - see class documentation; must not be {@code null} (the empty string is a legal key: it matches the empty JSON map key {@code ""})
      * @param typeName the type name string
      * @return this configuration instance for method chaining
+     * @throws IllegalArgumentException if {@code typeName} is null, blank, or structurally invalid, or {@code keyName} is null.
+     * @throws UnsupportedOperationException if the previously supplied value-type map does not support replacing or adding the entry.
      */
-    public C setValueType(final String keyName, final String typeName) {
+    public C setValueType(final String keyName, final String typeName) throws IllegalArgumentException, UnsupportedOperationException {
         return setValueType(keyName, Type.of(typeName));
     }
 
@@ -511,6 +534,12 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Sets multiple value types at once using a map.
      * This is useful when configuring types for many properties at once. The given map
      * replaces any previously configured value types (it is stored by reference, not copied).
+     *
+     * <p>Its entries are validated the same way as {@link #setValueType(String, Type)}: neither a
+     * {@code null} key (which no deserialized key could ever match) nor a {@code null} type is accepted.
+     * Because the map is stored by reference, entries put into it <i>after</i> this call are not
+     * validated; pass a map the caller does not keep mutating, or use {@link #setValueType(String, Type)}.
+     * A {@code null} map clears the value types.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -520,10 +549,23 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * config.setValueTypes(types);
      * }</pre>
      *
-     * @param valueTypes map of property names to their types
+     * @param valueTypes map of property names to their types; may be {@code null} to clear the value types
      * @return this configuration instance for method chaining
+     * @throws IllegalArgumentException if {@code valueTypes} contains a {@code null} key or a {@code null} type.
      */
-    public C setValueTypes(final Map<String, Type<?>> valueTypes) {
+    public C setValueTypes(final Map<String, Type<?>> valueTypes) throws IllegalArgumentException {
+        if (valueTypes != null) {
+            for (final Map.Entry<String, Type<?>> entry : valueTypes.entrySet()) {
+                if (entry.getKey() == null) {
+                    throw new IllegalArgumentException("The value type map must not contain a null key");
+                }
+
+                if (entry.getValue() == null) {
+                    throw new IllegalArgumentException("The value type map must not contain a null type. Key: \"" + entry.getKey() + "\"");
+                }
+            }
+        }
+
         valueTypeMap = valueTypes;
 
         return (C) this;
@@ -541,18 +583,54 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * // Now "name", "age", and "address" properties will use their declared types
      * }</pre>
      *
-     * @param beanType the bean type to extract property type information from; may be {@code null} to clear the setting
+     * @param beanType the bean type to extract property type information from - a bean {@link Class} or a {@link ParameterizedType} whose raw type is a bean class; may be {@code null} to clear the setting
      * @return this configuration instance for method chaining
-     * @throws IllegalArgumentException if the specified type is not a valid bean type.
+     * @throws IllegalArgumentException if the specified type is not a valid bean type (a non-bean class such as {@code String} or {@code List<String>}, or a {@link java.lang.reflect.GenericArrayType}, {@link java.lang.reflect.WildcardType} or {@link java.lang.reflect.TypeVariable}).
      */
     public C setValueTypesByBeanClass(final java.lang.reflect.Type beanType) throws IllegalArgumentException {
         if (beanType == null) {
             beanInfoForValueTypes = null;
         } else {
+            // ParserUtil.getBeanInfo(Type) casts anything that is not a ParameterizedType to Class, which turns a
+            // GenericArrayType/WildcardType/TypeVariable into a ClassCastException instead of the documented IAE.
+            if (!(beanType instanceof Class || beanType instanceof ParameterizedType)) {
+                throw new IllegalArgumentException("Not a bean type: " + beanType + " (" + beanType.getClass().getSimpleName()
+                        + "). Only a bean class or a parameterized bean type is supported");
+            }
+
             beanInfoForValueTypes = ParserUtil.getBeanInfo(beanType);
         }
 
         return (C) this;
+    }
+
+    /**
+     * Creates a copy of this configuration.
+     *
+     * <p>In addition to the shallow copy made by {@link ParserConfig#copy()}, the value-type map is copied,
+     * so {@link #setValueType(String, Type)} on the copy never affects the original (and vice versa),
+     * regardless of whether the original already had value types when it was copied. The bean info set by
+     * {@link #setValueTypesByBeanClass(java.lang.reflect.Type)} is immutable and shared. The ignored-property
+     * map is copied by {@link ParserConfig#copy()}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JsonDeserConfig original = new JsonDeserConfig().setValueType("x", String.class);
+     * JsonDeserConfig copy = original.copy().setValueType("y", Integer.class);
+     * original.getValueType("y");   // returns null - the original is untouched
+     * }</pre>
+     *
+     * @return a copy of this configuration with its own value-type map
+     */
+    @Override
+    public C copy() {
+        final C copy = super.copy();
+
+        if (valueTypeMap != null) {
+            copy.valueTypeMap = new HashMap<>(valueTypeMap);
+        }
+
+        return copy;
     }
 
     /**
@@ -586,10 +664,10 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
             return true;
         }
 
-        // Require exact same class to keep equals symmetric. JsonDeserConfig.equals uses
-        // `instanceof JsonDeserConfig` (which rejects XmlDeserConfig), so this base method must
-        // also reject cross-subclass comparisons; otherwise xml.equals(json) could be true while
-        // json.equals(xml) is false, violating the Object.equals contract.
+        // Require exact same class to keep equals symmetric: cross-subclass comparisons must be rejected
+        // here too, or xml.equals(json) could be true through this base method while json.equals(xml) is
+        // false (JsonDeserConfig overrides equals), violating the Object.equals contract. The overriding
+        // subclasses apply the same exact-class rule.
         if (obj == null || obj.getClass() != getClass()) {
             return false;
         }

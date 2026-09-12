@@ -20,6 +20,8 @@ import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * Type handler for java.sql.Ref objects.
  * A SQL REF is a reference to an SQL structured type value in the database. It is used in
@@ -33,6 +35,8 @@ import java.sql.SQLException;
  * <ul>
  *   <li>This type is NOT serializable (isSerializable() returns false)</li>
  *   <li>stringOf() and valueOf(String) operations are not supported and will throw UnsupportedOperationException</li>
+ *   <li>valueOf(Object) returns an object that already is a Ref unchanged, maps null to null, and rejects
+ *       everything else without touching it</li>
  *   <li>Ref objects are typically obtained from database queries and represent references to structured types</li>
  * </ul>
  *
@@ -162,6 +166,29 @@ public class RefType extends AbstractType<Ref> {
     }
 
     /**
+     * Returns {@code obj} unchanged if it already is a {@link Ref}; otherwise the conversion is not supported.
+     * Unlike the inherited default, this method never serializes the value: {@code AbstractType.valueOf(Object)}
+     * renders {@code obj} with the handler registered for its own runtime class and feeds that text to
+     * {@link #valueOf(String)}, which always throws - so the caller's locator would be read for nothing.
+     *
+     * @param obj the object to convert; may be {@code null}
+     * @return the same {@link Ref} instance if {@code obj} is a {@link Ref}, or {@code null} if {@code obj} is
+     *         {@code null}
+     * @throws UnsupportedOperationException if {@code obj} is non-null and not a {@link Ref}
+     */
+    @MayReturnNull
+    @Override
+    public Ref valueOf(final Object obj) throws UnsupportedOperationException {
+        if (obj == null) {
+            return null; // NOSONAR
+        } else if (obj instanceof Ref value) {
+            return value;
+        }
+
+        throw new UnsupportedOperationException("Ref cannot be created from " + obj.getClass().getName());
+    }
+
+    /**
      * Retrieves a SQL REF value from the specified column in the ResultSet.
      * A REF value represents a reference to an SQL structured type value in the database.
      *
@@ -179,10 +206,11 @@ public class RefType extends AbstractType<Ref> {
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
      * @return the Ref value from the specified column, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    public Ref get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Ref get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getRef(columnIndex);
     }
 
@@ -204,10 +232,11 @@ public class RefType extends AbstractType<Ref> {
      * @param rs the ResultSet to read from
      * @param columnName the label of the column to retrieve (column name or alias)
      * @return the Ref value from the specified column, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public Ref get(final ResultSet rs, final String columnName) throws SQLException {
+    public Ref get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getRef(columnName);
     }
 
@@ -228,10 +257,11 @@ public class RefType extends AbstractType<Ref> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the Ref value to set as the parameter
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Ref x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Ref x) throws NullPointerException, SQLException {
         stmt.setRef(columnIndex, x);
     }
 
@@ -255,10 +285,11 @@ public class RefType extends AbstractType<Ref> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Ref value to set as the parameter
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Ref x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Ref x) throws NullPointerException, SQLException {
         // stmt.setRef(parameterName, x);
 
         stmt.setObject(parameterName, x);

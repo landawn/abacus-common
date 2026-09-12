@@ -14,15 +14,15 @@ import com.landawn.abacus.TestBase;
 
 public class SuppressFBWarningsTest extends TestBase {
     @SuppressFBWarnings
-    static class TestClass {
+    public static class TestClass {
     }
 
     @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH")
-    static class TestClass2 {
+    public static class TestClass2 {
     }
 
     @SuppressFBWarnings(value = { "EI_EXPOSE_REP", "EI_EXPOSE_REP2" }, justification = "Intentional")
-    static class TestClass3 {
+    public static class TestClass3 {
     }
 
     @Test

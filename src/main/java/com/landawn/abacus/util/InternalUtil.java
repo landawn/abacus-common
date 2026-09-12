@@ -88,12 +88,20 @@ public final class InternalUtil {
 
         listElementDataField = tmp != null && tmp.getType().equals(Object[].class) ? tmp : null;
 
-        if (listElementDataField != null) {
+        if (listElementDataField == null) {
+            // No usable field at all (a runtime whose ArrayList has no Object[] elementData), so the flag
+            // must not stay at its initial 'true': the invariant is that the flag and actual readability
+            // always agree, and getInternalArray should never take the fast path on a null field.
+            isListElementDataFieldGettable = false;
+        } else {
             try {
                 listElementDataField.setAccessible(true); //NOSONAR
                 isListElementDataFieldGettable = listElementDataField.canAccess(new ArrayList<>());
             } catch (final Throwable e) {
-                // ignore.
+                // setAccessible is refused unless java.base/java.util is opened (the default since JDK 16),
+                // so the field is not readable. Record that here; leaving the flag at its initial 'true'
+                // would make the first getInternalArray call discover it by throwing and swallowing.
+                isListElementDataFieldGettable = false;
             }
         }
     }

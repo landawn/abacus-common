@@ -9,6 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.security.MessageDigest;
+import java.security.Provider;
+import java.security.Security;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -39,7 +42,7 @@ public class PasswordTest extends AbstractTest {
         N.println(pwd.toString());
 
         Password pwd2 = new Password("SHA-256");
-        Set<Password> set = N.toSet(pwd);
+        Set<Password> set = CommonUtil.toSet(pwd);
         assertTrue(set.contains(pwd2));
 
         assertEquals("SHA-256", pwd2.getAlgorithm());
@@ -133,7 +136,7 @@ public class PasswordTest extends AbstractTest {
         assertEquals(upperCase, lowerCase);
         assertEquals(upperCase.hashCode(), lowerCase.hashCode());
         assertEquals(upperCase.getAlgorithm(), lowerCase.getAlgorithm());
-        assertThrows(NullPointerException.class, () -> new Password(null));
+        assertThrows(IllegalArgumentException.class, () -> new Password(null));
     }
 
     @Test
@@ -241,6 +244,53 @@ public class PasswordTest extends AbstractTest {
             }
         }
         assertFalse(password.isEqual("realPassword", bogus.toString()));
+    }
+
+    /**
+     * A provider that advertises a {@code MessageDigest} for "SHA-256" (through an alias) under a
+     * different service name, but whose implementation class does not exist. {@code
+     * MessageDigest.getInstance} therefore skips it and falls through to the real provider.
+     */
+    private static final class UnusableDigestProvider extends Provider {
+
+        private static final long serialVersionUID = 1L;
+
+        static final String NAME = "PasswordTestUnusableDigestProvider";
+
+        UnusableDigestProvider() {
+            super(NAME, "1.0", "Test-only provider whose MessageDigest SPI cannot be instantiated");
+            put("MessageDigest.PASSWORDTEST-UNUSABLE-256", "com.landawn.abacus.util.NoSuchDigestSpi");
+            put("Alg.Alias.MessageDigest.SHA-256", "PASSWORDTEST-UNUSABLE-256");
+        }
+    }
+
+    @Test
+    public void testGetAlgorithm_usesTheProviderThatSuppliedTheDigest() throws Exception {
+        Security.insertProviderAt(new UnusableDigestProvider(), 1);
+
+        try {
+            // Sanity: the unusable provider is ahead of the real one and does answer for "SHA-256",
+            // so a scan over Security.getProviders() would name its service, ...
+            assertEquals("PASSWORDTEST-UNUSABLE-256", Security.getProviders()[0].getService("MessageDigest", "SHA-256").getAlgorithm());
+
+            // ... but its SPI cannot be instantiated, so JCA falls through to the real provider.
+            final String expected = MessageDigest.getInstance("SHA-256").getProvider().getService("MessageDigest", "SHA-256").getAlgorithm();
+            assertNotEquals("PASSWORDTEST-UNUSABLE-256", expected);
+
+            assertEquals(expected, new Password("SHA-256").getAlgorithm());
+            assertEquals(expected, new Password("sha-256").getAlgorithm());
+        } finally {
+            Security.removeProvider(UnusableDigestProvider.NAME);
+        }
+    }
+
+    @Test
+    public void testGetAlgorithm_reportsProviderSpelling() {
+        final Password lowerCase = new Password("sha-256");
+
+        // Not the string handed to the constructor: MessageDigest.getAlgorithm() would echo "sha-256".
+        assertEquals("SHA-256", lowerCase.getAlgorithm());
+        assertEquals(new Password("SHA-256").getAlgorithm(), lowerCase.getAlgorithm());
     }
 
 }

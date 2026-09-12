@@ -67,8 +67,12 @@ public final class Enumerations {
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if the enumeration or source iterator has no remaining element
+         */
         @Override
-        public Object nextElement() {
+        public Object nextElement() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
@@ -123,8 +127,12 @@ public final class Enumerations {
                 return hasNext;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if the enumeration or source iterator has no remaining element
+             */
             @Override
-            public T nextElement() {
+            public T nextElement() throws NoSuchElementException {
                 if (!hasNext) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -167,8 +175,12 @@ public final class Enumerations {
                 return cursor < len;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if the enumeration or source iterator has no remaining element
+             */
             @Override
-            public T nextElement() {
+            public T nextElement() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -208,9 +220,7 @@ public final class Enumerations {
      * <p>Note: The returned Enumeration is backed by the Iterator, so any modifications
      * to the underlying collection during enumeration may cause undefined behavior.</p>
      *
-     * <p>Note: The iterator is not validated when this method is called. If {@code iter} is
-     * {@code null}, a {@link NullPointerException} is thrown lazily on the first call to
-     * {@code hasMoreElements()} or {@code nextElement()} on the returned Enumeration.</p>
+     * <p>The source iterator is validated before the wrapper is created.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -221,17 +231,27 @@ public final class Enumerations {
      * @param <T> the type of elements
      * @param iter the iterator to wrap as an Enumeration; should not be {@code null}
      * @return an Enumeration that delegates to the specified Iterator
+     * @throws IllegalArgumentException if {@code iter} is {@code null}
      * @see #create(Collection)
      */
-    public static <T> Enumeration<T> create(final Iterator<? extends T> iter) {
+    public static <T> Enumeration<T> create(final Iterator<? extends T> iter) throws IllegalArgumentException {
+        N.checkArgNotNull(iter, cs.iter);
+
         return new Enumeration<>() {
+            /**
+             * {@inheritDoc}
+             */
             @Override
             public boolean hasMoreElements() {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if the enumeration or source iterator has no remaining element
+             */
             @Override
-            public T nextElement() {
+            public T nextElement() throws NoSuchElementException {
                 return iter.next();
             }
         };
@@ -302,8 +322,12 @@ public final class Enumerations {
                 return cur != null && cur.hasMoreElements();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if the enumeration or source iterator has no remaining element
+             */
             @Override
-            public T nextElement() {
+            public T nextElement() throws NoSuchElementException {
                 if ((cur == null || !cur.hasMoreElements()) && !hasMoreElements()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -344,8 +368,12 @@ public final class Enumerations {
                 return e.hasMoreElements();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if the enumeration or source iterator has no remaining element
+             */
             @Override
-            public T next() { // NOSONAR
+            public T next() throws NoSuchElementException { // NOSONAR
                 return e.nextElement();
             }
         };
@@ -431,15 +459,16 @@ public final class Enumerations {
      * @param e the Enumeration to convert; may be {@code null}
      * @param supplier the supplier to create the target collection; must not be {@code null} and must not supply a {@code null} collection
      * @return the collection created by {@code supplier} containing all elements from the Enumeration; an empty collection if {@code e} is {@code null}
-     * @throws IllegalArgumentException if {@code supplier} supplies a {@code null} collection.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if it supplies a {@code null} collection.
+     * @throws UnsupportedOperationException if the enumeration has an element and the supplied collection does not support adding it
      * @see #toList(Enumeration)
      * @see #toSet(Enumeration)
      */
     public static <T, C extends Collection<T>> C toCollection(final Enumeration<? extends T> e, final Supplier<? extends C> supplier)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final C c = N.checkArgNotNull(supplier.get(), "supplier result");
+        final C c = N.checkArgNotNull(supplier.get(), "supplier returned null");
 
         if (e != null) {
             while (e.hasMoreElements()) {

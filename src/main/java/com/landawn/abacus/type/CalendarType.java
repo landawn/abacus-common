@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 
@@ -31,7 +32,8 @@ import com.landawn.abacus.util.N;
  * <ul>
  *   <li>{@link Number}: interpreted as milliseconds since the Unix epoch</li>
  *   <li>{@link java.util.Date}: converted to a {@link Calendar} with the same instant</li>
- *   <li>{@link Calendar}: cloned to a new independent instance</li>
+ *   <li>{@link Calendar}: rebuilt as a new {@link java.util.GregorianCalendar} at the same instant and time zone
+ *       (the calendar system, leniency and week rules of the source are not copied)</li>
  *   <li>{@link String}: parsed as a date-time string, or {@code "sysTime"}/{@code "SYS_TIME"} for the current time</li>
  * </ul>
  *
@@ -56,8 +58,9 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * Used by subclasses that extend this type with a specialized name.
      *
      * @param typeName the custom type name to register
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    CalendarType(final String typeName) {
+    CalendarType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
@@ -77,16 +80,19 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * <ul>
      *   <li>{@link Number}: treated as milliseconds since the Unix epoch</li>
      *   <li>{@link java.util.Date}: the date's instant is used to construct a new {@link Calendar}</li>
-     *   <li>{@link Calendar}: a new independent copy is created via {@link com.landawn.abacus.util.Dates#createCalendar(Calendar)}</li>
+     *   <li>{@link Calendar}: rebuilt as a new {@link java.util.GregorianCalendar} at the same instant and time zone
+     *       via {@link com.landawn.abacus.util.Dates#createCalendar(Calendar)}; the calendar system (for example a
+     *       Buddhist or Japanese calendar), leniency and week rules of the source are not copied</li>
      *   <li>{@code null}: returns {@code null}</li>
      *   <li>Any other type: converted to its string representation, then parsed as a date-time string</li>
      * </ul>
      *
      * @param obj the object to convert; may be {@code null}
      * @return a {@link Calendar} representing the input value, or {@code null} if {@code obj} is {@code null}
+     * @throws IllegalArgumentException if the non-null value is not a supported date/time representation, or a non-lenient calendar contains invalid fields.
      */
     @Override
-    public Calendar valueOf(final Object obj) {
+    public Calendar valueOf(final Object obj) throws IllegalArgumentException {
         if (obj instanceof Number) {
             return Dates.createCalendar(((Number) obj).longValue());
         } else if (obj instanceof java.util.Date) {
@@ -103,7 +109,8 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * <ul>
      *   <li>{@code null}, empty, or the literal {@code "null"} string: returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns a {@link Calendar} for the current system time</li>
-     *   <li>All other values: parsed by {@link com.landawn.abacus.util.Dates#parseCalendar(String)}</li>
+     *   <li>Purely numeric values (possible epoch milliseconds): converted via the {@code Dates.create*} epoch factory</li>
+     *   <li>All other values: parsed by {@link com.landawn.abacus.util.Dates#parseToCalendar(String)}</li>
      * </ul>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
@@ -112,36 +119,62 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      *
      * @param str the string to parse; may be {@code null} or empty
      * @return a {@link Calendar} parsed from {@code str}, or {@code null} if {@code str} is {@code null}, empty, or the literal {@code "null"}
+     * @throws IllegalArgumentException if a nonempty value other than a recognized null or system-time token cannot be parsed as a supported
+     *         date/time or epoch-millisecond representation.
      * @see #valueOf(Object)
      * @see #stringOf(java.util.Calendar)
      */
+    @MayReturnNull
     @Override
-    public Calendar valueOf(final String str) {
-        return isNullDateTime(str) ? null : (isSysTime(str) ? Dates.currentCalendar() : Dates.parseCalendar(str));
+    public Calendar valueOf(final String str) throws IllegalArgumentException {
+        if (isNullDateTime(str)) {
+            return null; // NOSONAR
+        }
+
+        if (isSysTime(str)) {
+            return Dates.currentCalendar();
+        }
+
+        if (isPossibleMillis(str)) {
+            try {
+                return Dates.createCalendar(Long.parseLong(str));
+            } catch (final NumberFormatException e) {
+                // not a pure long after all; fall through to formatted parsing
+            }
+        }
+
+        return Dates.parseToCalendar(str);
     }
 
     /**
      * Converts a region of a character array to a {@link Calendar} instance.
-     * If the character sequence looks like a {@code long} value (an epoch-millisecond timestamp),
-     * it is parsed as such; otherwise the characters are converted to a {@link String} and
-     * delegated to {@link #valueOf(String)}.
+     * If the character sequence looks like a {@code long} value (an epoch-millisecond timestamp: digits ending in a
+     * digit, so a trailing {@code L}/{@code d}/{@code f} type suffix is not accepted), it is parsed as such; otherwise
+     * the characters are converted to a {@link String} and delegated to {@link #valueOf(String)}, so both overloads
+     * give the same answer for the same text.
      *
      * @param cbuf   the character array containing the value; may be {@code null}
      * @param offset the index of the first character to use
      * @param len    the number of characters to use
-     * @return the parsed calendar value
-     *         or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @return the parsed calendar value, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
+     * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see         {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
+    @MayReturnNull
     @Override
-    public Calendar valueOf(final char[] cbuf, final int offset, final int len) {
+    public Calendar valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, IllegalArgumentException {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
 
+        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
+        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
+        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
+        // IllegalArgumentException.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createCalendar(parseLong(cbuf, offset, len));
-            } catch (final NumberFormatException e) {
+            } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
@@ -157,10 +190,11 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * @param columnIndex the 1-based column index
      * @return a {@link Calendar} created from the column's timestamp value,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Calendar get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Calendar get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
         return (ts == null) ? null : Dates.createCalendar(ts);
@@ -174,10 +208,11 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * @param columnName the label of the column to retrieve
      * @return a {@link Calendar} created from the column's timestamp value,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Calendar get(final ResultSet rs, final String columnName) throws SQLException {
+    public Calendar get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final Timestamp ts = rs.getTimestamp(columnName);
 
         return (ts == null) ? null : Dates.createCalendar(ts);

@@ -12,7 +12,7 @@ import com.landawn.abacus.TestBase;
 
 public class RecordTest extends TestBase {
     @Record
-    static class TestRecordClass {
+    public static class TestRecordClass {
     }
 
     @Test

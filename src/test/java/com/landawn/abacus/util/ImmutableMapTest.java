@@ -429,7 +429,11 @@ public class ImmutableMapTest extends TestBase {
 
     @Test
     public void testBuilder() {
-        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder().put("one", 1).put("two", 2).putAll(N.asMap("three", 3, "four", 4)).build();
+        ImmutableMap<String, Integer> map = ImmutableMap.<String, Integer> builder()
+                .put("one", 1)
+                .put("two", 2)
+                .putAll(CommonUtil.asMap("three", 3, "four", 4))
+                .build();
 
         Assertions.assertEquals(4, map.size());
         Assertions.assertEquals(1, map.get("one"));
@@ -508,7 +512,7 @@ public class ImmutableMapTest extends TestBase {
         ImmutableMap<String, Integer> ofMap = ImmutableMap.of("a", 1, "b", 2);
         ImmutableMap<String, Integer> wrappedMap = ImmutableMap.wrap(backing);
 
-        for (ImmutableMap<String, Integer> map : N.asList(ofMap, wrappedMap)) {
+        for (ImmutableMap<String, Integer> map : CommonUtil.asList(ofMap, wrappedMap)) {
             // entrySet(): entries must not support setValue, the set must not support removal.
             Map.Entry<String, Integer> entry = map.entrySet().iterator().next();
             Assertions.assertThrows(UnsupportedOperationException.class, () -> entry.setValue(99));
@@ -551,5 +555,182 @@ public class ImmutableMapTest extends TestBase {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> wrapped.keySet().remove("a"));
         Assertions.assertThrows(UnsupportedOperationException.class, () -> wrapped.values().remove(1));
         Assertions.assertEquals(1, backing.get("a"));
+    }
+
+    @Test
+    public void testCopyOf_copiesAWrappedView() {
+        final Map<String, Integer> live = new LinkedHashMap<>();
+        live.put("a", 1);
+
+        final ImmutableMap<String, Integer> view = ImmutableMap.wrap(live);
+        final ImmutableMap<String, Integer> copy = ImmutableMap.copyOf(view);
+
+        Assertions.assertNotSame(view, copy);
+
+        live.put("b", 2);
+
+        Assertions.assertEquals(2, view.size());
+        Assertions.assertEquals(1, copy.size());
+        Assertions.assertFalse(copy.containsKey("b"));
+    }
+
+    @Test
+    public void testCopyOf_returnsSameInstanceForAnOwningMap() {
+        final ImmutableMap<String, Integer> owned = ImmutableMap.of("a", 1);
+        Assertions.assertSame(owned, ImmutableMap.copyOf(owned));
+        Assertions.assertSame(ImmutableMap.empty(), ImmutableMap.copyOf(ImmutableMap.empty()));
+
+        final ImmutableMap<String, Integer> copied = ImmutableMap.copyOf(new HashMap<>(Map.of("a", 1)));
+        Assertions.assertSame(copied, ImmutableMap.copyOf(copied));
+    }
+
+    @Test
+    public void testCopyOf_builderResults() {
+        final ImmutableMap.Builder<String, Integer> privateBuilder = ImmutableMap.<String, Integer> builder().put("a", 1);
+        final ImmutableMap<String, Integer> fromPrivateStorage = privateBuilder.build();
+        Assertions.assertSame(fromPrivateStorage, ImmutableMap.copyOf(fromPrivateStorage));
+        final ImmutableMap<String, Integer> repeatedBuild = privateBuilder.build();
+        Assertions.assertSame(repeatedBuild, ImmutableMap.copyOf(repeatedBuild));
+        Assertions.assertEquals(fromPrivateStorage, repeatedBuild);
+        Assertions.assertThrows(IllegalStateException.class, () -> privateBuilder.put("b", 2));
+        Assertions.assertEquals(Map.of("a", 1), fromPrivateStorage);
+        Assertions.assertEquals(Map.of("a", 1), repeatedBuild);
+
+        final Map<String, Integer> holder = new LinkedHashMap<>();
+        final ImmutableMap<String, Integer> fromHolder = ImmutableMap.builder(holder).put("a", 1).build();
+        final ImmutableMap<String, Integer> copy = ImmutableMap.copyOf(fromHolder);
+        Assertions.assertNotSame(fromHolder, copy);
+
+        holder.put("b", 2);
+        holder.put("a", 3);
+        Assertions.assertEquals(2, fromHolder.size());
+        Assertions.assertEquals(1, copy.size());
+        Assertions.assertEquals(3, fromHolder.get("a"));
+        Assertions.assertEquals(1, copy.get("a"));
+    }
+
+    @Test
+    public void testCopyOf_preservesEntryOrderThroughAWrapper() {
+        final LinkedHashMap<String, Integer> ordered = new LinkedHashMap<>();
+        final java.util.List<String> order = java.util.Arrays.asList("z", "y", "x", "w", "v", "u", "t", "s", "r", "q");
+
+        for (int i = 0; i < order.size(); i++) {
+            ordered.put(order.get(i), i);
+        }
+
+        Assertions.assertEquals(order, new java.util.ArrayList<>(ImmutableMap.copyOf(ordered).keySet()));
+        Assertions.assertEquals(order, new java.util.ArrayList<>(ImmutableMap.copyOf(java.util.Collections.unmodifiableMap(ordered)).keySet()));
+        Assertions.assertEquals(order, new java.util.ArrayList<>(ImmutableMap.copyOf(java.util.Collections.synchronizedMap(ordered)).keySet()));
+    }
+
+    @Test
+    public void testBuilderIsConsumedByBuild() {
+        final ImmutableMap.Builder<String, Integer> builder = ImmutableMap.builder();
+        final ImmutableMap<String, Integer> built = builder.put("a", 1).build();
+
+        Assertions.assertEquals(1, built.size());
+        Assertions.assertThrows(IllegalStateException.class, () -> builder.put("b", 2));
+        Assertions.assertThrows(IllegalStateException.class, () -> builder.putAll(Map.of("b", 2)));
+
+        Assertions.assertEquals(1, built.size());
+        Assertions.assertEquals(built, builder.build());
+    }
+
+    @Test
+    public void testGetOrDefaultDistinguishesNullValueFromAbsence() {
+        final Map<String, Integer> backing = new HashMap<>();
+        backing.put("nullValued", null);
+        backing.put("a", 1);
+
+        final ImmutableMap<String, Integer> map = ImmutableMap.wrap(backing);
+
+        Assertions.assertNull(map.getOrDefault("nullValued", 9));
+        Assertions.assertEquals(9, map.getOrDefault("absent", 9));
+        Assertions.assertEquals(1, map.getOrDefault("a", 9));
+    }
+
+    @Test
+    public void testForEachIteratesEveryEntryInOrder() {
+        final ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 3);
+        final java.util.List<String> seen = new java.util.ArrayList<>();
+
+        map.forEach((k, v) -> seen.add(k + "=" + v));
+
+        Assertions.assertEquals(java.util.Arrays.asList("a=1", "b=2", "c=3"), seen);
+        Assertions.assertThrows(NullPointerException.class, () -> map.forEach(null));
+    }
+
+    @Test
+    public void testEmptyMapViewsReportTheirInterfaceCharacteristics() {
+        // Collections.emptyMap()'s views report only SIZED|SUBSIZED, dropping the DISTINCT that
+        // Set.spliterator() promises for keySet()/entrySet() and the ORDERED that the views of every
+        // ImmutableMap built by of(...)/copyOf(...)/a no-argument builder() report - they all back onto a
+        // LinkedHashMap. A wrap(aHashMap) view reports no ORDERED, so this is not a family-wide property.
+        final ImmutableMap<String, Integer> empty = ImmutableMap.empty();
+        final ImmutableMap<String, Integer> one = ImmutableMap.of("a", 1);
+
+        Assertions.assertEquals(one.keySet().spliterator().characteristics(), empty.keySet().spliterator().characteristics());
+        Assertions.assertEquals(one.values().spliterator().characteristics(), empty.values().spliterator().characteristics());
+        Assertions.assertEquals(one.entrySet().spliterator().characteristics(), empty.entrySet().spliterator().characteristics());
+
+        Assertions.assertTrue(empty.keySet().spliterator().hasCharacteristics(java.util.Spliterator.DISTINCT));
+        Assertions.assertTrue(empty.keySet().spliterator().hasCharacteristics(java.util.Spliterator.ORDERED));
+        Assertions.assertTrue(empty.entrySet().spliterator().hasCharacteristics(java.util.Spliterator.DISTINCT));
+        Assertions.assertTrue(empty.values().spliterator().hasCharacteristics(java.util.Spliterator.ORDERED));
+
+        // Stream.concat intersects both sides' characteristics, so an unordered empty prefix used to strip
+        // ORDERED from the whole stream and make a parallel findFirst() stop meaning "first".
+        final java.util.List<Integer> big = new java.util.ArrayList<>();
+
+        for (int i = 0; i < 1000; i++) {
+            big.add(i);
+        }
+
+        Assertions.assertTrue(java.util.stream.Stream.concat(ImmutableMap.<Integer, Integer> empty().keySet().stream(), big.stream())
+                .spliterator()
+                .hasCharacteristics(java.util.Spliterator.ORDERED));
+
+        for (int i = 0; i < 50; i++) {
+            Assertions.assertEquals(java.util.Optional.of(0),
+                    java.util.stream.Stream.concat(ImmutableMap.<Integer, Integer> empty().keySet().stream(), big.stream()).parallel().findFirst());
+        }
+    }
+
+    @Test
+    public void testEmptyMapStillAcceptsNullQueries() {
+        // pins the other half of the fix above: Map.of() would report the right characteristics but its
+        // get(null)/containsKey(null) throw NullPointerException, which this empty map must never do.
+        Assertions.assertNull(ImmutableMap.empty().get(null));
+        Assertions.assertFalse(ImmutableMap.empty().containsKey(null));
+        Assertions.assertFalse(ImmutableMap.empty().containsValue(null));
+
+        Assertions.assertEquals(java.util.Collections.emptyMap(), ImmutableMap.empty());
+        Assertions.assertEquals(0, ImmutableMap.empty().hashCode());
+        Assertions.assertEquals("{}", ImmutableMap.empty().toString());
+        Assertions.assertSame(ImmutableMap.empty(), ImmutableMap.copyOf(new HashMap<String, Integer>()));
+        Assertions.assertTrue(ImmutableMap.empty().keySet().isEmpty());
+        Assertions.assertTrue(ImmutableMap.empty().entrySet().isEmpty());
+
+        // ... and pins the third consequence of the same one-line change: backing the singleton with an
+        // unmodifiable LinkedHashMap makes its views reject mutation, which is what
+        // AbstractImmutableMap.keySet()/values()/entrySet() document and what every non-empty ImmutableMap
+        // already did. Collections.emptyMap()'s views silently no-op'd (clear()) or answered false
+        // (remove/removeAll/removeIf/retainAll) instead, so a revert to N.emptyMap() must red this.
+        final ImmutableMap<String, Integer> empty = ImmutableMap.empty();
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.keySet().remove("a"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.keySet().removeIf(k -> true));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.keySet().retainAll(java.util.Collections.emptyList()));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.keySet().clear());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.values().clear());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.entrySet().clear());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.entrySet().removeIf(e -> true));
+
+        // identical to the answer a non-empty instance has always given
+        final ImmutableMap<String, Integer> one = ImmutableMap.of("a", 1);
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> one.keySet().remove("a"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> one.values().clear());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> one.entrySet().clear());
     }
 }

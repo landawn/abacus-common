@@ -18,6 +18,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.SK;
@@ -77,10 +80,16 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
 
         parameterTypes = List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName));
 
-        final Type<?> collectionValueType = SetMultimap.class.isAssignableFrom(typeClass) ? TypeFactory.getType("Set<" + valueTypeName + ">")
+        // Linked/immutable targets can only keep the order they are given: the intermediate map and the
+        // intermediate value set must be linked too, otherwise the JSON document order is scrambled before the copy.
+        final Type<?> collectionValueType = SetMultimap.class.isAssignableFrom(typeClass) ? TypeFactory.getType("LinkedHashSet<" + valueTypeName + ">")
                 : TypeFactory.getType("List<" + valueTypeName + ">");
 
-        jdc = JsonDeserConfig.create().setMapKeyType(parameterTypes.get(0)).setMapValueType(collectionValueType).setElementType(parameterTypes.get(1));
+        jdc = JsonDeserConfig.create()
+                .setMapKeyType(parameterTypes.get(0))
+                .setMapValueType(collectionValueType)
+                .setElementType(parameterTypes.get(1))
+                .setMapInstanceType(LinkedHashMap.class);
     }
 
     /**
@@ -132,6 +141,12 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * Indicates whether instances of this type can be serialized.
      * Guava multimaps are serializable through their {@link java.util.Map} representation.
      *
+     * <p>Because this type is reported as serializable and does not override {@code serializeTo}, a multimap that is
+     * nested in a bean property, a map value or a collection element is written as a quoted JSON <i>string</i> holding
+     * the value of {@link #stringOf(Multimap)} (e.g. {@code {"gm": "{\"a\": [1]}"}}), not as a JSON object; in XML the
+     * same text is written as the element's escaped character content. The JSON and XML parsers read that form back.
+     * Only a multimap serialized as the root value is emitted as a plain JSON object.</p>
+     *
      * @return {@code true}, always, because multimaps are serialized via their map view
      */
     @Override
@@ -155,6 +170,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final T x) {
         if (x == null) {
@@ -169,7 +185,17 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
     /**
      * Deserializes a JSON string into a multimap instance.
      * The string must represent a {@code Map<K, Collection<V>>} in JSON format.
-     * For immutable multimap types, an immutable copy of the constructed multimap is returned.
+     * For immutable multimap types, an immutable multimap built from the parsed entries is returned.
+     *
+     * <p>The keys and values of the JSON document are fed to the target in document order, so a target class that
+     * keeps insertion order ({@link LinkedHashMultimap}, {@link LinkedListMultimap}, the immutable multimaps) reflects
+     * the document order; for the other targets ({@link Multimap}, {@link ListMultimap}, {@link SetMultimap},
+     * {@link ArrayListMultimap}, {@link HashMultimap}, ...) the iteration order is unspecified, and a sorted target
+     * ({@link TreeMultimap}, {@link SortedSetMultimap}) is sorted.</p>
+     *
+     * <p>A key whose JSON value is {@code null} or an empty array (e.g. {@code {"k": null}} or {@code {"k": []}}) is
+     * dropped: a multimap never holds a key without values. A duplicate key keeps the position of its first occurrence
+     * and the values of its last one.</p>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
@@ -177,35 +203,70 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      *
      * @param str the JSON string to parse; may be {@code null} or empty
      * @return a new multimap instance containing the parsed data, or {@code null} if {@code str} is {@code null} or empty
+     * @throws ParsingException if {@code str} is not a well-formed JSON object text
+     * @throws NullPointerException if a JSON array contains {@code null} and the target multimap rejects {@code null}
+     *         values (the immutable multimaps and {@link TreeMultimap})
      * @see #valueOf(Object)
      * @see #stringOf(Multimap)
      */
+    @MayReturnNull
     @Override
-    public T valueOf(final String str) {
+    public T valueOf(final String str) throws ParsingException, NullPointerException {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         }
 
+        // jdc targets a LinkedHashMap (see the constructor), so the entries below are in document order.
         final Map<K, Collection<V>> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
 
         if (map == null) {
             return null;
         }
 
-        final int avgValueSize = (int) map.values().stream().mapToInt(Collection::size).average().orElse(0);
+        if (ImmutableMultimap.class.isAssignableFrom(typeClass)) {
+            // Build the immutable result straight from the ordered map: the Guava builders keep put order,
+            // whereas the ArrayListMultimap/HashMultimap temporary newInstance() would return scrambles it.
+            if (ImmutableSetMultimap.class.isAssignableFrom(typeClass)) {
+                final ImmutableSetMultimap.Builder<K, V> builder = ImmutableSetMultimap.builder();
 
-        final T multimap = newInstance(map.size(), avgValueSize);
+                for (final Map.Entry<K, Collection<V>> entry : map.entrySet()) {
+                    if (entry.getValue() != null) {
+                        builder.putAll(entry.getKey(), entry.getValue());
+                    }
+                }
 
-        for (final Map.Entry<K, Collection<V>> entry : map.entrySet()) {
-            multimap.putAll(entry.getKey(), entry.getValue());
+                return (T) builder.build();
+            } else {
+                // ImmutableListMultimap and the abstract ImmutableMultimap (whose copyOf also yields a list multimap).
+                final ImmutableListMultimap.Builder<K, V> builder = ImmutableListMultimap.builder();
+
+                for (final Map.Entry<K, Collection<V>> entry : map.entrySet()) {
+                    if (entry.getValue() != null) {
+                        builder.putAll(entry.getKey(), entry.getValue());
+                    }
+                }
+
+                return (T) builder.build();
+            }
         }
 
-        if (ImmutableListMultimap.class.isAssignableFrom(typeClass)) {
-            return (T) ImmutableListMultimap.copyOf(multimap);
-        } else if (ImmutableSetMultimap.class.isAssignableFrom(typeClass)) {
-            return (T) ImmutableSetMultimap.copyOf(multimap);
-        } else if (ImmutableMultimap.class.isAssignableFrom(typeClass)) {
-            return (T) ImmutableMultimap.copyOf(multimap);
+        int keyCount = 0;
+        int valueCount = 0;
+
+        for (final Collection<V> values : map.values()) {
+            if (values != null) {
+                keyCount++;
+                valueCount += values.size();
+            }
+        }
+
+        final T multimap = newInstance(map.size(), keyCount == 0 ? 0 : valueCount / keyCount);
+
+        for (final Map.Entry<K, Collection<V>> entry : map.entrySet()) {
+            // A null value ({"k": null}) drops the key, like the abacus ListMultimap/SetMultimap handlers do.
+            if (entry.getValue() != null) {
+                multimap.putAll(entry.getKey(), entry.getValue());
+            }
         }
 
         return multimap;
@@ -249,7 +310,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * @return a new multimap instance
      * @throws IllegalArgumentException if no suitable constructor or factory method is found.
      */
-    private T newInstance(int keySize, final int avgValueSize) {
+    private T newInstance(int keySize, final int avgValueSize) throws IllegalArgumentException {
         if (ArrayListMultimap.class.isAssignableFrom(typeClass) || ImmutableListMultimap.class.isAssignableFrom(typeClass) //
                 || Multimap.class.equals(typeClass) || ImmutableMultimap.class.equals(typeClass)
                 || (Modifier.isAbstract(typeClass.getModifiers()) && ListMultimap.class.isAssignableFrom(typeClass))) {

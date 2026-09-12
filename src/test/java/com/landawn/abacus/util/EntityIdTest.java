@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.Assert.assertThrows;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,24 +13,6 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.AbstractTest;
 
 public class EntityIdTest extends AbstractTest {
-
-    //     @Test
-    //     public void test_1() {
-    //         Seid entityId = Seid.of(AccountPNL.ID, 1);
-    //         assertEquals(1, entityId.get(AccountPNL.ID, int.class).intValue());
-    //
-    //         entityId.set(AccountPNL.FIRST_NAME, "firstName");
-    //         entityId.set(AccountPNL.LAST_NAME, "lastName");
-    //         entityId.set(AccountPNL.BIRTH_DATE, Dates.currentDate());
-    //         N.println(entityId);
-    //
-    //         entityId.set(N.asProps(AccountPNL.ID, 2));
-    //
-    //         entityId = Seid.of(AccountPNL.FIRST_NAME, "firstName", AccountPNL.LAST_NAME, "lastName");
-    //
-    //         N.println(entityId);
-    //
-    //     }
 
     @Test
     public void test_of_singleProperty() {
@@ -326,6 +309,75 @@ public class EntityIdTest extends AbstractTest {
         Assertions.assertFalse(first.containsKey("name"));
         Assertions.assertEquals(2, second.size());
         Assertions.assertEquals("Alice", second.get("name"));
+    }
+
+    @Test
+    public void test_create_fromMap_entityNameComesFromFirstKeyOnly() {
+        // Pins EntityId.create(Map): the entity name comes from the parent of the FIRST key in iteration
+        // order only, so identical content in a different order yields a different id.
+        final Map<String, Object> ordered = new LinkedHashMap<>();
+        ordered.put("User.id", 1);
+        ordered.put("plain", 2);
+
+        final Map<String, Object> reordered = new LinkedHashMap<>();
+        reordered.put("plain", 2);
+        reordered.put("User.id", 1);
+
+        Assertions.assertEquals(ordered, reordered);
+
+        final EntityId first = EntityId.create(ordered);
+        final EntityId second = EntityId.create(reordered);
+
+        Assertions.assertEquals("User", first.entityName());
+        Assertions.assertEquals(Set.of("id", "plain"), first.keySet());
+        Assertions.assertEquals(1, (Integer) first.get("id"));
+
+        Assertions.assertEquals("", second.entityName());
+        Assertions.assertEquals(Set.of("User.id", "plain"), second.keySet());
+        Assertions.assertNull(second.get("id"));
+        Assertions.assertEquals(1, (Integer) second.get("User.id"));
+
+        Assertions.assertNotEquals(first, second);
+
+        // Only names canonical against that entity name are shortened; a second parent is kept verbatim.
+        final Map<String, Object> twoParents = new LinkedHashMap<>();
+        twoParents.put("User.id", 1);
+        twoParents.put("Order.no", 2);
+
+        final EntityId mixed = EntityId.create(twoParents);
+        Assertions.assertEquals("User", mixed.entityName());
+        Assertions.assertEquals(Set.of("id", "Order.no"), mixed.keySet());
+        Assertions.assertNull(mixed.get("no"));
+        Assertions.assertEquals(2, (Integer) mixed.get("Order.no"));
+
+        // A name whose only dot is at index 0 yields an empty entity name but is still shortened.
+        final Map<String, Object> leadingDot = new LinkedHashMap<>();
+        leadingDot.put(".id", 7);
+
+        final EntityId dotted = EntityId.create(leadingDot);
+        Assertions.assertEquals("", dotted.entityName());
+        Assertions.assertEquals(Set.of("id"), dotted.keySet());
+        Assertions.assertEquals(7, (Integer) dotted.get("id"));
+
+        // The shape used by the method's own javadoc example: no dots at all -> empty entity name.
+        final Map<String, Object> undotted = new HashMap<>();
+        undotted.put("customerId", 1000);
+        undotted.put("orderDate", "2020-01-01");
+
+        final EntityId plain = EntityId.create(undotted);
+        Assertions.assertEquals("", plain.entityName());
+        Assertions.assertEquals(Set.of("customerId", "orderDate"), plain.keySet());
+    }
+
+    @Test
+    public void test_create_withEntityName_nullMapMustBeCast() {
+        // Pins the javadoc note on create(String, Map): an uncast null does not compile here because it is
+        // ambiguous with create(Object, Collection); the cast form is the documented, reachable one.
+        final EntityId id = EntityId.create("Person", (Map<String, Object>) null);
+
+        Assertions.assertEquals("Person", id.entityName());
+        Assertions.assertEquals(0, id.size());
+        Assertions.assertEquals(Set.of(), id.keySet());
     }
 
 }

@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -37,7 +38,6 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.KryoParser;
-import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.util.If.OrElse;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.u.Optional;
@@ -149,7 +149,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Access Patterns:</b>
  * <ul>
  *   <li><b>By Keys:</b> {@code get(rowKey, columnKey)}, {@code set(rowKey, columnKey, value)}</li>
- *   <li><b>By Indices:</b> {@code get(rowIndex, columnIndex)}, {@code set(rowIndex, columnIndex, value)}</li>
+ *   <li><b>By Indices:</b> {@code getAt(rowIndex, columnIndex)}, {@code setAt(rowIndex, columnIndex, value)}</li>
  *   <li><b>By Point:</b> {@code get(point)}, {@code set(point, value)} for coordinate-based access</li>
  *   <li><b>Bulk Access:</b> {@code rowValues()}, {@code columnValues()}, {@code setRow()}, {@code setColumn()}</li>
  * </ul>
@@ -175,7 +175,8 @@ import com.landawn.abacus.util.stream.Stream;
  * Sheet instances are <b>not thread-safe</b>. For concurrent access:
  * <ul>
  *   <li>Use external synchronization for write operations</li>
- *   <li>Read operations can be safely performed concurrently if no writes occur</li>
+ *   <li>Read operations can be safely performed concurrently if no writes occur: the key-to-index maps that back
+ *       keyed access are built by the constructors, so a read never allocates or publishes shared state</li>
  *   <li>Use {@link #freeze()} on a safely published dedicated instance, or {@link #clone(boolean) clone(true)}, before sharing sheet structure across threads</li>
  *   <li>Consider creating thread-local copies using {@link #clone()}</li>
  * </ul>
@@ -246,6 +247,47 @@ import com.landawn.abacus.util.stream.Stream;
  * axis is accepted as its full, empty key set; only {@code null} is always rejected. Display methods
  * ({@link #println(Collection, Collection, Appendable) println}) are exempt and tolerate null/empty.
  *
+ * <p><a id="view-semantics"><b>View semantics:</b></a> accessors that return a collection fall into three
+ * groups by what the returned object stays attached to. {@link Dataset} draws the same three distinctions,
+ * but note one difference: its {@code getColumn} views latch onto the column resolved at call time, whereas
+ * the keyed views below re-resolve their key on every access.</p>
+ * <table border="1">
+ *   <caption>What a returned collection stays attached to</caption>
+ *   <tr><th>Group</th><th>Methods</th><th>Behaviour</th></tr>
+ *   <tr>
+ *     <td><b>Keyed views</b></td>
+ *     <td>{@link #rowValues(Object)}, {@link #columnValues(Object)}</td>
+ *     <td>Attached to the <i>key</i>, which is re-resolved on every access. Reordering ({@code moveRow},
+ *         {@code swapRows}, {@code sortByRowKey}, …) does not change what the view shows, and its length
+ *         tracks the live count of the other axis. Once the key is gone - removed or renamed away - the
+ *         view's accessors throw {@link IllegalArgumentException} naming the missing key. Two accessors keep
+ *         their plain {@code List} behaviour instead: an index outside the other axis's live range is still
+ *         reported as {@link IndexOutOfBoundsException}, ahead of the missing key, and
+ *         {@code containsAll(emptyCollection)} is still vacuously {@code true}, never touching the view.</td>
+ *   </tr>
+ *   <tr>
+ *     <td><b>Live structural views</b></td>
+ *     <td>{@link #rowKeySet()}, {@link #columnKeySet()}, and the {@code Stream}-returning accessors</td>
+ *     <td>Attached to this Sheet itself. The key sets reflect additions, removals and reordering as they
+ *         happen. The streams are lazy and are <i>not</i> fail-fast: consuming one after a structural change
+ *         to this Sheet is undefined, so consume it before mutating.</td>
+ *   </tr>
+ *   <tr>
+ *     <td><b>Snapshots</b></td>
+ *     <td>{@link #copy()}, {@link #toArray()}, {@link #rowAsMap(Object)}, {@link #columnAsMap(Object)},
+ *         {@link #rowsMap()}, {@link #columnsMap()}, {@link #toDataset()}</td>
+ *     <td>Independent of this Sheet. Later changes to either side are invisible to the other (the cell
+ *         <i>values</i> themselves are shared, not deep-copied).</td>
+ *   </tr>
+ * </table>
+ * <p>No returned collection is modifiable; all of them reject mutation with
+ * {@link UnsupportedOperationException} except the freshly built maps and arrays in the snapshot group.</p>
+ *
+ * <p>Row and column keys use Objects.equals semantics, deeply for arrays, consistently for
+ * duplicate detection, lookup and Sheet equality. Array keys must not be mutated while stored.
+ * Returned key sets follow the standard Set contract instead: their array elements use identity equality.
+ * Integer coordinates use getAt/setAt/removeAt/isNullAt; get/set/remove/isNull always use keys.</p>
+ *
  * @param <R> the type of row keys used to identify rows in the sheet
  * @param <C> the type of column keys used to identify columns in the sheet
  * @param <V> the type of values stored in the cells of the sheet
@@ -255,19 +297,211 @@ import com.landawn.abacus.util.stream.Stream;
  * @see Cloneable
  * @see Point
  * @see Cell
+ *
  */
 public final class Sheet<R, C, V> implements Cloneable {
 
     /** The shared Kryo parser used by {@link #clone(boolean)} for deep copying, or {@code null} if the Kryo library is not on the classpath. */
-    static final KryoParser kryoParser = ParserFactory.isKryoParserAvailable() ? ParserFactory.createKryoParser() : null;
+    static final KryoParser kryoParser = RowDataset.newCloneParser();
+
+    // Keep key equivalence in a constructible value object so it survives generic map copying.
+    private static final class DeepKey {
+        private final Object value;
+
+        @SuppressWarnings("unused")
+        DeepKey() {
+            value = null; // Required by Kryo's field copier.
+        }
+
+        DeepKey(final Object value) {
+            this.value = value;
+        }
+
+        @Override
+        public boolean equals(final Object other) {
+            return this == other || other instanceof DeepKey key && N.deepEquals(value, key.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return N.deepHashCode(value);
+        }
+    }
+
+    private static Object normalizeKey(final Object key) {
+        return key != null && key.getClass().isArray() ? new DeepKey(key) : key;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <K> K originalKey(final Object key) {
+        return (K) (key instanceof DeepKey array ? array.value : key);
+    }
+
+    // Store the equivalence in the keys themselves. Kryo's generic Map copier recreates a
+    // BiMap with its default backing maps, so a custom backing-map comparator would be lost.
+    private static final class KeyIndex<K> {
+        private final BiMap<Object, Integer> indexes;
+
+        @SuppressWarnings("unused")
+        KeyIndex() {
+            this(16); // Required by Kryo's field copier.
+        }
+
+        KeyIndex(final int size) {
+            indexes = new BiMap<>(size);
+        }
+
+        Integer get(final K key) {
+            return indexes.get(normalizeKey(key));
+        }
+
+        K getByValue(final int index) {
+            return originalKey(indexes.getByValue(index));
+        }
+
+        void put(final K key, final int index) {
+            indexes.put(normalizeKey(key), index);
+        }
+
+        void forcePut(final K key, final int index) {
+            indexes.forcePut(normalizeKey(key), index);
+        }
+
+        Integer remove(final K key) {
+            return indexes.remove(normalizeKey(key));
+        }
+
+        int size() {
+            return indexes.size();
+        }
+    }
+
+    private static final class KeySet<K> extends java.util.AbstractSet<K> {
+        private final Map<Object, Boolean> keys = new java.util.LinkedHashMap<>();
+
+        @Override
+        public boolean add(final K key) {
+            return keys.put(normalizeKey(key), Boolean.TRUE) == null;
+        }
+
+        @Override
+        public boolean contains(final Object key) {
+            return keys.containsKey(normalizeKey(key));
+        }
+
+        @Override
+        public boolean remove(final Object key) {
+            return keys.remove(normalizeKey(key)) != null;
+        }
+
+        @Override
+        public int size() {
+            return keys.size();
+        }
+
+        @Override
+        public void clear() {
+            keys.clear();
+        }
+
+        @Override
+        public int hashCode() {
+            return keys.keySet().hashCode();
+        }
+
+        @Override
+        public Iterator<K> iterator() {
+            final Iterator<Object> iterator = keys.keySet().iterator();
+            return new Iterator<>() {
+                @Override
+                public boolean hasNext() {
+                    return iterator.hasNext();
+                }
+
+                @Override
+                public K next() {
+                    return originalKey(iterator.next());
+                }
+
+                @Override
+                public void remove() {
+                    iterator.remove();
+                }
+            };
+        }
+
+        @Override
+        public boolean removeAll(final Collection<?> values) {
+            return keys.keySet().removeAll(normalizedKeys(values));
+        }
+
+        @Override
+        public boolean retainAll(final Collection<?> values) {
+            return keys.keySet().retainAll(normalizedKeys(values));
+        }
+
+        private static Set<Object> normalizedKeys(final Collection<?> values) {
+            // AbstractSet's size-dependent removeAll implementation would otherwise sometimes use
+            // the caller's array identity equality instead of this set's deep equality.
+            final Set<Object> normalized = new java.util.HashSet<>();
+            for (final Object value : values) {
+                normalized.add(normalizeKey(value));
+            }
+            return normalized;
+        }
+    }
+
+    // A public Set must hash and compare the same objects that its iterator returns. Exposing
+    // KeySet directly mixes deep array membership with raw array identity and breaks that contract.
+    // Keep deep equivalence inside Sheet and wrap this live, standard-equality view before exposure.
+    private static final class StandardKeySetView<K> extends java.util.AbstractSet<K> {
+        private final Set<K> keys;
+
+        StandardKeySetView(final Set<K> keys) {
+            this.keys = keys;
+        }
+
+        @Override
+        public int size() {
+            return keys.size();
+        }
+
+        @Override
+        public boolean contains(final Object key) {
+            if (key == null || !key.getClass().isArray()) {
+                return keys.contains(key);
+            }
+
+            for (final K storedKey : keys) {
+                if (storedKey == key) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        @Override
+        public Iterator<K> iterator() {
+            return keys.iterator();
+        }
+    }
+
+    static <K> Set<K> newKeySet(final Collection<? extends K> keys) {
+        final Set<K> result = new KeySet<>();
+        if (keys != null) {
+            result.addAll(keys);
+        }
+        return result;
+    }
 
     private final Set<R> _rowKeySet; //NOSONAR
 
     private final Set<C> _columnKeySet; //NOSONAR
 
-    private BiMap<R, Integer> _rowKeyIndexMap; //NOSONAR
+    private KeyIndex<R> _rowKeyIndexMap; //NOSONAR
 
-    private BiMap<C, Integer> _columnKeyIndexMap; //NOSONAR
+    private KeyIndex<C> _columnKeyIndexMap; //NOSONAR
 
     private List<List<V>> _columnList; //NOSONAR
 
@@ -328,11 +562,18 @@ public final class Sheet<R, C, V> implements Cloneable {
     public Sheet(final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws IllegalArgumentException {
         N.checkArgument(!N.anyNull(rowKeySet), "Row key cannot be null");
         N.checkArgument(!N.anyNull(columnKeySet), "Column key cannot be null");
-        N.checkArgument(!N.containsDuplicates(rowKeySet), "Duplicate row keys are not allowed");
-        N.checkArgument(!N.containsDuplicates(columnKeySet), "Duplicate column keys are not allowed");
+        _rowKeySet = newKeySet(rowKeySet);
+        _columnKeySet = newKeySet(columnKeySet);
+        N.checkArgument(rowKeySet == null || _rowKeySet.size() == rowKeySet.size(), "Duplicate row keys are not allowed");
+        N.checkArgument(columnKeySet == null || _columnKeySet.size() == columnKeySet.size(), "Duplicate column keys are not allowed");
 
-        _rowKeySet = N.newLinkedHashSet(rowKeySet);
-        _columnKeySet = N.newLinkedHashSet(columnKeySet);
+        // Build the key -> index maps here rather than on first keyed access. They used to be built lazily by
+        // getRowIndex()/getColumnIndex()/initIndexMap(), which run on READ paths (rowValues, columnValues, the
+        // cell streams) and assign the field before filling it - so two threads reading a frozen Sheet that had
+        // never been written to could see a half-built map and fail with "No row found by key" for a key that
+        // exists, contradicting the class contract that concurrent reads are safe. Every keyed operation needs
+        // the maps anyway, and building them is O(rows + columns).
+        initIndexMap();
     }
 
     /**
@@ -369,21 +610,19 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #rows(Collection, Collection, Object[][])
      * @see #columns(Collection, Collection, Object[][])
      */
-    public Sheet(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Object[][] rows) throws IllegalArgumentException {
+    public Sheet(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final V[][] rows) throws IllegalArgumentException {
         this(rowKeySet, columnKeySet);
 
         final int rowLength = this.rowCount();
         final int columnLength = this.columnCount();
 
         if (N.notEmpty(rows)) {
-            N.checkArgument(rows.length == rowLength, "The length of array is not equal to size of row/column key set"); //NOSONAR
+            N.checkArgument(rows.length == rowLength, "The length of row array is not equal to size of row key set"); //NOSONAR
 
             for (final Object[] e : rows) {
                 N.checkArgument(e != null, "Row cannot be null");
-                N.checkArgument(e.length == columnLength, "The length of array is not equal to size of row/column key set");
+                N.checkArgument(e.length == columnLength, "The length of row is not equal to size of column key set");
             }
-
-            initIndexMap();
 
             _columnList = new ArrayList<>(columnLength);
 
@@ -391,7 +630,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                 final List<V> column = new ArrayList<>(rowLength);
 
                 for (int j = 0; j < rowLength; j++) {
-                    column.add((V) rows[j][i]);
+                    column.add(rows[j][i]);
                 }
 
                 _columnList.add(column);
@@ -465,7 +704,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #rows(Collection, Collection, Collection)
      * @see #columns(Collection, Collection, Object[][])
      */
-    public static <R, C, V> Sheet<R, C, V> rows(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Object[][] rows)
+    public static <R, C, V> Sheet<R, C, V> rows(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final V[][] rows)
             throws IllegalArgumentException {
         return new Sheet<>(rowKeySet, columnKeySet, rows);
     }
@@ -516,8 +755,6 @@ public final class Sheet<R, C, V> implements Cloneable {
                 N.checkArgument(e != null, "Row cannot be null");
                 N.checkArgument(e.size() == columnLength, "The size of row is not equal to size of column key set");
             }
-
-            instance.initIndexMap();
 
             instance._columnList = new ArrayList<>(columnLength);
 
@@ -572,7 +809,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #columns(Collection, Collection, Collection)
      * @see #rows(Collection, Collection, Object[][])
      */
-    public static <R, C, V> Sheet<R, C, V> columns(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final Object[][] columns)
+    public static <R, C, V> Sheet<R, C, V> columns(final Collection<R> rowKeySet, final Collection<C> columnKeySet, final V[][] columns)
             throws IllegalArgumentException {
         final Sheet<R, C, V> instance = new Sheet<>(rowKeySet, columnKeySet);
 
@@ -586,8 +823,6 @@ public final class Sheet<R, C, V> implements Cloneable {
                 N.checkArgument(e != null, "Column cannot be null");
                 N.checkArgument(e.length == rowLength, "The length of column is not equal to size of row key set");
             }
-
-            instance.initIndexMap();
 
             instance._columnList = new ArrayList<>(columnLength);
 
@@ -648,8 +883,6 @@ public final class Sheet<R, C, V> implements Cloneable {
                 N.checkArgument(e.size() == rowLength, "The size of column is not equal to size of row key set");
             }
 
-            instance.initIndexMap();
-
             instance._columnList = new ArrayList<>(columnLength);
 
             for (final Collection<? extends V> column : columns) {
@@ -668,7 +901,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The returned set maintains the insertion order of row keys. It is a live read-only view: changes
      * made through this Sheet are reflected in the view, while attempts to modify the view directly
      * throw {@code UnsupportedOperationException}.
-     * This is useful for iterating over rows or checking row existence.
+     * Membership, equality and hashing follow the standard {@link Set} contract. In particular, an array
+     * is an element only if that same array object is a key. Use {@link #containsRow(Object)} for deep
+     * array-key membership. Iteration returns the original key objects.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -691,7 +926,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #containsRow(Object)
      */
     public ImmutableSet<R> rowKeySet() {
-        return ImmutableSet.wrap(_rowKeySet);
+        return ImmutableSet.wrap(new StandardKeySetView<>(_rowKeySet));
     }
 
     /**
@@ -700,7 +935,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The returned set maintains the insertion order of column keys. It is a live read-only view: changes
      * made through this Sheet are reflected in the view, while attempts to modify the view directly
      * throw {@code UnsupportedOperationException}.
-     * This is useful for iterating over columns or checking column existence.
+     * Membership, equality and hashing follow the standard {@link Set} contract. In particular, an array
+     * is an element only if that same array object is a key. Use {@link #containsColumn(Object)} for deep
+     * array-key membership. Iteration returns the original key objects.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -723,7 +960,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #containsColumn(Object)
      */
     public ImmutableSet<C> columnKeySet() {
-        return ImmutableSet.wrap(_columnKeySet);
+        return ImmutableSet.wrap(new StandardKeySetView<>(_columnKeySet));
     }
 
     /**
@@ -747,7 +984,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKey the key identifying the column
      * @return {@code true} if the cell contains {@code null} or the Sheet has not been initialized with data, {@code false} otherwise
      * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet.
-     * @see #isNull(int, int)
+     * @see #isNullAt(int, int)
      * @see #isNull(Point)
      * @see #get(Object, Object)
      */
@@ -778,7 +1015,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2"),
      *     new Integer[][] {{1, null}, {3, 4}}
      * );
-     * boolean isNull = sheet.isNull(0, 1);   // returns true (row1, col2)
+     * boolean isNull = sheet.isNullAt(0, 1);   // returns true (row1, col2)
      * }</pre>
      *
      * @param rowIndex the zero-based index of the row
@@ -787,9 +1024,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IndexOutOfBoundsException if the indices are out of bounds
      * @see #isNull(Object, Object)
      * @see #isNull(Point)
-     * @see #get(int, int)
+     * @see #getAt(int, int)
      */
-    public boolean isNull(final int rowIndex, final int columnIndex) throws IndexOutOfBoundsException {
+    public boolean isNullAt(final int rowIndex, final int columnIndex) throws IndexOutOfBoundsException {
         checkRowIndex(rowIndex);
         checkColumnIndex(columnIndex);
 
@@ -804,7 +1041,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Checks whether the cell at the specified point contains a {@code null} value.
      * <p>
      * The Point object encapsulates both row and column indices for convenient access.
-     * This is a convenience method equivalent to calling {@code isNull(point.rowIndex, point.columnIndex)}.
+     * This is a convenience method equivalent to calling {@code isNullAt(point.rowIndex(), point.columnIndex())}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -813,16 +1050,19 @@ public final class Sheet<R, C, V> implements Cloneable {
      * boolean isNull = sheet.isNull(point);   // checks if cell at row 0, column 1 is null
      * }</pre>
      *
-     * @param point the Point containing row and column indices
+     * @param point the non-null Point containing zero-based row and column indices
      * @return {@code true} if the cell contains {@code null} or the Sheet has not been initialized with data, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code point} is null
      * @throws IndexOutOfBoundsException if the point's indices are out of bounds
-     * @see #isNull(int, int)
+     * @see #isNullAt(int, int)
      * @see #isNull(Object, Object)
      * @see #get(Point)
      */
     @Beta
-    public boolean isNull(final Point point) throws IndexOutOfBoundsException {
-        return isNull(point.rowIndex, point.columnIndex);
+    public boolean isNull(final Point point) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(point, cs.point);
+
+        return isNullAt(point.rowIndex, point.columnIndex);
     }
 
     /**
@@ -846,7 +1086,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnKey the key identifying the column
      * @return the value in the cell, or {@code null} if the cell is uninitialized or explicitly contains {@code null}
      * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet.
-     * @see #get(int, int)
+     * @see #getAt(int, int)
      * @see #get(Point)
      * @see #set(Object, Object, Object)
      * @see #isNull(Object, Object)
@@ -880,7 +1120,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2"),
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
-     * Integer value = sheet.get(0, 1);   // returns 2 (row1, col2)
+     * Integer value = sheet.getAt(0, 1);   // returns 2 (row1, col2)
      * }</pre>
      *
      * @param rowIndex the zero-based index of the row
@@ -889,11 +1129,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IndexOutOfBoundsException if the indices are out of bounds
      * @see #get(Object, Object)
      * @see #get(Point)
-     * @see #set(int, int, Object)
-     * @see #isNull(int, int)
+     * @see #setAt(int, int, Object)
+     * @see #isNullAt(int, int)
      */
     @MayReturnNull
-    public V get(final int rowIndex, final int columnIndex) throws IndexOutOfBoundsException {
+    public V getAt(final int rowIndex, final int columnIndex) throws IndexOutOfBoundsException {
         checkRowIndex(rowIndex);
         checkColumnIndex(columnIndex);
 
@@ -908,7 +1148,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Retrieves the value stored in the cell at the specified point.
      * <p>
      * The Point object encapsulates both row and column indices for convenient access.
-     * This is a convenience method equivalent to calling {@code get(point.rowIndex, point.columnIndex)}.
+     * This is a convenience method equivalent to calling {@code getAt(point.rowIndex(), point.columnIndex())}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -917,18 +1157,21 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Integer value = sheet.get(point);   // gets value at row 0, column 1
      * }</pre>
      *
-     * @param point the Point containing row and column indices
+     * @param point the non-null Point containing zero-based row and column indices
      * @return the value in the cell, or {@code null} if the cell is uninitialized or explicitly contains {@code null}
+     * @throws IllegalArgumentException if {@code point} is null
      * @throws IndexOutOfBoundsException if the point's indices are out of bounds
-     * @see #get(int, int)
+     * @see #getAt(int, int)
      * @see #get(Object, Object)
      * @see #set(Point, Object)
      * @see #isNull(Point)
      */
     @MayReturnNull
     @Beta
-    public V get(final Point point) throws IndexOutOfBoundsException {
-        return get(point.rowIndex, point.columnIndex);
+    public V get(final Point point) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(point, cs.point);
+
+        return getAt(point.rowIndex, point.columnIndex);
     }
 
     /**
@@ -954,7 +1197,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @return the previous value in the cell, or {@code null} if the cell was uninitialized or previously {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet.
-     * @see #set(int, int, Object)
+     * @see #setAt(int, int, Object)
      * @see #set(Point, Object)
      * @see #get(Object, Object)
      * @see #putAll(Sheet)
@@ -968,7 +1211,25 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         init();
 
-        return set(rowIndex, columnIndex, value);
+        // setValue, not set(int, int, V): the coordinates came from the key maps, so they are already
+        // in range, and checkFrozen()/init() have already run. Delegating to the public overload would
+        // repeat all four checks on every call.
+        return setValue(rowIndex, columnIndex, value);
+    }
+
+    /**
+     * Stores {@code value} at an already-validated position and returns the value it replaced.
+     *
+     * <p>Callers must have run {@link #checkFrozen()}, validated both coordinates and called {@link #init()}
+     * beforehand; this method performs no checks of its own.</p>
+     *
+     * @param rowIndex a valid zero-based row index
+     * @param columnIndex a valid zero-based column index
+     * @param value the new value
+     * @return the previous value at that position
+     */
+    private V setValue(final int rowIndex, final int columnIndex, final V value) {
+        return _columnList.get(columnIndex).set(rowIndex, value);
     }
 
     /**
@@ -985,7 +1246,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     List.of("col1", "col2"),
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
-     * Integer oldValue = sheet.set(0, 1, 10);   // returns 2, sets cell[0][1] to 10
+     * Integer oldValue = sheet.setAt(0, 1, 10);   // returns 2, sets cell[0][1] to 10
      * }</pre>
      *
      * @param rowIndex the zero-based index of the row
@@ -996,27 +1257,24 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IndexOutOfBoundsException if the specified indices are out of bounds
      * @see #set(Object, Object, Object)
      * @see #set(Point, Object)
-     * @see #get(int, int)
+     * @see #getAt(int, int)
      */
     @MayReturnNull
-    public V set(final int rowIndex, final int columnIndex, final V value) throws IllegalStateException, IndexOutOfBoundsException {
+    public V setAt(final int rowIndex, final int columnIndex, final V value) throws IllegalStateException, IndexOutOfBoundsException {
         checkFrozen();
         checkRowIndex(rowIndex);
         checkColumnIndex(columnIndex);
 
         init();
 
-        final V previousValue = _columnList.get(columnIndex).get(rowIndex);
-        _columnList.get(columnIndex).set(rowIndex, value);
-
-        return previousValue;
+        return setValue(rowIndex, columnIndex, value);
     }
 
     /**
      * Sets or updates the value in the cell at the specified point.
      * <p>
      * The Point object encapsulates both row and column indices for convenient access.
-     * This is a convenience method equivalent to calling {@code set(point.rowIndex, point.columnIndex, value)}.
+     * This is a convenience method equivalent to calling {@code setAt(point.rowIndex(), point.columnIndex(), value)}.
      * The Sheet must not be frozen for this operation to succeed.
      * </p>
      *
@@ -1031,19 +1289,22 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Integer oldValue = sheet.set(point, 10);   // returns 2, sets cell at row 0, column 1 to 10
      * }</pre>
      *
-     * @param point the Point containing row and column indices
+     * @param point the non-null Point containing zero-based row and column indices
      * @param value the new value to be stored in the cell
      * @return the previous value in the cell, or {@code null} if the cell was uninitialized or previously {@code null}
+     * @throws IllegalArgumentException if {@code point} is null
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IndexOutOfBoundsException if the point's indices are out of bounds
-     * @see #set(int, int, Object)
+     * @see #setAt(int, int, Object)
      * @see #set(Object, Object, Object)
      * @see #get(Point)
      */
     @Beta
     @MayReturnNull
-    public V set(final Point point, final V value) throws IllegalStateException, IndexOutOfBoundsException {
-        return set(point.rowIndex, point.columnIndex, value);
+    public V set(final Point point, final V value) throws IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException {
+        N.checkArgNotNull(point, cs.point);
+
+        return setAt(point.rowIndex, point.columnIndex, value);
     }
 
     /**
@@ -1081,37 +1342,57 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // row2: [4, 5, 6]
      * }</pre>
      *
-     * @param source the source Sheet from which to get the values
+     * @param source the source Sheet from which to get the values; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen and cannot be modified
-     * @throws IllegalArgumentException if the source Sheet contains row keys or column keys that are not present in
-     *         this Sheet.
+     * @throws IllegalArgumentException if {@code source} is {@code null}, or if the source Sheet contains row keys
+     *         or column keys that are not present in this Sheet.
      * @see #putAll(Sheet, BiFunction)
      * @see #set(Object, Object, Object)
      * @see #merge(Sheet, BiFunction)
      */
     public void putAll(final Sheet<? extends R, ? extends C, ? extends V> source) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
+        N.checkArgNotNull(source, cs.source);
 
-        if (!this.rowKeySet().containsAll(source.rowKeySet())) {
-            throw new IllegalArgumentException(source.rowKeySet() + " are not all included in this sheet with row key set: " + this.rowKeySet());
+        if (!_rowKeySet.containsAll(source._rowKeySet)) {
+            throw new IllegalArgumentException(
+                    keysToString(source.rowKeySet()) + " are not all included in this sheet with row key set: " + keysToString(this.rowKeySet()));
         }
 
-        if (!this.columnKeySet().containsAll(source.columnKeySet())) {
-            throw new IllegalArgumentException(source.columnKeySet() + " are not all included in this sheet with column key set: " + this.columnKeySet());
+        if (!_columnKeySet.containsAll(source._columnKeySet)) {
+            throw new IllegalArgumentException(
+                    keysToString(source.columnKeySet()) + " are not all included in this sheet with column key set: " + keysToString(this.columnKeySet()));
         }
 
         final Sheet<R, C, ? extends V> tmp = (Sheet<R, C, ? extends V>) source;
-        int rowIndex = 0;
-        int columnIndex = 0;
+
+        if (tmp.rowCount() == 0 || tmp.columnCount() == 0) {
+            return;
+        }
+
+        // Resolve each axis once and write through the unchecked getValue/setValue - as merge(Sheet,
+        // BiFunction) already does. Both key sets were validated above and every coordinate below comes
+        // from a key map, so the public set(int, int, V) would re-run checkFrozen, two bounds checks and
+        // init() for every single cell, and tmp.get(r, c) would repeat two key lookups already done here.
+        init();
+
+        final int[] sourceColumnIndexes = new int[tmp.columnCount()];
+        int idx = 0;
+
+        for (final C c : tmp.columnKeySet()) {
+            sourceColumnIndexes[idx++] = getColumnIndex(c);
+        }
+
+        int sourceRowIndex = 0;
 
         for (final R r : tmp.rowKeySet()) {
-            rowIndex = getRowIndex(r);
-            for (final C c : tmp.columnKeySet()) {
-                // this.put(r, c, tmp.get(r, c));
-                columnIndex = getColumnIndex(c);
+            final int rowIndex = getRowIndex(r);
 
-                set(rowIndex, columnIndex, tmp.get(r, c));
+            for (int i = 0, len = sourceColumnIndexes.length; i < len; i++) {
+                setValue(rowIndex, sourceColumnIndexes[i], tmp.getValue(sourceRowIndex, i));
             }
+
+            sourceRowIndex++;
         }
     }
 
@@ -1152,40 +1433,60 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // row2: [10, 12] (3+7, 4+8)
      * }</pre>
      *
-     * @param source the source Sheet from which to get the values
+     * @param source the source Sheet from which to get the values; must not be {@code null}
      * @param mergeFunction the function used to combine conflicting cell values; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen and cannot be modified
-     * @throws IllegalArgumentException if the source Sheet contains row keys or column keys that are not present in
-     *         this Sheet, or if {@code mergeFunction} is {@code null}.
+     * @throws IllegalArgumentException if {@code source} or {@code mergeFunction} is {@code null}, or if the source
+     *         Sheet contains row keys or column keys that are not present in this Sheet.
      * @see #putAll(Sheet)
      * @see #set(Object, Object, Object)
      * @see #merge(Sheet, BiFunction)
      */
     public void putAll(final Sheet<? extends R, ? extends C, ? extends V> source, final BiFunction<? super V, ? super V, ? extends V> mergeFunction)
             throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
         checkFrozen();
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgNotNull(mergeFunction, cs.mergeFunction);
 
-        if (!this.rowKeySet().containsAll(source.rowKeySet())) {
-            throw new IllegalArgumentException(source.rowKeySet() + " are not all included in this sheet with row key set: " + this.rowKeySet());
+        if (!_rowKeySet.containsAll(source._rowKeySet)) {
+            throw new IllegalArgumentException(
+                    keysToString(source.rowKeySet()) + " are not all included in this sheet with row key set: " + keysToString(this.rowKeySet()));
         }
 
-        if (!this.columnKeySet().containsAll(source.columnKeySet())) {
-            throw new IllegalArgumentException(source.columnKeySet() + " are not all included in this sheet with column key set: " + this.columnKeySet());
+        if (!_columnKeySet.containsAll(source._columnKeySet)) {
+            throw new IllegalArgumentException(
+                    keysToString(source.columnKeySet()) + " are not all included in this sheet with column key set: " + keysToString(this.columnKeySet()));
         }
 
         final Sheet<R, C, ? extends V> tmp = (Sheet<R, C, ? extends V>) source;
-        int rowIndex = 0;
-        int columnIndex = 0;
+
+        if (tmp.rowCount() == 0 || tmp.columnCount() == 0) {
+            return;
+        }
+
+        // See putAll(Sheet): resolve each axis once, then read and write through the unchecked
+        // getValue/setValue instead of paying the public accessors' repeated validation per cell.
+        init();
+
+        final int[] sourceColumnIndexes = new int[tmp.columnCount()];
+        int idx = 0;
+
+        for (final C c : tmp.columnKeySet()) {
+            sourceColumnIndexes[idx++] = getColumnIndex(c);
+        }
+
+        int sourceRowIndex = 0;
 
         for (final R r : tmp.rowKeySet()) {
-            rowIndex = getRowIndex(r);
-            for (final C c : tmp.columnKeySet()) {
-                // this.put(r, c, tmp.get(r, c));
-                columnIndex = getColumnIndex(c);
+            final int rowIndex = getRowIndex(r);
 
-                set(rowIndex, columnIndex, mergeFunction.apply(get(rowIndex, columnIndex), tmp.get(r, c)));
+            for (int i = 0, len = sourceColumnIndexes.length; i < len; i++) {
+                final int columnIndex = sourceColumnIndexes[i];
+
+                setValue(rowIndex, columnIndex, mergeFunction.apply(getValue(rowIndex, columnIndex), tmp.getValue(sourceRowIndex, i)));
             }
+
+            sourceRowIndex++;
         }
     }
 
@@ -1213,7 +1514,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @return the value that was previously stored in the cell, or {@code null} if the cell was uninitialized or already {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if the row key or column key does not exist in this Sheet.
-     * @see #remove(int, int)
+     * @see #removeAt(int, int)
      * @see #remove(Point)
      * @see #set(Object, Object, Object)
      */
@@ -1225,7 +1526,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             final int rowIndex = getRowIndex(rowKey);
             final int columnIndex = getColumnIndex(columnKey);
 
-            return remove(rowIndex, columnIndex);
+            return removeAt(rowIndex, columnIndex);
         } else {
             checkRowKey(rowKey);
             checkColumnKey(columnKey);
@@ -1249,8 +1550,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      *     new Integer[][] {{1, 2}, {3, 4}}
      * );
      *
-     * Integer removed = sheet.remove(0, 1);   // removes value at row1, col2; returns 2
-     * Integer nowNull = sheet.get(0, 1);      // returns null
+     * Integer removed = sheet.removeAt(0, 1);   // removes value at row1, col2; returns 2
+     * Integer nowNull = sheet.getAt(0, 1);      // returns null
      * }</pre>
      *
      * @param rowIndex the zero-based index of the row
@@ -1260,10 +1561,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IndexOutOfBoundsException if rowIndex &lt; 0 or rowIndex &gt;= rowCount() or columnIndex &lt; 0 or columnIndex &gt;= columnCount()
      * @see #remove(Object, Object)
      * @see #remove(Point)
-     * @see #set(int, int, Object)
+     * @see #setAt(int, int, Object)
      */
     @MayReturnNull
-    public V remove(final int rowIndex, final int columnIndex) throws IllegalStateException, IndexOutOfBoundsException {
+    public V removeAt(final int rowIndex, final int columnIndex) throws IllegalStateException, IndexOutOfBoundsException {
         checkFrozen();
         checkRowIndex(rowIndex);
         checkColumnIndex(columnIndex);
@@ -1296,16 +1597,19 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param point the Point containing the row and column indices of the cell
      * @return the value that was previously stored in the cell, or {@code null} if the cell was uninitialized or already {@code null}
+     * @throws IllegalArgumentException if {@code point} is {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IndexOutOfBoundsException if the point indices are out of bounds
-     * @see #remove(int, int)
+     * @see #removeAt(int, int)
      * @see #remove(Object, Object)
      * @see #set(Point, Object)
      */
     @Beta
     @MayReturnNull
-    public V remove(final Point point) throws IllegalStateException, IndexOutOfBoundsException {
-        return remove(point.rowIndex, point.columnIndex);
+    public V remove(final Point point) throws IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException {
+        N.checkArgNotNull(point, cs.point);
+
+        return removeAt(point.rowIndex, point.columnIndex);
     }
 
     /**
@@ -1383,6 +1687,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * even when searching for {@code null}; an uninitialized Sheet that does have both rows and
      * columns returns {@code true} only when searching for {@code null}.
      * </p>
+     * <p>
+     * The comparison is <i>shallow</i>, matching {@link #equals(Object)}: a cell holding an array matches
+     * only the identical array instance, not an equal-by-content one.
+     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1424,13 +1732,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Retrieves all the values in the row identified by the specified row key.
      * <p>
-     * Returns an immutable list view containing all values in the specified row, in the order
-     * corresponding to the column keys. Values are read lazily from this Sheet by row index and
-     * column index when the returned list is accessed. The view's size and numeric row position are
-     * fixed at creation time: later value updates at that position are visible, but moving or sorting
-     * rows does not make the view follow the original row key, and structural removal may invalidate it.
-     * The list may contain {@code null} values if cells in the row are empty or this Sheet has not been
-     * initialized with values.
+     * Returns an immutable list <i>view</i> containing all values in the specified row, in the order
+     * corresponding to the column keys. Nothing is copied: the row key, the row's current position and
+     * the column count are all resolved on every access, so the view keeps tracking the row this key
+     * names even after {@link #moveRow(Object, int)}, {@link #swapRows(Object, Object)},
+     * {@link #sortByRowKey()} or the insertion or removal of other rows, and it grows and shrinks with
+     * {@link #addColumn(Object, Collection)} / {@link #removeColumn(Object)}. See
+     * <a href="#view-semantics">View semantics</a>. The list may contain {@code null} values if cells in
+     * the row are empty or this Sheet has not been initialized with values.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1445,27 +1754,40 @@ public final class Sheet<R, C, V> implements Cloneable {
      * );
      * ImmutableList<Integer> row1 = sheet.rowValues("row1");   // returns [1, 2, 3]
      * ImmutableList<Integer> row2 = sheet.rowValues("row2");   // returns [4, null, 6]
+     *
+     * sheet.moveRow("row1", 1);   // row1 is now the second row
+     * row1.get(0);                // still 1 - the view follows the key, not the position
      * }</pre>
      *
      * @param rowKey the row key identifying the row to retrieve
-     * @return a lazy immutable list view of values at the row's current numeric position, in column order
-     * @throws IllegalArgumentException if the row key does not exist in this Sheet.
+     * @return a lazy immutable list view of the values of the row named by {@code rowKey}, in column order
+     * @throws IllegalArgumentException if the row key does not exist in this Sheet; also thrown later, by the
+     *         returned view's accessors, if the row is subsequently removed from, or renamed in, this Sheet
      * @see #columnValues(Object)
      * @see #setRow(Object, Collection)
      * @see #rowAsMap(Object)
      */
     public ImmutableList<V> rowValues(final R rowKey) throws IllegalArgumentException {
-        final int columnLength = columnCount();
-        // getRowIndex works on uninitialized sheets too (it lazily builds the index map from the key
-        // set); capturing -1 here would poison the lazy view once a later write initializes the sheet.
-        final int rowIndex = getRowIndex(rowKey);
+        // Validate eagerly so an unknown key fails at the call site rather than at first access.
+        // Everything else is resolved per access: this is a keyed view, so it must follow the row key
+        // through reordering, and its length must track the live column count. Capturing either the
+        // row index or the column count here made the view read a *different* row after moveRow/
+        // swapRows/sort, and made it outlive its own data after removeRow (size said 3 over 2 cells).
+        getRowIndex(rowKey);
 
         return new ImmutableList<>(new AbstractList<V>() {
             @Override
             public V get(final int columnIndex) {
+                final int columnLength = columnCount();
+
                 if (columnIndex < 0 || columnIndex >= columnLength) {
                     throw new IndexOutOfBoundsException("Index " + columnIndex + " out of bounds for length " + columnLength);
                 }
+
+                // Resolve the key before the initialization check, so that a row removed from this Sheet is
+                // reported the same way whether or not storage has been allocated yet. Reading it only inside
+                // the initialized branch made an uninitialized Sheet return null for a key that is gone.
+                final int rowIndex = getRowIndex(rowKey);
 
                 if (!_isInitialized) {
                     return null;
@@ -1476,7 +1798,42 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             @Override
             public int size() {
-                return columnLength;
+                // Resolve the key here too. Without it a view whose row is gone still answered size() (and
+                // through it isEmpty()/iterator()/stream()) while every element read threw, and on a Sheet with
+                // no columns it silently compared equal to the empty list. The price is that size() is no longer
+                // O(1) and no longer total: it costs one index-map lookup and it throws once the row is gone, so
+                // hoist it out of hot indexed loops - and see iterator() below, which exists only for that.
+                getRowIndex(rowKey);
+
+                return columnCount();
+            }
+
+            @Override
+            public Iterator<V> iterator() {
+                // Overridden purely for cost. AbstractList's own iterator asks size() on every hasNext(), and
+                // ImmutableCollection.iterator() wraps it in ObjIterator.of(..), whose next() calls hasNext()
+                // again: with the key resolved in size() that is three index-map lookups per element. Resolve
+                // it once here instead - a dead view then fails even sooner, at iterator() creation - and let
+                // next() pay only the one lookup get(int) already makes.
+                getRowIndex(rowKey);
+
+                return new Iterator<>() {
+                    private int cursor = 0;
+
+                    @Override
+                    public boolean hasNext() {
+                        return cursor < columnCount();
+                    }
+
+                    @Override
+                    public V next() {
+                        if (cursor >= columnCount()) {
+                            throw new NoSuchElementException();
+                        }
+
+                        return get(cursor++);
+                    }
+                };
             }
         }, true);
     }
@@ -1505,6 +1862,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * sheet.setRow("row2", List.of());
      * }</pre>
      *
+     * <p>Supplied values are snapshotted before any cells or keys change, so this Sheet's live
+     * row/column views can be used as inputs.</p>
+     *
      * @param rowKey the key of the row to be set
      * @param row the collection of values to set in the row; must match the number of columns, or be {@code null} or empty
      * @throws IllegalStateException if this Sheet is frozen
@@ -1514,8 +1874,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #updateRow(Object, Function)
      * @see #addRow(Object, Collection)
      */
-    public void setRow(final R rowKey, final Collection<? extends V> row) throws IllegalStateException, IllegalArgumentException {
+    public void setRow(final R rowKey, Collection<? extends V> row) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
+
+        // The input may be one of our live views; read it before changing cells or key indexes.
+        row = row == null ? null : new ArrayList<>(row);
 
         final int rowIndex = getRowIndex(rowKey);
         final int columnLength = columnCount();
@@ -1562,6 +1925,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * sheet.addRow("row3", List.of());
      * }</pre>
      *
+     * <p>Supplied values are snapshotted before any cells or keys change, so this Sheet's live
+     * row/column views can be used as inputs.</p>
+     *
      * @param rowKey the unique key for the new row; must not be {@code null} and must not already exist in the Sheet
      * @param row the collection of values for the new row; must match the number of columns, or be {@code null} or empty
      * @throws IllegalStateException if this Sheet is frozen
@@ -1571,15 +1937,17 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #removeRow(Object)
      * @see #setRow(Object, Collection)
      */
-    public void addRow(final R rowKey, final Collection<? extends V> row) throws IllegalStateException, IllegalArgumentException {
+    public void addRow(final R rowKey, Collection<? extends V> row) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
 
-        // Validate before any mutation: BiMap.put would reject the null AFTER the key set was
-        // already modified, leaving the sheet permanently inconsistent.
+        // The input may be one of our live views; read it before changing cells or key indexes.
+        row = row == null ? null : new ArrayList<>(row);
+
+        // Validate before any mutation so a rejected key cannot leave the axes and indexes inconsistent.
         N.checkArgNotNull(rowKey, cs.rowKey);
 
         if (_rowKeySet.contains(rowKey)) {
-            throw new IllegalArgumentException("Row '" + rowKey + "' already exists"); //NOSONAR
+            throw new IllegalArgumentException("Row '" + keyToString(rowKey) + "' already exists"); //NOSONAR
         }
 
         final int rowLength = rowCount();
@@ -1628,23 +1996,28 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Sheet now contains rows: ["row1", "row2", "row3"]
      * }</pre>
      *
+     * <p>Supplied values are snapshotted before any cells or keys change, so this Sheet's live
+     * row/column views can be used as inputs.</p>
+     *
      * @param rowIndex the zero-based index where the row should be inserted; must be &gt;= 0 and &lt;= rowCount()
      * @param rowKey the unique key for the new row; must not be {@code null} and must not already exist in the Sheet
      * @param row the collection of values for the new row; must match the number of columns, or be {@code null} or empty
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IndexOutOfBoundsException if rowIndex &lt; 0 or rowIndex &gt; rowCount()
      * @throws IllegalArgumentException if {@code rowKey} is {@code null}, the row key already exists in this Sheet,
      *         or the collection size does not match column count (unless {@code null} or empty).
+     * @throws IndexOutOfBoundsException if rowIndex &lt; 0 or rowIndex &gt; rowCount()
      * @see #addRow(Object, Collection)
      * @see #moveRow(Object, int)
      * @see #removeRow(Object)
      */
-    public void addRow(final int rowIndex, final R rowKey, final Collection<? extends V> row)
-            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException {
+    public void addRow(final int rowIndex, final R rowKey, Collection<? extends V> row)
+            throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException {
         checkFrozen();
 
-        // Validate before any mutation: BiMap.put would reject the null AFTER the key set was
-        // already modified, leaving the sheet permanently inconsistent.
+        // The input may be one of our live views; read it before changing cells or key indexes.
+        row = row == null ? null : new ArrayList<>(row);
+
+        // Validate before any mutation so a rejected key cannot leave the axes and indexes inconsistent.
         N.checkArgNotNull(rowKey, cs.rowKey);
 
         final int rowLength = rowCount();
@@ -1653,7 +2026,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         N.checkPositionIndex(rowIndex, rowLength);
 
         if (_rowKeySet.contains(rowKey)) {
-            throw new IllegalArgumentException("Row '" + rowKey + "' already exists");
+            throw new IllegalArgumentException("Row '" + keyToString(rowKey) + "' already exists");
         }
 
         if (N.notEmpty(row) && row.size() != columnLength) {
@@ -1726,8 +2099,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #updateAll(Function)
      */
     public void updateRow(final R rowKey, final Function<? super V, ? extends V> func) throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
         checkFrozen();
+        N.checkArgNotNull(func, cs.func);
 
         final int rowIndex = this.getRowIndex(rowKey);
 
@@ -1816,6 +2189,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Row order is now: ["row2", "row1", "row3"]
      * }</pre>
      *
+     * <p>Moving a row to the position it already occupies is a no-op: this Sheet, and any view or lazy
+     * {@code Stream} obtained from it, are left untouched.</p>
+     *
      * @param rowKey the key of the row to be moved
      * @param newRowIndex the new zero-based index where the row should be positioned
      * @throws IllegalStateException if this Sheet is frozen
@@ -1828,9 +2204,18 @@ public final class Sheet<R, C, V> implements Cloneable {
     public void moveRow(final R rowKey, final int newRowIndex) throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException {
         checkFrozen();
 
+        // Resolve the key before validating the index, matching moveColumn(Object, int) - an unknown key is
+        // the more specific complaint when both arguments are wrong.
+        final int rowIndex = this.getRowIndex(rowKey);
         this.checkRowIndex(newRowIndex);
 
-        final int rowIndex = this.getRowIndex(rowKey);
+        if (rowIndex == newRowIndex) {
+            // A move to the row's current position changes nothing, but the code below rebuilds _rowKeySet
+            // and discards _rowKeyIndexMap. Discarding that map is not merely wasted work: every live
+            // row/cell Stream resolves its keys through it, so a no-op move used to make them throw NPE.
+            return;
+        }
+
         final List<R> tmp = new ArrayList<>(rowCount());
         tmp.addAll(_rowKeySet);
         tmp.add(newRowIndex, tmp.remove(rowIndex));
@@ -1838,7 +2223,17 @@ public final class Sheet<R, C, V> implements Cloneable {
         _rowKeySet.clear();
         _rowKeySet.addAll(tmp);
 
-        _rowKeyIndexMap = null;
+        // Repair the affected entries in place rather than discarding the whole map. A move only changes the
+        // indexes between the old and the new position, so re-binding that window is enough. Nulling the map
+        // instead made a moveRow + keyed-access loop rebuild it on every iteration (quadratic), and left any
+        // already-created Stream - which resolves its keys through this map - dereferencing null, so the
+        // documented-undefined "consume a Stream after a structural change" case failed with a bare NPE
+        // instead of the stale-but-readable behaviour swapRows(Object, Object) leaves behind.
+        if (_rowKeyIndexMap != null && _rowKeyIndexMap.size() != 0) {
+            for (int i = N.min(rowIndex, newRowIndex), to = N.max(rowIndex, newRowIndex); i <= to; i++) {
+                _rowKeyIndexMap.forcePut(tmp.get(i), i);
+            }
+        }
 
         if (_isInitialized && _columnList.size() > 0) {
             for (final List<V> column : _columnList) {
@@ -1868,6 +2263,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Data follows the rows: {{5, 6}, {3, 4}, {1, 2}}
      * }</pre>
      *
+     * <p>Swapping a row with itself is a no-op: this Sheet, and any view or lazy {@code Stream} obtained
+     * from it, are left untouched.</p>
+     *
      * @param rowKeyA the key of the first row to swap
      * @param rowKeyB the key of the second row to swap
      * @throws IllegalStateException if this Sheet is frozen
@@ -1880,6 +2278,12 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         final int rowIndexA = this.getRowIndex(rowKeyA);
         final int rowIndexB = this.getRowIndex(rowKeyB);
+
+        if (rowIndexA == rowIndexB) {
+            // Self-swap. The code below would produce the same contents, but it still rebuilds _rowKeySet
+            // and re-forcePuts both keys - pure waste. Both keys are already validated above.
+            return;
+        }
 
         final List<R> tmp = new ArrayList<>(rowCount());
         tmp.addAll(_rowKeySet);
@@ -1952,7 +2356,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         _rowKeySet.clear();
         _rowKeySet.addAll(tmp);
 
-        if (N.notEmpty(_rowKeyIndexMap)) {
+        if (_rowKeyIndexMap != null && _rowKeyIndexMap.size() != 0) {
             _rowKeyIndexMap.put(newRowKey, _rowKeyIndexMap.remove(rowKey));
         }
     }
@@ -2080,11 +2484,14 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Retrieves all the values in the column identified by the specified column key.
      * <p>
-     * Returns an immutable list view of the specified column's values, in the order corresponding to
-     * the row keys. The view's size and numeric column position are fixed at creation time: later value
-     * updates at that position are visible, but moving or sorting columns does not make the view follow
-     * the original column key, and structural removal may invalidate it. The list may contain
-     * {@code null} values if cells in the column are empty.
+     * Returns an immutable list <i>view</i> of the specified column's values, in the order corresponding
+     * to the row keys. Nothing is copied: the column key, the column's current position and the row count
+     * are all resolved on every access, so the view keeps tracking the column this key names even after
+     * {@link #moveColumn(Object, int)}, {@link #swapColumns(Object, Object)},
+     * {@link #sortByColumnKey()} or the insertion or removal of other columns, and it grows and shrinks
+     * with {@link #addRow(Object, Collection)} / {@link #removeRow(Object)}. See
+     * <a href="#view-semantics">View semantics</a>. The list may contain {@code null} values if cells in
+     * the column are empty or this Sheet has not been initialized with values.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2100,29 +2507,37 @@ public final class Sheet<R, C, V> implements Cloneable {
      * );
      * ImmutableList<Integer> col1 = sheet.columnValues("col1");   // returns [1, 3, 5]
      * ImmutableList<Integer> col2 = sheet.columnValues("col2");   // returns [2, null, 6]
+     *
+     * sheet.removeRow("row3");
+     * col1;                       // returns [1, 3] - the view shrank with the Sheet
      * }</pre>
      *
      * @param columnKey the key identifying the column to retrieve
-     * @return a lazy immutable list view of values at the column's current numeric position, in row order
-     * @throws IllegalArgumentException if the column key does not exist in this Sheet.
+     * @return a lazy immutable list view of the values of the column named by {@code columnKey}, in row order
+     * @throws IllegalArgumentException if the column key does not exist in this Sheet; also thrown later, by
+     *         the returned view's accessors, if the column is subsequently removed from, or renamed in, this Sheet
      * @see #rowValues(Object)
      * @see #setColumn(Object, Collection)
      * @see #columnAsMap(Object)
      */
     public ImmutableList<V> columnValues(final C columnKey) throws IllegalArgumentException {
-        final int rowLength = rowCount();
-        // getColumnIndex works on uninitialized sheets too (it lazily builds the index map from the key
-        // set). Return a lazy view rather than calling init(): init() would mutate the Sheet - flipping
-        // _isInitialized and allocating every column - which a read accessor must not do, least of all on
-        // a frozen (immutable, possibly shared) Sheet. Mirrors rowValues(Object).
-        final int columnIndex = getColumnIndex(columnKey);
+        // Validate eagerly so an unknown key fails at the call site rather than at first access. Everything
+        // else is resolved per access - see rowValues(Object) for why. Note this deliberately does not call
+        // init(): init() would mutate the Sheet (flipping _isInitialized and allocating every column), which
+        // a read accessor must not do, least of all on a frozen - and possibly shared - Sheet.
+        getColumnIndex(columnKey);
 
         return new ImmutableList<>(new AbstractList<V>() {
             @Override
             public V get(final int rowIndex) {
+                final int rowLength = rowCount();
+
                 if (rowIndex < 0 || rowIndex >= rowLength) {
                     throw new IndexOutOfBoundsException("Index " + rowIndex + " out of bounds for length " + rowLength);
                 }
+
+                // Resolve the key before the initialization check - see rowValues(Object).
+                final int columnIndex = getColumnIndex(columnKey);
 
                 if (!_isInitialized) {
                     return null;
@@ -2133,7 +2548,34 @@ public final class Sheet<R, C, V> implements Cloneable {
 
             @Override
             public int size() {
-                return rowLength;
+                // Resolve the key here too, and note what it costs - see rowValues(Object).
+                getColumnIndex(columnKey);
+
+                return rowCount();
+            }
+
+            @Override
+            public Iterator<V> iterator() {
+                // Overridden purely for cost - see rowValues(Object).
+                getColumnIndex(columnKey);
+
+                return new Iterator<>() {
+                    private int cursor = 0;
+
+                    @Override
+                    public boolean hasNext() {
+                        return cursor < rowCount();
+                    }
+
+                    @Override
+                    public V next() {
+                        if (cursor >= rowCount()) {
+                            throw new NoSuchElementException();
+                        }
+
+                        return get(cursor++);
+                    }
+                };
             }
         }, true);
     }
@@ -2162,6 +2604,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * sheet.setColumn("col2", List.of());
      * }</pre>
      *
+     * <p>Supplied values are snapshotted before any cells or keys change, so this Sheet's live
+     * row/column views can be used as inputs.</p>
+     *
      * @param columnKey the key of the column to be set
      * @param column the collection of values to set in the column; must match the number of rows, or be {@code null} or empty
      * @throws IllegalStateException if this Sheet is frozen
@@ -2171,8 +2616,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #updateColumn(Object, Function)
      * @see #addColumn(Object, Collection)
      */
-    public void setColumn(final C columnKey, final Collection<? extends V> column) throws IllegalStateException, IllegalArgumentException {
+    public void setColumn(final C columnKey, Collection<? extends V> column) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
+
+        // The input may be one of our live views; read it before changing cells or key indexes.
+        column = column == null ? null : new ArrayList<>(column);
 
         final int columnIndex = getColumnIndex(columnKey);
 
@@ -2185,22 +2633,17 @@ public final class Sheet<R, C, V> implements Cloneable {
         init();
 
         final List<V> existing = _columnList.get(columnIndex);
+
         if (N.isEmpty(column)) {
             N.fill(existing, 0, rowLength, null);
         } else {
             // Mutate in place rather than replace, so that previously returned column views remain consistent.
+            // init() guarantees every column holds exactly rowCount() cells and `column` was size-checked
+            // against rowLength above, so a plain positional set() covers the whole column.
             int i = 0;
+
             for (final V v : column) {
-                if (i < existing.size()) {
-                    existing.set(i, v);
-                } else {
-                    existing.add(v);
-                }
-                i++;
-            }
-            // Trim any tail entries beyond the expected row length (defensive; should not trigger in normal use).
-            while (existing.size() > rowLength) {
-                existing.remove(existing.size() - 1);
+                existing.set(i++, v);
             }
         }
     }
@@ -2228,6 +2671,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * sheet.addColumn("col3", List.of());
      * }</pre>
      *
+     * <p>Supplied values are snapshotted before any cells or keys change, so this Sheet's live
+     * row/column views can be used as inputs.</p>
+     *
      * @param columnKey the unique key for the new column; must not be {@code null} and must not already exist in this Sheet
      * @param column the collection of values for the new column; must match the number of rows, or be {@code null} or empty
      * @throws IllegalStateException if this Sheet is frozen
@@ -2237,15 +2683,17 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #removeColumn(Object)
      * @see #setColumn(Object, Collection)
      */
-    public void addColumn(final C columnKey, final Collection<? extends V> column) throws IllegalStateException, IllegalArgumentException {
+    public void addColumn(final C columnKey, Collection<? extends V> column) throws IllegalStateException, IllegalArgumentException {
         checkFrozen();
 
-        // Validate before any mutation: BiMap.put would reject the null AFTER the key set was
-        // already modified, leaving the sheet permanently inconsistent.
+        // The input may be one of our live views; read it before changing cells or key indexes.
+        column = column == null ? null : new ArrayList<>(column);
+
+        // Validate before any mutation so a rejected key cannot leave the axes and indexes inconsistent.
         N.checkArgNotNull(columnKey, cs.columnKey);
 
         if (_columnKeySet.contains(columnKey)) {
-            throw new IllegalArgumentException("Column '" + columnKey + "' already exists");
+            throw new IllegalArgumentException("Column '" + keyToString(columnKey) + "' already exists");
         }
 
         final int rowLength = rowCount();
@@ -2290,22 +2738,28 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Sheet now contains columns: ["col1", "col2", "col3"]
      * }</pre>
      *
+     * <p>Supplied values are snapshotted before any cells or keys change, so this Sheet's live
+     * row/column views can be used as inputs.</p>
+     *
      * @param columnIndex the zero-based index where the column should be inserted; must be &gt;= 0 and &lt;= columnCount()
      * @param columnKey the unique key for the new column; must not be {@code null} and must not already exist in this Sheet
      * @param column the collection of values for the new column; must match the number of rows, or be {@code null} or empty
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws IndexOutOfBoundsException if columnIndex &lt; 0 or columnIndex &gt; columnCount()
      * @throws IllegalArgumentException if {@code columnKey} is {@code null}, the column key already exists, or the
      *         collection size does not match row count (unless {@code null} or empty).
+     * @throws IndexOutOfBoundsException if columnIndex &lt; 0 or columnIndex &gt; columnCount()
      * @see #addColumn(Object, Collection)
      * @see #moveColumn(Object, int)
+     * @see #removeColumn(Object)
      */
-    public void addColumn(final int columnIndex, final C columnKey, final Collection<? extends V> column)
-            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException {
+    public void addColumn(final int columnIndex, final C columnKey, Collection<? extends V> column)
+            throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException {
         checkFrozen();
 
-        // Validate before any mutation: BiMap.put would reject the null AFTER the key set was
-        // already modified, leaving the sheet permanently inconsistent.
+        // The input may be one of our live views; read it before changing cells or key indexes.
+        column = column == null ? null : new ArrayList<>(column);
+
+        // Validate before any mutation so a rejected key cannot leave the axes and indexes inconsistent.
         N.checkArgNotNull(columnKey, cs.columnKey);
 
         final int rowLength = rowCount();
@@ -2314,7 +2768,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         N.checkPositionIndex(columnIndex, columnLength);
 
         if (_columnKeySet.contains(columnKey)) {
-            throw new IllegalArgumentException("Column '" + columnKey + "' already exists");
+            throw new IllegalArgumentException("Column '" + keyToString(columnKey) + "' already exists");
         }
 
         if (N.notEmpty(column) && column.size() != rowLength) {
@@ -2382,8 +2836,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #updateAll(Function)
      */
     public void updateColumn(final C columnKey, final Function<? super V, ? extends V> func) throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
         checkFrozen();
+        N.checkArgNotNull(func, cs.func);
 
         final int columnIndex = this.getColumnIndex(columnKey);
 
@@ -2472,6 +2926,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Column order is now: ["col3", "col1", "col2"]
      * }</pre>
      *
+     * <p>Moving a column to the position it already occupies is a no-op: this Sheet, and any view or lazy
+     * {@code Stream} obtained from it, are left untouched.</p>
+     *
      * @param columnKey the key of the column to be moved
      * @param newColumnIndex the new zero-based index where the column should be positioned
      * @throws IllegalStateException if this Sheet is frozen
@@ -2487,6 +2944,11 @@ public final class Sheet<R, C, V> implements Cloneable {
         final int columnIndex = this.getColumnIndex(columnKey);
         this.checkColumnIndex(newColumnIndex);
 
+        if (columnIndex == newColumnIndex) {
+            // No-op; see moveRow(Object, int) for why returning here matters to live Streams.
+            return;
+        }
+
         final List<C> tmp = new ArrayList<>(columnCount());
         tmp.addAll(_columnKeySet);
         tmp.add(newColumnIndex, tmp.remove(columnIndex));
@@ -2494,7 +2956,12 @@ public final class Sheet<R, C, V> implements Cloneable {
         _columnKeySet.clear();
         _columnKeySet.addAll(tmp);
 
-        _columnKeyIndexMap = null;
+        // Repair the affected entries in place - see moveRow(Object, int).
+        if (_columnKeyIndexMap != null && _columnKeyIndexMap.size() != 0) {
+            for (int i = N.min(columnIndex, newColumnIndex), to = N.max(columnIndex, newColumnIndex); i <= to; i++) {
+                _columnKeyIndexMap.forcePut(tmp.get(i), i);
+            }
+        }
 
         if (_isInitialized && _columnList.size() > 0) {
             _columnList.add(newColumnIndex, _columnList.remove(columnIndex));
@@ -2522,6 +2989,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Data follows the columns: {{3, 2, 1}, {6, 5, 4}, {9, 8, 7}}
      * }</pre>
      *
+     * <p>Swapping a column with itself is a no-op: this Sheet, and any view or lazy {@code Stream} obtained
+     * from it, are left untouched.</p>
+     *
      * @param columnKeyA the key of the first column to swap
      * @param columnKeyB the key of the second column to swap
      * @throws IllegalStateException if this Sheet is frozen
@@ -2534,6 +3004,11 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         final int columnIndexA = getColumnIndex(columnKeyA);
         final int columnIndexB = getColumnIndex(columnKeyB);
+
+        if (columnIndexA == columnIndexB) {
+            // Self-swap; see swapRows(Object, Object).
+            return;
+        }
 
         final List<C> tmp = new ArrayList<>(columnCount());
         tmp.addAll(_columnKeySet);
@@ -2603,7 +3078,7 @@ public final class Sheet<R, C, V> implements Cloneable {
         _columnKeySet.clear();
         _columnKeySet.addAll(tmp);
 
-        if (N.notEmpty(_columnKeyIndexMap)) {
+        if (_columnKeyIndexMap != null && _columnKeyIndexMap.size() != 0) {
             _columnKeyIndexMap.put(newColumnKey, _columnKeyIndexMap.remove(columnKey));
         }
     }
@@ -2808,8 +3283,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #replaceIf(Predicate, Object)
      */
     public void updateAll(final Function<? super V, ? extends V> func) throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
         checkFrozen();
+        N.checkArgNotNull(func, cs.func);
 
         if (rowCount() > 0 && columnCount() > 0) {
             this.init();
@@ -2851,8 +3326,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #updateAll(TriFunction)
      */
     public void updateAll(final IntBiFunction<? extends V> func) throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
         checkFrozen();
+        N.checkArgNotNull(func, cs.func);
 
         if (rowCount() > 0 && columnCount() > 0) {
             this.init();
@@ -2900,24 +3375,24 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #updateAll(IntBiFunction)
      */
     public void updateAll(final TriFunction<? super R, ? super C, ? super V, ? extends V> func) throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
         checkFrozen();
+        N.checkArgNotNull(func, cs.func);
 
         if (rowCount() > 0 && columnCount() > 0) {
             this.init();
 
             final int rowLength = rowCount();
-            int columnIndex = 0;
-            C columnKey = null;
+            // Resolve the keys once per axis. Calling _rowKeyIndexMap.getByValue(rowIndex) inside the inner
+            // loop cost one BiMap inverse lookup per cell - rows x columns of them for a whole-sheet update.
+            final Object[] rowKeys = _rowKeySet.toArray();
+            final Iterator<C> columnKeyIter = _columnKeySet.iterator();
 
             for (final List<V> column : _columnList) {
-                columnKey = _columnKeyIndexMap.getByValue(columnIndex);
+                final C columnKey = columnKeyIter.next();
 
                 for (int rowIndex = 0; rowIndex < rowLength; rowIndex++) {
-                    column.set(rowIndex, func.apply(_rowKeyIndexMap.getByValue(rowIndex), columnKey, column.get(rowIndex)));
+                    column.set(rowIndex, func.apply((R) rowKeys[rowIndex], columnKey, column.get(rowIndex)));
                 }
-
-                columnIndex++;
             }
         }
     }
@@ -2954,8 +3429,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #updateAll(Function)
      */
     public void replaceIf(final Predicate<? super V> predicate, final V newValue) throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.predicate);
         checkFrozen();
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (rowCount() > 0 && columnCount() > 0) {
             this.init();
@@ -3003,8 +3478,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #replaceIf(TriPredicate, Object)
      */
     public void replaceIf(final IntBiPredicate predicate, final V newValue) throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.predicate);
         checkFrozen();
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (rowCount() > 0 && columnCount() > 0) {
             this.init();
@@ -3053,31 +3528,25 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     public void replaceIf(final TriPredicate<? super R, ? super C, ? super V> predicate, final V newValue)
             throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(predicate, cs.predicate);
         checkFrozen();
+        N.checkArgNotNull(predicate, cs.predicate);
 
         if (rowCount() > 0 && columnCount() > 0) {
             this.init();
 
             final int rowLength = rowCount();
-            int columnIndex = 0;
-            R rowKey = null;
-            C columnKey = null;
-            V val = null;
+            // Resolve the keys once per axis - see updateAll(TriFunction).
+            final Object[] rowKeys = _rowKeySet.toArray();
+            final Iterator<C> columnKeyIter = _columnKeySet.iterator();
 
             for (final List<V> column : _columnList) {
-                columnKey = _columnKeyIndexMap.getByValue(columnIndex);
+                final C columnKey = columnKeyIter.next();
 
                 for (int rowIndex = 0; rowIndex < rowLength; rowIndex++) {
-                    rowKey = _rowKeyIndexMap.getByValue(rowIndex);
-                    val = column.get(rowIndex);
-
-                    if (predicate.test(rowKey, columnKey, val)) {
+                    if (predicate.test((R) rowKeys[rowIndex], columnKey, column.get(rowIndex))) {
                         column.set(rowIndex, newValue);
                     }
                 }
-
-                columnIndex++;
             }
         }
     }
@@ -3102,12 +3571,12 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // With data: {{1, 2}, {5, 6}, {3, 4}}
      * }</pre>
      *
-     * @throws IllegalStateException if this Sheet is frozen
      * @throws ClassCastException if the row keys' class does not implement Comparable, or if comparing two row keys throws a ClassCastException
+     * @throws IllegalStateException if this Sheet is frozen
      * @see #sortByRowKey(Comparator)
      * @see #sortByColumnKey()
      */
-    public void sortByRowKey() throws IllegalStateException {
+    public void sortByRowKey() throws ClassCastException, IllegalStateException {
         sortByRowKey((Comparator<R>) Comparator.naturalOrder());
     }
 
@@ -3134,14 +3603,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param cmp the comparator to determine row key ordering; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws ClassCastException if comparing two row keys throws a ClassCastException
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws ClassCastException if comparing two row keys throws a ClassCastException
      * @see #sortByRowKey()
      * @see #sortByColumnKey(Comparator)
      */
-    public void sortByRowKey(final Comparator<? super R> cmp) throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public void sortByRowKey(final Comparator<? super R> cmp) throws IllegalStateException, IllegalArgumentException, ClassCastException {
         checkFrozen();
+        N.checkArgNotNull(cmp, cs.cmp);
 
         final int rowLength = rowCount();
         final Indexed<R>[] arrayOfPair = new Indexed[rowLength];
@@ -3156,44 +3625,10 @@ public final class Sheet<R, C, V> implements Cloneable {
         N.sort(arrayOfPair, pairCmp);
 
         if (_isInitialized) {
-            final int columnCount = _columnKeySet.size();
-            final Set<Integer> ordered = N.newHashSet(rowLength);
-            final V[] tempRow = (V[]) new Object[columnCount];
-            List<V> tmpColumn = null;
-
-            for (int i = 0, index = 0; i < rowLength; i++) {
-                index = arrayOfPair[i].index();
-
-                if ((index != i) && !ordered.contains(i)) {
-                    for (int j = 0; j < columnCount; j++) {
-                        tempRow[j] = _columnList.get(j).get(i);
-                    }
-
-                    int previous = i;
-                    int next = index;
-
-                    do {
-                        for (int j = 0; j < columnCount; j++) {
-                            tmpColumn = _columnList.get(j);
-                            tmpColumn.set(previous, tmpColumn.get(next));
-                        }
-
-                        ordered.add(next);
-
-                        previous = next;
-                        next = arrayOfPair[next].index();
-                    } while (next != i);
-
-                    for (int j = 0; j < columnCount; j++) {
-                        _columnList.get(j).set(previous, tempRow[j]);
-                    }
-
-                    ordered.add(i);
-                }
-            }
+            permuteRows(arrayOfPair, rowLength);
         }
 
-        final boolean indexedMapInitialized = N.notEmpty(_rowKeyIndexMap);
+        final boolean indexedMapInitialized = _rowKeyIndexMap != null && _rowKeyIndexMap.size() != 0;
         _rowKeySet.clear();
 
         for (int i = 0; i < rowLength; i++) {
@@ -3231,6 +3666,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Data becomes: {{1, 20, 200}, {2, 30, 300}, {3, 10, 100}}
      * }</pre>
      *
+     * <p>If every value in the selected column is {@code null} the row order is left unchanged and
+     * {@code cmp} is never invoked. Otherwise, the comparator must support the values being compared,
+     * which may include {@code null} when the column contains both null and non-null values.</p>
+     *
      * @param columnKey the key of the column whose values will determine the row ordering
      * @param cmp the comparator to determine the order of values; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
@@ -3240,9 +3679,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #sortColumnsByRowValues(Object, Comparator)
      * @see #sortRowsByColumnValues(Collection, Comparator)
      */
-    public void sortRowsByColumnValues(final C columnKey, final Comparator<? super V> cmp) throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public void sortRowsByColumnValues(final C columnKey, final Comparator<? super V> cmp)
+            throws IllegalStateException, IllegalArgumentException, ClassCastException {
         checkFrozen();
+        N.checkArgNotNull(cmp, cs.cmp);
 
         // Resolve (and validate) the key even when uninitialized: the documented IllegalArgumentException
         // for a missing key must not depend on whether data has been written yet.
@@ -3268,43 +3708,9 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         N.sort(arrayOfPair, pairCmp);
 
-        final int columnCount = _columnKeySet.size();
-        final Set<Integer> ordered = N.newHashSet(rowLength);
-        final V[] tempRow = (V[]) new Object[columnCount];
-        List<V> tmpColumn = null;
+        permuteRows(arrayOfPair, rowLength);
 
-        for (int i = 0, index = 0; i < rowLength; i++) {
-            index = arrayOfPair[i].index();
-
-            if ((index != i) && !ordered.contains(i)) {
-                for (int j = 0; j < columnCount; j++) {
-                    tempRow[j] = _columnList.get(j).get(i);
-                }
-
-                int previous = i;
-                int next = index;
-
-                do {
-                    for (int j = 0; j < columnCount; j++) {
-                        tmpColumn = _columnList.get(j);
-                        tmpColumn.set(previous, tmpColumn.get(next));
-                    }
-
-                    ordered.add(next);
-
-                    previous = next;
-                    next = arrayOfPair[next].index();
-                } while (next != i);
-
-                for (int j = 0; j < columnCount; j++) {
-                    _columnList.get(j).set(previous, tempRow[j]);
-                }
-
-                ordered.add(i);
-            }
-        }
-
-        final boolean indexedMapInitialized = N.notEmpty(_rowKeyIndexMap);
+        final boolean indexedMapInitialized = _rowKeyIndexMap != null && _rowKeyIndexMap.size() != 0;
         final Object[] rowKeys = _rowKeySet.toArray(new Object[rowLength]);
         R rowKey = null;
         _rowKeySet.clear();
@@ -3325,6 +3731,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Reorders the rows according to the combined values from multiple columns using the specified comparator.
      * Each row is represented as an array of values from the specified columns for comparison.
      * </p>
+     *
+     * <p>If every value in every selected column is {@code null} the row order is left unchanged and
+     * {@code cmp} is never invoked. Otherwise, the comparator receives non-null arrays of selected
+     * values and must support any null elements it compares within those arrays.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3347,7 +3757,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param columnKeysToSort the keys of columns whose values will determine row ordering; must not be
-     *            {@code null} or empty, and every key must exist in this Sheet
+     *            {@code null}, may be empty only on a zero-column Sheet, and every key must exist in this Sheet
      * @param cmp the comparator used for ordering; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if {@code columnKeysToSort} is {@code null} or empty (an empty collection is
@@ -3358,8 +3768,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     public void sortRowsByColumnValues(final Collection<C> columnKeysToSort, final Comparator<? super Object[]> cmp)
             throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
         checkFrozen();
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if (columnKeysToSort == null || (columnKeysToSort.isEmpty() && N.notEmpty(_columnKeySet))) {
             throw new IllegalArgumentException("The specified 'columnKeysToSort' can't be null or empty");
@@ -3369,15 +3779,13 @@ public final class Sheet<R, C, V> implements Cloneable {
             return;
         }
 
-        final Collection<C> columnKeys = columnKeysToSort;
-
         // Resolve (and validate) the keys even when uninitialized: the documented IllegalArgumentException
         // for a missing key must not depend on whether data has been written yet.
-        final int sortColumnSize = columnKeys.size();
+        final int sortColumnSize = columnKeysToSort.size();
         final int[] columnIndexes = new int[sortColumnSize];
         int idx = 0;
 
-        for (final C columnKey : columnKeys) {
+        for (final C columnKey : columnKeysToSort) {
             columnIndexes[idx++] = getColumnIndex(columnKey);
         }
 
@@ -3406,43 +3814,9 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         N.sort(arrayOfPair, pairCmp);
 
-        final int columnCount = _columnKeySet.size();
-        final Set<Integer> ordered = N.newHashSet(rowLength);
-        final V[] tempRow = (V[]) new Object[columnCount];
-        List<V> tmpColumn = null;
+        permuteRows(arrayOfPair, rowLength);
 
-        for (int i = 0, index = 0; i < rowLength; i++) {
-            index = arrayOfPair[i].index();
-
-            if ((index != i) && !ordered.contains(i)) {
-                for (int j = 0; j < columnCount; j++) {
-                    tempRow[j] = _columnList.get(j).get(i);
-                }
-
-                int previous = i;
-                int next = index;
-
-                do {
-                    for (int j = 0; j < columnCount; j++) {
-                        tmpColumn = _columnList.get(j);
-                        tmpColumn.set(previous, tmpColumn.get(next));
-                    }
-
-                    ordered.add(next);
-
-                    previous = next;
-                    next = arrayOfPair[next].index();
-                } while (next != i);
-
-                for (int j = 0; j < columnCount; j++) {
-                    _columnList.get(j).set(previous, tempRow[j]);
-                }
-
-                ordered.add(i);
-            }
-        }
-
-        final boolean indexedMapInitialized = N.notEmpty(_rowKeyIndexMap);
+        final boolean indexedMapInitialized = _rowKeyIndexMap != null && _rowKeyIndexMap.size() != 0;
         final Object[] rowKeys = _rowKeySet.toArray(new Object[rowLength]);
         R rowKey = null;
         _rowKeySet.clear();
@@ -3478,12 +3852,12 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Data reordered: {{"b", "c", "a"}, {"e", "f", "d"}}
      * }</pre>
      *
-     * @throws IllegalStateException if this Sheet is frozen
      * @throws ClassCastException if the column keys' class does not implement Comparable, or if comparing two column keys throws a ClassCastException
+     * @throws IllegalStateException if this Sheet is frozen
      * @see #sortByColumnKey(Comparator)
      * @see #sortByRowKey()
      */
-    public void sortByColumnKey() throws IllegalStateException {
+    public void sortByColumnKey() throws ClassCastException, IllegalStateException {
         sortByColumnKey((Comparator<C>) Comparator.naturalOrder());
     }
 
@@ -3511,14 +3885,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param cmp the comparator to determine the order of the column keys; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
-     * @throws ClassCastException if comparing two column keys throws a ClassCastException
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws ClassCastException if comparing two column keys throws a ClassCastException
      * @see #sortByColumnKey()
      * @see #sortByRowKey(Comparator)
      */
-    public void sortByColumnKey(final Comparator<? super C> cmp) throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public void sortByColumnKey(final Comparator<? super C> cmp) throws IllegalStateException, IllegalArgumentException, ClassCastException {
         checkFrozen();
+        N.checkArgNotNull(cmp, cs.cmp);
 
         final int columnLength = _columnKeySet.size();
         final Indexed<C>[] arrayOfPair = new Indexed[columnLength];
@@ -3533,35 +3907,10 @@ public final class Sheet<R, C, V> implements Cloneable {
         N.sort(arrayOfPair, pairCmp);
 
         if (_isInitialized) {
-            final Set<Integer> ordered = N.newHashSet(columnLength);
-            List<V> tempColumn = null;
-
-            for (int i = 0, index = 0; i < columnLength; i++) {
-                index = arrayOfPair[i].index();
-
-                if ((index != i) && !ordered.contains(i)) {
-                    tempColumn = _columnList.get(i);
-
-                    int previous = i;
-                    int next = index;
-
-                    do {
-                        _columnList.set(previous, _columnList.get(next));
-
-                        ordered.add(next);
-
-                        previous = next;
-                        next = arrayOfPair[next].index();
-                    } while (next != i);
-
-                    _columnList.set(previous, tempColumn);
-
-                    ordered.add(i);
-                }
-            }
+            permuteColumns(arrayOfPair, columnLength);
         }
 
-        final boolean indexedMapInitialized = N.notEmpty(_columnKeyIndexMap);
+        final boolean indexedMapInitialized = _columnKeyIndexMap != null && _columnKeyIndexMap.size() != 0;
         _columnKeySet.clear();
 
         for (int i = 0; i < columnLength; i++) {
@@ -3598,6 +3947,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // Data becomes: {{1, 2, 3}, {4, 5, 6}}
      * }</pre>
      *
+     * <p>If every value in the selected row is {@code null} the column order is left unchanged and
+     * {@code cmp} is never invoked. Otherwise, the comparator must support the values being compared,
+     * which may include {@code null} when the row contains both null and non-null values.</p>
+     *
      * @param rowKey the key of the row whose values will determine the column ordering
      * @param cmp the comparator to apply to values in the specified row; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
@@ -3606,9 +3959,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #sortRowsByColumnValues(Object, Comparator)
      * @see #sortColumnsByRowValues(Collection, Comparator)
      */
-    public void sortColumnsByRowValues(final R rowKey, final Comparator<? super V> cmp) throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public void sortColumnsByRowValues(final R rowKey, final Comparator<? super V> cmp)
+            throws IllegalStateException, IllegalArgumentException, ClassCastException {
         checkFrozen();
+        N.checkArgNotNull(cmp, cs.cmp);
 
         // Resolve (and validate) the key even when uninitialized: the documented IllegalArgumentException
         // for a missing key must not depend on whether data has been written yet.
@@ -3633,34 +3987,9 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         N.sort(arrayOfPair, pairCmp);
 
-        final Set<Integer> ordered = N.newHashSet(columnLength);
-        List<V> tempColumn = null;
+        permuteColumns(arrayOfPair, columnLength);
 
-        for (int i = 0, index = 0; i < columnLength; i++) {
-            index = arrayOfPair[i].index();
-
-            if ((index != i) && !ordered.contains(i)) {
-                tempColumn = _columnList.get(i);
-
-                int previous = i;
-                int next = index;
-
-                do {
-                    _columnList.set(previous, _columnList.get(next));
-
-                    ordered.add(next);
-
-                    previous = next;
-                    next = arrayOfPair[next].index();
-                } while (next != i);
-
-                _columnList.set(previous, tempColumn);
-
-                ordered.add(i);
-            }
-        }
-
-        final boolean indexedMapInitialized = N.notEmpty(_columnKeyIndexMap);
+        final boolean indexedMapInitialized = _columnKeyIndexMap != null && _columnKeyIndexMap.size() != 0;
         final Object[] columnKeys = _columnKeySet.toArray(new Object[columnLength]);
         C columnKey = null;
         _columnKeySet.clear();
@@ -3681,6 +4010,10 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Reorders the columns according to the combined values from multiple rows using the specified comparator.
      * Each column is represented as an array of values from the specified rows for comparison.
      * </p>
+     *
+     * <p>If every value in every selected row is {@code null} the column order is left unchanged and
+     * {@code cmp} is never invoked. Otherwise, the comparator receives non-null arrays of selected
+     * values and must support any null elements it compares within those arrays.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3703,7 +4036,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param rowKeysToSort the keys of rows whose values will determine column ordering; must not be
-     *            {@code null} or empty, and every key must exist in this Sheet
+     *            {@code null}, may be empty only on a zero-row Sheet, and every key must exist in this Sheet
      * @param cmp the comparator used for ordering; must not be {@code null}
      * @throws IllegalStateException if this Sheet is frozen
      * @throws IllegalArgumentException if {@code rowKeysToSort} is {@code null} or empty (an empty collection is
@@ -3714,8 +4047,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     public void sortColumnsByRowValues(final Collection<R> rowKeysToSort, final Comparator<? super Object[]> cmp)
             throws IllegalStateException, IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
         checkFrozen();
+        N.checkArgNotNull(cmp, cs.cmp);
 
         if (rowKeysToSort == null || (rowKeysToSort.isEmpty() && N.notEmpty(_rowKeySet))) {
             throw new IllegalArgumentException("The specified 'rowKeysToSort' can't be null or empty");
@@ -3725,15 +4058,13 @@ public final class Sheet<R, C, V> implements Cloneable {
             return;
         }
 
-        final Collection<R> rowKeys = rowKeysToSort;
-
         // Resolve (and validate) the keys even when uninitialized: the documented IllegalArgumentException
         // for a missing key must not depend on whether data has been written yet.
-        final int sortRowSize = rowKeys.size();
+        final int sortRowSize = rowKeysToSort.size();
         final int[] rowIndexes = new int[sortRowSize];
         int idx = 0;
 
-        for (final R rowKey : rowKeys) {
+        for (final R rowKey : rowKeysToSort) {
             rowIndexes[idx++] = getRowIndex(rowKey);
         }
 
@@ -3762,34 +4093,9 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         N.sort(arrayOfPair, pairCmp);
 
-        final Set<Integer> ordered = N.newHashSet(columnLength);
-        List<V> tempColumn = null;
+        permuteColumns(arrayOfPair, columnLength);
 
-        for (int i = 0, index = 0; i < columnLength; i++) {
-            index = arrayOfPair[i].index();
-
-            if ((index != i) && !ordered.contains(i)) {
-                tempColumn = _columnList.get(i);
-
-                int previous = i;
-                int next = index;
-
-                do {
-                    _columnList.set(previous, _columnList.get(next));
-
-                    ordered.add(next);
-
-                    previous = next;
-                    next = arrayOfPair[next].index();
-                } while (next != i);
-
-                _columnList.set(previous, tempColumn);
-
-                ordered.add(i);
-            }
-        }
-
-        final boolean indexedMapInitialized = N.notEmpty(_columnKeyIndexMap);
+        final boolean indexedMapInitialized = _columnKeyIndexMap != null && _columnKeyIndexMap.size() != 0;
         final Object[] columnKeys = _columnKeySet.toArray(new Object[columnLength]);
         C columnKey = null;
         _columnKeySet.clear();
@@ -3804,26 +4110,113 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
     }
 
-    @SuppressWarnings("rawtypes")
+    /**
+     * Lifts a value comparator to one over {@link Indexed} pairs. {@code cmp} is never {@code null}: every
+     * caller rejects a {@code null} comparator with {@code N.checkArgNotNull(cmp, cs.cmp)} first.
+     */
     private <T> Comparator<Indexed<T>> createComparatorForIndexedObject(final Comparator<? super T> cmp) {
-        Comparator<Indexed<T>> pairCmp = null;
-
-        if (cmp != null) {
-            pairCmp = (a, b) -> cmp.compare(a.value(), b.value());
-        } else {
-            final Comparator<Indexed<Comparable>> tmp = (a, b) -> N.compare(a.value(), b.value());
-            pairCmp = (Comparator) tmp;
-        }
-
-        return pairCmp;
+        return (a, b) -> cmp.compare(a.value(), b.value());
     }
 
+    /**
+     * Lifts an {@code Object[]} comparator to one over {@link Indexed} pairs. As above, {@code cmp} is never
+     * {@code null} at this point.
+     */
     private Comparator<Indexed<Object[]>> createComparatorForIndexedObjectArray(final Comparator<? super Object[]> cmp) {
-        if (cmp != null) {
-            return (a, b) -> cmp.compare(a.value(), b.value());
+        return (a, b) -> cmp.compare(a.value(), b.value());
+    }
+
+    /**
+     * Reorders the rows held in {@code _columnList} in place so that the row ending up at position {@code i}
+     * is the one that currently sits at {@code sortedPairs[i].index()}.
+     *
+     * <p>The permutation is applied one cycle at a time: a cycle is rotated using a single saved row, so
+     * each cell is written at most once and no copy of the sheet is allocated. {@code placed} records the
+     * positions already written, which is what stops the outer loop from walking a cycle a second time when
+     * it later reaches one of that cycle's other members.</p>
+     *
+     * <p>Callers must have established that this Sheet is initialized and that {@code sortedPairs} holds a
+     * permutation of {@code [0, rowLength)} - which a stable sort of {@code Indexed} pairs guarantees.</p>
+     *
+     * @param sortedPairs the sorted index pairs describing the target row order
+     * @param rowLength the number of rows, i.e. {@code sortedPairs.length}
+     */
+    private void permuteRows(final Indexed<?>[] sortedPairs, final int rowLength) {
+        final int columnCount = _columnList.size();
+
+        if (columnCount == 0) {
+            return;
         }
 
-        return (a, b) -> Comparators.OBJECT_ARRAY_COMPARATOR.compare(a.value(), b.value());
+        final boolean[] placed = new boolean[rowLength];
+        final Object[] tempRow = new Object[columnCount];
+
+        for (int i = 0; i < rowLength; i++) {
+            if (placed[i] || sortedPairs[i].index() == i) {
+                continue;
+            }
+
+            for (int j = 0; j < columnCount; j++) {
+                tempRow[j] = _columnList.get(j).get(i);
+            }
+
+            int previous = i;
+            int next = sortedPairs[i].index();
+
+            do {
+                for (int j = 0; j < columnCount; j++) {
+                    final List<V> column = _columnList.get(j);
+                    column.set(previous, column.get(next));
+                }
+
+                placed[next] = true;
+
+                previous = next;
+                next = sortedPairs[next].index();
+            } while (next != i);
+
+            for (int j = 0; j < columnCount; j++) {
+                _columnList.get(j).set(previous, (V) tempRow[j]);
+            }
+
+            placed[i] = true;
+        }
+    }
+
+    /**
+     * Reorders {@code _columnList} in place so that the column ending up at position {@code i} is the one
+     * that currently sits at {@code sortedPairs[i].index()}. Same cycle-rotation scheme as
+     * {@link #permuteRows(Indexed[], int)}, but it moves whole column lists by reference instead of cells.
+     *
+     * @param sortedPairs the sorted index pairs describing the target column order
+     * @param columnLength the number of columns, i.e. {@code sortedPairs.length}
+     */
+    private void permuteColumns(final Indexed<?>[] sortedPairs, final int columnLength) {
+        final boolean[] placed = new boolean[columnLength];
+
+        for (int i = 0; i < columnLength; i++) {
+            if (placed[i] || sortedPairs[i].index() == i) {
+                continue;
+            }
+
+            final List<V> tempColumn = _columnList.get(i);
+
+            int previous = i;
+            int next = sortedPairs[i].index();
+
+            do {
+                _columnList.set(previous, _columnList.get(next));
+
+                placed[next] = true;
+
+                previous = next;
+                next = sortedPairs[next].index();
+            } while (next != i);
+
+            _columnList.set(previous, tempColumn);
+
+            placed[i] = true;
+        }
     }
 
     /**
@@ -3854,8 +4247,6 @@ public final class Sheet<R, C, V> implements Cloneable {
         final Sheet<R, C, V> copy = new Sheet<>(_rowKeySet, _columnKeySet);
 
         if (_isInitialized) {
-            copy.initIndexMap();
-
             copy._columnList = new ArrayList<>(_columnList.size());
 
             for (final List<V> column : _columnList) {
@@ -3889,18 +4280,19 @@ public final class Sheet<R, C, V> implements Cloneable {
      * sheet.copy(N.asList("rX"), N.asList("c1"));   // throws IllegalArgumentException (unknown row key)
      * }</pre>
      *
-     * @param rowKeySet the row keys to include in the copy; must not be {@code null} or empty, and every key
-     *            must exist in this Sheet. To copy the entire Sheet, use {@link #copy()} instead
-     * @param columnKeySet the column keys to include in the copy; must not be {@code null} or empty, and every
-     *            key must exist in this Sheet
+     * @param rowKeySet the row keys to include in the copy; must not be {@code null}, may be empty only on a
+     *            zero-row Sheet, and every key must exist in this Sheet. To copy the entire Sheet, use {@link #copy()} instead
+     * @param columnKeySet the column keys to include in the copy; must not be {@code null}, may be empty only on a
+     *            zero-column Sheet, and every key must exist in this Sheet
      * @return a new mutable Sheet containing the values at the intersection of the specified keys
      * @throws IllegalArgumentException if {@code rowKeySet} or {@code columnKeySet} is {@code null} or empty (an
      *         empty collection is accepted only on the corresponding empty axis of a zero-row / zero-column Sheet),
-     *         or if any specified row key or column key is not present in this Sheet.
+     *         if any specified row key or column key is not present in this Sheet, or if either collection contains
+     *         a duplicate key.
      * @see #copy()
      * @see #clone()
      */
-    public Sheet<R, C, V> copy(final Collection<R> rowKeySet, final Collection<C> columnKeySet) {
+    public Sheet<R, C, V> copy(final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws IllegalArgumentException {
         if (rowKeySet == null || (rowKeySet.isEmpty() && N.notEmpty(_rowKeySet))) {
             throw new IllegalArgumentException("The specified 'rowKeySet' can't be null or empty");
         }
@@ -3910,19 +4302,18 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
 
         if (!_rowKeySet.containsAll(rowKeySet)) {
-            throw new IllegalArgumentException("Row keys: " + N.difference(rowKeySet, _rowKeySet) + " are not included in this sheet row keys: " + _rowKeySet);
+            throw new IllegalArgumentException(
+                    "Row keys: " + keysToString(N.difference(rowKeySet, _rowKeySet)) + " are not included in this sheet row keys: " + keysToString(_rowKeySet));
         }
 
         if (!_columnKeySet.containsAll(columnKeySet)) {
-            throw new IllegalArgumentException(
-                    "Column keys: " + N.difference(columnKeySet, _columnKeySet) + " are not included in this sheet Column keys: " + _columnKeySet);
+            throw new IllegalArgumentException("Column keys: " + keysToString(N.difference(columnKeySet, _columnKeySet))
+                    + " are not included in this sheet Column keys: " + keysToString(_columnKeySet));
         }
 
         final Sheet<R, C, V> copy = new Sheet<>(rowKeySet, columnKeySet);
 
         if (_isInitialized) {
-            copy.initIndexMap();
-
             copy._columnList = new ArrayList<>(copy.columnCount());
 
             final int[] rowKeyIndices = new int[copy.rowCount()];
@@ -3952,8 +4343,10 @@ public final class Sheet<R, C, V> implements Cloneable {
     /**
      * Creates a deep copy of this Sheet using Kryo serialization.
      * <p>
-     * All row keys, column keys, and cell values are deeply copied. Changes to the returned copy do
-     * not affect this Sheet, and vice versa. The frozen state of this Sheet is preserved in the copy:
+     * Keys and cell values are copied in one graph, preserving cycles and shared references within
+     * the copy. Nested Dataset slices become independent tables. Payload types must be supported by Kryo;
+     * unsupported types can cause a runtime copy failure, and objects treated as immutable may be shared.
+     * The frozen state of this Sheet is preserved in the copy:
      * if this Sheet is frozen, the copy will also be frozen.
      * </p>
      *
@@ -3965,15 +4358,17 @@ public final class Sheet<R, C, V> implements Cloneable {
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Beta
     @Override
-    public Sheet<R, C, V> clone() { //NOSONAR
+    public Sheet<R, C, V> clone() throws UnsupportedOperationException { //NOSONAR
         return clone(_isFrozen);
     }
 
     /**
      * Creates a deep copy of this Sheet using Kryo serialization, with the specified frozen state.
      * <p>
-     * All row keys, column keys, and cell values are deeply copied. Changes to the returned copy do
-     * not affect this Sheet, and vice versa. The frozen state of the copy is set to the value of the
+     * Keys and cell values are copied in one graph, preserving cycles and shared references within
+     * the copy. Nested Dataset slices become independent tables. Payload types must be supported by Kryo;
+     * unsupported types can cause a runtime copy failure, and objects treated as immutable may be shared.
+     * The frozen state of the copy is set to the value of the
      * {@code freeze} parameter, regardless of whether this Sheet is frozen.
      * </p>
      *
@@ -3997,11 +4392,12 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @see #freeze()
      * @see #copy()
      */
-    public Sheet<R, C, V> clone(final boolean freeze) {
+    public Sheet<R, C, V> clone(final boolean freeze) throws UnsupportedOperationException {
         if (kryoParser == null) {
             throw new UnsupportedOperationException("Kryo library is required for deep cloning. Please add Kryo to your classpath or use copy() instead.");
         }
 
+        // Copy the complete graph so cycles and shared references between keys and cells survive.
         final Sheet<R, C, V> copy = kryoParser.deepCopy(this);
 
         copy._isFrozen = freeze;
@@ -4063,22 +4459,24 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <U> the type of values in the other Sheet
      * @param <X> the type of values in the resulting merged Sheet
-     * @param b the other Sheet to merge with this one
+     * @param b the other Sheet to merge with this one; must not be {@code null}
      * @param mergeFunction the function used to combine conflicting cell values; must not be {@code null}
-     * @return a new Sheet containing the merged result
-     * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}.
+     * @return a new Sheet containing the merged result; like {@link #copy()} it is always mutable, whether or
+     *         not either input Sheet is frozen
+     * @throws IllegalArgumentException if {@code b} or {@code mergeFunction} is {@code null}.
      * @see #putAll(Sheet, BiFunction)
      */
     public <U, X> Sheet<R, C, X> merge(final Sheet<? extends R, ? extends C, ? extends U> b, final BiFunction<? super V, ? super U, ? extends X> mergeFunction)
             throws IllegalArgumentException {
+        N.checkArgNotNull(b, cs.b);
         N.checkArgNotNull(mergeFunction, cs.mergeFunction);
 
         final Sheet<R, C, U> sheetB = (Sheet<R, C, U>) b;
 
-        final Set<R> newRowKeySet = N.newLinkedHashSet(this.rowKeySet());
+        final Set<R> newRowKeySet = newKeySet(this.rowKeySet());
         newRowKeySet.addAll(sheetB.rowKeySet());
 
-        final Set<C> newColumnKeySet = N.newLinkedHashSet(this.columnKeySet());
+        final Set<C> newColumnKeySet = newKeySet(this.columnKeySet());
         newColumnKeySet.addAll(sheetB.columnKeySet());
 
         final Sheet<R, C, X> result = new Sheet<>(newRowKeySet, newColumnKeySet);
@@ -4103,15 +4501,49 @@ public final class Sheet<R, C, V> implements Cloneable {
         V e1 = null;
         U e2 = null;
 
+        // Materialize the result's storage once, then write cells through setValue/getValue. result is
+        // freshly built here and exclusively owned, and every coordinate below is a loop index over its own
+        // dimensions - so the public set(int, int, V)'s checkFrozen + two bounds checks + init() would run
+        // rows x columns times to prove something already known.
+        result.init();
+
         for (int rowIndex = 0, rowLen = newRowKeySet.size(); rowIndex < rowLen; rowIndex++) {
             for (int columnIndex = 0, columnLen = newColumnKeySet.size(); columnIndex < columnLen; columnIndex++) {
-                e1 = rowIndexes1[rowIndex] > -1 && columnIndexes1[columnIndex] > -1 ? this.get(rowIndexes1[rowIndex], columnIndexes1[columnIndex]) : null;
-                e2 = rowIndexes2[rowIndex] > -1 && columnIndexes2[columnIndex] > -1 ? sheetB.get(rowIndexes2[rowIndex], columnIndexes2[columnIndex]) : null;
-                result.set(rowIndex, columnIndex, mergeFunction.apply(e1, e2));
+                e1 = rowIndexes1[rowIndex] > -1 && columnIndexes1[columnIndex] > -1 ? this.getValue(rowIndexes1[rowIndex], columnIndexes1[columnIndex]) : null;
+                e2 = rowIndexes2[rowIndex] > -1 && columnIndexes2[columnIndex] > -1 ? sheetB.getValue(rowIndexes2[rowIndex], columnIndexes2[columnIndex])
+                        : null;
+                result.setValue(rowIndex, columnIndex, mergeFunction.apply(e1, e2));
             }
         }
 
         return result;
+    }
+
+    /**
+     * Returns a lazy stream over the values of an already-validated column, in row order.
+     *
+     * @param columnIndex a valid zero-based column index
+     * @return the column's values, read when the stream is consumed
+     */
+    private Stream<V> columnValueStream(final int columnIndex) {
+        if (_isInitialized) {
+            return Stream.of(_columnList.get(columnIndex));
+        }
+        // The first value write allocates storage. An inner stream created before that write must
+        // observe later values too, rather than permanently capturing the initial all-null state.
+        return IntStream.range(0, rowCount()).mapToObj(rowIndex -> getValue(rowIndex, columnIndex));
+    }
+
+    /**
+     * Reads an already-validated position without bounds checks, returning {@code null} when this Sheet has
+     * no storage allocated yet. Callers must pass coordinates that are known to be in range.
+     *
+     * @param rowIndex a valid zero-based row index
+     * @param columnIndex a valid zero-based column index
+     * @return the value at that position, or {@code null} if this Sheet is not initialized
+     */
+    private V getValue(final int rowIndex, final int columnIndex) {
+        return _isInitialized ? _columnList.get(columnIndex).get(rowIndex) : null;
     }
 
     /**
@@ -4146,15 +4578,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // +------+------+------+
      * }</pre>
      *
-     * @return a new transposed Sheet where row and column keys are swapped
+     * @return a new transposed Sheet where row and column keys are swapped. Like {@link #copy()}, it is always
+     *         mutable, regardless of whether this Sheet is frozen
      * @see #copy()
      */
     public Sheet<C, R, V> transposed() {
         final Sheet<C, R, V> copy = new Sheet<>(_columnKeySet, _rowKeySet);
 
         if (_isInitialized) {
-            copy.initIndexMap();
-
             final int rowLength = copy.rowCount();
             final int columnLength = copy.columnCount();
 
@@ -4184,6 +4615,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      * The frozen state cannot be reversed. Freezing is in-place and shallow: it does not create a snapshot,
      * make mutable key/value objects immutable, or by itself safely publish the instance to other threads.
      * </p>
+     *
+     * <p>The frozen check takes precedence over argument validation: every mutator tests the frozen state
+     * before validating its arguments, so a call on a frozen Sheet throws {@code IllegalStateException} even
+     * when its arguments are also invalid (for example {@code frozenSheet.updateAll((Function<Integer, Integer>) null)}
+     * on a Sheet of Integer values). The one
+     * exception is a {@code null} {@link Point}: {@link #set(Point, Object)} and {@link #remove(Point)} read
+     * the point's indices before delegating, so they still raise {@link NullPointerException} for it, as their
+     * own documentation states.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4267,6 +4706,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Reduces the capacity of internal column lists to match their current size,
      * potentially freeing unused memory. This is useful after bulk removal of rows.
      * </p>
+     * <p>
+     * This operation changes neither the content nor the structure of the Sheet, only its internal storage
+     * allocation, so it is safe to call on a frozen Sheet and does <i>not</i> throw
+     * {@link IllegalStateException}. This mirrors {@link Dataset#trimToSize()}.
+     * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4276,9 +4720,13 @@ public final class Sheet<R, C, V> implements Cloneable {
      * sheet.addRow("row4", List.of(4, 5, 6));
      * sheet.removeRow("row2");
      * sheet.trimToSize();   // optimize memory usage
+     *
+     * sheet.freeze();
+     * sheet.trimToSize();   // still allowed - no content or structure changes
      * }</pre>
      *
      * @see #clear()
+     * @see #isFrozen()
      */
     public void trimToSize() {
         if (_isInitialized && _columnList.size() > 0) {
@@ -4377,13 +4825,13 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each cell; receives row key, column key, and value
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      * @see #forEachColumnMajor(Throwables.TriConsumer)
      * @see #forEachNonNullRowMajor(Throwables.TriConsumer)
      */
     public <E extends Exception> void forEachRowMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         if (_isInitialized) {
@@ -4422,13 +4870,13 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each cell; receives row key, column key, and value
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      * @see #forEachRowMajor(Throwables.TriConsumer)
      * @see #forEachNonNullColumnMajor(Throwables.TriConsumer)
      */
     public <E extends Exception> void forEachColumnMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         if (_isInitialized) {
@@ -4467,13 +4915,13 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each {@code non-null} cell; receives row key, column key, and {@code non-null} value
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      * @see #forEachRowMajor(Throwables.TriConsumer)
      * @see #forEachNonNullColumnMajor(Throwables.TriConsumer)
      */
     public <E extends Exception> void forEachNonNullRowMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         if (_isInitialized) {
@@ -4510,13 +4958,13 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each {@code non-null} cell; receives row key, column key, and {@code non-null} value
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      * @see #forEachColumnMajor(Throwables.TriConsumer)
      * @see #forEachNonNullRowMajor(Throwables.TriConsumer)
      */
     public <E extends Exception> void forEachNonNullColumnMajor(final Throwables.TriConsumer<? super R, ? super C, ? super V, E> action)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         if (_isInitialized) {
@@ -4549,6 +4997,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * sheet.rowMajorCells().forEach(cell ->
      *     System.out.println(cell.rowKey() + "," + cell.columnKey() + "=" + cell.value()));
+     * // Prints: row1,col1=1  row1,col2=2  row2,col1=3  row2,col2=4
      * }</pre>
      *
      * @return a Stream of Cell objects representing all cells, ordered by rows
@@ -4749,6 +5198,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Creates a nested stream structure where the outer stream yields rows and each inner stream
      * contains the cells of that row ordered by columns.
      * </p>
+     * <p>Cell values are read when the inner stream is consumed, including when the first value write
+     * occurs after the inner stream was created. Structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4780,6 +5231,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each inner stream contains the cells of one row ordered by columns.
      * If the Sheet has no columns, the outer stream still contains one empty stream per selected row.
      * </p>
+     * <p>Cell values are read when the inner stream is consumed, including when the first value write
+     * occurs after the inner stream was created. Structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4895,6 +5348,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Creates a nested stream structure where the outer stream yields columns and each inner stream
      * contains the cells of that column ordered by rows.
      * </p>
+     * <p>Cell values are read when the inner stream is consumed, including when the first value write
+     * occurs after the inner stream was created. Structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4926,6 +5381,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each inner stream contains the cells of one column ordered by rows.
      * If the Sheet has no rows, the outer stream still contains one empty stream per selected column.
      * </p>
+     * <p>Cell values are read when the inner stream is consumed, including when the first value write
+     * occurs after the inner stream was created. Structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4987,7 +5444,8 @@ public final class Sheet<R, C, V> implements Cloneable {
                     return IntStream.range(0, rowLength).mapToObj(rowIndex -> Cell.of(_rowKeyIndexMap.getByValue(rowIndex), columnKey, column.get(rowIndex)));
                 } else {
                     //noinspection resource
-                    return IntStream.range(0, rowLength).mapToObj(rowIndex -> Cell.of(_rowKeyIndexMap.getByValue(rowIndex), columnKey, null));
+                    return IntStream.range(0, rowLength)
+                            .mapToObj(rowIndex -> Cell.of(_rowKeyIndexMap.getByValue(rowIndex), columnKey, getValue(rowIndex, curColumnIndex)));
                 }
 
             }
@@ -5033,6 +5491,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @return a Stream of Point objects representing all cell coordinates, ordered by rows
      * @see #rowMajorPoints(int, int)
      * @see #columnMajorPoints()
+     * @see #rowPoints()
      */
     public Stream<Point> rowMajorPoints() {
         return rowMajorPoints(0, rowCount());
@@ -5320,6 +5779,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @return a Stream of values from all cells, ordered by rows
      * @see #rowMajorStream(int, int)
      * @see #columnMajorStream()
+     * @see #rowStreams()
      */
     public Stream<V> rowMajorStream() {
         return rowMajorStream(0, rowCount());
@@ -5456,6 +5916,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
      * @see #columnMajorStream()
      * @see #rowMajorStream(int, int)
+     * @see #columnStreams(int, int)
      */
     public Stream<V> columnMajorStream(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         checkColumnFromToIndex(fromColumnIndex, toColumnIndex, columnCount());
@@ -5512,6 +5973,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Creates a nested stream structure where the outer stream yields rows and each inner stream
      * contains the values of that row ordered by columns. Includes {@code null} values.
      * </p>
+     * <p>Cell values are read when the inner stream is consumed, including when the first value write
+     * occurs after the inner stream was created. Structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5543,6 +6006,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each inner stream contains the values of one row ordered by columns. Includes {@code null} values.
      * If the Sheet has no columns, the outer stream still contains one empty stream per selected row.
      * </p>
+     * <p>Cell values are read when the inner stream is consumed, including when the first value write
+     * occurs after the inner stream was created. Structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5657,6 +6122,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Creates a nested stream structure where the outer stream yields columns and each inner stream
      * contains the values of that column ordered by rows. Includes {@code null} values.
      * </p>
+     * <p>Cell values are read when the inner stream is consumed, including when the first value write
+     * occurs after the inner stream was created. Structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5688,6 +6155,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each inner stream contains the values of one column ordered by rows. Includes {@code null} values.
      * If the Sheet has no rows, the outer stream still contains one empty stream per selected column.
      * </p>
+     * <p>Cell values are read when the inner stream is consumed, including when the first value write
+     * occurs after the inner stream was created. Structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5736,12 +6205,7 @@ public final class Sheet<R, C, V> implements Cloneable {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                if (_isInitialized) {
-                    return Stream.of(_columnList.get(cursor++));
-                } else {
-                    cursor++;
-                    return Stream.repeat(null, rowCount());
-                }
+                return columnValueStream(cursor++);
             }
 
             @Override
@@ -5768,6 +6232,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each pair contains a row key and a stream of all values in that row (ordered by columns).
      * This provides a convenient way to process rows with their identifiers.
      * </p>
+     * <p>Cell values are read when the inner stream is consumed, including when the first value write
+     * occurs after the inner stream was created. Structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5800,6 +6266,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Only rows in the specified range [fromRowIndex, toRowIndex) are included. Includes {@code null} values.
      * A row with no columns is represented by its key and an empty value stream.
      * </p>
+     * <p>Cell values are read when the inner stream is consumed, including when the first value write
+     * occurs after the inner stream was created. Structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5989,13 +6457,13 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                  The integer represents the index of the row in the Sheet, and the DisposableObjArray represents the row itself.
      * @return a Stream of Pair objects for the specified row range, where each Pair consists of a row key and a mapped value obtained by applying the {@code rowMapper} function to the row's values, ordered by rows.
-     * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex &gt; toRowIndex
      * @throws IllegalArgumentException if {@code rowMapper} is {@code null}.
+     * @throws IndexOutOfBoundsException if indices are out of bounds or fromRowIndex &gt; toRowIndex
      * @see #rows(IntObjFunction)
      * @see #columns(int, int, IntObjFunction)
      */
     public <T> Stream<Pair<R, T>> rows(final int fromRowIndex, final int toRowIndex, final IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkRowFromToIndex(fromRowIndex, toRowIndex, rowCount());
         N.checkArgNotNull(rowMapper, cs.rowMapper);
 
@@ -6059,6 +6527,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each pair contains a column key and a stream of all values in that column (ordered by rows).
      * This provides a convenient way to process columns with their identifiers.
      * </p>
+     * <p>Cell values are read when the inner stream is consumed, including when the first value write
+     * occurs after the inner stream was created. Structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6091,6 +6561,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Only columns in the specified range [fromColumnIndex, toColumnIndex) are included. Includes {@code null} values.
      * A column with no rows is represented by its key and an empty value stream.
      * </p>
+     * <p>Cell values are read when the inner stream is consumed, including when the first value write
+     * occurs after the inner stream was created. Structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6115,6 +6587,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
      * @see #columns()
      * @see #rows(int, int)
+     * @see #columnStreams(int, int)
      */
     public Stream<Pair<C, Stream<V>>> columns(final int fromColumnIndex, final int toColumnIndex) throws IndexOutOfBoundsException {
         checkColumnFromToIndex(fromColumnIndex, toColumnIndex, columnCount());
@@ -6143,12 +6616,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
                 final C columnKey = _columnKeyIndexMap.getByValue(cursor);
 
-                if (_isInitialized) {
-                    return Pair.of(columnKey, Stream.of(_columnList.get(cursor++)));
-                } else {
-                    cursor++;
-                    return Pair.of(columnKey, Stream.repeat(null, rowCount()));
-                }
+                return Pair.of(columnKey, columnValueStream(cursor++));
             }
 
             @Override
@@ -6243,13 +6711,13 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param columnMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                     The integer represents the index of the column in the Sheet, and the DisposableObjArray represents the column itself.
      * @return a Stream of Pair objects for the specified column range, where each Pair consists of a column key and a mapped value obtained by applying the {@code columnMapper} function to the column's values, ordered by columns.
-     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
      * @throws IllegalArgumentException if {@code columnMapper} is {@code null}.
+     * @throws IndexOutOfBoundsException if indices are out of bounds or fromColumnIndex &gt; toColumnIndex
      * @see #columns(IntObjFunction)
      * @see #rows(int, int, IntObjFunction)
      */
     public <T> Stream<Pair<C, T>> columns(final int fromColumnIndex, final int toColumnIndex,
-            final IntObjFunction<? super DisposableObjArray, ? extends T> columnMapper) throws IllegalArgumentException {
+            final IntObjFunction<? super DisposableObjArray, ? extends T> columnMapper) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkColumnFromToIndex(fromColumnIndex, toColumnIndex, columnCount());
         N.checkArgNotNull(columnMapper, cs.columnMapper);
 
@@ -6281,7 +6749,17 @@ public final class Sheet<R, C, V> implements Cloneable {
                 final C columnKey = _columnKeyIndexMap.getByValue(cursor);
 
                 if (_isInitialized) {
-                    _columnList.get(cursor).toArray(columnData);
+                    // Copy cell by cell rather than through List.toArray(T[]): toArray allocates and returns
+                    // a *new* array when the column has grown beyond columnData, and leaves a stale tail plus
+                    // a null sentinel when it has shrunk. Either way its return value must not be discarded.
+                    // Ignoring it meant that a row added or removed while this Stream was live silently
+                    // handed the mapper the previous column's values under the current column's key, instead
+                    // of failing the way the rows(int, int, IntObjFunction) twin does.
+                    final List<V> column = _columnList.get(cursor);
+
+                    for (int i = 0; i < rowLength; i++) {
+                        columnData[i] = column.get(i);
+                    }
                 }
 
                 return Pair.of(columnKey, columnMapper.apply(cursor++, columnArray));
@@ -6311,8 +6789,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each row in the Sheet becomes a row in the Dataset, with the column keys serving as the column names.
      * The data preserves its row structure, making this ideal for row-oriented data processing. The Dataset's
      * columns are named using {@link N#toString(Object)} on the Sheet's column keys. The resulting names
-     * must be non-empty and unique. Because Dataset derives its row count from its columns, a Sheet with
-     * rows but no columns converts to an empty Dataset and cannot preserve those row keys.
+     * must be non-empty and unique. A Sheet with rows but no columns is rejected with IllegalArgumentException because Dataset cannot preserve that row count.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6330,18 +6807,17 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @return a Dataset object with rows corresponding to Sheet rows and columns named by Sheet column keys
-     * @throws IllegalArgumentException if converted column-key names are empty or duplicated.
+     * @throws IllegalArgumentException if converted column-key names are empty or duplicated. The message names
+     *         the offending Sheet column keys - note that two distinct keys can collide here, e.g. {@code Integer 1}
+     *         and {@code "1"} both render as {@code "1"}, or this Sheet has rows but no columns.
      * @see #toTransposedDataset()
      * @see #toArray()
      */
-    public Dataset toDataset() {
+    public Dataset toDataset() throws IllegalArgumentException {
         final int rowLength = rowCount();
         final int columnLength = columnCount();
-        final List<String> datasetColumnNameList = new ArrayList<>(columnLength);
-
-        for (final C columnKey : _columnKeySet) {
-            datasetColumnNameList.add(N.toString(columnKey));
-        }
+        N.checkArgument(columnLength > 0 || rowLength == 0, "Cannot convert rows without columns to a Dataset");
+        final List<String> datasetColumnNameList = toDatasetColumnNames(_columnKeySet, "Column");
 
         final List<List<Object>> datasetColumnList = new ArrayList<>(columnLength);
 
@@ -6357,7 +6833,7 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
         }
 
-        return new RowDataset(datasetColumnNameList, datasetColumnList);
+        return new RowDataset(datasetColumnNameList, datasetColumnList, null, true);
     }
 
     /**
@@ -6366,8 +6842,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Each column in the Sheet becomes a row in the Dataset, with the row keys serving as the column names.
      * This effectively transposes the data, making Sheet columns into Dataset rows. The Dataset's
      * columns are named using {@link N#toString(Object)} on the Sheet's row keys. The resulting names
-     * must be non-empty and unique. Because Dataset derives its row count from its columns, a Sheet with
-     * columns but no rows converts to an empty Dataset and cannot preserve those column keys as Dataset rows.
+     * must be non-empty and unique. A Sheet with columns but no rows is rejected with IllegalArgumentException because the transposed Dataset cannot preserve that row count.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -6385,18 +6860,17 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @return a Dataset object with rows corresponding to Sheet columns and columns named by Sheet row keys (transposed)
-     * @throws IllegalArgumentException if converted row-key names are empty or duplicated.
+     * @throws IllegalArgumentException if converted row-key names are empty or duplicated. The message names the
+     *         offending Sheet row keys - note that two distinct keys can collide here, e.g. {@code Integer 1} and
+     *         {@code "1"} both render as {@code "1"}, or this Sheet has columns but no rows.
      * @see #toDataset()
      * @see #toTransposedArray()
      */
-    public Dataset toTransposedDataset() {
+    public Dataset toTransposedDataset() throws IllegalArgumentException {
         final int rowLength = rowCount();
         final int columnLength = columnCount();
-        final List<String> datasetColumnNameList = new ArrayList<>(rowLength);
-
-        for (final R rowKey : _rowKeySet) {
-            datasetColumnNameList.add(N.toString(rowKey));
-        }
+        N.checkArgument(rowLength > 0 || columnLength == 0, "Cannot convert transposed rows without columns to a Dataset");
+        final List<String> datasetColumnNameList = toDatasetColumnNames(_rowKeySet, "Row");
 
         final List<List<Object>> datasetColumnList = new ArrayList<>(rowLength);
 
@@ -6418,7 +6892,46 @@ public final class Sheet<R, C, V> implements Cloneable {
             }
         }
 
-        return new RowDataset(datasetColumnNameList, datasetColumnList);
+        return new RowDataset(datasetColumnNameList, datasetColumnList, null, true);
+    }
+
+    /**
+     * Renders {@code keys} as Dataset column names via {@link N#toString(Object)}, rejecting a result that a
+     * Dataset cannot use.
+     *
+     * <p>A Sheet key set is only required to be non-{@code null} and distinct, but Dataset column names must
+     * additionally be non-empty and distinct <i>as strings</i> - so {@code Integer 1} and {@code "1"} are two
+     * valid Sheet keys that collide here. Letting the {@code RowDataset} constructor catch that reported
+     * {@code "Duplicated column names found in: [1, 1]"}, which names neither the Sheet nor the keys at
+     * fault; this reports both.</p>
+     *
+     * @param keys the row or column keys to convert, in order
+     * @param axis {@code "Row"} or {@code "Column"}, for the error message
+     * @return the Dataset column names, in key order
+     * @throws IllegalArgumentException if a key renders as an empty name, or two keys render as the same name
+     */
+    private static List<String> toDatasetColumnNames(final Collection<?> keys, final String axis) throws IllegalArgumentException {
+        final List<String> names = new ArrayList<>(keys.size());
+        final Map<String, Object> keyByName = N.newHashMap(keys.size());
+
+        for (final Object key : keys) {
+            final String name = N.toString(key);
+
+            if (Strings.isEmpty(name)) {
+                throw new IllegalArgumentException("Cannot convert to Dataset: " + axis + " key " + N.toString(key) + " maps to an empty Dataset column name");
+            }
+
+            final Object previousKey = keyByName.put(name, key);
+
+            if (previousKey != null) {
+                throw new IllegalArgumentException("Cannot convert to Dataset: " + axis + " keys " + N.toString(previousKey) + " and " + N.toString(key)
+                        + " both map to the Dataset column name \"" + name + "\"");
+            }
+
+            names.add(name);
+        }
+
+        return names;
     }
 
     /**
@@ -6486,11 +6999,13 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <T> the type of the elements in the array
      * @param componentType the Class object representing the element type
      * @return a two-dimensional typed array with row-major ordering
+     * @throws IllegalArgumentException if {@code componentType} is {@code null} or {@code void.class}, or adding two array dimensions would exceed 255 dimensions
+     * @throws ClassCastException if {@code componentType} is a primitive type other than {@code void.class}
      * @throws ArrayStoreException if any value is not assignable to the specified component type
      * @see #toArray()
      * @see #toTransposedArray(Class)
      */
-    public <T> T[][] toArray(final Class<T> componentType) {
+    public <T> T[][] toArray(final Class<T> componentType) throws IllegalArgumentException, ClassCastException, ArrayStoreException {
         final int rowLength = rowCount();
         final int columnLength = columnCount();
         final T[][] copy = N.newArray(N.newArray(componentType, 0).getClass(), rowLength);
@@ -6574,11 +7089,13 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <T> the type of the elements in the array
      * @param componentType the Class object representing the element type
      * @return a two-dimensional typed array with column-major ordering
+     * @throws IllegalArgumentException if {@code componentType} is {@code null} or {@code void.class}, or adding two array dimensions would exceed 255 dimensions
+     * @throws ClassCastException if {@code componentType} is a primitive type other than {@code void.class}
      * @throws ArrayStoreException if any value is not assignable to the specified component type
      * @see #toTransposedArray()
      * @see #toArray(Class)
      */
-    public <T> T[][] toTransposedArray(final Class<T> componentType) {
+    public <T> T[][] toTransposedArray(final Class<T> componentType) throws IllegalArgumentException, ClassCastException, ArrayStoreException {
         final int rowLength = rowCount();
         final int columnLength = columnCount();
         final T[][] copy = N.newArray(N.newArray(componentType, 0).getClass(), columnLength);
@@ -6621,11 +7138,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <E> the type of exception the function may throw
      * @param func the function to apply to this Sheet
      * @return the result produced by applying the function to this Sheet
-     * @throws E if the function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if the function throws an exception
      * @see #applyIfNotEmpty(Throwables.Function)
      */
-    public <T, E extends Exception> T apply(final Throwables.Function<? super Sheet<R, C, V>, T, E> func) throws E, IllegalArgumentException {
+    public <T, E extends Exception> T apply(final Throwables.Function<? super Sheet<R, C, V>, T, E> func) throws IllegalArgumentException, E {
         N.checkArgNotNull(func, cs.func);
 
         return func.apply(this);
@@ -6661,13 +7178,13 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param func the function to apply if this Sheet has at least one row and one column
      * @return an Optional containing the result if both axes are non-empty and the function returned a
      *         {@code non-null} value, or an empty Optional otherwise
-     * @throws E if the function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if the function throws an exception
      * @see #apply(Throwables.Function)
      * @see #isEmpty()
      */
     public <T, E extends Exception> Optional<T> applyIfNotEmpty(final Throwables.Function<? super Sheet<R, C, V>, T, E> func)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(func, cs.func);
 
         if (!isEmpty()) {
@@ -6702,11 +7219,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on this Sheet
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      * @see #acceptIfNotEmpty(Throwables.Consumer)
      */
-    public <E extends Exception> void accept(final Throwables.Consumer<? super Sheet<R, C, V>, E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super Sheet<R, C, V>, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         action.accept(this);
@@ -6743,12 +7260,12 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param <E> the type of exception the action may throw
      * @param action the action to perform if this Sheet has at least one row and one column
      * @return OrElse.TRUE if the action was executed, or OrElse.FALSE if either axis was empty
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      * @see #accept(Throwables.Consumer)
      * @see #isEmpty()
      */
-    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Sheet<R, C, V>, E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Sheet<R, C, V>, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         if (!isEmpty()) {
@@ -6785,7 +7302,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * // +----+----+----+----+
      * }</pre>
      *
-     * @throws UncheckedIOException if an I/O error occurs while printing
+     * @throws UncheckedIOException if appending the formatted table or flushing its output fails
      * @see #println(String)
      * @see #println(Appendable)
      */
@@ -6819,7 +7336,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * @param prefix the string to prepend to each line of output; may be {@code null} or empty for no prefix
-     * @throws UncheckedIOException if an I/O error occurs while printing
+     * @throws UncheckedIOException if appending the formatted table or flushing its output fails
      * @see #println()
      * @see #println(Collection, Collection, String, Appendable)
      */
@@ -6850,12 +7367,12 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param rowKeySet the row keys to include in the output; {@code null} is treated as empty
      * @param columnKeySet the column keys to include in the output; {@code null} is treated as empty
      * @throws IllegalArgumentException if any specified row or column keys do not exist in this Sheet.
-     * @throws UncheckedIOException if an I/O error occurs while printing
+     * @throws UncheckedIOException if appending the formatted table or flushing its output fails
      * @see #println()
      * @see #println(Collection, Collection, Appendable)
      * @see #println(Collection, Collection, String, Appendable)
      */
-    public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws UncheckedIOException {
+    public void println(final Collection<R> rowKeySet, final Collection<C> columnKeySet) throws IllegalArgumentException, UncheckedIOException {
         println(rowKeySet, columnKeySet, System.out); // NOSONAR
     }
 
@@ -6887,11 +7404,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      *
      * @param output the destination for the formatted output; must not be {@code null}
      * @throws IllegalArgumentException if {@code output} is {@code null}.
-     * @throws UncheckedIOException if an I/O error occurs while writing
+     * @throws UncheckedIOException if appending the formatted table or flushing {@code output} fails
      * @see #println()
      * @see #println(Collection, Collection, Appendable)
      */
-    public void println(final Appendable output) throws UncheckedIOException {
+    public void println(final Appendable output) throws IllegalArgumentException, UncheckedIOException {
         println(_rowKeySet, _columnKeySet, output);
     }
 
@@ -6924,7 +7441,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param output the destination for the formatted output; must not be {@code null}
      * @throws IllegalArgumentException if {@code output} is {@code null}, or if any specified row or column keys do
      *         not exist in this Sheet.
-     * @throws UncheckedIOException if an I/O error occurs while printing
+     * @throws UncheckedIOException if appending the formatted table or flushing its output fails
      * @see #println()
      * @see #println(Appendable)
      * @see #println(Collection, Collection, String, Appendable)
@@ -6967,7 +7484,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @param output the destination for the formatted output; must not be {@code null}
      * @throws IllegalArgumentException if {@code output} is {@code null}, or if any specified row or column keys do
      *         not exist in this Sheet.
-     * @throws UncheckedIOException if an I/O error occurs while printing
+     * @throws UncheckedIOException if appending the formatted table or flushing its output fails
      * @see #println()
      * @see #println(String)
      * @see #println(Collection, Collection, Appendable)
@@ -6982,12 +7499,13 @@ public final class Sheet<R, C, V> implements Cloneable {
         }
 
         if (N.notEmpty(rowKeySet) && !_rowKeySet.containsAll(rowKeySet)) {
-            throw new IllegalArgumentException("Row keys: " + N.difference(rowKeySet, _rowKeySet) + " are not included in this sheet row keys: " + _rowKeySet);
+            throw new IllegalArgumentException(
+                    "Row keys: " + keysToString(N.difference(rowKeySet, _rowKeySet)) + " are not included in this sheet row keys: " + keysToString(_rowKeySet));
         }
 
         if (N.notEmpty(columnKeySet) && !_columnKeySet.containsAll(columnKeySet)) {
-            throw new IllegalArgumentException(
-                    "Column keys: " + N.difference(columnKeySet, _columnKeySet) + " are not included in this sheet Column keys: " + _columnKeySet);
+            throw new IllegalArgumentException("Column keys: " + keysToString(N.difference(columnKeySet, _columnKeySet))
+                    + " are not included in this sheet Column keys: " + keysToString(_columnKeySet));
         }
 
         N.checkArgNotNull(output, cs.output);
@@ -7060,7 +7578,13 @@ public final class Sheet<R, C, V> implements Cloneable {
                         maxLen = N.max(maxLen, 1);
                         N.fill(strColumn, 0, rowLen, " ");
                     } else if (!_isInitialized) {
-                        maxLen = N.max(maxLen, 4);
+                        // Reserve the width of "null" only when a "null" is actually printed. With no rows the
+                        // fill below is a no-op, so widening here made a Sheet emptied by removeRow and one
+                        // built empty - which are equals() - render at different widths.
+                        if (rowLen > 0) {
+                            maxLen = N.max(maxLen, 4);
+                        }
+
                         N.fill(strColumn, 0, rowLen, "null");
                     } else {
                         for (final int rowIndex : rowIndices) {
@@ -7133,13 +7657,17 @@ public final class Sheet<R, C, V> implements Cloneable {
                 if (rowLen == 0) {
                     appendable.append(lineSeparator);
 
+                    // Same cell framing as a data row - see RowDataset.println(...). Padding the gap between
+                    // columns with plain spaces instead of writing " | " rendered a zero-row Sheet as a
+                    // single cell spanning every column.
                     for (int i = 0; i < columnLen; i++) {
                         if (i == 0) {
                             appendable.append("| ");
-                            appendable.append(Strings.padEnd("", maxColumnLens[i]));
                         } else {
-                            appendable.append(Strings.padEnd("", maxColumnLens[i] + 3));
+                            appendable.append(" | ");
                         }
+
+                        appendable.append(Strings.padEndToDisplayWidth("", maxColumnLens[i]));
                     }
 
                     appendable.append(" |");
@@ -7188,20 +7716,69 @@ public final class Sheet<R, C, V> implements Cloneable {
         result = prime * result + orderedKeyHashCode(_columnKeySet);
         // Note: when uninitialized, all cells are conceptually null. An initialized but all-null
         // _columnList must hash the same as an uninitialized sheet to keep equals/hashCode consistent.
-        if (_isInitialized && hasAnyNonNullValue()) {
-            result = prime * result + _columnList.hashCode();
-        } else {
-            result = prime * result;
+        // Both the "is any cell non-null?" test and List.hashCode() walk every cell, so they are fused into
+        // one pass here: the cell hash is accumulated speculatively and discarded if nothing turned out to
+        // be non-null. The accumulation reproduces List.hashCode()'s algorithm exactly, so the result is
+        // identical to `_columnList.hashCode()`.
+        int cellsHash = 1;
+        boolean anyNonNull = false;
+
+        if (_isInitialized) {
+            for (final List<V> column : _columnList) {
+                int columnHash = 1;
+
+                for (final V e : column) {
+                    columnHash = prime * columnHash + (e == null ? 0 : e.hashCode());
+                    anyNonNull |= e != null;
+                }
+
+                cellsHash = prime * cellsHash + columnHash;
+            }
         }
+
+        return prime * result + (anyNonNull ? cellsHash : 0);
+    }
+
+    /**
+     * Order-sensitive hash of a key collection, with deep hashing for array keys.
+     * The key sets have order-insensitive hash codes, so this
+     * cannot delegate to them; it computes the list hash in place rather than copying into an {@code ArrayList}
+     * first, because it runs on every {@link #hashCode()} call.
+     */
+    private static int orderedKeyHashCode(final Collection<?> keys) {
+        if (keys == null) {
+            return 0;
+        }
+
+        int result = 1;
+
+        for (final Object key : keys) {
+            result = 31 * result + Objects.hashCode(N.hashKey(key));
+        }
+
         return result;
     }
 
-    private static int orderedKeyHashCode(final Collection<?> keys) {
-        return keys == null ? 0 : new ArrayList<>(keys).hashCode();
-    }
-
+    /** Order-sensitive equality of two key collections, without copying either one. */
     private static boolean orderedKeysEqual(final Collection<?> keys1, final Collection<?> keys2) {
-        return N.equals(keys1 == null ? null : new ArrayList<>(keys1), keys2 == null ? null : new ArrayList<>(keys2));
+        if (keys1 == keys2) {
+            return true;
+        }
+
+        if (keys1 == null || keys2 == null || keys1.size() != keys2.size()) {
+            return false;
+        }
+
+        final Iterator<?> iter1 = keys1.iterator();
+        final Iterator<?> iter2 = keys2.iterator();
+
+        while (iter1.hasNext()) {
+            if (!Objects.equals(N.hashKey(iter1.next()), N.hashKey(iter2.next()))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private boolean hasAnyNonNullValue() {
@@ -7223,6 +7800,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      * <p>
      * Two Sheets are considered equal if they have the same ordered row keys, ordered column keys, and
      * identical values at corresponding positions. Values are compared with {@code equals} position by position.
+     * </p>
+     * <p>
+     * <b>Note:</b> cell comparison is <i>shallow</i> - plain {@code equals}, so a cell holding an array is
+     * compared by identity. This deliberately differs from {@link Dataset}'s {@code equals}, which compares cells
+     * <i>deeply</i> so that it agrees with {@code distinct()} and the set operations. Two Sheets whose
+     * corresponding cells hold distinct but equal-by-content arrays are therefore <i>not</i> equal here, even
+     * though the {@link #toDataset() Datasets} converted from them are. {@link #containsValue(Object)} and
+     * {@link #containsValueAt(Object, Object, Object)} use the same shallow rule as this method.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -7329,9 +7914,9 @@ public final class Sheet<R, C, V> implements Cloneable {
     }
 
     private void init() {
-        // Always ensure the row/column index maps exist. They may have been reset to null
-        // (e.g. by moveRow/moveColumn) while the sheet remains initialized; callers such as
-        // addRow/addColumn rely on these maps right after invoking init().
+        // The constructors build the row/column index maps, so this is a no-op for every instance that went
+        // through one. It stays as the safety net for an instance materialised without a constructor
+        // (deserialization) - see getRowIndex(Object).
         initIndexMap();
 
         if (!_isInitialized) {
@@ -7352,7 +7937,7 @@ public final class Sheet<R, C, V> implements Cloneable {
     private void initIndexMap() {
         if (_rowKeyIndexMap == null) {
             final int rowLength = rowCount();
-            _rowKeyIndexMap = N.newBiMap(rowLength);
+            _rowKeyIndexMap = new KeyIndex<>(rowLength);
             int index = 0;
             for (final R rowKey : _rowKeySet) {
                 _rowKeyIndexMap.put(rowKey, index++);
@@ -7361,7 +7946,7 @@ public final class Sheet<R, C, V> implements Cloneable {
 
         if (_columnKeyIndexMap == null) {
             final int columnLength = columnCount();
-            _columnKeyIndexMap = N.newBiMap(columnLength);
+            _columnKeyIndexMap = new KeyIndex<>(columnLength);
             int index = 0;
             for (final C columnKey : _columnKeySet) {
                 _columnKeyIndexMap.put(columnKey, index++);
@@ -7378,7 +7963,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     private void checkRowKey(final R rowKey) throws IllegalArgumentException {
         if (!_rowKeySet.contains(rowKey)) {
-            throw new IllegalArgumentException("No row found by key: " + rowKey);
+            throw new IllegalArgumentException("No row found by key: " + keyToString(rowKey));
         }
     }
 
@@ -7391,7 +7976,7 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     private void checkColumnKey(final C columnKey) throws IllegalArgumentException {
         if (!_columnKeySet.contains(columnKey)) {
-            throw new IllegalArgumentException("No column found by key: " + columnKey);
+            throw new IllegalArgumentException("No column found by key: " + keyToString(columnKey));
         }
     }
 
@@ -7464,14 +8049,14 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IllegalArgumentException if the row key does not exist in this Sheet.
      */
     private int getRowIndex(final R rowKey) throws IllegalArgumentException {
-        if (_rowKeyIndexMap == null) {
+        if (_rowKeyIndexMap == null) { // only an instance materialised without running a constructor (deserialization) can get here
             this.initIndexMap();
         }
 
         final Integer index = _rowKeyIndexMap.get(rowKey);
 
         if (index == null) {
-            throw new IllegalArgumentException("No row found by key: " + rowKey);
+            throw new IllegalArgumentException("No row found by key: " + keyToString(rowKey));
         }
 
         return index;
@@ -7486,17 +8071,88 @@ public final class Sheet<R, C, V> implements Cloneable {
      * @throws IllegalArgumentException if the column key does not exist in this Sheet.
      */
     private int getColumnIndex(final C columnKey) throws IllegalArgumentException {
-        if (_columnKeyIndexMap == null) {
+        if (_columnKeyIndexMap == null) { // see getRowIndex(Object)
             this.initIndexMap();
         }
 
         final Integer index = _columnKeyIndexMap.get(columnKey);
 
         if (index == null) {
-            throw new IllegalArgumentException("No column found by key: " + columnKey);
+            throw new IllegalArgumentException("No column found by key: " + keyToString(columnKey));
         }
 
         return index;
+    }
+
+    private static final int MAX_KEY_ELEMENTS_IN_MESSAGE = 32;
+
+    private static final int MAX_KEY_CHARS_IN_MESSAGE = 512;
+
+    /**
+     * Renders a single row/column key for a diagnostic message - deeply for an array key, which is a
+     * first-class key type here, but bounded.
+     *
+     * @param key the key to render, may be {@code null}
+     * @return a bounded rendering of {@code key}
+     */
+    private static String keyToString(final Object key) {
+        // Bounded on purpose. N.toString renders an array key element by element, and this feeds the most
+        // frequent failure in the class (get/set/remove/rowValues/columnValues and the keyed views' size()):
+        // a 200,000-element key produced a 1.5 MB message. The element cap keeps that string from ever being
+        // built for a long array key; the character cap then bounds the message whatever the key is.
+        Object rendered = key;
+        int omittedElements = 0;
+
+        if (key != null && key.getClass().isArray()) {
+            final int len = Array.getLength(key);
+
+            if (len > MAX_KEY_ELEMENTS_IN_MESSAGE) {
+                rendered = java.lang.reflect.Array.newInstance(key.getClass().getComponentType(), MAX_KEY_ELEMENTS_IN_MESSAGE);
+                System.arraycopy(key, 0, rendered, 0, MAX_KEY_ELEMENTS_IN_MESSAGE);
+                omittedElements = len - MAX_KEY_ELEMENTS_IN_MESSAGE;
+            }
+        }
+
+        String str = N.toString(rendered);
+
+        if (omittedElements > 0) {
+            // N.toString of an array always closes with ']'.
+            str = str.substring(0, str.length() - 1) + ", ...(" + omittedElements + " more)]";
+        }
+
+        return str.length() <= MAX_KEY_CHARS_IN_MESSAGE ? str : str.substring(0, MAX_KEY_CHARS_IN_MESSAGE) + "...";
+    }
+
+    /**
+     * Renders a collection of row/column keys for a diagnostic message. {@code Collection.toString()} would
+     * leave an array key as {@code [I@1b6d3586}, so every key goes through {@link #keyToString(Object)}.
+     *
+     * @param keys the keys to render, may be {@code null}
+     * @return a bounded rendering of {@code keys}, in the collection's own iteration order
+     */
+    private static String keysToString(final Collection<?> keys) {
+        if (keys == null) {
+            return Strings.NULL;
+        }
+
+        final StringBuilder sb = new StringBuilder().append('[');
+        int i = 0;
+
+        for (final Object key : keys) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+
+            if (i == MAX_KEY_ELEMENTS_IN_MESSAGE) {
+                sb.append("...(").append(keys.size() - i).append(" more)");
+                break;
+            }
+
+            sb.append(keyToString(key));
+            i++;
+        }
+
+        return sb.append(']').toString();
     }
 
     /**
@@ -7558,6 +8214,11 @@ public final class Sheet<R, C, V> implements Cloneable {
      */
     public record Point(int rowIndex, int columnIndex) {
 
+        // Note on the size: the cache is populated eagerly in the static initializer below, so its whole cost
+        // is paid the first time anything touches Point - including a bare read of Point.ZERO. At 128 that is
+        // 16,384 Point instances plus the backing arrays, measured at ~420 KB on JDK 25. Shrinking it is a
+        // pure trade of that footprint against allocation avoidance for small coordinates and needs a
+        // benchmark to settle; SheetTest.testPointOf_cached currently pins the 128 boundary.
         private static final int MAX_CACHE_SIZE = 128;
         private static final Point[][] CACHE = new Point[MAX_CACHE_SIZE][MAX_CACHE_SIZE];
 

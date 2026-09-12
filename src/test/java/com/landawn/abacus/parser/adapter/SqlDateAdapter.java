@@ -15,6 +15,6 @@ public class SqlDateAdapter extends XmlAdapter<String, Date> {
 
     @Override
     public Date unmarshal(String v) throws Exception {
-        return Dates.parseDate(v);
+        return Dates.parseToDate(v);
     }
 }

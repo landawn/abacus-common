@@ -98,7 +98,7 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * @see #stringOf(BigInteger)
      */
     @Override
-    public BigInteger valueOf(final String str) {
+    public BigInteger valueOf(final String str) throws NumberFormatException {
         return Strings.isEmpty(str) ? null : new BigInteger(str.trim(), 10);
     }
 
@@ -110,11 +110,12 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the column containing the integer value
      * @return the {@code BigInteger} value at the specified column, or {@code null} if the column value is SQL NULL or empty
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      * @throws NumberFormatException if the column string value cannot be parsed as a valid {@code BigInteger}
      */
     @Override
-    public BigInteger get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public BigInteger get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, NumberFormatException {
         final String stringValue = rs.getString(columnIndex);
 
         return Strings.isEmpty(stringValue) ? null : new BigInteger(stringValue.trim());
@@ -128,11 +129,12 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
      * @return the {@code BigInteger} value at the specified column, or {@code null} if the column value is SQL NULL or empty
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      * @throws NumberFormatException if the column string value cannot be parsed as a valid {@code BigInteger}
      */
     @Override
-    public BigInteger get(final ResultSet rs, final String columnName) throws SQLException {
+    public BigInteger get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, NumberFormatException {
         final String stringValue = rs.getString(columnName);
 
         return Strings.isEmpty(stringValue) ? null : new BigInteger(stringValue.trim());
@@ -147,10 +149,11 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * @param stmt the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code BigInteger} value to set; {@code null} is stored as SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final BigInteger x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final BigInteger x) throws NullPointerException, SQLException {
         stmt.setString(columnIndex, (x == null) ? null : x.toString());
     }
 
@@ -163,10 +166,11 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code BigInteger} value to set; {@code null} is stored as SQL NULL
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final BigInteger x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final BigInteger x) throws NullPointerException, SQLException {
         stmt.setString(parameterName, (x == null) ? null : x.toString());
     }
 }

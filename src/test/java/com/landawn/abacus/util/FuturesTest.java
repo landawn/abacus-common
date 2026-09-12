@@ -1,8 +1,8 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
@@ -38,6 +39,42 @@ import com.landawn.abacus.util.Tuple.Tuple6;
 import com.landawn.abacus.util.Tuple.Tuple7;
 
 public class FuturesTest extends TestBase {
+
+    @Test
+    public void testAnyOfCancellationExceptionFromComputationIsFailure() {
+        for (int mode = 0; mode < 3; mode++) {
+            final int getMode = mode;
+            final CancellationException cause = new CancellationException("computation failed");
+            final FutureTask<String> failed = new FutureTask<>(() -> { throw cause; });
+            failed.run();
+            final ContinuableFuture<String> aggregate = Futures.anyOf(failed);
+            final ExecutionException first = assertThrows(ExecutionException.class, () -> {
+                if (getMode == 0) {
+                    aggregate.get();
+                } else {
+                    aggregate.get(getMode == 1 ? 1 : 0, TimeUnit.SECONDS);
+                }
+            });
+            Assertions.assertSame(cause, first.getCause());
+            assertFalse(failed.isCancelled());
+            assertFalse(aggregate.isCancelled());
+            assertTrue(aggregate.isDone());
+            Assertions.assertSame(cause, assertThrows(ExecutionException.class, aggregate::get).getCause());
+            Assertions.assertSame(cause, assertThrows(ExecutionException.class, () -> aggregate.get(0, TimeUnit.SECONDS)).getCause());
+
+            final FutureTask<String> cancelled = new FutureTask<>(() -> "unused");
+            cancelled.cancel(false);
+            final ContinuableFuture<String> mixed = Futures.anyOf(cancelled, failed);
+            final ExecutionException mixedFailure = assertThrows(ExecutionException.class, mixed::get);
+            assertInstanceOf(CancellationException.class, mixedFailure.getCause());
+            assertFalse(mixed.isCancelled());
+
+            final ContinuableFuture<String> allCancelled = Futures.anyOf(cancelled);
+            assertThrows(CancellationException.class, allCancelled::get);
+            assertTrue(allCancelled.isCancelled());
+            assertThrows(CancellationException.class, () -> allCancelled.get(1, TimeUnit.SECONDS));
+        }
+    }
 
     private ExecutorService executor;
 
@@ -176,9 +213,9 @@ public class FuturesTest extends TestBase {
         List<Future<Integer>> cfs = Arrays.asList(CompletableFuture.completedFuture(1), CompletableFuture.completedFuture(2),
                 CompletableFuture.completedFuture(3));
 
-        Throwables.Function<List<Future<Integer>>, Integer, Exception> zipFunction = list -> {
+        Throwables.Function<List<Future<? extends Integer>>, Integer, Exception> zipFunction = list -> {
             int sum = 0;
-            for (Future<Integer> f : list) {
+            for (Future<? extends Integer> f : list) {
                 sum += f.get();
             }
             return sum;
@@ -193,14 +230,14 @@ public class FuturesTest extends TestBase {
     public void testComposeCollectionEmpty() {
         List<Future<Integer>> cfs = new ArrayList<>();
 
-        Throwables.Function<List<Future<Integer>>, Integer, Exception> zipFunction = list -> 0;
+        Throwables.Function<List<Future<? extends Integer>>, Integer, Exception> zipFunction = list -> 0;
 
         assertThrows(IllegalArgumentException.class, () -> Futures.compose(cfs, zipFunction));
     }
 
     @Test
     public void testComposeCollectionNull() {
-        Throwables.Function<List<Future<Integer>>, Integer, Exception> zipFunction = list -> 0;
+        Throwables.Function<List<Future<? extends Integer>>, Integer, Exception> zipFunction = list -> 0;
 
         assertThrows(IllegalArgumentException.class, () -> Futures.compose(null, zipFunction));
     }
@@ -209,17 +246,17 @@ public class FuturesTest extends TestBase {
     public void testComposeCollectionWithTimeoutFunction() throws Exception {
         List<Future<Integer>> cfs = Arrays.asList(CompletableFuture.completedFuture(10), CompletableFuture.completedFuture(20));
 
-        Throwables.Function<List<Future<Integer>>, Integer, Exception> zipFunction = list -> {
+        Throwables.Function<List<Future<? extends Integer>>, Integer, Exception> zipFunction = list -> {
             int sum = 0;
-            for (Future<Integer> f : list) {
+            for (Future<? extends Integer> f : list) {
                 sum += f.get();
             }
             return sum;
         };
 
-        Throwables.Function<Tuple3<List<Future<Integer>>, Long, TimeUnit>, Integer, Exception> timeoutFunction = t -> {
+        Throwables.Function<Tuple3<List<Future<? extends Integer>>, Long, TimeUnit>, Integer, Exception> timeoutFunction = t -> {
             int sum = 0;
-            for (Future<Integer> f : t._1) {
+            for (Future<? extends Integer> f : t._1) {
                 sum += f.get(t._2, t._3);
             }
             return sum;
@@ -234,21 +271,9 @@ public class FuturesTest extends TestBase {
     @Test
     public void testComposeCollectionWithTimeoutFunctionNullArgs() {
         List<Future<Integer>> cfs = Arrays.asList(CompletableFuture.completedFuture(1));
-        Throwables.Function<List<Future<Integer>>, Integer, Exception> zipFunction = list -> 0;
+        Throwables.Function<List<Future<? extends Integer>>, Integer, Exception> zipFunction = list -> 0;
 
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Futures.compose(cfs, null, null));
-    }
-
-    @Test
-    public void testComposeWithBiFunction() throws Exception {
-        Future<Integer> future1 = CompletableFuture.completedFuture(5);
-        Future<Integer> future2 = CompletableFuture.completedFuture(10);
-
-        ContinuableFuture<Integer> composed = Futures.compose(future1, future2, (f1, f2) -> f1.get() + f2.get());
-
-        Assertions.assertEquals(15, composed.get());
-
-        Assertions.assertEquals(15, composed.get(1, TimeUnit.SECONDS));
     }
 
     @Test
@@ -290,61 +315,6 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
-    public void testComposeThreeFutures() throws Exception {
-        Future<String> f1 = CompletableFuture.completedFuture("A");
-        Future<String> f2 = CompletableFuture.completedFuture("B");
-        Future<String> f3 = CompletableFuture.completedFuture("C");
-
-        ContinuableFuture<String> composed = Futures.compose(f1, f2, f3, (fu1, fu2, fu3) -> fu1.get() + fu2.get() + fu3.get());
-
-        Assertions.assertEquals("ABC", composed.get());
-    }
-
-    @Test
-    public void testComposeCollection() throws Exception {
-        List<Future<Integer>> futures = Arrays.asList(CompletableFuture.completedFuture(1), CompletableFuture.completedFuture(2),
-                CompletableFuture.completedFuture(3));
-
-        ContinuableFuture<Integer> sum = Futures.compose(futures, list -> {
-            int total = 0;
-            for (Future<Integer> f : list) {
-                total += f.get();
-            }
-            return total;
-        });
-
-        Assertions.assertEquals(6, sum.get());
-    }
-
-    @Test
-    public void testComposeWithTwoFuturesAndTimeoutFunction() throws Exception {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(5);
-        CompletableFuture<Integer> cf2 = CompletableFuture.completedFuture(10);
-
-        Throwables.BiFunction<Future<Integer>, Future<Integer>, Integer, Exception> zipFunction = (f1, f2) -> f1.get() + f2.get();
-        Throwables.Function<Tuple4<Future<Integer>, Future<Integer>, Long, TimeUnit>, Integer, Exception> timeoutFunction = t -> t._1.get() + t._2.get();
-
-        ContinuableFuture<Integer> result = Futures.compose(cf1, cf2, zipFunction, timeoutFunction);
-
-        assertEquals(15, result.get());
-        assertEquals(15, result.get(1, TimeUnit.SECONDS));
-    }
-
-    @Test
-    public void testComposeWithThreeFuturesAndTriFunction() throws Exception {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
-        CompletableFuture<Integer> cf2 = CompletableFuture.completedFuture(2);
-        CompletableFuture<Integer> cf3 = CompletableFuture.completedFuture(3);
-
-        Throwables.TriFunction<Future<Integer>, Future<Integer>, Future<Integer>, Integer, Exception> zipFunction = (f1, f2, f3) -> f1.get() + f2.get()
-                + f3.get();
-
-        ContinuableFuture<Integer> result = Futures.compose(cf1, cf2, cf3, zipFunction);
-
-        assertEquals(6, result.get());
-    }
-
-    @Test
     public void testComposeWithThreeFuturesAndTimeoutFunction() throws Exception {
         CompletableFuture<String> cf1 = CompletableFuture.completedFuture("A");
         CompletableFuture<String> cf2 = CompletableFuture.completedFuture("B");
@@ -360,38 +330,20 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
-    public void testComposeWithCollectionAndFunction() throws Exception {
-        List<CompletableFuture<Integer>> futures = Arrays.asList(CompletableFuture.completedFuture(1), CompletableFuture.completedFuture(2),
-                CompletableFuture.completedFuture(3));
-
-        Throwables.Function<List<CompletableFuture<Integer>>, Integer, Exception> zipFunction = list -> {
-            int sum = 0;
-            for (Future<Integer> f : list) {
-                sum += f.get();
-            }
-            return sum;
-        };
-
-        ContinuableFuture<Integer> result = Futures.compose(futures, zipFunction);
-
-        assertEquals(6, result.get());
-    }
-
-    @Test
     public void testComposeWithCollectionAndTimeoutFunction() throws Exception {
         List<CompletableFuture<String>> futures = Arrays.asList(CompletableFuture.completedFuture("X"), CompletableFuture.completedFuture("Y"),
                 CompletableFuture.completedFuture("Z"));
 
-        Throwables.Function<List<CompletableFuture<String>>, String, Exception> zipFunction = list -> {
+        Throwables.Function<List<Future<? extends String>>, String, Exception> zipFunction = list -> {
             StringBuilder sb = new StringBuilder();
-            for (Future<String> f : list) {
+            for (Future<? extends String> f : list) {
                 sb.append(f.get());
             }
             return sb.toString();
         };
-        Throwables.Function<Tuple3<List<CompletableFuture<String>>, Long, TimeUnit>, String, Exception> timeoutFunction = t -> {
+        Throwables.Function<Tuple3<List<Future<? extends String>>, Long, TimeUnit>, String, Exception> timeoutFunction = t -> {
             StringBuilder sb = new StringBuilder();
-            for (Future<String> f : t._1) {
+            for (Future<? extends String> f : t._1) {
                 sb.append(f.get(t._2, t._3));
             }
             return sb.toString();
@@ -400,15 +352,6 @@ public class FuturesTest extends TestBase {
         ContinuableFuture<String> result = Futures.compose(futures, zipFunction, timeoutFunction);
 
         assertEquals("XYZ", result.get(1, TimeUnit.SECONDS));
-    }
-
-    @Test
-    public void testComposeWithEmptyCollectionThrowsException() {
-        List<CompletableFuture<Integer>> emptyList = new ArrayList<>();
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            Futures.compose(emptyList, list -> 0);
-        });
     }
 
     @Test
@@ -681,57 +624,6 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
-    public void testAllOfVarargsCancel() {
-        CompletableFuture<Integer> cf1 = new CompletableFuture<>();
-        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
-
-        ContinuableFuture<List<Integer>> result = Futures.allOf(cf1, cf2);
-
-        assertTrue(result.cancel(true));
-        assertTrue(cf1.isCancelled());
-        assertTrue(cf2.isCancelled());
-    }
-
-    @Test
-    public void testAllOfVarargsIsDone() {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
-        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
-
-        ContinuableFuture<List<Integer>> result = Futures.allOf(cf1, cf2);
-
-        assertFalse(result.isDone());
-        cf2.complete(2);
-        assertTrue(result.isDone());
-    }
-
-    @Test
-    public void testIsDone() {
-        CompletableFuture<String> f1 = new CompletableFuture<>();
-        CompletableFuture<String> f2 = CompletableFuture.completedFuture("Done");
-
-        ContinuableFuture<List<String>> all = Futures.allOf(f1, f2);
-        Assertions.assertFalse(all.isDone());
-
-        f1.complete("Also done");
-        Assertions.assertTrue(all.isDone());
-    }
-
-    @Test
-    public void testAllOfVarargs() throws Exception {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
-        CompletableFuture<Integer> cf2 = CompletableFuture.completedFuture(2);
-        CompletableFuture<Integer> cf3 = CompletableFuture.completedFuture(3);
-
-        ContinuableFuture<List<Integer>> result = Futures.allOf(cf1, cf2, cf3);
-
-        List<Integer> list = result.get();
-        assertEquals(3, list.size());
-        assertEquals(1, list.get(0));
-        assertEquals(2, list.get(1));
-        assertEquals(3, list.get(2));
-    }
-
-    @Test
     public void testAllOfVarargsWithTimeout() throws Exception {
         CompletableFuture<String> cf1 = CompletableFuture.completedFuture("A");
         CompletableFuture<String> cf2 = CompletableFuture.completedFuture("B");
@@ -742,39 +634,6 @@ public class FuturesTest extends TestBase {
         assertEquals(2, list.size());
         assertEquals("A", list.get(0));
         assertEquals("B", list.get(1));
-    }
-
-    @Test
-    public void testAllOfCollection() throws Exception {
-        Collection<Future<Integer>> cfs = Arrays.asList(CompletableFuture.completedFuture(10), CompletableFuture.completedFuture(20),
-                CompletableFuture.completedFuture(30));
-
-        ContinuableFuture<List<Integer>> result = Futures.allOf(cfs);
-
-        List<Integer> list = result.get();
-        assertEquals(3, list.size());
-        assertEquals(10, list.get(0));
-        assertEquals(20, list.get(1));
-        assertEquals(30, list.get(2));
-    }
-
-    @Test
-    public void testAllOfCollectionEmpty() {
-        Collection<Future<Integer>> cfs = new ArrayList<>();
-
-        assertThrows(IllegalArgumentException.class, () -> Futures.allOf(cfs));
-    }
-
-    @Test
-    public void testAllOfCollectionWithException() {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
-        CompletableFuture<Integer> cf2 = new CompletableFuture<>();
-        cf2.completeExceptionally(new RuntimeException("Test error"));
-
-        Collection<Future<Integer>> cfs = Arrays.asList(cf1, cf2);
-        ContinuableFuture<List<Integer>> result = Futures.allOf(cfs);
-
-        assertThrows(ExecutionException.class, () -> result.get());
     }
 
     @Test
@@ -830,20 +689,6 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
-    public void testCancelBehavior() throws Exception {
-        CompletableFuture<String> f1 = new CompletableFuture<>();
-        CompletableFuture<String> f2 = new CompletableFuture<>();
-
-        ContinuableFuture<List<String>> all = Futures.allOf(f1, f2);
-
-        boolean cancelled = all.cancel(true);
-        Assertions.assertTrue(cancelled);
-        Assertions.assertTrue(all.isCancelled());
-        Assertions.assertTrue(f1.isCancelled());
-        Assertions.assertTrue(f2.isCancelled());
-    }
-
-    @Test
     public void testEmptyCollection() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Futures.allOf(Collections.emptyList());
@@ -852,16 +697,6 @@ public class FuturesTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             Futures.anyOf(Collections.emptyList());
         });
-    }
-
-    @Test
-    public void testAllOfWithException() {
-        CompletableFuture<Integer> cf1 = CompletableFuture.completedFuture(1);
-        CompletableFuture<Integer> cf2 = CompletableFuture.failedFuture(new RuntimeException("Test exception"));
-
-        ContinuableFuture<List<Integer>> result = Futures.allOf(cf1, cf2);
-
-        assertThrows(ExecutionException.class, () -> result.get());
     }
 
     @Test
@@ -895,15 +730,6 @@ public class FuturesTest extends TestBase {
 
         assertTrue(allOfFuture.isDone());
         assertEquals(Arrays.asList(1, 2), allOfFuture.get());
-    }
-
-    @Test
-    public void testAllOfWithEmptyCollectionThrowsException() {
-        List<CompletableFuture<Integer>> emptyList = new ArrayList<>();
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            Futures.allOf(emptyList);
-        });
     }
 
     @Test
@@ -979,6 +805,39 @@ public class FuturesTest extends TestBase {
         ContinuableFuture<Integer> result = Futures.anyOf(cf1, cf2);
 
         assertTrue(result.isCancelled());
+    }
+
+    @Test
+    public void testAnyOfTimedGetDistinguishesInputTimeoutFailureFromDeadline() throws Exception {
+        final TimeoutException inputFailure = new TimeoutException("input failed before the aggregate deadline");
+        final CompletableFuture<String> failed = CompletableFuture.failedFuture(inputFailure);
+        final CompletableFuture<String> successful = CompletableFuture.completedFuture("ok");
+
+        assertEquals("ok", Futures.anyOf(failed, successful).get(1, TimeUnit.SECONDS));
+
+        final ExecutionException failure = assertThrows(ExecutionException.class, () -> Futures.anyOf(failed).get(1, TimeUnit.SECONDS));
+        assertEquals(inputFailure, failure.getCause());
+        assertThrows(TimeoutException.class, () -> Futures.anyOf(new CompletableFuture<String>()).get(1, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testAnyOfInputTimeoutFailureAcrossFutureImplementationsAndPolls() throws Exception {
+        for (final long timeout : new long[] { 0, 10 }) {
+            final TimeoutException firstFailure = new TimeoutException("input timeout");
+            final IllegalStateException secondFailure = new IllegalStateException("second input failure");
+            final java.util.concurrent.FutureTask<String> failed = new java.util.concurrent.FutureTask<>(() -> {
+                throw firstFailure;
+            });
+            failed.run();
+
+            assertEquals("ok", Futures.anyOf(Arrays.asList(failed, CompletableFuture.completedFuture("ok"))).get(timeout, TimeUnit.SECONDS));
+            final ExecutionException failure = assertThrows(ExecutionException.class,
+                    () -> Futures.anyOf(Arrays.asList(failed, CompletableFuture.failedFuture(secondFailure))).get(timeout, TimeUnit.SECONDS));
+            // Completed CompletableFuture callbacks and ordinary Future reads may be enqueued in either order.
+            final Throwable cause = failure.getCause();
+            assertTrue(cause == firstFailure || cause == secondFailure);
+            Assertions.assertArrayEquals(new Throwable[] { cause == firstFailure ? secondFailure : firstFailure }, cause.getSuppressed());
+        }
     }
 
     @Test
@@ -1060,13 +919,6 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
-    public void testAnyOfCollectionEmpty() {
-        Collection<Future<Integer>> cfs = new ArrayList<>();
-
-        assertThrows(IllegalArgumentException.class, () -> Futures.anyOf(cfs));
-    }
-
-    @Test
     public void testAnyOfCollectionWithTimeout() throws Exception {
         CompletableFuture<Integer> cf1 = new CompletableFuture<>();
         CompletableFuture<Integer> cf2 = CompletableFuture.completedFuture(42);
@@ -1094,7 +946,13 @@ public class FuturesTest extends TestBase {
 
         ContinuableFuture<String> allFailed = Futures.anyOf(CompletableFuture.<String> failedFuture(new IllegalStateException("first")),
                 CompletableFuture.<String> failedFuture(new IllegalArgumentException("second")));
-        assertThrows(RuntimeException.class, () -> allFailed.get(0, TimeUnit.NANOSECONDS));
+        // Future.get contract: a computation failure surfaces as ExecutionException, with the first
+        // failure as its cause and the remaining ones attached to that cause as suppressed.
+        ExecutionException ee = assertThrows(ExecutionException.class, () -> allFailed.get(0, TimeUnit.NANOSECONDS));
+        assertInstanceOf(IllegalStateException.class, ee.getCause());
+        assertEquals("first", ee.getCause().getMessage());
+        assertEquals(1, ee.getCause().getSuppressed().length);
+        assertInstanceOf(IllegalArgumentException.class, ee.getCause().getSuppressed()[0]);
     }
 
     @Test
@@ -1121,7 +979,11 @@ public class FuturesTest extends TestBase {
 
         ContinuableFuture<String> any = Futures.anyOf(f1, f2, f3);
 
-        Assertions.assertThrows(RuntimeException.class, () -> any.get());
+        // Future.get contract: a computation failure surfaces as ExecutionException, never as a bare
+        // unchecked exception (a standard `catch (ExecutionException)` used to miss it entirely).
+        ExecutionException ee = Assertions.assertThrows(ExecutionException.class, () -> any.get());
+        Assertions.assertEquals("Error1", ee.getCause().getMessage());
+        Assertions.assertEquals(2, ee.getCause().getSuppressed().length);
     }
 
     @Test
@@ -1172,15 +1034,6 @@ public class FuturesTest extends TestBase {
 
         assertTrue(anyOfFuture.isDone());
         assertEquals("Second", anyOfFuture.get());
-    }
-
-    @Test
-    public void testAnyOfWithEmptyCollectionThrowsException() {
-        List<CompletableFuture<Integer>> emptyList = new ArrayList<>();
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            Futures.anyOf(emptyList);
-        });
     }
 
     @Test
@@ -1399,25 +1252,6 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
-    public void testIterate() throws Exception {
-        Future<Integer> f1 = CompletableFuture.completedFuture(1);
-        Future<Integer> f2 = CompletableFuture.completedFuture(2);
-        Future<Integer> f3 = CompletableFuture.completedFuture(3);
-
-        ObjIterator<Integer> iter = Futures.iterate(f1, f2, f3);
-
-        List<Integer> results = new ArrayList<>();
-        while (iter.hasNext()) {
-            results.add(iter.next());
-        }
-
-        Assertions.assertEquals(3, results.size());
-        Assertions.assertTrue(results.contains(1));
-        Assertions.assertTrue(results.contains(2));
-        Assertions.assertTrue(results.contains(3));
-    }
-
-    @Test
     public void testIterateWithDelay() throws Exception {
         CompletableFuture<String> f1 = new CompletableFuture<>();
         CompletableFuture<String> f2 = new CompletableFuture<>();
@@ -1489,18 +1323,6 @@ public class FuturesTest extends TestBase {
     }
 
     @Test
-    public void testIterateNoSuchElement() {
-        Future<String> f1 = CompletableFuture.completedFuture("Only");
-        ObjIterator<String> iter = Futures.iterate(f1);
-
-        Assertions.assertTrue(iter.hasNext());
-        Assertions.assertEquals("Only", iter.next());
-        Assertions.assertFalse(iter.hasNext());
-
-        Assertions.assertThrows(NoSuchElementException.class, () -> iter.next());
-    }
-
-    @Test
     public void testIterateWithTimeoutAndResultHandler() throws Exception {
         Collection<CompletableFuture<String>> futures = Arrays.asList(CompletableFuture.completedFuture("Quick"), CompletableFuture.supplyAsync(() -> {
             try {
@@ -1529,18 +1351,6 @@ public class FuturesTest extends TestBase {
         assertEquals(2, results.size());
         assertTrue(results.contains("QUICK"));
         assertTrue(results.contains("DELAYED"));
-    }
-
-    @Test
-    public void testIterateNoSuchElementException() {
-        CompletableFuture<Integer> cf = CompletableFuture.completedFuture(1);
-        ObjIterator<Integer> iter = Futures.iterate(cf);
-
-        assertTrue(iter.hasNext());
-        assertEquals(1, iter.next());
-        assertFalse(iter.hasNext());
-
-        assertThrows(NoSuchElementException.class, () -> iter.next());
     }
 
     @Test
@@ -1823,4 +1633,932 @@ public class FuturesTest extends TestBase {
         assertThrows(CancellationException.class, () -> composed.get(1, TimeUnit.SECONDS));
     }
 
+    @Test
+    public void cancelPendingRelays_interruptsAbandonedPlainFutureRelay() throws Exception {
+        final java.util.concurrent.CountDownLatch enteredGet = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.atomic.AtomicBoolean getWasInterrupted = new java.util.concurrent.atomic.AtomicBoolean();
+        final Future<Integer> blocking = new Future<>() {
+            @Override
+            public boolean cancel(final boolean mayInterruptIfRunning) {
+                return false;
+            }
+
+            @Override
+            public boolean isCancelled() {
+                return false;
+            }
+
+            @Override
+            public boolean isDone() {
+                return false;
+            }
+
+            @Override
+            public Integer get() throws InterruptedException {
+                enteredGet.countDown();
+                try {
+                    Thread.sleep(60_000L);
+                    return 1;
+                } catch (final InterruptedException e) {
+                    getWasInterrupted.set(true);
+                    throw e;
+                }
+            }
+
+            @Override
+            public Integer get(final long timeout, final TimeUnit unit) throws InterruptedException {
+                return get();
+            }
+        };
+
+        final ObjIterator<Integer> iter = Futures.iterate(List.of(CompletableFuture.completedFuture(2), blocking));
+        assertTrue(iter.hasNext());
+        assertEquals(2, iter.next());
+        assertTrue(enteredGet.await(2, TimeUnit.SECONDS));
+        Futures.cancelPendingRelays(iter);
+
+        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        while (!getWasInterrupted.get() && System.nanoTime() < deadline) {
+            Thread.sleep(10L);
+        }
+        assertTrue(getWasInterrupted.get());
+    }
+
+    // --- regression tests for the 2026-09-11 Futures review (G46) ---
+
+    @Test
+    public void testAnyOfIsDoneDoesNotBlockOnALazilyMappedInput() {
+        // G46-001: Future.isDone() is a state query - it must neither block nor run the caller's code.
+        final java.util.concurrent.atomic.AtomicInteger mapperCalls = new java.util.concurrent.atomic.AtomicInteger();
+        final ContinuableFuture<String> lazy = ContinuableFuture.completed("base").map(v -> {
+            mapperCalls.incrementAndGet();
+            Thread.sleep(1_500);
+            return v;
+        });
+        final ContinuableFuture<String> any = Futures.anyOf(Arrays.asList(lazy));
+
+        Assertions.assertTimeoutPreemptively(java.time.Duration.ofMillis(500), () -> assertTrue(any.isDone()));
+        assertEquals(0, mapperCalls.get(), "isDone() must not run the caller's mapper");
+    }
+
+    @Test
+    public void testAnyOfIsDoneDoesNotBlockOnADoneInputWhoseGetBlocks() {
+        // G46-001: the non-positive-timeout branch documents "poll without blocking", so an already-done input
+        // has to be polled with get(0, NANOSECONDS), never with the unbounded no-arg get().
+        final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        final Future<String> doneButSlow = new Future<>() {
+            @Override
+            public boolean cancel(final boolean mayInterruptIfRunning) {
+                return false;
+            }
+
+            @Override
+            public boolean isCancelled() {
+                return false;
+            }
+
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+
+            @Override
+            public String get() throws InterruptedException {
+                release.await(5, TimeUnit.SECONDS);
+                return "slow";
+            }
+
+            @Override
+            public String get(final long timeout, final TimeUnit unit) throws InterruptedException, TimeoutException {
+                if (!release.await(timeout, unit)) {
+                    throw new TimeoutException();
+                }
+
+                return "slow";
+            }
+        };
+        final Future<String> pending = new CompletableFuture<>();
+        final ContinuableFuture<String> any = Futures.anyOf(Arrays.asList(pending, doneButSlow));
+
+        try {
+            Assertions.assertTimeoutPreemptively(java.time.Duration.ofMillis(500), () -> assertFalse(any.isDone()));
+        } finally {
+            release.countDown();
+        }
+    }
+
+    @Test
+    public void testIterateSnapshotsACollectionWhoseSizeDisagreesWithItsIterator() {
+        // G46-002: reading cfs.size() and then iterating cfs again left the iterator waiting for a relay that
+        // was never registered, and the untimed overload then blocked in take() forever.
+        final List<Future<? extends String>> actual = Collections.singletonList(CompletableFuture.completedFuture("a"));
+        final Collection<Future<? extends String>> skewed = new java.util.AbstractCollection<Future<? extends String>>() {
+            @Override
+            public java.util.Iterator<Future<? extends String>> iterator() {
+                return actual.iterator();
+            }
+
+            @Override
+            public int size() {
+                // What a CopyOnWriteArrayList/ConcurrentLinkedQueue reports when it loses an element between
+                // the size() call and the iteration.
+                return actual.size() + 1;
+            }
+        };
+
+        Assertions.assertTimeoutPreemptively(java.time.Duration.ofSeconds(3), () -> {
+            final ObjIterator<String> iter = Futures.iterate(skewed);
+
+            assertTrue(iter.hasNext());
+            assertEquals("a", iter.next());
+            assertFalse(iter.hasNext());
+        });
+    }
+
+    @Test
+    public void testIterateDeliversAlreadyQueuedResultsAfterTheDeadline() throws Exception {
+        // G46-004: a result that arrived inside the budget is within the caller's budget by definition, so the
+        // post-deadline branch has to poll the queue instead of fabricating a TimeoutException.
+        final ObjIterator<String> iter = Futures.iterate(Collections.singletonList(CompletableFuture.completedFuture("READY")), 50, TimeUnit.MILLISECONDS);
+
+        Thread.sleep(150);
+
+        assertTrue(iter.hasNext());
+        assertEquals("READY", iter.next());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testAnyOfSuppressionIsIdempotentAcrossAggregatesAndDuplicates() {
+        // G46-011: the primary is the input future's own exception object, so re-aggregating the same inputs
+        // must not append the same siblings again.
+        final IllegalStateException e1 = new IllegalStateException("first");
+        final IllegalArgumentException e2 = new IllegalArgumentException("second");
+        final RuntimeException e3 = new RuntimeException("third");
+        final CompletableFuture<String> f1 = CompletableFuture.failedFuture(e1);
+        final CompletableFuture<String> f2 = CompletableFuture.failedFuture(e2);
+        final CompletableFuture<String> f3 = CompletableFuture.failedFuture(e3);
+
+        for (int i = 0; i < 3; i++) {
+            assertThrows(ExecutionException.class, () -> Futures.anyOf(f1, f2, f3).get());
+        }
+
+        assertEquals(2, e1.getSuppressed().length, "one entry per distinct sibling, however many aggregates ran");
+        Assertions.assertSame(e2, e1.getSuppressed()[0]);
+        Assertions.assertSame(e3, e1.getSuppressed()[1]);
+
+        // The same failure instance also reaches ONE aggregate twice through two futures derived from one
+        // failed source.
+        final RuntimeException boom = new RuntimeException("boom");
+        final CompletableFuture<String> src = CompletableFuture.failedFuture(boom);
+        final IllegalStateException lead = new IllegalStateException("lead");
+        final ExecutionException ee = assertThrows(ExecutionException.class,
+                () -> Futures.anyOf(CompletableFuture.<String> failedFuture(lead), src.thenApply(v -> v), src.thenApply(v -> v)).get(0, TimeUnit.NANOSECONDS));
+
+        Assertions.assertSame(lead, ee.getCause());
+        assertEquals(1, lead.getSuppressed().length);
+        Assertions.assertSame(boom, lead.getSuppressed()[0]);
+    }
+
+    @Test
+    public void testAnyOfPublishesAnErrorFailureAsTheDirectCause() {
+        // G46-003: an Error cannot travel as a Result<T, Exception> failure, so it stays inside the transport
+        // ExecutionException; publishing must unwrap it rather than wrap it a second time.
+        final StackOverflowError boom = new StackOverflowError("boom");
+        final CompletableFuture<String> failed = CompletableFuture.failedFuture(boom);
+
+        final ExecutionException fromAnyOf = assertThrows(ExecutionException.class, () -> Futures.anyOf(Arrays.asList(failed)).get());
+        Assertions.assertSame(boom, fromAnyOf.getCause());
+
+        // ... which is what allOf and a plain Future.get() already report for the same input.
+        final ExecutionException fromAllOf = assertThrows(ExecutionException.class, () -> Futures.allOf(Arrays.asList(failed)).get());
+        Assertions.assertSame(boom, fromAllOf.getCause());
+    }
+
+    @Test
+    public void testAnyOfTimedGetRetriesShareOneCompletionRegistration() throws Exception {
+        // G46-010: a fresh iterate(...) per call registered another whenComplete dependent on the input, and a
+        // CompletableFuture offers no way to unregister one.
+        final CompletableFuture<String> never = new CompletableFuture<>();
+        final ContinuableFuture<String> any = Futures.anyOf(Arrays.asList(never));
+
+        for (int i = 0; i < 50; i++) {
+            assertThrows(TimeoutException.class, () -> any.get(1, TimeUnit.MILLISECONDS));
+        }
+
+        assertTrue(never.getNumberOfDependents() <= 1, "dependents after 50 abandoned timed get(): " + never.getNumberOfDependents());
+
+        never.complete("done");
+        assertEquals("done", any.get());
+    }
+
+    @Test
+    public void testAllOf_cancelledInputThrowsCancellationExceptionWhileCompositeIsNotCancelled() {
+        // G46-005 (documented contract): a cancelled input is reported as cancellation, not as a failure, and
+        // it surfaces while the composite itself still reports neither done nor cancelled.
+        final CompletableFuture<String> cancelled = new CompletableFuture<>();
+        final CompletableFuture<String> pending = new CompletableFuture<>();
+        cancelled.cancel(true);
+
+        final ContinuableFuture<List<String>> all = Futures.allOf(cancelled, pending);
+
+        assertFalse(all.isDone());
+        assertFalse(all.isCancelled());
+        assertThrows(CancellationException.class, all::get);
+        assertThrows(CancellationException.class, () -> all.get(50, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    @Timeout(10)
+    public void testIterateConsumerInterruptionYieldsOneFinalOutcomeAndRestoresTheInterruptFlag() throws Exception {
+        // G46-006 (documented contract): the consuming thread's interruption becomes one fabricated final
+        // outcome that belongs to no input future, and the interrupt status is restored for the caller.
+        final CompletableFuture<String> never = new CompletableFuture<>();
+        final java.util.concurrent.atomic.AtomicReference<Throwable> thrown = new java.util.concurrent.atomic.AtomicReference<>();
+        final java.util.concurrent.atomic.AtomicBoolean flagAfter = new java.util.concurrent.atomic.AtomicBoolean();
+        final java.util.concurrent.atomic.AtomicBoolean moreAfter = new java.util.concurrent.atomic.AtomicBoolean(true);
+        final java.util.concurrent.CountDownLatch done = new java.util.concurrent.CountDownLatch(1);
+
+        final Thread worker = new Thread(() -> {
+            final ObjIterator<String> iter = Futures.iterate(Collections.singletonList(never));
+
+            try {
+                iter.next();
+            } catch (final Throwable e) {
+                thrown.set(e);
+            } finally {
+                flagAfter.set(Thread.currentThread().isInterrupted());
+                moreAfter.set(iter.hasNext());
+                done.countDown();
+            }
+        });
+
+        worker.start();
+        worker.interrupt();
+
+        assertTrue(done.await(5, TimeUnit.SECONDS), "worker thread did not finish");
+        assertInstanceOf(com.landawn.abacus.exception.UncheckedInterruptedException.class, thrown.get());
+        assertInstanceOf(InterruptedException.class, thrown.get().getCause());
+        assertTrue(flagAfter.get(), "the iterator must restore the consumer's interrupt status");
+        assertFalse(moreAfter.get(), "no further outcomes are produced after the interruption");
+
+        never.complete("unblock");
+    }
+
+    @Test
+    public void testCompositeCancelPropagatesToEveryInputEvenWhenItReturnsFalse() throws Exception {
+        // G46-009 / G46-012 (documented contract): cancel(...) is attempted on EVERY input and returns true
+        // only if all of them accepted it; the inputs are cancelled even when it returns false.
+        final CompletableFuture<String> completed = CompletableFuture.completedFuture("done");
+        final CompletableFuture<String> pending = new CompletableFuture<>();
+        final ContinuableFuture<List<String>> all = Futures.allOf(completed, pending);
+
+        assertFalse(all.cancel(true), "an input that already completed refuses cancellation");
+        assertFalse(completed.isCancelled());
+        assertTrue(pending.isCancelled(), "the remaining inputs are cancelled anyway");
+        assertTrue(all.isCancelled());
+        assertThrows(CancellationException.class, all::get);
+
+        // ... and each composite keeps its own isCancelled() rule: anyOf reports cancelled only when EVERY
+        // candidate was cancelled.
+        final CompletableFuture<String> completed2 = CompletableFuture.completedFuture("done");
+        final CompletableFuture<String> pending2 = new CompletableFuture<>();
+        final ContinuableFuture<String> any = Futures.anyOf(completed2, pending2);
+
+        assertFalse(any.cancel(true));
+        assertTrue(pending2.isCancelled());
+        assertFalse(any.isCancelled());
+        assertEquals("done", any.get());
+    }
+
+    @Test
+    public void testComposeCollectionRejectsNullOrEmptyCollection() {
+        // G46-008 (documented contract): the two-argument overload validates the collection too.
+        assertThrows(IllegalArgumentException.class, () -> Futures.compose(Collections.<Future<String>> emptyList(), l -> "x"));
+        assertThrows(IllegalArgumentException.class, () -> Futures.compose((Collection<Future<String>>) null, l -> "x"));
+    }
+
+    @Test
+    public void testIterateRethrowsAnUncheckedInputFailureUnwrapped() {
+        // G46-013 (documented contract): an already-unchecked failure is rethrown as itself, so getCause() is
+        // null for it; only a checked failure is wrapped.
+        final IllegalStateException boom = new IllegalStateException("boom");
+        final ObjIterator<String> iter = Futures.iterate(Collections.singletonList(CompletableFuture.<String> failedFuture(boom)));
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, iter::next);
+        Assertions.assertSame(boom, thrown);
+        Assertions.assertNull(thrown.getCause());
+
+        final java.io.IOException io = new java.io.IOException("io");
+        final ObjIterator<String> checkedIter = Futures.iterate(Collections.singletonList(CompletableFuture.<String> failedFuture(io)));
+        final RuntimeException wrapped = assertThrows(RuntimeException.class, checkedIter::next);
+
+        Assertions.assertSame(io, wrapped.getCause());
+    }
+
+    /** Relay threads (see {@code Futures.RELAY_EXECUTOR}) currently blocked inside a {@code Futures} frame. */
+    private static int relayThreadsInsideFutures() {
+        int count = 0;
+
+        for (final java.util.Map.Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
+            if (!entry.getKey().getName().startsWith("abacus-futures-relay-")) {
+                continue;
+            }
+
+            for (final StackTraceElement frame : entry.getValue()) {
+                if (frame.getClassName().startsWith(Futures.class.getName())) {
+                    count++;
+                    break;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    @Test
+    @Timeout(30)
+    public void testAnyOfAbandonedTimedGetReleasesItsRelayThreads() throws Exception {
+        // G46-F01: a timed get() whose deadline expires publishes nothing, so the relays have to be released
+        // when the last waiter leaves and not only when a terminal outcome is published - otherwise one
+        // RELAY_EXECUTOR thread stays blocked inside the input's own get() for as long as that input runs.
+        // A plain Future is required here: a CompletableFuture input uses whenComplete, not a relay task.
+        final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        final FutureTask<String> input = new FutureTask<>(() -> {
+            release.await(20, TimeUnit.SECONDS);
+            return "late";
+        });
+        final Thread inputThread = new Thread(input, "futures-test-input");
+        inputThread.setDaemon(true);
+        inputThread.start();
+
+        try {
+            final int baseline = relayThreadsInsideFutures();
+            final ContinuableFuture<String> any = Futures.anyOf(Arrays.asList(input));
+
+            assertThrows(TimeoutException.class, () -> any.get(20, TimeUnit.MILLISECONDS));
+
+            final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (relayThreadsInsideFutures() > baseline && System.nanoTime() < deadline) {
+                Thread.sleep(10L);
+            }
+            assertEquals(baseline, relayThreadsInsideFutures(), "an abandoned timed get() must not leave a relay blocked in its input");
+
+            // The released relay wakes with its own InterruptedException, which must NOT be recorded as the
+            // input's outcome: a later get() still sees the real one.
+            release.countDown();
+            assertEquals("late", any.get());
+        } finally {
+            release.countDown();
+        }
+    }
+
+    @Test
+    @Timeout(30)
+    public void testAnyOfAbandonedTimedGetKeepsTheInputsRealOutcome() throws Exception {
+        // G46-F01: releasing the relays must not publish anything. Repeated expiring get()s over a
+        // still-pending input keep reporting TimeoutException - never a terminal failure built from the
+        // cancelled relay's InterruptedException - and the input's real value still wins afterwards.
+        final java.util.concurrent.CountDownLatch hold = new java.util.concurrent.CountDownLatch(1);
+        final FutureTask<String> pending = new FutureTask<>(() -> {
+            hold.await(20, TimeUnit.SECONDS);
+            return "v";
+        });
+        final Thread inputThread = new Thread(pending, "futures-test-input-2");
+        inputThread.setDaemon(true);
+        inputThread.start();
+
+        try {
+            final ContinuableFuture<String> any = Futures.anyOf(Arrays.asList(pending));
+
+            for (int i = 0; i < 5; i++) {
+                assertThrows(TimeoutException.class, () -> any.get(20, TimeUnit.MILLISECONDS));
+            }
+
+            hold.countDown();
+            assertEquals("v", any.get());
+        } finally {
+            hold.countDown();
+        }
+    }
+
+    @Test
+    @Timeout(30)
+    public void testAnyOfIsDoneAndALazilyMappedSiblingsMapper() throws Exception {
+        // G46-F01 (documented contract, green on base by design): isDone() polls with get(0, NANOSECONDS) and a
+        // lazily mapped ContinuableFuture ignores that deadline. If its mapper SUCCEEDS the value becomes this
+        // aggregate's published result and it is not run again; if it THROWS nothing is published, so every
+        // isDone() call re-runs it. Both need a still-pending sibling, or the all-settled short-circuit answers
+        // isDone() without reading any input at all.
+        final java.util.concurrent.atomic.AtomicInteger okCalls = new java.util.concurrent.atomic.AtomicInteger();
+        final ContinuableFuture<String> lazyOk = ContinuableFuture.completed("base").map(v -> {
+            okCalls.incrementAndGet();
+            return v + "!";
+        });
+        final CompletableFuture<String> sibling = new CompletableFuture<>();
+        final ContinuableFuture<String> withSuccess = Futures.anyOf(Arrays.asList(sibling, lazyOk));
+
+        for (int i = 0; i < 5; i++) {
+            assertTrue(withSuccess.isDone());
+        }
+
+        assertEquals(1, okCalls.get(), "a mapper whose value was published must not run again");
+        assertEquals("base!", withSuccess.get());
+
+        final java.util.concurrent.atomic.AtomicInteger failCalls = new java.util.concurrent.atomic.AtomicInteger();
+        final ContinuableFuture<String> lazyFail = ContinuableFuture.completed("base").map(v -> {
+            failCalls.incrementAndGet();
+            throw new IllegalStateException("mapper boom");
+        });
+        final CompletableFuture<String> sibling2 = new CompletableFuture<>();
+        final ContinuableFuture<String> withFailure = Futures.anyOf(Arrays.asList(sibling2, lazyFail));
+
+        for (int i = 0; i < 5; i++) {
+            assertFalse(withFailure.isDone());
+        }
+
+        assertEquals(5, failCalls.get(), "a failing mapper publishes nothing, so every isDone() re-runs it");
+
+        sibling.complete("x");
+        sibling2.complete("x");
+    }
+
+    @Test
+    @Timeout(30)
+    public void testIterateDoesNotDeliverAResultThatArrivedAfterTheDeadline() throws Exception {
+        // G46-F01: the post-deadline poll exists to hand over a result that arrived INSIDE the budget and was
+        // not consumed yet. An outcome produced after the deadline is outside the caller's budget, so queuing
+        // it would let a consumer slower than its inputs escape the total timeout entirely.
+        final CompletableFuture<String> late1 = new CompletableFuture<>();
+        final CompletableFuture<String> late2 = new CompletableFuture<>();
+        final ObjIterator<String> iter = Futures.iterate(Arrays.asList(late1, late2), 50, TimeUnit.MILLISECONDS);
+
+        // Both inputs complete well past the 50 ms budget, and the consumer only looks afterwards.
+        Thread.sleep(300);
+        late1.complete("L1");
+        late2.complete("L2");
+        Thread.sleep(100);
+
+        assertTrue(iter.hasNext());
+
+        final RuntimeException thrown = assertThrows(RuntimeException.class, iter::next);
+
+        assertInstanceOf(TimeoutException.class, thrown.getCause(), "the expired budget must be reported, not a post-deadline result");
+        assertFalse(iter.hasNext());
+        // The in-budget half of the boundary is pinned by testIterateDeliversAlreadyQueuedResultsAfterTheDeadline,
+        // which is RED on base; this one is GREEN on base and RED on the unfixed change, so keep them apart.
+    }
+
+    @Test
+    @Timeout(120)
+    public void testAnyOfConcurrentGettersAgreeOnOnePublishedOutcome() throws Exception {
+        // G46-F01: the anyOf fan-out (subscribe/offerOutcome/unsubscribe/terminalSignal) is shared by every
+        // concurrent get(...) on one aggregate, and the pass-3 rewrite was only ever exercised single-threaded.
+        // Every getter must observe the SAME single published outcome, and none may hang. Fixed seed, so a
+        // failure is reproducible.
+        final java.util.Random rnd = new java.util.Random(20260911L);
+        final ExecutorService pool = Executors.newFixedThreadPool(8);
+
+        try {
+            for (int round = 0; round < 150; round++) {
+                final int inputCount = 1 + rnd.nextInt(3);
+                // Half the rounds let every input settle (so the all-failure path runs too); the other half mix
+                // in never-completing inputs, which need one guaranteed success or an untimed get() may never
+                // return - anyOf waits for a success while any candidate is still pending.
+                final boolean allSettle = rnd.nextBoolean();
+                final int winner = allSettle ? -1 : rnd.nextInt(inputCount);
+                final List<Future<? extends String>> inputs = new ArrayList<>(inputCount);
+
+                for (int i = 0; i < inputCount; i++) {
+                    final int value = i;
+                    final int kind = i == winner ? rnd.nextInt(2) : rnd.nextInt(allSettle ? 5 : 6);
+
+                    switch (kind) {
+                        case 0 -> inputs.add(CompletableFuture.completedFuture("v" + value));
+                        case 1 -> inputs.add(pool.submit(() -> "v" + value));
+                        case 2 -> inputs.add(CompletableFuture.failedFuture(new IllegalStateException("f" + value)));
+                        case 3 -> inputs.add(pool.submit(() -> {
+                            throw new IllegalStateException("f" + value);
+                        }));
+                        case 4 -> {
+                            final CompletableFuture<String> cancelled = new CompletableFuture<>();
+                            cancelled.cancel(true);
+                            inputs.add(cancelled);
+                        }
+                        default -> inputs.add(new CompletableFuture<String>());
+                    }
+                }
+
+                final ContinuableFuture<String> any = Futures.anyOf(inputs);
+                final int getterCount = 2 + rnd.nextInt(2);
+                final List<java.util.concurrent.Callable<String>> getters = new ArrayList<>(getterCount);
+
+                for (int g = 0; g < getterCount; g++) {
+                    getters.add(() -> describeOutcome(any));
+                }
+
+                final List<java.util.concurrent.Future<String>> observed = pool.invokeAll(getters, 30, TimeUnit.SECONDS);
+                final String first = observed.get(0).get();
+
+                for (final java.util.concurrent.Future<String> o : observed) {
+                    assertEquals(first, o.get(), "round " + round + ": concurrent getters disagreed");
+                }
+
+                assertEquals(first, describeOutcome(any), "round " + round + ": a later get() disagreed with the published outcome");
+            }
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    @Test
+    @Timeout(10)
+    public void testAnyOfSlowMapperDoesNotHoldOtherGettersOrSiblingSuccess() throws Exception {
+        // Registration must not run a lazy mapper while holding a lock needed by every getter.
+        final java.util.concurrent.CountDownLatch entered = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        final ContinuableFuture<String> slow = ContinuableFuture.completed("slow").map(value -> {
+            entered.countDown();
+            release.await();
+            return value;
+        });
+        final CompletableFuture<String> sibling = new CompletableFuture<>();
+        final ContinuableFuture<String> any = Futures.anyOf(slow, sibling);
+        final FutureTask<String> getter = new FutureTask<>(any::get);
+        final Thread thread = new Thread(getter, "futures-slow-mapper-getter");
+        thread.setDaemon(true);
+        thread.start();
+
+        try {
+            assertTrue(entered.await(2, TimeUnit.SECONDS));
+            Assertions.assertTimeoutPreemptively(java.time.Duration.ofSeconds(1),
+                    () -> assertThrows(TimeoutException.class, () -> any.get(20, TimeUnit.MILLISECONDS)));
+            sibling.complete("winner");
+            assertEquals("winner", getter.get(2, TimeUnit.SECONDS));
+            assertEquals("winner", any.get());
+            assertFalse(slow.isCancelled(), "releasing a relay must not cancel the user's input");
+        } finally {
+            release.countDown();
+            thread.interrupt();
+            thread.join(2_000);
+        }
+    }
+
+    @Test
+    @Timeout(10)
+    public void testAnyOfPollingPublicationWakesAnUntimedGetter() throws Exception {
+        // A polling get can publish a later successful evaluation of a lazy input. Existing waiters
+        // must be signalled even though the polling caller never subscribed to the relay queues.
+        final java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+        final ContinuableFuture<String> lazy = ContinuableFuture.completed("winner").map(value -> {
+            if (calls.incrementAndGet() == 1) {
+                throw new IllegalStateException("first evaluation failed");
+            }
+            return value;
+        });
+        final CompletableFuture<String> pending = new CompletableFuture<>();
+        final ContinuableFuture<String> any = Futures.anyOf(lazy, pending);
+        final FutureTask<String> getter = new FutureTask<>(any::get);
+        final Thread thread = new Thread(getter, "futures-poll-publication-getter");
+        thread.setDaemon(true);
+        thread.start();
+
+        try {
+            final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+            while ((calls.get() == 0 || thread.getState() != Thread.State.WAITING) && System.nanoTime() < deadline) {
+                Thread.sleep(1);
+            }
+            assertEquals(1, calls.get());
+            assertEquals(Thread.State.WAITING, thread.getState());
+            assertEquals("winner", any.get(0, TimeUnit.NANOSECONDS));
+            assertEquals("winner", getter.get(2, TimeUnit.SECONDS));
+            assertFalse(pending.isDone());
+        } finally {
+            pending.complete("cleanup");
+            thread.interrupt();
+            thread.join(2_000);
+        }
+    }
+
+    @Test
+    @Timeout(10)
+    public void testAnyOfTimedGetBoundsALazyMapperAndCanRetry() throws Exception {
+        final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        final ContinuableFuture<String> lazy = ContinuableFuture.completed("ready").map(value -> {
+            release.await();
+            return value;
+        });
+        final ContinuableFuture<String> any = Futures.anyOf(lazy);
+
+        try {
+            Assertions.assertTimeoutPreemptively(java.time.Duration.ofSeconds(1),
+                    () -> assertThrows(TimeoutException.class, () -> any.get(20, TimeUnit.MILLISECONDS)));
+            assertFalse(lazy.isCancelled());
+            release.countDown();
+            assertEquals("ready", any.get(2, TimeUnit.SECONDS));
+        } finally {
+            release.countDown();
+        }
+    }
+
+    @Test
+    public void testAnyOfDirectUncheckedFailuresAreConsistentAcrossGetModes() throws Exception {
+        for (final Throwable failure : Arrays.asList(new IllegalStateException("direct"), new AssertionError("direct"))) {
+            final FutureTask<String> broken = new FutureTask<>(() -> "unused") {
+                @Override
+                public String get() {
+                    if (failure instanceof Error error) {
+                        throw error;
+                    }
+                    throw (RuntimeException) failure;
+                }
+
+                @Override
+                public String get(final long timeout, final TimeUnit unit) {
+                    return get();
+                }
+            };
+            broken.run();
+
+            for (int mode = 0; mode < 3; mode++) {
+                final int getMode = mode;
+                final ContinuableFuture<String> failed = Futures.anyOf(broken);
+                final ExecutionException thrown = assertThrows(ExecutionException.class, () -> getAnyOf(failed, getMode));
+                Assertions.assertSame(failure, thrown.getCause());
+                assertEquals("winner", getAnyOf(Futures.anyOf(broken, CompletableFuture.completedFuture("winner")), getMode));
+            }
+            final CompletableFuture<String> pending = new CompletableFuture<>();
+            assertFalse(Futures.anyOf(broken, pending).isDone(), "a failed input cannot finish a still-pending race");
+        }
+    }
+
+    @Test
+    public void testAnyOfMixedErrorSuppressionIsUnwrappedAndStable() {
+        final AssertionError first = new AssertionError("first");
+        final LinkageError second = new LinkageError("second");
+        final IllegalStateException third = new IllegalStateException("third");
+        final List<Future<? extends String>> failures = Arrays.asList(CompletableFuture.failedFuture(first),
+                CompletableFuture.failedFuture(second), CompletableFuture.failedFuture(third), CompletableFuture.failedFuture(first));
+
+        for (int mode = 0; mode < 3; mode++) {
+            final int getMode = mode;
+            final ContinuableFuture<String> any = Futures.anyOf(failures);
+            final ExecutionException thrown = assertThrows(ExecutionException.class, () -> getAnyOf(any, getMode));
+            Assertions.assertSame(first, thrown.getCause());
+            Assertions.assertArrayEquals(new Throwable[] { second, third }, first.getSuppressed());
+            Assertions.assertSame(thrown, assertThrows(ExecutionException.class, any::get));
+        }
+    }
+
+    @Test
+    @Timeout(10)
+    public void testAnyOfExpiringWaiterDoesNotInterruptAnotherWaitersRelay() throws Exception {
+        final java.util.concurrent.CountDownLatch entered = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.CountDownLatch release = new java.util.concurrent.CountDownLatch(1);
+        final java.util.concurrent.atomic.AtomicInteger interruptions = new java.util.concurrent.atomic.AtomicInteger();
+        final ContinuableFuture<String> lazy = ContinuableFuture.completed("ready").map(value -> {
+            entered.countDown();
+            try {
+                release.await();
+            } catch (final InterruptedException e) {
+                interruptions.incrementAndGet();
+                throw e;
+            }
+            return value;
+        });
+        final ContinuableFuture<String> any = Futures.anyOf(lazy);
+        final FutureTask<String> getter = new FutureTask<>(any::get);
+        final Thread thread = new Thread(getter, "futures-shared-relay-getter");
+        thread.setDaemon(true);
+        thread.start();
+
+        try {
+            assertTrue(entered.await(2, TimeUnit.SECONDS));
+            assertThrows(TimeoutException.class, () -> any.get(20, TimeUnit.MILLISECONDS));
+            assertEquals(0, interruptions.get());
+            release.countDown();
+            assertEquals("ready", getter.get(2, TimeUnit.SECONDS));
+            assertEquals(0, interruptions.get());
+        } finally {
+            release.countDown();
+            thread.interrupt();
+            thread.join(2_000);
+        }
+    }
+
+    @Test
+    public void testTimedIterateDrainsInBudgetFailureThenReportsTimeoutForLateSuccess() throws Exception {
+        final IllegalArgumentException failure = new IllegalArgumentException("early");
+        final CompletableFuture<String> late = new CompletableFuture<>();
+        final ObjIterator<Result<String, Exception>> iter = Futures.iterate(
+                Arrays.asList(CompletableFuture.<String> failedFuture(failure), late), 100, TimeUnit.MILLISECONDS, Function.identity());
+
+        Thread.sleep(200);
+        late.complete("late");
+        Assertions.assertSame(failure, iter.next().getException());
+        assertInstanceOf(TimeoutException.class, iter.next().getException());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+    }
+
+    private static String getAnyOf(final ContinuableFuture<String> any, final int mode) throws Exception {
+        return mode == 0 ? any.get() : any.get(mode == 1 ? 2 : 0, TimeUnit.SECONDS);
+    }
+
+    @Test
+    @Timeout(15)
+    public void testAnyOfConcurrentAggregatesDoNotDuplicateSuppressedFailures() throws Exception {
+        final ExecutorService pool = Executors.newFixedThreadPool(8);
+        try {
+            for (int round = 0; round < 30; round++) {
+                final IllegalStateException primary = new IllegalStateException("first");
+                final List<Throwable> secondaries = new ArrayList<>();
+                final List<CompletableFuture<String>> inputs = new ArrayList<>();
+                inputs.add(CompletableFuture.failedFuture(primary));
+                for (int i = 0; i < 32; i++) {
+                    final RuntimeException failure = new RuntimeException("sibling " + i);
+                    secondaries.add(failure);
+                    inputs.add(CompletableFuture.failedFuture(failure));
+                }
+                final java.util.concurrent.CyclicBarrier start = new java.util.concurrent.CyclicBarrier(8);
+                final List<Future<?>> getters = new ArrayList<>();
+                for (int i = 0; i < 8; i++) {
+                    getters.add(pool.submit(() -> {
+                        start.await(2, TimeUnit.SECONDS);
+                        Assertions.assertSame(primary, assertThrows(ExecutionException.class, () -> Futures.anyOf(inputs).get()).getCause());
+                        return null;
+                    }));
+                }
+                for (final Future<?> getter : getters) {
+                    getter.get(2, TimeUnit.SECONDS);
+                }
+                Assertions.assertArrayEquals(secondaries.toArray(new Throwable[0]), primary.getSuppressed());
+            }
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    @Test
+    @Timeout(10)
+    public void testTimedIterateRejectsLatePlainFutureAndInlineOutcomes() throws Exception {
+        // Exercise both non-CompletableFuture producers: a background relay and an already-done
+        // input whose get still performs work. Neither may admit an outcome after the budget.
+        for (final boolean initiallyDone : new boolean[] { false, true }) {
+            final java.util.concurrent.CountDownLatch returned = new java.util.concurrent.CountDownLatch(1);
+            final FutureTask<String> late = new FutureTask<>(() -> "unused") {
+                @Override
+                public String get() throws InterruptedException {
+                    Thread.sleep(200);
+                    returned.countDown();
+                    return "late";
+                }
+            };
+            if (initiallyDone) {
+                late.run();
+            }
+            final ObjIterator<Result<String, Exception>> iter = Futures.iterate(List.of(late), 50, TimeUnit.MILLISECONDS, Function.identity());
+            assertTrue(returned.await(2, TimeUnit.SECONDS));
+            assertInstanceOf(TimeoutException.class, iter.next().getException());
+            assertFalse(iter.hasNext());
+            assertFalse(late.isCancelled());
+        }
+    }
+
+    @Test
+    public void testTimedIterateHandlerReceivesOneFinalConsumerInterruption() {
+        final CompletableFuture<String> pending = new CompletableFuture<>();
+        final ObjIterator<Result<String, Exception>> iter = Futures.iterate(List.of(pending), 5, TimeUnit.SECONDS, Function.identity());
+        try {
+            Thread.currentThread().interrupt();
+            assertInstanceOf(InterruptedException.class, iter.next().getException());
+            assertTrue(Thread.currentThread().isInterrupted());
+            assertFalse(iter.hasNext());
+            assertThrows(NoSuchElementException.class, iter::next);
+            assertFalse(pending.isCancelled());
+        } finally {
+            Thread.interrupted();
+            pending.complete("cleanup");
+        }
+    }
+
+    @Test
+    public void testCompositeCancellationContinuesAndDeduplicatesDistinctExceptions() {
+        final IllegalStateException first = new IllegalStateException("first cancel failure");
+        final IllegalArgumentException second = new IllegalArgumentException("second cancel failure");
+        final java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+        final FutureTask<String> firstInput = new FutureTask<>(() -> "unused") {
+            @Override
+            public boolean cancel(final boolean interrupt) {
+                assertTrue(interrupt);
+                calls.incrementAndGet();
+                throw first;
+            }
+        };
+        final FutureTask<String> secondInput = new FutureTask<>(() -> "unused") {
+            @Override
+            public boolean cancel(final boolean interrupt) {
+                assertTrue(interrupt);
+                calls.incrementAndGet();
+                throw second;
+            }
+        };
+        final List<ContinuableFuture<?>> composites = Arrays.asList(
+                Futures.compose(firstInput, secondInput, (a, b) -> "unused"),
+                Futures.compose(firstInput, secondInput, secondInput, (a, b, c) -> "unused"),
+                Futures.compose(List.of(firstInput, secondInput, secondInput), inputs -> "unused"),
+                Futures.allOf(firstInput, secondInput), Futures.anyOf(firstInput, secondInput), Futures.combine(firstInput, secondInput));
+
+        for (final ContinuableFuture<?> composite : composites) {
+            calls.set(0);
+            Assertions.assertSame(first, assertThrows(IllegalStateException.class, () -> composite.cancel(true)));
+            assertTrue(calls.get() >= 2, "later inputs must be attempted after the first cancel throws");
+            Assertions.assertArrayEquals(new Throwable[] { second }, first.getSuppressed());
+        }
+    }
+
+    @Test
+    @Timeout(10)
+    public void testAnyOfExpiredDeadlineCarriesTheObservedFailuresWithoutGrowingThem() throws Exception {
+        // The caller-deadline TimeoutException is this caller's own failure, so the input failures observed
+        // before it expired ride along as suppressed - unwrapped exactly like a published cause, so an Error
+        // input is not reported one wrapper deeper here than it would be by get().
+        final IllegalStateException checkedStyle = new IllegalStateException("boom");
+        final AssertionError errorStyle = new AssertionError("boom-error");
+        final CompletableFuture<String> pending = new CompletableFuture<>();
+        final ContinuableFuture<String> any = Futures
+                .anyOf(Arrays.asList(CompletableFuture.<String> failedFuture(checkedStyle), CompletableFuture.<String> failedFuture(errorStyle), pending));
+
+        try {
+            final TimeoutException expired = assertThrows(TimeoutException.class, () -> any.get(80, TimeUnit.MILLISECONDS));
+
+            Assertions.assertArrayEquals(new Throwable[] { checkedStyle, errorStyle }, expired.getSuppressed(),
+                    "the failures observed inside the caller's budget ride along, the Error unwrapped from its carrier");
+
+            // Every expiring get() builds a FRESH TimeoutException, so repeating it must not accumulate
+            // anything on the inputs' own exception objects - they are the user's instances, shared with
+            // whoever else observes those futures.
+            for (int i = 0; i < 20; i++) {
+                assertThrows(TimeoutException.class, () -> any.get(5, TimeUnit.MILLISECONDS));
+            }
+
+            assertEquals(0, checkedStyle.getSuppressed().length, "an aggregate that never published must not touch its inputs' failures");
+            assertEquals(0, errorStyle.getSuppressed().length);
+
+            // The aggregate is still usable afterwards: the deadline published nothing.
+            pending.complete("winner");
+            assertEquals("winner", any.get());
+        } finally {
+            pending.complete("cleanup");
+        }
+    }
+
+    @Test
+    @Timeout(10)
+    public void testAnyOfCanRetryAfterCompletionListenerRegistrationFails() throws Exception {
+        // Like a rejected relay submission, failed listener registration must release its observation
+        // claim. No listener exists to settle this input, even if the CompletableFuture completes later.
+        for (final Throwable failure : Arrays.asList(new java.util.concurrent.RejectedExecutionException("registration rejected"),
+                new AssertionError("registration failed"))) {
+            final java.util.concurrent.atomic.AtomicInteger registrations = new java.util.concurrent.atomic.AtomicInteger();
+            final CompletableFuture<String> input = new CompletableFuture<>() {
+                @Override
+                public CompletableFuture<String> whenComplete(final java.util.function.BiConsumer<? super String, ? super Throwable> action) {
+                    if (registrations.incrementAndGet() == 1) {
+                        if (failure instanceof Error error) {
+                            throw error;
+                        }
+                        throw (RuntimeException) failure;
+                    }
+                    return super.whenComplete(action);
+                }
+            };
+            final CompletableFuture<String> earlier = new CompletableFuture<>();
+            final ContinuableFuture<String> any = Futures.anyOf(earlier, input);
+
+            Assertions.assertSame(failure, assertThrows(failure.getClass(), () -> any.get(1, TimeUnit.SECONDS)));
+            assertFalse(input.isCancelled());
+            assertEquals(0, input.getNumberOfDependents());
+            assertEquals(1, earlier.getNumberOfDependents(), "successful earlier registrations must survive a later rejection");
+            earlier.completeExceptionally(new IllegalStateException("earlier input failed"));
+            input.complete("winner");
+            assertEquals("winner", any.get(1, TimeUnit.SECONDS));
+            assertEquals(2, registrations.get());
+            assertEquals("winner", any.get());
+        }
+    }
+
+    /** One {@code anyOf} outcome rendered so that two getters can be compared for exact agreement. */
+    private static String describeOutcome(final ContinuableFuture<String> any) {
+        try {
+            return "OK:" + any.get();
+        } catch (final ExecutionException e) {
+            return "EE:" + System.identityHashCode(e.getCause()) + ":" + e.getCause();
+        } catch (final CancellationException e) {
+            return "CE";
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return "INTERRUPTED";
+        }
+    }
 }

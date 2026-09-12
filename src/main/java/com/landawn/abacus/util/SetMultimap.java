@@ -72,7 +72,7 @@ import com.landawn.abacus.annotation.Internal;
  *   <li>{@link #fromMap(Map)} - from an existing {@link Map}</li>
  *   <li>{@link #fromCollection(Collection, Function)} - group by key extractor</li>
  *   <li>{@link #fromCollection(Collection, Function, Function)} - key and value extractors</li>
- *   <li>{@link #merge(Map, Map)} / {@link #merge(Map, Map, Map)} - merge maps</li>
+ *   <li>{@link #merge(Map, Map)} / {@link #merge(Map, Map, Map)} / {@link #merge(Collection)} - merge maps</li>
  *   <li>{@link #wrap(Map)} - wrap an existing {@code Map<K, Set<E>>} without copying</li>
  *   <li>{@link N#newSetMultimap()} - empty instance with default backing</li>
  * </ul>
@@ -94,12 +94,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * Constructs a new instance of SetMultimap with the specified initial capacity.
+     * Constructs a new instance of SetMultimap sized for the given number of keys.
      *
-     * @param initialCapacity the initial capacity of the SetMultimap.
+     * @param expectedKeyCount the number of keys the multimap is expected to hold; it is converted to a
+     *            backing-map capacity, so no resize happens while that many keys are added.
      */
-    SetMultimap(final int initialCapacity) {
-        this(N.newHashMap(initialCapacity), HashSet.class);
+    SetMultimap(final int expectedKeyCount) {
+        this(N.newHashMap(expectedKeyCount), HashSet.class);
     }
 
     /**
@@ -131,7 +132,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param valueType The class of the set to be used as the value collection.
      */
     @Internal
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     SetMultimap(final Map<K, Set<E>> valueMap, final Class<? extends Set> valueType) {
         super(valueMap, valueTypeToSupplier(valueType));
     }
@@ -232,9 +233,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SetMultimap<String, Integer> mm = SetMultimap.of("a", 1, "b", 2, "c", 3);
-     * mm.size();     // returns 3 (number of keys)
-     * mm.get("a");   // returns [1]
-     * mm.get("z");   // returns null (absent key)
+     * mm.keyCount();   // returns 3 (number of keys)
+     * mm.get("a");     // returns [1]
+     * mm.get("z");     // returns null (absent key)
      *
      * SetMultimap<String, Integer> dup = SetMultimap.of("a", 1, "a", 1, "a", 2);
      * dup.get("a");                                      // contains 1 and 2 (duplicate removed; set order is unspecified)
@@ -273,9 +274,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SetMultimap<String, Integer> mm = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4);
-     * mm.size();     // returns 4 (number of keys)
-     * mm.get("d");   // returns [4]
-     * mm.get("z");   // returns null (absent key)
+     * mm.keyCount();   // returns 4 (number of keys)
+     * mm.get("d");     // returns [4]
+     * mm.get("z");     // returns null (absent key)
      *
      * SetMultimap<String, Integer> dup = SetMultimap.of("a", 1, "a", 2, "a", 1, "b", 5);
      * dup.get("a");                                      // contains 1 and 2 (duplicate removed; set order is unspecified)
@@ -317,9 +318,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SetMultimap<String, Integer> mm = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
-     * mm.size();     // returns 5 (number of keys)
-     * mm.get("e");   // returns [5]
-     * mm.get("z");   // returns null (absent key)
+     * mm.keyCount();   // returns 5 (number of keys)
+     * mm.get("e");     // returns [5]
+     * mm.get("z");     // returns null (absent key)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -362,9 +363,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SetMultimap<String, Integer> mm = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6);
-     * mm.size();     // returns 6 (number of keys)
-     * mm.get("f");   // returns [6]
-     * mm.get("z");   // returns null (absent key)
+     * mm.keyCount();   // returns 6 (number of keys)
+     * mm.get("f");     // returns [6]
+     * mm.get("z");     // returns null (absent key)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -410,9 +411,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SetMultimap<String, Integer> mm = SetMultimap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5, "f", 6, "g", 7);
-     * mm.size();     // returns 7 (number of keys)
-     * mm.get("g");   // returns [7]
-     * mm.get("z");   // returns null (absent key)
+     * mm.keyCount();   // returns 7 (number of keys)
+     * mm.get("g");     // returns [7]
+     * mm.get("z");     // returns null (absent key)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -475,6 +476,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param map The map containing the key-value pairs to be added to the new SetMultimap, may be {@code null} or empty
      * @return a new instance of SetMultimap with the key-value pairs from the specified map
      */
+    @SuppressWarnings("unchecked")
     public static <K, E> SetMultimap<K, E> fromMap(final Map<? extends K, ? extends E> map) {
         //noinspection rawtypes
         final SetMultimap<K, E> multimap = new SetMultimap<>(Maps.newTargetMap(map), HashSet.class);
@@ -621,6 +623,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Since this is a SetMultimap, duplicate values for the same key will be automatically eliminated.
      * Null maps are treated as empty maps.
      *
+     * <p><b>Note:</b> a bare {@code null} literal cannot be passed for {@code c}: the inherited instance method
+     * {@link Multimap#merge(Object, Object, java.util.function.BiFunction)} is also applicable to a
+     * three-argument call whose last argument is {@code null}, so such a call is ambiguous and does not compile.
+     * Pass a typed expression or a cast instead, as in {@code merge(a, b, (Map<K, E>) null)}. Arguments
+     * {@code a} and {@code b} accept a bare {@code null} literal.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> map1 = Map.of("a", 1);
@@ -705,6 +713,23 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
+     * Rejects a map that holds a {@code null} or empty value, naming the offending key rather than rendering
+     * the whole map into the exception message (which, for a large map, produced an unusable message and
+     * copied its entire contents into it).
+     *
+     * @param map the map about to be wrapped
+     * @throws IllegalArgumentException if any value is {@code null} or empty.
+     */
+    private static void checkNoNullOrEmptyValue(final Map<?, ? extends Set<?>> map) throws IllegalArgumentException {
+        for (final Map.Entry<?, ? extends Set<?>> entry : map.entrySet()) {
+            if (N.isEmpty(entry.getValue())) {
+                throw new IllegalArgumentException(
+                        "The specified map contains a null or empty value for key: " + N.toString(entry.getKey()) + ". Map size: " + map.size());
+            }
+        }
+    }
+
+    /**
      * Wraps an existing map into a SetMultimap without copying its contents. Changes to the wrapped map
      * will be reflected in the SetMultimap and vice versa, as they share the same underlying storage.
      *
@@ -714,12 +739,21 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * <p>This method is useful when you want to treat an existing {@code Map<K, Set<E>>} as a SetMultimap
      * without creating a copy.
+     * The map's declared value type must be {@code Set<E>}, since new keys can receive different
+     * set implementations. For a map declared with a subtype such as {@code TreeSet<E>}, use
+     * {@link #wrap(Map, Supplier) wrap(map, TreeSet::new)} to preserve its value type.
      *
      * <p>Value sets for <i>new</i> keys are created from the runtime type of the first existing value
      * ({@link HashSet} when the map is empty), via a no-argument construction path. State such as a
      * {@link java.util.TreeSet}'s comparator is therefore <b>not</b> carried over to new keys; use
-     * {@link #wrap(Map, Supplier)} when new value sets must be created with specific state. Existing
-     * keys keep their original set instances.
+     * {@link #wrap(Map, Supplier)} when new value sets must be created with specific state.
+     *
+     * <p>If that runtime set type cannot create empty instances at all - as for
+     * {@link java.util.Set#of(Object...) Set.of(...)}, {@link java.util.Collections#singleton(Object)} or
+     * {@link java.util.Collections#unmodifiableSet(java.util.Set)} - new keys fall back to {@link HashSet}
+     * rather than the wrap being rejected, matching {@link ListMultimap#wrap(Map)}. Existing keys always
+     * keep their original set instances, and therefore keep those sets' own mutation restrictions: adding
+     * a value to a key whose set is immutable still fails.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -737,23 +771,38 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * SetMultimap.wrap(bad);           // throws IllegalArgumentException (empty value)
      * }</pre>
      *
+     * <p><b>Note:</b> this empty-value rule is stricter than the invariant the class itself maintains, and it
+     * only holds at the moment of wrapping. A key mapped to an empty set is reachable afterwards - by
+     * emptying a set obtained from {@link #get(Object)}, or through the wrapped map, which stays externally
+     * mutable - and {@link #copy()} reproduces such a key faithfully. The check exists to catch a malformed
+     * map up front, not to guarantee the state can never occur.</p>
+     *
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the set
      * @param map the map to be wrapped into a SetMultimap; must not be {@code null} and must not contain {@code null} or empty values
      * @return a SetMultimap instance backed by the provided map
-     * @throws IllegalArgumentException if the provided map is {@code null}, contains a {@code null} or empty value,
-     *         or if the runtime type of its first value cannot be instantiated with a no-argument construction path.
+     * @throws IllegalArgumentException if the provided map is {@code null} or contains a {@code null} or empty value.
      * @see #wrap(Map, Supplier)
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Beta
-    public static <K, E> SetMultimap<K, E> wrap(final Map<K, ? extends Set<E>> map) throws IllegalArgumentException {
-        N.checkArgNotNull(map);
-        N.checkArgument(map.values().stream().noneMatch(v -> v == null || v.isEmpty()), "The specified map contains null or empty value: %s", map);
+    public static <K, E> SetMultimap<K, E> wrap(final Map<K, Set<E>> map) throws IllegalArgumentException {
+        N.checkArgNotNull(map, cs.map);
+        checkNoNullOrEmptyValue(map);
 
         final Class<? extends Set> valueType = map.isEmpty() ? HashSet.class : map.values().iterator().next().getClass();
+        Supplier<? extends Set<E>> valueSupplier;
 
-        return new SetMultimap<>((Map<K, Set<E>>) map, valueType);
+        try {
+            valueSupplier = valueTypeToSupplier(valueType);
+        } catch (final IllegalArgumentException ex) {
+            // Mirrors ListMultimap.wrap(Map): some legitimate Set implementations (Set.of/singleton/
+            // unmodifiable views) cannot create empty instances. They are still valid existing values in a
+            // wrapped map; use HashSet only for value collections created for subsequently added keys.
+            valueSupplier = HashSet::new;
+        }
+
+        return new SetMultimap<>(map, valueSupplier);
     }
 
     /**
@@ -789,11 +838,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *         or if {@code valueSupplier} is {@code null}.
      * @see #wrap(Map)
      */
+    @SuppressWarnings("unchecked")
     @Beta
     public static <K, E, V extends Set<E>> SetMultimap<K, E> wrap(final Map<K, V> map, final Supplier<? extends V> valueSupplier)
             throws IllegalArgumentException {
         N.checkArgNotNull(map, cs.map);
-        N.checkArgument(map.values().stream().noneMatch(v -> v == null || v.isEmpty()), "The specified map contains null or empty value: %s", map);
+        checkNoNullOrEmptyValue(map);
         N.checkArgNotNull(valueSupplier, cs.valueSupplier);
 
         return new SetMultimap<>((Map<K, Set<E>>) map, valueSupplier);
@@ -814,7 +864,14 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * the original map's key encounter order for the values associated with each inverted key.
      * The source value-set supplier is not reused because it is parameterized for {@code E}, while
      * inverted value sets contain {@code K}; a type-specific comparator from that supplier would be
-     * invalid for the swapped type.
+     * invalid for the swapped type. The inverted value sets are new {@link LinkedHashSet} instances.
+     *
+     * <p>The returned multimap mirrors this multimap's backing-map class only when that class's key equivalence
+     * carries over to the new keys. A {@link java.util.SortedMap} or {@link java.util.IdentityHashMap} backing is
+     * replaced by a {@link java.util.LinkedHashMap} that preserves this multimap's encounter order, because the
+     * original comparator or reference equivalence applies to the original keys, not to the inverted ones - so a
+     * sorted multimap does <i>not</i> invert into a sorted one, unlike {@link #copy()}, which does reuse this
+     * multimap's map supplier.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -833,13 +890,15 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *         an empty SetMultimap if this multimap is empty
      * @see #copy()
      */
+    // newOrderingMap, not newTargetMap: invert() genuinely re-keys by this multimap's VALUES, which is
+    // exactly the case newOrderingMap exists for. The unchecked warnings come from its raw return type.
+    @SuppressWarnings("unchecked")
     public SetMultimap<E, K> invert() {
-        final SetMultimap<K, E> multimap = this;
         //noinspection rawtypes
         final SetMultimap<E, K> result = new SetMultimap<>(Maps.newOrderingMap(backingMap), LinkedHashSet::new);
 
-        if (N.notEmpty(multimap)) {
-            for (final Map.Entry<K, Set<E>> entry : multimap.backingMap.entrySet()) {
+        if (!backingMap.isEmpty()) {
+            for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
                 final Set<E> c = entry.getValue();
 
                 if (N.notEmpty(c)) {
@@ -857,10 +916,19 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Creates a copy of this SetMultimap. The returned multimap contains all key-value pairs from the original,
      * but uses new set instances for value collections.
      *
-     * <p>The new SetMultimap uses the same map and set suppliers as the original, ensuring consistent behavior
-     * and characteristics (ordering, implementation type, etc.).
+     * <p>Existing sorted sets retain their comparators in independent {@link java.util.TreeSet}s;
+     * enum sets, library identity sets and exact HashSet/LinkedHashSet instances retain their known
+     * membership and ordering policies. Sorted subset bounds and concurrent implementation types
+     * are not retained. Other sets use the original set supplier, which must preserve their contents.
+     * The original suppliers are retained for future new keys.</p>
      *
      * <p>Modifications to the returned multimap will not affect the original and vice versa.
+     *
+     * <p>Every key of this SetMultimap appears in the copy, including a key whose value set is empty
+     * (which normal mutators never leave behind, but a caller can create by emptying a set obtained from
+     * {@link #get(Object)}). Unknown equivalence policies cannot be inferred: detected loss of distinct
+     * elements is rejected, but equal cardinality alone cannot guarantee every membership operation
+     * or equality comparison has identical semantics.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -873,14 +941,51 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * }</pre>
      *
      * @return a new SetMultimap containing all the key-value pairs of this SetMultimap
+     * @throws IllegalArgumentException if a backing value set is null, a factory returns aliased or
+     *         nonempty storage, or copying loses distinct source elements
      * @see #putValues(Multimap)
      */
+    @SuppressWarnings("rawtypes")
     @Override
-    public SetMultimap<K, E> copy() {
+    public SetMultimap<K, E> copy() throws IllegalArgumentException {
         final SetMultimap<K, E> copy = new SetMultimap<>(mapSupplier, valueSupplier);
 
-        copy.putValues(this);
-
+        if (copy.backingMap == backingMap) {
+            throw new IllegalArgumentException("Map supplier must return an independent map");
+        }
+        // Index every source before invoking a factory: even a later empty sibling is not reusable output.
+        final java.util.IdentityHashMap<Set<E>, Boolean> seen = new java.util.IdentityHashMap<>();
+        for (final Set<E> source : backingMap.values()) {
+            seen.put(source, Boolean.TRUE);
+        }
+        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
+            final Set<E> source = N.checkArgNotNull(entry.getValue(), "backingMap contains null value set");
+            final Set<E> values;
+            if (source instanceof java.util.SortedSet<E> sorted) {
+                values = new java.util.TreeSet<>(sorted);
+            } else if (source instanceof java.util.EnumSet) {
+                values = ((java.util.EnumSet) source).clone();
+            } else if (source instanceof IdentityHashSet) {
+                values = new IdentityHashSet<>(source);
+            } else if (source.getClass() == java.util.LinkedHashSet.class) {
+                values = new java.util.LinkedHashSet<>(source);
+            } else if (source.getClass() == java.util.HashSet.class) {
+                values = new java.util.HashSet<>(source);
+            } else {
+                values = N.checkArgNotNull(valueSupplier.get(), "valueSupplier.get()");
+                if (seen.containsKey(values) || !values.isEmpty()) {
+                    throw new IllegalArgumentException("Set supplier must return a fresh empty set");
+                }
+                values.addAll(source);
+            }
+            if (seen.put(values, Boolean.TRUE) != null) {
+                throw new IllegalArgumentException("Set copy must be independent");
+            }
+            if (values.size() != source.size()) {
+                throw new IllegalArgumentException("Set copy loses distinct source elements");
+            }
+            copy.backingMap.put(entry.getKey(), values);
+        }
         return copy;
     }
 
@@ -908,6 +1013,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *         an empty map if this multimap is empty
      * @see #toImmutableMap(IntFunction)
      */
+    @SuppressWarnings("unchecked")
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap() {
         final Map<K, ImmutableSet<E>> map = Maps.newTargetMap(backingMap);
 
@@ -939,15 +1045,16 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *
      * @param mapSupplier a function that creates a new map instance given an initial capacity;
      *                    the function receives the number of keys in this multimap as its argument
+     *                    and must not return {@code null}
      * @return an {@link ImmutableMap} where each key from this multimap is associated with an
      *         {@link ImmutableSet} containing all values that were associated with that key
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null} or returns {@code null}.
      * @see #toImmutableMap()
      */
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableSet<E>>> mapSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(mapSupplier, cs.mapSupplier);
 
-        final Map<K, ImmutableSet<E>> map = mapSupplier.apply(backingMap.size());
+        final Map<K, ImmutableSet<E>> map = N.checkArgNotNull(mapSupplier.apply(backingMap.size()), "mapSupplier returned null");
 
         for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
             map.put(entry.getKey(), ImmutableSet.copyOf(entry.getValue()));

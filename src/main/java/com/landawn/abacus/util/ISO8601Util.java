@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017,  Jackson Authors/Contributors.
+ * Copyright (c) 2017, Jackson Authors/Contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,503 +16,512 @@
 package com.landawn.abacus.util;
 
 import java.text.ParsePosition;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
-
-import com.landawn.abacus.annotation.SuppressFBWarnings;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.zone.ZoneRules;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
- * Utility class for parsing and formatting dates in ISO8601 format.
+ * Internal codec for the legacy ISO-8601 profile used by {@link Dates}.
  *
- * <p>This class provides fast and GC-friendly methods for handling ISO8601 date/time strings,
- * making it much more efficient than using SimpleDateFormat, especially when processing
- * large numbers of date objects.</p>
+ * <p>The parser accepts a complete calendar date in basic or extended form, optionally followed by
+ * an uppercase {@code T}, a basic or extended hour/minute value, optional seconds in the same style,
+ * an optional 1-9 digit fractional second, and an optional UTC/numeric-offset suffix:</p>
  *
- * <p>Supported parse format: {@code [yyyy-MM-dd|yyyyMMdd][T(HH:mm[:ss[.sss]]|HHmm[ss[.sss]])]?[Z|[+-]HH[:]mm]}
- * (24-hour clock; the historical {@code hh} form in some ISO-8601 references is a 24-hour hour-of-day,
- * NOT the {@code SimpleDateFormat} 12-hour {@code hh}).</p>
- *
- * <p>Note: This class is adapted from Jackson's date utilities.</p>
- *
- * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Parsing
- * Date date = ISO8601Util.parse("2023-12-25T10:30:45.123Z");
- * Date date2 = ISO8601Util.parse("20231225T103045Z");
- *
- * // Formatting
- * String iso = ISO8601Util.format(date);                   // "2023-12-25T10:30:45Z"
- * String isoWithMillis = ISO8601Util.format(date, true);   // "2023-12-25T10:30:45.123Z"
+ * date       = yyyy-MM-dd | yyyyMMdd
+ * time       = HH:mm[:ss[.fraction]] | HHmm[ss[.fraction]]
+ * offset     = Z | (+|-)HH:mm | (+|-)HHmm
+ * date-time  = date [T time [offset]]
  * }</pre>
  *
- * @see <a href="http://www.w3.org/TR/NOTE-datetime">W3C NOTE-datetime specification</a>
+ * <p>All digits are ASCII. Years are four-digit Common Era years from {@code 0001} through
+ * {@code 9999}; hours are {@code 00} through {@code 23}; minutes and seconds are {@code 00} through
+ * {@code 59}; numeric offsets are from {@code -18:00} through {@code +18:00}. Fractional seconds
+ * retain nanosecond precision. A caller that converts the returned {@link Instant} to a legacy
+ * millisecond type is responsible for that explicit precision reduction.</p>
+ *
+ * <p>The date and time components choose their basic/extended form independently, so
+ * {@code 20231225T10:30:45} and {@code 2023-12-25T103045} are both accepted; only the separators
+ * <i>within</i> one component must agree. Leap seconds ({@code :60}) are rejected, as
+ * {@link Instant} cannot represent them.</p>
+ *
+ * <p>Zone-less values use the immutable zone supplied by the caller, or UTC in the convenience
+ * overloads. A date-only value resolves at start of day in that zone. Nonexistent and ambiguous
+ * local times are rejected rather than adjusted or resolved implicitly.</p>
  */
 final class ISO8601Util {
 
-    /**
-     * The expected maximum length (29 characters) of an ISO 8601 formatted string that includes
-     * milliseconds and a UTC-offset timezone suffix, e.g. {@code yyyy-MM-ddTHH:mm:ss.SSS+00:00}.
-     * The literal string passed to {@code .length()} uses {@code hh} purely as a two-character
-     * placeholder; the actual formatted output always uses 24-hour {@code HH} notation.
-     */
-    static final int DEF_8601_LEN = "yyyy-MM-ddThh:mm:ss.SSS+00:00".length();
+    private static final ZoneOffset UTC = ZoneOffset.UTC;
 
-    /**
-     * The timezone used for the 'Z' suffix in ISO8601 date/time values (UTC timezone).
-     * This is an independent {@code TimeZone} instance, deliberately <i>not</i> aliased to
-     * {@link Dates#UTC_TIME_ZONE} — see the implementation note below.
-     */
-    // Do not alias Dates.UTC_TIME_ZONE: it is a mutable public compatibility constant and callers
-    // can change its raw offset. ISO parsing and formatting must retain an independent UTC zone.
-    static final TimeZone TIMEZONE_Z = TimeZone.getTimeZone("UTC");
+    private static final Supplier<ZoneId> UTC_ZONE_SUPPLIER = () -> UTC;
+
+    private static final DateTimeFormatter OUTPUT_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+
+    private static final int MAX_FRACTION_DIGITS = 9;
 
     private ISO8601Util() {
-        // Utility class - prevent instantiation
+        // Utility class.
     }
 
     // -------------------------------------------------------------------------
     // Formatting
 
     /**
-     * Formats a date into ISO8601 format using default settings.
+     * Formats an instant in UTC without losing fractional-second precision.
      *
-     * <p>The output format is {@code yyyy-MM-ddTHH:mm:ssZ} (no millisecond precision, UTC timezone, 24-hour clock).</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Date date = ISO8601Util.parse("2023-12-25T10:30:45Z");
-     * String formatted = ISO8601Util.format(date);   // "2023-12-25T10:30:45Z"
-     * }</pre>
-     *
-     * @param date the date to format
-     * @return the formatted date string in ISO8601 format
-     * @throws NullPointerException if {@code date} is {@code null}
+     * @param instant the instant to format
+     * @return an extended ISO date-time ending in {@code Z}
+     * @throws NullPointerException if {@code instant} is {@code null}
+     * @throws IllegalArgumentException if the instant cannot be represented in the UTC civil-year
+     *         range {@code 0001}-{@code 9999}
      */
-    public static String format(final Date date) {
-        return format(date, false, TIMEZONE_Z);
+    static String format(final Instant instant) throws NullPointerException, IllegalArgumentException {
+        return format(instant, UTC);
     }
 
     /**
-     * Formats a date into ISO8601 format with optional millisecond precision.
+     * Formats an instant using the effective offset of {@code zone}. Zero offset is written as
+     * {@code Z}; other offsets are written as {@code [+-]HH:mm}. A zero fractional second is omitted,
+     * while a non-zero fraction is emitted without losing nanosecond precision.
      *
-     * <p>The output format is {@code yyyy-MM-ddTHH:mm:ss[.SSS]Z} (UTC timezone, 24-hour clock).</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Date date = ISO8601Util.parse("2023-12-25T10:30:45.123Z");
-     * String withMillis = ISO8601Util.format(date, true);   // "2023-12-25T10:30:45.123Z"
-     * String noMillis = ISO8601Util.format(date, false);    // "2023-12-25T10:30:45Z"
-     * }</pre>
-     *
-     * @param date the date to format
-     * @param millis {@code true} to include milliseconds, {@code false} otherwise
-     * @return the formatted date string in ISO8601 format
-     * @throws NullPointerException if {@code date} is {@code null}
+     * @param instant the instant to format
+     * @param zone the zone whose effective offset and civil fields are used
+     * @return the formatted extended ISO date-time
+     * @throws NullPointerException if {@code instant} or {@code zone} is {@code null}
+     * @throws IllegalArgumentException if the instant cannot be represented as a civil date-time, the
+     *         civil year is outside {@code 0001}-{@code 9999}, or the effective offset has sub-minute
+     *         precision
      */
-    public static String format(final Date date, final boolean millis) {
-        return format(date, millis, TIMEZONE_Z);
-    }
+    static String format(final Instant instant, final ZoneId zone) throws NullPointerException, IllegalArgumentException {
+        Objects.requireNonNull(instant, "instant");
+        Objects.requireNonNull(zone, "zone");
 
-    /**
-     * Formats a date into ISO8601 format with the specified timezone using the US locale.
-     *
-     * @param date the date to format
-     * @param millis {@code true} to include milliseconds, {@code false} otherwise
-     * @param tz the timezone to use for formatting
-     * @return the formatted date string in ISO8601 format
-     * @throws NullPointerException if {@code date} or {@code tz} is {@code null}
-     * @deprecated since 2.9; use {@link #format(Date, boolean, TimeZone, Locale)} instead
-     */
-    @Deprecated // since 2.9
-    public static String format(final Date date, final boolean millis, final TimeZone tz) {
-        return format(date, millis, tz, Locale.US);
-    }
+        final ZonedDateTime dateTime;
 
-    /**
-     * Formats a date into ISO8601 format with full control over formatting options.
-     *
-     * <p>The output format is {@code yyyy-MM-ddTHH:mm:ss[.SSS][Z|[+-]HH:mm]} (24-hour clock).</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Date date = ISO8601Util.parse("2023-12-25T15:30:45.123Z");
-     * TimeZone tz = TimeZone.getTimeZone("America/New_York");
-     * String formatted = ISO8601Util.format(date, true, tz, Locale.US);
-     * // "2023-12-25T10:30:45.123-05:00"
-     * }</pre>
-     *
-     * @param date the date to format
-     * @param millis {@code true} to include milliseconds, {@code false} otherwise
-     * @param tz timezone to use for formatting; a zero UTC offset produces a trailing {@code 'Z'},
-     *           any other offset produces a {@code [+-]HH:mm} suffix
-     * @param loc locale to use for formatting
-     * @return the formatted date string in ISO8601 format
-     * @throws NullPointerException if {@code date}, {@code tz} or {@code loc} is {@code null}
-     */
-    public static String format(final Date date, final boolean millis, final TimeZone tz, final Locale loc) {
-        final Calendar calendar = new GregorianCalendar(tz, loc);
-        calendar.setTime(date);
-
-        // estimate capacity of buffer as close as we can (yeah, that's pedantic ;)
-        // ISO 8601 output is locale-independent: always use ASCII digits. String.format
-        // without an explicit locale would use the default FORMAT locale, which can emit
-        // non-Latin digits (e.g. Arabic-Indic under "ar", Thai under "th-TH-u-nu-thai").
-        final StringBuilder sb = new StringBuilder(30);
-        sb.append(String.format(Locale.US, "%04d-%02d-%02dT%02d:%02d:%02d", calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-                calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND)));
-        if (millis) {
-            sb.append(String.format(Locale.US, ".%03d", calendar.get(Calendar.MILLISECOND)));
+        try {
+            dateTime = instant.atZone(zone);
+        } catch (final DateTimeException e) {
+            throw new IllegalArgumentException("Instant cannot be represented as an ISO civil date-time in zone " + zone + ": " + instant, e);
         }
 
-        final int offset = tz.getOffset(calendar.getTimeInMillis());
-        if (offset != 0) {
-            final int hours = Math.abs((offset / (60 * 1000)) / 60);
-            final int minutes = Math.abs((offset / (60 * 1000)) % 60);
-            sb.append(String.format(Locale.US, "%c%02d:%02d", (offset < 0 ? '-' : '+'), hours, minutes));
-        } else {
-            sb.append('Z');
+        final int year = dateTime.getYear();
+
+        if (year < 1 || year > 9999) {
+            throw new IllegalArgumentException("ISO formatting supports Common Era years from 0001 through 9999; got proleptic year " + year);
         }
-        return sb.toString();
+
+        final int offsetSeconds = dateTime.getOffset().getTotalSeconds();
+
+        if (offsetSeconds % 60 != 0) {
+            throw new IllegalArgumentException("ISO formatting requires a whole-minute UTC offset; got " + dateTime.getOffset());
+        }
+
+        return OUTPUT_FORMATTER.format(dateTime.toOffsetDateTime());
     }
 
     // -------------------------------------------------------------------------
-    // Parsing
+    // Complete parsing
 
     /**
-     * Parses a date from an ISO8601 formatted string.
+     * Parses one complete value, interpreting zone-less text as UTC.
      *
-     * <p>Supported formats include (24-hour clock):</p>
-     * <ul>
-     * <li>{@code yyyy-MM-dd}</li>
-     * <li>{@code yyyyMMdd}</li>
-     * <li>{@code yyyy-MM-ddTHH:mm:ss}</li>
-     * <li>{@code yyyy-MM-ddTHH:mm:ss.SSS}</li>
-     * <li>{@code yyyy-MM-ddTHH:mm:ssZ}</li>
-     * <li>{@code yyyy-MM-ddTHH:mm:ss+HH:mm}</li>
-     * <li>{@code yyyy-MM-ddTHH:mm:ss-HH:mm}</li>
-     * </ul>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Date date1 = ISO8601Util.parse("2023-12-25");
-     * Date date2 = ISO8601Util.parse("2023-12-25T10:30:45Z");
-     * Date date3 = ISO8601Util.parse("2023-12-25T10:30:45.123+05:30");
-     * Date date4 = ISO8601Util.parse("20231225T103045Z");
-     * }</pre>
-     *
-     * <p>The entire input must be one complete ISO8601 value: any unparsed trailing characters are
-     * rejected. Use {@link #parse(String, ParsePosition)} to parse a date prefix out of a longer string.</p>
-     *
-     * @param date the ISO8601 string to parse
-     * @return the parsed Date object
-     * @throws IllegalArgumentException if {@code date} is {@code null}, cannot be parsed, or has unparsed trailing
-     *         characters.
-     * @see #parse(String, ParsePosition)
+     * @param text the text to parse
+     * @return the exact parsed instant
+     * @throws NullPointerException if {@code text} is {@code null}
+     * @throws DateTimeParseException if the text is malformed or has trailing characters
      */
-    public static Date parse(final String date) {
-        final ParsePosition pos = new ParsePosition(0);
-        final Date result = parse(date, pos);
+    static Instant parseInstant(final String text) throws NullPointerException, DateTimeParseException {
+        Objects.requireNonNull(text, "text");
+        return parseComplete(text, UTC_ZONE_SUPPLIER);
+    }
 
-        // Unlike parse(String, ParsePosition), this overload requires the entire input to be one
-        // complete, well-formed ISO 8601 value: reject any unparsed trailing characters.
-        if (pos.getIndex() != date.length()) {
-            throw new IllegalArgumentException("Failed to parse date \"" + date + "\": unexpected trailing characters at position: " + pos.getIndex());
+    /**
+     * Parses one complete value, using {@code defaultZone} only when the text has no explicit offset.
+     *
+     * @param text the text to parse
+     * @param defaultZone the immutable zone used for zone-less text
+     * @return the exact parsed instant
+     * @throws NullPointerException if either argument is {@code null}
+     * @throws DateTimeParseException if the text is malformed, resolves to a gap or overlap, or has
+     *         trailing characters
+     */
+    static Instant parseInstant(final String text, final ZoneId defaultZone) throws NullPointerException, DateTimeParseException {
+        Objects.requireNonNull(text, "text");
+        Objects.requireNonNull(defaultZone, "defaultZone");
+        return parseComplete(text, () -> defaultZone);
+    }
+
+    /**
+     * Legacy-boundary variant whose supplier is evaluated only for zone-less text. The caller must
+     * capture mutable state before calling this method. The supplier must return a non-null immutable
+     * zone. Exceptions thrown by the supplier propagate unchanged.
+     *
+     * @param text the text to parse
+     * @param defaultZoneSupplier a lazy fallback-zone supplier
+     * @return the exact parsed instant
+     * @throws NullPointerException if either argument is {@code null}, or the supplier returns
+     *         {@code null} when the text needs a fallback zone
+     * @throws DateTimeParseException if the text is malformed, resolves to a gap or overlap, or has
+     *         trailing characters
+     */
+    static Instant parseInstantWithDefaultZone(final String text, final Supplier<? extends ZoneId> defaultZoneSupplier)
+            throws NullPointerException, DateTimeParseException {
+        Objects.requireNonNull(text, "text");
+        Objects.requireNonNull(defaultZoneSupplier, "defaultZoneSupplier");
+        return parseComplete(text, defaultZoneSupplier);
+    }
+
+    /**
+     * @throws DateTimeParseException if the input has invalid ISO fields, an ambiguous or nonexistent local time, or trailing characters
+     * @throws NullPointerException if no explicit offset is present and the default-zone supplier returns {@code null}
+     */
+    private static Instant parseComplete(final String text, final Supplier<? extends ZoneId> defaultZoneSupplier)
+            throws DateTimeParseException, NullPointerException {
+        final Parsed parsed;
+
+        try {
+            parsed = parsePrefix(text, 0, defaultZoneSupplier);
+        } catch (final ParseFailure e) {
+            throw parseException(text, e);
+        }
+
+        if (parsed.endIndex != text.length()) {
+            throw new DateTimeParseException("Unexpected trailing characters", text, parsed.endIndex);
+        }
+
+        return parsed.instant;
+    }
+
+    // -------------------------------------------------------------------------
+    // Prefix parsing
+
+    /**
+     * Parses one value prefix from {@code text}, interpreting zone-less text as UTC.
+     *
+     * <p>This follows the JDK {@link ParsePosition} convention. On success, {@code index} is advanced
+     * to the first unconsumed character and {@code errorIndex} is reset to {@code -1}. On malformed
+     * input, this returns {@code null}, leaves {@code index} unchanged, and records the failure in
+     * {@code errorIndex}. An invalid initial index throws {@link IndexOutOfBoundsException}.</p>
+     *
+     * @param text the text containing an ISO value prefix
+     * @param position the starting position and output cursor
+     * @return the parsed instant, or {@code null} on malformed input
+     * @throws NullPointerException if either argument is {@code null}
+     * @throws IndexOutOfBoundsException if the initial position is outside the input
+     */
+    static Instant parseInstant(final String text, final ParsePosition position) throws NullPointerException, IndexOutOfBoundsException {
+        return parseInstant(text, position, UTC_ZONE_SUPPLIER);
+    }
+
+    /**
+     * Parses one prefix with an explicit immutable fallback zone for zone-less text.
+     *
+     * @param text the text containing an ISO value prefix
+     * @param position the starting position and output cursor
+     * @param defaultZone the immutable zone used for zone-less text
+     * @return the parsed instant, or {@code null} on malformed input
+     * @throws NullPointerException if any argument is {@code null}
+     * @throws IndexOutOfBoundsException if the initial position is outside the input
+     */
+    static Instant parseInstant(final String text, final ParsePosition position, final ZoneId defaultZone)
+            throws NullPointerException, IndexOutOfBoundsException {
+        Objects.requireNonNull(defaultZone, "defaultZone");
+        return parseInstant(text, position, () -> defaultZone);
+    }
+
+    /**
+     * @throws NullPointerException if {@code text} or {@code position} is null, or an offset-free input causes the default-zone supplier to return null
+     * @throws IndexOutOfBoundsException if the initial parse position is negative or greater than the input length
+     */
+    private static Instant parseInstant(final String text, final ParsePosition position, final Supplier<? extends ZoneId> defaultZoneSupplier)
+            throws NullPointerException, IndexOutOfBoundsException {
+        Objects.requireNonNull(text, "text");
+        Objects.requireNonNull(position, "position");
+
+        final int start = position.getIndex();
+
+        if (start < 0 || start > text.length()) {
+            throw new IndexOutOfBoundsException("ParsePosition index " + start + " is outside input length " + text.length());
+        }
+
+        try {
+            final Parsed parsed = parsePrefix(text, start, defaultZoneSupplier);
+            position.setIndex(parsed.endIndex);
+            position.setErrorIndex(-1);
+            return parsed.instant;
+        } catch (final ParseFailure e) {
+            position.setErrorIndex(e.errorIndex);
+            return null;
+        }
+    }
+
+    /**
+     * Parses one value starting at {@code start}, returning the resolved instant and the index of the
+     * first unconsumed character. The fallback-zone supplier is consulted only when the value carries
+     * no explicit offset.
+     * @throws ParseFailure if the ISO date, time, fraction, or offset is malformed, or an offset-free local time falls in a zone gap or overlap
+     * @throws NullPointerException if an offset-free input causes the default-zone supplier to return {@code null}
+     */
+    private static Parsed parsePrefix(final String text, final int start, final Supplier<? extends ZoneId> defaultZoneSupplier)
+            throws ParseFailure, NullPointerException {
+        int offset = start;
+
+        final int yearIndex = offset;
+        final int year = parseDigits(text, offset, 4, "four-digit year");
+        offset += 4;
+
+        if (year == 0) {
+            throw failure(yearIndex, "Year must be in the range 0001 through 9999");
+        }
+
+        final boolean separatedDate = hasChar(text, offset, '-');
+
+        if (separatedDate) {
+            offset++;
+        }
+
+        final int monthIndex = offset;
+        final int month = parseDigits(text, offset, 2, "two-digit month");
+        offset += 2;
+
+        if (hasChar(text, offset, '-') != separatedDate) {
+            throw failure(offset, "Inconsistent date separators");
+        }
+
+        if (separatedDate) {
+            offset++;
+        }
+
+        final int dayIndex = offset;
+        final int day = parseDigits(text, offset, 2, "two-digit day");
+        offset += 2;
+
+        final LocalDate localDate;
+
+        try {
+            localDate = LocalDate.of(year, month, day);
+        } catch (final DateTimeException e) {
+            final int errorIndex = month < 1 || month > 12 ? monthIndex : dayIndex;
+            throw failure(errorIndex, "Invalid calendar date", e);
+        }
+
+        if (!hasChar(text, offset, 'T')) {
+            return new Parsed(resolveStrict(localDate.atStartOfDay(), suppliedDefaultZone(defaultZoneSupplier), dayIndex), offset);
+        }
+
+        offset++;
+        final int hourIndex = offset;
+        final int hour = parseDigits(text, offset, 2, "two-digit hour");
+        offset += 2;
+
+        if (hour > 23) {
+            throw failure(hourIndex, "Hour must be in the range 00 through 23");
+        }
+
+        final boolean separatedTime = hasChar(text, offset, ':');
+
+        if (separatedTime) {
+            offset++;
+        }
+
+        final int minuteIndex = offset;
+        final int minute = parseDigits(text, offset, 2, "two-digit minute");
+        offset += 2;
+
+        if (minute > 59) {
+            throw failure(minuteIndex, "Minute must be in the range 00 through 59");
+        }
+
+        boolean hasSeconds = false;
+
+        if (separatedTime) {
+            if (hasChar(text, offset, ':')) {
+                hasSeconds = true;
+                offset++;
+            } else if (hasAsciiDigit(text, offset)) {
+                throw failure(offset, "Seconds in an extended time must be preceded by ':'");
+            }
+        } else if (hasChar(text, offset, ':')) {
+            throw failure(offset, "A compact time must not contain ':' before seconds");
+        } else if (hasAsciiDigit(text, offset)) {
+            hasSeconds = true;
+        }
+
+        int second = 0;
+        int nano = 0;
+
+        if (hasSeconds) {
+            final int secondIndex = offset;
+            second = parseDigits(text, offset, 2, "two-digit second");
+            offset += 2;
+
+            if (second > 59) {
+                throw failure(secondIndex, "Second must be in the range 00 through 59");
+            }
+
+            if (hasChar(text, offset, '.')) {
+                final int fractionIndex = ++offset;
+
+                while (hasAsciiDigit(text, offset)) {
+                    offset++;
+                }
+
+                final int fractionDigits = offset - fractionIndex;
+
+                if (fractionDigits == 0) {
+                    throw failure(fractionIndex, "At least one fractional-second digit is required after '.'");
+                }
+
+                if (fractionDigits > MAX_FRACTION_DIGITS) {
+                    throw failure(fractionIndex + MAX_FRACTION_DIGITS, "At most nine fractional-second digits are supported");
+                }
+
+                nano = parseDigits(text, fractionIndex, fractionDigits, "fractional second");
+
+                for (int i = fractionDigits; i < MAX_FRACTION_DIGITS; i++) {
+                    nano *= 10;
+                }
+            }
+        } else if (hasChar(text, offset, '.')) {
+            throw failure(offset, "Fractional seconds require an explicit seconds field");
+        }
+
+        ZoneOffset explicitOffset = null;
+
+        if (hasChar(text, offset, 'Z')) {
+            explicitOffset = UTC;
+            offset++;
+        } else if (hasChar(text, offset, '+') || hasChar(text, offset, '-')) {
+            final int offsetIndex = offset;
+            final int sign = text.charAt(offset++) == '-' ? -1 : 1;
+            final int offsetHour = parseDigits(text, offset, 2, "two-digit offset hour");
+            offset += 2;
+
+            if (hasChar(text, offset, ':')) {
+                offset++;
+            }
+
+            final int offsetMinute = parseDigits(text, offset, 2, "two-digit offset minute");
+            offset += 2;
+
+            if (offsetMinute > 59 || offsetHour > 18 || offsetHour == 18 && offsetMinute != 0) {
+                throw failure(offsetIndex, "UTC offset must be in the range -18:00 through +18:00");
+            }
+
+            try {
+                explicitOffset = ZoneOffset.ofHoursMinutes(sign * offsetHour, sign * offsetMinute);
+            } catch (final DateTimeException e) {
+                throw failure(offsetIndex, "Invalid UTC offset", e);
+            }
+        }
+
+        final LocalDateTime localDateTime = localDate.atTime(hour, minute, second, nano);
+        final Instant instant = explicitOffset == null ? resolveStrict(localDateTime, suppliedDefaultZone(defaultZoneSupplier), hourIndex)
+                : localDateTime.toInstant(explicitOffset);
+        return new Parsed(instant, offset);
+    }
+
+    /**
+     * @throws NullPointerException if {@code defaultZoneSupplier} returns {@code null}
+     */
+    private static ZoneId suppliedDefaultZone(final Supplier<? extends ZoneId> defaultZoneSupplier) throws NullPointerException {
+        return Objects.requireNonNull(defaultZoneSupplier.get(), "defaultZoneSupplier returned null");
+    }
+
+    /**
+     * @throws ParseFailure if the local date-time has no valid offset or has multiple valid offsets in the specified zone
+     */
+    private static Instant resolveStrict(final LocalDateTime localDateTime, final ZoneId zone, final int errorIndex) throws ParseFailure {
+        final ZoneRules rules = zone.getRules();
+        final List<ZoneOffset> validOffsets = rules.getValidOffsets(localDateTime);
+
+        if (validOffsets.isEmpty()) {
+            throw failure(errorIndex, "Nonexistent local date-time " + localDateTime + " in zone " + zone + " (DST gap)");
+        }
+
+        if (validOffsets.size() > 1) {
+            throw failure(errorIndex, "Ambiguous local date-time " + localDateTime + " in zone " + zone + " (DST overlap); valid offsets are " + validOffsets);
+        }
+
+        return localDateTime.toInstant(validOffsets.get(0));
+    }
+
+    /**
+     * @throws ParseFailure if the requested digit span is invalid, incomplete, or contains a non-ASCII digit
+     */
+    private static int parseDigits(final String text, final int index, final int digitCount, final String description) throws ParseFailure {
+        if (index < 0 || digitCount < 1 || index > text.length() - digitCount) {
+            throw failure(Math.max(0, Math.min(index, text.length())), "Expected " + description);
+        }
+
+        int result = 0;
+
+        for (int i = index; i < index + digitCount; i++) {
+            final char ch = text.charAt(i);
+
+            if (ch < '0' || ch > '9') {
+                throw failure(i, "Expected ASCII digit in " + description);
+            }
+
+            result = result * 10 + ch - '0';
         }
 
         return result;
     }
 
-    /**
-     * Parses a date from an ISO8601 formatted string with parse position tracking.
-     *
-     * <p>This method allows partial parsing of a string by tracking the parse position.
-     * On success, the position is updated to indicate where parsing stopped; on failure, it is
-     * left unchanged.</p>
-     *
-     * <p>Supported formats include (24-hour clock):</p>
-     * <ul>
-     * <li>{@code [yyyy-MM-dd|yyyyMMdd]}</li>
-     * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[HH:mm[:ss[.SSS]]|HHmm[ss[.SSS]]]}</li>
-     * <li>{@code [yyyy-MM-dd|yyyyMMdd]T[HH:mm[:ss[.SSS]]|HHmm[ss[.SSS]]][Z|[+-]HH:mm|[+-]HHmm]}</li>
-     * </ul>
-     * Fractional seconds may contain one or more digits; precision beyond milliseconds is consumed
-     * but truncated after the first three digits.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * ParsePosition pos = new ParsePosition(0);
-     * Date date = ISO8601Util.parse("2023-12-25T10:30:45Z extra text", pos);
-     * int toIndex = pos.getIndex();   // toIndex is the position after the parsed date
-     * }</pre>
-     *
-     * @param date the ISO8601 string to parse
-     * @param pos the parse position indicating the offset at which to begin; on success it is
-     *            updated to the index immediately after the last consumed character, and on
-     *            failure it is left unchanged
-     * @return the parsed {@link Date} object
-     * @throws IllegalArgumentException if {@code date} is {@code null}, cannot be parsed, or is malformed.
-     * @throws NullPointerException if {@code pos} is {@code null}
-     * @see #parse(String)
-     */
-    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    public static Date parse(final String date, final ParsePosition pos) {
-        Exception fail = null;
-        try {
-            int offset = pos.getIndex();
+    private static boolean hasChar(final String text, final int index, final char expected) {
+        return index >= 0 && index < text.length() && text.charAt(index) == expected;
+    }
 
-            // extract year
-            final int year = parseInt(date, offset, offset += 4);
-            final boolean hasDateSeparators = checkOffset(date, offset, '-');
-            if (hasDateSeparators) {
-                offset += 1;
-            }
+    private static boolean hasAsciiDigit(final String text, final int index) {
+        return index >= 0 && index < text.length() && text.charAt(index) >= '0' && text.charAt(index) <= '9';
+    }
 
-            // extract month
-            final int month = parseInt(date, offset, offset += 2);
-            if (checkOffset(date, offset, '-') != hasDateSeparators) {
-                throw new IllegalArgumentException("Inconsistent date separators in date \"" + date + "\"");
-            }
+    private static ParseFailure failure(final int errorIndex, final String message) {
+        return new ParseFailure(errorIndex, message, null);
+    }
 
-            if (hasDateSeparators) {
-                offset += 1;
-            }
+    private static ParseFailure failure(final int errorIndex, final String message, final Throwable cause) {
+        return new ParseFailure(errorIndex, message, cause);
+    }
 
-            // extract day
-            final int day = parseInt(date, offset, offset += 2);
-            // default time value
-            int hour = 0;
-            int minutes = 0;
-            int seconds = 0;
-            int milliseconds = 0; // always use 0 otherwise returned date will include millis of current time
+    private static DateTimeParseException parseException(final String text, final ParseFailure failure) {
+        return new DateTimeParseException(failure.getMessage(), text, failure.errorIndex, failure.getCause());
+    }
 
-            // If the value has no time component or immediately-adjacent timezone, the date
-            // prefix is complete. A ParsePosition caller may leave trailing text unconsumed.
-            final boolean hasT = checkOffset(date, offset, 'T');
-            final boolean hasTimezone = checkOffset(date, offset, 'Z') || checkOffset(date, offset, '+') || checkOffset(date, offset, '-');
+    private static final class Parsed {
+        final Instant instant;
+        final int endIndex;
 
-            if (!hasT && !hasTimezone) {
-                //noinspection MagicConstant
-                final Calendar calendar = new GregorianCalendar(TIMEZONE_Z);
-
-                calendar.clear();
-                calendar.setLenient(false);
-                calendar.set(year, month - 1, day);
-
-                final Date result = calendar.getTime();
-                pos.setIndex(offset);
-                return result;
-            }
-
-            if (hasT) {
-
-                // extract hours, minutes, seconds and milliseconds
-                hour = parseInt(date, offset += 1, offset += 2);
-                final boolean hasTimeSeparators = checkOffset(date, offset, ':');
-                if (hasTimeSeparators) {
-                    offset += 1;
-                }
-
-                minutes = parseInt(date, offset, offset += 2);
-                final boolean hasSecondsSeparator = checkOffset(date, offset, ':');
-                if (hasSecondsSeparator) {
-                    offset += 1;
-                }
-                // second and milliseconds can be optional
-                if (date.length() > offset) {
-                    final char c = date.charAt(offset);
-                    if (c != 'Z' && c != '+' && c != '-') {
-                        if (hasSecondsSeparator != hasTimeSeparators) {
-                            throw new IllegalArgumentException("Inconsistent time separators in date \"" + date + "\"");
-                        }
-
-                        seconds = parseInt(date, offset, offset += 2);
-                        if (seconds > 59 && seconds < 63) {
-                            seconds = 59; // truncate up to 3 leap seconds
-                        }
-                        // milliseconds can be optional in the format
-                        if (checkOffset(date, offset, '.')) {
-                            offset += 1;
-                            // A fractional-seconds part must contain at least one digit after the '.';
-                            // a bare trailing '.' (or a non-digit) is malformed, not a zero fraction.
-                            if (offset >= date.length() || date.charAt(offset) < '0' || date.charAt(offset) > '9') {
-                                throw new IllegalArgumentException(
-                                        "Invalid fractional seconds: at least one digit is required after '.' in date \"" + date + "\"");
-                            }
-                            final int endOffset = indexOfNonDigit(date, offset + 1); // at least one digit (validated above)
-                            final int parseEndOffset = Math.min(endOffset, offset + 3); // parse up to 3 digits
-                            final int fraction = parseInt(date, offset, parseEndOffset);
-                            // compensate for "missing" digits
-                            switch (parseEndOffset - offset) { // number of digits parsed
-                                case 2:
-                                    milliseconds = fraction * 10;
-                                    break;
-                                case 1:
-                                    milliseconds = fraction * 100;
-                                    break;
-                                default:
-                                    milliseconds = fraction;
-                            }
-                            offset = endOffset;
-                        }
-                    } else if (hasSecondsSeparator) {
-                        throw new IllegalArgumentException("Missing seconds after ':' in date \"" + date + "\"");
-                    }
-                } else if (hasSecondsSeparator) {
-                    throw new IllegalArgumentException("Missing seconds after ':' in date \"" + date + "\"");
-                }
-            }
-
-            // extract timezone
-            TimeZone timezone;
-
-            if (date.length() <= offset) {
-                // No timezone indicator. The Javadoc lists "yyyy-MM-ddTHH:mm:ss" and
-                // "yyyy-MM-ddTHH:mm:ss.SSS" as supported forms; default to UTC for those
-                // rather than throwing — matches the documented set of accepted formats.
-                timezone = TIMEZONE_Z;
-            } else {
-                final char timezoneIndicator = date.charAt(offset);
-
-                if (timezoneIndicator == 'Z') {
-                    timezone = TIMEZONE_Z;
-                    offset += 1;
-                } else if (timezoneIndicator == '+' || timezoneIndicator == '-') {
-                    final int timezoneEnd = offset + (checkOffset(date, offset + 3, ':') ? 6 : 5);
-                    final String timezoneOffset = date.substring(offset, timezoneEnd);
-                    offset = timezoneEnd;
-                    // 18-Jun-2015, tatu: Minor simplification, skip offset of "+0000"/"+00:00"
-                    if ("+0000".equals(timezoneOffset) || "+00:00".equals(timezoneOffset)) {
-                        timezone = TIMEZONE_Z;
-                    } else {
-                        // 18-Jun-2015, tatu: Looks like offsets only work from GMT, not UTC...
-                        //    not sure why, but that's the way it looks. Further, Javadocs for
-                        //    `java.util.TimeZone` specifically instruct use of GMT as base for
-                        //    custom timezones... odd.
-                        final String timezoneId = "GMT" + timezoneOffset;
-                        //                    String timezoneId = "UTC" + timezoneOffset;
-
-                        timezone = TimeZone.getTimeZone(timezoneId);
-
-                        final String act = timezone.getID();
-                        if (!act.equals(timezoneId)) {
-                            /* 22-Jan-2015, tatu: Looks like canonical version has colons, but we may be given
-                             *    one without. If so, don't sweat.
-                             *   Yes, very inefficient. Hopefully not hit often.
-                             *   If it becomes a perf problem, add <i>loose</i> comparison instead.
-                             */
-                            final String cleaned = act.replace(":", "");
-                            if (!cleaned.equals(timezoneId)) {
-                                // Use IllegalArgumentException for input-validation failures
-                                // rather than IndexOutOfBoundsException — the surrounding catch
-                                // wraps everything as IllegalArgumentException anyway, but
-                                // throwing the right type keeps stack traces meaningful if the
-                                // wrapper is removed later.
-                                throw new IllegalArgumentException(
-                                        "Mismatching time zone indicator: " + timezoneId + " given, resolves to " + timezone.getID());
-                            }
-                        }
-                    }
-                } else {
-                    throw new IllegalArgumentException("Invalid time zone indicator '" + timezoneIndicator + "'");
-                }
-            }
-
-            final Calendar calendar = new GregorianCalendar(timezone);
-
-            calendar.clear();
-
-            calendar.setLenient(false);
-            calendar.set(Calendar.YEAR, year);
-            calendar.set(Calendar.MONTH, month - 1);
-            calendar.set(Calendar.DAY_OF_MONTH, day);
-            calendar.set(Calendar.HOUR_OF_DAY, hour);
-            calendar.set(Calendar.MINUTE, minutes);
-            calendar.set(Calendar.SECOND, seconds);
-            calendar.set(Calendar.MILLISECOND, milliseconds);
-
-            final Date result = calendar.getTime();
-            pos.setIndex(offset);
-            return result;
-            // If we get a ParseException it'll already have the right message/offset.
-            // Other exception types can convert here.
-        } catch (final Exception e) {
-            fail = e;
+        Parsed(final Instant instant, final int endIndex) {
+            this.instant = instant;
+            this.endIndex = endIndex;
         }
-        final String input = (date == null) ? null : ('"' + date + '"');
-        String msg = fail.getMessage();
-        if (msg == null || msg.isEmpty()) {
-            msg = "(" + fail.getClass().getName() + ")";
-        }
-        final IllegalArgumentException ex = new IllegalArgumentException("Failed to parse date " + input + ": " + msg + " at position: " + pos.getIndex());
-        //noinspection UnnecessaryInitCause
-        ex.initCause(fail);
-        throw ex;
     }
 
     /**
-     * Checks if the expected character exists at the given offset in the string.
-     *
-     * @param value the string to check
-     * @param offset the position to check
-     * @param expected the expected character
-     * @return {@code true} if the character at offset matches expected
+     * Internal control-flow signal carrying the failure index. It never escapes this class: callers
+     * either translate it into a {@link DateTimeParseException} (propagating only its message and
+     * cause) or report it through a {@link ParsePosition}, so its own stack trace is never observed.
      */
-    private static boolean checkOffset(final String value, final int offset, final char expected) {
-        return (offset < value.length()) && (value.charAt(offset) == expected);
-    }
+    private static final class ParseFailure extends Exception {
+        private static final long serialVersionUID = 1L;
 
-    /**
-     * Parses a non-negative integer from the specified substring.
-     *
-     * @param value the string containing the digits to parse
-     * @param beginIndex the starting index (inclusive)
-     * @param toIndex the ending index (exclusive)
-     * @return the parsed non-negative integer value
-     * @throws NumberFormatException if the substring does not represent a valid non-negative integer
-     */
-    private static int parseInt(final String value, final int beginIndex, final int toIndex) throws NumberFormatException {
-        if (beginIndex < 0 || toIndex > value.length() || beginIndex > toIndex) {
-            throw new NumberFormatException(value);
-        }
-        // use the same logic as in Integer.parseInt() but less generic we're not supporting negative values
-        int i = beginIndex;
-        int result = 0;
-        int digit;
-        if (i < toIndex) {
-            digit = Character.digit(value.charAt(i++), 10);
-            if (digit < 0) {
-                throw new NumberFormatException("Invalid number: " + value.substring(beginIndex, toIndex));
-            }
-            result = -digit;
-        }
-        while (i < toIndex) {
-            digit = Character.digit(value.charAt(i++), 10);
-            if (digit < 0) {
-                throw new NumberFormatException("Invalid number: " + value.substring(beginIndex, toIndex));
-            }
-            result *= 10;
-            result -= digit;
-        }
-        return -result;
-    }
+        final int errorIndex;
 
-    /**
-     * Finds the index of the first non-digit character in the string starting from the given offset.
-     *
-     * @param string the string to search
-     * @param offset the starting position
-     * @return the index of the first non-digit character, or the string length if all remaining characters are digits
-     */
-    private static int indexOfNonDigit(final String string, final int offset) {
-        for (int i = offset; i < string.length(); i++) {
-            final char c = string.charAt(i);
-            if (c < '0' || c > '9') {
-                return i;
-            }
+        ParseFailure(final int errorIndex, final String message, final Throwable cause) {
+            super(message, cause);
+            this.errorIndex = errorIndex;
         }
-        return string.length();
     }
 }

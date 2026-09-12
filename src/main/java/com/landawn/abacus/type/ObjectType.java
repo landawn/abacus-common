@@ -43,8 +43,10 @@ public final class ObjectType<T> extends SingleValueType<T> {
      * {@code cls} as the type name.
      *
      * @param cls the class to create a type handler for
+     * @throws IllegalArgumentException if {@code cls} is {@code null}, or the class has incomplete,
+     *         duplicate, or invalid JSON value/creator annotations.
      */
-    protected ObjectType(final Class<T> cls) {
+    protected ObjectType(final Class<T> cls) throws IllegalArgumentException {
         super(cls);
     }
 
@@ -53,8 +55,10 @@ public final class ObjectType<T> extends SingleValueType<T> {
      *
      * @param typeName the custom name for this type
      * @param cls the class to create a type handler for
+     * @throws IllegalArgumentException if {@code typeName} or {@code cls} is {@code null}, or the class has
+     *         incomplete, duplicate, or invalid JSON value/creator annotations.
      */
-    protected ObjectType(final String typeName, final Class<T> cls) {
+    protected ObjectType(final String typeName, final Class<T> cls) throws IllegalArgumentException {
         super(typeName, cls);
     }
 }

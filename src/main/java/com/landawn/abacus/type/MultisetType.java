@@ -17,6 +17,8 @@ package com.landawn.abacus.type;
 import java.util.List;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Multiset;
@@ -51,9 +53,10 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * {@code Multiset<E>} type instances.
      *
      * @param parameterTypeName the name of the element type parameter
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings("unchecked")
-    MultisetType(final String parameterTypeName) {
+    MultisetType(final String parameterTypeName) throws IllegalArgumentException {
         super(getTypeName(typeClass, parameterTypeName, false));
 
         declaringName = getTypeName(typeClass, parameterTypeName, true);
@@ -121,6 +124,12 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * Indicates whether instances of this type support serialization.
      * {@link Multiset} objects are serialized to and deserialized from JSON through this type handler.
      *
+     * <p>Because this type is reported as serializable and does not override {@code serializeTo}, a multiset that is
+     * nested in a bean property, a map value or a collection element is written as a quoted JSON <i>string</i> holding
+     * the value of {@link #stringOf(Multiset)} (e.g. {@code {"ms": "{\"a\": 2}"}}), not as a JSON object; in XML the
+     * same text is written as the element's escaped character content. The JSON and XML parsers read that form back.
+     * Only a multiset serialized as the root value is emitted as a plain JSON object.</p>
+     *
      * @return {@code true}
      */
     @Override
@@ -142,11 +151,12 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * @param x the {@code Multiset} object to convert, may be {@code null}
      * @return the JSON string representation of the {@code Multiset} as an element-to-count map
      *         (e.g., {@code {"apple":3,"orange":2}}), or {@code null} if the input is {@code null}
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final Multiset<E> x) {
+    public String stringOf(final Multiset<E> x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
 
@@ -154,6 +164,10 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * Parses a JSON string to create a {@link Multiset} object.
      * The JSON must be an object where each key is an element and its value is the occurrence count,
      * e.g. {@code {"apple":3,"orange":2,"banana":1}}.
+     * The returned multiset is hash-based: its iteration order is unspecified.
+     *
+     * <p>An element whose count is {@code null} or {@code 0} (e.g. {@code {"a": null}} or {@code {"a": 0}}) is not
+     * added, so it is absent from the result.</p>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
@@ -161,11 +175,18 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      *
      * @param str the JSON string to parse; may be {@code null} or blank
      * @return the parsed {@code Multiset} object, or {@code null} if the input is {@code null} or blank
+     * @throws ParsingException if {@code str} is not a well-formed JSON object text
+     * @throws IllegalArgumentException if a count is negative
+     * @throws NumberFormatException if a count is not an integer literal
+     * @throws ArithmeticException if a count does not fit in an {@code int}
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(Multiset)
      */
+    @MayReturnNull
     @Override
-    public Multiset<E> valueOf(final String str) {
+    public Multiset<E> valueOf(final String str)
+            throws ParsingException, IllegalArgumentException, NumberFormatException, ArithmeticException, RuntimeException {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         }
@@ -179,7 +200,10 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
         final Multiset<E> multiset = N.newMultiset(map.size());
 
         for (final Map.Entry<E, Integer> entry : map.entrySet()) {
-            multiset.add(entry.getKey(), entry.getValue());
+            // A null count ({"a": null}) adds nothing, like a 0 count (an unboxing NPE before).
+            if (entry.getValue() != null) {
+                multiset.add(entry.getKey(), entry.getValue());
+            }
         }
 
         return multiset;
@@ -193,9 +217,12 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * @param parameterTypeName the name of the element type
      * @param isDeclaringName {@code true} to use declaring (simple) names; {@code false} for canonical names
      * @return the formatted type name string
+     * @throws NullPointerException if {@code typeClass} is {@code null}.
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings("hiding")
-    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName)
+            throws NullPointerException, IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         } else {

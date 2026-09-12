@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +21,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.util.CharacterWriter;
 
 public class AbstractCharacterTypeTest extends TestBase {
@@ -97,6 +99,14 @@ public class AbstractCharacterTypeTest extends TestBase {
         assertEquals('Z', type.valueOf("Z"));
         assertEquals('9', type.valueOf("9"));
         assertEquals(' ', type.valueOf(" "));
+        assertEquals('\n', type.valueOf("10"));
+    }
+
+    @Test
+    public void testValueOf_String_InvalidNumericCode() {
+        assertThrows(NumberFormatException.class, () -> type.valueOf("abc"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("-1"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("65536"));
     }
 
     @Test
@@ -214,5 +224,66 @@ public class AbstractCharacterTypeTest extends TestBase {
             when(config.getCharQuotation()).thenReturn('\'');
             type.serializeTo(characterWriter, '\'', config);
         });
+    }
+
+    // T4-05: valueOf(char[]) parsed a multi-char region with parseInt(char[]) (type suffix tolerated, ASCII digits
+    // only) while valueOf(String) used parseChar (Integer.parseInt): "1L" gave U+0001 from JSON and NFE from XML,
+    // and Arabic-Indic digits the reverse. Both overloads now share the parseChar grammar.
+    @Test
+    public void reviewFixes20260906_charArray_sharesStringGrammar_malformedRejectedOnBothPaths() {
+        for (String s : new String[] { "1L", "1d", "65L", "0x41", " 1", "1 ", "12x", "abc", "😀" }) {
+            char[] cbuf = s.toCharArray();
+            assertThrows(NumberFormatException.class, () -> type.valueOf(s), s);
+            assertThrows(NumberFormatException.class, () -> type.valueOf(cbuf, 0, cbuf.length), s);
+        }
+    }
+
+    @Test
+    public void reviewFixes20260906_charArray_sharesStringGrammar_values() {
+        // Arabic-Indic digits U+0666 U+0665 spell 65; Integer.parseInt accepts them, so both paths now yield 'A'
+        String arabicIndic65 = "٦٥";
+        assertEquals(Character.valueOf('A'), type.valueOf(arabicIndic65));
+        assertEquals(Character.valueOf('A'), type.valueOf(arabicIndic65.toCharArray(), 0, 2));
+        assertEquals(Character.valueOf('A'), type.valueOf("+65"));
+        assertEquals(Character.valueOf('A'), type.valueOf("+65".toCharArray(), 0, 3));
+        assertEquals(Character.valueOf('￿'), type.valueOf("65535".toCharArray(), 0, 5));
+        assertEquals(Character.valueOf('\n'), type.valueOf("10".toCharArray(), 0, 2));
+        assertEquals(Character.valueOf('A'), type.valueOf("xx65yy".toCharArray(), 2, 2));
+        assertEquals(Character.valueOf('c'), type.valueOf("abcde".toCharArray(), 2, 1));
+        assertEquals(Character.valueOf(' '), type.valueOf(" ".toCharArray(), 0, 1));
+        assertNull(type.valueOf((char[]) null, 0, 0));
+        assertNull(type.valueOf(new char[0], 0, 0));
+    }
+
+    @Test
+    public void reviewFixes20260906_charArray_outOfRange_isIllegalArgumentOnBothPaths() {
+        for (String s : new String[] { "-1", "65536", "1234567890" }) {
+            char[] cbuf = s.toCharArray();
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(cbuf, 0, cbuf.length), s);
+        }
+    }
+
+    public static class CharBean {
+        private char c;
+
+        public char getC() {
+            return c;
+        }
+
+        public void setC(final char c) {
+            this.c = c;
+        }
+    }
+
+    @Test
+    public void reviewFixes20260906_jsonAndXmlAgree() {
+        assertThrows(NumberFormatException.class, () -> ParserFactory.createJsonParser().deserialize("{\"c\": \"1L\"}", CharBean.class));
+        assertThrows(NumberFormatException.class, () -> ParserFactory.createXmlParser().deserialize("<charBean><c>1L</c></charBean>", CharBean.class));
+
+        assertEquals('A', ParserFactory.createJsonParser().deserialize("{\"c\": \"٦٥\"}", CharBean.class).getC());
+        assertEquals('A', ParserFactory.createXmlParser().deserialize("<charBean><c>٦٥</c></charBean>", CharBean.class).getC());
+        assertEquals('A', ParserFactory.createJsonParser().deserialize("{\"c\": \"65\"}", CharBean.class).getC());
+        assertEquals('A', ParserFactory.createJsonParser().deserialize("{\"c\": \"A\"}", CharBean.class).getC());
     }
 }

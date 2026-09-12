@@ -27,6 +27,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -84,8 +86,8 @@ public class ZonedDateTimeTypeTest extends TestBase {
     @Test
     public void testValueOf_Object_ZonedDateTime_identity() {
         ZonedDateTime zdt = ZonedDateTime.of(2023, 12, 25, 10, 30, 45, 123456789, ZoneId.of("UTC"));
-        assertEquals(zdt, zonedDateTimeType.valueOf((Object) zdt));
-        assertEquals(123456789, zonedDateTimeType.valueOf((Object) zdt).getNano());
+        assertEquals(zdt, zonedDateTimeType.valueOf(zdt));
+        assertEquals(123456789, zonedDateTimeType.valueOf(zdt).getNano());
     }
 
     @Test
@@ -437,5 +439,76 @@ public class ZonedDateTimeTypeTest extends TestBase {
 
         verify(writer, times(2)).write('"');
         verify(writer).write(anyString());
+    }
+
+    // --- review fixes 2026-09-06 (T10-01, T10-02, T10-03) ---
+
+    @Test
+    public void reviewFixes20260906_T1001_fastPathRejectsImpossibleCalendarValues() {
+        // the 20/24-char 'Z' fast path resolved with SMART and silently moved Feb 30 -> Feb 28, 24:00 -> next day
+        for (final String s : new String[] { "2023-02-30T10:30:45Z", "2023-02-30T10:30:45.123Z", "2023-04-31T10:30:45Z", "2023-02-29T00:00:00Z",
+                "2023-02-29T00:00:00.000Z", "2023-10-15T24:00:00Z", "2023-10-15T24:00:00.000Z" }) {
+            assertThrows(DateTimeParseException.class, () -> zonedDateTimeType.valueOf(s), s);
+            assertThrows(DateTimeParseException.class, () -> zonedDateTimeType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        assertThrows(DateTimeParseException.class, () -> zonedDateTimeType.valueOf("2023-02-30T10:30:45+00:00"));
+
+        for (final String s : new String[] { "2024-02-29T00:00:00Z", "2024-02-29T00:00:00.000Z", "0000-02-29T00:00:00Z", "0001-01-01T00:00:00.000Z",
+                "9999-12-31T23:59:59.999Z", "2023-10-15T10:30:45.123456789Z", "2023-10-15T10:30:45+05:30:15",
+                "2023-10-15T10:30:45-07:00[America/Los_Angeles]" }) {
+            assertEquals(ZonedDateTime.parse(s), zonedDateTimeType.valueOf(s), s);
+            assertEquals(ZonedDateTime.parse(s), zonedDateTimeType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        final ZonedDateTime x = ZonedDateTime.parse("2024-02-29T12:34:56.789+01:00[Europe/Paris]");
+        assertEquals(x, zonedDateTimeType.valueOf(zonedDateTimeType.stringOf(x)));
+    }
+
+    @Test
+    public void reviewFixes20260906_T1002_T1003_numericGrammarAndOverflow() {
+        for (final String s : new String[] { "170000000000000000000", "9223372036854775808", "-9223372036854775809", "0x1F4A0", "1700000000000L",
+                "1700000000000d", "12345L" }) {
+            assertThrows(DateTimeParseException.class, () -> zonedDateTimeType.valueOf(s), s);
+            assertThrows(DateTimeParseException.class, () -> zonedDateTimeType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        for (final String s : new String[] { "1700000000000", "+1700000000000", "-1700000000000", "9223372036854775807" }) {
+            final ZonedDateTime expected = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(s)), ZoneId.systemDefault());
+            assertEquals(expected, zonedDateTimeType.valueOf(s), s);
+            assertEquals(expected, zonedDateTimeType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        assertEquals(ZonedDateTime.ofInstant(Instant.ofEpochMilli(12345L), ZoneId.systemDefault()), zonedDateTimeType.valueOf("12345"));
+        assertThrows(DateTimeParseException.class, () -> zonedDateTimeType.valueOf("1234"));
+        assertThrows(DateTimeParseException.class, () -> zonedDateTimeType.valueOf("0"));
+    }
+
+    // Finding 125 (2026-09-08): the Calendar branch read only getTimeInMillis() and rebuilt the value in the JVM
+    // default zone, discarding the zone the caller had explicitly attached - in the one target type whose whole
+    // point is to carry a zone, and which serializes that zone through stringOf.
+    @Test
+    public void reviewFixes20260908_calendarKeepsItsOwnZone() {
+        final long millis = 1703502645123L;
+
+        for (final String zoneName : new String[] { "Asia/Tokyo", "America/Los_Angeles", "UTC", "GMT+05:30" }) {
+            final TimeZone tz = TimeZone.getTimeZone(zoneName);
+            final GregorianCalendar cal = new GregorianCalendar(tz);
+            cal.setTimeInMillis(millis);
+
+            final ZonedDateTime zdt = zonedDateTimeType.valueOf(cal);
+
+            assertEquals(millis, zdt.toInstant().toEpochMilli(), zoneName);
+            assertEquals(tz.toZoneId(), zdt.getZone(), zoneName);
+            // Same result as GregorianCalendar.toZonedDateTime(), which is the JDK's own conversion.
+            assertEquals(cal.toZonedDateTime(), zdt, zoneName);
+        }
+
+        final GregorianCalendar tokyo = new GregorianCalendar(TimeZone.getTimeZone("Asia/Tokyo"));
+        tokyo.setTimeInMillis(millis);
+        assertTrue(zonedDateTimeType.stringOf(zonedDateTimeType.valueOf(tokyo)).contains("[Asia/Tokyo]"));
+
+        // A java.util.Date carries no zone, so it keeps being read in the default zone.
+        assertEquals(ZoneId.systemDefault(), zonedDateTimeType.valueOf(new Date(millis)).getZone());
     }
 }

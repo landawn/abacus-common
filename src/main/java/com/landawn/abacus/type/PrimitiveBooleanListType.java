@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BooleanList;
 import com.landawn.abacus.util.CharacterWriter;
@@ -103,19 +104,21 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
     /**
      * Parses a string representation and creates a BooleanList.
      * The string is first parsed as a boolean array, then wrapped in a BooleanList.
-     * Returns {@code null} if the input string is {@code null} or empty.
+     * Returns {@code null} if the input string is {@code null}, empty or blank.
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
-     * @return a BooleanList created from the parsed values, or {@code null} if input is {@code null} or empty
+     * @return a BooleanList created from the parsed values, or {@code null} if input is {@code null}, empty or blank
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
      * @see #valueOf(Object)
      * @see #stringOf(BooleanList)
      */
+    @MayReturnNull
     @Override
-    public BooleanList valueOf(final String str) {
+    public BooleanList valueOf(final String str) throws IllegalArgumentException {
         if (Strings.isEmpty(str)) {
             return null;
         }
@@ -136,7 +139,8 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      *
      * @param appendable the Appendable to write to
      * @param x the BooleanList to append
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -148,7 +152,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final BooleanList x) throws IOException {
+    public void appendTo(final Appendable appendable, final BooleanList x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -173,10 +177,11 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * @param writer the CharacterWriter to write to
      * @param x the BooleanList to write
      * @param config the serialization configuration
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final BooleanList x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final BooleanList x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

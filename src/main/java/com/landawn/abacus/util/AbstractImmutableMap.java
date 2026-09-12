@@ -18,7 +18,9 @@ import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -51,38 +53,61 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
 
     /**
      * The read-only view through which all lookups and collection views ({@code keySet()},
-     * {@code values()}, {@code entrySet()}) are served. It is the same instance as {@link #valueMap}
-     * only when the supplied backing map was already declared unmodifiable at construction time.
+     * {@code values()}, {@code entrySet()}) are served, as well as {@code equals}/{@code hashCode}/
+     * {@code toString} - {@link Collections#unmodifiableMap(Map)} forwards all three to the map it wraps,
+     * so this single field is enough to compare equal to the mappings held. It is the supplied backing map
+     * itself only when that map was already declared unmodifiable at construction time.
      */
     final Map<K, V> map;
 
     /**
-     * The backing map exactly as supplied at construction time, used for {@code equals}/{@code hashCode}/
-     * {@code toString} so that this map compares equal to the mappings it holds.
+     * Whether this instance exclusively owns {@link #map}'s backing map, i.e. no other reference through
+     * which the mappings could still change escapes to a caller. Only an owning instance is a stable
+     * value; a non-owning one is a read-only <i>view</i> whose contents can change underneath it.
+     *
+     * <p>This models the backing map's <i>stability</i>, not the factory that produced this instance:
+     * {@code copyOf} may safely return an owning instance unchanged, derived views such as
+     * {@link ImmutableSortedMap#subMap(Object, Object)} inherit their parent's ownership, and anything
+     * built over caller-supplied storage ({@code wrap} or {@link ImmutableMap#builder(Map)}) is never owning.
+     * A consumed no-argument {@link ImmutableMap#builder()} transfers its private storage to its result. It is deliberately
+     * conservative - a false {@code false} only costs a redundant copy, whereas a false {@code true} would
+     * hand out a value that can change.</p>
      */
-    final Map<K, V> valueMap;
+    final boolean ownsBacking;
 
     /**
-     * Constructs a read-only map over the given backing map, always wrapping it in an unmodifiable view.
+     * Constructs a non-owning read-only map over the given backing map, always wrapping it in an
+     * unmodifiable view.
      *
      * @param map the backing map holding the mappings of this map
+     * @throws NullPointerException if {@code map} is {@code null}
      */
-    AbstractImmutableMap(final Map<? extends K, ? extends V> map) {
+    AbstractImmutableMap(final Map<? extends K, ? extends V> map) throws NullPointerException {
         // A class name is not a reliable immutability contract. Always create an unmodifiable
         // view here so that entrySet() entries and all collection views are read-only.
-        this(map, false);
+        this(map, false, false);
     }
 
     /**
      * Constructs a read-only map over the given backing map.
      *
+     * <p>There is deliberately no two-argument {@code (Map, boolean)} form here or on {@link ImmutableMap}.
+     * {@link ImmutableSortedMap}, {@link ImmutableNavigableMap} and {@link ImmutableBiMap} each declare one
+     * whose flag is {@code ownsBacking}, so a two-argument {@code super(...)} call from any of them would
+     * once have bound to a {@code (Map, boolean isUnmodifiable)} overload up here and silently skipped the
+     * unmodifiable wrapper while dropping the ownership flag. Subclasses must pass all three arguments.</p>
+     *
      * @param map the backing map holding the mappings of this map
      * @param isUnmodifiable {@code true} if {@code map} is already unmodifiable and therefore does not
      *        need to be wrapped in an additional unmodifiable view
+     * @param ownsBacking {@code true} only if no other modifiable reference to {@code map} survives this
+     *        call; see {@link #ownsBacking}
+     * @throws NullPointerException if {@code map} is {@code null} and {@code isUnmodifiable} is false
      */
-    AbstractImmutableMap(final Map<? extends K, ? extends V> map, final boolean isUnmodifiable) {
-        this.valueMap = (Map<K, V>) map;
-        this.map = isUnmodifiable ? valueMap : Collections.unmodifiableMap(valueMap); // to create immutable keySet(), values(), entrySet()
+    AbstractImmutableMap(final Map<? extends K, ? extends V> map, final boolean isUnmodifiable, final boolean ownsBacking) throws NullPointerException {
+        // to create immutable keySet(), values(), entrySet()
+        this.map = isUnmodifiable ? (Map<K, V>) map : Collections.unmodifiableMap(map);
+        this.ownsBacking = ownsBacking;
     }
 
     /**
@@ -102,13 +127,13 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * @param defaultValue the value to return if this map contains no mapping for the key
      * @return the value to which the specified key is mapped, or {@code defaultValue} if this
      *         map contains no mapping for the key
+     * @throws NullPointerException if {@code key} is {@code null} and the backing map rejects null-key queries
+     * @throws ClassCastException if {@code key} has a type that the backing map cannot query or compare
      * @see java.util.Map#getOrDefault(Object, Object)
      */
     @Override
-    public V getOrDefault(final Object key, final V defaultValue) {
-        final V val = get(key);
-
-        return val == null && !containsKey(key) ? defaultValue : val;
+    public V getOrDefault(final Object key, final V defaultValue) throws NullPointerException, ClassCastException {
+        return map.getOrDefault(key, defaultValue);
     }
 
     /**
@@ -226,18 +251,14 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param key ignored.
-     * @param mappingFunction ignored.
+     * @param mappingFunction ignored, and may be {@code null}.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @throws IllegalArgumentException if {@code mappingFunction} is {@code null}.
      * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
-    public final V computeIfAbsent(final K key, final Function<? super K, ? extends V> mappingFunction)
-            throws UnsupportedOperationException, IllegalArgumentException {
-        N.checkArgNotNull(mappingFunction, cs.mappingFunction);
-
+    public final V computeIfAbsent(final K key, final Function<? super K, ? extends V> mappingFunction) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -246,18 +267,14 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param key ignored.
-     * @param remappingFunction ignored.
+     * @param remappingFunction ignored, and may be {@code null}.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
-    public final V computeIfPresent(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction)
-            throws UnsupportedOperationException, IllegalArgumentException {
-        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
-
+    public final V computeIfPresent(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -266,18 +283,14 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @param key ignored.
-     * @param remappingFunction ignored.
+     * @param remappingFunction ignored, and may be {@code null}.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
-    public final V compute(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction)
-            throws UnsupportedOperationException, IllegalArgumentException {
-        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
-
+    public final V compute(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -287,18 +300,15 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      *
      * @param key ignored.
      * @param value ignored.
-     * @param remappingFunction ignored.
+     * @param remappingFunction ignored, and may be {@code null}.
      * @return never returns normally.
      * @throws UnsupportedOperationException always.
-     * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
      * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
     public final V merge(final K key, final V value, final BiFunction<? super V, ? super V, ? extends V> remappingFunction)
-            throws UnsupportedOperationException, IllegalArgumentException {
-        N.checkArgNotNull(remappingFunction, cs.remappingFunction);
-
+            throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -306,16 +316,13 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * This operation is not supported by this immutable map.
      * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
-     * @param function ignored.
+     * @param function ignored, and may be {@code null}.
      * @throws UnsupportedOperationException always.
-     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @deprecated this immutable map does not support modification operations.
      */
     @Deprecated
     @Override
-    public final void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws UnsupportedOperationException, IllegalArgumentException {
-        N.checkArgNotNull(function, cs.function);
-
+    public final void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws UnsupportedOperationException {
         // Without this override the inherited Map.replaceAll default iterates entrySet()/setValue(); on an EMPTY
         // immutable map it would silently no-op instead of throwing, inconsistent with every other mutator here
         // (and with ImmutableList.replaceAll). Block it unconditionally.
@@ -370,10 +377,12 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      *
      * @param key the key whose presence in this map is to be tested.
      * @return {@code true} if this map contains a mapping for the specified key.
+     * @throws NullPointerException if {@code key} is {@code null} and the backing map rejects null-key queries
+     * @throws ClassCastException if {@code key} has a type that the backing map cannot query or compare
      * @see java.util.Map#containsKey(Object)
      */
     @Override
-    public boolean containsKey(final Object key) {
+    public boolean containsKey(final Object key) throws NullPointerException, ClassCastException {
         return map.containsKey(key);
     }
 
@@ -414,10 +423,12 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      *
      * @param key the key whose associated value is to be returned.
      * @return the value to which the specified key is mapped, or {@code null} if no mapping exists.
+     * @throws NullPointerException if {@code key} is {@code null} and the backing map rejects null-key queries
+     * @throws ClassCastException if {@code key} has a type that the backing map cannot query or compare
      * @see java.util.Map#get(Object)
      */
     @Override
-    public V get(final Object key) {
+    public V get(final Object key) throws NullPointerException, ClassCastException {
         return map.get(key);
     }
 
@@ -508,6 +519,28 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
     }
 
     /**
+     * Performs the given action for each entry in this map until all entries have been processed or the
+     * action throws an exception. Delegates to the backing map so that its optimized traversal is used
+     * instead of the {@link Map#forEach(BiConsumer)} default's entry-set iteration.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
+     * map.forEach((k, v) -> System.out.println(k + "=" + v));   // prints a=1 then b=2
+     * }</pre>
+     *
+     * @param action the action to be performed for each entry
+     * @throws NullPointerException if {@code action} is {@code null}
+     * @see java.util.Map#forEach(BiConsumer)
+     */
+    @Override
+    public void forEach(final BiConsumer<? super K, ? super V> action) throws NullPointerException {
+        Objects.requireNonNull(action);
+
+        map.forEach(action);
+    }
+
+    /**
      * Compares the specified object with this map for equality.
      * Returns {@code true} if the given object is also a map and the two maps represent the same mappings.
      * More formally, two maps {@code m1} and {@code m2} are equal if {@code m1.entrySet().equals(m2.entrySet())}.
@@ -533,10 +566,10 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
         }
 
         if (obj instanceof AbstractImmutableMap im) {
-            return valueMap.equals(im.valueMap);
+            return map.equals(im.map);
         }
 
-        return valueMap.equals(obj);
+        return map.equals(obj);
     }
 
     /**
@@ -556,7 +589,7 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      */
     @Override
     public int hashCode() {
-        return valueMap.hashCode();
+        return map.hashCode();
     }
 
     /**
@@ -571,10 +604,13 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * System.out.println(map);   // {a=1, b=2}
      * }</pre>
      *
+     * <p>Direct self-references are rendered with the standard collection/map marker; indirect cycles are not detected.</p>
+     *
      * @return a string representation of this map.
      */
     @Override
     public String toString() {
-        return valueMap.toString();
+        // Format through this wrapper so direct self-references use the standard marker.
+        return super.toString();
     }
 }

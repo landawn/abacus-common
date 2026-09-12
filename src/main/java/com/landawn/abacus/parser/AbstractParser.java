@@ -332,7 +332,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     @SuppressWarnings("unchecked")
-    protected static <T> T newPropInstance(final Class<?> propClass, final Class<?> attributeTypeClass) {
+    protected static <T> T newPropInstance(final Class<?> propClass, final Class<?> attributeTypeClass) throws ParsingException {
         if ((attributeTypeClass != null) && ((propClass == null) || propClass.isAssignableFrom(attributeTypeClass))) {
             try {
                 return (T) N.newInstance(attributeTypeClass);
@@ -359,7 +359,11 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * <ul>
      *   <li>If type class is {@code null}, use target class</li>
      *   <li>If target class is {@code null} or the same as type class, use type class</li>
-     *   <li>If type class is assignable to target class, use type class (more specific)</li>
+     *   <li>If type class is assignable to target class, use type class (more specific), <b>unless</b> it is a
+     *       {@code Map}/{@code Collection} implementation the readers cannot instantiate (an immutable or
+     *       unmodifiable wrapper such as {@code ImmutableMap}, {@code List.of(..)} or
+     *       {@code Collections.emptyMap()}); such a type class is dropped in favour of the target class, which
+     *       is what actually gets filled</li>
      *   <li>Otherwise, use target class (type class is incompatible)</li>
      * </ul>
      *
@@ -371,10 +375,47 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         if (typeClass == null) {
             return targetClass;
         } else if ((targetClass == null) || (targetClass == typeClass || targetClass.isAssignableFrom(typeClass))) {
+            // A container is instantiated and then filled, so a runtime class without a no-argument constructor
+            // (an immutable/unmodifiable wrapper such as ImmutableMap, which the XML writer legitimately records as
+            // type="ImmutableMap<...>") cannot be used: preferring it would make the parser's own output unreadable
+            // with "No default constructor found". Scalars are converted from text and never instantiated this way,
+            // so they keep the more specific class (Integer, Instant, ... have no no-argument constructor either).
+            if (targetClass != null && isUninstantiableContainerClass(typeClass)) {
+                return targetClass;
+            }
+
             return typeClass;
         } else {
             return targetClass;
         }
+    }
+
+    private static final Map<Class<?>, Boolean> uninstantiableContainerClassPool = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * Returns whether {@code cls} is a concrete {@code Map}/{@code Collection} implementation that the readers
+     * cannot create. Interfaces and abstract types are excluded: those are mapped to a default implementation when
+     * the instance is created.
+     */
+    private static boolean isUninstantiableContainerClass(final Class<?> cls) {
+        if (!(Map.class.isAssignableFrom(cls) || Collection.class.isAssignableFrom(cls)) || cls.isInterface()
+                || java.lang.reflect.Modifier.isAbstract(cls.getModifiers())) {
+            return false;
+        }
+
+        return uninstantiableContainerClassPool.computeIfAbsent(cls, c -> {
+            try {
+                N.newInstance(c);
+                return false;
+            } catch (final Exception e) { // NOSONAR
+                // Ask exactly the question the reader will ask, because a missing no-argument constructor
+                // (ImmutableMap, List.of(..), Arrays.asList(..)) is only one of the ways this fails: the
+                // java.util.Collections empty/unmodifiable classes DO declare one, but it is private in a package
+                // java.base does not open, so the reflective call fails there instead. One throwaway instance per
+                // container class, then the answer is cached for the life of the JVM.
+                return true;
+            }
+        });
     }
 
     /**
@@ -384,33 +425,46 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * with special handling for:</p>
      * <ul>
      *   <li>Primitive arrays: Uses the target type's conversion method</li>
-     *   <li>Object arrays: Uses the declared component type when it accepts the collection elements</li>
+     *   <li>Object arrays: Always creates an array of the declared component type</li>
      *   <li>Empty collections: Returns an empty array of the target type</li>
      * </ul>
      *
-     * <p>For an object array, the method inspects the first {@code non-null} element. It uses the
-     * declared target type when that element is assignable to its component type; otherwise it
-     * falls back to an array whose component type is that element's runtime class.</p>
+     * <p>For an object array whose component type is not {@code Object}, every {@code non-null} element must be an
+     * instance of the declared component type. An element that is not (for example a nested {@code [...]} or
+     * {@code {...}} parsed into a {@code String[]} target) is reported as a {@link ParsingException} at the point of
+     * parsing; the method never substitutes an array of the element's runtime class, which would only surface later
+     * as a {@code ClassCastException} at an unrelated assignment.</p>
      *
      * @param <T> the return type
      * @param c the collection to convert (may be {@code null})
      * @param targetType the target array type
      * @return an array containing the collection elements, or {@code null} if the collection is {@code null}
+     * @throws ParsingException if a {@code non-null} element cannot be stored in an array of the declared
+     *         component type
      */
-    protected static <T> T collectionToArray(final Collection<?> c, final Type<?> targetType) {
+    protected static <T> T collectionToArray(final Collection<?> c, final Type<?> targetType) throws ParsingException {
         if (c == null) {
             return null;
         }
 
         if (!targetType.isPrimitiveArray()) {
-            // looking for the right array class.
-            for (final Object e : c) {
-                if (e != null) {
-                    if (targetType.elementType().javaType().isAssignableFrom(e.getClass())) {
-                        return (T) targetType.collectionToArray(c);
-                    } else {
-                        return (T) c.toArray((Object[]) N.newArray(e.getClass(), c.size()));
+            final Type<?> elementType = targetType.elementType();
+            final Class<?> componentClass = elementType.javaType();
+
+            // Object[] accepts everything; skip the scan on that hot path (Type.isObject() is also true for plain
+            // bean types, so compare the class). For any other component type a mis-typed element must fail here
+            // as a parse error, not as an ArrayStoreException from targetType.collectionToArray or a
+            // ClassCastException at the caller's assignment.
+            if (componentClass != Object.class) {
+                int index = 0;
+
+                for (final Object e : c) {
+                    if (e != null && !componentClass.isInstance(e)) {
+                        throw new ParsingException("Element at index " + index + " is a " + e.getClass().getName() + ", which cannot be stored in "
+                                + targetType.name() + " (expected " + elementType.name() + ")");
                     }
+
+                    index++;
                 }
             }
         }
@@ -428,9 +482,10 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * create them automatically before the file is created.</p>
      *
      * @param file the file to create if it doesn't exist (must not be {@code null})
+     * @throws NullPointerException if {@code file} is {@code null}.
      * @throws IOException if the file cannot be created
      */
-    protected static void createNewFileIfNotExists(final File file) throws IOException {
+    protected static void createNewFileIfNotExists(final File file) throws NullPointerException, IOException {
         if (!file.exists() && !IOUtil.createFileIfNotExists(file)) {
             throw new IOException("Failed to create new file: " + file.getName());
         }
@@ -482,7 +537,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      *         {@code config.isCircularReferenceSupported()} is {@code false}
      */
     protected static boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final JsonXmlSerConfig<?> config,
-            @SuppressWarnings("unused") final CharacterWriter bw) {
+            @SuppressWarnings("unused") final CharacterWriter bw) throws ParsingException {
         final Type<?> type = obj == null ? null : Type.of(obj.getClass());
         if (obj != null && serializedObjects != null //
                 && (type.isBean() || type.isMap() || type.isCollection() || type.isObjectArray() || type.isMapEntity())) {

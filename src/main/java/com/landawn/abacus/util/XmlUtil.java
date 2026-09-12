@@ -29,13 +29,13 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -94,7 +94,17 @@ import jakarta.xml.bind.Unmarshaller;
  *   <li>Node and attribute manipulation</li>
  * </ul>
  *
- * <p>The class employs object pooling for parsers and contexts to improve performance in high-throughput scenarios.</p>
+ * <p>The class pools parsers and opportunistically reuses JAXB contexts. JAXB contexts are scoped by
+ * binding class or context path and by the identity of the current thread context class loader.
+ * Context-path construction uses that captured loader explicitly; class-based construction retains
+ * JAXB's normal provider discovery. Weak context and loader references allow these caches to release
+ * unused binding and provider loaders. A context may be rebuilt after garbage collection.</p>
+ *
+ * <p>Keep JAXB provider/discovery configuration stable for a given context loader during reuse.
+ * Changing service configuration or system properties under the same loader does not guarantee an
+ * immediate rebuild. This cache policy does not control references retained by providers or other
+ * libraries. Each request creates a separate marshaller or unmarshaller; those objects remain subject
+ * to their provider's thread-safety rules.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -115,6 +125,16 @@ import jakarta.xml.bind.Unmarshaller;
  * }</pre>
  *
  * <p>This class is not instantiable.</p>
+ *
+ * <p><b>System properties:</b></p>
+ * <ul>
+ *   <li>{@code abacus.xml.allowXmlEncoderDecoder} - enables the deprecated {@link #xmlEncode(Object)} /
+ *       {@link #xmlDecode(String)} pair. Read once, when this class is initialized.</li>
+ *   <li>{@code abacus.xml.allowTypeAttrClassForName} - lets a {@code type} attribute in deserialized XML
+ *       name any class, instead of only those on the built-in allowlist. Attacker-controlled type names
+ *       feed reflective construction, so enable this only for trusted XML. Unlike the property above it
+ *       is read on <i>every</i> resolution, so it can be toggled at runtime.</li>
+ * </ul>
  *
  * @see XmlMappers
  * @see javax.xml.parsers.DocumentBuilder
@@ -155,6 +175,15 @@ public final class XmlUtil {
     private static final Queue<SAXParser> saxParserPool = new ArrayBlockingQueue<>(POOL_SIZE);
     private static final WeakIdentitySet<SAXParser> ownedSaxParsers = new WeakIdentitySet<>();
 
+    /**
+     * Which parsers are currently sitting in {@link #saxParserPool}. Guarded by that queue's monitor.
+     *
+     * <p>Recycling used to scan the whole queue for an identity match, which is O(POOL_SIZE) (1000) per
+     * call on what is meant to be the fast path. This membership set answers the same question in
+     * constant time.</p>
+     */
+    private static final Map<SAXParser, Boolean> pooledSaxParsers = new IdentityHashMap<>();
+
     // Hardened DOM builder configuration and reusable builder pool.
     private static final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
 
@@ -175,6 +204,9 @@ public final class XmlUtil {
 
     private static final Queue<DocumentBuilder> contentDocBuilderPool = new ArrayBlockingQueue<>(POOL_SIZE);
     private static final WeakIdentitySet<DocumentBuilder> ownedContentParsers = new WeakIdentitySet<>();
+
+    /** Which builders are currently in {@link #contentDocBuilderPool}; see {@link #pooledSaxParsers}. */
+    private static final Map<DocumentBuilder, Boolean> pooledContentParsers = new IdentityHashMap<>();
 
     // private static final int BUFFER_SIZE = 1024 * 16; // 16KB
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
@@ -213,14 +245,14 @@ public final class XmlUtil {
     // private static final Queue<DocumentBuilder> xmlOutputPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
     // Hardened transformer configuration.
-    private static final TransformerFactory transferFactory = TransformerFactory.newInstance();
+    private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
     // private static final Queue<DocumentBuilder> xmlTransferPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
     static {
         try {
-            transferFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 
-            if (!transferFactory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING)) {
+            if (!transformerFactory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING)) {
                 throw new IllegalStateException("TransformerFactory ignored FEATURE_SECURE_PROCESSING");
             }
         } catch (Exception e) { // NOSONAR
@@ -232,15 +264,22 @@ public final class XmlUtil {
     }
 
     // JAXB contexts and XML node-name metadata.
-    private static final Map<String, JAXBContext> pathJaxbContextPool = new ConcurrentHashMap<>(POOL_SIZE);
+    private static final LoaderJaxbCache<String> pathJaxbContextPool = new LoaderJaxbCache<>();
 
-    private static final Map<Class<?>, JAXBContext> classJaxbContextPool = new ConcurrentHashMap<>(POOL_SIZE);
+    private static final ClassValue<LoaderJaxbCache<Boolean>> classJaxbContextPool = new ClassValue<>() {
+        @Override
+        protected LoaderJaxbCache<Boolean> computeValue(final Class<?> type) {
+            return new LoaderJaxbCache<>();
+        }
+    };
 
     private static final Map<String, NodeType> nodeTypePool = new HashMap<>();
 
     static {
         nodeTypePool.put(XmlConstants.ARRAY, NodeType.ARRAY);
         nodeTypePool.put(XmlConstants.LIST, NodeType.COLLECTION);
+        nodeTypePool.put(XmlConstants.SET, NodeType.COLLECTION);
+        nodeTypePool.put(XmlConstants.COLLECTION, NodeType.COLLECTION);
         nodeTypePool.put(XmlConstants.E, NodeType.ELEMENT);
         nodeTypePool.put(XmlConstants.MAP, NodeType.MAP);
         nodeTypePool.put(XmlConstants.ENTRY, NodeType.ENTRY);
@@ -374,9 +413,9 @@ public final class XmlUtil {
 
     private static void setTransformerFactoryAttribute(final String attributeName, final String value) {
         try {
-            transferFactory.setAttribute(attributeName, value);
+            transformerFactory.setAttribute(attributeName, value);
 
-            if (!value.equals(transferFactory.getAttribute(attributeName))) {
+            if (!value.equals(transformerFactory.getAttribute(attributeName))) {
                 throw new IllegalStateException("TransformerFactory ignored attribute: " + attributeName);
             }
         } catch (Exception e) { // NOSONAR
@@ -386,7 +425,7 @@ public final class XmlUtil {
 
     /**
      * Marshals the given JAXB bean into an XML string.
-     * The JAXBContext is cached for the bean's class to improve performance on repeated operations.
+     * The JAXBContext is weakly cached for the bean's class and current context loader; see the class-level cache policy.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -410,22 +449,19 @@ public final class XmlUtil {
      *
      * @param jaxbBean The JAXB-annotated bean to be marshalled (must not be {@code null})
      * @return The XML string representation of the JAXB bean, decoded as UTF-8
-     * @throws NullPointerException if {@code jaxbBean} is {@code null}
+     * @throws IllegalArgumentException if {@code jaxbBean} is {@code null}
      * @throws RuntimeException if marshalling fails (e.g. a {@code JAXBException} is raised)
-     * @throws UncheckedIOException if an I/O error occurs while writing the XML
      * @see JAXBContext#newInstance(Class...)
      * @see Marshaller#marshal(Object, java.io.OutputStream)
      */
-    public static String marshal(final Object jaxbBean) {
+    public static String marshal(final Object jaxbBean) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(jaxbBean, cs.jaxbBean);
+
         final Class<?> cls = jaxbBean.getClass();
-        JAXBContext jc = classJaxbContextPool.get(cls);
         final ByteArrayOutputStream writer = Objectory.createByteArrayOutputStream();
 
         try {
-            if (jc == null) {
-                jc = JAXBContext.newInstance(cls);
-                classJaxbContextPool.put(cls, jc);
-            }
+            final JAXBContext jc = jaxbContext(cls);
 
             final Marshaller marshaller = jc.createMarshaller();
             marshaller.marshal(jaxbBean, writer);
@@ -446,7 +482,7 @@ public final class XmlUtil {
 
     /**
      * Unmarshals the given XML string into an object of the specified class.
-     * The JAXBContext is cached for the target class to improve performance on repeated operations.
+     * The JAXBContext is weakly cached for the target class and current context loader; see the class-level cache policy.
      * Parsing uses the security-hardened StAX factory, and the internal stream reader is closed
      * before this method returns or propagates a parsing failure.
      *
@@ -461,14 +497,15 @@ public final class XmlUtil {
      * @param cls The class of the object to be returned (must be JAXB-annotated)
      * @param xml The XML string to be unmarshalled (must not be {@code null})
      * @return The unmarshalled object of the specified class
-     * @throws NullPointerException if {@code cls} or {@code xml} is {@code null}
+     * @throws IllegalArgumentException if {@code cls} or {@code xml} is {@code null}
      * @throws RuntimeException if secure XML parsing or JAXB unmarshalling fails
+     * @throws ClassCastException if the XML root resolves to a JAXB object that is not an instance of {@code cls}
      * @see JAXBContext#newInstance(Class...)
      * @see Unmarshaller#unmarshal(XMLStreamReader)
      */
-    public static <T> T unmarshal(final Class<? extends T> cls, final String xml) {
-        java.util.Objects.requireNonNull(cls, "cls");
-        java.util.Objects.requireNonNull(xml, "xml");
+    public static <T> T unmarshal(final Class<? extends T> cls, final String xml) throws IllegalArgumentException, RuntimeException, ClassCastException {
+        N.checkArgNotNull(cls, cs.cls);
+        N.checkArgNotNull(xml, cs.xml);
 
         // Parse through the hardened StAX factory (DTD and external entities disabled) instead of
         // handing a raw Reader to JAXB, whose default unmarshaller would otherwise create its own
@@ -477,19 +514,14 @@ public final class XmlUtil {
     }
 
     /** Unmarshals from and always closes the supplied reader. Package-private for lifecycle testing. */
-    @SuppressWarnings("unchecked")
     static <T> T unmarshalAndClose(final Class<? extends T> cls, final XMLStreamReader xmlStreamReader) {
         try {
-            JAXBContext jc = classJaxbContextPool.get(cls);
-
-            if (jc == null) {
-                jc = JAXBContext.newInstance(cls);
-                classJaxbContextPool.put(cls, jc);
-            }
+            final JAXBContext jc = jaxbContext(cls);
 
             final Unmarshaller unmarshaller = jc.createUnmarshaller();
 
-            return (T) unmarshaller.unmarshal(xmlStreamReader);
+            // A JAXB context also knows related roots; creating it for cls does not enforce the result type.
+            return cls.cast(unmarshaller.unmarshal(xmlStreamReader));
         } catch (final JAXBException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
@@ -508,7 +540,7 @@ public final class XmlUtil {
 
     /**
      * Creates a JAXB Marshaller for the given context path.
-     * The JAXBContext is cached to improve performance on repeated operations.
+     * The JAXBContext is weakly cached for this binding and current context loader; see the class-level cache policy.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -519,18 +551,14 @@ public final class XmlUtil {
      *
      * @param contextPath The context path for which to create the Marshaller (package names separated by ':')
      * @return The created Marshaller
+     * @throws IllegalArgumentException if {@code contextPath} is {@code null}
      * @throws RuntimeException if the Marshaller cannot be created
      * @see JAXBContext#newInstance(String)
      * @see JAXBContext#createMarshaller()
      */
-    public static Marshaller createMarshaller(final String contextPath) {
-        JAXBContext jc = pathJaxbContextPool.get(contextPath);
-
+    public static Marshaller createMarshaller(final String contextPath) throws IllegalArgumentException, RuntimeException {
         try {
-            if (jc == null) {
-                jc = JAXBContext.newInstance(contextPath);
-                pathJaxbContextPool.put(contextPath, jc);
-            }
+            final JAXBContext jc = jaxbContext(contextPath);
 
             return jc.createMarshaller();
         } catch (final JAXBException e) {
@@ -540,7 +568,7 @@ public final class XmlUtil {
 
     /**
      * Creates a JAXB Marshaller for the given class.
-     * The JAXBContext is cached to improve performance on repeated operations.
+     * The JAXBContext is weakly cached for this binding and current context loader; see the class-level cache policy.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -551,18 +579,14 @@ public final class XmlUtil {
      *
      * @param cls The class for which to create the Marshaller (must be JAXB-annotated)
      * @return The created Marshaller
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      * @throws RuntimeException if the Marshaller cannot be created
      * @see JAXBContext#newInstance(Class...)
      * @see JAXBContext#createMarshaller()
      */
-    public static Marshaller createMarshaller(final Class<?> cls) {
-        JAXBContext jc = classJaxbContextPool.get(cls);
-
+    public static Marshaller createMarshaller(final Class<?> cls) throws IllegalArgumentException, RuntimeException {
         try {
-            if (jc == null) {
-                jc = JAXBContext.newInstance(cls);
-                classJaxbContextPool.put(cls, jc);
-            }
+            final JAXBContext jc = jaxbContext(cls);
 
             return jc.createMarshaller();
         } catch (final JAXBException e) {
@@ -572,7 +596,7 @@ public final class XmlUtil {
 
     /**
      * Creates a JAXB Unmarshaller for the given context path.
-     * The JAXBContext is cached to improve performance on repeated operations.
+     * The JAXBContext is weakly cached for this binding and current context loader; see the class-level cache policy.
      *
      * <p><b>Security:</b> An {@code Unmarshaller} does not itself define the security policy of a
      * parser it creates for raw {@code File}, {@code Reader}, or {@code InputStream} inputs. Do not
@@ -592,18 +616,14 @@ public final class XmlUtil {
      *
      * @param contextPath The context path for which to create the Unmarshaller (package names separated by ':')
      * @return The created Unmarshaller
+     * @throws IllegalArgumentException if {@code contextPath} is {@code null}
      * @throws RuntimeException if the Unmarshaller cannot be created
      * @see JAXBContext#newInstance(String)
      * @see JAXBContext#createUnmarshaller()
      */
-    public static Unmarshaller createUnmarshaller(final String contextPath) {
-        JAXBContext jc = pathJaxbContextPool.get(contextPath);
-
+    public static Unmarshaller createUnmarshaller(final String contextPath) throws IllegalArgumentException, RuntimeException {
         try {
-            if (jc == null) {
-                jc = JAXBContext.newInstance(contextPath);
-                pathJaxbContextPool.put(contextPath, jc);
-            }
+            final JAXBContext jc = jaxbContext(contextPath);
 
             return jc.createUnmarshaller();
         } catch (final JAXBException e) {
@@ -613,7 +633,7 @@ public final class XmlUtil {
 
     /**
      * Creates a JAXB Unmarshaller for the given class.
-     * The JAXBContext is cached to improve performance on repeated operations.
+     * The JAXBContext is weakly cached for this binding and current context loader; see the class-level cache policy.
      *
      * <p><b>Security:</b> An {@code Unmarshaller} does not itself define the security policy of a
      * parser it creates for raw {@code File}, {@code Reader}, or {@code InputStream} inputs. Do not
@@ -633,18 +653,14 @@ public final class XmlUtil {
      *
      * @param cls The class for which to create the Unmarshaller (must be JAXB-annotated)
      * @return The created Unmarshaller
+     * @throws IllegalArgumentException if {@code cls} is {@code null}
      * @throws RuntimeException if the Unmarshaller cannot be created
      * @see JAXBContext#newInstance(Class...)
      * @see JAXBContext#createUnmarshaller()
      */
-    public static Unmarshaller createUnmarshaller(final Class<?> cls) {
-        JAXBContext jc = classJaxbContextPool.get(cls);
-
+    public static Unmarshaller createUnmarshaller(final Class<?> cls) throws IllegalArgumentException, RuntimeException {
         try {
-            if (jc == null) {
-                jc = JAXBContext.newInstance(cls);
-                classJaxbContextPool.put(cls, jc);
-            }
+            final JAXBContext jc = jaxbContext(cls);
 
             return jc.createUnmarshaller();
         } catch (final JAXBException e) {
@@ -668,7 +684,7 @@ public final class XmlUtil {
      * @throws RuntimeException if the parser cannot be created
      * @see DocumentBuilderFactory#newDocumentBuilder()
      */
-    public static DocumentBuilder createDOMParser() {
+    public static DocumentBuilder createDOMParser() throws RuntimeException {
         synchronized (docBuilderFactory) {
             try {
                 return docBuilderFactory.newDocumentBuilder();
@@ -684,18 +700,22 @@ public final class XmlUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create parser that ignores comments and whitespace
+     * // Ignore comments and request removal of ignorable element-content whitespace.
      * DocumentBuilder parser = XmlUtil.createDOMParser(true, true);
      * Document doc = parser.parse(xmlFile);
      * }</pre>
      *
+     * <p>Whitespace removal applies only to whitespace identified as ignorable by an element-only
+     * content model. This non-validating, DTD-disabled factory does not generally remove indentation
+     * or other whitespace-only text nodes.</p>
+     *
      * @param ignoreComments Whether to ignore comments in the XML
-     * @param ignoringElementContentWhitespace Whether to ignore whitespace in element content
+     * @param ignoringElementContentWhitespace Whether to request removal of ignorable element-content whitespace
      * @return A new instance of {@code DocumentBuilder} with the specified configuration
      * @throws RuntimeException if the parser cannot be created
      * @see DocumentBuilderFactory#newDocumentBuilder()
      */
-    public static DocumentBuilder createDOMParser(final boolean ignoreComments, final boolean ignoringElementContentWhitespace) {
+    public static DocumentBuilder createDOMParser(final boolean ignoreComments, final boolean ignoringElementContentWhitespace) throws RuntimeException {
         DocumentBuilder documentBuilder = null;
 
         synchronized (docBuilderFactory) {
@@ -720,7 +740,9 @@ public final class XmlUtil {
 
     /**
      * Creates a new instance of {@code DocumentBuilder} optimized for parsing content.
-     * The parser is pre-configured to ignore comments and element content whitespace.
+     * The parser ignores comments and requests removal of ignorable element-content whitespace.
+     * As with {@link #createDOMParser(boolean, boolean)}, ordinary indentation is generally retained
+     * because the factory is non-validating and disables DTDs.
      * This method uses object pooling for better performance.
      *
      * <p>Important: Call {@link #recycleContentParser(DocumentBuilder)} when done to return the parser to the pool.</p>
@@ -739,11 +761,15 @@ public final class XmlUtil {
      * @return A {@code DocumentBuilder} instance from the pool or newly created
      * @throws RuntimeException if the parser cannot be created
      */
-    public static DocumentBuilder createContentParser() {
+    public static DocumentBuilder createContentParser() throws RuntimeException {
         DocumentBuilder documentBuilder;
 
         synchronized (contentDocBuilderPool) {
             documentBuilder = contentDocBuilderPool.poll();
+
+            if (documentBuilder != null) {
+                pooledContentParsers.remove(documentBuilder);
+            }
         }
 
         if (documentBuilder == null) {
@@ -778,6 +804,10 @@ public final class XmlUtil {
      * Recycles the given DocumentBuilder instance by resetting it and adding it back to the pool.
      * Only instances obtained from {@link #createContentParser()} are accepted; foreign and duplicate
      * instances are ignored so they cannot weaken or corrupt the security-hardened shared pool.
+     * A parser is also discarded rather than pooled when the pool is already at capacity, or when the
+     * provider's {@code reset()} throws; this method still returns normally in those cases. A caller
+     * cannot tell whether the instance was pooled, so it must not use the parser again after calling
+     * this method.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -797,15 +827,14 @@ public final class XmlUtil {
         }
 
         synchronized (contentDocBuilderPool) {
-            // Cheap checks first: the identity scan is O(POOL_SIZE) and runs under this monitor.
-            if (!ownedContentParsers.contains(docBuilder) || contentDocBuilderPool.size() >= POOL_SIZE
-                    || containsByIdentity(contentDocBuilderPool, docBuilder)) {
+            if (contentDocBuilderPool.size() >= POOL_SIZE || pooledContentParsers.containsKey(docBuilder) || !ownedContentParsers.contains(docBuilder)) {
                 return;
             }
 
             try {
                 docBuilder.reset();
                 contentDocBuilderPool.add(docBuilder);
+                pooledContentParsers.put(docBuilder, Boolean.TRUE);
             } catch (final RuntimeException e) {
                 // A provider is permitted not to support reset. Discard that parser rather than
                 // masking an earlier parsing failure from a caller's finally block.
@@ -837,9 +866,13 @@ public final class XmlUtil {
      * @throws ParsingException if the underlying SAX implementation fails to create the parser
      * @see SAXParserFactory#newSAXParser()
      */
-    public static SAXParser createSAXParser() {
+    public static SAXParser createSAXParser() throws RuntimeException, ParsingException {
         synchronized (saxParserPool) {
             SAXParser saxParser = saxParserPool.poll();
+
+            if (saxParser != null) {
+                pooledSaxParsers.remove(saxParser);
+            }
 
             if (saxParser == null) {
                 try {
@@ -860,6 +893,10 @@ public final class XmlUtil {
      * Recycles the given SAXParser instance by resetting it and adding it back to the pool.
      * Only instances obtained from {@link #createSAXParser()} are accepted; foreign and duplicate
      * instances are ignored so they cannot weaken or corrupt the security-hardened shared pool.
+     * A parser is also discarded rather than pooled when the pool is already at capacity, or when the
+     * provider's {@code reset()} throws; this method still returns normally in those cases. A caller
+     * cannot tell whether the instance was pooled, so it must not use the parser again after calling
+     * this method.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -879,30 +916,20 @@ public final class XmlUtil {
         }
 
         synchronized (saxParserPool) {
-            // Cheap checks first: the identity scan is O(POOL_SIZE) and runs under this monitor.
-            if (!ownedSaxParsers.contains(saxParser) || saxParserPool.size() >= POOL_SIZE || containsByIdentity(saxParserPool, saxParser)) {
+            if (saxParserPool.size() >= POOL_SIZE || pooledSaxParsers.containsKey(saxParser) || !ownedSaxParsers.contains(saxParser)) {
                 return;
             }
 
             try {
                 saxParser.reset();
                 saxParserPool.add(saxParser);
+                pooledSaxParsers.put(saxParser, Boolean.TRUE);
             } catch (final RuntimeException e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug(e, "Discarding SAXParser that could not be reset");
                 }
             }
         }
-    }
-
-    private static <T> boolean containsByIdentity(final Queue<T> pool, final T value) {
-        for (final T pooled : pool) {
-            if (pooled == value) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -925,10 +952,13 @@ public final class XmlUtil {
      *
      * @param source The Reader source from which to create the XMLStreamReader
      * @return The created XMLStreamReader
-     * @throws RuntimeException if an XMLStreamException occurs
+     * @throws IllegalArgumentException if {@code source} is {@code null}
+     * @throws RuntimeException if the StAX provider cannot initialize an XML reader over {@code source}
      * @see XMLInputFactory#createXMLStreamReader(Reader)
      */
-    public static XMLStreamReader createXMLStreamReader(final Reader source) {
+    public static XMLStreamReader createXMLStreamReader(final Reader source) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+
         synchronized (xmlInputFactory) {
             try {
                 return xmlInputFactory.createXMLStreamReader(source);
@@ -958,10 +988,13 @@ public final class XmlUtil {
      *
      * @param source The InputStream source from which to create the XMLStreamReader
      * @return The created XMLStreamReader
-     * @throws RuntimeException if an XMLStreamException occurs
+     * @throws IllegalArgumentException if {@code source} is {@code null}
+     * @throws RuntimeException if the StAX provider cannot initialize an XML reader over {@code source}
      * @see XMLInputFactory#createXMLStreamReader(InputStream)
      */
-    public static XMLStreamReader createXMLStreamReader(final InputStream source) {
+    public static XMLStreamReader createXMLStreamReader(final InputStream source) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+
         synchronized (xmlInputFactory) {
             try {
                 return xmlInputFactory.createXMLStreamReader(source);
@@ -992,10 +1025,13 @@ public final class XmlUtil {
      * @param source The InputStream source from which to create the XMLStreamReader
      * @param encoding The character encoding to be used (e.g., "UTF-8", "ISO-8859-1")
      * @return The created XMLStreamReader
-     * @throws RuntimeException if an XMLStreamException occurs
+     * @throws IllegalArgumentException if {@code source} is {@code null}
+     * @throws RuntimeException if the StAX provider cannot initialize an XML reader over {@code source}
      * @see XMLInputFactory#createXMLStreamReader(InputStream, String)
      */
-    public static XMLStreamReader createXMLStreamReader(final InputStream source, final String encoding) {
+    public static XMLStreamReader createXMLStreamReader(final InputStream source, final String encoding) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+
         synchronized (xmlInputFactory) {
             try {
                 return xmlInputFactory.createXMLStreamReader(source, encoding);
@@ -1006,7 +1042,14 @@ public final class XmlUtil {
     }
 
     private static RuntimeException toRuntimeException(final XMLStreamException e) {
-        for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause()) {
+        // Identity-based cycle detection, matching ExceptionUtil's cause walks: a provider is free to return a
+        // cause chain that loops (a custom getCause(), or initCause wiring done reflectively), and this walk runs
+        // inside the factory monitor (xmlInputFactory or xmlOutputFactory), so a loop here froze every other
+        // thread creating a reader or writer too.
+        final Set<Throwable> seen = java.util.Collections.newSetFromMap(new IdentityHashMap<>());
+        seen.add(e);
+
+        for (Throwable cause = e.getCause(); cause != null && seen.add(cause); cause = cause.getCause()) {
             if (cause instanceof IOException) {
                 return new UncheckedIOException((IOException) cause);
             }
@@ -1046,18 +1089,20 @@ public final class XmlUtil {
      * @param source The source XMLStreamReader to be filtered
      * @param filter The StreamFilter to apply to the source. Must not be {@code null}.
      * @return The filtered XMLStreamReader
-     * @throws IllegalArgumentException if {@code filter} is {@code null}.
-     * @throws RuntimeException if an XMLStreamException occurs
+     * @throws IllegalArgumentException if {@code source} or {@code filter} is {@code null}
+     * @throws RuntimeException if the StAX provider cannot create a filtered reader over {@code source} using {@code filter}
      * @see XMLInputFactory#createFilteredReader(XMLStreamReader, StreamFilter)
      */
-    public static XMLStreamReader createFilteredStreamReader(final XMLStreamReader source, final StreamFilter filter) throws IllegalArgumentException {
+    public static XMLStreamReader createFilteredStreamReader(final XMLStreamReader source, final StreamFilter filter)
+            throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
         N.checkArgNotNull(filter, cs.filter);
 
         synchronized (xmlInputFactory) {
             try {
                 return xmlInputFactory.createFilteredReader(source, filter);
             } catch (final XMLStreamException e) {
-                throw ExceptionUtil.toRuntimeException(e, true);
+                throw toRuntimeException(e);
             }
         }
     }
@@ -1083,15 +1128,18 @@ public final class XmlUtil {
      *
      * @param output The Writer output to which the XMLStreamWriter will write
      * @return The created XMLStreamWriter
-     * @throws RuntimeException if an XMLStreamException occurs
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws RuntimeException if the StAX provider cannot initialize an XML writer for {@code output}
      * @see XMLOutputFactory#createXMLStreamWriter(Writer)
      */
-    public static XMLStreamWriter createXMLStreamWriter(final Writer output) {
+    public static XMLStreamWriter createXMLStreamWriter(final Writer output) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(output, cs.output);
+
         synchronized (xmlOutputFactory) {
             try {
                 return xmlOutputFactory.createXMLStreamWriter(output);
             } catch (final XMLStreamException e) {
-                throw ExceptionUtil.toRuntimeException(e, true);
+                throw toRuntimeException(e);
             }
         }
     }
@@ -1115,15 +1163,18 @@ public final class XmlUtil {
      *
      * @param output The OutputStream to which the XMLStreamWriter will write
      * @return The created XMLStreamWriter
-     * @throws RuntimeException if an XMLStreamException occurs
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws RuntimeException if the StAX provider cannot initialize an XML writer for {@code output}
      * @see XMLOutputFactory#createXMLStreamWriter(OutputStream)
      */
-    public static XMLStreamWriter createXMLStreamWriter(final OutputStream output) {
+    public static XMLStreamWriter createXMLStreamWriter(final OutputStream output) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(output, cs.output);
+
         synchronized (xmlOutputFactory) {
             try {
                 return xmlOutputFactory.createXMLStreamWriter(output);
             } catch (final XMLStreamException e) {
-                throw ExceptionUtil.toRuntimeException(e, true);
+                throw toRuntimeException(e);
             }
         }
     }
@@ -1151,22 +1202,26 @@ public final class XmlUtil {
      * @param output The OutputStream to which the XMLStreamWriter will write
      * @param encoding The character encoding to be used (e.g., "UTF-8", "ISO-8859-1")
      * @return The created XMLStreamWriter
-     * @throws RuntimeException if an XMLStreamException occurs
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws RuntimeException if the StAX provider cannot initialize an XML writer for {@code output}
      * @see XMLOutputFactory#createXMLStreamWriter(OutputStream, String)
      */
-    public static XMLStreamWriter createXMLStreamWriter(final OutputStream output, final String encoding) {
+    public static XMLStreamWriter createXMLStreamWriter(final OutputStream output, final String encoding) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(output, cs.output);
+
         synchronized (xmlOutputFactory) {
             try {
                 return xmlOutputFactory.createXMLStreamWriter(output, encoding);
             } catch (final XMLStreamException e) {
-                throw ExceptionUtil.toRuntimeException(e, true);
+                throw toRuntimeException(e);
             }
         }
     }
 
     /**
      * Creates a new instance of Transformer for XML transformation operations.
-     * The Transformer can be used to transform XML documents using XSLT or for serialization.
+     * The returned transformer performs an identity transformation and can serialize a DOM document.
+     * This method does not compile or apply an XSLT stylesheet.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1179,13 +1234,13 @@ public final class XmlUtil {
      * @throws RuntimeException if a TransformerConfigurationException occurs
      * @see TransformerFactory#newTransformer()
      */
-    public static Transformer createXMLTransformer() {
+    public static Transformer createXMLTransformer() throws RuntimeException {
         // TransformerFactory instances are not guaranteed thread-safe for concurrent factory-method
         // calls (mirrors the synchronized(docBuilderFactory) / synchronized(saxParserPool) guards
         // used above for DocumentBuilderFactory/SAXParserFactory, for the same reason).
-        synchronized (transferFactory) {
+        synchronized (transformerFactory) {
             try {
-                return transferFactory.newTransformer();
+                return transformerFactory.newTransformer();
             } catch (final TransformerConfigurationException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
@@ -1206,14 +1261,25 @@ public final class XmlUtil {
      * <p>The file content is encoded by the transformer itself (UTF-8 by default), so the bytes
      * on disk match the encoding declared in the XML header.</p>
      *
+     * <p>The output path is used exactly as supplied. In particular, a {@code %20} in the path is
+     * <i>not</i> decoded to a space: this method always writes to {@code output} itself and never
+     * redirects to a different, already-existing file.</p>
+     *
      * @param source The XML Document to be transformed (must not be {@code null})
-     * @param output The output file where the transformed XML will be written
-     * @throws UncheckedIOException if an I/O error occurs while creating or writing the file
+     * @param output The output file where the transformed XML will be written; used verbatim
+     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}; checked before opening the file
+     * @throws UncheckedIOException if creating the output file or writing the transformed XML to it fails
      * @throws RuntimeException if a {@code TransformerException} occurs during transformation
      * @see Transformer#transform(Source, Result)
      */
-    public static void transform(final Document source, File output) {
-        output = PropertiesUtil.formatPath(output);
+    public static void transform(final Document source, final File output) throws IllegalArgumentException, UncheckedIOException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgNotNull(output, cs.output);
+
+        // Do NOT run the output path through PropertiesUtil.formatPath: that helper is a *read*-side
+        // heuristic which returns the "%20"-decoded sibling when that sibling happens to exist. On a
+        // write path it silently retargets the transform at an unrelated pre-existing file (asking for
+        // "a%20b.xml" would overwrite "a b.xml" and never create "a%20b.xml" at all).
 
         // Write through an OutputStream so the Transformer performs the character encoding
         // (UTF-8 by default, matching the encoding="UTF-8" it writes in the XML declaration).
@@ -1250,10 +1316,14 @@ public final class XmlUtil {
      *
      * @param source The XML Document to be transformed (must not be {@code null})
      * @param output The OutputStream where the transformed XML will be written (not closed by this method)
+     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
      * @throws RuntimeException if a {@code TransformerException} occurs
      * @see Transformer#transform(Source, Result)
      */
-    public static void transform(final Document source, final OutputStream output) {
+    public static void transform(final Document source, final OutputStream output) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgNotNull(output, cs.output);
+
         // Prepare the DOM document for writing
         final Source domSource = new DOMSource(source);
 
@@ -1280,10 +1350,14 @@ public final class XmlUtil {
      *
      * @param source The XML Document to be transformed (must not be {@code null})
      * @param output The Writer where the transformed XML will be written (not closed by this method)
+     * @throws IllegalArgumentException if {@code source} or {@code output} is {@code null}
      * @throws RuntimeException if a {@code TransformerException} occurs
      * @see Transformer#transform(Source, Result)
      */
-    public static void transform(final Document source, final Writer output) {
+    public static void transform(final Document source, final Writer output) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgNotNull(output, cs.output);
+
         // Prepare the DOM document for writing
         final Source domSource = new DOMSource(source);
 
@@ -1336,7 +1410,7 @@ public final class XmlUtil {
      * @deprecated unsafe deserialization primitive; disabled by default. Use JAXB or {@code XmlMappers}.
      */
     @Deprecated
-    public static String xmlEncode(final Object bean) {
+    public static String xmlEncode(final Object bean) throws UnsupportedOperationException {
         if (!ALLOW_XML_ENCODER_DECODER) {
             throw new UnsupportedOperationException("xmlEncode/xmlDecode are disabled by default because "
                     + "java.beans.XMLDecoder is an unsafe-deserialization primitive (CVE-2017-3506 etc). "
@@ -1388,7 +1462,7 @@ public final class XmlUtil {
      * @deprecated unsafe deserialization primitive; disabled by default. Use JAXB or {@code XmlMappers}.
      */
     @Deprecated
-    public static <T> T xmlDecode(final String xml) {
+    public static <T> T xmlDecode(final String xml) throws UnsupportedOperationException {
         if (!ALLOW_XML_ENCODER_DECODER) {
             throw new UnsupportedOperationException("xmlEncode/xmlDecode are disabled by default because "
                     + "java.beans.XMLDecoder is an unsafe-deserialization primitive (CVE-2017-3506 etc). "
@@ -1423,10 +1497,13 @@ public final class XmlUtil {
      * @param tagName The tag name of the elements to find, or {@code "*"} to match every direct child element
      * @return A list of elements with the specified tag name that are direct children of the given
      *         node; an empty list if there is no match (never {@code null})
+     * @throws IllegalArgumentException if {@code node} is {@code null}
      * @see Element#getElementsByTagName(String)
      * @see #getNodesByName(Node, String)
      */
-    public static List<Element> getElementsByTagName(final Element node, final String tagName) {
+    public static List<Element> getElementsByTagName(final Element node, final String tagName) throws IllegalArgumentException {
+        N.checkArgNotNull(node, cs.node);
+
         final List<Element> result = new ArrayList<>();
         final NodeList nodeList = node.getChildNodes();
         final boolean matchAll = "*".equals(tagName);
@@ -1444,7 +1521,7 @@ public final class XmlUtil {
 
     /**
      * Gets all nodes with the specified name from the given node and its descendants.
-     * This method performs a recursive search through the entire node tree.
+     * This method searches the entire node tree in depth-first preorder.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1455,14 +1532,19 @@ public final class XmlUtil {
      * <p>The search includes {@code node} itself: if its node name equals {@code nodeName} it is
      * included in the result.</p>
      *
+     * <p>Traversal uses an explicit work stack and does not impose a recursive call-depth limit.</p>
+     *
      * @param node The parent node to search within
      * @param nodeName The name of the nodes to find
      * @return A list of all nodes with the specified name; an empty list if there is no match
      *         (never {@code null})
+     * @throws IllegalArgumentException if {@code node} is {@code null}
      * @see #getNextNodeByName(Node, String)
      * @see #getElementsByTagName(Element, String)
      */
-    public static List<Node> getNodesByName(final Node node, final String nodeName) {
+    public static List<Node> getNodesByName(final Node node, final String nodeName) throws IllegalArgumentException {
+        N.checkArgNotNull(node, cs.node);
+
         final List<Node> nodes = new ArrayList<>();
 
         getNodesByName(node, nodeName, nodes);
@@ -1471,14 +1553,18 @@ public final class XmlUtil {
     }
 
     private static void getNodesByName(final Node node, final String nodeName, final List<Node> output) {
-        if (node.getNodeName().equals(nodeName)) {
-            output.add(node);
-        }
-
-        final NodeList nodeList = node.getChildNodes();
-
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            getNodesByName(nodeList.item(i), nodeName, output);
+        final var pending = new java.util.ArrayDeque<Node>();
+        pending.push(node);
+        // Reverse push order preserves the original preorder without using one call frame per DOM level.
+        while (!pending.isEmpty()) {
+            final Node current = pending.pop();
+            if (current.getNodeName().equals(nodeName)) {
+                output.add(current);
+            }
+            final NodeList children = current.getChildNodes();
+            for (int i = children.getLength() - 1; i >= 0; i--) {
+                pending.push(children.item(i));
+            }
         }
     }
 
@@ -1496,35 +1582,34 @@ public final class XmlUtil {
      * }
      * }</pre>
      *
+     * <p>Traversal uses an explicit work stack and does not impose a recursive call-depth limit.</p>
+     *
      * @param node The parent node to search within
      * @param nodeName The name of the node to find
      * @return The first node with the specified name, or {@code null} if no such node is found
+     * @throws IllegalArgumentException if {@code node} is {@code null}
      */
     @MayReturnNull
-    public static Node getNextNodeByName(final Node node, final String nodeName) {
-        if (node.getNodeName().equals(nodeName)) {
-            return node;
-        } else {
-            final NodeList nodeList = node.getChildNodes();
+    public static Node getNextNodeByName(final Node node, final String nodeName) throws IllegalArgumentException {
+        N.checkArgNotNull(node, cs.node);
 
-            Node subNode = null;
-
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                subNode = nodeList.item(i);
-
-                if (subNode.getNodeName().equals(nodeName)) {
-                    return subNode;
+        final var pending = new java.util.ArrayDeque<Node>();
+        pending.push(node);
+        while (!pending.isEmpty()) {
+            final Node current = pending.pop();
+            if (current.getNodeName().equals(nodeName)) {
+                return current;
+            }
+            final NodeList children = current.getChildNodes();
+            // Retain this method's special order: direct children precede descendants of any child.
+            for (int i = 0; i < children.getLength(); i++) {
+                final Node child = children.item(i);
+                if (child.getNodeName().equals(nodeName)) {
+                    return child;
                 }
             }
-
-            Node nextNode = null;
-
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                nextNode = getNextNodeByName(nodeList.item(i), nodeName);
-
-                if (nextNode != null) {
-                    return nextNode;
-                }
+            for (int i = children.getLength() - 1; i >= 0; i--) {
+                pending.push(children.item(i));
             }
         }
 
@@ -1544,9 +1629,13 @@ public final class XmlUtil {
      * @param node The XML node from which to get the attribute
      * @param attrName The name of the attribute to retrieve
      * @return The value of the specified attribute, or {@code null} if the attribute does not exist
+     * @throws IllegalArgumentException if {@code node} or {@code attrName} is {@code null}
      */
     @MayReturnNull
-    public static String getAttribute(final Node node, final String attrName) {
+    public static String getAttribute(final Node node, final String attrName) throws IllegalArgumentException {
+        N.checkArgNotNull(node, cs.node);
+        N.checkArgNotNull(attrName, cs.attrName);
+
         final NamedNodeMap attrsNode = node.getAttributes();
 
         if (attrsNode == null) {
@@ -1573,8 +1662,11 @@ public final class XmlUtil {
      *
      * @param node The XML node from which to read the attributes
      * @return A map containing the attributes of the given node, where keys are attribute names and values are attribute values
+     * @throws IllegalArgumentException if {@code node} is {@code null}
      */
-    public static Map<String, String> readAttributes(final Node node) {
+    public static Map<String, String> readAttributes(final Node node) throws IllegalArgumentException {
+        N.checkArgNotNull(node, cs.node);
+
         return readAttributes(Strings.EMPTY, node, new LinkedHashMap<>());
     }
 
@@ -1603,7 +1695,7 @@ public final class XmlUtil {
 
     /**
      * Reads the given XML element and returns its attributes and text content as a map.
-     * This method recursively processes the element and all its child elements,
+     * This method processes the element and all its descendant elements,
      * creating a flattened map with dot-notation keys for nested elements.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1615,41 +1707,44 @@ public final class XmlUtil {
      * }</pre>
      *
      * <p>The flattened representation can hold only one value per element path. If siblings use
-     * the same name, a later sibling overwrites the earlier sibling's text and attributes at that
-     * path. Traverse the DOM directly when repeated-element multiplicity must be preserved. Root
+     * the same name, later values overwrite earlier values only for keys they share; keys emitted
+     * only by an earlier sibling remain in the map. Text is recorded only for elements without
+     * child elements, and leading and trailing whitespace is stripped. Traverse the DOM directly
+     * when repeated-element multiplicity or mixed content must be preserved. Root
      * attributes retain unqualified keys for compatibility; nested attributes use the complete
      * element path.</p>
      *
+     * <p>Traversal uses an explicit work stack and does not impose a recursive call-depth limit.</p>
+     *
      * @param element The XML element to be read
      * @return A map containing the attributes and text content of the given element and its descendants
+     * @throws IllegalArgumentException if {@code element} is {@code null}
      */
-    public static Map<String, String> readElement(final Element element) {
+    public static Map<String, String> readElement(final Element element) throws IllegalArgumentException {
+        N.checkArgNotNull(element, cs.element);
+
         return readElement(Strings.EMPTY, element, new LinkedHashMap<>());
     }
 
     private static Map<String, String> readElement(final String parentNodeName, final Element element, final Map<String, String> output) {
-        final boolean isEmptyParentNodeName = Strings.isEmpty(parentNodeName);
-        final String elementPath = isEmptyParentNodeName ? element.getNodeName() : parentNodeName + "." + element.getNodeName();
-
-        // Root attributes retain their historical unqualified keys. Attributes on nested
-        // elements must include the current element name; qualifying them with only the
-        // parent path makes siblings such as <home zip="..."> and <work zip="...">
-        // overwrite the same "root.zip" entry.
-        readAttributes(isEmptyParentNodeName ? Strings.EMPTY : elementPath, element, output);
-
-        if (isTextElement(element)) {
-            final String nodeText = Strings.strip(getTextContent(element));
-
-            output.put(elementPath, nodeText);
-        }
-
-        final NodeList childNodeList = element.getChildNodes();
-
-        for (int childNodeIndex = 0; childNodeIndex < childNodeList.getLength(); childNodeIndex++) {
-            final Node childNode = childNodeList.item(childNodeIndex);
-
-            if (childNode instanceof Element childElement) {
-                readElement(elementPath, childElement, output);
+        final var pending = new java.util.ArrayDeque<Map.Entry<Element, String>>();
+        pending.push(Map.entry(element, parentNodeName));
+        while (!pending.isEmpty()) {
+            final var frame = pending.pop();
+            final Element current = frame.getKey();
+            final boolean root = Strings.isEmpty(frame.getValue());
+            final String elementPath = root ? current.getNodeName() : frame.getValue() + "." + current.getNodeName();
+            // Preserve unqualified root attributes and fully qualified descendant attributes.
+            readAttributes(root ? Strings.EMPTY : elementPath, current, output);
+            if (isTextElement(current)) {
+                output.put(elementPath, Strings.strip(getTextContent(current)));
+            }
+            final NodeList children = current.getChildNodes();
+            // Preorder also preserves insertion order and the last-value-wins policy for repeated paths.
+            for (int i = children.getLength() - 1; i >= 0; i--) {
+                if (children.item(i) instanceof Element child) {
+                    pending.push(Map.entry(child, elementPath));
+                }
             }
         }
 
@@ -1657,9 +1752,9 @@ public final class XmlUtil {
     }
 
     /**
-     * Checks if the given node is a text element.
-     * A text element is defined as an element that does not contain any child elements,
-     * only text content or other non-element nodes (like comments or text nodes).
+     * Checks whether the given node is non-null and has no direct child elements.
+     * Despite the method name, the node itself need not be an {@link Element}: text, comment,
+     * and other non-element nodes also qualify when they have no element children.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1672,8 +1767,8 @@ public final class XmlUtil {
      * boolean isParentText = XmlUtil.isTextElement(parent);   // returns false
      * }</pre>
      *
-     * @param node The node to be checked
-     * @return {@code true} if the node is a text element, {@code false} otherwise
+     * @param node The node to be checked; may be {@code null}
+     * @return {@code true} if the node is non-null and has no direct child elements, {@code false} otherwise
      */
     public static boolean isTextElement(final Node node) {
         if (node == null) {
@@ -1708,8 +1803,11 @@ public final class XmlUtil {
      * }</pre>
      *
      * @param node the XML node to read text from
-     * @return the value of {@code node.getTextContent()}, or {@code null} if {@code node} is {@code null}
+     * @return the value of {@code node.getTextContent()}; {@code null} if {@code node} is {@code null}, and also
+     *         {@code null} for node types whose DOM text content is undefined (document, document-type and
+     *         notation nodes)
      */
+    @MayReturnNull
     public static String getTextContent(final Node node) {
         return node == null ? null : node.getTextContent();
     }
@@ -1738,8 +1836,10 @@ public final class XmlUtil {
      * @param node the XML node to read text from
      * @param ignoreWhiteChar {@code true} to normalize tab/backspace/newline/carriage-return/form-feed
      *        characters and trim outer spaces; {@code false} to return the raw DOM text content
-     * @return the processed text content, or {@code null} if {@code node} is {@code null}
+     * @return the processed text content; {@code null} if {@code node} is {@code null}, and also {@code null}
+     *         when the DOM reports no text content for the node type (document, document-type and notation nodes)
      */
+    @MayReturnNull
     public static String getTextContent(final Node node, final boolean ignoreWhiteChar) {
         if (node == null) {
             return null;
@@ -1750,58 +1850,62 @@ public final class XmlUtil {
         if (ignoreWhiteChar && Strings.isNotEmpty(textContent)) {
             final StringBuilder sb = Objectory.createStringBuilder();
 
-            for (final char c : textContent.toCharArray()) {
-                switch (c) {
-                    case '\t':
-                    case '\b':
-                    case '\n':
-                    case '\r':
-                    case '\f':
+            try {
+                for (final char c : textContent.toCharArray()) {
+                    switch (c) {
+                        case '\t':
+                        case '\b':
+                        case '\n':
+                        case '\r':
+                        case '\f':
 
-                        if ((!sb.isEmpty()) && (sb.charAt(sb.length() - 1) != ' ')) {
-                            sb.append(' ');
+                            if ((!sb.isEmpty()) && (sb.charAt(sb.length() - 1) != ' ')) {
+                                sb.append(' ');
+                            }
+
+                            break;
+
+                        default:
+                            sb.append(c);
+                    }
+                }
+
+                final int length = sb.length();
+
+                if ((length > 0) && ((sb.charAt(0) == ' ') || (sb.charAt(length - 1) == ' '))) {
+                    int from = 0;
+
+                    do {
+                        if (sb.charAt(from) != ' ') {
+                            break;
                         }
 
-                        break;
+                        from++;
+                    } while (from < length);
 
-                    default:
-                        sb.append(c);
-                }
-            }
+                    int to = length - 1;
 
-            final int length = sb.length();
+                    do {
+                        if (sb.charAt(to) != ' ') {
+                            break;
+                        }
 
-            if ((length > 0) && ((sb.charAt(0) == ' ') || (sb.charAt(length - 1) == ' '))) {
-                int from = 0;
+                        to--;
+                    } while (to >= 0);
 
-                do {
-                    if (sb.charAt(from) != ' ') {
-                        break;
+                    if (from <= to) {
+                        textContent = sb.substring(from, to + 1);
+                    } else {
+                        textContent = "";
                     }
-
-                    from++;
-                } while (from < length);
-
-                int to = length - 1;
-
-                do {
-                    if (sb.charAt(to) != ' ') {
-                        break;
-                    }
-
-                    to--;
-                } while (to >= 0);
-
-                if (from <= to) {
-                    textContent = sb.substring(from, to + 1);
                 } else {
-                    textContent = "";
+                    textContent = sb.toString();
                 }
-            } else {
-                textContent = sb.toString();
+            } finally {
+                // Matches the pooled-handle shape of marshal/xmlEncode in this file: the builder returns to the
+                // pool even if the body ever gains a throwing call. The result String is already materialised.
+                Objectory.recycle(sb);
             }
-
-            Objectory.recycle(sb);
         }
 
         return textContent;
@@ -1821,9 +1925,10 @@ public final class XmlUtil {
      *
      * @param cbuf The character array containing the characters to be written
      * @param output The StringBuilder to which the escaped characters will be written
-     * @throws IOException If an I/O error occurs
+     * @throws NullPointerException if {@code cbuf} is {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      */
-    public static void writeCharacters(final char[] cbuf, final StringBuilder output) throws IOException {
+    public static void writeCharacters(final char[] cbuf, final StringBuilder output) throws NullPointerException, IllegalArgumentException {
         writeCharacters(cbuf, 0, cbuf.length, output);
     }
 
@@ -1843,10 +1948,18 @@ public final class XmlUtil {
      * @param off The start offset in the character array
      * @param len The number of characters to write
      * @param output The StringBuilder to which the escaped characters will be written
-     * @throws IOException If an I/O error occurs
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws NullPointerException if {@code cbuf} is {@code null} and {@code off} and {@code len} are non-negative
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds {@code cbuf.length}
      */
-    public static void writeCharacters(final char[] cbuf, final int off, final int len, final StringBuilder output) throws IOException {
-        writeCharacters(cbuf, off, len, IOUtil.stringBuilderToWriter(output));
+    public static void writeCharacters(final char[] cbuf, final int off, final int len, final StringBuilder output)
+            throws IllegalArgumentException, NullPointerException, IndexOutOfBoundsException {
+        // A StringBuilder-backed writer cannot fail; the checked exception is unreachable here.
+        try {
+            writeCharacters(cbuf, off, len, IOUtil.newStringWriter(output));
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e); //NOSONAR
+        }
     }
 
     /**
@@ -1863,15 +1976,16 @@ public final class XmlUtil {
      *
      * @param str The string containing the characters to be written
      * @param output The StringBuilder to which the escaped characters will be written
-     * @throws IOException If an I/O error occurs
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      */
-    public static void writeCharacters(String str, final StringBuilder output) throws IOException {
+    public static void writeCharacters(String str, final StringBuilder output) throws IllegalArgumentException {
         str = (str == null) ? Strings.NULL : str;
         writeCharacters(str, 0, str.length(), output);
     }
 
     /**
      * Writes XML-escaped characters from a portion of a string to the given StringBuilder.
+     * If the string is {@code null}, the offset and length select a slice of the literal {@code "null"}.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1886,10 +2000,18 @@ public final class XmlUtil {
      * @param off The start offset in the string
      * @param len The number of characters to write
      * @param output The StringBuilder to which the escaped characters will be written
-     * @throws IOException If an I/O error occurs
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds the length of
+     *         {@code str} (or the literal {@code "null"} when {@code str} is {@code null})
      */
-    public static void writeCharacters(final String str, final int off, final int len, final StringBuilder output) throws IOException {
-        writeCharacters(str, off, len, IOUtil.stringBuilderToWriter(output));
+    public static void writeCharacters(final String str, final int off, final int len, final StringBuilder output)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        // A StringBuilder-backed writer cannot fail; the checked exception is unreachable here.
+        try {
+            writeCharacters(str, off, len, IOUtil.newStringWriter(output));
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e); //NOSONAR
+        }
     }
 
     /**
@@ -1905,18 +2027,21 @@ public final class XmlUtil {
      * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
-     * @param output The OutputStream to which the escaped characters will be written
-     * @throws IOException If an I/O error occurs
+     * @param output The OutputStream to receive UTF-8 encoded escaped characters; flushed but not closed
+     * @throws NullPointerException if {@code cbuf} is {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IOException if writing the escaped characters to {@code output} or flushing {@code output} fails
      */
-    public static void writeCharacters(final char[] cbuf, final OutputStream output) throws IOException {
+    public static void writeCharacters(final char[] cbuf, final OutputStream output) throws NullPointerException, IllegalArgumentException, IOException {
         writeCharacters(cbuf, 0, cbuf.length, output);
     }
 
     /**
      * Writes XML-escaped characters from a portion of a character array to the given OutputStream.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
-     * Characters that are illegal in XML text (for example C0 control characters) are written as
-     * numeric character references such as <code>&amp;#x1f;</code>.
+     * Control characters U+0000 through U+001F and U+007F are written as numeric character
+     * references such as <code>&amp;#x1f;</code>. References do not make characters prohibited by
+     * the selected XML version legal; callers must provide text valid for that version.
      * Uses a BufferedXmlWriter internally for efficient writing.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1931,18 +2056,21 @@ public final class XmlUtil {
      * @param cbuf The character array containing the characters to be written
      * @param off The start offset in the character array
      * @param len The number of characters to write
-     * @param output The OutputStream to which the escaped characters will be written
-     * @throws IOException If an I/O error occurs
+     * @param output The OutputStream to receive UTF-8 encoded escaped characters; flushed but not closed
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws NullPointerException if {@code cbuf} is {@code null} and {@code off} and {@code len} are non-negative
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds {@code cbuf.length}
+     * @throws IOException if writing the escaped characters to {@code output} or flushing {@code output} fails
      */
-    public static void writeCharacters(final char[] cbuf, final int off, final int len, final OutputStream output) throws IOException {
+    public static void writeCharacters(final char[] cbuf, final int off, final int len, final OutputStream output)
+            throws IllegalArgumentException, NullPointerException, IndexOutOfBoundsException, IOException {
         final BufferedXmlWriter bufWriter = Objectory.createBufferedXmlWriter(output); //NOSONAR
 
-        try {
-            bufWriter.writeCharacter(cbuf, off, len);
-            bufWriter.flush();
-        } finally {
-            Objectory.recycle(bufWriter);
-        }
+        bufWriter.writeCharacter(cbuf, off, len);
+        bufWriter.flush();
+        // Recycling flushes pending output. After a failure, discard this wrapper instead of
+        // retrying a possibly partial write and replacing the original exception.
+        Objectory.recycle(bufWriter);
     }
 
     /**
@@ -1960,19 +2088,22 @@ public final class XmlUtil {
      * }</pre>
      *
      * @param str The string containing the characters to be written
-     * @param output The OutputStream to which the escaped characters will be written
-     * @throws IOException If an I/O error occurs
+     * @param output The OutputStream to receive UTF-8 encoded escaped characters; flushed but not closed
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IOException if writing the escaped characters to {@code output} or flushing {@code output} fails
      */
-    public static void writeCharacters(String str, final OutputStream output) throws IOException {
+    public static void writeCharacters(String str, final OutputStream output) throws IllegalArgumentException, IOException {
         str = (str == null) ? Strings.NULL : str;
         writeCharacters(str, 0, str.length(), output);
     }
 
     /**
      * Writes XML-escaped characters from a portion of a string to the given OutputStream.
+     * If the string is {@code null}, the offset and length select a slice of the literal {@code "null"}.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
-     * Characters that are illegal in XML text (for example C0 control characters) are written as
-     * numeric character references such as <code>&amp;#x1f;</code>.
+     * Control characters U+0000 through U+001F and U+007F are written as numeric character
+     * references such as <code>&amp;#x1f;</code>. References do not make characters prohibited by
+     * the selected XML version legal; callers must provide text valid for that version.
      * Uses a BufferedXmlWriter internally for efficient writing.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1987,18 +2118,20 @@ public final class XmlUtil {
      * @param str The string containing the characters to be written
      * @param off The start offset in the string
      * @param len The number of characters to write
-     * @param output The OutputStream to which the escaped characters will be written
-     * @throws IOException If an I/O error occurs
+     * @param output The OutputStream to receive UTF-8 encoded escaped characters; flushed but not closed
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds the length of
+     *         {@code str} (or the literal {@code "null"} when {@code str} is {@code null})
+     * @throws IOException if writing the escaped characters to {@code output} or flushing {@code output} fails
      */
-    public static void writeCharacters(final String str, final int off, final int len, final OutputStream output) throws IOException {
+    public static void writeCharacters(final String str, final int off, final int len, final OutputStream output)
+            throws IllegalArgumentException, IndexOutOfBoundsException, IOException {
         final BufferedXmlWriter bufWriter = Objectory.createBufferedXmlWriter(output); //NOSONAR
 
-        try {
-            bufWriter.writeCharacter(str, off, len);
-            bufWriter.flush();
-        } finally {
-            Objectory.recycle(bufWriter);
-        }
+        bufWriter.writeCharacter(str, off, len);
+        bufWriter.flush();
+        // Recycling can flush again, so only return a wrapper whose write and flush succeeded.
+        Objectory.recycle(bufWriter);
     }
 
     /**
@@ -2015,18 +2148,21 @@ public final class XmlUtil {
      * }</pre>
      *
      * @param cbuf The character array containing the characters to be written
-     * @param output The Writer to which the escaped characters will be written
-     * @throws IOException If an I/O error occurs
+     * @param output The Writer to receive escaped characters; flushed but not closed
+     * @throws NullPointerException if {@code cbuf} is {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IOException if {@code output} is a closed {@code BufferedXmlWriter}, or writing or flushing {@code output} fails
      */
-    public static void writeCharacters(final char[] cbuf, final Writer output) throws IOException {
+    public static void writeCharacters(final char[] cbuf, final Writer output) throws NullPointerException, IllegalArgumentException, IOException {
         writeCharacters(cbuf, 0, cbuf.length, output);
     }
 
     /**
      * Writes XML-escaped characters from a portion of a character array to the given Writer.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
-     * Characters that are illegal in XML text (for example C0 control characters) are written as
-     * numeric character references such as <code>&amp;#x1f;</code>.
+     * Control characters U+0000 through U+001F and U+007F are written as numeric character
+     * references such as <code>&amp;#x1f;</code>. References do not make characters prohibited by
+     * the selected XML version legal; callers must provide text valid for that version.
      * Uses a BufferedXmlWriter for efficient writing if the output is not already a BufferedXmlWriter.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2040,20 +2176,22 @@ public final class XmlUtil {
      * @param cbuf The character array containing the characters to be written
      * @param off The start offset in the character array
      * @param len The number of characters to write
-     * @param output The Writer to which the escaped characters will be written
-     * @throws IOException If an I/O error occurs
+     * @param output The Writer to receive escaped characters; flushed but not closed
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IOException if {@code output} is a closed {@code BufferedXmlWriter}, or writing or flushing {@code output} fails
+     * @throws NullPointerException if {@code cbuf} is {@code null} and {@code off} and {@code len} are non-negative
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds {@code cbuf.length}
      */
-    public static void writeCharacters(final char[] cbuf, final int off, final int len, final Writer output) throws IOException {
+    public static void writeCharacters(final char[] cbuf, final int off, final int len, final Writer output)
+            throws IllegalArgumentException, IOException, NullPointerException, IndexOutOfBoundsException {
         final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
         final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output); //NOSONAR
 
-        try {
-            bw.writeCharacter(cbuf, off, len);
-            bw.flush();
-        } finally {
-            if (!isBufferedWriter) {
-                Objectory.recycle(bw);
-            }
+        bw.writeCharacter(cbuf, off, len);
+        bw.flush();
+        // Do not retry failed output through the recycling flush, or recycle a caller-owned writer.
+        if (!isBufferedWriter) {
+            Objectory.recycle(bw);
         }
     }
 
@@ -2072,19 +2210,22 @@ public final class XmlUtil {
      * }</pre>
      *
      * @param str The string containing the characters to be written
-     * @param output The Writer to which the escaped characters will be written
-     * @throws IOException If an I/O error occurs
+     * @param output The Writer to receive escaped characters; flushed but not closed
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IOException if {@code output} is a closed {@code BufferedXmlWriter}, or writing or flushing {@code output} fails
      */
-    public static void writeCharacters(String str, final Writer output) throws IOException {
+    public static void writeCharacters(String str, final Writer output) throws IllegalArgumentException, IOException {
         str = (str == null) ? Strings.NULL : str;
         writeCharacters(str, 0, str.length(), output);
     }
 
     /**
      * Writes XML-escaped characters from a portion of a string to the given Writer.
+     * If the string is {@code null}, the offset and length select a slice of the literal {@code "null"}.
      * Special XML characters (&lt;, &gt;, &amp;, ', ") are escaped to their XML entity representations.
-     * Characters that are illegal in XML text (for example C0 control characters) are written as
-     * numeric character references such as <code>&amp;#x1f;</code>.
+     * Control characters U+0000 through U+001F and U+007F are written as numeric character
+     * references such as <code>&amp;#x1f;</code>. References do not make characters prohibited by
+     * the selected XML version legal; callers must provide text valid for that version.
      * Uses a BufferedXmlWriter for efficient writing if the output is not already a BufferedXmlWriter.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2097,20 +2238,22 @@ public final class XmlUtil {
      * @param str The string containing the characters to be written
      * @param off The start offset in the string
      * @param len The number of characters to write
-     * @param output The Writer to which the escaped characters will be written
-     * @throws IOException If an I/O error occurs
+     * @param output The Writer to receive escaped characters; flushed but not closed
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IOException if {@code output} is a closed {@code BufferedXmlWriter}, or writing or flushing {@code output} fails
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds the length of
+     *         {@code str} (or the literal {@code "null"} when {@code str} is {@code null})
      */
-    public static void writeCharacters(final String str, final int off, final int len, final Writer output) throws IOException {
+    public static void writeCharacters(final String str, final int off, final int len, final Writer output)
+            throws IllegalArgumentException, IOException, IndexOutOfBoundsException {
         final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
         final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output); //NOSONAR
 
-        try {
-            bw.writeCharacter(str, off, len);
-            bw.flush();
-        } finally {
-            if (!isBufferedWriter) {
-                Objectory.recycle(bw);
-            }
+        bw.writeCharacter(str, off, len);
+        bw.flush();
+        // Do not retry failed output through the recycling flush, or recycle a caller-owned writer.
+        if (!isBufferedWriter) {
+            Objectory.recycle(bw);
         }
     }
 
@@ -2124,9 +2267,9 @@ public final class XmlUtil {
     private static final String XML_TYPE_CLASS_FOR_NAME_PROPERTY = "abacus.xml.allowTypeAttrClassForName";
 
     /**
-     * Exact type names that may be resolved from untrusted XML without name-driven class loading.
-     * Generic type expressions are intentionally excluded: every nested type name in such an
-     * expression would otherwise need its own trust decision.
+     * Type names that may be resolved from untrusted XML without unrestricted name-driven class loading.
+     * Arrays and generic type expressions are accepted only when their component and nested
+     * type names also satisfy this allowlist.
      */
     private static final Set<String> SAFE_XML_TYPE_ATTRIBUTE_NAMES = Set.of("boolean", "byte", "char", "short", "int", "long", "float", "double", "Boolean",
             "Byte", "Character", "Short", "Integer", "Long", "Float", "Double", "java.lang.Boolean", "java.lang.Byte", "java.lang.Character", "java.lang.Short",
@@ -2154,30 +2297,86 @@ public final class XmlUtil {
             "java.util.LinkedHashMap", "java.util.SortedMap", "java.util.NavigableMap", "java.util.TreeMap", "java.util.Hashtable", "java.util.IdentityHashMap",
             "java.util.WeakHashMap", "java.util.Properties", "ConcurrentMap", "ConcurrentHashMap", "ConcurrentNavigableMap", "ConcurrentSkipListMap",
             "java.util.concurrent.ConcurrentMap", "java.util.concurrent.ConcurrentHashMap", "java.util.concurrent.ConcurrentNavigableMap",
-            "java.util.concurrent.ConcurrentSkipListMap");
+            "java.util.concurrent.ConcurrentSkipListMap", "ImmutableList", "ImmutableSet", "ImmutableMap", "com.landawn.abacus.util.ImmutableList",
+            "com.landawn.abacus.util.ImmutableSet", "com.landawn.abacus.util.ImmutableMap");
 
     /**
-     * Returns whether the exact scalar/container name, after removing array suffixes, is safe to
-     * pass to the type registry without the legacy opt-in.
+     * Returns whether {@code typeName} would be accepted by {@link #getAttributeType(Node)} under the
+     * currently effective policy, i.e. either it is on the built-in allowlist or the legacy
+     * {@code abacus.xml.allowTypeAttrClassForName} opt-in is enabled.
+     *
+     * <p>Writers use this to make sure they never emit a {@code type} attribute that the reader would
+     * later refuse, which would otherwise produce XML this library cannot load back. Surrounding
+     * whitespace is ignored, because the reader also trims the attribute value before resolving it.</p>
+     *
+     * @param typeName the candidate {@code type} attribute value
+     * @return {@code true} if this name passes the current type policy; actual resolution may still fail
+     */
+    static boolean isResolvableXmlTypeAttributeName(final String typeName) {
+        if (Strings.isEmpty(typeName)) {
+            return false;
+        }
+
+        // Normalise exactly as getAttributeType does before deciding: untrimmed whitespace otherwise defeats
+        // isSafeXmlTypeAttributeName's "[]" suffix stripping, so the two sides answer differently.
+        final String normalized = typeName.trim();
+
+        return !normalized.isEmpty() && (Boolean.getBoolean(XML_TYPE_CLASS_FOR_NAME_PROPERTY) || isSafeXmlTypeAttributeName(normalized));
+    }
+
+    /**
+     * Returns whether the scalar/container name and every nested generic component, after removing
+     * array suffixes, are safe to pass to the type registry without the legacy opt-in.
      */
     private static boolean isSafeXmlTypeAttributeName(String typeName) {
         while (typeName.endsWith("[]")) {
             typeName = typeName.substring(0, typeName.length() - 2);
         }
 
-        return SAFE_XML_TYPE_ATTRIBUTE_NAMES.contains(typeName);
+        try {
+            final TypeAttrParser typeAttr = TypeAttrParser.parse(typeName);
+            final String className = typeAttr.getClassName();
+
+            if (!SAFE_XML_TYPE_ATTRIBUTE_NAMES.contains(className)) {
+                return false;
+            }
+
+            for (final String typeParameter : typeAttr.getTypeParameters()) {
+                if (!isSafeXmlTypeAttributeName(typeParameter)) {
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (final IllegalArgumentException e) {
+            return false;
+        }
     }
 
     /**
      * Resolves the Java class indicated by the {@code type} attribute without permitting arbitrary
      * class loading by default. Only exact names in the built-in scalar/container allowlist (and
-     * arrays of those types) are accepted. Trusted legacy XML may restore unrestricted resolution
-     * by setting {@value #XML_TYPE_CLASS_FOR_NAME_PROPERTY} to {@code true}.
+     * arrays and generic expressions composed of those types) are accepted. Trusted legacy XML may
+     * restore unrestricted resolution by setting {@value #XML_TYPE_CLASS_FOR_NAME_PROPERTY} to {@code true}.
      *
      * @param node the XML node whose {@code type} attribute is to be resolved; must not be {@code null}
-     * @return the resolved {@link Class}, or {@code null} if the type cannot or should not be resolved
+     * @return the resolved {@link Class}, or {@code null} if the attribute is missing, blank, or rejected by the type policy
+     * @throws IllegalArgumentException if {@code node} is {@code null}
+     * @throws RuntimeException if an accepted type expression cannot be resolved by the type registry
      */
-    static Class<?> getAttributeTypeClass(final Node node) {
+    static Class<?> getAttributeTypeClass(final Node node) throws IllegalArgumentException, RuntimeException {
+        final Type<?> type = getAttributeType(node);
+
+        return type == null ? null : type.javaType();
+    }
+
+    /**
+     * Resolves the complete type expression declared by a node after applying the XML type allowlist.
+     * Unlike {@link #getAttributeTypeClass(Node)}, this retains generic component information.
+     *
+     * @throws IllegalArgumentException if {@code node} is {@code null}
+     */
+    static Type<?> getAttributeType(final Node node) throws IllegalArgumentException {
         final String typeAttr = XmlUtil.getAttribute(node, TYPE);
 
         if (Strings.isEmpty(typeAttr)) {
@@ -2195,9 +2394,7 @@ public final class XmlUtil {
             return null;
         }
 
-        final Type<?> type = Type.of(typeName);
-
-        return type == null ? null : type.javaType();
+        return Type.of(typeName);
     }
 
     /*
@@ -2282,6 +2479,66 @@ public final class XmlUtil {
         }
 
         return nodeType;
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code path} is {@code null}
+     * @throws JAXBException if a JAXB provider cannot create a context for the packages in {@code path}
+     */
+    private static JAXBContext jaxbContext(final String path) throws IllegalArgumentException, JAXBException {
+        N.checkArgNotNull(path, cs.contextPath);
+        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        return pathJaxbContextPool.get(loader, path, () -> JAXBContext.newInstance(path, loader));
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code type} is {@code null}
+     * @throws JAXBException if a JAXB provider cannot create a context for {@code type}
+     */
+    private static JAXBContext jaxbContext(final Class<?> type) throws IllegalArgumentException, JAXBException {
+        N.checkArgNotNull(type, cs.cls);
+        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        return classJaxbContextPool.get(type).get(loader, Boolean.TRUE, () -> JAXBContext.newInstance(type));
+    }
+
+    /** Context values must also be weak: a context can retain its binding and provider loaders. */
+    private static final class LoaderJaxbCache<K> {
+        private final ReferenceQueue<ClassLoader> staleLoaders = new ReferenceQueue<>();
+        private final Map<IdentityWeakReference<ClassLoader>, Map<K, JaxbContextSlot>> byLoader = new HashMap<>();
+
+        JAXBContext get(final ClassLoader loader, final K key, final Throwables.Supplier<JAXBContext, JAXBException> factory) throws JAXBException {
+            final JaxbContextSlot slot;
+            synchronized (this) {
+                java.lang.ref.Reference<? extends ClassLoader> stale;
+                while ((stale = staleLoaders.poll()) != null) {
+                    byLoader.remove(stale);
+                }
+                // Null represents the actual null TCCL; ordinary loader keys compare by identity.
+                final IdentityWeakReference<ClassLoader> lookup = loader == null ? null : new IdentityWeakReference<>(loader);
+                Map<K, JaxbContextSlot> contexts = byLoader.get(lookup);
+                if (contexts == null) {
+                    contexts = new HashMap<>();
+                    byLoader.put(loader == null ? null : new IdentityWeakReference<>(loader, staleLoaders), contexts);
+                }
+                slot = contexts.computeIfAbsent(key, ignored -> new JaxbContextSlot());
+            }
+            // Expensive creation is serialized per key, without blocking unrelated context misses.
+            return slot.get(factory);
+        }
+    }
+
+    private static final class JaxbContextSlot {
+        private WeakReference<JAXBContext> cached = new WeakReference<>(null);
+
+        synchronized JAXBContext get(final Throwables.Supplier<JAXBContext, JAXBException> factory) throws JAXBException {
+            JAXBContext context = cached.get();
+            if (context == null) {
+                context = factory.get();
+                cached = new WeakReference<>(context);
+            }
+            // Do not retain the factory: its captured arguments can strongly retain class loaders.
+            return context;
+        }
     }
 
     /** Weak, identity-based ownership registry used to keep caller-supplied parsers out of shared pools. */

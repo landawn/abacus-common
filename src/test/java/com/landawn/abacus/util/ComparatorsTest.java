@@ -1,6 +1,5 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -22,9 +21,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -65,30 +66,6 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_naturalOrder_withNulls() {
-        Comparator<Integer> comp = Comparators.naturalOrder();
-        List<Integer> list = new ArrayList<>(Arrays.asList(null, null, 3, 1, 2));
-        list.sort(comp);
-        assertEquals(Arrays.asList(null, null, 1, 2, 3), list);
-    }
-
-    @Test
-    public void test_naturalOrder_allNulls() {
-        Comparator<String> comp = Comparators.naturalOrder();
-        List<String> list = new ArrayList<>(Arrays.asList(null, null, null));
-        list.sort(comp);
-        assertEquals(Arrays.asList(null, null, null), list);
-    }
-
-    @Test
-    public void test_naturalOrder_emptyList() {
-        Comparator<String> comp = Comparators.naturalOrder();
-        List<String> list = new ArrayList<>();
-        list.sort(comp);
-        assertEquals(Arrays.asList(), list);
-    }
-
-    @Test
     public void testNaturalOrder() {
         Comparator<String> comp = Comparators.naturalOrder();
         List<String> list = new ArrayList<>(Arrays.asList("banana", null, "apple", "cherry"));
@@ -98,6 +75,18 @@ public class ComparatorsTest extends TestBase {
         List<Integer> intList = new ArrayList<>(Arrays.asList(3, null, 1, 4, 2));
         intList.sort(Comparators.naturalOrder());
         assertEquals(Arrays.asList(null, 1, 2, 3, 4), intList);
+
+        List<Integer> withDupNulls = new ArrayList<>(Arrays.asList(null, null, 3, 1, 2));
+        withDupNulls.sort(Comparators.naturalOrder());
+        assertEquals(Arrays.asList(null, null, 1, 2, 3), withDupNulls);
+
+        List<String> allNulls = new ArrayList<>(Arrays.asList(null, null, null));
+        allNulls.sort(Comparators.naturalOrder());
+        assertEquals(Arrays.asList(null, null, null), allNulls);
+
+        List<String> empty = new ArrayList<>();
+        empty.sort(Comparators.naturalOrder());
+        assertEquals(Arrays.asList(), empty);
     }
 
     @Test
@@ -108,20 +97,6 @@ public class ComparatorsTest extends TestBase {
         assertEquals(0, comp.compare("apple", "apple"));
         assertTrue(comp.compare(null, "apple") < 0);
         assertTrue(comp.compare("apple", null) > 0);
-    }
-
-    @Test
-    public void test_nullsFirst_noArgs() {
-        Comparator<String> comp = Comparators.nullsFirst();
-        assertEquals(-1, comp.compare(null, "a"));
-        assertEquals(1, comp.compare("a", null));
-        assertEquals(0, comp.compare(null, null));
-        assertTrue(comp.compare("a", "b") < 0);
-    }
-
-    @Test
-    public void test_nullsFirst_rejectsNullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> Comparators.nullsFirst(null));
     }
 
     @Test
@@ -140,6 +115,12 @@ public class ComparatorsTest extends TestBase {
         List<String> list2 = new ArrayList<>(Arrays.asList("b", null, "a"));
         list2.sort(Comparators.nullsFirst());
         assertEquals(Arrays.asList(null, "a", "b"), list2);
+
+        Comparator<String> cmp = Comparators.nullsFirst();
+        assertEquals(-1, cmp.compare(null, "a"));
+        assertEquals(1, cmp.compare("a", null));
+        assertEquals(0, cmp.compare(null, null));
+        assertTrue(cmp.compare("a", "b") < 0);
     }
 
     @Test
@@ -176,16 +157,6 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_nullsFirstOrElseEqual() {
-        Comparator<String> comp = Comparators.nullsFirstOrElseEqual();
-        assertEquals(-1, comp.compare(null, "a"));
-        assertEquals(1, comp.compare("a", null));
-        assertEquals(0, comp.compare(null, null));
-        assertEquals(0, comp.compare("a", "b"));
-        assertEquals(0, comp.compare("z", "a"));
-    }
-
-    @Test
     public void testNullsFirstOrElseEqual() {
         Comparator<String> comp = Comparators.nullsFirstOrElseEqual();
         List<String> list = Arrays.asList("b", null, "a", null, "c");
@@ -197,20 +168,12 @@ public class ComparatorsTest extends TestBase {
         assertEquals("b", sorted.get(2));
         assertEquals("a", sorted.get(3));
         assertEquals("c", sorted.get(4));
-    }
 
-    @Test
-    public void test_nullsLast_noArgs() {
-        Comparator<String> comp = Comparators.nullsLast();
-        assertEquals(1, comp.compare(null, "a"));
-        assertEquals(-1, comp.compare("a", null));
+        assertEquals(-1, comp.compare(null, "a"));
+        assertEquals(1, comp.compare("a", null));
         assertEquals(0, comp.compare(null, null));
-        assertTrue(comp.compare("a", "b") < 0);
-    }
-
-    @Test
-    public void test_nullsLast_rejectsNullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> Comparators.nullsLast(null));
+        assertEquals(0, comp.compare("a", "b"));
+        assertEquals(0, comp.compare("z", "a"));
     }
 
     @Test
@@ -225,6 +188,11 @@ public class ComparatorsTest extends TestBase {
         List<String> list = new ArrayList<>(Arrays.asList("banana", null, "apple", null, "cherry"));
         list.sort(comp);
         assertEquals(Arrays.asList("apple", "banana", "cherry", null, null), list);
+
+        assertEquals(1, comp.compare(null, "a"));
+        assertEquals(-1, comp.compare("a", null));
+        assertEquals(0, comp.compare(null, null));
+        assertTrue(comp.compare("a", "b") < 0);
     }
 
     @Test
@@ -261,16 +229,6 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_nullsLastOrElseEqual() {
-        Comparator<String> comp = Comparators.nullsLastOrElseEqual();
-        assertEquals(1, comp.compare(null, "a"));
-        assertEquals(-1, comp.compare("a", null));
-        assertEquals(0, comp.compare(null, null));
-        assertEquals(0, comp.compare("a", "b"));
-        assertEquals(0, comp.compare("z", "a"));
-    }
-
-    @Test
     public void testNullsLastOrElseEqual() {
         Comparator<String> comp = Comparators.nullsLastOrElseEqual();
         List<String> list = Arrays.asList("b", null, "a", null, "c");
@@ -282,21 +240,12 @@ public class ComparatorsTest extends TestBase {
         assertEquals("c", sorted.get(2));
         assertNull(sorted.get(3));
         assertNull(sorted.get(4));
-    }
 
-    @Test
-    public void test_emptiesFirst_noArgs() {
-        Comparator<u.Optional<Integer>> comp = Comparators.emptiesFirst();
-
-        u.Optional<Integer> empty1 = u.Optional.empty();
-        u.Optional<Integer> empty2 = u.Optional.empty();
-        u.Optional<Integer> val1 = u.Optional.of(1);
-        u.Optional<Integer> val2 = u.Optional.of(2);
-
-        assertTrue(comp.compare(empty1, val1) < 0);
-        assertTrue(comp.compare(val1, empty1) > 0);
-        assertEquals(0, comp.compare(empty1, empty2));
-        assertTrue(comp.compare(val1, val2) < 0);
+        assertEquals(1, comp.compare(null, "a"));
+        assertEquals(-1, comp.compare("a", null));
+        assertEquals(0, comp.compare(null, null));
+        assertEquals(0, comp.compare("a", "b"));
+        assertEquals(0, comp.compare("z", "a"));
     }
 
     @Test
@@ -310,26 +259,6 @@ public class ComparatorsTest extends TestBase {
         assertEquals(0, comp.compare(nullOpt, empty));
         assertTrue(comp.compare(nullOpt, val) < 0);
         assertTrue(comp.compare(val, nullOpt) > 0);
-    }
-
-    @Test
-    public void testEmptiesFirst_withComparator_presentValues() {
-        Comparator<u.Optional<Integer>> comp = Comparators.emptiesFirst(Comparator.naturalOrder());
-        // Both present - compare by value
-        assertTrue(comp.compare(u.Optional.of(1), u.Optional.of(2)) < 0);
-        assertTrue(comp.compare(u.Optional.of(2), u.Optional.of(1)) > 0);
-        assertEquals(0, comp.compare(u.Optional.of(5), u.Optional.of(5)));
-        // Empty vs present
-        assertTrue(comp.compare(u.Optional.empty(), u.Optional.of(1)) < 0);
-        assertTrue(comp.compare(u.Optional.of(1), u.Optional.empty()) > 0);
-        assertEquals(0, comp.compare(u.Optional.empty(), u.Optional.empty()));
-    }
-
-    @Test
-    public void test_emptiesFirst_withComparator_nullArg() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.emptiesFirst(null);
-        });
     }
 
     @Test
@@ -356,21 +285,6 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_emptiesLast_noArgs() {
-        Comparator<u.Optional<Integer>> comp = Comparators.emptiesLast();
-
-        u.Optional<Integer> empty1 = u.Optional.empty();
-        u.Optional<Integer> empty2 = u.Optional.empty();
-        u.Optional<Integer> val1 = u.Optional.of(1);
-        u.Optional<Integer> val2 = u.Optional.of(2);
-
-        assertTrue(comp.compare(empty1, val1) > 0);
-        assertTrue(comp.compare(val1, empty1) < 0);
-        assertEquals(0, comp.compare(empty1, empty2));
-        assertTrue(comp.compare(val1, val2) < 0);
-    }
-
-    @Test
     public void test_emptiesLast_withNullOptional() {
         Comparator<u.Optional<String>> comp = Comparators.emptiesLast(Comparator.naturalOrder());
 
@@ -381,26 +295,6 @@ public class ComparatorsTest extends TestBase {
         assertEquals(0, comp.compare(nullOpt, empty));
         assertTrue(comp.compare(nullOpt, val) > 0);
         assertTrue(comp.compare(val, nullOpt) < 0);
-    }
-
-    @Test
-    public void testEmptiesLast_withComparator_presentValues() {
-        Comparator<u.Optional<Integer>> comp = Comparators.emptiesLast(Comparator.naturalOrder());
-        // Both present - compare by value
-        assertTrue(comp.compare(u.Optional.of(1), u.Optional.of(2)) < 0);
-        assertTrue(comp.compare(u.Optional.of(2), u.Optional.of(1)) > 0);
-        assertEquals(0, comp.compare(u.Optional.of(5), u.Optional.of(5)));
-        // Empty vs present
-        assertTrue(comp.compare(u.Optional.empty(), u.Optional.of(1)) > 0);
-        assertTrue(comp.compare(u.Optional.of(1), u.Optional.empty()) < 0);
-        assertEquals(0, comp.compare(u.Optional.empty(), u.Optional.empty()));
-    }
-
-    @Test
-    public void test_emptiesLast_withComparator_nullArg() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.emptiesLast(null);
-        });
     }
 
     @Test
@@ -427,16 +321,6 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void testComparingByWithComparator_sorted() {
-        Comparator<String> comp = Comparators.comparingBy(String::length, Comparator.naturalOrder());
-        List<String> list = Arrays.asList("banana", "kiwi", "fig");
-        list.sort(comp);
-        assertEquals("fig", list.get(0));
-        assertEquals("kiwi", list.get(1));
-        assertEquals("banana", list.get(2));
-    }
-
-    @Test
     public void test_comparingBy_withNullValues() {
         Function<Person, String> extractor = p -> p.name;
         Comparator<Person> comp = Comparators.comparingBy(extractor);
@@ -446,27 +330,6 @@ public class ComparatorsTest extends TestBase {
 
         assertTrue(comp.compare(p1, p2) < 0);
         assertTrue(comp.compare(p2, p1) > 0);
-    }
-
-    @Test
-    public void test_comparingBy_nullExtractor() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.comparingBy((Function<String, String>) null);
-        });
-    }
-
-    @Test
-    public void test_comparingBy_withComparator_nullExtractor() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.comparingBy(null, Comparator.naturalOrder());
-        });
-    }
-
-    @Test
-    public void test_comparingBy_withComparator_nullComparator() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.comparingBy(p -> p, null);
-        });
     }
 
     @Test
@@ -748,12 +611,15 @@ public class ComparatorsTest extends TestBase {
     @Test
     public void test_comparingFloat_withNaN() {
         ToFloatFunction<String> extractor = s -> {
-            if ("NaN".equals(s))
+            if ("NaN".equals(s)) {
                 return Float.NaN;
-            if ("Inf".equals(s))
+            }
+            if ("Inf".equals(s)) {
                 return Float.POSITIVE_INFINITY;
-            if ("-Inf".equals(s))
+            }
+            if ("-Inf".equals(s)) {
                 return Float.NEGATIVE_INFINITY;
+            }
             return Float.parseFloat(s);
         };
         Comparator<String> comp = Comparators.comparingFloat(extractor);
@@ -822,13 +688,6 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_comparingIgnoreCase_withExtractor_nullExtractor() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.comparingIgnoreCase(null);
-        });
-    }
-
-    @Test
     public void testComparingIgnoreCaseWithExtractor() {
         Function<Person, String> nameExtractor = p -> p.name;
         Comparator<Person> comp = Comparators.comparingIgnoreCase(nameExtractor);
@@ -867,13 +726,6 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_comparingByKey_withComparator_nullComparator() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.comparingByKey(null);
-        });
-    }
-
-    @Test
     public void testComparingByKeyWithComparator() {
         Comparator<String> lengthComp = Comparator.comparingInt(String::length);
         Comparator<Map.Entry<String, Integer>> comp = Comparators.comparingByKey(lengthComp);
@@ -909,13 +761,6 @@ public class ComparatorsTest extends TestBase {
 
         assertTrue(comp.compare(e1, e2) < 0);
         assertTrue(comp.compare(e2, e1) > 0);
-    }
-
-    @Test
-    public void test_comparingByValue_withComparator_nullComparator() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.comparingByValue(null);
-        });
     }
 
     @Test
@@ -1142,13 +987,6 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_comparingArray_withComparator_nullComparator() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.comparingArray(null);
-        });
-    }
-
-    @Test
     public void testComparingArray() {
         Comparator<String[]> comp1 = Comparators.comparingArray();
         String[] arr1 = { "apple", "banana" };
@@ -1186,13 +1024,6 @@ public class ComparatorsTest extends TestBase {
         List<String> empty2 = new ArrayList<>();
 
         assertEquals(0, comp.compare(empty1, empty2));
-    }
-
-    @Test
-    public void test_comparingCollection_withComparator_nullComparator() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.comparingCollection(null);
-        });
     }
 
     @Test
@@ -1246,13 +1077,6 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_comparingIterable_withComparator_nullComparator() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.comparingIterable(null);
-        });
-    }
-
-    @Test
     public void testComparingIterable() {
         Comparator<Iterable<String>> comp1 = Comparators.comparingIterable();
         Iterable<String> iter1 = Arrays.asList("apple", "banana");
@@ -1296,13 +1120,6 @@ public class ComparatorsTest extends TestBase {
         assertTrue(comp.compare(Arrays.asList("a").iterator(), Arrays.asList("a", "b").iterator()) < 0);
         // First longer
         assertTrue(comp.compare(Arrays.asList("a", "b").iterator(), Arrays.asList("a").iterator()) > 0);
-    }
-
-    @Test
-    public void test_comparingIterator_withComparator_nullComparator() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.comparingIterator(null);
-        });
     }
 
     @Test
@@ -1377,13 +1194,6 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_comparingMapByKey_withComparator_nullComparator() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.comparingMapByKey(null);
-        });
-    }
-
-    @Test
     public void testComparingMapByKey() {
         Comparator<Map<String, Integer>> comp1 = Comparators.comparingMapByKey();
 
@@ -1442,13 +1252,6 @@ public class ComparatorsTest extends TestBase {
         m2.put("x", 1);
         m2.put("y", 2);
         assertEquals(0, comp.compare(m1, m2)); // same values in order
-    }
-
-    @Test
-    public void test_comparingMapByValue_withComparator_nullComparator() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.comparingMapByValue(null);
-        });
     }
 
     @Test
@@ -1529,16 +1332,15 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_reverseOrder_rejectsNullComparator() {
-        assertThrows(IllegalArgumentException.class, () -> Comparators.reverseOrder(null));
-    }
-
-    @Test
     public void testReverseOrderWithComparator() {
         assertThrows(IllegalArgumentException.class, () -> Comparators.reverseOrder(null));
 
         Comparator<String> lengthComp = Comparator.comparingInt(String::length);
         Comparator<String> reversed = Comparators.reverseOrder(lengthComp);
+        Comparator<String> nonSerializable = (left, right) -> left.compareTo(right);
+        Comparator<String> unwrapped = Comparators.reverseOrder(Collections.reverseOrder(nonSerializable));
+        assertSame(nonSerializable, unwrapped);
+        assertFalse(unwrapped instanceof java.io.Serializable);
         List<String> list2 = Arrays.asList("short", "a", "medium");
         list2.sort(reversed);
         assertEquals(Arrays.asList("medium", "short", "a"), list2);
@@ -1762,13 +1564,6 @@ public class ComparatorsTest extends TestBase {
     }
 
     @Test
-    public void test_reversedComparingByKey_withComparator_nullComparator() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.reversedComparingByKey(null);
-        });
-    }
-
-    @Test
     public void testReversedComparingByKeyWithComparator() {
         Comparator<String> lengthComp = Comparator.comparingInt(String::length);
         Comparator<Map.Entry<String, Integer>> comp = Comparators.reversedComparingByKey(lengthComp);
@@ -1803,13 +1598,6 @@ public class ComparatorsTest extends TestBase {
 
         assertTrue(comp.compare(e1, e2) > 0);
         assertTrue(comp.compare(e2, e1) < 0);
-    }
-
-    @Test
-    public void test_reversedComparingByValue_withComparator_nullComparator() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Comparators.reversedComparingByValue(null);
-        });
     }
 
     @Test
@@ -2223,4 +2011,221 @@ public class ComparatorsTest extends TestBase {
         assertEquals(4, callCount[0]);
     }
 
+    // ------------------------------------------------------------------------------------------------
+    // One null rule for every lexicographic comparator: a null container is less than any non-null
+    // container, including an empty one. Previously the *_ARRAY_COMPARATOR / COLLECTION_COMPARATOR
+    // constants said null < empty while the comparingXxx factories said null == empty.
+    // ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void testLexicographicComparatorsRankNullBelowEmpty() {
+        assertEquals(-1, Integer.signum(Comparators.<String> comparingArray().compare(null, new String[0])));
+        assertEquals(1, Integer.signum(Comparators.<String> comparingArray().compare(new String[0], null)));
+        assertEquals(0, Comparators.<String> comparingArray().compare(null, null));
+
+        assertEquals(-1, Integer
+                .signum(Comparators.<String, List<String>> comparingCollection(Comparators.naturalOrder()).compare(null, Collections.<String> emptyList())));
+        assertEquals(-1, Integer.signum(Comparators.<String, List<String>> comparingCollection().compare(null, Collections.<String> emptyList())));
+        assertEquals(-1, Integer.signum(Comparators.<String, Iterable<String>> comparingIterable().compare(null, Collections.<String> emptyList())));
+        assertEquals(-1, Integer.signum(Comparators.<String, Iterator<String>> comparingIterator().compare(null, Collections.<String> emptyList().iterator())));
+        assertEquals(-1, Integer.signum(Comparators.<String, Map<String, Integer>> comparingMapByKey().compare(null, Collections.emptyMap())));
+        assertEquals(-1, Integer.signum(Comparators.<Integer, Map<String, Integer>> comparingMapByValue().compare(null, Collections.emptyMap())));
+    }
+
+    @Test
+    public void testLexicographicComparatorsAgreeWithTheirConstantCounterparts() {
+        // comparingArray()/comparingCollection() and the corresponding constants must now order identically.
+        assertEquals(Integer.signum(Comparators.OBJECT_ARRAY_COMPARATOR.compare(null, new Object[0])),
+                Integer.signum(Comparators.<String> comparingArray().compare(null, new String[0])));
+        assertEquals(Integer.signum(Comparators.OBJECT_ARRAY_COMPARATOR.compare(new Object[0], new Object[] { "a" })),
+                Integer.signum(Comparators.<String> comparingArray().compare(new String[0], new String[] { "a" })));
+        assertEquals(Integer.signum(Comparators.COLLECTION_COMPARATOR.compare(null, Collections.emptyList())),
+                Integer.signum(Comparators.<String, List<String>> comparingCollection().compare(null, Collections.<String> emptyList())));
+    }
+
+    @Test
+    public void testNullSortsBeforeEmptyWhichSortsBeforeNonEmpty() {
+        final List<int[]> arrays = new ArrayList<>(Arrays.asList(new int[] { 1, 2 }, null, new int[0], new int[] { 1 }, new int[] { 1, 2, 3 }));
+        arrays.sort(Comparators.INT_ARRAY_COMPARATOR);
+
+        Assertions.assertNull(arrays.get(0));
+        Assertions.assertArrayEquals(new int[0], arrays.get(1));
+        Assertions.assertArrayEquals(new int[] { 1 }, arrays.get(2));
+        Assertions.assertArrayEquals(new int[] { 1, 2 }, arrays.get(3));
+        Assertions.assertArrayEquals(new int[] { 1, 2, 3 }, arrays.get(4));
+
+        final List<List<String>> collections = new ArrayList<>(Arrays.asList(Arrays.asList("b"), null, Collections.<String> emptyList(), Arrays.asList("a")));
+        collections.sort(Comparators.<String, List<String>> comparingCollection(Comparators.naturalOrder()));
+
+        assertEquals(Arrays.asList(null, Collections.<String> emptyList(), Arrays.asList("a"), Arrays.asList("b")), collections);
+    }
+
+    @Test
+    public void testSizeAndLengthProjectionsDeliberatelyTreatNullAsEmpty() {
+        // These compare only a projected length/size, so null and empty both project to 0 and tie.
+        // The divergence from the lexicographic comparators above is intentional and documented.
+        assertEquals(0, Comparators.<String> comparingByLength().compare(null, ""));
+        assertEquals(0, Comparators.<List<String>> comparingBySize().compare(null, Collections.<String> emptyList()));
+        assertEquals(0, Comparators.<Map<String, String>> comparingByMapSize().compare(null, Collections.<String, String> emptyMap()));
+        assertEquals(0, Comparators.<Object> comparingByArrayLength().compare(null, new int[0]));
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // The eight primitive array comparators delegate to Arrays.compare. Assert sign equivalence rather
+    // than exact magnitudes, and cover NaN, signed zero, prefixes and nulls.
+    // ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void testPrimitiveArrayComparatorsMatchArraysCompare() {
+        final java.util.Random rnd = new java.util.Random(20260831L);
+
+        for (int it = 0; it < 20000; it++) {
+            final int lenA = rnd.nextInt(5);
+            final int lenB = rnd.nextInt(5);
+            final boolean nullA = rnd.nextInt(9) == 0;
+            final boolean nullB = rnd.nextInt(9) == 0;
+            final int[] a = nullA ? null : new int[lenA];
+            final int[] b = nullB ? null : new int[lenB];
+
+            if (a != null) {
+                for (int j = 0; j < lenA; j++) {
+                    a[j] = rnd.nextInt(5) - 2;
+                }
+            }
+
+            if (b != null) {
+                for (int j = 0; j < lenB; j++) {
+                    b[j] = rnd.nextInt(5) - 2;
+                }
+            }
+
+            assertEquals(Integer.signum(Arrays.compare(a, b)), Integer.signum(Comparators.INT_ARRAY_COMPARATOR.compare(a, b)));
+
+            final long[] al = a == null ? null : new long[lenA];
+            final long[] bl = b == null ? null : new long[lenB];
+            final byte[] ab = a == null ? null : new byte[lenA];
+            final byte[] bb = b == null ? null : new byte[lenB];
+            final short[] as = a == null ? null : new short[lenA];
+            final short[] bs = b == null ? null : new short[lenB];
+            final char[] ac = a == null ? null : new char[lenA];
+            final char[] bc = b == null ? null : new char[lenB];
+            final boolean[] az = a == null ? null : new boolean[lenA];
+            final boolean[] bz = b == null ? null : new boolean[lenB];
+            final float[] af = a == null ? null : new float[lenA];
+            final float[] bf = b == null ? null : new float[lenB];
+            final double[] ad = a == null ? null : new double[lenA];
+            final double[] bd = b == null ? null : new double[lenB];
+
+            for (int j = 0; a != null && j < lenA; j++) {
+                al[j] = a[j];
+                ab[j] = (byte) a[j];
+                as[j] = (short) a[j];
+                ac[j] = (char) (a[j] + 2);
+                az[j] = a[j] > 0;
+                af[j] = specialFloat(a[j]);
+                ad[j] = specialDouble(a[j]);
+            }
+
+            for (int j = 0; b != null && j < lenB; j++) {
+                bl[j] = b[j];
+                bb[j] = (byte) b[j];
+                bs[j] = (short) b[j];
+                bc[j] = (char) (b[j] + 2);
+                bz[j] = b[j] > 0;
+                bf[j] = specialFloat(b[j]);
+                bd[j] = specialDouble(b[j]);
+            }
+
+            assertEquals(Integer.signum(Arrays.compare(al, bl)), Integer.signum(Comparators.LONG_ARRAY_COMPARATOR.compare(al, bl)));
+            assertEquals(Integer.signum(Arrays.compare(ab, bb)), Integer.signum(Comparators.BYTE_ARRAY_COMPARATOR.compare(ab, bb)));
+            assertEquals(Integer.signum(Arrays.compare(as, bs)), Integer.signum(Comparators.SHORT_ARRAY_COMPARATOR.compare(as, bs)));
+            assertEquals(Integer.signum(Arrays.compare(ac, bc)), Integer.signum(Comparators.CHAR_ARRAY_COMPARATOR.compare(ac, bc)));
+            assertEquals(Integer.signum(Arrays.compare(az, bz)), Integer.signum(Comparators.BOOLEAN_ARRAY_COMPARATOR.compare(az, bz)));
+            assertEquals(Integer.signum(Arrays.compare(af, bf)), Integer.signum(Comparators.FLOAT_ARRAY_COMPARATOR.compare(af, bf)));
+            assertEquals(Integer.signum(Arrays.compare(ad, bd)), Integer.signum(Comparators.DOUBLE_ARRAY_COMPARATOR.compare(ad, bd)));
+        }
+    }
+
+    private static float specialFloat(final int v) {
+        return v == -2 ? Float.NaN : v == -1 ? -0.0f : v == 0 ? 0.0f : v;
+    }
+
+    private static double specialDouble(final int v) {
+        return v == -2 ? Double.NaN : v == -1 ? -0.0d : v == 0 ? 0.0d : v;
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // The collection and map comparators are driven by their iterators, not by size(). A container whose
+    // size() disagrees with what it yields used to throw NoSuchElementException (or, when size() under-
+    // reported, silently compare as empty).
+    // ------------------------------------------------------------------------------------------------
+
+    private static Collection<String> collectionWithLyingSize(final List<String> contents, final int reportedSize) {
+        return new java.util.AbstractCollection<>() {
+            @Override
+            public Iterator<String> iterator() {
+                return contents.iterator();
+            }
+
+            @Override
+            public int size() {
+                return reportedSize;
+            }
+        };
+    }
+
+    @Test
+    public void testCollectionComparatorsUseTheIteratorNotSize() {
+        final Collection<String> overReporting = collectionWithLyingSize(Arrays.asList("a"), 3);
+
+        // Previously: NoSuchElementException, because the loop trusted size() == 3.
+        assertEquals(-1, Integer.signum(
+                Comparators.<String, Collection<String>> comparingCollection(Comparators.naturalOrder()).compare(overReporting, Arrays.asList("a", "b", "c"))));
+        assertEquals(-1, Integer.signum(Comparators.COLLECTION_COMPARATOR.compare(overReporting, Arrays.asList("a", "b", "c"))));
+
+        // Previously: treated as empty, because N.isEmpty() consulted size() == 0.
+        final Collection<String> underReporting = collectionWithLyingSize(Arrays.asList("a", "b"), 0);
+        assertEquals(1, Integer.signum(Comparators.<String, Collection<String>> comparingCollection(Comparators.naturalOrder())
+                .compare(underReporting, Collections.<String> emptyList())));
+        assertEquals(1, Integer.signum(Comparators.COLLECTION_COMPARATOR.compare(underReporting, Collections.<String> emptyList())));
+    }
+
+    @Test
+    public void testMapComparatorsUseTheIteratorNotSize() {
+        final Map<String, Integer> backing = new LinkedHashMap<>();
+        backing.put("a", 1);
+
+        final Map<String, Integer> overReporting = new java.util.AbstractMap<>() {
+            @Override
+            public Set<Entry<String, Integer>> entrySet() {
+                return backing.entrySet();
+            }
+
+            @Override
+            public int size() {
+                return 5;
+            }
+        };
+
+        final Map<String, Integer> longer = new LinkedHashMap<>();
+        longer.put("a", 1);
+        longer.put("b", 2);
+
+        assertEquals(-1,
+                Integer.signum(Comparators.<String, Map<String, Integer>> comparingMapByKey(Comparators.naturalOrder()).compare(overReporting, longer)));
+        assertEquals(-1,
+                Integer.signum(Comparators.<Integer, Map<String, Integer>> comparingMapByValue(Comparators.naturalOrder()).compare(overReporting, longer)));
+    }
+
+    @Test
+    public void testCollectionComparatorRemainsCorrectForHonestCollections() {
+        final Comparator<List<String>> cmp = Comparators.comparingCollection(Comparators.naturalOrder());
+
+        assertEquals(0, cmp.compare(Arrays.asList("a", "b"), Arrays.asList("a", "b")));
+        assertEquals(-1, Integer.signum(cmp.compare(Arrays.asList("a"), Arrays.asList("a", "b"))));
+        assertEquals(1, Integer.signum(cmp.compare(Arrays.asList("a", "b"), Arrays.asList("a"))));
+        assertEquals(-1, Integer.signum(cmp.compare(Arrays.asList("a", "b"), Arrays.asList("a", "c"))));
+        // A null element is the minimum under Comparators.naturalOrder().
+        assertEquals(-1, Integer.signum(cmp.compare(Arrays.asList((String) null), Arrays.asList("a"))));
+    }
 }

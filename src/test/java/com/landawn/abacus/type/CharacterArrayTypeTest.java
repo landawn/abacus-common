@@ -296,13 +296,48 @@ public class CharacterArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void testValueOfLegacyAppendToSpecialCharacters() throws IOException {
+    public void testValueOfSerializedSpecialCharacters() throws IOException {
         final Character[] chars = new Character[] { '\r', '\t', '"', '\'', ' ', ',', ' ', ',' };
         final StringBuilder sb = new StringBuilder();
 
         type.appendTo(sb, chars);
 
-        assertArrayEquals(chars, type.valueOf(sb.toString()));
+        assertArrayEquals(chars, type.valueOf(type.stringOf(chars)));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf(sb.toString()));
     }
 
+
+    @Test
+    public void reviewFixes20260906_stringOfEscapesNonAsciiAndSlashButNotDel() {
+        // T7-06: what the javadoc now says: a backslash-u escape for everything outside U+0020..U+007F, \/ for the slash, DEL as-is
+        final Character[] array = { '\u00E9', '\u4E2D', '/', '~', '\u007F', '\u0080', null };
+
+        final String str = type.stringOf(array);
+
+        assertEquals("['\\u00E9', '\\u4E2D', '\\/', '~', '\u007F', '\\u0080', null]", str);
+        assertArrayEquals(array, type.valueOf(str));
+    }
+
+    @Test
+    public void reviewFixes20260906_stringOfRoundTripsOnPooledAndUnpooledBuilders() {
+        // T7-08 / R-T03: the pooled StringBuilder is now recycled in a finally block; behaviour must be byte-identical
+        final Character[] small = { 'a', null, '\'' };
+        assertEquals("['a', null, '\\'']", type.stringOf(small));
+
+        for (int i = 0; i < 5; i++) {
+            assertArrayEquals(small, type.valueOf(type.stringOf(small)));
+        }
+
+        final Character[] large = new Character[4000];
+
+        for (int i = 0; i < large.length; i++) {
+            large[i] = i % 7 == 0 ? null : (char) ('a' + i % 26);
+        }
+
+        final String str = type.stringOf(large);
+        // index 3999: 3999 % 7 != 0 and 'a' + 3999 % 26 == 'v'
+        Assertions.assertEquals("[null, 'b', 'c', 'd', 'e', 'f', 'g', null, 'i'", str.substring(0, 46));
+        Assertions.assertTrue(str.endsWith(", 'u', 'v']"), str.substring(str.length() - 20));
+        assertArrayEquals(large, type.valueOf(str));
+    }
 }

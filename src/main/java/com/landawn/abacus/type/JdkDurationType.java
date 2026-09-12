@@ -21,17 +21,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.time.Duration;
+import java.time.format.DateTimeParseException;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for JDK {@link java.time.Duration} values.
  * This class provides serialization, deserialization, and database access for {@code Duration} instances.
- * Durations are stored and transmitted as millisecond counts for compatibility and efficiency.
+ * Text uses the lossless ISO-8601 duration form, including nanoseconds. Legacy integer-millisecond
+ * text remains readable. JDBC storage uses BIGINT milliseconds and rejects values that cannot be
+ * represented exactly in that column type.
  *
  * @see java.time.Duration
  * @see DurationType
@@ -72,7 +74,7 @@ public class JdkDurationType extends AbstractType<Duration> {
 
     /**
      * Indicates whether values of this type require quoting in CSV format.
-     * JDK Duration values are numeric and do not require quotes.
+     * ISO-8601 duration text has no CSV delimiters or quotation characters.
      *
      * @return {@code false}, as JDK Duration values do not require quoting in CSV format
      */
@@ -83,40 +85,46 @@ public class JdkDurationType extends AbstractType<Duration> {
 
     /**
      * Converts a Duration to its string representation.
-     * The duration is represented as the total number of milliseconds.
+     * The duration is represented by {@link Duration#toString()} in ISO-8601 format.
      *
      * <p>The returned string is a serializable representation designed to be parsed back by {@link #valueOf(String)}
-     * at millisecond precision. This is the key distinction from {@link Object#toString()}, whose result is not
-     * guaranteed to be convertible back into the original value.</p>
-     * <p><b>&#9888;&#65039;</b> Sub-millisecond precision is not preserved: for example, {@code Duration.ofNanos(1)}
-     * serializes as {@code "0"}.</p>
+     * without losing nanoseconds or overflowing a millisecond count.</p>
      *
      * @param x the {@code Duration} to convert to string
-     * @return the string representation of milliseconds, or {@code null} if the input is {@code null}
+     * @return the ISO-8601 duration string, or {@code null} if the input is {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
     public String stringOf(final Duration x) {
-        return (x == null) ? null : N.stringOf(x.toMillis());
+        return (x == null) ? null : x.toString();
     }
 
     /**
      * Parses a string representation into a Duration.
-     * The string should contain a number representing milliseconds.
+     * Accepts ISO-8601 duration text (for example, {@code PT0.000000001S}) or a legacy integer
+     * millisecond count (for example, {@code 1000}). Legacy text is parsed with the {@link Numbers#toLong(String)}
+     * grammar: an optional sign, an optional trailing {@code L}/{@code l} suffix and {@code 0x}/{@code #}
+     * hexadecimal are accepted ({@code "1000L"} and {@code "0x3E8"} both yield {@code PT1S}); surrounding whitespace
+     * is not.
      *
-     * <p>This method parses the millisecond-precision string produced by {@code stringOf}. Strings produced by
-     * {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
+     * <p>Every representation produced by {@link Duration#toString()} round-trips exactly.</p>
      *
-     * @param str the string containing milliseconds to parse
+     * @param str the duration text to parse
      * @return the parsed Duration instance, or {@code null} if the input is {@code null} or empty
-     * @throws NumberFormatException if {@code str} is non-empty but does not contain a parsable {@code long}
+     * @throws NumberFormatException if legacy millisecond text is not a parsable {@code long}
+     * @throws ArithmeticException if legacy millisecond text is an integer outside the {@code long} range
+     *@throws DateTimeParseException if ISO-8601 duration text is invalid
      * @see #valueOf(Object)
      * @see #stringOf(Duration)
      */
     @Override
-    public Duration valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : Duration.ofMillis(Numbers.toLong(str));
+    public Duration valueOf(final String str) throws NumberFormatException, ArithmeticException, DateTimeParseException {
+        if (Strings.isEmpty(str)) {
+            return null;
+        }
+
+        return str.regionMatches(true, 0, "P", 0, 1) || str.regionMatches(true, 1, "P", 0, 1) ? Duration.parse(str) : Duration.ofMillis(Numbers.toLong(str));
     }
 
     /**
@@ -127,10 +135,11 @@ public class JdkDurationType extends AbstractType<Duration> {
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
      * @return the Duration created from the milliseconds stored in the column, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
-    public Duration get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Duration get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final long millis = rs.getLong(columnIndex);
 
         return rs.wasNull() ? null : Duration.ofMillis(millis);
@@ -144,10 +153,11 @@ public class JdkDurationType extends AbstractType<Duration> {
      * @param rs the ResultSet to read from
      * @param columnName the label of the column to read
      * @return the Duration created from the milliseconds stored in the column, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the columnName is not found
      */
     @Override
-    public Duration get(final ResultSet rs, final String columnName) throws SQLException {
+    public Duration get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final long millis = rs.getLong(columnName);
 
         return rs.wasNull() ? null : Duration.ofMillis(millis);
@@ -161,14 +171,16 @@ public class JdkDurationType extends AbstractType<Duration> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)
      * @param x the Duration to set, or null
+     * @throws ArithmeticException if the duration has sub-millisecond precision or its millisecond count overflows
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Duration x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Duration x) throws ArithmeticException, NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.BIGINT);
         } else {
-            stmt.setLong(columnIndex, x.toMillis());
+            stmt.setLong(columnIndex, exactMillis(x));
         }
     }
 
@@ -180,29 +192,42 @@ public class JdkDurationType extends AbstractType<Duration> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Duration to set, or null
+     * @throws ArithmeticException if the duration has sub-millisecond precision or its millisecond count overflows
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Duration x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Duration x) throws ArithmeticException, NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.BIGINT);
         } else {
-            stmt.setLong(parameterName, x.toMillis());
+            stmt.setLong(parameterName, exactMillis(x));
         }
     }
 
     /**
+     * @throws ArithmeticException if the duration has sub-millisecond precision or its millisecond count overflows a long
+     */
+    private static long exactMillis(final Duration duration) throws ArithmeticException {
+        if (duration.getNano() % 1_000_000 != 0) {
+            throw new ArithmeticException("Duration cannot be represented exactly as JDBC milliseconds: " + duration);
+        }
+
+        return duration.toMillis();
+    }
+
+    /**
      * Appends the string representation of a Duration to an Appendable.
-     * The duration is written as its millisecond count.
+     * The duration is written in ISO-8601 format with full nanosecond precision.
      * If {@code x} is {@code null}, the literal {@code null} is appended.
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes this type's JSON/XML
-     * literal form and ignores string quotation/escaping config.
+     * string form using the configured quotation character.
      *
      * @param appendable the Appendable to write to
      * @param x the Duration to append
-     * @throws IOException if an I/O error occurs during writing
+     * @throws IOException if appending the ISO-8601 duration text or null literal to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -218,17 +243,16 @@ public class JdkDurationType extends AbstractType<Duration> {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            appendable.append(N.stringOf(x.toMillis()));
+            appendable.append(x.toString());
         }
     }
 
     /**
      * Writes the character representation of a Duration to a CharacterWriter.
-     * The duration is written as a numeric value (milliseconds) without quotes,
-     * regardless of the serialization configuration.
+     * The duration is written as lossless ISO-8601 text, quoted according to the configuration.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
-     * {@code CharacterWriter}. String quotation/escaping config is ignored.
+     * {@code CharacterWriter}, applying string quotation/escaping configuration.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML literal output,
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
@@ -236,15 +260,11 @@ public class JdkDurationType extends AbstractType<Duration> {
      *
      * @param writer the CharacterWriter to write to
      * @param x the Duration to write; may be {@code null}
-     * @param config the serialization configuration (not used for Duration); may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @param config the serialization configuration; {@code null} means unquoted text
+     * @throws IOException if writing the duration text, configured quotation or null literal to {@code writer} fails
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final Duration x, final JsonXmlSerConfig<?> config) throws IOException {
-        if (x == null) {
-            writer.write(NULL_CHAR_ARRAY);
-        } else {
-            writer.write(x.toMillis());
-        }
+        super.serializeTo(writer, x, config);
     }
 }

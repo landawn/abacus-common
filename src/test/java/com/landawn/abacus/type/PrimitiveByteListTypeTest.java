@@ -238,4 +238,19 @@ public class PrimitiveByteListTypeTest extends TestBase {
         verify(writer).write(']');
     }
 
+    // T8-09 / T8-13 (documented): overflow is an ArithmeticException (not NumberFormatException); blank input is null.
+    @Test
+    public void reviewFixes20260906_valueOfDocumentedFailureModesAndBlankInput() {
+        org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> type.valueOf("[128]"));
+        org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> type.valueOf("[-129]"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("[abc]"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,,2]"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1, ]"));
+        assertEquals(ByteList.of((byte) 127, (byte) -128), type.valueOf("[127, -128]"));
+
+        assertNull(type.valueOf("   "));
+        assertNull(type.valueOf(""));
+        org.junit.jupiter.api.Assertions.assertTrue(type.valueOf("[ ]").isEmpty());
+    }
+
 }

@@ -86,8 +86,9 @@ public class BiObjIntFunctionTest extends TestBase {
             StringBuilder sb = new StringBuilder();
             for (int j = 0; j < i; j++) {
                 sb.append(t).append(u);
-                if (j < i - 1)
+                if (j < i - 1) {
                     sb.append(", ");
+                }
             }
             return sb.toString();
         };

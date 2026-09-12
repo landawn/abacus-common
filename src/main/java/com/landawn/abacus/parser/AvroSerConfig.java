@@ -108,24 +108,21 @@ public class AvroSerConfig extends SerializationConfig<AvroSerConfig> {
     /**
      * Computes a hash code for this configuration based on its settings.
      *
-     * <p>The hash code includes the schema setting in addition to settings
+     * <p>The hash code combines the schema setting with the hash code of the settings
      * inherited from the parent class.</p>
      *
      * @return a hash code value for this configuration
      */
     @Override
     public int hashCode() {
-        int h = 17;
-        h = 31 * h + N.hashCode(getIgnoredPropNames());
-        h = 31 * h + N.hashCode(getExclusion());
-        h = 31 * h + N.hashCode(isSkipTransientField());
-        return 31 * h + N.hashCode(schema);
+        return 31 * super.hashCode() + N.hashCode(schema);
     }
 
     /**
      * Compares this configuration with another object for equality.
-     * Two configurations are considered equal if they have the same ignored properties,
-     * exclusion settings, transient field handling, and schema.
+     * Two configurations are considered equal if they are of exactly the same class, all settings
+     * inherited from the parent class are equal (see {@link SerializationConfig#equals(Object)}),
+     * and they have the same schema.
      *
      * @param obj the object to compare with
      * @return {@code true} if the objects are equal, {@code false} otherwise
@@ -133,16 +130,7 @@ public class AvroSerConfig extends SerializationConfig<AvroSerConfig> {
     @SuppressFBWarnings
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj instanceof AvroSerConfig other) {
-            return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(getExclusion(), other.getExclusion()) //NOSONAR
-                    && N.equals(isSkipTransientField(), other.isSkipTransientField()) && N.equals(schema, other.schema);
-        }
-
-        return false;
+        return this == obj || (obj instanceof AvroSerConfig other && super.equals(obj) && N.equals(schema, other.schema));
     }
 
     /**

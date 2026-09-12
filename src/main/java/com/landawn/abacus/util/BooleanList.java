@@ -16,6 +16,10 @@
 
 package com.landawn.abacus.util;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -189,7 +193,9 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
  *   <li><b>Version Compatibility:</b> Stable serialVersionUID</li>
- *   <li><b>Efficient Format:</b> Optimized serialization of boolean arrays</li>
+ *   <li><b>Serialized Form:</b> A custom {@code writeObject} writes only the elements in
+ *       {@code [0, size())}, so spare capacity is never emitted; {@code readObject} rejects a stream whose
+ *       {@code size} does not fit its {@code elementData}</li>
  *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
  * </ul>
  *
@@ -323,7 +329,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws IllegalArgumentException if the specified initial capacity is negative.
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
-    public BooleanList(final int initialCapacity) throws IllegalArgumentException {
+    public BooleanList(final int initialCapacity) throws IllegalArgumentException, OutOfMemoryError {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
 
         elementData = initialCapacity == 0 ? N.EMPTY_BOOLEAN_ARRAY : new boolean[initialCapacity];
@@ -346,10 +352,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * @param a the array to be used as the element array for this list; must not be {@code null}
-     * @throws NullPointerException if the specified array is {@code null}
+     * @throws IllegalArgumentException if the specified array is {@code null}
      */
-    public BooleanList(final boolean[] a) {
-        this(N.requireNonNull(a), a.length);
+    public BooleanList(final boolean[] a) throws IllegalArgumentException {
+        this(N.checkArgNotNull(a, cs.a), a.length);
     }
 
     /**
@@ -371,10 +377,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param a the array to be used as the element array for this list; must not be {@code null}
      * @param size the number of elements in the list. Must be between 0 and the array length (inclusive).
-     * @throws NullPointerException if the specified array is {@code null}
-     * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
+     * @throws IllegalArgumentException if the specified array is {@code null}
+     *         or if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code size} is greater than the array length
      */
-    public BooleanList(final boolean[] a, final int size) throws IndexOutOfBoundsException {
+    public BooleanList(final boolean[] a, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(a, cs.a);
         N.checkFromIndexSize(0, size, a.length);
 
         elementData = a;
@@ -422,9 +430,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param size the number of elements from the array to include in the list.
      *             Must be between 0 and the array length (inclusive).
      * @return a new BooleanList containing the first {@code size} elements of the specified array
-     * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
+     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code size} is greater than the array length
      */
-    public static BooleanList of(final boolean[] a, final int size) throws IndexOutOfBoundsException {
+    public static BooleanList of(final boolean[] a, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
 
         return new BooleanList(N.nullToEmpty(a), size);
@@ -477,10 +486,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new BooleanList containing a copy of the elements in the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
-     *                                   or {@code fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code a} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > a.length}
      */
-    public static BooleanList copyOf(final boolean[] a, final int fromIndex, final int toIndex) {
+    public static BooleanList copyOf(final boolean[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(a, cs.a);
+
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
@@ -497,7 +508,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return a new BooleanList containing the repeated elements
      * @throws IllegalArgumentException if {@code len} is negative.
      */
-    public static BooleanList repeat(final boolean element, final int len) {
+    public static BooleanList repeat(final boolean element, final int len) throws IllegalArgumentException {
         return of(Array.repeat(element, len));
     }
 
@@ -512,11 +523,16 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * BooleanList randomList = BooleanList.random(10);   // returns list with 10 random boolean values
      * }</pre>
      *
+     * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
+     * deliberate, but it is roughly two orders of magnitude slower than
+     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
+     * and wrap it with {@code of(..)}.</p>
+     *
      * @param len the number of random boolean values to generate. Must be non-negative.
      * @return a new BooleanList containing random boolean values
      * @throws NegativeArraySizeException if {@code len} is negative
      */
-    public static BooleanList random(final int len) {
+    public static BooleanList random(final int len) throws NegativeArraySizeException {
         final boolean[] a = new boolean[len];
 
         for (int i = 0; i < len; i++) {
@@ -564,7 +580,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
-    public boolean get(final int index) { // NOSONAR
+    public boolean get(final int index) throws IndexOutOfBoundsException { // NOSONAR
         rangeCheck(index);
 
         return elementData[index];
@@ -587,7 +603,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      */
-    public boolean set(final int index, final boolean e) {
+    public boolean set(final int index, final boolean e) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         final boolean oldValue = elementData[index];
@@ -615,8 +631,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * @param e the element to be appended to this list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void add(final boolean e) {
+    public void add(final boolean e) throws OutOfMemoryError {
         ensureCapacity(size + 1);
 
         elementData[size++] = e;
@@ -643,8 +660,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param index the index at which the specified element is to be inserted
      * @param e the element to be inserted
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void add(final int index, final boolean e) {
+    public void add(final int index, final boolean e) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         ensureCapacity(size + 1);
@@ -670,9 +688,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list changed as a result of the call (i.e., if the
      *         specified list was not empty); {@code false} otherwise
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final BooleanList c) {
+    public boolean addAll(final BooleanList c) throws OutOfMemoryError {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -701,9 +720,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return {@code true} if this list changed as a result of the call (i.e., if the
      *         specified list was not empty); {@code false} otherwise
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final int index, final BooleanList c) {
+    public boolean addAll(final int index, final BooleanList c) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(c)) {
@@ -737,9 +757,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list changed as a result of the call (i.e., if the
      *         array was not empty); {@code false} otherwise
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final boolean[] a) {
+    public boolean addAll(final boolean[] a) throws OutOfMemoryError {
         return addAll(size(), a);
     }
 
@@ -754,9 +775,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return {@code true} if this list changed as a result of the call (i.e., if the
      *         array was not empty); {@code false} otherwise
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index > size()})
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final int index, final boolean[] a) {
+    public boolean addAll(final int index, final boolean[] a) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(a)) {
@@ -780,7 +802,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return true;
     }
 
-    private void rangeCheckForAdd(final int index) {
+    /**
+     * @throws IndexOutOfBoundsException if {@code index < 0} or {@code index > size()}
+     */
+    private void rangeCheckForAdd(final int index) throws IndexOutOfBoundsException {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -865,7 +890,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             N.copy(elementData, index + 1, elementData, index, numMoved);
         }
 
-        elementData[--size] = false; // clear to let GC do its work
+        elementData[--size] = false; // keep the unused tail deterministic; it is reachable via internalArray()
     }
 
     /**
@@ -919,6 +944,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * list.removeIf(b -> b);   // removes all true values, list is now [false, false]
      * }</pre>
      *
+     * <p>The list is left unchanged if {@code p} throws: no element is moved until every
+     * {@code p.test(..)} call has returned. Nothing is allocated when no element matches.</p>
+     *
      * @param p the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed; {@code false} otherwise
      * @throws IllegalArgumentException if {@code p} is {@code null}.
@@ -926,21 +954,39 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     public boolean removeIf(final BooleanPredicate p) throws IllegalArgumentException {
         N.checkArgNotNull(p, cs.p);
 
-        final BooleanList tmp = new BooleanList(size());
+        // Split into locate-then-compact so the list is left untouched if the predicate throws:
+        // no element is moved until every p.test(..) call has returned. Nothing is allocated
+        // unless at least one element matches, and the marker set costs one bit per element.
+        int first = 0;
 
-        for (int i = 0; i < size; i++) {
-            if (!p.test(elementData[i])) {
-                tmp.add(elementData[i]);
-            }
+        while (first < size && !p.test(elementData[first])) {
+            first++;
         }
 
-        if (tmp.size() == size()) {
+        if (first == size) {
             return false;
         }
 
-        N.copy(tmp.elementData, 0, elementData, 0, tmp.size());
-        N.fill(elementData, tmp.size(), size, false);
-        size = tmp.size;
+        // bit k of removed[] corresponds to element (first + k); bit 0 is the match just found
+        final long[] removed = new long[((size - first) >> 6) + 1];
+        removed[0] |= 1L;
+
+        for (int i = first + 1; i < size; i++) {
+            if (p.test(elementData[i])) {
+                removed[(i - first) >> 6] |= 1L << (i - first);
+            }
+        }
+
+        int w = first;
+
+        for (int i = first + 1; i < size; i++) {
+            if ((removed[(i - first) >> 6] & (1L << (i - first))) == 0) {
+                elementData[w++] = elementData[i];
+            }
+        }
+
+        N.fill(elementData, w, size, false);
+        size = w;
 
         return true;
     }
@@ -1054,7 +1100,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
         int w = 0;
 
-        if (c.size() > 3 && size() > 9) {
+        // Compaction must not change membership when another list wraps the same array.
+        if (elementData == c.elementData || needToSet(size(), c.size())) {
             final Set<Boolean> set = c.toSet();
 
             for (int i = 0; i < size; i++) {
@@ -1104,7 +1151,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      * @see #removeAllAt(int...)
      */
-    public boolean removeAt(final int index) {
+    public boolean removeAt(final int index) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         final boolean oldValue = elementData[index];
@@ -1139,7 +1186,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @see #removeAt(int)
      */
     @Override
-    public void removeAllAt(final int... indices) {
+    public void removeAllAt(final int... indices) throws IndexOutOfBoundsException {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -1165,8 +1212,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param fromIndex the index of the first element to be removed (inclusive)
      * @param toIndex the index after the last element to be removed (exclusive)
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *                                   or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public void removeRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1209,7 +1255,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *         newPositionAfterMove would cause elements to be moved outside the list
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
 
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
@@ -1232,13 +1278,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param fromIndex the index of the first element to be replaced (inclusive)
      * @param toIndex the index after the last element to be replaced (exclusive)
-     * @param replacement the BooleanList whose elements will replace the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *                                   or {@code fromIndex > toIndex}
+     * @param replacement the BooleanList whose elements will replace the specified range. Can be
+     *                    {@code null} or empty, in which case the range is simply removed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
-    public void replaceRange(final int fromIndex, final int toIndex, final BooleanList replacement) throws IndexOutOfBoundsException {
+    public void replaceRange(final int fromIndex, final int toIndex, final BooleanList replacement) throws IndexOutOfBoundsException, OutOfMemoryError {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
@@ -1251,13 +1297,15 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.size();
 
         if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError("Required capacity is too large: " + newSizeLong + " > " + MAX_ARRAY_SIZE);
         }
 
         final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
-            elementData = N.copyOf(elementData, newSize);
+            // Grow with the same amortized policy ensureCapacity uses. Sizing the array to exactly
+            // newSize would make a loop of growing replaceRange calls reallocate and copy every time.
+            elementData = N.copyOf(elementData, calNewCapacity(newSize, elementData.length));
         }
 
         if (toIndex - fromIndex != replacement.size() && toIndex != size) {
@@ -1281,13 +1329,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param fromIndex the index of the first element to be replaced (inclusive)
      * @param toIndex the index after the last element to be replaced (exclusive)
-     * @param replacement the array whose elements will replace the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *                                   or {@code fromIndex > toIndex}
+     * @param replacement the array whose elements will replace the specified range. Can be
+     *                    {@code null} or empty, in which case the range is simply removed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
-    public void replaceRange(final int fromIndex, final int toIndex, final boolean[] replacement) throws IndexOutOfBoundsException {
+    public void replaceRange(final int fromIndex, final int toIndex, final boolean[] replacement) throws IndexOutOfBoundsException, OutOfMemoryError {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
@@ -1300,13 +1348,15 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.length;
 
         if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError("Required capacity is too large: " + newSizeLong + " > " + MAX_ARRAY_SIZE);
         }
 
         final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
-            elementData = N.copyOf(elementData, newSize);
+            // Grow with the same amortized policy ensureCapacity uses. Sizing the array to exactly
+            // newSize would make a loop of growing replaceRange calls reallocate and copy every time.
+            elementData = N.copyOf(elementData, calNewCapacity(newSize, elementData.length));
         }
 
         if (toIndex - fromIndex != replacement.length && toIndex != size) {
@@ -1449,8 +1499,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param fromIndex the index of the first element (inclusive) to be filled with the specified value
      * @param toIndex the index after the last element (exclusive) to be filled with the specified value
      * @param val the value to be stored in the specified range of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *                                   or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public void fill(final int fromIndex, final int toIndex, final boolean val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1489,7 +1538,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * and m is the size of the specified list. However, it may use more efficient algorithms
      * based on the relative sizes of the lists.</p>
      *
-     * @param c the BooleanList to be checked for containment in this list
+     * @param c the BooleanList to be checked for containment in this list.
+     *          If {@code null} or empty, {@code false} is returned
      * @return {@code true} if this list contains any of the elements in the specified list;
      *         {@code false} otherwise
      */
@@ -1507,7 +1557,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * <p>This method is equivalent to {@code containsAny(BooleanList.of(a))}.</p>
      *
-     * @param a the array to be checked for containment in this list
+     * @param a the array to be checked for containment in this list.
+     *          If {@code null} or empty, {@code false} is returned
      * @return {@code true} if this list contains any of the elements in the specified array;
      *         {@code false} otherwise
      */
@@ -1527,7 +1578,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * and m is the size of the specified list. However, it may use more efficient set-based
      * algorithms when beneficial.</p>
      *
-     * @param c the BooleanList to be checked for containment in this list
+     * @param c the BooleanList to be checked for containment in this list.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list contains all of the elements in the specified list;
      *         {@code false} otherwise
      */
@@ -1563,7 +1615,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * <p>This method is equivalent to {@code containsAll(BooleanList.of(a))}.</p>
      *
-     * @param a the array to be checked for containment in this list
+     * @param a the array to be checked for containment in this list.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list contains all of the elements in the specified array;
      *         {@code false} otherwise
      */
@@ -1584,7 +1637,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p>Two lists are disjoint if they share no common elements. Empty lists are disjoint
      * with all lists, including other empty lists.</p>
      *
-     * @param c the BooleanList to be checked for disjointness with this list
+     * @param c the BooleanList to be checked for disjointness with this list.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list and the specified list have no elements in common;
      *         {@code false} otherwise
      */
@@ -1618,7 +1672,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * <p>This method is equivalent to {@code disjoint(BooleanList.of(b))}.</p>
      *
-     * @param b the array to be checked for disjointness with this list
+     * @param b the array to be checked for disjointness with this list.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list and the specified array have no elements in common;
      *         {@code false} otherwise
      */
@@ -1648,7 +1703,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * @param b the BooleanList to intersect with this list
-     * @return a new BooleanList containing the intersection of this list and the specified list
+     * @return a new BooleanList containing the intersection of this list and the specified list.
+     *         Returns an empty list if the specified list is {@code null} or empty, or if this list is empty
      * @see #intersection(boolean[])
      */
     @Override
@@ -1677,7 +1733,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p>This method is equivalent to {@code intersection(BooleanList.of(b))}.</p>
      *
      * @param b the array to intersect with this list
-     * @return a new BooleanList containing the intersection of this list and the specified array
+     * @return a new BooleanList containing the intersection of this list and the specified array.
+     *         Returns an empty list if the array is {@code null} or empty, or if this list is empty
      * @see #intersection(BooleanList)
      */
     @Override
@@ -1705,7 +1762,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * @param b the BooleanList whose elements will be subtracted from this list
-     * @return a new BooleanList containing the elements in this list but not in the specified list
+     * @return a new BooleanList containing the elements in this list but not in the specified list.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty
      * @see #symmetricDifference(BooleanList)
      * @see N#difference(boolean[], boolean[])
      */
@@ -1735,7 +1793,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p>This method is equivalent to {@code difference(BooleanList.of(b))}.</p>
      *
      * @param b the array whose elements will be subtracted from this list
-     * @return a new BooleanList containing the elements in this list but not in the specified array
+     * @return a new BooleanList containing the elements in this list but not in the specified array.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty
      * @see #difference(BooleanList)
      * @see N#difference(boolean[], boolean[])
      */
@@ -1764,8 +1823,19 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * // result is [true, false] (one extra true from list1, one extra false from list2)
      * }</pre>
      *
+     * <p><b>Ordering of the second operand's contributions.</b> Occurrences of equal values are
+     * interchangeable, so when a value survives {@code n} times, those {@code n} occurrences are taken from
+     * that value's <i>earliest</i> positions in the second operand and emitted in index order. This appended
+     * portion is a subsequence of the second operand by value, but the complete result is not necessarily equal to
+     * {@code difference(b)}
+     * followed by {@code b.difference(this)} when the second operand holds duplicates of a partially
+     * cancelled value. For example {@code BooleanList.of(true).symmetricDifference(BooleanList.of(true, false, true))}
+     * returns {@code [true, false]}, whereas concatenating the two differences would give {@code [false, true]};
+     * both contain the same elements.</p>
+     *
      * @param b the BooleanList to compute symmetric difference with
-     * @return a new BooleanList containing the symmetric difference of the two lists
+     * @return a new BooleanList containing the symmetric difference of the two lists.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty
      * @see #symmetricDifference(boolean[])
      */
     @Override
@@ -1805,8 +1875,19 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * <p>This method is equivalent to {@code symmetricDifference(BooleanList.of(b))}.</p>
      *
+     * <p><b>Ordering of the second operand's contributions.</b> Occurrences of equal values are
+     * interchangeable, so when a value survives {@code n} times, those {@code n} occurrences are taken from
+     * that value's <i>earliest</i> positions in the second operand and emitted in index order. This appended
+     * portion is a subsequence of the second operand by value, but the complete result is not necessarily equal to
+     * {@code difference(b)}
+     * followed by {@code b.difference(this)} when the second operand holds duplicates of a partially
+     * cancelled value. For example {@code BooleanList.of(true).symmetricDifference(BooleanList.of(true, false, true))}
+     * returns {@code [true, false]}, whereas concatenating the two differences would give {@code [false, true]};
+     * both contain the same elements.</p>
+     *
      * @param b the array to compute symmetric difference with
-     * @return a new BooleanList containing the symmetric difference
+     * @return a new BooleanList containing the symmetric difference.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty
      * @see #symmetricDifference(BooleanList)
      */
     @Override
@@ -2021,9 +2102,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param toIndex the ending index (exclusive) of the range to process, or {@code -1} to process
      *                from {@code fromIndex} down to and including index 0
      * @param action the action to be performed for each element.
-     * @throws IndexOutOfBoundsException if the effective range is out of bounds for this list
-     *         (i.e., {@code min(fromIndex, max(toIndex,0)) < 0} or
-     *         {@code max(fromIndex, toIndex) > size()})
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or {@code max(fromIndex, toIndex) > size()}; {@code toIndex == -1} selects reverse traversal through index zero.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final int fromIndex, final int toIndex, final BooleanConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -2093,8 +2172,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param fromIndex the starting index (inclusive) of the range to process
      * @param toIndex the ending index (exclusive) of the range to process
      * @return a new {@code BooleanList} containing the distinct elements from the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public BooleanList distinct(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2201,8 +2279,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param fromIndex the starting index (inclusive) of the range to reverse
      * @param toIndex the ending index (exclusive) of the range to reverse
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2216,7 +2293,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Rotates all elements in this list by the specified distance.
      * After calling rotate(distance), the element at index i will be moved to
-     * index (i + distance) % size.
+     * index {@code Math.floorMod((long) i + distance, size())} when the list is non-empty.
      *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).
@@ -2238,6 +2315,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Each possible permutation occurs with approximately equal probability.
      *
      * <p>This operation modifies the list in-place and has O(n) time complexity.</p>
+     *
+     * <p>The source is {@link java.util.concurrent.ThreadLocalRandom}, which is <b>not</b>
+     * cryptographically secure. Note that this is a <i>different</i> generator from the one the
+     * {@code random(..)} factories use; call {@link #shuffle(Random)} with a
+     * {@link java.security.SecureRandom} when the permutation must be unpredictable.</p>
+     *
      */
     @Override
     public void shuffle() {
@@ -2273,7 +2356,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *         ({@code i < 0 || i >= size() || j < 0 || j >= size()})
      */
     @Override
-    public void swap(final int i, final int j) {
+    public void swap(final int i, final int j) throws IndexOutOfBoundsException {
         rangeCheck(i);
         rangeCheck(j);
 
@@ -2299,8 +2382,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param fromIndex the starting index (inclusive) of the range to copy
      * @param toIndex the ending index (exclusive) of the range to copy
      * @return a new {@code BooleanList} containing the elements in the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public BooleanList copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2317,17 +2399,21 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * If {@code fromIndex > toIndex} and {@code step < 0}, elements are sampled from high to low indices.
      * The first element sampled is at {@code fromIndex}, then {@code fromIndex + step}, and so on.</p>
      *
+     * <p>If the sign of {@code step} contradicts the direction of the range — a positive step with
+     * {@code fromIndex > toIndex}, or a negative step with {@code fromIndex < toIndex} — the result is an
+     * empty list rather than an exception. Only {@code step == 0} is rejected.</p>
+     *
      * @param fromIndex the starting index (inclusive) of the range to copy
      * @param toIndex the ending index (exclusive) of the range to copy. May be -1 when fromIndex &gt; toIndex
      * @param step the sampling interval; must not be zero. Positive for forward sampling,
      *             negative for backward sampling
      * @return a new {@code BooleanList} containing the sampled elements
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or {@code max(fromIndex, toIndex) > size()}; {@code toIndex == -1} is permitted for reverse traversal.
      * @throws IllegalArgumentException if {@code step} is zero.
      * @see N#copyOfRange(boolean[], int, int, int)
      */
     @Override
-    public BooleanList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
+    public BooleanList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
         if (size == 0) {
@@ -2351,20 +2437,18 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param toIndex the ending index (exclusive) of the range to split
      * @param chunkSize the desired size of each chunk. Must be greater than 0.
      * @return a list of {@code BooleanList} objects, each containing a chunk of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws IllegalArgumentException if {@code chunkSize <= 0}.
      */
     @Override
-    public List<BooleanList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
+    public List<BooleanList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final List<boolean[]> list = N.split(elementData, fromIndex, toIndex, chunkSize);
-        @SuppressWarnings("rawtypes")
-        final List<BooleanList> result = (List) list;
+        final List<boolean[]> arrays = N.split(elementData, fromIndex, toIndex, chunkSize);
+        final List<BooleanList> result = new ArrayList<>(arrays.size());
 
-        for (int i = 0, len = list.size(); i < len; i++) {
-            result.set(i, of(list.get(i)));
+        for (final boolean[] array : arrays) {
+            result.add(of(array));
         }
 
         return result;
@@ -2379,6 +2463,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @return this list instance
      */
+    @Beta
     @Override
     public BooleanList trimToSize() {
         if (elementData.length > size) {
@@ -2445,8 +2530,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param fromIndex the starting index (inclusive) of the range to box
      * @param toIndex the ending index (exclusive) of the range to box
      * @return a new {@code List<Boolean>} containing the specified range of elements as boxed values
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public List<Boolean> boxed(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2482,13 +2566,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param supplier a function that creates a new Collection instance with the specified
      *                 initial capacity. The function receives the number of elements as input.
      * @return a Collection containing the boxed boolean values from the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
+     * @throws UnsupportedOperationException if the selected range is non-empty and the supplied collection does not support adding elements
      */
     @Override
     public <C extends Collection<Boolean>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, UnsupportedOperationException {
         checkFromToIndex(fromIndex, toIndex);
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -2511,9 +2595,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param supplier a function that creates a new Multiset instance with the specified
      *                 initial capacity. The function receives the number of elements as input.
      * @return a Multiset containing the boxed boolean values from the specified range with their counts
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}, or adding the selected elements would exceed {@link Integer#MAX_VALUE} occurrences for an element in the supplied multiset
      */
     @Override
     public Multiset<Boolean> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Boolean>> supplier)
@@ -2558,6 +2641,12 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * empty.stream().count();   // returns 0
      * }</pre>
      *
+     * <p>The stream captures the backing array reference and the range endpoints when it is created,
+     * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured
+     * range can be observed by a stream that has not consumed those positions yet. Growing the list
+     * afterwards does not extend the stream, and any operation that reallocates the backing array leaves
+     * the stream reading the old one. Do not modify the list while a stream over it is in flight.</p>
+     *
      * @return a sequential {@code Stream} over the elements in this list
      */
     public Stream<Boolean> stream() {
@@ -2577,11 +2666,16 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * list.stream(0, 10);                                          // throws IndexOutOfBoundsException (toIndex > size)
      * }</pre>
      *
+     * <p>The stream captures the backing array reference and the range endpoints when it is created,
+     * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured
+     * range can be observed by a stream that has not consumed those positions yet. Growing the list
+     * afterwards does not extend the stream, and any operation that reallocates the backing array leaves
+     * the stream reading the old one. Do not modify the list while a stream over it is in flight.</p>
+     *
      * @param fromIndex the starting index (inclusive) of the range to stream
      * @param toIndex the ending index (exclusive) of the range to stream
      * @return a sequential {@code Stream} over the specified range of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public Stream<Boolean> stream(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2608,7 +2702,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @see #first()
      * @see #getLast()
      */
-    public boolean getFirst() {
+    public boolean getFirst() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return elementData[0];
@@ -2636,7 +2730,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @see #last()
      * @see #getFirst()
      */
-    public boolean getLast() {
+    public boolean getLast() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return elementData[size - 1];
@@ -2658,8 +2752,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * @param e the boolean value to insert at the beginning of the list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void addFirst(final boolean e) {
+    public void addFirst(final boolean e) throws OutOfMemoryError {
         add(0, e);
     }
 
@@ -2678,9 +2773,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * @param e the boolean value to append to the list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void addLast(final boolean e) {
-        add(size, e);
+    public void addLast(final boolean e) throws OutOfMemoryError {
+        add(e);
     }
 
     /**
@@ -2701,7 +2797,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return the first boolean value that was removed from the list
      * @throws NoSuchElementException if the list is empty
      */
-    public boolean removeFirst() {
+    public boolean removeFirst() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return removeAt(0);
@@ -2724,7 +2820,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @return the last boolean value that was removed from the list
      * @throws NoSuchElementException if the list is empty
      */
-    public boolean removeLast() {
+    public boolean removeLast() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return removeAt(size - 1);
@@ -2786,9 +2882,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         return size == 0 ? Strings.STR_FOR_EMPTY_ARRAY : N.toString(elementData, 0, size);
     }
 
-    private void ensureCapacity(final int minCapacity) {
+    /**
+     * @throws OutOfMemoryError if {@code minCapacity} is negative or exceeds the maximum supported array size, or the enlarged array cannot be allocated
+     */
+    private void ensureCapacity(final int minCapacity) throws OutOfMemoryError {
         if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError(
+                    "Required capacity is too large: " + (minCapacity < 0 ? "it overflowed the int range" : minCapacity + " > " + MAX_ARRAY_SIZE));
         }
 
         if (N.isEmpty(elementData)) {
@@ -2798,5 +2898,53 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
 
             elementData = Arrays.copyOf(elementData, newCapacity);
         }
+    }
+
+    /**
+     * Writes this list to the given stream using only the elements in {@code [0, size())}.
+     *
+     * <p>The default serialized form would emit the whole backing array. That is wasteful for a list
+     * whose capacity exceeds its size, and — because {@link #BooleanList(boolean[], int)} and
+     * {@code of(boolean[], int)} adopt the caller's array without copying — it would also write out
+     * whatever the caller left beyond {@code size()}. This method writes the same two fields under the
+     * same names, so streams stay readable in both directions across this change.</p>
+     *
+     * @param os the stream to write to
+     * @throws IOException if writing the list fields or backing-array contents to {@code os} fails
+     */
+    @Serial
+    private void writeObject(final ObjectOutputStream os) throws IOException {
+        final ObjectOutputStream.PutField fields = os.putFields();
+
+        fields.put("elementData", size == elementData.length ? elementData : N.copyOfRange(elementData, 0, size));
+        fields.put("size", size);
+
+        os.writeFields();
+    }
+
+    /**
+     * Restores this list from the given stream, rejecting a stream whose {@code size} does not fit its
+     * {@code elementData}.
+     *
+     * <p>Without this check a corrupted or hand-crafted stream would deserialize successfully and then
+     * fail much later with an {@link IndexOutOfBoundsException} from an unrelated method.</p>
+     *
+     * @param is the stream to read from
+     * @throws IOException if reading the serialized fields fails, or the stored array is null, has the wrong primitive type, or is inconsistent with the stored size
+     * @throws ClassNotFoundException if a class needed to restore a serialized field cannot be resolved
+     */
+    @Serial
+    private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {
+        final ObjectInputStream.GetField fields = is.readFields();
+        final Object a = fields.get("elementData", null);
+        final int sz = fields.get("size", 0);
+
+        if (!(a instanceof boolean[] array) || sz < 0 || sz > array.length) {
+            throw new InvalidObjectException(
+                    "Invalid serialized BooleanList: size=" + sz + ", elementData=" + (a == null ? "null" : a.getClass().getSimpleName()));
+        }
+
+        elementData = array;
+        size = sz;
     }
 }

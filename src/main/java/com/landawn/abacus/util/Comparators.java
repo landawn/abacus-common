@@ -16,6 +16,8 @@
 
 package com.landawn.abacus.util;
 
+import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -72,9 +74,18 @@ import com.landawn.abacus.util.function.ToShortFunction;
  * <ul>
  *   <li><b>nullsFirst():</b> Treats {@code null} as the minimum value (null &lt; any {@code non-null} value)</li>
  *   <li><b>nullsLast():</b> Treats {@code null} as the maximum value (null &gt; any {@code non-null} value)</li>
- *   <li><b>Per-factory behavior:</b> Natural-order comparators use nulls-first by default;
- *       size and lexicographic factories document when {@code null} is treated like an empty value,
- *       while extractor-based comparators generally require a non-{@code null} object</li>
+ *   <li><b>Lexicographic factories</b> (arrays, collections, iterables, iterators, maps) and the
+ *       {@code *_ARRAY_COMPARATOR} / {@link #COLLECTION_COMPARATOR} constants all follow one rule: a
+ *       {@code null} container is less than <i>any</i> non-{@code null} container, including an empty one,
+ *       and an empty container is less than a non-empty one. This matches
+ *       {@link java.util.Arrays#compare(int[], int[])} and keeps {@code null} distinguishable from empty in
+ *       sorted sets and maps</li>
+ *   <li><b>Projection factories</b> ({@link #comparingByLength()}, {@link #comparingBySize()},
+ *       {@link #comparingByMapSize()}, {@link #comparingByArrayLength()}) deliberately differ: they compare
+ *       only a length/size, so a {@code null} container and an empty one both project to {@code 0} and
+ *       compare <i>equal</i>. This is intentional, not an oversight</li>
+ *   <li><b>Extractor-based comparators</b> generally require a non-{@code null} object; use the
+ *       {@code comparingByIfNotNullOrElse*} variants when the objects themselves may be {@code null}</li>
  *   <li><b>Consistency:</b> Both nulls compare as equal (null == {@code null} returns 0)</li>
  * </ul>
  *
@@ -183,7 +194,9 @@ import com.landawn.abacus.util.function.ToShortFunction;
  * <ul>
  *   <li>Primitive comparators: O(1) time with no boxing overhead</li>
  *   <li>Array comparators: O(min(m,n)) where m,n are array lengths</li>
- *   <li>Collection comparators: O(min(m,n)) for element-wise, O(1) for size-based</li>
+ *   <li>Collection comparators: O(min(m,n)) for element-wise; size-based ones cost one {@code size()} call
+ *       per argument, which is O(1) for most implementations but O(n) for some (a concurrent queue or skip
+ *       list, for instance)</li>
  *   <li>String comparators: O(min(m,n)) for content comparison, O(1) for length</li>
  *   <li>Memory usage: No additional allocations for most operations</li>
  * </ul>
@@ -197,11 +210,45 @@ import com.landawn.abacus.util.function.ToShortFunction;
  *   <li>A stateful extractor or delegate comparator may require external synchronization</li>
  * </ul>
  *
+ * <p><b>Two {@code null} policies:</b>
+ * <ul>
+ *   <li><b>Lexicographic comparators</b> - the {@code *_ARRAY_COMPARATOR} constants,
+ *       {@link #COLLECTION_COMPARATOR}, and {@code comparingArray}/{@code comparingCollection}/
+ *       {@code comparingIterable}/{@code comparingIterator}/{@code comparingMapByKey}/
+ *       {@code comparingMapByValue} - order a {@code null} argument <i>strictly before</i> every
+ *       non-{@code null} one, an empty array/collection included, and two {@code null}s equal.</li>
+ *   <li><b>Metric comparators</b> - {@link #comparingByLength()}, {@link #comparingBySize()},
+ *       {@link #comparingByMapSize()} and {@link #comparingByArrayLength()} - project each argument onto a
+ *       length or size and read {@code null} as {@code 0}, so a {@code null} argument compares
+ *       <i>equal</i> to an empty one. Wrap them in {@link #nullsFirst(Comparator)} or
+ *       {@link #nullsLast(Comparator)} if {@code null} must be ordered apart from empty.</li>
+ * </ul>
+ *
+ * <p><b>Serialization:</b>
+ * Three groups of comparators are {@link Serializable}:
+ * <ul>
+ *   <li>the primitive key-extractor factories - {@link #comparingInt(ToIntFunction)} and its seven siblings,
+ *       and their {@code reversedComparingXxx} counterparts. Serializing one succeeds exactly when the key
+ *       extractor it was given is itself serializable;</li>
+ *   <li>the metric comparators {@link #comparingByLength()}, {@link #comparingByArrayLength()},
+ *       {@link #comparingBySize()} and {@link #comparingByMapSize()}, which hold nothing of the caller's and
+ *       therefore always serialize;</li>
+ *   <li>{@link #reverseOrder(Comparator)} when the delegated {@link Collections#reverseOrder(Comparator)}
+ *       creates a serializable wrapper. That method may instead unwrap an existing reverse comparator,
+ *       returning its original comparator with that comparator's serialization properties. This class's own
+ *       {@link #naturalOrder()} and {@link #reverseOrder()} short-circuit to non-serializable constants.</li>
+ * </ul>
+ * Everything else this class returns - the shared ordering comparators ({@link #naturalOrder()},
+ * {@link #reverseOrder()}, {@link #nullsFirst()}, {@link #nullsLast()}), the {@code *_ARRAY_COMPARATOR}
+ * constants, and every other factory built over a caller-supplied {@code Function} or {@code Comparator}
+ * (including {@link #nullsFirst(Comparator)} and {@link #nullsLast(Comparator)}, which do <i>not</i> reuse
+ * the JDK's serializable null-wrapper) - is not serializable and does not claim to be.
+ *
  * <p><b>Array Comparison Details:</b>
  * <ul>
  *   <li><b>Element-wise:</b> Compares arrays lexicographically element by element</li>
  *   <li><b>Length Handling:</b> Shorter arrays are considered "less than" longer arrays when all compared elements are equal</li>
- *   <li><b>Null Arrays:</b> Handled according to the chosen {@code null} semantics</li>
+ *   <li><b>Null Arrays:</b> A {@code null} array is less than any non-{@code null} array, including an empty one</li>
  *   <li><b>Type Safety:</b> Separate comparators for each primitive array type</li>
  * </ul>
  *
@@ -240,8 +287,8 @@ import com.landawn.abacus.util.function.ToShortFunction;
  *
  * <p><b>Error Handling:</b>
  * <ul>
- *   <li>Key extractors are not validated eagerly: a {@code null} key extractor causes a
- *       {@link NullPointerException} when the returned comparator is used</li>
+ *   <li>Key extractors and delegate comparators are validated eagerly: passing {@code null} to a factory
+ *       method throws {@link IllegalArgumentException} from that method, not later from the comparator</li>
  *   <li>Handles {@code null} inputs gracefully according to configured {@code null} semantics</li>
  *   <li>Preserves natural ordering contracts for Comparable types</li>
  *   <li>Provides consistent behavior across all comparison operations</li>
@@ -309,236 +356,125 @@ public final class Comparators {
 
     static final Comparator<String> COMPARING_IGNORE_CASE = (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : a.compareToIgnoreCase(b));
 
-    static final Comparator<CharSequence> COMPARING_BY_LENGTH = Comparator.comparingInt(a -> a == null ? 0 : a.length());
+    // The extractor carries "& Serializable" so that Comparator.comparingInt's own Serializable marker is
+    // honourable: it captures the extractor, and a plain lambda there makes every write attempt throw.
+    static final Comparator<CharSequence> COMPARING_BY_LENGTH = Comparator
+            .comparingInt((ToIntFunction<CharSequence> & Serializable) a -> a == null ? 0 : a.length());
 
-    static final Comparator<Object> COMPARING_BY_ARRAY_LENGTH = Comparator.comparingInt(a -> a == null ? 0 : Array.getLength(a));
+    // Array.getLength(null) already returns 0, so no null guard is needed here.
+    static final Comparator<Object> COMPARING_BY_ARRAY_LENGTH = Comparator.comparingInt((ToIntFunction<Object> & Serializable) Array::getLength);
 
     @SuppressWarnings("rawtypes")
-    static final Comparator<Collection> COMPARING_BY_SIZE = Comparator.comparingInt(a -> a == null ? 0 : a.size());
+    static final Comparator<Collection> COMPARING_BY_SIZE = Comparator.comparingInt((ToIntFunction<Collection> & Serializable) a -> a == null ? 0 : a.size());
 
     @SuppressWarnings("rawtypes")
-    static final Comparator<Map> COMPARING_BY_MAP_SIZE = Comparator.comparingInt(a -> a == null ? 0 : a.size());
+    static final Comparator<Map> COMPARING_BY_MAP_SIZE = Comparator.comparingInt((ToIntFunction<Map> & Serializable) a -> a == null ? 0 : a.size());
 
     /**
      * A comparator for boolean arrays that compares elements lexicographically.
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * In element comparison, {@code false} is considered less than {@code true}.
-     * Null arrays are handled with {@code null} considered as the minimum value.
+     * A {@code null} array is less than any non-{@code null} array, including an empty one; two {@code null}
+     * arrays are equal.
+     *
+     * @see Arrays#compare(boolean[], boolean[])
      */
-    public static final Comparator<boolean[]> BOOLEAN_ARRAY_COMPARATOR = (a, b) -> {
-        if (a == null) {
-            return b == null ? 0 : -1;
-        } else if (b == null) {
-            return 1;
-        }
-
-        final int lenA = a.length;
-        final int lenB = b.length;
-
-        for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
-            if (a[i] != b[i]) {
-                return a[i] ? 1 : -1;
-            }
-        }
-
-        return Integer.compare(lenA, lenB);
-    };
+    public static final Comparator<boolean[]> BOOLEAN_ARRAY_COMPARATOR = Arrays::compare;
 
     /**
      * A comparator for char arrays that compares elements lexicographically.
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Characters are compared by their numeric values.
-     * Null arrays are handled with {@code null} considered as the minimum value.
+     * A {@code null} array is less than any non-{@code null} array, including an empty one; two {@code null}
+     * arrays are equal.
+     *
+     * @see Arrays#compare(char[], char[])
      */
-    public static final Comparator<char[]> CHAR_ARRAY_COMPARATOR = (a, b) -> {
-        if (a == null) {
-            return b == null ? 0 : -1;
-        } else if (b == null) {
-            return 1;
-        }
-
-        final int lenA = a.length;
-        final int lenB = b.length;
-
-        for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
-            if (a[i] != b[i]) {
-                return a[i] > b[i] ? 1 : -1;
-            }
-        }
-
-        return Integer.compare(lenA, lenB);
-    };
+    public static final Comparator<char[]> CHAR_ARRAY_COMPARATOR = Arrays::compare;
 
     /**
      * A comparator for byte arrays that compares elements lexicographically.
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Bytes are compared as signed values.
-     * Null arrays are handled with {@code null} considered as the minimum value.
+     * A {@code null} array is less than any non-{@code null} array, including an empty one; two {@code null}
+     * arrays are equal.
+     *
+     * @see Arrays#compare(byte[], byte[])
      */
-    public static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = (a, b) -> {
-        if (a == null) {
-            return b == null ? 0 : -1;
-        } else if (b == null) {
-            return 1;
-        }
-
-        final int lenA = a.length;
-        final int lenB = b.length;
-
-        for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
-            if (a[i] != b[i]) {
-                return a[i] > b[i] ? 1 : -1;
-            }
-        }
-
-        return Integer.compare(lenA, lenB);
-    };
+    public static final Comparator<byte[]> BYTE_ARRAY_COMPARATOR = Arrays::compare;
 
     /**
      * A comparator for short arrays that compares elements lexicographically.
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Shorts are compared as signed values.
-     * Null arrays are handled with {@code null} considered as the minimum value.
+     * A {@code null} array is less than any non-{@code null} array, including an empty one; two {@code null}
+     * arrays are equal.
+     *
+     * @see Arrays#compare(short[], short[])
      */
-    public static final Comparator<short[]> SHORT_ARRAY_COMPARATOR = (a, b) -> {
-        if (a == null) {
-            return b == null ? 0 : -1;
-        } else if (b == null) {
-            return 1;
-        }
-
-        final int lenA = a.length;
-        final int lenB = b.length;
-
-        for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
-            if (a[i] != b[i]) {
-                return a[i] > b[i] ? 1 : -1;
-            }
-        }
-
-        return Integer.compare(lenA, lenB);
-    };
+    public static final Comparator<short[]> SHORT_ARRAY_COMPARATOR = Arrays::compare;
 
     /**
      * A comparator for int arrays that compares elements lexicographically.
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Integers are compared as signed values.
-     * Null arrays are handled with {@code null} considered as the minimum value.
+     * A {@code null} array is less than any non-{@code null} array, including an empty one; two {@code null}
+     * arrays are equal.
+     *
+     * @see Arrays#compare(int[], int[])
      */
-    public static final Comparator<int[]> INT_ARRAY_COMPARATOR = (a, b) -> {
-        if (a == null) {
-            return b == null ? 0 : -1;
-        } else if (b == null) {
-            return 1;
-        }
-
-        final int lenA = a.length;
-        final int lenB = b.length;
-
-        for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
-            if (a[i] != b[i]) {
-                return a[i] > b[i] ? 1 : -1;
-            }
-        }
-
-        return Integer.compare(lenA, lenB);
-    };
+    public static final Comparator<int[]> INT_ARRAY_COMPARATOR = Arrays::compare;
 
     /**
      * A comparator for long arrays that compares elements lexicographically.
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Longs are compared as signed values.
-     * Null arrays are handled with {@code null} considered as the minimum value.
+     * A {@code null} array is less than any non-{@code null} array, including an empty one; two {@code null}
+     * arrays are equal.
+     *
+     * @see Arrays#compare(long[], long[])
      */
-    public static final Comparator<long[]> LONG_ARRAY_COMPARATOR = (a, b) -> {
-        if (a == null) {
-            return b == null ? 0 : -1;
-        } else if (b == null) {
-            return 1;
-        }
-
-        final int lenA = a.length;
-        final int lenB = b.length;
-
-        for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
-            if (a[i] != b[i]) {
-                return a[i] > b[i] ? 1 : -1;
-            }
-        }
-
-        return Integer.compare(lenA, lenB);
-    };
+    public static final Comparator<long[]> LONG_ARRAY_COMPARATOR = Arrays::compare;
 
     /**
      * A comparator for float arrays that compares elements lexicographically.
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Floats are compared using {@link Float#compare(float, float)} to handle NaN and -0.0f correctly.
-     * Null arrays are handled with {@code null} considered as the minimum value.
+     * A {@code null} array is less than any non-{@code null} array, including an empty one; two {@code null}
+     * arrays are equal.
+     *
+     * @see Arrays#compare(float[], float[])
      */
-    public static final Comparator<float[]> FLOAT_ARRAY_COMPARATOR = (a, b) -> {
-        if (a == null) {
-            return b == null ? 0 : -1;
-        } else if (b == null) {
-            return 1;
-        }
-
-        final int lenA = a.length;
-        final int lenB = b.length;
-        int result = 0;
-
-        for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
-            result = Float.compare(a[i], b[i]);
-
-            if (result != 0) {
-                return result;
-            }
-        }
-
-        return Integer.compare(lenA, lenB);
-    };
+    public static final Comparator<float[]> FLOAT_ARRAY_COMPARATOR = Arrays::compare;
 
     /**
      * A comparator for double arrays that compares elements lexicographically.
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Doubles are compared using {@link Double#compare(double, double)} to handle NaN and -0.0 correctly.
-     * Null arrays are handled with {@code null} considered as the minimum value.
+     * A {@code null} array is less than any non-{@code null} array, including an empty one; two {@code null}
+     * arrays are equal.
+     *
+     * @see Arrays#compare(double[], double[])
      */
-    public static final Comparator<double[]> DOUBLE_ARRAY_COMPARATOR = (a, b) -> {
-        if (a == null) {
-            return b == null ? 0 : -1;
-        } else if (b == null) {
-            return 1;
-        }
-
-        final int lenA = a.length;
-        final int lenB = b.length;
-        int result = 0;
-
-        for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
-            result = Double.compare(a[i], b[i]);
-
-            if (result != 0) {
-                return result;
-            }
-        }
-
-        return Integer.compare(lenA, lenB);
-    };
+    public static final Comparator<double[]> DOUBLE_ARRAY_COMPARATOR = Arrays::compare;
 
     /**
      * A comparator for Object arrays that compares elements lexicographically using natural ordering.
      * The comparison is performed element by element until a difference is found.
      * If all compared elements are equal, the shorter array is considered less than the longer array.
      * Elements are compared using their natural ordering with {@code null} considered as the minimum value.
-     * Null arrays are handled with {@code null} considered as the minimum value.
+     * A {@code null} array is less than any non-{@code null} array, including an empty one; two {@code null}
+     * arrays are equal.
+     *
+     * @see Arrays#compare(Comparable[], Comparable[])
      */
     public static final Comparator<Object[]> OBJECT_ARRAY_COMPARATOR = (a, b) -> {
         if (a == null) {
@@ -567,7 +503,8 @@ public final class Comparators {
      * The comparison is performed by iterating through elements until a difference is found.
      * If all compared elements are equal, the smaller collection is considered less than the larger collection.
      * Elements are compared using their natural ordering with {@code null} considered as the minimum value.
-     * Empty collections are considered less than non-empty collections.
+     * A {@code null} collection is less than any non-{@code null} collection, including an empty one; two
+     * {@code null} collections are equal. An empty collection is less than a non-empty collection.
      */
     @SuppressWarnings("rawtypes")
     public static final Comparator<Collection> COLLECTION_COMPARATOR = (a, b) -> {
@@ -577,14 +514,14 @@ public final class Comparators {
             return 1;
         }
 
+        // Driven by the iterators rather than by size(): a collection whose size() disagrees with what its
+        // iterator yields (a lazily computed view, a concurrently mutated collection) must not make this
+        // throw NoSuchElementException.
         final Iterator<Object> iterA = a.iterator();
         final Iterator<Object> iterB = b.iterator();
-
-        final int lenA = N.size(a);
-        final int lenB = N.size(b);
         int result = 0;
 
-        for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
+        while (iterA.hasNext() && iterB.hasNext()) {
             result = NATURAL_ORDER.compare(iterA.next(), iterB.next());
 
             if (result != 0) {
@@ -592,7 +529,7 @@ public final class Comparators {
             }
         }
 
-        return Integer.compare(lenA, lenB);
+        return iterA.hasNext() ? 1 : (iterB.hasNext() ? -1 : 0);
     };
 
     private Comparators() {
@@ -615,13 +552,13 @@ public final class Comparators {
      * // Result: [null, "apple", "banana", "cherry"]
      * }</pre>
      *
-     * @param <T> the type of the objects being compared, must extend Comparable.
+     * @param <T> the type of the objects being compared, must be mutually comparable through {@code Comparable<? super T>}.
      * @return a comparator that imposes the natural ordering with nulls first.
      * @see #nullsFirst()
      * @see #reverseOrder()
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static <T extends Comparable> Comparator<T> naturalOrder() {
+    @SuppressWarnings({ "unchecked" })
+    public static <T extends Comparable<? super T>> Comparator<T> naturalOrder() {
         return NATURAL_ORDER;
     }
 
@@ -637,14 +574,14 @@ public final class Comparators {
      * // Result: [null, null, 1, 2, 3, 4]
      * }</pre>
      *
-     * @param <T> the type of the objects being compared, must extend Comparable.
+     * @param <T> the type of the objects being compared, must be mutually comparable through {@code Comparable<? super T>}.
      * @return a comparator that considers {@code null} less than {@code non-null} values, comparing {@code non-null} values in natural order.
      * @see #naturalOrder()
      * @see #nullsLast()
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Comparator<T> nullsFirst() {
-        return (Comparator<T>) NULL_FIRST_COMPARATOR;
+    public static <T extends Comparable<? super T>> Comparator<T> nullsFirst() {
+        // The public bound guarantees that every T can compare with every other T.
+        return (Comparator<T>) (Comparator<?>) NULL_FIRST_COMPARATOR;
     }
 
     /**
@@ -664,7 +601,7 @@ public final class Comparators {
      * @return a comparator that considers {@code null} less than {@code non-null} values, comparing {@code non-null} values using the specified comparator.
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> Comparator<T> nullsFirst(final Comparator<T> cmp) throws IllegalArgumentException {
+    public static <T> Comparator<T> nullsFirst(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);
 
         if (cmp == NULL_FIRST_COMPARATOR) { // NOSONAR
@@ -683,6 +620,10 @@ public final class Comparators {
      * {@code null}. If the objects themselves may be {@code null}, use
      * {@link #comparingByIfNotNullOrElseNullsFirst(Function)} instead.</p>
      *
+     * <p><b>This is the same comparator as {@link #comparingBy(Function)}</b>, whose key comparison is also
+     * nulls-first; the name states that policy explicitly. Use {@link #nullsLastBy(Function)} for the
+     * opposite key ordering.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class Person {
@@ -698,13 +639,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract the comparable key from objects;
+     * @param <K> the mutually comparable extracted key type
+     * @param keyExtractor the function to extract the comparable key from objects; must not be {@code null}.
      * @return a comparator that compares by extracted keys with nulls first
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #comparingByIfNotNullOrElseNullsFirst(Function)
      * @see #comparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T> Comparator<T> nullsFirstBy(@SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyExtractor)
+    public static <T, K extends Comparable<? super K>> Comparator<T> nullsFirstBy(final Function<? super T, ? extends K> keyExtractor)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
@@ -747,13 +689,13 @@ public final class Comparators {
      * // Result: ["apple", "banana", "cherry", null]
      * }</pre>
      *
-     * @param <T> the type of the objects being compared, must extend Comparable.
+     * @param <T> the type of the objects being compared, must be mutually comparable through {@code Comparable<? super T>}.
      * @return a comparator that considers {@code null} greater than {@code non-null} values, comparing {@code non-null} values in natural order.
      * @see #nullsFirst()
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Comparator<T> nullsLast() {
-        return (Comparator<T>) NULL_LAST_COMPARATOR;
+    public static <T extends Comparable<? super T>> Comparator<T> nullsLast() {
+        // The public bound guarantees that every T can compare with every other T.
+        return (Comparator<T>) (Comparator<?>) NULL_LAST_COMPARATOR;
     }
 
     /**
@@ -773,7 +715,7 @@ public final class Comparators {
      * @return a comparator that considers {@code null} greater than {@code non-null} values, comparing {@code non-null} values using the specified comparator.
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> Comparator<T> nullsLast(final Comparator<T> cmp) throws IllegalArgumentException {
+    public static <T> Comparator<T> nullsLast(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);
 
         if (cmp == NULL_LAST_COMPARATOR) { // NOSONAR
@@ -810,13 +752,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract the comparable key from objects;
+     * @param <K> the mutually comparable extracted key type
+     * @param keyExtractor the function to extract the comparable key from objects; must not be {@code null}.
      * @return a comparator that compares by extracted keys with nulls last
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #comparingByIfNotNullOrElseNullsFirst(Function)
      * @see #comparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T> Comparator<T> nullsLastBy(@SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyExtractor)
+    public static <T, K extends Comparable<? super K>> Comparator<T> nullsLastBy(final Function<? super T, ? extends K> keyExtractor)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
@@ -950,7 +893,12 @@ public final class Comparators {
     /**
      * Returns a comparator that compares objects by extracting a {@link Comparable} key using the provided function.
      * The extracted keys are compared using natural ordering. This method treats {@code null} keys as the minimum value
-     * (equivalent to using nullsFirst for the key comparison).
+     * (equivalent to using nullsFirst for the key comparison), so it is the same comparator as
+     * {@link #nullsFirstBy(Function)}.
+     *
+     * <p><b>Note:</b> The key extractor is applied to both objects regardless of whether those objects are
+     * {@code null}. If the objects themselves may be {@code null}, use
+     * {@link #comparingByIfNotNullOrElseNullsFirst(Function)} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -967,7 +915,8 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract the comparable key from objects;
+     * @param <K> the mutually comparable extracted key type
+     * @param keyExtractor the function to extract the comparable key from objects; must not be {@code null}.
      * @return a comparator that compares by extracted keys using natural ordering
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #nullsFirstBy(Function)
@@ -975,7 +924,7 @@ public final class Comparators {
      * @see #comparingByIfNotNullOrElseNullsFirst(Function)
      * @see #comparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T> Comparator<T> comparingBy(@SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyExtractor)
+    public static <T, K extends Comparable<? super K>> Comparator<T> comparingBy(final Function<? super T, ? extends K> keyExtractor)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
@@ -1003,15 +952,16 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract the comparable key from objects;
+     * @param <K> the mutually comparable extracted key type
+     * @param keyExtractor the function to extract the comparable key from objects; must not be {@code null}.
      * @return a comparator that handles {@code null} objects and {@code null} keys appropriately
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #comparingBy(Function)
      * @see #comparingByIfNotNullOrElseNullsLast(Function)
      */
     @Beta
-    public static <T> Comparator<T> comparingByIfNotNullOrElseNullsFirst(
-            @SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+    public static <T, K extends Comparable<? super K>> Comparator<T> comparingByIfNotNullOrElseNullsFirst(final Function<? super T, ? extends K> keyExtractor)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         @SuppressWarnings("rawtypes")
@@ -1041,15 +991,16 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract the comparable key from objects;
+     * @param <K> the mutually comparable extracted key type
+     * @param keyExtractor the function to extract the comparable key from objects; must not be {@code null}.
      * @return a comparator that handles {@code null} objects and {@code null} keys appropriately
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #comparingBy(Function)
      * @see #comparingByIfNotNullOrElseNullsFirst(Function)
      */
     @Beta
-    public static <T> Comparator<T> comparingByIfNotNullOrElseNullsLast(
-            @SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+    public static <T, K extends Comparable<? super K>> Comparator<T> comparingByIfNotNullOrElseNullsLast(final Function<? super T, ? extends K> keyExtractor)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         @SuppressWarnings("rawtypes")
@@ -1083,8 +1034,8 @@ public final class Comparators {
      *
      * @param <T> the type of the objects being compared
      * @param <U> the type of the keys extracted for comparison
-     * @param keyExtractor the function to extract keys from objects;
-     * @param keyComparator the comparator to use for comparing extracted keys;
+     * @param keyExtractor the function to extract keys from objects; must not be {@code null}.
+     * @param keyComparator the comparator to use for comparing extracted keys; must not be {@code null}.
      * @return a comparator that compares objects by their extracted keys
      * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code keyComparator} is {@code null}.
      * @see #comparingByIfNotNullOrElseNullsFirst(Function, Comparator)
@@ -1118,8 +1069,8 @@ public final class Comparators {
      *
      * @param <T> the type of the objects being compared
      * @param <U> the type of the keys extracted for comparison
-     * @param keyExtractor the function to extract keys from objects;
-     * @param keyComparator the comparator to use for comparing extracted keys;
+     * @param keyExtractor the function to extract keys from objects; must not be {@code null}.
+     * @param keyComparator the comparator to use for comparing extracted keys; must not be {@code null}.
      * @return a comparator that handles {@code null} objects appropriately
      * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code keyComparator} is {@code null}.
      */
@@ -1151,8 +1102,8 @@ public final class Comparators {
      *
      * @param <T> the type of the objects being compared
      * @param <U> the type of the keys extracted for comparison
-     * @param keyExtractor the function to extract keys from objects;
-     * @param keyComparator the comparator to use for comparing extracted keys;
+     * @param keyExtractor the function to extract keys from objects; must not be {@code null}.
+     * @param keyComparator the comparator to use for comparing extracted keys; must not be {@code null}.
      * @return a comparator that handles {@code null} objects appropriately
      * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code keyComparator} is {@code null}.
      */
@@ -1183,20 +1134,24 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract boolean values from objects;
+     * @param keyExtractor the function to extract boolean values from objects; must not be {@code null}.
      * @return a comparator that compares by extracted boolean values
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> comparingBoolean(final ToBooleanFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return (a, b) -> Boolean.compare(keyExtractor.applyAsBoolean(a), keyExtractor.applyAsBoolean(b));
+        // The whole comparingXxx/reversedComparingXxx primitive family is built with an explicit
+        // "& Serializable" intersection so it behaves uniformly: serializable exactly when the caller's key
+        // extractor is. Do not "simplify" one of these back to Comparator.comparingInt(keyExtractor::applyAsX)
+        // - that returns a (Comparator & Serializable) but captures a method-reference adapter that is NOT
+        // serializable, so the result carries the marker and then always throws NotSerializableException.
+        return (Comparator<T> & Serializable) (a, b) -> Boolean.compare(keyExtractor.applyAsBoolean(a), keyExtractor.applyAsBoolean(b));
     }
 
     /**
      * Returns a comparator that compares objects by extracting a char value using the provided function.
      * Characters are compared by their numeric UTF-16 code-unit values.
-     * This method delegates to {@link Comparator#comparingInt(ToIntFunction)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1213,20 +1168,19 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract char values from objects;
+     * @param keyExtractor the function to extract char values from objects; must not be {@code null}.
      * @return a comparator that compares by extracted char values
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> comparingChar(final ToCharFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return Comparator.comparingInt(keyExtractor::applyAsChar);
+        return (Comparator<T> & Serializable) (a, b) -> Character.compare(keyExtractor.applyAsChar(a), keyExtractor.applyAsChar(b));
     }
 
     /**
      * Returns a comparator that compares objects by extracting a byte value using the provided function.
      * Byte values are compared as signed values.
-     * This method delegates to {@link Comparator#comparingInt(ToIntFunction)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1243,20 +1197,19 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract byte values from objects;
+     * @param keyExtractor the function to extract byte values from objects; must not be {@code null}.
      * @return a comparator that compares by extracted byte values
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> comparingByte(final ToByteFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return Comparator.comparingInt(keyExtractor::applyAsByte);
+        return (Comparator<T> & Serializable) (a, b) -> Byte.compare(keyExtractor.applyAsByte(a), keyExtractor.applyAsByte(b));
     }
 
     /**
      * Returns a comparator that compares objects by extracting a short value using the provided function.
      * Short values are compared as signed values.
-     * This method delegates to {@link Comparator#comparingInt(ToIntFunction)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1273,20 +1226,19 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract short values from objects;
+     * @param keyExtractor the function to extract short values from objects; must not be {@code null}.
      * @return a comparator that compares by extracted short values
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> comparingShort(final ToShortFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return Comparator.comparingInt(keyExtractor::applyAsShort);
+        return (Comparator<T> & Serializable) (a, b) -> Short.compare(keyExtractor.applyAsShort(a), keyExtractor.applyAsShort(b));
     }
 
     /**
      * Returns a comparator that compares objects by extracting an int value using the provided function.
      * Integer values are compared as signed values.
-     * This method delegates to {@link Comparator#comparingInt(ToIntFunction)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1303,20 +1255,19 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract int values from objects;
+     * @param keyExtractor the function to extract int values from objects; must not be {@code null}.
      * @return a comparator that compares by extracted int values
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> comparingInt(final ToIntFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return Comparator.comparingInt(keyExtractor);
+        return (Comparator<T> & Serializable) (a, b) -> Integer.compare(keyExtractor.applyAsInt(a), keyExtractor.applyAsInt(b));
     }
 
     /**
      * Returns a comparator that compares objects by extracting a long value using the provided function.
      * Long values are compared as signed values.
-     * This method delegates to {@link Comparator#comparingLong(ToLongFunction)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1333,14 +1284,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract long values from objects;
+     * @param keyExtractor the function to extract long values from objects; must not be {@code null}.
      * @return a comparator that compares by extracted long values
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> comparingLong(final ToLongFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return Comparator.comparingLong(keyExtractor);
+        return (Comparator<T> & Serializable) (a, b) -> Long.compare(keyExtractor.applyAsLong(a), keyExtractor.applyAsLong(b));
     }
 
     /**
@@ -1362,20 +1313,19 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract float values from objects;
+     * @param keyExtractor the function to extract float values from objects; must not be {@code null}.
      * @return a comparator that compares by extracted float values
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> comparingFloat(final ToFloatFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return (a, b) -> Float.compare(keyExtractor.applyAsFloat(a), keyExtractor.applyAsFloat(b));
+        return (Comparator<T> & Serializable) (a, b) -> Float.compare(keyExtractor.applyAsFloat(a), keyExtractor.applyAsFloat(b));
     }
 
     /**
      * Returns a comparator that compares objects by extracting a double value using the provided function.
      * Double values are compared using {@link Double#compare(double, double)} to properly handle NaN and -0.0.
-     * This method delegates to {@link Comparator#comparingDouble(ToDoubleFunction)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1392,20 +1342,30 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract double values from objects;
+     * @param keyExtractor the function to extract double values from objects; must not be {@code null}.
      * @return a comparator that compares by extracted double values
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> comparingDouble(final ToDoubleFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return Comparator.comparingDouble(keyExtractor);
+        return (Comparator<T> & Serializable) (a, b) -> Double.compare(keyExtractor.applyAsDouble(a), keyExtractor.applyAsDouble(b));
     }
 
     /**
      * Returns a comparator that compares strings ignoring case differences.
      * Null values are considered less than {@code non-null} values. This comparator
      * uses {@link String#compareToIgnoreCase(String)} for the comparison.
+     *
+     * <p><b>Case folding is simple and locale-independent.</b> Comparison is by Unicode code point with
+     * {@code toUpperCase} then {@code toLowerCase} applied to each, so supplementary code points are folded
+     * correctly, but:</p>
+     * <ul>
+     *   <li>it is <i>simple</i> folding, not <i>full</i> folding - {@code "straße"} does not match
+     *       {@code "STRASSE"}</li>
+     *   <li>no locale is consulted, so it is not a substitute for {@link java.text.Collator}; the
+     *       Turkish dotted/dotless {@code I} rules, for instance, are not applied</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1424,6 +1384,11 @@ public final class Comparators {
      * Returns a comparator that compares objects by extracting a String value using the provided function
      * and comparing them ignoring case differences. Null values are considered less than {@code non-null} values.
      *
+     * <p><b>Note:</b> The key extractor is applied to both objects regardless of whether those objects are
+     * {@code null}; only the extracted strings are compared null-safely. Wrap the result in
+     * {@link #nullsFirst(Comparator)} or {@link #nullsLast(Comparator)} if the objects themselves may be
+     * {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * class User {
@@ -1439,7 +1404,7 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared
-     * @param keyExtractor the function to extract String values from objects;
+     * @param keyExtractor the function to extract String values from objects; must not be {@code null}.
      * @return a comparator that performs case-insensitive comparison on extracted strings
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
@@ -1563,6 +1528,11 @@ public final class Comparators {
      * Null values are treated as having length 0. This comparator can be used with
      * String, StringBuilder, StringBuffer, and other CharSequence implementations.
      *
+     * <p>Length means {@link CharSequence#length()}, i.e. the number of UTF-16 <i>code units</i>, not code
+     * points: a string holding one supplementary character counts as 2 and therefore ties with
+     * {@code "ab"}. Use {@code Comparators.comparingInt(s -> s.codePointCount(0, s.length()))} if you need
+     * code-point length.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> words = Arrays.asList("short", "a", "medium", "very long string");
@@ -1659,9 +1629,10 @@ public final class Comparators {
      * for element-wise comparison. The arrays are compared lexicographically, with shorter
      * arrays considered less than longer arrays when all compared elements are equal.
      *
-     * <p>The comparison algorithm (a {@code null} array is treated the same as an empty array):</p>
+     * <p>The comparison algorithm:</p>
      * <ol>
-     *   <li>Empty (or {@code null}) arrays are considered less than non-empty arrays; two empty/null arrays are equal</li>
+     *   <li>A {@code null} array is less than any non-{@code null} array, including an empty one; two
+     *       {@code null} arrays are equal. An empty array is less than a non-empty array</li>
      *   <li>Elements are compared in order using the provided comparator</li>
      *   <li>The first non-equal comparison determines the result</li>
      *   <li>If all compared elements are equal, the shorter array is considered less</li>
@@ -1675,9 +1646,17 @@ public final class Comparators {
      * int result = cmp.compare(arr1, arr2);   // returns negative (banana < cherry)
      * }</pre>
      *
+     * <p><b>The element comparator is applied unchecked.</b> {@code cmp} is accepted at any element type so
+     * that a narrower comparator such as {@link String#CASE_INSENSITIVE_ORDER} can be used on an
+     * {@code Object[]}; nothing verifies that the array elements are acceptable to it. The <i>returned
+     * comparator</i> therefore throws {@link ClassCastException} at comparison time if an element is not of
+     * the type {@code cmp} expects. Use {@link #comparingArray(Comparator)} when the element type is known -
+     * it is checked at compile time.</p>
+     *
      * @param cmp the comparator to use for comparing array elements; must not be {@code null}
      * @return a comparator that performs lexicographic comparison of Object arrays
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @see #comparingArray(Comparator)
      */
     @SuppressWarnings("rawtypes")
     public static Comparator<Object[]> comparingObjArray(final Comparator<?> cmp) throws IllegalArgumentException {
@@ -1694,8 +1673,9 @@ public final class Comparators {
      * <p>This method is equivalent to calling {@code comparingArray(Comparators.naturalOrder())}
      * (null elements are treated as the minimum value)
      * but is type-safe for arrays of Comparable elements.
-     * An empty or {@code null} array is considered less than a non-empty array, and an empty array
-     * and a {@code null} array compare as equal.</p>
+     * A {@code null} array is less than any non-{@code null} array, including an empty one; two {@code null}
+     * arrays are equal. An empty array is less than a non-empty array - the same rule as
+     * {@link #OBJECT_ARRAY_COMPARATOR} and {@link Arrays#compare(Comparable[], Comparable[])}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1708,8 +1688,7 @@ public final class Comparators {
      * @param <T> the type of Comparable elements in the arrays
      * @return a comparator that performs lexicographic comparison using natural ordering
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Comparator<T[]> comparingArray() {
+    public static <T extends Comparable<? super T>> Comparator<T[]> comparingArray() {
         return comparingArray(NATURAL_ORDER);
     }
 
@@ -1719,8 +1698,9 @@ public final class Comparators {
      *
      * <p>The comparison algorithm:</p>
      * <ol>
-     *   <li>If both arrays are empty or {@code null}, they are considered equal</li>
-     *   <li>An empty/null array is considered less than a non-empty array</li>
+     *   <li>A {@code null} array is less than any non-{@code null} array, including an empty one; two
+     *       {@code null} arrays are equal</li>
+     *   <li>An empty array is considered less than a non-empty array</li>
      *   <li>Elements are compared in order until a difference is found</li>
      *   <li>If all compared elements are equal, the shorter array is considered less</li>
      * </ol>
@@ -1742,14 +1722,14 @@ public final class Comparators {
         N.checkArgNotNull(cmp, cs.cmp);
 
         return (a, b) -> {
-            if (N.isEmpty(a)) {
-                return N.isEmpty(b) ? 0 : -1;
-            } else if (N.isEmpty(b)) {
+            if (a == null) {
+                return b == null ? 0 : -1;
+            } else if (b == null) {
                 return 1;
             }
 
-            final int lenA = N.len(a);
-            final int lenB = N.len(b);
+            final int lenA = a.length;
+            final int lenB = b.length;
             int result = 0;
 
             for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
@@ -1771,7 +1751,7 @@ public final class Comparators {
      *
      * <p>This method is particularly useful for comparing Lists, Sets, or other Collections
      * where element order matters. For Sets, the iteration order depends on the Set implementation.</p>
-     * A {@code null} collection is treated the same as an empty collection.
+     * A {@code null} collection is less than any non-{@code null} collection, including an empty one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1781,11 +1761,11 @@ public final class Comparators {
      * int result = cmp.compare(list1, list2);   // returns negative (3 < 4)
      * }</pre>
      *
-     * @param <C> the type of Collection containing Comparable elements
+     * @param <T> the mutually comparable element type
+     * @param <C> the type of Collection containing those elements
      * @return a comparator that performs lexicographic comparison using natural ordering
      */
-    @SuppressWarnings("rawtypes")
-    public static <C extends Collection<? extends Comparable>> Comparator<C> comparingCollection() {
+    public static <T extends Comparable<? super T>, C extends Collection<? extends T>> Comparator<C> comparingCollection() {
         return comparingCollection(NATURAL_ORDER);
     }
 
@@ -1796,11 +1776,14 @@ public final class Comparators {
      *
      * <p>The comparison algorithm:</p>
      * <ol>
-     *   <li>Empty or {@code null} collections are considered less than non-empty collections;
-     *       {@code null} and empty compare as equal</li>
+     *   <li>A {@code null} collection is less than any non-{@code null} collection, including an empty one;
+     *       two {@code null} collections are equal. An empty collection is less than a non-empty one</li>
      *   <li>Elements are compared in iteration order until a difference is found</li>
-     *   <li>If all compared elements are equal, the smaller collection is considered less</li>
+     *   <li>If all compared elements are equal, the collection exhausted first is considered less</li>
      * </ol>
+     *
+     * <p>The comparison is driven by the collections' iterators, so a collection whose {@code size()}
+     * disagrees with what its iterator yields is compared by its actual contents.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1820,20 +1803,19 @@ public final class Comparators {
         N.checkArgNotNull(cmp, cs.cmp);
 
         return (a, b) -> {
-            if (N.isEmpty(a)) {
-                return N.isEmpty(b) ? 0 : -1;
-            } else if (N.isEmpty(b)) {
+            if (a == null) {
+                return b == null ? 0 : -1;
+            } else if (b == null) {
                 return 1;
             }
 
+            // Driven by the iterators rather than by size(): a collection whose size() disagrees with what
+            // its iterator yields must not make this throw NoSuchElementException.
             final Iterator<T> iterA = a.iterator();
             final Iterator<T> iterB = b.iterator();
-
-            final int sizeA = N.size(a);
-            final int sizeB = N.size(b);
             int result = 0;
 
-            for (int i = 0, minLen = N.min(sizeA, sizeB); i < minLen; i++) {
+            while (iterA.hasNext() && iterB.hasNext()) {
                 result = cmp.compare(iterA.next(), iterB.next());
 
                 if (result != 0) {
@@ -1841,7 +1823,7 @@ public final class Comparators {
                 }
             }
 
-            return Integer.compare(sizeA, sizeB);
+            return iterA.hasNext() ? 1 : (iterB.hasNext() ? -1 : 0);
         };
     }
 
@@ -1852,7 +1834,7 @@ public final class Comparators {
      *
      * <p>This method works with any Iterable implementation, including custom iterables.
      * The comparison continues until one iterable is exhausted or a difference is found.</p>
-     * A {@code null} iterable is treated the same as an empty iterable.
+     * A {@code null} iterable is less than any non-{@code null} iterable, including an empty one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1862,11 +1844,11 @@ public final class Comparators {
      * int result = cmp.compare(iter1, iter2);   // returns negative (banana < cherry)
      * }</pre>
      *
-     * @param <C> the type of Iterable containing Comparable elements
+     * @param <T> the mutually comparable element type
+     * @param <C> the type of Iterable containing those elements
      * @return a comparator that performs lexicographic comparison using natural ordering
      */
-    @SuppressWarnings("rawtypes")
-    public static <C extends Iterable<? extends Comparable>> Comparator<C> comparingIterable() {
+    public static <T extends Comparable<? super T>, C extends Iterable<? extends T>> Comparator<C> comparingIterable() {
         return comparingIterable(NATURAL_ORDER);
     }
 
@@ -1877,8 +1859,8 @@ public final class Comparators {
      *
      * <p>The comparison algorithm:</p>
      * <ol>
-     *   <li>Empty or {@code null} iterables are considered less than non-empty iterables;
-     *       {@code null} and empty compare as equal</li>
+     *   <li>A {@code null} iterable is less than any non-{@code null} iterable, including an empty one;
+     *       two {@code null} iterables are equal. An empty iterable is less than a non-empty one</li>
      *   <li>Elements are compared in iteration order</li>
      *   <li>If one iterable is exhausted first, it is considered less</li>
      *   <li>If both are exhausted simultaneously with all elements equal, they are equal</li>
@@ -1912,15 +1894,15 @@ public final class Comparators {
                 return 0;
             }
 
-            final Iterator<T> iterA = N.iterate(a);
-            final Iterator<T> iterB = N.iterate(b);
-
-            if (N.isEmpty(iterA)) {
-                return N.isEmpty(iterB) ? 0 : -1;
-            } else if (N.isEmpty(iterB)) {
+            // Two null iterables were already handled by the identity check above.
+            if (a == null) {
+                return -1;
+            } else if (b == null) {
                 return 1;
             }
 
+            final Iterator<T> iterA = N.iterate(a);
+            final Iterator<T> iterB = N.iterate(b);
             int result = 0;
 
             while (iterA.hasNext() && iterB.hasNext()) {
@@ -1943,7 +1925,7 @@ public final class Comparators {
      * <p><strong>Warning:</strong> This comparator consumes elements from the iterators during
      * comparison. The iterators cannot be reused after comparison. The sole exception is when both
      * arguments are the same iterator object: the comparator returns {@code 0} without consuming it.</p>
-     * A {@code null} iterator is treated the same as an empty iterator.
+     * A {@code null} iterator is less than any non-{@code null} iterator, including an already-exhausted one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1954,11 +1936,11 @@ public final class Comparators {
      * // Note: iter1 and iter2 are now exhausted
      * }</pre>
      *
-     * @param <C> the type of Iterator containing Comparable elements
+     * @param <T> the mutually comparable element type
+     * @param <C> the type of Iterator containing those elements
      * @return a comparator that performs lexicographic comparison using natural ordering
      */
-    @SuppressWarnings("rawtypes")
-    public static <C extends Iterator<? extends Comparable>> Comparator<C> comparingIterator() {
+    public static <T extends Comparable<? super T>, C extends Iterator<? extends T>> Comparator<C> comparingIterator() {
         return comparingIterator(NATURAL_ORDER);
     }
 
@@ -1975,8 +1957,8 @@ public final class Comparators {
      *
      * <p>The comparison algorithm:</p>
      * <ol>
-     *   <li>Empty or {@code null} iterators are considered less than non-empty iterators;
-     *       {@code null} and empty compare as equal</li>
+     *   <li>A {@code null} iterator is less than any non-{@code null} iterator, including an already-exhausted
+     *       one; two {@code null} iterators are equal. An exhausted iterator is less than a non-exhausted one</li>
      *   <li>Elements are consumed and compared until a difference is found</li>
      *   <li>If one iterator is exhausted first, it is considered less</li>
      * </ol>
@@ -2004,9 +1986,10 @@ public final class Comparators {
                 return 0;
             }
 
-            if (N.isEmpty(a)) {
-                return N.isEmpty(b) ? 0 : -1;
-            } else if (N.isEmpty(b)) {
+            // Two null iterators were already handled by the identity check above.
+            if (a == null) {
+                return -1;
+            } else if (b == null) {
                 return 1;
             }
 
@@ -2031,7 +2014,7 @@ public final class Comparators {
      *
      * <p><strong>Note:</strong> The comparison order depends on the Map implementation. For predictable results,
      * use sorted maps (e.g., TreeMap) or maps with consistent iteration order (e.g., LinkedHashMap).</p>
-     * A {@code null} map is treated the same as an empty map.
+     * A {@code null} map is less than any non-{@code null} map, including an empty one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2047,11 +2030,11 @@ public final class Comparators {
      * int result = cmp.compare(map1, map2);   // returns negative (banana < cherry)
      * }</pre>
      *
+     * @param <K> the mutually comparable key type
      * @param <M> the type of Map with Comparable keys
      * @return a comparator that compares maps by their keys using natural ordering
      */
-    @SuppressWarnings("rawtypes")
-    public static <M extends Map<? extends Comparable, ?>> Comparator<M> comparingMapByKey() {
+    public static <K extends Comparable<? super K>, M extends Map<? extends K, ?>> Comparator<M> comparingMapByKey() {
         return comparingMapByKey(NATURAL_ORDER);
     }
 
@@ -2062,8 +2045,8 @@ public final class Comparators {
      *
      * <p>The comparison algorithm:</p>
      * <ol>
-     *   <li>Empty or {@code null} maps are considered less than non-empty maps;
-     *       {@code null} and empty compare as equal</li>
+     *   <li>A {@code null} map is less than any non-{@code null} map, including an empty one; two
+     *       {@code null} maps are equal. An empty map is less than a non-empty one</li>
      *   <li>Keys are compared in iteration order using the provided comparator</li>
      *   <li>If all compared keys are equal, the smaller map is considered less</li>
      * </ol>
@@ -2093,20 +2076,19 @@ public final class Comparators {
         N.checkArgNotNull(cmp, cs.cmp);
 
         return (a, b) -> {
-            if (N.isEmpty(a)) {
-                return N.isEmpty(b) ? 0 : -1;
-            } else if (N.isEmpty(b)) {
+            if (a == null) {
+                return b == null ? 0 : -1;
+            } else if (b == null) {
                 return 1;
             }
 
+            // Driven by the iterators rather than by size(), so a map whose size() disagrees with what its
+            // keySet() view yields cannot make this throw NoSuchElementException.
             final Iterator<K> iterA = a.keySet().iterator();
             final Iterator<K> iterB = b.keySet().iterator();
-
-            final int sizeA = N.size(a);
-            final int sizeB = N.size(b);
             int result = 0;
 
-            for (int i = 0, minLen = N.min(sizeA, sizeB); i < minLen; i++) {
+            while (iterA.hasNext() && iterB.hasNext()) {
                 result = cmp.compare(iterA.next(), iterB.next());
 
                 if (result != 0) {
@@ -2114,7 +2096,7 @@ public final class Comparators {
                 }
             }
 
-            return Integer.compare(sizeA, sizeB);
+            return iterA.hasNext() ? 1 : (iterB.hasNext() ? -1 : 0);
         };
     }
 
@@ -2125,7 +2107,7 @@ public final class Comparators {
      *
      * <p><strong>Note:</strong> The comparison order depends on the Map implementation and may not be predictable
      * for hash-based maps. This comparator is most useful when the iteration order is meaningful.</p>
-     * A {@code null} map is treated the same as an empty map.
+     * A {@code null} map is less than any non-{@code null} map, including an empty one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2141,11 +2123,11 @@ public final class Comparators {
      * int result = cmp.compare(scores1, scores2);   // returns positive (92 > 88)
      * }</pre>
      *
+     * @param <V> the mutually comparable value type
      * @param <M> the type of Map with Comparable values
      * @return a comparator that compares maps by their values using natural ordering
      */
-    @SuppressWarnings("rawtypes")
-    public static <M extends Map<?, ? extends Comparable>> Comparator<M> comparingMapByValue() {
+    public static <V extends Comparable<? super V>, M extends Map<?, ? extends V>> Comparator<M> comparingMapByValue() {
         return comparingMapByValue(NATURAL_ORDER);
     }
 
@@ -2156,7 +2138,7 @@ public final class Comparators {
      *
      * <p>This comparator is useful for comparing maps based on their value content rather than
      * their keys. The iteration order of values depends on the Map implementation.</p>
-     * A {@code null} map is treated the same as an empty map.
+     * A {@code null} map is less than any non-{@code null} map, including an empty one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2178,20 +2160,19 @@ public final class Comparators {
         N.checkArgNotNull(cmp, cs.cmp);
 
         return (a, b) -> {
-            if (N.isEmpty(a)) {
-                return N.isEmpty(b) ? 0 : -1;
-            } else if (N.isEmpty(b)) {
+            if (a == null) {
+                return b == null ? 0 : -1;
+            } else if (b == null) {
                 return 1;
             }
 
+            // Driven by the iterators rather than by size(), so a map whose size() disagrees with what its
+            // values() view yields cannot make this throw NoSuchElementException.
             final Iterator<V> iterA = a.values().iterator();
             final Iterator<V> iterB = b.values().iterator();
-
-            final int sizeA = N.size(a);
-            final int sizeB = N.size(b);
             int result = 0;
 
-            for (int i = 0, minLen = N.min(sizeA, sizeB); i < minLen; i++) {
+            while (iterA.hasNext() && iterB.hasNext()) {
                 result = cmp.compare(iterA.next(), iterB.next());
 
                 if (result != 0) {
@@ -2199,7 +2180,7 @@ public final class Comparators {
                 }
             }
 
-            return Integer.compare(sizeA, sizeB);
+            return iterA.hasNext() ? 1 : (iterB.hasNext() ? -1 : 0);
         };
     }
 
@@ -2221,17 +2202,28 @@ public final class Comparators {
      * // Employees sorted by age, then name, then salary
      * }</pre>
      *
+     * <p><b>Behavior of the returned comparator:</b> unlike the rest of this class it is <i>not</i>
+     * null-tolerant and validates lazily, because the work is delegated to
+     * {@link N#compareByProps(Object, Object, Collection)} at comparison time. It throws:</p>
+     * <ul>
+     *   <li>{@link IllegalArgumentException} if either compared object is {@code null}, is not a bean class,
+     *       or does not declare one of the requested properties</li>
+     *   <li>{@link ClassCastException} if a compared property value does not implement {@link Comparable}
+     *       (a {@code Collection}, {@code Map} or nested bean property, for example)</li>
+     * </ul>
+     *
      * @param <T> the type of beans to compare
-     * @param propNamesToCompare collection of property names to compare in order
+     * @param propNamesToCompare collection of property names to compare in order; must not be {@code null} or empty
      * @return a comparator that compares beans by the specified properties
-     * @throws IllegalArgumentException if {@code propNamesToCompare} is {@code null}.
-     * @deprecated calling {@code getPropValue} by reflection APIs during comparison or sorting may have a huge impact on performance. Use {@link ComparisonBuilder} instead.
+     * @throws IllegalArgumentException if {@code propNamesToCompare} is {@code null} or empty.
      * @see Builder#compare(Object, Object, Comparator)
      * @see ComparisonBuilder
+     * @see N#compareByProps(Object, Object, Collection)
+     * @deprecated calling {@code getPropValue} by reflection APIs during comparison or sorting may have a huge impact on performance. Use {@link ComparisonBuilder} instead.
      */
     @Deprecated
     public static <T> Comparator<T> comparingBeanByProps(final Collection<String> propNamesToCompare) throws IllegalArgumentException {
-        N.checkArgNotNull(propNamesToCompare, cs.propNamesToCompare);
+        N.checkArgNotEmpty(propNamesToCompare, cs.propNamesToCompare);
 
         return (a, b) -> N.compareByProps(a, b, propNamesToCompare);
     }
@@ -2259,8 +2251,7 @@ public final class Comparators {
      * @param <T> the type of Comparable objects to compare
      * @return a comparator that imposes the reverse natural ordering with nulls last
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> Comparator<T> reverseOrder() {
+    public static <T extends Comparable<? super T>> Comparator<T> reverseOrder() {
         return REVERSED_ORDER;
     }
 
@@ -2281,6 +2272,12 @@ public final class Comparators {
      * <p>Unlike {@link Collections#reverseOrder(Comparator)}, a {@code null} {@code cmp} is rejected
      * rather than treated as natural order.</p>
      *
+     * <p>Serialization depends on the actual comparator returned by {@link Collections#reverseOrder(Comparator)}.
+     * A newly created reverse wrapper implements {@link Serializable}, but serializing it also requires its
+     * captured comparator to be serializable. The JDK may instead unwrap an existing reverse wrapper and return
+     * its original comparator, which need not implement {@code Serializable}. The two short-circuits above
+     * return this class's shared constants, which are not serializable.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Comparator<Person> byAge = Comparator.comparing(Person::getAge);
@@ -2295,7 +2292,8 @@ public final class Comparators {
      * @return a comparator that imposes the reverse ordering of {@code cmp}
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    public static <T> Comparator<T> reverseOrder(final Comparator<T> cmp) throws IllegalArgumentException {
+    @SuppressWarnings("unchecked")
+    public static <T> Comparator<T> reverseOrder(final Comparator<? super T> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);
 
         if (cmp == NATURAL_ORDER) { // NOSONAR
@@ -2304,7 +2302,8 @@ public final class Comparators {
             return NATURAL_ORDER;
         }
 
-        return Collections.reverseOrder(cmp);
+        // Reversing a Comparator<? super T> yields a comparator usable wherever a Comparator<T> is expected.
+        return (Comparator<T>) Collections.reverseOrder(cmp);
     }
 
     /**
@@ -2326,14 +2325,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract boolean keys from objects;
+     * @param keyExtractor function to extract boolean keys from objects; must not be {@code null}.
      * @return a comparator that compares by extracted boolean values in reverse order
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> reversedComparingBoolean(final ToBooleanFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return (a, b) -> Boolean.compare(keyExtractor.applyAsBoolean(b), keyExtractor.applyAsBoolean(a));
+        return (Comparator<T> & Serializable) (a, b) -> Boolean.compare(keyExtractor.applyAsBoolean(b), keyExtractor.applyAsBoolean(a));
     }
 
     /**
@@ -2351,14 +2350,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract char keys from objects;
+     * @param keyExtractor function to extract char keys from objects; must not be {@code null}.
      * @return a comparator that compares by extracted char values in reverse order
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> reversedComparingChar(final ToCharFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return (a, b) -> Character.compare(keyExtractor.applyAsChar(b), keyExtractor.applyAsChar(a));
+        return (Comparator<T> & Serializable) (a, b) -> Character.compare(keyExtractor.applyAsChar(b), keyExtractor.applyAsChar(a));
     }
 
     /**
@@ -2376,14 +2375,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract byte keys from objects;
+     * @param keyExtractor function to extract byte keys from objects; must not be {@code null}.
      * @return a comparator that compares by extracted byte values in reverse order
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> reversedComparingByte(final ToByteFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return (a, b) -> Byte.compare(keyExtractor.applyAsByte(b), keyExtractor.applyAsByte(a));
+        return (Comparator<T> & Serializable) (a, b) -> Byte.compare(keyExtractor.applyAsByte(b), keyExtractor.applyAsByte(a));
     }
 
     /**
@@ -2401,14 +2400,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract short keys from objects;
+     * @param keyExtractor function to extract short keys from objects; must not be {@code null}.
      * @return a comparator that compares by extracted short values in reverse order
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> reversedComparingShort(final ToShortFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return (a, b) -> Short.compare(keyExtractor.applyAsShort(b), keyExtractor.applyAsShort(a));
+        return (Comparator<T> & Serializable) (a, b) -> Short.compare(keyExtractor.applyAsShort(b), keyExtractor.applyAsShort(a));
     }
 
     /**
@@ -2429,14 +2428,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract int keys from objects;
+     * @param keyExtractor function to extract int keys from objects; must not be {@code null}.
      * @return a comparator that compares by extracted int values in reverse order
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> reversedComparingInt(final ToIntFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return (a, b) -> Integer.compare(keyExtractor.applyAsInt(b), keyExtractor.applyAsInt(a));
+        return (Comparator<T> & Serializable) (a, b) -> Integer.compare(keyExtractor.applyAsInt(b), keyExtractor.applyAsInt(a));
     }
 
     /**
@@ -2457,14 +2456,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract long keys from objects;
+     * @param keyExtractor function to extract long keys from objects; must not be {@code null}.
      * @return a comparator that compares by extracted long values in reverse order
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> reversedComparingLong(final ToLongFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return (a, b) -> Long.compare(keyExtractor.applyAsLong(b), keyExtractor.applyAsLong(a));
+        return (Comparator<T> & Serializable) (a, b) -> Long.compare(keyExtractor.applyAsLong(b), keyExtractor.applyAsLong(a));
     }
 
     /**
@@ -2483,14 +2482,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract float keys from objects;
+     * @param keyExtractor function to extract float keys from objects; must not be {@code null}.
      * @return a comparator that compares by extracted float values in reverse order
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> reversedComparingFloat(final ToFloatFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return (a, b) -> Float.compare(keyExtractor.applyAsFloat(b), keyExtractor.applyAsFloat(a));
+        return (Comparator<T> & Serializable) (a, b) -> Float.compare(keyExtractor.applyAsFloat(b), keyExtractor.applyAsFloat(a));
     }
 
     /**
@@ -2509,14 +2508,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract double keys from objects;
+     * @param keyExtractor function to extract double keys from objects; must not be {@code null}.
      * @return a comparator that compares by extracted double values in reverse order
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     public static <T> Comparator<T> reversedComparingDouble(final ToDoubleFunction<? super T> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        return (a, b) -> Double.compare(keyExtractor.applyAsDouble(b), keyExtractor.applyAsDouble(a));
+        return (Comparator<T> & Serializable) (a, b) -> Double.compare(keyExtractor.applyAsDouble(b), keyExtractor.applyAsDouble(a));
     }
 
     /**
@@ -2538,13 +2537,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract Comparable keys from objects;
+     * @param <K> the mutually comparable extracted key type
+     * @param keyExtractor function to extract Comparable keys from objects; must not be {@code null}.
      * @return a comparator that compares by extracted Comparable values in reverse order
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #reversedComparingByIfNotNullOrElseNullsFirst(Function)
      * @see #reversedComparingByIfNotNullOrElseNullsLast(Function)
      */
-    public static <T> Comparator<T> reversedComparingBy(@SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyExtractor)
+    public static <T, K extends Comparable<? super K>> Comparator<T> reversedComparingBy(final Function<? super T, ? extends K> keyExtractor)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
@@ -2568,8 +2568,8 @@ public final class Comparators {
      *
      * @param <T> the type of objects to compare
      * @param <U> the type of the keys extracted for comparison
-     * @param keyExtractor the function to extract keys from objects;
-     * @param keyComparator the comparator used to compare extracted keys;
+     * @param keyExtractor the function to extract keys from objects; must not be {@code null}.
+     * @param keyComparator the comparator used to compare extracted keys; must not be {@code null}.
      * @return a comparator that compares by extracted keys in reverse order
      * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code keyComparator} is {@code null}.
      * @see #comparingBy(Function, Comparator)
@@ -2602,13 +2602,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract Comparable keys from objects;
+     * @param <K> the mutually comparable extracted key type
+     * @param keyExtractor function to extract Comparable keys from objects; must not be {@code null}.
      * @return a comparator with reverse ordering and nulls-first behavior
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     @Beta
-    public static <T> Comparator<T> reversedComparingByIfNotNullOrElseNullsFirst(
-            @SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+    public static <T, K extends Comparable<? super K>> Comparator<T> reversedComparingByIfNotNullOrElseNullsFirst(
+            final Function<? super T, ? extends K> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         @SuppressWarnings("rawtypes")
@@ -2637,13 +2638,14 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param keyExtractor function to extract Comparable keys from objects;
+     * @param <K> the mutually comparable extracted key type
+     * @param keyExtractor function to extract Comparable keys from objects; must not be {@code null}.
      * @return a comparator with reverse ordering and nulls-last behavior
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
     @Beta
-    public static <T> Comparator<T> reversedComparingByIfNotNullOrElseNullsLast(
-            @SuppressWarnings("rawtypes") final Function<? super T, ? extends Comparable> keyExtractor) throws IllegalArgumentException {
+    public static <T, K extends Comparable<? super K>> Comparator<T> reversedComparingByIfNotNullOrElseNullsLast(
+            final Function<? super T, ? extends K> keyExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         @SuppressWarnings("rawtypes")
@@ -2734,7 +2736,6 @@ public final class Comparators {
      * @return a comparator that compares entries by key using reversed cmp
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    @Beta
     public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByKey(final Comparator<? super K> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);
 
@@ -2771,7 +2772,6 @@ public final class Comparators {
      * @return a comparator that compares entries by value using reversed cmp
      * @throws IllegalArgumentException if {@code cmp} is {@code null}.
      */
-    @Beta
     public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByValue(final Comparator<? super V> cmp) throws IllegalArgumentException {
         N.checkArgNotNull(cmp, cs.cmp);
 

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -51,7 +52,7 @@ public class JdkDurationTypeTest extends TestBase {
     @Test
     public void testStringOf_ValidDuration() {
         Duration duration = Duration.ofMillis(1000);
-        assertEquals("1000", durationType.stringOf(duration));
+        assertEquals("PT1S", durationType.stringOf(duration));
     }
 
     @Test
@@ -62,13 +63,13 @@ public class JdkDurationTypeTest extends TestBase {
     @Test
     public void testStringOf_ZeroDuration() {
         Duration duration = Duration.ZERO;
-        assertEquals("0", durationType.stringOf(duration));
+        assertEquals("PT0S", durationType.stringOf(duration));
     }
 
     @Test
     public void testStringOf_NegativeDuration() {
         Duration duration = Duration.ofMillis(-1000);
-        assertEquals("-1000", durationType.stringOf(duration));
+        assertEquals("PT-1S", durationType.stringOf(duration));
     }
 
     @Test
@@ -206,7 +207,7 @@ public class JdkDurationTypeTest extends TestBase {
         Duration duration = Duration.ofMillis(1000);
 
         durationType.appendTo(sb, duration);
-        assertEquals("1000", sb.toString());
+        assertEquals("PT1S", sb.toString());
     }
 
     @Test
@@ -215,6 +216,29 @@ public class JdkDurationTypeTest extends TestBase {
 
         durationType.appendTo(sb, null);
         assertEquals("null", sb.toString());
+    }
+
+    // --- review fixes 2026-09-06 (T9-08) ---
+
+    @Test
+    public void reviewFixes20260906_T908_documentedNumbersToLongGrammarForLegacyText() {
+        // out-of-range legacy millisecond text: ArithmeticException (the Numbers.toLong contract), now documented
+        assertThrows(ArithmeticException.class, () -> type.valueOf("9223372036854775808"));
+        assertThrows(ArithmeticException.class, () -> type.valueOf("-9223372036854775809"));
+        assertEquals(Duration.ofMillis(Long.MAX_VALUE), type.valueOf("9223372036854775807"));
+
+        // documented leniency of the legacy grammar: L suffix, 0x hex, explicit plus sign
+        assertEquals(Duration.ofSeconds(1), type.valueOf("1000L"));
+        assertEquals(Duration.ofSeconds(1), type.valueOf("0x3E8"));
+        assertEquals(Duration.ofSeconds(1), type.valueOf("+1000"));
+
+        // surrounding whitespace stays NumberFormatException; ISO text is unaffected
+        assertThrows(NumberFormatException.class, () -> type.valueOf(" 1000"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("1000 "));
+        assertEquals(Duration.ofSeconds(1), type.valueOf("PT1S"));
+
+        assertNull(type.valueOf((String) null));
+        assertNull(type.valueOf(""));
     }
 
 }

@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class NotNullTest extends TestBase {
-    static class TestClass {
+    public static class TestClass {
         @NotNull
         public String method(@NotNull String param) {
             return param;

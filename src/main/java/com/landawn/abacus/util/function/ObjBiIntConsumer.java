@@ -45,7 +45,7 @@ import com.landawn.abacus.util.cs;
  * @see java.util.function.ObjIntConsumer
  */
 @FunctionalInterface
-public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, RuntimeException> { // NOSONAR
+public interface ObjBiIntConsumer<T> extends Throwables.ObjBiIntConsumer<T, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Performs this operation on the given arguments.
      *

@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 
@@ -48,8 +49,9 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * This constructor is package-private and should only be called by TypeFactory or subclasses.
      *
      * @param typeName the name to use for this type
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    TimestampType(final String typeName) {
+    TimestampType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
@@ -86,9 +88,10 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @param obj the object to convert to Timestamp
      * @return a Timestamp representation of the object, or {@code null} if {@code obj} is {@code null}
      *         or is a value whose string form {@link #valueOf(String)} maps to {@code null}
+     * @throws IllegalArgumentException if the non-null value is not a supported date/time representation, or a non-lenient calendar contains invalid fields.
      */
     @Override
-    public Timestamp valueOf(final Object obj) {
+    public Timestamp valueOf(final Object obj) throws IllegalArgumentException {
         if (obj instanceof Number) {
             return new Timestamp(((Number) obj).longValue());
         } else if (obj instanceof Timestamp ts) {
@@ -123,40 +126,68 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * <p>This method parses the millisecond-precision representation produced by {@code stringOf}. Consequently,
      * timestamps whose nanoseconds are not millisecond-aligned are truncated when converted through
      * {@code stringOf}; a {@link Timestamp#toString()} representation with up to nine fractional digits is also
-     * accepted and preserves the supplied nanosecond precision.</p>
+     * accepted and preserves the supplied nanosecond precision. Purely numeric input (possible epoch
+     * milliseconds) is converted via {@code Dates.createTimestamp(long)}.</p>
      *
      * @param str the string to parse
      * @return a Timestamp parsed from the string, or {@code null} if {@code str} is {@code null}, empty, or the literal {@code "null"}
+     * @throws IllegalArgumentException if a nonempty value other than a recognized null or system-time token cannot be parsed as a supported
+     *         date/time or epoch-millisecond representation.
      * @see #valueOf(Object)
      * @see #stringOf(java.util.Date)
      */
+    @MayReturnNull
     @Override
-    public Timestamp valueOf(final String str) {
-        return isNullDateTime(str) ? null : (isSysTime(str) ? Dates.currentTimestamp() : Dates.parseTimestamp(str));
+    public Timestamp valueOf(final String str) throws IllegalArgumentException {
+        if (isNullDateTime(str)) {
+            return null; // NOSONAR
+        }
+
+        if (isSysTime(str)) {
+            return Dates.currentTimestamp();
+        }
+
+        if (isPossibleMillis(str)) {
+            try {
+                return Dates.createTimestamp(Long.parseLong(str));
+            } catch (final NumberFormatException e) {
+                // not a pure long after all; fall through to formatted parsing
+            }
+        }
+
+        return Dates.parseToTimestamp(str);
     }
 
     /**
      * Parses a character array into a Timestamp.
      * <p>
      * This method first attempts to parse the character array as a long value representing
-     * milliseconds since epoch. If that fails, it converts the character array to a string
-     * and parses it using the string parsing logic.
+     * milliseconds since epoch (digits ending in a digit, so a trailing {@code L}/{@code d}/{@code f} type suffix is
+     * not accepted). If that fails, it converts the character array to a string and parses it with
+     * {@link #valueOf(String)}, so both overloads give the same answer for the same text.
      *
      * @param cbuf the character array containing the timestamp representation
      * @param offset the starting position in the character array
      * @param len the number of characters to parse
      * @return a Timestamp parsed from the character array, or {@code null} if the array is {@code null} or length is 0
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
+     * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see         {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
+    @MayReturnNull
     @Override
-    public Timestamp valueOf(final char[] cbuf, final int offset, final int len) {
+    public Timestamp valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, IllegalArgumentException {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
 
+        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
+        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
+        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
+        // IllegalArgumentException.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createTimestamp(parseLong(cbuf, offset, len));
-            } catch (final NumberFormatException e) {
+            } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
@@ -181,10 +212,11 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
      * @return the Timestamp value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Timestamp get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Timestamp get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getTimestamp(columnIndex);
     }
 
@@ -205,10 +237,11 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @param rs the ResultSet to read from
      * @param columnName the column label/name
      * @return the Timestamp value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the column label is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Timestamp get(final ResultSet rs, final String columnName) throws SQLException {
+    public Timestamp get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getTimestamp(columnName);
     }
 
@@ -228,10 +261,11 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the Timestamp value to set, may be null
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Timestamp x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Timestamp x) throws NullPointerException, SQLException {
         stmt.setTimestamp(columnIndex, x);
     }
 
@@ -251,10 +285,11 @@ public class TimestampType extends AbstractDateType<Timestamp> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter
      * @param x the Timestamp value to set, may be null
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Timestamp x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Timestamp x) throws NullPointerException, SQLException {
         stmt.setTimestamp(parameterName, x);
     }
 }

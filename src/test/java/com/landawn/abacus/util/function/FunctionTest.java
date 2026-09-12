@@ -43,7 +43,7 @@ public class FunctionTest extends TestBase {
     @Test
     public void testComposeRejectsNullFunctionAtComposition() {
         Function<Integer, String> toString = n -> String.valueOf(n);
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> toString.compose(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> toString.compose(null));
     }
 
     @Test
@@ -72,7 +72,7 @@ public class FunctionTest extends TestBase {
     @Test
     public void testAndThenRejectsNullFunctionAtComposition() {
         Function<String, Integer> length = String::length;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> length.andThen(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> length.andThen(null));
     }
 
     @Test

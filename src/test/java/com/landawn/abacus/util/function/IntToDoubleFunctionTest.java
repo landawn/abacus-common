@@ -27,8 +27,8 @@ public class IntToDoubleFunctionTest extends TestBase {
         assertEquals(100.0, IntToDoubleFunction.DEFAULT.applyAsDouble(100));
         assertEquals(0.0, IntToDoubleFunction.DEFAULT.applyAsDouble(0));
         assertEquals(-50.0, IntToDoubleFunction.DEFAULT.applyAsDouble(-50));
-        assertEquals((double) Integer.MAX_VALUE, IntToDoubleFunction.DEFAULT.applyAsDouble(Integer.MAX_VALUE));
-        assertEquals((double) Integer.MIN_VALUE, IntToDoubleFunction.DEFAULT.applyAsDouble(Integer.MIN_VALUE));
+        assertEquals(Integer.MAX_VALUE, IntToDoubleFunction.DEFAULT.applyAsDouble(Integer.MAX_VALUE));
+        assertEquals(Integer.MIN_VALUE, IntToDoubleFunction.DEFAULT.applyAsDouble(Integer.MIN_VALUE));
     }
 
     @Test

@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IntList;
@@ -72,7 +73,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<IntList> type = TypeFactory.getType(IntList.class);
-     * Type<Integer> elemType = type.elementType();
+     * Type<?> elemType = type.elementType();
      * // elemType can be used for element-level operations
      * }</pre>
      *
@@ -157,13 +158,16 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
-     * @return the parsed IntList, or {@code null} if the input string is {@code null} or empty
-     * @throws NumberFormatException if any element in the string cannot be parsed as an integer
+     * @return the parsed IntList, or {@code null} if the input string is {@code null}, empty or blank
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
+     * @throws NumberFormatException if an element is not a valid integer literal
+     * @throws ArithmeticException if an element is out of the {@code int} range (e.g. {@code 2147483648})
      * @see #valueOf(Object)
      * @see #stringOf(IntList)
      */
+    @MayReturnNull
     @Override
-    public IntList valueOf(final String str) {
+    public IntList valueOf(final String str) throws IllegalArgumentException, NumberFormatException, ArithmeticException {
         if (Strings.isEmpty(str)) {
             return null;
         }
@@ -198,7 +202,8 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the IntList to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -210,7 +215,7 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final IntList x) throws IOException {
+    public void appendTo(final Appendable appendable, final IntList x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -255,10 +260,11 @@ public final class PrimitiveIntListType extends AbstractPrimitiveListType<IntLis
      * @param writer the CharacterWriter to write to
      * @param x the IntList to write
      * @param config the serialization configuration (passed through to the array type writer)
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final IntList x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final IntList x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

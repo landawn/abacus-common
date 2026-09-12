@@ -14,9 +14,11 @@
 
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -26,6 +28,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
@@ -90,5 +93,34 @@ public class PrimitiveBooleanArrayTypeTest extends TestBase {
     @Test
     public void test_isPrimitiveArray() {
         assertTrue(type.isPrimitiveArray());
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfMapsNullAndUnknownTokensToFalse() {
+        // documented contract (T7-05): the boolean element type's lenient parse; a primitive array cannot hold null
+        assertArrayEquals(new boolean[] { false }, type.valueOf("[null]"));
+        assertArrayEquals(new boolean[] { true, false }, type.valueOf("[1, null]"));
+        assertArrayEquals(new boolean[] { false }, type.valueOf("[NULL]"));
+        assertArrayEquals(new boolean[] { false }, type.valueOf("[yes]"));
+        assertArrayEquals(new boolean[] { true, false, false, true, true }, type.valueOf("[Y, n, T, y, TRUE]"));
+        assertArrayEquals(new boolean[] { true, false, false }, type.valueOf("[1, null, yes]"));
+        assertArrayEquals(new boolean[] { true, false }, type.valueOf((Object) new Boolean[] { true, null }));
+        assertArrayEquals(new boolean[] { true, false, true }, type.valueOf(type.stringOf(new boolean[] { true, false, true })));
+        assertEquals(0, type.valueOf("[]").length);
+        assertNull(type.valueOf((String) null));
+    }
+
+    @Test
+    public void reviewFixes20260906_collectionToArrayRejectsNullAndForeignElementsAndHashCodeOfNullIsZero() {
+        assertThrows(NullPointerException.class, () -> type.collectionToArray(Arrays.asList((Boolean) null)));
+        assertThrows(NullPointerException.class, () -> type.collectionToArray(Arrays.asList(true, null)));
+        assertThrows(ClassCastException.class, () -> type.collectionToArray(Arrays.asList("zzz")));
+        assertThrows(ClassCastException.class, () -> type.collectionToArray(Arrays.asList(true, 1)));
+        assertArrayEquals(new boolean[] { true, false }, type.collectionToArray(Arrays.asList(true, false)));
+        assertEquals(0, type.collectionToArray(Arrays.asList()).length);
+        assertNull(type.collectionToArray(null));
+
+        assertEquals(0, type.hashCode(null));
+        assertEquals(Arrays.hashCode(new boolean[] { true, false }), type.hashCode(new boolean[] { true, false }));
     }
 }

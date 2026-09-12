@@ -117,11 +117,19 @@ import com.landawn.abacus.util.function.IntFunction;
  * stateful and sequential-only. A function supplied through a registration method retains the
  * thread-safety characteristics of the caller-provided function.</p>
  *
+ * <p>This class is a top-level sibling of {@link Fn}, not a nested type. Use {@link Fn} for the
+ * general functional-interface factory and {@link Fnn} for {@link Throwables} variants that can
+ * declare checked exceptions. For zero-argument collection suppliers see {@link Suppliers}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see Suppliers
+ * @see LongSuppliers
  * @see java.util.function.IntFunction
  * @see java.util.Collection
  * @see java.util.Map
  */
-@SuppressWarnings({ "java:S1694" })
+@SuppressWarnings("java:S1694")
 public final class IntFunctions {
     /** Shared factory function that creates a new {@code boolean[]} of the given length. */
     private static final IntFunction<boolean[]> BOOLEAN_ARRAY = boolean[]::new;
@@ -895,6 +903,7 @@ public final class IntFunctions {
      * IntFunction<LinkedBlockingQueue<String>> queueCreator = IntFunctions.ofLinkedBlockingQueue();
      * LinkedBlockingQueue<String> queue = queueCreator.apply(100);   // returns LinkedBlockingQueue with capacity 100
      * LinkedBlockingQueue<String> bounded = queueCreator.apply(1);   // returns LinkedBlockingQueue with capacity 1
+     * queueCreator.apply(0);                                         // throws IllegalArgumentException (capacity must be >= 1)
      * }</pre>
      *
      * @param <T> the type of elements to be stored in the LinkedBlockingQueue
@@ -917,6 +926,7 @@ public final class IntFunctions {
      * IntFunction<ArrayBlockingQueue<String>> queueCreator = IntFunctions.ofArrayBlockingQueue();
      * ArrayBlockingQueue<String> queue = queueCreator.apply(100);   // returns ArrayBlockingQueue with capacity 100
      * ArrayBlockingQueue<String> bounded = queueCreator.apply(1);   // returns ArrayBlockingQueue with capacity 1
+     * queueCreator.apply(0);                                        // throws IllegalArgumentException (capacity must be >= 1)
      * }</pre>
      *
      * @param <T> the type of elements to be stored in the ArrayBlockingQueue
@@ -939,6 +949,7 @@ public final class IntFunctions {
      * IntFunction<LinkedBlockingDeque<String>> dequeCreator = IntFunctions.ofLinkedBlockingDeque();
      * LinkedBlockingDeque<String> deque = dequeCreator.apply(100);   // returns LinkedBlockingDeque with capacity 100
      * LinkedBlockingDeque<String> bounded = dequeCreator.apply(1);   // returns LinkedBlockingDeque with capacity 1
+     * dequeCreator.apply(0);                                         // throws IllegalArgumentException (capacity must be >= 1)
      * }</pre>
      *
      * @param <T> the type of elements to be stored in the LinkedBlockingDeque
@@ -984,6 +995,7 @@ public final class IntFunctions {
      * IntFunction<PriorityQueue<String>> queueCreator = IntFunctions.ofPriorityQueue();
      * PriorityQueue<String> queue = queueCreator.apply(100);   // returns PriorityQueue with capacity 100
      * PriorityQueue<String> small = queueCreator.apply(1);     // returns PriorityQueue with capacity 1
+     * queueCreator.apply(0);                                   // throws IllegalArgumentException (capacity must be >= 1)
      * }</pre>
      *
      * @param <T> the type of elements to be stored in the PriorityQueue
@@ -1290,6 +1302,9 @@ public final class IntFunctions {
      * assert array1 == array2;                      // same instance reused
      * }</pre>
      *
+     * <p>The returned function throws {@link NegativeArraySizeException} if its length argument is negative
+     * before a backing array has been successfully initialized.</p>
+     *
      * @return a stateful {@code IntFunction} that, given a length, lazily creates and then reuses a
      *         {@code DisposableObjArray} of that length
      */
@@ -1300,8 +1315,12 @@ public final class IntFunctions {
         return new IntFunction<>() {
             private DisposableObjArray ret = null;
 
+            /**
+             * {@inheritDoc}
+             * @throws NegativeArraySizeException if {@code len} is negative and no backing array has yet been initialized
+             */
             @Override
-            public DisposableObjArray apply(final int len) {
+            public DisposableObjArray apply(final int len) throws NegativeArraySizeException {
                 if (ret == null) {
                     ret = DisposableObjArray.wrap(new Object[len]);
                 }
@@ -1331,25 +1350,35 @@ public final class IntFunctions {
      * assert array1 == array2;                           // same instance reused
      * }</pre>
      *
+     * <p>The returned function throws {@link NegativeArraySizeException} if its length argument is negative
+     * before a backing array has been successfully initialized. It throws {@link IllegalArgumentException}
+     * when allocation would add a dimension to a component type that already has 255 array dimensions.</p>
+     *
      * @param <T> the component type of the array
      * @param componentType the {@code Class} object representing the component type of the array; must not be {@code null}
      * @return a stateful {@code IntFunction} that, given a length, lazily creates and then reuses a
      *         {@code DisposableArray} of that component type and length
-     * @throws NullPointerException if {@code componentType} is {@code null}
-     * @throws IllegalArgumentException if {@code componentType} is primitive.
+     *
+     * @throws IllegalArgumentException if {@code componentType} is {@code null}
+     *         or if {@code componentType} is primitive.
      */
     @Beta
     @SequentialOnly
     @Stateful
-    public static <T> IntFunction<DisposableArray<T>> ofDisposableArray(final Class<T> componentType) {
-        N.requireNonNull(componentType, cs.componentType);
+    public static <T> IntFunction<DisposableArray<T>> ofDisposableArray(final Class<T> componentType) throws IllegalArgumentException {
+        N.checkArgNotNull(componentType, cs.componentType);
         N.checkArgument(!componentType.isPrimitive(), "'componentType' must not be primitive: {}", componentType);
 
         return new IntFunction<>() {
             private DisposableArray<T> ret = null;
 
+            /**
+             * {@inheritDoc}
+             * @throws NegativeArraySizeException if {@code len} is negative and no backing array has yet been initialized
+             * @throws IllegalArgumentException if no backing array has yet been initialized and {@code componentType} already has 255 array dimensions
+             */
             @Override
-            public DisposableArray<T> apply(final int len) {
+            public DisposableArray<T> apply(final int len) throws NegativeArraySizeException, IllegalArgumentException {
                 if (ret == null) {
                     ret = DisposableArray.wrap(N.newArray(componentType, len));
                 }
@@ -1360,17 +1389,47 @@ public final class IntFunctions {
     }
 
     @SuppressWarnings("rawtypes")
-    private static final Map<Class<?>, IntFunction> collectionCreatorPool = new ConcurrentHashMap<>();
+    private static final ClassValue<java.util.concurrent.atomic.AtomicReference<IntFunction>> collectionCreatorPool = new ClassValue<>() {
+        @Override
+        protected java.util.concurrent.atomic.AtomicReference<IntFunction> computeValue(final Class<?> type) {
+            return new java.util.concurrent.atomic.AtomicReference<>();
+        }
+    };
 
     /**
-     * Returns an {@code IntFunction} that creates {@link Collection} instances of the specified target type
-     * with the given initial capacity.
+     * Returns an {@code IntFunction} that creates {@link Collection} instances compatible with the specified
+     * target type with the given initial capacity.
      *
      * <p>This method supports all standard {@code Collection} implementations and uses reflection to
      * find an appropriate constructor or factory for custom types. The returned function is cached
      * per target type for performance. Discovering a custom constructor does not invoke it; if a
      * constructor later fails for a requested capacity, the returned function throws an
      * {@link IllegalArgumentException} with the constructor failure as its cause.</p>
+     *
+     * <p>Supported target types and the creator each one selects:</p>
+     * <ul>
+     *   <li>{@code Collection}, {@code List}, {@code ArrayList}, {@code AbstractCollection}, {@code AbstractList} - an {@code ArrayList} creator</li>
+     *   <li>{@code LinkedList} - a {@code LinkedList} creator</li>
+     *   <li>{@code Set}, {@code HashSet}, {@code AbstractSet} - a {@code HashSet} creator</li>
+     *   <li>{@code LinkedHashSet} - a {@code LinkedHashSet} creator</li>
+     *   <li>{@code ConcurrentSkipListSet} - a {@code ConcurrentSkipListSet} creator</li>
+     *   <li>{@code SortedSet}, {@code NavigableSet} interfaces - a {@code TreeSet} creator; a concrete sorted-set subtype is created as its own runtime type</li>
+     *   <li>{@code Queue}, {@code Deque}, {@code AbstractQueue} - a {@code LinkedList} creator (as {@code Deque})</li>
+     *   <li>{@code BlockingQueue}, {@code LinkedBlockingQueue} - a {@code LinkedBlockingQueue} creator</li>
+     *   <li>{@code ArrayBlockingQueue} - an {@code ArrayBlockingQueue} creator</li>
+     *   <li>{@code BlockingDeque}, {@code LinkedBlockingDeque} - a {@code LinkedBlockingDeque} creator</li>
+     *   <li>{@code ConcurrentLinkedQueue} - a {@code ConcurrentLinkedQueue} creator</li>
+     *   <li>{@code PriorityQueue} - a {@code PriorityQueue} creator</li>
+     *   <li>{@code ImmutableList} (and subtypes) - an {@code ArrayList} creator</li>
+     *   <li>{@code ImmutableSortedSet}, {@code ImmutableNavigableSet} (and subtypes) - a {@code TreeSet} creator, so the ordering they guarantee is not dropped</li>
+     *   <li>{@code ImmutableSet} (and other subtypes) - a {@code HashSet} creator</li>
+     * </ul>
+     * <p>The creator is therefore not always an instance of {@code targetType}: an {@code AbstractQueue} target
+     * yields a {@code LinkedList}, which does not extend {@code AbstractQueue}, and each {@code Immutable*}
+     * target listed above yields a plain mutable JDK collection, meant to be populated and then wrapped -
+     * casting such a result to the requested {@code Immutable*} type throws a {@link ClassCastException}.
+     * {@code ImmutableCollection} itself has no creator and is rejected with an {@code IllegalArgumentException}.
+     * Every other supported target type is created as its own type.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1380,23 +1439,32 @@ public final class IntFunctions {
      * IntFunction<? extends Collection<String>> hashFunc = IntFunctions.ofCollection(HashSet.class);
      * Collection<String> set = hashFunc.apply(50);   // returns HashSet sized for 50 elements
      *
+     * Collection<String> notImmutable = IntFunctions.<String> ofCollection(ImmutableList.class).apply(10);
+     * // notImmutable is a MUTABLE java.util.ArrayList; casting it to ImmutableList throws ClassCastException
+     *
      * // Only Collection classes are accepted, so a non-Collection argument is a compile error;
      * // the "not a Collection" check below guards raw-typed calls.
      * IntFunctions.ofCollection(java.util.AbstractSequentialList.class);   // throws IllegalArgumentException (abstract, no usable creator)
-     * IntFunctions.ofCollection(null);                                     // throws NullPointerException
+     * IntFunctions.ofCollection(null);                                     // throws IllegalArgumentException
      * }</pre>
+     *
+     * <p>Cached factories have the target class lifetime. Holding a returned factory or explicitly capturing other
+     * classes in a registered callback can retain those classes for as long as that factory remains reachable.</p>
      *
      * @param <T> the type of elements in the collection
      * @param targetType the {@code Class} object representing the desired {@code Collection} implementation, must not be {@code null}
-     * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code Collection}
-     *         using the selected implementation for {@code targetType}
-     * @throws IllegalArgumentException if {@code targetType} is not a {@code Collection} class, is abstract with no
+     * @return an {@code IntFunction} that, given an initial capacity, creates a new mutable {@code Collection}
+     *         using the creator selected for {@code targetType} as listed above
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}
+     *         or if {@code targetType} is not a {@code Collection} class, is abstract with no
      *         suitable constructor, or no appropriate factory can be found.
-     * @throws NullPointerException if {@code targetType} is {@code null}
      */
     @SuppressWarnings("rawtypes")
     public static <T> IntFunction<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetType) throws IllegalArgumentException {
-        IntFunction ret = collectionCreatorPool.get(targetType);
+        N.checkArgNotNull(targetType, cs.targetType);
+
+        final java.util.concurrent.atomic.AtomicReference<IntFunction> slot = collectionCreatorPool.get(targetType);
+        IntFunction ret = slot.get();
 
         if (ret == null) {
             N.checkArgument(Collection.class.isAssignableFrom(targetType), "'targetType': {} is not a Collection class", targetType);
@@ -1419,19 +1487,24 @@ public final class IntFunctions {
                 // An arbitrary abstract subtype is not interchangeable with TreeSet and must fail below.
                 ret = ofSortedSet();
             } else if (Queue.class.equals(targetType) || AbstractQueue.class.equals(targetType) || Deque.class.equals(targetType)) {
-                return ofDeque();
+                ret = ofDeque();
             } else if (BlockingQueue.class.equals(targetType) || LinkedBlockingQueue.class.equals(targetType)) {
-                return ofLinkedBlockingQueue();
+                ret = ofLinkedBlockingQueue();
             } else if (ArrayBlockingQueue.class.equals(targetType)) {
-                return ofArrayBlockingQueue();
+                ret = ofArrayBlockingQueue();
             } else if (BlockingDeque.class.equals(targetType) || LinkedBlockingDeque.class.equals(targetType)) {
-                return ofLinkedBlockingDeque();
+                ret = ofLinkedBlockingDeque();
             } else if (ConcurrentLinkedQueue.class.equals(targetType)) {
-                return ofConcurrentLinkedQueue();
+                ret = ofConcurrentLinkedQueue();
             } else if (PriorityQueue.class.equals(targetType)) {
-                return ofPriorityQueue();
+                ret = ofPriorityQueue();
             } else if (ImmutableList.class.isAssignableFrom(targetType)) {
                 ret = ofList();
+            } else if (ImmutableSortedSet.class.isAssignableFrom(targetType)) {
+                // Must precede the ImmutableSet branch (like Suppliers.ofCollection): ImmutableSortedSet
+                // and ImmutableNavigableSet are ImmutableSets, so falling through to ofSet() would drop
+                // the ordering they guarantee.
+                ret = ofSortedSet();
             } else if (ImmutableSet.class.isAssignableFrom(targetType)) {
                 ret = ofSet();
             } else if (Modifier.isAbstract(targetType.getModifiers())) {
@@ -1485,11 +1558,9 @@ public final class IntFunctions {
                 }
             }
 
-            // putIfAbsent so a concurrent registerForCollection cannot be silently overwritten.
-            final IntFunction existing = collectionCreatorPool.putIfAbsent(targetType, ret);
-
-            if (existing != null) {
-                ret = existing;
+            // Publish once so concurrent discovery and registration share the same winning factory.
+            if (!slot.compareAndSet(null, ret)) {
+                ret = slot.get();
             }
         }
 
@@ -1497,13 +1568,20 @@ public final class IntFunctions {
     }
 
     @SuppressWarnings("rawtypes")
-    private static final Map<Class<?>, IntFunction> mapCreatorPool = new ConcurrentHashMap<>();
+    private static final ClassValue<java.util.concurrent.atomic.AtomicReference<IntFunction>> mapCreatorPool = new ClassValue<>() {
+        @Override
+        protected java.util.concurrent.atomic.AtomicReference<IntFunction> computeValue(final Class<?> type) {
+            return new java.util.concurrent.atomic.AtomicReference<>();
+        }
+    };
 
     /**
      * Returns an {@code IntFunction} that creates {@link Map} instances compatible with the specified
      * target type with the given initial capacity.
      * {@code Map}, {@code AbstractMap}, {@code HashMap}, {@code EnumMap}, and {@code ImmutableMap}
-     * targets use a {@code HashMap} creator.
+     * targets use a {@code HashMap} creator, except {@code ImmutableSortedMap} and
+     * {@code ImmutableNavigableMap} (and their subtypes), which use a {@code TreeMap} creator so that the
+     * ordering they guarantee is not dropped.
      *
      * <p>This method supports all standard {@code Map} implementations and uses reflection to find
      * an appropriate constructor or factory for custom types. The returned function is cached per
@@ -1522,21 +1600,27 @@ public final class IntFunctions {
      * // Only Map classes are accepted, so a non-Map argument is a compile error; the
      * // "not a Map" check below guards raw-typed calls. An abstract Map with no usable
      * // constructor (e.g. a custom abstract Map subclass) throws IllegalArgumentException.
-     * IntFunctions.ofMap(null);                         // throws NullPointerException
+     * IntFunctions.ofMap(null);                         // throws IllegalArgumentException
      * }</pre>
+     *
+     * <p>Cached factories have the target class lifetime. Holding a returned factory or explicitly capturing other
+     * classes in a registered callback can retain those classes for as long as that factory remains reachable.</p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
      * @param targetType the {@code Class} object representing the desired {@code Map} implementation, must not be {@code null}
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code Map}
      *         using the selected implementation for {@code targetType}
-     * @throws IllegalArgumentException if {@code targetType} is not a {@code Map} class, is abstract with no suitable
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}
+     *         or if {@code targetType} is not a {@code Map} class, is abstract with no suitable
      *         constructor, or no appropriate factory can be found.
-     * @throws NullPointerException if {@code targetType} is {@code null}
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> IntFunction<? extends Map<K, V>> ofMap(final Class<? extends Map> targetType) throws IllegalArgumentException {
-        IntFunction ret = mapCreatorPool.get(targetType);
+        N.checkArgNotNull(targetType, cs.targetType);
+
+        final java.util.concurrent.atomic.AtomicReference<IntFunction> slot = mapCreatorPool.get(targetType);
+        IntFunction ret = slot.get();
 
         if (ret == null) {
             N.checkArgument(Map.class.isAssignableFrom(targetType), "'targetType': {} is not a Map class", targetType);
@@ -1559,6 +1643,11 @@ public final class IntFunctions {
                 ret = ofConcurrentHashMap();
             } else if (BiMap.class.equals(targetType)) {
                 ret = ofBiMap();
+            } else if (ImmutableSortedMap.class.isAssignableFrom(targetType)) {
+                // Must precede the ImmutableMap branch (like Suppliers.ofMap): ImmutableSortedMap and
+                // ImmutableNavigableMap are ImmutableMaps, so falling through to ofMap() would drop the
+                // ordering they guarantee.
+                ret = ofSortedMap();
             } else if (ImmutableMap.class.isAssignableFrom(targetType)) {
                 ret = ofMap();
             } else if (Modifier.isAbstract(targetType.getModifiers())) {
@@ -1610,11 +1699,9 @@ public final class IntFunctions {
                 }
             }
 
-            // putIfAbsent so a concurrent registerForMap cannot be silently overwritten.
-            final IntFunction existing = mapCreatorPool.putIfAbsent(targetType, ret);
-
-            if (existing != null) {
-                ret = existing;
+            // Publish once so concurrent discovery and registration share the same winning factory.
+            if (!slot.compareAndSet(null, ret)) {
+                ret = slot.get();
             }
         }
 
@@ -1637,6 +1724,9 @@ public final class IntFunctions {
      * IntFunctions.registerForCollection(ArrayList.class, null);             // throws IllegalArgumentException
      * }</pre>
      *
+     * <p>Cached factories have the target class lifetime. Holding a returned factory or explicitly capturing other
+     * classes in a registered callback can retain those classes for as long as that factory remains reachable.</p>
+     *
      * @param <T> the type of Collection to register
      * @param targetClass the {@code Class} object representing the {@code Collection} type to register, must not be {@code null}
      * @param creator the {@code IntFunction} that creates instances of the target class with the specified capacity, must not be {@code null}
@@ -1655,9 +1745,9 @@ public final class IntFunctions {
             throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
         }
 
-        // putIfAbsent: a check-then-put pair could overwrite a concurrent registration while still
+        // Atomic publication: a check-then-put pair could overwrite a concurrent registration while still
         // reporting failure. Matches the hardened Suppliers.registerForCollection.
-        return collectionCreatorPool.putIfAbsent(targetClass, Fn.from(creator)) == null;
+        return collectionCreatorPool.get(targetClass).compareAndSet(null, Fn.from(creator));
     }
 
     /**
@@ -1675,6 +1765,9 @@ public final class IntFunctions {
      * IntFunctions.registerForMap(null, HashMap::new);            // throws IllegalArgumentException
      * IntFunctions.registerForMap(HashMap.class, null);           // throws IllegalArgumentException
      * }</pre>
+     *
+     * <p>Cached factories have the target class lifetime. Holding a returned factory or explicitly capturing other
+     * classes in a registered callback can retain those classes for as long as that factory remains reachable.</p>
      *
      * @param <T> the type of Map to register
      * @param targetClass the {@code Class} object representing the {@code Map} type to register, must not be {@code null}
@@ -1694,9 +1787,9 @@ public final class IntFunctions {
             throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
         }
 
-        // putIfAbsent: a check-then-put pair could overwrite a concurrent registration while still
+        // Atomic publication: a check-then-put pair could overwrite a concurrent registration while still
         // reporting failure. Matches the hardened Suppliers.registerForMap.
-        return mapCreatorPool.putIfAbsent(targetClass, Fn.from(creator)) == null;
+        return mapCreatorPool.get(targetClass).compareAndSet(null, Fn.from(creator));
     }
 
     /**
@@ -1714,7 +1807,7 @@ public final class IntFunctions {
      * @deprecated unsupported operation
      */
     @Deprecated
-    public static IntFunction<ImmutableList<?>> ofImmutableList() {
+    public static IntFunction<ImmutableList<?>> ofImmutableList() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -1733,7 +1826,7 @@ public final class IntFunctions {
      * @deprecated unsupported operation
      */
     @Deprecated
-    public static IntFunction<ImmutableSet<?>> ofImmutableSet() {
+    public static IntFunction<ImmutableSet<?>> ofImmutableSet() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
@@ -1752,7 +1845,7 @@ public final class IntFunctions {
      * @deprecated unsupported operation
      */
     @Deprecated
-    public static IntFunction<ImmutableMap<?, ?>> ofImmutableMap() {
+    public static IntFunction<ImmutableMap<?, ?>> ofImmutableMap() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

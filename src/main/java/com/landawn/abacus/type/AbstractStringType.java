@@ -23,7 +23,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -48,8 +50,9 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * Constructs an {@code AbstractStringType} with the specified type name.
      *
      * @param typeName the name of the string type (e.g., "String")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractStringType(final String typeName) {
+    protected AbstractStringType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
@@ -119,9 +122,10 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @param len the number of characters to include
      * @return a new {@code String} from the specified characters, {@code null} if {@code cbuf} is
      *         {@code null}, or an empty string if {@code cbuf} is empty or {@code len} is {@code 0}
+     * @throws IndexOutOfBoundsException if {@code cbuf} is nonempty, {@code len} is nonzero, and the requested region is outside the buffer.
      */
     @Override
-    public String valueOf(final char[] cbuf, final int offset, final int len) {
+    public String valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException {
         return cbuf == null ? null : ((cbuf.length == 0 || len == 0) ? Strings.EMPTY : String.valueOf(cbuf, offset, len));
     }
 
@@ -133,20 +137,24 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * <ul>
      *   <li>{@code null} — returns {@code null}</li>
      *   <li>{@link java.io.Reader} — reads all content and returns it as a {@code String}</li>
-     *   <li>{@link java.sql.Clob} — extracts character data via {@link java.sql.Clob#getSubString} and always calls
+     *   <li>{@link java.sql.Clob} — extracts character data via {@link java.sql.Clob#getSubString} (a zero-length
+     *       {@code Clob} yields an empty string without calling {@code getSubString}) and always calls
      *       {@link java.sql.Clob#free()}; supplying a {@code Clob} transfers ownership to this method</li>
      *   <li>All other types — uses the type-specific {@code stringOf} conversion</li>
      * </ul>
      *
      * @param obj the object to convert, may be {@code null}
-     * @return the {@code String} representation of the object, or {@code null} if {@code obj} is {@code null}
-     * @throws com.landawn.abacus.exception.UncheckedIOException if an I/O error occurs while reading a {@code Reader}
-     * @throws UncheckedSQLException if a SQL error occurs while reading or freeing a {@code Clob}
+     * @return the {@code String} representation of the object, an empty string for a zero-length {@code Clob}, or
+     *         {@code null} if {@code obj} is {@code null}
+     * @throws UncheckedIOException if {@code obj} is a {@code Reader} and reading its characters to the end fails
+     * @throws UncheckedSQLException if {@code obj} is a {@code Clob} and obtaining its length or substring fails, or freeing it fails
+     *         when no earlier failure is propagating
      * @throws UnsupportedOperationException if a {@code Clob} is too large to convert (exceeds {@link Integer#MAX_VALUE} characters)
      */
+    @MayReturnNull
     @SuppressFBWarnings
     @Override
-    public String valueOf(final Object obj) {
+    public String valueOf(final Object obj) throws UncheckedIOException, UncheckedSQLException, UnsupportedOperationException {
         if (obj == null) {
             return null; // NOSONAR
         } else if (obj instanceof Reader reader) {
@@ -159,7 +167,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
                 if (len > Integer.MAX_VALUE) {
                     throw new UnsupportedOperationException("Clob too large to convert to String: " + len + " characters");
                 }
-                return clob.getSubString(1, (int) len);
+                // getSubString(1, 0) is rejected by e.g. SerialClob on a zero-length lob; stay inside the try so free() still runs
+                return len == 0 ? Strings.EMPTY : clob.getSubString(1, (int) len);
             } catch (final SQLException e) {
                 final UncheckedSQLException uncheckedException = new UncheckedSQLException(e);
                 primaryException = uncheckedException;
@@ -197,10 +206,11 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @param rs the {@code ResultSet} to retrieve the value from
      * @param columnIndex the column index (1-based) of the value to retrieve
      * @return the {@code String} value at the specified column, or {@code null} if the value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public String get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public String get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getString(columnIndex);
     }
 
@@ -211,10 +221,11 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @param columnName the label for the column specified with the SQL {@code AS} clause,
      *                   or the column name if no {@code AS} clause was specified
      * @return the {@code String} value in the specified column, or {@code null} if the value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the {@code columnName} is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public String get(final ResultSet rs, final String columnName) throws SQLException {
+    public String get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getString(columnName);
     }
 
@@ -224,10 +235,11 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code String} value to set, may be {@code null}
-     * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws NullPointerException, SQLException {
         stmt.setString(columnIndex, x);
     }
 
@@ -237,10 +249,11 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code String} value to set, may be {@code null}
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final String x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final String x) throws NullPointerException, SQLException {
         stmt.setString(parameterName, x);
     }
 
@@ -255,7 +268,8 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      *
      * @param appendable the {@code Appendable} to append to
      * @param x the {@code String} value to append, may be {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -267,7 +281,7 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final String x) throws IOException {
+    public void appendTo(final Appendable appendable, final String x) throws NullPointerException, IOException {
         appendable.append(Objects.requireNonNullElse(x, NULL_STRING));
     }
 
@@ -292,10 +306,11 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      * @param x the {@code String} value to write, may be {@code null}
      * @param config the serialization configuration controlling quotation and {@code null} handling,
      *               may be {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, String x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, String x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         x = x == null && config != null && config.isWriteNullStringAsEmpty() ? Strings.EMPTY : x;
 
         if (x == null) {
@@ -304,10 +319,10 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
             final char ch = config == null ? 0 : config.getStringQuotation();
 
             if (ch == 0) {
-                writer.writeCharacter(x);
+                Utils.writeStringContent(writer, x, ch);
             } else {
                 writer.write(ch);
-                writer.writeCharacter(x);
+                Utils.writeStringContent(writer, x, ch);
                 writer.write(ch);
             }
         }

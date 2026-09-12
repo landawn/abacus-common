@@ -19,9 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
 
 import com.landawn.abacus.annotation.Beta;
 
@@ -42,8 +40,8 @@ import com.landawn.abacus.annotation.Beta;
  *   <li>{@link #builder()} - provides a builder for constructing sets incrementally</li>
  * </ul>
  *
- * <p>The implementation maintains the iteration order when created from a List, LinkedHashSet,
- * or SortedSet, otherwise no specific iteration order is guaranteed.</p>
+ * <p>The implementation preserves the encounter order of the source: {@link #copyOf(Collection)} and
+ * {@link #copyOf(Object[])} keep each distinct element at the position of its first occurrence.</p>
  *
  * <p><b>Note:</b> the {@code of(...)} factory methods and the no-arg {@link #builder()} both preserve
  * the order in which the elements are supplied (they are backed by a {@code LinkedHashSet}). To use a
@@ -61,6 +59,7 @@ import com.landawn.abacus.annotation.Beta;
  * ImmutableSet<Integer> numbers = ImmutableSet.copyOf(mutable);
  *
  * // Create using builder
+ * Set<String> otherNames = new LinkedHashSet<>(Arrays.asList("Dave", "Erin"));
  * ImmutableSet<String> names = ImmutableSet.<String>builder()
  *     .add("Alice")
  *     .add("Bob", "Charlie")
@@ -72,31 +71,41 @@ import com.landawn.abacus.annotation.Beta;
  * @see Set
  * @see ImmutableCollection
  */
+@com.landawn.abacus.annotation.Immutable
 public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
 
     @SuppressWarnings("rawtypes")
-    private static final ImmutableSet EMPTY = new ImmutableSet(N.emptySet(), false);
+    private static final ImmutableSet EMPTY = new ImmutableSet(N.emptySet(), true, true);
 
     /**
-     * Constructs an ImmutableSet backed by the provided set.
+     * Constructs a non-owning ImmutableSet backed by the provided set.
      * The backing set is always exposed through an unmodifiable view; its concrete class name
      * is not treated as evidence that it is immutable.
      *
      * @param set the set of elements to be included in this ImmutableSet.
+     * @throws NullPointerException if {@code set} is {@code null}
      */
-    ImmutableSet(final Set<? extends E> set) {
-        this(set, false);
+    ImmutableSet(final Set<? extends E> set) throws NullPointerException {
+        this(set, false, false);
     }
 
     /**
      * Constructs an ImmutableSet backed by the provided set.
      * If {@code isUnmodifiable} is {@code false}, the set is wrapped in an unmodifiable view.
      *
+     * <p>There is deliberately no two-argument {@code (Set, boolean)} form. {@link ImmutableSortedSet}
+     * declares one whose flag is {@code ownsBacking}, so a two-argument {@code super(...)} call from there
+     * would once have bound to a {@code (Set, boolean isUnmodifiable)} overload here and silently skipped the
+     * unmodifiable wrapper while dropping the ownership flag. Subclasses must pass all three arguments.</p>
+     *
      * @param set the set of elements to be included in this ImmutableSet.
      * @param isUnmodifiable {@code true} if the provided set is already unmodifiable and does not need wrapping.
+     * @param ownsBacking {@code true} only if no other modifiable reference to {@code set} survives this call;
+     *        see {@link ImmutableCollection#ownsBacking}.
+     * @throws NullPointerException if {@code set} is {@code null} and {@code isUnmodifiable} is false
      */
-    ImmutableSet(final Set<? extends E> set, final boolean isUnmodifiable) {
-        super(isUnmodifiable ? set : Collections.unmodifiableSet(set));
+    ImmutableSet(final Set<? extends E> set, final boolean isUnmodifiable, final boolean ownsBacking) throws NullPointerException {
+        super(isUnmodifiable ? set : Collections.unmodifiableSet(set), ownsBacking);
     }
 
     /**
@@ -133,7 +142,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing only the specified element.
      */
     public static <E> ImmutableSet<E> of(final E e1) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1), false, true);
     }
 
     /**
@@ -157,7 +166,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2), false, true);
     }
 
     /**
@@ -178,7 +187,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3), false, true);
     }
 
     /**
@@ -200,7 +209,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4), false, true);
     }
 
     /**
@@ -223,7 +232,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5), false, true);
     }
 
     /**
@@ -247,7 +256,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6), false, true);
     }
 
     /**
@@ -272,7 +281,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7), false, true);
     }
 
     /**
@@ -298,7 +307,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8), false, true);
     }
 
     /**
@@ -325,7 +334,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9), false, true);
     }
 
     /**
@@ -354,16 +363,16 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
             final E e10) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), false);
+        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), false, true);
     }
 
     /**
      * Returns an {@code ImmutableSet} containing the elements of the specified array.
      * If the array is {@code null} or empty, an empty {@code ImmutableSet} is returned.
      *
-     * <p>Duplicate elements in the input array are eliminated according to set semantics.
-     * The iteration order of the resulting set follows the iteration order of the
-     * underlying collection created from the array.</p>
+     * <p>Duplicate elements in the input array are eliminated according to set semantics; each distinct
+     * element keeps the position of its first occurrence, so the resulting set iterates in array index
+     * order.</p>
      *
      * <p>Subsequent modifications to the original array do not affect the returned set.</p>
      *
@@ -384,22 +393,52 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      *         or an empty set if {@code elements} is {@code null} or empty
      * @see #copyOf(Collection)
      */
-    public static <E> ImmutableSet<E> copyOf(E[] elements) {
+    public static <E> ImmutableSet<E> copyOf(final E[] elements) {
         if (N.isEmpty(elements)) {
             return empty();
         } else if (elements.length == 1) {
             return of(elements[0]);
         } else {
-            return copyOf(N.toList(elements));
+            // Fill the LinkedHashSet straight from the array; routing through copyOf(Collection) would build
+            // an intermediate ArrayList first and then copy that into the set.
+            final Set<E> set = N.newLinkedHashSet(elements.length);
+
+            for (final E e : elements) {
+                set.add(e);
+            }
+
+            return new ImmutableSet<>(set, false, true);
         }
     }
 
     /**
      * Returns an ImmutableSet containing all distinct elements from the provided collection.
-     * If the provided collection is already an ImmutableSet, it is returned directly without copying.
      * If the collection is {@code null} or empty, an empty ImmutableSet is returned.
      * Otherwise, a new ImmutableSet is created with a defensive copy of the collection's distinct elements.
-     * The iteration order is preserved if the source collection is a List, LinkedHashSet, or SortedSet.
+     *
+     * <p>The source collection's encounter order is always preserved (each distinct element keeps the
+     * position of its first occurrence), whatever the source's concrete type - including an ordered source
+     * presented through a wrapper such as {@code Collections.unmodifiableSet(aLinkedHashSet)}, whose
+     * concrete class reveals nothing about its ordering.</p>
+     *
+     * <p><b>Note:</b> only the elements and their order are copied, never the source's element-comparison
+     * rule. The copy is a {@link LinkedHashSet}, so its elements are compared with
+     * {@code equals}/{@code hashCode}. A source that uses some other rule - a {@link java.util.SortedSet}
+     * with a {@link java.util.Comparator}, or a set built over
+     * {@code Collections.newSetFromMap(new IdentityHashMap<>())} - therefore yields a copy that can answer
+     * {@link #contains(Object)} differently from the source, and that silently drops elements the source
+     * considered distinct (two {@code equals}-equal elements held apart by an identity-based source collapse
+     * into one). Use {@link ImmutableSortedSet#copyOf(Collection)} to keep a comparator.</p>
+     *
+     * <p>The copy is skipped only when {@code c} is a <i>plain</i> {@code ImmutableSet} that already owns its
+     * backing storage - that is, one produced by this class's own {@code of(...)}, {@code copyOf(...)} or
+     * {@link #empty()}, by a consumed no-argument {@link #builder()}, or by {@code toImmutableSet()} on an
+     * {@link ObjIterator} (or on any other iterator type in this package). An {@code ImmutableSet} produced by
+     * {@link #wrap(Set)} or {@link #builder(Set)} is a live view over storage its creator may still modify,
+     * so it is copied like any other collection; and a
+     * subtype that compares elements by some other rule - {@link ImmutableSortedSet} or
+     * {@link ImmutableNavigableSet} with a {@link java.util.Comparator} - is likewise copied, so that the
+     * element-comparison rule stated above is dropped whatever the source's ownership.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -415,17 +454,18 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      *
      * @param <E> the type of elements in the collection.
      * @param c the collection whose distinct elements are to be placed into the {@code ImmutableSet}.
-     * @return an {@code ImmutableSet} containing all distinct elements from the collection, or the same instance if it is already an {@code ImmutableSet}, or an empty instance if {@code c} is {@code null} or empty.
+     * @return an {@code ImmutableSet} containing all distinct elements from the collection, in the
+     *         collection's encounter order; the same instance if it is already a plain {@code ImmutableSet}
+     *         that owns its backing storage; or an empty instance if {@code c} is {@code null} or empty.
      * @see #wrap(Set)
      */
     public static <E> ImmutableSet<E> copyOf(final Collection<? extends E> c) {
-        if (c instanceof ImmutableSet) {
+        if (c != null && c.getClass() == ImmutableSet.class && ((ImmutableSet<E>) c).ownsBacking) {
             return (ImmutableSet<E>) c;
         } else if (N.isEmpty(c)) {
             return empty();
         } else {
-            return new ImmutableSet<>((c instanceof List || c instanceof LinkedHashSet || c instanceof SortedSet) ? N.newLinkedHashSet(c) : N.newHashSet(c),
-                    false);
+            return new ImmutableSet<>(N.newLinkedHashSet(c), false, true);
         }
     }
 
@@ -461,7 +501,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
         } else if (set == null) {
             return empty();
         } else {
-            return new ImmutableSet<>(set);
+            return new ImmutableSet<>(set, false, false);
         }
     }
 
@@ -504,11 +544,14 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      *     .build();
      * }</pre>
      *
+     * <p>The builder uses its own private storage, so the set returned by {@link Builder#build()} is an
+     * independent, stable value once the builder has been consumed.</p>
+     *
      * @param <E> the type of elements to be maintained by the set.
      * @return a new Builder instance for creating an ImmutableSet.
      */
     public static <E> Builder<E> builder() {
-        return new Builder<>(new LinkedHashSet<>());
+        return new Builder<>(new LinkedHashSet<>(), true);
     }
 
     /**
@@ -526,15 +569,20 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      *     .build();
      * }</pre>
      *
+     * <p><b>Warning:</b> the caller keeps a reference to {@code holder}, so the set returned by
+     * {@link Builder#build()} is a live view over storage the caller can still modify. It is treated as
+     * such: {@link #copyOf(Collection)} will copy it rather than return it unchanged. Use the no-arg
+     * {@link #builder()} when an independent value is wanted.</p>
+     *
      * @param <E> the type of elements to be maintained by the set.
      * @param holder the set to be used as the backing storage for the Builder; must not be {@code null}.
      * @return a new Builder instance that will use the provided set.
      * @throws IllegalArgumentException if holder is {@code null}.
      */
     public static <E> Builder<E> builder(final Set<E> holder) throws IllegalArgumentException {
-        N.checkArgNotNull(holder);
+        N.checkArgNotNull(holder, cs.holder);
 
-        return new Builder<>(holder);
+        return new Builder<>(holder, false);
     }
 
     /**
@@ -545,6 +593,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * Collection<String> otherCollection = Arrays.asList("four", "five");
      * ImmutableSet<String> set = ImmutableSet.<String>builder()
      *     .add("one")
      *     .add("two", "three")
@@ -557,8 +606,24 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
     public static final class Builder<E> {
         private final Set<E> set;
 
-        Builder(final Set<E> holder) {
+        /** Whether {@link #set} is the builder's own storage, unreachable to any caller. */
+        private final boolean ownsStorage;
+
+        /** Set by {@link #build()}; further element additions are rejected from then on. */
+        private boolean built;
+
+        Builder(final Set<E> holder, final boolean ownsStorage) {
             set = holder;
+            this.ownsStorage = ownsStorage;
+        }
+
+        /**
+         * @throws IllegalStateException if this builder has already been consumed by {@code build()}
+         */
+        private void assertNotBuilt() throws IllegalStateException {
+            if (built) {
+                throw new IllegalStateException("This builder has already been consumed by build() and cannot be modified");
+            }
         }
 
         /**
@@ -568,7 +633,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Builder<String> builder = ImmutableSet.<String>builder();
+         * ImmutableSet.Builder<String> builder = ImmutableSet.builder();
          * builder.add("hello")
          *        .add("world")
          *        .add("hello");
@@ -576,8 +641,11 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          *
          * @param element the element to add, may be {@code null}.
          * @return this builder instance for method chaining.
+         * @throws IllegalStateException if {@link #build()} has already been called on this builder.
          */
-        public Builder<E> add(final E element) {
+        public Builder<E> add(final E element) throws IllegalStateException {
+            assertNotBuilt();
+
             set.add(element);
 
             return this;
@@ -597,9 +665,12 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          *
          * @param elements the elements to add, may be {@code null} or empty.
          * @return this builder instance for method chaining.
+         * @throws IllegalStateException if {@link #build()} has already been called on this builder.
          */
         @SafeVarargs
-        public final Builder<E> add(final E... elements) {
+        public final Builder<E> add(final E... elements) throws IllegalStateException {
+            assertNotBuilt();
+
             if (N.notEmpty(elements)) {
                 set.addAll(Arrays.asList(elements));
             }
@@ -622,8 +693,11 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          *
          * @param c the collection containing elements to add, may be {@code null} or empty.
          * @return this builder instance for method chaining.
+         * @throws IllegalStateException if {@link #build()} has already been called on this builder.
          */
-        public Builder<E> addAll(final Collection<? extends E> c) {
+        public Builder<E> addAll(final Collection<? extends E> c) throws IllegalStateException {
+            assertNotBuilt();
+
             if (N.notEmpty(c)) {
                 set.addAll(c);
             }
@@ -639,14 +713,18 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String> iter = someCollection.iterator();
+         * List<String> source = Arrays.asList("six", "seven");
+         * Iterator<String> iter = source.iterator();
          * builder.addAll(iter);
          * }</pre>
          *
          * @param iter the iterator over elements to add, may be {@code null}.
          * @return this builder instance for method chaining.
+         * @throws IllegalStateException if {@link #build()} has already been called on this builder.
          */
-        public Builder<E> addAll(final Iterator<? extends E> iter) {
+        public Builder<E> addAll(final Iterator<? extends E> iter) throws IllegalStateException {
+            assertNotBuilt();
+
             if (iter != null) {
                 while (iter.hasNext()) {
                     set.add(iter.next());
@@ -658,23 +736,31 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
 
         /**
          * Builds and returns an ImmutableSet containing all distinct elements added to this builder.
-         * After calling this method, the builder should not be used further as the created
-         * ImmutableSet may be backed by the builder's internal storage.
+         * The returned set is backed by the builder's storage rather than by a copy, so this method
+         * consumes the builder: any subsequent {@code add}/{@code addAll} call throws
+         * {@link IllegalStateException}. {@code build()} itself may be called more than once and returns
+         * an equal set each time.
          *
          * <p>The returned set is immutable and will throw UnsupportedOperationException
          * for any modification attempts. The iteration order depends on the type of set
-         * used internally by the builder.</p>
+         * used internally by the builder. When the builder was created by {@link ImmutableSet#builder()}
+         * its storage is private and the result is an independent value; when it was created by
+         * {@link ImmutableSet#builder(Set)} the caller can still modify the holder it supplied, so the
+         * result stays a live view and {@link ImmutableSet#copyOf(Collection)} will copy it.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ImmutableSet<String> finalSet = builder.build();
          * System.out.println(finalSet.size());   // prints the number of distinct elements
+         * // builder.add("more");   // throws IllegalStateException
          * }</pre>
          *
          * @return a new ImmutableSet containing all distinct elements added to the builder.
          */
         public ImmutableSet<E> build() {
-            return new ImmutableSet<>(set);
+            built = true;
+
+            return new ImmutableSet<>(set, false, ownsStorage);
         }
     }
 }

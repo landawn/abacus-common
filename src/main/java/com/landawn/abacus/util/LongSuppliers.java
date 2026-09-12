@@ -22,6 +22,16 @@ import com.landawn.abacus.util.function.LongSupplier;
  *
  * <p>This class contains factory methods and constants for creating and accessing
  * standard long suppliers, such as suppliers for current time.</p>
+ *
+ * <p>This class is a top-level sibling of {@link Fn}, not a nested type. Use {@link Fn} for the
+ * general functional-interface factory and {@link Fnn} for {@link Throwables} variants that can
+ * declare checked exceptions. For object suppliers see {@link Suppliers}; for capacity-taking
+ * collection factories see {@link IntFunctions}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see Suppliers
+ * @see IntFunctions
  */
 public final class LongSuppliers {
     private LongSuppliers() {

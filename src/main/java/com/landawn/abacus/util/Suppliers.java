@@ -110,6 +110,15 @@ import com.landawn.abacus.util.function.Supplier;
  * function, object, or custom supplier inherit that object's thread-safety; in particular,
  * {@link #ofInstance(Object)} deliberately returns the same instance on every invocation.</p>
  *
+ * <p>This class is a top-level sibling of {@link Fn}, not a nested type. Use {@link Fn} for the
+ * general functional-interface factory and {@link Fnn} for {@link Throwables} variants that can
+ * declare checked exceptions. For capacity-taking collection factories see {@link IntFunctions};
+ * for {@code long} suppliers see {@link LongSuppliers}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see IntFunctions
+ * @see LongSuppliers
  * @see java.util.function.Supplier
  * @see java.util.Collection
  * @see java.util.Map
@@ -1291,7 +1300,7 @@ public final class Suppliers {
      * @throws IllegalArgumentException if {@code valueMapType} is {@code null} or cannot be used to create a map.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <T> Supplier<Multiset<T>> ofMultiset(final Class<? extends Map> valueMapType) {
+    public static <T> Supplier<Multiset<T>> ofMultiset(final Class<? extends Map> valueMapType) throws IllegalArgumentException {
         final java.util.function.Supplier<? extends Map<T, ?>> mapSupplier = (java.util.function.Supplier) ofMap(valueMapType);
 
         return () -> N.newMultiset(mapSupplier);
@@ -1374,7 +1383,7 @@ public final class Suppliers {
      * @throws IllegalArgumentException if {@code mapType} is {@code null} or cannot be used to create a map.
      */
     @SuppressWarnings("rawtypes")
-    public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType) {
+    public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType) throws IllegalArgumentException {
         return ofListMultimap(mapType, ArrayList.class);
     }
 
@@ -1402,7 +1411,8 @@ public final class Suppliers {
      *         or list.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType, final Class<? extends List> valueType) {
+    public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final Class<? extends Map> mapType, final Class<? extends List> valueType)
+            throws IllegalArgumentException {
         N.checkArgNotNull(valueType, cs.valueType);
         N.checkArgument(List.class.isAssignableFrom(valueType), "'valueType': {} is not a List class", valueType);
 
@@ -1436,8 +1446,7 @@ public final class Suppliers {
      * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
      * @param valueSupplier supplier that creates the List instances for values, must not be {@code null}
      * @return a Supplier that creates new ListMultimap instances using the provided suppliers
-     * @throws IllegalArgumentException if either supplier is {@code null}, or if an invocation of either
-     *         supplier returns {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} or {@code valueSupplier} is {@code null}
      */
     public static <K, E> Supplier<ListMultimap<K, E>> ofListMultimap(final java.util.function.Supplier<? extends Map<K, List<E>>> mapSupplier,
             final java.util.function.Supplier<? extends List<E>> valueSupplier) throws IllegalArgumentException {
@@ -1496,7 +1505,7 @@ public final class Suppliers {
      * @throws IllegalArgumentException if {@code mapType} is {@code null} or cannot be used to create a map.
      */
     @SuppressWarnings("rawtypes")
-    public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType) {
+    public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType) throws IllegalArgumentException {
         return ofSetMultimap(mapType, HashSet.class);
     }
 
@@ -1524,7 +1533,8 @@ public final class Suppliers {
      *         or set.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType) {
+    public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final Class<? extends Map> mapType, final Class<? extends Set> valueType)
+            throws IllegalArgumentException {
         N.checkArgNotNull(valueType, cs.valueType);
         N.checkArgument(Set.class.isAssignableFrom(valueType), "'valueType': {} is not a Set class", valueType);
 
@@ -1558,8 +1568,7 @@ public final class Suppliers {
      * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
      * @param valueSupplier supplier that creates the Set instances for values, must not be {@code null}
      * @return a Supplier that creates new SetMultimap instances using the provided suppliers
-     * @throws IllegalArgumentException if either supplier is {@code null}, or if an invocation of either
-     *         supplier returns {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} or {@code valueSupplier} is {@code null}
      */
     public static <K, E> Supplier<SetMultimap<K, E>> ofSetMultimap(final java.util.function.Supplier<? extends Map<K, Set<E>>> mapSupplier,
             final java.util.function.Supplier<? extends Set<E>> valueSupplier) throws IllegalArgumentException {
@@ -1597,8 +1606,7 @@ public final class Suppliers {
      * @param mapSupplier supplier that creates the backing Map instances, must not be {@code null}
      * @param valueSupplier supplier that creates the Collection instances for values, must not be {@code null}
      * @return a Supplier that creates new Multimap instances using the provided suppliers
-     * @throws IllegalArgumentException if either supplier is {@code null}, or if an invocation of either
-     *         supplier returns {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} or {@code valueSupplier} is {@code null}
      */
     public static <K, E, V extends Collection<E>> Supplier<Multimap<K, E, V>> ofMultimap(final java.util.function.Supplier<? extends Map<K, V>> mapSupplier,
             final java.util.function.Supplier<? extends V> valueSupplier) throws IllegalArgumentException {
@@ -1629,7 +1637,12 @@ public final class Suppliers {
     }
 
     @SuppressWarnings("rawtypes")
-    private static final ConcurrentMap<Class<?>, Supplier> collectionSupplierPool = new ConcurrentHashMap<>();
+    private static final ClassValue<java.util.concurrent.atomic.AtomicReference<Supplier>> collectionSupplierPool = new ClassValue<>() {
+        @Override
+        protected java.util.concurrent.atomic.AtomicReference<Supplier> computeValue(final Class<?> type) {
+            return new java.util.concurrent.atomic.AtomicReference<>();
+        }
+    };
 
     /**
      * Returns a Supplier that creates mutable Collection instances for the specified type.
@@ -1651,21 +1664,28 @@ public final class Suppliers {
      *   <li>{@code Set}, {@code HashSet}, {@code AbstractSet} - returns HashSet supplier</li>
      *   <li>{@code LinkedHashSet} - returns LinkedHashSet supplier</li>
      *   <li>{@code ConcurrentSkipListSet} - returns ConcurrentSkipListSet supplier</li>
-     *   <li>{@code SortedSet}, {@code NavigableSet} interfaces (or an abstract sorted-set type) - returns TreeSet supplier; a concrete sorted-set subtype is instantiated as its own runtime type</li>
+     *   <li>{@code SortedSet}, {@code NavigableSet} interfaces - returns TreeSet supplier; a concrete sorted-set subtype is instantiated as its own runtime type</li>
      *   <li>{@code Queue}, {@code Deque}, {@code AbstractQueue} - returns LinkedList supplier (as Deque)</li>
      *   <li>{@code BlockingQueue}, {@code LinkedBlockingQueue} - returns LinkedBlockingQueue supplier</li>
      *   <li>{@code BlockingDeque}, {@code LinkedBlockingDeque} - returns LinkedBlockingDeque supplier</li>
      *   <li>{@code ConcurrentLinkedQueue} - returns ConcurrentLinkedQueue supplier</li>
      *   <li>{@code PriorityQueue} - returns PriorityQueue supplier</li>
      *   <li>{@code ImmutableList} (and subtypes) - returns ArrayList supplier</li>
-     *   <li>{@code ImmutableSet} (and subtypes) - returns HashSet supplier</li>
+     *   <li>{@code ImmutableSortedSet}, {@code ImmutableNavigableSet} (and subtypes) - returns TreeSet supplier</li>
+     *   <li>{@code ImmutableSet} (and other subtypes) - returns HashSet supplier</li>
      * </ul>
+     * <p>Custom interfaces and abstract sorted-set subtypes are rejected unless a matching supplier
+     * was registered with {@link #registerForCollection(Class, java.util.function.Supplier)}.
+     * Rejection does not cache a fallback, so registration can follow a failed lookup.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(LinkedHashSet.class);
      * Collection<String> coll = supplier.get();   // returns new LinkedHashSet<>()
      * }</pre>
+     *
+     * <p>Cached factories have the target class lifetime. Holding a returned factory or explicitly capturing other
+     * classes in a registered callback can retain those classes for as long as that factory remains reachable.</p>
      *
      * @param <T> the element type of the collection
      * @param targetType the Class object representing the desired Collection implementation
@@ -1680,7 +1700,8 @@ public final class Suppliers {
         N.checkArgNotNull(targetType, cs.targetType);
         N.checkArgument(Collection.class.isAssignableFrom(targetType), "'targetType': {} is not a Collection class", targetType);
 
-        Supplier ret = collectionSupplierPool.get(targetType);
+        final java.util.concurrent.atomic.AtomicReference<Supplier> slot = collectionSupplierPool.get(targetType);
+        Supplier ret = slot.get();
 
         if (ret == null) {
             if (Collection.class.equals(targetType) || AbstractCollection.class.equals(targetType) || List.class.equals(targetType)
@@ -1696,9 +1717,8 @@ public final class Suppliers {
                 // Must precede the SortedSet branch (like ConcurrentSkipListMap in ofMap):
                 // downgrading to TreeSet would silently lose thread-safety.
                 ret = Fn.s(ConcurrentSkipListSet::new);
-            } else if (SortedSet.class.isAssignableFrom(targetType) && (targetType.isInterface() || Modifier.isAbstract(targetType.getModifiers()))) {
-                // Only downgrade the SortedSet/NavigableSet interfaces (or an abstract sorted-set type) to
-                // TreeSet; a concrete sorted-set subclass is instantiated below to preserve its runtime type.
+            } else if (SortedSet.class.equals(targetType) || NavigableSet.class.equals(targetType)) {
+                // Arbitrary sorted subtypes may require semantics that TreeSet cannot provide.
                 ret = ofSortedSet();
             } else if (Queue.class.equals(targetType) || AbstractQueue.class.equals(targetType) || Deque.class.equals(targetType)) {
                 return ofDeque();
@@ -1712,6 +1732,10 @@ public final class Suppliers {
                 return ofPriorityQueue();
             } else if (ImmutableList.class.isAssignableFrom(targetType)) {
                 ret = ofList();
+            } else if (ImmutableSortedSet.class.isAssignableFrom(targetType)) {
+                // Must precede the ImmutableSet branch: ImmutableSortedSet/ImmutableNavigableSet are
+                // ImmutableSets, so falling through to ofSet() would drop the ordering they guarantee.
+                ret = ofSortedSet();
             } else if (ImmutableSet.class.isAssignableFrom(targetType)) {
                 ret = ofSet();
             } else if (Modifier.isAbstract(targetType.getModifiers())) {
@@ -1736,11 +1760,9 @@ public final class Suppliers {
                 }
             }
 
-            // putIfAbsent so a concurrent registerForCollection cannot be silently overwritten.
-            final Supplier existing = collectionSupplierPool.putIfAbsent(targetType, ret);
-
-            if (existing != null) {
-                ret = existing;
+            // Publish once so concurrent discovery and registration share the same winning factory.
+            if (!slot.compareAndSet(null, ret)) {
+                ret = slot.get();
             }
         }
 
@@ -1748,7 +1770,12 @@ public final class Suppliers {
     }
 
     @SuppressWarnings("rawtypes")
-    private static final ConcurrentMap<Class<?>, Supplier> mapSupplierPool = new ConcurrentHashMap<>();
+    private static final ClassValue<java.util.concurrent.atomic.AtomicReference<Supplier>> mapSupplierPool = new ClassValue<>() {
+        @Override
+        protected java.util.concurrent.atomic.AtomicReference<Supplier> computeValue(final Class<?> type) {
+            return new java.util.concurrent.atomic.AtomicReference<>();
+        }
+    };
 
     /**
      * Returns a Supplier that creates mutable Map instances for the specified type.
@@ -1769,20 +1796,28 @@ public final class Suppliers {
      *   <li>{@code ConcurrentMap} - returns ConcurrentHashMap supplier</li>
      *   <li>{@code LinkedHashMap} - returns LinkedHashMap supplier</li>
      *   <li>{@code ConcurrentNavigableMap}, {@code ConcurrentSkipListMap} - returns ConcurrentSkipListMap supplier</li>
-     *   <li>{@code SortedMap}, {@code NavigableMap} interfaces (or an abstract sorted-map type) - returns TreeMap supplier; a concrete sorted-map subtype is instantiated as its own runtime type</li>
+     *   <li>{@code SortedMap}, {@code NavigableMap} interfaces - returns TreeMap supplier; a concrete sorted-map subtype is instantiated as its own runtime type</li>
      *   <li>{@code IdentityHashMap} - returns IdentityHashMap supplier</li>
      *   <li>{@code ConcurrentHashMap} - returns ConcurrentHashMap supplier</li>
      *   <li>{@code BiMap} - returns BiMap supplier</li>
-     *   <li>{@code ImmutableMap} (and subtypes) - returns HashMap supplier</li>
+     *   <li>{@code ImmutableSortedMap}, {@code ImmutableNavigableMap} (and subtypes) - returns TreeMap supplier</li>
+     *   <li>{@code ImmutableMap} (and other subtypes) - returns HashMap supplier</li>
      *   <li>Concrete mutable map subclasses with an accessible no-argument constructor - returns
      *       a supplier of the requested runtime type</li>
      * </ul>
+     * <p>Custom interfaces and abstract sorted-map subtypes are rejected unless a matching supplier
+     * was registered with {@link #registerForMap(Class, java.util.function.Supplier)}.
+     * In particular, custom concurrent sorted maps are never replaced with a plain TreeMap.
+     * Rejection does not cache a fallback, so registration can follow a failed lookup.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Supplier<? extends Map<String, Integer>> supplier = Suppliers.ofMap(TreeMap.class);
      * Map<String, Integer> map = supplier.get();   // returns new TreeMap<>()
      * }</pre>
+     *
+     * <p>Cached factories have the target class lifetime. Holding a returned factory or explicitly capturing other
+     * classes in a registered callback can retain those classes for as long as that factory remains reachable.</p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -1798,7 +1833,8 @@ public final class Suppliers {
         N.checkArgNotNull(targetType, cs.targetType);
         N.checkArgument(Map.class.isAssignableFrom(targetType), "'targetType': {} is not a Map class", targetType);
 
-        Supplier ret = mapSupplierPool.get(targetType);
+        final java.util.concurrent.atomic.AtomicReference<Supplier> slot = mapSupplierPool.get(targetType);
+        Supplier ret = slot.get();
 
         if (ret == null) {
             if (Map.class.equals(targetType) || AbstractMap.class.equals(targetType) || HashMap.class.equals(targetType) || EnumMap.class.equals(targetType)) {
@@ -1809,9 +1845,8 @@ public final class Suppliers {
                 ret = ofLinkedHashMap();
             } else if (ConcurrentNavigableMap.class.equals(targetType) || ConcurrentSkipListMap.class.equals(targetType)) {
                 ret = ofConcurrentNavigableMap();
-            } else if (SortedMap.class.isAssignableFrom(targetType) && (targetType.isInterface() || Modifier.isAbstract(targetType.getModifiers()))) {
-                // Only downgrade the SortedMap/NavigableMap interfaces (or an abstract sorted-map type) to
-                // TreeMap; a concrete sorted-map subclass is instantiated below to preserve its runtime type.
+            } else if (SortedMap.class.equals(targetType) || NavigableMap.class.equals(targetType)) {
+                // Preserve custom subtype contracts, including concurrency, instead of silently downgrading.
                 ret = ofSortedMap();
             } else if (IdentityHashMap.class.equals(targetType)) {
                 ret = ofIdentityHashMap();
@@ -1819,6 +1854,10 @@ public final class Suppliers {
                 ret = ofConcurrentHashMap();
             } else if (BiMap.class.equals(targetType)) {
                 ret = ofBiMap();
+            } else if (ImmutableSortedMap.class.isAssignableFrom(targetType)) {
+                // Must precede the ImmutableMap branch: ImmutableSortedMap/ImmutableNavigableMap are
+                // ImmutableMaps, so falling through to ofMap() would drop the ordering they guarantee.
+                ret = ofSortedMap();
             } else if (ImmutableMap.class.isAssignableFrom(targetType)) {
                 ret = ofMap();
             } else if (Modifier.isAbstract(targetType.getModifiers())) {
@@ -1841,11 +1880,9 @@ public final class Suppliers {
                 }
             }
 
-            // putIfAbsent so a concurrent registerForMap cannot be silently overwritten.
-            final Supplier existing = mapSupplierPool.putIfAbsent(targetType, ret);
-
-            if (existing != null) {
-                ret = existing;
+            // Publish once so concurrent discovery and registration share the same winning factory.
+            if (!slot.compareAndSet(null, ret)) {
+                ret = slot.get();
             }
         }
 
@@ -1872,6 +1909,9 @@ public final class Suppliers {
      * Supplier<? extends Collection<String>> supplier = Suppliers.ofCollection(MyCustomList.class);
      * }</pre>
      *
+     * <p>Cached factories have the target class lifetime. Holding a returned factory or explicitly capturing other
+     * classes in a registered callback can retain those classes for as long as that factory remains reachable.</p>
+     *
      * @param <T> the Collection type
      * @param targetClass the Class object of the Collection implementation to register
      * @param supplier the Supplier that creates instances of the target class
@@ -1891,9 +1931,9 @@ public final class Suppliers {
             throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
         }
 
-        // putIfAbsent: a check-then-put pair could overwrite a concurrent registration while
+        // Atomic publication: a check-then-put pair could overwrite a concurrent registration while
         // reporting failure to the overwriting caller.
-        return collectionSupplierPool.putIfAbsent(targetClass, registeredSupplier(targetClass, supplier)) == null;
+        return collectionSupplierPool.get(targetClass).compareAndSet(null, registeredSupplier(targetClass, supplier));
     }
 
     /**
@@ -1916,6 +1956,9 @@ public final class Suppliers {
      * Supplier<? extends Map<String, Integer>> supplier = Suppliers.ofMap(MyCustomMap.class);
      * }</pre>
      *
+     * <p>Cached factories have the target class lifetime. Holding a returned factory or explicitly capturing other
+     * classes in a registered callback can retain those classes for as long as that factory remains reachable.</p>
+     *
      * @param <T> the Map type
      * @param targetClass the Class object of the Map implementation to register
      * @param supplier the Supplier that creates instances of the target class
@@ -1935,9 +1978,9 @@ public final class Suppliers {
             throw new IllegalArgumentException("Can't register Supplier with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
         }
 
-        // putIfAbsent: a check-then-put pair could overwrite a concurrent registration while
+        // Atomic publication: a check-then-put pair could overwrite a concurrent registration while
         // reporting failure to the overwriting caller.
-        return mapSupplierPool.putIfAbsent(targetClass, registeredSupplier(targetClass, supplier)) == null;
+        return mapSupplierPool.get(targetClass).compareAndSet(null, registeredSupplier(targetClass, supplier));
     }
 
     /**
@@ -1953,7 +1996,7 @@ public final class Suppliers {
      * @deprecated unsupported operation. An {@link ImmutableList} is immutable and cannot be populated through a no-arg supplier; there is no replacement.
      */
     @Deprecated
-    public static Supplier<ImmutableList<?>> ofImmutableList() {
+    public static Supplier<ImmutableList<?>> ofImmutableList() throws UnsupportedOperationException {
         throw new UnsupportedOperationException("ImmutableList cannot be created as an empty, subsequently populated result");
     }
 
@@ -1970,7 +2013,7 @@ public final class Suppliers {
      * @deprecated unsupported operation. An {@link ImmutableSet} is immutable and cannot be populated through a no-arg supplier; there is no replacement.
      */
     @Deprecated
-    public static Supplier<ImmutableSet<?>> ofImmutableSet() {
+    public static Supplier<ImmutableSet<?>> ofImmutableSet() throws UnsupportedOperationException {
         throw new UnsupportedOperationException("ImmutableSet cannot be created as an empty, subsequently populated result");
     }
 
@@ -1987,7 +2030,7 @@ public final class Suppliers {
      * @deprecated unsupported operation. An {@link ImmutableMap} is immutable and cannot be populated through a no-arg supplier; there is no replacement.
      */
     @Deprecated
-    public static Supplier<ImmutableMap<?, ?>> ofImmutableMap() {
+    public static Supplier<ImmutableMap<?, ?>> ofImmutableMap() throws UnsupportedOperationException {
         throw new UnsupportedOperationException("ImmutableMap cannot be created as an empty, subsequently populated result");
     }
 

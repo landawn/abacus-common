@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.type;
 
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.util.EntityId;
 import com.landawn.abacus.util.Strings;
 
@@ -101,13 +102,18 @@ public class EntityIdType extends AbstractType<EntityId> {
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
+     * <p>An {@code EntityId} whose entity name is empty (for example {@code EntityId.builder().build()} or
+     * {@code EntityId.of("id", 1)}) is written with an empty key, as {@code {"": {...}}}, and
+     * {@link #valueOf(String)} reads that form back into an id with an empty entity name.</p>
+     *
      * @param x the {@link EntityId} to serialize; may be {@code null}
      * @return the JSON string, or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final EntityId x) {
+    public String stringOf(final EntityId x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
 
@@ -120,12 +126,18 @@ public class EntityIdType extends AbstractType<EntityId> {
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the JSON string to parse; may be {@code null} or empty
-     * @return the deserialized {@link EntityId}, or {@code null} if {@code str} is {@code null} or empty
+     * @return the deserialized {@link EntityId}, or {@code null} if {@code str} is {@code null} or empty, or if
+     *         it is the empty object {@code "{}"} (no entity name token at all). An empty <i>quoted</i> name
+     *         ({@code {"": {...}}}, the form {@link #stringOf(EntityId)} produces for an id without an entity
+     *         name) yields an id whose entity name is the empty string.
+     * @throws ParsingException if the entity name token is missing rather than empty (for example {@code {{"id": 1}}})
+     *         or the string is not a valid {@link EntityId} document
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(EntityId)
      */
     @Override
-    public EntityId valueOf(final String str) {
+    public EntityId valueOf(final String str) throws ParsingException, RuntimeException {
         return (Strings.isEmpty(str)) ? null : Utils.jsonParser.deserialize(str, typeClass);
     }
 }

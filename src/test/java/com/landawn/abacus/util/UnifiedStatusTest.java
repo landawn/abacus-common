@@ -2,6 +2,7 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -109,10 +110,15 @@ public class UnifiedStatusTest extends TestBase {
         assertEquals(UnifiedStatus.UNAVAILABLE, UnifiedStatus.fromCode(76));
         assertEquals(UnifiedStatus.ENABLED, UnifiedStatus.fromCode(77));
         assertEquals(UnifiedStatus.DISABLED, UnifiedStatus.fromCode(78));
-        assertNull(UnifiedStatus.fromCode(-1));
-        assertNull(UnifiedStatus.fromCode(128));
-        assertNull(UnifiedStatus.fromCode(999));
-        assertNull(UnifiedStatus.fromCode(10));
+        assertNull(UnifiedStatus.fromCodeOrNull(-1));
+        assertNull(UnifiedStatus.fromCodeOrNull(128));
+        assertNull(UnifiedStatus.fromCodeOrNull(999));
+        assertNull(UnifiedStatus.fromCodeOrNull(10));
+        assertEquals(UnifiedStatus.ACTIVE, UnifiedStatus.fromCodeOrNull(1));
+
+        assertThrows(IllegalArgumentException.class, () -> UnifiedStatus.fromCode(-1));
+        assertThrows(IllegalArgumentException.class, () -> UnifiedStatus.fromCode(10));
+        assertThrows(IllegalArgumentException.class, () -> UnifiedStatus.fromCode(999));
     }
 
     @Test

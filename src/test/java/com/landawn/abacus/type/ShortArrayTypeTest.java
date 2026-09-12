@@ -1,8 +1,10 @@
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -77,4 +79,21 @@ public class ShortArrayTypeTest extends TestBase {
         assertNotNull(shortArrayType.name());
     }
 
+
+    @Test
+    public void reviewFixes20260906_valueOfExceptionTypesForOverflowEmptyAndInvalidElements() {
+        assertArrayEquals(new Short[] { 32767, null, -32768 }, shortArrayType.valueOf("[32767, null, -32768]"));
+
+        // one past the range is ArithmeticException (not NumberFormatException, which is what the javadoc used to claim)
+        assertThrows(ArithmeticException.class, () -> shortArrayType.valueOf("[32768]"));
+        assertThrows(ArithmeticException.class, () -> shortArrayType.valueOf("[-32769]"));
+        assertThrows(ArithmeticException.class, () -> shortArrayType.valueOf("[null, 32768]"));
+
+        // an empty / whitespace-only element is IllegalArgumentException from split (exact class, not a subclass)
+        assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> shortArrayType.valueOf("[1,,2]")).getClass());
+        assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> shortArrayType.valueOf("[1, ]")).getClass());
+
+        assertThrows(NumberFormatException.class, () -> shortArrayType.valueOf("[x]"));
+        assertThrows(NumberFormatException.class, () -> shortArrayType.valueOf("[NULL]"));
+    }
 }

@@ -56,8 +56,8 @@ public class FloatToDoubleFunctionTest extends TestBase {
     public void testDEFAULT_IsExactAndPreservesSpecialValues() {
         final FloatToDoubleFunction function = FloatToDoubleFunction.DEFAULT;
 
-        assertEquals((double) Float.MAX_VALUE, function.applyAsDouble(Float.MAX_VALUE));
-        assertEquals((double) Float.MIN_VALUE, function.applyAsDouble(Float.MIN_VALUE));
+        assertEquals(Float.MAX_VALUE, function.applyAsDouble(Float.MAX_VALUE));
+        assertEquals(Float.MIN_VALUE, function.applyAsDouble(Float.MIN_VALUE));
         assertEquals(Double.doubleToRawLongBits(0.0d), Double.doubleToRawLongBits(function.applyAsDouble(0.0f)));
         assertEquals(Double.doubleToRawLongBits(-0.0d), Double.doubleToRawLongBits(function.applyAsDouble(-0.0f)));
         assertEquals(Double.POSITIVE_INFINITY, function.applyAsDouble(Float.POSITIVE_INFINITY));

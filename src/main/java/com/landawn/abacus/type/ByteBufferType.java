@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import java.nio.ByteBuffer;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -34,6 +35,7 @@ import com.landawn.abacus.util.Strings;
  *
  * @see java.nio.ByteBuffer
  */
+@SuppressWarnings("java:S2160")
 public class ByteBufferType extends AbstractType<ByteBuffer> {
 
     /**
@@ -120,23 +122,90 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
+     * <p>The returned buffer is an instance of the class this handler was created for: a heap buffer for
+     * {@link java.nio.ByteBuffer} itself, a direct buffer for a handler whose class only direct buffers
+     * satisfy (a direct buffer is also a {@link java.nio.MappedByteBuffer} on this JDK). A handler created for
+     * a buffer class that neither can satisfy cannot be constructed from text at all.</p>
+     *
      * @param str the Base64-encoded string to decode; may be {@code null} or empty
-     * @return a buffer containing the decoded bytes
-     *         or {@code null} if {@code str} is {@code null},
-     *         or an empty buffer if {@code str} is empty
-     * @throws IllegalArgumentException if {@code str} contains characters outside the Base64 alphabet.
+     * @return a buffer wrapping the decoded bytes with its position at the end of the data,
+     *         an empty buffer if {@code str} is empty, or {@code null} if {@code str} is {@code null}
+     * @throws IllegalArgumentException if {@code str} is not valid Base64 (a character outside the
+     *         Base64 alphabet, or malformed padding)
+     * @throws UnsupportedOperationException if non-null text is supplied for a buffer class that neither a
+     *         heap nor a direct buffer is an instance of
      * @see #valueOf(Object)
      * @see #stringOf(ByteBuffer)
      */
+    @MayReturnNull
     @Override
-    public ByteBuffer valueOf(final String str) {
+    public ByteBuffer valueOf(final String str) throws IllegalArgumentException, UnsupportedOperationException {
         if (str == null) {
             return null; // NOSONAR
         } else if (str.isEmpty()) {
-            return valueOf(N.EMPTY_BYTE_ARRAY);
+            return wrap(N.EMPTY_BYTE_ARRAY);
         } else {
-            return valueOf(Strings.base64Decode(str));
+            return wrap(Strings.base64Decode(str));
         }
+    }
+
+    /**
+     * Wraps raw bytes in a buffer of the handled class, with the position at the end of the data
+     * (the convention shared by {@link #valueOf(byte[])} and {@link #byteArrayOf(ByteBuffer)}).
+     *
+     * <p>{@link #valueOf(byte[])} is {@code static} and can only ever build a heap buffer, so this instance
+     * helper is what keeps a handler created for a {@code ByteBuffer} subclass from advertising a
+     * {@link #javaType()} it never returns. The produced buffer is tested for assignability rather than the
+     * target class being classified: on this JDK {@code DirectByteBuffer} extends {@code MappedByteBuffer},
+     * so the direct allocation satisfies both.</p>
+     *
+     * @param bytes the content to wrap; must not be {@code null}
+     * @return a buffer of the handled class holding {@code bytes}, positioned at {@code bytes.length}
+     * @throws UnsupportedOperationException if the handled buffer class is neither a heap nor a direct buffer class
+     */
+    private ByteBuffer wrap(final byte[] bytes) throws UnsupportedOperationException {
+        final ByteBuffer heapBuffer = ByteBufferType.valueOf(bytes);
+
+        if (typeClass.isInstance(heapBuffer)) {
+            return heapBuffer;
+        }
+
+        final ByteBuffer directBuffer = ByteBuffer.allocateDirect(bytes.length);
+        directBuffer.put(bytes);
+
+        if (typeClass.isInstance(directBuffer)) {
+            return directBuffer;
+        }
+
+        throw new UnsupportedOperationException("Content construction is not supported for byte buffer class: " + typeClass.getName());
+    }
+
+    /**
+     * Converts an arbitrary object to a {@link java.nio.ByteBuffer}.
+     * A {@code byte[]} is wrapped directly in a buffer of the handled class (sharing the array when that
+     * class is satisfied by a heap buffer, with the position at {@code bytes.length}); every other object is
+     * converted through its own type's string form and then {@link #valueOf(String)}, exactly as the
+     * inherited default does. Both routes therefore produce an instance of {@link #javaType()}.
+     *
+     * @param obj the object to convert; may be {@code null}
+     * @return a buffer holding the byte array, the result of {@link #valueOf(String)} for any other
+     *         object, or {@code null} if {@code obj} is {@code null}
+     * @throws IllegalArgumentException if the string form of {@code obj} is not valid Base64
+     * @throws UnsupportedOperationException if content is supplied for a buffer class that neither a heap
+     *         nor a direct buffer is an instance of
+     * @see #valueOf(byte[])
+     * @see #valueOf(String)
+     */
+    @MayReturnNull
+    @Override
+    public ByteBuffer valueOf(final Object obj) throws IllegalArgumentException, UnsupportedOperationException {
+        // The inherited default would render a byte[] as its list text ("[1, 2, 3]") and then try to
+        // Base64-decode that text.
+        if (obj instanceof byte[] bytes) {
+            return wrap(bytes);
+        }
+
+        return super.valueOf(obj);
     }
 
     /**
@@ -179,6 +248,10 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * buf.limit();      // returns 3
      * buf.capacity();   // returns 3
      * }</pre>
+     *
+     * <p>This is a {@code static} utility and therefore always produces a plain heap buffer. A handler bound
+     * to a {@code ByteBuffer} subclass builds an instance of that subclass instead; use its
+     * {@link #valueOf(Object)} for that.</p>
      *
      * @param bytes the byte array to wrap; must not be {@code null}
      * @return a {@code ByteBuffer} wrapping {@code bytes} with position at {@code bytes.length}

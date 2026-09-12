@@ -44,7 +44,8 @@ public class DoubleNConsumerTest extends TestBase {
         List<String> results = new ArrayList<>();
         DoubleNConsumer consumer = new DoubleNConsumer() {
             @Override
-            public void accept(double... args) {
+            @SafeVarargs
+            public final void accept(double... args) {
                 double sum = 0;
                 for (double arg : args) {
                     sum += arg;

@@ -582,7 +582,9 @@ public final class Nulls {
      * indistinguishable from the empty-iterable case.</p>
      *
      * <p>Unlike {@link #lastNonNull(Iterable)}, this method does <em>not</em> skip trailing
-     * {@code null} elements. Non-random-access iterables are traversed once to their end.</p>
+     * {@code null} elements. An iterable that exposes a public {@code descendingIterator()} (a
+     * {@code Deque} or a {@code NavigableSet}, for example) is read from its tail; any other
+     * non-random-access iterable is traversed once to its end.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -607,6 +609,12 @@ public final class Nulls {
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
             return list.isEmpty() ? null : list.get(list.size() - 1);
+        }
+
+        final Iterator<T> descendingIterator = N.getDescendingIteratorIfPossible(c);
+
+        if (descendingIterator != null) {
+            return descendingIterator.hasNext() ? descendingIterator.next() : null;
         }
 
         return lastElement(c.iterator());

@@ -17,7 +17,7 @@ public class KryoDeserConfigTest extends TestBase {
     private KryoDeserConfig config;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         config = KryoDeserConfig.create();
     }
 

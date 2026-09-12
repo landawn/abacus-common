@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
@@ -118,6 +119,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final byte[] x) {
         if (x == null) {
@@ -141,12 +143,15 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param str the string to parse
      * @return the parsed byte array; {@code null} if input is {@code null}, empty, or blank;
      *         or an empty array if input is {@code "[]"}
-     * @throws NumberFormatException if any element in the string cannot be parsed as a byte
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
+     * @throws NumberFormatException if an element is not a valid integer literal
+     * @throws ArithmeticException if an element is outside the {@code byte} range
      * @see #valueOf(Object)
      * @see #stringOf(byte[])
      */
+    @MayReturnNull
     @Override
-    public byte[] valueOf(final String str) {
+    public byte[] valueOf(final String str) throws IllegalArgumentException, NumberFormatException, ArithmeticException {
         if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
@@ -174,14 +179,15 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * Returns {@code null} if input is {@code null}.
      *
      * @param obj the object to convert (can be an {@link InputStream}, {@link Blob}, or any other type)
-     * @return the byte array representation of the object, or {@code null} if input is null
-     * @throws UncheckedIOException if an I/O error occurs while reading an {@link InputStream}
-     * @throws UnsupportedOperationException if the input is a {@link Blob} whose length exceeds {@link Integer#MAX_VALUE}
+     * @return the byte array representation of the object, an empty array for a zero-length Blob, or {@code null} if input is null
+     * @throws UncheckedIOException if {@code obj} is an {@link InputStream} and reading its remaining bytes fails
      * @throws UncheckedSQLException if a database access error occurs while reading or freeing a Blob
+     * @throws UnsupportedOperationException if the input is a {@link Blob} whose length exceeds {@link Integer#MAX_VALUE}
      */
+    @MayReturnNull
     @SuppressFBWarnings
     @Override
-    public byte[] valueOf(final Object obj) {
+    public byte[] valueOf(final Object obj) throws UncheckedIOException, UncheckedSQLException, UnsupportedOperationException {
         if (obj == null) {
             return null; // NOSONAR
         } else if (obj instanceof InputStream is) {
@@ -196,7 +202,8 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
                     throw new UnsupportedOperationException("Blob too large to convert to byte[]: " + len + " bytes");
                 }
 
-                return blob.getBytes(1, (int) len);
+                // getBytes(1, 0) is rejected by e.g. SerialBlob on a zero-length lob; stay inside the try so free() still runs
+                return len == 0 ? N.EMPTY_BYTE_ARRAY : blob.getBytes(1, (int) len);
             } catch (final SQLException e) {
                 final UncheckedSQLException uncheckedException = new UncheckedSQLException(e);
                 primaryException = uncheckedException;
@@ -233,10 +240,11 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based)
      * @return the byte array from the database
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public byte[] get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public byte[] get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getBytes(columnIndex);
     }
 
@@ -246,10 +254,11 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param rs the ResultSet to read from
      * @param columnName the column label/name
      * @return the byte array from the database
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public byte[] get(final ResultSet rs, final String columnName) throws SQLException {
+    public byte[] get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getBytes(columnName);
     }
 
@@ -259,10 +268,11 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the byte array to set
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x) throws NullPointerException, SQLException {
         stmt.setBytes(columnIndex, x);
     }
 
@@ -272,10 +282,11 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter
      * @param x the byte array to set
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final byte[] x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final byte[] x) throws NullPointerException, SQLException {
         stmt.setBytes(parameterName, x);
     }
 
@@ -287,10 +298,11 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param columnIndex the parameter index (1-based)
      * @param x the byte array to set
      * @param sqlTypeOrLength the SQL type or length (ignored for byte arrays)
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
         stmt.setBytes(columnIndex, x);
     }
 
@@ -302,10 +314,12 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param parameterName the name of the parameter
      * @param x the byte array to set
      * @param sqlTypeOrLength the SQL type or length (ignored for byte arrays)
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final byte[] x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final byte[] x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setBytes(parameterName, x);
     }
 
@@ -321,7 +335,8 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      *
      * @param appendable the Appendable to write to
      * @param x the byte array to append
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -333,7 +348,7 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final byte[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final byte[] x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -368,10 +383,11 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @param writer the CharacterWriter to write to
      * @param x the byte array to write
      * @param config the serialization configuration (currently unused for byte arrays)
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final byte[] x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final byte[] x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -396,11 +412,13 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      *
      * @param c the Collection of Byte objects to convert
      * @return a byte array containing the unboxed values, or {@code null} if input is null
-     * @throws ClassCastException if any element in the collection is not a Byte
-     * @throws NullPointerException if any element in the collection is {@code null}
+     * @throws ClassCastException if an element is not a {@code Byte}.
+     * @throws NullPointerException if an element is {@code null} and cannot be unboxed.
+     * @throws ArrayIndexOutOfBoundsException if the collection supplies more elements during iteration than the size used to allocate the array.
      */
+    @MayReturnNull
     @Override
-    public byte[] collectionToArray(final Collection<?> c) {
+    public byte[] collectionToArray(final Collection<?> c) throws ClassCastException, NullPointerException, ArrayIndexOutOfBoundsException {
         if (c == null) {
             return null; // NOSONAR
         }
@@ -423,10 +441,14 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      *
      * @param x the byte array to convert
      * @param output the Collection to add the boxed Byte values to
+     * @throws NullPointerException if the input array is nonempty and {@code output} is {@code null}.
+     * @throws UnsupportedOperationException if the input array is nonempty and the output collection does not support adding elements.
      * @throws ClassCastException if the output collection cannot accept Byte objects
+     * @throws IllegalArgumentException if the output collection rejects an element for a restriction other than its type or nullness.
      */
     @Override
-    public void arrayToCollection(final byte[] x, final Collection<?> output) {
+    public void arrayToCollection(final byte[] x, final Collection<?> output)
+            throws NullPointerException, UnsupportedOperationException, ClassCastException, IllegalArgumentException {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

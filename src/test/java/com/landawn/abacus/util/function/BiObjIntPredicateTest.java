@@ -90,8 +90,9 @@ public class BiObjIntPredicateTest extends TestBase {
     @Test
     public void testComplexCondition() {
         BiObjIntPredicate<String, String> predicate = (t, u, i) -> {
-            if (t == null || u == null || (i < 0))
+            if (t == null || u == null || (i < 0)) {
                 return false;
+            }
             int totalLength = t.length() + u.length();
             return totalLength >= i;
         };

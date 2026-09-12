@@ -69,8 +69,9 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * character replacement table.
      *
      * @param replacementsForChars the character replacement table for escaping; must not be {@code null}
+     * @throws NullPointerException if {@code replacementsForChars} is {@code null}
      */
-    CharacterWriter(final char[][] replacementsForChars) {
+    CharacterWriter(final char[][] replacementsForChars) throws NullPointerException {
         this.replacementsForChars = replacementsForChars;
         lengthOfReplacementsForChars = replacementsForChars.length - 1;
     }
@@ -81,8 +82,10 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      *
      * @param os the output stream to write to; must not be {@code null}
      * @param replacementsForChars the character replacement table for escaping; must not be {@code null}
+     * @throws IllegalArgumentException if {@code os} is {@code null}
+     * @throws NullPointerException if {@code replacementsForChars} is {@code null}
      */
-    CharacterWriter(final OutputStream os, final char[][] replacementsForChars) {
+    CharacterWriter(final OutputStream os, final char[][] replacementsForChars) throws IllegalArgumentException, NullPointerException {
         super(os);
         this.replacementsForChars = replacementsForChars;
         lengthOfReplacementsForChars = replacementsForChars.length - 1;
@@ -94,8 +97,9 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      *
      * @param writer the writer to write to; must not be {@code null}
      * @param replacementsForChars the character replacement table for escaping; must not be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null} or {@code replacementsForChars} is {@code null}
      */
-    CharacterWriter(final Writer writer, final char[][] replacementsForChars) {
+    CharacterWriter(final Writer writer, final char[][] replacementsForChars) throws NullPointerException {
         super(writer);
         this.replacementsForChars = replacementsForChars;
         lengthOfReplacementsForChars = replacementsForChars.length - 1;
@@ -139,10 +143,10 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * }</pre>
      *
      * @param cbuf the character array to write; must not be {@code null}
-     * @throws IOException if this writer is closed or an I/O error occurs
      * @throws NullPointerException if {@code cbuf} is {@code null}
+     * @throws IOException if this writer is closed or an I/O error occurs
      */
-    public void writeCharacter(final char[] cbuf) throws IOException {
+    public void writeCharacter(final char[] cbuf) throws NullPointerException, IOException {
         ensureOpen();
 
         final int len = cbuf.length;
@@ -190,11 +194,11 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * @param cbuf the character array containing data to write; must not be {@code null}
      * @param off the start offset in the array; must be non-negative and not greater than {@code cbuf.length}
      * @param len the number of characters to write; must be non-negative and {@code off + len} must not exceed {@code cbuf.length}
-     * @throws IOException if this writer is closed or an I/O error occurs
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len} exceeds {@code cbuf.length}
      * @throws NullPointerException if {@code cbuf} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len} exceeds {@code cbuf.length}
+     * @throws IOException if this writer is closed or an I/O error occurs
      */
-    public void writeCharacter(final char[] cbuf, final int off, int len) throws IOException {
+    public void writeCharacter(final char[] cbuf, final int off, int len) throws NullPointerException, IndexOutOfBoundsException, IOException {
         ensureOpen();
 
         if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
@@ -245,12 +249,11 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * @param str the string to write
      * @throws IOException if this writer is closed or an I/O error occurs
      */
-    @SuppressWarnings("deprecation")
     public void writeCharacter(final String str) throws IOException {
         if (str == null) {
             write(Strings.NULL_CHAR_ARRAY);
         } else {
-            writeCharacter(InternalUtil.getCharsForReadOnly(str));
+            writeCharacter(str, 0, str.length());
         }
     }
 
@@ -258,7 +261,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * Writes a portion of a string with automatic escaping.
      *
      * <p>Only the specified portion of the string is processed for escaping.
-     * Characters outside the specified range are not written.
+     * Characters outside the specified range are neither copied nor written.
      * If {@code str} is {@code null}, the literal text {@code "null"} is used as the source,
      * and {@code off}/{@code len} apply to that four-character array.</p>
      *
@@ -273,16 +276,34 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      *            must be non-negative and not greater than the effective string length
      * @param len the number of characters to write; must be non-negative and {@code off + len} must
      *            not exceed the effective string length
-     * @throws IOException if this writer is closed or an I/O error occurs
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len}
      *         exceeds the effective string length
+     * @throws IOException if this writer is closed or an I/O error occurs
      */
-    @SuppressWarnings("deprecation")
-    public void writeCharacter(final String str, final int off, final int len) throws IOException {
+    public void writeCharacter(final String str, final int off, final int len) throws IndexOutOfBoundsException, IOException {
         if (str == null) {
             write(Strings.NULL_CHAR_ARRAY, off, len);
         } else {
-            writeCharacter(InternalUtil.getCharsForReadOnly(str), off, len);
+            ensureOpen();
+            if (off < 0 || len < 0 || off > str.length() || len > str.length() - off) {
+                throw new IndexOutOfBoundsException();
+            }
+            // Scan only the requested range and write unescaped runs directly from the original String.
+            final int end = off + len;
+            int from = off;
+            for (int i = off; i < end; i++) {
+                final char ch = str.charAt(i);
+                if (ch <= lengthOfReplacementsForChars && replacementsForChars[ch] != null) {
+                    if (i > from) {
+                        write(str, from, i - from);
+                    }
+                    write(replacementsForChars[ch]);
+                    from = i + 1;
+                }
+            }
+            if (end > from) {
+                write(str, from, end - from);
+            }
         }
     }
 

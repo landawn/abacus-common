@@ -192,9 +192,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param <V> the value type of the {@code Map.Entry}, which becomes the right element type.
      * @param entry the {@code Map.Entry} to convert to a Pair, must not be {@code null}.
      * @return a new Pair instance with the key as the left element and the value as the right element.
-     * @throws NullPointerException if {@code entry} is {@code null}.
+     * @throws IllegalArgumentException if {@code entry} is {@code null}.
      */
-    public static <K, V> Pair<K, V> from(final Map.Entry<K, V> entry) {
+    public static <K, V> Pair<K, V> from(final Map.Entry<K, V> entry) throws IllegalArgumentException {
+        N.checkArgNotNull(entry, cs.entry);
+
         return new Pair<>(entry.getKey(), entry.getValue());
     }
 
@@ -204,8 +206,8 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Returns a type-safe empty array of Pair instances.
      *
      * <p>This method returns a shared, reusable empty array, avoiding the need to allocate
-     * a new empty array each time. The array has length zero. Note that the array reference
-     * itself is shared; the caller should not store elements into it.</p>
+     * a new empty array each time. The array has length zero, so it is immutable in practice and
+     * safe to share.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -469,11 +471,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param newLeft the new value to assign to the left element if the predicate passes;
      *                may be {@code null}
      * @return {@code true} if the left element was updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setLeftIf(final Throwables.BiPredicate<? super L, ? super R, E> predicate, final L newLeft)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (predicate.test(left, right)) {
@@ -510,11 +512,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param newRight the new value to assign to the right element if the predicate passes;
      *                 may be {@code null}
      * @return {@code true} if the right element was updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setRightIf(final Throwables.BiPredicate<? super L, ? super R, E> predicate, final R newRight)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (predicate.test(left, right)) {
@@ -559,11 +561,11 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param newRight the new value to assign to the right element if the predicate passes;
      *                 may be {@code null}
      * @return {@code true} if both elements were updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     public <E extends Exception> boolean setIf(final Throwables.BiPredicate<? super L, ? super R, E> predicate, final L newLeft, final R newRight)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (predicate.test(left, right)) {
@@ -650,16 +652,16 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *          otherwise, a new array of the same runtime type is allocated for this purpose
      * @return an array containing the left element at index 0 and the right element at index 1.
      * @throws NullPointerException if {@code a} is {@code null}
-     * @throws ArrayStoreException if the runtime type of the specified array is not a
-     *         supertype of the runtime type of the elements in this pair
+     * @throws ArrayStoreException if an element is incompatible with the runtime component type of {@code a}
      */
-    public <A> A[] toArray(A[] a) {
+    public <A> A[] toArray(A[] a) throws NullPointerException, ArrayStoreException {
         if (a.length < 2) {
             a = N.copyOf(a, 2);
         }
 
-        a[0] = (A) left;
-        a[1] = (A) right;
+        final Object[] result = a;
+        result[0] = left;
+        result[1] = right;
 
         return a;
     }
@@ -669,33 +671,36 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * The consumer is called first with the left element, then with the right element.
      * The consumer must be able to handle the types of both elements.
      *
+     * <p>Because the two elements may have unrelated types, the consumer must accept {@code Object}.
+     * To process the pair with element-typed parameters, use {@link #accept(Throwables.BiConsumer)}
+     * instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Pair<String, String> pair = Pair.of("Hello", "World");
-     * List<String> collected = new ArrayList<>();
-     * pair.forEach((String value) -> collected.add(value));
-     * // collected now contains ["Hello", "World"]
-     *
-     * // With different types (requires consumer that accepts Object)
      * Pair<String, Integer> mixed = Pair.of("Count", 42);
      * mixed.forEach(System.out::println);
      * // Prints "Count" then "42"
+     *
+     * List<Object> collected = new ArrayList<>();
+     * mixed.forEach(collected::add);
+     * // collected now contains ["Count", 42]
+     *
+     * // Element-typed processing goes through accept(BiConsumer):
+     * mixed.accept((name, count) -> System.out.println(name + "=" + count));
      * }</pre>
      *
      * @param <E> the type of exception that the consumer may throw.
-     * @param consumer the action to be performed on each element; must accept a common
-     *                 supertype of both L and R (typically {@code Object}); must not be {@code null}.
-     * @throws E if the consumer throws an exception.
-     * @throws ClassCastException if the consumer cannot accept the runtime types of the elements.
+     * @param consumer the action to be performed on each element; must accept {@code Object},
+     *                 since the left and right elements may have unrelated types; must not be {@code null}.
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws E if the consumer throws an exception.
+     * @see #accept(Throwables.BiConsumer)
      */
-    public <E extends Exception> void forEach(final Throwables.Consumer<?, E> consumer) throws E, IllegalArgumentException {
+    public <E extends Exception> void forEach(final Throwables.Consumer<? super Object, E> consumer) throws IllegalArgumentException, E {
         N.checkArgNotNull(consumer, cs.consumer);
 
-        final Throwables.Consumer<Object, E> objConsumer = (Throwables.Consumer<Object, E>) consumer;
-
-        objConsumer.accept(left);
-        objConsumer.accept(right);
+        consumer.accept(left);
+        consumer.accept(right);
     }
 
     /**
@@ -716,13 +721,19 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // Prints "Age = 25"
      * }</pre>
      *
+     * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is
+     * written out; a <em>method reference</em> may not. One whose target has both a one-argument
+     * and a multi-argument form fits this overload and {@link #accept(Throwables.Consumer)} equally, so the call is
+     * ambiguous and does not compile. Disambiguate with a cast, e.g.
+     * {@code (Throwables.BiConsumer<L, R, RuntimeException>) Foo::bar}.</p>
+     *
      * @param <E> the type of exception that the action may throw.
      * @param action the action to be performed with the left and right elements as arguments;
      *               must not be {@code null}
-     * @throws E if the action throws an exception.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception.
      */
-    public <E extends Exception> void accept(final Throwables.BiConsumer<? super L, ? super R, E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void accept(final Throwables.BiConsumer<? super L, ? super R, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         action.accept(left, right);
@@ -750,10 +761,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param <E> the type of exception that the action may throw.
      * @param action the action to be performed with this pair as the argument; must not be {@code null}
-     * @throws E if the action throws an exception.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception.
      */
-    public <E extends Exception> void accept(final Throwables.Consumer<? super Pair<L, R>, E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void accept(final Throwables.Consumer<? super Pair<L, R>, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         action.accept(this);
@@ -775,14 +786,20 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // fullName equals "John Doe"
      * }</pre>
      *
+     * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is
+     * written out; a <em>method reference</em> may not. One whose target has both a one-argument
+     * and a multi-argument form fits this overload and {@link #map(Throwables.Function)} equally, so the call is
+     * ambiguous and does not compile. Disambiguate with a cast, e.g.
+     * {@code (Throwables.BiFunction<L, R, U, RuntimeException>) Foo::bar}.</p>
+     *
      * @param <U> the type of the result.
      * @param <E> the type of exception that the mapper function may throw.
      * @param mapper the function to apply to the left and right elements; must not be {@code null}
      * @return the result of applying the mapper function to both elements.
-     * @throws E if the mapper function throws an exception.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws E if the mapper function throws an exception.
      */
-    public <U, E extends Exception> U map(final Throwables.BiFunction<? super L, ? super R, ? extends U, E> mapper) throws E, IllegalArgumentException {
+    public <U, E extends Exception> U map(final Throwables.BiFunction<? super L, ? super R, ? extends U, E> mapper) throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, cs.mapper);
 
         return mapper.apply(left, right);
@@ -807,10 +824,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param <E> the type of exception that the mapper function may throw.
      * @param mapper the function to apply to this pair; must not be {@code null}
      * @return the result of applying the mapper function to this pair.
-     * @throws E if the mapper function throws an exception.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws E if the mapper function throws an exception.
      */
-    public <U, E extends Exception> U map(final Throwables.Function<? super Pair<L, R>, ? extends U, E> mapper) throws E, IllegalArgumentException {
+    public <U, E extends Exception> U map(final Throwables.Function<? super Pair<L, R>, ? extends U, E> mapper) throws IllegalArgumentException, E {
         N.checkArgNotNull(mapper, cs.mapper);
 
         return mapper.apply(this);
@@ -837,15 +854,21 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * // filtered2.isPresent() is false because 5 is not > 10
      * }</pre>
      *
+     * <p><b>Method references:</b> a lambda always resolves cleanly here because its arity is
+     * written out; a <em>method reference</em> may not. One whose target has both a one-argument
+     * and a multi-argument form fits this overload and {@link #filter(Throwables.Predicate)} equally, so the call is
+     * ambiguous and does not compile. Disambiguate with a cast, e.g.
+     * {@code (Throwables.BiPredicate<L, R, RuntimeException>) Foo::bar}.</p>
+     *
      * @param <E> the type of exception that the predicate may throw.
      * @param predicate the condition to test with the left and right elements; must not be {@code null}.
      * @return an Optional containing this pair if the predicate returns {@code true},
      *         otherwise an empty Optional.
-     * @throws E if the predicate throws an exception.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception.
      */
     public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.BiPredicate<? super L, ? super R, E> predicate)
-            throws E, IllegalArgumentException {
+            throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         return predicate.test(left, right) ? Optional.of(this) : Optional.empty();
@@ -877,10 +900,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * @param predicate the condition to test with this pair; must not be {@code null}.
      * @return an Optional containing this pair if the predicate returns {@code true},
      *         otherwise an empty Optional.
-     * @throws E if the predicate throws an exception.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception.
      */
-    public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.Predicate<? super Pair<L, R>, E> predicate) throws E, IllegalArgumentException {
+    public <E extends Exception> Optional<Pair<L, R>> filter(final Throwables.Predicate<? super Pair<L, R>, E> predicate) throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         return predicate.test(this) ? Optional.of(this) : Optional.empty();
@@ -930,9 +953,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Returns the left element of this pair, implementing the Map.Entry interface.
      * This method allows Pair to be used wherever a Map.Entry is expected.
      *
-     * <p>This method is deprecated in favor of {@link #left()} which provides
-     * a more concise API. When using Pair as a Map.Entry, the left element
-     * serves as the key.</p>
+     * <p>When you hold a {@code Pair} reference, prefer the more concise {@link #left()}; this method
+     * exists to satisfy {@link Map.Entry} and does not warn when called through a {@code Map.Entry}
+     * reference. When using Pair as a Map.Entry, the left element serves as the key.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -942,7 +965,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @return the left element of this pair, may be {@code null}.
-     * @deprecated Use {@link #left()} instead for cleaner code.
+     * @deprecated Use {@link #left()} instead when you hold a {@code Pair} reference.
      */
     @Deprecated
     @Override
@@ -954,9 +977,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Returns the right element of this pair, implementing the Map.Entry interface.
      * This method allows Pair to be used wherever a Map.Entry is expected.
      *
-     * <p>This method is deprecated in favor of {@link #right()} which provides
-     * a more concise API. When using Pair as a Map.Entry, the right element
-     * serves as the value.</p>
+     * <p>When you hold a {@code Pair} reference, prefer the more concise {@link #right()}; this method
+     * exists to satisfy {@link Map.Entry} and does not warn when called through a {@code Map.Entry}
+     * reference. When using Pair as a Map.Entry, the right element serves as the value.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -966,7 +989,7 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * }</pre>
      *
      * @return the right element of this pair, may be {@code null}.
-     * @deprecated Use {@link #right()} instead for cleaner code.
+     * @deprecated Use {@link #right()} instead when you hold a {@code Pair} reference.
      */
     @Deprecated
     @Override
@@ -979,10 +1002,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * the previous value, implementing the Map.Entry interface.
      * This method allows Pair to be used wherever a mutable Map.Entry is expected.
      *
-     * <p>This method is deprecated in favor of {@link #setRight(Object)} or
-     * {@link #getAndSetRight(Object)} which provide a clearer API. When using
-     * Pair as a Map.Entry, this method modifies the value (right element) and
-     * returns the old value.</p>
+     * <p>This is the {@link Map.Entry} mutation contract and the only way to change the value through
+     * a {@code Map.Entry} reference, so it is not deprecated. When you hold a {@code Pair} reference,
+     * {@link #setRight(Object)} and {@link #getAndSetRight(Object)} say the same thing more directly.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -994,9 +1016,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      *
      * @param value the new value to set for the right element, may be {@code null}.
      * @return the previous value of the right element, may be {@code null}.
-     * @deprecated Use {@link #setRight(Object)} or {@link #getAndSetRight(Object)} instead.
+     * @see #setRight(Object)
+     * @see #getAndSetRight(Object)
      */
-    @Deprecated
     @Override
     public R setValue(final R value) {
         return getAndSetRight(value);
@@ -1006,10 +1028,12 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Returns a hash code value for this pair.
      * The hash code is computed as the XOR of the hash codes of the left and right elements.
      *
-     * <p>Equal pairs (as determined by {@link #equals(Object)}) are guaranteed to have the
-     * same hash code, making them suitable for use as keys in hash-based collections.
-     * Note that because XOR is commutative, {@code Pair.of(a, b)} and {@code Pair.of(b, a)} always have the
-     * same hash code, regardless of the element values.</p>
+     * <p>Equal pairs (as determined by {@link #equals(Object)}) are guaranteed to have the same hash
+     * code. <b>A {@code Pair} is mutable, however, so its hash code changes when an element is
+     * replaced: do not mutate a pair while it is a key in a {@code HashMap} or an element of a
+     * {@code HashSet}.</b> Use {@link #toTuple()} or {@link #toImmutableEntry()} for a snapshot that
+     * is safe to key on. Note that because XOR is commutative, {@code Pair.of(a, b)} and
+     * {@code Pair.of(b, a)} always have the same hash code, regardless of the element values.</p>
      *
      * <p>The component hash codes follow the {@link Map.Entry} contract and therefore use each
      * component's ordinary {@link Object#hashCode()} implementation. In particular, array
@@ -1021,10 +1045,10 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Pair<String, Integer> pair2 = Pair.of("Hello", 42);
      * // pair1.hashCode() == pair2.hashCode()
      *
-     * Map<Pair<String, Integer>, String> map = new HashMap<>();
-     * map.put(pair1, "value");
-     * // Can retrieve using pair2 because they have the same hash code and are equal
-     * String value = map.get(pair2);   // returns "value"
+     * Map<Tuple2<String, Integer>, String> map = new HashMap<>();
+     * map.put(pair1.toTuple(), "value");
+     * // Retrieved with an equal snapshot; a snapshot cannot be mutated out from under the map
+     * String value = map.get(pair2.toTuple());   // returns "value"
      * }</pre>
      *
      * @return a hash code value for this pair.

@@ -21,10 +21,12 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.util.BufferedXmlWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.EscapeUtil;
 import com.landawn.abacus.util.IOUtil;
@@ -38,8 +40,10 @@ import com.landawn.abacus.util.Strings;
  * Provides functionality for serialization, deserialization, database operations,
  * and conversion between char arrays and their various representations including {@link Clob} objects.
  * The {@link #stringOf(char[])} representation single-quotes each element (for example {@code ['a', 'b', 'c']})
- * and backslash-escapes quotes, backslashes, and control characters so every {@code char} can round-trip.
- * {@link #appendTo(Appendable, char[])} and {@link #toString(char[])} emit the elements unquoted.
+ * and escapes it with {@link EscapeUtil#escapeEcmaScript(String)} so every {@code char} can round-trip: quotes,
+ * backslashes and {@code /} get a backslash, the C0 control characters use {@code \n}-style or <code>&#92;uXXXX</code>
+ * escapes, and every character outside U+0020..U+007F is written as <code>&#92;uXXXX</code> (U+007F itself is written as-is).
+ * {@link #appendTo(Appendable, char[])} and {@link #toString(char[])} emit the elements unquoted and unescaped.
  */
 @SuppressWarnings("java:S2160")
 public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<char[]> {
@@ -95,9 +99,11 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
     /**
      * Converts a char array to its string representation.
      * The format is: ['a', 'b', 'c'] with each character quoted and separated by commas.
-     * Characters that would make the representation ambiguous are escaped with JavaScript-style
-     * backslash escapes; for example, a single quote is written as {@code '\\''} and a newline as
-     * {@code '\\n'}.
+     * Each element is escaped with {@link EscapeUtil#escapeEcmaScript(String)}: quotes, backslashes and {@code /}
+     * get a backslash (a single quote is written as <code>'\''</code>, a slash as <code>'\/'</code>), the C0 control
+     * characters use {@code \n}-style or <code>&#92;uXXXX</code> escapes (a newline is written as <code>'\n'</code>), and
+     * every character outside U+0020..U+007F is written as <code>&#92;uXXXX</code> (for example U+00E9, Latin small
+     * letter e with acute, becomes <code>'&#92;u00E9'</code>); U+007F is written as-is.
      * Returns {@code null} if the input array is {@code null}, or "[]" if the array is empty.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
@@ -110,6 +116,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final char[] x) {
         if (x == null) {
@@ -120,25 +127,25 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
 
         final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(x.length, 5));
 
-        sb.append(SK._BRACKET_L);
+        try {
+            sb.append(SK._BRACKET_L);
 
-        for (int i = 0, len = x.length; i < len; i++) {
-            if (i > 0) {
-                sb.append(ELEMENT_SEPARATOR);
+            for (int i = 0, len = x.length; i < len; i++) {
+                if (i > 0) {
+                    sb.append(ELEMENT_SEPARATOR);
+                }
+
+                sb.append(SK.SINGLE_QUOTE);
+                sb.append(EscapeUtil.escapeEcmaScript(String.valueOf(x[i])));
+                sb.append(SK.SINGLE_QUOTE);
             }
 
-            sb.append(SK.SINGLE_QUOTE);
-            sb.append(EscapeUtil.escapeEcmaScript(String.valueOf(x[i])));
-            sb.append(SK.SINGLE_QUOTE);
+            sb.append(SK._BRACKET_R);
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
         }
-
-        sb.append(SK._BRACKET_R);
-
-        final String str = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return str;
     }
 
     /**
@@ -146,6 +153,8 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * Expected format: ['a', 'b', 'c'] with quoted characters or [a, b, c] without quotes.
      * Automatically detects whether characters are quoted and handles both formats. Backslash
      * escape sequences inside quoted elements are decoded.
+     * Whitespace outside quoted elements is ignored; quote a space character as {@code ' '}.
+     * Brackets containing only whitespace represent an empty array.
      * Returns {@code null} if input is {@code null}, empty, or blank, or an empty array if input is {@code "[]"}.
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form produced by
@@ -155,13 +164,15 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @param str the string to parse
      * @return the parsed char array, or {@code null} if input is {@code null}, empty, or blank.
      *         Returns an empty array for "[]".
-     * @throws NumberFormatException if an unquoted multi-character element cannot be parsed as a numeric character code
-     * @throws IllegalArgumentException if such an element parses to a numeric value outside the {@code char} range.
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only, or a numeric character code is outside the char range; or
+     *         a quoted element contains a malformed Unicode escape.
+     * @throws NumberFormatException if an element has multiple characters after removing quotes and escapes and is not an integer character code.
      * @see #valueOf(Object)
      * @see #stringOf(char[])
      */
+    @MayReturnNull
     @Override
-    public char[] valueOf(final String str) {
+    public char[] valueOf(final String str) throws IllegalArgumentException, NumberFormatException {
         if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
@@ -199,14 +210,15 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * Returns {@code null} if input is {@code null}.
      *
      * @param obj the object to convert (can be a {@link Reader}, {@link Clob}, or any other type)
-     * @return the char array representation of the object, or {@code null} if input is null
-     * @throws UncheckedIOException if an I/O error occurs while reading a {@link Reader}
+     * @return the char array representation of the object, an empty array for a zero-length Clob, or {@code null} if input is null
+     * @throws UncheckedIOException if {@code obj} is a {@link Reader} and reading its remaining characters fails
      * @throws UncheckedSQLException if a database access error occurs while reading or freeing a Clob
      * @throws UnsupportedOperationException if the Clob length exceeds {@link Integer#MAX_VALUE}
      */
+    @MayReturnNull
     @SuppressFBWarnings
     @Override
-    public char[] valueOf(final Object obj) {
+    public char[] valueOf(final Object obj) throws UncheckedIOException, UncheckedSQLException, UnsupportedOperationException {
         if (obj == null) {
             return null; // NOSONAR
         } else if (obj instanceof Reader reader) {
@@ -219,7 +231,9 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                 if (len > Integer.MAX_VALUE) {
                     throw new UnsupportedOperationException("Clob too large to convert to char[]: " + len + " characters");
                 }
-                return clob.getSubString(1, (int) len).toCharArray();
+
+                // getSubString(1, 0) is rejected by e.g. SerialClob on a zero-length lob; stay inside the try so free() still runs
+                return len == 0 ? N.EMPTY_CHAR_ARRAY : clob.getSubString(1, (int) len).toCharArray();
             } catch (final SQLException e) {
                 final UncheckedSQLException uncheckedException = new UncheckedSQLException(e);
                 primaryException = uncheckedException;
@@ -262,7 +276,8 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      *
      * @param appendable the Appendable to write to
      * @param x the char array to append
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -274,7 +289,7 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final char[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final char[] x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -296,11 +311,13 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * Writes the character representation of a char array to a CharacterWriter.
      * If a character quotation is specified in the config, characters are quoted.
      * Single quotes within characters are escaped when using single quote quotation.
+     * XML writers always use the quoted, escaped array text from {@link #stringOf(char[])},
+     * independently of {@code charQuotation}, so delimiters and XML control characters round-trip.
      * Writes "null" if the array is {@code null}.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
-     * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
+     * config (a {@code null} config means no surrounding quotation for non-XML writers). It is the streaming counterpart of {@code stringOf}
      * and is invoked by the JSON/XML serializers.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
@@ -310,12 +327,16 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @param writer the CharacterWriter to write to
      * @param x the char array to write
      * @param config the serialization configuration that may specify character quotation
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final char[] x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final char[] x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
+        } else if (writer instanceof BufferedXmlWriter) {
+            // XML text must preserve array delimiters and controls until valueOf decodes them.
+            writer.writeCharacter(stringOf(x));
         } else {
             writer.write(SK._BRACKET_L);
 
@@ -357,11 +378,13 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      *
      * @param c the Collection of Character objects to convert
      * @return a char array containing the unboxed values, or {@code null} if input is null
-     * @throws ClassCastException if any element in the collection is not a Character
-     * @throws NullPointerException if any element in the collection is {@code null}
+     * @throws ClassCastException if an element is not a {@code Character}.
+     * @throws NullPointerException if an element is {@code null} and cannot be unboxed.
+     * @throws ArrayIndexOutOfBoundsException if the collection supplies more elements during iteration than the size used to allocate the array.
      */
+    @MayReturnNull
     @Override
-    public char[] collectionToArray(final Collection<?> c) {
+    public char[] collectionToArray(final Collection<?> c) throws ClassCastException, NullPointerException, ArrayIndexOutOfBoundsException {
         if (c == null) {
             return null; // NOSONAR
         }
@@ -384,10 +407,14 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      *
      * @param x the char array to convert
      * @param output the Collection to add the boxed Character values to
+     * @throws NullPointerException if the input array is nonempty and {@code output} is {@code null}.
+     * @throws UnsupportedOperationException if the input array is nonempty and the output collection does not support adding elements.
      * @throws ClassCastException if the output collection cannot accept Character objects
+     * @throws IllegalArgumentException if the output collection rejects an element for a restriction other than its type or nullness.
      */
     @Override
-    public void arrayToCollection(final char[] x, final Collection<?> output) {
+    public void arrayToCollection(final char[] x, final Collection<?> output)
+            throws NullPointerException, UnsupportedOperationException, ClassCastException, IllegalArgumentException {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

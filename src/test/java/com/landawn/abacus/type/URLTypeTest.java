@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.UncheckedIOException;
 
 public class URLTypeTest extends TestBase {
 
@@ -148,5 +149,16 @@ public class URLTypeTest extends TestBase {
         urlType.set(stmt, "url_param", null);
 
         verify(stmt).setURL("url_param", null);
+    }
+
+    // ---- review fixes 2026-09-06: T3-07 documented exceptions of valueOf(String) ----
+
+    @Test
+    public void reviewFixes20260906_valueOfNonAbsoluteUriThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> urlType.valueOf("example.com/path")); // valid URI, no scheme
+        assertThrows(IllegalArgumentException.class, () -> urlType.valueOf("/relative/path"));
+        assertThrows(IllegalArgumentException.class, () -> urlType.valueOf("http://exa mple.com")); // invalid URI
+        assertThrows(UncheckedIOException.class, () -> urlType.valueOf("foo://bar")); // unknown protocol
+        assertEquals("https://example.com/path", urlType.valueOf("https://example.com/path").toExternalForm());
     }
 }

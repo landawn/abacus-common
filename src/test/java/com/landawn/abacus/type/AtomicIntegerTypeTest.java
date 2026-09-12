@@ -128,4 +128,28 @@ public class AtomicIntegerTypeTest extends TestBase {
     public void test_name() {
         assertEquals("AtomicInteger", type.name());
     }
+
+    // T5-07 (2026-09-06): Integer.parseInt/Long.parseLong accepted non-ASCII digits that IntegerType/MutableIntType reject.
+    @Test
+    public void reviewFixes20260906_valueOfUsesNumbersGrammarLikeIntegerType() {
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("\u0661\u0662\u0663"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> Type.of(Integer.class).valueOf("\u0661\u0662\u0663"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("\uFF11\uFF12"));
+        assertEquals(42, type.valueOf(" 42 ").get());
+        assertEquals(-7, type.valueOf("-7").get());
+        assertEquals(16, type.valueOf("0x10").get());
+        assertEquals(16, type.valueOf("#10").get());
+        assertEquals(10, type.valueOf("010").get()); // R9: a leading zero is decimal padding, never octal
+        assertEquals(10, Type.of(Integer.class).valueOf("010").intValue());
+        assertEquals(1, type.valueOf("1L").get());
+        assertEquals(Integer.MAX_VALUE, type.valueOf("2147483647").get());
+        assertEquals(Integer.MIN_VALUE, type.valueOf("-2147483648").get());
+        assertNull(type.valueOf(""));
+        assertNull(type.valueOf((String) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf(" "));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("\t"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("abc"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("1.5"));
+        org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> type.valueOf("2147483648"));
+    }
 }

@@ -31,6 +31,16 @@ package com.landawn.abacus.util;
  * comparison and parsing version strings.
  * </p>
  *
+ * <p>
+ * <b>Note:</b> {@link #JAVA_ANDROID_0_9} compares as {@code 1.5} - the same value as {@link #JAVA_1_5} - although
+ * it is declared first, so the natural enum order ({@code compareTo}, {@code EnumSet}, {@code EnumMap},
+ * {@code values()}) is <em>not</em> the order implied by {@link #atLeast(JavaVersion)} /
+ * {@link #atMost(JavaVersion)}: {@code JAVA_ANDROID_0_9.compareTo(JAVA_1_1)} is negative while
+ * {@code JAVA_ANDROID_0_9.atLeast(JAVA_1_1)} is {@code true}, and {@code atLeast} and {@code atMost} are both
+ * {@code true} in both directions between {@code JAVA_ANDROID_0_9} and {@code JAVA_1_5}. Always compare versions
+ * with those two methods rather than with the enum's own ordering.
+ * </p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Check if current Java version is at least Java 8
@@ -374,17 +384,24 @@ public enum JavaVersion {
     JAVA_39(39.0f, "39"),
 
     /**
-     * The most recent Java version detected at runtime.
+     * Sentinel for the current JVM and for version strings newer than the last named constant
+     * ({@link #JAVA_39}).
      * <p>
-     * This constant dynamically represents the highest Java version available on the system,
-     * as determined by the {@code java.specification.version} system property. It's primarily
-     * used to avoid breaking when newer versions of Java are released after this enum was defined.
+     * {@link #of(String)} / {@link #get(String)} return this constant for numeric versions
+     * greater than 39. Its comparison value is at least {@code 40} so that
+     * {@code JavaVersion.of("50").atLeast(JavaVersion.JAVA_39)} is {@code true} even when this
+     * library is running on an older JVM. The display name ({@link #toString()}) is the current JVM's
+     * {@code java.specification.version} rendered as a {@code float} - {@code "25.0"} on a Java 25 JVM, not
+     * {@code "25"} - or {@code "99.0"} if that property cannot be read. That name therefore does not round-trip:
+     * {@code JavaVersion.of(JAVA_RECENT.toString())} on a Java 25 JVM yields {@link #JAVA_25}, not this constant.
      * </p>
      * <p>
-     * If the system property cannot be read, defaults to version 99.0.
+     * To test the <em>running</em> JVM against a named constant, prefer
+     * {@code JavaVersion.of(System.getProperty("java.specification.version")).atLeast(...)}
+     * (or {@code IOUtil.JAVA_VERSION}) rather than comparing {@code JAVA_RECENT} itself.
      * </p>
      */
-    JAVA_RECENT(maxVersion());
+    JAVA_RECENT(recentComparisonValue(), recentDisplayName());
 
     /**
      * The float value used for numerical version comparisons.
@@ -409,8 +426,7 @@ public enum JavaVersion {
 
     /**
      * Constructs a JavaVersion enum constant whose name is derived from the float value
-     * (for example {@code 25.0f} yields the name {@code "25.0"}). Used for {@link #JAVA_RECENT},
-     * whose value is only known at runtime.
+     * (for example {@code 25.0f} yields the name {@code "25.0"}).
      *
      * @param value the float value for numerical comparisons
      */
@@ -438,10 +454,12 @@ public enum JavaVersion {
      * @param requiredVersion the minimum version to check against, not null
      * @return {@code true} if this version is equal to or greater than the specified version,
      *         {@code false} otherwise
-     * @throws NullPointerException if {@code requiredVersion} is {@code null}
+     * @throws IllegalArgumentException if {@code requiredVersion} is {@code null}
      * @see #atMost(JavaVersion)
      */
-    public boolean atLeast(final JavaVersion requiredVersion) {
+    public boolean atLeast(final JavaVersion requiredVersion) throws IllegalArgumentException {
+        N.checkArgNotNull(requiredVersion, cs.requiredVersion);
+
         return value >= requiredVersion.value;
     }
 
@@ -465,10 +483,12 @@ public enum JavaVersion {
      * @param requiredVersion the maximum version to check against, not null
      * @return {@code true} if this version is equal to or less than the specified version,
      *         {@code false} otherwise
-     * @throws NullPointerException if {@code requiredVersion} is {@code null}
+     * @throws IllegalArgumentException if {@code requiredVersion} is {@code null}
      * @see #atLeast(JavaVersion)
      */
-    public boolean atMost(final JavaVersion requiredVersion) {
+    public boolean atMost(final JavaVersion requiredVersion) throws IllegalArgumentException {
+        N.checkArgNotNull(requiredVersion, cs.requiredVersion);
+
         return value <= requiredVersion.value;
     }
 
@@ -481,7 +501,10 @@ public enum JavaVersion {
      * @throws IllegalArgumentException if the version string is {@code null}, empty, or unrecognized.
      */
     // helper for static importing
-    static JavaVersion getJavaVersion(final String nom) {
+    /**
+     * @throws IllegalArgumentException if {@code nom} is null, empty, or does not contain a supported version number
+     */
+    static JavaVersion getJavaVersion(final String nom) throws IllegalArgumentException {
         return get(nom);
     }
 
@@ -511,10 +534,9 @@ public enum JavaVersion {
      *
      * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1")
      * @return the corresponding JavaVersion enum constant, or {@link #JAVA_RECENT} for versions &gt; 39
-     * @throws IllegalArgumentException if the version string is {@code null}, empty, or does not correspond to any
-     *         known Java version and cannot be interpreted as a version number greater than 39.
+     * @throws IllegalArgumentException if the version string is {@code null}, empty, or its recognized version prefix is neither a known Java version nor ASCII decimal digits denoting a version number greater than 39.
      */
-    static JavaVersion get(final String versionStr) {
+    static JavaVersion get(final String versionStr) throws IllegalArgumentException {
         if (Strings.isEmpty(versionStr)) {
             throw new IllegalArgumentException("Invalid Java version: " + versionStr);
         }
@@ -616,7 +638,21 @@ public enum JavaVersion {
                     throw new IllegalArgumentException("Invalid Java version: " + versionStr); //NOSONAR
                 }
 
-                float v = toFloatVersion(versionStr);
+                // A bare version number is a run of ASCII decimal digits. Without this guard the token below went
+                // straight into Float.parseFloat, whose grammar also accepts "Infinity", exponents ("1e9"), f/d
+                // type suffixes ("40f"), hex floats and surrounding whitespace -- every one of which then cleared
+                // the `> 39` test and resolved to JAVA_RECENT, while the very same spellings at or below 39
+                // (" 25 ", "25f") were rejected. IOUtil.JAVA_VERSION feeds `java.version` straight in here, so a
+                // vendor string like that was silently accepted instead of falling through to the next property.
+                // isAsciiNumeric rather than isNumeric: the latter tests Character.isDigit, which also accepts
+                // non-ASCII decimal digits (Arabic-Indic, Devanagari, fullwidth). Those passed this guard and were
+                // then rejected only incidentally, by the NumberFormatException that Numbers.toFloat raises and
+                // toFloatVersion rethrows as IllegalArgumentException -- never reaching the `> 39` test at all.
+                if (!Strings.isAsciiNumeric(versionStr)) {
+                    throw new IllegalArgumentException("Invalid Java version: " + versionStr);
+                }
+
+                final float v = toFloatVersion(versionStr);
 
                 if (v > 39) {
                     return JAVA_RECENT;
@@ -636,6 +672,7 @@ public enum JavaVersion {
      *   <li>Android format: "0.9" → JAVA_ANDROID_0_9</li>
      *   <li>Modern format: "9", "11", "17" → JAVA_9, JAVA_11, JAVA_17</li>
      *   <li>With minor versions: "11.0.2" → JAVA_11 (ignores minor/patch versions)</li>
+     *   <li>With a pre-release or build suffix: "25-ea", "17-internal", "21+35" → JAVA_25, JAVA_17, JAVA_21</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -643,33 +680,57 @@ public enum JavaVersion {
      * JavaVersion v1 = JavaVersion.of("1.8");      // returns JAVA_1_8
      * JavaVersion v2 = JavaVersion.of("11");       // returns JAVA_11
      * JavaVersion v3 = JavaVersion.of("17.0.1");   // returns JAVA_17
+     * JavaVersion v4 = JavaVersion.of("25-ea");    // returns JAVA_25
      *
      * // Get current Java version
      * JavaVersion current = JavaVersion.of(System.getProperty("java.specification.version"));
      * }</pre>
      *
-     * <p>Version strings resolving to a number above Java 39 return {@link #JAVA_RECENT}.</p>
+     * <p><b>Pre-release and build suffixes:</b> a JEP 223 version string is
+     * {@code $VNUM(-$PRE)?(+$BUILD)?(-$OPT)?}, so the version <i>number</i> ends at the first {@code '-'}
+     * or {@code '+'}. Everything from there on is discarded before parsing, which is what makes an
+     * <i>undotted</i> build such as {@code "25-ea"} or {@code "17-internal"} resolve rather than be
+     * rejected. This matters for {@code java.version}, which is the implementation string and routinely
+     * carries such a suffix; {@code java.specification.version} never does.</p>
      *
-     * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1"); must not be {@code null} or empty
+     * <p>Version strings resolving to a number above Java 39 return {@link #JAVA_RECENT}.
+     * That constant compares as at least version 40, so {@code of("50").atLeast(JAVA_39)} is
+     * {@code true} regardless of the JVM this library is running on. The version number itself must be a run of
+     * ASCII decimal digits: {@code "Infinity"}, {@code "1e9"}, {@code "40f"}, {@code " 40 "} and digits from
+     * another script are rejected rather than treated as versions above 39.</p>
+     *
+     * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1", "25-ea"); must not be {@code null} or empty
      * @return the corresponding JavaVersion enum constant, never {@code null}; versions above 39 yield {@link #JAVA_RECENT}
      * @throws IllegalArgumentException if the version string is {@code null}, empty, or cannot be parsed as a known
      *         Java version or a numeric version greater than 39.
      */
-    public static JavaVersion of(final String versionStr) {
+    public static JavaVersion of(final String versionStr) throws IllegalArgumentException {
         if (Strings.isEmpty(versionStr)) {
             throw new IllegalArgumentException("Invalid Java version: " + versionStr);
         }
 
-        JavaVersion result = null;
+        // The version NUMBER ends at the first '-' or '+' (see the javadoc above). Stripping the suffix
+        // first is what lets an undotted build resolve: "17-internal" (a locally built OpenJDK), "25-ea"
+        // (every early-access build) and "21+35" used to be rejected outright, while the dotted spellings
+        // of the very same builds ("11.0.2-internal") only ever survived by accident, because the suffix
+        // happened to fall off in the dot truncation below.
+        final String vnum = stripVersionSuffix(versionStr);
 
-        if (versionStr.startsWith("1.") || versionStr.startsWith("0.")) {
-            // Truncate at the second dot (e.g. "1.8.0_291" -> "1.8") but keep two-part versions
-            // intact so unknown ones like "1.10" reject instead of collapsing to "1.1".
-            final int secondDot = versionStr.indexOf('.', 2);
-            result = get(secondDot > 0 ? versionStr.substring(0, secondDot) : versionStr);
-        } else {
-            final int idx = versionStr.indexOf('.');
-            result = get(idx > 0 ? versionStr.substring(0, idx) : versionStr);
+        final JavaVersion result;
+
+        try {
+            if (vnum.startsWith("1.") || vnum.startsWith("0.")) {
+                // Truncate at the second dot (e.g. "1.8.0_291" -> "1.8") but keep two-part versions
+                // intact so unknown ones like "1.10" reject instead of collapsing to "1.1".
+                final int secondDot = vnum.indexOf('.', 2);
+                result = get(secondDot > 0 ? vnum.substring(0, secondDot) : vnum);
+            } else {
+                final int idx = vnum.indexOf('.');
+                result = get(idx > 0 ? vnum.substring(0, idx) : vnum);
+            }
+        } catch (final IllegalArgumentException e) {
+            // Report the caller's original string, not the suffix-stripped one.
+            throw new IllegalArgumentException("Invalid Java version: " + versionStr); //NOSONAR
         }
 
         if (result == null) {
@@ -677,6 +738,27 @@ public enum JavaVersion {
         }
 
         return result;
+    }
+
+    /**
+     * Returns the version-number part of a JEP 223 version string: everything before the first {@code '-'}
+     * (pre-release or optional info) or {@code '+'} (build number).
+     *
+     * @param versionStr the version string; must not be empty.
+     * @return the leading version number, or {@code versionStr} unchanged when it starts with a suffix
+     *         character and so has no version number to isolate - leaving the original for the caller to
+     *         reject and report.
+     */
+    private static String stripVersionSuffix(final String versionStr) {
+        for (int i = 0, len = versionStr.length(); i < len; i++) {
+            final char ch = versionStr.charAt(i);
+
+            if (ch == '-' || ch == '+') {
+                return i == 0 ? versionStr : versionStr.substring(0, i);
+            }
+        }
+
+        return versionStr;
     }
 
     //-----------------------------------------------------------------------
@@ -690,7 +772,8 @@ public enum JavaVersion {
      *   <li>For Java 8 and earlier: "1.1", "1.2", ..., "1.8"</li>
      *   <li>For Java 9 and later: "9", "10", "11", ..., "39"</li>
      *   <li>For Android: "0.9"</li>
-     *   <li>For JAVA_RECENT: the detected version number as a string</li>
+     *   <li>For JAVA_RECENT: the detected {@code java.specification.version} rendered as a {@code float},
+     *       for example {@code "25.0"} on a Java 25 JVM</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -707,6 +790,22 @@ public enum JavaVersion {
     }
 
     /**
+     * Comparison value for {@link #JAVA_RECENT}: the current JVM spec version, but never below
+     * 40, so a future version string mapped to {@code JAVA_RECENT} is not treated as older than
+     * {@link #JAVA_39} when this library runs on an older JDK.
+     */
+    private static float recentComparisonValue() {
+        return Math.max(maxVersion(), 40.0f);
+    }
+
+    /**
+     * Display name for {@link #JAVA_RECENT}: the current {@code java.specification.version}.
+     */
+    private static String recentDisplayName() {
+        return Float.toString(maxVersion());
+    }
+
+    /**
      * Gets the Java version from the {@code java.specification.version} system property,
      * or {@code 99.0} if the property is not set, cannot be read, or does not parse to a positive number.
      *
@@ -718,7 +817,7 @@ public enum JavaVersion {
 
         try {
             v = toFloatVersion(System.getProperty("java.specification.version", "99.0"));
-        } catch (final SecurityException e) {
+        } catch (final SecurityException | IllegalArgumentException e) {
             return 99f;
         }
 
@@ -748,7 +847,7 @@ public enum JavaVersion {
      * @throws IllegalArgumentException if the numeric portion of the version string cannot be parsed, wrapping the
      *         underlying {@link NumberFormatException}.
      */
-    private static float toFloatVersion(final String value) {
+    private static float toFloatVersion(final String value) throws IllegalArgumentException {
         try {
             final int defaultReturnValue = -1;
             if (value.contains(".")) {

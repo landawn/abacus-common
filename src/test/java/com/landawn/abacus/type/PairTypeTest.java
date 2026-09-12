@@ -282,4 +282,57 @@ public class PairTypeTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertEquals(com.landawn.abacus.util.N.asList(1L, 2L), p.left());
         org.junit.jupiter.api.Assertions.assertEquals("x", p.right());
     }
+
+    @SuppressWarnings("unchecked")
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+        final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            ((Type<Object>) type).serializeTo(jsonWriter, value, config);
+            return jsonWriter.toString();
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(jsonWriter);
+        }
+    }
+
+    // T6-01 (2026-09-06): Object slots dispatch on the runtime class; non-serializable handlers write embedded JSON.
+    @SuppressWarnings("unchecked")
+    @Test
+    public void reviewFixes20260906_objectSlotsUseRuntimeTypeAndEmbeddedJson() throws IOException {
+        final Type<Object> type = (Type<Object>) createType("Pair<Object, Object>");
+        final com.landawn.abacus.parser.JsonSerConfig jsc = com.landawn.abacus.parser.JsonSerConfig.create();
+
+        assertEquals("[1, \"a\"]", reviewFixes20260906_ser(type, Pair.of(1, "a"), jsc));
+        assertEquals("[true, [2]]", reviewFixes20260906_ser(type, Pair.of(true, com.landawn.abacus.util.N.asList(2)), jsc));
+        assertEquals("[{\"k\": 1}, null]", reviewFixes20260906_ser(type, Pair.of(com.landawn.abacus.util.N.asMap("k", 1), null), jsc));
+        assertEquals("[[1, 2], 3]", reviewFixes20260906_ser(type, Pair.of(Pair.of(1, 2), 3), jsc));
+        assertEquals("[1, a]", reviewFixes20260906_ser(type, Pair.of(1, "a"), null));
+        assertEquals(type.stringOf(Pair.of(1, com.landawn.abacus.util.N.asList(2))), reviewFixes20260906_ser(type, Pair.of(1, com.landawn.abacus.util.N.asList(2)), jsc));
+        assertEquals("null", reviewFixes20260906_ser(type, null, jsc));
+        // declared slots keep their declared handler; a declared null slot honours the handler's null flag
+        assertEquals("[\"a\", 0]", reviewFixes20260906_ser(stringIntPairType, Pair.of("a", null), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true)));
+        assertEquals("[\"a\", null]", reviewFixes20260906_ser(stringIntPairType, Pair.of("a", null), jsc));
+        assertEquals("[{\"k\": 1}, 2]", reviewFixes20260906_ser(createType("Pair<Map<String, Integer>, Integer>"), Pair.of(com.landawn.abacus.util.N.asMap("k", 1), 2), jsc));
+        // real parser
+        assertEquals("[[1, 2]]", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(Pair.of(1, 2))));
+        assertEquals("{\"p\": [1, [2]]}", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asMap("p", Pair.of(1, com.landawn.abacus.util.N.asList(2)))));
+    }
+
+    // T6-08 (2026-09-06): documented exception types of valueOf.
+    @Test
+    public void reviewFixes20260906_valueOfExceptionTypes() {
+        assertNull(stringIntPairType.valueOf(""));
+        assertNull(stringIntPairType.valueOf((String) null));
+        assertThrows(IllegalArgumentException.class, () -> stringIntPairType.valueOf(" "));
+        assertThrows(IllegalArgumentException.class, () -> stringIntPairType.valueOf("[\"a\"]"));
+        assertThrows(IllegalArgumentException.class, () -> stringIntPairType.valueOf("[\"a\", 1, 2]"));
+        // Unquoted numeric payloads use JSON numeric conversion; quoted values use the declared text handler.
+        assertEquals(Pair.of("a", 1), stringIntPairType.valueOf("[\"a\", 1.0]"));
+        assertEquals(Pair.of("\u6c49\ud83d\ude42", -1), stringIntPairType.valueOf("[\"\u6c49\ud83d\ude42\", -1.5]"));
+        assertEquals(Pair.of("", Integer.MAX_VALUE), stringIntPairType.valueOf("[\"\", 2147483647.9]"));
+        assertThrows(ArithmeticException.class, () -> stringIntPairType.valueOf("[null, 2147483648]"));
+        assertThrows(NumberFormatException.class, () -> stringIntPairType.valueOf("[\"a\", \"1.5\"]"));
+        assertThrows(NumberFormatException.class, () -> stringIntPairType.valueOf("[\"a\", \"bad\"]"));
+        assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> createType("Pair<Integer, List<Integer>>").valueOf("[1, [2\"]\", 3]]"));
+    }
 }

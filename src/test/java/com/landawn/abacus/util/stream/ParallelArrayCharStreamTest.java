@@ -1043,4 +1043,17 @@ public class ParallelArrayCharStreamTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> stream.onClose(null));
         stream.close();
     }
+
+    @Test
+    public void testGroupToRejectsNullDownstreamBeforeMapFactory() {
+        final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();
+        final CharStream source = CharStream.of(new char[] { 1, 2, 3 }).parallel(2);
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> source.groupTo(value -> 0, null, () -> {
+            mapCreated.set(true);
+            return new java.util.HashMap<Integer, Object>();
+        }));
+        org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
+    }
 }

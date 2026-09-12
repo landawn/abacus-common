@@ -11,20 +11,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.landawn.abacus.entity.extendDirty.basic.AclGroup;
-import com.landawn.abacus.entity.extendDirty.basic.AclUser;
-import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountContactPNL;
-import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPNL;
-import com.landawn.abacus.entity.extendDirty.basic.ExtendDirtyBasicPNL.AclUserPNL;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.Dates;
-import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Profiler;
 import com.landawn.abacus.util.Strings;
+
+import testfixtures.entity.extendDirty.basic.AclGroup;
+import testfixtures.entity.extendDirty.basic.AclUser;
+import testfixtures.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountContactPNL;
+import testfixtures.entity.extendDirty.basic.ExtendDirtyBasicPNL.AccountPNL;
+import testfixtures.entity.extendDirty.basic.ExtendDirtyBasicPNL.AclUserPNL;
 
 public abstract class AbstractTest extends TestBase {
     protected static final Logger logger = LoggerFactory.getLogger(AbstractTest.class);
@@ -42,14 +42,7 @@ public abstract class AbstractTest extends TestBase {
     protected static final String COUNTRY = "U.S.";
 
     static {
-        N.println(IOUtil.JAVA_VERSION);
-
-        final boolean suspendPerformanceTest = true;
-
-        if (suspendPerformanceTest) {
-            N.println("Performane tests by Profiler have been suspended!!!");
-            Profiler.suspend();
-        }
+        Profiler.suspend();
     }
 
     /**
@@ -76,8 +69,9 @@ public abstract class AbstractTest extends TestBase {
     public static Map<String, Object> createAccountProps(final String firstName, final String lastName) {
         final String uuid = Strings.uuid();
 
-        final Map<String, Object> props = N.toMap(AccountPNL.GUI, uuid, AccountPNL.FIRST_NAME, firstName, AccountPNL.LAST_NAME, lastName,
-                AccountPNL.MIDDLE_NAME, MIDDLE_NAME, AccountPNL.EMAIL_ADDRESS, getEmail(uuid));
+        final Map<String, Object> props = N.toMap(AccountPNL.GUI, uuid, AccountPNL.FIRST_NAME, firstName, AccountPNL.LAST_NAME, lastName);
+        props.put(AccountPNL.MIDDLE_NAME, MIDDLE_NAME);
+        props.put(AccountPNL.EMAIL_ADDRESS, getEmail(uuid));
         props.put(AccountPNL.BIRTH_DATE, Dates.currentTimestamp());
         props.put(AccountPNL.STATUS, 0);
 
@@ -93,8 +87,9 @@ public abstract class AbstractTest extends TestBase {
 
         for (int i = 0; i < size; i++) {
             final String uuid = Strings.uuid();
-            final Map<String, Object> props = N.toMap(AccountPNL.GUI, uuid, AccountPNL.FIRST_NAME, firstName + i, AccountPNL.LAST_NAME, lastName + i,
-                    AccountPNL.MIDDLE_NAME, MIDDLE_NAME, AccountPNL.EMAIL_ADDRESS, getEmail(uuid));
+            final Map<String, Object> props = N.toMap(AccountPNL.GUI, uuid, AccountPNL.FIRST_NAME, firstName + i, AccountPNL.LAST_NAME, lastName + i);
+            props.put(AccountPNL.MIDDLE_NAME, MIDDLE_NAME);
+            props.put(AccountPNL.EMAIL_ADDRESS, getEmail(uuid));
             props.put(AccountPNL.BIRTH_DATE, Dates.currentTimestamp());
             props.put(AccountPNL.STATUS, 0);
             propsList.add(props);

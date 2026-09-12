@@ -63,6 +63,18 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
     }
 
     /**
+     * Indicates whether values of this type require quoting in CSV format.
+     * {@code MutableBoolean} values are written as the bare literals {@code true}/{@code false}, exactly like
+     * {@link BooleanType}, {@code AtomicBooleanType} and {@code OptionalBooleanType}, so no quotes are required.
+     *
+     * @return {@code false}, as MutableBoolean values do not require quoting in CSV format
+     */
+    @Override
+    public boolean isCsvQuoteRequired() {
+        return false;
+    }
+
+    /**
      * Converts a {@link MutableBoolean} object to its string representation ({@code "true"} or {@code "false"}).
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
@@ -90,15 +102,20 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
-     * @param str the string to parse, may be {@code null} or empty
+     * @param str the string to parse, may be {@code null}, empty or blank; surrounding padding is removed first
+     *            ({@linkplain Character#isWhitespace(char) Unicode whitespace} such as {@code U+3000}, or any
+     *            character {@code <= ' '}), so {@code " Y"} and {@code " true "} are accepted
      * @return a {@code MutableBoolean} containing the parsed value,
-     *         or {@code null} if the input is {@code null} or empty
+     *         or {@code null} if the input is {@code null}, empty, or blank (whitespace only) - the boolean handlers
+     *         treat a blank string as absent, unlike the numeric handlers which reject it
      * @see #valueOf(Object)
      * @see #stringOf(MutableBoolean)
      */
     @Override
     public MutableBoolean valueOf(final String str) {
-        return Strings.isBlank(str) ? null : MutableBoolean.of(parseBoolean(str.trim()));
+        // parseBoolean strips padding with the same definition Strings.isBlank uses (plus every character <= ' '),
+        // which is a strict superset of what String.trim() removes, so trimming first would be redundant.
+        return Strings.isBlank(str) ? null : MutableBoolean.of(parseBoolean(str));
     }
 
     /**
@@ -110,10 +127,11 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * @param columnIndex the 1-based index of the column to retrieve
      * @return a {@code MutableBoolean} wrapping the retrieved value,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public MutableBoolean get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public MutableBoolean get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final boolean value = rs.getBoolean(columnIndex);
 
         return rs.wasNull() ? null : MutableBoolean.of(value);
@@ -128,10 +146,11 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
      * @return a {@code MutableBoolean} wrapping the retrieved value,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public MutableBoolean get(final ResultSet rs, final String columnName) throws SQLException {
+    public MutableBoolean get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final boolean value = rs.getBoolean(columnName);
 
         return rs.wasNull() ? null : MutableBoolean.of(value);
@@ -145,10 +164,11 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code MutableBoolean} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final MutableBoolean x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final MutableBoolean x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.BOOLEAN);
         } else {
@@ -164,10 +184,11 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code MutableBoolean} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final MutableBoolean x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final MutableBoolean x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.BOOLEAN);
         } else {
@@ -185,7 +206,8 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      *
      * @param appendable the target to write to
      * @param x the {@code MutableBoolean} to append, may be {@code null}
-     * @throws IOException if an I/O error occurs while appending
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -197,7 +219,7 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final MutableBoolean x) throws IOException {
+    public void appendTo(final Appendable appendable, final MutableBoolean x) throws NullPointerException, IOException {
         appendable.append((x == null) ? NULL_STRING : (x.value() ? TRUE_STRING : FALSE_STRING));
     }
 
@@ -217,10 +239,11 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code MutableBoolean} to write, may be {@code null}
      * @param config the serialization configuration controlling null-boolean output; may be {@code null}
-     * @throws IOException if an I/O error occurs while writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final MutableBoolean x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final MutableBoolean x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(config != null && config.isWriteNullBooleanAsFalse() ? FALSE_CHAR_ARRAY : NULL_CHAR_ARRAY);
         } else {

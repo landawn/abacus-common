@@ -86,12 +86,12 @@ public class BSONObjectIdType extends AbstractType<ObjectId> {
      * @param str the 24-character hexadecimal string to parse; may be {@code null} or blank
      * @return a new {@code ObjectId} created from the hexadecimal string,
      *         or {@code null} if {@code str} is {@code null}, empty, or blank
-     * @throws IllegalArgumentException if {@code str} is not a valid 24-character hexadecimal string.
+     * @throws IllegalArgumentException if the trimmed nonblank input is not a valid 24-character hexadecimal ObjectId.
      * @see #valueOf(Object)
      * @see #stringOf(ObjectId)
      */
     @Override
-    public ObjectId valueOf(final String str) {
+    public ObjectId valueOf(final String str) throws IllegalArgumentException {
         return Strings.isBlank(str) ? null : new ObjectId(str.trim());
     }
 }

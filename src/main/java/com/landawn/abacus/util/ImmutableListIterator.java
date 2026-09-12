@@ -23,9 +23,11 @@ import java.util.NoSuchElementException;
  * An immutable implementation of {@link ListIterator} that provides read-only iteration
  * over list elements in both forward and backward directions.
  *
- * <p>This class extends {@link ObjIterator} and implements {@link ListIterator}, but
- * all modification operations ({@link #set(Object)}, {@link #add(Object)}, and inherited
- * {@link #remove()}) will throw {@link UnsupportedOperationException}.
+ * <p>This class extends {@link ObjIterator} and implements {@link ListIterator}; its own implementations
+ * of {@link #set(Object)}, {@link #add(Object)} and the inherited {@link #remove()} throw
+ * {@link UnsupportedOperationException}. Because the class is extensible these methods are not
+ * {@code final}, so a subclass can re-enable them; code that needs a guaranteed read-only list iterator
+ * must pass an untrusted instance through {@link #of(ListIterator)}, which re-wraps it.
  *
  * <p>ImmutableListIterator is particularly useful when you need to provide iteration
  * capabilities over a list while ensuring the underlying data cannot be modified
@@ -50,7 +52,7 @@ import java.util.NoSuchElementException;
  * @see ListIterator
  * @see ObjIterator
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements ListIterator<T> {
 
     /**
@@ -67,8 +69,12 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if no next element remains in this iterator
+         */
         @Override
-        public Object next() {
+        public Object next() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
@@ -77,8 +83,12 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if no previous element remains in this iterator
+         */
         @Override
-        public Object previous() {
+        public Object previous() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
@@ -127,6 +137,23 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * including its current position. Modifications to the underlying collection
      * after creating the immutable iterator may lead to undefined behavior.
      *
+     * <p>Exhaustion is deliberately <b>not</b> normalised: {@code next()} and {@code previous()} delegate
+     * straight to the wrapped list iterator, so whatever it raises at either end reaches the caller unchanged.
+     * What that is depends on the backing list - an {@link java.util.ArrayList} list iterator throws a
+     * message-less {@link NoSuchElementException}, an {@link java.util.AbstractList} one throws a
+     * {@code NoSuchElementException} carrying the internal {@link IndexOutOfBoundsException} as its cause (which
+     * is what {@link ImmutableList}'s own views do), and a list iterator left stale by a structural change to the
+     * backing list throws {@link java.util.ConcurrentModificationException} instead of reporting exhaustion at
+     * all. {@link ObjIterator#of(java.util.Iterator)} and {@link ObjListIterator#of(ListIterator)} behave the
+     * same way - none of the wrapping factories normalise exhaustion. Only {@link #empty()} and the iterators
+     * these classes build for themselves report {@code InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX}.</p>
+     *
+     * <p>So one {@link ImmutableList} still reports exhaustion in two different SHAPES, because its two
+     * traversals wrap different sources: {@code iterator()} wraps the backing collection's iterator and yields a
+     * message-less {@code NoSuchElementException}, while {@code listIterator()} wraps its list iterator and
+     * yields one carrying an {@link IndexOutOfBoundsException}. Do not match on the message or cause of either;
+     * test {@code hasNext()} / {@code hasPrevious()} instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> numbers = new ArrayList<>(Arrays.asList(1, 2, 3));
@@ -159,8 +186,15 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element remains in this iterator
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
+                // No hasNext() guard: exhaustion is reported by the wrapped list iterator, not normalised to
+                // ERROR_MSG_FOR_NO_SUCH_EX the way ObjIterator.of / ObjListIterator.of do it. Pinned by
+                // ImmutableListIteratorTest; see the note on of(ListIterator) before "fixing" the asymmetry.
                 return iter.next();
             }
 
@@ -169,8 +203,12 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
                 return iter.hasPrevious();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no previous element remains in this iterator
+             */
             @Override
-            public T previous() {
+            public T previous() throws NoSuchElementException {
                 return iter.previous();
             }
 

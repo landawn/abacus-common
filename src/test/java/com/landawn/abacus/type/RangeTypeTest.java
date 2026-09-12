@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,10 +15,13 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.util.Range;
 
 public class RangeTypeTest extends TestBase {
@@ -227,6 +231,60 @@ public class RangeTypeTest extends TestBase {
     public void test_set_CallableStatement() throws SQLException {
         CallableStatement stmt = mock(CallableStatement.class);
         assertDoesNotThrow(() -> rangeType.set(stmt, "param", null));
+    }
+
+    // --- review fixes 2026-09-06 (T10-05, T10-09) ---
+
+    @Test
+    public void reviewFixes20260906_T1005_instantEndpointsRoundTripToMillisOnly() {
+        // documented: instant-bearing endpoints are written as epoch millis with the default config
+        final Type<Range<Instant>> type = TypeFactory.getType("Range<Instant>");
+        final Instant lo = Instant.ofEpochSecond(1700000000L, 123456789);
+        final Instant hi = Instant.ofEpochSecond(1700000001L, 987654321);
+
+        assertEquals("[1700000000123, 1700000001987]", type.stringOf(Range.closed(lo, hi)));
+
+        final Range<Instant> back = type.valueOf(type.stringOf(Range.closed(lo, hi)));
+        assertEquals(Instant.ofEpochMilli(1700000000123L), back.lowerEndpoint());
+        assertEquals(Instant.ofEpochMilli(1700000001987L), back.upperEndpoint());
+        assertEquals(Range.BoundType.CLOSED_CLOSED, back.boundType());
+        assertNotEquals(Range.closed(lo, hi), back); // nanos lost, as documented
+
+        final Range<Instant> millisOnly = Range.openClosed(Instant.ofEpochMilli(1700000000123L), Instant.ofEpochMilli(1700000001987L));
+        assertEquals(millisOnly, type.valueOf(type.stringOf(millisOnly)));
+
+        // a local endpoint is written as ISO text and round-trips exactly
+        final Type<Range<LocalDateTime>> localType = TypeFactory.getType("Range<LocalDateTime>");
+        final Range<LocalDateTime> local = Range.closedOpen(LocalDateTime.of(2023, 1, 1, 10, 30, 45, 123456789), LocalDateTime.of(2023, 1, 2, 10, 30));
+        assertEquals(local, localType.valueOf(localType.stringOf(local)));
+
+        assertNull(type.stringOf(null));
+    }
+
+    @Test
+    public void reviewFixes20260906_T1009_endpointParseFailuresSurfaceElementHandlerExceptions() {
+        // Unquoted decimals use numeric coercion; quoted fractions reach the strict text handler.
+        assertEquals(Range.closed(1, 2), rangeType.valueOf("[1.5, 2]"));
+        assertEquals(Range.closed(-1, 2), rangeType.valueOf("[-1.9, 2.9]"));
+        assertEquals(Range.closed(Integer.MIN_VALUE, Integer.MAX_VALUE), rangeType.valueOf("[-2147483648, 2147483647]"));
+        assertThrows(NumberFormatException.class, () -> rangeType.valueOf("[\"1.5\", 2]"));
+        assertThrows(NumberFormatException.class, () -> rangeType.valueOf("[\"bad\", 2]"));
+        assertThrows(ArithmeticException.class, () -> rangeType.valueOf("[2147483648, 2147483649]"));
+        assertThrows(ParsingException.class, () -> rangeType.valueOf("[1 5]"));
+
+        // Range's own validation stays IllegalArgumentException
+        assertThrows(IllegalArgumentException.class, () -> rangeType.valueOf("[5, 1]"));
+        assertThrows(IllegalArgumentException.class, () -> rangeType.valueOf("[null, 5]"));
+        assertThrows(IllegalArgumentException.class, () -> rangeType.valueOf("[,]"));
+        assertThrows(IllegalArgumentException.class, () -> rangeType.valueOf("[1]"));
+        assertThrows(IllegalArgumentException.class, () -> rangeType.valueOf("[1, 2, 3]"));
+
+        // a nested endpoint list is unwrapped, not rejected (documented)
+        assertEquals(Range.closed(1, 5), rangeType.valueOf("[[1, 5]]"));
+        assertEquals(Range.closed("", "\u00e9\ud83d\ude42"), stringRangeType.valueOf("[\"\", \"\u00e9\ud83d\ude42\"]"));
+        assertNull(rangeType.valueOf((String) null));
+        assertNull(rangeType.valueOf(""));
+        assertNull(rangeType.valueOf(" "));
     }
 
 }

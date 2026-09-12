@@ -31,7 +31,7 @@ import com.landawn.abacus.util.cs;
  * @see java.util.function.BiConsumer
  */
 @FunctionalInterface
-public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, RuntimeException> { // NOSONAR
+public interface DoubleObjConsumer<T> extends Throwables.DoubleObjConsumer<T, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Performs this operation on the given arguments.
      *

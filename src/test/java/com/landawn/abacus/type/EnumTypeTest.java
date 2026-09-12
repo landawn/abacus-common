@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,6 +30,21 @@ public class EnumTypeTest extends TestBase {
 
     private enum TestEnum {
         VALUE1, VALUE2, VALUE3
+    }
+
+    private enum SingleQuotedNameEnum {
+        @JsonXmlField(name = "can't")
+        VALUE
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testSerializeSingleQuotedEnumName() {
+        final com.landawn.abacus.parser.JsonParser parser = com.landawn.abacus.parser.ParserFactory.createJsonParser();
+        final com.landawn.abacus.parser.JsonSerConfig config = com.landawn.abacus.parser.JsonSerConfig.create().setStringQuotation('\'');
+        final String encoded = parser.serialize(new SingleQuotedNameEnum[] { SingleQuotedNameEnum.VALUE }, config);
+        assertEquals("['can\\'t']", encoded);
+        assertEquals(SingleQuotedNameEnum.VALUE, parser.deserialize(encoded, SingleQuotedNameEnum[].class)[0]);
     }
 
     private enum JsonXmlNullNameEnum {
@@ -301,5 +317,345 @@ public class EnumTypeTest extends TestBase {
             when(config.getStringQuotation()).thenReturn('"');
             enumTypeByName.serializeTo(characterWriter, TestEnum.VALUE3, config);
         });
+    }
+
+    // ---- review fixes 2026-09-06, T2-03: an enum with only a Jackson @JsonValue gets a Type ----
+
+    public enum JacksonValueOnly {
+        A("a1"), B("b2");
+
+        private final String code;
+
+        JacksonValueOnly(final String code) {
+            this.code = code;
+        }
+
+        @com.fasterxml.jackson.annotation.JsonValue
+        public String getCode() {
+            return code;
+        }
+    }
+
+    public enum JacksonIntValueOnly {
+        X(1), Y(2);
+
+        private final int code;
+
+        JacksonIntValueOnly(final int code) {
+            this.code = code;
+        }
+
+        @com.fasterxml.jackson.annotation.JsonValue
+        public int getCode() {
+            return code;
+        }
+    }
+
+    public enum JacksonDuplicateValues {
+        A("same"), B("same");
+
+        private final String code;
+
+        JacksonDuplicateValues(final String code) {
+            this.code = code;
+        }
+
+        @com.fasterxml.jackson.annotation.JsonValue
+        public String getCode() {
+            return code;
+        }
+    }
+
+    public enum JacksonNullValued {
+        NONE("null"), SOME("s");
+
+        private final String code;
+
+        JacksonNullValued(final String code) {
+            this.code = code;
+        }
+
+        @com.fasterxml.jackson.annotation.JsonValue
+        public String getCode() {
+            return code;
+        }
+    }
+
+    public enum JacksonBoth {
+        A("a1"), B("b2");
+
+        private final String code;
+
+        JacksonBoth(final String code) {
+            this.code = code;
+        }
+
+        @com.fasterxml.jackson.annotation.JsonValue
+        public String getCode() {
+            return code;
+        }
+
+        @com.fasterxml.jackson.annotation.JsonCreator
+        public static JacksonBoth from(final String code) {
+            for (final JacksonBoth e : values()) {
+                if (e.code.equals(code)) {
+                    return e;
+                }
+            }
+
+            throw new IllegalArgumentException("unknown code: " + code);
+        }
+    }
+
+    public enum JacksonBothNullValued {
+        NONE("null"), SOME("s");
+
+        private final String code;
+
+        JacksonBothNullValued(final String code) {
+            this.code = code;
+        }
+
+        @com.fasterxml.jackson.annotation.JsonValue
+        public String getCode() {
+            return code;
+        }
+
+        @com.fasterxml.jackson.annotation.JsonCreator
+        public static JacksonBothNullValued from(final String code) {
+            for (final JacksonBothNullValued e : values()) {
+                if (e.code.equals(code)) {
+                    return e;
+                }
+            }
+
+            throw new IllegalArgumentException("unknown code: " + code);
+        }
+    }
+
+    public static class JacksonEnumBean {
+        private JacksonValueOnly e;
+        private JacksonIntValueOnly i;
+
+        public JacksonValueOnly getE() {
+            return e;
+        }
+
+        public void setE(final JacksonValueOnly e) {
+            this.e = e;
+        }
+
+        public JacksonIntValueOnly getI() {
+            return i;
+        }
+
+        public void setI(final JacksonIntValueOnly i) {
+            this.i = i;
+        }
+    }
+
+    public enum WithBodies {
+        X {
+            @Override
+            String hi() {
+                return "x";
+            }
+        },
+        Y {
+            @Override
+            String hi() {
+                return "y";
+            }
+        };
+
+        abstract String hi();
+    }
+
+    private static String serialize(final Type<?> type, final Object value, final JsonXmlSerConfig<?> cfg) throws IOException {
+        final java.io.StringWriter output = new java.io.StringWriter();
+        final com.landawn.abacus.util.BufferedJsonWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter(output);
+
+        try {
+            ((Type<Object>) type).serializeTo(writer, value, cfg);
+            writer.flush();
+            return output.toString();
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(writer);
+        }
+    }
+
+    @Test
+    public void reviewFixes20260906_loneJsonValueEnumGetsATypeAndWritesTheValue() throws IOException {
+        // Before the fix Type.of(...) threw "must be declared as a pair".
+        final Type<JacksonValueOnly> type = Type.of(JacksonValueOnly.class);
+        final Type<JacksonIntValueOnly> intType = Type.of(JacksonIntValueOnly.class);
+
+        assertEquals("b2", type.stringOf(JacksonValueOnly.B));
+        assertNull(type.stringOf(null));
+        assertEquals("\"b2\"", serialize(type, JacksonValueOnly.B, com.landawn.abacus.parser.JsonSerConfig.create()));
+        assertEquals("2", serialize(intType, JacksonIntValueOnly.Y, com.landawn.abacus.parser.JsonSerConfig.create()));
+        assertEquals("null", serialize(type, null, com.landawn.abacus.parser.JsonSerConfig.create()));
+        assertEquals("[\"a1\", \"b2\"]", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(JacksonValueOnly.A, JacksonValueOnly.B)));
+    }
+
+    @Test
+    public void reviewFixes20260906_loneJsonValueEnumReadsThroughTheReverseMap() {
+        final Type<JacksonValueOnly> type = Type.of(JacksonValueOnly.class);
+
+        assertEquals(JacksonValueOnly.B, type.valueOf("b2"));
+        // Constant name is accepted as a fallback (documented; Jackson itself rejects it).
+        assertEquals(JacksonValueOnly.B, type.valueOf("B"));
+        assertNull(type.valueOf(""));
+        assertNull(type.valueOf((String) null));
+        assertNull(type.valueOf("null"));
+        assertEquals(JacksonValueOnly.A, type.valueOf((Object) JacksonValueOnly.A));
+
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> type.valueOf("zzz"));
+        assertTrue(e.getMessage().contains("zzz"));
+
+        final Type<JacksonIntValueOnly> intType = Type.of(JacksonIntValueOnly.class);
+        assertEquals(JacksonIntValueOnly.Y, intType.valueOf("2"));
+        assertEquals(JacksonIntValueOnly.Y, com.landawn.abacus.util.N.fromJson("[1, 2]", JacksonIntValueOnly[].class)[1]);
+    }
+
+    @Test
+    public void reviewFixes20260906_loneJsonValueEnumReadsFromResultSet() throws SQLException {
+        final EnumType<JacksonValueOnly> type = (EnumType<JacksonValueOnly>) (Type) Type.of(JacksonValueOnly.class);
+        final EnumType<JacksonIntValueOnly> intType = (EnumType<JacksonIntValueOnly>) (Type) Type.of(JacksonIntValueOnly.class);
+
+        when(resultSet.getString(1)).thenReturn("a1");
+        when(resultSet.getString("col")).thenReturn(null);
+        when(resultSet.getString(2)).thenReturn("2");
+
+        // Before the fix (had the pair check been bypassed) this NPE'd on the missing creator.
+        assertEquals(JacksonValueOnly.A, type.get(resultSet, 1));
+        assertNull(type.get(resultSet, "col"));
+        assertEquals(JacksonIntValueOnly.Y, intType.get(resultSet, 2));
+    }
+
+    @Test
+    public void reviewFixes20260906_loneJsonValueEnumBeanRoundTrip() {
+        final JacksonEnumBean bean = new JacksonEnumBean();
+        bean.setE(JacksonValueOnly.B);
+        bean.setI(JacksonIntValueOnly.X);
+
+        final String json = com.landawn.abacus.util.N.toJson(bean);
+        assertEquals("{\"e\": \"b2\", \"i\": 1}", json);
+
+        final JacksonEnumBean back = com.landawn.abacus.util.N.fromJson(json, JacksonEnumBean.class);
+        assertEquals(JacksonValueOnly.B, back.getE());
+        assertEquals(JacksonIntValueOnly.X, back.getI());
+
+        // A bean with the enum fields left null must serialize too (BeanInfo resolves the field types).
+        assertEquals("{}", com.landawn.abacus.util.N.toJson(new JacksonEnumBean()));
+    }
+
+    @Test
+    public void reviewFixes20260907_loneJsonValueConstantClaimingNullWinsOverTheLiteralNullRule() {
+        // R12: the name-based branch lets a constant claiming "null" win (testJsonXmlNameLiteralNullRoundTrips);
+        // the creator-less annotated branch checked the literal-null rule FIRST and hid such a constant.
+        final Type<JacksonNullValued> type = Type.of(JacksonNullValued.class);
+
+        assertEquals("null", type.stringOf(JacksonNullValued.NONE));
+        assertEquals(JacksonNullValued.NONE, type.valueOf("null"));
+        assertEquals(JacksonNullValued.SOME, type.valueOf("s"));
+        // An enum whose constants do not claim it keeps the literal-null rule.
+        assertNull(Type.of(JacksonValueOnly.class).valueOf("null"));
+    }
+
+    @Test
+    public void reviewFixes20260906_loneJsonValueEnumRejectsDuplicateValues() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Type.of(JacksonDuplicateValues.class));
+        // R12: assert the REASON, not just the type - the pre-fix pair check threw the same exception class here.
+        assertTrue(e.getMessage().contains("Duplicate 'JsonValue' value 'same'"), e.getMessage());
+        assertTrue(e.getMessage().contains("A") && e.getMessage().contains("B"), e.getMessage());
+    }
+
+    @Test
+    public void reviewFixes20260906_bothAnnotationsKeepTheCreatorPath() {
+        final Type<JacksonBoth> type = Type.of(JacksonBoth.class);
+
+        assertEquals("a1", type.stringOf(JacksonBoth.A));
+        assertEquals(JacksonBoth.B, type.valueOf("b2"));
+        assertEquals("[\"a1\", \"b2\"]", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(JacksonBoth.A, JacksonBoth.B)));
+        // The creator, not the name fallback, decides: "B" is not a code.
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("B"));
+    }
+
+    // ---- T2-04: creator exceptions unwrapped, empty/"null" hoisted above the creator ----
+
+    @Test
+    public void reviewFixes20260906_creatorEnumEmptyIsNullAndCreatorExceptionIsUnwrapped() {
+        final Type<JacksonBoth> type = Type.of(JacksonBoth.class);
+
+        // Before the fix: RuntimeException(InvocationTargetException) for all three.
+        assertNull(type.valueOf(""));
+        assertNull(type.valueOf("null"));
+
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> type.valueOf("zzz"));
+        assertEquals("unknown code: zzz", e.getMessage());
+    }
+
+    // ---- T2-05: out-of-int-range numeric text is "no such constant", not ArithmeticException ----
+
+    @Test
+    public void reviewFixes20260906_outOfIntRangeNumericStringIsIllegalArgument() {
+        final Type<java.util.concurrent.TimeUnit> type = Type.of(java.util.concurrent.TimeUnit.class);
+
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> type.valueOf("99999999999"));
+        assertTrue(e.getMessage().contains("99999999999"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("-99999999999"));
+        // In-range signed forms still parse as ordinals.
+        assertEquals(java.util.concurrent.TimeUnit.MICROSECONDS, type.valueOf("+1"));
+        assertEquals(java.util.concurrent.TimeUnit.NANOSECONDS, type.valueOf("-0"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("-1"));
+    }
+
+    // ---- T2-08: a constant body class resolves to a handler named after (and equal to) the enum ----
+
+    @Test
+    public void reviewFixes20260906_constantBodyClassYieldsTheEnumsOwnHandler() {
+        final Type<?> fromBody = Type.of(WithBodies.X.getClass());
+        final Type<WithBodies> fromEnum = Type.of(WithBodies.class);
+
+        // Before the fix the name was "...EnumTypeTest$WithBodies$1(NAME)" and equals() was false.
+        assertEquals(fromEnum.name(), fromBody.name());
+        assertFalse(fromBody.name().contains("$1"));
+        assertEquals(fromEnum, fromBody);
+        assertEquals(WithBodies.class, fromBody.javaType());
+        assertEquals("Y", ((Type<Object>) fromBody).stringOf(WithBodies.Y));
+        assertEquals(WithBodies.Y, fromBody.valueOf("Y"));
+        assertEquals(fromEnum.name(), Type.of(WithBodies.Y.getClass().getName() + "(NAME)").name());
+        assertTrue(Type.of(WithBodies.Y.getClass().getName() + "(ORDINAL)").name().endsWith("WithBodies(ORDINAL)"));
+    }
+
+    // ---- F118 review fix 2026-09-08: the pair branch's literal-null rule now has an escape hatch ----
+
+    @Test
+    public void reviewFixes20260908_pairEnumConstantClaimingNullReachesTheCreator() {
+        // The pair branch short-circuited "null" on !hasNull, and hasNull asks for a constant NAMED "null" -
+        // impossible for a Java-compiled enum - so the guard could never fire and a constant whose annotated
+        // value is "null" was unreachable through valueOf(String), unlike the lone-@JsonValue branch.
+        final Type<JacksonBothNullValued> type = Type.of(JacksonBothNullValued.class);
+
+        assertEquals("null", type.stringOf(JacksonBothNullValued.NONE));
+        assertEquals(JacksonBothNullValued.NONE, type.valueOf("null"));
+        assertEquals(JacksonBothNullValued.SOME, type.valueOf("s"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("zzz"));
+
+        // Every other read route funnels through valueOf(String) - valueOf(Object), the char[] overload and the
+        // ResultSet reads - so all of them were hiding the constant too, and all of them must agree now.
+        assertEquals(JacksonBothNullValued.NONE, type.valueOf((Object) "null"));
+        assertEquals(JacksonBothNullValued.NONE, type.valueOf("null".toCharArray(), 0, 4));
+        assertEquals("null", type.stringOf(type.valueOf(type.stringOf(JacksonBothNullValued.NONE))));
+
+        // An empty string is still null everywhere, and a null string too.
+        assertNull(type.valueOf(""));
+        assertNull(type.valueOf((String) null));
+
+        // A pair enum whose constants do not claim it keeps the literal-null rule (the creator never sees it).
+        assertNull(Type.of(JacksonBoth.class).valueOf("null"));
+        // ... and so does a plain, unannotated enum.
+        assertNull(Type.of(java.util.concurrent.TimeUnit.class).valueOf("null"));
     }
 }

@@ -78,6 +78,13 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
     /**
      * The maximum lifetime allowed for the pooled object (in milliseconds).
+     *
+     * <p>Deliberately still named {@code liveTime}, unlike the accessors, the constructor/factory parameters and
+     * the {@link #toString()} key, which all say {@code maxLiveTime}: a private field name is part of a
+     * {@code Serializable} class's serialized form, and this class pins its {@code serialVersionUID}. Renaming the
+     * field would therefore make a stream written by an earlier version deserialize <i>silently</i> - the stream's
+     * {@code liveTime} discarded as unmatched and the new field left at {@code 0}, i.e. an already-expired entry -
+     * rather than failing.</p>
      */
     private volatile long liveTime;
 
@@ -104,17 +111,17 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * ActivityPrint activity = new ActivityPrint(3600000, 600000);   // 1 hour live, 10 min idle
      * activity.getMaxLiveTime();                                     // returns 3600000
      * activity.getMaxIdleTime();                                     // returns 600000
-     * new ActivityPrint(0, 600000);                                  // throws IllegalArgumentException (liveTime not positive)
+     * new ActivityPrint(0, 600000);                                  // throws IllegalArgumentException (maxLiveTime not positive)
      * new ActivityPrint(3600000, -1);                                // throws IllegalArgumentException (maxIdleTime not positive)
      * }</pre>
      *
-     * @param liveTime maximum lifetime in milliseconds (must be positive)
+     * @param maxLiveTime maximum lifetime in milliseconds (must be positive)
      * @param maxIdleTime maximum idle time in milliseconds (must be positive)
-     * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive.
+     * @throws IllegalArgumentException if maxLiveTime or maxIdleTime is not positive.
      */
-    public ActivityPrint(final long liveTime, final long maxIdleTime) throws IllegalArgumentException {
-        if (liveTime <= 0) {
-            throw new IllegalArgumentException("liveTime must be positive, got: " + liveTime);
+    public ActivityPrint(final long maxLiveTime, final long maxIdleTime) throws IllegalArgumentException {
+        if (maxLiveTime <= 0) {
+            throw new IllegalArgumentException("maxLiveTime must be positive, got: " + maxLiveTime);
         }
 
         if (maxIdleTime <= 0) {
@@ -123,7 +130,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
 
         createdTime = System.currentTimeMillis();
 
-        this.liveTime = liveTime;
+        liveTime = maxLiveTime;
         this.maxIdleTime = maxIdleTime;
 
         lastAccessTime = createdTime;
@@ -139,13 +146,13 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * ActivityPrint activity = ActivityPrint.of(3600000, 300000);
      * }</pre>
      *
-     * @param liveTime maximum lifetime in milliseconds (must be positive)
+     * @param maxLiveTime maximum lifetime in milliseconds (must be positive)
      * @param maxIdleTime maximum idle time in milliseconds (must be positive)
      * @return a new ActivityPrint instance
-     * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive.
+     * @throws IllegalArgumentException if maxLiveTime or maxIdleTime is not positive.
      */
-    public static ActivityPrint of(final long liveTime, final long maxIdleTime) {
-        return new ActivityPrint(liveTime, maxIdleTime);
+    public static ActivityPrint of(final long maxLiveTime, final long maxIdleTime) throws IllegalArgumentException {
+        return new ActivityPrint(maxLiveTime, maxIdleTime);
     }
 
     /**
@@ -171,16 +178,16 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * activity.setMaxLiveTime(7200000);   // 7200000 ms is 2 hours
      * }</pre>
      *
-     * @param liveTime the new maximum lifetime in milliseconds (must be positive)
+     * @param maxLiveTime the new maximum lifetime in milliseconds (must be positive)
      * @return this ActivityPrint instance for method chaining
-     * @throws IllegalArgumentException if liveTime is not positive.
+     * @throws IllegalArgumentException if maxLiveTime is not positive.
      */
-    public ActivityPrint setMaxLiveTime(final long liveTime) throws IllegalArgumentException {
-        if (liveTime <= 0) {
-            throw new IllegalArgumentException("liveTime must be positive, got: " + liveTime);
+    public ActivityPrint setMaxLiveTime(final long maxLiveTime) throws IllegalArgumentException {
+        if (maxLiveTime <= 0) {
+            throw new IllegalArgumentException("maxLiveTime must be positive, got: " + maxLiveTime);
         }
 
-        this.liveTime = liveTime;
+        liveTime = maxLiveTime;
 
         return this;
     }
@@ -326,6 +333,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
     /**
      * Calculates and returns the expiration time for the associated object.
      * The expiration time is the creation time plus the live time.
+     * Each mutable operand is sampled once so concurrent changes cannot invalidate the overflow check.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -333,10 +341,13 @@ public final class ActivityPrint implements Cloneable, Serializable {
      * long timeUntilExpiration = expirationTime - System.currentTimeMillis();
      * }</pre>
      *
-     * @return the expiration time in milliseconds since epoch, or {@code Long.MAX_VALUE} if {@code createdTime + liveTime} would overflow
+     * @return the expiration time in milliseconds since epoch, or {@code Long.MAX_VALUE} if the created time plus the
+     *         maximum lifetime would overflow
      */
     public long getExpirationTime() {
-        return createdTime > Long.MAX_VALUE - liveTime ? Long.MAX_VALUE : createdTime + liveTime;
+        final long created = createdTime;
+        final long lifetime = liveTime;
+        return created > Long.MAX_VALUE - lifetime ? Long.MAX_VALUE : created + lifetime;
     }
 
     /**
@@ -443,7 +454,7 @@ public final class ActivityPrint implements Cloneable, Serializable {
      */
     @Override
     public String toString() {
-        return "{createdTime=" + createdTime + ", liveTime=" + liveTime + ", maxIdleTime=" + maxIdleTime + ", lastAccessTime=" + lastAccessTime
+        return "{createdTime=" + createdTime + ", maxLiveTime=" + liveTime + ", maxIdleTime=" + maxIdleTime + ", lastAccessTime=" + lastAccessTime
                 + ", accessCount=" + accessCount + "}";
     }
 }

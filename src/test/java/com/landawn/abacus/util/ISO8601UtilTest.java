@@ -2,15 +2,16 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.text.ParsePosition;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,530 +19,292 @@ import com.landawn.abacus.TestBase;
 
 public class ISO8601UtilTest extends TestBase {
 
-    // ===== format(Date) =====
-
     @Test
-    public void testFormat_Date() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.DECEMBER, 25, 10, 30, 45);
-        Date date = cal.getTime();
-
-        String formatted = ISO8601Util.format(date);
-        assertEquals("2023-12-25T10:30:45Z", formatted);
+    public void format_utcIsExactAndCanonical() {
+        assertEquals("2023-12-25T10:30:45Z", ISO8601Util.format(Instant.parse("2023-12-25T10:30:45Z")));
+        assertEquals("2023-12-25T10:30:45.12Z", ISO8601Util.format(Instant.parse("2023-12-25T10:30:45.120Z")));
+        assertEquals("2023-12-25T10:30:45.123456789Z", ISO8601Util.format(Instant.parse("2023-12-25T10:30:45.123456789Z")));
+        assertEquals("2023-12-25T10:30:45.000000001Z", ISO8601Util.format(Instant.parse("2023-12-25T10:30:45.000000001Z")));
     }
 
     @Test
-    public void testFormat_Date_Epoch() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(1970, Calendar.JANUARY, 1, 0, 0, 0);
-        Date epoch = cal.getTime();
+    public void format_usesEffectiveOffsetWithoutLosingPrecision() {
+        final Instant instant = Instant.parse("2023-12-25T15:30:45.123456789Z");
 
-        String formatted = ISO8601Util.format(epoch);
-        assertEquals("1970-01-01T00:00:00Z", formatted);
+        assertEquals("2023-12-25T10:30:45.123456789-05:00", ISO8601Util.format(instant, ZoneOffset.ofHours(-5)));
+        assertEquals("2023-12-26T09:30:45.123456789+18:00", ISO8601Util.format(instant, ZoneOffset.ofHours(18)));
     }
 
     @Test
-    public void testFormat_Date_NoMillis() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.JUNE, 15, 14, 0, 0);
-        Date date = cal.getTime();
+    public void format_rejectsUnrepresentableValuesAndNulls() {
+        assertThrows(NullPointerException.class, () -> ISO8601Util.format(null));
+        assertThrows(NullPointerException.class, () -> ISO8601Util.format(Instant.EPOCH, null));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.format(Instant.EPOCH, ZoneOffset.ofTotalSeconds(30)));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.format(Instant.MIN));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.format(Instant.MAX));
 
-        String formatted = ISO8601Util.format(date);
-        // Should not contain milliseconds
-        assertTrue(formatted.endsWith("Z"));
-        assertEquals("2023-06-15T14:00:00Z", formatted);
-    }
-
-    // ===== format(Date, boolean) =====
-
-    @Test
-    public void testFormat_DateWithMillis_True() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.DECEMBER, 25, 10, 30, 45);
-        cal.set(Calendar.MILLISECOND, 123);
-        Date date = cal.getTime();
-
-        String formatted = ISO8601Util.format(date, true);
-        assertEquals("2023-12-25T10:30:45.123Z", formatted);
+        final Instant yearZero = LocalDateTime.of(0, 1, 1, 0, 0).toInstant(ZoneOffset.UTC);
+        final Instant year10000 = LocalDateTime.of(10000, 1, 1, 0, 0).toInstant(ZoneOffset.UTC);
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.format(yearZero));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.format(year10000));
     }
 
     @Test
-    public void testFormat_DateWithMillis_False() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.DECEMBER, 25, 10, 30, 45);
-        cal.set(Calendar.MILLISECOND, 123);
-        Date date = cal.getTime();
+    public void formatAndParse_roundTripNanoseconds() {
+        final Instant original = Instant.parse("2023-12-25T10:30:45.123456789Z");
 
-        String formatted = ISO8601Util.format(date, false);
-        assertEquals("2023-12-25T10:30:45Z", formatted);
-    }
-
-    // ===== format(Date, boolean, TimeZone) =====
-
-    @Test
-    public void testFormat_DateWithTimezone_UTC() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.JULY, 4, 18, 30, 0);
-        Date date = cal.getTime();
-
-        String formatted = ISO8601Util.format(date, false, ISO8601Util.TIMEZONE_Z);
-        assertEquals("2023-07-04T18:30:00Z", formatted);
+        assertEquals(original, ISO8601Util.parseInstant(ISO8601Util.format(original)));
+        assertEquals(original, ISO8601Util.parseInstant(ISO8601Util.format(original, ZoneOffset.ofHoursMinutes(5, 30))));
     }
 
     @Test
-    public void testFormat_DateWithTimezone_NonUTC() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.JULY, 4, 18, 30, 0);
-        Date date = cal.getTime();
+    public void parse_acceptsExtendedAndBasicForms() {
+        final Instant expected = Instant.parse("2023-12-25T10:30:45Z");
 
-        TimeZone est = TimeZone.getTimeZone("GMT+05:30");
-        String formatted = ISO8601Util.format(date, false, est);
-        assertEquals("2023-07-05T00:00:00+05:30", formatted);
-    }
-
-    // ===== format(Date, boolean, TimeZone, Locale) =====
-
-    @Test
-    public void testFormat_DateFullControl() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.DECEMBER, 25, 10, 30, 45);
-        cal.set(Calendar.MILLISECOND, 500);
-        Date date = cal.getTime();
-
-        String formatted = ISO8601Util.format(date, true, ISO8601Util.TIMEZONE_Z, Locale.US);
-        assertEquals("2023-12-25T10:30:45.500Z", formatted);
+        assertEquals(Instant.parse("2023-12-25T00:00:00Z"), ISO8601Util.parseInstant("2023-12-25"));
+        assertEquals(Instant.parse("2023-12-25T00:00:00Z"), ISO8601Util.parseInstant("20231225"));
+        assertEquals(expected, ISO8601Util.parseInstant("2023-12-25T10:30:45Z"));
+        assertEquals(expected, ISO8601Util.parseInstant("20231225T103045Z"));
+        assertEquals(expected, ISO8601Util.parseInstant("20231225T10:30:45Z"));
+        assertEquals(expected, ISO8601Util.parseInstant("2023-12-25T103045Z"));
     }
 
     @Test
-    public void testFormat_LocaleIndependentDigits() {
-        // ISO 8601 output must always use ASCII digits, even when the default
-        // FORMAT locale uses a non-Latin digit system (e.g. Arabic-Indic digits).
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.DECEMBER, 25, 10, 30, 45);
-        cal.set(Calendar.MILLISECOND, 123);
-        Date date = cal.getTime();
+    public void parse_acceptsOptionalSeconds() {
+        final Instant expected = Instant.parse("2023-12-25T10:30:00Z");
 
-        Locale savedFormatLocale = Locale.getDefault(Locale.Category.FORMAT);
-        try {
-            Locale.setDefault(Locale.Category.FORMAT, Locale.forLanguageTag("ar-SA"));
+        assertEquals(expected, ISO8601Util.parseInstant("2023-12-25T10:30Z"));
+        assertEquals(expected, ISO8601Util.parseInstant("2023-12-25T1030Z"));
+        assertEquals(expected, ISO8601Util.parseInstant("2023-12-25T10:30"));
+        assertEquals(expected, ISO8601Util.parseInstant("2023-12-25T1030"));
+    }
 
-            assertEquals("2023-12-25T10:30:45.123Z", ISO8601Util.format(date, true));
-            assertEquals("2023-12-25T16:00:45+05:30", ISO8601Util.format(date, false, TimeZone.getTimeZone("GMT+05:30")));
+    @Test
+    public void parse_preservesOneThroughNineFractionDigits() {
+        final String digits = "123456789";
+        int expectedNanos = 0;
+        int placeValue = 100_000_000;
 
-            // Round-trip must keep working under such a locale.
-            assertEquals(date.getTime(), ISO8601Util.parse(ISO8601Util.format(date, true)).getTime());
-        } finally {
-            Locale.setDefault(Locale.Category.FORMAT, savedFormatLocale);
+        for (int digitCount = 1; digitCount <= digits.length(); digitCount++) {
+            expectedNanos += (digits.charAt(digitCount - 1) - '0') * placeValue;
+            placeValue /= 10;
+            assertEquals(expectedNanos, ISO8601Util.parseInstant("2023-12-25T10:30:45." + digits.substring(0, digitCount) + "Z").getNano());
         }
+
+        final DateTimeParseException tooPrecise = assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2023-12-25T10:30:45.1234567890Z"));
+        assertEquals(29, tooPrecise.getErrorIndex());
     }
 
     @Test
-    public void testPlainParseRequiresCompleteWellFormedInput() {
-        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("2023-12-25T10:30:45Zjunk"));
-        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("2023-12-25T10:30:45."));
+    public void parse_appliesNumericOffsets() {
+        final Instant expected = Instant.parse("2023-12-25T05:00:45Z");
 
-        ParsePosition position = new ParsePosition(0);
-        assertNotNull(ISO8601Util.parse("2023-12-25T10:30:45Zjunk", position));
-        assertEquals("2023-12-25T10:30:45Z".length(), position.getIndex());
+        assertEquals(expected, ISO8601Util.parseInstant("2023-12-25T10:30:45+05:30"));
+        assertEquals(expected, ISO8601Util.parseInstant("2023-12-25T10:30:45+0530"));
+        assertEquals(Instant.parse("2023-12-25T15:30:45Z"), ISO8601Util.parseInstant("2023-12-25T10:30:45-05:00"));
+        assertEquals(ISO8601Util.parseInstant("2023-12-25T10:30:45Z"), ISO8601Util.parseInstant("2023-12-25T10:30:45+00:00"));
+        assertEquals(ISO8601Util.parseInstant("2023-12-25T10:30:45Z"), ISO8601Util.parseInstant("2023-12-25T10:30:45-0000"));
     }
 
     @Test
-    public void testParseRejectsMixedDateAndTimeSeparators() {
-        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("2023-1225"));
-        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("202312-25"));
-        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("2023-12-25T10:3045Z"));
-        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("2023-12-25T1030:45Z"));
-        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("2023-12-25T10:30:Z"));
-    }
-
-    // ===== Round-trip tests =====
-
-    @Test
-    public void testFormatParse_RoundTrip() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.JUNE, 15, 14, 30, 0);
-        Date original = cal.getTime();
-
-        String formatted = ISO8601Util.format(original);
-        Date parsed = ISO8601Util.parse(formatted);
-
-        assertEquals(original.getTime(), parsed.getTime());
+    public void parse_enforcesOffsetBoundary() {
+        assertEquals(Instant.parse("2023-12-24T16:30:00Z"), ISO8601Util.parseInstant("2023-12-25T10:30:00+18:00"));
+        assertEquals(Instant.parse("2023-12-26T04:30:00Z"), ISO8601Util.parseInstant("2023-12-25T10:30:00-18:00"));
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2023-12-25T10:30:00+18:01"));
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2023-12-25T10:30:00+19:00"));
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2023-12-25T10:30:00+05:60"));
     }
 
     @Test
-    public void testFormatParse_RoundTripWithMillis() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.JUNE, 15, 14, 30, 45);
-        cal.set(Calendar.MILLISECOND, 678);
-        Date original = cal.getTime();
+    public void parse_defaultZoneAppliesOnlyWhenOffsetIsAbsent() {
+        final ZoneId kolkata = ZoneId.of("Asia/Kolkata");
 
-        String formatted = ISO8601Util.format(original, true);
-        Date parsed = ISO8601Util.parse(formatted);
-
-        assertEquals(original.getTime(), parsed.getTime());
+        assertEquals(Instant.parse("2023-12-25T05:00:45Z"), ISO8601Util.parseInstant("2023-12-25T10:30:45", kolkata));
+        assertEquals(Instant.parse("2023-12-25T10:30:45Z"), ISO8601Util.parseInstant("2023-12-25T10:30:45Z", kolkata));
+        assertEquals(Instant.parse("2023-12-25T08:30:45Z"), ISO8601Util.parseInstant("2023-12-25T10:30:45+02:00", kolkata));
     }
 
     @Test
-    public void testFormatParse_RoundTrip_Midnight() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.JANUARY, 1, 0, 0, 0);
-        Date original = cal.getTime();
-
-        String formatted = ISO8601Util.format(original);
-        Date parsed = ISO8601Util.parse(formatted);
-
-        assertEquals(original.getTime(), parsed.getTime());
+    public void parse_defaultZoneSupplierIsLazyAndMustReturnAZone() {
+        assertEquals(Instant.parse("2023-12-25T10:30:45Z"), ISO8601Util.parseInstantWithDefaultZone("2023-12-25T10:30:45Z", () -> {
+            throw new AssertionError("An explicit offset must not consult the fallback zone");
+        }));
+        assertThrows(NullPointerException.class, () -> ISO8601Util.parseInstantWithDefaultZone("2023-12-25T10:30:45", () -> null));
     }
 
     @Test
-    public void testFormatParse_RoundTrip_EndOfDay() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.DECEMBER, 31, 23, 59, 59);
-        Date original = cal.getTime();
+    public void parse_rejectsDstGapsAndOverlaps() {
+        final ZoneId losAngeles = ZoneId.of("America/Los_Angeles");
 
-        String formatted = ISO8601Util.format(original);
-        Date parsed = ISO8601Util.parse(formatted);
-
-        assertEquals(original.getTime(), parsed.getTime());
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2024-03-10T02:30", losAngeles));
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2024-11-03T01:30", losAngeles));
+        assertEquals(Instant.parse("2024-11-03T08:30:00Z"), ISO8601Util.parseInstant("2024-11-03T01:30-07:00", losAngeles));
+        assertEquals(Instant.parse("2024-11-03T09:30:00Z"), ISO8601Util.parseInstant("2024-11-03T01:30-08:00", losAngeles));
     }
 
     @Test
-    public void testFormat_Year2000() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2000, Calendar.JANUARY, 1, 0, 0, 0);
-        Date date = cal.getTime();
+    public void parse_rejectsMalformedFieldsAndSeparators() {
+        final String[] invalid = { "", "not-a-date", "0000-01-01", "2023-13-01", "2023-02-29", "2024-02-30", "2023-12-25T24:00Z", "2023-12-25T10:60Z",
+                "2023-12-25T10:30:60Z", "2023-12-25T10:3045Z", "2023-12-25T1030:45Z", "2023-12-25T10:30:Z", "2023-12-25T10:30.5Z", "2023-12-25T10:30:45.Z",
+                "2023-1225", "202312-25", "\u0662\u0660\u0662\u0663-12-25T10:30:00Z" };
 
-        String formatted = ISO8601Util.format(date);
-        assertEquals("2000-01-01T00:00:00Z", formatted);
+        for (final String text : invalid) {
+            assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant(text), text);
+        }
+
+        assertEquals(Instant.parse("2024-02-29T12:00:00Z"), ISO8601Util.parseInstant("2024-02-29T12:00:00Z"));
     }
 
     @Test
-    public void testFormat_DateWithMillis_ZeroMillis() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.MARCH, 1, 12, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        Date date = cal.getTime();
-
-        String formatted = ISO8601Util.format(date, true);
-        assertEquals("2023-03-01T12:00:00.000Z", formatted);
+    public void completeParse_rejectsTrailingCharactersAndDateOnlyOffsets() {
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2023-12-25T10:30:45Zjunk"));
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2023-12-25T10:30:45 trailing"));
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2023-12-25Z"));
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2023-12-25+01:00"));
     }
 
     @Test
-    public void testFormat_DateFullControl_NegativeOffset() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.DECEMBER, 25, 15, 0, 0);
-        Date date = cal.getTime();
-
-        TimeZone est = TimeZone.getTimeZone("GMT-05:00");
-        String formatted = ISO8601Util.format(date, false, est, Locale.US);
-        assertEquals("2023-12-25T10:00:00-05:00", formatted);
+    public void parse_rejectsNullWithConsistentArgumentExceptions() {
+        assertThrows(NullPointerException.class, () -> ISO8601Util.parseInstant(null));
+        assertThrows(NullPointerException.class, () -> ISO8601Util.parseInstant("2023-12-25", (ZoneId) null));
+        assertThrows(NullPointerException.class, () -> ISO8601Util.parseInstant("2023-12-25", (ParsePosition) null));
     }
 
     @Test
-    public void testFormat_DateFullControl_PositiveOffset() {
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.clear();
-        cal.set(2023, Calendar.JANUARY, 1, 0, 0, 0);
-        Date date = cal.getTime();
-
-        TimeZone jst = TimeZone.getTimeZone("GMT+09:00");
-        String formatted = ISO8601Util.format(date, false, jst, Locale.US);
-        assertEquals("2023-01-01T09:00:00+09:00", formatted);
-    }
-
-    // ===== parse(String) =====
-
-    @Test
-    public void testParse_DateOnly() {
-        Date date = ISO8601Util.parse("2023-12-25");
-        assertNotNull(date);
-
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        assertEquals(2023, cal.get(Calendar.YEAR));
-        assertEquals(Calendar.DECEMBER, cal.get(Calendar.MONTH));
-        assertEquals(25, cal.get(Calendar.DAY_OF_MONTH));
+    public void prefixParse_acceptsZonedAndZoneLessPrefixes() {
+        assertPrefix("2023-12-25 trailing", "2023-12-25", Instant.parse("2023-12-25T00:00:00Z"));
+        assertPrefix("2023-12-25T10:30 trailing", "2023-12-25T10:30", Instant.parse("2023-12-25T10:30:00Z"));
+        assertPrefix("2023-12-25T10:30:45 trailing", "2023-12-25T10:30:45", Instant.parse("2023-12-25T10:30:45Z"));
+        assertPrefix("20231225T103045.123456789 trailing", "20231225T103045.123456789", Instant.parse("2023-12-25T10:30:45.123456789Z"));
+        assertPrefix("2023-12-25T10:30:45Z trailing", "2023-12-25T10:30:45Z", Instant.parse("2023-12-25T10:30:45Z"));
+        assertPrefix("2023-12-25T10:30:45+05:30 trailing", "2023-12-25T10:30:45+05:30", Instant.parse("2023-12-25T05:00:45Z"));
     }
 
     @Test
-    public void testParse_DateOnlyCompact() {
-        Date date = ISO8601Util.parse("20231225");
-        assertNotNull(date);
+    public void prefixParse_honorsNonZeroStart() {
+        final ParsePosition position = new ParsePosition(2);
 
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        assertEquals(2023, cal.get(Calendar.YEAR));
-        assertEquals(Calendar.DECEMBER, cal.get(Calendar.MONTH));
-        assertEquals(25, cal.get(Calendar.DAY_OF_MONTH));
+        assertEquals(Instant.parse("2023-12-25T10:30:45Z"), ISO8601Util.parseInstant("xx2023-12-25T10:30:45Z tail", position));
+        assertEquals(22, position.getIndex());
+        assertEquals(-1, position.getErrorIndex());
     }
 
     @Test
-    public void testParse_DateTimeWithZ() {
-        Date date = ISO8601Util.parse("2023-12-25T10:30:45Z");
-        assertNotNull(date);
+    public void prefixParse_returnsNullAndSetsActualErrorIndex() {
+        final ParsePosition invalidDate = new ParsePosition(2);
+        assertNull(ISO8601Util.parseInstant("xx2023-02-30", invalidDate));
+        assertEquals(2, invalidDate.getIndex());
+        assertEquals(10, invalidDate.getErrorIndex());
 
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        assertEquals(2023, cal.get(Calendar.YEAR));
-        assertEquals(Calendar.DECEMBER, cal.get(Calendar.MONTH));
-        assertEquals(25, cal.get(Calendar.DAY_OF_MONTH));
-        assertEquals(10, cal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(30, cal.get(Calendar.MINUTE));
-        assertEquals(45, cal.get(Calendar.SECOND));
+        final ParsePosition invalidTime = new ParsePosition(2);
+        assertNull(ISO8601Util.parseInstant("xx2023-12-25T25:00Z", invalidTime));
+        assertEquals(2, invalidTime.getIndex());
+        assertEquals(13, invalidTime.getErrorIndex());
     }
 
     @Test
-    public void testParse_DateTimeWithMillis() {
-        Date date = ISO8601Util.parse("2023-12-25T10:30:45.123Z");
-        assertNotNull(date);
+    public void prefixParse_resetsStaleErrorIndexOnSuccess() {
+        final ParsePosition position = new ParsePosition(0);
+        position.setErrorIndex(7);
 
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        assertEquals(2023, cal.get(Calendar.YEAR));
-        assertEquals(10, cal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(30, cal.get(Calendar.MINUTE));
-        assertEquals(45, cal.get(Calendar.SECOND));
-        assertEquals(123, cal.get(Calendar.MILLISECOND));
+        assertNotNull(ISO8601Util.parseInstant("2023-12-25", position));
+        assertEquals(10, position.getIndex());
+        assertEquals(-1, position.getErrorIndex());
     }
 
     @Test
-    public void testParse_DateTimeWithPositiveOffset() {
-        Date date = ISO8601Util.parse("2023-12-25T10:30:45+05:30");
-        assertNotNull(date);
-
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        // 10:30 at +05:30 is 05:00 UTC
-        assertEquals(5, cal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(0, cal.get(Calendar.MINUTE));
+    public void prefixParse_rejectsInvalidInitialPosition() {
+        assertThrows(IndexOutOfBoundsException.class, () -> ISO8601Util.parseInstant("2023-12-25", new ParsePosition(-1)));
+        assertThrows(IndexOutOfBoundsException.class, () -> ISO8601Util.parseInstant("2023-12-25", new ParsePosition(11)));
     }
 
     @Test
-    public void testParse_DateTimeWithNegativeOffset() {
-        Date date = ISO8601Util.parse("2023-12-25T10:30:45-05:00");
-        assertNotNull(date);
+    public void boundaryOffsetValues_roundTripInTheirOwnOffset() {
+        final Instant lower = ISO8601Util.parseInstant("0001-01-01T00:00:00+18:00");
+        final Instant upper = ISO8601Util.parseInstant("9999-12-31T23:59:59-18:00");
 
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        // 10:30 at -05:00 is 15:30 UTC
-        assertEquals(15, cal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(30, cal.get(Calendar.MINUTE));
+        assertEquals("0001-01-01T00:00:00+18:00", ISO8601Util.format(lower, ZoneOffset.ofHours(18)));
+        assertEquals("9999-12-31T23:59:59-18:00", ISO8601Util.format(upper, ZoneOffset.ofHours(-18)));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.format(lower));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.format(upper));
     }
 
     @Test
-    public void testParse_DateTimeWithZeroOffset() {
-        Date date = ISO8601Util.parse("2023-12-25T10:30:45+00:00");
-        assertNotNull(date);
+    public void format_usesTheEffectiveOffsetOfARegionZone() {
+        final ZoneId losAngeles = ZoneId.of("America/Los_Angeles");
 
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        assertEquals(10, cal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(30, cal.get(Calendar.MINUTE));
+        assertEquals("2023-07-01T05:00:00-07:00", ISO8601Util.format(Instant.parse("2023-07-01T12:00:00Z"), losAngeles));
+        assertEquals("2023-01-01T04:00:00-08:00", ISO8601Util.format(Instant.parse("2023-01-01T12:00:00Z"), losAngeles));
+
+        // A historical sub-minute offset cannot be written in the ISO offset field.
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.format(Instant.parse("1880-01-01T12:00:00Z"), ZoneId.of("Europe/Amsterdam")));
     }
 
     @Test
-    public void testParse_DateTimeWithZeroOffsetCompact() {
-        Date date = ISO8601Util.parse("2023-12-25T10:30:45+0000");
-        assertNotNull(date);
-
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        assertEquals(10, cal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(30, cal.get(Calendar.MINUTE));
+    public void parse_requiresUppercaseDesignators() {
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2023-12-25t10:30:45Z"));
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2023-12-25T10:30:45z"));
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2023-12-25 10:30:45Z"));
     }
 
     @Test
-    public void testParse_CompactDateTimeWithZ() {
-        Date date = ISO8601Util.parse("20231225T103045Z");
-        assertNotNull(date);
-
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        assertEquals(2023, cal.get(Calendar.YEAR));
-        assertEquals(Calendar.DECEMBER, cal.get(Calendar.MONTH));
-        assertEquals(25, cal.get(Calendar.DAY_OF_MONTH));
-        assertEquals(10, cal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(30, cal.get(Calendar.MINUTE));
-        assertEquals(45, cal.get(Calendar.SECOND));
+    public void parse_rejectsLeapSeconds() {
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2016-12-31T23:59:60Z"));
     }
 
     @Test
-    public void testParse_DateTimeWithoutSeconds() {
-        Date date = ISO8601Util.parse("2023-12-25T10:30Z");
-        assertNotNull(date);
+    public void parse_dateOnlyResolvesStartOfDayAndRejectsAMidnightGap() {
+        final ZoneId kolkata = ZoneId.of("Asia/Kolkata");
+        assertEquals(Instant.parse("2023-12-24T18:30:00Z"), ISO8601Util.parseInstant("2023-12-25", kolkata));
 
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        assertEquals(10, cal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(30, cal.get(Calendar.MINUTE));
-        assertEquals(0, cal.get(Calendar.SECOND));
+        // Cuba moved the clock forward at midnight, so 2018-03-11T00:00 never existed there.
+        assertThrows(DateTimeParseException.class, () -> ISO8601Util.parseInstant("2018-03-11", ZoneId.of("America/Havana")));
     }
 
     @Test
-    public void testParse_DateTimeWith1DigitMillis() {
-        Date date = ISO8601Util.parse("2023-12-25T10:30:45.1Z");
-        assertNotNull(date);
-
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        assertEquals(100, cal.get(Calendar.MILLISECOND));
+    public void parse_supplierFailurePropagatesUnchanged() {
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> ISO8601Util.parseInstantWithDefaultZone("2023-12-25T10:30:45", () -> {
+                    throw new IllegalStateException("zone unavailable");
+                }));
+        assertEquals("zone unavailable", thrown.getMessage());
     }
 
     @Test
-    public void testParse_DateTimeWith2DigitMillis() {
-        Date date = ISO8601Util.parse("2023-12-25T10:30:45.12Z");
-        assertNotNull(date);
+    public void prefixParse_honorsAnExplicitFallbackZone() {
+        final ParsePosition position = new ParsePosition(0);
 
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        assertEquals(120, cal.get(Calendar.MILLISECOND));
+        assertEquals(Instant.parse("2023-12-25T05:00:45Z"), ISO8601Util.parseInstant("2023-12-25T10:30:45 trailing", position, ZoneId.of("Asia/Kolkata")));
+        assertEquals(19, position.getIndex());
+        assertEquals(-1, position.getErrorIndex());
+
+        // An offset in the text still wins over the supplied fallback zone.
+        final ParsePosition offsetPosition = new ParsePosition(0);
+        assertEquals(Instant.parse("2023-12-25T08:30:45Z"), ISO8601Util.parseInstant("2023-12-25T10:30:45+02:00", offsetPosition, ZoneId.of("Asia/Kolkata")));
+        assertEquals(25, offsetPosition.getIndex());
+
+        assertThrows(NullPointerException.class, () -> ISO8601Util.parseInstant("2023-12-25", new ParsePosition(0), (ZoneId) null));
     }
 
     @Test
-    public void testParse_DateTimeWithExtraMillisDigits() {
-        // More than 3 digits of millis - should only use first 3
-        Date date = ISO8601Util.parse("2023-12-25T10:30:45.123456Z");
-        assertNotNull(date);
+    public void prefixParse_enforcesTheOffsetAndFractionLimits() {
+        final ParsePosition tooManyDigits = new ParsePosition(0);
+        assertNull(ISO8601Util.parseInstant("2023-12-25T10:30:45.1234567890Z", tooManyDigits));
+        assertEquals(0, tooManyDigits.getIndex());
+        assertEquals(29, tooManyDigits.getErrorIndex());
 
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        assertEquals(123, cal.get(Calendar.MILLISECOND));
+        final ParsePosition badOffset = new ParsePosition(0);
+        assertNull(ISO8601Util.parseInstant("2023-12-25T10:30:45+18:01", badOffset));
+        assertEquals(0, badOffset.getIndex());
+        assertEquals(19, badOffset.getErrorIndex());
     }
 
-    // ===== parse(String, ParsePosition) =====
+    private static void assertPrefix(final String input, final String prefix, final Instant expected) {
+        final ParsePosition position = new ParsePosition(0);
 
-    @Test
-    public void testParse_WithParsePosition() {
-        ParsePosition pos = new ParsePosition(0);
-        Date date = ISO8601Util.parse("2023-12-25T10:30:45Z", pos);
-        assertNotNull(date);
-        assertEquals(20, pos.getIndex());
-    }
-
-    @Test
-    public void testParse_WithParsePosition_DateOnly() {
-        ParsePosition pos = new ParsePosition(0);
-        Date date = ISO8601Util.parse("2023-12-25", pos);
-        assertNotNull(date);
-        assertEquals(10, pos.getIndex());
-    }
-
-    @Test
-    public void testParse_WithParsePosition_CompactDate() {
-        ParsePosition pos = new ParsePosition(0);
-        Date date = ISO8601Util.parse("20231225", pos);
-        assertNotNull(date);
-        assertEquals(8, pos.getIndex());
-    }
-
-    @Test
-    public void testParsePositionSupportsTrailingTextAfterNumericTimezone() {
-        final String input = "2023-12-25T10:30:45+05:30 trailing";
-        final ParsePosition pos = new ParsePosition(0);
-
-        assertNotNull(ISO8601Util.parse(input, pos));
-        assertEquals("2023-12-25T10:30:45+05:30".length(), pos.getIndex());
-
-        final String compactInput = "2023-12-25T10:30:45+0530 trailing";
-        final ParsePosition compactPosition = new ParsePosition(0);
-        assertNotNull(ISO8601Util.parse(compactInput, compactPosition));
-        assertEquals("2023-12-25T10:30:45+0530".length(), compactPosition.getIndex());
-
-        final ParsePosition dateOnlyPosition = new ParsePosition(0);
-        assertNotNull(ISO8601Util.parse("2023-12-25 trailing", dateOnlyPosition));
-        assertEquals("2023-12-25".length(), dateOnlyPosition.getIndex());
-    }
-
-    @Test
-    public void testParsePositionIsUnchangedWhenCalendarValidationFails() {
-        final ParsePosition invalidDatePosition = new ParsePosition(2);
-        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("xx2023-02-30", invalidDatePosition));
-        assertEquals(2, invalidDatePosition.getIndex());
-
-        final ParsePosition invalidTimePosition = new ParsePosition(2);
-        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parse("xx2023-12-25T25:00:00Z", invalidTimePosition));
-        assertEquals(2, invalidTimePosition.getIndex());
-    }
-
-    // ===== Edge cases =====
-
-    @Test
-    public void testParse_LeapYear() {
-        Date date = ISO8601Util.parse("2024-02-29T12:00:00Z");
-        assertNotNull(date);
-
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        assertEquals(2024, cal.get(Calendar.YEAR));
-        assertEquals(Calendar.FEBRUARY, cal.get(Calendar.MONTH));
-        assertEquals(29, cal.get(Calendar.DAY_OF_MONTH));
-    }
-
-    @Test
-    public void testParse_DateTimeWithMillisAndOffset() {
-        Date date = ISO8601Util.parse("2023-12-25T10:30:45.123+05:30");
-        assertNotNull(date);
-
-        Calendar cal = new GregorianCalendar(ISO8601Util.TIMEZONE_Z);
-        cal.setTime(date);
-        // 10:30:45.123 at +05:30 -> 05:00:45.123 UTC
-        assertEquals(5, cal.get(Calendar.HOUR_OF_DAY));
-        assertEquals(0, cal.get(Calendar.MINUTE));
-        assertEquals(45, cal.get(Calendar.SECOND));
-        assertEquals(123, cal.get(Calendar.MILLISECOND));
-    }
-
-    @Test
-    public void testParse_InvalidString_Null() {
-        assertThrows(Exception.class, () -> ISO8601Util.parse(null));
-    }
-
-    @Test
-    public void testParse_InvalidString_Empty() {
-        assertThrows(Exception.class, () -> ISO8601Util.parse(""));
-    }
-
-    @Test
-    public void testParse_InvalidString_Garbage() {
-        assertThrows(Exception.class, () -> ISO8601Util.parse("not-a-date"));
-    }
-
-    @Test
-    public void testParse_InvalidTimezoneIndicator() {
-        assertThrows(Exception.class, () -> ISO8601Util.parse("2023-12-25T10:30:45X"));
-    }
-
-    @Test
-    public void testParse_InvalidDateOnlyIsRejected() {
-        assertThrows(Exception.class, () -> ISO8601Util.parse("2023-02-30"));
-    }
-
-    // ===== Constants =====
-
-    @Test
-    public void testDEF_8601_LEN() {
-        assertEquals("yyyy-MM-ddThh:mm:ss.SSS+00:00".length(), ISO8601Util.DEF_8601_LEN);
-    }
-
-    @Test
-    public void testTIMEZONE_Z() {
-        assertNotNull(ISO8601Util.TIMEZONE_Z);
-        assertEquals("UTC", ISO8601Util.TIMEZONE_Z.getID());
+        assertEquals(expected, ISO8601Util.parseInstant(input, position));
+        assertEquals(prefix.length(), position.getIndex());
+        assertEquals(-1, position.getErrorIndex());
+        assertTrue(position.getIndex() <= input.length());
     }
 }

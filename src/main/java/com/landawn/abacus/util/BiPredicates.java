@@ -24,6 +24,18 @@ import com.landawn.abacus.util.function.IntBiObjPredicate;
 /**
  * Utility class providing various BiPredicate implementations and factory methods.
  * This class contains predefined BiPredicates and methods for creating indexed BiPredicates.
+ *
+ * <p>This class is a top-level sibling of {@link Fn} (formerly nested as {@code Fn.BiPredicates}),
+ * not a nested type. Use {@link Fn} for the general functional-interface factory and {@link Fnn}
+ * for {@link Throwables} variants that can declare checked exceptions. For one-argument predicates
+ * see {@link Predicates}; for three-argument predicates see {@link TriPredicates}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see Predicates
+ * @see TriPredicates
+ * @see BiConsumers
+ * @see BiFunctions
  */
 public final class BiPredicates {
 
@@ -108,6 +120,10 @@ public final class BiPredicates {
      * BiPredicates.indexed((i, t, u) -> i < 5).test("a", "b");  // returns true (index 0 < 5)
      * }</pre>
      *
+     * <p>The returned callback uses indices from zero through {@link Integer#MAX_VALUE}. Later calls
+     * throw {@link ArithmeticException} without invoking user code. An invocation consumes its index
+     * even when user code throws.</p>
+     *
      * @param <T> the type of the first argument to the predicate
      * @param <U> the type of the second argument to the predicate
      * @param predicate the IntBiObjPredicate that accepts an index and two elements for testing
@@ -121,11 +137,20 @@ public final class BiPredicates {
         N.checkArgNotNull(predicate, cs.predicate);
 
         return new BiPredicate<>() {
-            private final MutableInt idx = new MutableInt(0);
+            private long idx;
 
+            /**
+             * {@inheritDoc}
+             * @throws ArithmeticException if all nonnegative {@code int} indices have already been used by prior invocations
+             */
             @Override
-            public boolean test(final T t, final U u) {
-                return predicate.test(idx.getAndIncrement(), t, u);
+            public boolean test(final T t, final U u) throws ArithmeticException {
+                // Keep exhaustion representable and reject before invoking user code.
+                if (idx > Integer.MAX_VALUE) {
+                    throw new ArithmeticException("Index exceeds Integer.MAX_VALUE");
+                }
+
+                return predicate.test((int) idx++, t, u);
             }
         };
     }

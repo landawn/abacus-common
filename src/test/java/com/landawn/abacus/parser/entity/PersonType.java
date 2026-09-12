@@ -3,6 +3,7 @@ package com.landawn.abacus.parser.entity;
 import java.util.Date;
 import java.util.Objects;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.adapter.DateAdapter;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
@@ -16,7 +17,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "PersonType", propOrder = { "id", "firstName", "lastName", "address1", "postCode", "city", "country", "birthday" })
 @XmlRootElement
-public class PersonType {
+public class PersonType extends TestBase {
 
     protected int id;
     @XmlElement(required = true)

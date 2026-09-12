@@ -34,7 +34,7 @@ import com.landawn.abacus.util.cs;
  * @see IntConsumer
  */
 @FunctionalInterface
-public interface IntObjConsumer<T> extends Throwables.IntObjConsumer<T, RuntimeException> { // NOSONAR
+public interface IntObjConsumer<T> extends Throwables.IntObjConsumer<T, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Performs this operation on the given arguments.
      *

@@ -48,9 +48,9 @@ package com.landawn.abacus.util;
  * }</pre>
  *
  * <p><b>Attribution:</b>
- * This class includes code adapted from Apache Commons Lang, Google Guava, and other
- * open source projects under the Apache License 2.0. Methods from these libraries may have been
- * modified for consistency, performance optimization, and null-safety enhancement.</p>
+ * This class includes code adapted from Apache Commons Lang under the Apache License 2.0.
+ * Methods may have been modified for consistency, performance optimization, and null-safety
+ * enhancement.</p>
  *
  * @see Math#min(double, double)
  * @see Math#max(double, double)
@@ -138,10 +138,10 @@ public final class IEEE754rUtil {
      * @return the minimum value in the array according to IEEE-754r
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
-    public static float min(final float... array) {
+    public static float min(final float... array) throws IllegalArgumentException {
         // Validates input
         if (N.isEmpty(array)) {
-            throw new IllegalArgumentException("Array cannot be null or empty."); //NOSONAR
+            throw new IllegalArgumentException("Array cannot be null or empty.");
         }
 
         // Finds and returns min
@@ -229,7 +229,7 @@ public final class IEEE754rUtil {
      * @return the minimum value in the array according to IEEE-754r
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
-    public static double min(final double... array) {
+    public static double min(final double... array) throws IllegalArgumentException {
         // Validates input
         if (N.isEmpty(array)) {
             throw new IllegalArgumentException("Array cannot be null or empty.");
@@ -320,7 +320,7 @@ public final class IEEE754rUtil {
      * @return the maximum value in the array according to IEEE-754r
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
-    public static float max(final float... array) {
+    public static float max(final float... array) throws IllegalArgumentException {
         // Validates input
         if (N.isEmpty(array)) {
             throw new IllegalArgumentException("Array cannot be null or empty.");
@@ -411,7 +411,7 @@ public final class IEEE754rUtil {
      * @return the maximum value in the array according to IEEE-754r
      * @throws IllegalArgumentException if the array is {@code null} or empty.
      */
-    public static double max(final double... array) {
+    public static double max(final double... array) throws IllegalArgumentException {
         // Validates input
         if (N.isEmpty(array)) {
             throw new IllegalArgumentException("Array cannot be null or empty.");

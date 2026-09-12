@@ -31,6 +31,11 @@ import java.io.Serializable;
  * MutableBoolean instance concurrently, and at least one thread modifies it, external
  * synchronization is required.</p>
  *
+ * <p><strong>Note:</strong> this class has value-based {@code equals}/{@code hashCode} but is
+ * mutable. Do not mutate an instance while it is in use as a key in a hash-based collection or as
+ * an element of a hash set; changing the value can make the entry unreachable in its current
+ * bucket.</p>
+ *
  * <p>Note that MutableBoolean does not extend Boolean, so it is not treated by
  * {@code String.format} as a Boolean parameter.</p>
  *
@@ -249,10 +254,10 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * @param predicate the predicate to test the current value
      * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
-    public <E extends Exception> boolean setIf(final Throwables.BooleanPredicate<E> predicate, final boolean newValue) throws E, IllegalArgumentException {
+    public <E extends Exception> boolean setIf(final Throwables.BooleanPredicate<E> predicate, final boolean newValue) throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (predicate.test(value)) {
@@ -360,7 +365,7 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
-    public int compareTo(final MutableBoolean other) {
+    public int compareTo(final MutableBoolean other) throws NullPointerException {
         return (value == other.value) ? 0 : (value ? 1 : -1);
     }
 
@@ -394,6 +399,10 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * The hash code is the same as {@code Boolean.TRUE.hashCode()} for {@code true} values
      * and {@code Boolean.FALSE.hashCode()} for {@code false} values, ensuring consistency
      * with the standard Boolean class.
+     *
+     * <p>Note, however, that the value is mutable: do not mutate an instance while it is in use as a
+     * key in a hash-based collection, because changing the value can make the entry unreachable in
+     * its current bucket (see {@link Mutable}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

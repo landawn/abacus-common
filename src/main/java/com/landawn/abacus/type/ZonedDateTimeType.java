@@ -24,11 +24,11 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Numbers;
 
 /**
  * Type handler for {@link java.time.ZonedDateTime} instances.
@@ -146,7 +146,10 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * </p>
      * <ul>
      *   <li>{@link ZonedDateTime} - returned unchanged</li>
-     *   <li>{@link Number}, {@link java.util.Date}, or {@link java.util.Calendar} - interpreted as epoch milliseconds in the default zone</li>
+     *   <li>{@link Number} or {@link java.util.Date} - interpreted as epoch milliseconds in the default zone</li>
+     *   <li>{@link java.util.Calendar} - interpreted as epoch milliseconds in the calendar's own
+     *       {@linkplain java.util.Calendar#getTimeZone() time zone} (the default zone if it has none), so the zone the
+     *       caller supplied survives the conversion</li>
      *   <li>Other non-null objects - converted to a string and parsed according to supported date/time formats</li>
      *   <li>{@code null} - returns {@code null}</li>
      * </ul>
@@ -157,9 +160,12 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * ZonedDateTime zdt2 = type.valueOf("2023-10-15T10:30:00Z");   // From string
      * }</pre>
      *
+     * <p>SQL Timestamp inputs preserve nanoseconds in the default zone.</p>
+     *
      * @param obj the object to convert to ZonedDateTime
      * @return a ZonedDateTime instance, or {@code null} if the input is null
      */
+    @MayReturnNull
     @Override
     public ZonedDateTime valueOf(final Object obj) {
         if (obj == null) {
@@ -168,10 +174,16 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
             return zonedDateTime;
         } else if (obj instanceof Number) {
             return ZonedDateTime.ofInstant(Instant.ofEpochMilli(((Number) obj).longValue()), DEFAULT_ZONE_ID);
+        } else if (obj instanceof java.sql.Timestamp timestamp) {
+            return ZonedDateTime.ofInstant(timestamp.toInstant(), DEFAULT_ZONE_ID);
         } else if (obj instanceof java.util.Date date) {
             return ZonedDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), DEFAULT_ZONE_ID);
         } else if (obj instanceof java.util.Calendar cal) {
-            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(cal.getTimeInMillis()), DEFAULT_ZONE_ID);
+            // Keep the zone the caller attached to the Calendar - this type exists to carry one. Matches
+            // GregorianCalendar.toZonedDateTime() for every Calendar subclass, not just Gregorian.
+            final java.util.TimeZone tz = cal.getTimeZone();
+
+            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(cal.getTimeInMillis()), tz == null ? DEFAULT_ZONE_ID : tz.toZoneId());
         }
 
         return valueOf(N.stringOf(obj));
@@ -185,18 +197,23 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <ul>
      *   <li>{@code null}, empty string, or the literal "null" returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current ZonedDateTime</li>
-     *   <li>Numeric strings are interpreted as epoch milliseconds</li>
+     *   <li>Numeric strings of more than four characters (an optional sign followed by decimal digits only, as
+     *       accepted by {@link Long#parseLong(String)}; no {@code 0x} hex, no {@code L} suffix) are interpreted as
+     *       epoch milliseconds in the system default zone (shorter numeric strings such as {@code "1234"} are handed
+     *       to the ISO parser and rejected)</li>
      *   <li>ISO 8601 date-time strings with 'Z' suffix (20 chars) are parsed as ISO date-time</li>
      *   <li>ISO 8601 timestamp strings with 'Z' suffix (24 chars) are parsed as ISO timestamp</li>
      *   <li>Any other value is parsed with the default {@link ZonedDateTime#parse(CharSequence)} parser</li>
      * </ul>
+     * Invalid calendar values ({@code 2023-02-30}, {@code 2023-04-31}, {@code 2023-02-29}, {@code 24:00}) are
+     * rejected on every path, the two fixed-length forms included.
      *
      * <p>Every string produced by {@link ZonedDateTime#toString()} can be parsed back into an equivalent value,
      * including:</p>
      * <ul>
      *   <li>the seconds-omitted form (e.g. {@code "2023-10-15T10:30Z"})</li>
      *   <li>fractional seconds of any precision (e.g. {@code "2023-10-15T10:30:45.123456789Z"})</li>
-     *   <li>numeric UTC offsets, with optional offset-seconds (e.g. {@code "2023-10-15T10:30:45+05:45"})</li>
+     *   <li>numeric UTC offsets, with optional offset-seconds (e.g. {@code "2023-10-15T10:30:45+05:30:15"})</li>
      *   <li>the region-zone suffix (e.g. {@code "2023-10-15T10:30:45-07:00[America/Los_Angeles]"}), whose
      *       {@link java.time.ZoneId} is preserved</li>
      * </ul>
@@ -217,12 +234,14 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * @param str the string to convert to ZonedDateTime
      * @return a ZonedDateTime instance, or {@code null} if the string is {@code null}, empty, or the literal "null"
-     * @throws DateTimeParseException if the string cannot be parsed as a valid date/time
+     * @throws DateTimeParseException if the string is neither a millisecond number of more than four characters
+     *         (within the {@code long} range) nor a valid ISO-8601 date/time representation
      * @see #valueOf(Object)
      * @see #stringOf(ZonedDateTime)
      */
+    @MayReturnNull
     @Override
-    public ZonedDateTime valueOf(final String str) {
+    public ZonedDateTime valueOf(final String str) throws DateTimeParseException {
         if (isNullDateTime(str)) {
             return null; // NOSONAR
         }
@@ -233,8 +252,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
 
         if (isPossibleMillis(str)) {
             try {
-                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Numbers.toLong(str)), DEFAULT_ZONE_ID);
-            } catch (final NumberFormatException e) {
+                // Long.parseLong, not Numbers.toLong: epoch text is decimal digits only, like the java.util.Date /
+                // Calendar handlers ("0x1F4A0" must not become 128160 ms). Overflow is reported as NFE here; the
+                // ArithmeticException arm mirrors the char[] overload so both paths end in DateTimeParseException.
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(str)), DEFAULT_ZONE_ID);
+            } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
@@ -261,9 +283,10 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
     /**
      * Converts a character array to a ZonedDateTime instance.
      * <p>
-     * This method first checks if the character array represents a long value (epoch milliseconds).
-     * If so, it creates a ZonedDateTime from that timestamp. Otherwise, it converts the
-     * character array to a string and delegates to {@link #valueOf(String)}.
+     * This method first checks if the character array represents a long value (epoch milliseconds: digits ending
+     * in a digit, so a trailing {@code L}/{@code d}/{@code f} type suffix is not accepted). If so, it creates a
+     * ZonedDateTime from that timestamp. Otherwise, it converts the character array to a string and delegates to
+     * {@link #valueOf(String)}, so both overloads give the same answer for the same text.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -276,17 +299,24 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @param offset the starting position in the character array
      * @param len the number of characters to process
      * @return a ZonedDateTime instance, or {@code null} if the input is {@code null} or empty
+     * @throws DateTimeParseException if the text is neither a millisecond number nor a valid ISO-8601 representation
+     *         (see {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
+    @MayReturnNull
     @Override
-    public ZonedDateTime valueOf(final char[] cbuf, final int offset, final int len) {
+    public ZonedDateTime valueOf(final char[] cbuf, final int offset, final int len) throws DateTimeParseException {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
 
+        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
+        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
+        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
+        // DateTimeParseException.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return ZonedDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_ZONE_ID);
-            } catch (final NumberFormatException e) {
+            } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
@@ -310,10 +340,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) of the timestamp value
      * @return the ZonedDateTime value, or {@code null} if the database value is NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    public ZonedDateTime get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public ZonedDateTime get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
 
         return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_ZONE_ID);
@@ -335,10 +366,11 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @param rs the ResultSet to read from
      * @param columnName the label of the column containing the timestamp value
      * @return the ZonedDateTime value, or {@code null} if the database value is NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column label is invalid
      */
     @Override
-    public ZonedDateTime get(final ResultSet rs, final String columnName) throws SQLException {
+    public ZonedDateTime get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final Timestamp ts = rs.getTimestamp(columnName);
 
         return ts == null ? null : ZonedDateTime.ofInstant(ts.toInstant(), DEFAULT_ZONE_ID);
@@ -360,10 +392,13 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @param stmt the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the value
      * @param x the ZonedDateTime value to set, or {@code null} for SQL NULL
+     * @throws IllegalArgumentException if a non-null value cannot be converted to a {@code Timestamp} because its epoch-millisecond value overflows
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final ZonedDateTime x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final ZonedDateTime x)
+            throws IllegalArgumentException, NullPointerException, SQLException {
         stmt.setTimestamp(columnIndex, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
@@ -383,10 +418,13 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @param stmt the CallableStatement to set the value in
      * @param parameterName the name of the parameter where to set the value
      * @param x the ZonedDateTime value to set, or {@code null} for SQL NULL
+     * @throws IllegalArgumentException if a non-null value cannot be converted to a {@code Timestamp} because its epoch-millisecond value overflows
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final ZonedDateTime x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final ZonedDateTime x)
+            throws IllegalArgumentException, NullPointerException, SQLException {
         stmt.setTimestamp(parameterName, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
@@ -410,7 +448,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * @param appendable the Appendable to write to
      * @param x the ZonedDateTime value to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws IOException if appending the formatted date/time text or null literal to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -467,12 +505,12 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @param writer the CharacterWriter to write to
      * @param x the ZonedDateTime value to write
      * @param config the serialization configuration controlling format and quoting; may be {@code null}
-     * @throws IOException if an I/O error occurs during the write operation
-     * @throws RuntimeException if an unsupported {@code DateTimeFormat} is specified
+     * @throws IOException if writing the selected date/time representation, quotation marks or null literal to {@code writer} fails
+     * @throws ArithmeticException if the LONG format is selected and the epoch-millisecond value overflows a long
      */
     @SuppressWarnings("null")
     @Override
-    public void serializeTo(final CharacterWriter writer, final ZonedDateTime x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final ZonedDateTime x, final JsonXmlSerConfig<?> config) throws IOException, ArithmeticException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -140,7 +140,7 @@ public interface HashFunction {
      * @return a new hasher instance optimized for the expected input size
      * @throws IllegalArgumentException if {@code expectedInputSize} is negative.
      */
-    Hasher newHasher(int expectedInputSize);
+    Hasher newHasher(int expectedInputSize) throws IllegalArgumentException;
 
     /**
      * Computes the hash code for a single integer value. This is a convenience method
@@ -192,8 +192,9 @@ public interface HashFunction {
      *
      * @param input the byte array to hash
      * @return the hash code for the input bytes
+     * @throws NullPointerException if {@code input} is {@code null}.
      */
-    HashCode hash(byte[] input);
+    HashCode hash(byte[] input) throws NullPointerException;
 
     /**
      * Computes the hash code for a portion of a byte array. This is a convenience method
@@ -214,9 +215,10 @@ public interface HashFunction {
      * @param off the starting offset in the array (zero-based, inclusive)
      * @param len the number of bytes to hash from the array
      * @return the hash code for the specified bytes
+     * @throws NullPointerException if {@code input} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code off < 0} or {@code len < 0} or {@code off + len > input.length}
      */
-    HashCode hash(byte[] input, int off, int len);
+    HashCode hash(byte[] input, int off, int len) throws NullPointerException, IndexOutOfBoundsException;
 
     /**
      * Computes the hash code for a character sequence without encoding. This is a
@@ -237,8 +239,9 @@ public interface HashFunction {
      *
      * @param input the character sequence to hash
      * @return the hash code for the input characters
+     * @throws NullPointerException if {@code input} is {@code null}.
      */
-    HashCode hash(CharSequence input);
+    HashCode hash(CharSequence input) throws NullPointerException;
 
     /**
      * Computes the hash code for a character sequence using the specified character
@@ -249,6 +252,12 @@ public interface HashFunction {
      * those bytes are hashed. This method is useful for cross-language compatibility
      * as it produces consistent results when the same encoding is used.
      *
+     * <p><b>Warning:</b> Characters the charset cannot encode (including unpaired surrogates) are
+     * replaced by the charset's replacement byte (typically {@code '?'}) before hashing, so such inputs
+     * can collide with each other: {@code hash("a\uD800", UTF_8)} equals {@code hash("a?", UTF_8)}, and
+     * {@code hash("世", ISO_8859_1)} equals {@code hash("?", ISO_8859_1)}. Use {@link #hash(CharSequence)}
+     * to hash every {@code char} exactly.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String text = "Hello 世界";
@@ -258,8 +267,9 @@ public interface HashFunction {
      * @param input the character sequence to hash
      * @param charset the character encoding to use
      * @return the hash code for the encoded input
+     * @throws NullPointerException if {@code input} or {@code charset} is {@code null}
      */
-    HashCode hash(CharSequence input, Charset charset);
+    HashCode hash(CharSequence input, Charset charset) throws NullPointerException;
 
     /**
      * Computes the hash code for an arbitrary object using a Guava {@link Funnel} to decompose
@@ -292,11 +302,13 @@ public interface HashFunction {
      * }</pre>
      *
      * @param <T> the type of object to hash
-     * @param instance the object instance to hash
+     * @param instance the object instance to hash; may be {@code null} if the funnel accepts {@code null}
+     *                 (it is passed to the funnel unchecked)
      * @param funnel the funnel used to decompose the object into primitive values
      * @return the hash code for the object
+     * @throws IllegalArgumentException if {@code funnel} is {@code null}
      */
-    <T> HashCode hash(T instance, Funnel<? super T> funnel);
+    <T> HashCode hash(T instance, Funnel<? super T> funnel) throws IllegalArgumentException;
 
     /**
      * Returns the number of bits in each hash code produced by this hash function.

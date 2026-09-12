@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -84,23 +85,41 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
     }
 
     /**
-     * Parses a decimal string and returns a new {@link java.util.concurrent.atomic.AtomicInteger}
-     * containing the parsed value. Leading and trailing whitespace is trimmed before parsing.
+     * Parses an integer string and returns a new {@link java.util.concurrent.atomic.AtomicInteger}
+     * containing the parsed value. Leading and trailing whitespace is trimmed before parsing; the trimmed text is
+     * then parsed with the same grammar as {@link Numbers#toInt(String)} - the grammar {@code IntegerType} and
+     * {@code MutableIntType} use - so decimal is tried first (a leading zero is padding, never octal), a
+     * {@code 0x}/{@code 0X}/{@code #} prefix selects hexadecimal, a trailing {@code L}/{@code l} long-literal suffix is
+     * ignored, and only ASCII digits are accepted. This is a different grammar from {@link Integer#parseInt(String)}:
+     * non-ASCII Unicode digits such as Arabic-Indic digits are rejected where {@code parseInt} accepts them, and
+     * {@code "0x10"}/{@code "#10"}/{@code "1L"} are accepted where {@code parseInt} rejects them.
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
-     * @param str the decimal string to parse; may be {@code null} or empty
+     * @param str the integer string to parse; may be {@code null} or empty
      * @return a new {@code AtomicInteger} containing the parsed value,
      *         or {@code null} if {@code str} is {@code null} or empty
-     * @throws NumberFormatException if {@code str} cannot be parsed as a valid {@code int}
+     * @throws NumberFormatException if the trimmed string is not a valid integer token (a blank string included)
+     * @throws ArithmeticException if the string is a well-formed integer outside the {@code int} range
      * @see #valueOf(Object)
      * @see #stringOf(AtomicInteger)
      */
     @Override
-    public AtomicInteger valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : new AtomicInteger(Integer.parseInt(str.trim()));
+    public AtomicInteger valueOf(final String str) throws NumberFormatException, ArithmeticException {
+        if (Strings.isEmpty(str)) {
+            return null;
+        }
+
+        final String trimmed = str.trim();
+
+        // Numbers.toInt("") answers 0; a blank string has always been rejected by this handler and must stay rejected.
+        if (trimmed.isEmpty()) {
+            throw new NumberFormatException("Blank string is not a valid int: \"" + str + "\"");
+        }
+
+        return new AtomicInteger(Numbers.toInt(trimmed));
     }
 
     /**
@@ -111,10 +130,11 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the column containing the integer value
      * @return a new {@code AtomicInteger} wrapping the retrieved value, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
-    public AtomicInteger get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public AtomicInteger get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final int value = rs.getInt(columnIndex);
 
         return rs.wasNull() ? null : new AtomicInteger(value);
@@ -128,10 +148,11 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
      * @return a new {@code AtomicInteger} wrapping the retrieved value, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code columnName} is not found
      */
     @Override
-    public AtomicInteger get(final ResultSet rs, final String columnName) throws SQLException {
+    public AtomicInteger get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final int value = rs.getInt(columnName);
 
         return rs.wasNull() ? null : new AtomicInteger(value);
@@ -146,10 +167,11 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @param stmt the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code AtomicInteger} value to set; {@code null} is stored as SQL NULL
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final AtomicInteger x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final AtomicInteger x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, java.sql.Types.INTEGER);
         } else {
@@ -166,10 +188,11 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code AtomicInteger} value to set; {@code null} is stored as SQL NULL
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final AtomicInteger x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final AtomicInteger x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, java.sql.Types.INTEGER);
         } else {
@@ -188,7 +211,7 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      *
      * @param appendable the target {@code Appendable}
      * @param x the {@code AtomicInteger} value to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during appending
+     * @throws IOException if appending the current numeric value or null literal to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -224,7 +247,8 @@ public class AtomicIntegerType extends AbstractAtomicType<AtomicInteger> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code AtomicInteger} value to write; may be {@code null}
      * @param config the serialization configuration; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws IOException if writing the current numeric value, configured null representation or quotation marks to {@code writer}
+     *         fails
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final AtomicInteger x, final JsonXmlSerConfig<?> config) throws IOException {

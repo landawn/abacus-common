@@ -2,14 +2,17 @@ package com.landawn.abacus.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetSocketAddress;
@@ -18,14 +21,19 @@ import java.net.Proxy;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 
@@ -34,6 +42,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.HttpResponseException;
 import com.landawn.abacus.util.ContinuableFuture;
 
 public class HttpRequestTest extends TestBase {
@@ -98,31 +107,44 @@ public class HttpRequestTest extends TestBase {
         }
 
         private void handleConnection(Socket socket) throws IOException {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter writer = new PrintWriter(socket.getOutputStream());
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
 
             String requestLine = reader.readLine();
-            if (requestLine != null) {
-                requests.offer(new RecordedRequest(requestLine));
-            }
 
             String line;
             int contentLength = 0;
+            final Map<String, String> requestHeaders = new LinkedHashMap<>();
+
             while ((line = reader.readLine()) != null && !line.isEmpty()) {
+                final int colon = line.indexOf(':');
+
+                if (colon > 0) {
+                    // Header names are recorded lower-cased so lookups are case-insensitive.
+                    requestHeaders.put(line.substring(0, colon).trim().toLowerCase(Locale.ROOT), line.substring(colon + 1).trim());
+                }
+
                 if (line.regionMatches(true, 0, "Content-Length:", 0, "Content-Length:".length())) {
                     contentLength = Integer.parseInt(line.substring("Content-Length:".length()).trim());
                 }
             }
 
-            final char[] requestBody = new char[1024];
+            final StringBuilder requestBody = new StringBuilder();
+            final char[] buffer = new char[1024];
+
             while (contentLength > 0) {
-                final int read = reader.read(requestBody, 0, Math.min(contentLength, requestBody.length));
+                final int read = reader.read(buffer, 0, Math.min(contentLength, buffer.length));
 
                 if (read < 0) {
                     break;
                 }
 
+                requestBody.append(buffer, 0, read);
                 contentLength -= read;
+            }
+
+            if (requestLine != null) {
+                requests.offer(new RecordedRequest(requestLine, requestHeaders, requestBody.toString()));
             }
 
             MockResponse response = responses.poll();
@@ -130,8 +152,13 @@ public class HttpRequestTest extends TestBase {
                 response = new MockResponse().setBody("Default response");
             }
 
-            writer.println("HTTP/1.1 200 OK");
-            writer.println("Content-Length: " + response.body.length());
+            writer.println("HTTP/1.1 " + response.responseCode + " " + (response.responseCode == 200 ? "OK" : "Status"));
+            writer.println("Content-Length: " + response.body.getBytes(StandardCharsets.UTF_8).length);
+
+            for (final Map.Entry<String, String> header : response.headers.entrySet()) {
+                writer.println(header.getKey() + ": " + header.getValue());
+            }
+
             writer.println("Connection: close");
             writer.println();
             writer.print(response.body);
@@ -164,9 +191,21 @@ public class HttpRequestTest extends TestBase {
 
     private static class MockResponse {
         private String body = "";
+        private int responseCode = 200;
+        private final Map<String, String> headers = new LinkedHashMap<>();
 
         public MockResponse setBody(String body) {
             this.body = body;
+            return this;
+        }
+
+        public MockResponse setResponseCode(int responseCode) {
+            this.responseCode = responseCode;
+            return this;
+        }
+
+        public MockResponse setHeader(String name, String value) {
+            headers.put(name, value);
             return this;
         }
     }
@@ -174,11 +213,15 @@ public class HttpRequestTest extends TestBase {
     private static class RecordedRequest {
         private final String method;
         private final String path;
+        private final Map<String, String> headers;
+        private final String body;
 
-        RecordedRequest(String requestLine) {
+        RecordedRequest(String requestLine, Map<String, String> headers, String body) {
             String[] parts = requestLine.split(" ");
             method = parts.length > 0 ? parts[0] : "";
             path = parts.length > 1 ? parts[1] : "";
+            this.headers = headers;
+            this.body = body;
         }
 
         public String getMethod() {
@@ -187,6 +230,25 @@ public class HttpRequestTest extends TestBase {
 
         public String getPath() {
             return path;
+        }
+
+        /**
+         * Returns the value of the named request header, matched case-insensitively.
+         *
+         * @param name the header name
+         * @return the header value, or {@code null} when the request did not carry it
+         */
+        public String getHeader(String name) {
+            return headers.get(name.toLowerCase(Locale.ROOT));
+        }
+
+        /**
+         * Returns the request body exactly as it arrived on the wire.
+         *
+         * @return the request body; empty when there was none
+         */
+        public String getBody() {
+            return body;
         }
     }
 
@@ -199,10 +261,10 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testconnectTimeoutZero() {
+    public void testConnectTimeout() {
         HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.connectTimeout(0L);
-        assertNotNull(result);
+        assertSame(request, request.connectTimeout(0L));
+        assertSame(request, request.connectTimeout(5000L));
     }
 
     @Test
@@ -227,13 +289,7 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testconnectTimeoutMillis() {
-        HttpRequest request = HttpRequest.url(baseUrl);
-        assertSame(request, request.connectTimeout(5000L));
-    }
-
-    @Test
-    public void testconnectTimeoutDuration() {
+    public void testConnectTimeout_Duration() {
         HttpRequest request = HttpRequest.url(baseUrl);
         assertSame(request, request.connectTimeout(Duration.ofSeconds(5)));
         assertThrows(IllegalArgumentException.class, () -> request.connectTimeout(Duration.ofNanos(-1)));
@@ -262,8 +318,10 @@ public class HttpRequestTest extends TestBase {
     @Test
     public void testSettings() {
         HttpRequest request = HttpRequest.url(baseUrl);
-        HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
+        HttpSettings settings = HttpSettings.create().header("Accept", "application/json").setReadTimeout(1234);
         assertSame(request, request.settings(settings));
+        assertEquals(1234, request.checkSettings().getReadTimeout());
+        assertEquals("application/json", HttpHeaders.valueOf(request.checkSettings().headers().get("Accept")));
     }
 
     @Test
@@ -315,20 +373,14 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testReadTimeoutZero() {
+    public void testReadTimeout() {
         HttpRequest request = HttpRequest.url(baseUrl);
-        HttpRequest result = request.readTimeout(0L);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testReadTimeoutMillis() {
-        HttpRequest request = HttpRequest.url(baseUrl);
+        assertSame(request, request.readTimeout(0L));
         assertSame(request, request.readTimeout(10000L));
     }
 
     @Test
-    public void testReadTimeoutDuration() {
+    public void testReadTimeout_Duration() {
         HttpRequest request = HttpRequest.url(baseUrl);
         assertSame(request, request.readTimeout(Duration.ofSeconds(10)));
         assertThrows(IllegalArgumentException.class, () -> request.readTimeout(Duration.ofNanos(-1)));
@@ -393,10 +445,67 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testQueryIsRejectedForHead() {
+    public void testJsonBodySendsJsonContentType() throws Exception {
+        server.enqueue(new MockResponse().setBody("{}"));
+
+        HttpRequest.url(baseUrl).jsonBody("{\"a\":1}").post(String.class);
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("application/json", request.getHeader("Content-Type"));
+        assertEquals("{\"a\":1}", request.getBody());
+    }
+
+    @Test
+    public void testBodyWithoutAnExplicitContentTypeIsLabelledJson() throws Exception {
+        server.enqueue(new MockResponse().setBody("{}"));
+
+        Map<String, String> payload = new HashMap<>();
+        payload.put("k", "v");
+        HttpRequest.url(baseUrl).body(payload).post(String.class);
+
+        RecordedRequest request = server.takeRequest();
+        // The body is serialized by the default JSON parser, so the header must say so; the JDK
+        // would otherwise supply its legacy application/x-www-form-urlencoded default.
+        assertEquals("application/json", request.getHeader("Content-Type"));
+        assertEquals("{\"k\": \"v\"}", request.getBody());
+    }
+
+    @Test
+    public void testRawStringBodyIsLabelledTextPlain() throws Exception {
+        server.enqueue(new MockResponse().setBody("{}"));
+
+        HttpRequest.url(baseUrl).body("plain payload").post(String.class);
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("text/plain; charset=UTF-8", request.getHeader("Content-Type"));
+        assertEquals("plain payload", request.getBody());
+    }
+
+    @Test
+    public void testHttpErrorRaisesHttpResponseException() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(404).setBody("missing"));
+
+        HttpResponseException e = assertThrows(HttpResponseException.class, () -> HttpRequest.url(baseUrl).get(String.class));
+
+        assertEquals(404, e.statusCode());
+        assertEquals("missing", e.responseBody());
+    }
+
+    @Test
+    public void testQueryIsAcceptedForHead() throws Exception {
+        // Query parameters are a URL feature: they are valid for every method that carries no body.
+        server.enqueue(new MockResponse().setResponseCode(200));
+
+        HttpRequest.url(baseUrl).query("a=b").head();
+
+        assertEquals("/?a=b", server.takeRequest().getPath());
+    }
+
+    @Test
+    public void testQueryIsRejectedForPut() {
         HttpRequest request = HttpRequest.url(baseUrl).query("a=b");
 
-        assertThrows(IllegalStateException.class, request::head);
+        assertThrows(IllegalStateException.class, () -> request.put(String.class));
     }
 
     @Test
@@ -1091,9 +1200,9 @@ public class HttpRequestTest extends TestBase {
         File tempFile = File.createTempFile("test", ".txt");
         tempFile.deleteOnExit();
 
-        ContinuableFuture<Void> future = request.asyncExecute(null, tempFile);
-        assertNotNull(future);
-        assertThrows(Exception.class, () -> future.get());
+        // Rejected eagerly, like every other asyncExecute overload, instead of only when the
+        // returned future is resolved.
+        assertThrows(IllegalArgumentException.class, () -> request.asyncExecute(null, tempFile));
     }
 
     @Test
@@ -1101,9 +1210,9 @@ public class HttpRequestTest extends TestBase {
         HttpRequest request = HttpRequest.url(baseUrl);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        ContinuableFuture<Void> future = request.asyncExecute(null, baos);
-        assertNotNull(future);
-        assertThrows(Exception.class, () -> future.get());
+        // Rejected eagerly, like every other asyncExecute overload, instead of only when the
+        // returned future is resolved.
+        assertThrows(IllegalArgumentException.class, () -> request.asyncExecute(null, baos));
     }
 
     @Test
@@ -1111,9 +1220,9 @@ public class HttpRequestTest extends TestBase {
         HttpRequest request = HttpRequest.url(baseUrl);
         StringWriter writer = new StringWriter();
 
-        ContinuableFuture<Void> future = request.asyncExecute(null, writer);
-        assertNotNull(future);
-        assertThrows(Exception.class, () -> future.get());
+        // Rejected eagerly, like every other asyncExecute overload, instead of only when the
+        // returned future is resolved.
+        assertThrows(IllegalArgumentException.class, () -> request.asyncExecute(null, writer));
     }
 
     @Test
@@ -1121,6 +1230,117 @@ public class HttpRequestTest extends TestBase {
         HttpRequest request = HttpRequest.url(baseUrl);
 
         assertThrows(IllegalArgumentException.class, () -> request.asyncExecute(null, String.class, executor));
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // 2026-09-06 a04 F-2: settings() copies the RAW content format, never a header-derived one.
+    // ------------------------------------------------------------------------------------------
+
+    @Test
+    public void testSettingsWithJsonHeaderTemplateThenFormBodySendsUrlEncodedForm() {
+        // Previously the JSON format derived from the template's Content-Type header was frozen into
+        // the request, so formBody(..) relabelled the wire as a form while the body stayed JSON.
+        final HttpSettings template = HttpSettings.create().setContentType("application/json");
+        final Map<String, Object> form = new LinkedHashMap<>();
+        form.put("username", "john doe");
+        form.put("password", "s&cret");
+
+        server.enqueue(new MockResponse().setBody("ok"));
+        HttpRequest.url(baseUrl).settings(template).formBody(form).post(String.class);
+
+        final RecordedRequest recorded = server.takeRequest();
+        assertEquals("application/x-www-form-urlencoded", recorded.getHeader("Content-Type"));
+        assertEquals("username=john+doe&password=s%26cret", recorded.getBody());
+    }
+
+    @Test
+    public void testSettingsWithJsonHeaderTemplateThenXmlContentTypeSendsXml() {
+        final HttpSettings template = HttpSettings.create().setContentType("application/json");
+        final TestBean bean = new TestBean();
+        bean.setField1("a");
+        bean.setField2("b");
+
+        server.enqueue(new MockResponse().setBody("ok"));
+        HttpRequest.url(baseUrl).settings(template).body(bean).header("Content-Type", "application/xml").post(String.class);
+
+        final RecordedRequest recorded = server.takeRequest();
+        assertEquals("application/xml", recorded.getHeader("Content-Type"));
+        assertTrue(recorded.getBody().startsWith("<"), recorded.getBody());
+        assertTrue(recorded.getBody().contains("<field1>a</field1>"), recorded.getBody());
+    }
+
+    @Test
+    public void testSettingsWithExplicitJsonFormatStillSerializesBeanAsJson() {
+        // Regression guard: an explicitly configured template format is still copied and still wins.
+        final HttpSettings template = HttpSettings.create().setContentFormat(ContentFormat.JSON);
+        final TestBean bean = new TestBean();
+        bean.setField1("a");
+        bean.setField2("b");
+
+        server.enqueue(new MockResponse().setBody("ok"));
+        final HttpRequest request = HttpRequest.url(baseUrl).settings(template);
+        assertEquals(ContentFormat.JSON, request.checkSettings().getContentFormat());
+
+        request.body(bean).post(String.class);
+
+        final RecordedRequest recorded = server.takeRequest();
+        assertEquals("application/json", recorded.getHeader("Content-Type"));
+        assertTrue(recorded.getBody().startsWith("{"), recorded.getBody());
+        assertTrue(recorded.getBody().contains("\"field1\""), recorded.getBody());
+    }
+
+    @Test
+    public void testSettingsWithJsonHeaderTemplateKeepsThePlainJsonCase() {
+        // The merged headers carry the derivation, so a plain JSON post is unchanged.
+        final HttpSettings template = HttpSettings.create().setContentType("application/json");
+        final Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("k", "v");
+
+        server.enqueue(new MockResponse().setBody("ok"));
+        final HttpRequest request = HttpRequest.url(baseUrl).settings(template);
+        assertEquals(ContentFormat.JSON, request.checkSettings().getContentFormat());
+
+        request.body(payload).post(String.class);
+
+        final RecordedRequest recorded = server.takeRequest();
+        assertEquals("application/json", recorded.getHeader("Content-Type"));
+        assertEquals("{\"k\": \"v\"}", recorded.getBody());
+    }
+
+    @Test
+    public void testSettingsWithEmptyTemplateLeavesContentFormatNull() {
+        final HttpRequest request = HttpRequest.url(baseUrl).settings(HttpSettings.create());
+
+        assertNull(request.checkSettings().getContentFormat());
+    }
+
+    @Test
+    public void testSettingsThenFormBodyEncodesUnicodeValuesAsUtf8PercentEncoding() {
+        final HttpSettings template = HttpSettings.create().setContentType("application/json");
+        final Map<String, Object> form = new LinkedHashMap<>();
+        form.put("name", "café");
+
+        server.enqueue(new MockResponse().setBody("ok"));
+        HttpRequest.url(baseUrl).settings(template).formBody(form).post(String.class);
+
+        final RecordedRequest recorded = server.takeRequest();
+        assertEquals("application/x-www-form-urlencoded", recorded.getHeader("Content-Type"));
+        assertEquals("name=caf%C3%A9", recorded.getBody());
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // 2026-09-06 a04 F-8 (pinning): PATCH is rejected through the future on the async path.
+    // ------------------------------------------------------------------------------------------
+
+    @Test
+    public void testAsyncExecuteWithPatchFailsTheFutureWithUnsupportedOperationException() {
+        final HttpRequest request = HttpRequest.url(baseUrl);
+
+        final ExecutionException e = assertThrows(ExecutionException.class,
+                () -> request.asyncExecute(HttpMethod.PATCH, String.class).get(5, TimeUnit.SECONDS));
+
+        assertTrue(e.getCause() instanceof UnsupportedOperationException, String.valueOf(e.getCause()));
+        assertNull(server.takeRequest(), "PATCH must be rejected before any request is sent");
     }
 
 }

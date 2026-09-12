@@ -1,6 +1,16 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -9,39 +19,52 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.type.Type;
 
 public class TypeReferenceTest extends TestBase {
 
     private abstract static class SecondTypeReference<A, B> extends TypeReference<B> {
-        // Used to verify that TypeReference follows the declared mapping to B rather than
-        // blindly selecting the first type argument (A) from the immediate superclass.
     }
 
     private abstract static class NestedTypeReference<T> extends SecondTypeReference<String, List<T>> {
-        // Exercises substitution inside a nested ParameterizedType across two named levels.
     }
 
     private abstract static class GenericArrayTypeReference<T> extends TypeReference<T[]> {
-        // Exercises a type variable used as a generic-array component.
     }
 
     private abstract static class WildcardTypeReference<T> extends TypeReference<List<? extends T>> {
-        // Exercises a type variable used as a wildcard bound.
     }
 
     private static class GenericOwner<T> {
         class Member<U> {
-            // Used only as a reflection type with a parameterized owner.
         }
     }
 
     private abstract static class OwnerTypeReference<T> extends TypeReference<GenericOwner<T>.Member<String>> {
-        // Exercises substitution in both a member type and its owner type.
+    }
+
+    private static class ReferenceOwner<A, B> {
+        class Reference<C> extends TypeReference<Map<A, List<? extends B[]>>> {
+        }
+
+        class SwappedReference extends ReferenceOwner<B, A>.Reference<Integer> {
+            SwappedReference(ReferenceOwner<B, A> owner) {
+                owner.super();
+            }
+        }
+
+        class RecursiveReference extends ReferenceOwner<List<A>, B>.Reference<Integer> {
+            RecursiveReference(ReferenceOwner<List<A>, B> owner) {
+                owner.super();
+            }
+        }
+
+        class NestedOwner<C> {
+            class Reference extends TypeReference<Map<A, Map<B, C>>> {
+            }
+        }
     }
 
     public static class TestBean {
@@ -77,671 +100,225 @@ public class TypeReferenceTest extends TestBase {
         }
     }
 
-    @Test
-    public void testTypeReference_DifferentMapImplementations() {
-        TypeReference<HashMap<String, Integer>> ref1 = new TypeReference<>() {
-        };
-        TypeReference<TreeMap<String, Integer>> ref2 = new TypeReference<>() {
-        };
-
-        Assertions.assertNotEquals(ref1.type(), ref2.type());
-    }
-
-    @Test
-    public void testTypeReference_IsAnonymousClass() {
-        TypeReference<String> ref = new TypeReference<>() {
-        };
-
-        Assertions.assertTrue(ref.getClass().isAnonymousClass());
-    }
-
-    @Test
-    public void testTypeReferenceEquals() {
-        TypeReference<String> ref1 = new TypeReference<>() {
-        };
-        TypeReference<String> ref2 = new TypeReference<>() {
-        };
-        TypeReference<Integer> ref3 = new TypeReference<>() {
-        };
-
-        Assertions.assertEquals(ref1.type(), ref2.type());
-
-        Assertions.assertNotEquals(ref1.type(), ref3.type());
-    }
-
-    @Test
-    public void testTypeReference_WithCustomClass() {
-        TypeReference<TestBean> ref = new TypeReference<>() {
-        };
-        Type<TestBean> type = ref.type();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(TestBean.class, type.javaType());
-    }
-
-    @Test
-    public void testTypeReference_WithGenericCustomClass() {
-        TypeReference<GenericBean<String, Integer>> ref = new TypeReference<>() {
-        };
-        Type<GenericBean<String, Integer>> type = ref.type();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(GenericBean.class, type.javaType());
-    }
-
-    @Test
-    public void testTypeReferenceResolvesReorderedIntermediateTypeParameters() {
-        final TypeReference<Integer> ref = new SecondTypeReference<String, Integer>() {
-        };
-
-        Assertions.assertEquals(Integer.class, ref.javaType());
-        Assertions.assertEquals(Integer.class, ref.type().javaType());
-    }
-
-    @Test
-    public void testTypeReferenceResolvesNestedIntermediateTypeParameters() {
-        final TypeReference<List<Integer>> ref = new NestedTypeReference<Integer>() {
-        };
-
-        Assertions.assertTrue(ref.javaType() instanceof ParameterizedType);
-        final ParameterizedType parameterizedType = (ParameterizedType) ref.javaType();
-        Assertions.assertEquals(List.class, parameterizedType.getRawType());
-        Assertions.assertArrayEquals(new java.lang.reflect.Type[] { Integer.class }, parameterizedType.getActualTypeArguments());
-        Assertions.assertEquals(List.class, ref.type().javaType());
-    }
-
-    @Test
-    public void testTypeReferenceResolvesIntermediateGenericArrayAndWildcardBounds() {
-        final TypeReference<String[]> arrayRef = new GenericArrayTypeReference<String>() {
-        };
-        final TypeReference<List<? extends Number>> wildcardRef = new WildcardTypeReference<Number>() {
-        };
-
-        Assertions.assertEquals(String[].class, arrayRef.javaType());
-        final ParameterizedType listType = (ParameterizedType) wildcardRef.javaType();
-        final java.lang.reflect.WildcardType wildcard = (java.lang.reflect.WildcardType) listType.getActualTypeArguments()[0];
-        Assertions.assertArrayEquals(new java.lang.reflect.Type[] { Number.class }, wildcard.getUpperBounds());
-        Assertions.assertEquals(List.class, wildcardRef.type().javaType());
-    }
-
-    @Test
-    public void testResolvedMemberTypeNameIncludesParameterizedOwner() {
-        final TypeReference<GenericOwner<Integer>.Member<String>> ref = new OwnerTypeReference<Integer>() {
-        };
-        final String typeName = ref.javaType().getTypeName();
-
-        Assertions.assertTrue(typeName.contains("GenericOwner<java.lang.Integer>"), typeName);
-        Assertions.assertTrue(typeName.endsWith("$Member<java.lang.String>"), typeName);
-    }
-
-    @Test
-    public void testTypeReferenceRejectsUnresolvedTypeVariableWithIllegalArgumentException() {
-        Assertions.assertThrows(IllegalArgumentException.class, TypeReferenceTest::createUnresolvedTypeReference);
-    }
-
     private static <T> void createUnresolvedTypeReference() {
         new TypeReference<T>() {
         };
     }
 
     @Test
-    public void testTypeReference_MultiDimensionalArray() {
-        TypeReference<String[][]> ref = new TypeReference<>() {
-        };
-        Type<String[][]> type = ref.type();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(String[][].class, type.javaType());
-    }
-
-    @Test
-    public void testTypeReference_PrimitiveArray() {
-        TypeReference<int[]> ref = new TypeReference<>() {
-        };
-        Type<int[]> type = ref.type();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(int[].class, type.javaType());
-    }
-
-    @Test
-    public void testTypeReference_MultipleInstances() {
-        TypeReference<String> ref1 = new TypeReference<>() {
-        };
-        TypeReference<String> ref2 = new TypeReference<>() {
-        };
-
-        Assertions.assertNotSame(ref1, ref2);
-
-        Assertions.assertEquals(ref1.type(), ref2.type());
-    }
-
-    @Test
-    public void testTypeReferenceSimpleType() {
+    public void testTypeAndJavaType() {
         TypeReference<String> stringRef = new TypeReference<>() {
         };
-        Type<String> stringType = stringRef.type();
+        assertTrue(stringRef.getClass().isAnonymousClass());
+        assertEquals(String.class, stringRef.javaType());
+        assertEquals(String.class, stringRef.type().javaType());
+        assertFalse(stringRef.javaType() instanceof ParameterizedType);
+        assertSame(stringRef.javaType(), stringRef.javaType());
+        assertSame(stringRef.type(), stringRef.type());
 
-        Assertions.assertNotNull(stringType);
-        Assertions.assertEquals(String.class, stringType.javaType());
-    }
-
-    @Test
-    public void testTypeReferenceGenericList() {
-        TypeReference<List<String>> listRef = new TypeReference<>() {
+        TypeReference<String> other = new TypeReference<>() {
         };
-        Type<List<String>> listType = listRef.type();
+        assertNotSame(stringRef, other);
+        assertEquals(stringRef.type(), other.type());
+        assertEquals(stringRef.javaType(), other.javaType());
+        assertNotEquals(stringRef.type(), new TypeReference<Integer>() {
+        }.type());
 
-        Assertions.assertNotNull(listType);
-        Assertions.assertEquals(List.class, listType.javaType());
-    }
-
-    @Test
-    public void testTypeReferenceGenericMap() {
-        TypeReference<Map<String, Integer>> mapRef = new TypeReference<>() {
-        };
-        Type<Map<String, Integer>> mapType = mapRef.type();
-
-        Assertions.assertNotNull(mapType);
-        Assertions.assertEquals(Map.class, mapType.javaType());
-    }
-
-    @Test
-    public void testTypeReferenceNestedGenerics() {
-        TypeReference<Map<String, List<Set<Integer>>>> complexRef = new TypeReference<>() {
-        };
-        Type<Map<String, List<Set<Integer>>>> complexType = complexRef.type();
-
-        Assertions.assertNotNull(complexType);
-        Assertions.assertEquals(Map.class, complexType.javaType());
-    }
-
-    @Test
-    public void testTypeReferenceArray() {
-        TypeReference<String[]> arrayRef = new TypeReference<>() {
-        };
-        Type<String[]> arrayType = arrayRef.type();
-
-        Assertions.assertNotNull(arrayType);
-        Assertions.assertEquals(String[].class, arrayType.javaType());
-    }
-
-    @Test
-    public void testTypeReferencePrimitive() {
         TypeReference<Integer> intRef = new TypeReference<>() {
         };
-        Type<Integer> intType = intRef.type();
+        assertEquals(Integer.class, intRef.javaType());
+        assertEquals(Integer.class, intRef.type().javaType());
 
-        Assertions.assertNotNull(intType);
-        Assertions.assertEquals(Integer.class, intType.javaType());
-    }
-
-    @Test
-    public void testTypeReferenceCustomClass() {
         TypeReference<TestBean> beanRef = new TypeReference<>() {
         };
-        Type<TestBean> beanType = beanRef.type();
-
-        Assertions.assertNotNull(beanType);
-        Assertions.assertEquals(TestBean.class, beanType.javaType());
-    }
-
-    @Test
-    public void testTypeReferenceGenericCustomClass() {
+        assertEquals(TestBean.class, beanRef.type().javaType());
         TypeReference<GenericBean<String, Integer>> genericBeanRef = new TypeReference<>() {
         };
-        Type<GenericBean<String, Integer>> genericBeanType = genericBeanRef.type();
+        assertEquals(GenericBean.class, genericBeanRef.type().javaType());
 
-        Assertions.assertNotNull(genericBeanType);
-        Assertions.assertEquals(GenericBean.class, genericBeanType.javaType());
-    }
-
-    @Test
-    public void testTypeReferenceWithBounds() {
-        TypeReference<List<? extends Number>> boundedRef = new TypeReference<>() {
+        TypeReference<String[]> arrayRef = new TypeReference<>() {
         };
-        Type<List<? extends Number>> boundedType = boundedRef.type();
+        assertEquals(String[].class, arrayRef.javaType());
+        assertEquals(String[].class, arrayRef.type().javaType());
+        assertEquals(String[][].class, new TypeReference<String[][]>() {
+        }.type().javaType());
+        assertEquals(int[].class, new TypeReference<int[]>() {
+        }.type().javaType());
+        assertEquals(Integer[].class, new TypeReference<Integer[]>() {
+        }.type().javaType());
 
-        Assertions.assertNotNull(boundedType);
-        Assertions.assertEquals(List.class, boundedType.javaType());
-    }
-
-    @Test
-    public void testTypeReferenceNotInstantiatedDirectly() {
-
-        TypeReference<String> ref = new TypeReference<>() {
-        };
-        Assertions.assertNotNull(ref);
-
-        Assertions.assertTrue(ref.getClass().isAnonymousClass());
-    }
-
-    @Test
-    public void testConstructor_WithoutTypeInformation() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             @SuppressWarnings("rawtypes")
             TypeReference rawRef = new TypeReference() {
             };
         });
+        assertThrows(IllegalArgumentException.class, TypeReferenceTest::createUnresolvedTypeReference);
     }
 
     @Test
-    public void testGetType_DifferentImplementations() {
-        TypeReference<ArrayList<String>> ref1 = new TypeReference<>() {
+    public void testGenericAndWildcardTypes() {
+        TypeReference<List<String>> listRef = new TypeReference<>() {
         };
-        TypeReference<LinkedList<String>> ref2 = new TypeReference<>() {
+        assertEquals(List.class, listRef.type().javaType());
+        assertTrue(listRef.javaType() instanceof ParameterizedType);
+        ParameterizedType listPt = (ParameterizedType) listRef.javaType();
+        assertEquals(List.class, listPt.getRawType());
+        assertSame(listRef.javaType(), listRef.javaType());
+        assertSame(listRef.type(), listRef.type());
+        assertEquals(listRef.type(), new TypeReference<List<String>>() {
+        }.type());
+        assertNotEquals(listRef.type(), new TypeReference<List<Integer>>() {
+        }.type());
+        assertNotEquals(new TypeReference<ArrayList<String>>() {
+        }.javaType(), new TypeReference<LinkedList<String>>() {
+        }.javaType());
+
+        TypeReference<Map<String, Integer>> mapRef = new TypeReference<>() {
         };
+        assertEquals(Map.class, mapRef.type().javaType());
+        ParameterizedType mapPt = (ParameterizedType) mapRef.javaType();
+        assertEquals(Map.class, mapPt.getRawType());
+        assertEquals(2, mapPt.getActualTypeArguments().length);
+        assertEquals(String.class, mapPt.getActualTypeArguments()[0]);
+        assertEquals(Integer.class, mapPt.getActualTypeArguments()[1]);
+        assertNotEquals(new TypeReference<HashMap<String, Integer>>() {
+        }.type(), new TypeReference<TreeMap<String, Integer>>() {
+        }.type());
 
-        java.lang.reflect.Type type1 = ref1.javaType();
-        java.lang.reflect.Type type2 = ref2.javaType();
+        TypeReference<Map<String, List<Set<Integer>>>> nestedRef = new TypeReference<>() {
+        };
+        assertEquals(Map.class, nestedRef.type().javaType());
+        assertTrue(nestedRef.javaType() instanceof ParameterizedType);
+        assertEquals(Map.class, ((ParameterizedType) nestedRef.javaType()).getRawType());
 
-        Assertions.assertNotEquals(type1, type2);
+        TypeReference<Map<String, List<Integer>>> nestedListRef = new TypeReference<>() {
+        };
+        ParameterizedType nestedMap = (ParameterizedType) nestedListRef.javaType();
+        assertEquals(Map.class, nestedMap.getRawType());
+        assertEquals(String.class, nestedMap.getActualTypeArguments()[0]);
+        assertTrue(nestedMap.getActualTypeArguments()[1] instanceof ParameterizedType);
+
+        TypeReference<Map<String, Map<Integer, List<Set<String>>>>> deepRef = new TypeReference<>() {
+        };
+        assertEquals(Map.class, deepRef.type().javaType());
+
+        TypeReference<List<? extends Number>> upper = new TypeReference<>() {
+        };
+        assertEquals(List.class, upper.type().javaType());
+        assertTrue(upper.javaType() instanceof ParameterizedType);
+        TypeReference<List<? super Integer>> lower = new TypeReference<>() {
+        };
+        assertTrue(lower.javaType() instanceof ParameterizedType);
     }
 
     @Test
-    public void testJavaType_returnsClassForSimpleType() {
-        TypeReference<Integer> ref = new TypeReference<>() {
+    public void testResolvesReorderedAndNestedTypeParameters() {
+        TypeReference<Integer> reordered = new SecondTypeReference<String, Integer>() {
         };
-        java.lang.reflect.Type jt = ref.javaType();
+        assertEquals(Integer.class, reordered.javaType());
+        assertEquals(Integer.class, reordered.type().javaType());
 
-        Assertions.assertEquals(Integer.class, jt);
-        Assertions.assertFalse(jt instanceof ParameterizedType);
+        TypeReference<List<Integer>> nested = new NestedTypeReference<>() {
+        };
+        assertTrue(nested.javaType() instanceof ParameterizedType);
+        ParameterizedType parameterizedType = (ParameterizedType) nested.javaType();
+        assertEquals(List.class, parameterizedType.getRawType());
+        assertArrayEquals(new java.lang.reflect.Type[] { Integer.class }, parameterizedType.getActualTypeArguments());
+        assertEquals(List.class, nested.type().javaType());
+
+        TypeReference<String[]> arrayRef = new GenericArrayTypeReference<>() {
+        };
+        TypeReference<List<? extends Number>> wildcardRef = new WildcardTypeReference<>() {
+        };
+        assertEquals(String[].class, arrayRef.javaType());
+        ParameterizedType listType = (ParameterizedType) wildcardRef.javaType();
+        WildcardType wildcard = (WildcardType) listType.getActualTypeArguments()[0];
+        assertArrayEquals(new java.lang.reflect.Type[] { Number.class }, wildcard.getUpperBounds());
+        assertEquals(List.class, wildcardRef.type().javaType());
+
+        TypeReference<GenericOwner<Integer>.Member<String>> ownerRef = new OwnerTypeReference<Integer>() {
+        };
+        String typeName = ownerRef.javaType().getTypeName();
+        assertTrue(typeName.contains("GenericOwner<java.lang.Integer>"), typeName);
+        assertTrue(typeName.endsWith("$Member<java.lang.String>"), typeName);
     }
 
     @Test
-    public void testJavaType_matchesTypeJavaType() {
-        TypeReference<String> ref = new TypeReference<>() {
+    public void testResolvesOwnerArguments() {
+        ReferenceOwner<String, Number> owner = new ReferenceOwner<>();
+        TypeReference<Map<String, List<? extends Number[]>>> actual = owner.new Reference<Integer>() {
         };
-        Assertions.assertEquals(String.class, ref.javaType());
-        Assertions.assertEquals(String.class, ref.type().javaType());
+        TypeReference<Map<String, List<? extends Number[]>>> expected = new TypeReference<>() {
+        };
+        assertEquals(expected.javaType(), actual.javaType());
+        assertEquals(expected.hashCode(), actual.hashCode());
+        assertEquals(expected.type(), actual.type());
+
+        TypeReference<Map<Number, List<? extends String[]>>> swapped = owner.new SwappedReference(new ReferenceOwner<>()) {
+        };
+        TypeReference<Map<Number, List<? extends String[]>>> swappedExpected = new TypeReference<>() {
+        };
+        assertEquals(swappedExpected.javaType(), swapped.javaType());
+        assertEquals(swappedExpected.type(), swapped.type());
+
+        ReferenceOwner<String, Integer> nestedOwnerRoot = new ReferenceOwner<>();
+        ReferenceOwner<String, Integer>.NestedOwner<Long> nestedOwner = nestedOwnerRoot.new NestedOwner<>();
+        TypeReference<Map<String, Map<Integer, Long>>> nested = nestedOwner.new Reference() {
+        };
+        TypeReference<Map<String, Map<Integer, Long>>> nestedExpected = new TypeReference<>() {
+        };
+        assertEquals(nestedExpected.javaType(), nested.javaType());
+        assertEquals(nestedExpected.type(), nested.type());
+        assertThrows(IllegalArgumentException.class, () -> nestedOwnerRoot.new Reference<Integer>());
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        ReferenceOwner rawOwner = new ReferenceOwner();
+        assertThrows(IllegalArgumentException.class, () -> rawOwner.new SwappedReference(new ReferenceOwner()));
+        assertThrows(IllegalArgumentException.class, () -> rawOwner.new RecursiveReference(new ReferenceOwner()));
     }
 
     @Test
-    public void testGetType_SimpleType() {
-        TypeReference<String> ref = new TypeReference<>() {
-        };
-        java.lang.reflect.Type type = ref.javaType();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(String.class, type);
-    }
-
-    @Test
-    public void testGetType_GenericList() {
-        TypeReference<List<String>> ref = new TypeReference<>() {
-        };
-        java.lang.reflect.Type type = ref.javaType();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertTrue(type instanceof ParameterizedType);
-
-        ParameterizedType pt = (ParameterizedType) type;
-        Assertions.assertEquals(List.class, pt.getRawType());
-    }
-
-    @Test
-    public void testGetType_GenericMap() {
-        TypeReference<Map<String, Integer>> ref = new TypeReference<>() {
-        };
-        java.lang.reflect.Type type = ref.javaType();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertTrue(type instanceof ParameterizedType);
-
-        ParameterizedType pt = (ParameterizedType) type;
-        Assertions.assertEquals(Map.class, pt.getRawType());
-        Assertions.assertEquals(2, pt.getActualTypeArguments().length);
-    }
-
-    @Test
-    public void testGetType_ComplexNestedGeneric() {
-        TypeReference<Map<String, List<Set<Integer>>>> ref = new TypeReference<>() {
-        };
-        java.lang.reflect.Type type = ref.javaType();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertTrue(type instanceof ParameterizedType);
-
-        ParameterizedType pt = (ParameterizedType) type;
-        Assertions.assertEquals(Map.class, pt.getRawType());
-    }
-
-    @Test
-    public void testGetType_ArrayType() {
-        TypeReference<String[]> ref = new TypeReference<>() {
-        };
-        java.lang.reflect.Type type = ref.javaType();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(String[].class, type);
-    }
-
-    @Test
-    public void testGetType_PrimitiveWrapper() {
-        TypeReference<Integer> ref = new TypeReference<>() {
-        };
-        java.lang.reflect.Type type = ref.javaType();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(Integer.class, type);
-    }
-
-    @Test
-    public void testGetType_WildcardUpperBound() {
-        TypeReference<List<? extends Number>> ref = new TypeReference<>() {
-        };
-        java.lang.reflect.Type type = ref.javaType();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertTrue(type instanceof ParameterizedType);
-    }
-
-    @Test
-    public void testGetType_WildcardLowerBound() {
-        TypeReference<List<? super Integer>> ref = new TypeReference<>() {
-        };
-        java.lang.reflect.Type type = ref.javaType();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertTrue(type instanceof ParameterizedType);
-    }
-
-    @Test
-    public void testGetType_MultipleTypeParameters() {
-        TypeReference<Map<String, Integer>> ref = new TypeReference<>() {
-        };
-        java.lang.reflect.Type type = ref.javaType();
-
-        Assertions.assertNotNull(type);
-        ParameterizedType pt = (ParameterizedType) type;
-        java.lang.reflect.Type[] args = pt.getActualTypeArguments();
-
-        Assertions.assertEquals(2, args.length);
-        Assertions.assertEquals(String.class, args[0]);
-        Assertions.assertEquals(Integer.class, args[1]);
-    }
-
-    @Test
-    public void testGetType_ConsistentAcrossCalls() {
-        TypeReference<List<String>> ref = new TypeReference<>() {
-        };
-
-        java.lang.reflect.Type type1 = ref.javaType();
-        java.lang.reflect.Type type2 = ref.javaType();
-
-        Assertions.assertSame(type1, type2);
-    }
-
-    @Test
-    public void testGetType_AndType_Consistency() {
-        TypeReference<List<String>> ref = new TypeReference<>() {
-        };
-
-        java.lang.reflect.Type rawType = ref.javaType();
-        Type<List<String>> abacusType = ref.type();
-
-        Assertions.assertNotNull(rawType);
-        Assertions.assertNotNull(abacusType);
-    }
-
-    @Test
-    public void testJavaType_returnsParameterizedTypeForGeneric() {
-        TypeReference<Map<String, List<Integer>>> ref = new TypeReference<>() {
-        };
-        java.lang.reflect.Type jt = ref.javaType();
-
-        Assertions.assertNotNull(jt);
-        Assertions.assertTrue(jt instanceof ParameterizedType);
-        ParameterizedType pt = (ParameterizedType) jt;
-        Assertions.assertEquals(Map.class, pt.getRawType());
-        Assertions.assertEquals(2, pt.getActualTypeArguments().length);
-        Assertions.assertEquals(String.class, pt.getActualTypeArguments()[0]);
-        Assertions.assertTrue(pt.getActualTypeArguments()[1] instanceof ParameterizedType);
-    }
-
-    @Test
-    public void testType_NotEqualForDifferentGenericType() {
-        TypeReference<List<String>> ref1 = new TypeReference<>() {
-        };
-        TypeReference<List<Integer>> ref2 = new TypeReference<>() {
-        };
-
-        Type<List<String>> type1 = ref1.type();
-        Type<List<Integer>> type2 = ref2.type();
-
-        Assertions.assertNotEquals(type1, type2);
-    }
-
-    @Test
-    public void testTypeToken_ExtendsTypeReference() {
+    public void testTypeToken() {
         TypeReference.TypeToken<String> token = new TypeReference.TypeToken<>() {
         };
-
-        Assertions.assertTrue(token instanceof TypeReference);
-    }
-
-    @Test
-    public void testTypeToken_IsAnonymousClass() {
-        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<>() {
-        };
-
-        Assertions.assertTrue(token.getClass().isAnonymousClass());
-    }
-
-    @Test
-    public void testTypeToken_EqualityWithTypeReference() {
+        assertTrue(token instanceof TypeReference);
+        assertTrue(token.getClass().isAnonymousClass());
+        assertEquals(String.class, token.type().javaType());
         TypeReference<String> ref = new TypeReference<>() {
         };
-        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<>() {
+        assertEquals(ref.type(), token.type());
+
+        TypeReference<List<String>> listRef = new TypeReference<>() {
         };
-
-        Assertions.assertEquals(ref.type(), token.type());
-    }
-
-    @Test
-    public void testTypeToken_AndTypeReference_BothWork() {
-        TypeReference<List<String>> ref = new TypeReference<>() {
-        };
-        TypeReference.TypeToken<List<String>> token = new TypeReference.TypeToken<>() {
-        };
-
-        Assertions.assertEquals(ref.javaType(), token.javaType());
-        Assertions.assertEquals(ref.type(), token.type());
-    }
-
-    @Test
-    public void testType_SimpleType() {
-        TypeReference<String> ref = new TypeReference<>() {
-        };
-        Type<String> type = ref.type();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(String.class, type.javaType());
-    }
-
-    @Test
-    public void testType_GenericList() {
-        TypeReference<List<String>> ref = new TypeReference<>() {
-        };
-        Type<List<String>> type = ref.type();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(List.class, type.javaType());
-    }
-
-    @Test
-    public void testType_GenericMap() {
-        TypeReference<Map<String, Integer>> ref = new TypeReference<>() {
-        };
-        Type<Map<String, Integer>> type = ref.type();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(Map.class, type.javaType());
-    }
-
-    @Test
-    public void testType_ComplexNestedGeneric() {
-        TypeReference<Map<String, List<Integer>>> ref = new TypeReference<>() {
-        };
-        Type<Map<String, List<Integer>>> type = ref.type();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(Map.class, type.javaType());
-    }
-
-    @Test
-    public void testType_ArrayType() {
-        TypeReference<Integer[]> ref = new TypeReference<>() {
-        };
-        Type<Integer[]> type = ref.type();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(Integer[].class, type.javaType());
-    }
-
-    @Test
-    public void testType_NotNull() {
-        TypeReference<String> ref = new TypeReference<>() {
-        };
-        Type<String> type = ref.type();
-
-        Assertions.assertNotNull(type);
-    }
-
-    @Test
-    public void testType_ConsistentAcrossCalls() {
-        TypeReference<List<String>> ref = new TypeReference<>() {
-        };
-
-        Type<List<String>> type1 = ref.type();
-        Type<List<String>> type2 = ref.type();
-
-        Assertions.assertSame(type1, type2);
-    }
-
-    @Test
-    public void testType_EqualForSameGenericType() {
-        TypeReference<List<String>> ref1 = new TypeReference<>() {
-        };
-        TypeReference<List<String>> ref2 = new TypeReference<>() {
-        };
-
-        Type<List<String>> type1 = ref1.type();
-        Type<List<String>> type2 = ref2.type();
-
-        Assertions.assertEquals(type1, type2);
-    }
-
-    @Test
-    public void testType_WithBounds() {
-        TypeReference<List<? extends Number>> ref = new TypeReference<>() {
-        };
-        Type<List<? extends Number>> type = ref.type();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(List.class, type.javaType());
-    }
-
-    @Test
-    public void testTypeToken_SimpleType() {
-        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<>() {
-        };
-        Type<String> type = token.type();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(String.class, type.javaType());
-    }
-
-    @Test
-    public void testTypeToken_GenericType() {
-        TypeReference.TypeToken<List<String>> token = new TypeReference.TypeToken<>() {
-        };
-        Type<List<String>> type = token.type();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(List.class, type.javaType());
-    }
-
-    @Test
-    public void testTypeToken_GetType() {
-        TypeReference.TypeToken<List<Integer>> token = new TypeReference.TypeToken<>() {
-        };
-        java.lang.reflect.Type type = token.javaType();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertTrue(type instanceof ParameterizedType);
-    }
-
-    @Test
-    public void testTypeToken_ComplexType() {
-        TypeReference.TypeToken<Map<String, List<Integer>>> token = new TypeReference.TypeToken<>() {
-        };
-        Type<Map<String, List<Integer>>> type = token.type();
-
-        Assertions.assertNotNull(type);
-        Assertions.assertEquals(Map.class, type.javaType());
-    }
-
-    @Test
-    public void testTypeTokenSimpleType() {
-        TypeReference.TypeToken<String> stringToken = new TypeReference.TypeToken<>() {
-        };
-        Type<String> stringType = stringToken.type();
-
-        Assertions.assertNotNull(stringType);
-        Assertions.assertEquals(String.class, stringType.javaType());
-    }
-
-    @Test
-    public void testTypeTokenGenericType() {
         TypeReference.TypeToken<List<String>> listToken = new TypeReference.TypeToken<>() {
         };
-        Type<List<String>> listType = listToken.type();
+        assertEquals(listRef.javaType(), listToken.javaType());
+        assertEquals(listRef.type(), listToken.type());
+        assertEquals(List.class, listToken.type().javaType());
+        assertTrue(listToken.javaType() instanceof ParameterizedType);
 
-        Assertions.assertNotNull(listType);
-        Assertions.assertEquals(List.class, listType.javaType());
-    }
-
-    @Test
-    public void testMultipleInstancesAreDifferent() {
-        TypeReference<List<String>> ref1 = new TypeReference<>() {
+        TypeReference.TypeToken<Map<String, List<Integer>>> complex = new TypeReference.TypeToken<>() {
         };
-        TypeReference<List<String>> ref2 = new TypeReference<>() {
-        };
+        assertEquals(Map.class, complex.type().javaType());
 
-        Assertions.assertNotSame(ref1, ref2);
-
-        Assertions.assertEquals(ref1.type(), ref2.type());
-    }
-
-    @Test
-    public void testComplexNestedType() {
-        TypeReference<Map<String, Map<Integer, List<Set<String>>>>> complexRef = new TypeReference<>() {
-        };
-
-        Type<Map<String, Map<Integer, List<Set<String>>>>> complexType = complexRef.type();
-
-        Assertions.assertNotNull(complexType);
-        Assertions.assertEquals(Map.class, complexType.javaType());
-    }
-
-    @Test
-    public void testTypeTokenNotInstantiatedDirectly() {
-        TypeReference.TypeToken<String> token = new TypeReference.TypeToken<>() {
-        };
-        Assertions.assertNotNull(token);
-
-        Assertions.assertTrue(token.getClass().isAnonymousClass());
-    }
-
-    // TypeToken constructor without type information
-    @Test
-    public void testTypeToken_ConstructorWithoutTypeInformation() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             @SuppressWarnings("rawtypes")
             TypeReference.TypeToken rawToken = new TypeReference.TypeToken() {
             };
         });
     }
 
+    @Test
+    public void testReflectTypeIsNotInterchangeableWithTypeReflectType() {
+        final TypeReference<List<String>> ref = new TypeReference<>() {
+        };
+
+        assertEquals("java.util.List<java.lang.String>", ref.reflectType().getTypeName());
+        assertSame(ref.javaType(), ref.reflectType());
+
+        // Type#reflectType() is implemented in AbstractType as javaType(), so routing through type() drops the
+        // type arguments: the two reflectType() methods read alike but are NOT a one-word call chain.
+        assertEquals(List.class, ref.type().reflectType());
+        assertEquals(List.class, ref.type().javaType());
+    }
 }

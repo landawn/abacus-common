@@ -33,9 +33,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
 
 import javax.net.ssl.HostnameVerifier;
@@ -44,7 +47,9 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.exception.HttpResponseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.DeserializationConfig;
 import com.landawn.abacus.parser.JsonParser;
@@ -63,6 +68,7 @@ import com.landawn.abacus.util.LZ4BlockOutputStream;
 import com.landawn.abacus.util.MoreExecutors;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.cs;
 
 /**
  * Internal utility class for HTTP operations. This class is not intended for direct use by application code.
@@ -95,13 +101,32 @@ public final class HttpUtil {
         if (IOUtil.IS_PLATFORM_ANDROID) {
             DEFAULT_EXECUTOR = AndroidUtil.getThreadPoolExecutor();
         } else {
+            // Daemon workers are essential here, not cosmetic: a shutdown hook (below) only runs once the JVM
+            // has BEGUN shutting down, and on the natural-exit path that requires every non-daemon thread to
+            // have ended. Non-daemon core workers parked in the queue never end, so a single async HTTP call
+            // would keep the process alive forever and the hook meant to drain the pool would be unreachable
+            // exactly when it is needed. Core-thread timeout lets an idle pool release its threads as well.
+            final ThreadFactory defaultThreadFactory = Executors.defaultThreadFactory();
+            final AtomicInteger threadIndex = new AtomicInteger();
+            final ThreadFactory daemonThreadFactory = runnable -> {
+                final Thread thread = defaultThreadFactory.newThread(runnable);
+                thread.setName("abacus-http-async-" + threadIndex.incrementAndGet());
+                thread.setDaemon(true);
+                thread.setPriority(Thread.NORM_PRIORITY);
+                return thread;
+            };
+
             final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(//
                     N.max(64, IOUtil.CPU_CORES * 8), // coreThreadPoolSize
                     N.max(128, IOUtil.CPU_CORES * 16), // maxThreadPoolSize
-                    180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+                    180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), daemonThreadFactory);
+
+            threadPoolExecutor.allowCoreThreadTimeOut(true);
 
             DEFAULT_EXECUTOR = threadPoolExecutor;
 
+            // Still useful on the System.exit path, where the hook does run and drains in-flight work
+            // before the daemon workers are abandoned.
             MoreExecutors.addDelayedShutdownHook(threadPoolExecutor, 120, TimeUnit.SECONDS);
         }
     }
@@ -134,7 +159,7 @@ public final class HttpUtil {
 
     static final String KRYO = "kryo";
 
-    static final String URL_ENCODED = "urlencoded";
+    static final String URL_ENCODED = "www-form-urlencoded";
 
     static final JsonParser jsonParser = ParserFactory.createJsonParser();
 
@@ -215,6 +240,16 @@ public final class HttpUtil {
         contentEncoding2Format.put(Strings.EMPTY, ContentFormat.NONE);
     }
 
+    /**
+     * Maximum number of bytes read from an error response body when building an
+     * {@link HttpResponseException}. Bounded so that a large error page cannot be materialized into
+     * an exception; {@link HttpResponseException#responseBody()} exposes what was captured.
+     */
+    public static final int MAX_ERROR_BODY_SIZE = 4096;
+
+    /** Maximum number of error-body characters rendered into an exception <i>message</i>. */
+    public static final int MAX_ERROR_BODY_IN_MESSAGE = 1024;
+
     private HttpUtil() {
         // Utility class - prevent instantiation
     }
@@ -237,6 +272,18 @@ public final class HttpUtil {
      */
     public static boolean isSuccessfulResponseCode(final int code) {
         return code >= 200 && code < 300;
+    }
+
+    /**
+     * Returns whether a response can contain a message body, independently of its representation headers.
+     *
+     * @param requestMethod the request method, or {@code null} if unknown
+     * @param statusCode the response status code
+     * @return {@code false} for HEAD, informational, 204, 205, and 304 responses, and successful CONNECT responses
+     */
+    public static boolean hasResponseBody(final String requestMethod, final int statusCode) {
+        return !"HEAD".equalsIgnoreCase(requestMethod) && statusCode >= 200 && statusCode != 204 && statusCode != 205 && statusCode != 304
+                && !("CONNECT".equalsIgnoreCase(requestMethod) && statusCode < 300);
     }
 
     /**
@@ -301,7 +348,18 @@ public final class HttpUtil {
      * {@link HttpHeaders#valueOf(Object)} maps {@code null} to an empty string.
      *
      * <p>{@link java.util.Collection} values are joined with {@code ", "} (a single-element collection yields
-     * that element's string form); {@link Date}/{@link java.time.Instant} values are HTTP-date formatted.</p>
+     * that element's string form; a {@code null} element renders as the literal {@code null});
+     * {@link Date}/{@link java.time.Instant} values are HTTP-date formatted. Arrays are <i>not</i> joined:
+     * they fall through to {@code N.stringOf} and render as a JSON array literal such as
+     * {@code ["a", "b"]} - pass a {@code Collection} when a comma-joined header value is wanted.</p>
+     *
+     * <p>This method takes no header name and is therefore field-agnostic: the {@code ", "} separator is used
+     * for every field. Of its callers here, {@code getContentEncoding}, {@code getAccept},
+     * {@code getAcceptEncoding} and {@code getAcceptCharset} read comma-separated list fields (RFC 9110
+     * &sect;5.6.1), for which that separator is correct; {@code getContentType} reads a singleton field, where a
+     * {@code Collection} value is malformed under any separator. Use {@link HttpHeaders#valueOf(String, Object)}
+     * instead when the header name is known and the field may have a list grammar of its own, such as
+     * {@code Cookie}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -316,7 +374,9 @@ public final class HttpUtil {
      * @param value The header value (can be {@code null}, String, Collection, or any object)
      * @return The header value as a string, or {@code null} if value is null
      * @see HttpHeaders#valueOf(Object)
+     * @see HttpHeaders#valueOf(String, Object)
      */
+    @MayReturnNull
     public static String readHttpHeaderValue(final Object value) {
         if (value == null) {
             return null;
@@ -350,6 +410,7 @@ public final class HttpUtil {
      * @param httpHeaders The HTTP headers map; may be {@code null}
      * @return The Content-Type value, or {@code null} if not found (or if {@code httpHeaders} is {@code null})
      */
+    @MayReturnNull
     public static String getContentType(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -372,6 +433,7 @@ public final class HttpUtil {
      * @param httpHeaders The HttpHeaders object
      * @return The Content-Type value, or {@code null} if not found
      */
+    @MayReturnNull
     public static String getContentType(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -394,6 +456,7 @@ public final class HttpUtil {
      * @param httpSettings The HttpSettings object
      * @return The Content-Type value, or {@code null} if not found
      */
+    @MayReturnNull
     public static String getContentType(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -415,8 +478,11 @@ public final class HttpUtil {
      *
      * @param connection The HTTP connection
      * @return The Content-Type value from the response headers, or {@code null} if not found
+     * @throws IllegalArgumentException if {@code connection} is {@code null}.
      */
-    public static String getContentType(final HttpURLConnection connection) {
+    public static String getContentType(final HttpURLConnection connection) throws IllegalArgumentException {
+        N.checkArgNotNull(connection, cs.connection);
+
         return getContentType(connection.getHeaderFields());
     }
 
@@ -443,6 +509,7 @@ public final class HttpUtil {
      * @param httpHeaders The HTTP headers map; may be {@code null}
      * @return The Content-Encoding value, or {@code null} if not found (or if {@code httpHeaders} is {@code null})
      */
+    @MayReturnNull
     public static String getContentEncoding(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -465,6 +532,7 @@ public final class HttpUtil {
      * @param httpHeaders The HttpHeaders object
      * @return The Content-Encoding value, or {@code null} if not found
      */
+    @MayReturnNull
     public static String getContentEncoding(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -487,6 +555,7 @@ public final class HttpUtil {
      * @param httpSettings The HttpSettings object
      * @return The Content-Encoding value, or {@code null} if not found
      */
+    @MayReturnNull
     public static String getContentEncoding(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -508,8 +577,11 @@ public final class HttpUtil {
      *
      * @param connection The HTTP connection
      * @return The Content-Encoding value from the response headers, or {@code null} if not found
+     * @throws IllegalArgumentException if {@code connection} is {@code null}.
      */
-    public static String getContentEncoding(final HttpURLConnection connection) {
+    public static String getContentEncoding(final HttpURLConnection connection) throws IllegalArgumentException {
+        N.checkArgNotNull(connection, cs.connection);
+
         return getContentEncoding(connection.getHeaderFields());
     }
 
@@ -536,6 +608,7 @@ public final class HttpUtil {
      * @param httpHeaders The HTTP headers map; may be {@code null}
      * @return The Accept value, or {@code null} if not found (or if {@code httpHeaders} is {@code null})
      */
+    @MayReturnNull
     public static String getAccept(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -558,6 +631,7 @@ public final class HttpUtil {
      * @param httpHeaders The HttpHeaders object
      * @return The Accept value, or {@code null} if not found
      */
+    @MayReturnNull
     public static String getAccept(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -580,6 +654,7 @@ public final class HttpUtil {
      * @param httpSettings The HttpSettings object
      * @return The Accept value, or {@code null} if not found
      */
+    @MayReturnNull
     public static String getAccept(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -601,8 +676,11 @@ public final class HttpUtil {
      *
      * @param connection The HTTP connection
      * @return The Accept value from the response headers, or {@code null} if not found
+     * @throws IllegalArgumentException if {@code connection} is {@code null}.
      */
-    public static String getAccept(final HttpURLConnection connection) {
+    public static String getAccept(final HttpURLConnection connection) throws IllegalArgumentException {
+        N.checkArgNotNull(connection, cs.connection);
+
         return getAccept(connection.getHeaderFields());
     }
 
@@ -629,6 +707,7 @@ public final class HttpUtil {
      * @param httpHeaders The HTTP headers map; may be {@code null}
      * @return The Accept-Encoding value, or {@code null} if not found (or if {@code httpHeaders} is {@code null})
      */
+    @MayReturnNull
     public static String getAcceptEncoding(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -651,6 +730,7 @@ public final class HttpUtil {
      * @param httpHeaders The HttpHeaders object
      * @return The Accept-Encoding value, or {@code null} if not found
      */
+    @MayReturnNull
     public static String getAcceptEncoding(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -673,6 +753,7 @@ public final class HttpUtil {
      * @param httpSettings The HttpSettings object
      * @return The Accept-Encoding value, or {@code null} if not found
      */
+    @MayReturnNull
     public static String getAcceptEncoding(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -694,8 +775,11 @@ public final class HttpUtil {
      *
      * @param connection The HTTP connection
      * @return The Accept-Encoding value from the response headers, or {@code null} if not found
+     * @throws IllegalArgumentException if {@code connection} is {@code null}.
      */
-    public static String getAcceptEncoding(final HttpURLConnection connection) {
+    public static String getAcceptEncoding(final HttpURLConnection connection) throws IllegalArgumentException {
+        N.checkArgNotNull(connection, cs.connection);
+
         return getAcceptEncoding(connection.getHeaderFields());
     }
 
@@ -722,6 +806,7 @@ public final class HttpUtil {
      * @param httpHeaders The HTTP headers map; may be {@code null}
      * @return The Accept-Charset value, or {@code null} if not found (or if {@code httpHeaders} is {@code null})
      */
+    @MayReturnNull
     public static String getAcceptCharset(final Map<String, ?> httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -744,6 +829,7 @@ public final class HttpUtil {
      * @param httpHeaders The HttpHeaders object
      * @return The Accept-Charset value, or {@code null} if not found
      */
+    @MayReturnNull
     public static String getAcceptCharset(final HttpHeaders httpHeaders) {
         if (httpHeaders == null) {
             return null;
@@ -766,6 +852,7 @@ public final class HttpUtil {
      * @param httpSettings The HttpSettings object
      * @return The Accept-Charset value, or {@code null} if not found
      */
+    @MayReturnNull
     public static String getAcceptCharset(final HttpSettings httpSettings) {
         if (httpSettings == null || httpSettings.headers() == null) {
             return null;
@@ -787,8 +874,11 @@ public final class HttpUtil {
      *
      * @param connection The HTTP connection
      * @return The Accept-Charset value from the response headers, or {@code null} if not found
+     * @throws IllegalArgumentException if {@code connection} is {@code null}.
      */
-    public static String getAcceptCharset(final HttpURLConnection connection) {
+    public static String getAcceptCharset(final HttpURLConnection connection) throws IllegalArgumentException {
+        N.checkArgNotNull(connection, cs.connection);
+
         return getAcceptCharset(connection.getHeaderFields());
     }
 
@@ -858,6 +948,14 @@ public final class HttpUtil {
      * Content types are matched by media subtype (including structured suffixes such as
      * {@code application/problem+json}), rather than by an arbitrary substring; for example,
      * {@code application/jsonp} is not treated as JSON.
+     *
+     * <p>Only the codings {@code gzip} ({@code x-gzip}), {@code br}, {@code snappy} and {@code lz4} are
+     * recognized. Any other coding - for example {@code deflate}, {@code compress}, {@code zstd} or
+     * {@code identity} - is treated as identity: the returned format carries no compression and
+     * {@link #wrapInputStream(InputStream, ContentFormat)} hands the still-encoded bytes through
+     * unchanged, which then fail in the parser. Do not advertise such codings in
+     * {@code Accept-Encoding} when the response is to be deserialized by this library; see
+     * {@link HttpSettings#setContentEncoding(String)} for the request-side counterpart.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -979,8 +1077,11 @@ public final class HttpUtil {
      *
      * @param connection The HTTP connection
      * @return The ContentFormat, or ContentFormat.NONE if not determined
+     * @throws IllegalArgumentException if {@code connection} is {@code null}.
      */
-    public static ContentFormat getContentFormat(final HttpURLConnection connection) {
+    public static ContentFormat getContentFormat(final HttpURLConnection connection) throws IllegalArgumentException {
+        N.checkArgNotNull(connection, cs.connection);
+
         return getContentFormat(getContentType(connection), getContentEncoding(connection));
     }
 
@@ -1042,7 +1143,8 @@ public final class HttpUtil {
      * @return The parser for the content format, or the default JSON parser if {@code contentFormat} is {@code null}
      * @throws IllegalArgumentException if the content format is not supported.
      */
-    public static <SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> Parser<SC, DC> getParser(final ContentFormat contentFormat) {
+    public static <SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> Parser<SC, DC> getParser(final ContentFormat contentFormat)
+            throws IllegalArgumentException {
         if (contentFormat == null) {
             return (Parser<SC, DC>) jsonParser;
         }
@@ -1060,6 +1162,12 @@ public final class HttpUtil {
      * Wraps an input stream with decompression based on the content format.
      * Supports GZIP, Brotli, Snappy, and LZ4 decompression.
      *
+     * <p>These are the only codings this library decodes. A response encoded with any other coding
+     * (for example {@code deflate}, {@code compress} or {@code zstd}) maps to an uncompressed
+     * {@link ContentFormat} in {@link #getContentFormat(String, String)} and is returned here as-is,
+     * still encoded; do not advertise such codings in {@code Accept-Encoding} (see
+     * {@link HttpSettings#setContentEncoding(String)}).</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * InputStream wrapped = HttpUtil.wrapInputStream(inputStream, ContentFormat.JSON_GZIP);
@@ -1070,8 +1178,10 @@ public final class HttpUtil {
      * @param contentFormat The content format indicating compression
      * @return The wrapped input stream, or the original stream if no decompression is needed.
      *         Returns an empty stream if {@code is} is {@code null}.
+     * @throws UncheckedIOException if a decoder must read a stream header on construction (GZIP) and
+     *         {@code is} is empty or does not start with a valid header
      */
-    public static InputStream wrapInputStream(final InputStream is, final ContentFormat contentFormat) {
+    public static InputStream wrapInputStream(final InputStream is, final ContentFormat contentFormat) throws UncheckedIOException {
         if (is == null) {
             return new ByteArrayInputStream(N.EMPTY_BYTE_ARRAY);
         }
@@ -1110,11 +1220,13 @@ public final class HttpUtil {
      * @return The wrapped output stream, or the original stream if no compression is needed.
      *         Returns {@code null} if {@code os} is {@code null} (unlike
      *         {@link #wrapInputStream(InputStream, ContentFormat)}, which substitutes an empty stream).
-     * @throws UnsupportedOperationException if Brotli compression is requested; there is no bundled
-     *         Brotli encoder, so {@code _BR} formats are decode-only
+     * @throws UnsupportedOperationException if {@code os} is non-null and {@code contentFormat} requests Brotli compression, which has no bundled
+     *         encoder
+     * @throws UncheckedIOException if constructing the compression stream fails while writing its header
      * @see #wrapInputStream(InputStream, ContentFormat)
      */
-    public static OutputStream wrapOutputStream(final OutputStream os, final ContentFormat contentFormat) {
+    public static OutputStream wrapOutputStream(final OutputStream os, final ContentFormat contentFormat)
+            throws UnsupportedOperationException, UncheckedIOException {
         if (contentFormat == null || contentFormat == ContentFormat.NONE || os == null) {
             return os;
         }
@@ -1155,10 +1267,16 @@ public final class HttpUtil {
      * @param contentType The Content-Type header value (can be null)
      * @param contentEncoding The Content-Encoding header value (can be null)
      * @return The output stream, possibly wrapped with compression
-     * @throws IOException if an I/O error occurs
+     * @throws IllegalArgumentException if {@code connection} is {@code null}
+     * @throws IllegalStateException if a request header must be set after the connection has already been established
+     * @throws IOException if opening the connection output stream fails
+     * @throws UnsupportedOperationException if {@code contentFormat} requests Brotli compression, which has no bundled encoder
+     * @throws UncheckedIOException if constructing the compression stream fails while writing its header
      */
     public static OutputStream getOutputStream(final HttpURLConnection connection, final ContentFormat contentFormat, String contentType, // NOSONAR
-            String contentEncoding) throws IOException {
+            String contentEncoding) throws IllegalArgumentException, IllegalStateException, IOException, UnsupportedOperationException, UncheckedIOException {
+        N.checkArgNotNull(connection, cs.connection);
+
         if (Strings.isEmpty(contentType) && contentFormat != null) {
             contentType = getContentType(contentFormat);
         }
@@ -1192,15 +1310,31 @@ public final class HttpUtil {
      * // (falls back to the error stream on a non-2xx response; when executed against a live server)
      * }</pre>
      *
+     * <p>If the body (or the error body) opens but the decoder for {@code contentFormat} cannot be
+     * constructed over it - typically an empty or malformed compressed body under a stale
+     * {@code Content-Encoding} header - the stream that was opened is closed before the exception
+     * propagates, so a failed call never leaves a response stream dangling. In that case there is no
+     * fall-back from the success body to the error body: the decoder failure is a body problem, not a
+     * status problem.</p>
+     *
      * @param connection The HTTP connection
      * @param contentFormat The content format for decompression
      * @return The input stream, possibly wrapped with decompression; never {@code null}
-     * @throws UncheckedIOException if the response body cannot be opened and the connection exposes
-     *         no error stream to fall back to
+     * @throws IllegalArgumentException if {@code connection} is {@code null}.
+     * @throws UncheckedIOException if the response body cannot be opened and the connection exposes no error stream to fall back to, or if a
+     *         compressed body is empty or malformed so that its decoder cannot be constructed (on the error-stream branch the original {@link IOException}
+     *         is attached as a suppressed exception)
      */
-    public static InputStream getInputStream(final HttpURLConnection connection, final ContentFormat contentFormat) {
+    public static InputStream getInputStream(final HttpURLConnection connection, final ContentFormat contentFormat)
+            throws IllegalArgumentException, UncheckedIOException {
+        N.checkArgNotNull(connection, cs.connection);
+
+        InputStream rawStream = null;
+
         try {
-            return N.defaultIfNull(wrapInputStream(connection.getInputStream(), contentFormat), N.emptyInputStream());
+            rawStream = connection.getInputStream();
+
+            return N.defaultIfNull(wrapInputStream(rawStream, contentFormat), N.emptyInputStream());
         } catch (final IOException e) {
             final InputStream errorStream = connection.getErrorStream();
             if (errorStream == null) {
@@ -1210,15 +1344,30 @@ public final class HttpUtil {
             try {
                 return N.defaultIfNull(wrapInputStream(errorStream, contentFormat), N.emptyInputStream());
             } catch (final RuntimeException wrapEx) {
+                // No caller ever receives the error stream once its decoder failed to build.
+                IOUtil.closeQuietly(errorStream);
                 wrapEx.addSuppressed(e);
                 throw wrapEx;
             }
+        } catch (final RuntimeException e) {
+            // wrapInputStream rethrows decoder-construction failures unchecked, bypassing the IOException
+            // branch above; the successfully opened raw stream would otherwise leak.
+            IOUtil.closeQuietly(rawStream);
+            throw e;
         }
     }
 
     /**
      * Flushes an output stream, handling special cases for compression streams.
      * For LZ4 and GZIP streams, calls finish() before flush() to ensure all data is written.
+     *
+     * <p><b>This call is terminal for GZIP and LZ4 streams:</b> {@code finish()} writes the trailer, so no
+     * further data can be written afterwards (GZIP rejects a later write with an {@link IOException},
+     * LZ4 with an {@link IllegalStateException}). Call it once, after the last write. Repeating the call
+     * is tolerated for GZIP (its {@code finish()} is idempotent) and for Snappy (which has no finish
+     * step and stays writable), but a second call on an LZ4 stream throws {@link IllegalStateException}
+     * because the underlying block stream refuses to finish twice. Closing the stream after
+     * {@code flush} is still required and still yields a decodable payload for all three codecs.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1228,9 +1377,13 @@ public final class HttpUtil {
      * }</pre>
      *
      * @param os The output stream to flush
-     * @throws IOException if an I/O error occurs
+     * @throws IllegalArgumentException if {@code os} is {@code null}.
+     * @throws IllegalStateException if {@code os} is an LZ4 stream that has already been finished by an earlier {@code flush} (or {@code close})
+     * @throws IOException if finishing the compression stream or flushing its underlying output fails
      */
-    public static void flush(final OutputStream os) throws IOException {
+    public static void flush(final OutputStream os) throws IllegalArgumentException, IllegalStateException, IOException {
+        N.checkArgNotNull(os, cs.os);
+
         if (os instanceof LZ4BlockOutputStream) {
             ((LZ4BlockOutputStream) os).finish();
         } else if (os instanceof GZIPOutputStream) {
@@ -1319,7 +1472,14 @@ public final class HttpUtil {
      *
      * <p>An unrecognized or unsupported charset name does not raise an exception; it falls back to
      * {@code defaultIfNull}, as does a missing {@code charset} parameter. A quoted value
-     * ({@code charset="utf-8"}) is unquoted before it is resolved.</p>
+     * ({@code charset="utf-8"}) is unquoted before it is resolved; as a leniency the charset value
+     * itself is also unquoted from single quotes ({@code charset='utf-8'}).</p>
+     *
+     * <p>While scanning the other parameters only a double quote opens a quoted string (RFC 9110
+     * {@code quoted-string}); an apostrophe is an ordinary token character, so
+     * {@code x='y; charset=ISO-8859-1} resolves ISO-8859-1. An unbalanced double quote swallows the
+     * remainder of the value, so a {@code charset} parameter after it is not found and
+     * {@code defaultIfNull} is returned.</p>
      *
      * @param contentType The Content-Type header value; may be {@code null} or empty
      * @param defaultIfNull The default charset to return if none is found; may be {@code null}, in
@@ -1332,7 +1492,6 @@ public final class HttpUtil {
             return defaultIfNull;
         }
 
-        final String contentTypeLowerCase = contentType.toLowerCase(Locale.ROOT);
         int fromIndex = -1;
 
         // Find an occurrence of "charset" that is an actual parameter name (i.e. not a
@@ -1343,11 +1502,11 @@ public final class HttpUtil {
         int searchFrom = 0;
         char quotedValueDelimiter = 0;
 
-        while (searchFrom < contentTypeLowerCase.length()) {
-            final char ch = contentTypeLowerCase.charAt(searchFrom);
+        while (searchFrom < contentType.length()) {
+            final char ch = contentType.charAt(searchFrom);
 
             if (quotedValueDelimiter != 0) {
-                if (ch == '\\' && searchFrom + 1 < contentTypeLowerCase.length()) {
+                if (ch == '\\' && searchFrom + 1 < contentType.length()) {
                     searchFrom += 2;
                     continue;
                 }
@@ -1363,29 +1522,31 @@ public final class HttpUtil {
             if (ch == '=') {
                 int valueStart = searchFrom + 1;
 
-                while (valueStart < contentTypeLowerCase.length()
-                        && (contentTypeLowerCase.charAt(valueStart) == ' ' || contentTypeLowerCase.charAt(valueStart) == '\t')) {
+                while (valueStart < contentType.length() && (contentType.charAt(valueStart) == ' ' || contentType.charAt(valueStart) == '\t')) {
                     valueStart++;
                 }
 
-                if (valueStart < contentTypeLowerCase.length()
-                        && (contentTypeLowerCase.charAt(valueStart) == '"' || contentTypeLowerCase.charAt(valueStart) == '\'')) {
-                    quotedValueDelimiter = contentTypeLowerCase.charAt(valueStart);
+                // Only DQUOTE opens an HTTP quoted-string (RFC 9110). An apostrophe is an ordinary token
+                // character, so a value such as x='y must not swallow the rest of the header.
+                if (valueStart < contentType.length() && contentType.charAt(valueStart) == '"') {
+                    quotedValueDelimiter = '"';
                     searchFrom = valueStart + 1;
                     continue;
                 }
             }
 
-            if (contentTypeLowerCase.regionMatches(searchFrom, "charset", 0, "charset".length())) {
-                final boolean parameterStart = isContentTypeParameterStart(contentTypeLowerCase, searchFrom);
+            // Matched case-insensitively on the value itself rather than on a lower-cased copy:
+            // String.toLowerCase is not length-preserving (U+0130 lower-cases to two characters), so an index
+            // found in that copy did not address the same character in the value the parameter is read from.
+            if (contentType.regionMatches(true, searchFrom, "charset", 0, "charset".length())) {
+                final boolean parameterStart = isContentTypeParameterStart(contentType, searchFrom);
                 int afterToken = searchFrom + "charset".length();
 
-                while (afterToken < contentTypeLowerCase.length()
-                        && (contentTypeLowerCase.charAt(afterToken) == ' ' || contentTypeLowerCase.charAt(afterToken) == '\t')) {
+                while (afterToken < contentType.length() && (contentType.charAt(afterToken) == ' ' || contentType.charAt(afterToken) == '\t')) {
                     afterToken++;
                 }
 
-                if (parameterStart && afterToken < contentTypeLowerCase.length() && contentTypeLowerCase.charAt(afterToken) == '=') {
+                if (parameterStart && afterToken < contentType.length() && contentType.charAt(afterToken) == '=') {
                     fromIndex = searchFrom;
                     break;
                 }
@@ -1506,7 +1667,7 @@ public final class HttpUtil {
      * @deprecated For testing only. Do not use it in production.
      */
     @Deprecated
-    public static void disableCertificateValidation() {
+    public static void disableCertificateValidation() throws RuntimeException {
         // Create a trust manager that does not validate certificate chains
         final TrustManager[] trustAllCerts = { new X509TrustManager() {
             @Override
@@ -1671,9 +1832,11 @@ public final class HttpUtil {
          *
          * @param value The date to format; must not be {@code null}
          * @return The formatted date string, always in GMT
-         * @throws NullPointerException if {@code value} is {@code null}
+         * @throws IllegalArgumentException if {@code value} is {@code null}
          */
-        public static String format(final Date value) {
+        public static String format(final Date value) throws IllegalArgumentException {
+            N.checkArgNotNull(value, cs.value);
+
             return STANDARD_DATE_FORMAT.get().format(value);
         }
 

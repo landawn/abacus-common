@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 
@@ -195,8 +196,9 @@ public final class BufferedJsonWriter extends CharacterWriter {
      * }</pre>
      *
      * @param os the OutputStream to write to
+     * @throws IllegalArgumentException if {@code os} is {@code null}
      */
-    BufferedJsonWriter(final OutputStream os) {
+    BufferedJsonWriter(final OutputStream os) throws IllegalArgumentException {
         super(os, REPLACEMENT_CHARS);
     }
 
@@ -223,8 +225,159 @@ public final class BufferedJsonWriter extends CharacterWriter {
      * }</pre>
      *
      * @param writer the Writer to write to
+     * @throws NullPointerException if {@code writer} is {@code null}
      */
-    BufferedJsonWriter(final Writer writer) {
+    BufferedJsonWriter(final Writer writer) throws NullPointerException {
         super(writer, REPLACEMENT_CHARS);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>A UTF-16 surrogate written on its own (it can never be half of a pair here) is emitted as a
+     * <code>&#92;uXXXX</code> escape: a lone surrogate has no UTF-8 encoding, so the {@code OutputStream}-backed
+     * writer would otherwise substitute {@code ?} while the String/Writer-backed writers passed it through raw.
+     * RFC 8259 permits the escaped form and it decodes back to the same {@code char}.</p>
+     */
+    @Override
+    public void writeCharacter(final char ch) throws IOException {
+        if (Character.isSurrogate(ch)) {
+            write(getCharNum(ch));
+        } else {
+            super.writeCharacter(ch);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Unpaired surrogates are escaped as <code>&#92;uXXXX</code>; well-formed surrogate pairs are copied through
+     * unchanged (see {@link #writeCharacter(char)}).</p>
+     */
+    @Override
+    public void writeCharacter(final char[] cbuf) throws IOException {
+        writeCharacter(cbuf, 0, cbuf.length);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Unpaired surrogates are escaped as <code>&#92;uXXXX</code>; well-formed surrogate pairs are copied through
+     * unchanged (see {@link #writeCharacter(char)}).</p>
+     */
+    @Override
+    public void writeCharacter(final char[] cbuf, final int off, final int len) throws IOException {
+        ensureOpen();
+
+        if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        final int end = off + len;
+        int from = off;
+        char ch = 0;
+
+        for (int i = off; i < end; i++) {
+            ch = cbuf[i];
+
+            // The replacement table ends far below the surrogate block, so the two tests never overlap and the
+            // common (non-surrogate, non-escaped) character costs the same two comparisons as before.
+            if (ch < Character.MIN_SURROGATE) {
+                if (ch <= lengthOfReplacementsForChars && replacementsForChars[ch] != null) {
+                    if (i > from) {
+                        write(cbuf, from, i - from);
+                    }
+
+                    write(replacementsForChars[ch]);
+                    from = i + 1;
+                }
+            } else if (ch <= Character.MAX_SURROGATE) {
+                if (Character.isHighSurrogate(ch) && i + 1 < end && Character.isLowSurrogate(cbuf[i + 1])) {
+                    i++; // a valid pair: copy both units through
+                } else {
+                    if (i > from) {
+                        write(cbuf, from, i - from);
+                    }
+
+                    write(getCharNum(ch));
+                    from = i + 1;
+                }
+            }
+        }
+
+        if (end > from) {
+            write(cbuf, from, end - from);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Unpaired surrogates are escaped as <code>&#92;uXXXX</code>; well-formed surrogate pairs are copied through
+     * unchanged (see {@link #writeCharacter(char)}).</p>
+     */
+    @Override
+    public void writeCharacter(final String str) throws IOException {
+        if (str == null) {
+            write(Strings.NULL_CHAR_ARRAY);
+        } else {
+            writeCharacter(str, 0, str.length());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Unpaired surrogates are escaped as <code>&#92;uXXXX</code>; well-formed surrogate pairs are copied through
+     * unchanged (see {@link #writeCharacter(char)}). A pair split by the requested range boundary counts as
+     * unpaired.</p>
+     */
+    @Override
+    public void writeCharacter(final String str, final int off, final int len) throws IOException {
+        if (str == null) {
+            write(Strings.NULL_CHAR_ARRAY, off, len);
+
+            return;
+        }
+
+        ensureOpen();
+
+        if (off < 0 || len < 0 || off > str.length() || len > str.length() - off) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        final int end = off + len;
+        int from = off;
+        char ch = 0;
+
+        for (int i = off; i < end; i++) {
+            ch = str.charAt(i);
+
+            if (ch < Character.MIN_SURROGATE) {
+                if (ch <= lengthOfReplacementsForChars && replacementsForChars[ch] != null) {
+                    if (i > from) {
+                        write(str, from, i - from);
+                    }
+
+                    write(replacementsForChars[ch]);
+                    from = i + 1;
+                }
+            } else if (ch <= Character.MAX_SURROGATE) {
+                if (Character.isHighSurrogate(ch) && i + 1 < end && Character.isLowSurrogate(str.charAt(i + 1))) {
+                    i++; // a valid pair: copy both units through
+                } else {
+                    if (i > from) {
+                        write(str, from, i - from);
+                    }
+
+                    write(getCharNum(ch));
+                    from = i + 1;
+                }
+            }
+        }
+
+        if (end > from) {
+            write(str, from, end - from);
+        }
     }
 }

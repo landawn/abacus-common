@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.RowId;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
@@ -39,6 +40,8 @@ import com.landawn.abacus.util.CharacterWriter;
  * <ul>
  *   <li>This type is NOT serializable (isSerializable() returns false)</li>
  *   <li>valueOf(String) operation is not supported and will throw UnsupportedOperationException</li>
+ *   <li>valueOf(Object) returns an object that already is a RowId unchanged, maps null to null, and rejects
+ *       everything else</li>
  *   <li>stringOf() is supported for display purposes but the result cannot be converted back to RowId</li>
  *   <li>RowId lifetime and validity are database-specific; query
  *       {@link java.sql.DatabaseMetaData#getRowIdLifetime()} for the driver's declared lifetime</li>
@@ -160,6 +163,29 @@ public class RowIdType extends AbstractType<RowId> {
     }
 
     /**
+     * Returns {@code obj} unchanged if it already is a {@link RowId}; otherwise the conversion is not supported.
+     * Unlike the inherited default, this method never serializes the value: {@code AbstractType.valueOf(Object)}
+     * renders {@code obj} with the handler registered for its own runtime class and feeds that text to
+     * {@link #valueOf(String)}, which always throws - a {@code RowId} cannot be rebuilt from text.
+     *
+     * @param obj the object to convert; may be {@code null}
+     * @return the same {@link RowId} instance if {@code obj} is a {@link RowId}, or {@code null} if {@code obj}
+     *         is {@code null}
+     * @throws UnsupportedOperationException if {@code obj} is non-null and not a {@link RowId}
+     */
+    @MayReturnNull
+    @Override
+    public RowId valueOf(final Object obj) throws UnsupportedOperationException {
+        if (obj == null) {
+            return null; // NOSONAR
+        } else if (obj instanceof RowId value) {
+            return value;
+        }
+
+        throw new UnsupportedOperationException("RowId cannot be created from " + obj.getClass().getName());
+    }
+
+    /**
      * Retrieves a SQL ROWID value from the specified column in the ResultSet.
      * A ROWID is a unique identifier for a row in a database table.
      *
@@ -173,10 +199,11 @@ public class RowIdType extends AbstractType<RowId> {
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
      * @return the RowId value from the specified column, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    public RowId get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public RowId get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getRowId(columnIndex);
     }
 
@@ -194,10 +221,11 @@ public class RowIdType extends AbstractType<RowId> {
      * @param rs the ResultSet to read from
      * @param columnName the label of the column to retrieve (column name or alias)
      * @return the RowId value from the specified column, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public RowId get(final ResultSet rs, final String columnName) throws SQLException {
+    public RowId get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getRowId(columnName);
     }
 
@@ -215,10 +243,11 @@ public class RowIdType extends AbstractType<RowId> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the RowId value to set as the parameter
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final RowId x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final RowId x) throws NullPointerException, SQLException {
         stmt.setRowId(columnIndex, x);
     }
 
@@ -236,10 +265,11 @@ public class RowIdType extends AbstractType<RowId> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the RowId value to set as the parameter
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final RowId x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final RowId x) throws NullPointerException, SQLException {
         stmt.setRowId(parameterName, x);
     }
 
@@ -271,7 +301,7 @@ public class RowIdType extends AbstractType<RowId> {
      * @param writer the CharacterWriter to write to
      * @param x the RowId to write
      * @param config the serialization configuration (currently unused for RowId)
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws IOException if writing the row identifier representation or null literal to {@code writer} fails
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final RowId x, final JsonXmlSerConfig<?> config) throws IOException {

@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -49,9 +50,10 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * This constructor is called by the TypeFactory to create ImmutableList&lt;E&gt; type instances.
      *
      * @param parameterTypeName the name of the element type parameter
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings("rawtypes")
-    ImmutableListType(final String parameterTypeName) {
+    ImmutableListType(final String parameterTypeName) throws IllegalArgumentException {
         super(getTypeName(ImmutableList.class, parameterTypeName, false));
 
         typeClass = (Class) ImmutableList.class;
@@ -149,6 +151,17 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     }
 
     /**
+     * Indicates whether values of this type are immutable.
+     * An {@link ImmutableList} cannot be modified after construction, so its values are immutable by construction.
+     *
+     * @return {@code true}, always
+     */
+    @Override
+    public boolean isImmutable() {
+        return true;
+    }
+
+    /**
      * Returns the serialization type category for this immutable list.
      * Delegates to the underlying list type for serialization categorization.
      *
@@ -172,11 +185,12 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      *
      * @param x the immutable list to serialize; may be {@code null}
      * @return the string representation, or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its type handler fails to produce a string.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final ImmutableList<E> x) {
+    public String stringOf(final ImmutableList<E> x) throws RuntimeException {
         return listType.stringOf(x);
     }
 
@@ -192,11 +206,13 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @param str the string to parse; may be {@code null} or blank
      * @return a new {@link ImmutableList} containing the parsed elements,
      *         or {@code null} if {@code str} is {@code null} or blank
+     * @throws RuntimeException if parsing the array or converting a contained value using the declared element type fails.
      * @see #valueOf(Object)
      * @see #stringOf(ImmutableList)
      */
+    @MayReturnNull
     @Override
-    public ImmutableList<E> valueOf(final String str) {
+    public ImmutableList<E> valueOf(final String str) throws RuntimeException {
         final List<E> list = listType.valueOf(str);
 
         return list == null ? null : ImmutableList.wrap(list);
@@ -213,7 +229,9 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      *
      * @param writer the {@link Appendable} to write to
      * @param x the immutable list to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -225,7 +243,7 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable writer, final ImmutableList<E> x) throws IOException {
+    public void appendTo(final Appendable writer, final ImmutableList<E> x) throws NullPointerException, IOException, RuntimeException {
         listType.appendTo(writer, x);
     }
 
@@ -245,10 +263,13 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x the immutable list to write; may be {@code null}
      * @param config the serialization configuration to use; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final ImmutableList<E> x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final ImmutableList<E> x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, RuntimeException {
         listType.serializeTo(writer, x, config);
     }
 
@@ -260,8 +281,11 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @param parameterTypeName the name of the element type
      * @param isDeclaringName {@code true} to generate a declaring name with simple class names, {@code false} for fully qualified names
      * @return the formatted type name (e.g., "ImmutableList&lt;String&gt;" or "com.landawn.abacus.util.ImmutableList&lt;java.lang.String&gt;")
+     * @throws NullPointerException if {@code typeClass} is {@code null}.
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName)
+            throws NullPointerException, IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         } else {

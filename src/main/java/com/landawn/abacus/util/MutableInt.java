@@ -209,10 +209,10 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * @param predicate the predicate to test the current value
      * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
-    public <E extends Exception> boolean setIf(final Throwables.IntPredicate<E> predicate, final int newValue) throws E, IllegalArgumentException {
+    public <E extends Exception> boolean setIf(final Throwables.IntPredicate<E> predicate, final int newValue) throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (predicate.test(value)) {
@@ -473,7 +473,7 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
-    public int compareTo(final MutableInt other) {
+    public int compareTo(final MutableInt other) throws NullPointerException {
         return Integer.compare(value, other.value);
     }
 

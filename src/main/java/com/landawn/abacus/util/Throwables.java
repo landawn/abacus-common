@@ -187,11 +187,36 @@ import com.landawn.abacus.util.u.Nullable;
  *   <li><b>Interoperability:</b> Seamless conversion between standard and throwable variants</li>
  * </ul>
  *
+ * <p><b>{@code Error} gets no special treatment.</b> All eight static {@code run}/{@code call} helpers here are
+ * bounded on {@link Throwable}, so an {@link Error} is caught and handled exactly like a checked exception -
+ * the {@code Error} instance itself is never rethrown:</p>
+ * <ul>
+ *   <li>{@link #run(Throwables.Runnable)} and {@link #call(Throwables.Callable)} convert it to a runtime exception;</li>
+ *   <li>the {@code actionOnError}, {@code supplier} and {@code defaultValue} overloads hand it to the handler or
+ *       return the fallback, so it never reaches the caller at all - an {@code OutOfMemoryError} or
+ *       {@code StackOverflowError} is silently absorbed;</li>
+ *   <li>the {@code predicate} overloads absorb it the same way when the predicate accepts it, and convert it to a
+ *       runtime exception when the predicate rejects it.</li>
+ * </ul>
+ * <p>Use {@link Try#run(Throwables.Runnable)} / {@link Try#call(java.util.concurrent.Callable)} instead when an
+ * {@code Error} must reach the caller unchanged.</p>
+ *
  * <p><b>Unchecked adapter behavior:</b> An {@code unchecked()} adapter catches any {@link Throwable} from
  * its source operation. A {@link RuntimeException} is normally rethrown as the same instance; a checked
  * exception or {@link Error} is converted to a runtime exception. An {@link InterruptedException} also
  * restores the current thread's interrupted status. Registered exception mappings in {@link ExceptionUtil}
  * can customize the concrete runtime exception.</p>
+ *
+ * <p><b>Wrapper exceptions are unwrapped before conversion.</b> Every conversion described above - the
+ * {@code unchecked()} adapters and the static {@code run}/{@code call} helpers alike - first peels an
+ * {@link java.util.concurrent.ExecutionException}, {@link java.lang.reflect.InvocationTargetException} or
+ * {@link java.lang.reflect.UndeclaredThrowableException} down to its cause and converts <i>that</i>, so the
+ * wrapper instance does not appear in the thrown exception at all. An {@code ExecutionException(IOException)}
+ * therefore surfaces as {@code UncheckedIOException(IOException)}, and an
+ * {@code ExecutionException(IllegalStateException)} surfaces as that {@code IllegalStateException} itself
+ * rather than being wrapped. A wrapper whose cause is {@code null} has nothing to peel and is converted like
+ * any other checked exception. This applies only to the rethrown exception: an {@code actionOnError} or
+ * {@code predicate} argument is always handed the original, un-peeled throwable.</p>
  *
  * <p><b>Best Practices:</b>
  * <ul>
@@ -215,7 +240,8 @@ import com.landawn.abacus.util.u.Nullable;
  *   <li>Functional interfaces are lightweight with minimal memory footprint</li>
  *   <li>A lazy initializer retains its computed value - consider weak references for large objects</li>
  *   <li>Primitive specializations reduce memory pressure compared to boxed variants</li>
- *   <li>The shared empty iterator is stateless; no mutable user data is stored globally by this class</li>
+ *   <li>The shared empty iterator holds no user data; its only field is the inherited close flag, whose flip is
+ *       a no-op because it has no resource to release</li>
  * </ul>
  *
  * <p><b>Nested Utility Classes:</b>
@@ -253,7 +279,7 @@ import com.landawn.abacus.util.u.Nullable;
  * @see Function
  * @see Predicate
  */
-@SuppressWarnings({ "java:S6539" })
+@SuppressWarnings("java:S6539")
 public final class Throwables {
 
     /**
@@ -272,6 +298,9 @@ public final class Throwables {
      * checked exceptions are not allowed, such as within lambda expressions passed to
      * standard functional interfaces.</p>
      *
+     * <p><b>Interruption:</b> If the command throws {@link InterruptedException}, the current thread's
+     * interrupted status is restored before the converted exception is thrown.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Execute code that throws IOException
@@ -285,12 +314,16 @@ public final class Throwables {
      * }</pre>
      *
      * @param cmd the runnable command to execute that may throw a checked exception
-     * @throws RuntimeException if the command throws an exception; a checked exception (or an {@link Error}) is wrapped in a RuntimeException, while a runtime exception is rethrown as-is
      * @throws IllegalArgumentException if {@code cmd} is {@code null}.
+     * @throws RuntimeException if the command throws an exception; a checked exception (or an {@link Error}) is wrapped in a RuntimeException, while a runtime exception is rethrown as-is.
+     *         An {@link java.util.concurrent.ExecutionException}, {@link java.lang.reflect.InvocationTargetException}
+     *         or {@link java.lang.reflect.UndeclaredThrowableException} is peeled down to its cause first and that
+     *         cause is converted instead, so the wrapper does not appear in what is thrown - see the class-level
+     *         "Wrapper exceptions are unwrapped before conversion" note
      * @see Try#run(Throwables.Runnable)
      */
     @Beta
-    public static void run(final Throwables.Runnable<? extends Throwable> cmd) throws IllegalArgumentException {
+    public static void run(final Throwables.Runnable<? extends Throwable> cmd) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(cmd, cs.cmd);
 
         try {
@@ -303,6 +336,7 @@ public final class Throwables {
     /**
      * Executes the specified runnable command that may throw a checked exception.
      * If the command throws an exception, the specified error handler will be invoked with the exception.
+     * An {@link Error} is handled the same way.
      *
      * <p>This method allows custom exception handling logic instead of propagating exceptions.
      * It's useful for logging, recovery, or graceful degradation scenarios.</p>
@@ -353,6 +387,9 @@ public final class Throwables {
      * <p>This method allows using exception-throwing code in functional contexts that require
      * a return value, such as map operations in streams or Optional transformations.</p>
      *
+     * <p><b>Interruption:</b> If the command throws {@link InterruptedException}, the current thread's
+     * interrupted status is restored before the converted exception is thrown.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Read file content
@@ -370,12 +407,16 @@ public final class Throwables {
      * @param <R> the type of the result returned by the callable
      * @param cmd the callable command to execute that may throw a checked exception
      * @return the result returned by the callable command
-     * @throws RuntimeException if the command throws an exception; a checked exception (or an {@link Error}) is wrapped in a RuntimeException, while a runtime exception is rethrown as-is
      * @throws IllegalArgumentException if {@code cmd} is {@code null}.
+     * @throws RuntimeException if the command throws an exception; a checked exception (or an {@link Error}) is wrapped in a RuntimeException, while a runtime exception is rethrown as-is.
+     *         An {@link java.util.concurrent.ExecutionException}, {@link java.lang.reflect.InvocationTargetException}
+     *         or {@link java.lang.reflect.UndeclaredThrowableException} is peeled down to its cause first and that
+     *         cause is converted instead, so the wrapper does not appear in what is thrown - see the class-level
+     *         "Wrapper exceptions are unwrapped before conversion" note
      * @see Try#call(java.util.concurrent.Callable)
      */
     @Beta
-    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd) throws IllegalArgumentException {
+    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(cmd, cs.cmd);
 
         try {
@@ -388,7 +429,7 @@ public final class Throwables {
     /**
      * Executes the specified callable command that may throw a checked exception and returns its result.
      * If the command throws an exception, the specified error handler function will be invoked with the exception
-     * and its result will be returned instead.
+     * and its result will be returned instead. An {@link Error} is handled the same way.
      *
      * <p>This method enables transforming exceptions into valid return values, useful for
      * error recovery and functional error handling patterns.</p>
@@ -435,6 +476,7 @@ public final class Throwables {
     /**
      * Executes the specified callable command that may throw a checked exception and returns its result.
      * If the command throws an exception, the result from the specified supplier will be returned instead.
+     * An {@link Error} is handled the same way.
      * This method provides a safe way to handle exceptions by providing a fallback value supplier.
      * If the command throws {@link InterruptedException}, the current thread is re-interrupted before
      * the fallback supplier is invoked.
@@ -473,6 +515,7 @@ public final class Throwables {
     /**
      * Executes the specified callable command that may throw a checked exception and returns its result.
      * If the command throws an exception, the specified default value will be returned instead.
+     * An {@link Error} is handled the same way.
      *
      * <p>This is the simplest form of error handling with a known fallback value.</p>
      * If the command throws {@link InterruptedException}, the current thread's interrupted status is restored.
@@ -521,6 +564,7 @@ public final class Throwables {
      * If the command throws an exception and the predicate returns {@code true} for that exception,
      * the result from the supplier will be returned. If the predicate returns {@code false},
      * the exception will be rethrown, wrapped in a RuntimeException if it is a checked exception.
+     * An {@link Error} is passed to the predicate like any other throwable.
      *
      * <p>This method enables selective exception handling based on exception type or properties.</p>
      * If the command throws {@link InterruptedException}, the current thread is re-interrupted before
@@ -547,16 +591,18 @@ public final class Throwables {
      *
      * @param <R> the type of the result returned by the callable or the supplier
      * @param cmd the callable command to execute that may throw a checked exception
-     * @param predicate the predicate that tests whether to handle the exception or rethrow it
+     * @param predicate the predicate that tests whether to handle the exception or rethrow it; it receives the
+     *        exception exactly as thrown, including any {@code ExecutionException}/{@code InvocationTargetException}/
+     *        {@code UndeclaredThrowableException} wrapper - only the rethrow path peels those off
      * @param supplier the supplier that provides an alternative result if the predicate returns true
      * @return the result returned by the callable command if successful, or the result from the supplier if an exception occurs and the predicate returns true
-     * @throws RuntimeException if the command throws an exception and the predicate returns false
      * @throws IllegalArgumentException if any of {@code cmd}, {@code predicate}, {@code supplier} is {@code null}.
+     * @throws RuntimeException if the command throws an exception and the predicate returns false
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Predicate, java.util.function.Supplier)
      */
     @Beta
     public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
-            final java.util.function.Supplier<R> supplier) throws IllegalArgumentException {
+            final java.util.function.Supplier<R> supplier) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(predicate, cs.predicate);
         N.checkArgNotNull(supplier, cs.supplier);
@@ -579,6 +625,7 @@ public final class Throwables {
      * If the command throws an exception and the predicate returns {@code true} for that exception,
      * the specified default value will be returned. If the predicate returns {@code false},
      * the exception will be rethrown, wrapped in a RuntimeException if it is a checked exception.
+     * An {@link Error} is passed to the predicate like any other throwable.
      *
      * <p>Combines predicate-based exception filtering with a simple default value.</p>
      * If the command throws {@link InterruptedException}, the current thread is re-interrupted before
@@ -607,16 +654,18 @@ public final class Throwables {
      *
      * @param <R> the type of the result returned by the callable or the default value
      * @param cmd the callable command to execute that may throw a checked exception
-     * @param predicate the predicate that tests whether to handle the exception or rethrow it
+     * @param predicate the predicate that tests whether to handle the exception or rethrow it; it receives the
+     *        exception exactly as thrown, including any {@code ExecutionException}/{@code InvocationTargetException}/
+     *        {@code UndeclaredThrowableException} wrapper - only the rethrow path peels those off
      * @param defaultValue the default value to return if the predicate returns true
      * @return the result returned by the callable command if successful, or the default value if an exception occurs and the predicate returns true
-     * @throws RuntimeException if the command throws an exception and the predicate returns false
      * @throws IllegalArgumentException if any of {@code cmd}, {@code predicate} is {@code null}.
+     * @throws RuntimeException if the command throws an exception and the predicate returns false
      * @see #call(Throwables.Callable, java.util.function.Predicate, java.util.function.Supplier)
      */
     @Beta
     public static <R extends Comparable<? super R>> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd,
-            final java.util.function.Predicate<? super Throwable> predicate, final R defaultValue) throws IllegalArgumentException {
+            final java.util.function.Predicate<? super Throwable> predicate, final R defaultValue) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(cmd, cs.cmd);
         N.checkArgNotNull(predicate, cs.predicate);
 
@@ -647,7 +696,7 @@ public final class Throwables {
     }
 
     /**
-     * Shared stateless instance used by all empty iterators.
+     * Shared instance used by all empty iterators; it holds no user data and its inherited close flag releases nothing.
      */
     @SuppressWarnings("rawtypes")
     private static final Throwables.Iterator EMPTY = new Throwables.Iterator() {
@@ -673,12 +722,32 @@ public final class Throwables {
      * resource-backed iterators. Closing an iterator returned by
      * {@link #filter(Throwables.Predicate)} or {@link #map(Throwables.Function)} closes its source.
      *
+     * <p><b>Note on the factory methods' exception bound:</b> this class is declared with
+     * {@code <E extends Throwable>}, but {@link #of(Object...)}, {@link #of(Object[], int, int)},
+     * {@link #of(java.util.Iterator)}, {@link #defer(java.util.function.Supplier)} and the two {@code concat}
+     * overloads bound {@code E} to {@link Exception} instead. That is deliberate: because a factory call used as
+     * the <i>receiver</i> of a chained call is a standalone expression, {@code E} is inferred from the bound alone
+     * there, so widening the bound would silently change {@code Throwables.Iterator.of(x).filter(p)} from
+     * {@code Iterator<X, Exception>} to {@code Iterator<X, Throwable>} and break existing call sites. Use
+     * {@link #empty()}, {@link #just(Object)} or {@link #of(Iterable)} when {@code E} must be {@code Throwable}.</p>
+     *
      * @param <T> the type of elements in the iterator
      * @param <E> the type of exception that may be thrown
      * @see ObjIterator
      */
-    @SuppressWarnings({ "java:S6548" })
+    @SuppressWarnings("java:S6548")
     public abstract static class Iterator<T, E extends Throwable> {
+        /**
+         * Whether a failed bulk advance leaves the logical output position unchanged.
+         * Internal arithmetic-only iterators opt in so slicing can retain bulk advancement;
+         * other iterators are advanced one successfully returned element at a time.
+         *
+         * @return whether {@link #advance(long)} is failure-atomic
+         * @throws E if determining the capability requires initialization that fails
+         */
+        boolean supportsFailureAtomicAdvance() throws E {
+            return false;
+        }
 
         /**
          * Constructor for subclasses.
@@ -691,10 +760,10 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, IOException> empty = Iterator.empty();
+         * Throwables.Iterator<String, IOException> empty = Throwables.Iterator.empty();
          * assert !empty.hasNext();  // always returns false
          *
-         * Iterator<Integer, RuntimeException> noItems = Iterator.empty();
+         * Throwables.Iterator<Integer, RuntimeException> noItems = Throwables.Iterator.empty();
          * }</pre>
          *
          * @param <T> the type of elements that would be returned by this iterator
@@ -710,11 +779,11 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, IOException> single = Iterator.just("hello");
+         * Throwables.Iterator<String, IOException> single = Throwables.Iterator.just("hello");
          * String value = single.next();   // returns "hello"
          * assert !single.hasNext();       // returns false (iterator exhausted)
          *
-         * Iterator<Integer, RuntimeException> one = Iterator.just(42);
+         * Throwables.Iterator<Integer, RuntimeException> one = Throwables.Iterator.just(42);
          * }</pre>
          *
          * @param <T> the type of the element
@@ -749,11 +818,11 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b", "c");
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("a", "b", "c");
          * String first = iter.next(); // returns "a"
          *
          * String[] data = {"x", "y", "z"};
-         * Iterator<String, RuntimeException> iter2 = Iterator.of(data);
+         * Throwables.Iterator<String, RuntimeException> iter2 = Throwables.Iterator.of(data);
          * }</pre>
          *
          * @param <T> the type of elements in the array
@@ -772,7 +841,7 @@ public final class Throwables {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * String[] data = {"a", "b", "c", "d", "e"};
-         * Iterator<String, RuntimeException> iter = Iterator.of(data, 1, 4);
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of(data, 1, 4);
          * iter.next();   // returns "b"
          * iter.next();   // returns "c"
          * iter.next();   // returns "d"
@@ -798,6 +867,11 @@ public final class Throwables {
 
             return new Throwables.Iterator<>() {
                 private int cursor = fromIndex;
+
+                @Override
+                boolean supportsFailureAtomicAdvance() {
+                    return true;
+                }
 
                 @Override
                 public boolean hasNext() {
@@ -843,7 +917,7 @@ public final class Throwables {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * List<String> list = Arrays.asList("a", "b", "c");
-         * Iterator<String, RuntimeException> iter = Iterator.of(list);
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of(list);
          * iter.next(); // returns "a"
          * }</pre>
          *
@@ -878,7 +952,7 @@ public final class Throwables {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * java.util.Iterator<String> utilIter = Arrays.asList("x", "y").iterator();
-         * Iterator<String, RuntimeException> iter = Iterator.of(utilIter);
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of(utilIter);
          * iter.next(); // returns "x"
          * }</pre>
          *
@@ -914,19 +988,25 @@ public final class Throwables {
          * {@code advance(long)}, or {@code count()}. A non-positive advance remains a no-op and does not initialize it.
          * The underlying iterator is only closed if it has been initialized when {@code closeResource()} is called.
          * If creation fails with an unchecked exception, that exception is propagated and creation is retried on the next access.
-         * Closing before initialization releases the supplier without invoking it; subsequent access
-         * is rejected and can never acquire a resource after this wrapper has been closed.
+         * The returned iterator throws {@link IllegalStateException} on access if {@code iteratorSupplier}
+         * returns {@code null}; this factory does not invoke the supplier.
+         * Closing before initialization releases the supplier without invoking it, so a closed wrapper can never
+         * acquire a resource. After {@code closeResource()} the wrapper reports itself exhausted, exactly as
+         * {@link #concat(Collection)}, {@link #filter(Throwables.Predicate)} and {@link #map(Throwables.Function)}
+         * do: {@code hasNext()} returns {@code false}, {@code next()} throws {@link NoSuchElementException},
+         * {@code advance(long)} is a no-op and {@code count()} returns {@code 0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, IOException> iter = Iterator.defer(() ->
-         *         Iterator.ofLines(Throwables.call(() -> new FileReader("large-file.txt"))));
+         * Throwables.Iterator<String, IOException> iter = Throwables.Iterator.defer(() ->
+         *         Throwables.Iterator.ofLines(Throwables.call(() -> new FileReader("large-file.txt"))));
          * try {
          *     // The file is not opened until this first access.
          *     while (iter.hasNext()) {
          *         System.out.println(iter.next());
          *     }
          * } finally {
+         *     // See ofLines(Reader) for closing without discarding the exception that ended the loop.
          *     iter.closeResource();
          * }
          * }</pre>
@@ -936,8 +1016,6 @@ public final class Throwables {
          * @param iteratorSupplier a Supplier that provides the Throwables.Iterator when needed.
          * @return a Throwables.Iterator that is initialized on the first call to {@code hasNext()}, {@code next()},
          *         a positive {@code advance(long)}, or {@code count()}
-         * @throws IllegalStateException from the returned iterator (not from this method) if it is accessed after
-         *         being closed, or if {@code iteratorSupplier} returns {@code null} when it is first accessed
          * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
          */
         public static <T, E extends Exception> Throwables.Iterator<T, E> defer(final java.util.function.Supplier<Throwables.Iterator<T, E>> iteratorSupplier)
@@ -951,7 +1029,21 @@ public final class Throwables {
                 private boolean isClosed = false;
 
                 @Override
+                boolean supportsFailureAtomicAdvance() throws E {
+                    if (isClosed) {
+                        return false;
+                    }
+
+                    init();
+                    return iter.supportsFailureAtomicAdvance();
+                }
+
+                @Override
                 public boolean hasNext() throws E {
+                    if (isClosed) {
+                        return false;
+                    }
+
                     init();
 
                     return iter.hasNext();
@@ -959,6 +1051,10 @@ public final class Throwables {
 
                 @Override
                 public T next() throws E {
+                    if (isClosed) {
+                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
                     init();
 
                     return iter.next();
@@ -966,7 +1062,7 @@ public final class Throwables {
 
                 @Override
                 public void advance(final long n) throws E {
-                    if (n <= 0) {
+                    if (n <= 0 || isClosed) {
                         return;
                     }
 
@@ -977,6 +1073,10 @@ public final class Throwables {
 
                 @Override
                 public long count() throws E {
+                    if (isClosed) {
+                        return 0;
+                    }
+
                     init();
 
                     return iter.count();
@@ -998,7 +1098,10 @@ public final class Throwables {
 
                 private void init() {
                     if (isClosed) {
-                        throw new IllegalStateException("Iterator is already closed");
+                        // Every caller short-circuits on isClosed before reaching here; this is a safety net
+                        // guaranteeing that a closed wrapper never invokes the supplier and so can never
+                        // acquire a resource that nothing would close.
+                        return;
                     }
 
                     if (!isInitialized) {
@@ -1022,9 +1125,9 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, RuntimeException> iter1 = Iterator.of("a", "b");
-         * Iterator<String, RuntimeException> iter2 = Iterator.of("c", "d");
-         * Iterator<String, RuntimeException> combined = Iterator.concat(iter1, iter2);
+         * Throwables.Iterator<String, RuntimeException> iter1 = Throwables.Iterator.of("a", "b");
+         * Throwables.Iterator<String, RuntimeException> iter2 = Throwables.Iterator.of("c", "d");
+         * Throwables.Iterator<String, RuntimeException> combined = Throwables.Iterator.concat(iter1, iter2);
          * combined.next();   // returns "a"
          * combined.next();   // returns "b"
          * combined.next();   // returns "c"
@@ -1052,11 +1155,11 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * List<Iterator<String, RuntimeException>> iterators = Arrays.asList(
-         *     Iterator.of("a", "b"),
-         *     Iterator.of("c", "d")
+         * List<Throwables.Iterator<String, RuntimeException>> iterators = Arrays.asList(
+         *     Throwables.Iterator.of("a", "b"),
+         *     Throwables.Iterator.of("c", "d")
          * );
-         * Iterator<String, RuntimeException> combined = Iterator.concat(iterators);
+         * Throwables.Iterator<String, RuntimeException> combined = Throwables.Iterator.concat(iterators);
          * combined.next(); // returns "a"
          * }</pre>
          *
@@ -1137,21 +1240,31 @@ public final class Throwables {
          *
          * <p><b>Resource Management:</b> When {@code closeResource()} is called, it will close the underlying
          * BufferedReader (and thus the original Reader). Because this iterator does not implement
-         * {@code AutoCloseable}, close it explicitly (for example in a {@code finally} block) to ensure
-         * proper resource cleanup. Because this iterator's {@code closeResource()} method does not declare
-         * checked exceptions, a reader close failure is propagated as a runtime exception rather than
-         * silently discarded.
+         * {@code AutoCloseable}, close it explicitly to ensure proper resource cleanup. Because this
+         * iterator's {@code closeResource()} method does not declare checked exceptions, a reader close
+         * failure is propagated as a runtime exception rather than silently discarded. Do <i>not</i> close it
+         * in a bare {@code finally} block: a throw from that {@code finally} would replace the exception that
+         * ended the iteration. Use the shape below instead — the same one {@code try}-with-resources compiles
+         * to — which suppresses a close failure into the primary exception.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, IOException> lines = Iterator.ofLines(new FileReader("file.txt"));
+         * Throwables.Iterator<String, IOException> lines = Throwables.Iterator.ofLines(new FileReader("file.txt"));
          * try {
          *     while (lines.hasNext()) {
          *         System.out.println(lines.next());
          *     }
-         * } finally {
-         *     lines.closeResource();
+         * } catch (Throwable primary) {
+         *     try {
+         *         lines.closeResource();
+         *     } catch (Throwable closeFailure) {
+         *         primary.addSuppressed(closeFailure);
+         *     }
+         *
+         *     throw primary;
          * }
+         *
+         * lines.closeResource();   // normal completion: a close failure is the only exception, so it stands
          * }</pre>
          *
          * @param reader the Reader to read lines from
@@ -1216,17 +1329,18 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<Integer, RuntimeException> iter = Iterator.of(1, 2);
+         * Throwables.Iterator<Integer, RuntimeException> iter = Throwables.Iterator.of(1, 2);
          * iter.hasNext(); // returns true
          * iter.next();
          * iter.next();
          * iter.hasNext();               // returns false
          *
-         * Iterator.empty().hasNext();   // returns false
+         * Throwables.Iterator<String, RuntimeException> none = Throwables.Iterator.empty();
+         * none.hasNext();   // returns false
          * }</pre>
          *
          * @return {@code true} if there are more elements, {@code false} otherwise
-         * @throws E if an exception occurs while checking for more elements
+         * @throws E if the iterator implementation throws while determining whether another element is available
          */
         public abstract boolean hasNext() throws E;
 
@@ -1235,17 +1349,17 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b");
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("a", "b");
          * iter.next();   // returns "a"
          * iter.next();   // returns "b"
          * iter.next();   // throws NoSuchElementException (no more elements)
          * }</pre>
          *
          * @return the next element in the iteration
-         * @throws E if an exception occurs while retrieving the next element
          * @throws NoSuchElementException if there are no more elements
+         * @throws E if the iterator implementation throws while retrieving the next element
          */
-        public abstract T next() throws E;
+        public abstract T next() throws NoSuchElementException, E;
 
         /**
          * Advances the iterator by skipping the specified number of elements.
@@ -1254,18 +1368,20 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<Integer, RuntimeException> iter = Iterator.of(1, 2, 3, 4, 5);
+         * Throwables.Iterator<Integer, RuntimeException> iter = Throwables.Iterator.of(1, 2, 3, 4, 5);
          * iter.advance(2);                   // skips 1 and 2
          * iter.next();                       // returns 3
          *
          * iter.advance(10);                  // skips past the end (only 4, 5 remained)
          * iter.hasNext();                    // returns false
          *
-         * Iterator.of(1, 2, 3).advance(0);   // no-op; next() still returns 1
+         * Throwables.Iterator<Integer, RuntimeException> unmoved = Throwables.Iterator.of(1, 2, 3);
+         * unmoved.advance(0);   // no-op
+         * unmoved.next();       // still returns 1
          * }</pre>
          *
          * @param n the number of elements to skip; no-op if zero or negative
-         * @throws E if an exception occurs while advancing the iterator
+         * @throws E if {@code n} is positive and checking for or retrieving an element to skip throws
          */
         public void advance(long n) throws E {
             if (n <= 0) {
@@ -1283,16 +1399,16 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<Integer, RuntimeException> iter = Iterator.of(10, 20, 30);
+         * Throwables.Iterator<Integer, RuntimeException> iter = Throwables.Iterator.of(10, 20, 30);
          * iter.count(); // returns 3 (and consumes all elements)
          *
-         * Iterator<Integer, RuntimeException> iter2 = Iterator.of(10, 20, 30);
+         * Throwables.Iterator<Integer, RuntimeException> iter2 = Throwables.Iterator.of(10, 20, 30);
          * iter2.next();    // consumes 10
          * iter2.count();   // returns 2 (counts only the remaining elements)
          * }</pre>
          *
          * @return the number of remaining elements
-         * @throws E if an exception occurs while counting the elements
+         * @throws E if checking for or retrieving a remaining element while counting throws
          */
         public long count() throws E {
             long result = 0;
@@ -1316,7 +1432,7 @@ public final class Throwables {
          *
          * @throws RuntimeException if releasing an underlying resource fails with a checked exception
          */
-        public final void closeResource() {
+        public final void closeResource() throws RuntimeException {
             if (isClosed) {
                 return;
             }
@@ -1343,8 +1459,8 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<Integer, RuntimeException> iter = Iterator.of(1, 2, 3, 4, 5);
-         * Iterator<Integer, RuntimeException> even = iter.filter(x -> x % 2 == 0);
+         * Throwables.Iterator<Integer, RuntimeException> iter = Throwables.Iterator.of(1, 2, 3, 4, 5);
+         * Throwables.Iterator<Integer, RuntimeException> even = iter.filter(x -> x % 2 == 0);
          * even.next();   // returns 2
          * even.next();   // returns 4
          * }</pre>
@@ -1420,8 +1536,8 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, RuntimeException> iter = Iterator.of("1", "2", "3");
-         * Iterator<Integer, RuntimeException> ints = iter.map(Integer::parseInt);
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("1", "2", "3");
+         * Throwables.Iterator<Integer, RuntimeException> ints = iter.map(Integer::parseInt);
          * ints.next();   // returns 1
          * ints.next();   // returns 2
          * }</pre>
@@ -1474,12 +1590,12 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b", "c");
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("a", "b", "c");
          * Nullable<String> first = iter.first(); // returns Nullable.of("a")
          * }</pre>
          *
          * @return a {@code Nullable} containing the first element if present, otherwise an empty Nullable
-         * @throws E if an exception occurs while retrieving the first element
+         * @throws E if checking for or retrieving the first remaining element throws
          */
         public Nullable<T> first() throws E {
             if (hasNext()) {
@@ -1495,12 +1611,12 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, RuntimeException> iter = Iterator.of(null, "b", "c");
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of(null, "b", "c");
          * u.Optional<String> first = iter.firstNonNull(); // returns Optional.of("b")
          * }</pre>
          *
          * @return an Optional containing the first {@code non-null} element if present, otherwise an empty Optional
-         * @throws E if an exception occurs while searching for a {@code non-null} element
+         * @throws E if checking for or retrieving an element while searching for the first non-null value throws
          */
         public u.Optional<T> firstNonNull() throws E {
             T next = null;
@@ -1523,12 +1639,12 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b", "c");
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("a", "b", "c");
          * Nullable<String> last = iter.last(); // returns Nullable.of("c")
          * }</pre>
          *
          * @return a {@code Nullable} containing the last element if present, otherwise an empty Nullable
-         * @throws E if an exception occurs while iterating through the elements
+         * @throws E if checking for or retrieving a remaining element while finding the last value throws
          */
         public Nullable<T> last() throws E {
             if (hasNext()) {
@@ -1550,12 +1666,12 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b");
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("a", "b");
          * Object[] arr = iter.toArray(); // returns ["a", "b"]
          * }</pre>
          *
          * @return an array containing all remaining elements
-         * @throws E if an exception occurs while iterating through the elements
+         * @throws E if checking for or retrieving a remaining element throws
          */
         public Object[] toArray() throws E {
             return toArray(N.EMPTY_OBJECT_ARRAY);
@@ -1569,7 +1685,7 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b");
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("a", "b");
          * String[] arr = iter.toArray(new String[0]); // returns ["a", "b"]
          * }</pre>
          *
@@ -1578,9 +1694,9 @@ public final class Throwables {
          * @return an array containing all remaining elements
          * @throws IllegalArgumentException if {@code a} is {@code null}; validation occurs before this iterator is
          *         consumed.
-         * @throws E if an exception occurs while iterating through the elements
+         * @throws E if checking for or retrieving a remaining element throws
          */
-        public <A> A[] toArray(final A[] a) throws E {
+        public <A> A[] toArray(final A[] a) throws IllegalArgumentException, E {
             N.checkArgNotNull(a, cs.a);
 
             return toList().toArray(a);
@@ -1592,12 +1708,12 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b", "c");
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("a", "b", "c");
          * List<String> list = iter.toList(); // returns ["a", "b", "c"]
          * }</pre>
          *
          * @return a List containing all remaining elements
-         * @throws E if an exception occurs while iterating through the elements
+         * @throws E if checking for or retrieving a remaining element throws
          */
         public List<T> toList() throws E {
             final List<T> list = new ArrayList<>();
@@ -1620,16 +1736,16 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Iterator<String, RuntimeException> iter = Iterator.of("a", "b", "c");
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("a", "b", "c");
          * iter.forEachRemaining(System.out::println); // prints a b c
          * }</pre>
          *
          * @param action the action to be performed for each element
-         * @throws E if an exception occurs while iterating through the elements
          * @throws IllegalArgumentException if {@code action} is {@code null}.
+         * @throws E if checking for or retrieving a remaining element throws
          * @see #foreachRemaining(Throwables.Consumer)
          */
-        public void forEachRemaining(final java.util.function.Consumer<? super T> action) throws E, IllegalArgumentException {
+        public void forEachRemaining(final java.util.function.Consumer<? super T> action) throws IllegalArgumentException, E {
             N.checkArgNotNull(action, cs.action); // NOSONAR
 
             while (hasNext()) {
@@ -1649,24 +1765,24 @@ public final class Throwables {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * List<String> collected = new ArrayList<>();
-         * Iterator<String, RuntimeException> iter = Iterator.of("x", "y", "z");
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("x", "y", "z");
          * iter.foreachRemaining(collected::add); // collected becomes [x, y, z]
          *
          * List<String> rest = new ArrayList<>();
-         * Iterator<String, RuntimeException> iter2 = Iterator.of("x", "y", "z");
+         * Throwables.Iterator<String, RuntimeException> iter2 = Throwables.Iterator.of("x", "y", "z");
          * iter2.next();                        // consumes "x"
          * iter2.foreachRemaining(rest::add);   // rest becomes [y, z]
          * }</pre>
          *
          * @param <E2> the type of exception that the action may throw
          * @param action the action to be performed for each element
-         * @throws E if an exception occurs while iterating through the elements
-         * @throws E2 if the action throws an exception
          * @throws IllegalArgumentException if {@code action} is {@code null}.
+         * @throws E if checking for or retrieving a remaining element throws
+         * @throws E2 if the action throws an exception
          * @see #forEachRemaining(java.util.function.Consumer)
          * @see #foreachIndexed(Throwables.IntObjConsumer)
          */
-        public <E2 extends Throwable> void foreachRemaining(final Throwables.Consumer<? super T, E2> action) throws E, E2, IllegalArgumentException {
+        public <E2 extends Throwable> void foreachRemaining(final Throwables.Consumer<? super T, E2> action) throws IllegalArgumentException, E, E2 {
             N.checkArgNotNull(action, cs.action); // NOSONAR
 
             while (hasNext()) {
@@ -1686,27 +1802,32 @@ public final class Throwables {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * List<String> collected = new ArrayList<>();
-         * Iterator<String, RuntimeException> iter = Iterator.of("x", "y", "z");
+         * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("x", "y", "z");
          * // action receives (index, element): the int index comes first
          * iter.foreachIndexed((idx, val) -> collected.add(idx + "=" + val)); // collected becomes [0=x, 1=y, 2=z]
          * }</pre>
          *
          * @param <E2> the type of exception that the action may throw
          * @param action the action to be performed for each element with its index
-         * @throws E if an exception occurs while iterating through the elements
-         * @throws E2 if the action throws an exception
-         * @throws IllegalStateException if the iterator has more than {@code Integer.MAX_VALUE} elements
          * @throws IllegalArgumentException if {@code action} is {@code null}.
+         * @throws E if checking for or retrieving the next element fails
+         * @throws IllegalStateException if the iterator holds more elements than an {@code int} index can address,
+         *         that is more than {@code Integer.MAX_VALUE + 1} of them (indices {@code 0 .. Integer.MAX_VALUE}
+         *         are all delivered first). {@link Seq#forEachIndexed(Throwables.IntObjConsumer)} enforces the same
+         *         limit but reports it as an {@link ArithmeticException}
+         * @throws E2 if the action throws an exception
          * @see #foreachRemaining(Throwables.Consumer)
+         * @see Seq#forEachIndexed(Throwables.IntObjConsumer)
          */
-        public <E2 extends Throwable> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E2> action) throws E, E2, IllegalArgumentException {
+        public <E2 extends Throwable> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E2> action)
+                throws IllegalArgumentException, E, IllegalStateException, E2 {
             N.checkArgNotNull(action, cs.action);
 
             int idx = 0;
 
             while (hasNext()) {
                 if (idx < 0) {
-                    throw new IllegalStateException("Index overflow: iterator has more than Integer.MAX_VALUE elements");
+                    throw new IllegalStateException("Index overflow: iterator has more elements than an int index can address");
                 }
                 action.accept(idx++, next());
             }
@@ -1727,15 +1848,16 @@ public final class Throwables {
         /**
          * Executes this runnable operation.
          *
-         * @throws E if an exception occurs during execution
+         * @throws E if the task implementation throws while executing its action
          */
         void run() throws E;
 
         /**
          * Returns a {@code com.landawn.abacus.util.function.Runnable} (a {@code java.lang.Runnable}) that wraps this Throwables.Runnable.
-         * Any checked exceptions thrown by this runnable will be wrapped in a RuntimeException.
+         * Any checked exception - and any {@link Error} - thrown by this runnable is converted to a RuntimeException;
+         * a RuntimeException is normally rethrown as the same instance. See the class-level &quot;Unchecked adapter behavior&quot; note.
          *
-         * @return a {@code com.landawn.abacus.util.function.Runnable} that executes this runnable and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.Runnable} that executes this runnable and converts any thrown exception or error to a RuntimeException
          */
         @Beta
         default com.landawn.abacus.util.function.Runnable unchecked() {
@@ -1764,15 +1886,16 @@ public final class Throwables {
          * Computes a result.
          *
          * @return the computed result
-         * @throws E if an exception occurs during computation
+         * @throws E if the callable implementation throws while computing its result
          */
         R call() throws E;
 
         /**
          * Returns a {@code com.landawn.abacus.util.function.Callable} (a {@code java.util.concurrent.Callable}) that wraps this Throwables.Callable.
-         * Any checked exceptions thrown by this callable will be wrapped in a RuntimeException.
+         * Any checked exception - and any {@link Error} - thrown by this callable is converted to a RuntimeException;
+         * a RuntimeException is normally rethrown as the same instance. See the class-level &quot;Unchecked adapter behavior&quot; note.
          *
-         * @return a {@code com.landawn.abacus.util.function.Callable} that executes this callable and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.Callable} that executes this callable and converts any thrown exception or error to a RuntimeException
          */
         @Beta
         default com.landawn.abacus.util.function.Callable<R> unchecked() {
@@ -1801,15 +1924,16 @@ public final class Throwables {
          * Gets a result.
          *
          * @return the supplied value
-         * @throws E if an exception occurs while getting the result
+         * @throws E if the supplier implementation throws while producing the requested value
          */
         T get() throws E;
 
         /**
          * Returns a {@code com.landawn.abacus.util.function.Supplier} (a {@code java.util.function.Supplier}) that wraps this Throwables.Supplier.
-         * Any checked exceptions thrown by this supplier will be wrapped in a RuntimeException.
+         * Any checked exception - and any {@link Error} - thrown by this supplier is converted to a RuntimeException;
+         * a RuntimeException is normally rethrown as the same instance. See the class-level &quot;Unchecked adapter behavior&quot; note.
          *
-         * @return a {@code com.landawn.abacus.util.function.Supplier} that executes this supplier and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.Supplier} that executes this supplier and converts any thrown exception or error to a RuntimeException
          */
         @Beta
         default com.landawn.abacus.util.function.Supplier<T> unchecked() {
@@ -1844,7 +1968,7 @@ public final class Throwables {
          * }</pre>
          *
          * @return the supplied boolean result
-         * @throws E if an exception occurs while getting the result
+         * @throws E if the supplier implementation throws while producing the requested value
          */
         boolean getAsBoolean() throws E; // NOSONAR
     }
@@ -1863,7 +1987,7 @@ public final class Throwables {
          * Gets a char result.
          *
          * @return the char result
-         * @throws E if an exception occurs while getting the result
+         * @throws E if the supplier implementation throws while producing the requested value
          */
         char getAsChar() throws E;
     }
@@ -1882,7 +2006,7 @@ public final class Throwables {
          * Gets a byte result.
          *
          * @return the byte result
-         * @throws E if an exception occurs while getting the result
+         * @throws E if the supplier implementation throws while producing the requested value
          */
         byte getAsByte() throws E;
     }
@@ -1901,7 +2025,7 @@ public final class Throwables {
          * Gets a short result.
          *
          * @return the short result
-         * @throws E if an exception occurs while getting the result
+         * @throws E if the supplier implementation throws while producing the requested value
          */
         short getAsShort() throws E;
     }
@@ -1920,7 +2044,7 @@ public final class Throwables {
          * Gets an int result.
          *
          * @return the int result
-         * @throws E if an exception occurs while getting the result
+         * @throws E if the supplier implementation throws while producing the requested value
          */
         int getAsInt() throws E;
     }
@@ -1939,7 +2063,7 @@ public final class Throwables {
          * Gets a long result.
          *
          * @return the long result
-         * @throws E if an exception occurs while getting the result
+         * @throws E if the supplier implementation throws while producing the requested value
          */
         long getAsLong() throws E;
     }
@@ -1958,7 +2082,7 @@ public final class Throwables {
          * Gets a float result.
          *
          * @return the float result
-         * @throws E if an exception occurs while getting the result
+         * @throws E if the supplier implementation throws while producing the requested value
          */
         float getAsFloat() throws E;
     }
@@ -1977,7 +2101,7 @@ public final class Throwables {
          * Gets a double result.
          *
          * @return the double result
-         * @throws E if an exception occurs while getting the result
+         * @throws E if the supplier implementation throws while producing the requested value
          */
         double getAsDouble() throws E;
     }
@@ -1999,7 +2123,7 @@ public final class Throwables {
          *
          * @param t the input argument
          * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
-         * @throws E if an exception occurs during evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}
          */
         boolean test(T t) throws E;
 
@@ -2014,9 +2138,10 @@ public final class Throwables {
 
         /**
          * Returns a {@code com.landawn.abacus.util.function.Predicate} (a {@code java.util.function.Predicate}) that wraps this Throwables.Predicate.
-         * Any checked exceptions thrown by this predicate will be wrapped in a RuntimeException.
+         * Any checked exception - and any {@link Error} - thrown by this predicate is converted to a RuntimeException;
+         * a RuntimeException is normally rethrown as the same instance. See the class-level &quot;Unchecked adapter behavior&quot; note.
          *
-         * @return a {@code com.landawn.abacus.util.function.Predicate} that executes this predicate and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.Predicate} that executes this predicate and converts any thrown exception or error to a RuntimeException
          */
         @Beta
         default com.landawn.abacus.util.function.Predicate<T> unchecked() {
@@ -2049,15 +2174,16 @@ public final class Throwables {
          * @param t the first input argument
          * @param u the second input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an exception occurs during evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code u}
          */
         boolean test(T t, U u) throws E;
 
         /**
          * Returns a {@code com.landawn.abacus.util.function.BiPredicate} (a {@code java.util.function.BiPredicate}) that wraps this Throwables.BiPredicate.
-         * Any checked exceptions thrown by this predicate will be wrapped in a RuntimeException.
+         * Any checked exception - and any {@link Error} - thrown by this predicate is converted to a RuntimeException;
+         * a RuntimeException is normally rethrown as the same instance. See the class-level &quot;Unchecked adapter behavior&quot; note.
          *
-         * @return a {@code com.landawn.abacus.util.function.BiPredicate} that executes this predicate and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.BiPredicate} that executes this predicate and converts any thrown exception or error to a RuntimeException
          */
         @Beta
         default com.landawn.abacus.util.function.BiPredicate<T, U> unchecked() {
@@ -2090,7 +2216,7 @@ public final class Throwables {
          * @param b the second input argument
          * @param c the third input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an exception occurs during evaluation
+         * @throws E if the predicate implementation throws while testing {@code a}, {@code b}, {@code c}
          */
         boolean test(A a, B b, C c) throws E;
     }
@@ -2116,7 +2242,7 @@ public final class Throwables {
          * @param c the third input argument
          * @param d the fourth input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an exception occurs during evaluation
+         * @throws E if the predicate implementation throws while testing {@code a}, {@code b}, {@code c}, {@code d}
          */
         boolean test(A a, B b, C c, D d) throws E;
     }
@@ -2139,15 +2265,16 @@ public final class Throwables {
          *
          * @param t the function argument
          * @return the function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code t}
          */
         R apply(T t) throws E;
 
         /**
          * Returns a {@code com.landawn.abacus.util.function.Function} (a {@code java.util.function.Function}) that wraps this Throwables.Function.
-         * Any checked exceptions thrown by this function will be wrapped in a RuntimeException.
+         * Any checked exception - and any {@link Error} - thrown by this function is converted to a RuntimeException;
+         * a RuntimeException is normally rethrown as the same instance. See the class-level &quot;Unchecked adapter behavior&quot; note.
          *
-         * @return a {@code com.landawn.abacus.util.function.Function} that executes this function and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.Function} that executes this function and converts any thrown exception or error to a RuntimeException
          */
         @Beta
         default com.landawn.abacus.util.function.Function<T, R> unchecked() {
@@ -2181,15 +2308,16 @@ public final class Throwables {
          * @param t the first function argument
          * @param u the second function argument
          * @return the function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code u}
          */
         R apply(T t, U u) throws E;
 
         /**
          * Returns a {@code com.landawn.abacus.util.function.BiFunction} (a {@code java.util.function.BiFunction}) that wraps this Throwables.BiFunction.
-         * Any checked exceptions thrown by this function will be wrapped in a RuntimeException.
+         * Any checked exception - and any {@link Error} - thrown by this function is converted to a RuntimeException;
+         * a RuntimeException is normally rethrown as the same instance. See the class-level &quot;Unchecked adapter behavior&quot; note.
          *
-         * @return a {@code com.landawn.abacus.util.function.BiFunction} that executes this function and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.BiFunction} that executes this function and converts any thrown exception or error to a RuntimeException
          */
         @Beta
         default com.landawn.abacus.util.function.BiFunction<T, U, R> unchecked() {
@@ -2224,7 +2352,7 @@ public final class Throwables {
          * @param b the second function argument
          * @param c the third function argument
          * @return the function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         R apply(A a, B b, C c) throws E;
     }
@@ -2252,7 +2380,7 @@ public final class Throwables {
          * @param c the third function argument
          * @param d the fourth function argument
          * @return the function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}, {@code d}
          */
         R apply(A a, B b, C c, D d) throws E;
     }
@@ -2273,15 +2401,16 @@ public final class Throwables {
          * Performs this operation on the given argument.
          *
          * @param t the input argument
-         * @throws E if an exception occurs during the operation
+         * @throws E if the consumer implementation throws while processing {@code t}
          */
         void accept(T t) throws E;
 
         /**
          * Returns a {@code com.landawn.abacus.util.function.Consumer} (a {@code java.util.function.Consumer}) that wraps this Throwables.Consumer.
-         * Any checked exceptions thrown by this consumer will be wrapped in a RuntimeException.
+         * Any checked exception - and any {@link Error} - thrown by this consumer is converted to a RuntimeException;
+         * a RuntimeException is normally rethrown as the same instance. See the class-level &quot;Unchecked adapter behavior&quot; note.
          *
-         * @return a {@code com.landawn.abacus.util.function.Consumer} that executes this consumer and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.Consumer} that executes this consumer and converts any thrown exception or error to a RuntimeException
          */
         @Beta
         default com.landawn.abacus.util.function.Consumer<T> unchecked() {
@@ -2313,15 +2442,16 @@ public final class Throwables {
          *
          * @param t the first input argument
          * @param u the second input argument
-         * @throws E if an exception occurs during the operation
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code u}
          */
         void accept(T t, U u) throws E;
 
         /**
          * Returns a {@code com.landawn.abacus.util.function.BiConsumer} (a {@code java.util.function.BiConsumer}) that wraps this Throwables.BiConsumer.
-         * Any checked exceptions thrown by this consumer will be wrapped in a RuntimeException.
+         * Any checked exception - and any {@link Error} - thrown by this consumer is converted to a RuntimeException;
+         * a RuntimeException is normally rethrown as the same instance. See the class-level &quot;Unchecked adapter behavior&quot; note.
          *
-         * @return a {@code com.landawn.abacus.util.function.BiConsumer} that executes this consumer and wraps any checked exceptions
+         * @return a {@code com.landawn.abacus.util.function.BiConsumer} that executes this consumer and converts any thrown exception or error to a RuntimeException
          */
         @Beta
         default com.landawn.abacus.util.function.BiConsumer<T, U> unchecked() {
@@ -2354,7 +2484,7 @@ public final class Throwables {
          * @param a the first input argument
          * @param b the second input argument
          * @param c the third input argument
-         * @throws E if an exception occurs during the operation
+         * @throws E if the consumer implementation throws while processing {@code a}, {@code b}, {@code c}
          */
         void accept(A a, B b, C c) throws E;
     }
@@ -2380,7 +2510,7 @@ public final class Throwables {
          * @param b the second input argument
          * @param c the third input argument
          * @param d the fourth input argument
-         * @throws E if an exception occurs during the operation
+         * @throws E if the consumer implementation throws while processing {@code a}, {@code b}, {@code c}, {@code d}
          */
         void accept(A a, B b, C c, D d) throws E;
     }
@@ -2399,7 +2529,7 @@ public final class Throwables {
          * Performs this operation on the given boolean argument.
          *
          * @param value the boolean input argument
-         * @throws E if an exception occurs during the operation
+         * @throws E if the consumer implementation throws while processing {@code value}
          */
         void accept(boolean value) throws E;
     }
@@ -2419,7 +2549,7 @@ public final class Throwables {
          *
          * @param value the boolean input argument
          * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
-         * @throws E if an exception occurs during evaluation
+         * @throws E if the predicate implementation throws while testing {@code value}
          */
         boolean test(boolean value) throws E;
     }
@@ -2440,7 +2570,7 @@ public final class Throwables {
          *
          * @param value the boolean function argument
          * @return the function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         R apply(boolean value) throws E;
     }
@@ -2459,7 +2589,7 @@ public final class Throwables {
          * Performs this operation on the given char argument.
          *
          * @param value the char input argument
-         * @throws E if an exception occurs during the operation
+         * @throws E if the consumer implementation throws while processing {@code value}
          */
         void accept(char value) throws E;
     }
@@ -2479,7 +2609,7 @@ public final class Throwables {
          *
          * @param value the char input argument
          * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
-         * @throws E if an exception occurs during evaluation
+         * @throws E if the predicate implementation throws while testing {@code value}
          */
         boolean test(char value) throws E;
     }
@@ -2500,7 +2630,7 @@ public final class Throwables {
          *
          * @param value the char function argument
          * @return the function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         R apply(char value) throws E;
     }
@@ -2519,7 +2649,7 @@ public final class Throwables {
          * Performs this operation on the given byte argument.
          *
          * @param value the byte input argument
-         * @throws E if an exception occurs during the operation
+         * @throws E if the consumer implementation throws while processing {@code value}
          */
         void accept(byte value) throws E;
     }
@@ -2539,7 +2669,7 @@ public final class Throwables {
          *
          * @param value the byte input argument
          * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
-         * @throws E if an exception occurs during evaluation
+         * @throws E if the predicate implementation throws while testing {@code value}
          */
         boolean test(byte value) throws E;
     }
@@ -2560,7 +2690,7 @@ public final class Throwables {
          *
          * @param value the byte function argument
          * @return the function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         R apply(byte value) throws E;
     }
@@ -2579,7 +2709,7 @@ public final class Throwables {
          * Performs this operation on the given short argument.
          *
          * @param value the short input argument
-         * @throws E if an exception occurs during the operation
+         * @throws E if the consumer implementation throws while processing {@code value}
          */
         void accept(short value) throws E;
     }
@@ -2599,7 +2729,7 @@ public final class Throwables {
          *
          * @param value the short input argument
          * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
-         * @throws E if an exception occurs during evaluation
+         * @throws E if the predicate implementation throws while testing {@code value}
          */
         boolean test(short value) throws E;
     }
@@ -2620,7 +2750,7 @@ public final class Throwables {
          *
          * @param value the short function argument
          * @return the function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         R apply(short value) throws E;
     }
@@ -2639,7 +2769,7 @@ public final class Throwables {
          * Performs this operation on the given int argument.
          *
          * @param value the int input argument
-         * @throws E if an exception occurs during the operation
+         * @throws E if the consumer implementation throws while processing {@code value}
          */
         void accept(int value) throws E;
     }
@@ -2659,7 +2789,7 @@ public final class Throwables {
          *
          * @param value the int input argument
          * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
-         * @throws E if an exception occurs during evaluation
+         * @throws E if the predicate implementation throws while testing {@code value}
          */
         boolean test(int value) throws E;
     }
@@ -2680,7 +2810,7 @@ public final class Throwables {
          *
          * @param value the int function argument
          * @return the function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         R apply(int value) throws E;
     }
@@ -2699,7 +2829,7 @@ public final class Throwables {
          *
          * @param value the int function argument
          * @return the long function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         long applyAsLong(int value) throws E;
     }
@@ -2718,7 +2848,7 @@ public final class Throwables {
          *
          * @param value the int function argument
          * @return the double function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         double applyAsDouble(int value) throws E;
     }
@@ -2737,7 +2867,7 @@ public final class Throwables {
          * Performs this operation on the given long argument.
          *
          * @param value the long input argument
-         * @throws E if an exception occurs during the operation
+         * @throws E if the consumer implementation throws while processing {@code value}
          */
         void accept(long value) throws E;
     }
@@ -2757,7 +2887,7 @@ public final class Throwables {
          *
          * @param value the long input argument
          * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
-         * @throws E if an exception occurs during evaluation
+         * @throws E if the predicate implementation throws while testing {@code value}
          */
         boolean test(long value) throws E;
     }
@@ -2778,7 +2908,7 @@ public final class Throwables {
          *
          * @param value the long function argument
          * @return the function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         R apply(long value) throws E;
     }
@@ -2797,7 +2927,7 @@ public final class Throwables {
          *
          * @param value the long function argument
          * @return the int function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         int applyAsInt(long value) throws E;
     }
@@ -2816,7 +2946,7 @@ public final class Throwables {
          *
          * @param value the long function argument
          * @return the double function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         double applyAsDouble(long value) throws E;
     }
@@ -2834,7 +2964,7 @@ public final class Throwables {
          *
          * @param value the float function argument
          * @return the int function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         int applyAsInt(float value) throws E;
     }
@@ -2852,7 +2982,7 @@ public final class Throwables {
          *
          * @param value the float function argument
          * @return the long function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         long applyAsLong(float value) throws E;
     }
@@ -2870,7 +3000,7 @@ public final class Throwables {
          *
          * @param value the float function argument
          * @return the double function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         double applyAsDouble(float value) throws E;
     }
@@ -2889,7 +3019,7 @@ public final class Throwables {
          * Performs this operation on the given float argument.
          *
          * @param value the float input argument
-         * @throws E if an exception occurs during the operation
+         * @throws E if the consumer implementation throws while processing {@code value}
          */
         void accept(float value) throws E;
     }
@@ -2909,7 +3039,7 @@ public final class Throwables {
          *
          * @param value the float input argument
          * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
-         * @throws E if an exception occurs during evaluation
+         * @throws E if the predicate implementation throws while testing {@code value}
          */
         boolean test(float value) throws E;
     }
@@ -2930,7 +3060,7 @@ public final class Throwables {
          *
          * @param value the float function argument
          * @return the function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         R apply(float value) throws E;
     }
@@ -2949,7 +3079,7 @@ public final class Throwables {
          * Performs this operation on the given double argument.
          *
          * @param value the double input argument
-         * @throws E if an exception occurs during the operation
+         * @throws E if the consumer implementation throws while processing {@code value}
          */
         void accept(double value) throws E;
     }
@@ -2969,7 +3099,7 @@ public final class Throwables {
          *
          * @param value the double input argument
          * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
-         * @throws E if an exception occurs during evaluation
+         * @throws E if the predicate implementation throws while testing {@code value}
          */
         boolean test(double value) throws E;
     }
@@ -2990,7 +3120,7 @@ public final class Throwables {
          *
          * @param value the double function argument
          * @return the function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         R apply(double value) throws E;
     }
@@ -3009,7 +3139,7 @@ public final class Throwables {
          *
          * @param value the double function argument
          * @return the int function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         int applyAsInt(double value) throws E;
     }
@@ -3028,7 +3158,7 @@ public final class Throwables {
          *
          * @param value the double function argument
          * @return the long function result
-         * @throws E if an exception occurs during function application
+         * @throws E if the function implementation throws while computing the result for {@code value}
          */
         long applyAsLong(double value) throws E;
     }
@@ -3048,7 +3178,7 @@ public final class Throwables {
          *
          * @param t the input argument
          * @return the boolean result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}
          */
         boolean applyAsBoolean(T t) throws E;
     }
@@ -3068,7 +3198,7 @@ public final class Throwables {
          *
          * @param t the input argument
          * @return the char result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}
          */
         char applyAsChar(T t) throws E;
     }
@@ -3088,7 +3218,7 @@ public final class Throwables {
          *
          * @param t the input argument
          * @return the byte result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}
          */
         byte applyAsByte(T t) throws E;
     }
@@ -3108,7 +3238,7 @@ public final class Throwables {
          *
          * @param t the input argument
          * @return the short result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}
          */
         short applyAsShort(T t) throws E;
     }
@@ -3128,7 +3258,7 @@ public final class Throwables {
          *
          * @param t the input argument
          * @return the int result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}
          */
         int applyAsInt(T t) throws E;
     }
@@ -3148,7 +3278,7 @@ public final class Throwables {
          *
          * @param t the input argument
          * @return the long result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}
          */
         long applyAsLong(T t) throws E;
     }
@@ -3168,7 +3298,7 @@ public final class Throwables {
          *
          * @param t the input argument
          * @return the float result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}
          */
         float applyAsFloat(T t) throws E;
     }
@@ -3188,7 +3318,7 @@ public final class Throwables {
          *
          * @param t the input argument
          * @return the double result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}
          */
         double applyAsDouble(T t) throws E;
     }
@@ -3210,7 +3340,7 @@ public final class Throwables {
          * @param a the first function argument
          * @param b the second function argument
          * @return the boolean result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}
          */
         boolean applyAsBoolean(A a, B b) throws E;
     }
@@ -3232,7 +3362,7 @@ public final class Throwables {
          * @param a the first function argument
          * @param b the second function argument
          * @return the byte result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}
          */
         byte applyAsByte(A a, B b) throws E;
     }
@@ -3254,7 +3384,7 @@ public final class Throwables {
          * @param a the first function argument
          * @param b the second function argument
          * @return the char result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}
          */
         char applyAsChar(A a, B b) throws E;
     }
@@ -3276,7 +3406,7 @@ public final class Throwables {
          * @param a the first function argument
          * @param b the second function argument
          * @return the float result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}
          */
         float applyAsFloat(A a, B b) throws E;
     }
@@ -3298,7 +3428,7 @@ public final class Throwables {
          * @param a the first function argument
          * @param b the second function argument
          * @return the short result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}
          */
         short applyAsShort(A a, B b) throws E;
     }
@@ -3320,7 +3450,7 @@ public final class Throwables {
          * @param a the first function argument
          * @param b the second function argument
          * @return the int result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}
          */
         int applyAsInt(A a, B b) throws E;
     }
@@ -3342,7 +3472,7 @@ public final class Throwables {
          * @param a the first function argument
          * @param b the second function argument
          * @return the long result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}
          */
         long applyAsLong(A a, B b) throws E;
     }
@@ -3364,7 +3494,7 @@ public final class Throwables {
          * @param a the first function argument
          * @param b the second function argument
          * @return the double result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}
          */
         double applyAsDouble(A a, B b) throws E;
     }
@@ -3388,7 +3518,7 @@ public final class Throwables {
          * @param b the second function argument
          * @param c the third function argument
          * @return the int result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         int applyAsInt(A a, B b, C c) throws E;
     }
@@ -3412,7 +3542,7 @@ public final class Throwables {
          * @param b the second function argument
          * @param c the third function argument
          * @return the long result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         long applyAsLong(A a, B b, C c) throws E;
     }
@@ -3436,7 +3566,7 @@ public final class Throwables {
          * @param b the second function argument
          * @param c the third function argument
          * @return the double result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         double applyAsDouble(A a, B b, C c) throws E;
     }
@@ -3465,23 +3595,13 @@ public final class Throwables {
 
     /**
      * Represents an operation upon three operands of the same type, producing a result of the same type as the operands.
+     * This is a specialization of {@code TriFunction} for the case where the operands and the result are all of the same type.
      *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of exception that the operator may throw
      */
     @FunctionalInterface
-    public interface TernaryOperator<T, E extends Throwable> {
-
-        /**
-         * Applies this operator to the given operands.
-         *
-         * @param a the first operand
-         * @param b the second operand
-         * @param c the third operand
-         * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
-         */
-        T apply(T a, T b, T c) throws E;
+    public interface TernaryOperator<T, E extends Throwable> extends TriFunction<T, T, T, T, E> {
     }
 
     /**
@@ -3497,7 +3617,7 @@ public final class Throwables {
          *
          * @param operand the input operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code operand}
          */
         boolean applyAsBoolean(boolean operand) throws E;
     }
@@ -3515,7 +3635,7 @@ public final class Throwables {
          *
          * @param operand the input operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code operand}
          */
         char applyAsChar(char operand) throws E;
     }
@@ -3533,7 +3653,7 @@ public final class Throwables {
          *
          * @param operand the input operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code operand}
          */
         byte applyAsByte(byte operand) throws E;
     }
@@ -3551,7 +3671,7 @@ public final class Throwables {
          *
          * @param operand the input operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code operand}
          */
         short applyAsShort(short operand) throws E;
     }
@@ -3569,7 +3689,7 @@ public final class Throwables {
          *
          * @param operand the input operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code operand}
          */
         int applyAsInt(int operand) throws E;
     }
@@ -3590,7 +3710,7 @@ public final class Throwables {
          * @param operand the int operand
          * @param obj the object operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code operand}, {@code obj}
          */
         int applyAsInt(int operand, T obj) throws E;
     }
@@ -3608,7 +3728,7 @@ public final class Throwables {
          *
          * @param operand the input operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code operand}
          */
         long applyAsLong(long operand) throws E;
     }
@@ -3626,7 +3746,7 @@ public final class Throwables {
          *
          * @param operand the input operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code operand}
          */
         float applyAsFloat(float operand) throws E;
     }
@@ -3644,7 +3764,7 @@ public final class Throwables {
          *
          * @param operand the input operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code operand}
          */
         double applyAsDouble(double operand) throws E;
     }
@@ -3663,7 +3783,7 @@ public final class Throwables {
          * @param left the first operand
          * @param right the second operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code left}, {@code right}
          */
         boolean applyAsBoolean(boolean left, boolean right) throws E;
     }
@@ -3682,7 +3802,7 @@ public final class Throwables {
          * @param left the first operand
          * @param right the second operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code left}, {@code right}
          */
         char applyAsChar(char left, char right) throws E;
     }
@@ -3701,7 +3821,7 @@ public final class Throwables {
          * @param left the first operand
          * @param right the second operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code left}, {@code right}
          */
         byte applyAsByte(byte left, byte right) throws E;
     }
@@ -3720,7 +3840,7 @@ public final class Throwables {
          * @param left the first operand
          * @param right the second operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code left}, {@code right}
          */
         short applyAsShort(short left, short right) throws E;
     }
@@ -3739,7 +3859,7 @@ public final class Throwables {
          * @param left the first operand
          * @param right the second operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code left}, {@code right}
          */
         int applyAsInt(int left, int right) throws E;
     }
@@ -3758,7 +3878,7 @@ public final class Throwables {
          * @param left the first operand
          * @param right the second operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code left}, {@code right}
          */
         long applyAsLong(long left, long right) throws E;
     }
@@ -3777,7 +3897,7 @@ public final class Throwables {
          * @param left the first operand
          * @param right the second operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code left}, {@code right}
          */
         float applyAsFloat(float left, float right) throws E;
     }
@@ -3796,7 +3916,7 @@ public final class Throwables {
          * @param left the first operand
          * @param right the second operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code left}, {@code right}
          */
         double applyAsDouble(double left, double right) throws E;
     }
@@ -3816,7 +3936,7 @@ public final class Throwables {
          * @param b the second operand
          * @param c the third operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         boolean applyAsBoolean(boolean a, boolean b, boolean c) throws E;
     }
@@ -3836,7 +3956,7 @@ public final class Throwables {
          * @param b the second operand
          * @param c the third operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         char applyAsChar(char a, char b, char c) throws E;
     }
@@ -3856,7 +3976,7 @@ public final class Throwables {
          * @param b the second operand
          * @param c the third operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         byte applyAsByte(byte a, byte b, byte c) throws E;
     }
@@ -3876,7 +3996,7 @@ public final class Throwables {
          * @param b the second operand
          * @param c the third operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         short applyAsShort(short a, short b, short c) throws E;
     }
@@ -3896,7 +4016,7 @@ public final class Throwables {
          * @param b the second operand
          * @param c the third operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         int applyAsInt(int a, int b, int c) throws E;
     }
@@ -3916,7 +4036,7 @@ public final class Throwables {
          * @param b the second operand
          * @param c the third operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         long applyAsLong(long a, long b, long c) throws E;
     }
@@ -3936,7 +4056,7 @@ public final class Throwables {
          * @param b the second operand
          * @param c the third operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         float applyAsFloat(float a, float b, float c) throws E;
     }
@@ -3956,7 +4076,7 @@ public final class Throwables {
          * @param b the second operand
          * @param c the third operand
          * @return the result of applying this operator
-         * @throws E if an error occurs during operator execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         double applyAsDouble(double a, double b, double c) throws E;
     }
@@ -3975,7 +4095,7 @@ public final class Throwables {
          * @param t the first input argument
          * @param u the second input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code u}
          */
         boolean test(boolean t, boolean u) throws E;
     }
@@ -3994,7 +4114,7 @@ public final class Throwables {
          * @param t the first input argument
          * @param u the second input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code u}
          */
         boolean test(char t, char u) throws E;
     }
@@ -4013,7 +4133,7 @@ public final class Throwables {
          * @param t the first input argument
          * @param u the second input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code u}
          */
         boolean test(byte t, byte u) throws E;
     }
@@ -4032,7 +4152,7 @@ public final class Throwables {
          * @param t the first input argument
          * @param u the second input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code u}
          */
         boolean test(short t, short u) throws E;
     }
@@ -4051,7 +4171,7 @@ public final class Throwables {
          * @param t the first input argument
          * @param u the second input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code u}
          */
         boolean test(int t, int u) throws E;
     }
@@ -4070,7 +4190,7 @@ public final class Throwables {
          * @param t the first input argument
          * @param u the second input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code u}
          */
         boolean test(long t, long u) throws E;
     }
@@ -4089,7 +4209,7 @@ public final class Throwables {
          * @param t the first input argument
          * @param u the second input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code u}
          */
         boolean test(float t, float u) throws E;
     }
@@ -4108,7 +4228,7 @@ public final class Throwables {
          * @param t the first input argument
          * @param u the second input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code u}
          */
         boolean test(double t, double u) throws E;
     }
@@ -4128,7 +4248,7 @@ public final class Throwables {
          * @param t the first function argument
          * @param u the second function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code u}
          */
         R apply(boolean t, boolean u) throws E;
     }
@@ -4148,7 +4268,7 @@ public final class Throwables {
          * @param t the first function argument
          * @param u the second function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code u}
          */
         R apply(char t, char u) throws E;
     }
@@ -4168,7 +4288,7 @@ public final class Throwables {
          * @param t the first function argument
          * @param u the second function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code u}
          */
         R apply(byte t, byte u) throws E;
     }
@@ -4188,7 +4308,7 @@ public final class Throwables {
          * @param t the first function argument
          * @param u the second function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code u}
          */
         R apply(short t, short u) throws E;
     }
@@ -4208,7 +4328,7 @@ public final class Throwables {
          * @param t the first function argument
          * @param u the second function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code u}
          */
         R apply(int t, int u) throws E;
     }
@@ -4228,7 +4348,7 @@ public final class Throwables {
          * @param t the first function argument
          * @param u the second function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code u}
          */
         R apply(long t, long u) throws E;
     }
@@ -4248,7 +4368,7 @@ public final class Throwables {
          * @param t the first function argument
          * @param u the second function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code u}
          */
         R apply(float t, float u) throws E;
     }
@@ -4268,7 +4388,7 @@ public final class Throwables {
          * @param t the first function argument
          * @param u the second function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code u}
          */
         R apply(double t, double u) throws E;
     }
@@ -4286,7 +4406,7 @@ public final class Throwables {
          *
          * @param t the first input argument
          * @param u the second input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code u}
          */
         void accept(boolean t, boolean u) throws E;
     }
@@ -4304,7 +4424,7 @@ public final class Throwables {
          *
          * @param t the first input argument
          * @param u the second input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code u}
          */
         void accept(char t, char u) throws E;
     }
@@ -4322,7 +4442,7 @@ public final class Throwables {
          *
          * @param t the first input argument
          * @param u the second input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code u}
          */
         void accept(byte t, byte u) throws E;
     }
@@ -4340,7 +4460,7 @@ public final class Throwables {
          *
          * @param t the first input argument
          * @param u the second input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code u}
          */
         void accept(short t, short u) throws E;
     }
@@ -4363,7 +4483,7 @@ public final class Throwables {
          *
          * @param t the first input argument
          * @param u the second input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code u}
          */
         @Override
         void accept(int t, int u) throws E;
@@ -4382,7 +4502,7 @@ public final class Throwables {
          *
          * @param t the first input argument
          * @param u the second input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code u}
          */
         void accept(long t, long u) throws E;
     }
@@ -4400,7 +4520,7 @@ public final class Throwables {
          *
          * @param t the first input argument
          * @param u the second input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code u}
          */
         void accept(float t, float u) throws E;
     }
@@ -4418,7 +4538,7 @@ public final class Throwables {
          *
          * @param t the first input argument
          * @param u the second input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code u}
          */
         void accept(double t, double u) throws E;
     }
@@ -4438,7 +4558,7 @@ public final class Throwables {
          * @param b the second input argument
          * @param c the third input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code a}, {@code b}, {@code c}
          */
         boolean test(boolean a, boolean b, boolean c) throws E;
     }
@@ -4458,7 +4578,7 @@ public final class Throwables {
          * @param b the second input argument
          * @param c the third input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code a}, {@code b}, {@code c}
          */
         boolean test(char a, char b, char c) throws E;
     }
@@ -4478,7 +4598,7 @@ public final class Throwables {
          * @param b the second input argument
          * @param c the third input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code a}, {@code b}, {@code c}
          */
         boolean test(byte a, byte b, byte c) throws E;
     }
@@ -4498,7 +4618,7 @@ public final class Throwables {
          * @param b the second input argument
          * @param c the third input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code a}, {@code b}, {@code c}
          */
         boolean test(short a, short b, short c) throws E;
     }
@@ -4518,7 +4638,7 @@ public final class Throwables {
          * @param b the second input argument
          * @param c the third input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code a}, {@code b}, {@code c}
          */
         boolean test(int a, int b, int c) throws E;
     }
@@ -4538,7 +4658,7 @@ public final class Throwables {
          * @param b the second input argument
          * @param c the third input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code a}, {@code b}, {@code c}
          */
         boolean test(long a, long b, long c) throws E;
     }
@@ -4558,7 +4678,7 @@ public final class Throwables {
          * @param b the second input argument
          * @param c the third input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code a}, {@code b}, {@code c}
          */
         boolean test(float a, float b, float c) throws E;
     }
@@ -4578,7 +4698,7 @@ public final class Throwables {
          * @param b the second input argument
          * @param c the third input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code a}, {@code b}, {@code c}
          */
         boolean test(double a, double b, double c) throws E;
     }
@@ -4599,7 +4719,7 @@ public final class Throwables {
          * @param b the second function argument
          * @param c the third function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         R apply(boolean a, boolean b, boolean c) throws E;
     }
@@ -4620,7 +4740,7 @@ public final class Throwables {
          * @param b the second function argument
          * @param c the third function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         R apply(char a, char b, char c) throws E;
     }
@@ -4641,7 +4761,7 @@ public final class Throwables {
          * @param b the second function argument
          * @param c the third function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         R apply(byte a, byte b, byte c) throws E;
     }
@@ -4662,7 +4782,7 @@ public final class Throwables {
          * @param b the second function argument
          * @param c the third function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         R apply(short a, short b, short c) throws E;
     }
@@ -4683,7 +4803,7 @@ public final class Throwables {
          * @param b the second function argument
          * @param c the third function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         R apply(int a, int b, int c) throws E;
     }
@@ -4704,7 +4824,7 @@ public final class Throwables {
          * @param b the second function argument
          * @param c the third function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         R apply(long a, long b, long c) throws E;
     }
@@ -4725,7 +4845,7 @@ public final class Throwables {
          * @param b the second function argument
          * @param c the third function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         R apply(float a, float b, float c) throws E;
     }
@@ -4746,7 +4866,7 @@ public final class Throwables {
          * @param b the second function argument
          * @param c the third function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code a}, {@code b}, {@code c}
          */
         R apply(double a, double b, double c) throws E;
     }
@@ -4765,7 +4885,7 @@ public final class Throwables {
          * @param a the first input argument
          * @param b the second input argument
          * @param c the third input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code a}, {@code b}, {@code c}
          */
         void accept(boolean a, boolean b, boolean c) throws E;
     }
@@ -4784,7 +4904,7 @@ public final class Throwables {
          * @param a the first input argument
          * @param b the second input argument
          * @param c the third input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code a}, {@code b}, {@code c}
          */
         void accept(char a, char b, char c) throws E;
     }
@@ -4803,7 +4923,7 @@ public final class Throwables {
          * @param a the first input argument
          * @param b the second input argument
          * @param c the third input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code a}, {@code b}, {@code c}
          */
         void accept(byte a, byte b, byte c) throws E;
     }
@@ -4822,7 +4942,7 @@ public final class Throwables {
          * @param a the first input argument
          * @param b the second input argument
          * @param c the third input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code a}, {@code b}, {@code c}
          */
         void accept(short a, short b, short c) throws E;
     }
@@ -4841,7 +4961,7 @@ public final class Throwables {
          * @param a the first input argument
          * @param b the second input argument
          * @param c the third input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code a}, {@code b}, {@code c}
          */
         void accept(int a, int b, int c) throws E;
     }
@@ -4860,7 +4980,7 @@ public final class Throwables {
          * @param a the first input argument
          * @param b the second input argument
          * @param c the third input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code a}, {@code b}, {@code c}
          */
         void accept(long a, long b, long c) throws E;
     }
@@ -4879,7 +4999,7 @@ public final class Throwables {
          * @param a the first input argument
          * @param b the second input argument
          * @param c the third input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code a}, {@code b}, {@code c}
          */
         void accept(float a, float b, float c) throws E;
     }
@@ -4898,7 +5018,7 @@ public final class Throwables {
          * @param a the first input argument
          * @param b the second input argument
          * @param c the third input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code a}, {@code b}, {@code c}
          */
         void accept(double a, double b, double c) throws E;
     }
@@ -4917,7 +5037,7 @@ public final class Throwables {
          *
          * @param t the object input argument
          * @param value the boolean input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code value}
          */
         void accept(T t, boolean value) throws E;
     }
@@ -4936,7 +5056,7 @@ public final class Throwables {
          *
          * @param t the object input argument
          * @param value the char input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code value}
          */
         void accept(T t, char value) throws E;
     }
@@ -4955,7 +5075,7 @@ public final class Throwables {
          *
          * @param t the object input argument
          * @param value the byte input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code value}
          */
         void accept(T t, byte value) throws E;
     }
@@ -4974,7 +5094,7 @@ public final class Throwables {
          *
          * @param t the object input argument
          * @param value the short input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code value}
          */
         void accept(T t, short value) throws E;
     }
@@ -4993,7 +5113,7 @@ public final class Throwables {
          *
          * @param t the object input argument
          * @param value the int input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code value}
          */
         void accept(T t, int value) throws E;
     }
@@ -5014,7 +5134,7 @@ public final class Throwables {
          * @param t the object function argument
          * @param value the int function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code value}
          */
         R apply(T t, int value) throws E;
     }
@@ -5034,7 +5154,7 @@ public final class Throwables {
          * @param t the object input argument
          * @param value the int input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code value}
          */
         boolean test(T t, int value) throws E;
     }
@@ -5053,7 +5173,7 @@ public final class Throwables {
          *
          * @param t the object input argument
          * @param value the long input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code value}
          */
         void accept(T t, long value) throws E;
     }
@@ -5074,7 +5194,7 @@ public final class Throwables {
          * @param t the object function argument
          * @param value the long function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code value}
          */
         R apply(T t, long value) throws E;
     }
@@ -5094,7 +5214,7 @@ public final class Throwables {
          * @param t the object input argument
          * @param value the long input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code value}
          */
         boolean test(T t, long value) throws E;
     }
@@ -5113,7 +5233,7 @@ public final class Throwables {
          *
          * @param t the object input argument
          * @param value the float input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code value}
          */
         void accept(T t, float value) throws E;
     }
@@ -5132,7 +5252,7 @@ public final class Throwables {
          *
          * @param t the object input argument
          * @param value the double input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code value}
          */
         void accept(T t, double value) throws E;
     }
@@ -5153,7 +5273,7 @@ public final class Throwables {
          * @param t the object function argument
          * @param value the double function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code value}
          */
         R apply(T t, double value) throws E;
     }
@@ -5173,7 +5293,7 @@ public final class Throwables {
          * @param t the object input argument
          * @param value the double input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code value}
          */
         boolean test(T t, double value) throws E;
     }
@@ -5193,7 +5313,7 @@ public final class Throwables {
          * @param t the object input argument
          * @param i the first int input argument
          * @param j the second int input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code i}, {@code j}
          */
         void accept(T t, int i, int j) throws E;
     }
@@ -5215,7 +5335,7 @@ public final class Throwables {
          * @param i the first int function argument
          * @param j the second int function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code i}, {@code j}
          */
         R apply(T t, int i, int j) throws E;
     }
@@ -5236,7 +5356,7 @@ public final class Throwables {
          * @param i the first int input argument
          * @param j the second int input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code i}, {@code j}
          */
         boolean test(T t, int i, int j) throws E;
     }
@@ -5258,7 +5378,7 @@ public final class Throwables {
          * @param t the first object input argument
          * @param u the second object input argument
          * @param i the int index argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code t}, {@code u}, {@code i}
          */
         void accept(T t, U u, int i) throws E;
     }
@@ -5282,7 +5402,7 @@ public final class Throwables {
          * @param u the second object function argument
          * @param i the int index argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code t}, {@code u}, {@code i}
          */
         R apply(T t, U u, int i) throws E;
     }
@@ -5305,7 +5425,7 @@ public final class Throwables {
          * @param u the second object input argument
          * @param i the int index argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code t}, {@code u}, {@code i}
          */
         boolean test(T t, U u, int i) throws E;
     }
@@ -5339,7 +5459,7 @@ public final class Throwables {
          *
          * @param i the int input argument
          * @param t the object input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code i}, {@code t}
          */
         void accept(int i, T t) throws E;
     }
@@ -5376,7 +5496,7 @@ public final class Throwables {
          * @param i the int function argument
          * @param t the object function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code i}, {@code t}
          */
         R apply(int i, T t) throws E;
     }
@@ -5411,7 +5531,7 @@ public final class Throwables {
          * @param i the int input argument
          * @param t the object input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code i}, {@code t}
          */
         boolean test(int i, T t) throws E;
     }
@@ -5431,7 +5551,7 @@ public final class Throwables {
          * @param i the int input argument
          * @param t the first object input argument
          * @param u the second object input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code i}, {@code t}, {@code u}
          */
         void accept(int i, T t, U u) throws E;
     }
@@ -5454,7 +5574,7 @@ public final class Throwables {
          * @param t the first object function argument
          * @param u the second object function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code i}, {@code t}, {@code u}
          */
         R apply(int i, T t, U u) throws E;
     }
@@ -5476,7 +5596,7 @@ public final class Throwables {
          * @param t the first object input argument
          * @param u the second object input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code i}, {@code t}, {@code u}
          */
         boolean test(int i, T t, U u) throws E;
     }
@@ -5496,7 +5616,7 @@ public final class Throwables {
          * @param i the first int input argument
          * @param j the second int input argument
          * @param t the object input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code i}, {@code j}, {@code t}
          */
         void accept(int i, int j, T t) throws E;
     }
@@ -5518,7 +5638,7 @@ public final class Throwables {
          * @param j the second int function argument
          * @param t the object function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code i}, {@code j}, {@code t}
          */
         R apply(int i, int j, T t) throws E;
     }
@@ -5539,7 +5659,7 @@ public final class Throwables {
          * @param j the second int input argument
          * @param t the object input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code i}, {@code j}, {@code t}
          */
         boolean test(int i, int j, T t) throws E;
     }
@@ -5557,7 +5677,7 @@ public final class Throwables {
          *
          * @param i the long input argument
          * @param t the object input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code i}, {@code t}
          */
         void accept(long i, T t) throws E;
     }
@@ -5577,7 +5697,7 @@ public final class Throwables {
          * @param i the long function argument
          * @param t the object function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code i}, {@code t}
          */
         R apply(long i, T t) throws E;
     }
@@ -5596,7 +5716,7 @@ public final class Throwables {
          * @param i the long input argument
          * @param t the object input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code i}, {@code t}
          */
         boolean test(long i, T t) throws E;
     }
@@ -5614,7 +5734,7 @@ public final class Throwables {
          *
          * @param i the double input argument
          * @param t the object input argument
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code i}, {@code t}
          */
         void accept(double i, T t) throws E;
     }
@@ -5634,7 +5754,7 @@ public final class Throwables {
          * @param i the double function argument
          * @param t the object function argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code i}, {@code t}
          */
         R apply(double i, T t) throws E;
     }
@@ -5653,7 +5773,7 @@ public final class Throwables {
          * @param i the double input argument
          * @param t the object input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if an error occurs during predicate evaluation
+         * @throws E if the predicate implementation throws while testing {@code i}, {@code t}
          */
         boolean test(double i, T t) throws E;
     }
@@ -5672,7 +5792,7 @@ public final class Throwables {
          *
          * @param args the boolean array argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code args}
          */
         R apply(boolean... args) throws E;
 
@@ -5706,7 +5826,7 @@ public final class Throwables {
          *
          * @param args the char array argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code args}
          */
         R apply(char... args) throws E;
 
@@ -5740,7 +5860,7 @@ public final class Throwables {
          *
          * @param args the byte array argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code args}
          */
         R apply(byte... args) throws E;
 
@@ -5773,7 +5893,7 @@ public final class Throwables {
          *
          * @param args the short array argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code args}
          */
         R apply(short... args) throws E;
 
@@ -5807,7 +5927,7 @@ public final class Throwables {
          *
          * @param args the int array argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code args}
          */
         R apply(int... args) throws E;
 
@@ -5841,7 +5961,7 @@ public final class Throwables {
          *
          * @param args the long array argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code args}
          */
         R apply(long... args) throws E;
 
@@ -5875,7 +5995,7 @@ public final class Throwables {
          *
          * @param args the float array argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code args}
          */
         R apply(float... args) throws E;
 
@@ -5909,7 +6029,7 @@ public final class Throwables {
          *
          * @param args the double array argument
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code args}
          */
         R apply(double... args) throws E;
 
@@ -5944,7 +6064,7 @@ public final class Throwables {
          *
          * @param args the variable arguments of type T
          * @return the function result
-         * @throws E if an error occurs during function execution
+         * @throws E if the function implementation throws while computing the result for {@code args}
          */
         @SuppressWarnings("unchecked")
         R apply(T... args) throws E;
@@ -5979,7 +6099,7 @@ public final class Throwables {
          *
          * @param idx the zero-based index associated with the value
          * @param e the boolean element at the index
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code idx}, {@code e}
          */
         void accept(int idx, boolean e) throws E;
     }
@@ -5998,7 +6118,7 @@ public final class Throwables {
          *
          * @param idx the zero-based index associated with the value
          * @param e the char element at the index
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code idx}, {@code e}
          */
         void accept(int idx, char e) throws E;
     }
@@ -6017,7 +6137,7 @@ public final class Throwables {
          *
          * @param idx the zero-based index associated with the value
          * @param e the byte element at the index
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code idx}, {@code e}
          */
         void accept(int idx, byte e) throws E;
     }
@@ -6036,7 +6156,7 @@ public final class Throwables {
          *
          * @param idx the zero-based index associated with the value
          * @param e the short element at the index
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code idx}, {@code e}
          */
         void accept(int idx, short e) throws E;
     }
@@ -6055,7 +6175,7 @@ public final class Throwables {
          *
          * @param idx the zero-based index associated with the value
          * @param e the int element at the index
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code idx}, {@code e}
          */
         void accept(int idx, int e) throws E;
     }
@@ -6074,7 +6194,7 @@ public final class Throwables {
          *
          * @param idx the zero-based index associated with the value
          * @param e the long element at the index
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code idx}, {@code e}
          */
         void accept(int idx, long e) throws E;
     }
@@ -6093,7 +6213,7 @@ public final class Throwables {
          *
          * @param idx the zero-based index associated with the value
          * @param e the float element at the index
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code idx}, {@code e}
          */
         void accept(int idx, float e) throws E;
     }
@@ -6112,7 +6232,7 @@ public final class Throwables {
          *
          * @param idx the zero-based index associated with the value
          * @param e the double element at the index
-         * @throws E if an error occurs during operation execution
+         * @throws E if the consumer implementation throws while processing {@code idx}, {@code e}
          */
         void accept(int idx, double e) throws E;
     }
@@ -6874,6 +6994,13 @@ public final class Throwables {
      * @param <E> the type of exception that may be thrown during initialization
      */
     static final class LazyInitializer<T, E extends Throwable> implements Throwables.Supplier<T, E> {
+        /**
+         * A private monitor rather than {@code this}: this object is what the caller receives from
+         * {@code Fnn.memoize(Throwables.Supplier)} and {@code N.lazyInitChecked(Throwables.Supplier)}, and a caller
+         * doing {@code synchronized (lazy) { ... }} must not be able to block or interleave with an initialization.
+         */
+        private final Object lock = new Object();
+
         /** Supplier retained until initialization succeeds. */
         private Supplier<T, E> supplier;
 
@@ -6936,16 +7063,18 @@ public final class Throwables {
         /**
          * Gets the lazily initialized value. On first access, the value is computed using the supplier
          * and cached for subsequent calls. After successful initialization, the supplier reference is
-         * released so objects captured only for construction can be reclaimed. This method is thread-safe.
+         * released so objects captured only for construction can be reclaimed. This method is thread-safe:
+         * initialization is serialized on a private monitor, not on this object, so caller code that
+         * synchronizes on this initializer can neither block nor interleave with an initialization.
          *
          * @return the lazily initialized value
-         * @throws E if the supplier throws an exception during initialization
          * @throws IllegalStateException if the value is accessed recursively from within its own initialization
+         * @throws E if the supplier throws an exception during initialization
          */
         @Override
-        public T get() throws E {
+        public T get() throws IllegalStateException, E {
             if (!initialized) {
-                synchronized (this) {
+                synchronized (lock) {
                     if (!initialized) {
                         if (initializing) {
                             if (recursiveFailure == null) {

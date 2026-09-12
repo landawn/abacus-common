@@ -51,16 +51,24 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * ImmutableSortedSet<String> subset = set.subSet("banana", "cherry");
  * }</pre>
  *
+ * <p><b>Note:</b> the {@code of(...)} factories accept any element type and throw
+ * {@link ClassCastException} at run time if the elements are not mutually comparable, matching
+ * {@link #copyOf(Collection)}. They deliberately carry no {@code Comparable} bound, and one must not be
+ * added: a bound would make them inapplicable to a non-comparable element, so the call would quietly
+ * resolve to the inherited {@link ImmutableSet#of(Object)} and hand back an unsorted set instead of
+ * failing.</p>
+ *
  * @param <E> the type of elements maintained by this set
  * @see ImmutableSet
  * @see SortedSet
  */
+@com.landawn.abacus.annotation.Immutable
 @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
 @SuppressWarnings("java:S2160")
 public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<E> {
 
     @SuppressWarnings("rawtypes")
-    private static final ImmutableSortedSet EMPTY = new ImmutableSortedSet(N.emptySortedSet());
+    private static final ImmutableSortedSet EMPTY = new ImmutableSortedSet(N.emptySortedSet(), true);
 
     private final SortedSet<E> sortedSet;
 
@@ -70,9 +78,27 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * is not treated as evidence that it is immutable.
      *
      * @param sortedSet the sorted set whose elements are to be included in this ImmutableSortedSet.
+     * @throws NullPointerException if {@code sortedSet} is {@code null}
      */
-    ImmutableSortedSet(final SortedSet<? extends E> sortedSet) {
-        super(sortedSet);
+    ImmutableSortedSet(final SortedSet<? extends E> sortedSet) throws NullPointerException {
+        this(sortedSet, false);
+    }
+
+    /**
+     * Constructs an {@code ImmutableSortedSet} backed by the provided sortedSet.
+     *
+     * @param sortedSet the sortedSet whose elements are to be included in this ImmutableSortedSet.
+     * @param ownsBacking {@code true} only if no other modifiable reference to {@code sortedSet} survives
+     *        this call; see {@link ImmutableCollection#ownsBacking}.
+     * @throws NullPointerException if {@code sortedSet} is {@code null}
+     */
+    ImmutableSortedSet(final SortedSet<? extends E> sortedSet, final boolean ownsBacking) throws NullPointerException {
+        // Always the 3-arg super(): this class's own 2-arg flag is ownsBacking, while ImmutableSet's used to
+        // be isUnmodifiable, so a 2-arg super() call once bound to the wrong parameter - silently skipping the
+        // unmodifiable wrapper AND dropping the flag. ImmutableSet no longer declares a 2-arg constructor, so
+        // that mistake is now a compile error rather than a silent one; keep passing all three regardless.
+        super(sortedSet, false, ownsBacking);
+
         this.sortedSet = (SortedSet<E>) sortedSet;
     }
 
@@ -103,15 +129,16 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * System.out.println(set.first());   // prints 42
      * }</pre>
      *
-     * @param <E> the type of element, must extend {@link Comparable}
+     * @param <E> the element type; the element must be Comparable
      * @param e1 the element to be contained in the set
      * @return an {@code ImmutableSortedSet} containing only the specified element
-     * @throws NullPointerException if {@code e1} is {@code null}, since {@link java.util.TreeSet}
-     *         does not allow {@code null} elements when using natural ordering
+     * @throws NullPointerException if {@code e1} is {@code null}, since {@link java.util.TreeSet} does not allow {@code null} elements when using
+     *         natural ordering
+     * @throws ClassCastException if {@code e1} cannot be compared with itself in natural order
      * @see #of(Object, Object)
      */
-    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1) {
-        return new ImmutableSortedSet<>(new TreeSet<>(Collections.singletonList(e1)));
+    public static <E> ImmutableSortedSet<E> of(final E e1) throws NullPointerException, ClassCastException {
+        return new ImmutableSortedSet<>(new TreeSet<>(Collections.singletonList(e1)), true);
     }
 
     /**
@@ -125,14 +152,15 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * System.out.println(set);   // prints [alpha, beta]
      * }</pre>
      *
-     * @param <E> the type of elements, must extend {@link Comparable}
+     * @param <E> the element type; the elements must be mutually comparable
      * @param e1 the first element
      * @param e2 the second element
      * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
      * @throws NullPointerException if any element is {@code null}
+     * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2) {
-        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2)));
+    public static <E> ImmutableSortedSet<E> of(final E e1, final E e2) throws NullPointerException, ClassCastException {
+        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2)), true);
     }
 
     /**
@@ -146,15 +174,16 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * System.out.println(set);   // prints [alpha, beta, gamma]
      * }</pre>
      *
-     * @param <E> the type of elements, must extend {@link Comparable}
+     * @param <E> the element type; the elements must be mutually comparable
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
      * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
      * @throws NullPointerException if any element is {@code null}
+     * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3) {
-        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3)));
+    public static <E> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3) throws NullPointerException, ClassCastException {
+        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3)), true);
     }
 
     /**
@@ -168,16 +197,17 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * System.out.println(set);   // prints [1, 2, 3, 4]
      * }</pre>
      *
-     * @param <E> the type of elements, must extend {@link Comparable}
+     * @param <E> the element type; the elements must be mutually comparable
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
      * @param e4 the fourth element
      * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
      * @throws NullPointerException if any element is {@code null}
+     * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4) {
-        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4)));
+    public static <E> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4) throws NullPointerException, ClassCastException {
+        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4)), true);
     }
 
     /**
@@ -191,7 +221,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * System.out.println(set);   // prints [Fri, Mon, Thu, Tue, Wed]
      * }</pre>
      *
-     * @param <E> the type of elements, must extend {@link Comparable}
+     * @param <E> the element type; the elements must be mutually comparable
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -199,9 +229,10 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param e5 the fifth element
      * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
      * @throws NullPointerException if any element is {@code null}
+     * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
-        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5)));
+    public static <E> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) throws NullPointerException, ClassCastException {
+        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5)), true);
     }
 
     /**
@@ -215,7 +246,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * System.out.println(set);   // prints [1, 2, 3, 4, 5, 6]
      * }</pre>
      *
-     * @param <E> the type of elements, must extend {@link Comparable}
+     * @param <E> the element type; the elements must be mutually comparable
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -224,9 +255,11 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param e6 the sixth element
      * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
      * @throws NullPointerException if any element is {@code null}
+     * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
-        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6)));
+    public static <E> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6)
+            throws NullPointerException, ClassCastException {
+        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6)), true);
     }
 
     /**
@@ -243,7 +276,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * System.out.println(set.last());    // prints Wed
      * }</pre>
      *
-     * @param <E> the type of elements, must extend {@link Comparable}
+     * @param <E> the element type; the elements must be mutually comparable
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -253,10 +286,11 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param e7 the seventh element
      * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
      * @throws NullPointerException if any element is {@code null}
+     * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
-            final E e7) {
-        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7)));
+    public static <E> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7)
+            throws NullPointerException, ClassCastException {
+        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7)), true);
     }
 
     /**
@@ -270,7 +304,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * System.out.println(set);   // prints [1, 2, 3, 4, 5, 6, 7, 8]
      * }</pre>
      *
-     * @param <E> the type of elements, must extend {@link Comparable}
+     * @param <E> the element type; the elements must be mutually comparable
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -281,10 +315,11 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param e8 the eighth element
      * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
      * @throws NullPointerException if any element is {@code null}
+     * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7,
-            final E e8) {
-        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8)));
+    public static <E> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8)
+            throws NullPointerException, ClassCastException {
+        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8)), true);
     }
 
     /**
@@ -298,7 +333,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * System.out.println(set.last());   // prints 9
      * }</pre>
      *
-     * @param <E> the type of elements, must extend {@link Comparable}
+     * @param <E> the element type; the elements must be mutually comparable
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -310,10 +345,11 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param e9 the ninth element
      * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
      * @throws NullPointerException if any element is {@code null}
+     * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7,
-            final E e8, final E e9) {
-        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9)));
+    public static <E> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9)
+            throws NullPointerException, ClassCastException {
+        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9)), true);
     }
 
     /**
@@ -327,7 +363,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * System.out.println(set.size());   // prints 10
      * }</pre>
      *
-     * @param <E> the type of elements, must extend {@link Comparable}
+     * @param <E> the element type; the elements must be mutually comparable
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -340,10 +376,63 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param e10 the tenth element
      * @return an {@code ImmutableSortedSet} containing the specified elements in sorted order
      * @throws NullPointerException if any element is {@code null}
+     * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7,
-            final E e8, final E e9, final E e10) {
-        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10)));
+    public static <E> ImmutableSortedSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
+            final E e10) throws NullPointerException, ClassCastException {
+        return new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10)), true);
+    }
+
+    /**
+     * This method is deprecated and will always throw an {@link UnsupportedOperationException}.
+     *
+     * <p>{@code ImmutableSet.builder()} is a static method and is therefore reachable through this
+     * subclass's name, where {@code ImmutableSortedSet.builder().build()} would silently produce an
+     * <i>unsorted</i> {@link ImmutableSet} in insertion order. This overload hides it so the mistake fails
+     * loudly. Collect the elements into a {@link java.util.TreeSet} and pass it to
+     * {@link #copyOf(Collection)}, or use one of the {@code of(...)} factories.</p>
+     *
+     * <p>The return type must stay {@code ImmutableSet.Builder} to legally hide the superclass method;
+     * it never returns.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedSet.builder();   // throws UnsupportedOperationException
+     *
+     * // instead:
+     * ImmutableSortedSet<String> sorted = ImmutableSortedSet.copyOf(N.asList("b", "a"));
+     * }</pre>
+     *
+     * @param <E> the element type
+     * @return never returns normally
+     * @throws UnsupportedOperationException always
+     * @deprecated use {@link #copyOf(Collection)}, or an {@code of(...)} factory.
+     */
+    @Deprecated
+    public static <E> ImmutableSet.Builder<E> builder() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * This method is deprecated and will always throw an {@link UnsupportedOperationException}.
+     *
+     * <p>See {@link #builder()}: the inherited {@code ImmutableSet.builder(Set)} would silently produce an
+     * unsorted {@link ImmutableSet}.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedSet.builder(new TreeSet<String>());   // throws UnsupportedOperationException
+     * }</pre>
+     *
+     * @param <E> the element type
+     * @param holder ignored
+     * @return never returns normally
+     * @throws UnsupportedOperationException always
+     * @deprecated use {@link #copyOf(Collection)}, or an {@code of(...)} factory.
+     */
+    @Deprecated
+    public static <E> ImmutableSet.Builder<E> builder(final Set<E> holder) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -363,18 +452,30 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @throws ClassCastException if the elements are not mutually comparable
      * @see #copyOf(Collection)
      */
-    public static <E> ImmutableSortedSet<E> copyOf(final E[] a) {
-        return N.isEmpty(a) ? empty() : new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(a)));
+    public static <E> ImmutableSortedSet<E> copyOf(final E[] a) throws NullPointerException, ClassCastException {
+        return N.isEmpty(a) ? empty() : new ImmutableSortedSet<>(new TreeSet<>(Arrays.asList(a)), true);
     }
 
     /**
      * Returns an ImmutableSortedSet containing the elements of the specified collection.
-     * If the provided collection is already an instance of ImmutableSortedSet, it is directly returned.
+     * If the provided collection is already an instance of ImmutableSortedSet that owns its backing storage
+     * (one produced by {@code of(...)}, {@code copyOf(...)} or {@link #empty()}), it is directly returned;
+     * a {@link #wrap(SortedSet)}-created view is copied like any other collection.
      * If the provided collection is {@code null} or empty, an empty ImmutableSortedSet is returned.
      * Otherwise, a new ImmutableSortedSet is created with the elements of the provided collection.
      *
-     * <p>The elements are sorted according to their natural ordering if they implement Comparable,
-     * or a ClassCastException will be thrown if they don't.</p>
+     * <p>A {@link SortedSet} source retains its comparator, including when it is empty; its elements
+     * need not implement {@link Comparable} when that comparator supports them. Other collections use
+     * natural ordering and throw {@link ClassCastException} if their elements are not mutually comparable.</p>
+     *
+     * <p><b>Note:</b> a returned same instance is independent of further <i>modification</i>, not of the
+     * source's <i>memory</i>. This holds for every derived view of an owning set, not just a range:
+     * {@code subSet}/{@code headSet}/{@code tailSet}/{@code reversed}, and the {@code descendingSet},
+     * {@code navigableKeySet} and {@code descendingKeySet} views of the navigable subtypes, all own their
+     * backing storage too, so they are returned unchanged - and, like every {@code SortedSet} sub-view, each
+     * keeps its whole parent reachable. For a key-set view that parent is the entire map, its values included.
+     * Wrap the view in a fresh set ({@code copyOf(new TreeSet<>(view))}) when a small view of a large source
+     * must stop retaining it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -385,22 +486,23 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      *
      * @param <E> the type of elements in the collection
      * @param c the collection whose elements are to be placed into this set
-     * @return an {@code ImmutableSortedSet} containing the elements of the specified collection, or the same instance if it is already an
-     *         {@code ImmutableSortedSet}. The comparator of a {@code SortedSet} source is retained even when the source is empty; a {@code null}
-     *         or empty non-sorted source returns the shared empty instance.
-     * @throws ClassCastException if the elements are not mutually comparable (when the source collection is not a {@code SortedSet})
+     * @return an {@code ImmutableSortedSet} containing the elements of the specified collection, or the same instance
+     *         if it is already an {@code ImmutableSortedSet} that owns its backing storage. The comparator of a
+     *         {@code SortedSet} source is retained even when the source is empty; a {@code null} or empty
+     *         non-sorted source returns the shared empty instance.
      * @throws NullPointerException if the collection contains a {@code null} element and natural ordering is used
+     * @throws ClassCastException if the elements are not mutually comparable (when the source collection is not a {@code SortedSet})
      * @see #wrap(SortedSet)
      */
-    public static <E> ImmutableSortedSet<E> copyOf(final Collection<? extends E> c) {
-        if (c instanceof ImmutableSortedSet) {
+    public static <E> ImmutableSortedSet<E> copyOf(final Collection<? extends E> c) throws NullPointerException, ClassCastException {
+        if (c instanceof ImmutableSortedSet && ((ImmutableSortedSet<E>) c).ownsBacking) {
             return (ImmutableSortedSet<E>) c;
         } else if (c instanceof SortedSet sortedSet) {
-            return new ImmutableSortedSet<>(new TreeSet<>(sortedSet));
+            return new ImmutableSortedSet<>(new TreeSet<>(sortedSet), true);
         } else if (N.isEmpty(c)) {
             return empty();
         } else {
-            return new ImmutableSortedSet<>(new TreeSet<>(c));
+            return new ImmutableSortedSet<>(new TreeSet<>(c), true);
         }
     }
 
@@ -505,18 +607,17 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param toElement high endpoint (exclusive) of the returned set
      * @return a view of the portion of this set whose elements range from
      *         {@code fromElement}, inclusive, to {@code toElement}, exclusive
-     * @throws ClassCastException if {@code fromElement} and {@code toElement}
-     *         cannot be compared to one another using this set's comparator
-     *         (or, if the set has no comparator, using natural ordering)
-     * @throws NullPointerException if {@code fromElement} or {@code toElement} is {@code null}
-     *         and this set uses natural ordering, or its comparator does not permit {@code null} elements
-     * @throws IllegalArgumentException if {@code fromElement} is greater than {@code toElement}; or if this set
-     *         itself has a restricted range, and {@code fromElement} or {@code toElement} lies outside the bounds of
-     *         the range.
+     * @throws NullPointerException if an endpoint is null and the backing set rejects null endpoints
+     * @throws ClassCastException if the endpoints cannot be compared with each other, or an endpoint cannot be compared with a backing range bound
+     *         using the configured comparator or natural ordering
+     * @throws IllegalArgumentException if {@code fromElement} is greater than {@code toElement}; or if this set itself has a restricted range, and
+     *         {@code fromElement} or {@code toElement} lies outside the bounds of the range.
      */
     @Override
-    public ImmutableSortedSet<E> subSet(final E fromElement, final E toElement) {
-        return wrap(sortedSet.subSet(fromElement, toElement));
+    public ImmutableSortedSet<E> subSet(final E fromElement, final E toElement) throws NullPointerException, ClassCastException, IllegalArgumentException {
+        // A range/derived view is a window onto this instance's own backing storage, so it is exactly
+        // as stable as this instance is: an owning parent yields an owning view, a wrap()-backed one a live view.
+        return new ImmutableSortedSet<>(sortedSet.subSet(fromElement, toElement), ownsBacking);
     }
 
     /**
@@ -533,16 +634,15 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param toElement high endpoint (exclusive) of the returned set
      * @return a view of the portion of this set whose elements are strictly
      *         less than {@code toElement}
-     * @throws ClassCastException if {@code toElement} is not compatible with
-     *         this set's comparator (or, if the set has no comparator, using natural ordering)
-     * @throws NullPointerException if {@code toElement} is {@code null} and this set uses natural ordering,
-     *         or its comparator does not permit {@code null} elements
-     * @throws IllegalArgumentException if this set itself has a restricted range, and {@code toElement} lies outside
-     *         the bounds of the range.
+     * @throws NullPointerException if {@code toElement} is null and the backing set rejects null endpoints
+     * @throws ClassCastException if the endpoint is incompatible with the ordering, or cannot be compared with a backing range bound
+     * @throws IllegalArgumentException if this set itself has a restricted range, and {@code toElement} lies outside the bounds of the range.
      */
     @Override
-    public ImmutableSortedSet<E> headSet(final E toElement) {
-        return wrap(sortedSet.headSet(toElement));
+    public ImmutableSortedSet<E> headSet(final E toElement) throws NullPointerException, ClassCastException, IllegalArgumentException {
+        // A range/derived view is a window onto this instance's own backing storage, so it is exactly
+        // as stable as this instance is: an owning parent yields an owning view, a wrap()-backed one a live view.
+        return new ImmutableSortedSet<>(sortedSet.headSet(toElement), ownsBacking);
     }
 
     /**
@@ -559,16 +659,44 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @param fromElement low endpoint (inclusive) of the returned set
      * @return a view of the portion of this set whose elements are greater
      *         than or equal to {@code fromElement}
-     * @throws ClassCastException if {@code fromElement} is not compatible with
-     *         this set's comparator (or, if the set has no comparator, using natural ordering)
-     * @throws NullPointerException if {@code fromElement} is {@code null} and this set uses natural ordering,
-     *         or its comparator does not permit {@code null} elements
-     * @throws IllegalArgumentException if this set itself has a restricted range, and {@code fromElement} lies
-     *         outside the bounds of the range.
+     * @throws NullPointerException if {@code fromElement} is null and the backing set rejects null endpoints
+     * @throws ClassCastException if the endpoint is incompatible with the ordering, or cannot be compared with a backing range bound
+     * @throws IllegalArgumentException if this set itself has a restricted range, and {@code fromElement} lies outside the bounds of the range.
      */
     @Override
-    public ImmutableSortedSet<E> tailSet(final E fromElement) {
-        return wrap(sortedSet.tailSet(fromElement));
+    public ImmutableSortedSet<E> tailSet(final E fromElement) throws NullPointerException, ClassCastException, IllegalArgumentException {
+        // A range/derived view is a window onto this instance's own backing storage, so it is exactly
+        // as stable as this instance is: an owning parent yields an owning view, a wrap()-backed one a live view.
+        return new ImmutableSortedSet<>(sortedSet.tailSet(fromElement), ownsBacking);
+    }
+
+    /**
+     * Returns an immutable view of this set with its elements in reverse order.
+     * The returned set is backed by this set, so it remains immutable, and it has an ordering equivalent to
+     * {@link java.util.Collections#reverseOrder(java.util.Comparator) Collections.reverseOrder(comparator())}.
+     *
+     * <p>This narrows the {@link java.util.SortedSet#reversed()} default, which would otherwise hand back a
+     * plain JDK view that is neither an {@code ImmutableSortedSet} nor an {@link Immutable}, unlike the
+     * reversed views of {@link ImmutableList}, {@link ImmutableNavigableSet} and {@link ImmutableNavigableMap}.</p>
+     *
+     * <p>A fresh view is returned on every call, so {@code set.reversed().reversed()} is {@code equals} to
+     * {@code set} but is not the same instance - the rule {@link ImmutableNavigableSet#descendingSet()}
+     * already follows.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * ImmutableSortedSet<Integer> set = ImmutableSortedSet.of(1, 2, 3);
+     * ImmutableSortedSet<Integer> reversed = set.reversed();
+     * System.out.println(reversed);   // prints [3, 2, 1]
+     * }</pre>
+     *
+     * @return an immutable view of this set with its elements in reverse order
+     */
+    @Override
+    public ImmutableSortedSet<E> reversed() {
+        // A range/derived view is a window onto this instance's own backing storage, so it is exactly
+        // as stable as this instance is: an owning parent yields an owning view, a wrap()-backed one a live view.
+        return new ImmutableSortedSet<>(sortedSet.reversed(), ownsBacking);
     }
 
     /**
@@ -584,7 +712,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @throws NoSuchElementException if this set is empty
      */
     @Override
-    public E first() {
+    public E first() throws NoSuchElementException {
         return sortedSet.first();
     }
 
@@ -601,7 +729,37 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @throws NoSuchElementException if this set is empty
      */
     @Override
-    public E last() {
+    public E last() throws NoSuchElementException {
         return sortedSet.last();
+    }
+
+    /**
+     * This operation is not supported by ImmutableSortedSet.
+     * Attempting to call this method will always throw an UnsupportedOperationException,
+     * including on an empty set.
+     *
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableSortedSet does not support modification operations.
+     */
+    @Deprecated
+    @Override
+    public E removeFirst() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * This operation is not supported by ImmutableSortedSet.
+     * Attempting to call this method will always throw an UnsupportedOperationException,
+     * including on an empty set.
+     *
+     * @return never returns normally.
+     * @throws UnsupportedOperationException always.
+     * @deprecated ImmutableSortedSet does not support modification operations.
+     */
+    @Deprecated
+    @Override
+    public E removeLast() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
     }
 }

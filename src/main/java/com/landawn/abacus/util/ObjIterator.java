@@ -35,8 +35,14 @@ import com.landawn.abacus.util.stream.Stream;
 
 /**
  * An abstract iterator implementation that provides additional functional operations
- * beyond the standard Iterator interface. This class extends {@link ImmutableIterator}
- * and provides methods for transformation, filtering, and collection operations.
+ * beyond the standard Iterator interface; the class adds methods for transformation,
+ * filtering, and collection operations.
+ *
+ * <p>Element removal is not supported: every iterator returned by this class's factory methods
+ * throws {@link UnsupportedOperationException} from {@link #remove()}. Because the class is
+ * extensible (the constructor is {@code protected}), a subclass may override {@code remove()}, so an
+ * API that requires a guaranteed read-only iterator must wrap an untrusted implementation
+ * (see {@link #of(Iterator)}) rather than return it directly.</p>
  *
  * <p>ObjIterator is designed to be a lightweight, functional alternative to streams
  * for simple iteration scenarios. It provides lazy evaluation and can be more
@@ -70,13 +76,12 @@ import com.landawn.abacus.util.stream.Stream;
  * }</pre>
  *
  * @param <T> the type of elements returned by this iterator
- * @see ImmutableIterator
  * @see ObjListIterator
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
  * @see Throwables.Iterator
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
     /**
@@ -165,6 +170,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns an {@code ObjIterator} over the specified array.
      * The iterator traverses all elements of the array in order.
      * If the array is {@code null} or empty, an empty iterator is returned.
+     * A non-empty iterator reads elements directly from the supplied array; changes made to an
+     * element before that element is consumed are visible to the iteration.
+     *
+     * <p>Beware the usual varargs pitfall: {@code of((String) null)} yields a one-element iterator
+     * over {@code null}, whereas {@code of((String[]) null)} yields an empty iterator.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -190,6 +200,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * {@code toIndex} (exclusive). If the array is empty or the range is empty,
      * an empty iterator is returned. A {@code null} array is treated as length 0
      * for range validation, so only {@code fromIndex == toIndex == 0} is valid.
+     * A non-empty iterator reads elements directly from the supplied array; changes made to an
+     * element before that element is consumed are visible to the iteration.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -232,17 +244,19 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
             @Override
             public <A> A[] toArray(A[] output) {
+                N.requireNonNull(output, "a"); // match the base implementation's named check, not a bare JVM NPE
+
                 final int remaining = toIndex - cursor;
 
                 if (output.length < remaining) {
                     output = N.copyOf(output, remaining);
-                } else if (output.length > remaining) {
-                    // Collection.toArray(T[]) contract: when the array is larger than the
-                    // collection, set array[size()] to null as the end-of-data sentinel.
-                    output[remaining] = null;
                 }
 
                 N.copy(a, cursor, output, 0, remaining);
+
+                if (output.length > remaining) {
+                    output[remaining] = null;
+                }
 
                 cursor = toIndex; // Move cursor to the end after copying.
 
@@ -251,7 +265,13 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
             @Override
             public List<T> toList() {
-                return N.toList((T[]) toArray());
+                // N.toList(a, from, to) builds the ArrayList in a single copy; going through
+                // toArray() would allocate three (range copy -> Arrays.asList -> new ArrayList).
+                final List<T> ret = N.toList(a, cursor, toIndex);
+
+                cursor = toIndex; // Mark as exhausted; the helper does not advance the cursor.
+
+                return ret;
             }
         };
     }
@@ -276,6 +296,13 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * boolean none = empty.hasNext();   // returns false (null -> empty iterator)
      * }</pre>
      *
+     * <p>Exhaustion is deliberately <b>not</b> normalised: {@code next()} delegates straight to the wrapped
+     * iterator, so whatever it raises reaches the caller unchanged - a message-less
+     * {@link NoSuchElementException} from the JDK collections, or {@code IllegalStateException} /
+     * {@link java.util.ConcurrentModificationException} from other sources. Only the iterators this class
+     * builds itself, {@link #empty()} among them, report {@code InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX}. Do not
+     * match on the message or cause of an exhausted wrapper; test {@code hasNext()} instead.</p>
+     *
      * @param <T> the type of elements in the iterator
      * @param iter the {@code Iterator} to wrap
      * @return an {@code ObjIterator} wrapping the given iterator
@@ -293,6 +320,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
             @Override
             public T next() {
+                // No hasNext() guard: exhaustion is reported by the wrapped iterator, not normalised to
+                // ERROR_MSG_FOR_NO_SUCH_EX. Pinned by ObjIteratorTest; see of(Iterator) before re-adding one.
                 return iter.next();
             }
         };
@@ -348,7 +377,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * Returns an {@code ObjIterator} that defers creation of the underlying
      * iterator until the first call to {@code hasNext()} or {@code next()}.
      * This is useful for lazy initialization. If the supplier returns
-     * {@code null}, an empty iterator is used.
+     * {@code null}, an empty iterator is used - note that this differs from the primitive siblings
+     * ({@code IntIterator.defer(..)} and friends), which reject a {@code null} result with an
+     * {@link IllegalStateException}.
      * If initialization throws a runtime exception or error, that failure is cached and
      * rethrown on every subsequent access; the supplier is never invoked more than once.
      *
@@ -361,12 +392,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * // "Creating iterator" is printed only when hasNext() or next() is called
      * }</pre>
      *
+     * <p>Initialization happens on the returned iterator. Recursive access during initialization throws {@link IllegalStateException}; supplier runtime exceptions and errors are cached and rethrown by later iterator access.</p>
+     *
      * @param <T> the type of elements returned by this iterator
      * @param iteratorSupplier a {@code Supplier} that produces the {@code Iterator} when needed
      * @return an {@code ObjIterator} that lazily initializes using the supplier
-     * @throws IllegalStateException if the supplier recursively accesses this deferred iterator while it is being initialized
-     * @throws RuntimeException if the supplier throws a runtime exception when initialized
-     * @throws Error if the supplier throws an error when initialized
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static <T> ObjIterator<T> defer(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) throws IllegalArgumentException {
@@ -476,7 +506,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * finite generated sequences. Calling {@code next()} when {@code hasNext}
      * is {@code false} throws {@link NoSuchElementException}.
      * The {@code hasNext} supplier is called at most once per element; its result is cached
-     * until the next call to {@code next()}.
+     * until the next call to {@code next()}. Once {@code hasNext} has returned {@code false} the
+     * iterator is permanently exhausted: the condition is never re-evaluated, so the iterator does not
+     * resume even if the state it inspects changes later.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -530,7 +562,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * {@code next()} when {@code hasNext} returns {@code false} throws
      * {@link NoSuchElementException}.
      * The predicate result is cached until the corresponding element is consumed, so repeated
-     * {@code hasNext()} calls do not repeat predicate side effects.
+     * {@code hasNext()} calls do not repeat predicate side effects. Once {@code hasNext} has returned
+     * {@code false} the iterator is permanently exhausted: the predicate is never re-evaluated, so the
+     * iterator does not resume even if the state it inspects changes later.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -555,7 +589,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @return an {@code ObjIterator} that generates elements based on state
      * @throws IllegalArgumentException if any of {@code hasNext}, {@code supplier} is {@code null}.
      */
-    public static <T, U> ObjIterator<T> generate(final U init, final Predicate<? super U> hasNext, final Function<? super U, T> supplier)
+    public static <T, U> ObjIterator<T> generate(final U init, final Predicate<? super U> hasNext, final Function<? super U, ? extends T> supplier)
             throws IllegalArgumentException {
         N.checkArgNotNull(hasNext, cs.hasNext);
         N.checkArgNotNull(supplier, cs.supplier);
@@ -593,7 +627,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * before the first element is generated (and is also {@code null} after an actual
      * {@code null} element is generated). Calling {@code next()} when
      * {@code hasNext} returns {@code false} throws {@link NoSuchElementException}.
-     * The predicate result is cached until the corresponding element is consumed.
+     * The predicate result is cached until the corresponding element is consumed. Once {@code hasNext}
+     * has returned {@code false} the iterator is permanently exhausted: the predicate is never
+     * re-evaluated, so the iterator does not resume even if the state it inspects changes later.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -616,8 +652,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @return an {@code ObjIterator} that generates elements based on state and previous values
      * @throws IllegalArgumentException if any of {@code hasNext}, {@code supplier} is {@code null}.
      */
-    public static <T, U> ObjIterator<T> generate(final U init, final BiPredicate<? super U, T> hasNext, final BiFunction<? super U, T, T> supplier)
-            throws IllegalArgumentException {
+    public static <T, U> ObjIterator<T> generate(final U init, final BiPredicate<? super U, ? super T> hasNext,
+            final BiFunction<? super U, ? super T, ? extends T> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(hasNext, cs.hasNext);
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -677,6 +713,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
         return new ObjIterator<>() {
             private boolean skipped = false;
+            private long remaining = n;
 
             @Override
             public boolean hasNext() {
@@ -697,10 +734,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
             }
 
             private void skip() {
-                long idx = 0;
-
-                while (idx++ < n && iter.hasNext()) {
+                while (remaining > 0 && iter.hasNext()) {
                     iter.next();
+                    remaining--;
                 }
 
                 skipped = true;
@@ -750,8 +786,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final T result = iter.next();
                 cnt--;
-                return iter.next();
+                return result;
             }
         };
     }
@@ -777,7 +814,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @see #skip(long)
      * @see #limit(long)
      */
-    public ObjIterator<T> skipAndLimit(final long offset, final long count) {
+    public ObjIterator<T> skipAndLimit(final long offset, final long count) throws IllegalArgumentException {
         return Iterators.skipAndLimit(this, offset, count);
     }
 
@@ -822,8 +859,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see Iterators#map(Iterator, Function)
      */
-    @Beta
-    public <U> ObjIterator<U> map(final Function<? super T, U> mapper) throws IllegalArgumentException {
+    public <U> ObjIterator<U> map(final Function<? super T, ? extends U> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
         return Iterators.map(this, mapper);
@@ -900,7 +936,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *         or an empty {@code Optional} if none is found
      * @deprecated This method may leave the iterator in a partially consumed state;
      *         elements consumed before the first {@code non-null} element are discarded,
-     *         which can cause inconsistent results. Use {@link #skipNulls()} instead.
+     *         which can cause inconsistent results. Build the {@code non-null} view with
+     *         {@link #skipNulls()} instead and pull from it, e.g.
+     *         {@code ObjIterator<T> nonNulls = iter.skipNulls();} followed by
+     *         {@code nonNulls.hasNext() ? u.Optional.of(nonNulls.next()) : u.Optional.empty();} -
+     *         {@code skipNulls()} is lazy, so nothing is consumed until you pull.
      */
     @Deprecated
     public u.Optional<T> firstNonNull() {
@@ -980,9 +1020,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @param a the array into which the elements are stored, if it is big enough;
      *          otherwise a new array of the same runtime type is allocated
      * @return an array containing all remaining elements
-     * @throws NullPointerException if {@code a} is {@code null}
+     * @throws NullPointerException if {@code a} is {@code null}; rejected before consuming any elements
+     * @throws ArrayStoreException if a remaining element is not assignable to the runtime component type of {@code a}
      */
-    public <A> A[] toArray(final A[] a) {
+    public <A> A[] toArray(final A[] a) throws NullPointerException, ArrayStoreException {
+        N.requireNonNull(a, "a");
         return toList().toArray(a);
     }
 
@@ -1063,10 +1105,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * // Iterates over: Indexed(10, "a"), Indexed(11, "b"), Indexed(12, "c")
      * }</pre>
      *
+     * <p>The returned iterator throws {@link ArithmeticException} from {@code next()} if another element would require an index greater than {@link Long#MAX_VALUE}.</p>
+     *
      * @param startIndex the index to assign to the first element
      * @return a new {@code ObjIterator} of {@link Indexed} elements
      * @throws IllegalArgumentException if {@code startIndex} is negative.
-     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      * @see #indexed()
      */
     @Beta
@@ -1124,11 +1167,11 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to perform for each remaining element
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      * @see #foreachIndexed(Throwables.IntObjConsumer)
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachRemaining(final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         while (hasNext()) {
@@ -1154,13 +1197,14 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to perform for each element and its index
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws IllegalStateException if a remaining element would require an index greater than
      *         {@link Integer#MAX_VALUE}
      * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @see #foreachRemaining(Throwables.Consumer)
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachIndexed(final Throwables.IntObjConsumer<? super T, E> action)
+            throws IllegalArgumentException, IllegalStateException, E {
         N.checkArgNotNull(action, cs.action);
 
         int idx = 0;

@@ -23,6 +23,13 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * This interface provides methods for adding and retrieving objects from the pool with various
  * timeout and cleanup options.
  *
+ * <p>Timed operations include initial lock acquisition in their waiting budget and respond to
+ * interruption while acquiring that lock or waiting on a condition. Zero or negative timeouts
+ * make an immediate attempt. The timeout does not bound user callbacks, processing, or the
+ * lock reacquisition required when a condition wait finishes. With automatic destruction enabled,
+ * a failed add also waits to check whether the element remains pooled before deciding whether to
+ * destroy it; this ownership check and cleanup can finish after the timeout or interruption.</p>
+ *
  * <p>ObjectPool is designed for scenarios where you need to reuse expensive objects like:
  * <ul>
  *   <li>Database connections</li>
@@ -104,10 +111,10 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *
      * @param element the object to be added to the pool, must not be {@code null}
      * @return {@code true} if the object was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the element is null.
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the element is null.
      */
-    boolean add(E element);
+    boolean add(E element) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Adds a new object to the pool with optional automatic destruction on failure.
@@ -116,12 +123,14 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * <p><b>Execution Order:</b></p>
      * <ol>
      *   <li>Attempts to add the object to the pool using {@link #add(Poolable)}</li>
-     *   <li>If add fails and {@code autoDestroyOnFailedToAdd} is {@code true}, calls {@code element.destroy(PUT_ADD_FAILURE)}</li>
+     *   <li>If add fails and {@code autoDestroyOnFailedToAdd} is {@code true}, destroys the non-null element unless still pooled by identity</li>
      *   <li>Returns the success status of the add operation</li>
      * </ol>
      *
-     * <p>The destroy operation is guaranteed to execute in a finally block if the add fails,
-     * even if an exception occurs during the add attempt. This ensures no resource leaks.</p>
+     * <p>Cleanup is attempted in a finally block even if an exception occurs. A null element
+     * is ignored, and an instance still retained anywhere in this pool at the cleanup check is
+     * not destroyed. Callers must coordinate concurrent ownership transfers of the same instance;
+     * the check does not prevent a later admission by another thread.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -131,16 +140,24 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * }</pre>
      *
      * @param element the object to be added to the pool, must not be {@code null}
-     * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
+     * @param autoDestroyOnFailedToAdd if {@code true}, destroys a rejected non-null element unless
+     *        that same instance remains pooled at the cleanup check
      * @return {@code true} if the object was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the element is null.
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the element is null.
      */
-    boolean add(E element, boolean autoDestroyOnFailedToAdd);
+    boolean add(E element, boolean autoDestroyOnFailedToAdd) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Attempts to add an object to the pool, waiting if necessary for space to become available.
      * This method blocks until space is available, the timeout expires, or the thread is interrupted.
+     * Rejection of one waiting candidate allows other waiting candidates to proceed when space is available.
+     *
+     * <p>Waiting only happens when auto-balancing is disabled (or the capacity is {@code 0}). When
+     * auto-balancing is enabled (the {@link PoolFactory} default), a full pool is first balanced - a
+     * balance-factor share of the existing elements is detached and destroyed with
+     * {@link Poolable.Caller#VACATE} - and the element is inserted without waiting, so a full pool
+     * costs the caller's other pooled elements rather than time.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -158,11 +175,11 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @param unit the time unit of the timeout argument, must not be {@code null}
      * @return {@code true} if successful; {@code false} if the timeout elapsed before space was
      *         available, the element was already (or became) expired, or the memory measure rejected the element
-     * @throws IllegalArgumentException if the element or unit is null.
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the element or unit is null.
      * @throws InterruptedException if interrupted while waiting
      */
-    boolean add(E element, long timeout, TimeUnit unit) throws InterruptedException;
+    boolean add(E element, long timeout, TimeUnit unit) throws IllegalStateException, IllegalArgumentException, InterruptedException;
 
     /**
      * Attempts to add an object to the pool with timeout and automatic destruction on failure.
@@ -171,23 +188,26 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * <p><b>Execution Order:</b></p>
      * <ol>
      *   <li>Attempts to add the object to the pool using {@link #add(Poolable, long, TimeUnit)}, waiting up to the specified timeout</li>
-     *   <li>If add fails (timeout or capacity) and {@code autoDestroyOnFailedToAdd} is {@code true}, calls {@code element.destroy(PUT_ADD_FAILURE)}</li>
+     *   <li>If add fails (timeout or capacity) and {@code autoDestroyOnFailedToAdd} is {@code true}, destroys the non-null element unless still pooled by identity</li>
      *   <li>Returns the success status of the add operation</li>
      * </ol>
      *
-     * <p>The destroy operation is guaranteed to execute in a finally block if the add fails,
-     * even if an exception occurs during the add attempt. This ensures no resource leaks.</p>
+     * <p>Cleanup follows the identity-retention and concurrency rules of {@link #add(Poolable, boolean)},
+     * including when the admission throws. The ownership check may wait for the pool lock after
+     * timeout or interruption.</p>
      *
      * @param element the object to be added to the pool, must not be {@code null}
      * @param timeout the maximum time to wait for space to become available
      * @param unit the time unit of the timeout argument, must not be {@code null}
-     * @param autoDestroyOnFailedToAdd if {@code true}, calls element.destroy(PUT_ADD_FAILURE) if add fails
+     * @param autoDestroyOnFailedToAdd if {@code true}, destroys a rejected non-null element unless
+     *        that same instance remains pooled at the cleanup check
      * @return {@code true} if successful, {@code false} if timeout elapsed or add failed
-     * @throws IllegalArgumentException if the element or unit is null.
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the element or unit is null.
      * @throws InterruptedException if interrupted while waiting
      */
-    boolean add(E element, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToAdd) throws InterruptedException;
+    boolean add(E element, long timeout, TimeUnit unit, boolean autoDestroyOnFailedToAdd)
+            throws IllegalStateException, IllegalArgumentException, InterruptedException;
 
     /**
      * Retrieves and removes an object from the pool immediately, or returns {@code null} if the pool is empty.
@@ -218,7 +238,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @throws IllegalStateException if the pool has been closed
      */
     @MayReturnNull
-    E poll();
+    E poll() throws IllegalStateException;
 
     /**
      * Retrieves and removes an object from the pool, waiting if necessary for an object to become available.
@@ -250,7 +270,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @throws InterruptedException if interrupted while waiting
      */
     @MayReturnNull
-    E poll(long timeout, TimeUnit unit) throws InterruptedException;
+    E poll(long timeout, TimeUnit unit) throws IllegalStateException, IllegalArgumentException, InterruptedException;
 
     /**
      * Checks if the specified object is currently in the pool.
@@ -260,11 +280,18 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      * @return {@code true} if the pool contains the specified object, {@code false} otherwise
      * @throws IllegalStateException if the pool has been closed
      */
-    boolean contains(E element);
+    boolean contains(E element) throws IllegalStateException;
 
     /**
      * Interface for measuring the memory size of objects in the pool.
      * This allows the pool to enforce memory-based capacity limits in addition to count-based limits.
+     *
+     * <p><b>Serialization:</b> the measure is stored in a non-transient field of the pool, and every
+     * {@link Pool} is {@link java.io.Serializable}. A pool is therefore serializable only if every
+     * pooled element and the configured measure are {@code Serializable}; a lambda measure must be
+     * declared with an intersection cast such as
+     * {@code (ObjectPool.MemoryMeasure<E> & Serializable) e -> e.size()}, otherwise serializing the
+     * pool fails with {@link java.io.NotSerializableException}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -291,6 +318,15 @@ public interface ObjectPool<E extends Poolable> extends Pool {
         /**
          * Calculates the memory size of the given object in bytes.
          * The returned value is used to track total memory usage and enforce memory limits.
+         * The pool retains a separate charge for each successful admission and subtracts that charge
+         * on removal without measuring again. Mutating an admitted object does not change its charge;
+         * returning it to the pool measures it again. Totals must remain representable as a {@code long},
+         * even when no memory limit is configured.
+         *
+         * <p>Each eligible add attempt measures once before it acquires the pool lock, including
+         * attempts later rejected for capacity or timeout. Timed adds retain this sample while
+         * waiting. Measures must support concurrent calls; this admission does not hold the pool
+         * lock while measuring (unless its caller already holds that lock).</p>
          *
          * @param element the object to measure, never {@code null} when called by the pool
          * @return the size of the object in bytes, should be non-negative

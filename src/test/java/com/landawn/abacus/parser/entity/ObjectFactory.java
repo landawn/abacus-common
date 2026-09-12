@@ -2,12 +2,14 @@ package com.landawn.abacus.parser.entity;
 
 import javax.xml.namespace.QName;
 
+import com.landawn.abacus.TestBase;
+
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.annotation.XmlElementDecl;
 import jakarta.xml.bind.annotation.XmlRegistry;
 
 @XmlRegistry
-public class ObjectFactory {
+public class ObjectFactory extends TestBase {
     private static final QName _XBean_QNAME = new QName("http://abacus.landawn.com/parser", "persons");
 
     public ObjectFactory() {

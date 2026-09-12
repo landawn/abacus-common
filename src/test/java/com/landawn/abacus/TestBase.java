@@ -204,6 +204,7 @@ public abstract class TestBase {
         }
     }
 
+    @SafeVarargs
     public static <T> Iterable<T> createIterable(final T... a) {
         return () -> N.toList(a).iterator();
     }

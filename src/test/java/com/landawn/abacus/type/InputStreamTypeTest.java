@@ -12,9 +12,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
@@ -32,6 +36,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.N;
 
 public class InputStreamTypeTest extends TestBase {
 
@@ -211,5 +216,68 @@ public class InputStreamTypeTest extends TestBase {
         stream = new ByteArrayInputStream(new byte[0]);
         inputStreamType.serializeTo(characterWriter, stream, config);
         assertNotNull(stream);
+    }
+
+    // ---- review fixes 2026-09-06: T3-05 valueOf(Object) with a byte[] wraps the raw bytes ----
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectByteArrayWrapsRawBytes() throws IOException {
+        final byte[] bytes = { 1, 2, 3 };
+
+        // raw bytes, not the array's list text "[1, 2, 3]"
+        assertArrayEquals(bytes, inputStreamType.valueOf((Object) bytes).readAllBytes());
+        assertArrayEquals(new byte[0], inputStreamType.valueOf((Object) new byte[0]).readAllBytes());
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectByteArrayHonoursTheHandledStreamClass() throws IOException {
+        final byte[] bytes = { 1, 2, 3 };
+
+        final InputStream bais = Type.of(ByteArrayInputStream.class).valueOf((Object) bytes);
+        assertTrue(bais instanceof ByteArrayInputStream);
+        assertArrayEquals(bytes, bais.readAllBytes());
+
+        final InputStream buffered = Type.of(BufferedInputStream.class).valueOf((Object) bytes);
+        assertTrue(buffered instanceof BufferedInputStream);
+        assertArrayEquals(bytes, buffered.readAllBytes());
+
+        final InputStream data = Type.of(DataInputStream.class).valueOf((Object) bytes);
+        assertTrue(data instanceof DataInputStream);
+        assertArrayEquals(bytes, data.readAllBytes());
+
+        final InputStream pushback = Type.of(PushbackInputStream.class).valueOf((Object) bytes);
+        assertTrue(pushback instanceof PushbackInputStream);
+        assertArrayEquals(bytes, pushback.readAllBytes());
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectByteArrayUnsupportedStreamClassStillThrows() {
+        assertThrows(UnsupportedOperationException.class, () -> Type.of(FileInputStream.class).valueOf((Object) new byte[] { 1 }));
+        assertThrows(UnsupportedOperationException.class, () -> Type.of(FileInputStream.class).valueOf("x"));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectByteArrayIsCharsetIndependentOnAsciiHandler() throws IOException {
+        final byte[] nonAscii = { (byte) 0xC3, (byte) 0xA9, (byte) 0xFF, 0 };
+        final Type<InputStream> ascii = createType(AsciiStreamType.ASCII_STREAM);
+
+        assertArrayEquals(nonAscii, ascii.valueOf((Object) nonAscii).readAllBytes());
+        assertArrayEquals(nonAscii, inputStreamType.valueOf((Object) nonAscii).readAllBytes());
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectStringRouteUnchanged() throws IOException {
+        assertArrayEquals("hé".getBytes(StandardCharsets.UTF_8), inputStreamType.valueOf((Object) "hé").readAllBytes());
+        assertArrayEquals("7".getBytes(StandardCharsets.UTF_8), inputStreamType.valueOf((Object) 7).readAllBytes());
+        assertNull(inputStreamType.valueOf((Object) null));
+    }
+
+    @Test
+    public void reviewFixes20260906_convertByteArrayToStreamSubclasses() throws IOException {
+        final byte[] bytes = { 1, 2, 3 };
+
+        assertArrayEquals(bytes, N.convert(bytes, InputStream.class).readAllBytes());
+        assertArrayEquals(bytes, N.convert(bytes, ByteArrayInputStream.class).readAllBytes());
+        assertArrayEquals(bytes, N.convert(bytes, BufferedInputStream.class).readAllBytes());
     }
 }

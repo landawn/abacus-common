@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -267,4 +268,21 @@ public class PrimitiveLongArrayTypeTest extends TestBase {
         assertTrue(type.isPrimitiveArray());
     }
 
+
+    @Test
+    public void reviewFixes20260906_valueOfExceptionTypesForOverflowEmptyAndInvalidElements() {
+        assertArrayEquals(new long[] { Long.MAX_VALUE, Long.MIN_VALUE, 0L }, type.valueOf("[9223372036854775807, -9223372036854775808, 0]"));
+
+        // one past the range is ArithmeticException (not NumberFormatException, which is what the javadoc used to claim)
+        assertThrows(ArithmeticException.class, () -> type.valueOf("[9223372036854775808]"));
+        assertThrows(ArithmeticException.class, () -> type.valueOf("[-9223372036854775809]"));
+        assertThrows(ArithmeticException.class, () -> type.valueOf("[1, 9223372036854775808]"));
+
+        // an empty / whitespace-only element is IllegalArgumentException from split (exact class, not a subclass)
+        assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,,2]")).getClass());
+        assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1, ]")).getClass());
+
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[x]"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[1, null]"));
+    }
 }

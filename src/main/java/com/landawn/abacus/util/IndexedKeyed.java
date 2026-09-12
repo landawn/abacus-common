@@ -20,6 +20,9 @@ package com.landawn.abacus.util;
  * <p>This type extends {@link Keyed} and adds positional information. Equality and hash code are
  * based on {@code index} and {@code key} only; {@code val} is intentionally ignored.</p>
  *
+ * <p><b>&#9888;&#65039; Array keys compare by identity</b>, exactly as in {@link Keyed}; wrap an array
+ * key in {@link Wrapper#of(Object)} first if you need content-based equality.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedKeyed<String, Integer> indexed = IndexedKeyed.of("user123", 42, 0);
@@ -71,10 +74,13 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * @param <T> the type of the value component
      * @param key the key component (can be {@code null})
      * @param val the value component (can be {@code null})
-     * @param index the index component
+     * @param index the index component; must not be negative
      * @return a new immutable {@code IndexedKeyed} containing the specified key, value, and index
+     * @throws IllegalArgumentException if {@code index} is negative
      */
-    public static <K, T> IndexedKeyed<K, T> of(final K key, final T val, final int index) {
+    public static <K, T> IndexedKeyed<K, T> of(final K key, final T val, final int index) throws IllegalArgumentException {
+        N.checkArgNotNegative(index, cs.index);
+
         return new IndexedKeyed<>(key, val, index);
     }
 
@@ -120,7 +126,7 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
             return true;
         }
 
-        if (obj instanceof IndexedKeyed another) {
+        if (obj instanceof IndexedKeyed<?, ?> another) {
             return N.equals(another.index, index) && N.equals(another.key, key);
         }
 

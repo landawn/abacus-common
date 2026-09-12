@@ -16,6 +16,10 @@
 
 package com.landawn.abacus.util;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -196,7 +200,9 @@ import com.landawn.abacus.util.stream.LongStream;
  * <ul>
  *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
  *   <li><b>Version Identifier:</b> Declares a {@code serialVersionUID}; this does not by itself guarantee compatibility with future field changes</li>
- *   <li><b>Default Format:</b> Uses Java's default serialization, including the current backing-array capacity</li>
+ *   <li><b>Serialized Form:</b> A custom {@code writeObject} writes only the elements in
+ *       {@code [0, size())}, so spare capacity is never emitted; {@code readObject} rejects a stream whose
+ *       {@code size} does not fit its {@code elementData}</li>
  *   <li><b>Cross-Platform:</b> Platform-independent serialized format</li>
  * </ul>
  *
@@ -210,7 +216,7 @@ import com.landawn.abacus.util.stream.LongStream;
  *
  * <p><b>Mathematical and Statistical Operations:</b>
  * <ul>
- *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
+ *   <li><b>Aggregation:</b> Sum, min, max via the stream API; {@link LongStream#sum()} accumulates in a {@code long} and wraps silently on overflow</li>
  *   <li><b>Central Tendency:</b> Lower-median calculation</li>
  *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Duplicate Detection:</b> {@code containsDuplicates()}, {@code removeDuplicates()}</li>
@@ -221,7 +227,7 @@ import com.landawn.abacus.util.stream.LongStream;
  *   <li><b>vs List&lt;Long&gt;:</b> Avoids boxing in primitive operations; measure end-to-end performance for the intended workload</li>
  *   <li><b>vs long[]:</b> Dynamic sizing, rich API, set operations, statistical functions</li>
  *   <li><b>vs ArrayList&lt;Long&gt;:</b> Primitive storage and primitive-specific core methods</li>
- *   <li><b>vs IntList:</b> Double the range, suitable for large identifiers and timestamps</li>
+ *   <li><b>vs IntList:</b> Twice the bit width, suitable for large identifiers and timestamps</li>
  * </ul>
  *
  * <p><b>Best Practices:</b>
@@ -354,7 +360,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws IllegalArgumentException if the specified initial capacity is negative.
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
-    public LongList(final int initialCapacity) throws IllegalArgumentException {
+    public LongList(final int initialCapacity) throws IllegalArgumentException, OutOfMemoryError {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
 
         elementData = initialCapacity == 0 ? N.EMPTY_LONG_ARRAY : new long[initialCapacity];
@@ -375,14 +381,14 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * list.get(0);          // returns 1
      * a[0] = 99L;           // backing array is shared
      * list.get(0);          // returns 99
-     * new LongList(null);   // throws NullPointerException
+     * new LongList(null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param a the array whose elements are to be placed into this list.
-     * @throws NullPointerException if {@code a} is {@code null}
+     * @throws IllegalArgumentException if {@code a} is {@code null}
      */
-    public LongList(final long[] a) {
-        this(N.requireNonNull(a), a.length);
+    public LongList(final long[] a) throws IllegalArgumentException {
+        this(N.checkArgNotNull(a, cs.a), a.length);
     }
 
     /**
@@ -406,10 +412,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param a the array to be used as the internal storage for this list.
      * @param size the number of elements in the list, must be between 0 and {@code a.length} (inclusive)
-     * @throws IndexOutOfBoundsException if {@code size} is negative or greater than {@code a.length}
-     * @throws NullPointerException if {@code a} is {@code null}
+     * @throws IllegalArgumentException if {@code a} is {@code null}
+     *         or if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code size} is greater than the array length
      */
-    public LongList(final long[] a, final int size) throws IndexOutOfBoundsException {
+    public LongList(final long[] a, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(a, cs.a);
         N.checkFromIndexSize(0, size, a.length);
 
         elementData = a;
@@ -455,9 +463,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param size the number of elements from the array to include in the list.
      *             Must be between 0 and the array length (inclusive).
      * @return a new LongList containing the first {@code size} elements of the specified array
-     * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
+     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code size} is greater than the array length
      */
-    public static LongList of(final long[] a, final int size) throws IndexOutOfBoundsException {
+    public static LongList of(final long[] a, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
 
         return new LongList(N.nullToEmpty(a), size);
@@ -502,15 +511,16 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * LongList.copyOf(a, 1, 6);                   // throws IndexOutOfBoundsException
      * }</pre>
      *
-     * @param a the array from which a range is to be copied.
+     * @param a the array from which a range is to be copied; must not be {@code null}, unlike {@link #copyOf(long[])}
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new LongList containing a copy of the elements in the specified range
-     * @throws NullPointerException if {@code a} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
-     *                                   or {@code fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code a} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > a.length}
      */
-    public static LongList copyOf(final long[] a, final int fromIndex, final int toIndex) {
+    public static LongList copyOf(final long[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(a, cs.a);
+
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
@@ -534,7 +544,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *         {@code startInclusive >= endExclusive}
      * @throws IllegalArgumentException if the number of elements in the range exceeds {@code Integer.MAX_VALUE}.
      */
-    public static LongList range(final long startInclusive, final long endExclusive) {
+    public static LongList range(final long startInclusive, final long endExclusive) throws IllegalArgumentException {
         return of(Array.range(startInclusive, endExclusive));
     }
 
@@ -558,7 +568,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws IllegalArgumentException if {@code by} is zero, or if the number of elements in the range exceeds
      *         {@code Integer.MAX_VALUE}.
      */
-    public static LongList range(final long startInclusive, final long endExclusive, final long by) {
+    public static LongList range(final long startInclusive, final long endExclusive, final long by) throws IllegalArgumentException {
         return of(Array.range(startInclusive, endExclusive, by));
     }
 
@@ -583,7 +593,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *         {@code startInclusive > endInclusive}
      * @throws IllegalArgumentException if the number of elements in the range exceeds {@code Integer.MAX_VALUE}.
      */
-    public static LongList rangeClosed(final long startInclusive, final long endInclusive) {
+    public static LongList rangeClosed(final long startInclusive, final long endInclusive) throws IllegalArgumentException {
         return of(Array.rangeClosed(startInclusive, endInclusive));
     }
 
@@ -608,7 +618,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @throws IllegalArgumentException if {@code by} is zero, or if the number of elements in the range exceeds
      *         {@code Integer.MAX_VALUE}.
      */
-    public static LongList rangeClosed(final long startInclusive, final long endInclusive, final long by) {
+    public static LongList rangeClosed(final long startInclusive, final long endInclusive, final long by) throws IllegalArgumentException {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
     }
 
@@ -627,7 +637,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return a new LongList containing the repeated elements
      * @throws IllegalArgumentException if len is negative.
      */
-    public static LongList repeat(final long element, final int len) {
+    public static LongList repeat(final long element, final int len) throws IllegalArgumentException {
         return of(Array.repeat(element, len));
     }
 
@@ -645,11 +655,16 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * LongList.random(-1);   // throws NegativeArraySizeException
      * }</pre>
      *
+     * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
+     * deliberate, but it is roughly two orders of magnitude slower than
+     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
+     * and wrap it with {@code of(..)}.</p>
+     *
      * @param len the number of random elements to generate. Must be non-negative.
      * @return a new LongList containing random long values
      * @throws NegativeArraySizeException if {@code len} is negative
      */
-    public static LongList random(final int len) {
+    public static LongList random(final int len) throws NegativeArraySizeException {
         final long[] a = new long[len];
 
         for (int i = 0; i < len; i++) {
@@ -697,7 +712,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
-    public long get(final int index) {
+    public long get(final int index) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         return elementData[index];
@@ -719,7 +734,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
-    public long set(final int index, final long e) {
+    public long set(final int index, final long e) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         final long oldValue = elementData[index];
@@ -747,8 +762,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * }</pre>
      *
      * @param e the long value to be appended to this list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void add(final long e) {
+    public void add(final long e) throws OutOfMemoryError {
         ensureCapacity(size + 1);
 
         elementData[size++] = e;
@@ -777,8 +793,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param e the long value to be inserted
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void add(final int index, final long e) {
+    public void add(final int index, final long e) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         ensureCapacity(size + 1);
@@ -803,9 +820,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param c the LongList containing elements to be added to this list
      * @return {@code true} if this list changed as a result of the call
      *         (returns {@code false} if {@code c} is {@code null} or empty)
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final LongList c) {
+    public boolean addAll(final LongList c) throws OutOfMemoryError {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -834,9 +852,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *         (returns {@code false} if {@code c} is {@code null} or empty)
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final int index, final LongList c) {
+    public boolean addAll(final int index, final LongList c) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(c)) {
@@ -868,9 +887,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param a the array containing elements to be added to this list
      * @return {@code true} if this list changed as a result of the call,
      *         {@code false} if {@code a} is {@code null} or empty
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final long[] a) {
+    public boolean addAll(final long[] a) throws OutOfMemoryError {
         return addAll(size(), a);
     }
 
@@ -887,9 +907,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *         (returns {@code false} if the specified array is {@code null} or empty)
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final int index, final long[] a) {
+    public boolean addAll(final int index, final long[] a) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(a)) {
@@ -913,7 +934,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return true;
     }
 
-    private void rangeCheckForAdd(final int index) {
+    /**
+     * @throws IndexOutOfBoundsException if {@code index < 0} or {@code index > size()}
+     */
+    private void rangeCheckForAdd(final int index) throws IndexOutOfBoundsException {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -1009,7 +1033,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Every element in this list whose value appears anywhere in {@code c} is removed,
      * regardless of how many times it appears in either list.
      *
-     * @param c the LongList containing values to be removed from this list
+     * @param c the LongList containing values to be removed from this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list was modified as a result of the call
      */
     @Override
@@ -1026,7 +1051,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Every element in this list whose value appears anywhere in {@code a} is removed,
      * regardless of how many times it appears in either source.
      *
-     * @param a the array containing values to be removed from this list
+     * @param a the array containing values to be removed from this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list was modified as a result of the call
      */
     @Override
@@ -1052,6 +1078,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * boolean noChange = list.removeIf(i -> i > 99);   // returns false; list unchanged
      * }</pre>
      *
+     * <p>The list is left unchanged if {@code p} throws: no element is moved until every
+     * {@code p.test(..)} call has returned. Nothing is allocated when no element matches.</p>
+     *
      * @param p the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed from this list
      * @throws IllegalArgumentException if {@code p} is {@code null}.
@@ -1059,21 +1088,39 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     public boolean removeIf(final LongPredicate p) throws IllegalArgumentException {
         N.checkArgNotNull(p, cs.p);
 
-        final LongList tmp = new LongList(size());
+        // Split into locate-then-compact so the list is left untouched if the predicate throws:
+        // no element is moved until every p.test(..) call has returned. Nothing is allocated
+        // unless at least one element matches, and the marker set costs one bit per element.
+        int first = 0;
 
-        for (int i = 0; i < size; i++) {
-            if (!p.test(elementData[i])) {
-                tmp.add(elementData[i]);
-            }
+        while (first < size && !p.test(elementData[first])) {
+            first++;
         }
 
-        if (tmp.size() == size()) {
+        if (first == size) {
             return false;
         }
 
-        N.copy(tmp.elementData, 0, elementData, 0, tmp.size());
-        N.fill(elementData, tmp.size(), size, 0);
-        size = tmp.size;
+        // bit k of removed[] corresponds to element (first + k); bit 0 is the match just found
+        final long[] removed = new long[((size - first) >> 6) + 1];
+        removed[0] |= 1L;
+
+        for (int i = first + 1; i < size; i++) {
+            if (p.test(elementData[i])) {
+                removed[(i - first) >> 6] |= 1L << (i - first);
+            }
+        }
+
+        int w = first;
+
+        for (int i = first + 1; i < size; i++) {
+            if ((removed[(i - first) >> 6] & (1L << (i - first))) == 0) {
+                elementData[w++] = elementData[i];
+            }
+        }
+
+        N.fill(elementData, w, size, 0);
+        size = w;
 
         return true;
     }
@@ -1132,7 +1179,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>If the specified list is {@code null} or empty, all elements are removed from this list.</p>
      *
-     * @param c the LongList containing elements to be retained in this list
+     * @param c the LongList containing elements to be retained in this list.
+     *          If {@code null} or empty, all elements of this list are removed
      * @return {@code true} if this list was modified as a result of the call
      */
     @Override
@@ -1154,7 +1202,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>If the specified array is {@code null} or empty, all elements are removed from this list.</p>
      *
-     * @param a the array containing elements to be retained in this list
+     * @param a the array containing elements to be retained in this list.
+     *          If {@code null} or empty, all elements of this list are removed
      * @return {@code true} if this list was modified as a result of the call
      */
     @Override
@@ -1180,7 +1229,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
         int w = 0;
 
-        if (c.size() > 3 && size() > 9) {
+        // Compaction must not change membership when another list wraps the same array.
+        if (elementData == c.elementData || needToSet(size(), c.size())) {
             final Set<Long> set = c.toSet();
 
             for (int i = 0; i < size; i++) {
@@ -1230,7 +1280,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @see #removeAllAt(int...)
      * @see #remove(long)
      */
-    public long removeAt(final int index) {
+    public long removeAt(final int index) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         final long oldValue = elementData[index];
@@ -1254,7 +1304,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @see #removeAt(int)
      */
     @Override
-    public void removeAllAt(final int... indices) {
+    public void removeAllAt(final int... indices) throws IndexOutOfBoundsException {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -1272,8 +1322,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param fromIndex the index of the first element to be removed (inclusive)
      * @param toIndex the index after the last element to be removed (exclusive)
-     * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range
-     *         ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public void removeRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1316,7 +1365,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *         {@code newPositionAfterMove} would cause elements to be placed outside the list
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
 
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
@@ -1331,13 +1380,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param fromIndex the index of the first element to replace (inclusive)
      * @param toIndex the index after the last element to replace (exclusive)
-     * @param replacement the LongList whose elements will replace the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range
-     *         ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
+     * @param replacement the LongList whose elements will replace the specified range.
+     *                    If {@code null} or empty, the range is simply removed (no elements are inserted)
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
-    public void replaceRange(final int fromIndex, final int toIndex, final LongList replacement) throws IndexOutOfBoundsException {
+    public void replaceRange(final int fromIndex, final int toIndex, final LongList replacement) throws IndexOutOfBoundsException, OutOfMemoryError {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
@@ -1350,13 +1399,15 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.size();
 
         if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError("Required capacity is too large: " + newSizeLong + " > " + MAX_ARRAY_SIZE);
         }
 
         final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
-            elementData = N.copyOf(elementData, newSize);
+            // Grow with the same amortized policy ensureCapacity uses. Sizing the array to exactly
+            // newSize would make a loop of growing replaceRange calls reallocate and copy every time.
+            elementData = N.copyOf(elementData, calNewCapacity(newSize, elementData.length));
         }
 
         if (toIndex - fromIndex != replacement.size() && toIndex != size) {
@@ -1381,13 +1432,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param fromIndex the index of the first element to replace (inclusive)
      * @param toIndex the index after the last element to replace (exclusive)
-     * @param replacement the array whose elements will replace the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range
-     *         ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
+     * @param replacement the array whose elements will replace the specified range.
+     *                    If {@code null} or empty, the range is simply removed (no elements are inserted)
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
-    public void replaceRange(final int fromIndex, final int toIndex, final long[] replacement) throws IndexOutOfBoundsException {
+    public void replaceRange(final int fromIndex, final int toIndex, final long[] replacement) throws IndexOutOfBoundsException, OutOfMemoryError {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
@@ -1400,13 +1451,15 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.length;
 
         if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError("Required capacity is too large: " + newSizeLong + " > " + MAX_ARRAY_SIZE);
         }
 
         final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
-            elementData = N.copyOf(elementData, newSize);
+            // Grow with the same amortized policy ensureCapacity uses. Sizing the array to exactly
+            // newSize would make a loop of growing replaceRange calls reallocate and copy every time.
+            elementData = N.copyOf(elementData, calNewCapacity(newSize, elementData.length));
         }
 
         if (toIndex - fromIndex != replacement.length && toIndex != size) {
@@ -1550,8 +1603,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param fromIndex the index of the first element to fill (inclusive)
      * @param toIndex the index after the last element to fill (exclusive)
      * @param val the value to fill the range with
-     * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range
-     *         ({@code fromIndex < 0 || toIndex > size() || fromIndex > toIndex})
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public void fill(final int fromIndex, final int toIndex, final long val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1586,7 +1638,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>Returns {@code true} if this list contains at least one element that is also
      * present in the specified list.
      *
-     * @param c the LongList to check for common elements
+     * @param c the LongList to check for common elements.
+     *          If {@code null} or empty, {@code false} is returned
      * @return {@code true} if this list contains any element from the specified list
      */
     @Override
@@ -1604,7 +1657,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>Returns {@code true} if this list contains at least one element that is also
      * present in the specified array.
      *
-     * @param a the array to check for common elements
+     * @param a the array to check for common elements.
+     *          If {@code null} or empty, {@code false} is returned
      * @return {@code true} if this list contains any element from the specified array
      */
     @Override
@@ -1622,7 +1676,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>Returns {@code true} only if every distinct element in the specified list is also
      * present in this list. The frequency of elements is not considered; only presence is checked.</p>
      *
-     * @param c the LongList to check for containment
+     * @param c the LongList to check for containment.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list contains all distinct elements from the specified list
      */
     @Override
@@ -1658,7 +1713,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>Returns {@code true} only if every distinct element in the specified array is also
      * present in this list. The frequency of elements is not considered; only presence is checked.</p>
      *
-     * @param a the array to check for containment
+     * @param a the array to check for containment.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list contains all distinct elements from the specified array
      */
     @Override
@@ -1678,7 +1734,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>Two lists are disjoint if they share no common elements. Empty lists are
      * disjoint with all lists (including other empty lists).
      *
-     * @param c the LongList to check for common elements
+     * @param c the LongList to check for common elements.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list and the specified list have no elements in common
      */
     @Override
@@ -1712,7 +1769,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>This list and the array are disjoint if they share no common elements.
      * Empty lists are disjoint with all arrays (including empty arrays).
      *
-     * @param b the array to check for common elements
+     * @param b the array to check for common elements.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list and the specified array have no elements in common
      */
     @Override
@@ -1744,7 +1802,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param b the list to find common elements with this list
      * @return a new LongList containing elements present in both this list and the specified list,
      *         considering the minimum number of occurrences in either list.
-     *         Returns an empty list if either list is empty.
+     *         Returns an empty list if the specified list is {@code null} or empty, or if this list is empty.
      * @see #intersection(long[])
      * @see #difference(LongList)
      * @see #symmetricDifference(LongList)
@@ -1906,6 +1964,16 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * // - 4L appears only in list2, so it remains
      * }</pre>
      *
+     * <p><b>Ordering of the second operand's contributions.</b> Occurrences of equal values are
+     * interchangeable, so when a value survives {@code n} times, those {@code n} occurrences are taken from
+     * that value's <i>earliest</i> positions in the second operand and emitted in index order. This appended
+     * portion is a subsequence of the second operand by value, but the complete result is not necessarily equal to
+     * {@code difference(b)}
+     * followed by {@code b.difference(this)} when the second operand holds duplicates of a partially
+     * cancelled value. For example {@code LongList.of(2L).symmetricDifference(LongList.of(2L, 1L, 2L))}
+     * returns {@code [2, 1]}, whereas concatenating the two differences would give {@code [1, 2]};
+     * both contain the same elements.</p>
+     *
      * @param b the list to compare with this list for symmetric difference
      * @return a new LongList containing elements that are present in either this list or the specified list,
      *         but not in both, considering the number of occurrences.
@@ -1967,6 +2035,16 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * // - 2L appears once in list1 and twice in array, so one occurrence remains
      * // - 4L appears only in array, so it remains
      * }</pre>
+     *
+     * <p><b>Ordering of the second operand's contributions.</b> Occurrences of equal values are
+     * interchangeable, so when a value survives {@code n} times, those {@code n} occurrences are taken from
+     * that value's <i>earliest</i> positions in the second operand and emitted in index order. This appended
+     * portion is a subsequence of the second operand by value, but the complete result is not necessarily equal to
+     * {@code difference(b)}
+     * followed by {@code b.difference(this)} when the second operand holds duplicates of a partially
+     * cancelled value. For example {@code LongList.of(2L).symmetricDifference(LongList.of(2L, 1L, 2L))}
+     * returns {@code [2, 1]}, whereas concatenating the two differences would give {@code [1, 2]};
+     * both contain the same elements.</p>
      *
      * @param b the array to compare with this list for symmetric difference
      * @return a new LongList containing elements that are present in either this list or the specified array,
@@ -2179,8 +2257,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param toIndex the ending index of the range (exclusive)
      * @return an {@code OptionalLong} containing the minimum element in the specified range,
      *         or an empty {@code OptionalLong} if the range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public OptionalLong min(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2227,8 +2304,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param toIndex the ending index of the range (exclusive)
      * @return an {@code OptionalLong} containing the maximum element in the specified range,
      *         or an empty {@code OptionalLong} if the range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public OptionalLong max(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2246,7 +2322,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(5L, 2L, 8L, 1L, 9L);
-     * OptionalLong median = list.lowerMedian();  // returns sorted: [1, 2, 5, 8, 9]; median = OptionalLong[5]
+     * OptionalLong median = list.lowerMedian();  // sorted order would be [1, 2, 5, 8, 9], so median = OptionalLong[5]; the list is not reordered
      * }</pre>
      *
      * @return an OptionalLong containing the median value if the list is non-empty, or an empty OptionalLong if the list is empty
@@ -2271,7 +2347,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return an OptionalLong containing the median value if the range is non-empty, or an empty OptionalLong if the range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public OptionalLong lowerMedian(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2308,13 +2384,15 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p>
      * The range is defined by {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      * If {@code fromIndex} is less than {@code toIndex}, the action is performed on elements
-     * in ascending order. If {@code fromIndex} is greater than {@code toIndex}, the action
-     * is performed on elements in descending order. If {@code fromIndex} equals {@code toIndex},
-     * no action is performed.
+     * in ascending order. If {@code fromIndex} is greater than {@code toIndex}, the action is performed on
+     * elements in descending order, starting at {@code fromIndex} clamped to the last element: the bounds
+     * check accepts {@code fromIndex == size()}, which starts at {@code size() - 1}. If {@code fromIndex}
+     * equals {@code toIndex}, no action is performed.
      * </p>
      * <p>
      * Special case: if {@code toIndex} is -1 and {@code fromIndex} is greater than -1,
-     * the iteration starts from {@code fromIndex} and goes backwards to index 0.
+     * the iteration starts from {@code fromIndex} (subject to the same clamp, so {@code fromIndex == size()}
+     * starts at {@code size() - 1}) and goes backwards to index 0 inclusive.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2333,7 +2411,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for reverse iteration to index 0
      * @param action the action to be performed for each element.
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or {@code max(fromIndex, toIndex) > size()}; {@code toIndex == -1} selects reverse traversal through index zero.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final int fromIndex, final int toIndex, final LongConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -2404,8 +2482,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
      * @return a new {@code LongList} containing only the distinct elements from the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public LongList distinct(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2545,8 +2622,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *         as the point at which the key would be inserted into the range: the index
      *         of the first element in the range greater than the key, or {@code toIndex}
      *         if all elements in the range are less than the specified key
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public int binarySearch(final int fromIndex, final int toIndex, final long valueToFind) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2579,8 +2655,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @param fromIndex the starting index of the range to reverse (inclusive)
      * @param toIndex the ending index of the range to reverse (exclusive)
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2594,7 +2669,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     /**
      * Rotates all elements in this list by the specified distance.
      * After calling rotate(distance), the element at index i will be moved to
-     * index (i + distance) % size.
+     * index {@code Math.floorMod((long) i + distance, size())} when the list is non-empty.
      *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).
@@ -2618,6 +2693,12 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * After this method returns, the elements will be in random order.
      * Each permutation of the list elements is equally likely.
      * </p>
+     *
+     * <p>The source is {@link java.util.concurrent.ThreadLocalRandom}, which is <b>not</b>
+     * cryptographically secure. Note that this is a <i>different</i> generator from the one the
+     * {@code random(..)} factories use; call {@link #shuffle(Random)} with a
+     * {@link java.security.SecureRandom} when the permutation must be unpredictable.</p>
+     *
      */
     @Override
     public void shuffle() {
@@ -2659,7 +2740,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *         is out of range ({@code i < 0 || i >= size() || j < 0 || j >= size()})
      */
     @Override
-    public void swap(final int i, final int j) {
+    public void swap(final int i, final int j) throws IndexOutOfBoundsException {
         rangeCheck(i);
         rangeCheck(j);
 
@@ -2692,8 +2773,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param fromIndex the starting index of the range to copy (inclusive)
      * @param toIndex the ending index of the range to copy (exclusive)
      * @return a new {@code LongList} containing a copy of the elements in the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public LongList copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2717,16 +2797,20 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * {@code fromIndex == size()} starts at the last logical element. The step value must not be zero.
      * </p>
      *
+     * <p>If the sign of {@code step} contradicts the direction of the range — a positive step with
+     * {@code fromIndex > toIndex}, or a negative step with {@code fromIndex < toIndex} — the result is an
+     * empty list rather than an exception. Only {@code step == 0} is rejected.</p>
+     *
      * @param fromIndex the starting index of the range to copy (inclusive)
      * @param toIndex the ending index of the range to copy (exclusive)
      * @param step the step size for selecting elements (must not be zero)
      * @return a new {@code LongList} containing elements from the specified range at the specified intervals
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or {@code max(fromIndex, toIndex) > size()}; {@code toIndex == -1} is permitted for reverse traversal.
      * @throws IllegalArgumentException if {@code step} is zero.
      * @see N#copyOfRange(long[], int, int, int)
      */
     @Override
-    public LongList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
+    public LongList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
         if (size == 0) {
@@ -2756,12 +2840,11 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param toIndex the ending index of the range to split (exclusive)
      * @param chunkSize the desired size of each subsequence (must be positive)
      * @return a list of {@code LongList} instances, each containing a subsequence of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws IllegalArgumentException if {@code chunkSize} is not positive.
      */
     @Override
-    public List<LongList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
+    public List<LongList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
 
         final List<long[]> arrays = N.split(elementData, fromIndex, toIndex, chunkSize);
@@ -2784,6 +2867,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * @return this list instance (for method chaining)
      */
+    @Beta
     @Override
     public LongList trimToSize() {
         if (elementData.length > size) {
@@ -2851,8 +2935,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
      * @return a new {@code List<Long>} containing the elements in the specified range as boxed values
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public List<Long> boxed(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2940,13 +3023,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param supplier a function which produces a new collection of the desired type,
      *                given the size of the range
      * @return a collection containing the elements in the specified range
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws UnsupportedOperationException if the selected range is non-empty and the supplied collection does not support adding elements
      */
     @Override
     public <C extends Collection<Long>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, UnsupportedOperationException {
         checkFromToIndex(fromIndex, toIndex);
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -2969,9 +3052,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @param supplier a function which produces a new {@code Multiset} instance,
      *                given the size of the range
      * @return a {@code Multiset} containing the elements in the specified range with their counts
-     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}, or adding the selected elements would exceed {@link Integer#MAX_VALUE} occurrences for an element in the supplied multiset
      */
     @Override
     public Multiset<Long> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Long>> supplier)
@@ -3017,9 +3099,20 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(1L, 2L, 3L, 4L, 5L);
-     * long sum = list.stream().filter(x -> x > 2).sum();   // returns 12
+     * long sum = list.stream().filter(x -> x > 2).sum();   // returns 12 (accumulated in a long; silently
+     *                                                      // wraps if the total exceeds Long.MAX_VALUE)
      * long count = list.stream().count();                  // returns 5
      * }</pre>
+     *
+     * <p>{@link LongStream#sum()} accumulates in a {@code long} and wraps silently on overflow, unlike
+     * {@link com.landawn.abacus.util.stream.IntStream#sum()}, which throws. Use
+     * {@link N#sumToBigInteger(long...)} when the total may exceed {@link Long#MAX_VALUE}.</p>
+     *
+     * <p>The stream captures the backing array reference and the range endpoints when it is created,
+     * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured
+     * range can be observed by a stream that has not consumed those positions yet. Growing the list
+     * afterwards does not extend the stream, and any operation that reallocates the backing array leaves
+     * the stream reading the old one. Do not modify the list while a stream over it is in flight.</p>
      *
      * @return a sequential {@code LongStream} over the elements in this list
      */
@@ -3039,15 +3132,25 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongList list = LongList.of(1L, 2L, 3L, 4L, 5L, 6L);
-     * long sum = list.stream(2, 5).sum();   // returns 12 (sums [3, 4, 5])
+     * long sum = list.stream(2, 5).sum();   // returns 12 (sums [3, 4, 5]; accumulated in a long, so it
+     *                                       // silently wraps if the total exceeds Long.MAX_VALUE)
      * list.stream(0, 7);                    // throws IndexOutOfBoundsException
      * }</pre>
+     *
+     * <p>{@link LongStream#sum()} accumulates in a {@code long} and wraps silently on overflow, unlike
+     * {@link com.landawn.abacus.util.stream.IntStream#sum()}, which throws. Use
+     * {@link N#sumToBigInteger(long[], int, int)} when the total may exceed {@link Long#MAX_VALUE}.</p>
+     *
+     * <p>The stream captures the backing array reference and the range endpoints when it is created,
+     * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured
+     * range can be observed by a stream that has not consumed those positions yet. Growing the list
+     * afterwards does not extend the stream, and any operation that reallocates the backing array leaves
+     * the stream reading the old one. Do not modify the list while a stream over it is in flight.</p>
      *
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
      * @return a sequential {@code LongStream} over the elements in the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public LongStream stream(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -3073,7 +3176,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @see #first()
      * @see #getLast()
      */
-    public long getFirst() {
+    public long getFirst() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return elementData[0];
@@ -3097,7 +3200,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @see #last()
      * @see #getFirst()
      */
-    public long getLast() {
+    public long getLast() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return elementData[size - 1];
@@ -3118,8 +3221,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * }</pre>
      *
      * @param e the element to add at the beginning of this list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void addFirst(final long e) {
+    public void addFirst(final long e) throws OutOfMemoryError {
         add(0, e);
     }
 
@@ -3137,9 +3241,10 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * }</pre>
      *
      * @param e the element to add at the end of this list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void addLast(final long e) {
-        add(size, e);
+    public void addLast(final long e) throws OutOfMemoryError {
+        add(e);
     }
 
     /**
@@ -3159,7 +3264,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return the first element that was removed from this list
      * @throws NoSuchElementException if this list is empty
      */
-    public long removeFirst() {
+    public long removeFirst() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return removeAt(0);
@@ -3181,7 +3286,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * @return the last element that was removed from this list
      * @throws NoSuchElementException if this list is empty
      */
-    public long removeLast() {
+    public long removeLast() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return removeAt(size - 1);
@@ -3242,9 +3347,13 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
         return size == 0 ? Strings.STR_FOR_EMPTY_ARRAY : N.toString(elementData, 0, size);
     }
 
-    private void ensureCapacity(final int minCapacity) {
+    /**
+     * @throws OutOfMemoryError if {@code minCapacity} is negative or exceeds the maximum supported array size, or the enlarged array cannot be allocated
+     */
+    private void ensureCapacity(final int minCapacity) throws OutOfMemoryError {
         if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError(
+                    "Required capacity is too large: " + (minCapacity < 0 ? "it overflowed the int range" : minCapacity + " > " + MAX_ARRAY_SIZE));
         }
 
         if (N.isEmpty(elementData)) {
@@ -3254,5 +3363,53 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
             elementData = Arrays.copyOf(elementData, newCapacity);
         }
+    }
+
+    /**
+     * Writes this list to the given stream using only the elements in {@code [0, size())}.
+     *
+     * <p>The default serialized form would emit the whole backing array. That is wasteful for a list
+     * whose capacity exceeds its size, and — because {@link #LongList(long[], int)} and
+     * {@code of(long[], int)} adopt the caller's array without copying — it would also write out
+     * whatever the caller left beyond {@code size()}. This method writes the same two fields under the
+     * same names, so streams stay readable in both directions across this change.</p>
+     *
+     * @param os the stream to write to
+     * @throws IOException if writing the list fields or backing-array contents to {@code os} fails
+     */
+    @Serial
+    private void writeObject(final ObjectOutputStream os) throws IOException {
+        final ObjectOutputStream.PutField fields = os.putFields();
+
+        fields.put("elementData", size == elementData.length ? elementData : N.copyOfRange(elementData, 0, size));
+        fields.put("size", size);
+
+        os.writeFields();
+    }
+
+    /**
+     * Restores this list from the given stream, rejecting a stream whose {@code size} does not fit its
+     * {@code elementData}.
+     *
+     * <p>Without this check a corrupted or hand-crafted stream would deserialize successfully and then
+     * fail much later with an {@link IndexOutOfBoundsException} from an unrelated method.</p>
+     *
+     * @param is the stream to read from
+     * @throws IOException if reading the serialized fields fails, or the stored array is null, has the wrong primitive type, or is inconsistent with the stored size
+     * @throws ClassNotFoundException if a class needed to restore a serialized field cannot be resolved
+     */
+    @Serial
+    private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {
+        final ObjectInputStream.GetField fields = is.readFields();
+        final Object a = fields.get("elementData", null);
+        final int sz = fields.get("size", 0);
+
+        if (!(a instanceof long[] array) || sz < 0 || sz > array.length) {
+            throw new InvalidObjectException(
+                    "Invalid serialized LongList: size=" + sz + ", elementData=" + (a == null ? "null" : a.getClass().getSimpleName()));
+        }
+
+        elementData = array;
+        size = sz;
     }
 }

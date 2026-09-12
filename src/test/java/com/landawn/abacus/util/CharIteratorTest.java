@@ -1,7 +1,6 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -11,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 
 import org.junit.jupiter.api.Test;
 
@@ -21,27 +21,25 @@ import com.landawn.abacus.util.stream.CharStream;
 public class CharIteratorTest extends TestBase {
 
     @Test
-    public void testEmpty_singleton() {
-        CharIterator iter1 = CharIterator.empty();
-        CharIterator iter2 = CharIterator.empty();
-        assertSame(iter1, iter2);
-    }
+    public void testShortCircuitStreamLeavesRemainingElements() {
+        final CharIterator iter = CharIterator.of('a', 'b', 'c');
 
-    @Test
-    public void testEmpty_sameAsField() {
-        assertSame(CharIterator.EMPTY, CharIterator.empty());
+        assertEquals(1L, iter.stream().limit(1).count());
+        assertTrue(iter.hasNext());
+        assertArrayEquals(new char[] { 'b', 'c' }, iter.stream().toArray());
+        assertFalse(iter.hasNext());
     }
-
-    // ==================== empty() ====================
 
     @Test
     public void testEmpty() {
         CharIterator iter = CharIterator.empty();
         assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextChar());
+        assertThrows(NoSuchElementException.class, iter::nextChar);
+        assertSame(CharIterator.EMPTY, CharIterator.empty());
+        assertEquals(0, iter.toArray().length);
+        assertTrue(iter.toList().isEmpty());
+        assertFalse(iter.indexed().hasNext());
     }
-
-    // ==================== of(char...) ====================
 
     @Test
     public void testOf() {
@@ -51,820 +49,321 @@ public class CharIteratorTest extends TestBase {
         assertEquals('b', iter.nextChar());
         assertEquals('c', iter.nextChar());
         assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextChar);
+        assertFalse(CharIterator.of().hasNext());
+        assertFalse(CharIterator.of((char[]) null).hasNext());
+        assertEquals('z', CharIterator.of('z').nextChar());
+        CharIterator special = CharIterator.of(Character.MIN_VALUE, '\n', '\t', '世', Character.MAX_VALUE);
+        assertEquals(Character.MIN_VALUE, special.nextChar());
+        assertEquals('\n', special.nextChar());
+        assertEquals('\t', special.nextChar());
+        assertEquals('世', special.nextChar());
+        assertEquals(Character.MAX_VALUE, special.nextChar());
     }
 
     @Test
-    public void testOf_specialCharacters() {
-        CharIterator iter = CharIterator.of('\n', '\t', '\r', '\0');
-        assertEquals('\n', iter.nextChar());
-        assertEquals('\t', iter.nextChar());
-        assertEquals('\r', iter.nextChar());
-        assertEquals('\0', iter.nextChar());
+    public void testOf_Range() {
+        char[] array = { 'a', 'b', 'c', 'd', 'e' };
+        assertArrayEquals(new char[] { 'b', 'c', 'd' }, CharIterator.of(array, 1, 4).toArray());
+        assertEquals(CharList.of('b', 'c', 'd'), CharIterator.of(array, 1, 4).toList());
+        assertArrayEquals(array, CharIterator.of(array, 0, array.length).toArray());
+        assertFalse(CharIterator.of(array, 1, 1).hasNext());
+        assertThrows(IndexOutOfBoundsException.class, () -> CharIterator.of(array, -1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> CharIterator.of(array, 0, 6));
+        assertThrows(IndexOutOfBoundsException.class, () -> CharIterator.of(array, 2, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> CharIterator.of((char[]) null, 0, 1));
     }
-
-    @Test
-    public void testOf_unicodeCharacters() {
-        CharIterator iter = CharIterator.of('\u4E2D', '\u6587', '\u5B57');
-        assertEquals('\u4E2D', iter.nextChar());
-        assertEquals('\u6587', iter.nextChar());
-        assertEquals('\u5B57', iter.nextChar());
-    }
-
-    @Test
-    public void testOf_largeArray() {
-        char[] chars = new char[1000];
-        for (int i = 0; i < chars.length; i++) {
-            chars[i] = (char) ('A' + (i % 26));
-        }
-        CharIterator iter = CharIterator.of(chars);
-        int count = 0;
-        while (iter.hasNext()) {
-            iter.nextChar();
-            count++;
-        }
-        assertEquals(1000, count);
-    }
-
-    // ==================== of(char[], int, int) ====================
-
-    @Test
-    public void testOfWithRange() {
-        char[] chars = { 'a', 'b', 'c', 'd', 'e' };
-        CharIterator iter = CharIterator.of(chars, 1, 4);
-        assertEquals('b', iter.nextChar());
-        assertEquals('c', iter.nextChar());
-        assertEquals('d', iter.nextChar());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfWithRange_fullRange() {
-        char[] chars = { 'a', 'b', 'c' };
-        CharIterator iter = CharIterator.of(chars, 0, 3);
-        assertEquals('a', iter.nextChar());
-        assertEquals('b', iter.nextChar());
-        assertEquals('c', iter.nextChar());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfWithRange_toArray() {
-        char[] chars = { 'a', 'b', 'c', 'd', 'e' };
-        CharIterator iter = CharIterator.of(chars, 1, 4);
-        iter.nextChar();
-        char[] result = iter.toArray();
-        assertArrayEquals(new char[] { 'c', 'd' }, result);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfWithRange_toList() {
-        char[] chars = { 'a', 'b', 'c', 'd', 'e' };
-        CharIterator iter = CharIterator.of(chars, 1, 4);
-        iter.nextChar();
-        CharList result = iter.toList();
-        assertEquals(CharList.of('c', 'd'), result);
-        assertFalse(iter.hasNext());
-    }
-
-    // ==================== combined operations ====================
-
-    @Test
-    public void testCombinedOperations_skipAndLimit() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c', 'd', 'e').skip(1).limit(3);
-        assertEquals('b', iter.nextChar());
-        assertEquals('c', iter.nextChar());
-        assertEquals('d', iter.nextChar());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testCombinedOperations_filterAndToArray() {
-        char[] result = CharIterator.of('a', 'b', 'c', 'd', 'e').filter(ch -> ch != 'c').toArray();
-        assertArrayEquals(new char[] { 'a', 'b', 'd', 'e' }, result);
-    }
-
-    @Test
-    public void testCombinedOperations_filterAndToList() {
-        CharList result = CharIterator.of('a', 'b', 'c', 'd').filter(ch -> ch >= 'c').toList();
-        assertEquals(CharList.of('c', 'd'), result);
-    }
-
-    @Test
-    public void testCombinedOperations_skipFilterLimit() {
-        char[] result = CharIterator.of('a', 'b', 'c', 'd', 'e', 'f').skip(1).filter(ch -> ch != 'd').limit(2).toArray();
-        assertArrayEquals(new char[] { 'b', 'c' }, result);
-    }
-
-    @Test
-    public void testOf_emptyArray() {
-        CharIterator iter = CharIterator.of(new char[0]);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOf_nullArray() {
-        CharIterator iter = CharIterator.of((char[]) null);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOf_singleElement() {
-        CharIterator iter = CharIterator.of('x');
-        assertTrue(iter.hasNext());
-        assertEquals('x', iter.nextChar());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOf_maxMinCharValues() {
-        CharIterator iter = CharIterator.of(Character.MIN_VALUE, Character.MAX_VALUE);
-        assertEquals(Character.MIN_VALUE, iter.nextChar());
-        assertEquals(Character.MAX_VALUE, iter.nextChar());
-    }
-
-    @Test
-    public void testOf_hasNextMultipleCalls() {
-        CharIterator iter = CharIterator.of('a', 'b');
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertEquals('a', iter.nextChar());
-    }
-
-    @Test
-    public void testOfWithRange_emptyRange() {
-        char[] chars = { 'a', 'b', 'c' };
-        CharIterator iter = CharIterator.of(chars, 1, 1);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfWithRange_nullArray() {
-        CharIterator iter = CharIterator.of(null, 0, 0);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfWithRange_invalidIndices() {
-        char[] chars = { 'a', 'b', 'c' };
-        assertThrows(IndexOutOfBoundsException.class, () -> CharIterator.of(chars, -1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> CharIterator.of(chars, 0, 4));
-        assertThrows(IndexOutOfBoundsException.class, () -> CharIterator.of(chars, 2, 1));
-    }
-
-    @Test
-    public void testOfWithRange_nextCharAfterExhausted() {
-        char[] chars = { 'a', 'b' };
-        CharIterator iter = CharIterator.of(chars, 0, 1);
-        iter.nextChar();
-        assertThrows(NoSuchElementException.class, () -> iter.nextChar());
-    }
-
-    // ==================== defer(Supplier) ====================
 
     @Test
     public void testDefer() {
-        AtomicInteger callCount = new AtomicInteger(0);
+        AtomicInteger calls = new AtomicInteger();
         CharIterator iter = CharIterator.defer(() -> {
-            callCount.incrementAndGet();
+            calls.incrementAndGet();
             return CharIterator.of('a', 'b', 'c');
         });
-        assertEquals(0, callCount.get());
+        assertEquals(0, calls.get());
         assertTrue(iter.hasNext());
-        assertEquals(1, callCount.get());
+        assertEquals(1, calls.get());
         assertEquals('a', iter.nextChar());
-        assertEquals(1, callCount.get());
-    }
+        assertEquals('b', iter.nextChar());
+        assertEquals('c', iter.nextChar());
 
-    @Test
-    public void testDefer_initOnNextChar() {
-        AtomicInteger callCount = new AtomicInteger(0);
-        CharIterator iter = CharIterator.defer(() -> {
-            callCount.incrementAndGet();
-            return CharIterator.of('x');
+        boolean[] calledOnNext = { false };
+        CharIterator onNext = CharIterator.defer(() -> {
+            calledOnNext[0] = true;
+            return CharIterator.of('z');
         });
-        assertEquals(0, callCount.get());
-        assertEquals('x', iter.nextChar());
-        assertEquals(1, callCount.get());
-    }
+        assertEquals('z', onNext.nextChar());
+        assertTrue(calledOnNext[0]);
 
-    @Test
-    public void testDefer_withEmptyIterator() {
-        CharIterator iter = CharIterator.defer(() -> CharIterator.empty());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testDefer_nullSupplier() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CharIterator.defer(null));
-    }
-
-    @Test
-    public void testDefer_nullResultFailureIsStable() {
-        int[] callCount = { 0 };
-        CharIterator iter = CharIterator.defer(() -> {
-            callCount[0]++;
+        int[] failCount = { 0 };
+        CharIterator failing = CharIterator.defer(() -> {
+            failCount[0]++;
             return null;
         });
-
-        assertThrows(IllegalStateException.class, iter::hasNext);
-        assertThrows(IllegalStateException.class, iter::hasNext);
-        assertEquals(1, callCount[0]);
+        assertThrows(IllegalStateException.class, failing::hasNext);
+        assertThrows(IllegalStateException.class, failing::hasNext);
+        assertEquals(1, failCount[0]);
+        assertThrows(IllegalArgumentException.class, () -> CharIterator.defer(null));
     }
-
-    // ==================== generate(CharSupplier) ====================
 
     @Test
     public void testGenerate() {
-        CharIterator iter = CharIterator.generate(() -> 'X');
-        assertTrue(iter.hasNext());
-        assertEquals('X', iter.nextChar());
-        assertTrue(iter.hasNext());
-        assertEquals('X', iter.nextChar());
-        assertTrue(iter.hasNext());
+        AtomicInteger n = new AtomicInteger('a');
+        CharIterator infinite = CharIterator.generate(() -> (char) n.getAndIncrement());
+        assertEquals('a', infinite.nextChar());
+        assertEquals('b', infinite.nextChar());
+        assertTrue(infinite.hasNext());
+
+        AtomicInteger counter = new AtomicInteger('a');
+        CharIterator finite = CharIterator.generate(() -> counter.get() < 'd', () -> (char) counter.getAndIncrement());
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, finite.toArray());
+        assertThrows(NoSuchElementException.class, finite::nextChar);
+        assertFalse(CharIterator.generate(() -> false, () -> 'x').hasNext());
+        assertThrows(IllegalArgumentException.class, () -> CharIterator.generate((CharSupplier) null));
+        assertThrows(IllegalArgumentException.class, () -> CharIterator.generate(null, () -> 'x'));
+        assertThrows(IllegalArgumentException.class, () -> CharIterator.generate((BooleanSupplier) () -> true, null));
     }
 
     @Test
-    public void testGenerate_withCounter() {
-        AtomicInteger counter = new AtomicInteger(0);
-        CharIterator iter = CharIterator.generate(() -> (char) ('A' + counter.getAndIncrement()));
-        assertEquals('A', iter.nextChar());
-        assertEquals('B', iter.nextChar());
-        assertEquals('C', iter.nextChar());
-    }
-
-    // ==================== generate(BooleanSupplier, CharSupplier) ====================
-
-    @Test
-    public void testGenerate_conditional() {
-        AtomicInteger count = new AtomicInteger(0);
-        CharIterator iter = CharIterator.generate(() -> count.get() < 3, () -> (char) ('A' + count.getAndIncrement()));
-        assertTrue(iter.hasNext());
-        assertEquals('A', iter.nextChar());
-        assertTrue(iter.hasNext());
-        assertEquals('B', iter.nextChar());
-        assertTrue(iter.hasNext());
-        assertEquals('C', iter.nextChar());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testGenerate_conditional_multipleHasNextCalls() {
-        AtomicInteger count = new AtomicInteger(0);
-        CharIterator iter = CharIterator.generate(() -> count.get() < 2, () -> (char) ('A' + count.getAndIncrement()));
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertEquals('A', iter.nextChar());
-        assertTrue(iter.hasNext());
-        assertEquals('B', iter.nextChar());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testGenerate_nullSupplier() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CharIterator.generate((CharSupplier) null));
-    }
-
-    @Test
-    public void testGenerate_conditional_nullHasNext() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CharIterator.generate(null, () -> 'x'));
-    }
-
-    @Test
-    public void testGenerate_conditional_nullSupplier() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CharIterator.generate(() -> true, null));
-    }
-
-    @Test
-    public void testGenerate_conditional_nextCharWhenNoElements() {
-        CharIterator iter = CharIterator.generate(() -> false, () -> 'x');
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextChar());
-    }
-
-    // ==================== next() (deprecated boxed) ====================
-
-    @Test
+    @SuppressWarnings("deprecation")
     public void testNext() {
-        CharIterator iter = CharIterator.of('a', 'b');
-        Character ch = iter.next();
-        assertEquals(Character.valueOf('a'), ch);
-        assertEquals(Character.valueOf('b'), iter.next());
+        CharIterator iter = CharIterator.of('a', 'b', 'c');
+        assertEquals(Character.valueOf('a'), iter.next());
+        assertEquals('b', iter.nextChar());
+        assertEquals('c', iter.nextChar());
+        assertThrows(NoSuchElementException.class, iter::nextChar);
     }
-
-    // ==================== nextChar() ====================
-
-    @Test
-    public void testNextChar() {
-        CharIterator iter = CharIterator.of('x', 'y', 'z');
-        assertEquals('x', iter.nextChar());
-        assertEquals('y', iter.nextChar());
-        assertEquals('z', iter.nextChar());
-    }
-
-    @Test
-    public void testNextChar_noSuchElement() {
-        CharIterator iter = CharIterator.of('a');
-        iter.nextChar();
-        assertThrows(NoSuchElementException.class, () -> iter.nextChar());
-    }
-
-    // ==================== skip(long) ====================
 
     @Test
     public void testSkip() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c', 'd', 'e').skip(2);
-        assertEquals('c', iter.nextChar());
-        assertEquals('d', iter.nextChar());
-        assertEquals('e', iter.nextChar());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testSkip_moreThanAvailable() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c').skip(10);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testSkip_all() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c').skip(3);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testSkip_one() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c').skip(1);
-        assertEquals('b', iter.nextChar());
-        assertEquals('c', iter.nextChar());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testSkip_zero() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c').skip(0);
-        assertEquals('a', iter.nextChar());
-        assertEquals('b', iter.nextChar());
-        assertEquals('c', iter.nextChar());
-    }
-
-    @Test
-    public void testSkip_emptyIterator() {
-        CharIterator iter = CharIterator.empty().skip(5);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testSkip_returnsSameIfZero() {
+        assertArrayEquals(new char[] { 'c', 'd', 'e' }, CharIterator.of('a', 'b', 'c', 'd', 'e').skip(2).toArray());
+        assertFalse(CharIterator.of('a', 'b', 'c').skip(5).hasNext());
         CharIterator original = CharIterator.of('a', 'b');
-        CharIterator skipped = original.skip(0);
-        assertSame(original, skipped);
-    }
+        assertSame(original, original.skip(0));
+        assertThrows(IllegalArgumentException.class, () -> CharIterator.of('a').skip(-1));
+        assertThrows(NoSuchElementException.class, () -> CharIterator.of('a', 'b').skip(2).nextChar());
 
-    @Test
-    public void testSkip_negative() {
-        assertThrows(IllegalArgumentException.class, () -> CharIterator.of('a', 'b', 'c').skip(-1));
-    }
-
-    @Test
-    public void testSkip_nextCharAfterExhausted() {
-        CharIterator iter = CharIterator.of('a', 'b').skip(2);
-        assertThrows(NoSuchElementException.class, () -> iter.nextChar());
-    }
-
-    @Test
-    public void testSkip_lazyEvaluation() {
-        AtomicInteger consumed = new AtomicInteger(0);
-        CharIterator base = new CharIterator() {
-            private int idx = 0;
+        CharIterator source = new CharIterator() {
+            private int next;
+            private boolean failedOnce;
 
             @Override
             public boolean hasNext() {
-                return idx < 5;
+                return next < 4;
             }
 
             @Override
             public char nextChar() {
-                if (idx >= 5) {
-                    throw new NoSuchElementException();
+                if (next == 1 && !failedOnce) {
+                    failedOnce = true;
+                    throw new IllegalStateException("transient failure");
                 }
-                consumed.incrementAndGet();
-                return (char) ('a' + idx++);
+                return (char) ('a' + next++);
             }
         };
-
-        CharIterator iter = base.skip(2);
-        // skip is lazy, not consumed yet
-        assertEquals(0, consumed.get());
-        // hasNext triggers the skip
-        assertTrue(iter.hasNext());
-        assertEquals(2, consumed.get());
-        assertEquals('c', iter.nextChar());
+        CharIterator skipped = source.skip(2);
+        assertThrows(IllegalStateException.class, skipped::hasNext);
+        assertTrue(skipped.hasNext());
+        assertEquals('c', skipped.nextChar());
     }
-
-    // ==================== limit(long) ====================
 
     @Test
     public void testLimit() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c', 'd', 'e').limit(3);
-        assertEquals('a', iter.nextChar());
-        assertEquals('b', iter.nextChar());
-        assertEquals('c', iter.nextChar());
-        assertFalse(iter.hasNext());
-    }
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, CharIterator.of('a', 'b', 'c', 'd', 'e').limit(3).toArray());
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, CharIterator.of('a', 'b', 'c').limit(5).toArray());
+        assertFalse(CharIterator.of('a').limit(0).hasNext());
+        assertThrows(IllegalArgumentException.class, () -> CharIterator.of('a').limit(-1));
 
-    @Test
-    public void testLimit_moreThanAvailable() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c').limit(10);
-        assertEquals('a', iter.nextChar());
-        assertEquals('b', iter.nextChar());
-        assertEquals('c', iter.nextChar());
-        assertFalse(iter.hasNext());
+        int[] attempts = { 0 };
+        CharIterator quota = CharIterator.generate(() -> {
+            if (attempts[0]++ == 0) {
+                throw new IllegalStateException("temporary failure");
+            }
+            return 'z';
+        }).limit(1);
+        assertThrows(IllegalStateException.class, quota::nextChar);
+        assertTrue(quota.hasNext());
+        assertEquals('z', quota.nextChar());
+        assertFalse(quota.hasNext());
+        assertEquals(2, attempts[0]);
     }
-
-    @Test
-    public void testLimit_one() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c').limit(1);
-        assertEquals('a', iter.nextChar());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testLimit_zero() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c').limit(0);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testLimit_emptyIterator() {
-        CharIterator iter = CharIterator.empty().limit(5);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testLimit_returnsEmptyIfZero() {
-        CharIterator iter = CharIterator.of('a', 'b').limit(0);
-        assertSame(CharIterator.EMPTY, iter);
-    }
-
-    @Test
-    public void testLimit_negative() {
-        assertThrows(IllegalArgumentException.class, () -> CharIterator.of('a', 'b', 'c').limit(-1));
-    }
-
-    @Test
-    public void testLimit_nextCharAfterExhausted() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c').limit(1);
-        iter.nextChar();
-        assertThrows(NoSuchElementException.class, () -> iter.nextChar());
-    }
-
-    // ==================== filter(CharPredicate) ====================
 
     @Test
     public void testFilter() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c', 'd', 'e').filter(ch -> ch >= 'c');
-        assertEquals('c', iter.nextChar());
-        assertEquals('d', iter.nextChar());
-        assertEquals('e', iter.nextChar());
-        assertFalse(iter.hasNext());
+        assertArrayEquals(new char[] { 'a', 'e' }, CharIterator.of('a', 'b', 'c', 'd', 'e').filter(c -> c == 'a' || c == 'e').toArray());
+        CharIterator none = CharIterator.of('b', 'c').filter(c -> c == 'a');
+        assertFalse(none.hasNext());
+        assertThrows(NoSuchElementException.class, none::nextChar);
+        assertThrows(IllegalArgumentException.class, () -> CharIterator.of('a').filter(null));
+        assertArrayEquals(new char[] { 'c', 'd' }, CharIterator.of('a', 'b', 'c', 'd', 'e').skip(2).limit(2).toArray());
     }
 
     @Test
-    public void testFilter_allMatch() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c').filter(ch -> ch >= 'a');
-        assertEquals('a', iter.nextChar());
-        assertEquals('b', iter.nextChar());
-        assertEquals('c', iter.nextChar());
-        assertFalse(iter.hasNext());
+    public void testToArrayAndToList() {
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, CharIterator.of('a', 'b', 'c').toArray());
+        CharIterator partial = CharIterator.of('a', 'b', 'c', 'd', 'e');
+        partial.nextChar();
+        partial.nextChar();
+        assertArrayEquals(new char[] { 'c', 'd', 'e' }, partial.toArray());
+        assertEquals(CharList.of('a', 'b', 'c'), CharIterator.of('a', 'b', 'c').toList());
+        assertTrue(CharIterator.empty().toList().isEmpty());
     }
-
-    @Test
-    public void testFilter_everyOtherElement() {
-        AtomicInteger idx = new AtomicInteger(0);
-        CharIterator iter = CharIterator.of('a', 'b', 'c', 'd', 'e', 'f').filter(ch -> idx.getAndIncrement() % 2 == 0);
-        assertEquals('a', iter.nextChar());
-        assertEquals('c', iter.nextChar());
-        assertEquals('e', iter.nextChar());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testFilter_vowels() {
-        CharIterator iter = CharIterator.of('h', 'e', 'l', 'l', 'o').filter(ch -> "aeiou".indexOf(ch) >= 0);
-        assertEquals('e', iter.nextChar());
-        assertEquals('o', iter.nextChar());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testFilter_noneMatch() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c').filter(ch -> ch > 'z');
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testFilter_emptyIterator() {
-        CharIterator iter = CharIterator.empty().filter(ch -> true);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testFilter_multipleHasNextCalls() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c').filter(ch -> ch == 'b');
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertEquals('b', iter.nextChar());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testFilter_nullPredicate() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CharIterator.of('a').filter(null));
-    }
-
-    @Test
-    public void testFilter_nextCharWithoutHasNext() {
-        CharIterator iter = CharIterator.of('x', 'y', 'z').filter(ch -> ch == 'y');
-        assertEquals('y', iter.nextChar());
-        assertThrows(NoSuchElementException.class, () -> iter.nextChar());
-    }
-
-    // ==================== toArray() ====================
-
-    @Test
-    public void testToArray() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c');
-        char[] result = iter.toArray();
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testToArray_partiallyConsumed() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c', 'd');
-        iter.nextChar();
-        iter.nextChar();
-        char[] result = iter.toArray();
-        assertArrayEquals(new char[] { 'c', 'd' }, result);
-    }
-
-    @Test
-    public void testToArray_empty() {
-        CharIterator iter = CharIterator.empty();
-        char[] result = iter.toArray();
-        assertEquals(0, result.length);
-    }
-
-    // ==================== toList() ====================
-
-    @Test
-    public void testToList() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c');
-        CharList result = iter.toList();
-        assertEquals(CharList.of('a', 'b', 'c'), result);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testToList_partiallyConsumed() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c', 'd');
-        iter.nextChar();
-        CharList result = iter.toList();
-        assertEquals(CharList.of('b', 'c', 'd'), result);
-    }
-
-    @Test
-    public void testToList_empty() {
-        CharIterator iter = CharIterator.empty();
-        CharList result = iter.toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testStream_count() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c');
-        long count = iter.stream().count();
-        assertEquals(3, count);
-    }
-
-    @Test
-    public void testStream_map() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c');
-        char[] result = iter.stream().map(ch -> (char) (ch + 1)).toArray();
-        assertArrayEquals(new char[] { 'b', 'c', 'd' }, result);
-    }
-
-    @Test
-    public void testStream_filter() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c', 'd', 'e');
-        char[] result = iter.stream().filter(ch -> ch < 'd').toArray();
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
-    }
-
-    // ==================== stream() ====================
 
     @Test
     public void testStream() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c');
-        CharStream stream = iter.stream();
+        CharStream stream = CharIterator.of('a', 'b', 'c').stream();
         assertNotNull(stream);
-        char[] result = stream.toArray();
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, stream.toArray());
+        assertEquals(2, CharIterator.of('a', 'b', 'c').stream().filter(c -> c > 'a').count());
+        assertEquals(0, CharIterator.empty().stream().toArray().length);
     }
-
-    @Test
-    public void testStream_empty() {
-        CharIterator iter = CharIterator.empty();
-        CharStream stream = iter.stream();
-        char[] result = stream.toArray();
-        assertEquals(0, result.length);
-    }
-
-    // ==================== indexed() ====================
 
     @Test
     public void testIndexed() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c');
-        ObjIterator<IndexedChar> indexed = iter.indexed();
-        assertTrue(indexed.hasNext());
-        IndexedChar ic1 = indexed.next();
-        assertEquals(0, ic1.index());
-        assertEquals('a', ic1.value());
-        IndexedChar ic2 = indexed.next();
-        assertEquals(1, ic2.index());
-        assertEquals('b', ic2.value());
-        IndexedChar ic3 = indexed.next();
-        assertEquals(2, ic3.index());
-        assertEquals('c', ic3.value());
+        ObjIterator<IndexedChar> indexed = CharIterator.of('a', 'b', 'c').indexed();
+        assertEquals(0, indexed.next().index());
+        assertEquals('b', indexed.next().value());
+        assertEquals(2, indexed.next().index());
         assertFalse(indexed.hasNext());
-    }
+        assertEquals(100, CharIterator.of('a').indexed(100).next().index());
+        assertThrows(IllegalArgumentException.class, () -> CharIterator.of('a').indexed(-1));
 
-    // ==================== indexed(long) ====================
+        CharIterator source = CharIterator.of('a', 'b');
+        ObjIterator<IndexedChar> overflowing = source.indexed(Long.MAX_VALUE);
+        assertEquals(Long.MAX_VALUE, overflowing.next().longIndex());
+        assertThrows(ArithmeticException.class, overflowing::next);
+        assertEquals('b', source.nextChar());
 
-    @Test
-    public void testIndexed_withStartIndex() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c');
-        ObjIterator<IndexedChar> indexed = iter.indexed(10);
-        IndexedChar ic1 = indexed.next();
-        assertEquals(10, ic1.index());
-        assertEquals('a', ic1.value());
-        IndexedChar ic2 = indexed.next();
-        assertEquals(11, ic2.index());
-        assertEquals('b', ic2.value());
-    }
-
-    @Test
-    public void testIndexed_empty() {
-        CharIterator iter = CharIterator.empty();
-        ObjIterator<IndexedChar> indexed = iter.indexed();
-        assertFalse(indexed.hasNext());
+        ObjIterator<IndexedChar> max = CharIterator.of('a').indexed(Long.MAX_VALUE);
+        assertEquals(Long.MAX_VALUE, max.next().longIndex());
+        assertFalse(max.hasNext());
+        assertThrows(NoSuchElementException.class, max::next);
     }
 
     @Test
-    public void testIndexed_withStartIndex_zero() {
-        CharIterator iter = CharIterator.of('x');
-        ObjIterator<IndexedChar> indexed = iter.indexed(0);
-        IndexedChar ic = indexed.next();
-        assertEquals(0, ic.index());
-        assertEquals('x', ic.value());
-    }
-
-    @Test
-    public void testIndexed_withStartIndex_negative() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c');
-        assertThrows(IllegalArgumentException.class, () -> iter.indexed(-1));
-    }
-
-    @Test
-    public void testIndexed_withStartIndex_overflow() {
-        ObjIterator<IndexedChar> indexed = CharIterator.of('a', 'b').indexed(Long.MAX_VALUE);
-
-        IndexedChar first = indexed.next();
-        assertEquals(Long.MAX_VALUE, first.longIndex());
-        assertEquals('a', first.value());
-        assertTrue(indexed.hasNext());
-        assertThrows(ArithmeticException.class, indexed::next);
-
-        ObjIterator<IndexedChar> exhausted = CharIterator.of('a').indexed(Long.MAX_VALUE);
-        exhausted.next();
-        assertFalse(exhausted.hasNext());
-        assertThrows(NoSuchElementException.class, exhausted::next);
-    }
-
-    // ==================== forEachRemaining(Consumer) (deprecated) ====================
-
-    @Test
-    public void testForEachRemaining_deprecated() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c');
-        StringBuilder sb = new StringBuilder();
-        iter.forEachRemaining((Character ch) -> sb.append(ch));
-        assertEquals("abc", sb.toString());
-    }
-
-    // ==================== foreachRemaining(CharConsumer) ====================
-
-    @Test
+    @SuppressWarnings("deprecation")
     public void testForeachRemaining() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c');
-        StringBuilder sb = new StringBuilder();
-        iter.foreachRemaining(ch -> sb.append(ch));
-        assertEquals("abc", sb.toString());
-        assertFalse(iter.hasNext());
+        CharList boxed = new CharList();
+        CharIterator.of('a', 'b', 'c').forEachRemaining((Character c) -> boxed.add(c));
+        assertEquals(CharList.of('a', 'b', 'c'), boxed);
+
+        CharList values = new CharList();
+        CharIterator.of('a', 'b', 'c').foreachRemaining(values::add);
+        assertEquals(CharList.of('a', 'b', 'c'), values);
+
+        CharIterator partial = CharIterator.of('a', 'b', 'c', 'd');
+        partial.nextChar();
+        partial.nextChar();
+        CharList remaining = new CharList();
+        partial.foreachRemaining(remaining::add);
+        assertEquals(CharList.of('c', 'd'), remaining);
+        assertThrows(IllegalArgumentException.class, () -> CharIterator.of('a').foreachRemaining(null));
+
+        // forEachRemaining(Consumer) overrides Iterator.forEachRemaining, whose contract specifies NullPointerException.
+        assertThrows(NullPointerException.class, () -> CharIterator.of('a').forEachRemaining((java.util.function.Consumer<Character>) null));
+        assertThrows(NullPointerException.class, () -> CharIterator.empty().forEachRemaining((java.util.function.Consumer<Character>) null));
     }
 
     @Test
-    public void testForeachRemaining_partiallyConsumed() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c', 'd');
-        iter.nextChar();
-        iter.nextChar();
-        StringBuilder sb = new StringBuilder();
-        iter.foreachRemaining(ch -> sb.append(ch));
-        assertEquals("cd", sb.toString());
+    public void testForeachIndexed() {
+        CharList indices = new CharList();
+        CharList values = new CharList();
+        CharIterator.of('a', 'b', 'c').foreachIndexed((index, value) -> {
+            indices.add((char) ('0' + index));
+            values.add(value);
+        });
+        assertEquals(CharList.of('0', '1', '2'), indices);
+        assertEquals(CharList.of('a', 'b', 'c'), values);
+
+        CharIterator partial = CharIterator.of('a', 'b', 'c');
+        partial.nextChar();
+        int[] firstIndex = { -1 };
+        partial.foreachIndexed((index, value) -> {
+            if (firstIndex[0] == -1) {
+                firstIndex[0] = index;
+            }
+        });
+        assertEquals(0, firstIndex[0]);
+        assertThrows(IllegalArgumentException.class, () -> CharIterator.of('a').foreachIndexed(null));
     }
 
+    // Doc pin for the stream() javadoc de-duplicated on 2026-09-11. The removed sentence was a verbatim repeat of
+    // the "Do not access this iterator independently" warning in the preceding paragraph; the sentence that was
+    // KEPT makes a real, checkable claim - the returned stream starts out sequential.
     @Test
-    public void testForeachRemaining_empty() {
-        CharIterator iter = CharIterator.empty();
-        AtomicInteger count = new AtomicInteger(0);
-        iter.foreachRemaining(ch -> count.incrementAndGet());
-        assertEquals(0, count.get());
+    public void reviewFixes20260911_streamIsInitiallySequential() {
+        final CharStream stream = CharIterator.of('a', 'b', 'c').stream();
+        assertFalse(stream.isParallel(), "stream() hands back a sequential stream");
+        assertTrue(stream.parallel().isParallel(), "which the caller can convert with parallel(...)");
+
+        assertFalse(CharIterator.empty().stream().isParallel());
     }
 
+    // Doc pin for the class-javadoc paragraph added on 2026-09-11 (the sibling of the one IntIterator and
+    // ObjIterator carry): every iterator the factory methods hand back throws UnsupportedOperationException
+    // from remove(), but the class is extensible, so the guarantee is not implied by the declared type.
+    @SuppressWarnings("deprecation")
     @Test
-    public void testForeachRemaining_nullAction() {
-        CharIterator iter = CharIterator.of('a');
-        assertThrows(IllegalArgumentException.class, () -> iter.foreachRemaining((Throwables.CharConsumer<RuntimeException>) null));
-    }
+    public void reviewFixes20260911_removeIsUnsupportedButOverridable() {
+        assertThrows(UnsupportedOperationException.class, CharIterator.of('a', 'b')::remove);
+        assertThrows(UnsupportedOperationException.class, CharIterator.empty()::remove);
+        assertThrows(UnsupportedOperationException.class, CharIterator.of(new char[] { 'a', 'b' }, 0, 2)::remove);
+        assertThrows(UnsupportedOperationException.class, CharIterator.generate(() -> 'x')::remove);
+        assertThrows(UnsupportedOperationException.class, CharIterator.defer(() -> CharIterator.of('a'))::remove);
+        assertThrows(UnsupportedOperationException.class, CharIterator.of('a', 'b', 'c').skip(1)::remove);
+        assertThrows(UnsupportedOperationException.class, CharIterator.of('a', 'b', 'c').limit(2)::remove);
+        assertThrows(UnsupportedOperationException.class, CharIterator.of('a', 'b', 'c').filter(c -> true)::remove);
 
-    @Test
-    public void testForEachRemaining() {
-        CharIterator iter = new CharIterator() {
-            private int count = 0;
-
+        final AtomicInteger removed = new AtomicInteger();
+        final CharIterator overriding = new CharIterator() {
             @Override
             public boolean hasNext() {
-                return count < 3;
+                return true;
             }
 
             @Override
             public char nextChar() {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-                return (char) ('X' + count++);
+                return 'a';
+            }
+
+            @Override
+            public void remove() {
+                removed.incrementAndGet();
             }
         };
 
-        assertEquals('X', iter.nextChar());
-        assertEquals('Y', iter.nextChar());
-        assertEquals('Z', iter.nextChar());
-        assertFalse(iter.hasNext());
+        overriding.remove();
+        assertEquals(1, removed.get(), "a CharIterator subclass can override remove()");
     }
 
-    // ==================== foreachIndexed(IntCharConsumer) ====================
-
+    // Doc pin for the defer() javadoc clarified on 2026-09-11: the supplier runs at most once, a runtime
+    // failure is cached and rethrown as the SAME throwable, and the null-result IllegalStateException is
+    // raised by the returned iterator's first access rather than by defer(..) itself.
     @Test
-    public void testForeachIndexed() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c');
-        StringBuilder sb = new StringBuilder();
-        iter.foreachIndexed((idx, ch) -> sb.append(idx).append(':').append(ch).append(' '));
-        assertEquals("0:a 1:b 2:c ", sb.toString());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testForeachIndexed_partiallyConsumed() {
-        CharIterator iter = CharIterator.of('a', 'b', 'c', 'd');
-        iter.nextChar();
-        StringBuilder sb = new StringBuilder();
-        iter.foreachIndexed((idx, ch) -> sb.append(idx).append(':').append(ch).append(' '));
-        assertEquals("0:b 1:c 2:d ", sb.toString());
-    }
-
-    @Test
-    public void testForeachIndexed_verifyIndices() {
-        CharIterator iter = CharIterator.of('x', 'y', 'z');
-        AtomicInteger expectedIndex = new AtomicInteger(0);
-        iter.foreachIndexed((idx, ch) -> {
-            assertEquals(expectedIndex.getAndIncrement(), idx);
+    public void reviewFixes20260911_deferCachesSupplierFailure() {
+        final AtomicInteger calls = new AtomicInteger();
+        final IllegalStateException boom = new IllegalStateException("boom");
+        final CharIterator failing = CharIterator.defer(() -> {
+            calls.incrementAndGet();
+            throw boom;
         });
-        assertEquals(3, expectedIndex.get());
-    }
 
-    @Test
-    public void testForeachIndexed_empty() {
-        CharIterator iter = CharIterator.empty();
-        AtomicInteger count = new AtomicInteger(0);
-        iter.foreachIndexed((idx, ch) -> count.incrementAndGet());
-        assertEquals(0, count.get());
-    }
+        assertEquals(0, calls.get(), "defer(..) must not invoke the supplier");
+        assertSame(boom, assertThrows(IllegalStateException.class, failing::hasNext));
+        assertSame(boom, assertThrows(IllegalStateException.class, failing::nextChar));
+        assertSame(boom, assertThrows(IllegalStateException.class, failing::hasNext));
+        assertEquals(1, calls.get(), "the supplier is invoked at most once, and the failure is cached");
 
-    @Test
-    public void testForeachIndexed_nullAction() {
-        CharIterator iter = CharIterator.of('a');
-        assertThrows(IllegalArgumentException.class, () -> iter.foreachIndexed(null));
-    }
+        final AtomicInteger nullCalls = new AtomicInteger();
+        final CharIterator nullResult = CharIterator.defer(() -> {
+            nullCalls.incrementAndGet();
+            return null;
+        });
 
+        assertEquals(0, nullCalls.get(), "the IllegalStateException comes from the iterator, not from defer(..)");
+        assertThrows(IllegalStateException.class, nullResult::hasNext);
+        assertThrows(IllegalStateException.class, nullResult::hasNext);
+        assertEquals(1, nullCalls.get());
+    }
 }

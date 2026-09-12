@@ -17,6 +17,7 @@ package com.landawn.abacus.util;
 import static java.util.Objects.requireNonNull;
 
 import java.util.AbstractMap;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -80,12 +81,11 @@ public final class PrefixSearchTable<K, V> {
      * @param compoundKey the non-empty compound key to search for; elements must not be {@code null}
      * @return an {@code Optional} holding the value mapped to the longest (non-empty) prefix of
      *         {@code compoundKey}; an empty {@code Optional} if no non-empty prefix is present
-     * @throws IllegalArgumentException if {@code compoundKey} is empty.
-     * @throws NullPointerException if {@code compoundKey} is {@code null} or any key element is
-     *         {@code null}
+     * @throws IllegalArgumentException if {@code compoundKey} is null or empty.
+     * @throws NullPointerException if any key element is {@code null}
      * @see #getAll(List)
      */
-    public Optional<V> get(List<? extends K> compoundKey) {
+    public Optional<V> get(List<? extends K> compoundKey) throws IllegalArgumentException, NullPointerException {
         return getAll(compoundKey).values().reduce((shorter, longer) -> longer);
     }
 
@@ -113,12 +113,13 @@ public final class PrefixSearchTable<K, V> {
      * @return a lazy {@code EntryStream} pairing each matched prefix of {@code compoundKey}
      *         (as an immutable snapshot) with its mapped value, in ascending order of
      *         prefix length; empty if no non-empty prefix is present
-     * @throws IllegalArgumentException if {@code compoundKey} is empty (thrown eagerly by this method).
-     * @throws NullPointerException if {@code compoundKey} is {@code null} or any key element is
-     *         {@code null} (thrown eagerly by this method)
+     * @throws IllegalArgumentException if {@code compoundKey} is null or empty (thrown eagerly by this method).
+     * @throws NullPointerException if any key element is {@code null} (thrown eagerly by this method)
      * @see #get(List)
      */
-    public EntryStream<List<K>, V> getAll(List<? extends K> compoundKey) throws IllegalArgumentException {
+    public EntryStream<List<K>, V> getAll(List<? extends K> compoundKey) throws IllegalArgumentException, NullPointerException {
+        N.checkArgNotNull(compoundKey, cs.compoundKey);
+
         N.checkArgument(compoundKey.size() > 0, "cannot search by empty key");
         final List<K> keySnapshot = List.copyOf(compoundKey);
 
@@ -142,6 +143,10 @@ public final class PrefixSearchTable<K, V> {
                         remaining = node.children;
 
                         if (node.value != null) {
+                            // Copied rather than handed out as keySnapshot.subList(0, cursor): a sub-view of an
+                            // immutable list is immutable too, but it is NOT Serializable (unlike the List.copyOf
+                            // result) and it pins the whole snapshot array behind a one-element prefix. The copy
+                            // is bounded by the matched prefix length and happens at most once per match.
                             next = new AbstractMap.SimpleImmutableEntry<>(List.copyOf(keySnapshot.subList(0, cursor)), node.value);
                             break;
                         }
@@ -180,6 +185,8 @@ public final class PrefixSearchTable<K, V> {
      *         .build();
      * }</pre>
      *
+     * <p>Copying traverses compound keys iteratively without a recursive depth limit.</p>
+     *
      * @return a new builder containing all current mappings of this table
      */
     public Builder<K, V> toBuilder() {
@@ -201,11 +208,45 @@ public final class PrefixSearchTable<K, V> {
      * // Prints the internal node-map structure of the table.
      * }</pre>
      *
+     * <p>Rendering traverses the table iteratively without a recursive depth limit, so a table built
+     * from very long compound keys can also be printed.</p>
+     *
      * @return a string representation of this table
      */
     @Override
     public String toString() {
-        return nodes.toString();
+        // The default rendering (HashMap.toString -> Node.toString -> children.toString -> ...) costs several
+        // stack frames per trie level, so a table this class can build could not be printed. Same output,
+        // produced from an explicit stack of pending fragments: a String is emitted as is, a node or a child
+        // map is expanded in place.
+        final StringBuilder sb = new StringBuilder();
+        final ArrayDeque<Object> pending = new ArrayDeque<>();
+        pending.push(nodes);
+
+        while (!pending.isEmpty()) {
+            final Object pendingItem = pending.pop();
+
+            if (pendingItem instanceof String text) {
+                sb.append(text);
+            } else if (pendingItem instanceof Node<?, ?> node) {
+                sb.append("Node[value=").append(node.value()).append(", children=");
+                pending.push("]");
+                pending.push(node.children());
+            } else {
+                final Object[] entries = ((Map<?, ?>) pendingItem).entrySet().toArray();
+                sb.append('{');
+                pending.push("}");
+
+                // Pushed in reverse so that the entries are rendered in the map's own iteration order.
+                for (int i = entries.length - 1; i >= 0; i--) {
+                    final Map.Entry<?, ?> entry = (Map.Entry<?, ?>) entries[i];
+                    pending.push(entry.getValue());
+                    pending.push((i == 0 ? "" : ", ") + entry.getKey() + "=");
+                }
+            }
+        }
+
+        return sb.toString();
     }
 
     /**
@@ -249,15 +290,16 @@ public final class PrefixSearchTable<K, V> {
          * @param compoundKey the non-empty compound key to add
          * @param value the non-{@code null} value to associate with the compound key
          * @return this builder
-         * @throws IllegalArgumentException if {@code compoundKey} is empty, or it has already been mapped to a value
-         *         that is not equal to {@code value}.
-         * @throws NullPointerException if {@code compoundKey} is {@code null}, any key element is {@code null},
-         *     or {@code value} is {@code null}
+         * @throws IllegalArgumentException if {@code compoundKey} is null or empty, {@code value} is null,
+         *         or the key has already been mapped to a value that is not equal to {@code value}
+         * @throws NullPointerException if any key element is {@code null}
          */
-        public Builder<K, V> add(List<? extends K> compoundKey, V value) throws IllegalArgumentException {
+        public Builder<K, V> add(List<? extends K> compoundKey, V value) throws IllegalArgumentException, NullPointerException {
+            N.checkArgNotNull(compoundKey, cs.compoundKey);
+
             int size = compoundKey.size();
             N.checkArgument(size > 0, "empty key not allowed");
-            N.requireNonNull(value);
+            N.checkArgNotNull(value, cs.value);
 
             Node.Builder<K, V> node = nodes.computeIfAbsent(requireNonNull(compoundKey.get(0)), k -> new Node.Builder<>());
 
@@ -290,10 +332,11 @@ public final class PrefixSearchTable<K, V> {
          * @param mappings the mappings to add; an empty compound key, or a {@code null} compound key
          *     element or value within an entry, is not permitted
          * @return this builder
-         * @throws IllegalArgumentException if any compound key is empty or conflicts with an existing mapping.
-         * @throws NullPointerException if any compound key element or value within an entry is {@code null}
+         * @throws IllegalArgumentException if an entry has a null or empty compound key, a null value,
+         *         or conflicts with an existing mapping
+         * @throws NullPointerException if an entry has a null key element
          */
-        public Builder<K, V> addAll(Map<? extends List<? extends K>, ? extends V> mappings) {
+        public Builder<K, V> addAll(Map<? extends List<? extends K>, ? extends V> mappings) throws IllegalArgumentException, NullPointerException {
             EntryStream.of(mappings).forEach(this::add);
             return this;
         }
@@ -308,6 +351,8 @@ public final class PrefixSearchTable<K, V> {
          *         .add(Arrays.asList("c"), "bar")
          *         .build();
          * }</pre>
+         *
+         * <p>Construction traverses compound keys iteratively without a recursive depth limit.</p>
          *
          * @return a new {@code PrefixSearchTable} containing all mappings added to this builder
          */
@@ -325,9 +370,19 @@ public final class PrefixSearchTable<K, V> {
     private record Node<K, V>(V value, Map<K, Node<K, V>> children) {
 
         Builder<K, V> toBuilder() {
-            Builder<K, V> builder = new Builder<>();
-            builder.value = value;
-            EntryStream.of(children).mapValue(Node::toBuilder).forEach(builder.children::put);
+            final Builder<K, V> builder = new Builder<>();
+            final var pending = new ArrayDeque<Map.Entry<Node<K, V>, Builder<K, V>>>();
+            pending.push(Map.entry(this, builder));
+            // Explicit traversal keeps long compound keys independent of the JVM call-stack limit.
+            while (!pending.isEmpty()) {
+                final var frame = pending.pop();
+                frame.getValue().value = frame.getKey().value;
+                for (final var child : frame.getKey().children.entrySet()) {
+                    final Builder<K, V> copy = new Builder<>();
+                    frame.getValue().children.put(child.getKey(), copy);
+                    pending.push(Map.entry(child.getValue(), copy));
+                }
+            }
             return builder;
         }
 
@@ -335,7 +390,10 @@ public final class PrefixSearchTable<K, V> {
             private V value;
             private final Map<K, Builder<K, V>> children = new HashMap<>();
 
-            Builder<K, V> child(K key) {
+            /**
+             * @throws NullPointerException if {@code key} is {@code null}
+             */
+            Builder<K, V> child(K key) throws NullPointerException {
                 requireNonNull(key);
                 return children.computeIfAbsent(key, k -> new Builder<>());
             }
@@ -355,7 +413,19 @@ public final class PrefixSearchTable<K, V> {
             }
 
             Node<K, V> build() {
-                return new Node<>(value, EntryStream.of(children).mapValue(Builder::build).toMap());
+                final Node<K, V> root = new Node<>(value, new HashMap<>());
+                final var pending = new ArrayDeque<Map.Entry<Builder<K, V>, Node<K, V>>>();
+                pending.push(Map.entry(this, root));
+                // Newly allocated child maps remain private until the entire snapshot is assembled.
+                while (!pending.isEmpty()) {
+                    final var frame = pending.pop();
+                    for (final var child : frame.getKey().children.entrySet()) {
+                        final Node<K, V> copy = new Node<>(child.getValue().value, new HashMap<>());
+                        frame.getValue().children.put(child.getKey(), copy);
+                        pending.push(Map.entry(child.getValue(), copy));
+                    }
+                }
+                return root;
             }
         }
     }

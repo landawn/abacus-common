@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -50,8 +51,10 @@ public final class BeanType<T> extends AbstractType<T> {
      * @param clazz the {@code Class} object representing the concrete bean type
      * @param javaType the Java reflection {@code Type} for the bean (may be {@code null} for non-generic classes,
      *                 in which case {@code clazz} is used as the reflection type)
+     * @throws IllegalArgumentException if both {@code javaType} and {@code clazz} are {@code null},
+     *         or a reflected generic argument cannot be resolved as a supported type.
      */
-    BeanType(final Class<T> clazz, final java.lang.reflect.Type javaType) {
+    BeanType(final Class<T> clazz, final java.lang.reflect.Type javaType) throws IllegalArgumentException {
         super(javaType == null ? TypeFactory.getClassName(clazz) : TypeFactory.getJavaTypeName(javaType));
         this.typeClass = clazz;
         this.javaType = javaType == null ? clazz : javaType;
@@ -161,11 +164,12 @@ public final class BeanType<T> extends AbstractType<T> {
      * @param x the bean instance to serialize; may be {@code null}
      * @return the JSON string representation of the bean,
      *         or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final T x) {
+    public String stringOf(final T x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
 
@@ -180,11 +184,13 @@ public final class BeanType<T> extends AbstractType<T> {
      * @param str the JSON string to deserialize; may be {@code null} or empty
      * @return a new bean instance populated from the JSON data,
      *         or {@code null} if {@code str} is {@code null} or empty
+     * @throws ParsingException if the nonempty input has invalid JSON syntax or does not match the target type.
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(Object)
      */
     @Override
-    public T valueOf(final String str) {
+    public T valueOf(final String str) throws ParsingException, RuntimeException {
         return (Strings.isEmpty(str)) ? null : Utils.jsonParser.deserialize(str, Type.of(javaType));
     }
 }

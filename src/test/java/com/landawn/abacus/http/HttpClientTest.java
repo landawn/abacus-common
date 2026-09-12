@@ -24,10 +24,12 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -232,15 +234,9 @@ public class HttpClientTest extends TestBase {
     }
 
     @Test
-    public void testCheckSupportedProtocol_invalidProtocol() {
+    public void testCheckSupportedProtocol_InvalidProtocol() {
         assertThrows(IllegalArgumentException.class, () -> HttpClient.create("ftp://example.com"));
         assertThrows(IllegalArgumentException.class, () -> HttpClient.create("file:///tmp/test"));
-    }
-
-    @Test
-    public void testUrl() {
-        HttpClient client = HttpClient.create("https://api.example.com");
-        assertEquals("https://api.example.com", client.url());
     }
 
     @Test
@@ -257,7 +253,7 @@ public class HttpClientTest extends TestBase {
     }
 
     @Test
-    public void testCreateWithStringMaxconnectTimeoutsAndSettings() {
+    public void testCreateWithStringMaxTimeoutsAndSettings() {
         HttpSettings settings = HttpSettings.create().header("Accept", "application/json");
         HttpClient client = HttpClient.create("https://api.example.com", 16, 5000L, 10000L, settings);
         assertNotNull(client);
@@ -292,7 +288,7 @@ public class HttpClientTest extends TestBase {
     }
 
     @Test
-    public void testCreate_withTimeouts() {
+    public void testCreate_Timeouts() {
         HttpClient client = HttpClient.create("http://localhost:9999", 5000L, 10000L);
         assertNotNull(client);
         assertEquals("http://localhost:9999", client.url());
@@ -385,7 +381,7 @@ public class HttpClientTest extends TestBase {
 
         settings.useCaches(true).header("X-Test", "mutated");
 
-        HttpURLConnection connection = client.openConnection(HttpMethod.GET, null, false, String.class);
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, null, false);
         assertFalse(connection.getUseCaches());
         assertEquals("initial", connection.getRequestProperty("X-Test"));
         connection.disconnect();
@@ -397,7 +393,7 @@ public class HttpClientTest extends TestBase {
         HttpClient client = HttpClient.create(baseUrl, 16, 5000L, 10000L, baseSettings);
         HttpSettings requestSettings = HttpSettings.create().header("X-Request", "request").header("X-Override", "request");
 
-        HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false, String.class);
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false);
 
         assertEquals("base", connection.getRequestProperty("X-Base"));
         assertEquals("request", connection.getRequestProperty("X-Request"));
@@ -413,7 +409,7 @@ public class HttpClientTest extends TestBase {
         final HttpSettings requestSettings = HttpSettings.create().header("X-Trace-Id", "123");
 
         try {
-            final HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false, String.class);
+            final HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false);
 
             assertTrue(connection.usingProxy());
             connection.disconnect();
@@ -432,7 +428,7 @@ public class HttpClientTest extends TestBase {
         final HttpSettings requestSettings = HttpSettings.create().header("X-Trace-Id", "123");
 
         try {
-            final HttpsURLConnection connection = (HttpsURLConnection) client.openConnection(HttpMethod.GET, requestSettings, false, String.class);
+            final HttpsURLConnection connection = (HttpsURLConnection) client.openConnection(HttpMethod.GET, requestSettings, false);
 
             assertSame(sslSocketFactory, connection.getSSLSocketFactory());
             connection.disconnect();
@@ -907,7 +903,7 @@ public class HttpClientTest extends TestBase {
     public void testOpenConnectionWithHttpMethodSettingsDoOutputAndResultClass() throws IOException {
         HttpClient client = HttpClient.create(baseUrl);
         HttpSettings settings = HttpSettings.create();
-        HttpURLConnection connection = client.openConnection(HttpMethod.GET, settings, false, String.class);
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, settings, false);
         assertNotNull(connection);
         assertEquals("GET", connection.getRequestMethod());
     }
@@ -916,7 +912,7 @@ public class HttpClientTest extends TestBase {
     public void testOpenConnectionWithAllParameters() throws IOException {
         HttpClient client = HttpClient.create(baseUrl);
         HttpSettings settings = HttpSettings.create();
-        HttpURLConnection connection = client.openConnection(HttpMethod.GET, "param=value", settings, false, String.class);
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, "param=value", settings, false);
         assertNotNull(connection);
         String urlStr = connection.getURL().toString();
         assertTrue(urlStr.contains("param=value"));
@@ -925,7 +921,7 @@ public class HttpClientTest extends TestBase {
     @Test
     public void testOpenConnection() throws IOException {
         HttpClient client = HttpClient.create(baseUrl);
-        HttpURLConnection connection = client.openConnection(HttpMethod.GET, null, false, String.class);
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, null, false);
         assertNotNull(connection);
         assertEquals("GET", connection.getRequestMethod());
     }
@@ -936,7 +932,7 @@ public class HttpClientTest extends TestBase {
         HttpClient client = HttpClient.create(baseUrl, 16, 5000L, 10000L, baseSettings);
         HttpSettings requestSettings = HttpSettings.create().useCaches(true);
 
-        HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false, String.class);
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false);
         assertTrue(connection.getUseCaches());
         connection.disconnect();
     }
@@ -947,7 +943,7 @@ public class HttpClientTest extends TestBase {
         final HttpSettings requestSettings = HttpSettings.create().setConnectTimeout(Long.MAX_VALUE).setReadTimeout(Long.MAX_VALUE);
 
         try {
-            final HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false, String.class);
+            final HttpURLConnection connection = client.openConnection(HttpMethod.GET, requestSettings, false);
 
             assertEquals(Integer.MAX_VALUE, connection.getConnectTimeout());
             assertEquals(Integer.MAX_VALUE, connection.getReadTimeout());
@@ -960,7 +956,7 @@ public class HttpClientTest extends TestBase {
     @Test
     public void testOpenConnectionWithQueryParameters() throws IOException {
         HttpClient client = HttpClient.create(baseUrl);
-        HttpURLConnection connection = client.openConnection(HttpMethod.GET, "param=value", null, false, String.class);
+        HttpURLConnection connection = client.openConnection(HttpMethod.GET, "param=value", null, false);
         assertNotNull(connection);
         String urlStr = connection.getURL().toString();
         assertTrue(urlStr.contains("param=value"));
@@ -970,11 +966,11 @@ public class HttpClientTest extends TestBase {
     public void testOpenConnectionDoesNotExhaustConnectionLimit() throws IOException {
         HttpClient client = HttpClient.create(baseUrl, 1);
 
-        HttpURLConnection firstConnection = client.openConnection(HttpMethod.GET, null, false, String.class);
+        HttpURLConnection firstConnection = client.openConnection(HttpMethod.GET, null, false);
         assertNotNull(firstConnection);
         firstConnection.disconnect();
 
-        HttpURLConnection secondConnection = client.openConnection(HttpMethod.GET, null, false, String.class);
+        HttpURLConnection secondConnection = client.openConnection(HttpMethod.GET, null, false);
         assertNotNull(secondConnection);
         secondConnection.disconnect();
 
@@ -1271,8 +1267,10 @@ public class HttpClientTest extends TestBase {
         server.enqueue(new MockResponse());
         HttpClient client = HttpClient.create(baseUrl);
 
-        ContinuableFuture<Void> future = client.asyncHead();
-        future.get();
+        ContinuableFuture<HttpResponse> future = client.asyncHead();
+        HttpResponse response = future.get();
+
+        assertEquals(200, response.statusCode());
 
         RecordedRequest request = server.takeRequest();
         assertEquals("HEAD", request.getMethod());
@@ -1284,8 +1282,10 @@ public class HttpClientTest extends TestBase {
         HttpClient client = HttpClient.create(baseUrl);
         HttpSettings settings = HttpSettings.create();
 
-        ContinuableFuture<Void> future = client.asyncHead(settings);
-        future.get();
+        ContinuableFuture<HttpResponse> future = client.asyncHead(settings);
+        HttpResponse response = future.get();
+
+        assertEquals(200, response.statusCode());
 
         RecordedRequest request = server.takeRequest();
         assertEquals("HEAD", request.getMethod());
@@ -1373,6 +1373,101 @@ public class HttpClientTest extends TestBase {
         future.get();
 
         assertEquals("Writer content", writer.toString());
+    }
+
+
+    // ------------------------------------------------------------------------------------------
+    // 2026-09-08 spillover S3 ITEM 1 (finding 42): PATCH/CONNECT are refused by HttpClient itself,
+    // with the same UnsupportedOperationException HttpRequest raises, instead of reaching
+    // HttpURLConnection.setRequestMethod and surfacing as UncheckedIOException(ProtocolException).
+    // ------------------------------------------------------------------------------------------
+
+    @Test
+    public void reviewFixes20260908_patchAndConnectAreRejectedByEveryEntryPoint() throws Exception {
+        final HttpClient client = HttpClient.create(baseUrl);
+
+        try {
+            for (final HttpMethod method : new HttpMethod[] { HttpMethod.PATCH, HttpMethod.CONNECT }) {
+                final HttpSettings settings = HttpSettings.create();
+
+                final UnsupportedOperationException e = assertThrows(UnsupportedOperationException.class, () -> client.execute(method, "body"));
+                assertTrue(e.getMessage().contains("HttpMethod." + method.name()), e.getMessage());
+                assertTrue(e.getMessage().contains("java.net.HttpURLConnection"), e.getMessage());
+
+                assertThrows(UnsupportedOperationException.class, () -> client.execute(method, "body", String.class));
+                assertThrows(UnsupportedOperationException.class, () -> client.execute(method, "body", settings));
+                assertThrows(UnsupportedOperationException.class, () -> client.execute(method, "body", settings, String.class));
+                assertThrows(UnsupportedOperationException.class, () -> client.execute(method, "body", settings, new File("unused.txt")));
+                assertThrows(UnsupportedOperationException.class, () -> client.execute(method, "body", settings, new ByteArrayOutputStream()));
+                assertThrows(UnsupportedOperationException.class, () -> client.execute(method, "body", settings, new StringWriter()));
+
+                // the advanced, caller-managed connection factories refuse the method as well
+                assertThrows(UnsupportedOperationException.class, () -> client.openConnection(method, settings, false));
+                assertThrows(UnsupportedOperationException.class, () -> client.openConnection(method, null, settings, false));
+
+                // asynchronously the same exception arrives through the future
+                final ExecutionException async = assertThrows(ExecutionException.class, () -> client.asyncExecute(method, "body").get());
+                assertTrue(async.getCause() instanceof UnsupportedOperationException, String.valueOf(async.getCause()));
+
+                assertNull(server.takeRequest(), method + " must be rejected before any request is sent");
+            }
+
+            // The seven methods HttpURLConnection can issue are unaffected.
+            server.enqueue(new MockResponse().setBody("ok"));
+            assertEquals("ok", client.execute(HttpMethod.GET, null));
+        } finally {
+            client.close();
+        }
+    }
+
+    @Test
+    public void reviewFixes20260908_rejectedMethodDoesNotConsumeAnInFlightSlot() throws Exception {
+        // maxConnection == 1: had the guard run after the in-flight counter was incremented, the
+        // rejected request would have leaked the only slot and this GET would be refused.
+        final HttpClient client = HttpClient.create(baseUrl, 1, 1_000, 1_000);
+
+        try {
+            for (int i = 0; i < 5; i++) {
+                assertThrows(UnsupportedOperationException.class, () -> client.execute(HttpMethod.PATCH, "body"));
+            }
+
+            server.enqueue(new MockResponse().setBody("still usable"));
+            assertEquals("still usable", client.execute(HttpMethod.GET, null));
+        } finally {
+            client.close();
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // 2026-09-08 spillover S3 ITEM 3 (finding 46): a Cookie collection reaches the wire as ONE
+    // header line whose cookie-pairs are separated by "; " (RFC 6265 5.4), not comma-joined.
+    // ------------------------------------------------------------------------------------------
+
+    @Test
+    public void reviewFixes20260908_cookieCollectionIsSentAsOneSemicolonJoinedLine() throws Exception {
+        final HttpSettings settings = HttpSettings.create()
+                .header("Cookie", Arrays.asList("a=1", "b=2"))
+                .header("Accept-Encoding", Arrays.asList("gzip", "br"));
+        final HttpClient client = HttpClient.create(baseUrl);
+
+        try {
+            // The request property is set by setHttpProperties(..) while the connection is opened, so the
+            // rendering can be read back without a round trip.
+            final HttpURLConnection connection = client.openConnection(HttpMethod.GET, settings, false);
+            assertEquals("a=1; b=2", connection.getRequestProperty("Cookie"));
+            // every other multiply-valued field keeps the comma-separated list grammar
+            assertEquals("gzip, br", connection.getRequestProperty("Accept-Encoding"));
+            connection.disconnect();
+
+            server.enqueue(new MockResponse().setBody("ok"));
+            assertEquals("ok", client.execute(HttpMethod.GET, null, settings));
+
+            final RecordedRequest recorded = server.takeRequest();
+            assertEquals("a=1; b=2", recorded.getHeader("Cookie"));
+            assertEquals("gzip, br", recorded.getHeader("Accept-Encoding"));
+        } finally {
+            client.close();
+        }
     }
 
 }

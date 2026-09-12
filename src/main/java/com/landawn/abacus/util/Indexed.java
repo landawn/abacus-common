@@ -15,164 +15,50 @@
 package com.landawn.abacus.util;
 
 /**
- * An immutable container that pairs a value of type {@code T} with a long index position,
- * providing a type-safe way to associate data with positional information. This class is
- * particularly useful in scenarios where tracking both a value and its position is essential,
- * such as during stream operations, collection processing, and data transformation pipelines.
+ * An immutable pairing of a value with a {@code long} index position - the value's place in a sequence, carried
+ * alongside the value itself. Useful wherever a transformation must survive without losing where each element came
+ * from: filtering, sorting, or parallel processing that has to report original positions.
  *
- * <p>The {@code Indexed} class extends {@link AbstractIndexed}, which provides the core index
- * storage and access functionality. This design allows the class to focus on value management
- * while inheriting index-related operations from its parent class.</p>
+ * <p>The index is stored as a {@code long} by {@link AbstractIndexed}, so it spans sequences longer than
+ * {@link Integer#MAX_VALUE}; read it with {@link #index()} for an {@code int} (which throws
+ * {@link ArithmeticException} on overflow) or {@link #longIndex()} for the full range. The factory methods reject a
+ * negative index. The value may be {@code null}.
  *
- * <p><b>Key Features:</b>
- * <ul>
- *   <li><b>Type Safety:</b> Generic type parameter {@code T} ensures compile-time type checking for values</li>
- *   <li><b>Immutable Design:</b> Both index and value are final and set only during construction</li>
- *   <li><b>Long Index Support:</b> Uses long for index to support very large collections beyond Integer.MAX_VALUE</li>
- *   <li><b>Null Value Support:</b> Values can be {@code null}, allowing representation of absent or optional data</li>
- *   <li><b>Equality Semantics:</b> Two Indexed instances are equal if they have the same index and equal values</li>
- *   <li><b>Hash Code Contract:</b> Hash code is computed from both index and value for proper collection usage</li>
- *   <li><b>String Representation:</b> Clear format {@code [index]=value} for debugging and logging</li>
- * </ul>
+ * <p>Two instances are equal when their indices are equal and their values are equal, {@code null} included;
+ * {@link #hashCode()} mixes both halves of the index so a large index is not truncated away. {@link #toString()}
+ * renders as {@code [index]=value}.
  *
- * <p><b>Design Philosophy:</b>
- * <ul>
- *   <li><b>Shallow Immutability:</b> The index and value reference cannot be reassigned; a mutable value still requires its own synchronization</li>
- *   <li><b>Simplicity:</b> Focused on a single purpose - pairing values with indices</li>
- *   <li><b>Type Safety:</b> Leverages generics to prevent type-related runtime errors</li>
- *   <li><b>Integration:</b> Works seamlessly with Java's collections framework and functional APIs</li>
- * </ul>
- *
- * <p><b>Common Use Cases:</b>
- * <ul>
- *   <li><b>Stream Processing:</b> Maintaining element positions during stream transformations</li>
- *   <li><b>Parallel Processing:</b> Tracking original indices when processing collections in parallel</li>
- *   <li><b>Sorting with Index:</b> Preserving original positions when sorting or filtering data</li>
- *   <li><b>Pagination:</b> Associating values with their position in paginated result sets</li>
- *   <li><b>Data Mapping:</b> Creating index-to-value mappings without using heavyweight Map structures</li>
- *   <li><b>Result Tracking:</b> Recording the position where specific values or conditions occurred</li>
- * </ul>
+ * <p>Only the pairing is immutable. A mutable value is not copied or frozen, so the usual caution applies: mutating
+ * it after the {@code Indexed} is in a hash-based collection corrupts that collection.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Basic creation and access
  * Indexed<String> indexed = Indexed.of("Hello", 5);
- * String value = indexed.value();  // returns "Hello"
- * int index = indexed.index();     // returns 5
+ * indexed.value();       // "Hello"
+ * indexed.index();       // 5
+ * indexed.toString();    // "[5]=Hello"
  *
- * // Stream processing with indices
- * List<String> items = Arrays.asList("a", "b", "c");
- * List<Indexed<String>> indexedItems = IntStream.range(0, items.size())
- *     .mapToObj(i -> Indexed.of(items.get(i), i))
- *     .collect(Collectors.toList());
+ * // Keep the original position through a filter
+ * List<String> items = Arrays.asList("a", "bb", "c");
+ * List<Indexed<String>> longOnes = IntStream.range(0, items.size())
+ *         .mapToObj(i -> Indexed.of(items.get(i), i))
+ *         .filter(idx -> idx.value().length() > 1)
+ *         .collect(Collectors.toList());
+ * // [ [1]=bb ] - the element still knows it was second
  *
- * // Filtering while preserving indices
- * List<Indexed<String>> filtered = indexedItems.stream()
- *     .filter(idx -> idx.value().length() > 1)
- *     .collect(Collectors.toList());
- * // Each element knows its original position
- *
- * // Sorting with original index tracking
- * List<Indexed<Integer>> numbers = Arrays.asList(
- *     Indexed.of(30, 0),
- *     Indexed.of(10, 1),
- *     Indexed.of(20, 2)
- * );
+ * // Sort by value, recover the original order afterwards
+ * List<Indexed<Integer>> numbers = new ArrayList<>(List.of(
+ *         Indexed.of(30, 0), Indexed.of(10, 1), Indexed.of(20, 2)));
  * numbers.sort(Comparator.comparing(Indexed::value));
- * // Can still access original positions via index()
+ * // [ [1]=10, [2]=20, [0]=30 ]
  *
- * // Working with large indices
- * Indexed<String> largeIndex = Indexed.of("data", 5_000_000_000L);
- * // Supports indices beyond Integer.MAX_VALUE
+ * // Indices beyond int range
+ * Indexed.of("data", 5_000_000_000L);
  * }</pre>
  *
- * <p><b>Primitive Specializations:</b>
- * <p>For primitive types, specialized versions are available to avoid boxing overhead:
- * <ul>
- *   <li>{@link IndexedBoolean} - for boolean values</li>
- *   <li>{@link IndexedByte} - for byte values</li>
- *   <li>{@link IndexedChar} - for char values</li>
- *   <li>{@link IndexedShort} - for short values</li>
- *   <li>{@link IndexedInt} - for int values</li>
- *   <li>{@link IndexedLong} - for long values</li>
- *   <li>{@link IndexedFloat} - for float values</li>
- *   <li>{@link IndexedDouble} - for double values</li>
- * </ul>
- *
- * <p><b>Performance Characteristics:</b>
- * <ul>
- *   <li><b>Creation Cost:</b> O(1) - Simple object allocation with two field assignments</li>
- *   <li><b>Memory Overhead:</b> One {@code long} and one reference, plus JVM-dependent object headers, padding, and alignment</li>
- *   <li><b>Access Cost:</b> O(1) - Direct field access for both index and value</li>
- *   <li><b>Equality Check:</b> O(1) wrapper work plus the cost of the value's equality operation</li>
- *   <li><b>Hash Code:</b> O(1) wrapper work plus the cost of the value's hash-code operation</li>
- * </ul>
- *
- * <p><b>Thread Safety:</b>
- * <ul>
- *   <li><b>Immutable State:</b> Both index and value are final and cannot be changed after construction</li>
- *   <li><b>Safe Publication:</b> Can be safely shared between threads without synchronization</li>
- *   <li><b>No Synchronization:</b> No locks or synchronization needed due to immutability</li>
- *   <li><b>Concurrent Access:</b> Multiple threads can safely read from the same instance</li>
- *   <li><b>Value Mutability:</b> If the contained value is mutable, proper synchronization is required for the value itself</li>
- * </ul>
- *
- * <p><b>Equality and Hash Code:</b>
- * <ul>
- *   <li>Two Indexed instances are equal if they have the same index and equal values</li>
- *   <li>Null values are supported and two {@code null} values are considered equal</li>
- *   <li>Hash code is computed from all bits of the index and the value's hash code</li>
- *   <li>The implementation satisfies the hash code contract for use in collections</li>
- * </ul>
- *
- * <p><b>String Representation:</b>
- * <p>The {@link #toString()} method returns a string in the format {@code [index]=value},
- * making it easy to identify both the position and content at a glance. For example:
- * <pre>{@code
- * Indexed.of("hello", 5).toString();  // returns "[5]=hello"
- * Indexed.of(null, 0).toString();     // returns "[0]=null"
- * }</pre>
- *
- * <p><b>Best Practices:</b>
- * <ul>
- *   <li>Use factory methods {@link #of(Object, int)} or {@link #of(Object, long)} instead of constructor</li>
- *   <li>Choose int overload when indices are guaranteed to be within int range for clarity</li>
- *   <li>Use long overload when working with very large collections or unbounded sequences</li>
- *   <li>Consider primitive specializations (IndexedInt, IndexedLong, etc.) for performance-critical code</li>
- *   <li>Remember that while Indexed itself is immutable, contained values may be mutable</li>
- *   <li>Use in streams with {@code mapToObj} or similar operations to maintain index information</li>
- * </ul>
- *
- * <p><b>Comparison with Alternatives:</b>
- * <ul>
- *   <li><b>vs. Map.Entry:</b> Indexed uses long index vs Map.Entry's key-value semantics</li>
- *   <li><b>vs. Pair:</b> Indexed is specialized for index-value pairs with specific semantics</li>
- *   <li><b>vs. Tuple2:</b> Indexed provides semantic meaning (index + value) vs generic tuple</li>
- *   <li><b>vs. Array/List:</b> Indexed is immutable and can exist independently of collections</li>
- * </ul>
- *
- * <p><b>Integration Examples:</b>
- * <pre>{@code
- * // Collecting indexed values into a map
- * Map<Long, String> indexToValue = Stream.of(
- *     Indexed.of("a", 0L),
- *     Indexed.of("b", 1L),
- *     Indexed.of("c", 2L)
- * ).collect(Collectors.toMap(Indexed::longIndex, Indexed::value));
- *
- * // Finding first occurrence matching a predicate
- * Optional<Indexed<String>> firstMatch = indexedList.stream()
- *     .filter(idx -> idx.value().startsWith("test"))
- *     .findFirst();
- * // firstMatch contains both the value and its original position
- *
- * // Grouping by value while preserving indices
- * Map<String, List<Long>> valueToIndices = indexedList.stream()
- *     .collect(Collectors.groupingBy(
- *         Indexed::value,
- *         Collectors.mapping(Indexed::longIndex, Collectors.toList())
- *     ));
- * }</pre>
+ * <p>For primitive values, the specializations below avoid boxing: {@link IndexedBoolean}, {@link IndexedByte},
+ * {@link IndexedChar}, {@link IndexedShort}, {@link IndexedInt}, {@link IndexedLong}, {@link IndexedFloat},
+ * {@link IndexedDouble}.
  *
  * @param <T> the type of the value being indexed; the value itself may be {@code null}.
  * @see AbstractIndexed

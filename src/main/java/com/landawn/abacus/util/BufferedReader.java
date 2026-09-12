@@ -53,7 +53,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Shared placeholder passed to the {@link java.io.BufferedReader} superclass constructor in
-     * string mode, where there is no real source. All of its operations throw
+     * every mode, so the superclass never retains a real source across reuse. All of its operations throw
      * {@link UnsupportedOperationException}, so it must never actually be read from.
      */
     static final Reader DUMMY_READER = new DummyReader();
@@ -127,7 +127,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * @param st the string to read from; must not be {@code null}
      * @throws NullPointerException if {@code st} is {@code null}
      */
-    BufferedReader(final String st) {
+    BufferedReader(final String st) throws NullPointerException {
         super(DUMMY_READER, 1);
         reinit(st);
     }
@@ -145,8 +145,9 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * }</pre>
      *
      * @param is the input stream to read from
+     * @throws IllegalArgumentException if {@code is} is {@code null}
      */
-    BufferedReader(final InputStream is) {
+    BufferedReader(final InputStream is) throws IllegalArgumentException {
         this(IOUtil.newInputStreamReader(is, IOUtil.DEFAULT_CHARSET));
     }
 
@@ -161,10 +162,11 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * }</pre>
      *
      * @param reader the reader to read from
+     * @throws NullPointerException if {@code reader} is {@code null}
      */
-    BufferedReader(final Reader reader) {
-        super(reader, 1);
-        reinit(reader);
+    BufferedReader(final Reader reader) throws NullPointerException {
+        super(DUMMY_READER, 1);
+        reinit(java.util.Objects.requireNonNull(reader, "reader"));
     }
 
     /**
@@ -187,7 +189,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *
      * @return the character read, as an integer in the range 0 to 65535,
      *         or -1 if the end of the stream has been reached
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this reader is closed, or reading characters from the underlying reader fails
      */
     @Override
     public int read() throws IOException {
@@ -232,7 +234,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * @param len maximum number of characters to read
      * @return the number of characters read, or -1 if the end of the stream
      *         has been reached
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this reader is closed, or reading characters from the underlying reader fails
      */
     private int read1(final char[] cbuf, final int off, final int len) throws IOException { // NOSONAR
         if (nextChar >= nChars) {
@@ -294,12 +296,13 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * @param len maximum number of characters to read
      * @return the number of characters read, or -1 if the end of the stream
      *         has been reached. Returns 0 if {@code len} is 0
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this reader is closed, or reading characters from the underlying reader fails
      * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is
      *         negative, or {@code len} is greater than {@code cbuf.length - off}
+     * @throws NullPointerException if {@code cbuf} is null and {@code off} and {@code len} are nonnegative
      */
     @Override
-    public int read(final char[] cbuf, final int off, final int len) throws IOException {
+    public int read(final char[] cbuf, final int off, final int len) throws IOException, IndexOutOfBoundsException, NullPointerException {
         ensureOpen();
 
         if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
@@ -348,7 +351,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * @return a String containing the contents of the line, not including
      *         any line-termination characters, or {@code null} if the end of the
      *         stream has been reached without reading any characters
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this reader is closed, or reading characters from the underlying reader fails
      */
     String readLine(final boolean ignoreLF) throws IOException {
         ensureOpen();
@@ -448,7 +451,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * @return a String containing the contents of the line, not including
      *         any line-termination characters, or {@code null} if the end of the
      *         stream has been reached
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this reader is closed, or reading characters from the underlying reader fails
      */
     @MayReturnNull
     @Override
@@ -507,11 +510,11 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *
      * @param n the number of characters to skip
      * @return the number of characters actually skipped
+     * @throws IOException if this reader is closed, or reading the underlying reader while skipping characters fails
      * @throws IllegalArgumentException if {@code n} is negative
-     * @throws IOException if an I/O error occurs
      */
     @Override
-    public long skip(final long n) throws IllegalArgumentException, IOException {
+    public long skip(final long n) throws IOException, IllegalArgumentException {
         ensureOpen();
 
         N.checkArgNotNegative(n, cs.n);
@@ -581,7 +584,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *
      * @return {@code true} if the next {@link #read()} is guaranteed not to block for input,
      *         {@code false} otherwise; always {@code true} when reading from a string
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this reader is closed, or checking or reading the underlying reader while skipping a line feed fails
      */
     @Override
     public boolean ready() throws IOException {
@@ -668,7 +671,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * }
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if closing the underlying reader fails
      */
     @Override
     public void close() throws IOException {
@@ -708,7 +711,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * @throws NullPointerException if {@code st} is {@code null}
      */
     @SuppressWarnings("deprecation")
-    void reinit(final String st) {
+    void reinit(final String st) throws NullPointerException {
         isClosed = false;
         in = null;
         str = st;
@@ -774,7 +777,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
 
     /**
      * Resets all internal state to release resources: recycles the character buffer,
-     * clears string and reader references, and zeroes position counters.
+     * clears string, reader and source-lock references, and zeroes position counters.
      * This method is called during {@link #close()} to release held resources.
      */
     void _reset() { //NOSONAR
@@ -791,6 +794,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
             strLength = 0;
             in = null;
         }
+        // Release the source monitor only after leaving it; a pooled reader must not retain its old source.
+        lock = DUMMY_READER;
     }
 
     /**
@@ -798,7 +803,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * deliberately does not try to fill the entire buffer: doing so could block after some
      * characters are already available, contrary to the {@link Reader} read contract.
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this reader is closed, or reading characters from the underlying reader fails
      */
     void fill() throws IOException { // NOSONAR
         ensureOpen();

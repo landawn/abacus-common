@@ -20,7 +20,7 @@ import com.landawn.abacus.TestBase;
 
 public class StatefulTest extends TestBase {
     @Stateful
-    static class TestClass {
+    public static class TestClass {
         @Stateful
         private int field;
 

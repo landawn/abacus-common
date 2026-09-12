@@ -27,10 +27,10 @@ public class MTest extends TestBase {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        N.parallelSort(a);
+        CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(N.isSorted(a));
+        assertTrue(CommonUtil.isSorted(a));
     }
 
     @Test
@@ -44,10 +44,10 @@ public class MTest extends TestBase {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        N.parallelSort(a);
+        CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(N.isSorted(a));
+        assertTrue(CommonUtil.isSorted(a));
     }
 
     @Test
@@ -61,10 +61,10 @@ public class MTest extends TestBase {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        N.parallelSort(a);
+        CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(N.isSorted(a));
+        assertTrue(CommonUtil.isSorted(a));
     }
 
     @Test
@@ -78,10 +78,10 @@ public class MTest extends TestBase {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        N.parallelSort(a);
+        CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(N.isSorted(a));
+        assertTrue(CommonUtil.isSorted(a));
     }
 
     @Test
@@ -95,10 +95,10 @@ public class MTest extends TestBase {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        N.parallelSort(a);
+        CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
 
-        assertTrue(N.isSorted(a));
+        assertTrue(CommonUtil.isSorted(a));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class MTest extends TestBase {
         final String[] a = new String[10000000];
         final MutableInt idx = new MutableInt();
 
-        IOUtil.forLines(file, (Consumer<String>) line -> {
+        IOUtil.forEachLine(file, (Consumer<String>) line -> {
             if (line != null) {
                 a[idx.value()] = line;
                 idx.increment();
@@ -116,7 +116,7 @@ public class MTest extends TestBase {
 
         N.println("Sorting");
         long startTime = System.currentTimeMillis();
-        N.parallelSort(a);
+        CommonUtil.parallelSort(a);
         N.println("Took: " + (System.currentTimeMillis() - startTime));
         assertNotNull(startTime);
     }

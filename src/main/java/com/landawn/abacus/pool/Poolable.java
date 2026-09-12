@@ -26,8 +26,9 @@ package com.landawn.abacus.pool;
  *   <li>Access count</li>
  * </ul>
  *
- * <p>The {@link #destroy(Caller)} method is called when an object is removed from the pool,
- * allowing for proper cleanup of resources.
+ * <p>The {@link #destroy(Caller)} method releases resources when the pool discards an object.
+ * Successful {@link ObjectPool#poll()} and {@link KeyedObjectPool#remove(Object)} calls instead
+ * transfer ownership to the caller without destroying the returned object.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -75,7 +76,9 @@ public interface Poolable {
 
     /**
      * Destroys this poolable object and releases any resources it holds.
-     * This method is called when the object is being removed from the pool.
+     * The pool calls this when discarding the object through expiration, eviction, replacement,
+     * clearing or closure, or when automatic cleanup is requested after a failed insertion.
+     * Retrieval that transfers ownership to the caller does not invoke this method.
      *
      * <p>Implementations should:
      * <ul>
@@ -111,7 +114,8 @@ public interface Poolable {
      * }</pre>
      *
      * @param <T> the type of the object to wrap
-     * @param value the object to wrap, can be {@code null}
+     * @param value the object to wrap, can be {@code null}; must be {@code Serializable} if the adapter
+     *        (or a pool containing it) is to be serialized
      * @return a PoolableAdapter containing the source object
      */
     static <T> PoolableAdapter<T> wrap(final T value) {
@@ -131,14 +135,15 @@ public interface Poolable {
      * }</pre>
      *
      * @param <T> the type of the object to wrap
-     * @param value the object to wrap, can be {@code null}
-     * @param liveTime maximum lifetime in milliseconds before the object expires
+     * @param value the object to wrap, can be {@code null}; must be {@code Serializable} if the adapter
+     *        (or a pool containing it) is to be serialized
+     * @param maxLiveTime maximum lifetime in milliseconds before the object expires
      * @param maxIdleTime maximum idle time in milliseconds before the object expires
      * @return a PoolableAdapter containing the source object with the specified expiration settings
-     * @throws IllegalArgumentException if liveTime or maxIdleTime is not positive.
+     * @throws IllegalArgumentException if maxLiveTime or maxIdleTime is not positive.
      */
-    static <T> PoolableAdapter<T> wrap(final T value, final long liveTime, final long maxIdleTime) {
-        return PoolableAdapter.of(value, liveTime, maxIdleTime);
+    static <T> PoolableAdapter<T> wrap(final T value, final long maxLiveTime, final long maxIdleTime) throws IllegalArgumentException {
+        return PoolableAdapter.of(value, maxLiveTime, maxIdleTime);
     }
 
     /**

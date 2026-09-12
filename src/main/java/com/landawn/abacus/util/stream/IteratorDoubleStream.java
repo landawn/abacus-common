@@ -184,7 +184,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public DoubleStream filter(final DoublePredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream filter(final DoublePredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -233,7 +233,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public DoubleStream takeWhile(final DoublePredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream takeWhile(final DoublePredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -282,7 +282,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public DoubleStream dropWhile(final DoublePredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream dropWhile(final DoublePredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -296,8 +296,6 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             public boolean hasNext() {
                 if (!hasNext) {
                     if (!dropped) {
-                        dropped = true;
-
                         while (elements.hasNext()) {
                             next = elements.nextDouble();
 
@@ -306,6 +304,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                                 break;
                             }
                         }
+                        dropped = true;
                     } else if (elements.hasNext()) {
                         next = elements.nextDouble();
                         hasNext = true;
@@ -339,7 +338,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public DoubleStream map(final DoubleUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream map(final DoubleUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -368,7 +367,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public IntStream mapToInt(final DoubleToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream mapToInt(final DoubleToIntFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -397,7 +396,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public LongStream mapToLong(final DoubleToLongFunction mapper) throws IllegalArgumentException, IllegalStateException {
+    public LongStream mapToLong(final DoubleToLongFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -426,7 +425,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public FloatStream mapToFloat(final DoubleToFloatFunction mapper) throws IllegalArgumentException, IllegalStateException {
+    public FloatStream mapToFloat(final DoubleToFloatFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -456,7 +455,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> mapToObj(final DoubleFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> mapToObj(final DoubleFunction<? extends T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -485,7 +484,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public DoubleStream flatMap(final DoubleFunction<? extends DoubleStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream flatMap(final DoubleFunction<? extends DoubleStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -553,7 +552,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public DoubleStream flatmap(final DoubleFunction<? extends Collection<Double>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream flatmap(final DoubleFunction<? extends Collection<Double>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -594,7 +593,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public DoubleStream flatMapArray(final DoubleFunction<double[]> mapper) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream flatMapArray(final DoubleFunction<double[]> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -645,7 +644,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public IntStream flatMapToInt(final DoubleFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream flatMapToInt(final DoubleFunction<? extends IntStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -713,7 +712,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public LongStream flatMapToLong(final DoubleFunction<? extends LongStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public LongStream flatMapToLong(final DoubleFunction<? extends LongStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -781,7 +780,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public FloatStream flatMapToFloat(final DoubleFunction<? extends FloatStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public FloatStream flatMapToFloat(final DoubleFunction<? extends FloatStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -850,7 +849,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> flatMapToObj(final DoubleFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatMapToObj(final DoubleFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -919,7 +918,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> flatmapToObj(final DoubleFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final DoubleFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1037,13 +1036,24 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final double next = elements.nextDouble();
                 cnt++;
-                return elements.nextDouble();
+                return next;
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return cnt >= maxSize || elements.supportsFailureAtomicAdvance();
             }
 
             @Override
             public void advance(final long n) {
-                if (n <= 0) {
+                if (n <= 0 || cnt >= maxSize) {
+                    return;
+                }
+
+                if (!elements.supportsFailureAtomicAdvance()) {
+                    super.advance(n);
                     return;
                 }
 
@@ -1078,36 +1088,46 @@ class IteratorDoubleStream extends AbstractDoubleStream {
         }
 
         return newStream(new DoubleIteratorEx() { //NOSONAR
-            private boolean skipped = false;
+            private long remainingToSkip = n;
+
+            private void skipElements() {
+                if (remainingToSkip > 0) {
+                    if (elements.supportsFailureAtomicAdvance()) {
+                        elements.advance(remainingToSkip);
+                    } else {
+                        while (remainingToSkip > 0 && elements.hasNext()) {
+                            elements.nextDouble();
+                            remainingToSkip--;
+                        }
+                    }
+                    remainingToSkip = 0;
+                }
+            }
 
             @Override
             public boolean hasNext() {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 return elements.hasNext();
             }
 
             @Override
             public double nextDouble() {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 return elements.nextDouble();
             }
 
             @Override
             public long count() {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 return elements.count();
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return elements.supportsFailureAtomicAdvance();
             }
 
             @Override
@@ -1116,20 +1136,14 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                     return;
                 }
 
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 elements.advance(n2);
             }
 
             @Override
             public double[] toArray() {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 return elements.toArray();
             }
@@ -1178,6 +1192,8 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             private double[] aar;
             private int cursor = 0;
             private int to;
+            private LinkedList<Double> queue;
+            private Queue<Double> heap;
 
             @Override
             public boolean hasNext() {
@@ -1245,9 +1261,11 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
             private void init() {
                 if (!initialized) {
-                    initialized = true;
+                    // Keep the window/heap across retries so a failed source read does not drop already-accepted candidates.
                     if (isSorted() && isSameComparator(comparator, comparator())) {
-                        final LinkedList<Double> queue = new LinkedList<>();
+                        if (queue == null) {
+                            queue = new LinkedList<>();
+                        }
 
                         while (elements.hasNext()) {
                             if (queue.size() >= n) {
@@ -1260,7 +1278,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                         aar = Array.unbox(queue.toArray(N.EMPTY_DOUBLE_OBJ_ARRAY));
                     } else {
                         final Comparator<? super Double> cmp = comparator;
-                        final Queue<Double> heap = new PriorityQueue<>(Math.min(n, 16), cmp);
+                        if (heap == null) {
+                            heap = new PriorityQueue<>(Math.min(n, 16), cmp);
+                        }
 
                         Double next = null;
                         while (elements.hasNext()) {
@@ -1280,6 +1300,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                     }
 
                     to = aar.length;
+                    queue = null;
+                    heap = null;
+                    initialized = true;
                 }
             }
         }, false);
@@ -1295,7 +1318,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
-    public DoubleStream onEach(final DoubleConsumer action) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream onEach(final DoubleConsumer action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -1321,11 +1344,11 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @param <E> the type of exception the action may throw
      * @param action a non-interfering action to perform on each element
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the action throws
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws
      */
     @Override
-    public <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -1348,7 +1371,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    protected double[] toArray(final boolean closeStream) {
+    protected double[] toArray(final boolean closeStream) throws IllegalStateException {
         assertNotClosed();
 
         try {
@@ -1413,7 +1436,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
-    public <C extends Collection<Double>> C toCollection(final Supplier<? extends C> supplier) throws IllegalArgumentException, IllegalStateException {
+    public <C extends Collection<Double>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1455,7 +1478,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
-    public Multiset<Double> toMultiset(final Supplier<? extends Multiset<Double>> supplier) throws IllegalArgumentException, IllegalStateException {
+    public Multiset<Double> toMultiset(final Supplier<? extends Multiset<Double>> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1488,15 +1511,15 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @param mapFactory supplier that creates a new, empty map of the desired type
      * @return a map containing the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if {@code keyMapper} throws
-     * @throws E2 if {@code valueMapper} throws
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws E if {@code keyMapper} throws
+     * @throws E2 if {@code valueMapper} throws
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.DoubleFunction<? extends K, E> keyMapper,
             final Throwables.DoubleFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalArgumentException, IllegalStateException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1531,8 +1554,8 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @param mapFactory supplier that creates a new, empty map of the desired type
      * @return a map from group key to downstream collection result
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} returns a {@code null} key, or if {@code keyMapper} or
-     *         {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream} or {@code mapFactory} is {@code null}, or
+     *         {@code keyMapper} returns a {@code null} key.
      * @throws E if {@code keyMapper} throws
      */
     @Override
@@ -1542,6 +1565,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
@@ -1590,7 +1614,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
-    public double reduce(final double identity, final DoubleBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public double reduce(final double identity, final DoubleBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -1619,7 +1643,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
-    public OptionalDouble reduce(final DoubleBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public OptionalDouble reduce(final DoubleBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -1661,7 +1685,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjDoubleConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1860,11 +1884,11 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @param predicate a non-interfering, stateless predicate to apply to stream elements
      * @return {@code true} if any element matches, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1891,11 +1915,11 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @param predicate a non-interfering, stateless predicate to apply to stream elements
      * @return {@code true} if all elements match (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1922,11 +1946,11 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @param predicate a non-interfering, stateless predicate to apply to stream elements
      * @return {@code true} if no elements match (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1953,12 +1977,12 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @param predicate a non-interfering, stateless predicate to apply to stream elements
      * @return an {@code OptionalDouble} containing the first matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
     public <E extends Exception> OptionalDouble findFirst(final Throwables.DoublePredicate<E> predicate)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1987,12 +2011,12 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @param predicate a non-interfering, stateless predicate to apply to stream elements
      * @return an {@code OptionalDouble} containing the last matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
     public <E extends Exception> OptionalDouble findLast(final Throwables.DoublePredicate<E> predicate)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -2062,7 +2086,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    DoubleIteratorEx iteratorEx() {
+    DoubleIteratorEx iteratorEx() throws IllegalStateException {
         assertNotClosed();
 
         return elements;
@@ -2079,7 +2103,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
-    public DoubleStream appendIfEmpty(final Supplier<? extends DoubleStream> supplier) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream appendIfEmpty(final Supplier<? extends DoubleStream> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -2134,9 +2158,21 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                     if (elements.hasNext()) {
                         iter = elements;
                     } else {
+                        @SuppressWarnings("resource")
                         final DoubleStream s = supplier.get();
-                        holder.setValue(s);
-                        iter = s.iteratorEx();
+                        try {
+                            iter = s == null ? DoubleIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
+                            holder.setValue(s);
+                        } catch (final RuntimeException | Error e) {
+                            if (s != null) {
+                                try {
+                                    s.close();
+                                } catch (final RuntimeException ce) {
+                                    e.addSuppressed(ce);
+                                }
+                            }
+                            throw e;
+                        }
                     }
                 }
             }
@@ -2153,7 +2189,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
-    public DoubleStream ifEmpty(final Runnable action) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream ifEmpty(final Runnable action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -2203,9 +2239,10 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
             private void init() {
                 if (iter == null) {
+                    final boolean empty = !elements.hasNext();
                     iter = elements;
 
-                    if (!iter.hasNext()) {
+                    if (empty) {
                         action.run();
                     }
                 }
@@ -2226,7 +2263,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      */
     @Override
     protected DoubleStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
-            final boolean cancelUncompletedThreads) {
+            final boolean cancelUncompletedThreads) throws IllegalStateException {
         assertNotClosed();
 
         return new ParallelIteratorDoubleStream(elements, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,

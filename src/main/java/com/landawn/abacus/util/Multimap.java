@@ -17,6 +17,7 @@
 package com.landawn.abacus.util;
 
 import java.util.AbstractCollection;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.RandomAccess;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -52,9 +54,17 @@ import com.landawn.abacus.util.stream.Stream;
  * <p>Unlike a standard Map where each key maps to exactly one value, a Multimap allows:</p>
  * <ul>
  *   <li>Multiple values per key: {@code key1 -> [value1, value2, value3]}</li>
- *   <li>Absent keys return {@code null} from {@link #get(Object)} (empty collections are not retained)</li>
+ *   <li>Absent keys return {@code null} from {@link #get(Object)}</li>
  *   <li>Different collection types for values (List, Set, etc.)</li>
  * </ul>
+ *
+ * <p><b>Key lifecycle:</b> this class's own mutators do not retain empty value collections - a key whose
+ * last value is removed is removed with it, so {@link #get(Object)} returns {@code null} for it. That
+ * invariant holds only for mutations made <i>through</i> this class. Value collections are handed out live
+ * ({@link #get(Object)}, {@link #getOrDefault(Object, Collection)}, {@link #valueCollections()},
+ * {@link #iterator()}, {@link #stream()}), and a {@code wrap} factory keeps using a backing map the caller
+ * may still hold, so a caller can leave behind a key mapped to an empty collection. {@link #get(Object)}
+ * documents exactly what such a key does to the other operations.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
@@ -234,25 +244,26 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
     private transient Collection<E> values;
 
+    private transient Set<Map.Entry<K, V>> entries;
+
     /**
-     * Constructs a Multimap with default backing implementations.
+     * Constructs a Multimap with a {@link HashMap} backing map and {@link java.util.ArrayList} value
+     * collections.
      *
-     * <p>This constructor initializes a Multimap with a {@link HashMap} as the backing map and an
-     * {@link java.util.ArrayList} as the value collection type.</p>
+     * <p>Because the value collections are {@code ArrayList}s, {@code V} must be a type an {@code ArrayList}
+     * can be assigned to - {@code List<E>} or {@code Collection<E>}. Both permitted subclasses declare their
+     * own no-arg constructor with the right value type, so this one is only reached by instantiating the base
+     * class directly; prefer {@link N#newMultimap(Supplier, Supplier)}, which makes the value type explicit.</p>
      */
     Multimap() {
         this(HashMap.class, ArrayList.class);
     }
 
-    /**
-     * Constructs a Multimap with a {@link HashMap} backing map pre-sized to the specified initial capacity
-     * and an {@link java.util.ArrayList} as the value collection type.
-     *
-     * @param initialCapacity the initial capacity hint for the backing HashMap
-     */
-    Multimap(final int initialCapacity) {
-        this(N.newHashMap(initialCapacity), (Supplier<V>) Suppliers.ofList());
-    }
+    // There is deliberately no Multimap(int) constructor. One existed, nothing in the tree called it, and it
+    // forced `(Supplier<V>) Suppliers.ofList()` regardless of V - so any subclass that had ever picked it up
+    // (SetMultimap, say) would have been handed ArrayList values and failed with a ClassCastException on the
+    // first get(). The no-arg constructor above carries the same ArrayList assumption but is documented, is
+    // actually used, and is not a sizing overload anyone would reach for by analogy.
 
     /**
      * Constructs a Multimap with the specified map type and collection type.
@@ -274,13 +285,27 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <p>This constructor initializes a Multimap with a map provided by the specified supplier for the backing map
      * and a collection provided by the specified supplier for the value collection.</p>
      *
-     * @param mapSupplier the supplier of the map to be used as the backing map; invoked once during construction
-     * @param valueSupplier the supplier that creates a new value collection for each key
+     * @param mapSupplier the supplier of the map to be used as the backing map; invoked once during
+     *                    construction, and again by {@link #copy()}, so it must return a new empty map
+     *                    on every call
+     * @param valueSupplier the supplier that creates a new value collection for each key; it must return a
+     *                      new empty collection on every call
+     * @throws IllegalArgumentException if either supplier is {@code null}, or if {@code mapSupplier}
+     *         returns {@code null} or a non-empty map
      */
-    Multimap(final Supplier<? extends Map<K, V>> mapSupplier, final Supplier<? extends V> valueSupplier) {
+    Multimap(final Supplier<? extends Map<K, V>> mapSupplier, final Supplier<? extends V> valueSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+        N.checkArgNotNull(valueSupplier, cs.valueSupplier);
+
+        final Map<K, V> suppliedMap = N.checkArgNotNull(mapSupplier.get(), "mapSupplier.get()");
+
+        if (!suppliedMap.isEmpty()) {
+            throw new IllegalArgumentException("The supplied map must be empty");
+        }
+
         this.mapSupplier = mapSupplier;
         this.valueSupplier = valueSupplier;
-        backingMap = mapSupplier.get();
+        backingMap = suppliedMap;
     }
 
     /**
@@ -358,7 +383,17 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * <br />
      * The returned collection is backed by the Multimap, so changes to the returned collection are reflected in the Multimap.
-     * Usually, the returned collection should not be modified outside this Multimap directly, because it may cause unexpected behavior.
+     *
+     * <p><b>Mutating the returned collection bypasses this class's key lifecycle.</b> The mapping is not
+     * removed when the collection becomes empty, so the key stays present with an empty collection: after
+     * {@code get(key).clear()}, {@code containsKey(key)} still returns {@code true} and {@code get(key)}
+     * returns an empty collection rather than {@code null}. {@link #keyCount()} then counts a key that
+     * contributes nothing to {@link #totalValueCount()}, and {@link #toMultiset()} omits it (a zero count
+     * is not representable in a {@link Multiset}). {@link #copy()} does reproduce such a key faithfully.
+     * The same applies to collections obtained from {@link #getOrDefault(Object, Collection)},
+     * {@link #valueCollections()}, {@link #iterator()}, {@link #stream()} and to an externally retained
+     * backing map passed to a {@code wrap} factory. Prefer this class's own mutators - {@link #put(Object, Object)},
+     * {@link #removeEntry(Object, Object)}, {@link #removeAll(Object)} - which maintain the invariant.</p>
      *
      * @param key the key whose associated values are to be returned
      * @return the mutable collection of values for the key, or {@code null} if the key is not present
@@ -429,23 +464,89 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @see #putValues(Object, Collection)
      */
     public boolean put(final K key, final E e) {
-        V val = backingMap.get(key);
+        return addOne(key, e);
+    }
 
+    /**
+     * Adds one element under {@code key}, creating the value collection if the key is absent, and returns
+     * whether the collection accepted it. Shared by {@link #put(Object, Object)},
+     * {@link #putAll(Map)} and {@link #putIfValueAbsent(Object, Object)}.
+     *
+     * <p>The mapping is retained only after a successful add, and an already-present but <i>empty</i>
+     * collection that refuses the add is dropped, so this class's mutators never leave an empty value
+     * collection behind. (An empty collection can only be reached through a live collection handed out by
+     * {@link #get(Object)} or through an externally retained wrapped backing map.)</p>
+     *
+     * @param key the key to add under
+     * @param e the element to add
+     * @return {@code true} if the value collection accepted {@code e}
+     */
+    private boolean addOne(final K key, final E e) {
+        return addOne(key, backingMap.get(key), e);
+    }
+
+    /**
+     * {@link #addOne(Object, Object)} for a caller that has already looked {@code key} up, so the lookup is
+     * not repeated.
+     *
+     * @param key the key to add under
+     * @param val the value collection currently mapped to {@code key}, or {@code null} if the key is absent
+     * @param e the element to add
+     * @return {@code true} if the value collection accepted {@code e}
+     */
+    private boolean addOne(final K key, final V val, final E e) {
         if (val == null) {
-            val = valueSupplier.get();
-            // Only retain the mapping after a successful add so empty value collections
-            // are never left in the backing map (get(key) must stay null for absent keys).
-            if (val.add(e)) {
-                backingMap.put(key, val);
+            final V newVal = valueSupplier.get();
+
+            if (newVal.add(e)) {
+                backingMap.put(key, newVal);
                 return true;
             }
+
             return false;
         }
 
         final boolean added = val.add(e);
+
         if (!added && val.isEmpty()) {
             backingMap.remove(key);
         }
+
+        return added;
+    }
+
+    /**
+     * Adds every element of {@code c} under {@code key}, creating the value collection if the key is absent,
+     * and returns whether the collection accepted any of them. Shared by
+     * {@link #putValues(Object, Collection)}, {@link #putValues(Map)} and {@link #putValues(Multimap)}.
+     *
+     * <p>Callers must have established that {@code c} is non-empty. Key lifecycle is maintained exactly as in
+     * {@link #addOne(Object, Object)}.</p>
+     *
+     * @param key the key to add under
+     * @param c the non-empty collection of elements to add
+     * @return {@code true} if the value collection accepted at least one element of {@code c}
+     */
+    private boolean addMany(final K key, final Collection<? extends E> c) {
+        final V val = backingMap.get(key);
+
+        if (val == null) {
+            final V newVal = valueSupplier.get();
+
+            if (newVal.addAll(c)) {
+                backingMap.put(key, newVal);
+                return true;
+            }
+
+            return false;
+        }
+
+        final boolean added = val.addAll(c);
+
+        if (!added && val.isEmpty()) {
+            backingMap.remove(key);
+        }
+
         return added;
     }
 
@@ -475,30 +576,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         }
 
         boolean wasModified = false;
-        K key = null;
-        V val = null;
 
         for (final Map.Entry<? extends K, ? extends E> e : m.entrySet()) {
-            key = e.getKey();
-            val = backingMap.get(key);
-
-            if (val == null) {
-                val = valueSupplier.get();
-                final boolean added = val.add(e.getValue());
-
-                if (added) {
-                    backingMap.put(key, val);
-                    wasModified = true;
-                }
-            } else {
-                final boolean added = val.add(e.getValue());
-
-                if (!added && val.isEmpty()) {
-                    backingMap.remove(key);
-                }
-
-                wasModified |= added;
-            }
+            wasModified |= addOne(e.getKey(), e.getValue());
         }
 
         return wasModified;
@@ -531,24 +611,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @see #put(Object, Object)
      */
     public boolean putIfValueAbsent(final K key, final E e) {
-        V val = backingMap.get(key);
+        final V val = backingMap.get(key);
 
-        if (val == null) {
-            val = valueSupplier.get();
-            if (val.add(e)) {
-                backingMap.put(key, val);
-                return true;
-            }
-            return false;
-        } else if (val.contains(e)) {
+        if (val != null && val.contains(e)) {
             return false;
         }
 
-        final boolean added = val.add(e);
-        if (!added && val.isEmpty()) {
-            backingMap.remove(key);
-        }
-        return added;
+        // Pass `val` through rather than calling addOne(key, e): the lookup has already been paid for here,
+        // and repeating it would cost an extra O(log n) probe on a sorted backing map.
+        return addOne(key, val, e);
     }
 
     /**
@@ -620,22 +691,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
             return false;
         }
 
-        V val = backingMap.get(key);
-
-        if (val == null) {
-            val = valueSupplier.get();
-            final boolean added = val.addAll(c);
-            if (added) {
-                backingMap.put(key, val);
-            }
-            return added;
-        }
-
-        final boolean added = val.addAll(c);
-        if (!added && val.isEmpty()) {
-            backingMap.remove(key);
-        }
-        return added;
+        return addMany(key, c);
     }
 
     /**
@@ -694,7 +750,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // multimap now contains: {key1=[1, 2], key2=[3, 4]}
      * }</pre>
      *
-     * @param m the map whose keys and collections of values are to be added to this Multimap
+     * <p>An entry of {@code m} whose value collection is {@code null} or empty is skipped: it does not
+     * create a key here. (This is why {@link #copy()} does not go through this method - a copy must
+     * reproduce a key that is mapped to an empty collection.)</p>
+     *
+     * @param m the map whose keys and collections of values are to be added to this Multimap; entries with
+     *          a {@code null} or empty value collection are skipped
      * @return {@code true} if the operation modifies the Multimap, {@code false} otherwise
      * @see #putAll(Map)
      * @see #putValues(Object, Collection)
@@ -705,34 +766,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         }
 
         boolean wasModified = false;
-        K key = null;
-        V val = null;
 
         for (final Map.Entry<? extends K, ? extends Collection<? extends E>> e : m.entrySet()) {
             if (N.isEmpty(e.getValue())) {
                 continue;
             }
 
-            key = e.getKey();
-            val = backingMap.get(key);
-
-            if (val == null) {
-                val = valueSupplier.get();
-                final boolean added = val.addAll(e.getValue());
-
-                if (added) {
-                    backingMap.put(key, val);
-                    wasModified = true;
-                }
-            } else {
-                final boolean added = val.addAll(e.getValue());
-
-                if (!added && val.isEmpty()) {
-                    backingMap.remove(key);
-                }
-
-                wasModified |= added;
-            }
+            wasModified |= addMany(e.getKey(), e.getValue());
         }
 
         return wasModified;
@@ -758,7 +798,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // multimap1 now contains: {key1=[1, 2, 3, 4], key2=[5, 6]}
      * }</pre>
      *
-     * @param m the Multimap whose keys and collections of values are to be added to this Multimap
+     * <p>A key of {@code m} whose value collection is empty is skipped: it does not create a key here.
+     * (This is why {@link #copy()} does not go through this method - a copy must reproduce a key that is
+     * mapped to an empty collection.)</p>
+     *
+     * @param m the Multimap whose keys and collections of values are to be added to this Multimap; keys
+     *          mapped to an empty collection are skipped
      * @return {@code true} if the operation modifies the Multimap, {@code false} otherwise
      * @see #putAll(Map)
      * @see #putValues(Map)
@@ -769,35 +814,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         }
 
         boolean wasModified = false;
-        Collection<? extends E> v = null;
-        V val = null;
 
-        for (K key : m.keySet()) {
-            v = m.get(key);
-
-            if (N.isEmpty(v)) {
+        // Iterate the source's entries rather than keySet() + get(key): the latter costs a second lookup
+        // per key, which is O(log n) rather than free for a sorted backing map.
+        for (final Map.Entry<? extends K, ? extends Collection<? extends E>> e : m.backingMap.entrySet()) {
+            if (N.isEmpty(e.getValue())) {
                 continue;
             }
 
-            val = backingMap.get(key);
-
-            if (val == null) {
-                val = valueSupplier.get();
-                final boolean added = val.addAll(v);
-
-                if (added) {
-                    backingMap.put(key, val);
-                    wasModified = true;
-                }
-            } else {
-                final boolean added = val.addAll(v);
-
-                if (!added && val.isEmpty()) {
-                    backingMap.remove(key);
-                }
-
-                wasModified |= added;
-            }
+            wasModified |= addMany(e.getKey(), e.getValue());
         }
 
         return wasModified;
@@ -942,9 +967,29 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // multimap now contains: {numbers=[1, 4]}
      * }</pre>
      *
+     * <p>Membership is determined by {@code valuesToRemove.contains(value)} before any values are removed.
+     * The argument may therefore be a live value collection or a sublist backed by this Multimap;
+     * its comparator or identity-based membership rules are preserved. A stored value that
+     * {@code valuesToRemove} is not allowed to be asked about - a {@code null} in a null-hostile collection such
+     * as {@code List.of(...)}, or a foreign type in a {@link java.util.TreeSet} - counts as not a member rather
+     * than propagating the {@link NullPointerException} or {@link ClassCastException} that
+     * {@link Collection#contains(Object)} is permitted to throw for such an element.</p>
+     *
+     * <p>This is the rule the bulk removals share: {@link #removeValues(Map)}, {@link #removeValues(Multimap)}
+     * and both {@code removeValuesIf} overloads also decide membership with the supplied collection's
+     * {@code contains}. The single-value methods - {@link #removeEntry(Object, Object)},
+     * {@link #removeEntries(Map)}, {@code removeEntriesIf}, {@code replaceEntry} and the query
+     * {@link #containsEntry(Object, Object)} - use the value collection's own equivalence instead, so the two
+     * families can disagree: for a value set keyed by a comparator inconsistent with {@code equals},
+     * {@code containsEntry(key, value)} can report {@code true} for a value that
+     * {@code removeValues(key, List.of(value))} does not remove.</p>
+     *
      * @param key the key whose associated collection of values is to be processed
      * @param valuesToRemove the collection of elements to be removed from the collection of values associated with the specified key
      * @return {@code true} if at least one element was successfully removed from the collection of values associated with the specified key, {@code false} otherwise
+     * @implNote {@code valuesToRemove.contains} is invoked once per value currently stored under the key, so the
+     *           cost scales with the number of stored values rather than with the number of values being removed.
+     * @see #removeEntry(Object, Object)
      * @see #removeValues(Map)
      * @see #removeValues(Multimap)
      */
@@ -958,8 +1003,22 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         final V val = backingMap.get(key);
 
         if (N.notEmpty(val)) {
-            //noinspection SuspiciousMethodCalls
-            wasModified = val.removeAll(valuesToRemove);
+            // Ask the ARGUMENT what it contains, then remove those very objects by identity - the same staging
+            // removeValues(Map) and removeValuesFromKeys use. For a Set value collection, Collection.removeAll
+            // would instead pick between the argument's and the target's equivalence according to their relative
+            // sizes (AbstractSet.removeAll's heuristic), answering the same removal question two different ways.
+            // A List value collection already consulted the argument, but ArrayList.removeAll compacts in place
+            // while an argument that is a sublist view of that same list keeps reading it, so values the argument
+            // never matched were silently dropped.
+            final Set<E> matchingValues = new IdentityHashSet<>();
+
+            for (final E value : val) {
+                if (containsSafely(valuesToRemove, value)) {
+                    matchingValues.add(value);
+                }
+            }
+
+            wasModified = !matchingValues.isEmpty() && val.removeIf(matchingValues::contains);
 
             if (val.isEmpty()) {
                 //noinspection SuspiciousMethodCalls
@@ -968,6 +1027,24 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         }
 
         return wasModified;
+    }
+
+    /**
+     * Answers {@code c.contains(value)}, treating the {@link NullPointerException} and {@link ClassCastException}
+     * that {@link Collection#contains(Object)} is permitted to throw for an element the collection cannot hold as
+     * a negative answer. {@code AbstractSet.removeAll} suppressed the same two exceptions whenever it chose to
+     * iterate the argument, so answering rather than throwing is what callers of a bulk removal saw.
+     *
+     * @param c the collection whose membership decides the answer
+     * @param value the value to test for membership
+     * @return {@code true} if {@code c} reports {@code value} as a member
+     */
+    private static boolean containsSafely(final Collection<?> c, final Object value) {
+        try {
+            return c.contains(value);
+        } catch (final NullPointerException | ClassCastException e) {
+            return false;
+        }
     }
 
     /**
@@ -984,10 +1061,17 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // listMultimap now contains: {"a": [1], "b": [2]}
      * }</pre>
      *
+     * <p>{@code m} may be this multimap's own backing map, or a view of it - such as the map handed to a
+     * {@code wrap} factory and still held by the caller. Removing every value of every key that way empties
+     * this multimap rather than throwing {@link java.util.ConcurrentModificationException}.</p>
+     * <p>Removal collections may also be live value collections or sublists shared across keys. Membership
+     * is evaluated with each supplied collection's {@code contains} method before any target collection changes.</p>
+     *
      * @param m the map whose keys and collections of elements are to be removed from this Multimap
      * @return {@code true} if at least one element was successfully removed from the collections of values associated with the specified keys, {@code false} otherwise
-     * @implNote The input entries are snapshotted before mutation, so the method also works when
-     *           {@code m} is this multimap's backing map (or a view of it).
+     * @implNote Keys and matching target objects are staged before mutation. Identity sets record the objects
+     *           selected by each removal collection's membership rules, preserving comparator and identity semantics
+     *           even when removal collections are backed by a target collection that changes earlier in the operation.
      * @see #removeValues(Object, Collection)
      * @see #removeValues(Multimap)
      */
@@ -996,31 +1080,40 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
             return false;
         }
 
-        // Snapshot keys and collection references before removing mappings. A wrapped multimap's
-        // backing map is a valid argument here; iterating that map while removeValues removes empty
-        // mappings would otherwise throw ConcurrentModificationException.
+        // A removal collection may be a live bucket or subList shared by several keys. Stage every
+        // membership decision before changing a bucket, retaining each collection's contains semantics.
         final List<Object> keys = new ArrayList<>(m.size());
-        final List<Collection<?>> valuesToRemove = new ArrayList<>(m.size());
+        final List<Set<E>> removals = new ArrayList<>(m.size());
 
         for (final Map.Entry<?, ? extends Collection<?>> e : m.entrySet()) {
             keys.add(e.getKey());
-            valuesToRemove.add(e.getValue());
+            final Set<E> matchingValues = new IdentityHashSet<>();
+            final Collection<?> elements = e.getValue();
+            final V values = backingMap.get(e.getKey());
+
+            if (N.notEmpty(values) && N.notEmpty(elements)) {
+                for (final E value : values) {
+                    if (elements.contains(value)) {
+                        matchingValues.add(value);
+                    }
+                }
+            }
+
+            removals.add(matchingValues);
         }
 
         boolean wasModified = false;
         Object key = null;
-        Collection<?> elements = null;
         V val = null;
 
         for (int i = 0, size = keys.size(); i < size; i++) {
             key = keys.get(i);
-            elements = valuesToRemove.get(i);
+            final Set<E> matchingValues = removals.get(i);
             //noinspection SuspiciousMethodCalls
             val = backingMap.get(key);
 
-            if (N.notEmpty(val) && N.notEmpty(elements)) {
-                //noinspection SuspiciousMethodCalls
-                wasModified |= val.removeAll(elements);
+            if (val != null && !matchingValues.isEmpty()) {
+                wasModified |= val.removeIf(matchingValues::contains);
 
                 if (val.isEmpty()) {
                     //noinspection SuspiciousMethodCalls
@@ -1052,10 +1145,20 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // multimap1 now contains: {key1=[1], key2=[4, 5]}
      * }</pre>
      *
+     * <p>{@code m} may be a distinct multimap wrapping this multimap's backing map; that case empties this
+     * multimap rather than throwing {@link java.util.ConcurrentModificationException}. Passing this very
+     * instance is also accepted: every value is removed, which empties this multimap except for a key already
+     * mapped to an empty value collection - such a key has nothing to remove, so it is kept and does not
+     * contribute to the returned {@code boolean}. For that self case the value collections are dropped rather
+     * than emptied, so a caller still holding one of them - through the map handed to a {@code wrap} factory, say
+     * - sees its contents unchanged.</p>
+     *
      * @param m the Multimap whose keys and collections of elements are to be removed from this Multimap
      * @return {@code true} if at least one element was successfully removed from the collections of values associated with the specified keys, {@code false} otherwise
-     * @implNote The input entries are snapshotted before mutation, so this method also works when
-     *           {@code m} is a distinct multimap view over this multimap's backing map.
+     * @implNote Delegates to {@link #removeValues(Map)}, which stages keys and matching target objects before
+     *           any mutation. This also supports live removal collections and sublists shared across keys.
+     *           Passing this very instance is handled directly instead, in a single pass over the entry set, in
+     *           time proportional to the number of keys.
      * @see #removeValues(Object, Collection)
      * @see #removeValues(Map)
      */
@@ -1065,8 +1168,23 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         }
 
         if (m == this) {
-            clear();
-            return true;
+            // Self-removal is answered per key, not per value: every stored value matches, so routing this case
+            // through removeValues(Map) would consult the value collection's own contains once per stored value -
+            // quadratic in the values held by a key. Drop each non-empty value collection instead, without
+            // emptying it, so a fixed-size or immutable collection from a wrap factory is never asked to remove
+            // anything. clear() is not the shortcut either: it would report true even when nothing was removed,
+            // and would drop a key whose value collection is already empty - such a key has nothing to remove, so
+            // it is kept and does not set the flag, which is the answer removeValues(Map) gives for it.
+            boolean wasModified = false;
+
+            for (final Iterator<Map.Entry<K, V>> it = backingMap.entrySet().iterator(); it.hasNext();) {
+                if (!it.next().getValue().isEmpty()) {
+                    it.remove();
+                    wasModified = true;
+                }
+            }
+
+            return wasModified;
         }
 
         return removeValues(m.backingMap);
@@ -1107,25 +1225,29 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     public boolean removeEntriesIf(final Predicate<? super K> keyPredicate, final E value) throws IllegalArgumentException {
         N.checkArgNotNull(keyPredicate, cs.keyPredicate);
 
-        Set<K> removingKeys = null;
+        // Stage in a List, never a Set: the backing map may key by identity (IdentityHashMap) or by a
+        // comparator finer than equals, in which case a HashSet would collapse two distinct backing-map
+        // keys into one and leave the second one untouched. Keys from a single map iteration are already
+        // unique, so a List needs no de-duplication.
+        List<K> matchingKeys = null;
 
         for (final K key : backingMap.keySet()) {
             if (keyPredicate.test(key)) {
-                if (removingKeys == null) {
-                    removingKeys = N.newHashSet();
+                if (matchingKeys == null) {
+                    matchingKeys = new ArrayList<>();
                 }
 
-                removingKeys.add(key);
+                matchingKeys.add(key);
             }
         }
 
-        if (N.isEmpty(removingKeys)) {
+        if (N.isEmpty(matchingKeys)) {
             return false;
         }
 
         boolean wasModified = false;
 
-        for (final K k : removingKeys) {
+        for (final K k : matchingKeys) {
             wasModified |= removeEntry(k, value);
         }
 
@@ -1161,25 +1283,27 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     public boolean removeEntriesIf(final BiPredicate<? super K, ? super V> entryPredicate, final E value) throws IllegalArgumentException {
         N.checkArgNotNull(entryPredicate, cs.entryPredicate);
 
-        Set<K> removingKeys = null;
+        // See the sibling keyPredicate overload: a List, not a Set, so backing maps whose key equivalence
+        // is not equals/hashCode (IdentityHashMap, comparator-based TreeMap) do not lose a matching key.
+        List<K> matchingKeys = null;
 
         for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (entryPredicate.test(entry.getKey(), entry.getValue())) {
-                if (removingKeys == null) {
-                    removingKeys = N.newHashSet();
+                if (matchingKeys == null) {
+                    matchingKeys = new ArrayList<>();
                 }
 
-                removingKeys.add(entry.getKey());
+                matchingKeys.add(entry.getKey());
             }
         }
 
-        if (N.isEmpty(removingKeys)) {
+        if (N.isEmpty(matchingKeys)) {
             return false;
         }
 
         boolean wasModified = false;
 
-        for (final K k : removingKeys) {
+        for (final K k : matchingKeys) {
             wasModified |= removeEntry(k, value);
         }
 
@@ -1210,6 +1334,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <p><b>Note:</b> This method mutates this Multimap in place. If all values are removed
      * from a key's collection, the key is removed from the Multimap.</p>
      *
+     * <p>Membership is determined by {@code valuesToRemove.contains(value)} before any values are removed.
+     * The argument may therefore be a live value collection or a sublist backed by this Multimap;
+     * its comparator or identity-based membership rules are preserved.</p>
+     *
      * @param keyPredicate the predicate that determines which keys to process
      * @param valuesToRemove the collection of values to remove from matching collections
      * @return {@code true} if any values were removed from any collection,
@@ -1225,29 +1353,27 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
             return false;
         }
 
-        Set<K> removingKeys = null;
+        // Stage in a List, never a Set: the backing map may key by identity (IdentityHashMap) or by a
+        // comparator finer than equals, in which case a HashSet would collapse two distinct backing-map
+        // keys into one and leave the second one untouched. Keys from a single map iteration are already
+        // unique, so a List needs no de-duplication.
+        List<K> matchingKeys = null;
 
         for (final K key : backingMap.keySet()) {
             if (keyPredicate.test(key)) {
-                if (removingKeys == null) {
-                    removingKeys = N.newHashSet();
+                if (matchingKeys == null) {
+                    matchingKeys = new ArrayList<>();
                 }
 
-                removingKeys.add(key);
+                matchingKeys.add(key);
             }
         }
 
-        if (N.isEmpty(removingKeys)) {
+        if (N.isEmpty(matchingKeys)) {
             return false;
         }
 
-        boolean wasModified = false;
-
-        for (final K k : removingKeys) {
-            wasModified |= removeValues(k, valuesToRemove);
-        }
-
-        return wasModified;
+        return removeValuesFromKeys(matchingKeys, valuesToRemove);
     }
 
     /**
@@ -1256,6 +1382,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <p>This method iterates over the keys in the Multimap and applies the predicate to each key-value pair. If the predicate returns {@code true},
      * it retrieves the collection of values associated with the key and attempts to remove all occurrences of the elements from it.
      * If the elements are successfully removed and the collection becomes empty as a result, the key is also removed from the Multimap.</p>
+     *
+     * <p>As with {@link #removeValuesIf(Predicate, Collection)}, membership is evaluated before mutation
+     * using the argument collection's {@code contains} method, so live backed views are supported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1283,26 +1412,62 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
             return false;
         }
 
-        Set<K> removingKeys = null;
+        // See the sibling keyPredicate overload: a List, not a Set, so backing maps whose key equivalence
+        // is not equals/hashCode (IdentityHashMap, comparator-based TreeMap) do not lose a matching key.
+        List<K> matchingKeys = null;
 
         for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (entryPredicate.test(entry.getKey(), entry.getValue())) {
-                if (removingKeys == null) {
-                    removingKeys = N.newHashSet();
+                if (matchingKeys == null) {
+                    matchingKeys = new ArrayList<>();
                 }
 
-                removingKeys.add(entry.getKey());
+                matchingKeys.add(entry.getKey());
             }
         }
 
-        if (N.isEmpty(removingKeys)) {
+        if (N.isEmpty(matchingKeys)) {
             return false;
+        }
+
+        return removeValuesFromKeys(matchingKeys, valuesToRemove);
+    }
+
+    private boolean removeValuesFromKeys(final List<K> keys, final Collection<?> valuesToRemove) {
+        final List<Set<E>> removals = new ArrayList<>(keys.size());
+
+        // The argument may be a live value collection or subList. Evaluate its membership
+        // before any mutation, preserving its comparator/identity contains semantics.
+        for (final K key : keys) {
+            final Set<E> matchingValues = new IdentityHashSet<>();
+            final V values = backingMap.get(key);
+
+            if (values != null) {
+                for (final E value : values) {
+                    if (valuesToRemove.contains(value)) {
+                        matchingValues.add(value);
+                    }
+                }
+            }
+
+            removals.add(matchingValues);
         }
 
         boolean wasModified = false;
 
-        for (final K k : removingKeys) {
-            wasModified |= removeValues(k, valuesToRemove);
+        for (int i = 0; i < keys.size(); i++) {
+            final K key = keys.get(i);
+            final V values = backingMap.get(key);
+
+            if (N.notEmpty(values)) {
+                // Identity records exactly which target objects matched the original argument;
+                // equals-based removal could also remove equal objects that did not match it.
+                wasModified |= values.removeIf(removals.get(i)::contains);
+
+                if (values.isEmpty()) {
+                    backingMap.remove(key);
+                }
+            }
         }
 
         return wasModified;
@@ -1344,23 +1509,27 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     public boolean removeKeysIf(final Predicate<? super K> keyPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(keyPredicate, cs.keyPredicate);
 
-        Set<K> removingKeys = null;
+        // Stage in a List, never a Set: the backing map may key by identity (IdentityHashMap) or by a
+        // comparator finer than equals, in which case a HashSet would collapse two distinct backing-map
+        // keys into one and leave the second one untouched. Keys from a single map iteration are already
+        // unique, so a List needs no de-duplication.
+        List<K> matchingKeys = null;
 
         for (final K key : backingMap.keySet()) {
             if (keyPredicate.test(key)) {
-                if (removingKeys == null) {
-                    removingKeys = N.newHashSet();
+                if (matchingKeys == null) {
+                    matchingKeys = new ArrayList<>();
                 }
 
-                removingKeys.add(key);
+                matchingKeys.add(key);
             }
         }
 
-        if (N.isEmpty(removingKeys)) {
+        if (N.isEmpty(matchingKeys)) {
             return false;
         }
 
-        for (final K k : removingKeys) {
+        for (final K k : matchingKeys) {
             removeAll(k);
         }
 
@@ -1401,23 +1570,25 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     public boolean removeKeysIf(final BiPredicate<? super K, ? super V> entryPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(entryPredicate, cs.entryPredicate);
 
-        Set<K> removingKeys = null;
+        // See the sibling keyPredicate overload: a List, not a Set, so backing maps whose key equivalence
+        // is not equals/hashCode (IdentityHashMap, comparator-based TreeMap) do not lose a matching key.
+        List<K> matchingKeys = null;
 
         for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
             if (entryPredicate.test(entry.getKey(), entry.getValue())) {
-                if (removingKeys == null) {
-                    removingKeys = N.newHashSet();
+                if (matchingKeys == null) {
+                    matchingKeys = new ArrayList<>();
                 }
 
-                removingKeys.add(entry.getKey());
+                matchingKeys.add(entry.getKey());
             }
         }
 
-        if (N.isEmpty(removingKeys)) {
+        if (N.isEmpty(matchingKeys)) {
             return false;
         }
 
-        for (final K k : removingKeys) {
+        for (final K k : matchingKeys) {
             removeAll(k);
         }
 
@@ -1475,38 +1646,22 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         if (val instanceof List) {
             final List<E> list = (List<E>) val;
 
-            if (list instanceof ArrayList) {
-                if (oldValue == null) {
-                    for (int i = 0, len = list.size(); i < len; i++) {
-                        if (list.get(i) == null) {
-                            list.set(i, newValue);
-                            return true;
-                        }
-                    }
-                } else {
-                    for (int i = 0, len = list.size(); i < len; i++) {
-                        if (oldValue.equals(list.get(i))) {
-                            list.set(i, newValue);
-                            return true;
-                        }
+            if (list instanceof RandomAccess) {
+                for (int i = 0, len = list.size(); i < len; i++) {
+                    if (N.equals(oldValue, list.get(i))) {
+                        list.set(i, newValue);
+                        return true;
                     }
                 }
             } else {
+                // One ListIterator pass, not indexOf() followed by set(index, ..), which would walk a
+                // linked list twice.
                 final ListIterator<E> iter = list.listIterator();
 
-                if (oldValue == null) {
-                    while (iter.hasNext()) {
-                        if (iter.next() == null) {
-                            iter.set(newValue);
-                            return true;
-                        }
-                    }
-                } else {
-                    while (iter.hasNext()) {
-                        if (oldValue.equals(iter.next())) {
-                            iter.set(newValue);
-                            return true;
-                        }
+                while (iter.hasNext()) {
+                    if (N.equals(oldValue, iter.next())) {
+                        iter.set(newValue);
+                        return true;
                     }
                 }
             }
@@ -1552,8 +1707,18 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     /**
      * Replaces a live value collection while preserving its identity. If the configured collection
      * rejects the replacement, the previous contents are restored before an exception is reported.
+     *
+     * <p>{@code replacement} must be non-empty. Every caller reaches this method only after its own
+     * {@code N.isEmpty} guard has routed the empty case to outright removal of the mapping, because an empty
+     * replacement here would clear {@code target} and leave the key mapped to an empty collection - the one
+     * state this class's mutators are required never to produce.</p>
+     *
+     * @param key the key whose value collection is being replaced, used only for the failure messages
+     * @param target the live value collection to refill in place
+     * @param replacement the new contents; must not be empty
+     * @throws IllegalStateException if {@code target} rejects the replacement
      */
-    private void replaceCollectionContents(final K key, final V target, final Collection<? extends E> replacement) {
+    private void replaceCollectionContents(final K key, final V target, final Collection<? extends E> replacement) throws IllegalStateException {
         final List<E> previous = new ArrayList<>(target);
         RuntimeException updateFailure = null;
         boolean modified = false;
@@ -1565,7 +1730,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
             updateFailure = ex;
         }
 
-        if (updateFailure == null && (modified || replacement.isEmpty())) {
+        // No `|| replacement.isEmpty()` here: treating an empty replacement as success would return with
+        // `target` cleared and the key still mapped to it. The callers guarantee a non-empty replacement.
+        if (updateFailure == null && modified) {
             return;
         }
 
@@ -1613,19 +1780,22 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * multimap.replaceEntriesIf(key -> key.contains("test"), 30, 60);
      * }</pre>
      *
+     * <p>This method is not atomic: keys are processed in the backing map's iteration order and each is
+     * updated in place, so if a later key fails the updates already made to earlier keys remain.</p>
+     *
      * @param keyPredicate the predicate to test each key
      * @param oldValue the value to be replaced in matching collections
      * @param newValue the replacement value
      * @return {@code true} if at least one replacement was made,
      *         {@code false} if no keys matched or old value was not found
-     * @throws IllegalStateException if a Set-based value collection rejects the new value (e.g. the new value already exists in that collection)
      * @throws IllegalArgumentException if {@code keyPredicate} is {@code null}.
+     * @throws IllegalStateException if a Set-based value collection rejects the new value (e.g. the new value already exists in that collection)
      * @see #replaceEntriesIf(BiPredicate, Object, Object)
      * @see #replaceEntry(Object, Object, Object)
      * @see #replaceValuesIf(Predicate, Collection)
      */
     public boolean replaceEntriesIf(final Predicate<? super K> keyPredicate, final E oldValue, final E newValue)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(keyPredicate, cs.keyPredicate);
 
         boolean wasModified = false;
@@ -1658,17 +1828,20 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // multimap now contains: {small=[1, 2, 3], large=[100, 2, 3, 4, 5]}
      * }</pre>
      *
+     * <p>This method is not atomic: keys are processed in the backing map's iteration order and each is
+     * updated in place, so if a later key fails the updates already made to earlier keys remain.</p>
+     *
      * @param entryPredicate the predicate to be applied to each key and its value collection in the Multimap
      * @param oldValue the old value to be replaced in the collections of values associated with the keys that satisfy the predicate
      * @param newValue the new value to replace the old value in the collections of values associated with the keys that satisfy the predicate
      * @return {@code true} if at least one old value was successfully replaced in the collections of values associated with the keys that satisfy the predicate, {@code false} otherwise
-     * @throws IllegalStateException if a Set-based value collection rejects the new value (e.g. the new value already exists in that collection)
      * @throws IllegalArgumentException if {@code entryPredicate} is {@code null}.
+     * @throws IllegalStateException if a Set-based value collection rejects the new value (e.g. the new value already exists in that collection)
      * @see #replaceEntriesIf(Predicate, Object, Object)
      * @see #replaceEntry(Object, Object, Object)
      */
     public boolean replaceEntriesIf(final BiPredicate<? super K, ? super V> entryPredicate, final E oldValue, final E newValue)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(entryPredicate, cs.entryPredicate);
 
         boolean wasModified = false;
@@ -1754,15 +1927,18 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // multimap now contains: {key1=[100, 200], key2=[100, 200]}
      * }</pre>
      *
+     * <p>This method is not atomic: keys are processed in the backing map's iteration order and each is
+     * updated in place, so if a later key fails the updates already made to earlier keys remain.</p>
+     *
      * @param keyPredicate the predicate to be applied to each key in the Multimap
      * @param newValues the replacement values; if {@code null} or empty, matching keys are removed
      * @return {@code true} if at least one key was updated or removed, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code keyPredicate} is {@code null}.
      * @throws IllegalStateException if a configured value collection rejects the replacement;
      *         that key's previous contents are restored when the collection permits it
-     * @throws IllegalArgumentException if {@code keyPredicate} is {@code null}.
      */
     public boolean replaceValuesIf(final Predicate<? super K> keyPredicate, final Collection<? extends E> newValues)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(keyPredicate, cs.keyPredicate);
 
         boolean wasModified = false;
@@ -1811,15 +1987,18 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // multimap now contains: {small=[1, 2, 3], large=[100]}
      * }</pre>
      *
+     * <p>This method is not atomic: keys are processed in the backing map's iteration order and each is
+     * updated in place, so if a later key fails the updates already made to earlier keys remain.</p>
+     *
      * @param entryPredicate the predicate to be applied to each key and its value collection in the Multimap
      * @param newValues the replacement values; if {@code null} or empty, matching keys are removed
      * @return {@code true} if at least one key was updated or removed, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code entryPredicate} is {@code null}.
      * @throws IllegalStateException if a configured value collection rejects the replacement;
      *         that key's previous contents are restored when the collection permits it
-     * @throws IllegalArgumentException if {@code entryPredicate} is {@code null}.
      */
     public boolean replaceValuesIf(final BiPredicate<? super K, ? super V> entryPredicate, final Collection<? extends E> newValues)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(entryPredicate, cs.entryPredicate);
 
         boolean wasModified = false;
@@ -1888,14 +2067,19 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * entry is left unchanged. If the function empties the collection in place and returns it, the
      * empty-result rule above applies and the key is removed.</p>
      *
+     * <p><b>The collection instance a function returns is not stored.</b> Its <i>contents</i> are copied
+     * into the collection already held for that key, which keeps its identity - so a caller still holding a
+     * collection from {@link #get(Object)} sees the new values, and returning a different collection
+     * implementation does not change the type this Multimap stores.</p>
+     *
      * @param function the function that transforms each key's value collection; must not be {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @throws IllegalStateException if the returned non-empty collection of values cannot be added
      *         back into the existing value collection for a key
-     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see #compute(Object, BiFunction)
      * @see #replaceValuesIf(BiPredicate, Collection)
      */
-    public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws IllegalStateException, IllegalArgumentException {
+    public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(function, cs.function);
 
         List<K> keyToRemove = null;
@@ -1962,13 +2146,20 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * });
      * }</pre>
      *
+     * <p><b>The collection instance the function returns is not stored.</b> Its <i>contents</i> are copied
+     * into a fresh collection obtained from this Multimap's value supplier, which is what gets stored and
+     * returned - so the returned collection is never the one the function produced, and mutating the
+     * function's collection afterwards does not affect this Multimap. This matches
+     * {@link #compute(Object, BiFunction)} and {@link #replaceAll(BiFunction)}, and it is what keeps the
+     * value-collection type this Multimap was configured with.</p>
+     *
      * <p><b>Thread Safety:</b> This operation is not atomic. External synchronization is required
      * for concurrent access.</p>
      *
      * @param key the key for which to compute an initial value collection
      * @param mappingFunction the function to compute the initial collection, called only if key is absent
-     * @return the existing collection if key was present, or the newly computed and stored collection,
-     *         or {@code null} if the mapping function returned null/empty
+     * @return the existing collection if key was present, or the newly created collection holding the
+     *         computed contents, or {@code null} if the mapping function returned null/empty
      * @throws IllegalArgumentException if {@code mappingFunction} is {@code null}.
      * @see #computeIfPresent(Object, BiFunction)
      * @see #compute(Object, BiFunction)
@@ -2031,12 +2222,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param key the key whose value collection should be remapped
      * @param remappingFunction the function that computes a new collection based on key and current collection
      * @return the updated collection, or {@code null} if the key was not present or the function returned null/empty
-     * @throws IllegalStateException if the configured value collection rejects the computed replacement
      * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
+     * @throws IllegalStateException if the configured value collection rejects the computed replacement
      * @see #computeIfAbsent(Object, Function)
      * @see #compute(Object, BiFunction)
      */
-    public V computeIfPresent(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws IllegalArgumentException {
+    public V computeIfPresent(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction)
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
         final V oldValue = get(key);
@@ -2093,13 +2285,18 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // multimap now contains: {numbers=[11, 12, 13]}
      * }</pre>
      *
+     * <p>When the key was already present, the collection instance the function returns is not stored: its
+     * contents are copied into the collection already held for that key, which keeps its identity, and that
+     * same instance is returned. Only for a previously absent key is a new collection created.</p>
+     *
      * @param key the key whose associated value is to be computed
      * @param remappingFunction the function to compute a value
      * @return the new value associated with the specified key, or {@code null} if the remapping function returns {@code null} or an empty collection
-     * @throws IllegalStateException if the configured value collection rejects the computed replacement
      * @throws IllegalArgumentException if {@code remappingFunction} is {@code null}.
+     * @throws IllegalStateException if the configured value collection rejects the computed replacement
      */
-    public V compute(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws IllegalArgumentException {
+    public V compute(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction)
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
         V ret = null;
@@ -2166,7 +2363,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * @param <C> the type of the collection containing elements to merge
      * @param key the key whose value should be merged with the elements
-     * @param elements the collection of elements to merge with existing values
+     * @param elements the collection of elements to merge with existing values; must not be {@code null}
+     *                 (an empty collection is allowed), mirroring {@link java.util.Map#merge} where the
+     *                 supplied merge value may not be {@code null}
      * @param remappingFunction the function that defines how to merge old and new collections
      * @return the updated collection associated with the key, or {@code null} if the key was removed
      *         by the remapping function, or if the key was absent and {@code elements} is empty (nothing is stored)
@@ -2177,8 +2376,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @see #compute(Object, BiFunction)
      */
     public <C extends Collection<? extends E>> V merge(final K key, final C elements, final BiFunction<? super V, ? super C, ? extends V> remappingFunction)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(elements);
+            throws IllegalArgumentException, IllegalStateException {
+        N.checkArgNotNull(elements, cs.elements);
         N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
         final V oldValue = get(key);
@@ -2245,7 +2444,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * }</pre>
      *
      * @param key the key whose value should be merged with the element
-     * @param e the element to merge with existing values
+     * @param e the element to merge with existing values; must not be {@code null}, mirroring
+     *          {@link java.util.Map#merge} where the supplied merge value may not be {@code null}. Note
+     *          this is stricter than {@link #put(Object, Object)}, which does store a {@code null} element
+     *          when the value collection permits one.
      * @param remappingFunction the function that defines how to merge the collection with the new element
      * @return the updated collection associated with the key, or {@code null} if the key was removed
      * @throws IllegalArgumentException if {@code e} is {@code null}, or if {@code remappingFunction} is {@code null}.
@@ -2253,8 +2455,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @see #merge(Object, Collection, BiFunction)
      * @see #compute(Object, BiFunction)
      */
-    public V merge(final K key, final E e, final BiFunction<? super V, ? super E, ? extends V> remappingFunction) throws IllegalArgumentException {
-        N.checkArgNotNull(e);
+    public V merge(final K key, final E e, final BiFunction<? super V, ? super E, ? extends V> remappingFunction)
+            throws IllegalArgumentException, IllegalStateException {
+        N.checkArgNotNull(e, cs.element);
         N.checkArgNotNull(remappingFunction, cs.remappingFunction);
 
         final V oldValue = get(key);
@@ -2332,10 +2535,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     public <VV extends Collection<K>, M extends Multimap<E, K, VV>> M invert(final IntFunction<? extends M> multimapSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(multimapSupplier, cs.multimapSupplier);
 
-        final Multimap<K, E, V> multimap = this;
-        final M res = multimapSupplier.apply(multimap.saturatedTotalValueCount());
+        final M res = multimapSupplier.apply(saturatedTotalValueCount());
 
-        if (N.notEmpty(multimap)) {
+        if (!backingMap.isEmpty()) {
             for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
                 final V values = entry.getValue();
 
@@ -2376,15 +2578,77 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <p><b>Note:</b> the returned instance is a base {@code Multimap} created from this Multimap's
      * map and value suppliers; subclasses override this method to preserve their concrete type.</p>
      *
+     * <p>Every key of this Multimap appears in the copy, including a key whose value collection is
+     * empty. Normal mutators never leave such a key behind, but one that was emptied through a live
+     * collection from {@link #get(Object)} (or through an externally supplied backing map) is copied
+     * faithfully rather than dropped, so {@code copy().equals(this)} always holds.</p>
+     *
      * @return a new Multimap containing the same key-value mappings as this one
      * @see #invert(IntFunction)
      */
     public Multimap<K, E, V> copy() {
         final Multimap<K, E, V> copy = new Multimap<>(mapSupplier, valueSupplier);
 
-        copy.putValues(this);
+        copyInto(copy);
 
         return copy;
+    }
+
+    /**
+     * Verifies that {@code target} - freshly built from this Multimap's suppliers - shares no mutable state
+     * with this Multimap, and fails fast if it does.
+     *
+     * <p>The constructor can only check that a supplied map is empty <i>at that moment</i>. A supplier that
+     * hands out one shared instance therefore passes construction whenever the original is still empty, and
+     * {@link #copy()} would then return an alias: writes to the "copy" would be visible through the original.
+     * A shared value-collection supplier is worse still - {@link #copyInto(Multimap)} would ask for a fresh
+     * collection, be handed the one already installed under the source key, and append it to itself.</p>
+     *
+     * @param target the copy under construction, built from this Multimap's suppliers
+     * @throws IllegalArgumentException if {@code target} shares this Multimap's backing map or would reuse
+     *         one of its live value collections
+     */
+    void checkCopyIsIndependent(final Multimap<K, E, V> target) throws IllegalArgumentException {
+        if (target.backingMap == backingMap) {
+            throw new IllegalArgumentException("The map supplier returned this Multimap's own backing map; it must return a new empty map on every call");
+        }
+
+        if (!backingMap.isEmpty()) {
+            final V probe = target.valueSupplier.get();
+
+            for (final V existing : backingMap.values()) {
+                if (probe == existing) {
+                    throw new IllegalArgumentException(
+                            "The value supplier returned a value collection already held by this Multimap; it must return a new empty collection on every call");
+                }
+            }
+        }
+    }
+
+    /**
+     * Copies every mapping of this Multimap into {@code target}, giving each key a fresh value collection
+     * obtained from {@code target}'s value supplier.
+     *
+     * <p>This is deliberately not {@code target.putValues(this)}: {@code putValues} skips a source entry
+     * whose value collection is empty, which would make {@code copy()} silently drop such a key and stop
+     * being {@code equals} to its source. A copy must reproduce what is actually stored.</p>
+     *
+     * <p>Each key is <i>replaced</i> in {@code target}, not merged into it, so this is only meaningful for
+     * a freshly created target - which is the sole use, {@link #copy()} and the subclass overrides of it.</p>
+     *
+     * @param target the (normally empty) Multimap to copy this Multimap's mappings into
+     */
+    void copyInto(final Multimap<K, E, V> target) {
+        checkCopyIsIndependent(target);
+
+        V val = null;
+
+        for (final Map.Entry<K, V> entry : backingMap.entrySet()) {
+            val = target.valueSupplier.get();
+            val.addAll(entry.getValue());
+
+            target.backingMap.put(entry.getKey(), val);
+        }
     }
 
     /**
@@ -2491,6 +2755,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <p>Unlike iterating over {@link #stream()} or {@link #iterator()} (which operate on key-collection pairs),
      * this method operates on key-element pairs, iterating through every individual element.</p>
      *
+     * <p>The name is deliberately not {@code forEach}: the inherited {@link Iterable#forEach(java.util.function.Consumer)}
+     * visits key-<i>collection</i> pairs, so two same-named overloads would have differed only by the arity
+     * of the caller's lambda while iterating at different granularities.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ListMultimap<String, Integer> multimap = N.newListMultimap();
@@ -2498,7 +2766,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * multimap.putValues("group2", Arrays.asList(4, 5));
      *
      * // Process each key-element pair individually
-     * multimap.forEach((key, element) -> {
+     * multimap.forEachKeyValue((key, element) -> {
      *     System.out.println(key + " contains " + element);
      * });
      * // Output (key order follows the backing HashMap's iteration order, which is
@@ -2511,7 +2779,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * // Collect all values with their keys
      * Map<String, List<Integer>> collected = new HashMap<>();
-     * multimap.forEach((key, element) ->
+     * multimap.forEachKeyValue((key, element) ->
      *     collected.computeIfAbsent(key, k -> new ArrayList<>()).add(element));
      * }</pre>
      *
@@ -2524,7 +2792,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @see #entryStream()
      */
     @Beta
-    public void forEach(final BiConsumer<? super K, ? super E> action) throws IllegalArgumentException {
+    public void forEachKeyValue(final BiConsumer<? super K, ? super E> action) throws IllegalArgumentException {
         N.checkArgNotNull(action, cs.action);
 
         K key = null;
@@ -2580,8 +2848,22 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * Returns a Collection view of all value collections in this Multimap.
      * Each element in the returned collection is itself a collection of values for a key.
      *
-     * <p><b>Live View:</b> The returned collection is backed by the Multimap and reflects changes,
-     * but should not be modified directly as it may cause unexpected behavior.</p>
+     * <p><b>Live View:</b> The returned collection is the backing map's own {@code values()} view, so it
+     * reflects subsequent changes to this Multimap. It is <i>modifiable</i>, and mutating it bypasses this
+     * class's key lifecycle:</p>
+     * <ul>
+     *   <li>{@code add} and {@code addAll} throw {@link UnsupportedOperationException}, as for any
+     *       {@link Map#values()} view.</li>
+     *   <li>{@code remove(collection)} removes <b>one arbitrary</b> mapping whose value collection is
+     *       {@code equals} to the argument - not necessarily the one you meant, when several keys hold
+     *       equal collections.</li>
+     *   <li>{@code clear} removes every mapping, and {@code Iterator.remove} removes the mapping just
+     *       returned.</li>
+     *   <li>Mutating one of the <i>inner</i> collections it yields is the same as mutating the collection
+     *       from {@link #get(Object)} - see that method for what it implies.</li>
+     * </ul>
+     * <p>Prefer this class's own mutators, which maintain the key lifecycle. Note that {@link #allValues()},
+     * by contrast, is an unmodifiable view.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2652,8 +2934,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * multimap.putValues("evens", Arrays.asList(2, 4, 6));
      * multimap.putValues("odds", Arrays.asList(1, 3, 5));
      *
-     * // Get as LinkedHashSet to preserve order and remove duplicates
-     * Set<Integer> uniqueOrdered = multimap.flatValues(size -> new LinkedHashSet<>(size));
+     * // Get as LinkedHashSet to preserve order and remove duplicates. `size` is an expected element
+     * // count, so convert it to a capacity with N.newLinkedHashSet rather than passing it straight
+     * // to the LinkedHashSet capacity constructor.
+     * Set<Integer> uniqueOrdered = multimap.flatValues(N::newLinkedHashSet);
      *
      * // Get as TreeSet for sorted unique values
      * TreeSet<Integer> sorted = multimap.flatValues(size -> new TreeSet<>());
@@ -2708,7 +2992,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * @return an EntryStream of flattened key-element pairs
      * @see #stream()
-     * @see #forEach(BiConsumer)
+     * @see #forEachKeyValue(BiConsumer)
      */
     public EntryStream<K, E> entryStream() {
         return stream().mapToEntry(Fn.identity()).flatmapValue(Fn.identity());
@@ -2746,12 +3030,15 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *     ));
      * }</pre>
      *
+     * <p>The streamed entries are the same live, {@code setValue}-free entries {@link #iterator()} yields -
+     * see that method.</p>
+     *
      * @return a Stream of key-collection entries from this Multimap
      * @see #entryStream()
      * @see #iterator()
      */
     public Stream<Map.Entry<K, V>> stream() {
-        return Stream.of(backingMap.entrySet());
+        return Stream.of(entrySetView());
     }
 
     /**
@@ -2779,13 +3066,106 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // group2 -> [4, 5]
      * }</pre>
      *
+     * <p>The returned iterator walks the backing map's own entry set, so it is a live view and inherits that
+     * map's concurrent-modification behaviour: with a fail-fast backing map (the default {@link HashMap}, or
+     * {@link java.util.LinkedHashMap}/{@link java.util.TreeMap}) adding or removing a key during iteration
+     * raises {@link java.util.ConcurrentModificationException}, whereas a weakly consistent one such as
+     * {@link java.util.concurrent.ConcurrentHashMap} does not. {@link Iterator#remove()} is supported and
+     * removes the whole mapping, as {@link #removeAll(Object)} would.</p>
+     *
+     * <p><b>{@link Map.Entry#setValue} is not supported and throws {@link UnsupportedOperationException}.</b>
+     * It would install a caller-supplied collection directly into the backing map, bypassing both the value
+     * supplier and the key lifecycle: an unmodifiable or otherwise foreign collection installed that way makes
+     * {@link #put(Object, Object)}, {@link #putValues(Object, Collection)}, {@link #removeEntry(Object, Object)}
+     * and {@link #replaceValues(Object, Collection)} fail for that key until the whole mapping is dropped with
+     * {@link #removeAll(Object)}. Use {@link #replaceValues(Object, Collection)} to swap a key's contents.
+     * Mutating the value collection an entry hands back is still permitted and still bypasses the key
+     * lifecycle - see {@link #get(Object)} for what that implies.</p>
+     *
      * @return an iterator over the key-collection entries in this Multimap
      * @see #stream()
      * @see #entryStream()
      */
     @Override
     public Iterator<Entry<K, V>> iterator() {
-        return backingMap.entrySet().iterator();
+        return entrySetView().iterator();
+    }
+
+    /**
+     * Returns the live entry view that {@link #iterator()} and {@link #stream()} traverse: the backing map's
+     * entries, each wrapped so that {@link Map.Entry#setValue} is refused. Everything else - {@code size},
+     * {@code contains}, {@code remove}, {@code clear} and {@code Iterator.remove} - delegates straight to the
+     * backing map's own entry set, so the view stays as cheap and as live as that one.
+     *
+     * @return the cached entry view; never {@code null}
+     */
+    Set<Map.Entry<K, V>> entrySetView() {
+        final Set<Map.Entry<K, V>> result = entries;
+
+        return (result == null) ? entries = new EntrySetView() : result;
+    }
+
+    /**
+     * The live view over the backing map's entries whose {@link Map.Entry#setValue} is refused.
+     * See {@link Multimap#iterator()} for why {@code setValue} is withdrawn while {@code Iterator.remove}
+     * is kept.
+     */
+    final class EntrySetView extends AbstractSet<Map.Entry<K, V>> {
+
+        @Override
+        public Iterator<Map.Entry<K, V>> iterator() {
+            final Iterator<Map.Entry<K, V>> backingEntryIter = backingMap.entrySet().iterator();
+
+            // A plain Iterator, not ObjIterator: ObjIterator extends ImmutableIterator, whose remove() is
+            // deprecated because it never removes anything. This iterator's remove() does remove - it is
+            // only setValue that is withdrawn - so it must not claim that type.
+            return new Iterator<>() {
+                @Override
+                public boolean hasNext() {
+                    return backingEntryIter.hasNext();
+                }
+
+                @Override
+                public Map.Entry<K, V> next() {
+                    // ImmutableEntry copies the key and the value REFERENCE, so the value collection it hands
+                    // back is still the live one this Multimap stores - only setValue is withdrawn. A present
+                    // key's collection instance is never swapped by this class, so the copy cannot go stale.
+                    return ImmutableEntry.copyOf(backingEntryIter.next());
+                }
+
+                @Override
+                public void remove() {
+                    // Delegated deliberately: iterator() documents that remove() drops the whole mapping.
+                    backingEntryIter.remove();
+                }
+            };
+        }
+
+        @Override
+        public int size() {
+            return backingMap.size();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return backingMap.isEmpty();
+        }
+
+        @Override
+        public boolean contains(final Object o) {
+            // AbstractCollection.contains would scan linearly; the backing entry set answers directly.
+            return backingMap.entrySet().contains(o);
+        }
+
+        @Override
+        public boolean remove(final Object o) {
+            return backingMap.entrySet().remove(o);
+        }
+
+        @Override
+        public void clear() {
+            backingMap.clear();
+        }
     }
 
     /**
@@ -2865,8 +3245,6 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
     public Map<K, V> toMap() {
         final Map<K, V> result = Maps.newTargetMap(backingMap);
 
-        // result.putAll(backingMap);
-
         V val = null;
 
         for (final Map.Entry<K, V> e : backingMap.entrySet()) {
@@ -2895,9 +3273,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // Convert to TreeMap for sorted keys
      * TreeMap<String, List<Integer>> treeMap = multimap.toMap(size -> new TreeMap<>());
      *
-     * // Convert to LinkedHashMap for insertion order
-     * LinkedHashMap<String, List<Integer>> linkedMap =
-     *     multimap.toMap(size -> new LinkedHashMap<>(size));
+     * // Convert to LinkedHashMap for insertion order. `size` is an expected key count, so convert it to
+     * // a capacity with N.newLinkedHashMap rather than passing it straight to the capacity constructor.
+     * LinkedHashMap<String, List<Integer>> linkedMap = multimap.toMap(N::newLinkedHashMap);
      *
      * // Convert to concurrent map
      * ConcurrentHashMap<String, List<Integer>> concurrentMap =
@@ -2941,7 +3319,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * multimap.clear();
      * // multimap is now empty
-     * // size() returns 0
+     * // keyCount() returns 0
      * // isEmpty() returns true
      * }</pre>
      *
@@ -2959,7 +3337,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <pre>{@code
      * ListMultimap<String, Integer> multimap = N.newListMultimap();
      * multimap.put("a", 1);
-     * int keys = multimap.size(); // returns same as keyCount()
+     * int keys = multimap.size();       // deprecated; prefer multimap.keyCount()
      * }</pre>
      *
      * @return the number of distinct keys in this Multimap
@@ -3020,7 +3398,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @see #keyCount()
      * @see #isEmpty()
      */
-    public int totalValueCount() {
+    public int totalValueCount() throws ArithmeticException {
         return Numbers.toIntExact(totalValueCountAsLong());
     }
 
@@ -3064,14 +3442,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * // Conditional processing
      * if (!multimap.isEmpty()) {
-     *     multimap.forEach((key, value) -> {
+     *     multimap.forEachKeyValue((key, value) -> {
      *         System.out.println(key + ": " + value);
      *     });
      * }
      *
      * // With acceptIfNotEmpty
      * multimap.acceptIfNotEmpty(mm -> {
-     *     mm.forEach((k, v) -> System.out.println(k + ": " + v));
+     *     mm.forEachKeyValue((k, v) -> System.out.println(k + ": " + v));
      * }).orElse(() -> {
      *     System.out.println("No data available");
      * });
@@ -3126,12 +3504,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param <X> the type of exception that may be thrown
      * @param func the function to apply to this Multimap
      * @return the result of applying the function
-     * @throws X if the function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws X if the function throws an exception
      * @see #applyIfNotEmpty(Throwables.Function)
      * @see #accept(Throwables.Consumer)
      */
-    public <R, X extends Exception> R apply(final Throwables.Function<? super Multimap<K, E, V>, R, X> func) throws X, IllegalArgumentException {
+    public <R, X extends Exception> R apply(final Throwables.Function<? super Multimap<K, E, V>, R, X> func) throws IllegalArgumentException, X {
         N.checkArgNotNull(func, cs.func);
 
         return func.apply(this);
@@ -3172,13 +3550,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param func the function to apply if the Multimap is not empty
      * @return an Optional containing the result if this Multimap is not empty, otherwise an empty
      *         Optional. An empty Optional is also returned when the function itself returns {@code null}.
-     * @throws X if the function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws X if the function throws an exception
      * @see #apply(Throwables.Function)
      * @see #acceptIfNotEmpty(Throwables.Consumer)
      */
     public <R, X extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Multimap<K, E, V>, R, X> func)
-            throws X, IllegalArgumentException {
+            throws IllegalArgumentException, X {
         N.checkArgNotNull(func, cs.func);
 
         return isEmpty() ? Optional.empty() : Optional.ofNullable(func.apply(this));
@@ -3213,12 +3591,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * @param <X> the type of exception that may be thrown
      * @param action the consumer action to perform on this Multimap
-     * @throws X if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws X if the action throws an exception
      * @see #acceptIfNotEmpty(Throwables.Consumer)
      * @see #apply(Throwables.Function)
      */
-    public <X extends Exception> void accept(final Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws X, IllegalArgumentException {
+    public <X extends Exception> void accept(final Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws IllegalArgumentException, X {
         N.checkArgNotNull(action, cs.action);
 
         action.accept(this);
@@ -3244,7 +3622,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *
      * // With else clause
      * multimap.acceptIfNotEmpty(mm -> {
-     *     mm.forEach((k, v) -> System.out.println(k + ": " + v));
+     *     mm.forEachKeyValue((k, v) -> System.out.println(k + ": " + v));
      * }).orElse(() -> {
      *     System.out.println("No data to process");
      * });
@@ -3252,7 +3630,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * // More complex example
      * multimap.putValues("data", Arrays.asList(1, 2, 3));
      * multimap.acceptIfNotEmpty(mm -> {
-     *     mm.forEach((key, value) -> {
+     *     mm.forEachKeyValue((key, value) -> {
      *         System.out.println(key + ": " + value);
      *     });
      * }).orElse(() -> {
@@ -3263,12 +3641,12 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param <X> the type of exception that may be thrown
      * @param action the consumer action to perform if the Multimap is not empty
      * @return an OrElse instance for chaining an alternative action for the empty case
-     * @throws X if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws X if the action throws an exception
      * @see #accept(Throwables.Consumer)
      * @see #applyIfNotEmpty(Throwables.Function)
      */
-    public <X extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws X, IllegalArgumentException {
+    public <X extends Exception> OrElse acceptIfNotEmpty(final Throwables.Consumer<? super Multimap<K, E, V>, X> action) throws IllegalArgumentException, X {
         N.checkArgNotNull(action, cs.action);
 
         return If.is(!isEmpty()).then(this, action);
@@ -3279,9 +3657,17 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * The hash code is computed from the backing map's hash code, which in turn is based
      * on the hash codes of all key-value collection pairs.
      *
-     * <p>Two Multimaps are guaranteed to have the same hash code if they are equal according
-     * to the {@link #equals(Object)} method. This ensures proper behavior in hash-based
-     * collections like HashMap and HashSet.</p>
+     * <p>Two Multimaps that are equal according to the {@link #equals(Object)} method have the same hash code -
+     * which is what hash-based collections like HashMap and HashSet rely on - provided both backing maps decide
+     * key equality with {@code equals} and each value collection's {@code hashCode()} is consistent with its own
+     * {@code equals()} ({@link List#hashCode()} and {@link Set#hashCode()} specify such a hash code, while
+     * {@link Collection#hashCode()} stipulates nothing). Deciding equality some other way breaks the guarantee
+     * even when {@link Map#hashCode()} is implemented exactly as specified, because that hash code is built from
+     * {@code key.hashCode()}: two multimaps backed by {@link java.util.TreeMap}s that share one comparator
+     * inconsistent with {@code equals} can compare equal in both directions and still report different hash
+     * codes - under {@code String.CASE_INSENSITIVE_ORDER}, {@code A=[1]} and {@code a=[1]} hash to 97 and 65 -
+     * and so can an {@link java.util.IdentityHashMap}-backed multimap compared with a {@link HashMap}-backed
+     * one.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3289,7 +3675,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * m1.putValues("a", Arrays.asList(1, 2));
      * ListMultimap<String, Integer> m2 = N.newListMultimap();
      * m2.putValues("a", Arrays.asList(1, 2));
-     * boolean sameHash = m1.hashCode() == m2.hashCode();   // true (equal multimaps share a hash code)
+     * boolean sameHash = m1.hashCode() == m2.hashCode();   // true (both are HashMap-backed, so equal implies the same hash)
      *
      * m2.put("a", 3);
      * boolean changedHash = m1.hashCode() != m2.hashCode();   // true for these contents
@@ -3317,10 +3703,18 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *   <li>The equality check uses the backing map's equals method</li>
      * </ul>
      *
+     * <p><b>Equality is delegated to the backing maps, so it is only well defined between multimaps whose
+     * backing maps share the same key equivalence.</b> Two multimaps built on maps that judge keys
+     * differently - a {@link HashMap} versus an {@link java.util.IdentityHashMap}, or versus a
+     * {@link java.util.TreeMap} whose comparator is inconsistent with {@code equals} - can compare unequal
+     * in one direction and equal in the other, and can report different hash codes while comparing equal.
+     * This is inherited from {@link Map#equals(Object)}, which probes the other map with its own lookup
+     * rules. Compare only multimaps with compatible backing maps.</p>
+     *
      * <p><b>Note:</b> Equality is delegated to the backing maps, so the value-collection types
      * must also match: a {@code List} value collection never equals a {@code Set} value collection.
-     * Consequently a {@link ListMultimap} and a {@link SetMultimap} are never equal even when they
-     * hold the same logical key-to-elements mappings. The contents and ordering of each value
+     * Consequently a nonempty {@link ListMultimap} and a nonempty {@link SetMultimap} are never equal even when they
+     * hold the same logical key-to-elements mappings. Empty instances compare equal. The contents and ordering of each value
      * collection also matter (e.g., {@code [1, 2, 2]} is not equal to {@code [1, 2]}, and
      * {@code [1, 2]} is not equal to {@code [2, 1]}, for lists).</p>
      *
@@ -3347,10 +3741,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @return {@code true} if the specified object is equal to this Multimap, {@code false} otherwise
      * @see #hashCode()
      */
-    @SuppressWarnings("unchecked")
     @Override
     public boolean equals(final Object obj) {
-        return obj == this || (obj instanceof Multimap && backingMap.equals(((Multimap<K, E, V>) obj).backingMap));
+        return obj == this || (obj instanceof Multimap && backingMap.equals(((Multimap<?, ?, ?>) obj).backingMap));
     }
 
     /**
@@ -3435,7 +3828,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
     /**
      * Returns a spliterator over every element of every value collection, sized with the exact total
-     * value count (which may exceed {@link Integer#MAX_VALUE}) and reporting no characteristics.
+     * value count - which may exceed {@link Integer#MAX_VALUE}, and so may exceed what
+     * {@link #allValues()}{@code .size()} can report.
+     *
+     * <p>No characteristics are requested; {@link Spliterators#spliterator(Iterator, long, int)} nonetheless
+     * reports {@link Spliterator#SIZED} and {@link Spliterator#SUBSIZED}, which it adds unconditionally.</p>
      *
      * @return a spliterator over all individual values in this Multimap
      */

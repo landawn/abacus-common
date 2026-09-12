@@ -15,8 +15,12 @@
 package com.landawn.abacus.util;
 
 /**
- * Constants for all ASCII characters (those in the range of values {@code 0x00} through
- * {@code 0x7F}), covering all control characters as defined in RFC 20.
+ * Constants for the 33 ASCII control characters as defined in RFC 20 - {@link #NUL} ({@code 0x00})
+ * through {@link #US} ({@code 0x1F}) and {@link #DEL} ({@code 0x7F}) - plus the space character
+ * {@link #SP} ({@code 0x20}) and the {@link #MIN}/{@link #MAX} bounds of the ASCII range
+ * {@code 0x00}-{@code 0x7F}. Several constants have alternate names ({@link #NL}, {@link #XON},
+ * {@link #XOFF}, {@link #SPACE}). There are no constants for the printable characters
+ * {@code 0x21}-{@code 0x7E}.
  *
  * <p>Note: Copied from Google Guava under Apache License 2.0 and may be modified.</p>
  *

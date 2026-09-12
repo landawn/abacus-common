@@ -1,6 +1,5 @@
 package com.landawn.abacus.util.function;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -170,6 +169,6 @@ public class BiConsumerTest extends TestBase {
     public void testAndThenRejectsNullImmediately() {
         BiConsumer<String, String> instance = (a, b) -> {
         };
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.andThen((java.util.function.BiConsumer) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.andThen((java.util.function.BiConsumer) null));
     }
 }

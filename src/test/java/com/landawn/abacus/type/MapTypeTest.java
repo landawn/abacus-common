@@ -249,4 +249,39 @@ public class MapTypeTest extends TestBase {
         mapType.appendTo(sb, map);
         org.junit.jupiter.api.Assertions.assertNotEquals(sb.toString(), json);
     }
+
+    // T8-07 (documented contract): a null key is written as the String "null"; it reads back as that String for a
+    // String key type and fails for a numeric key type.
+    @Test
+    public void reviewFixes20260906_nullKeyIsWrittenAsTheStringNull() {
+        final Map<String, Integer> m = new HashMap<>();
+        m.put(null, 1);
+
+        final String json = mapType.stringOf(m);
+        assertEquals("{\"null\": 1}", json);
+
+        final Map<String, Integer> back = mapType.valueOf(json);
+        assertTrue(back.containsKey("null"));
+        Assertions.assertFalse(back.containsKey(null));
+        assertEquals(Integer.valueOf(1), back.get("null"));
+
+        // only an unquoted null key reads back as a null key
+        assertTrue(mapType.valueOf("{null: 1}").containsKey(null));
+
+        final MapType<Integer, Integer, Map<Integer, Integer>> intKeyType = (MapType<Integer, Integer, Map<Integer, Integer>>) createType("Map<Integer, Integer>");
+        final Map<Integer, Integer> mi = new HashMap<>();
+        mi.put(null, 1);
+        assertEquals("{\"null\": 1}", intKeyType.stringOf(mi));
+        assertThrows(NumberFormatException.class, () -> intKeyType.valueOf(intKeyType.stringOf(mi)));
+    }
+
+    // T8-12 / T8-14 (documented failure modes of valueOf)
+    @Test
+    public void reviewFixes20260906_valueOfDocumentedFailureModes() {
+        assertThrows(ParsingException.class, () -> mapType.valueOf("{\"a\": 1"));
+        // P2-12: a structural mismatch is reported as ParsingException (it used to escape as a raw ClassCastException).
+        assertThrows(ParsingException.class, () -> mapType.valueOf("[]"));
+        Assertions.assertNull(mapType.valueOf("   "));
+        assertTrue(mapType.valueOf("{}").isEmpty());
+    }
 }

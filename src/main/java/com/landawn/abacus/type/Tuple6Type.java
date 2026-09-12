@@ -47,10 +47,11 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractTupleType<Tuple6
      * @param t4TypeName the name of the fourth element type
      * @param t5TypeName the name of the fifth element type
      * @param t6TypeName the name of the sixth element type
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     Tuple6Type(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName, final String t5TypeName,
-            final String t6TypeName) {
+            final String t6TypeName) throws IllegalArgumentException {
         super(getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, t5TypeName, t6TypeName, false),
                 getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, t5TypeName, t6TypeName, true), (Class) Tuple6.class,
                 List.of(TypeFactory.getType(t1TypeName), TypeFactory.getType(t2TypeName), TypeFactory.getType(t3TypeName), TypeFactory.getType(t4TypeName),
@@ -63,10 +64,12 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractTupleType<Tuple6
      *
      * @param converted the array of converted element values (must be of length 6)
      * @return a new {@code Tuple6} containing the six elements in order
+     * @throws NullPointerException if {@code converted} is {@code null}.
+     * @throws ArrayIndexOutOfBoundsException if {@code converted} contains fewer than 6 elements.
      */
     @SuppressWarnings("unchecked")
     @Override
-    protected Tuple6<T1, T2, T3, T4, T5, T6> fromArray(final Object[] converted) {
+    protected Tuple6<T1, T2, T3, T4, T5, T6> fromArray(final Object[] converted) throws NullPointerException, ArrayIndexOutOfBoundsException {
         return Tuple.of((T1) converted[0], (T2) converted[1], (T3) converted[2], (T4) converted[3], (T5) converted[4], (T6) converted[5]);
     }
 
@@ -82,9 +85,10 @@ public class Tuple6Type<T1, T2, T3, T4, T5, T6> extends AbstractTupleType<Tuple6
      * @param isDeclaringName if {@code true}, returns the declaring name (simple class names);
      *                        if {@code false}, returns the full canonical name
      * @return the formatted type name string
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     protected static String getTypeName(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName,
-            final String t5TypeName, final String t6TypeName, final boolean isDeclaringName) {
+            final String t5TypeName, final String t6TypeName, final boolean isDeclaringName) throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(Tuple6.class) + SK.LESS_THAN + TypeFactory.getType(t1TypeName).declaringName() + SK.COMMA_SPACE
                     + TypeFactory.getType(t2TypeName).declaringName() + SK.COMMA_SPACE + TypeFactory.getType(t3TypeName).declaringName() + SK.COMMA_SPACE

@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.parser;
 
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
@@ -144,9 +145,10 @@ interface JsonReader {
      * }</pre>
      *
      * @return the token identifier, or {@link #EOF} ({@code -1}) if no next symbol is found
-     * @throws UncheckedIOException if an I/O error occurs during reading
+     * @throws UncheckedIOException if reading from the underlying character stream fails
+     * @throws ParsingException if a quoted string is unterminated, an escape sequence is malformed, or unquoted token text contains unexpected whitespace
      */
-    int nextToken() throws UncheckedIOException;
+    int nextToken() throws UncheckedIOException, ParsingException;
 
     /**
      * Reads and returns the next token identifier from the JSON input, providing the
@@ -165,15 +167,20 @@ interface JsonReader {
      *
      * @param nextTokenValueType the expected type of the next token's value (used as a parsing hint)
      * @return the token identifier, or {@link #EOF} ({@code -1}) if no next symbol is found
-     * @throws UncheckedIOException if an I/O error occurs during reading
+     * @throws UncheckedIOException if reading from the underlying character stream fails
+     * @throws ParsingException if a quoted string is unterminated, an escape sequence is malformed, or unquoted token text contains unexpected whitespace
      */
-    int nextToken(Type<?> nextTokenValueType) throws UncheckedIOException;
+    int nextToken(Type<?> nextTokenValueType) throws UncheckedIOException, ParsingException;
     // int nextNameToken() throws UncheckedIOException;
 
     /**
      * Checks if the reader has text content available.
-     * This is typically {@code true} after reading a string token or value token
-     * (like numbers, booleans, or null).
+     * This is {@code true} when the current token carries non-empty text: an unquoted value
+     * (number, boolean, {@code null} or any other unquoted token) or a quoted string with at least
+     * one character. It is {@code false} for an empty quoted string ({@code ""} or {@code ''}), for a
+     * structural token that no unquoted text precedes (a quoted string's text belongs to its closing-quote
+     * token, so the {@link #END_BRACKET} of {@code ["a"]} has no text), and at {@link #EOF} when only
+     * whitespace followed the last value.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -182,7 +189,7 @@ interface JsonReader {
      * }
      * }</pre>
      *
-     * @return {@code true} if text content is available, {@code false} otherwise
+     * @return {@code true} if non-empty text content is available, {@code false} otherwise
      */
     boolean hasText();
 
@@ -256,7 +263,7 @@ interface JsonReader {
      * }
      * }</pre>
      *
-     * @throws UncheckedIOException if an I/O error occurs during closing
+     * @throws UncheckedIOException if closing the underlying character reader or its input resource fails
      */
     void close() throws UncheckedIOException;
 

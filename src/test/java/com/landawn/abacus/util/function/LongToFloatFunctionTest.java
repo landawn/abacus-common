@@ -83,12 +83,12 @@ public class LongToFloatFunctionTest extends TestBase {
 
     @Test
     public void testApplyAsFloat_withMaxValue() {
-        assertEquals((float) Long.MAX_VALUE, LongToFloatFunction.DEFAULT.applyAsFloat(Long.MAX_VALUE));
+        assertEquals(Long.MAX_VALUE, LongToFloatFunction.DEFAULT.applyAsFloat(Long.MAX_VALUE));
     }
 
     @Test
     public void testApplyAsFloat_withMinValue() {
-        assertEquals((float) Long.MIN_VALUE, LongToFloatFunction.DEFAULT.applyAsFloat(Long.MIN_VALUE));
+        assertEquals(Long.MIN_VALUE, LongToFloatFunction.DEFAULT.applyAsFloat(Long.MIN_VALUE));
     }
 
     @Test

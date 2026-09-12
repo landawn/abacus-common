@@ -28,6 +28,38 @@ import com.landawn.abacus.util.CharacterWriter;
 
 public class JdkOptionalTypeTest extends TestBase {
 
+    @Test
+    public void testJdkOptionalTypeJdbcPrimitiveValuesDistinguishSqlNullFromZero() throws SQLException {
+        final JdkOptionalType<Integer> type = new JdkOptionalType<>("int");
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getInt(1)).thenReturn(0);
+        when(rs.getInt("value")).thenReturn(0);
+        when(rs.wasNull()).thenReturn(true);
+
+        assertTrue(type.get(rs, 1).isEmpty());
+        assertTrue(type.get(rs, "value").isEmpty());
+
+        when(rs.wasNull()).thenReturn(false);
+        assertEquals(0, type.get(rs, 1).get());
+        assertEquals(0, type.get(rs, "value").get());
+
+        when(rs.getInt(1)).thenReturn(7);
+        when(rs.getInt("value")).thenReturn(7);
+        assertEquals(7, type.get(rs, 1).get());
+        assertEquals(7, type.get(rs, "value").get());
+    }
+
+    @Test
+    public void testJdbcReadsPreserveNestedGenericTypes() throws SQLException {
+        final JdkOptionalType<List<String>> type = new JdkOptionalType<>("List<String>");
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getString(1)).thenReturn("[1]");
+        when(rs.getString("value")).thenReturn("[2]");
+
+        assertEquals(List.of("1"), type.get(rs, 1).get());
+        assertEquals(List.of("2"), type.get(rs, "value").get());
+    }
+
     private JdkOptionalType<String> optionalStringType;
     private JdkOptionalType<Integer> optionalIntegerType;
     private CharacterWriter characterWriter;
@@ -142,7 +174,7 @@ public class JdkOptionalTypeTest extends TestBase {
         PreparedStatement stmt = mock(PreparedStatement.class);
 
         optionalStringType.set(stmt, 1, Optional.empty());
-        verify(stmt).setObject(1, null);
+        verify(stmt).setString(1, null);
     }
 
     @Test
@@ -151,7 +183,7 @@ public class JdkOptionalTypeTest extends TestBase {
         Optional<String> opt = Optional.of("test");
 
         optionalStringType.set(stmt, 1, opt);
-        verify(stmt).setObject(1, "test");
+        verify(stmt).setString(1, "test");
     }
 
     @Test
@@ -159,7 +191,7 @@ public class JdkOptionalTypeTest extends TestBase {
         CallableStatement stmt = mock(CallableStatement.class);
 
         optionalStringType.set(stmt, "param", Optional.empty());
-        verify(stmt).setObject("param", null);
+        verify(stmt).setString("param", null);
     }
 
     @Test
@@ -168,7 +200,7 @@ public class JdkOptionalTypeTest extends TestBase {
         Optional<String> opt = Optional.of("test");
 
         optionalStringType.set(stmt, "param", opt);
-        verify(stmt).setObject("param", "test");
+        verify(stmt).setString("param", "test");
     }
 
     @Test
@@ -249,5 +281,92 @@ public class JdkOptionalTypeTest extends TestBase {
         JdkOptionalDerivedValue(final String value) {
             super(value);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+        final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            ((Type<Object>) type).serializeTo(jsonWriter, value, config);
+            return jsonWriter.toString();
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(jsonWriter);
+        }
+    }
+
+    // T6-03 (2026-09-06): the empty branch is delegated to the declared element handler, so its null-substitution flags apply.
+    @Test
+    public void reviewFixes20260906_emptyOptionalHonoursElementNullFlags() throws IOException {
+        final com.landawn.abacus.parser.JsonSerConfig zero = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true);
+        final com.landawn.abacus.parser.JsonSerConfig falseCfg = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullBooleanAsFalse(true);
+        final com.landawn.abacus.parser.JsonSerConfig emptyStr = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullStringAsEmpty(true);
+
+        assertEquals("0", reviewFixes20260906_ser(optionalIntegerType, Optional.empty(), zero));
+        assertEquals("0", reviewFixes20260906_ser(optionalIntegerType, null, zero));
+        assertEquals("false", reviewFixes20260906_ser(Type.of("JdkOptional<Boolean>"), Optional.empty(), falseCfg));
+        assertEquals("\"\"", reviewFixes20260906_ser(optionalStringType, Optional.empty(), emptyStr));
+        assertEquals("null", reviewFixes20260906_ser(optionalStringType, Optional.empty(), zero));
+        assertEquals("\"0\"", reviewFixes20260906_ser(Type.of("JdkOptional<Long>"), Optional.empty(), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true).setWriteLongAsString(true)));
+        assertEquals("null", reviewFixes20260906_ser(optionalIntegerType, Optional.empty(), com.landawn.abacus.parser.JsonSerConfig.create()));
+        assertEquals("null", reviewFixes20260906_ser(optionalIntegerType, Optional.empty(), null));
+        assertEquals("null", reviewFixes20260906_ser(optionalIntegerType, null, null));
+        assertEquals("7", reviewFixes20260906_ser(optionalIntegerType, Optional.of(7), zero));
+    }
+
+    // T6-01 (2026-09-06): an Object slot dispatches on the runtime class; a non-serializable handler writes embedded JSON.
+    @Test
+    public void reviewFixes20260906_objectSlotUsesRuntimeTypeAndEmbeddedJson() throws IOException {
+        final Type<?> type = Type.of("JdkOptional<Object>");
+        final com.landawn.abacus.parser.JsonSerConfig jsc = com.landawn.abacus.parser.JsonSerConfig.create();
+
+        assertEquals("1", reviewFixes20260906_ser(type, Optional.of(1), jsc));
+        assertEquals("true", reviewFixes20260906_ser(type, Optional.of(true), jsc));
+        assertEquals("\"s\"", reviewFixes20260906_ser(type, Optional.of("s"), jsc));
+        assertEquals("[1]", reviewFixes20260906_ser(type, Optional.of(com.landawn.abacus.util.N.asList(1)), jsc));
+        assertEquals("{\"k\": 1}", reviewFixes20260906_ser(type, Optional.of(com.landawn.abacus.util.N.asMap("k", 1)), jsc));
+        assertEquals("3", reviewFixes20260906_ser(type, Optional.of(Optional.of(3)), jsc));
+        assertEquals("null", reviewFixes20260906_ser(type, Optional.empty(), jsc));
+        assertEquals("1", reviewFixes20260906_ser(type, Optional.of(1), null));
+        assertEquals("[1]", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(Optional.of(1))));
+        assertEquals("{\"x\": [8]}", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asMap("x", Optional.of(com.landawn.abacus.util.N.asList(8)))));
+    }
+
+    // R12 (2026-09-08): serializeTo got the Object-slot runtime dispatch but appendTo did not, so an Object-declared
+    // optional holding a map/collection/bean appended ObjectType's JSON stringOf form ({"k": 1}) instead of the
+    // toString()-style form ({k:1}) appendTo documents and the bare Map handler produces.
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void reviewFixes20260908_appendToObjectSlotUsesRuntimeType() throws IOException {
+        final Type objectSlot = Type.of("JdkOptional<Object>");
+        final java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+        map.put("k", 1);
+        map.put("s", "v");
+        final List<Object> list = new java.util.ArrayList<>(java.util.Arrays.asList(1, "a"));
+
+        assertEquals("{k:1, s:v}", appendToString(objectSlot, Optional.of(map)));
+        assertEquals("[1, a]", appendToString(objectSlot, Optional.of(list)));
+
+        // an Object slot must append exactly what the bare value's own handler appends
+        for (final Object value : new Object[] { map, list, new int[] { 1, 2 }, 7, 1.5d, true, "q", com.landawn.abacus.util.Pair.of(1, "a") }) {
+            final Type runtimeType = Type.of(value.getClass());
+
+            assertEquals(appendToString(runtimeType, value), appendToString(objectSlot, Optional.of(value)), "value " + value);
+        }
+
+        // a declared (non-Object) element type keeps its own handler
+        assertEquals("{k:1, s:v}", appendToString(Type.of("JdkOptional<Map<String, Object>>"), Optional.of(map)));
+        assertEquals("3", appendToString(Type.of("JdkOptional<Integer>"), Optional.of(3)));
+
+        // empty / null still write the null literal
+        assertEquals("null", appendToString(objectSlot, Optional.empty()));
+        assertEquals("null", appendToString(objectSlot, null));
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static String appendToString(final Type type, final Object value) throws IOException {
+        final StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, value);
+        return sb.toString();
     }
 }

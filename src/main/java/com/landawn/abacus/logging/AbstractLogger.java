@@ -66,6 +66,40 @@ public abstract class AbstractLogger implements Logger {
         return name;
     }
 
+    enum LogLevel {
+        TRACE, DEBUG, INFO, WARN, ERROR
+    }
+
+    // Adapter hooks identify this class as the outer logging frame for inherited overloads.
+    // The defaults retain the existing message-only/Throwable dispatch for other subclasses.
+    /**
+     * @throws NullPointerException if {@code level} is {@code null}.
+     */
+    @SuppressWarnings("incomplete-switch")
+    void log(final LogLevel level, final String message) throws NullPointerException {
+        switch (level) {
+            case TRACE -> trace(message);
+            case DEBUG -> debug(message);
+            case INFO -> info(message);
+            case WARN -> warn(message);
+            case ERROR -> error(message);
+        }
+    }
+
+    /**
+     * @throws NullPointerException if {@code level} is {@code null}.
+     */
+    @SuppressWarnings("incomplete-switch")
+    void log(final LogLevel level, final String message, final Throwable throwable) throws NullPointerException {
+        switch (level) {
+            case TRACE -> trace(message, throwable);
+            case DEBUG -> debug(message, throwable);
+            case INFO -> info(message, throwable);
+            case WARN -> warn(message, throwable);
+            case ERROR -> error(message, throwable);
+        }
+    }
+
     /**
      * Logs a message at {@code TRACE} level with one parameter.
      *
@@ -82,7 +116,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void trace(final String template, final Object arg) {
         if (isTraceEnabled()) {
-            trace(format(template, arg));
+            log(LogLevel.TRACE, format(template, arg));
         }
     }
 
@@ -103,7 +137,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void trace(final String template, final Object arg1, final Object arg2) {
         if (isTraceEnabled()) {
-            trace(format(template, arg1, arg2));
+            log(LogLevel.TRACE, format(template, arg1, arg2));
         }
     }
 
@@ -125,7 +159,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void trace(final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isTraceEnabled()) {
-            trace(format(template, arg1, arg2, arg3));
+            log(LogLevel.TRACE, format(template, arg1, arg2, arg3));
         }
     }
 
@@ -148,7 +182,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void trace(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4) {
         if (isTraceEnabled()) {
-            trace(format(template, arg1, arg2, arg3, arg4));
+            log(LogLevel.TRACE, format(template, arg1, arg2, arg3, arg4));
         }
     }
 
@@ -172,7 +206,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void trace(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5) {
         if (isTraceEnabled()) {
-            trace(format(template, arg1, arg2, arg3, arg4, arg5));
+            log(LogLevel.TRACE, format(template, arg1, arg2, arg3, arg4, arg5));
         }
     }
 
@@ -197,7 +231,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void trace(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6) {
         if (isTraceEnabled()) {
-            trace(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
+            log(LogLevel.TRACE, format(template, arg1, arg2, arg3, arg4, arg5, arg6));
         }
     }
 
@@ -224,7 +258,7 @@ public abstract class AbstractLogger implements Logger {
     public void trace(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6,
             final Object arg7) {
         if (isTraceEnabled()) {
-            trace(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+            log(LogLevel.TRACE, format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
     }
 
@@ -244,10 +278,11 @@ public abstract class AbstractLogger implements Logger {
      * @deprecated Prefer {@link #trace(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
+    @SafeVarargs
     @Override
-    public void trace(final String template, final Object... args) {
+    public final void trace(final String template, final Object... args) {
         if (isTraceEnabled()) {
-            trace(format(template, args));
+            log(LogLevel.TRACE, format(template, args));
         }
     }
 
@@ -266,7 +301,7 @@ public abstract class AbstractLogger implements Logger {
      */
     @Override
     public void trace(final Throwable t, final String msg) {
-        trace(msg, t);
+        log(LogLevel.TRACE, msg, t);
     }
 
     /**
@@ -286,7 +321,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void trace(final Throwable t, final String template, final Object arg) {
         if (isTraceEnabled()) {
-            trace(t, format(template, arg));
+            log(LogLevel.TRACE, format(template, arg), t);
         }
     }
 
@@ -308,7 +343,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void trace(final Throwable t, final String template, final Object arg1, final Object arg2) {
         if (isTraceEnabled()) {
-            trace(t, format(template, arg1, arg2));
+            log(LogLevel.TRACE, format(template, arg1, arg2), t);
         }
     }
 
@@ -331,7 +366,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void trace(final Throwable t, final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isTraceEnabled()) {
-            trace(t, format(template, arg1, arg2, arg3));
+            log(LogLevel.TRACE, format(template, arg1, arg2, arg3), t);
         }
     }
 
@@ -347,13 +382,14 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     @Override
-    public void trace(final Supplier<String> supplier) throws IllegalArgumentException {
+    public void trace(final Supplier<String> supplier) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isTraceEnabled()) {
-            trace(supplier.get());
+            log(LogLevel.TRACE, supplier.get());
         }
     }
 
@@ -368,15 +404,16 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #trace(Throwable, Supplier)} instead
      */
     @Deprecated
     @Override
-    public void trace(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException {
+    public void trace(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isTraceEnabled()) {
-            trace(t, supplier.get());
+            log(LogLevel.TRACE, supplier.get(), t);
         }
     }
 
@@ -391,13 +428,14 @@ public abstract class AbstractLogger implements Logger {
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     @Override
-    public void trace(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
+    public void trace(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isTraceEnabled()) {
-            trace(t, supplier.get());
+            log(LogLevel.TRACE, supplier.get(), t);
         }
     }
 
@@ -417,7 +455,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void debug(final String template, final Object arg) {
         if (isDebugEnabled()) {
-            debug(format(template, arg));
+            log(LogLevel.DEBUG, format(template, arg));
         }
     }
 
@@ -438,7 +476,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void debug(final String template, final Object arg1, final Object arg2) {
         if (isDebugEnabled()) {
-            debug(format(template, arg1, arg2));
+            log(LogLevel.DEBUG, format(template, arg1, arg2));
         }
     }
 
@@ -460,7 +498,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void debug(final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isDebugEnabled()) {
-            debug(format(template, arg1, arg2, arg3));
+            log(LogLevel.DEBUG, format(template, arg1, arg2, arg3));
         }
     }
 
@@ -484,7 +522,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void debug(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4) {
         if (isDebugEnabled()) {
-            debug(format(template, arg1, arg2, arg3, arg4));
+            log(LogLevel.DEBUG, format(template, arg1, arg2, arg3, arg4));
         }
     }
 
@@ -509,7 +547,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void debug(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5) {
         if (isDebugEnabled()) {
-            debug(format(template, arg1, arg2, arg3, arg4, arg5));
+            log(LogLevel.DEBUG, format(template, arg1, arg2, arg3, arg4, arg5));
         }
     }
 
@@ -535,7 +573,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void debug(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6) {
         if (isDebugEnabled()) {
-            debug(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
+            log(LogLevel.DEBUG, format(template, arg1, arg2, arg3, arg4, arg5, arg6));
         }
     }
 
@@ -563,7 +601,7 @@ public abstract class AbstractLogger implements Logger {
     public void debug(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6,
             final Object arg7) {
         if (isDebugEnabled()) {
-            debug(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+            log(LogLevel.DEBUG, format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
     }
 
@@ -582,10 +620,11 @@ public abstract class AbstractLogger implements Logger {
      * @deprecated Prefer {@link #debug(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
+    @SafeVarargs
     @Override
-    public void debug(final String template, final Object... args) {
+    public final void debug(final String template, final Object... args) {
         if (isDebugEnabled()) {
-            debug(format(template, args));
+            log(LogLevel.DEBUG, format(template, args));
         }
     }
 
@@ -604,7 +643,7 @@ public abstract class AbstractLogger implements Logger {
      */
     @Override
     public void debug(final Throwable t, final String msg) {
-        debug(msg, t);
+        log(LogLevel.DEBUG, msg, t);
     }
 
     /**
@@ -624,7 +663,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void debug(final Throwable t, final String template, final Object arg) {
         if (isDebugEnabled()) {
-            debug(t, format(template, arg));
+            log(LogLevel.DEBUG, format(template, arg), t);
         }
     }
 
@@ -646,7 +685,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void debug(final Throwable t, final String template, final Object arg1, final Object arg2) {
         if (isDebugEnabled()) {
-            debug(t, format(template, arg1, arg2));
+            log(LogLevel.DEBUG, format(template, arg1, arg2), t);
         }
     }
 
@@ -669,7 +708,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void debug(final Throwable t, final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isDebugEnabled()) {
-            debug(t, format(template, arg1, arg2, arg3));
+            log(LogLevel.DEBUG, format(template, arg1, arg2, arg3), t);
         }
     }
 
@@ -685,13 +724,14 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     @Override
-    public void debug(final Supplier<String> supplier) throws IllegalArgumentException {
+    public void debug(final Supplier<String> supplier) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isDebugEnabled()) {
-            debug(supplier.get());
+            log(LogLevel.DEBUG, supplier.get());
         }
     }
 
@@ -706,15 +746,16 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #debug(Throwable, Supplier)} instead
      */
     @Deprecated
     @Override
-    public void debug(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException {
+    public void debug(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isDebugEnabled()) {
-            debug(t, supplier.get());
+            log(LogLevel.DEBUG, supplier.get(), t);
         }
     }
 
@@ -729,13 +770,14 @@ public abstract class AbstractLogger implements Logger {
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     @Override
-    public void debug(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
+    public void debug(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isDebugEnabled()) {
-            debug(t, supplier.get());
+            log(LogLevel.DEBUG, supplier.get(), t);
         }
     }
 
@@ -755,7 +797,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void info(final String template, final Object arg) {
         if (isInfoEnabled()) {
-            info(format(template, arg));
+            log(LogLevel.INFO, format(template, arg));
         }
     }
 
@@ -776,7 +818,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void info(final String template, final Object arg1, final Object arg2) {
         if (isInfoEnabled()) {
-            info(format(template, arg1, arg2));
+            log(LogLevel.INFO, format(template, arg1, arg2));
         }
     }
 
@@ -798,7 +840,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void info(final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isInfoEnabled()) {
-            info(format(template, arg1, arg2, arg3));
+            log(LogLevel.INFO, format(template, arg1, arg2, arg3));
         }
     }
 
@@ -822,7 +864,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void info(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4) {
         if (isInfoEnabled()) {
-            info(format(template, arg1, arg2, arg3, arg4));
+            log(LogLevel.INFO, format(template, arg1, arg2, arg3, arg4));
         }
     }
 
@@ -847,7 +889,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void info(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5) {
         if (isInfoEnabled()) {
-            info(format(template, arg1, arg2, arg3, arg4, arg5));
+            log(LogLevel.INFO, format(template, arg1, arg2, arg3, arg4, arg5));
         }
     }
 
@@ -873,7 +915,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void info(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6) {
         if (isInfoEnabled()) {
-            info(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
+            log(LogLevel.INFO, format(template, arg1, arg2, arg3, arg4, arg5, arg6));
         }
     }
 
@@ -901,7 +943,7 @@ public abstract class AbstractLogger implements Logger {
     public void info(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6,
             final Object arg7) {
         if (isInfoEnabled()) {
-            info(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+            log(LogLevel.INFO, format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
     }
 
@@ -921,10 +963,11 @@ public abstract class AbstractLogger implements Logger {
      * @deprecated Prefer {@link #info(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
+    @SafeVarargs
     @Override
-    public void info(final String template, final Object... args) {
+    public final void info(final String template, final Object... args) {
         if (isInfoEnabled()) {
-            info(format(template, args));
+            log(LogLevel.INFO, format(template, args));
         }
     }
 
@@ -943,7 +986,7 @@ public abstract class AbstractLogger implements Logger {
      */
     @Override
     public void info(final Throwable t, final String msg) {
-        info(msg, t);
+        log(LogLevel.INFO, msg, t);
     }
 
     /**
@@ -963,7 +1006,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void info(final Throwable t, final String template, final Object arg) {
         if (isInfoEnabled()) {
-            info(t, format(template, arg));
+            log(LogLevel.INFO, format(template, arg), t);
         }
     }
 
@@ -985,7 +1028,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void info(final Throwable t, final String template, final Object arg1, final Object arg2) {
         if (isInfoEnabled()) {
-            info(t, format(template, arg1, arg2));
+            log(LogLevel.INFO, format(template, arg1, arg2), t);
         }
     }
 
@@ -1008,7 +1051,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void info(final Throwable t, final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isInfoEnabled()) {
-            info(t, format(template, arg1, arg2, arg3));
+            log(LogLevel.INFO, format(template, arg1, arg2, arg3), t);
         }
     }
 
@@ -1024,13 +1067,14 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     @Override
-    public void info(final Supplier<String> supplier) throws IllegalArgumentException {
+    public void info(final Supplier<String> supplier) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isInfoEnabled()) {
-            info(supplier.get());
+            log(LogLevel.INFO, supplier.get());
         }
     }
 
@@ -1045,15 +1089,16 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #info(Throwable, Supplier)} instead
      */
     @Deprecated
     @Override
-    public void info(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException {
+    public void info(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isInfoEnabled()) {
-            info(t, supplier.get());
+            log(LogLevel.INFO, supplier.get(), t);
         }
     }
 
@@ -1068,13 +1113,14 @@ public abstract class AbstractLogger implements Logger {
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     @Override
-    public void info(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
+    public void info(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isInfoEnabled()) {
-            info(t, supplier.get());
+            log(LogLevel.INFO, supplier.get(), t);
         }
     }
 
@@ -1094,7 +1140,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void warn(final String template, final Object arg) {
         if (isWarnEnabled()) {
-            warn(format(template, arg));
+            log(LogLevel.WARN, format(template, arg));
         }
     }
 
@@ -1115,7 +1161,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void warn(final String template, final Object arg1, final Object arg2) {
         if (isWarnEnabled()) {
-            warn(format(template, arg1, arg2));
+            log(LogLevel.WARN, format(template, arg1, arg2));
         }
     }
 
@@ -1137,7 +1183,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void warn(final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isWarnEnabled()) {
-            warn(format(template, arg1, arg2, arg3));
+            log(LogLevel.WARN, format(template, arg1, arg2, arg3));
         }
     }
 
@@ -1161,7 +1207,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void warn(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4) {
         if (isWarnEnabled()) {
-            warn(format(template, arg1, arg2, arg3, arg4));
+            log(LogLevel.WARN, format(template, arg1, arg2, arg3, arg4));
         }
     }
 
@@ -1186,7 +1232,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void warn(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5) {
         if (isWarnEnabled()) {
-            warn(format(template, arg1, arg2, arg3, arg4, arg5));
+            log(LogLevel.WARN, format(template, arg1, arg2, arg3, arg4, arg5));
         }
     }
 
@@ -1212,7 +1258,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void warn(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6) {
         if (isWarnEnabled()) {
-            warn(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
+            log(LogLevel.WARN, format(template, arg1, arg2, arg3, arg4, arg5, arg6));
         }
     }
 
@@ -1240,7 +1286,7 @@ public abstract class AbstractLogger implements Logger {
     public void warn(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6,
             final Object arg7) {
         if (isWarnEnabled()) {
-            warn(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+            log(LogLevel.WARN, format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
     }
 
@@ -1260,10 +1306,11 @@ public abstract class AbstractLogger implements Logger {
      * @deprecated Prefer {@link #warn(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
+    @SafeVarargs
     @Override
-    public void warn(final String template, final Object... args) {
+    public final void warn(final String template, final Object... args) {
         if (isWarnEnabled()) {
-            warn(format(template, args));
+            log(LogLevel.WARN, format(template, args));
         }
     }
 
@@ -1282,7 +1329,7 @@ public abstract class AbstractLogger implements Logger {
      */
     @Override
     public void warn(final Throwable t, final String msg) {
-        warn(msg, t);
+        log(LogLevel.WARN, msg, t);
     }
 
     /**
@@ -1302,7 +1349,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void warn(final Throwable t, final String template, final Object arg) {
         if (isWarnEnabled()) {
-            warn(t, format(template, arg));
+            log(LogLevel.WARN, format(template, arg), t);
         }
     }
 
@@ -1324,7 +1371,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void warn(final Throwable t, final String template, final Object arg1, final Object arg2) {
         if (isWarnEnabled()) {
-            warn(t, format(template, arg1, arg2));
+            log(LogLevel.WARN, format(template, arg1, arg2), t);
         }
     }
 
@@ -1347,7 +1394,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void warn(final Throwable t, final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isWarnEnabled()) {
-            warn(t, format(template, arg1, arg2, arg3));
+            log(LogLevel.WARN, format(template, arg1, arg2, arg3), t);
         }
     }
 
@@ -1363,13 +1410,14 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     @Override
-    public void warn(final Supplier<String> supplier) throws IllegalArgumentException {
+    public void warn(final Supplier<String> supplier) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isWarnEnabled()) {
-            warn(supplier.get());
+            log(LogLevel.WARN, supplier.get());
         }
     }
 
@@ -1384,15 +1432,16 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #warn(Throwable, Supplier)} instead
      */
     @Deprecated
     @Override
-    public void warn(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException {
+    public void warn(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isWarnEnabled()) {
-            warn(t, supplier.get());
+            log(LogLevel.WARN, supplier.get(), t);
         }
     }
 
@@ -1407,13 +1456,14 @@ public abstract class AbstractLogger implements Logger {
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     @Override
-    public void warn(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
+    public void warn(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isWarnEnabled()) {
-            warn(t, supplier.get());
+            log(LogLevel.WARN, supplier.get(), t);
         }
     }
 
@@ -1433,7 +1483,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void error(final String template, final Object arg) {
         if (isErrorEnabled()) {
-            error(format(template, arg));
+            log(LogLevel.ERROR, format(template, arg));
         }
     }
 
@@ -1454,7 +1504,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void error(final String template, final Object arg1, final Object arg2) {
         if (isErrorEnabled()) {
-            error(format(template, arg1, arg2));
+            log(LogLevel.ERROR, format(template, arg1, arg2));
         }
     }
 
@@ -1476,7 +1526,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void error(final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isErrorEnabled()) {
-            error(format(template, arg1, arg2, arg3));
+            log(LogLevel.ERROR, format(template, arg1, arg2, arg3));
         }
     }
 
@@ -1500,7 +1550,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void error(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4) {
         if (isErrorEnabled()) {
-            error(format(template, arg1, arg2, arg3, arg4));
+            log(LogLevel.ERROR, format(template, arg1, arg2, arg3, arg4));
         }
     }
 
@@ -1525,7 +1575,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void error(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5) {
         if (isErrorEnabled()) {
-            error(format(template, arg1, arg2, arg3, arg4, arg5));
+            log(LogLevel.ERROR, format(template, arg1, arg2, arg3, arg4, arg5));
         }
     }
 
@@ -1551,7 +1601,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void error(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6) {
         if (isErrorEnabled()) {
-            error(format(template, arg1, arg2, arg3, arg4, arg5, arg6));
+            log(LogLevel.ERROR, format(template, arg1, arg2, arg3, arg4, arg5, arg6));
         }
     }
 
@@ -1579,7 +1629,7 @@ public abstract class AbstractLogger implements Logger {
     public void error(final String template, final Object arg1, final Object arg2, final Object arg3, final Object arg4, final Object arg5, final Object arg6,
             final Object arg7) {
         if (isErrorEnabled()) {
-            error(format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+            log(LogLevel.ERROR, format(template, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
         }
     }
 
@@ -1599,10 +1649,11 @@ public abstract class AbstractLogger implements Logger {
      * @deprecated Prefer {@link #error(Supplier)} for lazy evaluation to avoid object creation
      */
     @Deprecated
+    @SafeVarargs
     @Override
-    public void error(final String template, final Object... args) {
+    public final void error(final String template, final Object... args) {
         if (isErrorEnabled()) {
-            error(format(template, args));
+            log(LogLevel.ERROR, format(template, args));
         }
     }
 
@@ -1625,7 +1676,7 @@ public abstract class AbstractLogger implements Logger {
      */
     @Override
     public void error(final Throwable t, final String msg) {
-        error(msg, t);
+        log(LogLevel.ERROR, msg, t);
     }
 
     /**
@@ -1645,7 +1696,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void error(final Throwable t, final String template, final Object arg) {
         if (isErrorEnabled()) {
-            error(t, format(template, arg));
+            log(LogLevel.ERROR, format(template, arg), t);
         }
     }
 
@@ -1667,7 +1718,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void error(final Throwable t, final String template, final Object arg1, final Object arg2) {
         if (isErrorEnabled()) {
-            error(t, format(template, arg1, arg2));
+            log(LogLevel.ERROR, format(template, arg1, arg2), t);
         }
     }
 
@@ -1690,7 +1741,7 @@ public abstract class AbstractLogger implements Logger {
     @Override
     public void error(final Throwable t, final String template, final Object arg1, final Object arg2, final Object arg3) {
         if (isErrorEnabled()) {
-            error(t, format(template, arg1, arg2, arg3));
+            log(LogLevel.ERROR, format(template, arg1, arg2, arg3), t);
         }
     }
 
@@ -1706,13 +1757,14 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param supplier the supplier that provides the message
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     @Override
-    public void error(final Supplier<String> supplier) throws IllegalArgumentException {
+    public void error(final Supplier<String> supplier) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isErrorEnabled()) {
-            error(supplier.get());
+            log(LogLevel.ERROR, supplier.get());
         }
     }
 
@@ -1727,15 +1779,16 @@ public abstract class AbstractLogger implements Logger {
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #error(Throwable, Supplier)} instead
      */
     @Deprecated
     @Override
-    public void error(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException {
+    public void error(final Supplier<String> supplier, final Throwable t) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isErrorEnabled()) {
-            error(t, supplier.get());
+            log(LogLevel.ERROR, supplier.get(), t);
         }
     }
 
@@ -1750,13 +1803,40 @@ public abstract class AbstractLogger implements Logger {
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     @Override
-    public void error(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException {
+    public void error(final Throwable t, final Supplier<String> supplier) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (isErrorEnabled()) {
-            error(t, supplier.get());
+            log(LogLevel.ERROR, supplier.get(), t);
+        }
+    }
+
+    /**
+     * Renders a template argument with {@code N.toString(Object)} without ever letting the argument's own
+     * {@code toString()} abort the log call: any exception, and the {@link StackOverflowError} that
+     * {@code N.toString} raises for a self-referential collection or array, is replaced by a marker naming
+     * the argument's class, its identity hash and the failure type. Every other {@link VirtualMachineError}
+     * propagates.
+     *
+     * @param arg the argument to render, may be {@code null}
+     * @return the rendered argument, or a {@code [FAILED toString() of <class>@<hash>: <error>]} marker
+     */
+    private static String toStringSafe(final Object arg) {
+        try {
+            return N.toString(arg);
+        } catch (final Throwable e) {
+            // A StackOverflowError is the documented symptom of N.toString on a self-referential collection and
+            // the stack has already unwound by the time it is caught here; OutOfMemoryError & co. are not recoverable.
+            if (e instanceof VirtualMachineError && !(e instanceof StackOverflowError)) {
+                throw (VirtualMachineError) e;
+            }
+
+            // Never call arg.toString() again: the class name and identity hash cannot fail.
+            return "[FAILED toString() of " + arg.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(arg)) + ": " + e.getClass().getName()
+                    + "]";
         }
     }
 
@@ -1765,7 +1845,12 @@ public abstract class AbstractLogger implements Logger {
      *
      * <p>Supports {@code {}} (SLF4J-style) or {@code %s} (printf-style) placeholders.
      * If the template contains {@code {}}, that style is used; otherwise {@code %s} is tried.
-     * The two styles cannot be mixed in a single template.
+     * The two styles cannot be mixed in a single template. {@code %s} is matched literally: other printf
+     * conversions ({@code %d}, {@code %n}, {@code %5s}, ...) are not placeholders, and there is no escape
+     * sequence ({@code \{}} and {@code %%} are not special); to emit a literal placeholder pass it as an
+     * argument, because substituted arguments are never re-scanned. Unmatched placeholders (fewer arguments
+     * than placeholders) are left in the output verbatim; an argument whose {@code toString()} throws is
+     * rendered as a {@code [FAILED toString() of ...]} marker instead of aborting the call.
      * If no placeholder is found, the argument is appended in square brackets.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1777,7 +1862,8 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param template the message template, may be {@code null} (converted to {@code "null"})
-     * @param arg the argument to substitute; converted with {@code N.toString(Object)}, may be {@code null}
+     * @param arg the argument to substitute; converted with {@code N.toString(Object)} (a {@code toString()} that throws is rendered as a
+     *     {@code [FAILED toString() of ...]} marker), may be {@code null}
      * @return the formatted message
      */
     static String format(String template, final Object arg) {
@@ -1786,30 +1872,30 @@ public abstract class AbstractLogger implements Logger {
         // start substituting the arguments into the '{}' or '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 16);
 
-        String placeholder = "{}";
-        int placeholderStart = template.indexOf(placeholder);
+        try {
+            String placeholder = "{}";
+            int placeholderStart = template.indexOf(placeholder);
 
-        if (placeholderStart < 0) {
-            placeholder = "%s";
-            placeholderStart = template.indexOf(placeholder);
+            if (placeholderStart < 0) {
+                placeholder = "%s";
+                placeholderStart = template.indexOf(placeholder);
+            }
+
+            if (placeholderStart >= 0) {
+                sb.append(template, 0, placeholderStart);
+                sb.append(toStringSafe(arg));
+                sb.append(template, placeholderStart + placeholder.length(), template.length());
+            } else {
+                sb.append(template);
+                sb.append(" [");
+                sb.append(toStringSafe(arg));
+                sb.append(']');
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
         }
-
-        if (placeholderStart >= 0) {
-            sb.append(template, 0, placeholderStart);
-            sb.append(N.toString(arg));
-            sb.append(template, placeholderStart + placeholder.length(), template.length());
-        } else {
-            sb.append(template);
-            sb.append(" [");
-            sb.append(N.toString(arg));
-            sb.append(']');
-        }
-
-        final String result = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return result;
     }
 
     /**
@@ -1817,7 +1903,12 @@ public abstract class AbstractLogger implements Logger {
      *
      * <p>Supports {@code {}} (SLF4J-style) or {@code %s} (printf-style) placeholders.
      * If the template contains {@code {}}, that style is used; otherwise {@code %s} is tried.
-     * The two styles cannot be mixed in a single template.
+     * The two styles cannot be mixed in a single template. {@code %s} is matched literally: other printf
+     * conversions ({@code %d}, {@code %n}, {@code %5s}, ...) are not placeholders, and there is no escape
+     * sequence ({@code \{}} and {@code %%} are not special); to emit a literal placeholder pass it as an
+     * argument, because substituted arguments are never re-scanned. Unmatched placeholders (fewer arguments
+     * than placeholders) are left in the output verbatim; an argument whose {@code toString()} throws is
+     * rendered as a {@code [FAILED toString() of ...]} marker instead of aborting the call.
      * Extra arguments are appended in square brackets if there are fewer placeholders than arguments.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1829,8 +1920,10 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param template the message template, may be {@code null} (converted to {@code "null"})
-     * @param arg1 the first argument; converted with {@code N.toString(Object)}, may be {@code null}
-     * @param arg2 the second argument; converted with {@code N.toString(Object)}, may be {@code null}
+     * @param arg1 the first argument; converted with {@code N.toString(Object)} (a {@code toString()} that throws is rendered as a
+     *     {@code [FAILED toString() of ...]} marker), may be {@code null}
+     * @param arg2 the second argument; converted with {@code N.toString(Object)} (a {@code toString()} that throws is rendered as a
+     *     {@code [FAILED toString() of ...]} marker), may be {@code null}
      * @return the formatted message
      */
     static String format(String template, final Object arg1, final Object arg2) {
@@ -1839,52 +1932,52 @@ public abstract class AbstractLogger implements Logger {
         // start substituting the arguments into the '{}' or '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 32);
 
-        String placeholder = "{}";
-        int placeholderStart = template.indexOf(placeholder);
+        try {
+            String placeholder = "{}";
+            int placeholderStart = template.indexOf(placeholder);
 
-        if (placeholderStart < 0) {
-            placeholder = "%s";
-            placeholderStart = template.indexOf(placeholder);
-        }
+            if (placeholderStart < 0) {
+                placeholder = "%s";
+                placeholderStart = template.indexOf(placeholder);
+            }
 
-        int templateStart = 0;
-        int substitutedArgsCount = 0;
-
-        if (placeholderStart >= 0) {
-            substitutedArgsCount++;
-            sb.append(template, templateStart, placeholderStart);
-            sb.append(N.toString(arg1));
-            templateStart = placeholderStart + placeholder.length();
-            placeholderStart = template.indexOf(placeholder, templateStart);
+            int templateStart = 0;
+            int substitutedArgsCount = 0;
 
             if (placeholderStart >= 0) {
                 substitutedArgsCount++;
                 sb.append(template, templateStart, placeholderStart);
-                sb.append(N.toString(arg2));
+                sb.append(toStringSafe(arg1));
                 templateStart = placeholderStart + placeholder.length();
+                placeholderStart = template.indexOf(placeholder, templateStart);
+
+                if (placeholderStart >= 0) {
+                    substitutedArgsCount++;
+                    sb.append(template, templateStart, placeholderStart);
+                    sb.append(toStringSafe(arg2));
+                    templateStart = placeholderStart + placeholder.length();
+                }
+
+                sb.append(template, templateStart, template.length());
             }
 
-            sb.append(template, templateStart, template.length());
+            if (substitutedArgsCount == 0) {
+                sb.append(template);
+                sb.append(" [");
+                sb.append(toStringSafe(arg1));
+                sb.append(", ");
+                sb.append(toStringSafe(arg2));
+                sb.append(']');
+            } else if (substitutedArgsCount == 1) {
+                sb.append(" [");
+                sb.append(toStringSafe(arg2));
+                sb.append(']');
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
         }
-
-        if (substitutedArgsCount == 0) {
-            sb.append(template);
-            sb.append(" [");
-            sb.append(N.toString(arg1));
-            sb.append(", ");
-            sb.append(N.toString(arg2));
-            sb.append(']');
-        } else if (substitutedArgsCount == 1) {
-            sb.append(" [");
-            sb.append(N.toString(arg2));
-            sb.append(']');
-        }
-
-        final String result = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return result;
     }
 
     /**
@@ -1892,7 +1985,12 @@ public abstract class AbstractLogger implements Logger {
      *
      * <p>Supports {@code {}} (SLF4J-style) or {@code %s} (printf-style) placeholders.
      * If the template contains {@code {}}, that style is used; otherwise {@code %s} is tried.
-     * The two styles cannot be mixed in a single template.
+     * The two styles cannot be mixed in a single template. {@code %s} is matched literally: other printf
+     * conversions ({@code %d}, {@code %n}, {@code %5s}, ...) are not placeholders, and there is no escape
+     * sequence ({@code \{}} and {@code %%} are not special); to emit a literal placeholder pass it as an
+     * argument, because substituted arguments are never re-scanned. Unmatched placeholders (fewer arguments
+     * than placeholders) are left in the output verbatim; an argument whose {@code toString()} throws is
+     * rendered as a {@code [FAILED toString() of ...]} marker instead of aborting the call.
      * Extra arguments are appended in square brackets if there are fewer placeholders than arguments.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1905,9 +2003,12 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param template the message template, may be {@code null} (converted to {@code "null"})
-     * @param arg1 the first argument; converted with {@code N.toString(Object)}, may be {@code null}
-     * @param arg2 the second argument; converted with {@code N.toString(Object)}, may be {@code null}
-     * @param arg3 the third argument; converted with {@code N.toString(Object)}, may be {@code null}
+     * @param arg1 the first argument; converted with {@code N.toString(Object)} (a {@code toString()} that throws is rendered as a
+     *     {@code [FAILED toString() of ...]} marker), may be {@code null}
+     * @param arg2 the second argument; converted with {@code N.toString(Object)} (a {@code toString()} that throws is rendered as a
+     *     {@code [FAILED toString() of ...]} marker), may be {@code null}
+     * @param arg3 the third argument; converted with {@code N.toString(Object)} (a {@code toString()} that throws is rendered as a
+     *     {@code [FAILED toString() of ...]} marker), may be {@code null}
      * @return the formatted message
      */
     static String format(String template, final Object arg1, final Object arg2, final Object arg3) {
@@ -1916,68 +2017,68 @@ public abstract class AbstractLogger implements Logger {
         // start substituting the arguments into the '{}' or '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 48);
 
-        String placeholder = "{}";
-        int placeholderStart = template.indexOf(placeholder);
+        try {
+            String placeholder = "{}";
+            int placeholderStart = template.indexOf(placeholder);
 
-        if (placeholderStart < 0) {
-            placeholder = "%s";
-            placeholderStart = template.indexOf(placeholder);
-        }
+            if (placeholderStart < 0) {
+                placeholder = "%s";
+                placeholderStart = template.indexOf(placeholder);
+            }
 
-        int templateStart = 0;
-        int substitutedArgsCount = 0;
-
-        if (placeholderStart >= 0) {
-            substitutedArgsCount++;
-            sb.append(template, templateStart, placeholderStart);
-            sb.append(N.toString(arg1));
-            templateStart = placeholderStart + placeholder.length();
-            placeholderStart = template.indexOf(placeholder, templateStart);
+            int templateStart = 0;
+            int substitutedArgsCount = 0;
 
             if (placeholderStart >= 0) {
                 substitutedArgsCount++;
                 sb.append(template, templateStart, placeholderStart);
-                sb.append(N.toString(arg2));
+                sb.append(toStringSafe(arg1));
                 templateStart = placeholderStart + placeholder.length();
                 placeholderStart = template.indexOf(placeholder, templateStart);
 
                 if (placeholderStart >= 0) {
                     substitutedArgsCount++;
                     sb.append(template, templateStart, placeholderStart);
-                    sb.append(N.toString(arg3));
+                    sb.append(toStringSafe(arg2));
                     templateStart = placeholderStart + placeholder.length();
+                    placeholderStart = template.indexOf(placeholder, templateStart);
+
+                    if (placeholderStart >= 0) {
+                        substitutedArgsCount++;
+                        sb.append(template, templateStart, placeholderStart);
+                        sb.append(toStringSafe(arg3));
+                        templateStart = placeholderStart + placeholder.length();
+                    }
                 }
+
+                sb.append(template, templateStart, template.length());
             }
 
-            sb.append(template, templateStart, template.length());
+            if (substitutedArgsCount == 0) {
+                sb.append(template);
+                sb.append(" [");
+                sb.append(toStringSafe(arg1));
+                sb.append(", ");
+                sb.append(toStringSafe(arg2));
+                sb.append(", ");
+                sb.append(toStringSafe(arg3));
+                sb.append(']');
+            } else if (substitutedArgsCount == 1) {
+                sb.append(" [");
+                sb.append(toStringSafe(arg2));
+                sb.append(", ");
+                sb.append(toStringSafe(arg3));
+                sb.append(']');
+            } else if (substitutedArgsCount == 2) {
+                sb.append(" [");
+                sb.append(toStringSafe(arg3));
+                sb.append(']');
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
         }
-
-        if (substitutedArgsCount == 0) {
-            sb.append(template);
-            sb.append(" [");
-            sb.append(N.toString(arg1));
-            sb.append(", ");
-            sb.append(N.toString(arg2));
-            sb.append(", ");
-            sb.append(N.toString(arg3));
-            sb.append(']');
-        } else if (substitutedArgsCount == 1) {
-            sb.append(" [");
-            sb.append(N.toString(arg2));
-            sb.append(", ");
-            sb.append(N.toString(arg3));
-            sb.append(']');
-        } else if (substitutedArgsCount == 2) {
-            sb.append(" [");
-            sb.append(N.toString(arg3));
-            sb.append(']');
-        }
-
-        final String result = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return result;
     }
 
     /**
@@ -1987,8 +2088,10 @@ public abstract class AbstractLogger implements Logger {
      * position: the first placeholder gets {@code args[0]}, etc. If the template contains {@code {}},
      * that style is used; otherwise {@code %s} is tried. The two styles cannot be mixed in a single
      * template. If there are more arguments than placeholders, the unmatched arguments will be
-     * appended to the end of the formatted message in square brackets. An empty or {@code null}
-     * {@code args} array leaves the template unchanged.</p>
+     * appended to the end of the formatted message in square brackets; if there are fewer, the unmatched
+     * placeholders stay in the output verbatim. {@code %s} is matched literally (other printf conversions
+     * are plain text), there is no escape sequence, and substituted arguments are never re-scanned for
+     * placeholders. An empty or {@code null} {@code args} array leaves the template unchanged.</p>
      *
      * <p><b>Note:</b> this overload is only selected for four or more arguments; calls with one, two
      * or three arguments bind to the fixed-arity {@code format} overloads instead.</p>
@@ -2003,7 +2106,8 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param template the message template containing 0 or more {@code {}} or {@code %s} placeholders, may be {@code null} (converted to "null")
      * @param args the arguments to be substituted into the message template. Arguments
-     *     are converted to strings using {@code N.toString(Object)}. Arguments can be {@code null}.
+     *     are converted to strings using {@code N.toString(Object)}; an argument whose {@code toString()} throws is
+     *     rendered as a {@code [FAILED toString() of ...]} marker. Arguments can be {@code null}.
      * @return the formatted message
      */
     static String format(String template, final Object... args) {
@@ -2015,42 +2119,43 @@ public abstract class AbstractLogger implements Logger {
 
         // start substituting the arguments into the '{}' or '%s' placeholders
         final StringBuilder sb = Objectory.createStringBuilder(template.length() + 16 * args.length);
-        int templateStart = 0;
-        int i = 0;
 
-        String placeholder = "{}";
-        int placeholderStart = template.indexOf(placeholder);
+        try {
+            int templateStart = 0;
+            int i = 0;
 
-        if (placeholderStart < 0) {
-            placeholder = "%s";
-            placeholderStart = template.indexOf(placeholder);
-        }
+            String placeholder = "{}";
+            int placeholderStart = template.indexOf(placeholder);
 
-        while (placeholderStart >= 0 && i < args.length) {
-            sb.append(template, templateStart, placeholderStart);
-            sb.append(N.toString(args[i++]));
-            templateStart = placeholderStart + placeholder.length();
-            placeholderStart = template.indexOf(placeholder, templateStart);
-        }
-
-        sb.append(template, templateStart, template.length());
-
-        // if we run out of placeholders, append the extra args in square braces
-        if (i < args.length) {
-            sb.append(" [");
-            sb.append(N.toString(args[i++]));
-            while (i < args.length) {
-                sb.append(", ");
-                sb.append(N.toString(args[i++]));
+            if (placeholderStart < 0) {
+                placeholder = "%s";
+                placeholderStart = template.indexOf(placeholder);
             }
-            sb.append(']');
+
+            while (placeholderStart >= 0 && i < args.length) {
+                sb.append(template, templateStart, placeholderStart);
+                sb.append(toStringSafe(args[i++]));
+                templateStart = placeholderStart + placeholder.length();
+                placeholderStart = template.indexOf(placeholder, templateStart);
+            }
+
+            sb.append(template, templateStart, template.length());
+
+            // if we run out of placeholders, append the extra args in square braces
+            if (i < args.length) {
+                sb.append(" [");
+                sb.append(toStringSafe(args[i++]));
+                while (i < args.length) {
+                    sb.append(", ");
+                    sb.append(toStringSafe(args[i++]));
+                }
+                sb.append(']');
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
         }
-
-        final String result = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return result;
     }
 
 }

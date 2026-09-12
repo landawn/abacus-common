@@ -31,7 +31,7 @@ import com.landawn.abacus.util.cs;
  * @see java.util.function.DoublePredicate
  */
 @FunctionalInterface
-public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, RuntimeException> { // NOSONAR
+public interface DoubleObjPredicate<T> extends Throwables.DoubleObjPredicate<T, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Evaluates this predicate on the given arguments.
      *

@@ -33,12 +33,19 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.DiffIgnore;
 import com.landawn.abacus.annotation.Entity;
 import com.landawn.abacus.annotation.Record;
-import com.landawn.abacus.parser.ParserUtil;
-import com.landawn.abacus.parser.ParserUtil.BeanInfo;
-import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.util.function.Predicate;
 
 public class ClassUtilTest extends TestBase {
+
+    @Test
+    public void testGetDeclaredMethodCaseInsensitiveWithNullParameterTypes() throws Exception {
+        final Method expected = String.class.getDeclaredMethod("length");
+
+        assertEquals(expected, ClassUtil.getDeclaredMethod(String.class, "lEnGtH", (Class<?>[]) null));
+        assertEquals(expected, ClassUtil.getDeclaredMethod(String.class, "lEnGtH"));
+        assertEquals(expected, ClassUtil.getDeclaredMethod(String.class, "length", (Class<?>[]) null));
+        assertNull(ClassUtil.getDeclaredMethod(String.class, "sUbStRiNg", (Class<?>[]) null));
+    }
 
     public static class OuterClass {
         int x = 10;
@@ -60,29 +67,29 @@ public class ClassUtilTest extends TestBase {
 
     }
 
-    static class ThrowingCtorClass {
+    public static class ThrowingCtorClass {
         ThrowingCtorClass() {
             throw new IllegalStateException("boom");
         }
     }
 
-    static class ThrowingMethodClass {
+    public static class ThrowingMethodClass {
         String fail() {
             throw new IllegalArgumentException("boom");
         }
     }
 
-    static class GenericTypeHolder<T> {
+    public static class GenericTypeHolder<T> {
         public List<T> getValues() {
             return Collections.emptyList();
         }
     }
 
-    static class NonBean {
+    public static class NonBean {
         private String value;
     }
 
-    static class TestBean {
+    public static class TestBean {
         private String name;
         private int age;
         private boolean active;
@@ -123,7 +130,7 @@ public class ClassUtilTest extends TestBase {
     }
 
     @Entity
-    static class EntityBean {
+    public static class EntityBean {
         private List<String> tags = new ArrayList<>();
 
         public List<String> getTags() {
@@ -136,7 +143,7 @@ public class ClassUtilTest extends TestBase {
     }
 
     @Record
-    static class RecordBean {
+    public static class RecordBean {
         private String recordId;
 
         public String getRecordId() {
@@ -148,7 +155,7 @@ public class ClassUtilTest extends TestBase {
         }
     }
 
-    static class NestedBean {
+    public static class NestedBean {
         private TestBean inner;
 
         public TestBean getInner() {
@@ -172,7 +179,7 @@ public class ClassUtilTest extends TestBase {
         }
     }
 
-    static class DiffBean {
+    public static class DiffBean {
         private String name;
 
         @DiffIgnore
@@ -195,7 +202,7 @@ public class ClassUtilTest extends TestBase {
         }
     }
 
-    static class BuilderBean {
+    public static class BuilderBean {
         private String value;
 
         private BuilderBean() {
@@ -228,10 +235,28 @@ public class ClassUtilTest extends TestBase {
     interface TestInterface {
     }
 
-    static class ConcreteTestClass implements TestInterface {
+    interface HierarchyRoot {
     }
 
-    static class InnerClassContainer {
+    interface HierarchyLeft extends HierarchyRoot {
+    }
+
+    interface HierarchyRight extends HierarchyRoot {
+    }
+
+    interface HierarchyDiamond extends HierarchyLeft, HierarchyRight {
+    }
+
+    static class HierarchyBase implements HierarchyLeft, HierarchyRight {
+    }
+
+    static class HierarchyChild extends HierarchyBase implements HierarchyDiamond, HierarchyRight {
+    }
+
+    public static class ConcreteTestClass implements TestInterface {
+    }
+
+    public static class InnerClassContainer {
         class InnerClass {
         }
 
@@ -443,12 +468,10 @@ public class ClassUtilTest extends TestBase {
 
     @Test
     public void test_innerClass() {
-
         final OuterClass myOuter = new OuterClass();
         final OuterClass.InnerClass myInner = myOuter.new InnerClass();
-        System.out.println(myInner.y + myOuter.x);
-
-        N.println(ClassUtil.getClassName(myInner.getClass()));
+        assertEquals(15, myInner.y + myOuter.x);
+        assertEquals("com.landawn.abacus.util.ClassUtilTest$OuterClass$InnerClass", ClassUtil.getClassName(myInner.getClass()));
 
         final OuterClass.InnerClass myInner2 = myOuter.new InnerClass();
         assertEquals(myInner2.getClass(), myInner.getClass());
@@ -566,9 +589,9 @@ public class ClassUtilTest extends TestBase {
 
     @Test
     public void test_02() {
-        assertDoesNotThrow(() -> {
-            N.println(ClassUtil.findClassesInPackage("com.landawn.abacus", true, true));
-        });
+        List<Class<?>> classes = ClassUtil.findClassesInPackage("com.landawn.abacus", true, true);
+        assertNotNull(classes);
+        assertTrue(classes.stream().anyMatch(c -> c.getSimpleName().equals("ClassUtil")));
     }
 
     @Test
@@ -627,6 +650,7 @@ public class ClassUtilTest extends TestBase {
         Set<Class<?>> interfaces = ClassUtil.getAllInterfaces(ArrayList.class);
         assertNotNull(interfaces);
         assertTrue(interfaces.contains(List.class));
+        assertTrue(interfaces.contains(java.util.SequencedCollection.class));
         assertTrue(interfaces.contains(Collection.class));
         assertTrue(interfaces.contains(Iterable.class));
     }
@@ -676,11 +700,18 @@ public class ClassUtilTest extends TestBase {
 
     @Test
     public void test_01() {
-        assertDoesNotThrow(() -> {
-            N.println(ClassUtil.getAllSuperclasses(C.class));
-            N.println(ClassUtil.getAllInterfaces(C.class));
-            N.println(ClassUtil.getAllSuperTypes(C.class));
-        });
+        List<Class<?>> superclasses = ClassUtil.getAllSuperclasses(C.class);
+        assertTrue(superclasses.contains(B.class));
+        assertTrue(superclasses.contains(A.class));
+
+        Set<Class<?>> interfaces = ClassUtil.getAllInterfaces(C.class);
+        assertTrue(interfaces.contains(Callable.class));
+        assertTrue(interfaces.contains(Predicate.class));
+
+        Set<Class<?>> superTypes = ClassUtil.getAllSuperTypes(C.class);
+        assertTrue(superTypes.contains(B.class));
+        assertTrue(superTypes.contains(Callable.class));
+        assertTrue(superTypes.contains(Predicate.class));
     }
 
     @Test
@@ -688,6 +719,7 @@ public class ClassUtilTest extends TestBase {
         Set<Class<?>> superTypes = ClassUtil.getAllSuperTypes(ArrayList.class);
         assertNotNull(superTypes);
         assertTrue(superTypes.contains(List.class));
+        assertTrue(superTypes.contains(java.util.SequencedCollection.class));
         assertFalse(superTypes.contains(Object.class));
     }
 
@@ -711,6 +743,10 @@ public class ClassUtilTest extends TestBase {
     public void testGetEnclosingClass_InnerClass() {
         Class<?> enclosing = ClassUtil.getEnclosingClass(Map.Entry.class);
         assertEquals(Map.class, enclosing);
+        assertEquals(InnerClassContainer.class, ClassUtil.getEnclosingClass(InnerClassContainer.StaticInnerClass.class));
+        assertEquals(InnerClassContainer.class, ClassUtil.getEnclosingClass(InnerClassContainer.InnerClass.class));
+        assertNull(ClassUtil.getEnclosingClass(int.class));
+        assertNull(ClassUtil.getEnclosingClass(InnerClassContainer.StaticInnerClass[].class));
     }
 
     @Test
@@ -886,30 +922,18 @@ public class ClassUtilTest extends TestBase {
 
     @Test
     public void test_getTypeArgumentsByMethod() {
-        Method method = Beans.getPropGetter(Entity_2.class, "getAutoGeneratedClassMap");
+        Method getter = Beans.getPropGetter(Entity_2.class, "getAutoGeneratedClassMap");
+        String mapType = ClassUtil.getParameterizedTypeNameByMethod(getter);
+        assertTrue(mapType.contains("Map"), mapType);
+        assertTrue(mapType.contains("AutoGeneratedClass"), mapType);
 
-        N.println(ClassUtil.getParameterizedTypeNameByMethod(method));
+        Method setter = Beans.getPropSetter(Entity_2.class, "setAutoGeneratedClassMap");
+        assertEquals(mapType, ClassUtil.getParameterizedTypeNameByMethod(setter));
 
-        method = Beans.getPropSetter(Entity_2.class, "setAutoGeneratedClassMap");
-
-        N.println(ClassUtil.getParameterizedTypeNameByMethod(method));
-
-        method = Beans.getPropGetter(Entity_2.class, "gui");
-
-        N.println(ClassUtil.getParameterizedTypeNameByMethod(method));
-
-        method = Beans.getPropSetter(Entity_2.class, "gui");
-
-        N.println(ClassUtil.getParameterizedTypeNameByMethod(method));
-
-        method = Beans.getPropGetter(Entity_2.class, "intType");
-
-        N.println(ClassUtil.getParameterizedTypeNameByMethod(method));
-
-        method = Beans.getPropSetter(Entity_2.class, "intType");
-
-        N.println(ClassUtil.getParameterizedTypeNameByMethod(method));
-        assertNotNull(method);
+        assertEquals("String", ClassUtil.getParameterizedTypeNameByMethod(Beans.getPropGetter(Entity_2.class, "gui")));
+        assertEquals("String", ClassUtil.getParameterizedTypeNameByMethod(Beans.getPropSetter(Entity_2.class, "gui")));
+        assertEquals("int", ClassUtil.getParameterizedTypeNameByMethod(Beans.getPropGetter(Entity_2.class, "intType")));
+        assertEquals("int", ClassUtil.getParameterizedTypeNameByMethod(Beans.getPropSetter(Entity_2.class, "intType")));
     }
 
     @Test
@@ -1126,6 +1150,7 @@ public class ClassUtilTest extends TestBase {
 
         assertTrue(classes.contains(ArrayList.class));
         assertTrue(classes.contains(List.class));
+        assertTrue(classes.contains(java.util.SequencedCollection.class));
         assertTrue(classes.contains(Collection.class));
         assertTrue(classes.contains(Iterable.class));
     }
@@ -1183,6 +1208,14 @@ public class ClassUtilTest extends TestBase {
             }
         }
         assertTrue(foundInterface);
+    }
+
+    @Test
+    public void testHierarchySharedInterfacesPreserveDepthFirstOrder() {
+        assertEquals(List.of(HierarchyChild.class, HierarchyDiamond.class, HierarchyLeft.class, HierarchyRoot.class, HierarchyRight.class,
+                HierarchyBase.class, Object.class), ClassUtil.hierarchy(HierarchyChild.class, true).toList());
+        assertEquals(List.of(HierarchyDiamond.class, HierarchyLeft.class, HierarchyRoot.class, HierarchyRight.class),
+                ClassUtil.hierarchy(HierarchyDiamond.class, true).toList());
     }
 
     @Test
@@ -1833,26 +1866,32 @@ public class ClassUtilTest extends TestBase {
 
     @Test
     public void test_setPropValue() {
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(Account.class);
-        final PropInfo propInfo = beanInfo.getPropInfo("contact.address");
-        N.println(propInfo);
-
         final Account account = new Account();
         Beans.setPropValue(account, "contact.address", "address1");
+        assertEquals("address1", account.getContact().getAddress());
         Beans.setPropValue(account, "devices.name", "device1");
         Beans.setPropValue(account, "devices.model", "model1");
-        assertNotNull(account);
+        assertNotNull(account.getDevices());
+        assertEquals("device1", account.getDevices().get(0).getName());
+        assertEquals("model1", account.getDevices().get(0).getModel());
     }
 
     @Test
     public void test_getPropNameList() {
-        assertDoesNotThrow(() -> {
-            N.println(Beans.getPropNameList(Account.class));
+        List<String> names = Beans.getPropNameList(Account.class);
+        assertTrue(names.contains("id"));
+        assertTrue(names.contains("gui"));
+        assertTrue(names.contains("emailAddress"));
 
-            N.println(Beans.getPropNames(Account.class, N.toList("id", "gui")));
+        List<String> excludedByList = Beans.getPropNames(Account.class, CommonUtil.toList("id", "gui"));
+        assertFalse(excludedByList.contains("id"));
+        assertFalse(excludedByList.contains("gui"));
+        assertTrue(excludedByList.contains("emailAddress"));
 
-            N.println(Beans.getPropNames(Account.class, N.toSet("id", "gui")));
-        });
+        List<String> excludedBySet = Beans.getPropNames(Account.class, CommonUtil.toSet("id", "gui"));
+        assertFalse(excludedBySet.contains("id"));
+        assertFalse(excludedBySet.contains("gui"));
+        assertTrue(excludedBySet.contains("emailAddress"));
     }
 
     @Test
@@ -2013,7 +2052,7 @@ public class ClassUtilTest extends TestBase {
 
     // --- regression tests for 2026-06-10 deep-review fixes ---
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testForNameArrayForms() {
         // regression: arrays of plain classes hit a false "unresolvable component" guard, and the
         // array descriptor used getCanonicalName(), which breaks nested-class arrays
@@ -2022,10 +2061,81 @@ public class ClassUtilTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ClassUtil.forName("com.nonexistent.FooBarBaz[]"));
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     public void testFormatParameterizedTypeNameKeepsJavaLangSubpackages() {
         // regression: replace("java.lang.", "") also stripped the prefix of java.lang SUBPACKAGES
         org.junit.jupiter.api.Assertions.assertEquals("java.lang.reflect.Method", ClassUtil.formatParameterizedTypeName("java.lang.reflect.Method"));
         org.junit.jupiter.api.Assertions.assertEquals("String", ClassUtil.formatParameterizedTypeName("java.lang.String"));
+    }
+
+    /**
+     * Contract pin: the scan drops every class whose canonical name is {@code null} - anonymous and local classes,
+     * and an ordinary member class nested inside one of those - BEFORE the predicate is consulted, so a caller
+     * cannot opt back in. The javadoc now documents it.
+     */
+    @Test
+    public void testFindClassesInPackage_SkipsClassesWithoutCanonicalName() {
+        final Runnable anonymous = new Runnable() {
+            @Override
+            public void run() {
+                // nothing to do: this class exists only to be compiled into this package
+            }
+        };
+
+        class LocalHost {
+            class Inner {
+            }
+        }
+
+        final Class<?> anonymousClass = anonymous.getClass();
+
+        assertNull(anonymousClass.getCanonicalName());
+        assertNull(LocalHost.class.getCanonicalName());
+        assertNull(LocalHost.Inner.class.getCanonicalName());
+        assertEquals("com.landawn.abacus.util", anonymousClass.getPackage().getName());
+
+        final List<Class<?>> seenByPredicate = new ArrayList<>();
+        final List<Class<?>> found = ClassUtil.findClassesInPackage("com.landawn.abacus.util", false, true, cls -> {
+            seenByPredicate.add(cls);
+            return true;
+        });
+
+        assertFalse(found.contains(anonymousClass));
+        assertFalse(found.contains(LocalHost.class));
+        assertFalse(found.contains(LocalHost.Inner.class));
+
+        assertFalse(seenByPredicate.contains(anonymousClass));
+        assertFalse(seenByPredicate.contains(LocalHost.class));
+        assertFalse(seenByPredicate.contains(LocalHost.Inner.class));
+
+        assertEquals(0, found.stream().filter(cls -> cls.getCanonicalName() == null).count());
+        assertTrue(found.contains(ClassUtil.class));
+        assertTrue(found.contains(ClassUtilTest.class));
+
+        // the predicate-less overload delegates here, so it drops exactly the same classes - its javadoc says so
+        final List<Class<?>> foundWithoutPredicate = ClassUtil.findClassesInPackage("com.landawn.abacus.util", false, true);
+        assertEquals(0, foundWithoutPredicate.stream().filter(cls -> cls.getCanonicalName() == null).count());
+        assertFalse(foundWithoutPredicate.contains(anonymousClass));
+        assertFalse(foundWithoutPredicate.contains(LocalHost.class));
+        assertFalse(foundWithoutPredicate.contains(LocalHost.Inner.class));
+        assertTrue(foundWithoutPredicate.contains(ClassUtil.class));
+        assertEquals(found, foundWithoutPredicate);
+    }
+
+    /**
+     * Contract pin for the newly documented {@code @throws}: on JDK 9+ the failure this method propagates is
+     * {@link java.lang.reflect.InaccessibleObjectException}, not the {@code SecurityException} that used to be
+     * the only documented one ({@code java.util.regex} is opened to nobody, unlike {@code java.lang}).
+     */
+    @Test
+    public void testSetAccessible_ThrowsInaccessibleObjectExceptionWhenPackageNotOpen() throws Exception {
+        final Field field = java.util.regex.Pattern.class.getDeclaredField("pattern");
+        assertFalse(field.isAccessible());
+
+        assertThrows(java.lang.reflect.InaccessibleObjectException.class, () -> ClassUtil.setAccessible(field, true));
+
+        // the alternative named by the new tag answers false instead of throwing
+        assertFalse(ClassUtil.setAccessibleQuietly(field, true));
+        assertFalse(field.isAccessible());
     }
 }

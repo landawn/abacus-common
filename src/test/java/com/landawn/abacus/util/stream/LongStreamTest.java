@@ -1343,45 +1343,6 @@ public class LongStreamTest extends TestBase {
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, result, 0.001);
     }
 
-    // TODO: filter(LongPredicate) is abstract - tested via concrete implementations above
-    // TODO: takeWhile(LongPredicate) is abstract - tested via concrete implementations above
-    // TODO: dropWhile(LongPredicate) is abstract - tested via concrete implementations above
-    // TODO: map(LongUnaryOperator) is abstract - tested via concrete implementations above
-    // TODO: mapToInt(LongToIntFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToFloat(LongToFloatFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToDouble(LongToDoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToObj(LongFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMap(LongFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapArray(LongFunction<long[]>) is abstract - tested via concrete implementations above
-    // TODO: flatMapToInt(LongFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToFloat(LongFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToDouble(LongFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToObj(LongFunction) is abstract - tested via concrete implementations above
-    // TODO: flatmapToObj(LongFunction) is abstract - tested via concrete implementations above
-    // TODO: mapMulti(LongMapMultiConsumer) is abstract - tested via concrete implementations above
-    // TODO: mapPartial(LongFunction) is abstract - tested via concrete implementations above
-    // TODO: mapPartialJdk(LongFunction) is abstract - tested via concrete implementations above
-    // TODO: rangeMap(LongBiPredicate, LongBinaryOperator) is abstract - tested via concrete implementations above
-    // TODO: rangeMapToObj(LongBiPredicate, LongBiFunction) is abstract - tested via concrete implementations above
-    // TODO: collapse(...) overloads are abstract - tested via concrete implementations above
-    // TODO: scan(...) overloads are abstract - tested via concrete implementations above
-    // TODO: prepend(long...) is abstract - tested via concrete implementations above
-    // TODO: append(long...) is abstract - tested via concrete implementations above
-    // TODO: appendIfEmpty(long...) is abstract - tested via concrete implementations above
-    // TODO: top(...) overloads are abstract - tested via concrete implementations above
-    // TODO: toLongList() is abstract - tested via concrete implementations above
-    // TODO: toMap(...) overloads are abstract - tested via concrete implementations above
-    // TODO: groupTo(...) overloads are abstract - tested via concrete implementations above
-    // TODO: reduce(...) overloads are abstract - tested via concrete implementations above
-    // TODO: collect(...) overloads are abstract - tested via concrete implementations above
-    // TODO: forEach(Throwables.LongConsumer) is abstract - tested via concrete implementations above
-    // TODO: forEachIndexed(Throwables.IntLongConsumer) is abstract - tested via concrete implementations above
-    // TODO: anyMatch/allMatch/noneMatch are abstract - tested via concrete implementations above
-    // TODO: findFirst/findAny/findLast with predicate are abstract - tested via concrete implementations above
-    // TODO: min/max/kthLargest/sum/average/summaryStatistics are abstract - tested via concrete implementations above
-    // TODO: mergeWith/zipWith overloads are abstract - tested via concrete implementations above
-    // TODO: asFloatStream/asDoubleStream/boxed/toJdkStream are abstract - tested via concrete implementations above
-
     @Test
     public void testFlattMap() {
         // flattMap uses JDK LongStream
@@ -1755,13 +1716,6 @@ public class LongStreamTest extends TestBase {
         LongStream stream = LongStream.of(iter);
         assertArrayEquals(new long[] { 1L, 2L, 3L }, stream.toArray());
     }
-
-    //    @Test
-    //    public void testOfJavaStream() {
-    //        java.util.stream.LongStream javaStream = java.util.stream.LongStream.of(10L, 20L, 30L);
-    //        LongStream stream = LongStream.of(javaStream);
-    //        assertArrayEquals(new long[] { 10L, 20L, 30L }, stream.toArray());
-    //    }
 
     //
 
@@ -3350,7 +3304,7 @@ public class LongStreamTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> LongStream.interval(0, 0, TimeUnit.MILLISECONDS));
         assertThrows(IllegalArgumentException.class, () -> LongStream.interval(0, -1, TimeUnit.MILLISECONDS));
         assertThrows(IllegalArgumentException.class, () -> LongStream.interval(0, 1, TimeUnit.NANOSECONDS));
-        assertThrows(NullPointerException.class, () -> LongStream.interval(0, 1, null));
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> LongStream.interval(0, 1, null)).getMessage().contains("unit"));
     }
 
     @Test

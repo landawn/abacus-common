@@ -21,7 +21,7 @@ import com.landawn.abacus.TestBase;
 
 public class JoinedByTest extends TestBase {
 
-    static class TestEntity {
+    public static class TestEntity {
         @JoinedBy
         private Object field1;
 

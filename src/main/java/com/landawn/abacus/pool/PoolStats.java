@@ -65,8 +65,10 @@ package com.landawn.abacus.pool;
  * @param hitCount the number of successful get/poll operations (object was found)
  * @param missCount the number of unsuccessful get/poll operations (object not found or pool empty)
  * @param evictionCount the total number of objects evicted from the pool
- * @param maxMemory the maximum memory size in bytes (-1 if no memory limit)
- * @param dataSize the current total size of data in bytes (-1 if memory tracking is disabled)
+ * @param maxMemory the maximum memory size in bytes (-1 if no memory limit is configured)
+ * @param dataSize the current total size of data in bytes (-1 if no memory measure is configured, i.e.
+ *        memory is not tracked). A pool with a memory measure but no limit reports its data size
+ *        together with {@code maxMemory == -1}.
  *
  * @see Pool#stats()
  * @see ObjectPool
@@ -86,10 +88,12 @@ public record PoolStats(int capacity, int size, long putCount, long getCount, lo
      * @param missCount the number of unsuccessful get/poll operations
      * @param evictionCount the total number of objects evicted from the pool
      * @param maxMemory the maximum memory size in bytes, or {@code -1} if no memory limit is configured
-     * @param dataSize the current total data size in bytes, or {@code -1} if memory tracking is disabled
-     * @throws IllegalArgumentException if capacity, size, or an operation count is negative; if size exceeds capacity;
-     *             if hit and miss counts do not sum to the get count; or if the memory values are below {@code -1} or
-     *             do not consistently use {@code -1} to indicate disabled memory tracking
+     * @param dataSize the current total data size in bytes, or {@code -1} if memory is not tracked (no memory
+     *        measure configured); may be non-negative while {@code maxMemory} is {@code -1}
+     * @throws IllegalArgumentException if capacity, size, or an operation count is negative; if size exceeds
+     *             capacity; if hit and miss counts do not sum to the get count; if a memory value is below
+     *             {@code -1}; or when a memory limit is present ({@code maxMemory != -1}) while {@code dataSize}
+     *             is {@code -1} (a limit implies tracking)
      */
     public PoolStats {
         if (capacity < 0) {
@@ -112,8 +116,10 @@ public record PoolStats(int capacity, int size, long putCount, long getCount, lo
             throw new IllegalArgumentException("maxMemory and dataSize must be -1 or non-negative: " + maxMemory + ", " + dataSize);
         }
 
-        if ((maxMemory == -1) != (dataSize == -1)) {
-            throw new IllegalArgumentException("maxMemory and dataSize must both be -1 when memory tracking is disabled");
+        // A limit implies tracking, but not the converse: a pool with a memory measure and no limit
+        // reports maxMemory == -1 together with a real dataSize.
+        if (maxMemory != -1 && dataSize == -1) {
+            throw new IllegalArgumentException("dataSize must not be -1 when a memory limit is configured: maxMemory=" + maxMemory);
         }
     }
 

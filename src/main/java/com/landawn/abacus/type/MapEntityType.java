@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.type;
 
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.Strings;
 
@@ -99,14 +100,18 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
+     * <p>A {@code MapEntity} whose entity name is empty is written with an empty key, as {@code {"": {...}}},
+     * and {@link #valueOf(String)} reads that form back into an entity whose name is the empty string.</p>
+     *
      * @param x the {@code MapEntity} object to convert, may be {@code null}
      * @return the JSON string representation of the {@code MapEntity},
      *         or {@code null} if the input is {@code null}
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final MapEntity x) {
+    public String stringOf(final MapEntity x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
 
@@ -119,12 +124,18 @@ public class MapEntityType extends AbstractType<MapEntity> {
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the JSON string to parse, may be {@code null} or blank
-     * @return the parsed {@code MapEntity} object, or {@code null} if the input is {@code null} or blank
+     * @return the parsed {@code MapEntity} object, or {@code null} if the input is {@code null} or blank, or if
+     *         it is the empty object {@code "{}"} (no entity name token at all). An empty <i>quoted</i> name
+     *         ({@code {"": {...}}}, the form {@link #stringOf(MapEntity)} produces for an entity without a name)
+     *         yields an entity whose name is the empty string.
+     * @throws ParsingException if the entity name token is missing rather than empty (for example {@code {{"id": 1}}})
+     *         or the string is not a valid {@code MapEntity} document
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(MapEntity)
      */
     @Override
-    public MapEntity valueOf(final String str) {
+    public MapEntity valueOf(final String str) throws ParsingException, RuntimeException {
         return Strings.isBlank(str) ? null : Utils.jsonParser.deserialize(str, Utils.jdc, MapEntity.class);
     }
 }

@@ -236,6 +236,12 @@ import com.landawn.abacus.util.u.Optional;
  * <br />
  * <br />
  *
+ * <p><b>Null arguments.</b> Every operation rejects a {@code null} function argument &mdash; mapper,
+ * predicate, comparator, collector, supplier or action &mdash; with an
+ * {@link IllegalArgumentException} naming the parameter, not the {@link NullPointerException}
+ * {@code java.util.stream} would throw, and the stream is <b>closed</b> before the exception
+ * propagates. This holds whether or not the individual method's javadoc repeats it.
+ *
  * @param <K> the type of the keys in the entries of the stream
  * @param <V> the type of the values in the entries of the stream
  *
@@ -300,6 +306,11 @@ public final class EntryStream<K, V> extends
      * Returns a stream consisting of the keys from the entries in this EntryStream.
      * This is an intermediate operation.
      *
+     * <p>When this stream was created from a {@code Map}, the returned stream is a live view of that
+     * map's {@code keySet()}: it never consumes this {@code EntryStream}, and closing it closes this one.
+     * Later map mutations are visible (and may throw {@code ConcurrentModificationException}).
+     * For a non-map source, {@code keys()} maps this stream and shares its one-shot consumption.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> keys = EntryStream.of("a", 1, "b", 2, "c", 3)
@@ -337,6 +348,11 @@ public final class EntryStream<K, V> extends
     /**
      * Returns a stream consisting of the values from the entries in this EntryStream.
      * This is an intermediate operation.
+     *
+     * <p>When this stream was created from a {@code Map}, the returned stream is a live view of that
+     * map's {@code values()} collection: it never consumes this {@code EntryStream}, and closing it closes
+     * this one. Later map mutations are visible (and may throw {@code ConcurrentModificationException}).
+     * For a non-map source, {@code values()} maps this stream and shares its one-shot consumption.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -422,7 +438,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public EntryStream<V, K> inverted() {
+    public EntryStream<V, K> inverted() throws IllegalStateException {
         _stream.assertNotClosed();
 
         final Function<Map.Entry<K, V>, Map.Entry<V, K>> mapper = Fn.invert();
@@ -462,8 +478,10 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <KK> EntryStream<KK, V> selectByKey(final Class<KK> clazz) {
+    public <KK> EntryStream<KK, V> selectByKey(final Class<KK> clazz) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
+
+        checkArgNotNull(clazz, cs.clazz);
 
         if (isParallel()) {
             //noinspection resource
@@ -502,8 +520,10 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <VV> EntryStream<K, VV> selectByValue(final Class<VV> clazz) {
+    public <VV> EntryStream<K, VV> selectByValue(final Class<VV> clazz) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
+
+        checkArgNotNull(clazz, cs.clazz);
 
         if (isParallel()) {
             //noinspection resource
@@ -533,7 +553,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#filter(Predicate)
      */
     @Override
-    public EntryStream<K, V> filter(final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalArgumentException {
+    public EntryStream<K, V> filter(final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -563,7 +583,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public EntryStream<K, V> filter(final BiPredicate<? super K, ? super V> predicate) throws IllegalArgumentException {
+    public EntryStream<K, V> filter(final BiPredicate<? super K, ? super V> predicate) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -595,7 +615,7 @@ public final class EntryStream<K, V> extends
      */
     @Override
     public EntryStream<K, V> filter(final Predicate<? super Map.Entry<K, V>> predicate, final Consumer<? super Map.Entry<K, V>> onDrop)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -630,7 +650,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public EntryStream<K, V> filterByKey(final Predicate<? super K> keyPredicate) throws IllegalArgumentException {
+    public EntryStream<K, V> filterByKey(final Predicate<? super K> keyPredicate) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyPredicate, cs.keyPredicate);
@@ -666,7 +686,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public EntryStream<K, V> filterByValue(final Predicate<? super V> valuePredicate) throws IllegalArgumentException {
+    public EntryStream<K, V> filterByValue(final Predicate<? super V> valuePredicate) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(valuePredicate, cs.valuePredicate);
@@ -698,11 +718,13 @@ public final class EntryStream<K, V> extends
      * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
      * │                 │ (predicate false)       │ individually satisfy the predicate                             │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * │ dropWhile (+    │ first unmatched         │ prefix boundary is preserved: only the leading run is          │
+     * │ onDrop)         │ (predicate false)       │ dropped (predicate checks are serialized). Downstream          │
+     * │                 │                         │ encounter order is unspecified                                 │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * │ skipUntil       │ first matched           │ prefix boundary is preserved: only the leading run is          │
+     * │                 │ (predicate true)        │ skipped (it is dropWhile(not predicate)). Downstream           │
+     * │                 │                         │ encounter order is unspecified                                 │
      * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
      * </pre>
      *
@@ -724,7 +746,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#takeWhile(Predicate)
      */
     @Override
-    public EntryStream<K, V> takeWhile(final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalArgumentException {
+    public EntryStream<K, V> takeWhile(final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -754,11 +776,13 @@ public final class EntryStream<K, V> extends
      * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
      * │                 │ (predicate false)       │ individually satisfy the predicate                             │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * │ dropWhile (+    │ first unmatched         │ prefix boundary is preserved: only the leading run is          │
+     * │ onDrop)         │ (predicate false)       │ dropped (predicate checks are serialized). Downstream          │
+     * │                 │                         │ encounter order is unspecified                                 │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * │ skipUntil       │ first matched           │ prefix boundary is preserved: only the leading run is          │
+     * │                 │ (predicate true)        │ skipped (it is dropWhile(not predicate)). Downstream           │
+     * │                 │                         │ encounter order is unspecified                                 │
      * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
      * </pre>
      *
@@ -783,7 +807,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public EntryStream<K, V> takeWhile(final BiPredicate<? super K, ? super V> predicate) throws IllegalArgumentException {
+    public EntryStream<K, V> takeWhile(final BiPredicate<? super K, ? super V> predicate) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -802,11 +826,10 @@ public final class EntryStream<K, V> extends
      * operation that preserves encounter order in sequential streams.
      *
      * <p><b>Notes on parallel streams:</b><br>
-     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
-     * the predicate returns {@code false}) may still be processed and dropped if they individually
-     * satisfy the predicate.<br>
-     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
-     * is no guarantee of encounter-order prefix/suffix semantics.
+     * In a parallel stream the prefix boundary is still honoured: each element is taken from the shared
+     * cursor and tested under the same lock, so only the leading run of matching elements is dropped and
+     * the first unmatched element is always retained.<br>
+     * ⚠️ What parallel execution does not preserve is the encounter order of the retained elements.
      *
      * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
      * <pre>
@@ -816,11 +839,13 @@ public final class EntryStream<K, V> extends
      * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
      * │                 │ (predicate false)       │ individually satisfy the predicate                             │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * │ dropWhile (+    │ first unmatched         │ prefix boundary is preserved: only the leading run is          │
+     * │ onDrop)         │ (predicate false)       │ dropped (predicate checks are serialized). Downstream          │
+     * │                 │                         │ encounter order is unspecified                                 │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * │ skipUntil       │ first matched           │ prefix boundary is preserved: only the leading run is          │
+     * │                 │ (predicate true)        │ skipped (it is dropWhile(not predicate)). Downstream           │
+     * │                 │                         │ encounter order is unspecified                                 │
      * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
      * </pre>
      *
@@ -842,7 +867,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#dropWhile(Predicate)
      */
     @Override
-    public EntryStream<K, V> dropWhile(final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalArgumentException {
+    public EntryStream<K, V> dropWhile(final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -860,28 +885,14 @@ public final class EntryStream<K, V> extends
      * returns {@code false}, effectively performing a "drop while condition is true"
      * operation that preserves encounter order in sequential streams.
      *
-     * <p><b>Notes on parallel streams:</b><br>
-     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
-     * the predicate returns {@code false}) may still be processed and dropped if they individually
-     * satisfy the predicate.<br>
-     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
-     * is no guarantee of encounter-order prefix/suffix semantics.
+     * <p><b>Notes on parallel streams:</b> Only the leading matching prefix is dropped.
+     * The first non-matching entry and all later entries are retained, but their output order
+     * is not guaranteed to match the source encounter order.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
-     * <pre>
-     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
-     * │     Method      │        Boundary         │                            Warning                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
-     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
-     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
-     * </pre>
+     * <p>In parallel streams, {@code takeWhile} may include later matching entries.
+     * {@code dropWhile} (including its {@code onDrop} overload) drops only the leading matching
+     * prefix, and {@code skipUntil} retains the first matching entry and all later entries.
+     * These operations do not guarantee the output encounter order in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -904,7 +915,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public EntryStream<K, V> dropWhile(final BiPredicate<? super K, ? super V> predicate) throws IllegalArgumentException {
+    public EntryStream<K, V> dropWhile(final BiPredicate<? super K, ? super V> predicate) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -923,31 +934,17 @@ public final class EntryStream<K, V> extends
      * returns {@code false}, effectively performing a "drop while condition is true"
      * operation that preserves encounter order in sequential streams.
      *
-     * <p><b>Notes on parallel streams:</b><br>
-     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
-     * the predicate returns {@code false}) may still be processed and dropped if they individually
-     * satisfy the predicate.<br>
-     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
-     * is no guarantee of encounter-order prefix/suffix semantics.
+     * <p><b>Notes on parallel streams:</b> Only the leading matching prefix is dropped.
+     * The first non-matching entry and all later entries are retained, but their output order
+     * is not guaranteed to match the source encounter order.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
-     * <pre>
-     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
-     * │     Method      │        Boundary         │                            Warning                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
-     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
-     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
-     * </pre>
+     * <p>In parallel streams, {@code takeWhile} may include later matching entries.
+     * {@code dropWhile} (including its {@code onDrop} overload) drops only the leading matching
+     * prefix, and {@code skipUntil} retains the first matching entry and all later entries.
+     * These operations do not guarantee the output encounter order in parallel.
      *
-     * <p>In parallel streams, the action may be performed concurrently for multiple dropped elements.
-     * The implementation should ensure the action is thread-safe when used with parallel streams.</p>
+     * <p>Predicate checks and {@code onDrop} calls for the leading prefix are serialized, even
+     * in parallel streams.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -970,7 +967,7 @@ public final class EntryStream<K, V> extends
      */
     @Override
     public EntryStream<K, V> dropWhile(final Predicate<? super Map.Entry<K, V>> predicate, final Consumer<? super Map.Entry<K, V>> onDrop)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -985,29 +982,13 @@ public final class EntryStream<K, V> extends
      * element satisfies the predicate, that element and all subsequent elements are
      * included without further predicate checks. This is an intermediate operation.
      *
-     * <p><b>Notes on parallel streams:</b><br>
-     * ⚠️ In a parallel stream, elements after the first matched element (the first element for which
-     * the predicate returns {@code true}) may still be processed and skipped if they do not satisfy
-     * the predicate.<br>
-     * For sequential or ordered streams the operation is deterministic — elements are skipped until the
-     * first element for which the predicate returns {@code true}, and the rest are passed through
-     * unchanged; in unordered parallel streams the result may appear unintuitive.
+     * <p><b>Notes on parallel streams:</b> The first matching entry and all later entries are
+     * retained, but their output order is not guaranteed to match the source encounter order.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
-     * <pre>
-     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
-     * │     Method      │        Boundary         │                            Warning                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
-     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
-     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
-     * </pre>
+     * <p>In parallel streams, {@code takeWhile} may include later matching entries.
+     * {@code dropWhile} (including its {@code onDrop} overload) drops only the leading matching
+     * prefix, and {@code skipUntil} retains the first matching entry and all later entries.
+     * These operations do not guarantee the output encounter order in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1025,7 +1006,7 @@ public final class EntryStream<K, V> extends
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public EntryStream<K, V> skipUntil(final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalArgumentException {
+    public EntryStream<K, V> skipUntil(final Predicate<? super Map.Entry<K, V>> predicate) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1039,29 +1020,13 @@ public final class EntryStream<K, V> extends
      * element satisfies the predicate, that element and all subsequent elements are
      * included without further predicate checks. This is an intermediate operation.
      *
-     * <p><b>Notes on parallel streams:</b><br>
-     * ⚠️ In a parallel stream, elements after the first matched element (the first element for which
-     * the predicate returns {@code true}) may still be processed and skipped if they do not satisfy
-     * the predicate.<br>
-     * For sequential or ordered streams the operation is deterministic — elements are skipped until the
-     * first element for which the predicate returns {@code true}, and the rest are passed through
-     * unchanged; in unordered parallel streams the result may appear unintuitive.
+     * <p><b>Notes on parallel streams:</b> The first matching entry and all later entries are
+     * retained, but their output order is not guaranteed to match the source encounter order.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
-     * <pre>
-     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
-     * │     Method      │        Boundary         │                            Warning                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
-     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
-     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
-     * </pre>
+     * <p>In parallel streams, {@code takeWhile} may include later matching entries.
+     * {@code dropWhile} (including its {@code onDrop} overload) drops only the leading matching
+     * prefix, and {@code skipUntil} retains the first matching entry and all later entries.
+     * These operations do not guarantee the output encounter order in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1083,7 +1048,7 @@ public final class EntryStream<K, V> extends
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public EntryStream<K, V> skipUntil(final BiPredicate<? super K, ? super V> predicate) throws IllegalArgumentException {
+    public EntryStream<K, V> skipUntil(final BiPredicate<? super K, ? super V> predicate) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1118,7 +1083,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> map(final Function<? super Map.Entry<K, V>, ? extends Map.Entry<? extends KK, ? extends VV>> mapper)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1157,7 +1122,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> map(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
-            final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper) throws IllegalArgumentException {
+            final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1196,7 +1161,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> map(final BiFunction<? super K, ? super V, ? extends Map.Entry<? extends KK, ? extends VV>> mapper)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1236,7 +1201,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> map(final BiFunction<? super K, ? super V, ? extends KK> keyMapper,
-            final BiFunction<? super K, ? super V, ? extends VV> valueMapper) throws IllegalArgumentException {
+            final BiFunction<? super K, ? super V, ? extends VV> valueMapper) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1257,7 +1222,7 @@ public final class EntryStream<K, V> extends
      * <pre>{@code
      * Map<String, Integer> map = Map.of("a", 2, "b", 3);
      * Map<String, Integer> result = EntryStream.of(map)
-     *                                           .mapMulti((entry, consumer) -> {
+     *                                           .<String, Integer> mapMulti((entry, consumer) -> {
      *                                               for (int i = 0; i < entry.getValue(); i++) {
      *                                                   consumer.accept(new SimpleImmutableEntry<>(
      *                                                       entry.getKey() + i, i
@@ -1281,7 +1246,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> mapMulti(final BiConsumer<? super Map.Entry<K, V>, ? super Consumer<Map.Entry<KK, VV>>> mapper)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1319,7 +1284,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> mapPartial(final Function<? super Map.Entry<K, V>, Optional<Map.Entry<? extends KK, ? extends VV>>> mapper)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1357,7 +1322,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> mapPartial(final BiFunction<? super K, ? super V, Optional<Map.Entry<? extends KK, ? extends VV>>> mapper)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1373,7 +1338,7 @@ public final class EntryStream<K, V> extends
      * <pre>{@code
      * Map<String, Integer> map = Map.of("hello", 1, "world", 2);
      * Map<String, Integer> result = EntryStream.of(map)
-     *                                           .mapKey(String::toUpperCase)
+     *                                           .mapKey(k -> k.toUpperCase())
      *                                           .toMap();   // returns {"HELLO"=1, "WORLD"=2}
      * }</pre>
      *
@@ -1391,7 +1356,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <KK> EntryStream<KK, V> mapKey(final Function<? super K, ? extends KK> keyMapper) throws IllegalArgumentException {
+    public <KK> EntryStream<KK, V> mapKey(final Function<? super K, ? extends KK> keyMapper) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1428,7 +1393,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <KK> EntryStream<KK, V> mapKey(final BiFunction<? super K, ? super V, ? extends KK> keyMapper) throws IllegalArgumentException {
+    public <KK> EntryStream<KK, V> mapKey(final BiFunction<? super K, ? super V, ? extends KK> keyMapper)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1465,7 +1431,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <VV> EntryStream<K, VV> mapValue(final Function<? super V, ? extends VV> valueMapper) throws IllegalArgumentException {
+    public <VV> EntryStream<K, VV> mapValue(final Function<? super V, ? extends VV> valueMapper) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(valueMapper, cs.valueMapper);
@@ -1502,7 +1468,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <VV> EntryStream<K, VV> mapValue(final BiFunction<? super K, ? super V, ? extends VV> valueMapper) throws IllegalArgumentException {
+    public <VV> EntryStream<K, VV> mapValue(final BiFunction<? super K, ? super V, ? extends VV> valueMapper)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(valueMapper, cs.valueMapper);
@@ -1546,7 +1513,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <KK> EntryStream<KK, V> mapKeyPartial(final Function<? super K, Optional<KK>> keyMapper) throws IllegalArgumentException { //NOSONAR
+    public <KK> EntryStream<KK, V> mapKeyPartial(final Function<? super K, Optional<KK>> keyMapper) throws IllegalStateException, IllegalArgumentException { //NOSONAR
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1597,7 +1564,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <KK> EntryStream<KK, V> mapKeyPartial(final BiFunction<? super K, ? super V, Optional<KK>> keyMapper) throws IllegalArgumentException { //NOSONAR
+    public <KK> EntryStream<KK, V> mapKeyPartial(final BiFunction<? super K, ? super V, Optional<KK>> keyMapper)
+            throws IllegalStateException, IllegalArgumentException { //NOSONAR
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1652,7 +1620,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <VV> EntryStream<K, VV> mapValuePartial(final Function<? super V, Optional<VV>> valueMapper) throws IllegalArgumentException { //NOSONAR
+    public <VV> EntryStream<K, VV> mapValuePartial(final Function<? super V, Optional<VV>> valueMapper) throws IllegalStateException, IllegalArgumentException { //NOSONAR
         _stream.assertNotClosed();
 
         checkArgNotNull(valueMapper, cs.valueMapper);
@@ -1703,7 +1671,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <VV> EntryStream<K, VV> mapValuePartial(final BiFunction<? super K, ? super V, Optional<VV>> valueMapper) throws IllegalArgumentException { //NOSONAR
+    public <VV> EntryStream<K, VV> mapValuePartial(final BiFunction<? super K, ? super V, Optional<VV>> valueMapper)
+            throws IllegalStateException, IllegalArgumentException { //NOSONAR
         _stream.assertNotClosed();
 
         checkArgNotNull(valueMapper, cs.valueMapper);
@@ -1768,7 +1737,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> flatMap(final Function<? super Map.Entry<K, V>, ? extends EntryStream<? extends KK, ? extends VV>> mapper)
-            throws IllegalArgumentException { //NOSONAR
+            throws IllegalStateException, IllegalArgumentException { //NOSONAR
         _stream.assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1808,7 +1777,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> flatMap(final BiFunction<? super K, ? super V, ? extends EntryStream<? extends KK, ? extends VV>> mapper)
-            throws IllegalArgumentException { //NOSONAR
+            throws IllegalStateException, IllegalArgumentException { //NOSONAR
         _stream.assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1858,7 +1827,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> flatmap(final Function<? super Map.Entry<K, V>, ? extends Map<? extends KK, ? extends VV>> mapper)
-            throws IllegalArgumentException { //NOSONAR
+            throws IllegalStateException, IllegalArgumentException { //NOSONAR
         _stream.assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1903,7 +1872,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> flatmap(final BiFunction<? super K, ? super V, ? extends Map<? extends KK, ? extends VV>> mapper)
-            throws IllegalArgumentException { //NOSONAR
+            throws IllegalStateException, IllegalArgumentException { //NOSONAR
         _stream.assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1955,7 +1924,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> flattMap(
-            final Function<? super Map.Entry<K, V>, ? extends Stream<? extends Map.Entry<? extends KK, ? extends VV>>> mapper) throws IllegalArgumentException {
+            final Function<? super Map.Entry<K, V>, ? extends Stream<? extends Map.Entry<? extends KK, ? extends VV>>> mapper)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1998,7 +1968,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @Beta
     public <KK, VV> EntryStream<KK, VV> flattMap(
-            final BiFunction<? super K, ? super V, ? extends Stream<? extends Map.Entry<? extends KK, ? extends VV>>> mapper) throws IllegalArgumentException {
+            final BiFunction<? super K, ? super V, ? extends Stream<? extends Map.Entry<? extends KK, ? extends VV>>> mapper)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -2037,7 +2008,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <KK> EntryStream<KK, V> flatMapKey(final Function<? super K, ? extends Stream<? extends KK>> keyMapper) throws IllegalArgumentException {
+    public <KK> EntryStream<KK, V> flatMapKey(final Function<? super K, ? extends Stream<? extends KK>> keyMapper)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -2082,7 +2054,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK> EntryStream<KK, V> flatMapKey(final BiFunction<? super K, ? super V, ? extends Stream<? extends KK>> keyMapper)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -2124,7 +2096,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <KK> EntryStream<KK, V> flatmapKey(final Function<? super K, ? extends Collection<? extends KK>> keyMapper) throws IllegalArgumentException { //NOSONAR
+    public <KK> EntryStream<KK, V> flatmapKey(final Function<? super K, ? extends Collection<? extends KK>> keyMapper)
+            throws IllegalStateException, IllegalArgumentException { //NOSONAR
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -2165,7 +2138,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <KK> EntryStream<KK, V> flatmapKey(final BiFunction<? super K, ? super V, ? extends Collection<? extends KK>> keyMapper)
-            throws IllegalArgumentException { //NOSONAR
+            throws IllegalStateException, IllegalArgumentException { //NOSONAR
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -2207,7 +2180,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <VV> EntryStream<K, VV> flatMapValue(final Function<? super V, ? extends Stream<? extends VV>> valueMapper) throws IllegalArgumentException {
+    public <VV> EntryStream<K, VV> flatMapValue(final Function<? super V, ? extends Stream<? extends VV>> valueMapper)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(valueMapper, cs.valueMapper);
@@ -2252,7 +2226,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <VV> EntryStream<K, VV> flatMapValue(final BiFunction<? super K, ? super V, ? extends Stream<? extends VV>> valueMapper)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(valueMapper, cs.valueMapper);
@@ -2294,7 +2268,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <VV> EntryStream<K, VV> flatmapValue(final Function<? super V, ? extends Collection<? extends VV>> valueMapper) throws IllegalArgumentException { //NOSONAR
+    public <VV> EntryStream<K, VV> flatmapValue(final Function<? super V, ? extends Collection<? extends VV>> valueMapper)
+            throws IllegalStateException, IllegalArgumentException { //NOSONAR
         _stream.assertNotClosed();
 
         checkArgNotNull(valueMapper, cs.valueMapper);
@@ -2335,7 +2310,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     public <VV> EntryStream<K, VV> flatmapValue(final BiFunction<? super K, ? super V, ? extends Collection<? extends VV>> valueMapper)
-            throws IllegalArgumentException { //NOSONAR
+            throws IllegalStateException, IllegalArgumentException { //NOSONAR
         _stream.assertNotClosed();
 
         checkArgNotNull(valueMapper, cs.valueMapper);
@@ -2377,7 +2352,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     @TerminalOpTriggered
-    public EntryStream<K, List<V>> groupBy() {
+    public EntryStream<K, List<V>> groupBy() throws IllegalStateException {
         _stream.assertNotClosed();
 
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
@@ -2403,11 +2378,16 @@ public final class EntryStream<K, V> extends
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntryStream.of("a", 1, "b", 2, "a", 3, "b", 4)
-     *     .groupBy(HashMap::new)
+     *     .groupBy(() -> new HashMap<String, List<Integer>>())
      *     .toMap();
      * // Result: {a=[1, 3], b=[2, 4]}
-     * // HashMap::new controls the intermediate grouping map; toMap() creates the returned map.
+     * // The supplier controls the intermediate grouping map; toMap() creates the returned map.
      * }</pre>
+     *
+     * <p><b>Note:</b> supply {@code mapFactory} as a lambda, not as the constructor reference
+     * {@code HashMap::new}. A constructor reference is <i>inexact</i>, so the compiler cannot choose
+     * between this overload and {@link #groupBy(BinaryOperator)} and reports
+     * {@code reference to groupBy is ambiguous}.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
@@ -2421,7 +2401,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     @TerminalOpTriggered
-    public EntryStream<K, List<V>> groupBy(final Supplier<? extends Map<K, List<V>>> mapFactory) throws IllegalArgumentException {
+    public EntryStream<K, List<V>> groupBy(final Supplier<? extends Map<K, List<V>>> mapFactory) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapFactory, cs.mapFactory);
@@ -2469,7 +2449,7 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public <KK, VV> EntryStream<KK, List<VV>> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
-            final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper) throws IllegalArgumentException {
+            final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -2517,7 +2497,7 @@ public final class EntryStream<K, V> extends
     @TerminalOpTriggered
     public <KK, VV> EntryStream<KK, List<VV>> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper, final Supplier<? extends Map<KK, List<VV>>> mapFactory)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -2548,12 +2528,13 @@ public final class EntryStream<K, V> extends
      * @param downstream the collector to use for grouping the entries
      * @return a new EntryStream with keys and their associated collected results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code downstream} is {@code null}
      * @see Stream#groupBy(Function, Collector)
      */
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
-    public <D> EntryStream<K, D> groupBy(final Collector<? super Map.Entry<K, V>, ?, D> downstream) {
+    public <D> EntryStream<K, D> groupBy(final Collector<? super Map.Entry<K, V>, ?, D> downstream) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
@@ -2594,7 +2575,7 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public <D> EntryStream<K, D> groupBy(final Collector<? super Map.Entry<K, V>, ?, D> downstream, final Supplier<? extends Map<K, D>> mapFactory)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapFactory, cs.mapFactory);
@@ -2638,7 +2619,7 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public <KK, D> EntryStream<KK, D> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
-            final Collector<? super Map.Entry<K, V>, ?, D> downstream) throws IllegalArgumentException {
+            final Collector<? super Map.Entry<K, V>, ?, D> downstream) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -2683,7 +2664,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public <KK, D> EntryStream<KK, D> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
-            final Collector<? super Map.Entry<K, V>, ?, D> downstream, final Supplier<? extends Map<KK, D>> mapFactory) throws IllegalArgumentException {
+            final Collector<? super Map.Entry<K, V>, ?, D> downstream, final Supplier<? extends Map<KK, D>> mapFactory)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -2720,7 +2702,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     @TerminalOpTriggered
-    public EntryStream<K, V> groupBy(final BinaryOperator<V> mergeFunction) throws IllegalArgumentException {
+    public EntryStream<K, V> groupBy(final BinaryOperator<V> mergeFunction) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mergeFunction, cs.mergeFunction);
@@ -2749,7 +2731,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntryStream.of("a", 1, "b", 2, "a", 3, "b", 4)
-     *     .groupBy(Integer::sum, TreeMap::new)
+     *     .groupBy(Integer::sum, Suppliers.ofTreeMap())
      *     .toMap();
      * // Result: {a=4, b=6}
      * // TreeMap::new controls the intermediate grouping order; toMap() creates the returned map.
@@ -2767,7 +2749,8 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     @TerminalOpTriggered
-    public EntryStream<K, V> groupBy(final BinaryOperator<V> mergeFunction, final Supplier<? extends Map<K, V>> mapFactory) throws IllegalArgumentException {
+    public EntryStream<K, V> groupBy(final BinaryOperator<V> mergeFunction, final Supplier<? extends Map<K, V>> mapFactory)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mergeFunction, cs.mergeFunction);
@@ -2823,7 +2806,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public <KK, VV> EntryStream<KK, VV> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
-            final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper, final BinaryOperator<VV> mergeFunction) throws IllegalArgumentException {
+            final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper, final BinaryOperator<VV> mergeFunction)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -2875,7 +2859,7 @@ public final class EntryStream<K, V> extends
     @TerminalOpTriggered
     public <KK, VV> EntryStream<KK, VV> groupBy(final Function<? super Map.Entry<K, V>, ? extends KK> keyMapper,
             final Function<? super Map.Entry<K, V>, ? extends VV> valueMapper, final BinaryOperator<VV> mergeFunction,
-            final Supplier<? extends Map<KK, VV>> mapFactory) throws IllegalArgumentException {
+            final Supplier<? extends Map<KK, VV>> mapFactory) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -2917,7 +2901,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @IntermediateOp
-    public Stream<List<V>> collapseByKey(final BiPredicate<? super K, ? super K> collapsible) throws IllegalArgumentException {
+    public Stream<List<V>> collapseByKey(final BiPredicate<? super K, ? super K> collapsible) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(collapsible, cs.collapsible);
@@ -2954,17 +2938,18 @@ public final class EntryStream<K, V> extends
      * @param collector the collector to collect the mapped values
      * @return a new Stream with the collapsed and collected results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code collapsible} or {@code mapper} is {@code null}.
+     * @throws IllegalArgumentException if {@code collapsible}, {@code mapper}, or {@code collector} is {@code null}.
      * @see Stream#collapse(BiPredicate, Collector)
      */
     @SequentialOnly
     @IntermediateOp
     public <U, R> Stream<R> collapseByKey(final BiPredicate<? super K, ? super K> collapsible, final Function<? super Map.Entry<K, V>, U> mapper,
-            final Collector<? super U, ?, R> collector) throws IllegalArgumentException {
+            final Collector<? super U, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(collapsible, cs.collapsible);
         checkArgNotNull(mapper, cs.mapper);
+        checkArgNotNull(collector, cs.collector);
 
         final BiPredicate<? super Map.Entry<K, V>, ? super Map.Entry<K, V>> collapsible2 = (t, u) -> collapsible.test(t.getKey(), u.getKey());
 
@@ -3002,7 +2987,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @IntermediateOp
-    public Stream<List<K>> collapseByValue(final BiPredicate<? super V, ? super V> collapsible) throws IllegalArgumentException {
+    public Stream<List<K>> collapseByValue(final BiPredicate<? super V, ? super V> collapsible) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(collapsible, cs.collapsible);
@@ -3039,17 +3024,18 @@ public final class EntryStream<K, V> extends
      * @param collector the collector to collect the mapped values
      * @return a new Stream with the collapsed and collected results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code collapsible} or {@code mapper} is {@code null}.
+     * @throws IllegalArgumentException if {@code collapsible}, {@code mapper}, or {@code collector} is {@code null}.
      * @see Stream#collapse(BiPredicate, Collector)
      */
     @SequentialOnly
     @IntermediateOp
     public <U, R> Stream<R> collapseByValue(final BiPredicate<? super V, ? super V> collapsible, final Function<? super Map.Entry<K, V>, U> mapper,
-            final Collector<? super U, ?, R> collector) throws IllegalArgumentException {
+            final Collector<? super U, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(collapsible, cs.collapsible);
         checkArgNotNull(mapper, cs.mapper);
+        checkArgNotNull(collector, cs.collector);
 
         final BiPredicate<? super Map.Entry<K, V>, ? super Map.Entry<K, V>> collapsible2 = (t, u) -> collapsible.test(t.getValue(), u.getValue());
 
@@ -3081,7 +3067,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @IntermediateOp
-    public Stream<List<Map.Entry<K, V>>> split(final int chunkSize) {
+    public Stream<List<Map.Entry<K, V>>> split(final int chunkSize) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return _stream.split(chunkSize);
@@ -3097,16 +3083,19 @@ public final class EntryStream<K, V> extends
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntryStream.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5)
-     *     .split(2, LinkedList::new)
+     *     .split(2, ArrayList::new)
      *     .toList();
-     * // Result: [[a=1, b=2], [c=3, d=4], [e=5]] (each chunk is a LinkedList)
+     * // Result: [[a=1, b=2], [c=3, d=4], [e=5]] (each chunk is an ArrayList)
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers at most one chunk at a time.
      *
      * @param <C> the type of the collection to store the chunks.
      * @param chunkSize the size of each chunk
-     * @param collectionSupplier a function which returns a new, empty collection of the appropriate type
+     * @param collectionSupplier a function which returns a new, empty collection of the appropriate type.
+     *        It receives the expected size of the collection, so it must accept an {@code int}:
+     *        {@code ArrayList::new} works, {@code LinkedList::new} does not (there is no
+     *        {@code LinkedList(int)} constructor) &mdash; write {@code size -> new LinkedList<>()} instead
      * @return a new Stream consisting of collections of Map.Entry objects, each representing a chunk of the original Stream.
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code chunkSize} is not positive, or if {@code collectionSupplier} is
@@ -3116,7 +3105,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     public <C extends Collection<Map.Entry<K, V>>> Stream<C> split(final int chunkSize, final IntFunction<? extends C> collectionSupplier)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
@@ -3149,7 +3138,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @IntermediateOp
-    public Stream<List<Map.Entry<K, V>>> sliding(final int windowSize) {
+    public Stream<List<Map.Entry<K, V>>> sliding(final int windowSize) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return _stream.sliding(windowSize);
@@ -3166,16 +3155,19 @@ public final class EntryStream<K, V> extends
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntryStream.of("a", 1, "b", 2, "c", 3, "d", 4)
-     *     .sliding(3, LinkedList::new)
+     *     .sliding(3, ArrayList::new)
      *     .toList();
-     * // Result: [[a=1, b=2, c=3], [b=2, c=3, d=4]] (each window is a LinkedList)
+     * // Result: [[a=1, b=2, c=3], [b=2, c=3, d=4]] (each window is an ArrayList)
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers the current window in memory.
      *
      * @param <C> the type of the collection to store the windows.
      * @param windowSize the size of the window to be used for sliding over the Stream elements
-     * @param collectionSupplier a function which returns a new, empty collection of the appropriate type
+     * @param collectionSupplier a function which returns a new, empty collection of the appropriate type.
+     *        It receives the expected size of the collection, so it must accept an {@code int}:
+     *        {@code ArrayList::new} works, {@code LinkedList::new} does not (there is no
+     *        {@code LinkedList(int)} constructor) &mdash; write {@code size -> new LinkedList<>()} instead
      * @return a new Stream where each element is a collection of Map.Entry objects from the original Stream, representing a window.
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code windowSize} is not positive, or if {@code collectionSupplier} is
@@ -3184,7 +3176,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     public <C extends Collection<Map.Entry<K, V>>> Stream<C> sliding(final int windowSize, final IntFunction<? extends C> collectionSupplier)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
@@ -3218,7 +3210,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @IntermediateOp
-    public Stream<List<Map.Entry<K, V>>> sliding(final int windowSize, final int increment) {
+    public Stream<List<Map.Entry<K, V>>> sliding(final int windowSize, final int increment) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return _stream.sliding(windowSize, increment);
@@ -3235,9 +3227,9 @@ public final class EntryStream<K, V> extends
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntryStream.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5)
-     *     .sliding(3, 2, LinkedList::new)
+     *     .sliding(3, 2, ArrayList::new)
      *     .toList();
-     * // Result: [[a=1, b=2, c=3], [c=3, d=4, e=5]] (each window is a LinkedList)
+     * // Result: [[a=1, b=2, c=3], [c=3, d=4, e=5]] (each window is an ArrayList)
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers the current window in memory.
@@ -3245,7 +3237,10 @@ public final class EntryStream<K, V> extends
      * @param <C> the type of the collection to store the windows.
      * @param windowSize the size of the window to be used for sliding over the Stream elements
      * @param increment the number of elements to move the window forward after each step
-     * @param collectionSupplier a function which returns a new, empty collection of the appropriate type
+     * @param collectionSupplier a function which returns a new, empty collection of the appropriate type.
+     *        It receives the expected size of the collection, so it must accept an {@code int}:
+     *        {@code ArrayList::new} works, {@code LinkedList::new} does not (there is no
+     *        {@code LinkedList(int)} constructor) &mdash; write {@code size -> new LinkedList<>()} instead
      * @return a new Stream where each element is a collection of Map.Entry objects from the original Stream, representing a window.
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code windowSize} or {@code increment} is not positive, or if
@@ -3254,7 +3249,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     public <C extends Collection<Map.Entry<K, V>>> Stream<C> sliding(final int windowSize, final int increment,
-            final IntFunction<? extends C> collectionSupplier) throws IllegalArgumentException {
+            final IntFunction<? extends C> collectionSupplier) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
@@ -3294,7 +3289,7 @@ public final class EntryStream<K, V> extends
      * @see #symmetricDifference(Collection)
      */
     @Override
-    public EntryStream<K, V> intersection(final Collection<?> c) {
+    public EntryStream<K, V> intersection(final Collection<?> c) throws IllegalStateException {
         _stream.assertNotClosed();
 
         return of(_stream.intersection(c));
@@ -3332,7 +3327,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @IntermediateOp
-    public EntryStream<K, V> intersection(final Map<? extends K, ? extends V> map) {
+    public EntryStream<K, V> intersection(final Map<? extends K, ? extends V> map) throws IllegalStateException {
         _stream.assertNotClosed();
 
         return intersection(N.isEmpty(map) ? N.emptyList() : map.entrySet());
@@ -3367,7 +3362,7 @@ public final class EntryStream<K, V> extends
      * @see #symmetricDifference(Collection)
      */
     @Override
-    public EntryStream<K, V> difference(final Collection<?> c) {
+    public EntryStream<K, V> difference(final Collection<?> c) throws IllegalStateException {
         _stream.assertNotClosed();
 
         return of(_stream.difference(c));
@@ -3403,7 +3398,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @IntermediateOp
-    public EntryStream<K, V> difference(final Map<?, ?> map) {
+    public EntryStream<K, V> difference(final Map<?, ?> map) throws IllegalStateException {
         _stream.assertNotClosed();
 
         return difference(N.isEmpty(map) ? N.emptyList() : map.entrySet());
@@ -3446,7 +3441,7 @@ public final class EntryStream<K, V> extends
      * @see Iterables#symmetricDifference(Set, Set)
      */
     @Override
-    public EntryStream<K, V> symmetricDifference(final Collection<? extends Map.Entry<K, V>> c) {
+    public EntryStream<K, V> symmetricDifference(final Collection<? extends Map.Entry<K, V>> c) throws IllegalStateException {
         _stream.assertNotClosed();
 
         return of(_stream.symmetricDifference(c));
@@ -3490,7 +3485,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
-    public EntryStream<K, V> symmetricDifference(final Map<? extends K, ? extends V> map) {
+    public EntryStream<K, V> symmetricDifference(final Map<? extends K, ? extends V> map) throws IllegalStateException {
         _stream.assertNotClosed();
 
         return symmetricDifference(N.isEmpty(map) ? N.emptyList() : (Collection) map.entrySet());
@@ -3518,7 +3513,7 @@ public final class EntryStream<K, V> extends
      */
     @Deprecated
     @Override
-    public EntryStream<K, V> sorted() throws UnsupportedOperationException {
+    public EntryStream<K, V> sorted() throws IllegalStateException, UnsupportedOperationException {
         _stream.assertNotClosed();
 
         //    final Comparator<Map.Entry<K, V>> cmp = Comparators.<K, V> comparingByKey((Comparator) Comparators.naturalOrder())
@@ -3558,7 +3553,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
-    public EntryStream<K, V> sorted(final Comparator<? super Map.Entry<K, V>> comparator) throws IllegalArgumentException {
+    public EntryStream<K, V> sorted(final Comparator<? super Map.Entry<K, V>> comparator) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -3594,7 +3589,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
-    public EntryStream<K, V> sortedByKey(final Comparator<? super K> keyComparator) throws IllegalArgumentException {
+    public EntryStream<K, V> sortedByKey(final Comparator<? super K> keyComparator) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyComparator, cs.keyComparator);
@@ -3632,7 +3627,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
-    public EntryStream<K, V> sortedByValue(final Comparator<? super V> valueComparator) throws IllegalArgumentException {
+    public EntryStream<K, V> sortedByValue(final Comparator<? super V> valueComparator) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(valueComparator, cs.valueComparator);
@@ -3670,7 +3665,8 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     @SuppressWarnings("rawtypes")
-    public EntryStream<K, V> sortedBy(final Function<? super Map.Entry<K, V>, ? extends Comparable> sortKeyExtractor) throws IllegalArgumentException {
+    public EntryStream<K, V> sortedBy(final Function<? super Map.Entry<K, V>, ? extends Comparable> sortKeyExtractor)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(sortKeyExtractor, cs.sortKeyExtractor);
@@ -3706,7 +3702,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
-    public EntryStream<K, V> sortedByInt(final ToIntFunction<? super Map.Entry<K, V>> sortKeyExtractor) throws IllegalArgumentException {
+    public EntryStream<K, V> sortedByInt(final ToIntFunction<? super Map.Entry<K, V>> sortKeyExtractor) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(sortKeyExtractor, cs.sortKeyExtractor);
@@ -3744,7 +3740,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
-    public EntryStream<K, V> sortedByLong(final ToLongFunction<? super Map.Entry<K, V>> sortKeyExtractor) throws IllegalArgumentException {
+    public EntryStream<K, V> sortedByLong(final ToLongFunction<? super Map.Entry<K, V>> sortKeyExtractor)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(sortKeyExtractor, cs.sortKeyExtractor);
@@ -3782,7 +3779,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
-    public EntryStream<K, V> sortedByDouble(final ToDoubleFunction<? super Map.Entry<K, V>> sortKeyExtractor) throws IllegalArgumentException {
+    public EntryStream<K, V> sortedByDouble(final ToDoubleFunction<? super Map.Entry<K, V>> sortKeyExtractor)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(sortKeyExtractor, cs.sortKeyExtractor);
@@ -3814,7 +3812,7 @@ public final class EntryStream<K, V> extends
      */
     @Deprecated
     @Override
-    public EntryStream<K, V> reverseSorted() throws UnsupportedOperationException {
+    public EntryStream<K, V> reverseSorted() throws IllegalStateException, UnsupportedOperationException {
         _stream.assertNotClosed();
 
         //        @SuppressWarnings("rawtypes")
@@ -3856,7 +3854,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
-    public EntryStream<K, V> reverseSorted(final Comparator<? super Map.Entry<K, V>> comparator) throws IllegalArgumentException {
+    public EntryStream<K, V> reverseSorted(final Comparator<? super Map.Entry<K, V>> comparator) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -3892,7 +3890,7 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> reverseSortedBy(@SuppressWarnings("rawtypes") final Function<? super Map.Entry<K, V>, ? extends Comparable> sortKeyExtractor)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(sortKeyExtractor, cs.sortKeyExtractor);
@@ -3922,7 +3920,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#indexed()
      */
     @Override
-    public Stream<Indexed<Map.Entry<K, V>>> indexed() {
+    public Stream<Indexed<Map.Entry<K, V>>> indexed() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return _stream.indexed();
@@ -3955,7 +3953,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#distinct()
      */
     @Override
-    public EntryStream<K, V> distinct() {
+    public EntryStream<K, V> distinct() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return of(_stream.distinct());
@@ -3990,7 +3988,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
-    public EntryStream<K, V> distinct(final BinaryOperator<Map.Entry<K, V>> mergeFunction) throws IllegalArgumentException {
+    public EntryStream<K, V> distinct(final BinaryOperator<Map.Entry<K, V>> mergeFunction) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mergeFunction, cs.mergeFunction);
@@ -4029,7 +4027,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @IntermediateOp
-    public EntryStream<K, V> distinctByKey() {
+    public EntryStream<K, V> distinctByKey() throws IllegalStateException {
         _stream.assertNotClosed();
 
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
@@ -4074,7 +4072,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @IntermediateOp
-    public EntryStream<K, V> distinctByValue() {
+    public EntryStream<K, V> distinctByValue() throws IllegalStateException {
         _stream.assertNotClosed();
 
         final Function<? super Map.Entry<K, V>, V> valueMapper = Fn.value();
@@ -4113,7 +4111,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public EntryStream<K, V> distinctBy(final Function<? super Map.Entry<K, V>, ?> keyMapper) throws IllegalArgumentException {
+    public EntryStream<K, V> distinctBy(final Function<? super Map.Entry<K, V>, ?> keyMapper) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -4154,7 +4152,7 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @TerminalOpTriggered
     public EntryStream<K, V> distinctBy(final Function<? super Map.Entry<K, V>, ?> keyMapper, final BinaryOperator<Map.Entry<K, V>> mergeFunction)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -4189,7 +4187,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#rotated(int)
      */
     @Override
-    public EntryStream<K, V> rotated(final int distance) {
+    public EntryStream<K, V> rotated(final int distance) throws IllegalStateException {
         _stream.assertNotClosed();
 
         return of(_stream.rotated(distance));
@@ -4216,7 +4214,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#shuffled()
      */
     @Override
-    public EntryStream<K, V> shuffled() {
+    public EntryStream<K, V> shuffled() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return of(_stream.shuffled());
@@ -4242,10 +4240,11 @@ public final class EntryStream<K, V> extends
      * @param rnd the random to shuffle the elements
      * @return a new EntryStream with the elements shuffled using the specified random
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}
      * @see Stream#shuffled(Random)
      */
     @Override
-    public EntryStream<K, V> shuffled(final Random rnd) {
+    public EntryStream<K, V> shuffled(final Random rnd) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return of(_stream.shuffled(rnd));
@@ -4275,7 +4274,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#reversed()
      */
     @Override
-    public EntryStream<K, V> reversed() {
+    public EntryStream<K, V> reversed() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return of(_stream.reversed());
@@ -4302,7 +4301,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#cycled()
      */
     @Override
-    public EntryStream<K, V> cycled() {
+    public EntryStream<K, V> cycled() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return of(_stream.cycled());
@@ -4332,7 +4331,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#cycled(long)
      */
     @Override
-    public EntryStream<K, V> cycled(final long rounds) {
+    public EntryStream<K, V> cycled(final long rounds) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return of(_stream.cycled(rounds));
@@ -4364,7 +4363,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
-    public <M extends Map<? extends K, ? extends V>> EntryStream<K, V> prepend(final M map) {
+    public <M extends Map<? extends K, ? extends V>> EntryStream<K, V> prepend(final M map) throws IllegalStateException {
         _stream.assertNotClosed();
 
         if (N.isEmpty(map)) {
@@ -4395,10 +4394,10 @@ public final class EntryStream<K, V> extends
      * @see BaseStream#prepend(BaseStream)
      */
     @Override
-    public EntryStream<K, V> prepend(final EntryStream<K, V> stream) {
+    public EntryStream<K, V> prepend(final EntryStream<K, V> stream) throws IllegalStateException {
         _stream.assertNotClosed();
 
-        return of(_stream.prepend(stream._stream));
+        return of(_stream.prepend(stream == null ? null : stream._stream)); // a null stream prepends nothing, as Stream.prepend(Stream) does
     }
 
     /**
@@ -4418,11 +4417,14 @@ public final class EntryStream<K, V> extends
      * @param op the optional entry to prepend to the stream
      * @return a new EntryStream with the optional entry prepended
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code op} is {@code null}.
      * @see #prepend(Map)
      */
     @Override
-    public EntryStream<K, V> prepend(final Optional<Map.Entry<K, V>> op) {
+    public EntryStream<K, V> prepend(final Optional<Map.Entry<K, V>> op) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
+
+        checkArgNotNull(op, cs.op);
 
         if (op.isEmpty()) {
             return this;
@@ -4457,7 +4459,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
-    public <M extends Map<? extends K, ? extends V>> EntryStream<K, V> append(final M map) {
+    public <M extends Map<? extends K, ? extends V>> EntryStream<K, V> append(final M map) throws IllegalStateException {
         _stream.assertNotClosed();
 
         if (N.isEmpty(map)) {
@@ -4488,10 +4490,10 @@ public final class EntryStream<K, V> extends
      * @see BaseStream#append(BaseStream)
      */
     @Override
-    public EntryStream<K, V> append(final EntryStream<K, V> stream) {
+    public EntryStream<K, V> append(final EntryStream<K, V> stream) throws IllegalStateException {
         _stream.assertNotClosed();
 
-        return of(_stream.append(stream._stream));
+        return of(_stream.append(stream == null ? null : stream._stream)); // a null stream appends nothing, as Stream.append(Stream) does
     }
 
     /**
@@ -4511,11 +4513,14 @@ public final class EntryStream<K, V> extends
      * @param op the optional entry to append to the stream
      * @return a new EntryStream with the optional entry appended
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code op} is {@code null}.
      * @see #append(Map)
      */
     @Override
-    public EntryStream<K, V> append(final Optional<Map.Entry<K, V>> op) {
+    public EntryStream<K, V> append(final Optional<Map.Entry<K, V>> op) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
+
+        checkArgNotNull(op, cs.op);
 
         if (op.isEmpty()) {
             return this;
@@ -4557,7 +4562,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
-    public <M extends Map<? extends K, ? extends V>> EntryStream<K, V> appendIfEmpty(final M map) {
+    public <M extends Map<? extends K, ? extends V>> EntryStream<K, V> appendIfEmpty(final M map) throws IllegalStateException {
         _stream.assertNotClosed();
 
         if (N.isEmpty(map)) {
@@ -4599,12 +4604,16 @@ public final class EntryStream<K, V> extends
      * @see Stream#appendIfEmpty(Supplier)
      */
     @Override
-    public EntryStream<K, V> appendIfEmpty(final Supplier<? extends EntryStream<K, V>> supplier) throws IllegalArgumentException {
+    public EntryStream<K, V> appendIfEmpty(final Supplier<? extends EntryStream<K, V>> supplier) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
-        return EntryStream.of(_stream.appendIfEmpty(() -> supplier.get()._stream));
+        return EntryStream.of(_stream.appendIfEmpty(() -> {
+            final EntryStream<K, V> s = supplier.get();
+
+            return s == null ? Stream.empty() : s._stream; // a null result appends nothing, like Stream.appendIfEmpty / defer
+        }));
     }
 
     /**
@@ -4628,7 +4637,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#ifEmpty(Runnable)
      */
     @Override
-    public EntryStream<K, V> ifEmpty(final Runnable action) throws IllegalArgumentException, IllegalStateException {
+    public EntryStream<K, V> ifEmpty(final Runnable action) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -4659,7 +4668,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     @Override
-    public EntryStream<K, V> skip(final long n) {
+    public EntryStream<K, V> skip(final long n) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return of(_stream.skip(n));
@@ -4687,7 +4696,7 @@ public final class EntryStream<K, V> extends
      * @see #skip(long)
      */
     @Override
-    public EntryStream<K, V> skip(final long n, final Consumer<? super Map.Entry<K, V>> onSkip) throws IllegalArgumentException {
+    public EntryStream<K, V> skip(final long n, final Consumer<? super Map.Entry<K, V>> onSkip) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(onSkip, cs.onSkip);
@@ -4718,7 +4727,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @IntermediateOp
     @Override
-    public EntryStream<K, V> limit(final long maxSize) {
+    public EntryStream<K, V> limit(final long maxSize) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return of(_stream.limit(maxSize));
@@ -4745,7 +4754,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#step(long)
      */
     @Override
-    public EntryStream<K, V> step(final long step) {
+    public EntryStream<K, V> step(final long step) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return of(_stream.step(step));
@@ -4801,7 +4810,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#rateLimited(RateLimiter)
      */
     @Override
-    public EntryStream<K, V> rateLimited(final RateLimiter rateLimiter) {
+    public EntryStream<K, V> rateLimited(final RateLimiter rateLimiter) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return of(_stream.rateLimited(rateLimiter));
@@ -4856,7 +4865,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#delay(Duration)
      */
     @Override
-    public EntryStream<K, V> delay(final Duration duration) {
+    public EntryStream<K, V> delay(final Duration duration) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return of(_stream.delay(duration));
@@ -4871,10 +4880,12 @@ public final class EntryStream<K, V> extends
      * {@code duration} after the previous one &mdash; all but the most recent entry of the burst are
      * discarded; the most recent entry survives. It is emitted when a later pull observes a gap of at least
      * {@code duration}, or when the upstream is exhausted. The final entry of the stream is always emitted
-     * without waiting for an additional timer. Elapsed time is measured with {@link System#nanoTime()}
-     * at the moment each entry is pulled, so this operator is only meaningful for streams whose upstream
+     * without waiting for an additional timer. Elapsed time is measured with
+     * {@link System#currentTimeMillis()} at the moment each entry is pulled &mdash; the same clock the
+     * {@code window(...)} operators use &mdash; so this operator is only meaningful for streams whose upstream
      * produces entries over time; for a stream that produces all of its entries immediately, only the single
-     * last entry is emitted.
+     * last entry is emitted. Because that clock is not monotonic, a system-clock adjustment during traversal
+     * can make a gap look shorter or longer than it really was.
      *
      * <p>This differs from {@link #rateLimited(RateLimiter)}, which spreads permits evenly over time. It is
      * also not a scheduler-based debounce: it does not start a background timer, and pending entries are
@@ -4929,7 +4940,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#debounce(Duration)
      */
     @Override
-    public EntryStream<K, V> debounce(Duration duration) {
+    public EntryStream<K, V> debounce(Duration duration) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return of(_stream.debounce(duration));
@@ -4957,7 +4968,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#onEach(Consumer)
      */
     @Override
-    public EntryStream<K, V> peek(final Consumer<? super Map.Entry<K, V>> action) throws IllegalArgumentException {
+    public EntryStream<K, V> peek(final Consumer<? super Map.Entry<K, V>> action) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -4990,7 +5001,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public EntryStream<K, V> peek(final BiConsumer<? super K, ? super V> action) throws IllegalArgumentException {
+    public EntryStream<K, V> peek(final BiConsumer<? super K, ? super V> action) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -5019,7 +5030,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#peek(Consumer)
      */
     @Override
-    public EntryStream<K, V> onEach(final Consumer<? super Map.Entry<K, V>> action) throws IllegalArgumentException {
+    public EntryStream<K, V> onEach(final Consumer<? super Map.Entry<K, V>> action) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -5051,7 +5062,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public EntryStream<K, V> onEach(final BiConsumer<? super K, ? super V> action) throws IllegalArgumentException {
+    public EntryStream<K, V> onEach(final BiConsumer<? super K, ? super V> action) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -5085,14 +5096,15 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the action
      * @param action the action to be performed for each entry
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      * @see #forEach(Throwables.BiConsumer)
      * @see Stream#forEach(Throwables.Consumer)
      */
     @ParallelSupported
     @TerminalOp
-    public <E extends Exception> void forEach(final Throwables.Consumer<? super Map.Entry<K, V>, E> action) throws IllegalArgumentException, E {
+    public <E extends Exception> void forEach(final Throwables.Consumer<? super Map.Entry<K, V>, E> action)
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -5126,14 +5138,15 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the action
      * @param action the action to be performed for each key-value pair
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      * @see #forEach(Throwables.Consumer)
      * @see Stream#forEach(Throwables.Consumer)
      */
     @ParallelSupported
     @TerminalOp
-    public <E extends Exception> void forEach(final Throwables.BiConsumer<? super K, ? super V, E> action) throws IllegalArgumentException, E {
+    public <E extends Exception> void forEach(final Throwables.BiConsumer<? super K, ? super V, E> action)
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -5168,13 +5181,14 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the action
      * @param action the action to be performed for each entry with its index
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      * @see Stream#forEachIndexed(Throwables.IntObjConsumer)
      */
     @ParallelSupported
     @TerminalOp
-    public <E extends Exception> void forEachIndexed(final Throwables.IntObjConsumer<? super Map.Entry<K, V>, E> action) throws IllegalArgumentException, E {
+    public <E extends Exception> void forEachIndexed(final Throwables.IntObjConsumer<? super Map.Entry<K, V>, E> action)
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -5213,7 +5227,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> min(final Comparator<? super Map.Entry<K, V>> comparator) throws IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> min(final Comparator<? super Map.Entry<K, V>> comparator) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -5250,7 +5264,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> minByKey(final Comparator<? super K> keyComparator) throws IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> minByKey(final Comparator<? super K> keyComparator) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyComparator, cs.keyComparator);
@@ -5287,7 +5301,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> minByValue(final Comparator<? super V> valueComparator) throws IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> minByValue(final Comparator<? super V> valueComparator) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(valueComparator, cs.valueComparator);
@@ -5301,7 +5315,7 @@ public final class EntryStream<K, V> extends
      * This is a terminal operation.
      *
      * <p>Entries whose extracted sort key is {@code null} are considered bigger than entries with a
-     * {@code non-null} sort key, so they are never selected as the minimum.
+     * {@code non-null} sort key. An entry with a null sort key is selected only when all extracted keys are null.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5326,7 +5340,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     @SuppressWarnings("rawtypes")
-    public Optional<Map.Entry<K, V>> minBy(final Function<? super Map.Entry<K, V>, ? extends Comparable> keyMapper) throws IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> minBy(final Function<? super Map.Entry<K, V>, ? extends Comparable> keyMapper)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -5365,7 +5380,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> max(final Comparator<? super Map.Entry<K, V>> comparator) throws IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> max(final Comparator<? super Map.Entry<K, V>> comparator) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -5402,7 +5417,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> maxByKey(final Comparator<? super K> keyComparator) throws IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> maxByKey(final Comparator<? super K> keyComparator) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyComparator, cs.keyComparator);
@@ -5439,7 +5454,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> maxByValue(final Comparator<? super V> valueComparator) throws IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> maxByValue(final Comparator<? super V> valueComparator) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(valueComparator, cs.valueComparator);
@@ -5453,7 +5468,7 @@ public final class EntryStream<K, V> extends
      * This is a terminal operation.
      *
      * <p>Entries whose extracted sort key is {@code null} are considered smaller than entries with a
-     * {@code non-null} sort key, so they are never selected as the maximum.
+     * {@code non-null} sort key. An entry with a null sort key is selected only when all extracted keys are null.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5478,7 +5493,8 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     @SuppressWarnings("rawtypes")
-    public Optional<Map.Entry<K, V>> maxBy(final Function<? super Map.Entry<K, V>, ? extends Comparable> keyMapper) throws IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> maxBy(final Function<? super Map.Entry<K, V>, ? extends Comparable> keyMapper)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -5510,8 +5526,8 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return {@code true} if any elements match the predicate, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      * @see #anyMatch(Throwables.BiPredicate)
      * @see #allMatch(Throwables.Predicate)
      * @see #noneMatch(Throwables.Predicate)
@@ -5519,7 +5535,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public <E extends Exception> boolean anyMatch(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws IllegalArgumentException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -5551,14 +5568,15 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return {@code true} if any elements match the predicate, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      * @see #anyMatch(Throwables.Predicate)
      * @see Stream#anyMatch(Throwables.Predicate)
      */
     @ParallelSupported
     @TerminalOp
-    public <E extends Exception> boolean anyMatch(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws IllegalArgumentException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.BiPredicate<? super K, ? super V, E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -5591,8 +5609,8 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return {@code true} if all elements match the predicate or this EntryStream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      * @see #allMatch(Throwables.BiPredicate)
      * @see #anyMatch(Throwables.Predicate)
      * @see #noneMatch(Throwables.Predicate)
@@ -5600,7 +5618,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public <E extends Exception> boolean allMatch(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws IllegalArgumentException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -5633,14 +5652,15 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return {@code true} if all elements match the predicate or this EntryStream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      * @see #allMatch(Throwables.Predicate)
      * @see Stream#allMatch(Throwables.Predicate)
      */
     @ParallelSupported
     @TerminalOp
-    public <E extends Exception> boolean allMatch(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws IllegalArgumentException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.BiPredicate<? super K, ? super V, E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -5673,8 +5693,8 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless predicate to apply to elements of this stream
      * @return {@code true} if no elements match the predicate or this EntryStream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      * @see #noneMatch(Throwables.BiPredicate)
      * @see #anyMatch(Throwables.Predicate)
      * @see #allMatch(Throwables.Predicate)
@@ -5682,7 +5702,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public <E extends Exception> boolean noneMatch(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws IllegalArgumentException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -5715,14 +5736,15 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless bi-predicate to apply to key-value pairs of this stream
      * @return {@code true} if no elements match the predicate or this EntryStream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      * @see #noneMatch(Throwables.Predicate)
      * @see Stream#noneMatch(Throwables.Predicate)
      */
     @ParallelSupported
     @TerminalOp
-    public <E extends Exception> boolean noneMatch(final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws IllegalArgumentException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.BiPredicate<? super K, ? super V, E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -5766,7 +5788,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> boolean hasMatchCountBetween(final long atLeast, final long atMost,
-            final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws IllegalArgumentException, E {
+            final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -5810,7 +5832,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> boolean hasMatchCountBetween(final long atLeast, final long atMost,
-            final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws IllegalArgumentException, E {
+            final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -5823,13 +5845,13 @@ public final class EntryStream<K, V> extends
      * {@code Optional} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first entry without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is a deterministic alias of {@link #first()}: it always returns the first entry
-     * in encounter order, even for parallel streams. The {@code findFirst} name is kept to align with
-     * the standard {@link java.util.stream.Stream#findFirst()} API.</p>
+     * <p>This method is an alias of {@link #first()}: it returns the first entry delivered by the
+     * current pipeline. Parallel intermediate operations may reorder entries, so the result need
+     * not be the first entry of the original source and may differ between runs.</p>
      *
-     * <p><b>Null entries:</b> the returned {@code Optional} cannot hold {@code null}, so a
-     * {@link NullPointerException} is thrown if the first entry is {@code null}. An entry whose key
-     * or value is {@code null} is fine — only a {@code null} entry itself is rejected.</p>
+     * <p><b>Null entries:</b> the returned {@code Optional} is created with
+     * {@code Optional.ofNullable}, so a {@code null} first entry yields an <i>empty</i>
+     * {@code Optional} rather than throwing. An entry whose key or value is {@code null} is fine.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5841,7 +5863,6 @@ public final class EntryStream<K, V> extends
      *
      * @return an {@code Optional} containing the first entry of the stream, or an empty {@code Optional} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws NullPointerException if the first entry is {@code null}
      * @see #first()
      * @see #findAny()
      * @see #findFirst(Throwables.Predicate)
@@ -5850,7 +5871,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> findFirst() {
+    public Optional<Map.Entry<K, V>> findFirst() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return first();
@@ -5861,14 +5882,13 @@ public final class EntryStream<K, V> extends
      * {@code Optional} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first entry without processing the rest of the stream, which is then closed.
      *
-     * <p>Despite the name, this method is deterministic: unlike {@link java.util.stream.Stream#findAny()}, which may
-     * return an arbitrary entry (especially for parallel streams), this method is an alias of
-     * {@link #first()} and always returns the first entry in encounter order, even for parallel
-     * streams. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
+     * <p>This method is an alias of {@link #first()}: it returns the first entry delivered by the
+     * current pipeline. Parallel intermediate operations may reorder entries, so the result need
+     * not be the first entry of the original source and may differ between runs.</p>
      *
-     * <p><b>Null entries:</b> the returned {@code Optional} cannot hold {@code null}, so a
-     * {@link NullPointerException} is thrown if the first entry is {@code null}. An entry whose key
-     * or value is {@code null} is fine — only a {@code null} entry itself is rejected.</p>
+     * <p><b>Null entries:</b> the returned {@code Optional} is created with
+     * {@code Optional.ofNullable}, so a {@code null} first entry yields an <i>empty</i>
+     * {@code Optional} rather than throwing. An entry whose key or value is {@code null} is fine.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5880,7 +5900,6 @@ public final class EntryStream<K, V> extends
      *
      * @return an {@code Optional} containing the first entry of the stream, or an empty {@code Optional} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws NullPointerException if the first entry is {@code null}
      * @see #first()
      * @see #findFirst()
      * @see #findFirst(Throwables.Predicate)
@@ -5889,7 +5908,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> findAny() {
+    public Optional<Map.Entry<K, V>> findAny() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return first();
@@ -5906,10 +5925,10 @@ public final class EntryStream<K, V> extends
      * on {@code Map.Entry} objects; use {@link #findFirst(Throwables.BiPredicate)} to receive key and
      * value as separate arguments.</p>
      *
-     * <p><b>Null entries:</b> the predicate is applied to {@code null} entries as well, but the
-     * returned {@code Optional} cannot hold {@code null}, so a matching {@code null} entry causes a
-     * {@link NullPointerException}. An entry whose key or value is {@code null} is fine — only a
-     * {@code null} entry itself is rejected.</p>
+     * <p><b>Null entries:</b> the predicate is applied to {@code null} entries as well. The returned
+     * {@code Optional} is created with {@code Optional.ofNullable}, so a matching {@code null} entry
+     * yields an <i>empty</i> {@code Optional} rather than throwing. An entry whose key or value is
+     * {@code null} is fine.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5925,9 +5944,8 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless predicate to test each entry of the stream
      * @return an {@code Optional} containing the first entry that matches the predicate, or an empty {@code Optional} if no entry matches
      * @throws IllegalStateException if the stream is already closed
-     * @throws NullPointerException if the matching entry is {@code null}
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      * @see #findAny(Throwables.Predicate)
      * @see #findLast(Throwables.Predicate)
      * @see #findFirst(Throwables.BiPredicate)
@@ -5936,7 +5954,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findFirst(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate)
-            throws IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -5954,10 +5972,12 @@ public final class EntryStream<K, V> extends
      * entries match, the one at the smallest encounter-order index wins. If that ordering guarantee is not
      * needed, {@link #findAny(Throwables.BiPredicate)} may find a match faster in parallel.</p>
      *
-     * <p><b>Null entries:</b> the predicate is applied to {@code null} entries as well, but the
-     * returned {@code Optional} cannot hold {@code null}, so a matching {@code null} entry causes a
-     * {@link NullPointerException}. An entry whose key or value is {@code null} is fine — only a
-     * {@code null} entry itself is rejected.</p>
+     * <p><b>Null entries:</b> &#9888;&#65039; this {@code BiPredicate} overload throws
+     * {@link NullPointerException} when an entry evaluated by the predicate is {@code null}:
+     * the adapter that splits an entry into {@code (key, value)} dereferences it in order to call
+     * the predicate. The {@code Throwables.Predicate} overload of the same name does <i>not</i> —
+     * it passes the {@code null} entry to your predicate untouched. An entry whose key or value is
+     * {@code null} is fine in both.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5973,9 +5993,9 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless bi-predicate to test the key and value of each entry
      * @return an {@code Optional} containing the first entry that matches the bi-predicate, or an empty {@code Optional} if no entry matches
      * @throws IllegalStateException if the stream is already closed
-     * @throws NullPointerException if the matching entry is {@code null}
-     * @throws E if the bi-predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws NullPointerException if an entry evaluated by the predicate is {@code null}
+     * @throws E if the bi-predicate throws an exception
      * @see #findFirst(Throwables.Predicate)
      * @see #findAny(Throwables.BiPredicate)
      * @see #findLast(Throwables.BiPredicate)
@@ -5984,7 +6004,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findFirst(final Throwables.BiPredicate<? super K, ? super V, E> predicate)
-            throws IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -6001,14 +6021,14 @@ public final class EntryStream<K, V> extends
      * streams there is no ordering guarantee: the matching entry found first by any worker thread is
      * returned, so the result may differ between runs — which is what can make it faster than
      * {@link #findFirst(Throwables.Predicate)} in parallel. (Note the contrast with the no-arg
-     * {@link #findAny()}, which is a deterministic alias of {@link #first()}.) The predicate operates on
+     * {@link #findAny()}, which is an alias of {@link #first()}.) The predicate operates on
      * {@code Map.Entry} objects; use {@link #findAny(Throwables.BiPredicate)} to receive key and value
      * as separate arguments.</p>
      *
-     * <p><b>Null entries:</b> the predicate is applied to {@code null} entries as well, but the
-     * returned {@code Optional} cannot hold {@code null}, so a matching {@code null} entry causes a
-     * {@link NullPointerException}. An entry whose key or value is {@code null} is fine — only a
-     * {@code null} entry itself is rejected.</p>
+     * <p><b>Null entries:</b> the predicate is applied to {@code null} entries as well. The returned
+     * {@code Optional} is created with {@code Optional.ofNullable}, so a matching {@code null} entry
+     * yields an <i>empty</i> {@code Optional} rather than throwing. An entry whose key or value is
+     * {@code null} is fine.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6024,9 +6044,8 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless predicate to test each entry of the stream
      * @return an {@code Optional} containing a matching entry, or an empty {@code Optional} if no entry matches
      * @throws IllegalStateException if the stream is already closed
-     * @throws NullPointerException if the matching entry is {@code null}
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.Predicate)
      * @see #findLast(Throwables.Predicate)
      * @see #findAny(Throwables.BiPredicate)
@@ -6035,7 +6054,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findAny(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate)
-            throws IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -6053,13 +6072,15 @@ public final class EntryStream<K, V> extends
      * {@link #findFirst(Throwables.BiPredicate)}. In parallel streams there is no ordering guarantee: the
      * matching entry found first by any worker thread is returned, so the result may differ between
      * runs — which is what can make it faster than {@link #findFirst(Throwables.BiPredicate)} in
-     * parallel. (Note the contrast with the no-arg {@link #findAny()}, which is a deterministic alias
+     * parallel. (Note the contrast with the no-arg {@link #findAny()}, which is an alias
      * of {@link #first()}.)</p>
      *
-     * <p><b>Null entries:</b> the predicate is applied to {@code null} entries as well, but the
-     * returned {@code Optional} cannot hold {@code null}, so a matching {@code null} entry causes a
-     * {@link NullPointerException}. An entry whose key or value is {@code null} is fine — only a
-     * {@code null} entry itself is rejected.</p>
+     * <p><b>Null entries:</b> &#9888;&#65039; this {@code BiPredicate} overload throws
+     * {@link NullPointerException} when an entry evaluated by the predicate is {@code null}:
+     * the adapter that splits an entry into {@code (key, value)} dereferences it in order to call
+     * the predicate. The {@code Throwables.Predicate} overload of the same name does <i>not</i> —
+     * it passes the {@code null} entry to your predicate untouched. An entry whose key or value is
+     * {@code null} is fine in both.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6075,9 +6096,9 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless bi-predicate to test the key and value of each entry
      * @return an {@code Optional} containing a matching entry, or an empty {@code Optional} if no entry matches
      * @throws IllegalStateException if the stream is already closed
-     * @throws NullPointerException if the matching entry is {@code null}
-     * @throws E if the bi-predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws NullPointerException if an entry evaluated by the predicate is {@code null}
+     * @throws E if the bi-predicate throws an exception
      * @see #findAny(Throwables.Predicate)
      * @see #findFirst(Throwables.BiPredicate)
      * @see #findLast(Throwables.BiPredicate)
@@ -6086,7 +6107,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findAny(final Throwables.BiPredicate<? super K, ? super V, E> predicate)
-            throws IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -6099,16 +6120,17 @@ public final class EntryStream<K, V> extends
      * {@code Optional}, or an empty {@code Optional} if no entry matches. This is a terminal
      * operation, and the stream is then closed.
      *
-     * <p>Unlike {@link #findFirst(Throwables.Predicate)}, this operation cannot short-circuit: every entry
-     * must be tested, because a later entry is always a better candidate. The result is deterministic
-     * even for parallel streams: when several entries match, the one at the largest encounter-order
-     * index wins. The predicate operates on {@code Map.Entry} objects; use
+     * <p>Iterator-backed streams must traverse the remaining entries; array-backed streams can
+     * search backward and stop once the last match is established. When several entries match,
+     * the entry at the largest encounter-order index in the current pipeline wins. Parallel
+     * intermediate operations may already have reordered the source. The predicate operates on
+     * {@code Map.Entry} objects; use
      * {@link #findLast(Throwables.BiPredicate)} to receive key and value as separate arguments.</p>
      *
-     * <p><b>Null entries:</b> the predicate is applied to {@code null} entries as well, but the
-     * returned {@code Optional} cannot hold {@code null}, so a matching {@code null} entry causes a
-     * {@link NullPointerException}. An entry whose key or value is {@code null} is fine — only a
-     * {@code null} entry itself is rejected.</p>
+     * <p><b>Null entries:</b> the predicate is applied to {@code null} entries as well. The returned
+     * {@code Optional} is created with {@code Optional.ofNullable}, so a matching {@code null} entry
+     * yields an <i>empty</i> {@code Optional} rather than throwing. An entry whose key or value is
+     * {@code null} is fine.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6124,9 +6146,8 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless predicate to test each entry of the stream
      * @return an {@code Optional} containing the last entry that matches the predicate, or an empty {@code Optional} if no entry matches
      * @throws IllegalStateException if the stream is already closed
-     * @throws NullPointerException if the matching entry is {@code null}
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.Predicate)
      * @see #findAny(Throwables.Predicate)
      * @see #findLast(Throwables.BiPredicate)
@@ -6136,7 +6157,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findLast(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate)
-            throws IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -6150,15 +6171,17 @@ public final class EntryStream<K, V> extends
      * operation, and the stream is then closed.
      *
      * <p>The bi-predicate receives each entry's key and value as separate arguments, so callers need not
-     * handle {@code Map.Entry} objects. Unlike {@link #findFirst(Throwables.BiPredicate)}, this operation
-     * cannot short-circuit: every entry must be tested, because a later entry is always a better candidate.
-     * The result is deterministic even for parallel streams: when several entries match, the one at the
-     * largest encounter-order index wins.</p>
+     * handle {@code Map.Entry} objects. Iterator-backed streams must traverse the remaining entries;
+     * array-backed streams can search backward and stop once the last match is established.
+     * When several entries match, the entry at the largest encounter-order index in the current
+     * pipeline wins. Parallel intermediate operations may already have reordered the source.</p>
      *
-     * <p><b>Null entries:</b> the predicate is applied to {@code null} entries as well, but the
-     * returned {@code Optional} cannot hold {@code null}, so a matching {@code null} entry causes a
-     * {@link NullPointerException}. An entry whose key or value is {@code null} is fine — only a
-     * {@code null} entry itself is rejected.</p>
+     * <p><b>Null entries:</b> &#9888;&#65039; this {@code BiPredicate} overload throws
+     * {@link NullPointerException} when an entry evaluated by the predicate is {@code null}:
+     * the adapter that splits an entry into {@code (key, value)} dereferences it in order to call
+     * the predicate. The {@code Throwables.Predicate} overload of the same name does <i>not</i> —
+     * it passes the {@code null} entry to your predicate untouched. An entry whose key or value is
+     * {@code null} is fine in both.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6174,9 +6197,9 @@ public final class EntryStream<K, V> extends
      * @param predicate a non-interfering, stateless bi-predicate to test the key and value of each entry
      * @return an {@code Optional} containing the last entry that matches the bi-predicate, or an empty {@code Optional} if no entry matches
      * @throws IllegalStateException if the stream is already closed
-     * @throws NullPointerException if the matching entry is {@code null}
-     * @throws E if the bi-predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws NullPointerException if an entry evaluated by the predicate is {@code null}
+     * @throws E if the bi-predicate throws an exception
      * @see #findLast(Throwables.Predicate)
      * @see #findFirst(Throwables.BiPredicate)
      * @see #findAny(Throwables.BiPredicate)
@@ -6186,7 +6209,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findLast(final Throwables.BiPredicate<? super K, ? super V, E> predicate)
-            throws IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -6199,12 +6222,13 @@ public final class EntryStream<K, V> extends
      * {@code Optional} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first entry without processing the rest of the stream, which is then closed.
      *
-     * <p>{@link #findFirst()} and {@link #findAny()} are deterministic aliases of this method:
-     * they always return the first entry in encounter order, even for parallel streams.</p>
+     * <p>{@link #findFirst()} and {@link #findAny()} are aliases of this method. They return the
+     * first entry delivered by the current pipeline; parallel intermediate operations may have
+     * reordered the original source.</p>
      *
-     * <p><b>Null entries:</b> the returned {@code Optional} cannot hold {@code null}, so a
-     * {@link NullPointerException} is thrown if the first entry is {@code null}. An entry whose key
-     * or value is {@code null} is fine — only a {@code null} entry itself is rejected.</p>
+     * <p><b>Null entries:</b> the returned {@code Optional} is created with
+     * {@code Optional.ofNullable}, so a {@code null} first entry yields an <i>empty</i>
+     * {@code Optional} rather than throwing. An entry whose key or value is {@code null} is fine.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6216,14 +6240,13 @@ public final class EntryStream<K, V> extends
      *
      * @return an {@code Optional} containing the first entry of the stream, or an empty {@code Optional} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws NullPointerException if the first entry is {@code null}
      * @see #findFirst()
      * @see #findAny()
      * @see #last()
      * @see Stream#first()
      */
     @Override
-    public Optional<Map.Entry<K, V>> first() {
+    public Optional<Map.Entry<K, V>> first() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return _stream.first();
@@ -6236,9 +6259,9 @@ public final class EntryStream<K, V> extends
      * stream is exhausted; only the latest entry is retained, so memory usage stays constant. The
      * stream is then closed.
      *
-     * <p><b>Null entries:</b> the returned {@code Optional} cannot hold {@code null}, so a
-     * {@link NullPointerException} is thrown if the last entry is {@code null}. An entry whose key
-     * or value is {@code null} is fine — only a {@code null} entry itself is rejected.</p>
+     * <p><b>Null entries:</b> the returned {@code Optional} is created with
+     * {@code Optional.ofNullable}, so a {@code null} last entry yields an <i>empty</i>
+     * {@code Optional} rather than throwing. An entry whose key or value is {@code null} is fine.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6251,13 +6274,12 @@ public final class EntryStream<K, V> extends
      *
      * @return an {@code Optional} containing the last entry of the stream, or an empty {@code Optional} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws NullPointerException if the last entry is {@code null}
      * @see #first()
      * @see #findLast(Throwables.Predicate)
      * @see Stream#last()
      */
     @Override
-    public Optional<Map.Entry<K, V>> last() {
+    public Optional<Map.Entry<K, V>> last() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return _stream.last();
@@ -6289,7 +6311,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#elementAt(long)
      */
     @Override
-    public Optional<Map.Entry<K, V>> elementAt(final long position) {
+    public Optional<Map.Entry<K, V>> elementAt(final long position) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return _stream.elementAt(position);
@@ -6319,7 +6341,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#onlyOne()
      */
     @Override
-    public Optional<Map.Entry<K, V>> onlyOne() throws TooManyElementsException {
+    public Optional<Map.Entry<K, V>> onlyOne() throws IllegalStateException, TooManyElementsException {
         _stream.assertNotClosed();
 
         return _stream.onlyOne();
@@ -6351,7 +6373,7 @@ public final class EntryStream<K, V> extends
      */
     @Deprecated
     @Override
-    public Optional<Map<Percentage, Map.Entry<K, V>>> percentiles() throws UnsupportedOperationException {
+    public Optional<Map<Percentage, Map.Entry<K, V>>> percentiles() throws IllegalStateException, UnsupportedOperationException {
         _stream.assertNotClosed();
 
         //    final Comparator<Map.Entry<Comparable, Comparable>> cmp = Comparators.<Comparable, Comparable> comparingByKey()
@@ -6396,7 +6418,8 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public Optional<Map<Percentage, Map.Entry<K, V>>> percentiles(final Comparator<? super Map.Entry<K, V>> comparator) throws IllegalArgumentException {
+    public Optional<Map<Percentage, Map.Entry<K, V>>> percentiles(final Comparator<? super Map.Entry<K, V>> comparator)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -6424,7 +6447,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#count()
      */
     @Override
-    public long count() {
+    public long count() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return _stream.count();
@@ -6455,7 +6478,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#iterator()
      */
     @Override
-    public ObjIterator<Map.Entry<K, V>> iterator() {
+    public ObjIterator<Map.Entry<K, V>> iterator() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return _stream.iteratorEx();
@@ -6495,7 +6518,9 @@ public final class EntryStream<K, V> extends
      * @see #iterator()
      */
     @SequentialOnly
-    public BiIterator<K, V> biIterator() {
+    public BiIterator<K, V> biIterator() throws IllegalStateException {
+        _stream.assertNotClosed();
+
         final ObjIterator<Map.Entry<K, V>> iter = _stream.iteratorEx();
 
         final BooleanSupplier hasNext = iter::hasNext;
@@ -6509,7 +6534,7 @@ public final class EntryStream<K, V> extends
     }
 
     @Override
-    protected Object[] toArray(final boolean closeStream) {
+    protected Object[] toArray(final boolean closeStream) throws IllegalStateException {
         _stream.assertNotClosed();
 
         return _stream.toArray(closeStream);
@@ -6540,7 +6565,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#toList()
      */
     @Override
-    public List<Map.Entry<K, V>> toList() {
+    public List<Map.Entry<K, V>> toList() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return _stream.toList();
@@ -6569,7 +6594,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#toSet()
      */
     @Override
-    public Set<Map.Entry<K, V>> toSet() {
+    public Set<Map.Entry<K, V>> toSet() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return _stream.toSet();
@@ -6602,7 +6627,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#toCollection(Supplier)
      */
     @Override
-    public <C extends Collection<Map.Entry<K, V>>> C toCollection(final Supplier<? extends C> supplier) throws IllegalArgumentException {
+    public <C extends Collection<Map.Entry<K, V>>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -6630,7 +6655,7 @@ public final class EntryStream<K, V> extends
      * @see #toMultiset(Supplier)
      */
     @Override
-    public Multiset<Map.Entry<K, V>> toMultiset() {
+    public Multiset<Map.Entry<K, V>> toMultiset() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return _stream.toMultiset();
@@ -6658,7 +6683,8 @@ public final class EntryStream<K, V> extends
      * @see #toMultiset()
      */
     @Override
-    public Multiset<Map.Entry<K, V>> toMultiset(final Supplier<? extends Multiset<Map.Entry<K, V>>> supplier) throws IllegalArgumentException {
+    public Multiset<Map.Entry<K, V>> toMultiset(final Supplier<? extends Multiset<Map.Entry<K, V>>> supplier)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -6683,8 +6709,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a {@code Map} containing all key-value pairs from this stream
-     * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalStateException if duplicate keys are encountered
+     * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
      * @see Stream#toMap(Throwables.Function, Throwables.Function)
      * @see #toMap(BinaryOperator)
      * @see #toMap(Supplier)
@@ -6727,7 +6752,8 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @param mergeFunction a function used to resolve collisions between values associated
-     *                      with the same key
+     *                      with the same key. A {@code null} result removes the key, as
+     *                      {@link Map#merge(Object, Object, BiFunction)} does
      * @return a {@code Map} containing all key-value pairs from this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}.
@@ -6741,7 +6767,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public Map<K, V> toMap(final BinaryOperator<V> mergeFunction) throws IllegalArgumentException {
+    public Map<K, V> toMap(final BinaryOperator<V> mergeFunction) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mergeFunction, cs.mergeFunction);
@@ -6764,13 +6790,18 @@ public final class EntryStream<K, V> extends
      * <pre>{@code
      * // Create a TreeMap to maintain sorted order
      * Map<String, Integer> result = EntryStream.of("b", 2, "a", 1, "c", 3)
-     *     .toMap(TreeMap::new);
+     *     .toMap(() -> new TreeMap<String, Integer>());
      * // Result: TreeMap with entries in sorted order: {"a"=1, "b"=2, "c"=3}
      *
      * // Create a LinkedHashMap to maintain insertion order
      * Map<String, Integer> result2 = EntryStream.of("a", 1, "b", 2, "c", 3)
-     *     .toMap(LinkedHashMap::new);
+     *     .toMap(() -> new LinkedHashMap<String, Integer>());
      * }</pre>
+     *
+     * <p><b>Note:</b> supply {@code mapFactory} as a lambda, not as a constructor reference. A
+     * constructor reference such as {@code LinkedHashMap::new} is <i>inexact</i>, so the compiler
+     * cannot choose between this overload and {@link #toMap(BinaryOperator)} and reports
+     * {@code reference to toMap is ambiguous}.
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
@@ -6778,8 +6809,7 @@ public final class EntryStream<K, V> extends
      * @param mapFactory a function which returns a new, empty {@code Map} into which the
      *                   results will be inserted
      * @return a {@code Map} containing all key-value pairs from this stream
-     * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalStateException if duplicate keys are encountered
+     * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
      * @throws IllegalArgumentException if {@code mapFactory} is {@code null}.
      * @see Stream#toMap(Throwables.Function, Throwables.Function, Supplier)
      * @see #toMap()
@@ -6791,7 +6821,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public <M extends Map<K, V>> M toMap(final Supplier<? extends M> mapFactory) throws IllegalArgumentException, IllegalStateException {
+    public <M extends Map<K, V>> M toMap(final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapFactory, cs.mapFactory);
@@ -6813,12 +6843,12 @@ public final class EntryStream<K, V> extends
      * <pre>{@code
      * // Create a TreeMap with custom merge logic
      * Map<String, Integer> result = EntryStream.of("b", 2, "a", 1, "b", 3, "c", 4)
-     *     .toMap(Integer::sum, TreeMap::new);
+     *     .toMap(Integer::sum, Suppliers.ofTreeMap());
      * // Result: TreeMap {"a"=1, "b"=5, "c"=4}
      *
      * // Create a ConcurrentHashMap keeping the maximum value for duplicates
      * Map<String, Integer> result2 = EntryStream.of("a", 5, "b", 3, "a", 2)
-     *     .toMap(Integer::max, ConcurrentHashMap::new);
+     *     .toMap(Integer::max, Suppliers.ofConcurrentHashMap());
      * // Result: ConcurrentHashMap {"a"=5, "b"=3}
      * }</pre>
      *
@@ -6826,7 +6856,8 @@ public final class EntryStream<K, V> extends
      *
      * @param <M> the type of the resulting {@code Map}
      * @param mergeFunction a function used to resolve collisions between values associated
-     *                      with the same key
+     *                      with the same key. A {@code null} result removes the key, as
+     *                      {@link Map#merge(Object, Object, BiFunction)} does
      * @param mapFactory a function which returns a new, empty {@code Map} into which the
      *                   results will be inserted
      * @return a {@code Map} containing all key-value pairs from this stream
@@ -6842,7 +6873,8 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public <M extends Map<K, V>> M toMap(final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+    public <M extends Map<K, V>> M toMap(final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mergeFunction, cs.mergeFunction);
@@ -6881,10 +6913,9 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the function
      * @param func the function to apply to the resulting map
      * @return the result of applying the function to the collected map
-     * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalStateException if duplicate keys are encountered during map collection
-     * @throws E if the function throws an exception
+     * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered during map collection
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if the function throws an exception
      * @see #toMap()
      * @see #toMapThenAccept(Throwables.Consumer)
      * @see Fn#throwingMerger()
@@ -6894,7 +6925,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public <R, E extends Exception> R toMapThenApply(final Throwables.Function<? super Map<K, V>, ? extends R, E> func)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(func, cs.func);
@@ -6926,10 +6957,9 @@ public final class EntryStream<K, V> extends
      *
      * @param <E> the type of exception that may be thrown by the consumer
      * @param consumer the consumer to accept the resulting map
-     * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalStateException if duplicate keys are encountered during map collection
-     * @throws E if the consumer throws an exception
+     * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered during map collection
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws E if the consumer throws an exception
      * @see #toMap()
      * @see #toMapThenApply(Throwables.Function)
      * @see Fn#throwingMerger()
@@ -6939,7 +6969,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public <E extends Exception> void toMapThenAccept(final Throwables.Consumer<? super Map<K, V>, E> consumer)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(consumer, cs.consumer);
@@ -6968,8 +6998,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return an {@code ImmutableMap} containing all key-value pairs from this stream
-     * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalStateException if duplicate keys are encountered
+     * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
      * @see Stream#toImmutableMap(Throwables.Function, Throwables.Function)
      * @see #toImmutableMap(BinaryOperator)
      * @see #toMap()
@@ -7009,7 +7038,8 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @param mergeFunction a function used to resolve collisions between values associated
-     *                      with the same key
+     *                      with the same key. A {@code null} result removes the key, as
+     *                      {@link Map#merge(Object, Object, BiFunction)} does
      * @return an {@code ImmutableMap} containing all key-value pairs from this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}.
@@ -7023,7 +7053,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public ImmutableMap<K, V> toImmutableMap(final BinaryOperator<V> mergeFunction) throws IllegalArgumentException {
+    public ImmutableMap<K, V> toImmutableMap(final BinaryOperator<V> mergeFunction) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mergeFunction, cs.mergeFunction);
@@ -7062,7 +7092,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public ListMultimap<K, V> toMultimap() {
+    public ListMultimap<K, V> toMultimap() throws IllegalStateException {
         _stream.assertNotClosed();
 
         if (isParallel()) {
@@ -7088,7 +7118,7 @@ public final class EntryStream<K, V> extends
      * // Create a custom multimap implementation
      * Multimap<String, Integer, TreeSet<Integer>> sorted =
      *     EntryStream.of("a", 3, "a", 1, "a", 2)
-     *     .toMultimap(() -> N.newMultimap(TreeMap::new, TreeSet::new));
+     *     .toMultimap(() -> N.newMultimap(Suppliers.ofTreeMap(), TreeSet::new));
      * // Result: {"a"={1, 2, 3}} with sorted keys and values
      * }</pre>
      *
@@ -7111,7 +7141,8 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public <C extends Collection<V>, M extends Multimap<K, V, C>> M toMultimap(final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+    public <C extends Collection<V>, M extends Multimap<K, V, C>> M toMultimap(final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapFactory, cs.mapFactory);
@@ -7158,7 +7189,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public Map<K, List<V>> groupTo() {
+    public Map<K, List<V>> groupTo() throws IllegalStateException {
         _stream.assertNotClosed();
 
         if (isParallel()) {
@@ -7178,12 +7209,12 @@ public final class EntryStream<K, V> extends
      * <pre>{@code
      * // Group into a TreeMap for sorted keys
      * Map<String, List<Integer>> result = EntryStream.of("b", 2, "a", 1, "b", 4, "a", 3)
-     *     .groupTo(TreeMap::new);
+     *     .groupTo(Suppliers.ofTreeMap());
      * // Result: TreeMap {"a"=[1, 3], "b"=[2, 4]}
      *
      * // Group into a LinkedHashMap to preserve insertion order
      * Map<String, List<String>> result2 = EntryStream.of("x", "X1", "y", "Y1", "x", "X2")
-     *     .groupTo(LinkedHashMap::new);
+     *     .groupTo(Suppliers.ofLinkedHashMap());
      * // Result maintains order of first occurrence of each key
      * }</pre>
      *
@@ -7206,7 +7237,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public <M extends Map<K, List<V>>> M groupTo(final Supplier<? extends M> mapFactory) throws IllegalArgumentException {
+    public <M extends Map<K, List<V>>> M groupTo(final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapFactory, cs.mapFactory);
@@ -7248,15 +7279,15 @@ public final class EntryStream<K, V> extends
      * @param func the function to apply to the grouped map
      * @return the result of applying the function to the grouped map
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if the function throws an exception
      * @see #groupTo()
      * @see #groupToThenAccept(Throwables.Consumer)
      */
     @SequentialOnly
     @TerminalOp
     public <R, E extends Exception> R groupToThenApply(final Throwables.Function<? super Map<K, List<V>>, ? extends R, E> func)
-            throws IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(func, cs.func);
@@ -7291,14 +7322,15 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that may be thrown by the consumer
      * @param consumer the consumer to accept the grouped map
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the consumer throws an exception
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws E if the consumer throws an exception
      * @see #groupTo()
      * @see #groupToThenApply(Throwables.Function)
      */
     @SequentialOnly
     @TerminalOp
-    public <E extends Exception> void groupToThenAccept(final Throwables.Consumer<? super Map<K, List<V>>, E> consumer) throws IllegalArgumentException, E {
+    public <E extends Exception> void groupToThenAccept(final Throwables.Consumer<? super Map<K, List<V>>, E> consumer)
+            throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(consumer, cs.consumer);
@@ -7340,12 +7372,15 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public Map.Entry<K, V> reduce(final Map.Entry<K, V> identity, final BinaryOperator<Map.Entry<K, V>> accumulator) throws IllegalArgumentException {
+    public Map.Entry<K, V> reduce(final Map.Entry<K, V> identity, final BinaryOperator<Map.Entry<K, V>> accumulator)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
 
-        return _stream.reduce(identity, accumulator);
+        // Documented (and annotated) as always sequential: there is no combiner, so a parallel reduce would fold
+        // partial results with the accumulator and hand a non-associative accumulator arbitrary interleavings.
+        return _stream.isParallel() ? _stream.sequential().reduce(identity, accumulator) : _stream.reduce(identity, accumulator);
     }
 
     /**
@@ -7381,7 +7416,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> reduce(final BinaryOperator<Map.Entry<K, V>> accumulator) throws IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> reduce(final BinaryOperator<Map.Entry<K, V>> accumulator) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -7436,7 +7471,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super Map.Entry<K, V>> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -7466,7 +7501,7 @@ public final class EntryStream<K, V> extends
      *
      * // Collect into a custom map (different from toMap)
      * Map<String, Integer> map = EntryStream.of("a", 1, "b", 2, "c", 3)
-     *     .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()));
+     *     .collect(Suppliers.ofMap(), (m, e) -> m.put(e.getKey(), e.getValue()));
      *
      * // Build a string representation
      * StringBuilder sb = EntryStream.of("x", 10, "y", 20)
@@ -7491,7 +7526,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super Map.Entry<K, V>> accumulator) throws IllegalArgumentException {
+    public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super Map.Entry<K, V>> accumulator)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -7532,13 +7568,14 @@ public final class EntryStream<K, V> extends
      * @param collector the {@code Collector} describing the reduction
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code collector} is {@code null}
      * @see Stream#collect(Collector)
      * @see #collect(Supplier, BiConsumer, BiConsumer)
      * @see java.util.stream.Collectors
      */
     @ParallelSupported
     @TerminalOp
-    public <R> R collect(final Collector<? super Map.Entry<K, V>, ?, R> collector) {
+    public <R> R collect(final Collector<? super Map.Entry<K, V>, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return _stream.collect(collector);
@@ -7587,8 +7624,8 @@ public final class EntryStream<K, V> extends
      * @param func the function to apply to the result of the collection
      * @return the result of applying the function to the collected data
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the function throws an exception
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws E if the function throws an exception
      * @see Stream#collectThenApply(Collector, Throwables.Function)
      * @see #collect(Collector)
      * @see #collectThenAccept(Collector, Throwables.Consumer)
@@ -7596,7 +7633,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <R, RR, E extends Exception> RR collectThenApply(final Collector<? super Map.Entry<K, V>, ?, R> downstream,
-            final Throwables.Function<? super R, ? extends RR, E> func) throws IllegalArgumentException, E {
+            final Throwables.Function<? super R, ? extends RR, E> func) throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(func, cs.func);
@@ -7639,8 +7676,8 @@ public final class EntryStream<K, V> extends
      * @param downstream the {@code Collector} to perform the mutable reduction
      * @param consumer the consumer to accept the result of the collection
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the consumer throws an exception
      * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws E if the consumer throws an exception
      * @see Stream#collectThenAccept(Collector, Throwables.Consumer)
      * @see #collect(Collector)
      * @see #collectThenApply(Collector, Throwables.Function)
@@ -7648,7 +7685,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <R, E extends Exception> void collectThenAccept(final Collector<? super Map.Entry<K, V>, ?, R> downstream,
-            final Throwables.Consumer<? super R, E> consumer) throws IllegalArgumentException, E {
+            final Throwables.Consumer<? super R, E> consumer) throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
         checkArgNotNull(consumer, cs.consumer);
@@ -7678,7 +7715,7 @@ public final class EntryStream<K, V> extends
      * @see #join(CharSequence, CharSequence, CharSequence, CharSequence)
      */
     @Override
-    public String join(final CharSequence delimiter) {
+    public String join(final CharSequence delimiter) throws IllegalStateException {
         _stream.assertNotClosed();
 
         return join(delimiter, "", "");
@@ -7713,7 +7750,7 @@ public final class EntryStream<K, V> extends
      * @see #join(CharSequence, CharSequence, CharSequence, CharSequence)
      */
     @Override
-    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) {
+    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException {
         _stream.assertNotClosed();
 
         return join(delimiter, "=", prefix, suffix);
@@ -7749,7 +7786,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public String join(final CharSequence delimiter, final CharSequence keyValueDelimiter) {
+    public String join(final CharSequence delimiter, final CharSequence keyValueDelimiter) throws IllegalStateException {
         _stream.assertNotClosed();
 
         return join(delimiter, keyValueDelimiter, "", "");
@@ -7797,9 +7834,7 @@ public final class EntryStream<K, V> extends
             throws IllegalStateException {
         _stream.assertNotClosed();
 
-        try {
-            @SuppressWarnings("resource")
-            final Joiner joiner = Joiner.with(delimiter, keyValueDelimiter, prefix, suffix).reuseBuffer();
+        try (final Joiner joiner = Joiner.with(delimiter, keyValueDelimiter, prefix, suffix).reuseBuffer()) {
             final Iterator<Map.Entry<K, V>> iter = _stream.iteratorEx();
 
             while (iter.hasNext()) {
@@ -7897,7 +7932,7 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> transformViaStream(
             final Function<? super Stream<Map.Entry<K, V>>, ? extends Stream<? extends Map.Entry<? extends KK, ? extends VV>>> transfer)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(transfer, cs.transfer);
@@ -7944,16 +7979,18 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> transformViaStream(
             final Function<? super Stream<Map.Entry<K, V>>, ? extends Stream<? extends Map.Entry<? extends KK, ? extends VV>>> transfer, final boolean deferred)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(transfer, cs.transfer);
 
+        // onClose(this::close) for the same reason StreamBase.linkCloseToThis(..) exists: a transfer that
+        // ignores its input would otherwise leave this stream - and any handle behind it - open forever.
         if (deferred) {
             final Supplier<EntryStream<KK, VV>> delayInitializer = () -> EntryStream.of(transfer.apply(_stream));
-            return EntryStream.defer(delayInitializer);
+            return EntryStream.<KK, VV> defer(delayInitializer).onClose(this::close);
         } else {
-            return of(transfer.apply(_stream));
+            return of(transfer.apply(_stream)).onClose(this::close);
         }
     }
 
@@ -8005,7 +8042,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#sequential()
      */
     @Override
-    public EntryStream<K, V> sequential() {
+    public EntryStream<K, V> sequential() throws IllegalStateException {
         _stream.assertNotClosed();
 
         return _stream.isParallel() ? of(_stream.sequential()) : this;
@@ -8013,7 +8050,7 @@ public final class EntryStream<K, V> extends
 
     @Override
     protected EntryStream<K, V> parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
-            final boolean cancelUncompletedThreads) {
+            final boolean cancelUncompletedThreads) throws IllegalStateException {
         _stream.assertNotClosed();
 
         return of(_stream.parallel(maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads));
@@ -8069,6 +8106,13 @@ public final class EntryStream<K, V> extends
      * <p>This method is deprecated and marked as {@code @Beta} for experimental features.
      * It can only be used in sequential streams (not parallel).
      *
+     * <p><b>Every emitted entry must be read before the next one is produced:</b> a single mutable entry is reused
+     * for all elements, and it refuses to be overwritten while its current key/value pair has not been read through
+     * {@code getKey()} or {@code getValue()}. Downstream operations that advance without reading the entry, such as
+     * {@code skip(n)}, {@code count()} or {@code limit(n)} followed by another pull, therefore fail with an
+     * {@link IllegalStateException} ("Entry has already been set ..."). Consume the returned stream with
+     * {@code forEach}, {@code map}, {@code filter} or another operation that reads each entry.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Original: {("a", 1), ("b", 2), ("c", 3)}
@@ -8089,7 +8133,7 @@ public final class EntryStream<K, V> extends
     @IntermediateOp
     @Deprecated
     @Beta
-    public EntryStream<V, K> invertedToDisposableEntry() {
+    public EntryStream<V, K> invertedToDisposableEntry() throws IllegalStateException {
         _stream.assertNotClosed();
 
         checkState(!_stream.isParallel(), "invertedToDisposableEntry cannot be applied to parallel stream");
@@ -8133,7 +8177,7 @@ public final class EntryStream<K, V> extends
      * @throws IllegalArgumentException if {@code closeHandler} is {@code null}.
      */
     @Override
-    public EntryStream<K, V> onClose(final Runnable closeHandler) throws IllegalArgumentException {
+    public EntryStream<K, V> onClose(final Runnable closeHandler) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(closeHandler, cs.closeHandler);
@@ -8194,7 +8238,7 @@ public final class EntryStream<K, V> extends
      * @param <V> the type of values in the maps accepted by the returned function
      * @return a function mapping a {@code Map} to a {@code Stream} of its entries
      */
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings("rawtypes")
     static <K, V> Function<Map<K, V>, Stream<Map.Entry<K, V>>> mapFunc() {
         return (Function) mapper_func;
     }
@@ -8252,7 +8296,7 @@ public final class EntryStream<K, V> extends
      *
      * @param <K> the type of keys in the EntryStream
      * @param <V> the type of values in the EntryStream
-     * @param supplier the supplier that provides the EntryStream
+     * @param supplier the supplier that provides the EntryStream; a {@code null} result is treated as an empty stream
      * @return an EntryStream that is lazily populated by the provided supplier
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see Stream#defer(Supplier)
@@ -8261,7 +8305,12 @@ public final class EntryStream<K, V> extends
         N.checkArgNotNull(supplier, cs.supplier);
 
         // NOSONAR
-        final Stream<Map.Entry<? extends K, ? extends V>> s = Stream.defer(() -> supplier.get().entries());
+        final Stream<Map.Entry<? extends K, ? extends V>> s = Stream.defer(() -> {
+            final EntryStream<? extends K, ? extends V> es = supplier.get();
+
+            return es == null ? Stream.empty() : es.entries();
+        });
+
         return new EntryStream<>(s);
     }
 
@@ -8309,7 +8358,7 @@ public final class EntryStream<K, V> extends
      *
      * // Process a single entry
      * EntryStream.of("name", "John")
-     *     .mapValue(String::toUpperCase)
+     *     .mapValue(v -> v.toUpperCase())
      *     .forEach(e -> System.out.println(e.getKey() + ": " + e.getValue()));
      * // Prints: name: JOHN
      * }</pre>
@@ -8485,7 +8534,7 @@ public final class EntryStream<K, V> extends
      *     "Saturday", 6
      * );
      * Map<Integer, String> numberToDay = dayNumbers
-     *     .invert()
+     *     .inverted()
      *     .toMap();   // {1: "Monday", 2: "Tuesday", ...}
      * }</pre>
      *
@@ -8604,8 +8653,8 @@ public final class EntryStream<K, V> extends
      * Returns an EntryStream containing the entries from the given iterator.
      *
      * <p>This method creates a stream that lazily consumes entries from the iterator.
-     * The iterator is consumed as the stream operations are executed. Once the stream
-     * is consumed, the iterator will be exhausted and cannot be reused.
+     * The iterator is advanced as stream operations consume entries. A short-circuiting terminal
+     * operation may leave entries unread; closing the stream does not drain the iterator.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8786,7 +8835,7 @@ public final class EntryStream<K, V> extends
      * );
      * EntryStream<Integer, Person> byAge = EntryStream.of(people, Person::getAge);
      * // Group people by age
-     * Map<Integer, List<Person>> ageGroups = byAge.groupTo(LinkedHashMap::new);
+     * Map<Integer, List<Person>> ageGroups = byAge.groupTo(Suppliers.ofLinkedHashMap());
      * }</pre>
      *
      * @param <T> the type of elements in the collection
@@ -9143,8 +9192,9 @@ public final class EntryStream<K, V> extends
      *
      * @param <K> the type of keys in the maps
      * @param <V> the type of values in the maps
-     * @param maps the collection of maps to be merged
-     * @param nextSelector a function that determines which entry should be selected next
+     * @param maps the collection of maps to be merged; {@code null} or empty maps are skipped
+     * @param nextSelector a function that determines which entry should be selected next; it receives
+     *                     {@code Map.Entry<K, V>} arguments, like the two- and three-map overloads
      * @return an EntryStream containing the merged entries from all maps
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      * @see #merge(Map, Map, BiFunction)
@@ -9152,25 +9202,25 @@ public final class EntryStream<K, V> extends
      * @see Stream#mergeIterables(Collection, BiFunction)
      * @see MergeResult
      */
+    @SuppressWarnings("rawtypes")
     public static <K, V> EntryStream<K, V> merge(final Collection<? extends Map<? extends K, ? extends V>> maps,
-            final BiFunction<? super Map.Entry<? extends K, ? extends V>, ? super Map.Entry<? extends K, ? extends V>, MergeResult> nextSelector)
-            throws IllegalArgumentException {
+            final BiFunction<? super Map.Entry<K, V>, ? super Map.Entry<K, V>, MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(maps)) {
             return EntryStream.empty();
         }
 
-        final List<Set<? extends Map.Entry<? extends K, ? extends V>>> entryIteratorList = new ArrayList<>(maps.size());
+        final List<Set<Map.Entry<K, V>>> entrySets = new ArrayList<>(maps.size());
 
         for (final Map<? extends K, ? extends V> map : maps) {
             if (N.notEmpty(map)) {
-                entryIteratorList.add(map.entrySet());
+                entrySets.add((Set) map.entrySet());
             }
         }
 
         //noinspection resource
-        return Stream.mergeIterables(entryIteratorList, nextSelector).mapToEntry(Fn.identity());
+        return Stream.mergeIterables(entrySets, nextSelector).mapToEntry(Fn.identity());
     }
 
     /**
@@ -9524,9 +9574,9 @@ public final class EntryStream<K, V> extends
          * @param value the value to set
          * @throws IllegalStateException if the entry has already been set without being read
          */
-        public void set(final K key, final V value) {
+        public void set(final K key, final V value) throws IllegalStateException {
             if (flag) {
-                throw new IllegalStateException("Entry has already been set; call get() to retrieve the value before setting again");
+                throw new IllegalStateException("Entry has already been set; call getKey() or getValue() to retrieve the value before setting again");
             }
 
             this.key = key;
@@ -9561,6 +9611,10 @@ public final class EntryStream<K, V> extends
         public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
+            }
+
+            if (obj instanceof ReusableEntry<?, ?> other) {
+                return N.equals(key, other.key) && N.equals(value, other.value);
             }
 
             if (obj instanceof Entry<?, ?> another) {

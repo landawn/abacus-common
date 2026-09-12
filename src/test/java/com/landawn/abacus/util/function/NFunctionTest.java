@@ -40,9 +40,11 @@ public class NFunctionTest extends TestBase {
     public void testApplyWithAnonymousClass() {
         NFunction<Integer, Double> function = new NFunction<>() {
             @Override
-            public Double apply(Integer... args) {
-                if (args.length == 0)
+            @SafeVarargs
+            public final Double apply(Integer... args) {
+                if (args.length == 0) {
                     return 0.0;
+                }
                 double sum = 0;
                 for (Integer n : args) {
                     sum += n;
@@ -116,8 +118,9 @@ public class NFunctionTest extends TestBase {
         NFunction<String, Integer> function = args -> {
             int count = 0;
             for (String s : args) {
-                if (s != null)
+                if (s != null) {
                     count++;
+                }
             }
             return count;
         };
@@ -139,12 +142,14 @@ public class NFunctionTest extends TestBase {
     @Test
     public void testComplexCalculation() {
         NFunction<Integer, Integer> function = args -> {
-            if (args.length == 0)
+            if (args.length == 0) {
                 return 0;
+            }
             int max = args[0];
             for (Integer n : args) {
-                if (n > max)
+                if (n > max) {
                     max = n;
+                }
             }
             return max;
         };

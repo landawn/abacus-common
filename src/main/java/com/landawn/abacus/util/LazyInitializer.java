@@ -37,6 +37,10 @@ import java.util.function.Supplier;
  * @param <T> the type of the lazily initialized object
  */
 final class LazyInitializer<T> implements com.landawn.abacus.util.function.Supplier<T> {
+    // A private monitor rather than `this`: this object is what the caller receives from Fn.memoize(Supplier) and
+    // N.lazyInit(Supplier), and a caller doing `synchronized (lazy) { ... }` must not be able to block or
+    // interleave with an initialization.
+    private final Object lock = new Object();
     private Supplier<T> supplier;
     private volatile boolean initialized = false;
     private volatile T value = null; //NOSONAR
@@ -86,7 +90,9 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
      * be reclaimed even while this initializer remains reachable.
      *
      * <p>This method is thread-safe. In the absence of exceptions and recursive re-entry, the supplier
-     * is invoked exactly once even under concurrent access.</p>
+     * is invoked exactly once even under concurrent access. Initialization is serialized on a private monitor,
+     * not on this object, so caller code that synchronizes on this initializer can neither block nor interleave
+     * with an initialization.</p>
      *
      * <p><b>Exception handling:</b> If the supplier throws an unchecked exception during initialization,
      * the initialization state is <em>not</em> marked as completed and the exception is propagated to the
@@ -112,9 +118,9 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
      * @throws RuntimeException if the supplier throws an unchecked exception during initialization
      */
     @Override
-    public T get() {
+    public T get() throws IllegalStateException, RuntimeException {
         if (!initialized) {
-            synchronized (this) {
+            synchronized (lock) {
                 if (!initialized) {
                     if (initializing) {
                         if (recursiveFailure == null) {

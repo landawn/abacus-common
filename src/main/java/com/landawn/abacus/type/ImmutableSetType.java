@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -64,9 +65,10 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      *
      * @param typeClass the concrete ImmutableSet (sub)class this handler produces
      * @param parameterTypeName the name of the element type parameter
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings("rawtypes")
-    ImmutableSetType(final Class<?> typeClass, final String parameterTypeName) {
+    ImmutableSetType(final Class<?> typeClass, final String parameterTypeName) throws IllegalArgumentException {
         super(getTypeName(typeClass, parameterTypeName, false));
 
         this.typeClass = (Class) typeClass;
@@ -164,6 +166,18 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
+     * Indicates whether values of this type are immutable.
+     * An {@link ImmutableSet} (including its sorted and navigable subtypes) cannot be modified after construction,
+     * so its values are immutable by construction.
+     *
+     * @return {@code true}, always
+     */
+    @Override
+    public boolean isImmutable() {
+        return true;
+    }
+
+    /**
      * Returns the serialization type category for this immutable set.
      * Delegates to the underlying set type for serialization categorization.
      *
@@ -187,11 +201,12 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      *
      * @param x the immutable set to serialize; may be {@code null}
      * @return the string representation, or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its type handler fails to produce a string.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final ImmutableSet<E> x) {
+    public String stringOf(final ImmutableSet<E> x) throws RuntimeException {
         return setType.stringOf(x);
     }
 
@@ -209,11 +224,15 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @param str the string to parse; may be {@code null} or blank
      * @return a new {@link ImmutableSet} (or the declared sorted/navigable subtype) containing the parsed elements,
      *         or {@code null} if {@code str} is {@code null} or blank
+     * @throws RuntimeException if the declared element type rejects the non-null input during conversion.
+     * @throws ClassCastException if a sorted-set target receives elements that are not mutually comparable.
+     * @throws NullPointerException if a sorted-set target receives a null element that its comparator does not support.
      * @see #valueOf(Object)
      * @see #stringOf(ImmutableSet)
      */
+    @MayReturnNull
     @Override
-    public ImmutableSet<E> valueOf(final String str) {
+    public ImmutableSet<E> valueOf(final String str) throws RuntimeException, ClassCastException, NullPointerException {
         final Set<E> set = setType.valueOf(str);
 
         if (set == null) {
@@ -242,7 +261,9 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      *
      * @param writer the {@link Appendable} to write to
      * @param x the immutable set to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -254,7 +275,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable writer, final ImmutableSet<E> x) throws IOException {
+    public void appendTo(final Appendable writer, final ImmutableSet<E> x) throws NullPointerException, IOException, RuntimeException {
         setType.appendTo(writer, x);
     }
 
@@ -274,10 +295,13 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x the immutable set to write; may be {@code null}
      * @param config the serialization configuration to use; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final ImmutableSet<E> x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final ImmutableSet<E> x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, RuntimeException {
         setType.serializeTo(writer, x, config);
     }
 
@@ -289,8 +313,10 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @param parameterTypeName the name of the element type
      * @param isDeclaringName {@code true} to generate a declaring name with simple class names, {@code false} for fully qualified names
      * @return the formatted type name (e.g., "ImmutableSet&lt;String&gt;" or "com.landawn.abacus.util.ImmutableSet&lt;java.lang.String&gt;")
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName)
+            throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         } else {

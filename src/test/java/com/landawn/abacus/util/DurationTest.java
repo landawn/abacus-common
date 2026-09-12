@@ -13,772 +13,44 @@ import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
 public class DurationTest extends TestBase {
 
-    // --- ofDays ---
-
     @Test
-    public void testOfDays() {
-        Duration d = Duration.ofDays(1);
-        assertEquals(86400000L, d.toMillis());
-
-        Duration zero = Duration.ofDays(0);
-        assertEquals(Duration.ZERO, zero);
-        assertTrue(zero.isZero());
-
-        Duration negative = Duration.ofDays(-1);
-        assertEquals(-86400000L, negative.toMillis());
-
+    public void testOf() {
+        assertEquals(86400000L, Duration.ofDays(1).toMillis());
+        assertEquals(Duration.ZERO, Duration.ofDays(0));
+        assertTrue(Duration.ofDays(0).isZero());
+        assertEquals(-86400000L, Duration.ofDays(-1).toMillis());
         assertThrows(ArithmeticException.class, () -> Duration.ofDays(Long.MAX_VALUE / 1000));
-    }
+        assertThrows(ArithmeticException.class, () -> Duration.ofDays(Long.MAX_VALUE / 86400000L + 1));
 
-    @Test
-    public void testOverflowHandling() {
-        Assertions.assertThrows(ArithmeticException.class, () -> Duration.ofDays(Long.MAX_VALUE / 86400000L + 1));
-
-        Assertions.assertThrows(ArithmeticException.class, () -> Duration.ofHours(Long.MAX_VALUE / 3600000L + 1));
-
-        Duration large = Duration.ofMillis(Long.MAX_VALUE - 1000);
-        Assertions.assertThrows(ArithmeticException.class, () -> large.plusMillis(2000));
-
-        Duration small = Duration.ofMillis(Long.MIN_VALUE + 1000);
-        Assertions.assertThrows(ArithmeticException.class, () -> small.minusMillis(2000));
-
-        Duration d = Duration.ofDays(1000000);
-        Assertions.assertThrows(ArithmeticException.class, () -> d.multipliedBy(1000000));
-    }
-
-    @Test
-    public void testCombinedOperations() {
-        Duration workDay = Duration.ofHours(8);
-        Duration lunch = Duration.ofMinutes(30);
-        Duration meeting = Duration.ofMinutes(45);
-
-        Duration actualWork = workDay.minus(lunch).minus(meeting);
-        Assertions.assertEquals(405L, actualWork.toMinutes());
-
-        Duration result = Duration.ofDays(1).plusHours(2).plusMinutes(30).plusSeconds(15).plusMillis(500);
-
-        long expectedMillis = 86400000L + 7200000L + 1800000L + 15000L + 500L;
-        Assertions.assertEquals(expectedMillis, result.toMillis());
-    }
-
-    // --- ofHours ---
-
-    @Test
-    public void testOfHours() {
-        Duration d = Duration.ofHours(1);
-        assertEquals(3600000L, d.toMillis());
-
-        Duration zero = Duration.ofHours(0);
-        assertEquals(Duration.ZERO, zero);
-
-        Duration negative = Duration.ofHours(-24);
-        assertEquals(-86400000L, negative.toMillis());
-
+        assertEquals(3600000L, Duration.ofHours(1).toMillis());
+        assertEquals(Duration.ZERO, Duration.ofHours(0));
+        assertEquals(-86400000L, Duration.ofHours(-24).toMillis());
         assertThrows(ArithmeticException.class, () -> Duration.ofHours(Long.MAX_VALUE / 1000));
-    }
+        assertThrows(ArithmeticException.class, () -> Duration.ofHours(Long.MAX_VALUE / 3600000L + 1));
 
-    // --- ofMinutes ---
-
-    @Test
-    public void testOfMinutes() {
-        Duration d = Duration.ofMinutes(1);
-        assertEquals(60000L, d.toMillis());
-
-        Duration zero = Duration.ofMinutes(0);
-        assertEquals(Duration.ZERO, zero);
-
-        Duration negative = Duration.ofMinutes(-60);
-        assertEquals(-3600000L, negative.toMillis());
-
+        assertEquals(60000L, Duration.ofMinutes(1).toMillis());
+        assertEquals(Duration.ZERO, Duration.ofMinutes(0));
+        assertEquals(-3600000L, Duration.ofMinutes(-60).toMillis());
         assertThrows(ArithmeticException.class, () -> Duration.ofMinutes(Long.MAX_VALUE / 1000));
-    }
 
-    // --- ofSeconds ---
-
-    @Test
-    public void testOfSeconds() {
-        Duration d = Duration.ofSeconds(1);
-        assertEquals(1000L, d.toMillis());
-
-        Duration zero = Duration.ofSeconds(0);
-        assertEquals(Duration.ZERO, zero);
-
-        Duration negative = Duration.ofSeconds(-60);
-        assertEquals(-60000L, negative.toMillis());
-
+        assertEquals(1000L, Duration.ofSeconds(1).toMillis());
+        assertEquals(Duration.ZERO, Duration.ofSeconds(0));
+        assertEquals(-60000L, Duration.ofSeconds(-60).toMillis());
         assertThrows(ArithmeticException.class, () -> Duration.ofSeconds(Long.MAX_VALUE));
-    }
 
-    // --- ofMillis ---
-
-    @Test
-    public void testOfMillis() {
-        Duration d = Duration.ofMillis(1000);
-        assertEquals(1000L, d.toMillis());
-
-        Duration zero = Duration.ofMillis(0);
-        assertEquals(Duration.ZERO, zero);
-
-        Duration negative = Duration.ofMillis(-1000);
-        assertEquals(-1000L, negative.toMillis());
-    }
-
-    // --- between(Date, Date) ---
-
-    @Test
-    public void testBetween_dates() {
-        java.util.Date later = new java.util.Date(2_000L);
-        java.util.Date earlier = new java.util.Date(500L);
-
-        Duration diff = Duration.between(earlier, later);
-        assertEquals(Duration.ofMillis(1_500L), diff);
-
-        Duration negativeDiff = Duration.between(later, earlier);
-        assertEquals(Duration.ofMillis(-1_500L), negativeDiff);
-
-        Duration zeroDiff = Duration.between(later, later);
-        assertEquals(Duration.ZERO, zeroDiff);
-    }
-
-    @Test
-    public void testBetweenDatesThrowsOnOverflow() {
-        assertThrows(ArithmeticException.class, () -> Duration.between(new java.util.Date(Long.MAX_VALUE), new java.util.Date(Long.MIN_VALUE)));
-    }
-
-    // --- between(Calendar, Calendar) ---
-
-    @Test
-    public void testBetween_calendars() {
-        Calendar cal1 = Calendar.getInstance();
-        Calendar cal2 = Calendar.getInstance();
-
-        cal1.setTimeInMillis(1_000L);
-        cal2.setTimeInMillis(5_000L);
-
-        Duration diff = Duration.between(cal1, cal2);
-        assertEquals(Duration.ofMillis(4_000L), diff);
-
-        Duration negativeDiff = Duration.between(cal2, cal1);
-        assertEquals(Duration.ofMillis(-4_000L), negativeDiff);
-
-        cal1.setTimeInMillis(5_000L);
-        Duration zeroDiff = Duration.between(cal1, cal2);
-        assertEquals(Duration.ZERO, zeroDiff);
-    }
-
-    @Test
-    public void testBetweenCalendarsThrowsOnOverflow() {
-        Calendar start = Calendar.getInstance();
-        Calendar end = Calendar.getInstance();
-        start.setTimeInMillis(Long.MAX_VALUE);
-        end.setTimeInMillis(Long.MIN_VALUE);
-
-        assertThrows(ArithmeticException.class, () -> Duration.between(start, end));
-    }
-
-    // --- between(Temporal, Temporal) ---
-
-    @Test
-    public void testBetween_temporal_instant() {
-        Instant start = Instant.ofEpochMilli(1_000L);
-        Instant end = Instant.ofEpochMilli(1_600L);
-
-        Duration diff = Duration.between(start, end);
-        assertEquals(Duration.ofMillis(600L), diff);
-
-        Duration negativeDiff = Duration.between(end, start);
-        assertEquals(Duration.ofMillis(-600L), negativeDiff);
-
-        Duration zeroDiff = Duration.between(start, start);
-        assertEquals(Duration.ZERO, zeroDiff);
-    }
-
-    @Test
-    public void testBetween_temporal_localDateTime() {
-        LocalDateTime ldt1 = LocalDateTime.of(2025, 1, 1, 0, 0, 0);
-        LocalDateTime ldt2 = ldt1.plusDays(1).plusNanos(TimeUnit.MILLISECONDS.toNanos(123));
-
-        Duration diff = Duration.between(ldt1, ldt2);
-        assertEquals(Duration.ofMillis(TimeUnit.DAYS.toMillis(1) + 123), diff);
-
-        Duration negativeDiff = Duration.between(ldt2, ldt1);
-        assertEquals(Duration.ofMillis(-(TimeUnit.DAYS.toMillis(1) + 123)), negativeDiff);
-    }
-
-    @Test
-    public void testBetween_dates_null() {
-        java.util.Date date = new java.util.Date();
-
-        assertThrows(IllegalArgumentException.class, () -> Duration.between(date, null));
-        assertThrows(IllegalArgumentException.class, () -> Duration.between(null, date));
-    }
-
-    @Test
-    public void testBetween_calendars_null() {
-        Calendar cal = Calendar.getInstance();
-
-        assertThrows(IllegalArgumentException.class, () -> Duration.between(cal, null));
-        assertThrows(IllegalArgumentException.class, () -> Duration.between(null, cal));
-    }
-
-    @Test
-    public void testBetween_temporal_null() {
-        Instant now = Instant.now();
-
-        assertThrows(IllegalArgumentException.class, () -> Duration.between(now, null));
-        assertThrows(IllegalArgumentException.class, () -> Duration.between(null, now));
-    }
-
-    // --- isZero ---
-
-    @Test
-    public void testIsZero() {
-        assertTrue(Duration.ZERO.isZero());
-        assertTrue(Duration.ofMillis(0).isZero());
-        assertFalse(Duration.ofMillis(1).isZero());
-        assertFalse(Duration.ofMillis(-1).isZero());
-    }
-
-    // --- isNegative ---
-
-    @Test
-    public void testIsNegative() {
-        assertTrue(Duration.ofMillis(-1).isNegative());
-        assertTrue(Duration.ofSeconds(-1).isNegative());
-        assertFalse(Duration.ZERO.isNegative());
-        assertFalse(Duration.ofMillis(1).isNegative());
-    }
-
-    // --- plus ---
-
-    @Test
-    public void testPlus() {
-        Duration d1 = Duration.ofSeconds(30);
-        Duration d2 = Duration.ofSeconds(20);
-        Duration result = d1.plus(d2);
-        assertEquals(50000L, result.toMillis());
-
-        Duration zero = Duration.ofSeconds(10).plus(Duration.ZERO);
-        assertEquals(10000L, zero.toMillis());
-
-        Duration max = Duration.ofMillis(Long.MAX_VALUE);
-        assertThrows(ArithmeticException.class, () -> max.plus(Duration.ofMillis(1)));
-    }
-
-    // --- plusDays ---
-
-    @Test
-    public void testPlusDays() {
-        Duration d = Duration.ofDays(1);
-        Duration result = d.plusDays(1);
-        assertEquals(172800000L, result.toMillis());
-
-        Duration negative = Duration.ofDays(5).plusDays(-2);
-        assertEquals(259200000L, negative.toMillis());
-
-        assertThrows(ArithmeticException.class, () -> Duration.ofDays(1).plusDays(Long.MAX_VALUE / 1000));
-    }
-
-    // --- plusHours ---
-
-    @Test
-    public void testPlusHours() {
-        Duration d = Duration.ofHours(1);
-        Duration result = d.plusHours(2);
-        assertEquals(10800000L, result.toMillis());
-
-        Duration negative = Duration.ofHours(5).plusHours(-2);
-        assertEquals(10800000L, negative.toMillis());
-
-        assertThrows(ArithmeticException.class, () -> Duration.ofHours(1).plusHours(Long.MAX_VALUE / 1000));
-    }
-
-    // --- plusMinutes ---
-
-    @Test
-    public void testPlusMinutes() {
-        Duration d = Duration.ofMinutes(30);
-        Duration result = d.plusMinutes(15);
-        assertEquals(2700000L, result.toMillis());
-
-        Duration negative = Duration.ofMinutes(30).plusMinutes(-10);
-        assertEquals(1200000L, negative.toMillis());
-
-        assertThrows(ArithmeticException.class, () -> Duration.ofMinutes(1).plusMinutes(Long.MAX_VALUE / 1000));
-    }
-
-    // --- plusSeconds ---
-
-    @Test
-    public void testPlusSeconds() {
-        Duration d = Duration.ofSeconds(30);
-        Duration result = d.plusSeconds(20);
-        assertEquals(50000L, result.toMillis());
-
-        Duration negative = Duration.ofSeconds(30).plusSeconds(-10);
-        assertEquals(20000L, negative.toMillis());
-
-        assertThrows(ArithmeticException.class, () -> Duration.ofSeconds(1).plusSeconds(Long.MAX_VALUE));
-    }
-
-    // --- plusMillis ---
-
-    @Test
-    public void testPlusMillis() {
-        Duration d = Duration.ofMillis(1000);
-        Duration result = d.plusMillis(500);
-        assertEquals(1500L, result.toMillis());
-
-        Duration same = d.plusMillis(0);
-        assertSame(d, same);
-
-        Duration negative = Duration.ofMillis(1000).plusMillis(-500);
-        assertEquals(500L, negative.toMillis());
-
-        Duration max = Duration.ofMillis(Long.MAX_VALUE);
-        assertThrows(ArithmeticException.class, () -> max.plusMillis(1));
-    }
-
-    // --- minus ---
-
-    @Test
-    public void testMinus() {
-        Duration d1 = Duration.ofSeconds(50);
-        Duration d2 = Duration.ofSeconds(20);
-        Duration result = d1.minus(d2);
-        assertEquals(30000L, result.toMillis());
-
-        Duration zero = Duration.ofSeconds(10).minus(Duration.ZERO);
-        assertEquals(10000L, zero.toMillis());
-
-        Duration min = Duration.ofMillis(Long.MIN_VALUE);
-        assertThrows(ArithmeticException.class, () -> min.minus(Duration.ofMillis(1)));
-    }
-
-    // --- minusDays ---
-
-    @Test
-    public void testMinusDays() {
-        Duration d = Duration.ofDays(5);
-        Duration result = d.minusDays(2);
-        assertEquals(259200000L, result.toMillis());
-
-        Duration negative = Duration.ofDays(1).minusDays(-1);
-        assertEquals(172800000L, negative.toMillis());
-
-        assertThrows(ArithmeticException.class, () -> Duration.ofDays(-1).minusDays(Long.MAX_VALUE / 1000));
-    }
-
-    // --- minusHours ---
-
-    @Test
-    public void testMinusHours() {
-        Duration d = Duration.ofHours(5);
-        Duration result = d.minusHours(2);
-        assertEquals(10800000L, result.toMillis());
-
-        Duration negative = Duration.ofHours(1).minusHours(-2);
-        assertEquals(10800000L, negative.toMillis());
-
-        assertThrows(ArithmeticException.class, () -> Duration.ofHours(-1).minusHours(Long.MAX_VALUE / 1000));
-    }
-
-    // --- minusMinutes ---
-
-    @Test
-    public void testMinusMinutes() {
-        Duration d = Duration.ofMinutes(45);
-        Duration result = d.minusMinutes(15);
-        assertEquals(1800000L, result.toMillis());
-
-        Duration negative = Duration.ofMinutes(30).minusMinutes(-10);
-        assertEquals(2400000L, negative.toMillis());
-
-        assertThrows(ArithmeticException.class, () -> Duration.ofMinutes(-1).minusMinutes(Long.MAX_VALUE / 1000));
-    }
-
-    // --- minusSeconds ---
-
-    @Test
-    public void testMinusSeconds() {
-        Duration d = Duration.ofSeconds(50);
-        Duration result = d.minusSeconds(20);
-        assertEquals(30000L, result.toMillis());
-
-        Duration negative = Duration.ofSeconds(30).minusSeconds(-10);
-        assertEquals(40000L, negative.toMillis());
-
-        assertThrows(ArithmeticException.class, () -> Duration.ofSeconds(-1).minusSeconds(Long.MAX_VALUE));
-    }
-
-    // --- minusMillis ---
-
-    @Test
-    public void testMinusMillis() {
-        Duration d = Duration.ofMillis(1500);
-        Duration result = d.minusMillis(500);
-        assertEquals(1000L, result.toMillis());
-
-        Duration same = d.minusMillis(0);
-        assertSame(d, same);
-
-        Duration negative = Duration.ofMillis(1000).minusMillis(-500);
-        assertEquals(1500L, negative.toMillis());
-
-        Duration min = Duration.ofMillis(Long.MIN_VALUE);
-        assertThrows(ArithmeticException.class, () -> min.minusMillis(1));
-    }
-
-    // --- multipliedBy ---
-
-    @Test
-    public void testMultipliedBy() {
-        Duration d = Duration.ofSeconds(10);
-        Duration result = d.multipliedBy(3);
-        assertEquals(30000L, result.toMillis());
-
-        Duration zero = d.multipliedBy(0);
-        assertEquals(Duration.ZERO, zero);
-
-        Duration same = d.multipliedBy(1);
-        assertSame(d, same);
-
-        Duration negative = d.multipliedBy(-2);
-        assertEquals(-20000L, negative.toMillis());
-
-        Duration large = Duration.ofMillis(Long.MAX_VALUE / 2);
-        assertThrows(ArithmeticException.class, () -> large.multipliedBy(3));
-    }
-
-    // --- dividedBy ---
-
-    @Test
-    public void testDividedBy() {
-        Duration d = Duration.ofSeconds(30);
-        Duration result = d.dividedBy(3);
-        assertEquals(10000L, result.toMillis());
-
-        Duration same = d.dividedBy(1);
-        assertSame(d, same);
-
-        Duration negative = d.dividedBy(-2);
-        assertEquals(-15000L, negative.toMillis());
-
-        assertThrows(ArithmeticException.class, () -> d.dividedBy(0));
-
-        Duration truncated = Duration.ofMillis(100).dividedBy(3);
-        assertEquals(33L, truncated.toMillis());
-    }
-
-    // --- negated ---
-
-    @Test
-    public void testNegated() {
-        Duration positive = Duration.ofSeconds(10);
-        Duration negated = positive.negated();
-        assertEquals(-10000L, negated.toMillis());
-
-        Duration negative = Duration.ofSeconds(-10);
-        Duration negatedNegative = negative.negated();
-        assertEquals(10000L, negatedNegative.toMillis());
-
-        Duration zero = Duration.ZERO.negated();
-        assertEquals(Duration.ZERO, zero);
-
-        Duration min = Duration.ofMillis(Long.MIN_VALUE);
-        assertThrows(ArithmeticException.class, () -> min.negated());
-    }
-
-    // --- abs ---
-
-    @Test
-    public void testAbs() {
-        Duration positive = Duration.ofSeconds(10);
-        Duration abs = positive.abs();
-        assertSame(positive, abs);
-        assertEquals(10000L, abs.toMillis());
-
-        Duration negative = Duration.ofSeconds(-10);
-        Duration absNegative = negative.abs();
-        assertEquals(10000L, absNegative.toMillis());
-
-        Duration zero = Duration.ZERO.abs();
-        assertSame(zero, Duration.ZERO);
-
-        Duration min = Duration.ofMillis(Long.MIN_VALUE);
-        assertThrows(ArithmeticException.class, () -> min.abs());
-    }
-
-    // --- toDays ---
-
-    @Test
-    public void testToDays() {
-        Duration d = Duration.ofDays(5);
-        assertEquals(5L, d.toDays());
-
-        Duration partial = Duration.ofHours(30);
-        assertEquals(1L, partial.toDays());
-
-        Duration negative = Duration.ofDays(-3);
-        assertEquals(-3L, negative.toDays());
-
-        Duration zero = Duration.ZERO;
-        assertEquals(0L, zero.toDays());
-    }
-
-    // --- toHours ---
-
-    @Test
-    public void testToHours() {
-        Duration d = Duration.ofHours(10);
-        assertEquals(10L, d.toHours());
-
-        Duration partial = Duration.ofMinutes(90);
-        assertEquals(1L, partial.toHours());
-
-        Duration negative = Duration.ofHours(-5);
-        assertEquals(-5L, negative.toHours());
-
-        Duration zero = Duration.ZERO;
-        assertEquals(0L, zero.toHours());
-    }
-
-    // --- toMinutes ---
-
-    @Test
-    public void testToMinutes() {
-        Duration d = Duration.ofMinutes(45);
-        assertEquals(45L, d.toMinutes());
-
-        Duration partial = Duration.ofSeconds(90);
-        assertEquals(1L, partial.toMinutes());
-
-        Duration negative = Duration.ofMinutes(-30);
-        assertEquals(-30L, negative.toMinutes());
-
-        Duration zero = Duration.ZERO;
-        assertEquals(0L, zero.toMinutes());
-    }
-
-    // --- toSeconds ---
-
-    @Test
-    public void testToSeconds() {
-        Duration d = Duration.ofSeconds(120);
-        assertEquals(120L, d.toSeconds());
-
-        Duration partial = Duration.ofMillis(1500);
-        assertEquals(1L, partial.toSeconds());
-
-        Duration negative = Duration.ofSeconds(-60);
-        assertEquals(-60L, negative.toSeconds());
-
-        Duration zero = Duration.ZERO;
-        assertEquals(0L, zero.toSeconds());
-    }
-
-    // --- toMillis ---
-
-    @Test
-    public void testToMillis() {
-        Duration d = Duration.ofMillis(12345);
-        assertEquals(12345L, d.toMillis());
-
-        Duration negative = Duration.ofMillis(-5000);
-        assertEquals(-5000L, negative.toMillis());
-
-        Duration zero = Duration.ZERO;
-        assertEquals(0L, zero.toMillis());
-    }
-
-    @Test
-    public void testNegativeSecondAndMillisecondPartsUseSignedTruncatingRemainders() {
-        final Duration halfSecond = Duration.ofMillis(-500);
-        assertEquals(0, halfSecond.toSecondsPart());
-        assertEquals(-500, halfSecond.toMillisPart());
-
-        final Duration oneAndHalfSeconds = Duration.ofMillis(-1500);
-        assertEquals(-1, oneAndHalfSeconds.toSecondsPart());
-        assertEquals(-500, oneAndHalfSeconds.toMillisPart());
-    }
-
-    // --- toJdkDuration ---
-
-    @Test
-    public void testToJdkDuration() {
-        Duration d = Duration.ofHours(2);
-        java.time.Duration jdkDuration = d.toJdkDuration();
-        assertEquals(7200000L, jdkDuration.toMillis());
-
-        Duration negative = Duration.ofMinutes(-30);
-        java.time.Duration jdkNegative = negative.toJdkDuration();
-        assertEquals(-1800000L, jdkNegative.toMillis());
-
-        Duration zero = Duration.ZERO;
-        java.time.Duration jdkZero = zero.toJdkDuration();
-        assertEquals(0L, jdkZero.toMillis());
-    }
-
-    // --- compareTo ---
-
-    @Test
-    public void testCompareTo() {
-        Duration d1 = Duration.ofSeconds(10);
-        Duration d2 = Duration.ofSeconds(20);
-        Duration d3 = Duration.ofSeconds(10);
-
-        assertTrue(d1.compareTo(d2) < 0);
-        assertTrue(d2.compareTo(d1) > 0);
-        assertEquals(0, d1.compareTo(d3));
-
-        Duration negative = Duration.ofSeconds(-5);
-        assertTrue(negative.compareTo(d1) < 0);
-        assertTrue(d1.compareTo(negative) > 0);
-    }
-
-    // --- equals ---
-
-    @Test
-    public void testEquals() {
-        Duration d1 = Duration.ofSeconds(10);
-        Duration d2 = Duration.ofSeconds(10);
-        Duration d3 = Duration.ofSeconds(20);
-
-        assertEquals(d1, d2);
-        assertNotEquals(d1, d3);
-        assertNotEquals(d1, null);
-        assertNotEquals(d1, "not a duration");
-
-        assertEquals(d1, d1);
-
+        assertEquals(1000L, Duration.ofMillis(1000).toMillis());
         assertEquals(Duration.ZERO, Duration.ofMillis(0));
-    }
+        assertEquals(-1000L, Duration.ofMillis(-1000).toMillis());
 
-    // --- hashCode ---
-
-    @Test
-    public void testHashCode() {
-        Duration d1 = Duration.ofSeconds(10);
-        Duration d2 = Duration.ofSeconds(10);
-        Duration d3 = Duration.ofSeconds(20);
-
-        assertEquals(d1.hashCode(), d2.hashCode());
-        assertNotEquals(d1.hashCode(), d3.hashCode());
-
-        assertEquals(Duration.ZERO.hashCode(), Duration.ofMillis(0).hashCode());
-    }
-
-    // --- toString ---
-
-    @Test
-    public void testToString() {
-        assertEquals("PT0S", Duration.ZERO.toString());
-
-        assertEquals("PT1H", Duration.ofHours(1).toString());
-
-        assertEquals("PT1H30M", Duration.ofMinutes(90).toString());
-
-        Duration complex = Duration.ofHours(1).plusMinutes(30).plusSeconds(25);
-        assertEquals("PT1H30M25S", complex.toString());
-
-        Duration withMillis = Duration.ofSeconds(25).plusMillis(500);
-        assertEquals("PT25.500S", withMillis.toString());
-
-        assertEquals("-PT0.500S", Duration.ofMillis(-500).toString());
-
-        assertEquals("PT30S", Duration.ofSeconds(30).toString());
-
-        assertEquals("PT5M", Duration.ofMinutes(5).toString());
-
-        Duration negative = Duration.ofHours(-2).minusMinutes(30);
-        String negativeStr = negative.toString();
-        assertTrue(negativeStr.contains("-"));
-
-        Duration secWithMillis = Duration.ofMillis(1500);
-        assertEquals("PT1.500S", secWithMillis.toString());
-    }
-
-    /**
-     * Regression test for negative multi-component duration formatting.
-     *
-     * A sign after PT applies to an individual component, so "PT-1M30.500S"
-     * parses as -29.5 seconds. The sign must precede P to negate the entire
-     * 90.5-second duration.
-     */
-    @Test
-    public void testToString_negativeSubHour() {
-        // -90_500 ms = -(1 minute + 30 seconds + 500 ms)
-        assertEquals("-PT1M30.500S", Duration.ofMillis(-90_500).toString());
-
-        // -90_000 ms = -(1 minute + 30 seconds), no fractional second
-        assertEquals("-PT1M30S", Duration.ofMillis(-90_000).toString());
-
-        // -1_500 ms = -(1 second + 500 ms)
-        assertEquals("-PT1.500S", Duration.ofMillis(-1_500).toString());
-
-        // -3_661_000 ms = -(1 hour + 1 minute + 1 second)
-        assertEquals("-PT1H1M1S", Duration.ofMillis(-3_661_000).toString());
-
-        // positive control — must remain unchanged
-        assertEquals("PT1M30.500S", Duration.ofMillis(90_500).toString());
-
-        // -500 ms: only fractional second, zero whole-second part
-        assertEquals("-PT0.500S", Duration.ofMillis(-500).toString());
-
-        // -60_000 ms = exactly -1 minute, no seconds
-        assertEquals("-PT1M", Duration.ofMinutes(-1).toString());
-
-        // -3_600_000 ms = exactly -1 hour, no minutes/seconds
-        assertEquals("-PT1H", Duration.ofHours(-1).toString());
-    }
-
-    // --- Integration / edge-case tests ---
-
-    @Test
-    public void testImmutability() {
-        Duration original = Duration.ofSeconds(10);
-        long originalMillis = original.toMillis();
-
-        Duration plus = original.plusSeconds(5);
-        assertEquals(10000L, original.toMillis());
-        assertEquals(15000L, plus.toMillis());
-
-        Duration minus = original.minusSeconds(5);
-        assertEquals(10000L, original.toMillis());
-        assertEquals(5000L, minus.toMillis());
-
-        Duration multiplied = original.multipliedBy(2);
-        assertEquals(10000L, original.toMillis());
-        assertEquals(20000L, multiplied.toMillis());
-
-        Duration divided = original.dividedBy(2);
-        assertEquals(10000L, original.toMillis());
-        assertEquals(5000L, divided.toMillis());
-
-        Duration negated = original.negated();
-        assertEquals(10000L, original.toMillis());
-        assertEquals(-10000L, negated.toMillis());
-
-        Duration abs = original.abs();
-        assertEquals(10000L, original.toMillis());
-        assertEquals(10000L, abs.toMillis());
-    }
-
-    // --- ZERO constant ---
-
-    @Test
-    public void testZeroConstant() {
         assertNotNull(Duration.ZERO);
         assertTrue(Duration.ZERO.isZero());
         assertEquals(0L, Duration.ZERO.toMillis());
-
         assertSame(Duration.ZERO, Duration.ofMillis(0));
         assertSame(Duration.ZERO, Duration.ofSeconds(0));
         assertSame(Duration.ZERO, Duration.ofMinutes(0));
@@ -787,29 +59,234 @@ public class DurationTest extends TestBase {
     }
 
     @Test
-    public void testToStringLongMinValueUsesSingleLeadingSign() {
-        assertEquals("-PT2562047788015H12M55.808S", Duration.ofMillis(Long.MIN_VALUE).toString());
+    public void testBetween() {
+        java.util.Date later = new java.util.Date(2_000L);
+        java.util.Date earlier = new java.util.Date(500L);
+        assertEquals(Duration.ofMillis(1_500L), Duration.between(earlier, later));
+        assertEquals(Duration.ofMillis(-1_500L), Duration.between(later, earlier));
+        assertEquals(Duration.ZERO, Duration.between(later, later));
+        assertThrows(ArithmeticException.class, () -> Duration.between(new java.util.Date(Long.MAX_VALUE), new java.util.Date(Long.MIN_VALUE)));
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(later, null));
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(null, later));
+
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTimeInMillis(1_000L);
+        cal2.setTimeInMillis(5_000L);
+        assertEquals(Duration.ofMillis(4_000L), Duration.between(cal1, cal2));
+        assertEquals(Duration.ofMillis(-4_000L), Duration.between(cal2, cal1));
+        cal1.setTimeInMillis(5_000L);
+        assertEquals(Duration.ZERO, Duration.between(cal1, cal2));
+        Calendar start = Calendar.getInstance();
+        Calendar end = Calendar.getInstance();
+        start.setTimeInMillis(Long.MAX_VALUE);
+        end.setTimeInMillis(Long.MIN_VALUE);
+        assertThrows(ArithmeticException.class, () -> Duration.between(start, end));
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(cal2, null));
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(null, cal2));
+
+        Instant instantStart = Instant.ofEpochMilli(1_000L);
+        Instant instantEnd = Instant.ofEpochMilli(1_600L);
+        assertEquals(Duration.ofMillis(600L), Duration.between(instantStart, instantEnd));
+        assertEquals(Duration.ofMillis(-600L), Duration.between(instantEnd, instantStart));
+        assertEquals(Duration.ZERO, Duration.between(instantStart, instantStart));
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(instantStart, null));
+        assertThrows(IllegalArgumentException.class, () -> Duration.between(null, instantStart));
+
+        LocalDateTime ldt1 = LocalDateTime.of(2025, 1, 1, 0, 0, 0);
+        LocalDateTime ldt2 = ldt1.plusDays(1).plusNanos(TimeUnit.MILLISECONDS.toNanos(123));
+        assertEquals(Duration.ofMillis(TimeUnit.DAYS.toMillis(1) + 123), Duration.between(ldt1, ldt2));
+        assertEquals(Duration.ofMillis(-(TimeUnit.DAYS.toMillis(1) + 123)), Duration.between(ldt2, ldt1));
     }
 
     @Test
-    public void testNegativeToStringRoundTripsThroughJdkDuration() {
-        long[] values = { -500L, -60_000L, -90_500L, -3_600_000L, -3_661_000L, Long.MIN_VALUE };
+    public void testIsZeroAndNegative() {
+        assertTrue(Duration.ZERO.isZero());
+        assertTrue(Duration.ofMillis(0).isZero());
+        assertFalse(Duration.ofMillis(1).isZero());
+        assertFalse(Duration.ofMillis(-1).isZero());
+        assertTrue(Duration.ofMillis(-1).isNegative());
+        assertTrue(Duration.ofSeconds(-1).isNegative());
+        assertFalse(Duration.ZERO.isNegative());
+        assertFalse(Duration.ofMillis(1).isNegative());
+    }
 
+    @Test
+    public void testPlusAndMinus() {
+        Duration d1 = Duration.ofSeconds(30);
+        assertEquals(50000L, d1.plus(Duration.ofSeconds(20)).toMillis());
+        assertEquals(10000L, Duration.ofSeconds(10).plus(Duration.ZERO).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofMillis(Long.MAX_VALUE).plus(Duration.ofMillis(1)));
+        assertThrows(ArithmeticException.class, () -> Duration.ofMillis(Long.MAX_VALUE - 1000).plusMillis(2000));
+
+        assertEquals(172800000L, Duration.ofDays(1).plusDays(1).toMillis());
+        assertEquals(259200000L, Duration.ofDays(5).plusDays(-2).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofDays(1).plusDays(Long.MAX_VALUE / 1000));
+        assertEquals(10800000L, Duration.ofHours(1).plusHours(2).toMillis());
+        assertEquals(10800000L, Duration.ofHours(5).plusHours(-2).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofHours(1).plusHours(Long.MAX_VALUE / 1000));
+        assertEquals(2700000L, Duration.ofMinutes(30).plusMinutes(15).toMillis());
+        assertEquals(1200000L, Duration.ofMinutes(30).plusMinutes(-10).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofMinutes(1).plusMinutes(Long.MAX_VALUE / 1000));
+        assertEquals(50000L, Duration.ofSeconds(30).plusSeconds(20).toMillis());
+        assertEquals(20000L, Duration.ofSeconds(30).plusSeconds(-10).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofSeconds(1).plusSeconds(Long.MAX_VALUE));
+        Duration millis = Duration.ofMillis(1000);
+        assertEquals(1500L, millis.plusMillis(500).toMillis());
+        assertSame(millis, millis.plusMillis(0));
+        assertEquals(500L, millis.plusMillis(-500).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofMillis(Long.MAX_VALUE).plusMillis(1));
+
+        Duration d2 = Duration.ofSeconds(50);
+        assertEquals(30000L, d2.minus(Duration.ofSeconds(20)).toMillis());
+        assertEquals(10000L, Duration.ofSeconds(10).minus(Duration.ZERO).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofMillis(Long.MIN_VALUE).minus(Duration.ofMillis(1)));
+        assertThrows(ArithmeticException.class, () -> Duration.ofMillis(Long.MIN_VALUE + 1000).minusMillis(2000));
+
+        assertEquals(259200000L, Duration.ofDays(5).minusDays(2).toMillis());
+        assertEquals(172800000L, Duration.ofDays(1).minusDays(-1).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofDays(-1).minusDays(Long.MAX_VALUE / 1000));
+        assertEquals(10800000L, Duration.ofHours(5).minusHours(2).toMillis());
+        assertEquals(10800000L, Duration.ofHours(1).minusHours(-2).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofHours(-1).minusHours(Long.MAX_VALUE / 1000));
+        assertEquals(1800000L, Duration.ofMinutes(45).minusMinutes(15).toMillis());
+        assertEquals(2400000L, Duration.ofMinutes(30).minusMinutes(-10).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofMinutes(-1).minusMinutes(Long.MAX_VALUE / 1000));
+        assertEquals(30000L, Duration.ofSeconds(50).minusSeconds(20).toMillis());
+        assertEquals(40000L, Duration.ofSeconds(30).minusSeconds(-10).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofSeconds(-1).minusSeconds(Long.MAX_VALUE));
+        Duration minusMillis = Duration.ofMillis(1500);
+        assertEquals(1000L, minusMillis.minusMillis(500).toMillis());
+        assertSame(minusMillis, minusMillis.minusMillis(0));
+        assertEquals(1500L, Duration.ofMillis(1000).minusMillis(-500).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofMillis(Long.MIN_VALUE).minusMillis(1));
+
+        Duration actualWork = Duration.ofHours(8).minus(Duration.ofMinutes(30)).minus(Duration.ofMinutes(45));
+        assertEquals(405L, actualWork.toMinutes());
+        Duration chained = Duration.ofDays(1).plusHours(2).plusMinutes(30).plusSeconds(15).plusMillis(500);
+        assertEquals(86400000L + 7200000L + 1800000L + 15000L + 500L, chained.toMillis());
+    }
+
+    @Test
+    public void testMultipliedDividedNegatedAbs() {
+        Duration d = Duration.ofSeconds(10);
+        assertEquals(30000L, d.multipliedBy(3).toMillis());
+        assertEquals(Duration.ZERO, d.multipliedBy(0));
+        assertSame(d, d.multipliedBy(1));
+        assertEquals(-20000L, d.multipliedBy(-2).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofMillis(Long.MAX_VALUE / 2).multipliedBy(3));
+        assertThrows(ArithmeticException.class, () -> Duration.ofDays(1000000).multipliedBy(1000000));
+
+        Duration thirty = Duration.ofSeconds(30);
+        assertEquals(10000L, thirty.dividedBy(3).toMillis());
+        assertSame(thirty, thirty.dividedBy(1));
+        assertEquals(-15000L, thirty.dividedBy(-2).toMillis());
+        assertThrows(ArithmeticException.class, () -> thirty.dividedBy(0));
+        assertEquals(33L, Duration.ofMillis(100).dividedBy(3).toMillis());
+        assertThrows(ArithmeticException.class, () -> Duration.ofMillis(Long.MIN_VALUE).dividedBy(-1));
+        assertEquals(Duration.ofMillis(-5), Duration.ofMillis(5).dividedBy(-1));
+        assertEquals(Duration.ofMillis(2), Duration.ofMillis(5).dividedBy(2));
+
+        assertEquals(-10000L, d.negated().toMillis());
+        assertEquals(10000L, Duration.ofSeconds(-10).negated().toMillis());
+        assertEquals(Duration.ZERO, Duration.ZERO.negated());
+        assertThrows(ArithmeticException.class, () -> Duration.ofMillis(Long.MIN_VALUE).negated());
+
+        assertSame(d, d.abs());
+        assertEquals(10000L, Duration.ofSeconds(-10).abs().toMillis());
+        assertSame(Duration.ZERO, Duration.ZERO.abs());
+        assertThrows(ArithmeticException.class, () -> Duration.ofMillis(Long.MIN_VALUE).abs());
+
+        Duration original = Duration.ofSeconds(10);
+        original.plusSeconds(5);
+        original.minusSeconds(5);
+        original.multipliedBy(2);
+        original.dividedBy(2);
+        original.negated();
+        original.abs();
+        assertEquals(10000L, original.toMillis());
+    }
+
+    @Test
+    public void testConversions() {
+        assertEquals(5L, Duration.ofDays(5).toDays());
+        assertEquals(1L, Duration.ofHours(30).toDays());
+        assertEquals(-3L, Duration.ofDays(-3).toDays());
+        assertEquals(0L, Duration.ZERO.toDays());
+        assertEquals(10L, Duration.ofHours(10).toHours());
+        assertEquals(1L, Duration.ofMinutes(90).toHours());
+        assertEquals(-5L, Duration.ofHours(-5).toHours());
+        assertEquals(0L, Duration.ZERO.toHours());
+        assertEquals(45L, Duration.ofMinutes(45).toMinutes());
+        assertEquals(1L, Duration.ofSeconds(90).toMinutes());
+        assertEquals(-30L, Duration.ofMinutes(-30).toMinutes());
+        assertEquals(0L, Duration.ZERO.toMinutes());
+        assertEquals(120L, Duration.ofSeconds(120).toSeconds());
+        assertEquals(1L, Duration.ofMillis(1500).toSeconds());
+        assertEquals(-60L, Duration.ofSeconds(-60).toSeconds());
+        assertEquals(0L, Duration.ZERO.toSeconds());
+        assertEquals(12345L, Duration.ofMillis(12345).toMillis());
+        assertEquals(-5000L, Duration.ofMillis(-5000).toMillis());
+        assertEquals(0L, Duration.ZERO.toMillis());
+
+        Duration halfSecond = Duration.ofMillis(-500);
+        assertEquals(0, halfSecond.toSecondsPart());
+        assertEquals(-500, halfSecond.toMillisPart());
+        Duration oneAndHalfSeconds = Duration.ofMillis(-1500);
+        assertEquals(-1, oneAndHalfSeconds.toSecondsPart());
+        assertEquals(-500, oneAndHalfSeconds.toMillisPart());
+
+        assertEquals(7200000L, Duration.ofHours(2).toJdkDuration().toMillis());
+        assertEquals(-1800000L, Duration.ofMinutes(-30).toJdkDuration().toMillis());
+        assertEquals(0L, Duration.ZERO.toJdkDuration().toMillis());
+    }
+
+    @Test
+    public void testCompareEqualsHashCodeToString() {
+        Duration d1 = Duration.ofSeconds(10);
+        Duration d2 = Duration.ofSeconds(20);
+        Duration d3 = Duration.ofSeconds(10);
+        assertTrue(d1.compareTo(d2) < 0);
+        assertTrue(d2.compareTo(d1) > 0);
+        assertEquals(0, d1.compareTo(d3));
+        Duration negative = Duration.ofSeconds(-5);
+        assertTrue(negative.compareTo(d1) < 0);
+        assertTrue(d1.compareTo(negative) > 0);
+
+        assertEquals(d1, d3);
+        assertEquals(d1, d1);
+        assertNotEquals(d1, d2);
+        assertNotEquals(d1, null);
+        assertNotEquals(d1, "not a duration");
+        assertEquals(Duration.ZERO, Duration.ofMillis(0));
+        assertEquals(d1.hashCode(), d3.hashCode());
+        assertNotEquals(d1.hashCode(), d2.hashCode());
+        assertEquals(Duration.ZERO.hashCode(), Duration.ofMillis(0).hashCode());
+
+        assertEquals("PT0S", Duration.ZERO.toString());
+        assertEquals("PT1H", Duration.ofHours(1).toString());
+        assertEquals("PT1H30M", Duration.ofMinutes(90).toString());
+        assertEquals("PT1H30M25S", Duration.ofHours(1).plusMinutes(30).plusSeconds(25).toString());
+        assertEquals("PT25.500S", Duration.ofSeconds(25).plusMillis(500).toString());
+        assertEquals("PT30S", Duration.ofSeconds(30).toString());
+        assertEquals("PT5M", Duration.ofMinutes(5).toString());
+        assertEquals("PT1.500S", Duration.ofMillis(1500).toString());
+        assertTrue(Duration.ofHours(-2).minusMinutes(30).toString().contains("-"));
+
+        assertEquals("-PT1M30.500S", Duration.ofMillis(-90_500).toString());
+        assertEquals("-PT1M30S", Duration.ofMillis(-90_000).toString());
+        assertEquals("-PT1.500S", Duration.ofMillis(-1_500).toString());
+        assertEquals("-PT1H1M1S", Duration.ofMillis(-3_661_000).toString());
+        assertEquals("PT1M30.500S", Duration.ofMillis(90_500).toString());
+        assertEquals("-PT0.500S", Duration.ofMillis(-500).toString());
+        assertEquals("-PT1M", Duration.ofMinutes(-1).toString());
+        assertEquals("-PT1H", Duration.ofHours(-1).toString());
+        assertEquals("-PT2562047788015H12M55.808S", Duration.ofMillis(Long.MIN_VALUE).toString());
+
+        long[] values = { -500L, -60_000L, -90_500L, -3_600_000L, -3_661_000L, Long.MIN_VALUE };
         for (long value : values) {
             String text = Duration.ofMillis(value).toString();
             assertEquals(value, java.time.Duration.parse(text).toMillis(), text);
         }
     }
-
-    // --- regression tests for 2026-06-11 deep-review fixes ---
-
-    @Test
-    public void testDividedByMinusOneOverflowThrows() {
-        // regression: Long.MIN_VALUE / -1 overflows silently (JLS 15.17.2), returning a negative
-        // duration despite the class's checked-arithmetic contract; it now routes through negated()
-        org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> Duration.ofMillis(Long.MIN_VALUE).dividedBy(-1));
-        assertEquals(Duration.ofMillis(-5), Duration.ofMillis(5).dividedBy(-1));
-        assertEquals(Duration.ofMillis(2), Duration.ofMillis(5).dividedBy(2));
-    }
-
 }

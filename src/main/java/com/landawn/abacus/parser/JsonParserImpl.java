@@ -34,14 +34,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.nio.CharBuffer;
 import java.util.AbstractMap;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
@@ -53,6 +57,7 @@ import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
+import com.landawn.abacus.type.ObjectType;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.Type.SerializationType;
 import com.landawn.abacus.util.Array;
@@ -60,22 +65,28 @@ import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Dataset;
+import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.EntityId;
 import com.landawn.abacus.util.EscapeUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.IdentityHashSet;
+import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.ImmutableEntry;
+import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableInt;
+import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
+import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.RowDataset;
 import com.landawn.abacus.util.Seid;
 import com.landawn.abacus.util.Sheet;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.Timed;
 import com.landawn.abacus.util.Triple;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple1;
@@ -89,6 +100,8 @@ import com.landawn.abacus.util.Tuple.Tuple8;
 import com.landawn.abacus.util.Tuple.Tuple9;
 import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.stream.Stream;
+import com.landawn.abacus.util.u.Nullable;
+import com.landawn.abacus.util.u.Optional;
 
 /**
  * Internal implementation of JSON parser for serialization and deserialization operations.
@@ -102,8 +115,18 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Efficient JSON serialization with configurable formatting options</li>
  *   <li>Robust JSON deserialization with type safety</li>
  *   <li>Support for complex types (Dataset, Sheet, EntityId, MapEntity)</li>
- *   <li>Circular reference detection and handling</li>
+ *   <li>Circular reference handling: with {@code circularReferenceSupported} enabled an object already on the
+ *       current serialization path is written as {@code null}; when disabled (default) no identities are tracked.
+ *       In both modes a graph nested deeper than 256 structured values is rejected with a
+ *       {@link ParsingException} - the cycle heuristic of the default mode, and a stack-overflow guard in the
+ *       other. Deserialization separately permits 256 nested parsing dispatch levels. Ordinary Map/List
+ *       roots are not counted, while typed wrapper dispatch can consume additional levels, so the read and
+ *       write boundaries need not coincide</li>
  *   <li>Streaming support for large JSON arrays</li>
+ *   <li>Numeric conversion on read: an <i>unquoted</i> decimal token read into an integral slot is truncated
+ *       toward zero ({@code [1.50]} into a {@code List<Integer>} yields {@code [1]}), while the quoted form is
+ *       parsed by the target type itself and rejects it - see
+ *       {@link #readValue(JsonReader, boolean, com.landawn.abacus.type.Type)}</li>
  *   <li>Configurable {@code null} value handling and property exclusion</li>
  *   <li>Pretty printing and indentation support</li>
  * </ul>
@@ -198,11 +221,16 @@ final class JsonParserImpl extends AbstractJsonParser {
      *         default value, depending on the target type) is returned; if the source is {@code null}, the
      *         same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
      *         target type's default value
-     * @throws UncheckedIOException if an I/O error occurs during parsing
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
-    public <T> T parse(String source, JsonDeserConfig config, Type<? extends T> targetType) {
+    public <T> T parse(String source, JsonDeserConfig config, Type<? extends T> targetType)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         final JsonDeserConfig configToUse = check(config);
 
         if ((Strings.isEmpty(source) && configToUse.isReadNullToEmpty()) || (source != null && source.isEmpty())) {
@@ -247,11 +275,14 @@ final class JsonParserImpl extends AbstractJsonParser {
      *         default value, depending on the target type) is returned; if the source is {@code null}, the
      *         same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
      *         target type's default value
-     * @throws UncheckedIOException if an I/O error occurs during parsing
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
-    public <T> T parse(final String source, final JsonDeserConfig config, final Class<? extends T> targetClass) {
+    public <T> T parse(final String source, final JsonDeserConfig config, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return parse(source, config, Type.of(targetClass));
     }
 
@@ -266,7 +297,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * JsonDeserConfig config = new JsonDeserConfig();
      * String json = "[1, 2, 3, 4, 5]";
      * Integer[] numbers = new Integer[5];
-     * parser.parse(json, config, numbers);
+     * parser.parseInto(json, config, numbers);
      * // numbers array is now filled: [1, 2, 3, 4, 5]
      * }</pre>
      *
@@ -274,12 +305,14 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param output the pre-allocated array to populate with parsed values; must not be {@code null}
      * @throws IllegalArgumentException if {@code output} is {@code null}.
-     * @throws UncheckedIOException if an I/O error occurs during parsing
-     * @throws ParsingException if the JSON structure is invalid or not an array
-     * @throws IndexOutOfBoundsException if the JSON array contains more elements than the output array can hold
+     * @throws IndexOutOfBoundsException if more parsed elements are retained than the output array can hold
+     * @throws ParsingException if the source cannot be parsed as an element sequence
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
-    public void parse(final String source, final JsonDeserConfig config, final Object[] output) throws IllegalArgumentException {
+    public void parseInto(final String source, final JsonDeserConfig config, final Object[] output)
+            throws IllegalArgumentException, IndexOutOfBoundsException, ParsingException, UncheckedIOException {
         final JsonDeserConfig configToUse = check(config);
         N.checkArgNotNull(output, cs.output);
 
@@ -313,7 +346,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * JsonDeserConfig config = new JsonDeserConfig();
      * String json = "[\"apple\", \"banana\", \"orange\"]";
      * List<String> fruits = new ArrayList<>();
-     * parser.parse(json, config, fruits);
+     * parser.parseInto(json, config, fruits);
      * // fruits now contains: ["apple", "banana", "orange"]
      * }</pre>
      *
@@ -321,12 +354,14 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param output the collection to populate with parsed elements; must not be {@code null}
      * @throws IllegalArgumentException if {@code output} is {@code null}.
-     * @throws UncheckedIOException if an I/O error occurs during parsing
-     * @throws ParsingException if the JSON structure is invalid or not an array
-     * @throws UnsupportedOperationException if the collection is unmodifiable
+     * @throws UnsupportedOperationException if parsing attempts to insert an element into a collection that does not support insertion
+     * @throws ParsingException if the source cannot be parsed as an element sequence
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
-    public void parse(final String source, final JsonDeserConfig config, final Collection<?> output) throws IllegalArgumentException {
+    public void parseInto(final String source, final JsonDeserConfig config, final Collection<?> output)
+            throws IllegalArgumentException, UnsupportedOperationException, ParsingException, UncheckedIOException {
         final JsonDeserConfig configToUse = check(config);
         N.checkArgNotNull(output, cs.output);
 
@@ -360,7 +395,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * JsonDeserConfig config = new JsonDeserConfig();
      * String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
      * Map<String, String> map = new HashMap<>();
-     * parser.parse(json, config, map);
+     * parser.parseInto(json, config, map);
      * // map now contains: {key1=value1, key2=value2}
      * }</pre>
      *
@@ -368,12 +403,14 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param output the map to populate with parsed key-value pairs; must not be {@code null}
      * @throws IllegalArgumentException if {@code output} is {@code null}.
-     * @throws UncheckedIOException if an I/O error occurs during parsing
+     * @throws UnsupportedOperationException if parsing attempts to insert an entry into a map that does not support insertion
      * @throws ParsingException if the JSON structure is invalid or not an object
-     * @throws UnsupportedOperationException if the map is unmodifiable
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
-    public void parse(final String source, final JsonDeserConfig config, final Map<?, ?> output) throws IllegalArgumentException {
+    public void parseInto(final String source, final JsonDeserConfig config, final Map<?, ?> output)
+            throws IllegalArgumentException, UnsupportedOperationException, ParsingException, UncheckedIOException {
         final JsonDeserConfig configToUse = check(config);
         N.checkArgNotNull(output, cs.output);
 
@@ -415,11 +452,12 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetType the type of the target object to deserialize into
      * @param output optional pre-existing output object (array, collection, or map) to populate; may be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws IOException if an I/O error occurs during reading
      * @throws ParsingException if the JSON structure doesn't match the target type or is invalid
+     * @throws IOException if the supplied JSON reader cannot read JSON tokens or the selected root value from its underlying character
+     *         source
      */
     protected <T> T parse(final String source, final JsonReader jr, final JsonDeserConfig config, final Type<? extends T> targetType, final Object output)
-            throws IOException {
+            throws ParsingException, IOException {
         final T result = doParse(source, jr, config, targetType, output);
 
         // Match deserialize(String, ...) (see read(Object, JsonReader, ...)): scalar SERIALIZABLE values are
@@ -443,12 +481,13 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetType the type of the target object to deserialize into
      * @param output optional pre-existing output object (array, collection, or map) to populate; may be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws IOException if an I/O error occurs during reading
      * @throws ParsingException if the target type is not supported, or the JSON does not match it
+     * @throws IOException if the supplied JSON reader cannot read JSON tokens or the selected root value from its underlying character
+     *         source
      */
     @SuppressWarnings("unchecked")
     private <T> T doParse(final String source, final JsonReader jr, final JsonDeserConfig config, final Type<? extends T> targetType, final Object output)
-            throws IOException {
+            throws ParsingException, IOException {
         final Class<? extends T> targetClass = targetType.javaType();
         final Object[] a = (output instanceof Object[]) ? (Object[]) output : null;
         final Collection<Object> c = (output instanceof Collection) ? (Collection<Object>) output : null;
@@ -461,7 +500,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 } else if (targetType.isCollection()) {
                     return readCollection(jr, config, null, null, true, targetClass, targetType, c);
                 } else {
-                    return (T) readNullToEmpty(targetType, targetType.valueOf(source), config.isReadNullToEmpty());
+                    return (T) readNullToEmpty(targetType, rootScalarValue(targetType, source), config.isReadNullToEmpty());
                 }
 
             case ENTITY:
@@ -491,6 +530,8 @@ final class JsonParserImpl extends AbstractJsonParser {
             default:
                 final int firstToken = jr.nextToken();
 
+                checkNoTextBeforeRoot(jr, firstToken);
+
                 if (Object.class.equals(targetClass)) {
                     if (firstToken == START_BRACE) {
                         return (T) readMap(jr, config, null, false, Map.class, null, null);
@@ -509,7 +550,10 @@ final class JsonParserImpl extends AbstractJsonParser {
      *
      * <p>This implementation converts Java objects to JSON string format with support for:</p>
      * <ul>
-     *   <li>Circular reference detection and handling (when enabled in config)</li>
+     *   <li>Circular reference handling: when {@code circularReferenceSupported} is enabled, an object already on
+     *       the current serialization path is written as {@code null}; when disabled (default) no identities are
+     *       tracked. In both modes a graph nested deeper than 256 structured values fails with a
+     *       {@link ParsingException} (a cyclic graph always exceeds that bound)</li>
      *   <li>Pretty printing and indentation</li>
      *   <li>Custom property naming policies</li>
      *   <li>Selective property inclusion/exclusion</li>
@@ -534,11 +578,15 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param obj the object to serialize; may be {@code null}
      * @param config the serialization configuration to use; may be {@code null} to use default configuration
      * @return the JSON string representation; returns empty string if {@code obj} is {@code null}
-     * @throws UncheckedIOException if an I/O error occurs during serialization
-     * @throws ParsingException if the object type is not supported for serialization
+     * @throws ParsingException if the object type is not supported for serialization, if a bean exposes no
+     *         serializable property while {@code failOnEmptyBean} is enabled, or if structured values are nested
+     *         more than 256 levels deep - which a cyclic graph always is when {@code circularReferenceSupported}
+     *         is disabled (the default), because nothing else stops the recursion
+     * @throws UncheckedIOException if a value serializer cannot read an underlying stream or reader while generating its JSON
+     *         representation
      */
     @Override
-    public String serialize(final Object obj, final JsonSerConfig config) {
+    public String serialize(final Object obj, final JsonSerConfig config) throws ParsingException, UncheckedIOException {
         final JsonSerConfig configToUse = check(config);
 
         if (obj == null) {
@@ -586,11 +634,12 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param obj the object to serialize; may be {@code null} (writes empty string to file)
      * @param config the serialization configuration to use; may be {@code null} to use default configuration
      * @param output the file to write the JSON to; must not be {@code null}
-     * @throws UncheckedIOException if an I/O error occurs during serialization or file writing
      * @throws ParsingException if the object type is not supported for serialization
+     * @throws UncheckedIOException if creating, opening, writing, flushing or closing {@code output}, or reading a resource-backed value
+     *         while producing JSON, fails
      */
     @Override
-    public void serialize(final Object obj, final JsonSerConfig config, final File output) {
+    public void serialize(final Object obj, final JsonSerConfig config, final File output) throws ParsingException, UncheckedIOException {
         final JsonSerConfig configToUse = check(config);
 
         if (obj == null) {
@@ -653,11 +702,12 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param obj the object to serialize; may be {@code null} (writes empty string to stream)
      * @param config the serialization configuration to use; may be {@code null} to use default configuration
      * @param output the output stream to write the JSON to; must not be {@code null}
-     * @throws UncheckedIOException if an I/O error occurs during serialization or stream writing
      * @throws ParsingException if the object type is not supported for serialization
+     * @throws UncheckedIOException if writing or flushing JSON to {@code output}, or reading a resource-backed value during
+     *         serialization, fails
      */
     @Override
-    public void serialize(final Object obj, final JsonSerConfig config, final OutputStream output) {
+    public void serialize(final Object obj, final JsonSerConfig config, final OutputStream output) throws ParsingException, UncheckedIOException {
         final JsonSerConfig configToUse = check(config);
 
         if (obj == null) {
@@ -716,11 +766,12 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param obj the object to serialize; may be {@code null} (writes empty string to writer)
      * @param config the serialization configuration to use; may be {@code null} to use default configuration
      * @param output the writer to write the JSON to; must not be {@code null}
-     * @throws UncheckedIOException if an I/O error occurs during serialization or writing
      * @throws ParsingException if the object type is not supported for serialization
+     * @throws UncheckedIOException if writing or flushing JSON to {@code output}, or reading a resource-backed value during
+     *         serialization, fails
      */
     @Override
-    public void serialize(final Object obj, final JsonSerConfig config, final Writer output) {
+    public void serialize(final Object obj, final JsonSerConfig config, final Writer output) throws ParsingException, UncheckedIOException {
         final JsonSerConfig configToUse = check(config);
 
         if (obj == null) {
@@ -771,12 +822,14 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param indentation the current indentation string for pretty printing, or {@code null}
      * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
      * @param bw the buffered JSON writer
-     * @throws IOException if an I/O error occurs
-     * @throws ParsingException if the object type is not supported and the configuration requires failing on it
+     * @throws ParsingException if the object type is not supported and the configuration requires failing on it, or if structured values are nested
+     *         more than {@link #MAX_SERIALIZATION_DEPTH} levels deep on the current thread (the signature of a cyclic object graph when
+     *         circular-reference support is disabled)
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     @SuppressWarnings("rawtypes")
     protected void write(final Object obj, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
-            final IdentityHashSet<Object> serializedObjects, final BufferedJsonWriter bw) throws IOException {
+            final IdentityHashSet<Object> serializedObjects, final BufferedJsonWriter bw) throws ParsingException, IOException {
         if (hasCircularReference(obj, serializedObjects, config, bw)) {
             // Write a null placeholder: the caller has already emitted the name/comma for this
             // value position, so returning silently would produce malformed JSON ("name": }).
@@ -786,9 +839,29 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         final Type<Object> type = Type.of(obj.getClass());
+        final SerializationType serializationType = type.serializationType();
+
+        // Bounded-depth guard for structured values (same shape as NESTING_DEPTH on the deserialization
+        // side): with circularReferenceSupported=false no identity set is allocated (measured at 4-19%
+        // throughput), so a cyclic graph used to unwind in StackOverflowError instead of the documented
+        // ParsingException. Per-thread rather than a threaded parameter so the protected write*
+        // signatures stay untouched and so that a nested top-level serialize() (e.g. BeanType.stringOf
+        // from a typed collection property) is counted on the same path instead of restarting at 0.
+        // Scalars (SERIALIZABLE) never recurse from here, so they are not counted.
+        final int[] depth = serializationType == SerializationType.SERIALIZABLE ? null : SERIALIZATION_DEPTH.get();
+
+        if (depth != null && ++depth[0] > MAX_SERIALIZATION_DEPTH) {
+            // Undo this level's increment: the finally block below is not reached from here, while the
+            // outer levels unwind through theirs and release the thread-local at the root.
+            depth[0]--;
+
+            throw new ParsingException("Serialization nesting depth exceeded " + MAX_SERIALIZATION_DEPTH + " while writing "
+                    + ClassUtil.getClassName(obj.getClass()) + ": the object graph is probably circular (self reference). "
+                    + "Enable JsonSerConfig.setCircularReferenceSupported(true) to write repeated objects as null");
+        }
 
         try {
-            switch (type.serializationType()) {
+            switch (serializationType) {
                 case SERIALIZABLE:
                     type.serializeTo(bw, obj, config);
 
@@ -843,6 +916,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                     }
             }
         } finally {
+            // Leaving the outermost level: discard the counter so no state lingers on pooled threads.
+            if (depth != null && --depth[0] == 0) {
+                SERIALIZATION_DEPTH.remove();
+            }
+
             // Path-based cycle detection: remove this object so it's no longer "in progress"
             // once we finish writing it. Without this, two distinct branches of the bean graph
             // that share the same object (a DAG, not a cycle) would be misidentified as cyclic
@@ -854,6 +932,22 @@ final class JsonParserImpl extends AbstractJsonParser {
     }
 
     /**
+     * Maximum number of structured values (beans, maps, collections, arrays, {@code MapEntity}, ...) that may be
+     * nested on one serialization path. The bound is a cycle heuristic for the default
+     * {@code circularReferenceSupported=false} mode, which tracks no object identities: a graph deeper than
+     * this is rejected with a {@link ParsingException} instead of unwinding in {@link StackOverflowError}.
+     * It is enforced in both modes, so a legitimately deeper acyclic graph is rejected as well.
+     *
+     * <p>The bound limits recursive stack use. Deserialization has a separate 256-step budget whose
+     * accounting differs: ordinary Map/List roots are not counted and typed wrappers can consume extra
+     * steps. Neither bound guarantees sufficient native stack when the caller has little stack remaining.</p>
+     */
+    static final int MAX_SERIALIZATION_DEPTH = 256;
+
+    /** Per-thread serialization nesting depth counter (used as a single-element mutable int). */
+    private static final ThreadLocal<int[]> SERIALIZATION_DEPTH = ThreadLocal.withInitial(() -> new int[1]);
+
+    /**
      * Writes a root-level object to JSON, optionally omitting the enclosing brackets for serializable
      * array/collection root values when {@code config.isBracketRootValue()} is {@code false}.
      *
@@ -863,7 +957,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param type the type information for the object
      * @param bw the buffered JSON writer
      * @param flush whether to flush the writer after writing
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     protected void write(final Object obj, final JsonSerConfig config, final IdentityHashSet<Object> serializedObjects, final Type<Object> type,
             final BufferedJsonWriter bw, final boolean flush) throws IOException {
@@ -902,7 +996,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param type the type information for the object (unused; retained for signature consistency)
      * @param bw the buffered JSON writer
      * @param flush whether to flush the writer after writing
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     @SuppressWarnings("unused")
     protected void write(final Object obj, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
@@ -928,10 +1022,12 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
      * @param type the type information for the bean
      * @param bw the buffered JSON writer
-     * @throws IOException if an I/O error occurs
+     * @throws ParsingException if the bean class exposes no serializable property (no getter, or every property excluded by {@code @JsonXmlField(ignore = true)}
+     *         / {@code @Transient}) and {@code config.isFailOnEmptyBean()} is {@code true}; with the flag off such a bean is written as {@code {}}
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     protected void writeBean(final Object obj, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
-            final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
+            final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws ParsingException, IOException {
         //    if (hasCircularReference(obj, serializedObjects, config, bw)) {
         //        return;
         //    }
@@ -939,7 +1035,10 @@ final class JsonParserImpl extends AbstractJsonParser {
         final Class<?> cls = type.javaType();
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(type.reflectType());
 
-        if (N.isEmpty(beanInfo.jsonXmlSerializablePropInfos)) {
+        // Gate on the flag only; the loop below already emits the correct "{}" (with wrapRootValue /
+        // pretty-format / root-bracket handling) when there is nothing to write, exactly as it does today
+        // for an all-transient or all-DESERIALIZE_ONLY bean.
+        if (N.isEmpty(beanInfo.jsonXmlSerializablePropInfos) && config.isFailOnEmptyBean()) {
             throw new ParsingException("No serializable property is found in class: " + ClassUtil.getCanonicalClassName(cls));
         }
 
@@ -950,6 +1049,9 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         final Collection<String> ignoredClassPropNames = config.getIgnoredPropNames(cls);
         final boolean writeNullToEmpty = config.isWriteNullToEmpty();
+        // The three "write null X as ..." flags are consumed inside Type.serializeTo(writer, null, config);
+        // types that do not know them write "null" there, so no per-type allow-list is needed.
+        final boolean hasNullFlag = config.isWriteNullStringAsEmpty() || config.isWriteNullNumberAsZero() || config.isWriteNullBooleanAsFalse();
         final boolean quotePropName = config.isQuotePropName();
         final boolean isPrettyFormat = config.isPrettyFormat();
         final NamingPolicy jsonXmlNamingPolicy = config.getPropNamingPolicy() == null ? beanInfo.jsonXmlNamingPolicy : config.getPropNamingPolicy();
@@ -1023,7 +1125,9 @@ final class JsonParserImpl extends AbstractJsonParser {
             }
 
             if (propValue == null) {
-                if (writeNullToEmpty) {
+                // writeNullToEmpty wins for the types that have an empty form ("" / [] / {}); a null
+                // number/boolean has none, so it falls through to the flag branch (0 / false) below.
+                if (writeNullToEmpty && (propInfo.type.isCharSequence() || propInfo.type.isCollection() || propInfo.type.isArray() || propInfo.type.isMap())) {
                     if (quotePropName) {
                         bw.write(propInfo.jsonNameTags[nameTagIdx].quotedNameWithColon);
                     } else {
@@ -1032,6 +1136,18 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     writeNullToEmpty(bw, propInfo.type);
 
+                } else if (hasNullFlag) {
+                    // writeNullStringAsEmpty / writeNullNumberAsZero / writeNullBooleanAsFalse: let the
+                    // property type render the null ("" / 0 / false, or "null" when the flag does not apply).
+                    // jsonXmlType, not writePropValue: the latter short-circuits a @JsonXmlField(numberFormat /
+                    // dateFormat) property to "null", so such a property prints the plain 0/""/false instead.
+                    if (quotePropName) {
+                        bw.write(propInfo.jsonNameTags[nameTagIdx].quotedNameWithColon);
+                    } else {
+                        bw.write(propInfo.jsonNameTags[nameTagIdx].nameWithColon);
+                    }
+
+                    propInfo.jsonXmlType.serializeTo(bw, null, config);
                 } else {
                     if (quotePropName) {
                         bw.write(propInfo.jsonNameTags[nameTagIdx].quotedNameNull);
@@ -1050,7 +1166,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                     // Raw JSON: write the serialized payload verbatim. Routing through
                     // strType.serializeTo() would quote and JSON-escape the result, producing
                     // {"metadata":"{\"k\":\"v\"}"} instead of the documented {"metadata":{"k":"v"}}.
-                    bw.write(serialize(propValue, config));
+                    writeRawValue(propValue, config, nextIndentation, serializedObjects, bw);
                 } else if (propInfo.jsonXmlType.isSerializable()) {
                     propInfo.writePropValue(bw, propValue, config);
                 } else {
@@ -1087,6 +1203,37 @@ final class JsonParserImpl extends AbstractJsonParser {
     }
 
     /**
+     * Writes the value of a {@code @JsonXmlField(isJsonRawValue = true)} property without quoting or escaping it.
+     *
+     * <p>A value whose runtime type is a root scalar for {@link #serialize(Object, JsonSerConfig)} (a
+     * {@code String} holding pre-serialized JSON, a number, a date, ...) is written as its
+     * {@link Type#stringOf(Object) stringOf} text, exactly as the public {@code serialize} would render it at
+     * the root. Any structured value (map, bean, collection, array) is written through the shared
+     * {@link #write(Object, JsonSerConfig, boolean, String, IdentityHashSet, BufferedJsonWriter)} path so that
+     * it inherits the current circular-reference set, the current pretty-print indentation and the enclosing
+     * brackets, instead of restarting a fresh top-level serialization (which ignored all three).</p>
+     *
+     * @param propValue the non-null raw property value
+     * @param config the serialization configuration
+     * @param indentation the indentation of the property, or {@code null} when not pretty printing
+     * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
+     * @param bw the buffered JSON writer
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
+     */
+    private void writeRawValue(final Object propValue, final JsonSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
+            final BufferedJsonWriter bw) throws IOException {
+        final Type<Object> rawType = Type.of(propValue.getClass());
+
+        // Same root-scalar predicate as serialize(Object, JsonSerConfig): keeps raw String/Date/Integer
+        // properties byte-identical (unquoted stringOf text).
+        if (rawType.isSerializable() && !(rawType.isCollection() || rawType.isArray() || rawType.javaType().isEnum())) {
+            bw.write(rawType.stringOf(propValue));
+        } else {
+            write(propValue, config, false, indentation, serializedObjects, bw);
+        }
+    }
+
+    /**
      * Writes a map to JSON as an object with one entry per map entry.
      *
      * @param m the map to write
@@ -1096,7 +1243,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
      * @param type the type information for the map
      * @param bw the buffered JSON writer
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     @SuppressWarnings("unused")
     protected void writeMap(final Map<?, ?> m, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
@@ -1161,7 +1308,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                 keyType = Type.of(key.getClass());
 
                 if (keyType.isSerializable() && !(keyType.isArray() || keyType.isCollection() || keyType.javaType().isEnum())) {
-                    if (isQuoteMapKey || !(keyType.isNumber() || keyType.isBoolean())) {
+                    if (isConfigSensitiveKeyType(keyType, config)) {
+                        writeMapKeyWithConfig(key, keyType, config, isQuoteMapKey, bw);
+                    } else if (isQuoteMapKey || !(keyType.isNumber() || keyType.isBoolean())) {
                         bw.write(_DOUBLE_QUOTE);
                         bw.writeCharacter(keyType.stringOf(key));
                         bw.write(_DOUBLE_QUOTE);
@@ -1183,7 +1332,8 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         if (config.isBracketRootValue() || !isFirstCall) {
-            if (isPrettyFormat && N.notEmpty(m)) {
+            // i counts the entries actually written (ignoredPropNames may have skipped all of them).
+            if (isPrettyFormat && i > 0) {
                 bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                 if (indentation != null) {
@@ -1192,6 +1342,84 @@ final class JsonParserImpl extends AbstractJsonParser {
             }
 
             bw.write(_BRACE_R);
+        }
+    }
+
+    /**
+     * Tells whether a scalar map key of the given type must be rendered through
+     * {@code Type.serializeTo(writer, key, config)} rather than {@link Type#stringOf(Object)}
+     * because one of the serialization options changes its text: {@code writeLongAsString} for the
+     * long-carrying key types, {@code writeBigDecimalAsPlain} for {@code BigDecimal} keys and an explicit
+     * textual {@code dateTimeFormat} for date/time keys.
+     *
+     * <p>The default {@link DateTimeFormat#LONG} is deliberately excluded: it renders a temporal as bare
+     * epoch millis, which a key position cannot read back ({@code Type.valueOf} rejects unqualified numeric
+     * date/time text as ambiguous) and which makes distinct temporal keys of the same instant collide into
+     * one duplicate JSON name. Date/time keys therefore keep the type's own text unless the caller changed
+     * {@code dateTimeFormat} away from {@link DateTimeFormat#LONG} (including to {@code null}, which asks each
+     * temporal type for its own default text).</p>
+     *
+     * @param keyType the runtime type of the key
+     * @param config the serialization configuration
+     * @return {@code true} if the key text depends on the configuration
+     */
+    private static boolean isConfigSensitiveKeyType(final Type<?> keyType, final JsonSerConfig config) {
+        return (config.isWriteLongAsString() && isWriteLongAsStringKeyType(keyType)) //
+                || (config.isWriteBigDecimalAsPlain() && BigDecimal.class.equals(keyType.javaType())) //
+                || (config.getDateTimeFormat() != DateTimeFormat.LONG
+                        && (keyType.isDate() || keyType.isCalendar() || keyType.isTemporal() || keyType.isJodaDateTime()));
+    }
+
+    /**
+     * Tells whether the type's own writer honours {@code writeLongAsString}. {@link Type#isLong()} is reported
+     * only by the {@code long}/{@code Long} handlers, but {@code AtomicLong} and {@code MutableLong} consult the
+     * flag too, so a key of either type must be rendered the same way its value-position twin is.
+     *
+     * @param keyType the runtime type of the key
+     * @return {@code true} if the type writes its long payload as a quoted string under {@code writeLongAsString}
+     */
+    private static boolean isWriteLongAsStringKeyType(final Type<?> keyType) {
+        return keyType.isLong() || AtomicLong.class.equals(keyType.javaType()) || MutableLong.class.equals(keyType.javaType());
+    }
+
+    /**
+     * Writes a scalar map key with the same text the value side would produce for the same object under
+     * the same configuration ({@code writeLongAsString}, {@code writeBigDecimalAsPlain}, {@code dateTimeFormat}),
+     * then applies the map-key quoting rule: a key the type itself quoted (a string-typed rendering such as an
+     * ISO date or a long written as string) stays quoted, otherwise it is quoted unless {@code quoteMapKey} is
+     * off and the key is a number or boolean.
+     *
+     * @param key the non-null key
+     * @param keyType the runtime type of the key
+     * @param config the serialization configuration
+     * @param isQuoteMapKey the {@code quoteMapKey} setting
+     * @param bw the buffered JSON writer
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
+     */
+    private static void writeMapKeyWithConfig(final Object key, final Type<Object> keyType, final JsonSerConfig config, final boolean isQuoteMapKey,
+            final BufferedJsonWriter bw) throws IOException {
+        final BufferedJsonWriter keyWriter = Objectory.createBufferedJsonWriter();
+        String keyText = null;
+
+        try {
+            keyType.serializeTo(keyWriter, key, config);
+            keyText = keyWriter.toString();
+        } finally {
+            Objectory.recycle(keyWriter);
+        }
+
+        final int len = keyText.length();
+        final boolean quotedByType = len >= 2 && keyText.charAt(0) == _DOUBLE_QUOTE && keyText.charAt(len - 1) == _DOUBLE_QUOTE;
+
+        if (quotedByType) {
+            // Already quoted and escaped by the type handler.
+            bw.write(keyText);
+        } else if (isQuoteMapKey || !(keyType.isNumber() || keyType.isBoolean())) {
+            bw.write(_DOUBLE_QUOTE);
+            bw.writeCharacter(keyText);
+            bw.write(_DOUBLE_QUOTE);
+        } else {
+            bw.writeCharacter(keyText);
         }
     }
 
@@ -1205,7 +1433,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
      * @param type the type information for the array
      * @param bw the buffered JSON writer
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     protected void writeArray(final Object obj, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
@@ -1273,7 +1501,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
      * @param type the type information for the collection
      * @param bw the buffered JSON writer
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     @SuppressWarnings("unused")
     protected void writeCollection(final Collection<?> c, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
@@ -1336,7 +1564,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
      * @param type the type information for the map entity
      * @param bw the buffered JSON writer
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     @SuppressWarnings("unused")
     protected void writeMapEntity(final MapEntity mapEntity, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
@@ -1458,7 +1686,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
      * @param type the type information for the entity id
      * @param bw the buffered JSON writer
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     @SuppressWarnings("unused")
     protected void writeEntityId(final EntityId entityId, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
@@ -1581,9 +1809,9 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
      * @param type the type information for the dataset
      * @param bw the buffered JSON writer
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
-    @SuppressWarnings({ "unused" })
+    @SuppressWarnings("unused")
     protected void writeDataset(final Dataset ds, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final Type<Object> type, final BufferedJsonWriter bw) throws IOException {
         //    if (hasCircularReference(ds, serializedObjects, config, bw)) {
@@ -1851,7 +2079,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param serializedObjects set of objects on the current path for circular reference detection, or {@code null}
      * @param type the type information for the sheet
      * @param bw the buffered JSON writer
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     @SuppressWarnings({ "unused", "rawtypes" })
     protected void writeSheet(final Sheet sheet, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
@@ -2239,11 +2467,16 @@ final class JsonParserImpl extends AbstractJsonParser {
      *         default value, depending on the target type) is returned; if the source is {@code null}, the
      *         same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
      *         target type's default value
-     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
-    public <T> T deserialize(String source, JsonDeserConfig config, Type<? extends T> targetType) {
+    public <T> T deserialize(String source, JsonDeserConfig config, Type<? extends T> targetType)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         final JsonDeserConfig configToUse = check(config);
 
         if ((Strings.isEmpty(source) && configToUse.isReadNullToEmpty()) || (source != null && source.isEmpty())) {
@@ -2286,11 +2519,14 @@ final class JsonParserImpl extends AbstractJsonParser {
      *         default value, depending on the target type) is returned; if the source is {@code null}, the
      *         same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
      *         target type's default value
-     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
-    public <T> T deserialize(final String source, final JsonDeserConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final String source, final JsonDeserConfig config, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -2319,12 +2555,17 @@ final class JsonParserImpl extends AbstractJsonParser {
      *         the default value, depending on the target type) is returned; if the source is {@code null},
      *         the same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
      *         target type's default value
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}
      * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
-     * @throws UncheckedIOException if an I/O error occurs during deserialization
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
-    public <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserConfig config, Type<? extends T> targetType) throws IndexOutOfBoundsException {
+    public <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserConfig config, Type<? extends T> targetType)
+            throws IllegalArgumentException, IndexOutOfBoundsException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         N.checkFromToIndex(fromIndex, toIndex, N.len(source));
 
         final JsonDeserConfig configToUse = check(config);
@@ -2372,13 +2613,15 @@ final class JsonParserImpl extends AbstractJsonParser {
      *         the default value, depending on the target type) is returned; if the source is {@code null},
      *         the same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
      *         target type's default value
-     * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
-     * @throws UncheckedIOException if an I/O error occurs during deserialization
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
+     * @throws IndexOutOfBoundsException if the indices are out of bounds or {@code fromIndex > toIndex}
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
+     *         JSON text
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Class<? extends T> targetClass)
-            throws IndexOutOfBoundsException {
+            throws IllegalArgumentException, IndexOutOfBoundsException, ParsingException, UncheckedIOException {
         return deserialize(source, fromIndex, toIndex, config, Type.of(targetClass));
     }
 
@@ -2402,11 +2645,15 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws UncheckedIOException if an I/O error occurs during file reading or deserialization
+     * @throws IllegalArgumentException if {@code targetType} or {@code source} is {@code null}, or {@code source} is a directory
+     * @throws UncheckedIOException if opening {@code source} or reading JSON characters from its file reader fails
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
-    public <T> T deserialize(File source, JsonDeserConfig config, Type<? extends T> targetType) {
+    public <T> T deserialize(File source, JsonDeserConfig config, Type<? extends T> targetType)
+            throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         Reader reader = null;
 
         try {
@@ -2436,11 +2683,13 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws UncheckedIOException if an I/O error occurs during file reading or deserialization
+     * @throws IllegalArgumentException if {@code targetClass} or {@code source} is {@code null}, or {@code source} is a directory
+     * @throws UncheckedIOException if opening {@code source} or reading JSON characters from its file reader fails
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
-    public <T> T deserialize(final File source, final JsonDeserConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final File source, final JsonDeserConfig config, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, UncheckedIOException, ParsingException {
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -2464,11 +2713,15 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws UncheckedIOException if an I/O error occurs during stream reading or deserialization
+     * @throws IllegalArgumentException if {@code targetType} or {@code source} is {@code null}
+     * @throws UncheckedIOException if reading or UTF-8 decoding JSON bytes from {@code source} fails
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
-    public <T> T deserialize(InputStream source, JsonDeserConfig config, Type<? extends T> targetType) {
+    public <T> T deserialize(InputStream source, JsonDeserConfig config, Type<? extends T> targetType)
+            throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         // RFC 8259 mandates UTF-8 for JSON over the wire, so the charset is pinned explicitly here.
         // (IOUtil.newInputStreamReader(InputStream) already defaults to UTF-8 - the library-wide
         // default, not the JVM platform charset - so this only makes the intent explicit.)
@@ -2498,11 +2751,13 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws UncheckedIOException if an I/O error occurs during stream reading or deserialization
+     * @throws IllegalArgumentException if {@code targetClass} or {@code source} is {@code null}
+     * @throws UncheckedIOException if reading or UTF-8 decoding JSON bytes from {@code source} fails
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
-    public <T> T deserialize(final InputStream source, final JsonDeserConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final InputStream source, final JsonDeserConfig config, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, UncheckedIOException, ParsingException {
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -2526,11 +2781,15 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws UncheckedIOException if an I/O error occurs during reading or deserialization
+     * @throws IllegalArgumentException if {@code targetType} or {@code source} is {@code null}
+     * @throws UncheckedIOException if reading JSON characters from {@code source} fails
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
-    public <T> T deserialize(Reader source, JsonDeserConfig config, final Type<? extends T> targetType) {
+    public <T> T deserialize(Reader source, JsonDeserConfig config, final Type<? extends T> targetType)
+            throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         return read(source, config, targetType);
     }
 
@@ -2554,11 +2813,13 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws UncheckedIOException if an I/O error occurs during reading or deserialization
+     * @throws IllegalArgumentException if {@code targetClass} or {@code source} is {@code null}
+     * @throws UncheckedIOException if reading JSON characters from {@code source} fails
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
-    public <T> T deserialize(final Reader source, final JsonDeserConfig config, final Class<? extends T> targetClass) {
+    public <T> T deserialize(final Reader source, final JsonDeserConfig config, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, UncheckedIOException, ParsingException {
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -2570,10 +2831,10 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetType the type of the object to create
      * @return the deserialized object of type {@code T}
-     * @throws UncheckedIOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid or doesn't match the target type
+     * @throws UncheckedIOException if reading JSON characters from {@code source} fails
      */
-    protected <T> T read(final Reader source, final JsonDeserConfig config, final Type<? extends T> targetType) {
+    protected <T> T read(final Reader source, final JsonDeserConfig config, final Type<? extends T> targetType) throws ParsingException, UncheckedIOException {
         final JsonDeserConfig configToUse = check(config);
         final char[] rbuf = Objectory.createCharArrayBuffer();
         final char[] cbuf = Objectory.createCharArrayBuffer();
@@ -2600,11 +2861,12 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetClass the class of the object to create
      * @param targetType the type of the object to create
      * @return the deserialized object of type {@code T}
-     * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid or doesn't match the target type
+     * @throws IOException if the supplied JSON reader cannot read JSON tokens or the selected root value from its underlying character
+     *         source
      */
     protected <T> T read(final Object source, final JsonReader jr, final JsonDeserConfig config, final Class<? extends T> targetClass,
-            final Type<? extends T> targetType) throws IOException {
+            final Type<? extends T> targetType) throws ParsingException, IOException {
         final T result = read(source, jr, UNDEFINED, config, true, targetClass, targetType);
 
         // Scalar SERIALIZABLE values are converted directly from the original source. Every
@@ -2622,7 +2884,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param jr the reader positioned immediately after the root value
      * @throws ParsingException if another token or unquoted text follows the root value
      */
-    private static void verifyEndOfInput(final JsonReader jr) {
+    private static void verifyEndOfInput(final JsonReader jr) throws ParsingException {
         final int token = jr.nextToken();
 
         if (token != EOF || jr.hasText()) {
@@ -2644,12 +2906,13 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetClass the class of the object to create
      * @param targetType the type of the object to create
      * @return the deserialized object of type {@code T}
-     * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid or the target type is unsupported
+     * @throws IOException if the supplied JSON reader cannot read JSON tokens or the selected root value from its underlying character
+     *         source
      */
     @SuppressWarnings("unchecked")
     protected <T> T read(final Object source, final JsonReader jr, final int lastToken, final JsonDeserConfig config, final boolean isFirstCall,
-            final Class<? extends T> targetClass, final Type<? extends T> targetType) throws IOException {
+            final Class<? extends T> targetClass, final Type<? extends T> targetType) throws ParsingException, IOException {
         switch (targetType.serializationType()) {
             case SERIALIZABLE:
                 if (targetType.isArray()) {
@@ -2657,8 +2920,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                 } else if (targetType.isCollection()) {
                     return readCollection(jr, config, null, null, isFirstCall, targetClass, targetType, null);
                 } else {
-                    return (T) readNullToEmpty(targetType, targetType.valueOf(source instanceof String ? (String) source
-                            : (source instanceof Reader ? IOUtil.readAllToString(((Reader) source)) : source.toString())), config.isReadNullToEmpty());
+                    return (T) readNullToEmpty(targetType,
+                            rootScalarValue(targetType,
+                                    source instanceof String ? (String) source
+                                            : (source instanceof Reader ? IOUtil.readAllToString(((Reader) source)) : source.toString())),
+                            config.isReadNullToEmpty());
                 }
 
             case ENTITY:
@@ -2688,6 +2954,10 @@ final class JsonParserImpl extends AbstractJsonParser {
             default:
                 final int firstTokenToUse = isFirstCall ? jr.nextToken() : lastToken;
 
+                if (isFirstCall) {
+                    checkNoTextBeforeRoot(jr, firstTokenToUse);
+                }
+
                 if (Object.class.equals(targetClass)) {
                     if (firstTokenToUse == START_BRACE) {
                         return (T) readMap(jr, config, null, false, Map.class, null, null);
@@ -2711,13 +2981,13 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetClass the bean class to create
      * @param targetType the bean type to create
      * @return the deserialized bean of type {@code T}, or {@code null} if the JSON text is empty
-     * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid or an unmatched property is encountered
      *         while {@code ignoreUnmatchedProperty} is disabled
+     * @throws IOException if the supplied JSON reader cannot read bean property names or values from its underlying character source
      */
     @SuppressWarnings("unused")
     protected <T> T readBean(final JsonReader jr, final JsonDeserConfig config, final boolean isFirstCall, final Class<? extends T> targetClass,
-            final Type<? extends T> targetType) throws IOException {
+            final Type<? extends T> targetType) throws ParsingException, IOException {
         final boolean hasValueTypes = config.hasValueTypes();
         final boolean ignoreUnmatchedProperty = config.isIgnoreUnmatchedProperty();
         final boolean ignoreNullOrEmpty = config.isIgnoreNullOrEmpty();
@@ -2736,6 +3006,10 @@ final class JsonParserImpl extends AbstractJsonParser {
         Type<Object> propType = null;
 
         final int firstToken = isFirstCall ? jr.nextToken() : START_BRACE;
+
+        if (isFirstCall) {
+            checkNoTextBeforeRoot(jr, firstToken);
+        }
 
         if (firstToken == EOF) {
             if (Strings.isNotEmpty(jr.getText())) {
@@ -2784,7 +3058,8 @@ final class JsonParserImpl extends AbstractJsonParser {
                         if (propInfo == null) {
                             propType = null;
                         } else {
-                            propType = hasValueTypes ? config.getValueType(propName, propInfo.jsonXmlType) : propInfo.jsonXmlType;
+                            propType = nullTolerantPropType(hasValueTypes ? config.getValueType(propName, propInfo.jsonXmlType) : propInfo.jsonXmlType,
+                                    ignoreNullOrEmpty);
                         }
 
                         if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
@@ -2830,7 +3105,8 @@ final class JsonParserImpl extends AbstractJsonParser {
                             if (propInfo == null) {
                                 propType = null;
                             } else {
-                                propType = hasValueTypes ? config.getValueType(propName, propInfo.jsonXmlType) : propInfo.jsonXmlType;
+                                propType = nullTolerantPropType(hasValueTypes ? config.getValueType(propName, propInfo.jsonXmlType) : propInfo.jsonXmlType,
+                                        ignoreNullOrEmpty);
                             }
 
                             if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
@@ -2861,6 +3137,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                     if (isPropName) {
                         throw new ParsingException(getErrorMsg(jr, token), token);
                     } else {
+                        if (!valueComplete && !jr.hasText()) {
+                            throw new ParsingException("A value is required after a JSON object colon", token);
+                        }
+
                         isPropName = true;
                         propNameComplete = false;
                         commaJustRead = true;
@@ -2899,33 +3179,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         readMap(jr, defaultJsonDeserConfig, null, false, Map.class, null, null);
                     } else {
                         if (propInfo.isJsonRawValue && propInfo.jsonXmlType.isCharSequence()) {
-                            final StringBuilder sb = Objectory.createStringBuilder();
-                            sb.append('{');
-
-                            try {
-                                int startBraceCount = 1;
-                                int nextToken = 0;
-
-                                while (startBraceCount > 0) {
-                                    nextToken = jr.nextToken();
-
-                                    if (nextToken == START_BRACE) {
-                                        startBraceCount++;
-                                    } else if (nextToken == END_BRACE) {
-                                        startBraceCount--;
-                                    }
-
-                                    appendJsonRawToken(sb, jr, nextToken);
-
-                                    if (nextToken == EOF) {
-                                        break;
-                                    }
-                                }
-
-                                propValue = sb.toString();
-                            } finally {
-                                Objectory.recycle(sb);
-                            }
+                            propValue = readRawJsonValue(jr, START_BRACE, propInfo.name);
                         } else {
                             propValue = readBracedValue(jr, config, propType);
                         }
@@ -2953,33 +3207,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 null, null);
                     } else {
                         if (propInfo.isJsonRawValue && propInfo.jsonXmlType.isCharSequence()) {
-                            final StringBuilder sb = Objectory.createStringBuilder();
-                            sb.append('[');
-
-                            try {
-                                int startBracketCount = 1;
-                                int nextToken = 0;
-
-                                while (startBracketCount > 0) {
-                                    nextToken = jr.nextToken();
-
-                                    if (nextToken == START_BRACKET) {
-                                        startBracketCount++;
-                                    } else if (nextToken == END_BRACKET) {
-                                        startBracketCount--;
-                                    }
-
-                                    appendJsonRawToken(sb, jr, nextToken);
-
-                                    if (nextToken == EOF) {
-                                        break;
-                                    }
-                                }
-
-                                propValue = sb.toString();
-                            } finally {
-                                Objectory.recycle(sb);
-                            }
+                            propValue = readRawJsonValue(jr, START_BRACKET, propInfo.name);
                         } else {
                             propValue = readBracketedValue(jr, config, Strings.isEmpty(propName) ? null : config.getPropHandler(propName), propType);
                         }
@@ -2997,6 +3225,8 @@ final class JsonParserImpl extends AbstractJsonParser {
                         throw new ParsingException(getErrorMsg(jr, token), token);
                     } else if ((firstToken == START_BRACE) == (token != END_BRACE)) {
                         throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token); //NOSONAR
+                    } else if (!isPropName && !valueComplete && !jr.hasText()) {
+                        throw new ParsingException("A value is required after a JSON object colon", token);
                     } else if (valueComplete && jr.hasText()) {
                         throw new ParsingException("A comma is required between JSON object properties", token);
                     } else {
@@ -3019,6 +3249,112 @@ final class JsonParserImpl extends AbstractJsonParser {
     }
 
     /**
+     * Creates the map for an {@code EnumMap}-typed target. {@code EnumMap} has no no-arg constructor (the generic
+     * creator fails with "No default constructor found") and {@code N.newMap(EnumMap.class)} is documented to
+     * return a {@code HashMap}, which a caller that declared {@code EnumMap} cannot use.
+     *
+     * @param keyType the resolved key type (property type, {@code Type.of("java.util.EnumMap<K, V>")} or
+     *        {@code JsonDeserConfig.setMapKeyType})
+     * @return an empty {@code EnumMap} keyed by that enum
+     * @throws ParsingException if the resolved key type is not an enum (e.g. a raw {@code EnumMap.class} target)
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static Map<Object, Object> newEnumMap(final Type<?> keyType) throws ParsingException {
+        if (!keyType.javaType().isEnum()) {
+            throw new ParsingException("EnumMap requires an enum key type; declare it via the property type, Type.of(\"java.util.EnumMap<K, V>\") "
+                    + "or JsonDeserConfig.setMapKeyType (resolved key type: " + keyType.name() + ")");
+        }
+
+        return new EnumMap(keyType.javaType());
+    }
+
+    /**
+     * Converts the text of a scalar token read into the abstract {@code java.lang.Number} type. {@code Number}
+     * has no String factory, so {@code NumberType.valueOf} / {@code Numbers.convert} reject it (the latter by
+     * documented contract). The text is converted with {@link Numbers#createNumber(String)}, i.e. the same
+     * Integer / Long / BigInteger / Double / BigDecimal promotion an untyped ({@code Object}) slot gets, so
+     * {@code [1]} read as {@code List<Number>} holds the same {@code Integer 1} as {@code List<Object>}, and
+     * {@code 2.5} is a {@code Double} unless it carries an explicit {@code f}/{@code F} suffix.
+     *
+     * @param text the token text (quoted or unquoted); {@code null}, empty or the literal {@code null} -> {@code null}
+     * @return the number, or {@code null}
+     * @throws NumberFormatException if the text is not a number (same failure as a typed numeric slot)
+     */
+    private static Number abstractNumberValue(final String text) throws NumberFormatException {
+        if (Strings.isEmpty(text) || "null".equals(text)) {
+            return null;
+        }
+
+        final Number num = Numbers.createNumber(text);
+
+        if (num instanceof Float) {
+            final char lastChar = text.charAt(text.length() - 1);
+
+            if (!(lastChar == 'f' || lastChar == 'F')) {
+                return Double.valueOf(text);
+            }
+        }
+
+        return num;
+    }
+
+    /**
+     * Converts the whole source text of a scalar root value: {@code Type.valueOf(text)}, except for the abstract
+     * {@code Number} target, which has no factory and is handled by {@link #abstractNumberValue(String)}.
+     *
+     * @param <T> the target type
+     * @param targetType the root type
+     * @param text the source text
+     * @return the converted value
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> T rootScalarValue(final Type<? extends T> targetType, final String text) {
+        return targetType.javaType() == Number.class ? (T) abstractNumberValue(text) : targetType.valueOf(text);
+    }
+
+    /**
+     * Returns the type a bean property value should be read as. When {@code ignoreNullOrEmpty} is on, a
+     * primitive property is read through its wrapper type so that a JSON {@code null} yields {@code null}
+     * (and is then left unset, keeping the bean's default) instead of the primitive's zero value, which
+     * would silently overwrite a non-zero default. Otherwise the declared type is returned unchanged.
+     *
+     * @param propType the declared (or configured) property type
+     * @param ignoreNullOrEmpty the {@code ignoreNullOrEmpty} setting
+     * @return the type to read the value as
+     */
+    @SuppressWarnings("unchecked")
+    private static Type<Object> nullTolerantPropType(final Type<Object> propType, final boolean ignoreNullOrEmpty) {
+        if (ignoreNullOrEmpty && propType.isPrimitive()) {
+            return (Type<Object>) N.typeOf(ClassUtil.wrap(propType.javaType()));
+        }
+
+        return propType;
+    }
+
+    /**
+     * Rejects unquoted text that precedes the opening brace/bracket of a root JSON value, so that
+     * {@code abc[1]} or {@code 123{"a":1}} fail the same way trailing junk already does
+     * (see {@link #verifyEndOfInput(JsonReader)}). Exactly one leading U+FEFF byte-order mark is
+     * tolerated because BOM-prefixed files are common and were always accepted. Must only be called for
+     * the first token of a root value: inside a structure the readers report a missing comma themselves,
+     * and the un-bracketed CSV-row dialect ({@code a,b,c}) never starts with a brace/bracket token.
+     *
+     * @param jr the reader that has just returned {@code firstToken}
+     * @param firstToken the first token of the root value
+     * @throws ParsingException if non-BOM text precedes an object or array opening token
+     */
+    private static void checkNoTextBeforeRoot(final JsonReader jr, final int firstToken) throws ParsingException {
+        if ((firstToken == START_BRACE || firstToken == START_BRACKET) && jr.hasText()) {
+            final String text = jr.getText();
+
+            if (!"\uFEFF".equals(text)) {
+                throw new ParsingException("Unexpected content before the root JSON value: " + (text.length() > 64 ? text.substring(0, 64) + "..." : text),
+                        firstToken);
+            }
+        }
+    }
+
+    /**
      * Sets a deserialized value on the target bean, optionally skipping values that are {@code null}
      * or an empty String/Collection/array/Map.
      *
@@ -3036,7 +3372,13 @@ final class JsonParserImpl extends AbstractJsonParser {
 
     /**
      * Tests whether a deserialized value counts as "null or empty" for the given type: {@code null},
-     * an empty CharSequence, Collection, array, or Map. Values of any other type are never empty.
+     * an empty CharSequence, Collection, array, or Map. The check follows the declared type; when the
+     * declared type is plain {@code Object} (an untyped map value, collection element or {@code Object}
+     * property) the runtime value decides, so {@code ""}, {@code []} and <code>{}</code> read into an
+     * {@code Object} slot are empty too. Values of any other declared type (numbers, booleans, beans, ...)
+     * are never empty. Because nested untyped containers are filtered first, the check cascades: an untyped
+     * container whose every entry/element was skipped is itself empty and is skipped as well
+     * (<code>{"x":{"y":""}}</code> and {@code [[]]} both read as empty under {@code ignoreNullOrEmpty}).
      *
      * @param type the declared type of the value
      * @param value the value to test, may be {@code null}
@@ -3054,6 +3396,12 @@ final class JsonParserImpl extends AbstractJsonParser {
             return value.getClass().isArray() && Array.getLength(value) == 0;
         } else if (type.isMap()) {
             return value instanceof Map && ((Map) value).isEmpty();
+        } else if (type.isObject()) {
+            // Untyped slot: the declared type says nothing, so look at what was actually read.
+            return (value instanceof CharSequence && ((CharSequence) value).isEmpty()) //
+                    || (value instanceof Collection && ((Collection) value).isEmpty()) //
+                    || (value instanceof Map && ((Map) value).isEmpty()) //
+                    || (value.getClass().isArray() && Array.getLength(value) == 0);
         }
 
         return false;
@@ -3073,12 +3421,12 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetType the map type to create
      * @param output an existing map to populate, or {@code null} to create a new one
      * @return the deserialized map of type {@code T}
-     * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid
+     * @throws IOException if the supplied JSON reader cannot read map keys or values from its underlying character source
      */
     @SuppressWarnings("unchecked")
     protected <T> T readMap(final JsonReader jr, final JsonDeserConfig config, Type<?> propType, final boolean isFirstCall,
-            final Class<? extends T> targetClass, final Type<? extends T> targetType, final Map<Object, Object> output) throws IOException {
+            final Class<? extends T> targetClass, final Type<? extends T> targetType, final Map<Object, Object> output) throws ParsingException, IOException {
         Type<?> keyType = defaultKeyType;
 
         if (propType != null && propType.isMap() && !propType.parameterTypes().get(0).isObject()) {
@@ -3109,10 +3457,11 @@ final class JsonParserImpl extends AbstractJsonParser {
         final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = getCreatorAndConverterForTargetType(targetClass, null);
 
         @SuppressWarnings("rawtypes")
-        final Map<Object, Object> result = output == null ? (Map.class.equals(targetClass) ? (Map<Object, Object>) N.newMap(config.getMapInstanceType())
-                : Map.class.isAssignableFrom(targetClass) ? (Map<Object, Object>) creatorAndConverter._1.apply(targetClass)
-                        : N.newMap((Class<Map>) targetClass))
-                : output;
+        final Map<Object, Object> result = output != null ? output
+                : Map.class.equals(targetClass) ? (Map<Object, Object>) N.newMap(config.getMapInstanceType())
+                        : EnumMap.class.isAssignableFrom(targetClass) ? newEnumMap(keyType)
+                                : Map.class.isAssignableFrom(targetClass) ? (Map<Object, Object>) creatorAndConverter._1.apply(targetClass)
+                                        : N.newMap((Class<Map>) targetClass);
 
         String propName = null;
         boolean isKey = true;
@@ -3126,12 +3475,16 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         final int firstToken = isFirstCall ? jr.nextToken() : START_BRACE;
 
+        if (isFirstCall) {
+            checkNoTextBeforeRoot(jr, firstToken);
+        }
+
         if (firstToken == EOF) {
-            //    if (isFirstCall && N.notEmpty(jr.getText())) {
-            //        throw new ParseException("Can't parse: " + jr.getText());
-            //    }
-            //
-            //    return null; // (T) result;
+            // Same guard as readBean: an unquoted scalar root ("abc", "123", "null") is not an empty map.
+            // Empty/blank text still yields the empty map (the documented value for an empty source).
+            if (isFirstCall && Strings.isNotEmpty(jr.getText())) {
+                throw new ParsingException("Can't parse: " + jr.getText(), firstToken);
+            }
 
             return (T) creatorAndConverter._2.apply(result);
         }
@@ -3206,6 +3559,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                     if (isKey) {
                         throw new ParsingException(getErrorMsg(jr, token), token);
                     } else {
+                        if (!valueComplete && !jr.hasText()) {
+                            throw new ParsingException("A value is required after a JSON object colon", token);
+                        }
+
                         isKey = true;
                         keyComplete = false;
                         commaJustRead = true;
@@ -3305,6 +3662,8 @@ final class JsonParserImpl extends AbstractJsonParser {
                         throw new ParsingException(getErrorMsg(jr, token), token);
                     } else if ((firstToken == START_BRACE) == (token != END_BRACE)) {
                         throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
+                    } else if (!isKey && !valueComplete && !jr.hasText()) {
+                        throw new ParsingException("A value is required after a JSON object colon", token);
                     } else if (valueComplete && jr.hasText()) {
                         throw new ParsingException("A comma is required between JSON object properties", token);
                     } else {
@@ -3341,12 +3700,14 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetType the array type to create
      * @param output an existing array to populate, or {@code null} to create a new one
      * @return the deserialized array of type {@code T}
-     * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid
+     * @throws IOException if the supplied JSON reader cannot read array elements from its underlying character source
+     * @throws IndexOutOfBoundsException if more parsed elements are retained than the supplied output array can hold
      */
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings("unchecked")
     protected <T> T readArray(final JsonReader jr, final JsonDeserConfig config, final Type<?> propType, final boolean isFirstCall,
-            final Class<? extends T> targetClass, final Type<? extends T> targetType, Object[] output) throws IOException {
+            final Class<? extends T> targetClass, final Type<? extends T> targetType, final Object[] output)
+            throws ParsingException, IOException, IndexOutOfBoundsException {
         Type<?> eleType = defaultValueType;
 
         if (propType != null && (propType.isArray() || propType.isCollection()) && !propType.elementType().isObject()) {
@@ -3366,6 +3727,10 @@ final class JsonParserImpl extends AbstractJsonParser {
         final boolean readNullToEmpty = config.isReadNullToEmpty();
 
         final int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
+
+        if (isFirstCall) {
+            checkNoTextBeforeRoot(jr, firstToken);
+        }
 
         if (firstToken == EOF) {
             if (!jr.hasText()) {
@@ -3398,10 +3763,8 @@ final class JsonParserImpl extends AbstractJsonParser {
             }
 
             if (keepValue) {
-                if (output.length == 0) {
-                    output = N.newArray(targetClass.getComponentType(), 1);
-                }
-
+                // The caller owns this array. Replacing it would silently discard the value in parseInto.
+                // Use the same capacity check supplied by array assignment in the bracketed-input path.
                 output[0] = value;
             }
 
@@ -3625,13 +3988,13 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetType the collection type to create
      * @param output an existing collection to populate, or {@code null} to create a new one
      * @return the deserialized collection of type {@code T}
-     * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid
+     * @throws IOException if the supplied JSON reader cannot read collection elements from its underlying character source
      */
     @SuppressWarnings("unchecked")
     protected <T> T readCollection(final JsonReader jr, final JsonDeserConfig config, final Type<?> propType,
             final BiConsumer<? super Collection<Object>, ?> propHandler, final boolean isFirstCall, final Class<? extends T> targetClass,
-            final Type<? extends T> targetType, final Collection<Object> output) throws IOException {
+            final Type<? extends T> targetType, final Collection<Object> output) throws ParsingException, IOException {
         Type<?> eleType = defaultValueType;
 
         if (propType != null && (propType.isCollection() || propType.isArray()) && !propType.elementType().isObject()) {
@@ -3657,6 +4020,10 @@ final class JsonParserImpl extends AbstractJsonParser {
         boolean valueComplete = false;
 
         final int firstToken = isFirstCall ? jr.nextToken() : START_BRACKET;
+
+        if (isFirstCall) {
+            checkNoTextBeforeRoot(jr, firstToken);
+        }
 
         if (firstToken == EOF) {
             if (!jr.hasText()) {
@@ -3789,13 +4156,17 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetClass the target class to create
      * @param targetType the target type to create
      * @return the deserialized map entity of type {@code T}, or {@code null} if the JSON text is empty
-     * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid
+     * @throws IOException if the supplied JSON reader cannot read entity property names or values from its underlying character source
      */
     @SuppressWarnings("unused")
     protected <T> T readMapEntity(final JsonReader jr, final JsonDeserConfig config, final boolean isFirstCall, final Class<? extends T> targetClass,
-            final Type<? extends T> targetType) throws IOException {
+            final Type<? extends T> targetType) throws ParsingException, IOException {
         final int firstToken = isFirstCall ? jr.nextToken() : START_BRACE;
+
+        if (isFirstCall) {
+            checkNoTextBeforeRoot(jr, firstToken);
+        }
 
         if (firstToken == EOF) {
             if (Strings.isNotEmpty(jr.getText())) {
@@ -3806,6 +4177,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         MapEntity mapEntity = null;
+        boolean valueRead = false;
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
@@ -3813,18 +4185,28 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     break;
 
-                case END_DOUBLE_QUOTE, END_SINGLE_QUOTE, COLON:
+                case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
+                    // A quoted entity name. The empty name is legal: EntityId.of("id", 1) / EntityId.create(Map)
+                    // and MapEntity("") serialize as {"": {...}} and must read back.
+                    if (mapEntity != null) {
+                        throw new ParsingException(getErrorMsg(jr, token), token);
+                    }
+
+                    mapEntity = new MapEntity(jr.hasText() ? jr.getText() : Strings.EMPTY);
+
+                    break;
+
+                case COLON:
 
                     if (jr.hasText()) {
-                        if (mapEntity == null) {
-                            mapEntity = new MapEntity(jr.getText());
-                        } else {
+                        // unquoted entity name
+                        if (mapEntity != null) {
                             throw new ParsingException(getErrorMsg(jr, token), token);
                         }
-                    } else {
-                        if (mapEntity == null) {
-                            throw new ParsingException("Bean name cannot be null or empty", token);
-                        }
+
+                        mapEntity = new MapEntity(jr.getText());
+                    } else if (mapEntity == null) {
+                        throw new ParsingException("Bean name cannot be null or empty", token);
                     }
 
                     break;
@@ -3835,11 +4217,14 @@ final class JsonParserImpl extends AbstractJsonParser {
                     // same ParsingException already thrown for a missing name in the branch above.
                     if (mapEntity == null) {
                         throw new ParsingException("Bean name cannot be null or empty", token);
+                    } else if (valueRead) {
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
                     final Map<String, Object> props = readMap(jr, config, null, false, Map.class, null, null);
 
                     mapEntity.set(props);
+                    valueRead = true;
 
                     break;
 
@@ -3847,6 +4232,9 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     if ((firstToken == START_BRACE) == (token != END_BRACE)) {
                         throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
+                    } else if (jr.hasText() || (mapEntity != null && !valueRead)) {
+                        // {"E": 1} (scalar value) or {"E"} (no value): the entity value must be a JSON object.
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
                     return (T) mapEntity;
@@ -3867,13 +4255,17 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetClass the target class to create
      * @param targetType the target type to create
      * @return the deserialized entity id of type {@code T}, or {@code null} if the JSON text is empty
-     * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid
+     * @throws IOException if the supplied JSON reader cannot read entity identifier fields from its underlying character source
      */
-    @SuppressWarnings({ "unused" })
+    @SuppressWarnings("unused")
     protected <T> T readEntityId(final JsonReader jr, final JsonDeserConfig config, final boolean isFirstCall, final Class<? extends T> targetClass,
-            final Type<? extends T> targetType) throws IOException {
+            final Type<? extends T> targetType) throws ParsingException, IOException {
         final int firstToken = isFirstCall ? jr.nextToken() : START_BRACE;
+
+        if (isFirstCall) {
+            checkNoTextBeforeRoot(jr, firstToken);
+        }
 
         if (firstToken == EOF) {
             if (Strings.isNotEmpty(jr.getText())) {
@@ -3884,6 +4276,7 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         Seid entityId = null;
+        boolean valueRead = false;
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
@@ -3891,18 +4284,28 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     break;
 
-                case END_DOUBLE_QUOTE, END_SINGLE_QUOTE, COLON:
+                case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
+                    // A quoted entity name. The empty name is legal: EntityId.of("id", 1) / EntityId.create(Map)
+                    // serialize as {"": {"id": 1}} and must read back.
+                    if (entityId != null) {
+                        throw new ParsingException(getErrorMsg(jr, token), token);
+                    }
+
+                    entityId = Seid.of(jr.hasText() ? jr.getText() : Strings.EMPTY);
+
+                    break;
+
+                case COLON:
 
                     if (jr.hasText()) {
-                        if (entityId == null) {
-                            entityId = Seid.of(jr.getText());
-                        } else {
+                        // unquoted entity name
+                        if (entityId != null) {
                             throw new ParsingException(getErrorMsg(jr, token), token);
                         }
-                    } else {
-                        if (entityId == null) {
-                            throw new ParsingException("Bean name cannot be null or empty", token);
-                        }
+
+                        entityId = Seid.of(jr.getText());
+                    } else if (entityId == null) {
+                        throw new ParsingException("Bean name cannot be null or empty", token);
                     }
 
                     break;
@@ -3913,11 +4316,14 @@ final class JsonParserImpl extends AbstractJsonParser {
                     // same ParsingException already thrown for a missing name in the branch above.
                     if (entityId == null) {
                         throw new ParsingException("Bean name cannot be null or empty", token);
+                    } else if (valueRead) {
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
                     final Map<String, Object> props = readMap(jr, config, null, false, Map.class, null, null);
 
                     entityId.set(props);
+                    valueRead = true;
 
                     break;
 
@@ -3925,6 +4331,9 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     if ((firstToken == START_BRACE) == (token != END_BRACE)) {
                         throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
+                    } else if (jr.hasText() || (entityId != null && !valueRead)) {
+                        // {"E": 1} (scalar value) or {"E"} (no value): the id value must be a JSON object.
+                        throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
                     return (T) entityId;
@@ -3947,14 +4356,19 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetClass the target class to create
      * @param targetType the target type to create
      * @return the deserialized dataset of type {@code T}, or {@code null} if the JSON text is empty
-     * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid or not a valid dataset structure
+     * @throws IOException if the supplied JSON reader cannot read dataset column metadata or row values from its underlying character
+     *         source
      */
     @SuppressWarnings("unused")
     protected <T> T readDataset(final JsonReader jr, final int lastToken, final JsonDeserConfig config, final boolean isFirstCall,
-            final Class<? extends T> targetClass, final Type<? extends T> targetType) throws IOException {
+            final Class<? extends T> targetClass, final Type<? extends T> targetType) throws ParsingException, IOException {
 
         final int firstToken = isFirstCall ? jr.nextToken() : lastToken;
+
+        if (isFirstCall) {
+            checkNoTextBeforeRoot(jr, firstToken);
+        }
 
         if (firstToken == EOF) {
             if (isFirstCall && Strings.isNotEmpty(jr.getText())) {
@@ -3991,6 +4405,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                 final Type<?> keyType = strType;
                 Type<?> valueType = objType;
                 boolean isKey = true;
+                boolean valueComplete = false;
                 String key = null;
                 Object value = null;
                 int valueCount = 0;
@@ -4016,6 +4431,8 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                                     addDatasetColumnValue(key, value, valueCount, result);
                                 }
+
+                                valueComplete = true;
                             }
 
                             break;
@@ -4023,6 +4440,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         case COLON:
                             if (isKey) {
                                 isKey = false;
+                                valueComplete = false;
 
                                 if (jr.hasText()) {
                                     key = (String) readValue(jr, readNullToEmpty, keyType);
@@ -4037,6 +4455,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                         case COMMA:
                             if (isKey) {
                                 throw new ParsingException(getErrorMsg(jr, token), token);
+                            } else if (!valueComplete && !jr.hasText()) {
+                                // {"a":,"b":1} -- rejected like the Map/Bean/List readers do
+                                throw new ParsingException("A value is required after a JSON object colon", token);
                             } else {
                                 isKey = true;
 
@@ -4064,6 +4485,8 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                                     addDatasetColumnValue(key, value, valueCount, result);
                                 }
+
+                                valueComplete = true;
                             }
 
                             break;
@@ -4080,6 +4503,8 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                                     addDatasetColumnValue(key, value, valueCount, result);
                                 }
+
+                                valueComplete = true;
                             }
 
                             break;
@@ -4088,6 +4513,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                             if (isKey && key != null /* check for empty JSON text {} */
                                     || (isKey && key == null && jr.hasText()) /* check for invalid JSON text: {abc} */) {
                                 throw new ParsingException(getErrorMsg(jr, token), token);
+                            } else if (!isKey && !valueComplete && !jr.hasText()) {
+                                // {"a":} -- rejected like the Map/Bean/List readers do
+                                throw new ParsingException("A value is required after a JSON object colon", token);
                             } else {
                                 if (jr.hasText()) {
                                     if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key)) {
@@ -4112,15 +4540,25 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 }
                             }
 
-                            do {
+                            token = jr.nextToken();
+
+                            // Rows must be comma-separated like the elements of every other array
+                            // (readCollection / stream()). A leading, consecutive or trailing comma stays
+                            // tolerated, as the empty-element dialect of arrays does.
+                            if (token == START_BRACE) {
+                                throw new ParsingException("A comma is required between JSON array elements", token);
+                            }
+
+                            while (token == COMMA && !jr.hasText()) {
                                 token = jr.nextToken();
-                            } while (token == COMMA && !jr.hasText());
+                            }
 
                             if (jr.hasText()) {
                                 throw new ParsingException("A row-oriented Dataset JSON array may contain only JSON objects; found a scalar element", token);
                             }
 
                             isKey = true;
+                            valueComplete = false;
                             // Reset the stale key from the previous row: the END_BRACE guard above
                             // distinguishes an empty row ({}) from a dangling key by key == null,
                             // so a stale key made empty rows throw depending on their position.
@@ -4153,7 +4591,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                 throw new ParsingException(getErrorMsg(jr, token), token);
             }
 
-            rs = new RowDataset(new ArrayList<>(result.keySet()), new ArrayList<>(result.values()));
+            try {
+                rs = new RowDataset(new ArrayList<>(result.keySet()), new ArrayList<>(result.values()));
+            } catch (final IllegalArgumentException e) {
+                throw new ParsingException("Invalid Dataset JSON: " + e.getMessage(), e);
+            }
 
             return (T) rs;
         } else {
@@ -4169,6 +4611,9 @@ final class JsonParserImpl extends AbstractJsonParser {
             String columnName = null;
             Type<?> valueType = defaultValueType;
             boolean isKey = true;
+            // 'columns' consumes columnNames/columnTypes while reading, so a later occurrence of either
+            // could only be silently ignored; reject it the way readSheet rejects a late rowKeyType.
+            boolean columnsRead = false;
 
             for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
                 switch (token) {
@@ -4241,10 +4686,18 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                         switch (order) {
                             case 3:
+                                if (columnsRead) {
+                                    throw new ParsingException("'" + COLUMN_NAMES + "' must appear before '" + COLUMNS + "' in Dataset JSON", token);
+                                }
+
                                 columnNameList = readCollection(jr, jdcForStringElement, null, null, false, List.class, null, null);
                                 break;
 
                             case 4:
+                                if (columnsRead) {
+                                    throw new ParsingException("'" + COLUMN_TYPES + "' must appear before '" + COLUMNS + "' in Dataset JSON", token);
+                                }
+
                                 columnTypeList = readCollection(jr, jdcForTypeElement, null, null, false, List.class, null, null);
                                 break;
 
@@ -4338,8 +4791,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                                         }
 
                                         columnName = null;
-                                        isKey = true;
+                                        // the "columns" value is complete: a ',' (isFrozen / properties may
+                                        // follow) or the closing '}' comes next
+                                        isKey = false;
                                         readingColumns = false;
+                                        columnsRead = true;
                                         break;
 
                                     default:
@@ -4356,8 +4812,15 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                         if ((firstToken == START_BRACE) == (token != END_BRACE)) {
                             throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
-                        } else if ((isKey && columnName != null) || jr.hasText()) {
+                        } else if ((isKey && columnName != null) || (isKey && jr.hasText())) {
                             throw new ParsingException(getErrorMsg(jr, token), token);
+                        } else if (jr.hasText()) {
+                            // the last member is an unquoted scalar (only "isFrozen" can be one), e.g. ..., "isFrozen": true}
+                            if (!Integer.valueOf(6).equals(datasetSheetPropOrder.get(columnName))) {
+                                throw new ParsingException(getErrorMsg(jr, token), token);
+                            }
+
+                            isFrozen = jr.readValue(boolType);
                         }
 
                         if (columnNameList == null) {
@@ -4369,7 +4832,12 @@ final class JsonParserImpl extends AbstractJsonParser {
                         }
 
                         // rs = new RowDataset(beanName, beanClass, columnNameList, columnList, properties);
-                        rs = new RowDataset(columnNameList, columnList, properties);
+                        try {
+                            rs = new RowDataset(columnNameList, columnList, properties);
+                        } catch (final IllegalArgumentException e) {
+                            // a structurally inconsistent document (column count / length / duplicate names)
+                            throw new ParsingException("Invalid Dataset JSON: " + e.getMessage(), e);
+                        }
 
                         if (isFrozen) {
                             rs.freeze();
@@ -4386,7 +4854,8 @@ final class JsonParserImpl extends AbstractJsonParser {
 
     /**
      * Appends one cell value to the column accumulator of a row-oriented Dataset being read, creating the
-     * column on first sight and back-filling {@code null} for the rows in which the column was absent.
+     * column on first sight and back-filling {@code null} for the rows in which the column was absent. A key
+     * repeated inside the same row overwrites the cell (last wins, as for Map and bean targets).
      *
      * @param key the column name
      * @param value the cell value for the current row
@@ -4409,8 +4878,13 @@ final class JsonParserImpl extends AbstractJsonParser {
             output.put(key, values);
         }
 
-        values.add(value);
-        //}
+        // After a completed row every column holds exactly valueCount cells, so a size above that means the
+        // current row already wrote this column: overwrite instead of appending a phantom row.
+        if (values.size() > valueCount) {
+            values.set(values.size() - 1, value);
+        } else {
+            values.add(value);
+        }
     }
 
     /**
@@ -4424,14 +4898,19 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param targetClass the target class to create
      * @param targetType the target type to create
      * @return the deserialized sheet of type {@code T}, or {@code null} if the JSON text is empty
-     * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON is invalid or not a valid sheet structure
+     * @throws IOException if the supplied JSON reader cannot read sheet row keys, column keys or cell values from its underlying
+     *         character source
      */
     @SuppressWarnings({ "unused", "rawtypes" })
     protected <T> T readSheet(final JsonReader jr, final int lastToken, final JsonDeserConfig config, final boolean isFirstCall,
-            final Class<? extends T> targetClass, final Type<? extends T> targetType) throws IOException {
+            final Class<? extends T> targetClass, final Type<? extends T> targetType) throws ParsingException, IOException {
 
         final int firstToken = isFirstCall ? jr.nextToken() : lastToken;
+
+        if (isFirstCall) {
+            checkNoTextBeforeRoot(jr, firstToken);
+        }
 
         if (firstToken == EOF) {
             if (isFirstCall && Strings.isNotEmpty(jr.getText())) {
@@ -4497,6 +4976,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 break;
 
                             case 10:
+                                if (rowKeyList != null) {
+                                    throw new ParsingException("'rowKeyType' must appear before 'rowKeySet' in Sheet JSON", token);
+                                }
+
                                 rowKeyType = jr.readValue(strType);
 
                                 if (Strings.isNotEmpty(rowKeyType)) {
@@ -4506,6 +4989,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                                 break;
 
                             case 11:
+                                if (columnKeyList != null) {
+                                    throw new ParsingException("'columnKeyType' must appear before 'columnKeySet' in Sheet JSON", token);
+                                }
+
                                 columnKeyType = jr.readValue(strType);
 
                                 if (Strings.isNotEmpty(columnKeyType)) {
@@ -4553,6 +5040,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     break;
 
                                 case 10:
+                                    if (rowKeyList != null) {
+                                        throw new ParsingException("'rowKeyType' must appear before 'rowKeySet' in Sheet JSON", token);
+                                    }
+
                                     rowKeyType = jr.readValue(strType);
 
                                     if (Strings.isNotEmpty(rowKeyType)) {
@@ -4562,6 +5053,10 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     break;
 
                                 case 11:
+                                    if (columnKeyList != null) {
+                                        throw new ParsingException("'columnKeyType' must appear before 'columnKeySet' in Sheet JSON", token);
+                                    }
+
                                     columnKeyType = jr.readValue(strType);
 
                                     if (Strings.isNotEmpty(columnKeyType)) {
@@ -4700,7 +5195,8 @@ final class JsonParserImpl extends AbstractJsonParser {
                                     }
 
                                     columnName = null;
-                                    isKey = true;
+                                    // the "columns" value is complete: a ',' (isFrozen may follow) or '}' comes next
+                                    isKey = false;
                                     readingColumns = false;
                                     break;
 
@@ -4718,8 +5214,40 @@ final class JsonParserImpl extends AbstractJsonParser {
 
                     if ((firstToken == START_BRACE) == (token != END_BRACE)) {
                         throw new ParsingException("The JSON text should be wrapped or unwrapped with \"[]\" or \"{}\"", token);
-                    } else if ((isKey && columnName != null) || jr.hasText()) {
+                    } else if ((isKey && columnName != null) || (isKey && jr.hasText())) {
                         throw new ParsingException(getErrorMsg(jr, token), token);
+                    } else if (jr.hasText()) {
+                        // the last member is an unquoted scalar, e.g. ..., "isFrozen": true}
+                        final Integer lastOrder = datasetSheetPropOrder.get(columnName);
+
+                        if (lastOrder == null) {
+                            throw new ParsingException(getErrorMsg(jr, token), token);
+                        }
+
+                        switch (lastOrder) { //NOSONAR
+                            case 6:
+                                isFrozen = jr.readValue(boolType);
+                                break;
+
+                            case 10:
+                                if (rowKeyList != null) {
+                                    throw new ParsingException("'rowKeyType' must appear before 'rowKeySet' in Sheet JSON", token);
+                                }
+
+                                rowKeyType = jr.readValue(strType);
+                                break;
+
+                            case 11:
+                                if (columnKeyList != null) {
+                                    throw new ParsingException("'columnKeyType' must appear before 'columnKeySet' in Sheet JSON", token);
+                                }
+
+                                columnKeyType = jr.readValue(strType);
+                                break;
+
+                            default:
+                                throw new ParsingException(getErrorMsg(jr, token), token);
+                        }
                     }
 
                     if (rowKeyList == null) {
@@ -4730,7 +5258,12 @@ final class JsonParserImpl extends AbstractJsonParser {
                         columnList = new ArrayList<>();
                     }
 
-                    sheet = Sheet.columns(rowKeyList, columnKeyList, columnList);
+                    try {
+                        sheet = Sheet.columns(rowKeyList, columnKeyList, columnList);
+                    } catch (final IllegalArgumentException e) {
+                        // a structurally inconsistent document (key set sizes vs. column lengths, null columns)
+                        throw new ParsingException("Invalid Sheet JSON: " + e.getMessage(), e);
+                    }
 
                     if (isFrozen) {
                         sheet.freeze();
@@ -4753,13 +5286,25 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param propHandler an optional handler invoked for each element being added, or {@code null}
      * @param type the target type for the bracketed value
      * @return the deserialized value
-     * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON nesting depth exceeds the allowed maximum or the JSON is invalid
+     * @throws IOException if the supplied JSON reader cannot read a bracketed array or collection value from its underlying character
+     *         source
      */
     protected Object readBracketedValue(final JsonReader jr, JsonDeserConfig config, final BiConsumer<? super Collection<Object>, ?> propHandler,
-            final Type<?> type) throws IOException {
+            final Type<?> type) throws ParsingException, IOException {
         enterNesting();
         try {
+            if (isSingleValueObjectType(type)) {
+                return readSingleValueObject(jr, START_BRACKET, type);
+            }
+            if (isGenericWrapper(type)) {
+                return wrapValue(type, readBracketedValue(jr, tupleSlotConfig(config), propHandler, type.parameterTypes().get(0)));
+            }
+
+            if (list2PairTripleConverterMap.containsKey(type.javaType())) {
+                return readTupleValue(jr, config, type);
+            }
+
             if (type.parameterTypes().size() == 1) {
                 config = config.copy();
                 config.setElementType(type.parameterTypes().get(0));
@@ -4771,6 +5316,11 @@ final class JsonParserImpl extends AbstractJsonParser {
                 return readCollection(jr, config, type, propHandler, false, type.javaType(), type, null);
             } else if (type.isDataset()) {
                 return readDataset(jr, START_BRACKET, config, false, type.javaType(), type);
+            } else if (type.isSerializable() && !type.isObject()) {
+                // A scalar slot (Integer, String, enum, IntList, ...) fed a JSON array: hand the raw text to
+                // type.valueOf so the outcome equals the plain scalar sibling's (e.g. NumberFormatException
+                // "[1] is not a valid Integer") instead of an ArrayList smuggled into a typed slot or wrapper.
+                return readSingleValueObject(jr, START_BRACKET, type);
             } else {
                 final List<?> list = readCollection(jr, config, type, propHandler, false, List.class, null, null);
                 final BiFunction<List<?>, Type<?>, Object> converter = list2PairTripleConverterMap.get(type.javaType());
@@ -4782,8 +5332,144 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
-    /** Maximum permitted JSON nesting depth. Defends against StackOverflowError on hostile input. */
-    private static final int MAX_NESTING_DEPTH = 1000;
+    private static boolean isGenericWrapper(final Type<?> type) {
+        final Class<?> cls = type.javaType();
+        return cls == java.util.Optional.class || cls == Optional.class || cls == Nullable.class || cls == Holder.class;
+    }
+
+    private static boolean isSingleValueObjectType(final Type<?> type) {
+        return type instanceof ObjectType && !type.isObject();
+    }
+
+    /** Hands a detected value handler its original numeric tokens instead of an inferred List/Map.
+     * @throws ParsingException if the value is unterminated, has mismatched delimiters, or exceeds the maximum JSON nesting depth
+     */
+    private Object readSingleValueObject(final JsonReader jr, final int opening, final Type<?> type) throws ParsingException {
+        final StringBuilder text = new StringBuilder().append(eventChars[opening]);
+        final ArrayDeque<Integer> closingTokens = new ArrayDeque<>();
+        closingTokens.push(opening == START_BRACKET ? END_BRACKET : END_BRACE);
+
+        while (!closingTokens.isEmpty()) {
+            final int token = jr.nextToken(strType);
+            if (token == EOF) {
+                throw new ParsingException("Unterminated value for " + type.name(), token);
+            } else if (token == START_BRACKET || token == START_BRACE) {
+                // The caller already counted the outer container. Include its enclosing depth when
+                // bounding this iterative capture, and retain that depth during the typed reparse.
+                if (NESTING_DEPTH.get()[0] + closingTokens.size() > MAX_NESTING_DEPTH) {
+                    throw new ParsingException("JSON nesting depth exceeded " + MAX_NESTING_DEPTH, token);
+                }
+                closingTokens.push(token == START_BRACKET ? END_BRACKET : END_BRACE);
+            } else if (token == END_BRACKET || token == END_BRACE) {
+                if (closingTokens.pop() != token) {
+                    throw new ParsingException("Mismatched delimiters in value for " + type.name(), token);
+                }
+            }
+            // Preserve every bare token and delimiter; re-escape decoded quoted text. The value
+            // handler then validates the grammar while parsing with its resolved member metadata.
+            appendJsonRawToken(text, jr, token);
+        }
+
+        // Number has no String factory (see abstractNumberValue), so its valueOf would report an
+        // UnsupportedOperationException instead of the NumberFormatException every other numeric slot gives.
+        return type.javaType() == Number.class ? abstractNumberValue(text.toString()) : type.valueOf(text.toString());
+    }
+
+    private static JsonDeserConfig tupleSlotConfig(final JsonDeserConfig config) {
+        return config.copy().setElementType((Type<?>) null).setMapKeyType((Type<?>) null).setMapValueType((Type<?>) null);
+    }
+
+    /** Wraps an already typed structural value without a lossy serialization/conversion pass. */
+    private static Object wrapValue(final Type<?> type, final Object value) {
+        final Class<?> cls = type.javaType();
+        if (cls == java.util.Optional.class) {
+            return java.util.Optional.ofNullable(value);
+        } else if (cls == Optional.class) {
+            return Optional.ofNullable(value);
+        } else if (cls == Nullable.class) {
+            return Nullable.of(value);
+        } else {
+            return Holder.of(value);
+        }
+    }
+
+    /** Reads heterogeneous slots with their declared types before any numeric inference.
+     * @throws IOException if reading the tuple from the input reader fails
+     * @throws ParsingException if the JSON value does not contain the required tuple elements or has invalid delimiters
+     */
+    private Object readTupleValue(final JsonReader jr, final JsonDeserConfig config, final Type<?> type) throws IOException, ParsingException {
+        final boolean hasMetadata = type.javaType() == Indexed.class || type.javaType() == Timed.class;
+        final List<Type<?>> slotTypes = hasMetadata ? List.of(N.typeOf(Long.class), type.parameterTypes().get(0)) : type.parameterTypes();
+        final List<Object> slots = new ArrayList<>(slotTypes.size());
+        // An enclosing collection's homogeneous element hint must not leak into tuple slots.
+        final JsonDeserConfig slotConfig = tupleSlotConfig(config);
+        boolean complete = false;
+        final String error = "Invalid " + type.name() + " format: expected exactly " + slotTypes.size() + " elements";
+
+        while (true) {
+            final Type<?> slotType = slotTypes.get(Math.min(slots.size(), slotTypes.size() - 1));
+            final int token = jr.nextToken(slotType);
+
+            switch (token) {
+                case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
+                    if (complete || jr.hasText() || slots.size() == slotTypes.size()) {
+                        throw new ParsingException(error, token);
+                    }
+                    break;
+
+                case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
+                    if (complete || slots.size() == slotTypes.size()) {
+                        throw new ParsingException(error, token);
+                    }
+                    // Metadata must retain integer notation even when generic numeric payloads permit coercion.
+                    slots.add(hasMetadata && slots.isEmpty() ? slotType.valueOf(jr.getText()) : readValue(jr, false, slotType));
+                    complete = true;
+                    break;
+
+                case START_BRACE, START_BRACKET:
+                    if (complete || jr.hasText() || slots.size() == slotTypes.size()) {
+                        throw new ParsingException(error, token);
+                    }
+                    slots.add(token == START_BRACE ? readBracedValue(jr, slotConfig, slotType) : readBracketedValue(jr, slotConfig, null, slotType));
+                    complete = true;
+                    break;
+
+                case COMMA, END_BRACKET:
+                    if (complete) {
+                        if (jr.hasText()) {
+                            throw new ParsingException(error, token);
+                        }
+                    } else {
+                        if (!jr.hasText() || slots.size() == slotTypes.size()) {
+                            throw new ParsingException(error, token);
+                        }
+                        // Preserve null slots, including primitive and optional descriptors.
+                        slots.add("null".equals(jr.getText()) ? null
+                                : hasMetadata && slots.isEmpty() ? slotType.valueOf(jr.getText()) : readValue(jr, false, slotType));
+                    }
+
+                    if (token == END_BRACKET) {
+                        if (slots.size() != slotTypes.size()) {
+                            throw new ParsingException(error, token);
+                        }
+                        return list2PairTripleConverterMap.get(type.javaType()).apply(slots, type);
+                    }
+                    complete = false;
+                    break;
+
+                default:
+                    throw new ParsingException(error, token);
+            }
+        }
+    }
+
+    /**
+     * Maximum nested parsing dispatch budget. Ordinary Map/List roots are not counted; typed wrappers
+     * can consume additional steps. A 1,000-step budget could exhaust a default JVM stack before reaching
+     * the guard as JIT compilation changed frame sizes. This lower bound leaves more stack headroom,
+     * but cannot guarantee safety with arbitrarily little native stack remaining.
+     */
+    private static final int MAX_NESTING_DEPTH = 256;
 
     /** Per-thread JSON nesting depth counter (used as a single-element mutable int). */
     private static final ThreadLocal<int[]> NESTING_DEPTH = ThreadLocal.withInitial(() -> new int[1]);
@@ -4793,7 +5479,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      *
      * @throws ParsingException if the depth would exceed {@code MAX_NESTING_DEPTH}
      */
-    private static void enterNesting() {
+    private static void enterNesting() throws ParsingException {
         final int[] depth = NESTING_DEPTH.get();
         if (++depth[0] > MAX_NESTING_DEPTH) {
             // Decrement before throwing so a caught exception leaves the counter consistent
@@ -4824,10 +5510,10 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration
      * @param type the target type for the braced value
      * @return the deserialized value
-     * @throws IOException if an I/O error occurs while reading
      * @throws ParsingException if the JSON nesting depth exceeds the allowed maximum or the JSON is invalid
+     * @throws IOException if the supplied JSON reader cannot read a braced object or map value from its underlying character source
      */
-    protected Object readBracedValue(final JsonReader jr, JsonDeserConfig config, final Type<?> type) throws IOException {
+    protected Object readBracedValue(final JsonReader jr, JsonDeserConfig config, final Type<?> type) throws ParsingException, IOException {
         enterNesting();
         try {
             return readBracedValueBody(jr, config, type);
@@ -4843,10 +5529,19 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param jr the JSON reader positioned after the opening brace
      * @param config the deserialization configuration
      * @param type the target type for the braced value
-     * @return the deserialized value; a plain {@code Map} when {@code type} has no registered converter
-     * @throws IOException if an I/O error occurs while reading
+     * @return the deserialized value; a plain {@code Map} when {@code type} is untyped or structured and has no
+     *         registered converter; a serializable scalar type (Integer, String, enum, ...) is parsed from the raw
+     *         JSON text by its own {@code valueOf}, so a mismatch fails the way the un-wrapped scalar slot fails
+     * @throws IOException if the supplied JSON reader cannot read a braced object or map value from its underlying character source
      */
     private Object readBracedValueBody(final JsonReader jr, JsonDeserConfig config, final Type<?> type) throws IOException {
+        if (isSingleValueObjectType(type)) {
+            return readSingleValueObject(jr, START_BRACE, type);
+        }
+        if (isGenericWrapper(type)) {
+            return wrapValue(type, readBracedValue(jr, tupleSlotConfig(config), type.parameterTypes().get(0)));
+        }
+
         if (type.parameterTypes().size() == 2) {
             config = config.copy();
             config.setMapKeyType(type.parameterTypes().get(0));
@@ -4865,6 +5560,10 @@ final class JsonParserImpl extends AbstractJsonParser {
             return readMapEntity(jr, config, false, type.javaType(), type);
         } else if (type.isEntityId()) {
             return readEntityId(jr, config, false, type.javaType(), type);
+        } else if (type.isSerializable() && !type.isObject() && !Map.Entry.class.isAssignableFrom(type.javaType())
+                && !map2TargetTypeConverterMap.containsKey(type.javaType())) {
+            // A scalar slot fed a JSON object: same treatment as readBracketedValue (raw text -> type.valueOf).
+            return readSingleValueObject(jr, START_BRACE, type);
         } else {
             final Map<Object, Object> map = readMap(jr, config, type, false, Map.class, null, null);
             final Function<Map<Object, Object>, ?> converter = map2TargetTypeConverterMap.get(type.javaType());
@@ -4887,12 +5586,39 @@ final class JsonParserImpl extends AbstractJsonParser {
      * Reads a scalar JSON value and converts it to the given type, optionally substituting an
      * empty value for {@code null} when {@code nullToEmpty} is {@code true}.
      *
+     * <p><b>An unquoted decimal read into an integral target is truncated toward zero</b>, not rejected:
+     * {@code [1.50]} into a {@code List<Integer>} yields {@code [1]}, and so does a {@code byte}/{@code short}/
+     * {@code long}/{@code BigInteger} slot or a bean's {@code int} property. This is the long-standing contract of
+     * this parser - an unquoted number token is parsed once and then <i>converted</i> to the declared target, the
+     * same conversion {@code Numbers.convert} performs anywhere else - and it is deliberately <i>not</i> symmetric
+     * with the quoted form: {@code ["1.50"]} is handed to {@code Integer}'s own {@code valueOf(String)} and still
+     * raises {@code NumberFormatException}. A value the target cannot hold at all is still rejected, as
+     * {@code ArithmeticException} from the conversion (e.g. {@code [3000000000.5]} into an {@code int} slot).</p>
+     *
+     * <p>The one deliberate exception is the metadata slot of {@link Indexed} and {@link Timed}: an index or
+     * timestamp must be written in integer notation, so {@code readTupleValue(..)} reads that slot with
+     * {@code Type.valueOf(String)} and a fractional token there fails.</p>
+     *
      * @param jr the JSON reader positioned at the value token
      * @param nullToEmpty whether a {@code null} value should be replaced with an empty value
      * @param valueType the target type to convert the value to
      * @return the converted value
      */
     protected Object readValue(final JsonReader jr, final boolean nullToEmpty, final Type<?> valueType) {
+        if (valueType.javaType() == Number.class) {
+            return readNullToEmpty(valueType, abstractNumberValue(jr.getText()), nullToEmpty);
+        }
+
+        if (isSingleValueObjectType(valueType) && !("null".equals(jr.getText()) && jr.readValue(N.typeOf(Object.class)) == null)) {
+            // A cached Double cannot preserve a custom BigDecimal value's scale or precision.
+            return readNullToEmpty(valueType, valueType.valueOf(jr.getText()), nullToEmpty);
+        }
+        if (isGenericWrapper(valueType) && !("null".equals(jr.getText()) && jr.readValue(N.typeOf(Object.class)) == null)) {
+            // Read the contained type from the original token before wrapping. Converting a
+            // cached untyped Number into Optional<BigDecimal>, for example, has already lost scale.
+            return readNullToEmpty(valueType, wrapValue(valueType, readValue(jr, false, valueType.parameterTypes().get(0))), nullToEmpty);
+        }
+
         return readNullToEmpty(valueType, jr.readValue(valueType), nullToEmpty);
     }
 
@@ -4907,8 +5633,8 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @return the converted value
      */
     protected Object readValue(final JsonReader jr, final boolean nullToEmpty, final PropInfo propInfo, final Type<?> valueType) {
-        return readNullToEmpty(valueType, propInfo != null && propInfo.hasFormat ? propInfo.readPropValue(jr.readValue(strType)) : jr.readValue(valueType),
-                nullToEmpty);
+        return propInfo != null && propInfo.hasFormat ? readNullToEmpty(valueType, propInfo.readPropValue(jr.readValue(strType)), nullToEmpty)
+                : readValue(jr, nullToEmpty, valueType);
     }
 
     /**
@@ -4929,18 +5655,21 @@ final class JsonParserImpl extends AbstractJsonParser {
      * // Stream is automatically closed with try-with-resources
      * }</pre>
      *
+     * <p>The JSON root is checked before this method returns. Invalid array elements or later malformed JSON
+     * can raise {@link ParsingException} when the returned stream is consumed.</p>
+     *
      * @param <T> the type of elements in the stream
      * @param source the JSON array string to stream; may be {@code null} or empty (returns empty stream)
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
-     * @throws IllegalArgumentException if the element type is not supported for streaming.
-     * @throws UnsupportedOperationException if the root of the JSON is not an array
-     * @throws UncheckedIOException if an I/O error occurs during parsing
-     * @throws ParsingException if the JSON structure is invalid
+     * @throws IllegalArgumentException if {@code elementType} is {@code null}, or the element type is unsupported for streaming
+     * @throws ParsingException if tokenizing the input prefix fails, or non-whitespace text appears before the root array
+     * @throws UnsupportedOperationException if the initial token identifies a non-array JSON root
      */
     @Override
-    public <T> Stream<T> stream(final String source, final JsonDeserConfig config, final Type<? extends T> elementType) {
+    public <T> Stream<T> stream(final String source, final JsonDeserConfig config, final Type<? extends T> elementType)
+            throws IllegalArgumentException, ParsingException, UnsupportedOperationException {
         checkStreamSupportedType(elementType);
 
         final JsonDeserConfig configToUse = check(config);
@@ -4985,18 +5714,24 @@ final class JsonParserImpl extends AbstractJsonParser {
      * // File is automatically closed when stream is closed
      * }</pre>
      *
+     * <p>The JSON root is checked before this method returns. Invalid array elements or later malformed JSON
+     * can raise {@link ParsingException} when the returned stream is consumed. Later source read failures raise
+     * {@link UncheckedIOException} from the consuming operation.</p>
+     *
      * @param <T> the type of elements in the stream
      * @param source the file containing the JSON array to stream; must not be {@code null}
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
-     * @throws IllegalArgumentException if the element type is not supported for streaming.
-     * @throws UnsupportedOperationException if the root of the JSON is not an array
-     * @throws UncheckedIOException if an I/O error occurs during file reading or parsing
-     * @throws ParsingException if the JSON structure is invalid
+     * @throws IllegalArgumentException if {@code source} is {@code null}, is a directory, {@code elementType} is {@code null}, or
+     *         the element type is unsupported for streaming
+     * @throws UncheckedIOException if opening the file or reading the initial JSON token fails
+     * @throws ParsingException if tokenizing the input prefix fails, or non-whitespace text appears before the root array
+     * @throws UnsupportedOperationException if the initial token identifies a non-array JSON root
      */
     @Override
-    public <T> Stream<T> stream(final File source, final JsonDeserConfig config, final Type<? extends T> elementType) {
+    public <T> Stream<T> stream(final File source, final JsonDeserConfig config, final Type<? extends T> elementType)
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException {
         Stream<T> result = null;
         Reader reader = null;
 
@@ -5033,20 +5768,25 @@ final class JsonParserImpl extends AbstractJsonParser {
      * // Input stream is automatically closed
      * }</pre>
      *
+     * <p>The JSON root is checked before this method returns. Invalid array elements or later malformed JSON
+     * can raise {@link ParsingException} when the returned stream is consumed. Later source read failures raise
+     * {@link UncheckedIOException} from the consuming operation.</p>
+     *
      * @param <T> the type of elements in the stream
      * @param source the input stream containing the JSON array to stream; must not be {@code null}
      * @param closeInputStreamWhenStreamIsClosed {@code true} to close the input stream when the stream is closed
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
-     * @throws IllegalArgumentException if the element type is not supported for streaming.
-     * @throws UnsupportedOperationException if the root of the JSON is not an array
-     * @throws UncheckedIOException if an I/O error occurs during stream reading or parsing
-     * @throws ParsingException if the JSON structure is invalid
+     * @throws IllegalArgumentException if {@code source} is {@code null}, {@code elementType} is {@code null}, or the element type
+     *         is unsupported for streaming
+     * @throws UncheckedIOException if reading the initial JSON token fails
+     * @throws ParsingException if tokenizing the input prefix fails, or non-whitespace text appears before the root array
+     * @throws UnsupportedOperationException if the initial token identifies a non-array JSON root
      */
     @Override
     public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final JsonDeserConfig config,
-            final Type<? extends T> elementType) {
+            final Type<? extends T> elementType) throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException {
         // See deserialize(InputStream): JSON is UTF-8 per RFC 8259.
         final Reader reader = IOUtil.newInputStreamReader(source, Charsets.UTF_8); // NOSONAR
 
@@ -5074,29 +5814,36 @@ final class JsonParserImpl extends AbstractJsonParser {
      * // Reader is automatically closed
      * }</pre>
      *
+     * <p>The JSON root is checked before this method returns. Invalid array elements or later malformed JSON
+     * can raise {@link ParsingException} when the returned stream is consumed. Later source read failures raise
+     * {@link UncheckedIOException} from the consuming operation.</p>
+     *
      * @param <T> the type of elements in the stream
      * @param source the reader containing the JSON array to stream; must not be {@code null}
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
-     * @throws IllegalArgumentException if the source is {@code null} or the element type is not supported for
-     *         streaming.
-     * @throws UnsupportedOperationException if the root of the JSON is not an array
-     * @throws UncheckedIOException if an I/O error occurs during reading or parsing
-     * @throws ParsingException if the JSON structure is invalid
+     * @throws IllegalArgumentException if {@code source} is {@code null}, {@code elementType} is {@code null}, or the element type
+     *         is unsupported for streaming
+     * @throws UncheckedIOException if reading the initial JSON token fails
+     * @throws ParsingException if tokenizing the input prefix fails, or non-whitespace text appears before the root array
+     * @throws UnsupportedOperationException if the initial token identifies a non-array JSON root
      */
     @Override
     public <T> Stream<T> stream(final Reader source, final boolean closeReaderWhenStreamIsClosed, final JsonDeserConfig config,
-            final Type<? extends T> elementType) throws IllegalArgumentException {
+            final Type<? extends T> elementType) throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException {
         N.checkArgNotNull(source, cs.source);
-        checkStreamSupportedType(elementType);
 
         Stream<T> result = null;
         final char[] rbuf = Objectory.createCharArrayBuffer();
         final char[] cbuf = Objectory.createCharArrayBuffer();
 
         try {
+            // Inside the try: with closeReaderWhenStreamIsClosed the caller handed us the source, so a rejected
+            // element type must close it exactly as a rejected root does.
+            checkStreamSupportedType(elementType);
+
             final JsonDeserConfig configToUse = check(config);
 
             final JsonReader jr = JsonStreamReader.parse(source, rbuf, cbuf);
@@ -5123,9 +5870,17 @@ final class JsonParserImpl extends AbstractJsonParser {
         return result;
     }
 
-    private <T> Stream<T> stream(final Object source, final JsonReader jr, final JsonDeserConfig configToUse, final Type<? extends T> elementType) {
+    /**
+     * @throws UncheckedIOException if reading the initial token from the underlying source fails
+     * @throws ParsingException if tokenizing the input prefix fails, or non-whitespace text appears before the root array
+     * @throws UnsupportedOperationException if the first non-whitespace token does not begin a JSON array
+     */
+    private <T> Stream<T> stream(final Object source, final JsonReader jr, final JsonDeserConfig configToUse, final Type<? extends T> elementType)
+            throws UncheckedIOException, ParsingException, UnsupportedOperationException {
         final Class<? extends T> elementClass = elementType.javaType();
         final int firstToken = jr.nextToken();
+
+        checkNoTextBeforeRoot(jr, firstToken);
 
         if (firstToken == EOF) {
             if (jr.hasText()) {
@@ -5137,90 +5892,121 @@ final class JsonParserImpl extends AbstractJsonParser {
             throw new UnsupportedOperationException("Only Collection/Array JSON are supported by stream Methods");
         }
 
+        final boolean ignoreNullOrEmpty = configToUse.isIgnoreNullOrEmpty();
+        final boolean readNullToEmpty = configToUse.isReadNullToEmpty();
         final MutableBoolean hasNextFlag = MutableBoolean.of(false);
+        // START_BRACKET: positioned at the array start. COMMA: an unquoted scalar/null element is pending (its
+        // text travels with the comma token). END_BRACKET: the closing bracket carried a trailing unquoted
+        // scalar/null that is still to be read, or has just been read. UNDEFINED: a structured element was read.
         final MutableInt tokenHolder = MutableInt.of(START_BRACKET);
+        // element already read by hasNext (ignoreNullOrEmpty look-ahead)
+        final Holder<T> pending = new Holder<>();
+
+        // Positions the reader on the next element; false once the closing bracket has been consumed
+        // (verifyEndOfInput runs exactly once, on that call).
+        final BooleanSupplier advance = () -> {
+            if (tokenHolder.value() == END_BRACKET) {
+                // The trailing scalar was read by next(): the array is closed.
+                verifyEndOfInput(jr);
+                return false;
+            }
+
+            if (tokenHolder.value() == START_BRACKET || tokenHolder.value() == COMMA) {
+                // At the array start, or right after an empty/scalar element whose separator comma has
+                // already been consumed: the next token starts the next element.
+                tokenHolder.setAndGet(jr.nextToken());
+            } else {
+                tokenHolder.setAndGet(jr.nextToken());
+
+                if (tokenHolder.value() == COMMA) {
+                    tokenHolder.setAndGet(jr.nextToken());
+                } else if (tokenHolder.value() == END_BRACKET) {
+                    if (jr.hasText()) {
+                        // [{"a":1} null]: a scalar directly after a structured element, as deserialize rejects it
+                        throw new ParsingException("A comma is required between JSON array elements", END_BRACKET);
+                    }
+
+                    verifyEndOfInput(jr);
+                    return false;
+                } else if (tokenHolder.value() == EOF) {
+                    throw new ParsingException("The JSON array is missing its closing bracket", EOF);
+                } else {
+                    throw new ParsingException("A comma or closing bracket is expected between JSON array elements", tokenHolder.value());
+                }
+            }
+
+            if (tokenHolder.value() == END_BRACKET) {
+                if (jr.hasText()) {
+                    // A trailing unquoted scalar/null ([null], [{"a":1},null]): the bracket token carries
+                    // its text, so it is read by next(); the array is closed on the following call.
+                    return true;
+                }
+
+                verifyEndOfInput(jr);
+                return false;
+            } else if (tokenHolder.value() == EOF) {
+                throw new ParsingException("The JSON array is missing its closing bracket", EOF);
+            }
+
+            return true;
+        };
+
+        final Supplier<T> readElement = () -> {
+            final int token = tokenHolder.value();
+            // an unquoted scalar/null element: its text is carried by the COMMA or END_BRACKET token
+            final boolean scalar = token == COMMA || token == END_BRACKET;
+
+            try {
+                @SuppressWarnings("unchecked")
+                final T result = scalar ? (T) readValue(jr, readNullToEmpty, elementType)
+                        : read(source, jr, token, configToUse, false, elementClass, elementType);
+
+                // Neutral value, NOT jr.lastToken(): after an element whose parse consumed exactly
+                // one token (e.g. inner "[1]" or "[]"), lastToken() is the inner START_BRACKET,
+                // which advance treats as the "positioned at array start" sentinel and then
+                // mistakes the separator COMMA for an element - injecting spurious nulls.
+                tokenHolder.setAndGet(scalar ? token : UNDEFINED);
+
+                return result;
+            } catch (final IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        };
 
         final BooleanSupplier hasNext = () -> {
             if (hasNextFlag.isTrue()) {
                 return true;
             }
 
-            if (tokenHolder.value() == START_BRACKET) {
-                tokenHolder.setAndGet(jr.nextToken());
-
-                if (tokenHolder.value() == END_BRACKET) {
-                    verifyEndOfInput(jr);
-                    return false;
-                } else if (tokenHolder.value() == EOF) {
-                    throw new ParsingException("The JSON array is missing its closing bracket", EOF);
-                }
-
-                hasNextFlag.setTrue();
-                return true;
-            } else if (tokenHolder.value() == COMMA) {
-                // A consecutive comma denotes an empty element. The comma token also acts as
-                // the separator before the following element, so consume that element directly.
-                tokenHolder.setAndGet(jr.nextToken());
-
-                if (tokenHolder.value() == END_BRACKET) {
-                    verifyEndOfInput(jr);
-                    return false;
-                } else if (tokenHolder.value() == EOF) {
-                    throw new ParsingException("The JSON array is missing its closing bracket", EOF);
-                }
-
-                hasNextFlag.setTrue();
-                return true;
-            } else {
-                tokenHolder.setAndGet(jr.nextToken());
-
-                if (tokenHolder.value() == COMMA) {
-                    tokenHolder.setAndGet(jr.nextToken());
-
-                    if (tokenHolder.value() == END_BRACKET) {
-                        verifyEndOfInput(jr);
-                        return false;
-                    } else if (tokenHolder.value() == EOF) {
-                        throw new ParsingException("The JSON array is missing its closing bracket", EOF);
-                    }
-
+            while (advance.getAsBoolean()) {
+                if (!ignoreNullOrEmpty) {
                     hasNextFlag.setTrue();
                     return true;
-                } else if (tokenHolder.value() == END_BRACKET) {
-                    verifyEndOfInput(jr);
-                    return false;
-                } else if (tokenHolder.value() == EOF) {
-                    throw new ParsingException("The JSON array is missing its closing bracket", EOF);
                 }
 
-                throw new ParsingException("A comma or closing bracket is expected between JSON array elements", tokenHolder.value());
+                // ignoreNullOrEmpty: read ahead so null/empty elements are skipped exactly as readCollection does
+                final T value = readElement.get();
+
+                if (!isNullOrEmptyValue(elementType, value)) {
+                    pending.setValue(value);
+                    hasNextFlag.setTrue();
+                    return true;
+                }
             }
+
+            return false;
         };
 
         final Supplier<T> next = () -> {
             hasNextFlag.setFalse();
 
-            try {
-                T result = null;
-
-                final boolean emptyElement = tokenHolder.value() == COMMA;
-
-                if (emptyElement) {
-                    result = jr.readValue(elementType);
-                } else {
-                    result = read(source, jr, tokenHolder.value(), configToUse, false, elementClass, elementType);
-                }
-
-                // Neutral value, NOT jr.lastToken(): after an element whose parse consumed exactly
-                // one token (e.g. inner "[1]" or "[]"), lastToken() is the inner START_BRACKET,
-                // which hasNext treats as the "positioned at array start" sentinel and then
-                // mistakes the separator COMMA for an element - injecting spurious nulls.
-                tokenHolder.setAndGet(emptyElement ? COMMA : UNDEFINED);
-
-                return result;
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
+            if (ignoreNullOrEmpty) {
+                final T value = pending.value();
+                pending.setValue(null);
+                return value;
             }
+
+            return readElement.get();
         };
 
         return Stream.iterate(hasNext, next);
@@ -5233,7 +6019,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @throws IllegalArgumentException if {@code elementType} is {@code null} or is not a
      *         Bean/Map/MapEntity/Collection/object-array/Dataset/Sheet/EntityId type.
      */
-    private void checkStreamSupportedType(final Type<?> elementType) {
+    private void checkStreamSupportedType(final Type<?> elementType) throws IllegalArgumentException {
         N.checkArgNotNull(elementType, cs.elementType);
 
         switch (elementType.serializationType()) { // NOSONAR
@@ -5274,7 +6060,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      *
      * @param bw the buffered JSON writer
      * @param type the declared type of the value being written
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     private void writeNullToEmpty(final BufferedJsonWriter bw, final Type<?> type) throws IOException {
         if (type.isCollection() || type.isArray()) {
@@ -5327,68 +6113,50 @@ final class JsonParserImpl extends AbstractJsonParser {
     private static final Map<Class<?>, BiFunction<List<?>, Type<?>, Object>> list2PairTripleConverterMap = new HashMap<>();
 
     static {
+        list2PairTripleConverterMap.put(Indexed.class, (list, type) -> Indexed.of(list.get(1), list.get(0) == null ? 0 : (Long) list.get(0)));
+        list2PairTripleConverterMap.put(Timed.class, (list, type) -> Timed.of(list.get(1), list.get(0) == null ? 0 : (Long) list.get(0)));
         list2PairTripleConverterMap.put(Pair.class, (list, eleType) -> {
-            final List<Type<?>> paramTypes = eleType.parameterTypes();
-            return Pair.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)));
+            return Pair.of(list.get(0), list.get(1));
         });
 
         list2PairTripleConverterMap.put(Triple.class, (list, eleType) -> {
-            final List<Type<?>> paramTypes = eleType.parameterTypes();
-            return Triple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)));
+            return Triple.of(list.get(0), list.get(1), list.get(2));
         });
 
         list2PairTripleConverterMap.put(Tuple1.class, (list, eleType) -> {
-            final List<Type<?>> paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)));
+            return Tuple.of(list.get(0));
         });
 
         list2PairTripleConverterMap.put(Tuple2.class, (list, eleType) -> {
-            final List<Type<?>> paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)));
+            return Tuple.of(list.get(0), list.get(1));
         });
 
         list2PairTripleConverterMap.put(Tuple3.class, (list, eleType) -> {
-            final List<Type<?>> paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)));
+            return Tuple.of(list.get(0), list.get(1), list.get(2));
         });
 
         list2PairTripleConverterMap.put(Tuple4.class, (list, eleType) -> {
-            final List<Type<?>> paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)),
-                    N.convert(list.get(3), paramTypes.get(3)));
+            return Tuple.of(list.get(0), list.get(1), list.get(2), list.get(3));
         });
 
         list2PairTripleConverterMap.put(Tuple5.class, (list, eleType) -> {
-            final List<Type<?>> paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)),
-                    N.convert(list.get(3), paramTypes.get(3)), N.convert(list.get(4), paramTypes.get(4)));
+            return Tuple.of(list.get(0), list.get(1), list.get(2), list.get(3), list.get(4));
         });
 
         list2PairTripleConverterMap.put(Tuple6.class, (list, eleType) -> {
-            final List<Type<?>> paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)),
-                    N.convert(list.get(3), paramTypes.get(3)), N.convert(list.get(4), paramTypes.get(4)), N.convert(list.get(5), paramTypes.get(5)));
+            return Tuple.of(list.get(0), list.get(1), list.get(2), list.get(3), list.get(4), list.get(5));
         });
 
         list2PairTripleConverterMap.put(Tuple7.class, (list, eleType) -> {
-            final List<Type<?>> paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)),
-                    N.convert(list.get(3), paramTypes.get(3)), N.convert(list.get(4), paramTypes.get(4)), N.convert(list.get(5), paramTypes.get(5)),
-                    N.convert(list.get(6), paramTypes.get(6)));
+            return Tuple.of(list.get(0), list.get(1), list.get(2), list.get(3), list.get(4), list.get(5), list.get(6));
         });
 
         list2PairTripleConverterMap.put(Tuple8.class, (list, eleType) -> {
-            final List<Type<?>> paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)),
-                    N.convert(list.get(3), paramTypes.get(3)), N.convert(list.get(4), paramTypes.get(4)), N.convert(list.get(5), paramTypes.get(5)),
-                    N.convert(list.get(6), paramTypes.get(6)), N.convert(list.get(7), paramTypes.get(7)));
+            return Tuple.of(list.get(0), list.get(1), list.get(2), list.get(3), list.get(4), list.get(5), list.get(6), list.get(7));
         });
 
         list2PairTripleConverterMap.put(Tuple9.class, (list, eleType) -> {
-            final List<Type<?>> paramTypes = eleType.parameterTypes();
-            return Tuple.of(N.convert(list.get(0), paramTypes.get(0)), N.convert(list.get(1), paramTypes.get(1)), N.convert(list.get(2), paramTypes.get(2)),
-                    N.convert(list.get(3), paramTypes.get(3)), N.convert(list.get(4), paramTypes.get(4)), N.convert(list.get(5), paramTypes.get(5)),
-                    N.convert(list.get(6), paramTypes.get(6)), N.convert(list.get(7), paramTypes.get(7)), N.convert(list.get(8), paramTypes.get(8)));
+            return Tuple.of(list.get(0), list.get(1), list.get(2), list.get(3), list.get(4), list.get(5), list.get(6), list.get(7), list.get(8));
         });
     }
 
@@ -5434,6 +6202,50 @@ final class JsonParserImpl extends AbstractJsonParser {
 
             default:
                 return "Unknown error on event : " + (token == EOF ? "EOF" : String.valueOf((char) token)) + " with " + jr.getText();
+        }
+    }
+
+    /**
+     * Captures the raw JSON text of the container value of a {@code @JsonXmlField(isJsonRawValue = true)}
+     * {@code CharSequence} property, whose opening delimiter has already been consumed.
+     *
+     * <p>The delimiters are tracked on a stack rather than with one counter per delimiter kind, so a payload
+     * that closes a {@code [} with a {@code }} is rejected instead of being stored as malformed "raw JSON",
+     * and end of input is a failure rather than a terminator - the same rules
+     * {@link #readSingleValueObject(JsonReader, int, Type)} applies to the identical capture.</p>
+     *
+     * @param jr the JSON reader positioned just after the opening delimiter
+     * @param opening the opening delimiter token, {@code START_BRACE} or {@code START_BRACKET}
+     * @param propName the name of the property being read, for the failure message
+     * @return the raw JSON text of the value, opening and closing delimiters included
+     * @throws ParsingException if the value is unterminated or its delimiters do not match
+     */
+    private static String readRawJsonValue(final JsonReader jr, final int opening, final String propName) throws ParsingException {
+        final StringBuilder sb = Objectory.createStringBuilder();
+
+        try {
+            sb.append(eventChars[opening]);
+
+            final ArrayDeque<Integer> closingTokens = new ArrayDeque<>();
+            closingTokens.push(opening == START_BRACKET ? END_BRACKET : END_BRACE);
+
+            while (!closingTokens.isEmpty()) {
+                final int nextToken = jr.nextToken();
+
+                if (nextToken == EOF) {
+                    throw new ParsingException("Unterminated raw JSON value for property: " + propName, nextToken);
+                } else if (nextToken == START_BRACKET || nextToken == START_BRACE) {
+                    closingTokens.push(nextToken == START_BRACKET ? END_BRACKET : END_BRACE);
+                } else if ((nextToken == END_BRACKET || nextToken == END_BRACE) && closingTokens.pop() != nextToken) {
+                    throw new ParsingException("Mismatched delimiters in raw JSON value for property: " + propName, nextToken);
+                }
+
+                appendJsonRawToken(sb, jr, nextToken);
+            }
+
+            return sb.toString();
+        } finally {
+            Objectory.recycle(sb);
         }
     }
 

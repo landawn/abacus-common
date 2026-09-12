@@ -8,9 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,34 +31,6 @@ public class HttpHeadersTest extends TestBase {
         assertNotNull(headers);
         assertTrue(headers.isEmpty());
     }
-
-    @Test
-    public void testOfWithTwoHeaders() {
-        HttpHeaders headers = HttpHeaders.of("Content-Type", "application/json", "Accept", "text/plain");
-        assertEquals("application/json", headers.get("Content-Type"));
-        assertEquals("text/plain", headers.get("Accept"));
-    }
-
-    @Test
-    public void testOfWithThreeHeaders() {
-        HttpHeaders headers = HttpHeaders.of("Content-Type", "application/json", "Accept", "text/plain", "Authorization", "Bearer token");
-        assertEquals("application/json", headers.get("Content-Type"));
-        assertEquals("text/plain", headers.get("Accept"));
-        assertEquals("Bearer token", headers.get("Authorization"));
-    }
-
-    @Test
-    public void testOfWithMap() {
-        Map<String, String> map = new HashMap<>();
-        map.put("Content-Type", "application/json");
-        map.put("Accept", "text/plain");
-
-        HttpHeaders headers = HttpHeaders.wrap(map);
-        assertEquals("application/json", headers.get("Content-Type"));
-        assertEquals("text/plain", headers.get("Accept"));
-    }
-
-    // --- of(String, Object) ---
 
     @Test
     public void testOfSingleHeader() {
@@ -101,40 +75,13 @@ public class HttpHeadersTest extends TestBase {
     }
 
     @Test
-    public void testOfSingleHeaderWithNull() {
+    public void testOf_NullNames() {
         assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of(null, "value"));
-    }
-
-    @Test
-    public void testOfTwoHeadersWithNullName1() {
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of(null, "value1", "name2", "value2"));
-    }
-
-    @Test
-    public void testOfTwoHeadersWithNullName2() {
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", null, "value2"));
-    }
-
-    @Test
-    public void testOfWithTwoHeadersNullNames() {
         assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of(null, "value1", "name2", "value2"));
         assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", null, "value2"));
-    }
-
-    @Test
-    public void testOfThreeHeadersWithNullName() {
-        assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", null, "value2", "name3", "value3"));
-    }
-
-    @Test
-    public void testOfWithThreeHeadersNullNames() {
         assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of(null, "value1", "name2", "value2", "name3", "value3"));
         assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", null, "value2", "name3", "value3"));
         assertThrows(IllegalArgumentException.class, () -> HttpHeaders.of("name1", "value1", "name2", "value2", null, "value3"));
-    }
-
-    @Test
-    public void testOfMapWithNull() {
         assertThrows(IllegalArgumentException.class, () -> HttpHeaders.wrap((Map<String, ?>) null));
     }
 
@@ -166,21 +113,15 @@ public class HttpHeadersTest extends TestBase {
     }
 
     @Test
-    public void testCopyOfWithNull() {
+    public void testCopyOf_Null() {
         assertThrows(IllegalArgumentException.class, () -> HttpHeaders.copyOf(null));
     }
-
-    // --- valueOf ---
 
     @Test
     public void testValueOf() {
         assertEquals("test", HttpHeaders.valueOf("test"));
-    }
-
-    @Test
-    public void testValueOfString() {
-        String value = HttpHeaders.valueOf("test");
-        assertEquals("test", value);
+        assertEquals("42", HttpHeaders.valueOf(42));
+        assertEquals("", HttpHeaders.valueOf(null));
     }
 
     @Test
@@ -188,19 +129,6 @@ public class HttpHeadersTest extends TestBase {
         // RFC 7230 §3.2.2 — multi-value HTTP headers are joined by comma, not semicolon.
         String value = HttpHeaders.valueOf(Arrays.asList("gzip", "deflate"));
         assertEquals("gzip, deflate", value);
-    }
-
-    @Test
-    public void testValueOfOther() {
-        Integer number = 42;
-        String value = HttpHeaders.valueOf(number);
-        assertEquals("42", value);
-    }
-
-    @Test
-    public void testValueOfObject() {
-        Integer num = 42;
-        assertEquals("42", HttpHeaders.valueOf(num));
     }
 
     @Test
@@ -217,12 +145,6 @@ public class HttpHeadersTest extends TestBase {
         String value = HttpHeaders.valueOf(instant);
         assertNotNull(value);
         assertTrue(value.contains("1970"));
-    }
-
-    @Test
-    public void testValueOfNull() {
-        String value = HttpHeaders.valueOf(null);
-        assertNotNull(value);
     }
 
     // --- setContentType ---
@@ -656,6 +578,21 @@ public class HttpHeadersTest extends TestBase {
     }
 
     @Test
+    public void testEqualsCountsWrappedCaseDuplicateEntries() {
+        final HttpHeaders duplicatedX = HttpHeaders.wrap(Map.of("X", 1, "x", 1, "Y", 2));
+        final HttpHeaders duplicatedY = HttpHeaders.wrap(Map.of("X", 1, "Y", 2, "y", 2));
+
+        assertFalse(duplicatedX.equals(duplicatedY));
+        assertFalse(duplicatedY.equals(duplicatedX));
+
+        final HttpHeaders first = HttpHeaders.wrap(Map.of("Accept", 1, "accept", 2));
+        final HttpHeaders sameEntries = HttpHeaders.wrap(Map.of("ACCEPT", 2, "aCCEPT", 1));
+        assertEquals(first, sameEntries);
+        assertEquals(sameEntries, first);
+        assertEquals(first.hashCode(), sameEntries.hashCode());
+    }
+
+    @Test
     public void testEqualsAndHashCodeIgnoreUnicodeHeaderNameCase() {
         final HttpHeaders dottedCapitalI = HttpHeaders.of("\u0130", "value");
         final HttpHeaders asciiLowerI = HttpHeaders.of("i", "value");
@@ -725,31 +662,13 @@ public class HttpHeadersTest extends TestBase {
     // --- constant tests ---
 
     @Test
-    public void testHeaderNameConstants() {
-        assertEquals("Cache-Control", HttpHeaders.Names.CACHE_CONTROL);
-        assertEquals("Content-Length", HttpHeaders.Names.CONTENT_LENGTH);
-        assertEquals("Content-Type", HttpHeaders.Names.CONTENT_TYPE);
-        assertEquals("Accept", HttpHeaders.Names.ACCEPT);
-        assertEquals("Authorization", HttpHeaders.Names.AUTHORIZATION);
-        assertEquals("User-Agent", HttpHeaders.Names.USER_AGENT);
-    }
-
-    @Test
     public void testNamesConstants() {
+        assertEquals("Cache-Control", HttpHeaders.Names.CACHE_CONTROL);
         assertEquals("Content-Type", HttpHeaders.Names.CONTENT_TYPE);
         assertEquals("Content-Length", HttpHeaders.Names.CONTENT_LENGTH);
         assertEquals("Accept", HttpHeaders.Names.ACCEPT);
         assertEquals("Authorization", HttpHeaders.Names.AUTHORIZATION);
         assertEquals("User-Agent", HttpHeaders.Names.USER_AGENT);
-    }
-
-    @Test
-    public void testHeaderValueConstants() {
-        assertEquals("application/x-www-form-urlencoded", HttpHeaders.Values.APPLICATION_URL_ENCODED);
-        assertEquals("application/xml", HttpHeaders.Values.APPLICATION_XML);
-        assertEquals("application/json", HttpHeaders.Values.APPLICATION_JSON);
-        assertEquals("text/html", HttpHeaders.Values.TEXT_HTML);
-        assertEquals("utf-8", HttpHeaders.Values.UTF_8);
     }
 
     @Test
@@ -767,14 +686,6 @@ public class HttpHeadersTest extends TestBase {
     }
 
     @Test
-    public void testReferrerPolicyValueConstants() {
-        assertEquals("no-referrer", HttpHeaders.ReferrerPolicyValues.NO_REFERRER);
-        assertEquals("same-origin", HttpHeaders.ReferrerPolicyValues.SAME_ORIGIN);
-        assertEquals("origin", HttpHeaders.ReferrerPolicyValues.ORIGIN);
-        assertEquals("unsafe-url", HttpHeaders.ReferrerPolicyValues.UNSAFE_URL);
-    }
-
-    @Test
     public void testReferrerPolicyValuesConstants() {
         assertEquals("no-referrer", HttpHeaders.ReferrerPolicyValues.NO_REFERRER);
         assertEquals("no-referrer-when-downgrade", HttpHeaders.ReferrerPolicyValues.NO_REFERRER_WHEN_DOWNGRADE);
@@ -784,6 +695,116 @@ public class HttpHeadersTest extends TestBase {
         assertEquals("origin-when-cross-origin", HttpHeaders.ReferrerPolicyValues.ORIGIN_WHEN_CROSS_ORIGIN);
         assertEquals("strict-origin-when-cross-origin", HttpHeaders.ReferrerPolicyValues.STRICT_ORIGIN_WHEN_CROSS_ORIGIN);
         assertEquals("unsafe-url", HttpHeaders.ReferrerPolicyValues.UNSAFE_URL);
+    }
+
+    // --- a07 F-6: pin the documented rendering of arrays, null elements and null-valued headers ---
+
+    @Test
+    public void testValueOfArrayIsNotJoinedButRenderedAsJsonArray() {
+        // Only Collections are joined; an array falls through to N.stringOf and renders as a JSON literal.
+        assertEquals("[\"a\", \"b\"]", HttpHeaders.valueOf(new String[] { "a", "b" }));
+        assertEquals("a, b", HttpHeaders.valueOf(Arrays.asList("a", "b")));
+        assertEquals("a, b", HttpUtil.readHttpHeaderValue(Arrays.asList("a", "b")));
+        assertEquals("[\"a\", \"b\"]", HttpUtil.readHttpHeaderValue(new String[] { "a", "b" }));
+    }
+
+    @Test
+    public void testValueOfCollectionWithNullElementRendersLiteralNull() {
+        assertEquals("a, null, b", HttpHeaders.valueOf(Arrays.asList("a", null, "b")));
+        assertEquals("a, null, b", HttpUtil.readHttpHeaderValue(Arrays.asList("a", null, "b")));
+        assertEquals("", HttpHeaders.valueOf(null));
+        assertNull(HttpUtil.readHttpHeaderValue(null));
+    }
+
+    @Test
+    public void testGetAsStringOfNullValuedHeaderIsNullWhileHeaderIsPresent() {
+        final HttpHeaders headers = HttpHeaders.create().set("X-Null", (Object) null);
+
+        assertTrue(headers.containsHeader("X-Null"));
+        assertNull(headers.get("X-Null"));
+        assertNull(headers.getAsString("X-Null"));
+
+        assertFalse(headers.containsHeader("X-Missing"));
+        assertNull(headers.getAsString("X-Missing"));
+    }
+
+    // ---- F99 review fix 2026-09-08: copy() must not fold case-duplicate names together ----
+
+    @Test
+    public void reviewFixes20260908_copyKeepsWrappedCaseDuplicateEntries() {
+        // copy() rebuilt through setAll(..)/set(..), which folds a name onto the case-variant already
+        // stored, so a wrapped map holding both "Accept" and "accept" collapsed to a single entry - and
+        // equals(Object), which compares size() first and matches case-duplicates one-to-one, said false.
+        final Map<String, Object> wrapped = new LinkedHashMap<>();
+        wrapped.put("Accept", "a1");
+        wrapped.put("accept", "a2");
+        wrapped.put("X-Trace", "t");
+        final HttpHeaders original = HttpHeaders.wrap(wrapped);
+
+        final HttpHeaders copy = original.copy();
+
+        assertEquals(3, copy.headerNames().size());
+        assertEquals(original, copy);
+        assertEquals(copy, original);
+        assertEquals(original.hashCode(), copy.hashCode());
+        assertEquals(wrapped, copy.toMap());
+        // iteration order of a LinkedHashMap-backed instance is preserved
+        assertEquals(Arrays.asList("Accept", "accept", "X-Trace"), new ArrayList<>(copy.headerNames()));
+
+        // it is still an independent map (shallow: the values are the same references)
+        copy.set("X-Trace", "other");
+        assertEquals("t", original.get("X-Trace"));
+        assertEquals("other", copy.get("X-Trace"));
+        assertEquals(3, original.headerNames().size());
+    }
+
+    @Test
+    public void reviewFixes20260908_copyOfStillNormalizesForeignInput() {
+        // copyOf(Map) builds from foreign input and keeps folding case-duplicates through set(..).
+        final Map<String, Object> foreign = new LinkedHashMap<>();
+        foreign.put("Accept", "a1");
+        foreign.put("accept", "a2");
+
+        final HttpHeaders normalized = HttpHeaders.copyOf(foreign);
+
+        assertEquals(1, normalized.headerNames().size());
+        assertEquals("a2", normalized.get("Accept"));
+    }
+
+    // ---- F46 (carried over from G12) 2026-09-08: Cookie is not a comma-separated list field ----
+
+    @Test
+    public void reviewFixes20260908_cookieCollectionIsJoinedWithSemicolons() {
+        // RFC 6265 5.4 puts all cookie-pairs of a request on ONE Cookie line separated by "; ";
+        // the field-agnostic valueOf(Object) would comma-join them into a malformed cookie string.
+        assertEquals("a=1; b=2", HttpHeaders.valueOf("Cookie", Arrays.asList("a=1", "b=2")));
+        assertEquals("a=1; b=2", HttpHeaders.valueOf("cookie", Arrays.asList("a=1", "b=2")));
+        assertEquals("a=1; b=2", HttpHeaders.valueOf(HttpHeaders.Names.COOKIE, Arrays.asList("a=1", "b=2")));
+
+        // every other field keeps the comma-separated list grammar
+        assertEquals("gzip, br", HttpHeaders.valueOf("Accept-Encoding", Arrays.asList("gzip", "br")));
+        assertEquals("gzip, br", HttpHeaders.valueOf(null, Arrays.asList("gzip", "br")));
+        assertEquals("gzip, br", HttpHeaders.valueOf("Set-Cookie", Arrays.asList("gzip", "br")));
+
+        // non-Collection values are unaffected, whatever the field is
+        assertEquals("a=1", HttpHeaders.valueOf("Cookie", "a=1"));
+        assertEquals("", HttpHeaders.valueOf("Cookie", null));
+        assertEquals("42", HttpHeaders.valueOf("Cookie", 42));
+        assertEquals(HttpHeaders.valueOf(new Date(0)), HttpHeaders.valueOf("Cookie", new Date(0)));
+    }
+
+    @Test
+    public void reviewFixes20260908_getAsStringUsesTheFieldsOwnListGrammar() {
+        final HttpHeaders headers = HttpHeaders.create()
+                .set(HttpHeaders.Names.COOKIE, Arrays.asList("a=1", "b=2"))
+                .set("Accept-Encoding", Arrays.asList("gzip", "br"));
+
+        assertEquals("a=1; b=2", headers.getAsString("Cookie"));
+        assertEquals("a=1; b=2", headers.getAsString("COOKIE"));
+        assertEquals("gzip, br", headers.getAsString("Accept-Encoding"));
+
+        // get(..) still returns the raw stored value
+        assertEquals(Arrays.asList("a=1", "b=2"), headers.get("Cookie"));
     }
 
 }

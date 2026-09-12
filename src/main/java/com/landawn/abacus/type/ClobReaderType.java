@@ -58,10 +58,11 @@ public class ClobReaderType extends ReaderType {
      * @param columnIndex the 1-based column index
      * @return a {@link Reader} for the CLOB's character stream; closing it also releases the Clob locator,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Reader get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Reader get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final Clob clob = rs.getClob(columnIndex);
         return clobToReader(clob);
     }
@@ -76,10 +77,11 @@ public class ClobReaderType extends ReaderType {
      * @param columnName the label of the column to retrieve
      * @return a {@link Reader} for the CLOB's character stream; closing it also releases the Clob locator,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the column label is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Reader get(final ResultSet rs, final String columnName) throws SQLException {
+    public Reader get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return clobToReader(rs.getClob(columnName));
     }
 
@@ -90,10 +92,11 @@ public class ClobReaderType extends ReaderType {
      * @param stmt        the {@link java.sql.PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x           the {@link Reader} whose content will be stored as CLOB data; may be {@code null}
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws NullPointerException, SQLException {
         stmt.setClob(columnIndex, x);
     }
 
@@ -104,10 +107,11 @@ public class ClobReaderType extends ReaderType {
      * @param stmt          the {@link java.sql.CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x             the {@link Reader} whose content will be stored as CLOB data; may be {@code null}
-     * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws NullPointerException, SQLException {
         stmt.setClob(parameterName, x);
     }
 
@@ -120,10 +124,11 @@ public class ClobReaderType extends ReaderType {
      * @param columnIndex     the 1-based parameter index
      * @param x               the {@link Reader} whose content will be stored as CLOB data; may be {@code null}
      * @param sqlTypeOrLength the number of characters to read from the reader
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
         stmt.setClob(columnIndex, x, sqlTypeOrLength);
     }
 
@@ -136,10 +141,12 @@ public class ClobReaderType extends ReaderType {
      * @param parameterName   the name of the parameter to set
      * @param x               the {@link Reader} whose content will be stored as CLOB data; may be {@code null}
      * @param sqlTypeOrLength the number of characters to read from the reader
-     * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setClob(parameterName, x, sqlTypeOrLength);
     }
 

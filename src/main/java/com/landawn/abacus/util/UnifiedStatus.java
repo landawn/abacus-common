@@ -41,6 +41,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *
  * // Retrieving status from code
  * UnifiedStatus retrieved = UnifiedStatus.fromCode(32);   // returns PROCESSING
+ * UnifiedStatus missing = UnifiedStatus.fromCodeOrNull(10);   // returns null
  *
  * // Checking status
  * if (userStatus == UnifiedStatus.ACTIVE) {
@@ -393,23 +394,47 @@ public enum UnifiedStatus {
      * Returns the UnifiedStatus enum constant associated with the specified code.
      * This method provides O(1) lookup performance for valid codes.
      *
+     * <p>Unknown, reserved, or out-of-range codes throw {@link IllegalArgumentException},
+     * matching {@link AccountStatus#fromCode(int)} and {@link ServiceStatus#fromCode(int)}.
+     * Use {@link #fromCodeOrNull(int)} when a missing mapping should be handled as {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * UnifiedStatus status = UnifiedStatus.fromCode(1);      // returns ACTIVE
-     * UnifiedStatus invalid = UnifiedStatus.fromCode(999);   // returns null
+     * UnifiedStatus missing = UnifiedStatus.fromCodeOrNull(999);   // returns null
      * }</pre>
      *
      * <p>Not every value in the {@code [0, 128)} range is assigned (there are intentional
-     * gaps, e.g. code {@code 10} and codes {@code 16}&ndash;{@code 20}); such codes, as well
-     * as negative codes or codes {@code >= 128}, return {@code null}.</p>
+     * gaps, e.g. code {@code 10} and codes {@code 16}&ndash;{@code 20}). Those codes throw.</p>
      *
      * @param code the numeric code to look up
-     * @return the {@code UnifiedStatus} associated with the code, or {@code null} if no
-     *         {@code UnifiedStatus} is mapped to that code
+     * @return the {@code UnifiedStatus} associated with the code; never {@code null}
+     * @throws IllegalArgumentException if no {@code UnifiedStatus} is mapped to {@code code}
+     * @see #fromCodeOrNull(int)
      * @see #code()
      */
+    public static UnifiedStatus fromCode(final int code) throws IllegalArgumentException {
+        final UnifiedStatus status = fromCodeOrNull(code);
+
+        if (status == null) {
+            throw new IllegalArgumentException("No UnifiedStatus for code: " + code);
+        }
+
+        return status;
+    }
+
+    /**
+     * Returns the UnifiedStatus for {@code code}, or {@code null} if none is mapped.
+     *
+     * <p>Negative codes, codes {@code >= 128}, and unused slots in {@code [0, 128)}
+     * (for example {@code 10}) return {@code null}.</p>
+     *
+     * @param code the numeric code to look up
+     * @return the {@code UnifiedStatus} associated with the code, or {@code null}
+     * @see #fromCode(int)
+     */
     @MayReturnNull
-    public static UnifiedStatus fromCode(final int code) {
+    public static UnifiedStatus fromCodeOrNull(final int code) {
         return code < 0 || code >= MAX_CODE ? null : cache[code];
     }
 }

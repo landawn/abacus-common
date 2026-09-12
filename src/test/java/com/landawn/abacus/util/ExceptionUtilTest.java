@@ -1,5 +1,14 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -15,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.exceptions.base.MockitoException;
 import org.mockito.exceptions.misusing.InvalidUseOfMatchersException;
@@ -52,27 +60,31 @@ public class ExceptionUtilTest extends TestBase {
         }
     }
 
-    @Test
-    public void testRegisterRuntimeExceptionMapperNullArgs() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(null, e -> new RuntimeException()));
+    public static class CyclicExecutionException2026 extends ExecutionException {
+        public CyclicExecutionException2026() {
+        }
+    }
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(CustomCheckedException.class, null));
-        // A non-builtin exception class: only the null-mapper check can throw here
-        // (old code proceeded to the registry and threw NPE instead).
-        Assertions.assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(MockitoException.class, null, true));
+    private static final class NotUncheckedIOExceptionWrapper extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        private NotUncheckedIOExceptionWrapper(final IOException cause) {
+            super(cause);
+        }
     }
 
     @Test
-    public void testRegisterRuntimeExceptionMapperBuiltinClass() {
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> ExceptionUtil.registerRuntimeExceptionMapper(IOException.class, e -> new RuntimeException(e)));
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(RuntimeException.class, e -> e));
+    public void testRegisterRuntimeExceptionMapper() {
+        assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(null, e -> new RuntimeException()));
+        assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(CustomCheckedException.class, null));
+        assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(MockitoException.class, null, true));
+        assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(IOException.class, e -> new RuntimeException(e)));
+        assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(RuntimeException.class, e -> e));
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testRegisterRuntimeExceptionMapperInvalidatesDerivedSubclassCache() throws Exception {
+    public void testRegisterRuntimeExceptionMapper_InvalidatesDerivedSubclassCache() throws Exception {
         final Field registryField = ExceptionUtil.class.getDeclaredField("toRuntimeExceptionFuncMap");
         final Field resolvedCacheField = ExceptionUtil.class.getDeclaredField("resolvedToRuntimeExceptionFuncCache");
         final Field lockField = ExceptionUtil.class.getDeclaredField("runtimeExceptionMapperLock");
@@ -82,27 +94,25 @@ public class ExceptionUtilTest extends TestBase {
 
         final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> registry = (Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>>) registryField
                 .get(null);
-        final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> resolvedCache = (Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>>) resolvedCacheField
-                .get(null);
+        final ClassValue<?> resolvedCache = (ClassValue<?>) resolvedCacheField.get(null);
         final Object mapperLock = lockField.get(null);
         final Function<Throwable, RuntimeException> previousRegistration;
-        final Function<Throwable, RuntimeException> previousResolution;
 
         synchronized (mapperLock) {
             previousRegistration = registry.remove(MockitoException.class);
-            previousResolution = resolvedCache.remove(InvalidUseOfMatchersException.class);
+            resolvedCache.remove(InvalidUseOfMatchersException.class);
         }
 
         try {
             final InvalidUseOfMatchersException beforeRegistration = new InvalidUseOfMatchersException("before");
-            Assertions.assertSame(beforeRegistration, ExceptionUtil.toRuntimeException(beforeRegistration));
+            assertSame(beforeRegistration, ExceptionUtil.toRuntimeException(beforeRegistration));
 
             ExceptionUtil.registerRuntimeExceptionMapper(MockitoException.class, e -> new CustomRuntimeException("mapped", e), true);
 
             final InvalidUseOfMatchersException afterRegistration = new InvalidUseOfMatchersException("after");
             final RuntimeException mapped = ExceptionUtil.toRuntimeException(afterRegistration);
-            Assertions.assertInstanceOf(CustomRuntimeException.class, mapped);
-            Assertions.assertSame(afterRegistration, mapped.getCause());
+            assertInstanceOf(CustomRuntimeException.class, mapped);
+            assertSame(afterRegistration, mapped.getCause());
         } finally {
             synchronized (mapperLock) {
                 if (previousRegistration == null) {
@@ -110,19 +120,14 @@ public class ExceptionUtilTest extends TestBase {
                 } else {
                     registry.put(MockitoException.class, previousRegistration);
                 }
-
-                if (previousResolution == null) {
-                    resolvedCache.remove(InvalidUseOfMatchersException.class);
-                } else {
-                    resolvedCache.put(InvalidUseOfMatchersException.class, previousResolution);
-                }
+                ((ClassValue<?>) resolvedCacheField.get(null)).remove(InvalidUseOfMatchersException.class);
             }
         }
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testRegisterRuntimeExceptionMapperWithoutForceIsAtomic() throws Exception {
+    public void testRegisterRuntimeExceptionMapper_WithoutForceIsAtomic() throws Exception {
         final Field registryField = ExceptionUtil.class.getDeclaredField("toRuntimeExceptionFuncMap");
         final Field resolvedCacheField = ExceptionUtil.class.getDeclaredField("resolvedToRuntimeExceptionFuncCache");
         final Field lockField = ExceptionUtil.class.getDeclaredField("runtimeExceptionMapperLock");
@@ -132,15 +137,13 @@ public class ExceptionUtilTest extends TestBase {
 
         final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> registry = (Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>>) registryField
                 .get(null);
-        final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> resolvedCache = (Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>>) resolvedCacheField
-                .get(null);
+        final ClassValue<?> resolvedCache = (ClassValue<?>) resolvedCacheField.get(null);
         final Object mapperLock = lockField.get(null);
         final Function<Throwable, RuntimeException> previousRegistration;
-        final Function<Throwable, RuntimeException> previousResolution;
 
         synchronized (mapperLock) {
             previousRegistration = registry.remove(MissingMethodInvocationException.class);
-            previousResolution = resolvedCache.remove(MissingMethodInvocationException.class);
+            resolvedCache.remove(MissingMethodInvocationException.class);
         }
 
         try {
@@ -151,7 +154,6 @@ public class ExceptionUtilTest extends TestBase {
             final AtomicInteger unexpectedFailures = new AtomicInteger();
             final Runnable registration = () -> {
                 ready.countDown();
-
                 try {
                     start.await();
                     ExceptionUtil.registerRuntimeExceptionMapper(MissingMethodInvocationException.class, e -> new CustomRuntimeException(e.getMessage(), e));
@@ -167,19 +169,18 @@ public class ExceptionUtilTest extends TestBase {
             };
             final Thread first = new Thread(registration, "exception-mapper-registration-1");
             final Thread second = new Thread(registration, "exception-mapper-registration-2");
-
             first.start();
             second.start();
-            Assertions.assertTrue(ready.await(5, TimeUnit.SECONDS));
+            assertTrue(ready.await(5, TimeUnit.SECONDS));
             start.countDown();
             first.join(5000);
             second.join(5000);
 
-            Assertions.assertFalse(first.isAlive());
-            Assertions.assertFalse(second.isAlive());
-            Assertions.assertEquals(1, successes.get());
-            Assertions.assertEquals(1, duplicates.get());
-            Assertions.assertEquals(0, unexpectedFailures.get());
+            assertFalse(first.isAlive());
+            assertFalse(second.isAlive());
+            assertEquals(1, successes.get());
+            assertEquals(1, duplicates.get());
+            assertEquals(0, unexpectedFailures.get());
         } finally {
             synchronized (mapperLock) {
                 if (previousRegistration == null) {
@@ -187,338 +188,210 @@ public class ExceptionUtilTest extends TestBase {
                 } else {
                     registry.put(MissingMethodInvocationException.class, previousRegistration);
                 }
-
-                if (previousResolution == null) {
-                    resolvedCache.remove(MissingMethodInvocationException.class);
-                } else {
-                    resolvedCache.put(MissingMethodInvocationException.class, previousResolution);
-                }
+                ((ClassValue<?>) resolvedCacheField.get(null)).remove(MissingMethodInvocationException.class);
             }
         }
     }
 
     @Test
-    public void testRegisterRuntimeExceptionMapper_WithoutForce() {
-        // Test the one-arg overload which calls registerRuntimeExceptionMapper(class, mapper, false)
-        // This validates that the single-arg method properly delegates
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> ExceptionUtil.registerRuntimeExceptionMapper(IOException.class, e -> new RuntimeException(e)));
-    }
-
-    @Test
-    public void testToRuntimeExceptionWithException() {
+    public void testToRuntimeException() {
         RuntimeException runtimeEx = new RuntimeException("runtime");
-        Assertions.assertSame(runtimeEx, ExceptionUtil.toRuntimeException(runtimeEx));
+        assertSame(runtimeEx, ExceptionUtil.toRuntimeException(runtimeEx));
 
         IOException ioEx = new IOException("io error");
-        RuntimeException result = ExceptionUtil.toRuntimeException(ioEx);
-        Assertions.assertTrue(result instanceof UncheckedIOException);
-        Assertions.assertEquals(ioEx, result.getCause());
+        RuntimeException ioResult = ExceptionUtil.toRuntimeException(ioEx);
+        assertInstanceOf(UncheckedIOException.class, ioResult);
+        assertEquals(ioEx, ioResult.getCause());
+        assertInstanceOf(UncheckedIOException.class, ExceptionUtil.toRuntimeException(new IOException("io2")));
 
         SQLException sqlEx = new SQLException("sql error", "42", 1054);
-        result = ExceptionUtil.toRuntimeException(sqlEx);
-        Assertions.assertTrue(result instanceof UncheckedSQLException);
-        Assertions.assertEquals(sqlEx, result.getCause());
+        RuntimeException sqlResult = ExceptionUtil.toRuntimeException(sqlEx);
+        assertInstanceOf(UncheckedSQLException.class, sqlResult);
+        assertEquals(sqlEx, sqlResult.getCause());
 
         ParseException parseEx = new ParseException("parse error", 10);
-        result = ExceptionUtil.toRuntimeException(parseEx);
-        Assertions.assertTrue(result instanceof UncheckedParseException);
-        Assertions.assertEquals(parseEx, result.getCause());
+        RuntimeException parseResult = ExceptionUtil.toRuntimeException(parseEx);
+        assertInstanceOf(UncheckedParseException.class, parseResult);
+        assertEquals(parseEx, parseResult.getCause());
 
         InterruptedException interruptEx = new InterruptedException("interrupted");
-        result = ExceptionUtil.toRuntimeException(interruptEx);
-        Assertions.assertTrue(result instanceof UncheckedInterruptedException);
-        Assertions.assertEquals(interruptEx, result.getCause());
+        RuntimeException interruptResult = ExceptionUtil.toRuntimeException(interruptEx);
+        assertInstanceOf(UncheckedInterruptedException.class, interruptResult);
+        assertEquals(interruptEx, interruptResult.getCause());
 
         ReflectiveOperationException reflectiveEx = new ReflectiveOperationException("reflective error");
-        result = ExceptionUtil.toRuntimeException(reflectiveEx);
-        Assertions.assertTrue(result instanceof UncheckedReflectiveOperationException);
-        Assertions.assertEquals(reflectiveEx, result.getCause());
+        RuntimeException reflectiveResult = ExceptionUtil.toRuntimeException(reflectiveEx);
+        assertInstanceOf(UncheckedReflectiveOperationException.class, reflectiveResult);
+        assertEquals(reflectiveEx, reflectiveResult.getCause());
 
         Exception genericEx = new Exception("generic");
-        result = ExceptionUtil.toRuntimeException(genericEx);
-        Assertions.assertTrue(result instanceof UncheckedException);
-        Assertions.assertEquals(genericEx, result.getCause());
-    }
+        RuntimeException genericResult = ExceptionUtil.toRuntimeException(genericEx);
+        assertInstanceOf(UncheckedException.class, genericResult);
+        assertEquals(genericEx, genericResult.getCause());
 
-    @Test
-    public void testToRuntimeExceptionWithCallInterrupt() {
-        Thread.interrupted();
-
-        InterruptedException interruptEx = new InterruptedException("interrupted");
-        RuntimeException result = ExceptionUtil.toRuntimeException(interruptEx, true);
-
-        Assertions.assertTrue(result instanceof UncheckedInterruptedException);
-        Assertions.assertTrue(Thread.interrupted());
-
-        IOException ioEx = new IOException("io error");
-        result = ExceptionUtil.toRuntimeException(ioEx, true);
-        Assertions.assertTrue(result instanceof UncheckedIOException);
-        Assertions.assertFalse(Thread.interrupted());
-    }
-
-    @Test
-    public void testToRuntimeExceptionWithCallInterrupt_NonInterrupt() {
-        // When callInterrupt is true but exception is not InterruptedException, thread should not be interrupted
-        Thread.interrupted(); // clear any existing interrupt
-        IOException ioEx = new IOException("io error");
-        RuntimeException result = ExceptionUtil.toRuntimeException(ioEx, true);
-        Assertions.assertTrue(result instanceof UncheckedIOException);
-        Assertions.assertFalse(Thread.interrupted());
-    }
-
-    @Test
-    public void testToRuntimeExceptionWithThrowable() {
         Error error = new Error("error");
-        RuntimeException result = ExceptionUtil.toRuntimeException(error);
-        Assertions.assertTrue(result instanceof RuntimeException);
-        Assertions.assertEquals("error", result.getCause().getMessage());
+        RuntimeException errorResult = ExceptionUtil.toRuntimeException(error);
+        assertInstanceOf(RuntimeException.class, errorResult);
+        assertEquals("error", errorResult.getCause().getMessage());
+        assertEquals(error, ExceptionUtil.toRuntimeException(error, false, false).getCause());
+        assertThrows(Error.class, () -> ExceptionUtil.toRuntimeException(error, false, true));
+        assertThrows(Error.class, () -> ExceptionUtil.toRuntimeException(error, true, true));
 
         IOException cause = new IOException("io cause");
-        ExecutionException execEx = new ExecutionException(cause);
-        result = ExceptionUtil.toRuntimeException(execEx);
-        Assertions.assertTrue(result instanceof UncheckedIOException);
-        Assertions.assertEquals(cause, result.getCause());
+        RuntimeException execResult = ExceptionUtil.toRuntimeException(new ExecutionException(cause));
+        assertInstanceOf(UncheckedIOException.class, execResult);
+        assertEquals(cause, execResult.getCause());
+        RuntimeException execNoCause = ExceptionUtil.toRuntimeException(new ExecutionException(null));
+        assertInstanceOf(UncheckedException.class, execNoCause);
 
-        ExecutionException execExNoCause = new ExecutionException(null);
-        result = ExceptionUtil.toRuntimeException(execExNoCause);
-        Assertions.assertTrue(result instanceof UncheckedException);
-        Assertions.assertEquals(execExNoCause, result.getCause());
+        RuntimeException invocResult = ExceptionUtil.toRuntimeException(new InvocationTargetException(cause));
+        assertInstanceOf(UncheckedIOException.class, invocResult);
+        assertEquals(cause, invocResult.getCause());
+        assertInstanceOf(UncheckedException.class, ExceptionUtil.toRuntimeException(new InvocationTargetException(null)));
 
-        InvocationTargetException invocEx = new InvocationTargetException(cause);
-        result = ExceptionUtil.toRuntimeException(invocEx);
-        Assertions.assertTrue(result instanceof UncheckedIOException);
-        Assertions.assertEquals(cause, result.getCause());
-
-        UndeclaredThrowableException undeclaredEx = new UndeclaredThrowableException(cause);
-        result = ExceptionUtil.toRuntimeException(undeclaredEx);
-        Assertions.assertTrue(result instanceof UncheckedIOException);
-        Assertions.assertEquals(cause, result.getCause());
-    }
-
-    @Test
-    public void testToRuntimeExceptionThrowableWithCallInterrupt() {
-        // Test Throwable overload with callInterrupt=true and InterruptedException
-        Thread.interrupted(); // clear
-        InterruptedException interruptEx = new InterruptedException("interrupted");
-        RuntimeException result = ExceptionUtil.toRuntimeException((Throwable) interruptEx, true);
-        Assertions.assertTrue(result instanceof UncheckedInterruptedException);
-        Assertions.assertTrue(Thread.interrupted()); // should be interrupted
-
-        // Test with non-InterruptedException
-        Thread.interrupted(); // clear
-        Error error = new Error("test error");
-        result = ExceptionUtil.toRuntimeException(error, true);
-        Assertions.assertFalse(Thread.interrupted());
-        Assertions.assertEquals(error, result.getCause());
-    }
-
-    @Test
-    public void testToRuntimeExceptionWithThrowIfItIsError() {
-        Error error = new Error("test error");
-
-        Assertions.assertThrows(Error.class, () -> ExceptionUtil.toRuntimeException(error, false, true));
-
-        RuntimeException result = ExceptionUtil.toRuntimeException(error, false, false);
-        Assertions.assertTrue(result instanceof RuntimeException);
-        Assertions.assertEquals(error, result.getCause());
-    }
-
-    @Test
-    public void testCachingBehavior() {
-        IOException io1 = new IOException("io1");
-        IOException io2 = new IOException("io2");
-
-        RuntimeException result1 = ExceptionUtil.toRuntimeException(io1);
-        RuntimeException result2 = ExceptionUtil.toRuntimeException(io2);
-
-        Assertions.assertTrue(result1 instanceof UncheckedIOException);
-        Assertions.assertTrue(result2 instanceof UncheckedIOException);
-        Assertions.assertEquals(io1, result1.getCause());
-        Assertions.assertEquals(io2, result2.getCause());
-    }
-
-    @Test
-    public void testToRuntimeException_UndeclaredThrowableExceptionNoCause() {
+        RuntimeException undeclaredResult = ExceptionUtil.toRuntimeException(new UndeclaredThrowableException(cause));
+        assertInstanceOf(UncheckedIOException.class, undeclaredResult);
+        assertEquals(cause, undeclaredResult.getCause());
         UndeclaredThrowableException undeclaredNoCause = new UndeclaredThrowableException(null);
-        RuntimeException result = ExceptionUtil.toRuntimeException(undeclaredNoCause);
-        Assertions.assertSame(undeclaredNoCause, result);
+        assertSame(undeclaredNoCause, ExceptionUtil.toRuntimeException(undeclaredNoCause));
+
+        Thread.interrupted();
+        RuntimeException interruptTrue = ExceptionUtil.toRuntimeException(new InterruptedException("interrupted"), true);
+        assertInstanceOf(UncheckedInterruptedException.class, interruptTrue);
+        assertTrue(Thread.interrupted());
+        assertInstanceOf(UncheckedIOException.class, ExceptionUtil.toRuntimeException(new IOException("io error"), true));
+        assertFalse(Thread.interrupted());
+
+        Thread.interrupted();
+        RuntimeException throwableInterrupt = ExceptionUtil.toRuntimeException((Throwable) new InterruptedException("interrupted"), true);
+        assertInstanceOf(UncheckedInterruptedException.class, throwableInterrupt);
+        assertTrue(Thread.interrupted());
+        ExceptionUtil.toRuntimeException(new Error("test error"), true);
+        assertFalse(Thread.interrupted());
+
+        Thread.interrupted();
+        RuntimeException interruptThrowError = ExceptionUtil.toRuntimeException(new InterruptedException("interrupted"), true, true);
+        assertInstanceOf(UncheckedInterruptedException.class, interruptThrowError);
+        assertTrue(Thread.interrupted());
+
+        Thread.interrupted();
+        ExceptionUtil.toRuntimeException(new ExecutionException(new InterruptedException()), true);
+        // An ExecutionException reports what a task threw on *another* thread, so unwrapping it must not
+        // interrupt the thread doing the conversion.
+        assertFalse(Thread.interrupted());
+        ExceptionUtil.toRuntimeException(new ExecutionException(new ExecutionException(new InterruptedException())), true);
+        assertFalse(Thread.interrupted());
+        // InvocationTargetException and UndeclaredThrowableException are raised on the calling thread and
+        // keep their meaning.
+        ExceptionUtil.toRuntimeException(new InvocationTargetException(new InterruptedException()), true);
+        assertTrue(Thread.interrupted());
+        ExceptionUtil.toRuntimeException(new UndeclaredThrowableException(new InterruptedException()), true);
+        assertTrue(Thread.interrupted());
+        assertThrows(OutOfMemoryError.class, () -> ExceptionUtil.toRuntimeException(new ExecutionException(new OutOfMemoryError("fake")), false, true));
+
+        final CyclicExecutionException2026 e1 = new CyclicExecutionException2026();
+        final ExecutionException e2 = new ExecutionException(e1);
+        e1.initCause(e2);
+        assertNotNull(ExceptionUtil.toRuntimeException(e1));
     }
 
     @Test
-    public void testToRuntimeException_InvocationTargetExceptionNoCause() {
-        InvocationTargetException invocNoCause = new InvocationTargetException(null);
-        RuntimeException result = ExceptionUtil.toRuntimeException(invocNoCause);
-        Assertions.assertTrue(result instanceof UncheckedException);
-    }
+    public void testCauseSearchRejectsNullTargetType() {
+        final IOException failure = new IOException("io");
 
-    @Test
-    public void testToRuntimeException_CallInterruptAndThrowError() {
-        // Test with callInterrupt=true and throwIfItIsError=true for an Error
-        Error error = new Error("test error");
-        Assertions.assertThrows(Error.class, () -> ExceptionUtil.toRuntimeException(error, true, true));
-    }
+        // The Class overloads validate their second argument exactly like their Predicate twins.
+        assertEquals("'targetExceptionType' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.hasCause(failure, (Class<? extends Throwable>) null)).getMessage());
+        assertEquals("'targetExceptionType' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.hasCause(null, (Class<? extends Throwable>) null)).getMessage());
+        assertEquals("'targetExceptionType' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.findCause(failure, (Class<? extends Throwable>) null)).getMessage());
+        assertEquals("'targetExceptionType' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.findCause(null, (Class<? extends Throwable>) null)).getMessage());
 
-    @Test
-    public void testToRuntimeException_CallInterruptAndThrowError_WithInterruptedException() {
-        // Test with callInterrupt=true and throwIfItIsError=true for InterruptedException
-        Thread.interrupted(); // clear
-        InterruptedException interruptEx = new InterruptedException("interrupted");
-        RuntimeException result = ExceptionUtil.toRuntimeException(interruptEx, true, true);
-        Assertions.assertTrue(result instanceof UncheckedInterruptedException);
-        Assertions.assertTrue(Thread.interrupted()); // should have been interrupted
-    }
+        assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.hasCause(null, (Predicate<Throwable>) null));
+        assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.findCause(null, (Predicate<Throwable>) null));
 
-    @Test
-    public void testToRuntimeException_ThrowIfError() {
-        Error error = new Error("test error");
-        Assertions.assertThrows(Error.class, () -> ExceptionUtil.toRuntimeException(error, false, true));
-    }
-
-    @Test
-    public void testToRuntimeException_WrapError() {
-        Error error = new Error("test error");
-        RuntimeException result = ExceptionUtil.toRuntimeException(error, false, false);
-        Assertions.assertNotNull(result);
-        Assertions.assertSame(error, result.getCause());
+        // A valid type still answers normally.
+        assertTrue(ExceptionUtil.hasCause(new RuntimeException(failure), IOException.class));
+        assertSame(failure, ExceptionUtil.findCause(new RuntimeException(failure), IOException.class).orElseNull());
     }
 
     @Test
     public void testTryToGetOriginalCheckedException() {
         IOException originalCause = new IOException("original");
-        UncheckedException uncheckedException = new UncheckedException(originalCause);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(uncheckedException);
-        Assertions.assertEquals(originalCause, result);
-
+        assertEquals(originalCause, ExceptionUtil.tryToGetOriginalCheckedException(new UncheckedException(originalCause)));
         CustomCheckedException customCause = new CustomCheckedException("custom");
-        RuntimeException customUnchecked = new UncheckedException(customCause);
-        result = ExceptionUtil.tryToGetOriginalCheckedException(customUnchecked);
-        Assertions.assertEquals(customCause, result);
-
-        ExecutionException execEx = new ExecutionException(new InvocationTargetException(originalCause));
-        result = ExceptionUtil.tryToGetOriginalCheckedException(execEx);
-        Assertions.assertEquals(originalCause, result);
+        assertEquals(customCause, ExceptionUtil.tryToGetOriginalCheckedException(new UncheckedException(customCause)));
+        assertEquals(originalCause, ExceptionUtil.tryToGetOriginalCheckedException(new ExecutionException(new InvocationTargetException(originalCause))));
 
         RuntimeException runtimeEx = new RuntimeException(new RuntimeException("runtime cause"));
-        result = ExceptionUtil.tryToGetOriginalCheckedException(runtimeEx);
-        Assertions.assertEquals(runtimeEx, result);
-
+        assertEquals(runtimeEx, ExceptionUtil.tryToGetOriginalCheckedException(runtimeEx));
         RuntimeException noCause = new RuntimeException("no cause");
-        result = ExceptionUtil.tryToGetOriginalCheckedException(noCause);
-        Assertions.assertEquals(noCause, result);
-    }
+        assertEquals(noCause, ExceptionUtil.tryToGetOriginalCheckedException(noCause));
 
-    @Test
-    public void testTryToGetOriginalCheckedException_UncheckedIOException() {
         IOException originalIO = new IOException("io error");
-        UncheckedIOException uncheckedIO = new UncheckedIOException(originalIO);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(uncheckedIO);
-        // UncheckedIOException name matches the "Unchecked*Exception" pattern
-        Assertions.assertEquals(originalIO, result);
-    }
-
-    @Test
-    public void testTryToGetOriginalCheckedException_UncheckedSQLException() {
+        assertEquals(originalIO, ExceptionUtil.tryToGetOriginalCheckedException(new UncheckedIOException(originalIO)));
         SQLException originalSQL = new SQLException("sql error");
-        UncheckedSQLException uncheckedSQL = new UncheckedSQLException(originalSQL);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(uncheckedSQL);
-        Assertions.assertEquals(originalSQL, result);
-    }
-
-    @Test
-    public void testTryToGetOriginalCheckedException_UncheckedParseException() {
+        assertEquals(originalSQL, ExceptionUtil.tryToGetOriginalCheckedException(new UncheckedSQLException(originalSQL)));
         ParseException originalParse = new ParseException("parse error", 5);
-        UncheckedParseException uncheckedParse = new UncheckedParseException(originalParse);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(uncheckedParse);
-        Assertions.assertEquals(originalParse, result);
-    }
+        assertEquals(originalParse, ExceptionUtil.tryToGetOriginalCheckedException(new UncheckedParseException(originalParse)));
 
-    @Test
-    public void testTryToGetOriginalCheckedException_ExecutionExceptionWithCheckedException() {
-        IOException ioEx = new IOException("nested io");
-        ExecutionException execEx = new ExecutionException(ioEx);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(execEx);
-        Assertions.assertEquals(ioEx, result);
-    }
+        IOException nestedIo = new IOException("nested io");
+        assertEquals(nestedIo, ExceptionUtil.tryToGetOriginalCheckedException(new ExecutionException(nestedIo)));
+        SQLException nestedSql = new SQLException("nested sql");
+        assertEquals(nestedSql, ExceptionUtil.tryToGetOriginalCheckedException(new InvocationTargetException(nestedSql)));
 
-    @Test
-    public void testTryToGetOriginalCheckedException_InvocationTargetExceptionWithCheckedException() {
-        SQLException sqlEx = new SQLException("nested sql");
-        InvocationTargetException invocEx = new InvocationTargetException(sqlEx);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(invocEx);
-        Assertions.assertEquals(sqlEx, result);
-    }
+        RuntimeException outerRuntime = new RuntimeException("outer", new RuntimeException("inner"));
+        assertSame(outerRuntime, ExceptionUtil.tryToGetOriginalCheckedException(outerRuntime));
 
-    @Test
-    public void testTryToGetOriginalCheckedException_RuntimeCauseNotUnwrapped() {
-        // When cause is also a RuntimeException, should NOT unwrap
-        RuntimeException innerRuntime = new RuntimeException("inner");
-        RuntimeException outerRuntime = new RuntimeException("outer", innerRuntime);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(outerRuntime);
-        Assertions.assertSame(outerRuntime, result);
-    }
-
-    @Test
-    public void testTryToGetOriginalCheckedException_requiresWholeUncheckedClassName() {
         IOException cause = new IOException("checked cause");
         RuntimeException wrapper = new NotUncheckedIOExceptionWrapper(cause);
+        assertSame(wrapper, ExceptionUtil.tryToGetOriginalCheckedException(wrapper));
 
-        Assertions.assertSame(wrapper, ExceptionUtil.tryToGetOriginalCheckedException(wrapper));
-    }
-
-    private static final class NotUncheckedIOExceptionWrapper extends RuntimeException {
-        private static final long serialVersionUID = 1L;
-
-        private NotUncheckedIOExceptionWrapper(final IOException cause) {
-            super(cause);
-        }
+        IOException checked = new IOException("checked");
+        assertSame(checked, ExceptionUtil.tryToGetOriginalCheckedException(checked));
     }
 
     @Test
-    public void testTryToGetOriginalCheckedException_UncheckedException() {
-        IOException cause = new IOException("original io");
-        UncheckedIOException wrapped = new UncheckedIOException(cause);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(wrapped);
-        Assertions.assertSame(cause, result);
-    }
+    public void testHasCause() {
+        IOException ioEx = new IOException("io error");
+        SQLException sqlEx = new SQLException("sql error", ioEx);
+        RuntimeException runtimeEx = new RuntimeException("runtime error", sqlEx);
 
-    @Test
-    public void testTryToGetOriginalCheckedException_ExecutionException() throws Exception {
-        IOException cause = new IOException("exec cause");
-        ExecutionException execEx = new ExecutionException(cause);
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(execEx);
-        Assertions.assertSame(cause, result);
-    }
-
-    @Test
-    public void testTryToGetOriginalCheckedException_RuntimeException() {
-        RuntimeException ex = new RuntimeException("plain runtime");
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(ex);
-        Assertions.assertSame(ex, result);
-    }
-
-    @Test
-    public void testTryToGetOriginalCheckedException_NoRuntimeWrapper() {
-        IOException io = new IOException("checked");
-        Exception result = ExceptionUtil.tryToGetOriginalCheckedException(io);
-        Assertions.assertSame(io, result);
-    }
-
-    @Test
-    public void testHasCauseWithClass() {
-        IOException ioEx = new IOException("io");
-        SQLException sqlEx = new SQLException("sql", ioEx);
-        RuntimeException runtimeEx = new RuntimeException("runtime", sqlEx);
-
-        Assertions.assertTrue(ExceptionUtil.hasCause(runtimeEx, RuntimeException.class));
-        Assertions.assertTrue(ExceptionUtil.hasCause(runtimeEx, SQLException.class));
-        Assertions.assertTrue(ExceptionUtil.hasCause(runtimeEx, IOException.class));
-
-        Assertions.assertFalse(ExceptionUtil.hasCause(runtimeEx, ParseException.class));
+        assertTrue(ExceptionUtil.hasCause(runtimeEx, RuntimeException.class));
+        assertTrue(ExceptionUtil.hasCause(runtimeEx, SQLException.class));
+        assertTrue(ExceptionUtil.hasCause(runtimeEx, IOException.class));
+        assertFalse(ExceptionUtil.hasCause(runtimeEx, ParseException.class));
+        assertTrue(ExceptionUtil.hasCause(ioEx, IOException.class));
+        assertTrue(ExceptionUtil.hasCause(ioEx, Exception.class));
+        assertFalse(ExceptionUtil.hasCause(ioEx, SQLException.class));
 
         RuntimeException noCause = new RuntimeException("no cause");
-        Assertions.assertTrue(ExceptionUtil.hasCause(noCause, RuntimeException.class));
-        Assertions.assertFalse(ExceptionUtil.hasCause(noCause, IOException.class));
+        assertTrue(ExceptionUtil.hasCause(noCause, RuntimeException.class));
+        assertFalse(ExceptionUtil.hasCause(noCause, IOException.class));
+
+        Predicate<Throwable> containsError = ex -> ex.getMessage() != null && ex.getMessage().contains("error");
+        assertTrue(ExceptionUtil.hasCause(runtimeEx, containsError));
+        assertTrue(ExceptionUtil.hasCause(runtimeEx, ex -> ex instanceof IOException));
+        assertFalse(ExceptionUtil.hasCause(runtimeEx, ex -> ex.getMessage() != null && ex.getMessage().contains("foo")));
+        assertFalse(ExceptionUtil.hasCause(noCause, ex -> ex instanceof IOException));
+
+        assertTrue(ExceptionUtil.hasSQLCause(sqlEx));
+        assertTrue(ExceptionUtil.hasSQLCause(runtimeEx));
+        assertTrue(ExceptionUtil.hasSQLCause(new UncheckedSQLException(sqlEx)));
+        assertFalse(ExceptionUtil.hasSQLCause(ioEx));
+        assertFalse(ExceptionUtil.hasSQLCause(noCause));
+        assertTrue(ExceptionUtil.hasIOCause(ioEx));
+        assertTrue(ExceptionUtil.hasIOCause(runtimeEx));
+        assertTrue(ExceptionUtil.hasIOCause(new UncheckedIOException(ioEx)));
+        assertFalse(ExceptionUtil.hasIOCause(new SQLException("sql error")));
+        assertFalse(ExceptionUtil.hasIOCause(noCause));
+
+        assertFalse(ExceptionUtil.hasCause((Throwable) null, IOException.class));
+        assertFalse(ExceptionUtil.hasCause((Throwable) null, ex -> true));
+        assertFalse(ExceptionUtil.hasSQLCause((Throwable) null));
+        assertFalse(ExceptionUtil.hasIOCause((Throwable) null));
 
         RuntimeException circular1 = new RuntimeException("circular1");
         RuntimeException circular2 = new RuntimeException("circular2", circular1);
@@ -526,529 +399,169 @@ public class ExceptionUtilTest extends TestBase {
             Field causeField = Throwable.class.getDeclaredField("cause");
             causeField.setAccessible(true);
             causeField.set(circular1, circular2);
-
-            Assertions.assertTrue(ExceptionUtil.hasCause(circular1, RuntimeException.class));
-        } catch (Exception e) {
+            assertTrue(ExceptionUtil.hasCause(circular1, RuntimeException.class));
+        } catch (Exception ignored) {
         }
     }
 
     @Test
-    public void testHasCauseWithPredicate() {
-        IOException ioEx = new IOException("io error");
-        SQLException sqlEx = new SQLException("sql error", ioEx);
-        RuntimeException runtimeEx = new RuntimeException("runtime error", sqlEx);
-
-        Predicate<Throwable> containsError = ex -> ex.getMessage() != null && ex.getMessage().contains("error");
-        Assertions.assertTrue(ExceptionUtil.hasCause(runtimeEx, containsError));
-
-        Predicate<Throwable> isIOException = ex -> ex instanceof IOException;
-        Assertions.assertTrue(ExceptionUtil.hasCause(runtimeEx, isIOException));
-
-        Predicate<Throwable> containsFoo = ex -> ex.getMessage() != null && ex.getMessage().contains("foo");
-        Assertions.assertFalse(ExceptionUtil.hasCause(runtimeEx, containsFoo));
-    }
-
-    @Test
-    public void testHasCause_SingleException() {
-        IOException ioEx = new IOException("io");
-        Assertions.assertTrue(ExceptionUtil.hasCause(ioEx, IOException.class));
-        Assertions.assertTrue(ExceptionUtil.hasCause(ioEx, Exception.class));
-        Assertions.assertFalse(ExceptionUtil.hasCause(ioEx, SQLException.class));
-    }
-
-    @Test
-    public void testHasCause_WithPredicate_Found() {
-        IOException ioEx = new IOException("io");
-        RuntimeException runtimeEx = new RuntimeException("runtime", ioEx);
-        Assertions.assertTrue(ExceptionUtil.hasCause(runtimeEx, e -> e instanceof IOException));
-    }
-
-    @Test
-    public void testHasCause_WithPredicate_NotFound() {
-        RuntimeException ex = new RuntimeException("runtime");
-        Assertions.assertFalse(ExceptionUtil.hasCause(ex, e -> e instanceof IOException));
-    }
-
-    @Test
-    public void testHasSQLCause() {
-        SQLException sqlEx = new SQLException("sql error");
-        Assertions.assertTrue(ExceptionUtil.hasSQLCause(sqlEx));
-
-        RuntimeException runtimeEx = new RuntimeException("runtime", sqlEx);
-        Assertions.assertTrue(ExceptionUtil.hasSQLCause(runtimeEx));
-
-        UncheckedSQLException uncheckedSqlEx = new UncheckedSQLException(sqlEx);
-        Assertions.assertTrue(ExceptionUtil.hasSQLCause(uncheckedSqlEx));
-
-        IOException ioEx = new IOException("io error");
-        Assertions.assertFalse(ExceptionUtil.hasSQLCause(ioEx));
-    }
-
-    @Test
-    public void testHasSQLCause_DeepChain() {
-        SQLException sqlEx = new SQLException("sql");
-        IOException ioEx = new IOException("io", sqlEx);
-        RuntimeException runtimeEx = new RuntimeException("runtime", ioEx);
-        Assertions.assertTrue(ExceptionUtil.hasSQLCause(runtimeEx));
-    }
-
-    @Test
-    public void testHasSQLCause_NoCause() {
-        RuntimeException ex = new RuntimeException("no sql cause");
-        Assertions.assertFalse(ExceptionUtil.hasSQLCause(ex));
-    }
-
-    @Test
-    public void testHasIOCause() {
-        IOException ioEx = new IOException("io error");
-        Assertions.assertTrue(ExceptionUtil.hasIOCause(ioEx));
-
-        RuntimeException runtimeEx = new RuntimeException("runtime", ioEx);
-        Assertions.assertTrue(ExceptionUtil.hasIOCause(runtimeEx));
-
-        UncheckedIOException uncheckedIoEx = new UncheckedIOException(ioEx);
-        Assertions.assertTrue(ExceptionUtil.hasIOCause(uncheckedIoEx));
-
-        SQLException sqlEx = new SQLException("sql error");
-        Assertions.assertFalse(ExceptionUtil.hasIOCause(sqlEx));
-    }
-
-    @Test
-    public void testHasIOCause_DeepChain() {
-        IOException ioEx = new IOException("io");
-        SQLException sqlEx = new SQLException("sql", ioEx);
-        RuntimeException runtimeEx = new RuntimeException("runtime", sqlEx);
-        Assertions.assertTrue(ExceptionUtil.hasIOCause(runtimeEx));
-    }
-
-    @Test
-    public void testHasIOCause_NoCause() {
-        RuntimeException ex = new RuntimeException("no io cause");
-        Assertions.assertFalse(ExceptionUtil.hasIOCause(ex));
-    }
-
-    @Test
     public void testIsNullPointerOrIllegalArgumentException() {
-        NullPointerException npe = new NullPointerException("null");
-        Assertions.assertTrue(ExceptionUtil.isNullPointerOrIllegalArgumentException(npe));
-
-        IllegalArgumentException iae = new IllegalArgumentException("illegal");
-        Assertions.assertTrue(ExceptionUtil.isNullPointerOrIllegalArgumentException(iae));
-
-        IOException ioEx = new IOException("io");
-        Assertions.assertFalse(ExceptionUtil.isNullPointerOrIllegalArgumentException(ioEx));
-
-        RuntimeException runtimeEx = new RuntimeException("runtime");
-        Assertions.assertFalse(ExceptionUtil.isNullPointerOrIllegalArgumentException(runtimeEx));
+        assertTrue(ExceptionUtil.isNullPointerOrIllegalArgumentException(new NullPointerException("null")));
+        assertTrue(ExceptionUtil.isNullPointerOrIllegalArgumentException(new IllegalArgumentException("illegal")));
+        assertFalse(ExceptionUtil.isNullPointerOrIllegalArgumentException(new IOException("io")));
+        assertFalse(ExceptionUtil.isNullPointerOrIllegalArgumentException(new RuntimeException("runtime")));
     }
 
     @Test
-    public void testListCause() {
+    public void testListCausesGetRootCauseFindCause() {
         IOException ioEx = new IOException("io");
         SQLException sqlEx = new SQLException("sql", ioEx);
         RuntimeException runtimeEx = new RuntimeException("runtime", sqlEx);
 
         List<Throwable> causes = ExceptionUtil.listCauses(runtimeEx);
-        Assertions.assertEquals(3, causes.size());
-        Assertions.assertEquals(runtimeEx, causes.get(0));
-        Assertions.assertEquals(sqlEx, causes.get(1));
-        Assertions.assertEquals(ioEx, causes.get(2));
-
+        assertEquals(3, causes.size());
+        assertEquals(runtimeEx, causes.get(0));
+        assertEquals(sqlEx, causes.get(1));
+        assertEquals(ioEx, causes.get(2));
         RuntimeException noCause = new RuntimeException("no cause");
         causes = ExceptionUtil.listCauses(noCause);
-        Assertions.assertEquals(1, causes.size());
-        Assertions.assertEquals(noCause, causes.get(0));
+        assertEquals(1, causes.size());
+        assertEquals(noCause, causes.get(0));
+        List<Throwable> nullCauses = ExceptionUtil.listCauses(null);
+        assertNotNull(nullCauses);
+        assertTrue(nullCauses.isEmpty());
 
-        RuntimeException circular1 = new RuntimeException("circular1");
-        RuntimeException circular2 = new RuntimeException("circular2", circular1);
-        try {
-            Field causeField = Throwable.class.getDeclaredField("cause");
-            causeField.setAccessible(true);
-            causeField.set(circular1, circular2);
-
-            causes = ExceptionUtil.listCauses(circular1);
-            Assertions.assertTrue(causes.size() <= 3);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testGetRootCause() {
-        IOException ioEx = new IOException("io");
-        SQLException sqlEx = new SQLException("sql", ioEx);
-        RuntimeException runtimeEx = new RuntimeException("runtime", sqlEx);
-
-        Throwable firstCause = ExceptionUtil.getRootCause(runtimeEx);
-        Assertions.assertEquals(ioEx, firstCause);
-
-        RuntimeException noCause = new RuntimeException("no cause");
-        firstCause = ExceptionUtil.getRootCause(noCause);
-        Assertions.assertEquals(noCause, firstCause);
-
-        RuntimeException singleCause = new RuntimeException("single", ioEx);
-        firstCause = ExceptionUtil.getRootCause(singleCause);
-        Assertions.assertEquals(ioEx, firstCause);
-    }
-
-    @Test
-    public void testGetRootCause_CircularReference() {
-        RuntimeException circular1 = new RuntimeException("circular1");
-        RuntimeException circular2 = new RuntimeException("circular2", circular1);
-        try {
-            Field causeField = Throwable.class.getDeclaredField("cause");
-            causeField.setAccessible(true);
-            causeField.set(circular1, circular2);
-
-            // Should not loop forever, should terminate due to identity-based cycle detection
-            Throwable first = ExceptionUtil.getRootCause(circular1);
-            Assertions.assertNotNull(first);
-        } catch (Exception e) {
-            // Reflection may fail on some JVMs
-        }
-    }
-
-    @Test
-    public void testFindCauseByClass() {
-        IOException ioEx = new IOException("io");
-        SQLException sqlEx = new SQLException("sql", ioEx);
-        RuntimeException runtimeEx = new RuntimeException("runtime", sqlEx);
+        assertEquals(ioEx, ExceptionUtil.getRootCause(runtimeEx));
+        assertEquals(noCause, ExceptionUtil.getRootCause(noCause));
+        assertEquals(ioEx, ExceptionUtil.getRootCause(new RuntimeException("single", ioEx)));
+        assertNull(ExceptionUtil.getRootCause(null));
 
         Optional<RuntimeException> foundRuntime = ExceptionUtil.findCause(runtimeEx, RuntimeException.class);
-        Assertions.assertTrue(foundRuntime.isPresent());
-        Assertions.assertEquals(runtimeEx, foundRuntime.get());
-
+        assertTrue(foundRuntime.isPresent());
+        assertEquals(runtimeEx, foundRuntime.get());
         Optional<SQLException> foundSql = ExceptionUtil.findCause(runtimeEx, SQLException.class);
-        Assertions.assertTrue(foundSql.isPresent());
-        Assertions.assertEquals(sqlEx, foundSql.get());
-
+        assertTrue(foundSql.isPresent());
+        assertEquals(sqlEx, foundSql.get());
         Optional<IOException> foundIo = ExceptionUtil.findCause(runtimeEx, IOException.class);
-        Assertions.assertTrue(foundIo.isPresent());
-        Assertions.assertEquals(ioEx, foundIo.get());
+        assertTrue(foundIo.isPresent());
+        assertEquals(ioEx, foundIo.get());
+        assertFalse(ExceptionUtil.findCause(runtimeEx, ParseException.class).isPresent());
+        assertFalse(ExceptionUtil.findCause(noCause, IOException.class).isPresent());
 
-        Optional<ParseException> notFound = ExceptionUtil.findCause(runtimeEx, ParseException.class);
-        Assertions.assertFalse(notFound.isPresent());
-    }
+        Optional<Throwable> foundByMessage = ExceptionUtil.findCause(runtimeEx, ex -> ex.getMessage() != null && ex.getMessage().contains("io"));
+        assertTrue(foundByMessage.isPresent());
+        assertEquals(ioEx, foundByMessage.get());
+        Optional<Throwable> foundByType = ExceptionUtil.findCause(runtimeEx, ex -> ex instanceof SQLException);
+        assertTrue(foundByType.isPresent());
+        assertEquals(sqlEx, foundByType.get());
+        assertFalse(ExceptionUtil.findCause(runtimeEx, ex -> ex.getMessage() != null && ex.getMessage().contains("foo")).isPresent());
+        assertFalse(ExceptionUtil.findCause(noCause, ex -> ex instanceof IOException).isPresent());
+        assertFalse(ExceptionUtil.findCause((Throwable) null, IOException.class).isPresent());
+        assertFalse(ExceptionUtil.findCause((Throwable) null, ex -> true).isPresent());
 
-    @Test
-    public void testFindCauseByPredicate() {
-        IOException ioEx = new IOException("io error");
-        SQLException sqlEx = new SQLException("sql error", ioEx);
-        RuntimeException runtimeEx = new RuntimeException("runtime error", sqlEx);
+        IOException level3 = new IOException("level 3");
+        ExecutionException level0 = new ExecutionException("level 0", new RuntimeException("level 1", new SQLException("level 2", level3)));
+        assertEquals(level3, ExceptionUtil.findCause(level0, IOException.class).get());
+        assertEquals(level3, ExceptionUtil.getRootCause(level0));
+        assertEquals(4, ExceptionUtil.listCauses(level0).size());
 
-        Optional<Throwable> foundIo = ExceptionUtil.findCause(runtimeEx, ex -> ex.getMessage() != null && ex.getMessage().contains("io"));
-        Assertions.assertTrue(foundIo.isPresent());
-        Assertions.assertEquals(ioEx, foundIo.get());
-
-        Optional<Throwable> foundSql = ExceptionUtil.findCause(runtimeEx, ex -> ex instanceof SQLException);
-        Assertions.assertTrue(foundSql.isPresent());
-        Assertions.assertEquals(sqlEx, foundSql.get());
-
-        Optional<Throwable> notFound = ExceptionUtil.findCause(runtimeEx, ex -> ex.getMessage() != null && ex.getMessage().contains("foo"));
-        Assertions.assertFalse(notFound.isPresent());
+        RuntimeException circular1 = new RuntimeException("circular1");
+        RuntimeException circular2 = new RuntimeException("circular2", circular1);
+        try {
+            Field causeField = Throwable.class.getDeclaredField("cause");
+            causeField.setAccessible(true);
+            causeField.set(circular1, circular2);
+            assertNotNull(ExceptionUtil.getRootCause(circular1));
+            List<Throwable> circularCauses = ExceptionUtil.listCauses(circular1);
+            assertTrue(circularCauses.size() <= 3);
+            assertEquals(2, ExceptionUtil.listCauses(circular1).size());
+        } catch (Exception ignored) {
+        }
     }
 
     @Test
     public void testCauseQueriesDoNotTruncateDeepAcyclicChains() {
         Throwable chain = new IOException("deep");
-
         for (int i = 0; i < 150; i++) {
             chain = new RuntimeException((String) null, chain);
         }
-
-        Assertions.assertTrue(ExceptionUtil.hasCause(chain, IOException.class));
-        Assertions.assertTrue(ExceptionUtil.hasCause(chain, cause -> cause instanceof IOException));
-        Assertions.assertTrue(ExceptionUtil.hasIOCause(chain));
-        Assertions.assertTrue(ExceptionUtil.findCause(chain, IOException.class).isPresent());
-        Assertions.assertTrue(ExceptionUtil.findCause(chain, cause -> cause instanceof IOException).isPresent());
-        Assertions.assertEquals("deep", ExceptionUtil.getErrorMessage(chain));
+        assertTrue(ExceptionUtil.hasCause(chain, IOException.class));
+        assertTrue(ExceptionUtil.hasCause(chain, cause -> cause instanceof IOException));
+        assertTrue(ExceptionUtil.hasIOCause(chain));
+        assertTrue(ExceptionUtil.findCause(chain, IOException.class).isPresent());
+        assertTrue(ExceptionUtil.findCause(chain, cause -> cause instanceof IOException).isPresent());
+        assertEquals("deep", ExceptionUtil.getErrorMessage(chain));
 
         Throwable sqlChain = new SQLException("deep-sql");
-
         for (int i = 0; i < 150; i++) {
             sqlChain = new RuntimeException((String) null, sqlChain);
         }
-
-        Assertions.assertTrue(ExceptionUtil.hasSQLCause(sqlChain));
-    }
-
-    @Test
-    public void testComplexExceptionChains() {
-        IOException level3 = new IOException("level 3");
-        SQLException level2 = new SQLException("level 2", level3);
-        RuntimeException level1 = new RuntimeException("level 1", level2);
-        ExecutionException level0 = new ExecutionException("level 0", level1);
-
-        Optional<IOException> foundIo = ExceptionUtil.findCause(level0, IOException.class);
-        Assertions.assertTrue(foundIo.isPresent());
-        Assertions.assertEquals(level3, foundIo.get());
-
-        Throwable first = ExceptionUtil.getRootCause(level0);
-        Assertions.assertEquals(level3, first);
-
-        List<Throwable> causes = ExceptionUtil.listCauses(level0);
-        Assertions.assertEquals(4, causes.size());
-    }
-
-    @Test
-    public void testFindCause_NotFound() {
-        RuntimeException runtimeEx = new RuntimeException("runtime");
-        Optional<IOException> result = ExceptionUtil.findCause(runtimeEx, IOException.class);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testFindCauseByPredicate_NotFound() {
-        RuntimeException runtimeEx = new RuntimeException("runtime");
-        Optional<Throwable> result = ExceptionUtil.findCause(runtimeEx, ex -> ex instanceof IOException);
-        Assertions.assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testFindCause_Found() {
-        IOException ioEx = new IOException("found io");
-        RuntimeException runtimeEx = new RuntimeException("wrapper", ioEx);
-        Optional<IOException> result = ExceptionUtil.findCause(runtimeEx, IOException.class);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertSame(ioEx, result.get());
-    }
-
-    @Test
-    public void testFindCauseByPredicate_Found() {
-        IOException ioEx = new IOException("found");
-        RuntimeException runtimeEx = new RuntimeException("wrapper", ioEx);
-        Optional<Throwable> result = ExceptionUtil.findCause(runtimeEx, e -> e instanceof IOException);
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertSame(ioEx, result.get());
-    }
-
-    @Test
-    public void testHasCause_NullThrowable() {
-        // null Throwable should not throw NPE; consistent with getRootCause/listCause
-        Assertions.assertFalse(ExceptionUtil.hasCause((Throwable) null, IOException.class));
-        Assertions.assertFalse(ExceptionUtil.hasCause((Throwable) null, ex -> true));
-        Assertions.assertFalse(ExceptionUtil.hasSQLCause((Throwable) null));
-        Assertions.assertFalse(ExceptionUtil.hasIOCause((Throwable) null));
-
-        Optional<IOException> ioResult = ExceptionUtil.findCause((Throwable) null, IOException.class);
-        Assertions.assertFalse(ioResult.isPresent());
-
-        Optional<Throwable> predResult = ExceptionUtil.findCause((Throwable) null, ex -> true);
-        Assertions.assertFalse(predResult.isPresent());
+        assertTrue(ExceptionUtil.hasSQLCause(sqlChain));
     }
 
     @Test
     public void testGetStackTrace() {
         Exception ex = new Exception("test exception");
         String stackTrace = ExceptionUtil.getStackTrace(ex);
-        Assertions.assertNotNull(stackTrace);
-        Assertions.assertTrue(stackTrace.contains("test exception"));
-        Assertions.assertTrue(stackTrace.contains("Exception"));
-        Assertions.assertTrue(stackTrace.contains("at "));
+        assertNotNull(stackTrace);
+        assertTrue(stackTrace.contains("test exception"));
+        assertTrue(stackTrace.contains("Exception"));
+        assertTrue(stackTrace.contains("at "));
+        assertEquals("", ExceptionUtil.getStackTrace(null));
 
-        stackTrace = ExceptionUtil.getStackTrace(null);
-        Assertions.assertEquals("", stackTrace);
+        String withCause = ExceptionUtil.getStackTrace(new RuntimeException("wrapper", new IOException("cause")));
+        assertTrue(withCause.contains("wrapper"));
+        assertTrue(withCause.contains("cause"));
+        assertTrue(withCause.contains("Caused by"));
 
-        IOException cause = new IOException("cause");
-        RuntimeException withCause = new RuntimeException("wrapper", cause);
-        stackTrace = ExceptionUtil.getStackTrace(withCause);
-        Assertions.assertTrue(stackTrace.contains("wrapper"));
-        Assertions.assertTrue(stackTrace.contains("cause"));
-        Assertions.assertTrue(stackTrace.contains("Caused by"));
-    }
-
-    @Test
-    public void testGetErrorMessage() {
-        Exception ex = new Exception("error message");
-        String msg = ExceptionUtil.getErrorMessage(ex);
-        Assertions.assertEquals("error message", msg);
-
-        Exception noMsg = new Exception();
-        msg = ExceptionUtil.getErrorMessage(noMsg);
-        Assertions.assertEquals(noMsg.getClass().getCanonicalName(), msg);
-
-        Exception cause = new Exception("cause message");
-        Exception wrapper = new Exception(cause);
-        msg = ExceptionUtil.getErrorMessage(wrapper);
-        Assertions.assertEquals("java.lang.Exception: cause message", msg);
-
-        SQLException sqlEx = new SQLException("sql error", "42", 1054);
-        msg = ExceptionUtil.getErrorMessage(sqlEx);
-        Assertions.assertEquals("1054|sql error", msg);
-    }
-
-    @Test
-    public void testGetErrorMessageWithExceptionClassName() {
-        Exception ex = new Exception("error message");
-        String msg = ExceptionUtil.getErrorMessage(ex, true);
-        Assertions.assertEquals("Exception|error message", msg);
-
-        Exception noMsg = new Exception();
-        msg = ExceptionUtil.getErrorMessage(noMsg, true);
-        Assertions.assertEquals("Exception|" + noMsg.getClass().getCanonicalName(), msg);
-
-        SQLException sqlEx = new SQLException("sql error", "42", 1054);
-        msg = ExceptionUtil.getErrorMessage(sqlEx, true);
-        Assertions.assertEquals("SQLException|1054|sql error", msg);
-
-        Exception cause = new Exception("cause message");
-        Exception wrapper = new Exception(cause);
-        msg = ExceptionUtil.getErrorMessage(wrapper, true);
-        Assertions.assertEquals("Exception|java.lang.Exception: cause message", msg);
-    }
-
-    @Test
-    public void testGetErrorMessage_DeeplyNestedNoMessages() {
-        Exception inner = new Exception();
-        Exception middle = new Exception(inner);
-        Exception outer = new Exception(middle);
-        String msg = ExceptionUtil.getErrorMessage(outer);
-        Assertions.assertEquals(outer.getMessage(), msg);
-    }
-
-    @Test
-    public void testGetErrorMessage_DeeplyNestedWithMessageInCause() {
-        Exception inner = new Exception("deep message");
-        Exception middle = new Exception(inner);
-        Exception outer = new Exception(middle);
-        String msg = ExceptionUtil.getErrorMessage(outer);
-        // The wrapper has a non-null message from auto-generated toString of cause
-        Assertions.assertNotNull(msg);
-        Assertions.assertFalse(msg.isEmpty());
-    }
-
-    @Test
-    public void testGetErrorMessage_SQLExceptionWithoutClassName() {
-        SQLException sqlEx = new SQLException("some sql error", "state", 999);
-        String msg = ExceptionUtil.getErrorMessage(sqlEx, false);
-        Assertions.assertEquals("999|some sql error", msg);
-    }
-
-    @Test
-    public void testGetErrorMessage_WithClassName() {
-        IOException ex = new IOException("io message");
-        String msg = ExceptionUtil.getErrorMessage(ex, true);
-        Assertions.assertTrue(msg.contains("IOException"));
-        Assertions.assertTrue(msg.contains("io message"));
-    }
-
-    @Test
-    public void testGetErrorMessage_WithoutClassName() {
-        IOException ex = new IOException("plain message");
-        String msg = ExceptionUtil.getErrorMessage(ex, false);
-        Assertions.assertEquals("plain message", msg);
-    }
-
-    @Test
-    public void testGetErrorMessage_SQLWithClassName() {
-        SQLException sqlEx = new SQLException("sql msg", "S0001", 42);
-        String msg = ExceptionUtil.getErrorMessage(sqlEx, true);
-        Assertions.assertTrue(msg.contains("SQLException"));
-        Assertions.assertTrue(msg.contains("42"));
-    }
-
-    @Test
-    public void testGetErrorMessage_SQLWithoutClassName() {
-        SQLException sqlEx = new SQLException("sql msg", "S0001", 42);
-        String msg = ExceptionUtil.getErrorMessage(sqlEx, false);
-        Assertions.assertTrue(msg.contains("42"));
-    }
-
-    @Test
-    public void testGetErrorMessage_EmptyMessage_UsesClassName() {
-        RuntimeException ex = new RuntimeException();
-        String msg = ExceptionUtil.getErrorMessage(ex, false);
-        Assertions.assertNotNull(msg);
-        Assertions.assertFalse(msg.isEmpty());
-    }
-
-    @Test
-    public void testGetErrorMessage_NullMessageWithCause() {
-        IOException cause = new IOException("cause message");
-        RuntimeException ex = new RuntimeException((String) null, cause) {
-        };
-        String msg = ExceptionUtil.getErrorMessage(ex, false);
-        Assertions.assertEquals("cause message", msg);
-    }
-
-    @Test
-    public void testGetErrorMessage_NullThrowable() {
-        // Bug fix: getErrorMessage(null) should not throw NPE
-        Assertions.assertEquals("", ExceptionUtil.getErrorMessage((Throwable) null));
-        Assertions.assertEquals("", ExceptionUtil.getErrorMessage((Throwable) null, true));
-        Assertions.assertEquals("", ExceptionUtil.getErrorMessage((Throwable) null, false));
-    }
-
-    @Test
-    public void testGetRootCause_NullThrowable() {
-        // Bug fix: getRootCause(null) should return null instead of NPE
-        Assertions.assertNull(ExceptionUtil.getRootCause(null));
-    }
-
-    @Test
-    public void testListCause_NullThrowable() {
-        // Bug fix: listCauses(null) should return empty list instead of NPE
-        List<Throwable> result = ExceptionUtil.listCauses(null);
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testListCause_CircularChain() {
-        // Cycle detection in listCause should terminate cleanly using identity-based set
-        RuntimeException a = new RuntimeException("a");
-        RuntimeException b = new RuntimeException("b", a);
-        try {
-            Field causeField = Throwable.class.getDeclaredField("cause");
-            causeField.setAccessible(true);
-            causeField.set(a, b);
-        } catch (Exception ignored) {
-            return;
-        }
-        List<Throwable> causes = ExceptionUtil.listCauses(a);
-        // Should contain a and b only (no infinite loop)
-        Assertions.assertEquals(2, causes.size());
-    }
-
-    @Test
-    public void testGetStackTrace_LongChain() {
-        // Smoke test for very long cause chain
         Throwable t = new RuntimeException("root");
         for (int i = 0; i < 50; i++) {
             t = new RuntimeException("level-" + i, t);
         }
-        String trace = ExceptionUtil.getStackTrace(t);
-        Assertions.assertNotNull(trace);
-        Assertions.assertTrue(trace.contains("root"));
-        Assertions.assertTrue(trace.contains("Caused by"));
-    }
-
-    // --- regression tests for 2026-06-10 deep-review fixes ---
-
-    public static class CyclicExecutionException2026 extends ExecutionException {
-        public CyclicExecutionException2026() {
-        }
+        String longTrace = ExceptionUtil.getStackTrace(t);
+        assertNotNull(longTrace);
+        assertTrue(longTrace.contains("root"));
+        assertTrue(longTrace.contains("Caused by"));
     }
 
     @Test
-    public void testFlagsApplyAcrossExecutionExceptionUnwrap() {
-        // regression: callInterrupt/throwIfItIsError were silently dropped when the wrapper
-        // converters unwrapped ExecutionException/InvocationTargetException causes
-        Thread.interrupted(); // clear the flag first
-        ExceptionUtil.toRuntimeException(new ExecutionException(new InterruptedException()), true);
-        Assertions.assertTrue(Thread.interrupted()); // flag was set (and is cleared again here)
+    public void testGetErrorMessage() {
+        assertEquals("error message", ExceptionUtil.getErrorMessage(new Exception("error message")));
+        Exception noMsg = new Exception();
+        assertEquals(noMsg.getClass().getCanonicalName(), ExceptionUtil.getErrorMessage(noMsg));
+        assertEquals("java.lang.Exception: cause message", ExceptionUtil.getErrorMessage(new Exception(new Exception("cause message"))));
+        SQLException sqlEx = new SQLException("sql error", "42", 1054);
+        assertEquals("1054|sql error", ExceptionUtil.getErrorMessage(sqlEx));
+        assertEquals("999|some sql error", ExceptionUtil.getErrorMessage(new SQLException("some sql error", "state", 999), false));
+        assertEquals("42|sql msg", ExceptionUtil.getErrorMessage(new SQLException("sql msg", "S0001", 42), false));
 
-        Assertions.assertThrows(OutOfMemoryError.class,
-                () -> ExceptionUtil.toRuntimeException(new ExecutionException(new OutOfMemoryError("fake")), false, true));
-    }
+        assertEquals("Exception|error message", ExceptionUtil.getErrorMessage(new Exception("error message"), true));
+        assertEquals("Exception|" + noMsg.getClass().getCanonicalName(), ExceptionUtil.getErrorMessage(noMsg, true));
+        assertEquals("SQLException|1054|sql error", ExceptionUtil.getErrorMessage(sqlEx, true));
+        assertEquals("Exception|java.lang.Exception: cause message", ExceptionUtil.getErrorMessage(new Exception(new Exception("cause message")), true));
+        String ioWithClass = ExceptionUtil.getErrorMessage(new IOException("io message"), true);
+        assertTrue(ioWithClass.contains("IOException"));
+        assertTrue(ioWithClass.contains("io message"));
+        assertEquals("plain message", ExceptionUtil.getErrorMessage(new IOException("plain message"), false));
+        String sqlWithClass = ExceptionUtil.getErrorMessage(new SQLException("sql msg", "S0001", 42), true);
+        assertTrue(sqlWithClass.contains("SQLException"));
+        assertTrue(sqlWithClass.contains("42"));
 
-    @Test
-    public void testCyclicExecutionExceptionCauseChainTerminates() {
-        // regression: mutual recursion between the wrapper converters and toRuntimeException
-        // overflowed the stack on cyclic cause chains
-        final CyclicExecutionException2026 e1 = new CyclicExecutionException2026();
-        final ExecutionException e2 = new ExecutionException(e1);
-        e1.initCause(e2);
+        Exception outer = new Exception(new Exception(new Exception()));
+        assertEquals(outer.getMessage(), ExceptionUtil.getErrorMessage(outer));
+        String nested = ExceptionUtil.getErrorMessage(new Exception(new Exception(new Exception("deep message"))));
+        assertNotNull(nested);
+        assertFalse(nested.isEmpty());
+        RuntimeException empty = new RuntimeException();
+        String emptyMsg = ExceptionUtil.getErrorMessage(empty, false);
+        assertNotNull(emptyMsg);
+        assertFalse(emptyMsg.isEmpty());
 
-        Assertions.assertNotNull(ExceptionUtil.toRuntimeException(e1));
+        RuntimeException nullMessage = new RuntimeException((String) null, new IOException("cause message")) {
+        };
+        assertEquals("cause message", ExceptionUtil.getErrorMessage(nullMessage, false));
+        assertEquals("", ExceptionUtil.getErrorMessage((Throwable) null));
+        assertEquals("", ExceptionUtil.getErrorMessage((Throwable) null, true));
+        assertEquals("", ExceptionUtil.getErrorMessage((Throwable) null, false));
     }
 }

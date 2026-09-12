@@ -15,6 +15,6 @@ public class DateAdapter extends XmlAdapter<String, Date> {
 
     @Override
     public Date unmarshal(String v) throws Exception {
-        return Dates.parseJUDate(v);
+        return Dates.parseToJUDate(v);
     }
 }

@@ -16,44 +16,21 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Deque;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
-import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.LinkedBlockingQueue;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
-import com.landawn.abacus.util.ListMultimap;
-import com.landawn.abacus.util.Multiset;
-import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.TypeReference;
 
 public class TypeInterfaceTest extends TestBase {
@@ -62,7 +39,6 @@ public class TypeInterfaceTest extends TestBase {
     private Type<Integer> integerType;
     private Type<List<String>> listType;
     private Type<Map<String, Integer>> mapType;
-    private CharacterWriter characterWriter;
 
     @BeforeEach
     public void setUp() {
@@ -72,841 +48,330 @@ public class TypeInterfaceTest extends TestBase {
         });
         mapType = createType(new TypeReference<Map<String, Integer>>() {
         });
-
-        characterWriter = createCharacterWriter();
-    }
-
-    @AfterEach
-    public void tearDown() {
     }
 
     @Test
-    @DisplayName("Test Type.of(java.lang.reflect.Type)")
-    public void testOfReflectType() {
-        Type<String> type = Type.of(String.class);
-        assertNotNull(type);
-        assertEquals(String.class, type.javaType());
-    }
+    public void testOfFactories() {
+        Type<String> ofClass = Type.of(String.class);
+        assertEquals(String.class, ofClass.javaType());
+        Type<List<String>> ofRef = Type.of(new TypeReference<List<String>>() {
+        });
+        assertNotNull(ofRef);
+        assertNotNull(Type.of("String"));
+        assertNotNull(Type.of("List<String>"));
 
-    @Test
-    @DisplayName("Test Type.of(TypeReference)")
-    public void testOfTypeReference() {
-        TypeReference<List<String>> typeRef = new TypeReference<>() {
-        };
-        Type<List<String>> type = Type.of(typeRef);
-        assertNotNull(type);
-    }
-
-    @Test
-    @DisplayName("Test Type.of(String typeName)")
-    public void testOfTypeName() {
-        Type<String> type = Type.of("String");
-        assertNotNull(type);
-
-        Type<List> listType = Type.of("List<String>");
-        assertNotNull(listType);
-    }
-
-    @Test
-    @DisplayName("Test Type.ofAll(Class...)")
-    public void testOfAllVarargs() {
-        List<Type<Object>> types = Type.ofAll(String.class, Integer.class, Double.class);
-        assertNotNull(types);
-        assertEquals(3, types.size());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofAll(Collection<Class>)")
-    public void testOfAllCollection() {
+        List<Type<Object>> allVarargs = Type.ofAll(String.class, Integer.class, Double.class);
+        assertEquals(3, allVarargs.size());
         Collection<Class<? extends Number>> classes = Arrays.asList(Integer.class, Double.class, Float.class);
-        List<Type<Number>> types = Type.ofAll(classes);
-        assertNotNull(types);
-        assertEquals(3, types.size());
+        assertEquals(3, Type.ofAll(classes).size());
+
+        assertTrue(Type.ofList(String.class).isList());
+        assertTrue(Type.ofLinkedList(String.class).isList());
+        assertTrue(Type.ofListOfMap(String.class, Integer.class).isList());
+        assertTrue(Type.ofListOfLinkedHashMap(String.class, Integer.class).isList());
+        assertTrue(Type.ofSet(String.class).isSet());
+        assertTrue(Type.ofSetOfMap(String.class, Integer.class).isSet());
+        assertTrue(Type.ofSetOfLinkedHashMap(String.class, Integer.class).isSet());
+        assertTrue(Type.ofLinkedHashSet(String.class).isSet());
+        assertTrue(Type.ofSortedSet(String.class).isSet());
+        assertTrue(Type.ofNavigableSet(String.class).isSet());
+        assertTrue(Type.ofTreeSet(String.class).isSet());
+        assertTrue(Type.ofQueue(String.class).isCollection());
+        assertTrue(Type.ofDeque(String.class).isCollection());
+        assertTrue(Type.ofArrayDeque(String.class).isCollection());
+        assertTrue(Type.ofLinkedBlockingQueue(String.class).isCollection());
+        assertTrue(Type.ofConcurrentLinkedQueue(String.class).isCollection());
+        assertTrue(Type.ofPriorityQueue(String.class).isCollection());
+        assertTrue(Type.ofPropsMap().isMap());
+        assertTrue(Type.ofMap(String.class, Integer.class).isMap());
+        assertTrue(Type.ofLinkedHashMap(String.class, Integer.class).isMap());
+        assertTrue(Type.ofSortedMap(String.class, Integer.class).isMap());
+        assertTrue(Type.ofNavigableMap(String.class, Integer.class).isMap());
+        assertTrue(Type.ofTreeMap(String.class, Integer.class).isMap());
+        assertTrue(Type.ofConcurrentMap(String.class, Integer.class).isMap());
+        assertTrue(Type.ofConcurrentHashMap(String.class, Integer.class).isMap());
+        assertNotNull(Type.ofMultiset(String.class));
+        assertNotNull(Type.ofListMultimap(String.class, Integer.class));
+        assertNotNull(Type.ofSetMultimap(String.class, Integer.class));
     }
 
     @Test
-    @DisplayName("Test Type.ofList(Class)")
-    public void testOfList() {
-        Type<List<String>> type = Type.ofList(String.class);
-        assertNotNull(type);
-        assertTrue(type.isList());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofLinkedList(Class)")
-    public void testOfLinkedList() {
-        Type<LinkedList<String>> type = Type.ofLinkedList(String.class);
-        assertNotNull(type);
-        assertTrue(type.isList());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofListOfMap(Class, Class)")
-    public void testOfListOfMap() {
-        Type<List<Map<String, Integer>>> type = Type.ofListOfMap(String.class, Integer.class);
-        assertNotNull(type);
-        assertTrue(type.isList());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofListOfLinkedHashMap(Class, Class)")
-    public void testOfListOfLinkedHashMap() {
-        Type<List<Map<String, Integer>>> type = Type.ofListOfLinkedHashMap(String.class, Integer.class);
-        assertNotNull(type);
-        assertTrue(type.isList());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofSet(Class)")
-    public void testOfSet() {
-        Type<Set<String>> type = Type.ofSet(String.class);
-        assertNotNull(type);
-        assertTrue(type.isSet());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofSetOfMap(Class, Class)")
-    public void testOfSetOfMap() {
-        Type<Set<Map<String, Integer>>> type = Type.ofSetOfMap(String.class, Integer.class);
-        assertNotNull(type);
-        assertTrue(type.isSet());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofSetOfLinkedHashMap(Class, Class)")
-    public void testOfSetOfLinkedHashMap() {
-        Type<Set<Map<String, Integer>>> type = Type.ofSetOfLinkedHashMap(String.class, Integer.class);
-        assertNotNull(type);
-        assertTrue(type.isSet());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofLinkedHashSet(Class)")
-    public void testOfLinkedHashSet() {
-        Type<LinkedHashSet<String>> type = Type.ofLinkedHashSet(String.class);
-        assertNotNull(type);
-        assertTrue(type.isSet());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofSortedSet(Class)")
-    public void testOfSortedSet() {
-        Type<SortedSet<String>> type = Type.ofSortedSet(String.class);
-        assertNotNull(type);
-        assertTrue(type.isSet());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofNavigableSet(Class)")
-    public void testOfNavigableSet() {
-        Type<NavigableSet<String>> type = Type.ofNavigableSet(String.class);
-        assertNotNull(type);
-        assertTrue(type.isSet());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofTreeSet(Class)")
-    public void testOfTreeSet() {
-        Type<TreeSet<String>> type = Type.ofTreeSet(String.class);
-        assertNotNull(type);
-        assertTrue(type.isSet());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofQueue(Class)")
-    public void testOfQueue() {
-        Type<Queue<String>> type = Type.ofQueue(String.class);
-        assertNotNull(type);
-        assertTrue(type.isCollection());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofDeque(Class)")
-    public void testOfDeque() {
-        Type<Deque<String>> type = Type.ofDeque(String.class);
-        assertNotNull(type);
-        assertTrue(type.isCollection());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofArrayDeque(Class)")
-    public void testOfArrayDeque() {
-        Type<ArrayDeque<String>> type = Type.ofArrayDeque(String.class);
-        assertNotNull(type);
-        assertTrue(type.isCollection());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofLinkedBlockingQueue(Class)")
-    public void testOfLinkedBlockingQueue() {
-        Type<LinkedBlockingQueue<String>> type = Type.ofLinkedBlockingQueue(String.class);
-        assertNotNull(type);
-        assertTrue(type.isCollection());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofConcurrentLinkedQueue(Class)")
-    public void testOfConcurrentLinkedQueue() {
-        Type<ConcurrentLinkedQueue<String>> type = Type.ofConcurrentLinkedQueue(String.class);
-        assertNotNull(type);
-        assertTrue(type.isCollection());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofPriorityQueue(Class)")
-    public void testOfPriorityQueue() {
-        Type<PriorityQueue<String>> type = Type.ofPriorityQueue(String.class);
-        assertNotNull(type);
-        assertTrue(type.isCollection());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofPropsMap()")
-    public void testOfPropsMap() {
-        Type<Map<String, Object>> type = Type.ofPropsMap();
-        assertNotNull(type);
-        assertTrue(type.isMap());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofMap(Class, Class)")
-    public void testOfMap() {
-        Type<Map<String, Integer>> type = Type.ofMap(String.class, Integer.class);
-        assertNotNull(type);
-        assertTrue(type.isMap());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofLinkedHashMap(Class, Class)")
-    public void testOfLinkedHashMap() {
-        Type<LinkedHashMap<String, Integer>> type = Type.ofLinkedHashMap(String.class, Integer.class);
-        assertNotNull(type);
-        assertTrue(type.isMap());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofSortedMap(Class, Class)")
-    public void testOfSortedMap() {
-        Type<SortedMap<String, Integer>> type = Type.ofSortedMap(String.class, Integer.class);
-        assertNotNull(type);
-        assertTrue(type.isMap());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofNavigableMap(Class, Class)")
-    public void testOfNavigableMap() {
-        Type<NavigableMap<String, Integer>> type = Type.ofNavigableMap(String.class, Integer.class);
-        assertNotNull(type);
-        assertTrue(type.isMap());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofTreeMap(Class, Class)")
-    public void testOfTreeMap() {
-        Type<TreeMap<String, Integer>> type = Type.ofTreeMap(String.class, Integer.class);
-        assertNotNull(type);
-        assertTrue(type.isMap());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofConcurrentMap(Class, Class)")
-    public void testOfConcurrentMap() {
-        Type<ConcurrentMap<String, Integer>> type = Type.ofConcurrentMap(String.class, Integer.class);
-        assertNotNull(type);
-        assertTrue(type.isMap());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofConcurrentHashMap(Class, Class)")
-    public void testOfConcurrentHashMap() {
-        Type<ConcurrentHashMap<String, Integer>> type = Type.ofConcurrentHashMap(String.class, Integer.class);
-        assertNotNull(type);
-        assertTrue(type.isMap());
-    }
-
-    @Test
-    @DisplayName("Test Type.ofMultiset(Class)")
-    public void testOfMultiset() {
-        Type<Multiset<String>> type = Type.ofMultiset(String.class);
-        assertNotNull(type);
-    }
-
-    @Test
-    @DisplayName("Test Type.ofListMultimap(Class, Class)")
-    public void testOfListMultimap() {
-        Type<ListMultimap<String, Integer>> type = Type.ofListMultimap(String.class, Integer.class);
-        assertNotNull(type);
-    }
-
-    @Test
-    @DisplayName("Test Type.ofSetMultimap(Class, Class)")
-    public void testOfSetMultimap() {
-        Type<SetMultimap<String, Integer>> type = Type.ofSetMultimap(String.class, Integer.class);
-        assertNotNull(type);
-    }
-
-    @Test
-    @DisplayName("Test name()")
-    public void testName() {
-        assertNotNull(stringType.name());
+    public void testNamesAndJavaType() {
         assertTrue(stringType.name().length() > 0);
-    }
-
-    @Test
-    @DisplayName("Test declaringName()")
-    public void testDeclaringName() {
-        assertNotNull(stringType.declaringName());
         assertTrue(stringType.declaringName().length() > 0);
-    }
-
-    @Test
-    @DisplayName("Test xmlName()")
-    public void testXmlName() {
-        assertNotNull(stringType.xmlName());
         assertTrue(stringType.xmlName().length() > 0);
-    }
-
-    @Test
-    @DisplayName("Test javaType()")
-    public void testJavaType() {
         assertEquals(String.class, stringType.javaType());
         assertEquals(Integer.class, integerType.javaType());
-    }
-
-    @Test
-    @DisplayName("Test isPrimitive()")
-    public void testIsPrimitive() {
-        Type<Integer> intType = createType(int.class);
-        assertTrue(intType.isPrimitive());
-        assertFalse(stringType.isPrimitive());
-    }
-
-    @Test
-    @DisplayName("Test isPrimitiveWrapper()")
-    public void testIsPrimitiveWrapper() {
-        assertTrue(integerType.isPrimitiveWrapper());
-        assertFalse(stringType.isPrimitiveWrapper());
-    }
-
-    @Test
-    @DisplayName("Test isPrimitiveList()")
-    public void testIsPrimitiveList() {
-        assertFalse(stringType.isPrimitiveList());
-        assertFalse(listType.isPrimitiveList());
-    }
-
-    @Test
-    @DisplayName("Test isBoolean()")
-    public void testIsBoolean() {
-        Type<Boolean> booleanType = createType(Boolean.class);
-        assertTrue(booleanType.isBoolean());
-        assertFalse(stringType.isBoolean());
-    }
-
-    @Test
-    @DisplayName("Test isNumber()")
-    public void testIsNumber() {
-        assertTrue(integerType.isNumber());
-        assertFalse(stringType.isNumber());
-    }
-
-    @Test
-    @DisplayName("Test isString()")
-    public void testIsString() {
-        assertTrue(stringType.isString());
-        assertFalse(integerType.isString());
-    }
-
-    @Test
-    @DisplayName("Test isCharSequence()")
-    public void testIsCharSequence() {
-        assertTrue(stringType.isCharSequence());
-        assertFalse(integerType.isCharSequence());
-    }
-
-    @Test
-    @DisplayName("Test isDate()")
-    public void testIsDate() {
-        Type<Date> dateType = createType(Date.class);
-        assertTrue(dateType.isDate());
-        assertFalse(stringType.isDate());
-    }
-
-    @Test
-    @DisplayName("Test isCalendar()")
-    public void testIsCalendar() {
-        Type<Calendar> calendarType = createType(Calendar.class);
-        assertTrue(calendarType.isCalendar());
-        assertFalse(stringType.isCalendar());
-    }
-
-    @Test
-    @DisplayName("Test isJodaDateTime()")
-    public void testIsJodaDateTime() {
-        assertFalse(stringType.isJodaDateTime());
-    }
-
-    @Test
-    @DisplayName("Test isTemporal()")
-    public void testIsTemporal() {
-        Type<java.time.LocalDateTime> localDateTimeType = createType(java.time.LocalDateTime.class);
-        assertTrue(localDateTimeType.isTemporal());
-        assertFalse(stringType.isTemporal());
-    }
-
-    @Test
-    @DisplayName("Test isPrimitiveArray()")
-    public void testIsPrimitiveArray() {
-        Type<int[]> intArrayType = createType(int[].class);
-        assertTrue(intArrayType.isPrimitiveArray());
-        assertFalse(stringType.isPrimitiveArray());
-    }
-
-    @Test
-    @DisplayName("Test isPrimitiveByteArray()")
-    public void testIsPrimitiveByteArray() {
-        Type<byte[]> byteArrayType = createType(byte[].class);
-        assertTrue(byteArrayType.isPrimitiveByteArray());
-        assertFalse(stringType.isPrimitiveByteArray());
-    }
-
-    @Test
-    @DisplayName("Test isObjectArray()")
-    public void testIsObjectArray() {
-        Type<String[]> stringArrayType = createType(String[].class);
-        assertTrue(stringArrayType.isObjectArray());
-        assertFalse(stringType.isObjectArray());
-    }
-
-    @Test
-    @DisplayName("Test isArray()")
-    public void testIsArray() {
-        Type<String[]> stringArrayType = createType(String[].class);
-        Type<int[]> intArrayType = createType(int[].class);
-        assertTrue(stringArrayType.isArray());
-        assertTrue(intArrayType.isArray());
-        assertFalse(stringType.isArray());
-    }
-
-    @Test
-    @DisplayName("Test isList()")
-    public void testIsList() {
-        assertTrue(listType.isList());
-        assertFalse(stringType.isList());
-    }
-
-    @Test
-    @DisplayName("Test isSet()")
-    public void testIsSet() {
-        Type<Set<String>> setType = createType(new TypeReference<Set<String>>() {
-        });
-        assertTrue(setType.isSet());
-        assertFalse(stringType.isSet());
-    }
-
-    @Test
-    @DisplayName("Test isCollection()")
-    public void testIsCollection() {
-        assertTrue(listType.isCollection());
-        assertFalse(stringType.isCollection());
-    }
-
-    @Test
-    @DisplayName("Test isMap()")
-    public void testIsMap() {
-        assertTrue(mapType.isMap());
-        assertFalse(stringType.isMap());
-    }
-
-    @Test
-    @DisplayName("Test isBean()")
-    public void testIsBean() {
-        assertFalse(stringType.isBean());
-    }
-
-    @Test
-    @DisplayName("Test isMapEntity()")
-    public void testIsMapEntity() {
-        assertFalse(stringType.isMapEntity());
-    }
-
-    @Test
-    @DisplayName("Test isEntityId()")
-    public void testIsEntityId() {
-        assertFalse(stringType.isEntityId());
-    }
-
-    @Test
-    @DisplayName("Test isDataset()")
-    public void testIsDataset() {
-        assertFalse(stringType.isDataset());
-    }
-
-    @Test
-    @DisplayName("Test isInputStream()")
-    public void testIsInputStream() {
-        assertFalse(stringType.isInputStream());
-    }
-
-    @Test
-    @DisplayName("Test isReader()")
-    public void testIsReader() {
-        assertFalse(stringType.isReader());
-    }
-
-    @Test
-    @DisplayName("Test isByteBuffer()")
-    public void testIsByteBuffer() {
-        assertFalse(stringType.isByteBuffer());
-    }
-
-    @Test
-    @DisplayName("Test isGenericType()")
-    public void testIsGenericType() {
-        assertTrue(listType.isParameterizedType());
-        assertFalse(stringType.isParameterizedType());
-    }
-
-    @Test
-    @DisplayName("Test isImmutable()")
-    public void testIsImmutable() {
-        assertTrue(stringType.isImmutable());
-        assertFalse(listType.isImmutable());
-    }
-
-    @Test
-    @DisplayName("Test isComparable()")
-    public void testIsComparable() {
-        assertTrue(stringType.isComparable());
-        assertTrue(integerType.isComparable());
-    }
-
-    @Test
-    @DisplayName("Test isSerializable()")
-    public void testIsSerializable() {
-        assertTrue(stringType.isSerializable());
-    }
-
-    // M20: after flipping the interface default to true and dropping the AbstractType override,
-    // scalar/value types still report true and structured types still report false (behavior unchanged).
-    @Test
-    @DisplayName("Test isSerializable() interface default agrees with AbstractType (M20)")
-    public void testIsSerializable_DefaultAgreementM20() {
-        // The interface default is now true; AbstractType no longer overrides it.
-        assertTrue(createType(Integer.class).isSerializable());
-        assertTrue(createType(Boolean.class).isSerializable());
-        assertTrue(createType(java.math.BigDecimal.class).isSerializable());
-
-        // Structured types explicitly override to false and are unaffected by the default change.
-        assertFalse(createType("Map<String, Integer>").isSerializable());
-        assertFalse(createType(com.landawn.abacus.util.Dataset.class).isSerializable());
-    }
-
-    @Test
-    @DisplayName("Test isObject()")
-    public void testIsObject() {
-        Type<Object> objectType = createType(Object.class);
-        assertTrue(objectType.isObject());
-        assertFalse(stringType.isObject());
-    }
-
-    @Test
-    @DisplayName("Test isOptionalOrNullable()")
-    public void testIsOptionalOrNullable() {
-        Type<Optional<String>> optionalType = createType(new TypeReference<Optional<String>>() {
-        });
-        assertTrue(optionalType.isOptionalOrNullable());
-        assertFalse(stringType.isOptionalOrNullable());
-    }
-
-    @Test
-    @DisplayName("Test isCsvQuoteRequired()")
-    public void test_isCsvQuoteRequired() {
-        assertFalse(integerType.isCsvQuoteRequired());
-        assertTrue(stringType.isCsvQuoteRequired());
-    }
-
-    @Test
-    @DisplayName("Test getSerializationType()")
-    public void testGetSerializationType() {
-        assertNotNull(stringType.serializationType());
-        assertEquals(Type.SerializationType.SERIALIZABLE, stringType.serializationType());
-    }
-
-    @Test
-    @DisplayName("Test getElementType()")
-    public void testGetElementType() {
-        Type<?> elementType = listType.elementType();
-        assertNotNull(elementType);
-        assertEquals(String.class, elementType.javaType());
-
+        assertEquals(String.class, listType.elementType().javaType());
         assertNull(stringType.elementType());
-    }
-
-    @Test
-    @DisplayName("Test getParameterTypes()")
-    public void testGetParameterTypes() {
-        List<Type<?>> paramTypes = mapType.parameterTypes();
-        assertNotNull(paramTypes);
-        assertEquals(2, paramTypes.size());
-
-        List<Type<?>> stringParamTypes = stringType.parameterTypes();
-        assertNotNull(stringParamTypes);
-        assertEquals(0, stringParamTypes.size());
-    }
-
-    @Test
-    @DisplayName("Test defaultValue()")
-    public void testDefaultValue() {
+        assertEquals(2, mapType.parameterTypes().size());
+        assertEquals(0, stringType.parameterTypes().size());
+        assertEquals(Type.SerializationType.SERIALIZABLE, stringType.serializationType());
         assertNull(stringType.defaultValue());
         assertNull(integerType.defaultValue());
-    }
-
-    @Test
-    @DisplayName("Test isDefaultValue()")
-    public void testIsDefaultValue() {
         assertTrue(stringType.isDefaultValue(null));
         assertFalse(stringType.isDefaultValue("test"));
-
         assertFalse(integerType.isDefaultValue(0));
         assertFalse(integerType.isDefaultValue(1));
     }
 
     @Test
-    @DisplayName("Test compare()")
-    public void testCompare() {
+    public void testTypeFlags() {
+        assertTrue(createType(int.class).isPrimitive());
+        assertFalse(stringType.isPrimitive());
+        assertTrue(integerType.isPrimitiveWrapper());
+        assertFalse(stringType.isPrimitiveWrapper());
+        assertFalse(stringType.isPrimitiveList());
+        assertFalse(listType.isPrimitiveList());
+        assertTrue(createType(Boolean.class).isBoolean());
+        assertFalse(stringType.isBoolean());
+        assertTrue(integerType.isNumber());
+        assertFalse(stringType.isNumber());
+        assertTrue(stringType.isString());
+        assertFalse(integerType.isString());
+        assertTrue(stringType.isCharSequence());
+        assertFalse(integerType.isCharSequence());
+        assertTrue(createType(Date.class).isDate());
+        assertFalse(stringType.isDate());
+        assertTrue(createType(Calendar.class).isCalendar());
+        assertFalse(stringType.isCalendar());
+        assertFalse(stringType.isJodaDateTime());
+        assertTrue(createType(java.time.LocalDateTime.class).isTemporal());
+        assertFalse(stringType.isTemporal());
+        assertTrue(createType(int[].class).isPrimitiveArray());
+        assertFalse(stringType.isPrimitiveArray());
+        assertTrue(createType(byte[].class).isPrimitiveByteArray());
+        assertFalse(stringType.isPrimitiveByteArray());
+        assertTrue(createType(String[].class).isObjectArray());
+        assertFalse(stringType.isObjectArray());
+        assertTrue(createType(String[].class).isArray());
+        assertTrue(createType(int[].class).isArray());
+        assertFalse(stringType.isArray());
+        assertTrue(listType.isList());
+        assertFalse(stringType.isList());
+        Type<java.util.Set<String>> setType = createType(new TypeReference<java.util.Set<String>>() {
+        });
+        assertTrue(setType.isSet());
+        assertFalse(stringType.isSet());
+        assertTrue(listType.isCollection());
+        assertFalse(stringType.isCollection());
+        assertTrue(mapType.isMap());
+        assertFalse(stringType.isMap());
+        assertFalse(stringType.isBean());
+        assertFalse(stringType.isMapEntity());
+        assertFalse(stringType.isEntityId());
+        assertFalse(stringType.isDataset());
+        assertFalse(stringType.isInputStream());
+        assertFalse(stringType.isReader());
+        assertFalse(stringType.isByteBuffer());
+        assertTrue(listType.isParameterizedType());
+        assertFalse(stringType.isParameterizedType());
+        assertTrue(stringType.isImmutable());
+        assertFalse(listType.isImmutable());
+        assertTrue(stringType.isComparable());
+        assertTrue(integerType.isComparable());
+        assertTrue(stringType.isSerializable());
+        assertTrue(createType(Integer.class).isSerializable());
+        assertTrue(createType(Boolean.class).isSerializable());
+        assertTrue(createType(java.math.BigDecimal.class).isSerializable());
+        assertFalse(createType("Map<String, Integer>").isSerializable());
+        assertFalse(createType(com.landawn.abacus.util.Dataset.class).isSerializable());
+        assertTrue(createType(Object.class).isObject());
+        assertFalse(stringType.isObject());
+        Type<Optional<String>> optionalType = createType(new TypeReference<Optional<String>>() {
+        });
+        assertTrue(optionalType.isOptionalOrNullable());
+        assertFalse(stringType.isOptionalOrNullable());
+        assertFalse(integerType.isCsvQuoteRequired());
+        assertTrue(stringType.isCsvQuoteRequired());
+    }
+
+    @Test
+    public void testStringValueCompareAndHash() {
         assertEquals(0, stringType.compare("a", "a"));
         assertTrue(stringType.compare("a", "b") < 0);
         assertTrue(stringType.compare("b", "a") > 0);
         assertTrue(stringType.compare(null, "a") < 0);
         assertTrue(stringType.compare("a", null) > 0);
         assertEquals(0, stringType.compare(null, null));
-    }
-
-    @Test
-    @DisplayName("Test stringOf()")
-    public void testStringOf() {
         assertEquals("test", stringType.stringOf("test"));
-        assertEquals(null, stringType.stringOf(null));
+        assertNull(stringType.stringOf(null));
         assertEquals("123", integerType.stringOf(123));
-    }
-
-    @Test
-    @DisplayName("Test valueOf(String)")
-    public void testValueOfString() {
         assertEquals("test", stringType.valueOf("test"));
         assertNull(stringType.valueOf((String) null));
         assertEquals(123, integerType.valueOf("123"));
-    }
-
-    @Test
-    @DisplayName("Test valueOf(Object)")
-    public void testValueOfObject() {
         assertEquals("test", stringType.valueOf((Object) "test"));
         assertNull(stringType.valueOf((Object) null));
         assertEquals(123, integerType.valueOf(123));
-    }
-
-    @Test
-    @DisplayName("Test valueOf(char[], int, int)")
-    public void testValueOfCharArray() {
         char[] chars = "test".toCharArray();
         assertEquals("test", stringType.valueOf(chars, 0, 4));
         assertEquals("es", stringType.valueOf(chars, 1, 2));
         assertNull(stringType.valueOf(null, 0, 0));
-    }
-
-    @Test
-    @DisplayName("Test get(ResultSet, int)")
-    public void testGetResultSetInt() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        when(rs.getString(1)).thenReturn("test");
-
-        assertEquals("test", stringType.get(rs, 1));
-        verify(rs).getString(1);
-    }
-
-    @Test
-    @DisplayName("Test get(ResultSet, String)")
-    public void testGetResultSetString() throws SQLException {
-        ResultSet rs = mock(ResultSet.class);
-        when(rs.getString("column")).thenReturn("test");
-
-        assertEquals("test", stringType.get(rs, "column"));
-        verify(rs).getString("column");
-    }
-
-    @Test
-    @DisplayName("Test set(PreparedStatement, int, T)")
-    public void testSetPreparedStatement() throws SQLException {
-        PreparedStatement stmt = mock(PreparedStatement.class);
-        stringType.set(stmt, 1, "test");
-        verify(stmt).setString(1, "test");
-
-        stringType.set(stmt, 2, null);
-        verify(stmt).setString(2, null);
-    }
-
-    @Test
-    @DisplayName("Test set(CallableStatement, String, T)")
-    public void testSetCallableStatement() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        stringType.set(stmt, "param", "test");
-        verify(stmt).setString("param", "test");
-
-        stringType.set(stmt, "param2", null);
-        verify(stmt).setString("param2", null);
-    }
-
-    @Test
-    @DisplayName("Test set(PreparedStatement, int, T, int)")
-    public void testSetPreparedStatementWithSqlType() throws SQLException {
-        PreparedStatement stmt = mock(PreparedStatement.class);
-        stringType.set(stmt, 1, "test", java.sql.Types.VARCHAR);
-        verify(stmt).setString(1, "test");
-    }
-
-    @Test
-    @DisplayName("Test set(CallableStatement, String, T, int)")
-    public void testSetCallableStatementWithSqlType() throws SQLException {
-        CallableStatement stmt = mock(CallableStatement.class);
-        stringType.set(stmt, "param", "test", java.sql.Types.VARCHAR);
-        verify(stmt).setString("param", "test");
-    }
-
-    @Test
-    @DisplayName("Test appendTo()")
-    public void testAppendTo() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        stringType.appendTo(sb, "test");
-        assertEquals("test", sb.toString());
-
-        sb = new StringBuilder();
-        stringType.appendTo(sb, null);
-        assertEquals("null", sb.toString());
-    }
-
-    @Test
-    @DisplayName("Test serializeTo()")
-    public void testSerializeTo() throws IOException {
-        assertDoesNotThrow(() -> {
-            CharacterWriter writer = createCharacterWriter();
-            JsonXmlSerConfig<?> config = null;
-
-            stringType.serializeTo(writer, "test", config);
-
-            stringType.serializeTo(writer, null, config);
-
-            config = mock(JsonXmlSerConfig.class);
-            when(config.getStringQuotation()).thenReturn('"');
-            stringType.serializeTo(writer, "test", config);
-        });
-    }
-
-    @Test
-    @DisplayName("Test collectionToArray()")
-    public void testCollection2Array() {
-        Type<String[]> arrayType = createType(String[].class);
-        Collection<String> collection = Arrays.asList("a", "b", "c");
-        String[] array = arrayType.collectionToArray(collection);
-        assertNotNull(array);
-        assertEquals(3, array.length);
-
-        assertThrows(UnsupportedOperationException.class, () -> {
-            stringType.collectionToArray(collection);
-        });
-    }
-
-    @Test
-    @DisplayName("Test arrayToCollection(T, Class)")
-    public void testArray2CollectionWithClass() {
-        Type<String[]> arrayType = createType(String[].class);
-        String[] array = { "a", "b", "c" };
-        Collection<String> collection = arrayType.arrayToCollection(array, ArrayList.class);
-        assertNotNull(collection);
-        assertEquals(3, collection.size());
-
-        assertThrows(UnsupportedOperationException.class, () -> {
-            stringType.arrayToCollection("test", ArrayList.class);
-        });
-    }
-
-    @Test
-    @DisplayName("Test arrayToCollection(T, Collection)")
-    public void testArray2CollectionWithOutput() {
-        Type<String[]> arrayType = createType(String[].class);
-        String[] array = { "a", "b", "c" };
-        List<String> output = new ArrayList<>();
-        arrayType.arrayToCollection(array, output);
-        assertEquals(3, output.size());
-
-        assertThrows(UnsupportedOperationException.class, () -> {
-            List<String> out = new ArrayList<>();
-            stringType.arrayToCollection("test", out);
-        });
-    }
-
-    @Test
-    @DisplayName("Test hashCode(T)")
-    public void testHashCodeValue() {
         assertEquals("test".hashCode(), stringType.hashCode("test"));
         assertEquals(0, stringType.hashCode(null));
         assertEquals(Integer.valueOf(123).hashCode(), integerType.hashCode(123));
-    }
-
-    @Test
-    @DisplayName("Test deepHashCode(T)")
-    public void testDeepHashCode() {
         assertEquals("test".hashCode(), stringType.deepHashCode("test"));
         assertEquals(0, stringType.deepHashCode(null));
-
         Type<int[]> arrayType = createType(int[].class);
-        int[] array = { 1, 2, 3 };
-        assertTrue(arrayType.deepHashCode(array) != 0);
-    }
-
-    @Test
-    @DisplayName("Test equals(T, T)")
-    public void testEqualsValues() {
+        assertTrue(arrayType.deepHashCode(new int[] { 1, 2, 3 }) != 0);
         assertTrue(stringType.equals("test", "test"));
         assertFalse(stringType.equals("test1", "test2"));
         assertTrue(stringType.equals(null, null));
         assertFalse(stringType.equals("test", null));
         assertFalse(stringType.equals(null, "test"));
-    }
-
-    @Test
-    @DisplayName("Test deepEquals(T, T)")
-    public void testDeepEquals() {
         assertTrue(stringType.deepEquals("test", "test"));
         assertFalse(stringType.deepEquals("test1", "test2"));
-
-        Type<int[]> arrayType = createType(int[].class);
-        int[] array1 = { 1, 2, 3 };
-        int[] array2 = { 1, 2, 3 };
-        int[] array3 = { 1, 2, 4 };
-        assertTrue(arrayType.deepEquals(array1, array2));
-        assertFalse(arrayType.deepEquals(array1, array3));
-    }
-
-    @Test
-    @DisplayName("Test toString(T)")
-    public void testToStringValue() {
+        assertTrue(arrayType.deepEquals(new int[] { 1, 2, 3 }, new int[] { 1, 2, 3 }));
+        assertFalse(arrayType.deepEquals(new int[] { 1, 2, 3 }, new int[] { 1, 2, 4 }));
         assertEquals("test", stringType.toString("test"));
         assertEquals("null", stringType.toString(null));
         assertEquals("123", integerType.toString(123));
+        assertEquals("test", stringType.deepToString("test"));
+        assertEquals("null", stringType.deepToString(null));
+        String arrayStr = arrayType.deepToString(new int[] { 1, 2, 3 });
+        assertTrue(arrayStr.contains("1") && arrayStr.contains("2") && arrayStr.contains("3"));
     }
 
     @Test
-    @DisplayName("Test deepToString(T)")
-    public void testDeepToString() {
-        assertEquals("test", stringType.deepToString("test"));
-        assertEquals("null", stringType.deepToString(null));
+    public void testJdbcGetSet() throws SQLException {
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getString(1)).thenReturn("test");
+        when(rs.getString("column")).thenReturn("test");
+        assertEquals("test", stringType.get(rs, 1));
+        assertEquals("test", stringType.get(rs, "column"));
+        verify(rs).getString(1);
+        verify(rs).getString("column");
 
-        Type<int[]> arrayType = createType(int[].class);
-        int[] array = { 1, 2, 3 };
-        String str = arrayType.deepToString(array);
-        assertNotNull(str);
-        assertTrue(str.contains("1") && str.contains("2") && str.contains("3"));
+        PreparedStatement stmt = mock(PreparedStatement.class);
+        stringType.set(stmt, 1, "test");
+        stringType.set(stmt, 2, null);
+        stringType.set(stmt, 3, "test", java.sql.Types.VARCHAR);
+        verify(stmt).setString(1, "test");
+        verify(stmt).setString(2, null);
+        verify(stmt).setString(3, "test");
+
+        CallableStatement callable = mock(CallableStatement.class);
+        stringType.set(callable, "param", "test");
+        stringType.set(callable, "param2", null);
+        stringType.set(callable, "param3", "test", java.sql.Types.VARCHAR);
+        verify(callable).setString("param", "test");
+        verify(callable).setString("param2", null);
+        verify(callable).setString("param3", "test");
+    }
+
+    @Test
+    public void testAppendSerializeAndCollectionConversion() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        stringType.appendTo(sb, "test");
+        assertEquals("test", sb.toString());
+        sb = new StringBuilder();
+        stringType.appendTo(sb, null);
+        assertEquals("null", sb.toString());
+
+        assertDoesNotThrow(() -> {
+            CharacterWriter writer = createCharacterWriter();
+            stringType.serializeTo(writer, "test", null);
+            stringType.serializeTo(writer, null, null);
+            JsonXmlSerConfig<?> config = mock(JsonXmlSerConfig.class);
+            when(config.getStringQuotation()).thenReturn('"');
+            stringType.serializeTo(writer, "test", config);
+        });
+
+        Type<String[]> arrayType = createType(String[].class);
+        Collection<String> collection = Arrays.asList("a", "b", "c");
+        String[] array = arrayType.collectionToArray(collection);
+        assertEquals(3, array.length);
+        assertThrows(UnsupportedOperationException.class, () -> stringType.collectionToArray(collection));
+        Collection<String> fromArray = arrayType.arrayToCollection(new String[] { "a", "b", "c" }, ArrayList.class);
+        assertEquals(3, fromArray.size());
+        assertThrows(UnsupportedOperationException.class, () -> stringType.arrayToCollection("test", ArrayList.class));
+        List<String> output = new ArrayList<>();
+        arrayType.arrayToCollection(new String[] { "a", "b", "c" }, output);
+        assertEquals(3, output.size());
+        assertThrows(UnsupportedOperationException.class, () -> stringType.arrayToCollection("test", new ArrayList<>()));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfNullObjectYieldsThePrimitiveDefault() {
+        // T1-08: valueOf(Object null) / valueOf(char[] null) delegate to valueOf((String) null)
+        assertEquals(0, Type.of(int.class).valueOf((Object) null));
+        assertEquals(0L, Type.of(long.class).valueOf((Object) null));
+        assertEquals(false, Type.of(boolean.class).valueOf((Object) null));
+        assertEquals(0, Type.of(int.class).valueOf((char[]) null, 0, 0));
+        assertNull(Type.of(Integer.class).valueOf((Object) null));
+        assertNull(Type.of(Integer.class).valueOf((char[]) null, 0, 0));
+        assertNull(Type.of(String.class).valueOf((Object) null));
+        assertNull(Type.of(String.class).valueOf((char[]) null, 0, 0));
+    }
+
+    @Test
+    public void reviewFixes20260906_ofXxxHelpersRejectNullClassesWithIllegalArgumentException() {
+        // T1-10: consistent with Type.of((Class) null)
+        assertThrows(IllegalArgumentException.class, () -> Type.ofList(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofLinkedList(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofSet(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofLinkedHashSet(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofSortedSet(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofNavigableSet(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofTreeSet(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofQueue(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofDeque(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofArrayDeque(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofLinkedBlockingQueue(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofConcurrentLinkedQueue(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofPriorityQueue(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofMultiset(null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofListOfMap(null, String.class));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofListOfMap(String.class, null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofListOfLinkedHashMap(null, String.class));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofSetOfMap(String.class, null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofSetOfLinkedHashMap(null, String.class));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofMap(null, String.class));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofMap(String.class, null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofLinkedHashMap(String.class, null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofSortedMap(null, String.class));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofNavigableMap(String.class, null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofTreeMap(null, String.class));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofConcurrentMap(String.class, null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofConcurrentHashMap(null, String.class));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofListMultimap(null, String.class));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofListMultimap(String.class, null));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofSetMultimap(null, String.class));
+        assertThrows(IllegalArgumentException.class, () -> Type.ofSetMultimap(String.class, null));
+        final IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> Type.ofList(null));
+        assertTrue(error.getMessage().contains("eleClass"), error.getMessage());
+        // the happy path is unchanged
+        assertEquals(java.util.List.of("a"), Type.ofList(String.class).valueOf("[\"a\"]"));
+        assertEquals(java.util.Map.of("k", 1), Type.ofMap(String.class, Integer.class).valueOf("{\"k\": 1}"));
+    }
+
+    @Test
+    public void reviewFixes20260906_compareContractNullsFirstNaNAndNegativeZeroAndEqualsInconsistency() {
+        // R-T06: the documented contract of Type.compare
+        final Type<Double> doubleType = Type.of(Double.class);
+        assertEquals(0, doubleType.compare(null, null));
+        assertTrue(doubleType.compare(null, 1.0) < 0);
+        assertTrue(doubleType.compare(1.0, null) > 0);
+        assertEquals(0, doubleType.compare(Double.NaN, Double.NaN));
+        assertTrue(doubleType.compare(Double.NaN, Double.POSITIVE_INFINITY) > 0);
+        assertTrue(doubleType.compare(-0.0, 0.0) < 0);
+        assertEquals(0, Type.of(double.class).compare(Double.NaN, Double.NaN));
+        assertTrue(Type.of(double.class).compare(-0.0, 0.0) < 0);
+        assertTrue(Type.of(Float.class).compare(-0.0f, 0.0f) < 0);
+        assertEquals(0, Type.of(Float.class).compare(Float.NaN, Float.NaN));
+
+        final Type<java.math.BigDecimal> bigDecimalType = Type.of(java.math.BigDecimal.class);
+        assertEquals(0, bigDecimalType.compare(new java.math.BigDecimal("2.0"), new java.math.BigDecimal("2.00")));
+        assertFalse(bigDecimalType.equals(new java.math.BigDecimal("2.0"), new java.math.BigDecimal("2.00")));
+
+        final Type<StringBuilder> stringBuilderType = Type.of(StringBuilder.class);
+        assertTrue(stringBuilderType.isComparable());
+        assertEquals(0, stringBuilderType.compare(new StringBuilder("a"), new StringBuilder("a")));
+        assertFalse(stringBuilderType.equals(new StringBuilder("a"), new StringBuilder("a")));
+        final Type<StringBuffer> stringBufferType = Type.of(StringBuffer.class);
+        assertEquals(0, stringBufferType.compare(new StringBuffer("a"), new StringBuffer("a")));
+        assertFalse(stringBufferType.equals(new StringBuffer("a"), new StringBuffer("a")));
+
+        assertThrows(UnsupportedOperationException.class, () -> Type.of(Object.class).compare(new Object(), new Object()));
     }
 }

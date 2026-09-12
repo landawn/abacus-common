@@ -617,4 +617,26 @@ public class AppendableWriterTest extends TestBase {
         assertEquals(0, thrown.getSuppressed().length);
         assertTrue(underlying.closed);
     }
+
+    @Test
+    public void testAppendCharSequenceSubsequenceNull_EffectiveLengthIsFour() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        AppendableWriter writer = new AppendableWriter(sb);
+        writer.append((CharSequence) null, 0, 4);
+        assertEquals("null", sb.toString());
+
+        assertThrows(IndexOutOfBoundsException.class, () -> writer.append((CharSequence) null, 0, 5));
+        assertEquals("null", sb.toString());
+    }
+
+    @Test
+    public void testWriteStringWithOffsetAndLengthNull_EffectiveLengthIsFour() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        AppendableWriter writer = new AppendableWriter(sb);
+        writer.write((String) null, 2, 2);
+        assertEquals("ll", sb.toString());
+
+        assertThrows(IndexOutOfBoundsException.class, () -> writer.write((String) null, 0, 5));
+        assertEquals("ll", sb.toString());
+    }
 }

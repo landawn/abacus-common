@@ -101,7 +101,8 @@ public class ShortNConsumerTest extends TestBase {
 
         ShortNConsumer consumer = new ShortNConsumer() {
             @Override
-            public void accept(short... args) {
+            @SafeVarargs
+            public final void accept(short... args) {
                 for (short value : args) {
                     if (value > max[0]) {
                         max[0] = value;

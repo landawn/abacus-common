@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util.function;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -152,7 +151,7 @@ public class IntPredicateTest extends TestBase {
     @Test
     public void test_andRejectsNullPredicateAtComposition() {
         IntPredicate isPositive = value -> value > 0;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> isPositive.and(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> isPositive.and(null));
     }
 
     @Test
@@ -171,7 +170,7 @@ public class IntPredicateTest extends TestBase {
     @Test
     public void test_orRejectsNullPredicateAtComposition() {
         IntPredicate isNegative = value -> value < 0;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> isNegative.or(null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> isNegative.or(null));
     }
 
     @Test
@@ -256,6 +255,6 @@ public class IntPredicateTest extends TestBase {
     @Test
     public void testAndRejectsNullImmediately() {
         IntPredicate instance = a -> false;
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((java.util.function.IntPredicate) null));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class, () -> instance.and((java.util.function.IntPredicate) null));
     }
 }

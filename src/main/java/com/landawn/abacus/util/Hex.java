@@ -17,12 +17,16 @@
 
 package com.landawn.abacus.util;
 
+import java.util.HexFormat;
+import java.util.Locale;
+
 /**
  * Utility class for converting between byte arrays and hexadecimal string representations.
  *
  * <p>This class provides methods to encode byte arrays into hexadecimal character arrays
  * or strings, and to decode hexadecimal strings back into byte arrays. All methods are
- * thread-safe as they operate on immutable data and don't maintain any state.</p>
+ * thread-safe: they hold no state and share none. The caller's arrays are read, never modified,
+ * but the caller must not mutate them concurrently with a call.</p>
  *
  * <p>Hexadecimal encoding represents each byte as two hexadecimal characters. For example,
  * the byte value 255 (0xFF) is represented as "FF" or "ff" depending on the case setting.</p>
@@ -50,6 +54,12 @@ public final class Hex {
     /** Used to build output as Hex. */
     private static final char[] DIGITS_UPPER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
+    /** Lower-case formatter backing {@link #encodeToString(byte[])}. {@code HexFormat} instances are immutable. */
+    private static final HexFormat LOWER_CASE_FORMAT = HexFormat.of();
+
+    /** Upper-case formatter backing {@link #encodeToString(byte[], boolean)}. */
+    private static final HexFormat UPPER_CASE_FORMAT = HexFormat.of().withUpperCase();
+
     private Hex() {
         // Utility class - prevent instantiation
     }
@@ -75,7 +85,7 @@ public final class Hex {
      * @see #encodeToString(byte[])
      * @see #decode(char[])
      */
-    public static char[] encode(final byte[] data) {
+    public static char[] encode(final byte[] data) throws IllegalArgumentException {
         return encode(data, true);
     }
 
@@ -100,7 +110,7 @@ public final class Hex {
      * @see #encode(byte[])
      * @see #encodeToString(byte[], boolean)
      */
-    public static char[] encode(final byte[] data, final boolean toLowerCase) {
+    public static char[] encode(final byte[] data, final boolean toLowerCase) throws IllegalArgumentException {
         if (data == null) {
             throw new IllegalArgumentException("Data array cannot be null");
         }
@@ -128,8 +138,8 @@ public final class Hex {
      * @see #encodeToString(byte[], boolean)
      * @see #decode(String)
      */
-    public static String encodeToString(final byte[] data) {
-        return String.valueOf(encode(data));
+    public static String encodeToString(final byte[] data) throws IllegalArgumentException {
+        return encodeToString(data, true);
     }
 
     /**
@@ -154,8 +164,14 @@ public final class Hex {
      * @see #encodeToString(byte[])
      * @see #encode(byte[], boolean)
      */
-    public static String encodeToString(final byte[] data, final boolean toLowerCase) {
-        return String.valueOf(encode(data, toLowerCase));
+    public static String encodeToString(final byte[] data, final boolean toLowerCase) throws IllegalArgumentException {
+        if (data == null) {
+            throw new IllegalArgumentException("Data array cannot be null");
+        }
+
+        // HexFormat writes straight into the String's own byte array. The previous route built a char[]
+        // and then copied it a second time in String.valueOf(char[]). Output is byte-for-byte identical.
+        return (toLowerCase ? LOWER_CASE_FORMAT : UPPER_CASE_FORMAT).formatHex(data);
     }
 
     /**
@@ -164,11 +180,11 @@ public final class Hex {
      * given byte.
      *
      * @param data a byte array to convert to hexadecimal characters; must not be {@code null}.
-     * @param toDigits the output digit alphabet to use; typically {@code DIGITS_LOWER} or {@code DIGITS_UPPER}.
+     * @param toDigits the 16-character output digit alphabet to use, indexed by nibble value.
      * @return a char array containing hexadecimal characters; exactly twice the length of {@code data}.
      * @throws NullPointerException if {@code data} is {@code null}.
      */
-    static char[] encode(final byte[] data, final char[] toDigits) {
+    private static char[] encode(final byte[] data, final char[] toDigits) throws NullPointerException {
         final int l = data.length;
         final char[] out = new char[l << 1];
         // two characters form the hex value.
@@ -243,7 +259,7 @@ public final class Hex {
         final int len = data.length;
 
         if ((len & 0x01) != 0) {
-            throw new IllegalArgumentException("Odd number of characters.");
+            throw new IllegalArgumentException("Odd number of characters: " + len);
         }
 
         final byte[] out = new byte[len >> 1];
@@ -267,12 +283,7 @@ public final class Hex {
      * to its corresponding integer value. Valid characters are {@code '0'}-{@code '9'},
      * {@code 'A'}-{@code 'F'}, and {@code 'a'}-{@code 'f'}.</p>
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * int value1 = Hex.toDigit('5', 0);   // returns 5
-     * int value2 = Hex.toDigit('A', 1);   // returns 10
-     * int value3 = Hex.toDigit('f', 2);   // returns 15
-     * }</pre>
+     * <p>For example {@code '5'} maps to 5, {@code 'A'} to 10, and {@code 'f'} to 15.</p>
      *
      * @param ch the hexadecimal character to convert; must be one of {@code '0'}-{@code '9'},
      *           {@code 'A'}-{@code 'F'}, or {@code 'a'}-{@code 'f'}.
@@ -281,7 +292,7 @@ public final class Hex {
      * @return the integer value ({@code 0} to {@code 15}) represented by the hexadecimal character.
      * @throws IllegalArgumentException if {@code ch} is not a valid hexadecimal digit.
      */
-    static int toDigit(final char ch, final int index) throws IllegalArgumentException {
+    private static int toDigit(final char ch, final int index) throws IllegalArgumentException {
         if (ch >= '0' && ch <= '9') {
             return ch - '0';
         }
@@ -294,6 +305,13 @@ public final class Hex {
             return ch - 'a' + 10;
         }
 
-        throw new IllegalArgumentException("Illegal hexadecimal character " + ch + " at index " + index);
+        // The character is also reported as a fixed-width code point: a control or non-printable character
+        // rendered on its own produced messages such as "Illegal hexadecimal character  at index 1", which
+        // named neither the character nor anything usable to identify it. Padded by hand rather than through
+        // Strings/String.format so that this class stays free of dependencies on an error path.
+        final String codePoint = Integer.toHexString(ch).toUpperCase(Locale.ROOT);
+
+        throw new IllegalArgumentException(
+                "Illegal hexadecimal character '" + ch + "' (U+" + "0".repeat(Math.max(0, 4 - codePoint.length())) + codePoint + ") at index " + index);
     }
 }

@@ -30,7 +30,7 @@ public class SubscriberTest extends TestBase {
         eventBus = EventBus.create();
     }
 
-    static class TestHandler {
+    public static class TestHandler {
         String lastEvent;
 
         public void handle(String event) {

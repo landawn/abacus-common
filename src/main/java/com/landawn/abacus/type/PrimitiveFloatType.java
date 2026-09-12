@@ -22,6 +22,9 @@ package com.landawn.abacus.type;
  * {@link #defaultValue()} returns {@code 0.0f} (matching the JLS default for {@code float}),
  * whereas the wrapper type's default is {@code null}.</p>
  *
+ * <p>{@link #isDefaultValue(Object)} compares with {@code equals}, not {@code ==}: {@code -0.0f} is therefore
+ * <i>not</i> the default value (even though {@code 0.0f == -0.0f}), and {@code null} is never the default.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Float> type = TypeFactory.getType(float.class);

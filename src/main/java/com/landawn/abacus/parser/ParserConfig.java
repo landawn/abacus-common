@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.JsonXmlField;
 
 /**
@@ -81,8 +82,9 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * Gets the ignored property names for a specific class.
      *
      * <p>This method first looks for class-specific ignored properties. If none
-     * are found, it returns the globally ignored properties (those registered
-     * for {@code Object.class}).</p>
+     * are found (no entry for the class, or an entry set to {@code null}), it returns the globally
+     * ignored properties (those registered for {@code Object.class}). An empty class-specific set is
+     * found and returned as-is, so it overrides the global set.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -95,6 +97,7 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * @param cls the class to get ignored properties for
      * @return collection of ignored property names, or {@code null} if none are configured
      */
+    @MayReturnNull
     public Collection<String> getIgnoredPropNames(final Class<?> cls) {
         if (ignoredBeanPropNameMap == null) {
             return null; // NOSONAR
@@ -115,15 +118,26 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * <p>These properties will be ignored during parsing for any class type
      * unless overridden by class-specific settings.</p>
      *
+     * <p>This is a shortcut for {@code setIgnoredPropNames(Object.class, ignoredPropNames)}. Passing
+     * {@code null} therefore does not remove the map: it stores a {@code null} entry under
+     * {@code Object.class}, after which {@link #getIgnoredPropNames()} returns a (non-null) map containing
+     * {@code {Object.class=null}} and no property is ignored globally. To clear everything (so that
+     * {@link #getIgnoredPropNames()} returns {@code null} again) use {@link #setIgnoredPropNames(Map)} with
+     * {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setIgnoredPropNames(Set.of("internalId", "version", "deleted"));
+     *
+     * config.setIgnoredPropNames((Set<String>) null);            // no global ignores, but getIgnoredPropNames() is {Object.class=null}
+     * config.setIgnoredPropNames((Map<Class<?>, Set<String>>) null);   // getIgnoredPropNames() is null again
      * }</pre>
      *
-     * @param ignoredPropNames set of property names to ignore globally
+     * @param ignoredPropNames set of property names to ignore globally; {@code null} keeps an (empty) entry for {@code Object.class}
      * @return this configuration instance for method chaining
+     * @throws UnsupportedOperationException if the previously supplied ignored-property map does not support adding or replacing the entry.
      */
-    public C setIgnoredPropNames(final Set<String> ignoredPropNames) {
+    public C setIgnoredPropNames(final Set<String> ignoredPropNames) throws UnsupportedOperationException {
         return setIgnoredPropNames(Object.class, ignoredPropNames);
     }
 
@@ -131,19 +145,28 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * Sets ignored property names for a specific class.
      *
      * <p>These properties will be ignored during parsing only for the specified
-     * class type. This overrides any global settings for this class.</p>
+     * class type. A non-null set overrides the global settings for this class - including an
+     * <i>empty</i> set, which makes the class ignore nothing even when a global set exists.
+     * Passing {@code null} does not override anything: it removes the effect of any previous
+     * class-specific entry and lets the global set apply to this class again
+     * (see {@link #getIgnoredPropNames(Class)}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * config.setIgnoredPropNames(User.class, Set.of("password", "salt"));
      * config.setIgnoredPropNames(Order.class, Set.of("internalNotes"));
+     *
+     * config.setIgnoredPropNames(Set.of("version"));                 // global
+     * config.setIgnoredPropNames(Audit.class, Set.of());             // Audit ignores nothing (overrides the global set)
+     * config.setIgnoredPropNames(User.class, null);                  // User falls back to the global set: ["version"]
      * }</pre>
      *
      * @param cls the class to set ignored properties for
-     * @param ignoredPropNames set of property names to ignore for this class
+     * @param ignoredPropNames set of property names to ignore for this class; an empty set overrides the global set with "nothing", {@code null} removes the class-specific override so the global set applies again
      * @return this configuration instance for method chaining
+     * @throws UnsupportedOperationException if the previously supplied ignored-property map does not support adding or replacing the entry.
      */
-    public C setIgnoredPropNames(final Class<?> cls, final Set<String> ignoredPropNames) {
+    public C setIgnoredPropNames(final Class<?> cls, final Set<String> ignoredPropNames) throws UnsupportedOperationException {
         if (ignoredBeanPropNameMap == null) {
             ignoredBeanPropNameMap = new HashMap<>();
         }
@@ -180,24 +203,36 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
     /**
      * Creates a copy of this configuration.
      *
-     * <p>The copy is a shallow clone: the ignored-property map (and the sets it holds) is shared
-     * with the original. Replacing the whole map via {@link #setIgnoredPropNames(Map)} affects only
-     * the instance it is called on, but mutating the shared map via {@link #setIgnoredPropNames(Class, Set)}
-     * / {@link #setIgnoredPropNames(Set)} — or mutating a shared set — affects both instances.</p>
+     * <p>The ignored-property map is copied, so {@link #setIgnoredPropNames(Class, Set)} /
+     * {@link #setIgnoredPropNames(Set)} / {@link #setIgnoredPropNames(Map)} on the copy never affects the
+     * original (and vice versa), regardless of whether the original already had ignored properties when it
+     * was copied. The sets it holds are shared, but the setters replace an entry rather than mutate a set,
+     * so a shared set only changes if the caller mutates it directly. Subclasses copy further maps:
+     * {@link DeserializationConfig#copy()} copies the value-type map and {@link JsonDeserConfig#copy()}
+     * additionally copies the property-handler map.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig original = new JsonSerConfig().setPrettyFormat(true);
      * JsonSerConfig copy = original.copy();
      * // copy has the same settings as original
+     *
+     * copy.setIgnoredPropNames(User.class, Set.of("password"));
+     * original.getIgnoredPropNames(User.class);   // returns null - the original is untouched
      * }</pre>
      *
-     * @return a copy of this configuration
+     * @return a copy of this configuration with its own ignored-property map
      */
     @SuppressWarnings("unchecked")
     public C copy() {
         try {
-            return (C) super.clone();
+            final C copy = (C) super.clone();
+
+            if (ignoredBeanPropNameMap != null) {
+                copy.ignoredBeanPropNameMap = new HashMap<>(ignoredBeanPropNameMap);
+            }
+
+            return copy;
         } catch (final CloneNotSupportedException e) {
             throw new RuntimeException(e); // should never happen.
         }

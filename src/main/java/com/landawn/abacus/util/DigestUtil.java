@@ -20,6 +20,7 @@ package com.landawn.abacus.util;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -29,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.security.ProviderException;
 import java.security.NoSuchAlgorithmException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
@@ -39,17 +41,30 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * {@link File}s, {@link Path}s, {@link RandomAccessFile}s, {@link InputStream}s, and strings using standard
  * algorithms like MD5, SHA-1, SHA-256, etc.
  *
- * <p>This class is immutable and thread-safe. However, the MessageDigest instances it creates
- * generally won't be thread-safe.</p>
+ * <p>Algorithm-specific methods create a fresh {@link MessageDigest} for each call. Methods that
+ * accept a caller-supplied digest do not synchronize access to it; callers must coordinate access
+ * to shared digests and mutable input objects, including streams and buffers.</p>
+ *
+ * <p>Methods accepting a {@link MessageDigest} append the supplied data to any previously updated
+ * data. The {@code digest} methods then finalize and reset that digest on success; the
+ * {@code updateDigest} methods leave it ready for further updates. If reading or hashing fails,
+ * the digest may contain a partial update and is not automatically reset.</p>
  *
  * <p><b>Conventions shared by every method here:</b>
  * <ul>
- *   <li>A {@code String} input is always encoded as UTF-8 before being digested</li>
+ *   <li>A {@code String} input is encoded as UTF-8 without Unicode normalization; an unpaired
+ *       UTF-16 surrogate is rejected with {@link IllegalArgumentException}</li>
  *   <li>A {@code *Hex} method returns the digest as a <b>lowercase</b> hexadecimal string of exactly
  *       twice the digest's byte length</li>
  *   <li>An {@code InputStream} argument is read to EOF but is <b>never closed</b>; a {@code File} or
  *       {@code Path} argument is opened and closed by the method</li>
- *   <li>Arguments must not be {@code null}; a {@code null} argument results in a {@link NullPointerException}</li>
+ *   <li>Arguments must not be {@code null} unless a method explicitly documents otherwise;
+ *       required {@code null} arguments result in a {@link NullPointerException}</li>
+ *   <li>Every algorithm-specific method ({@code md2(..)}, {@code sha3_256(..)}, {@code sha512_256Hex(..)}, ...)
+ *       obtains its digest through {@link #getDigest(String)} and therefore throws
+ *       {@link IllegalArgumentException} if the underlying JVM does not provide that algorithm. The
+ *       {@code getXxxDigest()} factories document which algorithms need which Java version; use
+ *       {@link #isAvailable(String)} to test without catching</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -69,7 +84,12 @@ import com.landawn.abacus.annotation.MayReturnNull;
  */
 public final class DigestUtil {
 
-    static final int BUFFER_SIZE = 1024;
+    /**
+     * Read-chunk size for the stream/channel digest helpers. 8 KB matches Apache Commons Codec's
+     * {@code STREAM_BUFFER_LENGTH}; the previous 1 KB made hashing a large file issue eight times as
+     * many reads for no benefit.
+     */
+    static final int BUFFER_SIZE = 8192;
 
     private DigestUtil() {
         // Utility class - prevent instantiation
@@ -91,10 +111,13 @@ public final class DigestUtil {
      * @param messageDigest the MessageDigest algorithm to use (must not be {@code null})
      * @param data the byte array to digest (must not be {@code null})
      * @return The computed digest as a byte array; length depends on the algorithm used
-     * @throws NullPointerException if {@code messageDigest} or {@code data} is {@code null}
+     * @throws IllegalArgumentException if {@code messageDigest} or {@code data} is {@code null}
      * @see MessageDigest#digest(byte[])
      */
-    public static byte[] digest(final MessageDigest messageDigest, final byte[] data) {
+    public static byte[] digest(final MessageDigest messageDigest, final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(messageDigest, cs.messageDigest);
+        N.checkArgNotNull(data, cs.data);
+
         return messageDigest.digest(data);
     }
 
@@ -113,9 +136,12 @@ public final class DigestUtil {
      * @param messageDigest the MessageDigest algorithm to use (must not be {@code null})
      * @param data the ByteBuffer containing data to digest; position is advanced to the limit
      * @return The computed digest as a byte array; length depends on the algorithm used
-     * @throws NullPointerException if {@code messageDigest} or {@code data} is {@code null}
+     * @throws IllegalArgumentException if {@code messageDigest} or {@code data} is {@code null}
      */
-    public static byte[] digest(final MessageDigest messageDigest, final ByteBuffer data) {
+    public static byte[] digest(final MessageDigest messageDigest, final ByteBuffer data) throws IllegalArgumentException {
+        N.checkArgNotNull(messageDigest, cs.messageDigest);
+        N.checkArgNotNull(data, cs.data);
+
         messageDigest.update(data);
         return messageDigest.digest();
     }
@@ -135,11 +161,14 @@ public final class DigestUtil {
      * @param messageDigest the MessageDigest algorithm to use (must not be {@code null})
      * @param data the File to read and digest (must exist and be readable)
      * @return The computed digest as a byte array; length depends on the algorithm used
-     * @throws IOException if an I/O error occurs while reading the file
-     * @throws java.io.FileNotFoundException if the file does not exist or cannot be opened
-     * @throws NullPointerException if {@code messageDigest} or {@code data} is {@code null}
+     * @throws IllegalArgumentException if {@code messageDigest} or {@code data} is {@code null}
+     * @throws FileNotFoundException if the file does not exist or cannot be opened
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static byte[] digest(final MessageDigest messageDigest, final File data) throws IOException {
+    public static byte[] digest(final MessageDigest messageDigest, final File data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(messageDigest, cs.messageDigest);
+        N.checkArgNotNull(data, cs.data);
+
         return updateDigest(messageDigest, data).digest();
     }
 
@@ -159,10 +188,13 @@ public final class DigestUtil {
      * @param messageDigest the MessageDigest algorithm to use (must not be {@code null})
      * @param data the InputStream to read and digest (not closed by this method)
      * @return The computed digest as a byte array; length depends on the algorithm used
-     * @throws IOException if an I/O error occurs while reading from the stream
-     * @throws NullPointerException if {@code messageDigest} or {@code data} is {@code null}
+     * @throws IllegalArgumentException if {@code messageDigest} or {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] digest(final MessageDigest messageDigest, final InputStream data) throws IOException {
+    public static byte[] digest(final MessageDigest messageDigest, final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(messageDigest, cs.messageDigest);
+        N.checkArgNotNull(data, cs.data);
+
         return updateDigest(messageDigest, data).digest();
     }
 
@@ -184,10 +216,17 @@ public final class DigestUtil {
      * @param options optional open options for the file (e.g., {@code StandardOpenOption.READ});
      *                if not specified, default options are used
      * @return The computed digest as a byte array; length depends on the algorithm used
-     * @throws IOException if an I/O error occurs while reading the file
-     * @throws NullPointerException if {@code messageDigest} or {@code data} is {@code null}
+     * @throws IllegalArgumentException if {@code messageDigest}, {@code data} or {@code options} is {@code null}
+     * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static byte[] digest(final MessageDigest messageDigest, final Path data, final OpenOption... options) throws IOException {
+    @SafeVarargs
+    public static byte[] digest(final MessageDigest messageDigest, final Path data, final OpenOption... options)
+            throws IllegalArgumentException, NullPointerException, IOException {
+        N.checkArgNotNull(messageDigest, cs.messageDigest);
+        N.checkArgNotNull(data, cs.data);
+        N.checkArgNotNull(options, cs.options);
+
         return updateDigest(messageDigest, data, options).digest();
     }
 
@@ -206,10 +245,13 @@ public final class DigestUtil {
      * @param messageDigest the MessageDigest algorithm to use (must not be {@code null})
      * @param data the RandomAccessFile to read and digest (must not be {@code null})
      * @return The computed digest as a byte array; length depends on the algorithm used
-     * @throws IOException if an I/O error occurs while reading the file
-     * @throws NullPointerException if {@code messageDigest} or {@code data} is {@code null}
+     * @throws IllegalArgumentException if {@code messageDigest} or {@code data} is {@code null}
+     * @throws IOException if reading the channel of {@code data} from its current position fails
      */
-    public static byte[] digest(final MessageDigest messageDigest, final RandomAccessFile data) throws IOException {
+    public static byte[] digest(final MessageDigest messageDigest, final RandomAccessFile data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(messageDigest, cs.messageDigest);
+        N.checkArgNotNull(data, cs.data);
+
         return updateDigest(messageDigest, data).digest();
     }
 
@@ -232,7 +274,7 @@ public final class DigestUtil {
      * @see MessageDigest#getInstance(String)
      * @see MessageDigestAlgorithms
      */
-    public static MessageDigest getDigest(final String algorithm) {
+    public static MessageDigest getDigest(final String algorithm) throws IllegalArgumentException {
         try {
             return getMessageDigest(algorithm);
         } catch (final NoSuchAlgorithmException e) {
@@ -242,8 +284,8 @@ public final class DigestUtil {
 
     /**
      * Returns a MessageDigest instance for the specified algorithm, or a default digest if
-     * the algorithm is not available. This method provides a safe fallback mechanism and
-     * never throws an exception.
+     * the algorithm is not available. Only unavailability falls back to {@code defaultMessageDigest};
+     * a provider or policy failure is propagated to the caller.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -258,14 +300,26 @@ public final class DigestUtil {
      *                             may be {@code null}
      * @return A MessageDigest instance for the algorithm if available, otherwise
      *         {@code defaultMessageDigest} (which may be {@code null})
+     * @throws SecurityException if a security manager denies access to the provider
+     * @throws ProviderException if a configured provider fails while creating the digest
      * @see #getDigest(String)
      * @see #isAvailable(String)
      */
     @MayReturnNull
-    public static MessageDigest getDigest(final String algorithm, final MessageDigest defaultMessageDigest) {
+    public static MessageDigest getDigest(final String algorithm, final MessageDigest defaultMessageDigest) throws SecurityException, ProviderException {
+        // A null name is mapped to the default rather than passed to MessageDigest.getInstance, whose
+        // behaviour for a null name is not specified.
+        if (algorithm == null) {
+            return defaultMessageDigest;
+        }
+
         try {
             return getMessageDigest(algorithm);
-        } catch (final Exception e) {
+        } catch (final NoSuchAlgorithmException e) {
+            // Only "the algorithm is not available" falls back. The previous broad catch also swallowed
+            // SecurityException/ProviderException, which are provider or policy failures rather than
+            // availability - and so made isAvailable(..) answer "false" for a reason that has nothing to do
+            // with the algorithm.
             return defaultMessageDigest;
         }
     }
@@ -300,7 +354,7 @@ public final class DigestUtil {
      *
      * @see MessageDigestAlgorithms#MD2
      */
-    public static MessageDigest getMd2Digest() {
+    public static MessageDigest getMd2Digest() throws IllegalArgumentException {
         return getDigest(MessageDigestAlgorithms.MD2);
     }
 
@@ -323,7 +377,7 @@ public final class DigestUtil {
      *
      * @see MessageDigestAlgorithms#MD5
      */
-    public static MessageDigest getMd5Digest() {
+    public static MessageDigest getMd5Digest() throws IllegalArgumentException {
         return getDigest(MessageDigestAlgorithms.MD5);
     }
 
@@ -346,7 +400,7 @@ public final class DigestUtil {
      *
      * @see MessageDigestAlgorithms#SHA_1
      */
-    public static MessageDigest getSha1Digest() {
+    public static MessageDigest getSha1Digest() throws IllegalArgumentException {
         return getDigest(MessageDigestAlgorithms.SHA_1);
     }
 
@@ -368,7 +422,7 @@ public final class DigestUtil {
      *
      * @see MessageDigestAlgorithms#SHA_256
      */
-    public static MessageDigest getSha256Digest() {
+    public static MessageDigest getSha256Digest() throws IllegalArgumentException {
         return getDigest(MessageDigestAlgorithms.SHA_256);
     }
 
@@ -390,7 +444,7 @@ public final class DigestUtil {
      *
      * @see MessageDigestAlgorithms#SHA_224
      */
-    public static MessageDigest getSha224Digest() {
+    public static MessageDigest getSha224Digest() throws IllegalArgumentException {
         return getDigest(MessageDigestAlgorithms.SHA_224);
     }
 
@@ -412,7 +466,7 @@ public final class DigestUtil {
      *
      * @see MessageDigestAlgorithms#SHA3_224
      */
-    public static MessageDigest getSha3_224Digest() {
+    public static MessageDigest getSha3_224Digest() throws IllegalArgumentException {
         return getDigest(MessageDigestAlgorithms.SHA3_224);
     }
 
@@ -435,7 +489,7 @@ public final class DigestUtil {
      *
      * @see MessageDigestAlgorithms#SHA3_256
      */
-    public static MessageDigest getSha3_256Digest() {
+    public static MessageDigest getSha3_256Digest() throws IllegalArgumentException {
         return getDigest(MessageDigestAlgorithms.SHA3_256);
     }
 
@@ -456,7 +510,7 @@ public final class DigestUtil {
      *
      * @see MessageDigestAlgorithms#SHA3_384
      */
-    public static MessageDigest getSha3_384Digest() {
+    public static MessageDigest getSha3_384Digest() throws IllegalArgumentException {
         return getDigest(MessageDigestAlgorithms.SHA3_384);
     }
 
@@ -478,7 +532,7 @@ public final class DigestUtil {
      *
      * @see MessageDigestAlgorithms#SHA3_512
      */
-    public static MessageDigest getSha3_512Digest() {
+    public static MessageDigest getSha3_512Digest() throws IllegalArgumentException {
         return getDigest(MessageDigestAlgorithms.SHA3_512);
     }
 
@@ -501,7 +555,7 @@ public final class DigestUtil {
      *
      * @see MessageDigestAlgorithms#SHA_384
      */
-    public static MessageDigest getSha384Digest() {
+    public static MessageDigest getSha384Digest() throws IllegalArgumentException {
         return getDigest(MessageDigestAlgorithms.SHA_384);
     }
 
@@ -524,7 +578,7 @@ public final class DigestUtil {
      *
      * @see MessageDigestAlgorithms#SHA_512_224
      */
-    public static MessageDigest getSha512_224Digest() {
+    public static MessageDigest getSha512_224Digest() throws IllegalArgumentException {
         return getDigest(MessageDigestAlgorithms.SHA_512_224);
     }
 
@@ -547,7 +601,7 @@ public final class DigestUtil {
      *
      * @see MessageDigestAlgorithms#SHA_512_256
      */
-    public static MessageDigest getSha512_256Digest() {
+    public static MessageDigest getSha512_256Digest() throws IllegalArgumentException {
         return getDigest(MessageDigestAlgorithms.SHA_512_256);
     }
 
@@ -570,7 +624,7 @@ public final class DigestUtil {
      *
      * @see MessageDigestAlgorithms#SHA_512
      */
-    public static MessageDigest getSha512Digest() {
+    public static MessageDigest getSha512Digest() throws IllegalArgumentException {
         return getDigest(MessageDigestAlgorithms.SHA_512);
     }
 
@@ -590,7 +644,7 @@ public final class DigestUtil {
      * @deprecated Use {@link #getSha1Digest()} instead
      */
     @Deprecated
-    public static MessageDigest getShaDigest() {
+    public static MessageDigest getShaDigest() throws IllegalArgumentException {
         return getSha1Digest();
     }
 
@@ -610,11 +664,16 @@ public final class DigestUtil {
      * }
      * }</pre>
      *
+     * <p>Only "the algorithm is not available" answers {@code false}. A provider or policy failure is
+     * propagated rather than reported as unavailability.</p>
+     *
      * @param messageDigestAlgorithm the algorithm name to test (e.g., {@code "SHA-256"}, {@code "SHA3-512"});
      *                               if {@code null}, {@code false} is returned
      * @return {@code true} if the algorithm is available and can be used; {@code false} otherwise
+     * @throws SecurityException if a security manager denies access to the provider
+     * @throws ProviderException if a configured provider fails while creating the digest
      */
-    public static boolean isAvailable(final String messageDigestAlgorithm) {
+    public static boolean isAvailable(final String messageDigestAlgorithm) throws SecurityException, ProviderException {
         return getDigest(messageDigestAlgorithm, null) != null;
     }
 
@@ -630,8 +689,11 @@ public final class DigestUtil {
      *
      * @param data the data to digest (must not be {@code null})
      * @return MD2 digest as a 16-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static byte[] md2(final byte[] data) {
+    public static byte[] md2(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return getMd2Digest().digest(data);
     }
 
@@ -650,9 +712,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return MD2 digest as a 16-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] md2(final InputStream data) throws IOException {
+    public static byte[] md2(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getMd2Digest(), data);
     }
 
@@ -668,9 +733,12 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return MD2 digest as a 16-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static byte[] md2(final String data) {
-        return md2(Strings.getBytesUtf8(data));
+    public static byte[] md2(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
+        return md2(strictUtf8(data));
     }
 
     /**
@@ -681,13 +749,16 @@ public final class DigestUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String hash = DigestUtil.md2Hex(Strings.getBytesUtf8("legacy data"));
-     * // Returns something like "f03881a88c6e39135f0ecc60efd609b9"
+     * // returns "7db01e9c9419c10d047e45986382487a"
      * }</pre>
      *
      * @param data The data to digest (must not be {@code null})
      * @return MD2 digest as a 32-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static String md2Hex(final byte[] data) {
+    public static String md2Hex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(md2(data));
     }
 
@@ -706,9 +777,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return MD2 digest as a 32-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static String md2Hex(final InputStream data) throws IOException {
+    public static String md2Hex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(md2(data));
     }
 
@@ -724,8 +798,11 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return MD2 digest as a 32-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static String md2Hex(final String data) {
+    public static String md2Hex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(md2(data));
     }
 
@@ -742,8 +819,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return MD5 digest as a 16-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static byte[] md5(final byte[] data) {
+    public static byte[] md5(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return getMd5Digest().digest(data);
     }
 
@@ -762,9 +842,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return MD5 digest as a 16-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] md5(final InputStream data) throws IOException {
+    public static byte[] md5(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getMd5Digest(), data);
     }
 
@@ -780,9 +863,12 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return MD5 digest as a 16-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static byte[] md5(final String data) {
-        return md5(Strings.getBytesUtf8(data));
+    public static byte[] md5(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
+        return md5(strictUtf8(data));
     }
 
     /**
@@ -798,9 +884,12 @@ public final class DigestUtil {
      *
      * @param data The file to read and digest (must exist and be readable)
      * @return MD5 digest as a 16-byte array
-     * @throws IOException If an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static byte[] md5(final File data) throws IOException {
+    public static byte[] md5(final File data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getMd5Digest(), data);
     }
 
@@ -817,9 +906,15 @@ public final class DigestUtil {
      * @param data The path to the file to digest (must not be {@code null})
      * @param options optional open options for the file; if not specified, default read options are used
      * @return MD5 digest as a 16-byte array
-     * @throws IOException If an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}
+     * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static byte[] md5(final Path data, final OpenOption... options) throws IOException {
+    @SafeVarargs
+    public static byte[] md5(final Path data, final OpenOption... options) throws IllegalArgumentException, NullPointerException, IOException {
+        N.checkArgNotNull(data, cs.data);
+        N.checkArgNotNull(options, cs.options);
+
         return digest(getMd5Digest(), data, options);
     }
 
@@ -837,8 +932,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return MD5 digest as a 32-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static String md5Hex(final byte[] data) {
+    public static String md5Hex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(md5(data));
     }
 
@@ -857,9 +955,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return MD5 digest as a 32-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static String md5Hex(final InputStream data) throws IOException {
+    public static String md5Hex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(md5(data));
     }
 
@@ -875,8 +976,11 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return MD5 digest as a 32-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static String md5Hex(final String data) {
+    public static String md5Hex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(md5(data));
     }
 
@@ -892,9 +996,12 @@ public final class DigestUtil {
      *
      * @param data The file to read and digest (must exist and be readable)
      * @return MD5 digest as a 32-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static String md5Hex(final File data) throws IOException {
+    public static String md5Hex(final File data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(md5(data));
     }
 
@@ -911,9 +1018,15 @@ public final class DigestUtil {
      * @param data The path to the file to digest (must not be {@code null})
      * @param options optional open options for the file; if not specified, default read options are used
      * @return MD5 digest as a 32-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}
+     * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static String md5Hex(final Path data, final OpenOption... options) throws IOException {
+    @SafeVarargs
+    public static String md5Hex(final Path data, final OpenOption... options) throws IllegalArgumentException, NullPointerException, IOException {
+        N.checkArgNotNull(data, cs.data);
+        N.checkArgNotNull(options, cs.options);
+
         return Hex.encodeToString(md5(data, options));
     }
 
@@ -931,9 +1044,12 @@ public final class DigestUtil {
      * @param data The data to digest (must not be {@code null})
      * @return SHA-1 digest as a 20-byte array
      * @deprecated Use {@link #sha1(byte[])} instead
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
     @Deprecated
-    public static byte[] sha(final byte[] data) {
+    public static byte[] sha(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return sha1(data);
     }
 
@@ -953,11 +1069,14 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-1 digest as a 20-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      * @deprecated Use {@link #sha1(InputStream)} instead
+     * @throws IOException if reading bytes from {@code data} fails
      */
     @Deprecated
-    public static byte[] sha(final InputStream data) throws IOException {
+    public static byte[] sha(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return sha1(data);
     }
 
@@ -974,10 +1093,13 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-1 digest as a 20-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      * @deprecated Use {@link #sha1(String)} instead
      */
     @Deprecated
-    public static byte[] sha(final String data) {
+    public static byte[] sha(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return sha1(data);
     }
 
@@ -994,8 +1116,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-1 digest as a 20-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static byte[] sha1(final byte[] data) {
+    public static byte[] sha1(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return getSha1Digest().digest(data);
     }
 
@@ -1015,9 +1140,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-1 digest as a 20-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] sha1(final InputStream data) throws IOException {
+    public static byte[] sha1(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getSha1Digest(), data);
     }
 
@@ -1034,9 +1162,12 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-1 digest as a 20-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static byte[] sha1(final String data) {
-        return sha1(Strings.getBytesUtf8(data));
+    public static byte[] sha1(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
+        return sha1(strictUtf8(data));
     }
 
     /**
@@ -1052,8 +1183,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-1 digest as a 40-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static String sha1Hex(final byte[] data) {
+    public static String sha1Hex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha1(data));
     }
 
@@ -1073,9 +1207,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-1 digest as a 40-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static String sha1Hex(final InputStream data) throws IOException {
+    public static String sha1Hex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha1(data));
     }
 
@@ -1092,8 +1229,11 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-1 digest as a 40-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static String sha1Hex(final String data) {
+    public static String sha1Hex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha1(data));
     }
 
@@ -1108,8 +1248,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-224 digest as a 28-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static byte[] sha224(final byte[] data) {
+    public static byte[] sha224(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return getSha224Digest().digest(data);
     }
 
@@ -1126,9 +1269,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-224 digest as a 28-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] sha224(final InputStream data) throws IOException {
+    public static byte[] sha224(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getSha224Digest(), data);
     }
 
@@ -1142,9 +1288,12 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-224 digest as a 28-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static byte[] sha224(final String data) {
-        return sha224(Strings.getBytesUtf8(data));
+    public static byte[] sha224(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
+        return sha224(strictUtf8(data));
     }
 
     /**
@@ -1157,8 +1306,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-224 digest as a 56-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static String sha224Hex(final byte[] data) {
+    public static String sha224Hex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha224(data));
     }
 
@@ -1175,9 +1327,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-224 digest as a 56-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static String sha224Hex(final InputStream data) throws IOException {
+    public static String sha224Hex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha224(data));
     }
 
@@ -1191,8 +1346,11 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-224 digest as a 56-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static String sha224Hex(final String data) {
+    public static String sha224Hex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha224(data));
     }
 
@@ -1207,8 +1365,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-256 digest as a 32-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static byte[] sha256(final byte[] data) {
+    public static byte[] sha256(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return getSha256Digest().digest(data);
     }
 
@@ -1225,9 +1386,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-256 digest as a 32-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] sha256(final InputStream data) throws IOException {
+    public static byte[] sha256(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getSha256Digest(), data);
     }
 
@@ -1241,9 +1405,12 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-256 digest as a 32-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static byte[] sha256(final String data) {
-        return sha256(Strings.getBytesUtf8(data));
+    public static byte[] sha256(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
+        return sha256(strictUtf8(data));
     }
 
     /**
@@ -1257,9 +1424,12 @@ public final class DigestUtil {
      *
      * @param data The file to read and digest (must exist and be readable)
      * @return SHA-256 digest as a 32-byte array
-     * @throws IOException If an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static byte[] sha256(final File data) throws IOException {
+    public static byte[] sha256(final File data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getSha256Digest(), data);
     }
 
@@ -1274,9 +1444,15 @@ public final class DigestUtil {
      * @param data The path to the file to digest (must not be {@code null})
      * @param options optional open options for the file; if not specified, default read options are used
      * @return SHA-256 digest as a 32-byte array
-     * @throws IOException If an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}
+     * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static byte[] sha256(final Path data, final OpenOption... options) throws IOException {
+    @SafeVarargs
+    public static byte[] sha256(final Path data, final OpenOption... options) throws IllegalArgumentException, NullPointerException, IOException {
+        N.checkArgNotNull(data, cs.data);
+        N.checkArgNotNull(options, cs.options);
+
         return digest(getSha256Digest(), data, options);
     }
 
@@ -1296,8 +1472,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-256 digest as a 64-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static String sha256Hex(final byte[] data) {
+    public static String sha256Hex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha256(data));
     }
 
@@ -1314,9 +1493,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-256 digest as a 64-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static String sha256Hex(final InputStream data) throws IOException {
+    public static String sha256Hex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha256(data));
     }
 
@@ -1334,8 +1516,11 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-256 digest as a 64-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static String sha256Hex(final String data) {
+    public static String sha256Hex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha256(data));
     }
 
@@ -1349,9 +1534,12 @@ public final class DigestUtil {
      *
      * @param data The file to read and digest (must exist and be readable)
      * @return SHA-256 digest as a 64-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static String sha256Hex(final File data) throws IOException {
+    public static String sha256Hex(final File data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha256(data));
     }
 
@@ -1366,9 +1554,15 @@ public final class DigestUtil {
      * @param data The path to the file to digest (must not be {@code null})
      * @param options optional open options for the file; if not specified, default read options are used
      * @return SHA-256 digest as a 64-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}
+     * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static String sha256Hex(final Path data, final OpenOption... options) throws IOException {
+    @SafeVarargs
+    public static String sha256Hex(final Path data, final OpenOption... options) throws IllegalArgumentException, NullPointerException, IOException {
+        N.checkArgNotNull(data, cs.data);
+        N.checkArgNotNull(options, cs.options);
+
         return Hex.encodeToString(sha256(data, options));
     }
 
@@ -1383,8 +1577,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA3-224 digest as a 28-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static byte[] sha3_224(final byte[] data) {
+    public static byte[] sha3_224(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return getSha3_224Digest().digest(data);
     }
 
@@ -1401,9 +1598,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA3-224 digest as a 28-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] sha3_224(final InputStream data) throws IOException {
+    public static byte[] sha3_224(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getSha3_224Digest(), data);
     }
 
@@ -1417,9 +1617,12 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA3-224 digest as a 28-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static byte[] sha3_224(final String data) {
-        return sha3_224(Strings.getBytesUtf8(data));
+    public static byte[] sha3_224(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
+        return sha3_224(strictUtf8(data));
     }
 
     /**
@@ -1432,8 +1635,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA3-224 digest as a 56-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static String sha3_224Hex(final byte[] data) {
+    public static String sha3_224Hex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha3_224(data));
     }
 
@@ -1450,9 +1656,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA3-224 digest as a 56-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static String sha3_224Hex(final InputStream data) throws IOException {
+    public static String sha3_224Hex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha3_224(data));
     }
 
@@ -1466,8 +1675,11 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA3-224 digest as a 56-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static String sha3_224Hex(final String data) {
+    public static String sha3_224Hex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha3_224(data));
     }
 
@@ -1481,8 +1693,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA3-256 digest as a 32-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static byte[] sha3_256(final byte[] data) {
+    public static byte[] sha3_256(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return getSha3_256Digest().digest(data);
     }
 
@@ -1499,9 +1714,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA3-256 digest as a 32-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] sha3_256(final InputStream data) throws IOException {
+    public static byte[] sha3_256(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getSha3_256Digest(), data);
     }
 
@@ -1515,9 +1733,12 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA3-256 digest as a 32-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static byte[] sha3_256(final String data) {
-        return sha3_256(Strings.getBytesUtf8(data));
+    public static byte[] sha3_256(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
+        return sha3_256(strictUtf8(data));
     }
 
     /**
@@ -1530,8 +1751,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA3-256 digest as a 64-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static String sha3_256Hex(final byte[] data) {
+    public static String sha3_256Hex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha3_256(data));
     }
 
@@ -1548,9 +1772,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA3-256 digest as a 64-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static String sha3_256Hex(final InputStream data) throws IOException {
+    public static String sha3_256Hex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha3_256(data));
     }
 
@@ -1564,8 +1791,11 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA3-256 digest as a 64-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static String sha3_256Hex(final String data) {
+    public static String sha3_256Hex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha3_256(data));
     }
 
@@ -1579,8 +1809,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA3-384 digest as a 48-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static byte[] sha3_384(final byte[] data) {
+    public static byte[] sha3_384(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return getSha3_384Digest().digest(data);
     }
 
@@ -1597,9 +1830,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA3-384 digest as a 48-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] sha3_384(final InputStream data) throws IOException {
+    public static byte[] sha3_384(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getSha3_384Digest(), data);
     }
 
@@ -1613,9 +1849,12 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA3-384 digest as a 48-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static byte[] sha3_384(final String data) {
-        return sha3_384(Strings.getBytesUtf8(data));
+    public static byte[] sha3_384(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
+        return sha3_384(strictUtf8(data));
     }
 
     /**
@@ -1628,8 +1867,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA3-384 digest as a 96-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static String sha3_384Hex(final byte[] data) {
+    public static String sha3_384Hex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha3_384(data));
     }
 
@@ -1646,9 +1888,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA3-384 digest as a 96-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static String sha3_384Hex(final InputStream data) throws IOException {
+    public static String sha3_384Hex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha3_384(data));
     }
 
@@ -1662,8 +1907,11 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA3-384 digest as a 96-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static String sha3_384Hex(final String data) {
+    public static String sha3_384Hex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha3_384(data));
     }
 
@@ -1678,8 +1926,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA3-512 digest as a 64-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static byte[] sha3_512(final byte[] data) {
+    public static byte[] sha3_512(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return getSha3_512Digest().digest(data);
     }
 
@@ -1696,9 +1947,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA3-512 digest as a 64-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] sha3_512(final InputStream data) throws IOException {
+    public static byte[] sha3_512(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getSha3_512Digest(), data);
     }
 
@@ -1712,9 +1966,12 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA3-512 digest as a 64-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static byte[] sha3_512(final String data) {
-        return sha3_512(Strings.getBytesUtf8(data));
+    public static byte[] sha3_512(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
+        return sha3_512(strictUtf8(data));
     }
 
     /**
@@ -1727,8 +1984,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA3-512 digest as a 128-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static String sha3_512Hex(final byte[] data) {
+    public static String sha3_512Hex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha3_512(data));
     }
 
@@ -1745,9 +2005,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA3-512 digest as a 128-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static String sha3_512Hex(final InputStream data) throws IOException {
+    public static String sha3_512Hex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha3_512(data));
     }
 
@@ -1761,8 +2024,11 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA3-512 digest as a 128-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static String sha3_512Hex(final String data) {
+    public static String sha3_512Hex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha3_512(data));
     }
 
@@ -1776,8 +2042,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-384 digest as a 48-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static byte[] sha384(final byte[] data) {
+    public static byte[] sha384(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return getSha384Digest().digest(data);
     }
 
@@ -1794,9 +2063,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-384 digest as a 48-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] sha384(final InputStream data) throws IOException {
+    public static byte[] sha384(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getSha384Digest(), data);
     }
 
@@ -1810,9 +2082,12 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-384 digest as a 48-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static byte[] sha384(final String data) {
-        return sha384(Strings.getBytesUtf8(data));
+    public static byte[] sha384(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
+        return sha384(strictUtf8(data));
     }
 
     /**
@@ -1825,8 +2100,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-384 digest as a 96-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static String sha384Hex(final byte[] data) {
+    public static String sha384Hex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha384(data));
     }
 
@@ -1843,9 +2121,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-384 digest as a 96-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static String sha384Hex(final InputStream data) throws IOException {
+    public static String sha384Hex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha384(data));
     }
 
@@ -1859,8 +2140,11 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-384 digest as a 96-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static String sha384Hex(final String data) {
+    public static String sha384Hex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha384(data));
     }
 
@@ -1875,8 +2159,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-512 digest as a 64-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static byte[] sha512(final byte[] data) {
+    public static byte[] sha512(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return getSha512Digest().digest(data);
     }
 
@@ -1893,9 +2180,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-512 digest as a 64-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] sha512(final InputStream data) throws IOException {
+    public static byte[] sha512(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getSha512Digest(), data);
     }
 
@@ -1909,9 +2199,12 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-512 digest as a 64-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static byte[] sha512(final String data) {
-        return sha512(Strings.getBytesUtf8(data));
+    public static byte[] sha512(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
+        return sha512(strictUtf8(data));
     }
 
     /**
@@ -1925,9 +2218,12 @@ public final class DigestUtil {
      *
      * @param data The file to read and digest (must exist and be readable)
      * @return SHA-512 digest as a 64-byte array
-     * @throws IOException If an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static byte[] sha512(final File data) throws IOException {
+    public static byte[] sha512(final File data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getSha512Digest(), data);
     }
 
@@ -1942,9 +2238,15 @@ public final class DigestUtil {
      * @param data The path to the file to digest (must not be {@code null})
      * @param options optional open options for the file; if not specified, default read options are used
      * @return SHA-512 digest as a 64-byte array
-     * @throws IOException If an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}
+     * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static byte[] sha512(final Path data, final OpenOption... options) throws IOException {
+    @SafeVarargs
+    public static byte[] sha512(final Path data, final OpenOption... options) throws IllegalArgumentException, NullPointerException, IOException {
+        N.checkArgNotNull(data, cs.data);
+        N.checkArgNotNull(options, cs.options);
+
         return digest(getSha512Digest(), data, options);
     }
 
@@ -1959,8 +2261,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-512/224 digest as a 28-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static byte[] sha512_224(final byte[] data) {
+    public static byte[] sha512_224(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return getSha512_224Digest().digest(data);
     }
 
@@ -1977,9 +2282,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-512/224 digest as a 28-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] sha512_224(final InputStream data) throws IOException {
+    public static byte[] sha512_224(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getSha512_224Digest(), data);
     }
 
@@ -1993,9 +2301,12 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-512/224 digest as a 28-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static byte[] sha512_224(final String data) {
-        return sha512_224(Strings.getBytesUtf8(data));
+    public static byte[] sha512_224(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
+        return sha512_224(strictUtf8(data));
     }
 
     /**
@@ -2008,8 +2319,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-512/224 digest as a 56-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static String sha512_224Hex(final byte[] data) {
+    public static String sha512_224Hex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha512_224(data));
     }
 
@@ -2026,9 +2340,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-512/224 digest as a 56-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static String sha512_224Hex(final InputStream data) throws IOException {
+    public static String sha512_224Hex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha512_224(data));
     }
 
@@ -2042,8 +2359,11 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-512/224 digest as a 56-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static String sha512_224Hex(final String data) {
+    public static String sha512_224Hex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha512_224(data));
     }
 
@@ -2058,8 +2378,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-512/256 digest as a 32-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static byte[] sha512_256(final byte[] data) {
+    public static byte[] sha512_256(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return getSha512_256Digest().digest(data);
     }
 
@@ -2076,9 +2399,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-512/256 digest as a 32-byte array
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static byte[] sha512_256(final InputStream data) throws IOException {
+    public static byte[] sha512_256(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return digest(getSha512_256Digest(), data);
     }
 
@@ -2092,9 +2418,12 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-512/256 digest as a 32-byte array
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static byte[] sha512_256(final String data) {
-        return sha512_256(Strings.getBytesUtf8(data));
+    public static byte[] sha512_256(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
+        return sha512_256(strictUtf8(data));
     }
 
     /**
@@ -2107,8 +2436,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-512/256 digest as a 64-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static String sha512_256Hex(final byte[] data) {
+    public static String sha512_256Hex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha512_256(data));
     }
 
@@ -2125,9 +2457,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-512/256 digest as a 64-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static String sha512_256Hex(final InputStream data) throws IOException {
+    public static String sha512_256Hex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha512_256(data));
     }
 
@@ -2141,8 +2476,11 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-512/256 digest as a 64-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static String sha512_256Hex(final String data) {
+    public static String sha512_256Hex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha512_256(data));
     }
 
@@ -2156,8 +2494,11 @@ public final class DigestUtil {
      *
      * @param data The data to digest (must not be {@code null})
      * @return SHA-512 digest as a 128-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
-    public static String sha512Hex(final byte[] data) {
+    public static String sha512Hex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha512(data));
     }
 
@@ -2174,9 +2515,12 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-512 digest as a 128-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if reading bytes from {@code data} fails
      */
-    public static String sha512Hex(final InputStream data) throws IOException {
+    public static String sha512Hex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha512(data));
     }
 
@@ -2190,8 +2534,11 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-512 digest as a 128-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      */
-    public static String sha512Hex(final String data) {
+    public static String sha512Hex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha512(data));
     }
 
@@ -2205,9 +2552,12 @@ public final class DigestUtil {
      *
      * @param data The file to read and digest (must exist and be readable)
      * @return SHA-512 digest as a 128-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code data} is {@code null}
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static String sha512Hex(final File data) throws IOException {
+    public static String sha512Hex(final File data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return Hex.encodeToString(sha512(data));
     }
 
@@ -2222,9 +2572,15 @@ public final class DigestUtil {
      * @param data The path to the file to digest (must not be {@code null})
      * @param options optional open options for the file; if not specified, default read options are used
      * @return SHA-512 digest as a 128-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}
+     * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
-    public static String sha512Hex(final Path data, final OpenOption... options) throws IOException {
+    @SafeVarargs
+    public static String sha512Hex(final Path data, final OpenOption... options) throws IllegalArgumentException, NullPointerException, IOException {
+        N.checkArgNotNull(data, cs.data);
+        N.checkArgNotNull(options, cs.options);
+
         return Hex.encodeToString(sha512(data, options));
     }
 
@@ -2242,9 +2598,12 @@ public final class DigestUtil {
      * @param data The data to digest (must not be {@code null})
      * @return SHA-1 digest as a 40-character lowercase hexadecimal string
      * @deprecated Use {@link #sha1Hex(byte[])} instead
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      */
     @Deprecated
-    public static String shaHex(final byte[] data) {
+    public static String shaHex(final byte[] data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return sha1Hex(data);
     }
 
@@ -2264,11 +2623,14 @@ public final class DigestUtil {
      *
      * @param data The InputStream to read and digest (must not be {@code null})
      * @return SHA-1 digest as a 40-character lowercase hexadecimal string
-     * @throws IOException If an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code data} is {@code null}
      * @deprecated Use {@link #sha1Hex(InputStream)} instead
+     * @throws IOException if reading bytes from {@code data} fails
      */
     @Deprecated
-    public static String shaHex(final InputStream data) throws IOException {
+    public static String shaHex(final InputStream data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(data, cs.data);
+
         return sha1Hex(data);
     }
 
@@ -2285,10 +2647,13 @@ public final class DigestUtil {
      *
      * @param data The string to digest (must not be {@code null})
      * @return SHA-1 digest as a 40-character lowercase hexadecimal string
+     * @throws IllegalArgumentException if {@code data} is {@code null} or the text contains an unpaired UTF-16 surrogate
      * @deprecated Use {@link #sha1Hex(String)} instead
      */
     @Deprecated
-    public static String shaHex(final String data) {
+    public static String shaHex(final String data) throws IllegalArgumentException {
+        N.checkArgNotNull(data, cs.data);
+
         return sha1Hex(data);
     }
 
@@ -2307,8 +2672,12 @@ public final class DigestUtil {
      * @param messageDigest the MessageDigest to update (must not be {@code null})
      * @param valueToDigest the byte array to add to the digest (must not be {@code null})
      * @return The updated MessageDigest (the same instance as the input)
+     * @throws IllegalArgumentException if {@code messageDigest} or {@code valueToDigest} is {@code null}
      */
-    public static MessageDigest updateDigest(final MessageDigest messageDigest, final byte[] valueToDigest) {
+    public static MessageDigest updateDigest(final MessageDigest messageDigest, final byte[] valueToDigest) throws IllegalArgumentException {
+        N.checkArgNotNull(messageDigest, cs.messageDigest);
+        N.checkArgNotNull(valueToDigest, cs.valueToDigest);
+
         messageDigest.update(valueToDigest);
         return messageDigest;
     }
@@ -2328,8 +2697,12 @@ public final class DigestUtil {
      * @param messageDigest the MessageDigest to update (must not be {@code null})
      * @param valueToDigest the ByteBuffer containing data to add; position is advanced to the limit
      * @return The updated MessageDigest (the same instance as the input)
+     * @throws IllegalArgumentException if {@code messageDigest} or {@code valueToDigest} is {@code null}
      */
-    public static MessageDigest updateDigest(final MessageDigest messageDigest, final ByteBuffer valueToDigest) {
+    public static MessageDigest updateDigest(final MessageDigest messageDigest, final ByteBuffer valueToDigest) throws IllegalArgumentException {
+        N.checkArgNotNull(messageDigest, cs.messageDigest);
+        N.checkArgNotNull(valueToDigest, cs.valueToDigest);
+
         messageDigest.update(valueToDigest);
         return messageDigest;
     }
@@ -2348,9 +2721,13 @@ public final class DigestUtil {
      * @param digest the MessageDigest to update (must not be {@code null})
      * @param data the File to read (must exist and be readable)
      * @return The updated MessageDigest (the same instance as the input)
-     * @throws IOException if an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code digest} or {@code data} is {@code null}
+     * @throws IOException if the file cannot be opened or an I/O failure occurs while reading or closing it
      */
-    public static MessageDigest updateDigest(final MessageDigest digest, final File data) throws IOException {
+    public static MessageDigest updateDigest(final MessageDigest digest, final File data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(digest, cs.digest);
+        N.checkArgNotNull(data, cs.data);
+
         try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(data))) {
             return updateDigest(digest, inputStream);
         }
@@ -2363,15 +2740,30 @@ public final class DigestUtil {
      * @param digest The MessageDigest to update.
      * @param data The FileChannel to read from.
      * @return The updated MessageDigest.
-     * @throws IOException If an error occurs while reading.
+     * @throws NullPointerException if {@code digest} or {@code data} is {@code null}
+     * @throws IOException if the file channel is closed or reading from it fails
      */
-    private static MessageDigest updateDigest(final MessageDigest digest, final FileChannel data) throws IOException {
+    private static MessageDigest updateDigest(final MessageDigest digest, final FileChannel data) throws NullPointerException, IOException {
+        N.requireNonNull(digest, "digest");
         final ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
-        while (data.read(buffer) != -1) {
-            buffer.flip();
-            digest.update(buffer);
-            buffer.clear();
+
+        // -1, 0 and positive counts are handled explicitly. ReadableByteChannel.read is specified to
+        // return "possibly zero", and only -1 means end of input, so `> 0` alone would treat a zero as
+        // end-of-input and silently digest a TRUNCATED file. The buffer is cleared before every read, so
+        // a zero is not expected here in practice; handling it costs nothing and keeps the loop correct
+        // for any channel that does return one.
+        int read = data.read(buffer);
+
+        while (read != -1) {
+            if (read > 0) {
+                buffer.flip();
+                digest.update(buffer);
+                buffer.clear();
+            }
+
+            read = data.read(buffer);
         }
+
         return digest;
     }
 
@@ -2392,9 +2784,13 @@ public final class DigestUtil {
      * @param digest the MessageDigest to update (must not be {@code null})
      * @param inputStream the InputStream to read (not closed by this method)
      * @return The updated MessageDigest (the same instance as the input)
-     * @throws IOException if an error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code digest} or {@code inputStream} is {@code null}
+     * @throws IOException if reading from {@code inputStream} fails
      */
-    public static MessageDigest updateDigest(final MessageDigest digest, final InputStream inputStream) throws IOException {
+    public static MessageDigest updateDigest(final MessageDigest digest, final InputStream inputStream) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(digest, cs.digest);
+        N.checkArgNotNull(inputStream, cs.inputStream);
+
         final byte[] buffer = new byte[BUFFER_SIZE];
         int read = inputStream.read(buffer, 0, BUFFER_SIZE);
 
@@ -2422,9 +2818,19 @@ public final class DigestUtil {
      * @param options optional open options for the file (e.g., {@code StandardOpenOption.READ});
      *                if not specified, default options are used
      * @return The updated MessageDigest (the same instance as the input)
-     * @throws IOException if an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code digest}, {@code path} or {@code options} is {@code null},
+     *         or if {@code options} contains an invalid combination of open options
+     * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws UnsupportedOperationException if an open option is not supported for an input stream
+     * @throws IOException if the file cannot be opened or an I/O failure occurs while reading or closing it
      */
-    public static MessageDigest updateDigest(final MessageDigest digest, final Path path, final OpenOption... options) throws IOException {
+    @SafeVarargs
+    public static MessageDigest updateDigest(final MessageDigest digest, final Path path, final OpenOption... options)
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException, IOException {
+        N.checkArgNotNull(digest, cs.digest);
+        N.checkArgNotNull(path, cs.path);
+        N.checkArgNotNull(options, cs.options);
+
         try (BufferedInputStream inputStream = new BufferedInputStream(Files.newInputStream(path, options))) {
             return updateDigest(digest, inputStream);
         }
@@ -2447,9 +2853,13 @@ public final class DigestUtil {
      * @param digest the MessageDigest to update (must not be {@code null})
      * @param data the RandomAccessFile to read (must not be {@code null})
      * @return The updated MessageDigest (the same instance as the input)
-     * @throws IOException if an I/O error occurs while reading
+     * @throws IllegalArgumentException if {@code digest} or {@code data} is {@code null}
+     * @throws IOException if the file channel is closed or reading from it fails
      */
-    public static MessageDigest updateDigest(final MessageDigest digest, final RandomAccessFile data) throws IOException {
+    public static MessageDigest updateDigest(final MessageDigest digest, final RandomAccessFile data) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(digest, cs.digest);
+        N.checkArgNotNull(data, cs.data);
+
         return updateDigest(digest, data.getChannel());
     }
 
@@ -2468,10 +2878,21 @@ public final class DigestUtil {
      * @param messageDigest the MessageDigest to update (must not be {@code null})
      * @param valueToDigest the string value to add to the digest, encoded as UTF-8
      * @return The updated MessageDigest (the same instance as the input)
+     * @throws IllegalArgumentException if {@code messageDigest} or {@code valueToDigest} is {@code null},
+     *         or if the text contains an unpaired UTF-16 surrogate
      */
-    public static MessageDigest updateDigest(final MessageDigest messageDigest, final String valueToDigest) {
-        messageDigest.update(Strings.getBytesUtf8(valueToDigest));
+    public static MessageDigest updateDigest(final MessageDigest messageDigest, final String valueToDigest) throws IllegalArgumentException {
+        N.checkArgNotNull(messageDigest, cs.messageDigest);
+        N.checkArgNotNull(valueToDigest, cs.valueToDigest);
+
+        messageDigest.update(strictUtf8(valueToDigest));
         return messageDigest;
+    }
+
+    /** Reject malformed UTF-16 before encoding can replace it with the bytes of a different string. */
+    private static byte[] strictUtf8(final String text) {
+        Utf8.encodedLength(text);
+        return Strings.getBytesUtf8(text);
     }
 
     /**

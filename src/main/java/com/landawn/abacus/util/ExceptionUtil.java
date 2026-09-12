@@ -31,6 +31,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -66,6 +67,7 @@ import com.landawn.abacus.util.u.Optional;
  * Optional<SQLException> sqlEx = ExceptionUtil.findCause(wrapped, SQLException.class);
  * sqlEx.ifPresent(e -> System.err.println(e.getMessage()));
  * }</pre>
+ *
  */
 public final class ExceptionUtil {
 
@@ -108,7 +110,24 @@ public final class ExceptionUtil {
     // Resolution cache for converters derived via the superclass scan. Kept SEPARATE from the
     // registration map: caching derived results there would block registerRuntimeExceptionMapper
     // ("already registered") and let stale derived entries out-rank later-registered mappers.
-    private static final Map<Class<? extends Throwable>, Function<Throwable, RuntimeException>> resolvedToRuntimeExceptionFuncCache = new ConcurrentHashMap<>();
+    // ClassValue does not root disposable exception classes; swapping generations invalidates derived mappings.
+    private static volatile ClassValue<Function<Throwable, RuntimeException>> resolvedToRuntimeExceptionFuncCache = newResolutionCache();
+
+    private static ClassValue<Function<Throwable, RuntimeException>> newResolutionCache() {
+        return new ClassValue<>() {
+            @Override
+            protected Function<Throwable, RuntimeException> computeValue(final Class<?> type) {
+                synchronized (runtimeExceptionMapperLock) {
+                    for (Class<?> current = type; current != null; current = current.getSuperclass()) {
+                        final Function<Throwable, RuntimeException> mapper = toRuntimeExceptionFuncMap.get(current);
+                        if (mapper != null)
+                            return mapper;
+                    }
+                    return RuntimeException.class.isAssignableFrom(type) ? RUNTIME_FUNC : CHECKED_FUNC;
+                }
+            }
+        };
+    }
 
     // Serializes the rare registration/cache-miss paths so a resolver cannot repopulate a
     // stale derived mapping after a concurrent registration has invalidated the cache.
@@ -192,7 +211,7 @@ public final class ExceptionUtil {
 
             // Invalidate derived resolutions the new mapper may now apply to while holding the
             // same lock used by cache-miss resolution, preventing stale cache repopulation.
-            resolvedToRuntimeExceptionFuncCache.keySet().removeIf(exceptionClass::isAssignableFrom);
+            resolvedToRuntimeExceptionFuncCache = newResolutionCache();
         }
     }
 
@@ -212,10 +231,10 @@ public final class ExceptionUtil {
      *
      * @param e the exception to convert; must not be {@code null}
      * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
-     * @throws NullPointerException if {@code e} is {@code null}
+     * @throws IllegalArgumentException if {@code e} is {@code null}
      * @see #toRuntimeException(Throwable, boolean, boolean)
      */
-    public static RuntimeException toRuntimeException(final Exception e) {
+    public static RuntimeException toRuntimeException(final Exception e) throws IllegalArgumentException {
         return toRuntimeException(e, false, false);
     }
 
@@ -234,12 +253,14 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param e the exception to convert; must not be {@code null}
-     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException
+     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException.
+     *        An {@code InterruptedException} reached by unwrapping an {@link ExecutionException} was raised on another
+     *        thread and never interrupts this one, whatever this flag says
      * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
-     * @throws NullPointerException if {@code e} is {@code null}
+     * @throws IllegalArgumentException if {@code e} is {@code null}
      * @see #toRuntimeException(Throwable, boolean, boolean)
      */
-    public static RuntimeException toRuntimeException(final Exception e, final boolean callInterrupt) {
+    public static RuntimeException toRuntimeException(final Exception e, final boolean callInterrupt) throws IllegalArgumentException {
         return toRuntimeException(e, callInterrupt, false);
     }
 
@@ -255,10 +276,10 @@ public final class ExceptionUtil {
      *
      * @param e the throwable to convert; must not be {@code null}
      * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
-     * @throws NullPointerException if {@code e} is {@code null}
+     * @throws IllegalArgumentException if {@code e} is {@code null}
      * @see #toRuntimeException(Throwable, boolean, boolean)
      */
-    public static RuntimeException toRuntimeException(final Throwable e) {
+    public static RuntimeException toRuntimeException(final Throwable e) throws IllegalArgumentException {
         return toRuntimeException(e, false, false);
     }
 
@@ -274,12 +295,14 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param e the throwable to convert; must not be {@code null}
-     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException
+     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException.
+     *        An {@code InterruptedException} reached by unwrapping an {@link ExecutionException} was raised on another
+     *        thread and never interrupts this one, whatever this flag says
      * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
-     * @throws NullPointerException if {@code e} is {@code null}
+     * @throws IllegalArgumentException if {@code e} is {@code null}
      * @see #toRuntimeException(Throwable, boolean, boolean)
      */
-    public static RuntimeException toRuntimeException(final Throwable e, final boolean callInterrupt) {
+    public static RuntimeException toRuntimeException(final Throwable e, final boolean callInterrupt) throws IllegalArgumentException {
         return toRuntimeException(e, callInterrupt, false);
     }
 
@@ -294,19 +317,29 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param e the throwable to convert; must not be {@code null}
-     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException
+     * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException.
+     *        An {@code InterruptedException} reached by unwrapping an {@link ExecutionException} was raised on another
+     *        thread and never interrupts this one, whatever this flag says
      * @param throwIfItIsError whether to throw the throwable if it is an {@code Error}
      * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
-     * @throws Error if {@code e} is an {@code Error} and {@code throwIfItIsError} is {@code true}
-     * @throws NullPointerException if {@code e} is {@code null}
+     * @throws IllegalArgumentException if {@code e} is {@code null}
+     * @throws Error if {@code throwIfItIsError} is true and the exception remaining after unwrapping execution, invocation, or undeclared-throwable wrappers is an {@code Error}
      */
-    public static RuntimeException toRuntimeException(Throwable e, final boolean callInterrupt, final boolean throwIfItIsError) {
+    public static RuntimeException toRuntimeException(Throwable e, final boolean callInterrupt, final boolean throwIfItIsError)
+            throws IllegalArgumentException, Error {
+        N.checkArgNotNull(e, cs.e);
+
         // Unwrap wrapper exceptions first (depth-bounded for cyclic cause chains) so that the
         // callInterrupt/throwIfItIsError flags are applied to the unwrapped cause as well.
         int unwrapDepth = 0;
+        boolean unwrappedFromAnotherThread = false;
 
         while ((e instanceof ExecutionException || e instanceof InvocationTargetException || e instanceof UndeclaredThrowableException) && e.getCause() != null
                 && unwrapDepth++ < MAX_DEPTH_FOR_LOOP_CAUSE) {
+            // An ExecutionException reports what a task threw on *another* thread, so an InterruptedException
+            // found underneath it says nothing about the thread running this conversion. InvocationTargetException
+            // and UndeclaredThrowableException are raised on the calling thread and keep their meaning.
+            unwrappedFromAnotherThread = unwrappedFromAnotherThread || e instanceof ExecutionException;
             e = e.getCause();
         }
 
@@ -320,7 +353,7 @@ public final class ExceptionUtil {
             throw (Error) e;
         }
 
-        if (callInterrupt && e instanceof InterruptedException) {
+        if (callInterrupt && e instanceof InterruptedException && !unwrappedFromAnotherThread) {
             Thread.currentThread().interrupt();
         }
 
@@ -329,35 +362,6 @@ public final class ExceptionUtil {
 
         if (func == null) {
             func = resolvedToRuntimeExceptionFuncCache.get(cls);
-        }
-
-        if (func == null) {
-            synchronized (runtimeExceptionMapperLock) {
-                // A registration may have completed while this thread was waiting for the lock.
-                func = toRuntimeExceptionFuncMap.get(cls);
-
-                if (func == null) {
-                    func = resolvedToRuntimeExceptionFuncCache.get(cls);
-                }
-
-                if (func == null) {
-                    Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> candidate = null;
-
-                    for (final Map.Entry<Class<? extends Throwable>, Function<Throwable, RuntimeException>> entry : toRuntimeExceptionFuncMap.entrySet()) { //NOSONAR
-                        if (entry.getKey().isAssignableFrom(cls) && (candidate == null || candidate.getKey().isAssignableFrom(entry.getKey()))) {
-                            candidate = entry;
-                        }
-                    }
-
-                    if (candidate == null) {
-                        func = e instanceof RuntimeException ? RUNTIME_FUNC : CHECKED_FUNC;
-                    } else {
-                        func = candidate.getValue();
-                    }
-
-                    resolvedToRuntimeExceptionFuncCache.put(cls, func);
-                }
-            }
         }
 
         return func.apply(e);
@@ -373,9 +377,15 @@ public final class ExceptionUtil {
 
     /**
      * Cache mapping a runtime wrapper exception class to the checked exception class it was observed
-     * to wrap, so that repeated unwrapping does not have to re-derive the pairing.
+     * to wrap, so that repeated unwrapping does not have to re-derive the pairing. Each entry has the
+     * runtime wrapper class's lifetime and does not root its class loader.
      */
-    static final Map<Class<? extends Throwable>, Class<? extends Throwable>> runtimeToCheckedExceptionClassMap = new ConcurrentHashMap<>();
+    static final ClassValue<java.util.concurrent.atomic.AtomicReference<Class<? extends Throwable>>> runtimeToCheckedExceptionClassMap = new ClassValue<>() {
+        @Override
+        protected java.util.concurrent.atomic.AtomicReference<Class<? extends Throwable>> computeValue(final Class<?> type) {
+            return new java.util.concurrent.atomic.AtomicReference<>();
+        }
+    };
 
     /**
      * Attempts to extract the original checked exception from a wrapper exception.
@@ -395,13 +405,19 @@ public final class ExceptionUtil {
      * @return the unwrapped cause if {@code e} is a recognized wrapper (e.g. {@link com.landawn.abacus.exception.UncheckedException},
      *         {@link java.util.concurrent.ExecutionException}, or {@link java.lang.reflect.InvocationTargetException})
      *         whose cause is a checked (non-runtime) exception; otherwise returns {@code e} itself.
-     * @throws NullPointerException if {@code e} is {@code null}
+     * @throws IllegalArgumentException if {@code e} is {@code null}
+     * @throws NullPointerException if a registered exception mapper invoked to identify the wrapper returns {@code null}
      */
-    public static Exception tryToGetOriginalCheckedException(final Exception e) {
+    public static Exception tryToGetOriginalCheckedException(final Exception e) throws IllegalArgumentException, NullPointerException {
+        N.checkArgNotNull(e, cs.e);
+
         return tryToGetOriginalCheckedException(e, MAX_DEPTH_FOR_LOOP_CAUSE);
     }
 
-    private static Exception tryToGetOriginalCheckedException(final Exception e, int loopCount) {
+    /**
+     * @throws NullPointerException if {@code e} is {@code null} and {@code loopCount} is positive, or a registered exception mapper invoked to identify the wrapper returns {@code null}
+     */
+    private static Exception tryToGetOriginalCheckedException(final Exception e, int loopCount) throws NullPointerException {
         if (loopCount <= 0) {
             return e;
         }
@@ -414,14 +430,14 @@ public final class ExceptionUtil {
 
             final Throwable cause = e.getCause();
 
-            if (cause.getClass().equals(runtimeToCheckedExceptionClassMap.get(e.getClass()))) {
+            if (cause.getClass().equals(runtimeToCheckedExceptionClassMap.get(e.getClass()).get())) {
                 return (Exception) cause;
             }
 
             if (toRuntimeExceptionFuncMap.containsKey(cause.getClass())
                     && toRuntimeExceptionFuncMap.get(cause.getClass()).apply(cause).getClass().equals(e.getClass())) {
 
-                runtimeToCheckedExceptionClassMap.put(e.getClass(), cause.getClass());
+                runtimeToCheckedExceptionClassMap.get(e.getClass()).set(cause.getClass());
 
                 return (Exception) cause;
             }
@@ -444,9 +460,12 @@ public final class ExceptionUtil {
      * @param e the exception to check, which may be {@code null}
      * @param targetExceptionType the exception type to look for
      * @return {@code true} if the exception or any cause is assignable to the specified type; {@code false} if {@code e} is {@code null}
+     * @throws IllegalArgumentException if {@code targetExceptionType} is {@code null}.
      * @see #findCause(Throwable, Class)
      */
-    public static boolean hasCause(final Throwable e, final Class<? extends Throwable> targetExceptionType) {
+    public static boolean hasCause(final Throwable e, final Class<? extends Throwable> targetExceptionType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetExceptionType, cs.targetExceptionType);
+
         if (e == null) {
             return false;
         }
@@ -644,6 +663,7 @@ public final class ExceptionUtil {
      * @return the root cause or the input if no cause found; {@code null} if {@code e} is {@code null}
      * @see #findCause(Throwable, Class)
      */
+    @MayReturnNull
     public static Throwable getRootCause(final Throwable e) {
         if (e == null) {
             return null;
@@ -676,9 +696,12 @@ public final class ExceptionUtil {
      * @param targetExceptionType the class of the exception to find
      * @return an {@code Optional} containing the first exception in the cause chain assignable to the specified type,
      *         or an empty {@code Optional} if none is found or {@code e} is {@code null}
+     * @throws IllegalArgumentException if {@code targetExceptionType} is {@code null}.
      * @see #hasCause(Throwable, Class)
      */
-    public static <E extends Throwable> Optional<E> findCause(final Throwable e, final Class<? extends E> targetExceptionType) {
+    public static <E extends Throwable> Optional<E> findCause(final Throwable e, final Class<? extends E> targetExceptionType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetExceptionType, cs.targetExceptionType);
+
         if (e == null) {
             return Optional.empty();
         }
@@ -702,10 +725,10 @@ public final class ExceptionUtil {
     /**
      * Finds the first exception in the cause chain that matches the specified predicate.
      *
-     * <p>The matched exception is cast to {@code E} without a runtime type check, because the
-     * predicate — not a class token — determines the match. Declare {@code E} as a type the
-     * predicate actually guarantees, or use {@link #findCause(Throwable, Class)} when the match
-     * should be checked.</p>
+     * <p>A predicate does not determine a static exception subtype, so the result is an
+     * {@code Optional<Throwable>}. For a typed result, match the type in the predicate and then
+     * use {@code map(IOException.class::cast)}, or use {@link #findCause(Throwable, Class)}
+     * when no additional predicate is needed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -715,7 +738,6 @@ public final class ExceptionUtil {
      * );
      * }</pre>
      *
-     * @param <E> the type of exception expected
      * @param e the exception to search through, which may be {@code null}
      * @param targetExceptionTester the predicate to match exceptions
      * @return an {@code Optional} containing the first exception in the cause chain that matches the predicate,
@@ -723,8 +745,7 @@ public final class ExceptionUtil {
      * @throws IllegalArgumentException if {@code targetExceptionTester} is {@code null}.
      * @see #hasCause(Throwable, Predicate)
      */
-    public static <E extends Throwable> Optional<E> findCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester)
-            throws IllegalArgumentException {
+    public static Optional<Throwable> findCause(final Throwable e, final Predicate<? super Throwable> targetExceptionTester) throws IllegalArgumentException {
         N.checkArgNotNull(targetExceptionTester, cs.targetExceptionTester);
 
         if (e == null) {
@@ -738,7 +759,7 @@ public final class ExceptionUtil {
 
         while (cause != null && seen.add(cause)) {
             if (targetExceptionTester.test(cause)) {
-                return Optional.of((E) cause);
+                return Optional.of(cause);
             }
 
             cause = cause.getCause();

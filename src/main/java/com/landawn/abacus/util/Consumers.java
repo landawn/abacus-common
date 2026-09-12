@@ -24,6 +24,18 @@ import com.landawn.abacus.util.function.IntObjConsumer;
 /**
  * Utility class providing various Consumer implementations and factory methods.
  * This class contains methods for creating indexed consumers.
+ *
+ * <p>This class is a top-level sibling of {@link Fn} (formerly nested as {@code Fn.Consumers}),
+ * not a nested type. Use {@link Fn} for the general functional-interface factory and {@link Fnn}
+ * for {@link Throwables} variants that can declare checked exceptions. For two-argument consumers
+ * see {@link BiConsumers}; for three-argument consumers see {@link TriConsumers}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see BiConsumers
+ * @see TriConsumers
+ * @see Functions
+ * @see Predicates
  */
 public final class Consumers {
     private Consumers() {
@@ -39,6 +51,10 @@ public final class Consumers {
      * Consumers.indexed((i, s) -> System.out.println(i + ":" + s)).accept("hello");  // prints 0:hello
      * }</pre>
      *
+     * <p>The returned callback uses indices from zero through {@link Integer#MAX_VALUE}. Later calls
+     * throw {@link ArithmeticException} without invoking user code. An invocation consumes its index
+     * even when user code throws.</p>
+     *
      * @param <T> the type of the input to the consumer
      * @param action the IntObjConsumer that accepts an index and element
      * @return a stateful Consumer that applies the given IntObjConsumer with an incrementing index
@@ -51,11 +67,20 @@ public final class Consumers {
         N.checkArgNotNull(action, cs.action);
 
         return new Consumer<>() {
-            private final MutableInt idx = new MutableInt(0);
+            private long idx;
 
+            /**
+             * {@inheritDoc}
+             * @throws ArithmeticException if all nonnegative {@code int} indices have already been used by prior invocations
+             */
             @Override
-            public void accept(final T t) {
-                action.accept(idx.getAndIncrement(), t);
+            public void accept(final T t) throws ArithmeticException {
+                // Keep exhaustion representable and reject before invoking user code.
+                if (idx > Integer.MAX_VALUE) {
+                    throw new ArithmeticException("Index exceeds Integer.MAX_VALUE");
+                }
+
+                action.accept((int) idx++, t);
             }
         };
     }

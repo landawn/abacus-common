@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -61,7 +62,7 @@ public class PrefixSearchTableTest extends TestBase {
 
         Map<List<Integer>, String> map = table.getAll(Arrays.asList(1, 2, 3)).toMap();
         assertEquals(2, map.size());
-        assertTrue(map.equals(N.asMap(asList(1, 2), "bar", asList(1, 2, 3), "foo")));
+        assertTrue(map.equals(CommonUtil.asMap(asList(1, 2), "bar", asList(1, 2, 3), "foo")));
     }
 
     @Test
@@ -75,7 +76,7 @@ public class PrefixSearchTableTest extends TestBase {
         PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder().add(Arrays.asList(1), "foo").build();
         Map<List<Integer>, String> map = table.getAll(Arrays.asList(1)).toMap();
         assertEquals(1, map.size());
-        assertTrue(Maps.containsEntry(map, N.newImmutableEntry(Arrays.asList(1), "foo")));
+        assertTrue(Maps.containsEntry(map, CommonUtil.newImmutableEntry(Arrays.asList(1), "foo")));
     }
 
     @Test
@@ -89,7 +90,7 @@ public class PrefixSearchTableTest extends TestBase {
         PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder().add(Arrays.asList(1), "foo").build();
         Map<List<Integer>, String> map = table.getAll(Arrays.asList(1, 2, 3)).toMap();
         assertEquals(1, map.size());
-        assertTrue(Maps.containsEntry(map, N.newImmutableEntry(Arrays.asList(1), "foo")));
+        assertTrue(Maps.containsEntry(map, CommonUtil.newImmutableEntry(Arrays.asList(1), "foo")));
     }
 
     @Test
@@ -97,7 +98,7 @@ public class PrefixSearchTableTest extends TestBase {
         PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder().add(Arrays.asList(1, 2, 3), "foo").build();
         Map<List<Integer>, String> map = table.getAll(Arrays.asList(1, 2, 3)).toMap();
         assertEquals(1, map.size());
-        assertTrue(Maps.containsEntry(map, N.newImmutableEntry(Arrays.asList(1, 2, 3), "foo")));
+        assertTrue(Maps.containsEntry(map, CommonUtil.newImmutableEntry(Arrays.asList(1, 2, 3), "foo")));
     }
 
     @Test
@@ -105,7 +106,7 @@ public class PrefixSearchTableTest extends TestBase {
         PrefixSearchTable<Integer, String> table = PrefixSearchTable.<Integer, String> builder().add(Arrays.asList(1, 2, 3), "foo").build();
         Map<List<Integer>, String> map = table.getAll(Arrays.asList(1, 2, 3, 4, 5)).toMap();
         assertEquals(1, map.size());
-        assertTrue(Maps.containsEntry(map, N.newImmutableEntry(Arrays.asList(1, 2, 3), "foo")));
+        assertTrue(Maps.containsEntry(map, CommonUtil.newImmutableEntry(Arrays.asList(1, 2, 3), "foo")));
     }
 
     @Test
@@ -176,7 +177,7 @@ public class PrefixSearchTableTest extends TestBase {
 
         Map<List<Integer>, String> map = table.getAll(Arrays.asList(1, 2, 3)).toMap();
         assertEquals(2, map.size());
-        assertTrue(map.equals(N.asMap(Arrays.asList(1), "bar", Arrays.asList(1, 2, 3), "foo")));
+        assertTrue(map.equals(CommonUtil.asMap(Arrays.asList(1), "bar", Arrays.asList(1, 2, 3), "foo")));
     }
 
     // ===== Builder.addAll(Map) =====
@@ -324,7 +325,7 @@ public class PrefixSearchTableTest extends TestBase {
         EntryStream<List<String>, String> matches = table.getAll(query);
         query.set(0, "changed");
 
-        assertEquals(N.asMap(Arrays.asList("a"), "short", Arrays.asList("a", "b"), "long"), matches.toMap());
+        assertEquals(CommonUtil.asMap(Arrays.asList("a"), "short", Arrays.asList("a", "b"), "long"), matches.toMap());
     }
 
     @Test
@@ -332,5 +333,75 @@ public class PrefixSearchTableTest extends TestBase {
         PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String> builder().add(Arrays.asList("a"), "value").build();
 
         assertThrows(NullPointerException.class, () -> table.getAll(Arrays.asList("missing", null)));
+    }
+
+    @Test
+    public void reviewFixes20260908_toStringRendersADeepTableWithoutExhaustingTheStack() throws Exception {
+        // the rendered form is unchanged for an ordinary table
+        PrefixSearchTable<String, String> small = PrefixSearchTable.<String, String> builder().add(Arrays.asList("a", "b"), "foo").build();
+        assertEquals("{a=Node[value=null, children={b=Node[value=foo, children={}]}]}", small.toString());
+        assertEquals("{}", PrefixSearchTable.<String, String> builder().build().toString());
+
+        PrefixSearchTable.Builder<String, String> builder = PrefixSearchTable.<String, String> builder();
+        builder.add(Arrays.asList("x"), "shallow");
+        List<String> deepKey = new ArrayList<>();
+        for (int i = 0; i < 4000; i++) {
+            deepKey.add("k" + i);
+        }
+        PrefixSearchTable<String, String> deep = builder.add(deepKey, "deep").build();
+
+        // a table this class can build must also be printable: the recursive rendering (HashMap -> record Node ->
+        // children -> ...) costs several frames per level and overflows a small stack long before this depth.
+        final String[] rendered = new String[1];
+        final Throwable[] failure = new Throwable[1];
+        Thread renderer = new Thread(null, () -> {
+            try {
+                rendered[0] = deep.toString();
+            } catch (Throwable t) { // NOSONAR - StackOverflowError is exactly what this pins
+                failure[0] = t;
+            }
+        }, "prefix-search-table-toString", 128 * 1024);
+        renderer.start();
+        renderer.join(60_000);
+
+        assertNull(failure[0], () -> "toString failed with " + failure[0]);
+        assertNotNull(rendered[0]);
+        assertTrue(rendered[0].startsWith("{"), rendered[0].substring(0, 40));
+        assertTrue(rendered[0].endsWith("}"));
+        assertTrue(rendered[0].contains("x=Node[value=shallow, children={}]"));
+        assertTrue(rendered[0].contains("k0=Node[value=null, children={k1="), rendered[0].substring(0, 80));
+        assertTrue(rendered[0].contains("k3999=Node[value=deep, children={}]"));
+    }
+
+    @Test
+    public void reviewFixes20260908_getAllEmitsAnIndependentImmutablePrefixForEveryMatch() throws Exception {
+        PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String> builder()
+                .add(Arrays.asList("a"), "one")
+                .add(Arrays.asList("a", "b"), "two")
+                .add(Arrays.asList("a", "b", "c"), "three")
+                .build();
+        List<String> query = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
+
+        List<Map.Entry<List<String>, String>> matches = table.getAll(query).toList();
+        query.set(0, "changed");
+        query.clear();
+
+        assertEquals(3, matches.size());
+        assertEquals(Arrays.asList("a"), matches.get(0).getKey());
+        assertEquals(Arrays.asList("a", "b"), matches.get(1).getKey());
+        assertEquals(Arrays.asList("a", "b", "c"), matches.get(2).getKey());
+        assertEquals(Arrays.asList("one", "two", "three"), matches.stream().map(Map.Entry::getValue).toList());
+
+        for (Map.Entry<List<String>, String> match : matches) {
+            assertEquals(Arrays.asList("a", "b", "c").subList(0, match.getKey().size()).hashCode(), match.getKey().hashCode());
+            assertThrows(UnsupportedOperationException.class, () -> match.getKey().set(0, "changed"));
+            assertThrows(UnsupportedOperationException.class, () -> match.getKey().add("more"));
+
+            // The entry itself is Serializable, so its key must be too: an immutable *sub-view* of the key
+            // snapshot is immutable but not Serializable, and it would also pin the whole snapshot array.
+            try (java.io.ObjectOutputStream out = new java.io.ObjectOutputStream(new java.io.ByteArrayOutputStream())) {
+                out.writeObject(match);
+            }
+        }
     }
 }

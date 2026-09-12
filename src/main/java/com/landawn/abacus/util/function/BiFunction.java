@@ -13,8 +13,9 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.Objects;
+
 import com.landawn.abacus.annotation.SuppressFBWarnings;
-import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
@@ -70,11 +71,11 @@ public interface BiFunction<T, U, R> extends Throwables.BiFunction<T, U, R, Runt
      * @param <V> the type of output of the {@code after} function, and of the composed function
      * @param after the function to apply after this function is applied.
      * @return a composed {@code BiFunction} that first applies this function and then applies the {@code after} function
-     * @throws IllegalArgumentException if {@code after} is {@code null}.
+     * @throws NullPointerException if {@code after} is {@code null}.
      */
     @Override
-    default <V> BiFunction<T, U, V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws IllegalArgumentException {
-        N.checkArgNotNull(after, cs.after);
+    default <V> BiFunction<T, U, V> andThen(final java.util.function.Function<? super R, ? extends V> after) throws NullPointerException {
+        Objects.requireNonNull(after, cs.after);
 
         return (t, u) -> after.apply(apply(t, u));
     }

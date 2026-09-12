@@ -122,7 +122,7 @@ public enum Color {
      * @throws IllegalArgumentException if no {@code Color} is mapped to the specified value (i.e. {@code intValue} is
      *         outside the range 0 through 8).
      */
-    public static Color of(final int intValue) {
+    public static Color of(final int intValue) throws IllegalArgumentException {
         switch (intValue) {
             case 0:
                 return BLACK;

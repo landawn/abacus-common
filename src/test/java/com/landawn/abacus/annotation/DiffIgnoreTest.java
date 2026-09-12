@@ -20,7 +20,7 @@ import com.landawn.abacus.TestBase;
 
 public class DiffIgnoreTest extends TestBase {
 
-    static class TestClass {
+    public static class TestClass {
         private String includedField;
 
         @DiffIgnore

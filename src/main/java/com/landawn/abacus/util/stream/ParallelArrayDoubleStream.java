@@ -102,11 +102,11 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
      * @param closeHandlers handlers to execute when the stream is closed, may be {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
-     *         or {@code fromIndex > toIndex}
+     *         or {@code fromIndex > toIndex}; a {@code null} array is treated as having length zero
      */
     ParallelArrayDoubleStream(final double[] values, final int fromIndex, final int toIndex, final boolean sorted, final int maxThreadNum,
             final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads,
-            final Collection<LocalRunnable> closeHandlers) {
+            final Collection<LocalRunnable> closeHandlers) throws IndexOutOfBoundsException {
         super(values, fromIndex, toIndex, sorted, closeHandlers);
 
         this.maxThreadNum = maxThreadNum == 0 ? DEFAULT_MAX_THREAD_NUM : maxThreadNum;
@@ -129,7 +129,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public DoubleStream filter(final DoublePredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream filter(final DoublePredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -158,7 +158,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public DoubleStream takeWhile(final DoublePredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream takeWhile(final DoublePredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -173,13 +173,12 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
     }
 
     /**
-     * Returns a parallel stream after dropping matching elements until a worker observes a
-     * non-matching element. If the stream can be processed sequentially,
-     * delegates to the sequential implementation; otherwise boxes elements and delegates to
-     * the parallel object stream's {@code dropWhile}.
+     * Returns a parallel stream after dropping the leading elements that match the predicate.
+     * If the stream can be processed sequentially, delegates to the sequential implementation;
+     * otherwise boxes elements and delegates to the parallel object stream.
      *
-     * <p><b>&#9888;&#65039; Parallel streams:</b> this operation does not guarantee encounter-order prefix/suffix
-     * semantics; later matching elements may be dropped.
+     * <p>The first non-matching element and all remaining elements are retained, but their output
+     * order is not guaranteed to match the source encounter order.
      *
      * @param predicate a non-interfering, stateless predicate to apply to each element
      * @return a new parallel {@code DoubleStream} of the elements selected by the parallel {@code dropWhile} operation
@@ -187,7 +186,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public DoubleStream dropWhile(final DoublePredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream dropWhile(final DoublePredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -212,7 +211,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public DoubleStream map(final DoubleUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream map(final DoubleUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -238,7 +237,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public IntStream mapToInt(final DoubleToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream mapToInt(final DoubleToIntFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -264,7 +263,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public LongStream mapToLong(final DoubleToLongFunction mapper) throws IllegalArgumentException, IllegalStateException {
+    public LongStream mapToLong(final DoubleToLongFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -290,7 +289,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public FloatStream mapToFloat(final DoubleToFloatFunction mapper) throws IllegalArgumentException, IllegalStateException {
+    public FloatStream mapToFloat(final DoubleToFloatFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -317,7 +316,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> mapToObj(final DoubleFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> mapToObj(final DoubleFunction<? extends T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -342,7 +341,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public DoubleStream flatMap(final DoubleFunction<? extends DoubleStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream flatMap(final DoubleFunction<? extends DoubleStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -371,7 +370,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public DoubleStream flatmap(final DoubleFunction<? extends Collection<Double>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream flatmap(final DoubleFunction<? extends Collection<Double>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -400,7 +399,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public DoubleStream flatMapArray(final DoubleFunction<double[]> mapper) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream flatMapArray(final DoubleFunction<double[]> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -429,7 +428,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public IntStream flatMapToInt(final DoubleFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream flatMapToInt(final DoubleFunction<? extends IntStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -458,7 +457,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public LongStream flatMapToLong(final DoubleFunction<? extends LongStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public LongStream flatMapToLong(final DoubleFunction<? extends LongStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -487,7 +486,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public FloatStream flatMapToFloat(final DoubleFunction<? extends FloatStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public FloatStream flatMapToFloat(final DoubleFunction<? extends FloatStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -517,7 +516,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> flatMapToObj(final DoubleFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatMapToObj(final DoubleFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -545,7 +544,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> flatmapToObj(final DoubleFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final DoubleFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -573,7 +572,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
-    public DoubleStream onEach(final DoubleConsumer action) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream onEach(final DoubleConsumer action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -600,11 +599,11 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param <E> the type of exception the action may throw
      * @param action a non-interfering action to perform on each element
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      */
     @Override
-    public <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> void forEach(final Throwables.DoubleConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -625,7 +624,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -642,7 +641,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     double next = 0;
 
                     try {
@@ -684,15 +683,15 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a {@code Map} whose keys and values are produced by applying the mapper functions
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the key mapper throws an exception
-     * @throws E2 if the value mapper throws an exception
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws E if the key mapper throws an exception
+     * @throws E2 if the value mapper throws an exception
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.DoubleFunction<? extends K, E> keyMapper,
             final Throwables.DoubleFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalArgumentException, IllegalStateException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -727,16 +726,17 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a {@code Map} from keys to downstream reduction results
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}.
      * @throws E if the key mapper throws an exception
-     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}.
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.DoubleFunction<? extends K, E> keyMapper,
             final Collector<? super Double, ?, D> downstream, final Supplier<? extends M> mapFactory)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -764,7 +764,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
-    public double reduce(final double identity, final DoubleBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public double reduce(final double identity, final DoubleBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -784,7 +784,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -805,7 +805,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     double result = identity;
                     double next = 0;
 
@@ -856,7 +856,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
-    public OptionalDouble reduce(final DoubleBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public OptionalDouble reduce(final DoubleBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -876,7 +876,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -901,7 +901,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     double result = 0;
 
                     synchronized (elements) {
@@ -967,7 +967,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjDoubleConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -989,7 +989,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -1010,7 +1010,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     final R container = supplier.get();
                     double next = 0;
 
@@ -1047,11 +1047,11 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return {@code true} if any element matches the predicate, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1072,7 +1072,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -1092,7 +1092,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     double next = 0;
 
                     try {
@@ -1131,11 +1131,11 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return {@code true} if all elements match the predicate (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1156,7 +1156,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -1176,7 +1176,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     double next = 0;
 
                     try {
@@ -1215,11 +1215,11 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return {@code true} if no elements match the predicate (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.DoublePredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1240,7 +1240,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -1260,7 +1260,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     double next = 0;
 
                     try {
@@ -1301,12 +1301,12 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return an {@code OptionalDouble} with the first matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
     public <E extends Exception> OptionalDouble findFirst(final Throwables.DoublePredicate<E> predicate)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1327,7 +1327,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     final Pair<Integer, Double> pair = new Pair<>();
@@ -1356,7 +1356,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     final Pair<Integer, Double> pair = new Pair<>();
 
                     try {
@@ -1404,12 +1404,12 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return an {@code OptionalDouble} with any matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
     public <E extends Exception> OptionalDouble findAny(final Throwables.DoublePredicate<E> predicate)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1430,7 +1430,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     double next = 0;
@@ -1458,7 +1458,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     double next = 0;
 
                     try {
@@ -1504,12 +1504,12 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param predicate a non-interfering, stateless predicate to apply to elements
      * @return an {@code OptionalDouble} with the last matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
     @Override
     public <E extends Exception> OptionalDouble findLast(final Throwables.DoublePredicate<E> predicate)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1530,7 +1530,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
 
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     final int from = fromIndex + sliceIndex * sliceSize;
                     int cursor = toIndex - from > sliceSize ? from + sliceSize : toIndex;
                     final Pair<Integer, Double> pair = new Pair<>();
@@ -1559,7 +1559,7 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
             final MutableInt cursor = MutableInt.of(toIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, () -> {
+                asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     final Pair<Integer, Double> pair = new Pair<>();
 
                     try {
@@ -1605,13 +1605,15 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param b the second stream to zip with
      * @param zipFunction a function applied to corresponding elements of both streams
      * @return a new parallel {@code DoubleStream} of zipped results
-     * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     *
+     * @throws IllegalStateException if this stream or a source stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      */
     @Override
-    public DoubleStream zipWith(final DoubleStream b, final DoubleBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream zipWith(final DoubleStream b, final DoubleBinaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -1619,8 +1621,8 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
                     cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorDoubleStream(Stream.parallelZip(boxed(), b.boxed(), zipFunction::applyAsDouble, maxThreadNum), false, maxThreadNum,
-                splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorDoubleStream(Stream.parallelZip(boxed(), b.boxed(), zipFunction::applyAsDouble, maxThreadNum, asyncExecutor), false,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -1635,14 +1637,17 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param c the third stream to zip with
      * @param zipFunction a function applied to corresponding elements of all three streams
      * @return a new parallel {@code DoubleStream} of zipped results
-     * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     *
+     * @throws IllegalStateException if this stream or a source stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      */
     @Override
     public DoubleStream zipWith(final DoubleStream b, final DoubleStream c, final DoubleTernaryOperator zipFunction)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
+        checkArgNotNull(c, cs.c);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -1650,8 +1655,8 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
                     cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorDoubleStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), zipFunction::applyAsDouble, maxThreadNum), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorDoubleStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), zipFunction::applyAsDouble, maxThreadNum, asyncExecutor),
+                false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -1668,14 +1673,16 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param valueForNoneB the padding value used when {@code b} has fewer elements than this stream
      * @param zipFunction a function applied to corresponding (possibly padded) elements
      * @return a new parallel {@code DoubleStream} of zipped results, with length equal to the longer stream
-     * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     *
+     * @throws IllegalStateException if this stream or a source stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      */
     @Override
     public DoubleStream zipWith(final DoubleStream b, final double valueForNoneA, final double valueForNoneB, final DoubleBinaryOperator zipFunction)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -1683,8 +1690,9 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
                     asyncExecutor, cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorDoubleStream(Stream.parallelZip(boxed(), b.boxed(), valueForNoneA, valueForNoneB, zipFunction::applyAsDouble, maxThreadNum),
-                false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorDoubleStream(
+                Stream.parallelZip(boxed(), b.boxed(), valueForNoneA, valueForNoneB, zipFunction::applyAsDouble, maxThreadNum, asyncExecutor), false,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**
@@ -1702,14 +1710,17 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
      * @param valueForNoneC the padding value used when {@code c} is exhausted
      * @param zipFunction a function applied to corresponding (possibly padded) elements
      * @return a new parallel {@code DoubleStream} of zipped results, with length equal to the longest stream
-     * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     *
+     * @throws IllegalStateException if this stream or a source stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      */
     @Override
     public DoubleStream zipWith(final DoubleStream b, final DoubleStream c, final double valueForNoneA, final double valueForNoneB, final double valueForNoneC,
-            final DoubleTernaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
+            final DoubleTernaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
+        checkArgNotNull(c, cs.c);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -1717,9 +1728,8 @@ final class ParallelArrayDoubleStream extends ArrayDoubleStream {
                     splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorDoubleStream(
-                Stream.parallelZip(boxed(), b.boxed(), c.boxed(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction::applyAsDouble, maxThreadNum), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorDoubleStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), valueForNoneA, valueForNoneB, valueForNoneC,
+                zipFunction::applyAsDouble, maxThreadNum, asyncExecutor), false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     /**

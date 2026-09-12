@@ -63,8 +63,8 @@ public class XMLType<T> extends AbstractType<T> {
     /**
      * Returns the declaring name of this XML type.
      * <p>
-     * The declaring name includes the "XML" prefix and the type parameter in angle brackets,
-     * for example: "XML&lt;Map&gt;" or "XML&lt;User&gt;".
+     * The declaring name includes the "XML" prefix and the target type's declaring name in angle brackets,
+     * for example {@code "XML<Map<Object, Object>>"} (a raw {@code Map} argument is expanded) or {@code "XML<User>"}.
      * </p>
      *
      * @return the declaring name of this XML type
@@ -112,33 +112,63 @@ public class XMLType<T> extends AbstractType<T> {
      *
      * @param x the object to convert to XML
      * @return the XML string representation of the object, or {@code null} if the input is null
+     * @throws UnsupportedOperationException if no XML parser is available on the classpath and {@code x} is not
+     *         {@code null}
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final T x) {
-        return (x == null) ? null : Utils.xmlParser.serialize(x);
+    public String stringOf(final T x) throws UnsupportedOperationException {
+        if (x == null) {
+            return null;
+        }
+
+        checkXmlParserAvailable();
+
+        return Utils.xmlParser.serialize(x);
     }
 
     /**
      * Converts an XML string to an object of the target type.
      * <p>
      * This method uses the XML parser to deserialize the provided XML string into an
-     * object of the target class. If the string is {@code null} or empty, this method returns {@code null}.
+     * object of the target class. If the string is {@code null}, empty or blank (whitespace only), this method
+     * returns {@code null}, consistent with {@link JSONType#valueOf(String)}.
      * </p>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
-     * @param str the XML string to deserialize
-     * @return an object of type {@code T} deserialized from the XML string, or {@code null} if the string is {@code null} or empty
+     * @param str the XML string to deserialize; may be {@code null}, empty or blank
+     * @return an object of type {@code T} deserialized from the XML string, or {@code null} if the string is
+     *         {@code null}, empty or blank
      * @throws RuntimeException if the XML parsing fails or the XML doesn't match the target type
+     * @throws UnsupportedOperationException if no XML parser is available on the classpath and {@code str} is not
+     *         blank
      * @see #valueOf(Object)
      * @see #stringOf(Object)
      */
     @Override
-    public T valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : Utils.xmlParser.deserialize(str, targetType);
+    public T valueOf(final String str) throws RuntimeException, UnsupportedOperationException {
+        if (Strings.isBlank(str)) {
+            return null;
+        }
+
+        checkXmlParserAvailable();
+
+        return Utils.xmlParser.deserialize(str, targetType);
+    }
+
+    /**
+     * Fails with a descriptive exception instead of an NPE when {@code Utils.xmlParser} is {@code null}
+     * (no StAX implementation on the classpath). Checked lazily on use, not in the constructor, so that merely
+     * resolving an {@code XML<...>} type name never fails.
+     * @throws UnsupportedOperationException if no XML parser implementation is available on the classpath
+     */
+    private static void checkXmlParserAvailable() throws UnsupportedOperationException {
+        if (Utils.xmlParser == null) {
+            throw new UnsupportedOperationException("XML parser is not available: no XML parsing library found on the classpath");
+        }
     }
 }

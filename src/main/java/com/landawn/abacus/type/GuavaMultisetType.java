@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,8 @@ import com.google.common.collect.LinkedHashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SortedMultiset;
 import com.google.common.collect.TreeMultiset;
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
@@ -75,7 +78,12 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
         parameterTypes = List.of(elementType);
         isOrdered = LinkedHashMultiset.class.isAssignableFrom(typeClass) || SortedMultiset.class.isAssignableFrom(typeClass);
 
-        jdc = JsonDeserConfig.create().setMapKeyType(elementType).setMapValueType(Integer.class).setElementType(elementType);
+        // Linked/immutable targets can only keep the order they are given: the intermediate map must be linked too.
+        jdc = JsonDeserConfig.create()
+                .setMapKeyType(elementType)
+                .setMapValueType(Integer.class)
+                .setElementType(elementType)
+                .setMapInstanceType(LinkedHashMap.class);
     }
 
     /**
@@ -137,6 +145,12 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * Indicates whether instances of this type can be serialized.
      * Guava multisets are serializable through their {@link java.util.Map} representation.
      *
+     * <p>Because this type is reported as serializable and does not override {@code serializeTo}, a multiset that is
+     * nested in a bean property, a map value or a collection element is written as a quoted JSON <i>string</i> holding
+     * the value of {@link #stringOf(Multiset)} (e.g. {@code {"ms": "{\"a\": 2}"}}), not as a JSON object; in XML the
+     * same text is written as the element's escaped character content. The JSON and XML parsers read that form back.
+     * Only a multiset serialized as the root value is emitted as a plain JSON object.</p>
+     *
      * @return {@code true}, always, because multisets are serialized as element-to-count maps
      */
     @Override
@@ -161,6 +175,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final T x) {
         if (x == null) {
@@ -182,41 +197,82 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * The string must represent a {@code Map<E, Integer>} in JSON format, where each value is the element count.
      * Creates the appropriate multiset implementation based on the type class.
      *
+     * <p>The elements are fed to the target in document order, so a target class that keeps insertion order
+     * ({@link LinkedHashMultiset}, {@link ImmutableMultiset}) reflects the document order; a sorted target
+     * ({@link TreeMultiset}, {@link SortedMultiset}, {@link ImmutableSortedMultiset}) is sorted, and for the other
+     * targets ({@link Multiset}, {@link HashMultiset}, ...) the iteration order is unspecified.</p>
+     *
+     * <p>An element whose count is {@code null} or {@code 0} (e.g. {@code {"a": null}} or {@code {"a": 0}}) is not
+     * added, so it is absent from the result. The counts are copied entry by entry, so a large count (up to
+     * {@link Integer#MAX_VALUE}) costs no more than a small one, for every target class.</p>
+     *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the JSON string to parse; may be {@code null} or empty
-     * @return the deserialized multiset
-     *         or {@code null} if {@code str} is {@code null} or empty
+     * @return the deserialized multiset, or {@code null} if {@code str} is {@code null} or blank
+     * @throws ParsingException if {@code str} is not a well-formed JSON object text
+     * @throws IllegalArgumentException if a count is negative
+     * @throws NumberFormatException if a count is not an integer literal
+     * @throws ArithmeticException if a count does not fit in an {@code int}
      * @see #valueOf(Object)
      * @see #stringOf(Multiset)
      */
-    @SuppressWarnings("rawtypes")
+    @MayReturnNull
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public T valueOf(final String str) {
+    public T valueOf(final String str) throws ParsingException, IllegalArgumentException, NumberFormatException, ArithmeticException {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         }
 
+        // jdc targets a LinkedHashMap (see the constructor), so the entries below are in document order.
         final Map<E, Integer> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
 
         if (map == null) {
             return null;
         }
 
+        if (ImmutableMultiset.class.isAssignableFrom(typeClass) && !ImmutableSortedMultiset.class.isAssignableFrom(typeClass)) {
+            // Build the immutable result straight from the ordered map: the builder keeps put order,
+            // whereas the HashMultiset temporary newInstance() would return scrambles it.
+            final ImmutableMultiset.Builder<E> builder = ImmutableMultiset.builder();
+
+            for (final Map.Entry<E, Integer> entry : map.entrySet()) {
+                // A null count ({"a": null}) adds nothing, like a 0 count.
+                if (entry.getValue() != null) {
+                    builder.addCopies(entry.getKey(), entry.getValue());
+                }
+            }
+
+            return (T) builder.build();
+        }
+
         final T multiset = newInstance(map.size());
 
         for (final Map.Entry<E, Integer> entry : map.entrySet()) {
-            multiset.add(entry.getKey(), entry.getValue());
+            // A null count ({"a": null}) adds nothing, like a 0 count.
+            if (entry.getValue() != null) {
+                multiset.add(entry.getKey(), entry.getValue());
+            }
         }
 
-        // Immutable targets are abstract, so newInstance() built a mutable multiset: convert
-        // (like the GuavaMultimapType sibling) instead of returning the wrong runtime type.
+        // ImmutableSortedMultiset is abstract, so newInstance() built a mutable (Tree) multiset: convert it.
+        // copyOfSorted/addCopies copy the ENTRIES; ImmutableSortedMultiset.copyOf(Iterable) would expand every
+        // occurrence into a temporary list -- O(sum of counts), OutOfMemoryError for a large count.
         if (ImmutableSortedMultiset.class.isAssignableFrom(typeClass)) {
-            return (T) ImmutableSortedMultiset.copyOf((Multiset) multiset);
-        } else if (ImmutableMultiset.class.isAssignableFrom(typeClass)) {
-            return (T) ImmutableMultiset.copyOf(multiset);
+            if (multiset instanceof SortedMultiset) {
+                return (T) ImmutableSortedMultiset.copyOfSorted((SortedMultiset) multiset);
+            }
+
+            final ImmutableSortedMultiset.Builder builder = ImmutableSortedMultiset.naturalOrder();
+
+            for (final Multiset.Entry<E> entry : multiset.entrySet()) {
+                builder.addCopies(entry.getElement(), entry.getCount());
+            }
+
+            return (T) builder.build();
         }
 
         return multiset;
@@ -255,7 +311,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * @return a new multiset instance
      * @throws IllegalArgumentException if no suitable constructor or factory method is found.
      */
-    protected T newInstance(int size) {
+    protected T newInstance(int size) throws IllegalArgumentException {
         if (TreeMultiset.class.isAssignableFrom(typeClass)
                 || (Modifier.isAbstract(typeClass.getModifiers()) && SortedMultiset.class.isAssignableFrom(typeClass))) {
             // Mirrors GuavaMultimapType.newInstance: scope the abstract-type fallback to the sorted

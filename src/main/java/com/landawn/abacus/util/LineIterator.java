@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 import java.util.NoSuchElementException;
 
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.util.stream.Stream;
 
 /**
  * An Iterator over the lines in a {@code Reader}.
@@ -32,9 +33,36 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * {@code LineIterator} holds a reference to an open {@code Reader}.
  * When you have finished with the iterator, you should close the reader
  * to free internal resources. This can be done by closing the reader directly,
- * by calling {@link #close()} on the iterator, or by passing the iterator to
- * {@link IOUtil#closeQuietly(AutoCloseable)}.
+ * by calling {@link #close()} on the iterator, by closing the {@link #stream()} built from it,
+ * or by passing the iterator to {@link IOUtil#closeQuietly(AutoCloseable)}.
  * The iterator is stateful and is not safe for concurrent traversal without external synchronization.
+ *
+ * <p><b>Reading every line does not close anything.</b> Reaching end-of-stream only marks the iterator
+ * finished; the {@code Reader} stays open until one of the actions above is taken. Draining the iterator
+ * with {@code toList()}, {@code count()} or a {@code while (hasNext())} loop therefore still leaves the
+ * file handle open.</p>
+ *
+ * <p><b>Transformations do not carry the resource.</b> The inherited operations - {@link #filter},
+ * {@link #map}, {@link #skip}, {@link #limit}, {@link #skipNulls}, {@link #distinct} and friends - return
+ * a plain {@link ObjIterator}, which is <i>not</i> {@link AutoCloseable}. So a chain such as
+ * {@code LineIterator.of(file).filter(..).toList()} leaves no way to release the reader, because the
+ * {@code LineIterator} itself is never held by the caller. Either keep the {@code LineIterator} in a
+ * try-with-resources and transform inside it, or start from {@link #stream()}, which does own this
+ * iterator and closes it:</p>
+ * <pre>{@code
+ * // leaks the file handle - nothing here is closeable
+ * List<String> bad = LineIterator.of(file).filter(l -> l.contains("x")).toList();
+ *
+ * // either hold the iterator ...
+ * try (LineIterator it = LineIterator.of(file, StandardCharsets.UTF_8)) {
+ *     List<String> good = it.filter(l -> l.contains("x")).toList();
+ * }
+ *
+ * // ... or let the stream own it
+ * try (Stream<String> lines = LineIterator.of(file, StandardCharsets.UTF_8).stream()) {
+ *     List<String> alsoGood = lines.filter(l -> l.contains("x")).toList();
+ * }
+ * }</pre>
  *
  * <p>The recommended usage pattern is:</p>
  * <pre>{@code
@@ -49,7 +77,6 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * This class was copied from Apache Commons IO and may be modified.
  *
  * @see java.io.BufferedReader
- * @version $Id: LineIterator.java 1471767 2013-04-24 23:24:19Z sebb $
  */
 public final class LineIterator extends ObjIterator<String> implements AutoCloseable {
     // N.B. This class deliberately does not implement Iterable, see https://issues.apache.org/jira/browse/IO-181
@@ -116,11 +143,11 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      *
      * @param file the file to open for input, must not be {@code null}
      * @return an Iterator of the lines in the file, never {@code null}
-     * @throws IllegalArgumentException if {@code file} is {@code null}.
+     * @throws IllegalArgumentException if {@code file} is {@code null} or denotes a directory.
      * @throws UncheckedIOException in case of an I/O error (e.g., file not found or cannot be read)
      * @see #of(File, Charset)
      */
-    public static LineIterator of(final File file) {
+    public static LineIterator of(final File file) throws IllegalArgumentException, UncheckedIOException {
         return of(file, IOUtil.DEFAULT_CHARSET);
     }
 
@@ -146,11 +173,11 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @param file the file to open for input; must not be {@code null}
      * @param encoding the character encoding to use; must not be {@code null}
      * @return an Iterator of the lines in the file, never {@code null}
-     * @throws IllegalArgumentException if {@code file} or {@code encoding} is {@code null}.
+     * @throws IllegalArgumentException if {@code file} or {@code encoding} is {@code null}, or {@code file} denotes a directory.
      * @throws UncheckedIOException in case of an I/O error (e.g., file not found or cannot be read)
      * @see #of(File)
      */
-    public static LineIterator of(final File file, final Charset encoding) throws IllegalArgumentException {
+    public static LineIterator of(final File file, final Charset encoding) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(file, cs.file);
         N.checkArgNotNull(encoding, cs.encoding);
 
@@ -193,10 +220,9 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @param input the {@code InputStream} to read from, must not be null
      * @return an Iterator of the lines in the input stream, never null
      * @throws IllegalArgumentException if {@code input} is {@code null}.
-     * @throws UncheckedIOException if an I/O error occurs while reading from the input stream
      * @see #of(InputStream, Charset)
      */
-    public static LineIterator of(final InputStream input) {
+    public static LineIterator of(final InputStream input) throws IllegalArgumentException {
         return of(input, IOUtil.DEFAULT_CHARSET);
     }
 
@@ -220,10 +246,9 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @param encoding the character encoding to use; must not be {@code null}
      * @return an Iterator of the lines in the input stream, never {@code null}
      * @throws IllegalArgumentException if {@code input} or {@code encoding} is {@code null}.
-     * @throws UncheckedIOException if an I/O error occurs while reading from the input stream
      * @see #of(InputStream)
      */
-    public static LineIterator of(final InputStream input, final Charset encoding) throws IllegalArgumentException, UncheckedIOException {
+    public static LineIterator of(final InputStream input, final Charset encoding) throws IllegalArgumentException {
         N.checkArgNotNull(input, cs.inputStream);
         N.checkArgNotNull(encoding, cs.encoding);
 
@@ -251,7 +276,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @throws IllegalArgumentException if the reader is null.
      * @see #LineIterator(Reader)
      */
-    public static LineIterator of(final Reader reader) {
+    public static LineIterator of(final Reader reader) throws IllegalArgumentException {
         return new LineIterator(reader);
     }
 
@@ -264,6 +289,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * to read the next line and caching it. If an {@code IOException} occurs during this
      * operation, {@link #close()} will be automatically called on this instance to release
      * resources, and the exception will be wrapped in an {@link UncheckedIOException}.
+     * Any failure escaping cleanup is suppressed on that wrapper.
      * <p>
      * Once this method returns {@code false}, subsequent calls will continue to return
      * {@code false}, and calls to {@link #next()} will throw {@link NoSuchElementException}.
@@ -278,10 +304,10 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * }</pre>
      *
      * @return {@code true} if the reader has more lines, {@code false} if end of stream is reached
-     * @throws UncheckedIOException if an I/O error occurs while reading from the underlying reader
+     * @throws UncheckedIOException if reading the next line from the underlying reader fails
      */
     @Override
-    public boolean hasNext() {
+    public boolean hasNext() throws UncheckedIOException {
         if (cachedLine != null) {
             return true;
         } else if (finished) {
@@ -297,8 +323,14 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
                     return true;
                 }
             } catch (final IOException ioe) {
-                close();
-                throw new UncheckedIOException(ioe);
+                final UncheckedIOException failure = new UncheckedIOException(ioe);
+                try {
+                    close();
+                } catch (final Throwable cleanupFailure) {
+                    // Keep the read failure primary even if cleanup itself fails.
+                    failure.addSuppressed(cleanupFailure);
+                }
+                throw failure;
             }
         }
     }
@@ -326,17 +358,55 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * }</pre>
      *
      * @return the next line from the input, never {@code null} (empty lines are returned as empty strings)
+     * @throws UncheckedIOException if reading the next line from the underlying reader fails
      * @throws NoSuchElementException if there is no line to return (end of stream reached)
-     * @throws UncheckedIOException if an I/O error occurs while reading from the underlying reader
      */
     @Override
-    public String next() {
+    public String next() throws UncheckedIOException, NoSuchElementException {
         if (!hasNext()) {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
         final String res = cachedLine;
         cachedLine = null;
         return res;
+    }
+
+    /**
+     * Returns a {@link Stream} over the remaining lines that <b>owns this iterator</b>: closing the
+     * stream (or letting a terminal operation close it) also calls {@link #close()} on this iterator,
+     * releasing the underlying {@code Reader} and any file handle behind it.
+     * <p>
+     * This overrides {@link ObjIterator#stream()}, whose stream would leave the reader open. Either of
+     * the following therefore releases the file; nesting both is harmless because {@code close()} is
+     * idempotent.
+     *
+     * <p><b>API Note:</b> a terminal stream operation closes the stream, and therefore closes this
+     * iterator as well - even a short-circuiting one such as {@code stream().limit(5).count()}. Do not
+     * keep reading from this iterator directly after handing it to {@code stream()}; if you need to
+     * consume only part of the file and then continue with the iterator, iterate it directly instead.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * // the stream owns the iterator
+     * try (Stream<String> lines = LineIterator.of(file, StandardCharsets.UTF_8).stream()) {
+     *     lines.filter(line -> line.contains("keyword")).forEach(System.out::println);
+     * }
+     *
+     * // or keep owning the iterator yourself
+     * try (LineIterator it = LineIterator.of(file, StandardCharsets.UTF_8)) {
+     *     it.stream().forEach(System.out::println);
+     * }
+     * }</pre>
+     *
+     * @return a {@code Stream} of the remaining lines, whose {@code close()} closes this iterator
+     * @see #close()
+     */
+    @Override
+    public Stream<String> stream() {
+        // ObjIterator.stream() returns a stream with no close handler, which would silently leak the
+        // reader for the common `try (var s = LineIterator.of(f).stream())` idiom. This iterator owns a
+        // Reader, so the stream built from it must own the iterator in turn.
+        return super.stream().onClose(this::close);
     }
 
     /**

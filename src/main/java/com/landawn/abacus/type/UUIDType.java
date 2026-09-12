@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import java.util.UUID;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Strings;
 
 /**
@@ -31,6 +32,9 @@ import com.landawn.abacus.util.Strings;
  * String str = type.stringOf(uuid);   // Returns the UUID string representation
  * }</pre>
  *
+ * <p>Like the other JDK value handlers outside the primary/number/string/enum families (the {@code java.time}
+ * handlers, {@code URI}, {@code URL}, ...), this handler does not override {@link #isImmutable()}, which therefore
+ * reports {@code false} although {@link UUID} is immutable; the flag has no consumer in this library.</p>
  */
 public class UUIDType extends AbstractType<UUID> {
 
@@ -124,8 +128,9 @@ public class UUIDType extends AbstractType<UUID> {
      * @see #valueOf(Object)
      * @see #stringOf(UUID)
      */
+    @MayReturnNull
     @Override
-    public UUID valueOf(final String str) {
+    public UUID valueOf(final String str) throws IllegalArgumentException {
         if (Strings.isBlank(str)) {
             return null;
         }

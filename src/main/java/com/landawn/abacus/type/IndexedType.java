@@ -17,12 +17,13 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
@@ -52,8 +53,9 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * This constructor is called by the TypeFactory to create {@code Indexed<T>} type instances.
      *
      * @param valueTypeName the name of the type for values stored in the Indexed container
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    IndexedType(final String valueTypeName) {
+    IndexedType(final String valueTypeName) throws IllegalArgumentException {
         super(getTypeName(valueTypeName, false));
 
         declaringName = getTypeName(valueTypeName, true);
@@ -116,11 +118,12 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      *
      * @param x the {@link Indexed} object to serialize; may be {@code null}
      * @return the JSON array string, or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final Indexed<T> x) {
+    public String stringOf(final Indexed<T> x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asArray(x.longIndex(), x.value()), Utils.jsc);
     }
 
@@ -133,28 +136,35 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
+     * <p>Each slot is parsed directly from its JSON token using the declared type, preserving decimal
+     * precision and scale, including nested generic values.</p>
+     * <p>The first slot must use integer notation and fit in a {@code long} (or be null, interpreted
+     * as zero); fractional, scientific-notation, and out-of-range metadata is rejected, including
+     * when quoted. Quoted integer text is JSON-decoded before validation.</p>
+     *
      * @param str the JSON array string to parse (e.g., {@code "[5,\"hello\"]"}); may be {@code null} or empty
-     * @return the deserialized indexed value
-     *         or {@code null} if {@code str} is {@code null} or empty
-     * @throws IllegalArgumentException if the parsed array is {@code null} or does not have exactly two elements.
+     * @return the deserialized indexed value, or {@code null} if {@code str} is {@code null} or empty (a blank,
+     *         non-empty string is not treated as empty and is rejected)
+     * @throws IllegalArgumentException if the parsed value is not an array with exactly two elements (this includes a         blank string, unbalanced brackets and trailing text), or if the index is negative (which         {@link Indexed#of(Object, long)} rejects)
+     * @throws ParsingException if the value token is not valid JSON for the declared value type
+     * @throws NumberFormatException if the index slot is not an integer literal (fractional or scientific notation),         or a value token cannot be converted to the declared value type
+     * @throws ArithmeticException if the index does not fit in a {@code long}
      * @see #valueOf(Object)
      * @see #stringOf(Indexed)
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public Indexed<T> valueOf(final String str) {
+    public Indexed<T> valueOf(final String str) throws IllegalArgumentException, ParsingException, NumberFormatException, ArithmeticException {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }
 
-        final Object[] a = Utils.jsonParser.deserialize(str, Utils.jdc, Object[].class);
-
-        if (a == null || a.length != 2) {
-            throw new IllegalArgumentException("Invalid Indexed format. Expected an array with exactly 2 elements [index, value] but got: " + str);
-        }
-
-        final long index = a[0] == null ? 0 : (a[0] instanceof Number ? ((Number) a[0]).longValue() : Numbers.toLong(a[0].toString()));
-        final T value = (T) convertTupleElement(a[1], valueType);
+        // Keep the decoded metadata text: ordinary numeric payload coercion may truncate a fraction.
+        final Object[] a = Utils.parseTupleElements(str, name(), List.of(TypeFactory.getType(String.class), valueType));
+        final Long parsedIndex = (Long) TypeFactory.getType(Long.class).valueOf((String) a[0]);
+        final long index = parsedIndex == null ? 0 : parsedIndex;
+        final T value = (T) a[1];
 
         return Indexed.of(value, index);
     }
@@ -163,6 +173,11 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * Appends the {@code toString()}-style string representation of an {@link Indexed} object to an {@link Appendable}
      * in the format {@code [index, value]}.
      * <p>
+     * The value is appended by its declared element type handler. When that declared type is {@code Object} the
+     * handler of the value's runtime class is used instead, exactly as
+     * {@link #serializeTo(CharacterWriter, Indexed, JsonXmlSerConfig)} does, so a map, collection or bean value keeps
+     * the {@code toString()}-style form rather than falling back to {@code ObjectType}'s JSON {@code stringOf}.
+     * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
      * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
@@ -170,7 +185,9 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      *
      * @param appendable the {@link Appendable} to write to
      * @param x the {@link Indexed} object to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -182,7 +199,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Indexed<T> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Indexed<T> x) throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -190,7 +207,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
 
             appendable.append(N.stringOf(x.longIndex()));
             appendable.append(ELEMENT_SEPARATOR);
-            valueType.appendTo(appendable, x.value());
+            AbstractTupleType.appendElement(appendable, valueType, x.value());
 
             appendable.append(SK._BRACKET_R);
         }
@@ -205,6 +222,15 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
      * and is invoked by the JSON/XML serializers.
      * <p>
+     * The index slot honours {@code config.isWriteLongAsString()} exactly as a {@code long} value does: when the flag is
+     * set and the config has a non-zero {@code stringQuotation}, the index is wrapped in that quotation character
+     * ({@code ["7", "v"]}) so indexes beyond 2<sup>53</sup> survive JavaScript consumers; {@link #valueOf(String)}
+     * accepts the quoted form. The value slot is written by its declared type handler; when the declared value type is
+     * {@code Object} the handler of the value's runtime class is used instead, and a value whose handler is not
+     * {@linkplain Type#isSerializable() serializable} (bean, map, {@code List<Object>}) is written as embedded JSON
+     * under a {@code JsonSerConfig} rather than as a quoted JSON string. A {@code null} value is written by its declared
+     * handler, so that handler's null-substitution flags apply.
+     * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
      * quoting or escaping.
@@ -212,18 +238,31 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x the {@link Indexed} object to write; may be {@code null}
      * @param config the serialization configuration to use; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Indexed<T> x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Indexed<T> x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             writer.write(SK._BRACKET_L);
 
-            writer.write(N.stringOf(x.longIndex()));
+            final long index = x.longIndex();
+
+            if (config != null && config.isWriteLongAsString() && config.getStringQuotation() != 0) {
+                final char quotation = config.getStringQuotation();
+                writer.write(quotation);
+                writer.write(index);
+                writer.write(quotation);
+            } else {
+                writer.write(index);
+            }
+
             writer.write(ELEMENT_SEPARATOR_CHAR_ARRAY);
-            valueType.serializeTo(writer, x.value(), config);
+            AbstractTupleType.serializeSlot(writer, valueType, x.value(), config);
 
             writer.write(SK._BRACKET_R);
         }
@@ -236,8 +275,9 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * @param valueTypeName the name of the value type
      * @param isDeclaringName {@code true} to generate a declaring name with simple class names, {@code false} for fully qualified names
      * @return the formatted type name (e.g., "Indexed&lt;String&gt;" or "com.landawn.abacus.util.Indexed&lt;java.lang.String&gt;")
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    protected static String getTypeName(final String valueTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final String valueTypeName, final boolean isDeclaringName) throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(Indexed.class) + SK.LESS_THAN + TypeFactory.getType(valueTypeName).declaringName() + SK.GREATER_THAN;
         } else {

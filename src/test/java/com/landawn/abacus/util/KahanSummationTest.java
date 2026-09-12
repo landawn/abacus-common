@@ -155,6 +155,44 @@ public class KahanSummationTest extends TestBase {
     }
 
     @Test
+    public void testAverageOverflowFallbackPreservesCancellation() {
+        final KahanSummation sum = KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+
+        Assertions.assertEquals(0.0, sum.average().get(), 0.0);
+
+        // Preserve the compensation accumulated before overflow as well: the four extreme
+        // values cancel in exact arithmetic, leaving the otherwise sub-ULP value 1.0.
+        final KahanSummation withCompensatedPrefix = KahanSummation.of(Double.MAX_VALUE, 1.0, Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+        Assertions.assertEquals(0.2, withCompensatedPrefix.average().get(), 0.0);
+    }
+
+    @Test
+    public void testAverageOverflowFallbackCombinesWithoutLosingCancellation() {
+        final KahanSummation positive = KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE);
+        final KahanSummation negative = KahanSummation.of(-Double.MAX_VALUE, -Double.MAX_VALUE);
+
+        positive.combine(negative);
+
+        Assertions.assertEquals(4, positive.count());
+        Assertions.assertEquals(0.0, positive.average().get(), 0.0);
+
+        final KahanSummation selfCombined = KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE);
+        selfCombined.combine(selfCombined);
+        Assertions.assertEquals(Double.MAX_VALUE, selfCombined.average().get(), 0.0);
+
+        final KahanSummation aggregateCombined = KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE);
+        aggregateCombined.combine(2, -Double.MAX_VALUE);
+        Assertions.assertEquals(Double.MAX_VALUE / 4.0, aggregateCombined.average().get(), 0.0);
+    }
+
+    @Test
+    public void testAverageOverflowFallbackKeepsCorrectlyRoundedThreeValueMean() {
+        final KahanSummation sum = KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE);
+
+        Assertions.assertEquals(Double.MAX_VALUE / 3.0, sum.average().get(), 0.0);
+    }
+
+    @Test
     public void testAverage() {
         KahanSummation sum = new KahanSummation();
         sum.add(1.0);

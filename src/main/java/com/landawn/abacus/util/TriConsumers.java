@@ -18,6 +18,18 @@ package com.landawn.abacus.util;
 /**
  * Utility class providing various TriConsumer implementations and factory methods.
  * This class is reserved for future TriConsumer utilities.
+ *
+ * <p>This class is a top-level sibling of {@link Fn}, not a nested type. Use {@link Fn} for the
+ * general functional-interface factory and {@link Fnn} for {@link Throwables} variants that can
+ * declare checked exceptions. For one- and two-argument consumers see {@link Consumers} and
+ * {@link BiConsumers}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see Consumers
+ * @see BiConsumers
+ * @see TriFunctions
+ * @see TriPredicates
  */
 public final class TriConsumers {
     private TriConsumers() {

@@ -10,7 +10,7 @@ import com.landawn.abacus.TestBase;
 
 public class SequentialOnlyTest extends TestBase {
     @SequentialOnly
-    static class TestClass {
+    public static class TestClass {
         @SequentialOnly
         public void method() {
         }

@@ -63,7 +63,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * @param is the input stream to read compressed data from; must not be {@code null}
      * @throws IllegalArgumentException if {@code is} is {@code null}.
      */
-    public LZ4BlockInputStream(final InputStream is) {
+    public LZ4BlockInputStream(final InputStream is) throws IllegalArgumentException {
         N.checkArgNotNull(is, cs.is);
         in = new net.jpountz.lz4.LZ4BlockInputStream(is);
     }
@@ -87,7 +87,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * }</pre>
      *
      * @return the next byte of data, or -1 if the end of the stream is reached
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if the compressed input is truncated or corrupt, or reading from the underlying stream fails
      */
     @Override
     public int read() throws IOException {
@@ -98,7 +98,8 @@ public final class LZ4BlockInputStream extends InputStream {
      * Reads up to b.length bytes of decompressed data from the input stream
      * into an array of bytes.
      *
-     * <p>This method blocks until some input is available.</p>
+     * <p>This method blocks until some input is available, unless {@code b.length} is zero. A valid
+     * zero-length request returns zero without reading the underlying stream.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -109,10 +110,11 @@ public final class LZ4BlockInputStream extends InputStream {
      * @param b the buffer into which the data is read
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
      *         because the end of the stream has been reached
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code b} is {@code null}
+     * @throws IOException if compressed input cannot be read or contains invalid LZ4 data
      */
     @Override
-    public int read(final byte[] b) throws IOException {
+    public int read(final byte[] b) throws NullPointerException, IOException {
         return read(b, 0, b.length);
     }
 
@@ -120,7 +122,9 @@ public final class LZ4BlockInputStream extends InputStream {
      * Reads up to len bytes of decompressed data from the input stream into
      * an array of bytes, starting at the specified offset.
      *
-     * <p>This method blocks until some input is available.</p>
+     * <p>This method blocks until some input is available, unless {@code len} is zero. A valid
+     * zero-length request returns zero without reading the underlying stream. The buffer and the whole
+     * {@code (off, len)} range are validated before anything is read.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -133,25 +137,27 @@ public final class LZ4BlockInputStream extends InputStream {
      * @param len the maximum number of bytes to read
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
      *         because the end of the stream has been reached
-     * @throws IOException if an I/O error occurs
      * @throws NullPointerException if {@code b} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative,
      *         or {@code off + len} is greater than {@code b.length}
+     * @throws IOException if the compressed input is truncated or corrupt, or reading from the underlying stream fails
      */
     @Override
-    public int read(final byte[] b, final int off, final int len) throws IOException {
+    public int read(final byte[] b, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException, IOException {
+        // Validate the whole range here rather than only the len == 0 branch: the delegate reports a negative
+        // length as IllegalArgumentException, which contradicts the IndexOutOfBoundsException this method
+        // documents (and, for a null buffer with a negative length, that IAE fired before the NPE).
+        if (b == null) {
+            throw new NullPointerException("b");
+        }
+
+        // Subtraction, not off + len, so a length near Integer.MAX_VALUE cannot overflow into a passing check.
+        if (off < 0 || len < 0 || len > b.length - off) {
+            throw new IndexOutOfBoundsException("off: " + off + ", len: " + len + ", length: " + b.length);
+        }
+
         if (len == 0) {
-            if (b == null) {
-                throw new NullPointerException("b");
-            }
-
-            if (off < 0 || off > b.length) {
-                throw new IndexOutOfBoundsException("off: " + off + ", length: " + b.length);
-            }
-
-            // Let the delegate retain its closed-stream behavior, but normalize its EOF
-            // result to the InputStream contract for a zero-length request.
-            in.read(b, off, 0);
+            // The decoder may refill even for a zero-byte request; do not delegate it.
             return 0;
         }
 
@@ -173,7 +179,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * @param n the number of bytes to skip
      * @return the actual number of bytes skipped; 0 if the end of the stream has already been reached
      * @throws IllegalArgumentException if {@code n} is negative.
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if the compressed input is truncated or corrupt, or reading from the underlying stream fails
      */
     @Override
     public long skip(final long n) throws IllegalArgumentException, IOException {
@@ -190,21 +196,32 @@ public final class LZ4BlockInputStream extends InputStream {
      * <p>Note that this method provides only an estimate; the actual number of bytes
      * that can be read without blocking may be more or less than the returned value.</p>
      *
+     * <p>The estimate is the number of bytes left in the current decompressed block, so it is
+     * {@code 0} on a fresh stream (nothing has been decompressed yet) and {@code 0} once the end
+     * of the stream has been reached.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int n = lz4In.available();
-     * if (n > 0) {
-     *     byte[] buffer = new byte[n];
+     * // available() is 0 until a read has decompressed a block, so read first and then size the
+     * // next buffer from what is left of that block.
+     * int first = lz4In.read();
+     * if (first >= 0) {
+     *     byte[] buffer = new byte[lz4In.available()];
      *     lz4In.read(buffer);
      * }
      * }</pre>
      *
-     * @return an estimate of the number of bytes that can be read without blocking
-     * @throws IOException if an I/O error occurs
+     * @return an estimate of the number of bytes that can be read without blocking; never negative
+     * @throws IOException retained by the decoder contract; the current decoder implementation only reads its buffer counters
      */
     @Override
     public int available() throws IOException {
-        return in.available();
+        // Clamp: the delegate returns its unclamped originalLen - o, and the end-of-stream marker zeroes
+        // originalLen while o still holds the last block's length, so it reports -(last block size) at EOF.
+        // InputStream.available() specifies 0 at end of stream, and a negative value breaks callers -
+        // new byte[available()] throws NegativeArraySizeException and BufferedInputStream.available()
+        // overflows to Integer.MAX_VALUE.
+        return Math.max(0, in.available());
     }
 
     /**
@@ -229,7 +246,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * <p>The underlying LZ4 block stream does not support mark/reset; this method throws an
      * {@link IOException}.</p>
      *
-     * @throws IOException if the underlying stream does not support mark/reset or the mark is invalid
+     * @throws IOException always, because the LZ4 decoder does not support mark/reset
      * @see #mark(int)
      * @see #markSupported()
      */
@@ -267,7 +284,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * }
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if closing the LZ4 decoder or its underlying input stream fails
      */
     @Override
     public void close() throws IOException {

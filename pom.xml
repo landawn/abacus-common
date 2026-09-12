@@ -5,7 +5,7 @@
 
 	<groupId>com.landawn.abacus</groupId>
 	<artifactId>abacus-common</artifactId>
-	<version>7.9.5</version>
+	<version>8.0.1</version>
 	<packaging>jar</packaging>
 	<name>abacus-common</name>
 	<description>A general programming library in Java/Android. It's easy to learn and simple to use with concise and powerful APIs.</description>
@@ -32,12 +32,18 @@
 	</scm>
 
 	<properties>
-		<java.version>17</java.version>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
-		<maven.compiler.release>17</maven.compiler.release>
-		<junit.jupiter.version>6.1.1</junit.jupiter.version>
-		<junit.platform.version>6.1.1</junit.platform.version>
+		<java.version>21</java.version>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
+		<maven.compiler.release>21</maven.compiler.release>
+		<lombok.version>1.18.48</lombok.version>
+		<jackson.version>2.22.2</jackson.version>
+		<jackson.annotations.version>2.22</jackson.annotations.version>
+		<log4j.version>2.26.1</log4j.version>
+		<spring.version>7.0.9</spring.version>
+		<okhttp.version>5.5.0</okhttp.version>
+		<junit.jupiter.version>6.1.3</junit.jupiter.version>
+		<junit.platform.version>6.1.3</junit.platform.version>
 		<mockito.version>5.23.0</mockito.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -53,22 +59,16 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.landawn.abacus</groupId>
-			<artifactId>abacus-common</artifactId>
-			<version>7.9.4</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.46</version>
+			<version>${lombok.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-    		<version>33.6.0-jre</version>
+			<version>33.7.1-jre</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -89,21 +89,21 @@
 		<dependency>
 			<groupId>org.apache.avro</groupId>
 			<artifactId>avro</artifactId>
-			<version>1.12.1</version>
+			<version>1.12.2</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
-			<version>4.5.0</version>
+			<version>4.6.0</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.22.0</version>
+			<version>1.22.1</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -117,63 +117,63 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>2.0.18</version>
+			<version>2.0.19</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.25.4</version>
+			<version>${log4j.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.25.4</version>
+			<version>${log4j.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
-			<version>2.22.0</version>
+			<version>${jackson.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.22.0</version>
+			<version>${jackson.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-xml</artifactId>
-			<version>2.22.0</version>
+			<version>${jackson.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-			<version>2.22</version>
+			<version>${jackson.annotations.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.woodstox</groupId>
 			<artifactId>woodstox-core</artifactId>
-			<version>7.2.1</version>
+			<version>7.2.2</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
-			<version>4.0.4</version>
+			<version>4.0.5</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -222,28 +222,28 @@
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
-			<version>2.14.2</version>
+			<version>2.14.3</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>bson</artifactId>
-			<version>5.8.0</version>
+			<version>5.11.1</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.alibaba.fastjson2</groupId>
 			<artifactId>fastjson2</artifactId>
-			<version>2.0.62</version>
+			<version>2.0.65</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20260522</version>
+			<version>20260814</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -291,29 +291,49 @@
 
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
-		    <artifactId>okhttp</artifactId>
-		    <version>4.12.0</version>
+			<artifactId>okhttp-jvm</artifactId>
+			<version>${okhttp.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jibx</groupId>
+			<artifactId>jibx-run</artifactId>
+			<version>1.4.5</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>xpp3</groupId>
+					<artifactId>xpp3</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<version>1.4.21</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<version>7.0.8</version>
+			<version>${spring.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
-			<version>7.0.8</version>
+			<version>${spring.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>7.0.8</version>
+			<version>${spring.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -357,13 +377,13 @@
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>mockwebserver</artifactId>
-			<version>4.12.0</version>
+			<version>${okhttp.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.27.6</version>
+			<version>3.27.7</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -374,7 +394,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.15.0</version>
+				<version>3.16.0</version>
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
@@ -383,7 +403,7 @@
 			          <path>
 			            <groupId>org.projectlombok</groupId>
 			            <artifactId>lombok</artifactId>
-			            <version>1.18.46</version>
+			            <version>1.18.48</version>
 			          </path>
 			        </annotationProcessorPaths>
 				</configuration>
@@ -438,7 +458,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.5</version>
+				<version>3.6.0</version>
 				<configuration>
 					<includes>
 						<include>**/AbacusCommonUnitSuite.java</include>
@@ -462,7 +482,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.14</version>
+				<version>0.8.15</version>
 				<executions>
 					<!-- Prepare agent in all modules via inheritance -->
 					<execution>

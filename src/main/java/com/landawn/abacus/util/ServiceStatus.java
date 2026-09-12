@@ -142,7 +142,7 @@ public enum ServiceStatus {
      * @throws IllegalArgumentException if no {@code ServiceStatus} exists for the given integer value.
      * @see #code()
      */
-    public static ServiceStatus fromCode(final int code) {
+    public static ServiceStatus fromCode(final int code) throws IllegalArgumentException {
         switch (code) {
             case 0:
                 return BLANK;

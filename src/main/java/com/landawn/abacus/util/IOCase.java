@@ -93,7 +93,7 @@ public enum IOCase {
      *         {@code null}).
      * @see #getName()
      */
-    public static IOCase forName(final String name) {
+    public static IOCase forName(final String name) throws IllegalArgumentException {
         for (final IOCase ioCase : IOCase.values()) {
             if (ioCase.getName().equals(name)) {
                 return ioCase;
@@ -173,7 +173,7 @@ public enum IOCase {
      * @return negative if str1 &lt; str2, zero if str1 equals str2, positive if str1 &gt; str2
      * @throws IllegalArgumentException if either string is null.
      */
-    public int checkCompareTo(final String str1, final String str2) {
+    public int checkCompareTo(final String str1, final String str2) throws IllegalArgumentException {
         if (str1 == null || str2 == null) {
             throw new IllegalArgumentException(ERROR_MSG_01);
         }
@@ -197,7 +197,7 @@ public enum IOCase {
      * @return {@code true} if the strings are equal according to the case rule
      * @throws IllegalArgumentException if either string is null.
      */
-    public boolean checkEquals(final String str1, final String str2) {
+    public boolean checkEquals(final String str1, final String str2) throws IllegalArgumentException {
         if (str1 == null || str2 == null) {
             throw new IllegalArgumentException(ERROR_MSG_01);
         }
@@ -221,7 +221,7 @@ public enum IOCase {
      * @return {@code true} if str starts with the prefix according to the case rule
      * @throws IllegalArgumentException if either string is null.
      */
-    public boolean checkStartsWith(final String str, final String start) {
+    public boolean checkStartsWith(final String str, final String start) throws IllegalArgumentException {
         if (str == null || start == null) {
             throw new IllegalArgumentException(ERROR_MSG_01);
         }
@@ -246,7 +246,7 @@ public enum IOCase {
      * @return {@code true} if str ends with the suffix according to the case rule
      * @throws IllegalArgumentException if either string is null.
      */
-    public boolean checkEndsWith(final String str, final String end) {
+    public boolean checkEndsWith(final String str, final String end) throws IllegalArgumentException {
         if (str == null || end == null) {
             throw new IllegalArgumentException(ERROR_MSG_01);
         }
@@ -276,7 +276,7 @@ public enum IOCase {
      *         {@code strStartIndex}, or {@code -1} if not found
      * @throws IllegalArgumentException if either string is null.
      */
-    public int checkIndexOf(final String str, final int strStartIndex, final String search) {
+    public int checkIndexOf(final String str, final int strStartIndex, final String search) throws IllegalArgumentException {
         if (str == null || search == null) {
             throw new IllegalArgumentException(ERROR_MSG_01);
         }
@@ -315,7 +315,7 @@ public enum IOCase {
      * @return {@code true} if the region matches according to the case rule
      * @throws IllegalArgumentException if either string is null.
      */
-    public boolean checkRegionMatches(final String str, final int strStartIndex, final String search) {
+    public boolean checkRegionMatches(final String str, final int strStartIndex, final String search) throws IllegalArgumentException {
         if (str == null || search == null) {
             throw new IllegalArgumentException(ERROR_MSG_01);
         }

@@ -108,7 +108,8 @@ public abstract class AbstractPool implements Pool {
 
     /**
      * Total size of data in bytes currently stored in the pool.
-     * Only tracked when a memory measure is configured.
+     * Only tracked when a memory measure is configured (see {@link #isMemoryTracked()}); it is
+     * tracked even when no positive {@code maxMemorySize} limit is configured.
      */
     final AtomicLong totalDataSize = new AtomicLong();
 
@@ -150,10 +151,6 @@ public abstract class AbstractPool implements Pool {
 
     /** Propagates JVM-fatal failures while allowing callers to contain other optional/user-code failures. */
     static void rethrowIfFatal(final Throwable e) {
-        if (e instanceof ThreadDeath threadDeath) {
-            throw threadDeath;
-        }
-
         if (e instanceof VirtualMachineError virtualMachineError) {
             throw virtualMachineError;
         }
@@ -218,7 +215,7 @@ public abstract class AbstractPool implements Pool {
      *         {@code balanceFactor} is non-finite or outside [0, 1].
      */
     protected AbstractPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
-            final float balanceFactor, final long maxMemorySize) {
+            final float balanceFactor, final long maxMemorySize) throws IllegalArgumentException {
         if (capacity < 0 || evictDelayInMillis < 0 || maxMemorySize < 0 || !Float.isFinite(balanceFactor) || balanceFactor < 0 || balanceFactor > 1) {
             throw new IllegalArgumentException("Capacity(" + capacity + "), evict delay(" + evictDelayInMillis + "), and max memory size(" + maxMemorySize
                     + ") must be non-negative; balance factor(" + balanceFactor + ") must be finite and between 0 and 1");
@@ -299,7 +296,7 @@ public abstract class AbstractPool implements Pool {
      *
      * @throws IllegalMonitorStateException if the current thread does not hold the lock
      */
-    void unlock() {
+    void unlock() throws IllegalMonitorStateException {
         lock.unlock();
     }
 
@@ -330,6 +327,11 @@ public abstract class AbstractPool implements Pool {
      * Returns a snapshot of the current pool statistics.
      * The statistics include capacity, current size, operation counts, and memory usage.
      *
+     * <p>{@link PoolStats#maxMemory()} is {@code -1} unless a positive memory limit is configured.
+     * {@link PoolStats#dataSize()} is the current total of the retained admission charges whenever
+     * memory is tracked ({@link #isMemoryTracked()}), including a pool that has a memory measure but
+     * no limit; it is {@code -1} only when no memory measure is configured.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PoolStats stats = pool.stats();
@@ -343,13 +345,25 @@ public abstract class AbstractPool implements Pool {
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
-    public PoolStats stats() {
+    public PoolStats stats() throws IllegalStateException {
         final long currentHitCount = hitCount.get();
         final long currentMissCount = missCount.get();
         final long currentGetCount = currentHitCount + currentMissCount;
 
         return new PoolStats(capacity, size(), putCount.get(), currentGetCount, currentHitCount, currentMissCount, evictionCount.get(),
-                maxMemorySize <= 0 ? -1 : maxMemorySize, maxMemorySize <= 0 ? -1 : totalDataSize.get());
+                maxMemorySize <= 0 ? -1 : maxMemorySize, isMemoryTracked() ? totalDataSize.get() : -1);
+    }
+
+    /**
+     * Tells whether this pool records a memory charge for each admitted object, i.e. whether
+     * {@link #totalDataSize} is meaningful. The base implementation answers {@code true} only when a
+     * positive memory limit is configured; concrete pools override it to answer {@code true} whenever a
+     * memory measure is configured, because they track charges even without a limit.
+     *
+     * @return {@code true} if memory usage is tracked and reported by {@link #stats()}
+     */
+    boolean isMemoryTracked() {
+        return maxMemorySize > 0;
     }
 
     /**
@@ -367,7 +381,7 @@ public abstract class AbstractPool implements Pool {
      * @throws IllegalStateException if the pool has been closed
      */
     @Override
-    public boolean isEmpty() {
+    public boolean isEmpty() throws IllegalStateException {
         return size() == 0;
     }
 
@@ -389,7 +403,7 @@ public abstract class AbstractPool implements Pool {
      *
      * @throws IllegalStateException if the pool has been closed
      */
-    protected void assertNotClosed() {
+    protected void assertNotClosed() throws IllegalStateException {
         if (isClosed) {
             throw new IllegalStateException(ClassUtil.getCanonicalClassName(getClass()) + " has been closed");
         }

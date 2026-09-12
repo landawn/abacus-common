@@ -1,5 +1,6 @@
 package com.landawn.abacus.http;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -11,23 +12,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.management.ManagementFactory;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.parser.Parser;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.IOUtil;
 
@@ -283,16 +293,7 @@ public class HttpUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetContentTypeFromContentFormat() {
-        assertEquals(HttpHeaders.Values.APPLICATION_JSON, HttpUtil.getContentType(ContentFormat.JSON));
-        assertEquals(HttpHeaders.Values.APPLICATION_XML, HttpUtil.getContentType(ContentFormat.XML));
-        assertEquals(HttpHeaders.Values.APPLICATION_JSON, HttpUtil.getContentType(ContentFormat.JSON_GZIP));
-        assertEquals("", HttpUtil.getContentType(ContentFormat.NONE));
-        assertEquals("", HttpUtil.getContentType((ContentFormat) null));
-    }
-
-    @Test
-    public void testGetContentTypeForContentFormat() {
+    public void testGetContentType_ContentFormat() {
         assertEquals("", HttpUtil.getContentType((ContentFormat) null));
         assertEquals("", HttpUtil.getContentType(ContentFormat.NONE));
 
@@ -352,16 +353,6 @@ public class HttpUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetContentEncodingFromContentFormat() {
-        assertEquals("", HttpUtil.getContentEncoding(ContentFormat.JSON));
-        assertEquals("gzip", HttpUtil.getContentEncoding(ContentFormat.JSON_GZIP));
-        assertEquals("gzip", HttpUtil.getContentEncoding(ContentFormat.GZIP));
-        assertEquals("lz4", HttpUtil.getContentEncoding(ContentFormat.LZ4));
-        assertEquals("", HttpUtil.getContentEncoding(ContentFormat.NONE));
-        assertEquals("", HttpUtil.getContentEncoding((ContentFormat) null));
-    }
-
-    @Test
     public void testGetContentEncodingFromHttpSettings() {
         assertNull(HttpUtil.getContentEncoding((HttpSettings) null));
 
@@ -373,7 +364,7 @@ public class HttpUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetContentEncodingForContentFormat() {
+    public void testGetContentEncoding_ContentFormat() {
         assertEquals("", HttpUtil.getContentEncoding((ContentFormat) null));
         assertEquals("", HttpUtil.getContentEncoding(ContentFormat.NONE));
 
@@ -637,21 +628,10 @@ public class HttpUtilTest extends TestBase {
 
     @Test
     public void testGetParser() {
-        Parser<?, ?> jsonParser = HttpUtil.getParser(ContentFormat.JSON);
-        assertNotNull(jsonParser);
-
-        Parser<?, ?> xmlParser = HttpUtil.getParser(ContentFormat.XML);
-        assertNotNull(xmlParser);
-
-        Parser<?, ?> nullParser = HttpUtil.getParser(null);
-        assertNotNull(nullParser);
-
-        Parser<?, ?> kryoParser = HttpUtil.getParser(ContentFormat.KRYO);
-        assertNotNull(kryoParser);
-    }
-
-    @Test
-    public void testGetParserForAllFormats() {
+        assertNotNull(HttpUtil.getParser(ContentFormat.JSON));
+        assertNotNull(HttpUtil.getParser(ContentFormat.XML));
+        assertNotNull(HttpUtil.getParser(ContentFormat.KRYO));
+        assertNotNull(HttpUtil.getParser(null));
         assertNotNull(HttpUtil.getParser(ContentFormat.NONE));
         assertNotNull(HttpUtil.getParser(ContentFormat.FORM_URL_ENCODED));
         assertNotNull(HttpUtil.getParser(ContentFormat.GZIP));
@@ -1008,4 +988,307 @@ public class HttpUtilTest extends TestBase {
         // ANSI C asctime() format
         assertNotNull(HttpUtil.HttpDate.parse("Sun Nov  6 08:49:37 1994"));
     }
+
+    // ------------------------------------------------------------------------------------------------
+    // a07 F-1: DEFAULT_EXECUTOR must run on daemon threads, otherwise one async call pins the JVM.
+    // ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void testDefaultExecutorRunsTasksOnDaemonNormalPriorityThreads() throws Exception {
+        final CompletableFuture<Thread> worker = new CompletableFuture<>();
+
+        HttpUtil.DEFAULT_EXECUTOR.execute(() -> worker.complete(Thread.currentThread()));
+
+        final Thread thread = worker.get(10, TimeUnit.SECONDS);
+        assertTrue(thread.isDaemon(), "DEFAULT_EXECUTOR worker must be a daemon thread: " + thread);
+        assertEquals(Thread.NORM_PRIORITY, thread.getPriority());
+        assertTrue(thread.getName().startsWith("abacus-http-async-"), thread.getName());
+    }
+
+    @Test
+    public void testDefaultAsyncExecutorRunsTasksOnDaemonNormalPriorityThreads() throws Exception {
+        final CompletableFuture<Thread> worker = new CompletableFuture<>();
+
+        HttpUtil.DEFAULT_ASYNC_EXECUTOR.execute(() -> worker.complete(Thread.currentThread())).get(10, TimeUnit.SECONDS);
+
+        final Thread thread = worker.get(10, TimeUnit.SECONDS);
+        assertTrue(thread.isDaemon(), "DEFAULT_ASYNC_EXECUTOR worker must be a daemon thread: " + thread);
+        assertEquals(Thread.NORM_PRIORITY, thread.getPriority());
+        assertTrue(thread.getName().startsWith("abacus-http-async-"), thread.getName());
+    }
+
+    @Test
+    public void testDefaultExecutorAllowsCoreThreadTimeOut() {
+        assertTrue(HttpUtil.DEFAULT_EXECUTOR instanceof ThreadPoolExecutor);
+        assertTrue(((ThreadPoolExecutor) HttpUtil.DEFAULT_EXECUTOR).allowsCoreThreadTimeOut(),
+                "idle core workers must be allowed to time out so an idle pool releases its threads");
+    }
+
+    /**
+     * Entry point for the forked-JVM test below: uses the default executor once and returns from
+     * {@code main}. The JVM must then exit on its own, without {@code System.exit}.
+     */
+    public static class DefaultExecutorExitMain {
+        public static void main(final String[] args) throws Exception {
+            final CountDownLatch ran = new CountDownLatch(1);
+
+            HttpUtil.DEFAULT_EXECUTOR.execute(ran::countDown);
+
+            if (!ran.await(10, TimeUnit.SECONDS)) {
+                System.out.println("TASK-NOT-RUN");
+                System.exit(3);
+            }
+
+            System.out.println("MAIN-END");
+            // Return normally: with daemon workers the JVM terminates; with non-daemon ones it hangs.
+        }
+    }
+
+    @Test
+    public void testJvmExitsNaturallyAfterUsingDefaultExecutor() throws Exception {
+        final List<String> command = new ArrayList<>();
+        command.add(Paths.get(System.getProperty("java.home"), "bin", "java").toString());
+
+        // Carry the module-access flags of this JVM over to the child so class initialisation behaves the same.
+        final List<String> jvmArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
+
+        for (int i = 0; i < jvmArgs.size(); i++) {
+            final String arg = jvmArgs.get(i);
+
+            if (arg.startsWith("--add-opens") || arg.startsWith("--add-exports")) {
+                command.add(arg);
+
+                if ((arg.equals("--add-opens") || arg.equals("--add-exports")) && i + 1 < jvmArgs.size()) {
+                    command.add(jvmArgs.get(++i));
+                }
+            }
+        }
+
+        command.add("-Xmx256m");
+        command.add(DefaultExecutorExitMain.class.getName());
+
+        final ProcessBuilder processBuilder = new ProcessBuilder(command);
+        // The class path is passed through the environment to stay clear of the command-line length limit.
+        processBuilder.environment().put("CLASSPATH", System.getProperty("java.class.path"));
+        processBuilder.redirectErrorStream(true);
+
+        final File log = File.createTempFile("abacus-http-executor-exit", ".log");
+        processBuilder.redirectOutput(log);
+
+        final Process child = processBuilder.start();
+
+        try {
+            final boolean exited = child.waitFor(20, TimeUnit.SECONDS);
+            final String output = new String(Files.readAllBytes(log.toPath()), StandardCharsets.UTF_8);
+
+            assertTrue(exited, "child JVM did not exit within 20 s after main returned (non-daemon pool workers keep it alive):\n" + output);
+            assertEquals(0, child.exitValue(), output);
+            assertTrue(output.contains("MAIN-END"), output);
+        } finally {
+            if (child.isAlive()) {
+                child.destroyForcibly();
+                child.waitFor(10, TimeUnit.SECONDS);
+            }
+
+            log.delete();
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // a07 F-2: getInputStream must close the stream it opened when the decoder cannot be constructed.
+    // ------------------------------------------------------------------------------------------------
+
+    private static final class TrackingInputStream extends ByteArrayInputStream {
+        volatile boolean closed;
+
+        TrackingInputStream(final byte[] bytes) {
+            super(bytes);
+        }
+
+        @Override
+        public void close() throws IOException {
+            closed = true;
+            super.close();
+        }
+    }
+
+    @Test
+    public void testGetInputStreamClosesRawStreamWhenCompressedBodyIsEmpty() throws IOException {
+        final MockHttpURLConnection connection = new MockHttpURLConnection();
+        final TrackingInputStream raw = new TrackingInputStream(new byte[0]);
+        connection.setInputStream(raw);
+
+        assertThrows(UncheckedIOException.class, () -> HttpUtil.getInputStream(connection, ContentFormat.JSON_GZIP));
+        assertTrue(raw.closed, "the successfully opened raw stream must be closed when the GZIP decoder cannot be built");
+    }
+
+    @Test
+    public void testGetInputStreamClosesErrorStreamWhenCompressedErrorBodyIsMalformed() throws IOException {
+        final MockHttpURLConnection connection = new MockHttpURLConnection();
+        connection.setThrowOnGetInputStream(true);
+        final TrackingInputStream errorStream = new TrackingInputStream(new byte[] { 1, 2, 3 });
+        connection.setErrorStream(errorStream);
+
+        final RuntimeException ex = assertThrows(RuntimeException.class, () -> HttpUtil.getInputStream(connection, ContentFormat.JSON_GZIP));
+
+        assertTrue(errorStream.closed, "the error stream must be closed when its decoder cannot be built");
+        assertEquals(1, ex.getSuppressed().length, "the original IOException must travel as a suppressed exception");
+        assertTrue(ex.getSuppressed()[0] instanceof IOException, String.valueOf(ex.getSuppressed()[0]));
+        assertEquals("Test exception", ex.getSuppressed()[0].getMessage());
+    }
+
+    @Test
+    public void testGetInputStreamWithNoneReturnsRawStreamUnchangedAndOpen() throws IOException {
+        final MockHttpURLConnection connection = new MockHttpURLConnection();
+        final TrackingInputStream raw = new TrackingInputStream("body".getBytes(StandardCharsets.UTF_8));
+        connection.setInputStream(raw);
+
+        assertSame(raw, HttpUtil.getInputStream(connection, ContentFormat.NONE));
+        assertFalse(raw.closed);
+
+        // Error-stream branch without a decoder: the error stream itself is handed back, still open.
+        final MockHttpURLConnection failing = new MockHttpURLConnection();
+        failing.setThrowOnGetInputStream(true);
+        final TrackingInputStream errorStream = new TrackingInputStream("error".getBytes(StandardCharsets.UTF_8));
+        failing.setErrorStream(errorStream);
+
+        assertSame(errorStream, HttpUtil.getInputStream(failing, ContentFormat.NONE));
+        assertFalse(errorStream.closed);
+
+        // A valid GZIP body is still decoded on the success path.
+        final ByteArrayOutputStream compressed = new ByteArrayOutputStream();
+        try (OutputStream gzip = HttpUtil.wrapOutputStream(compressed, ContentFormat.JSON_GZIP)) {
+            gzip.write("{\"ok\":true}".getBytes(StandardCharsets.UTF_8));
+        }
+        final MockHttpURLConnection ok = new MockHttpURLConnection();
+        ok.setInputStream(new ByteArrayInputStream(compressed.toByteArray()));
+        assertEquals("{\"ok\":true}", IOUtil.readAllToString(HttpUtil.getInputStream(ok, ContentFormat.JSON_GZIP)));
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // a07 F-3: flush is terminal for GZIP/LZ4; pin the per-codec behaviour of a second flush.
+    // ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void testFlushTwiceIsToleratedByGzipAndSnappyButRejectedByLz4() throws IOException {
+        final byte[] payload = "payload for the double-flush pin".getBytes(StandardCharsets.UTF_8);
+
+        // Plain stream: flush is a no-op that may be repeated.
+        final ByteArrayOutputStream plain = new ByteArrayOutputStream();
+        HttpUtil.flush(plain);
+        assertDoesNotThrow(() -> HttpUtil.flush(plain));
+        assertEquals(0, plain.size());
+
+        // GZIP: finish() is idempotent, the second flush is accepted and the payload stays decodable.
+        final ByteArrayOutputStream gzipBytes = new ByteArrayOutputStream();
+        final OutputStream gzipOs = HttpUtil.wrapOutputStream(gzipBytes, ContentFormat.GZIP);
+        gzipOs.write(payload);
+        HttpUtil.flush(gzipOs);
+        assertDoesNotThrow(() -> HttpUtil.flush(gzipOs));
+        gzipOs.close();
+        assertArrayEquals(payload, IOUtil.readAllBytes(HttpUtil.wrapInputStream(new ByteArrayInputStream(gzipBytes.toByteArray()), ContentFormat.GZIP)));
+
+        // Snappy: no finish step, the second flush is accepted.
+        final ByteArrayOutputStream snappyBytes = new ByteArrayOutputStream();
+        final OutputStream snappyOs = HttpUtil.wrapOutputStream(snappyBytes, ContentFormat.SNAPPY);
+        snappyOs.write(payload);
+        HttpUtil.flush(snappyOs);
+        assertDoesNotThrow(() -> HttpUtil.flush(snappyOs));
+        snappyOs.close();
+        assertArrayEquals(payload, IOUtil.readAllBytes(HttpUtil.wrapInputStream(new ByteArrayInputStream(snappyBytes.toByteArray()), ContentFormat.SNAPPY)));
+
+        // LZ4: the block stream refuses to finish twice - documented on HttpUtil.flush.
+        final ByteArrayOutputStream lz4Bytes = new ByteArrayOutputStream();
+        final OutputStream lz4Os = HttpUtil.wrapOutputStream(lz4Bytes, ContentFormat.LZ4);
+        lz4Os.write(payload);
+        HttpUtil.flush(lz4Os);
+        assertThrows(IllegalStateException.class, () -> HttpUtil.flush(lz4Os));
+        lz4Os.close();
+        assertArrayEquals(payload, IOUtil.readAllBytes(HttpUtil.wrapInputStream(new ByteArrayInputStream(lz4Bytes.toByteArray()), ContentFormat.LZ4)));
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // a07 F-4: an apostrophe is a token character, not a quoted-string delimiter (RFC 9110).
+    // ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void testGetCharsetApostropheInAnotherParameterDoesNotHideTheCharsetParameter() {
+        // The triggering input: x='y is a legal unquoted token value; the charset that follows must be found.
+        assertEquals(StandardCharsets.ISO_8859_1, HttpUtil.getCharset("text/plain; x='y; charset=ISO-8859-1", null));
+        assertEquals(StandardCharsets.ISO_8859_1, HttpUtil.getCharset("text/plain; x='y; charset=ISO-8859-1", Charsets.UTF_8));
+
+        // Lenient unquoting of the charset value itself is unchanged.
+        assertEquals(StandardCharsets.UTF_8, HttpUtil.getCharset("text/html; charset='utf-8'", StandardCharsets.ISO_8859_1));
+
+        // An apostrophe INSIDE a real (double-quoted) value is data.
+        assertEquals(StandardCharsets.UTF_16, HttpUtil.getCharset("text/plain; note=\"it's\"; charset=UTF-16", Charsets.UTF_8));
+
+        // Non-ASCII inside an unrelated quoted value does not disturb the scan either.
+        assertEquals(StandardCharsets.ISO_8859_1, HttpUtil.getCharset("text/plain; note=\"häé; charset=UTF-16\"; charset=ISO-8859-1", Charsets.UTF_8));
+
+        // Locked: an unbalanced DQUOTE swallows the remainder, so the charset after it is not found.
+        assertEquals(Charsets.UTF_8, HttpUtil.getCharset("text/plain; x=\"y; charset=ISO-8859-1", Charsets.UTF_8));
+        assertNull(HttpUtil.getCharset("text/plain; x=\"y; charset=ISO-8859-1", null));
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // a07 F-5: codings other than gzip/br/snappy/lz4 are identity on the read side (documented, pinned).
+    // ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void testDeflateContentEncodingIsTreatedAsIdentity() {
+        // Documented limitation on getContentFormat/wrapInputStream: deflate is not decoded.
+        assertEquals(ContentFormat.JSON, HttpUtil.getContentFormat("application/json", "deflate"));
+        assertEquals(ContentFormat.XML, HttpUtil.getContentFormat("application/xml", "deflate"));
+        assertEquals(ContentFormat.JSON, HttpUtil.getContentFormat("application/json", "zstd"));
+
+        final InputStream raw = new ByteArrayInputStream(new byte[] { 120, -100, 1, 2, 3 });
+        assertSame(raw, HttpUtil.wrapInputStream(raw, HttpUtil.getContentFormat("application/json", "deflate")));
+    }
+
+    // G02-45: the media-subtype fallback must test the real IANA subtype (x-www-form-urlencoded); the token
+    // "urlencoded" it used matched no real form media type, so variants fell through to NONE.
+    @Test
+    public void reviewFixes20260908_formUrlEncodedVariantsAreRecognised() {
+        assertEquals(ContentFormat.FORM_URL_ENCODED, HttpUtil.getContentFormat("application/x-www-form-urlencoded", null));
+        assertEquals(ContentFormat.FORM_URL_ENCODED, HttpUtil.getContentFormat("application/x-www-form-urlencoded; charset=utf-8", null));
+        assertEquals(ContentFormat.FORM_URL_ENCODED, HttpUtil.getContentFormat("text/x-www-form-urlencoded", null));
+        assertEquals(ContentFormat.FORM_URL_ENCODED, HttpUtil.getContentFormat("TEXT/X-WWW-FORM-URLENCODED", null));
+        assertEquals(ContentFormat.FORM_URL_ENCODED, HttpUtil.getContentFormat("application/www-form-urlencoded", null));
+        assertEquals(ContentFormat.FORM_URL_ENCODED, HttpUtil.getContentFormat("application/vnd.foo+www-form-urlencoded", null));
+
+        // the tightening the media-subtype rewrite introduced is kept: a subtype that merely contains the
+        // token, or an unrelated form-ish type, is still not a form-encoded type
+        assertEquals(ContentFormat.NONE, HttpUtil.getContentFormat("application/urlencoded", null));
+        assertEquals(ContentFormat.NONE, HttpUtil.getContentFormat("application/x-urlencoded", null));
+        assertEquals(ContentFormat.NONE, HttpUtil.getContentFormat("multipart/form-data", null));
+        assertEquals(ContentFormat.NONE, HttpUtil.getContentFormat("application/jsonp", null));
+    }
+
+    // G04-100/101: the parameter scan ran over contentType.toLowerCase(Locale.ROOT) but the charset value was
+    // then read out of the ORIGINAL string. toLowerCase is not length-preserving - U+0130 lower-cases to two
+    // characters - so once the two index spaces are more than "charset=" apart, the value was read from an
+    // offset past the parameter and the default was returned for a header that declares a charset.
+    @Test
+    public void reviewFixes20260908_charsetIsFoundAfterCharactersThatGrowWhenLowerCased() {
+        final String dottedI = "İ"; // lower-cases to "i" + U+0307, i.e. one character becomes two
+
+        assertEquals(Charset.forName("ISO-8859-1"), HttpUtil.getCharset("text/plain; x=" + dottedI + "; charset=ISO-8859-1", Charsets.UTF_8));
+        assertEquals(Charset.forName("ISO-8859-1"), HttpUtil.getCharset("text/plain; x=" + dottedI.repeat(8) + "; charset=ISO-8859-1", Charsets.UTF_8));
+        assertEquals(Charset.forName("ISO-8859-1"),
+                HttpUtil.getCharset("text/plain; x=" + dottedI.repeat(20) + "; charset=ISO-8859-1; y=1", Charsets.UTF_8));
+
+        // ... including inside a quoted value, which the scan skips over
+        assertEquals(Charset.forName("ISO-8859-1"), HttpUtil
+                .getCharset("application/json; note=\"" + dottedI.repeat(12) + "; charset=UTF-16\"; charset=ISO-8859-1", Charsets.UTF_8));
+
+        // the parameter name is still matched case-insensitively, and a quoted value is still unquoted
+        assertEquals(Charset.forName("ISO-8859-1"), HttpUtil.getCharset("text/plain; CHARSET=ISO-8859-1", Charsets.UTF_8));
+        assertEquals(Charset.forName("ISO-8859-1"),
+                HttpUtil.getCharset("text/plain; " + dottedI.repeat(9) + "=1; ChArSeT=\"ISO-8859-1\"", Charsets.UTF_8));
+
+        // and a token that merely ends in "charset" is still not the charset parameter
+        assertEquals(Charsets.UTF_8, HttpUtil.getCharset("text/plain; x-" + dottedI + "-charset=UTF-16", Charsets.UTF_8));
+    }
+
 }

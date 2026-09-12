@@ -5,17 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,6 +27,9 @@ import com.landawn.abacus.util.Strings.StrUtil;
 public class NStringTest extends AbstractParserTest {
 
     private static final Random rand = new Random();
+
+    protected void changeCPUCoreNum(final int c) {
+    }
 
     @Test
     public void test_ImmutableList() {
@@ -57,15 +55,8 @@ public class NStringTest extends AbstractParserTest {
         assertTrue("".endsWith(""));
         assertTrue("".startsWith(""));
 
-        final String[] b = N.copyThenSetAll(N.asArray("a", "b"), (i, s) -> Strings.strip(s));
+        final String[] b = N.copyThenSetAll(CommonUtil.asArray("a", "b"), (i, s) -> Strings.strip(s));
         N.println(b);
-
-        try {
-            Strings.abbreviate("", 1);
-            fail("Shuld throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-
-        }
 
         assertEquals("", Strings.abbreviate("", 5));
 
@@ -94,7 +85,7 @@ public class NStringTest extends AbstractParserTest {
     @Test
     public void test_center() {
         assertEquals(Strings.center("a", 4, "yz"), "yayz");
-        assertEquals(Strings.center(null, 4, " "), "    ");
+        assertEquals("    ", Strings.center(null, 4, " "));
         assertEquals(Strings.center("", 4, " "), "    ");
         assertEquals(Strings.center("ab", 4, " "), " ab ");
         assertEquals(Strings.center("abcd", 2, " "), "abcd");
@@ -115,31 +106,31 @@ public class NStringTest extends AbstractParserTest {
         assertEquals(Strings.rotate("abcdefg", -9), "cdefgab");
 
         char[] chars = "abcdefg".toCharArray();
-        N.rotate(chars, 0);
+        CommonUtil.rotate(chars, 0);
         assertEquals(String.valueOf(chars), "abcdefg");
 
         chars = "abcdefg".toCharArray();
-        N.rotate(chars, 2);
+        CommonUtil.rotate(chars, 2);
         assertEquals(String.valueOf(chars), "fgabcde");
 
         chars = "abcdefg".toCharArray();
-        N.rotate(chars, -2);
+        CommonUtil.rotate(chars, -2);
         assertEquals(String.valueOf(chars), "cdefgab");
 
         chars = "abcdefg".toCharArray();
-        N.rotate(chars, 7);
+        CommonUtil.rotate(chars, 7);
         assertEquals(String.valueOf(chars), "abcdefg");
 
         chars = "abcdefg".toCharArray();
-        N.rotate(chars, -7);
+        CommonUtil.rotate(chars, -7);
         assertEquals(String.valueOf(chars), "abcdefg");
 
         chars = "abcdefg".toCharArray();
-        N.rotate(chars, 9);
+        CommonUtil.rotate(chars, 9);
         assertEquals(String.valueOf(chars), "fgabcde");
 
         chars = "abcdefg".toCharArray();
-        N.rotate(chars, -9);
+        CommonUtil.rotate(chars, -9);
         assertEquals(String.valueOf(chars), "cdefgab");
 
         N.println(Strings.shuffle("abcdefg"));
@@ -172,7 +163,7 @@ public class NStringTest extends AbstractParserTest {
 
     @Test
     public void test_13() {
-        final Map<String, Integer> map = N.asMap("a", 1, "b", 2, "c", 3);
+        final Map<String, Integer> map = CommonUtil.asMap("a", 1, "b", 2, "c", 3);
         final String str = Joiner.withDefault().appendEntries(map).toString();
         N.println(str);
 
@@ -194,30 +185,32 @@ public class NStringTest extends AbstractParserTest {
 
     @Test
     public void test_12() {
-        assertEquals(1, N.compare(Array.of(1, 2, 3), Array.of(1, 2, 2)));
-        assertEquals(-1, N.compare(Array.of(1, 2), Array.of(1, 2, 0)));
+        assertEquals(1, CommonUtil.compare(Array.of(1, 2, 3), Array.of(1, 2, 2)));
+        assertEquals(-1, CommonUtil.compare(Array.of(1, 2), Array.of(1, 2, 0)));
     }
 
     @Test
     public void test_11() {
-        assertTrue(N.equals(Array.of('a', 'b', 'c', '1', '2', '3'), N.concat(Array.of('a'), Array.of('b', 'c'), Array.of('1', '2', '3'))));
+        assertTrue(CommonUtil.equals(Array.of('a', 'b', 'c', '1', '2', '3'), N.concat(Array.of('a'), Array.of('b', 'c'), Array.of('1', '2', '3'))));
 
-        assertTrue(N.equals(N.asArray("a", "b", "c", "1", "2", "3"), N.concat(N.asArray("a"), N.asArray("b", "c"), N.asArray("1", "2", "3"))));
+        assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c", "1", "2", "3"),
+                N.concat(CommonUtil.asArray("a"), CommonUtil.asArray("b", "c"), CommonUtil.asArray("1", "2", "3"))));
     }
 
     @Test
     public void test_10() {
-        final Map<Map<Object, Object>, Map<Object, Object>> map = N.asMap(N.asMap("abc", 123D), N.asMap(123D, "abc"));
+        final Map<Map<Object, Object>, Map<Object, Object>> map = CommonUtil.asMap(CommonUtil.asMap("abc", 123D), CommonUtil.asMap(123D, "abc"));
         String json = N.toJson(map);
         N.println(json);
         assertEquals(map, N.fromJson(json,
-                JsonDeserConfig.create().setMapKeyType(N.typeOf("Map<String, Double>")).setMapValueType(N.typeOf("Map<Double, String>")), Map.class));
+                JsonDeserConfig.create().setMapKeyType(CommonUtil.typeOf("Map<String, Double>")).setMapValueType(CommonUtil.typeOf("Map<Double, String>")),
+                Map.class));
 
-        final List<Map<String, Double>> list = N.toList(N.asMap("abc", 123D));
+        final List<Map<String, Double>> list = CommonUtil.toList(CommonUtil.asMap("abc", 123D));
         json = N.toJson(list);
         N.println(json);
-        assertTrue(N.equals(list, N.fromJson(json, JsonDeserConfig.create().setElementType(N.typeOf("Map<String, Double>")), List.class)));
-        assertFalse(N.equals(list, N.fromJson(json, JsonDeserConfig.create().setElementType(N.typeOf("Map<String, Float>")), List.class)));
+        assertTrue(CommonUtil.equals(list, N.fromJson(json, JsonDeserConfig.create().setElementType(CommonUtil.typeOf("Map<String, Double>")), List.class)));
+        assertFalse(CommonUtil.equals(list, N.fromJson(json, JsonDeserConfig.create().setElementType(CommonUtil.typeOf("Map<String, Float>")), List.class)));
     }
 
     @Test
@@ -225,17 +218,17 @@ public class NStringTest extends AbstractParserTest {
         final SimpleDateFormat sdf = new SimpleDateFormat(Dates.ISO_8601_TIMESTAMP_FORMAT);
 
         String date = "2016-04-11T00:00:04.370Z";
-        N.println(Dates.parseTimestamp(date).getTime());
-        N.println(Dates.parseTimestamp(date, Dates.ISO_8601_TIMESTAMP_FORMAT).getTime());
-        assertEquals(1460332804370L, Dates.parseTimestamp(date).getTime());
-        assertEquals(1460332804370L, Dates.parseTimestamp(date, Dates.ISO_8601_TIMESTAMP_FORMAT).getTime());
+        N.println(Dates.parseToTimestamp(date).getTime());
+        N.println(Dates.parseToTimestamp(date, Dates.ISO_8601_TIMESTAMP_FORMAT).getTime());
+        assertEquals(1460332804370L, Dates.parseToTimestamp(date).getTime());
+        assertEquals(1460332804370L, Dates.parseToTimestamp(date, Dates.ISO_8601_TIMESTAMP_FORMAT).getTime());
         N.println(sdf.parse(date).getTime());
 
         date = "2016-04-11T00:00:04.385Z";
-        N.println(Dates.parseTimestamp(date).getTime());
-        N.println(Dates.parseTimestamp(date, Dates.ISO_8601_TIMESTAMP_FORMAT).getTime());
-        assertEquals(1460332804385L, Dates.parseTimestamp(date).getTime());
-        assertEquals(1460332804385L, Dates.parseTimestamp(date, Dates.ISO_8601_TIMESTAMP_FORMAT).getTime());
+        N.println(Dates.parseToTimestamp(date).getTime());
+        N.println(Dates.parseToTimestamp(date, Dates.ISO_8601_TIMESTAMP_FORMAT).getTime());
+        assertEquals(1460332804385L, Dates.parseToTimestamp(date).getTime());
+        assertEquals(1460332804385L, Dates.parseToTimestamp(date, Dates.ISO_8601_TIMESTAMP_FORMAT).getTime());
         N.println(sdf.parse(date).getTime());
 
     }
@@ -243,58 +236,58 @@ public class NStringTest extends AbstractParserTest {
     @Test
     public void test_Mutable() {
         {
-            final String str = N.stringOf(MutableBoolean.of(true));
-            assertEquals(MutableBoolean.of(true), N.valueOf(str, MutableBoolean.class));
+            final String str = CommonUtil.stringOf(MutableBoolean.of(true));
+            assertEquals(MutableBoolean.of(true), CommonUtil.valueOf(str, MutableBoolean.class));
         }
 
         {
-            final String str = N.stringOf(MutableChar.of('c'));
-            assertEquals(MutableChar.of('c'), N.valueOf(str, MutableChar.class));
+            final String str = CommonUtil.stringOf(MutableChar.of('c'));
+            assertEquals(MutableChar.of('c'), CommonUtil.valueOf(str, MutableChar.class));
         }
 
         {
-            final String str = N.stringOf(MutableByte.of((byte) 1));
-            assertEquals(MutableByte.of((byte) 1), N.valueOf(str, MutableByte.class));
+            final String str = CommonUtil.stringOf(MutableByte.of((byte) 1));
+            assertEquals(MutableByte.of((byte) 1), CommonUtil.valueOf(str, MutableByte.class));
         }
 
         {
-            final String str = N.stringOf(MutableShort.of((short) 1));
-            assertEquals(MutableShort.of((short) 1), N.valueOf(str, MutableShort.class));
+            final String str = CommonUtil.stringOf(MutableShort.of((short) 1));
+            assertEquals(MutableShort.of((short) 1), CommonUtil.valueOf(str, MutableShort.class));
         }
 
         {
-            final String str = N.stringOf(MutableInt.of(1));
-            assertEquals(MutableInt.of(1), N.valueOf(str, MutableInt.class));
+            final String str = CommonUtil.stringOf(MutableInt.of(1));
+            assertEquals(MutableInt.of(1), CommonUtil.valueOf(str, MutableInt.class));
         }
 
         {
-            final String str = N.stringOf(MutableLong.of(1));
-            assertEquals(MutableLong.of(1), N.valueOf(str, MutableLong.class));
+            final String str = CommonUtil.stringOf(MutableLong.of(1));
+            assertEquals(MutableLong.of(1), CommonUtil.valueOf(str, MutableLong.class));
         }
 
         {
-            final String str = N.stringOf(MutableFloat.of(1));
-            assertEquals(MutableFloat.of(1), N.valueOf(str, MutableFloat.class));
+            final String str = CommonUtil.stringOf(MutableFloat.of(1));
+            assertEquals(MutableFloat.of(1), CommonUtil.valueOf(str, MutableFloat.class));
         }
 
         {
-            final String str = N.stringOf(MutableDouble.of(1));
-            assertEquals(MutableDouble.of(1), N.valueOf(str, MutableDouble.class));
+            final String str = CommonUtil.stringOf(MutableDouble.of(1));
+            assertEquals(MutableDouble.of(1), CommonUtil.valueOf(str, MutableDouble.class));
         }
     }
 
     @Test
     public void test_range() {
         final Range<Integer> range = Range.closed(1, 6);
-        String str = N.stringOf(range);
-        assertEquals(range, N.typeOf("Range<Integer>").valueOf(str));
+        String str = CommonUtil.stringOf(range);
+        assertEquals(range, CommonUtil.typeOf("Range<Integer>").valueOf(str));
 
         final MyEntity_1 myBean = new MyEntity_1();
         myBean.setRange(Range.closed(1.0f, 4.0f));
 
-        str = N.stringOf(myBean);
+        str = CommonUtil.stringOf(myBean);
 
-        assertEquals(myBean, N.typeOf(MyEntity_1.class).valueOf(str));
+        assertEquals(myBean, CommonUtil.typeOf(MyEntity_1.class).valueOf(str));
 
         assertTrue(Range.just(1).overlaps(Range.closed(1, 2)));
     }
@@ -304,63 +297,63 @@ public class NStringTest extends AbstractParserTest {
         {
             final int[] a = { 1, 5, 3, 7, 9, 2 };
             final int[] b = N.top(a, 3);
-            assertTrue(N.equals(new int[] { 5, 7, 9 }, b));
+            assertTrue(CommonUtil.equals(new int[] { 5, 7, 9 }, b));
         }
 
         {
             final long[] a = { 1, 5, 3, 7, 9, 2 };
             final long[] b = N.top(a, 3);
-            assertTrue(N.equals(new long[] { 5, 7, 9 }, b));
+            assertTrue(CommonUtil.equals(new long[] { 5, 7, 9 }, b));
         }
 
         {
             final float[] a = { 1, 5, 3, 7, 9, 2 };
             final float[] b = N.top(a, 3);
-            assertTrue(N.equals(new float[] { 5, 7, 9 }, b));
+            assertTrue(CommonUtil.equals(new float[] { 5, 7, 9 }, b));
         }
 
         {
             final double[] a = { 1, 5, 3, 7, 9, 2 };
             final double[] b = N.top(a, 3);
-            assertTrue(N.equals(new double[] { 5, 7, 9 }, b));
+            assertTrue(CommonUtil.equals(new double[] { 5, 7, 9 }, b));
         }
 
         {
             final String[] a = { "1", "5", "3", "7", "9", "2" };
             final List<String> b = N.top(a, 3);
-            assertTrue(N.equals(N.toList("5", "7", "9"), b));
+            assertTrue(CommonUtil.equals(CommonUtil.toList("5", "7", "9"), b));
         }
 
         {
-            final Set<String> c = N.toLinkedHashSet("1", "5", "3", "7", "9", "2");
+            final Set<String> c = CommonUtil.toLinkedHashSet("1", "5", "3", "7", "9", "2");
             final List<String> b = N.top(c, 3);
-            assertTrue(N.equals(N.toList("5", "7", "9"), b));
+            assertTrue(CommonUtil.equals(CommonUtil.toList("5", "7", "9"), b));
         }
 
         {
-            final Set<String> c = N.toLinkedHashSet("1", "5", "3", "7", "9", "2");
+            final Set<String> c = CommonUtil.toLinkedHashSet("1", "5", "3", "7", "9", "2");
             final List<String> b = N.top(c, 3, Comparators.nullsFirst());
-            assertTrue(N.equals(N.toList("5", "7", "9"), b));
+            assertTrue(CommonUtil.equals(CommonUtil.toList("5", "7", "9"), b));
         }
 
         {
-            final Set<String> c = N.toLinkedHashSet("1", "5", "3", "7", "9", "2");
+            final Set<String> c = CommonUtil.toLinkedHashSet("1", "5", "3", "7", "9", "2");
             final List<String> b = N.top(c, 3, Comparators.nullsLast());
-            assertTrue(N.equals(N.toList("5", "7", "9"), b));
+            assertTrue(CommonUtil.equals(CommonUtil.toList("5", "7", "9"), b));
         }
 
         {
-            final Set<String> c = N.toLinkedHashSet("1", "5", "3", "7", "9", "2");
+            final Set<String> c = CommonUtil.toLinkedHashSet("1", "5", "3", "7", "9", "2");
             final List<String> b = N.top(c, 3, Comparators.reverseOrder());
             N.println(b);
-            assertTrue(N.equals(N.toList("3", "1", "2"), b));
+            assertTrue(CommonUtil.equals(CommonUtil.toList("3", "1", "2"), b));
         }
 
         {
-            final Set<String> c = N.toLinkedHashSet("1", "5", "3", "7", "9", "2");
+            final Set<String> c = CommonUtil.toLinkedHashSet("1", "5", "3", "7", "9", "2");
             final List<String> b = N.top(c, 3, Comparators.reverseOrder(), true);
             N.println(b);
-            assertTrue(N.equals(N.toList("1", "3", "2"), b));
+            assertTrue(CommonUtil.equals(CommonUtil.toList("1", "3", "2"), b));
         }
     }
 
@@ -389,114 +382,114 @@ public class NStringTest extends AbstractParserTest {
 
         {
             boolean[] a = null;
-            assertEquals(N.EMPTY_BOOLEAN_ARRAY, N.nullToEmpty(a));
+            assertEquals(CommonUtil.EMPTY_BOOLEAN_ARRAY, CommonUtil.nullToEmpty(a));
 
             a = new boolean[3];
-            assertEquals(a, N.nullToEmpty(a));
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
 
         {
             char[] a = null;
-            assertEquals(N.EMPTY_CHAR_ARRAY, N.nullToEmpty(a));
+            assertEquals(CommonUtil.EMPTY_CHAR_ARRAY, CommonUtil.nullToEmpty(a));
 
             a = new char[3];
-            assertEquals(a, N.nullToEmpty(a));
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
 
         {
             byte[] a = null;
-            assertEquals(N.EMPTY_BYTE_ARRAY, N.nullToEmpty(a));
+            assertEquals(CommonUtil.EMPTY_BYTE_ARRAY, CommonUtil.nullToEmpty(a));
 
             a = new byte[3];
-            assertEquals(a, N.nullToEmpty(a));
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
 
         {
             short[] a = null;
-            assertEquals(N.EMPTY_SHORT_ARRAY, N.nullToEmpty(a));
+            assertEquals(CommonUtil.EMPTY_SHORT_ARRAY, CommonUtil.nullToEmpty(a));
 
             a = new short[3];
-            assertEquals(a, N.nullToEmpty(a));
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
 
         {
             int[] a = null;
-            assertEquals(N.EMPTY_INT_ARRAY, N.nullToEmpty(a));
+            assertEquals(CommonUtil.EMPTY_INT_ARRAY, CommonUtil.nullToEmpty(a));
 
             a = new int[3];
-            assertEquals(a, N.nullToEmpty(a));
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
 
         {
             long[] a = null;
-            assertEquals(N.EMPTY_LONG_ARRAY, N.nullToEmpty(a));
+            assertEquals(CommonUtil.EMPTY_LONG_ARRAY, CommonUtil.nullToEmpty(a));
 
             a = new long[3];
-            assertEquals(a, N.nullToEmpty(a));
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
 
         {
             float[] a = null;
-            assertEquals(N.EMPTY_FLOAT_ARRAY, N.nullToEmpty(a));
+            assertEquals(CommonUtil.EMPTY_FLOAT_ARRAY, CommonUtil.nullToEmpty(a));
 
             a = new float[3];
-            assertEquals(a, N.nullToEmpty(a));
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
 
         {
             double[] a = null;
-            assertEquals(N.EMPTY_DOUBLE_ARRAY, N.nullToEmpty(a));
+            assertEquals(CommonUtil.EMPTY_DOUBLE_ARRAY, CommonUtil.nullToEmpty(a));
 
             a = new double[3];
-            assertEquals(a, N.nullToEmpty(a));
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
 
         {
             String[] a = null;
-            assertEquals(N.EMPTY_STRING_ARRAY, N.nullToEmpty(a));
+            assertEquals(CommonUtil.EMPTY_STRING_ARRAY, CommonUtil.nullToEmpty(a));
 
             a = new String[3];
-            assertEquals(a, N.nullToEmpty(a));
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
 
         {
             Object[] a = null;
-            assertEquals(N.EMPTY_OBJECT_ARRAY, N.nullToEmpty(a));
+            assertEquals(CommonUtil.EMPTY_OBJECT_ARRAY, CommonUtil.nullToEmpty(a));
 
             a = new Object[3];
-            assertEquals(a, N.nullToEmpty(a));
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
 
         {
             String[] a = null;
-            assertTrue(N.equals(new String[0], N.nullToEmpty(a, String[].class)));
+            assertTrue(CommonUtil.equals(new String[0], CommonUtil.nullToEmpty(a, String[].class)));
 
             a = new String[3];
-            assertEquals(a, N.nullToEmpty(a));
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
 
         {
             List<String> a = null;
-            assertEquals(N.EMPTY_LIST, N.nullToEmpty(a));
+            assertEquals(CommonUtil.EMPTY_LIST, CommonUtil.nullToEmpty(a));
 
-            a = N.toList("1", "2");
-            assertEquals(a, N.nullToEmpty(a));
+            a = CommonUtil.toList("1", "2");
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
 
         {
             Set<String> a = null;
-            assertEquals(N.EMPTY_SET, N.nullToEmpty(a));
+            assertEquals(CommonUtil.EMPTY_SET, CommonUtil.nullToEmpty(a));
 
-            a = N.toSet("1", "2");
-            assertEquals(a, N.nullToEmpty(a));
+            a = CommonUtil.toSet("1", "2");
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
 
         {
             Map<String, String> a = null;
-            assertEquals(N.EMPTY_MAP, N.nullToEmpty(a));
+            assertEquals(CommonUtil.EMPTY_MAP, CommonUtil.nullToEmpty(a));
 
-            a = N.asMap("1", "2");
-            assertEquals(a, N.nullToEmpty(a));
+            a = CommonUtil.asMap("1", "2");
+            assertEquals(a, CommonUtil.nullToEmpty(a));
         }
     }
 
@@ -612,105 +605,105 @@ public class NStringTest extends AbstractParserTest {
         final String nullStr = null;
 
         {
-            assertEquals(0, StrUtil.indexOf("a, b, c", "a", ","));
-            assertEquals(3, StrUtil.indexOf("a, b, c", "b", ", "));
-            assertEquals(6, StrUtil.indexOf("a, b, c", "c", ", "));
-            assertEquals(-1, StrUtil.indexOf("a,  b, c", "d", ","));
+            assertEquals(0, StrUtil.indexOfToken("a, b, c", "a", ","));
+            assertEquals(3, StrUtil.indexOfToken("a, b, c", "b", ", "));
+            assertEquals(6, StrUtil.indexOfToken("a, b, c", "c", ", "));
+            assertEquals(-1, StrUtil.indexOfToken("a,  b, c", "d", ","));
 
             final boolean[] b = { true, true };
-            assertEquals(0, N.indexOf(b, true));
-            assertEquals(-1, N.indexOf(b, false));
+            assertEquals(0, CommonUtil.indexOf(b, true));
+            assertEquals(-1, CommonUtil.indexOf(b, false));
 
             final char[] c = { '1', '3', '2' };
-            assertEquals(1, N.indexOf(c, '3'));
-            assertEquals(-1, N.indexOf(c, '4'));
+            assertEquals(1, CommonUtil.indexOf(c, '3'));
+            assertEquals(-1, CommonUtil.indexOf(c, '4'));
 
             final byte[] bt = { 1, 3, 2 };
-            assertEquals(1, N.indexOf(bt, (byte) 3));
-            assertEquals(-1, N.indexOf(bt, (byte) 4));
+            assertEquals(1, CommonUtil.indexOf(bt, (byte) 3));
+            assertEquals(-1, CommonUtil.indexOf(bt, (byte) 4));
 
             final short[] s = { 1, 3, 2 };
-            assertEquals(1, N.indexOf(s, (short) 3));
-            assertEquals(-1, N.indexOf(s, (short) 4));
+            assertEquals(1, CommonUtil.indexOf(s, (short) 3));
+            assertEquals(-1, CommonUtil.indexOf(s, (short) 4));
 
             final int[] i = { 1, 3, 2 };
-            assertEquals(1, N.indexOf(i, 3));
-            assertEquals(-1, N.indexOf(i, 4));
+            assertEquals(1, CommonUtil.indexOf(i, 3));
+            assertEquals(-1, CommonUtil.indexOf(i, 4));
 
             final long[] l = { 1, 3, 2 };
-            assertEquals(1, N.indexOf(l, 3));
-            assertEquals(-1, N.indexOf(l, 4));
+            assertEquals(1, CommonUtil.indexOf(l, 3));
+            assertEquals(-1, CommonUtil.indexOf(l, 4));
 
             final float[] f = { 1, 3, 2 };
-            assertEquals(1, N.indexOf(f, 3f));
-            assertEquals(-1, N.indexOf(f, 4f));
+            assertEquals(1, CommonUtil.indexOf(f, 3f));
+            assertEquals(-1, CommonUtil.indexOf(f, 4f));
 
             final double[] d = { 1, 3, 2 };
-            assertEquals(1, N.indexOf(d, 3));
-            assertEquals(-1, N.indexOf(d, 4));
+            assertEquals(1, CommonUtil.indexOf(d, 3));
+            assertEquals(-1, CommonUtil.indexOf(d, 4));
 
             final Integer[] st = { 1, 3, 2 };
-            assertEquals(1, N.indexOf(st, 3));
-            assertEquals(-1, N.indexOf(st, 4));
+            assertEquals(1, CommonUtil.indexOf(st, 3));
+            assertEquals(-1, CommonUtil.indexOf(st, 4));
 
-            final List<Integer> list = N.toList(1, 3, 2);
-            assertEquals(1, N.indexOf(list, 3));
-            assertEquals(-1, N.indexOf(list, 4));
+            final List<Integer> list = CommonUtil.toList(1, 3, 2);
+            assertEquals(1, CommonUtil.indexOf(list, 3));
+            assertEquals(-1, CommonUtil.indexOf(list, 4));
         }
 
         {
-            assertEquals(0, StrUtil.lastIndexOf("a,  b, c", "a", ","));
-            assertEquals(3, StrUtil.lastIndexOf("a, b, c", "b", ", "));
-            assertEquals(10, StrUtil.lastIndexOf("a,  b, c, b", "b", ", "));
-            assertEquals(-1, StrUtil.lastIndexOf("a,  b, c", "d", ","));
+            assertEquals(0, StrUtil.lastIndexOfToken("a,  b, c", "a", ","));
+            assertEquals(3, StrUtil.lastIndexOfToken("a, b, c", "b", ", "));
+            assertEquals(10, StrUtil.lastIndexOfToken("a,  b, c, b", "b", ", "));
+            assertEquals(-1, StrUtil.lastIndexOfToken("a,  b, c", "d", ","));
 
             final boolean[] b = { true, true };
-            assertEquals(1, N.lastIndexOf(b, true));
-            assertEquals(-1, N.lastIndexOf(b, false));
+            assertEquals(1, CommonUtil.lastIndexOf(b, true));
+            assertEquals(-1, CommonUtil.lastIndexOf(b, false));
 
             final char[] c = { '1', '3', '2' };
-            assertEquals(1, N.lastIndexOf(c, '3'));
-            assertEquals(-1, N.lastIndexOf(c, '4'));
+            assertEquals(1, CommonUtil.lastIndexOf(c, '3'));
+            assertEquals(-1, CommonUtil.lastIndexOf(c, '4'));
 
             final byte[] bt = { 1, 3, 2 };
-            assertEquals(1, N.lastIndexOf(bt, (byte) 3));
-            assertEquals(-1, N.lastIndexOf(bt, (byte) 4));
+            assertEquals(1, CommonUtil.lastIndexOf(bt, (byte) 3));
+            assertEquals(-1, CommonUtil.lastIndexOf(bt, (byte) 4));
 
             final short[] s = { 1, 3, 2 };
-            assertEquals(1, N.lastIndexOf(s, (short) 3));
-            assertEquals(-1, N.lastIndexOf(s, (short) 4));
+            assertEquals(1, CommonUtil.lastIndexOf(s, (short) 3));
+            assertEquals(-1, CommonUtil.lastIndexOf(s, (short) 4));
 
             final int[] i = { 1, 3, 2 };
-            assertEquals(1, N.lastIndexOf(i, 3));
-            assertEquals(-1, N.lastIndexOf(i, 4));
+            assertEquals(1, CommonUtil.lastIndexOf(i, 3));
+            assertEquals(-1, CommonUtil.lastIndexOf(i, 4));
 
             final long[] l = { 1, 3, 2 };
-            assertEquals(1, N.lastIndexOf(l, 3));
-            assertEquals(-1, N.lastIndexOf(l, 4));
+            assertEquals(1, CommonUtil.lastIndexOf(l, 3));
+            assertEquals(-1, CommonUtil.lastIndexOf(l, 4));
 
             final float[] f = { 1, 3, 2 };
-            assertEquals(1, N.lastIndexOf(f, 3f));
-            assertEquals(-1, N.lastIndexOf(f, 4f));
+            assertEquals(1, CommonUtil.lastIndexOf(f, 3f));
+            assertEquals(-1, CommonUtil.lastIndexOf(f, 4f));
 
             final double[] d = { 1, 3, 2 };
-            assertEquals(1, N.lastIndexOf(d, 3));
-            assertEquals(-1, N.lastIndexOf(d, 4));
+            assertEquals(1, CommonUtil.lastIndexOf(d, 3));
+            assertEquals(-1, CommonUtil.lastIndexOf(d, 4));
 
             final Integer[] st = { 1, 3, 2 };
-            assertEquals(1, N.lastIndexOf(st, 3));
-            assertEquals(-1, N.lastIndexOf(st, 4));
+            assertEquals(1, CommonUtil.lastIndexOf(st, 3));
+            assertEquals(-1, CommonUtil.lastIndexOf(st, 4));
 
-            final List<Integer> list = N.toList(1, 3, 2);
-            assertEquals(1, N.lastIndexOf(list, 3));
-            assertEquals(-1, N.lastIndexOf(list, 4));
+            final List<Integer> list = CommonUtil.toList(1, 3, 2);
+            assertEquals(1, CommonUtil.lastIndexOf(list, 3));
+            assertEquals(-1, CommonUtil.lastIndexOf(list, 4));
         }
 
         {
 
-            assertFalse(StrUtil.contains(nullStr, "a", ","));
-            assertFalse(StrUtil.contains("", "b", ","));
-            assertTrue(StrUtil.contains("a,  b, c", "c", ", "));
-            assertFalse(StrUtil.contains("a,  b, c", "d", ","));
+            assertFalse(StrUtil.containsToken(nullStr, "a", ","));
+            assertFalse(StrUtil.containsToken("", "b", ","));
+            assertTrue(StrUtil.containsToken("a,  b, c", "c", ", "));
+            assertFalse(StrUtil.containsToken("a,  b, c", "d", ","));
 
             final boolean[] b = { true, true };
             assertTrue(N.contains(b, true));
@@ -748,7 +741,7 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(N.contains(st, 3));
             assertFalse(N.contains(st, 4));
 
-            final List<Integer> list = N.toList(1, 3, 2);
+            final List<Integer> list = CommonUtil.toList(1, 3, 2);
             assertTrue(N.contains(list, 3));
             assertFalse(N.contains(list, 4));
 
@@ -763,7 +756,7 @@ public class NStringTest extends AbstractParserTest {
             assertFalse(Strings.containsAny("", 'a'));
             assertTrue(Strings.containsAny("abc", 'a'));
 
-            assertTrue(Strings.containsOnly(nullStr, 'a'));
+            assertFalse(Strings.containsOnly(nullStr, 'a'));
             assertTrue(Strings.containsOnly("", 'a'));
             assertFalse(Strings.containsOnly("abc", 'a', 'b'));
             assertTrue(Strings.containsOnly("abc", 'a', 'b', 'c'));
@@ -872,12 +865,12 @@ public class NStringTest extends AbstractParserTest {
     @Test
     public void test_sort_2() {
         String[] st1 = { "a", "c", "b" };
-        N.sort(st1);
+        CommonUtil.sort(st1);
         N.println(st1);
         assertEquals(st1[1], "b");
 
         st1 = new String[] { "a", "c", null, "b" };
-        N.sort(st1);
+        CommonUtil.sort(st1);
         N.println(st1);
         assertEquals(st1[1], "a");
     }
@@ -885,62 +878,62 @@ public class NStringTest extends AbstractParserTest {
     @Test
     public void test_sort() {
         final char[] c = { '1', '3', '2' };
-        N.sort(c);
+        CommonUtil.sort(c);
         N.println(c);
         assertEquals(c[1], '2');
 
         final byte[] bt = { 1, 3, 2 };
-        N.sort(bt);
+        CommonUtil.sort(bt);
         N.println(bt);
         assertEquals(bt[1], 2);
 
         final short[] s = { 1, 3, 2 };
-        N.sort(s);
+        CommonUtil.sort(s);
         N.println(s);
         assertEquals(s[1], 2);
 
         final int[] i = { 1, 3, 2 };
-        N.sort(i);
+        CommonUtil.sort(i);
         N.println(i);
         assertEquals(i[1], 2);
 
         final long[] l = { 1, 3, 2 };
-        N.sort(l);
+        CommonUtil.sort(l);
         N.println(l);
         assertEquals(l[1], 2);
 
         final float[] f = { 1, 3, 2 };
-        N.sort(f);
+        CommonUtil.sort(f);
         N.println(f);
         assertEquals(f[1], 2f);
 
         final double[] d = { 1, 3, 2 };
-        N.sort(d);
+        CommonUtil.sort(d);
         N.println(d);
         assertEquals(d[1], 2d);
 
         final Integer[] st = { 1, 3, 2 };
-        N.sort(st);
+        CommonUtil.sort(st);
         N.println(st);
         assertEquals(st[1].intValue(), 2);
 
         String[] st1 = { "a", "c", "b" };
-        N.sort(st1);
+        CommonUtil.sort(st1);
         N.println(st1);
         assertEquals(st1[1], "b");
 
         st1 = new String[] { "a", "c", "b" };
-        N.sort(st1, (Comparator<String>) (o1, o2) -> o2.compareTo(o1));
+        CommonUtil.sort(st1, (Comparator<String>) (o1, o2) -> o2.compareTo(o1));
         N.println(st1);
         assertEquals(st1[1], "b");
 
-        List<String> list = N.toList("a", "c", "b");
-        N.sort(list);
+        List<String> list = CommonUtil.toList("a", "c", "b");
+        CommonUtil.sort(list);
         N.println(list);
         assertEquals(list.get(1), "b");
 
-        list = N.toList("a", "c", "b");
-        N.sort(list, (Comparator<String>) (o1, o2) -> o2.compareTo(o1));
+        list = CommonUtil.toList("a", "c", "b");
+        CommonUtil.sort(list, (Comparator<String>) (o1, o2) -> o2.compareTo(o1));
         N.println(list);
         assertEquals(list.get(1), "b");
 
@@ -948,7 +941,7 @@ public class NStringTest extends AbstractParserTest {
         list.add("a");
         list.add("c");
         list.add("b");
-        N.sort(list, (Comparator<String>) (o1, o2) -> o2.compareTo(o1));
+        CommonUtil.sort(list, (Comparator<String>) (o1, o2) -> o2.compareTo(o1));
         N.println(list);
         assertEquals(list.get(1), "b");
     }
@@ -956,69 +949,69 @@ public class NStringTest extends AbstractParserTest {
     @Test
     public void test_fill() {
         final boolean[] b = new boolean[2];
-        N.fill(b, true);
+        CommonUtil.fill(b, true);
         N.println(b);
         assertEquals(b[0], true);
-        N.fill(b, 1, 2, true);
+        CommonUtil.fill(b, 1, 2, true);
 
         final char[] c = new char[2];
-        N.fill(c, 'a');
+        CommonUtil.fill(c, 'a');
         N.println(c);
         assertEquals(c[0], 'a');
-        N.fill(c, 1, 2, 'a');
+        CommonUtil.fill(c, 1, 2, 'a');
 
         final byte[] bt = new byte[2];
-        N.fill(bt, (byte) 12);
+        CommonUtil.fill(bt, (byte) 12);
         N.println(bt);
         assertEquals(bt[0], 12);
-        N.fill(bt, 1, 2, (byte) 12);
+        CommonUtil.fill(bt, 1, 2, (byte) 12);
 
         final short[] s = new short[2];
-        N.fill(s, (short) 12);
+        CommonUtil.fill(s, (short) 12);
         N.println(s);
         assertEquals(s[0], 12);
-        N.fill(s, 1, 2, (short) 12);
+        CommonUtil.fill(s, 1, 2, (short) 12);
 
         final int[] i = new int[2];
-        N.fill(i, 12);
+        CommonUtil.fill(i, 12);
         N.println(i);
         assertEquals(i[0], 12);
-        N.fill(i, 1, 2, 12);
+        CommonUtil.fill(i, 1, 2, 12);
 
         final long[] l = new long[2];
-        N.fill(l, 12);
+        CommonUtil.fill(l, 12);
         N.println(l);
         assertEquals(l[0], 12);
-        N.fill(l, 1, 2, 12);
+        CommonUtil.fill(l, 1, 2, 12);
 
         final float[] f = new float[2];
-        N.fill(f, 1.2f);
+        CommonUtil.fill(f, 1.2f);
         N.println(f);
         assertEquals(f[0], 1.2f);
-        N.fill(f, 1, 2, 1.2f);
+        CommonUtil.fill(f, 1, 2, 1.2f);
 
         final double[] d = new double[2];
-        N.fill(d, 1.2);
+        CommonUtil.fill(d, 1.2);
         N.println(d);
         assertEquals(d[0], 1.2);
-        N.fill(d, 1, 2, 1.2);
+        CommonUtil.fill(d, 1, 2, 1.2);
 
         final String[] st = new String[2];
-        N.fill(st, "a");
+        CommonUtil.fill(st, "a");
         N.println(st);
         assertEquals(st[0], "a");
-        N.fill(st, 1, 2, "a");
+        CommonUtil.fill(st, 1, 2, "a");
 
-        List<String> list = N.toList("b", "b", "b");
-        N.fill(list, "a");
+        List<String> list = CommonUtil.toList("b", "b", "b");
+        CommonUtil.fill(list, "a");
         N.println(list);
         assertEquals(list.get(0), "a");
-        N.fill(list, 1, 2, "a");
+        CommonUtil.fill(list, 1, 2, "a");
 
         for (int k = 5; k <= 1001; k++) {
-            list = N.toLinkedList();
-            N.fill(list, 0, k, null);
-            N.fill(list, 3, k - 2, "abc");
+            list = CommonUtil.toLinkedList();
+            CommonUtil.fill(list, 0, k, null);
+            CommonUtil.fill(list, 3, k - 2, "abc");
             N.println(list);
 
             for (int j = 3; j < k - 2; j++) {
@@ -1030,21 +1023,21 @@ public class NStringTest extends AbstractParserTest {
     @Test
     public void test_is() {
         {
-            assertTrue(Strings.isAllLowerCase(null));
-            assertTrue(Strings.isAllLowerCase(""));
+            assertFalse(Strings.isAllLowerCase(null));
+            assertFalse(Strings.isAllLowerCase(""));
             assertTrue(Strings.isAllLowerCase("abc"));
             assertFalse(Strings.isAllLowerCase("abc黎"));
             assertFalse(Strings.isAllLowerCase("ABC"));
             assertFalse(Strings.isAllLowerCase("ABC黎"));
 
-            assertTrue(Strings.isAllLowerCase(new StringBuilder("")));
+            assertFalse(Strings.isAllLowerCase(new StringBuilder("")));
             assertTrue(Strings.isAllLowerCase(new StringBuilder("abc")));
             assertFalse(Strings.isAllLowerCase(new StringBuilder("abc黎")));
             assertFalse(Strings.isAllLowerCase(new StringBuilder("ABC")));
             assertFalse(Strings.isAllLowerCase(new StringBuilder("ABC黎")));
 
-            assertTrue(Strings.isAllUpperCase(null));
-            assertTrue(Strings.isAllUpperCase(""));
+            assertFalse(Strings.isAllUpperCase(null));
+            assertFalse(Strings.isAllUpperCase(""));
             assertFalse(Strings.isAllUpperCase(new StringBuilder("abc")));
             assertFalse(Strings.isAllUpperCase(new StringBuilder("abc黎")));
             assertTrue(Strings.isAllUpperCase(new StringBuilder("ABC")));
@@ -1150,28 +1143,28 @@ public class NStringTest extends AbstractParserTest {
             assertFalse(Strings.isWhitespace("abc\n\123 "));
             assertFalse(Strings.isWhitespace(new StringBuilder("abc\n\123 ")));
 
-            assertTrue(Numbers.isNumber("0.0"));
-            assertTrue(Numbers.isNumber("0.4790"));
+            assertTrue(Numbers.isCreatable("0.0"));
+            assertTrue(Numbers.isCreatable("0.4790"));
 
-            assertTrue(Numbers.isNumber("123"));
-            assertTrue(Numbers.isNumber("0X123"));
-            assertTrue(Numbers.isNumber("123f"));
-            assertTrue(Numbers.isNumber("0X123f"));
-            assertFalse(Numbers.isNumber("123g"));
-            assertFalse(Numbers.isNumber("0X123g"));
+            assertTrue(Numbers.isCreatable("123"));
+            assertTrue(Numbers.isCreatable("0X123"));
+            assertTrue(Numbers.isCreatable("123f"));
+            assertTrue(Numbers.isCreatable("0X123f"));
+            assertFalse(Numbers.isCreatable("123g"));
+            assertFalse(Numbers.isCreatable("0X123g"));
 
-            assertTrue(Numbers.isNumber("-123"));
-            assertTrue(Numbers.isNumber("-0X123"));
-            assertTrue(Numbers.isNumber("-123f"));
-            assertTrue(Numbers.isNumber("-0X123f"));
-            assertFalse(Numbers.isNumber("-123g"));
-            assertFalse(Numbers.isNumber("-0X123g"));
+            assertTrue(Numbers.isCreatable("-123"));
+            assertTrue(Numbers.isCreatable("-0X123"));
+            assertTrue(Numbers.isCreatable("-123f"));
+            assertTrue(Numbers.isCreatable("-0X123f"));
+            assertFalse(Numbers.isCreatable("-123g"));
+            assertFalse(Numbers.isCreatable("-0X123g"));
 
-            assertTrue(Strings.isAsciiNumber("123"));
-            assertTrue(Strings.isAsciiNumber("-123"));
-            assertTrue(Strings.isAsciiNumber("-123.00"));
-            assertFalse(Strings.isAsciiNumber("-"));
-            assertFalse(Strings.isAsciiNumber("."));
+            assertTrue(Numbers.isParsable("123"));
+            assertTrue(Numbers.isParsable("-123"));
+            assertTrue(Numbers.isParsable("-123.00"));
+            assertFalse(Numbers.isParsable("-"));
+            assertFalse(Numbers.isParsable("."));
 
             assertTrue(Strings.isAsciiInteger("123"));
             assertTrue(Strings.isAsciiInteger("-123"));
@@ -1184,7 +1177,7 @@ public class NStringTest extends AbstractParserTest {
     @Test
     public void test_chomp_chop() {
         {
-            assertEquals(null, Strings.chomp((String) null));
+            assertEquals(null, Strings.chomp(null));
             assertEquals("", Strings.chomp(""));
             assertEquals("abc ", Strings.chomp("abc \r"));
             assertEquals("abc\n\rabc", Strings.chomp("abc\n\rabc"));
@@ -1201,7 +1194,7 @@ public class NStringTest extends AbstractParserTest {
         }
 
         {
-            assertEquals(null, Strings.chop((String) null));
+            assertEquals(null, Strings.chop(null));
             assertEquals("", Strings.chop(""));
             assertEquals("", Strings.chop("\r"));
             assertEquals("", Strings.chop("\n"));
@@ -1211,7 +1204,7 @@ public class NStringTest extends AbstractParserTest {
         }
 
         {
-            assertEquals(null, Strings.removeWhitespace((String) null));
+            assertEquals(null, Strings.removeWhitespace(null));
             assertEquals("", Strings.removeWhitespace(""));
             assertEquals("abc", Strings.removeWhitespace("abc \r"));
             assertEquals("abcabc", Strings.removeWhitespace("abc\n\rabc"));
@@ -1222,7 +1215,7 @@ public class NStringTest extends AbstractParserTest {
     @Test
     public void test_trim_strip() {
         {
-            assertEquals(null, Strings.trim((String) null));
+            assertEquals(null, Strings.trim(null));
             assertEquals("", Strings.trim(""));
 
             assertEquals("aa", Strings.trim("aa"));
@@ -1230,15 +1223,15 @@ public class NStringTest extends AbstractParserTest {
             assertEquals("aa", Strings.trim("  aa  "));
             assertEquals("a aa a", Strings.trim(" a aa a "));
 
-            assertEquals(null, Strings.trimToNull((String) null));
+            assertEquals(null, Strings.trimToNull(null));
             assertEquals(null, Strings.trimToNull(""));
 
-            assertEquals("", Strings.trimToEmpty((String) null));
+            assertEquals("", Strings.trimToEmpty(null));
             assertEquals("", Strings.trimToEmpty(""));
         }
 
         {
-            assertEquals(null, Strings.strip((String) null));
+            assertEquals(null, Strings.strip(null));
             assertEquals("", Strings.strip(""));
 
             assertEquals("aa", Strings.strip("aa"));
@@ -1246,16 +1239,16 @@ public class NStringTest extends AbstractParserTest {
             assertEquals("aa", Strings.strip("  aa  "));
             assertEquals("a aa a", Strings.strip(" a aa a "));
 
-            assertEquals(null, Strings.stripToNull((String) null));
+            assertEquals(null, Strings.stripToNull(null));
             assertEquals(null, Strings.stripToNull(""));
 
-            assertEquals("", Strings.stripToEmpty((String) null));
+            assertEquals("", Strings.stripToEmpty(null));
             assertEquals("", Strings.stripToEmpty(""));
         }
 
         {
 
-            assertEquals(Strings.stripEnd((String) null, "*"), null);
+            assertEquals(Strings.stripEnd(null, "*"), null);
             assertEquals(Strings.stripEnd("", "*"), "");
             assertEquals(Strings.stripEnd("abc", ""), "abc");
             assertEquals(Strings.stripEnd("abc", null), "abc");
@@ -1268,7 +1261,7 @@ public class NStringTest extends AbstractParserTest {
 
         {
 
-            assertEquals(Strings.stripStart((String) null, "*"), null);
+            assertEquals(Strings.stripStart(null, "*"), null);
             assertEquals(Strings.stripStart("", "*"), "");
             assertEquals(Strings.stripStart("abc", ""), "abc");
             assertEquals(Strings.stripStart("abc", null), "abc");
@@ -1280,30 +1273,31 @@ public class NStringTest extends AbstractParserTest {
         }
 
         {
-            assertEquals(Strings.stripStart((String) null, "*"), null);
-            String[] a = N.EMPTY_STRING_ARRAY;
-            Strings.strip(a, "*");
-            assertTrue(N.equals(a, N.EMPTY_STRING_ARRAY));
+            assertEquals(Strings.stripStart(null, "*"), null);
+            String[] a = CommonUtil.EMPTY_STRING_ARRAY;
+            Strings.stripEach(a, "*");
+            assertTrue(CommonUtil.equals(a, CommonUtil.EMPTY_STRING_ARRAY));
 
-            a = N.asArray("abc", "  abc");
-            Strings.strip(a, null);
-            assertTrue(N.equals(a, N.asArray("abc", "abc")));
+            a = CommonUtil.asArray("abc", "  abc");
+            Strings.stripEach(a, null);
+            assertTrue(CommonUtil.equals(a, CommonUtil.asArray("abc", "abc")));
 
-            a = N.asArray("abc  ", null);
-            Strings.strip(a, null);
-            assertTrue(N.equals(a, N.asArray("abc", null)));
+            a = CommonUtil.asArray("abc  ", null);
+            Strings.stripEach(a, null);
+            assertTrue(CommonUtil.equals(a, CommonUtil.asArray("abc", null)));
 
-            a = N.asArray("yabcz", null);
-            Strings.strip(a, "yz");
-            assertTrue(N.equals(a, N.asArray("abc", null)));
+            a = CommonUtil.asArray("yabcz", null);
+            Strings.stripEach(a, "yz");
+            assertTrue(CommonUtil.equals(a, CommonUtil.asArray("abc", null)));
         }
 
         {
 
-            assertEquals(null, Strings.stripAccents((String) null));
+            assertEquals(null, Strings.stripAccents(null));
             assertEquals("", Strings.stripAccents(""));
             assertEquals("control", Strings.stripAccents("control"));
             assertEquals("eclair", Strings.stripAccents("éclair"));
+            assertEquals("한", Strings.stripAccents("한"));
         }
     }
 
@@ -1326,671 +1320,6 @@ public class NStringTest extends AbstractParserTest {
         assertEquals(1.1, N.concat(new double[] { 1.1 }, new double[] { 1.1 })[1]);
 
         assertEquals("a", N.concat(new String[] { "a" }, new String[] { "a" })[1]);
-    }
-
-    @Test
-    public void test_min_max_median() {
-        final int len = 17;
-
-        {
-            assertEquals('1', N.min('1', '2'));
-            assertEquals('1', N.min('2', '1'));
-            assertEquals('2', N.max('1', '2'));
-            assertEquals('2', N.max('2', '2'));
-            assertEquals('1', N.lowerMedian('1', '2'));
-            assertEquals('1', N.lowerMedian('2', '1'));
-
-            assertEquals('1', N.min('1', '2', '3'));
-            assertEquals('1', N.min('2', '1', '3'));
-            assertEquals('1', N.min('3', '2', '1'));
-
-            assertEquals('3', N.max('1', '2', '3'));
-            assertEquals('3', N.max('2', '1', '3'));
-            assertEquals('3', N.max('3', '2', '1'));
-
-            assertEquals('2', N.median('1', '2', '3'));
-            assertEquals('2', N.median('2', '1', '3'));
-            assertEquals('2', N.median('3', '2', '1'));
-            assertEquals('2', N.median('1', '3', '2'));
-
-            char[] a = new char[len];
-            for (int i = 0; i < len; i++) {
-                a[i] = (char) rand.nextInt(1000);
-            }
-
-            final int min = N.min(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] >= min);
-            }
-
-            final int max = N.max(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] <= max);
-            }
-
-            final int median = N.lowerMedian(a);
-
-            int count = 0;
-            for (int i = 0; i < len; i++) {
-                if (a[i] < median) {
-                    count++;
-                }
-            }
-
-            assertTrue(count <= (a.length) / 2);
-
-            a = Array.of('1');
-            assertEquals('1', N.lowerMedian(a));
-
-            a = Array.of('2', '1');
-            assertEquals('1', N.lowerMedian(a));
-
-            a = Array.of('2', '1', '3');
-            assertEquals('2', N.lowerMedian(a));
-
-            a = null;
-            try {
-                N.min(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.max(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.lowerMedian(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-        }
-
-        {
-            assertEquals((byte) 1, N.min((byte) 1, (byte) 2));
-            assertEquals((byte) 1, N.min((byte) 2, (byte) 1));
-            assertEquals((byte) 2, N.max((byte) 1, (byte) 2));
-            assertEquals((byte) 2, N.max((byte) 2, (byte) 2));
-            assertEquals((byte) 1, N.lowerMedian((byte) 1, (byte) 2));
-            assertEquals((byte) 1, N.lowerMedian((byte) 2, (byte) 1));
-
-            assertEquals((byte) 1, N.min((byte) 1, (byte) 2, (byte) 3));
-            assertEquals((byte) 1, N.min((byte) 2, (byte) 1, (byte) 3));
-            assertEquals((byte) 1, N.min((byte) 3, (byte) 2, (byte) 1));
-
-            assertEquals((byte) 3, N.max((byte) 1, (byte) 2, (byte) 3));
-            assertEquals((byte) 3, N.max((byte) 2, (byte) 1, (byte) 3));
-            assertEquals((byte) 3, N.max((byte) 3, (byte) 2, (byte) 1));
-
-            assertEquals((byte) 2, N.median((byte) 1, (byte) 2, (byte) 3));
-            assertEquals((byte) 2, N.median((byte) 2, (byte) 1, (byte) 3));
-            assertEquals((byte) 2, N.median((byte) 3, (byte) 2, (byte) 1));
-            assertEquals((byte) 2, N.median((byte) 1, (byte) 3, (byte) 2));
-
-            byte[] a = new byte[len];
-            for (int i = 0; i < len; i++) {
-                a[i] = (byte) rand.nextInt(127);
-            }
-
-            final int min = N.min(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] >= min);
-            }
-
-            final int max = N.max(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] <= max);
-            }
-
-            final int median = N.lowerMedian(a);
-
-            int count = 0;
-            for (int i = 0; i < len; i++) {
-                if (a[i] < median) {
-                    count++;
-                }
-            }
-
-            assertTrue(count <= (a.length) / 2);
-
-            assertTrue(count <= (a.length) / 2);
-
-            a = Array.of((byte) 1);
-            assertEquals(1, N.lowerMedian(a));
-
-            a = Array.of((byte) 2, (byte) 1);
-            assertEquals(1, N.lowerMedian(a));
-
-            a = Array.of((byte) 2, (byte) 1, (byte) 3);
-            assertEquals(2, N.lowerMedian(a));
-
-            a = null;
-            try {
-                N.min(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.max(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.lowerMedian(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-        }
-
-        {
-            assertEquals((short) 1, N.min((short) 1, (short) 2));
-            assertEquals((short) 1, N.min((short) 2, (short) 1));
-            assertEquals((short) 2, N.max((short) 1, (short) 2));
-            assertEquals((short) 2, N.max((short) 2, (short) 2));
-            assertEquals((short) 1, N.lowerMedian((short) 1, (short) 2));
-            assertEquals((short) 1, N.lowerMedian((short) 2, (short) 1));
-
-            assertEquals((short) 1, N.min((short) 1, (short) 2, (short) 3));
-            assertEquals((short) 1, N.min((short) 2, (short) 1, (short) 3));
-            assertEquals((short) 1, N.min((short) 3, (short) 2, (short) 1));
-
-            assertEquals((short) 3, N.max((short) 1, (short) 2, (short) 3));
-            assertEquals((short) 3, N.max((short) 2, (short) 1, (short) 3));
-            assertEquals((short) 3, N.max((short) 3, (short) 2, (short) 1));
-
-            assertEquals((short) 2, N.median((short) 1, (short) 2, (short) 3));
-            assertEquals((short) 2, N.median((short) 2, (short) 1, (short) 3));
-            assertEquals((short) 2, N.median((short) 3, (short) 2, (short) 1));
-            assertEquals((short) 2, N.median((short) 1, (short) 3, (short) 2));
-
-            short[] a = new short[len];
-            for (int i = 0; i < len; i++) {
-                a[i] = (short) rand.nextInt(127);
-            }
-
-            final int min = N.min(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] >= min);
-            }
-
-            final int max = N.max(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] <= max);
-            }
-
-            final int median = N.lowerMedian(a);
-
-            int count = 0;
-            for (int i = 0; i < len; i++) {
-                if (a[i] < median) {
-                    count++;
-                }
-            }
-
-            assertTrue(count <= (a.length) / 2);
-
-            a = Array.of((short) 1);
-            assertEquals((short) 1, N.lowerMedian(a));
-
-            a = Array.of((short) 2, (short) 1);
-            assertEquals((short) 1, N.lowerMedian(a));
-
-            a = Array.of((short) 2, (short) 1, (short) 3);
-            assertEquals(2, N.lowerMedian(a));
-
-            a = null;
-            try {
-                N.min(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.max(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.lowerMedian(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-        }
-
-        {
-            assertEquals(1, N.min(1, 2));
-            assertEquals(1, N.min(2, 1));
-            assertEquals(2, N.max(1, 2));
-            assertEquals(2, N.max(2, 2));
-            assertEquals(1, N.lowerMedian(1, 2));
-            assertEquals(1, N.lowerMedian(2, 1));
-
-            assertEquals(1, N.min(1, 2, 3));
-            assertEquals(1, N.min(2, 1, 3));
-            assertEquals(1, N.min(3, 2, 1));
-
-            assertEquals(3, N.max(1, 2, 3));
-            assertEquals(3, N.max(2, 1, 3));
-            assertEquals(3, N.max(3, 2, 1));
-
-            assertEquals(2, N.median(1, 2, 3));
-            assertEquals(2, N.median(2, 1, 3));
-            assertEquals(2, N.median(3, 2, 1));
-            assertEquals(2, N.median(1, 3, 2));
-
-            int[] a = new int[len];
-            for (int i = 0; i < len; i++) {
-                a[i] = rand.nextInt();
-            }
-
-            final int min = N.min(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] >= min);
-            }
-
-            final int max = N.max(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] <= max);
-            }
-
-            final int median = N.lowerMedian(a);
-
-            int count = 0;
-            for (int i = 0; i < len; i++) {
-                if (a[i] < median) {
-                    count++;
-                }
-            }
-
-            assertTrue(count <= (a.length) / 2);
-
-            a = Array.of(1);
-            assertEquals(1, N.lowerMedian(a));
-
-            a = Array.of(2, 1);
-            assertEquals(1, N.lowerMedian(a));
-
-            a = null;
-            try {
-                N.min(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.max(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.lowerMedian(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-        }
-
-        {
-            assertEquals(1, N.min((long) 1, (long) 2));
-            assertEquals(1, N.min((long) 2, (long) 1));
-            assertEquals(2, N.max((long) 1, (long) 2));
-            assertEquals(2, N.max((long) 2, (long) 2));
-            assertEquals(1, N.lowerMedian((long) 1, (long) 2));
-            assertEquals(1, N.lowerMedian((long) 2, (long) 1));
-
-            assertEquals(1, N.min((long) 1, (long) 2, (long) 3));
-            assertEquals(1, N.min((long) 2, (long) 1, (long) 3));
-            assertEquals(1, N.min((long) 3, (long) 2, (long) 1));
-
-            assertEquals(3, N.max((long) 1, (long) 2, (long) 3));
-            assertEquals(3, N.max((long) 2, (long) 1, (long) 3));
-            assertEquals(3, N.max((long) 3, (long) 2, (long) 1));
-
-            assertEquals(2, N.median((long) 1, (long) 2, (long) 3));
-            assertEquals(2, N.median((long) 2, (long) 1, (long) 3));
-            assertEquals(2, N.median((long) 3, (long) 2, (long) 1));
-            assertEquals(2, N.median((long) 1, (long) 3, (long) 2));
-
-            long[] a = new long[len];
-            for (int i = 0; i < len; i++) {
-                a[i] = rand.nextInt(127);
-            }
-
-            final long min = N.min(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] >= min);
-            }
-
-            final long max = N.max(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] <= max);
-            }
-
-            final long median = N.lowerMedian(a);
-
-            int count = 0;
-            for (int i = 0; i < len; i++) {
-                if (a[i] < median) {
-                    count++;
-                }
-            }
-
-            assertTrue(count <= (a.length) / 2);
-
-            a = Array.of((long) 1);
-            assertEquals(1, N.lowerMedian(a));
-
-            a = Array.of((long) 2, (long) 1);
-            assertEquals(1, N.lowerMedian(a));
-
-            a = Array.of((long) 2, (long) 1, (long) 3);
-            assertEquals(2, N.lowerMedian(a));
-
-            a = null;
-            try {
-                N.min(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.max(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.lowerMedian(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-        }
-
-        {
-            assertEquals(1, N.min((float) 1, (float) 2));
-            assertEquals(1, N.min((float) 2, (float) 1));
-            assertEquals(2, N.max((float) 1, (float) 2));
-            assertEquals(2, N.max((float) 2, (float) 2));
-            assertEquals(1, N.lowerMedian((float) 1, (float) 2));
-            assertEquals(1, N.lowerMedian((float) 2, (float) 1));
-
-            assertEquals(1, N.min((float) 1, (float) 2, (float) 3));
-            assertEquals(1, N.min((float) 2, (float) 1, (float) 3));
-            assertEquals(1, N.min((float) 3, (float) 2, (float) 1));
-
-            assertEquals(3, N.max((float) 1, (float) 2, (float) 3));
-            assertEquals(3, N.max((float) 2, (float) 1, (float) 3));
-            assertEquals(3, N.max((float) 3, (float) 2, (float) 1));
-
-            assertEquals(2, N.median((float) 1, (float) 2, (float) 3));
-            assertEquals(2, N.median((float) 2, (float) 1, (float) 3));
-            assertEquals(2, N.median((float) 3, (float) 2, (float) 1));
-            assertEquals(2, N.median((float) 1, (float) 3, (float) 2));
-
-            float[] a = new float[len];
-            for (int i = 0; i < len; i++) {
-                a[i] = rand.nextInt(127);
-            }
-
-            final float min = N.min(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] >= min);
-            }
-
-            final float max = N.max(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] <= max);
-            }
-
-            final float median = N.lowerMedian(a);
-
-            int count = 0;
-            for (int i = 0; i < len; i++) {
-                if (a[i] < median) {
-                    count++;
-                }
-            }
-
-            assertTrue(count <= (a.length) / 2);
-
-            a = Array.of((float) 1);
-            assertEquals(1, N.lowerMedian(a));
-
-            a = Array.of((float) 2, (float) 1);
-            assertEquals(1, N.lowerMedian(a));
-
-            a = Array.of((float) 2, (float) 1, (float) 3);
-            assertEquals(2, N.lowerMedian(a));
-
-            a = null;
-            try {
-                N.min(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.max(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.lowerMedian(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-        }
-
-        {
-            assertEquals(1, N.min((double) 1, (double) 2));
-            assertEquals(1, N.min((double) 2, (double) 1));
-            assertEquals(2, N.max((double) 1, (double) 2));
-            assertEquals(2, N.max((double) 2, (double) 2));
-            assertEquals(1, N.lowerMedian((double) 1, (double) 2));
-            assertEquals(1, N.lowerMedian((double) 2, (double) 1));
-
-            assertEquals(1, N.min((double) 1, (double) 2, (double) 3));
-            assertEquals(1, N.min((double) 2, (double) 1, (double) 3));
-            assertEquals(1, N.min((double) 3, (double) 2, (double) 1));
-
-            assertEquals(3, N.max((double) 1, (double) 2, (double) 3));
-            assertEquals(3, N.max((double) 2, (double) 1, (double) 3));
-            assertEquals(3, N.max((double) 3, (double) 2, (double) 1));
-
-            assertEquals(2, N.median((double) 1, (double) 2, (double) 3));
-            assertEquals(2, N.median((double) 2, (double) 1, (double) 3));
-            assertEquals(2, N.median((double) 3, (double) 2, (double) 1));
-            assertEquals(2, N.median((double) 1, (double) 3, (double) 2));
-
-            double[] a = new double[len];
-            for (int i = 0; i < len; i++) {
-                a[i] = rand.nextInt(127);
-            }
-
-            final double min = N.min(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] >= min);
-            }
-
-            final double max = N.max(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a[i] <= max);
-            }
-
-            final double median = N.lowerMedian(a);
-
-            int count = 0;
-            for (int i = 0; i < len; i++) {
-                if (a[i] < median) {
-                    count++;
-                }
-            }
-
-            assertTrue(count <= (a.length) / 2);
-
-            a = Array.of((double) 1);
-            assertEquals(1, N.lowerMedian(a));
-
-            a = Array.of((double) 2, (double) 1);
-            assertEquals(1, N.lowerMedian(a));
-
-            a = Array.of((double) 2, (double) 1, (double) 3);
-            assertEquals(2, N.lowerMedian(a));
-
-            a = null;
-            try {
-                N.min(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.max(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.lowerMedian(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-        }
-
-        {
-
-            List<Integer> a = new ArrayList<>();
-            for (int i = 0; i < len; i++) {
-                a.add(rand.nextInt());
-            }
-
-            final int min = N.min(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a.get(i) >= min);
-            }
-
-            final int max = N.max(a);
-
-            for (int i = 0; i < len; i++) {
-                assertTrue(a.get(i) <= max);
-            }
-
-            final int median = N.lowerMedian(a);
-
-            int count = 0;
-            for (int i = 0; i < len; i++) {
-                if (a.get(i) < median) {
-                    count++;
-                }
-            }
-
-            assertTrue(count <= len / 2);
-
-            a = N.toList(1);
-            assertEquals(1, N.lowerMedian(a).intValue());
-
-            a = N.toList(2, 1);
-            assertEquals(1, N.lowerMedian(a).intValue());
-
-            a = N.toList(2, 1, 3);
-            assertEquals(2, N.lowerMedian(a).intValue());
-
-            a = null;
-            try {
-                N.min(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.max(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-            try {
-                N.lowerMedian(a);
-                fail("Should throw IllegalArgumentException");
-            } catch (final IllegalArgumentException e) {
-
-            }
-        }
-
-        {
-            assertEquals(5, N.lowerMedian(1, 2, 3, 4, 5, 6, 7, 8, 9));
-
-            assertEquals(5, N.lowerMedian(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 1, 8));
-
-            assertEquals(4, N.lowerMedian(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 7));
-
-            assertEquals(3, N.lowerMedian(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 6));
-
-            assertEquals(3, N.lowerMedian(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 5));
-
-            assertEquals(4, N.lowerMedian(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 2, 6));
-
-            assertEquals(4, N.lowerMedian(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 2, 5));
-        }
-
-        {
-            assertEquals(5, Median.of(1, 2, 3, 4, 5, 6, 7, 8, 9).left().intValue());
-
-            assertEquals(5, Median.of(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 1, 8).left().intValue());
-
-            assertEquals(4, Median.of(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 7).left().intValue());
-
-            assertEquals(3, Median.of(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 6).left().intValue());
-
-            assertEquals(3, Median.of(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 5).left().intValue());
-
-            assertEquals(4, Median.of(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 2, 6).left().intValue());
-
-            assertEquals(4, Median.of(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 2, 5).left().intValue());
-        }
-
-        {
-            assertEquals(true, Median.of(1, 2, 3, 4, 5, 6, 7, 8, 9).right().isEmpty());
-
-            assertEquals(true, Median.of(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 1, 8).right().isEmpty());
-
-            assertEquals(true, Median.of(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 7).right().isEmpty());
-
-            assertEquals(4, Median.of(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 6).right().get());
-
-            assertEquals(true, Median.of(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 0, 5).right().isEmpty());
-
-            assertEquals(5, Median.of(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 2, 6).right().get());
-
-            assertEquals(true, Median.of(Array.of(1, 2, 3, 4, 5, 6, 7, 8, 9), 2, 5).right().isEmpty());
-        }
     }
 
     @Test
@@ -2274,49 +1603,49 @@ public class NStringTest extends AbstractParserTest {
         {
             final String[] strs = "".split(", ");
             assertEquals(1, strs.length);
-            assertTrue(N.equals(N.asArray(""), strs));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray(""), strs));
         }
 
         {
-            assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Strings.split((String) null, '*')));
-            assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Strings.split("", '*')));
-            assertTrue(N.equals(N.asArray("a", "b", "c"), Strings.split("a.b.c", '.')));
-            assertTrue(N.equals(N.asArray("a", "b", "c"), Strings.split("a..b.c", '.')));
-            assertTrue(N.equals(N.asArray("a", "b", "c"), Strings.split("a b c", " ")));
+            assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Strings.split((String) null, '*')));
+            assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Strings.split("", '*')));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c"), Strings.split("a.b.c", '.')));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c"), Strings.split("a..b.c", '.')));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c"), Strings.split("a b c", " ")));
         }
 
         {
-            assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Strings.splitPreserveAllTokens(null, '*')));
-            assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Strings.split("", '*')));
-            assertTrue(N.equals(N.asArray("a", "b", "c"), Strings.splitPreserveAllTokens("a.b.c", '.')));
-            assertTrue(N.equals(N.asArray("a", "", "b", "c"), Strings.splitPreserveAllTokens("a..b.c", '.')));
-            assertTrue(N.equals(N.asArray("a", "b", "c"), Strings.splitPreserveAllTokens("a b c", " ")));
+            assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Strings.splitPreserveAllTokens(null, '*')));
+            assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Strings.split("", '*')));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c"), Strings.splitPreserveAllTokens("a.b.c", '.')));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "", "b", "c"), Strings.splitPreserveAllTokens("a..b.c", '.')));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c"), Strings.splitPreserveAllTokens("a b c", " ")));
         }
 
         {
-            assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Strings.split((String) null, '*')));
-            assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Strings.split("", "*")));
-            assertTrue(N.equals(N.asArray("a", "b", "c"), Strings.split("a.b.c", ".")));
-            assertTrue(N.equals(N.asArray("a", "b", "c"), Strings.split("a..b.c", ".")));
-            assertTrue(N.equals(N.asArray("a", "b", "c"), Strings.split("a b c", " ")));
-            assertTrue(N.equals(N.asArray("ab", "cd:ef"), Strings.split("ab:cd:ef", ":", 2)));
+            assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Strings.split((String) null, '*')));
+            assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Strings.split("", "*")));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c"), Strings.split("a.b.c", ".")));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c"), Strings.split("a..b.c", ".")));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c"), Strings.split("a b c", " ")));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("ab", "cd:ef"), Strings.split("ab:cd:ef", ":", 2)));
         }
 
         {
-            assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Strings.splitPreserveAllTokens(null, '*')));
-            assertTrue(N.equals(N.asArray(""), Strings.splitPreserveAllTokens("", "*")));
-            assertTrue(N.equals(N.asArray("a", "b", "c"), Strings.splitPreserveAllTokens("a.b.c", ".")));
-            assertTrue(N.equals(N.asArray("a", "", "b", "c"), Strings.splitPreserveAllTokens("a..b.c", ".")));
-            assertTrue(N.equals(N.asArray("a", "b", "c"), Strings.splitPreserveAllTokens("a b c", " ")));
+            assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Strings.splitPreserveAllTokens(null, '*')));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray(""), Strings.splitPreserveAllTokens("", "*")));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c"), Strings.splitPreserveAllTokens("a.b.c", ".")));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "", "b", "c"), Strings.splitPreserveAllTokens("a..b.c", ".")));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c"), Strings.splitPreserveAllTokens("a b c", " ")));
         }
 
         {
-            assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Strings.split((String) null, '*')));
-            assertTrue(N.equals(N.EMPTY_STRING_ARRAY, Strings.split("", "*")));
-            assertTrue(N.equals(N.asArray("a", "b", "c"), Strings.split("a..b..c", "..")));
-            assertTrue(N.equals(N.asArray("a", "b", "c"), Strings.split("a....b..c", "..")));
-            assertTrue(N.equals(N.asArray("a", "b", "c"), Strings.split("a  b  c", " ")));
-            assertArrayEquals(N.asArray("ab", "cd:;ef"), Strings.split("ab:;cd:;ef", ":;", 2));
+            assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Strings.split((String) null, '*')));
+            assertTrue(CommonUtil.equals(CommonUtil.EMPTY_STRING_ARRAY, Strings.split("", "*")));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c"), Strings.split("a..b..c", "..")));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c"), Strings.split("a....b..c", "..")));
+            assertTrue(CommonUtil.equals(CommonUtil.asArray("a", "b", "c"), Strings.split("a  b  c", " ")));
+            assertArrayEquals(CommonUtil.asArray("ab", "cd:;ef"), Strings.split("ab:;cd:;ef", ":;", 2));
         }
 
     }
@@ -2327,13 +1656,13 @@ public class NStringTest extends AbstractParserTest {
         {
             boolean[] a = {};
 
-            assertTrue(Arrays.equals(N.EMPTY_BOOLEAN_ARRAY, N.removeAllOccurrences(a, true)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.removeAllOccurrences(a, true)));
 
             a = new boolean[] { true };
-            assertTrue(Arrays.equals(N.EMPTY_BOOLEAN_ARRAY, N.removeAllOccurrences(a, true)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.removeAllOccurrences(a, true)));
 
             a = new boolean[] { true, true };
-            assertTrue(Arrays.equals(N.EMPTY_BOOLEAN_ARRAY, N.removeAllOccurrences(a, true)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.removeAllOccurrences(a, true)));
 
             a = new boolean[] { false, true, true, false, true };
             assertTrue(Arrays.equals(new boolean[] { false, false }, N.removeAllOccurrences(a, true)));
@@ -2342,10 +1671,10 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(Arrays.equals(new boolean[] { true, true, true }, N.removeAllOccurrences(a, false)));
 
             a = new boolean[0];
-            assertTrue(Arrays.equals(N.EMPTY_BOOLEAN_ARRAY, N.remove(a, true)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.remove(a, true)));
 
             a = new boolean[] { true };
-            assertTrue(Arrays.equals(N.EMPTY_BOOLEAN_ARRAY, N.remove(a, true)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_BOOLEAN_ARRAY, N.remove(a, true)));
 
             a = new boolean[] { true, true };
             assertTrue(Arrays.equals(new boolean[] { true }, N.remove(a, true)));
@@ -2360,13 +1689,13 @@ public class NStringTest extends AbstractParserTest {
         {
             char[] a = {};
 
-            assertTrue(Arrays.equals(N.EMPTY_CHAR_ARRAY, N.removeAllOccurrences(a, '2')));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_CHAR_ARRAY, N.removeAllOccurrences(a, '2')));
 
             a = new char[] { '2' };
-            assertTrue(Arrays.equals(N.EMPTY_CHAR_ARRAY, N.removeAllOccurrences(a, '2')));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_CHAR_ARRAY, N.removeAllOccurrences(a, '2')));
 
             a = new char[] { '2', '2' };
-            assertTrue(Arrays.equals(N.EMPTY_CHAR_ARRAY, N.removeAllOccurrences(a, '2')));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_CHAR_ARRAY, N.removeAllOccurrences(a, '2')));
 
             a = new char[] { '1', '2', '2', '3', '2' };
             assertTrue(Arrays.equals(new char[] { '1', '3' }, N.removeAllOccurrences(a, '2')));
@@ -2377,10 +1706,10 @@ public class NStringTest extends AbstractParserTest {
             a = null;
 
             a = new char[0];
-            assertTrue(Arrays.equals(N.EMPTY_CHAR_ARRAY, N.remove(a, '2')));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_CHAR_ARRAY, N.remove(a, '2')));
 
             a = new char[] { '2' };
-            assertTrue(Arrays.equals(N.EMPTY_CHAR_ARRAY, N.remove(a, '2')));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_CHAR_ARRAY, N.remove(a, '2')));
 
             a = new char[] { '2', '2' };
             assertTrue(Arrays.equals(new char[] { '2' }, N.remove(a, '2')));
@@ -2395,13 +1724,13 @@ public class NStringTest extends AbstractParserTest {
         {
             byte[] a = {};
 
-            assertTrue(Arrays.equals(N.EMPTY_BYTE_ARRAY, N.removeAllOccurrences(a, (byte) 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_BYTE_ARRAY, N.removeAllOccurrences(a, (byte) 2)));
 
             a = new byte[] { 2 };
-            assertTrue(Arrays.equals(N.EMPTY_BYTE_ARRAY, N.removeAllOccurrences(a, (byte) 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_BYTE_ARRAY, N.removeAllOccurrences(a, (byte) 2)));
 
             a = new byte[] { 2, 2 };
-            assertTrue(Arrays.equals(N.EMPTY_BYTE_ARRAY, N.removeAllOccurrences(a, (byte) 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_BYTE_ARRAY, N.removeAllOccurrences(a, (byte) 2)));
 
             a = new byte[] { 1, 2, 2, 3, 2 };
             assertTrue(Arrays.equals(new byte[] { 1, 3 }, N.removeAllOccurrences(a, (byte) 2)));
@@ -2410,10 +1739,10 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(Arrays.equals(new byte[] { 1, 2, 2, 3, 2 }, N.removeAllOccurrences(a, (byte) 4)));
 
             a = new byte[0];
-            assertTrue(Arrays.equals(N.EMPTY_BYTE_ARRAY, N.remove(a, (byte) 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_BYTE_ARRAY, N.remove(a, (byte) 2)));
 
             a = new byte[] { 2 };
-            assertTrue(Arrays.equals(N.EMPTY_BYTE_ARRAY, N.remove(a, (byte) 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_BYTE_ARRAY, N.remove(a, (byte) 2)));
 
             a = new byte[] { 2, 2 };
             assertTrue(Arrays.equals(new byte[] { 2 }, N.remove(a, (byte) 2)));
@@ -2428,13 +1757,13 @@ public class NStringTest extends AbstractParserTest {
         {
             short[] a = {};
 
-            assertTrue(Arrays.equals(N.EMPTY_SHORT_ARRAY, N.removeAllOccurrences(a, (short) 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_SHORT_ARRAY, N.removeAllOccurrences(a, (short) 2)));
 
             a = new short[] { 2 };
-            assertTrue(Arrays.equals(N.EMPTY_SHORT_ARRAY, N.removeAllOccurrences(a, (short) 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_SHORT_ARRAY, N.removeAllOccurrences(a, (short) 2)));
 
             a = new short[] { 2, 2 };
-            assertTrue(Arrays.equals(N.EMPTY_SHORT_ARRAY, N.removeAllOccurrences(a, (short) 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_SHORT_ARRAY, N.removeAllOccurrences(a, (short) 2)));
 
             a = new short[] { 1, 2, 2, 3, 2 };
             assertTrue(Arrays.equals(new short[] { 1, 3 }, N.removeAllOccurrences(a, (short) 2)));
@@ -2443,10 +1772,10 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(Arrays.equals(new short[] { 1, 2, 2, 3, 2 }, N.removeAllOccurrences(a, (short) 4)));
 
             a = new short[0];
-            assertTrue(Arrays.equals(N.EMPTY_SHORT_ARRAY, N.remove(a, (short) 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_SHORT_ARRAY, N.remove(a, (short) 2)));
 
             a = new short[] { 2 };
-            assertTrue(Arrays.equals(N.EMPTY_SHORT_ARRAY, N.remove(a, (short) 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_SHORT_ARRAY, N.remove(a, (short) 2)));
 
             a = new short[] { 2, 2 };
             assertTrue(Arrays.equals(new short[] { 2 }, N.remove(a, (short) 2)));
@@ -2461,13 +1790,13 @@ public class NStringTest extends AbstractParserTest {
         {
             int[] a = {};
 
-            assertTrue(Arrays.equals(N.EMPTY_INT_ARRAY, N.removeAllOccurrences(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_INT_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new int[] { 2 };
-            assertTrue(Arrays.equals(N.EMPTY_INT_ARRAY, N.removeAllOccurrences(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_INT_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new int[] { 2, 2 };
-            assertTrue(Arrays.equals(N.EMPTY_INT_ARRAY, N.removeAllOccurrences(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_INT_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new int[] { 1, 2, 2, 3, 2 };
             assertTrue(Arrays.equals(new int[] { 1, 3 }, N.removeAllOccurrences(a, 2)));
@@ -2476,10 +1805,10 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(Arrays.equals(new int[] { 1, 2, 2, 3, 2 }, N.removeAllOccurrences(a, 4)));
 
             a = new int[0];
-            assertTrue(Arrays.equals(N.EMPTY_INT_ARRAY, N.remove(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_INT_ARRAY, N.remove(a, 2)));
 
             a = new int[] { 2 };
-            assertTrue(Arrays.equals(N.EMPTY_INT_ARRAY, N.remove(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_INT_ARRAY, N.remove(a, 2)));
 
             a = new int[] { 2, 2 };
             assertTrue(Arrays.equals(new int[] { 2 }, N.remove(a, 2)));
@@ -2494,13 +1823,13 @@ public class NStringTest extends AbstractParserTest {
         {
             long[] a = {};
 
-            assertTrue(Arrays.equals(N.EMPTY_LONG_ARRAY, N.removeAllOccurrences(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_LONG_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new long[] { 2 };
-            assertTrue(Arrays.equals(N.EMPTY_LONG_ARRAY, N.removeAllOccurrences(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_LONG_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new long[] { 2, 2 };
-            assertTrue(Arrays.equals(N.EMPTY_LONG_ARRAY, N.removeAllOccurrences(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_LONG_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new long[] { 1, 2, 2, 3, 2 };
             assertTrue(Arrays.equals(new long[] { 1, 3 }, N.removeAllOccurrences(a, 2)));
@@ -2509,10 +1838,10 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(Arrays.equals(new long[] { 1, 2, 2, 3, 2 }, N.removeAllOccurrences(a, 4)));
 
             a = new long[0];
-            assertTrue(Arrays.equals(N.EMPTY_LONG_ARRAY, N.remove(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_LONG_ARRAY, N.remove(a, 2)));
 
             a = new long[] { 2 };
-            assertTrue(Arrays.equals(N.EMPTY_LONG_ARRAY, N.remove(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_LONG_ARRAY, N.remove(a, 2)));
 
             a = new long[] { 2, 2 };
             assertTrue(Arrays.equals(new long[] { 2 }, N.remove(a, 2)));
@@ -2527,13 +1856,13 @@ public class NStringTest extends AbstractParserTest {
         {
             float[] a = {};
 
-            assertTrue(Arrays.equals(N.EMPTY_FLOAT_ARRAY, N.removeAllOccurrences(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_FLOAT_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new float[] { 2 };
-            assertTrue(Arrays.equals(N.EMPTY_FLOAT_ARRAY, N.removeAllOccurrences(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_FLOAT_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new float[] { 2, 2 };
-            assertTrue(Arrays.equals(N.EMPTY_FLOAT_ARRAY, N.removeAllOccurrences(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_FLOAT_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new float[] { 1, 2, 2, 3, 2 };
             assertTrue(Arrays.equals(new float[] { 1, 3 }, N.removeAllOccurrences(a, 2)));
@@ -2542,10 +1871,10 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(Arrays.equals(new float[] { 1, 2, 2, 3, 2 }, N.removeAllOccurrences(a, 4)));
 
             a = new float[0];
-            assertTrue(Arrays.equals(N.EMPTY_FLOAT_ARRAY, N.remove(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_FLOAT_ARRAY, N.remove(a, 2)));
 
             a = new float[] { 2 };
-            assertTrue(Arrays.equals(N.EMPTY_FLOAT_ARRAY, N.remove(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_FLOAT_ARRAY, N.remove(a, 2)));
 
             a = new float[] { 2, 2 };
             assertTrue(Arrays.equals(new float[] { 2 }, N.remove(a, 2)));
@@ -2560,13 +1889,13 @@ public class NStringTest extends AbstractParserTest {
         {
             double[] a = {};
 
-            assertTrue(Arrays.equals(N.EMPTY_DOUBLE_ARRAY, N.removeAllOccurrences(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new double[] { 2 };
-            assertTrue(Arrays.equals(N.EMPTY_DOUBLE_ARRAY, N.removeAllOccurrences(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new double[] { 2, 2 };
-            assertTrue(Arrays.equals(N.EMPTY_DOUBLE_ARRAY, N.removeAllOccurrences(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.removeAllOccurrences(a, 2)));
 
             a = new double[] { 1, 2, 2, 3, 2 };
             assertTrue(Arrays.equals(new double[] { 1, 3 }, N.removeAllOccurrences(a, 2)));
@@ -2575,10 +1904,10 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(Arrays.equals(new double[] { 1, 2, 2, 3, 2 }, N.removeAllOccurrences(a, 4)));
 
             a = new double[0];
-            assertTrue(Arrays.equals(N.EMPTY_DOUBLE_ARRAY, N.remove(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.remove(a, 2)));
 
             a = new double[] { 2 };
-            assertTrue(Arrays.equals(N.EMPTY_DOUBLE_ARRAY, N.remove(a, 2)));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_DOUBLE_ARRAY, N.remove(a, 2)));
 
             a = new double[] { 2, 2 };
             assertTrue(Arrays.equals(new double[] { 2 }, N.remove(a, 2)));
@@ -2593,13 +1922,13 @@ public class NStringTest extends AbstractParserTest {
         {
             String[] a = {};
 
-            assertTrue(Arrays.equals(N.EMPTY_STRING_ARRAY, N.removeAllOccurrences(a, "2")));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_STRING_ARRAY, N.removeAllOccurrences(a, "2")));
 
             a = new String[] { "2" };
-            assertTrue(Arrays.equals(N.EMPTY_STRING_ARRAY, N.removeAllOccurrences(a, "2")));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_STRING_ARRAY, N.removeAllOccurrences(a, "2")));
 
             a = new String[] { "2", "2" };
-            assertTrue(Arrays.equals(N.EMPTY_STRING_ARRAY, N.removeAllOccurrences(a, "2")));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_STRING_ARRAY, N.removeAllOccurrences(a, "2")));
 
             a = new String[] { "1", "2", "2", "3", "2" };
             assertTrue(Arrays.equals(new String[] { "1", "3" }, N.removeAllOccurrences(a, "2")));
@@ -2608,10 +1937,10 @@ public class NStringTest extends AbstractParserTest {
             assertTrue(Arrays.equals(new String[] { "1", "2", "2", "3", "2" }, N.removeAllOccurrences(a, "4")));
 
             a = new String[0];
-            assertTrue(Arrays.equals(N.EMPTY_STRING_ARRAY, N.remove(a, "2")));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_STRING_ARRAY, N.remove(a, "2")));
 
             a = new String[] { "2" };
-            assertTrue(Arrays.equals(N.EMPTY_STRING_ARRAY, N.remove(a, "2")));
+            assertTrue(Arrays.equals(CommonUtil.EMPTY_STRING_ARRAY, N.remove(a, "2")));
 
             a = new String[] { "2", "2" };
             assertTrue(Arrays.equals(new String[] { "2" }, N.remove(a, "2")));
@@ -2641,12 +1970,12 @@ public class NStringTest extends AbstractParserTest {
 
             final IntList list = IntList.of(new int[a.length - indices.length], 0);
             for (int i = 0; i < len; i++) {
-                if (N.indexOf(indices, i) < 0) {
+                if (CommonUtil.indexOf(indices, i) < 0) {
                     list.add(a[i]);
                 }
             }
 
-            assertTrue(N.equals(list.trimToSize().internalArray(), N.removeAt(a, indices)));
+            assertTrue(CommonUtil.equals(list.trimToSize().internalArray(), N.removeAt(a, indices)));
         }
 
         {
@@ -2662,12 +1991,12 @@ public class NStringTest extends AbstractParserTest {
 
             final LongList list = LongList.of(new long[a.length - indices.length], 0);
             for (int i = 0; i < len; i++) {
-                if (N.indexOf(indices, i) < 0) {
+                if (CommonUtil.indexOf(indices, i) < 0) {
                     list.add(a[i]);
                 }
             }
 
-            assertTrue(N.equals(list.trimToSize().internalArray(), N.removeAt(a, indices)));
+            assertTrue(CommonUtil.equals(list.trimToSize().internalArray(), N.removeAt(a, indices)));
         }
     }
 
@@ -2976,7 +2305,7 @@ public class NStringTest extends AbstractParserTest {
         }
 
         {
-            final List<Integer> list = N.toList(1, 2, 1, 1);
+            final List<Integer> list = CommonUtil.toList(1, 2, 1, 1);
 
             list.remove(Integer.valueOf(1));
             assertEquals(3, list.size());
@@ -2985,30 +2314,30 @@ public class NStringTest extends AbstractParserTest {
         }
 
         {
-            List<?> list = N.toList(1, 2, 3);
+            List<?> list = CommonUtil.toList(1, 2, 3);
             N.removeAt(list, 0, 1, 2);
             N.println(list);
             assertEquals(0, list.size());
 
-            list = N.toList(1, 2, 3);
+            list = CommonUtil.toList(1, 2, 3);
             N.removeAt(list, 0, 1, 1);
             N.println(list);
-            assertEquals(N.toList(3), list);
+            assertEquals(CommonUtil.toList(3), list);
 
-            list = N.toList(1, 2, 3);
+            list = CommonUtil.toList(1, 2, 3);
             N.removeAt(list, 0, 2);
             N.println(list);
-            assertEquals(N.toList(2), list);
+            assertEquals(CommonUtil.toList(2), list);
 
-            list = N.toList(1, 2, 3);
+            list = CommonUtil.toList(1, 2, 3);
             N.removeAt(list, 1);
             N.println(list);
-            assertEquals(N.toList(1, 3), list);
+            assertEquals(CommonUtil.toList(1, 3), list);
 
-            list = N.toList(1, 2, 2, 3);
+            list = CommonUtil.toList(1, 2, 2, 3);
             N.removeAt(list, 1);
             N.println(list);
-            assertEquals(N.toList(1, 2, 3), list);
+            assertEquals(CommonUtil.toList(1, 2, 3), list);
         }
     }
 
@@ -3016,74 +2345,74 @@ public class NStringTest extends AbstractParserTest {
     public void test_array_op_2() {
         {
             final boolean[] a = { true, false };
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, 0, a)));
-            assertTrue(N.equals(new boolean[] { true, true, false, false }, N.insertAll(a, 1, a)));
-            assertTrue(N.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
+            assertTrue(CommonUtil.equals(new boolean[] { true, true, false, false }, N.insertAll(a, 1, a)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
             final char[] a = { 'a', 'b' };
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, 0, a)));
-            assertTrue(N.equals(new char[] { 'a', 'a', 'b', 'b' }, N.insertAll(a, 1, a)));
-            assertTrue(N.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
+            assertTrue(CommonUtil.equals(new char[] { 'a', 'a', 'b', 'b' }, N.insertAll(a, 1, a)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
             final byte[] a = { 1, 2 };
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, 0, a)));
-            assertTrue(N.equals(new byte[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(N.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
+            assertTrue(CommonUtil.equals(new byte[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
             final short[] a = { 1, 2 };
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, 0, a)));
-            assertTrue(N.equals(new short[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(N.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
+            assertTrue(CommonUtil.equals(new short[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
             final int[] a = { 1, 2 };
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, 0, a)));
-            assertTrue(N.equals(new int[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(N.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
+            assertTrue(CommonUtil.equals(new int[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
             final long[] a = { 1, 2 };
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, 0, a)));
-            assertTrue(N.equals(new long[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(N.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
+            assertTrue(CommonUtil.equals(new long[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
             final float[] a = { 1, 2 };
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, 0, a)));
-            assertTrue(N.equals(new float[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(N.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
+            assertTrue(CommonUtil.equals(new float[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
             final double[] a = { 1, 2 };
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, 0, a)));
-            assertTrue(N.equals(new double[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(N.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
+            assertTrue(CommonUtil.equals(new double[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
 
         {
             final Object[] a = { 1, 2 };
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
-            assertTrue(N.equals(N.concat(a, a), N.insertAll(a, 0, a)));
-            assertTrue(N.equals(new Object[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
-            assertTrue(N.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, a.length, a)));
+            assertTrue(CommonUtil.equals(N.concat(a, a), N.insertAll(a, 0, a)));
+            assertTrue(CommonUtil.equals(new Object[] { 1, 1, 2, 2 }, N.insertAll(a, 1, a)));
+            assertTrue(CommonUtil.equals(a, N.removeAt(N.insertAll(a, 1, a), 1, 2)));
         }
     }
 
@@ -3091,48 +2420,48 @@ public class NStringTest extends AbstractParserTest {
     public void test_removeDuplicates() {
         {
             final char[] a = { '1', '2', '1', '3' };
-            assertTrue(N.equals(new char[] { '1', '2', '3' }, N.removeDuplicates(a)));
+            assertTrue(CommonUtil.equals(new char[] { '1', '2', '3' }, N.removeDuplicates(a)));
         }
 
         {
             final byte[] a = { '1', '2', '1', '3' };
-            assertTrue(N.equals(new byte[] { '1', '2', '3' }, N.removeDuplicates(a)));
+            assertTrue(CommonUtil.equals(new byte[] { '1', '2', '3' }, N.removeDuplicates(a)));
         }
 
         {
             final short[] a = { '1', '2', '1', '3' };
-            assertTrue(N.equals(new short[] { '1', '2', '3' }, N.removeDuplicates(a)));
+            assertTrue(CommonUtil.equals(new short[] { '1', '2', '3' }, N.removeDuplicates(a)));
         }
 
         {
             final int[] a = { '1', '2', '1', '3' };
-            assertTrue(N.equals(new int[] { '1', '2', '3' }, N.removeDuplicates(a)));
+            assertTrue(CommonUtil.equals(new int[] { '1', '2', '3' }, N.removeDuplicates(a)));
         }
 
         {
             final long[] a = { '1', '2', '1', '3' };
-            assertTrue(N.equals(new long[] { '1', '2', '3' }, N.removeDuplicates(a)));
+            assertTrue(CommonUtil.equals(new long[] { '1', '2', '3' }, N.removeDuplicates(a)));
         }
 
         {
             final float[] a = { '1', '2', '1', '3' };
-            assertTrue(N.equals(new float[] { '1', '2', '3' }, N.removeDuplicates(a)));
+            assertTrue(CommonUtil.equals(new float[] { '1', '2', '3' }, N.removeDuplicates(a)));
         }
 
         {
             final double[] a = { '1', '2', '1', '3' };
-            assertTrue(N.equals(new double[] { '1', '2', '3' }, N.removeDuplicates(a)));
+            assertTrue(CommonUtil.equals(new double[] { '1', '2', '3' }, N.removeDuplicates(a)));
         }
 
         {
             final Object[] a = { '1', '2', '1', '3' };
-            assertTrue(N.equals(new Object[] { '1', '2', '3' }, N.removeDuplicates(a)));
+            assertTrue(CommonUtil.equals(new Object[] { '1', '2', '3' }, N.removeDuplicates(a)));
         }
 
         {
-            final List<Character> c = N.toList('1', '2', '1', '3');
+            final List<Character> c = CommonUtil.toList('1', '2', '1', '3');
             N.removeDuplicates(c);
-            assertTrue(N.equals(N.toList('1', '2', '3'), c));
+            assertTrue(CommonUtil.equals(CommonUtil.toList('1', '2', '3'), c));
         }
     }
 
@@ -3140,57 +2469,57 @@ public class NStringTest extends AbstractParserTest {
     public void test_removeDuplicates_sorted() {
         {
             final char[] a = { '1', '2', '1', '3' };
-            N.sort(a);
-            assertTrue(N.equals(new char[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
+            CommonUtil.sort(a);
+            assertTrue(CommonUtil.equals(new char[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
         }
 
         {
             final byte[] a = { '1', '2', '1', '3' };
-            N.sort(a);
-            assertTrue(N.equals(new byte[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
+            CommonUtil.sort(a);
+            assertTrue(CommonUtil.equals(new byte[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
         }
 
         {
             final short[] a = { '1', '2', '1', '3' };
-            N.sort(a);
-            assertTrue(N.equals(new short[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
+            CommonUtil.sort(a);
+            assertTrue(CommonUtil.equals(new short[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
         }
 
         {
             final int[] a = { '1', '2', '1', '3' };
-            N.sort(a);
-            assertTrue(N.equals(new int[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
+            CommonUtil.sort(a);
+            assertTrue(CommonUtil.equals(new int[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
         }
 
         {
             final long[] a = { '1', '2', '1', '3' };
-            N.sort(a);
-            assertTrue(N.equals(new long[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
+            CommonUtil.sort(a);
+            assertTrue(CommonUtil.equals(new long[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
         }
 
         {
             final float[] a = { '1', '2', '1', '3' };
-            N.sort(a);
-            assertTrue(N.equals(new float[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
+            CommonUtil.sort(a);
+            assertTrue(CommonUtil.equals(new float[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
         }
 
         {
             final double[] a = { '1', '2', '1', '3' };
-            N.sort(a);
-            assertTrue(N.equals(new double[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
+            CommonUtil.sort(a);
+            assertTrue(CommonUtil.equals(new double[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
         }
 
         {
             final Character[] a = { '1', '2', '1', '3' };
-            N.sort(a);
-            assertTrue(N.equals(new Character[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
+            CommonUtil.sort(a);
+            assertTrue(CommonUtil.equals(new Character[] { '1', '2', '3' }, N.removeDuplicates(a, true)));
         }
 
         {
-            final List<Character> c = N.toList('1', '2', '1', '3', '4', '3', '3', '2');
-            N.sort(c);
+            final List<Character> c = CommonUtil.toList('1', '2', '1', '3', '4', '3', '3', '2');
+            CommonUtil.sort(c);
             N.removeDuplicates(c, true);
-            assertTrue(N.equals(N.toList('1', '2', '3', '4'), c));
+            assertTrue(CommonUtil.equals(CommonUtil.toList('1', '2', '3', '4'), c));
         }
     }
 
@@ -3237,7 +2566,7 @@ public class NStringTest extends AbstractParserTest {
         }
 
         {
-            final List<?> a = N.toList('1', '2', '1', '3');
+            final List<?> a = CommonUtil.toList('1', '2', '1', '3');
             assertTrue(N.containsDuplicates(a));
         }
     }
@@ -3246,55 +2575,55 @@ public class NStringTest extends AbstractParserTest {
     public void test_containsDuplicates_sorted() {
         {
             final char[] a = { '1', '2', '1', '3' };
-            N.sort(a);
+            CommonUtil.sort(a);
             assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final byte[] a = { '1', '2', '1', '3' };
-            N.sort(a);
+            CommonUtil.sort(a);
             assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final short[] a = { '1', '2', '1', '3' };
-            N.sort(a);
+            CommonUtil.sort(a);
             assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final int[] a = { '1', '2', '1', '3' };
-            N.sort(a);
+            CommonUtil.sort(a);
             assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final long[] a = { '1', '2', '1', '3' };
-            N.sort(a);
+            CommonUtil.sort(a);
             assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final float[] a = { '1', '2', '1', '3' };
-            N.sort(a);
+            CommonUtil.sort(a);
             assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final double[] a = { '1', '2', '1', '3' };
-            N.sort(a);
+            CommonUtil.sort(a);
             assertTrue(N.containsDuplicates(a, true));
         }
 
         {
             final Character[] a = { '1', '2', '1', '3' };
-            N.sort(a);
+            CommonUtil.sort(a);
             assertTrue(N.containsDuplicates(a, true));
         }
 
         {
-            final List<Character> a = N.toList('1', '2', '1', '3');
-            N.sort(a);
+            final List<Character> a = CommonUtil.toList('1', '2', '1', '3');
+            CommonUtil.sort(a);
             assertTrue(N.containsDuplicates(a, true));
         }
     }
@@ -3342,7 +2671,7 @@ public class NStringTest extends AbstractParserTest {
         }
 
         {
-            final List<?> a = N.toList('1', '2', '3');
+            final List<?> a = CommonUtil.toList('1', '2', '3');
             assertFalse(N.containsDuplicates(a));
         }
     }
@@ -3449,7 +2778,7 @@ public class NStringTest extends AbstractParserTest {
         }
 
         {
-            List<Integer> a = N.toList(1, 2, 2);
+            List<Integer> a = CommonUtil.toList(1, 2, 2);
             N.replaceAll(a, 2, 1);
             for (final Integer element : a) {
                 assertEquals(1, (int) element);
@@ -3460,11 +2789,11 @@ public class NStringTest extends AbstractParserTest {
         }
 
         {
-            List<String> list = N.toList("b", "b", "b");
+            List<String> list = CommonUtil.toList("b", "b", "b");
 
             for (int k = 5; k <= 1001; k++) {
-                list = N.toLinkedList();
-                N.fill(list, 0, k, "123");
+                list = CommonUtil.toLinkedList();
+                CommonUtil.fill(list, 0, k, "123");
                 N.replaceAll(list, "123", "abc");
 
                 for (int j = 0; j < k; j++) {
@@ -3474,11 +2803,11 @@ public class NStringTest extends AbstractParserTest {
         }
 
         {
-            List<String> list = N.toList("b", "b", "b");
+            List<String> list = CommonUtil.toList("b", "b", "b");
 
             for (int k = 5; k <= 1001; k++) {
-                list = N.toLinkedList();
-                N.fill(list, 0, k, null);
+                list = CommonUtil.toLinkedList();
+                CommonUtil.fill(list, 0, k, null);
                 N.replaceAll(list, null, "abc");
 
                 for (int j = 0; j < k; j++) {
@@ -3492,11 +2821,11 @@ public class NStringTest extends AbstractParserTest {
     public void test_equalsIgnoreCase() {
 
         {
-            final String[] a = N.asArray("abC");
-            final String[] b = N.asArray("aBc");
+            final String[] a = CommonUtil.asArray("abC");
+            final String[] b = CommonUtil.asArray("aBc");
 
-            assertTrue(N.equalsIgnoreCase(a[0], b[0]));
-            assertTrue(N.equalsIgnoreCase(a, b));
+            assertTrue(CommonUtil.equalsIgnoreCase(a[0], b[0]));
+            assertTrue(CommonUtil.equalsIgnoreCase(a, b));
         }
     }
 
@@ -3504,7 +2833,7 @@ public class NStringTest extends AbstractParserTest {
     public void test_NotNullOrEmpty() {
         {
             final Dataset parameter = null;
-            assertFalse(N.notEmpty(parameter));
+            assertFalse(CommonUtil.notEmpty(parameter));
         }
 
         {
@@ -3517,10 +2846,10 @@ public class NStringTest extends AbstractParserTest {
     public void test_swap() {
 
         {
-            final List<?> a = N.toList(1, 2, 3);
+            final List<?> a = CommonUtil.toList(1, 2, 3);
             final List<?> b = new ArrayList<>(a);
 
-            N.swap(a, 0, 2);
+            CommonUtil.swap(a, 0, 2);
 
             assertEquals(a.get(0), b.get(2));
             assertEquals(a.get(2), b.get(0));
@@ -3528,9 +2857,9 @@ public class NStringTest extends AbstractParserTest {
 
         {
             final Object[] a = { 1, 2, 3 };
-            final Object[] b = N.copyOf(a, a.length);
+            final Object[] b = CommonUtil.copyOf(a, a.length);
 
-            N.swap(a, 0, 2);
+            CommonUtil.swap(a, 0, 2);
 
             assertEquals(a[0], b[2]);
             assertEquals(a[2], b[0]);
@@ -3538,9 +2867,9 @@ public class NStringTest extends AbstractParserTest {
 
         {
             final boolean[] a = { false, true, true };
-            final boolean[] b = N.copyOf(a, a.length);
+            final boolean[] b = CommonUtil.copyOf(a, a.length);
 
-            N.swap(a, 0, 2);
+            CommonUtil.swap(a, 0, 2);
 
             assertEquals(a[0], b[2]);
             assertEquals(a[2], b[0]);
@@ -3548,9 +2877,9 @@ public class NStringTest extends AbstractParserTest {
 
         {
             final char[] a = { '1', '2', '3' };
-            final char[] b = N.copyOf(a, a.length);
+            final char[] b = CommonUtil.copyOf(a, a.length);
 
-            N.swap(a, 0, 2);
+            CommonUtil.swap(a, 0, 2);
 
             assertEquals(a[0], b[2]);
             assertEquals(a[2], b[0]);
@@ -3558,9 +2887,9 @@ public class NStringTest extends AbstractParserTest {
 
         {
             final byte[] a = { 1, 2, 3 };
-            final byte[] b = N.copyOf(a, a.length);
+            final byte[] b = CommonUtil.copyOf(a, a.length);
 
-            N.swap(a, 0, 2);
+            CommonUtil.swap(a, 0, 2);
 
             assertEquals(a[0], b[2]);
             assertEquals(a[2], b[0]);
@@ -3568,9 +2897,9 @@ public class NStringTest extends AbstractParserTest {
 
         {
             final short[] a = { 1, 2, 3 };
-            final short[] b = N.copyOf(a, a.length);
+            final short[] b = CommonUtil.copyOf(a, a.length);
 
-            N.swap(a, 0, 2);
+            CommonUtil.swap(a, 0, 2);
 
             assertEquals(a[0], b[2]);
             assertEquals(a[2], b[0]);
@@ -3578,9 +2907,9 @@ public class NStringTest extends AbstractParserTest {
 
         {
             final int[] a = { 1, 2, 3 };
-            final int[] b = N.copyOf(a, a.length);
+            final int[] b = CommonUtil.copyOf(a, a.length);
 
-            N.swap(a, 0, 2);
+            CommonUtil.swap(a, 0, 2);
 
             assertEquals(a[0], b[2]);
             assertEquals(a[2], b[0]);
@@ -3588,9 +2917,9 @@ public class NStringTest extends AbstractParserTest {
 
         {
             final long[] a = { 1, 2, 3 };
-            final long[] b = N.copyOf(a, a.length);
+            final long[] b = CommonUtil.copyOf(a, a.length);
 
-            N.swap(a, 0, 2);
+            CommonUtil.swap(a, 0, 2);
 
             assertEquals(a[0], b[2]);
             assertEquals(a[2], b[0]);
@@ -3598,9 +2927,9 @@ public class NStringTest extends AbstractParserTest {
 
         {
             final float[] a = { 1, 2, 3 };
-            final float[] b = N.copyOf(a, a.length);
+            final float[] b = CommonUtil.copyOf(a, a.length);
 
-            N.swap(a, 0, 2);
+            CommonUtil.swap(a, 0, 2);
 
             assertEquals(a[0], b[2]);
             assertEquals(a[2], b[0]);
@@ -3608,1168 +2937,13 @@ public class NStringTest extends AbstractParserTest {
 
         {
             final double[] a = { 1, 2, 3 };
-            final double[] b = N.copyOf(a, a.length);
+            final double[] b = CommonUtil.copyOf(a, a.length);
 
-            N.swap(a, 0, 2);
+            CommonUtil.swap(a, 0, 2);
 
             assertEquals(a[0], b[2]);
             assertEquals(a[2], b[0]);
         }
 
-    }
-
-    @Test
-    public void test_reverse() {
-        {
-            final String str = "a.b.c";
-            String str2 = Strings.reverseDelimited(str, '.');
-            N.println(str2);
-            assertFalse(N.equals(str, str2));
-
-            str2 = Strings.reverseDelimited(str2, '.');
-            assertTrue(N.equals(str, str2));
-        }
-
-        {
-
-            final String str = "abc";
-            String str2 = Strings.reverse(str);
-            assertFalse(N.equals(str, str2));
-
-            str2 = Strings.reverse(str2);
-            assertTrue(N.equals(str, str2));
-        }
-
-        {
-            final List<Object> list = null;
-            N.reverse(list);
-        }
-
-        {
-            final Object[] a = null;
-            N.reverse(a);
-        }
-
-        {
-            final boolean[] a = null;
-            N.reverse(a);
-        }
-
-        {
-            final char[] a = null;
-            N.reverse(a);
-        }
-
-        {
-            final byte[] a = null;
-            N.reverse(a);
-        }
-
-        {
-            final short[] a = null;
-            N.reverse(a);
-        }
-
-        {
-            final int[] a = null;
-            N.reverse(a);
-        }
-
-        {
-            final long[] a = null;
-            N.reverse(a);
-        }
-
-        {
-            final float[] a = null;
-            N.reverse(a);
-        }
-
-        {
-            final double[] a = null;
-            N.reverse(a);
-        }
-
-        {
-            final List<?> a = N.toList(1, 2, 3);
-            final List<?> b = new ArrayList<>(a);
-
-            N.reverse(a);
-
-            for (int i = 0, len = a.size(); i < len; i++) {
-                assertEquals(a.get(i), b.get(len - i - 1));
-            }
-        }
-
-        {
-            final List<?> a = N.toList(1, 2, 3, 4, 5, 6);
-            final List<?> b = new ArrayList<>(a);
-
-            N.reverse(a);
-
-            for (int i = 0, len = a.size(); i < len; i++) {
-                assertEquals(a.get(i), b.get(len - i - 1));
-            }
-        }
-
-        {
-            for (int i = 0; i <= 1001; i++) {
-                final List<Object> a = new ArrayList<>(i);
-
-                for (int j = 0; j < i; j++) {
-                    a.add(j);
-                }
-
-                final List<Object> b = new ArrayList<>(a);
-                N.reverse(b);
-
-                for (int k = 0, size = a.size(); k < size; k++) {
-                    assertEquals(a.get(k), b.get(size - k - 1));
-                }
-            }
-        }
-
-        {
-            for (int i = 5; i <= 1001; i++) {
-                final List<Object> a = new ArrayList<>(i);
-
-                for (int j = 0; j < i; j++) {
-                    a.add(j);
-                }
-
-                final List<Object> b = new ArrayList<>(a);
-                final int fromIndex = 3;
-                final int toIndex = b.size() - 2;
-                N.reverse(b, fromIndex, toIndex);
-
-                for (int k = 0, size = toIndex - fromIndex; k < size; k++) {
-                    assertEquals(a.get(k + fromIndex), b.get(toIndex - k - 1));
-                }
-            }
-        }
-
-        {
-            for (int i = 5; i <= 1001; i++) {
-                final List<Object> a = new ArrayList<>(i);
-
-                for (int j = 0; j < i; j++) {
-                    a.add(j);
-                }
-
-                final List<Object> b = new LinkedList<>(a);
-                final int fromIndex = 3;
-                final int toIndex = b.size() - 2;
-                N.reverse(b, fromIndex, toIndex);
-
-                for (int k = 0, size = toIndex - fromIndex; k < size; k++) {
-                    assertEquals(a.get(k + fromIndex), b.get(toIndex - k - 1));
-                }
-            }
-        }
-
-        {
-            final Object[] a = { 1, 2, 3 };
-            final Object[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final boolean[] a = { false, true, true };
-            final boolean[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final char[] a = { '1', '2', '3' };
-            final char[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final byte[] a = { 1, 2, 3 };
-            final byte[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final short[] a = { 1, 2, 3 };
-            final short[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final int[] a = { 1, 2, 3 };
-            final int[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final long[] a = { 1, 2, 3 };
-            final long[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final float[] a = { 1, 2, 3 };
-            final float[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final double[] a = { 1, 2, 3 };
-            final double[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final boolean[] a = { false, true, false, false, true, true, true, true, true };
-            final boolean[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final char[] a = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-            final char[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final byte[] a = { 1, 2, 3, 4, 5, 6 };
-            final byte[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final short[] a = { 1, 2, 3, 4, 5, 6 };
-            final short[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final int[] a = { 1, 2, 3, 4, 5, 6 };
-            final int[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final long[] a = { 1, 2, 3, 4, 5, 6 };
-            final long[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final float[] a = { 1, 2, 3, 4, 5, 6 };
-            final float[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-        {
-            final double[] a = { 1, 2, 3, 4, 5, 6 };
-            final double[] b = N.copyOf(a, a.length);
-            N.reverse(a);
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                assertEquals(a[i], b[len - i - 1]);
-            }
-        }
-
-    }
-
-    @Test
-    public void test_checkNullOrEmpty() {
-
-        try {
-            final String parameter = null;
-            N.checkArgNotEmpty(parameter, "parameter");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final Object[] parameter = null;
-            N.checkArgNotEmpty(parameter, "parameter");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final boolean[] parameter = null;
-            N.checkArgNotEmpty(parameter, "parameter");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final char[] parameter = null;
-            N.checkArgNotEmpty(parameter, "parameter");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final byte[] parameter = null;
-            N.checkArgNotEmpty(parameter, "parameter");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final short[] parameter = null;
-            N.checkArgNotEmpty(parameter, "parameter");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final int[] parameter = null;
-            N.checkArgNotEmpty(parameter, "parameter");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final long[] parameter = null;
-            N.checkArgNotEmpty(parameter, "parameter");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final float[] parameter = null;
-            N.checkArgNotEmpty(parameter, "parameter");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final double[] parameter = null;
-            N.checkArgNotEmpty(parameter, "parameter");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final List<String> parameter = null;
-            N.checkArgNotEmpty(parameter, "parameter");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final Map<String, Object> parameter = null;
-            N.checkArgNotEmpty(parameter, "parameter");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final String parameter = null;
-            N.checkArgNotBlank(parameter, "parameter");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty or blank", e.getMessage());
-        }
-
-        try {
-            final String parameter = null;
-            N.checkArgNotEmpty(parameter, "'parameter' cannot be null or empty");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final Object[] parameter = null;
-            N.checkArgNotEmpty(parameter, "'parameter' cannot be null or empty");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final boolean[] parameter = null;
-            N.checkArgNotEmpty(parameter, "'parameter' cannot be null or empty");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final char[] parameter = null;
-            N.checkArgNotEmpty(parameter, "'parameter' cannot be null or empty");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final byte[] parameter = null;
-            N.checkArgNotEmpty(parameter, "'parameter' cannot be null or empty");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final short[] parameter = null;
-            N.checkArgNotEmpty(parameter, "'parameter' cannot be null or empty");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final int[] parameter = null;
-            N.checkArgNotEmpty(parameter, "'parameter' cannot be null or empty");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final long[] parameter = null;
-            N.checkArgNotEmpty(parameter, "'parameter' cannot be null or empty");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final float[] parameter = null;
-            N.checkArgNotEmpty(parameter, "'parameter' cannot be null or empty");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final double[] parameter = null;
-            N.checkArgNotEmpty(parameter, "'parameter' cannot be null or empty");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final List<String> parameter = null;
-            N.checkArgNotEmpty(parameter, "'parameter' cannot be null or empty");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final Map<String, Object> parameter = null;
-            N.checkArgNotEmpty(parameter, "'parameter' cannot be null or empty");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-
-        try {
-            final String parameter = null;
-            N.checkArgNotBlank(parameter, "'parameter' cannot be null or empty");
-            fail("Should throw IllegalArgumentException");
-        } catch (final IllegalArgumentException e) {
-            assertEquals("'parameter' cannot be null or empty", e.getMessage());
-        }
-    }
-
-    @Test
-    public void test_createNumber() throws Exception {
-        N.println(Numbers.createInteger(null));
-        N.println(StrUtil.tryParseInteger(""));
-        N.println(Numbers.createInteger("123"));
-        N.println(Numbers.createInteger("0x123"));
-        N.println(Numbers.createLong(null));
-        N.println(StrUtil.tryParseLong(""));
-        N.println(Numbers.createLong("123"));
-        N.println(Numbers.createLong("123l"));
-        N.println(Numbers.createLong("123L"));
-        N.println(Numbers.createLong("0X123"));
-        N.println(Numbers.createFloat(null));
-        N.println(StrUtil.tryParseFloat(""));
-        N.println(Numbers.createFloat("123"));
-        N.println(Numbers.createFloat("123.0139f"));
-        N.println(Numbers.createDouble("123e139f"));
-        N.println(Numbers.createDouble(null));
-        N.println(StrUtil.tryParseDouble(""));
-        N.println(Numbers.createDouble("123"));
-        N.println(Numbers.createDouble("123.0139d"));
-        N.println(Numbers.createDouble("123e139d"));
-
-        N.println(Numbers.createBigInteger(null));
-        N.println(StrUtil.tryParseBigInteger(""));
-        N.println(Numbers.createBigInteger("123"));
-        N.println(Numbers.createBigInteger("0X123"));
-
-        N.println(Numbers.createBigDecimal(null));
-        N.println(StrUtil.tryParseBigDecimal(""));
-        N.println(Numbers.createBigDecimal("123"));
-        N.println(Numbers.createBigDecimal("123.0139"));
-
-        N.println(Numbers.createNumber(null));
-        N.println(StrUtil.tryParseNumber(""));
-        N.println(Numbers.createNumber("123"));
-        N.println(Numbers.createNumber("123l"));
-        N.println(Numbers.createNumber("123.0139f"));
-        N.println(Numbers.createNumber("123.0139d"));
-        N.println(Numbers.createNumber("123"));
-        N.println(Numbers.createNumber("-160952.54").floatValue());
-        assertEquals(-160952.54f, Numbers.createNumber("-160952.54").floatValue());
-    }
-
-    @Test
-    public void test_padStartEnd() throws Exception {
-        String str = Strings.padStart("abc", 6);
-        N.println(str);
-        assertEquals("   abc", str);
-
-        str = Strings.padStart("abc", 6, "123");
-        N.println(str);
-        assertEquals("123abc", str);
-
-        str = Strings.padStart("abc", 6, "12");
-        N.println(str);
-        assertEquals("121abc", str);
-
-        str = Strings.padStart("abc", 6, "1");
-        N.println(str);
-        assertEquals("111abc", str);
-
-        str = Strings.padStart("abc", 8, "1");
-        N.println(str);
-        assertEquals("11111abc", str);
-
-        str = Strings.padEnd("abc", 6);
-        N.println(str);
-        assertEquals("abc   ", str);
-
-        str = Strings.padEnd("abc", 6, "123");
-        N.println(str);
-        assertEquals("abc123", str);
-
-        str = Strings.padEnd("abc", 6, "12");
-        N.println(str);
-        assertEquals("abc121", str);
-
-        str = Strings.padEnd("abc", 6, "1");
-        N.println(str);
-        assertEquals("abc111", str);
-
-        str = Strings.padEnd("abc", 8, "1");
-        N.println(str);
-        assertEquals("abc11111", str);
-    }
-
-    @Test
-    public void test_as() {
-        {
-            final List<String> list1 = ImmutableList.of("a", "b", "c");
-            N.println(list1);
-
-            final List<String> list2 = ImmutableList.wrap(N.toList("a", "b", "c"));
-            N.println(list2);
-
-            assertEquals(list1, list2);
-
-            final Set<String> set1 = ImmutableSet.of("a", "b", "c");
-            N.println(set1);
-
-            final Set<String> set2 = ImmutableSet.wrap(N.toSet("a", "b", "c"));
-            N.println(set2);
-
-            assertEquals(set1, set2);
-        }
-
-        {
-            final List<String> list1 = Collections.synchronizedList(N.toList("a", "b", "c"));
-            N.println(list1);
-
-            final List<String> list2 = Collections.synchronizedList(N.toList("a", "b", "c"));
-            N.println(list2);
-
-            assertEquals(list1, list2);
-
-            final Collection<String> set4 = Collections.synchronizedSortedSet(N.toSortedSet("a", "b", "c"));
-            N.println(set4);
-
-            final Collection<String> set5 = Collections.synchronizedCollection(N.toSet("a", "b", "c"));
-            N.println(set5);
-
-            final Map<String, String> map1 = Collections.synchronizedMap(N.asMap("a", "1", "b", "2"));
-            N.println(map1);
-
-            @SuppressWarnings("rawtypes")
-            final Map<String, String> map2 = Collections.synchronizedMap((Map) N.asMap("a", "1", "b", "2"));
-            N.println(map2);
-
-        }
-
-        {
-            Multiset<String> multiSet = N.toMultiset("a", "b", "c", "a", "a", "b");
-            assertEquals(3, multiSet.getCount("a"));
-
-            multiSet = new Multiset<>(N.toList("a", "b", "c", "a", "a", "b"));
-            multiSet = new Multiset<>(N.toList("a", "b", "c", "a", "a", "b"));
-            assertEquals(3, multiSet.getCount("a"));
-        }
-
-    }
-
-    @Test
-    public void test_newMultimap() throws Exception {
-        assertDoesNotThrow(() -> {
-            N.println(new BiMap<>());
-            N.println(new BiMap<>(12));
-
-            N.println(new Multiset<>(10));
-
-            N.println(N.newListMultimap(12));
-            N.println(N.newLinkedListMultimap(12));
-            N.println(N.newSortedListMultimap());
-            N.println(N.newSetMultimap(12));
-            N.println(N.newLinkedSetMultimap(12));
-            N.println(N.newSortedSetMultimap());
-        });
-    }
-
-    @Test
-    public void test_parallelSort_int() throws Exception {
-        final int maxSize = 10000;
-
-        for (int c = 1; c < 17; c++) {
-            changeCPUCoreNum(c);
-
-            for (int i = 0; i < 13; i++) {
-                final int[] a = new int[rand.nextInt(maxSize)];
-
-                for (int k = 0, len = a.length; k < len; k++) {
-                    a[k] = rand.nextInt();
-                }
-
-                final int[] b = a.clone();
-                N.parallelSort(a);
-                Arrays.sort(b);
-
-                for (int k = 0, len = a.length; k < len; k++) {
-                    assertEquals(b[k], a[k]);
-                }
-            }
-        }
-    }
-
-    @Test
-    public void test_parallelSort_long() throws Exception {
-        final int maxSize = 10000;
-
-        for (int c = 1; c < 17; c++) {
-            changeCPUCoreNum(c);
-
-            for (int i = 0; i < 13; i++) {
-                final long[] a = new long[rand.nextInt(maxSize)];
-
-                for (int k = 0, len = a.length; k < len; k++) {
-                    a[k] = rand.nextLong();
-                }
-
-                final long[] b = a.clone();
-                N.parallelSort(a);
-                Arrays.sort(b);
-
-                for (int k = 0, len = a.length; k < len; k++) {
-                    assertEquals(b[k], a[k]);
-                }
-            }
-        }
-    }
-
-    @Test
-    public void test_parallelSort_float() throws Exception {
-        assertFalse(1f > Float.NaN);
-        assertFalse(1f < Float.NaN);
-        assertFalse(1f == Float.NaN);
-        assertFalse(1f <= Float.NaN);
-
-        final int maxSize = 10000;
-
-        for (int c = 1; c < 17; c++) {
-            changeCPUCoreNum(c);
-
-            for (int i = 0; i < 13; i++) {
-                final float[] a = new float[rand.nextInt(maxSize)];
-
-                for (int k = 0, len = a.length; k < len; k++) {
-                    a[k] = k % 3 == 0 ? Float.NaN : rand.nextFloat();
-                }
-
-                final float[] b = a.clone();
-                N.parallelSort(a);
-                Arrays.sort(b);
-
-            }
-        }
-    }
-
-    @Test
-    public void test_parallelSort_double() throws Exception {
-        assertFalse(1d > Double.NaN);
-        assertFalse(1d < Double.NaN);
-        assertFalse(1d == Double.NaN);
-        assertFalse(1d <= Double.NaN);
-
-        final int maxSize = 10000;
-
-        for (int c = 1; c < 17; c++) {
-            changeCPUCoreNum(c);
-
-            for (int i = 0; i < 13; i++) {
-                final double[] a = new double[rand.nextInt(maxSize)];
-
-                for (int k = 0, len = a.length; k < len; k++) {
-                    a[k] = k % 3 == 0 ? Double.NaN : rand.nextFloat();
-                }
-
-                final double[] b = a.clone();
-                N.parallelSort(a);
-                Arrays.sort(b);
-
-            }
-        }
-    }
-
-    @Test
-    public void test_parallelSort_String() throws Exception {
-        final int maxSize = 10000;
-
-        for (int c = 1; c < 17; c++) {
-            changeCPUCoreNum(c);
-
-            for (int i = 0; i < 13; i++) {
-                final String[] a = new String[rand.nextInt(maxSize)];
-
-                for (int k = 0, len = a.length; k < len; k++) {
-                    a[k] = String.valueOf(rand.nextInt());
-                }
-
-                final String[] b = a.clone();
-                N.parallelSort(a);
-                Arrays.sort(b);
-
-                for (int k = 0, len = a.length; k < len; k++) {
-                    assertEquals(b[k], a[k]);
-                }
-            }
-        }
-    }
-
-    @Test
-    public void test_parallelSort_List() throws Exception {
-        final int maxSize = 10000;
-
-        for (int c = 1; c < 17; c++) {
-            changeCPUCoreNum(c);
-
-            for (int i = 0; i < 13; i++) {
-                final int len = rand.nextInt(maxSize);
-                final List<String> a = new ArrayList<>(len);
-
-                for (int k = 0; k < len; k++) {
-                    a.add(String.valueOf(rand.nextInt()));
-                }
-
-                final List<String> b = new ArrayList<>(a);
-
-                N.parallelSort(a);
-
-                for (int k = 1; k < len; k++) {
-                    assertTrue(a.get(k).compareTo(a.get(k - 1)) >= 0);
-                }
-
-                N.parallelSort(a);
-                N.sort(b);
-
-                for (int k = 0, size = a.size(); k < size; k++) {
-                    assertEquals(a.get(k), b.get(k));
-                }
-            }
-        }
-    }
-
-    @Test
-    public void test_parallelSort_List_2() throws Exception {
-        final int maxSize = 10000;
-
-        for (int c = 1; c < 17; c++) {
-            changeCPUCoreNum(c);
-
-            for (int i = 0; i < 13; i++) {
-                final int len = rand.nextInt(maxSize);
-                final List<String> list = new java.util.ArrayList<>(len);
-
-                for (int k = 0; k < len; k++) {
-                    list.add(String.valueOf(rand.nextInt()));
-                }
-
-                N.parallelSort(list);
-
-                for (int k = 1; k < len; k++) {
-                    assertTrue(list.get(k).compareTo(list.get(k - 1)) >= 0);
-                }
-            }
-        }
-    }
-
-    @Test
-    public void test_parallelSort_List_3() throws Exception {
-        final int maxSize = 10000;
-
-        for (int c = 1; c < 17; c++) {
-            changeCPUCoreNum(c);
-
-            for (int i = 0; i < 13; i++) {
-                final int len = rand.nextInt(maxSize);
-                final List<String> list = new java.util.LinkedList<>();
-
-                for (int k = 0; k < len; k++) {
-                    list.add(String.valueOf(rand.nextInt()));
-                }
-
-                N.parallelSort(list);
-
-                for (int k = 1; k < len; k++) {
-                    assertTrue(list.get(k).compareTo(list.get(k - 1)) >= 0);
-                }
-            }
-        }
-    }
-
-    @Test
-    public void test_commonPrefix() {
-        String commPrefix = Strings.commonPrefix(null, null);
-        assertNull(commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix(null, "");
-        assertNull(commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("", null);
-        assertNull(commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("", "");
-        assertEquals("", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("aaa", "");
-        assertEquals("", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("", "aaa");
-        assertEquals("", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("aaa", "bbb");
-        assertEquals("", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("aaa", "aabbb");
-        assertEquals("aa", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("aaa", "aaa");
-        assertEquals("aaa", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("aa", "aa");
-        assertEquals("aa", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("a", "a");
-        assertEquals("a", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("aaa", "aabbb", "ccc");
-        assertEquals("", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("aaa", "aabbb", "aaaccc");
-        assertEquals("aa", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("aaa", "aaa", "aaa");
-        assertEquals("aaa", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("aa", "aa", "aa");
-        assertEquals("aa", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("a", "a", "a");
-        assertEquals("a", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("", "a", "a");
-        assertEquals("", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("", "", "");
-        assertEquals("", commPrefix);
-        N.println(commPrefix);
-
-        commPrefix = Strings.commonPrefix("", null, "");
-        assertNull(commPrefix);
-        N.println(commPrefix);
-    }
-
-    @Test
-    public void test_commonSuffix() {
-        String commSuffix = Strings.commonSuffix(null, null);
-        assertNull(commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix(null, null, null, null);
-        assertNull(commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix(null, "");
-        assertNull(commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("", null);
-        assertNull(commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("", null, "", null);
-        assertNull(commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("", "");
-        assertEquals("", commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("", "", "", "");
-        assertEquals("", commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("aaa", "");
-        assertEquals("", commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("", "aaa");
-        assertEquals("", commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("aaa", "bbb");
-        assertEquals("", commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("aaa", "aabbb");
-        assertEquals("", commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("aaabb", "aabbb");
-        assertEquals("bb", commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("aaabb", "aabbb", "aaabb", "aabbb");
-        assertEquals("bb", commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("bb", "aabbb");
-        assertEquals("bb", commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("b", "bbb");
-        assertEquals("b", commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("bbb", "bbb");
-        assertEquals("bbb", commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("bb", "bb");
-        assertEquals("bb", commSuffix);
-        N.println(commSuffix);
-
-        commSuffix = Strings.commonSuffix("b", "b");
-        assertEquals("b", commSuffix);
-        N.println(commSuffix);
-    }
-
-    @Test
-    public void test_indexOfDifference() {
-        final String[] strs = null;
-        assertTrue(Strings.indexOfDifference(strs) == -1);
-        assertTrue(Strings.indexOfDifference() == -1);
-        assertTrue(Strings.indexOfDifference("abc") == -1);
-        assertTrue(Strings.indexOfDifference(new String[] { null, null }) == -1);
-        assertTrue(Strings.indexOfDifference(new String[] { "", "" }) == -1);
-        assertTrue(Strings.indexOfDifference(new String[] { "", null }) == -1);
-        assertTrue(Strings.indexOfDifference("abc", null, null) == 0);
-        assertTrue(Strings.indexOfDifference(null, null, "abc") == 0);
-        assertTrue(Strings.indexOfDifference(new String[] { "", "abc" }) == 0);
-        assertTrue(Strings.indexOfDifference(new String[] { "abc", "" }) == 0);
-        assertTrue(Strings.indexOfDifference(new String[] { "abc", "abc" }) == -1);
-        assertTrue(Strings.indexOfDifference(new String[] { "abc", "a" }) == 1);
-        assertTrue(Strings.indexOfDifference(new String[] { "ab", "abxyz" }) == 2);
-        assertTrue(Strings.indexOfDifference(new String[] { "abcde", "abxyz" }) == 2);
-        assertTrue(Strings.indexOfDifference(new String[] { "abcde", "xyz" }) == 0);
-        assertTrue(Strings.indexOfDifference(new String[] { "xyz", "abcde" }) == 0);
-        assertTrue(Strings.indexOfDifference(new String[] { "i am a machine", "i am a robot" }) == 7);
-    }
-
-    @Test
-    public void test_ordinaryIndex() {
-
-        String str = "aaaaaaaaaa";
-
-        String substr = "a";
-        int index = Strings.ordinalIndexOf(str, substr, 3);
-        String tmp = str.substring(0, index) + "--" + str.substring(index);
-        N.println(tmp);
-        assertEquals(tmp, "aa--aaaaaaaa");
-
-        substr = "aa";
-        index = Strings.ordinalIndexOf(str, substr, 3);
-        tmp = str.substring(0, index) + "--" + str.substring(index);
-        N.println(tmp);
-        assertEquals(tmp, "aaaa--aaaaaa");
-
-        substr = "aaa";
-        index = Strings.ordinalIndexOf(str, substr, 3);
-        tmp = str.substring(0, index) + "--" + str.substring(index);
-        N.println(tmp);
-        assertEquals(tmp, "aaaaaa--aaaa");
-
-        substr = str;
-        index = Strings.ordinalIndexOf(str, substr, 1);
-        tmp = str.substring(0, index) + "--" + str.substring(index);
-        N.println(tmp);
-        assertEquals(tmp, "--aaaaaaaaaa");
-
-        str = "aaaaaaa";
-        assertEquals(2, Strings.ordinalIndexOf(str, "aa", 2));
-
-        str = "aaaaaaa";
-        assertEquals(3, Strings.lastOrdinalIndexOf(str, "aa", 2));
-
-    }
-
-    @Test
-    public void test_lastOrdinaryIndex() {
-
-        final String str = "aaaaaaaaaa";
-
-        String substr = "a";
-        int index = Strings.lastOrdinalIndexOf(str, substr, 3);
-        String tmp = str.substring(0, index) + "--" + str.substring(index);
-        N.println(tmp);
-        assertEquals(tmp, "aaaaaaa--aaa");
-
-        substr = "aa";
-        index = Strings.lastOrdinalIndexOf(str, substr, 3);
-        tmp = str.substring(0, index) + "--" + str.substring(index);
-        N.println(tmp);
-        assertEquals(tmp, "aaaa--aaaaaa");
-
-        substr = "aaa";
-        index = Strings.lastOrdinalIndexOf(str, substr, 3);
-        tmp = str.substring(0, index) + "--" + str.substring(index);
-        N.println(tmp);
-        assertEquals(tmp, "a--aaaaaaaaa");
-
-        substr = "aaa";
-        index = Strings.lastOrdinalIndexOf(str, substr, 1);
-        tmp = str.substring(0, index) + "--" + str.substring(index);
-        N.println(tmp);
-        assertEquals(tmp, "aaaaaaa--aaa");
-
-        substr = str;
-        index = Strings.lastOrdinalIndexOf(str, substr, 1);
-        tmp = str.substring(0, index) + "--" + str.substring(index);
-        N.println(tmp);
-        assertEquals(tmp, "--aaaaaaaaaa");
-
-    }
-
-    protected void changeCPUCoreNum(final int c) {
     }
 }

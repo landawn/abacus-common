@@ -19,13 +19,13 @@ import com.landawn.abacus.TestBase;
 
 public class ReadOnlyIdTest extends TestBase {
     @ReadOnlyId
-    static class TestEntity1 {
+    public static class TestEntity1 {
         @ReadOnlyId
         private Long id;
     }
 
     @ReadOnlyId({ "order_id", "line_number" })
-    static class TestEntity2 {
+    public static class TestEntity2 {
     }
 
     @Test

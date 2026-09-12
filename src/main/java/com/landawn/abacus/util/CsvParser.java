@@ -17,6 +17,7 @@
 package com.landawn.abacus.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.landawn.abacus.exception.ParsingException;
@@ -37,8 +38,8 @@ import com.landawn.abacus.exception.ParsingException;
  *
  * <p><b>Divergences from RFC 4180 (opencsv-style dialect):</b></p>
  * <ul>
- * <li>Inside quoted fields, both RFC 4180 quote-doubling ({@code ""}) and backslash escapes
- *     ({@code \"} and {@code \\}) are recognized; RFC 4180 defines only the doubled-quote form</li>
+ * <li>Inside quoted fields, quote-doubling ({@code ""}) is recognized. Backslashes are literal by default;
+ *     an explicitly configured escape character enables the additional escape syntax</li>
  * <li>With the default settings, surrounding whitespace of unquoted fields is stripped and
  *     characters outside the quotes are kept as part of the field (RFC 4180 preserves whitespace
  *     and does not define text outside quotes)</li>
@@ -48,7 +49,7 @@ import com.landawn.abacus.exception.ParsingException;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Basic usage with default settings (comma separator, double-quote, backslash escape)
+ * // Basic usage with default settings (comma separator, doubled quotes, literal backslashes)
  * CsvParser parser = new CsvParser();
  * List<String> fields = parser.parseLine("John,Doe,30,\"New York, NY\"");
  * // Result: ["John", "Doe", "30", "New York, NY"]
@@ -95,11 +96,10 @@ public class CsvParser {
     public static final char DEFAULT_QUOTE_CHARACTER = '"';
 
     /**
-     * The default escape character (backslash).
-     * Used inside quoted fields to escape the quote character or the escape character itself.
-     * Other characters are not escaped.
+     * The default escape setting: disabled, so backslashes are literal and quotes use quote doubling.
+     * To read legacy backslash-escaped CSV, explicitly pass backslash to an escape-accepting constructor.
      */
-    public static final char DEFAULT_ESCAPE_CHARACTER = '\\';
+    public static final char DEFAULT_ESCAPE_CHARACTER = '\0';
 
     /**
      * The default strict quotes behavior.
@@ -153,7 +153,7 @@ public class CsvParser {
 
     /**
      * Constructs a CsvParser using default settings.
-     * Uses comma as separator, double-quote for quoting, and backslash for escaping.
+     * Uses comma as separator and doubled double-quotes for escaping; backslashes are literal.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -168,7 +168,7 @@ public class CsvParser {
 
     /**
      * Constructs a CsvParser with a custom separator.
-     * Uses default quote (") and escape (\) characters.
+     * Uses the default quote (") and disables the additional escape character.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -177,16 +177,15 @@ public class CsvParser {
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
-     * @throws UnsupportedOperationException if {@code separator} is {@link #NULL_CHARACTER} or equals
-     *         the default quote or escape character
+     * @throws UnsupportedOperationException if the separator is {@link #NULL_CHARACTER}, or any two enabled separator, quote, and escape characters are equal
      */
-    public CsvParser(final char separator) {
+    public CsvParser(final char separator) throws UnsupportedOperationException {
         this(separator, DEFAULT_QUOTE_CHARACTER, DEFAULT_ESCAPE_CHARACTER);
     }
 
     /**
      * Constructs a CsvParser with custom separator and quote characters.
-     * Uses default escape character (\).
+     * Disables the additional escape character; doubled quotes are still recognized.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -196,12 +195,10 @@ public class CsvParser {
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
-     * @param quoteChar the character to use for quoted elements, or {@link #NULL_CHARACTER} to disable quoting
-     * @throws UnsupportedOperationException if any two of {@code separator}, {@code quoteChar}, and the
-     *         default escape character are the same non-{@link #NULL_CHARACTER} characters, or if
-     *         {@code separator} is {@link #NULL_CHARACTER}
+     * @param quoteChar the character to use for quoted elements (including whitespace characters), or {@link #NULL_CHARACTER} to disable quoting
+     * @throws UnsupportedOperationException if the separator is {@link #NULL_CHARACTER}, or any two enabled separator, quote, and escape characters are equal
      */
-    public CsvParser(final char separator, final char quoteChar) {
+    public CsvParser(final char separator, final char quoteChar) throws UnsupportedOperationException {
         this(separator, quoteChar, DEFAULT_ESCAPE_CHARACTER);
     }
 
@@ -216,12 +213,11 @@ public class CsvParser {
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
-     * @param quoteChar the character to use for quoted elements, or {@link #NULL_CHARACTER} to disable quoting
-     * @param escape the character to use for escaping a separator or quote, or {@link #NULL_CHARACTER} to disable escaping
-     * @throws UnsupportedOperationException if any two of {@code separator}, {@code quoteChar}, and {@code escape}
-     *         are the same non-{@link #NULL_CHARACTER} characters, or if {@code separator} is {@link #NULL_CHARACTER}
+     * @param quoteChar the character to use for quoted elements (including whitespace characters), or {@link #NULL_CHARACTER} to disable quoting
+     * @param escape the character that escapes a quote or itself inside quoted regions, or {@link #NULL_CHARACTER} to disable escaping; other escapes remain literal
+     * @throws UnsupportedOperationException if the separator is {@link #NULL_CHARACTER}, or any two enabled separator, quote, and escape characters are equal
      */
-    public CsvParser(final char separator, final char quoteChar, final char escape) {
+    public CsvParser(final char separator, final char quoteChar, final char escape) throws UnsupportedOperationException {
         this(separator, quoteChar, escape, DEFAULT_STRICT_QUOTES);
     }
 
@@ -237,13 +233,12 @@ public class CsvParser {
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
-     * @param quoteChar the character to use for quoted elements, or {@link #NULL_CHARACTER} to disable quoting
-     * @param escape the character to use for escaping a separator or quote, or {@link #NULL_CHARACTER} to disable escaping
+     * @param quoteChar the character to use for quoted elements (including whitespace characters), or {@link #NULL_CHARACTER} to disable quoting
+     * @param escape the character that escapes a quote or itself inside quoted regions, or {@link #NULL_CHARACTER} to disable escaping; other escapes remain literal
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
-     * @throws UnsupportedOperationException if any two of {@code separator}, {@code quoteChar}, and {@code escape}
-     *         are the same non-{@link #NULL_CHARACTER} characters, or if {@code separator} is {@link #NULL_CHARACTER}
+     * @throws UnsupportedOperationException if the separator is {@link #NULL_CHARACTER}, or any two enabled separator, quote, and escape characters are equal
      */
-    public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes) {
+    public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes) throws UnsupportedOperationException {
         this(separator, quoteChar, escape, strictQuotes, DEFAULT_IGNORE_LEADING_WHITESPACE);
     }
 
@@ -259,15 +254,15 @@ public class CsvParser {
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
-     * @param quoteChar the character to use for quoted elements, or {@link #NULL_CHARACTER} to disable quoting
-     * @param escape the character to use for escaping a separator or quote, or {@link #NULL_CHARACTER} to disable escaping
+     * @param quoteChar the character to use for quoted elements (including whitespace characters), or {@link #NULL_CHARACTER} to disable quoting
+     * @param escape the character that escapes a quote or itself inside quoted regions, or {@link #NULL_CHARACTER} to disable escaping; other escapes remain literal
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
      * @param ignoreLeadingWhitespace if {@code true}, surrounding whitespace is stripped from unquoted
      *        fields and whitespace immediately after a separator is skipped
-     * @throws UnsupportedOperationException if any two of {@code separator}, {@code quoteChar}, and {@code escape}
-     *         are the same non-{@link #NULL_CHARACTER} characters, or if {@code separator} is {@link #NULL_CHARACTER}
+     * @throws UnsupportedOperationException if the separator is {@link #NULL_CHARACTER}, or any two enabled separator, quote, and escape characters are equal
      */
-    public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhitespace) {
+    public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhitespace)
+            throws UnsupportedOperationException {
         this(separator, quoteChar, escape, strictQuotes, ignoreLeadingWhitespace, DEFAULT_IGNORE_QUOTATIONS);
     }
 
@@ -285,19 +280,18 @@ public class CsvParser {
      * }</pre>
      *
      * @param separator the delimiter to use for separating entries
-     * @param quoteChar the character to use for quoted elements, or {@link #NULL_CHARACTER} to disable quoting
-     * @param escape the character to use for escaping a separator or quote, or {@link #NULL_CHARACTER} to disable escaping
+     * @param quoteChar the character to use for quoted elements (including whitespace characters), or {@link #NULL_CHARACTER} to disable quoting
+     * @param escape the character that escapes a quote or itself inside quoted regions, or {@link #NULL_CHARACTER} to disable escaping; other escapes remain literal
      * @param strictQuotes if {@code true}, characters outside the quotes are ignored
      * @param ignoreLeadingWhitespace if {@code true}, surrounding whitespace is stripped from unquoted
      *        fields and whitespace immediately after a separator is skipped
      * @param ignoreQuotations if {@code true}, quote characters do not establish quoted regions and
      *        therefore do not protect separators or escapes. Delimiting quote characters are omitted,
      *        while some quotes embedded in unquoted text are retained as literal data
-     * @throws UnsupportedOperationException if any two of separator, quoteChar, and escape are the same
-     *         non-{@link #NULL_CHARACTER} characters, or if separator is {@link #NULL_CHARACTER}
+     * @throws UnsupportedOperationException if the separator is {@link #NULL_CHARACTER}, or any two enabled separator, quote, and escape characters are equal
      */
     public CsvParser(final char separator, final char quoteChar, final char escape, final boolean strictQuotes, final boolean ignoreLeadingWhitespace,
-            final boolean ignoreQuotations) {
+            final boolean ignoreQuotations) throws UnsupportedOperationException {
         if (anyCharactersAreTheSame(separator, quoteChar, escape)) {
             throw new UnsupportedOperationException("The separator, quote, and escape characters must be different!");
         }
@@ -374,7 +368,7 @@ public class CsvParser {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CsvParser parser = new CsvParser();
-     * char esc = parser.getEscape();   // returns '\\'
+     * char esc = parser.getEscape();   // returns '\0' (escaping disabled)
      * }</pre>
      *
      * @return the escape character
@@ -418,7 +412,8 @@ public class CsvParser {
 
     /**
      * Returns whether this parser ignores quoted-region protection.
-     * When {@code true}, quote characters are consumed but quoted regions do not protect separators or escapes.
+     * When {@code true}, delimiting quote characters are consumed and quoted regions do not protect
+     * separators or escapes; some quotes embedded in unquoted text are retained as literal data.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -447,6 +442,7 @@ public class CsvParser {
      * @param nextLine the CSV line to be parsed; may be {@code null}
      * @return a {@code List} of parsed field values; an empty list if {@code nextLine} is {@code null}
      * @throws ParsingException if the line contains an unterminated quoted field
+     * @see #parseLineInto(String, Collection)
      */
     public List<String> parseLine(final String nextLine) throws ParsingException {
         return parseLine(nextLine, null);
@@ -467,6 +463,7 @@ public class CsvParser {
      * @param nextLine the CSV line to be parsed; may be {@code null}
      * @return an array of parsed field values; an empty array if {@code nextLine} is {@code null}
      * @throws ParsingException if the line contains an unterminated quoted field
+     * @see #parseLineInto(String, String[])
      */
     public String[] parseLineToArray(final String nextLine) throws ParsingException {
         final List<String> ret = parseLine(nextLine, null);
@@ -484,20 +481,62 @@ public class CsvParser {
      * <pre>{@code
      * CsvParser parser = new CsvParser();
      * String[] output = new String[4];
-     * parser.parseLineToArray("a,b,c,d", output);
+     * parser.parseLineInto("a,b,c,d", output);
      * // output now contains: ["a", "b", "c", "d"]
      * }</pre>
      *
      * @param nextLine the CSV line to be parsed; may be {@code null} (no values are written to {@code output})
      * @param output the pre-allocated array to receive parsed field values; must not be {@code null}
      * @throws IllegalArgumentException if {@code output} is {@code null}.
-     * @throws ParsingException if the line contains an unterminated quoted field
      * @throws ArrayIndexOutOfBoundsException if {@code output} is too small to hold all parsed fields
+     * @throws ParsingException if the line contains an unterminated quoted field
+     * @see #parseLineToArray(String)
+     * @see #parseLineInto(String, Collection)
      */
-    public void parseLineToArray(final String nextLine, final String[] output) throws IllegalArgumentException, ParsingException {
+    public void parseLineInto(final String nextLine, final String[] output) throws IllegalArgumentException, ArrayIndexOutOfBoundsException, ParsingException {
         N.checkArgNotNull(output, cs.output);
 
         parseLine(nextLine, output);
+    }
+
+    /**
+     * Parses a CSV line and appends the fields to the provided collection.
+     * Existing elements in {@code output} are left in place. This is useful when
+     * accumulating fields from several lines, or when a specific collection type is required.
+     * Parsing completes before fields are appended, so malformed CSV leaves the collection unchanged.
+     * If the collection rejects an insertion, earlier fields may already have been appended.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * CsvParser parser = new CsvParser();
+     * List<String> all = new ArrayList<>();
+     * parser.parseLineInto("a,b", all);
+     * parser.parseLineInto("c,d", all);
+     * // all now contains: ["a", "b", "c", "d"]
+     * }</pre>
+     *
+     * @param nextLine the CSV line to be parsed; may be {@code null} (no values are added to {@code output})
+     * @param output the collection to receive parsed field values; must not be {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or the collection rejects a field's value
+     * @throws ParsingException if the line contains an unterminated quoted field
+     * @throws UnsupportedOperationException if {@code output} rejects insertion (for example an immutable or
+     *         fixed-size collection) and at least one field is produced.
+     * @throws ClassCastException if the collection's element type restrictions reject a parsed field
+     * @throws IllegalStateException if the collection cannot accept a field because of an insertion restriction such as capacity
+     * @see #parseLine(String)
+     * @see #parseLineInto(String, String[])
+     */
+    public void parseLineInto(final String nextLine, final Collection<String> output)
+            throws IllegalArgumentException, ParsingException, UnsupportedOperationException, ClassCastException, IllegalStateException {
+        N.checkArgNotNull(output, cs.output);
+
+        if (nextLine == null) {
+            return;
+        }
+
+        // Parse fully first so a ParsingException leaves output unchanged, then append.
+        // Complete parsing before modifying the caller's collection, including when a later field is malformed.
+        output.addAll(parseLine(nextLine));
     }
 
     /**
@@ -512,10 +551,10 @@ public class CsvParser {
      * @param output an optional pre-allocated array to receive parsed values; may be {@code null}
      * @return the {@code List} of parsed field values when {@code output} is {@code null};
      *         {@code null} when {@code output} is provided; an empty list if {@code nextLine} is {@code null}
-     * @throws ParsingException if the line contains an unterminated quoted field
      * @throws ArrayIndexOutOfBoundsException if {@code output} is non-{@code null} and too small to hold all parsed fields
+     * @throws ParsingException if the line contains an unterminated quoted field
      */
-    protected List<String> parseLine(final String nextLine, final String[] output) throws ParsingException {
+    protected List<String> parseLine(final String nextLine, final String[] output) throws ArrayIndexOutOfBoundsException, ParsingException {
         if (nextLine == null) {
             return N.emptyList();
         }
@@ -533,11 +572,13 @@ public class CsvParser {
         try {
             int i = 0;
 
+            // An active whitespace quote must be processed as syntax before whitespace skipping.
             // Skip leading whitespace of the first field (mirrors the post-separator skip below), but
             // never skip the separator itself (a whitespace separator marks an empty first field). Without
             // this, leading whitespace before a quoted first field lands in sb and makes the opening quote
             // be mis-classified as embedded (see the isEmbedded check), corrupting or failing the parse.
-            while (ignoreLeadingWhitespace && i < len && nextLine.charAt(i) != separator && Character.isWhitespace(nextLine.charAt(i))) {
+            while (ignoreLeadingWhitespace && i < len && nextLine.charAt(i) != separator && (ignoreQuotations || nextLine.charAt(i) != quoteChar)
+                    && Character.isWhitespace(nextLine.charAt(i))) {
                 i++;
             }
 
@@ -554,8 +595,12 @@ public class CsvParser {
                     }
                 } else if (quoteChar != NULL_CHARACTER && c == quoteChar) {
                     if (ignoreQuotations) {
-                        // In this mode quote characters do not create quoted regions. Preserve only
-                        // embedded quotes in unquoted text, matching the normal unquoted-field behavior.
+                        // In this mode quote characters do not create quoted regions. Keep a quote only
+                        // when field data precedes it and the next character is neither a separator nor
+                        // the end of the line; a quote in either of those positions is a delimiter here
+                        // and is consumed. This is deliberately narrower than the unquoted-field rule
+                        // below, which also keeps a quote that ends a field (at a separator or at
+                        // end of line).
                         if (!strictQuotes && !sb.isEmpty() && i > 0 && nextLine.charAt(i - 1) != separator && i < len - 1
                                 && nextLine.charAt(i + 1) != separator) {
                             sb.append(c);
@@ -572,7 +617,8 @@ public class CsvParser {
                         if (ignoreLeadingWhitespace) {
                             int j = i + 1;
 
-                            while (j < len && nextLine.charAt(j) != separator && Character.isWhitespace(nextLine.charAt(j))) {
+                            while (j < len && nextLine.charAt(j) != separator && (ignoreQuotations || nextLine.charAt(j) != quoteChar)
+                                    && Character.isWhitespace(nextLine.charAt(j))) {
                                 j++;
                             }
 
@@ -606,7 +652,8 @@ public class CsvParser {
                     // Skip whitespace between the separator and the next field, but never skip the
                     // separator itself: when the separator is a whitespace character (e.g. tab),
                     // consuming it here would silently swallow empty fields ("a\t\tb" -> ["a","b"]).
-                    while (ignoreLeadingWhitespace && i < len - 1 && nextLine.charAt(i + 1) != separator && Character.isWhitespace(nextLine.charAt(i + 1))) {
+                    while (ignoreLeadingWhitespace && i < len - 1 && nextLine.charAt(i + 1) != separator
+                            && (ignoreQuotations || nextLine.charAt(i + 1) != quoteChar) && Character.isWhitespace(nextLine.charAt(i + 1))) {
                         i++;
                     }
 

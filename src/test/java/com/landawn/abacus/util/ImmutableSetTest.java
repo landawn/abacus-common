@@ -490,41 +490,6 @@ public class ImmutableSetTest extends TestBase {
         Assertions.assertEquals(3, iter.next());
     }
 
-    //    @Test
-    //    public void test_of_varargs() {
-    //        String[] array = { "a", "b", "c", "d" };
-    //        ImmutableSet<String> set = ImmutableSet.of(array);
-    //        assertNotNull(set);
-    //        assertEquals(4, set.size());
-    //        assertTrue(set.contains("a"));
-    //        assertTrue(set.contains("d"));
-    //
-    //        ImmutableSet<String> emptySet = ImmutableSet.of((String[]) null);
-    //        assertNotNull(emptySet);
-    //        assertTrue(emptySet.isEmpty());
-    //
-    //        ImmutableSet<String> emptySet2 = ImmutableSet.of(new String[0]);
-    //        assertNotNull(emptySet2);
-    //        assertTrue(emptySet2.isEmpty());
-    //        assertSame(ImmutableSet.empty(), emptySet2);
-    //
-    //        String[] arrayWithDup = { "x", "y", "x", "z" };
-    //        ImmutableSet<String> setWithDup = ImmutableSet.of(arrayWithDup);
-    //        assertEquals(3, setWithDup.size());
-    //
-    //        String[] arrayWithNull = { "a", null, "b" };
-    //        ImmutableSet<String> setWithNull = ImmutableSet.of(arrayWithNull);
-    //        assertEquals(3, setWithNull.size());
-    //        assertTrue(setWithNull.contains(null));
-    //
-    //        String[] ordered = { "first", "second", "third" };
-    //        ImmutableSet<String> orderedSet = ImmutableSet.of(ordered);
-    //        List<String> list = new ArrayList<>(orderedSet);
-    //        assertEquals("first", list.get(0));
-    //        assertEquals("second", list.get(1));
-    //        assertEquals("third", list.get(2));
-    //    }
-
     @Test
     public void testCopyOf_Array() {
         String[] array = { "a", "b", "c", "d" };
@@ -921,4 +886,119 @@ public class ImmutableSetTest extends TestBase {
         assertThrows(UnsupportedOperationException.class, () -> largeSet.add(100));
     }
 
+    @Test
+    public void testCopyOf_copiesAWrappedView() {
+        final Set<String> live = new LinkedHashSet<>(Arrays.asList("x", "y"));
+        final ImmutableSet<String> view = ImmutableSet.wrap(live);
+        final ImmutableSet<String> copy = ImmutableSet.copyOf(view);
+
+        Assertions.assertNotSame(view, copy);
+
+        live.add("z");
+
+        assertEquals(3, view.size());
+        assertEquals(2, copy.size());
+        assertFalse(copy.contains("z"));
+    }
+
+    @Test
+    public void testCopyOf_returnsSameInstanceForAnOwningSet() {
+        final ImmutableSet<String> owned = ImmutableSet.of("a", "b");
+        assertSame(owned, ImmutableSet.copyOf(owned));
+        assertSame(ImmutableSet.empty(), ImmutableSet.copyOf(ImmutableSet.empty()));
+
+        final ImmutableSet<String> copied = ImmutableSet.copyOf(new HashSet<>(Arrays.asList("a", "b")));
+        assertSame(copied, ImmutableSet.copyOf(copied));
+    }
+
+    @Test
+    public void testCopyOf_builderResults() {
+        final ImmutableSet.Builder<String> privateBuilder = ImmutableSet.<String> builder().add("a");
+        final ImmutableSet<String> fromPrivateStorage = privateBuilder.build();
+        assertSame(fromPrivateStorage, ImmutableSet.copyOf(fromPrivateStorage));
+        final ImmutableSet<String> rebuiltPrivateStorage = privateBuilder.build();
+        assertSame(rebuiltPrivateStorage, ImmutableSet.copyOf(rebuiltPrivateStorage));
+        assertEquals(fromPrivateStorage, rebuiltPrivateStorage);
+
+        final Set<String> holder = new LinkedHashSet<>();
+        final ImmutableSet.Builder<String> holderBuilder = ImmutableSet.builder(holder).add("a");
+        final ImmutableSet<String> fromHolder = holderBuilder.build();
+        final ImmutableSet<String> copy = ImmutableSet.copyOf(fromHolder);
+        Assertions.assertNotSame(fromHolder, copy);
+
+        holder.add("b");
+        assertEquals(2, fromHolder.size());
+        assertEquals(1, copy.size());
+        final ImmutableSet<String> rebuiltHolder = holderBuilder.build();
+        final ImmutableSet<String> laterCopy = ImmutableSet.copyOf(rebuiltHolder);
+        Assertions.assertNotSame(rebuiltHolder, laterCopy);
+        assertEquals(ImmutableSet.of("a", "b"), laterCopy);
+        holder.clear();
+        assertTrue(rebuiltHolder.isEmpty());
+        assertEquals(ImmutableSet.of("a", "b"), laterCopy);
+        assertEquals(ImmutableSet.of("a"), copy);
+    }
+
+    @Test
+    public void testCopyOf_preservesEncounterOrderThroughAWrapper() {
+        // 10 distinct elements, deliberately in an order a HashSet would not reproduce
+        final List<String> order = Arrays.asList("z", "y", "x", "w", "v", "u", "t", "s", "r", "q");
+        final LinkedHashSet<String> ordered = new LinkedHashSet<>(order);
+
+        assertEquals(order, new ArrayList<>(ImmutableSet.copyOf(ordered)));
+        assertEquals(order, new ArrayList<>(ImmutableSet.copyOf(java.util.Collections.unmodifiableSet(ordered))));
+        assertEquals(order, new ArrayList<>(ImmutableSet.copyOf(java.util.Collections.synchronizedSet(ordered))));
+        assertEquals(order, new ArrayList<>(ImmutableSet.copyOf(new java.util.ArrayDeque<>(order))));
+        assertEquals(order, new ArrayList<>(ImmutableSet.copyOf(order)));
+        assertEquals(order, new ArrayList<>(ImmutableSet.copyOf(order.toArray(new String[0]))));
+    }
+
+    @Test
+    public void testCopyOf_dropsDuplicatesKeepingFirstPosition() {
+        assertEquals(Arrays.asList("b", "a", "c"), new ArrayList<>(ImmutableSet.copyOf(Arrays.asList("b", "a", "b", "c", "a"))));
+        assertEquals(Arrays.asList("b", "a", "c"), new ArrayList<>(ImmutableSet.copyOf(new String[] { "b", "a", "b", "c", "a" })));
+    }
+
+    @Test
+    public void testBuilderIsConsumedByBuild() {
+        final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        final ImmutableSet<String> built = builder.add("one").build();
+
+        assertEquals(1, built.size());
+        assertThrows(IllegalStateException.class, () -> builder.add("two"));
+        assertThrows(IllegalStateException.class, () -> builder.add("two", "three"));
+        assertThrows(IllegalStateException.class, () -> builder.addAll(Arrays.asList("two")));
+        assertThrows(IllegalStateException.class, () -> builder.addAll(Arrays.asList("two").iterator()));
+
+        assertEquals(1, built.size());
+        assertEquals(built, builder.build());
+    }
+
+    @Test
+    public void testSpliteratorReportsDistinct() {
+        final java.util.Spliterator<String> sp = ImmutableSet.of("a", "b", "c").spliterator();
+
+        assertTrue(sp.hasCharacteristics(java.util.Spliterator.DISTINCT));
+        assertTrue(sp.hasCharacteristics(java.util.Spliterator.SIZED));
+        assertEquals(3, sp.getExactSizeIfKnown());
+    }
+
+    @Test
+    public void testCopyOfSilentlyDropsElementsAnIdentityBasedSourceHeldApart() {
+        // pins the copyOf(Collection) javadoc: the LinkedHashSet copy compares with equals/hashCode, so a
+        // source using any other rule can LOSE elements - it can never gain any.
+        final Set<String> identity = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        identity.add(new String("x"));
+        identity.add(new String("x"));
+
+        assertEquals(2, identity.size());
+        assertEquals(1, ImmutableSet.copyOf(identity).size());
+
+        final TreeSet<String> caseInsensitive = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        caseInsensitive.add("Apple");
+
+        assertTrue(caseInsensitive.contains("apple"));
+        assertFalse(ImmutableSet.copyOf(caseInsensitive).contains("apple"));
+        assertEquals(1, ImmutableSet.copyOf(caseInsensitive).size());
+    }
 }

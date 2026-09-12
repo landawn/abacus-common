@@ -31,7 +31,7 @@ import com.landawn.abacus.util.cs;
  * @see java.util.function.BiFunction
  */
 @FunctionalInterface
-public interface DoubleObjFunction<T, R> extends Throwables.DoubleObjFunction<T, R, RuntimeException> { // NOSONAR
+public interface DoubleObjFunction<T, R> extends Throwables.DoubleObjFunction<T, R, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Applies this function to the given arguments.
      *

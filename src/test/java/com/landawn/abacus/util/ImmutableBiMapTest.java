@@ -19,6 +19,22 @@ import com.landawn.abacus.TestBase;
 public class ImmutableBiMapTest extends TestBase {
 
     @Test
+    public void testValuesViewWithTreeMapBacking() {
+        final BiMap<String, Integer> backing = new BiMap<>(java.util.TreeMap::new, java.util.TreeMap::new);
+        backing.put("one", 1);
+        final ImmutableBiMap<String, Integer> view = ImmutableBiMap.wrap(backing);
+        final Set<Integer> values = view.values();
+
+        assertEquals(Set.of(1), values);
+        backing.put("two", 2);
+        assertEquals(Set.of(1, 2), values);
+        backing.remove("one");
+        assertEquals(Set.of(2), values);
+        assertThrows(UnsupportedOperationException.class, () -> values.remove(2));
+        assertEquals(Integer.valueOf(2), backing.get("two"));
+    }
+
+    @Test
     public void testEmpty() {
         ImmutableBiMap<String, Integer> empty = ImmutableBiMap.empty();
         assertNotNull(empty);
@@ -705,4 +721,103 @@ public class ImmutableBiMapTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> ImmutableBiMap.builder(null));
     }
 
+    @Test
+    public void testCopyOf_isAlwaysIndependentOfTheSourceBiMap() {
+        // ImmutableBiMap.copyOf only accepts a (mutable) BiMap and always copies it, so unlike the other
+        // Immutable* types it never had a "copyOf returns a live view" hole. Lock that in.
+        final BiMap<String, Integer> live = BiMap.of("a", 1);
+        final ImmutableBiMap<String, Integer> copy = ImmutableBiMap.copyOf(live);
+
+        live.put("b", 2);
+
+        Assertions.assertEquals(1, copy.size());
+        Assertions.assertFalse(copy.containsKey("b"));
+    }
+
+    @Test
+    public void testWrapStaysALiveView() {
+        final BiMap<String, Integer> live = BiMap.of("a", 1);
+        final ImmutableBiMap<String, Integer> view = ImmutableBiMap.wrap(live);
+
+        live.put("b", 2);
+
+        Assertions.assertEquals(2, view.size());
+        Assertions.assertTrue(view.containsKey("b"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> view.put("c", 3));
+    }
+
+    @Test
+    public void testBuilder_preservesInsertionOrder() {
+        ImmutableBiMap<String, Integer> map = ImmutableBiMap.<String, Integer> builder().put("one", 1).put("two", 2).put("three", 3).build();
+
+        Assertions.assertEquals(java.util.List.of("one", "two", "three"), new java.util.ArrayList<>(map.keySet()));
+        Assertions.assertEquals(java.util.List.of(1, 2, 3), new java.util.ArrayList<>(map.values()));
+        Assertions.assertEquals(java.util.List.of("one", "two", "three"),
+                new java.util.ArrayList<>(ImmutableBiMap.of("one", 1, "two", 2, "three", 3).keySet()));
+    }
+
+    @Test
+    public void testGetByValueAcceptsNullOnlyWhenTheBackingValueMapDoes() {
+        // the of(...) factories and empty() build a value map that permits a null key; copyOf(Map) instead
+        // derives the value map from the source, so whether a null key is permitted depends on the source
+        assertNull(ImmutableBiMap.of("one", 1).getByValue(null));
+        assertNull(ImmutableBiMap.<String, Integer> empty().getByValue(null));
+        assertNull(ImmutableBiMap.copyOf(N.asMap("one", 1)).getByValue(null));
+
+        // wrap(BiMap)/copyOf(BiMap) keep the caller's value map; a TreeMap one rejects a null key
+        final BiMap<String, Integer> treeValued = new BiMap<>(java.util.LinkedHashMap::new, java.util.TreeMap::new);
+        treeValued.put("one", 1);
+
+        final ImmutableBiMap<String, Integer> wrapped = ImmutableBiMap.wrap(treeValued);
+        assertEquals("one", wrapped.getByValue(1));
+        assertThrows(NullPointerException.class, () -> wrapped.getByValue(null));
+
+        // copyOf(Map) derives the value map from the source: a non-empty Hashtable or ConcurrentHashMap
+        // source yields a null-hostile value map. An EMPTY one would short-circuit to empty() and not throw.
+        final java.util.Hashtable<String, Integer> hashtable = new java.util.Hashtable<>();
+        hashtable.put("one", 1);
+        final ImmutableBiMap<String, Integer> fromHashtable = ImmutableBiMap.copyOf(hashtable);
+        assertEquals("one", fromHashtable.getByValue(1));
+        assertThrows(NullPointerException.class, () -> fromHashtable.getByValue(null));
+
+        final java.util.concurrent.ConcurrentHashMap<String, Integer> concurrent = new java.util.concurrent.ConcurrentHashMap<>();
+        concurrent.put("one", 1);
+        assertThrows(NullPointerException.class, () -> ImmutableBiMap.copyOf(concurrent).getByValue(null));
+
+        // an ImmutableBiMap source that owns its backing storage is returned unchanged, so it keeps its own
+        // null-hostile value map; a wrap() view is rebuilt through the source BiMap's own suppliers
+        final java.util.Map<String, Integer> asMap = fromHashtable;
+        assertSame(fromHashtable, ImmutableBiMap.copyOf(asMap));
+        assertThrows(NullPointerException.class, () -> ImmutableBiMap.copyOf(asMap).getByValue(null));
+        final java.util.Map<String, Integer> wrappedAsMap = wrapped;
+        assertThrows(NullPointerException.class, () -> ImmutableBiMap.copyOf(wrappedAsMap).getByValue(null));
+
+        // a plain TreeMap SOURCE does not: Maps.newOrderingMap maps any SortedMap to a LinkedHashMap,
+        // because the source's comparator orders its keys and cannot be reused for the reverse map's keys
+        final java.util.TreeMap<String, Integer> treeSource = new java.util.TreeMap<>();
+        treeSource.put("one", 1);
+        assertNull(ImmutableBiMap.copyOf(treeSource).getByValue(null));
+    }
+
+    @Test
+    public void testCopyOfThrowsWhenTheSourcesSuppliersHandOutOneSharedInstance() {
+        // both copyOf overloads copy a BiMap-backed source through BiMap.copy(), so they reach the same
+        // "the supplied maps must be empty" construction check that copy() documents
+        final java.util.Map<String, Integer> sharedForward = new java.util.HashMap<>();
+        final java.util.Map<Integer, String> sharedReverse = new java.util.HashMap<>();
+        final BiMap<String, Integer> shared = new BiMap<>(() -> sharedForward, () -> sharedReverse);
+        shared.put("one", 1);
+
+        assertThrows(IllegalArgumentException.class, () -> ImmutableBiMap.copyOf(shared));
+
+        final java.util.Map<String, Integer> sharedAsMap = shared;
+        assertThrows(IllegalArgumentException.class, () -> ImmutableBiMap.copyOf(sharedAsMap));
+
+        // wrap() does not copy, so it is unaffected; copyOf(Map) on that view does copy, and throws
+        final ImmutableBiMap<String, Integer> view = ImmutableBiMap.wrap(shared);
+        assertEquals(Integer.valueOf(1), view.get("one"));
+
+        final java.util.Map<String, Integer> viewAsMap = view;
+        assertThrows(IllegalArgumentException.class, () -> ImmutableBiMap.copyOf(viewAsMap));
+    }
 }

@@ -95,18 +95,18 @@ abstract class SmoothRateLimiter extends RateLimiter {
      * deal with overflow, then stored permits could be given out /slower/ than fresh ones. Thus, we
      * require a (different in each case) function that translates storedPermits to throttling time.
      *
-     * This role is played by storedPermitsToWaitTime(double storedPermits, double permitsToTake). The
+     * This role is played by addStoredPermitsWaitTime(double storedPermits, double permitsToTake). The
      * underlying model is a continuous function mapping storedPermits (from 0.0 to maxStoredPermits)
      * onto the 1/rate (i.e., intervals) that is effective at the given storedPermits. "storedPermits"
      * essentially measure unused time; we spend unused time buying/storing permits. Rate is
      * "permits / time", thus "1 / rate = time / permits". Thus, "1/rate" (time / permits) times
-     * "permits" gives time, i.e., integrals on this function (which is what storedPermitsToWaitTime()
+     * "permits" gives time, i.e., integrals on this function (which is what addStoredPermitsWaitTime()
      * computes) correspond to minimum intervals between subsequent requests, for the specified number
      * of requested permits.
      *
-     * Here is an example of storedPermitsToWaitTime: If storedPermits == 10.0, and we want 3 permits,
+     * Here is an example of addStoredPermitsWaitTime: If storedPermits == 10.0, and we want 3 permits,
      * we take them from storedPermits, reducing them to 7.0, and compute the throttling for these as
-     * a call to storedPermitsToWaitTime(storedPermits = 10.0, permitsToTake = 3.0), which will
+     * a call to addStoredPermitsWaitTime(storedPermits = 10.0, permitsToTake = 3.0), which will
      * evaluate the integral of the function from 7.0 to 10.0.
      *
      * Using integrals guarantees that the effect of a single acquire(3) is equivalent to {
@@ -233,9 +233,12 @@ abstract class SmoothRateLimiter extends RateLimiter {
          * @param warmupPeriod  the duration of the warmup period
          * @param timeUnit      the time unit of {@code warmupPeriod}
          * @param coldFactor    the ratio of the cold interval to the stable interval; must be &gt; 1.0
+         * @throws IllegalArgumentException if {@code stopwatch} or {@code timeUnit} is {@code null}.
          */
-        SmoothWarmingUp(final SleepingStopwatch stopwatch, final long warmupPeriod, final TimeUnit timeUnit, final double coldFactor) {
+        SmoothWarmingUp(final SleepingStopwatch stopwatch, final long warmupPeriod, final TimeUnit timeUnit, final double coldFactor)
+                throws IllegalArgumentException {
             super(stopwatch);
+            N.checkArgNotNull(timeUnit, cs.timeUnit);
             warmupPeriodMicros = timeUnit.toMicros(warmupPeriod);
             this.coldFactor = coldFactor;
         }
@@ -264,37 +267,37 @@ abstract class SmoothRateLimiter extends RateLimiter {
         }
 
         /**
-         * Computes the throttling time for consuming {@code permitsToTake} permits from stored permits,
+         * Adds the throttling debt for consuming {@code permitsToTake} permits from stored permits,
          * integrating over the trapezoidal region of the warmup function.
          *
          * @param storedPermits  the current number of stored permits before consumption
          * @param permitsToTake  the number of stored permits to consume
-         * @return the wait time in microseconds
          */
         @Override
-        long storedPermitsToWaitTime(final double storedPermits, double permitsToTake) {
+        void addStoredPermitsWaitTime(final double storedPermits, double permitsToTake) {
             final double availablePermitsAboveThreshold = storedPermits - thresholdPermits;
-            long micros = 0;
+
             // measuring the integral on the right part of the function (the climbing line)
             if (availablePermitsAboveThreshold > 0.0) {
                 final double permitsAboveThresholdToTake = min(availablePermitsAboveThreshold, permitsToTake);
                 // TODO(cpovirk): Figure out a good name for this variable.
                 final double length = permitsToTime(availablePermitsAboveThreshold)
                         + permitsToTime(availablePermitsAboveThreshold - permitsAboveThresholdToTake);
-                micros = (long) (permitsAboveThresholdToTake * length / 2.0);
+                addWaitMicros(permitsAboveThresholdToTake * length / 2.0);
                 permitsToTake -= permitsAboveThresholdToTake;
             }
             // measuring the integral on the left part of the function (the horizontal line)
-            micros = Numbers.saturatedAdd(micros, (long) (stableIntervalMicros * permitsToTake));
-            return micros;
+            addWaitMicros(stableIntervalMicros * permitsToTake);
         }
 
         /**
-         * Returns the throttling interval (in microseconds per permit) at the given stored-permit level,
-         * by interpolating linearly between the stable interval and the cold interval.
+         * Returns the throttling interval (in microseconds per permit) on the climbing segment of the warmup
+         * function, at a point {@code permits} permits <b>above</b> {@code thresholdPermits}; the value is
+         * interpolated linearly from {@code stableIntervalMicros} at {@code 0} to the cold interval at
+         * {@code maxPermits - thresholdPermits}.
          *
-         * @param permits the stored-permit level at which to evaluate the interval
-         * @return the throttling interval in microseconds per permit at that level
+         * @param permits the number of stored permits above {@code thresholdPermits} at which to evaluate the interval
+         * @return the throttling interval in microseconds per permit at that point on the ramp
          */
         private double permitsToTime(final double permits) {
             return stableIntervalMicros + permits * slope;
@@ -330,8 +333,9 @@ abstract class SmoothRateLimiter extends RateLimiter {
          * @param stopwatch       the stopwatch used to measure elapsed time
          * @param maxBurstSeconds the maximum number of seconds' worth of permits that can be saved
          *                        while the limiter is idle; must be &gt;= 0.0
+         * @throws IllegalArgumentException if {@code stopwatch} is {@code null}
          */
-        SmoothBursty(final SleepingStopwatch stopwatch, final double maxBurstSeconds) {
+        SmoothBursty(final SleepingStopwatch stopwatch, final double maxBurstSeconds) throws IllegalArgumentException {
             super(stopwatch);
             this.maxBurstSeconds = maxBurstSeconds;
         }
@@ -357,15 +361,14 @@ abstract class SmoothRateLimiter extends RateLimiter {
         }
 
         /**
-         * Returns zero because stored permits in a bursty limiter are given out at no throttling cost.
+         * Adds no debt because stored permits in a bursty limiter are given out at no throttling cost.
          *
          * @param storedPermits the current number of stored permits (unused)
          * @param permitsToTake the number of stored permits to consume (unused)
-         * @return always {@code 0L}
          */
         @Override
-        long storedPermitsToWaitTime(final double storedPermits, final double permitsToTake) {
-            return 0L;
+        void addStoredPermitsWaitTime(final double storedPermits, final double permitsToTake) {
+            // Stored burst permits carry no debt.
         }
 
         /**
@@ -402,12 +405,18 @@ abstract class SmoothRateLimiter extends RateLimiter {
      */
     private long nextFreeTicketMicros = 0L; // could be either in the past or future
 
+    // Together these retain a fraction in [0, 1); compensation prevents tiny later costs from
+    // disappearing. The high component alone may equal one when the low component is negative.
+    private double fractionalMicros;
+    private double fractionalMicrosLow;
+
     /**
      * Constructs a {@code SmoothRateLimiter} backed by the given stopwatch.
      *
      * @param stopwatch the stopwatch used to measure elapsed time
+     * @throws IllegalArgumentException if {@code stopwatch} is {@code null}
      */
-    private SmoothRateLimiter(final SleepingStopwatch stopwatch) {
+    private SmoothRateLimiter(final SleepingStopwatch stopwatch) throws IllegalArgumentException {
         super(stopwatch);
     }
 
@@ -472,26 +481,55 @@ abstract class SmoothRateLimiter extends RateLimiter {
         final long returnValue = nextFreeTicketMicros;
         final double storedPermitsToSpend = min(requiredPermits, storedPermits);
         final double freshPermits = requiredPermits - storedPermitsToSpend;
-        final long waitMicros = Numbers.saturatedAdd(storedPermitsToWaitTime(storedPermits, storedPermitsToSpend),
-                (long) (freshPermits * stableIntervalMicros));
-
-        nextFreeTicketMicros = Numbers.saturatedAdd(nextFreeTicketMicros, waitMicros);
+        addStoredPermitsWaitTime(storedPermits, storedPermitsToSpend);
+        addWaitMicros(freshPermits * stableIntervalMicros);
         storedPermits -= storedPermitsToSpend;
         return returnValue;
     }
 
     /**
-     * Translates a specified portion of our currently stored permits which we want to spend/acquire,
-     * into a throttling time. Conceptually, this evaluates the integral of the underlying function we
+     * Adds the throttling debt for the stored permits being spent to the reservation schedule,
+     * retaining fractional microseconds. Conceptually, this evaluates the integral of the underlying function we
      * use, for the range of [(storedPermits - permitsToTake), storedPermits].
      *
      * <p>This always holds: {@code 0 <= permitsToTake <= storedPermits}
      *
      * @param storedPermits the number of stored permits
      * @param permitsToTake the number of permits to take
-     * @return the wait time in microseconds
      */
-    abstract long storedPermitsToWaitTime(double storedPermits, double permitsToTake);
+    abstract void addStoredPermitsWaitTime(double storedPermits, double permitsToTake);
+
+    final void addWaitMicros(final double micros) {
+        // The old long casts treat zero/NaN costs as zero. In particular +Infinity rate
+        // has zero cost even when warmup/store arithmetic produces 0*Infinity or NaN.
+        if (!(micros > 0.0)) {
+            return;
+        }
+        if (micros >= Long.MAX_VALUE) {
+            nextFreeTicketMicros = Long.MAX_VALUE;
+            fractionalMicros = 0;
+            fractionalMicrosLow = 0;
+            return;
+        }
+        final long whole = (long) micros;
+        nextFreeTicketMicros = Numbers.saturatedAdd(nextFreeTicketMicros, whole);
+        final double part = micros - whole;
+        final double sum = fractionalMicros + part;
+        final double virtualPart = sum - fractionalMicros;
+        final double error = (fractionalMicros - (sum - virtualPart)) + (part - virtualPart) + fractionalMicrosLow;
+        double high = sum + error;
+        double low = error - (high - sum);
+        // A high component of 1 with a negative low component is still below one.
+        if (high > 1 || high == 1 && low >= 0) {
+            nextFreeTicketMicros = Numbers.saturatedAdd(nextFreeTicketMicros, 1);
+            high -= 1;
+            final double normalized = high + low;
+            low -= normalized - high;
+            high = normalized;
+        }
+        fractionalMicros = nextFreeTicketMicros == Long.MAX_VALUE ? 0 : high;
+        fractionalMicrosLow = nextFreeTicketMicros == Long.MAX_VALUE ? 0 : low;
+    }
 
     /**
      * Returns the number of microseconds during cooldown that we have to wait to accumulate a single
@@ -509,9 +547,11 @@ abstract class SmoothRateLimiter extends RateLimiter {
     void resync(final long nowMicros) {
         // if nextFreeTicket is in the past, resync to now
         if (nowMicros > nextFreeTicketMicros) {
-            final double newPermits = (nowMicros - nextFreeTicketMicros) / coolDownIntervalMicros();
+            final double newPermits = (((nowMicros - nextFreeTicketMicros) - fractionalMicros) - fractionalMicrosLow) / coolDownIntervalMicros();
             storedPermits = min(maxPermits, storedPermits + newPermits);
             nextFreeTicketMicros = nowMicros;
+            fractionalMicros = 0;
+            fractionalMicrosLow = 0;
         }
     }
 }

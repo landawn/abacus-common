@@ -32,8 +32,9 @@ public abstract class AbstractOptionalType<T> extends AbstractType<T> {
      * Constructs an {@code AbstractOptionalType} with the specified type name.
      *
      * @param typeName the name of the Optional type (e.g., "Optional", "OptionalInt", "OptionalLong")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractOptionalType(final String typeName) {
+    protected AbstractOptionalType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 

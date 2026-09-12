@@ -170,7 +170,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public ShortStream filter(final ShortPredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public ShortStream filter(final ShortPredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -209,7 +209,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public ShortStream takeWhile(final ShortPredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public ShortStream takeWhile(final ShortPredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -249,7 +249,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public ShortStream dropWhile(final ShortPredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public ShortStream dropWhile(final ShortPredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -263,8 +263,6 @@ class IteratorShortStream extends AbstractShortStream {
             public boolean hasNext() {
                 if (!hasNext) {
                     if (!dropped) {
-                        dropped = true;
-
                         while (elements.hasNext()) {
                             next = elements.nextShort();
 
@@ -273,6 +271,7 @@ class IteratorShortStream extends AbstractShortStream {
                                 break;
                             }
                         }
+                        dropped = true;
                     } else if (elements.hasNext()) {
                         next = elements.nextShort();
                         hasNext = true;
@@ -297,7 +296,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public ShortStream map(final ShortUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
+    public ShortStream map(final ShortUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -317,7 +316,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public IntStream mapToInt(final ShortToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream mapToInt(final ShortToIntFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -337,7 +336,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <T> Stream<T> mapToObj(final ShortFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> mapToObj(final ShortFunction<? extends T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -357,7 +356,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public ShortStream flatMap(final ShortFunction<? extends ShortStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public ShortStream flatMap(final ShortFunction<? extends ShortStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -416,7 +415,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public ShortStream flatmap(final ShortFunction<? extends Collection<Short>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public ShortStream flatmap(final ShortFunction<? extends Collection<Short>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -448,7 +447,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public ShortStream flatMapArray(final ShortFunction<short[]> mapper) throws IllegalArgumentException, IllegalStateException {
+    public ShortStream flatMapArray(final ShortFunction<short[]> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -490,7 +489,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public IntStream flatMapToInt(final ShortFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream flatMapToInt(final ShortFunction<? extends IntStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -549,7 +548,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <T> Stream<T> flatMapToObj(final ShortFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatMapToObj(final ShortFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -608,7 +607,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <T> Stream<T> flatmapToObj(final ShortFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final ShortFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -708,13 +707,24 @@ class IteratorShortStream extends AbstractShortStream {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final short next = elements.nextShort();
                 cnt++;
-                return elements.nextShort();
+                return next;
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return cnt >= maxSize || elements.supportsFailureAtomicAdvance();
             }
 
             @Override
             public void advance(final long n) {
-                if (n <= 0) {
+                if (n <= 0 || cnt >= maxSize) {
+                    return;
+                }
+
+                if (!elements.supportsFailureAtomicAdvance()) {
+                    super.advance(n);
                     return;
                 }
 
@@ -739,36 +749,46 @@ class IteratorShortStream extends AbstractShortStream {
         }
 
         return newStream(new ShortIteratorEx() { //NOSONAR
-            private boolean skipped = false;
+            private long remainingToSkip = n;
+
+            private void skipElements() {
+                if (remainingToSkip > 0) {
+                    if (elements.supportsFailureAtomicAdvance()) {
+                        elements.advance(remainingToSkip);
+                    } else {
+                        while (remainingToSkip > 0 && elements.hasNext()) {
+                            elements.nextShort();
+                            remainingToSkip--;
+                        }
+                    }
+                    remainingToSkip = 0;
+                }
+            }
 
             @Override
             public boolean hasNext() {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 return elements.hasNext();
             }
 
             @Override
             public short nextShort() {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 return elements.nextShort();
             }
 
             @Override
             public long count() {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 return elements.count();
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return elements.supportsFailureAtomicAdvance();
             }
 
             @Override
@@ -777,20 +797,14 @@ class IteratorShortStream extends AbstractShortStream {
                     return;
                 }
 
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 elements.advance(n2);
             }
 
             @Override
             public short[] toArray() {
-                if (!skipped) {
-                    skipped = true;
-                    elements.advance(n);
-                }
+                skipElements();
 
                 return elements.toArray();
             }
@@ -820,6 +834,8 @@ class IteratorShortStream extends AbstractShortStream {
             private short[] aar;
             private int cursor = 0;
             private int to;
+            private LinkedList<Short> queue;
+            private Queue<Short> heap;
 
             @Override
             public boolean hasNext() {
@@ -887,9 +903,11 @@ class IteratorShortStream extends AbstractShortStream {
 
             private void init() {
                 if (!initialized) {
-                    initialized = true;
+                    // Keep the window/heap across retries so a failed source read does not drop already-accepted candidates.
                     if (isSorted() && isSameComparator(comparator, comparator())) {
-                        final LinkedList<Short> queue = new LinkedList<>();
+                        if (queue == null) {
+                            queue = new LinkedList<>();
+                        }
 
                         while (elements.hasNext()) {
                             if (queue.size() >= n) {
@@ -902,7 +920,9 @@ class IteratorShortStream extends AbstractShortStream {
                         aar = Array.unbox(queue.toArray(N.EMPTY_SHORT_OBJ_ARRAY));
                     } else {
                         final Comparator<? super Short> cmp = comparator;
-                        final Queue<Short> heap = new PriorityQueue<>(Math.min(n, 16), cmp);
+                        if (heap == null) {
+                            heap = new PriorityQueue<>(Math.min(n, 16), cmp);
+                        }
 
                         Short next = null;
                         while (elements.hasNext()) {
@@ -922,13 +942,16 @@ class IteratorShortStream extends AbstractShortStream {
                     }
 
                     to = aar.length;
+                    queue = null;
+                    heap = null;
+                    initialized = true;
                 }
             }
         }, false);
     }
 
     @Override
-    public ShortStream onEach(final ShortConsumer action) throws IllegalArgumentException, IllegalStateException {
+    public ShortStream onEach(final ShortConsumer action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -950,7 +973,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -965,7 +988,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    protected short[] toArray(final boolean closeStream) {
+    protected short[] toArray(final boolean closeStream) throws IllegalStateException {
         assertNotClosed();
 
         try {
@@ -1003,7 +1026,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <C extends Collection<Short>> C toCollection(final Supplier<? extends C> supplier) throws IllegalArgumentException, IllegalStateException {
+    public <C extends Collection<Short>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1029,7 +1052,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public Multiset<Short> toMultiset(final Supplier<? extends Multiset<Short>> supplier) throws IllegalArgumentException, IllegalStateException {
+    public Multiset<Short> toMultiset(final Supplier<? extends Multiset<Short>> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1050,7 +1073,7 @@ class IteratorShortStream extends AbstractShortStream {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.ShortFunction<? extends K, E> keyMapper,
             final Throwables.ShortFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalArgumentException, IllegalStateException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1079,6 +1102,7 @@ class IteratorShortStream extends AbstractShortStream {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
@@ -1116,7 +1140,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public short reduce(final short identity, final ShortBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public short reduce(final short identity, final ShortBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -1135,7 +1159,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public OptionalShort reduce(final ShortBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public OptionalShort reduce(final ShortBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -1159,7 +1183,7 @@ class IteratorShortStream extends AbstractShortStream {
 
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjShortConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1357,7 +1381,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.ShortPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.ShortPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1376,7 +1400,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.ShortPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.ShortPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1395,7 +1419,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.ShortPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.ShortPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1415,7 +1439,7 @@ class IteratorShortStream extends AbstractShortStream {
 
     @Override
     public <E extends Exception> OptionalShort findFirst(final Throwables.ShortPredicate<E> predicate)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1437,7 +1461,7 @@ class IteratorShortStream extends AbstractShortStream {
 
     @Override
     public <E extends Exception> OptionalShort findLast(final Throwables.ShortPredicate<E> predicate)
-            throws IllegalArgumentException, IllegalStateException, E {
+            throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1487,21 +1511,29 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return elements.supportsFailureAtomicAdvance();
+            }
+
+            @Override
             public void advance(final long n) {
                 elements.advance(n);
             }
         }, isSorted());
     }
 
+    /**
+     * @throws IllegalStateException if the stream is already closed.
+     */
     @Override
-    ShortIteratorEx iteratorEx() {
+    ShortIteratorEx iteratorEx() throws IllegalStateException {
         assertNotClosed();
 
         return elements;
     }
 
     @Override
-    public ShortStream appendIfEmpty(final Supplier<? extends ShortStream> supplier) throws IllegalArgumentException, IllegalStateException {
+    public ShortStream appendIfEmpty(final Supplier<? extends ShortStream> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1556,9 +1588,21 @@ class IteratorShortStream extends AbstractShortStream {
                     if (elements.hasNext()) {
                         iter = elements;
                     } else {
+                        @SuppressWarnings("resource")
                         final ShortStream s = supplier.get();
-                        holder.setValue(s);
-                        iter = s.iteratorEx();
+                        try {
+                            iter = s == null ? ShortIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
+                            holder.setValue(s);
+                        } catch (final RuntimeException | Error e) {
+                            if (s != null) {
+                                try {
+                                    s.close();
+                                } catch (final RuntimeException ce) {
+                                    e.addSuppressed(ce);
+                                }
+                            }
+                            throw e;
+                        }
                     }
                 }
             }
@@ -1566,7 +1610,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public ShortStream ifEmpty(final Runnable action) throws IllegalArgumentException, IllegalStateException {
+    public ShortStream ifEmpty(final Runnable action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -1616,9 +1660,10 @@ class IteratorShortStream extends AbstractShortStream {
 
             private void init() {
                 if (iter == null) {
+                    final boolean empty = !elements.hasNext();
                     iter = elements;
 
-                    if (!iter.hasNext()) {
+                    if (empty) {
                         action.run();
                     }
                 }
@@ -1628,7 +1673,7 @@ class IteratorShortStream extends AbstractShortStream {
 
     @Override
     protected ShortStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
-            final boolean cancelUncompletedThreads) {
+            final boolean cancelUncompletedThreads) throws IllegalStateException {
         assertNotClosed();
 
         return new ParallelIteratorShortStream(elements, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,

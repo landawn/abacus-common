@@ -143,4 +143,30 @@ public class ShortSummaryStatisticsTest extends TestBase {
         Assertions.assertTrue(str.contains("sum=30"));
         Assertions.assertTrue(str.contains("average=15.000000"));
     }
+
+    // FINDING 27: toString() must render the same text on every machine. Byte/Char/Short built their text with the
+    // default locale, so the average printed as "15,000000" under a comma-decimal locale and the integral
+    // conversions used the locale's own zero digit, while FloatSummaryStatistics already pinned Locale.ROOT - one
+    // family, two renderings.
+    @Test
+    public void reviewFixes20260908_toStringRendersWithLocaleRootWhateverTheDefaultLocaleIs() {
+        final ShortSummaryStatistics stats = new ShortSummaryStatistics();
+        stats.accept((short) 10);
+        stats.accept((short) 20);
+
+        final String expected = "{min=10, max=20, count=2, sum=30, average=15.000000}";
+        Assertions.assertEquals(expected, stats.toString());
+
+        final java.util.Locale prev = java.util.Locale.getDefault();
+
+        try {
+            for (final String tag : new String[] { "de-DE", "fr-FR", "hi-IN-u-nu-deva", "ar-EG-u-nu-arab" }) {
+                java.util.Locale.setDefault(java.util.Locale.forLanguageTag(tag));
+                Assertions.assertEquals(expected, stats.toString(), tag);
+            }
+        } finally {
+            java.util.Locale.setDefault(prev);
+        }
+    }
+
 }

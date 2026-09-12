@@ -194,4 +194,31 @@ public class CalendarFieldTest extends TestBase {
         assertEquals(7, CalendarField.YEAR.ordinal());
     }
 
+    // Doc pin for the class javadoc corrected on 2026-09-11: the header used to say "Each enum value has the same
+    // integer value as its corresponding Calendar constant", which is false for the only integer an enum constant
+    // actually has. value() carries the Calendar constant; ordinal() is just the declaration position.
+    @Test
+    public void reviewFixes20260911_valueCarriesTheCalendarConstantAndOrdinalDoesNot() {
+        assertEquals(Calendar.MILLISECOND, CalendarField.MILLISECOND.value());
+        assertEquals(Calendar.SECOND, CalendarField.SECOND.value());
+        assertEquals(Calendar.MINUTE, CalendarField.MINUTE.value());
+        assertEquals(Calendar.HOUR_OF_DAY, CalendarField.HOUR_OF_DAY.value());
+        assertEquals(Calendar.DAY_OF_MONTH, CalendarField.DAY_OF_MONTH.value());
+        assertEquals(Calendar.WEEK_OF_YEAR, CalendarField.WEEK_OF_YEAR.value());
+        assertEquals(Calendar.MONTH, CalendarField.MONTH.value());
+        assertEquals(Calendar.YEAR, CalendarField.YEAR.value());
+
+        // Not one of the eight has ordinal() == value(), so passing an ordinal to Calendar always addresses the
+        // wrong field - silently, because every ordinal 0..7 is itself a valid Calendar field constant.
+        for (final CalendarField field : CalendarField.values()) {
+            org.junit.jupiter.api.Assertions.assertNotEquals(field.ordinal(), field.value(), field.name() + ": ordinal() is not the Calendar constant");
+        }
+
+        // The concrete trap: cal.get(CalendarField.MONTH.ordinal()) reads DAY_OF_YEAR, not MONTH.
+        assertEquals(6, CalendarField.MONTH.ordinal());
+        assertEquals(2, CalendarField.MONTH.value());
+        assertEquals(Calendar.DAY_OF_YEAR, CalendarField.MONTH.ordinal());
+        assertEquals(7, CalendarField.YEAR.ordinal());
+        assertEquals(Calendar.DAY_OF_WEEK, CalendarField.YEAR.ordinal());
+    }
 }

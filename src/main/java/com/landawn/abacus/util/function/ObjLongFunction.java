@@ -32,7 +32,7 @@ import com.landawn.abacus.util.cs;
  * @see ToLongFunction
  */
 @FunctionalInterface
-public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, RuntimeException> { // NOSONAR
+public interface ObjLongFunction<T, R> extends Throwables.ObjLongFunction<T, R, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Applies this function to the given arguments.
      *

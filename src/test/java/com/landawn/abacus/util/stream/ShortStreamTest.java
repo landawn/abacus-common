@@ -3786,13 +3786,6 @@ public class ShortStreamTest extends TestBase {
         assertTrue(elapsedTime >= 100);
     }
 
-    //    @Test
-    //    public void testDoubleUnderscoreTransform() {
-    //        IntStream result = createShortStream((short) 1, (short) 2, (short) 3).__(s -> s.mapToInt(n -> n * 10));
-    //
-    //        assertArrayEquals(new int[] { 10, 20, 30 }, result.toArray());
-    //    }
-
     @Test
     public void testParallelWithMaxThreadNum() {
         short[] result = createShortStream((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).parallel(2).map(n -> (short) (n * 2)).toArray();

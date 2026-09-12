@@ -45,9 +45,11 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractTupleType<Tuple5<T1,
      * @param t3TypeName the name of the third element type
      * @param t4TypeName the name of the fourth element type
      * @param t5TypeName the name of the fifth element type
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    Tuple5Type(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName, final String t5TypeName) {
+    Tuple5Type(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName, final String t5TypeName)
+            throws IllegalArgumentException {
         super(getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, t5TypeName, false),
                 getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, t5TypeName, true), (Class) Tuple5.class, List.of(TypeFactory.getType(t1TypeName),
                         TypeFactory.getType(t2TypeName), TypeFactory.getType(t3TypeName), TypeFactory.getType(t4TypeName), TypeFactory.getType(t5TypeName)));
@@ -59,10 +61,12 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractTupleType<Tuple5<T1,
      *
      * @param converted the array of converted element values (must be of length 5)
      * @return a new {@code Tuple5} containing the five elements in order
+     * @throws NullPointerException if {@code converted} is {@code null}.
+     * @throws ArrayIndexOutOfBoundsException if {@code converted} contains fewer than 5 elements.
      */
     @SuppressWarnings("unchecked")
     @Override
-    protected Tuple5<T1, T2, T3, T4, T5> fromArray(final Object[] converted) {
+    protected Tuple5<T1, T2, T3, T4, T5> fromArray(final Object[] converted) throws NullPointerException, ArrayIndexOutOfBoundsException {
         return Tuple.of((T1) converted[0], (T2) converted[1], (T3) converted[2], (T4) converted[3], (T5) converted[4]);
     }
 
@@ -77,9 +81,10 @@ public class Tuple5Type<T1, T2, T3, T4, T5> extends AbstractTupleType<Tuple5<T1,
      * @param isDeclaringName if {@code true}, returns the declaring name (simple class names);
      *                        if {@code false}, returns the full canonical name
      * @return the formatted type name string
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     protected static String getTypeName(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName,
-            final String t5TypeName, final boolean isDeclaringName) {
+            final String t5TypeName, final boolean isDeclaringName) throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(Tuple5.class) + SK.LESS_THAN + TypeFactory.getType(t1TypeName).declaringName() + SK.COMMA_SPACE
                     + TypeFactory.getType(t2TypeName).declaringName() + SK.COMMA_SPACE + TypeFactory.getType(t3TypeName).declaringName() + SK.COMMA_SPACE

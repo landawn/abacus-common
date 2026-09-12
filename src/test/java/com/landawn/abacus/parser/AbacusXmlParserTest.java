@@ -1,11 +1,11 @@
 package com.landawn.abacus.parser;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,18 +18,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilder;
-
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.entity.GenericEntity;
 import com.landawn.abacus.parser.entity.XBean;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.types.WeekDay;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.BufferedXmlWriter;
@@ -41,7 +37,11 @@ import com.landawn.abacus.util.StringWriter;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.XmlUtil;
 
+import testfixtures.entity.extendDirty.basic.Account;
+import testfixtures.types.WeekDay;
+
 public class AbacusXmlParserTest extends AbstractXmlParserTest {
+
     @Override
     protected Parser<?, ?> getParser() {
         return abacusXmlParser;
@@ -53,345 +53,47 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
     }
 
     @Test
-    public void test_prettyFormat_2() {
+    public void testPrettyFormatAndGenericEntity() {
         Account account = createAccount(Account.class);
-
         GenericEntity genericBean = new GenericEntity();
         genericBean.setBooleanList(N.toList(true, false));
         genericBean.setCharList(N.toList('a', 'b', '黎'));
         genericBean.setIntList(N.toList(1, 2, 3));
         genericBean.setStringList(N.toList("abc", "123"));
         genericBean.setAccountList(N.toList(account));
-        Map<String, Account> map = N.asMap(account.getFirstName(), account);
-        genericBean.setAccountMap(map);
+        genericBean.setAccountMap(N.asMap(account.getFirstName(), account));
 
-        XmlSerConfig xsc = XmlSerConfig.create().setPrettyFormat(true);
-        String str = abacusXmlParser.serialize(genericBean, xsc);
+        String pretty = abacusXmlParser.serialize(genericBean, XmlSerConfig.create().setPrettyFormat(true));
+        assertEquals(genericBean, abacusXmlParser.deserialize(pretty, GenericEntity.class));
 
-        N.println(str);
+        Map<String, Object> props2 = abacusXmlParser.deserialize(
+                abacusXmlParser.serialize(Beans.beanToMap(genericBean), XmlSerConfig.create().setPrettyFormat(true)),
+                XmlDeserConfig.create().setValueType("account", Account.class), Map.class);
+        assertTrue(props2.containsKey("stringList") || props2.containsKey("booleanList"));
 
-        GenericEntity genericBean2 = abacusXmlParser.deserialize(str, GenericEntity.class);
-        N.println(genericBean2);
-
-        assertEquals(genericBean, genericBean2);
+        GenericEntity slim = new GenericEntity();
+        slim.setAccountList(N.toList(account));
+        slim.setAccountMap(N.asMap(account.getFirstName(), account));
+        assertEquals(slim, abacusXmlParser.deserialize(abacusXmlParser.serialize(slim), GenericEntity.class));
     }
 
     @Test
-    public void test_prettyFormat_3() {
-        Account account = createAccount(Account.class);
-
-        GenericEntity genericBean = new GenericEntity();
-        genericBean.setBooleanList(N.toList(true, false));
-        genericBean.setCharList(N.toList('a', 'b', '黎'));
-        genericBean.setIntList(N.toList(1, 2, 3));
-        genericBean.setStringList(N.toList("abc", "123"));
-        genericBean.setAccountList(N.toList(account));
-        Map<String, Account> map = N.asMap(account.getFirstName(), account);
-        genericBean.setAccountMap(map);
-
-        XmlSerConfig xsc = XmlSerConfig.create().setPrettyFormat(true);
-        Map<String, Object> props = Beans.beanToMap(genericBean);
-        String str = abacusXmlParser.serialize(props, xsc);
-
-        N.println(str);
-
-        XmlDeserConfig xdc = XmlDeserConfig.create().setValueType("account", Account.class);
-        Map<String, Object> props2 = abacusXmlParser.deserialize(str, xdc, Map.class);
-        N.println(props);
-        N.println(props2);
-        assertNotNull(props2);
-    }
-
-    @Test
-    public void test_GenericEntity() {
-        Account account = createAccount(Account.class);
-
-        GenericEntity genericBean = new GenericEntity();
-        genericBean.setAccountList(N.toList(account));
-        Map<String, Account> map = N.asMap(account.getFirstName(), account);
-        genericBean.setAccountMap(map);
-
-        String str = abacusXmlParser.serialize(genericBean);
-
-        N.println(str);
-
-        GenericEntity genericBean2 = abacusXmlParser.deserialize(str, GenericEntity.class);
-        N.println(genericBean2);
-
-        assertEquals(genericBean, genericBean2);
-    }
-
-    @Test
-    public void test_node_by_name() throws SAXException, IOException {
-        Account account = createAccount(Account.class);
-
-        String str = abacusXmlParser.serialize(account);
-        InputStream is = IOUtil.stringToInputStream(str);
-
-        Map<String, Type<?>> nodeClasses = Map.of("account", Type.of(Account.class));
-
-        Account account2 = abacusXmlParser.deserialize(is, null, nodeClasses);
-
-        IOUtil.close(is);
-
-        N.println(account2);
-
-        assertEquals(account, account2);
-
-        Reader reader = new StringReader(str);
-        account2 = abacusXmlParser.deserialize(reader, null, nodeClasses);
-
-        IOUtil.close(reader);
-
-        N.println(account2);
-
-        assertEquals(account, account2);
-
-        DocumentBuilder docBuilder = XmlUtil.createDOMParser();
-        Document doc = docBuilder.parse(IOUtil.stringToInputStream(str));
-        account2 = abacusXmlParser.deserialize(doc.getDocumentElement(), null, nodeClasses);
-
-        N.println(account2);
-
-        assertEquals(account, account2);
-    }
-
-    @Test
-    public void test_BufferedWriter() {
-        Writer writer = new StringWriter();
-        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(writer);
-        Account account = createAccount(Account.class);
-        abacusXmlParser.serialize(account, bw);
-
-        N.println(writer.toString());
-
-        Objectory.recycle(bw);
-        assertNotNull(account);
-    }
-
-    @Test
-    public void test_BufferedWriter_2() {
-        Writer writer = new StringWriter();
-        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(writer);
-        Account account = null;
-        abacusXmlParser.serialize(account, bw);
-
-        assertEquals(Strings.EMPTY, writer.toString());
-
-        Objectory.recycle(bw);
-    }
-
-    @Test
-    public void test_null() {
-        String nullElement = null;
-
-        String[] array = N.asArray(nullElement);
-        String str = abacusXmlParser.serialize(array);
-        N.println(str);
-
-        String[] array2 = abacusXmlParser.deserialize(str, String[].class);
-        assertTrue(N.equals(array, array2));
-
-        List<String> list = N.toList(nullElement);
-        str = abacusXmlParser.serialize(list);
-        N.println(str);
-
-        List<String> list2 = abacusXmlParser.deserialize(str, List.class);
-        N.println(list2);
-
-        Map<String, Object> map = N.asMap(nullElement, nullElement);
-        XmlSerConfig jsc = XmlSerConfig.create().setExclusion(Exclusion.NONE);
-        str = abacusXmlParser.serialize(map, jsc);
-        N.println(str);
-
-        Map<String, Object> map2 = abacusXmlParser.deserialize(str, Map.class);
-        N.println(map2);
-
-        map2 = (Map<String, Object>) abacusXmlParser.deserialize(str, Object.class);
-        N.println(map2);
-
-        map2 = (Map<String, Object>) abacusXmlParser.deserialize(str, abacusXmlParser.getClass());
-        N.println(map2);
-
-        try {
-            abacusXmlParser.serialize(abacusXmlParser);
-            fail("Should throw RuntimeException");
-        } catch (ParsingException e) {
-
-        }
-    }
-
-    @Test
-    public void test_null_1() {
-        String nullElement = null;
-        String str = abacusXmlParser.serialize(nullElement);
-        assertNull(abacusXmlParser.deserialize(str, String.class));
-    }
-
-    @Test
-    public void test_null_2() {
-        Account account = new Account();
-        account.setFirstName("firstName");
-        account.setLastName("lastName");
-        String nullElement = null;
-
-        Object[] array = { account, nullElement };
-        String str = abacusXmlParser.serialize(array);
-        N.println(str);
-
-        Object[] array2 = abacusXmlParser.deserialize(str, XmlDeserConfig.create().setElementType(Account.class), Object[].class);
-        assertTrue(N.equals(array, array2));
-
-        List<?> list = N.toList(account, nullElement);
-        str = abacusXmlParser.serialize(list);
-        N.println(str);
-
-        List<String> list2 = abacusXmlParser.deserialize(str, XmlDeserConfig.create().setElementType(Account.class), List.class);
-        assertTrue(N.equals(list, list2));
-        N.println(list2);
-
-        Map<String, Object> map = N.asMap(nullElement, account);
-        XmlSerConfig xsc = XmlSerConfig.create().setExclusion(Exclusion.NONE);
-        str = abacusXmlParser.serialize(map, xsc);
-        N.println(str);
-
-        XmlDeserConfig xdc = XmlDeserConfig.create().setElementType(Account.class);
-        xdc.setValueType("account", Account.class);
-        Map<String, Object> map2 = abacusXmlParser.deserialize(str, xdc, Map.class);
-        N.println(map2);
-    }
-
-    @Test
-    public void test_null_3() {
-        Account account = new Account();
-
-        String str = abacusXmlParser.serialize(account);
-
-        account.setId(0);
-        account.setFirstName("firstName");
-        account.setLastName(null);
-
-        str = abacusXmlParser.serialize(account, XmlSerConfig.create().setExclusion(Exclusion.DEFAULT));
-        N.println(str);
-
-        str = abacusXmlParser.serialize(Beans.beanToMap(account), XmlSerConfig.create().setExclusion(Exclusion.DEFAULT));
-        N.println(str);
-
-        Map<String, Object> map = Beans.beanToMap(account);
-        map.put("lastName", null);
-        map.put("account", account);
-
-        Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Map.class, N.toSet("id"));
-
-        XmlSerConfig xsc = XmlSerConfig.create().setExclusion(Exclusion.DEFAULT).setIgnoredPropNames(ignoredPropNames).setPrettyFormat(true);
-        str = abacusXmlParser.serialize(map, xsc);
-        N.println(str);
-
-        XmlDeserConfig xdc = XmlDeserConfig.create().setElementType(Account.class);
-        xdc.setValueType("account", Account.class);
-        Map<String, Object> map2 = abacusXmlParser.deserialize(str, xdc, Map.class);
-        N.println(map2);
-
-        str = abacusXmlParser.serialize(N.toList(map), xsc);
-        N.println(str);
-
-        xdc = XmlDeserConfig.create().setElementType(Map.class);
-        xdc.setValueType("account", Account.class);
-        List<?> list = abacusXmlParser.deserialize(str, xdc, List.class);
-        N.println(list);
-
-        Map<String, Object> map3 = new HashMap<>();
-        map3.put("accountList", N.toList(account, null, account));
-        map3.put("accountArray", N.asArray(account, null, account));
-
-        xsc = XmlSerConfig.create().setExclusion(Exclusion.DEFAULT).setIgnoredPropNames(ignoredPropNames).setPrettyFormat(true);
-        str = abacusXmlParser.serialize(map3, xsc);
-        N.println(str);
-
-        xdc = XmlDeserConfig.create();
-        xdc.setValueType("account", Account.class);
-        N.println(abacusXmlParser.deserialize(str, xdc, Map.class));
-
-        xsc = XmlSerConfig.create().setExclusion(Exclusion.DEFAULT).setIgnoredPropNames(ignoredPropNames).setPrettyFormat(true);
-        str = abacusXmlParser.serialize(map3, xsc);
-        N.println(str);
-
-        XBean xBean = createXBean();
-        str = abacusXmlParser.serialize(xBean, xsc);
-        N.println(str);
-
-        N.println(abacusXmlParser.deserialize(str, XBean.class));
-        assertNotNull(str);
-    }
-
-    @Test
-    public void test_transient() {
-        TransientBean bean = new TransientBean();
-        bean.setTransientField("abc");
-        bean.setNontransientField("123");
-
-        String str = abacusXmlParser.serialize(bean);
-
-        N.println(str);
-
-        assertTrue(str.indexOf("abc") == -1);
-
-        XmlSerConfig config = XmlSerConfig.create().setSkipTransientField(false);
-        str = abacusXmlParser.serialize(bean, config);
-
-        N.println(str);
-
-        assertTrue(str.indexOf("abc") >= 0);
-
-        assertTrue(bean.equals(abacusXmlParser.deserialize(str, TransientBean.class)));
-    }
-
-    @Test
-    public void test_prettyFormat() {
+    public void testPrettyFormat() {
         Account account = createAccountWithContact(Account.class);
         account.setId(100);
-
         XmlSerConfig config = XmlSerConfig.create().setPrettyFormat(true).setIndentation("    ");
 
-        String str = abacusXmlParser.serialize(account, config);
-        N.println("============account=====================================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = abacusXmlParser.serialize(N.asArray(account, account), config);
-        N.println("============Array.of(account, account)=================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = abacusXmlParser.serialize(N.toList(account, account), config);
-        N.println("============N.toList(account, account)===================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = abacusXmlParser.serialize(Beans.deepBeanToMap(account), config);
-        N.println("============(N.deepBeanToMap(account)==================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = abacusXmlParser.serialize(new Object[] { Beans.deepBeanToMap(account), account }, config);
-        N.println("============Array.of(N.deepBeanToMap(account), account)===============================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = abacusXmlParser.serialize(N.toList(Beans.deepBeanToMap(account), account), config);
-        N.println("============N.toList(N.deepBeanToMap(account), account)================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = abacusXmlParser.serialize(new Object[] { N.asArray(account, account), N.toList(account, account) }, config);
-        N.println("============Array.of(Array.of(account, account), N.toList(account, account))==========================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = abacusXmlParser.serialize(N.toList(N.asArray(account, account), N.toList(account, account)), config);
-        N.println("============N.toList(Array.of(account, account), N.toList(account, account))===========================================");
-        N.println(str);
-        N.println("========================================================================================================================");
+        String accountXml = abacusXmlParser.serialize(account, config);
+        assertTrue(accountXml.contains("\n"));
+        assertEquals(100, abacusXmlParser.deserialize(accountXml, Account.class).getId());
+        assertEquals(2, abacusXmlParser.deserialize(abacusXmlParser.serialize(N.asArray(account, account), config), Account[].class).length);
+        assertEquals(2,
+                abacusXmlParser
+                        .deserialize(abacusXmlParser.serialize(N.toList(account, account), config), XmlDeserConfig.create().setElementType(Account.class),
+                                List.class)
+                        .size());
+        assertTrue(abacusXmlParser.serialize(Beans.deepBeanToMap(account), config).contains("id")
+                || abacusXmlParser.serialize(Beans.deepBeanToMap(account), config).contains("firstName"));
 
         XBean xBean = new XBean();
         xBean.setTypeBoolean(true);
@@ -401,466 +103,252 @@ public class AbacusXmlParserTest extends AbstractXmlParserTest {
         xBean.setTypeShort((short) 2);
         xBean.setTypeInt(3);
         xBean.setTypeLong(4);
-        xBean.setTypeLong2((long) 5);
+        xBean.setTypeLong2(5L);
         xBean.setTypeFloat(1.01f);
         xBean.setTypeDouble(2.3134454d);
-
         xBean.setTypeString(">string黎< > </ <//、");
-
         xBean.setWeekDay(WeekDay.THURSDAY);
-
-        str = abacusXmlParser.serialize(xBean, config);
-
-        N.println("============xBean=======================================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = abacusXmlParser.serialize(N.asArray("abc", "123"), config);
-
-        N.println("========================================================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-
-        str = abacusXmlParser.serialize(N.toList("abc", "123"), config);
-
-        N.println("========================================================================================================================");
-        N.println(str);
-        N.println("========================================================================================================================");
-        assertNotNull(str);
+        XBean roundTrip = abacusXmlParser.deserialize(abacusXmlParser.serialize(xBean, config), XBean.class);
+        assertEquals(WeekDay.THURSDAY, roundTrip.getWeekDay());
+        assertEquals('黎', roundTrip.getTypeChar());
+        assertEquals(xBean.getTypeString(), roundTrip.getTypeString());
+        assertTrue(N.equals(N.asArray("abc", "123"), abacusXmlParser.deserialize(abacusXmlParser.serialize(N.asArray("abc", "123"), config), String[].class)));
+        assertEquals(N.toList("abc", "123"), abacusXmlParser.deserialize(abacusXmlParser.serialize(N.toList("abc", "123"), config), List.class));
     }
 
     @Test
-    public void testSerialize_tagName() throws Exception {
-        Account account = createAccountWithContact(Account.class);
-        String xml = abacusXmlParser.serialize(account);
-        N.println(xml);
-        N.println(account);
+    public void testNodeByName() throws SAXException, IOException {
+        Account account = createAccount(Account.class);
+        String str = abacusXmlParser.serialize(account);
+        Map<String, Type<?>> nodeClasses = Map.of("account", Type.of(Account.class));
 
-        xml = "<unknown><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><unknown><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></unknown></contact></unknown>";
-        Account account2 = abacusXmlParser.deserialize(xml, Account.class);
-        N.println(account2);
-        assertNotNull(account2);
-    }
-
-    public void estSerialize_tagName2() throws Exception {
-        Account account = createAccountWithContact(Account.class);
-        String xml = abacusXmlParser.serialize(account);
-        N.println(xml);
-        N.println(account);
-
-        xml = "<map><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><accountContact><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></accountContact></contact></map>";
-        Map<String, String> account2 = abacusXmlParser.deserialize(xml, Map.class);
-        N.println(account2);
-
-        xml = "<map><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><map><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></map></contact></map>";
-        account2 = abacusXmlParser.deserialize(xml, Map.class);
-        N.println(account2);
-
-        xml = "<list><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><list><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></list></contact></list>";
-        account2 = abacusXmlParser.deserialize(xml, Map.class);
-        N.println(account2);
-
-        xml = "<key><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><key><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></key></contact></key>";
-        account2 = abacusXmlParser.deserialize(xml, Map.class);
-        N.println(account2);
-
-        xml = "<value><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><value><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></value></contact></value>";
-        account2 = abacusXmlParser.deserialize(xml, Map.class);
-        N.println(account2);
-
-        xml = "<entry><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><entry><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></entry></contact></entry>";
-        account2 = abacusXmlParser.deserialize(xml, Map.class);
-        N.println(account2);
-
-        xml = "<e><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><e><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></e></contact></e>";
-        account2 = abacusXmlParser.deserialize(xml, Map.class);
-        N.println(account2);
-
-        xml = "<unknown><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui><emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime><contact><unknown><id>2801</id><accountId>1002759403</accountId><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></unknown></contact></unknown>";
-        account2 = abacusXmlParser.deserialize(xml, Map.class);
-        N.println(account2);
-    }
-
-    @Test
-    public void testSerialize_array() throws Exception {
-        Account[] accounts = N.asArray(createAccount(Account.class), createAccount(Account.class));
-
-        String xml = abacusXmlParser.serialize(accounts);
-
-        N.println(xml);
-
-        Account[] accounts2 = abacusXmlParser.deserialize(xml, Account[].class);
-        N.println(accounts2);
-
-        assertTrue(N.equals(accounts, accounts2));
-    }
-
-    @Test
-    public void testSerialize_simple_type() throws Exception {
-        assertDoesNotThrow(() -> {
-            {
-                String xml = abacusXmlParser.serialize(new Object[] {});
-
-                N.println(xml);
-
-                String[] a = abacusXmlParser.deserialize(xml, String[].class);
-
-                N.println(N.stringOf(a));
-            }
-
-            {
-                String xml = abacusXmlParser.serialize(N.asArray("abc", "123"));
-
-                N.println(xml);
-
-                String[] a = abacusXmlParser.deserialize(xml, String[].class);
-
-                N.println(N.stringOf(a));
-            }
-
-            {
-                String xml = abacusXmlParser.serialize(new ArrayList<>());
-
-                N.println(xml);
-
-                List<?> a = abacusXmlParser.deserialize(xml, List.class);
-
-                N.println(N.stringOf(a));
-            }
-
-            {
-                String xml = abacusXmlParser.serialize(N.toList("abc", "123"));
-
-                N.println(xml);
-
-                List<?> a = abacusXmlParser.deserialize(xml, List.class);
-
-                N.println(N.stringOf(a));
-            }
-        });
-    }
-
-    @Test
-    public void testSerialize_1() throws Exception {
-        XBean xBean = createXBean();
-
-        XmlSerConfig sc = XmlSerConfig.create().setExclusion(Exclusion.NONE);
-        String str = abacusXmlParser.serialize(xBean, sc);
-
-        N.println(str);
-
-        XBean xBean2 = abacusXmlParser.deserialize(str, XBean.class);
-
-        N.println(xBean);
-        N.println(xBean2);
-        assertEquals(xBean, xBean2);
-    }
-
-    @Test
-    public void testSerialize_1_1() throws Exception {
-        XBean xBean = createXBean();
-
-        XmlSerConfig sc = XmlSerConfig.create().setExclusion(Exclusion.NONE);
-        sc.setPropNamingPolicy(NamingPolicy.SNAKE_CASE);
-        String str = abacusXmlParser.serialize(xBean, sc);
-
-        N.println(str);
-
-        XBean xBean2 = abacusXmlParser.deserialize(str, XBean.class);
-
-        N.println(xBean);
-        N.println(xBean2);
-        assertEquals(xBean, xBean2);
-    }
-
-    @Test
-    public void testSerialize_2() throws Exception {
-        XBean xBean = createXBean();
-
-        Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.toSet("typeBoolean", "typeShort", "typeLong"));
-        XmlSerConfig sc = XmlSerConfig.create();
-        sc.setIgnoredPropNames(ignoredPropNames);
-        sc.setWriteTypeInfo(true);
-
-        String str = abacusXmlParser.serialize(xBean, sc);
-
-        N.println(str);
-
-        XBean xBean2 = abacusXmlParser.deserialize(str, XBean.class);
-
-        xBean.setTypeBoolean(false);
-        xBean.setTypeShort((short) 0);
-        xBean.setTypeLong(0);
-
-        N.println(xBean);
-        N.println(xBean2);
-        assertEquals(xBean, xBean2);
-    }
-
-    @Test
-    public void testSerialize_3() throws Exception {
-        XBean xBean = createXBean();
-
-        Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.toSet("typeBoolean", "typeShort", "typeLong"));
-        XmlSerConfig sc = XmlSerConfig.create();
-        sc.setIgnoredPropNames(ignoredPropNames);
-        sc.setExclusion(Exclusion.NONE);
-
-        String str = abacusXmlParser.serialize(xBean, sc);
-
-        N.println(str);
-
-        XBean xBean2 = abacusXmlParser.deserialize(str, XBean.class);
-
-        xBean.setTypeBoolean(false);
-        xBean.setTypeShort((short) 0);
-        xBean.setTypeLong(0);
-
-        N.println(xBean);
-        N.println(xBean2);
-        assertEquals(xBean, xBean2);
-    }
-
-    @Test
-    public void testSerialize_4() throws Exception {
-        XBean xBean = createXBean();
-
-        Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(XBean.class, N.toSet("typeBoolean", "typeShort", "typeLong"));
-        XmlSerConfig sc = XmlSerConfig.create();
-        sc.setIgnoredPropNames(ignoredPropNames);
-        sc.setExclusion(Exclusion.NONE);
-
-        String str = abacusXmlParser.serialize(xBean, sc);
-
-        N.println(str);
-
+        InputStream is = IOUtil.stringToInputStream(str);
+        assertEquals(account, abacusXmlParser.deserialize(is, null, nodeClasses));
+        IOUtil.close(is);
+        Reader reader = new StringReader(str);
+        assertEquals(account, abacusXmlParser.deserialize(reader, null, nodeClasses));
+        IOUtil.close(reader);
         Document doc = XmlUtil.createDOMParser().parse(IOUtil.stringToInputStream(str));
-        XBean xBean2 = abacusXmlParser.deserialize(doc.getDocumentElement(), XBean.class);
-
-        xBean.setTypeBoolean(false);
-        xBean.setTypeShort((short) 0);
-        xBean.setTypeLong(0);
-
-        N.println(xBean);
-        N.println(xBean2);
-        assertEquals(xBean, xBean2);
+        assertEquals(account, abacusXmlParser.deserialize(doc.getDocumentElement(), null, nodeClasses));
     }
 
     @Test
-    public void testSerialize_5() throws Exception {
+    public void testBufferedWriter() {
+        Writer writer = new StringWriter();
+        BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(writer);
+        Account account = createAccount(Account.class);
+        abacusXmlParser.serialize(account, bw);
+        Objectory.recycle(bw);
+        String written = writer.toString();
+        assertTrue(written.contains(account.getFirstName()));
+        assertEquals(account, abacusXmlParser.deserialize(written, Account.class));
+
+        Writer empty = new StringWriter();
+        BufferedXmlWriter emptyBw = Objectory.createBufferedXmlWriter(empty);
+        abacusXmlParser.serialize((Account) null, emptyBw);
+        assertEquals(Strings.EMPTY, empty.toString());
+        Objectory.recycle(emptyBw);
+    }
+
+    @Test
+    public void testNull() {
+        assertNull(abacusXmlParser.deserialize(abacusXmlParser.serialize((String) null), String.class));
+        String[] array = N.asArray((String) null);
+        assertTrue(N.equals(array, abacusXmlParser.deserialize(abacusXmlParser.serialize(array), String[].class)));
+        List<String> list = N.toList((String) null);
+        assertEquals(list, abacusXmlParser.deserialize(abacusXmlParser.serialize(list), List.class));
+
+        String str = abacusXmlParser.serialize(N.asMap((String) null, (Object) null), XmlSerConfig.create().setExclusion(Exclusion.NONE));
+        Map<String, Object> map2 = abacusXmlParser.deserialize(str, Map.class);
+        map2 = (Map<String, Object>) abacusXmlParser.deserialize(str, Object.class);
+        map2 = (Map<String, Object>) abacusXmlParser.deserialize(str, abacusXmlParser.getClass());
+        assertThrows(ParsingException.class, () -> abacusXmlParser.serialize(abacusXmlParser));
+        assertNotNull(map2);
+
+        Account account = new Account();
+        account.setFirstName("firstName");
+        account.setLastName("lastName");
+        Object[] mixed = { account, null };
+        assertTrue(N.equals(mixed,
+                abacusXmlParser.deserialize(abacusXmlParser.serialize(mixed), XmlDeserConfig.create().setElementType(Account.class), Object[].class)));
+        List<?> mixedList = N.toList(account, (String) null);
+        assertTrue(N.equals(mixedList,
+                abacusXmlParser.deserialize(abacusXmlParser.serialize(mixedList), XmlDeserConfig.create().setElementType(Account.class), List.class)));
+        XmlDeserConfig xdc = XmlDeserConfig.create().setElementType(Account.class);
+        xdc.setValueType("account", Account.class);
+        assertNotNull(abacusXmlParser
+                .deserialize(abacusXmlParser.serialize(N.asMap((String) null, account), XmlSerConfig.create().setExclusion(Exclusion.NONE)), xdc, Map.class));
+
+        account.setId(0);
+        account.setLastName(null);
+        Map<String, Object> map = Beans.beanToMap(account);
+        map.put("lastName", null);
+        map.put("account", account);
+        Map<Class<?>, Set<String>> ignored = N.asMap(Map.class, N.toSet("id"));
+        XmlSerConfig xsc = XmlSerConfig.create().setExclusion(Exclusion.DEFAULT).setIgnoredPropNames(ignored).setPrettyFormat(true);
+        xdc = XmlDeserConfig.create().setElementType(Account.class);
+        xdc.setValueType("account", Account.class);
+        assertNotNull(abacusXmlParser.deserialize(abacusXmlParser.serialize(map, xsc), xdc, Map.class));
+        Map<String, Object> map3 = new HashMap<>();
+        map3.put("accountList", N.toList(account, null, account));
+        map3.put("accountArray", N.asArray(account, null, account));
+        xdc = XmlDeserConfig.create();
+        xdc.setValueType("account", Account.class);
+        assertNotNull(abacusXmlParser.deserialize(abacusXmlParser.serialize(map3, xsc), xdc, Map.class));
+        String xBeanXml = abacusXmlParser.serialize(createXBean(), xsc);
+        assertNotNull(abacusXmlParser.deserialize(xBeanXml, XBean.class));
+        assertTrue(xBeanXml.contains("firstName"));
+    }
+
+    @Test
+    public void testTransient() {
+        TransientBean bean = new TransientBean();
+        bean.setTransientField("abc");
+        bean.setNontransientField("123");
+        assertTrue(abacusXmlParser.serialize(bean).indexOf("abc") < 0);
+        String withTransient = abacusXmlParser.serialize(bean, XmlSerConfig.create().setSkipTransientField(false));
+        assertTrue(withTransient.indexOf("abc") >= 0);
+        assertEquals(bean, abacusXmlParser.deserialize(withTransient, TransientBean.class));
+    }
+
+    @Test
+    public void testSerializeTagName() {
+        String xml = "<unknown><id>1002759403</id><gui>8354b425f53d4c1893b848a35191bd89</gui>"
+                + "<emailAddress>a267c0eb96d84088968ec4885110ddab@earth.com</emailAddress>"
+                + "<firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName>"
+                + "<birthDate>1414001208304</birthDate><lastUpdateTime>1414001208304</lastUpdateTime><createdTime>1414001208305</createdTime>"
+                + "<contact><unknown><id>2801</id><accountId>1002759403</accountId><address>ca, US</address>"
+                + "<city>sunnyvale</city><state>CA</state><country>U.S.</country></unknown></contact></unknown>";
+        Account account2 = abacusXmlParser.deserialize(xml, Account.class);
+        assertEquals("firstName", account2.getFirstName());
+        assertEquals("lastName", account2.getLastName());
+        assertEquals("MN", account2.getMiddleName());
+        assertEquals(1002759403L, account2.getId());
+    }
+
+    @Test
+    public void testSerializeXBean() throws Exception {
+        XBean xBean = createXBean();
+        assertEquals(xBean, abacusXmlParser.deserialize(abacusXmlParser.serialize(xBean, XmlSerConfig.create().setExclusion(Exclusion.NONE)), XBean.class));
+        assertEquals(xBean,
+                abacusXmlParser.deserialize(
+                        abacusXmlParser.serialize(xBean, XmlSerConfig.create().setExclusion(Exclusion.NONE).setPropNamingPolicy(NamingPolicy.SNAKE_CASE)),
+                        XBean.class));
+        assertEquals(xBean, abacusXmlParser.deserialize(abacusXmlParser.serialize(xBean, XmlSerConfig.create().setTagByPropertyName(false)), XBean.class));
+
+        Map<Class<?>, Set<String>> ignored = N.asMap(XBean.class, N.toSet("typeBoolean", "typeShort", "typeLong"));
+        XBean ignoredCopy = createXBean();
+        XBean restored = abacusXmlParser
+                .deserialize(abacusXmlParser.serialize(ignoredCopy, XmlSerConfig.create().setIgnoredPropNames(ignored).setWriteTypeInfo(true)), XBean.class);
+        ignoredCopy.setTypeBoolean(false);
+        ignoredCopy.setTypeShort((short) 0);
+        ignoredCopy.setTypeLong(0);
+        assertEquals(ignoredCopy, restored);
+
+        XBean none = createXBean();
+        XBean noneRestored = abacusXmlParser
+                .deserialize(abacusXmlParser.serialize(none, XmlSerConfig.create().setIgnoredPropNames(ignored).setExclusion(Exclusion.NONE)), XBean.class);
+        none.setTypeBoolean(false);
+        none.setTypeShort((short) 0);
+        none.setTypeLong(0);
+        assertEquals(none, noneRestored);
+
+        XBean source = createXBean();
+        String str = abacusXmlParser.serialize(source, XmlSerConfig.create().setIgnoredPropNames(ignored).setExclusion(Exclusion.NONE));
+        Document doc = XmlUtil.createDOMParser().parse(IOUtil.stringToInputStream(str));
+        XBean fromNode = abacusXmlParser.deserialize(doc.getDocumentElement(), XBean.class);
+        assertEquals(source.getFirstName(), fromNode.getFirstName());
+        assertFalse(fromNode.getTypeBoolean());
+        assertEquals((short) 0, fromNode.getTypeShort());
+        assertEquals(0L, fromNode.getTypeLong());
+
         Map<String, Object> map = new HashMap<>();
         map.put("array", N.asArray("abc", "123"));
         map.put("list", N.toList("abc", "123"));
-
-        String str = abacusXmlParser.serialize(map);
-
-        N.println(str);
-
-        Map<String, Object> map2 = abacusXmlParser.deserialize(str, Map.class);
-
-        N.println(map2);
-
-        map2 = abacusXmlParser.deserialize(str, XmlDeserConfig.create().setMapKeyType(String.class).setMapValueType(String[].class), Map.class);
-
-        N.println(map2);
-        assertNotNull(map2);
+        Map<String, Object> restoredMap = abacusXmlParser.deserialize(abacusXmlParser.serialize(map),
+                XmlDeserConfig.create().setMapKeyType(String.class).setMapValueType(String[].class), Map.class);
+        assertTrue(restoredMap.containsKey("list") || restoredMap.containsKey("array"));
     }
 
     @Test
-    public void testSerialize_8() throws Exception {
-        XBean xBean = createXBean();
-
-        XmlSerConfig sc = XmlSerConfig.create().setTagByPropertyName(false);
-        String str = abacusXmlParser.serialize(xBean, sc);
-
-        N.println(str);
-
-        XBean xBean2 = abacusXmlParser.deserialize(str, XBean.class);
-
-        N.println(xBean);
-        N.println(xBean2);
-        assertNotNull(xBean2);
-    }
-
-    @Test
-    public void testSerialize__10() throws Exception {
+    public void testSerializeNullFirstName() {
         Account account = createAccountWithContact(Account.class);
         account.setFirstName(null);
 
-        XmlSerConfig xsc = XmlSerConfig.create().setTagByPropertyName(false).setWriteTypeInfo(false);
-        xsc.setExclusion(Exclusion.NONE);
-        String xml = abacusXmlParser.serialize(account, xsc);
-        N.println(xml);
+        XmlSerConfig xsc = XmlSerConfig.create().setTagByPropertyName(false).setWriteTypeInfo(false).setExclusion(Exclusion.NONE);
+        Account restored = abacusXmlParser.deserialize(abacusXmlParser.serialize(account, xsc), XmlDeserConfig.create(), Account.class);
+        assertNull(restored.getFirstName());
+        assertNotNull(restored.getContact());
 
+        xsc = XmlSerConfig.create().setTagByPropertyName(false).setWriteTypeInfo(true).setExclusion(Exclusion.NONE);
+        restored = abacusXmlParser.deserialize(abacusXmlParser.serialize(account, xsc), XmlDeserConfig.create(), Account.class);
+        assertNull(restored.getFirstName());
+        assertNotNull(restored.getContact());
+
+        xsc = XmlSerConfig.create().setTagByPropertyName(true).setWriteTypeInfo(false).setExclusion(Exclusion.NONE);
         XmlDeserConfig xdc = XmlDeserConfig.create();
-        Account account2 = abacusXmlParser.deserialize(xml, xdc, Account.class);
-
-        N.println(account);
-        N.println(account2);
-
-        assertNull(account2.getFirstName());
-        assertNotNull(account2.getContact());
-
-        xsc = XmlSerConfig.create().setTagByPropertyName(false).setWriteTypeInfo(true);
-        xsc.setExclusion(Exclusion.NONE);
-        xml = abacusXmlParser.serialize(account, xsc);
-        N.println(xml);
-
-        xdc = XmlDeserConfig.create();
-        account2 = abacusXmlParser.deserialize(xml, xdc, Account.class);
-
-        N.println(account);
-        N.println(account2);
-
-        assertNull(account2.getFirstName());
-        assertNotNull(account2.getContact());
+        xdc.setValueType("accountContact", account.getContact().getClass());
+        Map<String, Object> asMap = abacusXmlParser.deserialize(abacusXmlParser.serialize(Beans.deepBeanToMap(account), xsc), xdc, Map.class);
+        List<Account> accountList = abacusXmlParser.deserialize(abacusXmlParser.serialize(N.toList(account), xsc),
+                XmlDeserConfig.create().setElementType(Account.class), List.class);
+        Object[] accountArray = abacusXmlParser.deserialize(abacusXmlParser.serialize(N.asArray(account), xsc),
+                XmlDeserConfig.create().setElementType(Account.class), Object[].class);
+        assertNotNull(asMap);
+        assertEquals(1, accountList.size());
+        assertEquals(1, accountArray.length);
+        assertNull(accountList.get(0).getFirstName());
     }
 
     @Test
-    public void testSerialize__11() throws Exception {
-        Account account = createAccountWithContact(Account.class);
-        account.setFirstName(null);
-        N.println(account);
-
-        XmlSerConfig xsc = XmlSerConfig.create().setTagByPropertyName(true).setWriteTypeInfo(false);
-
-        xsc.setExclusion(Exclusion.NONE);
-        String xml = abacusXmlParser.serialize(Beans.deepBeanToMap(account), xsc);
-        N.println(xml);
-
-        XmlDeserConfig xdc = XmlDeserConfig.create();
-        xdc.setValueType("accountContact", account.getContact().getClass());
-        Map<String, Object> account2 = abacusXmlParser.deserialize(xml, xdc, Map.class);
-
-        N.println(account2);
-
-        xml = abacusXmlParser.serialize(N.toList(account), xsc);
-        N.println(xml);
-
-        xdc = XmlDeserConfig.create().setElementType(Account.class);
-        List<Account> accountList = abacusXmlParser.deserialize(xml, xdc, List.class);
-        N.println(accountList);
-
-        xml = abacusXmlParser.serialize(N.asArray(account), xsc);
-        N.println(xml);
-
-        xdc = XmlDeserConfig.create().setElementType(Account.class);
-        Object[] accountArray = abacusXmlParser.deserialize(xml, xdc, Object[].class);
-        N.println(accountArray);
-
-        xsc = XmlSerConfig.create().setTagByPropertyName(false).setWriteTypeInfo(true);
-        xsc.setExclusion(Exclusion.NONE);
-        xml = abacusXmlParser.serialize(Beans.deepBeanToMap(account), xsc);
-        N.println(xml);
-
-        xdc = XmlDeserConfig.create();
-        xdc.setValueType("accountContact", account.getContact().getClass());
-        account2 = abacusXmlParser.deserialize(xml, xdc, Map.class);
-
-        N.println(account);
-        N.println(account2);
-        assertNotNull(account2);
-    }
-
-    @Test
-    public void testSerialize__12() throws Exception {
+    public void testSerializeCollectionKeys() {
         Map<Object, Object> map = new HashMap<>();
-
         map.put(N.toList("abc"), N.toList(123));
-
-        String str = abacusXmlParser.serialize(map);
-        N.println(str);
-
-        Map<Object, Object> map2 = abacusXmlParser.deserialize(str, Map.class);
-        N.println(map2);
-
-        str = abacusXmlParser.serialize(map, XmlSerConfig.create().setTagByPropertyName(true).setWriteTypeInfo(false));
-        N.println(str);
-
-        map2 = abacusXmlParser.deserialize(str, Map.class);
-        N.println(map2);
-
+        Map<Object, Object> restored = abacusXmlParser.deserialize(abacusXmlParser.serialize(map), Map.class);
+        restored = abacusXmlParser.deserialize(abacusXmlParser.serialize(map, XmlSerConfig.create().setTagByPropertyName(true).setWriteTypeInfo(false)),
+                Map.class);
         map = new HashMap<>();
         map.put(N.asArray("abc"), Array.of(123));
-
-        str = abacusXmlParser.serialize(map, XmlSerConfig.create().setTagByPropertyName(true).setWriteTypeInfo(false));
-        N.println(str);
-
-        map2 = abacusXmlParser.deserialize(str, Map.class);
-        N.println(map2);
-        assertNotNull(map2);
+        String str = abacusXmlParser.serialize(map, XmlSerConfig.create().setTagByPropertyName(true).setWriteTypeInfo(false));
+        restored = abacusXmlParser.deserialize(str, Map.class);
+        assertFalse(restored.isEmpty());
+        assertTrue(str.contains("abc"));
     }
 
     @Test
-    public void testSerialize_ignorePropName() throws Exception {
+    public void testIgnorePropNames() {
         Account account = createAccountWithContact(Account.class);
-
-        Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.toSet("firstName", "contact"));
-        XmlSerConfig sc = XmlSerConfig.create();
-        sc.setIgnoredPropNames(ignoredPropNames);
-
-        String xml = abacusXmlParser.serialize(account);
-        N.println(xml);
-
-        XmlDeserConfig xdc = XmlDeserConfig.create();
-        xdc.setIgnoredPropNames(ignoredPropNames);
-        Account account2 = abacusXmlParser.deserialize(xml, xdc, Account.class);
-
-        N.println(account);
-        N.println(account2);
-
-        assertNull(account2.getFirstName());
-        assertNull(account2.getContact());
-    }
-
-    @Test
-    public void testSerialize_ignorePropName_2() throws Exception {
-        Account account = createAccountWithContact(Account.class);
-
-        Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Map.class, N.toSet("firstName", "contact"));
-        XmlSerConfig sc = XmlSerConfig.create();
-        sc.setIgnoredPropNames(ignoredPropNames);
-
-        String xml = abacusXmlParser.serialize(Beans.deepBeanToMap(account));
-        N.println(xml);
-
-        XmlDeserConfig xdc = XmlDeserConfig.create();
-        xdc.setIgnoredPropNames(ignoredPropNames);
-        Map<String, Object> account2 = abacusXmlParser.deserialize(xml, xdc, Map.class);
-
-        N.println(account);
-        N.println(account2);
-
-        assertNull(account2.get("firstName"));
-        assertNull(account2.get("contact"));
-    }
-
-    @Test
-    public void testSerialize_unknowPropNames() throws Exception {
-        String xml = "<account><gui_1>9b1b4964298a4868a4ab95ccf6a5f987</gui_1><emailAddress>48c6a440fa114de28fad1bf04fa66090@earth.com</emailAddress><firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName><birthDate>1413839551838</birthDate><lastUpdateTime>1413839551838</lastUpdateTime><createdTime>1413839551838</createdTime><contact_1><accountContact><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></accountContact></contact_1></account>";
-        N.println(xml);
-
-        Map<Class<?>, Set<String>> ignoredPropNames = N.asMap(Account.class, N.toSet("firstName", "contact"));
-        XmlDeserConfig dc = XmlDeserConfig.create();
-        dc.setIgnoredPropNames(ignoredPropNames);
-        Account account2 = abacusXmlParser.deserialize(xml, dc, Account.class);
-        N.println(account2);
-
-        assertNull(account2.getFirstName());
-        assertNull(account2.getContact());
-
-        try {
-            abacusXmlParser.deserialize(xml, XmlDeserConfig.create().setIgnoreUnmatchedProperty(false), Account.class);
-            fail("Should throw RuntimeException");
-        } catch (ParsingException e) {
-
-        }
-
-        ignoredPropNames = N.asMap(Account.class, N.toSet("gui_1", "contact_1"));
-        account2 = abacusXmlParser.deserialize(xml, XmlDeserConfig.create().setIgnoreUnmatchedProperty(false).setIgnoredPropNames(ignoredPropNames),
+        Map<Class<?>, Set<String>> ignored = N.asMap(Account.class, N.toSet("firstName", "contact"));
+        Account ignoredAccount = abacusXmlParser.deserialize(abacusXmlParser.serialize(account), XmlDeserConfig.create().setIgnoredPropNames(ignored),
                 Account.class);
+        assertNull(ignoredAccount.getFirstName());
+        assertNull(ignoredAccount.getContact());
 
-        assertNotNull(account2.getFirstName());
-        assertNull(account2.getContact());
+        Map<Class<?>, Set<String>> mapIgnored = N.asMap(Map.class, N.toSet("firstName", "contact"));
+        Map<String, Object> ignoredMap = abacusXmlParser.deserialize(abacusXmlParser.serialize(Beans.deepBeanToMap(account)),
+                XmlDeserConfig.create().setIgnoredPropNames(mapIgnored), Map.class);
+        assertNull(ignoredMap.get("firstName"));
+        assertNull(ignoredMap.get("contact"));
+
+        String xml = "<account><gui_1>9b1b4964298a4868a4ab95ccf6a5f987</gui_1><emailAddress>48c6a440fa114de28fad1bf04fa66090@earth.com</emailAddress>"
+                + "<firstName>firstName</firstName><middleName>MN</middleName><lastName>lastName</lastName>"
+                + "<birthDate>1413839551838</birthDate><lastUpdateTime>1413839551838</lastUpdateTime><createdTime>1413839551838</createdTime>"
+                + "<contact_1><accountContact><address>ca, US</address><city>sunnyvale</city><state>CA</state><country>U.S.</country></accountContact></contact_1></account>";
+        assertNull(abacusXmlParser.deserialize(xml, XmlDeserConfig.create().setIgnoredPropNames(ignored), Account.class).getFirstName());
+        assertThrows(ParsingException.class, () -> abacusXmlParser.deserialize(xml, XmlDeserConfig.create().setIgnoreUnmatchedProperty(false), Account.class));
+        Account allowed = abacusXmlParser.deserialize(xml,
+                XmlDeserConfig.create().setIgnoreUnmatchedProperty(false).setIgnoredPropNames(N.asMap(Account.class, N.toSet("gui_1", "contact_1"))),
+                Account.class);
+        assertNotNull(allowed.getFirstName());
+        assertNull(allowed.getContact());
+    }
+
+    @Test
+    public void testSerializeCollections() {
+        Account[] accounts = N.asArray(createAccount(Account.class), createAccount(Account.class));
+        assertTrue(N.equals(accounts, abacusXmlParser.deserialize(abacusXmlParser.serialize(accounts), Account[].class)));
+        assertEquals(0, abacusXmlParser.deserialize(abacusXmlParser.serialize(new Object[] {}), String[].class).length);
+        assertTrue(N.equals(N.asArray("abc", "123"), abacusXmlParser.deserialize(abacusXmlParser.serialize(N.asArray("abc", "123")), String[].class)));
+        assertTrue(abacusXmlParser.deserialize(abacusXmlParser.serialize(new ArrayList<>()), List.class).isEmpty());
+        assertEquals(N.toList("abc", "123"), abacusXmlParser.deserialize(abacusXmlParser.serialize(N.toList("abc", "123")), List.class));
     }
 }

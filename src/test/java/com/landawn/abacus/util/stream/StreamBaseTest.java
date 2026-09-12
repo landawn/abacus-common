@@ -15,6 +15,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,6 +48,480 @@ import com.landawn.abacus.util.stream.StreamBase.LocalArrayDeque;
 import com.landawn.abacus.util.stream.StreamBase.LocalRunnable;
 
 public class StreamBaseTest extends TestBase {
+
+    @Test
+    public void testIfEmptyRetriesSourceInspectionAndRunsActionOnce() {
+        for (int type = 0; type < 8; type++) {
+            for (boolean actionFails : new boolean[] { false, true }) {
+                AtomicInteger inspections = new AtomicInteger();
+                AtomicInteger actions = new AtomicInteger();
+                Stream<Integer> source = Stream.of(new Iterator<Integer>() {
+                    @Override
+                    public boolean hasNext() {
+                        if (inspections.getAndIncrement() == 0) {
+                            throw new IllegalStateException("empty source inspection failed");
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public Integer next() {
+                        throw new NoSuchElementException();
+                    }
+                });
+                Runnable action = () -> {
+                    actions.incrementAndGet();
+                    if (actionFails) {
+                        throw new IllegalArgumentException("empty action failed");
+                    }
+                };
+                try (BaseStream<?, ?, ?, ?, ?, ?, ?, ?> stream = switch (type) {
+                    case 0 -> source.ifEmpty(action);
+                    case 1 -> source.mapToByte(Number::byteValue).ifEmpty(action);
+                    case 2 -> source.mapToChar(value -> (char) value.intValue()).ifEmpty(action);
+                    case 3 -> source.mapToShort(Number::shortValue).ifEmpty(action);
+                    case 4 -> source.mapToInt(Number::intValue).ifEmpty(action);
+                    case 5 -> source.mapToLong(Number::longValue).ifEmpty(action);
+                    case 6 -> source.mapToFloat(Number::floatValue).ifEmpty(action);
+                    case 7 -> source.mapToDouble(Number::doubleValue).ifEmpty(action);
+                    default -> throw new AssertionError(type);
+                }) {
+                    Iterator<?> iterator = stream.iterator();
+                    Assertions.assertThrows(IllegalStateException.class, iterator::hasNext);
+                    Assertions.assertEquals(0, actions.get());
+                    if (actionFails) {
+                        Assertions.assertThrows(IllegalArgumentException.class, iterator::hasNext);
+                    } else {
+                        Assertions.assertFalse(iterator.hasNext());
+                    }
+                    Assertions.assertFalse(iterator.hasNext());
+                    Assertions.assertEquals(1, actions.get(), "stream type " + type);
+                    Assertions.assertThrows(NoSuchElementException.class, iterator::next);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testArrayTopRetriesAfterComparatorFailure() {
+        for (int type = 0; type < 6; type++) {
+            for (boolean nextFirst : new boolean[] { false, true }) {
+                java.util.concurrent.atomic.AtomicInteger comparisons = new java.util.concurrent.atomic.AtomicInteger();
+                java.util.Comparator<Number> comparator = (left, right) -> {
+                    if (comparisons.getAndIncrement() == 0) {
+                        throw new IllegalStateException("top comparison failed");
+                    }
+                    return Double.compare(left.doubleValue(), right.doubleValue());
+                };
+                try (BaseStream<?, ?, ?, ?, ?, ?, ?, ?> stream = switch (type) {
+                    case 0 -> Stream.of(3, 1, 4, 2).top(2, comparator);
+                    case 1 -> ShortStream.of((short) 3, (short) 1, (short) 4, (short) 2).top(2, comparator);
+                    case 2 -> IntStream.of(3, 1, 4, 2).top(2, comparator);
+                    case 3 -> LongStream.of(3, 1, 4, 2).top(2, comparator);
+                    case 4 -> FloatStream.of(3, 1, 4, 2).top(2, comparator);
+                    case 5 -> DoubleStream.of(3, 1, 4, 2).top(2, comparator);
+                    default -> throw new AssertionError(type);
+                }) {
+                    java.util.Iterator<?> iterator = stream.iterator();
+                    if (nextFirst) {
+                        Assertions.assertThrows(IllegalStateException.class, iterator::next);
+                    } else {
+                        Assertions.assertThrows(IllegalStateException.class, iterator::hasNext);
+                    }
+                    java.util.List<Integer> actual = new java.util.ArrayList<>();
+                    iterator.forEachRemaining(value -> actual.add(((Number) value).intValue()));
+                    java.util.Collections.sort(actual);
+                    Assertions.assertEquals(java.util.Arrays.asList(3, 4), actual, "array type " + type);
+                    Assertions.assertThrows(java.util.NoSuchElementException.class, iterator::next);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testDropWhileContinuesDroppingAfterPredicateFailure() {
+        for (int type = 0; type < 8; type++) {
+            for (boolean iteratorSource : new boolean[] { false, true }) {
+                for (int failAt : new int[] { 1, 2 }) {
+                    AtomicBoolean failed = new AtomicBoolean();
+                    IllegalStateException failure = new IllegalStateException("predicate failed");
+                    java.util.function.IntPredicate predicate = value -> {
+                        Assertions.assertTrue(value <= 3, "predicate must stop at the first retained element");
+                        if (value == failAt && failed.compareAndSet(false, true)) {
+                            throw failure;
+                        }
+                        return value < 3;
+                    };
+
+                    try (BaseStream<?, ?, ?, ?, ?, ?, ?, ?> stream = dropWhileRegressionStream(type, iteratorSource, predicate)) {
+                        Iterator<?> iterator = stream.iterator();
+                        Assertions.assertSame(failure, Assertions.assertThrows(IllegalStateException.class, iterator::hasNext));
+                        Assertions.assertTrue(iterator.hasNext());
+                        Assertions.assertTrue(iterator.hasNext());
+                        Object first = iterator.next();
+                        Object second = iterator.next();
+                        Assertions.assertEquals(3, first instanceof Character value ? value.charValue() : ((Number) first).intValue());
+                        Assertions.assertEquals(4, second instanceof Character value ? value.charValue() : ((Number) second).intValue());
+                        Assertions.assertFalse(iterator.hasNext());
+                        Assertions.assertThrows(NoSuchElementException.class, iterator::next);
+                    }
+                }
+            }
+        }
+    }
+
+    private BaseStream<?, ?, ?, ?, ?, ?, ?, ?> dropWhileRegressionStream(int type, boolean iteratorSource,
+            java.util.function.IntPredicate predicate) {
+        return switch (type) {
+            case 0 -> (iteratorSource ? Stream.of(ObjIteratorEx.of(1, 2, 3, 4)) : Stream.of(1, 2, 3, 4)).dropWhile(predicate::test);
+            case 1 -> (iteratorSource ? ByteStream.of(ByteIteratorEx.of((byte) 1, (byte) 2, (byte) 3, (byte) 4))
+                    : ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4)).dropWhile(predicate::test);
+            case 2 -> (iteratorSource ? CharStream.of(CharIteratorEx.of((char) 1, (char) 2, (char) 3, (char) 4))
+                    : CharStream.of((char) 1, (char) 2, (char) 3, (char) 4)).dropWhile(predicate::test);
+            case 3 -> (iteratorSource ? ShortStream.of(ShortIteratorEx.of((short) 1, (short) 2, (short) 3, (short) 4))
+                    : ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4)).dropWhile(predicate::test);
+            case 4 -> (iteratorSource ? IntStream.of(IntIteratorEx.of(1, 2, 3, 4)) : IntStream.of(1, 2, 3, 4)).dropWhile(predicate::test);
+            case 5 -> (iteratorSource ? LongStream.of(LongIteratorEx.of(1, 2, 3, 4)) : LongStream.of(1, 2, 3, 4))
+                    .dropWhile(value -> predicate.test((int) value));
+            case 6 -> (iteratorSource ? FloatStream.of(FloatIteratorEx.of(1, 2, 3, 4)) : FloatStream.of(1, 2, 3, 4))
+                    .dropWhile(value -> predicate.test((int) value));
+            case 7 -> (iteratorSource ? DoubleStream.of(DoubleIteratorEx.of(1, 2, 3, 4)) : DoubleStream.of(1, 2, 3, 4))
+                    .dropWhile(value -> predicate.test((int) value));
+            default -> throw new AssertionError(type);
+        };
+    }
+
+    @Test
+    public void testRejectedParallelSubmissionStopsNestedIteration() throws Exception {
+        assertParallelFailureStopsNestedIteration(true);
+    }
+
+    @Test
+    public void testParallelWorkerFailureStopsNestedIteration() throws Exception {
+        assertParallelFailureStopsNestedIteration(false);
+    }
+
+    private void assertParallelFailureStopsNestedIteration(boolean rejectSubmission) throws Exception {
+        for (int sourceKind = 0; sourceKind < 3; sourceKind++) {
+            for (int nestingKind = 0; nestingKind < 4; nestingKind++) {
+                AtomicBoolean stop = new AtomicBoolean();
+                AtomicInteger closeCount = new AtomicInteger();
+                AtomicInteger submissions = new AtomicInteger();
+                CountDownLatch nestedIterationStarted = new CountDownLatch(1);
+                RuntimeException failure = rejectSubmission ? new RejectedExecutionException("rejected after nested iteration started")
+                        : new IllegalStateException("peer callback failed");
+                ExecutorService worker = Executors.newFixedThreadPool(2);
+                ExecutorService caller = Executors.newSingleThreadExecutor();
+                Iterable<Integer> unbounded = () -> new Iterator<>() {
+                    @Override
+                    public boolean hasNext() {
+                        nestedIterationStarted.countDown();
+                        return !stop.get();
+                    }
+
+                    @Override
+                    public Integer next() {
+                        return 1;
+                    }
+                };
+                java.util.concurrent.Executor executor = command -> {
+                    if (submissions.getAndIncrement() == 0 || !rejectSubmission) {
+                        worker.execute(command);
+                    } else {
+                        try {
+                            Assertions.assertTrue(nestedIterationStarted.await(5, TimeUnit.SECONDS));
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new AssertionError(e);
+                        }
+                        throw failure;
+                    }
+                };
+                Stream<Integer> source = sourceKind == 2 ? Stream.of(Arrays.asList(1, 2).iterator()) : Stream.of(1, 2);
+                Stream<Integer> stream = source.onClose(closeCount::incrementAndGet)
+                        .parallel(ParallelSettings.builder().maxThreadNum(2).splitStrategy(sourceKind == 0 ? SplitStrategy.ARRAY : SplitStrategy.ITERATOR)
+                                .executor(executor).build());
+                final int nesting = nestingKind;
+                Throwables.Function<Integer, Iterable<Integer>, RuntimeException> mapper = value -> {
+                    if (!rejectSubmission && value == 2) {
+                        try {
+                            Assertions.assertTrue(nestedIterationStarted.await(5, TimeUnit.SECONDS));
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new AssertionError(e);
+                        }
+                        throw failure;
+                    }
+                    return nesting == 2 ? Collections.singletonList(value) : unbounded;
+                };
+
+                try {
+                    java.util.concurrent.Future<Throwable> result = caller.submit(() -> Assertions.assertThrows(RuntimeException.class, () -> {
+                        if (nesting == 0) {
+                            stream.forEach(mapper, (value, nested) -> { });
+                        } else if (nesting == 1) {
+                            stream.forEach(mapper, value -> Collections.singletonList(value), (value, nested, inner) -> { });
+                        } else if (nesting == 2) {
+                            stream.forEach(mapper, value -> unbounded, (value, nested, inner) -> { });
+                        } else {
+                            stream.flatGroupTo(value -> {
+                                mapper.apply(value);
+                                return new java.util.AbstractCollection<Integer>() {
+                                    @Override
+                                    public Iterator<Integer> iterator() {
+                                        return unbounded.iterator();
+                                    }
+
+                                    @Override
+                                    public int size() {
+                                        return Integer.MAX_VALUE;
+                                    }
+                                };
+                            }, (key, value) -> value, Collectors.counting(), HashMap::new);
+                        }
+                    }));
+
+                    Assertions.assertSame(failure, result.get(5, TimeUnit.SECONDS));
+                    Assertions.assertEquals(1, closeCount.get());
+                    Assertions.assertFalse(worker.isShutdown(), "The supplied executor remains caller-owned");
+                    stream.close();
+                    Assertions.assertEquals(1, closeCount.get());
+                } finally {
+                    // Bound the regression even if a worker fails to observe the terminal's shared error.
+                    stop.set(true);
+                    caller.shutdown();
+                    worker.shutdown();
+                    Assertions.assertTrue(caller.awaitTermination(5, TimeUnit.SECONDS));
+                    Assertions.assertTrue(worker.awaitTermination(5, TimeUnit.SECONDS));
+                    stream.close();
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testRejectedParallelSubmissionPreservesFailureWhenCloseFails() {
+        for (boolean iteratorBacked : new boolean[] { false, true }) {
+            for (int terminal = 0; terminal < 4; terminal++) {
+                AtomicInteger closeCount = new AtomicInteger();
+                RejectedExecutionException rejection = new RejectedExecutionException("rejected submission");
+                IllegalStateException closeFailure = new IllegalStateException("close failed");
+                Stream<Integer> stream = (iteratorBacked ? Stream.of(Arrays.asList(1, 2).iterator()) : Stream.of(1, 2))
+                        .onClose(() -> {
+                            closeCount.incrementAndGet();
+                            throw closeFailure;
+                        }).parallel(2, command -> { throw rejection; });
+                final int operation = terminal;
+
+                Assertions.assertSame(rejection, Assertions.assertThrows(RejectedExecutionException.class, () -> {
+                    switch (operation) {
+                        case 0 -> stream.forEach(value -> { });
+                        case 1 -> stream.collect(ArrayList<Integer>::new, List::add, List::addAll);
+                        case 2 -> stream.reduce(0, Integer::sum, Integer::sum);
+                        case 3 -> stream.forEach(value -> { }, () -> Assertions.fail("onComplete must not run after rejection"));
+                        default -> throw new AssertionError(operation);
+                    }
+                }));
+                Assertions.assertArrayEquals(new Throwable[] { closeFailure }, rejection.getSuppressed());
+                Assertions.assertEquals(1, closeCount.get());
+                stream.close();
+                Assertions.assertEquals(1, closeCount.get());
+                Assertions.assertThrows(IllegalStateException.class, stream::count);
+            }
+        }
+    }
+
+    @Test
+    public void testParallelTerminalsCloseWhenExecutorRejectsSubmission() {
+        for (boolean iteratorBacked : new boolean[] { false, true }) {
+            for (int type = 0; type < 8; type++) {
+                AtomicInteger closeCount = new AtomicInteger();
+                RejectedExecutionException rejection = new RejectedExecutionException("rejected submission");
+                java.util.concurrent.Executor executor = command -> { throw rejection; };
+                final int streamType = type;
+
+                Assertions.assertSame(rejection, Assertions.assertThrows(RejectedExecutionException.class, () -> {
+                    switch (streamType) {
+                        case 0 -> (iteratorBacked ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3))
+                                .onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                        case 1 -> (iteratorBacked ? ByteStream.of(com.landawn.abacus.util.ByteIterator.of((byte) 1, (byte) 2, (byte) 3))
+                                : ByteStream.of((byte) 1, (byte) 2, (byte) 3)).onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                        case 2 -> (iteratorBacked ? CharStream.of(com.landawn.abacus.util.CharIterator.of('a', 'b', 'c')) : CharStream.of('a', 'b', 'c'))
+                                .onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                        case 3 -> (iteratorBacked ? ShortStream.of(com.landawn.abacus.util.ShortIterator.of((short) 1, (short) 2, (short) 3))
+                                : ShortStream.of((short) 1, (short) 2, (short) 3)).onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                        case 4 -> (iteratorBacked ? IntStream.of(com.landawn.abacus.util.IntIterator.of(1, 2, 3)) : IntStream.of(1, 2, 3))
+                                .onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                        case 5 -> (iteratorBacked ? LongStream.of(com.landawn.abacus.util.LongIterator.of(1, 2, 3)) : LongStream.of(1, 2, 3))
+                                .onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                        case 6 -> (iteratorBacked ? FloatStream.of(com.landawn.abacus.util.FloatIterator.of(1, 2, 3)) : FloatStream.of(1, 2, 3))
+                                .onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                        case 7 -> (iteratorBacked ? DoubleStream.of(com.landawn.abacus.util.DoubleIterator.of(1, 2, 3)) : DoubleStream.of(1, 2, 3))
+                                .onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                        default -> throw new AssertionError(streamType);
+                    }
+                }));
+                Assertions.assertEquals(1, closeCount.get(), "type=" + type + ", iteratorBacked=" + iteratorBacked);
+            }
+
+            for (boolean collecting : new boolean[] { false, true }) {
+                AtomicInteger closeCount = new AtomicInteger();
+                RejectedExecutionException rejection = new RejectedExecutionException("rejected result submission");
+                Stream<Integer> stream = (iteratorBacked ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3))
+                        .onClose(closeCount::incrementAndGet).parallel(2, command -> { throw rejection; });
+
+                Assertions.assertSame(rejection, Assertions.assertThrows(RejectedExecutionException.class, () -> {
+                    if (collecting) {
+                        stream.collect(ArrayList<Integer>::new, List::add, List::addAll);
+                    } else {
+                        stream.reduce(0, Integer::sum);
+                    }
+                }));
+                Assertions.assertEquals(1, closeCount.get());
+                Assertions.assertThrows(IllegalStateException.class, stream::count);
+            }
+        }
+    }
+
+    @Test
+    public void testRejectedParallelSubmissionWaitsForAcceptedWorkerBeforeClose() throws Exception {
+        ExecutorService worker = Executors.newSingleThreadExecutor();
+        CountDownLatch entered = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        AtomicBoolean keepProducing = new AtomicBoolean(true);
+        AtomicBoolean callbackFinished = new AtomicBoolean();
+        AtomicInteger closeCount = new AtomicInteger();
+        AtomicInteger submissions = new AtomicInteger();
+        RejectedExecutionException rejection = new RejectedExecutionException("second submission rejected");
+
+        try {
+            Stream<Integer> stream = Stream.generate(() -> 1).takeWhile(value -> keepProducing.get()).onClose(() -> {
+                Assertions.assertTrue(callbackFinished.get());
+                closeCount.incrementAndGet();
+            }).parallel(2, command -> {
+                if (submissions.getAndIncrement() == 0) {
+                    worker.execute(command);
+                    try {
+                        Assertions.assertTrue(entered.await(5, TimeUnit.SECONDS));
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new AssertionError(e);
+                    }
+                } else {
+                    release.countDown();
+                    throw rejection;
+                }
+            });
+
+            Assertions.assertSame(rejection, Assertions.assertThrows(RejectedExecutionException.class, () -> stream.forEach(value -> {
+                entered.countDown();
+                Assertions.assertTrue(release.await(5, TimeUnit.SECONDS));
+                Assertions.assertEquals(0, closeCount.get());
+                callbackFinished.set(true);
+            })));
+            Assertions.assertEquals(1, closeCount.get());
+            Assertions.assertFalse(worker.isShutdown(), "the supplied executor is borrowed");
+        } finally {
+            keepProducing.set(false);
+            release.countDown();
+            worker.shutdownNow();
+            Assertions.assertTrue(worker.awaitTermination(5, TimeUnit.SECONDS));
+        }
+    }
+
+    @Test
+    public void testParallelWorkerSetupFailureStopsOtherWorkers() throws Exception {
+        for (int operation = 0; operation < 3; operation++) {
+            ExecutorService workers = Executors.newFixedThreadPool(2);
+            ExecutorService caller = Executors.newSingleThreadExecutor();
+            AtomicBoolean keepProducing = new AtomicBoolean(true);
+            AtomicInteger setupCalls = new AtomicInteger();
+            AtomicInteger closeCount = new AtomicInteger();
+            CountDownLatch secondSupplierReady = new CountDownLatch(1);
+            IllegalStateException failure = new IllegalStateException("worker setup failed");
+            final int terminalOperation = operation;
+
+            try {
+                java.util.concurrent.Future<?> result = caller.submit(() -> {
+                    com.landawn.abacus.util.function.Supplier<AtomicInteger> supplier = () -> {
+                        if (setupCalls.getAndIncrement() == 0) {
+                            try {
+                                Assertions.assertTrue(secondSupplierReady.await(5, TimeUnit.SECONDS));
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                                throw new AssertionError(e);
+                            }
+                            throw failure;
+                        }
+                        secondSupplierReady.countDown();
+                        return new AtomicInteger();
+                    };
+
+                    if (terminalOperation == 0) {
+                        Stream.generate(() -> 1).takeWhile(value -> keepProducing.get()).onClose(closeCount::incrementAndGet).parallel(2, workers)
+                                .collect(supplier, (count, value) -> count.incrementAndGet(), (left, right) -> left.addAndGet(right.get()));
+                    } else if (terminalOperation == 1) {
+                        IntStream.generate(() -> 1).takeWhile(value -> keepProducing.get()).onClose(closeCount::incrementAndGet).parallel(2, workers)
+                                .collect(supplier, (count, value) -> count.incrementAndGet(), (left, right) -> left.addAndGet(right.get()));
+                    } else {
+                        IntStream.of(new com.landawn.abacus.util.IntIterator() {
+                            @Override
+                            public boolean hasNext() {
+                                if (setupCalls.getAndIncrement() == 0) {
+                                    throw failure;
+                                }
+                                return keepProducing.get();
+                            }
+
+                            @Override
+                            public int nextInt() {
+                                return 1;
+                            }
+                        }).onClose(closeCount::incrementAndGet).parallel(2, workers).reduce(Integer::sum);
+                    }
+                });
+
+                java.util.concurrent.ExecutionException thrown = Assertions.assertThrows(java.util.concurrent.ExecutionException.class,
+                        () -> result.get(5, TimeUnit.SECONDS));
+                Assertions.assertSame(failure, thrown.getCause());
+                Assertions.assertEquals(1, closeCount.get());
+                Assertions.assertFalse(workers.isShutdown(), "the supplied executor is borrowed");
+            } finally {
+                keepProducing.set(false);
+                secondSupplierReady.countDown();
+                workers.shutdownNow();
+                caller.shutdownNow();
+                Assertions.assertTrue(workers.awaitTermination(5, TimeUnit.SECONDS));
+                Assertions.assertTrue(caller.awaitTermination(5, TimeUnit.SECONDS));
+            }
+        }
+    }
+
+    @Test
+    public void testConcurrentCollectorSupplierFailureClosesSource() {
+        for (boolean iteratorBacked : new boolean[] { false, true }) {
+            AtomicInteger closeCount = new AtomicInteger();
+            AtomicInteger supplierCalls = new AtomicInteger();
+            AtomicInteger submissions = new AtomicInteger();
+            IllegalStateException failure = new IllegalStateException("concurrent collector setup failed");
+            Stream<Integer> stream = (iteratorBacked ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3))
+                    .onClose(closeCount::incrementAndGet).parallel(2, command -> {
+                        submissions.incrementAndGet();
+                        command.run();
+                    });
+            java.util.stream.Collector<Integer, AtomicInteger, AtomicInteger> collector = java.util.stream.Collector.of(() -> {
+                supplierCalls.incrementAndGet();
+                throw failure;
+            }, (count, value) -> count.addAndGet(value), (left, right) -> left, java.util.stream.Collector.Characteristics.CONCURRENT,
+                    java.util.stream.Collector.Characteristics.UNORDERED);
+
+            Assertions.assertSame(failure, Assertions.assertThrows(IllegalStateException.class, () -> stream.collect(collector)));
+            Assertions.assertEquals(1, supplierCalls.get());
+            Assertions.assertEquals(0, submissions.get());
+            Assertions.assertEquals(1, closeCount.get());
+            Assertions.assertThrows(IllegalStateException.class, stream::count);
+        }
+    }
 
     @SafeVarargs
     private final <T> Stream<T> createStream(T... elements) {
@@ -1938,6 +2413,307 @@ public class StreamBaseTest extends TestBase {
         }).onClose(closed::incrementAndGet).close());
         Assertions.assertSame(failure, thrown);
         Assertions.assertEquals(1, closed.get());
+    }
+
+    @Test
+    public void testGroupingCachesOnlySuccessfullyReadLookahead() {
+        for (String type : Arrays.asList("Object", "Byte", "Char", "Short", "Int", "Long", "Float", "Double")) {
+            int operationCount = type.equals("Object") ? 9 : 5;
+            for (int operation = 0; operation < operationCount; operation++) {
+                for (int failureKind = 0; failureKind < 3; failureKind++) {
+                    for (int failureAt : new int[] { 2, 3 }) {
+                        for (boolean mergeAll : new boolean[] { false, true }) {
+                            final int kind = failureKind;
+                            final AtomicInteger failures = new AtomicInteger();
+                            final String context = type + "/" + operation + "/" + kind + "/" + failureAt + "/" + mergeAll;
+                            java.util.Iterator<Integer> source = new java.util.Iterator<>() {
+                                private int next = 1;
+
+                                private void fail(int phase) {
+                                    if (kind == phase && next == failureAt && failures.getAndIncrement() == 0) {
+                                        throw new IllegalStateException("source lookahead");
+                                    }
+                                }
+
+                                @Override
+                                public boolean hasNext() {
+                                    fail(0);
+                                    return next <= 4;
+                                }
+
+                                @Override
+                                public Integer next() {
+                                    fail(1);
+                                    if (next > 4) {
+                                        throw new java.util.NoSuchElementException();
+                                    }
+                                    return next++;
+                                }
+                            };
+                            java.util.function.BiPredicate<Integer, Integer> predicate = (left, right) -> {
+                                if (kind == 2 && right == failureAt && failures.getAndIncrement() == 0) {
+                                    throw new IllegalStateException("predicate lookahead");
+                                }
+                                return mergeAll;
+                            };
+
+                            try (Stream<Integer> grouped = groupingFailureStream(type, operation, source, predicate)) {
+                                java.util.Iterator<Integer> iterator = grouped.iterator();
+                                if (!mergeAll && failureAt == 3) {
+                                    Assertions.assertEquals(1, iterator.next(), context);
+                                }
+                                Assertions.assertThrows(IllegalStateException.class, iterator::next, context);
+                                List<Integer> remaining = new ArrayList<>();
+                                while (iterator.hasNext()) {
+                                    Assertions.assertTrue(iterator.hasNext(), context);
+                                    remaining.add(iterator.next());
+                                }
+                                List<Integer> expected = mergeAll ? Arrays.asList(failureAt)
+                                        : failureAt == 2 ? Arrays.asList(2, 3, 4) : Arrays.asList(3, 4);
+                                Assertions.assertEquals(expected, remaining, context);
+                                Assertions.assertThrows(java.util.NoSuchElementException.class, iterator::next, context);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static Stream<Integer> groupingFailureStream(String type, int operation, java.util.Iterator<Integer> source,
+            java.util.function.BiPredicate<Integer, Integer> predicate) {
+        switch (type) {
+            case "Object": {
+                Stream<Integer> stream = Stream.of(source);
+                com.landawn.abacus.util.function.BiPredicate<Integer, Integer> pair = predicate::test;
+                com.landawn.abacus.util.function.TriPredicate<Integer, Integer, Integer> triple = (first, previous, next) -> predicate.test(previous, next);
+                switch (operation) {
+                    case 0: return stream.rangeMap(pair, (first, last) -> first);
+                    case 1: return stream.collapse(pair).map(values -> values.get(0));
+                    case 2: return stream.collapse(pair, (first, next) -> first);
+                    case 3: return stream.collapse(triple, (first, next) -> first);
+                    case 4: return stream.collapse(pair, (Integer) null, (first, next) -> first == null ? next : first);
+                    case 5: return stream.collapse(triple, (Integer) null, (first, next) -> first == null ? next : first);
+                    case 6: return stream.collapse(pair, java.util.stream.Collectors.toList()).map(values -> values.get(0));
+                    case 7: return stream.collapse(triple, java.util.stream.Collectors.toList()).map(values -> values.get(0));
+                    case 8: return stream.collapse(triple).map(values -> values.get(0));
+                    default: throw new AssertionError(operation);
+                }
+            }
+            case "Byte": {
+                ByteStream stream = Stream.of(source).mapToByte(value -> (byte) value.intValue());
+                com.landawn.abacus.util.function.ByteBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
+                com.landawn.abacus.util.function.ByteTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
+                switch (operation) {
+                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default: throw new AssertionError(operation);
+                }
+            }
+            case "Char": {
+                CharStream stream = Stream.of(source).mapToChar(value -> (char) value.intValue());
+                com.landawn.abacus.util.function.CharBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
+                com.landawn.abacus.util.function.CharTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
+                switch (operation) {
+                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default: throw new AssertionError(operation);
+                }
+            }
+            case "Short": {
+                ShortStream stream = Stream.of(source).mapToShort(value -> (short) value.intValue());
+                com.landawn.abacus.util.function.ShortBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
+                com.landawn.abacus.util.function.ShortTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
+                switch (operation) {
+                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default: throw new AssertionError(operation);
+                }
+            }
+            case "Int": {
+                IntStream stream = Stream.of(source).mapToInt(value -> (int) value.intValue());
+                com.landawn.abacus.util.function.IntBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
+                com.landawn.abacus.util.function.IntTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
+                switch (operation) {
+                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default: throw new AssertionError(operation);
+                }
+            }
+            case "Long": {
+                LongStream stream = Stream.of(source).mapToLong(value -> (long) value.intValue());
+                com.landawn.abacus.util.function.LongBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
+                com.landawn.abacus.util.function.LongTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
+                switch (operation) {
+                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default: throw new AssertionError(operation);
+                }
+            }
+            case "Float": {
+                FloatStream stream = Stream.of(source).mapToFloat(value -> (float) value.intValue());
+                com.landawn.abacus.util.function.FloatBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
+                com.landawn.abacus.util.function.FloatTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
+                switch (operation) {
+                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default: throw new AssertionError(operation);
+                }
+            }
+            case "Double": {
+                DoubleStream stream = Stream.of(source).mapToDouble(value -> (double) value.intValue());
+                com.landawn.abacus.util.function.DoubleBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
+                com.landawn.abacus.util.function.DoubleTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
+                switch (operation) {
+                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default: throw new AssertionError(operation);
+                }
+            }
+            default: throw new AssertionError(type);
+        }
+    }
+
+    /**
+     * The deadlock-avoidance fallback pool must be OWNED by its {@code AsyncExecutor}, so that its threads
+     * are daemon threads and {@code shutdownTempExecutor} can actually shut it down.
+     *
+     * <p>It used to be built as {@code new AsyncExecutor(Executors.newFixedThreadPool(n))}. That constructor
+     * records {@code ownsExecutor = false}, so {@code AsyncExecutor.shutdown()} never shut the wrapped pool
+     * down, and {@code Executors.defaultThreadFactory()} threads are <b>non-daemon</b> with no core timeout.
+     * A process that once tripped this path could therefore never exit: measured with two nested
+     * {@code parallel()} levels, the pipeline finished in ~600 ms and the JVM then had to be killed after
+     * 60 s with 32 surviving non-daemon threads.
+     *
+     * <p>The fallback only triggers above {@code CORE_THREAD_POOL_SIZE - RESERVED_POOL_SIZE} active threads
+     * (240 on a 16-core machine), so rather than spawning that many real threads the test raises the
+     * internal counter directly and restores it afterwards.
+     */
+    @Test
+    public void testFallbackAsyncExecutorUsesDaemonThreads() throws Exception {
+        final java.lang.reflect.Field field = StreamBase.class.getDeclaredField("ACTIVE_THREAD_NUM");
+        field.setAccessible(true);
+        final java.util.concurrent.atomic.AtomicInteger activeThreadNum = (java.util.concurrent.atomic.AtomicInteger) field.get(null);
+
+        final int bump = StreamBase.CORE_THREAD_POOL_SIZE;
+        activeThreadNum.addAndGet(bump);
+
+        try {
+            final com.landawn.abacus.util.AsyncExecutor fallback = StreamBase.checkAsyncExecutor(null, 2);
+
+            Assertions.assertNotSame(StreamBase.DEFAULT_ASYNC_EXECUTOR, fallback, "the fallback pool should have been created");
+
+            final java.util.concurrent.atomic.AtomicBoolean daemon = new java.util.concurrent.atomic.AtomicBoolean();
+            final java.util.concurrent.CountDownLatch done = new java.util.concurrent.CountDownLatch(1);
+
+            fallback.execute(() -> {
+                daemon.set(Thread.currentThread().isDaemon());
+                done.countDown();
+            });
+
+            Assertions.assertTrue(done.await(30, java.util.concurrent.TimeUnit.SECONDS), "the fallback pool never ran the task");
+            Assertions.assertTrue(daemon.get(), "the fallback pool must use daemon threads, otherwise the JVM cannot exit");
+
+            StreamBase.shutdownTempExecutor(fallback);
+        } finally {
+            activeThreadNum.addAndGet(-bump);
+        }
+    }
+
+    /**
+     * An {@code Error} raised by user code inside a parallel worker must reach the caller <b>as an Error</b>.
+     *
+     * <p>{@code StreamBase.toRuntimeException(Throwable)} used to default {@code throwIfItIsError} to
+     * {@code false}, so an {@code AssertionError} or {@code OutOfMemoryError} from a mapper arrived wrapped in
+     * a {@code RuntimeException} and was swallowed by an ordinary {@code catch (Exception)}, silently
+     * truncating the stream. Sequential pipelines and parallel {@code forEach} always propagated it
+     * correctly; these four terminals did not.
+     */
+    @Test
+    public void testParallelPipelinePropagatesAnErrorAsAnError() {
+        final List<Integer> data = new ArrayList<>();
+
+        for (int i = 0; i < 8; i++) {
+            data.add(i);
+        }
+
+        Assertions.assertThrows(AssertionError.class, () -> Stream.of(data).parallel(4).map(x -> {
+            throw new AssertionError("boom-" + x);
+        }).toList());
+
+        Assertions.assertThrows(AssertionError.class, () -> Stream.of(data.iterator()).parallel(4).map(x -> {
+            throw new AssertionError("boom-" + x);
+        }).count());
+
+        Assertions.assertThrows(AssertionError.class, () -> Stream.of(data).parallel(4).filter(x -> {
+            throw new AssertionError("boom-" + x);
+        }).toList());
+
+        Assertions.assertThrows(AssertionError.class, () -> IntStream.range(0, 8).parallel(4).map(x -> {
+            throw new AssertionError("boom-" + x);
+        }).sum());
+
+        // an ordinary exception must still arrive unchanged
+        Assertions.assertThrows(IllegalStateException.class, () -> Stream.of(data).parallel(4).map(x -> {
+            throw new IllegalStateException("normal-" + x);
+        }).toList());
+
+        // and a healthy parallel pipeline is unaffected
+        Assertions.assertEquals(8, Stream.of(data).parallel(4).map(x -> x * 2).toList().size());
+    }
+
+    // ------------------------------------------------------------------------------------------------------
+    // Stream review 2026-09-09 (pass B) - non-RejectedExecutionException failures during worker submission
+    // ------------------------------------------------------------------------------------------------------
+
+    /**
+     * The submission helper caught only {@code RejectedExecutionException}, so any other throw from an
+     * {@code Executor.execute(...)} escaped before {@code completeAndShutdownTempExecutor(...)}: already-accepted
+     * workers were never awaited and the stream was never closed. Reachable without a hostile executor -
+     * {@code StreamBase}'s own pool installs a handler that throws a plain {@code RuntimeException}, and its JVM
+     * shutdown hook shuts that pool down, so a parallel stream run from a user shutdown hook takes this path.
+     *
+     * <p>The sibling {@code testParallelTerminalsCloseWhenExecutorRejectsSubmission} covers the
+     * {@code RejectedExecutionException} case, which was always handled.
+     */
+    @Test
+    public void testParallelTerminalsCloseWhenSubmissionFailsWithANonRejectedException() {
+        for (final boolean iteratorBacked : new boolean[] { false, true }) {
+            final AtomicInteger closeCount = new AtomicInteger();
+            final java.util.concurrent.Executor executor = command -> {
+                throw new IllegalStateException("submission failed");
+            };
+
+            Assertions.assertThrows(IllegalStateException.class,
+                    () -> (iteratorBacked ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3))
+                            .onClose(closeCount::incrementAndGet)
+                            .parallel(2, executor)
+                            .forEach(value -> {
+                            }));
+
+            Assertions.assertEquals(1, closeCount.get(), "the stream must be closed even when submission fails"); // used to be 0
+        }
     }
 
 }

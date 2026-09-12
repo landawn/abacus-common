@@ -72,7 +72,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
     /**
      * Shared placeholder passed to the {@link java.io.BufferedWriter} superclass constructor in
-     * internal buffer mode, where there is no real destination. All of its I/O methods throw
+     * every mode, so the superclass never retains a real destination across reuse. All of its I/O methods throw
      * {@link UnsupportedOperationException}, so it must never actually be written to.
      */
     static final Writer DUMMY_WRITER = new DummyWriter();
@@ -105,6 +105,12 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     protected int nextChar = 0;
 
     /**
+     * Whether this writer has accepted data for its external destination since that
+     * destination was last flushed through this writer.
+     */
+    private boolean destinationDirty = false;
+
+    /**
      * Indicates whether this writer has been closed.
      */
     protected boolean isClosed = false;
@@ -119,6 +125,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * writer.write("Hello World");
      * String content = writer.toString();   // "Hello World"
      * }</pre>
+     *
      */
     BufferedWriter() {
         super(DUMMY_WRITER, 1);
@@ -139,8 +146,9 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param os the output stream to write to
+     * @throws IllegalArgumentException if {@code os} is {@code null}
      */
-    BufferedWriter(final OutputStream os) {
+    BufferedWriter(final OutputStream os) throws IllegalArgumentException {
         this(IOUtil.newOutputStreamWriter(os, IOUtil.DEFAULT_CHARSET));
     }
 
@@ -155,10 +163,12 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param writer the underlying writer to write to
+     * @throws NullPointerException if {@code writer} is {@code null}
      */
-    BufferedWriter(final Writer writer) {
-        super(writer, 1);
-        out = writer;
+    BufferedWriter(final Writer writer) throws NullPointerException {
+        // The superclass keeps its own private destination even after our pooled state is reset.
+        super(DUMMY_WRITER, 1);
+        out = N.requireNonNull(writer, "writer");
         lock = writer;
     }
 
@@ -172,7 +182,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param b the boolean value to write
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void write(final boolean b) throws IOException {
         write(b ? Strings.TRUE_CHAR_ARRAY : Strings.FALSE_CHAR_ARRAY);
@@ -188,7 +198,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param b the byte value to write
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void write(final byte b) throws IOException {
         write(N.stringOf(b));
@@ -203,7 +213,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param s the short value to write
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void write(final short s) throws IOException {
         write(N.stringOf(s));
@@ -214,7 +224,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * low-order 16 bits are written and any higher-order bits are discarded.
      *
      * @param ch the character to write; the value is cast to {@code char} (0-65535)
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      * @deprecated replaced by {@link #write(char)}
      */
     @Deprecated
@@ -233,7 +243,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param i the integer value to write
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void writeInt(final int i) throws IOException {
         write(N.stringOf(i));
@@ -248,7 +258,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param lng the long value to write
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void write(final long lng) throws IOException {
         write(N.stringOf(lng));
@@ -266,7 +276,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param f the float value to write
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void write(final float f) throws IOException {
         write(N.stringOf(f));
@@ -284,7 +294,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param d the double value to write
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void write(final double d) throws IOException {
         write(N.stringOf(d));
@@ -303,7 +313,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param date the date to write; if {@code null}, {@code "null"} is written
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void write(final Date date) throws UncheckedIOException {
         Dates.formatTo(date, null, null, this);
@@ -322,7 +332,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param c the calendar to write; if {@code null}, {@code "null"} is written
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void write(final Calendar c) throws UncheckedIOException {
         Dates.formatTo(c, null, null, this);
@@ -342,7 +352,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param c the XMLGregorianCalendar to write; if {@code null}, {@code "null"} is written
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void write(final XMLGregorianCalendar c) throws UncheckedIOException {
         Dates.formatTo(c, null, null, this);
@@ -358,7 +368,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param c the character to write
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void write(final char c) throws IOException {
         ensureOpen();
@@ -373,6 +383,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
             }
 
             _cbuf[nextChar++] = c;
+            destinationDirty = true;
         } else {
             if (count == value.length) {
                 expandCapacity(count + 64);
@@ -392,7 +403,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param str the string to write
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     @Override
     public void write(final String str) throws IOException {
@@ -416,12 +427,12 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @param off the offset from which to start writing; bounds are checked against {@code str},
      *        or against the four-character string {@code "null"} when {@code str} is {@code null}
      * @param len the number of characters to write; bounds are checked against the same effective source string
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      * @throws IndexOutOfBoundsException if {@code off < 0}, {@code len < 0},
      *         or the requested range exceeds the effective source string
      */
     @Override
-    public void write(final String str, final int off, final int len) throws IOException {
+    public void write(final String str, final int off, final int len) throws IOException, IndexOutOfBoundsException {
         if (str == null) {
             write(Strings.NULL_CHAR_ARRAY, off, len);
         } else {
@@ -433,10 +444,11 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * Internal method to write a {@code non-null} string.
      *
      * @param str the string to write (must not be null)
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code str} is null
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     @Internal
-    void writeNonNull(final String str) throws IOException {
+    void writeNonNull(final String str) throws NullPointerException, IOException {
         writeNonNull(str, 0, str.length());
     }
 
@@ -446,12 +458,13 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @param str the string to write; must not be {@code null}
      * @param off the offset from which to start writing; must be {@code >= 0} and {@code <= str.length()}
      * @param len the number of characters to write; must be {@code >= 0} and {@code <= str.length() - off}
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      * @throws IndexOutOfBoundsException if {@code off < 0}, {@code len < 0},
      *         {@code off > str.length()}, or {@code len > str.length() - off}
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code str} is null and {@code off} and {@code len} are nonnegative
      */
     @Internal
-    void writeNonNull(final String str, final int off, int len) throws IOException {
+    void writeNonNull(final String str, final int off, int len) throws IOException, IndexOutOfBoundsException, NullPointerException {
         ensureOpen();
 
         if ((off < 0) || (len < 0) || (off > str.length()) || (len > str.length() - off)) {
@@ -469,6 +482,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
                 }
 
                 out.write(str, off, len);
+                destinationDirty = true;
             } else {
                 if (_cbuf == null) {
                     _cbuf = Objectory.createCharArrayBuffer();
@@ -476,6 +490,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
                 str.getChars(off, off + len, _cbuf, nextChar);
                 nextChar += len;
+                destinationDirty = true;
             }
         } else {
             if (len > (value.length - count)) {
@@ -497,11 +512,11 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param cbuf the character array to write; must not be {@code null}
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IOException if an I/O error occurs
      */
     @Override
-    public void write(final char[] cbuf) throws IOException {
+    public void write(final char[] cbuf) throws IOException, NullPointerException {
         ensureOpen();
 
         final int len = cbuf.length;
@@ -513,6 +528,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
                 }
 
                 out.write(cbuf, 0, len);
+                destinationDirty = true;
             } else {
                 if (_cbuf == null) {
                     _cbuf = Objectory.createCharArrayBuffer();
@@ -520,6 +536,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
                 N.copy(cbuf, 0, _cbuf, nextChar, len);
                 nextChar += len;
+                destinationDirty = true;
             }
         } else {
             if (len > (value.length - count)) {
@@ -543,13 +560,13 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @param cbuf the character array; must not be {@code null}
      * @param off the offset from which to start writing; must be {@code >= 0} and {@code <= cbuf.length}
      * @param len the number of characters to write; must be {@code >= 0} and {@code <= cbuf.length - off}
-     * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      * @throws IndexOutOfBoundsException if {@code off < 0}, {@code len < 0},
      *         {@code off > cbuf.length}, or {@code len > cbuf.length - off}
+     * @throws NullPointerException if {@code cbuf} is null and {@code off} and {@code len} are nonnegative
      */
     @Override
-    public void write(final char[] cbuf, final int off, int len) throws IOException {
+    public void write(final char[] cbuf, final int off, int len) throws IOException, IndexOutOfBoundsException, NullPointerException {
         ensureOpen();
 
         if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
@@ -565,6 +582,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
                 }
 
                 out.write(cbuf, off, len);
+                destinationDirty = true;
             } else {
                 if (_cbuf == null) {
                     _cbuf = Objectory.createCharArrayBuffer();
@@ -572,6 +590,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
                 N.copy(cbuf, off, _cbuf, nextChar, len);
                 nextChar += len;
+                destinationDirty = true;
             }
         } else {
             if (len > (value.length - count)) {
@@ -599,7 +618,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * // Output on every platform: "Line 1\nLine 2"
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     @Override
     public void newLine() throws IOException {
@@ -617,7 +636,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @param csq the character sequence to append. If {@code null}, then
      *        the four characters "null" are appended
      * @return this writer
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     @Override
     public Writer append(final CharSequence csq) throws IOException { //NOSONAR
@@ -639,11 +658,11 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @param end the index of the character following the last character in the subsequence
      * @return this writer
      * @throws IndexOutOfBoundsException if start or end are negative, start is greater
-     *         than end, or end is greater than csq.length()
-     * @throws IOException if an I/O error occurs
+     *         than end, or end is greater than the effective sequence length (four when {@code csq} is null)
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     @Override
-    public Writer append(final CharSequence csq, final int start, final int end) throws IOException { //NOSONAR
+    public Writer append(final CharSequence csq, final int start, final int end) throws IndexOutOfBoundsException, IOException { //NOSONAR
         return super.append(csq, start, end);
     }
 
@@ -657,7 +676,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * @param c the character to append
      * @return this writer
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     @Override
     public Writer append(final char c) throws IOException { //NOSONAR
@@ -671,7 +690,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * flush buffer is empty. It is invoked automatically when the flush buffer becomes
      * full or cannot accommodate the next write.
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing the pending buffered characters to the underlying writer fails
      */
     void flushBufferToWriter() throws IOException {
         if (value == null) {
@@ -682,6 +701,23 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
             out.write(_cbuf, 0, nextChar);
 
             nextChar = 0;
+        }
+    }
+
+    /**
+     * Flushes pending data to the underlying writer (for example an
+     * {@code OutputStreamWriter} / StreamEncoder). Used by {@code Objectory.recycle}
+     * so encoder-held bytes are not dropped when this instance is reset without
+     * {@link #close()} or {@link #flush()}. If the destination has already been flushed
+     * and no more data has been written, this method is a no-op.
+     * @throws IOException if buffered content cannot be written or flushed to the destination.
+     */
+    void flushBufferToDestination() throws IOException {
+        flushBufferToWriter();
+
+        if (value == null && out != null && destinationDirty) {
+            out.flush();
+            destinationDirty = false;
         }
     }
 
@@ -700,7 +736,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * writer.flush();   // data is flushed to the underlying stream
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if this writer is closed, or writing buffered characters or flushing the underlying writer fails
      */
     @Override
     public void flush() throws IOException {
@@ -710,11 +746,13 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
 
         if (value == null) {
             out.flush();
+            destinationDirty = false;
         }
 
         Objectory.recycle(_cbuf);
         _cbuf = null;
         nextChar = 0;
+        destinationDirty = false;
     }
 
     /**
@@ -745,7 +783,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing buffered characters, flushing, or closing the underlying writer fails
      */
     @Override
     public void close() throws IOException {
@@ -812,7 +850,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @return the string representation of the written content
-     * @throws UncheckedIOException if an I/O error occurs during flush, or if the writer has been closed
+     * @throws UncheckedIOException if this writer is closed in external writer mode, or writing or flushing buffered characters to the underlying writer fails
      */
     @Override
     public String toString() throws UncheckedIOException {
@@ -847,12 +885,14 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * writer.write("Second use");
      * System.out.println(writer.toString());   // "Second use"
      * }</pre>
+     *
      */
     void reinit() {
         isClosed = false;
         Objectory.recycle(_cbuf);
         _cbuf = null;
         nextChar = 0;
+        destinationDirty = false;
 
         Objectory.recycle(value);
         value = Objectory.createCharArrayBuffer();
@@ -919,6 +959,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
         value = null;
         count = 0;
         nextChar = 0;
+        destinationDirty = false;
         out = writer;
         lock = writer;
     }
@@ -933,6 +974,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
         Objectory.recycle(_cbuf);
         _cbuf = null;
         nextChar = 0;
+        destinationDirty = false;
 
         Objectory.recycle(value);
         value = null;
@@ -982,16 +1024,25 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
         DummyWriter() {
         }
 
+        /**
+         * @throws UnsupportedOperationException always; this sentinel writer does not support I/O operations.
+         */
         @Override
         public void write(final char[] cbuf, final int off, final int len) throws UnsupportedOperationException {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * @throws UnsupportedOperationException always; this sentinel writer does not support I/O operations.
+         */
         @Override
         public void flush() throws UnsupportedOperationException {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * @throws UnsupportedOperationException always; this sentinel writer does not support I/O operations.
+         */
         @Override
         public void close() throws UnsupportedOperationException {
             throw new UnsupportedOperationException();

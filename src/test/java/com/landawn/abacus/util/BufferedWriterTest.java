@@ -174,7 +174,7 @@ public class BufferedWriterTest extends TestBase {
     public void testWriteFloat() throws IOException {
         BufferedWriter writer = new BufferedWriter();
         writer.write(3.14f);
-        assertEquals(N.stringOf(3.14f), writer.toString());
+        assertEquals(CommonUtil.stringOf(3.14f), writer.toString());
     }
 
     // === write(double) ===

@@ -253,4 +253,76 @@ public class OptionalLongTypeTest extends TestBase {
             com.landawn.abacus.util.Objectory.recycle(jsonWriter);
         }
     }
+
+    @SuppressWarnings("unchecked")
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+        final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            ((Type<Object>) type).serializeTo(jsonWriter, value, config);
+            return jsonWriter.toString();
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(jsonWriter);
+        }
+    }
+
+    // T5-01 / T6-03 (2026-09-06): serializeTo ignored writeNullNumberAsZero for the optional numeric handlers.
+    @Test
+    public void reviewFixes20260906_serializeToHonoursWriteNullNumberAsZero() throws java.io.IOException {
+        final com.landawn.abacus.parser.JsonSerConfig zero = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true);
+
+        assertEquals("0", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), zero));
+        assertEquals("0", reviewFixes20260906_ser(optionalLongType, null, zero));
+        assertEquals("0", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), com.landawn.abacus.parser.XmlSerConfig.create().setWriteNullNumberAsZero(true)));
+        assertEquals("null", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), com.landawn.abacus.parser.JsonSerConfig.create()));
+        assertEquals("null", reviewFixes20260906_ser(optionalLongType, null, com.landawn.abacus.parser.JsonSerConfig.create()));
+        assertEquals("null", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), null));
+        assertEquals("null", reviewFixes20260906_ser(optionalLongType, null, null));
+        assertEquals("null", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullBooleanAsFalse(true)));
+        assertEquals("7", reviewFixes20260906_ser(optionalLongType, OptionalLong.of(7L), zero));
+        assertEquals("7", reviewFixes20260906_ser(optionalLongType, OptionalLong.of(7L), null));
+
+        // the substituted zero is quoted under writeLongAsString exactly as MutableLongType/LongType do
+        final com.landawn.abacus.parser.JsonSerConfig zeroLas = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true).setWriteLongAsString(true);
+        assertEquals("\"0\"", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), zeroLas));
+        assertEquals("\"0\"", reviewFixes20260906_ser(optionalLongType, null, zeroLas));
+        assertEquals("\"7\"", reviewFixes20260906_ser(optionalLongType, OptionalLong.of(7L), zeroLas));
+        // XML config has quotation 0, so the zero stays bare
+        assertEquals("0", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), com.landawn.abacus.parser.XmlSerConfig.create().setWriteNullNumberAsZero(true).setWriteLongAsString(true)));
+        assertEquals("null", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), com.landawn.abacus.parser.JsonSerConfig.create().setWriteLongAsString(true)));
+    }
+
+    // T5-06 (2026-09-06, code change REJECTED - pinned): an empty-string column value is coerced by Numbers.toXxx(Object)
+    // to a PRESENT zero, exactly as the non-optional handlers (IntegerType.get ...) answer, while valueOf("") is empty.
+    @Test
+    public void reviewFixes20260906_getEmptyStringColumnIsPresentZeroUnlikeValueOf() throws SQLException {
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getObject(1)).thenReturn("");
+        when(rs.getObject("c")).thenReturn("");
+        when(rs.getObject(2)).thenReturn(" ");
+        when(rs.getObject(3)).thenReturn("7");
+        when(rs.getObject(4)).thenReturn(null);
+
+        assertTrue(optionalLongType.get(rs, 1).isPresent());
+        assertEquals(0L, optionalLongType.get(rs, 1).get());
+        assertTrue(optionalLongType.get(rs, "c").isPresent());
+        assertEquals(0L, optionalLongType.get(rs, "c").get());
+        assertThrows(NumberFormatException.class, () -> optionalLongType.get(rs, 2));
+        assertEquals(7L, optionalLongType.get(rs, 3).get());
+        assertTrue(optionalLongType.get(rs, 4).isEmpty());
+
+        assertTrue(optionalLongType.valueOf("").isEmpty());
+        assertTrue(optionalLongType.valueOf((String) null).isEmpty());
+        assertEquals(7L, optionalLongType.valueOf("7").get());
+    }
+
+    // T5-03 (2026-09-06): out-of-range text throws ArithmeticException (Numbers.toXxx contract), not NumberFormatException.
+    @Test
+    public void reviewFixes20260906_valueOfOutOfRangeThrowsArithmeticException() {
+        assertThrows(ArithmeticException.class, () -> optionalLongType.valueOf("9223372036854775808"));
+        assertThrows(ArithmeticException.class, () -> optionalLongType.valueOf("-9223372036854775809"));
+        assertThrows(NumberFormatException.class, () -> optionalLongType.valueOf("abc"));
+        assertThrows(NumberFormatException.class, () -> optionalLongType.valueOf(" "));
+        assertEquals(Long.MAX_VALUE, optionalLongType.valueOf("9223372036854775807").get());
+    }
 }

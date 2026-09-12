@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Type handler for {@link java.util.regex.Pattern} objects, providing conversion between Pattern instances
@@ -34,6 +35,11 @@ import java.util.regex.Pattern;
  * boolean matches = restored.matcher("test@example.com").matches();   // true
  * }</pre>
  *
+ * <p>{@link Pattern} does not override {@link Object#equals(Object)}, so {@link #equals(Object, Object)} and
+ * {@link #hashCode(Object)} are identity-based: a pattern and its {@code valueOf(stringOf(p))} round trip are
+ * <b>not</b> equal. Compare {@link Pattern#pattern()} and {@link Pattern#flags()} yourself when value
+ * semantics are needed. Like the other JDK value handlers outside the primary/number/string/enum families,
+ * this handler does not override {@link #isImmutable()}, which therefore reports {@code false}.</p>
  */
 public class PatternType extends AbstractType<Pattern> {
 
@@ -90,12 +96,12 @@ public class PatternType extends AbstractType<Pattern> {
      *
      * @param str the regular expression string to compile
      * @return a compiled Pattern object, or {@code null} if the input is {@code null}
-     * @throws java.util.regex.PatternSyntaxException if {@code str} is not a valid regular expression
+     * @throws PatternSyntaxException if {@code str} is not a valid regular expression
      * @see #valueOf(Object)
      * @see #stringOf(Pattern)
      */
     @Override
-    public Pattern valueOf(final String str) {
+    public Pattern valueOf(final String str) throws PatternSyntaxException {
         return str == null ? null : Pattern.compile(str);
     }
 }

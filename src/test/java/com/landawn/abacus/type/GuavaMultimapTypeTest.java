@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -84,7 +85,9 @@ public class GuavaMultimapTypeTest extends TestBase {
     public void testValueOf() {
         assertNull(multimapType.valueOf(null));
         assertNull(multimapType.valueOf(""));
-        assertTrue(multimapType.valueOf("null").isEmpty());
+        // P2-07: an unquoted scalar root is no longer silently read as an empty map; the bean reader has always
+        // rejected "null"/"abc" this way, and the multimap types delegate to the same map reader.
+        assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> multimapType.valueOf("null"));
     }
 
     @Test
@@ -191,5 +194,88 @@ public class GuavaMultimapTypeTest extends TestBase {
         typeName = GuavaMultimapType.getTypeName(Multimap.class, "String", "Integer", false);
         assertNotNull(typeName);
         assertTrue(typeName.contains("Multimap"));
+    }
+
+    // T8-01: the ordered targets (linked / immutable) were fed from an unordered HashMap intermediate.
+    @Test
+    public void reviewFixes20260906_orderedTargetsKeepDocumentOrder() {
+        final String json = "{\"z\": [1], \"a\": [2], \"m\": [3], \"b\": [4], \"q\": [5]}";
+        final List<String> expected = java.util.Arrays.asList("z", "a", "m", "b", "q");
+
+        for (final String typeName : new String[] { "com.google.common.collect.LinkedHashMultimap<String, Integer>",
+                "com.google.common.collect.LinkedListMultimap<String, Integer>", "com.google.common.collect.ImmutableListMultimap<String, Integer>",
+                "com.google.common.collect.ImmutableSetMultimap<String, Integer>", "com.google.common.collect.ImmutableMultimap<String, Integer>" }) {
+            final Type<Multimap<String, Integer>> t = TypeFactory.getType(typeName);
+            final Multimap<String, Integer> mm = t.valueOf(json);
+
+            assertEquals(expected, new java.util.ArrayList<>(mm.keySet()), typeName);
+            assertEquals(json, t.stringOf(mm), typeName);
+            assertEquals(json, t.stringOf(t.valueOf(t.stringOf(mm))), typeName);
+        }
+
+        // immutable runtime classes are still produced
+        assertTrue(TypeFactory.getType("com.google.common.collect.ImmutableListMultimap<String, Integer>").valueOf(json) instanceof ImmutableListMultimap);
+        assertTrue(TypeFactory.getType("com.google.common.collect.ImmutableSetMultimap<String, Integer>").valueOf(json) instanceof ImmutableSetMultimap);
+        assertTrue(TypeFactory.getType("com.google.common.collect.ImmutableMultimap<String, Integer>").valueOf(json) instanceof com.google.common.collect.ImmutableMultimap);
+
+        // Set-valued ordered targets keep the array order of the values as well (duplicates collapsed)
+        final String values = "{\"k\": [\"z\", \"a\", \"m\", \"b\", \"q\", \"z\"]}";
+        final Type<SetMultimap<String, String>> linkedSet = TypeFactory.getType("com.google.common.collect.LinkedHashMultimap<String, String>");
+        assertEquals(expected, new java.util.ArrayList<>(linkedSet.valueOf(values).get("k")));
+        final Type<SetMultimap<String, String>> immutableSet = TypeFactory.getType("com.google.common.collect.ImmutableSetMultimap<String, String>");
+        assertEquals(expected, new java.util.ArrayList<>(immutableSet.valueOf(values).get("k")));
+
+        // Unicode
+        final String unicode = "{\"é\": [\"中\"], \"à\": [\"x\"], \"😀\": [\"y\"]}";
+        final Type<Multimap<String, String>> tu = TypeFactory.getType("com.google.common.collect.ImmutableListMultimap<String, String>");
+        assertEquals(unicode, tu.stringOf(tu.valueOf(unicode)));
+    }
+
+    // Negative test: the unordered interface targets keep their runtime classes (no re-routing to Linked* classes).
+    @Test
+    public void reviewFixes20260906_unorderedTargetsKeepTheirRuntimeClasses() {
+        final String json = "{\"z\": [1], \"a\": [2], \"m\": [3]}";
+
+        assertEquals(ArrayListMultimap.class, multimapType.valueOf(json).getClass());
+        assertEquals(ArrayListMultimap.class, TypeFactory.getType("com.google.common.collect.ListMultimap<String, Integer>").valueOf(json).getClass());
+        assertEquals(HashMultimap.class, TypeFactory.getType("com.google.common.collect.SetMultimap<String, Integer>").valueOf(json).getClass());
+        assertEquals(HashMultimap.class, TypeFactory.getType("com.google.common.collect.HashMultimap<String, Integer>").valueOf(json).getClass());
+        assertEquals(ArrayListMultimap.class, TypeFactory.getType("com.google.common.collect.ArrayListMultimap<String, Integer>").valueOf(json).getClass());
+
+        final Multimap<String, Integer> sorted = TypeFactory.<Multimap<String, Integer>> getType("com.google.common.collect.TreeMultimap<String, Integer>").valueOf(json);
+        assertEquals(TreeMultimap.class, sorted.getClass());
+        assertEquals(java.util.Arrays.asList("a", "m", "z"), new java.util.ArrayList<>(sorted.keySet()));
+
+        // same content regardless of order
+        assertEquals(new java.util.HashSet<>(java.util.Arrays.asList("z", "a", "m")), multimapType.valueOf(json).keySet());
+    }
+
+    // T8-05: {"k": null} threw a raw NullPointerException (Collection::size); now the key is dropped like the abacus twins do.
+    @Test
+    public void reviewFixes20260906_nullValueDropsTheKey() {
+        for (final String typeName : new String[] { "com.google.common.collect.Multimap<String, Integer>",
+                "com.google.common.collect.ListMultimap<String, Integer>", "com.google.common.collect.SetMultimap<String, Integer>",
+                "com.google.common.collect.LinkedHashMultimap<String, Integer>", "com.google.common.collect.ImmutableListMultimap<String, Integer>",
+                "com.google.common.collect.ImmutableSetMultimap<String, Integer>", "com.google.common.collect.TreeMultimap<String, Integer>" }) {
+            final Type<Multimap<String, Integer>> t = TypeFactory.getType(typeName);
+
+            final Multimap<String, Integer> mm = t.valueOf("{\"a\": null, \"b\": [1], \"c\": []}");
+            assertEquals(java.util.Collections.singleton("b"), new java.util.HashSet<>(mm.keySet()), typeName);
+            assertEquals(java.util.Arrays.asList(1), new java.util.ArrayList<>(mm.get("b")), typeName);
+
+            assertTrue(t.valueOf("{\"a\": null}").isEmpty(), typeName);
+            assertTrue(t.valueOf("{}").isEmpty(), typeName);
+
+            // duplicate key: position of the first occurrence, values of the last one
+            final Multimap<String, Integer> dup = t.valueOf("{\"a\": [1], \"b\": [2], \"a\": [3]}");
+            assertEquals(java.util.Arrays.asList(3), new java.util.ArrayList<>(dup.get("a")), typeName);
+
+            org.junit.jupiter.api.Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> t.valueOf("{\"a\": [1]"), typeName);
+        }
+
+        // a null element is accepted by the mutable targets and rejected by the immutable ones (documented)
+        assertEquals(java.util.Arrays.asList((Integer) null), new java.util.ArrayList<>(multimapType.valueOf("{\"a\": [null]}").get("a")));
+        org.junit.jupiter.api.Assertions.assertThrows(NullPointerException.class,
+                () -> TypeFactory.getType("com.google.common.collect.ImmutableListMultimap<String, Integer>").valueOf("{\"a\": [null]}"));
     }
 }

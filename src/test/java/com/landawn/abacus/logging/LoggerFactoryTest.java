@@ -109,9 +109,9 @@ public class LoggerFactoryTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test getLogger with null Class throws NullPointerException")
+    @DisplayName("Test getLogger with null Class throws IllegalArgumentException")
     public void testGetLoggerWithNullClass() {
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             LoggerFactory.getLogger((Class<?>) null);
         });
     }
@@ -170,10 +170,7 @@ public class LoggerFactoryTest extends TestBase {
     @Test
     public void testBackendDiscoveryDoesNotSwallowFatalErrors() {
         final OutOfMemoryError outOfMemory = new OutOfMemoryError("simulated");
-        final ThreadDeath threadDeath = new ThreadDeath();
-
         assertSame(outOfMemory, assertThrows(OutOfMemoryError.class, () -> LoggerFactory.rethrowIfFatal(outOfMemory)));
-        assertSame(threadDeath, assertThrows(ThreadDeath.class, () -> LoggerFactory.rethrowIfFatal(threadDeath)));
         assertDoesNotThrow(() -> LoggerFactory.rethrowIfFatal(new LinkageError("optional backend unavailable")));
         assertDoesNotThrow(() -> LoggerFactory.rethrowIfFatal(new RuntimeException("optional backend failed")));
     }

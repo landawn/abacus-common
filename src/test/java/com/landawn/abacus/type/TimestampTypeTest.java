@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -44,7 +45,7 @@ public class TimestampTypeTest extends TestBase {
     @Test
     public void test_valueOf_Object_TimestampPreservesNanos() {
         Timestamp timestamp = Timestamp.valueOf("2020-01-01 00:00:00.123456789");
-        Timestamp result = type.valueOf((Object) timestamp);
+        Timestamp result = type.valueOf(timestamp);
 
         assertEquals(timestamp.getTime(), result.getTime());
         assertEquals(123456789, result.getNanos());
@@ -142,5 +143,39 @@ public class TimestampTypeTest extends TestBase {
     @Test
     public void test_name() {
         assertEquals("Timestamp", type.name());
+    }
+
+    // --- review fixes 2026-09-06 (T9-02, T9-03) ---
+
+    @Test
+    public void reviewFixes20260906_T902_charArrayRejectsTypeSuffixLikeStringOverload() {
+        // the char[] fast path used to strip a trailing l/L/f/F/d/D and parse "1700000000000d" as epoch millis
+        // while valueOf(String) threw for the same text
+        for (final String s : new String[] { "1700000000000d", "1700000000000L", "1700000000000f", "12345L" }) {
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        for (final String s : new String[] { "1700000000000", "+1700000000000", "-1700000000000" }) {
+            final long expected = Long.parseLong(s);
+            assertEquals(expected, type.valueOf(s).getTime(), s);
+            assertEquals(expected, type.valueOf(s.toCharArray(), 0, s.length()).getTime(), s);
+        }
+
+        // a digit-terminated region inside a larger buffer still takes the fast path
+        final char[] padded = "xx1700000000000yy".toCharArray();
+        assertEquals(1700000000000L, type.valueOf(padded, 2, 13).getTime());
+    }
+
+    @Test
+    public void reviewFixes20260906_T903_charArrayOverflowIsIllegalArgument() {
+        // used to escape as ArithmeticException("long overflow") on the char[] (JSON) path only
+        for (final String s : new String[] { "99999999999999999999", "9223372036854775808", "-9223372036854775809" }) {
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s.toCharArray(), 0, s.length()), s);
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s), s);
+        }
+
+        assertEquals(Long.MAX_VALUE, type.valueOf("9223372036854775807".toCharArray(), 0, 19).getTime());
+        assertEquals(Long.MAX_VALUE, type.valueOf("9223372036854775807").getTime());
     }
 }

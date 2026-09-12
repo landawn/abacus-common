@@ -199,4 +199,17 @@ public class PrimitiveBooleanListTypeTest extends TestBase {
     public void testIsCollection() {
         assertFalse(booleanListType.isCollection());
     }
+
+    // T8-13 (documented): blank input returns null like null/empty; "[ ]" is an empty list.
+    @Test
+    public void reviewFixes20260906_valueOfBlankAndEmptyBrackets() {
+        assertNull(booleanListType.valueOf("   "));
+        assertNull(booleanListType.valueOf("\t\n"));
+        assertNull(booleanListType.valueOf(""));
+        assertNull(booleanListType.valueOf((String) null));
+        assertTrue(booleanListType.valueOf("[ ]").isEmpty());
+        assertTrue(booleanListType.valueOf("[]").isEmpty());
+        // never throws: an unparseable token is false
+        assertEquals(com.landawn.abacus.util.BooleanList.of(true, false), booleanListType.valueOf("[true, abc]"));
+    }
 }

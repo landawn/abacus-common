@@ -46,6 +46,10 @@ import okio.Buffer;
  * {@code Cookie}, {@code X-Api-Key}) and the request body verbatim, with no masking. Ensure the
  * {@code logHandler} destination is trusted before logging requests that carry credentials.</p>
  *
+ * <p>One-shot and duplex request bodies are not rendered (reading them would consume the request),
+ * and every other body is decoded as text in the declared charset (UTF-8 by default), so binary
+ * payloads are not reproduced faithfully by the generated command.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * OkHttpRequest request = WebUtil.createCurlLoggingOkHttpRequest(
@@ -81,13 +85,18 @@ class CurlInterceptor implements Interceptor {
      * Creates a new {@code CurlInterceptor} with a specified quote character for shell escaping.
      *
      * @param quoteChar The character to use for quoting values in the cURL command.
-     *                  Can be either single quote ({@code '}) or double quote ({@code "}) depending on shell requirements.
+     *                  Must be either a single quote ({@code '}) or a double quote ({@code "}),
+     *                  depending on shell requirements.
      * @param logHandler A consumer function that handles the generated cURL command string.
      *                   This is typically used to log or store the command. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code logHandler} is {@code null}.
+     * @throws IllegalArgumentException if {@code logHandler} is {@code null}, or {@code quoteChar} is
+     *         neither a single nor a double quote.
      */
     public CurlInterceptor(final char quoteChar, final Consumer<? super String> logHandler) throws IllegalArgumentException {
         N.checkArgNotNull(logHandler, cs.logHandler);
+        // Validated here rather than while building the command: intercept() runs on the request
+        // path, where throwing would fail the HTTP call instead of just the logging.
+        N.checkArgument(quoteChar == '\'' || quoteChar == '"', "quoteChar must be a single (') or double (\") quote, but was: {}", quoteChar);
 
         this.logHandler = logHandler;
         this.quoteChar = quoteChar;
@@ -99,10 +108,11 @@ class CurlInterceptor implements Interceptor {
      *
      * @param chain The interceptor chain containing the request to be processed.
      * @return The response from the next interceptor in the chain.
-     * @throws IOException If an I/O error occurs during request processing.
+     * @throws IOException if writing the replayable request body to the logging buffer or proceeding with the HTTP request fails.
+     * @throws RuntimeException if the configured log handler throws an unchecked exception while receiving the generated curl command.
      */
     @Override
-    public Response intercept(final Chain chain) throws IOException {
+    public Response intercept(final Chain chain) throws IOException, RuntimeException {
         final Request request = chain.request();
         buildCurl(request);
 
@@ -122,9 +132,10 @@ class CurlInterceptor implements Interceptor {
      * <p>The generated cURL command can be directly executed in a terminal to reproduce the request.</p>
      *
      * @param request The HTTP request to convert to a cURL command.
-     * @throws IOException If an error occurs while reading the request body.
+     * @throws IOException if writing the replayable request body to the logging buffer fails.
+     * @throws RuntimeException if the configured log handler throws an unchecked exception while receiving the generated curl command.
      */
-    private void buildCurl(final Request request) throws IOException {
+    private void buildCurl(final Request request) throws IOException, RuntimeException {
         final Headers headers = request.headers();
         final String httpMethod = request.method();
         final String url = request.url().toString();

@@ -23,6 +23,9 @@ import java.io.Reader;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.List;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserConfig;
@@ -31,6 +34,7 @@ import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.XmlParser;
 import com.landawn.abacus.util.BufferedJsonWriter;
+import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Objectory;
 
 /**
@@ -75,6 +79,190 @@ final class Utils {
     static final JsonDeserConfig jdc = JsonDeserConfig.create();
 
     /**
+     * Parses each tuple slot directly from its original JSON token with the declared type.
+     * An Object[] first pass would already have rounded decimal tokens before their types were known.
+     */
+    static Object[] parseTupleElements(final String source, final String typeName, final List<Type<?>> types) {
+        int from = 0;
+        int end = source.length();
+
+        while (from < end && Character.isWhitespace(source.charAt(from))) {
+            from++;
+        }
+
+        while (end > from && Character.isWhitespace(source.charAt(end - 1))) {
+            end--;
+        }
+
+        final int arity = types.size();
+
+        if (end == from) {
+            throw malformedTuple(typeName, "the value is blank");
+        }
+
+        if (end - from < 2 || source.charAt(from) != '[' || source.charAt(end - 1) != ']') {
+            throw malformedTuple(typeName, "not an array: the value must start with '[' and end with ']'");
+        }
+
+        final int[] starts = new int[arity];
+        final int[] ends = new int[arity];
+        final Deque<Character> nesting = new ArrayDeque<>();
+        int count = 0;
+        int start = from + 1;
+        char quote = 0;
+        boolean escaped = false;
+
+        // Locate slots without interpreting their numbers, escaped strings, or nested containers.
+        for (int i = start; i < end - 1; i++) {
+            final char ch = source.charAt(i);
+
+            if (quote != 0) {
+                if (escaped) {
+                    escaped = false;
+                } else if (ch == '\\') {
+                    escaped = true;
+                } else if (ch == quote) {
+                    quote = 0;
+                }
+            } else if (ch == '"' || ch == '\'') {
+                quote = ch;
+            } else if (ch == '[' || ch == '{') {
+                nesting.push(ch);
+            } else if (ch == ']' || ch == '}') {
+                final char opener = ch == ']' ? '[' : '{';
+
+                if (nesting.isEmpty()) {
+                    throw malformedTuple(typeName, "unbalanced brackets: '" + ch + "' at index " + i + " has no matching '" + opener + "'");
+                }
+
+                final char opened = nesting.pop();
+
+                if (opened != opener) {
+                    throw malformedTuple(typeName, "unbalanced brackets: '" + ch + "' at index " + i + " does not close the enclosing '" + opened + "'");
+                }
+            } else if (ch == ',' && nesting.isEmpty()) {
+                // Keep counting past the arity so the element-count message below can report how many were found.
+                if (count < arity) {
+                    starts[count] = start;
+                    ends[count] = i;
+                }
+
+                count++;
+                start = i + 1;
+            }
+        }
+
+        if (quote != 0) {
+            throw malformedTuple(typeName, "unterminated quoted value: no closing " + quote);
+        }
+
+        if (!nesting.isEmpty()) {
+            throw malformedTuple(typeName, "unbalanced brackets: unclosed '" + nesting.peek() + "'");
+        }
+
+        // "[]" and "[  ]" hold no element at all; every other input has one more slot than separators.
+        final int found = count == 0 && isBlankRange(source, start, end - 1) ? 0 : count + 1;
+
+        if (found != arity) {
+            throw malformedTuple(typeName, "expected exactly " + arity + (arity == 1 ? " element" : " elements") + " but found " + found);
+        }
+
+        starts[count] = start;
+        ends[count] = end - 1;
+        final Object[] values = new Object[arity];
+
+        for (int i = 0; i < values.length; i++) {
+            while (starts[i] < ends[i] && Character.isWhitespace(source.charAt(starts[i]))) {
+                starts[i]++;
+            }
+
+            while (ends[i] > starts[i] && Character.isWhitespace(source.charAt(ends[i] - 1))) {
+                ends[i]--;
+            }
+
+            if (starts[i] == ends[i]) {
+                throw malformedTuple(typeName, "empty element at index " + i);
+            }
+
+            final String token = source.substring(starts[i], ends[i]);
+
+            // Root scalar deserialization accepts raw type text, not a JSON literal. A typed
+            // singleton list invokes JSON decoding while keeping each slot's declared type.
+            // Preserve literal null even for primitive/optional type descriptors.
+            if (!"null".equals(token)) {
+                final Type<List<Object>> slotListType = TypeFactory.getType("List<" + types.get(i).name() + ">");
+                values[i] = jsonParser.deserialize("[" + token + "]", jdc, slotListType).get(0);
+            }
+        }
+
+        return values;
+    }
+
+    private static boolean isBlankRange(final String source, final int from, final int to) {
+        for (int i = from; i < to; i++) {
+            if (!Character.isWhitespace(source.charAt(i))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Each rejection names the condition that actually failed: one shared "wrong element count" message
+    // reported an unterminated quote or an unbalanced bracket as an arity problem.
+    private static IllegalArgumentException malformedTuple(final String typeName, final String reason) {
+        return new IllegalArgumentException("Invalid " + typeName + " format: " + reason);
+    }
+
+    // The standard JSON writer escapes double quotes. Single-quoted JSON also needs
+    // apostrophes escaped; keep XML escaping and the usual double-quoted path intact.
+    /**
+     * @throws IOException if writing the escaped string content to {@code writer} fails
+     */
+    static void writeStringContent(final CharacterWriter writer, final String value, final char quotation) throws IOException {
+        if (quotation != '\'' || !(writer instanceof BufferedJsonWriter) || value == null || value.indexOf('\'') < 0) {
+            writer.writeCharacter(value);
+            return;
+        }
+
+        int start = 0;
+
+        for (int i = 0; i < value.length(); i++) {
+            if (value.charAt(i) == '\'') {
+                writer.writeCharacter(value, start, i - start);
+                writer.write("\\'");
+                start = i + 1;
+            }
+        }
+
+        writer.writeCharacter(value, start, value.length() - start);
+    }
+
+    /**
+     * @throws IOException if writing the escaped string content to {@code writer} fails
+     */
+    static void writeStringContent(final CharacterWriter writer, final char[] value, final int offset, final int length, final char quotation)
+            throws IOException {
+        if (quotation != '\'' || !(writer instanceof BufferedJsonWriter)) {
+            writer.writeCharacter(value, offset, length);
+            return;
+        }
+
+        int start = offset;
+        final int end = offset + length;
+
+        for (int i = offset; i < end; i++) {
+            if (value[i] == '\'') {
+                writer.writeCharacter(value, start, i - start);
+                writer.write("\\'");
+                start = i + 1;
+            }
+        }
+
+        writer.writeCharacter(value, start, end - start);
+    }
+
+    /**
      * Opens a binary stream and transfers ownership of the supplied {@link Blob} locator
      * to the returned stream. Closing the stream closes the delegate and releases the locator.
      * If opening fails, the locator is freed before the failure propagates.
@@ -106,6 +294,9 @@ final class Utils {
         return new FilterInputStream(stream) {
             private boolean closed;
 
+            /**
+             * @throws IOException if closing the underlying stream or reader fails, or releasing its JDBC locator fails after a successful close
+             */
             @Override
             public synchronized void close() throws IOException {
                 if (!closed) {
@@ -148,6 +339,9 @@ final class Utils {
         return new FilterInputStream(stream) {
             private boolean closed;
 
+            /**
+             * @throws IOException if closing the underlying stream or reader fails, or releasing its JDBC locator fails after a successful close
+             */
             @Override
             public synchronized void close() throws IOException {
                 if (!closed) {
@@ -190,6 +384,9 @@ final class Utils {
         return new FilterReader(reader) {
             private boolean closed;
 
+            /**
+             * @throws IOException if closing the underlying stream or reader fails, or releasing its JDBC locator fails after a successful close
+             */
             @Override
             public synchronized void close() throws IOException {
                 if (!closed) {
@@ -256,6 +453,9 @@ final class Utils {
         }
     }
 
+    /**
+     * @throws IOException if closing the resource throws IOException, or releasing its JDBC locator throws SQLException after a successful close
+     */
     private static void closeAndFree(final CloseAction closeAction, final FreeAction freeAction, final String lobType) throws IOException {
         Throwable failure = null;
 

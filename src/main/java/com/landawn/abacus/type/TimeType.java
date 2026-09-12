@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.N;
 
@@ -48,8 +49,9 @@ public class TimeType extends AbstractDateType<Time> {
      * This constructor is package-private and should only be called by TypeFactory or subclasses.
      *
      * @param typeName the name to use for this type
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    TimeType(final String typeName) {
+    TimeType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
@@ -78,9 +80,10 @@ public class TimeType extends AbstractDateType<Time> {
      * @param obj the object to convert
      * @return a Time object, or {@code null} if {@code obj} is {@code null}
      *         or is a value whose string form {@link #valueOf(String)} maps to {@code null}
+     * @throws IllegalArgumentException if the non-null value is not a supported date/time representation, or a non-lenient calendar contains invalid fields.
      */
     @Override
-    public Time valueOf(final Object obj) {
+    public Time valueOf(final Object obj) throws IllegalArgumentException {
         if (obj instanceof Number) {
             return new Time(((Number) obj).longValue());
         } else if (obj instanceof java.util.Date) {
@@ -103,40 +106,69 @@ public class TimeType extends AbstractDateType<Time> {
      * Time time3 = type.valueOf(null);         // Returns null
      * }</pre>
      *
-     * <p>This method accepts the whole-second UTC representation produced by {@code stringOf}. Because that
-     * representation omits milliseconds, conversion through {@code stringOf} truncates any sub-second component
-     * carried by the underlying {@code Time#getTime()} value.</p>
+     * <p>This method accepts the millisecond-precision UTC representation produced by {@code stringOf} and
+     * delegates its formatted parsing to {@link Dates#parseToTime(String)}. Consequently, within the Common Era
+     * year range supported by the default format, {@code valueOf(stringOf(value)).getTime() == value.getTime()}
+     * for every non-null {@code Time}. Purely numeric input (possible epoch milliseconds) is converted via
+     * {@code Dates.createTime(long)}.</p>
      *
      * @param str the string to parse
      * @return a Time object, or {@code null} if {@code str} is {@code null}, empty, or the literal {@code "null"}
+     * @throws IllegalArgumentException if a nonempty value other than a recognized null or system-time token cannot be parsed as a supported
+     *         date/time or epoch-millisecond representation.
      * @see #valueOf(Object)
      * @see #stringOf(java.util.Date)
      */
+    @MayReturnNull
     @Override
-    public Time valueOf(final String str) {
-        return isNullDateTime(str) ? null : (isSysTime(str) ? Dates.currentTime() : Dates.parseTime(str));
+    public Time valueOf(final String str) throws IllegalArgumentException {
+        if (isNullDateTime(str)) {
+            return null; // NOSONAR
+        }
+
+        if (isSysTime(str)) {
+            return Dates.currentTime();
+        }
+
+        if (isPossibleMillis(str)) {
+            try {
+                return Dates.createTime(Long.parseLong(str));
+            } catch (final NumberFormatException e) {
+                // not a pure long after all; fall through to formatted parsing
+            }
+        }
+
+        return Dates.parseToTime(str);
     }
 
     /**
      * Creates a Time from a character array.
-     * First attempts to parse as milliseconds if the format suggests a long value,
-     * otherwise delegates to string parsing.
+     * First attempts to parse as milliseconds if the format suggests a long value (digits ending in a digit, so a
+     * trailing {@code L}/{@code d}/{@code f} type suffix is not accepted), otherwise delegates to
+     * {@link #valueOf(String)}, so both overloads give the same answer for the same text.
      *
      * @param cbuf the character buffer containing the value
      * @param offset the start offset in the character buffer
      * @param len the number of characters to use
      * @return a Time object, or {@code null} if the input is {@code null} or empty
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
+     * @throws IllegalArgumentException if the text is not a recognized time or numeric form (see         {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
+    @MayReturnNull
     @Override
-    public Time valueOf(final char[] cbuf, final int offset, final int len) {
+    public Time valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, IllegalArgumentException {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
 
+        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
+        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
+        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
+        // IllegalArgumentException.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createTime(parseLong(cbuf, offset, len));
-            } catch (final NumberFormatException e) {
+            } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
@@ -161,10 +193,11 @@ public class TimeType extends AbstractDateType<Time> {
      * @param rs the ResultSet containing the query results
      * @param columnIndex the index of the column to retrieve (1-based)
      * @return a Time object, or {@code null} if the database value is null
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Time get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Time get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getTime(columnIndex);
     }
 
@@ -185,10 +218,11 @@ public class TimeType extends AbstractDateType<Time> {
      * @param rs the ResultSet containing the query results
      * @param columnName the label of the column to retrieve
      * @return a Time object, or {@code null} if the database value is null
-     * @throws SQLException if a database access error occurs or the columnName is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Time get(final ResultSet rs, final String columnName) throws SQLException {
+    public Time get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getTime(columnName);
     }
 
@@ -208,10 +242,11 @@ public class TimeType extends AbstractDateType<Time> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)
      * @param x the Time value to set, may be null
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Time x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Time x) throws NullPointerException, SQLException {
         stmt.setTime(columnIndex, x);
     }
 
@@ -231,10 +266,11 @@ public class TimeType extends AbstractDateType<Time> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Time value to set, may be null
-     * @throws SQLException if a database access error occurs or the parameterName is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Time x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Time x) throws NullPointerException, SQLException {
         stmt.setTime(parameterName, x);
     }
 }

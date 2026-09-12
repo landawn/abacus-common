@@ -21,8 +21,10 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
@@ -37,7 +39,8 @@ import com.landawn.abacus.type.TypeFactory;
  * This class captures that information by analyzing the generic superclass of concrete
  * subclasses, allowing frameworks to access complete type information including
  * generic parameters. Named intermediate subclasses are supported: type-variable
- * substitutions are resolved while walking the superclass hierarchy.
+ * substitutions are resolved while walking the superclass hierarchy, including type arguments
+ * declared by parameterized enclosing classes of member superclasses.
  *
  * <p><b>To use this class, create an anonymous subclass with the desired generic type:</b></p>
  * <pre>{@code
@@ -68,7 +71,7 @@ import com.landawn.abacus.type.TypeFactory;
  * @see Type
  * @see TypeFactory
  */
-@SuppressWarnings({ "java:S1694" })
+@SuppressWarnings("java:S1694")
 public abstract class TypeReference<T> {
 
     /**
@@ -88,7 +91,7 @@ public abstract class TypeReference<T> {
     /**
      * Constructs a new TypeReference by capturing the generic type parameter
      * from the concrete subclass. This constructor walks the superclass hierarchy and
-     * resolves type-variable substitutions until it reaches {@code TypeReference}.
+     * resolves type-variable substitutions, including parameterized owner types, until it reaches {@code TypeReference}.
      *
      * <p>This constructor must be called from a concrete subclass that specifies
      * the generic type parameter. Direct instantiation of TypeReference is not
@@ -99,8 +102,11 @@ public abstract class TypeReference<T> {
      *   <li>Rejects a raw superclass that loses the required type information</li>
      *   <li>Resolves type variables through any named intermediate subclasses</li>
      *   <li>Resolves the type using TypeFactory</li>
-     *   <li>Validates the resolved Type is not null</li>
      * </ol>
+     *
+     * <p>Generic arrays such as {@code List<String>[]} preserve their parameterized component in both the
+     * captured reflection type and the resolved {@link Type}. Arrays of non-generic components
+     * ({@code String[]}, {@code int[]}) and arrays nested inside type arguments are also supported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -109,15 +115,26 @@ public abstract class TypeReference<T> {
      * }</pre>
      *
      * @throws IllegalArgumentException if a raw superclass loses the type information, the captured type still
-     *         contains an unresolved type variable, or the hierarchy is unsupported.
-     * @throws IllegalStateException if the type cannot be resolved by TypeFactory
+     *         contains an unresolved type variable, the hierarchy is unsupported, or the captured type cannot be
+     *         resolved by {@link TypeFactory}.
+     * @throws IllegalStateException if {@link TypeFactory} returns {@code null} for the captured type. This is a
+     *         defensive guard rather than a reachable outcome: {@code TypeFactory} documents a non-{@code null}
+     *         result, falling back to an object type for anything it does not recognise.
      */
-    protected TypeReference() {
+    protected TypeReference() throws IllegalArgumentException, IllegalStateException {
         javaType = captureTypeArgument(getClass());
 
-        type = TypeFactory.getType(javaType);
+        try {
+            type = TypeFactory.getType(javaType);
+        } catch (final IllegalArgumentException e) {
+            // Name the captured type so a TypeFactory failure can be traced to the caller's TypeReference.
+            throw new IllegalArgumentException(
+                    "Failed to resolve a Type for the captured type '" + javaType.getTypeName() + "'; see the cause for what TypeFactory rejected.", e);
+        }
 
         if (type == null) {
+            // Defensive: TypeFactory documents a non-null result (it falls back to ObjectType), so this is
+            // unreachable today and exists only so a future change there cannot leak a null through this field.
             throw new IllegalStateException("Failed to resolve type from TypeFactory for: " + javaType);
         }
     }
@@ -134,12 +151,9 @@ public abstract class TypeReference<T> {
                     throw new IllegalArgumentException("Unsupported generic superclass for TypeReference: " + parameterizedSuperClass);
                 }
 
-                final TypeVariable<?>[] typeParameters = rawSuperClass.getTypeParameters();
-                final java.lang.reflect.Type[] typeArguments = parameterizedSuperClass.getActualTypeArguments();
-
-                for (int i = 0; i < typeParameters.length; i++) {
-                    resolvedVariables.put(typeParameters[i], resolveType(typeArguments[i], resolvedVariables));
-                }
+                // Resolve the whole edge before publishing bindings: an owner can reorder its own
+                // type variables in a member superclass without changing the meaning of later arguments.
+                recordTypeArguments((ParameterizedType) resolveType(parameterizedSuperClass, resolvedVariables), resolvedVariables);
 
                 if (rawSuperClass == TypeReference.class) {
                     final java.lang.reflect.Type result = resolvedVariables.get(TypeReference.class.getTypeParameters()[0]);
@@ -164,6 +178,19 @@ public abstract class TypeReference<T> {
         }
 
         throw new IllegalArgumentException("TypeReference constructed without actual type information");
+    }
+
+    private static void recordTypeArguments(final ParameterizedType resolvedType, final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables) {
+        if (resolvedType.getOwnerType() instanceof ParameterizedType ownerType) {
+            recordTypeArguments(ownerType, resolvedVariables);
+        }
+
+        final TypeVariable<?>[] typeParameters = ((Class<?>) resolvedType.getRawType()).getTypeParameters();
+        final java.lang.reflect.Type[] typeArguments = resolvedType.getActualTypeArguments();
+
+        for (int i = 0; i < typeParameters.length; i++) {
+            resolvedVariables.put(typeParameters[i], typeArguments[i]);
+        }
     }
 
     private static boolean containsTypeVariable(final java.lang.reflect.Type typeToCheck) {
@@ -202,20 +229,38 @@ public abstract class TypeReference<T> {
 
     private static java.lang.reflect.Type resolveType(final java.lang.reflect.Type source,
             final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables) {
+        return resolveType(source, resolvedVariables, new HashSet<>());
+    }
+
+    private static java.lang.reflect.Type resolveType(final java.lang.reflect.Type source, final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables,
+            final Set<TypeVariable<?>> resolvingVariables) {
         if (source instanceof TypeVariable<?> variable) {
             final java.lang.reflect.Type resolved = resolvedVariables.get(variable);
-            return resolved == null || resolved == variable ? variable : resolveType(resolved, resolvedVariables);
+
+            if (resolved == null || resolved.equals(variable)) {
+                return variable;
+            }
+
+            if (!resolvingVariables.add(variable)) {
+                throw new IllegalArgumentException("Cyclic unresolved type variable in TypeReference: " + variable);
+            }
+
+            try {
+                return resolveType(resolved, resolvedVariables, resolvingVariables);
+            } finally {
+                resolvingVariables.remove(variable);
+            }
         }
 
         if (source instanceof ParameterizedType parameterizedType) {
             final java.lang.reflect.Type owner = parameterizedType.getOwnerType();
-            final java.lang.reflect.Type resolvedOwner = owner == null ? null : resolveType(owner, resolvedVariables);
+            final java.lang.reflect.Type resolvedOwner = owner == null ? null : resolveType(owner, resolvedVariables, resolvingVariables);
             final java.lang.reflect.Type[] arguments = parameterizedType.getActualTypeArguments();
             final java.lang.reflect.Type[] resolvedArguments = new java.lang.reflect.Type[arguments.length];
             boolean changed = resolvedOwner != owner;
 
             for (int i = 0; i < arguments.length; i++) {
-                resolvedArguments[i] = resolveType(arguments[i], resolvedVariables);
+                resolvedArguments[i] = resolveType(arguments[i], resolvedVariables, resolvingVariables);
                 changed |= resolvedArguments[i] != arguments[i];
             }
 
@@ -224,7 +269,7 @@ public abstract class TypeReference<T> {
 
         if (source instanceof GenericArrayType arrayType) {
             final java.lang.reflect.Type componentType = arrayType.getGenericComponentType();
-            final java.lang.reflect.Type resolvedComponentType = resolveType(componentType, resolvedVariables);
+            final java.lang.reflect.Type resolvedComponentType = resolveType(componentType, resolvedVariables, resolvingVariables);
 
             if (resolvedComponentType == componentType) {
                 return arrayType;
@@ -235,8 +280,8 @@ public abstract class TypeReference<T> {
         }
 
         if (source instanceof WildcardType wildcardType) {
-            final java.lang.reflect.Type[] upperBounds = resolveTypes(wildcardType.getUpperBounds(), resolvedVariables);
-            final java.lang.reflect.Type[] lowerBounds = resolveTypes(wildcardType.getLowerBounds(), resolvedVariables);
+            final java.lang.reflect.Type[] upperBounds = resolveTypes(wildcardType.getUpperBounds(), resolvedVariables, resolvingVariables);
+            final java.lang.reflect.Type[] lowerBounds = resolveTypes(wildcardType.getLowerBounds(), resolvedVariables, resolvingVariables);
 
             return Arrays.equals(upperBounds, wildcardType.getUpperBounds()) && Arrays.equals(lowerBounds, wildcardType.getLowerBounds()) ? wildcardType
                     : new ResolvedWildcardType(upperBounds, lowerBounds);
@@ -246,11 +291,11 @@ public abstract class TypeReference<T> {
     }
 
     private static java.lang.reflect.Type[] resolveTypes(final java.lang.reflect.Type[] sources,
-            final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables) {
+            final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables, final Set<TypeVariable<?>> resolvingVariables) {
         final java.lang.reflect.Type[] result = new java.lang.reflect.Type[sources.length];
 
         for (int i = 0; i < sources.length; i++) {
-            result[i] = resolveType(sources[i], resolvedVariables);
+            result[i] = resolveType(sources[i], resolvedVariables, resolvingVariables);
         }
 
         return result;
@@ -303,6 +348,10 @@ public abstract class TypeReference<T> {
                 result = new StringBuilder(rawType.getTypeName());
             }
 
+            if (typeArguments.length == 0) {
+                return result.toString();
+            }
+
             result.append('<');
 
             for (int i = 0; i < typeArguments.length; i++) {
@@ -322,6 +371,11 @@ public abstract class TypeReference<T> {
         }
     }
 
+    /**
+     * Produced by {@link #resolveType} when a generic array's component resolves to something other than a
+     * {@link Class}, such as the parameterized component {@code List<String>} in {@code List<String>[]}.
+     * Preserves the substituted component for reflection and {@link TypeFactory} resolution.
+     */
     private static final class ResolvedGenericArrayType implements GenericArrayType {
         private final java.lang.reflect.Type componentType;
 
@@ -412,12 +466,12 @@ public abstract class TypeReference<T> {
      * <ul>
      *   <li>A {@link Class} object for simple types (e.g., {@code String.class})</li>
      *   <li>A {@link ParameterizedType} for generic types (e.g., {@code List<String>})</li>
-     *   <li>A {@link java.lang.reflect.GenericArrayType} for arrays whose component is a
-     *       parameterized type (e.g., {@code List<String>[]})</li>
+     *   <li>A {@link GenericArrayType} for arrays of parameterized components (e.g., {@code List<String>[]})</li>
      * </ul>
      * Wildcards can occur inside a returned parameterized type, such as the type argument in
      * {@code List<? extends Number>}. An unresolved {@link java.lang.reflect.TypeVariable} is
-     * rejected by the constructor rather than returned from this method.
+     * rejected by the constructor rather than returned from this method. An array of a non-generic component
+     * is returned as the corresponding array {@link Class} ({@code String[].class}), not as a {@code GenericArrayType}.
      *
      * <p>This raw Type representation is particularly useful when working with reflection-based
      * frameworks, serialization libraries, or any code that needs to introspect generic types
@@ -451,6 +505,37 @@ public abstract class TypeReference<T> {
      * @see ParameterizedType
      */
     public java.lang.reflect.Type javaType() {
+        return javaType;
+    }
+
+    /**
+     * Returns the captured {@link java.lang.reflect.Type} - an exact alias of {@link #javaType()}.
+     *
+     * <p>The name mirrors {@link Type#reflectType()} so the two APIs read alike, but they are <i>not</i>
+     * interchangeable: this method returns the full captured type, whereas {@code Type#reflectType()} yields
+     * only the raw {@link Class} for most types - {@code AbstractType} implements it by delegating to
+     * {@link Type#javaType()}, and only a few types such as {@code BeanType} override that. The alias exists
+     * because {@link #javaType()} here and {@link Type#javaType()} mean different things: the latter returns
+     * the raw {@link Class}. Prefer this method in new code, so that a reader of code holding both a
+     * {@code TypeReference} and a {@link Type} need not work out which {@code javaType()} is meant; it differs
+     * from {@link #javaType()} in name only.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * TypeReference<List<String>> ref = new TypeReference<List<String>>() {};
+     *
+     * ref.reflectType();         // java.util.List<java.lang.String>   (a ParameterizedType)
+     * ref.type().javaType();     // interface java.util.List           (the raw Class - a different meaning!)
+     * ref.type().reflectType();  // interface java.util.List           (also raw - NOT the captured type)
+     * }</pre>
+     *
+     * @return the raw {@link java.lang.reflect.Type} instance representing the generic type T;
+     *         never {@code null} (validated during construction).
+     * @see #javaType()
+     * @see #type()
+     * @see Type#reflectType()
+     */
+    public java.lang.reflect.Type reflectType() {
         return javaType;
     }
 
@@ -502,6 +587,56 @@ public abstract class TypeReference<T> {
      */
     public Type<T> type() {
         return type;
+    }
+
+    /**
+     * Returns {@code true} if {@code obj} is a {@code TypeReference} that captured the same type.
+     *
+     * <p>Equality is by captured type, not by identity: two anonymous subclasses written at two places
+     * in the source, and a {@link TypeToken} and a {@code TypeReference} for the same type, all compare
+     * equal. That is what makes a {@code TypeReference} usable as a cache key.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * TypeReference<List<String>> a = new TypeReference<List<String>>() {};
+     * TypeReference<List<String>> b = new TypeReference<List<String>>() {};
+     * a.equals(b);   // returns true
+     *
+     * TypeReference<List<Integer>> c = new TypeReference<List<Integer>>() {};
+     * a.equals(c);   // returns false
+     * }</pre>
+     *
+     * @param obj the object to compare with
+     * @return {@code true} if {@code obj} captured an equal {@link java.lang.reflect.Type}
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        return obj == this || (obj instanceof TypeReference<?> other && javaType.equals(other.javaType));
+    }
+
+    /**
+     * Returns a hash code consistent with {@link #equals(Object)}, derived from the captured type.
+     *
+     * @return the hash code of the captured {@link java.lang.reflect.Type}
+     */
+    @Override
+    public int hashCode() {
+        return javaType.hashCode();
+    }
+
+    /**
+     * Returns the captured type's name, for example {@code "java.util.List<java.lang.String>"}.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * new TypeReference<List<String>>() {}.toString();   // returns "java.util.List<java.lang.String>"
+     * }</pre>
+     *
+     * @return the type name of the captured {@link java.lang.reflect.Type}
+     */
+    @Override
+    public String toString() {
+        return javaType.getTypeName();
     }
 
     /**
@@ -574,11 +709,13 @@ public abstract class TypeReference<T> {
          * }</pre>
          *
          * @throws IllegalArgumentException if a raw superclass loses the type information, the captured type still
-         *         contains an unresolved type variable, or the hierarchy is unsupported.
-         * @throws IllegalStateException if the type cannot be resolved by TypeFactory
+         *         contains an unresolved type variable, the hierarchy is unsupported, or the captured type cannot
+         *         be resolved by {@link TypeFactory}.
+         * @throws IllegalStateException if {@link TypeFactory} returns {@code null} for the captured type; see
+         *         {@link TypeReference#TypeReference()}.
          * @see TypeReference#TypeReference()
          */
-        protected TypeToken() {
+        protected TypeToken() throws IllegalArgumentException, IllegalStateException {
             super();
         }
     }

@@ -417,4 +417,54 @@ public class BigDecimalSummaryStatisticsTest extends TestBase {
         assertEquals(new BigDecimal("5"), stats.getMax());
     }
 
+
+    @Test
+    public void reviewFixes20260908_toStringRendersWithLocaleRootWhateverTheDefaultLocaleIs() throws Exception {
+        final String expectedPlain = "{min=5.250000, max=25.750000, count=3, sum=46.500000, average=15.500000}";
+        final String expectedGrouped = "{min=1,234,567.500000, max=1,234,567.500000, count=1, sum=1,234,567.500000, average=1,234,567.500000}";
+
+        assertEquals(expectedPlain, renderOnAFreshThread(false));
+        assertEquals(expectedGrouped, renderOnAFreshThread(true));
+
+        final java.util.Locale prev = java.util.Locale.getDefault();
+
+        try {
+            for (final String tag : new String[] { "de-DE", "fr-FR", "hi-IN-u-nu-deva", "ar-EG-u-nu-arab" }) {
+                java.util.Locale.setDefault(java.util.Locale.forLanguageTag(tag));
+                assertEquals(expectedPlain, renderOnAFreshThread(false), tag);
+                assertEquals(expectedGrouped, renderOnAFreshThread(true), tag);
+            }
+        } finally {
+            java.util.Locale.setDefault(prev);
+        }
+    }
+
+    /**
+     * The formatter is held in a {@code ThreadLocal}, so it is built once per thread. Rendering on a brand-new
+     * thread is what makes the assertion above see the default locale in force at that moment instead of the
+     * one that happened to be in force when this thread first called {@code toString()}.
+     */
+    private static String renderOnAFreshThread(final boolean grouped) throws InterruptedException {
+        final String[] out = new String[1];
+
+        final Thread t = new Thread(() -> {
+            final BigDecimalSummaryStatistics stats = new BigDecimalSummaryStatistics();
+
+            if (grouped) {
+                stats.accept(new BigDecimal("1234567.5"));
+            } else {
+                stats.accept(new BigDecimal("5.25"));
+                stats.accept(new BigDecimal("25.75"));
+                stats.accept(new BigDecimal("15.50"));
+            }
+
+            out[0] = stats.toString();
+        });
+
+        t.start();
+        t.join();
+
+        return out[0];
+    }
+
 }

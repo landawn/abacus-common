@@ -13,7 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
@@ -76,12 +77,12 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * @param before the operator to apply before this operator is applied.
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is {@code null}.
+     * @throws NullPointerException if {@code before} is {@code null}.
      * @see #andThen(java.util.function.LongUnaryOperator)
      */
     @Override
-    default LongUnaryOperator compose(final java.util.function.LongUnaryOperator before) throws IllegalArgumentException {
-        N.checkArgNotNull(before, cs.before);
+    default LongUnaryOperator compose(final java.util.function.LongUnaryOperator before) throws NullPointerException {
+        Objects.requireNonNull(before, cs.before);
 
         return (final long v) -> applyAsLong(before.applyAsLong(v));
     }
@@ -105,12 +106,12 @@ public interface LongUnaryOperator extends Throwables.LongUnaryOperator<RuntimeE
      * @param after the operator to apply after this operator is applied.
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is {@code null}.
+     * @throws NullPointerException if {@code after} is {@code null}.
      * @see #compose(java.util.function.LongUnaryOperator)
      */
     @Override
-    default LongUnaryOperator andThen(final java.util.function.LongUnaryOperator after) throws IllegalArgumentException {
-        N.checkArgNotNull(after, cs.after);
+    default LongUnaryOperator andThen(final java.util.function.LongUnaryOperator after) throws NullPointerException {
+        Objects.requireNonNull(after, cs.after);
 
         return (final long t) -> after.applyAsLong(applyAsLong(t));
     }

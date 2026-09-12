@@ -258,8 +258,9 @@ public class ParserConfigTest extends TestBase {
 
         TestParserConfig copy = config.copy();
 
-        // Shallow copy - they share the same map and sets
+        // The map is copied; the sets it holds are shared
         assertEquals(config.getIgnoredPropNames(), copy.getIgnoredPropNames());
+        assertSame(props, copy.getIgnoredPropNames(Object.class));
     }
 
     @Test
@@ -271,6 +272,102 @@ public class ParserConfigTest extends TestBase {
         TestParserConfig copy = config.copy();
         assertNotSame(config, copy);
         assertEquals(config.getIgnoredPropNames(), copy.getIgnoredPropNames());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // G09 fixes 2026-09-08: copy() owns its ignored-property map, whether or not one was set first
+    // ---------------------------------------------------------------------------------------------
+
+    @Test
+    public void g09_copy_ignoredPropNameMapIsNotAliased() {
+        final Set<String> global = new HashSet<>();
+        global.add("version");
+        config.setIgnoredPropNames(global);
+
+        final TestParserConfig copy = config.copy();
+        assertNotSame(config.getIgnoredPropNames(), copy.getIgnoredPropNames());
+        assertEquals(config.getIgnoredPropNames(), copy.getIgnoredPropNames());
+
+        // mutating the copy must not leak into the original ...
+        copy.setIgnoredPropNames(String.class, new HashSet<>(Set.of("password")));
+        assertNull(config.getIgnoredPropNames().get(String.class));
+        assertEquals(global, config.getIgnoredPropNames(String.class));
+        assertEquals(1, config.getIgnoredPropNames().size());
+
+        // ... and mutating the original must not leak into the copy
+        config.setIgnoredPropNames(Integer.class, new HashSet<>(Set.of("id")));
+        assertNull(copy.getIgnoredPropNames().get(Integer.class));
+        assertEquals(2, copy.getIgnoredPropNames().size());
+    }
+
+    @Test
+    public void g09_copy_withoutIgnoredPropNames_lazyMapOnCopyDoesNotLeak() {
+        // the leak used to depend on whether a setter had run before the copy
+        final TestParserConfig copy = config.copy();
+        assertNull(copy.getIgnoredPropNames());
+
+        copy.setIgnoredPropNames(String.class, new HashSet<>(Set.of("password")));
+        assertNull(config.getIgnoredPropNames());
+        assertNotNull(copy.getIgnoredPropNames());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // Review fixes 2026-09-06 (P8-11 javadoc pins: null / empty class-specific set, null global set)
+    // ---------------------------------------------------------------------------------------------
+
+    @Test
+    public void reviewFixes20260906_setIgnoredPropNames_classNull_fallsBackToGlobalSet() {
+        final Set<String> global = new HashSet<>();
+        global.add("version");
+        config.setIgnoredPropNames(global);
+
+        config.setIgnoredPropNames(String.class, null);
+        // null is not an override: the global set applies again
+        assertEquals(global, config.getIgnoredPropNames(String.class));
+        assertEquals(global, config.getIgnoredPropNames(Integer.class));
+        assertTrue(config.getIgnoredPropNames().containsKey(String.class));
+        assertNull(config.getIgnoredPropNames().get(String.class));
+
+        // and it removes the effect of a previous class-specific entry
+        final Set<String> forString = new HashSet<>();
+        forString.add("password");
+        config.setIgnoredPropNames(String.class, forString);
+        assertEquals(forString, config.getIgnoredPropNames(String.class));
+        config.setIgnoredPropNames(String.class, null);
+        assertEquals(global, config.getIgnoredPropNames(String.class));
+    }
+
+    @Test
+    public void reviewFixes20260906_setIgnoredPropNames_classEmptySet_overridesGlobalSet() {
+        final Set<String> global = new HashSet<>();
+        global.add("version");
+        config.setIgnoredPropNames(global);
+
+        final Set<String> empty = new HashSet<>();
+        config.setIgnoredPropNames(String.class, empty);
+
+        final Collection<String> forString = config.getIgnoredPropNames(String.class);
+        assertNotNull(forString);
+        assertTrue(forString.isEmpty());
+        assertEquals(global, config.getIgnoredPropNames(Integer.class));
+    }
+
+    @Test
+    public void reviewFixes20260906_setIgnoredPropNames_globalNull_keepsEntry_mapNullClears() {
+        assertNull(config.getIgnoredPropNames());
+
+        config.setIgnoredPropNames((Set<String>) null);
+        final Map<Class<?>, Set<String>> map = config.getIgnoredPropNames();
+        assertNotNull(map);
+        assertEquals(1, map.size());
+        assertTrue(map.containsKey(Object.class));
+        assertNull(map.get(Object.class));
+        assertNull(config.getIgnoredPropNames(Integer.class));
+        assertTrue(config.toString().contains("{class java.lang.Object=null}") || config.getIgnoredPropNames().toString().equals("{class java.lang.Object=null}"));
+
+        config.setIgnoredPropNames((Map<Class<?>, Set<String>>) null);
+        assertNull(config.getIgnoredPropNames());
+        assertNull(config.getIgnoredPropNames(Integer.class));
     }
 
 }

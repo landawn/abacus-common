@@ -16,7 +16,10 @@
 package com.landawn.abacus.util;
 
 /**
- * A minimal extension point for iterator transformations used by stream-windowing integrations.
+ * A minimal extension point for iterator transformations, intended for stream-windowing strategies.
+ *
+ * <p>No type in this library consumes a {@code WindowAssigner}; it exists so that windowing strategies
+ * can be defined outside this package.</p>
  *
  * <p>The base class defines only the protected {@link #process(ObjIterator)} hook. It does not
  * itself create window objects, impose window boundaries, validate input, or prescribe ownership

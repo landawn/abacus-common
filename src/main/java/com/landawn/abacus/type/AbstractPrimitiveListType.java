@@ -32,8 +32,9 @@ public abstract class AbstractPrimitiveListType<T extends PrimitiveList<?, ?, ?>
      * Constructs an {@code AbstractPrimitiveListType} with the specified type name.
      *
      * @param typeName the name of the primitive list type (e.g., "IntList", "DoubleList", "BooleanList")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractPrimitiveListType(final String typeName) {
+    protected AbstractPrimitiveListType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 

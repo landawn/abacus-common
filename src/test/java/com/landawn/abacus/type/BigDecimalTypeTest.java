@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,8 +20,22 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.N;
 
 public class BigDecimalTypeTest extends TestBase {
+
+    /** Bean with a BigDecimal property for the JSON round trip (T3-03). */
+    public static class PaddedDecimalBean {
+        private BigDecimal a;
+
+        public BigDecimal getA() {
+            return a;
+        }
+
+        public void setA(final BigDecimal a) {
+            this.a = a;
+        }
+    }
 
     private final BigDecimalType type = new BigDecimalType();
 
@@ -186,5 +201,66 @@ public class BigDecimalTypeTest extends TestBase {
         sw = new StringWriter();
         type.appendTo(sw, null);
         assertEquals("null", sw.toString());
+    }
+
+    // ---- review fixes 2026-09-06: T3-03 valueOf(char[], offset, len) trims like valueOf(String) ----
+
+    @Test
+    public void reviewFixes20260906_valueOfCharArrayTrimsLikeValueOfString() {
+        assertEquals(new BigDecimal("1.5"), type.valueOf(" 1.5 ".toCharArray(), 0, 5));
+        assertEquals(new BigDecimal("1.5"), type.valueOf("\t1.5\n".toCharArray(), 0, 5));
+        assertEquals(new BigDecimal("-0.25"), type.valueOf("   -0.25".toCharArray(), 0, 8));
+        assertEquals(new BigDecimal("1E+3"), type.valueOf("1E+3  ".toCharArray(), 0, 6));
+        // the same padded text through both overloads gives the same value, scale included
+        assertEquals(type.valueOf("  42.00  "), type.valueOf("  42.00  ".toCharArray(), 0, 9));
+        assertEquals(2, type.valueOf("  42.00  ".toCharArray(), 0, 9).scale());
+        // unpadded input is unchanged
+        assertEquals(new BigDecimal("999.999"), type.valueOf("999.999".toCharArray(), 0, 7));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfCharArrayTrimsOnlyWithinTheRequestedRange() {
+        final char[] buf = "xx 1.5 yy".toCharArray();
+
+        assertEquals(new BigDecimal("1.5"), type.valueOf(buf, 2, 5));
+        assertEquals(new BigDecimal("1.5"), type.valueOf(buf, 3, 3));
+        // the trailing 'y' is inside the range -> still an error
+        assertThrows(NumberFormatException.class, () -> type.valueOf(buf, 2, 6));
+    }
+
+    // R11: a blank range must fail exactly as valueOf(String) fails - it trims to "" and BigDecimal rejects that.
+    // Returning null here would re-open the JSON-vs-XML split the trim was added to close, in the other direction.
+    @Test
+    public void reviewFixes20260906_valueOfCharArrayBlankRangeIsRejectedLikeValueOfString() {
+        assertThrows(NumberFormatException.class, () -> type.valueOf("   "));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("   ".toCharArray(), 0, 3));
+        assertThrows(NumberFormatException.class, () -> type.valueOf(new char[] { (char) 9, (char) 10, (char) 32 }, 0, 3));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("a  b".toCharArray(), 1, 2));
+        // only null and a zero-length range are null, exactly as for valueOf(String)
+        assertNull(type.valueOf(new char[0], 0, 0));
+        assertNull(type.valueOf(null, 0, 0));
+        assertNull(type.valueOf(""));
+        assertNull(type.valueOf((String) null));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfCharArrayStillRejectsInnerGarbage() {
+        assertThrows(NumberFormatException.class, () -> type.valueOf(" 1 5 ".toCharArray(), 0, 5));
+        assertThrows(NumberFormatException.class, () -> type.valueOf(" abc ".toCharArray(), 0, 5));
+        // NBSP is not trimmed by String.trim() either, so both overloads reject it alike
+        assertThrows(NumberFormatException.class, () -> type.valueOf("\u00a01.5".toCharArray(), 0, 4));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("\u00a01.5"));
+    }
+
+    @Test
+    public void reviewFixes20260906_jsonQuotedPaddedValueParsesIntoBigDecimalField() {
+        assertEquals(new BigDecimal("1.5"), N.fromJson("{\"a\":\" 1.5 \"}", PaddedDecimalBean.class).getA());
+        assertEquals(new BigDecimal("1.5"), N.fromJson("{\"a\":\"1.5\"}", PaddedDecimalBean.class).getA());
+        assertNull(N.fromJson("{\"a\":\"\"}", PaddedDecimalBean.class).getA());
+        // R11: a blank value is rejected on both paths, so JSON and XML agree
+        assertThrows(NumberFormatException.class, () -> N.fromJson("{\"a\":\"   \"}", PaddedDecimalBean.class));
+        assertThrows(NumberFormatException.class,
+                () -> N.fromXml("<paddedDecimalBean><a>   </a></paddedDecimalBean>", PaddedDecimalBean.class));
+        assertEquals(new BigDecimal("1.5"), N.fromXml("<paddedDecimalBean><a> 1.5 </a></paddedDecimalBean>", PaddedDecimalBean.class).getA());
     }
 }

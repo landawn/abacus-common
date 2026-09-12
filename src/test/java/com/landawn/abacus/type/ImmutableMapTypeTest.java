@@ -344,4 +344,39 @@ public class ImmutableMapTypeTest extends TestBase {
         // and the empty form keeps the declared subtype too
         org.junit.jupiter.api.Assertions.assertTrue(t.valueOf("{}") instanceof com.landawn.abacus.util.ImmutableSortedMap);
     }
+
+    // T8-03 / R-T04: isImmutable() answered false for a type whose values are immutable by construction.
+    @Test
+    public void reviewFixes20260906_isImmutableIsTrue() {
+        assertTrue(immutableMapType.isImmutable());
+        assertTrue(TypeFactory.getType("ImmutableMap<String, Integer>").isImmutable());
+        assertTrue(TypeFactory.getType("ImmutableSortedMap<String, Integer>").isImmutable());
+        assertTrue(TypeFactory.getType("ImmutableNavigableMap<String, Integer>").isImmutable());
+
+        assertFalse(TypeFactory.getType("Map<String, Integer>").isImmutable());
+        assertFalse(TypeFactory.getType("SortedMap<String, Integer>").isImmutable());
+
+        final ImmutableMap<String, Integer> parsed = immutableMapType.valueOf("{\"中\": 1}");
+        org.junit.jupiter.api.Assertions.assertThrows(UnsupportedOperationException.class, () -> parsed.put("b", 2));
+    }
+
+    // T8-07 (documented contract): a null key is written as the String "null" and does not round-trip as null.
+    @Test
+    public void reviewFixes20260906_nullKeyIsWrittenAsTheStringNull() {
+        final Map<String, Integer> m = new HashMap<>();
+        m.put(null, 1);
+
+        final String json = immutableMapType.stringOf(ImmutableMap.wrap(m));
+        assertEquals("{\"null\": 1}", json);
+
+        final ImmutableMap<String, Integer> back = immutableMapType.valueOf(json);
+        assertTrue(back.containsKey("null"));
+        assertFalse(back.containsKey(null));
+        assertEquals(Integer.valueOf(1), back.get("null"));
+
+        // only an unquoted null key reads back as a null key
+        assertTrue(immutableMapType.valueOf("{null: 1}").containsKey(null));
+
+        org.junit.jupiter.api.Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> immutableMapType.valueOf("{\"a\": 1"));
+    }
 }

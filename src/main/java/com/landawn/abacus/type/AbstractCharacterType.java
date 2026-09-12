@@ -44,8 +44,9 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * Constructs a new {@code AbstractCharacterType} with the specified type name.
      *
      * @param typeName the name of the {@code Character} type (e.g., "Character", "char")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractCharacterType(final String typeName) {
+    protected AbstractCharacterType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
@@ -76,8 +77,11 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * <ul>
      *   <li>Empty or {@code null} strings return the default value.</li>
      *   <li>Single character strings return that character.</li>
-     *   <li>Multi-character strings are parsed as a numeric character code.</li>
+     *   <li>Multi-character strings are parsed as a numeric UTF-16 code-unit value: an optional sign followed by
+     *       decimal digits, as accepted by {@link Integer#parseInt(String)} (so non-ASCII decimal digits are
+     *       accepted; a radix prefix, a type suffix such as {@code "65L"}, or surrounding whitespace is not).</li>
      * </ul>
+     * <p>{@link #valueOf(char[], int, int)} applies exactly the same grammar to a multi-character region.</p>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
@@ -86,36 +90,38 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @param str the string to convert, may be {@code null}
      * @return the {@code Character} value, or the default value if the input is empty or {@code null}
      * @throws NumberFormatException if a multi-character string cannot be parsed as a numeric character code
-     * @throws IllegalArgumentException if a multi-character string parses to a numeric value outside the {@code char}
-     *         range.
+     * @throws IllegalArgumentException if a multi-character string parses to a numeric value outside the {@code char}         range.
      * @see #valueOf(Object)
      * @see #stringOf(Character)
      */
-    @SuppressWarnings("deprecation")
     @Override
-    public Character valueOf(final String str) {
+    public Character valueOf(final String str) throws NumberFormatException, IllegalArgumentException {
         if (Strings.isEmpty(str)) {
             return defaultValue();
         }
 
-        return Strings.parseChar(str);
+        return parseChar(str);
     }
 
     /**
      * Converts a region of the specified character array to a {@code Character} value.
      * <p>For a single character region, returns that character directly.
-     * For longer regions, parses the content as a numeric character code.</p>
+     * For longer regions, parses the content as a numeric UTF-16 code-unit value with exactly the grammar of
+     * {@link #valueOf(String)}: an optional sign followed by decimal digits as accepted by
+     * {@link Integer#parseInt(String)}; a radix prefix, a type suffix (for example {@code "65L"}) or surrounding
+     * whitespace is rejected.</p>
      *
      * @param cbuf the character array to convert, may be {@code null}
      * @param offset the starting position in the array (0-based)
      * @param len the number of characters to read
      * @return the {@code Character} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @throws IndexOutOfBoundsException if {@code cbuf} is nonempty, {@code len} is nonzero, and the requested region is outside the buffer.
      * @throws NumberFormatException if a multi-character region cannot be parsed as a numeric character code
-     * @throws IllegalArgumentException if a multi-character region parses to a numeric value outside the {@code char}
-     *         range.
+     * @throws IllegalArgumentException if a multi-character region parses to a numeric value outside the {@code char} range.
      */
     @Override
-    public Character valueOf(final char[] cbuf, final int offset, final int len) {
+    public Character valueOf(final char[] cbuf, final int offset, final int len)
+            throws IndexOutOfBoundsException, NumberFormatException, IllegalArgumentException {
         if (N.isEmpty(cbuf) || (len == 0)) {
             return defaultValue();
         }
@@ -124,15 +130,10 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
             return cbuf[offset];
         }
 
-        // Range check like the String overload (Strings.parseChar): a silent (char) cast would
-        // wrap out-of-range codes (e.g. 70000) to an unrelated character.
-        final int ch = parseInt(cbuf, offset, len);
-
-        if (ch < Character.MIN_VALUE || ch > Character.MAX_VALUE) {
-            throw new IllegalArgumentException("Integer value out of char range: " + ch);
-        }
-
-        return (char) ch;
+        // One grammar for both overloads: parseInt(char[]) tolerates a type suffix ("1L" -> U+0001, a silent wrong
+        // value) and rejects non-ASCII digits, so a JSON (char[]) and an XML (String) document parsed differently.
+        // parseChar also applies the char-range check (IllegalArgumentException).
+        return parseChar(new String(cbuf, offset, len));
     }
 
     /**
@@ -153,10 +154,11 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
      * @return the first character of the string value, or the default value if {@code NULL} or empty
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Character get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Character get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final String result = rs.getString(columnIndex);
 
         if (result == null || result.isEmpty()) {
@@ -174,10 +176,11 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
      * @return the first character of the string value, or the default value if {@code NULL} or empty
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Character get(final ResultSet rs, final String columnName) throws SQLException {
+    public Character get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final String result = rs.getString(columnName);
 
         if (result == null || result.isEmpty()) {
@@ -195,10 +198,11 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code Character} value to set, or {@code null} for SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Character x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Character x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.VARCHAR);
         } else {
@@ -214,10 +218,11 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the {@code Character} value to set, or {@code null} for SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Character x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Character x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.VARCHAR);
         } else {
@@ -236,7 +241,8 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Character} value to append
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -248,7 +254,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Character x) throws IOException {
+    public void appendTo(final Appendable appendable, final Character x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -273,10 +279,11 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Character} value to write
      * @param config the serialization configuration, may be {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Character x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Character x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

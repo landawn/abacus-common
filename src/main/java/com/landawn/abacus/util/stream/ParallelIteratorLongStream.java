@@ -120,9 +120,10 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
      * @param asyncExecutor the executor for running parallel tasks ({@code null} uses the default)
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
      * @param closeHandlers additional close handlers to execute when the stream is closed, may be {@code null}
+     * @throws IllegalStateException if {@code stream} is already closed
      */
     ParallelIteratorLongStream(final LongStream stream, final boolean sorted, final int maxThreadNum, final SplitStrategy splitStrategy,
-            final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads, final Deque<LocalRunnable> closeHandlers) {
+            final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads, final Deque<LocalRunnable> closeHandlers) throws IllegalStateException {
         this(iterate(stream), sorted, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, mergeCloseHandlers(closeHandlers, stream));
     }
 
@@ -140,15 +141,16 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
      * @param asyncExecutor the executor for running parallel tasks ({@code null} uses the default)
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
      * @param closeHandlers additional close handlers to execute when the stream is closed, may be {@code null}
+     * @throws IllegalStateException if {@code stream} is already closed
      */
     ParallelIteratorLongStream(final Stream<Long> stream, final boolean sorted, final int maxThreadNum, final SplitStrategy splitStrategy,
-            final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads, final Deque<LocalRunnable> closeHandlers) {
+            final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads, final Deque<LocalRunnable> closeHandlers) throws IllegalStateException {
         this(longIterator(iterate(stream)), sorted, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                 mergeCloseHandlers(closeHandlers, stream));
     }
 
     @Override
-    public LongStream filter(final LongPredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public LongStream filter(final LongPredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -163,7 +165,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public LongStream takeWhile(final LongPredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public LongStream takeWhile(final LongPredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -178,7 +180,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public LongStream dropWhile(final LongPredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public LongStream dropWhile(final LongPredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -193,7 +195,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public LongStream map(final LongUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
+    public LongStream map(final LongUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -209,7 +211,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public IntStream mapToInt(final LongToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream mapToInt(final LongToIntFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -225,7 +227,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public FloatStream mapToFloat(final LongToFloatFunction mapper) throws IllegalArgumentException, IllegalStateException {
+    public FloatStream mapToFloat(final LongToFloatFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -241,7 +243,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public DoubleStream mapToDouble(final LongToDoubleFunction mapper) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream mapToDouble(final LongToDoubleFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -257,7 +259,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public <T> Stream<T> mapToObj(final LongFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> mapToObj(final LongFunction<? extends T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -271,7 +273,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public LongStream flatMap(final LongFunction<? extends LongStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public LongStream flatMap(final LongFunction<? extends LongStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -289,7 +291,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public LongStream flatmap(final LongFunction<? extends Collection<Long>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public LongStream flatmap(final LongFunction<? extends Collection<Long>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -307,7 +309,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public LongStream flatMapArray(final LongFunction<long[]> mapper) throws IllegalArgumentException, IllegalStateException {
+    public LongStream flatMapArray(final LongFunction<long[]> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -325,7 +327,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public IntStream flatMapToInt(final LongFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream flatMapToInt(final LongFunction<? extends IntStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -343,7 +345,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public FloatStream flatMapToFloat(final LongFunction<? extends FloatStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public FloatStream flatMapToFloat(final LongFunction<? extends FloatStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -361,7 +363,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public DoubleStream flatMapToDouble(final LongFunction<? extends DoubleStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public DoubleStream flatMapToDouble(final LongFunction<? extends DoubleStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -379,7 +381,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public <T> Stream<T> flatMapToObj(final LongFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatMapToObj(final LongFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -395,7 +397,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public <T> Stream<T> flatmapToObj(final LongFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final LongFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -411,7 +413,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public LongStream onEach(final LongConsumer action) throws IllegalArgumentException, IllegalStateException {
+    public LongStream onEach(final LongConsumer action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -427,7 +429,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public <E extends Exception> void forEach(final Throwables.LongConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> void forEach(final Throwables.LongConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -442,7 +444,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 long next = 0;
 
                 try {
@@ -469,7 +471,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.LongFunction<? extends K, E> keyMapper,
             final Throwables.LongFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalArgumentException, IllegalStateException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -491,10 +493,11 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
 
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.LongFunction<? extends K, E> keyMapper,
-            final Collector<? super Long, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalArgumentException, IllegalStateException, E {
+            final Collector<? super Long, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         if (canBeSequential(maxThreadNum)) {
@@ -508,7 +511,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public long reduce(final long identity, final LongBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public long reduce(final long identity, final LongBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -522,7 +525,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 long result = identity;
                 long next = 0;
 
@@ -558,7 +561,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public OptionalLong reduce(final LongBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public OptionalLong reduce(final LongBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -572,7 +575,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 long result = 0;
 
                 synchronized (elements) {
@@ -620,7 +623,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
 
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjLongConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -636,7 +639,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 final R container = supplier.get();
                 long next = 0;
 
@@ -664,7 +667,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.LongPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -679,7 +682,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 long next = 0;
 
                 try {
@@ -711,7 +714,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.LongPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -726,7 +729,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 long next = 0;
 
                 try {
@@ -758,7 +761,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.LongPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -773,7 +776,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 long next = 0;
 
                 try {
@@ -805,7 +808,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public <E extends Exception> OptionalLong findFirst(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> OptionalLong findFirst(final Throwables.LongPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -821,7 +824,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 final Pair<Long, Long> pair = new Pair<>();
 
                 try {
@@ -857,7 +860,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public <E extends Exception> OptionalLong findAny(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> OptionalLong findAny(final Throwables.LongPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -872,7 +875,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 long next = 0;
 
                 try {
@@ -907,7 +910,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
     }
 
     @Override
-    public <E extends Exception> OptionalLong findLast(final Throwables.LongPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> OptionalLong findLast(final Throwables.LongPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -923,7 +926,7 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
         AsyncExecutor asyncExecutorToUse = checkAsyncExecutor(asyncExecutor, maxThreadNum);
 
         for (int i = 0; i < maxThreadNum; i++) {
-            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, () -> {
+            asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 final Pair<Long, Long> pair = new Pair<>();
 
                 try {
@@ -956,10 +959,17 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
         return resultHolder.value() == null ? OptionalLong.empty() : OptionalLong.of(resultHolder.value().right());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalStateException if this stream or a source stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
+     */
     @Override
-    public LongStream zipWith(final LongStream b, final LongBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
+    public LongStream zipWith(final LongStream b, final LongBinaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum)) {
@@ -967,15 +977,23 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
                     cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorLongStream(Stream.parallelZip(boxed(), b.boxed(), zipFunction::applyAsLong, maxThreadNum), false, maxThreadNum,
-                splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorLongStream(Stream.parallelZip(boxed(), b.boxed(), zipFunction::applyAsLong, maxThreadNum, asyncExecutor), false,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalStateException if this stream or a source stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
+     */
     @Override
     public LongStream zipWith(final LongStream b, final LongStream c, final LongTernaryOperator zipFunction)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
+        checkArgNotNull(c, cs.c);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum)) {
@@ -983,15 +1001,22 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
                     cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorLongStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), zipFunction::applyAsLong, maxThreadNum), false, maxThreadNum,
-                splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorLongStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), zipFunction::applyAsLong, maxThreadNum, asyncExecutor), false,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalStateException if this stream or a source stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
+     */
     @Override
     public LongStream zipWith(final LongStream b, final long valueForNoneA, final long valueForNoneB, final LongBinaryOperator zipFunction)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum)) {
@@ -999,15 +1024,24 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
                     asyncExecutor, cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorLongStream(Stream.parallelZip(boxed(), b.boxed(), valueForNoneA, valueForNoneB, zipFunction::applyAsLong, maxThreadNum),
-                false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorLongStream(
+                Stream.parallelZip(boxed(), b.boxed(), valueForNoneA, valueForNoneB, zipFunction::applyAsLong, maxThreadNum, asyncExecutor), false,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalStateException if this stream or a source stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
+     */
     @Override
     public LongStream zipWith(final LongStream b, final LongStream c, final long valueForNoneA, final long valueForNoneB, final long valueForNoneC,
-            final LongTernaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
+            final LongTernaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
+        checkArgNotNull(c, cs.c);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         if (canBeSequential(maxThreadNum)) {
@@ -1015,9 +1049,8 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
                     splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorLongStream(
-                Stream.parallelZip(boxed(), b.boxed(), c.boxed(), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction::applyAsLong, maxThreadNum), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        return new ParallelIteratorLongStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), valueForNoneA, valueForNoneB, valueForNoneC,
+                zipFunction::applyAsLong, maxThreadNum, asyncExecutor), false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
     }
 
     @Override

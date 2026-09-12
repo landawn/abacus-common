@@ -41,7 +41,7 @@ import com.landawn.abacus.util.cs;
  * @see ObjIterator
  * @see IteratorEx
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 @Internal
 public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements IteratorEx<T> {
 
@@ -50,6 +50,37 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
      * This constructor is protected to allow subclassing.
      */
     protected ObjIteratorEx() {
+    }
+
+    /**
+     * Internal opt-in for bulk advancement that consumes no logical elements if it throws.
+     * This describes failure recovery only; it does not imply thread safety.
+     * Checking this capability may initialize a deferred iterator, without consuming logical elements.
+     * Unmarked iterators are advanced element by element when exact skip progress is required.
+     */
+    boolean supportsFailureAtomicAdvance() {
+        return false;
+    }
+
+    static boolean supportsFailureAtomicAdvance(final Iterator<?> iterator) {
+        if (iterator instanceof final ObjIteratorEx<?> iter) {
+            return iter.supportsFailureAtomicAdvance();
+        } else if (iterator instanceof final CharIteratorEx iter) {
+            return iter.supportsFailureAtomicAdvance();
+        } else if (iterator instanceof final ByteIteratorEx iter) {
+            return iter.supportsFailureAtomicAdvance();
+        } else if (iterator instanceof final ShortIteratorEx iter) {
+            return iter.supportsFailureAtomicAdvance();
+        } else if (iterator instanceof final IntIteratorEx iter) {
+            return iter.supportsFailureAtomicAdvance();
+        } else if (iterator instanceof final LongIteratorEx iter) {
+            return iter.supportsFailureAtomicAdvance();
+        } else if (iterator instanceof final FloatIteratorEx iter) {
+            return iter.supportsFailureAtomicAdvance();
+        } else if (iterator instanceof final DoubleIteratorEx iter) {
+            return iter.supportsFailureAtomicAdvance();
+        }
+        return false;
     }
 
     /**
@@ -106,7 +137,7 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
      * @param toIndex the ending index (exclusive)
      * @return an ObjIteratorEx for the specified array range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > a.length},
-     *         or {@code fromIndex > toIndex}
+     *         or {@code fromIndex > toIndex}; a {@code null} array is treated as having length zero
      */
     public static <T> ObjIteratorEx<T> of(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(a));
@@ -124,12 +155,17 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return a[cursor++];
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
             }
 
             @Override
@@ -148,8 +184,14 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
                 return ret;
             }
 
+            /**
+             * {@inheritDoc}
+             *
+             * @throws NullPointerException if {@code output} is {@code null}
+             * @throws ArrayStoreException if an element cannot be stored in the component type of {@code output}
+             */
             @Override
-            public <A> A[] toArray(A[] output) {
+            public <A> A[] toArray(A[] output) throws NullPointerException, ArrayStoreException {
                 final int len = toIndex - cursor;
 
                 if (output.length < len) {
@@ -204,7 +246,7 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 return iter.next();
             }
 
@@ -243,7 +285,7 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 return iter.next();
             }
 
@@ -308,14 +350,14 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
      *
      * <p>Calling {@link #closeResource()} before any traversal request is a no-op and does not invoke the supplier.</p>
      *
+     * <p>On first traversal, the returned iterator throws {@link IllegalStateException} if the
+     * supplier returns {@code null}. A runtime exception or error from initialization is cached
+     * and rethrown on each subsequent traversal attempt. These failures do not occur when this
+     * factory creates the deferred iterator.</p>
+     *
      * @param <T> the type of elements
      * @param iteratorSupplier the supplier that provides the iterator
      * @return a deferred ObjIteratorEx
-     * @throws IllegalStateException if the supplier returns {@code null} when initialized
-     * @throws RuntimeException if the supplier throws a runtime exception when initialized;
-     *         the same failure is rethrown on subsequent access attempts
-     * @throws Error if the supplier throws an error when initialized;
-     *         the same failure is rethrown on subsequent access attempts
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static <T> ObjIteratorEx<T> defer(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) throws IllegalArgumentException {
@@ -335,10 +377,16 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 init();
 
                 return iter.next();
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                init();
+                return ObjIteratorEx.supportsFailureAtomicAdvance(iterEx);
             }
 
             @Override
@@ -381,7 +429,14 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
                 }
             }
 
-            private void init() {
+            /**
+             * Initializes the supplied iterator once and rethrows a cached initialization failure.
+             *
+             * @throws IllegalStateException if the iterator supplier returned {@code null} during initialization
+             * @throws RuntimeException if the supplier throws during initialization; the cached failure is rethrown
+             * @throws Error if the supplier throws an error during initialization; the cached failure is rethrown
+             */
+            private void init() throws IllegalStateException, RuntimeException, Error {
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
@@ -418,10 +473,10 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
      * Anything else (including {@code null}) is ignored.
      *
      * @param iter the object whose resources should be released; may be {@code null}
-     * @throws RuntimeException if {@link AutoCloseable#close()} throws a checked exception, it is
-     *         wrapped and rethrown as an unchecked exception
+     * @throws RuntimeException if the iterator's close operation fails; checked exceptions from
+     *         {@link AutoCloseable#close()} are converted to unchecked exceptions
      */
-    static void closeResource(final Object iter) {
+    static void closeResource(final Object iter) throws RuntimeException {
         if (iter instanceof IteratorEx) {
             ((IteratorEx<?>) iter).closeResource();
         } else if (iter instanceof AutoCloseable) {
@@ -467,8 +522,13 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
             }
 
             @Override
-            public Object next() {
+            public Object next() throws NoSuchElementException {
                 throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
             }
 
             @Override

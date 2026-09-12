@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,8 +11,10 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Supplier;
@@ -20,10 +23,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.entity.extendDirty.basic.Account;
-import com.landawn.abacus.entity.extendDirty.basic.AccountContact;
 
 import lombok.Data;
+import testfixtures.entity.extendDirty.basic.Account;
+import testfixtures.entity.extendDirty.basic.AccountContact;
 
 public class URLEncodedUtilTest extends AbstractTest {
 
@@ -49,24 +52,19 @@ public class URLEncodedUtilTest extends AbstractTest {
         private String[] tags;
     }
 
+    @Data
+    public static class NullableBean {
+        private String value;
+    }
+
     @Test
-    public void test_encode_object_stringWithoutEquals() {
+    public void testEncode_stringWithoutEquals() {
         String result = URLEncodedUtil.encode("test");
         assertEquals("test", result);
     }
 
     @Test
-    public void test_encode_url_object() {
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("q", "java url encoding");
-        params.put("page", 1);
-
-        String result = URLEncodedUtil.encode("http://search.example.com", params);
-        assertEquals("http://search.example.com?q=java+url+encoding&page=1", result);
-    }
-
-    @Test
-    public void test_encode_url_object_withExistingQueryAndFragment() {
+    public void testEncodeUrl_withExistingQueryAndFragment() {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("page", 2);
 
@@ -75,20 +73,26 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_encode_url_object_charset() {
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("name", "中文");
+    public void testEncodeUrlDoesNotAppendSeparatorForBeanWithNoEncodedProperties() {
+        final NullableBean bean = new NullableBean();
 
-        String result = URLEncodedUtil.encode("http://example.com", params, StandardCharsets.UTF_8);
-        assertEquals("http://example.com?name=%E4%B8%AD%E6%96%87", result);
+        assertEquals("https://example.test/path#fragment", URLEncodedUtil.encode("https://example.test/path#fragment", bean));
+        assertEquals("https://example.test/path?a=1#fragment", URLEncodedUtil.encode("https://example.test/path?a=1#fragment", bean));
+        assertEquals("https://example.test/path?", URLEncodedUtil.encode("https://example.test/path?", bean));
+        assertEquals("https://example.test/path?a=1&", URLEncodedUtil.encode("https://example.test/path?a=1&", bean));
     }
 
     @Test
-    public void test_encode_objectArray_evenLength() {
-        Object[] params = new Object[] { "key1", "value1", "key2", "value2" };
-        String result = URLEncodedUtil.encode(params);
-        assertTrue(result.contains("key1=value1"));
-        assertTrue(result.contains("key2=value2"));
+    public void testEncode_rejectsInvalidParameterNames() {
+        final Map<Object, Object> nonStringKey = new LinkedHashMap<>();
+        nonStringKey.put(1, "value");
+        assertThrows(ClassCastException.class, () -> URLEncodedUtil.encode(nonStringKey));
+        assertThrows(ClassCastException.class, () -> URLEncodedUtil.encode(new Object[] { 1, "value" }));
+
+        final Map<Object, Object> nullKey = new LinkedHashMap<>();
+        nullKey.put(null, "value");
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(nullKey));
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(new Object[] { null, "value" }));
     }
 
     @Test
@@ -115,78 +119,32 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_format() {
+    public void testFormat() {
         Account account = createAccount(Account.class);
         AccountContact contact = createAccountContact(AccountContact.class);
         account.setContact(contact);
 
         String query = URLEncodedUtil.encode(account);
-        N.println(query);
+        assertFalse(query.isEmpty());
 
         Account account2 = URLEncodedUtil.decode(query, Account.class);
-        N.println(N.stringOf(account2));
+        assertNotNull(account2);
 
         query = URLEncodedUtil.encode(Beans.beanToMap(account));
-        N.println(query);
+        assertFalse(query.isEmpty());
 
         account2 = URLEncodedUtil.decode(query, Account.class);
-        N.println(N.stringOf(account2));
         assertNotNull(account2);
     }
 
     @Test
-    public void test_encode_object() {
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("name", "John Doe");
-        params.put("age", 30);
-
-        String result = URLEncodedUtil.encode(params);
-        assertNotNull(result);
-        assertTrue(result.contains("name=John+Doe"));
-        assertTrue(result.contains("age=30"));
-    }
-
-    @Test
-    public void test_encode_object_null() {
-        String result = URLEncodedUtil.encode(null);
-        assertEquals("", result);
-    }
-
-    @Test
-    public void test_encode_object_array() {
-        Object[] params = new Object[] { "name", "John Doe", "age", 30 };
-        String result = URLEncodedUtil.encode(params);
-        assertNotNull(result);
-        assertTrue(result.contains("name=John+Doe"));
-        assertTrue(result.contains("age=30"));
-    }
-
-    @Test
-    public void test_encode_object_string() {
-        String result = URLEncodedUtil.encode("name=John&age=30");
-        assertNotNull(result);
-        assertTrue(result.contains("name=John"));
-        assertTrue(result.contains("age=30"));
-    }
-
-    @Test
-    public void test_encode_object_charset() {
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("name", "中文");
-
-        String result = URLEncodedUtil.encode(params, StandardCharsets.UTF_8);
-        assertNotNull(result);
-        assertTrue(result.contains("name=%E4%B8%AD%E6%96%87"));
-    }
-
-    @Test
-    public void test_encode_object_charset_null() {
+    public void testEncodeObject_nullWithCharset() {
         String result = URLEncodedUtil.encode((Map) null, StandardCharsets.UTF_8);
         assertEquals("", result);
     }
 
     @Test
-    public void test_encode_object_charset_nullCharset() {
+    public void testEncodeObject_nullCharset() {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("name", "test");
 
@@ -195,7 +153,7 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_encode_object_charset_namingPolicy_noChange() {
+    public void testEncodeObject_namingPolicyNoChange() {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("firstName", "John");
 
@@ -204,7 +162,7 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_encode_object_charset_namingPolicy_null() {
+    public void testEncodeObject_nullNamingPolicy() {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("name", "test");
 
@@ -213,23 +171,13 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_encode_url_object_charset_namingPolicy_null() {
+    public void testEncodeUrl_nullParamsWithNamingPolicy() {
         String result = URLEncodedUtil.encode("http://example.com", null, StandardCharsets.UTF_8, NamingPolicy.CAMEL_CASE);
         assertEquals("http://example.com", result);
     }
 
     @Test
-    public void test_encode_specialCharacters() {
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("key", "!@#$%^&*()");
-
-        String result = URLEncodedUtil.encode(params);
-        assertNotNull(result);
-        assertTrue(result.contains("key="));
-    }
-
-    @Test
-    public void test_encode_emptyValue() {
+    public void testEncode_emptyValue() {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("key", "");
 
@@ -238,21 +186,7 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_encode_multipleParameters() {
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("a", "1");
-        params.put("b", "2");
-        params.put("c", "3");
-
-        String result = URLEncodedUtil.encode(params);
-        assertTrue(result.contains("a=1"));
-        assertTrue(result.contains("b=2"));
-        assertTrue(result.contains("c=3"));
-        assertTrue(result.contains("&"));
-    }
-
-    @Test
-    public void test_encode_bean_nullProperties() {
+    public void testEncodeBean_nullProperties() {
         User user = new User();
         String result = URLEncodedUtil.encode(user);
         assertNotNull(result);
@@ -273,6 +207,12 @@ public class URLEncodedUtilTest extends AbstractTest {
         params.put("name", "hello world");
         result = URLEncodedUtil.encode(params);
         Assertions.assertEquals("name=hello+world", result);
+
+        params.clear();
+        params.put("first_name", "Ada");
+        result = URLEncodedUtil.encode(params);
+        Assertions.assertEquals("first_name=Ada", result);
+        Assertions.assertEquals("first_name=Ada", URLEncodedUtil.encode(params, StandardCharsets.UTF_8));
 
         params.clear();
         params.put("special", "!@#$%");
@@ -328,6 +268,11 @@ public class URLEncodedUtilTest extends AbstractTest {
         result = URLEncodedUtil.encode("http://example.com", params);
         Assertions.assertEquals("http://example.com?key=value", result);
 
+        Map<String, Object> ordered = new LinkedHashMap<>();
+        ordered.put("q", "java url encoding");
+        ordered.put("page", 1);
+        Assertions.assertEquals("http://search.example.com?q=java+url+encoding&page=1", URLEncodedUtil.encode("http://search.example.com", ordered));
+
         params.put("key2", "value2");
         result = URLEncodedUtil.encode("http://example.com", params);
         Assertions.assertTrue(result.startsWith("http://example.com?"));
@@ -351,20 +296,76 @@ public class URLEncodedUtilTest extends AbstractTest {
         params.put("key1", null);
         params.put("key2", "value2");
         String result = URLEncodedUtil.encode(params);
-        Assertions.assertTrue(result.contains("key1=null"));
+        Assertions.assertFalse(result.contains("key1="));
+        Assertions.assertTrue(result.contains("key1"));
         Assertions.assertTrue(result.contains("key2=value2"));
 
-        Map<String, String> decoded = URLEncodedUtil.decode("key=%2");
-        Assertions.assertEquals("%2", decoded.get("key"));
+        // A null value round-trips as a valueless token, not the literal string "null".
+        final Map<String, String> decodedParams = URLEncodedUtil.decode(result);
+        Assertions.assertTrue(decodedParams.containsKey("key1"));
+        Assertions.assertNull(decodedParams.get("key1"));
 
-        decoded = URLEncodedUtil.decode("key=%ZZ");
-        Assertions.assertEquals("%ZZ", decoded.get("key"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("key=%2"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("key=%ZZ"));
+        Assertions.assertEquals("%2", URLEncodedUtil.decodeLenient("key=%2").get("key"));
+        Assertions.assertEquals("%ZZ", URLEncodedUtil.decodeLenient("key=%ZZ").get("key"));
 
-        decoded = URLEncodedUtil.decode("a=1&b=2;c=3&d=4");
+        Map<String, String> decoded = URLEncodedUtil.decode("a=1&b=2;c=3&d=4");
         Assertions.assertEquals(4, decoded.size());
 
         decoded = URLEncodedUtil.decode("  key  =  value  ");
-        Assertions.assertEquals("value", decoded.get("key"));
+        Assertions.assertEquals("  value  ", decoded.get("  key  "));
+
+        final ListMultimap<String, String> decodedMultimap = URLEncodedUtil.decodeToMultimap("  key  =  value  &  key  = second ");
+        Assertions.assertEquals(Arrays.asList("  value  ", " second "), decodedMultimap.get("  key  "));
+
+        final NullableBean decodedBean = URLEncodedUtil.decode("value=  text  ", NullableBean.class);
+        Assertions.assertEquals("  text  ", decodedBean.getValue());
+    }
+
+    @Test
+    public void testEncodeDecodeRoundTrip_MultiByteCharsets() {
+        // Every byte of a non-safe character must be percent-escaped so decode(encode(v, cs), cs)
+        // round-trips for multi-byte and stateful charsets (UTF-16, ISO-2022-JP, ...).
+        for (final String charsetName : new String[] { "UTF-16", "ISO-2022-JP", "UTF-8" }) {
+            final Charset charset = Charset.forName(charsetName);
+            final Map<String, Object> params = new LinkedHashMap<>();
+            params.put("k", "abc");
+            params.put("text", "a b&c");
+
+            if (charsetName.equals("ISO-2022-JP")) {
+                params.put("stateful", "日本a語");
+            }
+
+            final String encoded = URLEncodedUtil.encode(params, charset);
+            final Map<String, String> decoded = URLEncodedUtil.decode(encoded, charset);
+
+            Assertions.assertEquals("abc", decoded.get("k"), charsetName);
+            Assertions.assertEquals("a b&c", decoded.get("text"), charsetName);
+
+            if (charsetName.equals("ISO-2022-JP")) {
+                Assertions.assertEquals("日本a語", decoded.get("stateful"), charsetName);
+            }
+        }
+
+        // UTF-16 specifically used to split a character's bytes across the literal/escape boundary.
+        final Map<String, Object> params = new LinkedHashMap<>();
+        params.put("k", "abc");
+        Assertions.assertEquals("abc", URLEncodedUtil.decode(URLEncodedUtil.encode(params, StandardCharsets.UTF_16), StandardCharsets.UTF_16).get("k"));
+    }
+
+    @Test
+    public void testEncodeRejectsLossyCharsetConversion() {
+        final Map<String, Object> params = new LinkedHashMap<>();
+        params.put("value", "é");
+
+        final IllegalArgumentException unmappable = assertThrows(IllegalArgumentException.class,
+                () -> URLEncodedUtil.encode(params, StandardCharsets.US_ASCII));
+        assertTrue(unmappable.getMessage().contains("US-ASCII"));
+
+        params.put("value", "\uD800");
+        final IllegalArgumentException malformed = assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(params, StandardCharsets.UTF_8));
+        assertTrue(malformed.getMessage().contains("UTF-8"));
     }
 
     @Test
@@ -412,25 +413,7 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_encode_object_appendable() throws IOException {
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("key", "value");
-
-        StringBuilder sb = new StringBuilder();
-        URLEncodedUtil.encode(params, sb);
-
-        assertEquals("key=value", sb.toString());
-    }
-
-    @Test
-    public void test_encode_object_appendable_null() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        URLEncodedUtil.encode((Map) null, sb);
-        assertEquals("", sb.toString());
-    }
-
-    @Test
-    public void test_encode_object_appendable_writer() throws IOException {
+    public void testEncodeToAppendable_writer() throws IOException {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("name", "test");
 
@@ -441,32 +424,21 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_encode_object_charset_appendable() throws IOException {
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("name", "中文");
-
-        StringBuilder sb = new StringBuilder();
-        URLEncodedUtil.encode(params, StandardCharsets.UTF_8, sb);
-
-        assertEquals("name=%E4%B8%AD%E6%96%87", sb.toString());
-    }
-
-    @Test
-    public void test_encode_object_charset_appendable_null() throws IOException {
+    public void testEncodeToAppendableWithCharset_null() throws IOException {
         StringBuilder sb = new StringBuilder();
         URLEncodedUtil.encode(null, StandardCharsets.UTF_8, sb);
         assertEquals("", sb.toString());
     }
 
     @Test
-    public void test_encode_object_charset_namingPolicy_appendable_null() throws IOException {
+    public void testEncodeToAppendableWithCharsetAndNamingPolicy_null() throws IOException {
         StringBuilder sb = new StringBuilder();
         URLEncodedUtil.encode(null, StandardCharsets.UTF_8, NamingPolicy.CAMEL_CASE, sb);
         assertEquals("", sb.toString());
     }
 
     @Test
-    public void test_encode_object_charset_namingPolicy_appendable_emptyMap() throws IOException {
+    public void testEncodeToAppendableWithCharsetAndNamingPolicy_emptyMap() throws IOException {
         StringBuilder sb = new StringBuilder();
         URLEncodedUtil.encode(new HashMap<>(), StandardCharsets.UTF_8, NamingPolicy.CAMEL_CASE, sb);
         assertEquals("", sb.toString());
@@ -474,17 +446,8 @@ public class URLEncodedUtilTest extends AbstractTest {
 
     @Test
     public void testRequiredEncodingTargetsAreValidatedForEmptyInput() {
-        assertThrows(NullPointerException.class, () -> URLEncodedUtil.encode(null, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE, null));
-        assertThrows(NullPointerException.class, () -> URLEncodedUtil.encode((String) null, null, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE));
-    }
-
-    @Test
-    public void test_encode_object_charset_namingPolicy_appendable_arrayOddLength() {
-        Object[] params = new Object[] { "name", "John", "age" };
-        StringBuilder sb = new StringBuilder();
-        assertThrows(IllegalArgumentException.class, () -> {
-            URLEncodedUtil.encode(params, StandardCharsets.UTF_8, NamingPolicy.CAMEL_CASE, sb);
-        });
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(null, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE, null));
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode((String) null, null, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE));
     }
 
     @Test
@@ -581,13 +544,20 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_decodeToBean() {
+    public void testComponentEncodersRejectNullCharset() {
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encUserInfo("", null, new StringBuilder()));
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encUric("safe", null, new StringBuilder()));
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encPath(null, null, new StringBuilder()));
+    }
+
+    @Test
+    public void testConvertToBean_account() {
         Account account = createAccount(Account.class);
         Map<String, Object> props = Beans.beanToMap(account);
         Map<String, String[]> parameters = new HashMap<>();
 
         for (String propName : props.keySet()) {
-            parameters.put(propName, N.asArray(N.stringOf(props.get(propName))));
+            parameters.put(propName, CommonUtil.asArray(CommonUtil.stringOf(props.get(propName))));
         }
 
         Account account2 = URLEncodedUtil.convertToBean(parameters, Account.class);
@@ -596,61 +566,20 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_decode_string() {
-        Map<String, String> result = URLEncodedUtil.decode("name=John+Doe&age=30");
-        assertEquals("John Doe", result.get("name"));
-        assertEquals("30", result.get("age"));
-    }
-
-    @Test
-    public void test_decode_string_withPercentEncoding() {
-        Map<String, String> result = URLEncodedUtil.decode("name=John%20Doe&email=john%40example.com");
-        assertEquals("John Doe", result.get("name"));
-        assertEquals("john@example.com", result.get("email"));
-    }
-
-    @Test
-    public void test_decode_string_withSemicolonSeparator() {
-        Map<String, String> result = URLEncodedUtil.decode("name=John;age=30");
-        assertEquals("John", result.get("name"));
-        assertEquals("30", result.get("age"));
-    }
-
-    @Test
-    public void test_decode_string_duplicateKeys() {
+    public void testDecode_duplicateKeysKeepLast() {
         Map<String, String> result = URLEncodedUtil.decode("color=red&color=blue");
         assertEquals("blue", result.get("color"));
     }
 
     @Test
-    public void test_decode_string_charset() {
-        Map<String, String> result = URLEncodedUtil.decode("name=%E4%B8%AD%E6%96%87", StandardCharsets.UTF_8);
-        assertEquals("中文", result.get("name"));
-    }
-
-    @Test
-    public void test_decode_string_charset_class_encoding() {
+    public void testDecodeToProduct_withCharset() {
         Product product = URLEncodedUtil.decode("productName=%E4%B8%AD%E6%96%87&price=100", StandardCharsets.UTF_8, Product.class);
         assertEquals("中文", product.getProductName());
         assertEquals(100.0, product.getPrice(), 0.001);
-    }
 
-    @Test
-    public void test_decode_specialCharacters() {
-        Map<String, String> result = URLEncodedUtil.decode("key=%21%40%23%24%25%5E%26*");
-        assertEquals("!@#$%^&*", result.get("key"));
-    }
-
-    @Test
-    public void test_decode_whitespace() {
-        Map<String, String> result = URLEncodedUtil.decode("  name  =  value  ");
-        assertEquals("value", result.get("name"));
-    }
-
-    @Test
-    public void test_decode_urlWithFragment() {
-        Map<String, String> result = URLEncodedUtil.decode("name=John&age=30");
-        assertEquals(2, result.size());
+        product = URLEncodedUtil.decode("productName=Laptop&price=999.99", StandardCharsets.UTF_8, Product.class);
+        assertEquals("Laptop", product.getProductName());
+        assertEquals(999.99, product.getPrice(), 0.001);
     }
 
     @Test
@@ -716,49 +645,28 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_decode_string_empty() {
-        Map<String, String> result = URLEncodedUtil.decode("");
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void test_decode_string_null() {
-        Map<String, String> result = URLEncodedUtil.decode(null);
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void test_decode_string_withNullValue() {
+    public void testDecode_emptyValue() {
         Map<String, String> result = URLEncodedUtil.decode("name=John&age=");
         assertEquals("John", result.get("name"));
         assertEquals("", result.get("age"));
     }
 
     @Test
-    public void test_decode_string_noValue() {
-        Map<String, String> result = URLEncodedUtil.decode("name");
-        assertNull(result.get("name"));
-        assertTrue(result.containsKey("name"));
-    }
-
-    @Test
-    public void test_decode_string_charset_null() {
+    public void testDecode_nullWithCharset() {
         Map<String, String> result = URLEncodedUtil.decode(null, StandardCharsets.UTF_8);
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
     @Test
-    public void test_decode_string_charset_nullCharset() {
+    public void testDecode_nullCharset() {
         Charset nullCharset = null;
         Map<String, String> result = URLEncodedUtil.decode("name=test", nullCharset);
         assertEquals("test", result.get("name"));
     }
 
     @Test
-    public void test_decode_string_charset_supplier() {
+    public void testDecodeWithMapSupplier_treeMap() {
         TreeMap<String, String> result = URLEncodedUtil.decode("b=2&a=1", StandardCharsets.UTF_8, TreeMap::new);
         assertNotNull(result);
         assertTrue(result instanceof TreeMap);
@@ -768,41 +676,25 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_decode_string_charset_supplier_empty() {
+    public void testDecodeWithMapSupplier_empty() {
         HashMap<String, String> result = URLEncodedUtil.decode("", StandardCharsets.UTF_8, HashMap::new);
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
     @Test
-    public void test_decode_string_class() {
-        User user = URLEncodedUtil.decode("name=John&age=30", User.class);
-        assertNotNull(user);
-        assertEquals("John", user.getName());
-        assertEquals(30, user.getAge());
-    }
-
-    @Test
-    public void test_decode_string_class_empty() {
-        User user = URLEncodedUtil.decode("", User.class);
-        assertNotNull(user);
-        assertNull(user.getName());
-        assertEquals(0, user.getAge());
-    }
-
-    @Test
-    public void test_decode_string_class_null() {
+    public void testDecodeToUser_nullQuery() {
         User user = URLEncodedUtil.decode(null, User.class);
         assertNotNull(user);
     }
 
     @Test
-    public void test_decode_string_class_nullTargetType() {
+    public void testDecodeToClass_nullTargetType() {
         assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("name=John", (Class<User>) null));
     }
 
     @Test
-    public void test_decode_string_class_map() {
+    public void testDecodeToMap_withoutCharset() {
         @SuppressWarnings("unchecked")
         Map<String, String> result = URLEncodedUtil.decode("name=John&age=30", LinkedHashMap.class);
         assertNotNull(result);
@@ -811,21 +703,13 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_decode_string_charset_class() {
-        Product product = URLEncodedUtil.decode("productName=Laptop&price=999.99", StandardCharsets.UTF_8, Product.class);
-        assertNotNull(product);
-        assertEquals("Laptop", product.getProductName());
-        assertEquals(999.99, product.getPrice(), 0.001);
-    }
-
-    @Test
-    public void test_decode_string_charset_class_null() {
+    public void testDecodeToUser_nullQueryWithCharset() {
         User user = URLEncodedUtil.decode(null, StandardCharsets.UTF_8, User.class);
         assertNotNull(user);
     }
 
     @Test
-    public void test_decodeToBean_multipleValues() {
+    public void testConvertToBean_multipleValues() {
         Map<String, String[]> params = new HashMap<>();
         params.put("name", new String[] { "Bob", "Bobby" });
         params.put("age", new String[] { "30" });
@@ -837,32 +721,8 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_decodeToBean_emptyValue() {
-        Map<String, String[]> params = new HashMap<>();
-        params.put("name", new String[] { "" });
-        params.put("age", new String[] { "35" });
-
-        User user = URLEncodedUtil.convertToBean(params, User.class);
-        assertNotNull(user);
-        assertNull(user.getName());
-        assertEquals(35, user.getAge());
-    }
-
-    @Test
-    public void test_decodeToBean_nullMap() {
-        User user = URLEncodedUtil.convertToBean(null, User.class);
-        assertNotNull(user);
-    }
-
-    @Test
-    public void test_decodeToBean_nullTargetType() {
+    public void testConvertToBean_nullTargetType() {
         assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.convertToBean(new HashMap<>(), null));
-    }
-
-    @Test
-    public void test_decodeToBean_emptyMap() {
-        User user = URLEncodedUtil.convertToBean(new HashMap<>(), User.class);
-        assertNotNull(user);
     }
 
     @Test
@@ -900,6 +760,22 @@ public class URLEncodedUtilTest extends AbstractTest {
 
         result = URLEncodedUtil.decode("key=%21%40%23%24%25");
         Assertions.assertEquals("!@#$%", result.get("key"));
+
+        result = URLEncodedUtil.decode("name=John+Doe&age=30");
+        Assertions.assertEquals("John Doe", result.get("name"));
+        Assertions.assertEquals("30", result.get("age"));
+
+        result = URLEncodedUtil.decode("name=John%20Doe&email=john%40example.com");
+        Assertions.assertEquals("John Doe", result.get("name"));
+        Assertions.assertEquals("john@example.com", result.get("email"));
+
+        result = URLEncodedUtil.decode("key=%21%40%23%24%25%5E%26*");
+        Assertions.assertEquals("!@#$%^&*", result.get("key"));
+
+        result = URLEncodedUtil.decode("a=+x+&b=%20x%20&c= x ");
+        Assertions.assertEquals(" x ", result.get("a"));
+        Assertions.assertEquals(" x ", result.get("b"));
+        Assertions.assertEquals(" x ", result.get("c"));
     }
 
     @Test
@@ -934,68 +810,12 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void test_decodeToMultimap_string_charset_withEncoding() {
-        ListMultimap<String, String> result = URLEncodedUtil.decodeToMultimap("name=%E4%B8%AD%E6%96%87&name=test", StandardCharsets.UTF_8);
-        assertEquals(2, result.get("name").size());
-        assertTrue(result.get("name").contains("中文"));
-        assertTrue(result.get("name").contains("test"));
-    }
-
-    @Test
     public void testDecodeToMultimapWithSpecificCharset() {
         ListMultimap<String, String> result = URLEncodedUtil.decodeToMultimap("name=%E4%B8%AD%E6%96%87&name=test", StandardCharsets.UTF_8);
 
         Assertions.assertEquals(2, result.get("name").size());
         Assertions.assertEquals("中文", result.get("name").get(0));
         Assertions.assertEquals("test", result.get("name").get(1));
-    }
-
-    @Test
-    public void test_decodeToMultimap_string() {
-        ListMultimap<String, String> result = URLEncodedUtil.decodeToMultimap("color=red&color=blue&size=L");
-        assertNotNull(result);
-        assertEquals(2, result.get("color").size());
-        assertTrue(result.get("color").contains("red"));
-        assertTrue(result.get("color").contains("blue"));
-        assertEquals(1, result.get("size").size());
-        assertEquals("L", result.get("size").get(0));
-    }
-
-    @Test
-    public void test_decodeToMultimap_string_empty() {
-        ListMultimap<String, String> result = URLEncodedUtil.decodeToMultimap("");
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void test_decodeToMultimap_string_null() {
-        ListMultimap<String, String> result = URLEncodedUtil.decodeToMultimap(null);
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void test_decodeToMultimap_string_charset() {
-        ListMultimap<String, String> result = URLEncodedUtil.decodeToMultimap("tag=java&tag=url", StandardCharsets.UTF_8);
-        assertNotNull(result);
-        assertEquals(2, result.get("tag").size());
-        assertTrue(result.get("tag").contains("java"));
-        assertTrue(result.get("tag").contains("url"));
-    }
-
-    @Test
-    public void test_decodeToMultimap_string_charset_null() {
-        ListMultimap<String, String> result = URLEncodedUtil.decodeToMultimap(null, StandardCharsets.UTF_8);
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void test_decodeToMultimap_singleValue() {
-        ListMultimap<String, String> result = URLEncodedUtil.decodeToMultimap("name=John");
-        assertEquals(1, result.get("name").size());
-        assertEquals("John", result.get("name").get(0));
     }
 
     @Test
@@ -1019,6 +839,13 @@ public class URLEncodedUtilTest extends AbstractTest {
         result = URLEncodedUtil.decodeToMultimap("a=1&b=2&a=3");
         Assertions.assertEquals(2, result.get("a").size());
         Assertions.assertEquals(1, result.get("b").size());
+
+        result = URLEncodedUtil.decodeToMultimap("color=red&color=blue&size=L");
+        Assertions.assertEquals(2, result.get("color").size());
+        Assertions.assertTrue(result.get("color").contains("red"));
+        Assertions.assertTrue(result.get("color").contains("blue"));
+        Assertions.assertEquals(1, result.get("size").size());
+        Assertions.assertEquals("L", result.get("size").get(0));
     }
 
     @Test
@@ -1135,8 +962,33 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void testDecodePreservesInvalidPercentEscapeBeforeUnicode() {
-        assertEquals("%雪x", URLEncodedUtil.decode("q=%雪x").get("q"));
+    public void testDecodeRejectsMalformedPercentEscapeAndLenientModePreservesIt() {
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("q=%雪x"));
+        assertEquals("%雪x", URLEncodedUtil.decodeLenient("q=%雪x").get("q"));
+    }
+
+    @Test
+    public void testDecodeUsesAsciiHexAndReportsMalformedEncodedBytes() {
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("q=%１２"));
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("q=%١٢"));
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("q=%C3"));
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("q=%ZZ"));
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("q=%A"));
+
+        assertEquals("%１２", URLEncodedUtil.decodeLenient("q=%１２").get("q"));
+        assertEquals("%١٢", URLEncodedUtil.decodeLenient("q=%١٢").get("q"));
+        assertEquals("�", URLEncodedUtil.decodeLenient("q=%C3").get("q"));
+        assertEquals("%ZZ", URLEncodedUtil.decodeLenient("q=%ZZ").get("q"));
+        assertEquals("%A", URLEncodedUtil.decodeLenient("q=%A").get("q"));
+        assertEquals("ÿ", URLEncodedUtil.decode("q=%FF", StandardCharsets.ISO_8859_1).get("q"));
+    }
+
+    @Test
+    public void testDecodeToMultimapStrictAndLenientPolicies() {
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decodeToMultimap("q=%C3&q=ok"));
+
+        final ListMultimap<String, String> result = URLEncodedUtil.decodeToMultimapLenient("q=%C3&q=ok");
+        assertEquals(List.of("�", "ok"), result.get("q"));
     }
 
     // --- regression tests for 2026-06-10 deep-review fixes ---
@@ -1151,6 +1003,18 @@ public class URLEncodedUtilTest extends AbstractTest {
         assertEquals("1", decoded.get("a"));
         assertEquals("2", decoded.get("b"));
         org.junit.jupiter.api.Assertions.assertFalse(decoded.containsKey(""));
+
+        // Only truly empty tokens are skipped. Whitespace is significant query data and remains a valueless name.
+        decoded = URLEncodedUtil.decode("&a=1;; &;b=2&");
+        assertEquals(3, decoded.size());
+        assertEquals("1", decoded.get("a"));
+        assertTrue(decoded.containsKey(" "));
+        assertNull(decoded.get(" "));
+        assertEquals("2", decoded.get("b"));
+
+        final ListMultimap<String, String> decodedMultimap = URLEncodedUtil.decodeToMultimap("&a=1;; &;b=2&");
+        assertEquals(Arrays.asList((String) null), decodedMultimap.get(" "));
+        assertEquals(3, decodedMultimap.totalValueCount());
     }
 
     @Test
@@ -1165,12 +1029,182 @@ public class URLEncodedUtilTest extends AbstractTest {
     }
 
     @Test
-    public void testEncodeStandaloneParameterStringPreservesDuplicateNames() {
-        assertEquals("a=1&a=2&q=hello+world", URLEncodedUtil.encode((Object) " a = 1 & a = 2 & q = hello world "));
+    public void testEncodeStandaloneParameterStringAppendsVerbatim() {
+        // A CharSequence containing '=' is a pre-built, already-encoded query string and is appended
+        // verbatim - the same rule encode(String url, Object) applies. It used to be re-split into
+        // name/value pairs and re-encoded here only, so the two overloads disagreed: encode("q=a%20b")
+        // produced "q=a%2520b" while encode(url, "q=a%20b") produced "...?q=a%20b".
+        assertEquals("q=a%20b", URLEncodedUtil.encode("q=a%20b"));
+        assertEquals("a=1&a=2", URLEncodedUtil.encode("a=1&a=2"));
+        assertEquals(" a = 1 & a = 2 & q = hello world ", URLEncodedUtil.encode(" a = 1 & a = 2 & q = hello world "));
+
+        // The two overloads must agree on the same input.
+        assertEquals("http://h/s?" + URLEncodedUtil.encode("q=a%20b"), URLEncodedUtil.encode("http://h/s", "q=a%20b"));
+
+        // A CharSequence WITHOUT '=' is not a query string: it is encoded as a single form field.
+        assertEquals("hello+world", URLEncodedUtil.encode("hello world"));
 
         final StringBuilder output = new StringBuilder();
         URLEncodedUtil.encode("a=1&a=2", StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE, output);
         assertEquals("a=1&a=2", output.toString());
     }
 
+    @Test
+    public void testDecodeRejectsMapTargetTypesThatCannotBeInstantiated() {
+        // Suppliers.ofMap silently substitutes a HashMap/TreeMap for these four, and the unchecked cast in
+        // decode erases, so the caller used to get a bare ClassCastException thrown in its own frame.
+        for (final Class<?> targetType : new Class<?>[] { ImmutableMap.class, ImmutableSortedMap.class, ImmutableNavigableMap.class,
+                java.util.EnumMap.class }) {
+            final String expected = "Cannot decode into " + targetType.getName() + ": no mutable instance of that type can be created";
+
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("a=1&b=2", targetType)).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("", targetType)).getMessage());
+            assertEquals(expected,
+                    assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("a=1", StandardCharsets.UTF_8, targetType)).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decodeLenient("a=1", targetType)).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class,
+                    () -> URLEncodedUtil.decodeLenient("a=1", StandardCharsets.UTF_8, targetType)).getMessage());
+        }
+
+        // Map targets whose substitution still satisfies the request are untouched.
+        assertEquals(LinkedHashMap.class, URLEncodedUtil.decode("a=1", Map.class).getClass());
+        assertEquals(LinkedHashMap.class, URLEncodedUtil.decode("a=1", java.util.AbstractMap.class).getClass());
+        assertEquals(LinkedHashMap.class, URLEncodedUtil.decode("a=1", LinkedHashMap.class).getClass());
+        assertEquals(HashMap.class, URLEncodedUtil.decode("a=1", HashMap.class).getClass());
+        assertEquals(TreeMap.class, URLEncodedUtil.decode("a=1", TreeMap.class).getClass());
+        assertEquals(TreeMap.class, URLEncodedUtil.decode("a=1", java.util.SortedMap.class).getClass());
+        assertEquals(TreeMap.class, URLEncodedUtil.decode("a=1", java.util.NavigableMap.class).getClass());
+        assertEquals(java.util.concurrent.ConcurrentHashMap.class, URLEncodedUtil.decode("a=1", java.util.concurrent.ConcurrentMap.class).getClass());
+        assertEquals(BiMap.class, URLEncodedUtil.decode("a=1", BiMap.class).getClass());
+        assertEquals("1", URLEncodedUtil.decode("a=1", BiMap.class).get("a"));
+    }
+
+    @Test
+    public void testDecodeValuelessTokenIntoNullHostileMapNamesTheCulprit() {
+        // A token without '=' is documented to be stored with a null value; a null-hostile Map rejects that
+        // with a message-less NPE, although the class contract promises descriptive NPE messages.
+        assertEquals(
+                "The Map created for this call (java.util.concurrent.ConcurrentHashMap) does not permit null values, but the query contains"
+                        + " the valueless token \"flag\". Use a null-tolerant Map or decodeToMultimap(..).",
+                assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode("flag", java.util.concurrent.ConcurrentMap.class)).getMessage());
+
+        assertEquals(
+                "The Map created for this call (java.util.Hashtable) does not permit null values, but the query contains"
+                        + " the valueless token \"debug\". Use a null-tolerant Map or decodeToMultimap(..).",
+                assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode("debug", java.util.Hashtable.class)).getMessage());
+
+        assertEquals(
+                "The Map created for this call (java.util.concurrent.ConcurrentSkipListMap) does not permit null values, but the query contains"
+                        + " the valueless token \"verbose\". Use a null-tolerant Map or decodeToMultimap(..).",
+                assertThrows(NullPointerException.class,
+                        () -> URLEncodedUtil.decode("a=1&verbose&b=2", java.util.concurrent.ConcurrentNavigableMap.class)).getMessage());
+
+        // the Supplier entry points and both lenient families reach the same guard
+        assertNotNull(assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode("flag", StandardCharsets.UTF_8, java.util.Hashtable::new))
+                .getMessage());
+        assertNotNull(assertThrows(NullPointerException.class,
+                () -> URLEncodedUtil.decodeLenient("flag", StandardCharsets.UTF_8, java.util.concurrent.ConcurrentHashMap::new)).getMessage());
+        assertNotNull(assertThrows(NullPointerException.class, () -> URLEncodedUtil.decodeLenient("flag", java.util.Hashtable.class)).getMessage());
+        assertNotNull(assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode("flag", java.util.Properties.class)).getMessage());
+
+        // The token is interpolated from the query, so it is bounded and its control characters escaped: a
+        // crafted token must not be able to forge a line in a log that records this message, and a huge one
+        // must not allocate a message as large as the query.
+        final String crafted = assertThrows(NullPointerException.class,
+                () -> URLEncodedUtil.decode("%0A%0DFAKE%20LOG%20LINE", java.util.Hashtable.class)).getMessage();
+        assertFalse(crafted.contains("\n"), crafted);
+        assertFalse(crafted.contains("\r"), crafted);
+        assertTrue(crafted.contains("\\u000A\\u000DFAKE LOG LINE"), crafted);
+
+        final String huge = assertThrows(NullPointerException.class,
+                () -> URLEncodedUtil.decode("x".repeat(200_000), java.util.Hashtable.class)).getMessage();
+        assertTrue(huge.length() < 300, "message length " + huge.length() + " grows with the token");
+        assertTrue(huge.contains("\"" + "x".repeat(61) + "...\""), huge);
+
+        // a well-formed surrogate pair is printable and passes through whole
+        assertTrue(assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode("%F0%9F%98%80ok", java.util.Hashtable.class)).getMessage()
+                .contains(Character.toString(0x1F600) + "ok"));
+
+        // the documented null is unchanged wherever the Map tolerates it
+        final Map<String, String> tolerant = URLEncodedUtil.decode("flag", TreeMap.class);
+        assertTrue(tolerant.containsKey("flag"));
+        assertNull(tolerant.get("flag"));
+        assertEquals("1", URLEncodedUtil.decode("flag=1", java.util.Hashtable.class).get("flag"));
+    }
+
+    @Test
+    public void testEncodeStringifiesAnyOtherParameterShape() {
+        // documented catch-all: a value that is not a Map, bean, Object[] or CharSequence is converted with
+        // N.stringOf(..) into ONE valueless form field instead of being split into name/value pairs
+        assertEquals("%5B1%2C+2%5D", URLEncodedUtil.encode((Object) new int[] { 1, 2 }));
+        assertEquals("a=1", URLEncodedUtil.encode((Object) new String[] { "a", "1" }));
+        assertEquals("%5B%22a%22%2C+%22b%22%5D", URLEncodedUtil.encode((Object) List.of("a", "b")));
+        assertEquals("42", URLEncodedUtil.encode((Object) 42));
+        assertEquals("http://x/p?%5B1%2C+2%5D", URLEncodedUtil.encode("http://x/p", (Object) new int[] { 1, 2 }));
+
+        final Map<String, String> roundTripped = URLEncodedUtil.decode(URLEncodedUtil.encode((Object) new int[] { 1, 2 }));
+        assertTrue(roundTripped.containsKey("[1, 2]"));
+        assertNull(roundTripped.get("[1, 2]"));
+
+        // ... so an EMPTY Collection or empty primitive array is not one of the @return empty cases: it still
+        // encodes, as the text "[]". Only an empty Map/CharSequence/Object[] (and null) leave the URL untouched.
+        assertEquals("http://x/p?%5B%5D", URLEncodedUtil.encode("http://x/p", (Object) new java.util.ArrayList<>()));
+        assertEquals("http://x/p?%5B%5D", URLEncodedUtil.encode("http://x/p", (Object) new int[0]));
+        assertEquals("http://x/p?%5B%5D", URLEncodedUtil.encode("http://x/p", new java.util.ArrayList<>(), StandardCharsets.UTF_8));
+        assertEquals("http://x/p?%5B%5D",
+                URLEncodedUtil.encode("http://x/p", new int[0], StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE));
+        assertEquals("http://x/p", URLEncodedUtil.encode("http://x/p", (Object) new Object[0]));
+        assertEquals("http://x/p", URLEncodedUtil.encode("http://x/p", (Object) ""));
+        assertEquals("http://x/p", URLEncodedUtil.encode("http://x/p", (Object) new LinkedHashMap<>()));
+        assertEquals("http://x/p", URLEncodedUtil.encode("http://x/p", (Object) null));
+    }
+
+    @Test
+    public void testEncodeRejectsEmptyNameWithNullValueOnUtf8Overloads() {
+        final Map<String, Object> emptyNameNullValue = new LinkedHashMap<>();
+        emptyNameNullValue.put("", null);
+        final String message = "An empty parameter name requires a non-null value";
+
+        assertEquals(message, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(emptyNameNullValue)).getMessage());
+        assertEquals(message, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode("http://x", emptyNameNullValue)).getMessage());
+        assertEquals(message,
+                assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(emptyNameNullValue, new StringBuilder())).getMessage());
+        assertEquals(message, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode((Object) new Object[] { "", null })).getMessage());
+
+        // the @throws sentence now stands on every encode overload, so all nine are covered here
+        assertEquals(message, assertThrows(IllegalArgumentException.class,
+                () -> URLEncodedUtil.encode(emptyNameNullValue, StandardCharsets.UTF_8)).getMessage());
+        assertEquals(message, assertThrows(IllegalArgumentException.class,
+                () -> URLEncodedUtil.encode(emptyNameNullValue, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE)).getMessage());
+        assertEquals(message, assertThrows(IllegalArgumentException.class,
+                () -> URLEncodedUtil.encode("http://x", emptyNameNullValue, StandardCharsets.UTF_8)).getMessage());
+        assertEquals(message, assertThrows(IllegalArgumentException.class,
+                () -> URLEncodedUtil.encode("http://x", emptyNameNullValue, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE)).getMessage());
+        assertEquals(message, assertThrows(IllegalArgumentException.class,
+                () -> URLEncodedUtil.encode(emptyNameNullValue, StandardCharsets.UTF_8, new StringBuilder())).getMessage());
+        assertEquals(message, assertThrows(IllegalArgumentException.class,
+                () -> URLEncodedUtil.encode(emptyNameNullValue, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE, new StringBuilder())).getMessage());
+    }
+
+    @Test
+    public void testConvertToBeanJoinsNullElementOfMultiValueArrayAsText() {
+        final Map<String, String[]> parameters = new HashMap<>();
+
+        parameters.put("name", new String[] { null, "x" });
+        assertEquals("null, x", URLEncodedUtil.convertToBean(parameters, User.class).getName());
+
+        // a lone null element counts as empty, so the property falls back to its default value
+        parameters.put("name", new String[] { null });
+        assertNull(URLEncodedUtil.convertToBean(parameters, User.class).getName());
+
+        // the consequence of the documented join on a TYPED property: "null, 5" is not a number, and the
+        // conversion failure reaches the caller as a raw NumberFormatException
+        final Map<String, String[]> typed = new HashMap<>();
+        typed.put("age", new String[] { null, "5" });
+        assertThrows(NumberFormatException.class, () -> URLEncodedUtil.convertToBean(typed, User.class));
+
+        // ... while a lone null on the same typed property still falls back to the type default
+        typed.put("age", new String[] { null });
+        assertEquals(0, URLEncodedUtil.convertToBean(typed, User.class).getAge());
+    }
 }

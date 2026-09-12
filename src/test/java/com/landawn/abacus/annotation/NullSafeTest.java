@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class NullSafeTest extends TestBase {
-    static class TestClass {
+    public static class TestClass {
         @NullSafe
         public String method(@NullSafe String param) {
             return param;

@@ -86,7 +86,7 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      * @see #stringOf(MutableFloat)
      */
     @Override
-    public MutableFloat valueOf(final String str) {
+    public MutableFloat valueOf(final String str) throws NumberFormatException {
         return Strings.isEmpty(str) ? null : MutableFloat.of(Numbers.toFloat(str));
     }
 
@@ -99,10 +99,11 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      * @param columnIndex the 1-based index of the column to retrieve
      * @return a {@code MutableFloat} wrapping the retrieved value,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public MutableFloat get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public MutableFloat get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final float value = rs.getFloat(columnIndex);
 
         return rs.wasNull() ? null : MutableFloat.of(value);
@@ -117,10 +118,11 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      * @param columnName the label of the column to retrieve (as specified in the SQL AS clause)
      * @return a {@code MutableFloat} wrapping the retrieved value,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public MutableFloat get(final ResultSet rs, final String columnName) throws SQLException {
+    public MutableFloat get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final float value = rs.getFloat(columnName);
 
         return rs.wasNull() ? null : MutableFloat.of(value);
@@ -134,10 +136,11 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code MutableFloat} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final MutableFloat x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final MutableFloat x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.REAL);
         } else {
@@ -153,10 +156,11 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code MutableFloat} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final MutableFloat x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final MutableFloat x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.REAL);
         } else {
@@ -174,7 +178,8 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      *
      * @param appendable the target to write to
      * @param x the {@code MutableFloat} to append, may be {@code null}
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -186,7 +191,7 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final MutableFloat x) throws IOException {
+    public void appendTo(final Appendable appendable, final MutableFloat x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -209,10 +214,11 @@ public class MutableFloatType extends NumberType<MutableFloat> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code MutableFloat} to write, may be {@code null}
      * @param config the serialization configuration controlling null-number output; may be {@code null}
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final MutableFloat x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final MutableFloat x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             if (config != null && config.isWriteNullNumberAsZero()) {
                 writer.write(0.0f);

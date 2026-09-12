@@ -34,8 +34,8 @@ import com.landawn.abacus.util.cs;
 /**
  * A dynamically growing append-only buffer that uses a spine-and-chunk layout instead of a single
  * resizable backing array. The first chunk has size {@code initialCapacity}; subsequent chunks
- * have a fixed size and are tracked by a spine (an array of chunk arrays) which itself grows in
- * blocks. This avoids the O(n) copy cost of a doubling {@code ArrayList}-style buffer while
+ * have a fixed size and are tracked by a spine (an array of chunk arrays) which itself grows by
+ * doubling its number of chunk slots. This avoids the O(n) copy cost of a doubling {@code ArrayList}-style buffer while
  * keeping per-element access cheap.
  *
  * <p>It implements {@link Consumer} so it can be passed directly as the accumulator for stream
@@ -48,6 +48,13 @@ import com.landawn.abacus.util.cs;
  */
 final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E> {
     private static final int CHUNK_SIZE = 9;
+
+    /**
+     * Initial number of chunk slots in the spine. The spine then grows by <b>doubling</b>, not by a
+     * constant increment: {@link #CHUNK_SIZE} is fixed, so a buffer of {@code n} elements needs
+     * {@code n / CHUNK_SIZE} chunks, and growing the spine by a constant would reallocate and copy it
+     * a linear number of times, making {@code add} quadratic overall.
+     */
     private static final int SPINE_SIZE_TO_INCREASE = 8;
 
     private final int initialCapacity;
@@ -144,7 +151,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                 final int chunkIndex = (size - spine[0].length) / CHUNK_SIZE + 1;
 
                 if (spine.length <= chunkIndex) {
-                    spine = N.copyOf(spine, spine.length + SPINE_SIZE_TO_INCREASE);
+                    spine = N.copyOf(spine, spine.length << 1);
                 }
 
                 if (spine[chunkIndex] == null) {
@@ -214,7 +221,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                 }
 
                 @Override
-                public E next() {
+                public E next() throws NoSuchElementException {
                     if (cursor >= localSize) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -349,7 +356,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                     final int chunkIndex = (size - spine[0].length) / CHUNK_SIZE + 1;
 
                     if (spine.length <= chunkIndex) {
-                        spine = N.copyOf(spine, spine.length + SPINE_SIZE_TO_INCREASE);
+                        spine = N.copyOf(spine, spine.length << 1);
                     }
 
                     if (spine[chunkIndex] == null) {
@@ -404,7 +411,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                     }
 
                     @Override
-                    public int nextInt() {
+                    public int nextInt() throws NoSuchElementException {
                         if (cursor >= localSize) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -549,7 +556,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                     final int chunkIndex = (size - spine[0].length) / CHUNK_SIZE + 1;
 
                     if (spine.length <= chunkIndex) {
-                        spine = N.copyOf(spine, spine.length + SPINE_SIZE_TO_INCREASE);
+                        spine = N.copyOf(spine, spine.length << 1);
                     }
 
                     if (spine[chunkIndex] == null) {
@@ -604,7 +611,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                     }
 
                     @Override
-                    public long nextLong() {
+                    public long nextLong() throws NoSuchElementException {
                         if (cursor >= localSize) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -749,7 +756,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                     final int chunkIndex = (size - spine[0].length) / CHUNK_SIZE + 1;
 
                     if (spine.length <= chunkIndex) {
-                        spine = N.copyOf(spine, spine.length + SPINE_SIZE_TO_INCREASE);
+                        spine = N.copyOf(spine, spine.length << 1);
                     }
 
                     if (spine[chunkIndex] == null) {
@@ -804,7 +811,7 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                     }
 
                     @Override
-                    public double nextDouble() {
+                    public double nextDouble() throws NoSuchElementException {
                         if (cursor >= localSize) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }

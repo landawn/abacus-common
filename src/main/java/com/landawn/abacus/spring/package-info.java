@@ -13,9 +13,20 @@
  */
 
 /**
- * Integration between Abacus serialization and the Spring Framework.
+ * Integration between Abacus JSON serialization and the Spring Framework.
  *
- * <p>{@link com.landawn.abacus.spring.JsonHttpMessageConverter} adapts the Abacus JSON parser and
- * type system to Spring's HTTP message conversion infrastructure.</p>
+ * <p>{@link JsonHttpMessageConverter} extends Spring's {@code AbstractJsonHttpMessageConverter}
+ * and delegates JSON read/write to Abacus {@link com.landawn.abacus.util.N} and
+ * {@link com.landawn.abacus.type.TypeFactory}. Register it in Spring MVC or on a
+ * {@code RestTemplate} / {@code WebClient} message-converter list to use Abacus JSON for
+ * {@code application/json}.</p>
+ *
+ * <p>Root JDK and Abacus {@code Optional} values, Abacus {@code Nullable}, and {@code Holder} use
+ * the JSON representation of their contained value. Entries, pairs, tuples, indexed/timed values,
+ * primitive lists, and custom value objects keep their type-handler representation. Spring must be
+ * on the classpath.</p>
+ *
+ * @see JsonHttpMessageConverter
+ * @see com.landawn.abacus.parser.ParserFactory
  */
 package com.landawn.abacus.spring;

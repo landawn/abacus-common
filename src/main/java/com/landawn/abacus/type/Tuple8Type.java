@@ -51,10 +51,11 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractTupleTyp
      * @param t6TypeName the name of the sixth element type
      * @param t7TypeName the name of the seventh element type
      * @param t8TypeName the name of the eighth element type
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     Tuple8Type(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName, final String t5TypeName,
-            final String t6TypeName, final String t7TypeName, final String t8TypeName) {
+            final String t6TypeName, final String t7TypeName, final String t8TypeName) throws IllegalArgumentException {
         super(getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, t5TypeName, t6TypeName, t7TypeName, t8TypeName, false),
                 getTypeName(t1TypeName, t2TypeName, t3TypeName, t4TypeName, t5TypeName, t6TypeName, t7TypeName, t8TypeName, true), (Class) Tuple8.class,
                 List.of(TypeFactory.getType(t1TypeName), TypeFactory.getType(t2TypeName), TypeFactory.getType(t3TypeName), TypeFactory.getType(t4TypeName),
@@ -67,10 +68,12 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractTupleTyp
      *
      * @param converted the array of converted element values (must be of length 8)
      * @return a new {@code Tuple8} containing the eight elements in order
+     * @throws NullPointerException if {@code converted} is {@code null}.
+     * @throws ArrayIndexOutOfBoundsException if {@code converted} contains fewer than 8 elements.
      */
     @SuppressWarnings({ "unchecked", "deprecation" })
     @Override
-    protected Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> fromArray(final Object[] converted) {
+    protected Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> fromArray(final Object[] converted) throws NullPointerException, ArrayIndexOutOfBoundsException {
         return Tuple.of((T1) converted[0], (T2) converted[1], (T3) converted[2], (T4) converted[3], (T5) converted[4], (T6) converted[5], (T7) converted[6],
                 (T8) converted[7]);
     }
@@ -89,9 +92,11 @@ public class Tuple8Type<T1, T2, T3, T4, T5, T6, T7, T8> extends AbstractTupleTyp
      * @param isDeclaringName if {@code true}, returns the declaring name (simple class names);
      *                        if {@code false}, returns the full canonical name
      * @return the formatted type name string
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     protected static String getTypeName(final String t1TypeName, final String t2TypeName, final String t3TypeName, final String t4TypeName,
-            final String t5TypeName, final String t6TypeName, final String t7TypeName, final String t8TypeName, final boolean isDeclaringName) {
+            final String t5TypeName, final String t6TypeName, final String t7TypeName, final String t8TypeName, final boolean isDeclaringName)
+            throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(Tuple8.class) + SK.LESS_THAN + TypeFactory.getType(t1TypeName).declaringName() + SK.COMMA_SPACE
                     + TypeFactory.getType(t2TypeName).declaringName() + SK.COMMA_SPACE + TypeFactory.getType(t3TypeName).declaringName() + SK.COMMA_SPACE

@@ -126,8 +126,8 @@ public enum Month {
      * {@code Month} enum constant. This is useful when working with legacy code or
      * external systems that represent months as integers.</p>
      *
-     * <p>Note: this overload accepts an {@code int} and is distinct from the inherited
-     * {@code valueOf(String)} method, which looks up a constant by its name.</p>
+     * <p>Note: {@code Month.of(3)} looks a constant up by its numeric value, whereas the
+     * compiler-generated {@code Month.valueOf("MARCH")} looks one up by its name.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -139,7 +139,7 @@ public enum Month {
      * @return the corresponding {@code Month} enum constant; never {@code null}
      * @throws IllegalArgumentException if {@code intValue} is not between 1 and 12 inclusive.
      */
-    public static Month of(final int intValue) {
+    public static Month of(final int intValue) throws IllegalArgumentException {
         switch (intValue) {
             case 1:
                 return JANUARY;

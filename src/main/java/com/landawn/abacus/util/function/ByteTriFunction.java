@@ -36,6 +36,7 @@ import com.landawn.abacus.util.cs;
 public interface ByteTriFunction<R> extends Throwables.ByteTriFunction<R, RuntimeException> { //NOSONAR
     /**
      * Applies this function to the given byte arguments.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteTriFunction<String> formatter = (r, g, b) -> String.format("RGB(%d,%d,%d)", r & 0xFF, g & 0xFF, b & 0xFF);

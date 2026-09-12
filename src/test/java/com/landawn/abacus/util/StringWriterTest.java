@@ -3,6 +3,10 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
@@ -187,4 +191,31 @@ public class StringWriterTest extends AbstractTest {
         assertEquals("Hello World!", writer.toString());
     }
 
+    @Test
+    public void testClose_StringWriterRelaxesAppendableWriterPostCloseContract() throws Exception {
+        StringWriter writer = new StringWriter();
+        assertTrue(writer instanceof AppendableWriter);
+
+        writer.write("Test");
+        writer.close();
+        writer.close();
+
+        writer.write(" more");
+        writer.append('!');
+        writer.append((CharSequence) "?");
+        writer.append("xyz", 0, 1);
+        writer.write(new char[] { 'a', 'b' });
+        writer.write(new char[] { 'c', 'd' }, 0, 1);
+        writer.write("efg", 0, 2);
+        writer.write(64);
+        writer.flush();
+        assertEquals("Test more!?xabcef@", writer.toString());
+
+        // Contrast: the superclass itself does enforce the post-close contract.
+        AppendableWriter plain = new AppendableWriter(new StringBuilder());
+        plain.write("a");
+        plain.close();
+        assertThrows(IOException.class, () -> plain.write("b"));
+        assertThrows(IOException.class, plain::flush);
+    }
 }

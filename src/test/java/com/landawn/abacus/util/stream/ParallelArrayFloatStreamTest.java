@@ -1378,4 +1378,17 @@ public class ParallelArrayFloatStreamTest extends TestBase {
         assertEquals(-Float.MAX_VALUE, result[0], 0.0001f);
         assertEquals(Float.MAX_VALUE, result[5], 0.0001f);
     }
+
+    @Test
+    public void testGroupToRejectsNullDownstreamBeforeMapFactory() {
+        final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();
+        final FloatStream source = FloatStream.of(new float[] { 1, 2, 3 }).parallel(2);
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> source.groupTo(value -> 0, null, () -> {
+            mapCreated.set(true);
+            return new java.util.HashMap<Integer, Object>();
+        }));
+        org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
+    }
 }

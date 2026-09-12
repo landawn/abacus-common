@@ -165,4 +165,15 @@ public class MutableIntTypeTest extends TestBase {
             mutableIntType.serializeTo(characterWriter, MutableInt.of(123), null);
         });
     }
+
+    // T5-03 (2026-09-06): out-of-range text throws ArithmeticException (Numbers.toXxx contract), not NumberFormatException.
+    @Test
+    public void reviewFixes20260906_valueOfOutOfRangeThrowsArithmeticException() {
+        Assertions.assertThrows(ArithmeticException.class, () -> mutableIntType.valueOf("2147483648"));
+        Assertions.assertThrows(ArithmeticException.class, () -> mutableIntType.valueOf("-2147483649"));
+        Assertions.assertThrows(NumberFormatException.class, () -> mutableIntType.valueOf("abc"));
+        Assertions.assertThrows(NumberFormatException.class, () -> mutableIntType.valueOf(" "));
+        assertEquals(Integer.MAX_VALUE, mutableIntType.valueOf("2147483647").value());
+        Assertions.assertNull(mutableIntType.valueOf(""));
+    }
 }

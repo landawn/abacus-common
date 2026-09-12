@@ -40,7 +40,7 @@ import com.landawn.abacus.util.cs;
  * @see java.util.function.ObjLongConsumer
  */
 @FunctionalInterface
-public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, RuntimeException> { // NOSONAR
+public interface LongObjConsumer<T> extends Throwables.LongObjConsumer<T, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Performs this operation on the given arguments.
      *

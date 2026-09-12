@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.FloatList;
@@ -72,7 +73,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<FloatList> type = TypeFactory.getType(FloatList.class);
-     * Type<Float> elementType = type.elementType();
+     * Type<?> elementType = type.elementType();
      * // Returns: Type instance for float
      * }</pre>
      *
@@ -126,7 +127,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
     /**
      * Parses a string representation and creates a FloatList.
      * The string is first parsed as a float array, then wrapped in a FloatList.
-     * Returns {@code null} if the input string is {@code null} or empty.
+     * Returns {@code null} if the input string is {@code null}, empty or blank.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -143,13 +144,15 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
-     * @return a FloatList created from the parsed values, or {@code null} if input is {@code null} or empty
+     * @return a FloatList created from the parsed values, or {@code null} if input is {@code null}, empty or blank
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
      * @throws NumberFormatException if any element in the string cannot be parsed as a float
      * @see #valueOf(Object)
      * @see #stringOf(FloatList)
      */
+    @MayReturnNull
     @Override
-    public FloatList valueOf(final String str) {
+    public FloatList valueOf(final String str) throws IllegalArgumentException, NumberFormatException {
         if (Strings.isEmpty(str)) {
             return null;
         }
@@ -180,7 +183,8 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      *
      * @param appendable the Appendable to write to
      * @param x the FloatList to append
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -192,7 +196,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final FloatList x) throws IOException {
+    public void appendTo(final Appendable appendable, final FloatList x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -231,10 +235,11 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * @param writer the CharacterWriter to write to
      * @param x the FloatList to write
      * @param config the serialization configuration (passed through to the array type writer)
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final FloatList x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final FloatList x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

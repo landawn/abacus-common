@@ -85,7 +85,8 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
 
     /**
      * Parses a string and returns a new {@link java.util.concurrent.atomic.AtomicBoolean} containing
-     * the parsed value. Leading and trailing whitespace is trimmed before parsing. The trimmed string
+     * the parsed value. Surrounding padding is removed first ({@linkplain Character#isWhitespace(char) Unicode
+     * whitespace} such as {@code U+3000}, or any character {@code <= ' '}). The stripped string
      * is interpreted using the type system's boolean parsing rules: single-character {@code "Y"},
      * {@code "y"}, or {@code "1"} yields {@code true}; multi-character inputs are interpreted via
      * {@link Boolean#valueOf(String)} (case-insensitive {@code "true"} yields {@code true}); any other
@@ -103,7 +104,9 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      */
     @Override
     public AtomicBoolean valueOf(final String str) {
-        return Strings.isBlank(str) ? null : new AtomicBoolean(parseBoolean(str.trim()));
+        // parseBoolean already strips padding with the same definition Strings.isBlank uses (plus every
+        // character <= ' '), so an outer String.trim() here would be a no-op that only reads narrower.
+        return Strings.isBlank(str) ? null : new AtomicBoolean(parseBoolean(str));
     }
 
     /**
@@ -114,10 +117,11 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the column containing the boolean value
      * @return a new {@code AtomicBoolean} wrapping the retrieved value, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public AtomicBoolean get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public AtomicBoolean get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final boolean value = rs.getBoolean(columnIndex);
 
         return rs.wasNull() ? null : new AtomicBoolean(value);
@@ -131,10 +135,11 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
      * @return a new {@code AtomicBoolean} wrapping the retrieved value, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public AtomicBoolean get(final ResultSet rs, final String columnName) throws SQLException {
+    public AtomicBoolean get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final boolean value = rs.getBoolean(columnName);
 
         return rs.wasNull() ? null : new AtomicBoolean(value);
@@ -149,10 +154,11 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @param stmt the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code AtomicBoolean} value to set; {@code null} is stored as SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final AtomicBoolean x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final AtomicBoolean x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, java.sql.Types.BOOLEAN);
         } else {
@@ -169,10 +175,11 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code AtomicBoolean} value to set; {@code null} is stored as SQL NULL
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final AtomicBoolean x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final AtomicBoolean x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, java.sql.Types.BOOLEAN);
         } else {
@@ -190,7 +197,8 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      *
      * @param appendable the target {@code Appendable}
      * @param x the {@code AtomicBoolean} value to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during appending
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -202,7 +210,7 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final AtomicBoolean x) throws IOException {
+    public void appendTo(final Appendable appendable, final AtomicBoolean x) throws NullPointerException, IOException {
         appendable.append((x == null) ? NULL_STRING : (x.get() ? TRUE_STRING : FALSE_STRING));
     }
 
@@ -225,10 +233,11 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @param config the serialization configuration; if {@code x} is {@code null} and
      *               {@link com.landawn.abacus.parser.JsonXmlSerConfig#isWriteNullBooleanAsFalse()} is set,
      *               {@code "false"} is written instead of {@code "null"}; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final AtomicBoolean x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final AtomicBoolean x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(config != null && config.isWriteNullBooleanAsFalse() ? FALSE_CHAR_ARRAY : NULL_CHAR_ARRAY);
         } else {

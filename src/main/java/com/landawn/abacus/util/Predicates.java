@@ -28,6 +28,18 @@ import com.landawn.abacus.util.function.Predicate;
 /**
  * Utility class providing various Predicate implementations and factory methods.
  * This class contains methods for creating stateful, indexed, and specialized predicates.
+ *
+ * <p>This class is a top-level sibling of {@link Fn} (formerly nested as {@code Fn.Predicates}),
+ * not a nested type. Use {@link Fn} for the general functional-interface factory and {@link Fnn}
+ * for {@link Throwables} variants that can declare checked exceptions. For two-argument predicates
+ * see {@link BiPredicates}; for three-argument predicates see {@link TriPredicates}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see BiPredicates
+ * @see TriPredicates
+ * @see Consumers
+ * @see Functions
  */
 public final class Predicates {
 
@@ -44,6 +56,10 @@ public final class Predicates {
      * Predicates.indexed((i, s) -> i < 5).test("hello");     // returns true (index 0 < 5)
      * }</pre>
      *
+     * <p>The returned callback uses indices from zero through {@link Integer#MAX_VALUE}. Later calls
+     * throw {@link ArithmeticException} without invoking user code. An invocation consumes its index
+     * even when user code throws.</p>
+     *
      * @param <T> the type of the input to the predicate
      * @param predicate the IntObjPredicate that accepts an index and element for testing
      * @return a stateful Predicate that applies the given IntObjPredicate with an incrementing index
@@ -56,11 +72,20 @@ public final class Predicates {
         N.checkArgNotNull(predicate, cs.predicate);
 
         return new Predicate<>() {
-            private final MutableInt idx = new MutableInt(0);
+            private long idx;
 
+            /**
+             * {@inheritDoc}
+             * @throws ArithmeticException if the next zero-based invocation index exceeds {@link Integer#MAX_VALUE}
+             */
             @Override
-            public boolean test(final T t) {
-                return predicate.test(idx.getAndIncrement(), t);
+            public boolean test(final T t) throws ArithmeticException {
+                // Keep exhaustion representable and reject before invoking user code.
+                if (idx > Integer.MAX_VALUE) {
+                    throw new ArithmeticException("Index exceeds Integer.MAX_VALUE");
+                }
+
+                return predicate.test((int) idx++, t);
             }
         };
     }

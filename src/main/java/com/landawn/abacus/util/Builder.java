@@ -25,7 +25,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -136,23 +135,30 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>{@link #of(List)} - ListBuilder for generic list operations</li>
  *   <li>{@link #of(Collection)} - CollectionBuilder for generic collections</li>
  *   <li>{@link #of(Map)} - MapBuilder for key-value maps</li>
+ *   <li>{@link #of(Multiset)} - MultisetBuilder for counting collections</li>
  *   <li>{@link #of(Multimap)} - MultimapBuilder for one-to-many mappings</li>
  *   <li>{@link #of(Dataset)} - DatasetBuilder for tabular data</li>
  *   <li>{@link #of(Object)} - Generic builder with automatic type detection</li>
  * </ul>
  *
  * <p><b>Automatic Type Detection:</b>
- * The generic {@link #of(Object)} method automatically detects the input type and returns
- * the most appropriate specialized builder:
+ * The generic {@link #of(Object)} method inspects the <i>runtime</i> class of its argument and returns the most
+ * appropriate specialized builder. The selection is a runtime one only: {@code of(Object)} is declared to return
+ * {@code Builder<T>}, so the specialized methods become reachable only after a cast.
  * <pre>{@code
- * // Automatically returns IntListBuilder
- * var intBuilder = Builder.of(IntList.of());
+ * Object val = IntList.of(1, 2, 3);
+ * Builder<?> b = Builder.of(val);                              // runtime class is IntListBuilder
+ * Builder.IntListBuilder ilb = (Builder.IntListBuilder) b;     // cast needed - the static type is Builder<?>
+ * ilb.add(4);
+ * }</pre>
  *
- * // Automatically returns ListBuilder
- * var listBuilder = Builder.of(new ArrayList<String>());
- *
- * // Automatically returns MapBuilder
- * var mapBuilder = Builder.of(new HashMap<String, Integer>());
+ * <p>When the argument's type is known at compile time, javac picks the specialized overload directly and no cast
+ * is needed. The calls below bind to {@link #of(IntList)}, {@link #of(List)} and {@link #of(Map)} respectively,
+ * not to {@link #of(Object)}:
+ * <pre>{@code
+ * var intBuilder = Builder.of(IntList.of());                   // static type IntListBuilder
+ * var listBuilder = Builder.of(new ArrayList<String>());       // static type ListBuilder
+ * var mapBuilder = Builder.of(new HashMap<String, Integer>()); // static type MapBuilder
  * }</pre>
  *
  * <p><b>Utility Builders:</b>
@@ -225,12 +231,33 @@ import com.landawn.abacus.util.stream.Stream;
  *                      .result();
  * }</pre>
  *
+ * <p><b>Mixing a primitive with its wrapper is ambiguous.</b> {@code compare} and {@code equals} are
+ * overloaded for references and primitives: {@code equals} accepts {@link Object} references or matching primitive
+ * values, while {@code compare} accepts {@link Comparable} references or matching numeric or {@code char} values.
+ * When one argument is primitive and the other is its wrapper, the reference and primitive overloads can be
+ * ambiguous, so calls such as the following do not compile:
+ * <pre>{@code
+ * int count = 7;
+ * Integer other = 7;
+ *
+ * Builder.equals(count, other);        // error: reference to equals is ambiguous
+ * Builder.compare(count, other);       // error: reference to compare is ambiguous
+ *
+ * Builder.equals(count, (int) other);          // OK - picks equals(int, int)
+ * Builder.equals((Object) count, other);       // OK - picks equals(Object, Object)
+ * }</pre>
+ * Cast one side to select the overload you want. Both casts give the same result for the shown {@code int}
+ * and non-null {@code Integer} values. Unboxing a null wrapper throws {@link NullPointerException}, whereas
+ * reference equality handles nulls. Reference equality also distinguishes numeric wrapper types: an
+ * {@code Integer} and a {@code Long} are unequal even when their primitive numeric values are equal.
+ *
  * @param <T> the type of the value this Builder wraps and manipulates.
  *
  * @see BooleanListBuilder
  * @see ListBuilder
  * @see CollectionBuilder
  * @see MapBuilder
+ * @see MultisetBuilder
  * @see MultimapBuilder
  * @see DatasetBuilder
  * @see ComparisonBuilder
@@ -239,7 +266,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see Stream
  * @see N
  */
-@SuppressWarnings({ "java:S6539" })
+@SuppressWarnings("java:S6539")
 public class Builder<T> {
 
     final T val;
@@ -250,7 +277,7 @@ public class Builder<T> {
      * @param val the value to wrap; must not be {@code null}
      * @throws IllegalArgumentException if {@code val} is {@code null}.
      */
-    Builder(final T val) {
+    Builder(final T val) throws IllegalArgumentException {
         N.checkArgNotNull(val, cs.val);
 
         this.val = val;
@@ -601,15 +628,20 @@ public class Builder<T> {
         creatorMap.put(FloatList.class, val -> Builder.of((FloatList) val));
         creatorMap.put(DoubleList.class, val -> Builder.of((DoubleList) val));
 
-        creatorMap.put(List.class, val -> Builder.of((List) val));
+        // The eight primitive-list entries above are NOT optional: PrimitiveList does not implement
+        // java.util.List, so the instanceof chain in of(Object) has no branch for them and dropping an entry
+        // would silently downgrade of(Object) to a plain Builder for that type.
+        //
+        // Keys are matched against val.getClass(), so only concrete classes can ever hit this lookup -
+        // an interface key would be dead weight. For the collection types below the lookup is only a fast
+        // path: anything not listed still reaches the right builder through the instanceof chain in
+        // of(Object), at a slightly higher cost.
         creatorMap.put(ArrayList.class, val -> Builder.of((List) val));
         creatorMap.put(LinkedList.class, val -> Builder.of((List) val));
 
-        creatorMap.put(Set.class, val -> Builder.of((Collection) val));
         creatorMap.put(HashSet.class, val -> Builder.of((Collection) val));
         creatorMap.put(LinkedHashSet.class, val -> Builder.of((Collection) val));
 
-        creatorMap.put(Map.class, val -> Builder.of((Map) val));
         creatorMap.put(HashMap.class, val -> Builder.of((Map) val));
         creatorMap.put(LinkedHashMap.class, val -> Builder.of((Map) val));
         creatorMap.put(TreeMap.class, val -> Builder.of((Map) val));
@@ -620,7 +652,6 @@ public class Builder<T> {
         creatorMap.put(ListMultimap.class, val -> Builder.of((Multimap) val));
         creatorMap.put(SetMultimap.class, val -> Builder.of((Multimap) val));
 
-        creatorMap.put(Dataset.class, val -> Builder.of((Dataset) val));
         creatorMap.put(RowDataset.class, val -> Builder.of((Dataset) val));
     }
 
@@ -783,8 +814,33 @@ public class Builder<T> {
          * @param val the list to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
-        BooleanListBuilder(final BooleanList val) {
+        BooleanListBuilder(final BooleanList val) throws IllegalArgumentException {
             super(val);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code BooleanList} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code BooleanListBuilder}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * BooleanList result = Builder.of(BooleanList.of(true))
+         *     .accept(l -> l.add(false))
+         *     .add(true)
+         *     .val();   // returns [true, false, true]
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public BooleanListBuilder accept(final Consumer<? super BooleanList> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -806,7 +862,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public BooleanListBuilder set(final int index, final boolean e) {
+        public BooleanListBuilder set(final int index, final boolean e) throws IndexOutOfBoundsException {
             val.set(index, e);
 
             return this;
@@ -852,7 +908,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public BooleanListBuilder add(final int index, final boolean e) {
+        public BooleanListBuilder add(final int index, final boolean e) throws IndexOutOfBoundsException {
             val.add(index, e);
 
             return this;
@@ -869,7 +925,8 @@ public class Builder<T> {
          * lb.addAll(BooleanList.of()).val();                                   // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the BooleanList containing elements to be added to this list
+         * @param c the BooleanList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          */
         public BooleanListBuilder addAll(final BooleanList c) {
@@ -893,12 +950,16 @@ public class Builder<T> {
          * }
          * }</pre>
          *
+         * <p>The index is validated even when {@code c} is {@code null} or empty, so an out-of-range
+         * index is reported consistently rather than only when there happens to be something to insert.</p>
+         *
          * @param index the index at which to insert the first element from the specified list
-         * @param c the BooleanList containing elements to be added to this list
+         * @param c the BooleanList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public BooleanListBuilder addAll(final int index, final BooleanList c) {
+        public BooleanListBuilder addAll(final int index, final BooleanList c) throws IndexOutOfBoundsException {
             val.addAll(index, c);
 
             return this;
@@ -933,7 +994,8 @@ public class Builder<T> {
          * lb.removeAll(BooleanList.of()).val();                                  // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the BooleanList containing elements to be removed from this list
+         * @param c the BooleanList containing elements to be removed from this list; may be {@code null} or
+         *        empty, in which case the list is left unchanged
          * @return this builder instance
          */
         public BooleanListBuilder removeAll(final BooleanList c) {
@@ -960,8 +1022,33 @@ public class Builder<T> {
          * @param val the list to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
-        CharListBuilder(final CharList val) {
+        CharListBuilder(final CharList val) throws IllegalArgumentException {
             super(val);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code CharList} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code CharListBuilder}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * CharList result = Builder.of(CharList.of('a'))
+         *     .accept(l -> l.add('b'))
+         *     .add('c')
+         *     .val();   // returns [a, b, c]
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public CharListBuilder accept(final Consumer<? super CharList> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -983,7 +1070,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public CharListBuilder set(final int index, final char e) {
+        public CharListBuilder set(final int index, final char e) throws IndexOutOfBoundsException {
             val.set(index, e);
 
             return this;
@@ -995,8 +1082,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * CharListBuilder lb = Builder.of(CharList.of('a', 'b'));
-         * CharList result = lb.add('c').val();                         // returns ['a', 'b', 'c']
-         * CharList empty = Builder.of(CharList.of()).add('a').val();   // returns ['a']
+         * CharList result = lb.add('c').val();                         // returns [a, b, c]
+         * CharList empty = Builder.of(CharList.of()).add('a').val();   // returns [a]
          * }</pre>
          *
          * @param e the char value to append
@@ -1016,7 +1103,7 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * CharListBuilder lb = Builder.of(CharList.of('a', 'b', 'c'));
-         * CharList result = lb.add(1, 'd').val();            // returns ['a', 'd', 'b', 'c']
+         * CharList result = lb.add(1, 'd').val();            // returns [a, d, b, c]
          * try {
          *     lb.add(10, 'd');
          * } catch (IndexOutOfBoundsException e) {
@@ -1029,7 +1116,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public CharListBuilder add(final int index, final char e) {
+        public CharListBuilder add(final int index, final char e) throws IndexOutOfBoundsException {
             val.add(index, e);
 
             return this;
@@ -1042,11 +1129,12 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * CharListBuilder lb = Builder.of(CharList.of('a', 'b'));
-         * CharList result = lb.addAll(CharList.of('c', 'd')).val();   // returns ['a','b','c','d']
+         * CharList result = lb.addAll(CharList.of('c', 'd')).val();   // returns [a,b,c,d]
          * lb.addAll(CharList.of()).val();                             // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the CharList containing elements to be added to this list
+         * @param c the CharList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          */
         public CharListBuilder addAll(final CharList c) {
@@ -1070,12 +1158,16 @@ public class Builder<T> {
          * }
          * }</pre>
          *
+         * <p>The index is validated even when {@code c} is {@code null} or empty, so an out-of-range
+         * index is reported consistently rather than only when there happens to be something to insert.</p>
+         *
          * @param index the index at which to insert the first element from the specified list
-         * @param c the CharList containing elements to be added to this list
+         * @param c the CharList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public CharListBuilder addAll(final int index, final CharList c) {
+        public CharListBuilder addAll(final int index, final CharList c) throws IndexOutOfBoundsException {
             val.addAll(index, c);
 
             return this;
@@ -1087,7 +1179,7 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * CharListBuilder lb = Builder.of(CharList.of('a', 'b', 'c'));
-         * CharList result = lb.remove('b').val();   // returns ['a', 'c']
+         * CharList result = lb.remove('b').val();   // returns [a, c]
          * lb.remove('a'); lb.remove('a');           // second remove is no-op
          * }</pre>
          *
@@ -1106,11 +1198,12 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * CharListBuilder lb = Builder.of(CharList.of('a', 'b', 'c', 'd'));
-         * CharList result = lb.removeAll(CharList.of('a', 'c')).val();   // returns ['b','d']
+         * CharList result = lb.removeAll(CharList.of('a', 'c')).val();   // returns [b,d]
          * lb.removeAll(CharList.of()).val();                             // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the CharList containing elements to be removed from this list
+         * @param c the CharList containing elements to be removed from this list; may be {@code null} or
+         *        empty, in which case the list is left unchanged
          * @return this builder instance
          */
         public CharListBuilder removeAll(final CharList c) {
@@ -1137,8 +1230,33 @@ public class Builder<T> {
          * @param val the list to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
-        ByteListBuilder(final ByteList val) {
+        ByteListBuilder(final ByteList val) throws IllegalArgumentException {
             super(val);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code ByteList} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code ByteListBuilder}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ByteList result = Builder.of(ByteList.of((byte) 1))
+         *     .accept(l -> l.add((byte) 2))
+         *     .add((byte) 3)
+         *     .val();   // returns [1, 2, 3]
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public ByteListBuilder accept(final Consumer<? super ByteList> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -1160,7 +1278,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public ByteListBuilder set(final int index, final byte e) {
+        public ByteListBuilder set(final int index, final byte e) throws IndexOutOfBoundsException {
             val.set(index, e);
 
             return this;
@@ -1172,8 +1290,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2));
-         * ByteList result = lb.add((byte)3).val();                         // returns [(byte)1, (byte)2, (byte)3]
-         * ByteList empty = Builder.of(ByteList.of()).add((byte)1).val();   // returns [(byte)1]
+         * ByteList result = lb.add((byte)3).val();                         // returns [1, 2, 3]
+         * ByteList empty = Builder.of(ByteList.of()).add((byte)1).val();   // returns [1]
          * }</pre>
          *
          * @param e the byte value to append
@@ -1193,7 +1311,7 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2, (byte)3));
-         * ByteList result = lb.add(1, (byte)4).val();            // returns [(byte)1, (byte)4, (byte)2, (byte)3]
+         * ByteList result = lb.add(1, (byte)4).val();            // returns [1, 4, 2, 3]
          * try {
          *     lb.add(10, (byte)4);
          * } catch (IndexOutOfBoundsException e) {
@@ -1206,7 +1324,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public ByteListBuilder add(final int index, final byte e) {
+        public ByteListBuilder add(final int index, final byte e) throws IndexOutOfBoundsException {
             val.add(index, e);
 
             return this;
@@ -1219,11 +1337,12 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2));
-         * ByteList result = lb.addAll(ByteList.of((byte)3, (byte)4)).val();   // returns [(byte)1,(byte)2,(byte)3,(byte)4]
+         * ByteList result = lb.addAll(ByteList.of((byte)3, (byte)4)).val();   // returns [1,2,3,4]
          * lb.addAll(ByteList.of()).val();                                     // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the ByteList containing elements to be added to this list
+         * @param c the ByteList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          */
         public ByteListBuilder addAll(final ByteList c) {
@@ -1247,12 +1366,16 @@ public class Builder<T> {
          * }
          * }</pre>
          *
+         * <p>The index is validated even when {@code c} is {@code null} or empty, so an out-of-range
+         * index is reported consistently rather than only when there happens to be something to insert.</p>
+         *
          * @param index the index at which to insert the first element from the specified list
-         * @param c the ByteList containing elements to be added to this list
+         * @param c the ByteList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public ByteListBuilder addAll(final int index, final ByteList c) {
+        public ByteListBuilder addAll(final int index, final ByteList c) throws IndexOutOfBoundsException {
             val.addAll(index, c);
 
             return this;
@@ -1264,7 +1387,7 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2, (byte)3));
-         * ByteList result = lb.remove((byte)2).val();   // returns [(byte)1, (byte)3]
+         * ByteList result = lb.remove((byte)2).val();   // returns [1, 3]
          * lb.remove((byte)1); lb.remove((byte)1);       // second remove is no-op
          * }</pre>
          *
@@ -1283,11 +1406,12 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ByteListBuilder lb = Builder.of(ByteList.of((byte)1, (byte)2, (byte)3, (byte)4));
-         * ByteList result = lb.removeAll(ByteList.of((byte)1, (byte)3)).val();   // returns [(byte)2,(byte)4]
+         * ByteList result = lb.removeAll(ByteList.of((byte)1, (byte)3)).val();   // returns [2,4]
          * lb.removeAll(ByteList.of()).val();                                     // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the ByteList containing elements to be removed from this list
+         * @param c the ByteList containing elements to be removed from this list; may be {@code null} or
+         *        empty, in which case the list is left unchanged
          * @return this builder instance
          */
         public ByteListBuilder removeAll(final ByteList c) {
@@ -1314,8 +1438,33 @@ public class Builder<T> {
          * @param val the list to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
-        ShortListBuilder(final ShortList val) {
+        ShortListBuilder(final ShortList val) throws IllegalArgumentException {
             super(val);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code ShortList} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code ShortListBuilder}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ShortList result = Builder.of(ShortList.of((short) 1))
+         *     .accept(l -> l.add((short) 2))
+         *     .add((short) 3)
+         *     .val();   // returns [1, 2, 3]
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public ShortListBuilder accept(final Consumer<? super ShortList> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -1337,7 +1486,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public ShortListBuilder set(final int index, final short e) {
+        public ShortListBuilder set(final int index, final short e) throws IndexOutOfBoundsException {
             val.set(index, e);
 
             return this;
@@ -1349,8 +1498,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20));
-         * ShortList result = lb.add((short)30).val();                          // returns [(short)10, (short)20, (short)30]
-         * ShortList empty = Builder.of(ShortList.of()).add((short)10).val();   // returns [(short)10]
+         * ShortList result = lb.add((short)30).val();                          // returns [10, 20, 30]
+         * ShortList empty = Builder.of(ShortList.of()).add((short)10).val();   // returns [10]
          * }</pre>
          *
          * @param e the short value to append
@@ -1370,7 +1519,7 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20, (short)30));
-         * ShortList result = lb.add(1, (short)40).val();            // returns [(short)10, (short)40, (short)20, (short)30]
+         * ShortList result = lb.add(1, (short)40).val();            // returns [10, 40, 20, 30]
          * try {
          *     lb.add(10, (short)40);
          * } catch (IndexOutOfBoundsException e) {
@@ -1383,7 +1532,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public ShortListBuilder add(final int index, final short e) {
+        public ShortListBuilder add(final int index, final short e) throws IndexOutOfBoundsException {
             val.add(index, e);
 
             return this;
@@ -1396,11 +1545,12 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20));
-         * ShortList result = lb.addAll(ShortList.of((short)30, (short)40)).val();   // returns [(short)10,(short)20,(short)30,(short)40]
+         * ShortList result = lb.addAll(ShortList.of((short)30, (short)40)).val();   // returns [10,20,30,40]
          * lb.addAll(ShortList.of()).val();                                          // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the ShortList containing elements to be added to this list
+         * @param c the ShortList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          */
         public ShortListBuilder addAll(final ShortList c) {
@@ -1424,12 +1574,16 @@ public class Builder<T> {
          * }
          * }</pre>
          *
+         * <p>The index is validated even when {@code c} is {@code null} or empty, so an out-of-range
+         * index is reported consistently rather than only when there happens to be something to insert.</p>
+         *
          * @param index the index at which to insert the first element from the specified list
-         * @param c the ShortList containing elements to be added to this list
+         * @param c the ShortList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public ShortListBuilder addAll(final int index, final ShortList c) {
+        public ShortListBuilder addAll(final int index, final ShortList c) throws IndexOutOfBoundsException {
             val.addAll(index, c);
 
             return this;
@@ -1441,7 +1595,7 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20, (short)30));
-         * ShortList result = lb.remove((short)20).val();   // returns [(short)10, (short)30]
+         * ShortList result = lb.remove((short)20).val();   // returns [10, 30]
          * lb.remove((short)10); lb.remove((short)10);      // second remove is no-op
          * }</pre>
          *
@@ -1460,11 +1614,12 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * ShortListBuilder lb = Builder.of(ShortList.of((short)10, (short)20, (short)30, (short)40));
-         * ShortList result = lb.removeAll(ShortList.of((short)10, (short)30)).val();   // returns [(short)20,(short)40]
+         * ShortList result = lb.removeAll(ShortList.of((short)10, (short)30)).val();   // returns [20,40]
          * lb.removeAll(ShortList.of()).val();                                          // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the ShortList containing elements to be removed from this list
+         * @param c the ShortList containing elements to be removed from this list; may be {@code null} or
+         *        empty, in which case the list is left unchanged
          * @return this builder instance
          */
         public ShortListBuilder removeAll(final ShortList c) {
@@ -1491,8 +1646,33 @@ public class Builder<T> {
          * @param val the list to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
-        IntListBuilder(final IntList val) {
+        IntListBuilder(final IntList val) throws IllegalArgumentException {
             super(val);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code IntList} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code IntListBuilder}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * IntList result = Builder.of(IntList.of(1))
+         *     .accept(l -> l.add(2))
+         *     .add(3)
+         *     .val();   // returns [1, 2, 3]
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public IntListBuilder accept(final Consumer<? super IntList> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -1514,7 +1694,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public IntListBuilder set(final int index, final int e) {
+        public IntListBuilder set(final int index, final int e) throws IndexOutOfBoundsException {
             val.set(index, e);
 
             return this;
@@ -1560,7 +1740,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public IntListBuilder add(final int index, final int e) {
+        public IntListBuilder add(final int index, final int e) throws IndexOutOfBoundsException {
             val.add(index, e);
 
             return this;
@@ -1577,7 +1757,8 @@ public class Builder<T> {
          * lb.addAll(IntList.of()).val();                        // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the IntList containing elements to be added to this list
+         * @param c the IntList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          */
         public IntListBuilder addAll(final IntList c) {
@@ -1601,12 +1782,16 @@ public class Builder<T> {
          * }
          * }</pre>
          *
+         * <p>The index is validated even when {@code c} is {@code null} or empty, so an out-of-range
+         * index is reported consistently rather than only when there happens to be something to insert.</p>
+         *
          * @param index the index at which to insert the first element from the specified list
-         * @param c the IntList containing elements to be added to this list
+         * @param c the IntList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public IntListBuilder addAll(final int index, final IntList c) {
+        public IntListBuilder addAll(final int index, final IntList c) throws IndexOutOfBoundsException {
             val.addAll(index, c);
 
             return this;
@@ -1641,7 +1826,8 @@ public class Builder<T> {
          * lb.removeAll(IntList.of()).val();                        // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the IntList containing elements to be removed from this list
+         * @param c the IntList containing elements to be removed from this list; may be {@code null} or
+         *        empty, in which case the list is left unchanged
          * @return this builder instance
          */
         public IntListBuilder removeAll(final IntList c) {
@@ -1668,8 +1854,33 @@ public class Builder<T> {
          * @param val the list to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
-        LongListBuilder(final LongList val) {
+        LongListBuilder(final LongList val) throws IllegalArgumentException {
             super(val);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code LongList} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code LongListBuilder}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * LongList result = Builder.of(LongList.of(1L))
+         *     .accept(l -> l.add(2L))
+         *     .add(3L)
+         *     .val();   // returns [1, 2, 3]
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public LongListBuilder accept(final Consumer<? super LongList> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -1691,7 +1902,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public LongListBuilder set(final int index, final long e) {
+        public LongListBuilder set(final int index, final long e) throws IndexOutOfBoundsException {
             val.set(index, e);
 
             return this;
@@ -1703,8 +1914,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * LongListBuilder lb = Builder.of(LongList.of(100L, 200L));
-         * LongList result = lb.add(300L).val();                         // returns [100L, 200L, 300L]
-         * LongList empty = Builder.of(LongList.of()).add(100L).val();   // returns [100L]
+         * LongList result = lb.add(300L).val();                         // returns [100, 200, 300]
+         * LongList empty = Builder.of(LongList.of()).add(100L).val();   // returns [100]
          * }</pre>
          *
          * @param e the long value to append
@@ -1724,7 +1935,7 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * LongListBuilder lb = Builder.of(LongList.of(100L, 200L, 300L));
-         * LongList result = lb.add(1, 400L).val();            // returns [100L, 400L, 200L, 300L]
+         * LongList result = lb.add(1, 400L).val();            // returns [100, 400, 200, 300]
          * try {
          *     lb.add(10, 400L);
          * } catch (IndexOutOfBoundsException e) {
@@ -1737,7 +1948,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public LongListBuilder add(final int index, final long e) {
+        public LongListBuilder add(final int index, final long e) throws IndexOutOfBoundsException {
             val.add(index, e);
 
             return this;
@@ -1750,11 +1961,12 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * LongListBuilder lb = Builder.of(LongList.of(100L, 200L));
-         * LongList result = lb.addAll(LongList.of(300L, 400L)).val();   // returns [100L,200L,300L,400L]
+         * LongList result = lb.addAll(LongList.of(300L, 400L)).val();   // returns [100,200,300,400]
          * lb.addAll(LongList.of()).val();                               // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the LongList containing elements to be added to this list
+         * @param c the LongList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          */
         public LongListBuilder addAll(final LongList c) {
@@ -1778,12 +1990,16 @@ public class Builder<T> {
          * }
          * }</pre>
          *
+         * <p>The index is validated even when {@code c} is {@code null} or empty, so an out-of-range
+         * index is reported consistently rather than only when there happens to be something to insert.</p>
+         *
          * @param index the index at which to insert the first element from the specified list
-         * @param c the LongList containing elements to be added to this list
+         * @param c the LongList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public LongListBuilder addAll(final int index, final LongList c) {
+        public LongListBuilder addAll(final int index, final LongList c) throws IndexOutOfBoundsException {
             val.addAll(index, c);
 
             return this;
@@ -1795,7 +2011,7 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * LongListBuilder lb = Builder.of(LongList.of(100L, 200L, 300L));
-         * LongList result = lb.remove(200L).val();   // returns [100L, 300L]
+         * LongList result = lb.remove(200L).val();   // returns [100, 300]
          * lb.remove(100L); lb.remove(100L);          // second remove is no-op
          * }</pre>
          *
@@ -1814,11 +2030,12 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * LongListBuilder lb = Builder.of(LongList.of(100L, 200L, 300L, 400L));
-         * LongList result = lb.removeAll(LongList.of(100L, 300L)).val();   // returns [200L,400L]
+         * LongList result = lb.removeAll(LongList.of(100L, 300L)).val();   // returns [200,400]
          * lb.removeAll(LongList.of()).val();                               // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the LongList containing elements to be removed from this list
+         * @param c the LongList containing elements to be removed from this list; may be {@code null} or
+         *        empty, in which case the list is left unchanged
          * @return this builder instance
          */
         public LongListBuilder removeAll(final LongList c) {
@@ -1845,8 +2062,33 @@ public class Builder<T> {
          * @param val the list to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
-        FloatListBuilder(final FloatList val) {
+        FloatListBuilder(final FloatList val) throws IllegalArgumentException {
             super(val);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code FloatList} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code FloatListBuilder}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * FloatList result = Builder.of(FloatList.of(1.5f))
+         *     .accept(l -> l.add(2.5f))
+         *     .add(3.5f)
+         *     .val();   // returns [1.5, 2.5, 3.5]
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public FloatListBuilder accept(final Consumer<? super FloatList> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -1868,7 +2110,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public FloatListBuilder set(final int index, final float e) {
+        public FloatListBuilder set(final int index, final float e) throws IndexOutOfBoundsException {
             val.set(index, e);
 
             return this;
@@ -1880,8 +2122,8 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f));
-         * FloatList result = lb.add(3.5f).val();                          // returns [1.5f, 2.5f, 3.5f]
-         * FloatList empty = Builder.of(FloatList.of()).add(1.5f).val();   // returns [1.5f]
+         * FloatList result = lb.add(3.5f).val();                          // returns [1.5, 2.5, 3.5]
+         * FloatList empty = Builder.of(FloatList.of()).add(1.5f).val();   // returns [1.5]
          * }</pre>
          *
          * @param e the float value to append
@@ -1901,7 +2143,7 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f, 3.5f));
-         * FloatList result = lb.add(1, 4.5f).val();            // returns [1.5f, 4.5f, 2.5f, 3.5f]
+         * FloatList result = lb.add(1, 4.5f).val();            // returns [1.5, 4.5, 2.5, 3.5]
          * try {
          *     lb.add(10, 4.5f);
          * } catch (IndexOutOfBoundsException e) {
@@ -1914,7 +2156,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public FloatListBuilder add(final int index, final float e) {
+        public FloatListBuilder add(final int index, final float e) throws IndexOutOfBoundsException {
             val.add(index, e);
 
             return this;
@@ -1927,11 +2169,12 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f));
-         * FloatList result = lb.addAll(FloatList.of(3.5f, 4.5f)).val();   // returns [1.5f,2.5f,3.5f,4.5f]
+         * FloatList result = lb.addAll(FloatList.of(3.5f, 4.5f)).val();   // returns [1.5,2.5,3.5,4.5]
          * lb.addAll(FloatList.of()).val();                                // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the FloatList containing elements to be added to this list
+         * @param c the FloatList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          */
         public FloatListBuilder addAll(final FloatList c) {
@@ -1955,12 +2198,16 @@ public class Builder<T> {
          * }
          * }</pre>
          *
+         * <p>The index is validated even when {@code c} is {@code null} or empty, so an out-of-range
+         * index is reported consistently rather than only when there happens to be something to insert.</p>
+         *
          * @param index the index at which to insert the first element from the specified list
-         * @param c the FloatList containing elements to be added to this list
+         * @param c the FloatList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public FloatListBuilder addAll(final int index, final FloatList c) {
+        public FloatListBuilder addAll(final int index, final FloatList c) throws IndexOutOfBoundsException {
             val.addAll(index, c);
 
             return this;
@@ -1972,7 +2219,7 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f, 3.5f));
-         * FloatList result = lb.remove(2.5f).val();   // returns [1.5f, 3.5f]
+         * FloatList result = lb.remove(2.5f).val();   // returns [1.5, 3.5]
          * lb.remove(1.5f); lb.remove(1.5f);           // second remove is no-op
          * }</pre>
          *
@@ -1991,11 +2238,12 @@ public class Builder<T> {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * FloatListBuilder lb = Builder.of(FloatList.of(1.5f, 2.5f, 3.5f, 4.5f));
-         * FloatList result = lb.removeAll(FloatList.of(1.5f, 3.5f)).val();   // returns [2.5f,4.5f]
+         * FloatList result = lb.removeAll(FloatList.of(1.5f, 3.5f)).val();   // returns [2.5,4.5]
          * lb.removeAll(FloatList.of()).val();                                // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the FloatList containing elements to be removed from this list
+         * @param c the FloatList containing elements to be removed from this list; may be {@code null} or
+         *        empty, in which case the list is left unchanged
          * @return this builder instance
          */
         public FloatListBuilder removeAll(final FloatList c) {
@@ -2022,8 +2270,33 @@ public class Builder<T> {
          * @param val the list to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code val} is {@code null}.
          */
-        DoubleListBuilder(final DoubleList val) {
+        DoubleListBuilder(final DoubleList val) throws IllegalArgumentException {
             super(val);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code DoubleList} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code DoubleListBuilder}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * DoubleList result = Builder.of(DoubleList.of(1.0))
+         *     .accept(l -> l.add(2.0))
+         *     .add(3.0)
+         *     .val();   // returns [1.0, 2.0, 3.0]
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public DoubleListBuilder accept(final Consumer<? super DoubleList> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -2045,7 +2318,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public DoubleListBuilder set(final int index, final double e) {
+        public DoubleListBuilder set(final int index, final double e) throws IndexOutOfBoundsException {
             val.set(index, e);
 
             return this;
@@ -2091,7 +2364,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public DoubleListBuilder add(final int index, final double e) {
+        public DoubleListBuilder add(final int index, final double e) throws IndexOutOfBoundsException {
             val.add(index, e);
 
             return this;
@@ -2108,7 +2381,8 @@ public class Builder<T> {
          * lb.addAll(DoubleList.of()).val();                               // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the DoubleList containing elements to be added to this list
+         * @param c the DoubleList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          */
         public DoubleListBuilder addAll(final DoubleList c) {
@@ -2132,12 +2406,16 @@ public class Builder<T> {
          * }
          * }</pre>
          *
+         * <p>The index is validated even when {@code c} is {@code null} or empty, so an out-of-range
+         * index is reported consistently rather than only when there happens to be something to insert.</p>
+         *
          * @param index the index at which to insert the first element from the specified list
-         * @param c the DoubleList containing elements to be added to this list
+         * @param c the DoubleList containing elements to be added to this list; may be {@code null} or empty,
+         *        in which case the list is left unchanged
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public DoubleListBuilder addAll(final int index, final DoubleList c) {
+        public DoubleListBuilder addAll(final int index, final DoubleList c) throws IndexOutOfBoundsException {
             val.addAll(index, c);
 
             return this;
@@ -2172,7 +2450,8 @@ public class Builder<T> {
          * lb.removeAll(DoubleList.of()).val();                               // unchanged (empty argument)
          * }</pre>
          *
-         * @param c the DoubleList containing elements to be removed from this list
+         * @param c the DoubleList containing elements to be removed from this list; may be {@code null} or
+         *        empty, in which case the list is left unchanged
          * @return this builder instance
          */
         public DoubleListBuilder removeAll(final DoubleList c) {
@@ -2203,8 +2482,34 @@ public class Builder<T> {
          * @param c the list to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code c} is {@code null}.
          */
-        ListBuilder(final L c) {
+        ListBuilder(final L c) throws IllegalArgumentException {
             super(c);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code L} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code ListBuilder<T, L>}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * List<String> result = Builder.of(new ArrayList<String>())
+         *     .add("a")
+         *     .accept(l -> l.add("b"))
+         *     .add("c")
+         *     .val();   // returns [a, b, c]
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public ListBuilder<T, L> accept(final Consumer<? super L> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -2221,7 +2526,7 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public ListBuilder<T, L> set(final int index, final T e) {
+        public ListBuilder<T, L> set(final int index, final T e) throws IndexOutOfBoundsException {
             val.set(index, e);
 
             return this;
@@ -2256,7 +2561,7 @@ public class Builder<T> {
          * <pre>{@code
          * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<String>());
          * lb.addAll(Arrays.asList("Alice", "Bob")).val();   // returns [Alice, Bob]
-         * lb.addAll(null).val();                            // returns no change - null is ignored
+         * lb.addAll((Collection<String>) null).val();         // returns no change - null is ignored
          * }</pre>
          *
          * @param c the collection containing elements to be added to the list
@@ -2308,8 +2613,15 @@ public class Builder<T> {
          * lb.remove("Zed").val();     // returns no change - not present
          * }</pre>
          *
+         * <p><b>Note:</b> for a list of boxed integers this overload competes with
+         * {@link #remove(int)}, exactly as {@link List#remove(Object)} competes with
+         * {@link List#remove(int)}. An {@code int} argument always selects the index-based overload:
+         * {@code Builder.of(intList).remove(1)} removes the element <i>at index 1</i>. Write
+         * {@code remove((Object) 1)} - or {@code remove(Integer.valueOf(1))} - to remove by value.
+         *
          * @param e the element to be removed from the list, if present
          * @return this builder instance for method chaining
+         * @see #remove(int)
          */
         @Override
         public ListBuilder<T, L> remove(final Object e) {
@@ -2328,7 +2640,7 @@ public class Builder<T> {
          * ListBuilder<String, ArrayList<String>> lb = Builder.of(new ArrayList<>());
          * lb.addAll("Alice", "Bob", "Charlie");
          * lb.removeAll(Arrays.asList("Alice", "Charlie")).val();   // returns [Bob]
-         * lb.removeAll(null).val();                                // returns no change - null is ignored
+         * lb.removeAll((Collection<?>) null).val();                // returns no change - null is ignored
          * }</pre>
          *
          * @param c the collection containing elements to be removed from the list
@@ -2391,7 +2703,7 @@ public class Builder<T> {
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
-        public ListBuilder<T, L> add(final int index, final T e) {
+        public ListBuilder<T, L> add(final int index, final T e) throws IndexOutOfBoundsException {
             val.add(index, e);
 
             return this;
@@ -2414,12 +2726,18 @@ public class Builder<T> {
          * }
          * }</pre>
          *
+         * <p>The index is validated even when {@code c} is {@code null} or empty, so an out-of-range index is
+         * reported consistently rather than only when there happens to be something to insert.</p>
+         *
          * @param index the index at which to insert the first element from the specified collection
-         * @param c the collection containing elements to be added to this list
+         * @param c the collection containing elements to be added to this list; may be {@code null} or empty,
+         *          in which case the list is left unchanged
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
          */
         public ListBuilder<T, L> addAll(final int index, final Collection<? extends T> c) throws IndexOutOfBoundsException {
+            N.checkPositionIndex(index, val.size());
+
             if (N.notEmpty(c)) {
                 val.addAll(index, c);
             }
@@ -2443,11 +2761,17 @@ public class Builder<T> {
          * }
          * }</pre>
          *
+         * <p><b>Note:</b> an {@code int} argument always selects this overload, never
+         * {@link #remove(Object)} - so for a {@code ListBuilder<Integer, ?>}, {@code remove(1)} removes the
+         * element at index 1 rather than the element equal to 1. Cast the argument
+         * ({@code remove((Object) 1)}) to remove by value.
+         *
          * @param index the index of the element to be removed
          * @return this builder instance
          * @throws IndexOutOfBoundsException if {@code index} is out of range for the wrapped list
+         * @see #remove(Object)
          */
-        public ListBuilder<T, L> remove(final int index) {
+        public ListBuilder<T, L> remove(final int index) throws IndexOutOfBoundsException {
             val.remove(index);
 
             return this;
@@ -2475,8 +2799,34 @@ public class Builder<T> {
          * @param c the collection to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code c} is {@code null}.
          */
-        CollectionBuilder(final C c) {
+        CollectionBuilder(final C c) throws IllegalArgumentException {
             super(c);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code C} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code CollectionBuilder<T, C>}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Set<String> result = Builder.of(new LinkedHashSet<String>())
+         *     .add("a")
+         *     .accept(c -> c.add("b"))
+         *     .add("c")
+         *     .val();   // returns [a, b, c]
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public CollectionBuilder<T, C> accept(final Consumer<? super C> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -2506,7 +2856,7 @@ public class Builder<T> {
          * <pre>{@code
          * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
          * cb.addAll(Arrays.asList("apple", "banana")).val();   // returns [apple, banana]
-         * cb.addAll(null).val();                               // returns no change - null is ignored
+         * cb.addAll((Collection<String>) null).val();          // returns no change - null is ignored
          * }</pre>
          *
          * @param c the collection containing elements to be added to this collection
@@ -2534,6 +2884,7 @@ public class Builder<T> {
          * @param a the array containing elements to be added to this collection
          * @return this builder instance
          */
+        @SuppressWarnings("unchecked")
         public CollectionBuilder<T, C> addAll(final T... a) {
             if (N.notEmpty(a)) {
                 val.addAll(Arrays.asList(a));
@@ -2575,7 +2926,7 @@ public class Builder<T> {
          * CollectionBuilder<String, LinkedHashSet<String>> cb = Builder.of(new LinkedHashSet<String>());
          * cb.add("apple").add("banana").add("cherry");
          * cb.removeAll(Arrays.asList("apple", "cherry")).val();   // returns [banana]
-         * cb.removeAll(null).val();                               // returns no change - null is ignored
+         * cb.removeAll((Collection<?>) null).val();               // returns no change - null is ignored
          * }</pre>
          *
          * @param c the collection containing elements to be removed from this collection
@@ -2605,6 +2956,7 @@ public class Builder<T> {
          * @param a the array containing elements to be removed from this collection
          * @return this builder instance
          */
+        @SuppressWarnings("unchecked")
         public CollectionBuilder<T, C> removeAll(final T... a) {
             if (N.notEmpty(a)) {
                 val.removeAll(Arrays.asList(a));
@@ -2631,8 +2983,34 @@ public class Builder<T> {
          * @param c the multiset to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code c} is {@code null}.
          */
-        MultisetBuilder(final Multiset<T> c) {
+        MultisetBuilder(final Multiset<T> c) throws IllegalArgumentException {
             super(c);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code Multiset<T>} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code MultisetBuilder<T>}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Multiset<String> result = Builder.of(new Multiset<String>())
+         *     .add("a")
+         *     .accept(m -> m.add("b"))
+         *     .add("c")
+         *     .val();
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public MultisetBuilder<T> accept(final Consumer<? super Multiset<T>> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -2659,7 +3037,7 @@ public class Builder<T> {
          * @throws IllegalArgumentException if {@code occurrences} is negative.
          * @see Multiset#setCount(Object, int)
          */
-        public MultisetBuilder<T> setCount(final T e, final int occurrences) {
+        public MultisetBuilder<T> setCount(final T e, final int occurrences) throws IllegalArgumentException {
             val.setCount(e, occurrences);
 
             return this;
@@ -2680,7 +3058,7 @@ public class Builder<T> {
          * @throws IllegalArgumentException if the element already has {@link Integer#MAX_VALUE} occurrences.
          * @see Multiset#add(Object)
          */
-        public MultisetBuilder<T> add(final T e) {
+        public MultisetBuilder<T> add(final T e) throws IllegalArgumentException {
             val.add(e);
 
             return this;
@@ -2709,7 +3087,7 @@ public class Builder<T> {
          *         would overflow an {@code int}.
          * @see Multiset#add(Object, int)
          */
-        public MultisetBuilder<T> add(final T e, final int occurrencesToAdd) {
+        public MultisetBuilder<T> add(final T e, final int occurrencesToAdd) throws IllegalArgumentException {
             val.add(e, occurrencesToAdd);
 
             return this;
@@ -2760,7 +3138,7 @@ public class Builder<T> {
          * @throws IllegalArgumentException if {@code occurrencesToRemove} is negative.
          * @see Multiset#remove(Object, int)
          */
-        public MultisetBuilder<T> remove(final Object e, final int occurrencesToRemove) {
+        public MultisetBuilder<T> remove(final Object e, final int occurrencesToRemove) throws IllegalArgumentException {
             val.remove(e, occurrencesToRemove);
 
             return this;
@@ -2779,12 +3157,12 @@ public class Builder<T> {
          *
          * @param c the collection of elements to remove all occurrences of
          * @return this builder instance
-         * @see #removeAllOccurrences(Collection)
-         * @deprecated Use {@link #removeAllOccurrences(Collection)} instead
+         * @see #removeAllOccurrencesOfAll(Collection)
+         * @deprecated Use {@link #removeAllOccurrencesOfAll(Collection)} instead
          */
         @Deprecated
         public MultisetBuilder<T> removeAll(final Collection<?> c) {
-            return removeAllOccurrences(c);
+            return removeAllOccurrencesOfAll(c);
         }
 
         /**
@@ -2794,14 +3172,18 @@ public class Builder<T> {
          * <pre>{@code
          * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
          * mb.add("apple", 3).add("banana", 2);
-         * mb.removeAllOccurrences("apple").val();   // returns apple removed entirely
-         * mb.removeAllOccurrences("nope").val();    // returns no change - not present
+         * mb.removeAllOccurrencesOf("apple").val();   // returns apple removed entirely
+         * mb.removeAllOccurrencesOf("nope").val();    // returns no change - not present
          * }</pre>
          *
-         * @param e the element to remove all occurrences of
+         * @param e the element to remove all occurrences of; the whole object is the element, even when it
+         *        is itself a {@link Collection} - use {@link #removeAllOccurrencesOfAll(Collection)} to
+         *        treat the argument as a collection <i>of</i> elements
          * @return this builder instance
+         * @see #removeAllOccurrencesOfAll(Collection)
+         * @see Multiset#removeAllOccurrencesOf(Object)
          */
-        public MultisetBuilder<T> removeAllOccurrences(final Object e) {
+        public MultisetBuilder<T> removeAllOccurrencesOf(final Object e) {
             val.removeAllOccurrencesOf(e);
 
             return this;
@@ -2810,18 +3192,28 @@ public class Builder<T> {
         /**
          * Removes all occurrences of all elements in the specified collection from this multiset.
          *
+         * <p>The name distinguishes this from {@link #removeAllOccurrencesOf(Object)}, which removes the
+         * argument itself. Overloading both on {@code Object} and on {@code Collection<?>} silently
+         * mis-resolves for a multiset whose element type <i>is</i> a collection: for a
+         * {@code Multiset<List<String>>}, {@code removeAllOccurrences(someList)} would bind to the bulk
+         * overload and try to remove the list's <i>elements</i>, which are not members, leaving the
+         * multiset untouched.
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * MultisetBuilder<String> mb = Builder.of(new Multiset<String>());
          * mb.add("apple", 2).add("banana", 3).add("cherry", 1);
-         * mb.removeAllOccurrences(Arrays.asList("apple", "banana")).val();   // returns both removed
-         * mb.removeAllOccurrences(Arrays.asList()).val();                    // returns no change - empty collection
+         * mb.removeAllOccurrencesOfAll(Arrays.asList("apple", "banana")).val();   // returns both removed
+         * mb.removeAllOccurrencesOfAll(Arrays.asList()).val();                    // returns no change - empty collection
          * }</pre>
          *
-         * @param c the collection of elements to remove all occurrences of
+         * @param c the collection whose elements should each have all their occurrences removed; may be
+         *        {@code null} or empty, in which case the multiset is left unchanged
          * @return this builder instance
+         * @see #removeAllOccurrencesOf(Object)
+         * @see Multiset#removeAllOccurrencesOf(Collection)
          */
-        public MultisetBuilder<T> removeAllOccurrences(final Collection<?> c) {
+        public MultisetBuilder<T> removeAllOccurrencesOfAll(final Collection<?> c) {
             val.removeAllOccurrencesOf(c);
 
             return this;
@@ -2848,8 +3240,34 @@ public class Builder<T> {
          * @param m the map to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code m} is {@code null}.
          */
-        MapBuilder(final M m) {
+        MapBuilder(final M m) throws IllegalArgumentException {
             super(m);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code M} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code MapBuilder<K, V, M>}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Map<String, Integer> result = Builder.of(new LinkedHashMap<String, Integer>())
+         *     .put("a", 1)
+         *     .accept(m -> m.put("b", 2))
+         *     .put("c", 3)
+         *     .val();   // returns {a=1, b=2, c=3}
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public MapBuilder<K, V, M> accept(final Consumer<? super M> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -2919,6 +3337,7 @@ public class Builder<T> {
          * @param key the key with which the specified value is to be associated
          * @param value the value to be associated with the specified key
          * @return this builder instance
+         * @see #putIfAbsentBySupplier(Object, Supplier)
          * @see Map#putIfAbsent(Object, Object)
          */
         public MapBuilder<K, V, M> putIfAbsent(final K key, final V value) {
@@ -2935,21 +3354,29 @@ public class Builder<T> {
          * <br />
          * Absent -> key is not found in this map or found with {@code null} value.
          *
+         * <p>The name differs from {@link #putIfAbsent(Object, Object)} on purpose. Overloading on
+         * {@code V} and {@code Supplier<? extends V>} is a trap once {@code V} is wide enough to hold a
+         * supplier: in a {@code MapBuilder<String, Object, ?>} the supplier overload is the more specific
+         * one, so {@code putIfAbsent(key, someSupplier)} would silently store the supplier's <i>result</i>
+         * instead of the supplier. Naming the two apart makes the intent explicit at the call site.
+         * The corresponding Maps utility is {@link Maps#putIfAbsent(Map, Object, Supplier)}.
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * MapBuilder<String, Integer, LinkedHashMap<String, Integer>> mb = Builder.of(new LinkedHashMap<>());
          * mb.put("Alice", 95);
-         * mb.putIfAbsent("Alice", () -> 100).val();   // returns {Alice=95} - supplier not invoked
-         * mb.putIfAbsent("Bob", () -> 87).val();      // returns {Alice=95, Bob=87}
+         * mb.putIfAbsentBySupplier("Alice", () -> 100).val();   // returns {Alice=95} - supplier not invoked
+         * mb.putIfAbsentBySupplier("Bob", () -> 87).val();      // returns {Alice=95, Bob=87}
          * }</pre>
          *
          * @param key the key with which the specified value is to be associated
          * @param supplier the supplier that produces the value to be associated with the specified key
          * @return this builder instance
          * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+         * @see #putIfAbsent(Object, Object)
          * @see Map#putIfAbsent(Object, Object)
          */
-        public MapBuilder<K, V, M> putIfAbsent(final K key, final Supplier<V> supplier) throws IllegalArgumentException {
+        public MapBuilder<K, V, M> putIfAbsentBySupplier(final K key, final Supplier<? extends V> supplier) throws IllegalArgumentException {
             N.checkArgNotNull(supplier, cs.supplier);
 
             final V v = val.get(key);
@@ -2988,6 +3415,7 @@ public class Builder<T> {
          * This is equivalent to calling {@link Map#remove(Object)} for each key in the
          * provided collection, but with the added convenience of method chaining.
          * If the collection is empty or {@code null}, no changes are made to the map.
+         * The keys are captured before removal, so the collection may be a live view backed by this map.
          *
          * <p><b>Cardinality note:</b> this method accepts a collection of keys and removes each
          * corresponding map entry. By contrast, {@link MultimapBuilder#removeAll(Object)} accepts
@@ -3008,7 +3436,8 @@ public class Builder<T> {
          */
         public MapBuilder<K, V, M> removeAll(final Collection<?> keysToRemove) {
             if (N.notEmpty(keysToRemove)) {
-                for (final Object k : keysToRemove) {
+                // A key or value view of this map changes as entries are removed.
+                for (final Object k : new ArrayList<>(keysToRemove)) {
                     //noinspection SuspiciousMethodCalls
                     val.remove(k);
                 }
@@ -3040,8 +3469,34 @@ public class Builder<T> {
          * @param m the multimap to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code m} is {@code null}.
          */
-        MultimapBuilder(final M m) {
+        MultimapBuilder(final M m) throws IllegalArgumentException {
             super(m);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code M} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code MultimapBuilder<K, E, V, M>}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * ListMultimap<String, String> mm = N.newListMultimap();
+         * Builder.of(mm)
+         *     .put("k", "a")
+         *     .accept(m -> m.put("k", "b"))
+         *     .put("k", "c");
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public MultimapBuilder<K, E, V, M> accept(final Consumer<? super M> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -3067,6 +3522,7 @@ public class Builder<T> {
         /**
          * Adds all key-value mappings from the specified map to the multimap.
          * Each entry in the map results in a single value being added to the multimap.
+         * Does nothing if the map is {@code null} or empty.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3086,6 +3542,7 @@ public class Builder<T> {
         /**
          * Adds multiple values for a single key to the multimap.
          * All values in the collection are associated with the specified key.
+         * Does nothing if the collection is {@code null} or empty.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3105,6 +3562,7 @@ public class Builder<T> {
         /**
          * Adds multiple key-collection mappings from the specified map to the multimap.
          * Each key is mapped to all values in its corresponding collection.
+         * Does nothing if the map is {@code null} or empty.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3127,6 +3585,10 @@ public class Builder<T> {
         /**
          * Adds all key-value mappings from another multimap to this multimap.
          * All associations from the source multimap are copied.
+         * Does nothing if the multimap is {@code null} or empty.
+         *
+         * <p>The source multimap's value-collection type is independent of this one's, so, for example, a
+         * {@link SetMultimap} can be copied into a {@link ListMultimap}.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3136,8 +3598,9 @@ public class Builder<T> {
          *
          * @param m the multimap whose mappings should be added
          * @return this builder instance for method chaining
+         * @see Multimap#putValues(Multimap)
          */
-        public MultimapBuilder<K, E, V, M> putMany(final Multimap<? extends K, ? extends E, ? extends V> m) {
+        public MultimapBuilder<K, E, V, M> putMany(final Multimap<? extends K, ? extends E, ? extends Collection<? extends E>> m) {
             val.putValues(m);
 
             return this;
@@ -3166,6 +3629,7 @@ public class Builder<T> {
         /**
          * Removes single occurrences of all key-value mappings specified in the map.
          * For each entry, one occurrence of the key-value pair is removed if it exists.
+         * Does nothing if the map is {@code null} or empty.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3209,6 +3673,7 @@ public class Builder<T> {
         /**
          * Removes multiple specific values associated with a key from the multimap.
          * Only the specified values are removed; other values for the key remain.
+         * Does nothing if the collection is {@code null} or empty.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3228,6 +3693,7 @@ public class Builder<T> {
         /**
          * Removes multiple values for multiple keys as specified in the map.
          * For each key in the map, the associated collection of values is removed.
+         * Does nothing if the map is {@code null} or empty.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3250,6 +3716,7 @@ public class Builder<T> {
         /**
          * Removes all key-value mappings that exist in the specified multimap from this multimap.
          * Each key-value pair in the source multimap is removed from this multimap if present.
+         * Does nothing if the multimap is {@code null} or empty.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3285,8 +3752,34 @@ public class Builder<T> {
          * @param ds the dataset to wrap; must not be {@code null}
          * @throws IllegalArgumentException if {@code ds} is {@code null}.
          */
-        DatasetBuilder(final Dataset ds) {
+        DatasetBuilder(final Dataset ds) throws IllegalArgumentException {
             super(ds);
+        }
+
+        /**
+         * Performs the given action on the wrapped {@code Dataset} and returns this builder for method chaining.
+         *
+         * <p>Overridden only to narrow the return type: {@link Builder#accept(Consumer)} returns the general
+         * {@code Builder}, which would end the chain of {@code DatasetBuilder}-specific operations.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Dataset result = Builder.of(dataset)
+         *     .renameColumn("age", "years")
+         *     .accept(ds -> ds.removeColumn("tmp"))
+         *     .renameColumn("name", "fullName")
+         *     .val();
+         * }</pre>
+         *
+         * @param consumer the action to perform on the wrapped value; must not be {@code null}
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+         */
+        @Override
+        public DatasetBuilder accept(final Consumer<? super Dataset> consumer) throws IllegalArgumentException {
+            super.accept(consumer);
+
+            return this;
         }
 
         /**
@@ -3300,8 +3793,11 @@ public class Builder<T> {
          * @param columnName the current name of the column
          * @param newColumnName the new name for the column
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code columnName} is not a column of the wrapped Dataset, or
+         *         {@code newColumnName} already is one
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder renameColumn(final String columnName, final String newColumnName) {
+        public DatasetBuilder renameColumn(final String columnName, final String newColumnName) throws IllegalArgumentException, IllegalStateException {
             val.renameColumn(columnName, newColumnName);
 
             return this;
@@ -3321,8 +3817,11 @@ public class Builder<T> {
          *
          * @param oldNewNames a map where keys are current column names and values are new names
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code oldNewNames} is {@code null}, if any key is not a column of
+         *         the wrapped Dataset, or if the renamed Dataset would have duplicated column names
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder renameColumns(final Map<String, String> oldNewNames) {
+        public DatasetBuilder renameColumns(final Map<String, String> oldNewNames) throws IllegalArgumentException, IllegalStateException {
             val.renameColumns(oldNewNames);
 
             return this;
@@ -3341,9 +3840,14 @@ public class Builder<T> {
          * @param columnNames the collection of column names to rename
          * @param func the function that transforms old names to new names
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalArgumentException if {@code func} is {@code null}, if {@code columnNames} is {@code null}
+         *         or is empty while the wrapped Dataset has at least one column, or lists a column the wrapped
+         *         Dataset does not have or lists the same column twice, if {@code func} returns a {@code null} or
+         *         empty name, or if the renamed Dataset would have duplicated column names
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder renameColumns(final Collection<String> columnNames, final Function<? super String, String> func) throws IllegalArgumentException {
+        public DatasetBuilder renameColumns(final Collection<String> columnNames, final Function<? super String, String> func)
+                throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.renameColumns(columnNames, func);
@@ -3361,9 +3865,11 @@ public class Builder<T> {
          *
          * @param func the function that transforms old names to new names
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalArgumentException if {@code func} is {@code null}, if {@code func} returns a {@code null}
+         *         or empty name, or if the renamed Dataset would have duplicated column names
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder renameColumns(final Function<? super String, String> func) throws IllegalArgumentException {
+        public DatasetBuilder renameColumns(final Function<? super String, String> func) throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.renameColumns(func);
@@ -3373,7 +3879,9 @@ public class Builder<T> {
 
         /**
          * Adds a new column to the dataset at the end with the specified name and values.
-         * The size of the column list must match the number of rows in the dataset.
+         * A non-empty {@code column} must hold one value per row; a {@code null} or empty {@code column} is
+         * accepted and fills the new column with nulls. On a Dataset that has no columns yet, the first column
+         * added <i>establishes</i> the row count, so there is nothing for its size to disagree with.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3381,10 +3889,16 @@ public class Builder<T> {
          * }</pre>
          *
          * @param columnName the name of the new column
-         * @param column the list of values for the new column
+         * @param column the values for the new column, in row order
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code columnName} is {@code null} or empty, or is already a column
+         *         of the wrapped Dataset, or if {@code column} is not empty and its size differs from the
+         *         Dataset's row count (unless the wrapped Dataset has no columns, in which case {@code column}
+         *         establishes the row count)
+         * @throws IllegalStateException if the wrapped Dataset is frozen
+         * @see Dataset#addColumn(String, Collection)
          */
-        public DatasetBuilder addColumn(final String columnName, final List<?> column) {
+        public DatasetBuilder addColumn(final String columnName, final Collection<?> column) throws IllegalArgumentException, IllegalStateException {
             val.addColumn(columnName, column);
 
             return this;
@@ -3393,6 +3907,9 @@ public class Builder<T> {
         /**
          * Adds a new column to the dataset at the specified position with the given name and values.
          * Existing columns at or after the index are shifted to the right.
+         * A non-empty {@code column} must hold one value per row; a {@code null} or empty {@code column} is
+         * accepted and fills the new column with nulls. On a Dataset that has no columns yet, the first column
+         * added <i>establishes</i> the row count, so there is nothing for its size to disagree with.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3401,10 +3918,18 @@ public class Builder<T> {
          *
          * @param columnIndex the position where the column should be inserted (0-based)
          * @param columnName the name of the new column
-         * @param column the list of values for the new column
+         * @param column the values for the new column, in row order
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code columnName} is {@code null} or empty, or is already a column
+         *         of the wrapped Dataset, or if {@code column} is not empty and its size differs from the
+         *         Dataset's row count (unless the wrapped Dataset has no columns, in which case {@code column}
+         *         establishes the row count)
+         * @throws IndexOutOfBoundsException if {@code columnIndex} is negative or greater than the column count
+         * @throws IllegalStateException if the wrapped Dataset is frozen
+         * @see Dataset#addColumn(int, String, Collection)
          */
-        public DatasetBuilder addColumn(final int columnIndex, final String columnName, final List<?> column) {
+        public DatasetBuilder addColumn(final int columnIndex, final String columnName, final Collection<?> column)
+                throws IllegalArgumentException, IndexOutOfBoundsException, IllegalStateException {
             val.addColumn(columnIndex, columnName, column);
 
             return this;
@@ -3424,9 +3949,13 @@ public class Builder<T> {
          * @param fromColumnName the name of the source column
          * @param func the function to transform values from the source column
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalArgumentException if {@code func} is {@code null}, if {@code newColumnName} is
+         *         {@code null} or empty or is already a column of the wrapped Dataset, or if
+         *         {@code fromColumnName} is not a column of the wrapped Dataset
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder addColumn(final String newColumnName, final String fromColumnName, final Function<?, ?> func) throws IllegalArgumentException {
+        public DatasetBuilder addColumn(final String newColumnName, final String fromColumnName, final Function<?, ?> func)
+                throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.addColumn(newColumnName, fromColumnName, func);
@@ -3448,10 +3977,14 @@ public class Builder<T> {
          * @param fromColumnName the name of the source column
          * @param func the function to transform values from the source column
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalArgumentException if {@code func} is {@code null}, if {@code newColumnName} is
+         *         {@code null} or empty or is already a column of the wrapped Dataset, or if
+         *         {@code fromColumnName} is not a column of the wrapped Dataset
+         * @throws IndexOutOfBoundsException if {@code columnIndex} is negative or greater than the column count
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder addColumn(final int columnIndex, final String newColumnName, final String fromColumnName, final Function<?, ?> func)
-                throws IllegalArgumentException {
+                throws IllegalArgumentException, IndexOutOfBoundsException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.addColumn(columnIndex, newColumnName, fromColumnName, func);
@@ -3473,10 +4006,14 @@ public class Builder<T> {
          * @param fromColumnNames the names of the source columns
          * @param func the function that combines values from source columns
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalArgumentException if {@code func} is {@code null}, if {@code newColumnName} is
+         *         {@code null} or empty or is already a column of the wrapped Dataset, or if
+         *         {@code fromColumnNames} is {@code null} or is empty while the wrapped Dataset has at least one
+         *         column, or lists a column the wrapped Dataset does not have or lists the same column twice
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder addColumn(final String newColumnName, final Collection<String> fromColumnNames,
-                final Function<? super DisposableObjArray, ?> func) throws IllegalArgumentException {
+                final Function<? super DisposableObjArray, ?> func) throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.addColumn(newColumnName, fromColumnNames, func);
@@ -3498,10 +4035,15 @@ public class Builder<T> {
          * @param fromColumnNames the names of the source columns
          * @param func the function that combines values from source columns
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalArgumentException if {@code func} is {@code null}, if {@code newColumnName} is
+         *         {@code null} or empty or is already a column of the wrapped Dataset, or if
+         *         {@code fromColumnNames} is {@code null} or is empty while the wrapped Dataset has at least one
+         *         column, or lists a column the wrapped Dataset does not have or lists the same column twice
+         * @throws IndexOutOfBoundsException if {@code columnIndex} is negative or greater than the column count
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder addColumn(final int columnIndex, final String newColumnName, final Collection<String> fromColumnNames,
-                final Function<? super DisposableObjArray, ?> func) throws IllegalArgumentException {
+                final Function<? super DisposableObjArray, ?> func) throws IllegalArgumentException, IndexOutOfBoundsException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
@@ -3522,10 +4064,13 @@ public class Builder<T> {
          * @param fromColumnNames a tuple containing the names of two source columns
          * @param func the binary function to combine values from the two columns
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalArgumentException if {@code func} is {@code null}, if {@code newColumnName} is
+         *         {@code null} or empty or is already a column of the wrapped Dataset, or if
+         *         {@code fromColumnNames} names a column the wrapped Dataset does not have
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder addColumn(final String newColumnName, final Tuple2<String, String> fromColumnNames, final BiFunction<?, ?, ?> func)
-                throws IllegalArgumentException {
+                throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.addColumn(newColumnName, fromColumnNames, func);
@@ -3547,10 +4092,14 @@ public class Builder<T> {
          * @param fromColumnNames a tuple containing the names of two source columns
          * @param func the binary function to combine values from the two columns
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalArgumentException if {@code func} is {@code null}, if {@code newColumnName} is
+         *         {@code null} or empty or is already a column of the wrapped Dataset, or if
+         *         {@code fromColumnNames} names a column the wrapped Dataset does not have
+         * @throws IndexOutOfBoundsException if {@code columnIndex} is negative or greater than the column count
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder addColumn(final int columnIndex, final String newColumnName, final Tuple2<String, String> fromColumnNames,
-                final BiFunction<?, ?, ?> func) throws IllegalArgumentException {
+                final BiFunction<?, ?, ?> func) throws IllegalArgumentException, IndexOutOfBoundsException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
@@ -3571,10 +4120,13 @@ public class Builder<T> {
          * @param fromColumnNames a tuple containing the names of three source columns
          * @param func the ternary function to combine values from the three columns
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalArgumentException if {@code func} is {@code null}, if {@code newColumnName} is
+         *         {@code null} or empty or is already a column of the wrapped Dataset, or if
+         *         {@code fromColumnNames} names a column the wrapped Dataset does not have
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder addColumn(final String newColumnName, final Tuple3<String, String, String> fromColumnNames, final TriFunction<?, ?, ?, ?> func)
-                throws IllegalArgumentException {
+                throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.addColumn(newColumnName, fromColumnNames, func);
@@ -3596,10 +4148,14 @@ public class Builder<T> {
          * @param fromColumnNames a tuple containing the names of three source columns
          * @param func the ternary function to combine values from the three columns
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalArgumentException if {@code func} is {@code null}, if {@code newColumnName} is
+         *         {@code null} or empty or is already a column of the wrapped Dataset, or if
+         *         {@code fromColumnNames} names a column the wrapped Dataset does not have
+         * @throws IndexOutOfBoundsException if {@code columnIndex} is negative or greater than the column count
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder addColumn(final int columnIndex, final String newColumnName, final Tuple3<String, String, String> fromColumnNames,
-                final TriFunction<?, ?, ?, ?> func) throws IllegalArgumentException {
+                final TriFunction<?, ?, ?, ?> func) throws IllegalArgumentException, IndexOutOfBoundsException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.addColumn(columnIndex, newColumnName, fromColumnNames, func);
@@ -3617,8 +4173,10 @@ public class Builder<T> {
          *
          * @param columnName the name of the column to remove
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code columnName} is not a column of the wrapped Dataset
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder removeColumn(final String columnName) {
+        public DatasetBuilder removeColumn(final String columnName) throws IllegalArgumentException, IllegalStateException {
             val.removeColumn(columnName);
 
             return this;
@@ -3634,8 +4192,11 @@ public class Builder<T> {
          *
          * @param columnNames the collection of column names to remove
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code columnNames} is {@code null} or names a column the wrapped
+         *         Dataset does not have
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder removeColumns(final Collection<String> columnNames) {
+        public DatasetBuilder removeColumns(final Collection<String> columnNames) throws IllegalArgumentException, IllegalStateException {
             val.removeColumns(columnNames);
 
             return this;
@@ -3652,8 +4213,9 @@ public class Builder<T> {
          * @param filter the predicate to test column names; columns returning {@code true} are removed
          * @return this builder instance for method chaining
          * @throws IllegalArgumentException if {@code filter} is {@code null}.
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder removeColumns(final Predicate<? super String> filter) throws IllegalArgumentException {
+        public DatasetBuilder removeColumns(final Predicate<? super String> filter) throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(filter, cs.filter);
 
             val.removeColumns(filter);
@@ -3673,9 +4235,11 @@ public class Builder<T> {
          * @param columnName the name of the column to update
          * @param func the function to transform each value in the column
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalArgumentException if {@code func} is {@code null}, or if {@code columnName} is not a
+         *         column of the wrapped Dataset
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder updateColumn(final String columnName, final Function<?, ?> func) throws IllegalArgumentException {
+        public DatasetBuilder updateColumn(final String columnName, final Function<?, ?> func) throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.updateColumn(columnName, func);
@@ -3692,14 +4256,17 @@ public class Builder<T> {
          * datasetBuilder.updateColumns(Arrays.asList("price", "cost"), (i, c, v) -> ((Double) v) * 1.1);
          * }</pre>
          *
-         * @param columnNames the names of columns to update
+         * @param columnNames the names of columns to update; an empty collection is accepted and updates nothing
          * @param func the function to transform values in the specified columns; it receives the row index,
          *             the column name and the current value
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalArgumentException if {@code func} is {@code null}, if {@code columnNames} is {@code null},
+         *         or if it lists a column the wrapped Dataset does not have or lists the same column twice
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          * @see Dataset#updateColumns(Collection, IntBiObjFunction)
          */
-        public DatasetBuilder updateColumns(final Collection<String> columnNames, final IntBiObjFunction<String, ?, ?> func) throws IllegalArgumentException {
+        public DatasetBuilder updateColumns(final Collection<String> columnNames, final IntBiObjFunction<String, ?, ?> func)
+                throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.updateColumns(columnNames, func);
@@ -3719,8 +4286,11 @@ public class Builder<T> {
          * @param columnName the name of the column to convert
          * @param targetType the target class type for the column values
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code columnName} is not a column of the wrapped Dataset, or if a
+         *         value cannot be converted to {@code targetType}
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder convertColumn(final String columnName, final Class<?> targetType) {
+        public DatasetBuilder convertColumn(final String columnName, final Class<?> targetType) throws IllegalArgumentException, IllegalStateException {
             val.convertColumn(columnName, targetType);
 
             return this;
@@ -3740,29 +4310,47 @@ public class Builder<T> {
          *
          * @param columnTargetTypes a map of column names to their target types
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code columnTargetTypes} is {@code null} or names a column the
+         *         wrapped Dataset does not have, or if a value cannot be converted to its target type
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder convertColumns(final Map<String, Class<?>> columnTargetTypes) {
+        public DatasetBuilder convertColumns(final Map<String, Class<?>> columnTargetTypes) throws IllegalArgumentException, IllegalStateException {
             val.convertColumns(columnTargetTypes);
 
             return this;
         }
 
         /**
-         * Combines multiple columns into a single new column of the specified type.
-         * The values from the source columns are merged based on the target type's requirements.
+         * Combines multiple columns into a single new column whose values hold the combined row.
+         *
+         * <p>{@code newColumnClass} must be one of the row types the {@code Dataset} can materialise: an
+         * {@code Object} array type, a {@link Collection} type, a {@link Map} type, or a bean class. Each
+         * combined value holds the source columns' values for that row - positionally for an array or
+         * collection, keyed by column name for a map or bean. An unsupported type (for example
+         * {@code LocalDate}) is rejected with an {@link IllegalArgumentException}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * datasetBuilder.combineColumns(Arrays.asList("year", "month", "day"),
-         *                              "date", LocalDate.class);
+         * // {year=2020, month=1, day=2} -> a single "date" column holding [2020, 1, 2]
+         * datasetBuilder.combineColumns(Arrays.asList("year", "month", "day"), "date", List.class);
+         *
+         * // ... or holding {year=2020, month=1, day=2}
+         * datasetBuilder.combineColumns(Arrays.asList("year", "month", "day"), "date", Map.class);
          * }</pre>
          *
          * @param columnNames the names of columns to combine
          * @param newColumnName the name of the resulting combined column
-         * @param newColumnClass the class type of the new column
+         * @param newColumnClass the row type each combined value is materialised as; must be an
+         *        {@code Object} array type, a {@code Collection} type, a {@code Map} type, or a bean class
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code newColumnClass} is not a supported row type, if
+         *         {@code columnNames} is {@code null} or empty or lists a column the wrapped Dataset does not
+         *         have or lists the same column twice, or if {@code newColumnName} is {@code null} or empty or
+         *         is already a column of the wrapped Dataset
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder combineColumns(final Collection<String> columnNames, final String newColumnName, final Class<?> newColumnClass) {
+        public DatasetBuilder combineColumns(final Collection<String> columnNames, final String newColumnName, final Class<?> newColumnClass)
+                throws IllegalArgumentException, IllegalStateException {
             val.combineColumns(columnNames, newColumnName, newColumnClass);
 
             return this;
@@ -3781,10 +4369,14 @@ public class Builder<T> {
          * @param newColumnName the name of the resulting combined column
          * @param combineFunc the function that combines values from the source columns
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code combineFunc} is {@code null}.
+         * @throws IllegalArgumentException if {@code combineFunc} is {@code null}, if {@code columnNames} is
+         *         {@code null} or empty or lists a column the wrapped Dataset does not have or lists the same
+         *         column twice, or if {@code newColumnName} is {@code null} or empty or is already a column of the
+         *         wrapped Dataset
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder combineColumns(final Collection<String> columnNames, final String newColumnName,
-                final Function<? super DisposableObjArray, ?> combineFunc) throws IllegalArgumentException {
+                final Function<? super DisposableObjArray, ?> combineFunc) throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(combineFunc, cs.combineFunc);
 
             val.combineColumns(columnNames, newColumnName, combineFunc);
@@ -3805,10 +4397,13 @@ public class Builder<T> {
          * @param newColumnName the name of the resulting combined column
          * @param combineFunc the binary function to combine values from the two columns
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code combineFunc} is {@code null}.
+         * @throws IllegalArgumentException if {@code combineFunc} is {@code null}, if {@code columnNames} names a
+         *         column the wrapped Dataset does not have or names the same column twice, or if
+         *         {@code newColumnName} is {@code null} or empty or is already a column of the wrapped Dataset
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder combineColumns(final Tuple2<String, String> columnNames, final String newColumnName, final BiFunction<?, ?, ?> combineFunc)
-                throws IllegalArgumentException {
+                throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(combineFunc, cs.combineFunc);
 
             val.combineColumns(columnNames, newColumnName, combineFunc);
@@ -3829,10 +4424,13 @@ public class Builder<T> {
          * @param newColumnName the name of the resulting combined column
          * @param combineFunc the ternary function to combine values from the three columns
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code combineFunc} is {@code null}.
+         * @throws IllegalArgumentException if {@code combineFunc} is {@code null}, if {@code columnNames} names a
+         *         column the wrapped Dataset does not have or names the same column twice, or if
+         *         {@code newColumnName} is {@code null} or empty or is already a column of the wrapped Dataset
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder combineColumns(final Tuple3<String, String, String> columnNames, final String newColumnName,
-                final TriFunction<?, ?, ?, ?> combineFunc) throws IllegalArgumentException {
+                final TriFunction<?, ?, ?, ?> combineFunc) throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(combineFunc, cs.combineFunc);
 
             val.combineColumns(columnNames, newColumnName, combineFunc);
@@ -3854,10 +4452,13 @@ public class Builder<T> {
          * @param newColumnNames the names of the new columns to create
          * @param divideFunc the function that splits a value into multiple values
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code divideFunc} is {@code null}.
+         * @throws IllegalArgumentException if {@code divideFunc} is {@code null}, if {@code columnName} is not a
+         *         column of the wrapped Dataset, or if {@code newColumnNames} is {@code null} or empty or holds a
+         *         duplicate or a name that is already a column of the wrapped Dataset
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder divideColumn(final String columnName, final Collection<String> newColumnNames, final Function<?, ? extends List<?>> divideFunc)
-                throws IllegalArgumentException {
+                throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(divideFunc, cs.divideFunc);
 
             val.divideColumn(columnName, newColumnNames, divideFunc);
@@ -3884,10 +4485,13 @@ public class Builder<T> {
          * @param newColumnNames the names of the new columns to create
          * @param output the consumer that populates the output array with divided values
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code output} is {@code null}.
+         * @throws IllegalArgumentException if {@code output} is {@code null}, if {@code columnName} is not a
+         *         column of the wrapped Dataset, or if {@code newColumnNames} is {@code null} or empty or holds a
+         *         duplicate or a name that is already a column of the wrapped Dataset
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder divideColumn(final String columnName, final Collection<String> newColumnNames, final BiConsumer<?, Object[]> output)
-                throws IllegalArgumentException {
+                throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(output, cs.output);
 
             val.divideColumn(columnName, newColumnNames, output);
@@ -3912,10 +4516,13 @@ public class Builder<T> {
          * @param newColumnNames a tuple containing the names of two new columns
          * @param output the consumer that populates the output pair
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code output} is {@code null}.
+         * @throws IllegalArgumentException if {@code output} is {@code null}, if {@code columnName} is not a
+         *         column of the wrapped Dataset, or if {@code newColumnNames} holds a duplicate or a name that is
+         *         already a column of the wrapped Dataset
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder divideColumn(final String columnName, final Tuple2<String, String> newColumnNames,
-                final BiConsumer<?, Pair<Object, Object>> output) throws IllegalArgumentException {
+                final BiConsumer<?, Pair<Object, Object>> output) throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(output, cs.output);
 
             val.divideColumn(columnName, newColumnNames, output);
@@ -3941,10 +4548,13 @@ public class Builder<T> {
          * @param newColumnNames a tuple containing the names of three new columns
          * @param output the consumer that populates the output triple
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code output} is {@code null}.
+         * @throws IllegalArgumentException if {@code output} is {@code null}, if {@code columnName} is not a
+         *         column of the wrapped Dataset, or if {@code newColumnNames} holds a duplicate or a name that is
+         *         already a column of the wrapped Dataset
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
         public DatasetBuilder divideColumn(final String columnName, final Tuple3<String, String, String> newColumnNames,
-                final BiConsumer<?, Triple<Object, Object, Object>> output) throws IllegalArgumentException {
+                final BiConsumer<?, Triple<Object, Object, Object>> output) throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(output, cs.output);
 
             val.divideColumn(columnName, newColumnNames, output);
@@ -3964,8 +4574,9 @@ public class Builder<T> {
          * @param func the function to transform all values in the dataset
          * @return this builder instance for method chaining
          * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder updateAll(final Function<?, ?> func) throws IllegalArgumentException {
+        public DatasetBuilder updateAll(final Function<?, ?> func) throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.updateAll(func);
@@ -3991,9 +4602,10 @@ public class Builder<T> {
          *             current value, and returns the new value
          * @return this builder instance for method chaining
          * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          * @see Dataset#updateAll(IntBiObjFunction)
          */
-        public DatasetBuilder updateAll(final IntBiObjFunction<String, ?, ?> func) throws IllegalArgumentException {
+        public DatasetBuilder updateAll(final IntBiObjFunction<String, ?, ?> func) throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(func, cs.func);
 
             val.updateAll(func);
@@ -4013,8 +4625,9 @@ public class Builder<T> {
          * @param newValue the replacement value for matching elements
          * @return this builder instance for method chaining
          * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          */
-        public DatasetBuilder replaceIf(final Predicate<?> predicate, final Object newValue) throws IllegalArgumentException {
+        public DatasetBuilder replaceIf(final Predicate<?> predicate, final Object newValue) throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(predicate, cs.predicate);
 
             val.replaceIf(predicate, newValue);
@@ -4038,9 +4651,11 @@ public class Builder<T> {
          * @param newValue the replacement value for cells satisfying the predicate
          * @return this builder instance for method chaining
          * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          * @see Dataset#replaceIf(IntBiObjPredicate, Object)
          */
-        public DatasetBuilder replaceIf(final IntBiObjPredicate<String, ?> predicate, final Object newValue) throws IllegalArgumentException {
+        public DatasetBuilder replaceIf(final IntBiObjPredicate<String, ?> predicate, final Object newValue)
+                throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(predicate, cs.predicate);
 
             val.replaceIf(predicate, newValue);
@@ -4060,9 +4675,12 @@ public class Builder<T> {
          *
          * @param other the Dataset whose rows should be added at the beginning
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code other} is {@code null} or its column names differ from the
+         *         wrapped Dataset's
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          * @see Dataset#prepend(Dataset)
          */
-        public DatasetBuilder prepend(final Dataset other) {
+        public DatasetBuilder prepend(final Dataset other) throws IllegalArgumentException, IllegalStateException {
             val.prepend(other);
 
             return this;
@@ -4080,9 +4698,12 @@ public class Builder<T> {
          *
          * @param other the Dataset whose rows should be added at the end
          * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if {@code other} is {@code null} or its column names differ from the
+         *         wrapped Dataset's
+         * @throws IllegalStateException if the wrapped Dataset is frozen
          * @see Dataset#append(Dataset)
          */
-        public DatasetBuilder append(final Dataset other) {
+        public DatasetBuilder append(final Dataset other) throws IllegalArgumentException, IllegalStateException {
             val.append(other);
 
             return this;
@@ -4114,6 +4735,13 @@ public class Builder<T> {
      * Creates a new ComparisonBuilder and compares two objects using a specified comparator.
      * This is the starting point for building a comparison chain with custom comparison logic.
      *
+     * <p><b>The comparator receives both arguments unchanged, {@code null} included.</b> No null-handling is
+     * applied before the call, so a {@code null} argument reaches comparators such as
+     * {@link Comparator#naturalOrder()} or {@code Comparator.comparing(Person::getAge)} and makes them throw
+     * {@link NullPointerException}. Wrap the comparator in {@link Comparator#nullsFirst(Comparator)} or
+     * {@link Comparator#nullsLast(Comparator)}, or use {@link #compareNullLess(Comparable, Comparable)} /
+     * {@link #compareNullBigger(Comparable, Comparable)}, when either side may be {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int result = Builder.compare(str1, str2, String.CASE_INSENSITIVE_ORDER)
@@ -4122,13 +4750,19 @@ public class Builder<T> {
      * }</pre>
      *
      * @param <T> the type of objects being compared
-     * @param left the first object to compare
-     * @param right the second object to compare
+     * @param left the first object to compare; handed to {@code comparator} as given, so it may be {@code null}
+     *        only if {@code comparator} accepts {@code null}
+     * @param right the second object to compare; handed to {@code comparator} as given, so it may be {@code null}
+     *        only if {@code comparator} accepts {@code null}
      * @param comparator the comparator to use for comparison
      * @return a new ComparisonBuilder for method chaining
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws NullPointerException if {@code comparator} rejects a {@code null} argument; the exception comes from
+     *         {@code comparator}, not from a check performed here, and any other exception it throws propagates
+     *         unchanged
      */
-    public static <T> ComparisonBuilder compare(final T left, final T right, final Comparator<T> comparator) throws IllegalArgumentException {
+    public static <T> ComparisonBuilder compare(final T left, final T right, final Comparator<? super T> comparator)
+            throws IllegalArgumentException, NullPointerException {
         N.checkArgNotNull(comparator, cs.comparator);
 
         return new ComparisonBuilder().compare(left, right, comparator);
@@ -4145,10 +4779,16 @@ public class Builder<T> {
      *                     .result();
      * }</pre>
      *
+     * <p><b>This is the same comparison as {@link #compare(Comparable, Comparable)}</b>, which also orders
+     * {@code null} before every non-{@code null} value; the name states that policy explicitly. Use
+     * {@link #compareNullBigger(Comparable, Comparable)} for the opposite ordering.</p>
+     *
      * @param <T> the type of objects being compared (must be Comparable)
      * @param left the first object to compare
      * @param right the second object to compare
      * @return a new ComparisonBuilder for method chaining
+     * @see #compare(Comparable, Comparable)
+     * @see #compareNullBigger(Comparable, Comparable)
      */
     public static <T extends Comparable<? super T>> ComparisonBuilder compareNullLess(final T left, final T right) {
         return new ComparisonBuilder().compareNullLess(left, right);
@@ -4326,6 +4966,14 @@ public class Builder<T> {
      * Creates a new ComparisonBuilder and compares two float values with a specified tolerance.
      * This is useful for comparing floating-point numbers where exact equality is not required.
      *
+     * <p><b>Warning - this comparison is not transitive, so the chain is no longer a valid ordering.</b>
+     * With a tolerance of {@code 0.01}, {@code 0} and {@code 0.009} compare equal and {@code 0.009} and
+     * {@code 0.018} compare equal, yet {@code 0} and {@code 0.018} do not. A {@link Comparable#compareTo}
+     * or {@link java.util.Comparator} built on a chain containing this call therefore violates its general
+     * contract, and sorting with it can fail with
+     * {@code IllegalArgumentException: Comparison method violates its general contract!} on inputs large
+     * enough for TimSort to detect it. Use it for one-off comparisons, not for ordering.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int result = Builder.compare(obj1.getWeight(), obj2.getWeight(), 0.01f)
@@ -4335,11 +4983,13 @@ public class Builder<T> {
      *
      * @param left the first float to compare
      * @param right the second float to compare
-     * @param tolerance the acceptable difference between the two floats
+     * @param tolerance the acceptable difference between the two floats; two {@code NaN}s, and two infinities of the same
+     *        sign, are equal at any tolerance
      * @return a new ComparisonBuilder for method chaining
      * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
+     * @see ComparisonBuilder#compare(float, float, float)
      */
-    public static ComparisonBuilder compare(final float left, final float right, final float tolerance) {
+    public static ComparisonBuilder compare(final float left, final float right, final float tolerance) throws IllegalArgumentException {
         return new ComparisonBuilder().compare(left, right, tolerance);
     }
 
@@ -4366,6 +5016,14 @@ public class Builder<T> {
      * Creates a new ComparisonBuilder and compares two double values with a specified tolerance.
      * This is useful for comparing floating-point numbers where exact equality is not required.
      *
+     * <p><b>Warning - this comparison is not transitive, so the chain is no longer a valid ordering.</b>
+     * With a tolerance of {@code 0.01}, {@code 0} and {@code 0.009} compare equal and {@code 0.009} and
+     * {@code 0.018} compare equal, yet {@code 0} and {@code 0.018} do not. A {@link Comparable#compareTo}
+     * or {@link java.util.Comparator} built on a chain containing this call therefore violates its general
+     * contract, and sorting with it can fail with
+     * {@code IllegalArgumentException: Comparison method violates its general contract!} on inputs large
+     * enough for TimSort to detect it. Use it for one-off comparisons, not for ordering.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int result = Builder.compare(obj1.getPrice(), obj2.getPrice(), 0.01)
@@ -4375,11 +5033,13 @@ public class Builder<T> {
      *
      * @param left the first double to compare
      * @param right the second double to compare
-     * @param tolerance the acceptable difference between the two doubles
+     * @param tolerance the acceptable difference between the two doubles; two {@code NaN}s, and two infinities of the same
+     *        sign, are equal at any tolerance
      * @return a new ComparisonBuilder for method chaining
      * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
+     * @see ComparisonBuilder#compare(double, double, double)
      */
-    public static ComparisonBuilder compare(final double left, final double right, final double tolerance) {
+    public static ComparisonBuilder compare(final double left, final double right, final double tolerance) throws IllegalArgumentException {
         return new ComparisonBuilder().compare(left, right, tolerance);
     }
 
@@ -4406,17 +5066,21 @@ public class Builder<T> {
      * Creates a new EquivalenceBuilder and checks equality using a custom function.
      * The function determines whether the two objects should be considered equal.
      *
+     * <p>The predicate is invoked with the arguments unchanged, {@code null} included, so a predicate that
+     * dereferences them must guard them itself.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean equal = Builder.equals(obj1, obj2, (a, b) -> a.getId() == b.getId())
+     * boolean equal = Builder.equals(obj1, obj2, (a, b) -> a != null && b != null && a.getId() == b.getId())
      *                        .equals(obj1.getName(), obj2.getName())
      *                        .result();
      * }</pre>
      *
      * @param <T> the type of objects being compared
-     * @param left the first object to compare
-     * @param right the second object to compare
-     * @param predicate the predicate to check equality.
+     * @param left the first object to compare, may be {@code null}
+     * @param right the second object to compare, may be {@code null}
+     * @param predicate the predicate to check equality; invoked with the arguments as given, so it is
+     *        called even when both are {@code null}
      * @return a new EquivalenceBuilder for method chaining
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
@@ -4558,6 +5222,13 @@ public class Builder<T> {
      * Creates a new EquivalenceBuilder and checks equality of two float values with a specified tolerance.
      * This is useful for comparing floating-point numbers where exact equality is not required.
      *
+     * <p><b>Warning - fuzzy equality is not transitive.</b> With a tolerance of {@code 0.01}, {@code 0}
+     * equals {@code 0.009} and {@code 0.009} equals {@code 0.018}, yet {@code 0} does not equal
+     * {@code 0.018}. An {@link Object#equals(Object)} built on a chain containing this call therefore
+     * violates the equivalence contract, and the only {@link Object#hashCode()} consistent with it is a
+     * constant - which would put every instance in one hash bucket. Use it for assertions and one-off
+     * checks, not for the identity of a value type.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1.getWeight(), obj2.getWeight(), 0.01f)
@@ -4567,11 +5238,13 @@ public class Builder<T> {
      *
      * @param left the first float to compare
      * @param right the second float to compare
-     * @param tolerance the acceptable difference between the two floats
+     * @param tolerance the acceptable difference between the two floats; two {@code NaN}s, and two infinities of the same
+     *        sign, are equal at any tolerance
      * @return a new EquivalenceBuilder for method chaining
      * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
+     * @see EquivalenceBuilder#equals(float, float, float)
      */
-    public static EquivalenceBuilder equals(final float left, final float right, final float tolerance) {
+    public static EquivalenceBuilder equals(final float left, final float right, final float tolerance) throws IllegalArgumentException {
         return new EquivalenceBuilder().equals(left, right, tolerance);
     }
 
@@ -4598,6 +5271,13 @@ public class Builder<T> {
      * Creates a new EquivalenceBuilder and checks equality of two double values with a specified tolerance.
      * This is useful for comparing floating-point numbers where exact equality is not required.
      *
+     * <p><b>Warning - fuzzy equality is not transitive.</b> With a tolerance of {@code 0.01}, {@code 0}
+     * equals {@code 0.009} and {@code 0.009} equals {@code 0.018}, yet {@code 0} does not equal
+     * {@code 0.018}. An {@link Object#equals(Object)} built on a chain containing this call therefore
+     * violates the equivalence contract, and the only {@link Object#hashCode()} consistent with it is a
+     * constant - which would put every instance in one hash bucket. Use it for assertions and one-off
+     * checks, not for the identity of a value type.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean equal = Builder.equals(obj1.getPrice(), obj2.getPrice(), 0.01)
@@ -4607,11 +5287,13 @@ public class Builder<T> {
      *
      * @param left the first double to compare
      * @param right the second double to compare
-     * @param tolerance the acceptable difference between the two doubles
+     * @param tolerance the acceptable difference between the two doubles; two {@code NaN}s, and two infinities of the same
+     *        sign, are equal at any tolerance
      * @return a new EquivalenceBuilder for method chaining
      * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
+     * @see EquivalenceBuilder#equals(double, double, double)
      */
-    public static EquivalenceBuilder equals(final double left, final double right, final double tolerance) {
+    public static EquivalenceBuilder equals(final double left, final double right, final double tolerance) throws IllegalArgumentException {
         return new EquivalenceBuilder().equals(left, right, tolerance);
     }
 
@@ -4638,6 +5320,11 @@ public class Builder<T> {
      * Creates a new HashCodeBuilder and adds a hash code computed by a custom function.
      * This allows custom hash code calculation for complex objects.
      *
+     * <p><b>The function receives {@code value} unchanged, {@code null} included.</b> Unlike
+     * {@link #hash(Object)}, no null-handling is applied before the call, so a function that dereferences its
+     * argument must guard it itself &mdash; the example below throws {@link NullPointerException} when
+     * {@code person} is {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int hashCode = Builder.hash(person, p -> p.getId())
@@ -4646,12 +5333,16 @@ public class Builder<T> {
      * }</pre>
      *
      * @param <T> the type of the value
-     * @param value the object to hash
+     * @param value the object to hash; handed to {@code func} as given, so it may be {@code null} only if
+     *        {@code func} accepts {@code null}
      * @param func the function that computes the hash code for the value
      * @return a new HashCodeBuilder for method chaining
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws NullPointerException if {@code func} dereferences a {@code null} {@code value}; the exception comes
+     *         from {@code func}, not from a check performed here, and any other exception {@code func} throws
+     *         propagates unchanged
      */
-    public static <T> HashCodeBuilder hash(final T value, final ToIntFunction<? super T> func) throws IllegalArgumentException {
+    public static <T> HashCodeBuilder hash(final T value, final ToIntFunction<? super T> func) throws IllegalArgumentException, NullPointerException {
         N.checkArgNotNull(func, cs.func);
 
         return new HashCodeBuilder().hash(value, func);
@@ -4794,6 +5485,20 @@ public class Builder<T> {
     }
 
     /**
+     * Validates a fuzzy-comparison tolerance, using exactly the same rule and message as
+     * {@link Numbers#fuzzyEquals(double, double, double)} so that a caller sees the identical exception whether
+     * or not the surrounding comparison chain has already short-circuited.
+     *
+     * @param tolerance the tolerance to validate
+     * @throws IllegalArgumentException if {@code tolerance} is negative or {@code NaN}
+     */
+    private static void checkTolerance(final double tolerance) throws IllegalArgumentException {
+        if (!(tolerance >= 0)) { // NOSONAR - negated so that NaN, which fails every comparison, is rejected too
+            throw new IllegalArgumentException("tolerance must be non-negative and not NaN");
+        }
+    }
+
+    /**
      * A builder class for performing chained comparisons between objects.
      * This class follows the builder pattern to allow multiple comparisons to be
      * chained together, with the result being determined by the first non-zero
@@ -4861,6 +5566,16 @@ public class Builder<T> {
          *
          * <p>The comparator must not be {@code null}. This allows for flexible comparison strategies.</p>
          *
+         * <p><b>When the comparator is invoked it receives both arguments unchanged, {@code null} included.</b>
+         * No null-handling is applied before the call, so a {@code null} argument reaches comparators such as
+         * {@link Comparator#naturalOrder()} or the {@code Comparator.comparing(Person::getAge)} used in the
+         * example below and makes them throw {@link NullPointerException}. Once an earlier link has decided the
+         * chain, however, the comparator is not invoked at all, so neither that exception nor any other one it
+         * would throw can occur. Wrap the comparator in
+         * {@link Comparator#nullsFirst(Comparator)} or {@link Comparator#nullsLast(Comparator)}, or use
+         * {@link #compareNullLess(Comparable, Comparable)} / {@link #compareNullBigger(Comparable, Comparable)},
+         * when either side may be {@code null}.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Builder
@@ -4869,13 +5584,19 @@ public class Builder<T> {
          * }</pre>
          *
          * @param <T> the type of objects being compared
-         * @param left the first object to compare, may be {@code null}
-         * @param right the second object to compare, may be {@code null}
+         * @param left the first object to compare; handed to {@code comparator} as given, so it may be
+         *        {@code null} only if {@code comparator} accepts {@code null}
+         * @param right the second object to compare; handed to {@code comparator} as given, so it may be
+         *        {@code null} only if {@code comparator} accepts {@code null}
          * @param comparator the comparator used to compare {@code left} and {@code right}; must not be {@code null}
          * @return this ComparisonBuilder instance for method chaining
          * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+         * @throws NullPointerException if the comparator is invoked (that is, the chain is still undecided) and
+         *         rejects a {@code null} argument; the exception comes from {@code comparator}, not from a check
+         *         performed here, and any other exception it throws propagates unchanged
          */
-        public <T> ComparisonBuilder compare(final T left, final T right, final Comparator<T> comparator) throws IllegalArgumentException {
+        public <T> ComparisonBuilder compare(final T left, final T right, final Comparator<? super T> comparator)
+                throws IllegalArgumentException, NullPointerException {
             N.checkArgNotNull(comparator, cs.comparator);
 
             if (result == 0) {
@@ -4905,10 +5626,15 @@ public class Builder<T> {
          *     .result();   // returns -1
          * }</pre>
          *
+         * <p><b>This is the same comparison as {@link #compare(Comparable, Comparable)}</b>, which also
+         * orders {@code null} before every non-{@code null} value; the name states that policy explicitly.</p>
+         *
          * @param <T> the type of objects being compared, must implement Comparable
          * @param left the first object to compare, may be {@code null}
          * @param right the second object to compare, may be {@code null}
          * @return this ComparisonBuilder instance for method chaining
+         * @see #compare(Comparable, Comparable)
+         * @see #compareNullBigger(Comparable, Comparable)
          */
         public <T extends Comparable<? super T>> ComparisonBuilder compareNullLess(final T left, final T right) {
             if (result == 0) {
@@ -5046,7 +5772,7 @@ public class Builder<T> {
          * <pre>{@code
          * Builder
          *     .compare((byte)10, (byte)20)
-         *     .result();   // returns -1
+         *     .result();   // returns a negative value
          * }</pre>
          *
          * @param left the first byte value
@@ -5070,7 +5796,7 @@ public class Builder<T> {
          * <pre>{@code
          * Builder
          *     .compare((short)100, (short)200)
-         *     .result();   // returns -1
+         *     .result();   // returns a negative value
          * }</pre>
          *
          * @param left the first short value
@@ -5168,8 +5894,22 @@ public class Builder<T> {
          * This method is useful for comparing floating-point numbers that may have
          * small differences due to rounding errors or precision limitations.
          *
-         * <p>Values are considered equal if their absolute difference is less than
-         * or equal to the specified tolerance.</p>
+         * <p>Values are considered equal if their absolute difference is less than or equal to the
+         * specified tolerance, as defined by {@link Numbers#fuzzyEquals(double, double, double)}. Two cases
+         * do not follow from that difference: two {@code NaN}s are equal at any tolerance, and two
+         * infinities of the same sign are equal at any tolerance (their difference is {@code NaN}).</p>
+         *
+         * <p><b>Warning - this comparison is not transitive, so the chain is no longer a valid ordering.</b>
+         * With a tolerance of {@code 0.01}, {@code 0} and {@code 0.009} compare equal and {@code 0.009} and
+         * {@code 0.018} compare equal, yet {@code 0} and {@code 0.018} do not. A {@link Comparable#compareTo}
+         * or {@link java.util.Comparator} built on a chain containing this call therefore violates its general
+         * contract, and sorting with it can fail with
+         * {@code IllegalArgumentException: Comparison method violates its general contract!} on inputs large
+         * enough for TimSort to detect it. Use it for one-off comparisons, not for ordering.</p>
+         *
+         * <p>Values that are not fuzzily equal are ordered as by
+         * {@link Numbers#fuzzyCompare(double, double, double)}, which places every {@code NaN} above every
+         * other value, {@code +Infinity} included.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -5184,7 +5924,11 @@ public class Builder<T> {
          * @return this ComparisonBuilder instance for method chaining
          * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
          */
-        public ComparisonBuilder compare(final float left, final float right, final float tolerance) {
+        public ComparisonBuilder compare(final float left, final float right, final float tolerance) throws IllegalArgumentException {
+            // Validate before the short-circuit: otherwise an invalid tolerance would only be reported when
+            // no earlier comparison in the chain had already decided the result.
+            checkTolerance(tolerance);
+
             if (result == 0) {
                 result = Numbers.fuzzyCompare(left, right, tolerance);
             }
@@ -5227,8 +5971,22 @@ public class Builder<T> {
          * This method is useful for comparing floating-point numbers that may have
          * small differences due to rounding errors or precision limitations.
          *
-         * <p>Values are considered equal if their absolute difference is less than
-         * or equal to the specified tolerance.</p>
+         * <p>Values are considered equal if their absolute difference is less than or equal to the
+         * specified tolerance, as defined by {@link Numbers#fuzzyEquals(double, double, double)}. Two cases
+         * do not follow from that difference: two {@code NaN}s are equal at any tolerance, and two
+         * infinities of the same sign are equal at any tolerance (their difference is {@code NaN}).</p>
+         *
+         * <p><b>Warning - this comparison is not transitive, so the chain is no longer a valid ordering.</b>
+         * With a tolerance of {@code 0.01}, {@code 0} and {@code 0.009} compare equal and {@code 0.009} and
+         * {@code 0.018} compare equal, yet {@code 0} and {@code 0.018} do not. A {@link Comparable#compareTo}
+         * or {@link java.util.Comparator} built on a chain containing this call therefore violates its general
+         * contract, and sorting with it can fail with
+         * {@code IllegalArgumentException: Comparison method violates its general contract!} on inputs large
+         * enough for TimSort to detect it. Use it for one-off comparisons, not for ordering.</p>
+         *
+         * <p>Values that are not fuzzily equal are ordered as by
+         * {@link Numbers#fuzzyCompare(double, double, double)}, which places every {@code NaN} above every
+         * other value, {@code +Infinity} included.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -5243,7 +6001,11 @@ public class Builder<T> {
          * @return this ComparisonBuilder instance for method chaining
          * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
          */
-        public ComparisonBuilder compare(final double left, final double right, final double tolerance) {
+        public ComparisonBuilder compare(final double left, final double right, final double tolerance) throws IllegalArgumentException {
+            // Validate before the short-circuit: otherwise an invalid tolerance would only be reported when
+            // no earlier comparison in the chain had already decided the result.
+            checkTolerance(tolerance);
+
             if (result == 0) {
                 result = Numbers.fuzzyCompare(left, right, tolerance);
             }
@@ -5325,6 +6087,12 @@ public class Builder<T> {
          * <p>This method handles {@code null} values gracefully, considering two null
          * values as equal.</p>
          *
+         * <p>Arrays are compared <b>by identity</b>, matching {@link N#equals(Object, Object)}: two distinct
+         * arrays with equal contents are <i>not</i> equal here. Use
+         * {@link #equals(Object, Object, BiPredicate)} with, for example, {@code N::deepEquals} to compare array
+         * contents. This is consistent with {@link HashCodeBuilder#hash(Object)}, which also hashes arrays by
+         * identity.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Builder
@@ -5352,17 +6120,22 @@ public class Builder<T> {
          *
          * <p>This allows for custom equality logic beyond standard equals() method.</p>
          *
+         * <p><b>The predicate receives the arguments unchanged, {@code null} included.</b> Unlike
+         * {@link #equals(Object, Object)}, no null-handling is applied before the call, so a predicate that
+         * dereferences its arguments must guard them itself.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Builder
-         *     .equals(str1, str2, (a, b) -> a.equalsIgnoreCase(b))
+         *     .equals(str1, str2, (a, b) -> a == null ? b == null : a.equalsIgnoreCase(b))
          *     .result();
          * }</pre>
          *
          * @param <T> the type of objects being compared
-         * @param left the first object to compare
-         * @param right the second object to compare
-         * @param predicate the predicate to check equality.
+         * @param left the first object to compare, may be {@code null}
+         * @param right the second object to compare, may be {@code null}
+         * @param predicate the predicate to check equality; invoked with the arguments as given, so it is
+         *        called even when both are {@code null}
          * @return this EquivalenceBuilder instance for method chaining
          * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
@@ -5556,8 +6329,17 @@ public class Builder<T> {
          * This method is useful for comparing floating-point numbers that may have
          * small differences due to rounding errors or precision limitations.
          *
-         * <p>Values are considered equal if their absolute difference is less than
-         * or equal to the specified tolerance.</p>
+         * <p>Values are considered equal if their absolute difference is less than or equal to the
+         * specified tolerance, as defined by {@link Numbers#fuzzyEquals(double, double, double)}. Two cases
+         * do not follow from that difference: two {@code NaN}s are equal at any tolerance, and two
+         * infinities of the same sign are equal at any tolerance (their difference is {@code NaN}).</p>
+         *
+         * <p><b>Warning - fuzzy equality is not transitive.</b> With a tolerance of {@code 0.01}, {@code 0}
+         * equals {@code 0.009} and {@code 0.009} equals {@code 0.018}, yet {@code 0} does not equal
+         * {@code 0.018}. An {@link Object#equals(Object)} built on a chain containing this call therefore
+         * violates the equivalence contract, and the only {@link Object#hashCode()} consistent with it is a
+         * constant - which would put every instance in one hash bucket. Use it for assertions and one-off
+         * checks, not for the identity of a value type.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -5572,7 +6354,11 @@ public class Builder<T> {
          * @return this EquivalenceBuilder instance for method chaining
          * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
          */
-        public EquivalenceBuilder equals(final float left, final float right, final float tolerance) {
+        public EquivalenceBuilder equals(final float left, final float right, final float tolerance) throws IllegalArgumentException {
+            // Validate before the short-circuit: otherwise an invalid tolerance would only be reported when
+            // no earlier comparison in the chain had already produced false.
+            checkTolerance(tolerance);
+
             if (result) {
                 result = Numbers.fuzzyEquals(left, right, tolerance);
             }
@@ -5613,8 +6399,17 @@ public class Builder<T> {
          * This method is useful for comparing floating-point numbers that may have
          * small differences due to rounding errors or precision limitations.
          *
-         * <p>Values are considered equal if their absolute difference is less than
-         * or equal to the specified tolerance.</p>
+         * <p>Values are considered equal if their absolute difference is less than or equal to the
+         * specified tolerance, as defined by {@link Numbers#fuzzyEquals(double, double, double)}. Two cases
+         * do not follow from that difference: two {@code NaN}s are equal at any tolerance, and two
+         * infinities of the same sign are equal at any tolerance (their difference is {@code NaN}).</p>
+         *
+         * <p><b>Warning - fuzzy equality is not transitive.</b> With a tolerance of {@code 0.01}, {@code 0}
+         * equals {@code 0.009} and {@code 0.009} equals {@code 0.018}, yet {@code 0} does not equal
+         * {@code 0.018}. An {@link Object#equals(Object)} built on a chain containing this call therefore
+         * violates the equivalence contract, and the only {@link Object#hashCode()} consistent with it is a
+         * constant - which would put every instance in one hash bucket. Use it for assertions and one-off
+         * checks, not for the identity of a value type.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -5629,7 +6424,11 @@ public class Builder<T> {
          * @return this EquivalenceBuilder instance for method chaining
          * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
          */
-        public EquivalenceBuilder equals(final double left, final double right, final double tolerance) {
+        public EquivalenceBuilder equals(final double left, final double right, final double tolerance) throws IllegalArgumentException {
+            // Validate before the short-circuit: otherwise an invalid tolerance would only be reported when
+            // no earlier comparison in the chain had already produced false.
+            checkTolerance(tolerance);
+
             if (result) {
                 result = Numbers.fuzzyEquals(left, right, tolerance);
             }
@@ -5673,6 +6472,28 @@ public class Builder<T> {
      * ({@code result = result * 31 + hash(value)}). This
      * provides good distribution of hash values for use in hash-based collections.</p>
      *
+     * <p><b>The running total starts at 0</b>, not at 1 as {@link java.util.Objects#hash(Object...)} and
+     * {@link java.util.Arrays#hashCode(Object[])} do. Two consequences:</p>
+     * <ul>
+     *   <li>A single-value chain is the identity: {@code Builder.hash(x).result()} equals
+     *       {@code N.hashCode(x)}, and for a non-null {@code x} that is {@code x.hashCode()}.</li>
+     *   <li>Leading values whose hash is 0 &mdash; a {@code null} reference, the zero of every numeric or
+     *       {@code char} primitive ({@code 0}, {@code 0L}, {@code 0.0f}, {@code 0.0}, {@code (byte) 0},
+     *       {@code (short) 0}, {@code '\u005Cu0000'}), and <i>any</i> object whose {@code hashCode()} is 0, such as
+     *       the empty {@code String}, an empty {@code Set} or an empty {@code Map} &mdash; do not change the result,
+     *       so chains of <i>different</i> lengths can collide: {@code Builder.hash(nullRef).hash(x)} equals
+     *       {@code Builder.hash(x)}. This is harmless for the intended use &mdash; deriving one class's
+     *       {@code hashCode()} from a fixed list of fields &mdash; because at a fixed chain length the seed is only a
+     *       constant offset, leaving the distribution identical to a seed of 1. Prefer
+     *       {@link java.util.Objects#hash(Object...)} if you need chains of varying length to be distinguished. Note
+     *       that {@code false} hashes to 1237, that {@code -0.0f} and {@code -0.0} hash to {@link Integer#MIN_VALUE},
+     *       and that an empty {@code List} hashes to 1, so none of those is a zero-hash value.</li>
+     * </ul>
+     *
+     * <p><b>Arrays</b> are hashed by identity, because {@link #hash(Object)} delegates to
+     * {@link N#hashCode(Object)}. Use {@link #hash(Object, ToIntFunction)} with, for example,
+     * {@code Arrays::hashCode} to hash an array by content.</p>
+     *
      * <p><strong>Thread Safety:</strong> This class is not thread-safe and should
      * not be shared between threads.</p>
      *
@@ -5701,7 +6522,13 @@ public class Builder<T> {
          * which handles {@code null} values gracefully (returning 0 for null).
          *
          * <p>The hash code is updated using the formula:
-         * {@code result = result * 31 + hashCode(value)}</p>
+         * {@code result = result * 31 + hashCode(value)}, starting from a running total of 0 &mdash; so the
+         * first value in a chain contributes its own hash unchanged. See the class javadoc for what that
+         * implies.</p>
+         *
+         * <p>An array argument is hashed <b>by identity</b>, matching {@link N#hashCode(Object)}. To hash one by
+         * content, use {@link #hash(Object, ToIntFunction)} with {@code Arrays::hashCode} (or
+         * {@code Arrays::deepHashCode} for a nested array).</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -5729,6 +6556,10 @@ public class Builder<T> {
          * <p>The hash code is updated using the formula:
          * {@code result = result * 31 + func.applyAsInt(value)}</p>
          *
+         * <p><b>The function receives {@code value} unchanged, {@code null} included.</b> Unlike
+         * {@link #hash(Object)}, no null-handling is applied before the call, so a function that dereferences
+         * its argument must guard it itself.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Builder
@@ -5738,12 +6569,16 @@ public class Builder<T> {
          * }</pre>
          *
          * @param <T> the type of the value
-         * @param value the value to hash
+         * @param value the value to hash; handed to {@code func} as given, so it may be {@code null} only if
+         *        {@code func} accepts {@code null}
          * @param func the function to compute the hash code.
          * @return this HashCodeBuilder instance for method chaining
          * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws NullPointerException if {@code func} dereferences a {@code null} {@code value}; the exception
+         *         comes from {@code func}, not from a check performed here, and any other exception {@code func}
+         *         throws propagates unchanged
          */
-        public <T> HashCodeBuilder hash(final T value, final ToIntFunction<? super T> func) throws IllegalArgumentException {
+        public <T> HashCodeBuilder hash(final T value, final ToIntFunction<? super T> func) throws IllegalArgumentException, NullPointerException {
             N.checkArgNotNull(func, cs.func);
 
             result = result * 31 + func.applyAsInt(value);

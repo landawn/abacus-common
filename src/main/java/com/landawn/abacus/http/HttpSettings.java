@@ -68,13 +68,29 @@ public final class HttpSettings {
 
     private long readTimeout;
 
-    private boolean useCaches = false;
+    /** Default applied by {@link #useCaches()} when the flag was never set on this instance. */
+    static final boolean DEFAULT_USE_CACHES = false;
 
-    private boolean doInput = true;
+    /** Default applied by {@link #doInput()} when the flag was never set on this instance. */
+    static final boolean DEFAULT_DO_INPUT = true;
 
-    private boolean doOutput = true;
+    /** Default applied by {@link #doOutput()} when the flag was never set on this instance. */
+    static final boolean DEFAULT_DO_OUTPUT = true;
 
-    private boolean isOneWayRequest = false;
+    /** Default applied by {@link #isOneWayRequest()} when the flag was never set on this instance. */
+    static final boolean DEFAULT_ONE_WAY_REQUEST = false;
+
+    // The four connection flags are tri-state: null means "never set on this instance", which is
+    // what lets HttpClient layer a per-request HttpSettings on top of the client-level defaults.
+    // A plain boolean cannot distinguish an explicitly requested false from "unset", so a request
+    // settings object created only to add a header used to silently reset these flags.
+    private Boolean useCaches;
+
+    private Boolean doInput;
+
+    private Boolean doOutput;
+
+    private Boolean isOneWayRequest;
 
     private ContentFormat contentFormat;
 
@@ -319,6 +335,17 @@ public final class HttpSettings {
      * @return {@code true} if caches should be used, {@code false} otherwise
      */
     public boolean useCaches() { // NOSONAR
+        return useCaches == null ? DEFAULT_USE_CACHES : useCaches;
+    }
+
+    /**
+     * Returns the raw tri-state value of the {@code useCaches} flag, or {@code null} if it was never
+     * set on this instance. Used by {@link HttpClient} to layer per-request settings over the
+     * client-level defaults without letting an unset flag overwrite a configured one.
+     *
+     * @return {@link Boolean#TRUE}/{@link Boolean#FALSE} if explicitly set, otherwise {@code null}
+     */
+    Boolean useCachesOrNull() {
         return useCaches;
     }
 
@@ -360,6 +387,17 @@ public final class HttpSettings {
      * @see java.net.HttpURLConnection#setDoInput(boolean)
      */
     public boolean doInput() {
+        return doInput == null ? DEFAULT_DO_INPUT : doInput;
+    }
+
+    /**
+     * Returns the raw tri-state value of the {@code doInput} flag, or {@code null} if it was never
+     * set on this instance.
+     *
+     * @return {@link Boolean#TRUE}/{@link Boolean#FALSE} if explicitly set, otherwise {@code null}
+     * @see #useCachesOrNull()
+     */
+    Boolean doInputOrNull() {
         return doInput;
     }
 
@@ -402,6 +440,17 @@ public final class HttpSettings {
      * @see java.net.HttpURLConnection#setDoOutput(boolean)
      */
     public boolean doOutput() {
+        return doOutput == null ? DEFAULT_DO_OUTPUT : doOutput;
+    }
+
+    /**
+     * Returns the raw tri-state value of the {@code doOutput} flag, or {@code null} if it was never
+     * set on this instance.
+     *
+     * @return {@link Boolean#TRUE}/{@link Boolean#FALSE} if explicitly set, otherwise {@code null}
+     * @see #useCachesOrNull()
+     */
+    Boolean doOutputOrNull() {
         return doOutput;
     }
 
@@ -446,6 +495,17 @@ public final class HttpSettings {
      * @return {@code true} if this is a one-way request
      */
     public boolean isOneWayRequest() {
+        return isOneWayRequest == null ? DEFAULT_ONE_WAY_REQUEST : isOneWayRequest;
+    }
+
+    /**
+     * Returns the raw tri-state value of the one-way-request flag, or {@code null} if it was never
+     * set on this instance.
+     *
+     * @return {@link Boolean#TRUE}/{@link Boolean#FALSE} if explicitly set, otherwise {@code null}
+     * @see #useCachesOrNull()
+     */
+    Boolean isOneWayRequestOrNull() {
         return isOneWayRequest;
     }
 
@@ -488,7 +548,10 @@ public final class HttpSettings {
      * settings.getContentFormat();                   // returns ContentFormat.JSON
      * }</pre>
      *
-     * @return the content format, or {@code null} if none was set and none could be derived from the headers
+     * @return the configured content format; when none is configured ({@code null} or
+     *         {@link ContentFormat#NONE}) and any header has been set, the format derived from the
+     *         headers, which is {@link ContentFormat#NONE} when they carry no {@code Content-Type} or
+     *         {@code Content-Encoding}; {@code null} only when neither a format nor any header was ever set
      */
     public ContentFormat getContentFormat() {
         if ((contentFormat == null || contentFormat == ContentFormat.NONE) && headers != null) {
@@ -496,6 +559,31 @@ public final class HttpSettings {
         }
 
         return contentFormat;
+    }
+
+    /**
+     * Returns the content format exactly as configured through {@link #setContentFormat(ContentFormat)},
+     * without deriving one from the headers. Used when this instance is copied into another
+     * {@code HttpSettings}: copying the header-derived value would freeze it into the target's field,
+     * where it would outlive later header changes that the derivation would otherwise follow
+     * (a {@code Content-Type} rewritten by a body setter, for example).
+     *
+     * @return the configured content format, or {@code null} if none was set
+     */
+    ContentFormat contentFormatOrNull() {
+        return contentFormat;
+    }
+
+    /**
+     * Returns the live headers object if one has been created, without creating an empty one as
+     * {@link #headers()} does. Lets read-only consumers inspect a settings object that is shared as a
+     * template without mutating it (an empty {@code HttpHeaders} flips {@link #getContentFormat()}
+     * from {@code null} to {@link ContentFormat#NONE}).
+     *
+     * @return the headers, or {@code null} if no header has ever been set
+     */
+    HttpHeaders headersOrNull() {
+        return headers;
     }
 
     /**
@@ -678,7 +766,7 @@ public final class HttpSettings {
      * @throws IllegalArgumentException if {@code name} is {@code null}.
      * @see HttpHeaders
      */
-    public HttpSettings header(final String name, final Object value) {
+    public HttpSettings header(final String name, final Object value) throws IllegalArgumentException {
         headers().set(name, value);
 
         return this;
@@ -704,7 +792,7 @@ public final class HttpSettings {
      * @throws IllegalArgumentException if {@code name1} or {@code name2} is {@code null}.
      * @see HttpHeaders
      */
-    public HttpSettings headers(final String name1, final Object value1, final String name2, final Object value2) {
+    public HttpSettings headers(final String name1, final Object value1, final String name2, final Object value2) throws IllegalArgumentException {
         headers().set(name1, value1);
         headers().set(name2, value2);
 
@@ -736,7 +824,8 @@ public final class HttpSettings {
      * @throws IllegalArgumentException if {@code name1}, {@code name2} or {@code name3} is {@code null}.
      * @see HttpHeaders
      */
-    public HttpSettings headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
+    public HttpSettings headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3)
+            throws IllegalArgumentException {
         headers().set(name1, value1);
         headers().set(name2, value2);
         headers().set(name3, value3);
@@ -767,12 +856,13 @@ public final class HttpSettings {
      *
      * @param headers a map containing header names and values to merge in; must not be {@code null}
      * @return this HttpSettings instance for method chaining
-     * @throws NullPointerException if {@code headers} is {@code null}
-     * @throws IllegalArgumentException if any key in {@code headers} is {@code null}.
+     * @throws IllegalArgumentException if {@code headers} or any key in {@code headers} is {@code null}.
      * @see HttpHeaders
      * @see #setHeaders(HttpHeaders)
      */
-    public HttpSettings headers(final Map<String, ?> headers) {
+    public HttpSettings headers(final Map<String, ?> headers) throws IllegalArgumentException {
+        N.checkArgNotNull(headers, cs.headers);
+
         headers().setAll(headers);
 
         return this;
@@ -797,10 +887,11 @@ public final class HttpSettings {
      *
      * @param headers the HttpHeaders to set (replacing all existing headers); {@code null} clears all headers
      * @return this HttpSettings instance for method chaining
+     * @throws IllegalArgumentException if copying the supplied headers encounters a {@code null} header name.
      * @see HttpHeaders
      * @see #headers(Map)
      */
-    public HttpSettings setHeaders(final HttpHeaders headers) {
+    public HttpSettings setHeaders(final HttpHeaders headers) throws IllegalArgumentException {
         if (this.headers == headers) {
             return this;
         }
@@ -819,12 +910,13 @@ public final class HttpSettings {
      *
      * @param headers the HttpHeaders to set
      * @return this HttpSettings instance for method chaining
+     * @throws IllegalArgumentException if copying the supplied headers encounters a {@code null} header name.
      * @see HttpHeaders
      * @deprecated this name collides semantically with {@link #headers(Map)} (which <i>merges</i>);
      *             use {@link #setHeaders(HttpHeaders)} for the replace-all behavior instead.
      */
     @Deprecated
-    public HttpSettings headers(final HttpHeaders headers) {
+    public HttpSettings headers(final HttpHeaders headers) throws IllegalArgumentException {
         return setHeaders(headers);
     }
 
@@ -877,17 +969,33 @@ public final class HttpSettings {
                 .setReadTimeout(readTimeout)
                 .setSSLSocketFactory(sslSocketFactory)
                 .setProxy(proxy)
-                .useCaches(useCaches)
-                .doInput(doInput)
-                .doOutput(doOutput)
-                .setOneWayRequest(isOneWayRequest)
                 .setContentFormat(contentFormat);
+
+        // Assigned directly rather than through the setters: the setters would turn an unset flag
+        // into an explicitly-set default and defeat the layering described on useCachesOrNull().
+        copy.useCaches = useCaches;
+        copy.doInput = doInput;
+        copy.doOutput = doOutput;
+        copy.isOneWayRequest = isOneWayRequest;
 
         if (headers != null) {
             copy.setHeaders(headers.copy());
         }
 
         return copy;
+    }
+
+    /**
+     * Copies the four tri-state connection flags from {@code source} into this instance, preserving
+     * the "never set" state so that {@link HttpClient}'s per-request layering keeps working.
+     *
+     * @param source the settings to copy the flags from; must not be {@code null}
+     */
+    void copyConnectionFlagsFrom(final HttpSettings source) {
+        useCaches = source.useCaches;
+        doInput = source.doInput;
+        doOutput = source.doOutput;
+        isOneWayRequest = source.isOneWayRequest;
     }
 
     /**
@@ -899,8 +1007,8 @@ public final class HttpSettings {
     @Override
     public String toString() {
         return "{connectTimeout=" + connectTimeout + ", readTimeout=" + readTimeout + ", sslSocketFactory=" + sslSocketFactory + ", proxy=" + proxy
-                + ", useCaches=" + useCaches + ", doInput=" + doInput + ", doOutput=" + doOutput + ", isOneWayRequest=" + isOneWayRequest + ", contentFormat="
-                + contentFormat + ", headers=" + headers + "}";
+                + ", useCaches=" + useCaches() + ", doInput=" + doInput() + ", doOutput=" + doOutput() + ", isOneWayRequest=" + isOneWayRequest()
+                + ", contentFormat=" + contentFormat + ", headers=" + headers + "}";
     }
 
 }

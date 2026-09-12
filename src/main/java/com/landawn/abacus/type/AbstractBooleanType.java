@@ -44,8 +44,9 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * Constructs a new {@code AbstractBooleanType} with the specified type name.
      *
      * @param typeName the name of the boolean type (e.g., "Boolean", "boolean")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractBooleanType(final String typeName) {
+    protected AbstractBooleanType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
@@ -79,14 +80,16 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      *   <li>{@code null} — returns the default value.</li>
      *   <li>{@code Boolean} — returned as-is.</li>
      *   <li>{@code Number} — returns {@code true} if {@code longValue() > 0}, {@code false} otherwise.</li>
-     *   <li>{@code CharSequence} — single character {@code 'Y'}, {@code 'y'}, or {@code '1'} returns
-     *       {@code true}; any other single character returns {@code false}; all other values (including
-     *       the empty string) are parsed using {@link Boolean#valueOf(String)} (case-insensitive
-     *       {@code "true"} yields {@code true}).</li>
+     *   <li>{@code CharSequence} or {@code Character} — leading and trailing padding is removed and the text is then read exactly as by
+     *       {@link #valueOf(String)}: a single {@code 'Y'}, {@code 'y'}, or {@code '1'} returns {@code true}; any
+     *       other single character returns {@code false}; longer text is parsed using
+     *       {@link Boolean#valueOf(String)} (case-insensitive {@code "true"} yields {@code true}).</li>
      *   <li>Other objects — converted via {@code Boolean.valueOf(obj.toString())}.</li>
      * </ul>
-     * <p><b>Note:</b> unlike {@link #valueOf(String)}, this method does not special-case the empty
-     * string: an empty {@code CharSequence} yields {@link Boolean#FALSE} rather than the default value.</p>
+     * <p><b>Note:</b> unlike {@link #valueOf(String)}, this method does not special-case blank text: an empty or
+     * whitespace-only {@code CharSequence} yields {@link Boolean#FALSE} rather than the default value. A
+     * {@code Character} is treated as a one-character string, so {@code 'Y'}, {@code 'y'} and {@code '1'} yield
+     * {@code true} (earlier releases passed it through {@code Boolean.valueOf}, which always gave {@code false}).</p>
      *
      * @param obj the source object to convert, may be {@code null}
      * @return the corresponding {@code Boolean} value, or the default value if the input is {@code null}
@@ -105,8 +108,12 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
             return num.longValue() > 0;
         }
 
-        if (obj instanceof CharSequence) {
-            return parseBoolean(obj.toString());
+        if (obj instanceof CharSequence || obj instanceof Character) {
+            final String str = obj.toString();
+
+            // Blank (not only empty) keeps the documented FALSE special case; everything else follows the padding-
+            // stripped valueOf(String) rule so " Y" and Character 'Y' agree with the String overload (and XML with JSON).
+            return Strings.isBlank(str) ? Boolean.FALSE : parseBoolean(str);
         }
 
         return Boolean.valueOf(obj.toString());
@@ -116,7 +123,11 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * Converts the specified string to a {@code Boolean} value.
      * This method handles various string formats:
      * <ul>
-     *   <li>Empty or {@code null} strings return the default value.</li>
+     *   <li>{@code null}, empty or whitespace-only strings return the default value.</li>
+     *   <li>Other strings have leading and trailing padding removed before parsing (so {@code " Y"} and
+     *       {@code " true "} are accepted). Padding is a character the blank test above would discard
+     *       ({@linkplain Character#isWhitespace(char) Unicode whitespace}, e.g. {@code U+3000}) or a character
+     *       {@code <= ' '} (e.g. {@code U+0001}); interior padding is not removed.</li>
      *   <li>Single character strings: {@code 'Y'}, {@code 'y'}, or {@code '1'} return {@code true};
      *       any other single character returns {@code false}.</li>
      *   <li>Other strings are parsed using {@link Boolean#valueOf(String)} (i.e. {@code true} only
@@ -128,7 +139,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to convert, may be {@code null}
-     * @return the {@code Boolean} value, or the default value if the input is empty or {@code null}
+     * @return the {@code Boolean} value, or the default value if the input is {@code null} or blank
      * @see #valueOf(Object)
      * @see #stringOf(Boolean)
      */
@@ -138,7 +149,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
             return defaultValue();
         }
 
-        return parseBoolean(str.trim());
+        return parseBoolean(str);
     }
 
     /**
@@ -148,8 +159,13 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * </p>
      * <ul>
      *   <li>{@code null} or zero-length region — returns the default value.</li>
-     *   <li>Single character {@code 'Y'}, {@code 'y'}, or {@code '1'} — returns {@code true}.</li>
+     *   <li>Single character {@code 'Y'}, {@code 'y'}, or {@code '1'} — returns {@code true}; any other single
+     *       non-padding character — returns {@code false}.</li>
      *   <li>Four-character sequence equal to {@code "true"} (case-insensitive) — returns {@code true}.</li>
+     *   <li>A region that begins or ends with padding (a character {@code <= ' '} or any
+     *       {@linkplain Character#isWhitespace(char) Unicode whitespace}) — read as by
+     *       {@link #valueOf(String)}: stripped first, so {@code " Y"} and {@code " true "} return {@code true} and a
+     *       whitespace-only region (of any length) returns the default value. Interior whitespace is not removed.</li>
      *   <li>Any other value — returns {@code false}.</li>
      * </ul>
      *
@@ -157,21 +173,40 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @param offset the starting position in the array (0-based)
      * @param len the number of characters to read
      * @return the corresponding {@code Boolean} value, or the default value if {@code cbuf} is {@code null} or {@code len} is 0
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
      */
     @Override
-    public Boolean valueOf(final char[] cbuf, final int offset, final int len) {
+    public Boolean valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException {
         if ((cbuf == null) || (len == 0)) {
             return defaultValue();
         }
 
         if (len == 1) {
             final char ch = cbuf[offset];
-            return ch == 'Y' || ch == 'y' || ch == '1';
+
+            if (ch == 'Y' || ch == 'y' || ch == '1') {
+                return Boolean.TRUE;
+            }
+
+            // A lone padding character is text that valueOf(String) - and therefore the XML reader - either rejects
+            // as blank (the default value) or strips away, leaving "" for Boolean.valueOf (FALSE). Which of the two
+            // it is depends on the character, so defer to it rather than answering FALSE here.
+            return isPadding(ch) ? valueOf(String.valueOf(ch)) : Boolean.FALSE;
         }
 
-        return ((len == 4) && (((cbuf[offset] == 't') || (cbuf[offset] == 'T')) && ((cbuf[offset + 1] == 'r') || (cbuf[offset + 1] == 'R'))
-                && ((cbuf[offset + 2] == 'u') || (cbuf[offset + 2] == 'U')) && ((cbuf[offset + 3] == 'e') || (cbuf[offset + 3] == 'E')))) ? Boolean.TRUE
-                        : Boolean.FALSE;
+        if ((len == 4) && (((cbuf[offset] == 't') || (cbuf[offset] == 'T')) && ((cbuf[offset + 1] == 'r') || (cbuf[offset + 1] == 'R'))
+                && ((cbuf[offset + 2] == 'u') || (cbuf[offset + 2] == 'U')) && ((cbuf[offset + 3] == 'e') || (cbuf[offset + 3] == 'E')))) {
+            return Boolean.TRUE;
+        }
+
+        // Miss path only: a region padded with whitespace (" Y", " true ") is read by valueOf(String) so the JSON
+        // (char[]) and XML (String) deserializers agree; the fast checks above keep the common case allocation-free.
+        // isPadding covers both definitions (<= ' ' and Character.isWhitespace), as parseBoolean's strip does.
+        if (isPadding(cbuf[offset]) || isPadding(cbuf[offset + len - 1])) {
+            return valueOf(new String(cbuf, offset, len));
+        }
+
+        return Boolean.FALSE;
     }
 
     /**
@@ -202,10 +237,11 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
      * @return the boolean value at the specified column, or {@code false} if the value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Boolean get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Boolean get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getBoolean(columnIndex);
     }
 
@@ -217,10 +253,11 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
      * @return the boolean value at the specified column, or {@code false} if the value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public Boolean get(final ResultSet rs, final String columnName) throws SQLException {
+    public Boolean get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getBoolean(columnName);
     }
 
@@ -231,10 +268,11 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the boolean value to set, or {@code null} for SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Boolean x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Boolean x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, java.sql.Types.BOOLEAN);
         } else {
@@ -249,10 +287,11 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the boolean value to set, or {@code null} for SQL {@code NULL}
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Boolean x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Boolean x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, java.sql.Types.BOOLEAN);
         } else {
@@ -270,7 +309,8 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the boolean value to append, may be {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -282,7 +322,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Boolean x) throws IOException {
+    public void appendTo(final Appendable appendable, final Boolean x) throws NullPointerException, IOException {
         appendable.append((x == null) ? NULL_STRING : (x ? TRUE_STRING : FALSE_STRING));
     }
 
@@ -301,10 +341,11 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the boolean value to write, may be {@code null}
      * @param config the serialization configuration, may be {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, Boolean x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, Boolean x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         x = x == null && config != null && config.isWriteNullBooleanAsFalse() ? Boolean.FALSE : x;
 
         writer.write((x == null) ? NULL_CHAR_ARRAY : (x ? TRUE_CHAR_ARRAY : FALSE_CHAR_ARRAY));

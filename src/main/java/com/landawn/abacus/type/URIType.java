@@ -20,6 +20,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * Type handler for {@link java.net.URI} instances.
  * <p>
@@ -137,8 +139,9 @@ public class URIType extends AbstractType<URI> {
      * @see #valueOf(Object)
      * @see #stringOf(URI)
      */
+    @MayReturnNull
     @Override
-    public URI valueOf(final String str) {
+    public URI valueOf(final String str) throws IllegalArgumentException {
         if (str == null) {
             return null; // NOSONAR
         }
@@ -174,10 +177,12 @@ public class URIType extends AbstractType<URI> {
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) of the URI value
      * @return the URI value, or {@code null} if the database value is NULL
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws IllegalArgumentException if the column text violates URI syntax.
      */
     @Override
-    public URI get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public URI get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, IllegalArgumentException {
         return valueOf(rs.getString(columnIndex));
     }
 
@@ -198,10 +203,12 @@ public class URIType extends AbstractType<URI> {
      * @param rs the ResultSet to read from
      * @param columnName the label of the column containing the URI value
      * @return the URI value, or {@code null} if the database value is NULL
-     * @throws SQLException if a database access error occurs or the column label is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws IllegalArgumentException if the column text violates URI syntax.
      */
     @Override
-    public URI get(final ResultSet rs, final String columnName) throws SQLException {
+    public URI get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, IllegalArgumentException {
         return valueOf(rs.getString(columnName));
     }
 
@@ -222,10 +229,11 @@ public class URIType extends AbstractType<URI> {
      * @param stmt the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the URI value
      * @param x the URI value to set, or {@code null} for SQL NULL
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final URI x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final URI x) throws NullPointerException, SQLException {
         stmt.setString(columnIndex, stringOf(x));
     }
 
@@ -246,10 +254,11 @@ public class URIType extends AbstractType<URI> {
      * @param stmt the CallableStatement to set the value in
      * @param parameterName the name of the parameter where to set the URI value
      * @param x the URI value to set, or {@code null} for SQL NULL
-     * @throws SQLException if a database access error occurs or the parameter name is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final URI x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final URI x) throws NullPointerException, SQLException {
         stmt.setString(parameterName, stringOf(x));
     }
 }

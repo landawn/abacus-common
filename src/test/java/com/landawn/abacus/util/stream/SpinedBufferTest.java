@@ -588,4 +588,77 @@ public class SpinedBufferTest extends TestBase {
         Assertions.assertEquals("x", result2[0]);
         Assertions.assertEquals("y", result2[1]);
     }
+
+    /**
+     * The spine must grow <b>geometrically</b>, not by a constant increment.
+     *
+     * <p>{@code CHUNK_SIZE} is a fixed constant, so a buffer of {@code n} elements needs
+     * {@code n / CHUNK_SIZE} chunks. Growing the spine by a constant would reallocate and copy it a
+     * linear number of times, making {@code add} quadratic overall (measured: 123.6 ms vs 4.4 ms for
+     * 800k elements, and a per-element cost climbing 63 -> 154 ns instead of staying flat).
+     *
+     * <p>Doubling is asserted structurally rather than by timing, so the test cannot flake: the spine
+     * length stays a power of two. Under the previous constant-increment policy these same sizes
+     * produced 56 / 224 / 1112 / 11112, none of which is a power of two.
+     */
+    @Test
+    public void testSpineGrowsGeometrically() throws Exception {
+        for (final int n : new int[] { 500, 2000, 10000, 100000 }) {
+            final SpinedBuffer<Integer> buffer = new SpinedBuffer<>();
+
+            for (int i = 0; i < n; i++) {
+                buffer.add(i);
+            }
+
+            final int spineLength = spineLengthOf(buffer);
+            Assertions.assertEquals(1, Integer.bitCount(spineLength),
+                    "spine must grow by doubling, but for n=" + n + " its length is " + spineLength + " (not a power of two)");
+
+            // the new indexing must still read back every element in order
+            Assertions.assertEquals(n, buffer.size());
+            int expected = 0;
+            for (final Integer actual : buffer) {
+                Assertions.assertEquals(expected++, actual.intValue());
+            }
+            Assertions.assertEquals(n, expected);
+        }
+    }
+
+    /** The three primitive variants carry their own copy of the growth code, so each is pinned too. */
+    @Test
+    public void testSpineGrowsGeometricallyForPrimitiveBuffers() throws Exception {
+        final int n = 2000;
+
+        final SpinedBuffer.OfInt intBuffer = new SpinedBuffer.OfInt();
+        final SpinedBuffer.OfLong longBuffer = new SpinedBuffer.OfLong();
+        final SpinedBuffer.OfDouble doubleBuffer = new SpinedBuffer.OfDouble();
+
+        for (int i = 0; i < n; i++) {
+            intBuffer.accept(i);
+            longBuffer.accept(i);
+            doubleBuffer.accept(i);
+        }
+
+        Assertions.assertEquals(1, Integer.bitCount(spineLengthOf(intBuffer)), "SpinedBuffer.OfInt spine must grow by doubling");
+        Assertions.assertEquals(1, Integer.bitCount(spineLengthOf(longBuffer)), "SpinedBuffer.OfLong spine must grow by doubling");
+        Assertions.assertEquals(1, Integer.bitCount(spineLengthOf(doubleBuffer)), "SpinedBuffer.OfDouble spine must grow by doubling");
+
+        Assertions.assertEquals(n, intBuffer.size());
+        Assertions.assertEquals(n, longBuffer.size());
+        Assertions.assertEquals(n, doubleBuffer.size());
+
+        final IntIterator intIter = intBuffer.iterator();
+        for (int i = 0; i < n; i++) {
+            Assertions.assertEquals(i, intIter.nextInt());
+        }
+        Assertions.assertFalse(intIter.hasNext());
+    }
+
+    private static int spineLengthOf(final Object buffer) throws Exception {
+        final java.lang.reflect.Field field = buffer.getClass().getDeclaredField("spine");
+        field.setAccessible(true);
+        final Object spine = field.get(buffer);
+
+        return spine == null ? 0 : java.lang.reflect.Array.getLength(spine);
+    }
 }

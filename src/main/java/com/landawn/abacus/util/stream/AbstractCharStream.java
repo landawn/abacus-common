@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -97,7 +96,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream rateLimited(final RateLimiter rateLimiter) throws IllegalArgumentException {
+    public CharStream rateLimited(final RateLimiter rateLimiter) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(rateLimiter, cs.rateLimiter);
@@ -113,12 +112,12 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream delay(final Duration delay) throws IllegalArgumentException {
+    public CharStream delay(final Duration duration) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        checkArgNotNull(delay, cs.delay);
+        checkArgNotNull(duration, cs.duration);
 
-        final long millis = delay.toMillis();
+        final long millis = duration.toMillis();
 
         final CharConsumer action = new CharConsumer() {
             private boolean isFirst = true;
@@ -142,7 +141,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream debounce(Duration duration) throws IllegalArgumentException {
+    public CharStream debounce(Duration duration) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(duration, cs.duration);
@@ -155,7 +154,7 @@ abstract class AbstractCharStream extends CharStream {
         final CharIteratorEx iter = iteratorEx();
 
         return newStream(new CharIteratorEx() { //NOSONAR
-            private final long durationNanos = TimeUnit.MILLISECONDS.toNanos(duration.toMillis());
+            private final long durationMillis = duration.toMillis();
             private char prev = 0; // the most recent element of the current burst, awaiting a quiet gap
             private boolean hasPrev = false;
             private long prevTime = 0;
@@ -170,13 +169,13 @@ abstract class AbstractCharStream extends CharStream {
 
                 while (iter.hasNext()) {
                     final char val = iter.nextChar();
-                    final long now = System.nanoTime();
+                    final long now = System.currentTimeMillis();
 
                     if (!hasPrev) {
                         prev = val;
                         prevTime = now;
                         hasPrev = true;
-                    } else if (now - prevTime >= durationNanos) {
+                    } else if (now - prevTime >= durationMillis) {
                         // prev was followed by a quiet gap >= duration -> emit it; val starts the next burst.
                         next = prev;
                         hasNext = true;
@@ -214,7 +213,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream skipUntil(final CharPredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public CharStream skipUntil(final CharPredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -233,7 +232,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream flatMapArray(final CharFunction<char[]> mapper) throws IllegalArgumentException, IllegalStateException {
+    public CharStream flatMapArray(final CharFunction<char[]> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -242,7 +241,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public <T> Stream<T> flatmapToObj(final CharFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final CharFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -251,7 +250,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public <T> Stream<T> flatMapArrayToObj(final CharFunction<T[]> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatMapArrayToObj(final CharFunction<T[]> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -260,7 +259,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream mapPartial(final CharFunction<OptionalChar> mapper) throws IllegalArgumentException {
+    public CharStream mapPartial(final CharFunction<OptionalChar> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -275,7 +274,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream rangeMap(final CharBiPredicate sameRange, final CharBinaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
+    public CharStream rangeMap(final CharBiPredicate sameRange, final CharBinaryOperator mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(sameRange, cs.sameRange);
@@ -297,14 +296,19 @@ abstract class AbstractCharStream extends CharStream {
                 left = hasNext ? next : iter.nextChar();
                 right = left;
 
-                while (hasNext = iter.hasNext()) {
+                hasNext = false;
+
+                while (iter.hasNext()) {
                     next = iter.nextChar();
+                    hasNext = true;
 
                     if (sameRange.test(left, next)) {
                         right = next;
                     } else {
                         break;
                     }
+
+                    hasNext = false;
                 }
 
                 return mapper.applyAsChar(left, right);
@@ -314,7 +318,7 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public <T> Stream<T> rangeMapToObj(final CharBiPredicate sameRange, final CharBiFunction<? extends T> mapper)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(sameRange, cs.sameRange);
@@ -336,14 +340,19 @@ abstract class AbstractCharStream extends CharStream {
                 left = hasNext ? next : iter.nextChar();
                 right = left;
 
-                while (hasNext = iter.hasNext()) {
+                hasNext = false;
+
+                while (iter.hasNext()) {
                     next = iter.nextChar();
+                    hasNext = true;
 
                     if (sameRange.test(left, next)) {
                         right = next;
                     } else {
                         break;
                     }
+
+                    hasNext = false;
                 }
 
                 return mapper.apply(left, right);
@@ -352,7 +361,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public Stream<CharList> collapse(final CharBiPredicate collapsible) throws IllegalArgumentException, IllegalStateException {
+    public Stream<CharList> collapse(final CharBiPredicate collapsible) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(collapsible, cs.collapsible);
@@ -373,12 +382,20 @@ abstract class AbstractCharStream extends CharStream {
                 final CharList result = new CharList(9);
                 result.add(hasNext ? next : (next = iter.nextChar()));
 
-                while ((hasNext = iter.hasNext())) {
-                    if (collapsible.test(next, (next = iter.nextChar()))) {
+                hasNext = false;
+
+                while (iter.hasNext()) {
+                    final char previous = next;
+                    next = iter.nextChar();
+                    hasNext = true;
+
+                    if (collapsible.test(previous, next)) {
                         result.add(next);
                     } else {
                         break;
                     }
+
+                    hasNext = false;
                 }
 
                 return result;
@@ -388,7 +405,7 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream collapse(final CharBiPredicate collapsible, final CharBinaryOperator mergeFunction)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(collapsible, cs.collapsible);
@@ -409,12 +426,20 @@ abstract class AbstractCharStream extends CharStream {
             public char nextChar() {
                 char merged = hasNext ? next : (next = iter.nextChar());
 
-                while ((hasNext = iter.hasNext())) {
-                    if (collapsible.test(next, (next = iter.nextChar()))) {
+                hasNext = false;
+
+                while (iter.hasNext()) {
+                    final char previous = next;
+                    next = iter.nextChar();
+                    hasNext = true;
+
+                    if (collapsible.test(previous, next)) {
                         merged = mergeFunction.applyAsChar(merged, next);
                     } else {
                         break;
                     }
+
+                    hasNext = false;
                 }
 
                 return merged;
@@ -424,7 +449,7 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream collapse(final CharTriPredicate collapsible, final CharBinaryOperator mergeFunction)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(collapsible, cs.collapsible);
@@ -446,12 +471,20 @@ abstract class AbstractCharStream extends CharStream {
                 final char first = hasNext ? next : (next = iter.nextChar());
                 char merged = first;
 
-                while ((hasNext = iter.hasNext())) {
-                    if (collapsible.test(first, next, (next = iter.nextChar()))) {
+                hasNext = false;
+
+                while (iter.hasNext()) {
+                    final char previous = next;
+                    next = iter.nextChar();
+                    hasNext = true;
+
+                    if (collapsible.test(first, previous, next)) {
                         merged = mergeFunction.applyAsChar(merged, next);
                     } else {
                         break;
                     }
+
+                    hasNext = false;
                 }
 
                 return merged;
@@ -490,7 +523,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream filter(final CharPredicate predicate, final CharConsumer onDrop) throws IllegalArgumentException, IllegalStateException {
+    public CharStream filter(final CharPredicate predicate, final CharConsumer onDrop) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -507,7 +540,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream dropWhile(final CharPredicate predicate, final CharConsumer onDrop) throws IllegalArgumentException, IllegalStateException {
+    public CharStream dropWhile(final CharPredicate predicate, final CharConsumer onDrop) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -553,7 +586,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream scan(final CharBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public CharStream scan(final CharBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -572,8 +605,9 @@ abstract class AbstractCharStream extends CharStream {
             @Override
             public char nextChar() {
                 if (isFirst) {
+                    accumulated = iter.nextChar();
                     isFirst = false;
-                    return (accumulated = iter.nextChar());
+                    return accumulated;
                 } else {
                     return (accumulated = accumulator.applyAsChar(accumulated, iter.nextChar()));
                 }
@@ -582,7 +616,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream scan(final char init, final CharBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public CharStream scan(final char init, final CharBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -606,7 +640,7 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream scan(final char init, final boolean initIncluded, final CharBinaryOperator accumulator)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -993,7 +1027,7 @@ abstract class AbstractCharStream extends CharStream {
      */
     private CharStream lazyLoad(final UnaryOperator<char[]> op, final boolean sorted) {
         // Preserve sorted state on the outer stream (see AbstractStream.lazyLoad).
-        return newStream(CharIterator.defer(() -> {
+        return newStream(CharIterator.defer(() -> { //NOSONAR
             final char[] a = op.apply(toArrayForIntermediateOp());
             return a == null || a.length == 0 ? CharIterator.empty() : CharIterator.of(a);
         }), sorted);
@@ -1160,6 +1194,7 @@ abstract class AbstractCharStream extends CharStream {
         return newStream(iteratorEx(), isSorted(), isSorted() ? CHAR_COMPARATOR : null);
     }
 
+    @SafeVarargs
     @Override
     public final CharStream prepend(final char... a) throws IllegalStateException {
         assertNotClosed();
@@ -1179,13 +1214,16 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream prepend(final OptionalChar op) throws IllegalStateException {
+    public CharStream prepend(final OptionalChar op) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(op, cs.op);
 
         // return prepend(op.stream());
         return op.isEmpty() ? this : prepend(op.orElseThrow());
     }
 
+    @SafeVarargs
     @Override
     public final CharStream append(final char... a) throws IllegalStateException {
         assertNotClosed();
@@ -1205,13 +1243,16 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream append(final OptionalChar op) { //NOSONAR
+    public CharStream append(final OptionalChar op) throws IllegalStateException, IllegalArgumentException { //NOSONAR
         assertNotClosed();
+
+        checkArgNotNull(op, cs.op);
 
         // return append(op.stream());
         return op.isEmpty() ? this : append(op.orElseThrow());
     }
 
+    @SafeVarargs
     @Override
     public final CharStream appendIfEmpty(final char... a) throws IllegalStateException {
         assertNotClosed();
@@ -1220,7 +1261,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream mergeWith(final CharStream b, final CharBiFunction<MergeResult> nextSelector) throws IllegalArgumentException, IllegalStateException {
+    public CharStream mergeWith(final CharStream b, final CharBiFunction<MergeResult> nextSelector) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(nextSelector, cs.nextSelector);
@@ -1233,9 +1274,10 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public CharStream zipWith(final CharStream b, final CharBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
+    public CharStream zipWith(final CharStream b, final CharBinaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         return CharStream.zip(this, b, zipFunction);
@@ -1243,9 +1285,11 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream zipWith(final CharStream b, final CharStream c, final CharTernaryOperator zipFunction)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
+        checkArgNotNull(c, cs.c);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         return CharStream.zip(this, b, c, zipFunction);
@@ -1253,9 +1297,10 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream zipWith(final CharStream b, final char valueForNoneA, final char valueForNoneB, final CharBinaryOperator zipFunction)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         return CharStream.zip(this, b, valueForNoneA, valueForNoneB, zipFunction);
@@ -1263,9 +1308,11 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public CharStream zipWith(final CharStream b, final CharStream c, final char valueForNoneA, final char valueForNoneB, final char valueForNoneC,
-            final CharTernaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
+            final CharTernaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(b, cs.b);
+        checkArgNotNull(c, cs.c);
         checkArgNotNull(zipFunction, cs.zipFunction);
 
         return CharStream.zip(this, b, c, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction);
@@ -1273,7 +1320,7 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(final Throwables.CharFunction<? extends K, E> keyMapper,
-            final Throwables.CharFunction<? extends V, E2> valueMapper) throws IllegalArgumentException, IllegalStateException, E, E2 {
+            final Throwables.CharFunction<? extends V, E2> valueMapper) throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1285,7 +1332,7 @@ abstract class AbstractCharStream extends CharStream {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.CharFunction<? extends K, E> keyMapper,
             final Throwables.CharFunction<? extends V, E2> valueMapper, final Supplier<? extends M> mapFactory)
-            throws IllegalArgumentException, IllegalStateException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1298,7 +1345,7 @@ abstract class AbstractCharStream extends CharStream {
     @Override
     public <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(final Throwables.CharFunction<? extends K, E> keyMapper,
             final Throwables.CharFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction)
-            throws IllegalArgumentException, IllegalStateException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1310,7 +1357,7 @@ abstract class AbstractCharStream extends CharStream {
 
     @Override
     public <K, D, E extends Exception> Map<K, D> groupTo(final Throwables.CharFunction<? extends K, E> keyMapper,
-            final Collector<? super Character, ?, D> downstream) throws IllegalArgumentException, IllegalStateException, E {
+            final Collector<? super Character, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1319,7 +1366,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public <E extends Exception> void forEachIndexed(final Throwables.IntCharConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> void forEachIndexed(final Throwables.IntCharConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -1395,7 +1442,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public <E extends Exception> OptionalChar findAny(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> OptionalChar findAny(final Throwables.CharPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1452,9 +1499,7 @@ abstract class AbstractCharStream extends CharStream {
     public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException {
         assertNotClosed();
 
-        try {
-            @SuppressWarnings("resource")
-            final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseBuffer();
+        try (final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseBuffer()) {
             @SuppressWarnings("resource")
             final CharIteratorEx iter = iteratorEx();
 
@@ -1488,7 +1533,7 @@ abstract class AbstractCharStream extends CharStream {
     }
 
     @Override
-    public <R> R collect(final Supplier<R> supplier, final ObjCharConsumer<? super R> accumulator) throws IllegalArgumentException, IllegalStateException {
+    public <R> R collect(final Supplier<R> supplier, final ObjCharConsumer<? super R> accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);

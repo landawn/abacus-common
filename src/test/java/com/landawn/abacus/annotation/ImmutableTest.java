@@ -13,7 +13,7 @@ import com.landawn.abacus.TestBase;
 public class ImmutableTest extends TestBase {
 
     @Immutable
-    static class TestImmutableClass {
+    public static class TestImmutableClass {
         private final String value;
 
         public TestImmutableClass(String value) {

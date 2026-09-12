@@ -22,6 +22,9 @@ package com.landawn.abacus.type;
  * {@link #defaultValue()} returns {@code 0.0d} (matching the JLS default for {@code double}),
  * whereas the wrapper type's default is {@code null}.</p>
  *
+ * <p>{@link #isDefaultValue(Object)} compares with {@code equals}, not {@code ==}: {@code -0.0d} is therefore
+ * <i>not</i> the default value (even though {@code 0.0d == -0.0d}), and {@code null} is never the default.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Type<Double> type = TypeFactory.getType(double.class);

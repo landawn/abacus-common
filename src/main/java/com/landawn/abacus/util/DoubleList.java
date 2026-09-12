@@ -16,6 +16,10 @@
 
 package com.landawn.abacus.util;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -51,7 +55,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *   <li><b>Zero-Boxing Overhead:</b> Direct double primitive storage without Double wrapper allocation</li>
  *   <li><b>Memory Efficiency:</b> Compact double array storage with minimal memory overhead</li>
  *   <li><b>Double-Precision Arithmetic:</b> Full support for IEEE 754 double-precision operations</li>
- *   <li><b>Rich Mathematical API:</b> Statistical operations like min, max, median, sum, average</li>
+ *   <li><b>Rich Mathematical API:</b> Statistical operations {@code min()}, {@code max()} and {@code lowerMedian()}; sum and average via {@link #stream()}</li>
  *   <li><b>Set Operations:</b> Occurrence-aware intersection, difference, and symmetric difference operations</li>
  *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
  *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
@@ -121,7 +125,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  *   <li><b>Deletion:</b> O(1) for last element, O(n) for arbitrary position</li>
  *   <li><b>Search:</b> O(n) for contains/indexOf, O(log n) for binary search on sorted data</li>
  *   <li><b>Sorting:</b> O(n log n) using optimized primitive sorting algorithms</li>
- *   <li><b>Parallel Sorting:</b> O(n log n), delegated to the JDK primitive-array parallel sort</li>
+ *   <li><b>Parallel Sorting:</b> O(n log n); delegates to the JDK primitive-array parallel sort for large lists on multi-core hosts, and to the sequential sort otherwise</li>
  *   <li><b>Set Operations:</b> O(n) to O(n²), depending on the operation and input sizes</li>
  *   <li><b>Mathematical Operations:</b> O(n) for statistical calculations</li>
  * </ul>
@@ -209,7 +213,9 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * <ul>
  *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
  *   <li><b>Version Identifier:</b> Declares a fixed {@code serialVersionUID}</li>
- *   <li><b>Format:</b> Default Java serialization includes the backing array, including unused capacity</li>
+ *   <li><b>Format:</b> A custom {@code writeObject} writes only the elements in
+ *       {@code [0, size())}, so spare capacity is never emitted; {@code readObject} rejects a stream whose
+ *       {@code size} does not fit its {@code elementData}</li>
  * </ul>
  *
  * <p><b>Integration with Collections Framework:</b>
@@ -223,7 +229,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * <p><b>Mathematical and Statistical Operations:</b>
  * <ul>
  *   <li><b>Aggregation:</b> Sum, min, max, average operations via stream API</li>
- *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
+ *   <li><b>Central Tendency:</b> {@code lowerMedian()} selects the lower median without sorting or otherwise modifying the list</li>
  *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Duplicate Detection:</b> {@code containsDuplicates()}, {@code removeDuplicates()}</li>
  *   <li><b>Advanced Statistics:</b> Standard deviation, variance via stream operations</li>
@@ -370,7 +376,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws IllegalArgumentException if the specified initial capacity is negative.
      * @throws OutOfMemoryError if the requested array cannot be allocated
      */
-    public DoubleList(final int initialCapacity) throws IllegalArgumentException {
+    public DoubleList(final int initialCapacity) throws IllegalArgumentException, OutOfMemoryError {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
 
         elementData = initialCapacity == 0 ? N.EMPTY_DOUBLE_ARRAY : new double[initialCapacity];
@@ -392,10 +398,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * }</pre>
      *
      * @param a the array to be used as the backing array for this list.
-     * @throws NullPointerException if the specified array is {@code null}
+     * @throws IllegalArgumentException if the specified array is {@code null}
      */
-    public DoubleList(final double[] a) {
-        this(N.requireNonNull(a), a.length);
+    public DoubleList(final double[] a) throws IllegalArgumentException {
+        this(N.checkArgNotNull(a, cs.a), a.length);
     }
 
     /**
@@ -416,10 +422,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param a the array to be used as the backing array for this list.
      * @param size the number of elements in the list. Must be between 0 and {@code a.length} (inclusive).
-     * @throws IndexOutOfBoundsException if {@code size} is negative or greater than {@code a.length}
-     * @throws NullPointerException if {@code a} is {@code null}
+     * @throws IllegalArgumentException if {@code a} is {@code null}
+     *         or if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code size} is greater than the array length
      */
-    public DoubleList(final double[] a, final int size) throws IndexOutOfBoundsException {
+    public DoubleList(final double[] a, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(a, cs.a);
         N.checkFromIndexSize(0, size, a.length);
 
         elementData = a;
@@ -464,9 +472,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param size the number of elements from the array to include in the list.
      *             Must be between 0 and the array length (inclusive).
      * @return a new DoubleList containing the first {@code size} elements of the specified array
-     * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
+     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code size} is greater than the array length
      */
-    public static DoubleList of(final double[] a, final int size) throws IndexOutOfBoundsException {
+    public static DoubleList of(final double[] a, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
 
         return new DoubleList(N.nullToEmpty(a), size);
@@ -516,11 +525,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new DoubleList containing a copy of the elements in the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
-     *                                   or {@code fromIndex > toIndex}
-     * @throws NullPointerException if {@code a} is {@code null}
+     * @throws IllegalArgumentException if {@code a} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > a.length}
      */
-    public static DoubleList copyOf(final double[] a, final int fromIndex, final int toIndex) {
+    public static DoubleList copyOf(final double[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(a, cs.a);
+
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
@@ -541,7 +551,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return a new DoubleList containing <i>len</i> copies of the specified element
      * @throws IllegalArgumentException if len is negative.
      */
-    public static DoubleList repeat(final double element, final int len) {
+    public static DoubleList repeat(final double element, final int len) throws IllegalArgumentException {
         return of(Array.repeat(element, len));
     }
 
@@ -557,11 +567,16 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * DoubleList empty = DoubleList.random(0);   // returns [] (empty)
      * }</pre>
      *
+     * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
+     * deliberate, but it is roughly two orders of magnitude slower than
+     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
+     * and wrap it with {@code of(..)}.</p>
+     *
      * @param len the number of random double values to generate. Must be non-negative.
      * @return a new DoubleList containing <i>len</i> random double values
      * @throws NegativeArraySizeException if len is negative
      */
-    public static DoubleList random(final int len) {
+    public static DoubleList random(final int len) throws NegativeArraySizeException {
         final double[] a = new double[len];
 
         for (int i = 0; i < len; i++) {
@@ -610,7 +625,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
-    public double get(final int index) {
+    public double get(final int index) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         return elementData[index];
@@ -633,7 +648,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
-    public double set(final int index, final double e) {
+    public double set(final int index, final double e) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         final double oldValue = elementData[index];
@@ -660,8 +675,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * }</pre>
      *
      * @param e the element to be appended to this list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void add(final double e) {
+    public void add(final double e) throws OutOfMemoryError {
         ensureCapacity(size + 1);
 
         elementData[size++] = e;
@@ -689,8 +705,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param e the element to be inserted
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void add(final int index, final double e) {
+    public void add(final int index, final double e) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         ensureCapacity(size + 1);
@@ -710,11 +727,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Appends all elements from the specified DoubleList to the end of this list.
      * The elements are appended in the order they appear in the specified list.
      *
-     * @param c the DoubleList containing elements to be added to this list
+     * @param c the DoubleList containing elements to be added to this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty)
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final DoubleList c) {
+    public boolean addAll(final DoubleList c) throws OutOfMemoryError {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -737,12 +756,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * in the specified list.
      *
      * @param index the index at which to insert the first element from the specified list
-     * @param c the DoubleList containing elements to be inserted into this list
+     * @param c the DoubleList containing elements to be inserted into this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list changed as a result of the call (i.e., if c was not empty)
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final int index, final DoubleList c) {
+    public boolean addAll(final int index, final DoubleList c) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(c)) {
@@ -770,11 +791,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Appends all elements from the specified array to the end of this list.
      * The elements are appended in the order they appear in the array.
      *
-     * @param a the array containing elements to be added to this list
+     * @param a the array containing elements to be added to this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty)
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final double[] a) {
+    public boolean addAll(final double[] a) throws OutOfMemoryError {
         return addAll(size(), a);
     }
 
@@ -785,12 +808,14 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * in the array.
      *
      * @param index the index at which to insert the first element from the specified array
-     * @param a the array containing elements to be inserted into this list
+     * @param a the array containing elements to be inserted into this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list changed as a result of the call (i.e., if the array was not empty)
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final int index, final double[] a) {
+    public boolean addAll(final int index, final double[] a) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(a)) {
@@ -814,7 +839,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return true;
     }
 
-    private void rangeCheckForAdd(final int index) {
+    /**
+     * @throws IndexOutOfBoundsException if {@code index < 0} or {@code index > size()}
+     */
+    private void rangeCheckForAdd(final int index) throws IndexOutOfBoundsException {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -909,7 +937,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * rather than their positions. If an element appears multiple times, all occurrences are removed.
      * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
-     * @param c the DoubleList containing elements to be removed from this list
+     * @param c the DoubleList containing elements to be removed from this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list was modified as a result of this operation
      */
     @Override
@@ -927,7 +956,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * rather than their positions. If an element appears multiple times, all occurrences are removed.
      * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
-     * @param a the array containing elements to be removed from this list
+     * @param a the array containing elements to be removed from this list.
+     *          If {@code null} or empty, this list remains unchanged
      * @return {@code true} if this list was modified as a result of this operation
      */
     @Override
@@ -953,6 +983,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * boolean none = list2.removeIf(d -> d > 100);   // returns false, list unchanged
      * }</pre>
      *
+     * <p>The list is left unchanged if {@code p} throws: no element is moved until every
+     * {@code p.test(..)} call has returned. Nothing is allocated when no element matches.</p>
+     *
      * @param p the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed
      * @throws IllegalArgumentException if {@code p} is {@code null}.
@@ -960,21 +993,39 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     public boolean removeIf(final DoublePredicate p) throws IllegalArgumentException {
         N.checkArgNotNull(p, cs.p);
 
-        final DoubleList tmp = new DoubleList(size());
+        // Split into locate-then-compact so the list is left untouched if the predicate throws:
+        // no element is moved until every p.test(..) call has returned. Nothing is allocated
+        // unless at least one element matches, and the marker set costs one bit per element.
+        int first = 0;
 
-        for (int i = 0; i < size; i++) {
-            if (!p.test(elementData[i])) {
-                tmp.add(elementData[i]);
-            }
+        while (first < size && !p.test(elementData[first])) {
+            first++;
         }
 
-        if (tmp.size() == size()) {
+        if (first == size) {
             return false;
         }
 
-        N.copy(tmp.elementData, 0, elementData, 0, tmp.size());
-        N.fill(elementData, tmp.size(), size, 0d);
-        size = tmp.size;
+        // bit k of removed[] corresponds to element (first + k); bit 0 is the match just found
+        final long[] removed = new long[((size - first) >> 6) + 1];
+        removed[0] |= 1L;
+
+        for (int i = first + 1; i < size; i++) {
+            if (p.test(elementData[i])) {
+                removed[(i - first) >> 6] |= 1L << (i - first);
+            }
+        }
+
+        int w = first;
+
+        for (int i = first + 1; i < size; i++) {
+            if ((removed[(i - first) >> 6] & (1L << (i - first))) == 0) {
+                elementData[w++] = elementData[i];
+            }
+        }
+
+        N.fill(elementData, w, size, 0d);
+        size = w;
 
         return true;
     }
@@ -983,6 +1034,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Removes duplicate elements from this list, keeping only the first occurrence of each value.
      * The relative order of retained elements is preserved. This method is optimized to handle
      * both sorted and unsorted lists efficiently.
+     *
+     * <p>Values are compared with {@code Double.compare()}, so {@code NaN} counts as a duplicate of {@code NaN}
+     * while {@code -0.0} is <i>not</i> a duplicate of {@code 0.0}; the sorted fast path and the
+     * {@code LinkedHashSet} path apply the same rule.</p>
      *
      * @return {@code true} if any duplicates were removed from the list
      */
@@ -1029,7 +1084,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * This operation effectively performs a set intersection based on element values.
      * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
-     * @param c the DoubleList containing elements to be retained in this list
+     * <p>If the specified list is {@code null} or empty, all elements are removed from this list (it is
+     * cleared), because no elements can be retained. This is the opposite of {@link #removeAll(DoubleList)},
+     * which leaves this list unchanged for a {@code null} or empty argument.</p>
+     *
+     * @param c the DoubleList containing elements to be retained in this list.
+     *          If {@code null} or empty, all elements of this list are removed
      * @return {@code true} if this list was modified as a result of this operation
      */
     @Override
@@ -1049,9 +1109,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * This operation effectively performs a set intersection based on element values.
      * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
-     * <p>If the specified array is {@code null} or empty, all elements are removed from this list.</p>
+     * <p>If the specified array is {@code null} or empty, all elements are removed from this list (it is
+     * cleared), because no elements can be retained. This is the opposite of {@link #removeAll(double[])},
+     * which leaves this list unchanged for a {@code null} or empty argument.</p>
      *
-     * @param a the array containing elements to be retained in this list
+     * @param a the array containing elements to be retained in this list.
+     *          If {@code null} or empty, all elements of this list are removed
      * @return {@code true} if this list was modified as a result of this operation
      */
     @Override
@@ -1077,7 +1140,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
         int w = 0;
 
-        if (c.size() > 3 && size() > 9) {
+        // Compaction must not change membership when another list wraps the same array.
+        if (elementData == c.elementData || needToSet(size(), c.size())) {
             final Set<Double> set = c.toSet();
 
             for (int i = 0; i < size; i++) {
@@ -1127,7 +1191,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      * @see #removeAllAt(int...)
      */
-    public double removeAt(final int index) {
+    public double removeAt(final int index) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         final double oldValue = elementData[index];
@@ -1151,7 +1215,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @see #removeAt(int)
      */
     @Override
-    public void removeAllAt(final int... indices) {
+    public void removeAllAt(final int... indices) throws IndexOutOfBoundsException {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -1168,7 +1232,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param fromIndex the starting index of the range to be removed (inclusive)
      * @param toIndex the ending index of the range to be removed (exclusive)
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public void removeRange(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -1211,7 +1275,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *         {@code newPositionAfterMove} would cause elements to be placed outside the list
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
 
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
@@ -1225,12 +1289,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param fromIndex the starting index of the range to be replaced (inclusive)
      * @param toIndex the ending index of the range to be replaced (exclusive)
-     * @param replacement the DoubleList whose elements will replace the specified range
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @param replacement the DoubleList whose elements will replace the specified range.
+     *                    If {@code null} or empty, the range is simply removed (no elements are inserted)
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
-    public void replaceRange(final int fromIndex, final int toIndex, final DoubleList replacement) throws IndexOutOfBoundsException {
+    public void replaceRange(final int fromIndex, final int toIndex, final DoubleList replacement) throws IndexOutOfBoundsException, OutOfMemoryError {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
@@ -1243,13 +1308,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.size();
 
         if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError("Required capacity is too large: " + newSizeLong + " > " + MAX_ARRAY_SIZE);
         }
 
         final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
-            elementData = N.copyOf(elementData, newSize);
+            // Grow with the same amortized policy ensureCapacity uses. Sizing the array to exactly
+            // newSize would make a loop of growing replaceRange calls reallocate and copy every time.
+            elementData = N.copyOf(elementData, calNewCapacity(newSize, elementData.length));
         }
 
         if (toIndex - fromIndex != replacement.size() && toIndex != size) {
@@ -1273,12 +1340,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param fromIndex the starting index of the range to be replaced (inclusive)
      * @param toIndex the ending index of the range to be replaced (exclusive)
-     * @param replacement the array whose elements will replace the specified range
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @param replacement the array whose elements will replace the specified range.
+     *                    If {@code null} or empty, the range is simply removed (no elements are inserted)
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
-    public void replaceRange(final int fromIndex, final int toIndex, final double[] replacement) throws IndexOutOfBoundsException {
+    public void replaceRange(final int fromIndex, final int toIndex, final double[] replacement) throws IndexOutOfBoundsException, OutOfMemoryError {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
@@ -1291,13 +1359,15 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.length;
 
         if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError("Required capacity is too large: " + newSizeLong + " > " + MAX_ARRAY_SIZE);
         }
 
         final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
-            elementData = N.copyOf(elementData, newSize);
+            // Grow with the same amortized policy ensureCapacity uses. Sizing the array to exactly
+            // newSize would make a loop of growing replaceRange calls reallocate and copy every time.
+            elementData = N.copyOf(elementData, calNewCapacity(newSize, elementData.length));
         }
 
         if (toIndex - fromIndex != replacement.length && toIndex != size) {
@@ -1359,6 +1429,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * list.replaceAll(d -> d + 1);   // list is now [3.0, 5.0, 7.0]
      * }</pre>
      *
+     * <p>Elements are written as they are visited, so if {@code operator} throws, the elements already visited
+     * keep their new values and the remaining elements are unchanged. Contrast {@link #removeIf(DoublePredicate)},
+     * which leaves the list untouched when its predicate throws.</p>
+     *
      * @param operator the operator to apply to each element.
      * @throws IllegalArgumentException if {@code operator} is {@code null}.
      */
@@ -1383,6 +1457,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * DoubleList list2 = DoubleList.of(1.0, 2.0, 3.0);
      * boolean none = list2.replaceIf(d -> d > 100, 0.0);   // returns false, list unchanged
      * }</pre>
+     *
+     * <p>Elements are written as they are visited, so if {@code predicate} throws, the elements already visited
+     * keep their new values and the remaining elements are unchanged. Contrast {@link #removeIf(DoublePredicate)},
+     * which leaves the list untouched when its predicate throws.</p>
      *
      * @param predicate the predicate to test elements.
      * @param newValue the value to replace matching elements with
@@ -1439,7 +1517,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the starting index of the range to fill (inclusive)
      * @param toIndex the ending index of the range to fill (exclusive)
      * @param val the value to fill the range with
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public void fill(final int fromIndex, final int toIndex, final double val) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -1477,7 +1555,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns {@code true} if there is at least one element that appears in both lists.
      * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
-     * @param c the DoubleList to check for common elements
+     * @param c the DoubleList to check for common elements.
+     *          If {@code null} or empty, {@code false} is returned
      * @return {@code true} if this list contains any element from the specified list
      */
     @Override
@@ -1494,7 +1573,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns {@code true} if there is at least one element that appears in both this list and the array.
      * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
-     * @param a the array to check for common elements
+     * @param a the array to check for common elements.
+     *          If {@code null} or empty, {@code false} is returned
      * @return {@code true} if this list contains any element from the specified array
      */
     @Override
@@ -1512,7 +1592,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * The frequency of elements is not considered; only presence is checked.
      * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
-     * @param c the DoubleList to check for containment
+     * @param c the DoubleList to check for containment.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list contains all elements from the specified list
      */
     @Override
@@ -1548,7 +1629,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * The frequency of elements is not considered; only presence is checked.
      * The comparison is done using {@code Double.compare} to handle NaN values correctly.
      *
-     * @param a the array to check for containment
+     * @param a the array to check for containment.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list contains all elements from the specified array
      */
     @Override
@@ -1566,7 +1648,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Checks if this list and the specified DoubleList have no elements in common.
      * Returns {@code true} if the two lists are disjoint (i.e., have no common elements).
      *
-     * @param c the DoubleList to check for disjointness
+     * <p>Elements are compared with {@code Double.compare()}, so {@code NaN} matches {@code NaN} while
+     * {@code -0.0} does not match {@code 0.0}.</p>
+     *
+     * @param c the DoubleList to check for disjointness.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list and the specified list have no elements in common
      */
     @Override
@@ -1598,7 +1684,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Checks if this list and the specified array have no elements in common.
      * Returns {@code true} if the list and array are disjoint (i.e., have no common elements).
      *
-     * @param b the array to check for disjointness
+     * <p>Elements are compared with {@code Double.compare()}, so {@code NaN} matches {@code NaN} while
+     * {@code -0.0} does not match {@code 0.0}.</p>
+     *
+     * @param b the array to check for disjointness.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list and the specified array have no elements in common
      */
     @Override
@@ -1614,6 +1704,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns a new list containing elements that are present in both this list and the specified list.
      * For elements that appear multiple times, the intersection contains the minimum number of occurrences
      * present in both lists. The order of elements from this list is preserved.
+     *
+     * <p>Elements are compared with {@code Double.compare()}, so {@code NaN} matches {@code NaN} while
+     * {@code -0.0} does not match {@code 0.0}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1631,7 +1724,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param b the list to find common elements with this list
      * @return a new DoubleList containing elements present in both this list and the specified list,
      *         considering the minimum number of occurrences in either list.
-     *         Returns an empty list if either list is empty.
+     *         Returns an empty list if the specified list is {@code null} or empty, or if this list is empty.
      * @see #intersection(double[])
      * @see #difference(DoubleList)
      * @see #symmetricDifference(DoubleList)
@@ -1660,6 +1753,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Returns a new list containing elements that are present in both this list and the specified array.
      * For elements that appear multiple times, the intersection contains the minimum number of occurrences
      * present in both sources. The order of elements from this list is preserved.
+     *
+     * <p>Elements are compared with {@code Double.compare()}, so {@code NaN} matches {@code NaN} while
+     * {@code -0.0} does not match {@code 0.0}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1697,6 +1793,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * considering the number of occurrences of each element. If an element appears n times in this list
      * and m times in the specified list, the result will contain (n - m) occurrences of that element
      * (or zero if m &gt;= n). The order of elements from this list is preserved.
+     *
+     * <p>Elements are compared with {@code Double.compare()}, so {@code NaN} matches {@code NaN} while
+     * {@code -0.0} does not match {@code 0.0}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1745,6 +1844,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * and m times in the specified array, the result will contain (n - m) occurrences of that element
      * (or zero if m &gt;= n). The order of elements from this list is preserved.
      *
+     * <p>Elements are compared with {@code Double.compare()}, so {@code NaN} matches {@code NaN} while
+     * {@code -0.0} does not match {@code 0.0}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleList list1 = DoubleList.of(1.0, 1.0, 2.0, 3.0);
@@ -1782,6 +1884,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * For elements that appear multiple times, the symmetric difference contains the absolute difference
      * in occurrences between the two lists.
      *
+     * <p>Elements are compared with {@code Double.compare()}, so {@code NaN} matches {@code NaN} while
+     * {@code -0.0} does not match {@code 0.0}.</p>
+     *
      * <p>The order of elements is preserved, with elements from this list appearing first,
      * followed by elements from the specified list.
      *
@@ -1797,6 +1902,17 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * // - 3.0 appears once in list1 and twice in list2, so one occurrence remains
      * // - 4.0 appears only in list2, so it remains in the result
      * }</pre>
+     *
+     * <p><b>Ordering of the second operand's contributions.</b> Occurrences of equal values are
+     * interchangeable, so when a value survives {@code n} times, those {@code n} occurrences are taken from
+     * that value's <i>earliest</i> positions in the second operand and emitted in index order. This suffix of
+     * the result is a subsequence of the second operand by value. The complete result also includes the
+     * first operand's unmatched occurrences and is not necessarily equal to
+     * {@code difference(b)}
+     * followed by {@code b.difference(this)} when the second operand holds duplicates of a partially
+     * cancelled value. For example {@code DoubleList.of(2d).symmetricDifference(DoubleList.of(2d, 1d, 2d))}
+     * returns {@code [2.0, 1.0]}, whereas concatenating the two differences would give {@code [1.0, 2.0]};
+     * both contain the same elements.</p>
      *
      * @param b the list to compare with this list for symmetric difference
      * @return a new DoubleList containing elements that are present in either this list or the specified list,
@@ -1843,6 +1959,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * For elements that appear multiple times, the symmetric difference contains the absolute difference
      * in occurrences between this list and the array.
      *
+     * <p>Elements are compared with {@code Double.compare()}, so {@code NaN} matches {@code NaN} while
+     * {@code -0.0} does not match {@code 0.0}.</p>
+     *
      * <p>The order of elements is preserved, with elements from this list appearing first,
      * followed by elements from the specified array.
      *
@@ -1858,6 +1977,17 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * // - 3.0 appears once in list1 and twice in array, so one occurrence remains
      * // - 4.0 appears only in array, so it remains in the result
      * }</pre>
+     *
+     * <p><b>Ordering of the second operand's contributions.</b> Occurrences of equal values are
+     * interchangeable, so when a value survives {@code n} times, those {@code n} occurrences are taken from
+     * that value's <i>earliest</i> positions in the second operand and emitted in index order. This suffix of
+     * the result is a subsequence of the second operand by value. The complete result also includes the
+     * first operand's unmatched occurrences and is not necessarily equal to
+     * {@code difference(b)}
+     * followed by {@code b.difference(this)} when the second operand holds duplicates of a partially
+     * cancelled value. For example {@code DoubleList.of(2d).symmetricDifference(DoubleList.of(2d, 1d, 2d))}
+     * returns {@code [2.0, 1.0]}, whereas concatenating the two differences would give {@code [1.0, 2.0]};
+     * both contain the same elements.</p>
      *
      * @param b the array to compare with this list for symmetric difference
      * @return a new DoubleList containing elements that are present in either this list or the specified array,
@@ -2046,7 +2176,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
      * @return an OptionalDouble containing the minimum element in the range, or empty if the range is empty
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public OptionalDouble min(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2086,7 +2216,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the starting index of the range (inclusive)
      * @param toIndex the ending index of the range (exclusive)
      * @return an OptionalDouble containing the maximum element in the range, or empty if the range is empty
-     * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public OptionalDouble max(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2129,7 +2259,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return an OptionalDouble containing the median value if the range is non-empty, or an empty OptionalDouble if the range is empty
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()} or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public OptionalDouble lowerMedian(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2188,8 +2318,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param toIndex the index of the last element (exclusive) to be processed,
      *                or -1 for reverse iteration to the beginning
      * @param action the action to be performed for each element.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
-     *         ({@code min(fromIndex, toIndex == -1 ? 0 : toIndex) < 0 || max(fromIndex, toIndex) > size()})
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or {@code max(fromIndex, toIndex) > size()}; {@code toIndex == -1} selects reverse traversal through index zero.
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final int fromIndex, final int toIndex, final DoubleConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -2265,11 +2394,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>For example, if the range contains [1.0, 2.0, 1.0, 3.0, 2.0], the returned
      * list will contain [1.0, 2.0, 3.0].</p>
      *
+     * <p>Elements are compared with {@code Double.compare()}, so {@code NaN} counts as a duplicate of
+     * {@code NaN} while {@code -0.0} is <i>not</i> a duplicate of {@code 0.0}.</p>
+     *
      * @param fromIndex the index of the first element (inclusive) to process
      * @param toIndex the index of the last element (exclusive) to process
      * @return a new {@code DoubleList} containing the distinct elements from the specified range
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public DoubleList distinct(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2303,11 +2434,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Checks whether the elements in this list are sorted in ascending order.
      *
      * <p>Returns {@code true} if the list is empty, contains only one element,
-     * or all elements are arranged in non-decreasing order (each element is less
-     * than or equal to the next element).</p>
+     * or all elements are arranged in non-decreasing order under the total order
+     * described below (no element compares as less than the one before it).</p>
      *
-     * <p>This method considers {@code NaN} values according to their natural
-     * ordering as defined by {@code Double.compare()}.</p>
+     * <p>The order is the total order of {@link Double#compare(double,double)}, not that of {@code <=}:
+     * {@code NaN} is considered greater than every other value, and {@code -0.0} sorts before {@code 0.0} (so
+     * {@code [0.0, -0.0]} is <i>not</i> sorted).</p>
      *
      * @return {@code true} if this list is sorted in ascending order,
      *         {@code false} otherwise
@@ -2325,7 +2457,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * <p>The sorting algorithm is a Dual-Pivot Quicksort by Vladimir Yaroslavskiy,
      * Jon Bentley, and Joshua Bloch. This algorithm offers O(n log(n)) performance
-     * on many data sets. NaN values are sorted to the end of the list.</p>
+     * on many data sets. The order imposed is the total order of {@link Double#compare(double,double)}: NaN
+     * values are sorted to the end of the list, and {@code -0.0} sorts before {@code 0.0}.</p>
      *
      * <p>If the list contains fewer than 2 elements, no sorting is performed.</p>
      */
@@ -2339,13 +2472,17 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Sorts the elements of this list into ascending order using a parallel sort algorithm.
      *
-     * <p>This method modifies the list in-place, arranging all elements according
-     * to their natural ordering. The parallel sort algorithm divides the array into
-     * sub-arrays that are sorted in parallel and then merged. NaN values are sorted
-     * to the end of the list.</p>
+     * <p>This method modifies the list in-place, arranging all elements according to their natural ordering.
+     * The order imposed is the total order of {@link Double#compare(double,double)}: NaN values are sorted to
+     * the end of the list, and {@code -0.0} sorts before {@code 0.0}.</p>
      *
-     * <p>This method is beneficial for large lists on multi-core systems. For small
-     * lists, the overhead of parallelization may make it slower than {@link #sort()}.</p>
+     * <p>Parallelism is applied only where it can pay for itself, and is never guaranteed: for a small list,
+     * or on a single-processor host, this method performs the same sequential sort as {@link #sort()}. A
+     * larger list is handed to {@link java.util.Arrays#parallelSort(double[], int, int)}, which applies a
+     * threshold of its own and still sorts sequentially whenever the common
+     * {@link java.util.concurrent.ForkJoinPool} offers no parallelism, or the range left once the NaN values
+     * are set aside is too small to be worth splitting - so a large list on a multi-core host may be sorted
+     * sequentially too. The elements end up in the same order either way.</p>
      *
      * <p>If the list contains fewer than 2 elements, no sorting is performed.</p>
      *
@@ -2369,8 +2506,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * Sorts the elements of this list into descending order.
      *
      * <p>This method first sorts the list in ascending order using {@link #sort()},
-     * then reverses the entire list to achieve descending order. NaN values will
-     * appear at the beginning of the list after reverse sorting.</p>
+     * then reverses the entire list to achieve descending order. The result is the exact reverse of
+     * {@link #sort()}: NaN values appear at the beginning of the list, and {@code 0.0} appears before
+     * {@code -0.0}.</p>
      *
      * <p>If the list contains fewer than 2 elements, no sorting is performed.</p>
      */
@@ -2388,6 +2526,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>The list must be sorted in ascending order prior to making this call.
      * If it is not sorted, the results are undefined. If the list contains multiple
      * elements with the specified value, there is no guarantee which one will be found.</p>
+     *
+     * <p>Ordering follows {@link Double#compare(double,double)}, the same total order {@link #sort()} produces,
+     * so {@code NaN} is a findable key that sorts above every other value, and {@code -0.0} and {@code 0.0} are
+     * distinct keys: searching for {@code -0.0} does not find a stored {@code 0.0}.</p>
      *
      * <p>This method runs in O(log n) time for a list of size n.</p>
      *
@@ -2418,6 +2560,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * If it is not sorted, the results are undefined. If the range contains multiple
      * elements with the specified value, there is no guarantee which one will be found.</p>
      *
+     * <p>Ordering follows {@link Double#compare(double,double)}, the same total order {@link #sort()} produces,
+     * so {@code NaN} is a findable key that sorts above every other value, and {@code -0.0} and {@code 0.0} are
+     * distinct keys: searching for {@code -0.0} does not find a stored {@code 0.0}.</p>
+     *
      * <p>This method runs in O(log(toIndex - fromIndex)) time.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2435,8 +2581,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *         defined as the point at which the key would be inserted into the range:
      *         the index of the first element greater than the key, or {@code toIndex}
      *         if all elements in the range are less than the specified key.
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public int binarySearch(final int fromIndex, final int toIndex, final double valueToFind) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2471,8 +2616,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param fromIndex the index of the first element (inclusive) to be reversed
      * @param toIndex the index of the last element (exclusive) to be reversed
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public void reverse(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2486,7 +2630,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Rotates all elements in this list by the specified distance.
      * After calling rotate(distance), the element at index i will be moved to
-     * index (i + distance) % size.
+     * index {@code Math.floorMod((long) i + distance, size())} when the list is non-empty.
      *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).
@@ -2514,6 +2658,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * current position.</p>
      *
      * <p>If the list contains fewer than 2 elements, no shuffling is performed.</p>
+     *
+     * <p>The source is {@link java.util.concurrent.ThreadLocalRandom}, which is <b>not</b>
+     * cryptographically secure. Note that this is a <i>different</i> generator from the one the
+     * {@code random(..)} factories use; call {@link #shuffle(Random)} with a
+     * {@link java.security.SecureRandom} when the permutation must be unpredictable.</p>
+     *
      */
     @Override
     public void shuffle() {
@@ -2558,7 +2708,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *         is out of range ({@code i < 0 || i >= size() || j < 0 || j >= size()})
      */
     @Override
-    public void swap(final int i, final int j) {
+    public void swap(final int i, final int j) throws IndexOutOfBoundsException {
         rangeCheck(i);
         rangeCheck(j);
 
@@ -2590,8 +2740,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the index of the first element (inclusive) to be copied
      * @param toIndex the index of the last element (exclusive) to be copied
      * @return a new {@code DoubleList} containing the specified range of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public DoubleList copy(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2612,17 +2761,21 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>For example, copying elements from index 0 to 10 with step 2 will return
      * elements at indices 0, 2, 4, 6, 8.</p>
      *
+     * <p>If the sign of {@code step} contradicts the direction of the range — a positive step with
+     * {@code fromIndex > toIndex}, or a negative step with {@code fromIndex < toIndex} — the result is an
+     * empty list rather than an exception. Only {@code step == 0} is rejected.</p>
+     *
      * @param fromIndex the index of the first element to be copied
      * @param toIndex the index boundary (exclusive) for copying
      * @param step the increment between successive elements to be copied.
      *             Must not be zero.
      * @return a new {@code DoubleList} containing the selected elements
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or {@code max(fromIndex, toIndex) > size()}; {@code toIndex == -1} is permitted for reverse traversal.
      * @throws IllegalArgumentException if {@code step} is zero.
      * @see N#copyOfRange(double[], int, int, int)
      */
     @Override
-    public DoubleList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
+    public DoubleList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
         if (size == 0) {
@@ -2649,20 +2802,18 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param toIndex the index of the last element (exclusive) to be included
      * @param chunkSize the desired size of each subsequence. Must be positive.
      * @return a list of {@code DoubleList} instances, each containing a chunk of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      * @throws IllegalArgumentException if {@code chunkSize <= 0}.
      */
     @Override
-    public List<DoubleList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
+    public List<DoubleList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final List<double[]> list = N.split(elementData, fromIndex, toIndex, chunkSize);
-        @SuppressWarnings("rawtypes")
-        final List<DoubleList> result = (List) list;
+        final List<double[]> arrays = N.split(elementData, fromIndex, toIndex, chunkSize);
+        final List<DoubleList> result = new ArrayList<>(arrays.size());
 
-        for (int i = 0, len = list.size(); i < len; i++) {
-            result.set(i, of(list.get(i)));
+        for (final double[] array : arrays) {
+            result.add(of(array));
         }
 
         return result;
@@ -2680,6 +2831,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @return this {@code DoubleList} instance (for method chaining)
      */
+    @Beta
     @Override
     public DoubleList trimToSize() {
         if (elementData.length > size) {
@@ -2749,8 +2901,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param fromIndex the index of the first element (inclusive) to be included
      * @param toIndex the index of the last element (exclusive) to be included
      * @return a new {@code List<Double>} containing the specified range of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     @Override
     public List<Double> boxed(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -2786,13 +2937,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param supplier a function that creates a new collection instance with the
      *                 specified initial capacity
      * @return a collection containing the specified range of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
+     * @throws UnsupportedOperationException if the selected range is non-empty and the supplied collection does not support adding elements
      */
     @Override
     public <C extends Collection<Double>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, UnsupportedOperationException {
         checkFromToIndex(fromIndex, toIndex);
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -2815,9 +2966,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @param supplier a function that creates a new {@code Multiset} instance with the
      *                 specified initial capacity
      * @return a {@code Multiset} containing the specified range of elements with their counts
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}, or adding the selected elements would exceed {@link Integer#MAX_VALUE} occurrences for an element in the supplied multiset
      */
     @Override
     public Multiset<Double> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Double>> supplier)
@@ -2865,6 +3015,12 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * long count = list.stream().filter(d -> d > 1).count();   // returns 2
      * }</pre>
      *
+     * <p>The stream captures the backing array reference and the range endpoints when it is created,
+     * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured
+     * range can be observed by a stream that has not consumed those positions yet. Growing the list
+     * afterwards does not extend the stream, and any operation that reallocates the backing array leaves
+     * the stream reading the old one. Do not modify the list while a stream over it is in flight.</p>
+     *
      * @return a sequential {@code DoubleStream} over the elements in this list
      */
     public DoubleStream stream() {
@@ -2887,11 +3043,16 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * list.stream(0, 10);                     // throws IndexOutOfBoundsException (10 > size())
      * }</pre>
      *
+     * <p>The stream captures the backing array reference and the range endpoints when it is created,
+     * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured
+     * range can be observed by a stream that has not consumed those positions yet. Growing the list
+     * afterwards does not extend the stream, and any operation that reallocates the backing array leaves
+     * the stream reading the old one. Do not modify the list while a stream over it is in flight.</p>
+     *
      * @param fromIndex the index of the first element (inclusive) to be included
      * @param toIndex the index of the last element (exclusive) to be included
      * @return a sequential {@code DoubleStream} over the specified range of elements
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > size()}
-     *         or {@code fromIndex > toIndex}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public DoubleStream stream(final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
@@ -2918,7 +3079,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @see #first()
      * @see #getLast()
      */
-    public double getFirst() {
+    public double getFirst() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return elementData[0];
@@ -2943,7 +3104,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @see #last()
      * @see #getFirst()
      */
-    public double getLast() {
+    public double getLast() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return elementData[size - 1];
@@ -2966,8 +3127,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * }</pre>
      *
      * @param e the element to add at the beginning of the list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void addFirst(final double e) {
+    public void addFirst(final double e) throws OutOfMemoryError {
         add(0, e);
     }
 
@@ -2987,9 +3149,10 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * }</pre>
      *
      * @param e the element to add at the end of the list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void addLast(final double e) {
-        add(size, e);
+    public void addLast(final double e) throws OutOfMemoryError {
+        add(e);
     }
 
     /**
@@ -3010,7 +3173,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return the first double value that was removed from the list
      * @throws NoSuchElementException if this list is empty
      */
-    public double removeFirst() {
+    public double removeFirst() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return removeAt(0);
@@ -3032,7 +3195,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * @return the last double value that was removed from the list
      * @throws NoSuchElementException if this list is empty
      */
-    public double removeLast() {
+    public double removeLast() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return removeAt(size - 1);
@@ -3044,6 +3207,11 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>The hash code is calculated based on the elements in the list and their
      * order. Two lists with the same elements in the same order will have the
      * same hash code.</p>
+     *
+     * <p>Element hashes come from {@link Double#hashCode(double)}, which hashes the {@code doubleToLongBits}
+     * pattern, so the result is consistent with {@link #equals(Object)} for {@code NaN} and for signed zero:
+     * lists holding {@code NaN} at the same positions share a hash code, while {@code 0.0} and {@code -0.0}
+     * hash differently.</p>
      *
      * @return the hash code value for this list
      */
@@ -3097,9 +3265,13 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
         return size == 0 ? Strings.STR_FOR_EMPTY_ARRAY : N.toString(elementData, 0, size);
     }
 
-    private void ensureCapacity(final int minCapacity) {
+    /**
+     * @throws OutOfMemoryError if {@code minCapacity} is negative or exceeds the maximum supported array size, or the enlarged array cannot be allocated
+     */
+    private void ensureCapacity(final int minCapacity) throws OutOfMemoryError {
         if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError(
+                    "Required capacity is too large: " + (minCapacity < 0 ? "it overflowed the int range" : minCapacity + " > " + MAX_ARRAY_SIZE));
         }
 
         if (N.isEmpty(elementData)) {
@@ -3109,5 +3281,53 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
             elementData = Arrays.copyOf(elementData, newCapacity);
         }
+    }
+
+    /**
+     * Writes this list to the given stream using only the elements in {@code [0, size())}.
+     *
+     * <p>The default serialized form would emit the whole backing array. That is wasteful for a list
+     * whose capacity exceeds its size, and — because {@link #DoubleList(double[], int)} and
+     * {@code of(double[], int)} adopt the caller's array without copying — it would also write out
+     * whatever the caller left beyond {@code size()}. This method writes the same two fields under the
+     * same names, so streams stay readable in both directions across this change.</p>
+     *
+     * @param os the stream to write to
+     * @throws IOException if writing the list fields or backing-array contents to {@code os} fails
+     */
+    @Serial
+    private void writeObject(final ObjectOutputStream os) throws IOException {
+        final ObjectOutputStream.PutField fields = os.putFields();
+
+        fields.put("elementData", size == elementData.length ? elementData : N.copyOfRange(elementData, 0, size));
+        fields.put("size", size);
+
+        os.writeFields();
+    }
+
+    /**
+     * Restores this list from the given stream, rejecting a stream whose {@code size} does not fit its
+     * {@code elementData}.
+     *
+     * <p>Without this check a corrupted or hand-crafted stream would deserialize successfully and then
+     * fail much later with an {@link IndexOutOfBoundsException} from an unrelated method.</p>
+     *
+     * @param is the stream to read from
+     * @throws IOException if reading the serialized fields fails, or the stored array is null, has the wrong primitive type, or is inconsistent with the stored size
+     * @throws ClassNotFoundException if a class needed to restore a serialized field cannot be resolved
+     */
+    @Serial
+    private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {
+        final ObjectInputStream.GetField fields = is.readFields();
+        final Object a = fields.get("elementData", null);
+        final int sz = fields.get("size", 0);
+
+        if (!(a instanceof double[] array) || sz < 0 || sz > array.length) {
+            throw new InvalidObjectException(
+                    "Invalid serialized DoubleList: size=" + sz + ", elementData=" + (a == null ? "null" : a.getClass().getSimpleName()));
+        }
+
+        elementData = array;
+        size = sz;
     }
 }

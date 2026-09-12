@@ -49,8 +49,10 @@ public interface FloatToLongFunction extends Throwables.FloatToLongFunction<Runt
      * FloatToLongFunction truncate = value -> (long) value;
      * long result = truncate.applyAsLong(3.14f); // Returns 3L
      *
-     * FloatToLongFunction round = value -> Math.round(value);
+     * // Widen first to select Math.round(double), which returns long rather than int.
+     * FloatToLongFunction round = value -> Math.round((double) value);
      * long rounded = round.applyAsLong(3.7f); // Returns 4L
+     * long large = round.applyAsLong(3_000_000_000f); // Returns 3_000_000_000L
      * }</pre>
      *
      * @param value the float function argument

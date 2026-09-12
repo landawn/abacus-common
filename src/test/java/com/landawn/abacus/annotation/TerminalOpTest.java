@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class TerminalOpTest extends TestBase {
-    static class TestStream {
+    public static class TestStream {
         @TerminalOp
         public void collect() {
         }

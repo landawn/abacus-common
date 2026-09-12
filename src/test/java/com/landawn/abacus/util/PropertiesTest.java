@@ -20,10 +20,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.properties.MyProperties;
 import com.landawn.abacus.util.PropertiesUtil.ConfigBean;
 import com.landawn.abacus.util.PropertiesUtil.Resource;
 import com.landawn.abacus.util.PropertiesUtil.ResourceType;
+
+import testfixtures.properties.MyProperties;
 
 public class PropertiesTest extends AbstractTest {
 
@@ -365,7 +366,7 @@ public class PropertiesTest extends AbstractTest {
     public void testResetRejectsNullBackingMap() {
         Properties<String, String> props = new Properties<>();
 
-        assertThrows(NullPointerException.class, () -> props.reset(null));
+        assertThrows(IllegalArgumentException.class, () -> props.reset(null));
         assertTrue(props.isEmpty());
     }
 
@@ -506,7 +507,7 @@ public class PropertiesTest extends AbstractTest {
 
         final ConfigBean bean2 = Beans.copy(bean);
         assertEquals(bean, bean2);
-        final Set<ConfigBean> set = N.toSet(bean);
+        final Set<ConfigBean> set = CommonUtil.toSet(bean);
         assertTrue(set.contains(bean2));
 
         N.println(bean);
@@ -692,7 +693,7 @@ public class PropertiesTest extends AbstractTest {
 
         File file = new File("./src/test/resources/myProperties.xml");
         final String srcPath = "./src/test/java";
-        final String packageName = "com.landawn.abacus.properties";
+        final String packageName = "testfixtures.properties";
         final String className = "MyProperties";
         PropertiesUtil.xmlToJava(file, srcPath, packageName, className, false);
         final MyProperties myProperties = PropertiesUtil.loadFromXml(file, MyProperties.class);
@@ -752,7 +753,7 @@ public class PropertiesTest extends AbstractTest {
 
         N.println(resource1);
 
-        assertTrue(N.toSet(resource1).contains(resource2));
+        assertTrue(CommonUtil.toSet(resource1).contains(resource2));
 
     }
 

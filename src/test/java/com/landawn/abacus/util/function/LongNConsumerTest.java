@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 
-public class LongNConsumerTest extends TestBase {
+public final class LongNConsumerTest extends TestBase {
     private void processValues(final long... values) {
         // Process values (empty for testing)
     }

@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.DirectoryIteratorException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +16,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -61,10 +65,12 @@ public class TraverserTest extends TestBase {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o)
+            if (this == o) {
                 return true;
-            if (o == null || getClass() != o.getClass())
+            }
+            if (o == null || getClass() != o.getClass()) {
                 return false;
+            }
             GraphNode graphNode = (GraphNode) o;
             return Objects.equals(name, graphNode.name);
         }
@@ -344,5 +350,261 @@ public class TraverserTest extends TestBase {
         int subIndex = fileNames.indexOf("sub");
         int testIndex = fileNames.indexOf("test");
         assertTrue(subIndex < testIndex);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // a01 F-2: Guava validates start nodes eagerly - the successor function runs once per start node
+    // inside the traversal method (before any consumption), and again during traversal.
+    // ---------------------------------------------------------------------------------------------
+
+    private static List<String> names(Stream<TreeNode> s) {
+        return s.map(n -> n.name).toList();
+    }
+
+    @Test
+    public void testSuccessorFunction_IsCalledOncePerStartNode_BeforeConsumption() {
+        TreeNode root = createSimpleTree(); // A -> B, C ; B -> D, E ; C -> F
+        AtomicInteger calls = new AtomicInteger();
+        Traverser<TreeNode> traverser = Traverser.forTree(n -> {
+            calls.incrementAndGet();
+            return n.getChildren();
+        });
+
+        Stream<TreeNode> bfs = traverser.breadthFirst(root);
+        assertEquals(1, calls.get(), "one validation call for the single start node, before consumption");
+        assertEquals(6, bfs.count());
+        assertEquals(7, calls.get(), "validation call + one call per traversed node");
+
+        calls.set(0);
+        Stream<TreeNode> pre = traverser.depthFirstPreOrder(root);
+        assertEquals(1, calls.get());
+        pre.count();
+
+        calls.set(0);
+        Stream<TreeNode> post = traverser.depthFirstPostOrder(root);
+        assertEquals(1, calls.get());
+        post.count();
+
+        // two start nodes -> two validation calls before anything is consumed
+        calls.set(0);
+        TreeNode other = new TreeNode("X");
+        Stream<TreeNode> multi = traverser.breadthFirst(Arrays.asList(root, other));
+        assertEquals(2, calls.get());
+        assertEquals(7, multi.count());
+    }
+
+    @Test
+    public void testSuccessorFunction_ThrowingForStartNode_PropagatesFromTraversalMethod_NotFromStream() {
+        TreeNode root = new TreeNode("root");
+        Traverser<TreeNode> thrower = Traverser.forTree(n -> {
+            throw new IllegalStateException("succ(" + n.name + ")");
+        });
+
+        // no consumption at all - the exception escapes from the wrapper call itself
+        IllegalStateException e1 = assertThrows(IllegalStateException.class, () -> thrower.breadthFirst(root));
+        assertEquals("succ(root)", e1.getMessage());
+        assertThrows(IllegalStateException.class, () -> thrower.depthFirstPreOrder(root));
+        assertThrows(IllegalStateException.class, () -> thrower.depthFirstPostOrder(root));
+        assertThrows(IllegalStateException.class, () -> thrower.breadthFirst(Arrays.asList(root)));
+        assertThrows(IllegalStateException.class, () -> thrower.depthFirstPreOrder(Arrays.asList(root)));
+        assertThrows(IllegalStateException.class, () -> thrower.depthFirstPostOrder(Arrays.asList(root)));
+    }
+
+    @Test
+    public void testSuccessorFunction_ThrowingForChildNode_IsDeferredToConsumption() {
+        TreeNode root = new TreeNode("root");
+        TreeNode child = new TreeNode("child");
+        root.addChild(child);
+        Traverser<TreeNode> childThrower = Traverser.forTree(n -> {
+            if (n == child) {
+                throw new IllegalStateException("succ(child)");
+            }
+            return n.getChildren();
+        });
+
+        // the start node validates fine, so the stream is created ...
+        Stream<TreeNode> s = childThrower.breadthFirst(root);
+        // ... and the failure surfaces only while consuming
+        assertThrows(IllegalStateException.class, () -> s.toList());
+    }
+
+    @Test
+    public void testSuccessorFunction_ReturningNullForStartNode_FailsOnlyOnConsumption() {
+        TreeNode root = new TreeNode("root");
+        Traverser<TreeNode> nullReturner = Traverser.forTree(n -> null);
+
+        // validate() ignores the returned Iterable, so the factory-level doc statement holds
+        Stream<TreeNode> s = nullReturner.breadthFirst(root);
+        assertThrows(NullPointerException.class, () -> s.toList());
+    }
+
+    @Test
+    public void testPATHS_StartDirectoryIsListedAtCallTimeAndAgainOnConsumption() throws IOException {
+        Path dir = tempDir.resolve("double-listed");
+        java.nio.file.Files.createDirectory(dir);
+        java.nio.file.Files.createFile(dir.resolve("one.txt"));
+
+        Stream<Path> s = Traverser.PATHS.breadthFirst(dir);
+        // created AFTER the call but BEFORE consumption: the second listing picks it up
+        java.nio.file.Files.createFile(dir.resolve("two.txt"));
+
+        List<String> seen = s.map(p -> p.getFileName().toString()).toList();
+        assertEquals(3, seen.size());
+        assertTrue(seen.contains("one.txt"));
+        assertTrue(seen.contains("two.txt"));
+    }
+
+    // Windows-only: an unlistable START directory makes PATHS throw from the traversal method itself;
+    // an unlistable CHILD directory throws only on consumption; FILES yields the single start element.
+
+    private static boolean isWindows() {
+        return System.getProperty("os.name", "").toLowerCase().contains("win");
+    }
+
+    private static boolean runIcacls(String... args) {
+        try {
+            List<String> cmd = new ArrayList<>();
+            cmd.add("icacls");
+            cmd.addAll(Arrays.asList(args));
+            Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start();
+            p.getInputStream().readAllBytes();
+            return p.waitFor() == 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Denies READ_DATA (directory listing) on {@code dir} for the current user; returns {@code false} (and
+     * leaves the ACL unchanged) if that is not possible here, in which case the caller skips.
+     */
+    private static boolean denyListing(Path dir) {
+        if (!isWindows()) {
+            return false;
+        }
+        String user = System.getProperty("user.name");
+        if (user == null || user.isEmpty() || !runIcacls(dir.toString(), "/deny", user + ":(RD)")) {
+            return false;
+        }
+        try (java.nio.file.DirectoryStream<Path> ds = java.nio.file.Files.newDirectoryStream(dir)) {
+            ds.iterator().hasNext(); // still listable (e.g. privileged account): undo and skip
+            runIcacls(dir.toString(), "/remove:d", user);
+            return false;
+        } catch (IOException expected) {
+            return true;
+        }
+    }
+
+    private static void allowListing(Path dir) {
+        runIcacls(dir.toString(), "/remove:d", System.getProperty("user.name"));
+    }
+
+    @Test
+    public void testPATHS_UnlistableStartDirectory_ThrowsFromTraversalMethod() throws IOException {
+        Path locked = tempDir.resolve("locked-start");
+        java.nio.file.Files.createDirectory(locked);
+        java.nio.file.Files.createFile(locked.resolve("inside.txt"));
+        Assumptions.assumeTrue(denyListing(locked), "could not deny directory listing on this platform/account");
+        try {
+            // no consumption: the DirectoryIteratorException escapes from the wrapper call
+            DirectoryIteratorException e = assertThrows(DirectoryIteratorException.class, () -> Traverser.PATHS.breadthFirst(locked));
+            assertTrue(e.getCause() instanceof AccessDeniedException, String.valueOf(e.getCause()));
+            assertThrows(DirectoryIteratorException.class, () -> Traverser.PATHS.depthFirstPreOrder(locked));
+            assertThrows(DirectoryIteratorException.class, () -> Traverser.PATHS.depthFirstPostOrder(Arrays.asList(locked)));
+
+            // FILES treats an unreadable directory as a leaf (File.listFiles() returns null)
+            assertEquals(Arrays.asList(locked.toFile()), Traverser.FILES.breadthFirst(locked.toFile()).toList());
+        } finally {
+            allowListing(locked);
+        }
+    }
+
+    @Test
+    public void testPATHS_UnlistableChildDirectory_ThrowsOnlyOnConsumption() throws IOException {
+        Path parent = tempDir.resolve("parent-of-locked");
+        Path locked = parent.resolve("locked-child");
+        java.nio.file.Files.createDirectories(locked);
+        Assumptions.assumeTrue(denyListing(locked), "could not deny directory listing on this platform/account");
+        try {
+            // the start node (parent) is listable, so the stream is created ...
+            Stream<Path> s = Traverser.PATHS.breadthFirst(parent);
+            // ... and the child's failure surfaces during consumption
+            assertThrows(DirectoryIteratorException.class, () -> s.toList());
+        } finally {
+            allowListing(locked);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // a01 F-4: multi-root overloads - equal start nodes are collapsed; a forTree start node reachable
+    // from an earlier start node is visited again; forGraph visits once.
+    // ---------------------------------------------------------------------------------------------
+
+    @Test
+    public void testMultiRoot_DuplicateStartNodes_AreCollapsed() {
+        TreeNode a = new TreeNode("a");
+        TreeNode b = new TreeNode("b");
+        a.addChild(b);
+        Traverser<TreeNode> tree = Traverser.forTree(TreeNode::getChildren);
+
+        assertEquals(Arrays.asList("a", "b"), names(tree.breadthFirst(Arrays.asList(a, a))));
+        assertEquals(Arrays.asList("a", "b"), names(tree.depthFirstPreOrder(Arrays.asList(a, a))));
+        assertEquals(Arrays.asList("b", "a"), names(tree.depthFirstPostOrder(Arrays.asList(a, a))));
+    }
+
+    @Test
+    public void testMultiRoot_ForTree_StartNodeReachableFromEarlierStartNode_IsVisitedTwice() {
+        TreeNode a = new TreeNode("a");
+        TreeNode b = new TreeNode("b");
+        a.addChild(b);
+        Traverser<TreeNode> tree = Traverser.forTree(TreeNode::getChildren);
+
+        assertEquals(Arrays.asList("a", "b", "b"), names(tree.breadthFirst(Arrays.asList(a, b))));
+        assertEquals(Arrays.asList("b", "a", "b"), names(tree.breadthFirst(Arrays.asList(b, a))));
+        assertEquals(Arrays.asList("a", "b", "b"), names(tree.depthFirstPreOrder(Arrays.asList(a, b))));
+        assertEquals(Arrays.asList("b", "a", "b"), names(tree.depthFirstPostOrder(Arrays.asList(a, b))));
+    }
+
+    @Test
+    public void testMultiRoot_ForGraph_VisitsEachNodeOnce() {
+        GraphNode a = new GraphNode("a");
+        GraphNode b = new GraphNode("b");
+        a.addNeighbor(b);
+        Traverser<GraphNode> graph = Traverser.forGraph(GraphNode::getNeighbors);
+
+        List<String> bfs = graph.breadthFirst(Arrays.asList(a, b)).map(n -> n.name).toList();
+        assertEquals(Arrays.asList("a", "b"), bfs);
+        assertEquals(Arrays.asList("a", "b"), graph.depthFirstPreOrder(Arrays.asList(a, b)).map(n -> n.name).toList());
+        // an equal (by equals) duplicate start node is collapsed; the surviving 'a' still reaches 'b'
+        assertEquals(Arrays.asList("a", "b"), graph.breadthFirst(Arrays.asList(a, new GraphNode("a"))).map(n -> n.name).toList());
+    }
+
+    @Test
+    public void testMultiRoot_EmptyIterable_YieldsEmptyStream() {
+        Traverser<TreeNode> tree = Traverser.forTree(TreeNode::getChildren);
+        List<TreeNode> none = new ArrayList<>();
+
+        assertEquals(0, tree.breadthFirst(none).count());
+        assertEquals(0, tree.depthFirstPreOrder(none).count());
+        assertEquals(0, tree.depthFirstPostOrder(none).count());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // a01 F-6: traversal methods reject null with NullPointerException (factories throw IAE, locked above).
+    // ---------------------------------------------------------------------------------------------
+
+    @Test
+    public void testTraversalMethods_NullStartNode_ThrowNullPointerException() {
+        Traverser<TreeNode> tree = Traverser.forTree(TreeNode::getChildren);
+
+        assertThrows(NullPointerException.class, () -> tree.breadthFirst((TreeNode) null));
+        assertThrows(NullPointerException.class, () -> tree.depthFirstPreOrder((TreeNode) null));
+        assertThrows(NullPointerException.class, () -> tree.depthFirstPostOrder((TreeNode) null));
+        assertThrows(NullPointerException.class, () -> tree.breadthFirst((Iterable<TreeNode>) null));
+        assertThrows(NullPointerException.class, () -> tree.depthFirstPreOrder((Iterable<TreeNode>) null));
+        assertThrows(NullPointerException.class, () -> tree.depthFirstPostOrder((Iterable<TreeNode>) null));
+        assertThrows(NullPointerException.class, () -> tree.breadthFirst(Arrays.asList(new TreeNode("a"), null)));
+        assertThrows(NullPointerException.class, () -> Traverser.FILES.breadthFirst((File) null));
+        assertThrows(NullPointerException.class, () -> Traverser.PATHS.depthFirstPreOrder((Path) null));
     }
 }

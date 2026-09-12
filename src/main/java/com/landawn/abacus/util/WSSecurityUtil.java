@@ -18,6 +18,7 @@
  */
 package com.landawn.abacus.util;
 
+import java.security.ProviderException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -97,11 +98,13 @@ public final class WSSecurityUtil {
      *
      * @param length the length of the nonce to be generated in bytes, must be non-negative
      *               and not exceed {@code 1024}
-     * @return a byte array containing cryptographically secure random bytes of the specified length
+     * @return a byte array containing cryptographically secure random bytes of the specified length.
+     *         A {@code length} of {@code 0} returns an empty array, which is <b>not</b> a usable nonce:
+     *         an empty nonce is constant, so a digest computed from it is precomputable by an attacker.
      * @throws IllegalArgumentException if {@code length} is negative or exceeds {@code 1024}.
-     * @throws RuntimeException if an error occurs during the nonce generation
+     * @throws ProviderException if the underlying {@link SecureRandom} provider fails
      */
-    public static byte[] generateNonce(final int length) {
+    public static byte[] generateNonce(final int length) throws IllegalArgumentException, ProviderException {
         if (length < 0) {
             throw new IllegalArgumentException("Nonce length cannot be negative: " + length);
         }
@@ -109,13 +112,10 @@ public final class WSSecurityUtil {
             throw new IllegalArgumentException("Nonce length exceeds maximum of " + MAX_NONCE_LENGTH + ": " + length);
         }
 
-        try {
-            final byte[] temp = new byte[length];
-            random.nextBytes(temp);
-            return temp;
-        } catch (final Exception ex) {
-            throw new RuntimeException("Error in generating nonce of length " + length, ex);
-        }
+        final byte[] temp = new byte[length];
+        random.nextBytes(temp);
+
+        return temp;
     }
 
     /**
@@ -142,10 +142,10 @@ public final class WSSecurityUtil {
      * @param inputBytes the bytes to be digested, must not be null
      * @return a byte array containing the SHA-1 hash of the input bytes (always 20 bytes)
      * @throws IllegalArgumentException if inputBytes is null.
-     * @throws RuntimeException if an unexpected error occurs during the digest operation
+     * @throws IllegalStateException if this JVM does not provide the mandatory {@code SHA-1} algorithm
      * @see #generateDigest(byte[], String)
      */
-    public static byte[] generateDigest(final byte[] inputBytes) {
+    public static byte[] generateDigest(final byte[] inputBytes) throws IllegalArgumentException, IllegalStateException {
         if (inputBytes == null) {
             throw new IllegalArgumentException("Input bytes cannot be null");
         }
@@ -156,7 +156,8 @@ public final class WSSecurityUtil {
             final MessageDigest md = MessageDigest.getInstance(HASH_ALGORITHM);
             return md.digest(inputBytes);
         } catch (final NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error in generating digest", e);
+            // SHA-1 is mandatory for every JVM, so its absence is a broken environment, not bad input.
+            throw new IllegalStateException(HASH_ALGORITHM + " is not available in this JVM", e);
         }
     }
 
@@ -186,7 +187,7 @@ public final class WSSecurityUtil {
      * @throws IllegalArgumentException if {@code inputBytes} or {@code algorithm} is {@code null}, or if the
      *         algorithm is not available.
      */
-    public static byte[] generateDigest(final byte[] inputBytes, final String algorithm) {
+    public static byte[] generateDigest(final byte[] inputBytes, final String algorithm) throws IllegalArgumentException {
         if (inputBytes == null) {
             throw new IllegalArgumentException("Input bytes cannot be null");
         }
@@ -248,20 +249,21 @@ public final class WSSecurityUtil {
      * String passwordDigest = WSSecurityUtil.computePasswordDigest(nonce, created, password);
      * }</pre>
      *
-     * @param nonce the nonce byte array, a cryptographically random value that should only
-     *              be used once, must not be null
-     * @param created the created timestamp byte array, typically the current timestamp in
-     *                ISO 8601 format, must not be null
-     * @param password the password byte array to be digested, must not be null
+     * @param nonce the raw nonce bytes before Base64 encoding, a cryptographically random value
+     *              that should only be used once, must not be null
+     * @param created the UTF-8 bytes of the created timestamp, typically in ISO 8601 format,
+     *                must not be null
+     * @param password the UTF-8 bytes of the password to be digested, must not be null
      * @return a Base64-encoded string of the SHA-1 hash of the concatenated inputs
      * @throws IllegalArgumentException if any parameter is null.
-     * @throws RuntimeException if an unexpected error occurs during the digest operation
+     * @throws IllegalStateException if this JVM does not provide the mandatory {@code SHA-1} algorithm
      * @see #computePasswordDigest(byte[], byte[], byte[], String)
      * @see #computePasswordDigest(String, String, String)
      * @see #generateNonce(int)
      * @see #generateDigest(byte[])
      */
-    public static String computePasswordDigest(final byte[] nonce, final byte[] created, final byte[] password) {
+    public static String computePasswordDigest(final byte[] nonce, final byte[] created, final byte[] password)
+            throws IllegalArgumentException, IllegalStateException {
         if (nonce == null) {
             throw new IllegalArgumentException("Nonce cannot be null");
         }
@@ -275,7 +277,8 @@ public final class WSSecurityUtil {
         try {
             return Strings.base64Encode(generateDigest(HASH_ALGORITHM, nonce, created, password));
         } catch (final NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error in generating digest", e);
+            // SHA-1 is mandatory for every JVM, so its absence is a broken environment, not bad input.
+            throw new IllegalStateException(HASH_ALGORITHM + " is not available in this JVM", e);
         }
     }
 
@@ -292,6 +295,9 @@ public final class WSSecurityUtil {
      * <p>The arrays are supplied to the digest incrementally in that order; no combined array
      * containing a second copy of the password is allocated.</p>
      *
+     * <p>An algorithm other than SHA-1 is a protocol extension and must be agreed with the peer;
+     * it does not produce the standard UsernameToken {@code PasswordDigest} value.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] nonce = WSSecurityUtil.generateNonce(16);
@@ -303,16 +309,17 @@ public final class WSSecurityUtil {
      *     nonce, created, password, "SHA-256");
      * }</pre>
      *
-     * @param nonce the nonce byte array, must not be {@code null}
-     * @param created the created timestamp byte array, must not be {@code null}
-     * @param password the password byte array to be digested, must not be {@code null}
+     * @param nonce the raw nonce bytes before Base64 encoding, must not be {@code null}
+     * @param created the UTF-8 bytes of the created timestamp, must not be {@code null}
+     * @param password the UTF-8 bytes of the password to be digested, must not be {@code null}
      * @param algorithm the name of the digest algorithm (e.g. {@code "SHA-256"}), must not be {@code null}
      * @return a Base64-encoded string of the hash of the concatenated inputs
      * @throws IllegalArgumentException if any parameter is {@code null}, or if the algorithm is not available.
      * @see #computePasswordDigest(byte[], byte[], byte[])
      * @see #generateDigest(byte[], String)
      */
-    public static String computePasswordDigest(final byte[] nonce, final byte[] created, final byte[] password, final String algorithm) {
+    public static String computePasswordDigest(final byte[] nonce, final byte[] created, final byte[] password, final String algorithm)
+            throws IllegalArgumentException {
         if (nonce == null) {
             throw new IllegalArgumentException("Nonce cannot be null");
         }
@@ -334,13 +341,13 @@ public final class WSSecurityUtil {
     }
 
     /**
-     * Creates a WS-Security compliant password digest using string inputs. This is a convenience
+     * Creates a SHA-1 password digest using string inputs. This is a convenience
      * method that converts the string parameters to bytes using UTF-8 before processing them
      * with the WS-Security password digest algorithm.
      *
      * <p>This method internally calls {@link #computePasswordDigest(byte[], byte[], byte[])} after
-     * converting all string parameters to byte arrays using UTF-8 (as mandated by the WS-Security
-     * UsernameToken Profile).</p>
+     * converting all string parameters to byte arrays using UTF-8. The UsernameToken Profile
+     * requires UTF-8 for the timestamp and password; the nonce is hashed as raw bytes.</p>
      *
      * <p><b>Important — nonce encoding:</b> This overload hashes the {@code nonce} <i>string's</i> UTF-8 bytes
      * verbatim; it does <b>not</b> Base64-decode it. The WS-Security UsernameToken digest is defined over the
@@ -373,14 +380,15 @@ public final class WSSecurityUtil {
      *                format, must not be null
      * @param password the password string to be digested, must not be null
      * @return a Base64-encoded string of the SHA-1 hash of the concatenated inputs
-     * @throws IllegalArgumentException if any parameter is null.
-     * @throws RuntimeException if an unexpected error occurs during the digest operation
+     * @throws IllegalArgumentException if any parameter is null or any text field contains an unpaired UTF-16 surrogate.
+     * @throws IllegalStateException if this JVM does not provide the mandatory {@code SHA-1} algorithm
      * @see #computePasswordDigest(String, String, String, String)
      * @see #computePasswordDigest(byte[], byte[], byte[])
      * @see #generateNonce(int)
      * @see #generateDigest(byte[])
      */
-    public static String computePasswordDigest(final String nonce, final String created, final String password) {
+    public static String computePasswordDigest(final String nonce, final String created, final String password)
+            throws IllegalArgumentException, IllegalStateException {
         if (nonce == null) {
             throw new IllegalArgumentException("Nonce cannot be null");
         }
@@ -394,6 +402,10 @@ public final class WSSecurityUtil {
         // WS-Security UsernameToken Profile mandates UTF-8. Charsets.DEFAULT is the JVM platform
         // charset (e.g. cp1252 on Windows) and produced different digests on different OSes for
         // identical credentials containing non-ASCII characters.
+        // Validate each independently encoded field; surrogate halves cannot span fields.
+        Utf8.encodedLength(nonce);
+        Utf8.encodedLength(created);
+        Utf8.encodedLength(password);
         return computePasswordDigest(nonce.getBytes(Charsets.UTF_8), created.getBytes(Charsets.UTF_8), password.getBytes(Charsets.UTF_8));
     }
 
@@ -428,12 +440,13 @@ public final class WSSecurityUtil {
      * @param password the password string to be digested, must not be {@code null}
      * @param algorithm the name of the digest algorithm (e.g. {@code "SHA-256"}), must not be {@code null}
      * @return a Base64-encoded string of the hash of the concatenated inputs
-     * @throws IllegalArgumentException if any parameter is {@code null}, or if the algorithm is not available.
+     * @throws IllegalArgumentException if any parameter is {@code null}, any text field contains an unpaired UTF-16 surrogate, or the algorithm is not available.
      * @see #computePasswordDigest(byte[], byte[], byte[], String)
      * @see #computePasswordDigest(String, String, String)
      * @see #generateNonce(int)
      */
-    public static String computePasswordDigest(final String nonce, final String created, final String password, final String algorithm) {
+    public static String computePasswordDigest(final String nonce, final String created, final String password, final String algorithm)
+            throws IllegalArgumentException {
         if (nonce == null) {
             throw new IllegalArgumentException("Nonce cannot be null");
         }
@@ -448,6 +461,10 @@ public final class WSSecurityUtil {
         }
 
         // See note on the SHA-1 overload: standardize on UTF-8 for cross-platform interop.
+        // Validate each independently encoded field; surrogate halves cannot span fields.
+        Utf8.encodedLength(nonce);
+        Utf8.encodedLength(created);
+        Utf8.encodedLength(password);
         return computePasswordDigest(nonce.getBytes(Charsets.UTF_8), created.getBytes(Charsets.UTF_8), password.getBytes(Charsets.UTF_8), algorithm);
     }
 }

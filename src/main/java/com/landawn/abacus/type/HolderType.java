@@ -52,8 +52,9 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
      * through the TypeFactory.
      *
      * @param parameterTypeName the name of the type parameter for the Holder (e.g., "String", "Integer")
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    protected HolderType(final String parameterTypeName) {
+    protected HolderType(final String parameterTypeName) throws IllegalArgumentException {
         super(HOLDER + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + SK.GREATER_THAN);
 
         declaringName = HOLDER + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
@@ -168,11 +169,12 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
      * @param x the Holder object to convert; may be {@code null}
      * @return the string representation of the contained value,
      *         or {@code null} if {@code x} is {@code null} or holds a {@code null} value
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its type handler fails to produce a string.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final Holder<T> x) {
+    public String stringOf(final Holder<T> x) throws RuntimeException {
         return (x == null || x.isNull()) ? null : elementType.stringOf(x.value());
     }
 
@@ -197,11 +199,12 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
      *
      * @param str the string to convert; may be {@code null}
      * @return a Holder containing the parsed value, or a Holder holding {@code null} if {@code str} is {@code null}
+     * @throws RuntimeException if the declared element type rejects the non-null input during conversion.
      * @see #valueOf(Object)
      * @see #stringOf(Holder)
      */
     @Override
-    public Holder<T> valueOf(final String str) {
+    public Holder<T> valueOf(final String str) throws RuntimeException {
         return str == null ? new Holder<>() : Holder.of(elementType.valueOf(str));
     }
 
@@ -225,13 +228,17 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
      * @param rs the {@link ResultSet} to read from
      * @param columnIndex the 1-based column index to retrieve the value from
      * @return a {@code Holder} containing the retrieved value, or a {@code Holder} holding {@code null} if the value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @throws NullPointerException if {@code rs} is {@code null} and the selected type handler accesses it.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws RuntimeException if the declared element type cannot convert the column value.
      */
     @Override
-    public Holder<T> get(final ResultSet rs, final int columnIndex) throws SQLException {
-        final T result = getColumnValue(rs, columnIndex, elementType.javaType());
+    public Holder<T> get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, RuntimeException {
+        // Use the declared handler to retain nested generic metadata. Primitive JDBC getters return
+        // default values for SQL NULL, so inspect wasNull before wrapping that value.
+        final T result = elementType.get(rs, columnIndex);
 
-        return result == null ? new Holder<>()
+        return result == null || rs.wasNull() ? new Holder<>()
                 : Holder.of(elementType.javaType().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
     }
 
@@ -242,13 +249,17 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
      * @param rs the ResultSet to read from
      * @param columnName the label for the column specified with the SQL AS clause
      * @return a Holder containing the retrieved value, or a Holder holding {@code null} if the value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @throws NullPointerException if {@code rs} is {@code null} and the selected type handler accesses it.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws RuntimeException if the declared element type cannot convert the column value.
      */
     @Override
-    public Holder<T> get(final ResultSet rs, final String columnName) throws SQLException {
-        final T result = getColumnValue(rs, columnName, elementType.javaType());
+    public Holder<T> get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, RuntimeException {
+        // Use the declared handler to retain nested generic metadata. Primitive JDBC getters return
+        // default values for SQL NULL, so inspect wasNull before wrapping that value.
+        final T result = elementType.get(rs, columnName);
 
-        return result == null ? new Holder<>()
+        return result == null || rs.wasNull() ? new Holder<>()
                 : Holder.of(elementType.javaType().isAssignableFrom(result.getClass()) ? result : N.convert(result, elementType));
     }
 
@@ -256,41 +267,55 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
      * Sets a parameter in a PreparedStatement to the value contained in a {@link Holder}.
      * If the Holder is {@code null} or holds a {@code null} value, sets the parameter to SQL NULL.
      *
+     * <p>The declared element handler performs the binding, including its null mapping and JDBC representation.</p>
+     *
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the Holder value to set
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null} and the selected type handler accesses it.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
+     * @throws RuntimeException if the declared element type rejects or cannot convert the contained value for JDBC binding.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Holder<T> x) throws SQLException {
-        stmt.setObject(columnIndex, (x == null || x.isNull()) ? null : x.value());
+    public void set(final PreparedStatement stmt, final int columnIndex, final Holder<T> x) throws NullPointerException, SQLException, RuntimeException {
+        elementType.set(stmt, columnIndex, (x == null || x.isNull()) ? null : x.value());
     }
 
     /**
      * Sets a named parameter in a CallableStatement to the value contained in a {@link Holder}.
      * If the Holder is {@code null} or holds a {@code null} value, sets the parameter to SQL NULL.
      *
+     * <p>The declared element handler performs the binding, including its null mapping and JDBC representation.</p>
+     *
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Holder value to set
-     * @throws SQLException if a database access error occurs or the parameterName is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null} and the selected type handler accesses it.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
+     * @throws RuntimeException if the declared element type rejects or cannot convert the contained value for JDBC binding.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Holder<T> x) throws SQLException {
-        stmt.setObject(parameterName, (x == null || x.isNull()) ? null : x.value());
+    public void set(final CallableStatement stmt, final String parameterName, final Holder<T> x) throws NullPointerException, SQLException, RuntimeException {
+        elementType.set(stmt, parameterName, (x == null || x.isNull()) ? null : x.value());
     }
 
     /**
      * Appends the string representation of a {@link Holder} to an Appendable.
      * If the Holder is {@code null} or holds a {@code null} value, appends the {@code NULL_STRING} constant.
-     * Otherwise, delegates to the runtime type handler of the contained value.
+     * Otherwise, delegates to the declared element type handler - the handler for the {@code T} of
+     * {@code Holder<T>}, not the handler of the contained value's runtime class; when the declared element type is
+     * {@code Object} the handler of the value's runtime class is used instead, exactly as
+     * {@link #serializeTo(CharacterWriter, Holder, JsonXmlSerConfig)} does, so a map, collection or bean value
+     * keeps the {@code toString()}-style form rather than falling back to {@code ObjectType}'s JSON {@code stringOf}.
      * <p>
-     * <b>appendTo vs. serializeTo:</b> {@code appendTo} delegates to the contained value's plain append contract,
-     * whereas {@code serializeTo} delegates to the contained value's serialization contract.
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} delegates to the declared element type's plain append
+     * contract, whereas {@code serializeTo} delegates to its serialization contract.
      *
      * @param appendable the Appendable to write to
      * @param x the Holder value to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -301,37 +326,53 @@ public class HolderType<T> extends AbstractType<Holder<T>> {
      * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public void appendTo(final Appendable appendable, final Holder<T> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Holder<T> x) throws NullPointerException, IOException, RuntimeException {
         if (x == null || x.isNull()) {
             appendable.append(NULL_STRING);
         } else {
-            elementType.appendTo(appendable, x.value());
+            final Object value = x.value();
+            // An Object slot has no usable declared handler (ObjectType has no appendTo of its own, so it falls back
+            // to stringOf, i.e. the JSON form); dispatch on the runtime class the way serializeTo does.
+            final Type type = elementType.isObject() ? TypeFactory.getType(value.getClass()) : elementType;
+
+            type.appendTo(appendable, value);
         }
     }
 
     /**
      * Writes the serialized representation of a {@link Holder} to a {@link CharacterWriter}.
-     * If the Holder is {@code null} or holds a {@code null} value, writes {@code null}.
-     * Otherwise, delegates to the runtime type handler of the contained value.
      * <p>
-     * Any string quotation or character escaping is performed by the delegated value type handler according to the
+     * A {@code null} Holder, and one holding a {@code null} value, are both written by the declared element type
+     * handler, so that handler's null-substitution flags apply: {@code Holder<Integer>} honours
+     * {@code config.isWriteNullNumberAsZero()} (written as {@code 0}), {@code Holder<Boolean>} honours
+     * {@code writeNullBooleanAsFalse} ({@code false}) and {@code Holder<String>} honours
+     * {@code writeNullStringAsEmpty} ({@code ""}); without such a flag the literal {@code null} is written.
+     * <p>
+     * A non-{@code null} value is written by the declared element type handler - the handler for the {@code T} of
+     * {@code Holder<T>}, not the handler of the value's runtime class. When the declared element type is
+     * {@code Object} the handler of the value's runtime class is used instead, so {@code Holder.of(1)} inside a
+     * {@code List<Object>} is written as {@code 1}, not {@code "1"}. A value whose handler is not
+     * {@linkplain Type#isSerializable() serializable} - a bean, a map, a {@code List<Object>} - is written as embedded
+     * JSON when {@code config} is a {@code JsonSerConfig}, and as its escaped {@code stringOf} text under any other
+     * config. Any string quotation or character escaping is performed by the delegated handler according to the
      * supplied serialization config.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} delegates to the contained value's serialization contract,
-     * whereas {@code appendTo} delegates to the contained value's plain append contract.
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML using the declared
+     * element type's serializer, whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style
+     * rendering.
      *
      * @param writer the CharacterWriter to write to
-     * @param x the Holder value to write
-     * @param config the serialization configuration
-     * @throws IOException if an I/O error occurs during the write operation
+     * @param x the Holder value to write, may be {@code null}
+     * @param config the serialization configuration, may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Holder<T> x, final JsonXmlSerConfig<?> config) throws IOException {
-        if (x == null || x.isNull()) {
-            writer.write(NULL_CHAR_ARRAY);
-        } else {
-            elementType.serializeTo(writer, x.value(), config);
-        }
+    public void serializeTo(final CharacterWriter writer, final Holder<T> x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, RuntimeException {
+        AbstractTupleType.serializeSlot(writer, elementType, x == null ? null : x.value(), config);
     }
 }

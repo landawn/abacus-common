@@ -154,9 +154,12 @@ public enum Percentage {
      * @param startInclusive the starting percentage (inclusive), must not be {@code null}.
      * @param endExclusive the ending percentage (exclusive), must not be {@code null}.
      * @return an immutable set containing all {@code Percentage} values in the specified range.
-     * @throws NullPointerException if {@code startInclusive} or {@code endExclusive} is {@code null}
+     * @throws IllegalArgumentException if {@code startInclusive} or {@code endExclusive} is {@code null}
      */
-    public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive) {
+    public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive) throws IllegalArgumentException {
+        N.checkArgNotNull(startInclusive, cs.startInclusive);
+        N.checkArgNotNull(endExclusive, cs.endExclusive);
+
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ")";
         return rangePool.computeIfAbsent(key, ignored -> {
             final Set<Percentage> set = N.newLinkedHashSet();
@@ -174,7 +177,13 @@ public enum Percentage {
     /**
      * Returns an immutable set of Percentage values within the specified range with a step increment.
      * The range is inclusive of the start value and exclusive of the end value.
-     * Only percentages that are at the specified step intervals from the start are included.
+     *
+     * <p>The step is applied to this enum's discrete table, not to a continuous percent line.
+     * A constant {@code p} is kept when {@code (scaled(p) - scaled(start)) % scaled(by) == 0},
+     * where {@code scaled} is the decimal value times {@code 1_000_000}. Because the table is
+     * not uniformly spaced, a start that is not on the same grid as later constants yields
+     * only that start (for example {@code range(_1, _50, _10)} is {@code {_1}}, not every
+     * 10&nbsp;percent). Inverted ranges ({@code start > end}) return an empty set.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -186,9 +195,14 @@ public enum Percentage {
      * @param endExclusive the ending percentage (exclusive), must not be {@code null}.
      * @param by the step increment between percentages, must not be {@code null}.
      * @return an immutable set containing {@code Percentage} values at the specified intervals.
-     * @throws NullPointerException if any argument is {@code null}
+     * @throws IllegalArgumentException if any argument is {@code null}
      */
-    public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive, final Percentage by) {
+    public static ImmutableSet<Percentage> range(final Percentage startInclusive, final Percentage endExclusive, final Percentage by)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(startInclusive, cs.startInclusive);
+        N.checkArgNotNull(endExclusive, cs.endExclusive);
+        N.checkArgNotNull(by, cs.by);
+
         final String key = "(" + startInclusive.str + ", " + endExclusive.str + ", " + by.str + ")";
         return rangePool.computeIfAbsent(key, ignored -> {
             final Set<Percentage> set = N.newLinkedHashSet();
@@ -221,9 +235,12 @@ public enum Percentage {
      * @param startInclusive the starting percentage (inclusive), must not be {@code null}.
      * @param endInclusive the ending percentage (inclusive), must not be {@code null}.
      * @return an immutable set containing all {@code Percentage} values in the specified closed range.
-     * @throws NullPointerException if {@code startInclusive} or {@code endInclusive} is {@code null}
+     * @throws IllegalArgumentException if {@code startInclusive} or {@code endInclusive} is {@code null}
      */
-    public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive) {
+    public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive) throws IllegalArgumentException {
+        N.checkArgNotNull(startInclusive, cs.startInclusive);
+        N.checkArgNotNull(endInclusive, cs.endInclusive);
+
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + "]";
         return rangePool.computeIfAbsent(key, ignored -> {
             final Set<Percentage> set = N.newLinkedHashSet();
@@ -241,7 +258,10 @@ public enum Percentage {
     /**
      * Returns an immutable set of Percentage values within the specified closed range with a step increment.
      * Both the start and end values are inclusive.
-     * Only percentages that are at the specified step intervals from the start are included.
+     *
+     * <p>The step uses the same discrete-table modulo rule as
+     * {@link #range(Percentage, Percentage, Percentage)}: only constants whose scaled
+     * difference from {@code startInclusive} is a multiple of {@code by} are included.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -253,9 +273,14 @@ public enum Percentage {
      * @param endInclusive the ending percentage (inclusive), must not be {@code null}.
      * @param by the step increment between percentages, must not be {@code null}.
      * @return an immutable set containing {@code Percentage} values at the specified intervals.
-     * @throws NullPointerException if any argument is {@code null}
+     * @throws IllegalArgumentException if any argument is {@code null}
      */
-    public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive, final Percentage by) {
+    public static ImmutableSet<Percentage> rangeClosed(final Percentage startInclusive, final Percentage endInclusive, final Percentage by)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(startInclusive, cs.startInclusive);
+        N.checkArgNotNull(endInclusive, cs.endInclusive);
+        N.checkArgNotNull(by, cs.by);
+
         final String key = "(" + startInclusive.str + ", " + endInclusive.str + ", " + by.str + "]";
         return rangePool.computeIfAbsent(key, ignored -> {
             final Set<Percentage> set = N.newLinkedHashSet();
@@ -284,7 +309,7 @@ public enum Percentage {
      * @return the integer representation of the percentage.
      * @throws NullPointerException if {@code p} is {@code null}.
      */
-    private static int intValue(final Percentage p) {
+    private static int intValue(final Percentage p) throws NullPointerException {
         return (int) Math.round(p.val * 1_000_000);
     }
 

@@ -1,8 +1,11 @@
 package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -11,10 +14,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Base64;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -166,5 +173,47 @@ public class PasswordTypeTest extends TestBase {
     public void testValueOf() {
         assertEquals("test", passwordType.valueOf("test"));
         assertNull(passwordType.valueOf(null));
+    }
+
+    // ---- review fixes 2026-09-06: T3-10 documented exceptions of the protected constructor ----
+
+    @Test
+    public void reviewFixes20260906_constructorUnknownAlgorithmThrowsRuntimeWrappingNoSuchAlgorithm() {
+        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> new PasswordType("NO-SUCH-DIGEST") {
+        });
+
+        assertInstanceOf(NoSuchAlgorithmException.class, thrown.getCause());
+    }
+
+    @Test
+    public void reviewFixes20260906_constructorNullAlgorithmThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> new PasswordType((String) null) {
+        });
+    }
+
+    @Test
+    public void reviewFixes20260906_constructorKnownAlgorithmInstallsThatDigest() throws Exception {
+        final PasswordType sha512 = new PasswordType("SHA-512") {
+        };
+        final String expected = Base64.getEncoder()
+                .encodeToString(MessageDigest.getInstance("SHA-512").digest("secret".getBytes(StandardCharsets.UTF_8)));
+        final String sha256 = Base64.getEncoder()
+                .encodeToString(MessageDigest.getInstance("SHA-256").digest("secret".getBytes(StandardCharsets.UTF_8)));
+        final PreparedStatement stmt = mock(PreparedStatement.class);
+
+        // the constructor really installed SHA-512: set() binds that algorithm's Base64 digest, not the default SHA-256 one
+        sha512.set(stmt, 1, "secret");
+        verify(stmt).setString(1, expected);
+        assertNotEquals(sha256, expected);
+        passwordType.set(stmt, 2, "secret");
+        verify(stmt).setString(2, sha256);
+
+        // null still binds SQL NULL rather than a digest of "null"
+        sha512.set(stmt, 3, null);
+        verify(stmt).setString(3, null);
+
+        // stringOf/valueOf stay the identity conversion inherited from AbstractStringType
+        assertEquals("secret", sha512.stringOf("secret"));
+        assertEquals("secret", sha512.valueOf("secret"));
     }
 }

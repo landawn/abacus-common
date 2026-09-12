@@ -17,7 +17,7 @@ package com.landawn.abacus.util;
 /**
  * Enumeration representing the threading mode used for event delivery in the
  * {@link com.landawn.abacus.eventbus.EventBus}. The mode controls whether subscriber
- * methods are invoked on the posting thread or dispatched to a background thread pool.
+ * methods are invoked on the posting thread or dispatched through the configured executor.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -57,11 +57,11 @@ public enum ThreadMode {
     DEFAULT,
 
     /**
-     * Thread-pool executor mode. Events are delivered asynchronously on a background thread
-     * from the {@code EventBus}'s configured executor, decoupling the subscriber from the
-     * posting thread.
+     * Executor-dispatched mode. Events are submitted to the {@code EventBus}'s configured
+     * executor. The default executor uses background threads; a custom direct executor may
+     * invoke the subscriber synchronously on the posting thread.
      *
-     * <p>Use this mode when:</p>
+     * <p>With a background executor, use this mode when:</p>
      * <ul>
      *   <li>Event handlers perform time-consuming or blocking operations</li>
      *   <li>Parallel execution of independent event handlers is desired</li>

@@ -1402,4 +1402,17 @@ public class ParallelArrayDoubleStreamTest extends TestBase {
         assertEquals(-Double.MAX_VALUE, result[0], 0.0001);
         assertEquals(Double.MAX_VALUE, result[5], 0.0001);
     }
+
+    @Test
+    public void testGroupToRejectsNullDownstreamBeforeMapFactory() {
+        final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();
+        final DoubleStream source = DoubleStream.of(new double[] { 1, 2, 3 }).parallel(2);
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> source.groupTo(value -> 0, null, () -> {
+            mapCreated.set(true);
+            return new java.util.HashMap<Integer, Object>();
+        }));
+        org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
+    }
 }

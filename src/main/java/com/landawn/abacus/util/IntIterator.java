@@ -28,6 +28,11 @@ import com.landawn.abacus.util.stream.IntStream;
  * by avoiding boxing/unboxing overhead. This abstract class provides various utility methods for
  * creating, transforming, and consuming int iterators.
  *
+ * <p>Element removal is not supported: every iterator returned by this class's factory methods throws
+ * {@link UnsupportedOperationException} from {@link #remove()}. Because the class is extensible (the
+ * constructor is {@code protected}), a subclass may override {@code remove()}, so a guaranteed read-only
+ * iterator cannot be assumed from the declared type alone.</p>
+ *
  * <p>Instances are mutable traversal cursors and are not safe for concurrent consumption unless a
  * particular implementation explicitly documents stronger guarantees. Transformation methods return
  * wrappers over this same source iterator; consuming a wrapper also advances the source.</p>
@@ -52,7 +57,7 @@ import com.landawn.abacus.util.stream.IntStream;
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 public abstract class IntIterator extends ImmutableIterator<Integer> {
 
     /**
@@ -75,8 +80,12 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if this iterator has no remaining element
+         */
         @Override
-        public int nextInt() {
+        public int nextInt() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
@@ -161,8 +170,12 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
                 return cursor < toIndex;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -189,6 +202,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Creates a deferred IntIterator that is initialized lazily using the provided Supplier.
      * The Supplier is called only when the first method of the iterator is invoked.
+     * The supplier is invoked at most once. If it throws a runtime exception or error, that same
+     * failure is cached and rethrown by subsequent access attempts.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -199,9 +214,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * }
      * }</pre>
      *
+     * <p>The returned iterator initializes its source on its first traversal operation. If the supplier returns null, initialization throws IllegalStateException; a RuntimeException or Error from initialization is cached and rethrown by subsequent traversal operations.</p>
+     *
      * @param iteratorSupplier a {@code Supplier} that provides the {@code IntIterator} when needed
      * @return a lazily initialized {@code IntIterator}
-     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static IntIterator defer(final Supplier<? extends IntIterator> iteratorSupplier) throws IllegalArgumentException {
@@ -226,7 +242,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
                 return iter.nextInt();
             }
 
-            private void init() {
+            /**
+             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null}
+             */
+            private void init() throws IllegalStateException {
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
@@ -290,7 +309,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Creates an IntIterator that generates values while a condition is {@code true}.
      * The {@code hasNext} supplier is called at most once per element; its result is cached
-     * until the next call to {@code nextInt()}.
+     * until the next call to {@code nextInt()}. Once {@code hasNext} has returned {@code false} the
+     * iterator is permanently exhausted: the condition is never re-evaluated, so the iterator does not
+     * resume even if the state it inspects changes later.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -324,8 +345,12 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
                 return hasNextValue;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -355,7 +380,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      */
     @Deprecated
     @Override
-    public Integer next() {
+    public Integer next() throws NoSuchElementException {
         return nextInt();
     }
 
@@ -372,7 +397,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * @return the next int value
      * @throws NoSuchElementException if the iteration has no more elements
      */
-    public abstract int nextInt();
+    public abstract int nextInt() throws NoSuchElementException;
 
     /**
      * Returns a new {@code IntIterator} that skips the first {@code n} elements.
@@ -405,6 +430,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
 
         return new IntIterator() {
             private boolean skipped = false;
+            private long remaining = n;
 
             @Override
             public boolean hasNext() {
@@ -415,8 +441,12 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -425,10 +455,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
             }
 
             private void skip() {
-                long idx = 0;
-
-                while (idx++ < n && iter.hasNext()) {
+                while (remaining > 0 && iter.hasNext()) {
                     iter.nextInt();
+                    remaining--;
                 }
 
                 skipped = true;
@@ -474,14 +503,19 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
                 return cnt > 0 && iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final int result = iter.nextInt();
                 cnt--;
-                return iter.nextInt();
+                return result;
             }
         };
     }
@@ -526,8 +560,12 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
                 return hasNext;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -593,6 +631,11 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     /**
      * Converts this iterator to an IntStream for further processing.
      *
+     * <p>The stream shares this iterator's traversal position and consumes elements as needed.
+     * Operations that consume all remaining elements exhaust this iterator; short-circuiting
+     * operations may leave elements unconsumed. Do not access this iterator independently
+     * while the stream is consuming it.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int sum = IntIterator.of(1, 2, 3, 4, 5)
@@ -637,10 +680,11 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * // Prints: 100: 10, 101: 20, 102: 30
      * }</pre>
      *
+     * <p>The returned iterator throws ArithmeticException when traversal would assign an index greater than Long.MAX_VALUE.</p>
+     *
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedInt} elements with indices starting at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative.
-     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
     public ObjIterator<IndexedInt> indexed(final long startIndex) throws IllegalArgumentException {
@@ -657,8 +701,13 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if the source iterator has no remaining element
+             * @throws ArithmeticException if an element remains after index {@link Long#MAX_VALUE} has already been assigned
+             */
             @Override
-            public IndexedInt next() {
+            public IndexedInt next() throws NoSuchElementException, ArithmeticException {
                 if (indexOverflow) {
                     if (!iter.hasNext()) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
@@ -694,13 +743,13 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * }</pre>
      *
      * @param action the action to perform on each remaining element
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws NullPointerException if {@code action} is {@code null}, as specified by {@link java.util.Iterator#forEachRemaining(java.util.function.Consumer)}.
      * @deprecated use {@link #foreachRemaining(Throwables.IntConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Integer> action) throws IllegalArgumentException {
-        N.checkArgNotNull(action, cs.action);
+    public void forEachRemaining(final java.util.function.Consumer<? super Integer> action) throws NullPointerException {
+        N.requireNonNull(action, cs.action);
 
         super.forEachRemaining(action);
     }
@@ -722,10 +771,10 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each element
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.IntConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachRemaining(final Throwables.IntConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);//NOSONAR
 
         while (hasNext()) {
@@ -753,12 +802,12 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each index-value pair
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
-     * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if {@code action} throws while processing a remaining element and its index
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntIntConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachIndexed(final Throwables.IntIntConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         N.checkArgNotNull(action, cs.action);
 
         int idx = 0;

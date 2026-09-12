@@ -19,7 +19,7 @@ import com.landawn.abacus.TestBase;
 
 public class JsonXmlValueTest extends TestBase {
 
-    static class TestClass {
+    public static class TestClass {
         @JsonXmlValue
         private String value;
 

@@ -243,10 +243,10 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * @param predicate the predicate to test the current value
      * @param newValue the new value to set if the condition is met
      * @return {@code true} if the value was updated, {@code false} otherwise
-     * @throws E if the predicate throws an exception
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws an exception
      */
-    public <E extends Exception> boolean setIf(final Throwables.FloatPredicate<E> predicate, final float newValue) throws E, IllegalArgumentException {
+    public <E extends Exception> boolean setIf(final Throwables.FloatPredicate<E> predicate, final float newValue) throws IllegalArgumentException, E {
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (predicate.test(value)) {
@@ -612,7 +612,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * @throws NullPointerException if {@code other} is {@code null}
      */
     @Override
-    public int compareTo(final MutableFloat other) {
+    public int compareTo(final MutableFloat other) throws NullPointerException {
         return Float.compare(value, other.value);
     }
 

@@ -223,4 +223,73 @@ public class AvroSerConfigTest extends TestBase {
         Assertions.assertEquals(Exclusion.NULL, config2.getExclusion());
     }
 
+    // reviewFixes20260906 (P6-13): equals/hashCode delegate to SerializationConfig.
+    @Test
+    public void reviewFixes20260906_equalsAndHashCodeDelegateToParent() {
+        final Schema schema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
+        final Schema sameSchema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
+        final Schema otherSchema = new Schema.Parser()
+                .parse("{\"type\":\"record\",\"name\":\"Other\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}");
+
+        final AvroSerConfig a = AvroSerConfig.create().setSchema(schema).setExclusion(Exclusion.NULL).setSkipTransientField(false);
+        final Set<String> ignored = new HashSet<>();
+        ignored.add("p");
+        a.setIgnoredPropNames(String.class, ignored);
+
+        final AvroSerConfig copy = a.copy();
+        assertNotSame(a, copy);
+        assertEquals(a, copy);
+        assertEquals(copy, a);
+        assertEquals(a.hashCode(), copy.hashCode());
+
+        // A distinct but equal Schema object counts as equal.
+        final AvroSerConfig b = AvroSerConfig.create().setSchema(sameSchema).setExclusion(Exclusion.NULL).setSkipTransientField(false);
+        final Set<String> ignoredB = new HashSet<>();
+        ignoredB.add("p");
+        b.setIgnoredPropNames(String.class, ignoredB);
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
+
+        b.setSchema(otherSchema);
+        assertFalse(a.equals(b));
+        b.setSchema(null);
+        assertFalse(a.equals(b));
+        assertFalse(b.equals(a));
+        b.setSchema(sameSchema);
+        assertTrue(a.equals(b));
+
+        b.setSkipTransientField(true);
+        assertFalse(a.equals(b));
+        b.setSkipTransientField(false);
+        assertTrue(a.equals(b));
+
+        b.setExclusion(Exclusion.DEFAULT);
+        assertFalse(a.equals(b));
+        b.setExclusion(Exclusion.NULL);
+        assertTrue(a.equals(b));
+
+        final Set<String> ignoredQ = new HashSet<>();
+        ignoredQ.add("q");
+        b.setIgnoredPropNames(String.class, ignoredQ);
+        assertFalse(a.equals(b));
+        b.setIgnoredPropNames(String.class, ignoredB);
+        assertTrue(a.equals(b));
+        assertEquals(a.hashCode(), b.hashCode());
+
+        assertFalse(a.equals(null));
+        assertFalse(a.equals("not a config"));
+        assertFalse(a.equals(KryoSerConfig.create()));
+
+        // The parent requires the exact same class: an anonymous subclass is unequal in BOTH directions.
+        final AvroSerConfig anonymous = new AvroSerConfig() {
+        };
+        anonymous.setSchema(schema).setExclusion(Exclusion.NULL).setSkipTransientField(false);
+        anonymous.setIgnoredPropNames(String.class, ignored);
+        assertEquals(anonymous.equals(a), a.equals(anonymous));
+        assertFalse(a.equals(anonymous));
+
+        assertTrue(a.toString().contains("schema="));
+        assertTrue(a.toString().contains("exclusion=NULL"));
+    }
+
 }

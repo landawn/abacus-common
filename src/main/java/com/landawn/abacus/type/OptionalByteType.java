@@ -22,6 +22,10 @@ import com.landawn.abacus.util.u.OptionalByte;
  * providing serialization, deserialization, and database interaction capabilities for optional byte values.
  * Note: this handles the abacus-specific {@code OptionalByte}, which has no direct JDK equivalent.
  * This handler manages the conversion between database byte/numeric values and {@link OptionalByte} wrapper objects.
+ *
+ * <p>JDBC numeric coercion truncates finite fractional values toward zero, then checks the target range.
+ * NaN, infinities and out-of-range integer parts throw {@link ArithmeticException}; no wraparound occurs.</p>
+ *
  */
 public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
 
@@ -147,12 +151,13 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      *
      * @param str the string to convert
      * @return an OptionalByte containing the parsed byte value, or empty if the input is empty or null
-     * @throws NumberFormatException if the string cannot be parsed as a byte
+     * @throws NumberFormatException if the string is not a valid integer token
+     * @throws ArithmeticException if the string is a well-formed integer outside the {@code byte} range
      * @see #valueOf(Object)
      * @see #stringOf(OptionalByte)
      */
     @Override
-    public OptionalByte valueOf(final String str) {
+    public OptionalByte valueOf(final String str) throws NumberFormatException, ArithmeticException {
         return Strings.isEmpty(str) ? OptionalByte.empty() : OptionalByte.of(Numbers.toByte(str));
     }
 
@@ -178,15 +183,20 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return an OptionalByte containing the byte value, or empty if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @return an OptionalByte containing the byte value, or empty if the column value is SQL NULL. A non-{@code Number}
+     *         column value is coerced with {@link Numbers#toByte(Object)}, so an empty string yields a <i>present</i>
+     *         zero (the same answer {@code ByteType.get} gives), unlike {@link #valueOf(String)} which answers empty for
+     *         {@code ""}
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string         included)
+     * @throws ArithmeticException if the numeric value is nonfinite or its integer part is out of range
      */
     @Override
-    public OptionalByte get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public OptionalByte get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, NumberFormatException, ArithmeticException {
         final Object result = rs.getObject(columnIndex);
 
-        return result == null ? OptionalByte.empty()
-                : OptionalByte.of(result instanceof Byte num ? num : (result instanceof Number num ? num.byteValue() : Numbers.toByte(result.toString())));
+        return result == null ? OptionalByte.empty() : OptionalByte.of(Numbers.toByte(result));
     }
 
     /**
@@ -211,15 +221,20 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      *
      * @param rs the ResultSet to read from
      * @param columnName the label for the column specified with the SQL AS clause
-     * @return an OptionalByte containing the byte value, or empty if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @return an OptionalByte containing the byte value, or empty if the column value is SQL NULL. A non-{@code Number}
+     *         column value is coerced with {@link Numbers#toByte(Object)}, so an empty string yields a <i>present</i>
+     *         zero (the same answer {@code ByteType.get} gives), unlike {@link #valueOf(String)} which answers empty for
+     *         {@code ""}
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string         included)
+     * @throws ArithmeticException if the numeric value is nonfinite or its integer part is out of range
      */
     @Override
-    public OptionalByte get(final ResultSet rs, final String columnName) throws SQLException {
+    public OptionalByte get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, NumberFormatException, ArithmeticException {
         final Object result = rs.getObject(columnName);
 
-        return result == null ? OptionalByte.empty()
-                : OptionalByte.of(result instanceof Byte num ? num : (result instanceof Number num ? num.byteValue() : Numbers.toByte(result.toString())));
+        return result == null ? OptionalByte.empty() : OptionalByte.of(Numbers.toByte(result));
     }
 
     /**
@@ -243,10 +258,11 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the OptionalByte value to set
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalByte x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalByte x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.TINYINT);
         } else {
@@ -275,10 +291,11 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OptionalByte value to set
-     * @throws SQLException if a database access error occurs or the parameterName is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final OptionalByte x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final OptionalByte x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.TINYINT);
         } else {
@@ -310,7 +327,8 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      *
      * @param appendable the Appendable to write to
      * @param x the OptionalByte value to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -322,7 +340,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final OptionalByte x) throws IOException {
+    public void appendTo(final Appendable appendable, final OptionalByte x) throws NullPointerException, IOException {
         if (x == null || x.isEmpty()) {
             appendable.append(NULL_STRING);
         } else {
@@ -339,6 +357,7 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * Type<OptionalByte> type = TypeFactory.getType(OptionalByte.class);
      * BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
      * BufferedJsonWriter nullWriter = Objectory.createBufferedJsonWriter();
+     * BufferedJsonWriter zeroWriter = Objectory.createBufferedJsonWriter();
      * try {
      *     OptionalByte opt = OptionalByte.of((byte) 127);
      *     type.serializeTo(writer, opt, null);
@@ -346,12 +365,22 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      *
      *     type.serializeTo(nullWriter, OptionalByte.empty(), null);
      *     // Writes: null
+     *
+     *     type.serializeTo(zeroWriter, OptionalByte.empty(), JsonSerConfig.create().setWriteNullNumberAsZero(true));
+     *     // Writes: 0
      * } finally {
      *     Objectory.recycle(writer);
      *     Objectory.recycle(nullWriter);
+     *     Objectory.recycle(zeroWriter);
      * }
      * }</pre>
      *
+     * <p>
+     * A {@code null} or empty optional is written as {@code null} unless {@code config.isWriteNullNumberAsZero()} is
+     * set, in which case {@code 0} is written - the same substitution {@code ByteType} and {@code MutableByteType}
+     * apply to a {@code null} value. A substituted zero reads back as a <i>present</i> {@code OptionalByte.of((byte) 0)},
+     * which is what the flag asks for. The XML serializers represent an empty optional property with the
+     * {@code isNull="true"} attribute form rather than with the text written here.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
      * {@code CharacterWriter}. String quotation/escaping config is ignored.
@@ -362,13 +391,18 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      *
      * @param writer the CharacterWriter to write to
      * @param x the OptionalByte value to write
-     * @param config the serialization configuration
-     * @throws IOException if an I/O error occurs during the write operation
+     * @param config the serialization configuration; only {@code writeNullNumberAsZero} is consulted, may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final OptionalByte x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final OptionalByte x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null || x.isEmpty()) {
-            writer.write(NULL_CHAR_ARRAY);
+            if (config != null && config.isWriteNullNumberAsZero()) {
+                writer.write((byte) 0);
+            } else {
+                writer.write(NULL_CHAR_ARRAY);
+            }
         } else {
             writer.write(x.get());
         }

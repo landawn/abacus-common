@@ -178,11 +178,12 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
             return true;
         }
 
-        // Require exact same class to keep equals symmetric. Concrete subclasses (JsonSerConfig,
-        // XmlSerConfig, ...) each override equals() with a narrower `instanceof <OwnType>` check, so this
-        // base method must also reject cross-subclass comparisons; otherwise xml.equals(json) could be
-        // true (via this base implementation) while json.equals(xml) is false, violating the
-        // Object.equals contract. Mirrors DeserializationConfig#equals.
+        // Require exact same class to keep equals symmetric. A subclass that does not override equals
+        // (JsonXmlSerConfig, and any user subclass) inherits this method; comparing by `instanceof
+        // SerializationConfig` would make such an instance equal to an instance of a different subclass whose
+        // own override answers false in the other direction - AvroSerConfig and KryoSerConfig narrow with
+        // `instanceof <OwnType> && super.equals`, while JsonSerConfig and XmlSerConfig apply this same
+        // exact-class rule - violating the Object.equals contract. Mirrors DeserializationConfig#equals.
         if (obj == null || obj.getClass() != getClass()) {
             return false;
         }

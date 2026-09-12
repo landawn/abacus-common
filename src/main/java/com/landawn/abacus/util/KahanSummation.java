@@ -14,6 +14,9 @@
 
 package com.landawn.abacus.util;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Locale;
 
 import com.landawn.abacus.util.u.OptionalDouble;
@@ -45,6 +48,11 @@ import com.landawn.abacus.util.u.OptionalDouble;
  */
 public final class KahanSummation { // NOSONAR
 
+    // This precision covers the exact decimal expansion of a binary64 value plus the extra
+    // quotient bits from any positive long count, including rounding decisions at subnormal ties.
+    // The context is used only after the ordinary finite summation has overflowed.
+    private static final MathContext OVERFLOW_AVERAGE_CONTEXT = new MathContext(1200, RoundingMode.HALF_EVEN);
+
     /**
      * Constructs a new KahanSummation with initial values of zero.
      *
@@ -68,6 +76,14 @@ public final class KahanSummation { // NOSONAR
 
     private double simpleSum;
 
+    // Activated only after a finite simple sum overflows. The compensated prefix and all
+    // subsequent finite additions are retained at higher precision, so later cancellation
+    // does not amplify rounding performed by a single-double running mean.
+    private BigDecimal overflowSafeSum;
+
+    // False after a non-finite value, or an aggregate with unknown finite provenance, is seen.
+    private boolean finiteValuesOnly = true;
+
     /**
      * Creates a new KahanSummation instance initialized with the provided values.
      *
@@ -79,10 +95,12 @@ public final class KahanSummation { // NOSONAR
      *
      * @param a the array of double values to sum; may be empty but not {@code null}
      * @return a new KahanSummation instance containing the sum of the provided values
-     * @throws NullPointerException if {@code a} is {@code null}
+     * @throws IllegalArgumentException if {@code a} is {@code null}
      * @see #addAll(double[])
      */
-    public static KahanSummation of(final double... a) {
+    public static KahanSummation of(final double... a) throws IllegalArgumentException {
+        N.checkArgNotNull(a, cs.a);
+
         final KahanSummation summation = new KahanSummation();
 
         for (final double e : a) {
@@ -107,10 +125,29 @@ public final class KahanSummation { // NOSONAR
      * }</pre>
      *
      * @param value the value to add to the summation
+     * @throws ArithmeticException if the observation count would overflow; this summation is unchanged
      */
-    public void add(final double value) {
-        count++;
+    public void add(final double value) throws ArithmeticException {
+        final long previousCount = count;
+        final double previousSimpleSum = simpleSum;
+        count = Math.addExact(count, 1L);
         simpleSum += value;
+
+        if (finiteValuesOnly) {
+            if (overflowSafeSum == null) {
+                if (!Double.isFinite(simpleSum)) {
+                    if (Double.isFinite(value)) {
+                        activateOverflowSafeSum(previousCount, previousSimpleSum, exactBigDecimal(value));
+                    } else {
+                        invalidateOverflowSafeSum();
+                    }
+                }
+            } else if (Double.isFinite(value)) {
+                overflowSafeSum = overflowSafeSum.add(exactBigDecimal(value));
+            } else {
+                invalidateOverflowSafeSum();
+            }
+        }
 
         kahanSum(value);
     }
@@ -126,9 +163,15 @@ public final class KahanSummation { // NOSONAR
      * }</pre>
      *
      * @param values the array of values to add to the summation; must not be {@code null}
-     * @throws NullPointerException if {@code values} is {@code null}
+     * @throws IllegalArgumentException if {@code values} is {@code null}
+     * @throws ArithmeticException if the observation count would overflow; no values are added
      */
-    public void addAll(final double[] values) {
+    public void addAll(final double[] values) throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(values, cs.values);
+
+        // Preflight the whole batch so count overflow cannot leave a partially added prefix.
+        Math.addExact(count, values.length);
+
         for (final double value : values) {
             add(value);
         }
@@ -151,12 +194,33 @@ public final class KahanSummation { // NOSONAR
      * @param countA the number of values represented by {@code sumA}
      * @param sumA the pre-computed sum of those values
      * @throws IllegalArgumentException if {@code countA} is negative.
+     * @throws ArithmeticException if the combined observation count would overflow; this summation is unchanged
      */
-    public void combine(final long countA, final double sumA) throws IllegalArgumentException {
-        N.checkArgNotNegative(countA, "countA");
+    public void combine(final long countA, final double sumA) throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNegative(countA, cs.countA);
 
-        count += countA;
+        final long previousCount = count;
+        final double previousSimpleSum = simpleSum;
+        count = Math.addExact(count, countA);
         simpleSum += sumA;
+
+        if (finiteValuesOnly) {
+            if (countA > 0 && Double.isFinite(sumA)) {
+                final BigDecimal addedSum = exactBigDecimal(sumA);
+
+                if (overflowSafeSum != null) {
+                    overflowSafeSum = overflowSafeSum.add(addedSum);
+                } else if (!Double.isFinite(simpleSum)) {
+                    activateOverflowSafeSum(previousCount, previousSimpleSum, addedSum);
+                }
+            } else if (countA > 0 || sumA != 0d) {
+                // A non-finite aggregate sum may have come from finite values that
+                // overflowed, but combine(count, sum) does not retain enough
+                // information to reconstruct their average. Likewise, a non-zero
+                // sum representing zero observations has no meaningful average.
+                invalidateOverflowSafeSum();
+            }
+        }
 
         kahanSum(sumA);
     }
@@ -177,18 +241,41 @@ public final class KahanSummation { // NOSONAR
      * }</pre>
      *
      * @param other the other KahanSummation to combine with this one; may be this instance
-     * @throws NullPointerException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}
+     * @throws ArithmeticException if the combined observation count would overflow; this summation is unchanged
      */
-    public void combine(final KahanSummation other) {
+    public void combine(final KahanSummation other) throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(other, cs.other);
+
         // Snapshot all source fields before mutating this instance. This is required when
         // other == this because kahanSum changes both sum and correction.
         final long otherCount = other.count;
         final double otherSimpleSum = other.simpleSum;
         final double otherSum = other.sum;
         final double otherCorrection = other.correction;
+        final BigDecimal otherOverflowSafeSum = other.overflowSafeSum;
+        final boolean otherFiniteValuesOnly = other.finiteValuesOnly;
+        final long previousCount = count;
+        final double previousSimpleSum = simpleSum;
 
-        count += otherCount;
+        count = Math.addExact(count, otherCount);
         simpleSum += otherSimpleSum;
+
+        if (finiteValuesOnly) {
+            if (otherCount > 0 && otherFiniteValuesOnly) {
+                final BigDecimal otherAggregate = otherOverflowSafeSum != null ? otherOverflowSafeSum
+                        : exactCompensatedSum(otherSum, otherCorrection, otherSimpleSum);
+
+                if (overflowSafeSum != null) {
+                    overflowSafeSum = overflowSafeSum.add(otherAggregate);
+                } else if (otherOverflowSafeSum != null || !Double.isFinite(simpleSum)) {
+                    activateOverflowSafeSum(previousCount, previousSimpleSum, otherAggregate);
+                }
+            } else if (otherCount > 0 || otherSimpleSum != 0d) {
+                invalidateOverflowSafeSum();
+            }
+        }
+
         kahanSum(otherSum);
         // Subtract the compensation bits: the running invariant is
         // (true sum) ~= sum - correction, so the other's correction must be
@@ -255,12 +342,32 @@ public final class KahanSummation { // NOSONAR
      * System.out.println(avg.orElse(0));   // prints 2.5
      * }</pre>
      *
+     * <p>If all recorded values are finite but their intermediate sum overflows, this method uses its
+     * higher-precision overflow-safe total instead of returning a spurious infinity. If any recorded value
+     * is non-finite, standard IEEE 754 propagation applies.</p>
+     *
      * @return an {@link OptionalDouble} containing the average, or an empty {@link OptionalDouble} if no values have been added
      * @see #sum()
      * @see #count()
      */
     public OptionalDouble average() {
-        return count == 0 ? OptionalDouble.empty() : OptionalDouble.of(sum() / count());
+        if (count == 0) {
+            return OptionalDouble.empty();
+        }
+
+        final double result = sum();
+
+        if (!Double.isFinite(result)) {
+            if (overflowSafeSum != null) {
+                return OptionalDouble.of(overflowSafeAverage());
+            } else if (finiteValuesOnly && Double.isFinite(simpleSum)) {
+                // A compensated result can cross the finite boundary while the
+                // simple sum remains finite. It is still a safe fallback mean.
+                return OptionalDouble.of(simpleSum / count);
+            }
+        }
+
+        return OptionalDouble.of(result / count);
     }
 
     /**
@@ -297,5 +404,37 @@ public final class KahanSummation { // NOSONAR
 
         correction = (t - sum) - y;
         sum = t;
+    }
+
+    /** Activates the higher-precision fallback only after a finite aggregate crosses the representable range. */
+    private void activateOverflowSafeSum(final long previousCount, final double previousSimpleSum, final BigDecimal addedSum) {
+        overflowSafeSum = previousCount == 0 ? addedSum : exactCompensatedSum(sum, correction, previousSimpleSum).add(addedSum);
+    }
+
+    private void invalidateOverflowSafeSum() {
+        finiteValuesOnly = false;
+        overflowSafeSum = null;
+    }
+
+    private double overflowSafeAverage() {
+        final double result = overflowSafeSum.divide(BigDecimal.valueOf(count), OVERFLOW_AVERAGE_CONTEXT).doubleValue();
+
+        // The mathematical mean of finite values is bounded by those values. Guard against a
+        // higher-precision compensated prefix rounding just beyond the binary64 finite boundary.
+        return Double.isInfinite(result) ? Math.copySign(Double.MAX_VALUE, result) : result;
+    }
+
+    /** Reconstructs the represented compensated total without rounding sum - correction back to binary64. */
+    private static BigDecimal exactCompensatedSum(final double sum, final double correction, final double simpleSum) {
+        if (Double.isFinite(sum) && Double.isFinite(correction)) {
+            return exactBigDecimal(sum).subtract(exactBigDecimal(correction));
+        }
+
+        return exactBigDecimal(simpleSum);
+    }
+
+    /** BigDecimal.valueOf deliberately uses a decimal surrogate; this constructor retains the exact binary64 value. */
+    private static BigDecimal exactBigDecimal(final double value) {
+        return new BigDecimal(value); // NOSONAR - exact binary64 reconstruction is required here.
     }
 }

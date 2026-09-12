@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -17,42 +18,130 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.Writer;
-import java.net.URL;
+import java.nio.MappedByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.stream.Stream;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedIOException;
 
-public class IOUtilTest extends TestBase {
+public class IOUtilTest extends IOUtilTestSupport {
 
-    @TempDir
-    Path tempFolder;
+    @Test
+    public void testLineIterationProcessingWorkersReadSingleReader() throws Exception {
+        Thread caller = Thread.currentThread();
 
-    private File tempFile;
-    private File largeFile;
-    private File emptyFile;
-    private static final String TEST_CONTENT = "Hello World!";
-    private static final String MULTILINE_CONTENT = "Line 1\nLine 2\nLine 3\nLine 4\nLine 5\n";
-    private static final String UNICODE_CONTENT = "Hello 世界 \uD83D\uDE00 Здравствуй мир";
-    private static final Charset UTF_8 = StandardCharsets.UTF_8;
-    private static final Charset UTF_16 = StandardCharsets.UTF_16;
-    private static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
+        for (int processThreads : new int[] { 0, 2 }) {
+            java.util.Set<Thread> readers = java.util.concurrent.ConcurrentHashMap.newKeySet();
+            java.util.concurrent.atomic.AtomicInteger processed = new java.util.concurrent.atomic.AtomicInteger();
+            Reader source = new java.io.StringReader("one\ntwo\nthree\nfour\n") {
+                @Override
+                public int read(char[] chars, int offset, int count) throws IOException {
+                    readers.add(Thread.currentThread());
+                    return super.read(chars, offset, count);
+                }
+            };
+
+            IOUtil.forEachLine(source, IOUtil.LineIterationOptions.builder().readThreads(0).processThreads(processThreads).build(),
+                    line -> processed.incrementAndGet());
+
+            assertEquals(4, processed.get());
+            assertFalse(readers.isEmpty());
+            assertEquals(processThreads == 0, readers.contains(caller));
+            if (processThreads == 0) {
+                assertEquals(java.util.Set.of(caller), readers);
+            }
+        }
+    }
+
+    @Test
+    public void testRepeatedCharsetWritesUseSeparateEncodingSessions() throws IOException {
+        java.io.ByteArrayOutputStream encoded = new java.io.ByteArrayOutputStream();
+        IOUtil.write(new char[] { 'A' }, StandardCharsets.UTF_16, encoded);
+        IOUtil.write(new char[] { 'B' }, StandardCharsets.UTF_16, encoded);
+        assertEquals("A\uFEFFB", encoded.toString(StandardCharsets.UTF_16));
+
+        encoded.reset();
+        try (Writer writer = IOUtil.newOutputStreamWriter(encoded, StandardCharsets.UTF_16)) {
+            IOUtil.write(new char[] { 'A' }, writer);
+            IOUtil.write(new char[] { 'B' }, writer);
+        }
+        assertEquals("AB", encoded.toString(StandardCharsets.UTF_16));
+
+        if (Charset.isSupported("UTF-32")) {
+            Charset utf32 = Charset.forName("UTF-32");
+            encoded.reset();
+            IOUtil.write(new char[] { 'A' }, utf32, encoded);
+            IOUtil.write(new char[] { 'B' }, utf32, encoded);
+            java.io.ByteArrayOutputStream expected = new java.io.ByteArrayOutputStream();
+            expected.write("A".getBytes(utf32));
+            expected.write("B".getBytes(utf32));
+            assertArrayEquals(expected.toByteArray(), encoded.toByteArray());
+        }
+    }
+
+    @Test
+    public void testWriteLinesPreservesPrimaryFailureWhenDrainingFails() {
+        for (boolean iterable : new boolean[] { false, true }) {
+            for (boolean sameFailure : new boolean[] { false, true }) {
+                RuntimeException primary = new IllegalStateException("iteration failure");
+                RuntimeException secondary = sameFailure ? primary : new IllegalStateException("writer failure");
+                java.util.concurrent.atomic.AtomicInteger writeAttempts = new java.util.concurrent.atomic.AtomicInteger();
+                Iterator<String> lines = new Iterator<>() {
+                    boolean emitted;
+
+                    @Override
+                    public boolean hasNext() {
+                        if (emitted) {
+                            throw primary;
+                        }
+                        return true;
+                    }
+
+                    @Override
+                    public String next() {
+                        emitted = true;
+                        return "one";
+                    }
+                };
+                Writer writer = new Writer() {
+                    @Override
+                    public void write(char[] chars, int offset, int count) {
+                        writeAttempts.incrementAndGet();
+                        throw secondary;
+                    }
+
+                    @Override
+                    public void flush() {
+                    }
+
+                    @Override
+                    public void close() {
+                    }
+                };
+
+                RuntimeException actual = assertThrows(RuntimeException.class, () -> {
+                    if (iterable) {
+                        IOUtil.writeLines((Iterable<String>) () -> lines, writer, false);
+                    } else {
+                        IOUtil.writeLines(lines, writer, false);
+                    }
+                });
+                org.junit.jupiter.api.Assertions.assertSame(primary, actual);
+                assertEquals(1, writeAttempts.get());
+                assertArrayEquals(sameFailure ? new Throwable[0] : new Throwable[] { secondary }, actual.getSuppressed());
+            }
+        }
+    }
 
     @Test
     public void testSameFileGuardsRejectHardLinkAliases() throws IOException {
@@ -98,17 +187,10 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testContentEqualsRejectsIdenticalDirectory() throws IOException {
-        File directory = Files.createDirectory(tempFolder.resolve("content-directory")).toFile();
-
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.contentEquals(directory, directory));
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.contentEqualsIgnoreEOL(directory, directory, "UTF-8"));
-    }
-
-    @Test
-    public void testMissingFileIsNeverNewer() {
+    public void testMissingFileIsNeverNewer() throws IOException {
         File missing = tempFolder.resolve("missing-file.txt").toFile();
-        File beforeEpochReference = new File("before-epoch-reference") {
+        File existingReference = Files.createFile(tempFolder.resolve("before-epoch-reference.txt")).toFile();
+        File beforeEpochReference = new File(existingReference.getPath()) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -117,119 +199,42 @@ public class IOUtilTest extends TestBase {
             }
         };
 
+        // A file that does not exist is neither newer nor older, even against a pre-epoch reference time.
         assertFalse(IOUtil.isFileNewer(missing, new java.util.Date(-1)));
+        assertFalse(IOUtil.isFileOlder(missing, new java.util.Date(-1)));
         assertFalse(IOUtil.isFileNewer(missing, beforeEpochReference));
+        assertFalse(IOUtil.isFileOlder(missing, beforeEpochReference));
+    }
+
+    @Test
+    public void testMissingReferenceIsRejected() throws IOException {
+        File existing = Files.createFile(tempFolder.resolve("reference-subject.txt")).toFile();
+        File missingReference = tempFolder.resolve("no-such-reference.txt").toFile();
+
+        // File.lastModified() reports 0 for an absent file, so without a guard every existing file would silently
+        // test as "newer than" a reference that was never created. Rejected as a bad argument instead, matching
+        // Apache Commons-IO.
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.isFileNewer(existing, missingReference));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.isFileOlder(existing, missingReference));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.isFileNewer(existing, (File) null));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.isFileOlder(existing, (File) null));
+
+        // A Date reference has no existence to check, so it is unaffected.
+        assertFalse(IOUtil.isFileNewer(existing, new java.util.Date(Long.MAX_VALUE)));
     }
 
     @Test
     public void testEmptyFileCollectionsInvokeCompletion() throws Exception {
         java.util.concurrent.atomic.AtomicInteger completions = new java.util.concurrent.atomic.AtomicInteger();
 
-        IOUtil.forLines(java.util.Collections.emptyList(), 0, Long.MAX_VALUE, 0, 1, line -> {
-        }, completions::incrementAndGet);
-        IOUtil.forLines(java.util.Collections.emptyList(), 0, Long.MAX_VALUE, 1, 0, 1, line -> {
-        }, completions::incrementAndGet);
+        IOUtil.forEachLine(java.util.Collections.emptyList(),
+                IOUtil.LineIterationOptions.builder().offset(0).count(Long.MAX_VALUE).processThreads(0).queueSize(1).build(), line -> {
+                }, completions::incrementAndGet);
+        IOUtil.forEachLine(java.util.Collections.emptyList(),
+                IOUtil.LineIterationOptions.builder().offset(0).count(Long.MAX_VALUE).readThreads(1).processThreads(0).queueSize(1).build(), line -> {
+                }, completions::incrementAndGet);
 
         assertEquals(2, completions.get());
-    }
-
-    private static final class ListingFailureFile extends File {
-        private static final long serialVersionUID = 1L;
-
-        ListingFailureFile(final File file) {
-            super(file.getPath());
-        }
-
-        @Override
-        public boolean exists() {
-            return true;
-        }
-
-        @Override
-        public boolean isFile() {
-            return false;
-        }
-
-        @Override
-        public boolean isDirectory() {
-            return true;
-        }
-
-        @Override
-        public File[] listFiles() {
-            return null;
-        }
-    }
-
-    private static final class ZeroThenEofInputStream extends InputStream {
-        private int arrayReads = 0;
-
-        @Override
-        public int read(final byte[] b, final int off, final int len) {
-            arrayReads++;
-
-            if (arrayReads == 1) {
-                return 0;
-            } else if (arrayReads == 2) {
-                return -1;
-            }
-
-            throw new AssertionError("zero-progress InputStream was read again");
-        }
-
-        @Override
-        public int read() {
-            return -1;
-        }
-    }
-
-    private static final class ZeroThenEofReader extends Reader {
-        private int arrayReads = 0;
-
-        @Override
-        public int read(final char[] cbuf, final int off, final int len) {
-            arrayReads++;
-
-            if (arrayReads == 1) {
-                return 0;
-            } else if (arrayReads == 2) {
-                return -1;
-            }
-
-            throw new AssertionError("zero-progress Reader was read again");
-        }
-
-        @Override
-        public void close() {
-            // no resources
-        }
-    }
-
-    @BeforeEach
-    public void setUp() throws Exception {
-        tempFile = Files.createTempFile(tempFolder, "test", ".txt").toFile();
-        emptyFile = Files.createTempFile(tempFolder, "empty", ".txt").toFile();
-        largeFile = Files.createTempFile(tempFolder, "large", ".txt").toFile();
-
-        Files.write(tempFile.toPath(), TEST_CONTENT.getBytes(UTF_8));
-
-        StringBuilder largeSb = new StringBuilder();
-        for (int i = 0; i < 1000; i++) {
-            largeSb.append("Line ").append(i).append(": This is a test line with some content.\n");
-        }
-        Files.write(largeFile.toPath(), largeSb.toString().getBytes(UTF_8));
-    }
-
-    @AfterEach
-    public void tearDown() {
-    }
-
-    @Test
-    public void testGetHostName() {
-        String hostName = IOUtil.getHostName();
-
-        assertNotNull(hostName);
-        assertTrue(hostName.length() > 0);
     }
 
     @Test
@@ -557,7 +562,7 @@ public class IOUtilTest extends TestBase {
     @Test
     public void testStringBuilder2Writer() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
+        Writer writer = IOUtil.newStringWriter(sb);
         assertNotNull(writer);
         writer.write(TEST_CONTENT);
         writer.flush();
@@ -568,7 +573,7 @@ public class IOUtilTest extends TestBase {
     @Test
     public void testStringBuilder2Writer_MultipleWrites() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
+        Writer writer = IOUtil.newStringWriter(sb);
         writer.write("Hello");
         writer.write(" ");
         writer.write("World");
@@ -580,7 +585,7 @@ public class IOUtilTest extends TestBase {
     @Test
     public void testStringBuilder2Writer_EmptyWrite() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
+        Writer writer = IOUtil.newStringWriter(sb);
         writer.write("");
         writer.flush();
         assertEquals("", sb.toString());
@@ -590,7 +595,7 @@ public class IOUtilTest extends TestBase {
     @Test
     public void testStringBuilder2Writer_UnicodeContent() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
+        Writer writer = IOUtil.newStringWriter(sb);
         writer.write(UNICODE_CONTENT);
         writer.flush();
         assertEquals(UNICODE_CONTENT, sb.toString());
@@ -600,1110 +605,11 @@ public class IOUtilTest extends TestBase {
     @Test
     public void testStringBuilder2Writer_MultilineContent() throws IOException {
         StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
+        Writer writer = IOUtil.newStringWriter(sb);
         writer.write(MULTILINE_CONTENT);
         writer.flush();
         assertEquals(MULTILINE_CONTENT, sb.toString());
         writer.close();
-    }
-
-    @Test
-    public void testStringBuilder2Writer_NullStringBuilder() {
-        assertThrows(Exception.class, () -> {
-            IOUtil.stringBuilderToWriter(null);
-        });
-    }
-
-    @Test
-    public void testReadAllBytes_FromFile() {
-        byte[] bytes = IOUtil.readAllBytes(tempFile);
-        assertNotNull(bytes);
-        assertEquals(TEST_CONTENT, new String(bytes, UTF_8));
-    }
-
-    @Test
-    public void testReadAllBytes_EmptyFile() {
-        byte[] bytes = IOUtil.readAllBytes(emptyFile);
-        assertNotNull(bytes);
-        assertEquals(0, bytes.length);
-    }
-
-    @Test
-    public void testReadAllBytes_LargeData() {
-        byte[] bytes = IOUtil.readAllBytes(largeFile);
-        assertNotNull(bytes);
-        assertTrue(bytes.length > 10000);
-    }
-
-    @Test
-    public void testReadAllBytes_FromInputStream() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            byte[] bytes = IOUtil.readAllBytes(is);
-            assertNotNull(bytes);
-            assertEquals(TEST_CONTENT, new String(bytes, UTF_8));
-        }
-    }
-
-    @Test
-    public void testReadAllBytes_EmptyInputStream() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(new byte[0])) {
-            byte[] bytes = IOUtil.readAllBytes(is);
-            assertNotNull(bytes);
-            assertEquals(0, bytes.length);
-        }
-    }
-
-    @Test
-    public void testReadAllBytes_NonexistentFile() {
-        File nonexistent = new File(tempFolder.toFile(), "nonexistent.txt");
-        assertThrows(Exception.class, () -> {
-            IOUtil.readAllBytes(nonexistent);
-        });
-    }
-
-    @Test
-    public void testReadBytes_FromFile() throws IOException {
-        byte[] bytes = IOUtil.readBytes(tempFile);
-        assertNotNull(bytes);
-        assertEquals(TEST_CONTENT, new String(bytes, UTF_8));
-    }
-
-    @Test
-    public void testReadBytes_FromFileWithOffset() throws IOException {
-        byte[] bytes = IOUtil.readBytes(tempFile, 6, 5);
-        assertNotNull(bytes);
-        assertEquals("World", new String(bytes, UTF_8));
-    }
-
-    @Test
-    public void testReadBytes_FromFileWithZeroLength() throws IOException {
-        byte[] bytes = IOUtil.readBytes(tempFile, 0, 0);
-        assertNotNull(bytes);
-        assertEquals(0, bytes.length);
-    }
-
-    @Test
-    public void testReadBytes_FromFileOffsetBeyondEnd() throws IOException {
-        byte[] bytes = IOUtil.readBytes(tempFile, 1000, 10);
-        assertNotNull(bytes);
-        assertEquals(0, bytes.length);
-    }
-
-    @Test
-    public void testReadBytes_FromInputStream() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            byte[] bytes = IOUtil.readBytes(is);
-            assertNotNull(bytes);
-            assertEquals(TEST_CONTENT, new String(bytes, UTF_8));
-        }
-    }
-
-    @Test
-    public void testReadBytes_FromInputStreamWithOffset() throws IOException {
-        byte[] data = "0123456789ABCDEF".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            byte[] bytes = IOUtil.readBytes(is, 5, 5);
-            assertNotNull(bytes);
-            assertEquals("56789", new String(bytes, UTF_8));
-        }
-    }
-
-    @Test
-    public void testReadBytes_FromInputStreamWithZeroOffset() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            byte[] bytes = IOUtil.readBytes(is, 0, 5);
-            assertNotNull(bytes);
-            assertEquals("Hello", new String(bytes, UTF_8));
-        }
-    }
-
-    @Test
-    public void testReadBytes_FromInputStreamWithMaxLen() throws IOException {
-        byte[] data = new byte[10000];
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            byte[] bytes = IOUtil.readBytes(is, 0, 100);
-            assertNotNull(bytes);
-            assertEquals(100, bytes.length);
-        }
-    }
-
-    @Test
-    public void testReadBytes_BreaksOnZeroProgressInputStream() throws IOException {
-        final byte[] bytes = IOUtil.readBytes(new ZeroThenEofInputStream(), 0, 10);
-
-        assertNotNull(bytes);
-        assertEquals(0, bytes.length);
-    }
-
-    @Test
-    public void testReadBytes_PartialLargeFile() throws IOException {
-        byte[] bytes = IOUtil.readBytes(largeFile, 100, 50);
-        assertNotNull(bytes);
-        assertEquals(50, bytes.length);
-    }
-
-    // ===== readBytes with InputStream offset/maxLen =====
-
-    @Test
-    public void testReadBytes_FromInputStream_WithOffsetAndMaxLen() throws IOException {
-        byte[] data = "Hello World!".getBytes(UTF_8);
-        try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(data)) {
-            byte[] result = IOUtil.readBytes(bais, 6L, 5);
-            assertEquals("World", new String(result, UTF_8));
-        }
-    }
-
-    @Test
-    public void testReadBytes_FromInputStream_ZeroMaxLen() throws IOException {
-        byte[] data = "Hello World!".getBytes(UTF_8);
-        try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(data)) {
-            byte[] result = IOUtil.readBytes(bais, 0L, 0);
-            assertEquals(0, result.length);
-        }
-    }
-
-    @Test
-    public void testReadAllChars_FromFile() {
-        char[] chars = IOUtil.readAllChars(tempFile);
-        assertNotNull(chars);
-        assertEquals(TEST_CONTENT, new String(chars));
-    }
-
-    @Test
-    public void testReadAllChars_FromFileWithEncoding() {
-        char[] chars = IOUtil.readAllChars(tempFile, UTF_8);
-        assertNotNull(chars);
-        assertEquals(TEST_CONTENT, new String(chars));
-    }
-
-    @Test
-    public void testReadAllChars_EmptyFile() {
-        char[] chars = IOUtil.readAllChars(emptyFile);
-        assertNotNull(chars);
-        assertEquals(0, chars.length);
-    }
-
-    @Test
-    public void testReadAllChars_LargeData() {
-        char[] chars = IOUtil.readAllChars(largeFile);
-        assertNotNull(chars);
-        assertTrue(chars.length > 10000);
-    }
-
-    @Test
-    public void testReadAllChars_FromInputStream() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            char[] chars = IOUtil.readAllChars(is);
-            assertNotNull(chars);
-            assertEquals(TEST_CONTENT, new String(chars));
-        }
-    }
-
-    @Test
-    public void testReadAllChars_FromInputStreamWithEncoding() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            char[] chars = IOUtil.readAllChars(is, UTF_8);
-            assertNotNull(chars);
-            assertEquals(TEST_CONTENT, new String(chars));
-        }
-    }
-
-    @Test
-    public void testReadAllChars_FromReader() throws IOException {
-        try (Reader reader = new StringReader(TEST_CONTENT)) {
-            char[] chars = IOUtil.readAllChars(reader);
-            assertNotNull(chars);
-            assertEquals(TEST_CONTENT, new String(chars));
-        }
-    }
-
-    @Test
-    public void testReadAllChars_EmptyReader() throws IOException {
-        try (Reader reader = new StringReader("")) {
-            char[] chars = IOUtil.readAllChars(reader);
-            assertNotNull(chars);
-            assertEquals(0, chars.length);
-        }
-    }
-
-    @Test
-    public void testReadAllChars_MultilineContent() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        char[] chars = IOUtil.readAllChars(multilineFile);
-        assertNotNull(chars);
-        assertEquals(MULTILINE_CONTENT, new String(chars));
-    }
-
-    @Test
-    public void testReadAllChars_NonexistentFile() {
-        File nonexistent = new File(tempFolder.toFile(), "nonexistent.txt");
-        assertThrows(Exception.class, () -> {
-            IOUtil.readAllChars(nonexistent);
-        });
-    }
-
-    @Test
-    public void testReadChars_FromFile() throws IOException {
-        char[] chars = IOUtil.readChars(tempFile);
-        assertNotNull(chars);
-        assertEquals(TEST_CONTENT, new String(chars));
-    }
-
-    @Test
-    public void testReadChars_FromFileWithEncoding() throws IOException {
-        char[] chars = IOUtil.readChars(tempFile, UTF_8);
-        assertNotNull(chars);
-        assertEquals(TEST_CONTENT, new String(chars));
-    }
-
-    @Test
-    public void testReadChars_FromFileWithOffset() throws IOException {
-        char[] chars = IOUtil.readChars(tempFile, 6, 5);
-        assertNotNull(chars);
-        assertEquals("World", new String(chars));
-    }
-
-    @Test
-    public void testReadChars_FromFileWithEncodingAndOffset() throws IOException {
-        char[] chars = IOUtil.readChars(tempFile, UTF_8, 6, 5);
-        assertNotNull(chars);
-        assertEquals("World", new String(chars));
-    }
-
-    @Test
-    public void testReadChars_FromFileWithZeroLength() throws IOException {
-        char[] chars = IOUtil.readChars(tempFile, 0, 0);
-        assertNotNull(chars);
-        assertEquals(0, chars.length);
-    }
-
-    @Test
-    public void testReadChars_FromFileOffsetBeyondEnd() throws IOException {
-        char[] chars = IOUtil.readChars(tempFile, 1000, 10);
-        assertNotNull(chars);
-        assertEquals(0, chars.length);
-    }
-
-    @Test
-    public void testReadChars_FromInputStream() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            char[] chars = IOUtil.readChars(is);
-            assertNotNull(chars);
-            assertEquals(TEST_CONTENT, new String(chars));
-        }
-    }
-
-    @Test
-    public void testReadChars_FromInputStreamWithEncoding() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            char[] chars = IOUtil.readChars(is, UTF_8);
-            assertNotNull(chars);
-            assertEquals(TEST_CONTENT, new String(chars));
-        }
-    }
-
-    @Test
-    public void testReadChars_FromInputStreamWithOffset() throws IOException {
-        byte[] data = "0123456789ABCDEF".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            char[] chars = IOUtil.readChars(is, 5, 5);
-            assertNotNull(chars);
-            assertEquals("56789", new String(chars));
-        }
-    }
-
-    @Test
-    public void testReadChars_FromInputStreamWithEncodingAndOffset() throws IOException {
-        byte[] data = "0123456789ABCDEF".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            char[] chars = IOUtil.readChars(is, UTF_8, 5, 5);
-            assertNotNull(chars);
-            assertEquals("56789", new String(chars));
-        }
-    }
-
-    @Test
-    public void testReadChars_FromReader() throws IOException {
-        try (Reader reader = new StringReader(TEST_CONTENT)) {
-            char[] chars = IOUtil.readChars(reader);
-            assertNotNull(chars);
-            assertEquals(TEST_CONTENT, new String(chars));
-        }
-    }
-
-    @Test
-    public void testReadChars_FromReaderWithOffset() throws IOException {
-        try (Reader reader = new StringReader("0123456789ABCDEF")) {
-            char[] chars = IOUtil.readChars(reader, 5, 5);
-            assertNotNull(chars);
-            assertEquals("56789", new String(chars));
-        }
-    }
-
-    @Test
-    public void testReadChars_BreaksOnZeroProgressReader() throws IOException {
-        final char[] chars = IOUtil.readChars(new ZeroThenEofReader(), 0, 10);
-
-        assertNotNull(chars);
-        assertEquals(0, chars.length);
-    }
-
-    @Test
-    public void testReadChars_FromReaderWithZeroLength() throws IOException {
-        try (Reader reader = new StringReader(TEST_CONTENT)) {
-            char[] chars = IOUtil.readChars(reader, 0, 0);
-            assertNotNull(chars);
-            assertEquals(0, chars.length);
-        }
-    }
-
-    @Test
-    public void testReadChars_PartialLargeFile() throws IOException {
-        char[] chars = IOUtil.readChars(largeFile, 100, 50);
-        assertNotNull(chars);
-        assertEquals(50, chars.length);
-    }
-
-    // ===== readChars with Reader offset/maxLen =====
-
-    @Test
-    public void testReadChars_FromReader_WithOffsetAndMaxLen() throws IOException {
-        try (java.io.StringReader sr = new java.io.StringReader("Hello World!")) {
-            char[] result = IOUtil.readChars(sr, 6L, 5);
-            assertEquals("World", new String(result));
-        }
-    }
-
-    @Test
-    public void testReadChars_FromReader_ZeroMaxLen() throws IOException {
-        try (java.io.StringReader sr = new java.io.StringReader("Hello World!")) {
-            char[] result = IOUtil.readChars(sr, 0L, 0);
-            assertEquals(0, result.length);
-        }
-    }
-
-    @Test
-    public void testReadAllToString_FromFile() {
-        String content = IOUtil.readAllToString(tempFile);
-        assertNotNull(content);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testReadAllToString_FromFileWithStringEncoding() {
-        String content = IOUtil.readAllToString(tempFile, "UTF-8");
-        assertNotNull(content);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testReadAllToString_FromFileWithCharsetEncoding() {
-        String content = IOUtil.readAllToString(tempFile, UTF_8);
-        assertNotNull(content);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testReadAllToString_EmptyFile() {
-        String content = IOUtil.readAllToString(emptyFile);
-        assertNotNull(content);
-        assertEquals("", content);
-    }
-
-    @Test
-    public void testReadAllToString_LargeData() {
-        String content = IOUtil.readAllToString(largeFile);
-        assertNotNull(content);
-        assertTrue(content.length() > 10000);
-    }
-
-    @Test
-    public void testReadAllToString_FromInputStream() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            String content = IOUtil.readAllToString(is);
-            assertNotNull(content);
-            assertEquals(TEST_CONTENT, content);
-        }
-    }
-
-    @Test
-    public void testReadAllToString_FromInputStreamWithEncoding() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            String content = IOUtil.readAllToString(is, UTF_8);
-            assertNotNull(content);
-            assertEquals(TEST_CONTENT, content);
-        }
-    }
-
-    @Test
-    public void testReadAllToString_FromReader() throws IOException {
-        try (Reader reader = new StringReader(TEST_CONTENT)) {
-            String content = IOUtil.readAllToString(reader);
-            assertNotNull(content);
-            assertEquals(TEST_CONTENT, content);
-        }
-    }
-
-    @Test
-    public void testReadAllToString_EmptyReader() throws IOException {
-        try (Reader reader = new StringReader("")) {
-            String content = IOUtil.readAllToString(reader);
-            assertNotNull(content);
-            assertEquals("", content);
-        }
-    }
-
-    @Test
-    public void testReadAllToString_MultilineContent() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        String content = IOUtil.readAllToString(multilineFile);
-        assertNotNull(content);
-        assertEquals(MULTILINE_CONTENT, content);
-    }
-
-    @Test
-    public void testReadAllToString_UnicodeContent() throws IOException {
-        File unicodeFile = Files.createTempFile(tempFolder, "unicode", ".txt").toFile();
-        Files.write(unicodeFile.toPath(), UNICODE_CONTENT.getBytes(UTF_8));
-
-        String content = IOUtil.readAllToString(unicodeFile, UTF_8);
-        assertNotNull(content);
-        assertEquals(UNICODE_CONTENT, content);
-    }
-
-    @Test
-    public void testReadAllToString_NonexistentFile() {
-        File nonexistent = new File(tempFolder.toFile(), "nonexistent.txt");
-        assertThrows(Exception.class, () -> {
-            IOUtil.readAllToString(nonexistent);
-        });
-    }
-
-    @Test
-    public void testReadToString_FromFileWithOffset() throws IOException {
-        String content = IOUtil.readToString(tempFile, 6, 5);
-        assertNotNull(content);
-        assertEquals("World", content);
-    }
-
-    @Test
-    public void testReadToString_FromFileWithEncodingAndOffset() throws IOException {
-        String content = IOUtil.readToString(tempFile, UTF_8, 6, 5);
-        assertNotNull(content);
-        assertEquals("World", content);
-    }
-
-    @Test
-    public void testReadToString_FromFileWithZeroLength() throws IOException {
-        String content = IOUtil.readToString(tempFile, 0, 0);
-        assertNotNull(content);
-        assertEquals("", content);
-    }
-
-    @Test
-    public void testReadToString_FromFileOffsetBeyondEnd() throws IOException {
-        String content = IOUtil.readToString(tempFile, 1000, 10);
-        assertNotNull(content);
-        assertEquals("", content);
-    }
-
-    @Test
-    public void testReadToString_FromInputStreamWithOffset() throws IOException {
-        byte[] data = "0123456789ABCDEF".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            String content = IOUtil.readToString(is, 5, 5);
-            assertNotNull(content);
-            assertEquals("56789", content);
-        }
-    }
-
-    @Test
-    public void testReadToString_FromInputStreamWithEncodingAndOffset() throws IOException {
-        byte[] data = "0123456789ABCDEF".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            String content = IOUtil.readToString(is, UTF_8, 5, 5);
-            assertNotNull(content);
-            assertEquals("56789", content);
-        }
-    }
-
-    @Test
-    public void testReadToString_FromReaderWithOffset() throws IOException {
-        try (Reader reader = new StringReader("0123456789ABCDEF")) {
-            String content = IOUtil.readToString(reader, 5, 5);
-            assertNotNull(content);
-            assertEquals("56789", content);
-        }
-    }
-
-    @Test
-    public void testReadToString_FromReaderWithZeroLength() throws IOException {
-        try (Reader reader = new StringReader(TEST_CONTENT)) {
-            String content = IOUtil.readToString(reader, 0, 0);
-            assertNotNull(content);
-            assertEquals("", content);
-        }
-    }
-
-    @Test
-    public void testReadToString_FromFileFullContent() throws IOException {
-        String content = IOUtil.readToString(tempFile, 0, 1000);
-        assertNotNull(content);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testReadToString_FromInputStreamZeroOffset() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            String content = IOUtil.readToString(is, 0, 5);
-            assertNotNull(content);
-            assertEquals("Hello", content);
-        }
-    }
-
-    @Test
-    public void testReadToString_PartialLargeFile() throws IOException {
-        String content = IOUtil.readToString(largeFile, 100, 50);
-        assertNotNull(content);
-        assertEquals(50, content.length());
-    }
-
-    @Test
-    public void testReadAllLines_FromFile() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        java.util.List<String> lines = IOUtil.readAllLines(multilineFile);
-        assertNotNull(lines);
-        assertEquals(5, lines.size());
-        assertEquals("Line 1", lines.get(0));
-        assertEquals("Line 2", lines.get(1));
-        assertEquals("Line 3", lines.get(2));
-        assertEquals("Line 4", lines.get(3));
-        assertEquals("Line 5", lines.get(4));
-    }
-
-    @Test
-    public void testReadAllLines_FromFileWithStringEncoding() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        java.util.List<String> lines = IOUtil.readAllLines(multilineFile, "UTF-8");
-        assertNotNull(lines);
-        assertEquals(5, lines.size());
-        assertEquals("Line 1", lines.get(0));
-    }
-
-    @Test
-    public void testReadAllLines_FromFileWithCharsetEncoding() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        java.util.List<String> lines = IOUtil.readAllLines(multilineFile, UTF_8);
-        assertNotNull(lines);
-        assertEquals(5, lines.size());
-        assertEquals("Line 1", lines.get(0));
-    }
-
-    @Test
-    public void testReadAllLines_FromInputStream() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(MULTILINE_CONTENT.getBytes(UTF_8))) {
-            java.util.List<String> lines = IOUtil.readAllLines(is);
-            assertNotNull(lines);
-            assertEquals(5, lines.size());
-            assertEquals("Line 1", lines.get(0));
-            assertEquals("Line 5", lines.get(4));
-        }
-    }
-
-    @Test
-    public void testReadAllLines_FromInputStreamWithEncoding() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(MULTILINE_CONTENT.getBytes(UTF_8))) {
-            java.util.List<String> lines = IOUtil.readAllLines(is, UTF_8);
-            assertNotNull(lines);
-            assertEquals(5, lines.size());
-            assertEquals("Line 1", lines.get(0));
-        }
-    }
-
-    @Test
-    public void testReadAllLines_FromReader() throws IOException {
-        try (Reader reader = new StringReader(MULTILINE_CONTENT)) {
-            java.util.List<String> lines = IOUtil.readAllLines(reader);
-            assertNotNull(lines);
-            assertEquals(5, lines.size());
-            assertEquals("Line 1", lines.get(0));
-            assertEquals("Line 5", lines.get(4));
-        }
-    }
-
-    @Test
-    public void testReadAllLines_EmptyFile() throws IOException {
-        java.util.List<String> lines = IOUtil.readAllLines(emptyFile);
-        assertNotNull(lines);
-        assertEquals(0, lines.size());
-    }
-
-    @Test
-    public void testReadAllLines_SingleLine() throws IOException {
-        File singleLineFile = Files.createTempFile(tempFolder, "single", ".txt").toFile();
-        Files.write(singleLineFile.toPath(), "Single Line".getBytes(UTF_8));
-
-        java.util.List<String> lines = IOUtil.readAllLines(singleLineFile);
-        assertNotNull(lines);
-        assertEquals(1, lines.size());
-        assertEquals("Single Line", lines.get(0));
-    }
-
-    @Test
-    public void testReadAllLines_NonexistentFile() {
-        File nonexistent = new File(tempFolder.toFile(), "nonexistent.txt");
-        assertThrows(Exception.class, () -> {
-            IOUtil.readAllLines(nonexistent);
-        });
-    }
-
-    @Test
-    public void testReadLines_FromFileWithOffsetAndCount() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        java.util.List<String> lines = IOUtil.readLines(multilineFile, 1, 3);
-        assertNotNull(lines);
-        assertEquals(3, lines.size());
-        assertEquals("Line 2", lines.get(0));
-        assertEquals("Line 3", lines.get(1));
-        assertEquals("Line 4", lines.get(2));
-    }
-
-    @Test
-    public void testReadLines_FromFileWithEncodingOffsetAndCount() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        java.util.List<String> lines = IOUtil.readLines(multilineFile, UTF_8, 1, 3);
-        assertNotNull(lines);
-        assertEquals(3, lines.size());
-        assertEquals("Line 2", lines.get(0));
-        assertEquals("Line 3", lines.get(1));
-        assertEquals("Line 4", lines.get(2));
-    }
-
-    @Test
-    public void testReadLines_FromInputStreamWithOffsetAndCount() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(MULTILINE_CONTENT.getBytes(UTF_8))) {
-            java.util.List<String> lines = IOUtil.readLines(is, 1, 3);
-            assertNotNull(lines);
-            assertEquals(3, lines.size());
-            assertEquals("Line 2", lines.get(0));
-        }
-    }
-
-    @Test
-    public void testReadLines_FromInputStreamWithEncodingOffsetAndCount() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(MULTILINE_CONTENT.getBytes(UTF_8))) {
-            java.util.List<String> lines = IOUtil.readLines(is, UTF_8, 1, 3);
-            assertNotNull(lines);
-            assertEquals(3, lines.size());
-            assertEquals("Line 2", lines.get(0));
-        }
-    }
-
-    @Test
-    public void testReadLines_FromReaderWithOffsetAndCount() throws IOException {
-        try (Reader reader = new StringReader(MULTILINE_CONTENT)) {
-            java.util.List<String> lines = IOUtil.readLines(reader, 1, 3);
-            assertNotNull(lines);
-            assertEquals(3, lines.size());
-            assertEquals("Line 2", lines.get(0));
-            assertEquals("Line 3", lines.get(1));
-            assertEquals("Line 4", lines.get(2));
-        }
-    }
-
-    @Test
-    public void testReadLines_ZeroOffset() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        java.util.List<String> lines = IOUtil.readLines(multilineFile, 0, 2);
-        assertNotNull(lines);
-        assertEquals(2, lines.size());
-        assertEquals("Line 1", lines.get(0));
-        assertEquals("Line 2", lines.get(1));
-    }
-
-    @Test
-    public void testReadLines_ZeroCount() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        java.util.List<String> lines = IOUtil.readLines(multilineFile, 1, 0);
-        assertNotNull(lines);
-        assertEquals(0, lines.size());
-    }
-
-    @Test
-    public void testReadLines_OffsetBeyondEnd() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        java.util.List<String> lines = IOUtil.readLines(multilineFile, 100, 5);
-        assertNotNull(lines);
-        assertEquals(0, lines.size());
-    }
-
-    @Test
-    public void testReadLines_CountExceedsAvailable() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        java.util.List<String> lines = IOUtil.readLines(multilineFile, 3, 100);
-        assertNotNull(lines);
-        assertEquals(2, lines.size());
-        assertEquals("Line 4", lines.get(0));
-        assertEquals("Line 5", lines.get(1));
-    }
-
-    @Test
-    public void testReadFirstLine_FromFile() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        String firstLine = IOUtil.readFirstLine(multilineFile);
-        assertNotNull(firstLine);
-        assertEquals("Line 1", firstLine);
-    }
-
-    @Test
-    public void testReadFirstLine_FromFileWithEncoding() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        String firstLine = IOUtil.readFirstLine(multilineFile, UTF_8);
-        assertNotNull(firstLine);
-        assertEquals("Line 1", firstLine);
-    }
-
-    @Test
-    public void testReadFirstLine_FromReader() throws IOException {
-        try (Reader reader = new StringReader(MULTILINE_CONTENT)) {
-            String firstLine = IOUtil.readFirstLine(reader);
-            assertNotNull(firstLine);
-            assertEquals("Line 1", firstLine);
-        }
-    }
-
-    @Test
-    public void testReadFirstLine_EmptyFile() throws IOException {
-        String firstLine = IOUtil.readFirstLine(emptyFile);
-        assertEquals(null, firstLine);
-    }
-
-    @Test
-    public void testReadFirstLine_SingleLineFile() throws IOException {
-        File singleLineFile = Files.createTempFile(tempFolder, "single", ".txt").toFile();
-        Files.write(singleLineFile.toPath(), "Only Line".getBytes(UTF_8));
-
-        String firstLine = IOUtil.readFirstLine(singleLineFile);
-        assertNotNull(firstLine);
-        assertEquals("Only Line", firstLine);
-    }
-
-    @Test
-    public void testReadFirstLine_NonexistentFile() {
-        File nonexistent = new File(tempFolder.toFile(), "nonexistent.txt");
-        assertThrows(Exception.class, () -> {
-            IOUtil.readFirstLine(nonexistent);
-        });
-    }
-
-    @Test
-    public void testReadLastLine_FromFile() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        String lastLine = IOUtil.readLastLine(multilineFile);
-        assertNotNull(lastLine);
-        assertEquals("Line 5", lastLine);
-    }
-
-    @Test
-    public void testReadLastLine_FromFileWithEncoding() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        String lastLine = IOUtil.readLastLine(multilineFile, UTF_8);
-        assertNotNull(lastLine);
-        assertEquals("Line 5", lastLine);
-    }
-
-    @Test
-    public void testReadLastLine_FromReader() throws IOException {
-        try (Reader reader = new StringReader(MULTILINE_CONTENT)) {
-            String lastLine = IOUtil.readLastLine(reader);
-            assertNotNull(lastLine);
-            assertEquals("Line 5", lastLine);
-        }
-    }
-
-    @Test
-    public void testReadLastLine_EmptyFile() throws IOException {
-        String lastLine = IOUtil.readLastLine(emptyFile);
-        assertEquals(null, lastLine);
-    }
-
-    @Test
-    public void testReadLastLine_SingleLineFile() throws IOException {
-        File singleLineFile = Files.createTempFile(tempFolder, "single", ".txt").toFile();
-        Files.write(singleLineFile.toPath(), "Only Line".getBytes(UTF_8));
-
-        String lastLine = IOUtil.readLastLine(singleLineFile);
-        assertNotNull(lastLine);
-        assertEquals("Only Line", lastLine);
-    }
-
-    @Test
-    public void testReadLastLine_NoTrailingNewline() throws IOException {
-        File noNewlineFile = Files.createTempFile(tempFolder, "nonewline", ".txt").toFile();
-        Files.write(noNewlineFile.toPath(), "Line 1\nLine 2\nLine 3".getBytes(UTF_8));
-
-        String lastLine = IOUtil.readLastLine(noNewlineFile);
-        assertNotNull(lastLine);
-        assertEquals("Line 3", lastLine);
-    }
-
-    @Test
-    public void testReadLastLine_NonexistentFile() {
-        File nonexistent = new File(tempFolder.toFile(), "nonexistent.txt");
-        assertThrows(Exception.class, () -> {
-            IOUtil.readLastLine(nonexistent);
-        });
-    }
-
-    @Test
-    public void testReadLine_FromFileByIndex() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        String line = IOUtil.readLine(multilineFile, 0);
-        assertEquals("Line 1", line);
-
-        line = IOUtil.readLine(multilineFile, 2);
-        assertEquals("Line 3", line);
-
-        line = IOUtil.readLine(multilineFile, 4);
-        assertEquals("Line 5", line);
-    }
-
-    @Test
-    public void testReadLine_FromFileWithEncodingByIndex() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        String line = IOUtil.readLine(multilineFile, UTF_8, 0);
-        assertEquals("Line 1", line);
-
-        line = IOUtil.readLine(multilineFile, UTF_8, 2);
-        assertEquals("Line 3", line);
-    }
-
-    @Test
-    public void testReadLine_FromReaderByIndex() throws IOException {
-        try (Reader reader = new StringReader(MULTILINE_CONTENT)) {
-            String line = IOUtil.readLine(reader, 2);
-            assertEquals("Line 3", line);
-        }
-    }
-
-    @Test
-    public void testReadLine_FirstIndex() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        String line = IOUtil.readLine(multilineFile, 0);
-        assertEquals("Line 1", line);
-    }
-
-    @Test
-    public void testReadLine_LastIndex() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        String line = IOUtil.readLine(multilineFile, 4);
-        assertEquals("Line 5", line);
-    }
-
-    @Test
-    public void testReadLine_IndexOutOfBounds() throws IOException {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        String line = IOUtil.readLine(multilineFile, 100);
-        assertEquals(null, line);
-    }
-
-    @Test
-    public void testReadLine_NegativeIndex() {
-        File multilineFile = tempFile;
-        assertThrows(IllegalArgumentException.class, () -> {
-            IOUtil.readLine(multilineFile, -1);
-        });
-    }
-
-    @Test
-    public void testReadLine_NonexistentFile() {
-        File nonexistent = new File(tempFolder.toFile(), "nonexistent.txt");
-        assertThrows(Exception.class, () -> {
-            IOUtil.readLine(nonexistent, 0);
-        });
-    }
-
-    @Test
-    public void testRead_ByteArrayFromFile() throws IOException {
-        byte[] buf = new byte[100];
-        int bytesRead = IOUtil.read(tempFile, buf);
-        assertEquals(TEST_CONTENT.length(), bytesRead);
-        assertEquals(TEST_CONTENT, new String(buf, 0, bytesRead, UTF_8));
-    }
-
-    @Test
-    public void testRead_ByteArrayFromFileWithOffsetAndLength() throws IOException {
-        byte[] buf = new byte[100];
-        int bytesRead = IOUtil.read(tempFile, buf, 10, 50);
-        assertEquals(TEST_CONTENT.length(), bytesRead);
-        assertEquals(TEST_CONTENT, new String(buf, 10, bytesRead, UTF_8));
-    }
-
-    @Test
-    public void testRead_ByteArrayFromInputStream() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            byte[] buf = new byte[100];
-            int bytesRead = IOUtil.read(is, buf);
-            assertEquals(TEST_CONTENT.length(), bytesRead);
-            assertEquals(TEST_CONTENT, new String(buf, 0, bytesRead, UTF_8));
-        }
-    }
-
-    @Test
-    public void testRead_ByteArrayFromInputStreamWithOffsetAndLength() throws IOException {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            byte[] buf = new byte[100];
-            int bytesRead = IOUtil.read(is, buf, 10, 50);
-            assertEquals(TEST_CONTENT.length(), bytesRead);
-            assertEquals(TEST_CONTENT, new String(buf, 10, bytesRead, UTF_8));
-        }
-    }
-
-    @Test
-    public void testRead_ByteArraySmallBuffer() throws IOException {
-        byte[] buf = new byte[5];
-        int bytesRead = IOUtil.read(tempFile, buf);
-        assertEquals(5, bytesRead);
-        assertEquals("Hello", new String(buf, 0, bytesRead, UTF_8));
-    }
-
-    @Test
-    public void testRead_ByteArrayEmptyFile() throws IOException {
-        byte[] buf = new byte[100];
-        int bytesRead = IOUtil.read(emptyFile, buf);
-        assertEquals(-1, bytesRead);
-    }
-
-    @Test
-    public void testRead_ByteArrayZeroLength() throws IOException {
-        byte[] buf = new byte[100];
-        int bytesRead = IOUtil.read(tempFile, buf, 0, 0);
-        assertEquals(0, bytesRead);
-    }
-
-    @Test
-    public void testRead_CharArrayFromFile() throws IOException {
-        char[] buf = new char[100];
-        int charsRead = IOUtil.read(tempFile, buf);
-        assertEquals(TEST_CONTENT.length(), charsRead);
-        assertEquals(TEST_CONTENT, new String(buf, 0, charsRead));
-    }
-
-    @Test
-    public void testRead_CharArrayFromFileWithCharset() throws IOException {
-        char[] buf = new char[100];
-        int charsRead = IOUtil.read(tempFile, UTF_8, buf);
-        assertEquals(TEST_CONTENT.length(), charsRead);
-        assertEquals(TEST_CONTENT, new String(buf, 0, charsRead));
-    }
-
-    @Test
-    public void testRead_CharArrayFromFileWithOffsetAndLength() throws IOException {
-        char[] buf = new char[100];
-        int charsRead = IOUtil.read(tempFile, buf, 10, 50);
-        assertEquals(TEST_CONTENT.length(), charsRead);
-        assertEquals(TEST_CONTENT, new String(buf, 10, charsRead));
-    }
-
-    @Test
-    public void testRead_CharArrayFromFileWithCharsetOffsetAndLength() throws IOException {
-        char[] buf = new char[100];
-        int charsRead = IOUtil.read(tempFile, UTF_8, buf, 10, 50);
-        assertEquals(TEST_CONTENT.length(), charsRead);
-        assertEquals(TEST_CONTENT, new String(buf, 10, charsRead));
-    }
-
-    @Test
-    public void testRead_CharArrayFromReader() throws IOException {
-        try (Reader reader = new StringReader(TEST_CONTENT)) {
-            char[] buf = new char[100];
-            int charsRead = IOUtil.read(reader, buf);
-            assertEquals(TEST_CONTENT.length(), charsRead);
-            assertEquals(TEST_CONTENT, new String(buf, 0, charsRead));
-        }
-    }
-
-    @Test
-    public void testRead_CharArrayFromReaderWithOffsetAndLength() throws IOException {
-        try (Reader reader = new StringReader(TEST_CONTENT)) {
-            char[] buf = new char[100];
-            int charsRead = IOUtil.read(reader, buf, 10, 50);
-            assertEquals(TEST_CONTENT.length(), charsRead);
-            assertEquals(TEST_CONTENT, new String(buf, 10, charsRead));
-        }
-    }
-
-    @Test
-    public void testRead_CharArraySmallBuffer() throws IOException {
-        char[] buf = new char[5];
-        int charsRead = IOUtil.read(tempFile, buf);
-        assertEquals(5, charsRead);
-        assertEquals("Hello", new String(buf, 0, charsRead));
-    }
-
-    @Test
-    public void testRead_CharArrayEmptyFile() throws IOException {
-        char[] buf = new char[100];
-        int charsRead = IOUtil.read(emptyFile, buf);
-        assertEquals(-1, charsRead);
-    }
-
-    @Test
-    public void testRead_CharArrayZeroLength() throws IOException {
-        char[] buf = new char[100];
-        int charsRead = IOUtil.read(tempFile, buf, 0, 0);
-        assertEquals(0, charsRead);
-    }
-
-    @Test
-    public void testRead_CharArrayUnicodeContent() throws IOException {
-        File unicodeFile = Files.createTempFile(tempFolder, "unicode", ".txt").toFile();
-        Files.write(unicodeFile.toPath(), UNICODE_CONTENT.getBytes(UTF_8));
-
-        char[] buf = new char[200];
-        int charsRead = IOUtil.read(unicodeFile, UTF_8, buf);
-        assertEquals(UNICODE_CONTENT.length(), charsRead);
-        assertEquals(UNICODE_CONTENT, new String(buf, 0, charsRead));
     }
 
     @Test
@@ -1720,880 +626,6 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testRead_NullBuffer() {
-        assertThrows(Exception.class, () -> {
-            IOUtil.read(tempFile, (byte[]) null);
-        });
-    }
-
-    @Test
-    public void testRead_NullCharBuffer() {
-        assertThrows(Exception.class, () -> {
-            IOUtil.read(tempFile, (char[]) null);
-        });
-    }
-
-    @Test
-    public void testWriteLine_ToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-
-        IOUtil.writeLine("Test Line", outputFile);
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Test Line\n", content);
-    }
-
-    @Test
-    public void testWriteLine_ToWriter() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-
-        try (java.io.FileWriter fw = new java.io.FileWriter(outputFile)) {
-            IOUtil.writeLine("Test Line", fw);
-        }
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Test Line\n", content);
-    }
-
-    @Test
-    public void testWriteLine_ToWriterWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-
-        try (java.io.FileWriter fw = new java.io.FileWriter(outputFile)) {
-            IOUtil.writeLine("Test Line", fw, true);
-        }
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Test Line\n", content);
-    }
-
-    @Test
-    public void testWriteLine_MultipleLines() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-
-        try (java.io.FileWriter fw = new java.io.FileWriter(outputFile)) {
-            IOUtil.writeLine("Line 1", fw, false);
-            IOUtil.writeLine("Line 2", fw, false);
-            IOUtil.writeLine("Line 3", fw, true);
-        }
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\nLine 2\nLine 3\n", content);
-    }
-
-    @Test
-    public void testWriteLine_NullObject() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-
-        IOUtil.writeLine(null, outputFile);
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("null\n", content);
-    }
-
-    @Test
-    public void testWriteLine_EmptyString() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-
-        IOUtil.writeLine("", outputFile);
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("\n", content);
-    }
-
-    @Test
-    public void testWriteLine_NonexistentDirectory() throws IOException {
-        File outputFile = new File(tempFolder.toFile(), "nonexistent/output.txt");
-        IOUtil.writeLine("Test", outputFile);
-        assertEquals("Test", IOUtil.readLine(outputFile, 0));
-    }
-
-    @Test
-    public void testWriteLines_IteratorToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        java.util.List<String> lines = java.util.Arrays.asList("Line 1", "Line 2", "Line 3");
-
-        IOUtil.writeLines(lines.iterator(), outputFile);
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\nLine 2\nLine 3\n", content);
-    }
-
-    @Test
-    public void testWriteLines_IteratorToWriter() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        java.util.List<String> lines = java.util.Arrays.asList("Line 1", "Line 2", "Line 3");
-
-        try (java.io.FileWriter fw = new java.io.FileWriter(outputFile)) {
-            IOUtil.writeLines(lines.iterator(), fw);
-        }
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\nLine 2\nLine 3\n", content);
-    }
-
-    @Test
-    public void testWriteLines_IteratorToWriterWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        java.util.List<String> lines = java.util.Arrays.asList("Line 1", "Line 2", "Line 3");
-
-        try (java.io.FileWriter fw = new java.io.FileWriter(outputFile)) {
-            IOUtil.writeLines(lines.iterator(), fw, true);
-        }
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\nLine 2\nLine 3\n", content);
-    }
-
-    @Test
-    public void testWriteLines_EmptyIterator() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        java.util.List<String> lines = java.util.Collections.emptyList();
-
-        IOUtil.writeLines(lines.iterator(), outputFile);
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("", content);
-    }
-
-    @Test
-    public void testWriteLines_IterableToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        java.util.List<String> lines = java.util.Arrays.asList("Line 1", "Line 2", "Line 3");
-
-        IOUtil.writeLines(lines, outputFile);
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\nLine 2\nLine 3\n", content);
-    }
-
-    @Test
-    public void testWriteLines_IterableToWriter() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        java.util.List<String> lines = java.util.Arrays.asList("Line 1", "Line 2", "Line 3");
-
-        try (java.io.FileWriter fw = new java.io.FileWriter(outputFile)) {
-            IOUtil.writeLines(lines, fw);
-        }
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\nLine 2\nLine 3\n", content);
-    }
-
-    @Test
-    public void testWriteLines_IterableToWriterWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        java.util.List<String> lines = java.util.Arrays.asList("Line 1", "Line 2", "Line 3");
-
-        try (java.io.FileWriter fw = new java.io.FileWriter(outputFile)) {
-            IOUtil.writeLines(lines, fw, true);
-        }
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Line 1\nLine 2\nLine 3\n", content);
-    }
-
-    @Test
-    public void testWriteLines_EmptyIterable() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        java.util.List<String> lines = java.util.Collections.emptyList();
-
-        IOUtil.writeLines(lines, outputFile);
-
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("", content);
-    }
-
-    @Test
-    public void testWriteLines_LargeIterable() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            lines.add("Line " + i);
-        }
-
-        IOUtil.writeLines(lines, outputFile);
-
-        java.util.List<String> readLines = IOUtil.readAllLines(outputFile);
-        assertEquals(100, readLines.size());
-        assertEquals("Line 0", readLines.get(0));
-        assertEquals("Line 99", readLines.get(99));
-    }
-
-    @Test
-    public void testWriteLines_NonexistentDirectory() throws IOException {
-        File outputFile = new File(tempFolder.toFile(), "nonexistent/output.txt");
-        java.util.List<String> lines = java.util.Arrays.asList("Line 1");
-        IOUtil.writeLines(lines, outputFile);
-        assertEquals("Line 1", IOUtil.readLine(outputFile, 0));
-    }
-
-    // ===== writeLines – empty-iterator early return via Writer overloads (L3362, L3389) =====
-
-    @Test
-    public void testWriteLines_EmptyIterator_ToWriter_EarlyReturn() throws IOException {
-        // writeLines(Iterator, Writer) – when the iterator is empty the method should
-        // return immediately (L3362) without writing anything.
-        java.io.StringWriter sw = new java.io.StringWriter();
-        IOUtil.writeLines(java.util.Collections.emptyIterator(), sw);
-        assertEquals("", sw.toString());
-    }
-
-    @Test
-    public void testWriteLines_EmptyIterator_ToWriter_WithFlush_EarlyReturn() throws IOException {
-        // writeLines(Iterator, Writer, boolean) – empty iterator hits the early return at L3389.
-        java.io.StringWriter sw = new java.io.StringWriter();
-        IOUtil.writeLines(java.util.Collections.emptyIterator(), sw, true);
-        assertEquals("", sw.toString());
-    }
-
-    // ===== writeLines – null element written as "null" char array (L3402) =====
-
-    @Test
-    public void testWriteLines_Iterator_NullElement_WritesNullString() throws IOException {
-        // When the iterator contains a null element, the implementation writes
-        // Strings.NULL_CHAR_ARRAY (the text "null") instead of calling N.toString(line).
-        java.io.StringWriter sw = new java.io.StringWriter();
-        java.util.Iterator<String> iter = java.util.Arrays.asList("hello", null, "world").iterator();
-        IOUtil.writeLines(iter, sw);
-        String result = sw.toString();
-        assertTrue(result.contains("hello"));
-        assertTrue(result.contains("null"));
-        assertTrue(result.contains("world"));
-    }
-
-    // ===== writeLines – empty-Iterable early return via Writer overloads (L3474, L3500) =====
-
-    @Test
-    public void testWriteLines_EmptyIterable_ToWriter_EarlyReturn() throws IOException {
-        // writeLines(Iterable, Writer) – empty iterable hits the early return at L3474.
-        java.io.StringWriter sw = new java.io.StringWriter();
-        IOUtil.writeLines(java.util.Collections.emptyList(), sw);
-        assertEquals("", sw.toString());
-    }
-
-    @Test
-    public void testWriteLines_EmptyIterable_ToWriter_WithFlush_EarlyReturn() throws IOException {
-        // writeLines(Iterable, Writer, boolean) – empty iterable hits the early return at L3500.
-        java.io.StringWriter sw = new java.io.StringWriter();
-        IOUtil.writeLines(java.util.Collections.emptyList(), sw, true);
-        assertEquals("", sw.toString());
-    }
-
-    // ===== writeLines – null element in Iterable written as "null" char array (L3509) =====
-
-    @Test
-    public void testWriteLines_Iterable_NullElement_WritesNullString() throws IOException {
-        java.io.StringWriter sw = new java.io.StringWriter();
-        IOUtil.writeLines(java.util.Arrays.asList("first", null, "last"), sw);
-        String result = sw.toString();
-        assertTrue(result.contains("first"));
-        assertTrue(result.contains("null"));
-        assertTrue(result.contains("last"));
-    }
-
-    @Test
-    public void testWrite_BooleanToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(true, writer);
-        writer.flush();
-        assertEquals("true", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_BooleanFalseToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(false, writer);
-        writer.flush();
-        assertEquals("false", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_CharToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write('A', writer);
-        writer.flush();
-        assertEquals("A", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_CharUnicodeToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write('\u4E16', writer);
-        writer.flush();
-        assertEquals("世", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_ByteToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write((byte) 65, writer);
-        writer.flush();
-        assertEquals("65", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_ByteNegativeToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write((byte) -128, writer);
-        writer.flush();
-        assertEquals("-128", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_ShortToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write((short) 12345, writer);
-        writer.flush();
-        assertEquals("12345", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_ShortNegativeToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write((short) -32768, writer);
-        writer.flush();
-        assertEquals("-32768", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_IntToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(123456789, writer);
-        writer.flush();
-        assertEquals("123456789", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_IntNegativeToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(-987654321, writer);
-        writer.flush();
-        assertEquals("-987654321", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_LongToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(9876543210L, writer);
-        writer.flush();
-        assertEquals("9876543210", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_LongNegativeToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(-9876543210L, writer);
-        writer.flush();
-        assertEquals("-9876543210", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_FloatToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(3.14f, writer);
-        writer.flush();
-        assertEquals("3.14", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_FloatNegativeToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(-2.718f, writer);
-        writer.flush();
-        assertEquals("-2.718", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_DoubleToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(3.141592653589793, writer);
-        writer.flush();
-        assertEquals("3.141592653589793", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_DoubleNegativeToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(-2.718281828459045, writer);
-        writer.flush();
-        assertEquals("-2.718281828459045", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_ObjectToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write((Object) "Hello", writer);
-        writer.flush();
-        assertEquals("Hello", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_ObjectIntegerToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(Integer.valueOf(42), writer);
-        writer.flush();
-        assertEquals("42", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_ObjectNullToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write((Object) null, writer);
-        writer.flush();
-        assertEquals("null", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_CharSequenceToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        IOUtil.write(TEST_CONTENT, outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharSequenceWithCharsetToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        IOUtil.write(UNICODE_CONTENT, UTF_8, outputFile);
-        String content = IOUtil.readAllToString(outputFile, UTF_8);
-        assertEquals(UNICODE_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharSequenceToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            IOUtil.write(TEST_CONTENT, fos);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharSequenceWithCharsetToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            IOUtil.write(UNICODE_CONTENT, UTF_8, fos);
-        }
-        String content = IOUtil.readAllToString(outputFile, UTF_8);
-        assertEquals(UNICODE_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharSequenceToOutputStreamWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            IOUtil.write(TEST_CONTENT, fos, true);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharSequenceToOutputStreamWithoutFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            IOUtil.write(TEST_CONTENT, fos, false);
-            fos.flush();
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharSequenceWithCharsetToOutputStreamWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            IOUtil.write(UNICODE_CONTENT, UTF_8, fos, true);
-        }
-        String content = IOUtil.readAllToString(outputFile, UTF_8);
-        assertEquals(UNICODE_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharSequenceToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(TEST_CONTENT, writer);
-        writer.flush();
-        assertEquals(TEST_CONTENT, sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_CharSequenceToWriterWithFlush() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(TEST_CONTENT, writer, true);
-        assertEquals(TEST_CONTENT, sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_CharSequenceToWriterWithoutFlush() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(TEST_CONTENT, writer, false);
-        writer.flush();
-        assertEquals(TEST_CONTENT, sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_EmptyCharSequenceToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        IOUtil.write("", outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("", content);
-    }
-
-    @Test
-    public void testWrite_MultilineCharSequenceToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        IOUtil.write(MULTILINE_CONTENT, outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(MULTILINE_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharArrayToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        IOUtil.write(TEST_CONTENT.toCharArray(), outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharArrayWithCharsetToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        IOUtil.write(UNICODE_CONTENT.toCharArray(), UTF_8, outputFile);
-        String content = IOUtil.readAllToString(outputFile, UTF_8);
-        assertEquals(UNICODE_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharArrayWithOffsetCountToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        char[] chars = "0123456789".toCharArray();
-        IOUtil.write(chars, 2, 5, outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("23456", content);
-    }
-
-    @Test
-    public void testWrite_CharArrayWithOffsetCountCharsetToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        char[] chars = UNICODE_CONTENT.toCharArray();
-        IOUtil.write(chars, 0, 5, UTF_8, outputFile);
-        String content = IOUtil.readAllToString(outputFile, UTF_8);
-        assertEquals(UNICODE_CONTENT.substring(0, 5), content);
-    }
-
-    @Test
-    public void testWrite_CharArrayToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            IOUtil.write(TEST_CONTENT.toCharArray(), fos);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharArrayWithCharsetToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            IOUtil.write(UNICODE_CONTENT.toCharArray(), UTF_8, fos);
-        }
-        String content = IOUtil.readAllToString(outputFile, UTF_8);
-        assertEquals(UNICODE_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharArrayWithOffsetCountToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            char[] chars = "0123456789ABCDEF".toCharArray();
-            IOUtil.write(chars, 5, 6, fos);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("56789A", content);
-    }
-
-    @Test
-    public void testWrite_CharArrayWithOffsetCountCharsetToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            char[] chars = UNICODE_CONTENT.substring(0, 11).toCharArray();
-            IOUtil.write(chars, 0, 11, UTF_8, fos);
-        }
-        String content = IOUtil.readAllToString(outputFile, UTF_8);
-        assertEquals(UNICODE_CONTENT.substring(0, 11), content);
-    }
-
-    @Test
-    public void testWrite_CharArrayToOutputStreamWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            IOUtil.write(TEST_CONTENT.toCharArray(), fos, true);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharArrayWithOffsetCountToOutputStreamWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            char[] chars = "0123456789".toCharArray();
-            IOUtil.write(chars, 3, 4, fos, true);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("3456", content);
-    }
-
-    @Test
-    public void testWrite_CharArrayWithOffsetCountCharsetToOutputStreamWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            char[] chars = UNICODE_CONTENT.toCharArray();
-            IOUtil.write(chars, 0, 8, UTF_8, fos, true);
-        }
-        String content = IOUtil.readAllToString(outputFile, UTF_8);
-        assertEquals(UNICODE_CONTENT.substring(0, 8), content);
-    }
-
-    @Test
-    public void testWrite_CharArrayToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(TEST_CONTENT.toCharArray(), writer);
-        writer.flush();
-        assertEquals(TEST_CONTENT, sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_CharArrayWithOffsetCountToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        char[] chars = "0123456789".toCharArray();
-        IOUtil.write(chars, 2, 5, writer);
-        writer.flush();
-        assertEquals("23456", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_CharArrayToWriterWithFlush() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        IOUtil.write(TEST_CONTENT.toCharArray(), writer, true);
-        assertEquals(TEST_CONTENT, sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_CharArrayWithOffsetCountToWriterWithFlush() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        char[] chars = "ABCDEFGHIJ".toCharArray();
-        IOUtil.write(chars, 3, 4, writer, true);
-        assertEquals("DEFG", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_EmptyCharArrayToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        IOUtil.write(new char[0], outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("", content);
-    }
-
-    @Test
-    public void testWrite_CharArrayZeroCountToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        char[] chars = "0123456789".toCharArray();
-        IOUtil.write(chars, 5, 0, writer);
-        writer.flush();
-        assertEquals("", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_ByteArrayToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        IOUtil.write(TEST_CONTENT.getBytes(UTF_8), outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_ByteArrayWithOffsetCountToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        byte[] bytes = "0123456789".getBytes(UTF_8);
-        IOUtil.write(bytes, 2, 5, outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("23456", content);
-    }
-
-    @Test
-    public void testWrite_ByteArrayToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            IOUtil.write(TEST_CONTENT.getBytes(UTF_8), fos);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_ByteArrayWithOffsetCountToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            byte[] bytes = "0123456789ABCDEF".getBytes(UTF_8);
-            IOUtil.write(bytes, 5, 6, fos);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("56789A", content);
-    }
-
-    @Test
-    public void testWrite_ByteArrayToOutputStreamWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            IOUtil.write(TEST_CONTENT.getBytes(UTF_8), fos, true);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_ByteArrayWithOffsetCountToOutputStreamWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            byte[] bytes = "0123456789".getBytes(UTF_8);
-            IOUtil.write(bytes, 3, 4, fos, true);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("3456", content);
-    }
-
-    @Test
-    public void testWrite_EmptyByteArrayToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        IOUtil.write(new byte[0], outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("", content);
-    }
-
-    @Test
-    public void testWrite_ByteArrayZeroCountToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            byte[] bytes = "0123456789".getBytes(UTF_8);
-            IOUtil.write(bytes, 5, 0, fos);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("", content);
-    }
-
-    @Test
-    public void testWrite_UnicodeByteArrayToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        IOUtil.write(UNICODE_CONTENT.getBytes(UTF_8), outputFile);
-        String content = IOUtil.readAllToString(outputFile, UTF_8);
-        assertEquals(UNICODE_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_FileToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        long bytesWritten = IOUtil.write(tempFile, outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-        assertEquals(TEST_CONTENT.getBytes(UTF_8).length, bytesWritten);
-    }
-
-    @Test
-    public void testWrite_FileWithOffsetCountToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        long bytesWritten = IOUtil.write(tempFile, 6, 5, outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("World", content);
-        assertEquals(5, bytesWritten);
-    }
-
-    @Test
-    public void testWrite_FileToItself_isRejectedWithoutDataLoss() throws IOException {
-        // Regression: a self-copy must not truncate/wipe the source. write(File, File) opens the output
-        // with a truncating FileOutputStream, so a same-file copy previously zeroed the file and returned 0.
-        // It is now rejected up front (IllegalArgumentException), consistent with copyFile(...).
-        final long originalLen = tempFile.length();
-        assertTrue(originalLen > 0);
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.write(tempFile, tempFile));
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.write(tempFile, 0, Long.MAX_VALUE, tempFile));
-        assertEquals(originalLen, tempFile.length());
-        assertEquals(TEST_CONTENT, IOUtil.readAllToString(tempFile));
-    }
-
-    @Test
-    public void testAppend_FileToItself_isRejectedWithoutGrowth() throws IOException {
-        // Regression: append(File, File) opens the target in append mode while reading the same
-        // file from position 0, so a self-append grows the file unboundedly (the reader keeps
-        // finding the bytes the writer just appended). It must be rejected up front like
-        // write(File, File) and copyFile(...).
-        final long originalLen = tempFile.length();
-        assertTrue(originalLen > 0);
-        // bounded-count overload first: on a regression this fails fast without unbounded growth
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.append(tempFile, 0, 16, tempFile));
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.append(tempFile, tempFile));
-        assertEquals(originalLen, tempFile.length());
-        assertEquals(TEST_CONTENT, IOUtil.readAllToString(tempFile));
-    }
-
-    @Test
     public void testMerge_destAmongSources_isRejectedWithoutDataLoss() throws IOException {
         // Regression: merge(...) truncates destFile up front (newFileOutputStream), so a source
         // that is the same file as the destination was silently wiped (or read back the freshly
@@ -2602,1060 +634,10 @@ public class IOUtilTest extends TestBase {
         IOUtil.write("other-content", other);
         final long originalLen = tempFile.length();
         assertTrue(originalLen > 0);
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.merge(N.asList(tempFile), new byte[0], tempFile));
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.merge(N.asList(other, tempFile), new byte[0], tempFile));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.merge(CommonUtil.asList(tempFile), new byte[0], tempFile));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.merge(CommonUtil.asList(other, tempFile), new byte[0], tempFile));
         assertEquals(originalLen, tempFile.length());
         assertEquals(TEST_CONTENT, IOUtil.readAllToString(tempFile));
-    }
-
-    @Test
-    public void testWrite_FileToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            long bytesWritten = IOUtil.write(tempFile, fos);
-            assertEquals(TEST_CONTENT.getBytes(UTF_8).length, bytesWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_FileWithOffsetCountToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            long bytesWritten = IOUtil.write(tempFile, 6, 5, fos);
-            assertEquals(5, bytesWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("World", content);
-    }
-
-    @Test
-    public void testWrite_FileToOutputStreamWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            long bytesWritten = IOUtil.write(tempFile, fos, true);
-            assertEquals(TEST_CONTENT.getBytes(UTF_8).length, bytesWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_FileWithOffsetCountToOutputStreamWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
-            long bytesWritten = IOUtil.write(tempFile, 0, 5, fos, true);
-            assertEquals(5, bytesWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Hello", content);
-    }
-
-    @Test
-    public void testWrite_EmptyFileToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        long bytesWritten = IOUtil.write(emptyFile, outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("", content);
-        assertEquals(0, bytesWritten);
-    }
-
-    @Test
-    public void testWrite_FileWithZeroCountToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        long bytesWritten = IOUtil.write(tempFile, 0, 0, outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("", content);
-        assertEquals(0, bytesWritten);
-    }
-
-    @Test
-    public void testWrite_InputStreamToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            long bytesWritten = IOUtil.write(is, outputFile);
-            assertEquals(TEST_CONTENT.getBytes(UTF_8).length, bytesWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_InputStreamWithOffsetCountToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (InputStream is = new ByteArrayInputStream("0123456789ABCDEF".getBytes(UTF_8))) {
-            long bytesWritten = IOUtil.write(is, 5, 6, outputFile);
-            assertEquals(6, bytesWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("56789A", content);
-    }
-
-    @Test
-    public void testWrite_InputStreamToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8));
-             FileOutputStream fos = new FileOutputStream(outputFile)) {
-            long bytesWritten = IOUtil.write(is, fos);
-            assertEquals(TEST_CONTENT.getBytes(UTF_8).length, bytesWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_InputStreamToOutputStreamBreaksOnZeroProgress() throws IOException {
-        final java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream();
-
-        assertEquals(0, IOUtil.write(new ZeroThenEofInputStream(), output));
-        assertEquals(0, output.size());
-    }
-
-    @Test
-    public void testWrite_InputStreamWithOffsetCountToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (InputStream is = new ByteArrayInputStream("0123456789ABCDEF".getBytes(UTF_8));
-             FileOutputStream fos = new FileOutputStream(outputFile)) {
-            long bytesWritten = IOUtil.write(is, 5, 6, fos);
-            assertEquals(6, bytesWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("56789A", content);
-    }
-
-    @Test
-    public void testWrite_InputStreamToOutputStreamWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8));
-             FileOutputStream fos = new FileOutputStream(outputFile)) {
-            long bytesWritten = IOUtil.write(is, fos, true);
-            assertEquals(TEST_CONTENT.getBytes(UTF_8).length, bytesWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_InputStreamWithOffsetCountToOutputStreamWithFlush() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (InputStream is = new ByteArrayInputStream("0123456789".getBytes(UTF_8));
-             FileOutputStream fos = new FileOutputStream(outputFile)) {
-            long bytesWritten = IOUtil.write(is, 3, 4, fos, true);
-            assertEquals(4, bytesWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("3456", content);
-    }
-
-    @Test
-    public void testWrite_EmptyInputStreamToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (InputStream is = new ByteArrayInputStream(new byte[0])) {
-            long bytesWritten = IOUtil.write(is, outputFile);
-            assertEquals(0, bytesWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("", content);
-    }
-
-    @Test
-    public void testWrite_InputStreamWithZeroCountToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8))) {
-            long bytesWritten = IOUtil.write(is, 0, 0, outputFile);
-            assertEquals(0, bytesWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("", content);
-    }
-
-    @Test
-    public void testWrite_FileInputStreamToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileInputStream fis = new FileInputStream(tempFile)) {
-            long bytesWritten = IOUtil.write(fis, outputFile);
-            assertEquals(TEST_CONTENT.getBytes(UTF_8).length, bytesWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_ReaderToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (Reader reader = new StringReader(TEST_CONTENT)) {
-            long charsWritten = IOUtil.write(reader, outputFile);
-            assertEquals(TEST_CONTENT.length(), charsWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_ReaderWithCharsetToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (Reader reader = new StringReader(UNICODE_CONTENT)) {
-            long charsWritten = IOUtil.write(reader, UTF_8, outputFile);
-            assertEquals(UNICODE_CONTENT.length(), charsWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile, UTF_8);
-        assertEquals(UNICODE_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_ReaderWithOffsetCountToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (Reader reader = new StringReader("0123456789ABCDEF")) {
-            long charsWritten = IOUtil.write(reader, 5, 6, outputFile);
-            assertEquals(6, charsWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("56789A", content);
-    }
-
-    @Test
-    public void testWrite_ReaderWithOffsetCountCharsetToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (Reader reader = new StringReader(UNICODE_CONTENT)) {
-            long charsWritten = IOUtil.write(reader, 0, 11, UTF_8, outputFile);
-            assertEquals(11, charsWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile, UTF_8);
-        assertEquals(UNICODE_CONTENT.substring(0, 11), content);
-    }
-
-    @Test
-    public void testWrite_ReaderToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        try (Reader reader = new StringReader(TEST_CONTENT)) {
-            long charsWritten = IOUtil.write(reader, writer);
-            assertEquals(TEST_CONTENT.length(), charsWritten);
-        }
-        writer.flush();
-        assertEquals(TEST_CONTENT, sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_ReaderToWriterBreaksOnZeroProgress() throws IOException {
-        final java.io.StringWriter writer = new java.io.StringWriter();
-
-        assertEquals(0, IOUtil.write(new ZeroThenEofReader(), writer));
-        assertEquals("", writer.toString());
-    }
-
-    @Test
-    public void testWrite_ReaderWithOffsetCountToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        try (Reader reader = new StringReader("0123456789ABCDEF")) {
-            long charsWritten = IOUtil.write(reader, 5, 6, writer);
-            assertEquals(6, charsWritten);
-        }
-        writer.flush();
-        assertEquals("56789A", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_ReaderToWriterWithFlush() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        try (Reader reader = new StringReader(TEST_CONTENT)) {
-            long charsWritten = IOUtil.write(reader, writer, true);
-            assertEquals(TEST_CONTENT.length(), charsWritten);
-        }
-        assertEquals(TEST_CONTENT, sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_ReaderWithOffsetCountToWriterWithFlush() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        try (Reader reader = new StringReader("0123456789")) {
-            long charsWritten = IOUtil.write(reader, 3, 4, writer, true);
-            assertEquals(4, charsWritten);
-        }
-        assertEquals("3456", sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_EmptyReaderToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (Reader reader = new StringReader("")) {
-            long charsWritten = IOUtil.write(reader, outputFile);
-            assertEquals(0, charsWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("", content);
-    }
-
-    @Test
-    public void testWrite_ReaderWithZeroCountToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (Reader reader = new StringReader(TEST_CONTENT)) {
-            long charsWritten = IOUtil.write(reader, 0, 0, outputFile);
-            assertEquals(0, charsWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("", content);
-    }
-
-    @Test
-    public void testWrite_FileReaderToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileReader reader = new FileReader(tempFile)) {
-            long charsWritten = IOUtil.write(reader, outputFile);
-            assertEquals(TEST_CONTENT.length(), charsWritten);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_MultilineReaderToWriter() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.stringBuilderToWriter(sb);
-        try (Reader reader = new StringReader(MULTILINE_CONTENT)) {
-            long charsWritten = IOUtil.write(reader, writer);
-            assertEquals(MULTILINE_CONTENT.length(), charsWritten);
-        }
-        writer.flush();
-        assertEquals(MULTILINE_CONTENT, sb.toString());
-        writer.close();
-    }
-
-    @Test
-    public void testWrite_MultipleWritesToSameFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        IOUtil.write("Hello", outputFile);
-        IOUtil.write("World", outputFile);
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("World", content);
-    }
-
-    @Test
-    public void testWrite_AppendToOutputStream() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = new FileOutputStream(outputFile, true)) {
-            IOUtil.write("Hello ", fos);
-            IOUtil.write("World", fos);
-        }
-        String content = IOUtil.readAllToString(outputFile);
-        assertEquals("Hello World", content);
-    }
-
-    @Test
-    public void testWrite_LargeDataFileToFile() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        long bytesWritten = IOUtil.write(largeFile, outputFile);
-        String originalContent = IOUtil.readAllToString(largeFile);
-        String outputContent = IOUtil.readAllToString(outputFile);
-        assertEquals(originalContent, outputContent);
-        assertTrue(bytesWritten > 10000);
-    }
-
-    @Test
-    public void testWrite_CharsetEncodingRoundTrip() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        IOUtil.write(UNICODE_CONTENT, UTF_16, outputFile);
-        String content = IOUtil.readAllToString(outputFile, UTF_16);
-        assertEquals(UNICODE_CONTENT, content);
-    }
-
-    @Test
-    public void testWrite_CharArrayWithDifferentCharsets() throws IOException {
-        File outputFile1 = Files.createTempFile(tempFolder, "output1", ".txt").toFile();
-        File outputFile2 = Files.createTempFile(tempFolder, "output2", ".txt").toFile();
-
-        char[] chars = UNICODE_CONTENT.toCharArray();
-        IOUtil.write(chars, UTF_8, outputFile1);
-        IOUtil.write(chars, UTF_16, outputFile2);
-
-        String content1 = IOUtil.readAllToString(outputFile1, UTF_8);
-        String content2 = IOUtil.readAllToString(outputFile2, UTF_16);
-
-        assertEquals(UNICODE_CONTENT, content1);
-        assertEquals(UNICODE_CONTENT, content2);
-        assertEquals(content1, content2);
-    }
-
-    @Test
-    public void testWrite_ByteArrayPartialData() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        byte[] bytes = new byte[100];
-        for (int i = 0; i < bytes.length; i++) {
-            bytes[i] = (byte) ('A' + (i % 26));
-        }
-        IOUtil.write(bytes, 10, 20, outputFile);
-        byte[] readBytes = IOUtil.readAllBytes(outputFile);
-        assertEquals(20, readBytes.length);
-        for (int i = 0; i < 20; i++) {
-            assertEquals(bytes[10 + i], readBytes[i]);
-        }
-    }
-
-    @Test
-    public void testWrite_StreamCopyWithOffset() throws IOException {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        byte[] data = new byte[100];
-        for (int i = 0; i < data.length; i++) {
-            data[i] = (byte) i;
-        }
-
-        try (InputStream is = new ByteArrayInputStream(data);
-             FileOutputStream fos = new FileOutputStream(outputFile)) {
-            long bytesWritten = IOUtil.write(is, 10, 20, fos);
-            assertEquals(20, bytesWritten);
-        }
-
-        byte[] readBytes = IOUtil.readAllBytes(outputFile);
-        assertEquals(20, readBytes.length);
-        for (int i = 0; i < 20; i++) {
-            assertEquals(data[10 + i], readBytes[i]);
-        }
-    }
-
-    @Test
-    public void testWrite_ReaderToFileWithDifferentCharsets() throws IOException {
-        File outputFile1 = Files.createTempFile(tempFolder, "output1", ".txt").toFile();
-        File outputFile2 = Files.createTempFile(tempFolder, "output2", ".txt").toFile();
-
-        try (Reader reader1 = new StringReader(UNICODE_CONTENT);
-             Reader reader2 = new StringReader(UNICODE_CONTENT)) {
-            IOUtil.write(reader1, UTF_8, outputFile1);
-            IOUtil.write(reader2, UTF_16, outputFile2);
-        }
-
-        String content1 = IOUtil.readAllToString(outputFile1, UTF_8);
-        String content2 = IOUtil.readAllToString(outputFile2, UTF_16);
-
-        assertEquals(UNICODE_CONTENT, content1);
-        assertEquals(UNICODE_CONTENT, content2);
-    }
-
-    @Test
-    public void testWrite_FlushBehaviorComparison() throws IOException {
-        File outputFile1 = Files.createTempFile(tempFolder, "output1", ".txt").toFile();
-        File outputFile2 = Files.createTempFile(tempFolder, "output2", ".txt").toFile();
-
-        try (FileOutputStream fos = new FileOutputStream(outputFile1)) {
-            IOUtil.write(TEST_CONTENT.getBytes(UTF_8), fos, true);
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(outputFile2)) {
-            IOUtil.write(TEST_CONTENT.getBytes(UTF_8), fos, false);
-            fos.flush();
-        }
-
-        String content1 = IOUtil.readAllToString(outputFile1);
-        String content2 = IOUtil.readAllToString(outputFile2);
-
-        assertEquals(TEST_CONTENT, content1);
-        assertEquals(TEST_CONTENT, content2);
-        assertEquals(content1, content2);
-    }
-
-    // ===== write(char[], int, int, Writer) =====
-
-    @Test
-    public void testWrite_charArrayOffsetCountWriter() throws Exception {
-        char[] chars = "Hello World!".toCharArray();
-        java.io.StringWriter sw = new java.io.StringWriter();
-        IOUtil.write(chars, 6, 5, sw);
-        assertEquals("World", sw.toString());
-    }
-
-    @Test
-    public void testWrite_charArrayOffsetCountWriter_zeroCount() throws Exception {
-        char[] chars = "Hello".toCharArray();
-        java.io.StringWriter sw = new java.io.StringWriter();
-        IOUtil.write(chars, 0, 0, sw);
-        assertEquals("", sw.toString());
-    }
-
-    @Test
-    public void testWrite_charArrayOffsetCountWriter_fullArray() throws Exception {
-        char[] chars = "Hello".toCharArray();
-        java.io.StringWriter sw = new java.io.StringWriter();
-        IOUtil.write(chars, 0, chars.length, sw);
-        assertEquals("Hello", sw.toString());
-    }
-
-    // ===== write(byte[], int, int, OutputStream) =====
-
-    @Test
-    public void testWrite_byteArrayOffsetCountOutputStream() throws Exception {
-        byte[] bytes = "Hello World!".getBytes(UTF_8);
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        IOUtil.write(bytes, 6, 5, baos);
-        assertEquals("World", baos.toString("UTF-8"));
-    }
-
-    @Test
-    public void testWrite_byteArrayOffsetCountOutputStream_zeroCount() throws Exception {
-        byte[] bytes = "Hello".getBytes(UTF_8);
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        IOUtil.write(bytes, 0, 0, baos);
-        assertEquals(0, baos.size());
-    }
-
-    @Test
-    public void testWrite_byteArrayOffsetCountOutputStream_fullArray() throws Exception {
-        byte[] bytes = "Hello".getBytes(UTF_8);
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        IOUtil.write(bytes, 0, bytes.length, baos);
-        assertEquals("Hello", baos.toString("UTF-8"));
-    }
-
-    // ===== write(InputStream, long, long, OutputStream, boolean) =====
-
-    @Test
-    public void testWrite_inputStreamWithOffsetAndCount() throws Exception {
-        byte[] data = "Hello World!".getBytes(UTF_8);
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(data)) {
-            long written = IOUtil.write(bais, 6L, 5L, baos, true);
-            assertEquals(5L, written);
-            assertEquals("World", baos.toString("UTF-8"));
-        }
-    }
-
-    @Test
-    public void testWrite_inputStreamWithZeroCount() throws Exception {
-        byte[] data = "Hello World!".getBytes(UTF_8);
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(data)) {
-            long written = IOUtil.write(bais, 0L, 0L, baos, false);
-            assertEquals(0L, written);
-        }
-    }
-
-    @Test
-    public void testWrite_inputStreamOffsetBeyondEnd() throws Exception {
-        byte[] data = "Hello".getBytes(UTF_8);
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(data)) {
-            long written = IOUtil.write(bais, 100L, 5L, baos, false);
-            assertEquals(0L, written);
-        }
-    }
-
-    @Test
-    public void testWrite_inputStreamNoOffset() throws Exception {
-        byte[] data = "Hello".getBytes(UTF_8);
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(data)) {
-            long written = IOUtil.write(bais, 0L, 5L, baos, true);
-            assertEquals(5L, written);
-            assertEquals("Hello", baos.toString("UTF-8"));
-        }
-    }
-
-    @Test
-    public void testAppendBytes_ToFile() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Initial".getBytes(UTF_8));
-
-        IOUtil.append(" Content".getBytes(UTF_8), appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Initial Content", result);
-    }
-
-    @Test
-    public void testAppendBytes_WithOffsetAndCount() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Start".getBytes(UTF_8));
-
-        byte[] bytes = "0123456789".getBytes(UTF_8);
-        IOUtil.append(bytes, 2, 5, appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Start23456", result);
-    }
-
-    @Test
-    public void testAppendBytes_EmptyArray() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Content".getBytes(UTF_8));
-
-        IOUtil.append(new byte[0], appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Content", result);
-    }
-
-    @Test
-    public void testAppendBytes_ZeroCount() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Content".getBytes(UTF_8));
-
-        IOUtil.append("Test".getBytes(UTF_8), 0, 0, appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Content", result);
-    }
-
-    @Test
-    public void testAppendBytes_ToEmptyFile() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-
-        IOUtil.append("New Content".getBytes(UTF_8), appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("New Content", result);
-    }
-
-    @Test
-    public void testAppendBytes_MultipleAppends() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "A".getBytes(UTF_8));
-
-        IOUtil.append("B".getBytes(UTF_8), appendFile);
-        IOUtil.append("C".getBytes(UTF_8), appendFile);
-        IOUtil.append("D".getBytes(UTF_8), appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("ABCD", result);
-    }
-
-    @Test
-    public void testAppendChars_ToFile() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Initial".getBytes(UTF_8));
-
-        IOUtil.append(" Content".toCharArray(), appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Initial Content", result);
-    }
-
-    @Test
-    public void testAppendChars_WithCharset() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Start".getBytes(UTF_16));
-
-        IOUtil.append(" End".toCharArray(), UTF_16, appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_16);
-        assertEquals("Start﻿ End", result);
-    }
-
-    @Test
-    public void testAppendChars_WithOffsetAndCount() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Begin".getBytes(UTF_8));
-
-        char[] chars = "0123456789".toCharArray();
-        IOUtil.append(chars, 3, 4, appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Begin3456", result);
-    }
-
-    @Test
-    public void testAppendChars_WithOffsetCountAndCharset() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Data".getBytes(UTF_8));
-
-        char[] chars = "ABCDEFGH".toCharArray();
-        IOUtil.append(chars, 2, 3, UTF_8, appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("DataCDE", result);
-    }
-
-    @Test
-    public void testAppendChars_EmptyArray() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Text".getBytes(UTF_8));
-
-        IOUtil.append(new char[0], appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Text", result);
-    }
-
-    @Test
-    public void testAppendChars_UnicodeContent() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Hello ".getBytes(UTF_8));
-
-        IOUtil.append("世界 \uD83D\uDE00".toCharArray(), UTF_8, appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Hello 世界 \uD83D\uDE00", result);
-    }
-
-    @Test
-    public void testAppendCharSequence_ToFile() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Hello".getBytes(UTF_8));
-
-        IOUtil.append(" World", appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Hello World", result);
-    }
-
-    @Test
-    public void testAppendCharSequence_WithCharset() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "First".getBytes(UTF_16));
-
-        IOUtil.append(" Second", UTF_16, appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_16);
-        assertEquals("First﻿ Second", result);
-    }
-
-    @Test
-    public void testAppendCharSequence_StringBuilder() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Part1".getBytes(UTF_8));
-
-        StringBuilder sb = new StringBuilder(" Part2");
-        IOUtil.append(sb, UTF_8, appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Part1 Part2", result);
-    }
-
-    @Test
-    public void testAppendCharSequence_EmptyString() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Content".getBytes(UTF_8));
-
-        IOUtil.append("", appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Content", result);
-    }
-
-    @Test
-    public void testAppendFile_ToFile() throws IOException {
-        File sourceFile = Files.createTempFile(tempFolder, "source", ".txt").toFile();
-        Files.write(sourceFile.toPath(), " from source".getBytes(UTF_8));
-
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Content".getBytes(UTF_8));
-
-        long bytesAppended = IOUtil.append(sourceFile, targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertEquals("Content from source", result);
-        assertEquals(" from source".length(), bytesAppended);
-    }
-
-    @Test
-    public void testAppendFile_WithOffsetAndCount() throws IOException {
-        File sourceFile = Files.createTempFile(tempFolder, "source", ".txt").toFile();
-        Files.write(sourceFile.toPath(), "0123456789".getBytes(UTF_8));
-
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Start".getBytes(UTF_8));
-
-        long bytesAppended = IOUtil.append(sourceFile, 3, 4, targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertEquals("Start3456", result);
-        assertEquals(4, bytesAppended);
-    }
-
-    @Test
-    public void testAppendFile_EmptySource() throws IOException {
-        File sourceFile = Files.createTempFile(tempFolder, "source", ".txt").toFile();
-
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Target".getBytes(UTF_8));
-
-        long bytesAppended = IOUtil.append(sourceFile, targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertEquals("Target", result);
-        assertEquals(0, bytesAppended);
-    }
-
-    @Test
-    public void testAppendFile_ToEmptyTarget() throws IOException {
-        File sourceFile = Files.createTempFile(tempFolder, "source", ".txt").toFile();
-        Files.write(sourceFile.toPath(), "Source data".getBytes(UTF_8));
-
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-
-        long bytesAppended = IOUtil.append(sourceFile, targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertEquals("Source data", result);
-        assertEquals("Source data".length(), bytesAppended);
-    }
-
-    @Test
-    public void testAppendInputStream_ToFile() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Prefix".getBytes(UTF_8));
-
-        try (InputStream is = new ByteArrayInputStream(" suffix".getBytes(UTF_8))) {
-            long bytesAppended = IOUtil.append(is, targetFile);
-
-            String result = IOUtil.readAllToString(targetFile, UTF_8);
-            assertEquals("Prefix suffix", result);
-            assertEquals(" suffix".length(), bytesAppended);
-        }
-    }
-
-    @Test
-    public void testAppendInputStream_WithOffsetAndCount() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Base".getBytes(UTF_8));
-
-        try (InputStream is = new ByteArrayInputStream("0123456789".getBytes(UTF_8))) {
-            long bytesAppended = IOUtil.append(is, 2, 5, targetFile);
-
-            String result = IOUtil.readAllToString(targetFile, UTF_8);
-            assertEquals("Base23456", result);
-            assertEquals(5, bytesAppended);
-        }
-    }
-
-    @Test
-    public void testAppendInputStream_EmptyStream() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Data".getBytes(UTF_8));
-
-        try (InputStream is = new ByteArrayInputStream(new byte[0])) {
-            long bytesAppended = IOUtil.append(is, targetFile);
-
-            String result = IOUtil.readAllToString(targetFile, UTF_8);
-            assertEquals("Data", result);
-            assertEquals(0, bytesAppended);
-        }
-    }
-
-    @Test
-    public void testAppendInputStream_LargeStream() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Header\n".getBytes(UTF_8));
-
-        byte[] largeData = new byte[10000];
-        for (int i = 0; i < largeData.length; i++) {
-            largeData[i] = (byte) ('A' + (i % 26));
-        }
-
-        try (InputStream is = new ByteArrayInputStream(largeData)) {
-            long bytesAppended = IOUtil.append(is, targetFile);
-
-            byte[] result = IOUtil.readAllBytes(targetFile);
-            assertEquals(7 + 10000, result.length);
-            assertEquals(10000, bytesAppended);
-        }
-    }
-
-    @Test
-    public void testAppendReader_ToFile() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Start".getBytes(UTF_8));
-
-        try (Reader reader = new StringReader(" Middle End")) {
-            long charsAppended = IOUtil.append(reader, targetFile);
-
-            String result = IOUtil.readAllToString(targetFile, UTF_8);
-            assertEquals("Start Middle End", result);
-            assertEquals(" Middle End".length(), charsAppended);
-        }
-    }
-
-    @Test
-    public void testAppendReader_WithCharset() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Begin".getBytes(UTF_16));
-
-        try (Reader reader = new StringReader(" Continue")) {
-            long charsAppended = IOUtil.append(reader, UTF_16, targetFile);
-
-            String result = IOUtil.readAllToString(targetFile, UTF_16);
-            assertEquals("Begin﻿ Continue", result);
-            assertEquals(" Continue".length(), charsAppended);
-        }
-    }
-
-    @Test
-    public void testAppendReader_WithOffsetAndCount() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Pre".getBytes(UTF_8));
-
-        try (Reader reader = new StringReader("0123456789")) {
-            long charsAppended = IOUtil.append(reader, 4, 3, targetFile);
-
-            String result = IOUtil.readAllToString(targetFile, UTF_8);
-            assertEquals("Pre456", result);
-            assertEquals(3, charsAppended);
-        }
-    }
-
-    @Test
-    public void testAppendReader_WithOffsetCountAndCharset() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Data".getBytes(UTF_8));
-
-        try (Reader reader = new StringReader("ABCDEFGH")) {
-            long charsAppended = IOUtil.append(reader, 1, 4, UTF_8, targetFile);
-
-            String result = IOUtil.readAllToString(targetFile, UTF_8);
-            assertEquals("DataBCDE", result);
-            assertEquals(4, charsAppended);
-        }
-    }
-
-    @Test
-    public void testAppendReader_EmptyReader() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Content".getBytes(UTF_8));
-
-        try (Reader reader = new StringReader("")) {
-            long charsAppended = IOUtil.append(reader, targetFile);
-
-            String result = IOUtil.readAllToString(targetFile, UTF_8);
-            assertEquals("Content", result);
-            assertEquals(0, charsAppended);
-        }
-    }
-
-    // ===== append(byte[], int, int, File) =====
-
-    @Test
-    public void testAppend_byteArrayOffsetCountFile() throws Exception {
-        File target = Files.createTempFile(tempFolder, "append-bytes", ".bin").toFile();
-        byte[] data = "Hello World!".getBytes(UTF_8);
-        IOUtil.append(data, 6, 5, target);
-        byte[] result = IOUtil.readAllBytes(target);
-        assertEquals("World", new String(result, UTF_8));
-    }
-
-    @Test
-    public void testAppend_byteArrayOffsetCountFile_appendsToExisting() throws Exception {
-        File target = Files.createTempFile(tempFolder, "append-bytes-existing", ".bin").toFile();
-        Files.write(target.toPath(), "Hello ".getBytes(UTF_8));
-        byte[] data = "World!".getBytes(UTF_8);
-        IOUtil.append(data, 0, data.length, target);
-        byte[] result = IOUtil.readAllBytes(target);
-        assertEquals("Hello World!", new String(result, UTF_8));
-    }
-
-    @Test
-    public void testAppend_byteArrayOffsetCountFile_zeroCount() throws Exception {
-        File target = Files.createTempFile(tempFolder, "append-bytes-zero", ".bin").toFile();
-        byte[] data = "Hello".getBytes(UTF_8);
-        IOUtil.append(data, 0, 0, target);
-        assertEquals(0, target.length());
-    }
-
-    @Test
-    public void testAppendLine_String() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Line 1\n".getBytes(UTF_8));
-
-        IOUtil.appendLine("Line 2", targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertTrue(result.contains("Line 1"));
-        assertTrue(result.contains("Line 2"));
-    }
-
-    @Test
-    public void testAppendLine_WithCharset() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "First\n".getBytes(UTF_16));
-
-        IOUtil.appendLine("Second", UTF_16, targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_16);
-        assertTrue(result.contains("First"));
-        assertTrue(result.contains("Second"));
-    }
-
-    @Test
-    public void testAppendLine_NullObject() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Start\n".getBytes(UTF_8));
-
-        IOUtil.appendLine(null, targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertTrue(result.contains("Start"));
-    }
-
-    @Test
-    public void testAppendLine_Integer() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Number:\n".getBytes(UTF_8));
-
-        IOUtil.appendLine(42, targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertTrue(result.contains("Number:"));
-        assertTrue(result.contains("42"));
-    }
-
-    @Test
-    public void testAppendLines_StringList() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Header\n".getBytes(UTF_8));
-
-        java.util.List<String> lines = java.util.Arrays.asList("Line A", "Line B", "Line C");
-        IOUtil.appendLines(lines, targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertTrue(result.contains("Header"));
-        assertTrue(result.contains("Line A"));
-        assertTrue(result.contains("Line B"));
-        assertTrue(result.contains("Line C"));
-    }
-
-    @Test
-    public void testAppendLines_WithCharset() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Title\n".getBytes(UTF_16));
-
-        java.util.List<String> lines = java.util.Arrays.asList("Data 1", "Data 2");
-        IOUtil.appendLines(lines, UTF_16, targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_16);
-        assertTrue(result.contains("Title"));
-        assertTrue(result.contains("Data 1"));
-        assertTrue(result.contains("Data 2"));
-    }
-
-    @Test
-    public void testAppendLines_EmptyList() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Existing".getBytes(UTF_8));
-
-        java.util.List<String> lines = java.util.Collections.emptyList();
-        IOUtil.appendLines(lines, targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertEquals("Existing", result);
-    }
-
-    @Test
-    public void testAppendLines_MixedTypes() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Start\n".getBytes(UTF_8));
-
-        java.util.List<Object> lines = java.util.Arrays.asList("Text", 123, true, null);
-        IOUtil.appendLines(lines, targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertTrue(result.contains("Start"));
-        assertTrue(result.contains("Text"));
-        assertTrue(result.contains("123"));
-        assertTrue(result.contains("true"));
     }
 
     @Test
@@ -3708,187 +690,6 @@ public class IOUtilTest extends TestBase {
 
             assertEquals(largeData.length, transferred);
             assertArrayEquals(largeData, Files.readAllBytes(targetFile.toPath()));
-        }
-    }
-
-    @Test
-    public void testSkip_InputStream() throws IOException {
-        byte[] data = "0123456789ABCDEF".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            long skipped = IOUtil.skip(is, 5);
-
-            assertEquals(5, skipped);
-            assertEquals('5', is.read());
-        }
-    }
-
-    @Test
-    public void testSkip_InputStreamZeroBytes() throws IOException {
-        byte[] data = "Test".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            long skipped = IOUtil.skip(is, 0);
-
-            assertEquals(0, skipped);
-            assertEquals('T', is.read());
-        }
-    }
-
-    @Test
-    public void testSkip_InputStreamBeyondEnd() throws IOException {
-        byte[] data = "Short".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            long skipped = IOUtil.skip(is, 100);
-
-            assertEquals(5, skipped);
-            assertEquals(-1, is.read());
-        }
-    }
-
-    @Test
-    public void testSkip_InputStreamBreaksOnZeroProgress() throws IOException {
-        assertEquals(0, IOUtil.skip(new ZeroThenEofInputStream(), 10));
-    }
-
-    @Test
-    public void testSkip_InputStreamNegativeBytes() {
-        try (InputStream is = new ByteArrayInputStream("Test".getBytes(UTF_8))) {
-            assertThrows(IllegalArgumentException.class, () -> {
-                IOUtil.skip(is, -5);
-            });
-        } catch (IOException e) {
-        }
-    }
-
-    @Test
-    public void testSkip_Reader() throws IOException {
-        try (Reader reader = new StringReader("0123456789ABCDEF")) {
-            long skipped = IOUtil.skip(reader, 7);
-
-            assertEquals(7, skipped);
-            assertEquals('7', reader.read());
-        }
-    }
-
-    @Test
-    public void testSkip_ReaderZeroChars() throws IOException {
-        try (Reader reader = new StringReader("Test")) {
-            long skipped = IOUtil.skip(reader, 0);
-
-            assertEquals(0, skipped);
-            assertEquals('T', reader.read());
-        }
-    }
-
-    @Test
-    public void testSkip_ReaderBeyondEnd() throws IOException {
-        try (Reader reader = new StringReader("Small")) {
-            long skipped = IOUtil.skip(reader, 50);
-
-            assertEquals(5, skipped);
-            assertEquals(-1, reader.read());
-        }
-    }
-
-    @Test
-    public void testSkip_ReaderBreaksOnZeroProgress() throws IOException {
-        assertEquals(0, IOUtil.skip(new ZeroThenEofReader(), 10));
-    }
-
-    @Test
-    public void testSkip_ReaderNegativeChars() {
-        try (Reader reader = new StringReader("Test")) {
-            assertThrows(IllegalArgumentException.class, () -> {
-                IOUtil.skip(reader, -3);
-            });
-        } catch (IOException e) {
-        }
-    }
-
-    @Test
-    public void testSkip_InputStreamLargeSkip() throws IOException {
-        byte[] largeData = new byte[50000];
-        try (InputStream is = new ByteArrayInputStream(largeData)) {
-            long skipped = IOUtil.skip(is, 30000);
-
-            assertEquals(30000, skipped);
-        }
-    }
-
-    @Test
-    public void testSkipFully_InputStream() throws IOException {
-        byte[] data = "0123456789ABCDEF".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            IOUtil.skipFully(is, 8);
-
-            assertEquals('8', is.read());
-        }
-    }
-
-    @Test
-    public void testSkipFully_InputStreamExactLength() throws IOException {
-        byte[] data = "12345".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            IOUtil.skipFully(is, 5);
-
-            assertEquals(-1, is.read());
-        }
-    }
-
-    @Test
-    public void testSkipFully_InputStreamBeyondEnd() {
-        byte[] data = "Short".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            assertThrows(IOException.class, () -> {
-                IOUtil.skipFully(is, 10);
-            });
-        } catch (IOException e) {
-        }
-    }
-
-    @Test
-    public void testSkipFully_InputStreamZero() throws IOException {
-        byte[] data = "Test".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            IOUtil.skipFully(is, 0);
-
-            assertEquals('T', is.read());
-        }
-    }
-
-    @Test
-    public void testSkipFully_Reader() throws IOException {
-        try (Reader reader = new StringReader("0123456789")) {
-            IOUtil.skipFully(reader, 6);
-
-            assertEquals('6', reader.read());
-        }
-    }
-
-    @Test
-    public void testSkipFully_ReaderExactLength() throws IOException {
-        try (Reader reader = new StringReader("ABC")) {
-            IOUtil.skipFully(reader, 3);
-
-            assertEquals(-1, reader.read());
-        }
-    }
-
-    @Test
-    public void testSkipFully_ReaderBeyondEnd() {
-        try (Reader reader = new StringReader("Tiny")) {
-            assertThrows(IOException.class, () -> {
-                IOUtil.skipFully(reader, 20);
-            });
-        } catch (IOException e) {
-        }
-    }
-
-    @Test
-    public void testSkipFully_ReaderZero() throws IOException {
-        try (Reader reader = new StringReader("Data")) {
-            IOUtil.skipFully(reader, 0);
-
-            assertEquals('D', reader.read());
         }
     }
 
@@ -3973,9 +774,25 @@ public class IOUtilTest extends TestBase {
     public void testMap_NonexistentFile() {
         File nonexistent = new File(tempFolder.toFile(), "nonexistent.bin");
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            IOUtil.map(nonexistent);
-        });
+        // A missing source is a FileNotFoundException wrapped in UncheckedIOException, per the class contract -
+        // and the whole map(..) family agrees on that, whichever overload is called.
+        assertThrows(UncheckedIOException.class, () -> IOUtil.map(nonexistent));
+        assertThrows(UncheckedIOException.class, () -> IOUtil.map(nonexistent, java.nio.channels.FileChannel.MapMode.READ_ONLY));
+        assertThrows(UncheckedIOException.class, () -> IOUtil.map(nonexistent, java.nio.channels.FileChannel.MapMode.READ_ONLY, 0, 4));
+
+        // The whole-file overloads never create the file, not even for READ_WRITE: there would be nothing to map.
+        assertThrows(UncheckedIOException.class, () -> IOUtil.map(nonexistent, java.nio.channels.FileChannel.MapMode.READ_WRITE));
+        assertFalse(nonexistent.exists());
+
+        // Only the explicitly-sized overload creates and extends a missing file, as its javadoc promises.
+        File created = new File(tempFolder.toFile(), "created-by-map.bin");
+        unmap(IOUtil.map(created, java.nio.channels.FileChannel.MapMode.READ_WRITE, 0, 8));
+        assertTrue(created.exists());
+        assertEquals(8, created.length());
+
+        // A null argument is still a bad argument, not an I/O failure.
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.map(null));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.map(nonexistent, null));
     }
 
     @Test
@@ -3995,828 +812,10 @@ public class IOUtilTest extends TestBase {
         unmap(buffer);
     }
 
-    static Stream<Arguments> simplifyPathCases() {
-        return Stream.of(Arguments.of("/foo/bar/baz", "/foo/bar/baz"), Arguments.of("/foo/./bar", "/foo/bar"), Arguments.of("/foo/bar/../baz", "/foo/baz"),
-                Arguments.of("/foo/bar/", "/foo/bar"), Arguments.of("/", "/"), Arguments.of(".", "."), Arguments.of("foo/bar/baz", "foo/bar/baz"),
-                Arguments.of("foo/./bar", "foo/bar"), Arguments.of("foo/bar/../baz", "foo/baz"), Arguments.of("..", ".."), Arguments.of("/../foo", "/foo"),
-                Arguments.of("C:\\foo\\bar\\..\\baz", "C:/foo/baz"), Arguments.of("/foo\\bar/baz", "/foo/bar/baz"), Arguments.of("/a/./b/../../c/", "/c"),
-                Arguments.of("/foo/bar/../../baz", "/baz"), Arguments.of("/foo//bar///baz", "/foo/bar/baz"), Arguments.of("", "."));
-    }
-
     @ParameterizedTest(name = "simplifyPath({0}) -> {1}")
     @MethodSource("simplifyPathCases")
     public void testSimplifyPath(final String input, final String expected) {
         assertEquals(expected, IOUtil.simplifyPath(input));
-    }
-
-    @Test
-    public void testGetFileExtension_FromFile() {
-        File file = new File("test.txt");
-        String ext = IOUtil.getFileExtension(file);
-        assertEquals("txt", ext);
-    }
-
-    @Test
-    public void testGetFileExtension_FromFileName() {
-        String ext = IOUtil.getFileExtension("document.pdf");
-        assertEquals("pdf", ext);
-    }
-
-    @Test
-    public void testGetFileExtension_NoExtension() {
-        String ext = IOUtil.getFileExtension("README");
-        assertEquals("", ext);
-    }
-
-    @Test
-    public void testGetFileExtension_DotFile() {
-        String ext = IOUtil.getFileExtension(".gitignore");
-        assertEquals("gitignore", ext);
-    }
-
-    @Test
-    public void testGetFileExtension_PathWithExtension() {
-        String ext = IOUtil.getFileExtension("/path/to/file.java");
-        assertEquals("java", ext);
-    }
-
-    @Test
-    public void testGetFileExtension_OnlyDot() {
-        String ext = IOUtil.getFileExtension("file.");
-        assertEquals("", ext);
-    }
-
-    @Test
-    public void testGetFileExtension_MultipleExtensions() {
-        String ext = IOUtil.getFileExtension("archive.tar.gz");
-        assertEquals("gz", ext);
-    }
-
-    @Test
-    public void testGetFileExtension_NullFile() {
-        String ext = IOUtil.getFileExtension((File) null);
-        assertEquals(null, ext);
-    }
-
-    @Test
-    public void testGetFileExtension_NullFileName() {
-        String ext = IOUtil.getFileExtension((String) null);
-        assertEquals(null, ext);
-    }
-
-    @Test
-    public void testGetFileExtension_EmptyString() {
-        String ext = IOUtil.getFileExtension("");
-        assertEquals("", ext);
-    }
-
-    @Test
-    public void testGetNameWithoutExtension_FromFile() {
-        File file = new File("document.txt");
-        String name = IOUtil.getNameWithoutExtension(file);
-        assertEquals("document", name);
-    }
-
-    @Test
-    public void testGetNameWithoutExtension_FromFileName() {
-        String name = IOUtil.getNameWithoutExtension("image.png");
-        assertEquals("image", name);
-    }
-
-    @Test
-    public void testGetNameWithoutExtension_NoExtension() {
-        String name = IOUtil.getNameWithoutExtension("LICENSE");
-        assertEquals("LICENSE", name);
-    }
-
-    @Test
-    public void testGetNameWithoutExtension_DotFile() {
-        String name = IOUtil.getNameWithoutExtension(".hidden");
-        assertEquals("", name);
-    }
-
-    @Test
-    public void testGetNameWithoutExtension_PathWithExtension() {
-        String name = IOUtil.getNameWithoutExtension("/usr/local/bin/script.sh");
-        assertEquals("/usr/local/bin/script", name);
-    }
-
-    @Test
-    public void testGetNameWithoutExtension_OnlyDot() {
-        String name = IOUtil.getNameWithoutExtension("name.");
-        assertEquals("name", name);
-    }
-
-    @Test
-    public void testGetNameWithoutExtension_WithPath() {
-        File file = new File("/tmp/test.log");
-        String name = IOUtil.getNameWithoutExtension(file);
-        assertEquals("test", name);
-    }
-
-    @Test
-    public void testGetNameWithoutExtension_MultipleExtensions() {
-        String name = IOUtil.getNameWithoutExtension("backup.tar.gz");
-        assertEquals("backup.tar", name);
-    }
-
-    @Test
-    public void testGetNameWithoutExtension_NullFile() {
-        String name = IOUtil.getNameWithoutExtension((File) null);
-        assertEquals(null, name);
-    }
-
-    @Test
-    public void testGetNameWithoutExtension_NullFileName() {
-        String name = IOUtil.getNameWithoutExtension((String) null);
-        assertEquals(null, name);
-    }
-
-    @Test
-    public void testGetNameWithoutExtension_EmptyString() {
-        String name = IOUtil.getNameWithoutExtension("");
-        assertEquals("", name);
-    }
-
-    @Test
-    public void testNewAppendableWriter_WithStringBuilder() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.newAppendableWriter(sb);
-
-        writer.write("Hello");
-        writer.write(" ");
-        writer.write("World");
-        writer.flush();
-
-        assertEquals("Hello World", sb.toString());
-    }
-
-    @Test
-    public void testNewAppendableWriter_WithStringBuffer() throws IOException {
-        StringBuffer sb = new StringBuffer();
-        Writer writer = IOUtil.newAppendableWriter(sb);
-
-        writer.write("Test");
-        writer.flush();
-
-        assertEquals("Test", sb.toString());
-    }
-
-    @Test
-    public void testNewAppendableWriter_MultipleWrites() throws IOException {
-        StringBuilder sb = new StringBuilder();
-        Writer writer = IOUtil.newAppendableWriter(sb);
-
-        for (int i = 0; i < 5; i++) {
-            writer.write("Line" + i + "\n");
-        }
-        writer.flush();
-
-        assertTrue(sb.toString().contains("Line0"));
-        assertTrue(sb.toString().contains("Line4"));
-    }
-
-    @Test
-    public void testNewAppendableWriter_NullAppendable() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            IOUtil.newAppendableWriter(null);
-        });
-    }
-
-    @Test
-    public void testNewStringWriter_Default() {
-        StringWriter sw = IOUtil.newStringWriter();
-        assertNotNull(sw);
-        sw.write("test");
-        assertEquals("test", sw.toString());
-    }
-
-    @Test
-    public void testNewStringWriter_WithInitialSize() {
-        StringWriter sw = IOUtil.newStringWriter(100);
-        assertNotNull(sw);
-        sw.write("test content");
-        assertEquals("test content", sw.toString());
-    }
-
-    @Test
-    public void testNewStringWriter_WithStringBuilder() {
-        StringBuilder sb = new StringBuilder("initial");
-        StringWriter sw = IOUtil.newStringWriter(sb);
-        assertNotNull(sw);
-        sw.write(" added");
-        assertEquals("initial added", sw.toString());
-    }
-
-    @Test
-    public void testNewStringWriter_MultipleWrites() {
-        StringWriter sw = IOUtil.newStringWriter();
-        sw.write("Hello");
-        sw.write(" ");
-        sw.write("World");
-        assertEquals("Hello World", sw.toString());
-    }
-
-    @Test
-    public void testNewByteArrayOutputStream_Default() {
-        ByteArrayOutputStream baos = IOUtil.newByteArrayOutputStream();
-        assertNotNull(baos);
-        baos.write(65);
-        assertEquals(1, baos.size());
-    }
-
-    @Test
-    public void testNewByteArrayOutputStream_WithInitCapacity() {
-        ByteArrayOutputStream baos = IOUtil.newByteArrayOutputStream(256);
-        assertNotNull(baos);
-        byte[] data = "test data".getBytes(UTF_8);
-        baos.write(data, 0, data.length);
-        assertEquals(9, baos.size());
-    }
-
-    @Test
-    public void testNewByteArrayOutputStream_WriteBytes() throws Exception {
-        ByteArrayOutputStream baos = IOUtil.newByteArrayOutputStream();
-        byte[] testData = TEST_CONTENT.getBytes(UTF_8);
-        baos.write(testData);
-        assertArrayEquals(testData, baos.toByteArray());
-    }
-
-    @Test
-    public void testNewFileInputStream_WithFile() throws Exception {
-        try (FileInputStream fis = IOUtil.newFileInputStream(tempFile)) {
-            assertNotNull(fis);
-            byte[] buffer = new byte[1024];
-            int bytesRead = fis.read(buffer);
-            assertTrue(bytesRead > 0);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
-        }
-    }
-
-    @Test
-    public void testNewFileInputStream_WithFileName() throws Exception {
-        try (FileInputStream fis = IOUtil.newFileInputStream(tempFile.getAbsolutePath())) {
-            assertNotNull(fis);
-            byte[] buffer = new byte[1024];
-            int bytesRead = fis.read(buffer);
-            assertTrue(bytesRead > 0);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
-        }
-    }
-
-    @Test
-    public void testNewFileInputStream_NonExistentFile() {
-        File nonExistent = new File(tempFolder.toFile(), "nonexistent.txt");
-        assertThrows(UncheckedIOException.class, () -> IOUtil.newFileInputStream(nonExistent));
-    }
-
-    @Test
-    public void testNewFileInputStream_NonExistentFileName() {
-        assertThrows(UncheckedIOException.class, () -> IOUtil.newFileInputStream(tempFolder.resolve("nonexistent.txt").toString()));
-    }
-
-    @Test
-    public void testNewFileOutputStream_WithFile() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = IOUtil.newFileOutputStream(outputFile)) {
-            assertNotNull(fos);
-            fos.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-        String content = new String(Files.readAllBytes(outputFile.toPath()), UTF_8);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testNewFileOutputStream_WithFileAppendFalse() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        Files.write(outputFile.toPath(), "existing".getBytes(UTF_8));
-
-        try (FileOutputStream fos = IOUtil.newFileOutputStream(outputFile, false)) {
-            fos.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-        String content = new String(Files.readAllBytes(outputFile.toPath()), UTF_8);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testNewFileOutputStream_WithFileAppendTrue() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        Files.write(outputFile.toPath(), "existing".getBytes(UTF_8));
-
-        try (FileOutputStream fos = IOUtil.newFileOutputStream(outputFile, true)) {
-            fos.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-        String content = new String(Files.readAllBytes(outputFile.toPath()), UTF_8);
-        assertEquals("existing" + TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testNewFileOutputStream_WithFileName() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (FileOutputStream fos = IOUtil.newFileOutputStream(outputFile.getAbsolutePath())) {
-            assertNotNull(fos);
-            fos.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-        String content = new String(Files.readAllBytes(outputFile.toPath()), UTF_8);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testNewFileOutputStream_InvalidDirectory() throws IOException {
-        // Block the path: parent is a regular file, so mkdirs cannot succeed there.
-        File blocker = Files.createTempFile(tempFolder, "blocker", "").toFile();
-        File invalidFile = new File(blocker, "subdir/file.txt");
-        assertThrows(UncheckedIOException.class, () -> IOUtil.newFileOutputStream(invalidFile));
-    }
-
-    @Test
-    public void testNewFileReader_WithFile() throws Exception {
-        try (FileReader fr = IOUtil.newFileReader(tempFile)) {
-            assertNotNull(fr);
-            char[] buffer = new char[1024];
-            int charsRead = fr.read(buffer);
-            assertTrue(charsRead > 0);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, charsRead));
-        }
-    }
-
-    @Test
-    public void testNewFileReader_WithFileAndCharset() throws Exception {
-        try (FileReader fr = IOUtil.newFileReader(tempFile, UTF_8)) {
-            assertNotNull(fr);
-            char[] buffer = new char[1024];
-            int charsRead = fr.read(buffer);
-            assertTrue(charsRead > 0);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, charsRead));
-        }
-    }
-
-    @Test
-    public void testNewFileReader_NonExistentFile() {
-        File nonExistent = new File(tempFolder.toFile(), "nonexistent.txt");
-        assertThrows(UncheckedIOException.class, () -> IOUtil.newFileReader(nonExistent));
-    }
-
-    @Test
-    public void testNewFileReader_WithDifferentCharset() throws Exception {
-        File isoFile = Files.createTempFile(tempFolder, "iso", ".txt").toFile();
-        Files.write(isoFile.toPath(), "ISO content".getBytes(ISO_8859_1));
-
-        try (FileReader fr = IOUtil.newFileReader(isoFile, ISO_8859_1)) {
-            assertNotNull(fr);
-            char[] buffer = new char[1024];
-            int charsRead = fr.read(buffer);
-            assertEquals("ISO content", new String(buffer, 0, charsRead));
-        }
-    }
-
-    @Test
-    public void testNewFileWriter_WithFile() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (java.io.FileWriter fw = IOUtil.newFileWriter(outputFile)) {
-            assertNotNull(fw);
-            fw.write(TEST_CONTENT);
-        }
-        String content = new String(Files.readAllBytes(outputFile.toPath()), UTF_8);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testNewFileWriter_WithFileAndCharset() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (java.io.FileWriter fw = IOUtil.newFileWriter(outputFile, UTF_8)) {
-            assertNotNull(fw);
-            fw.write(UNICODE_CONTENT);
-        }
-        String content = new String(Files.readAllBytes(outputFile.toPath()), UTF_8);
-        assertEquals(UNICODE_CONTENT, content);
-    }
-
-    @Test
-    public void testNewFileWriter_WithFileCharsetAndAppend() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        Files.write(outputFile.toPath(), "existing".getBytes(UTF_8));
-
-        try (java.io.FileWriter fw = IOUtil.newFileWriter(outputFile, UTF_8, true)) {
-            fw.write(TEST_CONTENT);
-        }
-        String content = new String(Files.readAllBytes(outputFile.toPath()), UTF_8);
-        assertEquals("existing" + TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testNewFileWriter_WithFileCharsetNoAppend() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        Files.write(outputFile.toPath(), "existing".getBytes(UTF_8));
-
-        try (java.io.FileWriter fw = IOUtil.newFileWriter(outputFile, UTF_8, false)) {
-            fw.write(TEST_CONTENT);
-        }
-        String content = new String(Files.readAllBytes(outputFile.toPath()), UTF_8);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testNewFileWriter_InvalidDirectory() throws IOException {
-        File blocker = Files.createTempFile(tempFolder, "blocker", "").toFile();
-        File invalidFile = new File(blocker, "subdir/file.txt");
-        assertThrows(UncheckedIOException.class, () -> IOUtil.newFileWriter(invalidFile));
-    }
-
-    @Test
-    public void testNewInputStreamReader_WithInputStream() throws Exception {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8));
-             java.io.InputStreamReader isr = IOUtil.newInputStreamReader(is)) {
-            assertNotNull(isr);
-            char[] buffer = new char[1024];
-            int charsRead = isr.read(buffer);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, charsRead));
-        }
-    }
-
-    @Test
-    public void testNewInputStreamReader_WithInputStreamAndCharset() throws Exception {
-        try (InputStream is = new ByteArrayInputStream(UNICODE_CONTENT.getBytes(UTF_8));
-             java.io.InputStreamReader isr = IOUtil.newInputStreamReader(is, UTF_8)) {
-            assertNotNull(isr);
-            char[] buffer = new char[1024];
-            int charsRead = isr.read(buffer);
-            assertEquals(UNICODE_CONTENT, new String(buffer, 0, charsRead));
-        }
-    }
-
-    @Test
-    public void testNewInputStreamReader_WithUTF16() throws Exception {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_16));
-             java.io.InputStreamReader isr = IOUtil.newInputStreamReader(is, UTF_16)) {
-            assertNotNull(isr);
-            char[] buffer = new char[1024];
-            int charsRead = isr.read(buffer);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, charsRead));
-        }
-    }
-
-    @Test
-    public void testNewOutputStreamWriter_WithOutputStream() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.io.OutputStreamWriter osw = IOUtil.newOutputStreamWriter(baos)) {
-            assertNotNull(osw);
-            osw.write(TEST_CONTENT);
-            osw.flush();
-        }
-        assertEquals(TEST_CONTENT, baos.toString(UTF_8.name()));
-    }
-
-    @Test
-    public void testNewOutputStreamWriter_WithOutputStreamAndCharset() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.io.OutputStreamWriter osw = IOUtil.newOutputStreamWriter(baos, UTF_8)) {
-            assertNotNull(osw);
-            osw.write(UNICODE_CONTENT);
-            osw.flush();
-        }
-        assertEquals(UNICODE_CONTENT, baos.toString(UTF_8.name()));
-    }
-
-    @Test
-    public void testNewOutputStreamWriter_WithUTF16() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.io.OutputStreamWriter osw = IOUtil.newOutputStreamWriter(baos, UTF_16)) {
-            assertNotNull(osw);
-            osw.write(TEST_CONTENT);
-            osw.flush();
-        }
-        assertEquals(TEST_CONTENT, baos.toString(UTF_16.name()));
-    }
-
-    @Test
-    public void testNewBufferedInputStream_WithInputStream() throws Exception {
-        try (java.io.BufferedInputStream bis = IOUtil.newBufferedInputStream(new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8)))) {
-            assertNotNull(bis);
-            byte[] buffer = new byte[1024];
-            int bytesRead = bis.read(buffer);
-            assertTrue(bytesRead > 0);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
-        }
-    }
-
-    @Test
-    public void testNewBufferedInputStream_WithInputStream_AlreadyBuffered() throws Exception {
-        java.io.BufferedInputStream original = new java.io.BufferedInputStream(new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8)));
-        java.io.BufferedInputStream result = IOUtil.newBufferedInputStream(original);
-        assertNotNull(result);
-        result.close();
-    }
-
-    @Test
-    public void testNewBufferedInputStream_WithFile() throws Exception {
-        try (java.io.BufferedInputStream bis = IOUtil.newBufferedInputStream(tempFile)) {
-            assertNotNull(bis);
-            byte[] buffer = new byte[1024];
-            int bytesRead = bis.read(buffer);
-            assertTrue(bytesRead > 0);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
-        }
-    }
-
-    @Test
-    public void testNewBufferedInputStream_WithFileAndSize() throws Exception {
-        try (java.io.BufferedInputStream bis = IOUtil.newBufferedInputStream(tempFile, 4096)) {
-            assertNotNull(bis);
-            byte[] buffer = new byte[1024];
-            int bytesRead = bis.read(buffer);
-            assertTrue(bytesRead > 0);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
-        }
-    }
-
-    @Test
-    public void testNewBufferedInputStream_NonExistentFile() {
-        File nonExistent = new File(tempFolder.toFile(), "nonexistent.txt");
-        assertThrows(UncheckedIOException.class, () -> IOUtil.newBufferedInputStream(nonExistent));
-    }
-
-    @Test
-    public void testNewBufferedInputStream_LargeBuffer() throws Exception {
-        try (java.io.BufferedInputStream bis = IOUtil.newBufferedInputStream(largeFile, 16384)) {
-            assertNotNull(bis);
-            byte[] buffer = new byte[1024];
-            int bytesRead = bis.read(buffer);
-            assertTrue(bytesRead > 0);
-        }
-    }
-
-    @Test
-    public void testNewBufferedReader_WithReader() throws Exception {
-        try (java.io.BufferedReader br = IOUtil.newBufferedReader(new StringReader(TEST_CONTENT))) {
-            assertNotNull(br);
-            String line = br.readLine();
-            assertEquals(TEST_CONTENT, line);
-        }
-    }
-
-    @Test
-    public void testNewBufferedReader_WithReader_AlreadyBuffered() throws Exception {
-        java.io.BufferedReader original = new java.io.BufferedReader(new StringReader(TEST_CONTENT));
-        java.io.BufferedReader result = IOUtil.newBufferedReader(original);
-        assertNotNull(result);
-        result.close();
-    }
-
-    @Test
-    public void testNewBufferedReader_WithFile() throws Exception {
-        try (java.io.BufferedReader br = IOUtil.newBufferedReader(tempFile)) {
-            assertNotNull(br);
-            String line = br.readLine();
-            assertEquals(TEST_CONTENT, line);
-        }
-    }
-
-    @Test
-    public void testNewBufferedReader_WithFileAndCharset() throws Exception {
-        try (java.io.BufferedReader br = IOUtil.newBufferedReader(tempFile, UTF_8)) {
-            assertNotNull(br);
-            String line = br.readLine();
-            assertEquals(TEST_CONTENT, line);
-        }
-    }
-
-    @Test
-    public void testNewBufferedReader_WithPath() throws Exception {
-        try (java.io.BufferedReader br = IOUtil.newBufferedReader(tempFile.toPath())) {
-            assertNotNull(br);
-            String line = br.readLine();
-            assertEquals(TEST_CONTENT, line);
-        }
-    }
-
-    @Test
-    public void testNewBufferedReader_WithPathAndCharset() throws Exception {
-        try (java.io.BufferedReader br = IOUtil.newBufferedReader(tempFile.toPath(), UTF_8)) {
-            assertNotNull(br);
-            String line = br.readLine();
-            assertEquals(TEST_CONTENT, line);
-        }
-    }
-
-    @Test
-    public void testNewBufferedReader_WithInputStream() throws Exception {
-        try (InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8));
-             java.io.BufferedReader br = IOUtil.newBufferedReader(is)) {
-            assertNotNull(br);
-            String line = br.readLine();
-            assertEquals(TEST_CONTENT, line);
-        }
-    }
-
-    @Test
-    public void testNewBufferedReader_WithInputStreamAndCharset() throws Exception {
-        try (InputStream is = new ByteArrayInputStream(UNICODE_CONTENT.getBytes(UTF_8));
-             java.io.BufferedReader br = IOUtil.newBufferedReader(is, UTF_8)) {
-            assertNotNull(br);
-            String line = br.readLine();
-            assertEquals(UNICODE_CONTENT, line);
-        }
-    }
-
-    @Test
-    public void testNewBufferedReader_NonExistentFile() {
-        File nonExistent = new File(tempFolder.toFile(), "nonexistent.txt");
-        assertThrows(UncheckedIOException.class, () -> IOUtil.newBufferedReader(nonExistent));
-    }
-
-    @Test
-    public void testNewBufferedReader_MultipleLines() throws Exception {
-        File multilineFile = Files.createTempFile(tempFolder, "multiline", ".txt").toFile();
-        Files.write(multilineFile.toPath(), MULTILINE_CONTENT.getBytes(UTF_8));
-
-        try (java.io.BufferedReader br = IOUtil.newBufferedReader(multilineFile)) {
-            assertEquals("Line 1", br.readLine());
-            assertEquals("Line 2", br.readLine());
-            assertEquals("Line 3", br.readLine());
-        }
-    }
-
-    @Test
-    public void testNewBufferedOutputStream_WithOutputStream() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.io.BufferedOutputStream bos = IOUtil.newBufferedOutputStream(baos)) {
-            assertNotNull(bos);
-            bos.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-        assertEquals(TEST_CONTENT, baos.toString(UTF_8.name()));
-    }
-
-    @Test
-    public void testNewBufferedOutputStream_WithOutputStream_AlreadyBuffered() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        java.io.BufferedOutputStream original = new java.io.BufferedOutputStream(baos);
-        java.io.BufferedOutputStream result = IOUtil.newBufferedOutputStream(original);
-        assertNotNull(result);
-        result.close();
-    }
-
-    @Test
-    public void testNewBufferedOutputStream_WithFile() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (java.io.BufferedOutputStream bos = IOUtil.newBufferedOutputStream(outputFile)) {
-            assertNotNull(bos);
-            bos.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-        String content = new String(Files.readAllBytes(outputFile.toPath()), UTF_8);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testNewBufferedOutputStream_WithFileAndSize() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (java.io.BufferedOutputStream bos = IOUtil.newBufferedOutputStream(outputFile, 4096)) {
-            assertNotNull(bos);
-            bos.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-        String content = new String(Files.readAllBytes(outputFile.toPath()), UTF_8);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testNewBufferedOutputStream_InvalidDirectory() throws IOException {
-        File blocker = Files.createTempFile(tempFolder, "blocker", "").toFile();
-        File invalidFile = new File(blocker, "subdir/file.txt");
-        assertThrows(UncheckedIOException.class, () -> IOUtil.newBufferedOutputStream(invalidFile));
-    }
-
-    @Test
-    public void testNewBufferedOutputStream_LargeBuffer() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (java.io.BufferedOutputStream bos = IOUtil.newBufferedOutputStream(outputFile, 16384)) {
-            assertNotNull(bos);
-            byte[] largeData = new byte[8192];
-            java.util.Arrays.fill(largeData, (byte) 'X');
-            bos.write(largeData);
-        }
-        assertEquals(8192, Files.size(outputFile.toPath()));
-    }
-
-    @Test
-    public void testNewBufferedWriter_WithWriter() throws Exception {
-        java.io.StringWriter sw = new java.io.StringWriter();
-        try (java.io.BufferedWriter bw = IOUtil.newBufferedWriter(sw)) {
-            assertNotNull(bw);
-            bw.write(TEST_CONTENT);
-        }
-        assertEquals(TEST_CONTENT, sw.toString());
-    }
-
-    @Test
-    public void testNewBufferedWriter_WithWriter_AlreadyBuffered() throws Exception {
-        java.io.StringWriter sw = new java.io.StringWriter();
-        java.io.BufferedWriter original = new java.io.BufferedWriter(sw);
-        java.io.BufferedWriter result = IOUtil.newBufferedWriter(original);
-        assertNotNull(result);
-        result.close();
-    }
-
-    @Test
-    public void testNewBufferedWriter_WithFile() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (java.io.BufferedWriter bw = IOUtil.newBufferedWriter(outputFile)) {
-            assertNotNull(bw);
-            bw.write(TEST_CONTENT);
-        }
-        String content = new String(Files.readAllBytes(outputFile.toPath()), UTF_8);
-        assertEquals(TEST_CONTENT, content);
-    }
-
-    @Test
-    public void testNewBufferedWriter_WithFileAndCharset() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (java.io.BufferedWriter bw = IOUtil.newBufferedWriter(outputFile, UTF_8)) {
-            assertNotNull(bw);
-            bw.write(UNICODE_CONTENT);
-        }
-        String content = new String(Files.readAllBytes(outputFile.toPath()), UTF_8);
-        assertEquals(UNICODE_CONTENT, content);
-    }
-
-    @Test
-    public void testNewBufferedWriter_WithOutputStream() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.io.BufferedWriter bw = IOUtil.newBufferedWriter(baos)) {
-            assertNotNull(bw);
-            bw.write(TEST_CONTENT);
-            bw.flush();
-        }
-        assertEquals(TEST_CONTENT, baos.toString(UTF_8.name()));
-    }
-
-    @Test
-    public void testNewBufferedWriter_WithOutputStreamAndCharset() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.io.BufferedWriter bw = IOUtil.newBufferedWriter(baos, UTF_8)) {
-            assertNotNull(bw);
-            bw.write(UNICODE_CONTENT);
-            bw.flush();
-        }
-        assertEquals(UNICODE_CONTENT, baos.toString(UTF_8.name()));
-    }
-
-    @Test
-    public void testNewBufferedWriter_InvalidDirectory() throws IOException {
-        File blocker = Files.createTempFile(tempFolder, "blocker", "").toFile();
-        File invalidFile = new File(blocker, "subdir/file.txt");
-        assertThrows(UncheckedIOException.class, () -> IOUtil.newBufferedWriter(invalidFile));
-    }
-
-    @Test
-    public void testNewBufferedWriter_MultipleWrites() throws Exception {
-        File outputFile = Files.createTempFile(tempFolder, "output", ".txt").toFile();
-        try (java.io.BufferedWriter bw = IOUtil.newBufferedWriter(outputFile)) {
-            bw.write("Line 1");
-            bw.newLine();
-            bw.write("Line 2");
-            bw.newLine();
-            bw.write("Line 3");
-        }
-        String content = new String(Files.readAllBytes(outputFile.toPath()), UTF_8);
-        assertTrue(content.contains("Line 1"));
-        assertTrue(content.contains("Line 2"));
-        assertTrue(content.contains("Line 3"));
-    }
-
-    @Test
-    public void testNewLZ4BlockInputStream() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (LZ4BlockOutputStream lz4Out = IOUtil.newLZ4BlockOutputStream(baos)) {
-            lz4Out.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
-             LZ4BlockInputStream lz4In = IOUtil.newLZ4BlockInputStream(is)) {
-            assertNotNull(lz4In);
-            byte[] buffer = new byte[1024];
-            int bytesRead = lz4In.read(buffer);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
-        }
-    }
-
-    @Test
-    public void testNewLZ4BlockOutputStream() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (LZ4BlockOutputStream lz4Out = IOUtil.newLZ4BlockOutputStream(baos)) {
-            assertNotNull(lz4Out);
-            lz4Out.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-        assertTrue(baos.size() > 0);
-    }
-
-    @Test
-    public void testNewLZ4BlockOutputStream_WithBlockSize() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (LZ4BlockOutputStream lz4Out = IOUtil.newLZ4BlockOutputStream(baos, 4096)) {
-            assertNotNull(lz4Out);
-            lz4Out.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-        assertTrue(baos.size() > 0);
     }
 
     @Test
@@ -4835,42 +834,6 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testNewSnappyInputStream() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (SnappyOutputStream snappyOut = IOUtil.newSnappyOutputStream(baos)) {
-            snappyOut.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
-             SnappyInputStream snappyIn = IOUtil.newSnappyInputStream(is)) {
-            assertNotNull(snappyIn);
-            byte[] buffer = new byte[1024];
-            int bytesRead = snappyIn.read(buffer);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
-        }
-    }
-
-    @Test
-    public void testNewSnappyOutputStream() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (SnappyOutputStream snappyOut = IOUtil.newSnappyOutputStream(baos)) {
-            assertNotNull(snappyOut);
-            snappyOut.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-        assertTrue(baos.size() > 0);
-    }
-
-    @Test
-    public void testNewSnappyOutputStream_WithBufferSize() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (SnappyOutputStream snappyOut = IOUtil.newSnappyOutputStream(baos, 4096)) {
-            assertNotNull(snappyOut);
-            snappyOut.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-        assertTrue(baos.size() > 0);
-    }
-
-    @Test
     public void testSnappyCompressDecompress() throws Exception {
         java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
         try (SnappyOutputStream snappyOut = IOUtil.newSnappyOutputStream(baos, 8192)) {
@@ -4886,64 +849,6 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testNewGZIPInputStream() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.util.zip.GZIPOutputStream gzipOut = IOUtil.newGZIPOutputStream(baos)) {
-            gzipOut.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
-             java.util.zip.GZIPInputStream gzipIn = IOUtil.newGZIPInputStream(is)) {
-            assertNotNull(gzipIn);
-            byte[] buffer = new byte[1024];
-            int bytesRead = gzipIn.read(buffer);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
-        }
-    }
-
-    @Test
-    public void testNewGZIPInputStream_WithBufferSize() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.util.zip.GZIPOutputStream gzipOut = IOUtil.newGZIPOutputStream(baos)) {
-            gzipOut.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
-             java.util.zip.GZIPInputStream gzipIn = IOUtil.newGZIPInputStream(is, 4096)) {
-            assertNotNull(gzipIn);
-            byte[] buffer = new byte[1024];
-            int bytesRead = gzipIn.read(buffer);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
-        }
-    }
-
-    @Test
-    public void testNewGZIPInputStream_InvalidData() {
-        InputStream is = new ByteArrayInputStream("not gzip data".getBytes(UTF_8));
-        assertThrows(UncheckedIOException.class, () -> IOUtil.newGZIPInputStream(is));
-    }
-
-    @Test
-    public void testNewGZIPOutputStream() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.util.zip.GZIPOutputStream gzipOut = IOUtil.newGZIPOutputStream(baos)) {
-            assertNotNull(gzipOut);
-            gzipOut.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-        assertTrue(baos.size() > 0);
-    }
-
-    @Test
-    public void testNewGZIPOutputStream_WithBufferSize() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.util.zip.GZIPOutputStream gzipOut = IOUtil.newGZIPOutputStream(baos, 4096)) {
-            assertNotNull(gzipOut);
-            gzipOut.write(TEST_CONTENT.getBytes(UTF_8));
-        }
-        assertTrue(baos.size() > 0);
-    }
-
-    @Test
     public void testGZIPCompressDecompress() throws Exception {
         java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
         try (java.util.zip.GZIPOutputStream gzipOut = IOUtil.newGZIPOutputStream(baos, 8192)) {
@@ -4956,674 +861,6 @@ public class IOUtilTest extends TestBase {
             int bytesRead = gzipIn.read(buffer);
             assertEquals(MULTILINE_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
         }
-    }
-
-    @Test
-    public void testNewZipInputStream() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.util.zip.ZipOutputStream zipOut = IOUtil.newZipOutputStream(baos)) {
-            java.util.zip.ZipEntry entry = new java.util.zip.ZipEntry("test.txt");
-            zipOut.putNextEntry(entry);
-            zipOut.write(TEST_CONTENT.getBytes(UTF_8));
-            zipOut.closeEntry();
-        }
-
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
-             java.util.zip.ZipInputStream zipIn = IOUtil.newZipInputStream(is)) {
-            assertNotNull(zipIn);
-            java.util.zip.ZipEntry entry = zipIn.getNextEntry();
-            assertNotNull(entry);
-            assertEquals("test.txt", entry.getName());
-            byte[] buffer = new byte[1024];
-            int bytesRead = zipIn.read(buffer);
-            assertEquals(TEST_CONTENT, new String(buffer, 0, bytesRead, UTF_8));
-        }
-    }
-
-    @Test
-    public void testNewZipInputStream_WithCharset() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.util.zip.ZipOutputStream zipOut = IOUtil.newZipOutputStream(baos, UTF_8)) {
-            java.util.zip.ZipEntry entry = new java.util.zip.ZipEntry("test.txt");
-            zipOut.putNextEntry(entry);
-            zipOut.write(TEST_CONTENT.getBytes(UTF_8));
-            zipOut.closeEntry();
-        }
-
-        try (InputStream is = new ByteArrayInputStream(baos.toByteArray());
-             java.util.zip.ZipInputStream zipIn = IOUtil.newZipInputStream(is, UTF_8)) {
-            assertNotNull(zipIn);
-            java.util.zip.ZipEntry entry = zipIn.getNextEntry();
-            assertNotNull(entry);
-        }
-    }
-
-    @Test
-    public void testNewZipOutputStream() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.util.zip.ZipOutputStream zipOut = IOUtil.newZipOutputStream(baos)) {
-            assertNotNull(zipOut);
-            java.util.zip.ZipEntry entry = new java.util.zip.ZipEntry("file.txt");
-            zipOut.putNextEntry(entry);
-            zipOut.write(TEST_CONTENT.getBytes(UTF_8));
-            zipOut.closeEntry();
-        }
-        assertTrue(baos.size() > 0);
-    }
-
-    @Test
-    public void testNewZipOutputStream_WithCharset() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        try (java.util.zip.ZipOutputStream zipOut = IOUtil.newZipOutputStream(baos, UTF_8)) {
-            assertNotNull(zipOut);
-            java.util.zip.ZipEntry entry = new java.util.zip.ZipEntry("unicode.txt");
-            zipOut.putNextEntry(entry);
-            zipOut.write(UNICODE_CONTENT.getBytes(UTF_8));
-            zipOut.closeEntry();
-        }
-        assertTrue(baos.size() > 0);
-    }
-
-    @Test
-    public void testNewBrotliInputStream() throws IOException {
-        try (InputStream testInput = new ByteArrayInputStream(new byte[0]);
-             BrotliInputStream brotliIn = IOUtil.newBrotliInputStream(testInput)) {
-            assertNotNull(brotliIn);
-        }
-    }
-
-    @Test
-    public void testNewBrotliInputStream_NullInputStream() {
-        assertThrows(Exception.class, () -> {
-            IOUtil.newBrotliInputStream(null);
-        });
-    }
-
-    @Test
-    public void testClose_NullURLConnection() {
-        assertDoesNotThrow(() -> {
-            IOUtil.close((java.net.URLConnection) null);
-        });
-    }
-
-    @Test
-    public void testClose_NullAutoCloseable() {
-        assertDoesNotThrow(() -> {
-            IOUtil.close((AutoCloseable) null);
-        });
-    }
-
-    @Test
-    public void testClose_URLConnection() throws Exception {
-        assertDoesNotThrow(() -> {
-            File testFile = Files.createTempFile(tempFolder, "urltest", ".txt").toFile();
-            Files.write(testFile.toPath(), TEST_CONTENT.getBytes(UTF_8));
-
-            java.net.URL url = testFile.toURI().toURL();
-            java.net.URLConnection conn = url.openConnection();
-            conn.connect();
-
-            try (InputStream in = conn.getInputStream()) {
-                in.readAllBytes(); // simulate use
-            }
-
-            IOUtil.close(conn);
-        });
-    }
-
-    @Test
-    public void testClose_AutoCloseable() throws Exception {
-        InputStream is = IOUtil.newBufferedInputStream(new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8)));
-        IOUtil.close(is);
-
-        assertThrows(IOException.class, () -> is.read());
-    }
-
-    @Test
-    public void testClose_WithExceptionHandler() throws Exception {
-        InputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8));
-        java.util.concurrent.atomic.AtomicBoolean handlerCalled = new java.util.concurrent.atomic.AtomicBoolean(false);
-
-        IOUtil.close(is, ex -> handlerCalled.set(true));
-
-        assertTrue(!handlerCalled.get());
-    }
-
-    @Test
-    public void testClose_WithExceptionHandlerOnError() {
-        AutoCloseable problematic = () -> {
-            throw new IOException("Test exception");
-        };
-
-        java.util.concurrent.atomic.AtomicBoolean handlerCalled = new java.util.concurrent.atomic.AtomicBoolean(false);
-        java.util.concurrent.atomic.AtomicReference<Exception> caughtException = new java.util.concurrent.atomic.AtomicReference<>();
-
-        IOUtil.close(problematic, ex -> {
-            handlerCalled.set(true);
-            caughtException.set(ex);
-        });
-
-        assertTrue(handlerCalled.get());
-        assertNotNull(caughtException.get());
-        assertTrue(caughtException.get().getMessage().contains("Test exception"));
-    }
-
-    @Test
-    public void testCloseAll_EmptyVarArgs() {
-        assertDoesNotThrow(() -> {
-            IOUtil.closeAll();
-        });
-    }
-
-    @Test
-    public void testCloseAll_EmptyIterable() {
-        assertDoesNotThrow(() -> {
-            java.util.List<AutoCloseable> closeables = new java.util.ArrayList<>();
-            IOUtil.closeAll(closeables);
-        });
-    }
-
-    @Test
-    public void testCloseAll_VarArgs() throws Exception {
-        InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
-        InputStream is2 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data2".getBytes(UTF_8)));
-        InputStream is3 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8)));
-
-        IOUtil.closeAll(is1, is2, is3);
-
-        assertThrows(IOException.class, () -> is1.read());
-        assertThrows(IOException.class, () -> is2.read());
-        assertThrows(IOException.class, () -> is3.read());
-    }
-
-    @Test
-    public void testCloseAll_WithNulls() throws Exception {
-        InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
-        InputStream is2 = null;
-        InputStream is3 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8)));
-
-        IOUtil.closeAll(is1, is2, is3);
-
-        assertThrows(IOException.class, () -> is1.read());
-        assertThrows(IOException.class, () -> is3.read());
-    }
-
-    @Test
-    public void testCloseAll_Iterable() throws Exception {
-        java.util.List<AutoCloseable> closeables = new java.util.ArrayList<>();
-        closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8))));
-        closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data2".getBytes(UTF_8))));
-
-        closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8))));
-
-        IOUtil.closeAll(closeables);
-
-        for (AutoCloseable c : closeables) {
-            InputStream is = (InputStream) c;
-            assertThrows(IOException.class, () -> is.read());
-        }
-    }
-
-    @Test
-    public void testCloseAll_IterableWithNulls() throws Exception {
-        java.util.List<AutoCloseable> closeables = new java.util.ArrayList<>();
-        closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8))));
-
-        closeables.add(null);
-        closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8))));
-
-        IOUtil.closeAll(closeables);
-
-        InputStream is1 = (InputStream) closeables.get(0);
-        InputStream is3 = (InputStream) closeables.get(2);
-        assertThrows(IOException.class, () -> is1.read());
-        assertThrows(IOException.class, () -> is3.read());
-    }
-
-    @Test
-    public void testCloseAll_ContinuesOnException() {
-        AutoCloseable problematic = () -> {
-            throw new IOException("Error in first closeable");
-        };
-        InputStream is = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data".getBytes(UTF_8)));
-
-        assertThrows(UncheckedIOException.class, () -> IOUtil.closeAll(problematic, is));
-
-        assertThrows(IOException.class, () -> is.read());
-    }
-
-    @Test
-    public void testCloseQuietly_Null() {
-        assertDoesNotThrow(() -> {
-            IOUtil.closeQuietly((AutoCloseable) null);
-        });
-    }
-
-    @Test
-    public void testCloseQuietly_AutoCloseable() throws Exception {
-        InputStream is = IOUtil.newBufferedInputStream(new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8)));
-        IOUtil.closeQuietly(is);
-
-        assertThrows(IOException.class, () -> is.read());
-    }
-
-    @Test
-    public void testCloseQuietly_WithException() {
-        assertDoesNotThrow(() -> {
-            AutoCloseable problematic = () -> {
-                throw new IOException("Test exception");
-            };
-
-            IOUtil.closeQuietly(problematic);
-        });
-    }
-
-    @Test
-    public void testCloseQuietly_MultipleResources() throws Exception {
-        InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
-        InputStream is2 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data2".getBytes(UTF_8)));
-
-        IOUtil.closeQuietly(is1);
-        IOUtil.closeQuietly(is2);
-
-        assertThrows(IOException.class, () -> is1.read());
-        assertThrows(IOException.class, () -> is2.read());
-    }
-
-    @Test
-    public void testCloseAllQuietly_EmptyVarArgs() {
-        assertDoesNotThrow(() -> {
-            IOUtil.closeAllQuietly();
-        });
-    }
-
-    @Test
-    public void testCloseAllQuietly_EmptyIterable() {
-        assertDoesNotThrow(() -> {
-            java.util.List<AutoCloseable> closeables = new java.util.ArrayList<>();
-            IOUtil.closeAllQuietly(closeables);
-        });
-    }
-
-    @Test
-    public void testCloseAllQuietly_NullIterable() {
-        assertDoesNotThrow(() -> {
-            IOUtil.closeAllQuietly((Iterable<? extends AutoCloseable>) null);
-        });
-    }
-
-    @Test
-    public void testCloseAllQuietly_VarArgs() throws Exception {
-        InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
-        InputStream is2 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data2".getBytes(UTF_8)));
-        InputStream is3 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8)));
-
-        IOUtil.closeAllQuietly(is1, is2, is3);
-
-        assertThrows(IOException.class, () -> is1.read());
-        assertThrows(IOException.class, () -> is2.read());
-        assertThrows(IOException.class, () -> is3.read());
-    }
-
-    @Test
-    public void testCloseAllQuietly_WithNulls() throws Exception {
-        InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
-        InputStream is2 = null;
-        InputStream is3 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8)));
-
-        IOUtil.closeAllQuietly(is1, is2, is3);
-
-        assertThrows(IOException.class, () -> is1.read());
-        assertThrows(IOException.class, () -> is3.read());
-    }
-
-    @Test
-    public void testCloseAllQuietly_Iterable() throws Exception {
-        java.util.List<AutoCloseable> closeables = new java.util.ArrayList<>();
-        closeables.add(IOUtil.newBufferedReader(new ByteArrayInputStream("data1".getBytes(UTF_8))));
-        closeables.add(IOUtil.newBufferedReader(new ByteArrayInputStream("data2".getBytes(UTF_8))));
-        closeables.add(IOUtil.newBufferedReader(new ByteArrayInputStream("data3".getBytes(UTF_8))));
-
-        IOUtil.closeAllQuietly(closeables);
-
-        for (AutoCloseable c : closeables) {
-            Reader is = (Reader) c;
-            assertThrows(IOException.class, () -> is.read());
-        }
-    }
-
-    @Test
-    public void testCloseAllQuietly_IterableWithNulls() throws Exception {
-        java.util.List<AutoCloseable> closeables = new java.util.ArrayList<>();
-        closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8))));
-
-        closeables.add(null);
-        closeables.add(IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8))));
-
-        IOUtil.closeAllQuietly(closeables);
-
-        InputStream is1 = (InputStream) closeables.get(0);
-        InputStream is3 = (InputStream) closeables.get(2);
-        assertThrows(IOException.class, () -> is1.read());
-        assertThrows(IOException.class, () -> is3.read());
-    }
-
-    @Test
-    public void testCloseAllQuietly_WithExceptions() {
-        AutoCloseable problematic1 = () -> {
-            throw new IOException("Error 1");
-        };
-        AutoCloseable problematic2 = () -> {
-            throw new IOException("Error 2");
-        };
-        InputStream is = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data".getBytes(UTF_8)));
-
-        IOUtil.closeAllQuietly(problematic1, problematic2, is);
-
-        assertThrows(IOException.class, () -> is.read());
-    }
-
-    @Test
-    public void testCloseAllQuietly_MixedTypes() throws Exception {
-        FileInputStream fis = new FileInputStream(tempFile);
-        java.io.BufferedReader br = IOUtil.newBufferedReader(tempFile);
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-
-        IOUtil.closeAllQuietly(fis, br, baos);
-
-        assertThrows(IOException.class, () -> fis.read());
-        assertThrows(IOException.class, () -> br.read());
-    }
-
-    @Test
-    public void testCopyToDirectory_File() throws Exception {
-        File destDir = Files.createTempDirectory(tempFolder, "dest").toFile();
-        IOUtil.copyToDirectory(tempFile, destDir);
-
-        File copiedFile = new File(destDir, tempFile.getName());
-        assertTrue(copiedFile.exists());
-        assertEquals(TEST_CONTENT, IOUtil.readAllToString(copiedFile));
-    }
-
-    @Test
-    public void testCopyToDirectory_FileWithPreserveFileDate() throws Exception {
-        File destDir = Files.createTempDirectory(tempFolder, "dest").toFile();
-        long originalTime = tempFile.lastModified();
-        Thread.sleep(100);
-
-        IOUtil.copyToDirectory(tempFile, destDir, true);
-
-        File copiedFile = new File(destDir, tempFile.getName());
-        assertTrue(copiedFile.exists());
-        assertEquals(originalTime, copiedFile.lastModified());
-    }
-
-    @Test
-    public void testCopyToDirectory_FileWithoutPreserveFileDate() throws Exception {
-        File destDir = Files.createTempDirectory(tempFolder, "dest").toFile();
-        long originalTime = tempFile.lastModified();
-        Thread.sleep(100);
-
-        IOUtil.copyToDirectory(tempFile, destDir, false);
-
-        File copiedFile = new File(destDir, tempFile.getName());
-        assertTrue(copiedFile.exists());
-    }
-
-    @Test
-    public void testCopyToDirectory_Directory() throws Exception {
-        File srcDir = Files.createTempDirectory(tempFolder, "src").toFile();
-        File subFile1 = new File(srcDir, "file1.txt");
-        File subFile2 = new File(srcDir, "file2.txt");
-        Files.write(subFile1.toPath(), "Content 1".getBytes());
-        Files.write(subFile2.toPath(), "Content 2".getBytes());
-
-        File destDir = Files.createTempDirectory(tempFolder, "dest").toFile();
-        IOUtil.copyToDirectory(srcDir, destDir);
-
-        File copiedDir = new File(destDir, srcDir.getName());
-        assertTrue(copiedDir.exists());
-        assertTrue(copiedDir.isDirectory());
-        assertTrue(new File(copiedDir, "file1.txt").exists());
-        assertTrue(new File(copiedDir, "file2.txt").exists());
-    }
-
-    @Test
-    public void testCopyToDirectory_WithFilter() throws Exception {
-        File srcDir = Files.createTempDirectory(tempFolder, "src").toFile();
-        File txtFile = new File(srcDir, "file.txt");
-        File logFile = new File(srcDir, "file.log");
-        Files.write(txtFile.toPath(), "Text content".getBytes());
-        Files.write(logFile.toPath(), "Log content".getBytes());
-
-        File destDir = Files.createTempDirectory(tempFolder, "dest").toFile();
-        IOUtil.copyToDirectory(srcDir, destDir, true, (parent, file) -> file.getName().endsWith(".txt"));
-
-        File copiedDir = new File(destDir, srcDir.getName());
-        assertTrue(new File(copiedDir, "file.txt").exists());
-        assertTrue(!new File(copiedDir, "file.log").exists());
-    }
-
-    @Test
-    public void testCopyToDirectory_SameDirectory() throws Exception {
-        File parentDir = tempFile.getParentFile();
-        IOUtil.copyToDirectory(tempFile, parentDir);
-
-        File copiedFile = new File(parentDir, "Copy of " + tempFile.getName());
-        assertTrue(copiedFile.exists());
-    }
-
-    // ===== getRelativePath via copyToDirectory with subdirs =====
-
-    @Test
-    public void testCopyToDirectory_PreservesRelativePaths() throws Exception {
-        File subDir = new File(tempFolder.toFile(), "srcDir");
-        subDir.mkdirs();
-        File srcFile = new File(subDir, "hello.txt");
-        Files.write(srcFile.toPath(), "Hello".getBytes(UTF_8));
-
-        File destDir = new File(tempFolder.toFile(), "destDir");
-        destDir.mkdirs();
-
-        IOUtil.copyToDirectory(srcFile, destDir);
-        File copiedFile = new File(destDir, "hello.txt");
-        assertTrue(copiedFile.exists());
-    }
-
-    @Test
-    public void testCopyDirectory_Basic() throws Exception {
-        File srcDir = Files.createTempDirectory(tempFolder, "src").toFile();
-        File file1 = new File(srcDir, "file1.txt");
-        File file2 = new File(srcDir, "file2.txt");
-        Files.write(file1.toPath(), "Content 1".getBytes());
-        Files.write(file2.toPath(), "Content 2".getBytes());
-
-        File destDir = Files.createTempDirectory(tempFolder, "dest").toFile();
-        IOUtil.copyDirectory(srcDir, destDir);
-
-        assertTrue(new File(destDir, file1.getName()).exists());
-        assertTrue(new File(destDir, file2.getName()).exists());
-    }
-
-    @Test
-    public void testCopyDirectory_Nested() throws Exception {
-        File srcDir = Files.createTempDirectory(tempFolder, "src").toFile();
-        File subDir = new File(srcDir, "subdir");
-        subDir.mkdir();
-        File file1 = new File(srcDir, "file1.txt");
-        File file2 = new File(subDir, "file2.txt");
-        Files.write(file1.toPath(), "Content 1".getBytes());
-        Files.write(file2.toPath(), "Content 2".getBytes());
-
-        File destDir = Files.createTempDirectory(tempFolder, "dest").toFile();
-        IOUtil.copyDirectory(srcDir, destDir);
-
-        assertTrue(new File(destDir, "file1.txt").exists());
-        File copiedSubDir = new File(destDir, "subdir");
-        assertTrue(copiedSubDir.exists());
-        assertTrue(new File(copiedSubDir, "file2.txt").exists());
-    }
-
-    // ===== copyDirectory =====
-
-    @Test
-    public void testCopyDirectory_basicFiles() throws Exception {
-        File srcDir = Files.createTempDirectory(tempFolder, "copy-src").toFile();
-        File destDir = Files.createTempDirectory(tempFolder, "copy-dest").toFile();
-        // Create files in srcDir
-        File f1 = new File(srcDir, "file1.txt");
-        Files.write(f1.toPath(), "content1".getBytes(UTF_8));
-        File f2 = new File(srcDir, "file2.txt");
-        Files.write(f2.toPath(), "content2".getBytes(UTF_8));
-
-        IOUtil.copyDirectory(srcDir, destDir);
-
-        File copied1 = new File(destDir, "file1.txt");
-        File copied2 = new File(destDir, "file2.txt");
-        assertTrue(copied1.exists());
-        assertTrue(copied2.exists());
-        assertEquals("content1", new String(IOUtil.readAllBytes(copied1), UTF_8));
-        assertEquals("content2", new String(IOUtil.readAllBytes(copied2), UTF_8));
-    }
-
-    @Test
-    public void testCopyDirectory_emptyDirectory() throws Exception {
-        File srcDir = Files.createTempDirectory(tempFolder, "copy-empty-src").toFile();
-        File destDir = Files.createTempDirectory(tempFolder, "copy-empty-dest").toFile();
-
-        IOUtil.copyDirectory(srcDir, destDir);
-
-        assertEquals(0, destDir.listFiles().length);
-    }
-
-    @Test
-    public void testCopyFile_Basic() throws Exception {
-        File destFile = Files.createTempFile(tempFolder, "dest", ".txt").toFile();
-        destFile.delete();
-
-        IOUtil.copyFile(tempFile, destFile);
-
-        assertTrue(destFile.exists());
-        assertEquals(TEST_CONTENT, IOUtil.readAllToString(destFile));
-    }
-
-    @Test
-    public void testCopyFile_WithPreserveFileDate() throws Exception {
-        File destFile = Files.createTempFile(tempFolder, "dest", ".txt").toFile();
-        destFile.delete();
-
-        long originalTime = tempFile.lastModified();
-        Thread.sleep(100);
-
-        IOUtil.copyFile(tempFile, destFile, true);
-
-        assertTrue(destFile.exists());
-        assertEquals(originalTime, destFile.lastModified());
-    }
-
-    @Test
-    public void testCopyFile_WithoutPreserveFileDate() throws Exception {
-        File destFile = Files.createTempFile(tempFolder, "dest", ".txt").toFile();
-        destFile.delete();
-
-        IOUtil.copyFile(tempFile, destFile, false);
-
-        assertTrue(destFile.exists());
-    }
-
-    @Test
-    public void testCopyFile_WithCopyOptions() throws Exception {
-        File destFile = Files.createTempFile(tempFolder, "dest", ".txt").toFile();
-
-        IOUtil.copyFile(tempFile, destFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-
-        assertTrue(destFile.exists());
-        assertEquals(TEST_CONTENT, IOUtil.readAllToString(destFile));
-    }
-
-    @Test
-    public void testCopyFile_WithPreserveDateAndCopyOptions() throws Exception {
-        File destFile = Files.createTempFile(tempFolder, "dest", ".txt").toFile();
-
-        IOUtil.copyFile(tempFile, destFile, true, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-
-        assertTrue(destFile.exists());
-    }
-
-    @Test
-    public void testCopyFile_ToOutputStream() throws Exception {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        long bytesWritten = IOUtil.copyFile(tempFile, baos);
-
-        assertTrue(bytesWritten > 0);
-        assertEquals(TEST_CONTENT, new String(baos.toByteArray(), UTF_8));
-    }
-
-    @Test
-    public void testCopyURLToFile_Basic() throws Exception {
-        File sourceFile = Files.createTempFile(tempFolder, "source", ".txt").toFile();
-        Files.write(sourceFile.toPath(), "URL content".getBytes());
-
-        java.net.URL url = sourceFile.toURI().toURL();
-        File destFile = Files.createTempFile(tempFolder, "url_dest", ".txt").toFile();
-        destFile.delete();
-
-        IOUtil.copyURLToFile(url, destFile);
-
-        assertTrue(destFile.exists());
-        assertEquals("URL content", IOUtil.readAllToString(destFile));
-    }
-
-    @Test
-    public void testCopyURLToFile_WithTimeout() throws Exception {
-        File sourceFile = Files.createTempFile(tempFolder, "source", ".txt").toFile();
-        Files.write(sourceFile.toPath(), "URL content with timeout".getBytes());
-
-        java.net.URL url = sourceFile.toURI().toURL();
-        File destFile = Files.createTempFile(tempFolder, "url_dest", ".txt").toFile();
-        destFile.delete();
-
-        IOUtil.copyURLToFile(url, destFile, 5000, 5000);
-
-        assertTrue(destFile.exists());
-        assertEquals("URL content with timeout", IOUtil.readAllToString(destFile));
-    }
-
-    @Test
-    public void testCopy_PathToPath() throws Exception {
-        Path source = tempFile.toPath();
-        Path target = Files.createTempFile(tempFolder, "path_dest", ".txt");
-        Files.delete(target);
-
-        Path result = IOUtil.copy(source, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-
-        assertNotNull(result);
-        assertTrue(Files.exists(target));
-        assertEquals(TEST_CONTENT, IOUtil.readAllToString(target.toFile()));
-    }
-
-    @Test
-    public void testCopy_InputStreamToPath() throws Exception {
-        InputStream is = new ByteArrayInputStream("InputStream content".getBytes());
-        Path target = Files.createTempFile(tempFolder, "is_dest", ".txt");
-        Files.delete(target);
-
-        long bytesWritten = IOUtil.copy(is, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-
-        assertTrue(bytesWritten > 0);
-        assertTrue(Files.exists(target));
-        assertEquals("InputStream content", IOUtil.readAllToString(target.toFile()));
-    }
-
-    @Test
-    public void testCopy_PathToOutputStream() throws Exception {
-        Path source = tempFile.toPath();
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-
-        long bytesWritten = IOUtil.copy(source, baos);
-
-        assertTrue(bytesWritten > 0);
-        assertEquals(TEST_CONTENT, new String(baos.toByteArray(), UTF_8));
     }
 
     @Test
@@ -5705,285 +942,6 @@ public class IOUtilTest extends TestBase {
         File nonExistent = new File(tempFolder.toFile(), "nonexistent.txt");
         boolean result = IOUtil.renameTo(nonExistent, "newname.txt");
         assertFalse(result);
-    }
-
-    @Test
-    public void testDeleteQuietly_NullFile() {
-        boolean result = IOUtil.deleteQuietly(null);
-        assertTrue(!result);
-    }
-
-    @Test
-    public void testDeleteQuietly_ExistingFile() throws Exception {
-        File file = Files.createTempFile(tempFolder, "delete_quiet", ".txt").toFile();
-        assertTrue(file.exists());
-
-        boolean result = IOUtil.deleteQuietly(file);
-
-        assertTrue(result);
-        assertTrue(!file.exists());
-    }
-
-    @Test
-    public void testDeleteQuietly_NonExistingFile() throws Exception {
-        File file = new File(tempFolder.toFile(), "nonexistent.txt");
-
-        boolean result = IOUtil.deleteQuietly(file);
-
-        assertTrue(!result);
-    }
-
-    @Test
-    public void testDeleteQuietly_Directory() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "del-test").toFile();
-        assertTrue(dir.exists());
-        boolean result = IOUtil.deleteQuietly(dir);
-        assertTrue(result);
-        assertFalse(dir.exists());
-    }
-
-    @Test
-    public void testDeleteIfExists_NullFile() {
-        boolean result = IOUtil.deleteIfExists(null);
-        assertTrue(!result);
-    }
-
-    @Test
-    public void testDeleteIfExists_ExistingFile() throws Exception {
-        File file = Files.createTempFile(tempFolder, "delete", ".txt").toFile();
-        assertTrue(file.exists());
-
-        boolean result = IOUtil.deleteIfExists(file);
-
-        assertTrue(result);
-        assertTrue(!file.exists());
-    }
-
-    @Test
-    public void testDeleteIfExists_NonExistingFile() throws Exception {
-        File file = new File(tempFolder.toFile(), "nonexistent.txt");
-
-        boolean result = IOUtil.deleteIfExists(file);
-
-        assertTrue(!result);
-    }
-
-    @Test
-    public void testDeleteIfExists_EmptyDirectory() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "delete_dir").toFile();
-        assertTrue(dir.exists());
-
-        boolean result = IOUtil.deleteIfExists(dir);
-
-        assertTrue(result);
-        assertTrue(!dir.exists());
-    }
-
-    @Test
-    public void testDeleteAllIfExists_NullFile() {
-        boolean result = IOUtil.deleteRecursivelyIfExists(null);
-        assertTrue(!result);
-    }
-
-    @Test
-    public void testDeleteRecursivelyIfExists_NullFile() {
-        boolean result = IOUtil.deleteRecursivelyIfExists(null);
-        assertFalse(result);
-    }
-
-    @Test
-    public void testDeleteRecursivelyIfExists_NonExistentFile() {
-        File nonExistent = new File(tempFolder.toFile(), "nonexistent_for_recursive_delete");
-        boolean result = IOUtil.deleteRecursivelyIfExists(nonExistent);
-        assertFalse(result);
-    }
-
-    // ========== Additional tests for deleteRecursivelyIfExists ==========
-
-    @Test
-    public void testDeleteRecursivelyIfExists_SingleFile() throws Exception {
-        File file = Files.createTempFile(tempFolder, "del-recursive", ".txt").toFile();
-        Files.write(file.toPath(), "content".getBytes(UTF_8));
-        assertTrue(file.exists());
-
-        boolean result = IOUtil.deleteRecursivelyIfExists(file);
-        assertTrue(result);
-        assertFalse(file.exists());
-    }
-
-    @Test
-    public void testDeleteRecursivelyIfExists_DirectoryWithFiles() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "del-recursive-dir").toFile();
-        File file1 = new File(dir, "file1.txt");
-        File file2 = new File(dir, "file2.txt");
-        Files.write(file1.toPath(), "content1".getBytes(UTF_8));
-        Files.write(file2.toPath(), "content2".getBytes(UTF_8));
-        assertTrue(dir.exists());
-        assertTrue(file1.exists());
-
-        boolean result = IOUtil.deleteRecursivelyIfExists(dir);
-        assertTrue(result);
-        assertFalse(dir.exists());
-    }
-
-    @Test
-    public void testDeleteRecursivelyIfExists_NestedDirectories() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "del-recursive-nested").toFile();
-        File subDir = new File(dir, "subdir");
-        subDir.mkdir();
-        File subFile = new File(subDir, "nested.txt");
-        Files.write(subFile.toPath(), "nested content".getBytes(UTF_8));
-        File deepDir = new File(subDir, "deepdir");
-        deepDir.mkdir();
-        File deepFile = new File(deepDir, "deep.txt");
-        Files.write(deepFile.toPath(), "deep content".getBytes(UTF_8));
-
-        boolean result = IOUtil.deleteRecursivelyIfExists(dir);
-        assertTrue(result);
-        assertFalse(dir.exists());
-        assertFalse(subDir.exists());
-        assertFalse(deepDir.exists());
-    }
-
-    @Test
-    public void testDeleteRecursivelyIfExists_EmptyDirectory() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "del-recursive-empty").toFile();
-        assertTrue(dir.exists());
-
-        boolean result = IOUtil.deleteRecursivelyIfExists(dir);
-        assertTrue(result);
-        assertFalse(dir.exists());
-    }
-
-    @Test
-    public void testDeleteFilesFromDirectory_AllFiles() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "delete_files_dir").toFile();
-        File file1 = new File(dir, "file1.txt");
-        File file2 = new File(dir, "file2.txt");
-        Files.write(file1.toPath(), "Content 1".getBytes());
-        Files.write(file2.toPath(), "Content 2".getBytes());
-
-        boolean result = IOUtil.deleteFilesFromDirectory(dir);
-
-        assertTrue(result);
-        assertTrue(dir.exists());
-        assertTrue(!file1.exists());
-        assertTrue(!file2.exists());
-    }
-
-    @Test
-    public void testDeleteFilesFromDirectory_WithFilter() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "delete_filter_dir").toFile();
-        File txtFile = new File(dir, "file.txt");
-        File logFile = new File(dir, "file.log");
-        Files.write(txtFile.toPath(), "Text content".getBytes());
-        Files.write(logFile.toPath(), "Log content".getBytes());
-
-        boolean result = IOUtil.deleteFilesFromDirectory(dir, (parent, file) -> file.getName().endsWith(".txt"));
-
-        assertTrue(result);
-        assertTrue(dir.exists());
-        assertTrue(!txtFile.exists());
-        assertTrue(logFile.exists());
-    }
-
-    @Test
-    public void testDeleteFilesFromDirectory_EmptyDirectory() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "delete_empty_dir").toFile();
-
-        boolean result = IOUtil.deleteFilesFromDirectory(dir);
-
-        assertTrue(result);
-        assertTrue(dir.exists());
-    }
-
-    @Test
-    public void testDeleteFilesFromDirectory_NonExistingDirectory() throws Exception {
-        File dir = new File(tempFolder.toFile(), "nonexistent_dir");
-
-        boolean result = IOUtil.deleteFilesFromDirectory(dir);
-
-        assertTrue(!result);
-    }
-
-    @Test
-    public void testDeleteFilesFromDirectory_NullDirectory() throws Exception {
-        boolean result = IOUtil.deleteFilesFromDirectory(null);
-        assertFalse(result);
-    }
-
-    @Test
-    public void testDeleteFilesFromDirectory_FileNotDirectory() throws Exception {
-        assertFalse(IOUtil.deleteFilesFromDirectory(tempFile));
-    }
-
-    @Test
-    public void testDeleteFilesFromDirectory_ReturnsFalseWhenListingFails() throws Exception {
-        File dir = new ListingFailureFile(new File(tempFolder.toFile(), "listing_failure_dir"));
-
-        assertFalse(IOUtil.deleteFilesFromDirectory(dir));
-    }
-
-    @Test
-    public void testCleanDirectory_WithFiles() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "clean_dir").toFile();
-        File file1 = new File(dir, "file1.txt");
-        File file2 = new File(dir, "file2.txt");
-        Files.write(file1.toPath(), "Content 1".getBytes());
-        Files.write(file2.toPath(), "Content 2".getBytes());
-
-        boolean result = IOUtil.cleanDirectory(dir);
-
-        assertTrue(result);
-        assertTrue(dir.exists());
-        assertTrue(!file1.exists());
-        assertTrue(!file2.exists());
-    }
-
-    @Test
-    public void testCleanDirectory_WithSubdirectories() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "clean_nested_dir").toFile();
-        File subDir = new File(dir, "subdir");
-        subDir.mkdir();
-        File file1 = new File(dir, "file1.txt");
-        File file2 = new File(subDir, "file2.txt");
-        Files.write(file1.toPath(), "Content 1".getBytes());
-        Files.write(file2.toPath(), "Content 2".getBytes());
-
-        boolean result = IOUtil.cleanDirectory(dir);
-
-        assertTrue(result);
-        assertTrue(dir.exists());
-        assertTrue(!subDir.exists());
-        assertTrue(!file1.exists());
-    }
-
-    @Test
-    public void testCleanDirectory_EmptyDirectory() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "clean_empty").toFile();
-
-        boolean result = IOUtil.cleanDirectory(dir);
-
-        assertTrue(result);
-        assertTrue(dir.exists());
-    }
-
-    @Test
-    public void testCleanDirectory_NonExistingDirectory() throws Exception {
-        File nonExistent = new File(tempFolder.toFile(), "nonexistent_dir");
-        boolean result = IOUtil.cleanDirectory(nonExistent);
-        assertFalse(result);
-    }
-
-    @Test
-    public void testCleanDirectory_NullDirectory() throws Exception {
-        boolean result = IOUtil.cleanDirectory(null);
-        assertFalse(result);
-    }
-
-    @Test
-    public void testCleanDirectory_FileNotDirectory() throws Exception {
-        assertFalse(IOUtil.cleanDirectory(tempFile));
     }
 
     // ===== createNewFileIfNotExists =====
@@ -6099,420 +1057,6 @@ public class IOUtilTest extends TestBase {
 
         assertTrue(result);
         assertTrue(dir.exists());
-    }
-
-    @Test
-    public void testIsBufferedReader_BufferedReader() throws Exception {
-        Reader reader = new java.io.BufferedReader(new StringReader("test"));
-        assertTrue(IOUtil.isBufferedReader(reader));
-    }
-
-    @Test
-    public void testIsBufferedReader_NonBufferedReader() throws Exception {
-        Reader reader = new StringReader("test");
-        assertTrue(!IOUtil.isBufferedReader(reader));
-    }
-
-    @Test
-    public void testIsBufferedReader_FileReader() throws Exception {
-        Reader reader = new FileReader(tempFile);
-        try {
-            assertTrue(!IOUtil.isBufferedReader(reader));
-        } finally {
-            reader.close();
-        }
-    }
-
-    @Test
-    public void testIsBufferedWriter_BufferedWriter() throws Exception {
-        Writer writer = new java.io.BufferedWriter(new java.io.StringWriter());
-        assertTrue(IOUtil.isBufferedWriter(writer));
-    }
-
-    @Test
-    public void testIsBufferedWriter_NonBufferedWriter() throws Exception {
-        Writer writer = new java.io.StringWriter();
-        assertTrue(!IOUtil.isBufferedWriter(writer));
-    }
-
-    @Test
-    public void testIsFileNewer_WithDate() throws Exception {
-        File file = Files.createTempFile(tempFolder, "newer", ".txt").toFile();
-        java.util.Date pastDate = new java.util.Date(System.currentTimeMillis() - 10000);
-
-        boolean result = IOUtil.isFileNewer(file, pastDate);
-        assertTrue(result);
-    }
-
-    @Test
-    public void testIsFileNewer_WithFutureDate() throws Exception {
-        File file = Files.createTempFile(tempFolder, "newer", ".txt").toFile();
-        java.util.Date futureDate = new java.util.Date(System.currentTimeMillis() + 10000);
-
-        boolean result = IOUtil.isFileNewer(file, futureDate);
-        assertTrue(!result);
-    }
-
-    @Test
-    public void testIsFileNewer_WithReferenceFile() throws Exception {
-        File oldFile = Files.createTempFile(tempFolder, "old", ".txt").toFile();
-        Thread.sleep(100);
-        File newFile = Files.createTempFile(tempFolder, "new", ".txt").toFile();
-
-        boolean result = IOUtil.isFileNewer(newFile, oldFile);
-        assertTrue(result);
-    }
-
-    @Test
-    public void testIsFileOlder_WithDate() throws Exception {
-        File file = Files.createTempFile(tempFolder, "older", ".txt").toFile();
-        java.util.Date futureDate = new java.util.Date(System.currentTimeMillis() + 10000);
-
-        boolean result = IOUtil.isFileOlder(file, futureDate);
-        assertTrue(result);
-    }
-
-    @Test
-    public void testIsFileOlder_WithPastDate() throws Exception {
-        File file = Files.createTempFile(tempFolder, "older", ".txt").toFile();
-        java.util.Date pastDate = new java.util.Date(System.currentTimeMillis() - 10000);
-
-        boolean result = IOUtil.isFileOlder(file, pastDate);
-        assertTrue(!result);
-    }
-
-    @Test
-    public void testIsFileOlder_WithReferenceFile() throws Exception {
-        File oldFile = Files.createTempFile(tempFolder, "old", ".txt").toFile();
-        Thread.sleep(100);
-        File newFile = Files.createTempFile(tempFolder, "new", ".txt").toFile();
-
-        boolean result = IOUtil.isFileOlder(oldFile, newFile);
-        assertTrue(result);
-    }
-
-    @Test
-    public void testIsFile_NullFile() {
-        assertTrue(!IOUtil.isFile(null));
-    }
-
-    @Test
-    public void testIsFile_NonExisting() {
-        File file = new File(tempFolder.toFile(), "nonexistent.txt");
-        assertTrue(!IOUtil.isFile(file));
-    }
-
-    @Test
-    public void testIsFile_NullInput() {
-        assertFalse(IOUtil.isFile(null));
-    }
-
-    @Test
-    public void testIsFile_ExistingFile() throws Exception {
-        assertTrue(IOUtil.isFile(tempFile));
-    }
-
-    @Test
-    public void testIsFile_Directory() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "dir").toFile();
-        assertTrue(!IOUtil.isFile(dir));
-    }
-
-    @Test
-    public void testIsDirectory_NullFile() {
-        assertTrue(!IOUtil.isDirectory(null));
-    }
-
-    @Test
-    public void testIsDirectory_NullInput() {
-        assertFalse(IOUtil.isDirectory(null));
-    }
-
-    @Test
-    public void testIsDirectory_NonExisting() {
-        File nonExistent = new File(tempFolder.toFile(), "nonexistent_dir_test");
-        assertFalse(IOUtil.isDirectory(nonExistent));
-    }
-
-    @Test
-    public void testIsDirectory_ExistingDirectory() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "dir").toFile();
-        assertTrue(IOUtil.isDirectory(dir));
-    }
-
-    @Test
-    public void testIsDirectory_File() throws Exception {
-        assertTrue(!IOUtil.isDirectory(tempFile));
-    }
-
-    @Test
-    public void testIsDirectory_WithLinkOptions() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "dir").toFile();
-        assertTrue(IOUtil.isDirectory(dir, java.nio.file.LinkOption.NOFOLLOW_LINKS));
-    }
-
-    @Test
-    public void testIsDirectory_ExistingFile() throws Exception {
-        assertFalse(IOUtil.isDirectory(tempFile));
-    }
-
-    @Test
-    public void testIsRegularFile_NullFile() {
-        assertTrue(!IOUtil.isRegularFile(null, java.nio.file.LinkOption.NOFOLLOW_LINKS));
-    }
-
-    // ========== Additional edge case tests ==========
-
-    @Test
-    public void testIsRegularFile_NonExisting() {
-        File nonExistent = new File(tempFolder.toFile(), "does_not_exist.txt");
-        assertFalse(IOUtil.isRegularFile(nonExistent));
-    }
-
-    @Test
-    public void testIsRegularFile_ExistingFile() throws Exception {
-        assertTrue(IOUtil.isRegularFile(tempFile, java.nio.file.LinkOption.NOFOLLOW_LINKS));
-    }
-
-    @Test
-    public void testIsRegularFile_Directory() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "dir").toFile();
-        assertTrue(!IOUtil.isRegularFile(dir, java.nio.file.LinkOption.NOFOLLOW_LINKS));
-    }
-
-    @Test
-    public void testIsSymbolicLink_NullFile() {
-        assertTrue(!IOUtil.isSymbolicLink(null));
-    }
-
-    @Test
-    public void testIsSymbolicLink_RegularFile() throws Exception {
-        assertTrue(!IOUtil.isSymbolicLink(tempFile));
-    }
-
-    @Test
-    public void testIsSymbolicLink_Directory() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "symlink-test-dir").toFile();
-        assertFalse(IOUtil.isSymbolicLink(dir));
-    }
-
-    @Test
-    public void testSizeOf_File() throws Exception {
-        long size = IOUtil.sizeOf(tempFile);
-        assertEquals(TEST_CONTENT.getBytes(UTF_8).length, size);
-    }
-
-    @Test
-    public void testSizeOf_EmptyFile() throws Exception {
-        long size = IOUtil.sizeOf(emptyFile);
-        assertEquals(0, size);
-    }
-
-    @Test
-    public void testSizeOf_Directory() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "size_dir").toFile();
-        File file1 = new File(dir, "file1.txt");
-        File file2 = new File(dir, "file2.txt");
-        Files.write(file1.toPath(), "12345".getBytes());
-        Files.write(file2.toPath(), "67890".getBytes());
-
-        long size = IOUtil.sizeOf(dir);
-        assertEquals(10, size);
-    }
-
-    @Test
-    public void testSizeOf_WithConsiderNonExistingAsEmpty() throws Exception {
-        File nonExisting = new File(tempFolder.toFile(), "nonexistent.txt");
-
-        long size = IOUtil.sizeOf(nonExisting, true);
-        assertEquals(0, size);
-    }
-
-    @Test
-    public void testSizeOf_NonExistingFileThrowsException() {
-        File nonExisting = new File(tempFolder.toFile(), "nonexistent.txt");
-
-        assertThrows(java.io.FileNotFoundException.class, () -> {
-            IOUtil.sizeOf(nonExisting, false);
-        });
-    }
-
-    // ===== sizeOf(File, boolean) =====
-
-    @Test
-    public void testSizeOf_file_considerNonExistingAsEmpty() throws Exception {
-        File nonExistent = new File(tempFolder.toFile(), "does-not-exist.txt");
-        long size = IOUtil.sizeOf(nonExistent, true);
-        assertEquals(0L, size);
-    }
-
-    @Test
-    public void testSizeOf_existingFile() throws Exception {
-        long size = IOUtil.sizeOf(tempFile, false);
-        assertEquals(TEST_CONTENT.length(), size);
-    }
-
-    @Test
-    public void testSizeOf_existingFile_withConsiderNonExisting() throws Exception {
-        long size = IOUtil.sizeOf(tempFile, true);
-        assertEquals(TEST_CONTENT.length(), size);
-    }
-
-    @Test
-    public void testSizeOf_directory() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "sizeOf-dir").toFile();
-        File f1 = new File(dir, "a.txt");
-        Files.write(f1.toPath(), new byte[100]);
-        long size = IOUtil.sizeOf(dir, true);
-        assertTrue(size >= 100);
-    }
-
-    @Test
-    public void testSizeOf_nullFile_considerNonExistingAsEmpty() throws Exception {
-        long size = IOUtil.sizeOf(null, true);
-        assertEquals(0L, size);
-    }
-
-    @Test
-    public void testSizeOfDirectory_Basic() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "size_dir").toFile();
-        File file1 = new File(dir, "file1.txt");
-        File file2 = new File(dir, "file2.txt");
-        Files.write(file1.toPath(), "123".getBytes());
-        Files.write(file2.toPath(), "4567".getBytes());
-
-        long size = IOUtil.sizeOfDirectory(dir);
-        assertEquals(7, size);
-    }
-
-    @Test
-    public void testSizeOfDirectory_Nested() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "size_nested").toFile();
-        File subDir = new File(dir, "subdir");
-        subDir.mkdir();
-        File file1 = new File(dir, "file1.txt");
-        File file2 = new File(subDir, "file2.txt");
-        Files.write(file1.toPath(), "12".getBytes());
-        Files.write(file2.toPath(), "345".getBytes());
-
-        long size = IOUtil.sizeOfDirectory(dir);
-        assertEquals(5, size);
-    }
-
-    @Test
-    public void testSizeOfDirectory_Empty() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "size_empty").toFile();
-
-        long size = IOUtil.sizeOfDirectory(dir);
-        assertEquals(0, size);
-    }
-
-    @Test
-    public void testSizeOfDirectory_WithConsiderNonExistingAsEmpty() throws Exception {
-        File nonExisting = new File(tempFolder.toFile(), "nonexistent_dir");
-
-        long size = IOUtil.sizeOfDirectory(nonExisting, true);
-        assertEquals(0, size);
-    }
-
-    @Test
-    public void testSizeOfDirectory_NonExistingThrowsException() {
-        File nonExisting = new File(tempFolder.toFile(), "nonexistent_dir");
-
-        assertThrows(java.io.FileNotFoundException.class, () -> {
-            IOUtil.sizeOfDirectory(nonExisting, false);
-        });
-    }
-
-    @Test
-    public void testSizeOfAsBigInteger_File() throws Exception {
-        java.math.BigInteger size = IOUtil.sizeOfAsBigInteger(tempFile);
-        assertEquals(java.math.BigInteger.valueOf(TEST_CONTENT.getBytes(UTF_8).length), size);
-    }
-
-    @Test
-    public void testSizeOfAsBigInteger_EmptyFile() throws Exception {
-        java.math.BigInteger size = IOUtil.sizeOfAsBigInteger(emptyFile);
-        assertEquals(java.math.BigInteger.ZERO, size);
-    }
-
-    @Test
-    public void testSizeOfAsBigInteger_Directory() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "bigint_dir").toFile();
-        File file1 = new File(dir, "file1.txt");
-        File file2 = new File(dir, "file2.txt");
-        Files.write(file1.toPath(), "12345".getBytes());
-        Files.write(file2.toPath(), "67890".getBytes());
-
-        java.math.BigInteger size = IOUtil.sizeOfAsBigInteger(dir);
-        assertEquals(java.math.BigInteger.valueOf(10), size);
-    }
-
-    @Test
-    public void testSizeOfAsBigInteger_NonExistingThrowsException() {
-        File nonExisting = new File(tempFolder.toFile(), "nonexistent.txt");
-
-        assertThrows(java.io.FileNotFoundException.class, () -> {
-            IOUtil.sizeOfAsBigInteger(nonExisting);
-        });
-    }
-
-    @Test
-    public void testSizeOfDirectoryAsBigInteger_Basic() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "bigint_dir").toFile();
-        File file1 = new File(dir, "file1.txt");
-        File file2 = new File(dir, "file2.txt");
-        Files.write(file1.toPath(), "123".getBytes());
-        Files.write(file2.toPath(), "4567".getBytes());
-
-        java.math.BigInteger size = IOUtil.sizeOfDirectoryAsBigInteger(dir);
-        assertEquals(java.math.BigInteger.valueOf(7), size);
-    }
-
-    @Test
-    public void testSizeOfDirectoryAsBigInteger_Nested() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "bigint_nested").toFile();
-        File subDir = new File(dir, "subdir");
-        subDir.mkdir();
-        File file1 = new File(dir, "file1.txt");
-        File file2 = new File(subDir, "file2.txt");
-        Files.write(file1.toPath(), "12".getBytes());
-        Files.write(file2.toPath(), "345".getBytes());
-
-        java.math.BigInteger size = IOUtil.sizeOfDirectoryAsBigInteger(dir);
-        assertEquals(java.math.BigInteger.valueOf(5), size);
-    }
-
-    @Test
-    public void testSizeOfDirectoryAsBigInteger_Empty() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "bigint_empty").toFile();
-
-        java.math.BigInteger size = IOUtil.sizeOfDirectoryAsBigInteger(dir);
-        assertEquals(java.math.BigInteger.ZERO, size);
-    }
-
-    @Test
-    public void testSizeOfDirectoryAsBigInteger_FileNotDirectory() {
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.sizeOfDirectoryAsBigInteger(tempFile));
-    }
-
-    // ===== sizeOfDirectoryAsBigInteger =====
-
-    @Test
-    public void testSizeOfDirectoryAsBigInteger() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "sizeOfBig-dir").toFile();
-        File f1 = new File(dir, "b.txt");
-        Files.write(f1.toPath(), new byte[200]);
-        java.math.BigInteger size = IOUtil.sizeOfDirectoryAsBigInteger(dir);
-        assertNotNull(size);
-        assertTrue(size.compareTo(java.math.BigInteger.valueOf(200)) >= 0);
-    }
-
-    @Test
-    public void testSizeOfDirectoryAsBigInteger_emptyDir() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "sizeOfBig-empty").toFile();
-        java.math.BigInteger size = IOUtil.sizeOfDirectoryAsBigInteger(dir);
-        assertEquals(java.math.BigInteger.ZERO, size);
     }
 
     // ===== checkFileExists (tested indirectly via copyFile) =====
@@ -6658,7 +1202,8 @@ public class IOUtilTest extends TestBase {
         File zipFile = Files.createTempFile(tempFolder, "existing-archive", ".zip").toFile();
         Files.write(zipFile.toPath(), "precious existing content".getBytes(UTF_8));
 
-        assertThrows(UncheckedIOException.class, () -> IOUtil.zip(missingSource, zipFile));
+        // zip is checked now, like its unzip counterpart.
+        assertThrows(java.io.FileNotFoundException.class, () -> IOUtil.zip(missingSource, zipFile));
 
         // The existing target file must not be truncated when the source is invalid.
         assertEquals("precious existing content", new String(Files.readAllBytes(zipFile.toPath()), UTF_8));
@@ -6673,7 +1218,7 @@ public class IOUtilTest extends TestBase {
         File zipFile = Files.createTempFile(tempFolder, "existing-archive2", ".zip").toFile();
         Files.write(zipFile.toPath(), "precious existing content".getBytes(UTF_8));
 
-        assertThrows(UncheckedIOException.class, () -> IOUtil.zip(java.util.Arrays.asList(okSource, missingSource), zipFile));
+        assertThrows(java.io.FileNotFoundException.class, () -> IOUtil.zip(java.util.Arrays.asList(okSource, missingSource), zipFile));
 
         // The existing target file must not be truncated when any source is invalid.
         assertEquals("precious existing content", new String(Files.readAllBytes(zipFile.toPath()), UTF_8));
@@ -6726,206 +1271,6 @@ public class IOUtilTest extends TestBase {
         File targetDir = Files.createTempDirectory(tempFolder, "unzip-fail").toFile();
 
         assertThrows(Exception.class, () -> IOUtil.unzip(nonexistentZip, targetDir));
-    }
-
-    @Test
-    public void testSplit_TwoParts() throws Exception {
-        File sourceFile = Files.createTempFile(tempFolder, "split-source", ".txt").toFile();
-        StringBuilder content = new StringBuilder();
-        for (int i = 0; i < 100; i++) {
-            content.append("Line ").append(i).append("\n");
-        }
-        Files.write(sourceFile.toPath(), content.toString().getBytes(UTF_8));
-
-        IOUtil.split(sourceFile, 2);
-
-        File part1 = new File(sourceFile.getAbsolutePath() + "_0001");
-        File part2 = new File(sourceFile.getAbsolutePath() + "_0002");
-
-        assertTrue(part1.exists());
-        assertTrue(part2.exists());
-        assertTrue(part1.length() > 0);
-        assertTrue(part2.length() > 0);
-    }
-
-    @Test
-    public void testSplit_ThreeParts() throws Exception {
-        File sourceFile = Files.createTempFile(tempFolder, "split3", ".txt").toFile();
-        Files.write(sourceFile.toPath(), "0123456789ABCDEFGHIJ".getBytes(UTF_8));
-
-        IOUtil.split(sourceFile, 3);
-
-        File part1 = new File(sourceFile.getAbsolutePath() + "_0001");
-        File part2 = new File(sourceFile.getAbsolutePath() + "_0002");
-        File part3 = new File(sourceFile.getAbsolutePath() + "_0003");
-
-        assertTrue(part1.exists());
-        assertTrue(part2.exists());
-        assertTrue(part3.exists());
-    }
-
-    @Test
-    public void testSplit_WithDestDir() throws Exception {
-        File sourceFile = Files.createTempFile(tempFolder, "split-dest", ".txt").toFile();
-        Files.write(sourceFile.toPath(), "Content for splitting".getBytes(UTF_8));
-
-        File destDir = Files.createTempDirectory(tempFolder, "split-dest-dir").toFile();
-
-        IOUtil.split(sourceFile, 2, destDir);
-
-        File part1 = new File(destDir.getAbsolutePath() + "\\" + sourceFile.getName() + "_0001");
-        File part2 = new File(destDir.getAbsolutePath() + "\\" + sourceFile.getName() + "_0002");
-
-        assertTrue(part1.exists());
-        assertTrue(part2.exists());
-    }
-
-    @Test
-    public void testSplit_OnePart() throws Exception {
-        File file = Files.createTempFile(tempFolder, "split-one", ".txt").toFile();
-        Files.write(file.toPath(), "Short content".getBytes(UTF_8));
-
-        File destDir = Files.createTempDirectory(tempFolder, "split-dest").toFile();
-        IOUtil.split(file, 1, destDir);
-
-        File[] parts = destDir.listFiles();
-        assertNotNull(parts);
-        assertEquals(1, parts.length);
-    }
-
-    @Test
-    public void testSplitBySize_SmallChunks() throws Exception {
-        File sourceFile = Files.createTempFile(tempFolder, "split-size", ".txt").toFile();
-        Files.write(sourceFile.toPath(), "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".getBytes(UTF_8));
-
-        IOUtil.splitBySize(sourceFile, 10);
-
-        File part1 = new File(sourceFile.getAbsolutePath() + "_0001");
-        File part2 = new File(sourceFile.getAbsolutePath() + "_0002");
-
-        assertTrue(part1.exists());
-        assertTrue(part2.exists());
-        assertTrue(part1.length() <= 10);
-    }
-
-    @Test
-    public void testSplitBySize_WithDestDir() throws Exception {
-        File sourceFile = Files.createTempFile(tempFolder, "split-by-size-dest", ".txt").toFile();
-        Files.write(sourceFile.toPath(), "Content for size-based splitting".getBytes(UTF_8));
-
-        File destDir = Files.createTempDirectory(tempFolder, "split-size-dir").toFile();
-
-        IOUtil.splitBySize(sourceFile, 10, destDir);
-
-        File[] parts = destDir.listFiles();
-        assertNotNull(parts);
-        assertTrue(parts.length > 0);
-    }
-
-    @Test
-    public void testSplitBySize_LargerThanFile() throws Exception {
-        File sourceFile = Files.createTempFile(tempFolder, "small-file", ".txt").toFile();
-        Files.write(sourceFile.toPath(), "Small".getBytes(UTF_8));
-
-        IOUtil.splitBySize(sourceFile, 1000);
-
-        File part1 = new File(sourceFile.getAbsolutePath() + "_0001");
-        assertTrue(part1.exists());
-        assertEquals("Small", IOUtil.readAllToString(part1));
-    }
-
-    @Test
-    public void testSplitBySize_LargerThanFileWithDestDir() throws Exception {
-        File file = Files.createTempFile(tempFolder, "split-size", ".txt").toFile();
-        Files.write(file.toPath(), "Small data".getBytes(UTF_8));
-
-        File destDir = Files.createTempDirectory(tempFolder, "split-dest").toFile();
-        IOUtil.splitBySize(file, 999999, destDir);
-
-        File[] parts = destDir.listFiles();
-        assertNotNull(parts);
-        assertEquals(1, parts.length);
-    }
-
-    @Test
-    public void testSplitBySize_EmptyFile_CreatesOneEmptyPart() throws Exception {
-        // BUG FIX: an empty source file previously threw IOException ("Source file ended before
-        // split part 1 was complete") instead of producing the documented single empty part.
-        File sourceFile = Files.createTempFile(tempFolder, "split-empty", ".txt").toFile();
-        File destDir = Files.createTempDirectory(tempFolder, "split-empty-dest").toFile();
-
-        IOUtil.splitBySize(sourceFile, 10, destDir);
-
-        File[] parts = destDir.listFiles();
-        assertNotNull(parts);
-        assertEquals(1, parts.length);
-        assertEquals(0, parts[0].length());
-    }
-
-    @Test
-    public void testSplit_EmptyFile_CreatesOneEmptyPart() throws Exception {
-        File sourceFile = Files.createTempFile(tempFolder, "split-empty-count", ".txt").toFile();
-        File destDir = Files.createTempDirectory(tempFolder, "split-empty-count-dest").toFile();
-
-        IOUtil.split(sourceFile, 3, destDir);
-
-        File[] parts = destDir.listFiles();
-        assertNotNull(parts);
-        assertEquals(1, parts.length);
-        assertEquals(0, parts[0].length());
-    }
-
-    @Test
-    public void testSplitBySize_NonPositiveSize_DoesNotCreateDestDir() throws Exception {
-        File sourceFile = Files.createTempFile(tempFolder, "split-bad-size", ".txt").toFile();
-        Files.write(sourceFile.toPath(), "data".getBytes(UTF_8));
-
-        File destDir = new File(tempFolder.toFile(), "split-bad-size-dest");
-
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.splitBySize(sourceFile, 0, destDir));
-
-        // The destination directory must not be created when sizeOfPart is invalid.
-        assertFalse(destDir.exists());
-    }
-
-    @Test
-    public void testSplitByLine_MultiplePartsWithDestDir() throws Exception {
-        File file = Files.createTempFile(tempFolder, "split-by-line", ".txt").toFile();
-        Files.write(file.toPath(), java.util.Arrays.asList("L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8", "L9", "L10"), UTF_8);
-
-        File destDir = Files.createTempDirectory(tempFolder, "split-lines-dest").toFile();
-        IOUtil.splitByLine(file, 2, destDir);
-
-        File[] parts = destDir.listFiles();
-        assertNotNull(parts);
-        assertEquals(2, parts.length);
-        java.util.Arrays.sort(parts, java.util.Comparator.comparing(File::getName));
-        assertHaveSameElements(java.util.Arrays.asList("L1", "L2", "L3", "L4", "L5"), Files.readAllLines(parts[0].toPath(), UTF_8));
-        assertHaveSameElements(java.util.Arrays.asList("L6", "L7", "L8", "L9", "L10"), Files.readAllLines(parts[1].toPath(), UTF_8));
-    }
-
-    @Test
-    public void testSplitByLine_EmptyFileCreatesNoParts() throws Exception {
-        File file = Files.createTempFile(tempFolder, "split-empty", ".txt").toFile();
-        File destDir = Files.createTempDirectory(tempFolder, "split-empty-dest").toFile();
-
-        IOUtil.splitByLine(file, 3, destDir);
-
-        File[] parts = destDir.listFiles();
-        assertNotNull(parts);
-        assertEquals(0, parts.length);
-    }
-
-    @Test
-    public void testSplitByLine_DefaultDestDir() throws Exception {
-        File file = Files.createTempFile(tempFolder, "split-default", ".txt").toFile();
-        IOUtil.writeLines(java.util.Arrays.asList("line1", "line2", "line3", "line4"), file);
-        File parentDir = file.getParentFile();
-
-        IOUtil.splitByLine(file, 2);
-
-        // Just verify no exception was thrown and original file still exists
-        assertTrue(file.exists() || parentDir != null);
     }
 
     @Test
@@ -7043,7 +1388,8 @@ public class IOUtilTest extends TestBase {
         File destFile = Files.createTempFile(tempFolder, "merged-existing", ".txt").toFile();
         Files.write(destFile.toPath(), "precious existing content".getBytes(UTF_8));
 
-        assertThrows(UncheckedIOException.class, () -> IOUtil.merge(java.util.Arrays.asList(okSource, missingSource), destFile));
+        // merge is checked now, like its split/splitBySize counterparts.
+        assertThrows(java.io.FileNotFoundException.class, () -> IOUtil.merge(java.util.Arrays.asList(okSource, missingSource), destFile));
 
         // The existing destination file must not be truncated when any source is invalid.
         assertEquals("precious existing content", new String(Files.readAllBytes(destFile.toPath()), UTF_8));
@@ -7375,652 +1721,87 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testDeleteAllIfExists_SingleFile() throws Exception {
-        File file = Files.createTempFile(tempFolder, "delete_all", ".txt").toFile();
-        assertTrue(file.exists());
-
-        boolean result = IOUtil.deleteRecursivelyIfExists(file);
-
-        assertTrue(result);
-        assertTrue(!file.exists());
-    }
-
-    @Test
-    public void testDeleteAllIfExists_DirectoryWithFiles() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "delete_all_dir").toFile();
-        File file1 = new File(dir, "file1.txt");
-        File file2 = new File(dir, "file2.txt");
-        Files.write(file1.toPath(), "Content 1".getBytes());
-        Files.write(file2.toPath(), "Content 2".getBytes());
-
-        boolean result = IOUtil.deleteRecursivelyIfExists(dir);
-
-        assertTrue(result);
-        assertTrue(!dir.exists());
-        assertTrue(!file1.exists());
-        assertTrue(!file2.exists());
-    }
-
-    @Test
-    public void testDeleteAllIfExists_NestedDirectory() throws Exception {
-        File dir = Files.createTempDirectory(tempFolder, "delete_all_nested").toFile();
-        File subDir = new File(dir, "subdir");
-        subDir.mkdir();
-        File file1 = new File(dir, "file1.txt");
-        File file2 = new File(subDir, "file2.txt");
-        Files.write(file1.toPath(), "Content 1".getBytes());
-        Files.write(file2.toPath(), "Content 2".getBytes());
-
-        boolean result = IOUtil.deleteRecursivelyIfExists(dir);
-
-        assertTrue(result);
-        assertTrue(!dir.exists());
-    }
-
-    @Test
-    public void testToFile_ValidURL() throws Exception {
-        File file = Files.createTempFile(tempFolder, "url-test", ".txt").toFile();
-        java.net.URL url = file.toURI().toURL();
-
-        File result = IOUtil.toFile(url);
-
-        assertNotNull(result);
-        assertEquals(file.getAbsolutePath(), result.getAbsolutePath());
-    }
-
-    @Test
-    public void testToFile_NullURL() {
-        assertThrows(Exception.class, () -> IOUtil.toFile(null));
-    }
-
-    @Test
-    public void testToFile_MalformedPercentEncodingPreserved() throws Exception {
-        URL url = new URL("file:/tmp/invalid%2Gname.txt");
-
-        File result = IOUtil.toFile(url);
-
-        assertNotNull(result);
-        assertTrue(result.getPath().endsWith("invalid%2Gname.txt"));
-    }
-
-    @Test
-    public void testToFiles_URLArray() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "url1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "url2", ".txt").toFile();
-
-        java.net.URL[] urls = { file1.toURI().toURL(), file2.toURI().toURL() };
-
-        File[] files = IOUtil.toFiles(urls);
-
-        assertNotNull(files);
-        assertEquals(2, files.length);
-    }
-
-    @Test
-    public void testToFiles_URLCollection() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "url-c1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "url-c2", ".txt").toFile();
-
-        java.util.List<java.net.URL> urls = java.util.Arrays.asList(file1.toURI().toURL(), file2.toURI().toURL());
-
-        java.util.List<File> files = IOUtil.toFiles(urls);
-
-        assertNotNull(files);
-        assertEquals(2, files.size());
-    }
-
-    @Test
-    public void testToFiles_EmptyArray() throws Exception {
-        java.net.URL[] urls = {};
-
-        File[] files = IOUtil.toFiles(urls);
-
-        assertNotNull(files);
-        assertEquals(0, files.length);
-    }
-
-    @Test
-    public void testToFiles_EmptyCollection() throws Exception {
-        java.util.List<java.net.URL> urls = new java.util.ArrayList<>();
-
-        java.util.List<File> files = IOUtil.toFiles(urls);
-
-        assertNotNull(files);
-        assertEquals(0, files.size());
-    }
-
-    @Test
-    public void testToFiles_NullURLCollection() throws Exception {
-        assertThrows(Exception.class, () -> IOUtil.toFiles((java.util.Collection<java.net.URL>) null));
-    }
-
-    @Test
-    public void testToURL_ValidFile() throws Exception {
-        File file = Files.createTempFile(tempFolder, "to-url", ".txt").toFile();
-
-        java.net.URL url = IOUtil.toUrl(file);
-
-        assertNotNull(url);
-        assertTrue(url.toString().contains(file.getName()));
-    }
-
-    @Test
-    public void testToUrl_NullFile() throws Exception {
-        assertThrows(Exception.class, () -> IOUtil.toUrl(null));
-    }
-
-    @Test
-    public void testToURLs_FileArray() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "to-urls1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "to-urls2", ".txt").toFile();
-
-        File[] files = { file1, file2 };
-
-        java.net.URL[] urls = IOUtil.toUrls(files);
-
-        assertNotNull(urls);
-        assertEquals(2, urls.length);
-    }
-
-    @Test
-    public void testToURLs_FileCollection() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "to-urls-c1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "to-urls-c2", ".txt").toFile();
-
-        java.util.List<File> files = java.util.Arrays.asList(file1, file2);
-
-        java.util.List<java.net.URL> urls = IOUtil.toUrls(files);
-
-        assertNotNull(urls);
-        assertEquals(2, urls.size());
-    }
-
-    @Test
-    public void testToURLs_EmptyArray() throws Exception {
-        File[] files = {};
-
-        java.net.URL[] urls = IOUtil.toUrls(files);
-
-        assertNotNull(urls);
-        assertEquals(0, urls.length);
-    }
-
-    @Test
-    public void testToURLs_EmptyCollection() throws Exception {
-        java.util.List<File> files = new java.util.ArrayList<>();
-
-        java.util.List<java.net.URL> urls = IOUtil.toUrls(files);
-
-        assertNotNull(urls);
-        assertEquals(0, urls.size());
-    }
-
-    @Test
-    public void testToUrls_NullFileArray() throws Exception {
-        assertThrows(Exception.class, () -> IOUtil.toUrls((File[]) null));
-    }
-
-    @Test
-    public void testToUrls_NullFileCollection() throws Exception {
-        assertThrows(Exception.class, () -> IOUtil.toUrls((java.util.Collection<File>) null));
-    }
-
-    @Test
     public void testTouch_ExistingFile() throws Exception {
         File file = Files.createTempFile(tempFolder, "touch-existing", ".txt").toFile();
+        Files.write(file.toPath(), "keep me".getBytes(UTF_8));
         long originalModified = file.lastModified();
 
         Thread.sleep(100);
 
-        boolean result = IOUtil.touch(file);
+        IOUtil.touch(file);
 
-        assertTrue(result);
         assertTrue(file.lastModified() >= originalModified);
+        // touch only stamps the time; it must not truncate an existing file.
+        assertEquals("keep me", new String(Files.readAllBytes(file.toPath()), UTF_8));
     }
 
     @Test
-    public void testTouch_NonexistentFile() throws Exception {
+    public void testTouch_NonexistentFile_IsCreated() throws Exception {
         File newFile = new File(tempFolder.toFile(), "new-touch-file.txt");
-
-        boolean result = IOUtil.touch(newFile);
-
-        assertFalse(result);
         assertFalse(newFile.exists());
+
+        IOUtil.touch(newFile);
+
+        assertTrue(newFile.exists());
+        assertEquals(0, newFile.length());
+    }
+
+    @Test
+    public void testTouch_NonexistentFile_CreatesMissingParentDirectories() throws Exception {
+        File newFile = new File(tempFolder.toFile(), "touch-parent/nested/created.txt");
+        assertFalse(newFile.exists());
+
+        IOUtil.touch(newFile);
+
+        assertTrue(newFile.exists());
+        assertTrue(newFile.getParentFile().isDirectory());
     }
 
     @Test
     public void testTouch_Directory() throws Exception {
         File dir = Files.createTempDirectory(tempFolder, "touch-dir").toFile();
 
-        boolean result = IOUtil.touch(dir);
+        IOUtil.touch(dir);
 
-        assertTrue(result);
+        assertTrue(dir.isDirectory());
     }
 
     @Test
     public void testTouch_NullFile() throws Exception {
-        assertFalse(IOUtil.touch(null));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.touch(null));
+    }
+
+    // ===== updateLastModified: the non-creating counterpart of touch =====
+
+    @Test
+    public void testUpdateLastModified_ExistingFile() throws Exception {
+        File file = Files.createTempFile(tempFolder, "update-existing", ".txt").toFile();
+        long originalModified = file.lastModified();
+
+        Thread.sleep(100);
+
+        assertTrue(IOUtil.updateLastModified(file));
+        assertTrue(file.lastModified() >= originalModified);
     }
 
     @Test
-    public void testContentEquals_Files_Identical() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "equal1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "equal2", ".txt").toFile();
+    public void testUpdateLastModified_NonexistentFile_DoesNotCreate() throws Exception {
+        File newFile = new File(tempFolder.toFile(), "never-created.txt");
 
-        String content = "Identical content";
-        Files.write(file1.toPath(), content.getBytes(UTF_8));
-        Files.write(file2.toPath(), content.getBytes(UTF_8));
-
-        boolean result = IOUtil.contentEquals(file1, file2);
-
-        assertTrue(result);
+        assertFalse(IOUtil.updateLastModified(newFile));
+        assertFalse(newFile.exists());
     }
 
     @Test
-    public void testContentEquals_Files_Different() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "diff1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "diff2", ".txt").toFile();
+    public void testUpdateLastModified_Directory() throws Exception {
+        File dir = Files.createTempDirectory(tempFolder, "update-dir").toFile();
 
-        Files.write(file1.toPath(), "Content 1".getBytes(UTF_8));
-        Files.write(file2.toPath(), "Content 2".getBytes(UTF_8));
-
-        boolean result = IOUtil.contentEquals(file1, file2);
-
-        assertTrue(!result);
+        assertTrue(IOUtil.updateLastModified(dir));
     }
 
     @Test
-    public void testContentEquals_Files_BothEmpty() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "empty-eq1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "empty-eq2", ".txt").toFile();
-
-        boolean result = IOUtil.contentEquals(file1, file2);
-
-        assertTrue(result);
-    }
-
-    @Test
-    public void testContentEquals_Files_SameFile() throws Exception {
-        File file = Files.createTempFile(tempFolder, "same", ".txt").toFile();
-        Files.write(file.toPath(), "Content".getBytes(UTF_8));
-
-        boolean result = IOUtil.contentEquals(file, file);
-
-        assertTrue(result);
-    }
-
-    @Test
-    public void testContentEquals_InputStreams_Identical() throws Exception {
-        String content = "Stream content";
-        InputStream is1 = new ByteArrayInputStream(content.getBytes(UTF_8));
-        InputStream is2 = new ByteArrayInputStream(content.getBytes(UTF_8));
-
-        boolean result = IOUtil.contentEquals(is1, is2);
-
-        assertTrue(result);
-    }
-
-    @Test
-    public void testContentEquals_InputStreams_Different() throws Exception {
-        InputStream is1 = new ByteArrayInputStream("Content 1".getBytes(UTF_8));
-        InputStream is2 = new ByteArrayInputStream("Content 2".getBytes(UTF_8));
-
-        boolean result = IOUtil.contentEquals(is1, is2);
-
-        assertTrue(!result);
-    }
-
-    @Test
-    public void testContentEquals_InputStreams_Empty() throws Exception {
-        InputStream is1 = new ByteArrayInputStream(new byte[0]);
-        InputStream is2 = new ByteArrayInputStream(new byte[0]);
-
-        boolean result = IOUtil.contentEquals(is1, is2);
-
-        assertTrue(result);
-    }
-
-    @Test
-    public void testContentEquals_Readers_Identical() throws Exception {
-        String content = "Reader content";
-        Reader r1 = new StringReader(content);
-        Reader r2 = new StringReader(content);
-
-        boolean result = IOUtil.contentEquals(r1, r2);
-
-        assertTrue(result);
-    }
-
-    @Test
-    public void testContentEquals_Readers_Different() throws Exception {
-        Reader r1 = new StringReader("Content 1");
-        Reader r2 = new StringReader("Content 2");
-
-        boolean result = IOUtil.contentEquals(r1, r2);
-
-        assertTrue(!result);
-    }
-
-    @Test
-    public void testContentEquals_Readers_Empty() throws Exception {
-        Reader r1 = new StringReader("");
-        Reader r2 = new StringReader("");
-
-        boolean result = IOUtil.contentEquals(r1, r2);
-
-        assertTrue(result);
-    }
-
-    @Test
-    public void testContentEquals_LargeFiles() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "large-eq1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "large-eq2", ".txt").toFile();
-
-        StringBuilder content = new StringBuilder();
-        for (int i = 0; i < 10000; i++) {
-            content.append("Line ").append(i).append("\n");
-        }
-
-        Files.write(file1.toPath(), content.toString().getBytes(UTF_8));
-        Files.write(file2.toPath(), content.toString().getBytes(UTF_8));
-
-        boolean result = IOUtil.contentEquals(file1, file2);
-
-        assertTrue(result);
-    }
-
-    @Test
-    public void testContentEquals_NullFiles() throws Exception {
-        assertTrue(IOUtil.contentEquals((File) null, (File) null));
-    }
-
-    @Test
-    public void testContentEquals_OneNullFile() throws Exception {
-        assertFalse(IOUtil.contentEquals(tempFile, null));
-        assertFalse(IOUtil.contentEquals(null, tempFile));
-    }
-
-    @Test
-    public void testContentEquals_SameInputStream() throws Exception {
-        ByteArrayInputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8));
-        assertTrue(IOUtil.contentEquals(is, is));
-    }
-
-    @Test
-    public void testContentEquals_NullInputStreams() throws Exception {
-        assertTrue(IOUtil.contentEquals((InputStream) null, (InputStream) null));
-    }
-
-    @Test
-    public void testContentEquals_OneNullInputStream() throws Exception {
-        ByteArrayInputStream is = new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8));
-        assertFalse(IOUtil.contentEquals(is, null));
-    }
-
-    @Test
-    public void testContentEquals_NullReaders() throws Exception {
-        assertTrue(IOUtil.contentEquals((Reader) null, (Reader) null));
-    }
-
-    @Test
-    public void testContentEquals_OneNullReader() throws Exception {
-        Reader reader = new StringReader(TEST_CONTENT);
-        assertFalse(IOUtil.contentEquals(reader, null));
-    }
-
-    @Test
-    public void testContentEquals_OneNullOneEmpty_Reader() throws Exception {
-        assertFalse(IOUtil.contentEquals(null, new StringReader("")));
-    }
-
-    @Test
-    public void testContentEquals_OneNullOneEmpty_InputStream() throws Exception {
-        assertFalse(IOUtil.contentEquals(null, new ByteArrayInputStream(new byte[0])));
-    }
-
-    // ===== contentEquals InputStream same reference =====
-
-    @Test
-    public void testContentEquals_InputStream_SameReference() throws IOException {
-        byte[] data = "Hello".getBytes(UTF_8);
-        try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(data)) {
-            assertTrue(IOUtil.contentEquals(bais, bais));
-        }
-    }
-
-    @Test
-    public void testContentEquals_InputStream_OneNull() throws IOException {
-        byte[] data = "Hello".getBytes(UTF_8);
-        try (java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(data)) {
-            assertFalse(IOUtil.contentEquals(bais, null));
-            assertFalse(IOUtil.contentEquals(null, bais));
-        }
-    }
-
-    // ===== contentEquals Reader same reference =====
-
-    @Test
-    public void testContentEquals_Reader_SameReference() throws IOException {
-        java.io.StringReader sr = new java.io.StringReader("Hello");
-        assertTrue(IOUtil.contentEquals(sr, sr));
-    }
-
-    @Test
-    public void testContentEquals_Reader_OneNull() throws IOException {
-        java.io.StringReader sr = new java.io.StringReader("Hello");
-        assertFalse(IOUtil.contentEquals(sr, null));
-        assertFalse(IOUtil.contentEquals(null, sr));
-    }
-
-    @Test
-    public void testContentEqualsIgnoreEOL_Files_Identical() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "eol1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "eol2", ".txt").toFile();
-
-        Files.write(file1.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
-        Files.write(file2.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
-
-        boolean result = IOUtil.contentEqualsIgnoreEOL(file1, file2, UTF_8.name());
-
-        assertTrue(result);
-    }
-
-    @Test
-    public void testContentEqualsIgnoreEOL_Files_DifferentEOL() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "eol-unix", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "eol-win", ".txt").toFile();
-
-        Files.write(file1.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
-        Files.write(file2.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
-
-        boolean result = IOUtil.contentEqualsIgnoreEOL(file1, file2, UTF_8.name());
-
-        assertTrue(result);
-    }
-
-    @Test
-    public void testContentEqualsIgnoreEOL_Files_DifferentContent() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "eol-diff1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "eol-diff2", ".txt").toFile();
-
-        Files.write(file1.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
-        Files.write(file2.toPath(), "Line1\nLine3\n".getBytes(UTF_8));
-
-        boolean result = IOUtil.contentEqualsIgnoreEOL(file1, file2, UTF_8.name());
-
-        assertTrue(!result);
-    }
-
-    @Test
-    public void testContentEqualsIgnoreEOL_Readers_DifferentEOL() throws Exception {
-        Reader r1 = new StringReader("Line1\nLine2");
-        Reader r2 = new StringReader("Line1\nLine2");
-
-        boolean result = IOUtil.contentEqualsIgnoreEOL(r1, r2);
-
-        assertTrue(result);
-    }
-
-    @Test
-    public void testContentEqualsIgnoreEOL_Readers_DifferentContent() throws Exception {
-        Reader r1 = new StringReader("Line1\nLine2");
-        Reader r2 = new StringReader("Line1\nLine3");
-
-        boolean result = IOUtil.contentEqualsIgnoreEOL(r1, r2);
-
-        assertTrue(!result);
-    }
-
-    @Test
-    public void testContentEqualsIgnoreEOL_Readers_Empty() throws Exception {
-        Reader r1 = new StringReader("");
-        Reader r2 = new StringReader("");
-
-        boolean result = IOUtil.contentEqualsIgnoreEOL(r1, r2);
-
-        assertTrue(result);
-    }
-
-    @Test
-    public void testContentEqualsIgnoreEOL_SameFile() throws Exception {
-        assertTrue(IOUtil.contentEqualsIgnoreEOL(tempFile, tempFile, "UTF-8"));
-    }
-
-    @Test
-    public void testContentEqualsIgnoreEOL_NullReaders() throws Exception {
-        assertTrue(IOUtil.contentEqualsIgnoreEOL((Reader) null, (Reader) null));
-    }
-
-    @Test
-    public void testContentEqualsIgnoreEOL_OneNullReader() throws Exception {
-        Reader reader = new StringReader(TEST_CONTENT);
-        assertFalse(IOUtil.contentEqualsIgnoreEOL(reader, null));
-    }
-
-    @Test
-    public void testContentEqualsIgnoreEOL_OneNullOneEmpty_Reader() throws Exception {
-        assertFalse(IOUtil.contentEqualsIgnoreEOL(null, new StringReader("")));
-    }
-
-    @Test
-    public void testForLines_File_Basic() throws Exception {
-        File file = Files.createTempFile(tempFolder, "for-lines", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\nLine2\nLine3\n".getBytes(UTF_8));
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        IOUtil.forLines(file, line -> lines.add(line));
-
-        assertEquals(3, lines.size());
-        assertEquals("Line1", lines.get(0));
-        assertEquals("Line2", lines.get(1));
-        assertEquals("Line3", lines.get(2));
-    }
-
-    @Test
-    public void testForLines_File_WithCharset() throws Exception {
-        File file = Files.createTempFile(tempFolder, "for-lines-enc", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        IOUtil.forLines(file, line -> lines.add(line), () -> {
-        });
-
-        assertEquals(2, lines.size());
-    }
-
-    @Test
-    public void testForLines_File_WithOffsetAndCount() throws Exception {
-        File file = Files.createTempFile(tempFolder, "for-lines-offset", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\nLine2\nLine3\nLine4\nLine5\n".getBytes(UTF_8));
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        IOUtil.forLines(file, 1, 3, line -> lines.add(line));
-
-        assertEquals(3, lines.size());
-        assertEquals("Line2", lines.get(0));
-        assertEquals("Line3", lines.get(1));
-        assertEquals("Line4", lines.get(2));
-    }
-
-    @Test
-    public void testForLines_File_WithOffsetCountAndCallback() throws Exception {
-        File file = Files.createTempFile(tempFolder, "for-lines-callback", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\nLine2\nLine3\n".getBytes(UTF_8));
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        final boolean[] callbackInvoked = { false };
-
-        IOUtil.forLines(file, 0, 2, line -> lines.add(line), () -> callbackInvoked[0] = true);
-
-        assertEquals(2, lines.size());
-        assertTrue(callbackInvoked[0]);
-    }
-
-    @Test
-    public void testForLines_File_WithThreads() throws Exception {
-        File file = Files.createTempFile(tempFolder, "for-lines-threads", ".txt").toFile();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 100; i++) {
-            sb.append("Line").append(i).append("\n");
-        }
-        Files.write(file.toPath(), sb.toString().getBytes(UTF_8));
-
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-        IOUtil.forLines(file, 0, 100, 2, line -> lines.add(line));
-
-        assertEquals(100, lines.size());
-    }
-
-    @Test
-    public void testForLines_File_WithThreadsAndCallback() throws Exception {
-        File file = Files.createTempFile(tempFolder, "for-lines-threads-cb", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\nLine2\nLine3\n".getBytes(UTF_8));
-
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-        final boolean[] callbackInvoked = { false };
-
-        IOUtil.forLines(file, 0, 3, 2, line -> lines.add(line), () -> callbackInvoked[0] = true);
-
-        assertEquals(3, lines.size());
-        assertTrue(callbackInvoked[0]);
-    }
-
-    @Test
-    public void testForLines_Collection_Basic() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "coll1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "coll2", ".txt").toFile();
-        Files.write(file1.toPath(), "File1Line1\nFile1Line2\n".getBytes(UTF_8));
-        Files.write(file2.toPath(), "File2Line1\nFile2Line2\n".getBytes(UTF_8));
-
-        java.util.List<File> files = java.util.Arrays.asList(file1, file2);
-        java.util.List<String> lines = new java.util.ArrayList<>();
-
-        IOUtil.forLines(files, line -> lines.add(line));
-
-        assertEquals(4, lines.size());
-    }
-
-    @Test
-    public void testForLines_Directory_LazyOpen() throws Exception {
-        // A directory with many files: forLines now opens each file lazily (LazyFileLineIterator) rather than
-        // holding every file descriptor open up front. Verify all lines from all files are still read.
-        File dir = Files.createTempDirectory(tempFolder, "forlines-dir").toFile();
-        final int fileCount = 20;
-        final int linesPerFile = 5;
-
-        for (int f = 0; f < fileCount; f++) {
-            File file = new File(dir, "f" + f + ".txt");
-            StringBuilder sb = new StringBuilder();
-            for (int l = 0; l < linesPerFile; l++) {
-                sb.append("f").append(f).append("L").append(l).append("\n");
-            }
-            Files.write(file.toPath(), sb.toString().getBytes(UTF_8));
-        }
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        IOUtil.forLines(dir, line -> lines.add(line));
-
-        assertEquals(fileCount * linesPerFile, lines.size());
+    public void testUpdateLastModified_NullFile() throws Exception {
+        assertFalse(IOUtil.updateLastModified(null));
     }
 
     @Test
@@ -8029,437 +1810,13 @@ public class IOUtilTest extends TestBase {
                 .filter(it -> it.getSimpleName().equals("LazyFileLineIterator"))
                 .findFirst()
                 .orElseThrow();
-        final java.lang.reflect.Constructor<?> constructor = iteratorClass.getDeclaredConstructor(File.class);
+        final java.lang.reflect.Constructor<?> constructor = iteratorClass.getDeclaredConstructor(File.class, java.nio.charset.Charset.class);
         constructor.setAccessible(true);
-        final Object iterator = constructor.newInstance(emptyFile);
+        final Object iterator = constructor.newInstance(emptyFile, UTF_8);
 
         ((AutoCloseable) iterator).close();
 
         assertThrows(NoSuchElementException.class, () -> ((Iterator<?>) iterator).next());
-    }
-
-    @Test
-    public void testForLines_Collection_WithCallback() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "coll-cb1", ".txt").toFile();
-        Files.write(file1.toPath(), "Line1\n".getBytes(UTF_8));
-
-        java.util.List<File> files = java.util.Arrays.asList(file1);
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        final boolean[] callbackInvoked = { false };
-
-        IOUtil.forLines(files, line -> lines.add(line), () -> callbackInvoked[0] = true);
-
-        assertEquals(1, lines.size());
-        assertTrue(callbackInvoked[0]);
-    }
-
-    @Test
-    public void testForLines_Collection_WithOffsetAndCount() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "coll-offset1", ".txt").toFile();
-        Files.write(file1.toPath(), "Line1\nLine2\nLine3\nLine4\n".getBytes(UTF_8));
-
-        java.util.List<File> files = java.util.Arrays.asList(file1);
-        java.util.List<String> lines = new java.util.ArrayList<>();
-
-        IOUtil.forLines(files, 1, 2, line -> lines.add(line));
-
-        assertEquals(2, lines.size());
-        assertEquals("Line2", lines.get(0));
-    }
-
-    @Test
-    public void testForLines_Collection_WithThreads() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "coll-threads", ".txt").toFile();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 50; i++) {
-            sb.append("Line").append(i).append("\n");
-        }
-        Files.write(file1.toPath(), sb.toString().getBytes(UTF_8));
-
-        java.util.List<File> files = java.util.Arrays.asList(file1);
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-
-        IOUtil.forLines(files, 0, 50, 2, line -> lines.add(line));
-
-        assertEquals(50, lines.size());
-    }
-
-    @Test
-    public void testForLines_File_ReadAndProcessThreads() throws Exception {
-        File file = Files.createTempFile(tempFolder, "read-process", ".txt").toFile();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 100; i++) {
-            sb.append("Line").append(i).append("\n");
-        }
-        Files.write(file.toPath(), sb.toString().getBytes(UTF_8));
-
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-        IOUtil.forLines(file, 1, 2, 100, line -> lines.add(line));
-
-        assertEquals(100, lines.size());
-    }
-
-    @Test
-    public void testForLines_File_ReadProcessThreadsWithCallback() throws Exception {
-        File file = Files.createTempFile(tempFolder, "read-process-cb", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\nLine2\nLine3\n".getBytes(UTF_8));
-
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-        final boolean[] callbackInvoked = { false };
-
-        IOUtil.forLines(file, 1, 2, 100, line -> lines.add(line), () -> callbackInvoked[0] = true);
-
-        assertEquals(3, lines.size());
-        assertTrue(callbackInvoked[0]);
-    }
-
-    @Test
-    public void testForLines_File_WithOffsetCountReadProcessThreads() throws Exception {
-        File file = Files.createTempFile(tempFolder, "offset-read-process", ".txt").toFile();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 100; i++) {
-            sb.append("Line").append(i).append("\n");
-        }
-        Files.write(file.toPath(), sb.toString().getBytes(UTF_8));
-
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-        IOUtil.forLines(file, 10, 50, 1, 2, 100, line -> lines.add(line));
-
-        assertEquals(50, lines.size());
-    }
-
-    @Test
-    public void testForLines_File_WithOffsetCountReadProcessThreadsCallback() throws Exception {
-        File file = Files.createTempFile(tempFolder, "offset-read-process-cb", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\nLine2\nLine3\nLine4\nLine5\n".getBytes(UTF_8));
-
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-        final boolean[] callbackInvoked = { false };
-
-        IOUtil.forLines(file, 1, 3, 1, 2, 50, line -> lines.add(line), () -> callbackInvoked[0] = true);
-
-        assertEquals(3, lines.size());
-        assertTrue(callbackInvoked[0]);
-    }
-
-    @Test
-    public void testForLines_Collection_ReadProcessThreads() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "coll-rp1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "coll-rp2", ".txt").toFile();
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 50; i++) {
-            sb.append("Line").append(i).append("\n");
-        }
-        Files.write(file1.toPath(), sb.toString().getBytes(UTF_8));
-        Files.write(file2.toPath(), sb.toString().getBytes(UTF_8));
-
-        java.util.List<File> files = java.util.Arrays.asList(file1, file2);
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-
-        IOUtil.forLines(files, 0, 100, 2, 1024, line -> lines.add(line));
-
-        assertEquals(100, lines.size());
-    }
-
-    @Test
-    public void testForLines_Collection_ReadProcessThreadsCallback() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "coll-rp-cb", ".txt").toFile();
-        Files.write(file1.toPath(), "Line1\nLine2\n".getBytes(UTF_8));
-
-        java.util.List<File> files = java.util.Arrays.asList(file1);
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-        final boolean[] callbackInvoked = { false };
-
-        IOUtil.forLines(files, 1, 2, 50, line -> lines.add(line), () -> callbackInvoked[0] = true);
-
-        assertEquals(2, lines.size());
-        assertTrue(callbackInvoked[0]);
-    }
-
-    @Test
-    public void testForLines_Collection_WithOffsetCountReadProcessThreads() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "coll-offset-rp", ".txt").toFile();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 100; i++) {
-            sb.append("Line").append(i).append("\n");
-        }
-        Files.write(file1.toPath(), sb.toString().getBytes(UTF_8));
-
-        java.util.List<File> files = java.util.Arrays.asList(file1);
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-
-        IOUtil.forLines(files, 10, 30, 1, 2, 100, line -> lines.add(line));
-
-        assertEquals(30, lines.size());
-    }
-
-    @Test
-    public void testForLines_Collection_WithOffsetCountReadProcessThreadsCallback() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "coll-offset-rp-cb", ".txt").toFile();
-        Files.write(file1.toPath(), "Line1\nLine2\nLine3\nLine4\nLine5\n".getBytes(UTF_8));
-
-        java.util.List<File> files = java.util.Arrays.asList(file1);
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-        final boolean[] callbackInvoked = { false };
-
-        IOUtil.forLines(files, 1, 3, 1, 2, 50, line -> lines.add(line), () -> callbackInvoked[0] = true);
-
-        assertEquals(3, lines.size());
-        assertTrue(callbackInvoked[0]);
-    }
-
-    @Test
-    public void testForLines_InputStream_Basic() throws Exception {
-        String content = "Line1\nLine2\nLine3\n";
-        InputStream is = new ByteArrayInputStream(content.getBytes(UTF_8));
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        IOUtil.forLines(is, line -> lines.add(line));
-
-        assertEquals(3, lines.size());
-        assertEquals("Line1", lines.get(0));
-    }
-
-    @Test
-    public void testForLines_InputStream_WithCallback() throws Exception {
-        String content = "Line1\nLine2\n";
-        InputStream is = new ByteArrayInputStream(content.getBytes(UTF_8));
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        final boolean[] callbackInvoked = { false };
-
-        IOUtil.forLines(is, line -> lines.add(line), () -> callbackInvoked[0] = true);
-
-        assertEquals(2, lines.size());
-        assertTrue(callbackInvoked[0]);
-    }
-
-    @Test
-    public void testForLines_InputStream_WithOffsetAndCount() throws Exception {
-        String content = "Line1\nLine2\nLine3\nLine4\nLine5\n";
-        InputStream is = new ByteArrayInputStream(content.getBytes(UTF_8));
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        IOUtil.forLines(is, 1, 3, line -> lines.add(line));
-
-        assertEquals(3, lines.size());
-        assertEquals("Line2", lines.get(0));
-    }
-
-    @Test
-    public void testForLines_InputStream_WithOffsetCountCallback() throws Exception {
-        String content = "Line1\nLine2\nLine3\n";
-        InputStream is = new ByteArrayInputStream(content.getBytes(UTF_8));
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        final boolean[] callbackInvoked = { false };
-
-        IOUtil.forLines(is, 0, 2, line -> lines.add(line), () -> callbackInvoked[0] = true);
-
-        assertEquals(2, lines.size());
-        assertTrue(callbackInvoked[0]);
-    }
-
-    @Test
-    public void testForLines_InputStream_WithProcessThreads() throws Exception {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 100; i++) {
-            sb.append("Line").append(i).append("\n");
-        }
-        InputStream is = new ByteArrayInputStream(sb.toString().getBytes(UTF_8));
-
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-        IOUtil.forLines(is, 0L, 100L, 2, 16, Fnn.c(line -> lines.add(line)));
-
-        assertEquals(100, lines.size());
-    }
-
-    @Test
-    public void testForLines_InputStream_WithProcessThreadsCallback() throws Exception {
-        String content = "Line1\nLine2\nLine3\n";
-        InputStream is = new ByteArrayInputStream(content.getBytes(UTF_8));
-
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-        final boolean[] callbackInvoked = { false };
-
-        IOUtil.forLines(is, 0L, 3L, 2, 16, Fnn.c(line -> lines.add(line)), () -> callbackInvoked[0] = true);
-
-        assertEquals(3, lines.size());
-        assertTrue(callbackInvoked[0]);
-    }
-
-    @Test
-    public void testForLines_Reader_Basic() throws Exception {
-        Reader reader = new StringReader("Line1\nLine2\nLine3\n");
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        IOUtil.forLines(reader, line -> lines.add(line));
-
-        assertEquals(3, lines.size());
-        assertEquals("Line1", lines.get(0));
-    }
-
-    @Test
-    public void testForLines_Reader_WithCallback() throws Exception {
-        Reader reader = new StringReader("Line1\nLine2\n");
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        final boolean[] callbackInvoked = { false };
-
-        IOUtil.forLines(reader, line -> lines.add(line), () -> callbackInvoked[0] = true);
-
-        assertEquals(2, lines.size());
-        assertTrue(callbackInvoked[0]);
-    }
-
-    @Test
-    public void testForLines_Reader_WithOffsetAndCount() throws Exception {
-        Reader reader = new StringReader("Line1\nLine2\nLine3\nLine4\nLine5\n");
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        IOUtil.forLines(reader, 1, 3, line -> lines.add(line));
-
-        assertEquals(3, lines.size());
-        assertEquals("Line2", lines.get(0));
-    }
-
-    @Test
-    public void testForLines_Reader_WithOffsetCountCallback() throws Exception {
-        Reader reader = new StringReader("Line1\nLine2\nLine3\n");
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        final boolean[] callbackInvoked = { false };
-
-        IOUtil.forLines(reader, 0, 2, line -> lines.add(line), () -> callbackInvoked[0] = true);
-
-        assertEquals(2, lines.size());
-        assertTrue(callbackInvoked[0]);
-    }
-
-    @Test
-    public void testForLines_Reader_WithProcessThreads() throws Exception {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 100; i++) {
-            sb.append("Line").append(i).append("\n");
-        }
-        Reader reader = new StringReader(sb.toString());
-
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-        IOUtil.forLines(reader, 0L, 100L, 2, 16, line -> lines.add(line));
-
-        assertEquals(100, lines.size());
-    }
-
-    @Test
-    public void testForLines_Reader_WithProcessThreadsCallback() throws Exception {
-        Reader reader = new StringReader("Line1\nLine2\nLine3\n");
-
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-        final boolean[] callbackInvoked = { false };
-
-        IOUtil.forLines(reader, 0L, 3L, 2, 16, line -> lines.add(line), () -> callbackInvoked[0] = true);
-
-        assertEquals(3, lines.size());
-        assertTrue(callbackInvoked[0]);
-    }
-
-    @Test
-    public void testForLines_EmptyFile() throws Exception {
-        File file = Files.createTempFile(tempFolder, "empty-for-lines", ".txt").toFile();
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        IOUtil.forLines(file, line -> lines.add(line));
-
-        assertEquals(0, lines.size());
-    }
-
-    @Test
-    public void testForLines_EmptyInputStream() throws Exception {
-        InputStream is = new ByteArrayInputStream(new byte[0]);
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        IOUtil.forLines(is, line -> lines.add(line));
-
-        assertEquals(0, lines.size());
-    }
-
-    @Test
-    public void testForLines_EmptyReader() throws Exception {
-        Reader reader = new StringReader("");
-
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        IOUtil.forLines(reader, line -> lines.add(line));
-
-        assertEquals(0, lines.size());
-    }
-
-    @Test
-    public void testForLines_LargeFile() throws Exception {
-        File largeFile = Files.createTempFile(tempFolder, "large-for-lines", ".txt").toFile();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 10000; i++) {
-            sb.append("Line ").append(i).append("\n");
-        }
-        Files.write(largeFile.toPath(), sb.toString().getBytes(UTF_8));
-
-        java.util.concurrent.atomic.AtomicInteger count = new java.util.concurrent.atomic.AtomicInteger(0);
-        IOUtil.forLines(largeFile, line -> count.incrementAndGet());
-
-        assertEquals(10000, count.get());
-    }
-
-    @Test
-    public void testForLines_WithException() throws Exception {
-        File file = Files.createTempFile(tempFolder, "for-lines-exception", ".txt").toFile();
-        Files.write(file.toPath(), "Line1\nLine2\nLine3\n".getBytes(UTF_8));
-
-        assertThrows(Exception.class, () -> {
-            IOUtil.forLines(file, line -> {
-                if (line.equals("Line2")) {
-                    throw new RuntimeException("Test exception");
-                }
-            });
-        });
-    }
-
-    @Test
-    public void testForLines_WithProcessThreads() throws Exception {
-        File file = Files.createTempFile(tempFolder, "forlines-thread", ".txt").toFile();
-        IOUtil.writeLines(java.util.Arrays.asList("line1", "line2", "line3", "line4", "line5"), file);
-
-        java.util.List<String> lines = new java.util.concurrent.CopyOnWriteArrayList<>();
-        IOUtil.forLines(file, 0L, Long.MAX_VALUE, 2, 4, line -> lines.add(line));
-        assertEquals(5, lines.size());
-    }
-
-    // ===== forLines with Collection<File> and processThreadNum =====
-
-    @Test
-    public void testForLines_Collection_WithOffsetCountAndProcessThreads() throws Exception {
-        java.util.List<String> lines = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
-        java.util.List<File> files = java.util.Arrays.asList(largeFile);
-        IOUtil.forLines(files, 0L, 5L, 1, 1, (String line) -> lines.add(line), () -> {
-        });
-        assertEquals(5, lines.size());
-    }
-
-    @Test
-    public void testForLines_Collection_EmptyList_WithProcessThreads() throws Exception {
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        java.util.List<File> emptyFiles = java.util.Collections.emptyList();
-        IOUtil.forLines(emptyFiles, 0L, 5L, 1, 1, (String line) -> lines.add(line), () -> {
-        });
-        assertEquals(0, lines.size());
-    }
-
-    @Test
-    public void testForLines_Collection_WithOffsetCount_NoProcessThreads() throws Exception {
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        java.util.List<File> files = java.util.Arrays.asList(largeFile);
-        IOUtil.forLines(files, 2L, 3L, 0, 0, (String line) -> lines.add(line), () -> {
-        });
-        assertEquals(3, lines.size());
     }
 
     @Test
@@ -8495,53 +1852,6 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testReadAllBytes_ZipSkipsLeadingDirectoryEntries() throws Exception {
-        final File zipFile = Files.createTempFile(tempFolder, "io-util-directory-first", ".zip").toFile();
-
-        try (java.util.zip.ZipOutputStream out = new java.util.zip.ZipOutputStream(Files.newOutputStream(zipFile.toPath()))) {
-            out.putNextEntry(new java.util.zip.ZipEntry("directory/"));
-            out.closeEntry();
-            out.putNextEntry(new java.util.zip.ZipEntry("directory/entry.txt"));
-            out.write("zip-content".getBytes(UTF_8));
-            out.closeEntry();
-        }
-
-        assertEquals("zip-content", new String(IOUtil.readAllBytes(zipFile), UTF_8));
-    }
-
-    @Test
-    public void testReadAllBytes_ZipWithOnlyDirectoriesFailsAndClosesArchive() throws Exception {
-        final File zipFile = Files.createTempFile(tempFolder, "io-util-directory-only", ".zip").toFile();
-
-        try (java.util.zip.ZipOutputStream out = new java.util.zip.ZipOutputStream(Files.newOutputStream(zipFile.toPath()))) {
-            out.putNextEntry(new java.util.zip.ZipEntry("directory/"));
-            out.closeEntry();
-        }
-
-        final UncheckedIOException error = assertThrows(UncheckedIOException.class, () -> IOUtil.readAllBytes(zipFile));
-        assertTrue(error.getCause().getMessage().contains("contains no file entries"));
-        assertTrue(zipFile.delete(), "the ZipFile must be closed when opening fails");
-    }
-
-    // ---------------------------------------------------------------------
-    //  Regression tests for symbolic-link handling in recursive operations.
-    //  These guard against infinite loops on cyclic symlinks (listFiles,
-    //  copyDirectory) and verify that copy never escapes the source tree
-    //  by following a symlink target outside it.
-    // ---------------------------------------------------------------------
-
-    /** Try to create a symbolic link; return false if not supported (Windows w/o privilege). */
-    private static boolean trySymlink(Path link, Path target) {
-        try {
-            Files.createSymbolicLink(link, target);
-            return true;
-        } catch (UnsupportedOperationException | IOException e) {
-            // SecurityException, AccessDenied on Windows without "Create symbolic links" privilege.
-            return false;
-        }
-    }
-
-    @Test
     public void testListFiles_recursive_doesNotFollowSymlinkCycle() throws Exception {
         File root = Files.createTempDirectory(tempFolder, "symlink-cycle").toFile();
         File sub = new File(root, "sub");
@@ -8550,9 +1860,7 @@ public class IOUtilTest extends TestBase {
 
         // sub/loop -> root  (cycle: root/sub/loop/sub/loop/sub/...)
         Path loop = sub.toPath().resolve("loop");
-        if (!trySymlink(loop, root.toPath())) {
-            return; // Skip on platforms that can't create symlinks (e.g. Windows non-admin).
-        }
+        assumeTrue(trySymlink(loop, root.toPath()), SYMLINK_UNSUPPORTED);
 
         // Must complete (no StackOverflowError / no hang).
         java.util.List<File> files = IOUtil.listFiles(root, true, false);
@@ -8564,210 +1872,10 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testCopyDirectory_doesNotFollowSymlinkCycle() throws Exception {
-        File src = Files.createTempDirectory(tempFolder, "copy-symlink-src").toFile();
-        File dest = Files.createTempDirectory(tempFolder, "copy-symlink-dest").toFile();
-        // Make dest non-existent so copyDirectory creates it inside.
-        assertTrue(IOUtil.deleteRecursivelyIfExists(dest));
-        Files.write(new File(src, "a.txt").toPath(), "A".getBytes(UTF_8));
-
-        // src/loop -> src
-        Path loop = src.toPath().resolve("loop");
-        if (!trySymlink(loop, src.toPath())) {
-            return;
-        }
-
-        // Must terminate; previously this could spin forever.
-        IOUtil.copyDirectory(src, dest);
-
-        // a.txt was copied; we don't recurse through the symlink, so we shouldn't see
-        // src/loop/loop/loop/... materialized as nested directories at the destination.
-        File copiedA = new File(dest, src.getName() + "/a.txt");
-        assertTrue(copiedA.exists() || new File(dest, "a.txt").exists());
-    }
-
-    @Test
     public void testListFiles_nullParentReturnsEmptyNotNpe() {
         java.util.List<File> files = IOUtil.listFiles(null, true, false);
         assertNotNull(files);
         assertTrue(files.isEmpty());
-    }
-
-    @Test
-    public void testWriteLines_doesNotCloseCallerWriter() throws Exception {
-        File out = Files.createTempFile(tempFolder, "wl", ".txt").toFile();
-        java.util.concurrent.atomic.AtomicBoolean closed = new java.util.concurrent.atomic.AtomicBoolean();
-        try (Writer w = new java.io.OutputStreamWriter(new FileOutputStream(out), UTF_8) {
-            @Override
-            public void close() throws IOException {
-                closed.set(true);
-                super.close();
-            }
-        }) {
-            IOUtil.writeLines(java.util.Arrays.asList("a", "b"), w);
-            // Caller-supplied writer must still be usable after writeLines returns.
-            assertFalse(closed.get(), "writeLines must not close caller's Writer");
-            w.write("c\n");
-        }
-        // After try-with-resources, content should include all three lines.
-        String content = new String(Files.readAllBytes(out.toPath()), UTF_8);
-        assertTrue(content.contains("a"));
-        assertTrue(content.contains("b"));
-        assertTrue(content.contains("c"));
-    }
-
-    @Test
-    public void testReadLines_doesNotCloseCallerReader() throws Exception {
-        File f = Files.createTempFile(tempFolder, "rl", ".txt").toFile();
-        Files.write(f.toPath(), "x\ny\nz\n".getBytes(UTF_8));
-        java.util.concurrent.atomic.AtomicBoolean closed = new java.util.concurrent.atomic.AtomicBoolean();
-        // Use a BufferedReader so subsequent reads aren't lost — readLines() wraps a
-        // non-BufferedReader in a pooled buffer that read-aheads then gets recycled,
-        // which is incompatible with the "still advanceable" check below.
-        try (Reader r = new java.io.BufferedReader(new java.io.InputStreamReader(new FileInputStream(f), UTF_8) {
-            @Override
-            public void close() throws IOException {
-                closed.set(true);
-                super.close();
-            }
-        })) {
-            java.util.List<String> first = IOUtil.readLines(r, 0, 1);
-            assertEquals(java.util.Collections.singletonList("x"), first);
-            assertFalse(closed.get(), "readLines must not close caller's Reader");
-            // Reader should still be advanceable.
-            java.util.List<String> rest = IOUtil.readLines(r, 0, 10);
-            assertEquals(java.util.Arrays.asList("y", "z"), rest);
-        }
-    }
-
-    @Test
-    public void testReadBytes_offsetSkippedShortReturnsEmpty() throws Exception {
-        File f = Files.createTempFile(tempFolder, "rb", ".bin").toFile();
-        Files.write(f.toPath(), new byte[] { 1, 2, 3 });
-        // offset > file size -> empty array, NOT exception.
-        byte[] result = IOUtil.readBytes(f, 100, 10);
-        assertNotNull(result);
-        assertEquals(0, result.length);
-    }
-
-    // BUG FIX: append(CharSequence, Charset=null, File) used to NPE on String.getBytes(null);
-    // toByteArray(...) now treats null charset as platform default (matches charsToBytes/write semantics).
-    @Test
-    public void testAppendCharSequence_nullCharsetUsesDefault() throws Exception {
-        File f = Files.createTempFile(tempFolder, "appendcs", ".txt").toFile();
-        // overwrite with a known prefix using default charset
-        IOUtil.write("PRE-", f);
-        // null charset must be tolerated and behave as DEFAULT_CHARSET (no NPE).
-        IOUtil.append("hello", (Charset) null, f);
-        String content = new String(Files.readAllBytes(f.toPath()), Charset.defaultCharset());
-        assertEquals("PRE-hello", content);
-    }
-
-    // BUG FIX: appendLine(Object, Charset=null, File) used to NPE on String.getBytes(null).
-    @Test
-    public void testAppendLine_nullCharsetUsesDefault() throws Exception {
-        File f = Files.createTempFile(tempFolder, "appendln", ".txt").toFile();
-        IOUtil.write("first\n", f);
-        // null charset must not NPE; should append "second\n" using default charset.
-        IOUtil.appendLine("second", (Charset) null, f);
-        String content = new String(Files.readAllBytes(f.toPath()), Charset.defaultCharset());
-        assertEquals("first\nsecond\n", content);
-    }
-
-    // BUG FIX: splitBySize previously declared `throws IOException` but unconditionally
-    // wrapped any IOException in UncheckedIOException, so the declared checked type could
-    // never actually be observed. Verify a normal successful split with valid inputs.
-    @Test
-    public void testSplitBySize_normalSplitMatchesDeclaredSignature() throws Exception {
-        File src = Files.createTempFile(tempFolder, "splitsrc", ".bin").toFile();
-        byte[] data = new byte[10];
-        for (int i = 0; i < data.length; i++) {
-            data[i] = (byte) i;
-        }
-        Files.write(src.toPath(), data);
-        File destDir = Files.createTempDirectory(tempFolder, "splitdest").toFile();
-
-        // Should not throw UncheckedIOException for a healthy file.
-        // Splitting a 10-byte file by 4 should produce 3 parts (4, 4, 2).
-        IOUtil.splitBySize(src, 4, destDir);
-
-        File p1 = new File(destDir, src.getName() + "_0001");
-        File p2 = new File(destDir, src.getName() + "_0002");
-        File p3 = new File(destDir, src.getName() + "_0003");
-        assertTrue(p1.exists() && p2.exists() && p3.exists());
-        assertEquals(4, p1.length());
-        assertEquals(4, p2.length());
-        assertEquals(2, p3.length());
-
-        byte[] merged = new byte[10];
-        System.arraycopy(Files.readAllBytes(p1.toPath()), 0, merged, 0, 4);
-        System.arraycopy(Files.readAllBytes(p2.toPath()), 0, merged, 4, 4);
-        System.arraycopy(Files.readAllBytes(p3.toPath()), 0, merged, 8, 2);
-        assertArrayEquals(data, merged);
-    }
-
-    @Test
-    public void test_write_charArray_negativeOffsetOrCount_throws() throws Exception {
-        // Regression: char[] write variants must validate offset/count like their byte[]/Writer siblings (#34-37).
-        final char[] chars = { 'a', 'b', 'c' };
-        final java.io.File f = new java.io.File("./tmp_abacus_write_neg_test.txt");
-        try {
-            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IOUtil.write(chars, -1, 0, f));
-            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IOUtil.write(chars, 0, -1, f));
-            final java.io.ByteArrayOutputStream os = new java.io.ByteArrayOutputStream();
-            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IOUtil.write(chars, -1, 0, os));
-            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IOUtil.write(chars, 0, -1, os));
-        } finally {
-            f.delete();
-        }
-    }
-
-    // --- regression tests for 2026-06-10 deep-review fixes ---
-
-    @Test
-    public void testReadFileIntoByteBuffer_decompressesGzLikeSiblings() throws Exception {
-        // regression: read(File, byte[], off, len) bypassed openFile(), returning raw gzip container
-        // bytes while the char[] sibling and readBytes(File, ...) returned decompressed content
-        final java.io.File gz = tempFolder.resolve("regression_data.gz").toFile();
-        try (java.util.zip.GZIPOutputStream out = IOUtil.newGZIPOutputStream(IOUtil.newFileOutputStream(gz))) {
-            out.write("hello world".getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        }
-
-        final byte[] buf = new byte[11];
-        final int n = IOUtil.read(gz, buf, 0, buf.length);
-
-        assertEquals(11, n);
-        assertEquals("hello world", new String(buf, java.nio.charset.StandardCharsets.UTF_8));
-    }
-
-    @Test
-    public void testAppendEmptyBytesCreatesTargetFile() throws Exception {
-        // regression: append(byte[], File) with empty input did not create the missing target file,
-        // unlike the char[] sibling and the write family
-        final java.io.File f1 = tempFolder.resolve("append_empty_bytes.txt").toFile();
-        IOUtil.append(new byte[0], f1);
-        assertTrue(f1.exists());
-
-        final java.io.File f2 = tempFolder.resolve("append_zero_count_bytes.txt").toFile();
-        IOUtil.append(new byte[] { 1, 2 }, 0, 0, f2);
-        assertTrue(f2.exists());
-    }
-
-    @Test
-    public void testSplitByLineProducesRequestedNumberOfParts() throws Exception {
-        // regression: floor division created more part files than requested (10 lines / 3 parts -> 4 files)
-        final java.io.File src = tempFolder.resolve("regression_ten_lines.txt").toFile();
-        final StringBuilder sb = new StringBuilder();
-        for (int i = 1; i <= 10; i++) {
-            sb.append("line").append(i).append('\n');
-        }
-        IOUtil.write(sb.toString(), src);
-
-        final java.io.File destDir = tempFolder.resolve("regression_split_parts").toFile();
-        assertTrue(destDir.mkdirs());
-        IOUtil.splitByLine(src, 3, destDir);
-
-        assertEquals(3, destDir.listFiles().length);
     }
 
     @Test
@@ -8792,41 +1900,6 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testSplitProducesRequestedNumberOfParts() throws Exception {
-        final File src = tempFolder.resolve("regression_split_exact.bin").toFile();
-        final byte[] data = new byte[10];
-        for (int i = 0; i < data.length; i++) {
-            data[i] = (byte) i;
-        }
-        Files.write(src.toPath(), data);
-
-        final File destDir = tempFolder.resolve("regression_split_exact_parts").toFile();
-        assertTrue(destDir.mkdirs());
-
-        IOUtil.split(src, 6, destDir);
-
-        final File[] parts = destDir.listFiles();
-        assertNotNull(parts);
-        assertEquals(6, parts.length);
-
-        final byte[] merged = new byte[10];
-        int offset = 0;
-        final int[] expectedLengths = { 2, 2, 2, 2, 1, 1 };
-
-        for (int i = 0; i < expectedLengths.length; i++) {
-            final File part = new File(destDir, src.getName() + "_" + Strings.padStart(N.stringOf(i + 1), 4, '0'));
-            assertTrue(part.exists());
-            assertEquals(expectedLengths[i], part.length());
-
-            final byte[] partBytes = Files.readAllBytes(part.toPath());
-            System.arraycopy(partBytes, 0, merged, offset, partBytes.length);
-            offset += partBytes.length;
-        }
-
-        assertArrayEquals(data, merged);
-    }
-
-    @Test
     public void testSimplifyPathDoesNotTrimComponents() {
         // regression: trimResults() stripped spaces from path components, which could fabricate
         // parent-directory traversal (" .. " -> "..") and merge distinct names ("b " -> "b")
@@ -8837,80 +1910,6 @@ public class IOUtilTest extends TestBase {
         assertEquals("b", IOUtil.simplifyPath("a/../b"));
         assertEquals(".", IOUtil.simplifyPath(""));
         assertEquals("a/b", IOUtil.simplifyPath("a//b/"));
-    }
-
-    @Test
-    public void testCopyEmptyDirectoryPreservesFileDate() throws Exception {
-        // regression: the empty-directory early return skipped the preserveFileDate step
-        final java.io.File srcDir = tempFolder.resolve("regression_empty_src_dir").toFile();
-        assertTrue(srcDir.mkdirs());
-        final long past = (System.currentTimeMillis() - 200_000_000L) / 1000 * 1000;
-        assertTrue(srcDir.setLastModified(past));
-
-        final java.io.File destParent = tempFolder.resolve("regression_copy_dest").toFile();
-        assertTrue(destParent.mkdirs());
-        IOUtil.copyToDirectory(srcDir, destParent, true);
-
-        final java.io.File copied = new java.io.File(destParent, srcDir.getName());
-        assertTrue(copied.exists());
-        assertEquals(srcDir.lastModified(), copied.lastModified());
-    }
-
-    @Test
-    public void testWriteFileToFile_negativeOffsetOrCount_doesNotTruncateOutput() throws Exception {
-        // regression: write(File, long, long, File) opened (and truncated) the output file before
-        // validating offset/count, so an invalid call destroyed the existing output content.
-        // Siblings (write(File, long, long, OutputStream, boolean), write(InputStream, long, long, File))
-        // validate before any side effect.
-        final File src = tempFolder.resolve("regression_write_src.txt").toFile();
-        IOUtil.write("source-data", src);
-
-        final File out = tempFolder.resolve("regression_write_out.txt").toFile();
-        IOUtil.write("KEEP", out);
-
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.write(src, -1L, 5L, out));
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.write(src, 0L, -1L, out));
-
-        assertEquals("KEEP", IOUtil.readAllToString(out));
-
-        // a valid call still overwrites the output file
-        assertEquals(11L, IOUtil.write(src, 0L, Long.MAX_VALUE, out));
-        assertEquals("source-data", IOUtil.readAllToString(out));
-    }
-
-    @Test
-    public void testWriteBytesToFile_outOfBoundsRange_doesNotTruncateOutput() throws Exception {
-        // regression: write(byte[], offset, count, File) opened (and truncated) the target before
-        // validating offset+count against the array length, so a bad range destroyed existing content
-        // and then failed with IndexOutOfBoundsException.
-        final File out = tempFolder.resolve("regression_write_bytes_out.txt").toFile();
-        IOUtil.write("KEEP", out);
-
-        final byte[] bytes = { 1, 2, 3 };
-        assertThrows(IndexOutOfBoundsException.class, () -> IOUtil.write(bytes, 1, 5, out));
-
-        assertEquals("KEEP", IOUtil.readAllToString(out));
-
-        // a valid sub-range still overwrites the output file
-        IOUtil.write(bytes, 1, 2, out);
-        assertArrayEquals(new byte[] { 2, 3 }, IOUtil.readAllBytes(out));
-    }
-
-    @Test
-    public void testWriteReaderOffsetPastEofReturnsZeroLikeInputStreamOverload() throws Exception {
-        final java.io.StringWriter writer = new java.io.StringWriter();
-
-        assertEquals(0L, IOUtil.write(new StringReader("abc"), 10L, 1L, writer, false));
-        assertEquals("", writer.toString());
-    }
-
-    @Test
-    public void testToFile_DecodesUtf8AndMalformedPercent() throws Exception {
-        final File file = IOUtil.toFile(new URL("file:/tmp/a%20b/%E2%82%AC%2B%25bad%zz.txt"));
-        final String path = file.getPath();
-
-        assertTrue(path.contains("a b"));
-        assertTrue(path.contains("\u20ac+%bad%zz.txt"));
     }
 
     @Test
@@ -8966,56 +1965,26 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testSizeOfDirectoryAsBigIntegerRejectsMissingDirectory() {
-        final File missing = tempFolder.resolve("missing_big_integer_directory").toFile();
+    public void testPrimitiveWriteToWriter_charIsTextEveryOtherPrimitiveIsDecimal() throws Exception {
+        // The family rule now documented on all nine overloads: the value's natural *text* form.
+        assertEquals("A", writeToString(w -> IOUtil.write((char) 65, w)));
+        assertEquals("65", writeToString(w -> IOUtil.write((byte) 65, w)));
+        assertEquals("65", writeToString(w -> IOUtil.write((short) 65, w)));
+        assertEquals("65", writeToString(w -> IOUtil.write(65, w)));
+        assertEquals("65", writeToString(w -> IOUtil.write(65L, w)));
+        assertEquals("true", writeToString(w -> IOUtil.write(true, w)));
 
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.sizeOfDirectoryAsBigInteger(missing));
-    }
+        // Boxed values fall through to write(Object, Writer) and are rendered by toString().
+        assertEquals("A", writeToString(w -> IOUtil.write(Character.valueOf('A'), w)));
+        assertEquals("65", writeToString(w -> IOUtil.write(Byte.valueOf((byte) 65), w)));
+        assertEquals("null", writeToString(w -> IOUtil.write((Object) null, w)));
 
-    @Test
-    public void testWriteFlushFlagIsHonoredWhenNoContentIsWritten() throws Exception {
-        final java.util.concurrent.atomic.AtomicInteger byteFlushes = new java.util.concurrent.atomic.AtomicInteger();
-        final java.io.OutputStream output = new java.io.ByteArrayOutputStream() {
-            @Override
-            public void flush() {
-                byteFlushes.incrementAndGet();
-            }
-        };
-
-        assertEquals(0L, IOUtil.write(new ByteArrayInputStream(new byte[0]), 0, 0, output, true));
-        assertEquals(0L, IOUtil.write(new ByteArrayInputStream(new byte[] { 1 }), 2, 1, output, true));
-        assertEquals(2, byteFlushes.get());
-
-        final java.util.concurrent.atomic.AtomicInteger charFlushes = new java.util.concurrent.atomic.AtomicInteger();
-        final Writer writer = new java.io.StringWriter() {
-            @Override
-            public void flush() {
-                charFlushes.incrementAndGet();
-            }
-        };
-
-        assertEquals(0L, IOUtil.write(new StringReader(""), 0, 0, writer, true));
-        assertEquals(0L, IOUtil.write(new StringReader("a"), 2, 1, writer, true));
-        assertEquals(2, charFlushes.get());
-    }
-
-    @Test
-    public void testContentEqualsMakesProgressWhenBulkReadReturnsZero() throws Exception {
-        final byte[] bytes = { 0, 1, 2, 3 };
-        assertTrue(IOUtil.contentEquals(zeroBulkInputStream(bytes), new ByteArrayInputStream(bytes)));
-
-        final char[] chars = { 0, 'a', 'b' };
-        assertTrue(IOUtil.contentEquals(zeroBulkReader(chars), new StringReader(new String(chars))));
-    }
-
-    @Test
-    public void testForLinesValidatesEmptyInputsAndMissingFiles() {
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.forLines(java.util.Collections.emptyList(), -1, 0, 0, 0, line -> {
-        }));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> IOUtil.forLines(java.util.Collections.emptyList(), 0, 0, 0, 0, (Throwables.Consumer<String, RuntimeException>) null));
-        assertThrows(UncheckedIOException.class, () -> IOUtil.forLines(tempFolder.resolve("missing-lines.txt").toFile(), line -> {
-        }));
+        // Non-finite and signed-zero floats keep their Float/Double.toString rendering.
+        assertEquals("NaN", writeToString(w -> IOUtil.write(Float.NaN, w)));
+        assertEquals("Infinity", writeToString(w -> IOUtil.write(Float.POSITIVE_INFINITY, w)));
+        assertEquals("-0.0", writeToString(w -> IOUtil.write(-0.0f, w)));
+        assertEquals("NaN", writeToString(w -> IOUtil.write(Double.NaN, w)));
+        assertEquals("-0.0", writeToString(w -> IOUtil.write(-0.0d, w)));
     }
 
     @Test
@@ -9076,22 +2045,6 @@ public class IOUtilTest extends TestBase {
     }
 
     @Test
-    public void testSplitReportsSourceThatEndsBeforeAdvertisedLength() throws Exception {
-        final File actual = tempFolder.resolve("short-source.bin").toFile();
-        Files.write(actual.toPath(), new byte[] { 1, 2, 3 });
-        final File lengthChangingSource = new File(actual.getPath()) {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public long length() {
-                return 10;
-            }
-        };
-
-        assertThrows(IOException.class, () -> IOUtil.split(lengthChangingSource, 2, tempFolder.resolve("short-source-parts").toFile()));
-    }
-
-    @Test
     public void testCompressedFileExtensionIsCaseInsensitive() throws Exception {
         final File gzip = tempFolder.resolve("text.GZ").toFile();
         try (java.util.zip.GZIPOutputStream output = new java.util.zip.GZIPOutputStream(new FileOutputStream(gzip))) {
@@ -9101,41 +2054,327 @@ public class IOUtilTest extends TestBase {
         assertEquals("hello", IOUtil.readAllToString(gzip));
     }
 
-    private static InputStream zeroBulkInputStream(final byte[] bytes) {
-        return new InputStream() {
-            private int position;
+    @Test
+    public void testMutatingOperationsStayChecked() throws Exception {
+        // Inverse pairs must agree, so a round trip needs one catch rather than two shapes.
+        final File missing = new File(tempFolder.toFile(), "no-such-source.bin");
+        final File target = new File(tempFolder.toFile(), "round-trip-target.zip");
 
-            @Override
-            public int read(final byte[] buffer, final int offset, final int length) {
-                return length == 0 ? 0 : (position < bytes.length ? 0 : -1);
-            }
-
-            @Override
-            public int read() {
-                return position < bytes.length ? bytes[position++] & 0xff : -1;
-            }
-        };
+        assertThrows(IOException.class, () -> IOUtil.zip(missing, target));
+        assertThrows(IOException.class, () -> IOUtil.unzip(missing, tempFolder.toFile()));
+        assertThrows(IOException.class, () -> IOUtil.merge(new File[] { missing }, target));
+        assertThrows(IOException.class, () -> IOUtil.split(missing, 2, tempFolder.toFile()));
+        assertThrows(IOException.class, () -> IOUtil.splitBySize(missing, 2, tempFolder.toFile()));
     }
 
-    private static Reader zeroBulkReader(final char[] chars) {
-        return new Reader() {
-            private int position;
+    @Test
+    public void testLineWritersAndAppendersHonourAnExplicitCharset() throws IOException {
+        // writeLine/writeLines gained the Charset overloads that appendLine/appendLines already had, so the two
+        // families are now mirror images. Latin-1 makes the charset observable: "é" is one byte there and two in
+        // UTF-8.
+        final java.nio.charset.Charset latin1 = java.nio.charset.StandardCharsets.ISO_8859_1;
+        final byte[] cafeLatin1 = { 'c', 'a', 'f', (byte) 0xE9, '\n' };
 
-            @Override
-            public int read(final char[] buffer, final int offset, final int length) {
-                return length == 0 ? 0 : (position < chars.length ? 0 : -1);
-            }
+        final File file = new File(tempFolder.toFile(), "charset-writers.txt");
 
-            @Override
-            public int read() {
-                return position < chars.length ? chars[position++] : -1;
-            }
+        IOUtil.writeLine("café", latin1, file);
+        assertArrayEquals(cafeLatin1, IOUtil.readAllBytes(file));
 
-            @Override
-            public void close() {
-                // no resources
-            }
-        };
+        // Each write REPLACES, so the file holds only the latest content - never appended to.
+        IOUtil.writeLines(CommonUtil.asList("café"), latin1, file);
+        assertArrayEquals(cafeLatin1, IOUtil.readAllBytes(file));
+
+        IOUtil.writeLines(CommonUtil.asList("café").iterator(), latin1, file);
+        assertArrayEquals(cafeLatin1, IOUtil.readAllBytes(file));
+
+        // ...and an empty source still truncates, matching every other write to a File.
+        IOUtil.writeLines(CommonUtil.<String> emptyList(), latin1, file);
+        assertEquals(0, file.length());
+
+        // appendLines(Iterator, ..) is the new mirror of writeLines(Iterator, ..): it never truncates.
+        final File log = new File(tempFolder.toFile(), "charset-appends.txt");
+        IOUtil.appendLines(CommonUtil.asList("a", "b").iterator(), log);
+        IOUtil.appendLines(CommonUtil.asList("café").iterator(), latin1, log);
+
+        final byte[] expected = { 'a', '\n', 'b', '\n', 'c', 'a', 'f', (byte) 0xE9, '\n' };
+        assertArrayEquals(expected, IOUtil.readAllBytes(log));
+
+        // An empty or null iterator appends nothing but still creates a missing file - and never truncates.
+        // The cast is required: appendLines(null, ..) is ambiguous now that both an Iterable and an Iterator
+        // overload exist at this arity, exactly as writeLines(null, ..) already was.
+        IOUtil.appendLines(CommonUtil.<String> emptyList().iterator(), log);
+        IOUtil.appendLines((Iterator<String>) null, latin1, log);
+        assertArrayEquals(expected, IOUtil.readAllBytes(log));
+
+        final File created = new File(tempFolder.toFile(), "created-by-append/nested.txt");
+        IOUtil.appendLines(CommonUtil.<String> emptyList().iterator(), created);
+        assertTrue(created.exists());
+        assertEquals(0, created.length());
+
+        // A null charset means the default, not a NullPointerException.
+        IOUtil.writeLine("hi", null, file);
+        assertEquals("hi\n", IOUtil.readAllToString(file));
+    }
+
+    @Test
+    public void testMapRejectsADirectoryAsABadArgument() throws IOException {
+        // The class contract splits the two failures: a path that does not exist is FileNotFoundException
+        // (wrapped, since map is unchecked), while a path that exists but is the WRONG KIND is
+        // IllegalArgumentException. Left to RandomAccessFile a directory surfaced as an UncheckedIOException
+        // whose text is platform-dependent - "Access is denied" on Windows, "Is a directory" on Unix.
+        final File directory = Files.createDirectory(tempFolder.resolve("map-a-directory")).toFile();
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.map(directory));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.map(directory, java.nio.channels.FileChannel.MapMode.READ_ONLY));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.map(directory, java.nio.channels.FileChannel.MapMode.READ_ONLY, 0, 4));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.map(directory, java.nio.channels.FileChannel.MapMode.READ_WRITE, 0, 4));
+
+        // The not-found case is unchanged, and a real file still maps.
+        assertThrows(UncheckedIOException.class, () -> IOUtil.map(new File(tempFolder.toFile(), "no-such-file.bin")));
+
+        final File file = new File(tempFolder.toFile(), "mappable.bin");
+        IOUtil.write("abcd", file);
+
+        final java.nio.MappedByteBuffer buffer = IOUtil.map(file);
+        assertEquals(4, buffer.remaining());
+        // A live mapping keeps a Windows file lock, which would break @TempDir cleanup.
+        unmap(buffer);
+
+        // MapMode has THREE values, not two. PRIVATE is copy-on-write and still needs write access, so it opens
+        // the file exactly as READ_WRITE does - which means the whole-file overloads must refuse to create a
+        // missing file for it, while the explicitly-sized one creates it.
+        final File missingPrivate = new File(tempFolder.toFile(), "private-missing.bin");
+        assertThrows(UncheckedIOException.class, () -> IOUtil.map(missingPrivate, java.nio.channels.FileChannel.MapMode.PRIVATE));
+        assertFalse(missingPrivate.exists(), "the whole-file overloads never create the file");
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.map(directory, java.nio.channels.FileChannel.MapMode.PRIVATE));
+
+        final File createdByPrivate = new File(tempFolder.toFile(), "private-created.bin");
+        unmap(IOUtil.map(createdByPrivate, java.nio.channels.FileChannel.MapMode.PRIVATE, 0, 8));
+        assertTrue(createdByPrivate.exists());
+        assertEquals(8, createdByPrivate.length());
+    }
+
+    @Test
+    public void testMkdirIfNotExistsRejectsNull() throws IOException {
+        // A null path is a programming error and is reported as IllegalArgumentException, like every other
+        // null-path argument in this class - not as a bare NullPointerException from File.isDirectory().
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.mkdirIfNotExists(null));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.mkdirsIfNotExists(null));
+
+        final File dir = new File(tempFolder.toFile(), "made-once");
+        assertTrue(IOUtil.mkdirIfNotExists(dir));
+        assertTrue(dir.isDirectory());
+        assertFalse(IOUtil.mkdirIfNotExists(dir), "already existing is reported as false, not as an error");
+
+        final File nested = new File(tempFolder.toFile(), "made/deeply/nested");
+        assertTrue(IOUtil.mkdirsIfNotExists(nested));
+        assertTrue(nested.isDirectory());
+    }
+
+    @Test
+    public void testTransferHonoursChannelPositionsAndFallsBackForNonFileSources() throws IOException {
+        // transfer() gained a FileChannel-to-FileChannel fast path built on transferFrom(..). These are the
+        // scenarios that path can get wrong and the existing whole-file tests cannot see.
+        final File source = new File(tempFolder.toFile(), "transfer-src.bin");
+        Files.write(source.toPath(), "ABCDEFGH".getBytes(UTF_8));
+
+        // 1. A source positioned mid-stream must transfer only the remainder, not the whole file.
+        final File midDest = new File(tempFolder.toFile(), "transfer-mid.bin");
+
+        try (FileInputStream fis = new FileInputStream(source);
+             FileOutputStream fos = new FileOutputStream(midDest)) {
+            fis.getChannel().position(3);
+            assertEquals(5, IOUtil.transfer(fis.getChannel(), fos.getChannel()));
+        }
+
+        assertEquals("DEFGH", IOUtil.readAllToString(midDest));
+
+        // 2. A destination positioned mid-stream must write AT that position and leave it after the last byte.
+        final File posDest = new File(tempFolder.toFile(), "transfer-pos.bin");
+        Files.write(posDest.toPath(), "0123456789".getBytes(UTF_8));
+
+        try (FileInputStream fis = new FileInputStream(source);
+             java.nio.channels.FileChannel out = java.nio.channels.FileChannel.open(posDest.toPath(), java.nio.file.StandardOpenOption.WRITE)) {
+            out.position(1);
+            assertEquals(8, IOUtil.transfer(fis.getChannel(), out));
+            assertEquals(9, out.position());
+        }
+
+        assertEquals("0ABCDEFGH9", IOUtil.readAllToString(posDest));
+
+        // 3. An APPEND-mode destination must still append rather than overwrite - transferFrom takes an absolute
+        //    position, so getting this wrong would silently clobber the existing content.
+        final File appendDest = new File(tempFolder.toFile(), "transfer-append.bin");
+        Files.write(appendDest.toPath(), "EXISTING:".getBytes(UTF_8));
+
+        try (FileInputStream fis = new FileInputStream(source);
+             java.nio.channels.FileChannel out = java.nio.channels.FileChannel.open(appendDest.toPath(), java.nio.file.StandardOpenOption.WRITE,
+                     java.nio.file.StandardOpenOption.APPEND)) {
+            assertEquals(8, IOUtil.transfer(fis.getChannel(), out));
+        }
+
+        assertEquals("EXISTING:ABCDEFGH", IOUtil.readAllToString(appendDest));
+
+        // 4. A non-file source takes the buffered fallback: a zero-byte transferFrom cannot be told apart from
+        //    end-of-input there, so the fast path is deliberately not used.
+        final File fallbackDest = new File(tempFolder.toFile(), "transfer-fallback.bin");
+
+        try (InputStream in = new ByteArrayInputStream("from-a-pipe".getBytes(UTF_8));
+             FileOutputStream fos = new FileOutputStream(fallbackDest)) {
+            assertEquals(11, IOUtil.transfer(java.nio.channels.Channels.newChannel(in), fos.getChannel()));
+        }
+
+        assertEquals("from-a-pipe", IOUtil.readAllToString(fallbackDest));
+    }
+
+    @Test
+    public void testNullSourceCollectionNeverTouchesTheDestination() throws IOException {
+        // Array.asList(null) yields an EMPTY list, so merge((File[]) null, dest) used to mean "merge zero files"
+        // - which truncates dest. A null must be a bad argument, and must be rejected before anything opens the
+        // destination.
+        final File dest = new File(tempFolder.toFile(), "null-source-dest.txt");
+        Files.write(dest.toPath(), "PRE-EXISTING".getBytes(UTF_8));
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.merge((File[]) null, dest));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.merge((java.util.Collection<File>) null, dest));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.merge(null, new byte[] { ',' }, dest));
+        assertEquals("PRE-EXISTING", IOUtil.readAllToString(dest));
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.zip((java.util.Collection<File>) null, dest));
+        assertEquals("PRE-EXISTING", IOUtil.readAllToString(dest));
+
+        // An EMPTY collection is still a real request to replace the destination with nothing.
+        assertEquals(0, IOUtil.merge(java.util.Collections.<File> emptyList(), dest));
+        assertTrue(dest.exists());
+        assertEquals(0, dest.length());
+    }
+
+    @Test
+    public void testZipMergeRoundTripNeedsOneCatch() throws IOException {
+        // Compiles only because zip/unzip/split/merge all declare the same checked IOException.
+        final File src = new File(tempFolder.toFile(), "round-trip.txt");
+        Files.write(src.toPath(), "round-trip-content".getBytes(UTF_8));
+
+        final File archive = new File(tempFolder.toFile(), "round-trip.zip");
+        final File extractDir = new File(tempFolder.toFile(), "round-trip-out");
+
+        IOUtil.zip(src, archive);
+        IOUtil.unzip(archive, extractDir);
+
+        assertEquals("round-trip-content", IOUtil.readAllToString(new File(extractDir, "round-trip.txt")));
+
+        final File partsDir = new File(tempFolder.toFile(), "round-trip-parts");
+        IOUtil.split(src, 3, partsDir);
+        final File[] parts = partsDir.listFiles();
+        assertNotNull(parts);
+        Arrays.sort(parts);
+
+        final File merged = new File(tempFolder.toFile(), "round-trip-merged.txt");
+        IOUtil.merge(parts, merged);
+        assertEquals("round-trip-content", IOUtil.readAllToString(merged));
+    }
+
+    @Test
+    public void testRenameTo_RejectsPathElements() throws Exception {
+        File srcFile = Files.createTempFile(tempFolder, "rename_path", ".txt").toFile();
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.renameTo(srcFile, "subdir/name.txt"));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.renameTo(srcFile, "subdir\\name.txt"));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.renameTo(srcFile, ".."));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.renameTo(srcFile, "."));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.renameTo(srcFile, ""));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.renameTo(srcFile, null));
+        assertTrue(srcFile.exists());
+    }
+
+    @Test
+    public void testZip_DuplicateBasenameRejectedBeforeTruncate() throws Exception {
+        File dir1 = tempFolder.resolve("zip-dup-1").toFile();
+        File dir2 = tempFolder.resolve("zip-dup-2").toFile();
+        assertTrue(dir1.mkdirs());
+        assertTrue(dir2.mkdirs());
+        File a1 = new File(dir1, "same.txt");
+        File a2 = new File(dir2, "same.txt");
+        Files.write(a1.toPath(), "one".getBytes(UTF_8));
+        Files.write(a2.toPath(), "two".getBytes(UTF_8));
+
+        File zipFile = Files.createTempFile(tempFolder, "dup-archive", ".zip").toFile();
+        Files.write(zipFile.toPath(), "precious existing content".getBytes(UTF_8));
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.zip(java.util.Arrays.asList(a1, a2), zipFile));
+        assertEquals("precious existing content", new String(Files.readAllBytes(zipFile.toPath()), UTF_8));
+    }
+
+    @Test
+    public void testZip_DirectorySourceToAbsentTarget() throws Exception {
+        final File sourceDir = tempFolder.resolve("zip-absent-target-src").toFile();
+        assertTrue(new File(sourceDir, "nested").mkdirs());
+        Files.write(new File(sourceDir, "a.txt").toPath(), "A".getBytes(UTF_8));
+        Files.write(new File(sourceDir, "nested/b.txt").toPath(), "B".getBytes(UTF_8));
+
+        final File zipFile = tempFolder.resolve("zip-absent-target.zip").toFile();
+        assertFalse(zipFile.exists());
+
+        IOUtil.zip(Arrays.asList(sourceDir), zipFile);
+
+        assertTrue(zipFile.exists());
+
+        final File extracted = tempFolder.resolve("zip-absent-target-out").toFile();
+        IOUtil.unzip(zipFile, extracted);
+
+        final File root = new File(extracted, sourceDir.getName());
+        assertEquals("A", IOUtil.readAllToString(new File(root, "a.txt")));
+        assertEquals("B", IOUtil.readAllToString(new File(root, "nested/b.txt")));
+    }
+
+    @Test
+    public void testZip_TargetInsideSourceDirectoryIsNotArchived() throws Exception {
+        final File sourceDir = tempFolder.resolve("zip-target-inside").toFile();
+        assertTrue(sourceDir.mkdirs());
+        Files.write(new File(sourceDir, "a.txt").toPath(), "A".getBytes(UTF_8));
+
+        final File zipFile = new File(sourceDir, "inside.zip");
+        IOUtil.zip(Arrays.asList(sourceDir), zipFile);
+
+        final File extracted = tempFolder.resolve("zip-target-inside-out").toFile();
+        IOUtil.unzip(zipFile, extracted);
+
+        final File root = new File(extracted, sourceDir.getName());
+        assertTrue(new File(root, "a.txt").exists());
+        assertFalse(new File(root, "inside.zip").exists(), "the archive must not contain itself");
+    }
+
+    @Test
+    public void testMap_ReturnsUsableBufferAfterFileHandleClosed() throws IOException {
+        // Deliberately NOT under @TempDir: on Windows a MappedByteBuffer keeps the file locked until the
+        // mapping is released by the garbage collector, which would break the temp-directory cleanup.
+        final File file = File.createTempFile("map-src", ".bin");
+        file.deleteOnExit();
+
+        try {
+            Files.write(file.toPath(), "mapped-content".getBytes(UTF_8));
+
+            final MappedByteBuffer buffer = IOUtil.map(file);
+            final byte[] read = new byte[(int) file.length()];
+            buffer.get(read);
+
+            assertEquals("mapped-content", new String(read, UTF_8));
+        } finally {
+            file.delete(); // best effort: fails while the mapping is still held, hence deleteOnExit above
+        }
+    }
+
+    @Test
+    public void testOpenFile_CorruptGzipReleasesTheFileHandle() throws IOException {
+        // The gzip branch of openFile opens the FileInputStream and only then constructs the GZIPInputStream.
+        // When that construction fails the stream must still be closed, or the handle leaks.
+        final File corrupt = tempFolder.resolve("corrupt.gz").toFile();
+        Files.write(corrupt.toPath(), "not actually gzip".getBytes(UTF_8));
+
+        assertThrows(UncheckedIOException.class, () -> IOUtil.readAllToString(corrupt));
+
+        // On Windows an open handle prevents deletion, so this asserts the handle was released.
+        assertTrue(corrupt.delete(), "the file handle must be released when the gzip stream cannot be built");
     }
 
     @Test
@@ -9152,4 +2391,283 @@ public class IOUtilTest extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> IOUtil.bytesToChars(bytes, 1, 10, UTF_8));
     }
 
+    @Test
+    public void testMaxMemoryInMb_isPositive() {
+        assertTrue(IOUtil.MAX_MEMORY_IN_MB > 0, "MAX_MEMORY_IN_MB must never be negative: " + IOUtil.MAX_MEMORY_IN_MB);
+    }
+
+    @Test
+    public void testSimplifyPath_preservesUncPrefix() {
+        assertEquals("//host/share/x", IOUtil.simplifyPath("//host/share/./x"));
+        assertEquals("//host/share/x", IOUtil.simplifyPath("//host/share/y/../x"));
+        assertEquals("//host/share", IOUtil.simplifyPath("//host/share/"));
+        assertEquals("//host/share", IOUtil.simplifyPath("\\\\host\\share"));
+        // A UNC root cannot be ascended above.
+        assertEquals("//host/share", IOUtil.simplifyPath("//host/share/../.."));
+    }
+
+    @Test
+    public void testSimplifyPath_threeOrMoreLeadingSlashesAreNotUnc() {
+        assertEquals("/a", IOUtil.simplifyPath("///a"));
+        assertEquals("/a", IOUtil.simplifyPath("////a"));
+        // A bare "//" names no host, so it is not a UNC root and collapses like any other run of separators.
+        assertEquals("/", IOUtil.simplifyPath("//"));
+        assertEquals("/", IOUtil.simplifyPath("/"));
+        // ...but two slashes followed by a host are kept.
+        assertEquals("//a", IOUtil.simplifyPath("//a"));
+    }
+
+    @Test
+    public void testSimplifyPath_absoluteAndWindowsRootsAreStable() {
+        assertEquals("/a/b/c", IOUtil.simplifyPath("/a/./b/./c/"));
+        assertEquals("/", IOUtil.simplifyPath("/.."));
+        assertEquals("/a", IOUtil.simplifyPath("/../a"));
+        assertEquals("C:/b", IOUtil.simplifyPath("C:/a/../../b"));
+        assertEquals("C:/", IOUtil.simplifyPath("C:/"));
+        assertEquals("../a", IOUtil.simplifyPath("../a"));
+        assertEquals(".", IOUtil.simplifyPath(""));
+    }
+
+    @Test
+    public void testErrorMessagesUseAbsolutePaths() throws Exception {
+        final File relative = new File("no-such-relative-file.txt");
+
+        // checkFileExists / checkDirectoryExists / checkDestDirectory all report the absolute path, so a
+        // failure on a relative File still says which file on disk was meant.
+        final Exception missingFile = assertThrows(Exception.class, () -> IOUtil.sizeOf(relative));
+        assertTrue(missingFile.getMessage().contains(relative.getAbsolutePath()),
+                "message should identify the file by absolute path but was: " + missingFile.getMessage());
+
+        final Exception missingDir = assertThrows(Exception.class, () -> IOUtil.sizeOfDirectory(relative));
+        assertTrue(missingDir.getMessage().contains(relative.getAbsolutePath()),
+                "message should identify the directory by absolute path but was: " + missingDir.getMessage());
+
+        final File existingFile = Files.createTempFile(tempFolder, "not-a-dir", ".txt").toFile();
+        final Exception notADir = assertThrows(IllegalArgumentException.class, () -> IOUtil.copyToDirectory(existingFile, existingFile));
+        assertTrue(notADir.getMessage().contains(existingFile.getAbsolutePath()),
+                "message should identify the destination by absolute path but was: " + notADir.getMessage());
+
+        // A null File is rendered as "null" rather than dereferenced.
+        final Exception nullFile = assertThrows(Exception.class, () -> IOUtil.sizeOf(null));
+        assertTrue(nullFile.getMessage().contains("null"), "message should render a null file as \"null\" but was: " + nullFile.getMessage());
+    }
+
+    /**
+     * C-002: {@code File.listFiles()} answers {@code null} on an I/O error, which is not an empty directory.
+     * {@code copyDirectory} used to route the listing through {@code listFiles(File)}, whose walk semantics fold
+     * that into "no entries", so it reported a successful copy of a source it had not read - the failure mode a
+     * caller of the documented copy-then-delete idiom loses data to. {@code doCopyDirectory} always guarded it.
+     */
+    @Test
+    public void testCopyDirectory_RejectsAnUnlistableSourceInsteadOfCopyingNothing() throws Exception {
+        final Path realSource = tempFolder.resolve("c002-src");
+        Files.createDirectories(realSource);
+        Files.writeString(realSource.resolve("a.txt"), "payload");
+
+        final File unlistable = new File(realSource.toFile().getAbsolutePath()) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public File[] listFiles() {
+                return null; // what the JDK returns when the directory cannot be read
+            }
+        };
+
+        final File destination = tempFolder.resolve("c002-dest").toFile();
+
+        final IOException e = assertThrows(IOException.class, () -> IOUtil.copyDirectory(unlistable, destination));
+        assertTrue(e.getMessage().contains("Failed to list contents of"), "unexpected message: " + e.getMessage());
+
+        // and the ordinary path is untouched
+        final File destination2 = tempFolder.resolve("c002-dest2").toFile();
+        IOUtil.copyDirectory(realSource.toFile(), destination2);
+        assertEquals("payload", IOUtil.readAllToString(new File(destination2, "a.txt")));
+    }
+
+    /**
+     * C-005: a {@code null} {@code InputStream} used to reach {@code newInputStreamReader}, which reports the
+     * internal parameter name {@code 'is'}, and only after the offset/count checks - while the byte readers and
+     * every {@code Reader} overload report {@code 'source'} first. All three families now agree.
+     */
+    @Test
+    public void testRead_NullInputStreamIsReportedAsSource() {
+        for (final org.junit.jupiter.api.function.Executable call : new org.junit.jupiter.api.function.Executable[] {
+                () -> IOUtil.readAllChars((InputStream) null), //
+                () -> IOUtil.readAllLines((InputStream) null), //
+                () -> IOUtil.readChars((InputStream) null, 0, 8), //
+                () -> IOUtil.readToString((InputStream) null, 0, 8), //
+                () -> IOUtil.readLines((InputStream) null, 0, 8) }) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, call);
+            assertTrue(e.getMessage().contains("source"), "should name the caller's argument, was: " + e.getMessage());
+        }
+
+        // the stream is checked BEFORE offset/count, exactly as readBytes(InputStream, long, int) does
+        for (final org.junit.jupiter.api.function.Executable call : new org.junit.jupiter.api.function.Executable[] {
+                () -> IOUtil.readChars((InputStream) null, -1, 8), //
+                () -> IOUtil.readToString((InputStream) null, -1, 8), //
+                () -> IOUtil.readLines((InputStream) null, -1, 8) }) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, call);
+            assertTrue(e.getMessage().contains("source"), "the source must be reported first, was: " + e.getMessage());
+        }
+
+        // a negative offset is still reported when the stream itself is fine
+        final IllegalArgumentException offsetFailure = assertThrows(IllegalArgumentException.class,
+                () -> IOUtil.readChars(new ByteArrayInputStream(new byte[0]), -1, 8));
+        assertTrue(offsetFailure.getMessage().contains("offset"), offsetFailure.getMessage());
+    }
+
+    /**
+     * C-001: the deprecated {@code move(File, File, CopyOption...)} javadoc claimed {@code IllegalArgumentException}
+     * for a missing source; the code has always thrown {@code FileNotFoundException}, like its two-argument twin
+     * and like {@code moveToDirectory}. The javadoc was corrected, and this pins the behaviour it now describes.
+     */
+    @Test
+    public void testMove_MissingSourceIsFileNotFound() throws Exception {
+        final File missing = tempFolder.resolve("c001-missing.txt").toFile();
+        final File destination = tempFolder.resolve("c001-dest").toFile();
+
+        assertThrows(java.io.FileNotFoundException.class, () -> IOUtil.move(missing, destination));
+        assertThrows(java.io.FileNotFoundException.class, () -> IOUtil.move(missing, destination, java.nio.file.StandardCopyOption.REPLACE_EXISTING));
+    }
+
+    /**
+     * C-004: {@code appendLine}/{@code appendLines} accept a {@code null} charset and resolve it to UTF-8, which
+     * their javadoc did not say (every {@code writeLine}/{@code writeLines} sibling does). Pins the behaviour the
+     * corrected javadoc now documents.
+     */
+    @Test
+    public void testAppend_NullCharsetResolvesToUtf8() throws Exception {
+        final File target = tempFolder.resolve("c004-append.txt").toFile();
+
+        IOUtil.appendLine("premier", (Charset) null, target);
+        IOUtil.appendLines(CommonUtil.asList("deuxieme", "troisieme"), (Charset) null, target);
+
+        assertEquals(CommonUtil.asList("premier", "deuxieme", "troisieme"), IOUtil.readAllLines(target, StandardCharsets.UTF_8));
+    }
+
+    /**
+     * C-031: {@code close(AutoCloseable, Consumer)} was the only member of the close family that let an
+     * {@code InterruptedException} pass to the handler without restoring the thread's interrupt status.
+     */
+    @Test
+    public void testClose_WithHandlerRestoresTheInterruptStatus() {
+        Thread.interrupted(); // clear
+
+        // Each assertion below leaves an interrupt pending on the way in and clears it as a side effect of
+        // Thread.interrupted(). That is only true when they all pass: a failure part-way through would leave
+        // the flag set on a thread surefire reuses, so one real failure would be followed by unrelated ones.
+        try {
+            final java.util.concurrent.atomic.AtomicReference<Exception> seen = new java.util.concurrent.atomic.AtomicReference<>();
+            IOUtil.close(() -> {
+                throw new InterruptedException();
+            }, seen::set);
+
+            assertTrue(Thread.interrupted(), "close(closeable, handler) must not swallow the interrupt");
+            assertNotNull(seen.get());
+            assertTrue(seen.get() instanceof InterruptedException);
+
+            // the siblings it now matches
+            Thread.interrupted();
+            IOUtil.closeQuietly(() -> {
+                throw new InterruptedException();
+            });
+            assertTrue(Thread.interrupted());
+
+            Thread.interrupted();
+            assertThrows(RuntimeException.class, () -> IOUtil.closeAll(CommonUtil.asList((AutoCloseable) () -> {
+                throw new InterruptedException();
+            })));
+            assertTrue(Thread.interrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    /**
+     * C-032: {@code write(char[], offset, count, [Charset,] File)} judged the slice before looking at the
+     * destination, so a call that was wrong twice over answered {@code IndexOutOfBoundsException} where its
+     * {@code byte[]} twin and its {@code append} mirror answered {@code IllegalArgumentException}.
+     */
+    @Test
+    public void testWrite_CharArrayValidatesTheDestinationFirst() {
+        for (final org.junit.jupiter.api.function.Executable call : new org.junit.jupiter.api.function.Executable[] {
+                () -> IOUtil.write(new char[] { 'a' }, 0, 5, (File) null), //
+                () -> IOUtil.write(new char[] { 'a' }, 0, 5, StandardCharsets.UTF_8, (File) null), //
+                () -> IOUtil.write(new char[] { 'a' }, -1, 1, (File) null), //
+                () -> IOUtil.write(new byte[] { 1 }, 0, 5, (File) null), //
+                () -> IOUtil.append(new char[] { 'a' }, 0, 5, (File) null) }) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, call);
+            assertTrue(e.getMessage().contains("output") || e.getMessage().contains("targetFile"), e.getMessage());
+        }
+
+        // a bad slice with a valid destination is still an IndexOutOfBoundsException
+        assertThrows(IndexOutOfBoundsException.class, () -> IOUtil.write(new char[] { 'a' }, 0, 5, tempFolder.resolve("c032.txt").toFile()));
+    }
+
+    /**
+     * C-033: the {@code String}-taking and size-taking {@code newXxx} factories reject a directory with
+     * {@code IllegalArgumentException} exactly as their {@code File} twins do; only the twins said so.
+     */
+    @Test
+    public void testNewFileInputStream_RejectsADirectory() {
+        final File dir = tempFolder.toFile();
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.newFileInputStream(dir.getAbsolutePath()));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.newFileOutputStream(dir.getAbsolutePath()));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.newFileOutputStream(dir.getAbsolutePath(), true));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.newBufferedInputStream(dir, 1024));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.newBufferedOutputStream(dir, 1024));
+    }
+
+    /**
+     * C-003: when neither move can replace the destination (the documented Windows case - a reader holds it
+     * without {@code FILE_SHARE_DELETE}), {@code replaceWith} writes the downloaded content over the
+     * destination in place. That write succeeding means the destination holds the whole download, so the
+     * operation succeeded; the trailing removal of the {@code .part} sibling used to be unguarded, and a
+     * failure there propagated out as an {@code IOException} describing a transfer that had in fact worked.
+     * It is now logged instead.
+     *
+     * <p>The scenario is reproduced with a live memory mapping, which on Windows blocks both {@code rename}
+     * and {@code delete} while allowing reads - so both moves fail, the in-place write succeeds, and the
+     * cleanup fails. The method is reached by reflection because it is private and the public
+     * {@code copyURLToFile} cannot be steered onto this branch: the {@code .part} name it generates is a
+     * fresh random hex string that a test cannot lock in advance.</p>
+     */
+    @Test
+    public void testCopyURLToFile_ReplaceWithReportsSuccessWhenOnlyTempCleanupFails() throws Exception {
+        // Deliberately NOT under @TempDir: on Windows a live MappedByteBuffer keeps the file locked, which
+        // would break the temp-directory cleanup. The mapping is released explicitly in the finally below -
+        // deleteOnExit could not do it, because its shutdown hook runs while this JVM still holds the mapping.
+        final File part = File.createTempFile("c003-download", ".part");
+        final File target = File.createTempFile("c003-download", ".txt");
+        MappedByteBuffer mapping = null;
+
+        try {
+            IOUtil.write("NEW CONTENT", part);
+            IOUtil.write("OLD CONTENT", target);
+
+            mapping = IOUtil.map(part);
+            assertNotNull(mapping);
+
+            // Only a platform where a live mapping locks the file can reach the in-place fallback at all;
+            // where it does not, both moves succeed and there is nothing to test.
+            assumeTrue(aLiveMappingLocksFiles(), "a live memory mapping does not lock files on this platform");
+
+            final java.lang.reflect.Method replaceWith = IOUtil.class.getDeclaredMethod("replaceWith", File.class, File.class);
+            replaceWith.setAccessible(true);
+
+            // must NOT throw: the destination already holds the whole download
+            replaceWith.invoke(null, part, target);
+
+            assertEquals("NEW CONTENT", IOUtil.readAllToString(target));
+            assertTrue(part.exists(), "the temporary sibling survives - its removal failed and was only logged");
+        } finally {
+            // Unmapping is what releases the lock, and the call also keeps `mapping` reachable through the
+            // scenario above: a buffer whose last use is assertNotNull is collectable from that point on, and
+            // a cleaner running early would unlock the file and defeat the whole test.
+            unmap(mapping);
+            part.delete();
+            target.delete();
+        }
+    }
 }

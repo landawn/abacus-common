@@ -24,6 +24,10 @@ import com.landawn.abacus.util.Strings;
  * an {@code int} value; this handler unboxes the underlying primitive on read/write.
  * Empty optionals (and {@code null} references) are represented as {@code null} in serialized form
  * and as SQL {@code NULL} in database form.
+ *
+ * <p>JDBC numeric coercion truncates finite fractional values toward zero, then checks the target range.
+ * NaN, infinities and out-of-range integer parts throw {@link ArithmeticException}; no wraparound occurs.</p>
+ *
  */
 public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
@@ -137,12 +141,13 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      *
      * @param str the string to parse
      * @return OptionalInt.empty() if the string is {@code null} or empty, otherwise OptionalInt containing the parsed value
-     * @throws NumberFormatException if a non-empty string cannot be parsed as an {@code int}
+     * @throws NumberFormatException if a non-empty string is not a valid integer token
+     * @throws ArithmeticException if the string is a well-formed integer outside the {@code int} range
      * @see #valueOf(Object)
      * @see #stringOf(OptionalInt)
      */
     @Override
-    public OptionalInt valueOf(final String str) {
+    public OptionalInt valueOf(final String str) throws NumberFormatException, ArithmeticException {
         return Strings.isEmpty(str) ? OptionalInt.empty() : OptionalInt.of(Numbers.toInt(str));
     }
 
@@ -153,15 +158,20 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
-     * @return OptionalInt.empty() if the column is {@code null}, otherwise OptionalInt containing the value
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @return OptionalInt.empty() if the column is {@code null}, otherwise OptionalInt containing the value. A
+     *         non-{@code Number} column value is coerced with {@link Numbers#toInt(Object)}, so an empty string yields a
+     *         <i>present</i> zero (the same answer {@code IntegerType.get} gives), unlike {@link #valueOf(String)}
+     *         which answers empty for {@code ""}
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string         included)
+     * @throws ArithmeticException if the numeric value is nonfinite or its integer part is out of range
      */
     @Override
-    public OptionalInt get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public OptionalInt get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, NumberFormatException, ArithmeticException {
         final Object result = rs.getObject(columnIndex);
 
-        return result == null ? OptionalInt.empty()
-                : OptionalInt.of(result instanceof Integer num ? num : (result instanceof Number num ? num.intValue() : Numbers.toInt(result.toString())));
+        return result == null ? OptionalInt.empty() : OptionalInt.of(Numbers.toInt(result));
     }
 
     /**
@@ -171,15 +181,20 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      *
      * @param rs the ResultSet to read from
      * @param columnName the label of the column to read
-     * @return OptionalInt.empty() if the column is {@code null}, otherwise OptionalInt containing the value
-     * @throws SQLException if a database access error occurs or the columnName is not found
+     * @return OptionalInt.empty() if the column is {@code null}, otherwise OptionalInt containing the value. A
+     *         non-{@code Number} column value is coerced with {@link Numbers#toInt(Object)}, so an empty string yields a
+     *         <i>present</i> zero (the same answer {@code IntegerType.get} gives), unlike {@link #valueOf(String)}
+     *         which answers empty for {@code ""}
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string         included)
+     * @throws ArithmeticException if the numeric value is nonfinite or its integer part is out of range
      */
     @Override
-    public OptionalInt get(final ResultSet rs, final String columnName) throws SQLException {
+    public OptionalInt get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, NumberFormatException, ArithmeticException {
         final Object result = rs.getObject(columnName);
 
-        return result == null ? OptionalInt.empty()
-                : OptionalInt.of(result instanceof Integer num ? num : (result instanceof Number num ? num.intValue() : Numbers.toInt(result.toString())));
+        return result == null ? OptionalInt.empty() : OptionalInt.of(Numbers.toInt(result));
     }
 
     /**
@@ -190,10 +205,11 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)
      * @param x the OptionalInt to set
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalInt x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalInt x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.INTEGER);
         } else {
@@ -209,10 +225,11 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OptionalInt to set
-     * @throws SQLException if a database access error occurs
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final OptionalInt x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final OptionalInt x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.INTEGER);
         } else {
@@ -230,7 +247,8 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      *
      * @param appendable the Appendable to write to
      * @param x the OptionalInt to append
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -242,7 +260,7 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final OptionalInt x) throws IOException {
+    public void appendTo(final Appendable appendable, final OptionalInt x) throws NullPointerException, IOException {
         if (x == null || x.isEmpty()) {
             appendable.append(NULL_STRING);
         } else {
@@ -252,7 +270,11 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
 
     /**
      * Writes the character representation of an OptionalInt to a CharacterWriter.
-     * Empty optionals are written as {@code null}.
+     * A {@code null} or empty optional is written as {@code null} unless {@code config.isWriteNullNumberAsZero()} is
+     * set, in which case {@code 0} is written - the same substitution {@code IntegerType} applies to a {@code null}
+     * value; a substituted zero reads back as a <i>present</i> {@code OptionalInt.of(0)}, which is what the flag asks
+     * for. The XML serializers represent an empty optional property with the {@code isNull="true"} attribute form
+     * rather than with the text written here.
      * Present values are written as numeric values without quotes using the optimized writeInt method.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
@@ -264,13 +286,18 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      *
      * @param writer the CharacterWriter to write to
      * @param x the OptionalInt to write
-     * @param config the serialization configuration (not used for numeric values)
-     * @throws IOException if an I/O error occurs during writing
+     * @param config the serialization configuration; only {@code writeNullNumberAsZero} is consulted, may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final OptionalInt x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final OptionalInt x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null || x.isEmpty()) {
-            writer.write(NULL_CHAR_ARRAY);
+            if (config != null && config.isWriteNullNumberAsZero()) {
+                writer.writeInt(0);
+            } else {
+                writer.write(NULL_CHAR_ARRAY);
+            }
         } else {
             writer.writeInt(x.getAsInt());
         }

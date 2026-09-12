@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
@@ -45,7 +47,7 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
      * ListMultimap<String, Integer> multimap = N.newLinkedListMultimap();
      * multimap.put("key", 1);
      * multimap.put("key", 2);
-     * String json = type.stringOf(multimap);  // {"key":[1,2]}
+     * String json = type.stringOf(multimap);  // {"key": [1, 2]}
      * }</pre>
      *
      * @param typeClass the Class object for ListMultimap
@@ -72,7 +74,7 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
      * multimap.put("grades", 95);
      *
      * String json = type.stringOf(multimap);
-     * // Returns: {"scores":[85,90,78],"grades":[95]}
+     * // Returns: {"scores": [85, 90, 78], "grades": [95]}
      *
      * json = type.stringOf(null);
      * // Returns: null
@@ -86,20 +88,23 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
      *
      * @param x the ListMultimap to convert to JSON string
      * @return the JSON string representation of the multimap, or {@code null} if the input is null
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final ListMultimap<K, E> x) {
+    public String stringOf(final ListMultimap<K, E> x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
 
     /**
      * Parses a JSON string into a ListMultimap instance.
      *
-     * This method deserializes the JSON string as a Map&lt;K, Collection&lt;E&gt;&gt;,
+     * This method deserializes the JSON string as an insertion-ordered Map&lt;K, Collection&lt;E&gt;&gt;,
      * then populates a new LinkedListMultimap with the entries.
-     * The resulting multimap preserves insertion order for both keys and values.
+     * The resulting multimap preserves the document order for both keys and values.
+     * A key whose value is {@code null} or an empty array is dropped (a multimap never holds a key without values);
+     * a duplicate key keeps the position of its first occurrence and the values of its last one.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -122,13 +127,15 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
      *
      * @param str the JSON string to parse
      * @return a ListMultimap instance populated with the parsed data, or {@code null} if the string is {@code null}, empty, or blank
-     * @throws com.landawn.abacus.exception.ParsingException if the JSON string is malformed
+     * @throws ParsingException if the JSON string is malformed
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(ListMultimap)
      */
+    @MayReturnNull
     @SuppressWarnings("unchecked")
     @Override
-    public ListMultimap<K, E> valueOf(final String str) {
+    public ListMultimap<K, E> valueOf(final String str) throws ParsingException, RuntimeException {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         }

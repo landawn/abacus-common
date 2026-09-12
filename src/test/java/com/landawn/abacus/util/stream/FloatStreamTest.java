@@ -1549,38 +1549,6 @@ public class FloatStreamTest extends TestBase {
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, stream.asDoubleStream().toArray(), 0.001);
     }
 
-    // TODO: filter(FloatPredicate) is abstract - tested via concrete implementations above
-    // TODO: takeWhile(FloatPredicate) is abstract - tested via concrete implementations above
-    // TODO: dropWhile(FloatPredicate) is abstract - tested via concrete implementations above
-    // TODO: map(FloatUnaryOperator) is abstract - tested via concrete implementations above
-    // TODO: mapToInt(FloatToIntFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToLong(FloatToLongFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToDouble(FloatToDoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToObj(FloatFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMap(FloatFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapArray(FloatFunction<float[]>) is abstract - tested via concrete implementations above
-    // TODO: flatMapToInt(FloatFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToLong(FloatFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToDouble(FloatFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToObj(FloatFunction) is abstract - tested via concrete implementations above
-    // TODO: flatmapToObj(FloatFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapArrayToObj(FloatFunction) is abstract - tested via concrete implementations above
-    // TODO: mapPartial(FloatFunction) is abstract - tested via concrete implementations above
-    // TODO: rangeMap(FloatBiPredicate, FloatBinaryOperator) is abstract - tested via concrete implementations above
-    // TODO: rangeMapToObj(FloatBiPredicate, FloatBiFunction) is abstract - tested via concrete implementations above
-    // TODO: collapse(...) overloads are abstract - tested via concrete implementations above
-    // TODO: scan(...) overloads are abstract - tested via concrete implementations above
-    // TODO: prepend/append/appendIfEmpty are abstract - tested via concrete implementations above
-    // TODO: top(...) overloads are abstract - tested via concrete implementations above
-    // TODO: toFloatList() is abstract - tested via concrete implementations above
-    // TODO: toMap/groupTo/reduce/collect overloads are abstract - tested via concrete implementations above
-    // TODO: forEach/forEachIndexed are abstract - tested via concrete implementations above
-    // TODO: anyMatch/allMatch/noneMatch are abstract - tested via concrete implementations above
-    // TODO: findFirst/findAny/findLast with predicate are abstract - tested via concrete implementations above
-    // TODO: min/max/kthLargest/sum/average/summaryStatistics are abstract - tested via concrete implementations above
-    // TODO: mergeWith/zipWith overloads are abstract - tested via concrete implementations above
-    // TODO: asDoubleStream/boxed are abstract - tested via concrete implementations above
-
     @Test
     public void testForeach() {
         List<Float> collected = new ArrayList<>();

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -150,12 +151,14 @@ public class IndexedKeyedTest extends TestBase {
 
     @Test
     public void test_of_withNegativeIndex() {
-        IndexedKeyed<String, Integer> indexed = IndexedKeyed.of("key", 100, -5);
+        // A negative index is rejected, exactly like Indexed.of(Object, int)/of(Object, long).
+        assertThrows(IllegalArgumentException.class, () -> IndexedKeyed.of("key", 100, -5));
+        assertThrows(IllegalArgumentException.class, () -> IndexedKeyed.of("key", 100, -1));
+        assertThrows(IllegalArgumentException.class, () -> IndexedKeyed.of("key", 100, Integer.MIN_VALUE));
 
-        assertNotNull(indexed);
-        assertEquals(-5, indexed.index());
-        assertEquals("key", indexed.key());
-        assertEquals(100, indexed.val());
+        // ... while 0 and positive indexes are accepted.
+        assertEquals(0, IndexedKeyed.of("key", 100, 0).index());
+        assertEquals(Integer.MAX_VALUE, IndexedKeyed.of("key", 100, Integer.MAX_VALUE).index());
     }
 
     @Test
@@ -254,30 +257,29 @@ public class IndexedKeyedTest extends TestBase {
 
     @Test
     public void test_index_withNegativeIndex() {
-        IndexedKeyed<String, Integer> indexed = IndexedKeyed.of("testKey", 50, -10);
-        assertEquals(-10, indexed.index());
+        assertThrows(IllegalArgumentException.class, () -> IndexedKeyed.of("testKey", 50, -10));
     }
 
     @Test
     public void test_index_boundaryValues() {
         IndexedKeyed<String, Integer> indexedMax = IndexedKeyed.of("key", 100, Integer.MAX_VALUE);
-        IndexedKeyed<String, Integer> indexedMin = IndexedKeyed.of("key", 100, Integer.MIN_VALUE);
         IndexedKeyed<String, Integer> indexedZero = IndexedKeyed.of("key", 100, 0);
 
         assertEquals(Integer.MAX_VALUE, indexedMax.index());
-        assertEquals(Integer.MIN_VALUE, indexedMin.index());
         assertEquals(0, indexedZero.index());
+
+        // The valid index range is [0, Integer.MAX_VALUE]; everything below 0 is rejected.
+        assertThrows(IllegalArgumentException.class, () -> IndexedKeyed.of("key", 100, Integer.MIN_VALUE));
     }
 
     @Test
     public void testIndex() {
         IndexedKeyed<String, Integer> indexedKeyed1 = IndexedKeyed.of("key", 42, 0);
         IndexedKeyed<String, Integer> indexedKeyed2 = IndexedKeyed.of("key", 42, Integer.MAX_VALUE);
-        IndexedKeyed<String, Integer> indexedKeyed3 = IndexedKeyed.of("key", 42, Integer.MIN_VALUE);
 
         assertEquals(0, indexedKeyed1.index());
         assertEquals(Integer.MAX_VALUE, indexedKeyed2.index());
-        assertEquals(Integer.MIN_VALUE, indexedKeyed3.index());
+        assertThrows(IllegalArgumentException.class, () -> IndexedKeyed.of("key", 42, Integer.MIN_VALUE));
     }
 
     @Test
@@ -389,18 +391,15 @@ public class IndexedKeyedTest extends TestBase {
 
     @Test
     public void test_hashCode_withNegativeIndex() {
-        IndexedKeyed<String, Integer> indexed1 = IndexedKeyed.of("key", 100, -3);
-        IndexedKeyed<String, Integer> indexed2 = IndexedKeyed.of("key", 200, -3);
-
-        assertEquals(indexed1.hashCode(), indexed2.hashCode());
+        assertThrows(IllegalArgumentException.class, () -> IndexedKeyed.of("key", 100, -3));
     }
 
     @Test
     public void test_hashCode_withExtremeIndexValues() {
         IndexedKeyed<String, Integer> indexedMax = IndexedKeyed.of("key", 100, Integer.MAX_VALUE);
-        IndexedKeyed<String, Integer> indexedMin = IndexedKeyed.of("key", 100, Integer.MIN_VALUE);
+        IndexedKeyed<String, Integer> indexedZero = IndexedKeyed.of("key", 100, 0);
 
-        assertNotEquals(indexedMax.hashCode(), indexedMin.hashCode());
+        assertNotEquals(indexedMax.hashCode(), indexedZero.hashCode());
     }
 
     @Test
@@ -573,10 +572,7 @@ public class IndexedKeyedTest extends TestBase {
 
     @Test
     public void test_equals_withNegativeIndexes() {
-        IndexedKeyed<String, Integer> indexed1 = IndexedKeyed.of("key", 100, -5);
-        IndexedKeyed<String, Integer> indexed2 = IndexedKeyed.of("key", 200, -5);
-
-        assertTrue(indexed1.equals(indexed2));
+        assertThrows(IllegalArgumentException.class, () -> IndexedKeyed.of("key", 100, -5));
     }
 
     @Test
@@ -589,10 +585,7 @@ public class IndexedKeyedTest extends TestBase {
 
     @Test
     public void test_equals_withMinIntegerIndex() {
-        IndexedKeyed<String, Integer> indexed1 = IndexedKeyed.of("key", 100, Integer.MIN_VALUE);
-        IndexedKeyed<String, Integer> indexed2 = IndexedKeyed.of("key", 200, Integer.MIN_VALUE);
-
-        assertTrue(indexed1.equals(indexed2));
+        assertThrows(IllegalArgumentException.class, () -> IndexedKeyed.of("key", 100, Integer.MIN_VALUE));
     }
 
     @Test
@@ -705,8 +698,7 @@ public class IndexedKeyedTest extends TestBase {
 
     @Test
     public void test_toString_withNegativeIndex() {
-        IndexedKeyed<String, Integer> indexed = IndexedKeyed.of("key", 100, -10);
-        assertEquals("{index=-10, key=key, val=100}", indexed.toString());
+        assertThrows(IllegalArgumentException.class, () -> IndexedKeyed.of("key", 100, -10));
     }
 
     @Test

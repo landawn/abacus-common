@@ -8,7 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
@@ -16,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 
@@ -624,6 +630,236 @@ public class DeserializationConfigTest extends TestBase {
         Assertions.assertTrue(str.contains("elementType="));
         Assertions.assertTrue(str.contains("mapKeyType="));
         Assertions.assertTrue(str.contains("mapValueType="));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // Review fixes 2026-09-06 (P8-08 copy() clones the value-type map; P8-10 IAE for non-Class/
+    // non-ParameterizedType; P8-12 null key rejected; P8-13 javadoc pin)
+    // ---------------------------------------------------------------------------------------------
+
+    /** Generic bean so that a {@code Box<String>} field yields a ParameterizedType with a bean raw type. */
+    public static class Box<T> {
+        private T value;
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(final T value) {
+            this.value = value;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private static class ReflectTypes {
+        List<?> wildcard;
+        List<String>[] genericArray;
+        Box<String> parameterizedBean;
+
+        <T> void typeVariable(final T t) {
+        }
+    }
+
+    private static java.lang.reflect.Type reflectType(final String fieldName) throws Exception {
+        return ReflectTypes.class.getDeclaredField(fieldName).getGenericType();
+    }
+
+    @Test
+    public void reviewFixes20260906_setValueType_nullKeyRejected_allOverloads() {
+        final Type<String> stringType = Type.of(String.class);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueType(null, stringType));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueType(null, String.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueType(null, "String"));
+
+        // nothing was stored: no map created, no null key, no leak into equals/toString
+        assertFalse(config.hasValueTypes());
+        assertNull(config.getValueType(null));
+        assertEquals(new TestDeserializationConfig(), config);
+        assertTrue(config.toString().contains("valueTypeMap=null"), config.toString());
+
+        // an existing map is left untouched by a rejected call
+        config.setValueType("x", stringType);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueType(null, stringType));
+        assertEquals(1, config.valueTypeMap.size());
+        assertSame(stringType, config.getValueType("x"));
+    }
+
+    @Test
+    public void reviewFixes20260906_setValueType_emptyKeyAccepted_andConsultedForEmptyMapKey() {
+        final Type<Integer> intType = Type.of(Integer.class);
+        assertSame(config, config.setValueType("", intType));
+        assertTrue(config.hasValueTypes());
+        assertSame(intType, config.getValueType(""));
+
+        // the "" entry is what the JSON parser consults for the empty map key
+        final JsonParser jp = ParserFactory.createJsonParser();
+        final Map<String, Object> result = jp.deserialize("{\"\":\"1\",\"x\":\"2\"}", new JsonDeserConfig().setValueType("", Integer.class), Map.class);
+        assertEquals(Integer.valueOf(1), result.get(""));
+        assertEquals("2", result.get("x"));
+    }
+
+    @Test
+    public void reviewFixes20260906_setValueTypesByBeanClass_wildcardTypeThrowsIAE() throws Exception {
+        final java.lang.reflect.Type wildcard = ((ParameterizedType) reflectType("wildcard")).getActualTypeArguments()[0];
+        assertTrue(wildcard instanceof WildcardType);
+
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueTypesByBeanClass(wildcard));
+        assertTrue(e.getMessage().contains("Not a bean type"), e.getMessage());
+        assertFalse(config.hasValueTypes());
+    }
+
+    @Test
+    public void reviewFixes20260906_setValueTypesByBeanClass_genericArrayTypeThrowsIAE() throws Exception {
+        final java.lang.reflect.Type genericArray = reflectType("genericArray");
+        assertTrue(genericArray instanceof GenericArrayType);
+
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueTypesByBeanClass(genericArray));
+        assertTrue(e.getMessage().contains("Not a bean type"), e.getMessage());
+        assertFalse(config.hasValueTypes());
+    }
+
+    @Test
+    public void reviewFixes20260906_setValueTypesByBeanClass_typeVariableThrowsIAE() throws Exception {
+        final java.lang.reflect.Type typeVar = ReflectTypes.class.getDeclaredMethod("typeVariable", Object.class).getGenericParameterTypes()[0];
+        assertTrue(typeVar instanceof TypeVariable);
+
+        // a previously configured bean must survive the rejected call
+        config.setValueTypesByBeanClass(TestBean.class);
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueTypesByBeanClass(typeVar));
+        assertTrue(e.getMessage().contains("Not a bean type"), e.getMessage());
+        assertTrue(config.hasValueTypes());
+        assertEquals(String.class, config.getValueType("name").javaType());
+    }
+
+    @Test
+    public void reviewFixes20260906_setValueTypesByBeanClass_classAndParameterizedBeanStillAccepted_nonBeanStillIAE() throws Exception {
+        // ParameterizedType with a bean raw type is still accepted and resolves property types
+        final java.lang.reflect.Type parameterizedBean = reflectType("parameterizedBean");
+        assertTrue(parameterizedBean instanceof ParameterizedType);
+        assertSame(config, config.setValueTypesByBeanClass(parameterizedBean));
+        assertTrue(config.hasValueTypes());
+        assertNotNull(config.getValueType("value"));
+
+        // non-bean Class / non-bean ParameterizedType keep the original IAE (not a CCE)
+        Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueTypesByBeanClass(String.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueTypesByBeanClass(reflectType("wildcard")));
+        // null still clears
+        config.setValueTypesByBeanClass(null);
+        assertFalse(config.hasValueTypes());
+    }
+
+    @Test
+    public void reviewFixes20260906_copy_valueTypeMapIsNotSharedWithTheOriginal() {
+        final Type<String> stringType = Type.of(String.class);
+        final Type<Integer> intType = Type.of(Integer.class);
+        config.setValueType("x", stringType);
+
+        final TestDeserializationConfig copy = config.copy();
+        assertNotSame(config, copy);
+        assertEquals(config, copy);
+        assertEquals(config.hashCode(), copy.hashCode());
+        assertNotSame(config.valueTypeMap, copy.valueTypeMap);
+        assertSame(stringType, copy.getValueType("x"));
+
+        // mutating the copy must not leak into the original (this was the state-dependent leak)
+        copy.setValueType("y", intType);
+        assertNull(config.getValueType("y"));
+        assertEquals(1, config.valueTypeMap.size());
+        assertSame(intType, copy.getValueType("y"));
+        Assertions.assertNotEquals(config, copy);
+
+        // ... and mutating the original must not leak into the copy
+        config.setValueType("z", intType);
+        assertNull(copy.getValueType("z"));
+        assertEquals(2, copy.valueTypeMap.size());
+    }
+
+    @Test
+    public void reviewFixes20260906_copy_withoutValueTypes_lazyMapOnCopyDoesNotLeak() {
+        final TestDeserializationConfig copy = config.copy();
+        assertNull(copy.valueTypeMap);
+
+        copy.setValueType("y", Integer.class);
+        assertFalse(config.hasValueTypes());
+        assertNull(config.valueTypeMap);
+        assertTrue(copy.hasValueTypes());
+
+        // setValueTypes(Map) replaces the copy's map by reference, as documented, without touching the original
+        final Map<String, Type<?>> shared = new HashMap<>();
+        shared.put("q", Type.of(Long.class));
+        config.setValueTypes(shared);
+        final TestDeserializationConfig copy2 = config.copy();
+        assertNotSame(shared, copy2.valueTypeMap);
+        shared.put("r", Type.of(Long.class));
+        assertNotNull(config.getValueType("r"));
+        assertNull(copy2.getValueType("r"));
+    }
+
+    public static class Named {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // G09 fixes 2026-09-08: null keys and null types are rejected at every value-type door
+    // ---------------------------------------------------------------------------------------------
+
+    @Test
+    public void g09_setValueType_nullTypeIsRejectedByEveryOverload() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueType("x", (Type<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueType("x", (Class<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueType("x", (String) null));
+
+        // nothing was installed, so a configured key still means "there is a type for it"
+        assertFalse(config.hasValueTypes());
+        assertNull(config.getValueType("x"));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueType(null, Type.of(String.class)));
+    }
+
+    @Test
+    public void g09_setValueTypes_rejectsNullKeysAndNullTypes() {
+        final Map<String, Type<?>> nullKey = new HashMap<>();
+        nullKey.put(null, Type.of(String.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueTypes(nullKey));
+
+        final Map<String, Type<?>> nullType = new HashMap<>();
+        nullType.put("x", null);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> config.setValueTypes(nullType));
+
+        // a rejected map is not installed
+        assertFalse(config.hasValueTypes());
+        assertNull(config.valueTypeMap);
+
+        // a valid map still is, and null still clears
+        final Map<String, Type<?>> valid = new HashMap<>();
+        valid.put("x", Type.of(String.class));
+        assertSame(config, config.setValueTypes(valid));
+        assertSame(valid, config.valueTypeMap);
+        assertEquals(String.class, config.getValueType("x").javaType());
+
+        config.setValueTypes(null);
+        assertFalse(config.hasValueTypes());
+        assertNull(config.valueTypeMap);
+    }
+
+    @Test
+    public void reviewFixes20260906_ignoreUnmatchedProperty_false_throwsParsingException() {
+        final JsonParser jp = ParserFactory.createJsonParser();
+        final ParsingException e = Assertions.assertThrows(ParsingException.class,
+                () -> jp.deserialize("{\"name\":\"n\",\"zzz\":1}", new JsonDeserConfig().setIgnoreUnmatchedProperty(false), Named.class));
+        assertTrue(e.getMessage().contains("zzz"), e.getMessage());
+
+        final Named bean = jp.deserialize("{\"name\":\"n\",\"zzz\":1}", new JsonDeserConfig().setIgnoreUnmatchedProperty(true), Named.class);
+        assertEquals("n", bean.getName());
     }
 
 }

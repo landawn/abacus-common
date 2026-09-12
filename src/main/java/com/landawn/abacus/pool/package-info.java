@@ -18,30 +18,28 @@
  *
  * <h2>Choosing a pool type</h2>
  * <ul>
- *   <li>{@link com.landawn.abacus.pool.ObjectPool} &mdash; an <em>unkeyed</em> collection of
- *       interchangeable objects. Follows {@link java.util.concurrent.BlockingQueue} naming
+ *   <li>{@link ObjectPool} &mdash; an <em>unkeyed</em> collection of interchangeable objects.
+ *       Follows {@link java.util.concurrent.BlockingQueue} naming
  *       ({@code add} / {@code poll} / {@code contains}); {@code poll()} removes the returned object.</li>
- *   <li>{@link com.landawn.abacus.pool.KeyedObjectPool} &mdash; objects associated with a unique
- *       key (e.g. connections per schema, resources per tenant). Follows {@link java.util.Map}
- *       naming ({@code put} / {@code get} / {@code remove} / {@code peek} / {@code containsKey});
+ *   <li>{@link KeyedObjectPool} &mdash; objects associated with a unique key (e.g. connections per
+ *       schema, resources per tenant). Follows {@link java.util.Map} naming
+ *       ({@code put} / {@code get} / {@code remove} / {@code peek} / {@code containsKey});
  *       {@code get(key)} returns the value <em>without</em> removing it, whereas {@code remove(key)}
  *       hands ownership to the caller.</li>
  * </ul>
  *
- * <p>Instances are obtained from {@link com.landawn.abacus.pool.PoolFactory}, whose overloads layer
- * on eviction delay, {@linkplain com.landawn.abacus.pool.EvictionPolicy eviction policy},
- * auto-balancing, and optional memory-based capacity limits. The concrete implementations are
- * {@link com.landawn.abacus.pool.GenericObjectPool} (LIFO storage) and
- * {@link com.landawn.abacus.pool.GenericKeyedObjectPool} (insertion-ordered storage).</p>
+ * <p>Instances are obtained from {@link PoolFactory}, whose overloads layer on eviction delay,
+ * {@linkplain EvictionPolicy eviction policy}, auto-balancing, and optional memory-based capacity
+ * limits. The concrete implementations are {@link GenericObjectPool} (LIFO storage) and
+ * {@link GenericKeyedObjectPool} (insertion-ordered storage).</p>
  *
  * <h2>Poolable objects</h2>
- * <p>Every pooled value implements {@link com.landawn.abacus.pool.Poolable}, exposing an
- * {@link com.landawn.abacus.pool.ActivityPrint} (creation time, live time, max idle time, last
- * access time, access count) and a {@link com.landawn.abacus.pool.Poolable#destroy destroy} callback
- * that receives a {@link com.landawn.abacus.pool.Poolable.Caller} explaining why the object is being
- * released. {@link com.landawn.abacus.pool.AbstractPoolable} is a convenient base class, and
- * {@link com.landawn.abacus.pool.PoolableAdapter} wraps objects that do not implement
- * {@code Poolable} directly (or use {@link com.landawn.abacus.pool.Poolable#wrap Poolable.wrap}).</p>
+ * <p>Every pooled value implements {@link Poolable}, exposing an {@link ActivityPrint} (creation
+ * time, live time, max idle time, last access time, access count) and a
+ * {@link Poolable#destroy destroy} callback that receives a {@code Poolable.Caller} explaining why
+ * the object is being released. {@link AbstractPoolable} is a convenient base class.
+ * {@link PoolableAdapter} wraps objects that do not implement {@code Poolable} directly
+ * (or use {@link Poolable#wrap}).</p>
  *
  * <h2>Expiration vs. eviction</h2>
  * <p>These are two distinct mechanisms:</p>
@@ -51,20 +49,25 @@
  *       delay) and are also skipped and destroyed lazily when encountered during {@code poll}/{@code get}.
  *       The eviction policy has no bearing on expiration.</li>
  *   <li><b>Eviction / balancing</b> is capacity-based: when a full pool must make room, the configured
- *       {@link com.landawn.abacus.pool.EvictionPolicy} decides the <em>order</em> in which live
- *       objects are shed (LRU, LFU, closest-to-expiration, oldest-created, or FIFO). This is driven
- *       by {@code autoBalance} plus a balance factor, or invoked explicitly via
- *       {@link com.landawn.abacus.pool.Pool#evict()}.</li>
+ *       {@link EvictionPolicy} decides the <em>order</em> in which live objects are shed (LRU, LFU,
+ *       closest-to-expiration, oldest-created, or FIFO). This is driven by {@code autoBalance} plus a
+ *       balance factor, or invoked explicitly via {@link Pool#evict()}.</li>
  * </ul>
  *
- * <h2>Lifecycle and thread-safety</h2>
+ * <h2>Lifecycle, thread-safety, and serialization</h2>
  * <p>All pools are thread-safe and support concurrent access. A pool progresses through creation,
- * use, and closure; once {@linkplain com.landawn.abacus.pool.Pool#close() closed} it cannot be
- * reopened, and every operation except {@code capacity()}, {@code isClosed()}, and {@code close()}
- * throws {@link java.lang.IllegalStateException}. Pools are {@link java.lang.AutoCloseable} and also
- * register a JVM shutdown hook to destroy their contents on exit. Runtime metrics are available as an
- * immutable {@link com.landawn.abacus.pool.PoolStats} snapshot from
- * {@link com.landawn.abacus.pool.Pool#stats()}.</p>
+ * use, and closure; once {@linkplain Pool#close() closed} it cannot be reopened. Operations
+ * requiring an open pool throw {@link java.lang.IllegalStateException}; {@code capacity()},
+ * {@code isClosed()}, and {@code close()} remain available, as do the generic implementations'
+ * {@code equals}, {@code hashCode}, and {@code toString} methods. Pools are
+ * {@link java.lang.AutoCloseable} and also register a JVM shutdown hook to destroy their contents
+ * on exit. Runtime metrics are available as an immutable {@link PoolStats} snapshot from
+ * {@link Pool#stats()}.</p>
+ *
+ * <p>Every {@link Pool} is {@link java.io.Serializable}. {@link AbstractPoolable} is serializable so
+ * pooled values can be written with the pool; a subclass (or a {@link PoolableAdapter} around a
+ * value) is serializable only when all of its non-transient state is. Serializing a non-serializable
+ * pooled value fails with {@link java.io.NotSerializableException}.</p>
  *
  * <h2>Usage example</h2>
  * <pre>{@code
@@ -99,8 +102,8 @@
  * }   // close() destroys everything still pooled
  * }</pre>
  *
- * @see com.landawn.abacus.pool.Pool
- * @see com.landawn.abacus.pool.PoolFactory
- * @see com.landawn.abacus.pool.Poolable
+ * @see Pool
+ * @see PoolFactory
+ * @see Poolable
  */
 package com.landawn.abacus.pool;

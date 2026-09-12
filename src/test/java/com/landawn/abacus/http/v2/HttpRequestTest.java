@@ -1,5 +1,6 @@
 package com.landawn.abacus.http.v2;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -26,19 +26,15 @@ import java.net.PasswordAuthentication;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -46,164 +42,57 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import com.landawn.abacus.TestBase;
 import com.landawn.abacus.http.HttpMethod;
 import com.sun.net.httpserver.HttpServer;
 
-public class HttpRequestTest extends TestBase {
-
-    private static final HttpServer SHARED_TEST_SERVER = startSharedTestServer();
-    private static final String SHARED_TEST_SERVER_URL = localUrl(SHARED_TEST_SERVER);
-    private static final String TEST_URL = SHARED_TEST_SERVER_URL + "get";
-    private static final String POST_URL = SHARED_TEST_SERVER_URL + "post";
-    private static final String PUT_URL = SHARED_TEST_SERVER_URL + "put";
-    private static final String PATCH_URL = SHARED_TEST_SERVER_URL + "patch";
-    private static final String DELETE_URL = SHARED_TEST_SERVER_URL + "delete";
-
-    private final String testUrl = TEST_URL;
-    private final URI testUri = URI.create(testUrl);
-    private final HttpClient mockHttpClient = HttpClient.newHttpClient();
-
-    @AfterAll
-    public static void stopSharedTestServer() {
-        SHARED_TEST_SERVER.stop(0);
-    }
-
-    public static class TestBean {
-        private String name;
-        private int value;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getValue() {
-            return value;
-        }
-
-        public void setValue(int value) {
-            this.value = value;
-        }
-    }
-
-    // ==================== create(String, HttpClient) ====================
+public class HttpRequestTest extends HttpRequestTestSupport {
 
     @Test
-    public void test_create_withStringUrl() {
+    public void testCreate() {
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.create(TEST_URL, client);
-        assertNotNull(request);
+        assertNotNull(HttpRequest.create(TEST_URL, client));
+        assertNotNull(HttpRequest.create(testUrl, mockHttpClient));
     }
 
     @Test
-    public void testCreateWithUrlAndHttpClient() {
-        HttpRequest request = HttpRequest.create(testUrl, mockHttpClient);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testCreateWithStringReturnsNonNull() {
+    public void testCreate_URI() {
         HttpClient client = HttpClient.newHttpClient();
-        assertNotNull(HttpRequest.create(testUrl, client));
-    }
-
-    // ==================== create(URI, HttpClient) ====================
-
-    @Test
-    public void test_create_withURI() {
-        HttpClient client = HttpClient.newHttpClient();
-        URI uri = URI.create(TEST_URL);
-        HttpRequest request = HttpRequest.create(uri, client);
-        assertNotNull(request);
+        assertNotNull(HttpRequest.create(URI.create(TEST_URL), client));
+        assertNotNull(HttpRequest.create(testUri, mockHttpClient));
     }
 
     @Test
-    public void testCreateWithURIAndHttpClient() {
-        HttpRequest request = HttpRequest.create(testUri, mockHttpClient);
-        assertNotNull(request);
+    public void testCreate_URIContainingQueryParams() {
+        assertNotNull(HttpRequest.url(URI.create("https://httpbin.org/get?key=value")));
     }
 
     @Test
-    public void testCreateWithURIReturnsNonNull() {
-        HttpClient client = HttpClient.newHttpClient();
-        assertNotNull(HttpRequest.create(testUri, client));
-    }
-
-    @Test
-    public void testCreateWithURIContainingQueryParams() {
-        URI uriWithParams = URI.create("https://httpbin.org/get?key=value");
-        HttpRequest request = HttpRequest.url(uriWithParams);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testCreateWithDifferentHttpClients() {
+    public void testCreate_DifferentHttpClients() {
         HttpClient client1 = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
         HttpClient client2 = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
-
-        HttpRequest request1 = HttpRequest.create(testUrl, client1);
-        HttpRequest request2 = HttpRequest.create(testUrl, client2);
-
-        assertNotNull(request1);
-        assertNotNull(request2);
+        assertNotNull(HttpRequest.create(testUrl, client1));
+        assertNotNull(HttpRequest.create(testUrl, client2));
     }
 
     @Test
-    public void testCreateWithHttpsUrl() {
-        HttpRequest request = HttpRequest.url("https://httpbin.org/get");
-        assertNotNull(request);
+    public void testCreate_HttpsAndHttpUrls() {
+        assertNotNull(HttpRequest.url("https://httpbin.org/get"));
+        assertNotNull(HttpRequest.url("http://httpbin.org/get"));
     }
 
     @Test
-    public void testCreateWithHttpUrl() {
-        HttpRequest request = HttpRequest.url("http://httpbin.org/get");
-        assertNotNull(request);
-    }
-
-    // ==================== create(URL, HttpClient) ====================
-
-    @Test
-    public void test_create_withURL() throws Exception {
+    public void testCreate_URL() throws Exception {
         HttpClient client = HttpClient.newHttpClient();
-        URL url = new URL(TEST_URL);
-        HttpRequest request = HttpRequest.create(url, client);
-        assertNotNull(request);
+        assertNotNull(HttpRequest.create(new URL(TEST_URL), client));
+        assertNotNull(HttpRequest.create(new URL(testUrl), mockHttpClient));
     }
 
     @Test
-    public void testCreateWithURLObjectAndHttpClient() throws Exception {
-        URL url = new URL(testUrl);
-        HttpRequest request = HttpRequest.create(url, mockHttpClient);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testCreateWithURLReturnsNonNull() throws Exception {
-        HttpClient client = HttpClient.newHttpClient();
-        assertNotNull(HttpRequest.create(new URL(testUrl), client));
-    }
-
-    @Test
-    public void testCreateWithTimeoutsAndExecute() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(testUrl, 5000L, 30000L).header("Accept", "application/json").get();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testCreateWithTimeoutsUsesNewClient() {
+    public void testCreate_TimeoutsUsesNewClient() {
         HttpRequest request = HttpRequest.url(testUrl, 1000L, 2000L);
         assertNotNull(request);
-        // The request should work with internal client built from timeouts
         assertDoesNotThrow(() -> {
             try {
                 request.get();
@@ -211,256 +100,21 @@ public class HttpRequestTest extends TestBase {
                 // Network errors are expected
             }
         });
-    }
-
-    // ==================== url(String) ====================
-
-    @Test
-    public void test_url_withString() {
-        HttpRequest request = HttpRequest.url(TEST_URL);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithString() {
-        HttpRequest request = HttpRequest.url(testUrl);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithStringReturnsNonNull() {
-        assertNotNull(HttpRequest.url(testUrl));
-    }
-
-    // ==================== url(String, long, long) ====================
-
-    @Test
-    public void test_url_withStringAndTimeouts() {
-        HttpRequest request = HttpRequest.url(TEST_URL, 5000, 10000);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithStringAndTimeouts() {
-        HttpRequest request = HttpRequest.url(testUrl, 5000L, 30000L);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithStringAndTimeoutsReturnsNonNull() {
-        assertNotNull(HttpRequest.url(testUrl, 3000L, 6000L));
-    }
-
-    @Test
-    public void testUrlWithStringAndZeroTimeouts() {
-        HttpRequest request = HttpRequest.url(testUrl, 0L, 0L);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithStringAndLargeTimeouts() {
-        HttpRequest request = HttpRequest.url(testUrl, 60000L, 120000L);
-        assertNotNull(request);
-    }
-
-    // ==================== url(URI) ====================
-
-    @Test
-    public void test_url_withURI() {
-        URI uri = URI.create(TEST_URL);
-        HttpRequest request = HttpRequest.url(uri);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithURI() {
-        HttpRequest request = HttpRequest.url(testUri);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithURIReturnsNonNull() {
-        assertNotNull(HttpRequest.url(testUri));
-    }
-
-    // ==================== url(URI, long, long) ====================
-
-    @Test
-    public void test_url_withURIAndTimeouts() {
-        URI uri = URI.create(TEST_URL);
-        HttpRequest request = HttpRequest.url(uri, 5000, 10000);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithURIAndTimeouts() {
-        HttpRequest request = HttpRequest.url(testUri, 5000L, 30000L);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithURIAndTimeoutsReturnsNonNull() {
-        assertNotNull(HttpRequest.url(testUri, 3000L, 6000L));
-    }
-
-    @Test
-    public void testUrlWithURIAndZeroTimeouts() {
-        HttpRequest request = HttpRequest.url(testUri, 0L, 0L);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testMultipleConnectTimeoutOverrides() {
-        HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ofSeconds(1)).connectTimeout(Duration.ofSeconds(5));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testMultipleReadTimeoutOverrides() {
-        HttpRequest request = HttpRequest.url(testUrl).readTimeout(Duration.ofSeconds(5)).readTimeout(Duration.ofSeconds(30));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testChainedBuilderWithQueryAndHeaders() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", 1);
-        HttpRequest request = HttpRequest.url(testUrl).header("Accept", "application/json").query(params).readTimeout(Duration.ofSeconds(10));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testChainedBuilderWithBodyAndHeaders() {
-        HttpRequest request = HttpRequest.url(testUrl).header("X-Custom", "custom-value").jsonBody("{\"key\":\"value\"}").connectTimeout(Duration.ofSeconds(5));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testChainedBuilderWithAllOptions() {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Accept", "application/json");
-
-        HttpRequest request = HttpRequest.url(testUrl)
-                .connectTimeout(Duration.ofSeconds(5))
-                .readTimeout(Duration.ofSeconds(30))
-                .basicAuth("user", "pass")
-                .headers(headers)
-                .query("param=value")
-                .jsonBody("{\"key\":\"value\"}");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithQueryStringAlreadyInUrl() {
-        HttpRequest request = HttpRequest.url("https://httpbin.org/get?existing=param");
-        assertNotNull(request);
-    }
-
-    // ==================== url(URL) ====================
-
-    @Test
-    public void test_url_withURL() throws Exception {
-        URL url = new URL(TEST_URL);
-        HttpRequest request = HttpRequest.url(url);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithURLObject() throws Exception {
-        URL url = new URL(testUrl);
-        HttpRequest request = HttpRequest.url(url);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithURLReturnsNonNull() throws Exception {
-        assertNotNull(HttpRequest.url(new URL(testUrl)));
-    }
-
-    // ==================== url(URL, long, long) ====================
-
-    @Test
-    public void test_url_withURLAndTimeouts() throws Exception {
-        URL url = new URL(TEST_URL);
-        HttpRequest request = HttpRequest.url(url, 5000, 10000);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithURLObjectAndTimeouts() throws Exception {
-        URL url = new URL(testUrl);
-        HttpRequest request = HttpRequest.url(url, 5000L, 30000L);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithURLAndTimeoutsReturnsNonNull() throws Exception {
-        assertNotNull(HttpRequest.url(new URL(testUrl), 3000L, 6000L));
-    }
-
-    @Test
-    public void testUrlWithURLAndZeroTimeouts() throws Exception {
-        URL url = new URL(testUrl);
-        HttpRequest request = HttpRequest.url(url, 0L, 0L);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testUrlWithURITimeoutsUsesNewClient() throws Exception {
-        URI uri = URI.create(testUrl);
-        HttpRequest request = HttpRequest.url(uri, 1000L, 2000L);
-        assertNotNull(request);
-        assertDoesNotThrow(() -> {
-            try {
-                request.get();
-            } catch (Exception e) {
-                // Network errors are expected
-            }
-        });
-    }
-
-    @Test
-    public void testUrlWithURLTimeoutsUsesNewClient() throws Exception {
-        URL url = new URL(testUrl);
-        HttpRequest request = HttpRequest.url(url, 1000L, 2000L);
-        assertNotNull(request);
-        assertDoesNotThrow(() -> {
-            try {
-                request.get();
-            } catch (Exception e) {
-                // Network errors are expected
-            }
-        });
-    }
-
-    // ==================== connectTimeout(Duration) ====================
-
-    @Test
-    public void test_connectTimeout() {
-        HttpRequest request = HttpRequest.url(TEST_URL).connectTimeout(Duration.ofSeconds(10));
-        assertNotNull(request);
     }
 
     @Test
     public void testConnectTimeout() {
-        HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ofSeconds(10));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testConnectTimeoutReturnsSameInstance() {
         HttpRequest request = HttpRequest.url(testUrl);
+        assertNotNull(request.connectTimeout(Duration.ofSeconds(10)));
         assertSame(request, request.connectTimeout(Duration.ofSeconds(5)));
+        assertNotNull(HttpRequest.url(testUrl).connectTimeout(Duration.ZERO));
+        assertNotNull(HttpRequest.url(testUrl).connectTimeout(Duration.ofMillis(1)));
+        assertNotNull(HttpRequest.url(testUrl).connectTimeout(Duration.ofMinutes(5)));
+        assertNotNull(HttpRequest.create(testUrl, HttpClient.newHttpClient()).connectTimeout(Duration.ofSeconds(10)));
     }
 
     @Test
-    public void testConnectTimeoutWithZeroDuration() {
-        HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ZERO);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testConnectTimeoutOwnsReplacementClient() throws Exception {
+    public void testConnectTimeout_OwnsReplacementClient() throws Exception {
         final HttpRequest request = HttpRequest.create(testUrl, HttpClient.newHttpClient()).connectTimeout(Duration.ofSeconds(1));
 
         assertEquals(true, booleanField(request, "requireNewClient"));
@@ -468,7 +122,7 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testEmptyConnectTimeoutDoesNotReplaceSharedClient() throws Exception {
+    public void testConnectTimeout_EmptyDoesNotReplaceSharedClient() throws Exception {
         final HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ZERO).connectTimeout((Duration) null);
 
         assertEquals(false, booleanField(request, "requireNewClient"));
@@ -477,101 +131,31 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testConnectTimeoutWithSmallDuration() {
-        HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ofMillis(1));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testConnectTimeoutWithLargeDuration() {
-        HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ofMinutes(5));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testConnectTimeoutOnCreateInstance() {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.create(testUrl, client).connectTimeout(Duration.ofSeconds(10));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testConnectTimeoutThenAuthenticator() {
+    public void testConnectTimeout_ThenAuthenticator() {
         Authenticator auth = mock(Authenticator.class);
-        HttpRequest request = HttpRequest.url(testUrl).connectTimeout(Duration.ofSeconds(5)).authenticator(auth);
-        assertNotNull(request);
-    }
-
-    // ==================== readTimeout(Duration) ====================
-
-    @Test
-    public void test_readTimeout() {
-        HttpRequest request = HttpRequest.url(TEST_URL).readTimeout(Duration.ofSeconds(30));
-        assertNotNull(request);
+        assertNotNull(HttpRequest.url(testUrl).connectTimeout(Duration.ofSeconds(5)).authenticator(auth));
     }
 
     @Test
     public void testReadTimeout() {
-        HttpRequest request = HttpRequest.url(testUrl).readTimeout(Duration.ofSeconds(30));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testReadTimeoutReturnsSameInstance() {
         HttpRequest request = HttpRequest.url(testUrl);
+        assertNotNull(request.readTimeout(Duration.ofSeconds(30)));
         assertSame(request, request.readTimeout(Duration.ofSeconds(30)));
-    }
-
-    @Test
-    public void testReadTimeoutWithZeroDuration() {
-        HttpRequest request = HttpRequest.url(testUrl).readTimeout(Duration.ZERO);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testReadTimeoutWithLargeDuration() {
-        HttpRequest request = HttpRequest.url(testUrl).readTimeout(Duration.ofMinutes(10));
-        assertNotNull(request);
-    }
-
-    // ==================== authenticator(Authenticator) ====================
-
-    @Test
-    public void test_authenticator() {
-        Authenticator auth = new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("user", "pass".toCharArray());
-            }
-        };
-        HttpRequest request = HttpRequest.url(TEST_URL).authenticator(auth);
-        assertNotNull(request);
+        assertNotNull(HttpRequest.url(testUrl).readTimeout(Duration.ZERO));
+        assertNotNull(HttpRequest.url(testUrl).readTimeout(Duration.ofMinutes(10)));
     }
 
     @Test
     public void testAuthenticator() {
         Authenticator authenticator = mock(Authenticator.class);
-        HttpRequest request = HttpRequest.url(testUrl).authenticator(authenticator);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testAuthenticatorReturnsSameInstance() {
         HttpRequest request = HttpRequest.url(testUrl);
-        Authenticator auth = mock(Authenticator.class);
-        assertSame(request, request.authenticator(auth));
+        assertNotNull(request.authenticator(authenticator));
+        assertSame(request, request.authenticator(authenticator));
+        assertNotNull(HttpRequest.create(testUrl, HttpClient.newHttpClient()).authenticator(authenticator));
     }
 
     @Test
-    public void testAuthenticatorOnCreateInstance() {
-        Authenticator auth = mock(Authenticator.class);
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.create(testUrl, client).authenticator(auth);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testAuthenticatorOwnsReplacementClient() throws Exception {
+    public void testAuthenticator_OwnsReplacementClient() throws Exception {
         final HttpRequest request = HttpRequest.create(testUrl, HttpClient.newHttpClient()).authenticator(mock(Authenticator.class));
 
         assertEquals(true, booleanField(request, "requireNewClient"));
@@ -579,71 +163,37 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testAuthenticatorThenConnectTimeout() {
+    public void testAuthenticator_ThenConnectTimeout() {
         Authenticator auth = mock(Authenticator.class);
-        HttpRequest request = HttpRequest.url(testUrl).authenticator(auth).connectTimeout(Duration.ofSeconds(5));
-        assertNotNull(request);
-    }
-
-    // ==================== basicAuth(String, Object) ====================
-
-    @Test
-    public void test_basicAuth() {
-        HttpRequest request = HttpRequest.url(TEST_URL).basicAuth("testuser", "testpass");
-        assertNotNull(request);
+        assertNotNull(HttpRequest.url(testUrl).authenticator(auth).connectTimeout(Duration.ofSeconds(5)));
     }
 
     @Test
     public void testBasicAuth() {
-        HttpRequest request = HttpRequest.url(testUrl).basicAuth("username", "password");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBasicAuthReturnsSameInstance() {
         HttpRequest request = HttpRequest.url(testUrl);
+        assertNotNull(request.basicAuth("username", "password"));
         assertSame(request, request.basicAuth("user", "pass"));
+        assertNotNull(HttpRequest.url(testUrl).basicAuth("", ""));
+        assertNotNull(HttpRequest.url(testUrl).basicAuth("user@domain.com", "p@ss:w0rd!"));
+        assertNotNull(HttpRequest.url(testUrl).basicAuth("admin", 12345));
     }
 
     @Test
-    public void testBasicAuthWithEmptyCredentials() {
-        HttpRequest request = HttpRequest.url(testUrl).basicAuth("", "");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBasicAuthWithSpecialCharacters() {
-        HttpRequest request = HttpRequest.url(testUrl).basicAuth("user@domain.com", "p@ss:w0rd!");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBasicAuthWithNumericPassword() {
-        HttpRequest request = HttpRequest.url(testUrl).basicAuth("admin", 12345);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBasicAuthCharArrayPasswordIsEncodedAsString() throws Exception {
-        // Regression: prior code did `username + ":" + password` which calls Object.toString()
-        // on a char[] (yielding "[C@xxxx") instead of treating it as a real password.
+    public void testBasicAuth_CharArrayPasswordIsEncodedAsString() throws Exception {
         HttpRequest request = HttpRequest.url(testUrl).basicAuth("user", new char[] { 'p', 'a', 's', 's' });
 
-        // Pull the underlying java.net.http.HttpRequest.Builder out via reflection so we can inspect
-        // the Authorization header that was actually set.
         java.lang.reflect.Field f = HttpRequest.class.getDeclaredField("requestBuilder");
         f.setAccessible(true);
         java.net.http.HttpRequest.Builder builder = (java.net.http.HttpRequest.Builder) f.get(request);
         java.net.http.HttpRequest built = builder.uri(URI.create(testUrl)).GET().build();
 
         String auth = built.headers().firstValue("Authorization").orElseThrow();
-        String expected = "Basic " + java.util.Base64.getEncoder().encodeToString("user:pass".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        String expected = "Basic " + java.util.Base64.getEncoder().encodeToString("user:pass".getBytes(StandardCharsets.UTF_8));
         assertEquals(expected, auth);
     }
 
     @Test
-    public void testBasicAuthStringOverload() throws Exception {
-        // M15: basicAuth(String, String) parity overload encodes the same as the Object form.
+    public void testBasicAuth_StringOverload() throws Exception {
         HttpRequest request = HttpRequest.url(testUrl).basicAuth("user", "pass");
 
         java.lang.reflect.Field f = HttpRequest.class.getDeclaredField("requestBuilder");
@@ -652,31 +202,26 @@ public class HttpRequestTest extends TestBase {
         java.net.http.HttpRequest built = builder.uri(URI.create(testUrl)).GET().build();
 
         String auth = built.headers().firstValue("Authorization").orElseThrow();
-        String expected = "Basic " + java.util.Base64.getEncoder().encodeToString("user:pass".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        String expected = "Basic " + java.util.Base64.getEncoder().encodeToString("user:pass".getBytes(StandardCharsets.UTF_8));
         assertEquals(expected, auth);
     }
 
     @Test
-    public void testConnectTimeoutLongMillisOverload() {
-        // M15: long-millis instance overloads for parity with the other builders.
+    public void testConnectTimeout_LongMillis() {
         HttpRequest request = HttpRequest.url(testUrl);
         assertSame(request, request.connectTimeout(5000L));
-        assertSame(request, request.connectTimeout(0L)); // 0 is a no-op, still chainable
+        assertSame(request, request.connectTimeout(0L));
     }
 
     @Test
-    public void testReadTimeoutLongMillisOverload() {
+    public void testReadTimeout_LongMillis() {
         HttpRequest request = HttpRequest.url(testUrl);
         assertSame(request, request.readTimeout(60_000L));
         assertSame(request, request.readTimeout(0L));
     }
 
     @Test
-    public void testHeaderReplacesPreviousValueInsteadOfAppending() throws Exception {
-        // Regression: header(...) used java.net.http.HttpRequest.Builder.header (append)
-        // instead of setHeader (replace). The Javadoc states existing headers with the
-        // same name are "all replaced", so a second header(...) call (or setContentType
-        // after a manual Content-Type header) must overwrite, not duplicate.
+    public void testHeader_ReplacesPreviousValueInsteadOfAppending() throws Exception {
         HttpRequest request = HttpRequest.url(testUrl).header("Content-Type", "text/plain").header("Content-Type", "application/json");
 
         java.lang.reflect.Field f = HttpRequest.class.getDeclaredField("requestBuilder");
@@ -690,9 +235,7 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testJsonBodyDoesNotDuplicateContentTypeHeader() throws Exception {
-        // Regression: setContentType(...) -> header(...) appended a second Content-Type
-        // when one was already present, yielding "text/plain, application/json".
+    public void testJsonBody_DoesNotDuplicateContentTypeHeader() throws Exception {
         HttpRequest request = HttpRequest.url(POST_URL).header("Content-Type", "text/plain").jsonBody("{\"k\":\"v\"}");
 
         java.lang.reflect.Field f = HttpRequest.class.getDeclaredField("requestBuilder");
@@ -705,528 +248,136 @@ public class HttpRequestTest extends TestBase {
         assertEquals("application/json", values.get(0));
     }
 
-    // ==================== header(String, Object) ====================
-
-    @Test
-    public void test_header() {
-        HttpRequest request = HttpRequest.url(TEST_URL).header("Accept", "application/json");
-        assertNotNull(request);
-    }
-
     @Test
     public void testHeader() {
-        HttpRequest request = HttpRequest.url(testUrl).header("Accept", "application/json");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeaderReturnsSameInstance() {
         HttpRequest request = HttpRequest.url(testUrl);
+        assertNotNull(request.header("Accept", "application/json"));
         assertSame(request, request.header("Accept", "application/json"));
+        assertNotNull(HttpRequest.url(testUrl).header("X-Request-Id", 12345).header("X-Debug", true).header("X-Empty", "").header("X-Timestamp", 1L));
     }
 
     @Test
-    public void testHeaderWithIntegerValue() {
-        HttpRequest request = HttpRequest.url(testUrl).header("X-Request-Id", 12345);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeaderWithMultipleCalls() {
-        HttpRequest request = HttpRequest.url(testUrl).header("Accept", "application/json").header("User-Agent", "TestAgent").header("X-Custom", "value");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeaderWithEmptyValue() {
-        HttpRequest request = HttpRequest.url(testUrl).header("X-Empty", "");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeaderWithBooleanValue() {
-        HttpRequest request = HttpRequest.url(testUrl).header("X-Debug", true);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeaderWithLongValue() {
-        HttpRequest request = HttpRequest.url(testUrl).header("X-Timestamp", System.currentTimeMillis());
-        assertNotNull(request);
-    }
-
-    // ==================== headers(String, Object, String, Object) ====================
-
-    @Test
-    public void test_headers_twoParams() {
-        HttpRequest request = HttpRequest.url(TEST_URL).headers("Accept", "application/json", "User-Agent", "TestAgent");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeadersWithTwoHeaders() {
-        HttpRequest request = HttpRequest.url(testUrl).headers("Accept", "application/json", "Content-Type", "application/json");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeadersTwoReturnsSameInstance() {
+    public void testHeaders_Two() {
         HttpRequest request = HttpRequest.url(testUrl);
+        assertNotNull(request.headers("Accept", "application/json", "User-Agent", "TestAgent"));
         assertSame(request, request.headers("Accept", "application/json", "User-Agent", "TestAgent"));
+        assertNotNull(HttpRequest.url(testUrl).headers("X-Id", 100, "X-Count", 200));
     }
 
     @Test
-    public void testHeadersTwoWithIntegerValues() {
-        HttpRequest request = HttpRequest.url(testUrl).headers("X-Id", 100, "X-Count", 200);
-        assertNotNull(request);
-    }
-
-    // ==================== headers(String, Object, String, Object, String, Object) ====================
-
-    @Test
-    public void test_headers_threeParams() {
-        HttpRequest request = HttpRequest.url(TEST_URL).headers("Accept", "application/json", "User-Agent", "TestAgent", "X-Custom", "value");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeadersWithThreeHeaders() {
-        HttpRequest request = HttpRequest.url(testUrl)
-                .headers("Accept", "application/json", "Content-Type", "application/json", "Authorization", "Bearer token");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeadersThreeReturnsSameInstance() {
+    public void testHeaders_Three() {
         HttpRequest request = HttpRequest.url(testUrl);
+        assertNotNull(request.headers("Accept", "application/json", "User-Agent", "TestAgent", "X-Custom", "value"));
         assertSame(request, request.headers("Accept", "application/json", "User-Agent", "TestAgent", "X-Custom", "value"));
+        assertNotNull(HttpRequest.url(testUrl).headers("X-String", "abc", "X-Int", 42, "X-Bool", true));
     }
 
     @Test
-    public void testHeadersThreeWithMixedValueTypes() {
-        HttpRequest request = HttpRequest.url(testUrl).headers("X-String", "abc", "X-Int", 42, "X-Bool", true);
-        assertNotNull(request);
-    }
-
-    // ==================== headers(Map) ====================
-
-    @Test
-    public void test_headers_withMap() {
+    public void testHeaders_Map() {
         Map<String, String> headers = new HashMap<>();
         headers.put("Accept", "application/json");
         headers.put("User-Agent", "TestAgent");
-
-        HttpRequest request = HttpRequest.url(TEST_URL).headers(headers);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeadersWithMap() {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Accept", "application/json");
-        headers.put("Content-Type", "application/json");
-
-        HttpRequest request = HttpRequest.url(testUrl).headers(headers);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeadersMapReturnsSameInstance() {
         HttpRequest request = HttpRequest.url(testUrl);
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Accept", "application/json");
+        assertNotNull(request.headers(headers));
         assertSame(request, request.headers(headers));
+        assertNotNull(HttpRequest.url(testUrl).headers((Map<String, String>) null));
+        assertNotNull(HttpRequest.url(testUrl).headers(new HashMap<>()));
     }
 
     @Test
-    public void test_headers_withNullMap() {
-        HttpRequest request = HttpRequest.url(TEST_URL).headers((Map<String, String>) null);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeadersWithEmptyMap() {
-        HttpRequest request = HttpRequest.url(testUrl).headers(new HashMap<>());
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testHeadersWithLargeMap() {
-        Map<String, String> headers = new LinkedHashMap<>();
-        for (int i = 0; i < 10; i++) {
-            headers.put("X-Header-" + i, "value-" + i);
-        }
-        HttpRequest request = HttpRequest.url(testUrl).headers(headers);
-        assertNotNull(request);
-    }
-
-    // ==================== query(String) ====================
-
-    @Test
-    public void test_query_withString() {
-        HttpRequest request = HttpRequest.url(TEST_URL).query("param1=value1&param2=value2");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testQueryWithString() {
-        HttpRequest request = HttpRequest.url(testUrl).query("param1=value1&param2=value2");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testQueryStringReturnsSameInstance() {
+    public void testQuery() {
         HttpRequest request = HttpRequest.url(testUrl);
+        assertNotNull(request.query("param1=value1&param2=value2"));
         assertSame(request, request.query("param=value"));
+        assertNotNull(HttpRequest.url(testUrl).query(""));
+        assertNotNull(HttpRequest.url(testUrl).query((String) null));
+        assertNotNull(HttpRequest.url(testUrl).query("q=hello+world&lang=en"));
     }
 
     @Test
-    public void test_query_withEmptyString() {
-        HttpRequest request = HttpRequest.url(TEST_URL).query("");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testQueryWithNullString() {
-        HttpRequest request = HttpRequest.url(testUrl).query((String) null);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testQueryWithSingleParam() {
-        HttpRequest request = HttpRequest.url(testUrl).query("key=value");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testQueryWithEncodedValues() {
-        HttpRequest request = HttpRequest.url(testUrl).query("q=hello+world&lang=en");
-        assertNotNull(request);
-    }
-
-    // ==================== query(Map) ====================
-
-    @Test
-    public void test_query_withMap() {
+    public void testQuery_Map() {
         Map<String, Object> params = new HashMap<>();
         params.put("param1", "value1");
         params.put("param2", 123);
-
-        HttpRequest request = HttpRequest.url(TEST_URL).query(params);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testQueryWithMap() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("param1", "value1");
-        params.put("param2", "value2");
-
-        HttpRequest request = HttpRequest.url(testUrl).query(params);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testQueryMapReturnsSameInstance() {
         HttpRequest request = HttpRequest.url(testUrl);
-        Map<String, Object> params = new HashMap<>();
-        params.put("key", "value");
+        assertNotNull(request.query(params));
         assertSame(request, request.query(params));
+        assertNotNull(HttpRequest.url(testUrl).query(new HashMap<>()));
+        assertNotNull(HttpRequest.url(testUrl).query((Map<String, Object>) null));
     }
 
     @Test
-    public void test_query_withEmptyMap() {
-        HttpRequest request = HttpRequest.url(TEST_URL).query(new HashMap<>());
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testQueryWithNullMap() {
-        HttpRequest request = HttpRequest.url(testUrl).query((Map<String, Object>) null);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testQueryWithMapContainingIntegerValues() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("page", 1);
-        params.put("size", 20);
-        HttpRequest request = HttpRequest.url(testUrl).query(params);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testQueryOverridesOnSameInstance() {
+    public void testJsonBody() {
         HttpRequest request = HttpRequest.url(testUrl);
-        request.query("first=1");
-        request.query("second=2");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testQueryWithMultipleParams() {
-        Map<String, Object> params = new LinkedHashMap<>();
-        params.put("q", "search term");
-        params.put("page", 1);
-        params.put("size", 20);
-        params.put("sort", "name");
-        HttpRequest request = HttpRequest.url(testUrl).query(params);
-        assertNotNull(request);
-    }
-
-    // ==================== jsonBody(String) ====================
-
-    @Test
-    public void test_jsonBody_withString() {
-        HttpRequest request = HttpRequest.url(POST_URL).jsonBody("{\"key\":\"value\"}");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testJsonBodyWithString() {
-        HttpRequest request = HttpRequest.url(testUrl).jsonBody("{\"key\":\"value\"}");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testJsonBodyStringReturnsSameInstance() {
-        HttpRequest request = HttpRequest.url(testUrl);
+        assertNotNull(request.jsonBody("{\"key\":\"value\"}"));
         assertSame(request, request.jsonBody("{\"key\":\"value\"}"));
+        assertNotNull(HttpRequest.url(testUrl).jsonBody("{}"));
+        assertNotNull(HttpRequest.url(testUrl).jsonBody("[1,2,3]"));
     }
 
     @Test
-    public void testJsonBodyWithEmptyJsonString() {
-        HttpRequest request = HttpRequest.url(testUrl).jsonBody("{}");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testJsonBodyWithJsonArrayString() {
-        HttpRequest request = HttpRequest.url(testUrl).jsonBody("[1,2,3]");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testJsonBodyWithComplexJsonString() {
-        HttpRequest request = HttpRequest.url(testUrl).jsonBody("{\"name\":\"test\",\"items\":[1,2,3],\"nested\":{\"key\":\"val\"}}");
-        assertNotNull(request);
-    }
-
-    // ==================== jsonBody(Object) ====================
-
-    @Test
-    public void test_jsonBody_withObject() {
+    public void testJsonBody_Object() {
         Map<String, Object> data = new HashMap<>();
         data.put("name", "test");
         data.put("value", 123);
-
-        HttpRequest request = HttpRequest.url(POST_URL).jsonBody(data);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testJsonBodyWithObject() {
-        Map<String, String> obj = new HashMap<>();
-        obj.put("key", "value");
-
-        HttpRequest request = HttpRequest.url(testUrl).jsonBody(obj);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testJsonBodyObjectReturnsSameInstance() {
         HttpRequest request = HttpRequest.url(testUrl);
-        Map<String, String> obj = new HashMap<>();
-        obj.put("key", "value");
-        assertSame(request, request.jsonBody(obj));
-    }
+        assertNotNull(request.jsonBody(data));
+        assertSame(request, request.jsonBody(data));
+        assertNotNull(HttpRequest.url(testUrl).jsonBody(new HashMap<>()));
 
-    @Test
-    public void testJsonBodyWithEmptyObject() {
-        HttpRequest request = HttpRequest.url(testUrl).jsonBody(new HashMap<>());
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testJsonBodyWithBean() {
         TestBean bean = new TestBean();
         bean.setName("test");
         bean.setValue(42);
-        HttpRequest request = HttpRequest.url(testUrl).jsonBody(bean);
-        assertNotNull(request);
+        assertNotNull(HttpRequest.url(testUrl).jsonBody(bean));
     }
 
     @Test
-    public void testJsonBodyWithNestedMap() {
-        Map<String, Object> outer = new HashMap<>();
-        Map<String, Object> inner = new HashMap<>();
-        inner.put("nested_key", "nested_value");
-        outer.put("data", inner);
-        outer.put("count", 5);
-        HttpRequest request = HttpRequest.url(testUrl).jsonBody(outer);
-        assertNotNull(request);
-    }
-
-    // ==================== xmlBody(String) ====================
-
-    @Test
-    public void test_xmlBody_withString() {
-        HttpRequest request = HttpRequest.url(POST_URL).xmlBody("<root><key>value</key></root>");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testXmlBodyWithString() {
-        HttpRequest request = HttpRequest.url(testUrl).xmlBody("<root><key>value</key></root>");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testXmlBodyStringReturnsSameInstance() {
+    public void testXmlBody() {
         HttpRequest request = HttpRequest.url(testUrl);
+        assertNotNull(request.xmlBody("<root><key>value</key></root>"));
         assertSame(request, request.xmlBody("<root/>"));
+        assertNotNull(HttpRequest.url(testUrl).xmlBody("<root/>"));
     }
 
     @Test
-    public void testXmlBodyWithEmptyXmlString() {
-        HttpRequest request = HttpRequest.url(testUrl).xmlBody("<root/>");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testXmlBodyWithNestedXml() {
-        HttpRequest request = HttpRequest.url(testUrl).xmlBody("<root><parent><child>value</child></parent></root>");
-        assertNotNull(request);
-    }
-
-    // ==================== xmlBody(Object) ====================
-
-    @Test
-    public void test_xmlBody_withObject() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("key", "value");
-
-        HttpRequest request = HttpRequest.url(POST_URL).xmlBody(data);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testXmlBodyWithObject() {
+    public void testXmlBody_Object() {
         Map<String, String> obj = new HashMap<>();
         obj.put("key", "value");
-
-        HttpRequest request = HttpRequest.url(testUrl).xmlBody(obj);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testXmlBodyObjectReturnsSameInstance() {
         HttpRequest request = HttpRequest.url(testUrl);
-        Map<String, String> obj = new HashMap<>();
-        obj.put("key", "value");
+        assertNotNull(request.xmlBody(obj));
         assertSame(request, request.xmlBody(obj));
-    }
+        assertNotNull(HttpRequest.url(testUrl).xmlBody(new HashMap<>()));
 
-    @Test
-    public void testXmlBodyWithEmptyMapObject() {
-        HttpRequest request = HttpRequest.url(testUrl).xmlBody(new HashMap<>());
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testXmlBodyWithBeanObject() {
         TestBean bean = new TestBean();
         bean.setName("xmlTest");
         bean.setValue(99);
-        HttpRequest request = HttpRequest.url(testUrl).xmlBody(bean);
-        assertNotNull(request);
+        assertNotNull(HttpRequest.url(testUrl).xmlBody(bean));
     }
 
-    // ==================== formBody(Map) ====================
-
     @Test
-    public void test_formBody_withMap() {
+    public void testFormBody() {
         Map<String, String> formData = new HashMap<>();
         formData.put("username", "testuser");
         formData.put("password", "testpass");
-
-        HttpRequest request = HttpRequest.url(POST_URL).formBody(formData);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testFormBodyWithMap() {
-        Map<String, String> formData = new HashMap<>();
-        formData.put("username", "user");
-        formData.put("password", "pass");
-
-        HttpRequest request = HttpRequest.url(testUrl).formBody(formData);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testFormBodyMapReturnsSameInstance() {
         HttpRequest request = HttpRequest.url(testUrl);
-        Map<String, String> formData = new HashMap<>();
-        formData.put("user", "admin");
+        assertNotNull(request.formBody(formData));
         assertSame(request, request.formBody(formData));
+        assertNotNull(HttpRequest.url(testUrl).formBody(new HashMap<>()));
     }
 
     @Test
-    public void testFormBodyWithEmptyMap() {
-        HttpRequest request = HttpRequest.url(testUrl).formBody(new HashMap<>());
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testFormBodyWithSpecialCharactersMap() {
-        Map<String, String> formData = new HashMap<>();
-        formData.put("query", "hello world&foo=bar");
-        formData.put("email", "user@example.com");
-        HttpRequest request = HttpRequest.url(testUrl).formBody(formData);
-        assertNotNull(request);
-    }
-
-    // ==================== formBody(Object) ====================
-
-    @Test
-    public void test_formBody_withBean() {
+    public void testFormBody_Bean() {
         TestBean bean = new TestBean();
         bean.setName("test");
         bean.setValue(123);
-
-        HttpRequest request = HttpRequest.url(POST_URL).formBody(bean);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testFormBodyWithObject() {
-        TestBean bean = new TestBean();
-        bean.setName("user");
-        bean.setValue(1);
-
-        HttpRequest request = HttpRequest.url(testUrl).formBody(bean);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testFormBodyObjectReturnsSameInstance() {
-        TestBean bean = new TestBean();
-        bean.setName("test");
-        bean.setValue(1);
         HttpRequest request = HttpRequest.url(testUrl);
+        assertNotNull(request.formBody(bean));
         assertSame(request, request.formBody(bean));
+        assertNotNull(HttpRequest.url(testUrl).formBody(new TestBean()));
     }
 
     @Test
-    public void testFormBodyWithDefaultBean() {
-        TestBean bean = new TestBean();
-        HttpRequest request = HttpRequest.url(testUrl).formBody(bean);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testFormBodyThenJsonBody() {
+    public void testFormBody_ThenJsonBody() {
         Map<String, String> formData = new HashMap<>();
         formData.put("key", "value");
         HttpRequest request = HttpRequest.url(testUrl);
@@ -1236,72 +387,17 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testFormBodyWithSingleEntryMap() {
-        Map<String, String> formData = new HashMap<>();
-        formData.put("token", "abc123");
-        HttpRequest request = HttpRequest.url(testUrl).formBody(formData);
-        assertNotNull(request);
-    }
-
-    // ==================== body(BodyPublisher) ====================
-
-    @Test
-    public void test_body_withBodyPublisher() {
-        HttpRequest request = HttpRequest.url(POST_URL).body(BodyPublishers.ofString("test data"));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBodyWithBodyPublisher() {
-        BodyPublisher publisher = BodyPublishers.ofString("test");
-        HttpRequest request = HttpRequest.url(testUrl).body(publisher);
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBodyPublisherReturnsSameInstance() {
+    public void testBody() {
         HttpRequest request = HttpRequest.url(testUrl);
+        assertNotNull(request.body(BodyPublishers.ofString("test data")));
         assertSame(request, request.body(BodyPublishers.ofString("test")));
+        assertNotNull(HttpRequest.url(testUrl).body(BodyPublishers.noBody()));
+        assertNotNull(HttpRequest.url(testUrl).body(BodyPublishers.ofByteArray(new byte[] { 1, 2, 3 })));
+        assertNotNull(HttpRequest.url(testUrl).body(BodyPublishers.ofByteArray(new byte[0])));
     }
 
     @Test
-    public void testBodyPublisherWithNoBody() {
-        HttpRequest request = HttpRequest.url(testUrl).body(BodyPublishers.noBody());
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBodyPublisherWithByteArray() {
-        HttpRequest request = HttpRequest.url(testUrl).body(BodyPublishers.ofByteArray(new byte[] { 1, 2, 3 }));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBodyPublisherWithEmptyByteArray() {
-        HttpRequest request = HttpRequest.url(testUrl).body(BodyPublishers.ofByteArray(new byte[0]));
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBodyOverridesOnSameInstance() {
-        HttpRequest request = HttpRequest.url(testUrl);
-        request.jsonBody("{\"first\":1}");
-        request.xmlBody("<second/>");
-        assertNotNull(request);
-    }
-
-    @Test
-    public void testBodyPublisherOverridesJsonBody() {
-        HttpRequest request = HttpRequest.url(testUrl);
-        request.jsonBody("{\"key\":\"value\"}");
-        request.body(BodyPublishers.ofString("plain text"));
-        assertNotNull(request);
-    }
-
-    // ==================== get() ====================
-
-    @Test
-    public void test_get() throws Exception {
+    public void testGet() throws Exception {
         final HttpServer server = startLocalServer("get body");
 
         try {
@@ -1314,10 +410,8 @@ public class HttpRequestTest extends TestBase {
         }
     }
 
-    // ==================== get(BodyHandler) ====================
-
     @Test
-    public void test_get_withBodyHandler() throws Exception {
+    public void testGet_BodyHandler() throws Exception {
         final HttpServer server = startLocalServer("handler body");
 
         try {
@@ -1328,1261 +422,163 @@ public class HttpRequestTest extends TestBase {
         } finally {
             server.stop(0);
         }
+
+        HttpResponse<byte[]> bytes = HttpRequest.url(TEST_URL).get(BodyHandlers.ofByteArray());
+        assertNotNull(bytes);
+        assertEquals(200, bytes.statusCode());
+
+        HttpResponse<Void> discarded = HttpRequest.url(TEST_URL).get(BodyHandlers.discarding());
+        assertNotNull(discarded);
+        assertEquals(200, discarded.statusCode());
     }
 
     @Test
-    public void test_get_withByteArrayBodyHandler() {
-        try {
-            HttpResponse<byte[]> response = HttpRequest.url(TEST_URL).get(BodyHandlers.ofByteArray());
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
+    public void testGet_ResultClass() {
+        String result = HttpRequest.url(TEST_URL).get(String.class);
+        assertNotNull(result);
+
+        byte[] bytes = HttpRequest.url(TEST_URL).get(byte[].class);
+        assertNotNull(bytes);
     }
 
     @Test
-    public void test_get_withDiscardingBodyHandler() {
-        try {
-            HttpResponse<Void> response = HttpRequest.url(TEST_URL).get(BodyHandlers.discarding());
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
+    public void testGet_Query() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("key", "value");
+        HttpResponse<String> mapped = HttpRequest.url(TEST_URL).query(params).get();
+        assertNotNull(mapped);
+        assertEquals(200, mapped.statusCode());
 
-    // ==================== get(Class) ====================
-
-    @Test
-    public void test_get_withResultClass() {
-        try {
-            String result = HttpRequest.url(TEST_URL).get(String.class);
-            assertNotNull(result);
-        } catch (Exception e) {
-        }
+        HttpResponse<String> query = HttpRequest.url(TEST_URL).query("key=value&other=123").get();
+        assertNotNull(query);
+        assertEquals(200, query.statusCode());
     }
 
     @Test
-    public void test_get_withByteArrayResultClass() {
-        try {
-            byte[] result = HttpRequest.url(TEST_URL).get(byte[].class);
-            assertNotNull(result);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testGetWithQueryParams() {
-        try {
-            Map<String, Object> params = new HashMap<>();
-            params.put("key", "value");
-            HttpResponse<String> response = HttpRequest.url(TEST_URL).query(params).get();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testGetWithStringQuery() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(TEST_URL).query("key=value&other=123").get();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== post() ====================
-
-    @Test
-    public void test_post() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").post();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== post(BodyHandler) ====================
-
-    @Test
-    public void test_post_withBodyHandler() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").post(BodyHandlers.ofString());
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_post_withByteArrayBodyHandler() {
-        try {
-            HttpResponse<byte[]> response = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").post(BodyHandlers.ofByteArray());
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== post(Class) ====================
-
-    @Test
-    public void test_post_withResultClass() {
-        try {
-            String result = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").post(String.class);
-            assertNotNull(result);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testPostWithFormBody() {
-        try {
-            Map<String, String> formData = new HashMap<>();
-            formData.put("username", "testuser");
-            formData.put("password", "testpass");
-            HttpResponse<String> response = HttpRequest.url(POST_URL).formBody(formData).post();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testPostWithXmlBody() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(POST_URL).xmlBody("<root><key>value</key></root>").post();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== put() ====================
-
-    @Test
-    public void test_put() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").put();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== put(BodyHandler) ====================
-
-    @Test
-    public void test_put_withBodyHandler() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").put(BodyHandlers.ofString());
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_put_withByteArrayBodyHandler() {
-        try {
-            HttpResponse<byte[]> response = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").put(BodyHandlers.ofByteArray());
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== put(Class) ====================
-
-    @Test
-    public void test_put_withResultClass() {
-        try {
-            String result = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").put(String.class);
-            assertNotNull(result);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== patch() ====================
-
-    @Test
-    public void test_patch() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").patch();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== patch(BodyHandler) ====================
-
-    @Test
-    public void test_patch_withBodyHandler() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").patch(BodyHandlers.ofString());
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_patch_withByteArrayBodyHandler() {
-        try {
-            HttpResponse<byte[]> response = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").patch(BodyHandlers.ofByteArray());
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== patch(Class) ====================
-
-    @Test
-    public void test_patch_withResultClass() {
-        try {
-            String result = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").patch(String.class);
-            assertNotNull(result);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== delete() ====================
-
-    @Test
-    public void test_delete() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(DELETE_URL).delete();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== delete(BodyHandler) ====================
-
-    @Test
-    public void test_delete_withBodyHandler() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(DELETE_URL).delete(BodyHandlers.ofString());
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_delete_withByteArrayBodyHandler() {
-        try {
-            HttpResponse<byte[]> response = HttpRequest.url(DELETE_URL).delete(BodyHandlers.ofByteArray());
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== delete(Class) ====================
-
-    @Test
-    public void test_delete_withResultClass() {
-        try {
-            String result = HttpRequest.url(DELETE_URL).delete(String.class);
-            assertNotNull(result);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== head() ====================
-
-    @Test
-    public void test_head() {
-        try {
-            HttpResponse<Void> response = HttpRequest.url(TEST_URL).head();
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== execute(HttpMethod) ====================
-
-    @Test
-    public void test_execute_withMethod() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(TEST_URL).execute(HttpMethod.GET);
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_execute_withNullMethod() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            HttpRequest.url(TEST_URL).execute(null);
-        });
-    }
-
-    @Test
-    public void testExecuteWithNullHttpMethod() {
-        HttpRequest request = HttpRequest.url(testUrl);
-        assertThrows(IllegalArgumentException.class, () -> request.execute(null));
-    }
-
-    @Test
-    public void test_execute_withPostMethod() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").execute(HttpMethod.POST);
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_execute_withPutMethod() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").execute(HttpMethod.PUT);
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_execute_withDeleteMethod() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(DELETE_URL).execute(HttpMethod.DELETE);
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_execute_withPatchMethod() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").execute(HttpMethod.PATCH);
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_execute_withHeadMethod() {
-        final HttpResponse<String> response = HttpRequest.url(TEST_URL, 1_000L, 5_000L).execute(HttpMethod.HEAD);
-
+    public void testPost() {
+        HttpResponse<String> response = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").post();
         assertNotNull(response);
         assertEquals(200, response.statusCode());
-        assertEquals("HEAD", response.headers().firstValue("X-Request-Method").orElse(null));
-    }
-
-    // ==================== execute(HttpMethod, BodyHandler) ====================
-
-    @Test
-    public void test_execute_withMethodAndBodyHandler() {
-        try {
-            HttpResponse<String> response = HttpRequest.url(TEST_URL).execute(HttpMethod.GET, BodyHandlers.ofString());
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
     }
 
     @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testExecuteRestoresInterruptStatusWhenSendIsInterrupted() throws Exception {
-        final HttpClient client = mock(HttpClient.class);
-        when(client.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(new InterruptedException("interrupted"));
+    public void testPost_BodyHandler() {
+        HttpResponse<String> stringResponse = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").post(BodyHandlers.ofString());
+        assertNotNull(stringResponse);
+        assertEquals(200, stringResponse.statusCode());
 
-        Thread.interrupted();
-
-        try {
-            assertThrows(RuntimeException.class, () -> HttpRequest.create("http://localhost", client).execute(HttpMethod.GET, BodyHandlers.ofString()));
-            assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            Thread.interrupted();
-        }
+        HttpResponse<byte[]> bytesResponse = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").post(BodyHandlers.ofByteArray());
+        assertNotNull(bytesResponse);
+        assertEquals(200, bytesResponse.statusCode());
     }
 
     @Test
-    public void testExecuteRejectsNullBodyHandlerBeforeBuildingOwnedClient() {
-        final HttpClient.Builder clientBuilder = mock(HttpClient.Builder.class);
-        final HttpRequest request = new HttpRequest(TEST_URL, null, null, clientBuilder, java.net.http.HttpRequest.newBuilder())
-                .closeHttpClientAfterExecution(true);
-
-        assertThrows(IllegalArgumentException.class, () -> request.execute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null));
-        verify(clientBuilder, never()).build();
+    public void testPost_ResultClass() {
+        String result = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").post(String.class);
+        assertNotNull(result);
     }
 
     @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testExecutePreservesIOExceptionWhenOwnedClientCloseThrowsError() throws Exception {
-        final IOException failure = new IOException("send failure");
-        final AssertionError cleanupFailure = new AssertionError("cleanup failure");
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(failure);
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-
-        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
-
-        assertSame(failure, thrown.getCause());
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        verify((AutoCloseable) ownedClient).close();
+    public void testPost_FormAndXmlBody() {
+        Map<String, String> formData = new HashMap<>();
+        formData.put("username", "testuser");
+        formData.put("password", "testpass");
+        assertEquals(200, HttpRequest.url(POST_URL).formBody(formData).post().statusCode());
+        assertEquals(200, HttpRequest.url(POST_URL).xmlBody("<root><key>value</key></root>").post().statusCode());
     }
 
     @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testExecutePreservesRuntimeFailureWhenOwnedClientCloseThrowsError() throws Exception {
-        final IllegalStateException failure = new IllegalStateException("send failure");
-        final AssertionError cleanupFailure = new AssertionError("cleanup failure");
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(failure);
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-
-        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
-
-        assertSame(failure, thrown);
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        verify((AutoCloseable) ownedClient).close();
+    public void testPut() {
+        HttpResponse<String> response = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").put();
+        assertNotNull(response);
+        assertEquals(200, response.statusCode());
     }
 
     @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testExecutePreservesResponseBodyFailureAndClosesOwnedClientOnce() throws Exception {
-        final IllegalStateException failure = new IllegalStateException("response body failure");
-        final AssertionError cleanupFailure = new AssertionError("cleanup failure");
-        final HttpResponse<String> response = mock(HttpResponse.class);
-        when(response.body()).thenThrow(failure);
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn((HttpResponse) response);
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+    public void testPut_BodyHandler() {
+        HttpResponse<String> stringResponse = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").put(BodyHandlers.ofString());
+        assertNotNull(stringResponse);
+        assertEquals(200, stringResponse.statusCode());
 
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-
-        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
-
-        assertSame(failure, thrown);
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        verify((AutoCloseable) ownedClient, times(1)).close();
+        HttpResponse<byte[]> bytesResponse = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").put(BodyHandlers.ofByteArray());
+        assertNotNull(bytesResponse);
+        assertEquals(200, bytesResponse.statusCode());
     }
 
     @Test
-    public void testExecuteWithNullMethodAndBodyHandler() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            HttpRequest.url(testUrl).execute(null, BodyHandlers.ofString());
-        });
+    public void testPut_ResultClass() {
+        String result = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").put(String.class);
+        assertNotNull(result);
     }
 
     @Test
-    public void test_execute_withMethodAndByteArrayBodyHandler() {
-        try {
-            HttpResponse<byte[]> response = HttpRequest.url(TEST_URL).execute(HttpMethod.GET, BodyHandlers.ofByteArray());
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== execute(HttpMethod, Class) ====================
-
-    @Test
-    public void test_execute_withMethodAndResultClass() {
-        try {
-            String result = HttpRequest.url(TEST_URL).execute(HttpMethod.GET, String.class);
-            assertNotNull(result);
-        } catch (Exception e) {
-        }
+    public void testPatch() {
+        HttpResponse<String> response = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").patch();
+        assertNotNull(response);
+        assertEquals(200, response.statusCode());
     }
 
     @Test
-    public void testExecuteWithNullMethodAndResultClass() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            HttpRequest.url(testUrl).execute(null, String.class);
-        });
+    public void testPatch_BodyHandler() {
+        HttpResponse<String> stringResponse = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").patch(BodyHandlers.ofString());
+        assertNotNull(stringResponse);
+        assertEquals(200, stringResponse.statusCode());
+
+        HttpResponse<byte[]> bytesResponse = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").patch(BodyHandlers.ofByteArray());
+        assertNotNull(bytesResponse);
+        assertEquals(200, bytesResponse.statusCode());
     }
 
     @Test
-    public void test_execute_withMethodAndByteArrayResultClass() {
-        try {
-            byte[] result = HttpRequest.url(TEST_URL).execute(HttpMethod.GET, byte[].class);
-            assertNotNull(result);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncGet() ====================
-
-    @Test
-    public void test_asyncGet() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncGet();
-            assertNotNull(future);
-            HttpResponse<String> response = future.get(5, TimeUnit.SECONDS);
-            assertNotNull(response);
-        } catch (ExecutionException e) {
-        }
-    }
-
-    // ==================== asyncGet(BodyHandler) ====================
-
-    @Test
-    public void test_asyncGet_withBodyHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofString());
-            assertNotNull(future);
-            HttpResponse<String> response = future.get(5, TimeUnit.SECONDS);
-            assertNotNull(response);
-        } catch (ExecutionException e) {
-        }
+    public void testPatch_ResultClass() {
+        String result = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").patch(String.class);
+        assertNotNull(result);
     }
 
     @Test
-    public void test_asyncGet_withByteArrayBodyHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<byte[]>> future = HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofByteArray());
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncGet(Class) ====================
-
-    @Test
-    public void test_asyncGet_withResultClass() throws Exception {
-        try {
-            CompletableFuture<String> future = HttpRequest.url(TEST_URL).asyncGet(String.class);
-            assertNotNull(future);
-            String result = future.get(5, TimeUnit.SECONDS);
-            assertNotNull(result);
-        } catch (ExecutionException e) {
-        }
-    }
-
-    // ==================== asyncGet(BodyHandler, PushPromiseHandler) ====================
-
-    @Test
-    public void test_asyncGet_withPushPromiseHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofString(), null);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
+    public void testDelete() {
+        HttpResponse<String> response = HttpRequest.url(DELETE_URL).delete();
+        assertNotNull(response);
+        assertEquals(200, response.statusCode());
     }
 
     @Test
-    public void testAsyncGetWithQueryMap() throws Exception {
-        try {
-            Map<String, Object> params = new HashMap<>();
-            params.put("page", 1);
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).query(params).asyncGet();
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
+    public void testDelete_BodyHandler() {
+        HttpResponse<String> stringResponse = HttpRequest.url(DELETE_URL).delete(BodyHandlers.ofString());
+        assertNotNull(stringResponse);
+        assertEquals(200, stringResponse.statusCode());
 
-    // ==================== asyncPost() ====================
-
-    @Test
-    public void test_asyncPost() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost();
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncPost(BodyHandler) ====================
-
-    @Test
-    public void test_asyncPost_withBodyHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(BodyHandlers.ofString());
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
+        HttpResponse<byte[]> bytesResponse = HttpRequest.url(DELETE_URL).delete(BodyHandlers.ofByteArray());
+        assertNotNull(bytesResponse);
+        assertEquals(200, bytesResponse.statusCode());
     }
 
     @Test
-    public void test_asyncPost_withByteArrayBodyHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<byte[]>> future = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(BodyHandlers.ofByteArray());
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncPost(Class) ====================
-
-    @Test
-    public void test_asyncPost_withResultClass() throws Exception {
-        try {
-            CompletableFuture<String> future = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(String.class);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncPost(BodyHandler, PushPromiseHandler) ====================
-
-    @Test
-    public void test_asyncPost_withPushPromiseHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(BodyHandlers.ofString(), null);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
+    public void testDelete_ResultClass() {
+        String result = HttpRequest.url(DELETE_URL).delete(String.class);
+        assertNotNull(result);
     }
 
     @Test
-    public void testAsyncPostWithFormBody() throws Exception {
-        try {
-            Map<String, String> formData = new HashMap<>();
-            formData.put("key", "value");
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(POST_URL).formBody(formData).asyncPost();
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncPut() ====================
-
-    @Test
-    public void test_asyncPut() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut();
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncPut(BodyHandler) ====================
-
-    @Test
-    public void test_asyncPut_withBodyHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(BodyHandlers.ofString());
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
+    public void testHead() {
+        HttpResponse<Void> response = HttpRequest.url(TEST_URL).head();
+        assertNotNull(response);
+        assertEquals(200, response.statusCode());
     }
 
     @Test
-    public void test_asyncPut_withByteArrayBodyHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<byte[]>> future = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(BodyHandlers.ofByteArray());
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
+    public void testChainedBuilder() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Accept", "application/json");
 
-    // ==================== asyncPut(Class) ====================
-
-    @Test
-    public void test_asyncPut_withResultClass() throws Exception {
-        try {
-            CompletableFuture<String> future = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(String.class);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncPut(BodyHandler, PushPromiseHandler) ====================
-
-    @Test
-    public void test_asyncPut_withPushPromiseHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(BodyHandlers.ofString(), null);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncPatch() ====================
-
-    @Test
-    public void test_asyncPatch() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch();
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncPatch(BodyHandler) ====================
-
-    @Test
-    public void test_asyncPatch_withBodyHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch(BodyHandlers.ofString());
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_asyncPatch_withByteArrayBodyHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<byte[]>> future = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch(BodyHandlers.ofByteArray());
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncPatch(Class) ====================
-
-    @Test
-    public void test_asyncPatch_withResultClass() throws Exception {
-        try {
-            CompletableFuture<String> future = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch(String.class);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncPatch(BodyHandler, PushPromiseHandler) ====================
-
-    @Test
-    public void test_asyncPatch_withPushPromiseHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PATCH_URL)
-                    .jsonBody("{\"test\":\"data\"}")
-                    .asyncPatch(BodyHandlers.ofString(), null);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncDelete() ====================
-
-    @Test
-    public void test_asyncDelete() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(DELETE_URL).asyncDelete();
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncDelete(BodyHandler) ====================
-
-    @Test
-    public void test_asyncDelete_withBodyHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(DELETE_URL).asyncDelete(BodyHandlers.ofString());
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_asyncDelete_withByteArrayBodyHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<byte[]>> future = HttpRequest.url(DELETE_URL).asyncDelete(BodyHandlers.ofByteArray());
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncDelete(Class) ====================
-
-    @Test
-    public void test_asyncDelete_withResultClass() throws Exception {
-        try {
-            CompletableFuture<String> future = HttpRequest.url(DELETE_URL).asyncDelete(String.class);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncDelete(BodyHandler, PushPromiseHandler) ====================
-
-    @Test
-    public void test_asyncDelete_withPushPromiseHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(DELETE_URL).asyncDelete(BodyHandlers.ofString(), null);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncHead() ====================
-
-    @Test
-    public void test_asyncHead() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<Void>> future = HttpRequest.url(TEST_URL).asyncHead();
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncExecute(HttpMethod) ====================
-
-    @Test
-    public void test_asyncExecute_withMethod() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncExecute(HttpMethod.GET);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_asyncExecute_withNullMethod() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            HttpRequest.url(TEST_URL).asyncExecute(null);
-        });
-    }
-
-    @Test
-    public void testAsyncExecuteWithNullHttpMethod() {
-        HttpRequest request = HttpRequest.url(testUrl);
-        assertThrows(IllegalArgumentException.class, () -> request.asyncExecute(null));
-    }
-
-    @Test
-    public void test_asyncExecute_withPostMethod() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncExecute(HttpMethod.POST);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_asyncExecute_withPutMethod() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncExecute(HttpMethod.PUT);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_asyncExecute_withDeleteMethod() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(DELETE_URL).asyncExecute(HttpMethod.DELETE);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void test_asyncExecute_withPatchMethod() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncExecute(HttpMethod.PATCH);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    // ==================== asyncExecute(HttpMethod, BodyHandler) ====================
-
-    @Test
-    public void test_asyncExecute_withMethodAndBodyHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncExecute(HttpMethod.GET, BodyHandlers.ofString());
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncExecuteWithNullMethodAndBodyHandler() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            HttpRequest.url(testUrl).asyncExecute(null, BodyHandlers.ofString());
-        });
-    }
-
-    @Test
-    public void test_asyncExecute_withMethodAndByteArrayBodyHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<byte[]>> future = HttpRequest.url(TEST_URL).asyncExecute(HttpMethod.GET, BodyHandlers.ofByteArray());
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testAsyncExecuteBodyHandlerClosesOwnedClientOnSynchronousSendFailure() throws Exception {
-        final IllegalStateException failure = new IllegalStateException("synchronous send failure");
-        final AssertionError cleanupFailure = new AssertionError("body-handler cleanup failure");
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(failure);
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-
-        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString()));
-
-        assertSame(failure, thrown);
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        verify((AutoCloseable) ownedClient).close();
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testAsyncExecuteNonStreamCleanupErrorClosesOwnedClientOnce() throws Exception {
-        final AssertionError cleanupFailure = new AssertionError("async cleanup failure");
-        final HttpResponse<String> response = mock(HttpResponse.class);
-        when(response.body()).thenReturn("body");
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class)))
-                .thenReturn((CompletableFuture) CompletableFuture.completedFuture(response));
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-        final CompletableFuture<HttpResponse<String>> future = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString());
-
-        final CompletionException thrown = assertThrows(CompletionException.class, future::join);
-
-        assertSame(cleanupFailure, thrown.getCause());
-        assertEquals(0, cleanupFailure.getSuppressed().length);
-        verify((AutoCloseable) ownedClient, times(1)).close();
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testAsyncExecuteCancellationStillCleansOwnedClientAfterUpstreamFailure() throws Exception {
-        final IOException failure = new IOException("upstream failure after cancellation");
-        final AssertionError cleanupFailure = new AssertionError("cleanup failure after cancellation");
-        final CompletableFuture<HttpResponse<String>> upstream = new CompletableFuture<>();
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn((CompletableFuture) upstream);
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-        final CompletableFuture<HttpResponse<String>> future = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString());
-
-        assertTrue(future.cancel(false));
-        assertTrue(future.isCancelled());
-        assertTrue(upstream.completeExceptionally(failure));
-
-        assertTrue(future.isCancelled());
-        assertEquals(1, failure.getSuppressed().length);
-        assertSame(cleanupFailure, failure.getSuppressed()[0]);
-        verify((AutoCloseable) ownedClient, times(1)).close();
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testAsyncExecuteCancellationClosesOrphanedInputStreamResponse() throws Exception {
-        final AtomicInteger delegateCloseCount = new AtomicInteger();
-        final InputStream delegate = new InputStream() {
-            @Override
-            public int read() {
-                return -1;
-            }
-
-            @Override
-            public void close() {
-                delegateCloseCount.incrementAndGet();
-            }
-        };
-        final HttpResponse<InputStream> response = mock(HttpResponse.class);
-        when(response.body()).thenReturn(delegate);
-        final CompletableFuture<HttpResponse<InputStream>> upstream = new CompletableFuture<>();
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn((CompletableFuture) upstream);
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-        final CompletableFuture<HttpResponse<InputStream>> future = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofInputStream());
-
-        assertTrue(future.cancel(false));
-        assertTrue(future.isCancelled());
-        assertTrue(upstream.complete(response));
-
-        assertTrue(future.isCancelled());
-        assertEquals(1, delegateCloseCount.get());
-        verify((AutoCloseable) ownedClient, times(1)).close();
-    }
-
-    // ==================== asyncExecute(HttpMethod, Class) ====================
-
-    @Test
-    public void test_asyncExecute_withMethodAndResultClass() throws Exception {
-        try {
-            CompletableFuture<String> future = HttpRequest.url(TEST_URL).asyncExecute(HttpMethod.GET, String.class);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncExecuteWithNullMethodAndResultClass() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            HttpRequest.url(testUrl).asyncExecute(null, String.class);
-        });
-    }
-
-    @Test
-    public void testAsyncExecuteResultClassClosesOwnedClientOnSynchronousBuildFailure() throws Exception {
-        final IllegalStateException failure = new IllegalStateException("synchronous build failure");
-        final AssertionError cleanupFailure = new AssertionError("result-class cleanup failure");
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-        final java.net.http.HttpRequest.Builder requestBuilder = mock(java.net.http.HttpRequest.Builder.class);
-        when(requestBuilder.uri(any(URI.class))).thenReturn(requestBuilder);
-        when(requestBuilder.method(any(String.class), any(BodyPublisher.class))).thenReturn(requestBuilder);
-        when(requestBuilder.build()).thenThrow(failure);
-
-        final HttpRequest request = newOwnedRequest(ownedClient, requestBuilder);
-
-        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.asyncExecute(HttpMethod.GET, String.class));
-
-        assertSame(failure, thrown);
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        verify((AutoCloseable) ownedClient).close();
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testAsyncExecuteResultProcessingFailureDoesNotRepeatCompletedCleanup() throws Exception {
-        final IllegalStateException failure = new IllegalStateException("result processing failure");
-        final HttpResponse<byte[]> response = mock(HttpResponse.class);
-        when(response.body()).thenReturn(new byte[] { 1 }).thenThrow(failure);
-        when(response.headers()).thenReturn(java.net.http.HttpHeaders.of(Map.of(), (name, value) -> true));
-        when(response.statusCode()).thenReturn(200);
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class)))
-                .thenReturn((CompletableFuture) CompletableFuture.completedFuture(response));
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-        final CompletableFuture<String> future = request.asyncExecute(HttpMethod.GET, String.class);
-
-        final CompletionException thrown = assertThrows(CompletionException.class, future::join);
-
-        assertSame(failure, thrown.getCause());
-        assertEquals(0, failure.getSuppressed().length);
-        verify((AutoCloseable) ownedClient, times(1)).close();
-    }
-
-    // ==================== asyncExecute(HttpMethod, BodyHandler, PushPromiseHandler) ====================
-
-    @Test
-    public void test_asyncExecute_withPushPromiseHandler() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), null);
-            assertNotNull(future);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncExecuteWithNullMethodAndPushPromiseHandler() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            HttpRequest.url(testUrl).asyncExecute(null, BodyHandlers.ofString(), null);
-        });
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testAsyncExecutePushHandlerClosesOwnedClientOnSynchronousSendFailure() throws Exception {
-        final IllegalStateException failure = new IllegalStateException("synchronous push send failure");
-        final AssertionError cleanupFailure = new AssertionError("push-handler cleanup failure");
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class), any(HttpResponse.PushPromiseHandler.class)))
-                .thenThrow(failure);
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-        final HttpResponse.PushPromiseHandler<String> pushHandler = (initiatingRequest, pushPromiseRequest, acceptor) -> {
-            // no-op
-        };
-
-        final IllegalStateException thrown = assertThrows(IllegalStateException.class,
-                () -> request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), pushHandler));
-
-        assertSame(failure, thrown);
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        verify((AutoCloseable) ownedClient).close();
-    }
-
-    @Test
-    public void testAsyncExecuteRejectsNullBodyHandlersBeforeBuildingOwnedClient() {
-        final HttpClient.Builder twoArgBuilder = mock(HttpClient.Builder.class);
-        final HttpRequest twoArgRequest = new HttpRequest(TEST_URL, null, null, twoArgBuilder, java.net.http.HttpRequest.newBuilder())
-                .closeHttpClientAfterExecution(true);
-
-        assertThrows(IllegalArgumentException.class, () -> twoArgRequest.asyncExecute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null));
-        verify(twoArgBuilder, never()).build();
-
-        final HttpClient.Builder pushBuilder = mock(HttpClient.Builder.class);
-        final HttpRequest pushRequest = new HttpRequest(TEST_URL, null, null, pushBuilder, java.net.http.HttpRequest.newBuilder())
-                .closeHttpClientAfterExecution(true);
-
-        assertThrows(IllegalArgumentException.class, () -> pushRequest.asyncExecute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null, null));
-        verify(pushBuilder, never()).build();
-
-        final HttpClient.Builder nullPushHandlerBuilder = mock(HttpClient.Builder.class);
-        final HttpRequest nullPushHandlerRequest = new HttpRequest(TEST_URL, null, null, nullPushHandlerBuilder, java.net.http.HttpRequest.newBuilder())
-                .closeHttpClientAfterExecution(true);
-
-        assertThrows(IllegalArgumentException.class, () -> nullPushHandlerRequest.asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), null));
-        verify(nullPushHandlerBuilder, never()).build();
-    }
-
-    private static HttpRequest newOwnedRequest(final HttpClient ownedClient, final java.net.http.HttpRequest.Builder requestBuilder) {
-        final HttpClient.Builder clientBuilder = mock(HttpClient.Builder.class);
-        when(clientBuilder.build()).thenReturn(ownedClient);
-
-        return new HttpRequest(TEST_URL, null, null, clientBuilder, requestBuilder).closeHttpClientAfterExecution(true);
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static HttpRequest newOwnedAsyncInputStreamRequest(final HttpClient ownedClient, final InputStream delegate) {
-        final HttpResponse<InputStream> response = mock(HttpResponse.class);
-        when(response.body()).thenReturn(delegate);
-        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class)))
-                .thenReturn((CompletableFuture) CompletableFuture.completedFuture(response));
-
-        return newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-    }
-
-    // ==================== Comprehensive integration / edge case tests ====================
-
-    @Test
-    public void testChainedBuilderMethods() {
         HttpRequest request = HttpRequest.url(testUrl)
                 .connectTimeout(Duration.ofSeconds(5))
                 .readTimeout(Duration.ofSeconds(30))
-                .header("Accept", "application/json")
-                .header("User-Agent", "TestAgent");
+                .basicAuth("user", "pass")
+                .headers(headers)
+                .query("param=value")
+                .jsonBody("{\"key\":\"value\"}");
         assertNotNull(request);
-    }
-
-    @Test
-    public void testExecuteInputStreamBodyCanBeReadBeforeClientCleanup() throws Exception {
-        final HttpServer server = startLocalServer("stream body");
-
-        try {
-            final HttpResponse<InputStream> response = HttpRequest.url(localUrl(server), 1_000L, 5_000L).execute(HttpMethod.GET, BodyHandlers.ofInputStream());
-
-            assertEquals(200, response.statusCode());
-
-            try (InputStream inputStream = response.body()) {
-                assertEquals("stream body", new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
-            }
-        } finally {
-            server.stop(0);
-        }
-    }
-
-    @Test
-    public void testExecuteInputStreamPreservesPreviousResponseAfterRedirect() throws Exception {
-        final HttpServer server = startRedirectServer("redirect body");
-
-        try {
-            final HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
-            final String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/redirect";
-            final HttpResponse<InputStream> response = HttpRequest.create(URI.create(url), client).execute(HttpMethod.GET, BodyHandlers.ofInputStream());
-
-            assertEquals(200, response.statusCode());
-            assertEquals(true, response.previousResponse().isPresent());
-            assertEquals(302, response.previousResponse().get().statusCode());
-
-            try (InputStream inputStream = response.body()) {
-                assertEquals("redirect body", new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
-            }
-        } finally {
-            server.stop(0);
-        }
-    }
-
-    @Test
-    public void testAsyncExecuteInputStreamFutureCompletesBeforeBodyRead() throws Exception {
-        final HttpServer server = startLocalServer("async stream body");
-
-        try {
-            final CompletableFuture<HttpResponse<InputStream>> future = HttpRequest.url(localUrl(server), 1_000L, 5_000L)
-                    .asyncExecute(HttpMethod.GET, BodyHandlers.ofInputStream());
-            final HttpResponse<InputStream> response = future.get(2, TimeUnit.SECONDS);
-
-            assertEquals(200, response.statusCode());
-
-            try (InputStream inputStream = response.body()) {
-                assertEquals("async stream body", new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
-            }
-        } finally {
-            server.stop(0);
-        }
-    }
-
-    @Test
-    public void testAsyncCleanupInputStreamClosesDelegateAndOwnedClientOnceConcurrently() throws Exception {
-        final int threadCount = 16;
-        final AtomicInteger delegateCloseCount = new AtomicInteger();
-        final InputStream delegate = new InputStream() {
-            @Override
-            public int read() {
-                return -1;
-            }
-
-            @Override
-            public void close() {
-                delegateCloseCount.incrementAndGet();
-            }
-        };
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        final HttpRequest request = newOwnedAsyncInputStreamRequest(ownedClient, delegate);
-        final InputStream stream = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofInputStream()).get(2, TimeUnit.SECONDS).body();
-        final CountDownLatch allReady = new CountDownLatch(threadCount);
-        final CountDownLatch releaseClose = new CountDownLatch(1);
-        final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-
-        try {
-            final Future<?>[] closes = new Future<?>[threadCount];
-
-            for (int i = 0; i < threadCount; i++) {
-                closes[i] = executor.submit(() -> {
-                    allReady.countDown();
-
-                    try {
-                        releaseClose.await();
-                        stream.close();
-                    } catch (final InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        throw new AssertionError(e);
-                    } catch (final IOException e) {
-                        throw new AssertionError(e);
-                    }
-                });
-            }
-
-            assertTrue(allReady.await(5, TimeUnit.SECONDS));
-            releaseClose.countDown();
-
-            for (final Future<?> close : closes) {
-                close.get(5, TimeUnit.SECONDS);
-            }
-
-            assertEquals(1, delegateCloseCount.get());
-            verify((AutoCloseable) ownedClient, times(1)).close();
-        } finally {
-            releaseClose.countDown();
-            executor.shutdownNow();
-        }
-    }
-
-    @Test
-    public void testAsyncCleanupInputStreamPreservesDelegateCloseFailureWhenClientCleanupThrowsError() throws Exception {
-        final IOException delegateFailure = new IOException("delegate close failure");
-        final AssertionError cleanupFailure = new AssertionError("owned-client cleanup failure");
-        final AtomicInteger delegateCloseCount = new AtomicInteger();
-        final InputStream delegate = new InputStream() {
-            @Override
-            public int read() {
-                return -1;
-            }
-
-            @Override
-            public void close() throws IOException {
-                delegateCloseCount.incrementAndGet();
-                throw delegateFailure;
-            }
-        };
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-        final HttpRequest request = newOwnedAsyncInputStreamRequest(ownedClient, delegate);
-        final InputStream stream = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofInputStream()).get(2, TimeUnit.SECONDS).body();
-
-        final IOException thrown = assertThrows(IOException.class, stream::close);
-
-        assertSame(delegateFailure, thrown);
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        assertEquals(1, delegateCloseCount.get());
-        verify((AutoCloseable) ownedClient, times(1)).close();
     }
 
     @Test
@@ -2706,6 +702,36 @@ public class HttpRequestTest extends TestBase {
     }
 
     @Test
+    public void testBodylessResponsesIgnoreCompressionHeaders() throws Exception {
+        final AtomicInteger statusCode = new AtomicInteger(200);
+        final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/", exchange -> {
+            exchange.getResponseHeaders().set("Content-Encoding", "gzip");
+            exchange.sendResponseHeaders(statusCode.get(), -1);
+            exchange.close();
+        });
+        server.start();
+
+        try {
+            final String url = localUrl(server);
+            assertEquals("", HttpRequest.url(url).execute(HttpMethod.HEAD).body());
+            assertEquals("", HttpRequest.url(url).asyncExecute(HttpMethod.HEAD).get(5, TimeUnit.SECONDS).body());
+            assertEquals("", HttpRequest.url(url).execute(HttpMethod.HEAD, String.class));
+            assertEquals("", HttpRequest.url(url).asyncExecute(HttpMethod.HEAD, String.class).get(5, TimeUnit.SECONDS));
+
+            for (final int code : new int[] { 204, 205 }) {
+                statusCode.set(code);
+                assertEquals("", HttpRequest.url(url).get().body());
+                assertEquals("", HttpRequest.url(url).asyncGet().get(5, TimeUnit.SECONDS).body());
+                assertEquals("", HttpRequest.url(url).get(String.class));
+                assertEquals(0, HttpRequest.url(url).asyncGet(byte[].class).get(5, TimeUnit.SECONDS).length);
+            }
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
     public void testTypedStringUsesDeclaredResponseCharset() throws Exception {
         final byte[] body = "café".getBytes(StandardCharsets.ISO_8859_1);
         final HttpServer server = startResponseServer(body, "text/plain; charset=ISO-8859-1", null);
@@ -2749,129 +775,527 @@ public class HttpRequestTest extends TestBase {
         }
     }
 
-    private static HttpServer startErrorServer(final int statusCode, final String body) throws Exception {
-        final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    // ==================== a06 F-1: owned/default clients follow redirects ====================
 
-        server.createContext("/", exchange -> {
-            final byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
-            exchange.sendResponseHeaders(statusCode, bytes.length);
+    @Test
+    public void testDefaultAndOwnedClientsFollowRedirects() throws Exception {
+        for (final int statusCode : new int[] { 301, 302, 303, 307, 308 }) {
+            final HttpServer server = startRedirectServer(statusCode, "landed " + statusCode);
 
-            try (OutputStream outputStream = exchange.getResponseBody()) {
-                outputStream.write(bytes);
+            try {
+                final String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/redirect";
+                final String expected = "landed " + statusCode;
+
+                // shared default client
+                final HttpResponse<String> response = HttpRequest.url(url).get();
+                assertEquals(200, response.statusCode(), "status " + statusCode);
+                assertEquals(expected, response.body());
+                assertEquals(true, response.previousResponse().isPresent());
+                assertEquals(statusCode, response.previousResponse().get().statusCode());
+                assertEquals(expected, HttpRequest.url(url).get(String.class));
+                assertEquals(expected, HttpRequest.url(url).asyncGet(String.class).get(5, TimeUnit.SECONDS));
+                assertEquals(expected, HttpRequest.url(URI.create(url)).get(String.class));
+                assertEquals(expected, HttpRequest.url(new URL(url)).execute(HttpMethod.GET, String.class));
+
+                // clients owned through the timeout factories
+                assertEquals(expected, HttpRequest.url(url, 1_000L, 5_000L).get(String.class));
+                assertEquals(expected, HttpRequest.url(URI.create(url), 1_000L, 5_000L).get().body());
+                assertEquals(expected, HttpRequest.url(new URL(url), 0L, 0L).asyncGet().get(5, TimeUnit.SECONDS).body());
+
+                // client owned through fluent configuration of a default-client request
+                assertEquals(expected, HttpRequest.url(url).connectTimeout(Duration.ofSeconds(1)).get(String.class));
+                assertEquals(expected, HttpRequest.url(url).readTimeout(5_000L).connectTimeout(1_000L).asyncGet(String.class).get(5, TimeUnit.SECONDS));
+
+                // a null caller client is the default client
+                assertEquals(expected, HttpRequest.create(url, null).get(String.class));
+            } finally {
+                server.stop(0);
             }
-        });
-
-        server.start();
-        return server;
-    }
-
-    private static HttpServer startSharedTestServer() {
-        try {
-            final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-
-            server.createContext("/", exchange -> {
-                final String requestMethod = exchange.getRequestMethod();
-                exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
-                exchange.getResponseHeaders().set("X-Request-Method", requestMethod);
-
-                try (InputStream requestBody = exchange.getRequestBody()) {
-                    requestBody.transferTo(OutputStream.nullOutputStream());
-                }
-
-                if (HttpMethod.HEAD.name().equals(requestMethod)) {
-                    exchange.sendResponseHeaders(200, -1);
-                    exchange.close();
-                    return;
-                }
-
-                final byte[] responseBody = (requestMethod + " response").getBytes(StandardCharsets.UTF_8);
-                exchange.sendResponseHeaders(200, responseBody.length);
-
-                try (OutputStream outputStream = exchange.getResponseBody()) {
-                    outputStream.write(responseBody);
-                }
-            });
-
-            server.start();
-            return server;
-        } catch (final IOException e) {
-            throw new ExceptionInInitializerError(e);
         }
     }
 
-    private static HttpServer startLocalServer(final String body) throws Exception {
-        final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    @Test
+    public void testCallerSuppliedClientKeepsItsOwnRedirectPolicy() throws Exception {
+        final HttpServer server = startRedirectServer(302, "landed");
 
+        try {
+            final String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/redirect";
+
+            // JDK default policy is NEVER: the raw 302 is visible, and typed overloads throw.
+            final HttpClient never = HttpClient.newHttpClient();
+            assertEquals(302, HttpRequest.create(url, never).get().statusCode());
+            assertEquals(302, HttpRequest.create(URI.create(url), never).asyncGet().get(5, TimeUnit.SECONDS).statusCode());
+            final com.landawn.abacus.exception.HttpResponseException failure = assertThrows(com.landawn.abacus.exception.HttpResponseException.class,
+                    () -> HttpRequest.create(url, never).get(String.class));
+            assertEquals(302, failure.statusCode());
+
+            // Fluent configuration copies the caller's policy into the replacement client.
+            assertEquals(302, HttpRequest.create(url, never).connectTimeout(Duration.ofSeconds(1)).get().statusCode());
+            assertEquals(302, HttpRequest.create(url, never).readTimeout(Duration.ofSeconds(5)).connectTimeout(Duration.ofSeconds(1)).get().statusCode());
+
+            final HttpClient always = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
+            assertEquals("landed", HttpRequest.create(url, always).get(String.class));
+            assertEquals("landed", HttpRequest.create(url, always).connectTimeout(Duration.ofSeconds(1)).get(String.class));
+
+            final HttpClient normal = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
+            assertEquals("landed", HttpRequest.create(url, normal).get(String.class));
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    public void testInputStreamResultIsDecodedForCompressedResponses() throws Exception {
+        final String text = "café中😀 compressed";
+        final HttpServer server = startResponseServer(gzip(text), "text/plain; charset=UTF-8", "gzip");
+
+        try {
+            final String url = localUrl(server);
+
+            try (InputStream in = HttpRequest.url(url).get(InputStream.class)) {
+                assertEquals(text, new String(in.readAllBytes(), StandardCharsets.UTF_8));
+            }
+
+            try (InputStream in = HttpRequest.url(url).asyncGet(InputStream.class).get(5, TimeUnit.SECONDS)) {
+                assertEquals(text, new String(in.readAllBytes(), StandardCharsets.UTF_8));
+            }
+
+            try (InputStream in = HttpRequest.url(url).execute(HttpMethod.GET, InputStream.class)) {
+                assertEquals(text, new String(in.readAllBytes(), StandardCharsets.UTF_8));
+            }
+
+            // owned client: the stream is readable after the call returns and released on close
+            try (InputStream in = HttpRequest.url(url, 1_000L, 5_000L).get(InputStream.class)) {
+                assertEquals(text, new String(in.readAllBytes(), StandardCharsets.UTF_8));
+            }
+
+            try (InputStream in = HttpRequest.url(url, 1_000L, 5_000L).asyncGet(InputStream.class).get(5, TimeUnit.SECONDS)) {
+                assertEquals(text, new String(in.readAllBytes(), StandardCharsets.UTF_8));
+            }
+
+            // supertype path
+            final Object object = HttpRequest.url(url).get(Object.class);
+            assertTrue(object instanceof InputStream, String.valueOf(object));
+
+            try (InputStream in = (InputStream) object) {
+                assertEquals(text, new String(in.readAllBytes(), StandardCharsets.UTF_8));
+            }
+
+            // single-byte read, available and skip go through the decoder too
+            try (InputStream in = HttpRequest.url(url).get(InputStream.class)) {
+                assertEquals('c', in.read());
+                assertEquals(1L, in.skip(1));
+                assertTrue(in.available() >= 0);
+                final byte[] one = new byte[1];
+                assertEquals(1, in.read(one));
+                assertEquals("f".getBytes(StandardCharsets.UTF_8)[0], one[0]);
+                assertEquals(text.substring(3), new String(in.readAllBytes(), StandardCharsets.UTF_8));
+            }
+
+            // the other result types are unchanged
+            assertEquals(text, HttpRequest.url(url).get(String.class));
+            assertEquals(text, new String(HttpRequest.url(url).get(byte[].class), StandardCharsets.UTF_8));
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    public void testInputStreamResultPassesThroughPlainIdentityAndUnknownEncodings() throws Exception {
+        final String text = "plain café body";
+
+        for (final String contentEncoding : new String[] { null, "identity", "zebra" }) {
+            final HttpServer server = startResponseServer(text.getBytes(StandardCharsets.UTF_8), "text/plain; charset=UTF-8", contentEncoding);
+
+            try {
+                final String url = localUrl(server);
+
+                try (InputStream in = HttpRequest.url(url).get(InputStream.class)) {
+                    assertEquals(text, new String(in.readAllBytes(), StandardCharsets.UTF_8), String.valueOf(contentEncoding));
+                }
+
+                try (InputStream in = HttpRequest.url(url, 1_000L, 5_000L).asyncGet(InputStream.class).get(5, TimeUnit.SECONDS)) {
+                    assertEquals(text, new String(in.readAllBytes(), StandardCharsets.UTF_8), String.valueOf(contentEncoding));
+                }
+
+                try (InputStream in = (InputStream) HttpRequest.url(url).get(Object.class)) {
+                    assertEquals(text, new String(in.readAllBytes(), StandardCharsets.UTF_8), String.valueOf(contentEncoding));
+                }
+            } finally {
+                server.stop(0);
+            }
+        }
+
+        // no Content-Type at all
+        final HttpServer server = startLocalServer("plain");
+
+        try {
+            try (InputStream in = HttpRequest.url(localUrl(server)).get(InputStream.class)) {
+                assertEquals("plain", new String(in.readAllBytes(), StandardCharsets.UTF_8));
+            }
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    public void testDecodedInputStreamResultReleasesOwnedClientOnlyWhenClosed() throws Exception {
+        for (final boolean async : new boolean[] { false, true }) {
+            final AtomicInteger closeCount = new AtomicInteger();
+            final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+            final HttpRequest request = newOwnedSyncRequest(ownedClient, countingStream(gzip("café"), closeCount), "gzip");
+
+            final InputStream stream = async ? request.asyncGet(InputStream.class).get(5, TimeUnit.SECONDS) : request.get(InputStream.class);
+
+            verify((AutoCloseable) ownedClient, never()).close();
+            assertEquals(0, closeCount.get());
+
+            assertEquals("café", new String(stream.readAllBytes(), StandardCharsets.UTF_8));
+            verify((AutoCloseable) ownedClient, never()).close();
+            assertEquals(0, closeCount.get());
+
+            stream.close();
+            assertEquals(1, closeCount.get(), "raw stream closed exactly once");
+            verify((AutoCloseable) ownedClient, times(1)).close();
+
+            stream.close();
+            assertEquals(1, closeCount.get(), "a second close is a no-op");
+            verify((AutoCloseable) ownedClient, times(1)).close();
+        }
+    }
+
+    @Test
+    public void testDecodedInputStreamResultWithCorruptEncodingFailsOnFirstReadAndReleasesOnce() throws Exception {
+        for (final boolean async : new boolean[] { false, true }) {
+            final AtomicInteger closeCount = new AtomicInteger();
+            final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+            final HttpRequest request = newOwnedSyncRequest(ownedClient, countingStream("this is not gzip".getBytes(StandardCharsets.UTF_8), closeCount),
+                    "gzip");
+
+            // Delivery itself must not fail: the header is only read on first use.
+            final InputStream stream = async ? request.asyncGet(InputStream.class).get(5, TimeUnit.SECONDS) : request.get(InputStream.class);
+            verify((AutoCloseable) ownedClient, never()).close();
+            assertEquals(0, closeCount.get());
+
+            assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, stream::read);
+            assertEquals(1, closeCount.get(), "raw stream closed once after the failed wrap");
+            verify((AutoCloseable) ownedClient, times(1)).close();
+
+            // Later use reports the closed stream; nothing is closed twice.
+            assertThrows(IOException.class, () -> stream.read(new byte[4], 0, 4));
+            stream.close();
+            assertEquals(1, closeCount.get());
+            verify((AutoCloseable) ownedClient, times(1)).close();
+        }
+
+        // Same shape against a real server.
+        final HttpServer server = startResponseServer("this is not gzip".getBytes(StandardCharsets.UTF_8), "text/plain; charset=UTF-8", "gzip");
+
+        try {
+            final InputStream stream = HttpRequest.url(localUrl(server), 1_000L, 5_000L).get(InputStream.class);
+            assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, stream::read);
+            stream.close();
+
+            // The eager byte[] path fails at the call, as before.
+            assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> HttpRequest.url(localUrl(server)).get(String.class));
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    public void testDecodedInputStreamResultClosedBeforeAnyReadReleasesOnce() throws Exception {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        final HttpRequest request = newOwnedSyncRequest(ownedClient, countingStream(gzip("café"), closeCount), "gzip");
+
+        final InputStream stream = request.get(InputStream.class);
+        stream.close();
+        assertEquals(1, closeCount.get());
+        verify((AutoCloseable) ownedClient, times(1)).close();
+
+        assertThrows(IOException.class, stream::read);
+        stream.close();
+        assertEquals(1, closeCount.get());
+        verify((AutoCloseable) ownedClient, times(1)).close();
+    }
+
+    // ==================== a06 F-3: validation before the client is replaced ====================
+
+    @Test
+    public void testNegativeConnectTimeoutIsRejectedBeforeReplacingTheClient() throws Exception {
+        final HttpClient caller = HttpClient.newHttpClient();
+        final HttpRequest request = HttpRequest.create(testUrl, caller);
+
+        assertThrows(IllegalArgumentException.class, () -> request.connectTimeout(Duration.ofMillis(-1)));
+        assertThrows(IllegalArgumentException.class, () -> request.connectTimeout(Duration.ofSeconds(-30)));
+        assertEquals(false, booleanField(request, "requireNewClient"));
+        assertEquals(false, booleanField(request, "closeHttpClientAfterExecution"));
+        assertEquals(null, field(request, "clientBuilder"));
+
+        // The millis overload used to treat ANY non-positive value as "leave unchanged", which silently
+        // discarded a meaningless negative while the Duration overload above rejects it. It now rejects a
+        // negative too; 0 stays the documented "unset" sentinel and is still a no-op.
+        assertThrows(IllegalArgumentException.class, () -> request.connectTimeout(-1L));
+        assertSame(request, request.connectTimeout(0L));
+        assertEquals(false, booleanField(request, "requireNewClient"));
+        assertEquals(null, field(request, "clientBuilder"));
+
+        // A shared-default-client request is left untouched as well.
+        final HttpRequest shared = HttpRequest.url(testUrl);
+        assertThrows(IllegalArgumentException.class, () -> shared.connectTimeout(Duration.ofNanos(-1)));
+        assertEquals(false, booleanField(shared, "requireNewClient"));
+        assertEquals(false, booleanField(shared, "closeHttpClientAfterExecution"));
+        assertEquals(null, field(shared, "clientBuilder"));
+        assertEquals("GET response", shared.get(String.class));
+
+        // Valid values still replace the client (regression guard).
+        final HttpRequest replaced = HttpRequest.create(testUrl, caller).connectTimeout(Duration.ofSeconds(1));
+        assertEquals(true, booleanField(replaced, "requireNewClient"));
+        assertEquals(true, booleanField(replaced, "closeHttpClientAfterExecution"));
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testRejectedConnectTimeoutStillExecutesOnTheCallerClient() throws Exception {
+        final HttpClient caller = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        final HttpResponse<byte[]> response = mock(HttpResponse.class);
+        when(response.statusCode()).thenReturn(200);
+        when(response.body()).thenReturn("ok".getBytes(StandardCharsets.UTF_8));
+        when(response.headers()).thenReturn(java.net.http.HttpHeaders.of(Map.of(), (a, b) -> true));
+        when(caller.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(response);
+
+        final HttpRequest request = HttpRequest.create(testUrl, caller);
+        assertThrows(IllegalArgumentException.class, () -> request.connectTimeout(Duration.ofMillis(-1)));
+
+        assertEquals("ok", request.get(String.class));
+        verify(caller, times(1)).send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class));
+        verify((AutoCloseable) caller, never()).close();
+    }
+
+    @Test
+    public void testNullAuthenticatorIsRejectedBeforeReplacingTheClient() throws Exception {
+        final HttpRequest request = HttpRequest.create(testUrl, HttpClient.newHttpClient());
+
+        assertThrows(IllegalArgumentException.class, () -> request.authenticator(null));
+        assertEquals(false, booleanField(request, "requireNewClient"));
+        assertEquals(false, booleanField(request, "closeHttpClientAfterExecution"));
+        assertEquals(null, field(request, "clientBuilder"));
+        assertEquals("GET response", request.get(String.class));
+
+        final HttpRequest shared = HttpRequest.url(testUrl);
+        assertThrows(IllegalArgumentException.class, () -> shared.authenticator(null));
+        assertEquals(null, field(shared, "clientBuilder"));
+
+        // A real authenticator still replaces the client (regression guard).
+        final Authenticator authenticator = new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication("u", "p".toCharArray());
+            }
+        };
+        final HttpRequest replaced = HttpRequest.url(testUrl).authenticator(authenticator);
+        assertEquals(true, booleanField(replaced, "closeHttpClientAfterExecution"));
+        assertEquals("GET response", replaced.get(String.class));
+    }
+
+    // ==================== a06 F-4 / F-6: pinned documented behaviour ====================
+
+    @Test
+    public void testRestrictedAndMalformedHeadersAreRejectedEagerly() {
+        for (final String name : new String[] { "Connection", "Content-Length", "Expect", "Host", "Upgrade", "content-length", "HOST" }) {
+            assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUrl).header(name, "x"), name);
+            assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUrl).headers("Accept", "*/*", name, "x"), name);
+            assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUrl).headers("Accept", "*/*", "X-A", "a", name, "x"), name);
+            final Map<String, Object> headers = new LinkedHashMap<>();
+            headers.put(name, "x");
+            assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUrl).headers(headers), name);
+        }
+
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUrl).header(null, "x"));
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUrl).header("X-Bad Name", "x"));
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUrl).header("X-Name", "bad\r\nvalue"));
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUrl).header("X-Name", "café中"));
+
+        // ordinary headers are fine
+        assertNotNull(HttpRequest.url(testUrl).header("Content-Type", "text/plain").header("X-Empty", "").header("User-Agent", "abacus"));
+    }
+
+    @Test
+    public void testNullHeaderValueIsSentAsEmptyString() throws Exception {
+        final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/", exchange -> {
-            final byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+            final String value = exchange.getRequestHeaders().getFirst("X-Null");
+            final byte[] bytes = (value == null ? "absent" : "[" + value + "]").getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(200, bytes.length);
 
             try (OutputStream outputStream = exchange.getResponseBody()) {
                 outputStream.write(bytes);
             }
         });
-
         server.start();
-        return server;
+
+        try {
+            assertEquals("[]", HttpRequest.url(localUrl(server)).header("X-Null", null).get(String.class));
+            assertEquals("[]", HttpRequest.url(localUrl(server)).headers("Accept", "*/*", "X-Null", null).get(String.class));
+            final Map<String, Object> headers = new HashMap<>();
+            headers.put("X-Null", null);
+            assertEquals("[]", HttpRequest.url(localUrl(server)).headers(headers).get(String.class));
+            assertEquals("[7]", HttpRequest.url(localUrl(server)).header("X-Null", 7).get(String.class));
+            assertEquals("absent", HttpRequest.url(localUrl(server)).get(String.class));
+        } finally {
+            server.stop(0);
+        }
     }
 
-    private static HttpServer startResponseServer(final byte[] body, final String contentType, final String contentEncoding) throws Exception {
+    @Test
+    public void testNullCallerClientMeansTheSharedDefaultClient() throws Exception {
+        assertEquals("GET response", HttpRequest.create(testUrl, null).get(String.class));
+        assertEquals("GET response", HttpRequest.create(URI.create(testUrl), null).get(String.class));
+        assertEquals("GET response", HttpRequest.create(new URL(testUrl), null).asyncGet(String.class).get(5, TimeUnit.SECONDS));
+        assertEquals("POST response", HttpRequest.create(POST_URL, null).post(String.class));
+    }
+
+    @Test
+    public void testZeroFactoryTimeoutMeansNoTimeoutAndNegativeIsRejected() throws Exception {
+        // 0 is the factories' documented "no timeout" sentinel (the JDK default, unbounded).
+        final HttpRequest request = HttpRequest.url(testUrl, 0L, 0L);
+        final HttpClient.Builder clientBuilder = (HttpClient.Builder) field(request, "clientBuilder");
+        assertNotNull(clientBuilder);
+        assertEquals(true, clientBuilder.build().connectTimeout().isEmpty());
+        assertEquals(true, booleanField(request, "closeHttpClientAfterExecution"));
+        assertEquals("GET response", request.get(String.class));
+
+        // A NEGATIVE value used to be accepted here as "no timeout" too - the same silent discard that
+        // connectTimeout(long)/readTimeout(long) performed - while the Duration overloads rejected it.
+        // Every millis entry point now refuses it, so this asserts the rejection rather than the discard.
+        for (final long timeout : new long[] { -1L, Long.MIN_VALUE }) {
+            assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUrl, timeout, 0L));
+            assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUrl, 0L, timeout));
+        }
+
+        final HttpRequest bounded = HttpRequest.url(testUrl, 1_000L, 5_000L);
+        assertEquals(Duration.ofSeconds(1), ((HttpClient.Builder) field(bounded, "clientBuilder")).build().connectTimeout().get());
+    }
+
+    // G04-103: decompress() ran every response body through wrapInputStream + readAllBytes, even for the formats
+    // that carry no Content-Encoding, where the stream comes back unchanged - a full copy of every uncompressed
+    // body. The short-circuit must leave compressed, uncompressed and empty responses reading the same.
+    @Test
+    public void fixG04_uncompressedResponsesSkipTheDecompressionCopy() throws Exception {
+        final byte[] plain = "plain body".getBytes(StandardCharsets.UTF_8);
+        HttpServer server = startResponseServer(plain, "text/plain; charset=UTF-8", null);
+
+        try {
+            assertArrayEquals(plain, HttpRequest.url(localUrl(server), 1_000L, 5_000L).get(byte[].class));
+            assertEquals("plain body", HttpRequest.url(localUrl(server), 1_000L, 5_000L).get(String.class));
+            assertEquals("plain body", HttpRequest.url(localUrl(server), 1_000L, 5_000L).get().body());
+        } finally {
+            server.stop(0);
+        }
+
+        server = startResponseServer(new byte[0], "text/plain; charset=UTF-8", null);
+
+        try {
+            assertArrayEquals(new byte[0], HttpRequest.url(localUrl(server), 1_000L, 5_000L).get(byte[].class));
+            assertEquals("", HttpRequest.url(localUrl(server), 1_000L, 5_000L).get().body());
+        } finally {
+            server.stop(0);
+        }
+
+        final ByteArrayOutputStream compressed = new ByteArrayOutputStream();
+
+        try (GZIPOutputStream gzip = new GZIPOutputStream(compressed)) {
+            gzip.write(plain);
+        }
+
+        server = startResponseServer(compressed.toByteArray(), "text/plain; charset=UTF-8", "gzip");
+
+        try {
+            assertArrayEquals(plain, HttpRequest.url(localUrl(server), 1_000L, 5_000L).get(byte[].class));
+            assertEquals("plain body", HttpRequest.url(localUrl(server), 1_000L, 5_000L).get().body());
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // 2026-09-08 spillover S3 ITEM 5 (finding 44): inside one class connectTimeout(Duration.ofMillis(-1))
+    // threw while connectTimeout(-1L) was a silent no-op. Every millis entry point now rejects a negative,
+    // matching the Duration overloads, HttpSettings, OkHttpRequest and the v1 HttpClient constructor.
+    // ------------------------------------------------------------------------------------------
+
+    @Test
+    public void reviewFixes20260908_negativeMillisTimeoutsAreRejectedByEveryEntryPoint() throws Exception {
+        final HttpRequest request = HttpRequest.url(testUrl);
+
+        assertThrows(IllegalArgumentException.class, () -> request.connectTimeout(-1L));
+        assertThrows(IllegalArgumentException.class, () -> request.connectTimeout(Long.MIN_VALUE));
+        assertThrows(IllegalArgumentException.class, () -> request.readTimeout(-1L));
+        assertThrows(IllegalArgumentException.class, () -> request.readTimeout(-30_000L));
+
+        // rejected before anything is mutated: no replacement client is created and none is owned
+        assertEquals(false, booleanField(request, "requireNewClient"));
+        assertEquals(false, booleanField(request, "closeHttpClientAfterExecution"));
+        assertEquals(null, field(request, "clientBuilder"));
+
+        // 0 remains the "leave the current setting unchanged" sentinel on both
+        assertSame(request, request.connectTimeout(0L));
+        assertSame(request, request.readTimeout(0L));
+        assertEquals(null, field(request, "clientBuilder"));
+        assertEquals("GET response", request.get(String.class));
+
+        // the three url(.., long, long) factories share withConnectTimeout/withReadTimeout
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUrl, -1L, 0L));
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUrl, 0L, -1L));
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(new URL(testUrl), -1L, 0L));
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(new URL(testUrl), 0L, -1L));
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUri, -1L, 0L));
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(testUri, 0L, -1L));
+
+        // 0 still means "no timeout" there, and real values still work
+        assertEquals("GET response", HttpRequest.url(testUrl, 0L, 0L).get(String.class));
+        assertEquals("GET response", HttpRequest.url(testUrl, 5_000L, 5_000L).get(String.class));
+        assertEquals("GET response", HttpRequest.url(testUri, 5_000L, 0L).get(String.class));
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // 2026-09-08 spillover S3 ITEM 3 (finding 46): a Cookie collection reaches the wire as ONE header
+    // line whose cookie-pairs are separated by "; " (RFC 6265 5.4), not comma-joined.
+    // ------------------------------------------------------------------------------------------
+
+    @Test
+    public void reviewFixes20260908_cookieCollectionIsSentAsOneSemicolonJoinedLine() throws Exception {
         final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
 
         server.createContext("/", exchange -> {
-            if (contentType != null) {
-                exchange.getResponseHeaders().set("Content-Type", contentType);
-            }
-
-            if (contentEncoding != null) {
-                exchange.getResponseHeaders().set("Content-Encoding", contentEncoding);
-            }
-
+            final byte[] body = (exchange.getRequestHeaders().getFirst("Cookie") + "|" + exchange.getRequestHeaders().getFirst("Accept-Language"))
+                    .getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(200, body.length);
 
-            try (OutputStream outputStream = exchange.getResponseBody()) {
-                outputStream.write(body);
+            try (OutputStream out = exchange.getResponseBody()) {
+                out.write(body);
             }
         });
 
         server.start();
-        return server;
-    }
 
-    private static HttpServer startRedirectServer(final String body) throws Exception {
-        final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        try {
+            final String url = localUrl(server);
 
-        server.createContext("/redirect", exchange -> {
-            exchange.getResponseHeaders().add("Location", "/target");
-            exchange.sendResponseHeaders(302, -1);
-            exchange.close();
-        });
+            // Cookie uses its own list grammar; every other multiply-valued field keeps ", ".
+            assertEquals("a=1; b=2|en, fr", HttpRequest.url(url)
+                    .header("Cookie", Arrays.asList("a=1", "b=2"))
+                    .header("Accept-Language", Arrays.asList("en", "fr"))
+                    .get(String.class));
 
-        server.createContext("/target", exchange -> {
-            final byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
-            exchange.sendResponseHeaders(200, bytes.length);
-
-            try (OutputStream outputStream = exchange.getResponseBody()) {
-                outputStream.write(bytes);
-            }
-        });
-
-        server.start();
-        return server;
-    }
-
-    private static String localUrl(final HttpServer server) {
-        return "http://127.0.0.1:" + server.getAddress().getPort() + "/";
-    }
-
-    private static boolean booleanField(final HttpRequest request, final String fieldName) throws Exception {
-        return (boolean) field(request, fieldName);
-    }
-
-    private static Object field(final HttpRequest request, final String fieldName) throws Exception {
-        final java.lang.reflect.Field field = HttpRequest.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return field.get(request);
+            // the name is matched case-insensitively, and headers(Map) routes through header(..) too
+            assertEquals("a=1; b=2|en, fr",
+                    HttpRequest.url(url).headers(Map.of("cookie", Arrays.asList("a=1", "b=2"), "accept-language", Arrays.asList("en", "fr")))
+                            .get(String.class));
+        } finally {
+            server.stop(0);
+        }
     }
 
 }

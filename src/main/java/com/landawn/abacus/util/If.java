@@ -20,261 +20,62 @@ import java.util.function.Supplier;
 import com.landawn.abacus.annotation.Beta;
 
 /**
- * A functional programming utility class for creating fluent conditional execution chains that provides
- * an alternative to traditional if-else statements through method chaining. This class enables elegant
- * conditional logic in functional programming contexts while maintaining readability and supporting
- * various condition types including {@code null} checks, emptiness validation, and custom boolean conditions.
+ * A fluent alternative to {@code if}/{@code else} for functional code: a condition is evaluated once by a static
+ * factory, and the resulting object runs one action or the other.
  *
- * <p>The {@code If} class follows a fluent API pattern where conditions are evaluated once and subsequent
- * actions are executed based on that evaluation. It provides a more expressive way to handle conditional
- * logic, especially in scenarios involving method chaining, functional transformations, or when building
- * complex conditional workflows.</p>
+ * <p><b>&#9888;&#65039; Prefer a plain {@code if} statement.</b> This class exists for the cases where a chain reads
+ * better - a long validation sequence, or conditional logic that would otherwise interrupt a functional pipeline. For
+ * an ordinary two-branch decision, {@code if}/{@code else} or a ternary is clearer and cheaper.
  *
- * <p><b>⚠️ IMPORTANT - Performance Consideration:</b>
- * While this class provides a functional approach to conditionals, traditional if-else statements
- * or ternary operators are generally preferred for better readability and performance in most cases.
- * Use this class when the fluent API significantly improves code expressiveness or when integrating
- * with functional programming patterns.</p>
+ * <p><b>The shape.</b> A factory ({@link #is(boolean)}, {@link #notNull(Object)}, {@link #notEmpty(Collection)},
+ * {@link #notBlank(CharSequence)}, ...) produces an {@code If}; {@link #then(Throwables.Runnable)} runs the true
+ * branch and returns an {@link OrElse}; {@link OrElse#orElse(Throwables.Runnable)} runs the false branch.
+ * {@link #thenThrow(Supplier)} and {@link OrElse#orElseThrow(Supplier)} are the throwing counterparts - note that
+ * {@code thenThrow} returns an {@code OrElse} only when the condition was false, since a true condition leaves by
+ * throwing. Every branch is optional - a chain may stop at any point, and {@link #thenDoNothing()} /
+ * {@link OrElse#orElseDoNothing()} exist to say so explicitly.
  *
- * <p><b>Key Features:</b>
- * <ul>
- *   <li><b>Fluent API Design:</b> Method chaining for readable conditional logic</li>
- *   <li><b>Comprehensive Condition Types:</b> Boolean, {@code null}, empty, blank, and existence checks</li>
- *   <li><b>Exception Safety:</b> Built-in exception handling with custom exception suppliers</li>
- *   <li><b>Type Safety:</b> Generic support for various data types and collections</li>
- *   <li><b>Functional Integration:</b> Seamless integration with lambda expressions and method references</li>
- *   <li><b>Lazy Evaluation:</b> Actions are only executed when conditions are met</li>
- *   <li><b>Immutable Design:</b> Thread-safe and side-effect free condition evaluation</li>
- *   <li><b>Beta Features:</b> Experimental enhancements for advanced use cases</li>
- * </ul>
+ * <p>Actions may throw checked exceptions: the exception type is a type parameter of {@code then}/{@code orElse}, so
+ * it propagates to the caller without wrapping. The action arguments themselves are validated eagerly - passing
+ * {@code null} raises {@link IllegalArgumentException} whether or not that branch is the one taken.
  *
- * <p><b>⚠️ IMPORTANT - Final Class Design:</b>
- * <ul>
- *   <li>This is a <b>final utility class</b> that cannot be extended</li>
- *   <li>Uses static factory methods for creating {@code If} instances</li>
- *   <li>Immutable condition state ensures predictable behavior</li>
- *   <li>Thread-safe design with no mutable static state</li>
- * </ul>
+ * <p>An {@code If} carries only the evaluated {@code boolean}, so it is immutable, allocation-free (the two instances
+ * are cached), and safe to share; whether the actions it runs are safe is up to the actions. Note that the condition
+ * has already been computed by the time the factory returns - only the <i>actions</i> are deferred.
  *
- * <p><b>Design Philosophy:</b>
- * <ul>
- *   <li><b>Expressiveness:</b> Makes conditional logic more readable through natural language-like syntax</li>
- *   <li><b>Functional Style:</b> Embraces functional programming paradigms with lambda support</li>
- *   <li><b>Error Prevention:</b> Reduces common mistakes through type-safe APIs</li>
- *   <li><b>Composability:</b> Enables building complex conditional workflows</li>
- *   <li><b>Consistency:</b> Uniform API across different condition types</li>
- * </ul>
- *
- * <p><b>Core API Pattern:</b>
- * <ul>
- *   <li><b>Condition Creation:</b> Static factory methods ({@code is()}, {@code notNull()}, {@code notEmpty()}, etc.)</li>
- *   <li><b>Action Execution:</b> {@code then()} methods for conditional execution</li>
- *   <li><b>Alternative Handling:</b> {@code orElse()} methods for fallback logic</li>
- *   <li><b>Exception Throwing:</b> {@code thenThrow()} and {@code orElseThrow()} for error scenarios</li>
- * </ul>
- *
- * <p><b>Supported Condition Types:</b>
- * <ul>
- *   <li><b>Boolean Conditions:</b> {@code is(boolean)}, {@code not(boolean)}</li>
- *   <li><b>Null Checks:</b> {@code isNull(Object)}, {@code notNull(Object)}</li>
- *   <li><b>Empty Checks:</b> Arrays, Collections, Maps, Strings, and specialized containers</li>
- *   <li><b>Blank Checks:</b> {@code isBlank(CharSequence)}, {@code notBlank(CharSequence)}</li>
- *   <li><b>Existence Checks:</b> {@code exists(int)} for index validation</li>
- * </ul>
- *
- * <p><b>Common Usage Patterns:</b>
+ * <p><b>Usage Examples:</b>
  * <pre>{@code
- * // Basic boolean condition with action
+ * // Two branches
  * If.is(user.isActive())
  *   .then(() -> sendWelcomeEmail(user))
  *   .orElse(() -> sendReactivationEmail(user));
  *
- * // Null safety with conditional processing
- * If.notNull(user.getProfile())
- *   .then(user.getProfile(), profile -> updateProfile(profile))
- *   .orElse(() -> createDefaultProfile(user));
- *
- * // Collection emptiness checking
+ * // Validation: run, or fail with a specific exception
  * If.notEmpty(orders)
  *   .then(() -> processOrders(orders))
  *   .orElseThrow(() -> new IllegalStateException("No orders to process"));
  *
- * // String validation
- * If.notBlank(email)
- *   .then(() -> sendNotification(email))
- *   .orElse(() -> logMissingEmailWarning());
+ * // Guard clause
+ * If.isNull(user)
+ *   .thenThrow(() -> new IllegalArgumentException("User cannot be null"));
  *
- * // Complex conditional logic
- * If.is(user.hasPermission() && resource.isAvailable())
- *   .then(() -> grantAccess(user, resource))
- *   .orElseThrow(() -> new AccessDeniedException("Insufficient permissions"));
+ * // Only the false branch is interesting
+ * If.is(cache.contains(key))
+ *   .thenDoNothing()
+ *   .orElse(() -> cache.load(key));
+ * // ... though If.not(cache.contains(key)).then(() -> cache.load(key)) says it better
+ *
+ * // Passing a value into the action instead of capturing it
+ * If.notNull(user)
+ *   .then(user, u -> save(u))
+ *   .orElse(() -> createNewUser());
  * }</pre>
  *
- * <p><b>Advanced Usage Examples:</b></p>
- * <pre>{@code
- * // Beta feature: action with initialization parameter
- * If.notEmpty(dataList)
- *   .then(new ProcessingContext(), context -> {
- *       context.initialize();
- *       processDataWithContext(context, dataList);
- *   })
- *   .orElse(() -> handleEmptyData());
- *
- * // Chaining multiple conditions
- * class UserProcessor {
- *     public void processUser(User user) {
- *         If.notNull(user)
- *           .then(() -> validateUser(user))
- *           .orElseThrow(() -> new IllegalArgumentException("User cannot be null"));
- *
- *         If.notBlank(user.getEmail())
- *           .then(() -> sendEmail(user.getEmail()))
- *           .orElse(() -> logEmailMissing(user.getId()));
- *
- *         If.notEmpty(user.getPreferences())
- *           .then(() -> applyPreferences(user.getPreferences()))
- *           .orElse(() -> setDefaultPreferences(user));
- *     }
- * }
- *
- * // Exception handling patterns
- * If.is(criticalCondition)
- *   .thenThrow(() -> new CriticalException("System failure detected"))
- *   .orElse(() -> continueNormalOperation());
- *
- * // Working with arrays
- * If.notEmpty(dataArray)
- *   .then(() -> Arrays.stream(dataArray).forEach(this::processItem))
- *   .orElse(() -> handleEmptyArray());
- * }</pre>
- *
- * <p><b>OrElse Nested Class:</b>
- * <ul>
- *   <li><b>Fluent Continuation:</b> Returned by {@code then()} methods to enable {@code orElse()} chaining</li>
- *   <li><b>Lazy Evaluation:</b> {@code orElse()} actions only execute if the original condition was false</li>
- *   <li><b>Multiple Options:</b> Supports actions, exception throwing, and no-operation alternatives</li>
- *   <li><b>Type Safety:</b> Maintains generic type information through the chain</li>
- * </ul>
- *
- * <p><b>Performance Characteristics:</b>
- * <ul>
- *   <li><b>Condition Evaluation:</b> O(1) for boolean conditions, O(1) for {@code null} checks</li>
- *   <li><b>Collection Checks:</b> O(1) for size-based emptiness checks</li>
- *   <li><b>String Operations:</b> O(n) for blank checking (whitespace scanning)</li>
- *   <li><b>Memory Overhead:</b> Minimal object creation, cached instances for common cases</li>
- *   <li><b>Method Calls:</b> Additional method call overhead compared to direct if-else</li>
- * </ul>
- *
- * <p><b>Thread Safety:</b>
- * <ul>
- *   <li><b>Immutable State:</b> {@code If} instances are immutable after creation</li>
- *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
- *   <li><b>Static Methods:</b> All factory methods are thread-safe</li>
- *   <li><b>Action Execution:</b> Thread safety depends on the provided lambda expressions</li>
- * </ul>
- *
- * <p><b>Error Handling:</b>
- * <ul>
- *   <li><b>IllegalArgumentException:</b> Thrown for {@code null} action parameters where not allowed</li>
- *   <li><b>Custom Exceptions:</b> Support for throwing custom exceptions via suppliers</li>
- *   <li><b>Exception Propagation:</b> Exceptions from lambda expressions are propagated correctly</li>
- *   <li><b>Type Safety:</b> Compile-time checking prevents many runtime errors</li>
- * </ul>
- *
- * <p><b>Memory Management:</b>
- * <ul>
- *   <li><b>Instance Caching:</b> {@code TRUE} and {@code FALSE} instances are cached for reuse</li>
- *   <li><b>Minimal Allocation:</b> Reduces object creation for common boolean conditions</li>
- *   <li><b>Lambda Efficiency:</b> Lambda expressions are compiled efficiently by the JVM</li>
- *   <li><b>No Leaks:</b> No references held beyond the execution chain</li>
- * </ul>
- *
- * <p><b>Integration with Functional Programming:</b>
- * <ul>
- *   <li><b>Lambda Expressions:</b> Full support for lambda expressions and method references</li>
- *   <li><b>Stream API:</b> Can be used within stream operations for conditional processing</li>
- *   <li><b>Optional Integration:</b> Complements {@code Optional} for different conditional scenarios</li>
- *   <li><b>Function Composition:</b> Enables building complex conditional workflows</li>
- * </ul>
- *
- * <p><b>Beta Features:</b>
- * <ul>
- *   <li><b>Parameter Passing:</b> {@code then(T init, Consumer<T>)} allows passing initialization parameters</li>
- *   <li><b>Experimental API:</b> Subject to change in future versions</li>
- *   <li><b>Enhanced Expressiveness:</b> Provides additional ways to structure conditional logic</li>
- *   <li><b>Feedback Requested:</b> Beta features are for evaluation and feedback</li>
- * </ul>
- *
- * <p><b>Comparison with Alternatives:</b>
- * <ul>
- *   <li><b>vs. if-else:</b> More expressive but with slight performance overhead</li>
- *   <li><b>vs. ternary operator:</b> Better for complex conditions and multiple actions</li>
- *   <li><b>vs. Optional:</b> Different use case - conditional execution vs. value presence</li>
- *   <li><b>vs. Guards:</b> More fluent than guard clauses but less explicit</li>
- * </ul>
- *
- * <p><b>Best Practices:</b>
- * <ul>
- *   <li>Use for complex conditional logic where readability is improved</li>
- *   <li>Prefer traditional if-else for simple boolean conditions</li>
- *   <li>Chain multiple conditions for related validation logic</li>
- *   <li>Use meaningful lambda expressions and avoid complex inline logic</li>
- *   <li>Consider performance implications for hot code paths</li>
- *   <li>Leverage type safety features to prevent runtime errors</li>
- * </ul>
- *
- * <p><b>Common Anti-Patterns to Avoid:</b>
- * <ul>
- *   <li>Overusing fluent API where simple if-else would be clearer</li>
- *   <li>Creating overly complex lambda expressions inline</li>
- *   <li>Ignoring the performance overhead in performance-critical code</li>
- *   <li>Using for simple boolean conditions that don't benefit from fluency</li>
- *   <li>Nesting {@code If} chains unnecessarily</li>
- * </ul>
- *
- * <p><b>Related Utility Methods:</b>
- * <ul>
- *   <li><b>{@link N#ifOrEmpty}:</b> Alternative conditional execution utilities</li>
- *   <li><b>{@link N#ifOrElse}:</b> Simple if-else utility methods</li>
- *   <li><b>{@link N#ifNotNull}:</b> Null-safe conditional execution</li>
- *   <li><b>{@link N#ifNotEmpty(Collection, Throwables.Consumer) N.ifNotEmpty}:</b> Emptiness-aware conditional execution
- *       (also overloaded for {@code CharSequence} and {@code Map})</li>
- * </ul>
- *
- * <p><b>Usage Examples: User Validation Workflow</b></p>
- * <pre>{@code
- * public class UserValidator {
- *     public void validateAndProcess(User user, UserContext context) {
- *         // Comprehensive user validation using If chains
- *         If.notNull(user)
- *           .then(() -> validateUserStructure(user))
- *           .orElseThrow(() -> new IllegalArgumentException("User cannot be null"));
- *
- *         If.notBlank(user.getUsername())
- *           .then(() -> checkUsernameAvailability(user.getUsername()))
- *           .orElseThrow(() -> new ValidationException("Username is required"));
- *
- *         If.notBlank(user.getEmail())
- *           .then(() -> validateEmailFormat(user.getEmail()))
- *           .orElse(() -> user.setEmail(generateTemporaryEmail()));
- *
- *         If.notEmpty(user.getRoles())
- *           .then(() -> validateRoles(user.getRoles()))
- *           .orElse(() -> assignDefaultRole(user));
- *
- *         If.is(user.isActive() && context.isRegistrationOpen())
- *           .then(() -> processActiveUser(user, context))
- *           .orElse(() -> queueForLaterProcessing(user));
- *
- *         If.notEmpty(user.getPreferences())
- *           .then(context, ctx -> {
- *               ctx.setProcessingMode(CUSTOM);
- *               applyUserPreferences(user.getPreferences(), ctx);
- *           })
- *           .orElse(() -> context.setProcessingMode(DEFAULT));
- *     }
- * }
- * }</pre>
+ * <p>Conditions are available for booleans ({@link #is(boolean)}, {@link #not(boolean)}), nullity
+ * ({@link #isNull(Object)}, {@link #notNull(Object)}), emptiness of every array type plus {@link Collection},
+ * {@link Map}, {@link CharSequence}, {@link PrimitiveList}, {@link Multiset} and {@link Multimap}, blankness
+ * ({@link #isBlank(CharSequence)}, {@link #notBlank(CharSequence)}), and index validity ({@link #exists(int)}, for
+ * results of {@code -1}-returning searches).
  *
  * @see N#ifOrEmpty(boolean, Throwables.Supplier)
  * @see N#ifOrElse(boolean, Throwables.Runnable, Throwables.Runnable)
@@ -587,15 +388,14 @@ public final class If {
      * <pre>{@code
      * IntList numbers = IntList.of(1, 2, 3);
      * If.isEmpty(numbers).then(() -> System.out.println("Empty"));                // does nothing
-     * If.isEmpty((PrimitiveList) null).then(() -> System.out.println("Empty"));   // prints "Empty"
+     * If.isEmpty((PrimitiveList<?, ?, ?>) null).then(() -> System.out.println("Empty"));   // prints "Empty"
      * If.isEmpty(IntList.of()).then(() -> System.out.println("Empty"));           // prints "Empty"
      * }</pre>
      *
      * @param list the PrimitiveList to check (can be {@code null})
      * @return an If instance that is {@code true} if the PrimitiveList is {@code null} or empty
      */
-    @SuppressWarnings("rawtypes")
-    public static If isEmpty(final PrimitiveList list) {
+    public static If isEmpty(final PrimitiveList<?, ?, ?> list) {
         return is(N.isEmpty(list));
     }
 
@@ -656,7 +456,6 @@ public final class If {
      * @return an If instance that is {@code true} if the CharSequence is {@code null}, empty, or contains only whitespace
      */
     public static If isBlank(final CharSequence s) {
-        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
         return is(Strings.isBlank(s));
     }
 
@@ -887,15 +686,14 @@ public final class If {
      * <pre>{@code
      * IntList numbers = IntList.of(1, 2, 3);
      * If.notEmpty(numbers).then(() -> System.out.println("Has data"));                // prints "Has data"
-     * If.notEmpty((PrimitiveList) null).then(() -> System.out.println("Has data"));   // does nothing
+     * If.notEmpty((PrimitiveList<?, ?, ?>) null).then(() -> System.out.println("Has data"));   // does nothing
      * If.notEmpty(IntList.of()).then(() -> System.out.println("Has data"));           // does nothing
      * }</pre>
      *
      * @param list the PrimitiveList to check (can be {@code null})
      * @return an If instance that is {@code true} if the PrimitiveList is not {@code null} and not empty
      */
-    @SuppressWarnings("rawtypes")
-    public static If notEmpty(final PrimitiveList list) {
+    public static If notEmpty(final PrimitiveList<?, ?, ?> list) {
         return is(N.notEmpty(list));
     }
 
@@ -956,7 +754,6 @@ public final class If {
      * @return an If instance that is {@code true} if the CharSequence is not {@code null}, not empty, and contains non-whitespace characters
      */
     public static If notBlank(final CharSequence s) {
-        // DON'T change 'OrEmptyOrBlank' to 'OrBlank' because of the occurring order in the auto-completed context menu.
         return is(Strings.isNotBlank(s));
     }
 
@@ -1023,10 +820,10 @@ public final class If {
      * @param <E> the type of exception that the runnable may throw
      * @param cmd the runnable to execute if the condition is {@code true}
      * @return an OrElse instance for optional chaining of an else clause
-     * @throws E if the runnable throws an exception during execution
      * @throws IllegalArgumentException if {@code cmd} is {@code null}.
+     * @throws E if the condition is true and the supplied callback throws during execution
      */
-    public <E extends Throwable> OrElse then(final Throwables.Runnable<E> cmd) throws E, IllegalArgumentException {
+    public <E extends Throwable> OrElse then(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
         N.checkArgNotNull(cmd, cs.cmd);
 
         if (b) {
@@ -1068,11 +865,11 @@ public final class If {
      * @param init the input value to pass to the consumer (can be {@code null})
      * @param action the consumer to execute if the condition is {@code true}
      * @return an OrElse instance for optional chaining of an else clause
-     * @throws E if the consumer throws an exception during execution
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the condition is true and the supplied callback throws during execution
      */
     @Beta
-    public <T, E extends Throwable> OrElse then(final T init, final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
+    public <T, E extends Throwable> OrElse then(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);
 
         if (b) {
@@ -1120,10 +917,11 @@ public final class If {
      * @param <E> the type of exception to throw
      * @param exceptionSupplier the supplier that provides the exception to throw
      * @return an OrElse instance for optional chaining of an else clause (unreachable if the condition is true)
-     * @throws E if the condition is true
      * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
+     * @throws NullPointerException if the condition is true and {@code exceptionSupplier} returns {@code null}
+     * @throws E if the condition is true
      */
-    public <E extends Throwable> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
+    public <E extends Throwable> OrElse thenThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, NullPointerException, E {
         N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
         if (b) {
@@ -1145,7 +943,8 @@ public final class If {
      * <ul>
      *   <li><b>Lazy Evaluation:</b> Actions are only executed if the initial condition was {@code false}</li>
      *   <li><b>Multiple Options:</b> Supports actions, exception throwing, and no-operation alternatives</li>
-     *   <li><b>Type Safety:</b> Maintains generic type information through the chain</li>
+     *   <li><b>Stateless Carrier:</b> {@code OrElse} carries only the evaluated condition, not the value or its
+     *       type; each {@code orElse} overload introduces its own type parameters</li>
      *   <li><b>Immutable State:</b> The condition state is immutable once created</li>
      * </ul>
      *
@@ -1159,14 +958,20 @@ public final class If {
      */
     public static final class OrElse {
         /**
-         * Cached {@code OrElse} instance representing a {@code true} condition (the {@code then} branch was taken).
-         * Intended for internal use only.
+         * Cached {@code OrElse} instance representing a {@code true} condition (the {@code then} branch was taken),
+         * on which every {@code orElse} method is a no-op.
+         *
+         * <p>There is no reason to reference this constant directly: an {@code OrElse} is obtained by calling
+         * {@link If#then(Throwables.Runnable)}, {@link If#thenDoNothing()} or a sibling, which already return the
+         * cached instance matching the evaluated condition.</p>
          */
         public static final OrElse TRUE = new OrElse(true);
 
         /**
-         * Cached {@code OrElse} instance representing a {@code false} condition (the {@code then} branch was not taken).
-         * Intended for internal use only.
+         * Cached {@code OrElse} instance representing a {@code false} condition (the {@code then} branch was not
+         * taken), on which every {@code orElse} method runs.
+         *
+         * <p>There is no reason to reference this constant directly; see {@link #TRUE}.</p>
          */
         public static final OrElse FALSE = new OrElse(false);
 
@@ -1202,14 +1007,21 @@ public final class If {
         }
 
         /**
-         * Package-private no-op placeholder representing an empty else branch.
+         * Completes the conditional chain without performing any action when the initial condition was
+         * {@code false}.
          *
-         * <p>This method completes the conditional chain without performing any action
-         * when the initial condition is {@code false}. It is implicitly the default
-         * behavior when no {@code orElse} method is chained, and is not part of the
-         * public API.</p>
+         * <p>This is a no-op in every case; it exists so that a chain can state explicitly that the else
+         * branch is intentionally empty. Simply not calling any {@code orElse} method has exactly the same
+         * effect.</p>
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * If.is(cache.contains(key))
+         *   .then(() -> stats.recordHit())
+         *   .orElseDoNothing();   // explicit: a miss is not interesting here
+         * }</pre>
          */
-        void orElseDoNothing() {
+        public void orElseDoNothing() {
             // Do nothing.
         }
 
@@ -1245,10 +1057,10 @@ public final class If {
          *
          * @param <E> the type of exception that the runnable may throw
          * @param cmd the runnable to execute if the initial condition was {@code false}
-         * @throws E if the runnable throws an exception during execution
          * @throws IllegalArgumentException if {@code cmd} is {@code null}.
+         * @throws E if the initial condition is false and the supplied callback throws during execution
          */
-        public <E extends Throwable> void orElse(final Throwables.Runnable<E> cmd) throws E, IllegalArgumentException {
+        public <E extends Throwable> void orElse(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
             N.checkArgNotNull(cmd, cs.cmd);
 
             if (!isIfTrue) {
@@ -1286,11 +1098,11 @@ public final class If {
          * @param <E> the type of exception that the consumer may throw
          * @param init the input value to pass to the consumer (can be {@code null})
          * @param action the consumer to execute if the initial condition was {@code false}
-         * @throws E if the consumer throws an exception during execution
          * @throws IllegalArgumentException if {@code action} is {@code null}.
+         * @throws E if the initial condition is false and the supplied callback throws during execution
          */
         @Beta
-        public <T, E extends Throwable> void orElse(final T init, final Throwables.Consumer<? super T, E> action) throws E, IllegalArgumentException {
+        public <T, E extends Throwable> void orElse(final T init, final Throwables.Consumer<? super T, E> action) throws IllegalArgumentException, E {
             N.checkArgNotNull(action, cs.action);
 
             if (!isIfTrue) {
@@ -1334,10 +1146,11 @@ public final class If {
          *
          * @param <E> the type of exception to throw
          * @param exceptionSupplier the supplier that provides the exception to throw
-         * @throws E if the initial condition was false
          * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
+         * @throws NullPointerException if the initial condition is false and {@code exceptionSupplier} returns {@code null}
+         * @throws E if the initial condition was false
          */
-        public <E extends Throwable> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws E, IllegalArgumentException {
+        public <E extends Throwable> void orElseThrow(final Supplier<? extends E> exceptionSupplier) throws IllegalArgumentException, NullPointerException, E {
             N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
             if (!isIfTrue) {

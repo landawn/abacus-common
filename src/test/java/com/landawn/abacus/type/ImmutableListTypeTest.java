@@ -137,4 +137,22 @@ public class ImmutableListTypeTest extends TestBase {
         assertTrue(typeName.contains("ImmutableList"));
         assertTrue(typeName.contains("String"));
     }
+
+    // T8-03 / R-T04: isImmutable() answered false for a type whose values are immutable by construction.
+    @Test
+    public void reviewFixes20260906_isImmutableIsTrue() {
+        assertTrue(immutableListType.isImmutable());
+        assertTrue(TypeFactory.getType("ImmutableList<Integer>").isImmutable());
+        assertTrue(TypeFactory.getType(ImmutableList.class).isImmutable());
+
+        // contrast: a mutable sibling stays false, and so does ImmutableCollection - TypeFactory resolves it to the
+        // generic CollectionType handler, not to this one, so it is not covered by this override
+        org.junit.jupiter.api.Assertions.assertFalse(TypeFactory.getType("List<String>").isImmutable());
+        org.junit.jupiter.api.Assertions.assertFalse(TypeFactory.getType("ImmutableCollection<String>").isImmutable());
+
+        // the parsed value really is immutable
+        final ImmutableList<String> parsed = immutableListType.valueOf("[\"a\", \"中\"]");
+        org.junit.jupiter.api.Assertions.assertThrows(UnsupportedOperationException.class, () -> parsed.add("b"));
+        assertNull(immutableListType.valueOf("   "));
+    }
 }

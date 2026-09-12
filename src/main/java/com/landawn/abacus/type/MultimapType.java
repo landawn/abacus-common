@@ -15,10 +15,13 @@
 package com.landawn.abacus.type;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ListMultimap;
@@ -67,7 +70,8 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * @throws IllegalArgumentException if a supplied value collection type is not a collection type, or if only the
      *         element type is given and {@code typeClass} is neither a {@link ListMultimap} nor a {@link SetMultimap}.
      */
-    MultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName, final String valueTypeName) {
+    MultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName, final String valueTypeName)
+            throws IllegalArgumentException {
         super(getTypeName(typeClass, keyTypeName, valueElementTypeName, valueTypeName, false));
 
         parameterTypes = Strings.isEmpty(valueElementTypeName) ? List.of(TypeFactory.getType(keyTypeName), TypeFactory.getType(valueTypeName))
@@ -78,7 +82,10 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
 
         declaringName = getTypeName(typeClass, keyTypeName, valueElementTypeName, valueTypeName, true);
 
-        jdc = JsonDeserConfig.create().setMapKeyType(parameterTypes.get(0));
+        // The multimaps built by valueOf are linked, but they can only keep the order they are given:
+        // the intermediate map (and, for a SetMultimap, the intermediate value set) must be linked too,
+        // otherwise the JSON document order is scrambled before it is copied.
+        jdc = JsonDeserConfig.create().setMapKeyType(parameterTypes.get(0)).setMapInstanceType(LinkedHashMap.class);
 
         if (Strings.isEmpty(valueElementTypeName)) {
             if (!(parameterTypes.get(1) instanceof CollectionType)) {
@@ -91,7 +98,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
             if (ListMultimap.class.isAssignableFrom(typeClass)) {
                 jdc.setMapValueType(TypeFactory.getType("List<" + parameterTypes.get(1).name() + ">"));
             } else if (SetMultimap.class.isAssignableFrom(typeClass)) {
-                jdc.setMapValueType(TypeFactory.getType("Set<" + parameterTypes.get(1).name() + ">"));
+                jdc.setMapValueType(TypeFactory.getType("LinkedHashSet<" + parameterTypes.get(1).name() + ">"));
             } else {
                 throw new IllegalArgumentException("Unsupported Multimap type: " + typeClass);
             }
@@ -125,7 +132,7 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      *
      * @return the class of the concrete {@code Multimap} implementation (e.g., {@code ListMultimap.class})
      */
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings("rawtypes")
     @Override
     public Class<T> javaType() {
         return (Class) typeClass;
@@ -162,6 +169,12 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * Indicates whether instances of this type support serialization.
      * {@link Multimap} objects are serialized to and deserialized from JSON through this type handler.
      *
+     * <p>Because this type is reported as serializable and does not override {@code serializeTo}, a multimap that is
+     * nested in a bean property, a map value or a collection element is written as a quoted JSON <i>string</i> holding
+     * the value of {@link #stringOf(Multimap)} (e.g. {@code {"lm": "{\"a\": [1]}"}}), not as a JSON object; in XML the
+     * same text is written as the element's escaped character content. The JSON and XML parsers read that form back.
+     * Only a multimap serialized as the root value is emitted as a plain JSON object.</p>
+     *
      * @return {@code true}
      */
     @Override
@@ -173,7 +186,8 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * Converts a {@link Multimap} object to its JSON string representation.
      * The {@code Multimap} is first converted to a regular {@link java.util.Map} via
      * {@link Multimap#toMap()}, where each key maps to its collection of values,
-     * and the resulting map is then serialized as JSON.
+     * and the resulting map is then serialized as JSON. When the multimap is nested inside a bean, map or collection,
+     * this string is what the JSON/XML serializers embed (as a quoted, escaped string value; see {@link #isSerializable()}).
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
      * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is
@@ -200,7 +214,16 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * A {@link java.util.Set}-backed multimap is returned when the declared multimap class is a
      * {@link com.landawn.abacus.util.SetMultimap SetMultimap} or its value collection type is a
      * {@link java.util.Set}; otherwise a {@link com.landawn.abacus.util.ListMultimap ListMultimap}-backed
-     * multimap is returned. In both cases the result preserves insertion order (a linked implementation).
+     * multimap is returned. In both cases the result is a linked implementation whose keys keep the order of the JSON
+     * document. The values of each key keep the order of their JSON array when the value collection is implied by the
+     * multimap class ({@code ListMultimap<K, E>}, {@code SetMultimap<K, E>}) or is declared as a {@code List} or a
+     * {@code LinkedHashSet}; when an unordered value collection is declared explicitly (e.g.
+     * {@code Multimap<K, E, Set<E>>} or {@code Multimap<K, Set<E>>}), the values are collected into that declared
+     * collection first and their order is unspecified.
+     *
+     * <p>A key whose JSON value is {@code null} or an empty array (e.g. {@code {"k": null}} or {@code {"k": []}}) is
+     * dropped: a multimap never holds a key without values. A duplicate key keeps the position of its first occurrence
+     * and the values of its last one.</p>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
@@ -208,15 +231,18 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      *
      * @param str the JSON string to parse; may be {@code null} or blank
      * @return the parsed {@code Multimap} object, or {@code null} if the input is {@code null} or blank
+     * @throws ParsingException if {@code str} is not a well-formed JSON object text
      * @see #valueOf(Object)
      * @see #stringOf(Multimap)
      */
+    @MayReturnNull
     @Override
-    public T valueOf(final String str) {
+    public T valueOf(final String str) throws ParsingException {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         }
 
+        // jdc targets a LinkedHashMap (see the constructor), so the entries below are in document order.
         final Map<K, Collection<E>> map = Utils.jsonParser.deserialize(str, jdc, Map.class);
 
         if (map == null) {

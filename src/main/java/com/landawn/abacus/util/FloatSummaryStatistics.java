@@ -88,7 +88,7 @@ public class FloatSummaryStatistics implements FloatConsumer {
      *         {@code NaN} {@code sum} is accepted when {@code min} is {@code -Infinity} and {@code max} is
      *         {@code +Infinity}, since summing opposite infinities produces exactly that state.
      */
-    public FloatSummaryStatistics(final long count, final float min, final float max, final double sum) {
+    public FloatSummaryStatistics(final long count, final float min, final float max, final double sum) throws IllegalArgumentException {
         if (count < 0) {
             throw new IllegalArgumentException("count must be non-negative");
         }
@@ -125,9 +125,10 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * }</pre>
      *
      * @param value the input value to be recorded
+     * @throws ArithmeticException if the observation count would overflow; this instance is unchanged
      */
     @Override
-    public void accept(final float value) {
+    public void accept(final float value) throws ArithmeticException {
         summation.add(value);
 
         min = Math.min(min, value);
@@ -154,8 +155,9 @@ public class FloatSummaryStatistics implements FloatConsumer {
      *
      * @param other another {@code FloatSummaryStatistics} to be combined with this one; must not be {@code null}
      * @throws NullPointerException if {@code other} is {@code null}
+     * @throws ArithmeticException if the combined observation count would overflow; this instance is unchanged
      */
-    public void combine(final FloatSummaryStatistics other) {
+    public void combine(final FloatSummaryStatistics other) throws NullPointerException, ArithmeticException {
         summation.combine(other.summation);
 
         min = Math.min(min, other.min);
@@ -284,6 +286,9 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * System.out.println(stats);
      * // Output: {min=1.000000, max=2.000000, count=2, sum=3.000000, average=1.500000}
      * }</pre>
+     *
+     * <p>The text is rendered with {@link java.util.Locale#ROOT}, so the decimal separator and the digits are the
+     * same on every machine regardless of the default locale.</p>
      *
      * @return a string representation of this object
      */

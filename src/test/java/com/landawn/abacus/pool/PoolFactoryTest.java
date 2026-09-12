@@ -12,6 +12,30 @@ import com.landawn.abacus.TestBase;
 
 public class PoolFactoryTest extends TestBase {
 
+    @Test
+    public void testDocumentedConfigurationBoundaries() {
+        for (final float factor : new float[] { Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, -Float.MIN_VALUE, Math.nextUp(1f) }) {
+            assertThrows(IllegalArgumentException.class, () -> PoolFactory.createObjectPool(1, 0, null, false, factor));
+            assertThrows(IllegalArgumentException.class, () -> PoolFactory.createKeyedObjectPool(1, 0, null, false, factor));
+        }
+        assertThrows(IllegalArgumentException.class, () -> PoolFactory.createObjectPool(-1));
+        assertThrows(IllegalArgumentException.class, () -> PoolFactory.createKeyedObjectPool(-1));
+        assertThrows(IllegalArgumentException.class, () -> PoolFactory.createObjectPool(1, -1));
+        assertThrows(IllegalArgumentException.class, () -> PoolFactory.createKeyedObjectPool(1, -1));
+        assertThrows(IllegalArgumentException.class, () -> PoolFactory.createObjectPool(1, 0, null, -1, v -> 0));
+        assertThrows(IllegalArgumentException.class, () -> PoolFactory.createKeyedObjectPool(1, 0, null, -1, (k, v) -> 0));
+        for (final float factor : new float[] { 0f, -0f, Float.MIN_VALUE, 1f }) {
+            try (ObjectPool<Poolable> objectPool = PoolFactory.createObjectPool(0, 0, null, false, factor);
+                 KeyedObjectPool<String, Poolable> keyedPool = PoolFactory.createKeyedObjectPool(0, 0, null, false, factor)) {
+                for (final AbstractPool pool : new AbstractPool[] { (AbstractPool) objectPool, (AbstractPool) keyedPool }) {
+                    assertEquals(EvictionPolicy.LAST_ACCESS_TIME, pool.evictionPolicy);
+                    assertEquals(factor == 0f ? 0.2f : factor, pool.balanceFactor);
+                    assertEquals(0, pool.capacity());
+                }
+            }
+        }
+    }
+
     private static class TestPoolable extends AbstractPoolable {
         TestPoolable(long liveTime, long maxIdleTime) {
             super(liveTime, maxIdleTime);

@@ -36,7 +36,7 @@ import com.landawn.abacus.util.cs;
  * @see java.util.function.BiFunction
  */
 @FunctionalInterface
-public interface LongObjFunction<T, R> extends Throwables.LongObjFunction<T, R, RuntimeException> { // NOSONAR
+public interface LongObjFunction<T, R> extends Throwables.LongObjFunction<T, R, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Applies this function to the given arguments.
      *

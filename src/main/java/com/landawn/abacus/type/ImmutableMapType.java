@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ImmutableMap;
@@ -65,9 +67,10 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      * @param typeClass the concrete ImmutableMap (sub)class this handler produces
      * @param keyTypeName the name of the key type parameter
      * @param valueTypeName the name of the value type parameter
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings("rawtypes")
-    ImmutableMapType(final Class<?> typeClass, final String keyTypeName, final String valueTypeName) {
+    ImmutableMapType(final Class<?> typeClass, final String keyTypeName, final String valueTypeName) throws IllegalArgumentException {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
 
         declaringName = getTypeName(typeClass, keyTypeName, valueTypeName, true);
@@ -146,6 +149,18 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
+     * Indicates whether values of this type are immutable.
+     * An {@link ImmutableMap} (including its sorted and navigable subtypes) cannot be modified after construction,
+     * so its values are immutable by construction.
+     *
+     * @return {@code true}, always
+     */
+    @Override
+    public boolean isImmutable() {
+        return true;
+    }
+
+    /**
      * Returns the serialization type category for this ImmutableMap type.
      * ImmutableMap values are serialized and deserialized as structured map objects.
      *
@@ -166,13 +181,20 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
+     * <p>A {@code null} key is written as the quoted string {@code "null"} (JSON object keys must be strings). Reading
+     * that text back yields the String key {@code "null"} when the key type is {@code String}, and fails (e.g. with a
+     * {@code NumberFormatException}) for other key types; a {@code null} key therefore does not round-trip. Only an
+     * unquoted {@code null} key in the input text (e.g. {@code {null: 1}}) is parsed back to a {@code null} key.</p>
+     *
      * @param x the {@link ImmutableMap} to serialize; may be {@code null}
      * @return the JSON string representation of the map, or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
-    public String stringOf(final T x) {
+    public String stringOf(final T x) throws RuntimeException {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.isEmpty()) {
@@ -196,11 +218,16 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      *
      * @param str the JSON string to parse; may be {@code null} or blank
      * @return the parsed {@link ImmutableMap}, or {@code null} if {@code str} is {@code null} or blank
+     * @throws ParsingException if {@code str} is not a well-formed JSON object text
+     * @throws ClassCastException if a sorted-map target receives keys that are not mutually comparable.
+     * @throws NullPointerException if a sorted-map target receives a null key that its comparator does not support.
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(ImmutableMap)
      */
+    @MayReturnNull
     @Override
-    public T valueOf(final String str) {
+    public T valueOf(final String str) throws ParsingException, ClassCastException, NullPointerException, RuntimeException {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if ("{}".equals(str)) {
@@ -235,6 +262,14 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      * in the form {@code {key1:value1, key2:value2}}, with each key and value rendered by its own type's {@code appendTo}.
      * If {@code x} is {@code null}, the literal {@code null} is appended.
      * <p>
+     * Each key and each value is appended by its declared handler. When a declared handler is {@code Object} the
+     * handler of that entry half's runtime class is used instead, exactly as {@code AbstractTupleType.appendElement} -
+     * the slot writer the Pair/Triple/Tuple, {@code Map.Entry} and optional handlers use - resolves a slot:
+     * {@code ObjectType} has no {@code appendTo} of its own, so it would otherwise fall back to {@code stringOf}, i.e.
+     * the JSON form. A map, collection or bean key or value therefore keeps the {@code toString()}-style form
+     * ({@code {k:{a:1}}}, not {@code {k:{"a": 1}}}), matching what the same value appends as when it is not in a map.
+     * A {@code null} key or value is appended as the literal {@code null}.
+     * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
      * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
@@ -242,7 +277,9 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      *
      * @param appendable the {@link Appendable} to write to
      * @param x          the {@link ImmutableMap} to append; may be {@code null}
-     * @throws IOException if an I/O error occurs while appending
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -255,7 +292,7 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public void appendTo(final Appendable appendable, final T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -273,7 +310,7 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
                 if (entry.getKey() == null) {
                     appendable.append(NULL_STRING);
                 } else {
-                    keyType.appendTo(appendable, entry.getKey());
+                    AbstractTupleType.appendElement(appendable, keyType, entry.getKey());
                 }
 
                 appendable.append(SK._COLON);
@@ -281,7 +318,7 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
                 if (entry.getValue() == null) {
                     appendable.append(NULL_STRING);
                 } else {
-                    valueType.appendTo(appendable, entry.getValue());
+                    AbstractTupleType.appendElement(appendable, valueType, entry.getValue());
                 }
             }
 
@@ -299,8 +336,10 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      * @param isDeclaringName {@code true} to use declaring names (simple class names),
      *                        {@code false} to use regular names (canonical class names)
      * @return the formatted type name string
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName)
+            throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + SK.COMMA_SPACE
                     + TypeFactory.getType(valueTypeName).declaringName() + SK.GREATER_THAN;

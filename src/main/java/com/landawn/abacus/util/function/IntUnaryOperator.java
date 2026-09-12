@@ -13,7 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
-import com.landawn.abacus.util.N;
+import java.util.Objects;
+
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
 
@@ -82,12 +83,12 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      *
      * @return a composed operator that first applies the {@code before}
      *         operator and then applies this operator
-     * @throws IllegalArgumentException if {@code before} is {@code null}.
+     * @throws NullPointerException if {@code before} is {@code null}.
      * @see #andThen(java.util.function.IntUnaryOperator)
      */
     @Override
-    default IntUnaryOperator compose(final java.util.function.IntUnaryOperator before) throws IllegalArgumentException {
-        N.checkArgNotNull(before, cs.before);
+    default IntUnaryOperator compose(final java.util.function.IntUnaryOperator before) throws NullPointerException {
+        Objects.requireNonNull(before, cs.before);
 
         return (final int v) -> applyAsInt(before.applyAsInt(v));
     }
@@ -113,12 +114,12 @@ public interface IntUnaryOperator extends Throwables.IntUnaryOperator<RuntimeExc
      *
      * @return a composed operator that first applies this operator and then
      *         applies the {@code after} operator
-     * @throws IllegalArgumentException if {@code after} is {@code null}.
+     * @throws NullPointerException if {@code after} is {@code null}.
      * @see #compose(java.util.function.IntUnaryOperator)
      */
     @Override
-    default IntUnaryOperator andThen(final java.util.function.IntUnaryOperator after) throws IllegalArgumentException {
-        N.checkArgNotNull(after, cs.after);
+    default IntUnaryOperator andThen(final java.util.function.IntUnaryOperator after) throws NullPointerException {
+        Objects.requireNonNull(after, cs.after);
 
         return (final int t) -> after.applyAsInt(applyAsInt(t));
     }

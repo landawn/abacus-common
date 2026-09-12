@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -61,6 +62,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final Short[] x) {
         if (x == null) {
@@ -90,13 +92,16 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * @param str the string to parse, expected format is "[value1, value2, ...]"
      * @return the parsed Short array, or {@code null} if the input string is {@code null}, empty, or blank.
      *         Returns an empty array for "[]".
-     * @throws NumberFormatException if any {@code non-null} element in the string cannot be parsed as a short
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
+     * @throws NumberFormatException if a non-{@code null} element is not a valid integer literal
+     * @throws ArithmeticException if an element is outside the {@code short} range
      * @see #valueOf(Object)
      * @see #stringOf(Short[])
      */
+    @MayReturnNull
     @Override
-    public Short[] valueOf(final String str) {
-        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
+    public Short[] valueOf(final String str) throws IllegalArgumentException, NumberFormatException, ArithmeticException {
+        if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_SHORT_OBJ_ARRAY;
@@ -139,7 +144,8 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the Short array to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -151,7 +157,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Short[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final Short[] x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -203,10 +209,11 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * @param writer the CharacterWriter to write to
      * @param x the Short array to write
      * @param config the serialization configuration forwarded to each element; may be {@code null}
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Short[] x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Short[] x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

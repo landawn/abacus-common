@@ -18,7 +18,7 @@ import com.landawn.abacus.TestBase;
 
 public class ParallelSupportedTest extends TestBase {
     @ParallelSupported
-    static class TestClass {
+    public static class TestClass {
         @ParallelSupported
         public void method() {
         }

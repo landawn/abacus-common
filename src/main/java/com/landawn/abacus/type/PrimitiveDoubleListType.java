@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.io.IOException;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DoubleList;
@@ -103,19 +104,22 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
     /**
      * Parses a string representation and creates a DoubleList.
      * The string is first parsed as a double array, then wrapped in a DoubleList.
-     * Returns {@code null} if the input string is {@code null} or empty.
+     * Returns {@code null} if the input string is {@code null}, empty or blank.
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
-     * @return a DoubleList created from the parsed values, or {@code null} if input is {@code null} or empty
+     * @return a DoubleList created from the parsed values, or {@code null} if input is {@code null}, empty or blank
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
+     * @throws NumberFormatException if any element in the string cannot be parsed as a double
      * @see #valueOf(Object)
      * @see #stringOf(DoubleList)
      */
+    @MayReturnNull
     @Override
-    public DoubleList valueOf(final String str) {
+    public DoubleList valueOf(final String str) throws IllegalArgumentException, NumberFormatException {
         if (Strings.isEmpty(str)) {
             return null;
         }
@@ -136,7 +140,8 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
      *
      * @param appendable the Appendable to write to
      * @param x the DoubleList to append
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -148,7 +153,7 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final DoubleList x) throws IOException {
+    public void appendTo(final Appendable appendable, final DoubleList x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -173,10 +178,11 @@ public final class PrimitiveDoubleListType extends AbstractPrimitiveListType<Dou
      * @param writer the CharacterWriter to write to
      * @param x the DoubleList to write
      * @param config the serialization configuration
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final DoubleList x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final DoubleList x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

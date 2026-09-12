@@ -236,4 +236,75 @@ public class AvroDeserConfigTest extends TestBase {
         assertTrue(str.contains("schema="));
     }
 
+    // reviewFixes20260906 (P6-13): equals/hashCode delegate to DeserializationConfig.
+    @Test
+    public void reviewFixes20260906_equalsAndHashCodeDelegateToParent() {
+        final Schema schema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
+        final Schema sameSchema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
+        final Schema otherSchema = new Schema.Parser()
+                .parse("{\"type\":\"record\",\"name\":\"Other\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}");
+
+        final AvroDeserConfig a = AvroDeserConfig.create()
+                .setSchema(schema)
+                .setIgnoreUnmatchedProperty(false)
+                .setElementType(String.class)
+                .setMapKeyType(String.class)
+                .setMapValueType(Integer.class);
+
+        final AvroDeserConfig copy = a.copy();
+        assertNotSame(a, copy);
+        assertEquals(a, copy);
+        assertEquals(copy, a);
+        assertEquals(a.hashCode(), copy.hashCode());
+
+        final AvroDeserConfig b = AvroDeserConfig.create()
+                .setSchema(sameSchema)
+                .setIgnoreUnmatchedProperty(false)
+                .setElementType(String.class)
+                .setMapKeyType(String.class)
+                .setMapValueType(Integer.class);
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
+
+        b.setSchema(otherSchema);
+        assertNotEquals(a, b);
+        b.setSchema(null);
+        assertNotEquals(a, b);
+        assertNotEquals(b, a);
+        b.setSchema(sameSchema);
+        assertEquals(a, b);
+
+        b.setIgnoreUnmatchedProperty(true);
+        assertNotEquals(a, b);
+        b.setIgnoreUnmatchedProperty(false);
+        assertEquals(a, b);
+
+        b.setElementType(Integer.class);
+        assertNotEquals(a, b);
+        b.setElementType(String.class);
+        assertEquals(a, b);
+
+        b.setMapKeyType(Integer.class);
+        assertNotEquals(a, b);
+        b.setMapKeyType(String.class);
+        assertEquals(a, b);
+
+        b.setMapValueType(String.class);
+        assertNotEquals(a, b);
+        b.setMapValueType(Integer.class);
+        assertEquals(a, b);
+        assertEquals(a.hashCode(), b.hashCode());
+
+        assertFalse(a.equals(null));
+        assertFalse(a.equals("not a config"));
+        assertFalse(a.equals(KryoDeserConfig.create()));
+
+        // The parent requires the exact same class: an anonymous subclass is unequal in BOTH directions.
+        final AvroDeserConfig anonymous = new AvroDeserConfig() {
+        };
+        anonymous.setSchema(schema).setIgnoreUnmatchedProperty(false).setElementType(String.class).setMapKeyType(String.class).setMapValueType(Integer.class);
+        assertEquals(anonymous.equals(a), a.equals(anonymous));
+        assertFalse(a.equals(anonymous));
+    }
+
 }

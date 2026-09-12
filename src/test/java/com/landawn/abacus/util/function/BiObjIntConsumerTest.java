@@ -74,8 +74,9 @@ public class BiObjIntConsumerTest extends TestBase {
             sb.append("[").append(t).append(", ").append(u).append("] repeated ").append(i).append(" times: ");
             for (int j = 0; j < i; j++) {
                 sb.append(t).append(u);
-                if (j < i - 1)
+                if (j < i - 1) {
                     sb.append(", ");
+                }
             }
         };
 

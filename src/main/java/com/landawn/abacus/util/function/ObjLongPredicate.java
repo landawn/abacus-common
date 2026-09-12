@@ -31,7 +31,7 @@ import com.landawn.abacus.util.cs;
  * @see java.util.function.LongPredicate
  */
 @FunctionalInterface
-public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, RuntimeException> { // NOSONAR
+public interface ObjLongPredicate<T> extends Throwables.ObjLongPredicate<T, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Evaluates this predicate on the given arguments.
      *

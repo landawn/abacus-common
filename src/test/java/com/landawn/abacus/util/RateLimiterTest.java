@@ -1,11 +1,14 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -25,550 +28,240 @@ public class RateLimiterTest extends TestBase {
             this.micros += micros;
         }
 
-        void advanceMicros(final long micros) {
+        public void advanceMicros(final long micros) {
             this.micros += micros;
         }
     }
 
     @Test
-    public void testRateChange_affectsSubsequentAcquires() {
+    public void testCreateAndSetRate() {
         RateLimiter limiter = RateLimiter.create(5.0);
-
-        limiter.acquire();
+        assertEquals(5.0, limiter.getRate(), 0.001);
+        assertEquals(1.0, RateLimiter.create(1.0).getRate(), 0.001);
+        assertEquals(0.5, RateLimiter.create(0.5).getRate(), 0.001);
+        assertEquals(10.0, RateLimiter.create(10.0, 3, TimeUnit.SECONDS).getRate(), 0.001);
+        assertEquals(5.0, RateLimiter.create(5.0, 0, TimeUnit.SECONDS).getRate(), 0.001);
+        assertNotNull(RateLimiter.create(10.0, 500, TimeUnit.MILLISECONDS));
+        assertNotNull(RateLimiter.create(10.0, 1, TimeUnit.MINUTES));
 
         limiter.setRate(10.0);
-        Assertions.assertEquals(10.0, limiter.getRate(), 0.001);
+        assertEquals(10.0, limiter.getRate(), 0.001);
+        limiter.setRate(0.25);
+        assertEquals(0.25, limiter.getRate(), 0.001);
 
-        double waitTime = limiter.acquire();
-        Assertions.assertTrue(waitTime >= 0.0);
-    }
-
-    @Test
-    public void testWarmupLimiter_behavior() {
-        RateLimiter limiter = RateLimiter.create(10.0, 2, TimeUnit.SECONDS);
-
-        double waitTime1 = limiter.acquire();
-        Assertions.assertTrue(waitTime1 >= 0.0);
-
-        double waitTime2 = limiter.acquire();
-        Assertions.assertTrue(waitTime2 >= 0.0);
-
-        Assertions.assertEquals(10.0, limiter.getRate(), 0.001);
-    }
-
-    @Test
-    public void testCreate_withValidRate() {
-        RateLimiter limiter = RateLimiter.create(5.0);
-        Assertions.assertNotNull(limiter);
-        Assertions.assertEquals(5.0, limiter.getRate(), 0.001);
-
-        RateLimiter limiter1 = RateLimiter.create(1.0);
-        Assertions.assertNotNull(limiter1);
-        Assertions.assertEquals(1.0, limiter1.getRate(), 0.001);
-
-        RateLimiter limiter100 = RateLimiter.create(100.0);
-        Assertions.assertNotNull(limiter100);
-        Assertions.assertEquals(100.0, limiter100.getRate(), 0.001);
-
-        RateLimiter limiterFrac = RateLimiter.create(0.5);
-        Assertions.assertNotNull(limiterFrac);
-        Assertions.assertEquals(0.5, limiterFrac.getRate(), 0.001);
-    }
-
-    @Test
-    public void testCreate_withWarmup() {
-        RateLimiter limiter = RateLimiter.create(10.0, 3, TimeUnit.SECONDS);
-        Assertions.assertNotNull(limiter);
-        Assertions.assertEquals(10.0, limiter.getRate(), 0.001);
-
-        RateLimiter limiterZeroWarmup = RateLimiter.create(5.0, 0, TimeUnit.SECONDS);
-        Assertions.assertNotNull(limiterZeroWarmup);
-        Assertions.assertEquals(5.0, limiterZeroWarmup.getRate(), 0.001);
-
-        RateLimiter limiterMillis = RateLimiter.create(10.0, 500, TimeUnit.MILLISECONDS);
-        Assertions.assertNotNull(limiterMillis);
-
-        RateLimiter limiterMinutes = RateLimiter.create(10.0, 1, TimeUnit.MINUTES);
-        Assertions.assertNotNull(limiterMinutes);
+        assertThrows(IllegalArgumentException.class, () -> RateLimiter.create(0.0));
+        assertThrows(IllegalArgumentException.class, () -> RateLimiter.create(-1.0));
+        assertThrows(IllegalArgumentException.class, () -> RateLimiter.create(Double.NaN));
+        assertThrows(IllegalArgumentException.class, () -> RateLimiter.create(10.0, -1, TimeUnit.SECONDS));
+        assertThrows(IllegalArgumentException.class, () -> RateLimiter.create(0.0, 3, TimeUnit.SECONDS));
+        assertThrows(IllegalArgumentException.class, () -> limiter.setRate(0.0));
+        assertThrows(IllegalArgumentException.class, () -> limiter.setRate(-1.0));
+        assertThrows(IllegalArgumentException.class, () -> limiter.setRate(Double.NaN));
+        assertEquals(0.25, limiter.getRate(), 0.001);
     }
 
     @Test
     public void testCreateWithZeroWarmupDoesNotCorruptPermitsAfterIdle() {
         FakeSleepingStopwatch stopwatch = new FakeSleepingStopwatch();
         RateLimiter limiter = RateLimiter.create(1.0, 0, TimeUnit.SECONDS, 3.0, stopwatch);
-
-        Assertions.assertTrue(limiter.tryAcquire());
+        assertTrue(limiter.tryAcquire());
         stopwatch.advanceMicros(2_000_000L);
-
-        Assertions.assertTrue(limiter.tryAcquire());
-        Assertions.assertTrue(limiter.tryAcquire());
-        Assertions.assertFalse(limiter.tryAcquire());
+        assertTrue(limiter.tryAcquire());
+        assertTrue(limiter.tryAcquire());
+        assertFalse(limiter.tryAcquire());
     }
 
     @Test
-    public void testCreate() {
-        RateLimiter limiter = RateLimiter.create(10.0);
-        Assertions.assertNotNull(limiter);
-        Assertions.assertEquals(10.0, limiter.getRate(), 0.01);
-    }
+    public void testAcquire() {
+        RateLimiter fast = RateLimiter.create(1000.0);
+        assertTrue(fast.acquire() >= 0);
+        assertTrue(fast.acquire(5) >= 0);
 
-    @Test
-    public void testCreateWithWarmup() {
-        RateLimiter limiter = RateLimiter.create(5.0, 1, TimeUnit.SECONDS);
-        Assertions.assertNotNull(limiter);
-        Assertions.assertEquals(5.0, limiter.getRate(), 0.01);
-    }
+        RateLimiter limiter = RateLimiter.create(5.0);
+        limiter.acquire();
+        limiter.setRate(10.0);
+        assertEquals(10.0, limiter.getRate(), 0.001);
+        assertTrue(limiter.acquire() >= 0);
+        assertTrue(limiter.acquire(3) >= 0);
+        assertThrows(IllegalArgumentException.class, () -> limiter.acquire(0));
+        assertThrows(IllegalArgumentException.class, () -> limiter.acquire(-1));
 
-    @Test
-    public void testCreate_withInvalidRate() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RateLimiter.create(0.0);
-        });
+        RateLimiter warmup = RateLimiter.create(10.0, 2, TimeUnit.SECONDS);
+        assertTrue(warmup.acquire() >= 0);
+        assertTrue(warmup.acquire() >= 0);
+        assertEquals(10.0, warmup.getRate(), 0.001);
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RateLimiter.create(-1.0);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RateLimiter.create(Double.NaN);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RateLimiter.create(-0.5);
-        });
-    }
-
-    @Test
-    public void testCreate_withWarmup_invalidParameters() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RateLimiter.create(10.0, -1, TimeUnit.SECONDS);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RateLimiter.create(0.0, 3, TimeUnit.SECONDS);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RateLimiter.create(-5.0, 3, TimeUnit.SECONDS);
-        });
-    }
-
-    @Test
-    public void testConcurrentAcquire() throws InterruptedException {
-        RateLimiter limiter = RateLimiter.create(10.0);
-        AtomicInteger successCount = new AtomicInteger(0);
-        int numThreads = 5;
-        Thread[] threads = new Thread[numThreads];
-
-        for (int i = 0; i < numThreads; i++) {
-            threads[i] = new Thread(() -> {
-                limiter.acquire();
-                successCount.incrementAndGet();
-            });
-            threads[i].start();
-        }
-
-        for (Thread thread : threads) {
-            thread.join();
-        }
-
-        Assertions.assertEquals(numThreads, successCount.get(), "All threads should successfully acquire permits");
-    }
-
-    @Test
-    public void testConcurrentTryAcquire() throws InterruptedException {
-        RateLimiter limiter = RateLimiter.create(10.0);
-        AtomicInteger successCount = new AtomicInteger(0);
-        int numThreads = 5;
-        Thread[] threads = new Thread[numThreads];
-
-        for (int i = 0; i < numThreads; i++) {
-            threads[i] = new Thread(() -> {
-                if (limiter.tryAcquire(100, TimeUnit.MILLISECONDS)) {
-                    successCount.incrementAndGet();
-                }
-            });
-            threads[i].start();
-        }
-
-        for (Thread thread : threads) {
-            thread.join();
-        }
-
-        Assertions.assertTrue(successCount.get() > 0, "At least some threads should successfully acquire permits");
-    }
-
-    @Test
-    public void testBurstCapacity() {
-        RateLimiter limiter = RateLimiter.create(2.0);
-
+        RateLimiter burst = RateLimiter.create(2.0);
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+        long start = System.nanoTime();
+        burst.acquire();
+        burst.acquire();
+        assertTrue((System.nanoTime() - start) / 1_000_000_000.0 < 0.8);
 
-        long startTime = System.nanoTime();
-        limiter.acquire();
-        limiter.acquire();
-        long elapsed = System.nanoTime() - startTime;
-        double elapsedSeconds = elapsed / 1_000_000_000.0;
-
-        Assertions.assertTrue(elapsedSeconds < 0.8, "Burst acquisition should be fast, elapsed: " + elapsedSeconds);
+        RateLimiter paced = RateLimiter.create(2.0);
+        start = System.nanoTime();
+        paced.acquire();
+        paced.acquire();
+        paced.acquire();
+        paced.acquire();
+        assertTrue((System.nanoTime() - start) / 1_000_000_000.0 >= 1.0);
     }
 
     @Test
-    public void testCreateWithNegativeWarmup() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RateLimiter.create(5.0, -1, TimeUnit.SECONDS);
-        });
-    }
-
-    @Test
-    public void testSetRate_withValidRate() {
-        RateLimiter limiter = RateLimiter.create(5.0);
-        Assertions.assertEquals(5.0, limiter.getRate(), 0.001);
-
-        limiter.setRate(10.0);
-        Assertions.assertEquals(10.0, limiter.getRate(), 0.001);
-
-        limiter.setRate(1.0);
-        Assertions.assertEquals(1.0, limiter.getRate(), 0.001);
-
-        limiter.setRate(0.25);
-        Assertions.assertEquals(0.25, limiter.getRate(), 0.001);
-    }
-
-    @Test
-    public void testSetRate() {
+    public void testTryAcquire() {
         RateLimiter limiter = RateLimiter.create(10.0);
-        limiter.setRate(20.0);
-        Assertions.assertEquals(20.0, limiter.getRate(), 0.01);
+        assertTrue(limiter.tryAcquire());
+        assertTrue(RateLimiter.create(1000.0).tryAcquire());
+        assertTrue(RateLimiter.create(1000.0).tryAcquire(5));
+        assertTrue(RateLimiter.create(10.0).tryAcquire(5, 500, TimeUnit.MILLISECONDS));
+        assertTrue(RateLimiter.create(1.0).tryAcquire(100, TimeUnit.MILLISECONDS));
+        assertNotNull(RateLimiter.create(10.0).tryAcquire(-100, TimeUnit.MILLISECONDS));
+
+        RateLimiter slow = RateLimiter.create(0.1);
+        slow.acquire();
+        assertFalse(slow.tryAcquire(10, TimeUnit.MILLISECONDS));
+
+        assertThrows(IllegalArgumentException.class, () -> limiter.tryAcquire(0));
+        assertThrows(IllegalArgumentException.class, () -> limiter.tryAcquire(-1));
+        assertThrows(IllegalArgumentException.class, () -> limiter.tryAcquire(0, 100, TimeUnit.MILLISECONDS));
+        assertThrows(IllegalArgumentException.class, () -> limiter.tryAcquire(-1, 100, TimeUnit.MILLISECONDS));
     }
 
     @Test
-    public void testSetRate_withInvalidRate() {
-        RateLimiter limiter = RateLimiter.create(5.0);
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            limiter.setRate(0.0);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            limiter.setRate(-1.0);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            limiter.setRate(Double.NaN);
-        });
-
-        Assertions.assertEquals(5.0, limiter.getRate(), 0.001);
-    }
-
-    @Test
-    public void testSetRateInvalid() {
+    public void testConcurrentAcquire() throws InterruptedException {
         RateLimiter limiter = RateLimiter.create(10.0);
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            limiter.setRate(0.0);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            limiter.setRate(-1.0);
-        });
-    }
-
-    @Test
-    public void testGetRate() {
-        RateLimiter limiter = RateLimiter.create(7.5);
-        Assertions.assertEquals(7.5, limiter.getRate(), 0.001);
-
-        limiter.setRate(15.0);
-        Assertions.assertEquals(15.0, limiter.getRate(), 0.001);
-
-        RateLimiter warmupLimiter = RateLimiter.create(10.0, 2, TimeUnit.SECONDS);
-        Assertions.assertEquals(10.0, warmupLimiter.getRate(), 0.001);
-    }
-
-    @Test
-    public void testGetRate_threadSafety() throws InterruptedException {
-        RateLimiter limiter = RateLimiter.create(5.0);
-        AtomicInteger errorCount = new AtomicInteger(0);
-        int numThreads = 10;
-        Thread[] threads = new Thread[numThreads];
-
-        for (int i = 0; i < numThreads; i++) {
-            final int threadId = i;
+        AtomicInteger success = new AtomicInteger();
+        Thread[] threads = new Thread[5];
+        for (int i = 0; i < threads.length; i++) {
             threads[i] = new Thread(() -> {
-                for (int j = 0; j < 100; j++) {
-                    double rate = limiter.getRate();
-                    if (rate != 5.0 && rate != 10.0) {
-                        errorCount.incrementAndGet();
-                    }
-                    if (j == 50 && threadId == 0) {
-                        limiter.setRate(10.0);
-                    }
+                limiter.acquire();
+                success.incrementAndGet();
+            });
+            threads[i].start();
+        }
+        for (Thread thread : threads) {
+            thread.join();
+        }
+        assertEquals(5, success.get());
+
+        RateLimiter tryLimiter = RateLimiter.create(10.0);
+        AtomicInteger trySuccess = new AtomicInteger();
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new Thread(() -> {
+                if (tryLimiter.tryAcquire(100, TimeUnit.MILLISECONDS)) {
+                    trySuccess.incrementAndGet();
                 }
             });
             threads[i].start();
         }
-
         for (Thread thread : threads) {
             thread.join();
         }
+        assertTrue(trySuccess.get() > 0);
 
-        Assertions.assertEquals(0, errorCount.get(), "Rate reading should be thread-safe");
-    }
-
-    @Test
-    public void testAcquire_rateLimiting() {
-        RateLimiter limiter = RateLimiter.create(2.0);
-
-        long startTime = System.nanoTime();
-
-        limiter.acquire();
-        limiter.acquire();
-        limiter.acquire();
-        limiter.acquire();
-
-        long elapsed = System.nanoTime() - startTime;
-        double elapsedSeconds = elapsed / 1_000_000_000.0;
-
-        Assertions.assertTrue(elapsedSeconds >= 1.0, "Rate limiting should enforce delays, elapsed: " + elapsedSeconds);
-    }
-
-    @Test
-    public void testAcquire_largeNumberOfPermits() {
-        RateLimiter limiter = RateLimiter.create(100.0);
-
-        double waitTime = limiter.acquire(50);
-        Assertions.assertTrue(waitTime >= 0.0);
-
-        double waitTime2 = limiter.acquire();
-        Assertions.assertTrue(waitTime2 >= 0.0);
-    }
-
-    @Test
-    public void testAcquire_maintainsRate() {
-        RateLimiter limiter = RateLimiter.create(5.0);
-
-        long startTime = System.currentTimeMillis();
-
-        for (int i = 0; i < 10; i++) {
-            limiter.acquire();
+        RateLimiter shared = RateLimiter.create(5.0);
+        AtomicInteger errors = new AtomicInteger();
+        Thread[] readers = new Thread[10];
+        for (int i = 0; i < readers.length; i++) {
+            final int threadId = i;
+            readers[i] = new Thread(() -> {
+                for (int j = 0; j < 100; j++) {
+                    double rate = shared.getRate();
+                    if (rate != 5.0 && rate != 10.0) {
+                        errors.incrementAndGet();
+                    }
+                    if (j == 50 && threadId == 0) {
+                        shared.setRate(10.0);
+                    }
+                }
+            });
+            readers[i].start();
         }
-
-        long elapsed = System.currentTimeMillis() - startTime;
-        double elapsedSeconds = elapsed / 1000.0;
-
-        Assertions.assertTrue(elapsedSeconds >= 1.0, "Should maintain rate limiting, elapsed: " + elapsedSeconds);
+        for (Thread thread : readers) {
+            thread.join();
+        }
+        assertEquals(0, errors.get());
     }
 
     @Test
-    public void testAcquire() {
-        RateLimiter limiter = RateLimiter.create(1000.0);
-        double waitTime = limiter.acquire();
-        Assertions.assertTrue(waitTime >= 0);
-    }
-
-    @Test
-    public void testAcquire_singlePermit() {
-        RateLimiter limiter = RateLimiter.create(10.0);
-
-        double waitTime = limiter.acquire();
-        Assertions.assertTrue(waitTime >= 0.0, "Wait time should be non-negative");
-
-        double waitTime2 = limiter.acquire();
-        Assertions.assertTrue(waitTime2 >= 0.0, "Wait time should be non-negative");
-    }
-
-    @Test
-    public void testAcquire_multiplePermits() {
+    public void testToStringAndStopwatch() {
         RateLimiter limiter = RateLimiter.create(5.0);
-
-        double waitTime = limiter.acquire(3);
-        Assertions.assertTrue(waitTime >= 0.0, "Wait time should be non-negative");
-
-        double waitTime2 = limiter.acquire(1);
-        Assertions.assertTrue(waitTime2 >= 0.0, "Wait time should be non-negative");
-    }
-
-    @Test
-    public void testAcquireMultiple() {
-        RateLimiter limiter = RateLimiter.create(1000.0);
-        double waitTime = limiter.acquire(5);
-        Assertions.assertTrue(waitTime >= 0);
-    }
-
-    @Test
-    public void testAcquire_withInvalidPermits() {
-        RateLimiter limiter = RateLimiter.create(5.0);
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            limiter.acquire(0);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            limiter.acquire(-1);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            limiter.acquire(-10);
-        });
-    }
-
-    @Test
-    public void testTryAcquire_noTimeout() {
-        RateLimiter limiter = RateLimiter.create(10.0);
-
-        boolean acquired = limiter.tryAcquire();
-        Assertions.assertTrue(acquired, "First tryAcquire should succeed");
-
-        boolean acquired2 = limiter.tryAcquire();
-    }
-
-    @Test
-    public void testTryAcquire_withPermits() {
-        RateLimiter limiter = RateLimiter.create(10.0);
-
-        boolean acquired = limiter.tryAcquire(5);
-        Assertions.assertTrue(acquired, "First tryAcquire(5) should succeed");
-
-        boolean acquired2 = limiter.tryAcquire(1);
-    }
-
-    @Test
-    public void testTryAcquire_withTimeout() {
-        RateLimiter limiter = RateLimiter.create(5.0);
-
-        boolean acquired = limiter.tryAcquire(1000, TimeUnit.MILLISECONDS);
-        Assertions.assertTrue(acquired, "Should acquire within 1 second");
-
-        boolean acquired2 = limiter.tryAcquire(1, TimeUnit.MICROSECONDS);
-    }
-
-    @Test
-    public void testTryAcquire_withPermitsAndTimeout() {
-        RateLimiter limiter = RateLimiter.create(10.0);
-
-        boolean acquired = limiter.tryAcquire(5, 500, TimeUnit.MILLISECONDS);
-        Assertions.assertTrue(acquired, "Should acquire 5 permits within 500ms");
-
-        boolean acquired2 = limiter.tryAcquire(1, 0, TimeUnit.MILLISECONDS);
-    }
-
-    @Test
-    public void testTryAcquireWithTimeout() {
-        RateLimiter limiter = RateLimiter.create(1.0);
-        boolean acquired = limiter.tryAcquire(100, TimeUnit.MILLISECONDS);
-        Assertions.assertTrue(acquired);
-    }
-
-    @Test
-    public void testTryAcquireNoWait() {
-        RateLimiter limiter = RateLimiter.create(1000.0);
-        boolean acquired = limiter.tryAcquire();
-        Assertions.assertTrue(acquired);
-    }
-
-    @Test
-    public void testTryAcquire_negativeTimeout() {
-        RateLimiter limiter = RateLimiter.create(10.0);
-
-        boolean acquired = limiter.tryAcquire(-100, TimeUnit.MILLISECONDS);
-        assertNotNull(acquired);
-    }
-
-    @Test
-    public void testTryAcquire_withZeroTimeout() {
-        RateLimiter limiter = RateLimiter.create(10.0);
-
-        boolean acquired = limiter.tryAcquire(1, 0, TimeUnit.MILLISECONDS);
-        Assertions.assertTrue(acquired);
-
-        boolean acquired2 = limiter.tryAcquire(1, 0, TimeUnit.MILLISECONDS);
-    }
-
-    @Test
-    public void testTryAcquireMultiple() {
-        RateLimiter limiter = RateLimiter.create(1000.0);
-        boolean acquired = limiter.tryAcquire(5);
-        Assertions.assertTrue(acquired);
-    }
-
-    @Test
-    public void testTryAcquireMultipleWithTimeout() {
-        RateLimiter limiter = RateLimiter.create(1000.0);
-        boolean acquired = limiter.tryAcquire(5, 100, TimeUnit.MILLISECONDS);
-        Assertions.assertTrue(acquired);
-    }
-
-    @Test
-    public void testTryAcquire_withPermits_invalid() {
-        RateLimiter limiter = RateLimiter.create(5.0);
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            limiter.tryAcquire(0);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            limiter.tryAcquire(-1);
-        });
-    }
-
-    @Test
-    public void testTryAcquire_withTimeout_failure() {
-        RateLimiter limiter = RateLimiter.create(0.1);
-
-        limiter.acquire();
-
-        boolean acquired = limiter.tryAcquire(10, TimeUnit.MILLISECONDS);
-        Assertions.assertFalse(acquired, "Should timeout when rate is too slow");
-    }
-
-    @Test
-    public void testTryAcquire_withPermitsAndTimeout_invalid() {
-        RateLimiter limiter = RateLimiter.create(5.0);
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            limiter.tryAcquire(0, 100, TimeUnit.MILLISECONDS);
-        });
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            limiter.tryAcquire(-1, 100, TimeUnit.MILLISECONDS);
-        });
-    }
-
-    @Test
-    public void testToString() {
-        RateLimiter limiter = RateLimiter.create(5.0);
-        String str = limiter.toString();
-
-        Assertions.assertNotNull(str);
-        Assertions.assertTrue(str.contains("RateLimiter"), "toString should contain 'RateLimiter'");
-        Assertions.assertTrue(str.contains("5.0") || str.contains("5."), "toString should contain the rate");
-
+        assertTrue(limiter.toString().contains("RateLimiter"));
+        assertTrue(limiter.toString().contains("5."));
         limiter.setRate(10.0);
-        String str2 = limiter.toString();
-        Assertions.assertTrue(str2.contains("10.0") || str2.contains("10."), "toString should reflect updated rate");
-    }
+        assertTrue(limiter.toString().contains("10."));
 
-    @Test
-    public void testSleepingStopwatch_createFromSystemTimer() {
         RateLimiter.SleepingStopwatch stopwatch = RateLimiter.SleepingStopwatch.createFromSystemTimer();
-        Assertions.assertNotNull(stopwatch);
-    }
-
-    @Test
-    public void testSleepingStopwatch_readMicrosAndSleep() {
-        RateLimiter.SleepingStopwatch stopwatch = RateLimiter.SleepingStopwatch.createFromSystemTimer();
+        assertNotNull(stopwatch);
         long micros1 = stopwatch.readMicros();
-        Assertions.assertTrue(micros1 >= 0, "readMicros should return non-negative value");
-
-        stopwatch.sleepMicrosUninterruptibly(1000); // sleep 1ms
-
-        long micros2 = stopwatch.readMicros();
-        Assertions.assertTrue(micros2 >= micros1, "readMicros should be monotonically increasing after sleep");
+        assertTrue(micros1 >= 0);
+        stopwatch.sleepMicrosUninterruptibly(1000);
+        assertTrue(stopwatch.readMicros() >= micros1);
     }
 
+    /**
+     * Pins the exact rendering documented on {@link RateLimiter#toString()}: the rate goes through
+     * {@link Double#toString(double)}, so a fractional rate keeps every digit it needs and a large rate
+     * comes out in scientific notation. The equivalent assertions in {@code MultiClassRegressionCTest}
+     * live in a {@code @Nested public static class}, which JUnit never runs, so they pin nothing.
+     */
+    @Test
+    public void testToStringRendersRateWithDoubleToString() {
+        assertEquals("RateLimiter[stableRate=5.0qps]", RateLimiter.create(5.0).toString());
+        assertEquals("RateLimiter[stableRate=0.05qps]", RateLimiter.create(0.05).toString());
+
+        final RateLimiter limiter = RateLimiter.create(5.0);
+        limiter.setRate(10.0);
+        assertEquals("RateLimiter[stableRate=10.0qps]", limiter.toString());
+
+        // Large rates are rendered in scientific notation - documented on toString().
+        assertEquals("RateLimiter[stableRate=1.0E7qps]", RateLimiter.create(1e7).toString());
+    }
+
+    /**
+     * Pins the paragraph now on {@link RateLimiter#getRate()} about the upper extreme: {@code +Infinity} is a
+     * positive, non-NaN rate, so both {@code create} and {@code setRate} accept it. It yields a zero permit
+     * interval - an effectively unlimited limiter that never throttles - and {@code getRate()} reports
+     * {@code Infinity}. Only {@code NaN}, zero and negative rates are rejected.
+     */
+    @Test
+    public void reviewFixes20260911_positiveInfinityIsAnAcceptedRateThatNeverThrottles() {
+        assertEquals(Double.POSITIVE_INFINITY, RateLimiter.create(Double.POSITIVE_INFINITY).getRate());
+
+        final RateLimiter limiter = RateLimiter.create(5.0);
+        limiter.setRate(Double.POSITIVE_INFINITY);
+        assertEquals(Double.POSITIVE_INFINITY, limiter.getRate());
+
+        // A zero permit interval: even an absurd permit count costs nothing and nothing is queued behind it.
+        assertEquals(0.0, limiter.acquire(1_000_000));
+        assertTrue(limiter.tryAcquire(1_000_000));
+        assertEquals(0.0, limiter.acquire());
+
+        // The rejected values are unchanged.
+        assertThrows(IllegalArgumentException.class, () -> RateLimiter.create(Double.NaN));
+        assertThrows(IllegalArgumentException.class, () -> RateLimiter.create(0.0));
+        assertThrows(IllegalArgumentException.class, () -> RateLimiter.create(Double.NEGATIVE_INFINITY));
+        assertThrows(IllegalArgumentException.class, () -> limiter.setRate(Double.NaN));
+    }
+
+    /**
+     * Pins the one exception to {@code doGetRate()}'s "positive" contract, which the paragraph on
+     * {@link RateLimiter#getRate()} documents: below roughly {@code 5.6e-303} permits per second the stored
+     * permit interval overflows to {@code +Infinity} and the reported rate is {@code 0.0} - a value
+     * {@code setRate} itself rejects, so a {@code 0.0} reading is not proof that no rate was ever set.
+     */
+    @Test
+    public void reviewFixes20260911_aRateWhosePermitIntervalOverflowsIsReportedAsZeroNotAsPositive() {
+        assertTrue(RateLimiter.create(5.6e-303).getRate() > 0.0);
+
+        assertEquals(0.0, RateLimiter.create(5.5e-303).getRate());
+        assertEquals(0.0, RateLimiter.create(Double.MIN_VALUE).getRate());
+        assertEquals(0.0, RateLimiter.create(5.5e-303, 1, TimeUnit.SECONDS).getRate());
+
+        assertThrows(IllegalArgumentException.class, () -> RateLimiter.create(5.5e-303).setRate(0.0));
+    }
 }

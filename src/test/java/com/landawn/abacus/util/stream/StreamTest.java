@@ -67,6 +67,7 @@ import java.util.stream.Collector;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -152,6 +153,10 @@ import com.landawn.abacus.util.function.ToDoubleFunction;
 import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToLongTriFunction;
 import com.landawn.abacus.util.function.UnaryOperator;
+import com.landawn.abacus.util.stream.Stream.WindowHandler;
+
+import com.landawn.abacus.TestBase;
+
 
 public class StreamTest extends AbstractTest {
 
@@ -780,6 +785,45 @@ public class StreamTest extends AbstractTest {
         assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3).map(e -> e).append(Arrays.asList(4, 5)).skip(1).toList());
     }
 
+    @Test
+    public void testStreamCreatedAfterOnClose() {
+        AtomicBoolean closed = new AtomicBoolean(false);
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).onClose(() -> closed.set(true)).count());
+        assertTrue(closed.get());
+        closed.set(false);
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).onClose(() -> closed.set(true)).skip(1).count());
+        assertTrue(closed.get());
+        closed.set(false);
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).onClose(() -> closed.set(true)).toArray());
+        assertTrue(closed.get());
+        closed.set(false);
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).onClose(() -> closed.set(true)).skip(1).toArray());
+        assertTrue(closed.get());
+        closed.set(false);
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).onClose(() -> closed.set(true)).toList());
+        assertTrue(closed.get());
+        closed.set(false);
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).onClose(() -> closed.set(true)).skip(1).toList());
+        assertTrue(closed.get());
+        closed.set(false);
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).onClose(() -> closed.set(true)).count());
+        assertTrue(closed.get());
+        closed.set(false);
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).onClose(() -> closed.set(true)).skip(1).count());
+        assertTrue(closed.get());
+        closed.set(false);
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).onClose(() -> closed.set(true)).toArray());
+        assertTrue(closed.get());
+        closed.set(false);
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).onClose(() -> closed.set(true)).skip(1).toArray());
+        assertTrue(closed.get());
+        closed.set(false);
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).onClose(() -> closed.set(true)).toList());
+        assertTrue(closed.get());
+        closed.set(false);
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).onClose(() -> closed.set(true)).skip(1).toList());
+        assertTrue(closed.get());
+    }
 
     @Test
     public void testStreamCreatedAfterPeek() {
@@ -1375,6 +1419,19 @@ public class StreamTest extends AbstractTest {
         assertEquals(N.toList(5), Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).skip(1).toList());
     }
 
+    @Test
+    public void testSkipLastTakeLastSliding_tolerateNullElements() {
+        // Regression: skipLast/takeLast/sliding are value-agnostic structural ops and must not NPE on a
+        // null element (the iterator-backed impls previously buffered into a null-rejecting ArrayDeque).
+        // map(e -> e) forces the IteratorStream path where the buffer lives.
+        assertEquals(N.asList("a", null), Stream.of("a", null, "c").map(e -> e).skipLast(1).toList());
+        assertEquals(N.asList(null, "c"), Stream.of("a", null, "c").map(e -> e).takeLast(2).toList());
+
+        List<List<String>> windows = Stream.of("a", null, "c").map(e -> e).sliding(2).toList();
+        assertEquals(2, windows.size());
+        assertEquals(N.asList("a", null), windows.get(0));
+        assertEquals(N.asList(null, "c"), windows.get(1));
+    }
 
     @Test
     public void testStreamCreatedAfterOnFirst() {
@@ -1700,8 +1757,60 @@ public class StreamTest extends AbstractTest {
         assertNull(f);
     }
 
+    @Test
+    public void testStreamCreatedAfterMaxWaitWithDefaultValue() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).skip(2).toList());
+    }
 
+    @Test
+    public void testStreamCreatedAfterMaxWaitWithSupplier() {
+        Supplier<Integer> defaultSupplier = () -> 99;
 
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).toList());
+    }
+
+    @Test
+    public void testMaxWaitPropagatesUpstreamException() {
+        // An exception thrown while fetching elements asynchronously must be propagated to the consumer,
+        // not silently swallowed by truncating the stream.
+        assertThrows(RuntimeException.class, () -> Stream.of(1, 2, 3, 4, 5).map(e -> {
+            if (e == 3) {
+                throw new IllegalStateException("failed to fetch element: " + e);
+            }
+            return e;
+        }).maxWait(Duration.ofMillis(100), 99).toList());
+
+        final Supplier<Integer> defaultSupplier = () -> 99;
+
+        assertThrows(RuntimeException.class, () -> Stream.of(1, 2, 3, 4, 5).map(e -> {
+            if (e == 3) {
+                throw new IllegalStateException("failed to fetch element: " + e);
+            }
+            return e;
+        }).maxWait(Duration.ofMillis(100), defaultSupplier).toList());
+    }
 
     @Test
     public void testStreamCreatedAfterAppendIfEmpty() {
@@ -1758,6 +1867,45 @@ public class StreamTest extends AbstractTest {
         assertEquals(N.toList(), Stream.<Integer> empty().map(e -> e).defaultIfEmpty(99).skip(1).toList());
     }
 
+    @Test
+    public void testStreamCreatedAfterIfEmpty() {
+        AtomicBoolean flag = new AtomicBoolean(false);
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).count());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).skip(1).count());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).toArray());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).skip(1).toArray());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).toList());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).skip(1).toList());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).count());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).skip(1).count());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).toArray());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).skip(1).toArray());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).toList());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).skip(1).toList());
+        assertFalse(flag.get());
+    }
 
     @Test
     public void testStreamCreatedAfterMapIfNotNull() {
@@ -2005,6 +2153,18 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList("A", "B", "C"), result);
     }
 
+    @Test
+    @Timeout(10)
+    public void testStreamState_SortingAndComparator() throws Exception {
+        Stream.of(3, 1, 4, 1, 5).sorted().addSubscriber(s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, 1, 3, 4, 5), mainStreamResults);
+        assertEquals(Arrays.asList(1, 1, 3, 4, 5), subscriberStreamResults);
+    }
 
     @Test
     public void testStreamCreatedAfterThrowIfEmpty() {
@@ -2981,6 +3141,18 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList("Value: 10", "Value: 2", "Value: 20", "Value: 30", "Value: 4", "Value: 40", "Value: 50"), result);
     }
 
+    @Test
+    public void testFlatMapArray() {
+        List<Integer> result = Stream.of("1,2", "3,4").flatMapArray(s -> {
+            String[] parts = s.split(",");
+            Integer[] nums = new Integer[parts.length];
+            for (int i = 0; i < parts.length; i++) {
+                nums[i] = Integer.parseInt(parts[i]);
+            }
+            return nums;
+        }).toList();
+        assertEquals(Arrays.asList(1, 2, 3, 4), result);
+    }
 
     @Test
     public void testFlattmapArray() {
@@ -3328,6 +3500,15 @@ public class StreamTest extends AbstractTest {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    public void testMapMultiToInt() {
+        int[] result = Stream.of("a", "bb", "ccc").mapMultiToInt((s, consumer) -> {
+            for (int i = 0; i < s.length(); i++) {
+                consumer.accept(s.length());
+            }
+        }).toArray();
+        assertArrayEquals(new int[] { 1, 2, 2, 3, 3, 3 }, result);
+    }
 
     @Test
     public void testMapMultiToLong() {
@@ -3993,6 +4174,47 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList("a", "b", ""), Stream.split("a,b,", ',').toList());
     }
 
+    @Test
+    public void test_splitAt() {
+        for (int j = 0; j < 10; j++) {
+            final int[] a = IntList.random(10_000).internalArray();
+            int n = a.length / 2;
+
+            for (int i = 0, len = a.length; i < len; i++) {
+                if (a[i] == a[n]) {
+                    n = i;
+                    break;
+                }
+            }
+
+            final int tmp = a[n];
+
+            Object[] r1 = Stream.of(a).splitAt(n).toArray();
+            Object[] r2 = Stream.of(a).parallel().splitAt(value -> value == tmp).toArray();
+
+            assertTrue(N.deepEquals(((Stream) r1[0]).toArray(), ((Stream) r2[0]).toArray()));
+            assertTrue(N.deepEquals(((Stream) r1[1]).toArray(), ((Stream) r2[1]).toArray()));
+
+            r1 = IntStream.of(a).boxed().splitAt(n).toArray();
+            r2 = IntStream.of(a).boxed().parallel().splitAt(value -> value.intValue() == tmp).toArray();
+
+            assertTrue(N.equals(((Stream<Integer>) r1[0]).toArray(), ((Stream<Integer>) r2[0]).toArray()));
+
+            final Integer[] a1 = ((Stream<Integer>) r1[1]).toArray(value -> new Integer[value]);
+
+            final Integer[] a2 = ((Stream<Integer>) r2[1]).toArray(value -> new Integer[value]);
+
+            N.println("=================");
+            N.println(a);
+            N.println(tmp);
+
+            N.println("=================");
+            N.println(a1);
+            N.println(a2);
+
+            assertTrue(N.equals(a1, a2));
+        }
+    }
 
     @Test
     public void testSplitAt() {
@@ -4253,6 +4475,16 @@ public class StreamTest extends AbstractTest {
         }
     }
 
+    @Test
+    public void test_sliding_window() throws Exception {
+
+        long count = Stream.range(0, 30).rateLimited(10).window(Duration.ofMillis(1000), Suppliers.ofList()).peek(Fn.println()).count();
+        assertEquals(3, count);
+
+        count = Stream.range(0, 30).rateLimited(10).window(Duration.ofMillis(1000), 2, Suppliers.ofList()).peek(Fn.println()).count();
+        assertEquals(15, count);
+
+    }
 
     @Test
     public void testIntersperse() {
@@ -4674,19 +4906,127 @@ public class StreamTest extends AbstractTest {
         assertFalse(peeked.isEmpty());
     }
 
+    @Test
+    public void testForEach() {
+        List<Integer> result = new ArrayList<>();
+        Stream.of(1, 2, 3).forEach(result::add);
+        assertEquals(Arrays.asList(1, 2, 3), result);
+    }
 
+    @Test
+    public void testForeachWithCompletion() {
+        List<Integer> result = new ArrayList<>();
+        AtomicBoolean completed = new AtomicBoolean(false);
+        Stream.of(1, 2, 3).forEach(result::add, () -> completed.set(true));
+        assertEquals(Arrays.asList(1, 2, 3), result);
+        assertTrue(completed.get());
+    }
 
+    @Test
+    public void testForEachWithOnComplete() {
+        List<Integer> collected = new ArrayList<>();
+        AtomicBoolean completed = new AtomicBoolean(false);
+        stream.forEach(collected::add, () -> completed.set(true));
+        assertEquals(testList, collected);
+        assertTrue(completed.get());
+    }
 
+    @Test
+    public void testForEachWithFlatMapper() {
+        List<String> collected = new ArrayList<>();
+        stream.forEach(n -> Arrays.asList("a" + n, "b" + n), (n, s) -> collected.add(s));
+        assertEquals(Arrays.asList("a1", "b1", "a2", "b2", "a3", "b3", "a4", "b4", "a5", "b5"), collected);
+    }
 
+    @Test
+    public void testForeach() {
+        List<Integer> collected = new ArrayList<>();
+        Stream.of(1, 2, 3).foreach(collected::add);
+        assertEquals(Arrays.asList(1, 2, 3), collected);
+    }
 
+    @Test
+    public void testForEachEmpty() {
+        List<Integer> result = new ArrayList<>();
+        Stream.<Integer> empty().forEach(result::add);
+        assertTrue(result.isEmpty());
+    }
 
+    @Test
+    public void testForEachThrowing() {
+        List<Integer> collected = new ArrayList<>();
+        Stream.of(1, 2, 3).forEach(collected::add);
+        assertEquals(Arrays.asList(1, 2, 3), collected);
+    }
 
+    @Test
+    public void testForEachIndexed() {
+        List<String> result = new ArrayList<>();
+        Stream.of("a", "b", "c").forEachIndexed((i, s) -> result.add(i + ":" + s));
+        assertEquals(Arrays.asList("0:a", "1:b", "2:c"), result);
+    }
 
+    @Test
+    public void testForEachUntil() {
+        List<Integer> collected = new ArrayList<>();
+        MutableBoolean flagToBreak = MutableBoolean.of(false);
+        Stream.of(1, 2, 3, 4, 5).forEachUntil(flagToBreak, n -> {
+            collected.add(n);
+            if (n >= 3) {
+                flagToBreak.setTrue();
+            }
+        });
+        assertEquals(Arrays.asList(1, 2, 3), collected);
+    }
 
+    @Test
+    public void testForEachUntilBiConsumer() {
+        List<Integer> collected = new ArrayList<>();
+        Stream.of(1, 2, 3, 4, 5).forEachUntil((n, breakCondition) -> {
+            collected.add(n);
+            if (n >= 3) {
+                breakCondition.setTrue();
+            }
+        });
+        assertEquals(Arrays.asList(1, 2, 3), collected);
+    }
 
+    @Test
+    public void testForEachUntilMutableBoolean() {
+        List<Integer> collected = new ArrayList<>();
+        MutableBoolean flag = MutableBoolean.of(false);
+        Stream.of(1, 2, 3, 4, 5).forEachUntil(flag, val -> {
+            collected.add(val);
+            if (val == 3) {
+                flag.setTrue();
+            }
+        });
+        assertEquals(Arrays.asList(1, 2, 3), collected);
+    }
 
+    @Test
+    public void testForEachUntilEmpty() {
+        List<Integer> collected = new ArrayList<>();
+        com.landawn.abacus.util.MutableBoolean flagToBreak = com.landawn.abacus.util.MutableBoolean.of(true);
+        Stream.<Integer> empty().forEachUntil(flagToBreak, n -> {
+            collected.add(n);
+        });
+        assertTrue(collected.isEmpty());
+    }
 
+    @Test
+    public void testForEachPair() {
+        List<String> result = new ArrayList<>();
+        Stream.of(1, 2, 3, 4).forEachPair((a, b) -> result.add(a + "-" + b));
+        assertEquals(Arrays.asList("1-2", "2-3", "3-4"), result);
+    }
 
+    @Test
+    public void testForEachTriple() {
+        List<String> result = new ArrayList<>();
+        Stream.of(1, 2, 3, 4).forEachTriple((a, b, c) -> result.add(a + "-" + b + "-" + c));
+        assertEquals(Arrays.asList("1-2-3", "2-3-4"), result);
+    }
 
     @Test
     public void testAnyMatch() {
@@ -4886,13 +5226,6 @@ public class StreamTest extends AbstractTest {
         assertEquals(1, iter.next().getKey());
         assertEquals(2, iter.next().getKey());
     }
-
-    //
-    //    @Test
-    //    public void testReduceUntilWithBiPredicate() {
-    //        int result = Stream.of(1, 2, 3, 4, 5).reduceUntil((a, b) -> a + b, (a, b) -> a + b > 6).get();
-    //        assertEquals(6, result);
-    //    }
 
     //
     //
@@ -5156,13 +5489,6 @@ public class StreamTest extends AbstractTest {
         List<Integer> list = Stream.of(1, 2, 3).collect(Collectors.toList());
         assertEquals(Arrays.asList(1, 2, 3), list);
     }
-
-    //
-    //    @Test
-    //    public void testReduceUntilAccumulatorAndBiCondition() {
-    //        Optional<Integer> result = Stream.of(1, 2, 3, 4, 5).reduceUntil((acc, next) -> acc + next, (acc, next) -> (acc + next) > 5);
-    //        assertEquals(Optional.of(6), result);
-    //    }
 
     //
     //
@@ -5509,6 +5835,19 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
+    public void testCartesianProductNullCollectionClosesWithoutConsumingSource() {
+        final AtomicInteger consumed = new AtomicInteger();
+        final AtomicInteger closed = new AtomicInteger();
+        final Stream<Integer> stream = Stream.of(1, 2).peek(value -> consumed.incrementAndGet()).onClose(closed::incrementAndGet);
+
+        assertTrue(assertThrows(IllegalArgumentException.class,
+                () -> stream.cartesianProduct((Collection<Collection<Integer>>) null)).getMessage().contains("cs"));
+        assertEquals(0, consumed.get());
+        assertEquals(1, closed.get());
+        assertThrows(IllegalStateException.class, stream::count);
+    }
+
+    @Test
     public void testRollup() {
         List<List<Integer>> result = Stream.of(1, 2, 3, 4).rollup().toList();
         assertEquals(5, result.size());
@@ -5772,7 +6111,24 @@ public class StreamTest extends AbstractTest {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    public void testZipWith_StreamWithDefaults() {
+        List<String> result = Stream.of(1, 2).zipWith(Stream.of("a", "b", "c"), 0, "x", (i, s) -> i + s).toList();
+        assertEquals(3, result.size());
+        assertEquals("1a", result.get(0));
+        assertEquals("0c", result.get(2)); // uses default for missing left element (0 paired with "c")
+    }
 
+    @Test
+    public void testonEachSaveToFileDefault() throws IOException {
+        File tempFile = new File(tempDir.toFile(), "onEachSaveDefault.txt");
+        Stream.of("hello", "world").onEachSave(tempFile).forEach(e -> {
+        });
+        assertTrue(tempFile.exists());
+        String content = IOUtil.readAllToString(tempFile);
+        assertTrue(content.contains("hello"));
+        assertTrue(content.contains("world"));
+    }
 
     @Test
     public void testPersist() throws IOException {
@@ -5830,10 +6186,37 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList(1, 2, 3), jdkStream.collect(Collectors.toList()));
     }
 
+    @Test
+    public void testTransformViaJdkStream() {
+        List<Integer> result = Stream.of(1, 2, 3, 4, 5).transformViaJdkStream(jdkStream -> jdkStream.filter(n -> n % 2 == 0)).toList();
+        assertEquals(Arrays.asList(2, 4), result);
+    }
 
+    @Test
+    public void testTransformViaJdkStreamWithMap() {
+        List<Integer> result = Stream.of("a", "bb", "ccc").transformViaJdkStream(jdkStream -> jdkStream.map(String::length)).toList();
+        assertEquals(Arrays.asList(1, 2, 3), result);
+    }
 
+    @Test
+    public void testTransformViaJdkStream_Deferred() {
+        // Covers the deferred=true branch in transformViaJdkStream(Function, boolean)
+        List<Integer> result = Stream.of(1, 2, 3, 4, 5).transformViaJdkStream(jdkStream -> jdkStream.filter(n -> n % 2 == 0), true).toList();
+        assertEquals(Arrays.asList(2, 4), result);
+    }
 
+    @Test
+    public void testTransformViaJdkStream_NotDeferred() {
+        // Covers the deferred=false branch in transformViaJdkStream(Function, boolean)
+        List<Integer> result = Stream.of(1, 2, 3, 4, 5).transformViaJdkStream(jdkStream -> jdkStream.map(n -> n * 3), false).toList();
+        assertEquals(Arrays.asList(3, 6, 9, 12, 15), result);
+    }
 
+    @Test
+    public void testTransformViaJdkStreamEmpty() {
+        List<Integer> result = Stream.<Integer> empty().transformViaJdkStream(jdkStream -> jdkStream.filter(n -> n > 0)).toList();
+        assertTrue(result.isEmpty());
+    }
 
     @Test
     public void testSps() {
@@ -6048,6 +6431,21 @@ public class StreamTest extends AbstractTest {
         }
     }
 
+    @Test
+    public void testSjpsClosesReturnedJdkStream() {
+        {
+            AtomicBoolean closed = new AtomicBoolean(false);
+
+            assertEquals(1, Stream.of(1).sjps(s -> s.onClose(() -> closed.set(true)).map(x -> x)).count());
+            assertTrue(closed.get());
+        }
+        {
+            AtomicBoolean closed = new AtomicBoolean(false);
+
+            assertEquals(1, Stream.of(1).parallel().sjps(s -> s.onClose(() -> closed.set(true)).map(x -> x)).count());
+            assertTrue(closed.get());
+        }
+    }
 
     @Test
     public void testFilterE() {
@@ -6233,342 +6631,1677 @@ public class StreamTest extends AbstractTest {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    public void testMaxWaitWithDurationAndDefaultValue() {
+        Duration duration = Duration.ofMillis(100);
+        Integer defaultValue = -1;
+
+        Stream<Integer> result = stream.maxWait(duration, defaultValue);
+        List<Integer> collected = result.toList();
+
+        Assertions.assertNotNull(collected);
+        Assertions.assertTrue(collected.size() > 0);
+        for (Integer value : collected) {
+            Assertions.assertTrue(testData.contains(value) || value.equals(defaultValue));
+        }
+    }
+
+    @Test
+    public void testMaxWaitWithDurationAndNullDefaultValue() {
+        Duration duration = Duration.ofMillis(100);
+
+        Stream<Integer> result = stream.maxWait(duration, (Integer) null);
+        List<Integer> collected = result.toList();
+
+        Assertions.assertNotNull(collected);
+    }
+
+    @Test
+    public void testMaxWaitWithDurationAndSupplier() {
+        Duration duration = Duration.ofMillis(100);
+        AtomicInteger counter = new AtomicInteger(0);
+        Supplier<Integer> supplier = () -> -counter.incrementAndGet();
+
+        Stream<Integer> result = stream.maxWait(duration, supplier);
+        List<Integer> collected = result.toList();
+
+        Assertions.assertNotNull(collected);
+        Assertions.assertTrue(collected.size() > 0);
+    }
+
+    @Test
+    public void testMaxWait() {
+        List<Integer> input = Arrays.asList(1, 2, 3);
+        Stream<Integer> stream = Stream.of(input);
+
+        List<Integer> result = stream.maxWait(Duration.ofMillis(50), -1).limit(5).toList();
+        assertNotNull(result);
+        assertTrue(result.size() > 0);
+    }
+
+    @Test
+    public void testMaxWaitWithSupplier() {
+        List<Integer> input = Arrays.asList(1, 2, 3);
+        Stream<Integer> stream = Stream.of(input);
+        AtomicInteger counter = new AtomicInteger(0);
+
+        List<Integer> result = stream.maxWait(Duration.ofMillis(50), () -> -counter.incrementAndGet()).limit(5).toList();
+
+        assertNotNull(result);
+        assertTrue(result.size() > 0);
+    }
+
+    @Test
+    public void testMaxWaitPreservesOrder() {
+        Duration duration = Duration.ofMillis(50);
+        Stream<Integer> orderedStream = Stream.of(1, 2, 3, 4, 5);
+
+        List<Integer> result = orderedStream.maxWait(duration, -1).toList();
+
+        int prev = Integer.MIN_VALUE;
+        for (Integer val : result) {
+            if (val > 0) {
+                Assertions.assertTrue(val > prev);
+                prev = val;
+            }
+        }
+    }
+
+    @Test
+    public void testMaxWaitWithNullDuration() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            stream.maxWait(null, 0);
+        });
+    }
+
+    @Test
+    public void testMaxWaitWithNullSupplier() {
+        Duration duration = Duration.ofMillis(50);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).delay(Duration.ofMillis(200)).maxWait(duration, (Supplier<Integer>) null).count();
+        });
+    }
+
+    @Test
+    public void test_window_01() {
+        assertDoesNotThrow(() -> {
+            final MutableBoolean stopSign = MutableBoolean.of(false);
+            final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+
+            N.asyncExecute(() -> Stream.observe(queue, () -> stopSign.value(), 100)
+                    .flatMapArray(s -> s.split(" "))
+                    .window(Duration.ofMillis(100))
+                    .forEach(ss -> Stream.of(ss).countBy(Fn.identity()).println()));
+
+            for (int i = 0; i < 100; i++) {
+                CharStream.of(Strings.uuid()).mapToObj(String::valueOf).forEach(ch -> queue.add(ch));
+                N.sleep(33);
+            }
+
+            stopSign.setTrue();
+
+            IntStream.range(1, 100).boxed().window(Duration.ofMillis(10)).flatmap(Fn.identity()).groupBy(i -> i % 3).forEach(Fn.println());
+        });
+    }
+
+    @Test
+    public void testWindowWithDuration() {
+        Duration duration = Duration.ofMillis(50);
+
+        Stream<List<Integer>> result = stream.window(duration);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        int totalElements = windows.stream().mapToInt(List::size).sum();
+        Assertions.assertEquals(testData.size(), totalElements);
+    }
+
+    @Test
+    public void testWindowWithDurationAndCollectionSupplier() {
+        Duration duration = Duration.ofMillis(50);
+        Supplier<List<Integer>> supplier = LinkedList::new;
+
+        Stream<List<Integer>> result = stream.window(duration, supplier);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        for (List<Integer> window : windows) {
+            Assertions.assertTrue(window instanceof LinkedList);
+        }
+    }
+
+    @Test
+    public void testWindowWithDurationStartTimeAndCollectionSupplier() {
+        Duration duration = Duration.ofMillis(50);
+        LongSupplier startTimeSupplier = System::currentTimeMillis;
+        Supplier<List<Integer>> supplier = ArrayList::new;
+
+        Stream<List<Integer>> result = stream.window(duration, startTimeSupplier, supplier);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        for (List<Integer> window : windows) {
+            Assertions.assertTrue(window instanceof ArrayList);
+        }
+    }
+
+    @Test
+    public void testWindowWithDurationAndCollector() {
+        Duration duration = Duration.ofMillis(50);
+
+        Stream<Long> result = stream.window(duration, Collectors.counting());
+        List<Long> counts = result.toList();
+
+        Assertions.assertNotNull(counts);
+        long totalCount = counts.stream().mapToLong(Long::longValue).sum();
+        Assertions.assertEquals(testData.size(), totalCount);
+    }
+
+    @Test
+    public void testWindowWithDurationAndIncrement() {
+        Duration duration = Duration.ofMillis(100);
+        Duration increment = Duration.ofMillis(50);
+
+        Stream<List<Integer>> result = stream.window(duration, increment);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+    }
+
+    @Test
+    public void testWindowWithDurationIncrementAndCollectionSupplier() {
+        Duration duration = Duration.ofMillis(100);
+        Duration increment = Duration.ofMillis(50);
+        Supplier<HashSet<Integer>> supplier = HashSet::new;
+
+        Stream<Set<Integer>> result = stream.window(duration, increment, supplier);
+        List<Set<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        for (Set<Integer> window : windows) {
+            Assertions.assertTrue(window instanceof HashSet);
+        }
+    }
+
+    @Test
+    public void testWindowWithDurationIncrementStartTimeAndCollectionSupplier() {
+        Duration duration = Duration.ofMillis(100);
+        Duration increment = Duration.ofMillis(50);
+        LongSupplier startTimeSupplier = () -> System.currentTimeMillis() - 1000;
+        Supplier<List<Integer>> supplier = ArrayList::new;
+
+        Stream<List<Integer>> result = stream.window(duration, increment, startTimeSupplier, supplier);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+    }
+
+    @Test
+    public void testWindowWithDurationIncrementAndCollector() {
+        Duration duration = Duration.ofMillis(100);
+        Duration increment = Duration.ofMillis(50);
+
+        Stream<String> result = stream.window(duration, increment, Collectors.mapping(Object::toString, Collectors.joining(",")));
+        List<String> joinedWindows = result.toList();
+
+        Assertions.assertNotNull(joinedWindows);
+    }
+
+    @Test
+    public void testWindowWithDurationIncrementStartTimeAndCollector() {
+        Duration duration = Duration.ofMillis(100);
+        Duration increment = Duration.ofMillis(50);
+        LongSupplier startTimeSupplier = System::currentTimeMillis;
+
+        Stream<Long> result = stream.window(duration, increment, startTimeSupplier, Collectors.counting());
+        List<Long> counts = result.toList();
+
+        Assertions.assertNotNull(counts);
+    }
+
+    @Test
+    public void testWindowWithDurationIncrementStartTimeHandlerAndCollector() {
+        Duration duration = Duration.ofMillis(100);
+        Duration increment = Duration.ofMillis(50);
+        LongSupplier startTimeSupplier = System::currentTimeMillis;
+        WindowHandler<Integer, Long> handler = null;
+
+        Stream<Long> result = stream.window(duration, increment, startTimeSupplier, handler, Collectors.counting());
+        List<Long> counts = result.toList();
+
+        Assertions.assertNotNull(counts);
+    }
+
+    @Test
+    public void testWindowWithMaxDurationAndMaxWindowSize() {
+        Duration maxDuration = Duration.ofMillis(100);
+        int maxWindowSize = 3;
+
+        Stream<List<Integer>> result = stream.window(maxDuration, maxWindowSize);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        for (List<Integer> window : windows) {
+            Assertions.assertTrue(window.size() <= maxWindowSize);
+        }
+    }
+
+    @Test
+    public void testWindowWithMaxDurationMaxSizeAndCollectionSupplier() {
+        Duration maxDuration = Duration.ofMillis(100);
+        int maxWindowSize = 3;
+        Supplier<List<Integer>> supplier = LinkedList::new;
+
+        Stream<List<Integer>> result = stream.window(maxDuration, maxWindowSize, supplier);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        for (List<Integer> window : windows) {
+            Assertions.assertTrue(window.size() <= maxWindowSize);
+            Assertions.assertTrue(window instanceof LinkedList);
+        }
+    }
+
+    @Test
+    public void testWindowWithMaxDurationMaxSizeStartTimeAndCollectionSupplier() {
+        Duration maxDuration = Duration.ofMillis(100);
+        int maxWindowSize = 3;
+        LongSupplier startTimeSupplier = System::currentTimeMillis;
+        Supplier<List<Integer>> supplier = ArrayList::new;
+
+        Stream<List<Integer>> result = stream.window(maxDuration, maxWindowSize, startTimeSupplier, supplier);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        for (List<Integer> window : windows) {
+            Assertions.assertTrue(window.size() <= maxWindowSize);
+        }
+    }
+
+    @Test
+    public void testWindowWithMaxDurationMaxSizeAndCollector() {
+        Duration maxDuration = Duration.ofMillis(100);
+        int maxWindowSize = 3;
+
+        Stream<Long> result = stream.window(maxDuration, maxWindowSize, Collectors.counting());
+        List<Long> counts = result.toList();
+
+        Assertions.assertNotNull(counts);
+        for (Long count : counts) {
+            Assertions.assertTrue(count <= maxWindowSize);
+        }
+    }
+
+    @Test
+    public void testWindowWithMaxDurationMaxSizeStartTimeHandlerAndCollector() {
+        Duration maxDuration = Duration.ofMillis(100);
+        int maxWindowSize = 3;
+        LongSupplier startTimeSupplier = System::currentTimeMillis;
+        WindowHandler<Integer, Long> handler = null;
+
+        Stream<Long> result = stream.window(maxDuration, maxWindowSize, startTimeSupplier, handler, Collectors.counting());
+        List<Long> counts = result.toList();
+
+        Assertions.assertNotNull(counts);
+    }
+
+    @Test
+    public void testWindowWithQuadPredicate() {
+        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
+                current, next, count) -> count >= 3;
+
+        Stream<List<Integer>> result = stream.window(splitter);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        for (List<Integer> window : windows) {
+            Assertions.assertTrue(window.size() <= 3);
+        }
+    }
+
+    @Test
+    public void testWindowWithQuadPredicateAndCollectionSupplier() {
+        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
+                current, next, count) -> count >= 3;
+        Supplier<List<Integer>> supplier = LinkedList::new;
+
+        Stream<List<Integer>> result = stream.window(splitter, supplier);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        for (List<Integer> window : windows) {
+            Assertions.assertTrue(window instanceof LinkedList);
+        }
+    }
+
+    @Test
+    public void testWindowWithQuadPredicateStartTimeAndCollectionSupplier() {
+        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
+                current, next, count) -> count >= 3;
+        LongSupplier startTimeSupplier = System::currentTimeMillis;
+        Supplier<List<Integer>> supplier = ArrayList::new;
+
+        Stream<List<Integer>> result = stream.window(splitter, startTimeSupplier, supplier);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+    }
+
+    @Test
+    public void testWindowWithQuadPredicateAndCollector() {
+        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
+                current, next, count) -> count >= 3;
+
+        Stream<Long> result = stream.window(splitter, Collectors.counting());
+        List<Long> counts = result.toList();
+
+        Assertions.assertNotNull(counts);
+    }
+
+    @Test
+    public void testWindowWithQuadPredicateStartTimeAndCollector() {
+        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
+                current, next, count) -> count >= 3;
+        LongSupplier startTimeSupplier = System::currentTimeMillis;
+
+        Stream<String> result = stream.window(splitter, startTimeSupplier, Collectors.mapping(Object::toString, Collectors.joining(",")));
+        List<String> joinedWindows = result.toList();
+
+        Assertions.assertNotNull(joinedWindows);
+    }
+
+    @Test
+    public void testWindowWithMaxWaitAndQuadPredicate() {
+        ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> 50L;
+        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
+                current, next, count) -> count >= 3;
+
+        Stream<List<Integer>> result = stream.window(maxWait, splitter);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+    }
+
+    @Test
+    public void testWindowWithMaxWaitQuadPredicateAndCollectionSupplier() {
+        ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> 50L;
+        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
+                current, next, count) -> count >= 3;
+        Supplier<HashSet<Integer>> supplier = HashSet::new;
+
+        Stream<Set<Integer>> result = stream.window(maxWait, splitter, supplier);
+        List<Set<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        for (Set<Integer> window : windows) {
+            Assertions.assertTrue(window instanceof HashSet);
+        }
+    }
+
+    @Test
+    public void testWindowWithMaxWaitQuadPredicateStartTimeAndCollectionSupplier() {
+        ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> 50L;
+        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
+                current, next, count) -> count >= 3;
+        LongSupplier startTimeSupplier = System::currentTimeMillis;
+        Supplier<List<Integer>> supplier = ArrayList::new;
+
+        Stream<List<Integer>> result = stream.window(maxWait, splitter, startTimeSupplier, supplier);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+    }
+
+    @Test
+    public void testWindowWithMaxWaitQuadPredicateAndCollector() {
+        ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> 50L;
+        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
+                current, next, count) -> count >= 3;
+
+        Stream<Long> result = stream.window(maxWait, splitter, Collectors.counting());
+        List<Long> counts = result.toList();
+
+        Assertions.assertNotNull(counts);
+    }
+
+    @Test
+    public void testWindowWithEmptyStream() {
+        Stream<Integer> emptyStream = Stream.<Integer> empty();
+        Duration duration = Duration.ofMillis(100);
+
+        Stream<List<Integer>> result = emptyStream.window(duration);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        Assertions.assertTrue(windows.isEmpty());
+    }
+
+    @Test
+    public void testWindowWithSingleElement() {
+        Stream<Integer> singleStream = Stream.of(42);
+        Duration duration = Duration.ofMillis(100);
+
+        Stream<List<Integer>> result = singleStream.window(duration);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        Assertions.assertEquals(1, windows.size());
+        Assertions.assertEquals(1, windows.get(0).size());
+        Assertions.assertEquals(42, windows.get(0).get(0));
+    }
+
+    @Test
+    public void testWindowWithLargeDataset() {
+        List<Integer> largeData = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            largeData.add(i);
+        }
+        Stream<Integer> largeStream = Stream.of(largeData);
+        Duration duration = Duration.ofMillis(10);
+        int maxWindowSize = 100;
+
+        Stream<List<Integer>> result = largeStream.window(duration, maxWindowSize);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        int totalElements = windows.stream().mapToInt(List::size).sum();
+        Assertions.assertEquals(largeData.size(), totalElements);
+
+        for (List<Integer> window : windows) {
+            Assertions.assertTrue(window.size() <= maxWindowSize);
+        }
+    }
+
+    @Test
+    public void testWindowWithOverlappingWindows() {
+        Duration duration = Duration.ofMillis(100);
+        Duration increment = Duration.ofMillis(30);
+
+        Stream<List<Integer>> result = stream.window(duration, increment);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+    }
+
+    @Test
+    public void testWindowWithNonOverlappingWindows() {
+        Duration duration = Duration.ofMillis(50);
+        Duration increment = Duration.ofMillis(100);
+
+        Stream<List<Integer>> result = stream.window(duration, increment);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+    }
+
+    @Test
+    public void testWindowWithCustomCollectorAggregation() {
+        Duration duration = Duration.ofMillis(100);
+
+        Stream<Integer> sumResult = stream.window(duration, Collectors.summingInt(Integer::intValue));
+        List<Integer> sums = sumResult.toList();
+
+        Assertions.assertNotNull(sums);
+        int totalSum = sums.stream().mapToInt(Integer::intValue).sum();
+        int expectedSum = testData.stream().mapToInt(Integer::intValue).sum();
+        Assertions.assertEquals(expectedSum, totalSum);
+    }
+
+    @Test
+    public void testWindowWithComplexPredicate() {
+        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
+                current, next, count) -> {
+            if (current.value() != null && next.value() != null) {
+                return Math.abs(next.value() - current.value()) > 2;
+            }
+            return false;
+        };
+
+        Stream<Integer> testStream = Stream.of(1, 2, 3, 7, 8, 9, 15, 16);
+        Stream<List<Integer>> result = testStream.window(splitter);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        Assertions.assertTrue(windows.size() >= 3);
+    }
+
+    @Test
+    public void testWindowWithDynamicMaxWait() {
+        ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> count * 20L;
+        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
+                current, next, count) -> count >= 5;
+
+        Stream<List<Integer>> result = stream.window(maxWait, splitter);
+        List<List<Integer>> windows = result.toList();
+
+        Assertions.assertNotNull(windows);
+        for (List<Integer> window : windows) {
+            Assertions.assertTrue(window.size() <= 5);
+        }
+    }
+
+    @Test
+    public void testWindowInternalMethodsWithAsync() {
+        Duration duration = Duration.ofMillis(100);
+        Supplier<List<Integer>> supplier = ArrayList::new;
+
+        Stream<List<Integer>> resultAsync = stream.window(duration, duration, LongSuppliers.ofCurrentTimeMillis(), supplier, true);
+        List<List<Integer>> windowsAsync = resultAsync.toList();
+        Assertions.assertNotNull(windowsAsync);
+
+        stream = Stream.of(testData);
+
+        Stream<List<Integer>> resultSync = stream.window(duration, duration, LongSuppliers.ofCurrentTimeMillis(), supplier, false);
+        List<List<Integer>> windowsSync = resultSync.toList();
+        Assertions.assertNotNull(windowsSync);
+    }
+
+    @Test
+    public void testWindowWithMaxDurationMaxSizeInternalAsync() {
+        Duration maxDuration = Duration.ofMillis(100);
+        int maxWindowSize = 3;
+        Supplier<List<Integer>> supplier = ArrayList::new;
+
+        Stream<List<Integer>> resultAsync = stream.window(maxDuration, maxWindowSize, LongSuppliers.ofCurrentTimeMillis(), supplier, true);
+        List<List<Integer>> windowsAsync = resultAsync.toList();
+        Assertions.assertNotNull(windowsAsync);
+
+        stream = Stream.of(testData);
+
+        Stream<List<Integer>> resultSync = stream.window(maxDuration, maxWindowSize, LongSuppliers.ofCurrentTimeMillis(), supplier, false);
+        List<List<Integer>> windowsSync = resultSync.toList();
+        Assertions.assertNotNull(windowsSync);
+    }
+
+    @Test
+    public void testWindow() {
+        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        Stream<Integer> stream = Stream.of(input);
+
+        List<List<Integer>> windows = stream.window(Duration.ofMillis(100)).limit(3).toList();
+        assertNotNull(windows);
+        assertTrue(windows.size() > 0);
+    }
+
+    @Test
+    public void testWindowWithIncrement() {
+        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        Stream<Integer> stream = Stream.of(input);
+
+        List<List<Integer>> windows = stream.window(Duration.ofMillis(100), Duration.ofMillis(50)).limit(3).toList();
+
+        assertNotNull(windows);
+        assertTrue(windows.size() > 0);
+    }
+
+    @Test
+    public void testWindowWithMaxSize() {
+        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        Stream<Integer> stream = Stream.of(input);
+
+        List<List<Integer>> windows = stream.window(Duration.ofMillis(1000), 3).limit(4).toList();
+
+        assertNotNull(windows);
+        for (List<Integer> window : windows) {
+            assertTrue(window.size() <= 3);
+        }
+    }
+
+    @Test
+    public void testWindowWithCollector() {
+        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5);
+        Stream<Integer> stream = Stream.of(input);
+
+        List<Integer> sums = stream.window(Duration.ofMillis(100), Collectors.summingInt(Integer::intValue)).limit(3).toList();
+
+        assertNotNull(sums);
+        assertTrue(sums.size() > 0);
+    }
+
+    @Test
+    public void testWindowWithCustomSplitter() {
+        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8);
+        Stream<Integer> stream = Stream.of(input);
+
+        List<List<Integer>> windows = stream.window((first, last, next, count) -> count >= 3 || next.value() - first.value() > 3).toList();
+
+        assertNotNull(windows);
+        assertTrue(windows.size() > 0);
+    }
+
+    @Test
+    public void test_window_04() {
+        final Consumer<List<Integer>> println = N::println;
+
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 3).forEach(println);
+
+        N.println(Strings.repeat("=", 120));
+
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20).forEach(println);
+
+        N.println(Strings.repeat("=", 120));
+
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 3, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
+
+        N.println(Strings.repeat("=", 120));
+
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
 
+        N.println(Strings.repeat("=", 120));
 
+        final Function<Integer, Timed<Integer>> mapper = t -> Timed.of(t, System.currentTimeMillis());
 
+        final LongSupplier sysTimeGetter = System::currentTimeMillis;
 
+        final Function<Timed<Integer>, Integer> unwrap = Timed::value;
 
+        final ToIntFunction<Timed<Integer>> toInt = Timed::value;
 
+        final Consumer<List<Timed<Integer>>> println2 = s -> Stream.of(s).map(unwrap).println();
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 3).forEach(println2);
 
+        IntStream.range(0, 30)
+                .boxed()
+                .peek(Fn.sleep(11))
+                .map(mapper)
+                .window(Duration.ofMillis(100), 5, sysTimeGetter, Collectors.summingInt(toInt))
+                .forEach(Fn.println());
 
+        N.println(Strings.repeat("=", 120));
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 20).forEach(println2);
 
+        IntStream.range(0, 30)
+                .boxed()
+                .peek(Fn.sleep(11))
+                .map(mapper)
+                .window(Duration.ofMillis(100), 3, sysTimeGetter, Collectors.summingInt(toInt))
+                .forEach(Fn.println());
 
+        N.println(Strings.repeat("=", 120));
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 120).forEach(println2);
 
+        IntStream.range(0, 30)
+                .boxed()
+                .peek(Fn.sleep(11))
+                .map(mapper)
+                .window(Duration.ofMillis(100), 3, sysTimeGetter, Collectors.summingInt(toInt))
+                .forEach(Fn.println());
+        assertNotNull(println2);
+    }
 
+    @Test
+    public void test_window_05() {
+        final Consumer<List<Integer>> println = N::println;
 
+        IntStream.range(0, 12).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(9), 3).forEach(println);
 
+        N.println(Strings.repeat('=', 80));
+        N.sleep(200);
 
+        IntStream.range(0, 12).boxed().peek(Fn.sleep(10)).window(Duration.ofMillis(100), 3).forEach(println);
 
+        N.println(Strings.repeat('=', 80));
+        N.sleep(200);
 
+        IntStream.range(0, 12).boxed().peek(Fn.sleep(1)).window(Duration.ofMillis(100), 3).forEach(println);
 
+        N.println(Strings.repeat('=', 80));
+        N.sleep(200);
+        assertNotNull(println);
+    }
 
+    @Test
+    public void test_window_06() {
+        final Consumer<List<Integer>> println = N::println;
 
+        IntStream.range(0, 12).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(10)).forEach(println);
 
+        N.println(Strings.repeat('=', 80));
+        N.sleep(200);
 
+        IntStream.range(0, 12).boxed().peek(Fn.sleep(10)).window(Duration.ofMillis(100)).forEach(println);
 
+        N.println(Strings.repeat('=', 80));
+        N.sleep(200);
 
+        IntStream.range(0, 12).boxed().peek(Fn.sleep(1)).window(Duration.ofMillis(100)).forEach(println);
 
+        N.println(Strings.repeat('=', 80));
+        N.sleep(200);
+        assertNotNull(println);
+    }
 
+    @Test
+    public void test_window_07() {
+        final Consumer<List<Integer>> println = N::println;
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100)).forEach(println);
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
 
+        N.println(Strings.repeat("=", 120));
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20).forEach(println);
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
 
+        N.println(Strings.repeat("=", 120));
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 120).forEach(println);
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 120, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
 
+        N.println(Strings.repeat("=", 120));
 
+        final Function<Integer, Timed<Integer>> mapper = t -> Timed.of(t, System.currentTimeMillis());
 
+        final LongSupplier sysTimeGetter = System::currentTimeMillis;
 
+        final Function<Timed<Integer>, Integer> unwrap = Timed::value;
 
+        final ToIntFunction<Timed<Integer>> toInt = Timed::value;
 
+        final Consumer<List<Timed<Integer>>> println2 = s -> Stream.of(s).map(unwrap).println();
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100)).forEach(println2);
 
+        IntStream.range(0, 30)
+                .boxed()
+                .peek(Fn.sleep(11))
+                .map(mapper)
+                .window(Duration.ofMillis(100), sysTimeGetter, Collectors.summingInt(toInt))
+                .forEach(Fn.println());
 
+        N.println(Strings.repeat("=", 120));
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 20).forEach(println2);
 
+        IntStream.range(0, 30)
+                .boxed()
+                .peek(Fn.sleep(11))
+                .map(mapper)
+                .window(Duration.ofMillis(100), 20, sysTimeGetter, Collectors.summingInt(toInt))
+                .forEach(Fn.println());
 
+        N.println(Strings.repeat("=", 120));
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 120).forEach(println2);
 
+        IntStream.range(0, 30)
+                .boxed()
+                .peek(Fn.sleep(11))
+                .map(mapper)
+                .window(Duration.ofMillis(100), 120, sysTimeGetter, Collectors.summingInt(toInt))
+                .forEach(Fn.println());
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), ArrayList::new).forEach(Fn.println());
+        assertNotNull(println2);
+    }
 
-    //    @Test
-    //    public void test_window_late_01() {
-    //
-    //        {
-    //            N.println(Strings.repeat("=", 120));
-    //            final long startTimeMillis = System.currentTimeMillis();
-    //
-    //            final long windowInMillis = 1000;
-    //            final long slideInMillis = 500;
-    //
-    //            List<Timed<String>> list = N.toList(Timed.of("cat dog", startTimeMillis + 200), Timed.of("dog dog", startTimeMillis + 300),
-    //                    Timed.of("owl cat", startTimeMillis + 700), Timed.of("dog", startTimeMillis + 400), Timed.of("owl", startTimeMillis + 1300));
-    //
-    //            final WindowHandler<Timed<String>, Multiset<String>> windowHandler = WindowHandler.of(Timed::timestamp);
-    //
-    //            Stream.of(list).peek(it -> {
-    //                if (it.value().equals("dog")) {
-    //                    N.sleep(startTimeMillis + 1100 - System.currentTimeMillis());
-    //                } else {
-    //                    N.sleep(it.timestamp() - System.currentTimeMillis());
-    //                }
-    //            })
-    //                    .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), () -> startTimeMillis, windowHandler,
-    //                            Collectors.flatmapping(it -> Array.asList(Strings.split(it.value(), " ")), Collectors.toCollection(N::newMultiset)))
-    //                    .toList()
-    //                    .forEach(it -> N.println(it.toMapSortedByKey(Comparators.naturalOrder())));
-    //        }
-    //
-    //        {
-    //            N.println(Strings.repeat("=", 120));
-    //            final long startTimeMillis = System.currentTimeMillis();
-    //
-    //            final long windowInMillis = 1000;
-    //            final long slideInMillis = 500;
-    //
-    //            List<Timed<String>> list = N.toList(Timed.of("cat dog", startTimeMillis + 200), Timed.of("dog dog", startTimeMillis + 300),
-    //                    Timed.of("owl cat", startTimeMillis + 700), Timed.of("owl", startTimeMillis + 1100), Timed.of("dog", startTimeMillis + 400),
-    //                    Timed.of("owl", startTimeMillis + 1300));
-    //
-    //            final WindowHandler<Timed<String>, Multiset<String>> windowHandler = WindowHandler.of(Timed::timestamp);
-    //
-    //            Stream.of(list).peek(it -> {
-    //                if (it.value().equals("dog")) {
-    //                    N.sleep(startTimeMillis + 1100 - System.currentTimeMillis());
-    //                } else {
-    //                    N.sleep(it.timestamp() - System.currentTimeMillis());
-    //                }
-    //            })
-    //                    .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), () -> startTimeMillis, windowHandler,
-    //                            Collectors.flatmapping(it -> Array.asList(Strings.split(it.value(), " ")), Collectors.toCollection(N::newMultiset)))
-    //                    .toList()
-    //                    .forEach(it -> N.println(it.toMapSortedByKey(Comparators.naturalOrder())));
-    //        }
-    //
-    //        {
-    //
-    //            N.println(Strings.repeat("=", 120));
-    //            final long startTimeMillis = System.currentTimeMillis();
-    //
-    //            final long windowInMillis = 1000;
-    //            final long slideInMillis = 500;
-    //
-    //            final WindowHandler<Timed<String>, Multiset<String>> windowHandler = WindowHandler.<Timed<String>, Multiset<String>> builder()
-    //                    .timeExtractor(Timed::timestamp)
-    //                    .onLateData((element, windowResultContainer) -> windowResultContainer.addAll(Array.asList(Strings.split(element.value(), " "))))
-    //                    .build();
-    //
-    //            List<Timed<String>> list = N.toList(Timed.of("cat dog", startTimeMillis + 200), Timed.of("dog dog", startTimeMillis + 300),
-    //                    Timed.of("owl cat", startTimeMillis + 700), Timed.of("dog", startTimeMillis + 400), Timed.of("owl", startTimeMillis + 1300));
-    //
-    //            Stream.of(list).peek(it -> {
-    //                if (it.value().equals("dog")) {
-    //                    N.sleep(startTimeMillis + 1100 - System.currentTimeMillis());
-    //                } else {
-    //                    N.sleep(it.timestamp() - System.currentTimeMillis());
-    //                }
-    //            })
-    //                    .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), () -> startTimeMillis, windowHandler,
-    //                            Collectors.flatmapping(it -> Array.asList(Strings.split(it.value(), " ")), Collectors.toCollection(N::newMultiset)))
-    //                    .toList()
-    //                    .forEach(it -> N.println(it.toMapSortedByKey(Comparators.naturalOrder())));
-    //        }
-    //
-    //        {
-    //
-    //            N.println(Strings.repeat("=", 120));
-    //            final long startTimeMillis = System.currentTimeMillis();
-    //
-    //            final long windowInMillis = 1000;
-    //            final long slideInMillis = 500;
-    //
-    //            final WindowHandler<Timed<String>, Multiset<String>> windowHandler = WindowHandler.<Timed<String>, Multiset<String>> builder()
-    //                    .timeExtractor(Timed::timestamp)
-    //                    .delayForLateData(true)
-    //                    .onLateData((element, windowResultContainer) -> windowResultContainer.addAll(Array.asList(Strings.split(element.value(), " "))))
-    //                    .build();
-    //
-    //            List<Timed<String>> list = N.toList(Timed.of("cat dog", startTimeMillis + 200), Timed.of("dog dog", startTimeMillis + 300),
-    //                    Timed.of("owl cat", startTimeMillis + 700), Timed.of("dog", startTimeMillis + 400), Timed.of("owl", startTimeMillis + 1300));
-    //
-    //            Stream.of(list).peek(it -> {
-    //                if (it.value().equals("dog")) {
-    //                    N.sleep(startTimeMillis + 1100 - System.currentTimeMillis());
-    //                } else {
-    //                    N.sleep(it.timestamp() - System.currentTimeMillis());
-    //                }
-    //            })
-    //                    .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), () -> startTimeMillis, windowHandler,
-    //                            Collectors.flatmapping(it -> Array.asList(Strings.split(it.value(), " ")), Collectors.toCollection(N::newMultiset)))
-    //                    .forEach(it -> N.println(it.toMapSortedByKey(Comparators.naturalOrder())));
-    //        }
-    //
-    //        {
-    //
-    //            N.println(Strings.repeat("=", 120));
-    //            final long startTimeMillis = System.currentTimeMillis();
-    //
-    //            final long windowInMillis = 1000;
-    //            final long slideInMillis = 500;
-    //
-    //            final WindowHandler<Timed<String>, Multiset<String>> windowHandler = WindowHandler.<Timed<String>, Multiset<String>> builder()
-    //                    .cacheSizeForLateData(10)
-    //                    .delayForLateData(false)
-    //                    .timeExtractor(Timed::timestamp)
-    //                    .onLateData((element, windowResultContainer) -> windowResultContainer.addAll(Array.asList(Strings.split(element.value(), " "))))
-    //                    .build();
-    //
-    //            List<Timed<String>> list = N.toList(Timed.of("cat dog", startTimeMillis + 200), Timed.of("dog dog", startTimeMillis + 300),
-    //                    Timed.of("owl cat", startTimeMillis + 700), Timed.of("dog", startTimeMillis + 600), Timed.of("owl", startTimeMillis + 1300));
-    //
-    //            Stream.of(list).peek(it -> {
-    //                if (it.value().equals("dog")) {
-    //                    N.sleep(startTimeMillis + 1100 - System.currentTimeMillis());
-    //                } else {
-    //                    N.sleep(it.timestamp() - System.currentTimeMillis());
-    //                }
-    //            })
-    //                    .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), () -> startTimeMillis, windowHandler,
-    //                            Collectors.flatmapping(it -> Array.asList(Strings.split(it.value(), " ")), Collectors.toCollection(N::newMultiset)))
-    //                    .toList()
-    //                    .forEach(it -> N.println(it.toMapSortedByKey(Comparators.naturalOrder())));
-    //        }
-    //
-    //        {
-    //
-    //            N.println(Strings.repeat("=", 120));
-    //            final long startTimeMillis = System.currentTimeMillis();
-    //
-    //            final long windowInMillis = 1000;
-    //            final long slideInMillis = 200;
-    //
-    //            final WindowHandler<Timed<String>, Multiset<String>> windowHandler = WindowHandler.<Timed<String>, Multiset<String>> builder()
-    //                    .cacheSizeForLateData(10)
-    //                    .delayForLateData(false)
-    //                    .timeExtractor(Timed::timestamp)
-    //                    .onLateData((element, windowResultContainer) -> windowResultContainer.addAll(Array.asList(Strings.split(element.value(), " "))))
-    //                    .build();
-    //
-    //            List<Timed<String>> list = new ArrayList<>(30);
-    //
-    //            for (int i = 0; i < 30; i++) {
-    //                list.add(Timed.of("cat", startTimeMillis + i * 100));
-    //            }
-    //
-    //            list.add(10, Timed.of("doggy", startTimeMillis + 20 * 100));
-    //
-    //            Stream.of(list)
-    //                    .peek(it -> N.sleep(it.timestamp() - System.currentTimeMillis()))
-    //                    .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), () -> startTimeMillis, windowHandler,
-    //                            Collectors.flatmapping(it -> Array.asList(Strings.split(it.value(), " ")), Collectors.toCollection(N::newMultiset)))
-    //                    .toList()
-    //                    .forEach(it -> N.println(it.toMapSortedByKey(Comparators.naturalOrder())));
-    //        }
-    //    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //    @Test
-    //    public void test_window_02() throws Exception {
-    //        assertDoesNotThrow(() -> {
-    //            Stream.range(1, 10).peek(it -> {
-    //                if (it == 7 || it == 8) {
-    //                    N.sleep(3000);
-    //                } else if (it % 2 == 0) {
-    //                    N.sleep(200);
-    //                }
-    //
-    //                N.println(System.currentTimeMillis() + ": " + it);
-    //            }).window(Duration.ofMillis(1000), Collectors.toList()).map(Timed::of).forEach(Fn.println());
-    //
-    //            N.println(Strings.repeat("=", 80));
-    //
-    //            N.println(Strings.repeat("=", 80));
-    //
-    //            Stream.range(1, 10).peek(it -> {
-    //                if (it == 7 || it == 8) {
-    //                    N.sleep(3000);
-    //                } else if (it % 2 == 0) {
-    //                    N.sleep(200);
-    //                }
-    //
-    //            }).window(Duration.ofMillis(1000), Collectors.toList()).maxWait(Duration.ofMillis(1000), N.emptyList()).map(Timed::of).forEach(Fn.println());
-    //
-    //            N.println(Strings.repeat("=", 80));
-    //
-    //            N.println(Strings.repeat("=", 80));
-    //            Stream.range(1, 10).peek(it -> {
-    //                if (it == 7 || it == 8) {
-    //                    N.sleep(3000);
-    //                } else if (it % 2 == 0) {
-    //                    N.sleep(200);
-    //                }
-    //
-    //                N.println(System.currentTimeMillis() + ": " + it);
-    //            }).window((f, l, cn) -> 500, (f, l, n, cn) -> cn <= 3, Suppliers.ofList()).map(Timed::of).forEach(Fn.println());
-    //
-    //            N.println(Strings.repeat("=", 80));
-    //
-    //            Stream.range(1, 10).peek(it -> {
-    //                if (it == 7 || it == 8) {
-    //                    N.sleep(3000);
-    //                } else if (it % 2 == 0) {
-    //                    N.sleep(200);
-    //                }
-    //
-    //                N.println(System.currentTimeMillis() + ": " + it);
-    //            }).window((f, l, n, cn) -> cn <= 3, Suppliers.ofList()).map(Timed::of).forEach(Fn.println());
-    //
-    //            N.println(Strings.repeat("=", 80));
-    //        });
-    //    }
+    @Test
+    public void test_window_08() {
+        final long now = System.currentTimeMillis();
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), () -> now + 3000, Suppliers.ofList()).forEach(Fn.println());
 
+        N.println(Strings.repeat("=", 120));
 
+        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), () -> now - 3000, Suppliers.ofList()).forEach(Fn.println());
 
+        N.println(Strings.repeat("=", 120));
 
+        IntStream.range(0, 30)
+                .boxed()
+                .map(e -> Timed.of(e, now - 3000 - e * 10))
+                .window(Duration.ofMillis(100))
+                .forEach(s -> Stream.of(s).map(Timed::value).println());
 
+        N.println(Strings.repeat("=", 120));
 
+        IntStream.range(0, 30)
+                .boxed()
+                .map(e -> Timed.of(e, now + 3000 + e * 10))
+                .window(Duration.ofMillis(100))
+                .forEach(s -> Stream.of(s).map(Timed::value).println());
 
+        N.println(Strings.repeat("=", 120));
 
+        IntStream.range(0, 30)
+                .boxed()
+                .map(e -> Timed.of(e, now + 3000 + e * 10))
+                .window(Duration.ofMillis(100), 20)
+                .forEach(s -> Stream.of(s).map(Timed::value).println());
 
+        N.println(Strings.repeat("=", 120));
+        assertNotNull(now);
+    }
 
+    @Test
+    public void test_window_late_03() {
 
+        final long startTimeMillis = System.currentTimeMillis();
 
+        final long windowInMillis = 1000;
+        final long slideInMillis = 500;
 
+        final int cacheSize = 10;
+        final Tuple2<Long, Multiset<String>>[] cache = new Tuple2[cacheSize];
+        final MutableLong prevWindowNum = MutableLong.of(-1);
 
+        Supplier<Tuple2<Long, Multiset<String>>> supplier = () -> {
+            long windowNum = (System.currentTimeMillis() - startTimeMillis) / slideInMillis;
 
+            if (windowNum <= prevWindowNum.value()) {
+                windowNum = prevWindowNum.value() + 1;
+            }
 
+            prevWindowNum.setValue(windowNum);
 
+            final Tuple2<Long, Multiset<String>> tp = Tuple.of(windowNum, N.newMultiset());
 
+            cache[(int) (tp._1 % cacheSize)] = tp;
+            return tp;
+        };
 
+        BiConsumer<Tuple2<Long, Multiset<String>>, Timed<String>> accumulator = (tp, it) -> {
+            long n = (it.timestamp() - startTimeMillis) / slideInMillis;
 
+            List<String> words = Array.asList(Strings.split(it.value(), " "));
+            Tuple2<Long, Multiset<String>> e = cache[(int) (n % cacheSize)];
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            if (e != null && e._1 == n) {
+                e._2.addAll(words);
+            }
+
+            e = n < 1 ? null : cache[(int) ((n - 1) % cacheSize)];
+
+            if (e != null && e._1 == n - 1) {
+                e._2.addAll(words);
+            }
+        };
+
+        BinaryOperator<Tuple2<Long, Multiset<String>>> combiner = (a, b) -> {
+            a._2.addAll(b._2);
+            return a;
+        };
+
+        Collector<Timed<String>, ?, Tuple2<Long, Multiset<String>>> collector = Collectors.create(supplier, accumulator, combiner);
+
+        List<Timed<String>> list = N.toList(Timed.of("cat dog", startTimeMillis + 200), Timed.of("dog dog", startTimeMillis + 300),
+                Timed.of("owl cat", startTimeMillis + 700), Timed.of("owl", startTimeMillis + 1300));
+
+        Stream.of(list)
+                .peek(it -> N.sleep(it.timestamp() - System.currentTimeMillis()))
+                .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), collector)
+                .toList()
+                .forEach(tp -> N.println("Window[" + tp._1 + "]: " + tp._2.toMapSortedByKey(Comparators.naturalOrder())));
+        assertNotNull(collector);
+    }
+
+    @Test
+    public void testWindowHandlerBuilderAndDefaults() {
+        Stream.WindowHandler<String, List<String>> handler = Stream.WindowHandler.<String, List<String>> builder()
+                .cacheSizeForLateData(10)
+                .delayForLateData(true)
+                .timeExtractor(s -> Long.parseLong(s.split(":")[1]))
+                .onLateData((el, resList) -> resList.add("LATE:" + el))
+                .build();
+
+        assertEquals(10, handler.cacheSizeForLateData());
+        assertTrue(handler.delayForLateData());
+        assertNotNull(handler.timeExtractor());
+        assertEquals(100L, handler.timeExtractor().applyAsLong("event:100"));
+        assertNotNull(handler.onLateDataAction());
+
+        List<String> testList = new ArrayList<>();
+        handler.onLateDataAction().accept(0, 0, 0, "lateEvent", testList);
+        assertEquals(Arrays.asList("LATE:lateEvent"), testList);
+
+        Stream.WindowHandler<String, Void> handler2 = Stream.WindowHandler.of(s -> Long.parseLong(s.split(":")[0]));
+        assertEquals(Stream.WindowHandler.DEFAULT_CACHE_SIZE_LATE_DATA, handler2.cacheSizeForLateData());
+        assertFalse(handler2.delayForLateData());
+        assertNotNull(handler2.timeExtractor());
+        assertNull(handler2.onLateDataAction());
+    }
+
+    @Test
+    public void testWindowHandlerBuilderSnapshotsSettings() {
+        final Stream.WindowHandler.WindowHandlerBuilder<String, List<String>> builder = Stream.WindowHandler.<String, List<String>> builder()
+                .cacheSizeForLateData(10)
+                .delayForLateData(true)
+                .timeExtractor(String::length)
+                .timeWrapper((value, timestamp) -> Timed.of("first:" + value, timestamp))
+                .onLateData((element, result) -> result.add("first:" + element));
+        final Stream.WindowHandler<String, List<String>> first = builder.build();
+
+        final Stream.WindowHandler<String, List<String>> second = builder.cacheSizeForLateData(20)
+                .delayForLateData(false)
+                .timeExtractor(value -> 99L)
+                .timeWrapper((value, timestamp) -> Timed.of("second:" + value, timestamp))
+                .onLateData((element, result) -> result.add("second:" + element))
+                .build();
+
+        assertEquals(10, first.cacheSizeForLateData());
+        assertTrue(first.delayForLateData());
+        assertEquals(3L, first.timeExtractor().applyAsLong("abc"));
+        assertEquals("first:abc", first.timeWrapper().apply("abc", 100L).value());
+        final List<String> firstLateData = new ArrayList<>();
+        first.onLateDataAction().accept(0L, 0L, 0L, "abc", firstLateData);
+        assertEquals(List.of("first:abc"), firstLateData);
+
+        assertEquals(20, second.cacheSizeForLateData());
+        assertFalse(second.delayForLateData());
+        assertEquals(99L, second.timeExtractor().applyAsLong("abc"));
+        assertEquals("second:abc", second.timeWrapper().apply("abc", 100L).value());
+        final List<String> secondLateData = new ArrayList<>();
+        second.onLateDataAction().accept(0L, 0L, 0L, "abc", secondLateData);
+        assertEquals(List.of("second:abc"), secondLateData);
+    }
+
+    @Test
+    public void testWindowHandlerRejectsNonPositiveCacheSizeAtConfigurationTime() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Stream.WindowHandler.<String, List<String>> of(0, false, String::length, (element, result) -> result.add(element)));
+        assertThrows(IllegalArgumentException.class,
+                () -> Stream.WindowHandler.<String, List<String>> of(-1, false, String::length, (element, result) -> result.add(element)));
+        assertThrows(IllegalArgumentException.class, () -> Stream.WindowHandler.<String, List<String>> builder().cacheSizeForLateData(0));
+        assertThrows(IllegalArgumentException.class, () -> Stream.WindowHandler.<String, List<String>> builder().cacheSizeForLateData(-1));
+    }
+
+    @Test
+    public void testWindow_WithDurationSizeHandlerAndCollector_Async() {
+        Duration maxDuration = Duration.ofMillis(500);
+        int maxWindowSize = 3;
+        List<Long> result = Stream.of(1, 2, 3, 4, 5, 6).window(maxDuration, maxWindowSize, System::currentTimeMillis, null, Collectors.counting()).toList();
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+    }
+
+    @Test
+    public void testWindowWithDurationStartTimeAndCollector() {
+        Duration duration = Duration.ofMillis(50);
+        LongSupplier startTimeSupplier = System::currentTimeMillis;
+
+        Stream<Double> result = stream.window(duration, startTimeSupplier, Collectors.averagingIntOrElseThrow(Integer::intValue));
+        List<Double> averages = result.toList();
+
+        Assertions.assertNotNull(averages);
+        Assertions.assertTrue(averages.size() > 0);
+    }
+
+    @Test
+    public void testWindowWithMaxDurationMaxSizeStartTimeAndCollector() {
+        Duration maxDuration = Duration.ofMillis(100);
+        int maxWindowSize = 3;
+        LongSupplier startTimeSupplier = System::currentTimeMillis;
+
+        Stream<Double> result = stream.window(maxDuration, maxWindowSize, startTimeSupplier, Collectors.averagingIntOrElseThrow(Integer::intValue));
+        List<Double> averages = result.toList();
+
+        Assertions.assertNotNull(averages);
+    }
+
+    @Test
+    public void testWindowWithMaxWaitQuadPredicateStartTimeAndCollector() {
+        ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> 50L;
+        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
+                current, next, count) -> count >= 3;
+        LongSupplier startTimeSupplier = System::currentTimeMillis;
+
+        Stream<Double> result = stream.window(maxWait, splitter, startTimeSupplier, Collectors.averagingIntOrElseThrow(Integer::intValue));
+        List<Double> averages = result.toList();
+
+        Assertions.assertNotNull(averages);
+    }
+
+    @Test
+    public void testWindowWithNullDuration() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            stream.window((Duration) null);
+        });
+    }
+
+    @Test
+    public void testWindowWithNegativeDuration() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            stream.window(Duration.ofMillis(-1));
+        });
+    }
+
+    @Test
+    public void testWindowWithZeroDuration() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            stream.window(Duration.ZERO);
+        });
+    }
+
+    @Test
+    public void testWindowWithNullIncrement() {
+        Duration duration = Duration.ofMillis(100);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            stream.window(duration, (Duration) null);
+        });
+    }
+
+    @Test
+    public void testWindowWithNegativeIncrement() {
+        Duration duration = Duration.ofMillis(100);
+        Duration increment = Duration.ofMillis(-1);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            stream.window(duration, increment);
+        });
+    }
+
+    @Test
+    public void testWindowWithNullCollector() {
+        Duration duration = Duration.ofMillis(100);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            stream.window(duration, (java.util.stream.Collector<Integer, ?, ?>) null);
+        });
+    }
+
+    @Test
+    public void testWindowWithNullStartTimeSupplier() {
+        final Duration duration = Duration.ofMillis(100);
+        final Duration increment = Duration.ofMillis(50);
+        final QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (
+                first, current, next, count) -> count >= 3;
+        final ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> 50L;
+
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).window(duration, increment, (LongSupplier) null, Collectors.toList()).count());
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).window(splitter, (LongSupplier) null, Collectors.toList()).count());
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).window(maxWait, splitter, (LongSupplier) null, Collectors.toList()).count());
+    }
+
+    @Test
+    public void testWindowWithNullQuadPredicate() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            stream.window(
+                    (QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer>) null)
+                    .count();
+        });
+    }
+
+    @Test
+    public void testWindowWithNullMaxWaitFunction() {
+        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
+                current, next, count) -> count >= 3;
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            stream.window(null, splitter).count();
+        });
+    }
+
+    @Test
+    public void testWindowWithNegativeMaxWindowSize() {
+        Duration duration = Duration.ofMillis(100);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            stream.window(duration, -1);
+        });
+    }
+
+    @Test
+    public void testWindowWithZeroMaxWindowSize() {
+        Duration duration = Duration.ofMillis(100);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            stream.window(duration, 0);
+        });
+    }
+
+    @Test
+    public void test_window_03() {
+        assertDoesNotThrow(() -> {
+            IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100)).forEach(N::println);
+
+            IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
+
+            N.println(Strings.repeat("=", 120));
+
+            IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20).forEach(N::println);
+
+            IntStream.range(0, 30)
+                    .boxed()
+                    .peek(Fn.sleep(11))
+                    .window(Duration.ofMillis(100), 20, Collectors.summingInt(ToIntFunction.UNBOX))
+                    .forEach(Fn.println());
+
+            N.println(Strings.repeat("=", 120));
+
+            IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 120).forEach(N::println);
+
+            IntStream.range(0, 30)
+                    .boxed()
+                    .peek(Fn.sleep(11))
+                    .window(Duration.ofMillis(100), 120, Collectors.summingInt(ToIntFunction.UNBOX))
+                    .forEach(Fn.println());
+
+            N.println(Strings.repeat("=", 120));
+
+            IntStream.range(0, 30)
+                    .boxed()
+                    .peek(Fn.sleep(11))
+                    .map(e -> Timed.of(e, System.currentTimeMillis()))
+                    .window(Duration.ofMillis(100))
+                    .forEach(s -> Stream.of(s).map(Timed::value).println());
+
+            IntStream.range(0, 30)
+                    .boxed()
+                    .peek(Fn.sleep(11))
+                    .map(e -> Timed.of(e, System.currentTimeMillis()))
+                    .window(Duration.ofMillis(100), System::currentTimeMillis, Collectors.summingInt(Timed::value))
+                    .forEach(Fn.println());
+
+            N.println(Strings.repeat("=", 120));
+
+            IntStream.range(0, 30)
+                    .boxed()
+                    .peek(Fn.sleep(11))
+                    .map(e -> Timed.of(e, System.currentTimeMillis()))
+                    .window(Duration.ofMillis(100), 20)
+                    .forEach(s -> Stream.of(s).map(Timed::value).println());
+
+            IntStream.range(0, 30)
+                    .boxed()
+                    .peek(Fn.sleep(11))
+                    .map(e -> Timed.of(e, System.currentTimeMillis()))
+                    .window(Duration.ofMillis(100), 20, System::currentTimeMillis, Collectors.summingInt(Timed::value))
+                    .forEach(Fn.println());
+
+            N.println(Strings.repeat("=", 120));
+
+            IntStream.range(0, 30)
+                    .boxed()
+                    .peek(Fn.sleep(11))
+                    .map(e -> Timed.of(e, System.currentTimeMillis()))
+                    .window(Duration.ofMillis(100), 120)
+                    .forEach(s -> Stream.of(s).map(Timed::value).println());
+
+            IntStream.range(0, 30)
+                    .boxed()
+                    .peek(Fn.sleep(11))
+                    .map(e -> Timed.of(e, System.currentTimeMillis()))
+                    .window(Duration.ofMillis(100), 120, System::currentTimeMillis, Collectors.summingInt(Timed::value))
+                    .forEach(Fn.println());
+        });
+    }
+
+    @Test
+    public void test_addSubscriber() {
+        assertDoesNotThrow(() -> {
+            {
+                N.println("injectNewStream" + Strings.repeat("=", 80));
+                Stream.range(0, 10).addSubscriber(ss -> ss.filter(it -> it % 2 != 0).println()).filter(it -> it % 2 == 0).prepend(100).limit(3).println();
+                N.sleep(100);
+                Stream.range(0, 10).addSubscriber(ss -> ss.filter(it -> it % 2 != 0).println()).filter(it -> it % 2 == 0).prepend(100).println();
+                N.sleep(100);
+                N.println(Strings.repeat("=", 80));
+            }
+
+            {
+                N.println("filterAndInjectNewStream" + Strings.repeat("=", 80));
+                Stream.range(0, 10).filterWhileAddSubscriber(it -> it % 2 == 0, Stream::println).prepend(100).limit(3).println();
+                N.sleep(100);
+                Stream.range(0, 10).filterWhileAddSubscriber(it -> it % 2 == 0, ss -> ss.limit(2).println()).prepend(100).println();
+                N.sleep(100);
+                N.println(Strings.repeat("=", 80));
+            }
+
+            {
+                N.println("takeWhileAndInjectNewStream" + Strings.repeat("=", 80));
+                Stream.range(0, 10).takeWhileAddSubscriber(it -> it < 5, Stream::println).prepend(100).limit(3).println();
+                N.sleep(100);
+                Stream.range(0, 10).takeWhileAddSubscriber(it -> it < 5, ss -> ss.limit(2).println()).prepend(100).println();
+                N.sleep(100);
+                N.println(Strings.repeat("=", 80));
+            }
+
+            {
+                N.println("dropWhileAndInjectNewStream" + Strings.repeat("=", 80));
+                Stream.range(0, 10).dropWhileAddSubscriber(it -> it < 5, Stream::println).prepend(100).limit(3).println();
+                N.sleep(100);
+                Stream.range(0, 10).dropWhileAddSubscriber(it -> it < 5, ss -> ss.limit(2).println()).prepend(100).println();
+                N.sleep(100);
+                N.println(Strings.repeat("=", 80));
+            }
+
+            {
+                N.println("dropWhileAndInjectNewStream" + Strings.repeat("=", 80));
+                final Holder<Object> resultHolder = new Holder<>();
+                Stream.range(0, 10)
+                        .onClose(() -> N.println("closing main Stream - 1"))
+                        .dropWhileAddSubscriber(it -> it < 5, ss -> resultHolder.setValue(ss.onClose(() -> N.println("closing inject Stream")).join(", ")))
+                        .prepend(100)
+                        .limit(3)
+                        .onClose(() -> N.println("closing main Stream - 2"))
+                        .println();
+                N.sleep(100);
+                N.println(resultHolder);
+                Stream.range(0, 10)
+                        .onClose(() -> N.println("closing main Stream - 1"))
+                        .dropWhileAddSubscriber(it -> it < 5,
+                                ss -> resultHolder.setValue(ss.limit(2).mapToInt(e -> e).onClose(() -> N.println("closing inject Stream")).sum()))
+                        .prepend(100)
+                        .onClose(() -> N.println("closing main Stream - 2"))
+                        .println();
+                N.println(resultHolder);
+                N.println(Strings.repeat("=", 80));
+            }
+
+            {
+                N.println("dropWhileAndInjectNewStream" + Strings.repeat("=", 80));
+                Stream.range(0, 10).dropWhileAddSubscriber(it -> it < 5, Stream::println).prepend(100).limit(3).println();
+                N.sleep(100);
+                Stream.range(0, 10).dropWhileAddSubscriber(it -> it < 5, ss -> ss.limit(2).println()).prepend(100).println();
+                N.sleep(100);
+                N.println(Strings.repeat("=", 80));
+            }
+        });
+    }
+
+    @Test
+    @Timeout(10)
+    public void testAddSubscriber_BasicFunctionality() throws Exception {
+        Stream.of(1, 2, 3, 4, 5).addSubscriber(s -> {
+            s.forEach(x -> {
+                subscriberStreamResults.add(x);
+            });
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), mainStreamResults);
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), subscriberStreamResults);
+    }
+
+    @Test
+    @Timeout(10)
+    public void testAddSubscriber_skip_limit() throws Exception {
+        Stream.of(1, 2, 3, 4, 5).addSubscriber(s -> {
+            s.skip(2).forEach(x -> {
+                subscriberStreamResults.add(x);
+            });
+        }).skip(1).limit(2).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(2, 3), mainStreamResults);
+        assertEquals(Arrays.asList(3, 4, 5), subscriberStreamResults);
+    }
+
+    @Test
+    public void testAddSubscriber_timeout() throws Exception {
+        MutableBoolean mainStreamClosed = MutableBoolean.of(false);
+
+        assertThrows(IllegalStateException.class, () -> Stream.of(1, 2, 3, 4, 5).addSubscriber(s -> {
+            s.peek(Fn.sleep(100)).forEach(x -> {
+                subscriberStreamResults.add(x);
+            });
+        }, 2, 10, customExecutor).onClose(() -> mainStreamClosed.setTrue()).forEach(x -> {
+            mainStreamResults.add(x);
+        }));
+
+        assertTrue(mainStreamClosed.value());
+    }
+
+    @Test
+    @Timeout(10)
+    public void testAddSubscriber_EmptyStream() throws Exception {
+        Stream.<Integer> empty().addSubscriber(s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(mainStreamResults::add);
+
+        assertTrue(mainStreamResults.isEmpty());
+        assertTrue(subscriberStreamResults.isEmpty());
+    }
+
+    @Test
+    @Timeout(10)
+    public void testAddSubscriber_NullElements() throws Exception {
+
+        Stream.of(1, null, 3, null, 5).addSubscriber(s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, null, 3, null, 5), mainStreamResults);
+        assertEquals(Arrays.asList(1, null, 3, null, 5), subscriberStreamResults);
+    }
+
+    @Test
+    public void testAddSubscriber_NullConsumer() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).addSubscriber(null).forEach(x -> {
+            });
+        });
+    }
+
+    @Test
+    public void testAddSubscriber_ClosedStream() {
+        Stream<Integer> closedStream = Stream.of(1, 2, 3);
+        closedStream.close();
+
+        assertThrows(IllegalStateException.class, () -> {
+            closedStream.addSubscriber(s -> s.forEach(x -> {
+            }));
+        });
+    }
+
+    @Test
+    @Timeout(10)
+    public void testAddSubscriberWithParameters_CustomConfiguration() throws Exception {
+        Stream.of(1, 2, 3, 4, 5).addSubscriber(s -> {
+            s.forEach(subscriberStreamResults::add);
+        }, 10, 1000, customExecutor).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), mainStreamResults);
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), subscriberStreamResults);
+    }
+
+    @Test
+    public void testAddSubscriberWithParameters_InvalidQueueSize() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).addSubscriber(s -> {
+            }, -1, 1000, customExecutor);
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).addSubscriber(s -> {
+            }, 0, 1000, customExecutor);
+        });
+    }
+
+    @Test
+    public void testAddSubscriberWithParameters_InvalidMaxWait() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).addSubscriber(s -> {
+            }, 10, -1, customExecutor);
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).addSubscriber(s -> {
+            }, 10, 0, customExecutor);
+        });
+    }
+
+    @Test
+    public void testAddSubscriberWithParameters_NullExecutor() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).addSubscriber(s -> {
+            }, 10, 1000, null).count();
+        });
+    }
+
+    @Test
+    public void test_addSubscriber_2() {
+        assertDoesNotThrow(() -> {
+            {
+                N.println("addSubscriber twice" + Strings.repeat("=", 80));
+                Stream.range(0, 30)
+                        .addSubscriber(ss -> ss.filter(it -> it % 2 != 0).println())
+                        .filter(it -> it % 2 == 0)
+                        .addSubscriber(ss -> ss.filter(it -> it % 3 == 0).parallel(10).peek(it -> N.sleep(it % 6 == 0 ? 100 : 0)).println())
+                        .prepend(100)
+                        .limit(3)
+                        .println();
+            }
+        });
+    }
+
+    @Test
+    public void testAddSubscriber() throws Exception {
+        Holder<List<Integer>> subscriberResult = new Holder<>();
+        List<Integer> mainResult = Stream.of(1, 2, 3, 4, 5).addSubscriber(newStream -> subscriberResult.setValue(newStream.toList())).toList();
+
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), mainResult);
+        assertNotNull(subscriberResult.value());
+        assertEquals(5, subscriberResult.value().size());
+    }
+
+    @Test
+    @Timeout(10)
+    public void testFilterWhileAddSubscriber_BasicFunctionality() throws Exception {
+        Stream.of(1, 2, 3, 4, 5).filterWhileAddSubscriber(x -> x % 2 == 1, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, 3, 5), mainStreamResults);
+        assertEquals(Arrays.asList(2, 4), subscriberStreamResults);
+    }
+
+    @Test
+    @Timeout(10)
+    public void testFilterWhileAddSubscriber_AllMatch() throws Exception {
+        Stream.of(1, 3, 5, 7, 9).filterWhileAddSubscriber(x -> x % 2 == 1, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, 3, 5, 7, 9), mainStreamResults);
+        assertTrue(subscriberStreamResults.isEmpty());
+    }
+
+    @Test
+    @Timeout(10)
+    public void testFilterWhileAddSubscriber_NoneMatch() throws Exception {
+        Stream.of(2, 4, 6, 8, 10).filterWhileAddSubscriber(x -> x % 2 == 1, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertTrue(mainStreamResults.isEmpty());
+        assertEquals(Arrays.asList(2, 4, 6, 8, 10), subscriberStreamResults);
+    }
+
+    @Test
+    public void testFilterWhileAddSubscriber_NullPredicate() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).filterWhileAddSubscriber(null, s -> {
+            }).count();
+        });
+    }
+
+    @Test
+    @Timeout(10)
+    public void testFilterWhileAddSubscriberWithParameters_CustomConfiguration() throws Exception {
+        Stream.of(1, 2, 3, 4, 5).filterWhileAddSubscriber(x -> x > 3, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }, 100, 5000, customExecutor).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(4, 5), mainStreamResults);
+        assertEquals(Arrays.asList(1, 2, 3), subscriberStreamResults);
+    }
+
+    @Test
+    public void testFilterWhileAddSubscriber() throws Exception {
+        Holder<List<Integer>> subscriberResult = new Holder<>();
+        List<Integer> mainResult = Stream.of(1, 2, 3, 4, 5)
+                .filterWhileAddSubscriber(x -> x <= 3, newStream -> subscriberResult.setValue(newStream.toList()))
+                .toList();
+
+        assertEquals(Arrays.asList(1, 2, 3), mainResult);
+        assertNotNull(subscriberResult.value());
+    }
+
+    @Test
+    @Timeout(10)
+    public void testTakeWhileAddSubscriber_BasicFunctionality() throws Exception {
+        Stream.of(1, 2, 3, 4, 5).takeWhileAddSubscriber(x -> x < 3, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, 2), mainStreamResults);
+        assertEquals(Arrays.asList(3, 4, 5), subscriberStreamResults);
+    }
+
+    @Test
+    @Timeout(10)
+    public void testTakeWhileAddSubscriber_TakeAll() throws Exception {
+        Stream.of(1, 2, 3, 4, 5).takeWhileAddSubscriber(x -> x <= 10, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), mainStreamResults);
+        assertTrue(subscriberStreamResults.isEmpty());
+    }
+
+    @Test
+    @Timeout(10)
+    public void testTakeWhileAddSubscriber_TakeNone() throws Exception {
+        Stream.of(1, 2, 3, 4, 5).takeWhileAddSubscriber(x -> x > 10, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertTrue(mainStreamResults.isEmpty());
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), subscriberStreamResults);
+    }
+
+    @Test
+    public void testTakeWhileAddSubscriber_NullPredicate() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).takeWhileAddSubscriber(null, s -> {
+            }).count();
+        });
+    }
+
+    @Test
+    @Timeout(10)
+    public void testTakeWhileAddSubscriberWithExecutor_CustomExecutor() throws Exception {
+        Stream.of(1, 2, 3, 4, 5).takeWhileAddSubscriber(x -> x <= 3, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }, customExecutor).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, 2, 3), mainStreamResults);
+        assertEquals(Arrays.asList(4, 5), subscriberStreamResults);
+    }
+
+    @Test
+    public void testTakeWhileAddSubscriberWithExecutor_NullExecutor() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).takeWhileAddSubscriber(x -> x < 5, s -> {
+            }, null).count();
+        });
+    }
+
+    @Test
+    public void testTakeWhileAddSubscriber() throws Exception {
+        Holder<List<Integer>> subscriberResult = new Holder<>();
+        List<Integer> mainResult = Stream.of(1, 2, 3, 4, 5)
+                .takeWhileAddSubscriber(x -> x <= 3, newStream -> subscriberResult.setValue(newStream.toList()))
+                .toList();
+
+        assertEquals(Arrays.asList(1, 2, 3), mainResult);
+        assertNotNull(subscriberResult.value());
+    }
+
+    @Test
+    @Timeout(10)
+    public void testDropWhileAddSubscriber_BasicFunctionality() throws Exception {
+        Stream.of(1, 2, 3, 4, 5).dropWhileAddSubscriber(x -> x < 3, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(3, 4, 5), mainStreamResults);
+        assertEquals(Arrays.asList(1, 2), subscriberStreamResults);
+    }
+
+    @Test
+    @Timeout(10)
+    public void testDropWhileAddSubscriber_DropAll() throws Exception {
+        Stream.of(1, 2, 3, 4, 5).dropWhileAddSubscriber(x -> x <= 10, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertTrue(mainStreamResults.isEmpty());
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), subscriberStreamResults);
+    }
+
+    @Test
+    @Timeout(10)
+    public void testDropWhileAddSubscriber_DropNone() throws Exception {
+        Stream.of(1, 2, 3, 4, 5).dropWhileAddSubscriber(x -> x > 10, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), mainStreamResults);
+        assertTrue(subscriberStreamResults.isEmpty());
+    }
+
+    @Test
+    public void testDropWhileAddSubscriber_NullPredicate() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Stream.of(1, 2, 3).dropWhileAddSubscriber(null, s -> {
+            }).count();
+        });
+    }
+
+    @Test
+    @Timeout(10)
+    public void testDropWhileAddSubscriberWithParameters_CustomConfiguration() throws Exception {
+        Stream.of(1, 2, 3, 4, 5).dropWhileAddSubscriber(x -> x <= 2, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }, 100, 5000, customExecutor).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(3, 4, 5), mainStreamResults);
+        assertEquals(Arrays.asList(1, 2), subscriberStreamResults);
+    }
+
+    @Test
+    public void testDropWhileAddSubscriber() throws Exception {
+        Holder<List<Integer>> subscriberResult = new Holder<>();
+        List<Integer> mainResult = Stream.of(1, 2, 3, 4, 5)
+                .dropWhileAddSubscriber(x -> x <= 3, newStream -> subscriberResult.setValue(newStream.toList()))
+                .toList();
+
+        assertEquals(Arrays.asList(4, 5), mainResult);
+        assertNotNull(subscriberResult.value());
+    }
+
+    @Test
+    public void testrunAsync() throws Exception {
+        AtomicInteger result = new AtomicInteger(0);
+        com.landawn.abacus.util.ContinuableFuture<Void> future = Stream.of(1, 2, 3).runAsync(s -> s.forEach(result::addAndGet));
+        future.get();
+        assertEquals(6, result.get());
+    }
+
+    @Test
+    public void testrunAsyncWithExecutor() throws Exception {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            AtomicInteger sum = new AtomicInteger(0);
+            Stream.of(1, 2, 3).runAsync(s -> s.forEach(e -> sum.addAndGet(e)), executor).get();
+            assertEquals(6, sum.get());
+        } finally {
+            executor.shutdownNow();
+        }
+    }
 
     @Test
     public void testcallAsync() throws Exception {
@@ -6605,6 +8338,12 @@ public class StreamTest extends AbstractTest {
         assertEquals("", Stream.empty().join(","));
     }
 
+    @Test
+    public void testIfEmpty() {
+        AtomicBoolean executed = new AtomicBoolean(false);
+        Stream.empty().ifEmpty(() -> executed.set(true)).count();
+        assertTrue(executed.get());
+    }
 
     @Test
     public void testEmptyStreamOperations() {
@@ -6618,6 +8357,12 @@ public class StreamTest extends AbstractTest {
         assertEquals("", Stream.<Integer> empty().join(","));
     }
 
+    @Test
+    public void testAcceptIfNotEmptyWithEmpty() {
+        List<Integer> holder = new ArrayList<>();
+        Stream.<Integer> empty().acceptIfNotEmpty(s -> s.forEach(holder::add));
+        assertTrue(holder.isEmpty());
+    }
 
     @Test
     public void testApplyIfNotEmptyWithEmpty() {
@@ -6835,6 +8580,42 @@ public class StreamTest extends AbstractTest {
         assertTrue(stream2.toList().isEmpty());
     }
 
+    @Test
+    public void test_perf() {
+        final String[] strs = new String[10_000];
+        N.fill(strs, Strings.uuid());
+
+        final int m = 500;
+        final Function<String, Long> mapper = str -> {
+            long result = 0;
+            for (int i = 0; i < m; i++) {
+                result += N.sum(str.toCharArray()) + 1;
+            }
+            return result;
+        };
+
+        long tmp = 0;
+
+        for (final String str : strs) {
+            tmp += mapper.apply(str);
+        }
+
+        final long sum = tmp;
+
+        Profiler.run(1, 10, 1, "For loop", () -> {
+            long result = 0;
+
+            for (final String str : strs) {
+                result += mapper.apply(str);
+            }
+
+            assertEquals(sum, result);
+        }).printResult();
+
+        Profiler.run(1, 10, 1, "Abacus sequential", () -> assertEquals(sum, Stream.of(strs).map(mapper).mapToLong(t -> t).sum())).printResult();
+
+        Profiler.run(1, 10, 1, "Abacus parallel", () -> assertEquals(sum, Stream.of(strs).parallel().map(mapper).mapToLong(t -> t).sum())).printResult();
+    }
 
     @Test
     public void testOfVarargs() {
@@ -7068,7 +8849,20 @@ public class StreamTest extends AbstractTest {
         assertTrue(Stream.of(1, 2, 3).parallel().isParallel());
     }
 
+    @Test
+    public void testOnClose() {
+        AtomicBoolean closed = new AtomicBoolean(false);
+        Stream<Integer> stream = Stream.of(1, 2, 3).onClose(() -> closed.set(true));
+        stream.count();
+        stream.close();
+        assertTrue(closed.get());
+    }
 
+    @Test
+    public void testTransform() {
+        List<Integer> result = Stream.of(1, 2, 3).transform(s -> s.map(n -> n * 2)).toList();
+        assertEquals(Arrays.asList(2, 4, 6), result);
+    }
 
     @Test
     public void testComplexStreamPipeline() {
@@ -7616,6 +9410,12 @@ public class StreamTest extends AbstractTest {
         assertEquals(2, counter.get());
     }
 
+    @Test
+    public void testIfEmptyNonEmpty() {
+        AtomicBoolean executed = new AtomicBoolean(false);
+        Stream.of(1, 2, 3).ifEmpty(() -> executed.set(true)).count();
+        assertFalse(executed.get());
+    }
 
     @Test
     public void testHasDuplicates() {
@@ -7642,6 +9442,12 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList(1, 2, 3), result);
     }
 
+    @Test
+    public void testAcceptIfNotEmpty() {
+        List<Integer> holder = new ArrayList<>();
+        Stream.of(1, 2, 3).acceptIfNotEmpty(s -> s.forEach(holder::add));
+        assertEquals(Arrays.asList(1, 2, 3), holder);
+    }
 
     @Test
     public void testApplyIfNotEmpty() {
@@ -7741,6 +9547,24 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList(2, 3), result);
     }
 
+    @Test
+    public void test_asyncExecute() throws Exception {
+        try {
+            N.asyncExecute(() -> Stream.of(1, 2, 3).forEach(Fnn.throwIOException("oooh"))).get();
+
+            fail("Should throw ExecutionException");
+        } catch (final ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Stream.repeat("a", 100).parallel(10).forEach(Fnn.throwIOException("oooh"));
+
+            fail("Should throw IOException");
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void test_average() {
@@ -7798,10 +9622,95 @@ public class StreamTest extends AbstractTest {
         }
     }
 
+    @Test
+    @Timeout(10)
+    public void testSubscriberStreams_IndependentOperations() throws Exception {
+        List<Integer> mainProcessed = new ArrayList<>();
+        List<Integer> subscriberProcessed = new ArrayList<>();
 
+        Stream.of(1, 2, 3, 4, 5).addSubscriber(s -> {
+            s.filter(x -> x % 2 == 0).map(x -> x * 10).forEach(subscriberProcessed::add);
+        }).filter(x -> x % 2 == 1).map(x -> x * 100).forEach(x -> {
+            mainProcessed.add(x);
+        });
 
+        assertEquals(Arrays.asList(100, 300, 500), mainProcessed);
+        assertEquals(Arrays.asList(20, 40), subscriberProcessed);
+    }
 
+    @Test
+    @Timeout(10)
+    public void testSubscriberStream_ExceptionHandling() throws Exception {
+        AtomicBoolean exceptionCaught = new AtomicBoolean(false);
 
+        try {
+            Stream.of(1, 2, 3, 4, 5).addSubscriber(s -> {
+                try {
+                    s.forEach(x -> {
+                        if (x == 3) {
+                            throw new RuntimeException("Test exception");
+                        }
+                        subscriberStreamResults.add(x);
+                    });
+                } catch (Exception e) {
+                    exceptionCaught.set(true);
+                }
+            }).forEach(mainStreamResults::add);
+        } catch (Exception e) {
+        }
+
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), mainStreamResults);
+        assertTrue(exceptionCaught.get());
+    }
+
+    @Test
+    @Timeout(10)
+    public void testSubscriberStream_CloseHandling() throws Exception {
+        AtomicBoolean subscriberClosed = new AtomicBoolean(false);
+
+        Stream.of(1, 2, 3).addSubscriber(s -> {
+            s.onClose(() -> subscriberClosed.set(true)).forEach(subscriberStreamResults::add);
+        }).forEach(mainStreamResults::add);
+
+        assertEquals(Arrays.asList(1, 2, 3), mainStreamResults);
+        assertEquals(Arrays.asList(1, 2, 3), subscriberStreamResults);
+        assertTrue(subscriberClosed.get());
+    }
+
+    @Test
+    @Timeout(10)
+    public void testLargeDataset_Performance() throws Exception {
+        int size = 10000;
+        List<Integer> data = new ArrayList<>();
+        for (int i = 1; i <= size; i++) {
+            data.add(i);
+        }
+        AtomicInteger mainCount = new AtomicInteger(0);
+        AtomicInteger subscriberCount = new AtomicInteger(0);
+
+        Stream.of(data.toArray(new Integer[0])).addSubscriber(s -> {
+            s.forEach(x -> subscriberCount.incrementAndGet());
+        }).forEach(x -> {
+            mainCount.incrementAndGet();
+            if (mainCount.get() == size) {
+            }
+        });
+        assertEquals(size, mainCount.get());
+        assertEquals(size, subscriberCount.get());
+    }
+
+    @Test
+    @Timeout(10)
+    public void testNullElementHandling_InFilters() throws Exception {
+        Stream.of(1, null, 3, null, 5).filterWhileAddSubscriber(x -> x != null && x % 2 == 1, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, 3, 5), mainStreamResults);
+        assertEquals(Arrays.asList(null, null), subscriberStreamResults);
+    }
 
     @Test
     public void testOf_ArrayWithInvalidRange() {
@@ -7856,6 +9765,142 @@ public class StreamTest extends AbstractTest {
         assertThrows(ConcurrentModificationException.class, () -> stream.toList());
     }
 
+    @Test
+    public void test_lazyEvalation() throws Exception {
+        final MutableBoolean moved = MutableBoolean.of(false);
+
+        Stream<String> s = Stream.of("a", "b", "c", "d").peek(Fn.println()).peek(it -> {
+            new RuntimeException("Testing lazy evaluation").printStackTrace();
+            moved.setTrue();
+        })
+                .parallel()
+                .map(it -> it + "111")
+                .buffered()
+                .shuffled()
+                .sorted()
+                .rotated(2)
+                .filter(Fn.alwaysTrue())
+                .flatMap(Stream::of)
+                .takeWhile(Fn.alwaysTrue())
+                .dropWhile(Fn.alwaysFalse())
+                .sequential()
+                .map(it -> it + "111")
+                .buffered()
+                .shuffled()
+                .sorted()
+                .rotated(2)
+                .filter(Fn.alwaysTrue())
+                .flatMap(Stream::of)
+                .takeWhile(Fn.alwaysTrue())
+                .dropWhile(Fn.alwaysFalse());
+
+        assertFalse(moved.value());
+
+        s = s.filter(Fn.notNull());
+
+        assertFalse(moved.value());
+
+        s = s.buffered();
+
+        assertFalse(moved.value());
+
+        final ObjIterator<String> iter = s.iterator();
+
+        assertFalse(moved.value());
+
+        s.forEach(Fn.println());
+
+        assertTrue(moved.value());
+
+        assertFalse(iter.hasNext());
+
+        moved.setFalse();
+        final List<ByteStream> list = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            list.add(ByteStream.range((byte) 0, (byte) i).peek(it -> moved.setTrue()).peek(N::println));
+        }
+
+        ByteStream bs = ByteStream.merge(list, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+
+        bs = bs.filter(it -> it < 10);
+
+        assertFalse(moved.value());
+
+        final ByteIterator byteIter = bs.iterator();
+
+        bs.forEach(N::println);
+
+        assertFalse(byteIter.hasNext());
+
+        moved.setFalse();
+
+        final IntStream is = Stream.range(0, 10_000)
+                .peek(it -> moved.setTrue())
+                .parallel(128)
+                .map(it -> it - 0)
+                .map(it -> it + 0)
+                .flatMap(Stream::of)
+                .map(it -> it + 1)
+                .map(it -> it - 1)
+                .filter(it -> it >= 0)
+                .buffered(1024)
+                .peek(it -> {
+                    if (it % 37 == 0) {
+                        N.sleep(3);
+                    }
+                })
+                .map(it -> it - 0)
+                .map(it -> it + 0)
+                .flatMap(Stream::of)
+                .map(it -> it + 1)
+                .sequential()
+                .map(it -> it - 1)
+                .filter(it -> it >= 0)
+                .buffered(1024)
+                .reverseSorted()
+                .peek(it -> {
+                    if (it % 79 == 0) {
+                        N.sleep(3);
+                    }
+                })
+                .map(it -> it - 0)
+                .map(it -> it + 0)
+                .flatMap(Stream::of)
+                .map(it -> it + 1)
+                .map(it -> it - 1)
+                .filter(it -> it >= 0)
+                .buffered(1024)
+                .peek(it -> {
+                    if (it % 137 == 0) {
+                        N.sleep(3);
+                    }
+                })
+                .map(it -> it - 0)
+                .parallel(64)
+                .map(it -> it + 0)
+                .flatMap(Stream::of)
+                .map(it -> it + 1)
+                .map(it -> it - 1)
+                .filter(it -> it >= 0)
+                .buffered(137)
+                .peek(it -> {
+                    if (it % 537 == 0) {
+                        N.sleep(3);
+                    }
+                })
+                .mapToInt(ToIntFunction.UNBOX);
+
+        assertFalse(moved.value());
+
+        final IntIterator ii = is.iterator();
+
+        assertFalse(moved.value());
+
+        assertEquals(IntStream.range(0, 10_000).sum(), is.sum());
+
+        assertFalse(ii.hasNext());
+    }
 
     @Test
     public void testOfKeys() {
@@ -8070,6 +10115,17 @@ public class StreamTest extends AbstractTest {
         assertEquals(expectedSum, sum);
     }
 
+    @Test
+    public void testPerformance_LargeConcat() {
+        List<Stream<Integer>> manyStreams = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            final int base = i * 10;
+            manyStreams.add(Stream.range(base, base + 10));
+        }
+
+        long count = Stream.concat(manyStreams).count();
+        assertEquals(1000, count);
+    }
 
     @Test
     public void testRangeInt() {
@@ -8116,6 +10172,41 @@ public class StreamTest extends AbstractTest {
         assertEquals(Short.MAX_VALUE * 2 + 2, Array.rangeClosed(Short.MIN_VALUE, Short.MAX_VALUE).length);
     }
 
+    @Test
+    public void test_02() {
+        N.println(0 - Long.MIN_VALUE);
+        N.println(-1 - Long.MIN_VALUE);
+        N.println(Long.MAX_VALUE);
+        N.println(Long.MAX_VALUE * 1D + 10);
+        N.println(Double.MAX_VALUE - Long.MAX_VALUE);
+        assertFalse((double) Long.MAX_VALUE + 2 - Long.MAX_VALUE > 0);
+
+        assertEquals(Integer.MAX_VALUE, ((int) (Integer.MAX_VALUE + 0.9999999999999999999D)));
+        assertEquals(Long.MAX_VALUE, ((long) (Long.MAX_VALUE + 0.999999999999999D)));
+
+        N.println(Integer.MAX_VALUE - Integer.MIN_VALUE);
+        N.println(Integer.MAX_VALUE * 1L - Integer.MIN_VALUE);
+
+        double d = 100;
+        for (int i = 0; i < 100; i++) {
+            N.println(d--);
+        }
+
+        N.println(Long.MAX_VALUE - Long.MIN_VALUE);
+        N.println(Long.MAX_VALUE);
+        N.println(Long.MIN_VALUE);
+        assertEquals(Long.MAX_VALUE, (long) ((Long.MAX_VALUE * 1D - Long.MIN_VALUE) + Long.MIN_VALUE));
+        N.println(String.format("%s", Long.MAX_VALUE * 1D - Long.MIN_VALUE));
+        assertTrue(N.equals(new int[] { 1, 2, 3, 4, 5 }, IntStream.range(1, 6).toArray()));
+        assertTrue(N.equals(new int[] { 1, 2, 3, 4, 5 }, IntStream.rangeClosed(1, 5).toArray()));
+        assertTrue(N.equals(new int[] { 1, 3, 5 }, IntStream.range(1, 6, 2).toArray()));
+        assertTrue(N.equals(new int[] { 1, 3, 5 }, IntStream.rangeClosed(1, 5, 2).toArray()));
+        assertTrue(N.equals(new int[] { 1, 1, 1 }, IntStream.repeat(1, 3).toArray()));
+
+        assertTrue(N.equals(Integer.MAX_VALUE, IntStream.range(0, Integer.MAX_VALUE).count()));
+        assertTrue(N.equals(Integer.MAX_VALUE + 1L, IntStream.rangeClosed(0, Integer.MAX_VALUE).count()));
+        assertTrue(N.equals(Integer.MAX_VALUE, IntStream.repeat(0, Integer.MAX_VALUE).count()));
+    }
 
     @Test
     public void testRange_NegativeSteps() {
@@ -8126,7 +10217,57 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList(20L, 17L, 14L, 11L), longRange);
     }
 
+    @Test
+    public void testComplexScenarios_NestedParallelism() {
+        List<Integer> result = Stream.range(0, 10)
+                .parallel()
+                .flatMap(i -> Stream.range(i * 10, (i + 1) * 10).parallel())
+                .filter(n -> n % 3 == 0)
+                .sorted()
+                .toList();
 
+        List<Integer> expected = new ArrayList<>();
+        for (int i = 0; i < 100; i += 3) {
+            expected.add(i);
+        }
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void test_exception_parallel() {
+        try {
+            Stream.range(0, 10).forEach(e -> {
+                throw new IOException("oooh");
+            });
+            fail("Should throw IOException");
+        } catch (IOException e) {
+        }
+
+        try {
+            Stream.range(0, 10).peek(e -> {
+                throw new UncheckedIOException(new IOException("oooh"));
+            }).forEach(Fn.println());
+            fail("Should throw UncheckedIOException");
+        } catch (UncheckedIOException e) {
+        }
+
+        try {
+            Stream.range(0, 10).parallel().forEach(e -> {
+                throw new IOException("oooh");
+            });
+            fail("Should throw IOException");
+        } catch (IOException e) {
+        }
+
+        try {
+            Stream.range(0, 10).parallel().peek(e -> {
+                throw new UncheckedIOException(new IOException("oooh"));
+            }).forEach(Fn.println());
+            fail("Should throw UncheckedIOException");
+        } catch (UncheckedIOException e) {
+        }
+
+    }
 
     @Test
     public void test_step() {
@@ -8202,6 +10343,125 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList(1L, 4L, 7L, 10L), result);
     }
 
+    @Test
+    public void test_04() {
+        Iterator<List<String>> iter = PermutationIterator.of(N.toList("a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.of(N.toList("a", "b"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.of(N.toList("a", "a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.of(N.toList("a", "b", "c"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.of(N.toList("a", "b", "a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.of(new ArrayList<String>());
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+
+        iter = PermutationIterator.ordered(N.toList("a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("a", "b"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("a", "a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("a", "b", "c"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("a", "b", "a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(new ArrayList<String>());
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+
+        iter = PermutationIterator.of(N.toList("1", "2", "2", "1"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("a", "b", "c"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("1", "2", "2", "1"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("a", "b", "a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        final Consumer<? super List<Character>> consumer = N::println;
+
+        CharStream.rangeClosed('a', 'e').boxed().permutations().forEach(consumer);
+        assertNotNull(consumer);
+    }
 
     @Test
     public void testRangeClosed_NegativeSteps() {
@@ -8310,6 +10570,30 @@ public class StreamTest extends AbstractTest {
         assertEquals("6-7", result.get(4));
     }
 
+    @Test
+    public void testSplitByChunkCount2() {
+        IntBiFunction<List<Integer>> mapper = (from, to) -> {
+            List<Integer> list = new ArrayList<>();
+            for (int i = from; i < to; i++) {
+                list.add(i);
+            }
+            return list;
+        };
+
+        Stream<List<Integer>> chunks = Stream.splitByChunkCount(10, 3, mapper);
+        List<List<Integer>> result = chunks.toList();
+        assertEquals(3, result.size());
+        assertEquals(Arrays.asList(0, 1, 2, 3), result.get(0));
+        assertEquals(Arrays.asList(4, 5, 6), result.get(1));
+        assertEquals(Arrays.asList(7, 8, 9), result.get(2));
+
+        Stream<List<Integer>> smallerFirstChunks = Stream.splitByChunkCount(10, 3, true, mapper);
+        List<List<Integer>> smallerFirstResult = smallerFirstChunks.toList();
+        assertEquals(3, smallerFirstResult.size());
+        assertEquals(Arrays.asList(0, 1, 2), smallerFirstResult.get(0));
+        assertEquals(Arrays.asList(3, 4, 5), smallerFirstResult.get(1));
+        assertEquals(Arrays.asList(6, 7, 8, 9), smallerFirstResult.get(2));
+    }
 
     @Test
     public void testSplitByChunkCount_SizeSmallerFirst() {
@@ -8687,6 +10971,17 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList(0, 1, 2, 3, 4), generated.limit(5).toList());
     }
 
+    @Test
+    public void testGenerate_RandomNumbers() {
+        Random random = new Random(12345);
+
+        List<Integer> randomNumbers = Stream.generate(() -> random.nextInt(100)).limit(10).toList();
+
+        assertEquals(10, randomNumbers.size());
+        for (Integer num : randomNumbers) {
+            assertTrue(num >= 0 && num < 100);
+        }
+    }
 
     @Test
     public void testMemoryEfficientOperations() {
@@ -8851,10 +11146,77 @@ public class StreamTest extends AbstractTest {
         assertEquals("", lines.get(4));
     }
 
+    @Test
+    public void testResourceManagement() throws IOException {
+        File testFile = Files.createTempFile(tempFolder, "resource-test", ".txt").toFile();
+        Files.write(testFile.toPath(), Arrays.asList("line1", "line2", "line3"));
 
+        AtomicBoolean streamClosed = new AtomicBoolean(false);
 
+        try (Stream<String> stream = Stream.ofLines(testFile).onClose(() -> streamClosed.set(true))) {
+            assertEquals(3, stream.count());
+        }
 
+        assertTrue(streamClosed.get());
+    }
 
+    @Test
+    public void testOfLines_FileNotFound() {
+        File nonExistentFile = new File("non-existent-file.txt");
+
+        try {
+            Stream.ofLines(nonExistentFile).toList();
+            fail("Expected exception for non-existent file");
+        } catch (UncheckedIOException e) {
+            assertTrue(e.getCause() instanceof FileNotFoundException);
+        }
+    }
+
+    @Test
+    public void testOfLines_PathNotFound() {
+        Path nonExistentPath = new File("non-existent-path.txt").toPath();
+
+        try {
+            Stream.ofLines(nonExistentPath).toList();
+            fail("Expected exception for non-existent path");
+        } catch (UncheckedIOException e) {
+            assertTrue(e.getCause() instanceof IOException);
+        }
+    }
+
+    @Test
+    public void testOfLines_DifferentCharsets() throws IOException {
+        File utf8File = Files.createTempFile(tempFolder, "utf8", ".txt").toFile();
+        String content = "Hello\nWorld\n你好\n世界";
+        Files.write(utf8File.toPath(), content.getBytes("UTF-8"));
+
+        List<String> utf8Lines = Stream.ofLines(utf8File, Charsets.UTF_8).toList();
+        assertEquals(4, utf8Lines.size());
+        assertEquals("你好", utf8Lines.get(2));
+        assertEquals("世界", utf8Lines.get(3));
+
+        List<String> isoLines = Stream.ofLines(utf8File, Charset.forName("ISO-8859-1")).toList();
+        assertEquals(4, isoLines.size());
+        assertNotEquals("你好", isoLines.get(2));
+    }
+
+    @Test
+    public void testOfLines_LargeFile() throws IOException {
+        File largeFile = Files.createTempFile(tempFolder, "large", ".txt").toFile();
+        List<String> lines = new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            lines.add("Line " + i);
+        }
+        Files.write(largeFile.toPath(), lines);
+
+        long count = Stream.ofLines(largeFile).count();
+        assertEquals(10000, count);
+
+        long evenCount = Stream.ofLines(largeFile)
+                .filter(line -> line.contains("0") || line.contains("2") || line.contains("4") || line.contains("6") || line.contains("8"))
+                .count();
+        assertTrue(evenCount > 0);
+    }
 
     @Test
     public void testOfLines_ReaderClosed() throws IOException {
@@ -9045,6 +11407,22 @@ public class StreamTest extends AbstractTest {
         assertTrue(files.isEmpty());
     }
 
+    @Test
+    public void testListFiles_DeepRecursion() throws IOException {
+        File root = Files.createTempDirectory(tempFolder, "deep").toFile();
+        File current = root;
+        for (int i = 0; i < 5; i++) {
+            File subDir = new File(current, "level" + i);
+            subDir.mkdir();
+            File file = new File(current, "file" + i + ".txt");
+            file.createNewFile();
+            current = subDir;
+        }
+
+        List<File> files = Stream.listFiles(root, true).toList();
+
+        assertEquals(10, files.size());
+    }
 
     @Test
     public void testListFiles_MixedContent() throws IOException {
@@ -9064,6 +11442,142 @@ public class StreamTest extends AbstractTest {
 
         List<File> recursiveFiles = Stream.listFiles(dir, true, true).toList();
         assertEquals(5, recursiveFiles.size());
+    }
+
+    @Test
+    public void testListFiles_RecursiveDoesNotDescendIntoADirectorySymlink() throws IOException {
+        // The recursive traversal used to queue any entry for which isDirectory() was true - and isDirectory()
+        // FOLLOWS a symbolic link. That walked out of the tree through a link, and looped forever on a link
+        // pointing at one of its own ancestors. It also made IOUtil.walk(..)'s javadoc, which promises links
+        // are never descended into, false.
+        final File real = Files.createTempDirectory(tempFolder, "sym-target").toFile();
+        new File(real, "inside.txt").createNewFile();
+
+        final File root = Files.createTempDirectory(tempFolder, "sym-root").toFile();
+        new File(root, "plain.txt").createNewFile();
+
+        try {
+            Files.createSymbolicLink(new File(root, "link").toPath(), real.toPath());
+        } catch (final UnsupportedOperationException | IOException e) {
+            // Creating a symlink needs a privilege this process may not hold (Windows without Developer Mode).
+            // Abort so the run reports this as skipped rather than as a test that asserted nothing.
+            Assumptions.abort("symbolic links cannot be created here: " + e);
+        }
+
+        final List<String> names = new ArrayList<>();
+        for (final File f : Stream.listFiles(root, true).toList()) {
+            names.add(f.getName());
+        }
+        Collections.sort(names);
+
+        // The link itself is reported; what it points at is not.
+        assertEquals(N.asList("link", "plain.txt"), names);
+    }
+
+    @Test
+    public void testListFiles_RecursiveTerminatesOnACyclicSymlink() throws IOException {
+        final File root = Files.createTempDirectory(tempFolder, "sym-cycle").toFile();
+        new File(root, "f.txt").createNewFile();
+
+        try {
+            Files.createSymbolicLink(new File(root, "self").toPath(), root.toPath());
+        } catch (final UnsupportedOperationException | IOException e) {
+            Assumptions.abort("symbolic links cannot be created here: " + e); // see above
+        }
+
+        assertEquals(2, Stream.listFiles(root, true).toList().size());
+    }
+
+    /**
+     * Creates a Windows directory junction, or aborts the test if this platform has none.
+     *
+     * <p>A junction is deliberately used instead of a symbolic link: {@code Files.createSymbolicLink}
+     * needs {@code SeCreateSymbolicLinkPrivilege} and fails on a stock Windows account, which is why
+     * {@link #testListFiles_RecursiveTerminatesOnACyclicSymlink()} is skipped there - exactly the platform
+     * where junctions exist. {@code mklink /J} needs no privilege.
+     */
+    private static void createJunctionOrAbort(final File link, final File target) throws Exception {
+        if (!IOUtil.IS_OS_WINDOWS) {
+            Assumptions.abort("directory junctions are a Windows concept");
+        }
+
+        final Process p = new ProcessBuilder("cmd", "/c", "mklink", "/J", link.getAbsolutePath(), target.getAbsolutePath())
+                .redirectErrorStream(true)
+                .start();
+
+        p.waitFor();
+
+        if (!(p.exitValue() == 0 && link.exists())) {
+            Assumptions.abort("a directory junction could not be created here");
+        }
+    }
+
+    /** Unlinks a junction without touching its target. Never use a recursive delete on one. */
+    private static void unlinkQuietly(final File link) {
+        try {
+            java.nio.file.Files.deleteIfExists(link.toPath());
+        } catch (final IOException e) {
+            // best effort: the temp folder rule cleans up the rest
+        }
+    }
+
+    /**
+     * {@code Stream.listFiles(dir, true)} must not descend into a Windows directory junction.
+     *
+     * <p>The guard used {@code !Files.isSymbolicLink(path)}, which is {@code false} for a junction (it
+     * carries the {@code MOUNT_POINT} reparse tag, not {@code SYMLINK}), so the walk descended through one.
+     * Measured before the fix on this tree: {@code IOUtil.listFiles} returned 5 entries while
+     * {@code Stream.listFiles} returned 383 (capped), 365 of them {@code loop\loop\loop\...} repetitions.
+     * The javadoc claims parity with {@link IOUtil#listFiles(File, boolean, boolean)}, so that parity is
+     * what this asserts.
+     */
+    @Test
+    public void testListFiles_DoesNotDescendIntoAWindowsJunction() throws Exception {
+        final File root = Files.createTempDirectory(tempFolder, "junction-cycle").toFile();
+        new File(root, "a.txt").createNewFile();
+        final File sub = new File(root, "sub");
+        sub.mkdir();
+        new File(sub, "b.txt").createNewFile();
+
+        final File loop = new File(root, "loop");
+        createJunctionOrAbort(loop, root);
+
+        try {
+            final List<File> viaStream = Stream.listFiles(root, true).limit(400).toList();
+            final List<File> viaIoUtil = IOUtil.listFiles(root, true, false);
+
+            assertEquals(viaIoUtil.size(), viaStream.size(), "Stream.listFiles must match IOUtil.listFiles, as its javadoc claims");
+            assertTrue(viaStream.stream().noneMatch(f -> f.getPath().contains("loop" + File.separator + "loop")),
+                    "the traversal descended into the junction: " + viaStream);
+        } finally {
+            unlinkQuietly(loop);
+        }
+    }
+
+    /**
+     * A junction needs no cycle to be dangerous: one pointing outside the tree made the traversal report
+     * files from outside its own root, contradicting "a link is therefore never followed out of the tree".
+     */
+    @Test
+    public void testListFiles_DoesNotFollowAJunctionOutOfTheTree() throws Exception {
+        final File root = Files.createTempDirectory(tempFolder, "junction-escape").toFile();
+        new File(root, "a.txt").createNewFile();
+
+        final File outside = Files.createTempDirectory(tempFolder, "junction-outside").toFile();
+        new File(outside, "SECRET.txt").createNewFile();
+
+        final File escape = new File(root, "escape");
+        createJunctionOrAbort(escape, outside);
+
+        try {
+            final List<File> viaStream = Stream.listFiles(root, true).limit(400).toList();
+
+            assertTrue(viaStream.stream().noneMatch(f -> "SECRET.txt".equals(f.getName())),
+                    "the traversal followed the junction out of the tree: " + viaStream);
+            assertEquals(IOUtil.listFiles(root, true, false).size(), viaStream.size());
+        } finally {
+            unlinkQuietly(escape);
+        }
     }
 
     @Test
@@ -9203,8 +11717,42 @@ public class StreamTest extends AbstractTest {
         assertTrue(result.get(1).startsWith("Time: "));
     }
 
+    @Test
+    public void testInterval_WithSupplier() throws InterruptedException {
+        List<Long> timestamps = new ArrayList<>();
+        long startTime = System.currentTimeMillis();
 
+        Stream.interval(50, s -> s).limit(3).forEach(timestamps::add);
 
+        assertEquals(3, timestamps.size());
+
+        for (int i = 1; i < timestamps.size(); i++) {
+            long interval = timestamps.get(i) - timestamps.get(i - 1);
+            assertTrue(interval >= 40 && interval <= 70, "Interval should be around 50ms");
+        }
+    }
+
+    @Test
+    public void testInterval_WithDelayAndSupplier() throws InterruptedException {
+        List<String> results = new ArrayList<>();
+
+        Stream.interval(100, 50, () -> "tick").limit(3).forEach(results::add);
+
+        assertEquals(Arrays.asList("tick", "tick", "tick"), results);
+    }
+
+    @Test
+    public void testInterval_WithLongFunction() throws InterruptedException {
+        List<Long> values = new ArrayList<>();
+
+        Stream.interval(50, timeMillis -> timeMillis).limit(3).forEach(values::add);
+
+        assertEquals(3, values.size());
+
+        for (Long value : values) {
+            assertTrue(value > 0);
+        }
+    }
 
     @Test
     public void testInterval_CancellationBehavior() throws InterruptedException {
@@ -9331,6 +11879,31 @@ public class StreamTest extends AbstractTest {
         assertTrue(results.contains(2));
     }
 
+    @Test
+    public void testThreadSafety() throws InterruptedException {
+        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1000);
+
+        Thread producer = new Thread(() -> {
+            for (int i = 0; i < 100; i++) {
+                try {
+                    queue.put(i);
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        });
+
+        producer.start();
+
+        List<Integer> consumed = Stream.observe(queue, Duration.ofMillis(500)).filter(n -> n % 2 == 0).toList();
+
+        producer.join();
+
+        assertTrue(consumed.size() > 0);
+        assertTrue(consumed.stream().allMatch(n -> n % 2 == 0));
+    }
 
     @Test
     public void testConcat() {
@@ -9417,7 +11990,43 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
     }
 
+    @Test
+    public void testConcat_StreamClose() {
+        AtomicBoolean stream1Closed = new AtomicBoolean(false);
+        AtomicBoolean stream2Closed = new AtomicBoolean(false);
 
+        Stream<String> stream1 = createStream01("a", "b").onClose(() -> stream1Closed.set(true));
+        Stream<String> stream2 = createStream01("c", "d").onClose(() -> stream2Closed.set(true));
+
+        try (Stream<String> concatenated = Stream.concat(stream1, stream2)) {
+            assertEquals(Arrays.asList("a", "b", "c", "d"), concatenated.toList());
+        }
+
+        assertTrue(stream1Closed.get());
+        assertTrue(stream2Closed.get());
+    }
+
+    @Test
+    public void testConcat_CollectionOfStreams_CloseHandlers() {
+        List<AtomicBoolean> closedFlags = new ArrayList<>();
+        List<Stream<Integer>> streams = new ArrayList<>();
+
+        for (int i = 0; i < 3; i++) {
+            AtomicBoolean closed = new AtomicBoolean(false);
+            closedFlags.add(closed);
+            final int base = i * 10;
+            streams.add(createStream(base, base + 1).onClose(() -> closed.set(true)));
+        }
+
+        try (Stream<Integer> concatenated = Stream.concat(streams)) {
+            List<Integer> result = concatenated.toList();
+            assertEquals(Arrays.asList(0, 1, 10, 11, 20, 21), result);
+        }
+
+        for (AtomicBoolean flag : closedFlags) {
+            assertTrue(flag.get());
+        }
+    }
 
     @Test
     public void testConcat_CollectionSnapshotPreservesTraversalAndClosing() {
@@ -9608,6 +12217,74 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
+    public void testParallelConcatIteratorsWithOnlyNullSources() {
+        final List<Iterator<Integer>> sources = Arrays.asList(null, null);
+
+        assertTrue(Stream.parallelConcatIterators(sources).toList().isEmpty());
+        assertTrue(Stream.parallelConcatIterators(sources, 1).toList().isEmpty());
+        assertTrue(Stream.parallelConcatIterators(sources, 1, 1).toList().isEmpty());
+        assertTrue(Stream.<Integer> parallelConcat((Iterator<Integer>) null, (Iterator<Integer>) null).toList().isEmpty());
+    }
+
+    @Test
+    public void testMinByAndMaxByWithOnlyNullKeys() {
+        assertEquals("a", Stream.of("a", "b").minBy(value -> (String) null).get());
+        assertEquals("a", Stream.of("a", "b").maxBy(value -> (String) null).get());
+    }
+
+    @Test
+    public void testTransformViaJdkStreamModeAndDeferral() {
+        for (final boolean deferred : new boolean[] { false, true }) {
+            final AtomicInteger transferCalls = new AtomicInteger();
+            try (final Stream<Integer> result = Stream.of(1, 2).transformViaJdkStream(jdkStream -> {
+                transferCalls.incrementAndGet();
+                assertFalse(jdkStream.isParallel());
+                return jdkStream.parallel().map(value -> value * 2);
+            }, deferred)) {
+                assertEquals(deferred ? 0 : 1, transferCalls.get());
+                assertEquals(!deferred, result.isParallel());
+                assertEquals(Arrays.asList(2, 4), result.sorted().toList());
+                assertEquals(1, transferCalls.get());
+            }
+        }
+        try (final Stream<Integer> result = Stream.of(1, 2).transformViaJdkStream(java.util.stream.Stream::parallel)) {
+            assertTrue(result.isParallel());
+        }
+    }
+
+    @Test
+    public void testParallelConcatIteratorsSkipsNullSourcesAndRetainsNullElements() {
+        for (int nullIndex = 0; nullIndex < 3; nullIndex++) {
+            for (boolean explicitBufferSize : new boolean[] { false, true }) {
+                final List<Iterator<Integer>> sources = new ArrayList<>();
+                sources.add(Arrays.asList(1, (Integer) null).iterator());
+                sources.add(Arrays.asList(2, 3).iterator());
+                sources.add(nullIndex, null);
+
+                final Stream<Integer> stream = explicitBufferSize ? Stream.parallelConcatIterators(sources, 1, 1)
+                        : Stream.parallelConcatIterators(sources, 1);
+
+                assertEquals(Arrays.asList(1, null, 2, 3), stream.toList());
+            }
+        }
+    }
+
+    @Test
+    public void testParallelConcatIteratorVarargsSkipsNullSourcesAndRetainsNullElements() {
+        for (int nullIndex = 0; nullIndex < 3; nullIndex++) {
+            final List<Iterator<Integer>> sources = new ArrayList<>();
+            sources.add(Arrays.asList(1, (Integer) null).iterator());
+            sources.add(Arrays.asList(2, 3).iterator());
+            sources.add(nullIndex, null);
+
+            final List<Integer> result = Stream.parallelConcat(sources.get(0), sources.get(1), sources.get(2)).toList();
+
+            assertEquals(4, result.size());
+            assertTrue(result.containsAll(Arrays.asList(1, null, 2, 3)));
+        }
+    }
+
+    @Test
     public void testParallelConcatRejectsDisposableAfterRegularElement() {
         NoCachingNoUpdating.DisposableArray<Integer> disposable = NoCachingNoUpdating.DisposableArray.wrap(new Integer[] { 1 });
         Stream<Object> source = Stream.of((Object) "safe", disposable);
@@ -9737,6 +12414,25 @@ public class StreamTest extends AbstractTest {
         assertEquals("cz3", result.get(2));
     }
 
+    @Test
+    public void testZipCharStreamCollectionWithNFunction() {
+        Collection<CharStream> streams = Arrays.asList(CharStream.of('a', 'b', 'c'), CharStream.of('x', 'y', 'z'), CharStream.of('1', '2', '3'));
+
+        CharNFunction<String> zipFunction = chars -> {
+            StringBuilder sb = new StringBuilder();
+            for (char c : chars) {
+                sb.append(c);
+            }
+            return sb.toString();
+        };
+
+        List<String> result = Stream.zip(streams, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals("ax1", result.get(0));
+        assertEquals("by2", result.get(1));
+        assertEquals("cz3", result.get(2));
+    }
 
     @Test
     public void testZipByteArraysWithBiFunction() {
@@ -9831,6 +12527,26 @@ public class StreamTest extends AbstractTest {
         assertEquals(Integer.valueOf(18), result.get(2));
     }
 
+    @Test
+    public void testZipByteStreamCollectionWithNFunction() {
+        Collection<ByteStream> streams = Arrays.asList(ByteStream.of((byte) 1, (byte) 2, (byte) 3), ByteStream.of((byte) 4, (byte) 5, (byte) 6),
+                ByteStream.of((byte) 7, (byte) 8, (byte) 9));
+
+        ByteNFunction<Integer> zipFunction = bytes -> {
+            int sum = 0;
+            for (byte b : bytes) {
+                sum += b;
+            }
+            return sum;
+        };
+
+        List<Integer> result = Stream.zip(streams, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Integer.valueOf(12), result.get(0));
+        assertEquals(Integer.valueOf(15), result.get(1));
+        assertEquals(Integer.valueOf(18), result.get(2));
+    }
 
     @Test
     public void testZipShortArraysWithBiFunction() {
@@ -9925,6 +12641,26 @@ public class StreamTest extends AbstractTest {
         assertEquals(Integer.valueOf(18), result.get(2));
     }
 
+    @Test
+    public void testZipShortStreamCollectionWithNFunction() {
+        Collection<ShortStream> streams = Arrays.asList(ShortStream.of((short) 1, (short) 2, (short) 3), ShortStream.of((short) 4, (short) 5, (short) 6),
+                ShortStream.of((short) 7, (short) 8, (short) 9));
+
+        ShortNFunction<Integer> zipFunction = shorts -> {
+            int sum = 0;
+            for (short s : shorts) {
+                sum += s;
+            }
+            return sum;
+        };
+
+        List<Integer> result = Stream.zip(streams, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Integer.valueOf(12), result.get(0));
+        assertEquals(Integer.valueOf(15), result.get(1));
+        assertEquals(Integer.valueOf(18), result.get(2));
+    }
 
     @Test
     public void testZipIntArraysWithBiFunction() {
@@ -10019,6 +12755,25 @@ public class StreamTest extends AbstractTest {
         assertEquals(Integer.valueOf(18), result.get(2));
     }
 
+    @Test
+    public void testZipIntStreamCollectionWithNFunction() {
+        Collection<IntStream> streams = Arrays.asList(IntStream.of(1, 2, 3), IntStream.of(4, 5, 6), IntStream.of(7, 8, 9));
+
+        IntNFunction<Integer> zipFunction = ints -> {
+            int sum = 0;
+            for (int i : ints) {
+                sum += i;
+            }
+            return sum;
+        };
+
+        List<Integer> result = Stream.zip(streams, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Integer.valueOf(12), result.get(0));
+        assertEquals(Integer.valueOf(15), result.get(1));
+        assertEquals(Integer.valueOf(18), result.get(2));
+    }
 
     @Test
     public void testZipLongArraysWithBiFunction() {
@@ -10113,6 +12868,25 @@ public class StreamTest extends AbstractTest {
         assertEquals(Long.valueOf(18L), result.get(2));
     }
 
+    @Test
+    public void testZipLongStreamCollectionWithNFunction() {
+        Collection<LongStream> streams = Arrays.asList(LongStream.of(1L, 2L, 3L), LongStream.of(4L, 5L, 6L), LongStream.of(7L, 8L, 9L));
+
+        LongNFunction<Long> zipFunction = longs -> {
+            long sum = 0;
+            for (long l : longs) {
+                sum += l;
+            }
+            return sum;
+        };
+
+        List<Long> result = Stream.zip(streams, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Long.valueOf(12L), result.get(0));
+        assertEquals(Long.valueOf(15L), result.get(1));
+        assertEquals(Long.valueOf(18L), result.get(2));
+    }
 
     @Test
     public void testZipFloatArraysWithBiFunction() {
@@ -10207,6 +12981,25 @@ public class StreamTest extends AbstractTest {
         assertEquals(Float.valueOf(18f), result.get(2));
     }
 
+    @Test
+    public void testZipFloatStreamCollectionWithNFunction() {
+        Collection<FloatStream> streams = Arrays.asList(FloatStream.of(1, 2, 3), FloatStream.of(4, 5f, 6f), FloatStream.of(7f, 8f, 9f));
+
+        FloatNFunction<Float> zipFunction = floats -> {
+            float sum = 0;
+            for (float l : floats) {
+                sum += l;
+            }
+            return sum;
+        };
+
+        List<Float> result = Stream.zip(streams, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Float.valueOf(12), result.get(0));
+        assertEquals(Float.valueOf(15f), result.get(1));
+        assertEquals(Float.valueOf(18f), result.get(2));
+    }
 
     @Test
     public void testZipDoubleArraysWithBiFunction() {
@@ -10301,6 +13094,25 @@ public class StreamTest extends AbstractTest {
         assertEquals(Double.valueOf(18d), result.get(2));
     }
 
+    @Test
+    public void testZipDoubleStreamCollectionWithNFunction() {
+        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1d, 2d, 3d), DoubleStream.of(4d, 5d, 6d), DoubleStream.of(7d, 8d, 9d));
+
+        DoubleNFunction<Double> zipFunction = doubles -> {
+            double sum = 0;
+            for (double l : doubles) {
+                sum += l;
+            }
+            return sum;
+        };
+
+        List<Double> result = Stream.zip(streams, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Double.valueOf(12d), result.get(0));
+        assertEquals(Double.valueOf(15d), result.get(1));
+        assertEquals(Double.valueOf(18d), result.get(2));
+    }
 
     @Test
     public void testZipCharArrays() {
@@ -10607,6 +13419,27 @@ public class StreamTest extends AbstractTest {
         assertEquals("-+3", result.get(2));
     }
 
+    @Test
+    public void testZipCharStreamCollectionWithValuesForNone() {
+        Collection<CharStream> streams = Arrays.asList(CharStream.of('a'), CharStream.of('x', 'y'), CharStream.of('1', '2', '3'));
+
+        char[] valuesForNone = { '-', '+', '*' };
+
+        CharNFunction<String> zipFunction = chars -> {
+            StringBuilder sb = new StringBuilder();
+            for (char c : chars) {
+                sb.append(c);
+            }
+            return sb.toString();
+        };
+
+        List<String> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals("ax1", result.get(0));
+        assertEquals("-y2", result.get(1));
+        assertEquals("-+3", result.get(2));
+    }
 
     @Test
     public void testZipByteArraysWithValueForNone() {
@@ -10701,6 +13534,27 @@ public class StreamTest extends AbstractTest {
         assertEquals(Integer.valueOf(39), result.get(2));
     }
 
+    @Test
+    public void testZipByteStreamCollectionWithValuesForNone() {
+        Collection<ByteStream> streams = Arrays.asList(ByteStream.of((byte) 1), ByteStream.of((byte) 4, (byte) 5), ByteStream.of((byte) 7, (byte) 8, (byte) 9));
+
+        byte[] valuesForNone = { 10, 20, 30 };
+
+        ByteNFunction<Integer> zipFunction = bytes -> {
+            int sum = 0;
+            for (byte b : bytes) {
+                sum += b;
+            }
+            return sum;
+        };
+
+        List<Integer> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Integer.valueOf(12), result.get(0));
+        assertEquals(Integer.valueOf(23), result.get(1));
+        assertEquals(Integer.valueOf(39), result.get(2));
+    }
 
     @Test
     public void testZipShortArraysWithValueForNone() {
@@ -10795,6 +13649,28 @@ public class StreamTest extends AbstractTest {
         assertEquals(Integer.valueOf(39), result.get(2));
     }
 
+    @Test
+    public void testZipShortStreamCollectionWithValuesForNone() {
+        Collection<ShortStream> streams = Arrays.asList(ShortStream.of((short) 1), ShortStream.of((short) 4, (short) 5),
+                ShortStream.of((short) 7, (short) 8, (short) 9));
+
+        short[] valuesForNone = { 10, 20, 30 };
+
+        ShortNFunction<Integer> zipFunction = shorts -> {
+            int sum = 0;
+            for (short s : shorts) {
+                sum += s;
+            }
+            return sum;
+        };
+
+        List<Integer> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Integer.valueOf(12), result.get(0));
+        assertEquals(Integer.valueOf(23), result.get(1));
+        assertEquals(Integer.valueOf(39), result.get(2));
+    }
 
     @Test
     public void testZipIntArraysWithValueForNone() {
@@ -10889,6 +13765,27 @@ public class StreamTest extends AbstractTest {
         assertEquals(Integer.valueOf(39), result.get(2));
     }
 
+    @Test
+    public void testZipIntStreamCollectionWithValuesForNone() {
+        Collection<IntStream> streams = Arrays.asList(IntStream.of(1), IntStream.of(4, 5), IntStream.of(7, 8, 9));
+
+        int[] valuesForNone = { 10, 20, 30 };
+
+        IntNFunction<Integer> zipFunction = ints -> {
+            int sum = 0;
+            for (int i : ints) {
+                sum += i;
+            }
+            return sum;
+        };
+
+        List<Integer> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Integer.valueOf(12), result.get(0));
+        assertEquals(Integer.valueOf(23), result.get(1));
+        assertEquals(Integer.valueOf(39), result.get(2));
+    }
 
     @Test
     public void testZipLongArraysWithValueForNone() {
@@ -10983,6 +13880,27 @@ public class StreamTest extends AbstractTest {
         assertEquals(Long.valueOf(39L), result.get(2));
     }
 
+    @Test
+    public void testZipLongStreamCollectionWithValuesForNone() {
+        Collection<LongStream> streams = Arrays.asList(LongStream.of(1L), LongStream.of(4L, 5L), LongStream.of(7L, 8L, 9L));
+
+        long[] valuesForNone = { 10L, 20L, 30L };
+
+        LongNFunction<Long> zipFunction = longs -> {
+            long sum = 0;
+            for (long l : longs) {
+                sum += l;
+            }
+            return sum;
+        };
+
+        List<Long> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Long.valueOf(12L), result.get(0));
+        assertEquals(Long.valueOf(23L), result.get(1));
+        assertEquals(Long.valueOf(39L), result.get(2));
+    }
 
     @Test
     public void testZipFloatArraysWithValueForNone() {
@@ -11077,6 +13995,27 @@ public class StreamTest extends AbstractTest {
         assertEquals(Float.valueOf(39f), result.get(2));
     }
 
+    @Test
+    public void testZipFloatStreamCollectionWithValuesForNone() {
+        Collection<FloatStream> streams = Arrays.asList(FloatStream.of(1), FloatStream.of(4, 5f), FloatStream.of(7f, 8f, 9f));
+
+        float[] valuesForNone = { 10, 20, 30 };
+
+        FloatNFunction<Float> zipFunction = floats -> {
+            float sum = 0;
+            for (float l : floats) {
+                sum += l;
+            }
+            return sum;
+        };
+
+        List<Float> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Float.valueOf(12), result.get(0));
+        assertEquals(Float.valueOf(23), result.get(1));
+        assertEquals(Float.valueOf(39f), result.get(2));
+    }
 
     @Test
     public void testZipDoubleArraysWithValueForNone() {
@@ -11171,6 +14110,27 @@ public class StreamTest extends AbstractTest {
         assertEquals(Double.valueOf(39d), result.get(2));
     }
 
+    @Test
+    public void testZipDoubleStreamCollectionWithValuesForNone() {
+        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1d), DoubleStream.of(4d, 5d), DoubleStream.of(7d, 8d, 9d));
+
+        double[] valuesForNone = { 10d, 20d, 30d };
+
+        DoubleNFunction<Double> zipFunction = doubles -> {
+            double sum = 0;
+            for (double l : doubles) {
+                sum += l;
+            }
+            return sum;
+        };
+
+        List<Double> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
+
+        assertEquals(3, result.size());
+        assertEquals(Double.valueOf(12d), result.get(0));
+        assertEquals(Double.valueOf(23d), result.get(1));
+        assertEquals(Double.valueOf(39d), result.get(2));
+    }
 
     @Test
     public void testZipArraysWithValueForNone() {
@@ -11520,7 +14480,40 @@ public class StreamTest extends AbstractTest {
         assertEquals(5, Stream.iterate(1, x -> x + 1).limit(5).count());
     }
 
+    @Test
+    @Timeout(10)
+    public void testMultipleSubscribers_Chaining() throws Exception {
+        List<Integer> subscriber1Results = new ArrayList<>();
+        List<Integer> subscriber2Results = new ArrayList<>();
 
+        Stream.of(1, 2, 3, 4, 5, 6).addSubscriber(s -> {
+            s.filter(x -> x % 2 == 0).forEach(subscriber1Results::add);
+        }).filterWhileAddSubscriber(x -> x % 3 != 0, s -> {
+            s.forEach(subscriber2Results::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, 2, 4, 5), mainStreamResults);
+        assertEquals(Arrays.asList(2, 4, 6), subscriber1Results);
+        assertEquals(Arrays.asList(3, 6), subscriber2Results);
+    }
+
+    @Test
+    public void test_ArrayDeque() {
+        assertDoesNotThrow(() -> {
+            final ArrayDeque<Integer> queue = new ArrayDeque<>(10);
+
+            for (int i = 0; i < 16; i++) {
+                if (queue.size() > 10) {
+                    queue.removeFirst();
+                }
+
+                queue.add(i);
+                N.println(queue);
+            }
+        });
+    }
 
     @Test
     public void testExceptionPropagation() {
@@ -11553,8 +14546,29 @@ public class StreamTest extends AbstractTest {
 
     // TODO: Remaining Stream$5/Stream$6 gaps are anonymous iterator branches for async windowing/merge internals that require deterministic scheduler control beyond the current unit-test harness.
 
+    @Test
+    public void testMaxWaitRejectsZeroDuration() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).maxWait(Duration.ZERO, 99));
 
+        Supplier<Integer> defaultSupplier = () -> 99;
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).maxWait(Duration.ZERO, defaultSupplier));
+    }
 
+    @Test
+    public void testMaxWaitRejectsNegativeDuration() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).maxWait(Duration.ofMillis(-1), 99));
+
+        Supplier<Integer> defaultSupplier = () -> 99;
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).maxWait(Duration.ofMillis(-1), defaultSupplier));
+    }
+
+    @Test
+    public void testMaxWaitRejectsNullDuration() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).maxWait((Duration) null, 99));
+
+        Supplier<Integer> defaultSupplier = () -> 99;
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).maxWait((Duration) null, defaultSupplier));
+    }
 
     @Test
     public void testZipIteratorsWithNullIteratorInCollection() {
@@ -11823,6 +14837,11 @@ public class StreamTest extends AbstractTest {
         assertEquals(3, chunks);
     }
 
+    @Test
+    public void testSplitByChunkCount_sizeSmallerFirst_skip_uncovered() {
+        // chunk sizes smaller-first for 7/3 => [2,2,3]; skip 1 -> [2,3]
+        assertEquals(N.asList(2, 3), Stream.splitByChunkCount(7, 3, true, (from, to) -> to - from).skip(1).toList());
+    }
 
     @Test
     public void testSplitByChunkCount_sizeBiggerFirst_skip_uncovered() {
@@ -12042,7 +15061,33 @@ public class StreamTest extends AbstractTest {
 
     // --- regression tests for 2026-06-10 deep-review fixes ---
 
+    @Test
+    public void testTimeBasedSlidingWindow_noDuplicatesAcrossOverlappingWindows() {
+        // regression: next()'s pull loop queued an element belonging to a future window AND kept it as
+        // timedNext, so overlapping windows accumulated it twice and re-queued a second copy
+        final long t0 = System.currentTimeMillis();
+        final Long a = t0 + 60_000; // 1 min after the first window start
+        final Long x = t0 + 720_000; // 12 min: belongs to the windows starting at 5 and 10 min
+        final WindowHandler<Long, List<Long>> handler = WindowHandler.of(Long::longValue);
 
+        final List<List<Long>> windows = Stream.of(a, x).window(Duration.ofMinutes(10), Duration.ofMinutes(5), () -> t0, handler, Collectors.toList()).toList();
+
+        assertEquals(N.asList(N.asList(a), N.asList(x), N.asList(x)), windows);
+    }
+
+    @Test
+    public void testBoundedWindowCountClose_eventTimeContinuesFromLastEvent() {
+        // regression: when a window closed early on element count in event-time mode, the next window
+        // started at the wall clock instead of the last event time, silently dropping buffered events
+        final long t0 = System.currentTimeMillis();
+        final WindowHandler<Long, List<Long>> handler = WindowHandler.of(Long::longValue);
+
+        final List<List<Long>> windows = Stream.of(t0 - 100_000, t0 - 99_000, t0 - 98_000, t0 - 97_000)
+                .window(Duration.ofHours(1), 2, () -> t0 - 200_000, handler, Collectors.toList())
+                .toList();
+
+        assertEquals(N.asList(N.asList(t0 - 100_000, t0 - 99_000), N.asList(t0 - 98_000, t0 - 97_000)), windows);
+    }
 
     @Test
     public void testParallelConcatValidatesReadThreadNum() {
@@ -12059,8 +15104,94 @@ public class StreamTest extends AbstractTest {
         assertEquals(N.asSet(1, 2, 3), Stream.parallelConcat(N.asList(Stream.of(1, 2), Stream.of(3)), 2).toSet());
     }
 
+    @Test
+    public void testParallelMergeClosesInputStreamsOnCloseWithoutConsumption() {
+        // regression: the size >= 4 path returned a lazy stream without close handlers for the inputs,
+        // so closing the result without consuming it never closed the source streams
+        final AtomicInteger closedCount = new AtomicInteger();
+        final List<Stream<Integer>> sources = new ArrayList<>();
 
+        for (int i = 0; i < 4; i++) {
+            sources.add(Stream.of(1, 2, 3).onClose(closedCount::incrementAndGet));
+        }
 
+        Stream.parallelMerge(sources, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 4).close();
+
+        assertEquals(4, closedCount.get());
+    }
+
+    @Test
+    public void testCollectionZipCloseHandlersUseSourceSnapshot() {
+        final AtomicInteger closedCount = new AtomicInteger();
+        List<Stream<Integer>> sources = new ArrayList<>(
+                Arrays.asList(Stream.of(1).onClose(closedCount::incrementAndGet), Stream.of(2).onClose(closedCount::incrementAndGet)));
+        Stream<Integer> zipped = Stream.zip(sources, values -> values.get(0) + values.get(1));
+
+        sources.clear();
+        zipped.close();
+        assertEquals(2, closedCount.get());
+
+        closedCount.set(0);
+        sources = new ArrayList<>(Arrays.asList(Stream.of(1).onClose(closedCount::incrementAndGet), Stream.of(2).onClose(closedCount::incrementAndGet)));
+        zipped = Stream.zip(sources, Arrays.asList(0, 0), values -> values.get(0) + values.get(1));
+
+        sources.clear();
+        zipped.close();
+        assertEquals(2, closedCount.get());
+
+        closedCount.set(0);
+        sources = new ArrayList<>(Arrays.asList(Stream.of(1).onClose(closedCount::incrementAndGet), Stream.of(2).onClose(closedCount::incrementAndGet)));
+        zipped = Stream.parallelZip(sources, values -> values.get(0) + values.get(1), 2);
+
+        sources.clear();
+        zipped.close();
+        assertEquals(2, closedCount.get());
+
+        closedCount.set(0);
+        sources = new ArrayList<>(Arrays.asList(Stream.of(1).onClose(closedCount::incrementAndGet), Stream.of(2).onClose(closedCount::incrementAndGet)));
+        zipped = Stream.parallelZip(sources, Arrays.asList(0, 0), values -> values.get(0) + values.get(1), 2);
+
+        sources.clear();
+        zipped.close();
+        assertEquals(2, closedCount.get());
+    }
+
+    @Test
+    public void testCompositeCloseBeforeConsumptionSeesLateSourceCloseHandlers() {
+        final AtomicInteger closedCount = new AtomicInteger();
+        final Stream<Integer> source = Stream.of(1);
+        final Stream<Integer> concatenated = Stream.concat(Collections.singletonList(source));
+
+        source.onClose(closedCount::incrementAndGet);
+        concatenated.close();
+        assertEquals(1, closedCount.get());
+
+        closedCount.set(0);
+        final Stream<Integer> singleSource = Stream.of(1);
+        final Stream<Integer> zipWithCollection = singleSource.zipWith(Collections.singletonList(2), Integer::sum);
+
+        singleSource.onClose(closedCount::incrementAndGet);
+        zipWithCollection.close();
+        assertEquals(1, closedCount.get());
+
+        closedCount.set(0);
+        final Stream<Integer> left = Stream.of(1);
+        final Stream<Integer> right = Stream.of(2);
+        final Stream<Integer> zipped = Stream.zip(left, right, Integer::sum);
+
+        left.onClose(closedCount::incrementAndGet);
+        right.onClose(closedCount::incrementAndGet);
+        zipped.close();
+        assertEquals(2, closedCount.get());
+
+        closedCount.set(0);
+        final IntStream intSource = IntStream.of(1);
+        final IntStream intConcatenated = IntStream.concat(Collections.singletonList(intSource));
+
+        intSource.onClose(closedCount::incrementAndGet);
+        intConcatenated.close();
+        assertEquals(1, closedCount.get());
+    }
 
     @Test
     public void testPrimitiveCollectionZipCloseHandlersUseSourceSnapshots() {
@@ -12172,7 +15303,49 @@ public class StreamTest extends AbstractTest {
         assertTrue(Stream.parallelMerge(sources, (x, y) -> MergeResult.TAKE_FIRST, 2).toList().isEmpty());
     }
 
+    @Test
+    public void testGroupJoinParallelNoSharedStateRace() {
+        // regression: the groupJoin mappers stored the looked-up group in a shared instance field,
+        // racing across parallel worker threads and returning another element's (or no) group
+        final List<Integer> left = new ArrayList<>();
+        for (int i = 0; i < 20000; i++) {
+            left.add(i);
+        }
+        final List<Integer> right = new ArrayList<>();
+        for (int i = 0; i < 20000; i += 2) {
+            right.add(i);
+        }
 
+        final List<Pair<Integer, List<Integer>>> joined = Stream.of(left)
+                .parallel(8)
+                .groupJoin(right, Fn.identity(), Fn.identity(), (final Integer t, final List<Integer> l) -> Pair.of(t, l))
+                .toList();
+
+        assertEquals(20000, joined.size());
+
+        for (final Pair<Integer, List<Integer>> p : joined) {
+            if (p.left() % 2 == 0) {
+                assertEquals(N.asList(p.left()), p.right());
+            } else {
+                assertTrue(p.right().isEmpty());
+            }
+        }
+    }
+
+    @Test
+    public void testStreamArgJoinsWithEmptyLeftKeepRightRows() {
+        // regression: the right-side rows were only materialized inside the flatMap mapper, which
+        // never runs for an empty left stream, so full/right joins silently returned []
+        final List<Pair<Integer, Integer>> full = Stream.<Integer> empty()
+                .fullJoin(Stream.of(10, 20), Fn.identity(), Fn.identity(), (t, u) -> Pair.of(t, u))
+                .toList();
+        assertEquals(N.asList(Pair.of((Integer) null, 10), Pair.of((Integer) null, 20)), full);
+
+        final List<Pair<Integer, Integer>> rightJoined = Stream.<Integer> empty()
+                .rightJoin(Stream.of(10, 20), Fn.identity(), Fn.identity(), (t, u) -> Pair.of(t, u))
+                .toList();
+        assertEquals(N.asList(Pair.of((Integer) null, 10), Pair.of((Integer) null, 20)), rightJoined);
+    }
 
     @Test
     public void testJoinByRangeEmptyLeftRoutesUnjoinedElements() {
@@ -12236,6 +15409,12 @@ public class StreamTest extends AbstractTest {
         assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toList());
     }
 
+    @Test
+    public void testWindowAssignerCanBeImplementedOutsideUtilPackage() {
+        final IdentityWindowAssigner assigner = new IdentityWindowAssigner();
+
+        assertEquals(Arrays.asList(1, 2, 3), assigner.apply(ObjIterator.of(1, 2, 3)).toList());
+    }
 
     private static final class IdentityWindowAssigner extends WindowAssigner {
 
@@ -12249,6 +15428,24 @@ public class StreamTest extends AbstractTest {
         }
     }
 
+    @Test
+    public void testBooleanSupplierIteratorsStayExhausted() {
+        final AtomicInteger conditionCalls = new AtomicInteger();
+        Iterator<Integer> iter = Stream.iterate(() -> conditionCalls.getAndIncrement() > 0, () -> 1).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+        assertEquals(1, conditionCalls.get());
+
+        conditionCalls.set(0);
+        iter = Stream.iterate(1, () -> conditionCalls.getAndIncrement() > 0, value -> value + 1).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+        assertEquals(1, conditionCalls.get());
+    }
 
     @Test
     @Timeout(10)
@@ -12305,6 +15502,11 @@ public class StreamTest extends AbstractTest {
         assertTrue(Stream.parallelConcat((Stream<Integer>[]) null).toList().isEmpty());
     }
 
+    @Test
+    public void testParallelConcatValidatesBufferSizeBeforeEmptyShortcut() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.parallelConcat(Collections.emptyList(), 1, 0));
+        assertThrows(IllegalArgumentException.class, () -> Stream.parallelConcatIterators(Collections.emptyList(), 1, 0));
+    }
 
     @Test
     public void testReferenceArrayMergeNullSelectorThrowsOnConsumption() {
@@ -12378,6 +15580,108 @@ public class StreamTest extends AbstractTest {
         assertThrows(IllegalStateException.class, closeFailingSource::count);
     }
 
+    @Test
+    public void testMaxWaitClosesSourceWithoutTraversal() {
+        for (final boolean suppliedDefault : new boolean[] { false, true }) {
+            for (int mode = 0; mode < 3; mode++) {
+                final AtomicInteger closeCalls = new AtomicInteger();
+                final AtomicInteger nextCalls = new AtomicInteger();
+                final Stream<Integer> source = Stream.of(countingIterator(Arrays.asList(1, 2), nextCalls)).onClose(closeCalls::incrementAndGet);
+                // This verifies closure, so allow a generous worker-startup delay before emitting a timeout value.
+                final Stream<Integer> result = suppliedDefault ? source.maxWait(Duration.ofSeconds(5), () -> 99)
+                        : source.maxWait(Duration.ofSeconds(5), 99);
+
+                if (mode == 0) {
+                    result.close();
+                } else if (mode == 1) {
+                    assertEquals(0, result.limit(0).count());
+                } else {
+                    assertEquals(Arrays.asList(1, 2), result.toList());
+                }
+
+                result.close();
+                assertEquals(1, closeCalls.get(), "source must close exactly once");
+                assertEquals(mode == 2 ? 2 : 0, nextCalls.get(), "closing must preserve lazy traversal");
+                assertThrows(IllegalStateException.class, source::count);
+            }
+        }
+    }
+
+    @Test
+    public void testBufferedClosesSourceWithoutTraversal() {
+        for (int overload = 0; overload < 3; overload++) {
+            for (int mode = 0; mode < 3; mode++) {
+                final AtomicInteger closeCalls = new AtomicInteger();
+                final AtomicInteger nextCalls = new AtomicInteger();
+                final Stream<Integer> source = Stream.of(countingIterator(Arrays.asList(1, 2), nextCalls)).onClose(closeCalls::incrementAndGet);
+                final Stream<Integer> result = overload == 0 ? source.buffered()
+                        : overload == 1 ? source.buffered(2) : source.buffered(new ArrayBlockingQueue<>(2));
+
+                if (mode == 0) {
+                    result.close();
+                } else if (mode == 1) {
+                    assertEquals(0, result.limit(0).count());
+                } else {
+                    assertEquals(Arrays.asList(1, 2), result.toList());
+                }
+
+                result.close();
+                assertEquals(1, closeCalls.get(), "source must close exactly once");
+                assertEquals(mode == 2 ? 2 : 0, nextCalls.get(), "closing must preserve lazy traversal");
+                assertThrows(IllegalStateException.class, source::count);
+            }
+        }
+    }
+
+    @Test
+    public void testTimeWindowsRejectOverflowingBoundariesAndCloseSource() {
+        final WindowHandler<Long, List<Long>> handler = WindowHandler.of((Long timestamp) -> timestamp);
+
+        for (final boolean sliding : new boolean[] { false, true }) {
+            for (final boolean initialBoundary : new boolean[] { false, true }) {
+                for (final boolean iteratorSource : new boolean[] { false, true }) {
+                    final AtomicInteger closeCalls = new AtomicInteger();
+                    final long start = initialBoundary ? 1 : sliding ? Long.MAX_VALUE - 3 : Long.MAX_VALUE - 2;
+                    final long event = initialBoundary ? 0 : sliding ? Long.MAX_VALUE - 3 : Long.MAX_VALUE - 1;
+                    final Duration duration = Duration.ofMillis(initialBoundary ? Long.MAX_VALUE : 2);
+                    final Stream<Long> source = (iteratorSource ? Stream.of(Arrays.asList(event).iterator()) : Stream.of(event))
+                            .onClose(closeCalls::incrementAndGet);
+                    final Stream<List<Long>> windows = sliding
+                            ? source.window(duration, duration, () -> start, handler, Collectors.toList())
+                            : source.window(duration, 1, () -> start, handler, Collectors.toList());
+
+                    assertThrows(ArithmeticException.class, windows::toList);
+                    windows.close();
+                    assertEquals(1, closeCalls.get(), "an unrepresentable boundary must still close the source exactly once");
+                    assertThrows(IllegalStateException.class, source::count);
+                }
+            }
+        }
+
+        final long start = Long.MAX_VALUE - 4;
+        assertEquals(Arrays.asList(Arrays.asList(start)),
+                Stream.of(start).window(Duration.ofMillis(2), Duration.ofMillis(2), () -> start, handler, Collectors.toList()).toList());
+        assertEquals(Arrays.asList(Arrays.asList(start)),
+                Stream.of(start).window(Duration.ofMillis(2), 1, () -> start, handler, Collectors.toList()).toList());
+    }
+
+    @Test
+    public void testDefaultIfEmptyNullSupplierClosesEveryStreamType() {
+        final BaseStream<?, ?, ?, ?, ?, ?, ?, ?>[] sources = { Stream.of(1), EntryStream.of("key", 1), ByteStream.of((byte) 1), CharStream.of('a'),
+                ShortStream.of((short) 1), IntStream.of(1), LongStream.of(1L), FloatStream.of(1F), DoubleStream.of(1D) };
+
+        for (final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> original : sources) {
+            final AtomicInteger closeCalls = new AtomicInteger();
+            final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> source = original.onClose(closeCalls::incrementAndGet);
+
+            assertThrows(IllegalArgumentException.class, () -> source.defaultIfEmpty(null));
+            assertEquals(1, closeCalls.get(), "a null supplier must close the source");
+            source.close();
+            assertEquals(1, closeCalls.get());
+            assertThrows(IllegalStateException.class, () -> source.defaultIfEmpty(null));
+        }
+    }
+
     private static <T> Iterator<T> countingIterator(final List<T> values, final AtomicInteger nextCalls) {
         final Iterator<T> delegate = values.iterator();
 
@@ -12417,6 +15721,61 @@ public class StreamTest extends AbstractTest {
         };
     }
 
+    @Test
+    public void testAddSubscriberPreservesInterruptedOffer() {
+        assertSubscriberOfferPreservesInterrupt(0);
+    }
+
+    @Test
+    public void testFilterSubscriberPreservesInterruptedOffer() {
+        assertSubscriberOfferPreservesInterrupt(1);
+    }
+
+    @Test
+    public void testTakeWhileSubscriberPreservesInterruptedOffer() {
+        assertSubscriberOfferPreservesInterrupt(2);
+    }
+
+    @Test
+    public void testDropWhileSubscriberPreservesInterruptedOffer() {
+        assertSubscriberOfferPreservesInterrupt(3);
+    }
+
+    private static void assertSubscriberOfferPreservesInterrupt(final int operation) {
+        final AtomicReference<Runnable> subscriberTask = new AtomicReference<>();
+        final com.landawn.abacus.util.Throwables.Consumer<Stream<Integer>, RuntimeException> subscriber =
+                attached -> assertThrows(RuntimeException.class, attached::count);
+        final Stream<Integer> source = Stream.of(1, 2);
+        final Stream<Integer> main = switch (operation) {
+            case 0 -> source.addSubscriber(subscriber, 1, 1, subscriberTask::set);
+            case 1 -> source.filterWhileAddSubscriber(value -> value == 2, subscriber, 1, 1, subscriberTask::set);
+            case 2 -> source.takeWhileAddSubscriber(value -> value < 1, subscriber, subscriberTask::set);
+            case 3 -> source.dropWhileAddSubscriber(value -> value < 2, subscriber, 1, 1, subscriberTask::set);
+            default -> throw new AssertionError(operation);
+        };
+
+        try {
+            final ObjIterator<Integer> iterator = main.iterator();
+            Thread.currentThread().interrupt();
+
+            if (operation == 2) {
+                assertFalse(iterator.hasNext());
+            } else {
+                assertTrue(iterator.hasNext());
+                assertEquals(operation == 0 ? 1 : 2, iterator.next());
+            }
+
+            assertTrue(Thread.currentThread().isInterrupted(), "subscriber delivery must preserve caller interruption");
+        } finally {
+            Thread.interrupted();
+            final Runnable task = subscriberTask.get();
+            if (task != null) {
+                task.run();
+            }
+            main.close();
+        }
+    }
+
     private static void await(final CountDownLatch latch) {
         try {
             assertTrue(latch.await(5, TimeUnit.SECONDS), "parallel zip did not check the exhausted source");
@@ -12426,4 +15785,148 @@ public class StreamTest extends AbstractTest {
         }
     }
 
+    // ------------------------------------------------------------------------------------------------------
+    // Stream review 2026-09-09 (pass B) - cartesianProduct null-array handling
+    // ------------------------------------------------------------------------------------------------------
+
+    /**
+     * {@code cartesianProduct(Collection...)} used {@code Arrays.asList(cs)}, which NPEs on a null array, while its
+     * neighbours and {@code Iterables.cartesianProduct(Collection...)} - the method its own {@code @see} points at -
+     * use the null-safe {@code Array.asList}.
+     */
+    @Test
+    public void testCartesianProduct_nullArrayIsTreatedAsNoCollections() {
+        final List<List<Integer>> expected = Stream.of(1, 2, 3).cartesianProduct().toList();
+
+        assertEquals(expected, Stream.of(1, 2, 3).cartesianProduct((Collection<Integer>[]) null).toList());
+
+        // the ordinary path is unaffected
+        assertEquals(6, Stream.of(1, 2, 3).cartesianProduct(N.asList(9, 8)).count());
+    }
+
+    @Test
+    public void testZipMismatchedValuesForNoneDoesNotOpenSources() {
+        final AtomicInteger closed = new AtomicInteger();
+        final Stream<Integer> a = Stream.of(1, 2).onClose(closed::incrementAndGet);
+        // An already-closed source makes the opening step observable: whichever check runs first decides
+        // the exception. The size check must win, otherwise iterateAll() opens 'a' and strands it.
+        final Stream<Integer> alreadyClosed = Stream.of(3);
+        alreadyClosed.close();
+
+        assertThrows(IllegalArgumentException.class, () -> Stream.zip(Arrays.asList(a, alreadyClosed), Arrays.asList(0), list -> 0));
+        assertEquals(0, closed.get());
+        assertEquals(Arrays.asList(1, 2), a.toList());
+
+        // parallelZip guards the same way.
+        final AtomicInteger closedParallel = new AtomicInteger();
+        final Stream<Integer> pa = Stream.of(1, 2).onClose(closedParallel::incrementAndGet);
+        final Stream<Integer> pClosed = Stream.of(3);
+        pClosed.close();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> Stream.parallelZip(Arrays.asList(pa, pClosed), Arrays.asList(0), list -> 0, 2));
+        assertEquals(0, closedParallel.get());
+        assertEquals(Arrays.asList(1, 2), pa.toList());
+    }
+
+    @Test
+    public void testZipClosesOpenedSourceWhenSiblingIterateFails() {
+        final AtomicInteger closed = new AtomicInteger();
+        final Stream<Integer> a = Stream.of(1, 2).onClose(closed::incrementAndGet);
+        final Stream<Integer> b = Stream.of(3);
+        b.close();
+
+        assertThrows(IllegalStateException.class, () -> Stream.zip(a, b, Integer::sum).toList());
+        assertEquals(1, closed.get());
+    }
+
+    @Test
+    public void testZipDoesNotCloseUnopenedSiblingWhenFirstIterateFails() {
+        final AtomicInteger closed = new AtomicInteger();
+        final Stream<Integer> a = Stream.of(1, 2);
+        a.close();
+        final Stream<Integer> b = Stream.of(3, 4).onClose(closed::incrementAndGet);
+
+        assertThrows(IllegalStateException.class, () -> Stream.zip(a, b, Integer::sum).toList());
+        assertEquals(0, closed.get());
+        assertEquals(Arrays.asList(3, 4), b.toList());
+    }
+
+    @Test
+    public void testZipCollectionClosesOnlyOpenedPrefixWhenLaterIterateFails() {
+        final AtomicInteger closedA = new AtomicInteger();
+        final AtomicInteger closedC = new AtomicInteger();
+        final Stream<Integer> a = Stream.of(1).onClose(closedA::incrementAndGet);
+        final Stream<Integer> b = Stream.of(2);
+        b.close();
+        final Stream<Integer> c = Stream.of(3).onClose(closedC::incrementAndGet);
+
+        assertThrows(IllegalStateException.class, () -> Stream.zip(Arrays.asList(a, b, c), list -> 0).toList());
+        assertEquals(1, closedA.get());
+        assertEquals(0, closedC.get());
+        assertEquals(Arrays.asList(3), c.toList());
+    }
+
+    @Test
+    public void testIteratePredicateRetriesSeedAfterThrow() {
+        final AtomicInteger tests = new AtomicInteger();
+        final Iterator<Integer> iter = Stream.iterate(0, i -> {
+            if (tests.getAndIncrement() == 0) {
+                throw new IllegalStateException("seed test failed");
+            }
+            return i < 2;
+        }, i -> i + 1).iterator();
+
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(0, iter.next());
+        assertEquals(1, iter.next());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testIteratePredicateRetriesFunctionResultAfterThrow() {
+        final AtomicInteger tests = new AtomicInteger();
+        final AtomicInteger fCalls = new AtomicInteger();
+        final Iterator<Integer> iter = Stream.iterate(0, i -> {
+            if (i > 0 && tests.getAndIncrement() == 0) {
+                throw new IllegalStateException("candidate test failed");
+            }
+            return i < 2;
+        }, i -> {
+            fCalls.incrementAndGet();
+            return i + 1;
+        }).iterator();
+
+        assertEquals(0, iter.next());
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(1, fCalls.get());
+        assertEquals(1, iter.next());
+        assertEquals(1, fCalls.get());
+        assertFalse(iter.hasNext());
+        assertEquals(2, fCalls.get());
+    }
+    @Test
+    public void testParallelZipClosesOpenedSourceWhenSiblingIterateFails() {
+        final AtomicInteger closed = new AtomicInteger();
+        final Stream<Integer> a = Stream.of(1, 2).onClose(closed::incrementAndGet);
+        final Stream<Integer> b = Stream.of(3);
+        b.close();
+
+        assertThrows(IllegalStateException.class, () -> Stream.parallelZip(a, b, Integer::sum, 2).toList());
+        assertEquals(1, closed.get());
+    }
+
+    @Test
+    public void testGroupJoinPassesStoredNullRightValueThrough() {
+        // An absent key and a key stored with a null value are the same thing to the merge-function
+        // overload: both hand 'func' null. A containsKey() probe here would only cost a second lookup.
+        final List<String> right = new ArrayList<>();
+        right.add(null);
+
+        final List<String> result = Stream.of("k", "missing")
+                .groupJoin(right, s -> s, s -> "k", (x, y) -> x, (l, r) -> l + "/" + (r == null ? "<null>" : r))
+                .toList();
+
+        assertEquals(Arrays.asList("k/<null>", "missing/<null>"), result);
+    }
 }

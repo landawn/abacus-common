@@ -18,8 +18,14 @@ import com.landawn.abacus.annotation.MayReturnNull;
 
 /**
  * A shallowly immutable container that pairs a key with a value, where equality and hashing
- * are based solely on the key. This design provides significant performance improvements
- * in collections by avoiding expensive value comparisons.
+ * of a direct {@code Keyed} are based solely on the key. This design provides significant performance
+ * improvements in collections by avoiding expensive value comparisons.
+ *
+ * <p>More precisely, a direct {@code Keyed} instance is equal only to another instance of the <i>exact</i>
+ * same runtime class with an equal key. A permitted subclass may add further equality state: {@link IndexedKeyed}
+ * compares its {@code index} as well as the key. Because {@code equals} is class-exact in both directions, a
+ * {@code Keyed} and an {@code IndexedKeyed} never compare equal to each other, so the two can coexist in one
+ * hash-based collection without breaking symmetry.</p>
  *
  * <p>It's designed for performance improvement by only hashing and comparing the {@code key} in
  * the {@code hashCode} and {@code equals} methods. This makes it ideal for scenarios where you need
@@ -29,6 +35,12 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * <p>The key and value references never change, but this class does not copy or freeze the
  * referenced objects. In particular, a mutable key must not be changed in a way that affects
  * {@code equals} or {@code hashCode} while this object is stored in a hash-based collection.</p>
+ *
+ * <p><b>&#9888;&#65039; Array keys compare by identity.</b> Hashing and equality delegate to
+ * {@link N#hashCode(Object)} / {@link N#equals(Object, Object)}, which use the key's own
+ * {@code hashCode}/{@code equals} - and an array inherits those from {@link Object}. So
+ * {@code Keyed.of(new int[] {1, 2}, v1)} does <b>not</b> equal {@code Keyed.of(new int[] {1, 2}, v2)}.
+ * Wrap an array key in {@link Wrapper#of(Object)} first if you need content-based equality.</p>
  *
  * <p>This class is sealed and only permits {@link IndexedKeyed} as a subclass.</p>
  *
@@ -200,7 +212,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
         }
 
         if (obj != null && this.getClass().equals(obj.getClass())) {
-            return N.equals(((Keyed<K, T>) obj).key, key);
+            return N.equals(((Keyed<?, ?>) obj).key, key);
         }
 
         return false;

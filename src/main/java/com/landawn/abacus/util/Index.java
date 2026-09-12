@@ -28,272 +28,109 @@ import java.util.function.Predicate;
 import com.landawn.abacus.util.u.OptionalInt;
 
 /**
- * A comprehensive utility class providing index-finding operations for arrays, collections, and strings with
- * a fluent API design. This class serves as a modern alternative to traditional index-finding methods by
- * returning {@link OptionalInt} instead of primitive {@code -1} for "not found" cases, making the API more
- * null-safe, expressive, and aligned with modern Java practices.
+ * Index-finding operations for arrays, collections, iterators, and strings, returning an {@link OptionalInt} instead
+ * of a magic {@code -1}. Every operation is a single static call; nothing here is stateful or chained.
  *
- * <p>This class provides extensive support for finding first occurrence, last occurrence, and all occurrences
- * of elements in various data structures including primitive arrays, object arrays, collections, and strings.
- * Advanced features include subarray/sublist searching, case-insensitive string searching, and predicate-based
- * filtering with high-performance implementations optimized for different data types.</p>
+ * <p><b>Four families.</b> {@code of(...)} finds the first occurrence and {@code last(...)} the last;
+ * {@code ofSubArray}/{@code ofSubList} and {@code lastOfSubArray}/{@code lastOfSubList} find a contiguous run;
+ * {@code allOf(...)} returns every matching position as a {@link BitSet}.
  *
- * <p><b>Key Features:</b>
+ * <p>All four families take every primitive array and object arrays. Beyond that the overload sets differ:
+ * {@code of}/{@code last}/{@code allOf} also take a {@link Collection}; {@code of}/{@code last} also take a
+ * {@link String}; {@code of} alone also takes an {@link Iterator}, which it consumes. The pattern searches take a
+ * {@link List} rather than a {@code Collection}, under the names {@code ofSubList}/{@code lastOfSubList}. On top of
+ * that there are case-insensitive variants for {@code String} and {@code String[]} ({@code ofIgnoreCase},
+ * {@code lastOfIgnoreCase}), predicate-based {@code allOf} for arrays and collections, and tolerance-based
+ * {@code float}/{@code double} overloads of {@code of}, {@code last} and {@code allOf}.
+ *
+ * <p><b>An unsuccessful search returns an empty result</b> - an empty {@link OptionalInt} from the
+ * single-index families, an empty {@link BitSet} from {@code allOf}. With valid search arguments, a {@code null}
+ * source produces an empty result. Empty inputs and out-of-range starts do not always mean a miss:
+ * an empty pattern can match an empty input or the end of an input, and start indices are handled as described below.
+ * Object elements are compared with {@link N#equals(Object, Object)}, so
+ * {@code null} elements compare correctly; {@code float}/{@code double} elements are compared with
+ * {@link Float#compare(float, float)} / {@link Double#compare(double, double)}, so {@code NaN} matches itself and
+ * {@code -0.0} does <i>not</i> match {@code 0.0}. The tolerance overloads are the exception: they match by
+ * {@link Numbers#fuzzyEquals(double, double, double)}, under which {@code -0.0} and {@code 0.0} <i>do</i> match even
+ * at a tolerance of {@code 0}.
+ *
+ * <p><b>The two start-index conventions.</b> A forward {@code fromIndex} is inclusive and a negative value is treated
+ * as {@code 0}. A backward {@code startIndexFromBack} is inclusive too, but a negative value finds nothing, and it
+ * means slightly different things in the two families - because an empty pattern legitimately matches one position
+ * past the last element:
  * <ul>
- *   <li><b>Modern API Design:</b> Returns {@code OptionalInt} instead of {@code -1} for better {@code null} safety</li>
- *   <li><b>Comprehensive Type Support:</b> All primitive types, objects, collections, and strings</li>
- *   <li><b>Advanced Search Operations:</b> Subarray, sublist, and predicate-based searching</li>
- *   <li><b>High Performance:</b> Optimized algorithms with minimal overhead for different data structures</li>
- *   <li><b>Fluent API:</b> Method chaining and expressive operation names for better readability</li>
- *   <li><b>Thread Safety:</b> Stateless design ensuring safe concurrent access</li>
- *   <li><b>Range-Based Operations:</b> Support for custom start indices and search ranges</li>
- *   <li><b>Tolerance Support:</b> Floating-point comparisons with configurable tolerance values</li>
+ *   <li>Element searches - {@code last} over an array, a {@link Collection}, or a single character of a
+ *       {@link String} - read it as an <i>element</i> index; the useful range is {@code [0, length - 1]} and
+ *       anything larger searches the whole input.</li>
+ *   <li>Pattern searches - {@code lastOfSubArray}, {@code lastOfSubList} and the substring forms
+ *       {@code last(String, String, int)} / {@code lastOfIgnoreCase(String, String, int)} - read it as the highest
+ *       index at which a match may <i>start</i>; the useful range is {@code [0, length]}, and the no-argument
+ *       overloads pass {@code length} so an empty pattern matches at {@code length}, exactly as
+ *       {@link String#lastIndexOf(String)} does.</li>
  * </ul>
+ * Empty-pattern results follow {@code String.indexOf}/{@code lastIndexOf} throughout. In contrast, the explicit
+ * pattern-slice bounds ({@code startIndexOfSubArray}, {@code sizeToMatch}) are validated: a negative
+ * {@code sizeToMatch} raises {@link IllegalArgumentException} and any other invalid slice raises
+ * {@link IndexOutOfBoundsException}; a negative or {@code NaN} {@code tolerance}, and a {@code null}
+ * {@code predicate}, raise {@link IllegalArgumentException}; and the {@link Iterator} overloads of {@code of} raise
+ * {@link ArithmeticException} when the match is found past element {@code Integer.MAX_VALUE}, because the index is
+ * counted as a {@code long} and then narrowed exactly.
  *
- * <p><b>Design Philosophy:</b>
- * <ul>
- *   <li><b>Null Safety:</b> {@code OptionalInt} return type eliminates magic number {@code -1}</li>
- *   <li><b>Type Safety:</b> Overloaded methods for all primitive types avoid boxing overhead</li>
- *   <li><b>Performance Focus:</b> Optimized implementations for different data structure characteristics</li>
- *   <li><b>Consistency:</b> Uniform method naming and parameter conventions across all operations</li>
- *   <li><b>Expressiveness:</b> Clear method names that describe the operation being performed</li>
- * </ul>
+ * <p><b>Cost.</b> Element and predicate searches are O(n) and allocate nothing beyond the result, with the one
+ * exception noted below. Subarray and sublist
+ * searches are a straightforward scan with early termination on the first mismatch - O(n*m) worst case, with no
+ * pattern preprocessing (no KMP/Boyer-Moore), so a long, highly self-similar pattern really does cost that.
+ * Single-element collection searches take an indexed path when the collection is a {@link RandomAccess} list;
+ * otherwise {@code of} and {@code allOf} walk the iterator, while {@code last} calls the collection's own public
+ * {@code descendingIterator()} if it has one and, failing that, copies the whole collection to an array first -
+ * that copy being the exception, so {@code last} on, say, a {@link java.util.LinkedHashSet} costs O(n) extra
+ * space. A sublist search takes the indexed path only when <i>both</i> lists are
+ * {@code RandomAccess}, and otherwise copies the searched region and the pattern to arrays first, which costs O(n)
+ * extra space.
  *
- * <p><b>Core Method Families:</b>
- * <ul>
- *   <li><b>{@code of} Methods:</b> Find the index of the first occurrence of an element or pattern</li>
- *   <li><b>{@code last} Methods:</b> Find the index of the last occurrence of an element or pattern</li>
- *   <li><b>{@code ofSubArray} Methods:</b> Find the starting index of a subarray within a larger array</li>
- *   <li><b>{@code lastOfSubArray} Methods:</b> Find the last starting index of a subarray within a larger array</li>
- *   <li><b>{@code ofSubList} Methods:</b> Find the starting index of a sublist within a larger list</li>
- *   <li><b>{@code lastOfSubList} Methods:</b> Find the last starting index of a sublist within a larger list</li>
- *   <li><b>{@code allOf} Methods:</b> Find all indices where an element or predicate matches</li>
- * </ul>
+ * <p>All methods are static and read their inputs without modifying them. Concurrent modification of an input is the
+ * caller's problem, as usual.
  *
- * <p><b>Supported Data Types:</b>
- * <ul>
- *   <li><b>Primitive Arrays:</b> {@code boolean[]}, {@code char[]}, {@code byte[]}, {@code short[]}, {@code int[]}, {@code long[]}, {@code float[]}, {@code double[]}</li>
- *   <li><b>Object Arrays:</b> {@code Object[]} and all typed arrays with null-safe comparisons</li>
- *   <li><b>Collections:</b> {@code Collection<?>}, {@code List<?>} with optimized {@code RandomAccess} handling</li>
- *   <li><b>Iterators:</b> {@code Iterator<?>} for streaming and lazy evaluation scenarios</li>
- *   <li><b>Strings:</b> {@code String} values with character and substring operations</li>
- * </ul>
- *
- * <p><b>Return Type Philosophy:</b>
- * <ul>
- *   <li><b>{@code OptionalInt}:</b> For single index operations, provides null-safe "not found" handling</li>
- *   <li><b>{@code BitSet}:</b> For multiple index operations, efficient storage of all matching positions</li>
- *   <li><b>Performance Benefits:</b> Avoids autoboxing and provides efficient bit manipulation operations</li>
- *   <li><b>Fluent API:</b> Enables method chaining and expressive conditional logic</li>
- * </ul>
- *
- * <p><b>Common Usage Patterns:</b>
+ * <p><b>Usage Examples:</b>
  * <pre>{@code
- * // Basic element searching
  * int[] numbers = {1, 2, 3, 4, 5, 3, 2, 1};
- * OptionalInt firstIndex = Index.of(numbers, 3);    // returns OptionalInt[2]
- * OptionalInt lastIndex = Index.last(numbers, 3);   // returns OptionalInt[5]
  *
- * // Handle "not found" cases gracefully
- * Index.of(numbers, 10).ifPresent(i -> System.out.println("Found at: " + i));
- * int index = Index.of(numbers, 10).orElse(-1);        // Traditional fallback
- * boolean exists = Index.of(numbers, 3).isPresent();   // Existence check
+ * Index.of(numbers, 3);        // OptionalInt[2]
+ * Index.last(numbers, 3);      // OptionalInt[5]
+ * Index.of(numbers, 2, 3);     // OptionalInt[6] - searching forward from index 3
+ * Index.allOf(numbers, 1);     // {0, 7}
+ * Index.of(numbers, 10);       // OptionalInt.empty
  *
- * // Range-based searching
- * OptionalInt fromIndex = Index.of(numbers, 2, 3);     // Start search from index 3
- * OptionalInt backIndex = Index.last(numbers, 1, 6);   // Search backward from index 6
+ * // Idiomatic handling
+ * Index.of(numbers, 3).ifPresent(i -> System.out.println("found at " + i));
+ * boolean present = Index.of(numbers, 3).isPresent();
  *
- * // String operations
- * OptionalInt charIndex = Index.of("Hello World", 'o');                  // returns OptionalInt[4]
- * OptionalInt subIndex = Index.of("Hello World", "World");               // returns OptionalInt[6]
- * OptionalInt ignoreCase = Index.ofIgnoreCase("Hello World", "WORLD");   // returns OptionalInt[6]
+ * // Strings
+ * Index.of("Hello World", 'o');                  // OptionalInt[4]
+ * Index.of("Hello World", "World");              // OptionalInt[6]
+ * Index.ofIgnoreCase("Hello World", "WORLD");    // OptionalInt[6]
  *
- * // Collection searching
- * List<String> words = Arrays.asList("apple", "banana", "cherry", "apple");
- * OptionalInt wordIndex = Index.of(words, "banana");    // returns OptionalInt[1]
- * OptionalInt lastApple = Index.last(words, "apple");   // returns OptionalInt[3]
+ * // Collections and patterns
+ * List<String> document = Arrays.asList("The", "quick", "brown", "fox");
+ * Index.ofSubList(document, Arrays.asList("quick", "brown"));   // OptionalInt[1]
+ * Index.ofSubArray(new int[] {1, 2, 3, 4, 5}, new int[] {3, 4});   // OptionalInt[2]
  *
- * // Find all occurrences
- * BitSet allOccurrences = Index.allOf(numbers, 1);   // returns BitSet with bits 0 and 7 set
- * List<Integer> indices = allOccurrences.stream().boxed().collect(Collectors.toList());
- * }</pre>
- *
- * <p><b>Advanced Subarray/Sublist Operations:</b>
- * <pre>{@code
- * // Subarray searching
- * int[] source = {1, 2, 3, 4, 5, 6, 7};
- * int[] pattern = {3, 4, 5};
- * OptionalInt subArrayIndex = Index.ofSubArray(source, pattern);   // returns OptionalInt[2]
- *
- * // Partial subarray matching
- * OptionalInt partialMatch = Index.ofSubArray(source, 1, pattern, 0, 2);   // Match {3, 4} starting from index 1
- *
- * // Sublist operations with custom objects
- * List<String> document = Arrays.asList("The", "quick", "brown", "fox", "jumps");
- * List<String> phrase = Arrays.asList("quick", "brown");
- * OptionalInt phraseIndex = Index.ofSubList(document, phrase);   // returns OptionalInt[1]
- *
- * // Complex pattern searching
- * boolean[] flags = {true, false, true, true, false, true, true, false};
- * boolean[] flagPattern = {true, true, false};
- * OptionalInt lastPattern = Index.lastOfSubArray(flags, flagPattern);   // returns OptionalInt[5]
- * }</pre>
- *
- * <p><b>Predicate-Based Searching:</b>
- * <pre>{@code
- * // Custom predicate matching
+ * // Predicates
  * String[] words = {"apple", "apricot", "banana", "avocado"};
- * Predicate<String> startsWithA = s -> s.startsWith("a");
- * BitSet aWords = Index.allOf(words, startsWithA);   // returns BitSet with bits 0, 1, 3 set
+ * Index.allOf(words, s -> s.startsWith("a"));   // {0, 1, 3}
  *
- * // Complex predicate combinations
- * Integer[] numbers = {1, 4, 9, 16, 25, 36, 49};
- * Predicate<Integer> isPerfectSquare = n -> {
- *     int sqrt = (int) Math.sqrt(n);
- *     return sqrt * sqrt == n;
- * };
- * BitSet perfectSquares = Index.allOf(numbers, isPerfectSquare);   // All indices
- *
- * // Range-based predicate searching
- * BitSet fromIndex = Index.allOf(words, startsWithA, 1);   // Start searching from index 1
- * }</pre>
- *
- * <p><b>Floating-Point Operations with Tolerance:</b>
- * <pre>{@code
- * // Tolerance-based searching for floating-point values
+ * // Floating point within a tolerance (the 4-arg overloads; 0 = from the start)
  * double[] measurements = {1.0, 2.001, 3.0, 2.002, 4.0};
- * double target = 2.0;
- * double tolerance = 0.01;
- *
- * // Tolerance searches use the 4-arg overloads; of/allOf take a fromIndex (0 = whole array forward),
- * // last takes a startIndexFromBack (length-1 = whole array backward).
- * OptionalInt closeMatch = Index.of(measurements, target, 0, tolerance);       // returns OptionalInt[1]
- * OptionalInt lastMatch = Index.last(measurements, target, 4, tolerance);      // returns OptionalInt[3]
- * BitSet allMatches = Index.allOf(measurements, target, 0, tolerance);         // returns BitSet with bits 1, 3 set
- *
- * // High precision requirements
- * double strictTolerance = 0.001;
- * BitSet strictMatches = Index.allOf(measurements, target, 0, strictTolerance);   // returns BitSet with bit 1 set (2.001 matches; 2.002 - 2.0 > 0.001 does not)
+ * Index.of(measurements, 2.0, 0, 0.01);      // OptionalInt[1]
+ * Index.allOf(measurements, 2.0, 0, 0.01);   // {1, 3}
  * }</pre>
  *
- * <p><b>Performance Characteristics:</b>
- * <ul>
- *   <li><b>Linear Search:</b> O(n) for most single-element operations</li>
- *   <li><b>Subarray Search:</b> O(n*m) worst case, optimized for common patterns</li>
- *   <li><b>All Occurrences:</b> O(n) with efficient BitSet population</li>
- *   <li><b>RandomAccess Lists:</b> O(1) element access, O(n) overall search</li>
- *   <li><b>Sequential Lists:</b> O(n) with iterator-based traversal</li>
- *   <li><b>Memory Usage:</b> O(1) for single searches, O(n) for BitSet results</li>
- * </ul>
- *
- * <p><b>Thread Safety:</b>
- * <ul>
- *   <li><b>Stateless Operations:</b> The utility itself has no mutable shared state</li>
- *   <li><b>Concurrent Access:</b> Inputs must not be modified concurrently unless their own contracts permit it</li>
- *   <li><b>Input Immutability:</b> Methods do not modify input arrays or collections</li>
- *   <li><b>No Shared State:</b> No static mutable fields or shared resources</li>
- * </ul>
- *
- * <p><b>Error Handling and Edge Cases:</b>
- * <ul>
- *   <li><b>Null Inputs:</b> Graceful handling of {@code null} arrays and collections</li>
- *   <li><b>Empty Inputs:</b> Single-value searches return {@code OptionalInt.empty()}; an empty subarray or sublist can match at a valid boundary</li>
- *   <li><b>Range Handling:</b> Search start indices are clamped or produce no match; explicit pattern-slice bounds are validated and may throw {@code IndexOutOfBoundsException}</li>
- *   <li><b>Null Elements:</b> Proper null-safe comparison using {@link N#equals(Object, Object)}</li>
- * </ul>
- *
- * <p><b>Optimization Strategies:</b>
- * <ul>
- *   <li><b>Primitive Specialization:</b> Avoids boxing overhead with dedicated primitive methods</li>
- *   <li><b>RandomAccess Detection:</b> Optimized algorithms for {@code RandomAccess} collections</li>
- *   <li><b>Early Termination:</b> Breaks loops as soon as result is determined</li>
- *   <li><b>Memory Efficiency:</b> Reuses {@code OptionalInt.empty()} instance for all "not found" cases</li>
- * </ul>
- *
- * <p><b>Comparison with Alternative APIs:</b>
- * <ul>
- *   <li><b>vs. Arrays.binarySearch():</b> Works with unsorted data and provides richer API</li>
- *   <li><b>vs. Collections.indexOfSubList():</b> Enhanced with range support and {@code null} safety</li>
- *   <li><b>vs. String.indexOf():</b> Consistent API across all data types with additional features</li>
- *   <li><b>vs. Stream.findFirst():</b> More efficient for simple searches without stream overhead</li>
- * </ul>
- *
- * <p><b>Best Practices:</b>
- * <ul>
- *   <li>Use {@code OptionalInt.ifPresent()} for conditional logic instead of checking for {@code -1}</li>
- *   <li>Leverage {@code OptionalInt.orElse()} for providing default values</li>
- *   <li>Use appropriate tolerance values for floating-point comparisons</li>
- *   <li>Consider {@code BitSet} operations for efficient multiple-index manipulation</li>
- *   <li>Validate input parameters before calling methods to avoid exceptions</li>
- *   <li>Use predicate-based methods for complex matching logic</li>
- * </ul>
- *
- * <p><b>Integration with Other Utilities:</b>
- * <ul>
- *   <li><b>Relationship to {@link N}:</b> Complements N.indexOf methods with modern API design</li>
- *   <li><b>Stream Integration:</b> BitSet results can be converted to IntStream for further processing</li>
- *   <li><b>Optional Pattern:</b> Follows Java 8+ Optional pattern for null-safe operations</li>
- *   <li><b>Collection Utilities:</b> Works seamlessly with other collection utility classes</li>
- * </ul>
- *
- * <p><b>Common Anti-Patterns to Avoid:</b>
- * <ul>
- *   <li>Converting {@code OptionalInt} to {@code int} unnecessarily with {@code .orElse(-1)}</li>
- *   <li>Using {@code .get()} without checking {@code .isPresent()} first</li>
- *   <li>Ignoring the null-safety benefits by falling back to traditional {@code -1} patterns</li>
- *   <li>Using inappropriate tolerance values for floating-point comparisons</li>
- * </ul>
- *
- * <p><b>Usage Examples: Complex Search Pipeline</b></p>
- * <pre>{@code
- * // Advanced search combining multiple techniques
- * public class DocumentSearcher {
- *     public List<SearchResult> findComplexPatterns(String[] document, String[] patterns) {
- *         List<SearchResult> results = new ArrayList<>();
- *
- *         for (String pattern : patterns) {
- *             // Find all occurrences of each pattern
- *             BitSet occurrences = Index.allOf(document, pattern);
- *
- *             // Convert BitSet to list of indices
- *             List<Integer> indices = occurrences.stream()
- *                 .boxed()
- *                 .collect(Collectors.toList());
- *
- *             if (!indices.isEmpty()) {
- *                 // Find first and last occurrence
- *                 OptionalInt first = Index.of(document, pattern);
- *                 OptionalInt last = Index.last(document, pattern);
- *
- *                 SearchResult result = new SearchResult(
- *                     pattern,
- *                     indices,
- *                     first.orElse(-1),
- *                     last.orElse(-1),
- *                     indices.size()
- *                 );
- *                 results.add(result);
- *             }
- *         }
- *
- *         return results;
- *     }
- * }
- * }</pre>
- *
- * <p><b>Three index-finding APIs, two "not found" conventions:</b> the same "find the position of an element"
- * operation appears in three places in this library, and the method name signals which convention applies:
- * <ul>
- *   <li>{@code Index.of(...)} / {@code Index.last(...)} (this class) return an {@link OptionalInt} that is
- *       <i>empty</i> when nothing matches. Note that {@code of} reads like a factory method but here means
- *       <i>index of the first occurrence</i>, and {@code last} the index of the last occurrence.</li>
- *   <li>{@link N#indexOf} / {@link N#lastIndexOf} (arrays and collections) return a primitive {@code int}, using
- *       {@code -1} for "not found".</li>
- *   <li>{@link Strings#indexOf(String, String)} / {@link Strings#lastIndexOf(String, String)} (strings) likewise
- *       return an {@code int} with {@code -1} for "not found".</li>
- * </ul>
- * <p>Prefer {@code Index} for {@link OptionalInt} ergonomics; prefer {@code N}/{@code Strings} when a bare
- * {@code int}/{@code -1} result is wanted.</p>
+ * <p><b>The same operation exists in three places, with two "not found" conventions.</b> {@code Index.of} /
+ * {@code Index.last} return an empty {@link OptionalInt}; {@link N#indexOf} / {@link N#lastIndexOf} (arrays and
+ * collections) and {@link Strings#indexOf(String, String)} / {@link Strings#lastIndexOf(String, String)} return a
+ * primitive {@code int} using {@code -1}. Reach for this class when the {@code OptionalInt} ergonomics help, and for
+ * {@code N}/{@code Strings} when a bare {@code int} is what the surrounding code wants. Note that {@code of} reads
+ * like a factory method but here means <i>index of the first occurrence</i>.
  *
  * @see OptionalInt
  * @see BitSet
@@ -696,6 +533,12 @@ public final class Index {
      * Matching uses {@link Numbers#fuzzyEquals(float, float, float)}, so two {@link Float#NaN} values are
      * considered equal and infinities of the same sign match.
      *
+     * <p><b>Signed zero:</b> {@code -0.0f} matches {@code 0.0f} here, and it does so even when
+     * {@code tolerance} is {@code 0}, because {@link Numbers#fuzzyEquals(float, float, float)} treats them as
+     * equal. A {@code tolerance} of {@code 0} is therefore <i>not</i> equivalent to
+     * {@link #of(float[], float, int)}, which orders by {@link Float#compare(float, float)} and reports the two zeros as
+     * different.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.1f, 3.0f, 2.2f, 4.0f};
@@ -716,9 +559,7 @@ public final class Index {
      * @see #of(float[], float, int)
      * @see N#indexOf(float[], float, int, float)
      */
-    public static OptionalInt of(final float[] source, final float valueToFind, final int fromIndex, final float tolerance) {
-        checkTolerance(tolerance);
-
+    public static OptionalInt of(final float[] source, final float valueToFind, final int fromIndex, final float tolerance) throws IllegalArgumentException {
         return toOptionalInt(N.indexOf(source, valueToFind, fromIndex, tolerance));
     }
 
@@ -787,6 +628,12 @@ public final class Index {
      * Matching uses {@link Numbers#fuzzyEquals(double, double, double)}, so two {@link Double#NaN} values are
      * considered equal and infinities of the same sign match.
      *
+     * <p><b>Signed zero:</b> {@code -0.0} matches {@code 0.0} here, and it does so even when
+     * {@code tolerance} is {@code 0}, because {@link Numbers#fuzzyEquals(double, double, double)} treats them as
+     * equal. A {@code tolerance} of {@code 0} is therefore <i>not</i> equivalent to
+     * {@link #of(double[], double, int)}, which orders by {@link Double#compare(double, double)} and reports the two zeros as
+     * different.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
@@ -807,9 +654,7 @@ public final class Index {
      * @see #of(double[], double, int)
      * @see N#indexOf(double[], double, int, double)
      */
-    public static OptionalInt of(final double[] source, final double valueToFind, final int fromIndex, final double tolerance) {
-        checkTolerance(tolerance);
-
+    public static OptionalInt of(final double[] source, final double valueToFind, final int fromIndex, final double tolerance) throws IllegalArgumentException {
         return toOptionalInt(N.indexOf(source, valueToFind, fromIndex, tolerance));
     }
 
@@ -933,9 +778,10 @@ public final class Index {
      * @param valueToFind the object to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index (in iteration order) of the first occurrence of the value,
      *         or an empty OptionalInt if the value is not found or the iterator is {@code null}
+     * @throws ArithmeticException if the matching value has a zero-based index greater than {@link Integer#MAX_VALUE}.
      * @see #of(Iterator, Object, int)
      */
-    public static OptionalInt of(final Iterator<?> source, final Object valueToFind) {
+    public static OptionalInt of(final Iterator<?> source, final Object valueToFind) throws ArithmeticException {
         return toOptionalInt(N.indexOf(source, valueToFind));
     }
 
@@ -959,9 +805,10 @@ public final class Index {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @return an OptionalInt containing the zero-based index (in iteration order) of the first occurrence of the value at or after {@code fromIndex},
      *         or an empty OptionalInt if the value is not found or the iterator is {@code null}
+     * @throws ArithmeticException if the matching value has a zero-based index greater than {@link Integer#MAX_VALUE}.
      * @see #of(Iterator, Object)
      */
-    public static OptionalInt of(final Iterator<?> source, final Object valueToFind, final int fromIndex) {
+    public static OptionalInt of(final Iterator<?> source, final Object valueToFind, final int fromIndex) throws ArithmeticException {
         return toOptionalInt(N.indexOf(source, valueToFind, fromIndex));
     }
 
@@ -1019,7 +866,9 @@ public final class Index {
      * Returns the index of the first occurrence of the specified substring in the given string.
      * <p>
      * This method searches for the first occurrence of {@code valueToFind} within {@code source}.
-     * If the string is {@code null} or empty, an empty OptionalInt is returned.
+     * If either argument is {@code null}, an empty OptionalInt is returned. Note that an <i>empty</i>
+     * {@code source} is not automatically a miss: as with {@link String#indexOf(String)}, an empty
+     * {@code valueToFind} is found at index 0, so {@code Index.of("", "")} returns {@code OptionalInt[0]}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1070,7 +919,11 @@ public final class Index {
      * Returns the index of the first occurrence of the specified substring in the given string, ignoring case.
      * <p>
      * This method performs a case-insensitive search for {@code valueToFind} within {@code source}.
-     * Both ASCII and Unicode characters are compared case-insensitively.
+     * Matching is a same-length UTF-16 compare via
+     * {@link String#regionMatches(boolean, int, String, int, int)}, not Unicode case folding: non-ASCII characters
+     * are compared case-insensitively, but length-changing mappings such as {@code "ß"}/{@code "SS"} do not match.
+     * As with {@link String#indexOf(String)}, an empty {@code valueToFind} is found at index 0, so
+     * {@code Index.ofIgnoreCase("", "")} returns {@code OptionalInt[0]}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1079,6 +932,9 @@ public final class Index {
      * Index.ofIgnoreCase("Hello World", "bye").isPresent();   // returns false
      * Index.ofIgnoreCase((String) null, "a").isPresent();     // returns false
      * }</pre>
+     *
+     * <p>A {@code null} {@code valueToFind} never matches here - a substring search for "no string" has no
+     * answer - whereas the {@code String[]} overload treats it as a search for a {@code null} <i>element</i>.</p>
      *
      * @param source the string to be searched, may be {@code null}
      * @param valueToFind the substring to search for (case-insensitive), may be {@code null}
@@ -1096,6 +952,9 @@ public final class Index {
      * <p>
      * This method performs a case-insensitive search for {@code valueToFind} within {@code source},
      * beginning at the specified {@code fromIndex}. Negative {@code fromIndex} values are treated as 0.
+     * Matching is a same-length UTF-16 compare via
+     * {@link String#regionMatches(boolean, int, String, int, int)}, not Unicode case folding: non-ASCII characters
+     * are compared case-insensitively, but length-changing mappings such as {@code "ß"}/{@code "SS"} do not match.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1104,6 +963,9 @@ public final class Index {
      * Index.ofIgnoreCase("Hello", "bye", 0).isPresent();     // returns false
      * Index.ofIgnoreCase("Hello", "HELLO", 5).isPresent();   // returns false
      * }</pre>
+     *
+     * <p>A {@code null} {@code valueToFind} never matches here - a substring search for "no string" has no
+     * answer - whereas the {@code String[]} overload treats it as a search for a {@code null} <i>element</i>.</p>
      *
      * @param source the string to be searched, may be {@code null}
      * @param valueToFind the substring to search for (case-insensitive), may be {@code null}
@@ -1127,6 +989,9 @@ public final class Index {
      * Index.ofIgnoreCase(new String[] {"Hello"}, "xyz").isPresent();        // returns false
      * }</pre>
      *
+     * <p>A {@code null} {@code valueToFind} matches a {@code null} <i>element</i> of the array, unlike the
+     * {@code String} overload, where a {@code null} substring never matches.</p>
+     *
      * @param source the string array to be searched, may be {@code null}
      * @param valueToFind the string to search for (case-insensitive), may be {@code null}
      * @return an OptionalInt containing the zero-based index of the first element equal (ignoring case) to {@code valueToFind},
@@ -1146,6 +1011,9 @@ public final class Index {
      * Index.ofIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello", 1).get();   // returns 2
      * Index.ofIgnoreCase(new String[] {"Hello"}, "xyz", 0).isPresent();                 // returns false
      * }</pre>
+     *
+     * <p>A {@code null} {@code valueToFind} matches a {@code null} <i>element</i> of the array, unlike the
+     * {@code String} overload, where a {@code null} substring never matches.</p>
      *
      * @param source the string array to be searched, may be {@code null}
      * @param valueToFind the string to search for (case-insensitive), may be {@code null}
@@ -1175,7 +1043,9 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at index {@code 0} of a non-null source
+     *         (including a zero-length source), matching {@link String#indexOf(String)}
      * @see #ofSubArray(boolean[], int, boolean[])
      * @see #ofSubArray(Object[], Object[])
      * @see String#indexOf(String)
@@ -1203,7 +1073,9 @@ public final class Index {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts at or after {@code fromIndex},
-     *         or an empty OptionalInt if the subarray is not found, either array is {@code null}, or {@code fromIndex >= source.length}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}. Note an EMPTY
+     *         subarray is a zero-width match that is always found: it answers {@code min(max(fromIndex, 0), source.length)},
+     *         so {@code fromIndex >= source.length} yields {@code source.length}, not an empty result
      * @see #ofSubArray(boolean[], boolean[])
      * @see #ofSubArray(boolean[], int, boolean[], int, int)
      * @see #ofSubArray(Object[], int, Object[])
@@ -1232,10 +1104,10 @@ public final class Index {
      * <pre>{@code
      * boolean[] source = {true, false, true, true, false};
      * boolean[] sub = {true, true, false};
-     * Index.ofSubArray(source, 0, sub, 0, 2).getAsInt();              // returns 2
-     * Index.ofSubArray(source, 0, sub, 0, 3).getAsInt();              // returns 2
+     * Index.ofSubArray(source, 0, sub, 0, 2).get();                   // returns 2
+     * Index.ofSubArray(source, 0, sub, 0, 3).get();                   // returns 2
      * Index.ofSubArray(source, 3, sub, 0, 2).isPresent();             // returns false
-     * Index.ofSubArray(source, 3, sub, 0, 0).getAsInt();              // returns 3 (empty match clamped to fromIndex)
+     * Index.ofSubArray(source, 3, sub, 0, 0).get();                   // returns 3 (empty match clamped to fromIndex)
      * Index.ofSubArray((boolean[]) null, 0, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
@@ -1246,6 +1118,7 @@ public final class Index {
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #ofSubArray(boolean[], boolean[])
@@ -1253,7 +1126,7 @@ public final class Index {
      * @see String#indexOf(String, int)
      */
     public static OptionalInt ofSubArray(final boolean[] source, final int fromIndex, final boolean[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -1306,7 +1179,9 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at index {@code 0} of a non-null source
+     *         (including a zero-length source), matching {@link String#indexOf(String)}
      * @see #ofSubArray(char[], int, char[])
      * @see #ofSubArray(Object[], Object[])
      * @see String#indexOf(String)
@@ -1334,7 +1209,9 @@ public final class Index {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts at or after {@code fromIndex},
-     *         or an empty OptionalInt if the subarray is not found, either array is {@code null}, or {@code fromIndex >= source.length}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}. Note an EMPTY
+     *         subarray is a zero-width match that is always found: it answers {@code min(max(fromIndex, 0), source.length)},
+     *         so {@code fromIndex >= source.length} yields {@code source.length}, not an empty result
      * @see #ofSubArray(char[], char[])
      * @see #ofSubArray(char[], int, char[], int, int)
      * @see #ofSubArray(Object[], int, Object[])
@@ -1384,6 +1261,7 @@ public final class Index {
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #ofSubArray(char[], char[])
@@ -1392,7 +1270,7 @@ public final class Index {
      * @see String#indexOf(String, int)
      */
     public static OptionalInt ofSubArray(final char[] source, final int fromIndex, final char[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -1448,7 +1326,9 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at index {@code 0} of a non-null source
+     *         (including a zero-length source), matching {@link String#indexOf(String)}
      * @see #ofSubArray(byte[], int, byte[])
      * @see #ofSubArray(Object[], Object[])
      * @see String#indexOf(String)
@@ -1476,7 +1356,9 @@ public final class Index {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts at or after {@code fromIndex},
-     *         or an empty OptionalInt if the subarray is not found, either array is {@code null}, or {@code fromIndex >= source.length}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}. Note an EMPTY
+     *         subarray is a zero-width match that is always found: it answers {@code min(max(fromIndex, 0), source.length)},
+     *         so {@code fromIndex >= source.length} yields {@code source.length}, not an empty result
      * @see #ofSubArray(byte[], byte[])
      * @see #ofSubArray(byte[], int, byte[], int, int)
      * @see #ofSubArray(Object[], int, Object[])
@@ -1518,6 +1400,7 @@ public final class Index {
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #ofSubArray(byte[], byte[])
@@ -1527,7 +1410,7 @@ public final class Index {
      * @see String#indexOf(String, int)
      */
     public static OptionalInt ofSubArray(final byte[] source, final int fromIndex, final byte[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -1581,7 +1464,9 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at index {@code 0} of a non-null source
+     *         (including a zero-length source), matching {@link String#indexOf(String)}
      * @see #ofSubArray(boolean[], boolean[])
      * @see #ofSubArray(short[], int, short[])
      * @see #ofSubArray(Object[], Object[])
@@ -1611,7 +1496,9 @@ public final class Index {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts at or after {@code fromIndex},
-     *         or an empty OptionalInt if the subarray is not found, either array is {@code null}, or {@code fromIndex >= source.length}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}. Note an EMPTY
+     *         subarray is a zero-width match that is always found: it answers {@code min(max(fromIndex, 0), source.length)},
+     *         so {@code fromIndex >= source.length} yields {@code source.length}, not an empty result
      * @see #ofSubArray(boolean[], int, boolean[])
      * @see #ofSubArray(short[], short[])
      * @see #ofSubArray(short[], int, short[], int, int)
@@ -1653,6 +1540,7 @@ public final class Index {
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #ofSubArray(short[], short[])
@@ -1662,7 +1550,7 @@ public final class Index {
      * @see String#indexOf(String, int)
      */
     public static OptionalInt ofSubArray(final short[] source, final int fromIndex, final short[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -1716,7 +1604,9 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at index {@code 0} of a non-null source
+     *         (including a zero-length source), matching {@link String#indexOf(String)}
      * @see #ofSubArray(boolean[], boolean[])
      * @see #ofSubArray(int[], int, int[])
      * @see #ofSubArray(Object[], Object[])
@@ -1745,7 +1635,9 @@ public final class Index {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts at or after {@code fromIndex},
-     *         or an empty OptionalInt if the subarray is not found, either array is {@code null}, or {@code fromIndex >= source.length}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}. Note an EMPTY
+     *         subarray is a zero-width match that is always found: it answers {@code min(max(fromIndex, 0), source.length)},
+     *         so {@code fromIndex >= source.length} yields {@code source.length}, not an empty result
      * @see #ofSubArray(boolean[], int, boolean[])
      * @see #ofSubArray(int[], int[])
      * @see #ofSubArray(int[], int, int[], int, int)
@@ -1777,10 +1669,10 @@ public final class Index {
      * <pre>{@code
      * int[] source = {1, 2, 3, 2, 3, 4};
      * int[] sub = {2, 3, 9};
-     * Index.ofSubArray(source, 0, sub, 0, 2).getAsInt();          // returns 1
-     * Index.ofSubArray(source, 2, sub, 0, 2).getAsInt();          // returns 3
+     * Index.ofSubArray(source, 0, sub, 0, 2).get();               // returns 1
+     * Index.ofSubArray(source, 2, sub, 0, 2).get();               // returns 3
      * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();         // returns false
-     * Index.ofSubArray(source, 2, sub, 0, 0).getAsInt();          // returns 2 (empty match clamped to fromIndex)
+     * Index.ofSubArray(source, 2, sub, 0, 0).get();               // returns 2 (empty match clamped to fromIndex)
      * Index.ofSubArray((int[]) null, 0, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
@@ -1791,6 +1683,7 @@ public final class Index {
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #ofSubArray(int[], int[])
@@ -1799,7 +1692,7 @@ public final class Index {
      * @see String#indexOf(String, int)
      */
     public static OptionalInt ofSubArray(final int[] source, final int fromIndex, final int[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -1853,7 +1746,9 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at index {@code 0} of a non-null source
+     *         (including a zero-length source), matching {@link String#indexOf(String)}
      * @see #ofSubArray(boolean[], boolean[])
      * @see #ofSubArray(long[], int, long[])
      * @see #ofSubArray(Object[], Object[])
@@ -1882,7 +1777,9 @@ public final class Index {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts at or after {@code fromIndex},
-     *         or an empty OptionalInt if the subarray is not found, either array is {@code null}, or {@code fromIndex >= source.length}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}. Note an EMPTY
+     *         subarray is a zero-width match that is always found: it answers {@code min(max(fromIndex, 0), source.length)},
+     *         so {@code fromIndex >= source.length} yields {@code source.length}, not an empty result
      * @see #ofSubArray(boolean[], int, boolean[])
      * @see #ofSubArray(long[], long[])
      * @see #ofSubArray(long[], int, long[], int, int)
@@ -1914,10 +1811,10 @@ public final class Index {
      * <pre>{@code
      * long[] source = {1L, 2L, 3L, 2L, 3L, 4L};
      * long[] sub = {2L, 3L, 9L};
-     * Index.ofSubArray(source, 0, sub, 0, 2).getAsInt();           // returns 1
-     * Index.ofSubArray(source, 2, sub, 0, 2).getAsInt();           // returns 3
+     * Index.ofSubArray(source, 0, sub, 0, 2).get();                // returns 1
+     * Index.ofSubArray(source, 2, sub, 0, 2).get();                // returns 3
      * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();          // returns false
-     * Index.ofSubArray(source, 2, sub, 0, 0).getAsInt();           // returns 2 (empty match clamped to fromIndex)
+     * Index.ofSubArray(source, 2, sub, 0, 0).get();                // returns 2 (empty match clamped to fromIndex)
      * Index.ofSubArray((long[]) null, 0, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
@@ -1928,6 +1825,7 @@ public final class Index {
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #ofSubArray(long[], long[])
@@ -1936,7 +1834,7 @@ public final class Index {
      * @see String#indexOf(String, int)
      */
     public static OptionalInt ofSubArray(final long[] source, final int fromIndex, final long[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -1991,7 +1889,9 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at index {@code 0} of a non-null source
+     *         (including a zero-length source), matching {@link String#indexOf(String)}
      * @see #ofSubArray(boolean[], boolean[])
      * @see #ofSubArray(float[], int, float[])
      * @see #ofSubArray(Object[], Object[])
@@ -2020,7 +1920,9 @@ public final class Index {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts at or after {@code fromIndex},
-     *         or an empty OptionalInt if the subarray is not found, either array is {@code null}, or {@code fromIndex >= source.length}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}. Note an EMPTY
+     *         subarray is a zero-width match that is always found: it answers {@code min(max(fromIndex, 0), source.length)},
+     *         so {@code fromIndex >= source.length} yields {@code source.length}, not an empty result
      * @see #ofSubArray(boolean[], int, boolean[])
      * @see #ofSubArray(float[], float[])
      * @see #ofSubArray(float[], int, float[], int, int)
@@ -2051,10 +1953,10 @@ public final class Index {
      * <pre>{@code
      * float[] source = {1f, 2f, 3f, 2f, 3f, 4f};
      * float[] sub = {2f, 3f, 9f};
-     * Index.ofSubArray(source, 0, sub, 0, 2).getAsInt();            // returns 1
-     * Index.ofSubArray(source, 2, sub, 0, 2).getAsInt();            // returns 3
+     * Index.ofSubArray(source, 0, sub, 0, 2).get();                 // returns 1
+     * Index.ofSubArray(source, 2, sub, 0, 2).get();                 // returns 3
      * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();           // returns false
-     * Index.ofSubArray(source, 2, sub, 0, 0).getAsInt();            // returns 2 (empty match clamped to fromIndex)
+     * Index.ofSubArray(source, 2, sub, 0, 0).get();                 // returns 2 (empty match clamped to fromIndex)
      * Index.ofSubArray((float[]) null, 0, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
@@ -2065,6 +1967,7 @@ public final class Index {
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #ofSubArray(float[], float[])
@@ -2073,7 +1976,7 @@ public final class Index {
      * @see String#indexOf(String, int)
      */
     public static OptionalInt ofSubArray(final float[] source, final int fromIndex, final float[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -2128,7 +2031,9 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at index {@code 0} of a non-null source
+     *         (including a zero-length source), matching {@link String#indexOf(String)}
      * @see #ofSubArray(boolean[], boolean[])
      * @see #ofSubArray(double[], int, double[])
      * @see #ofSubArray(Object[], Object[])
@@ -2157,7 +2062,9 @@ public final class Index {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts at or after {@code fromIndex},
-     *         or an empty OptionalInt if the subarray is not found, either array is {@code null}, or {@code fromIndex >= source.length}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}. Note an EMPTY
+     *         subarray is a zero-width match that is always found: it answers {@code min(max(fromIndex, 0), source.length)},
+     *         so {@code fromIndex >= source.length} yields {@code source.length}, not an empty result
      * @see #ofSubArray(boolean[], int, boolean[])
      * @see #ofSubArray(double[], double[])
      * @see #ofSubArray(double[], int, double[], int, int)
@@ -2188,10 +2095,10 @@ public final class Index {
      * <pre>{@code
      * double[] source = {1d, 2d, 3d, 2d, 3d, 4d};
      * double[] sub = {2d, 3d, 9d};
-     * Index.ofSubArray(source, 0, sub, 0, 2).getAsInt();             // returns 1
-     * Index.ofSubArray(source, 2, sub, 0, 2).getAsInt();             // returns 3
+     * Index.ofSubArray(source, 0, sub, 0, 2).get();                  // returns 1
+     * Index.ofSubArray(source, 2, sub, 0, 2).get();                  // returns 3
      * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();            // returns false
-     * Index.ofSubArray(source, 2, sub, 0, 0).getAsInt();             // returns 2 (empty match clamped to fromIndex)
+     * Index.ofSubArray(source, 2, sub, 0, 0).get();                  // returns 2 (empty match clamped to fromIndex)
      * Index.ofSubArray((double[]) null, 0, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
@@ -2202,6 +2109,7 @@ public final class Index {
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #ofSubArray(double[], double[])
@@ -2210,7 +2118,7 @@ public final class Index {
      * @see String#indexOf(String, int)
      */
     public static OptionalInt ofSubArray(final double[] source, final int fromIndex, final double[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -2273,7 +2181,9 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at index {@code 0} of a non-null source
+     *         (including a zero-length source), matching {@link String#indexOf(String)}
      * @see #ofSubArray(Object[], int, Object[])
      * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String)
@@ -2302,7 +2212,9 @@ public final class Index {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the subarray starts at or after {@code fromIndex},
-     *         or an empty OptionalInt if the subarray is not found, either array is {@code null}, or {@code fromIndex >= source.length}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}. Note an EMPTY
+     *         subarray is a zero-width match that is always found: it answers {@code min(max(fromIndex, 0), source.length)},
+     *         so {@code fromIndex >= source.length} yields {@code source.length}, not an empty result
      * @see #ofSubArray(Object[], Object[])
      * @see #ofSubArray(Object[], int, Object[], int, int)
      * @see String#indexOf(String, int)
@@ -2352,6 +2264,7 @@ public final class Index {
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #ofSubArray(Object[], Object[])
@@ -2359,7 +2272,7 @@ public final class Index {
      * @see String#indexOf(String, int)
      */
     public static OptionalInt ofSubArray(final Object[] source, final int fromIndex, final Object[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -2422,7 +2335,8 @@ public final class Index {
      * @param source the list to be searched, may be {@code null}
      * @param subListToFind the sublist to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the sublist starts,
-     *         or an empty OptionalInt if the sublist is not found or either list is {@code null}
+     *         or an empty OptionalInt if the sublist is not found or either list is {@code null}.
+     *         An empty pattern is a zero-width match at index {@code 0} of a non-null source
      * @see #ofSubList(List, int, List)
      * @see #ofSubList(List, int, List, int, int)
      * @see #ofSubArray(Object[], Object[])
@@ -2454,7 +2368,9 @@ public final class Index {
      * @param fromIndex the index to start the search from (inclusive); negative values are treated as 0
      * @param subListToFind the sublist to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the sublist starts at or after {@code fromIndex},
-     *         or an empty OptionalInt if the sublist is not found, either list is {@code null}, or {@code fromIndex >= source.size()}
+     *         or an empty OptionalInt if the sublist is not found or either list is {@code null}. Note an EMPTY
+     *         sublist is a zero-width match that is always found: it answers {@code min(max(fromIndex, 0), source.size())},
+     *         so {@code fromIndex >= source.size()} yields {@code source.size()}, not an empty result
      * @see #ofSubList(List, List)
      * @see #ofSubList(List, int, List, int, int)
      * @see #ofSubArray(Object[], int, Object[])
@@ -2509,6 +2425,7 @@ public final class Index {
      * @param sizeToMatch the number of elements to match from {@code subListToFind}
      * @return an OptionalInt containing the zero-based index where the sublist portion is found,
      *         or an empty OptionalInt if the sublist is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubList} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subListToFind}
      * @see #ofSubList(List, List)
@@ -2518,7 +2435,7 @@ public final class Index {
      * @see String#indexOf(String, int)
      */
     public static OptionalInt ofSubList(final List<?> source, final int fromIndex, final List<?> subListToFind, final int startIndexOfSubList,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubList, sizeToMatch, N.size(subListToFind));
 
         final int len = N.size(source);
@@ -2607,7 +2524,8 @@ public final class Index {
      *
      * @param source the boolean array to be searched, may be {@code null}
      * @param valueToFind the boolean value to search for
-     * @param startIndexFromBack the position to start the backwards search from (inclusive)
+     * @param startIndexFromBack the position to start the backwards search from (inclusive); a value at or
+     *                           beyond the end searches the whole input, and a negative value finds nothing
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the value is not found or the array is {@code null} or empty
      * @see #last(boolean[], boolean)
@@ -2660,7 +2578,8 @@ public final class Index {
      * @param source the char array to be searched, may be {@code null}
      * @param valueToFind the char value to search for
      * @param startIndexFromBack the position to start the backwards search from (inclusive); if greater than
-     *                            or equal to the array length, the entire array is searched
+     *                            or equal to the array length, the entire array is searched, and a negative
+     *                            value finds nothing
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the value is not found or the array is {@code null} or empty
      * @see #last(boolean[], boolean, int)
@@ -2714,7 +2633,8 @@ public final class Index {
      * @param source the byte array to be searched, may be {@code null}
      * @param valueToFind the byte value to search for
      * @param startIndexFromBack the position to start the backwards search from (inclusive); if greater than
-     *                            or equal to the array length, the entire array is searched
+     *                            or equal to the array length, the entire array is searched, and a negative
+     *                            value finds nothing
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the value is not found or the array is {@code null} or empty
      * @see #last(boolean[], boolean, int)
@@ -2768,7 +2688,8 @@ public final class Index {
      * @param source the short array to be searched, may be {@code null}
      * @param valueToFind the short value to search for
      * @param startIndexFromBack the position to start the backwards search from (inclusive); if greater than
-     *                            or equal to the array length, the entire array is searched
+     *                            or equal to the array length, the entire array is searched, and a negative
+     *                            value finds nothing
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the value is not found or the array is {@code null} or empty
      * @see #last(boolean[], boolean, int)
@@ -2822,7 +2743,8 @@ public final class Index {
      * @param source the int array to be searched, may be {@code null}
      * @param valueToFind the int value to search for
      * @param startIndexFromBack the position to start the backwards search from (inclusive); if greater than
-     *                            or equal to the array length, the entire array is searched
+     *                            or equal to the array length, the entire array is searched, and a negative
+     *                            value finds nothing
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the value is not found or the array is {@code null} or empty
      * @see #last(boolean[], boolean, int)
@@ -2876,7 +2798,8 @@ public final class Index {
      * @param source the long array to be searched, may be {@code null}
      * @param valueToFind the long value to search for
      * @param startIndexFromBack the position to start the backwards search from (inclusive); if greater than
-     *                            or equal to the array length, the entire array is searched
+     *                            or equal to the array length, the entire array is searched, and a negative
+     *                            value finds nothing
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the value is not found or the array is {@code null} or empty
      * @see #last(boolean[], boolean, int)
@@ -2933,7 +2856,8 @@ public final class Index {
      *
      * @param source the float array to be searched, may be {@code null}
      * @param valueToFind the float value to search for
-     * @param startIndexFromBack the position to start the backwards search from (inclusive)
+     * @param startIndexFromBack the position to start the backwards search from (inclusive); a value at or
+     *                           beyond the end searches the whole input, and a negative value finds nothing
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the value is not found or the array is {@code null} or empty
      * @see #last(boolean[], boolean, int)
@@ -2955,6 +2879,12 @@ public final class Index {
      * Matching uses {@link Numbers#fuzzyEquals(float, float, float)}, so two {@link Float#NaN} values are
      * considered equal and infinities of the same sign match.
      *
+     * <p><b>Signed zero:</b> {@code -0.0f} matches {@code 0.0f} here, and it does so even when
+     * {@code tolerance} is {@code 0}, because {@link Numbers#fuzzyEquals(float, float, float)} treats them as
+     * equal. A {@code tolerance} of {@code 0} is therefore <i>not</i> equivalent to
+     * {@link #last(float[], float, int)}, which orders by {@link Float#compare(float, float)} and reports the two zeros as
+     * different.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.1f, 3.0f, 2.2f, 4.0f};
@@ -2966,7 +2896,8 @@ public final class Index {
      *
      * @param source the float array to be searched, may be {@code null}
      * @param valueToFind the float value to search for
-     * @param startIndexFromBack the position to start the backwards search from (inclusive)
+     * @param startIndexFromBack the position to start the backwards search from (inclusive); a value at or
+     *                           beyond the end searches the whole input, and a negative value finds nothing
      * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
      *                  {@code valueToFind +/- tolerance}
      * @return an OptionalInt containing the zero-based index of the last occurrence of a value within tolerance at or before {@code startIndexFromBack},
@@ -2975,9 +2906,8 @@ public final class Index {
      * @see #last(float[], float, int)
      * @see N#lastIndexOf(float[], float, int, float)
      */
-    public static OptionalInt last(final float[] source, final float valueToFind, final int startIndexFromBack, final float tolerance) {
-        checkTolerance(tolerance);
-
+    public static OptionalInt last(final float[] source, final float valueToFind, final int startIndexFromBack, final float tolerance)
+            throws IllegalArgumentException {
         return toOptionalInt(N.lastIndexOf(source, valueToFind, startIndexFromBack, tolerance));
     }
 
@@ -3026,7 +2956,8 @@ public final class Index {
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
-     * @param startIndexFromBack the position to start the backwards search from (inclusive)
+     * @param startIndexFromBack the position to start the backwards search from (inclusive); a value at or
+     *                           beyond the end searches the whole input, and a negative value finds nothing
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the value is not found or the array is {@code null} or empty
      * @see #last(boolean[], boolean, int)
@@ -3047,6 +2978,12 @@ public final class Index {
      * Matching uses {@link Numbers#fuzzyEquals(double, double, double)}, so two {@link Double#NaN} values are
      * considered equal and infinities of the same sign match.
      *
+     * <p><b>Signed zero:</b> {@code -0.0} matches {@code 0.0} here, and it does so even when
+     * {@code tolerance} is {@code 0}, because {@link Numbers#fuzzyEquals(double, double, double)} treats them as
+     * equal. A {@code tolerance} of {@code 0} is therefore <i>not</i> equivalent to
+     * {@link #last(double[], double, int)}, which orders by {@link Double#compare(double, double)} and reports the two zeros as
+     * different.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
@@ -3058,7 +2995,8 @@ public final class Index {
      *
      * @param source the double array to be searched, may be {@code null}
      * @param valueToFind the double value to search for
-     * @param startIndexFromBack the position to start the backwards search from (inclusive)
+     * @param startIndexFromBack the position to start the backwards search from (inclusive); a value at or
+     *                           beyond the end searches the whole input, and a negative value finds nothing
      * @param tolerance the tolerance for matching; must be non-negative and not NaN. A value matches if it's within
      *                  {@code valueToFind +/- tolerance}
      * @return an OptionalInt containing the zero-based index of the last occurrence of a value within tolerance at or before {@code startIndexFromBack},
@@ -3067,9 +3005,8 @@ public final class Index {
      * @see #last(double[], double, int)
      * @see N#lastIndexOf(double[], double, int, double)
      */
-    public static OptionalInt last(final double[] source, final double valueToFind, final int startIndexFromBack, final double tolerance) {
-        checkTolerance(tolerance);
-
+    public static OptionalInt last(final double[] source, final double valueToFind, final int startIndexFromBack, final double tolerance)
+            throws IllegalArgumentException {
         return toOptionalInt(N.lastIndexOf(source, valueToFind, startIndexFromBack, tolerance));
     }
 
@@ -3120,7 +3057,8 @@ public final class Index {
      *
      * @param source the array to be searched, may be {@code null}
      * @param valueToFind the value to find in the array, may be {@code null}
-     * @param startIndexFromBack the index to start the search from (inclusive), searching backwards
+     * @param startIndexFromBack the index to start the search from (inclusive), searching backwards; a value at
+     *                           or beyond the end searches the whole input, and a negative value finds nothing
      * @return an OptionalInt containing the zero-based index of the last occurrence of the value at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the value is not found or the array is {@code null}
      * @see #last(Object[], Object)
@@ -3174,7 +3112,8 @@ public final class Index {
      *
      * @param source the collection to be searched, may be {@code null}
      * @param valueToFind the value to find in the collection, may be {@code null}
-     * @param startIndexFromBack the index to start the search from (inclusive), searching backwards
+     * @param startIndexFromBack the index to start the search from (inclusive), searching backwards; a value at
+     *                           or beyond the end searches the whole input, and a negative value finds nothing
      * @return an OptionalInt containing the zero-based index (in iteration order) of the last occurrence of the value at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the value is not found or the collection is {@code null}
      * @see #last(Collection, Object)
@@ -3225,7 +3164,8 @@ public final class Index {
      *
      * @param source the string to be searched, may be {@code null}
      * @param charValueToFind the character value (Unicode code point) to search for
-     * @param startIndexFromBack the position to start the backwards search from (inclusive)
+     * @param startIndexFromBack the position to start the backwards search from (inclusive); a value at or
+     *                           beyond the end searches the whole input, and a negative value finds nothing
      * @return an OptionalInt containing the zero-based index of the last occurrence of the character at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the character is not found, the string is {@code null}, or {@code startIndexFromBack < 0}
      * @see #last(String, int)
@@ -3250,8 +3190,9 @@ public final class Index {
      *
      * @param source the string to be searched, may be {@code null}
      * @param valueToFind the substring to search for, may be {@code null}
-     * @return an OptionalInt containing the zero-based index of the last occurrence of the substring,
-     *         or an empty OptionalInt if the substring is not found or either parameter is {@code null}
+     * @return an OptionalInt containing the zero-based index of the last occurrence of the substring
+     *         (an empty substring returns {@code source.length()}), or an empty OptionalInt if the substring is not
+     *         found or either parameter is {@code null}
      * @see #last(String, String, int)
      * @see #lastOfIgnoreCase(String, String)
      * @see #of(String, String)
@@ -3278,9 +3219,11 @@ public final class Index {
      *
      * @param source the string to be searched, may be {@code null}
      * @param valueToFind the substring to search for, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from (inclusive)
-     * @return an OptionalInt containing the zero-based index of the last occurrence of the substring at or before {@code startIndexFromBack},
-     *         or an empty OptionalInt if the substring is not found, either parameter is {@code null}, or {@code startIndexFromBack < 0}
+     * @param startIndexFromBack the position to start the backwards search from (inclusive); a value at or
+     *                           beyond the end searches the whole input, and a negative value finds nothing
+     * @return an OptionalInt containing the zero-based index of the last occurrence of the substring at or before {@code startIndexFromBack}
+     *         (an empty substring returns {@code Math.min(startIndexFromBack, source.length())}), or an empty
+     *         OptionalInt if the substring is not found, either parameter is {@code null}, or {@code startIndexFromBack < 0}
      * @see #last(String, String)
      * @see Strings#lastIndexOf(String, String, int)
      * @see String#lastIndexOf(String, int)
@@ -3293,7 +3236,9 @@ public final class Index {
      * Returns the index of the last occurrence of the specified substring in the given string, ignoring case.
      * <p>
      * This method performs a case-insensitive backwards search for {@code valueToFind} within {@code source},
-     * starting from the end of the string. Both ASCII and Unicode characters are compared case-insensitively.
+     * starting from the end of the string. Matching is a same-length UTF-16 compare via
+     * {@link String#regionMatches(boolean, int, String, int, int)}, not Unicode case folding: non-ASCII characters
+     * are compared case-insensitively, but length-changing mappings such as {@code "ß"}/{@code "SS"} do not match.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3303,10 +3248,14 @@ public final class Index {
      * Index.lastOfIgnoreCase((String) null, "a").isPresent();       // returns false
      * }</pre>
      *
+     * <p>A {@code null} {@code valueToFind} never matches here - a substring search for "no string" has no
+     * answer - whereas the {@code String[]} overload treats it as a search for a {@code null} <i>element</i>.</p>
+     *
      * @param source the string to be searched, may be {@code null}
      * @param valueToFind the substring to search for (case-insensitive), may be {@code null}
-     * @return an OptionalInt containing the zero-based index of the last occurrence of the substring (ignoring case),
-     *         or an empty OptionalInt if the substring is not found or either parameter is {@code null}
+     * @return an OptionalInt containing the zero-based index of the last occurrence of the substring (ignoring case)
+     *         (an empty substring returns {@code source.length()}), or an empty OptionalInt if the substring is not
+     *         found or either parameter is {@code null}
      * @see #lastOfIgnoreCase(String, String, int)
      * @see Strings#lastIndexOfIgnoreCase(String, String)
      */
@@ -3318,7 +3267,9 @@ public final class Index {
      * Returns the index of the last occurrence of the specified substring in the given string, ignoring case and searching backwards from the specified position.
      * <p>
      * This method performs a case-insensitive backwards search for {@code valueToFind} within {@code source},
-     * starting from the specified {@code startIndexFromBack}. Both ASCII and Unicode characters are compared case-insensitively.
+     * starting from the specified {@code startIndexFromBack}. Matching is a same-length UTF-16 compare via
+     * {@link String#regionMatches(boolean, int, String, int, int)}, not Unicode case folding: non-ASCII characters
+     * are compared case-insensitively, but length-changing mappings such as {@code "ß"}/{@code "SS"} do not match.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3328,11 +3279,16 @@ public final class Index {
      * Index.lastOfIgnoreCase("Hello", "he", 1).get();                   // returns 0
      * }</pre>
      *
+     * <p>A {@code null} {@code valueToFind} never matches here - a substring search for "no string" has no
+     * answer - whereas the {@code String[]} overload treats it as a search for a {@code null} <i>element</i>.</p>
+     *
      * @param source the string to be searched, may be {@code null}
      * @param valueToFind the substring to search for (case-insensitive), may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from (inclusive)
-     * @return an OptionalInt containing the zero-based index of the last occurrence of the substring (ignoring case) at or before {@code startIndexFromBack},
-     *         or an empty OptionalInt if the substring is not found, either parameter is {@code null}, or {@code startIndexFromBack < 0}
+     * @param startIndexFromBack the position to start the backwards search from (inclusive); a value at or
+     *                           beyond the end searches the whole input, and a negative value finds nothing
+     * @return an OptionalInt containing the zero-based index of the last occurrence of the substring (ignoring case) at or before {@code startIndexFromBack}
+     *         (an empty substring returns {@code Math.min(startIndexFromBack, source.length())}), or an empty
+     *         OptionalInt if the substring is not found, either parameter is {@code null}, or {@code startIndexFromBack < 0}
      * @see #lastOfIgnoreCase(String, String)
      * @see Strings#lastIndexOfIgnoreCase(String, String, int)
      */
@@ -3348,6 +3304,9 @@ public final class Index {
      * Index.lastOfIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello").get();   // returns 2
      * Index.lastOfIgnoreCase(new String[] {"Hello"}, "xyz").isPresent();                 // returns false
      * }</pre>
+     *
+     * <p>A {@code null} {@code valueToFind} matches a {@code null} <i>element</i> of the array, unlike the
+     * {@code String} overload, where a {@code null} substring never matches.</p>
      *
      * @param source the string array to be searched, may be {@code null}
      * @param valueToFind the string to search for (case-insensitive), may be {@code null}
@@ -3369,9 +3328,13 @@ public final class Index {
      * Index.lastOfIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello", 1).get();   // returns 0
      * }</pre>
      *
+     * <p>A {@code null} {@code valueToFind} matches a {@code null} <i>element</i> of the array, unlike the
+     * {@code String} overload, where a {@code null} substring never matches.</p>
+     *
      * @param source the string array to be searched, may be {@code null}
      * @param valueToFind the string to search for (case-insensitive), may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from (inclusive)
+     * @param startIndexFromBack the position to start the backwards search from (inclusive); a value at or
+     *                           beyond the end searches the whole input, and a negative value finds nothing
      * @return an OptionalInt containing the zero-based index of the last element equal (ignoring case) to {@code valueToFind} at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if not found or the array is {@code null}
      * @see #lastOfIgnoreCase(String[], String)
@@ -3399,7 +3362,11 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at {@code source.length} for the two-arg form
+     *         (and at {@code min(startIndexFromBack, length)} for the indexed form when {@code startIndexFromBack >= 0};
+     *         a negative {@code startIndexFromBack} finds nothing, as in {@link String#lastIndexOf(String, int)}), matching
+     *         {@link String#lastIndexOf(String)}
      * @see #lastOfSubArray(boolean[], int, boolean[])
      * @see #lastOfSubArray(Object[], Object[])
      * @see Strings#lastIndexOf(String, String)
@@ -3425,7 +3392,9 @@ public final class Index {
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
@@ -3457,20 +3426,23 @@ public final class Index {
      * <pre>{@code
      * boolean[] source = {true, true, false, true, true, false};
      * boolean[] sub = {true, true, false};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();              // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();              // returns 0
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                   // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                   // returns 0
      * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();            // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();              // returns 5 (empty match)
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                   // returns 5 (empty match)
      * Index.lastOfSubArray((boolean[]) null, 5, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #lastOfSubArray(boolean[], boolean[])
@@ -3478,7 +3450,7 @@ public final class Index {
      * @see Strings#lastIndexOf(String, String, int)
      */
     public static OptionalInt lastOfSubArray(final boolean[] source, final int startIndexFromBack, final boolean[] subArrayToFind,
-            final int startIndexOfSubArray, final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int startIndexOfSubArray, final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -3529,7 +3501,11 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at {@code source.length} for the two-arg form
+     *         (and at {@code min(startIndexFromBack, length)} for the indexed form when {@code startIndexFromBack >= 0};
+     *         a negative {@code startIndexFromBack} finds nothing, as in {@link String#lastIndexOf(String, int)}), matching
+     *         {@link String#lastIndexOf(String)}
      * @see #lastOfSubArray(boolean[], boolean[])
      * @see #lastOfSubArray(char[], int, char[])
      * @see #lastOfSubArray(Object[], Object[])
@@ -3554,7 +3530,9 @@ public final class Index {
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
@@ -3588,20 +3566,23 @@ public final class Index {
      * <pre>{@code
      * char[] source = {'a', 'b', 'c', 'b', 'c', 'd'};
      * char[] sub = {'b', 'c', 'z'};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();           // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();           // returns 1
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                // returns 1
      * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();         // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();           // returns 5 (empty match)
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                // returns 5 (empty match)
      * Index.lastOfSubArray((char[]) null, 5, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #lastOfSubArray(char[], char[])
@@ -3609,7 +3590,7 @@ public final class Index {
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      */
     public static OptionalInt lastOfSubArray(final char[] source, final int startIndexFromBack, final char[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -3658,7 +3639,11 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at {@code source.length} for the two-arg form
+     *         (and at {@code min(startIndexFromBack, length)} for the indexed form when {@code startIndexFromBack >= 0};
+     *         a negative {@code startIndexFromBack} finds nothing, as in {@link String#lastIndexOf(String, int)}), matching
+     *         {@link String#lastIndexOf(String)}
      * @see #lastOfSubArray(boolean[], boolean[])
      * @see #lastOfSubArray(byte[], int, byte[])
      * @see #lastOfSubArray(Object[], Object[])
@@ -3683,7 +3668,9 @@ public final class Index {
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
@@ -3717,20 +3704,23 @@ public final class Index {
      * <pre>{@code
      * byte[] source = {1, 2, 3, 2, 3, 4};
      * byte[] sub = {2, 3, 9};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();           // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();           // returns 1
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                // returns 1
      * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();         // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();           // returns 5 (empty match)
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                // returns 5 (empty match)
      * Index.lastOfSubArray((byte[]) null, 5, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #lastOfSubArray(byte[], byte[])
@@ -3738,7 +3728,7 @@ public final class Index {
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      */
     public static OptionalInt lastOfSubArray(final byte[] source, final int startIndexFromBack, final byte[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -3787,7 +3777,11 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at {@code source.length} for the two-arg form
+     *         (and at {@code min(startIndexFromBack, length)} for the indexed form when {@code startIndexFromBack >= 0};
+     *         a negative {@code startIndexFromBack} finds nothing, as in {@link String#lastIndexOf(String, int)}), matching
+     *         {@link String#lastIndexOf(String)}
      * @see #lastOfSubArray(boolean[], boolean[])
      * @see #lastOfSubArray(short[], int, short[])
      * @see #lastOfSubArray(Object[], Object[])
@@ -3813,7 +3807,9 @@ public final class Index {
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
@@ -3849,20 +3845,23 @@ public final class Index {
      * <pre>{@code
      * short[] source = {1, 2, 3, 2, 3, 4};
      * short[] sub = {2, 3, 9};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();            // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();            // returns 1
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                 // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                 // returns 1
      * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();          // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();            // returns 5 (empty match)
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                 // returns 5 (empty match)
      * Index.lastOfSubArray((short[]) null, 5, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #lastOfSubArray(short[], short[])
@@ -3870,7 +3869,7 @@ public final class Index {
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      */
     public static OptionalInt lastOfSubArray(final short[] source, final int startIndexFromBack, final short[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -3919,7 +3918,11 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at {@code source.length} for the two-arg form
+     *         (and at {@code min(startIndexFromBack, length)} for the indexed form when {@code startIndexFromBack >= 0};
+     *         a negative {@code startIndexFromBack} finds nothing, as in {@link String#lastIndexOf(String, int)}), matching
+     *         {@link String#lastIndexOf(String)}
      * @see #lastOfSubArray(boolean[], boolean[])
      * @see #lastOfSubArray(int[], int, int[])
      * @see #lastOfSubArray(Object[], Object[])
@@ -3945,7 +3948,9 @@ public final class Index {
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
@@ -3981,20 +3986,23 @@ public final class Index {
      * <pre>{@code
      * int[] source = {1, 2, 3, 2, 3, 4};
      * int[] sub = {2, 3, 9};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();          // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();          // returns 1
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();               // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();               // returns 1
      * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();        // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();          // returns 5 (empty match)
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();               // returns 5 (empty match)
      * Index.lastOfSubArray((int[]) null, 5, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #lastOfSubArray(int[], int[])
@@ -4002,7 +4010,7 @@ public final class Index {
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      */
     public static OptionalInt lastOfSubArray(final int[] source, final int startIndexFromBack, final int[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -4051,7 +4059,11 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at {@code source.length} for the two-arg form
+     *         (and at {@code min(startIndexFromBack, length)} for the indexed form when {@code startIndexFromBack >= 0};
+     *         a negative {@code startIndexFromBack} finds nothing, as in {@link String#lastIndexOf(String, int)}), matching
+     *         {@link String#lastIndexOf(String)}
      * @see #lastOfSubArray(boolean[], boolean[])
      * @see #lastOfSubArray(long[], int, long[])
      * @see #lastOfSubArray(Object[], Object[])
@@ -4077,7 +4089,9 @@ public final class Index {
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
@@ -4113,20 +4127,23 @@ public final class Index {
      * <pre>{@code
      * long[] source = {1L, 2L, 3L, 2L, 3L, 4L};
      * long[] sub = {2L, 3L, 9L};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();           // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();           // returns 1
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                // returns 1
      * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();         // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();           // returns 5 (empty match)
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                // returns 5 (empty match)
      * Index.lastOfSubArray((long[]) null, 5, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #lastOfSubArray(long[], long[])
@@ -4134,7 +4151,7 @@ public final class Index {
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      */
     public static OptionalInt lastOfSubArray(final long[] source, final int startIndexFromBack, final long[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -4184,7 +4201,11 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at {@code source.length} for the two-arg form
+     *         (and at {@code min(startIndexFromBack, length)} for the indexed form when {@code startIndexFromBack >= 0};
+     *         a negative {@code startIndexFromBack} finds nothing, as in {@link String#lastIndexOf(String, int)}), matching
+     *         {@link String#lastIndexOf(String)}
      * @see #lastOfSubArray(boolean[], boolean[])
      * @see #lastOfSubArray(float[], int, float[])
      * @see #lastOfSubArray(Object[], Object[])
@@ -4210,7 +4231,9 @@ public final class Index {
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
@@ -4247,20 +4270,23 @@ public final class Index {
      * <pre>{@code
      * float[] source = {1f, 2f, 3f, 2f, 3f, 4f};
      * float[] sub = {2f, 3f, 9f};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();            // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();            // returns 1
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                 // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                 // returns 1
      * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();          // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();            // returns 5 (empty match)
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                 // returns 5 (empty match)
      * Index.lastOfSubArray((float[]) null, 5, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #lastOfSubArray(float[], float[])
@@ -4268,7 +4294,7 @@ public final class Index {
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      */
     public static OptionalInt lastOfSubArray(final float[] source, final int startIndexFromBack, final float[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -4318,7 +4344,11 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at {@code source.length} for the two-arg form
+     *         (and at {@code min(startIndexFromBack, length)} for the indexed form when {@code startIndexFromBack >= 0};
+     *         a negative {@code startIndexFromBack} finds nothing, as in {@link String#lastIndexOf(String, int)}), matching
+     *         {@link String#lastIndexOf(String)}
      * @see #lastOfSubArray(boolean[], boolean[])
      * @see #lastOfSubArray(double[], int, double[])
      * @see #lastOfSubArray(Object[], Object[])
@@ -4344,7 +4374,9 @@ public final class Index {
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
@@ -4381,20 +4413,23 @@ public final class Index {
      * <pre>{@code
      * double[] source = {1d, 2d, 3d, 2d, 3d, 4d};
      * double[] sub = {2d, 3d, 9d};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();             // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();             // returns 1
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                  // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                  // returns 1
      * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();           // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();             // returns 5 (empty match)
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                  // returns 5 (empty match)
      * Index.lastOfSubArray((double[]) null, 5, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #lastOfSubArray(double[], double[])
@@ -4402,7 +4437,7 @@ public final class Index {
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      */
     public static OptionalInt lastOfSubArray(final double[] source, final int startIndexFromBack, final double[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -4453,7 +4488,11 @@ public final class Index {
      * @param source the array to be searched, may be {@code null}
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts,
-     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
+     *         or an empty OptionalInt if the subarray is not found or either array is {@code null}.
+     *         An empty pattern is a zero-width match at {@code source.length} for the two-arg form
+     *         (and at {@code min(startIndexFromBack, length)} for the indexed form when {@code startIndexFromBack >= 0};
+     *         a negative {@code startIndexFromBack} finds nothing, as in {@link String#lastIndexOf(String, int)}), matching
+     *         {@link String#lastIndexOf(String)}
      * @see #lastOfSubArray(Object[], int, Object[])
      * @see #lastOfSubArray(Object[], int, Object[], int, int)
      * @see #ofSubArray(Object[], Object[])
@@ -4480,7 +4519,9 @@ public final class Index {
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray starts at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the subarray is not found or either array is {@code null}
@@ -4513,20 +4554,23 @@ public final class Index {
      * <pre>{@code
      * String[] source = {"a", "b", "c", "b", "c", "d"};
      * String[] sub = {"b", "c", "z"};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).getAsInt();             // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).getAsInt();             // returns 1
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                  // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                  // returns 1
      * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();           // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).getAsInt();             // returns 5 (empty match)
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                  // returns 5 (empty match)
      * Index.lastOfSubArray((Object[]) null, 5, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subArrayToFind the subarray to search for, may be {@code null}
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
      *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
      * @see #lastOfSubArray(Object[], Object[])
@@ -4534,7 +4578,7 @@ public final class Index {
      * @see #ofSubArray(Object[], int, Object[], int, int)
      */
     public static OptionalInt lastOfSubArray(final Object[] source, final int startIndexFromBack, final Object[] subArrayToFind, final int startIndexOfSubArray,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubArray, sizeToMatch, N.len(subArrayToFind));
 
         final int len = N.len(source);
@@ -4585,7 +4629,8 @@ public final class Index {
      * @param source the list to be searched, may be {@code null}
      * @param subListToFind the sub-list to find in the source list, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the sub-list starts,
-     *         or an empty OptionalInt if the sub-list is not found or either list is {@code null}
+     *         or an empty OptionalInt if the sub-list is not found or either list is {@code null}.
+     *         An empty pattern is a zero-width match at {@code source.size()} of a non-null source
      * @see #lastOfSubList(List, int, List)
      * @see #ofSubList(List, List)
      */
@@ -4611,7 +4656,9 @@ public final class Index {
      * }</pre>
      *
      * @param source the list to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subListToFind the sub-list to find in the source list, may be {@code null}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the sub-list starts at or before {@code startIndexFromBack},
      *         or an empty OptionalInt if the sub-list is not found or either list is {@code null}
@@ -4645,20 +4692,23 @@ public final class Index {
      * <pre>{@code
      * List<String> source = Arrays.asList("a", "b", "c", "b", "c", "d");
      * List<String> sub = Arrays.asList("b", "c", "z");
-     * Index.lastOfSubList(source, 5, sub, 0, 2).getAsInt();            // returns 3
-     * Index.lastOfSubList(source, 2, sub, 0, 2).getAsInt();            // returns 1
+     * Index.lastOfSubList(source, 5, sub, 0, 2).get();                 // returns 3
+     * Index.lastOfSubList(source, 2, sub, 0, 2).get();                 // returns 1
      * Index.lastOfSubList(source, -1, sub, 0, 2).isPresent();          // returns false
-     * Index.lastOfSubList(source, 5, sub, 0, 0).getAsInt();            // returns 5 (empty match)
+     * Index.lastOfSubList(source, 5, sub, 0, 0).get();                 // returns 5 (empty match)
      * Index.lastOfSubList((List<?>) null, 5, sub, 0, 2).isPresent();   // returns false
      * }</pre>
      *
      * @param source the list to be searched, may be {@code null}
-     * @param startIndexFromBack the position to start the backwards search from; the search includes this position
+     * @param startIndexFromBack the highest index at which a match may start; the search includes this position.
+     *                           A value at or beyond the end searches the whole input, and a negative value
+     *                           finds nothing (an empty pattern included)
      * @param subListToFind the sub-list to find in the source list, may be {@code null}
      * @param startIndexOfSubList the starting index within {@code subListToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subListToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the sub-list is found,
      *         or an empty OptionalInt if the sub-list is not found or inputs are invalid
+     * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubList} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subListToFind}
      * @see #lastOfSubList(List, List)
@@ -4666,7 +4716,7 @@ public final class Index {
      * @see #ofSubList(List, int, List, int, int)
      */
     public static OptionalInt lastOfSubList(final List<?> source, final int startIndexFromBack, final List<?> subListToFind, final int startIndexOfSubList,
-            final int sizeToMatch) throws IndexOutOfBoundsException {
+            final int sizeToMatch) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(startIndexOfSubList, sizeToMatch, N.size(subListToFind));
 
         final int len = N.size(source);
@@ -5144,6 +5194,12 @@ public final class Index {
      * {@link #of(float[], float, int, float)} and {@link #last(float[], float, int, float)}.
      * In particular, two {@link Float#NaN} values are considered equal, and infinities of the same sign match.
      *
+     * <p><b>Signed zero:</b> {@code -0.0f} matches {@code 0.0f} here, and it does so even when
+     * {@code tolerance} is {@code 0}, because {@link Numbers#fuzzyEquals(float, float, float)} treats them as
+     * equal. A {@code tolerance} of {@code 0} is therefore <i>not</i> equivalent to
+     * {@link #allOf(float[], float, int)}, which orders by {@link Float#compare(float, float)} and reports the two zeros as
+     * different.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.1f, 3.0f, 2.2f, 4.0f};
@@ -5161,8 +5217,8 @@ public final class Index {
      * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      * @see #allOf(float[], float, int)
      */
-    public static BitSet allOf(final float[] source, final float valueToFind, final int fromIndex, final float tolerance) {
-        checkTolerance(tolerance);
+    public static BitSet allOf(final float[] source, final float valueToFind, final int fromIndex, final float tolerance) throws IllegalArgumentException {
+        N.checkArgNotNegative(tolerance, cs.tolerance);
 
         final BitSet bitSet = new BitSet();
         final int len = N.len(source);
@@ -5254,6 +5310,12 @@ public final class Index {
      * {@link #of(double[], double, int, double)} and {@link #last(double[], double, int, double)}.
      * In particular, two {@link Double#NaN} values are considered equal, and infinities of the same sign match.
      *
+     * <p><b>Signed zero:</b> {@code -0.0} matches {@code 0.0} here, and it does so even when
+     * {@code tolerance} is {@code 0}, because {@link Numbers#fuzzyEquals(double, double, double)} treats them as
+     * equal. A {@code tolerance} of {@code 0} is therefore <i>not</i> equivalent to
+     * {@link #allOf(double[], double, int)}, which orders by {@link Double#compare(double, double)} and reports the two zeros as
+     * different.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
@@ -5271,8 +5333,8 @@ public final class Index {
      * @throws IllegalArgumentException if {@code tolerance} is negative or NaN.
      * @see #allOf(double[], double, int)
      */
-    public static BitSet allOf(final double[] source, final double valueToFind, final int fromIndex, final double tolerance) {
-        checkTolerance(tolerance);
+    public static BitSet allOf(final double[] source, final double valueToFind, final int fromIndex, final double tolerance) throws IllegalArgumentException {
+        N.checkArgNotNegative(tolerance, cs.tolerance);
 
         final BitSet bitSet = new BitSet();
         final int len = N.len(source);
@@ -5315,7 +5377,8 @@ public final class Index {
      *
      * // Handles null elements
      * String[] withNulls = {"a", null, "b", null, "a"};
-     * BitSet nullIndices = Index.allOf(withNulls, null);
+     * // the cast is required: a bare null binds to allOf(T[], Predicate), which rejects it
+     * BitSet nullIndices = Index.allOf(withNulls, (Object) null);
      * // nullIndices contains {1, 3}
      * }</pre>
      *
@@ -5555,7 +5618,7 @@ public final class Index {
      * Index.allOf(collection, Objects::nonNull);
      *
      * // DON'T: Assume predicate won't receive nulls
-     * Index.allOf(Arrays.asList(1, null, 3), x -> x > 0);   // throws NPE inside predicate!
+     * Index.allOf(Arrays.asList(1, null, 3), x -> x > 0);   // throws NullPointerException inside the predicate!
      *
      * // DO: Handle nulls in predicate
      * Index.allOf(Arrays.asList(1, null, 3), x -> x != null && x > 0);
@@ -5638,18 +5701,6 @@ public final class Index {
         }
 
         return bitSet;
-    }
-
-    private static void checkTolerance(final float tolerance) throws IllegalArgumentException {
-        if (tolerance < 0 || Float.isNaN(tolerance)) {
-            throw new IllegalArgumentException("tolerance must be non-negative and not NaN: " + tolerance);
-        }
-    }
-
-    private static void checkTolerance(final double tolerance) throws IllegalArgumentException {
-        if (tolerance < 0 || Double.isNaN(tolerance)) {
-            throw new IllegalArgumentException("tolerance must be non-negative and not NaN: " + tolerance);
-        }
     }
 
     /**

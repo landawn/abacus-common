@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -166,5 +167,31 @@ public class DateTypeTest extends TestBase {
         sw = new StringWriter();
         type.appendTo(sw, null);
         assertEquals("null", sw.toString());
+    }
+
+    // --- review fixes 2026-09-06 (T9-02, T9-03) ---
+
+    @Test
+    public void reviewFixes20260906_T902_T903_charArrayAgreesWithStringOverload() {
+        // type suffix: rejected by both overloads (the char[] fast path used to strip it)
+        for (final String s : new String[] { "1700000000000L", "1700000000000d", "12345L" }) {
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        // overflow: IllegalArgumentException on both overloads (the char[] path used to throw ArithmeticException)
+        for (final String s : new String[] { "99999999999999999999", "9223372036854775808", "-9223372036854775809" }) {
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        for (final String s : new String[] { "1700000000000", "+1700000000000", "-1700000000000", "9223372036854775807" }) {
+            final long expected = Long.parseLong(s);
+            assertEquals(expected, type.valueOf(s).getTime(), s);
+            assertEquals(expected, type.valueOf(s.toCharArray(), 0, s.length()).getTime(), s);
+        }
+
+        assertNull(type.valueOf((char[]) null, 0, 0));
+        assertNull(type.valueOf(new char[0], 0, 0));
     }
 }

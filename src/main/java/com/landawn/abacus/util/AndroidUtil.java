@@ -47,10 +47,21 @@ public final class AndroidUtil {
 
     private static final Executor TP_EXECUTOR;
 
-    private static final ThreadFactory DAEMON_THREAD_FACTORY = runnable -> {
-        final Thread thread = Executors.defaultThreadFactory().newThread(runnable);
-        thread.setDaemon(true);
-        return thread;
+    /**
+     * Wraps a single default factory instead of creating one per thread: every
+     * {@link Executors#defaultThreadFactory()} call allocates a fresh factory that takes the next
+     * JVM-wide pool number and starts its own thread counter, which would name every worker
+     * {@code pool-N-thread-1} under a different {@code N} and shift the names of unrelated pools.
+     */
+    private static final ThreadFactory DAEMON_THREAD_FACTORY = new ThreadFactory() {
+        private final ThreadFactory delegate = Executors.defaultThreadFactory();
+
+        @Override
+        public Thread newThread(final Runnable runnable) {
+            final Thread thread = delegate.newThread(runnable);
+            thread.setDaemon(true);
+            return thread;
+        }
     };
 
     static {

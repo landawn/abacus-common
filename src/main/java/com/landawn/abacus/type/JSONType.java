@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import java.util.List;
 
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
 
@@ -52,9 +53,10 @@ public class JSONType<T> extends AbstractType<T> {
      *
      * @param clsName the class name or short alias ({@code "Map"}, {@code "List"}) for which
      *                to create the JSON type handler
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings({ "unchecked", "cast" })
-    JSONType(final String clsName) {
+    JSONType(final String clsName) throws IllegalArgumentException {
         super(JSON + SK.LESS_THAN + TypeFactory.getType(clsName).name() + SK.GREATER_THAN);
 
         targetType = (Type<T>) TypeFactory.getType(clsName);
@@ -68,7 +70,8 @@ public class JSONType<T> extends AbstractType<T> {
     /**
      * Returns the declaring name of this JSONType.
      * The declaring name wraps the underlying type's declaring name with the {@code JSON<>} notation,
-     * for example {@code "JSON<Map>"} or {@code "JSON<MyBean>"}.
+     * for example {@code "JSON<Map<Object, Object>>"} (a raw {@code Map} argument is expanded to its
+     * declaring name) or {@code "JSON<MyBean>"}.
      *
      * @return the declaring name in the format {@code "JSON<TypeDeclaringName>"}
      */
@@ -109,11 +112,12 @@ public class JSONType<T> extends AbstractType<T> {
      *
      * @param x the object to serialize; may be {@code null}
      * @return the JSON string representation of the object, or {@code null} if the input is {@code null}
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final T x) {
+    public String stringOf(final T x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
 
@@ -124,13 +128,16 @@ public class JSONType<T> extends AbstractType<T> {
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
-     * @param str the JSON string to parse; may be {@code null} or empty
-     * @return the deserialized object of type {@code T}, or {@code null} if {@code str} is {@code null} or empty
+     * @param str the JSON string to parse; may be {@code null}, empty or blank
+     * @return the deserialized object of type {@code T}, or {@code null} if {@code str} is {@code null}, empty
+     *         or blank (whitespace only), consistent with {@link XMLType#valueOf(String)}
+     * @throws ParsingException if the nonempty input has invalid JSON syntax or does not match the target type.
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(Object)
      */
     @Override
-    public T valueOf(final String str) {
-        return Strings.isEmpty(str) ? null : Utils.jsonParser.deserialize(str, targetType);
+    public T valueOf(final String str) throws ParsingException, RuntimeException {
+        return Strings.isBlank(str) ? null : Utils.jsonParser.deserialize(str, targetType);
     }
 }

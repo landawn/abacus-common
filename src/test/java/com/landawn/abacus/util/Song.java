@@ -4,7 +4,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-public class Song {
+import com.landawn.abacus.TestBase;
+
+public class Song extends TestBase {
     private UUID id;
     private String title;
     private String album;

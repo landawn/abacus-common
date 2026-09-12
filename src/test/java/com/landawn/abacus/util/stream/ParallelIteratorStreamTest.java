@@ -279,14 +279,6 @@ public class ParallelIteratorStreamTest extends TestBase {
         assertEquals(Arrays.asList(5, 6, 7, 8, 9, 10), result);
     }
 
-    //    @Test
-    //    public void testTakeWhilePreservesPrefixSemantics() {
-    //        try (Stream<Integer> local = createIteratorParallelStream(Arrays.asList(3, 1, 2))) {
-    //            List<Integer> result = local.takeWhile(n -> n < 3).toList();
-    //            assertHaveSameElements(Collections.emptyList(), result);
-    //        }
-    //    }
-
     //
 
     @Test
@@ -1797,9 +1789,15 @@ public class ParallelIteratorStreamTest extends TestBase {
         // regression: an Error (e.g. AssertionError) thrown by a parallel mapper was swallowed by
         // catch(Exception) in the parallel-concat worker, silently truncating the stream instead of
         // propagating it. The worker now catches Throwable so the error reaches the caller.
+        //
+        // This asserted RuntimeException until StreamBase.toRuntimeException stopped passing
+        // throwIfItIsError = false: the Error did reach the caller, but WRAPPED, so an ordinary
+        // catch(Exception) still swallowed it - i.e. the assertion pinned the very defect the comment
+        // above says this test exists to prevent. It now asserts the Error type itself, matching the
+        // sequential path and parallel forEach.
         final List<Integer> data = N.asList(1, 2, 3, 4, 5, 6, 7, 8);
 
-        assertThrows(RuntimeException.class,
+        assertThrows(AssertionError.class,
                 () -> Stream.of(data.iterator()).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(4).build()).map(x -> {
                     throw new AssertionError("boom-" + x);
                 }).count());
@@ -1837,4 +1835,30 @@ public class ParallelIteratorStreamTest extends TestBase {
         }
     }
 
+
+    @Test
+    public void testGroupToRejectsNullDownstreamBeforeMapFactory() {
+        final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();
+        final Stream<Integer> source = Stream.of(java.util.Arrays.asList(1, 2, 3).iterator()).parallel(2);
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> source.groupTo(value -> 0, value -> value, null, () -> {
+            mapCreated.set(true);
+            return new java.util.HashMap<Integer, Object>();
+        }));
+        org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
+    }
+
+    @Test
+    public void testFlatGroupToRejectsNullDownstreamBeforeMapFactory() {
+        final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();
+        final Stream<Integer> source = Stream.of(java.util.Arrays.asList(1, 2, 3).iterator()).parallel(2);
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> source.flatGroupTo(value -> java.util.Arrays.asList(0), (key, value) -> value, null, () -> {
+            mapCreated.set(true);
+            return new java.util.HashMap<Integer, Object>();
+        }));
+        org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
+    }
 }

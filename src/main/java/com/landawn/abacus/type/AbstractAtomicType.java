@@ -34,8 +34,9 @@ public abstract class AbstractAtomicType<T> extends AbstractType<T> {
      * Constructs a new {@code AbstractAtomicType} with the specified type name.
      *
      * @param typeName the name of the atomic type (e.g., "AtomicInteger", "AtomicLong", "AtomicBoolean")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractAtomicType(final String typeName) {
+    protected AbstractAtomicType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 

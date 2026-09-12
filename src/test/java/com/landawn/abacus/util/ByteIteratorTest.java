@@ -1,7 +1,6 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -10,1000 +9,288 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.function.BytePredicate;
 import com.landawn.abacus.util.function.ByteSupplier;
 import com.landawn.abacus.util.stream.ByteStream;
 
 public class ByteIteratorTest extends TestBase {
 
-    // =================================================
-    // empty()
-    // =================================================
+    @Test
+    public void testShortCircuitStreamLeavesRemainingElements() {
+        final ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
+
+        assertEquals(1L, iter.stream().limit(1).count());
+        assertTrue(iter.hasNext());
+        assertArrayEquals(new byte[] { 2, 3 }, iter.stream().toArray());
+        assertFalse(iter.hasNext());
+    }
 
     @Test
     public void testEmpty() {
         ByteIterator iter = ByteIterator.empty();
         assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextByte());
+        assertThrows(NoSuchElementException.class, iter::nextByte);
         assertSame(ByteIterator.EMPTY, ByteIterator.empty());
+        assertEquals(0, iter.toArray().length);
+        assertTrue(iter.toList().isEmpty());
+        assertFalse(iter.indexed().hasNext());
     }
 
-    // =================================================
-    // of(byte...)
-    // =================================================
-
     @Test
-    public void testOfArray() {
+    public void testOf() {
         ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
         assertTrue(iter.hasNext());
         assertEquals((byte) 1, iter.nextByte());
         assertEquals((byte) 2, iter.nextByte());
         assertEquals((byte) 3, iter.nextByte());
         assertFalse(iter.hasNext());
-    }
-
-    // =================================================
-    // of(byte[], int, int)
-    // =================================================
-
-    @Test
-    public void testOfArrayWithRange() {
-        byte[] arr = { 1, 2, 3, 4, 5 };
-        ByteIterator iter = ByteIterator.of(arr, 1, 4);
-        assertEquals((byte) 2, iter.nextByte());
-        assertEquals((byte) 3, iter.nextByte());
-        assertEquals((byte) 4, iter.nextByte());
-        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextByte);
+        assertFalse(ByteIterator.of().hasNext());
+        assertFalse(ByteIterator.of((byte[]) null).hasNext());
+        assertEquals((byte) 42, ByteIterator.of((byte) 42).nextByte());
+        ByteIterator special = ByteIterator.of(Byte.MIN_VALUE, (byte) -1, (byte) 0, (byte) 1, Byte.MAX_VALUE);
+        assertEquals(Byte.MIN_VALUE, special.nextByte());
+        assertEquals((byte) -1, special.nextByte());
+        assertEquals((byte) 0, special.nextByte());
+        assertEquals((byte) 1, special.nextByte());
+        assertEquals(Byte.MAX_VALUE, special.nextByte());
     }
 
     @Test
-    public void testOfArrayWithRangeBasic() {
-        byte[] arr = { 10, 20, 30, 40, 50 };
-        ByteIterator iter = ByteIterator.of(arr, 1, 4);
-        assertEquals((byte) 20, iter.nextByte());
-        assertEquals((byte) 30, iter.nextByte());
-        assertEquals((byte) 40, iter.nextByte());
-        assertFalse(iter.hasNext());
+    public void testOf_Range() {
+        byte[] array = { 1, 2, 3, 4, 5 };
+        assertArrayEquals(new byte[] { 2, 3, 4 }, ByteIterator.of(array, 1, 4).toArray());
+        assertEquals(ByteList.of((byte) 2, (byte) 3, (byte) 4), ByteIterator.of(array, 1, 4).toList());
+        assertArrayEquals(array, ByteIterator.of(array, 0, array.length).toArray());
+        assertFalse(ByteIterator.of(array, 1, 1).hasNext());
+        assertThrows(IndexOutOfBoundsException.class, () -> ByteIterator.of(array, -1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> ByteIterator.of(array, 0, 6));
+        assertThrows(IndexOutOfBoundsException.class, () -> ByteIterator.of(array, 2, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> ByteIterator.of((byte[]) null, 0, 1));
     }
-
-    @Test
-    public void testOfArrayWithRangeFullArray() {
-        byte[] arr = { 1, 2, 3 };
-        ByteIterator iter = ByteIterator.of(arr, 0, 3);
-        assertEquals((byte) 1, iter.nextByte());
-        assertEquals((byte) 2, iter.nextByte());
-        assertEquals((byte) 3, iter.nextByte());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfArrayToArrayOptimization() {
-        byte[] arr = { 1, 2, 3, 4, 5 };
-        ByteIterator iter = ByteIterator.of(arr, 1, 4);
-        byte[] result = iter.toArray();
-        assertArrayEquals(new byte[] { 2, 3, 4 }, result);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfArrayToListOptimization() {
-        byte[] arr = { 1, 2, 3, 4, 5 };
-        ByteIterator iter = ByteIterator.of(arr, 1, 4);
-        ByteList result = iter.toList();
-        assertEquals(3, result.size());
-        assertEquals((byte) 2, result.get(0));
-        assertEquals((byte) 3, result.get(1));
-        assertEquals((byte) 4, result.get(2));
-        assertFalse(iter.hasNext());
-    }
-
-    // =================================================
-    // Integration / combined tests
-    // =================================================
-
-    @Test
-    public void testChainedOperations() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6, (byte) 7, (byte) 8)
-                .skip(2)
-                .filter(b -> b % 2 == 0)
-                .limit(2);
-
-        assertEquals((byte) 4, iter.nextByte());
-        assertEquals((byte) 6, iter.nextByte());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfEmptyArray() {
-        ByteIterator iter = ByteIterator.of(new byte[0]);
-        assertFalse(iter.hasNext());
-        assertSame(ByteIterator.EMPTY, iter);
-    }
-
-    @Test
-    public void testOfNullArray() {
-        ByteIterator iter = ByteIterator.of((byte[]) null);
-        assertFalse(iter.hasNext());
-        assertSame(ByteIterator.EMPTY, iter);
-    }
-
-    @Test
-    public void testOfSingleElement() {
-        ByteIterator iter = ByteIterator.of((byte) 42);
-        assertTrue(iter.hasNext());
-        assertEquals((byte) 42, iter.nextByte());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfArrayWithRangeEmpty() {
-        byte[] arr = { 1, 2, 3 };
-        ByteIterator iter = ByteIterator.of(arr, 1, 1);
-        assertFalse(iter.hasNext());
-        assertSame(ByteIterator.EMPTY, iter);
-    }
-
-    @Test
-    public void testMultipleHasNextCalls() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2);
-
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertEquals((byte) 1, iter.nextByte());
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertEquals((byte) 2, iter.nextByte());
-        assertFalse(iter.hasNext());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testOfArrayBasic() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        assertTrue(iter.hasNext());
-        assertEquals((byte) 1, iter.nextByte());
-        assertEquals((byte) 2, iter.nextByte());
-        assertEquals((byte) 3, iter.nextByte());
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextByte());
-    }
-
-    @Test
-    public void testOfArrayWithRangeInvalidBounds() {
-        byte[] arr = { 1, 2, 3 };
-        assertThrows(IndexOutOfBoundsException.class, () -> ByteIterator.of(arr, -1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> ByteIterator.of(arr, 0, 4));
-        assertThrows(IndexOutOfBoundsException.class, () -> ByteIterator.of(arr, 2, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> ByteIterator.of(arr, 0, 10));
-    }
-
-    @Test
-    public void testOfArrayWithInvalidRange() {
-        byte[] arr = { 1, 2, 3 };
-        assertThrows(IndexOutOfBoundsException.class, () -> ByteIterator.of(arr, -1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> ByteIterator.of(arr, 0, 4));
-        assertThrows(IndexOutOfBoundsException.class, () -> ByteIterator.of(arr, 2, 1));
-    }
-
-    @Test
-    public void testOfArrayWithRangeNullArray() {
-        assertThrows(IndexOutOfBoundsException.class, () -> ByteIterator.of(null, 0, 1));
-    }
-
-    // =================================================
-    // defer()
-    // =================================================
 
     @Test
     public void testDefer() {
-        boolean[] supplierCalled = { false };
-        Supplier<ByteIterator> supplier = () -> {
-            supplierCalled[0] = true;
+        AtomicInteger calls = new AtomicInteger();
+        ByteIterator iter = ByteIterator.defer(() -> {
+            calls.incrementAndGet();
             return ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        };
-
-        ByteIterator iter = ByteIterator.defer(supplier);
-        assertFalse(supplierCalled[0]);
-
+        });
+        assertEquals(0, calls.get());
         assertTrue(iter.hasNext());
-        assertTrue(supplierCalled[0]);
-        assertEquals((byte) 1, iter.nextByte());
-    }
-
-    @Test
-    public void testDeferBasic() {
-        boolean[] supplierCalled = { false };
-        Supplier<ByteIterator> supplier = () -> {
-            supplierCalled[0] = true;
-            return ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        };
-
-        ByteIterator iter = ByteIterator.defer(supplier);
-        assertFalse(supplierCalled[0], "Supplier should not be called until first use");
-
-        assertTrue(iter.hasNext());
-        assertTrue(supplierCalled[0], "Supplier should be called on first hasNext");
+        assertEquals(1, calls.get());
         assertEquals((byte) 1, iter.nextByte());
         assertEquals((byte) 2, iter.nextByte());
-    }
+        assertEquals((byte) 3, iter.nextByte());
 
-    @Test
-    public void testDeferCalledOnNextByte() {
-        boolean[] supplierCalled = { false };
-        Supplier<ByteIterator> supplier = () -> {
-            supplierCalled[0] = true;
+        boolean[] calledOnNext = { false };
+        ByteIterator onNext = ByteIterator.defer(() -> {
+            calledOnNext[0] = true;
             return ByteIterator.of((byte) 42);
-        };
+        });
+        assertEquals((byte) 42, onNext.nextByte());
+        assertTrue(calledOnNext[0]);
 
-        ByteIterator iter = ByteIterator.defer(supplier);
-        assertFalse(supplierCalled[0]);
-
-        assertEquals((byte) 42, iter.nextByte());
-        assertTrue(supplierCalled[0]);
-    }
-
-    @Test
-    public void testDeferSupplierCalledOnce() {
-        int[] callCount = { 0 };
-        Supplier<ByteIterator> supplier = () -> {
-            callCount[0]++;
-            return ByteIterator.of((byte) 1, (byte) 2);
-        };
-
-        ByteIterator iter = ByteIterator.defer(supplier);
-        iter.hasNext();
-        iter.nextByte();
-        iter.hasNext();
-        iter.nextByte();
-
-        assertEquals(1, callCount[0], "Supplier should only be called once");
-    }
-
-    @Test
-    public void testDeferWithNull() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ByteIterator.defer(null));
-    }
-
-    @Test
-    public void testDeferNullResultFailureIsStable() {
-        int[] callCount = { 0 };
-        ByteIterator iter = ByteIterator.defer(() -> {
-            callCount[0]++;
+        int[] failCount = { 0 };
+        ByteIterator failing = ByteIterator.defer(() -> {
+            failCount[0]++;
             return null;
         });
-
-        assertThrows(IllegalStateException.class, iter::hasNext);
-        assertThrows(IllegalStateException.class, iter::hasNext);
-        assertEquals(1, callCount[0]);
+        assertThrows(IllegalStateException.class, failing::hasNext);
+        assertThrows(IllegalStateException.class, failing::hasNext);
+        assertEquals(1, failCount[0]);
+        assertThrows(IllegalArgumentException.class, () -> ByteIterator.defer(null));
     }
-
-    // =================================================
-    // generate(ByteSupplier)
-    // =================================================
 
     @Test
     public void testGenerate() {
-        ByteSupplier supplier = () -> (byte) 42;
-        ByteIterator iter = ByteIterator.generate(supplier);
+        AtomicInteger n = new AtomicInteger();
+        ByteIterator infinite = ByteIterator.generate(() -> (byte) n.getAndIncrement());
+        assertEquals((byte) 0, infinite.nextByte());
+        assertEquals((byte) 1, infinite.nextByte());
+        assertTrue(infinite.hasNext());
 
-        assertTrue(iter.hasNext());
-        assertEquals((byte) 42, iter.nextByte());
-        assertTrue(iter.hasNext());
-        assertEquals((byte) 42, iter.nextByte());
+        AtomicInteger counter = new AtomicInteger();
+        ByteIterator finite = ByteIterator.generate(() -> counter.get() < 3, () -> (byte) counter.getAndIncrement());
+        assertArrayEquals(new byte[] { 0, 1, 2 }, finite.toArray());
+        assertThrows(NoSuchElementException.class, finite::nextByte);
+        assertFalse(ByteIterator.generate(() -> false, () -> (byte) 1).hasNext());
+        assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate((ByteSupplier) null));
+        assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(null, () -> (byte) 0));
+        assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate((BooleanSupplier) () -> true, null));
     }
 
     @Test
-    public void testGenerateInfinite() {
-        ByteSupplier supplier = () -> (byte) 42;
-        ByteIterator iter = ByteIterator.generate(supplier);
-
-        assertTrue(iter.hasNext());
-        assertEquals((byte) 42, iter.nextByte());
-        assertTrue(iter.hasNext());
-        assertEquals((byte) 42, iter.nextByte());
-        assertTrue(iter.hasNext());
-        assertEquals((byte) 42, iter.nextByte());
-        assertTrue(iter.hasNext());
-    }
-
-    @Test
-    public void testGenerateWithCounter() {
-        int[] count = { 0 };
-        ByteSupplier supplier = () -> (byte) (count[0]++);
-        ByteIterator iter = ByteIterator.generate(supplier);
-
-        assertEquals((byte) 0, iter.nextByte());
-        assertEquals((byte) 1, iter.nextByte());
-        assertEquals((byte) 2, iter.nextByte());
-    }
-
-    @Test
-    public void testGenerateWithConditionBasic() {
-        int[] count = { 0 };
-        BooleanSupplier hasNext = () -> count[0] < 3;
-        ByteSupplier supplier = () -> (byte) (count[0]++);
-
-        ByteIterator iter = ByteIterator.generate(hasNext, supplier);
-
-        assertTrue(iter.hasNext());
-        assertEquals((byte) 0, iter.nextByte());
-        assertTrue(iter.hasNext());
-        assertEquals((byte) 1, iter.nextByte());
-        assertTrue(iter.hasNext());
-        assertEquals((byte) 2, iter.nextByte());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testGenerateWithNull() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(null));
-    }
-
-    // =================================================
-    // generate(BooleanSupplier, ByteSupplier)
-    // =================================================
-
-    @Test
-    public void testGenerateWithCondition() {
-        int[] count = { 0 };
-        BooleanSupplier hasNext = () -> count[0] < 3;
-        ByteSupplier supplier = () -> (byte) (count[0]++);
-
-        ByteIterator iter = ByteIterator.generate(hasNext, supplier);
-
-        assertEquals((byte) 0, iter.nextByte());
-        assertEquals((byte) 1, iter.nextByte());
-        assertEquals((byte) 2, iter.nextByte());
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextByte());
-    }
-
-    @Test
-    public void testGenerateWithConditionNoElements() {
-        BooleanSupplier hasNext = () -> false;
-        ByteSupplier supplier = () -> (byte) 1;
-
-        ByteIterator iter = ByteIterator.generate(hasNext, supplier);
-
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextByte());
-    }
-
-    @Test
-    public void testGenerateWithConditionNullHasNext() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(null, () -> (byte) 1));
-    }
-
-    @Test
-    public void testGenerateWithConditionNullSupplier() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(() -> true, null));
-    }
-
-    @Test
-    public void testGenerateWithConditionNullParams() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(null, () -> (byte) 1));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ByteIterator.generate(() -> true, null));
-    }
-
-    // =================================================
-    // next() [deprecated]
-    // =================================================
-
-    @Test
+    @SuppressWarnings("deprecation")
     public void testNext() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2);
-        assertEquals(Byte.valueOf((byte) 1), iter.next());
-        assertEquals(Byte.valueOf((byte) 2), iter.next());
-        assertFalse(iter.hasNext());
-    }
-
-    // =================================================
-    // nextByte()
-    // =================================================
-
-    @Test
-    public void testNextByte() {
         ByteIterator iter = ByteIterator.of((byte) 10, (byte) 20, (byte) 30);
-        assertEquals((byte) 10, iter.nextByte());
+        assertEquals(Byte.valueOf((byte) 10), iter.next());
         assertEquals((byte) 20, iter.nextByte());
         assertEquals((byte) 30, iter.nextByte());
-        assertThrows(NoSuchElementException.class, () -> iter.nextByte());
+        assertThrows(NoSuchElementException.class, iter::nextByte);
     }
-
-    // =================================================
-    // skip(long)
-    // =================================================
 
     @Test
     public void testSkip() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        ByteIterator skipped = iter.skip(2);
+        assertArrayEquals(new byte[] { 3, 4, 5 }, ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).skip(2).toArray());
+        assertFalse(ByteIterator.of((byte) 1, (byte) 2, (byte) 3).skip(5).hasNext());
+        ByteIterator original = ByteIterator.of((byte) 1, (byte) 2);
+        assertSame(original, original.skip(0));
+        assertThrows(IllegalArgumentException.class, () -> ByteIterator.of((byte) 1).skip(-1));
+        assertThrows(NoSuchElementException.class, () -> ByteIterator.of((byte) 1, (byte) 2).skip(2).nextByte());
 
-        assertEquals((byte) 3, skipped.nextByte());
-        assertEquals((byte) 4, skipped.nextByte());
-        assertEquals((byte) 5, skipped.nextByte());
-        assertFalse(skipped.hasNext());
-    }
+        ByteIterator source = new ByteIterator() {
+            private int next;
+            private boolean failedOnce;
 
-    @Test
-    public void testSkipBasic() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        ByteIterator skipped = iter.skip(2);
+            @Override
+            public boolean hasNext() {
+                return next < 4;
+            }
 
+            @Override
+            public byte nextByte() {
+                if (next == 1 && !failedOnce) {
+                    failedOnce = true;
+                    throw new IllegalStateException("transient failure");
+                }
+                return (byte) next++;
+            }
+        };
+        ByteIterator skipped = source.skip(2);
+        assertThrows(IllegalStateException.class, skipped::hasNext);
         assertTrue(skipped.hasNext());
-        assertEquals((byte) 3, skipped.nextByte());
-        assertEquals((byte) 4, skipped.nextByte());
-        assertEquals((byte) 5, skipped.nextByte());
-        assertFalse(skipped.hasNext());
+        assertEquals((byte) 2, skipped.nextByte());
     }
 
     @Test
-    public void testSkipAll() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        ByteIterator skipped = iter.skip(3);
+    public void testLimit() {
+        assertArrayEquals(new byte[] { 1, 2, 3 }, ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).limit(3).toArray());
+        assertArrayEquals(new byte[] { 1, 2, 3 }, ByteIterator.of((byte) 1, (byte) 2, (byte) 3).limit(5).toArray());
+        assertFalse(ByteIterator.of((byte) 1).limit(0).hasNext());
+        assertThrows(IllegalArgumentException.class, () -> ByteIterator.of((byte) 1).limit(-1));
 
-        assertFalse(skipped.hasNext());
+        int[] attempts = { 0 };
+        ByteIterator quota = ByteIterator.generate(() -> {
+            if (attempts[0]++ == 0) {
+                throw new IllegalStateException("temporary failure");
+            }
+            return (byte) 7;
+        }).limit(1);
+        assertThrows(IllegalStateException.class, quota::nextByte);
+        assertTrue(quota.hasNext());
+        assertEquals((byte) 7, quota.nextByte());
+        assertFalse(quota.hasNext());
+        assertEquals(2, attempts[0]);
     }
 
     @Test
-    public void testSkipMoreThanAvailable() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2);
-        ByteIterator skipped = iter.skip(10);
-
-        assertFalse(skipped.hasNext());
+    public void testFilter() {
+        assertArrayEquals(new byte[] { 2, 4, 6 },
+                ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6).filter(x -> x % 2 == 0).toArray());
+        ByteIterator none = ByteIterator.of((byte) 1, (byte) 3, (byte) 5).filter(x -> x % 2 == 0);
+        assertFalse(none.hasNext());
+        assertThrows(NoSuchElementException.class, none::nextByte);
+        assertThrows(IllegalArgumentException.class, () -> ByteIterator.of((byte) 1).filter(null));
+        assertEquals(18,
+                ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6, (byte) 7, (byte) 8, (byte) 9, (byte) 10)
+                        .skip(2)
+                        .limit(6)
+                        .filter(x -> x % 2 == 0)
+                        .stream()
+                        .sum());
     }
 
     @Test
-    public void testSkipLazy() {
-        int[] count = { 0 };
-        ByteSupplier supplier = () -> {
-            count[0]++;
-            return (byte) count[0];
-        };
-        ByteIterator iter = ByteIterator.generate(() -> count[0] < 10, supplier);
-        ByteIterator skipped = iter.skip(5);
-
-        assertEquals(0, count[0], "Skip should be lazy");
-        skipped.hasNext();
-        assertEquals(5, count[0], "Should skip 5 elements");
+    public void testToArrayAndToList() {
+        assertArrayEquals(new byte[] { 1, 2, 3 }, ByteIterator.of((byte) 1, (byte) 2, (byte) 3).toArray());
+        ByteIterator partial = ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
+        partial.nextByte();
+        partial.nextByte();
+        assertArrayEquals(new byte[] { 3, 4, 5 }, partial.toArray());
+        assertEquals(ByteList.of((byte) 1, (byte) 2, (byte) 3), ByteIterator.of((byte) 1, (byte) 2, (byte) 3).toList());
+        assertTrue(ByteIterator.empty().toList().isEmpty());
     }
 
     @Test
-    public void testSkipZero() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2);
-        ByteIterator skipped = iter.skip(0);
-
-        assertSame(iter, skipped);
-        assertEquals((byte) 1, skipped.nextByte());
-    }
-
-    @Test
-    public void testSkipNegative() {
-        ByteIterator iter = ByteIterator.of((byte) 1);
-        assertThrows(IllegalArgumentException.class, () -> iter.skip(-1));
-    }
-
-    @Test
-    public void testSkip_NoSuchElementAfterExhaustion() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2).skip(2);
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextByte());
-    }
-
-    // =================================================
-    // limit(long)
-    // =================================================
-
-    @Test
-    public void testLimitBasic() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        ByteIterator limited = iter.limit(3);
-
-        assertEquals((byte) 1, limited.nextByte());
-        assertEquals((byte) 2, limited.nextByte());
-        assertEquals((byte) 3, limited.nextByte());
-        assertFalse(limited.hasNext());
-    }
-
-    @Test
-    public void testLimitOne() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        ByteIterator limited = iter.limit(1);
-
-        assertTrue(limited.hasNext());
-        assertEquals((byte) 1, limited.nextByte());
-        assertFalse(limited.hasNext());
-    }
-
-    @Test
-    public void testLimitMoreThanAvailable() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2);
-        ByteIterator limited = iter.limit(10);
-
-        assertEquals((byte) 1, limited.nextByte());
-        assertEquals((byte) 2, limited.nextByte());
-        assertFalse(limited.hasNext());
-    }
-
-    @Test
-    public void testLimitExact() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        ByteIterator limited = iter.limit(3);
-
-        assertEquals((byte) 1, limited.nextByte());
-        assertEquals((byte) 2, limited.nextByte());
-        assertEquals((byte) 3, limited.nextByte());
-        assertFalse(limited.hasNext());
-    }
-
-    @Test
-    public void testLimitZero() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2);
-        ByteIterator limited = iter.limit(0);
-
-        assertFalse(limited.hasNext());
-        assertSame(ByteIterator.EMPTY, limited);
-    }
-
-    @Test
-    public void testLimitNegative() {
-        ByteIterator iter = ByteIterator.of((byte) 1);
-        assertThrows(IllegalArgumentException.class, () -> iter.limit(-1));
-    }
-
-    @Test
-    public void testLimit_NoSuchElementAfterExhaustion() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2).limit(1);
-        assertEquals((byte) 1, iter.nextByte());
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextByte());
-    }
-
-    // =================================================
-    // filter(BytePredicate)
-    // =================================================
-
-    @Test
-    public void testFilterBasic() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        BytePredicate evenFilter = b -> b % 2 == 0;
-        ByteIterator filtered = iter.filter(evenFilter);
-
-        assertEquals((byte) 2, filtered.nextByte());
-        assertEquals((byte) 4, filtered.nextByte());
-        assertFalse(filtered.hasNext());
-    }
-
-    @Test
-    public void testFilterAll() {
-        ByteIterator iter = ByteIterator.of((byte) 2, (byte) 4, (byte) 6);
-        BytePredicate evenFilter = b -> b % 2 == 0;
-        ByteIterator filtered = iter.filter(evenFilter);
-
-        assertEquals((byte) 2, filtered.nextByte());
-        assertEquals((byte) 4, filtered.nextByte());
-        assertEquals((byte) 6, filtered.nextByte());
-        assertFalse(filtered.hasNext());
-    }
-
-    @Test
-    public void testFilterLazy() {
-        int[] count = { 0 };
-        ByteSupplier supplier = () -> {
-            count[0]++;
-            return (byte) count[0];
-        };
-        ByteIterator iter = ByteIterator.generate(() -> count[0] < 10, supplier);
-        ByteIterator filtered = iter.filter(b -> b > 5);
-
-        assertEquals(0, count[0], "Filter should be lazy");
-        filtered.hasNext();
-        assertTrue(count[0] >= 6, "Should consume elements until predicate matches");
-    }
-
-    @Test
-    public void testFilterHasNextConsistency() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3).filter(b -> b == 2);
-
-        assertTrue(iter.hasNext());
-        assertTrue(iter.hasNext());
-        assertEquals((byte) 2, iter.nextByte());
-        assertFalse(iter.hasNext());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testFilterNone() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 3, (byte) 5);
-        BytePredicate evenFilter = b -> b % 2 == 0;
-        ByteIterator filtered = iter.filter(evenFilter);
-
-        assertFalse(filtered.hasNext());
-    }
-
-    @Test
-    public void testFilterNull() {
-        ByteIterator iter = ByteIterator.of((byte) 1);
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> iter.filter(null));
-    }
-
-    @Test
-    public void testFilter_NoSuchElementWhenNoneMatch() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 3, (byte) 5).filter(b -> b % 2 == 0);
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, () -> iter.nextByte());
-    }
-
-    // =================================================
-    // toArray()
-    // =================================================
-
-    @Test
-    public void testToArray() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        byte[] array = iter.toArray();
-        assertArrayEquals(new byte[] { 1, 2, 3 }, array);
-    }
-
-    @Test
-    public void testToArrayBasic() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        byte[] array = iter.toArray();
-        assertArrayEquals(new byte[] { 1, 2, 3 }, array);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testToArrayPartiallyConsumed() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4);
-        iter.nextByte();
-        iter.nextByte();
-        byte[] array = iter.toArray();
-        assertArrayEquals(new byte[] { 3, 4 }, array);
-    }
-
-    @Test
-    public void testToArrayEmpty() {
-        ByteIterator iter = ByteIterator.empty();
-        byte[] array = iter.toArray();
-        assertEquals(0, array.length);
-    }
-
-    @Test
-    public void testToArraySingleElement() {
-        ByteIterator iter = ByteIterator.of((byte) 42);
-        byte[] array = iter.toArray();
-        assertArrayEquals(new byte[] { 42 }, array);
-    }
-
-    // =================================================
-    // toList()
-    // =================================================
-
-    @Test
-    public void testToList() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        ByteList list = iter.toList();
-        assertEquals(3, list.size());
-        assertEquals((byte) 1, list.get(0));
-        assertEquals((byte) 2, list.get(1));
-        assertEquals((byte) 3, list.get(2));
-    }
-
-    @Test
-    public void testToListBasic() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        ByteList list = iter.toList();
-        assertEquals(3, list.size());
-        assertEquals((byte) 1, list.get(0));
-        assertEquals((byte) 2, list.get(1));
-        assertEquals((byte) 3, list.get(2));
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testToListPartiallyConsumed() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        iter.nextByte();
-        ByteList list = iter.toList();
-        assertEquals(2, list.size());
-        assertEquals((byte) 2, list.get(0));
-        assertEquals((byte) 3, list.get(1));
-    }
-
-    @Test
-    public void testToListEmpty() {
-        ByteIterator iter = ByteIterator.empty();
-        ByteList list = iter.toList();
-        assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testStreamOperations() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-        ByteStream stream = iter.stream();
-
-        long sum = stream.asIntStream().sum();
-        assertEquals(15, sum);
-    }
-
-    // =================================================
-    // stream()
-    // =================================================
-
-    @Test
-    public void testStreamBasic() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        ByteStream stream = iter.stream();
+    public void testStream() {
+        ByteStream stream = ByteIterator.of((byte) 1, (byte) 2, (byte) 3).stream();
         assertNotNull(stream);
-
-        byte[] result = stream.toArray();
-        assertArrayEquals(new byte[] { 1, 2, 3 }, result);
+        assertArrayEquals(new byte[] { 1, 2, 3 }, stream.toArray());
+        assertEquals(0, ByteIterator.empty().stream().toArray().length);
     }
 
     @Test
-    public void testStreamEmpty() {
-        ByteIterator iter = ByteIterator.empty();
-        ByteStream stream = iter.stream();
-        assertNotNull(stream);
-
-        byte[] result = stream.toArray();
-        assertEquals(0, result.length);
-    }
-
-    // =================================================
-    // indexed()
-    // =================================================
-
-    @Test
-    public void testIndexedBasic() {
-        ByteIterator iter = ByteIterator.of((byte) 10, (byte) 20, (byte) 30);
-        ObjIterator<IndexedByte> indexed = iter.indexed();
-
-        IndexedByte ib1 = indexed.next();
-        assertEquals(0, ib1.index());
-        assertEquals((byte) 10, ib1.value());
-
-        IndexedByte ib2 = indexed.next();
-        assertEquals(1, ib2.index());
-        assertEquals((byte) 20, ib2.value());
-
-        IndexedByte ib3 = indexed.next();
-        assertEquals(2, ib3.index());
-        assertEquals((byte) 30, ib3.value());
-
+    public void testIndexed() {
+        ObjIterator<IndexedByte> indexed = ByteIterator.of((byte) 10, (byte) 20, (byte) 30).indexed();
+        assertEquals(0, indexed.next().index());
+        assertEquals((byte) 20, indexed.next().value());
+        assertEquals(2, indexed.next().index());
         assertFalse(indexed.hasNext());
-    }
+        assertEquals(100, ByteIterator.of((byte) 10).indexed(100).next().index());
+        assertThrows(IllegalArgumentException.class, () -> ByteIterator.of((byte) 1).indexed(-1));
 
-    // =================================================
-    // indexed(long)
-    // =================================================
+        ByteIterator source = ByteIterator.of((byte) 1, (byte) 2);
+        ObjIterator<IndexedByte> overflowing = source.indexed(Long.MAX_VALUE);
+        assertEquals(Long.MAX_VALUE, overflowing.next().longIndex());
+        assertThrows(ArithmeticException.class, overflowing::next);
+        assertEquals((byte) 2, source.nextByte());
 
-    @Test
-    public void testIndexedWithStartIndex() {
-        ByteIterator iter = ByteIterator.of((byte) 10, (byte) 20, (byte) 30);
-        ObjIterator<IndexedByte> indexed = iter.indexed(100);
-
-        IndexedByte ib1 = indexed.next();
-        assertEquals(100, ib1.index());
-        assertEquals((byte) 10, ib1.value());
-
-        IndexedByte ib2 = indexed.next();
-        assertEquals(101, ib2.index());
-        assertEquals((byte) 20, ib2.value());
+        ObjIterator<IndexedByte> max = ByteIterator.of((byte) 1).indexed(Long.MAX_VALUE);
+        assertEquals(Long.MAX_VALUE, max.next().longIndex());
+        assertFalse(max.hasNext());
+        assertThrows(NoSuchElementException.class, max::next);
     }
 
     @Test
-    public void testIndexedWithStartIndexBasic() {
-        ByteIterator iter = ByteIterator.of((byte) 10, (byte) 20, (byte) 30);
-        ObjIterator<IndexedByte> indexed = iter.indexed(100);
-
-        IndexedByte ib1 = indexed.next();
-        assertEquals(100, ib1.index());
-        assertEquals((byte) 10, ib1.value());
-
-        IndexedByte ib2 = indexed.next();
-        assertEquals(101, ib2.index());
-        assertEquals((byte) 20, ib2.value());
-
-        IndexedByte ib3 = indexed.next();
-        assertEquals(102, ib3.index());
-        assertEquals((byte) 30, ib3.value());
-    }
-
-    @Test
-    public void testIndexedEmpty() {
-        ByteIterator iter = ByteIterator.empty();
-        ObjIterator<IndexedByte> indexed = iter.indexed();
-
-        assertFalse(indexed.hasNext());
-    }
-
-    @Test
-    public void testIndexedSingleElement() {
-        ByteIterator iter = ByteIterator.of((byte) 42);
-        ObjIterator<IndexedByte> indexed = iter.indexed();
-
-        IndexedByte ib = indexed.next();
-        assertEquals(0, ib.index());
-        assertEquals((byte) 42, ib.value());
-        assertFalse(indexed.hasNext());
-    }
-
-    @Test
-    public void testIndexedWithStartIndexZero() {
-        ByteIterator iter = ByteIterator.of((byte) 10, (byte) 20);
-        ObjIterator<IndexedByte> indexed = iter.indexed(0);
-
-        IndexedByte ib1 = indexed.next();
-        assertEquals(0, ib1.index());
-        assertEquals((byte) 10, ib1.value());
-    }
-
-    @Test
-    public void testIndexedWithStartIndexNegative() {
-        ByteIterator iter = ByteIterator.of((byte) 1);
-        assertThrows(IllegalArgumentException.class, () -> iter.indexed(-1));
-    }
-
-    @Test
-    public void testIndexedWithStartIndexOverflow() {
-        ObjIterator<IndexedByte> indexed = ByteIterator.of((byte) 1, (byte) 2).indexed(Long.MAX_VALUE);
-
-        IndexedByte first = indexed.next();
-        assertEquals(Long.MAX_VALUE, first.longIndex());
-        assertEquals((byte) 1, first.value());
-        assertTrue(indexed.hasNext());
-        assertThrows(ArithmeticException.class, indexed::next);
-
-        ObjIterator<IndexedByte> exhausted = ByteIterator.of((byte) 1).indexed(Long.MAX_VALUE);
-        exhausted.next();
-        assertFalse(exhausted.hasNext());
-        assertThrows(NoSuchElementException.class, exhausted::next);
-    }
-
-    // =================================================
-    // forEachRemaining() [deprecated]
-    // =================================================
-
-    @Test
-    public void testForEachRemaining() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        int[] sum = { 0 };
-
-        iter.forEachRemaining(b -> sum[0] += b);
-
-        assertEquals(6, sum[0]);
-    }
-
-    @Test
-    public void testForEachRemainingDeprecated() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        int[] sum = { 0 };
-
-        iter.forEachRemaining((Byte b) -> sum[0] += b);
-
-        assertEquals(6, sum[0]);
-        assertFalse(iter.hasNext());
-    }
-
-    // =================================================
-    // foreachRemaining()
-    // =================================================
-
-    @Test
+    @SuppressWarnings("deprecation")
     public void testForeachRemaining() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        int[] sum = { 0 };
+        ByteList boxed = new ByteList();
+        ByteIterator.of((byte) 1, (byte) 2, (byte) 3).forEachRemaining((Byte i) -> boxed.add(i));
+        assertEquals(ByteList.of((byte) 1, (byte) 2, (byte) 3), boxed);
 
-        iter.foreachRemaining(b -> sum[0] += b);
+        ByteList values = new ByteList();
+        ByteIterator.of((byte) 1, (byte) 2, (byte) 3).foreachRemaining(values::add);
+        assertEquals(ByteList.of((byte) 1, (byte) 2, (byte) 3), values);
 
-        assertEquals(6, sum[0]);
+        ByteIterator partial = ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
+        partial.nextByte();
+        partial.nextByte();
+        AtomicInteger sum = new AtomicInteger();
+        partial.foreachRemaining(v -> sum.addAndGet(v));
+        assertEquals(12, sum.get());
+        assertThrows(IllegalArgumentException.class, () -> ByteIterator.of((byte) 1).foreachRemaining(null));
+
+        // forEachRemaining(Consumer) overrides Iterator.forEachRemaining, whose contract specifies NullPointerException.
+        assertThrows(NullPointerException.class, () -> ByteIterator.of((byte) 1).forEachRemaining((java.util.function.Consumer<Byte>) null));
+        assertThrows(NullPointerException.class, () -> ByteIterator.empty().forEachRemaining((java.util.function.Consumer<Byte>) null));
     }
 
     @Test
-    public void testForeachRemainingBasic() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        int[] sum = { 0 };
-
-        iter.foreachRemaining(b -> sum[0] += b);
-
-        assertEquals(6, sum[0]);
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testForeachRemainingPartiallyConsumed() {
-        ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3, (byte) 4);
-        iter.nextByte();
-        int[] sum = { 0 };
-
-        iter.foreachRemaining(b -> sum[0] += b);
-
-        assertEquals(9, sum[0]);
-    }
-
-    @Test
-    public void testForEachRemainingEmpty() {
-        ByteIterator iter = ByteIterator.empty();
-        int[] count = { 0 };
-
-        iter.forEachRemaining((Byte b) -> count[0]++);
-
-        assertEquals(0, count[0]);
-    }
-
-    @Test
-    public void testForeachRemainingEmpty() {
-        ByteIterator iter = ByteIterator.empty();
-        int[] count = { 0 };
-
-        iter.foreachRemaining(b -> count[0]++);
-
-        assertEquals(0, count[0]);
-    }
-
-    @Test
-    public void testForeachRemainingNull() {
-        ByteIterator iter = ByteIterator.of((byte) 1);
-        assertThrows(IllegalArgumentException.class, () -> iter.foreachRemaining(null));
-    }
-
-    // =================================================
-    // foreachIndexed()
-    // =================================================
-
-    @Test
-    public void testForeachIndexedBasic() {
-        ByteIterator iter = ByteIterator.of((byte) 10, (byte) 20, (byte) 30);
-        int[] indexSum = { 0 };
-        int[] valueSum = { 0 };
-
-        iter.foreachIndexed((index, b) -> {
-            indexSum[0] += index;
-            valueSum[0] += b;
+    public void testForeachIndexed() {
+        ByteList indices = new ByteList();
+        ByteList values = new ByteList();
+        ByteIterator.of((byte) 10, (byte) 20, (byte) 30).foreachIndexed((index, value) -> {
+            indices.add((byte) index);
+            values.add(value);
         });
+        assertEquals(ByteList.of((byte) 0, (byte) 1, (byte) 2), indices);
+        assertEquals(ByteList.of((byte) 10, (byte) 20, (byte) 30), values);
 
-        assertEquals(3, indexSum[0]);
-        assertEquals(60, valueSum[0]);
-    }
-
-    @Test
-    public void testForeachIndexedPartiallyConsumed() {
-        ByteIterator iter = ByteIterator.of((byte) 10, (byte) 20, (byte) 30);
-        iter.nextByte();
+        ByteIterator partial = ByteIterator.of((byte) 10, (byte) 20, (byte) 30);
+        partial.nextByte();
         int[] firstIndex = { -1 };
-
-        iter.foreachIndexed((index, b) -> {
+        partial.foreachIndexed((index, value) -> {
             if (firstIndex[0] == -1) {
                 firstIndex[0] = index;
             }
         });
-
-        assertEquals(0, firstIndex[0], "Index should start from 0 even if iterator partially consumed");
+        assertEquals(0, firstIndex[0]);
+        assertThrows(IllegalArgumentException.class, () -> ByteIterator.of((byte) 1).foreachIndexed(null));
     }
-
-    @Test
-    public void testForeachIndexedEmpty() {
-        ByteIterator iter = ByteIterator.empty();
-        int[] count = { 0 };
-
-        iter.foreachIndexed((index, b) -> count[0]++);
-
-        assertEquals(0, count[0]);
-    }
-
-    @Test
-    public void testForeachIndexedNull() {
-        ByteIterator iter = ByteIterator.of((byte) 1);
-        assertThrows(IllegalArgumentException.class, () -> iter.foreachIndexed(null));
-    }
-
 }

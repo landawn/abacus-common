@@ -16,9 +16,9 @@
 package com.landawn.abacus.util;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -114,13 +114,10 @@ import com.landawn.abacus.util.stream.Stream;
  * }</pre>
  *
  * <p><b>Naming Convention:</b>
- * The class name "Fnn" follows the pattern:
- * <ul>
- *   <li><b>"F":</b> Functions (functional interfaces)</li>
- *   <li><b>"n":</b> Nullable/throwable (can handle {@code null} values and throw exceptions)</li>
- *   <li><b>"n":</b> Second "n" emphasizes the exception-throwing capability</li>
- * </ul>
- * This distinguishes it from {@link Fn} which works with standard non-throwing functional interfaces.
+ * {@code Fnn} is {@link Fn} for {@link Throwables} interfaces: every factory here mirrors the {@code Fn} factory of
+ * the same name, but produces (and accepts) the exception-declaring {@code Throwables.*} variant instead of the
+ * unchecked {@code com.landawn.abacus.util.function.*} one. Use {@code Fn} with
+ * {@link com.landawn.abacus.util.stream.Stream} and {@code Fnn} with {@link Seq}.
  *
  * <p><b>Method Categories:</b>
  * <ul>
@@ -289,6 +286,43 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Function memoization is unbounded; use a bounded external cache when the key space is unbounded</li>
  * </ul>
  *
+ * <p><b>The exception-type parameter {@code E} has two different bounds.</b>
+ * The factories that <i>adapt a lambda you supply</i> - {@code f}, {@code p}, {@code c}, {@code s},
+ * {@code testByKey}, the {@code memoize*} and {@code synchronized*} wrappers, and so on - are declared
+ * {@code <E extends Throwable>}. The <i>constant</i> factories are declared {@code <E extends Exception>}:
+ * {@code identity()}, {@code alwaysTrue()}/{@code alwaysFalse()}, {@code isNull()}/{@code notNull()},
+ * {@code isEmpty*()}/{@code notEmpty*()}, {@code isBlank()}/{@code notBlank()}, {@code toStr()},
+ * {@code key()}/{@code value()}/{@code entry()}/{@code pair()}/{@code triple()}/{@code tuple1()}..{@code tuple3()},
+ * {@code invert()}, {@code doNothing()}, {@code emptyAction()}, {@code println()}, {@code sleep(..)},
+ * {@code sleepUninterruptibly(..)}, {@code rateLimiter(..)}, {@code throwException(Supplier)},
+ * {@code closeQuietly(..)} and the three {@code *Merger()} factories.
+ *
+ * <p>Passing one of the {@code Exception}-bounded factories where a {@code Throwable}-bounded function is
+ * expected does <b>not</b> compile - {@code javac} reports
+ * {@code inference variable E has incompatible bounds}. Write the lambda directly, or route it through one
+ * of the {@code Throwable}-bounded adapters:
+ * <pre>{@code
+ * Throwables.Iterator<String, Throwable> it = Throwables.Iterator.of(N.asList("a", "b"));
+ * it.map(v -> v);                        // ok - a lambda infers E from the target
+ * it.map(Fnn.f(v -> v));                 // ok - f(..) is <E extends Throwable>
+ *
+ * Throwables.Iterator<String, Exception> checked = Throwables.Iterator.of(N.asList("a", "b"));
+ * checked.map(Fnn.<String, Exception> identity());   // ok - the pipeline's own bound is Exception
+ * }</pre>
+ *
+ * <p>A second group fixes the exception type outright rather than bounding a type parameter:
+ * {@link #close()}, {@link #jc2c(java.util.concurrent.Callable)} and {@link #throwException(String)} are
+ * {@code Exception}, {@link #throwIOException(String)} is {@code IOException}, and
+ * {@link #throwRuntimeException(String)} is {@code RuntimeException}. These are likewise unusable in a
+ * {@code Throwable}-bounded pipeline, but because there is no inference variable to bound, {@code javac}
+ * reports a plain {@code incompatible types: ... conforms to ...} mismatch instead of the message above.
+ *
+ * <p>The narrower bound is deliberate and is <b>not</b> widened to {@code Throwable}. Wherever such a call
+ * has no target type - a factory used as the receiver of a chained call, as in
+ * {@code Fnn.doNothing().accept(x)} - {@code E} is inferred from the bound alone, so widening it makes that
+ * expression throw {@code Throwable} and every existing caller that declares {@code throws Exception} stops
+ * compiling. {@link Throwables.Iterator} records the same divergence for the same reason.
+ *
  * <p><b>Comparison with Related Classes:</b>
  * <ul>
  *   <li><b>vs {@link Fn}:</b> Fnn handles checked exceptions while Fn works with standard interfaces</li>
@@ -296,14 +330,36 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>vs Standard Functional:</b> Enhanced with exception handling, memoization, and synchronization</li>
  * </ul>
  *
+ * <p><b>Related classes in this package</b> - non-throwing sibling factories of {@link Fn}
+ * (not nested in {@code Fnn}): {@link Predicates}, {@link BiPredicates}, {@link TriPredicates},
+ * {@link Consumers}, {@link BiConsumers}, {@link Functions}, {@link BiFunctions},
+ * {@link UnaryOperators}, {@link BinaryOperators}, {@link Suppliers}, {@link LongSuppliers},
+ * {@link IntFunctions}. {@link TriConsumers} and {@link TriFunctions} are siblings too, but are
+ * currently empty placeholders.</p>
+ *
  * @see Throwables
  * @see Fn
+ * @see Consumers
+ * @see BiConsumers
+ * @see TriConsumers
+ * @see Functions
+ * @see BiFunctions
+ * @see TriFunctions
+ * @see Predicates
+ * @see BiPredicates
+ * @see TriPredicates
+ * @see UnaryOperators
+ * @see BinaryOperators
+ * @see Suppliers
+ * @see IntFunctions
+ * @see LongSuppliers
  * @see java.util.function
  * @see java.util.concurrent
  * @see Stream
  * @see java.util.Optional
  */
 public final class Fnn {
+
     private Fnn() {
         // Utility class; do not instantiate.
     }
@@ -316,8 +372,10 @@ public final class Fnn {
      *
      * <p>The returned supplier is <b>thread-safe</b> and guarantees that the underlying supplier is called
      * at most once successfully, even when accessed concurrently from multiple threads. If the supplier
-     * throws, the failure is not cached and a later call retries initialization. The implementation uses
-     * double-checked locking to ensure thread safety with minimal synchronization overhead.</p>
+     * throws, the failure is not cached and a later call retries initialization. Re-entering {@code get()}
+     * from within the delegate throws {@link IllegalStateException}; that failure is not cached and a later
+     * call may retry once the recursive attempt has unwound. The implementation uses double-checked locking
+     * to ensure thread safety with minimal synchronization overhead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -351,11 +409,15 @@ public final class Fnn {
      *
      * <p><b>Thread Safety:</b> The returned supplier is <b>thread-safe</b> and uses double-checked locking with
      * volatile variables to ensure correct behavior under concurrent access. Multiple threads may safely call
-     * {@code get()} simultaneously.</p>
+     * {@code get()} simultaneously. Refreshes are serialized on a private monitor, not on the returned supplier
+     * itself, so caller code that synchronizes on the returned object can neither block nor interleave with a
+     * refresh.</p>
      *
      * <p><b>Exception Handling:</b> If the underlying supplier throws an exception, the value is not cached and
      * subsequent calls will retry the computation. The memoization only occurs upon successful completion,
-     * ensuring that transient failures don't permanently cache error states.</p>
+     * ensuring that transient failures don't permanently cache error states. Re-entering {@code get()} from
+     * within the delegate throws {@link IllegalStateException}; that failure is not cached and a later call may
+     * retry once the recursive attempt has unwound.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -388,12 +450,16 @@ public final class Fnn {
     public static <T, E extends Throwable> Throwables.Supplier<T, E> memoizeWithExpiration(final Throwables.Supplier<T, E> supplier, final long duration,
             final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
-        N.checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
         N.checkArgNotNull(unit, cs.unit);
+        N.checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
 
         return new Throwables.Supplier<>() {
             private final Throwables.Supplier<T, E> delegate = supplier;
             private final long durationNanos = unit.toNanos(duration);
+            // A private monitor rather than `this`: the returned supplier is handed to the caller, and a caller
+            // doing `synchronized (memoizedSupplier) { ... }` must not be able to block or interleave with a
+            // refresh. Same reason memoize(Function) uses its own resultMapLock.
+            private final Object lock = new Object();
             private volatile T value;
             // The special value 0 means "not yet initialized".
             private volatile long expirationNanos = 0;
@@ -411,7 +477,7 @@ public final class Fnn {
                 long nanos = expirationNanos;
                 final long now = System.nanoTime();
                 if (nanos == 0 || now - nanos >= 0) {
-                    synchronized (this) {
+                    synchronized (lock) {
                         if (nanos == expirationNanos) { // recheck for lost race
                             if (computing) {
                                 if (recursiveFailure == null) {
@@ -456,10 +522,11 @@ public final class Fnn {
      * Returns a memoized (caching) version of the given exception-throwing supplier whose cached value
      * expires after the specified {@link Duration}. This is a convenience overload of
      * {@link #memoizeWithExpiration(Throwables.Supplier, long, TimeUnit)} that accepts a {@code Duration}
-     * instead of a {@code (long, TimeUnit)} pair (mirroring {@link Fn#memoizeWithExpiration(java.util.function.Supplier, com.landawn.abacus.util.Duration)}).
+     * instead of a {@code (long, TimeUnit)} pair.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
+     * // note: Duration here is com.landawn.abacus.util.Duration, not java.time.Duration
      * Throwables.Supplier<Config, IOException> config =
      *     Fnn.memoizeWithExpiration(() -> loadConfig(), Duration.ofMinutes(10));
      * }</pre>
@@ -467,12 +534,16 @@ public final class Fnn {
      * @param <T> the type of results supplied by this supplier
      * @param <E> the type of exception that may be thrown by the supplier
      * @param supplier the delegate supplier whose results should be memoized
-     * @param duration the length of time after a refresh starts before its value expires and must be recomputed;
-     *                 must not be {@code null} and must be positive (its millisecond value must be {@code > 0})
+     * @param duration the length of time after a refresh starts that its value should remain in
+     *                 the cache before expiring. Must represent a positive duration when
+     *                 converted to milliseconds. After this duration passes, the next call
+     *                 to {@code get()} will invoke the delegate supplier again
      * @return a supplier that caches results with time-based expiration
      * @throws IllegalArgumentException if {@code supplier} or {@code duration} is {@code null}, or if
-     *         {@code duration} is not positive (milliseconds {@code <= 0}).
+     *         {@code duration} is not positive when converted to milliseconds.
      * @see #memoizeWithExpiration(Throwables.Supplier, long, TimeUnit)
+     * @see Duration
+     * @see Fn#memoizeWithExpiration(java.util.function.Supplier, Duration)
      */
     public static <T, E extends Throwable> Throwables.Supplier<T, E> memoizeWithExpiration(final Throwables.Supplier<T, E> supplier, final Duration duration)
             throws IllegalArgumentException {
@@ -489,8 +560,11 @@ public final class Fnn {
      * with the same input return the cached result immediately without re-executing the function logic.
      * This is particularly valuable for expensive computations or I/O operations with deterministic results.
      *
-     * <p><b>Thread Safety:</b> The returned function is <b>thread-safe</b> and uses a {@link ConcurrentHashMap}
-     * internally to store cached results, allowing safe concurrent access from multiple threads.</p>
+     * <p><b>Thread Safety:</b> The returned function is <b>thread-safe</b> and stores cached results in a
+     * {@link ConcurrentHashMap}, so concurrent <i>hits</i> are lock-free. Concurrent <i>misses</i> are not: every
+     * invocation of the underlying function is serialized on a single lock owned by the returned function, so two
+     * threads computing two <i>different</i> keys still wait for one another, and the underlying function runs while
+     * that lock is held. Do not memoize a function that blocks waiting on another thread through this method.</p>
      *
      * <p><b>Null Handling:</b> The function correctly handles {@code null} input values and {@code null}
      * return values. {@code null} inputs are cached separately from {@code non-null} inputs, and {@code null} results are
@@ -498,6 +572,16 @@ public final class Fnn {
      *
      * <p><b>Exception Handling:</b> If the function throws for an input, no result is cached for that
      * attempt and a later invocation with the same input retries the function.</p>
+     *
+     * <p><b>Recursion:</b> A function that re-enters the memoized function with the <i>same</i> input throws
+     * {@link IllegalStateException}. That input stays poisoned for the rest of the enclosing computation, so a
+     * function that swallows the exception still cannot publish a value for it: the call for that input fails and
+     * no value is cached <i>for it</i>. Poisoning is per input, not per computation: <i>other</i> inputs the same
+     * function computes are unaffected, and recursion on a different input is supported. In a cycle across two
+     * inputs (a computation of {@code A} asks for {@code B}, whose computation asks for {@code A} again and
+     * swallows the failure) only {@code A} fails - {@code B} is computed and cached as usual, and because the
+     * cached {@code B} no longer re-enters {@code A}, retrying {@code A} then <i>succeeds</i>. Treat the
+     * exception as a defect report about the function, not as a stable outcome to depend on.</p>
      *
      * <p><b>Memory Considerations:</b> The cache grows unbounded as new distinct inputs are encountered.
      * For applications with a large or unbounded input space, consider the memory implications or use
@@ -531,10 +615,16 @@ public final class Fnn {
         return new Throwables.Function<>() {
             private final R none = (R) Fn.NONE;
             private final Map<T, R> resultMap = new ConcurrentHashMap<>();
+            // One lock for every key, mirroring Fn.memoize(Function): ConcurrentHashMap.computeIfAbsent rejects a
+            // recursive computation of a *distinct* key that hashes into the same bin ("Recursive update"), so a
+            // reentrant lock is what lets a legitimately recursive function compute other keys while still
+            // publishing each key exactly once. The price is that cache misses do not run concurrently.
             private final Object resultMapLock = new Object();
             private volatile R resultForNull = none; //NOSONAR
             private final ThreadLocal<Set<T>> keysInProgress = new ThreadLocal<>();
-            private final ThreadLocal<IllegalStateException> recursiveFailure = new ThreadLocal<>();
+            // Poisoned inputs of the computations this thread is currently running, keyed by input:
+            // a recursion on one input must not fail an unrelated input computed by the same delegate.
+            private final ThreadLocal<Map<T, IllegalStateException>> recursiveFailures = new ThreadLocal<>();
 
             @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
             @Override
@@ -587,7 +677,8 @@ public final class Fnn {
 
                 try {
                     final R computed = func.apply(key);
-                    final IllegalStateException failure = recursiveFailure.get();
+                    final Map<T, IllegalStateException> failures = recursiveFailures.get();
+                    final IllegalStateException failure = failures == null ? null : failures.get(key);
 
                     if (failure != null) {
                         throw failure;
@@ -597,9 +688,18 @@ public final class Fnn {
                 } finally {
                     keys.remove(key);
 
+                    final Map<T, IllegalStateException> failures = recursiveFailures.get();
+
+                    if (failures != null) {
+                        failures.remove(key);
+
+                        if (failures.isEmpty()) {
+                            recursiveFailures.remove();
+                        }
+                    }
+
                     if (keys.isEmpty()) {
                         keysInProgress.remove();
-                        recursiveFailure.remove();
                     }
                 }
             }
@@ -608,11 +708,18 @@ public final class Fnn {
                 final Set<T> keys = keysInProgress.get();
 
                 if (keys != null && keys.contains(key)) {
-                    IllegalStateException failure = recursiveFailure.get();
+                    Map<T, IllegalStateException> failures = recursiveFailures.get();
+
+                    if (failures == null) {
+                        failures = new HashMap<>();
+                        recursiveFailures.set(failures);
+                    }
+
+                    IllegalStateException failure = failures.get(key);
 
                     if (failure == null) {
                         failure = new IllegalStateException("Recursive computation of memoized value");
-                        recursiveFailure.set(failure);
+                        failures.put(key, failure);
                     }
 
                     throw failure;
@@ -700,7 +807,7 @@ public final class Fnn {
     /**
      * Returns a Function that converts its input to a String representation using {@link N#toString(Object)}.
      * This function handles {@code null} inputs safely, returning the string {@code "null"} for {@code null} input.
-     * The conversion never throws exceptions despite the generic exception type parameter.
+     * The adapter adds no checked exceptions; failures from the input's string conversion propagate unchanged.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -713,8 +820,8 @@ public final class Fnn {
      * }</pre>
      *
      * @param <T> the type of the input to the function
-     * @param <E> the type of exception that may be thrown (though none will be)
-     * @return a function that converts its input to a String using {@link N#toString(Object)}
+     * @param <E> the declared checked-exception type; the adapter itself adds none
+     * @return a function that converts its input to a String using {@link N#toString(Object)}, propagating conversion failures
      * @see N#toString(Object)
      */
     public static <T, E extends Exception> Throwables.Function<T, String, E> toStr() {
@@ -783,6 +890,9 @@ public final class Fnn {
      * a new entry where the original value becomes the key and the original key becomes the value.
      * This is useful for reversing map relationships or creating inverted indices.
      *
+     * <p>The returned entry is an immutable {@link ImmutableEntry}:
+     * {@link Map.Entry#setValue(Object) setValue} throws {@link UnsupportedOperationException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create inverted map
@@ -801,6 +911,7 @@ public final class Fnn {
      * @param <E> the type of exception that may be thrown (though none will be)
      * @return a function that returns a new Entry with key and value swapped
      * @see Map.Entry
+     * @see ImmutableEntry
      * @see #key()
      * @see #value()
      */
@@ -813,6 +924,9 @@ public final class Fnn {
      * Returns a BiFunction that creates a {@link Map.Entry} from a key and value pair.
      * This factory function combines two separate values into a single Map.Entry, useful
      * for constructing entries in stream operations or when building maps programmatically.
+     *
+     * <p>The returned entry is an immutable {@link ImmutableEntry}:
+     * {@link Map.Entry#setValue(Object) setValue} throws {@link UnsupportedOperationException}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -830,7 +944,7 @@ public final class Fnn {
      * @param <E> the type of exception that may be thrown (though none will be)
      * @return a BiFunction that creates a Map.Entry from a key and value
      * @see Map.Entry
-     * @see java.util.AbstractMap.SimpleEntry
+     * @see ImmutableEntry
      */
     @SuppressWarnings("rawtypes")
     public static <K, V, E extends Exception> Throwables.BiFunction<K, V, Map.Entry<K, V>, E> entry() {
@@ -840,7 +954,8 @@ public final class Fnn {
     /**
      * Returns a BiFunction that creates a {@link Pair} from two values.
      * This factory function combines a left and right value into a Pair tuple, useful for
-     * pairing related values in functional operations while maintaining type safety and immutability.
+     * pairing related values in functional operations while maintaining type safety. The returned Pair is mutable;
+     * use {@link #tuple2()} for a shallow immutable grouping.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -874,7 +989,7 @@ public final class Fnn {
      * Returns a TriFunction that creates a {@link Triple} from three values.
      * This factory function combines left, middle, and right values into a Triple tuple,
      * useful for grouping three related values in functional operations while maintaining
-     * type safety and immutability.
+     * type safety. The returned Triple is mutable; use {@link #tuple3()} for a shallow immutable grouping.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1022,10 +1137,15 @@ public final class Fnn {
      * stream.forEach(Fnn.doNothing());
      * }</pre>
      *
+     * <p>Note the asymmetry with {@link Fn}: {@code Fn.doNothing()} is deprecated in favour of
+     * {@link Fn#emptyConsumer()}, but {@code Fnn} has no {@code emptyConsumer} alias, so this method
+     * is the supported spelling on the {@code Throwables} side and is not deprecated.</p>
+     *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown (though none will be)
      * @return a Consumer that performs no operation
      * @see #emptyAction()
+     * @see Fn#emptyConsumer()
      */
     public static <T, E extends Exception> Throwables.Consumer<T, E> doNothing() {
         return Fn.EMPTY_CONSUMER;
@@ -1116,9 +1236,12 @@ public final class Fnn {
      *     Fnn.throwException(() -> new IllegalStateException("Unexpected state"));
      * }</pre>
      *
+     * <p>The supplier must produce a {@code non-null} exception. If it returns {@code null}, the returned consumer
+     * fails with a {@link NullPointerException} instead of throwing the intended exception.</p>
+     *
      * @param <T> the type of the input to the consumer
      * @param <E> the type of exception that may be thrown
-     * @param exceptionSupplier the supplier that provides the exception instance to throw
+     * @param exceptionSupplier the supplier that provides the exception instance to throw; must not return {@code null}
      * @return a Consumer that always throws the exception supplied by {@code exceptionSupplier}
      * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
      * @see #throwException(String)
@@ -1203,7 +1326,7 @@ public final class Fnn {
      * @see #rateLimiter(RateLimiter)
      */
     @Stateful
-    public static <T, E extends Exception> Throwables.Consumer<T, E> rateLimiter(final double permitsPerSecond) {
+    public static <T, E extends Exception> Throwables.Consumer<T, E> rateLimiter(final double permitsPerSecond) throws IllegalArgumentException {
         return rateLimiter(RateLimiter.create(permitsPerSecond));
     }
 
@@ -1230,7 +1353,7 @@ public final class Fnn {
      */
     @Stateful
     public static <T, E extends Exception> Throwables.Consumer<T, E> rateLimiter(final RateLimiter rateLimiter) throws IllegalArgumentException {
-        N.checkArgNotNull(rateLimiter);
+        N.checkArgNotNull(rateLimiter, cs.rateLimiter);
 
         return t -> rateLimiter.acquire();
     }
@@ -1264,8 +1387,8 @@ public final class Fnn {
 
     /**
      * Returns a {@code Throwables.Consumer} that closes an {@link AutoCloseable} resource quietly.
-     * The consumer closes the resource (if not {@code null}) while suppressing any exception thrown
-     * by {@code close()}, so the returned consumer never throws.
+     * The consumer closes the resource (if not {@code null}), suppressing and logging {@link Exception}
+     * from {@code close()}. It restores the interrupt flag for {@link InterruptedException}; {@link Error} propagates.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1275,8 +1398,8 @@ public final class Fnn {
      * }</pre>
      *
      * @param <T> the type of {@code AutoCloseable} accepted by the consumer
-     * @param <E> the type of exception that may be thrown (though none will be)
-     * @return a Consumer that closes the {@code AutoCloseable} resource, suppressing any exception
+     * @param <E> the declared checked-exception type; Exceptions from close are suppressed
+     * @return a Consumer that closes the {@code AutoCloseable} resource, suppressing Exceptions but allowing Errors to propagate
      * @see #close()
      * @see IOUtil#closeQuietly(AutoCloseable)
      */
@@ -1315,11 +1438,13 @@ public final class Fnn {
      * @param <T> the type of the first input to the consumer
      * @param <U> the type of the second input to the consumer
      * @param <E> the type of exception that may be thrown
-     * @param separator the separator string to place between the two values in the output
+     * @param separator the separator string to place between the two values in the output; must not be {@code null}
      * @return a BiConsumer that prints two values with the specified separator to standard output
+     * @throws IllegalArgumentException if {@code separator} is {@code null}.
      * @see #println()
+     * @see Fn#println(String)
      */
-    public static <T, U, E extends Exception> Throwables.BiConsumer<T, U, E> println(final String separator) {
+    public static <T, U, E extends Exception> Throwables.BiConsumer<T, U, E> println(final String separator) throws IllegalArgumentException {
         return cc(Fn.println(separator));
     }
 
@@ -1334,6 +1459,10 @@ public final class Fnn {
      * // Compose with other predicates
      * Throwables.Predicate<String, Exception> isNullOrEmpty = t -> t == null || t.isEmpty();
      * }</pre>
+     *
+     * <p><b>Marked {@link Beta}:</b> only this {@code Throwables} spelling is provisional; the equivalent
+     * {@link Fn#isNull()} is not marked. Both factories return the same shared predicate instance, so the
+     * marker applies to this declaration rather than to the predicate's behaviour.</p>
      *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of exception that may be thrown
@@ -1464,9 +1593,14 @@ public final class Fnn {
      * Fnn.<String, Exception>notNull().test(null);      // returns false
      * }</pre>
      *
+     * <p><b>Marked {@link Beta}:</b> only this {@code Throwables} spelling is provisional; the equivalent
+     * {@link Fn#notNull()} is not marked. Both factories return the same shared predicate instance, so the
+     * marker applies to this declaration rather than to the predicate's behaviour.</p>
+     *
      * @param <T> the type of the input to the predicate
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input is not {@code null}, {@code false} otherwise
+     * @see #isNull()
      * @see java.util.Objects#nonNull(Object)
      */
     @Beta
@@ -1488,6 +1622,7 @@ public final class Fnn {
      * @param <T> the type of the CharSequence to test
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input CharSequence is not empty, {@code false} otherwise
+     * @see #isEmpty()
      * @see CharSequence#length()
      */
     public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> notEmpty() {
@@ -1510,6 +1645,7 @@ public final class Fnn {
      * @param <T> the type of the CharSequence to test
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input CharSequence is not blank, {@code false} otherwise
+     * @see #isBlank()
      * @see Character#isWhitespace(char)
      */
     public static <T extends CharSequence, E extends Exception> Throwables.Predicate<T, E> notBlank() {
@@ -1530,7 +1666,7 @@ public final class Fnn {
      * @param <T> the component type of the array
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input array is not empty, {@code false} otherwise
-     * @see java.lang.reflect.Array#getLength(Object)
+     * @see #isEmptyArray()
      */
     @Beta
     @SuppressWarnings("rawtypes")
@@ -1552,6 +1688,7 @@ public final class Fnn {
      * @param <T> the type of the Collection to test
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input Collection is not empty, {@code false} otherwise
+     * @see #isEmptyCollection()
      * @see Collection#isEmpty()
      */
     @Beta
@@ -1574,6 +1711,7 @@ public final class Fnn {
      * @param <T> the type of the Map to test
      * @param <E> the type of the exception that may be thrown
      * @return a Predicate that returns {@code true} if the input Map is not empty, {@code false} otherwise
+     * @see #isEmptyMap()
      * @see Map#isEmpty()
      */
     @Beta
@@ -1850,7 +1988,7 @@ public final class Fnn {
     }
 
     /** The Constant MIN. */
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings("rawtypes")
     private static final Throwables.BinaryOperator<Comparable, Throwable> MIN = (t, u) -> Comparators.NULL_LAST_COMPARATOR.compare(t, u) <= 0 ? t : u;
 
     /**
@@ -1882,8 +2020,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.min(Comparator.naturalOrder()).apply(3, 5);   // returns 3
-     * Fnn.min(Comparator.reverseOrder()).apply(3, 5);   // returns 5
+     * Fnn.<Integer, Exception> min(Comparator.<Integer> naturalOrder()).apply(3, 5);   // returns 3
+     * Fnn.<Integer, Exception> min(Comparator.<Integer> reverseOrder()).apply(3, 5);   // returns 5
      * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
@@ -2024,8 +2162,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.max(Comparator.naturalOrder()).apply(3, 5);   // returns 5
-     * Fnn.max(Comparator.reverseOrder()).apply(3, 5);   // returns 3
+     * Fnn.<Integer, Exception> max(Comparator.<Integer> naturalOrder()).apply(3, 5);   // returns 5
+     * Fnn.<Integer, Exception> max(Comparator.<Integer> reverseOrder()).apply(3, 5);   // returns 3
      * }</pre>
      *
      * @param <T> the type of the operands and result of the operator

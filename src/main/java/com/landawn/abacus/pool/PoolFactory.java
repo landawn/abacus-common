@@ -88,10 +88,11 @@ public final class PoolFactory { //NOSONAR
      * }</pre>
      *
      * @param <E> the type of elements in the pool, must implement Poolable
-     * @param capacity the maximum number of objects the pool can hold
+     * @param capacity the maximum number of objects the pool can hold (must be non-negative)
      * @return a new ObjectPool instance with the specified capacity
+     * @throws IllegalArgumentException if capacity is negative.
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity) {
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity) throws IllegalArgumentException {
         return new GenericObjectPool<>(capacity, AbstractPool.DEFAULT_EVICT_DELAY_IN_MILLIS, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
@@ -112,11 +113,12 @@ public final class PoolFactory { //NOSONAR
      * }</pre>
      *
      * @param <E> the type of elements in the pool, must implement Poolable
-     * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param capacity the maximum number of objects the pool can hold (must be non-negative)
+     * @param evictDelayInMillis the non-negative delay in milliseconds between eviction runs, or 0 to disable eviction
      * @return a new ObjectPool instance with the specified capacity and eviction delay
+     * @throws IllegalArgumentException if capacity or eviction delay is negative.
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis) {
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis) throws IllegalArgumentException {
         return new GenericObjectPool<>(capacity, evictDelayInMillis, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
@@ -138,12 +140,14 @@ public final class PoolFactory { //NOSONAR
      * }</pre>
      *
      * @param <E> the type of elements in the pool, must implement Poolable
-     * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for selecting objects to evict
+     * @param capacity the maximum number of objects the pool can hold (must be non-negative)
+     * @param evictDelayInMillis the non-negative delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting objects to evict; null selects LAST_ACCESS_TIME
      * @return a new ObjectPool instance with the specified configuration
+     * @throws IllegalArgumentException if capacity or eviction delay is negative.
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy) {
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy)
+            throws IllegalArgumentException {
         return new GenericObjectPool<>(capacity, evictDelayInMillis, evictionPolicy);
     }
 
@@ -168,13 +172,13 @@ public final class PoolFactory { //NOSONAR
      * }</pre>
      *
      * @param <E> the type of elements in the pool, must implement Poolable
-     * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for selecting objects to evict
-     * @param maxMemorySize the maximum total memory in bytes the pool can use
+     * @param capacity the maximum number of objects the pool can hold (must be non-negative)
+     * @param evictDelayInMillis the non-negative delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting objects to evict; null selects LAST_ACCESS_TIME
+     * @param maxMemorySize the non-negative maximum memory in bytes, or 0 for no configured memory limit
      * @param memoryMeasure the function to calculate memory size of pool elements; must not be {@code null}
      * @return a new ObjectPool instance with memory constraints
-     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}.
+     * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative, or if memoryMeasure is null.
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
             final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) throws IllegalArgumentException {
@@ -202,15 +206,17 @@ public final class PoolFactory { //NOSONAR
      * }</pre>
      *
      * @param <E> the type of elements in the pool, must implement Poolable
-     * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for selecting objects to evict
+     * @param capacity the maximum number of objects the pool can hold (must be non-negative)
+     * @param evictDelayInMillis the non-negative delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting objects to evict; null selects LAST_ACCESS_TIME
      * @param autoBalance whether to automatically remove objects when the pool is full
-     * @param balanceFactor the proportion of objects to remove during balancing (typically 0.1 to 0.5)
+     * @param balanceFactor the finite proportion to remove in [0, 1]; either signed zero selects the default 0.2
      * @return a new ObjectPool instance with custom balancing configuration
+     * @throws IllegalArgumentException if capacity or eviction delay is negative;
+     *         if balanceFactor is non-finite or outside [0, 1].
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
-            final boolean autoBalance, final float balanceFactor) {
+            final boolean autoBalance, final float balanceFactor) throws IllegalArgumentException {
         return new GenericObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor);
     }
 
@@ -235,15 +241,16 @@ public final class PoolFactory { //NOSONAR
      * }</pre>
      *
      * @param <E> the type of elements in the pool, must implement Poolable
-     * @param capacity the maximum number of objects the pool can hold
-     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for selecting objects to evict
+     * @param capacity the maximum number of objects the pool can hold (must be non-negative)
+     * @param evictDelayInMillis the non-negative delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting objects to evict; null selects LAST_ACCESS_TIME
      * @param autoBalance whether to automatically remove objects when the pool is full
-     * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5
-     * @param maxMemorySize the maximum total memory in bytes, or 0 for no memory limit
+     * @param balanceFactor the finite proportion to remove in [0, 1]; either signed zero selects the default 0.2
+     * @param maxMemorySize the non-negative maximum memory in bytes, or 0 for no configured memory limit
      * @param memoryMeasure the function to calculate memory size of pool elements; must not be {@code null}
      * @return a new ObjectPool instance with full configuration
-     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}.
+     * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative;
+     *         if balanceFactor is non-finite or outside [0, 1]; or if memoryMeasure is null.
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
             final boolean autoBalance, final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure)
@@ -271,10 +278,11 @@ public final class PoolFactory { //NOSONAR
      *
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
-     * @param capacity the maximum number of key-value pairs the pool can hold
+     * @param capacity the maximum number of key-value pairs the pool can hold (must be non-negative)
      * @return a new KeyedObjectPool instance with the specified capacity
+     * @throws IllegalArgumentException if capacity is negative.
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity) {
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity) throws IllegalArgumentException {
         return new GenericKeyedObjectPool<>(capacity, AbstractPool.DEFAULT_EVICT_DELAY_IN_MILLIS, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
@@ -296,11 +304,13 @@ public final class PoolFactory { //NOSONAR
      *
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
-     * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param capacity the maximum number of key-value pairs the pool can hold (must be non-negative)
+     * @param evictDelayInMillis the non-negative delay in milliseconds between eviction runs, or 0 to disable eviction
      * @return a new KeyedObjectPool instance with the specified capacity and eviction delay
+     * @throws IllegalArgumentException if capacity or eviction delay is negative.
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis) {
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis)
+            throws IllegalArgumentException {
         return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
@@ -323,13 +333,14 @@ public final class PoolFactory { //NOSONAR
      *
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
-     * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for selecting entries to evict
+     * @param capacity the maximum number of key-value pairs the pool can hold (must be non-negative)
+     * @param evictDelayInMillis the non-negative delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting entries to evict; null selects LAST_ACCESS_TIME
      * @return a new KeyedObjectPool instance with the specified configuration
+     * @throws IllegalArgumentException if capacity or eviction delay is negative.
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
-            final EvictionPolicy evictionPolicy) {
+            final EvictionPolicy evictionPolicy) throws IllegalArgumentException {
         return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, evictionPolicy);
     }
 
@@ -356,13 +367,13 @@ public final class PoolFactory { //NOSONAR
      *
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
-     * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for selecting entries to evict
-     * @param maxMemorySize the maximum total memory in bytes the pool can use
+     * @param capacity the maximum number of key-value pairs the pool can hold (must be non-negative)
+     * @param evictDelayInMillis the non-negative delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting entries to evict; null selects LAST_ACCESS_TIME
+     * @param maxMemorySize the non-negative maximum memory in bytes, or 0 for no configured memory limit
      * @param memoryMeasure the function to calculate memory size of key-value pairs; must not be {@code null}
      * @return a new KeyedObjectPool instance with memory constraints
-     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}.
+     * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative, or if memoryMeasure is null.
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure)
@@ -392,15 +403,17 @@ public final class PoolFactory { //NOSONAR
      *
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
-     * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for selecting entries to evict
+     * @param capacity the maximum number of key-value pairs the pool can hold (must be non-negative)
+     * @param evictDelayInMillis the non-negative delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting entries to evict; null selects LAST_ACCESS_TIME
      * @param autoBalance whether to automatically remove entries when the pool is full
-     * @param balanceFactor the proportion of entries to remove during balancing (typically 0.1 to 0.5)
+     * @param balanceFactor the finite proportion to remove in [0, 1]; either signed zero selects the default 0.2
      * @return a new KeyedObjectPool instance with custom balancing configuration
+     * @throws IllegalArgumentException if capacity or eviction delay is negative;
+     *         if balanceFactor is non-finite or outside [0, 1].
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
-            final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor) {
+            final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor) throws IllegalArgumentException {
         return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor);
     }
 
@@ -428,15 +441,16 @@ public final class PoolFactory { //NOSONAR
      *
      * @param <K> the type of keys maintained by the pool
      * @param <E> the type of pooled values, must implement Poolable
-     * @param capacity the maximum number of key-value pairs the pool can hold
-     * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction
-     * @param evictionPolicy the policy to use for selecting entries to evict
+     * @param capacity the maximum number of key-value pairs the pool can hold (must be non-negative)
+     * @param evictDelayInMillis the non-negative delay in milliseconds between eviction runs, or 0 to disable eviction
+     * @param evictionPolicy the policy to use for selecting entries to evict; null selects LAST_ACCESS_TIME
      * @param autoBalance whether to automatically remove entries when the pool is full
-     * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5
-     * @param maxMemorySize the maximum total memory in bytes, or 0 for no memory limit
+     * @param balanceFactor the finite proportion to remove in [0, 1]; either signed zero selects the default 0.2
+     * @param maxMemorySize the non-negative maximum memory in bytes, or 0 for no configured memory limit
      * @param memoryMeasure the function to calculate memory size of key-value pairs; must not be {@code null}
      * @return a new KeyedObjectPool instance with full configuration
-     * @throws IllegalArgumentException if {@code memoryMeasure} is {@code null}.
+     * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative;
+     *         if balanceFactor is non-finite or outside [0, 1]; or if memoryMeasure is null.
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor, final long maxMemorySize,

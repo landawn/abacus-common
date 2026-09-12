@@ -34,8 +34,9 @@ public abstract class AbstractCharSequenceType<T extends CharSequence> extends A
      * Constructs a new {@code AbstractCharSequenceType} with the specified type name.
      *
      * @param typeName the name of the {@code CharSequence} type (e.g., "String", "StringBuilder")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractCharSequenceType(final String typeName) {
+    protected AbstractCharSequenceType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 

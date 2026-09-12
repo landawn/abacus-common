@@ -96,7 +96,7 @@ public enum OperationType {
      * @return the corresponding {@code OperationType}
      * @throws IllegalArgumentException if {@code intValue} does not match one of the defined enum constants exactly.
      */
-    public static OperationType of(final int intValue) {
+    public static OperationType of(final int intValue) throws IllegalArgumentException {
         switch (intValue) {
             case 1:
                 return QUERY;

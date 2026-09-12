@@ -5,7 +5,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-public class TypeBean {
+import com.landawn.abacus.TestBase;
+
+public class TypeBean extends TestBase {
     private boolean boolType;
     private boolean[] boolArrayType;
     private List<Boolean> booleanListType;
@@ -316,16 +318,8 @@ public class TypeBean {
                 || !Objects.equals(characterListType, other.characterListType)) {
             return false;
         }
-        if (!Arrays.equals(dateArrayType, other.dateArrayType)) {
-            return false;
-        }
-        if (!Objects.equals(dateListType, other.dateListType)) {
-            return false;
-        }
-        if (!Objects.equals(dateType, other.dateType)) {
-            return false;
-        }
-        if (!Arrays.equals(doubleArrayType, other.doubleArrayType)) {
+        if (!Arrays.equals(dateArrayType, other.dateArrayType) || !Objects.equals(dateListType, other.dateListType) || !Objects.equals(dateType, other.dateType)
+                || !Arrays.equals(doubleArrayType, other.doubleArrayType)) {
             return false;
         }
         if (!Objects.equals(doubleListType, other.doubleListType)) {

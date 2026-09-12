@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -11,17 +12,25 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
+import java.time.Instant;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.JsonSerConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
+import com.landawn.abacus.util.DateTimeFormat;
+import com.landawn.abacus.util.Objectory;
 
 public class LocalTimeTypeTest extends TestBase {
 
@@ -250,5 +259,59 @@ public class LocalTimeTypeTest extends TestBase {
 
         localTimeType.set(stmt, "param_name", null);
         verify(stmt).setObject("param_name", null);
+    }
+
+    // --- review fixes 2026-09-06 (T10-02, T10-03, T10-04) ---
+
+    @Test
+    public void reviewFixes20260906_T1002_T1003_numericGrammarAndOverflow() {
+        for (final String s : new String[] { "170000000000000000000", "9223372036854775808", "-9223372036854775809", "0x1F4A0", "1700000000000L",
+                "12345L" }) {
+            assertThrows(DateTimeParseException.class, () -> localTimeType.valueOf(s), s);
+            assertThrows(DateTimeParseException.class, () -> localTimeType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        for (final String s : new String[] { "1700000000000", "+1700000000000", "-1700000000000", "9223372036854775807", "12345" }) {
+            final LocalTime expected = LocalTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(s)), ZoneId.systemDefault());
+            assertEquals(expected, localTimeType.valueOf(s), s);
+            assertEquals(expected, localTimeType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        assertThrows(DateTimeParseException.class, () -> localTimeType.valueOf("1234"));
+        assertThrows(DateTimeParseException.class, () -> localTimeType.valueOf("0"));
+    }
+
+    @Test
+    public void reviewFixes20260906_T1004_dateTimeFormatDoesNotApply() throws IOException {
+        final LocalTime v = LocalTime.of(10, 30, 45, 123456789);
+
+        for (final DateTimeFormat f : new DateTimeFormat[] { DateTimeFormat.LONG, DateTimeFormat.ISO_8601_DATE_TIME, DateTimeFormat.ISO_8601_TIMESTAMP }) {
+            final BufferedJsonWriter w = Objectory.createBufferedJsonWriter();
+            localTimeType.serializeTo(w, v, JsonSerConfig.create().setDateTimeFormat(f));
+            assertEquals("\"10:30:45.123456789\"", w.toString(), f.toString());
+
+            final BufferedJsonWriter wn = Objectory.createBufferedJsonWriter();
+            localTimeType.serializeTo(wn, null, JsonSerConfig.create().setDateTimeFormat(f));
+            assertEquals("null", wn.toString(), f.toString());
+        }
+    }
+
+    // FINDING R05-3 (2026-09-08): r9506 made ZonedDateTimeType/OffsetDateTimeType read a Calendar in the calendar's
+    // own zone, but this handler still rebuilt from getTimeInMillis() in the JVM default zone - so the displayed
+    // fields, which is all a LocalTime is, silently shifted by the zone offset.
+    @Test
+    public void reviewFixes20260908_calendarKeepsItsOwnZone() {
+        // GMT+14:00 and GMT-12:00 are 26 h apart, so whatever the JVM default zone is, at least one of them is on a
+        // different calendar day from it - which is what makes this test fail against the default-zone rebuild.
+        for (final String zoneName : new String[] { "Asia/Tokyo", "America/Los_Angeles", "UTC", "GMT+05:30", "GMT+14:00", "GMT-12:00" }) {
+            final java.util.TimeZone tz = java.util.TimeZone.getTimeZone(zoneName);
+            final java.util.GregorianCalendar cal = new java.util.GregorianCalendar(tz);
+            cal.setTimeInMillis(1703502645123L);
+
+            // GregorianCalendar.toZonedDateTime() is the JDK's own conversion, and it keeps the calendar's zone.
+            assertEquals(cal.toZonedDateTime().toLocalTime(), localTimeType.valueOf(cal), zoneName);
+            // ... and the java.time family now agrees with itself.
+            assertEquals(createType(java.time.ZonedDateTime.class).valueOf(cal).toLocalTime(), localTimeType.valueOf(cal), zoneName);
+        }
     }
 }

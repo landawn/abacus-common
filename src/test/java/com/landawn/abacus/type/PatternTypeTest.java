@@ -147,4 +147,19 @@ public class PatternTypeTest extends TestBase {
     public void testIsSerializable() {
         assertTrue(patternType.isSerializable());
     }
+
+    // ---- review fixes 2026-09-06, T2-10 (WONTFIX, documented): identity equals and the package-wide isImmutable default ----
+
+    @Test
+    public void reviewFixes20260906_equalsIsIdentityAndIsImmutableIsTheInheritedDefault() {
+        final Pattern p = Pattern.compile("a+b", Pattern.CASE_INSENSITIVE);
+        final Pattern roundTrip = patternType.valueOf(patternType.stringOf(p));
+
+        assertEquals(p.pattern(), roundTrip.pattern());
+        // Pattern does not override equals(): the round trip is a different instance, hence not equal.
+        assertFalse(patternType.equals(p, roundTrip));
+        assertTrue(patternType.equals(p, p));
+        assertFalse(patternType.equals(Pattern.compile("x"), Pattern.compile("x")));
+        assertFalse(patternType.isImmutable());
+    }
 }

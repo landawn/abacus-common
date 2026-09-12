@@ -23,6 +23,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Charsets;
@@ -34,6 +35,8 @@ import com.landawn.abacus.util.Objectory;
  * This class specializes in reading and writing ASCII character streams from databases and
  * provides conversion between {@link java.io.InputStream} and various output formats using
  * US-ASCII character encoding ({@link com.landawn.abacus.util.Charsets#US_ASCII}).
+ * Text encoding replaces non-ASCII characters and malformed surrogate sequences with {@code ?};
+ * decoding replaces non-ASCII bytes with U+FFFD. Non-ASCII content does not round-trip losslessly.
  *
  * <p>JDBC operations use the dedicated ASCII-stream APIs:
  * retrieval via {@link java.sql.ResultSet#getAsciiStream} and storage via
@@ -57,7 +60,7 @@ public class AsciiStreamType extends InputStreamType {
      * Instances are created by {@link TypeFactory}; do not instantiate directly.
      */
     AsciiStreamType() {
-        super(ASCII_STREAM);
+        super(ASCII_STREAM, Charsets.US_ASCII);
     }
 
     /**
@@ -67,10 +70,11 @@ public class AsciiStreamType extends InputStreamType {
      * @param rs the {@code ResultSet} to retrieve the ASCII stream from
      * @param columnIndex the 1-based column index of the ASCII stream column
      * @return an {@code InputStream} containing the ASCII-encoded data, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public InputStream get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getAsciiStream(columnIndex);
     }
 
@@ -81,10 +85,11 @@ public class AsciiStreamType extends InputStreamType {
      * @param rs the {@code ResultSet} to retrieve the ASCII stream from
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
      * @return an {@code InputStream} containing the ASCII-encoded data, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public InputStream get(final ResultSet rs, final String columnName) throws SQLException {
+    public InputStream get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getAsciiStream(columnName);
     }
 
@@ -96,10 +101,11 @@ public class AsciiStreamType extends InputStreamType {
      * @param stmt the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code InputStream} containing ASCII-encoded data; may be {@code null}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws NullPointerException, SQLException {
         stmt.setAsciiStream(columnIndex, x);
     }
 
@@ -111,10 +117,11 @@ public class AsciiStreamType extends InputStreamType {
      * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code InputStream} containing ASCII-encoded data; may be {@code null}
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws NullPointerException, SQLException {
         stmt.setAsciiStream(parameterName, x);
     }
 
@@ -127,10 +134,12 @@ public class AsciiStreamType extends InputStreamType {
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code InputStream} containing ASCII-encoded data; may be {@code null}
      * @param sqlTypeOrLength the number of bytes in the stream
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setAsciiStream(columnIndex, x, sqlTypeOrLength);
     }
 
@@ -143,10 +152,12 @@ public class AsciiStreamType extends InputStreamType {
      * @param parameterName the name of the parameter to set
      * @param x the {@code InputStream} containing ASCII-encoded data; may be {@code null}
      * @param sqlTypeOrLength the number of bytes in the stream
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setAsciiStream(parameterName, x, sqlTypeOrLength);
     }
 
@@ -163,7 +174,9 @@ public class AsciiStreamType extends InputStreamType {
      *
      * @param appendable the target {@code Appendable} to append to
      * @param x the {@code InputStream} containing ASCII-encoded data to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during reading or appending
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if reading the input or writing the destination through checked I/O operations fails.
+     * @throws UncheckedIOException if reading a non-null input fails when the destination is not a {@link java.io.Writer}.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -175,7 +188,7 @@ public class AsciiStreamType extends InputStreamType {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final InputStream x) throws IOException {
+    public void appendTo(final Appendable appendable, final InputStream x) throws NullPointerException, IOException, UncheckedIOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -207,10 +220,11 @@ public class AsciiStreamType extends InputStreamType {
      * @param config the serialization/formatting configuration; if non-{@code null} and its
      *               {@link com.landawn.abacus.parser.JsonXmlSerConfig#getStringQuotation()} is non-zero,
      *               the value is wrapped in that quotation character
-     * @throws IOException if an I/O error occurs during reading or writing
+     * @throws NullPointerException if writer is null when a null literal, quotation mark, or input character is written.
+     * @throws IOException if reading the input or writing the destination through checked I/O operations fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final InputStream x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final InputStream x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -225,7 +239,7 @@ public class AsciiStreamType extends InputStreamType {
                 int count = 0;
 
                 while (IOUtil.EOF != (count = IOUtil.read(reader, buf, 0, buf.length))) {
-                    writer.writeCharacter(buf, 0, count);
+                    Utils.writeStringContent(writer, buf, 0, count, config == null ? 0 : config.getStringQuotation());
                 }
             } finally {
                 Objectory.recycle(buf);

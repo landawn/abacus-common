@@ -1545,72 +1545,6 @@ public class IntStreamTest extends TestBase {
         assertArrayEquals(new int[] { 1, 2, 3 }, javaStream.toArray());
     }
 
-    // TODO: filter(IntPredicate) is abstract - tested via concrete implementations above
-    // TODO: takeWhile(IntPredicate) is abstract - tested via concrete implementations above
-    // TODO: dropWhile(IntPredicate) is abstract - tested via concrete implementations above
-    // TODO: map(IntUnaryOperator) is abstract - tested via concrete implementations above
-    // TODO: mapToChar(IntToCharFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToByte(IntToByteFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToShort(IntToShortFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToLong(IntToLongFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToFloat(IntToFloatFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToDouble(IntToDoubleFunction) is abstract - tested via concrete implementations above
-    // TODO: mapToObj(IntFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMap(IntFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapArray(IntFunction<int[]>) is abstract - tested via concrete implementations above
-    // TODO: flatMapToByte(IntFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToChar(IntFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToShort(IntFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToLong(IntFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToFloat(IntFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToDouble(IntFunction) is abstract - tested via concrete implementations above
-    // TODO: flatMapToObj(IntFunction) is abstract - tested via concrete implementations above
-    // TODO: flatmapToObj(IntFunction) is abstract - tested via concrete implementations above
-    // TODO: mapMulti(IntMapMultiConsumer) is abstract - tested via concrete implementations above
-    // TODO: mapPartial(IntFunction) is abstract - tested via concrete implementations above
-    // TODO: mapPartialJdk(IntFunction) is abstract - tested via concrete implementations above
-    // TODO: rangeMap(IntBiPredicate, IntBinaryOperator) is abstract - tested via concrete implementations above
-    // TODO: rangeMapToObj(IntBiPredicate, IntBiFunction) is abstract - tested via concrete implementations above
-    // TODO: collapse(IntBiPredicate) is abstract - tested via concrete implementations above
-    // TODO: collapse(IntBiPredicate, IntBinaryOperator) is abstract - tested via concrete implementations above
-    // TODO: collapse(IntTriPredicate, IntBinaryOperator) is abstract - tested via concrete implementations above
-    // TODO: scan(IntBinaryOperator) is abstract - tested via concrete implementations above
-    // TODO: scan(int, IntBinaryOperator) is abstract - tested via concrete implementations above
-    // TODO: scan(int, boolean, IntBinaryOperator) is abstract - tested via concrete implementations above
-    // TODO: prepend(int...) is abstract - tested via concrete implementations above
-    // TODO: append(int...) is abstract - tested via concrete implementations above
-    // TODO: appendIfEmpty(int...) is abstract - tested via concrete implementations above
-    // TODO: top(int) is abstract - tested via concrete implementations above
-    // TODO: top(int, Comparator) is abstract - tested via concrete implementations above
-    // TODO: toIntList() is abstract - tested via concrete implementations above
-    // TODO: toMap(...) overloads are abstract - tested via concrete implementations above
-    // TODO: groupTo(...) overloads are abstract - tested via concrete implementations above
-    // TODO: reduce(int, IntBinaryOperator) is abstract - tested via concrete implementations above
-    // TODO: reduce(IntBinaryOperator) is abstract - tested via concrete implementations above
-    // TODO: collect(...) overloads are abstract - tested via concrete implementations above
-    // TODO: forEach(Throwables.IntConsumer) is abstract - tested via concrete implementations above
-    // TODO: forEachIndexed(Throwables.IntIntConsumer) is abstract - tested via concrete implementations above
-    // TODO: anyMatch(Throwables.IntPredicate) is abstract - tested via concrete implementations above
-    // TODO: allMatch(Throwables.IntPredicate) is abstract - tested via concrete implementations above
-    // TODO: noneMatch(Throwables.IntPredicate) is abstract - tested via concrete implementations above
-    // TODO: findFirst(Throwables.IntPredicate) is abstract - tested via concrete implementations above
-    // TODO: findAny(Throwables.IntPredicate) is abstract - tested via concrete implementations above
-    // TODO: findLast(Throwables.IntPredicate) is abstract - tested via concrete implementations above
-    // TODO: min() is abstract - tested via concrete implementations above
-    // TODO: max() is abstract - tested via concrete implementations above
-    // TODO: kthLargest(int) is abstract - tested via concrete implementations above
-    // TODO: sum() is abstract - tested via concrete implementations above
-    // TODO: average() is abstract - tested via concrete implementations above
-    // TODO: summaryStatistics() is abstract - tested via concrete implementations above
-    // TODO: summaryStatisticsAndPercentiles() is abstract - tested via concrete implementations above
-    // TODO: mergeWith(IntStream, IntBiFunction) is abstract - tested via concrete implementations above
-    // TODO: zipWith(...) overloads are abstract - tested via concrete implementations above
-    // TODO: asLongStream() is abstract - tested via concrete implementations above
-    // TODO: asFloatStream() is abstract - tested via concrete implementations above
-    // TODO: asDoubleStream() is abstract - tested via concrete implementations above
-    // TODO: boxed() is abstract - tested via concrete implementations above
-    // TODO: toJdkStream() is abstract - tested via concrete implementations above
-
     @Test
     public void testFlattMap() {
         // flattMap uses JDK IntStream
@@ -2067,13 +2001,6 @@ public class IntStreamTest extends TestBase {
         stream = IntStream.of(iterator);
         assertArrayEquals(new int[] { 1, 2, 3 }, stream.toArray());
     }
-
-    //    @Test
-    //    public void testOf_WithJdkStream() {
-    //        java.util.stream.IntStream jdkStream = java.util.stream.IntStream.of(1, 2, 3);
-    //        stream = IntStream.of(jdkStream);
-    //        assertArrayEquals(new int[] { 1, 2, 3 }, stream.toArray());
-    //    }
 
     //
 
@@ -5417,6 +5344,39 @@ public class IntStreamTest extends TestBase {
     }
 
     @Test
+    public void testOfIndicesRetriesFailedInitialIndexLookup() {
+        for (boolean firstPullIsNext : new boolean[] { false, true }) {
+            for (int increment : new int[] { -1, 1 }) {
+                AtomicInteger attempts = new AtomicInteger();
+                List<Integer> requestedIndices = new ArrayList<>();
+                int start = increment < 0 ? 2 : 0;
+
+                try (IntStream indices = IntStream.ofIndices("abc", start, increment, (source, fromIndex) -> {
+                    requestedIndices.add(fromIndex);
+                    if (attempts.getAndIncrement() == 0) {
+                        throw new IllegalStateException("initial lookup");
+                    }
+                    return fromIndex;
+                })) {
+                    IntIterator iterator = indices.iterator();
+                    if (firstPullIsNext) {
+                        assertThrows(IllegalStateException.class, iterator::nextInt);
+                    } else {
+                        assertThrows(IllegalStateException.class, iterator::hasNext);
+                    }
+
+                    assertTrue(iterator.hasNext());
+                    assertTrue(iterator.hasNext());
+                    assertArrayEquals(increment < 0 ? new int[] { 2, 1, 0 } : new int[] { 0, 1, 2 }, iterator.toArray());
+                    assertEquals(increment < 0 ? Arrays.asList(2, 2, 1, 0) : Arrays.asList(0, 0, 1, 2), requestedIndices);
+                    assertFalse(iterator.hasNext());
+                    assertThrows(NoSuchElementException.class, iterator::nextInt);
+                }
+            }
+        }
+    }
+
+    @Test
     public void testOfIndices_WithNegativeStep() {
         int[] result = IntStream.ofIndices(5, -1).toArray();
         assertArrayEquals(new int[] { 4, 3, 2, 1, 0 }, result);
@@ -6780,5 +6740,109 @@ public class IntStreamTest extends TestBase {
         assertFalse(iter.hasNext());
         assertThrows(NoSuchElementException.class, iter::nextInt);
         assertEquals(1, conditionCalls.get());
+    }
+
+    @Test
+    public void testIteratePredicateRetriesSeedAfterThrow() {
+        final AtomicInteger tests = new AtomicInteger();
+        final IntIterator iter = IntStream.iterate(0, i -> {
+            if (tests.getAndIncrement() == 0) {
+                throw new IllegalStateException("seed test failed");
+            }
+            return i < 2;
+        }, i -> i + 1).iterator();
+
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(0, iter.nextInt());
+        assertEquals(1, iter.nextInt());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testIteratePredicateRetriesFunctionResultAfterThrow() {
+        final AtomicInteger tests = new AtomicInteger();
+        final AtomicInteger fCalls = new AtomicInteger();
+        final IntIterator iter = IntStream.iterate(0, i -> {
+            if (i > 0 && tests.getAndIncrement() == 0) {
+                throw new IllegalStateException("candidate test failed");
+            }
+            return i < 2;
+        }, i -> {
+            fCalls.incrementAndGet();
+            return i + 1;
+        }).iterator();
+
+        assertEquals(0, iter.nextInt());
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(1, fCalls.get());
+        assertEquals(1, iter.nextInt());
+        assertEquals(1, fCalls.get());
+        assertFalse(iter.hasNext());
+        assertEquals(2, fCalls.get());
+    }
+
+    @Test
+    public void testMergeRetriesPeekedHeadsAfterSelectorThrow() {
+        final AtomicInteger calls = new AtomicInteger();
+        final IntIterator iter = IntStream.merge(IntIterator.of(1, 3), IntIterator.of(2, 4), (x, y) -> {
+            if (calls.getAndIncrement() == 0) {
+                throw new IllegalStateException("selector failed");
+            }
+            return x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+        }).iterator();
+
+        assertThrows(IllegalStateException.class, iter::nextInt);
+        assertEquals(1, iter.nextInt());
+        assertEquals(2, iter.nextInt());
+        assertEquals(3, iter.nextInt());
+        assertEquals(4, iter.nextInt());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testOfIndicesTreatsNullIndexAsEnd() {
+        assertArrayEquals(new int[] { 0, 1 }, IntStream.ofIndices(new int[] { 9, 8, 7 }, (a, i) -> i < 2 ? i : null).toArray());
+    }
+    @Test
+    public void testAppendIfEmptyNullSupplierResultAppendsNothing() {
+        // Matches IntStream.defer(() -> null) and the object streams: a null fallback appends nothing.
+        assertArrayEquals(new int[0], IntStream.of(new int[0]).appendIfEmpty(() -> null).toArray());
+        assertArrayEquals(new int[0], IntStream.of(IntIterator.empty()).appendIfEmpty(() -> null).toArray());
+        assertArrayEquals(new int[] { 1 }, IntStream.of(1).appendIfEmpty(() -> null).toArray());
+    }
+
+    @Test
+    public void testZipClosesOpenedSourceWhenSiblingIterateFails() {
+        final AtomicInteger closed = new AtomicInteger();
+        final IntStream a = IntStream.of(1, 2).onClose(closed::incrementAndGet);
+        final IntStream b = IntStream.of(3);
+        b.close();
+
+        assertThrows(IllegalStateException.class, () -> IntStream.zip(a, b, (x, y) -> x + y).toArray());
+        assertEquals(1, closed.get());
+    }
+
+    @Test
+    public void testZipDoesNotCloseUnopenedSiblingWhenFirstIterateFails() {
+        final AtomicInteger closed = new AtomicInteger();
+        final IntStream a = IntStream.of(1, 2);
+        a.close();
+        final IntStream b = IntStream.of(3, 4).onClose(closed::incrementAndGet);
+
+        assertThrows(IllegalStateException.class, () -> IntStream.zip(a, b, (x, y) -> x + y).toArray());
+        assertEquals(0, closed.get());
+        assertArrayEquals(new int[] { 3, 4 }, b.toArray());
+    }
+
+    @Test
+    public void testMergeClosesOpenedSourceWhenSiblingIterateFails() {
+        final AtomicInteger closed = new AtomicInteger();
+        final IntStream a = IntStream.of(1, 2).onClose(closed::incrementAndGet);
+        final IntStream b = IntStream.of(3);
+        b.close();
+
+        assertThrows(IllegalStateException.class,
+                () -> IntStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray());
+        assertEquals(1, closed.get());
     }
 }

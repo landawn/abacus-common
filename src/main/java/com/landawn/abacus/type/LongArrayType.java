@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -63,6 +64,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final Long[] x) {
         if (x == null) {
@@ -91,13 +93,16 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      *
      * @param str the string to parse; may be {@code null}
      * @return the parsed {@code Long[]}, or {@code null} if {@code str} is {@code null} or blank
-     * @throws NumberFormatException if any non-{@code null} value cannot be parsed as a {@code Long}
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
+     * @throws NumberFormatException if a non-{@code null} element is not a valid integer literal
+     * @throws ArithmeticException if an element is outside the {@code long} range
      * @see #valueOf(Object)
      * @see #stringOf(Long[])
      */
+    @MayReturnNull
     @Override
-    public Long[] valueOf(final String str) {
-        if (Strings.isEmpty(str) || Strings.isBlank(str)) {
+    public Long[] valueOf(final String str) throws IllegalArgumentException, NumberFormatException, ArithmeticException {
+        if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
             return N.EMPTY_LONG_OBJ_ARRAY;
@@ -131,7 +136,8 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      *
      * @param appendable the {@link Appendable} to write to
      * @param x          the {@code Long[]} to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -143,7 +149,7 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Long[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final Long[] x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -181,10 +187,11 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the {@code Long[]} to write; may be {@code null}
      * @param config serialization configuration forwarded to each element; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Long[] x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Long[] x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

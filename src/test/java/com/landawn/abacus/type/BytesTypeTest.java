@@ -206,4 +206,24 @@ public class BytesTypeTest extends TestBase {
         assertFalse(type.name().isEmpty());
     }
 
+    // ---- review fixes 2026-09-06: T3-09 documented Base64 failures and handler registration ----
+
+    @Test
+    public void reviewFixes20260906_valueOfMalformedPaddingThrowsIllegalArgument() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("AQID=")); // wrong padding
+        Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("AQ!D")); // outside the alphabet
+        Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("A")); // too short
+        // missing padding is tolerated by the decoder
+        Assertions.assertArrayEquals(new byte[] { 1 }, type.valueOf("AQ"));
+        Assertions.assertArrayEquals(new byte[] { 1 }, type.valueOf("AQ=="));
+    }
+
+    @Test
+    public void reviewFixes20260906_registeredUnderNameBytesNotUnderByteArrayClass() {
+        Assertions.assertTrue(Type.<byte[]> of("Bytes") instanceof BytesType);
+        Assertions.assertTrue(Type.of(byte[].class) instanceof PrimitiveByteArrayType);
+        assertEquals("AQID", Type.<byte[]> of("Bytes").stringOf(new byte[] { 1, 2, 3 }));
+        assertEquals("[1, 2, 3]", Type.of(byte[].class).stringOf(new byte[] { 1, 2, 3 }));
+    }
+
 }

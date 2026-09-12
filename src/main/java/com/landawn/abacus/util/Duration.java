@@ -13,6 +13,7 @@
  */
 package com.landawn.abacus.util;
 
+import java.time.DateTimeException;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
@@ -34,7 +35,9 @@ import java.time.temporal.TemporalUnit;
  *   <li><b>Multiple Time Units:</b> Direct support for days, hours, minutes, seconds, and milliseconds</li>
  *   <li><b>Type Safety:</b> Strong typing prevents mixing incompatible duration operations</li>
  *   <li><b>ISO 8601 Formatting:</b> Standard duration string representation following ISO 8601 format</li>
- *   <li><b>JDK Interoperability:</b> Seamless conversion to/from {@code java.time.Duration}</li>
+ *   <li><b>JDK Interoperability:</b> Converts to {@code java.time.Duration} via {@link #toJdkDuration()};
+ *       convert back with {@code Duration.ofMillis(jdkDuration.toMillis())}, which truncates any
+ *       sub-millisecond part</li>
  *   <li><b>Compact State:</b> Each instance has one primitive value field</li>
  * </ul>
  *
@@ -276,9 +279,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *
      * @param days the number of days, positive or negative.
      * @return a Duration representing the specified number of days.
-     * @throws ArithmeticException if numeric overflow occurs during the calculation.
+     * @throws ArithmeticException if the resulting duration in milliseconds is outside the {@code long} range
      */
-    public static Duration ofDays(final long days) {
+    public static Duration ofDays(final long days) throws ArithmeticException {
         return create(Numbers.multiplyExact(days, MILLIS_PER_DAY));
     }
 
@@ -299,9 +302,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *
      * @param hours the number of hours, positive or negative.
      * @return a Duration representing the specified number of hours.
-     * @throws ArithmeticException if numeric overflow occurs during the calculation.
+     * @throws ArithmeticException if the resulting duration in milliseconds is outside the {@code long} range
      */
-    public static Duration ofHours(final long hours) {
+    public static Duration ofHours(final long hours) throws ArithmeticException {
         return create(Numbers.multiplyExact(hours, MILLIS_PER_HOUR));
     }
 
@@ -322,9 +325,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *
      * @param minutes the number of minutes, positive or negative.
      * @return a Duration representing the specified number of minutes.
-     * @throws ArithmeticException if numeric overflow occurs during the calculation.
+     * @throws ArithmeticException if the resulting duration in milliseconds is outside the {@code long} range
      */
-    public static Duration ofMinutes(final long minutes) {
+    public static Duration ofMinutes(final long minutes) throws ArithmeticException {
         return create(Numbers.multiplyExact(minutes, MILLIS_PER_MINUTE));
     }
 
@@ -345,9 +348,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *
      * @param seconds the number of seconds, positive or negative.
      * @return a Duration representing the specified number of seconds.
-     * @throws ArithmeticException if numeric overflow occurs during the calculation.
+     * @throws ArithmeticException if the resulting duration in milliseconds is outside the {@code long} range
      */
-    public static Duration ofSeconds(final long seconds) {
+    public static Duration ofSeconds(final long seconds) throws ArithmeticException {
         return create(Numbers.multiplyExact(seconds, MILLIS_PER_SECOND));
     }
 
@@ -389,14 +392,14 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * long millisElapsed = elapsed.toMillis();   // returns 250
      *
      * // Calculating age
-     * Date birthDate = Dates.parseDate("1990-05-15");
+     * Date birthDate = Dates.parseToDate("1990-05-15");
      * Date today = new Date();
      * Duration age = Duration.between(birthDate, today);
      * long ageInDays = age.toDays();
      *
      * // Time until deadline
      * Date now = new Date();
-     * Date deadline = Dates.parseDate("2024-12-31");
+     * Date deadline = Dates.parseToDate("2024-12-31");
      * Duration remaining = Duration.between(now, deadline);
      * if (remaining.isNegative()) {
      *     System.out.println("Deadline has passed");
@@ -417,9 +420,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @see #between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      */
-    public static Duration between(final java.util.Date start, final java.util.Date end) throws IllegalArgumentException {
-        N.checkArgNotNull(start, "Start Date cannot be null");
-        N.checkArgNotNull(end, "End Date cannot be null");
+    public static Duration between(final java.util.Date start, final java.util.Date end) throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(start, cs.start);
+        N.checkArgNotNull(end, cs.end);
 
         return Duration.ofMillis(Numbers.subtractExact(end.getTime(), start.getTime()));
     }
@@ -466,15 +469,15 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @param end the end calendar, must not be {@code null}.
      * @return a {@link Duration} representing the time difference from {@code start} to {@code end},
      *         positive if {@code end} is after {@code start}, negative if {@code end} is before {@code start}.
-     * @throws IllegalArgumentException if either calendar is {@code null}.
+     * @throws IllegalArgumentException if either calendar is {@code null}, or a non-lenient calendar contains invalid fields when its time is computed
      * @throws ArithmeticException if the millisecond difference between the two calendars overflows a {@code long}.
      * @see #between(java.util.Date, java.util.Date)
      * @see #between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      */
-    public static Duration between(final java.util.Calendar start, final java.util.Calendar end) throws IllegalArgumentException {
-        N.checkArgNotNull(start, "Start Calendar cannot be null");
-        N.checkArgNotNull(end, "End Calendar cannot be null");
+    public static Duration between(final java.util.Calendar start, final java.util.Calendar end) throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(start, cs.start);
+        N.checkArgNotNull(end, cs.end);
 
         return Duration.ofMillis(Numbers.subtractExact(end.getTimeInMillis(), start.getTimeInMillis()));
     }
@@ -486,6 +489,13 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *
      * <p><b>Calculation:</b> {@code Duration = start.until(end, ChronoUnit.MILLIS)}</p>
      *
+     * <p><b>Sub-millisecond precision is discarded, truncating towards zero.</b> This is the one entry
+     * point where a nanosecond-precision source meets this millisecond-precision class, and the
+     * remainder is dropped rather than rounded: a 999-microsecond gap between two {@link java.time.Instant}
+     * values yields {@link #ZERO}, and {@code -1999999} nanoseconds yields {@code -1} millisecond, not
+     * {@code -2}. Use {@link java.time.Duration#between(Temporal, Temporal)} when the sub-millisecond part
+     * matters.</p>
+     *
      * <p><b>Examples:</b>
      * <pre>{@code
      * // Measuring elapsed time
@@ -495,14 +505,14 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * long millisElapsed = elapsed.toMillis();   // returns 250
      *
      * // Calculating age
-     * LocalDateTime birthDate = LocalDateTime.of(1990, Month.MAY, 15, 0, 0);
+     * LocalDateTime birthDate = LocalDateTime.of(1990, java.time.Month.MAY, 15, 0, 0);
      * LocalDateTime today = LocalDateTime.now();
      * Duration age = Duration.between(birthDate, today);
      * long ageInDays = age.toDays();
      *
      * // Time until deadline
      * LocalDateTime now = LocalDateTime.now();
-     * LocalDateTime deadline = LocalDateTime.of(2024, Month.DECEMBER, 31, 0, 0);
+     * LocalDateTime deadline = LocalDateTime.of(2024, java.time.Month.DECEMBER, 31, 0, 0);
      * Duration remaining = Duration.between(now, deadline);
      * if (remaining.isNegative()) {
      *     System.out.println("Deadline has passed");
@@ -516,9 +526,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return a {@link Duration} representing the time difference from {@code start} to {@code end},
      *         positive if {@code end} is after {@code start}, negative if {@code end} is before {@code start}.
      * @throws IllegalArgumentException if either temporal is {@code null}.
-     * @throws java.time.DateTimeException if the duration cannot be calculated (e.g., the temporal types are incompatible
-     *         or do not support {@link ChronoUnit#MILLIS}).
      * @throws ArithmeticException if the calculated number of milliseconds overflows a {@code long}.
+     * @throws DateTimeException if the duration cannot be calculated (e.g., the temporal types are incompatible
+     *         or do not support {@link ChronoUnit#MILLIS}).
      * @see #between(java.util.Date, java.util.Date)
      * @see #between(java.util.Calendar, java.util.Calendar)
      * @see Temporal#until(java.time.temporal.Temporal, java.time.temporal.TemporalUnit)
@@ -526,9 +536,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @see ChronoUnit#between(Temporal, Temporal)
      * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      */
-    public static Duration between(final Temporal start, final Temporal end) throws IllegalArgumentException {
-        N.checkArgNotNull(start, "Start Temporal cannot be null");
-        N.checkArgNotNull(end, "End Temporal cannot be null");
+    public static Duration between(final Temporal start, final Temporal end) throws IllegalArgumentException, ArithmeticException, DateTimeException {
+        N.checkArgNotNull(start, cs.start);
+        N.checkArgNotNull(end, cs.end);
 
         return Duration.ofMillis(start.until(end, ChronoUnit.MILLIS));
     }
@@ -603,10 +613,12 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *
      * @param duration the duration to add, must not be {@code null}.
      * @return a Duration based on this duration with the specified duration added.
-     * @throws NullPointerException if {@code duration} is {@code null}.
+     * @throws IllegalArgumentException if {@code duration} is {@code null}.
      * @throws ArithmeticException if numeric overflow occurs.
      */
-    public Duration plus(final Duration duration) {
+    public Duration plus(final Duration duration) throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(duration, cs.duration);
+
         return plusMillis(duration.milliseconds);
     }
 
@@ -614,7 +626,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Returns a copy of this duration with the specified number of days added.
      * <p>
      * This method adds the specified number of days to this duration, where each day is treated as exactly 24 hours.
-     * The calculation includes overflow checking at both the multiplication and addition stages.
+     * The calculation rejects only a final millisecond result outside the signed long range.
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
@@ -627,19 +639,21 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration oneDayTwoHours = twoHours.plusDays(1);  // returns 26 hours
      * }</pre>
      *
+     * <p>Overflow is checked on the complete millisecond result; an oversized intermediate unit conversion alone does not cause failure.</p>
+     *
      * @param daysToAdd the days to add, may be negative.
      * @return a Duration based on this duration with the specified days added.
-     * @throws ArithmeticException if numeric overflow occurs during the calculation.
+     * @throws ArithmeticException if the resulting duration in milliseconds is outside the {@code long} range
      */
-    public Duration plusDays(final long daysToAdd) {
-        return plusMillis(Numbers.multiplyExact(daysToAdd, MILLIS_PER_DAY));
+    public Duration plusDays(final long daysToAdd) throws ArithmeticException {
+        return addUnits(daysToAdd, MILLIS_PER_DAY, false);
     }
 
     /**
      * Returns a copy of this duration with the specified number of hours added.
      * <p>
      * This method adds the specified number of hours to this duration, where each hour is treated as exactly 60 minutes.
-     * The calculation includes overflow checking at both the multiplication and addition stages.
+     * The calculation rejects only a final millisecond result outside the signed long range.
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
@@ -652,19 +666,21 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration fiveHours = twoHours.plusHours(3);  // returns 5 hours
      * }</pre>
      *
+     * <p>Overflow is checked on the complete millisecond result; an oversized intermediate unit conversion alone does not cause failure.</p>
+     *
      * @param hoursToAdd the hours to add, may be negative.
      * @return a Duration based on this duration with the specified hours added.
-     * @throws ArithmeticException if numeric overflow occurs during the calculation.
+     * @throws ArithmeticException if the resulting duration in milliseconds is outside the {@code long} range
      */
-    public Duration plusHours(final long hoursToAdd) {
-        return plusMillis(Numbers.multiplyExact(hoursToAdd, MILLIS_PER_HOUR));
+    public Duration plusHours(final long hoursToAdd) throws ArithmeticException {
+        return addUnits(hoursToAdd, MILLIS_PER_HOUR, false);
     }
 
     /**
      * Returns a copy of this duration with the specified number of minutes added.
      * <p>
      * This method adds the specified number of minutes to this duration, where each minute is treated as exactly 60 seconds.
-     * The calculation includes overflow checking at both the multiplication and addition stages.
+     * The calculation rejects only a final millisecond result outside the signed long range.
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
@@ -677,19 +693,21 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration twoHours = thirtyMinutes.plusMinutes(90);  // returns 120 minutes
      * }</pre>
      *
+     * <p>Overflow is checked on the complete millisecond result; an oversized intermediate unit conversion alone does not cause failure.</p>
+     *
      * @param minutesToAdd the minutes to add, may be negative.
      * @return a Duration based on this duration with the specified minutes added.
-     * @throws ArithmeticException if numeric overflow occurs during the calculation.
+     * @throws ArithmeticException if the resulting duration in milliseconds is outside the {@code long} range
      */
-    public Duration plusMinutes(final long minutesToAdd) {
-        return plusMillis(Numbers.multiplyExact(minutesToAdd, MILLIS_PER_MINUTE));
+    public Duration plusMinutes(final long minutesToAdd) throws ArithmeticException {
+        return addUnits(minutesToAdd, MILLIS_PER_MINUTE, false);
     }
 
     /**
      * Returns a copy of this duration with the specified number of seconds added.
      * <p>
      * This method adds the specified number of seconds to this duration, where each second is treated as exactly 1000 milliseconds.
-     * The calculation includes overflow checking at both the multiplication and addition stages.
+     * The calculation rejects only a final millisecond result outside the signed long range.
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
@@ -702,12 +720,14 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration oneMinuteTen = tenSeconds.plusSeconds(60);  // returns 70 seconds
      * }</pre>
      *
+     * <p>Overflow is checked on the complete millisecond result; an oversized intermediate unit conversion alone does not cause failure.</p>
+     *
      * @param secondsToAdd the seconds to add, may be negative.
      * @return a Duration based on this duration with the specified seconds added.
-     * @throws ArithmeticException if numeric overflow occurs during the calculation.
+     * @throws ArithmeticException if the resulting duration in milliseconds is outside the {@code long} range
      */
-    public Duration plusSeconds(final long secondsToAdd) {
-        return plusMillis(Numbers.multiplyExact(secondsToAdd, MILLIS_PER_SECOND));
+    public Duration plusSeconds(final long secondsToAdd) throws ArithmeticException {
+        return addUnits(secondsToAdd, MILLIS_PER_SECOND, false);
     }
 
     /**
@@ -731,7 +751,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return a Duration based on this duration with the specified milliseconds added, or this instance if millisToAdd is 0.
      * @throws ArithmeticException if numeric overflow occurs during the addition.
      */
-    public Duration plusMillis(final long millisToAdd) {
+    public Duration plusMillis(final long millisToAdd) throws ArithmeticException {
         if (millisToAdd == 0) {
             return this;
         }
@@ -759,10 +779,12 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *
      * @param duration the duration to subtract, must not be {@code null}.
      * @return a Duration based on this duration with the specified duration subtracted.
-     * @throws NullPointerException if {@code duration} is {@code null}.
+     * @throws IllegalArgumentException if {@code duration} is {@code null}.
      * @throws ArithmeticException if numeric overflow occurs.
      */
-    public Duration minus(final Duration duration) {
+    public Duration minus(final Duration duration) throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(duration, cs.duration);
+
         return minusMillis(duration.milliseconds);
     }
 
@@ -770,7 +792,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Returns a copy of this duration with the specified number of days subtracted.
      * <p>
      * This method subtracts the specified number of days from this duration, where each day is treated as exactly 24 hours.
-     * The calculation includes overflow checking at both the multiplication and subtraction stages.
+     * The calculation rejects only a final millisecond result outside the signed long range.
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
@@ -783,19 +805,21 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration negativeDay = oneDay.minusDays(2);  // returns -1 day
      * }</pre>
      *
+     * <p>Overflow is checked on the complete millisecond result; an oversized intermediate unit conversion alone does not cause failure.</p>
+     *
      * @param daysToSubtract the days to subtract, may be negative.
      * @return a Duration based on this duration with the specified days subtracted.
-     * @throws ArithmeticException if numeric overflow occurs during the calculation.
+     * @throws ArithmeticException if the resulting duration in milliseconds is outside the {@code long} range
      */
-    public Duration minusDays(final long daysToSubtract) {
-        return minusMillis(Numbers.multiplyExact(daysToSubtract, MILLIS_PER_DAY));
+    public Duration minusDays(final long daysToSubtract) throws ArithmeticException {
+        return addUnits(daysToSubtract, MILLIS_PER_DAY, true);
     }
 
     /**
      * Returns a copy of this duration with the specified number of hours subtracted.
      * <p>
      * This method subtracts the specified number of hours from this duration, where each hour is treated as exactly 60 minutes.
-     * The calculation includes overflow checking at both the multiplication and subtraction stages.
+     * The calculation rejects only a final millisecond result outside the signed long range.
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
@@ -808,19 +832,21 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration negativeHour = twoHours.minusHours(3);  // returns -1 hour
      * }</pre>
      *
+     * <p>Overflow is checked on the complete millisecond result; an oversized intermediate unit conversion alone does not cause failure.</p>
+     *
      * @param hoursToSubtract the hours to subtract, may be negative.
      * @return a Duration based on this duration with the specified hours subtracted.
-     * @throws ArithmeticException if numeric overflow occurs during the calculation.
+     * @throws ArithmeticException if the resulting duration in milliseconds is outside the {@code long} range
      */
-    public Duration minusHours(final long hoursToSubtract) {
-        return minusMillis(Numbers.multiplyExact(hoursToSubtract, MILLIS_PER_HOUR));
+    public Duration minusHours(final long hoursToSubtract) throws ArithmeticException {
+        return addUnits(hoursToSubtract, MILLIS_PER_HOUR, true);
     }
 
     /**
      * Returns a copy of this duration with the specified number of minutes subtracted.
      * <p>
      * This method subtracts the specified number of minutes from this duration, where each minute is treated as exactly 60 seconds.
-     * The calculation includes overflow checking at both the multiplication and subtraction stages.
+     * The calculation rejects only a final millisecond result outside the signed long range.
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
@@ -833,19 +859,21 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration negativeMinutes = thirtyMinutes.minusMinutes(45);  // returns -15 minutes
      * }</pre>
      *
+     * <p>Overflow is checked on the complete millisecond result; an oversized intermediate unit conversion alone does not cause failure.</p>
+     *
      * @param minutesToSubtract the minutes to subtract, may be negative.
      * @return a Duration based on this duration with the specified minutes subtracted.
-     * @throws ArithmeticException if numeric overflow occurs during the calculation.
+     * @throws ArithmeticException if the resulting duration in milliseconds is outside the {@code long} range
      */
-    public Duration minusMinutes(final long minutesToSubtract) {
-        return minusMillis(Numbers.multiplyExact(minutesToSubtract, MILLIS_PER_MINUTE));
+    public Duration minusMinutes(final long minutesToSubtract) throws ArithmeticException {
+        return addUnits(minutesToSubtract, MILLIS_PER_MINUTE, true);
     }
 
     /**
      * Returns a copy of this duration with the specified number of seconds subtracted.
      * <p>
      * This method subtracts the specified number of seconds from this duration, where each second is treated as exactly 1000 milliseconds.
-     * The calculation includes overflow checking at both the multiplication and subtraction stages.
+     * The calculation rejects only a final millisecond result outside the signed long range.
      * This instance is immutable and unaffected by this method call.
      * </p>
      *
@@ -858,12 +886,29 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration negativeSeconds = thirtySeconds.minusSeconds(45);  // returns -15 seconds
      * }</pre>
      *
+     * <p>Overflow is checked on the complete millisecond result; an oversized intermediate unit conversion alone does not cause failure.</p>
+     *
      * @param secondsToSubtract the seconds to subtract, may be negative.
      * @return a Duration based on this duration with the specified seconds subtracted.
-     * @throws ArithmeticException if numeric overflow occurs during the calculation.
+     * @throws ArithmeticException if the resulting duration in milliseconds is outside the {@code long} range
      */
-    public Duration minusSeconds(final long secondsToSubtract) {
-        return minusMillis(Numbers.multiplyExact(secondsToSubtract, MILLIS_PER_SECOND));
+    public Duration minusSeconds(final long secondsToSubtract) throws ArithmeticException {
+        return addUnits(secondsToSubtract, MILLIS_PER_SECOND, true);
+    }
+
+    /**
+     * @throws ArithmeticException if the resulting duration in milliseconds is outside the {@code long} range
+     */
+    private Duration addUnits(final long amount, final long unitMillis, final boolean subtract) throws ArithmeticException {
+        try {
+            final long scaled = Math.multiplyExact(amount, unitMillis);
+            return subtract ? minusMillis(scaled) : plusMillis(scaled);
+        } catch (final ArithmeticException overflow) {
+            // The scaled operand may overflow even when cancellation makes the complete result fit.
+            final java.math.BigInteger scaled = java.math.BigInteger.valueOf(amount).multiply(java.math.BigInteger.valueOf(unitMillis));
+            final java.math.BigInteger base = java.math.BigInteger.valueOf(milliseconds);
+            return create((subtract ? base.subtract(scaled) : base.add(scaled)).longValueExact());
+        }
     }
 
     /**
@@ -887,7 +932,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return a Duration based on this duration with the specified milliseconds subtracted, or this instance if millisToSubtract is 0.
      * @throws ArithmeticException if numeric overflow occurs during the subtraction.
      */
-    public Duration minusMillis(final long millisToSubtract) {
+    public Duration minusMillis(final long millisToSubtract) throws ArithmeticException {
         if (millisToSubtract == 0) {
             return this;
         }
@@ -923,7 +968,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return a Duration based on this duration multiplied by the specified scalar.
      * @throws ArithmeticException if numeric overflow occurs during the multiplication.
      */
-    public Duration multipliedBy(final long multiplicand) {
+    public Duration multipliedBy(final long multiplicand) throws ArithmeticException {
         if (multiplicand == 0) {
             return ZERO;
         } else if (multiplicand == 1) {
@@ -962,7 +1007,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @throws ArithmeticException if the divisor is zero, or if the divisor is {@code -1} and this
      *         duration equals {@code Long.MIN_VALUE} milliseconds (negation would overflow).
      */
-    public Duration dividedBy(final long divisor) {
+    public Duration dividedBy(final long divisor) throws ArithmeticException {
         if (divisor == 0) {
             throw new ArithmeticException("Cannot divide by zero");
         } else if (divisor == 1) {
@@ -1002,7 +1047,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return a Duration based on this duration with the amount negated.
      * @throws ArithmeticException if numeric overflow occurs (only when the duration equals Long.MIN_VALUE milliseconds).
      */
-    public Duration negated() {
+    public Duration negated() throws ArithmeticException {
         return multipliedBy(-1);
     }
 
@@ -1029,7 +1074,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return a Duration based on this duration with an absolute length.
      * @throws ArithmeticException if numeric overflow occurs (only when the duration equals Long.MIN_VALUE milliseconds).
      */
-    public Duration abs() {
+    public Duration abs() throws ArithmeticException {
         return isNegative() ? negated() : this;
     }
 
@@ -1188,8 +1233,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Gets the number of hours within a day in this duration (the part of the hour count that does not form a whole day).
      * <p>
      * The returned value is in the range -23 to 23 (inclusive). For example, a duration of 25 hours returns 1.
-     * This mirrors {@code java.time.Duration.toHoursPart()} (Java 9+) and is useful when formatting a duration
-     * into day/hour/minute/second components.
+     * Total milliseconds are divided into hours with truncation toward zero, then reduced modulo 24.
+     * Unlike the JDK's normalized seconds representation, negative fractional seconds do not round down:
+     * {@code Duration.ofMillis(-3599999).toHoursPart()} returns 0; the JDK equivalent returns -1.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1209,8 +1255,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
     /**
      * Gets the number of minutes within an hour in this duration (the part of the minute count that does not form a whole hour).
      * <p>
-     * The returned value is in the range -59 to 59 (inclusive). This mirrors {@code java.time.Duration.toMinutesPart()}
-     * (Java 9+) and is useful when formatting a duration into hour/minute/second components.
+     * The returned value is in the range -59 to 59 (inclusive). Total milliseconds are divided into minutes
+     * with truncation toward zero, then reduced modulo 60. Unlike the JDK's normalized seconds representation,
+     * {@code Duration.ofMillis(-59999).toMinutesPart()} returns 0; the JDK equivalent returns -1.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1318,10 +1365,15 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *
      * @param other the other duration to compare to, must not be {@code null}.
      * @return the comparator value, negative if less, positive if greater, zero if equal.
-     * @throws NullPointerException if {@code other} is {@code null}.
+     * @throws NullPointerException if {@code other} is {@code null}, as required by
+     *         {@link Comparable#compareTo(Object)}.
      */
     @Override
-    public int compareTo(final Duration other) {
+    public int compareTo(final Duration other) throws NullPointerException {
+        // NullPointerException, not this library's usual IllegalArgumentException: Comparable#compareTo
+        // specifies NPE for a null argument, and generic code (sorting, TreeMap) is written against that.
+        N.requireNonNull(other, cs.other);
+
         return Long.compare(milliseconds, other.milliseconds);
     }
 
@@ -1380,11 +1432,23 @@ public final class Duration implements Comparable<Duration>, Immutable {
      *   <li>"-PT0.500S" - negative 500 milliseconds; the leading '-' negates the whole duration</li>
      * </ul>
      *
+     * <p><b>Difference from {@code java.time.Duration.toString()}:</b> the JDK signs each component
+     * individually, so {@code java.time.Duration.ofMillis(-90500)} prints {@code "PT-1M-30.5S"}, while
+     * this class emits a single leading sign and non-negative components: {@code "-PT1M30.500S"}. The
+     * JDK also trims trailing zeros in the fractional second where this class always pads to three
+     * digits.</p>
+     *
+     * <p>Both spellings are valid ISO-8601, and this one round-trips:
+     * {@code java.time.Duration.parse(d.toString())} reproduces {@code d} exactly for every
+     * {@code Duration}, including {@link Long#MIN_VALUE} and {@link Long#MAX_VALUE} milliseconds.</p>
+     *
      * @return an ISO-8601 representation of this duration, not {@code null}.
+     * @see java.time.Duration#parse(CharSequence)
+     * @see #toJdkDuration()
      */
     @Override
     public String toString() {
-        if (this == ZERO) {
+        if (milliseconds == 0) {
             return "PT0S";
         }
 
@@ -1409,7 +1473,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
         final int seconds = (int) ((remainder % MILLIS_PER_MINUTE) / MILLIS_PER_SECOND);
         int millis = (int) (remainder % MILLIS_PER_SECOND);
 
-        final StringBuilder sb = Objectory.createStringBuilder();
+        // A plain builder rather than the Objectory pool: the output is at most ~30 chars, and a
+        // pooled builder would leak from the pool if any append below threw.
+        final StringBuilder sb = new StringBuilder(24);
 
         if (milliseconds < 0) {
             sb.append('-');
@@ -1426,9 +1492,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
         }
 
         if (seconds == 0 && millis == 0 && sb.length() > (milliseconds < 0 ? 3 : 2)) {
-            final String result = sb.toString();
-            Objectory.recycle(sb);
-            return result;
+            // At least one of the hour/minute components was emitted, so "PT1H" is complete as-is.
+            return sb.toString();
         }
 
         sb.append(seconds);
@@ -1447,10 +1512,6 @@ public final class Duration implements Comparable<Duration>, Immutable {
 
         sb.append('S');
 
-        final String result = sb.toString();
-
-        Objectory.recycle(sb);
-
-        return result;
+        return sb.toString();
     }
 }

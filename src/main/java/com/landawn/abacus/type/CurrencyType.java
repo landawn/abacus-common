@@ -97,7 +97,7 @@ public class CurrencyType extends AbstractType<Currency> {
      * @see #stringOf(Currency)
      */
     @Override
-    public Currency valueOf(final String str) {
+    public Currency valueOf(final String str) throws IllegalArgumentException {
         return Strings.isEmpty(str) ? null : Currency.getInstance(str);
     }
 }

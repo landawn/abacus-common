@@ -81,6 +81,208 @@ import lombok.NoArgsConstructor;
 
 public class AbstractStreamTest extends TestBase {
 
+    @Test
+    public void testFlatGroupToRejectsNullDownstreamBeforeInvokingMapFactory() {
+        for (final boolean empty : new boolean[] { true, false }) {
+            final AtomicInteger factoryCalls = new AtomicInteger();
+            try (final Stream<Integer> stream = empty ? Stream.empty() : Stream.of(1)) {
+                assertThrows(IllegalArgumentException.class, () -> stream.flatGroupTo(value -> List.of(value),
+                        (key, value) -> value, null, () -> {
+                            factoryCalls.incrementAndGet();
+                            return new HashMap<>();
+                        }));
+                assertEquals(0, factoryCalls.get());
+            }
+        }
+    }
+
+    @Test
+    public void testForEachUntilRejectsNullFlagEvenForEmptyStreams() {
+        for (final boolean empty : new boolean[] { true, false }) {
+            final AtomicInteger actionCalls = new AtomicInteger();
+            try (final Stream<Integer> stream = empty ? Stream.empty() : Stream.of(1)) {
+                assertThrows(IllegalArgumentException.class, () -> stream.forEachUntil(null, value -> actionCalls.incrementAndGet()));
+                assertEquals(0, actionCalls.get());
+            }
+        }
+    }
+
+    @Test
+    public void testSplitAtRejectsNullCollectorsBeforeTraversal() {
+        final Collector<Integer, ?, List<Integer>> collector = null;
+        try (final Stream<Integer> stream = Stream.of(1, 2)) {
+            assertThrows(IllegalArgumentException.class, () -> stream.splitAt(1, collector));
+        }
+        final AtomicInteger predicateCalls = new AtomicInteger();
+        try (final Stream<Integer> stream = Stream.of(1, 2)) {
+            assertThrows(IllegalArgumentException.class, () -> stream.splitAt(value -> {
+                predicateCalls.incrementAndGet();
+                return value == 2;
+            }, collector));
+            assertEquals(0, predicateCalls.get());
+        }
+    }
+
+    @Test
+    public void testPartitionByRejectsNullDownstreamBeforeTraversal() {
+        final AtomicInteger predicateCalls = new AtomicInteger();
+        try (final Stream<Integer> stream = Stream.of(1, 2)) {
+            assertThrows(IllegalArgumentException.class, () -> stream.partitionBy(value -> {
+                predicateCalls.incrementAndGet();
+                return value == 2;
+            }, null));
+            assertEquals(0, predicateCalls.get());
+        }
+    }
+
+    @Test
+    public void testScanInitializesOnlyAfterSuccessfulSourceRead() {
+        for (final String first : new String[] { "a", null }) {
+            final IllegalStateException failure = new IllegalStateException("first read failed");
+            final AtomicInteger attempts = new AtomicInteger();
+            final AtomicInteger accumulatorCalls = new AtomicInteger();
+            final Iterator<String> source = new Iterator<>() {
+                private final Iterator<String> values = Arrays.asList(first, "b").iterator();
+
+                @Override
+                public boolean hasNext() {
+                    return values.hasNext();
+                }
+
+                @Override
+                public String next() {
+                    if (attempts.getAndIncrement() == 0) {
+                        throw failure;
+                    }
+                    return values.next();
+                }
+            };
+
+            try (Stream<String> stream = Stream.of(source).scan((left, right) -> {
+                accumulatorCalls.incrementAndGet();
+                return left + right;
+            })) {
+                final ObjIterator<String> iter = stream.iterator();
+                org.junit.jupiter.api.Assertions.assertSame(failure, assertThrows(IllegalStateException.class, iter::next));
+                assertEquals(first, iter.next());
+                assertEquals(0, accumulatorCalls.get());
+                assertEquals(first + "b", iter.next());
+                assertEquals(1, accumulatorCalls.get());
+                assertFalse(iter.hasNext());
+            }
+        }
+    }
+
+    @Test
+    public void testSkipRangeResumesUnfinishedSkipAfterSourceFailure() {
+        for (final boolean failInHasNext : new boolean[] { false, true }) {
+            final IllegalStateException failure = new IllegalStateException("skip read failed");
+            try (Stream<Integer> stream = Stream.of(sourceFailingOnceAt(2, failInHasNext, failure)).skipRange(1, 4)) {
+                final ObjIterator<Integer> iter = stream.iterator();
+                assertEquals(0, iter.next());
+                org.junit.jupiter.api.Assertions.assertSame(failure, assertThrows(IllegalStateException.class, iter::hasNext));
+                assertTrue(iter.hasNext());
+                assertEquals(4, iter.next());
+                assertEquals(5, iter.next());
+                assertFalse(iter.hasNext());
+            }
+        }
+    }
+
+    @Test
+    public void testSkipRangeDoesNotCountFailedRetainedRead() {
+        final IllegalStateException failure = new IllegalStateException("retained read failed");
+        try (Stream<Integer> stream = Stream.of(sourceFailingOnceAt(0, false, failure)).skipRange(1, 4)) {
+            final ObjIterator<Integer> iter = stream.iterator();
+            org.junit.jupiter.api.Assertions.assertSame(failure, assertThrows(IllegalStateException.class, iter::next));
+            assertEquals(0, iter.next());
+            assertEquals(4, iter.next());
+            assertEquals(5, iter.next());
+            assertFalse(iter.hasNext());
+        }
+    }
+
+    private static Iterator<Integer> sourceFailingOnceAt(final int failureIndex, final boolean failInHasNext,
+            final IllegalStateException failure) {
+        return new Iterator<>() {
+            private final Iterator<Integer> values = Arrays.asList(0, 1, 2, 3, 4, 5).iterator();
+            private int index;
+            private boolean failed;
+
+            private void failOnce(final boolean fromHasNext) {
+                if (!failed && index == failureIndex && fromHasNext == failInHasNext) {
+                    failed = true;
+                    throw failure;
+                }
+            }
+
+            @Override
+            public boolean hasNext() {
+                failOnce(true);
+                return values.hasNext();
+            }
+
+            @Override
+            public Integer next() {
+                failOnce(false);
+                final Integer value = values.next();
+                index++;
+                return value;
+            }
+        };
+    }
+
+    @Test
+    public void testOnEachSaveReleasesConnectionOnceWhenPreparationFails() throws SQLException {
+        for (final boolean terminal : new boolean[] { false, true }) {
+            final javax.sql.DataSource ds = mock(javax.sql.DataSource.class);
+            final Connection connection = mock(Connection.class);
+            final SQLException failure = new SQLException("prepare failed");
+            when(ds.getConnection()).thenReturn(connection);
+            when(connection.prepareStatement(anyString())).thenThrow(failure);
+            final AtomicInteger closeCount = new AtomicInteger();
+            final Stream<Integer> saved = Stream.of(1).onClose(closeCount::incrementAndGet)
+                    .onEachSave(ds, "INSERT INTO test VALUES (?)", (value, statement) -> statement.setInt(1, value));
+
+            final RuntimeException thrown = terminal ? assertThrows(RuntimeException.class, saved::count)
+                    : assertThrows(RuntimeException.class, () -> saved.iterator().next());
+            org.junit.jupiter.api.Assertions.assertSame(failure, thrown.getCause());
+            verify(connection, times(1)).close();
+            saved.close();
+            verify(connection, times(1)).close();
+            assertEquals(1, closeCount.get());
+        }
+    }
+
+    @Test
+    public void testContainsUsesEqualsForSetsWithOtherEquivalence() {
+        final Set<String> sorted = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        sorted.addAll(Arrays.asList("a", "b"));
+        final Set<String> identity = Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        identity.add(new String("a"));
+        identity.add(new String("a"));
+
+        for (final boolean parallel : new boolean[] { false, true }) {
+            final java.util.function.Function<List<String>, Stream<String>> source = values -> parallel
+                    ? Stream.of(values.iterator()).parallel(2) : Stream.of(values.iterator());
+            assertFalse(source.apply(Arrays.asList("A", "B")).containsAll(sorted));
+            assertFalse(source.apply(Arrays.asList("A", "B")).containsAny(sorted));
+            assertTrue(source.apply(Arrays.asList("A", "B")).containsNone(sorted));
+            assertTrue(source.apply(Arrays.asList(new String("a"))).containsAll(identity));
+            assertTrue(source.apply(Arrays.asList(new String("a"))).containsAny(identity));
+            assertFalse(source.apply(Arrays.asList(new String("a"))).containsNone(identity));
+            assertEquals(2, sorted.size());
+            assertEquals(2, identity.size());
+        }
+
+        final int[] first = { 1 };
+        final int[] second = { 1 };
+        assertTrue(Stream.of(first, second).containsAll(Arrays.asList(first, second)));
+        assertFalse(Stream.of(first, first).containsAll(Arrays.asList(first, second)));
+        assertTrue(Stream.of(first, second).containsAll(first, second));
+        assertFalse(Stream.of(first, first).containsAll(first, second));
+    }
+
     private Stream<Integer> stream;
     private Stream<Object> objectStream;
     private Stream<String> stringStream;
@@ -1118,6 +1320,35 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
+    public void testSplitAtExhaustedOuterIteratorDoesNotConsumeSecondStream() {
+        assertSplitAtExhaustedOuterIteratorDoesNotConsumeSecondStream(source -> source.splitAt(2));
+        assertSplitAtExhaustedOuterIteratorDoesNotConsumeSecondStream(source -> source.splitAt(value -> value == 3));
+    }
+
+    private static void assertSplitAtExhaustedOuterIteratorDoesNotConsumeSecondStream(
+            final java.util.function.Function<Stream<Integer>, Stream<Stream<Integer>>> splitter) {
+        for (final boolean advanceFirst : new boolean[] { false, true }) {
+            try (Stream<Stream<Integer>> parts = splitter.apply(Stream.of(Arrays.asList(1, 2, 3, 4).iterator()))) {
+                final ObjIteratorEx<Stream<Integer>> iterator = parts.iteratorEx();
+                try (Stream<Integer> first = iterator.next(); Stream<Integer> second = iterator.next()) {
+                    assertFalse(iterator.hasNext());
+                    if (advanceFirst) {
+                        iterator.advance(1);
+                    }
+                    assertEquals(0L, iterator.count());
+                    iterator.advance(1);
+                    iterator.advance(Long.MAX_VALUE);
+                    assertEquals(0L, iterator.count());
+                    assertFalse(iterator.hasNext());
+                    assertThrows(java.util.NoSuchElementException.class, iterator::next);
+                    assertEquals(Arrays.asList(1, 2), first.toList());
+                    assertEquals(Arrays.asList(3, 4), second.toList());
+                }
+            }
+        }
+    }
+
+    @Test
     public void testSplitAtKeepsIteratorSourceOpenForEscapedSecondStream() {
         assertSplitAtKeepsIteratorSourceOpen(source -> source.splitAt(2));
         assertSplitAtKeepsIteratorSourceOpen(source -> source.splitAt(value -> value == 3));
@@ -1442,13 +1673,6 @@ public class AbstractStreamTest extends TestBase {
         assertEquals(Arrays.asList("1,2,3", "2,3,4", "3,4,5"), result);
     }
 
-    //    @Test
-    //    public void test_reduceUntil() {
-    //        Optional<Integer> result = Stream.of(1, 2, 3, 4, 5).reduceUntil((a, b) -> a + b, sum -> sum > 6);
-    //        assertTrue(result.isPresent());
-    //        assertEquals(10, result.get());
-    //    }
-
     //
 
     @Test
@@ -1468,15 +1692,6 @@ public class AbstractStreamTest extends TestBase {
         Map<Integer, Long> result = Stream.of(1, 2, 3, 4, 5).groupByToEntry(i -> i % 2, Collectors.counting()).toMap();
         assertEquals(Map.of(0, 2L, 1, 3L), result);
     }
-
-    //
-    //
-    //    @Test
-    //    public void testReduceUntilWithIdentity() {
-    //        stream = createStream(1, 2, 3, 4, 5);
-    //        Integer result = stream.reduceUntil(0, Integer::sum, (a, b) -> a + b, sum -> sum > 5);
-    //        assertEquals(6, result);
-    //    }
 
     //
     //
@@ -2177,16 +2392,6 @@ public class AbstractStreamTest extends TestBase {
         stream = createStream(1, 2);
         assertThrows(TooManyElementsException.class, () -> stream.onlyOne());
     }
-
-    //
-    //    @Test
-    //    public void testReduceUntil_2() {
-    //        List<Integer> input = Arrays.asList(1, 2, 2, 3, 3, 3, 4);
-    //        Stream<Integer> stream = createStream(input);
-    //
-    //        Integer result = stream.reduceUntil(0, (a, b) -> a + b, (a, b) -> a + b, sum -> sum >= 10);
-    //        assertEquals(11, result);
-    //    }
 
     @Test
     public void testOnlyOneWithMultipleElements() {
@@ -3568,23 +3773,48 @@ public class AbstractStreamTest extends TestBase {
     }
 
     @Test
-    public void testPersistClosesSourceWhenOutputCannotBeOpened() {
+    public void testPersistClosesSourceWhenOutputCannotBeOpened() throws IOException {
+        // The point of this test is that the SOURCE is closed when the output cannot be opened, whatever the
+        // reason. Both provocations below are exercised, because the two report differently: as of the
+        // 2026-08-31 IOUtil pass a directory handed to a write destination is a wrong-KIND argument
+        // (IllegalArgumentException, which persist(..) already declares), while a file that exists but cannot
+        // be written is a genuine I/O failure (UncheckedIOException).
         final File directory = tempFolder.toFile();
 
         final AtomicInteger persistCloseCount = new AtomicInteger();
         final Stream<Integer> source = Stream.of(1).onClose(persistCloseCount::incrementAndGet);
-        assertThrows(UncheckedIOException.class, () -> source.persist(directory));
+        assertThrows(IllegalArgumentException.class, () -> source.persist(directory));
         assertEquals(1, persistCloseCount.get());
 
         final AtomicInteger csvCloseCount = new AtomicInteger();
         final Stream<Map<String, Integer>> csvSource = Stream.of(List.of(Map.of("value", 1))).onClose(csvCloseCount::incrementAndGet);
-        assertThrows(UncheckedIOException.class, () -> csvSource.persistToCsv(directory));
+        assertThrows(IllegalArgumentException.class, () -> csvSource.persistToCsv(directory));
         assertEquals(1, csvCloseCount.get());
 
         final AtomicInteger jsonCloseCount = new AtomicInteger();
         final Stream<Integer> jsonSource = Stream.of(1).onClose(jsonCloseCount::incrementAndGet);
-        assertThrows(UncheckedIOException.class, () -> jsonSource.persistToJson(directory));
+        assertThrows(IllegalArgumentException.class, () -> jsonSource.persistToJson(directory));
         assertEquals(1, jsonCloseCount.get());
+
+        final File unwritable = new File(directory, "unwritable-persist-target.txt");
+        assertTrue(unwritable.createNewFile());
+        assertTrue(unwritable.setReadOnly());
+
+        if (unwritable.canWrite()) {
+            // This platform/user can write a read-only file; the directory cases above already cover the
+            // close-on-failure property.
+            return;
+        }
+
+        try {
+            final AtomicInteger unwritableCloseCount = new AtomicInteger();
+            final Stream<Integer> unwritableSource = Stream.of(1).onClose(unwritableCloseCount::incrementAndGet);
+            assertThrows(UncheckedIOException.class, () -> unwritableSource.persist(unwritable));
+            assertEquals(1, unwritableCloseCount.get());
+        } finally {
+            // Leave nothing read-only behind, or @TempDir cleanup fails on Windows.
+            unwritable.setWritable(true);
+        }
     }
 
     @Test
@@ -4882,6 +5112,269 @@ public class AbstractStreamTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).debounce((com.landawn.abacus.util.Duration) null).toList());
         assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toList());
         assertThrows(IllegalArgumentException.class, () -> createStream(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toList());
+    }
+
+    /**
+     * {@code persistToJson} must write each element as a JSON <i>value</i>, quoted and escaped.
+     *
+     * <p>It used to call {@code N.toJson(element, writer)}, the <i>root document</i> entry point, whose
+     * root-scalar shortcut writes a String unquoted. Inside the array that produced text the library's own
+     * parser rejects: {@code Stream.of("A","B","C")} wrote {@code [\nA,\nB,\nC\n]} while the javadoc
+     * example promised {@code ["A", "B", "C"]}.
+     */
+    @Test
+    public void testPersistToJson_quotesAndEscapesScalarElements() throws IOException {
+        final StringWriter writer = new StringWriter();
+        final long count = Stream.of("A", "B", "C").persistToJson(writer);
+
+        assertEquals(3, count);
+        assertEquals("[\"A\",\"B\",\"C\"]", writer.toString().replaceAll("\\s", ""));
+    }
+
+    /**
+     * A quote, a comma, a bracket or a {@code null} element must survive a round trip. Before the fix a null
+     * element vanished entirely and any of the others made the document unparseable.
+     */
+    @Test
+    public void testPersistToJson_roundTripsAwkwardScalarElements() throws IOException {
+        final List<String> elements = Arrays.asList("he said \"hi\"", "a,b", null, "]", "{\"k\":1}");
+
+        final StringWriter writer = new StringWriter();
+        assertEquals(elements.size(), Stream.of(elements).persistToJson(writer));
+
+        final List<?> readBack = N.fromJson(writer.toString(), List.class);
+        assertEquals(elements, readBack);
+    }
+
+    /** Characters are scalars too, and a null element must be written as JSON {@code null}, not as nothing. */
+    @Test
+    public void testPersistToJson_charactersAndNulls() throws IOException {
+        final StringWriter writer = new StringWriter();
+        Stream.of('a', null, 'b').persistToJson(writer);
+
+        assertEquals("[\"a\",null,\"b\"]", writer.toString().replaceAll("\\s", ""));
+        assertEquals(Arrays.asList("a", null, "b"), N.fromJson(writer.toString(), List.class));
+    }
+
+    /** Numbers, Maps and beans were already correct and must stay byte-identical. */
+    @Test
+    public void testPersistToJson_structuredElementsUnchanged() throws IOException {
+        final StringWriter ints = new StringWriter();
+        Stream.of(1, 2, 3).persistToJson(ints);
+        assertEquals("[1,2,3]", ints.toString().replaceAll("\\s", ""));
+
+        final StringWriter maps = new StringWriter();
+        Stream.of(Map.of("key", "val1")).persistToJson(maps);
+        assertEquals("[{\"key\":\"val1\"}]", maps.toString().replaceAll("\\s", ""));
+    }
+
+    /**
+     * The class javadoc (Stream.java:329-336) promises that a null {@code collector} is "rejected with
+     * {@code IllegalArgumentException} naming the parameter" and that "the stream is closed before the
+     * exception propagates". All four backends used to throw a raw NPE from
+     * {@code collector.supplier()} / {@code collector.characteristics()} and leave the stream open.
+     */
+    @Test
+    public void testCollect_nullCollectorThrowsIaeAndClosesTheStream() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).collect((Collector<Integer, ?, ?>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Stream.of(Arrays.asList(1, 2, 3).iterator()).collect((Collector<Integer, ?, ?>) null));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).parallel(2).collect((Collector<Integer, ?, ?>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Stream.of(Arrays.asList(1, 2, 3).iterator()).parallel(2).collect((Collector<Integer, ?, ?>) null));
+
+        final Stream<Integer> stream = Stream.of(1, 2, 3);
+        assertThrows(IllegalArgumentException.class, () -> stream.collect((Collector<Integer, ?, ?>) null));
+        // the stream must have been closed by the failed call, not left usable
+        assertThrows(IllegalStateException.class, stream::count);
+    }
+
+    /**
+     * {@code crossJoin(Collection)} silently returned an empty stream for a null right-hand side, while its
+     * own javadoc says "must not be null" and every sibling join family - and {@code crossJoin(Stream, func)}
+     * - throws {@code IllegalArgumentException}.
+     */
+    @Test
+    public void testCrossJoin_nullCollectionIsRejectedLikeEveryOtherJoin() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2).crossJoin((Collection<Integer>) null).toList());
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2).crossJoin((Collection<Integer>) null, (a, b) -> a).toList());
+
+        // the ordinary path is unaffected
+        assertEquals(2, Stream.of(1, 2).crossJoin(Arrays.asList("a")).count());
+    }
+
+
+    // ------------------------------------------------------------------------------------------------------
+    // Stream review 2026-09-09 (pass B) - rollup / forEachUntil / splitAt
+    // ------------------------------------------------------------------------------------------------------
+
+    /**
+     * {@code rollup()} used to emit {@code Arrays.asList(...).subList(...)} views over the array returned by
+     * {@code arrayForIntermediateOp()}, which for an array-backed stream is the CALLER's own array (and which
+     * {@code StreamBase} documents as read-only). So {@code set(...)} on an emitted list wrote through into the
+     * caller's array, and every emitted list was a mutable view of one shared buffer.
+     */
+    @Test
+    public void testRollup_emittedListsAreIsolatedFromTheCallersArray() {
+        final String[] arr = { "a", "b", "c", "d" };
+        final List<List<String>> out = Stream.of(arr).rollup().toList();
+
+        assertEquals(5, out.size());
+        assertEquals(N.asList("a", "b", "c", "d"), out.get(4));
+
+        // used to rewrite arr[0] to "PWNED", and every other emitted list with it
+        assertThrows(UnsupportedOperationException.class, () -> out.get(3).set(0, "PWNED"));
+        assertArrayEquals(new String[] { "a", "b", "c", "d" }, arr);
+
+        // and mutating the caller's array used to retroactively change already-collected lists
+        arr[1] = "MUTATED";
+        assertEquals(N.asList("a", "b"), out.get(2));
+        assertEquals(N.asList("a", "b", "c"), out.get(3));
+    }
+
+    /**
+     * The iterator-backed path never touched the caller's array, but every emitted list was still a view over
+     * one shared buffer, so writing into one corrupted the others.
+     */
+    @Test
+    public void testRollup_emittedListsDoNotAliasEachOther() {
+        final List<List<String>> out = Stream.of(Arrays.asList("a", "b", "c", "d").iterator()).rollup().toList();
+
+        assertThrows(UnsupportedOperationException.class, () -> out.get(3).set(0, "PWNED"));
+        assertEquals(N.asList("a"), out.get(1));
+        assertEquals(N.asList("a", "b", "c", "d"), out.get(4));
+    }
+
+    /**
+     * {@code forEachUntil} was implemented as {@code takeWhile(v -> flag.isFalse()).forEach(action)}, and
+     * {@code takeWhile.hasNext()} has to pull an element before it can test the predicate - so it consumed one
+     * element past the stop point. {@code Seq.forEachUntil} uses a plain loop for exactly this reason
+     * (see {@code SeqRegressionTest} "B5 - forEachUntil consumes exactly the elements it delivers").
+     */
+    @Test
+    public void testForEachUntil_consumesExactlyTheElementsItDelivers() {
+        final List<Integer> pulled = new ArrayList<>();
+        final List<Integer> delivered = new ArrayList<>();
+        final MutableBoolean flag = MutableBoolean.of(false);
+
+        Stream.of(1, 2, 3, 4).peek(pulled::add).forEachUntil(flag, value -> {
+            delivered.add(value);
+
+            if (value == 2) {
+                flag.setTrue();
+            }
+        });
+
+        assertEquals(N.asList(1, 2), delivered);
+        assertEquals(N.asList(1, 2), pulled); // used to be [1, 2, 3]
+    }
+
+    @Test
+    public void testForEachUntil_biConsumerConsumesExactlyTheElementsItDelivers() {
+        final List<Integer> pulled = new ArrayList<>();
+        final List<Integer> delivered = new ArrayList<>();
+
+        Stream.of(1, 2, 3, 4).peek(pulled::add).forEachUntil((value, flag) -> {
+            delivered.add(value);
+
+            if (value == 2) {
+                flag.setTrue();
+            }
+        });
+
+        assertEquals(N.asList(1, 2), delivered);
+        assertEquals(N.asList(1, 2), pulled); // used to be [1, 2, 3]
+    }
+
+    /**
+     * {@code Stream.forEachUntil}'s javadoc: "If the flagToBreak is set to {@code true} at the beginning, no
+     * elements will be iterated from the stream before it is stopped and closed." It used to iterate one.
+     */
+    @Test
+    public void testForEachUntil_flagAlreadySetIteratesNothing() {
+        final List<Integer> pulled = new ArrayList<>();
+        final List<Integer> delivered = new ArrayList<>();
+
+        Stream.of(1, 2, 3).peek(pulled::add).forEachUntil(MutableBoolean.of(true), delivered::add);
+
+        assertTrue(delivered.isEmpty());
+        assertTrue(pulled.isEmpty()); // used to be [1]
+    }
+
+    @Test
+    public void testForEachUntil_flagAlreadySetIteratesNothingInParallel() {
+        final AtomicInteger pulled = new AtomicInteger();
+        final List<Integer> delivered = Collections.synchronizedList(new ArrayList<>());
+
+        Stream.of(1, 2, 3, 4, 5, 6, 7, 8).parallel(4).peek(x -> pulled.incrementAndGet()).forEachUntil(MutableBoolean.of(true), delivered::add);
+
+        assertTrue(delivered.isEmpty());
+        assertEquals(0, pulled.get());
+    }
+
+    /**
+     * {@code splitAt(Predicate)} built its tail with a hard-coded {@code new IteratorStream<>(...)}, so the tail
+     * came back sequential and lost maxThreadNum, the split strategy and the executor - while the sibling
+     * {@code splitAt(int)} preserved all of them.
+     */
+    @Test
+    public void testSplitAt_predicateTailKeepsTheStreamsParallelSettings() {
+        final List<Stream<Integer>> halves = Stream.of(1, 2, 3, 4, 5, 6).parallel(4).splitAt(i -> i > 3).toList();
+
+        assertEquals(2, halves.size());
+        assertTrue(halves.get(0).isParallel(), "head should be parallel");
+        assertTrue(halves.get(1).isParallel(), "tail should be parallel"); // used to be false
+
+        halves.get(0).close();
+        halves.get(1).close();
+    }
+
+    @Test
+    public void testSplitAt_predicateStillSplitsAtTheRightPoint() {
+        final List<Stream<Integer>> halves = Stream.of(1, 2, 3, 4, 5, 6).splitAt(i -> i > 3).toList();
+
+        assertEquals(N.asList(1, 2, 3), halves.get(0).toList());
+        assertEquals(N.asList(4, 5, 6), halves.get(1).toList());
+    }
+
+    /**
+     * Sibling of {@code EntryStreamTest.testSelectByKeyValue_nullClassIsRejectedAndTheStreamIsClosed}:
+     * {@code Fn.instanceOf(targetType)} is evaluated as the argument to {@code filter}, so a null class threw
+     * before {@code filter}'s own closing {@code checkArgNotNull} ran, leaving the stream open.
+     */
+    @Test
+    public void testSelect_nullClassIsRejectedAndTheStreamIsClosed() {
+        final MutableBoolean closed = MutableBoolean.of(false);
+
+        assertThrows(IllegalArgumentException.class, () -> Stream.of("a", 1).onClose(closed::setTrue).select(null));
+        assertTrue(closed.isTrue(), "select(null) must close the stream before throwing");
+
+        // the ordinary path is unaffected, sequential and parallel
+        assertEquals(N.asList("a"), Stream.of("a", 1).select(String.class).toList());
+        assertEquals(N.asList(1), Stream.of("a", 1).select(Integer.class).toList());
+        assertEquals(1, Stream.of("a", 1, "b").parallel(2).select(Integer.class).count());
+    }
+
+    /**
+     * The sequential path consumes exactly what it delivers; the parallel path cannot, because its workers
+     * buffer ahead. Measured: sequential over-read 0, parallel(2/4/8) 131/44/271 — and a plain
+     * {@code parallel(8).limit(3)} over-reads a comparable 390, so the read-ahead is inherent to parallel
+     * short-circuiting rather than to this method. This pins the sequential guarantee and the fact that the
+     * parallel form still delivers the right elements.
+     */
+    @Test
+    public void testForEachUntil_parallelStillDeliversTheRightElementsDespiteReadAhead() {
+        final MutableBoolean flag = MutableBoolean.of(false);
+        final List<Integer> delivered = Collections.synchronizedList(new ArrayList<>());
+
+        Stream.of(1, 2, 3, 4, 5, 6, 7, 8).parallel(4).forEachUntil(flag, v -> {
+            delivered.add(v);
+            flag.setTrue();
+        });
+
+        // the flag stops delivery promptly; ordering is explicitly nondeterministic in parallel
+        assertTrue(delivered.size() >= 1, "at least one element must be delivered");
+        assertTrue(delivered.size() <= 4, "delivery must stop promptly, was " + delivered.size());
     }
 
 }

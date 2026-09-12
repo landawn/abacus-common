@@ -99,12 +99,12 @@ public class LongToDoubleFunctionTest extends TestBase {
 
     @Test
     public void testApplyAsDouble_withMaxValue() {
-        assertEquals((double) Long.MAX_VALUE, LongToDoubleFunction.DEFAULT.applyAsDouble(Long.MAX_VALUE));
+        assertEquals(Long.MAX_VALUE, LongToDoubleFunction.DEFAULT.applyAsDouble(Long.MAX_VALUE));
     }
 
     @Test
     public void testApplyAsDouble_withMinValue() {
-        assertEquals((double) Long.MIN_VALUE, LongToDoubleFunction.DEFAULT.applyAsDouble(Long.MIN_VALUE));
+        assertEquals(Long.MIN_VALUE, LongToDoubleFunction.DEFAULT.applyAsDouble(Long.MIN_VALUE));
     }
 
     @Test

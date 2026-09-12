@@ -18,28 +18,28 @@ import com.landawn.abacus.TestBase;
 
 public class TableTest extends TestBase {
     @Table
-    static class TestEntity1 {
+    public static class TestEntity1 {
     }
 
     @Table(name = "users")
-    static class TestEntity2 {
+    public static class TestEntity2 {
     }
 
     @Table(name = "orders", alias = "o")
-    static class TestEntity3 {
+    public static class TestEntity3 {
     }
 
     @Table(name = "products", columnFields = { "id", "name" })
-    static class TestEntity4 {
+    public static class TestEntity4 {
     }
 
     @Table(name = "customers", nonColumnFields = { "temp" })
-    static class TestEntity5 {
+    public static class TestEntity5 {
     }
 
     @Table(value = "legacy", name = "new_table", alias = "nt", columnFields = { "id" }, nonColumnFields = { "old" })
     @Deprecated
-    static class TestEntity6 {
+    public static class TestEntity6 {
     }
 
     @Test

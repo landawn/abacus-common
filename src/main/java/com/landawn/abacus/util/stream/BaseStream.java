@@ -45,9 +45,7 @@ import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.RateLimiter;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u;
-import com.landawn.abacus.util.cs;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
@@ -147,6 +145,16 @@ import lombok.experimental.Accessors;
  *       <td><b><i>abacus</i></b>: does not elide upstream stages such as {@code peek}/{@code filter} when counting their output &middot; &#9888;&#65039; <b><i>JDK</i></b> (9+): may return the count without traversing such stages when the element count is already known</td>
  *     </tr>
  *     <tr>
+ *       <td>{@code sum()} on {@link CharStream}/{@link ByteStream}/{@link ShortStream}/{@link IntStream}</td>
+ *       <td><b><i>abacus</i></b>: accumulates in a {@code long} and throws {@link ArithmeticException} if the
+ *           total does not fit the {@code int} return type &middot; &#9888;&#65039; <b><i>JDK</i></b>:
+ *           {@code IntStream.sum()} wraps around silently.
+ *           <br>{@link LongStream#sum()} and {@link DoubleStream#sum()} are unaffected &mdash; there is no wider
+ *           accumulator, so {@code LongStream.sum()} wraps like the JDK. Use
+ *           {@code mapToLong(...).sum()} or {@link Collectors#summingBigInteger(java.util.function.Function)}
+ *           when the total may exceed the range.</td>
+ *     </tr>
+ *     <tr>
  *       <td>{@code peek}/{@code onEach}</td>
  *       <td><b><i>abacus</i></b>: always invokes the action for every element pulled &middot; &#9888;&#65039; <b><i>JDK</i></b>: the action "may not be invoked" for elements it optimizes away (e.g. under a short-circuiting {@code count()})</td>
  *     </tr>
@@ -217,7 +225,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @ParallelSupported
     @IntermediateOp
-    S filter(P predicate);
+    S filter(P predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the elements of this stream that match the given predicate.
@@ -258,7 +266,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @Beta
     @ParallelSupported
     @IntermediateOp
-    S filter(P predicate, C onDrop);
+    S filter(P predicate, C onDrop) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the longest prefix of elements from this stream
@@ -282,11 +290,13 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
      * │                 │ (predicate false)       │ individually satisfy the predicate                             │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * │ dropWhile (+    │ first unmatched         │ prefix boundary is preserved: only the leading run is          │
+     * │ onDrop)         │ (predicate false)       │ dropped (predicate checks are serialized). Downstream          │
+     * │                 │                         │ encounter order is unspecified                                 │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * │ skipUntil       │ first matched           │ prefix boundary is preserved: only the leading run is          │
+     * │                 │ (predicate true)        │ skipped (it is dropWhile(not predicate)). Downstream           │
+     * │                 │                         │ encounter order is unspecified                                 │
      * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
      * </pre>
      *
@@ -321,7 +331,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @ParallelSupported
     @IntermediateOp
-    S takeWhile(P predicate);
+    S takeWhile(P predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the remaining elements of this stream after
@@ -333,12 +343,14 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * returns {@code false}, effectively performing a "drop while condition is true"
      * operation that preserves encounter order in sequential streams.
      *
+     * <p>During manual sequential iteration, a source or predicate failure does not by itself end
+     * the dropping phase. Elements already consumed from an iterator source are not replayed on retry.
+     *
      * <p><b>Notes on parallel streams:</b><br>
-     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
-     * the predicate returns {@code false}) may still be processed and dropped if they individually
-     * satisfy the predicate.<br>
-     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
-     * is no guarantee of encounter-order prefix/suffix semantics.
+     * In a parallel stream the prefix boundary is still honoured: each element is taken from the shared
+     * cursor and tested under the same lock, so only the leading run of matching elements is dropped and
+     * the first unmatched element is always retained.<br>
+     * ⚠️ What parallel execution does not preserve is the encounter order of the retained elements.
      *
      * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
      * <pre>
@@ -348,11 +360,13 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
      * │                 │ (predicate false)       │ individually satisfy the predicate                             │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * │ dropWhile (+    │ first unmatched         │ prefix boundary is preserved: only the leading run is          │
+     * │ onDrop)         │ (predicate false)       │ dropped (predicate checks are serialized). Downstream          │
+     * │                 │                         │ encounter order is unspecified                                 │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * │ skipUntil       │ first matched           │ prefix boundary is preserved: only the leading run is          │
+     * │                 │ (predicate true)        │ skipped (it is dropWhile(not predicate)). Downstream           │
+     * │                 │                         │ encounter order is unspecified                                 │
      * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
      * </pre>
      *
@@ -388,7 +402,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @ParallelSupported
     @IntermediateOp
-    S dropWhile(P predicate);
+    S dropWhile(P predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the remaining elements of this stream after
@@ -402,11 +416,10 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * operation that preserves encounter order in sequential streams.
      *
      * <p><b>Notes on parallel streams:</b><br>
-     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
-     * the predicate returns {@code false}) may still be processed and dropped if they individually
-     * satisfy the predicate.<br>
-     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
-     * is no guarantee of encounter-order prefix/suffix semantics.
+     * In a parallel stream the prefix boundary is still honoured: each element is taken from the shared
+     * cursor and tested under the same lock, so only the leading run of matching elements is dropped and
+     * the first unmatched element is always retained.<br>
+     * ⚠️ What parallel execution does not preserve is the encounter order of the retained elements.
      *
      * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
      * <pre>
@@ -416,11 +429,13 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
      * │                 │ (predicate false)       │ individually satisfy the predicate                             │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * │ dropWhile (+    │ first unmatched         │ prefix boundary is preserved: only the leading run is          │
+     * │ onDrop)         │ (predicate false)       │ dropped (predicate checks are serialized). Downstream          │
+     * │                 │                         │ encounter order is unspecified                                 │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * │ skipUntil       │ first matched           │ prefix boundary is preserved: only the leading run is          │
+     * │                 │ (predicate true)        │ skipped (it is dropWhile(not predicate)). Downstream           │
+     * │                 │                         │ encounter order is unspecified                                 │
      * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
      * </pre>
      *
@@ -458,7 +473,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @Beta
     @ParallelSupported
     @IntermediateOp
-    S dropWhile(P predicate, C onDrop);
+    S dropWhile(P predicate, C onDrop) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the remaining elements of this stream after
@@ -467,9 +482,10 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * included without further predicate checks. This is an intermediate operation.
      *
      * <p><b>Notes on parallel streams:</b><br>
-     * ⚠️ In a parallel stream, elements after the first matched element (the first element for which
-     * the predicate returns {@code true}) may still be processed and skipped if they do not satisfy
-     * the predicate.<br>
+     * In a parallel stream the prefix boundary is still honoured: this operation is {@code dropWhile} with
+     * the predicate negated, and that takes and tests each element under the same lock, so only the leading
+     * run of non-matching elements is skipped and the first matching element is always retained.<br>
+     * ⚠️ What parallel execution does not preserve is the encounter order of the retained elements.<br>
      * For sequential or ordered streams the operation is deterministic — elements are skipped until the
      * first element for which the predicate returns {@code true}, and the rest are passed through
      * unchanged; in unordered parallel streams the result may appear unintuitive.
@@ -482,11 +498,13 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
      * │                 │ (predicate false)       │ individually satisfy the predicate                             │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * │ dropWhile (+    │ first unmatched         │ prefix boundary is preserved: only the leading run is          │
+     * │ onDrop)         │ (predicate false)       │ dropped (predicate checks are serialized). Downstream          │
+     * │                 │                         │ encounter order is unspecified                                 │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * │ skipUntil       │ first matched           │ prefix boundary is preserved: only the leading run is          │
+     * │                 │ (predicate true)        │ skipped (it is dropWhile(not predicate)). Downstream           │
+     * │                 │                         │ encounter order is unspecified                                 │
      * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
      * </pre>
      *
@@ -522,7 +540,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @Beta
     @ParallelSupported
     @IntermediateOp
-    S skipUntil(P predicate);
+    S skipUntil(P predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the distinct elements of this stream.
@@ -565,7 +583,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S distinct();
+    S distinct() throws IllegalStateException;
 
     /**
      * Returns a stream consisting of the elements that are present in both this stream and the specified collection.
@@ -598,7 +616,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S intersection(Collection<?> c);
+    S intersection(Collection<?> c) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of the elements of this stream that are not present in the specified collection,
@@ -632,7 +650,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S difference(Collection<?> c);
+    S difference(Collection<?> c) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of elements that are present in either this stream or the specified collection,
@@ -679,7 +697,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S symmetricDifference(Collection<? extends T> c);
+    S symmetricDifference(Collection<? extends T> c) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of the elements of this stream in reverse order.
@@ -716,7 +734,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @SequentialOnly
     @IntermediateOp
     @TerminalOpTriggered
-    S reversed();
+    S reversed() throws IllegalStateException;
 
     /**
      * Returns a stream consisting of the elements of this stream rotated by the specified distance.
@@ -763,7 +781,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @SequentialOnly
     @IntermediateOp
     @TerminalOpTriggered
-    S rotated(int distance);
+    S rotated(int distance) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of the elements of this stream in a random order.
@@ -803,7 +821,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @SequentialOnly
     @IntermediateOp
     @TerminalOpTriggered
-    S shuffled();
+    S shuffled() throws IllegalStateException;
 
     /**
      * Returns a stream consisting of the elements of this stream in a random order determined by the provided Random instance.
@@ -837,6 +855,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param rnd the Random instance to use for shuffling elements
      * @return a new stream consisting of the elements of this stream in a random order determined by the provided Random
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code rnd} is {@code null}
      * @see #shuffled()
      * @see #reversed()
      * @see #sorted()
@@ -846,7 +865,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @SequentialOnly
     @IntermediateOp
     @TerminalOpTriggered
-    S shuffled(Random rnd);
+    S shuffled(Random rnd) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the elements of this stream in sorted order.
@@ -873,10 +892,21 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * Although this method is marked as {@code @ParallelSupported}, the sorting operation itself
      * may not be performed in parallel depending on the stream implementation.
      *
+     * <p><b>&#9888;&#65039; Not supported by every stream type.</b> This operation is only meaningful when the
+     * element type has a natural order. {@link EntryStream#sorted()} always throws
+     * {@link UnsupportedOperationException}, because {@code Map.Entry} does not implement {@code Comparable};
+     * use {@link EntryStream#sorted(java.util.Comparator)}, {@link EntryStream#sortedByKey(java.util.Comparator)}
+     * or {@link EntryStream#sortedByValue(java.util.Comparator)} there. Code written against {@code BaseStream}
+     * rather than a concrete stream type must allow for that.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     *
+     * <p>For object streams, comparison during terminal traversal throws {@link ClassCastException}
+     * if the elements are not mutually {@link Comparable}.</p>
      *
      * @return a new stream consisting of the elements of this stream in sorted order
      * @throws IllegalStateException if the stream is already closed
+     * @throws UnsupportedOperationException always for {@link EntryStream}, whose entries have no natural order
      * @see #reverseSorted()
      * @see #reversed()
      * @see #shuffled()
@@ -885,7 +915,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
-    S sorted();
+    S sorted() throws IllegalStateException, UnsupportedOperationException;
 
     /**
      * Returns a stream consisting of the elements of this stream in reverse sorted order.
@@ -912,10 +942,20 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * Although this method is marked as {@code @ParallelSupported}, the sorting operation itself
      * may not be performed in parallel depending on the stream implementation.
      *
+     * <p><b>&#9888;&#65039; Not supported by every stream type.</b> This operation is only meaningful when the
+     * element type has a natural order. {@link EntryStream#reverseSorted()} always throws
+     * {@link UnsupportedOperationException}, because {@code Map.Entry} does not implement {@code Comparable};
+     * use {@link EntryStream#reverseSorted(java.util.Comparator)} there. Code written against
+     * {@code BaseStream} rather than a concrete stream type must allow for that.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     *
+     * <p>For object streams, comparison during terminal traversal throws {@link ClassCastException}
+     * if the elements are not mutually {@link Comparable}.</p>
      *
      * @return a new stream consisting of the elements of this stream in reverse sorted order
      * @throws IllegalStateException if the stream is already closed
+     * @throws UnsupportedOperationException always for {@link EntryStream}, whose entries have no natural order
      * @see #sorted()
      * @see #reversed()
      * @see #shuffled()
@@ -924,7 +964,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @ParallelSupported
     @IntermediateOp
     @TerminalOpTriggered
-    S reverseSorted();
+    S reverseSorted() throws IllegalStateException, UnsupportedOperationException;
 
     /**
      * Returns a stream consisting of the elements of this stream, repeating indefinitely.
@@ -964,7 +1004,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S cycled();
+    S cycled() throws IllegalStateException;
 
     /**
      * Returns a stream consisting of the elements of this stream, repeating for the specified number of rounds.
@@ -1004,7 +1044,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S cycled(long rounds);
+    S cycled(long rounds) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the elements of this stream, each paired with its index in the stream.
@@ -1044,7 +1084,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    Stream<IT> indexed();
+    Stream<IT> indexed() throws IllegalStateException;
 
     /**
      * Returns a stream consisting of the remaining elements of this stream after skipping the first n elements.
@@ -1090,7 +1130,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S skip(long n) throws IllegalArgumentException;
+    S skip(long n) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the remaining elements of this stream after skipping the first n elements,
@@ -1128,7 +1168,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @return a new stream consisting of the remaining elements of this stream after skipping
      *         the first n elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code n} is negative.
+     * @throws IllegalArgumentException if {@code n} is negative or {@code onSkip} is {@code null}.
      * @see #skip(long)
      * @see #filter(Object, Object)
      * @see #limit(long)
@@ -1137,7 +1177,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @Beta
     @ParallelSupported
     @IntermediateOp
-    S skip(long n, C onSkip) throws IllegalArgumentException;
+    S skip(long n, C onSkip) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the first maxSize elements of this stream.
@@ -1184,7 +1224,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S limit(long maxSize) throws IllegalArgumentException;
+    S limit(long maxSize) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of elements from this stream, starting after skipping
@@ -1234,7 +1274,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S skipAndLimit(long offset, long maxSize) throws IllegalArgumentException;
+    S skipAndLimit(long offset, long maxSize) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of every 'step'th element of this stream.
@@ -1279,7 +1319,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S step(long step) throws IllegalArgumentException;
+    S step(long step) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream with a rate limit applied. The rate limit is specified by the <i>permitsPerSecond</i> parameter.
@@ -1337,8 +1377,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param permitsPerSecond the rate limit, specified as permits per second. Must be positive.
      * @return a new stream with the rate limit applied.
+     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative or zero.
      * @see #rateLimited(RateLimiter)
      * @see #delay(Duration)
      * @see #debounce(Duration)
@@ -1346,7 +1386,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    default S rateLimited(final double permitsPerSecond) {
+    default S rateLimited(final double permitsPerSecond) throws IllegalArgumentException, IllegalStateException {
         return rateLimited(RateLimiter.create(permitsPerSecond));
     }
 
@@ -1418,7 +1458,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S rateLimited(RateLimiter rateLimiter);
+    S rateLimited(RateLimiter rateLimiter) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Delay each element in this {@code Stream} by a given {@link Duration} except the first element.
@@ -1510,7 +1550,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S delay(Duration duration);
+    S delay(Duration duration) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Delay each element in this {@code Stream} by a given {@link java.time.Duration} except the first element.
@@ -1523,23 +1563,30 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p>This is a convenience overload that accepts a {@link java.time.Duration} instead of
      * {@link Duration}. The duration is converted to milliseconds internally.
      *
+     * <p><b>&#9888;&#65039; Millisecond resolution.</b> The conversion truncates toward zero, so a positive
+     * duration shorter than one millisecond becomes {@code 0} and this operation applies <i>no delay at all</i>
+     * &mdash; {@code delay(java.time.Duration.ofNanos(500_000))} is silently a no-op. Sub-millisecond pacing is
+     * not supported; round up to at least {@code ofMillis(1)} if any delay is required. A negative duration
+     * likewise produces no delay.
+     *
      * <p>This method only runs sequentially, even in parallel streams, as noted by the
      * {@code @SequentialOnly} annotation.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param duration the duration to delay each element in the stream (except the first element). Must not be {@code null}.
+     * @param duration the duration to delay each element in the stream (except the first element). Must not be
+     *                 {@code null}. Truncated to whole milliseconds; anything under one millisecond means no delay.
      * @return a new stream with the delay applied to each element.
+     * @throws ArithmeticException if the duration is too large to be represented in milliseconds
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code duration} is {@code null}.
-     * @throws ArithmeticException if the duration is too large to be represented in milliseconds
      * @see #delay(Duration)
      * @see #rateLimited(double)
      * @see #rateLimited(RateLimiter)
      */
     @SequentialOnly
     @IntermediateOp
-    default S delay(java.time.Duration duration) {
+    default S delay(java.time.Duration duration) throws ArithmeticException, IllegalStateException, IllegalArgumentException {
         final Duration durationToUse = duration == null ? null : Duration.ofMillis(duration.toMillis()); // to throw same exception as in the other overload for null.
         return delay(durationToUse);
     }
@@ -1553,8 +1600,9 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * {@code duration} after the previous one &mdash; all but the most recent element of the burst are
      * discarded; the most recent element survives. It is emitted when a later pull observes a gap of at least
      * {@code duration}, or when the upstream is exhausted. The final element of the stream is always emitted
-     * without waiting for an additional timer. Arrival time is measured with {@link System#nanoTime()}
-     * at the moment each element is pulled from the upstream, so this operator is only meaningful for streams
+     * without waiting for an additional timer. Arrival time is measured with
+     * {@link System#currentTimeMillis()} at the moment each element is pulled from the upstream &mdash; the same
+     * clock the {@code window(...)} operators use &mdash; so this operator is only meaningful for streams
      * whose upstream produces elements over time. For a stream that produces all of its elements immediately
      * (e.g. a stream over an in-memory collection), every gap is effectively zero, so only the single last
      * element is emitted.
@@ -1579,7 +1627,9 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *   <li>Within a burst (consecutive elements less than {@code duration} apart), only the most recent
      *       element survives; the earlier ones are silently discarded.</li>
      *   <li>The relative order of the surviving elements is preserved.</li>
-     *   <li>Arrival time is tracked with the monotonic {@link System#nanoTime()} clock at pull time.</li>
+     *   <li>Arrival time is tracked with the wall-clock {@link System#currentTimeMillis()} at pull time, so a
+     *       backward or forward system-clock adjustment during traversal can make a gap look shorter or longer
+     *       than it really was.</li>
      * </ul>
      *
      * <p>Only the debounce step itself is forced sequential, as noted by the {@code @SequentialOnly} annotation.
@@ -1627,7 +1677,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S debounce(Duration duration);
+    S debounce(Duration duration) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs the given action on the elements pulled by downstream/terminal operation.
@@ -1658,12 +1708,13 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param action the action to be performed on the elements pulled by downstream/terminal operation
      * @return a new stream consisting of the elements of this stream with the provided action applied to each element.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @see #onEach(Object)
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    default S peek(final C action) {
+    default S peek(final C action) throws IllegalStateException, IllegalArgumentException {
         return onEach(action);
     }
 
@@ -1707,11 +1758,12 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param action the action to be performed on the elements pulled by downstream/terminal operation
      * @return a new stream consisting of the elements of this stream with the provided action applied to each element.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @see #peek(Object)
      */
     @ParallelSupported
     @IntermediateOp
-    S onEach(final C action);
+    S onEach(final C action) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Prepends the elements of the provided stream to this stream.
@@ -1740,7 +1792,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S prepend(S stream);
+    S prepend(S stream) throws IllegalStateException;
 
     /**
      * Prepends the element of the provided optional to this stream.
@@ -1766,10 +1818,11 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param op the optional whose element should be prepended to this stream.
      * @return a new stream consisting of the element of the provided optional (if present) followed by the elements of this stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code op} is {@code null}
      */
     @SequentialOnly
     @IntermediateOp
-    S prepend(OT op);
+    S prepend(OT op) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Appends the elements of the provided stream to this stream.
@@ -1798,7 +1851,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S append(S stream);
+    S append(S stream) throws IllegalStateException;
 
     /**
      * Appends the element of the provided optional to this stream.
@@ -1824,10 +1877,11 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param op the optional whose element should be appended to this stream.
      * @return a new stream consisting of the elements of this stream followed by the element of the provided optional (if present).
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code op} is {@code null}
      */
     @SequentialOnly
     @IntermediateOp
-    S append(OT op);
+    S append(OT op) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the elements of this stream if it is not empty, or the elements
@@ -1866,7 +1920,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S appendIfEmpty(Supplier<? extends S> supplier);
+    S appendIfEmpty(Supplier<? extends S> supplier) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the elements of this stream if it is not empty, or the elements
@@ -1893,17 +1947,17 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // result = ["default1", "default2"]
      *
      * // Non-empty stream - supplier is not called
-     * List<String> result = Stream.of("A", "B")
+     * List<String> nonEmptyResult = Stream.of("A", "B")
      *       .defaultIfEmpty(() -> Stream.of("default"))
      *       .toList();
-     * // result = ["A", "B"]
+     * // nonEmptyResult = ["A", "B"]
      *
      * // Use with filtering to ensure results
-     * List<Integer> result = Stream.of(1, 2, 3, 4)
+     * List<Integer> filteredResult = Stream.of(1, 2, 3, 4)
      *       .filter(n -> n > 10)  // filters out all; no elements match
      *       .defaultIfEmpty(() -> Stream.of(0))
      *       .toList();
-     * // result = [0]
+     * // filteredResult = [0]
      *
      * // Provide multiple defaults
      * List<Integer> numbers = Stream.of(1, 2, 3)
@@ -1930,9 +1984,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    default S defaultIfEmpty(final Supplier<? extends S> supplier) throws IllegalArgumentException {
-        N.checkArgNotNull(supplier, cs.supplier);
-
+    default S defaultIfEmpty(final Supplier<? extends S> supplier) throws IllegalStateException, IllegalArgumentException {
         return appendIfEmpty(supplier);
     }
 
@@ -1956,14 +2008,15 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>When terminal traversal finds the stream empty, the returned stream throws {@link java.util.NoSuchElementException}.</p>
+     *
      * @return a stream with the same elements as this stream, which throws if it turns out to be
      *         empty when a terminal operation is executed.
      * @throws IllegalStateException if the stream is already closed
-     * @throws java.util.NoSuchElementException if the stream is empty when a terminal operation is executed
      */
     @SequentialOnly
     @IntermediateOp
-    S throwIfEmpty();
+    S throwIfEmpty() throws IllegalStateException;
 
     /**
      * Throws a custom exception provided by the specified {@code exceptionSupplier} in the executed terminal operation if this {@code Stream} is empty.
@@ -1985,19 +2038,23 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>When terminal traversal finds the stream empty, the returned stream throws the exception
+     * provided by {@code exceptionSupplier}; a {@code null} supplied exception causes {@link NullPointerException}.</p>
+     *
      * @param exceptionSupplier the supplier of the exception to be thrown if this stream is empty.
      * @return a stream with the same elements as this stream, which throws if it turns out to be
      *         empty when a terminal operation is executed.
      * @throws IllegalStateException if the stream is already closed
-     * @throws RuntimeException the exception provided by the supplier if the stream is empty when a terminal operation is executed
      * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
      */
     @SequentialOnly
     @IntermediateOp
-    S throwIfEmpty(Supplier<? extends RuntimeException> exceptionSupplier);
+    S throwIfEmpty(Supplier<? extends RuntimeException> exceptionSupplier) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Executes the given action if the stream is empty.
+     * A failed source emptiness check is retried on the next manual iterator access. Once emptiness
+     * is established, the action is invoked at most once, even if the action itself throws.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2022,11 +2079,12 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @return a stream with the same elements as this stream, which executes the action if it
      *         turns out to be empty when a terminal operation is executed
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      */
     @Beta
     @SequentialOnly
     @IntermediateOp
-    S ifEmpty(Runnable action);
+    S ifEmpty(Runnable action) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Joins the elements of this stream into a single String, separated by the specified delimiter.
@@ -2055,7 +2113,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @TerminalOp
-    default String join(final CharSequence delimiter) {
+    default String join(final CharSequence delimiter) throws IllegalStateException {
         return join(delimiter, "", "");
     }
 
@@ -2089,7 +2147,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @TerminalOp
-    String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix);
+    String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException;
 
     /**
      * Joins the elements of this stream into a single String using the provided Joiner.
@@ -2114,14 +2172,14 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param joiner the Joiner specifying how to join the elements of the stream.
      * @return the provided Joiner after appending all elements of the stream.
-     * @throws IllegalArgumentException if {@code joiner} is {@code null}.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code joiner} is {@code null}.
      * @see Joiner
      * @see #join(CharSequence, CharSequence, CharSequence)
      */
     @SequentialOnly
     @TerminalOp
-    Joiner joinTo(final Joiner joiner);
+    Joiner joinTo(final Joiner joiner) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Calculates the percentiles of the elements in the stream.
@@ -2157,16 +2215,25 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *       });
      * }</pre>
      *
+     * <p><b>&#9888;&#65039; Not supported by every stream type.</b> This operation sorts by natural order, so it is
+     * only meaningful when the element type has one. {@link EntryStream#percentiles()} always throws
+     * {@link UnsupportedOperationException}, because {@code Map.Entry} does not implement {@code Comparable};
+     * use {@link EntryStream#percentiles(java.util.Comparator)} there. Code written against {@code BaseStream}
+     * rather than a concrete stream type must allow for that.
+     *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return an Optional containing a Map of Percentages to elements if the stream is not empty, otherwise an empty Optional.
      * @throws IllegalStateException if the stream is already closed
+     * @throws UnsupportedOperationException always for {@link EntryStream}, whose entries have no natural order
+     * @throws ClassCastException if the elements are not mutually {@link Comparable}; raised on the first comparison,
+     *         when the terminal operation runs
      * @see N#percentilesOfSorted(int[])
      * @see Percentage
      */
     @SequentialOnly
     @TerminalOp
-    u.Optional<Map<Percentage, T>> percentiles();
+    u.Optional<Map<Percentage, T>> percentiles() throws IllegalStateException, UnsupportedOperationException, ClassCastException;
 
     /**
      * Counts the number of elements in the stream.
@@ -2195,7 +2262,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @TerminalOp
-    long count();
+    long count() throws IllegalStateException;
 
     /**
      * Returns the first element of this stream wrapped in an {@code Optional}, or an empty
@@ -2206,10 +2273,11 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * way to test whether a stream is non-empty — prefer {@code stream.first().isPresent()}
      * over {@code stream.count() > 0}.</p>
      *
-     * <p><b>Null elements:</b> primitive streams are unaffected, but for object streams
-     * ({@link Stream}, {@link EntryStream}) the returned {@code Optional} cannot hold {@code null},
-     * so a {@link NullPointerException} is thrown if the first element is {@code null}. {@code null}
-     * elements elsewhere in the stream are harmless — only the one actually returned matters.</p>
+     * <p><b>Null elements:</b> primitive streams are unaffected. For object streams
+     * ({@link Stream}, {@link EntryStream}) the returned {@code Optional} is created with
+     * {@code Optional.ofNullable}, so a {@code null} first element yields an <i>empty</i>
+     * {@code Optional} rather than throwing — which makes "the first element was {@code null}"
+     * indistinguishable from "the stream was empty".</p>
      *
      * <p>The concrete return type follows the stream type: {@link Stream} returns {@code Optional<T>},
      * while the primitive streams return their specialized {@code Optional}, e.g. {@code OptionalInt}
@@ -2229,7 +2297,6 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @return an {@code Optional} containing the first element of the stream, or an empty {@code Optional} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws NullPointerException if the first element is {@code null} (object streams only)
      * @see #last()
      * @see #elementAt(long)
      * @see #count()
@@ -2239,7 +2306,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @TerminalOp
-    OT first();
+    OT first() throws IllegalStateException;
 
     /**
      * Returns the last element of this stream wrapped in an {@code Optional}, or an empty {@code Optional} if this stream is empty.
@@ -2248,10 +2315,11 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * because the last element is only known when the stream is exhausted. Only the latest element is retained while
      * scanning, so memory usage stays constant. The stream is then closed.</p>
      *
-     * <p><b>Null elements:</b> primitive streams are unaffected, but for object streams
-     * ({@link Stream}, {@link EntryStream}) the returned {@code Optional} cannot hold {@code null},
-     * so a {@link NullPointerException} is thrown if the last element is {@code null}. {@code null}
-     * elements elsewhere in the stream are harmless — only the one actually returned matters.</p>
+     * <p><b>Null elements:</b> primitive streams are unaffected. For object streams
+     * ({@link Stream}, {@link EntryStream}) the returned {@code Optional} is created with
+     * {@code Optional.ofNullable}, so a {@code null} last element yields an <i>empty</i>
+     * {@code Optional} rather than throwing — which makes "the last element was {@code null}"
+     * indistinguishable from "the stream was empty".</p>
      *
      * <p>The concrete return type follows the stream type: {@link Stream} returns {@code Optional<T>},
      * while the primitive streams return their specialized {@code Optional}, e.g. {@code OptionalInt}
@@ -2270,13 +2338,12 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @return an {@code Optional} containing the last element of the stream, or an empty {@code Optional} if the stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws NullPointerException if the last element is {@code null} (object streams only)
      * @see #first()
      * @see #elementAt(long)
      */
     @SequentialOnly
     @TerminalOp
-    OT last();
+    OT last() throws IllegalStateException;
 
     /**
      * Returns the element at the specified position in this stream.
@@ -2311,7 +2378,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @Beta
     @SequentialOnly
     @TerminalOp
-    OT elementAt(long position);
+    OT elementAt(long position) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an {@code Optional} containing the only element of this stream if it contains exactly one element, or an empty {@code Optional} if the stream is empty.
@@ -2353,7 +2420,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @TerminalOp
-    OT onlyOne() throws TooManyElementsException;
+    OT onlyOne() throws IllegalStateException, TooManyElementsException;
 
     /**
      * Collects the elements of this stream into an array.
@@ -2384,7 +2451,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @TerminalOp
-    A toArray();
+    A toArray() throws IllegalStateException;
 
     /**
      * Collects the elements of this stream into a modifiable List.
@@ -2418,7 +2485,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @TerminalOp
-    List<T> toList();
+    List<T> toList() throws IllegalStateException;
 
     /**
      * Collects the elements of this stream into a modifiable Set.
@@ -2450,7 +2517,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @TerminalOp
-    Set<T> toSet();
+    Set<T> toSet() throws IllegalStateException;
 
     /**
      * Collects the elements of this stream into an ImmutableList.
@@ -2491,7 +2558,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @TerminalOp
-    ImmutableList<T> toImmutableList();
+    ImmutableList<T> toImmutableList() throws IllegalStateException;
 
     /**
      * Collects the elements of this stream into an ImmutableSet.
@@ -2538,7 +2605,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @TerminalOp
-    ImmutableSet<T> toImmutableSet();
+    ImmutableSet<T> toImmutableSet() throws IllegalStateException;
 
     /**
      * Collects the elements of this stream into a Collection.
@@ -2566,12 +2633,17 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param supplier a supplier function that provides a new, empty Collection of the desired type.
      * @return a Collection of the desired type containing the elements of this stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}
+     * @throws NullPointerException if the supplied collection is {@code null} and the implementation attempts insertion, or if the collection rejects a null element
+     * @throws ClassCastException if an element has a type that the supplied collection cannot accept or compare
+     * @throws UnsupportedOperationException if the supplied collection rejects an attempted insertion
      * @see #toList()
      * @see #toSet()
      */
     @SequentialOnly
     @TerminalOp
-    <CC extends Collection<T>> CC toCollection(Supplier<? extends CC> supplier);
+    <CC extends Collection<T>> CC toCollection(Supplier<? extends CC> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, ClassCastException, UnsupportedOperationException;
 
     /**
      * Collects the elements of this stream into a Multiset.
@@ -2603,7 +2675,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @TerminalOp
-    Multiset<T> toMultiset();
+    Multiset<T> toMultiset() throws IllegalStateException;
 
     /**
      * Collects the elements of this stream into a Multiset.
@@ -2641,12 +2713,14 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param supplier a supplier function that provides a new, empty Multiset of the desired type.
      * @return a Multiset of the desired type containing the elements of this stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or adding an element would overflow its existing count in the supplied multiset
+     * @throws NullPointerException if an element is added and the supplier returns {@code null}, or the supplied multiset rejects a null element
      * @see #toMultiset()
      * @see Multiset
      */
     @SequentialOnly
     @TerminalOp
-    Multiset<T> toMultiset(Supplier<? extends Multiset<T>> supplier); //NOSONAR
+    Multiset<T> toMultiset(Supplier<? extends Multiset<T>> supplier) throws IllegalStateException, IllegalArgumentException, NullPointerException; //NOSONAR
 
     /**
      * Prints at most the first thousand elements of this stream to the standard output in a formatted manner.
@@ -2674,7 +2748,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @Beta
     @SequentialOnly
     @TerminalOp
-    void println();
+    void println() throws IllegalStateException;
 
     /**
      * Returns an iterator for the elements of this stream.
@@ -2696,8 +2770,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * }
      *
      * // Using try-with-resources (better approach if you must use iterator)
-     * try (Stream<String> stream = Stream.of("a", "b", "c")) {
-     *     Iterator<String> iter = stream.iterator();
+     * try (Stream<String> resourceStream = Stream.of("a", "b", "c")) {
+     *     Iterator<String> iter = resourceStream.iterator();
      *     while (iter.hasNext()) {
      *         process(iter.next());
      *     }
@@ -2718,7 +2792,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @Deprecated
     @SequentialOnly
-    ITER iterator();
+    ITER iterator() throws IllegalStateException;
 
     /**
      * Checks if the stream is running in parallel mode.
@@ -2789,7 +2863,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S sequential();
+    S sequential() throws IllegalStateException;
 
     /**
      * Switches the stream to parallel mode.
@@ -2935,6 +3009,21 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <br />
      * <i>splitXXX/splitAt/splitBy/slidingXXX/collapse, distinct, reverse, rotate, shuffle, indexed, cached, top, kthLargest, count, toArray, toList, toSet, toMultiset...</i>
      *
+     * <p><b>&#9888;&#65039; Encounter order is not preserved.</b> Unlike
+     * {@link java.util.stream.BaseStream#parallel() the JDK}, a parallel stream here hands elements to
+     * worker threads one at a time and emits results in <i>completion</i> order. Even
+     * {@code parallel().map(x -> x).toList()} generally returns a permutation of the source, not the
+     * source order. Calling {@link #sequential()} afterwards does not restore an order that has already
+     * been lost &mdash; it only affects later stages.
+     *
+     * <p>Consequently, on a parallel pipeline: the {@code // returns [...]} results shown throughout
+     * these classes describe <i>sequential</i> execution; "first encountered wins" rules
+     * ({@code distinctBy}, {@code groupTo}, {@code toMap} merge order) and the
+     * {@code Collectors.toList(int)} / {@code toSet(int)} / {@code toCollection(int, Supplier)}
+     * "first <i>n</i>" collectors do not hold; and {@code forEachIndexed} passes an invocation counter
+     * rather than the element's position. Keep the pipeline sequential, or {@code sorted()} the result,
+     * when order matters.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return a new stream that is identical to this stream but configured for parallel execution
@@ -2952,7 +3041,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S parallel();
+    S parallel() throws IllegalStateException;
 
     /**
      * Switches the stream to parallel mode with a specified maximum thread number.
@@ -2998,7 +3087,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S parallel(int maxThreadNum);
+    S parallel(int maxThreadNum) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Switches the stream to parallel mode with a specified Executor.
@@ -3035,10 +3124,32 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>&#9888;&#65039;</b> The call could hang if this executor is created by
      * {@code Executors.newVirtualThreadPerTaskExecutor()} and used by multiple calls in this stream.
      *
+     * <p><b>&#9888;&#65039; Size this executor for the whole pipeline.</b> A caller-supplied
+     * {@code Executor} does <b>not</b> get the deadlock-avoidance fallback that the default executor has
+     * (that fallback provisions extra capacity only for the shared default pool), and <b>every chained
+     * parallel stage after the first permanently occupies {@code maxThreadNum} threads of this executor</b>
+     * as buffered readers. If the pool is too small the pipeline <b>deadlocks permanently</b>: the later
+     * stages' readers hold every thread, so nothing is left to run the earlier stages' producers.
+     *
+     * <p>The measured minimum pool size is {@code (numberOfParallelStages - 1) * maxThreadNum + 1}
+     * (with {@code maxThreadNum = 4}: 1 stage needs 1 thread, 2 stages need 5, 3 stages need 9, 4 stages
+     * need 13). Sizing the pool at {@code maxThreadNum} is therefore safe only for a <i>single</i>
+     * parallel stage; adding a second operation such as {@code .map(..).map(..)},
+     * {@code .map(..).filter(..)}, {@code .map(..).flatMap(..)}, {@code .map(..).groupTo(..)},
+     * {@code .map(..).collect(..)}, {@code .map(..).forEach(..)}, {@code .map(..).toMap(..)} or
+     * {@code .map(..).zipWith(..)} will hang.
+     * Allow at least {@code numberOfParallelStages * maxThreadNum} threads for headroom, or keep the
+     * pipeline to one parallel stage with {@link #sps(int, Executor, Function)}.
+     * ({@link #parallel()} and {@link #parallel(int)} are unaffected - they use the shared default
+     * executor, which grows a temporary pool rather than deadlocking.)
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param executor the Executor to use for parallel operations.
-     *          {@code Executor} can be specified for bigger thread number than the maximum allowed thread number per operation ({@code min(64, cpu_cores * 8)}) or virtual thread.
+     * @param executor the Executor to use for parallel operations. It must be large enough for the whole
+     *          pipeline - see the pool-sizing note above. A virtual-thread executor may be used.
+     *          This overload runs {@code min(min(64, cpu_cores * 8), cpu_cores)} threads per stage whatever the
+     *          executor's own size; use {@link #parallel(int, Executor)} to raise that, which is the overload
+     *          that can exceed the per-operation maximum.
      * @return a new stream configured for parallel execution with the specified executor
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
@@ -3050,7 +3161,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S parallel(Executor executor);
+    S parallel(Executor executor) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Switches the stream to parallel mode with specified maximum thread number and Executor.
@@ -3066,10 +3177,11 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use a custom executor with limited parallelism
+     * // The pool must be big enough for every parallel stage - see the pool-sizing note below.
      * ExecutorService executor = Executors.newFixedThreadPool(20);
      * try {
      *     Stream.of(data)
-     *           .parallel(10, executor)  // uses at most 10 threads from the pool
+     *           .parallel(10, executor)  // 10 threads per parallel stage, not 10 in total
      *           .map(expensiveOperation)
      *           .toList();
      * } finally {
@@ -3080,9 +3192,29 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>&#9888;&#65039;</b> The call could hang if this executor is created by
      * {@code Executors.newVirtualThreadPerTaskExecutor()} and used by multiple calls in this stream.
      *
+     * <p><b>&#9888;&#65039; Size this executor for the whole pipeline.</b> A caller-supplied
+     * {@code Executor} does <b>not</b> get the deadlock-avoidance fallback that the default executor has
+     * (that fallback provisions extra capacity only for the shared default pool), and <b>every chained
+     * parallel stage after the first permanently occupies {@code maxThreadNum} threads of this executor</b>
+     * as buffered readers. If the pool is too small the pipeline <b>deadlocks permanently</b>: the later
+     * stages' readers hold every thread, so nothing is left to run the earlier stages' producers.
+     *
+     * <p>The measured minimum pool size is {@code (numberOfParallelStages - 1) * maxThreadNum + 1}
+     * (with {@code maxThreadNum = 4}: 1 stage needs 1 thread, 2 stages need 5, 3 stages need 9, 4 stages
+     * need 13). Sizing the pool at {@code maxThreadNum} is therefore safe only for a <i>single</i>
+     * parallel stage; adding a second operation such as {@code .map(..).map(..)},
+     * {@code .map(..).filter(..)}, {@code .map(..).flatMap(..)}, {@code .map(..).groupTo(..)},
+     * {@code .map(..).collect(..)}, {@code .map(..).forEach(..)}, {@code .map(..).toMap(..)} or
+     * {@code .map(..).zipWith(..)} will hang.
+     * Allow at least {@code numberOfParallelStages * maxThreadNum} threads for headroom, or keep the
+     * pipeline to one parallel stage with {@link #sps(int, Executor, Function)}.
+     * ({@link #parallel()} and {@link #parallel(int)} are unaffected - they use the shared default
+     * executor, which grows a temporary pool rather than deadlocking.)
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param maxThreadNum the maximum number of threads to use for parallel operations.
+     * @param maxThreadNum the maximum number of threads to use for parallel operations, <i>per parallel
+     *          stage</i> - see the pool-sizing note above.
      * @param executor the Executor to use for parallel operations.
      *          {@code Executor} can be specified for bigger thread number than the maximum allowed thread number per operation ({@code min(64, cpu_cores * 8)}) or virtual thread.
      * @return a new stream configured for parallel execution with the specified parameters
@@ -3096,7 +3228,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S parallel(int maxThreadNum, Executor executor);
+    S parallel(int maxThreadNum, Executor executor) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Switches the stream to parallel mode with the specified parallel settings.
@@ -3122,9 +3254,15 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param ps the ParallelSettings object containing configuration for parallel execution,
      *        including maximum thread number, split strategy and executor
+     *
+     * <p><b>&#9888;&#65039;</b> When an {@code Executor} is supplied, it must be large enough for the
+     * whole pipeline - every chained parallel stage after the first occupies {@code maxThreadNum} of its
+     * threads, and too small a pool deadlocks permanently. See {@link #parallel(int, Executor)} for the
+     * measured minimum sizes.
+     *
      * @return a new stream configured for parallel execution with the specified settings
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code ps} is {@code null}.
+     * @throws IllegalArgumentException if {@code ps} is {@code null} or {@code ps.maxThreadNum()} is negative.
      * @see #sps(Function)
      * @see #sps(int, Function)
      * @see #parallel()
@@ -3136,13 +3274,18 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @Beta
     @SequentialOnly
     @IntermediateOp
-    S parallel(ParallelSettings ps);
+    S parallel(ParallelSettings ps) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Temporarily switches the stream to parallel mode for the specified operation and then switches back to sequential mode.
      * This is useful when you want to parallelize only a specific operation in a stream pipeline.
      *
      * <p>This method is equivalent to: {@code stream.parallel().ops(map/filter/...).sequential()}
+     *
+     * <p><b>&#9888;&#65039; Output order is not the source order.</b> The work runs on a parallel
+     * stream, so results are emitted in completion order; the trailing {@code sequential()} only
+     * affects later stages and does not restore it. Sort the result, or keep the pipeline
+     * sequential, if order matters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3171,7 +3314,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
-    <SS extends BaseStream> SS sps(Function<? super S, ? extends SS> ops);
+    <SS extends BaseStream> SS sps(Function<? super S, ? extends SS> ops) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Temporarily switches the stream to parallel mode with specified thread count for the specified operation
@@ -3208,7 +3351,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
-    <SS extends BaseStream> SS sps(int maxThreadNum, Function<? super S, ? extends SS> ops);
+    <SS extends BaseStream> SS sps(int maxThreadNum, Function<? super S, ? extends SS> ops) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Temporarily switches the stream to parallel mode with specified thread count and executor for the specified
@@ -3216,6 +3359,11 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * This provides maximum control over the parallel execution of a specific operation.
      *
      * <p>This method is equivalent to: {@code stream.parallel(maxThreadNum, executor).ops(map/filter/...).sequential()}
+     *
+     * <p><b>&#9888;&#65039; Output order is not the source order.</b> The work runs on a parallel
+     * stream, so results are emitted in completion order; the trailing {@code sequential()} only
+     * affects later stages and does not restore it. Sort the result, or keep the pipeline
+     * sequential, if order matters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3238,6 +3386,11 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param maxThreadNum the maximum number of threads to use for the parallel operation
      * @param executor the executor to use for the parallel operation
      * @param ops the function that defines the operations to be performed in parallel mode
+     *
+     * <p><b>&#9888;&#65039;</b> If {@code ops} chains more than one parallel stage, the supplied
+     * {@code executor} must be sized for all of them - see {@link #parallel(int, Executor)}. A single
+     * parallel stage is safe with a pool of {@code maxThreadNum}.
+     *
      * @return a new stream with the operations applied in parallel mode, then switched back to sequential
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code maxThreadNum} is negative, or if {@code executor} or {@code ops} is
@@ -3252,12 +3405,13 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
-    <SS extends BaseStream> SS sps(int maxThreadNum, Executor executor, Function<? super S, ? extends SS> ops);
+    <SS extends BaseStream> SS sps(int maxThreadNum, Executor executor, Function<? super S, ? extends SS> ops)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Temporarily switches the stream to sequential mode for the specified operation and then switches back to
-     * parallel mode with the same configuration (maxThreadNum/splitStrategy/executor).
-     * This is useful when you have a parallel stream but want to execute a specific operation sequentially.
+     * parallel mode. On a parallel source the original maxThreadNum/splitStrategy/executor are restored.
+     * On a sequential source the result is parallel with default settings ({@code ops.apply(this).parallel()}).
      *
      * <p>This method is equivalent to: {@code stream.sequential().ops(map/filter/...).parallel(sameMaxThreadNum, sameSplitStrategy, sameExecutor)}
      *
@@ -3288,7 +3442,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
-    <SS extends BaseStream> SS psp(Function<? super S, ? extends SS> ops);
+    <SS extends BaseStream> SS psp(Function<? super S, ? extends SS> ops) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Transforms the current stream into a new stream using the provided transformation function.
@@ -3313,11 +3467,15 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * // result contains ["Even: 2", "Even: 4"]
      *
      * // Complex transformation with grouping
-     * Stream<Map<Boolean, List<Integer>>> result = Stream.of(1, 2, 3, 4, 5)
-     *     .transform(s -> Stream.of(s.collect(Collectors.partitioningBy(n -> n % 2 == 0))));
+     * // Stream.just(map) wraps the map as ONE element; Stream.of(map) would stream its entries
+     * Stream<Map<Boolean, List<Integer>>> grouped = Stream.of(1, 2, 3, 4, 5)
+     *     .transform(s -> Stream.just(s.collect(Collectors.partitioningBy(n -> n % 2 == 0))));
+     * // grouped.toList() = [{false=[1, 3, 5], true=[2, 4]}]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; invokes {@code transfer}
+     * immediately (the returned pipeline is lazy only if that function returns a lazy stream);
+     * {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @param <RS> the type of the new stream
      * @param transfer the transformation function that takes the current stream and returns a new stream
@@ -3329,7 +3487,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
-    <RS extends BaseStream> RS transform(Function<? super S, ? extends RS> transfer); //NOSONAR
+    <RS extends BaseStream> RS transform(Function<? super S, ? extends RS> transfer) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Applies the provided function to the stream if it is not empty.
@@ -3360,11 +3518,13 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @return an Optional containing the result of the function if the stream is not empty,
      *         or an empty Optional if the stream is empty or the function returns {@code null}
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the function throws an exception
+     * @throws IllegalArgumentException if {@code func} is {@code null}
+     * @throws E if {@code func} throws while processing this nonempty stream
      */
     @SequentialOnly
     @TerminalOp
-    <R, E extends Exception> u.Optional<R> applyIfNotEmpty(Throwables.Function<? super S, ? extends R, E> func) throws E;
+    <R, E extends Exception> u.Optional<R> applyIfNotEmpty(Throwables.Function<? super S, ? extends R, E> func)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Applies the provided consumer to the stream if it is not empty.
@@ -3394,11 +3554,12 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param action the consumer to be applied to the stream if it's not empty
      * @return an OrElse instance which can be used to perform further actions if the stream is empty
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the consumer throws an exception
+     * @throws IllegalArgumentException if {@code action} is {@code null}
+     * @throws E if {@code action} throws while processing this nonempty stream
      */
     @SequentialOnly
     @TerminalOp
-    <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super S, E> action) throws E;
+    <E extends Exception> OrElse acceptIfNotEmpty(Throwables.Consumer<? super S, E> action) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Registers a close handler to be invoked when the stream is closed.
@@ -3433,7 +3594,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    S onClose(Runnable closeHandler);
+    S onClose(Runnable closeHandler) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Closes the stream, releasing any system resources associated with it.
@@ -3466,10 +3627,10 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *     stream.close();   // closes the stream
      * }
      * }</pre>
-     *
+     * @throws RuntimeException if a registered close handler fails; later failures are suppressed on the first failure
      */
     @Override
-    void close();
+    void close() throws RuntimeException;
 
     /**
      * Enum defining strategies for splitting stream elements among parallel threads.
@@ -3588,7 +3749,6 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     @Builder
     @Value
     @Accessors(fluent = true)
-    @AllArgsConstructor
     final class ParallelSettings {
         private int maxThreadNum;
         //    /**
@@ -3608,6 +3768,19 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
         @Deprecated
         private SplitStrategy splitStrategy;
         private Executor executor;
-        // private boolean cancelUncompletedThreads = false;   
+        // private boolean cancelUncompletedThreads = false;
+
+        /**
+         * Creates parallel settings. Prefer {@code ParallelSettings.builder()} to construct instances.
+         *
+         * @param maxThreadNum maximum worker threads; {@code 0} selects the stream default
+         * @param splitStrategy work-splitting strategy; unused when {@code null}
+         * @param executor executor for parallel tasks; {@code null} uses the stream default
+         */
+        public ParallelSettings(final int maxThreadNum, final SplitStrategy splitStrategy, final Executor executor) {
+            this.maxThreadNum = maxThreadNum;
+            this.splitStrategy = splitStrategy;
+            this.executor = executor;
+        }
     }
 }

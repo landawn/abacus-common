@@ -36,9 +36,10 @@ public class Tuple1Type<T1> extends AbstractTupleType<Tuple1<T1>> {
      * This constructor is package-private and should only be called by TypeFactory.
      *
      * @param t1TypeName the name of the element type
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    Tuple1Type(final String t1TypeName) {
+    Tuple1Type(final String t1TypeName) throws IllegalArgumentException {
         super(getTypeName(t1TypeName, false), getTypeName(t1TypeName, true), (Class) Tuple1.class, List.of(TypeFactory.getType(t1TypeName)));
     }
 
@@ -48,10 +49,12 @@ public class Tuple1Type<T1> extends AbstractTupleType<Tuple1<T1>> {
      *
      * @param converted the array of converted element values (must be of length 1)
      * @return a new {@code Tuple1} containing the single element
+     * @throws NullPointerException if {@code converted} is {@code null}.
+     * @throws ArrayIndexOutOfBoundsException if {@code converted} contains fewer than 1 elements.
      */
     @SuppressWarnings("unchecked")
     @Override
-    protected Tuple1<T1> fromArray(final Object[] converted) {
+    protected Tuple1<T1> fromArray(final Object[] converted) throws NullPointerException, ArrayIndexOutOfBoundsException {
         return Tuple.of((T1) converted[0]);
     }
 
@@ -62,8 +65,9 @@ public class Tuple1Type<T1> extends AbstractTupleType<Tuple1<T1>> {
      * @param isDeclaringName if {@code true}, returns the declaring name (simple class names);
      *                        if {@code false}, returns the full canonical name
      * @return the formatted type name string
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    protected static String getTypeName(final String t1TypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final String t1TypeName, final boolean isDeclaringName) throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(Tuple1.class) + SK.LESS_THAN + TypeFactory.getType(t1TypeName).declaringName() + SK.GREATER_THAN;
         } else {

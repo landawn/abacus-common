@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 import java.util.Set;
@@ -183,5 +184,95 @@ public class GuavaMultisetTypeTest extends TestBase {
 
         org.junit.jupiter.api.Assertions.assertEquals(2, ms.count("apple"));
         org.junit.jupiter.api.Assertions.assertEquals(1, ms.count("pear"));
+    }
+
+    // T8-02: ImmutableSortedMultiset.copyOf(Iterable) expanded every occurrence (OutOfMemoryError for a large count).
+    @Test
+    public void reviewFixes20260906_immutableSortedMultisetIsBuiltEntryByEntry() {
+        final Type<com.google.common.collect.ImmutableSortedMultiset<String>> t = TypeFactory
+                .getType("com.google.common.collect.ImmutableSortedMultiset<String>");
+
+        // Integer.MAX_VALUE, not a merely large count: the old copyOf(Iterable) asked for an
+        // Object[Integer.MAX_VALUE] up front, which fails with "Requested array size exceeds VM limit" on any heap in
+        // a few milliseconds. A count such as 200,000,000 only takes about 2.5 s on a 2 GB heap, so a timeout budget
+        // around it makes the pin depend on the machine (it passed against the unfixed code in 1 of 3 runs here).
+        // The error must be caught here: JUnit treats an escaping OutOfMemoryError as unrecoverable and aborts the
+        // whole run instead of failing this test. Nothing is actually allocated on this path.
+        final long startNano = System.nanoTime();
+        com.google.common.collect.ImmutableSortedMultiset<String> big = null;
+
+        try {
+            big = t.valueOf("{\"b\": 1, \"a\": 2147483647}");
+        } catch (final OutOfMemoryError e) {
+            fail("valueOf must copy the entry counts, not expand every occurrence: " + e);
+        }
+
+        final long elapsedMillis = (System.nanoTime() - startNano) / 1_000_000;
+        assertTrue(elapsedMillis < 5_000, "an entry-by-entry copy is immediate; took " + elapsedMillis + " ms");
+
+        assertEquals(Integer.MAX_VALUE, big.count("a"));
+        assertEquals(1, big.count("b"));
+        assertEquals(java.util.Arrays.asList("a", "b"), new java.util.ArrayList<>(big.elementSet()));
+        assertTrue(big instanceof com.google.common.collect.ImmutableSortedMultiset);
+
+        // sorted order, empty document, zero count, Integer elements
+        assertEquals(java.util.Arrays.asList("a", "b"), new java.util.ArrayList<>(t.valueOf("{\"b\": 1, \"a\": 2}").elementSet()));
+        assertEquals(2, t.valueOf("{\"b\": 1, \"a\": 2}").count("a"));
+        assertTrue(t.valueOf("{}").isEmpty());
+        assertTrue(t.valueOf("{}") instanceof com.google.common.collect.ImmutableSortedMultiset);
+        assertTrue(t.valueOf("{\"a\": 0}").isEmpty());
+
+        final Type<com.google.common.collect.ImmutableSortedMultiset<Integer>> ti = TypeFactory
+                .getType("com.google.common.collect.ImmutableSortedMultiset<Integer>");
+        assertEquals(java.util.Arrays.asList(9, 10), new java.util.ArrayList<>(ti.valueOf("{\"10\": 1, \"9\": 2}").elementSet()));
+        assertEquals(2, ti.valueOf("{\"10\": 1, \"9\": 2}").count(9));
+    }
+
+    // T8-01: the ordered targets (LinkedHashMultiset, ImmutableMultiset) were fed from an unordered HashMap intermediate.
+    @Test
+    public void reviewFixes20260906_orderedTargetsKeepDocumentOrder() {
+        final String json = "{\"z\": 1, \"a\": 2, \"m\": 3, \"b\": 4, \"q\": 5}";
+        final List<String> expected = java.util.Arrays.asList("z", "a", "m", "b", "q");
+
+        final Type<LinkedHashMultiset<String>> linked = TypeFactory.getType("com.google.common.collect.LinkedHashMultiset<String>");
+        assertEquals(expected, new java.util.ArrayList<>(linked.valueOf(json).elementSet()));
+        assertEquals(json, linked.stringOf(linked.valueOf(json)));
+        assertEquals(json, linked.stringOf(linked.valueOf(linked.stringOf(linked.valueOf(json)))));
+
+        final Type<com.google.common.collect.ImmutableMultiset<String>> immutable = TypeFactory.getType("com.google.common.collect.ImmutableMultiset<String>");
+        final com.google.common.collect.ImmutableMultiset<String> im = immutable.valueOf(json);
+        assertEquals(expected, new java.util.ArrayList<>(im.elementSet()));
+        assertEquals(5, im.count("q"));
+        assertTrue(immutable.valueOf("{}").isEmpty());
+
+        final String unicode = "{\"é\": 1, \"中\": 2, \"😀\": 3}";
+        assertEquals(unicode, linked.stringOf(linked.valueOf(unicode)));
+
+        // unordered / sorted targets keep their runtime classes
+        assertEquals(HashMultiset.class, multisetType.valueOf(json).getClass());
+        assertEquals(HashMultiset.class, TypeFactory.getType("com.google.common.collect.HashMultiset<String>").valueOf(json).getClass());
+        assertEquals(TreeMultiset.class, TypeFactory.getType("com.google.common.collect.SortedMultiset<String>").valueOf(json).getClass());
+        assertEquals(new java.util.HashSet<>(expected), multisetType.valueOf(json).elementSet());
+    }
+
+    // T8-05: {"a": null} threw an unboxing NullPointerException; now the element is simply not added (like a 0 count).
+    @Test
+    public void reviewFixes20260906_nullOrZeroCountAddsNothing() {
+        for (final String typeName : new String[] { "com.google.common.collect.Multiset<String>", "com.google.common.collect.HashMultiset<String>",
+                "com.google.common.collect.LinkedHashMultiset<String>", "com.google.common.collect.TreeMultiset<String>",
+                "com.google.common.collect.ImmutableMultiset<String>", "com.google.common.collect.ImmutableSortedMultiset<String>" }) {
+            final Type<Multiset<String>> t = TypeFactory.getType(typeName);
+
+            final Multiset<String> ms = t.valueOf("{\"a\": null, \"b\": 1, \"c\": 0}");
+            assertEquals(0, ms.count("a"), typeName);
+            assertEquals(1, ms.count("b"), typeName);
+            assertEquals(java.util.Collections.singleton("b"), ms.elementSet(), typeName);
+            assertTrue(t.valueOf("{\"a\": null}").isEmpty(), typeName);
+
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> t.valueOf("{\"a\": -1}"), typeName);
+            org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> t.valueOf("{\"a\": \"x\"}"), typeName);
+            org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> t.valueOf("{\"a\": 2147483648}"), typeName);
+            org.junit.jupiter.api.Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> t.valueOf("{\"a\": 1"), typeName);
+        }
     }
 }

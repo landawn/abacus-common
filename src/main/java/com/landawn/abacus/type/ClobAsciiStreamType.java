@@ -24,6 +24,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Charsets;
@@ -35,6 +36,9 @@ import com.landawn.abacus.util.Objectory;
  * This class extends {@link InputStreamType} and overrides the JDBC accessors so that
  * CLOB columns are read via {@link java.sql.Clob#getAsciiStream()} and written via
  * {@link java.sql.PreparedStatement#setAsciiStream setAsciiStream}.
+ * All text conversion uses US-ASCII. Encoding replaces non-ASCII characters and malformed surrogate
+ * sequences with {@code ?}; decoding replaces non-ASCII bytes with U+FFFD.
+ * Non-ASCII content does not round-trip losslessly.
  *
  * <p>When writing CLOB data to a {@link java.io.Writer}-based {@link Appendable}, the stream is
  * decoded as US-ASCII. For other {@link Appendable} targets, the stream is fully buffered into a
@@ -57,7 +61,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * Instances are created by the {@code TypeFactory}.
      */
     ClobAsciiStreamType() {
-        super(CLOB_ASCII_STREAM);
+        super(CLOB_ASCII_STREAM, Charsets.US_ASCII);
     }
 
     /**
@@ -68,10 +72,11 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @param columnIndex the 1-based column index
      * @return an ASCII {@link java.io.InputStream} for the CLOB value; closing it also releases the Clob locator,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the column index is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public InputStream get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public InputStream get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final Clob clob = rs.getClob(columnIndex);
         return clobToAsciiStream(clob);
     }
@@ -84,10 +89,11 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @param columnName the label of the column to retrieve
      * @return an ASCII {@link java.io.InputStream} for the CLOB value; closing it also releases the Clob locator,
      *         or {@code null} if the column value is SQL {@code NULL}
-     * @throws SQLException if a database access error occurs or the column label is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public InputStream get(final ResultSet rs, final String columnName) throws SQLException {
+    public InputStream get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return clobToAsciiStream(rs.getClob(columnName));
     }
 
@@ -98,10 +104,11 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @param stmt        the {@link java.sql.PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x           the ASCII {@link java.io.InputStream} to bind; may be {@code null}
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws NullPointerException, SQLException {
         stmt.setAsciiStream(columnIndex, x);
     }
 
@@ -112,10 +119,11 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @param stmt          the {@link java.sql.CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x             the ASCII {@link java.io.InputStream} to bind; may be {@code null}
-     * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws NullPointerException, SQLException {
         stmt.setAsciiStream(parameterName, x);
     }
 
@@ -128,10 +136,12 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @param columnIndex     the 1-based parameter index
      * @param x               the ASCII {@link java.io.InputStream} to bind; may be {@code null}
      * @param sqlTypeOrLength the number of bytes to read from the stream
-     * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setAsciiStream(columnIndex, x, sqlTypeOrLength);
     }
 
@@ -144,10 +154,12 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @param parameterName   the name of the parameter to set
      * @param x               the ASCII {@link java.io.InputStream} to bind; may be {@code null}
      * @param sqlTypeOrLength the number of bytes to read from the stream
-     * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
         stmt.setAsciiStream(parameterName, x, sqlTypeOrLength);
     }
 
@@ -164,7 +176,9 @@ public class ClobAsciiStreamType extends InputStreamType {
      *
      * @param appendable the {@link Appendable} to write to
      * @param x          the ASCII {@link java.io.InputStream} whose content to append; may be {@code null}
-     * @throws IOException if an I/O error occurs during reading or writing
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if reading the input or writing the destination through checked I/O operations fails.
+     * @throws UncheckedIOException if reading a non-null input fails when the destination is not a {@link java.io.Writer}.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -176,7 +190,7 @@ public class ClobAsciiStreamType extends InputStreamType {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final InputStream x) throws IOException {
+    public void appendTo(final Appendable appendable, final InputStream x) throws NullPointerException, IOException, UncheckedIOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -206,10 +220,11 @@ public class ClobAsciiStreamType extends InputStreamType {
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the ASCII {@link java.io.InputStream} to write; may be {@code null}
      * @param config serialization configuration controlling string quotation; may be {@code null}
-     * @throws IOException if an I/O error occurs during reading or writing
+     * @throws NullPointerException if writer is null when a null literal, quotation mark, or input character is written.
+     * @throws IOException if reading the input or writing the destination through checked I/O operations fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final InputStream x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final InputStream x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -224,7 +239,7 @@ public class ClobAsciiStreamType extends InputStreamType {
                 int count = 0;
 
                 while (IOUtil.EOF != (count = IOUtil.read(reader, buf, 0, buf.length))) {
-                    writer.writeCharacter(buf, 0, count);
+                    Utils.writeStringContent(writer, buf, 0, count, config == null ? 0 : config.getStringQuotation());
                 }
             } finally {
                 Objectory.recycle(buf);

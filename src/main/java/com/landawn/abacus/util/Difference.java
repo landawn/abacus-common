@@ -16,14 +16,18 @@ package com.landawn.abacus.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.TreeSet;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
@@ -131,15 +135,24 @@ import com.landawn.abacus.util.function.TriPredicate;
  * <ul>
  *   <li>Counts occurrences in the right-hand structure</li>
  *   <li>Consumes one right-hand occurrence for each matching left-hand element</li>
- *   <li>Collects unmatched elements while preserving their encounter order</li>
+ *   <li>Collects unmatched elements while preserving their encounter order. Only the <i>number</i> of
+ *       surplus occurrences is meaningful: when several right-hand elements are equal, the instances placed
+ *       in {@link #onlyOnRight()} are the earliest ones in encounter order, not specifically the
+ *       unmatched ones, so equal-but-distinct instances are not paired stably</li>
  *   <li>Uses {@code ArrayList} results for object arrays and collections, and the corresponding primitive-list type for primitive inputs</li>
  * </ul>
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li>Time complexity: O(n + m) where n and m are the sizes of input structures</li>
+ *   <li>Time complexity: O(n + m) where n and m are the sizes of input structures. A key selection that is
+ *       not already a {@link Set} is copied into a {@code HashSet} first, so supplying a {@code List} does
+ *       not add a factor; a {@code Set} is used as given, which means a {@code SortedSet} selection is
+ *       probed in O(log k) under its own comparator rather than by {@code equals}/{@code hashCode}</li>
  *   <li>Space complexity: O(n + m) for storing difference results</li>
- *   <li>Primitive overloads store their results in the corresponding primitive-list type</li>
+ *   <li>Primitive overloads store their results in the corresponding primitive-list type. The occurrence
+ *       counting itself is <i>not</i> primitive: each element is boxed into a {@code Multiset} of the
+ *       wrapper type, so a large primitive comparison allocates accordingly (measured: ~114 MB for a
+ *       single 1,000,000-element {@code IntList} pair)</li>
  * </ul>
  *
  * <p><b>Mutability and Thread Use:</b>
@@ -279,9 +292,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * char[] a = {'a', 'b', 'c', 'a'};
      * char[] b = {'a', 'b', 'd'};
      * Difference<CharList, CharList> diff = Difference.of(a, b);
-     * // common: ['a', 'b']
-     * // onlyOnLeft: ['c', 'a']
-     * // onlyOnRight: ['d']
+     * // common: [a, b]
+     * // onlyOnLeft: [c, a]
+     * // onlyOnRight: [d]
      * }</pre>
      *
      * @param a the first char array to compare. Can be {@code null}, which is treated as an empty array.
@@ -454,6 +467,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
+     * <p><b>{@code NaN} and signed zero.</b> Occurrences are counted after boxing, so a match follows
+     * {@link Float#equals(Object)} rather than {@code ==}: two {@code NaN}s <i>do</i> match each other, and
+     * {@code +0.0} and {@code -0.0} do <i>not</i> match. Same rule as {@link FloatList#difference(FloatList)}.
+     *
      * <p><b>Usage Examples:</b>
      * <pre>{@code
      * float[] a = {1.0f, 2.0f, 3.0f, 2.0f};
@@ -493,6 +510,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>The comparison takes into account the number of occurrences of each value. For example,
      * if {@code 1} appears twice in the first array and once in the second array, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
+     *
+     * <p><b>{@code NaN} and signed zero.</b> Occurrences are counted after boxing, so a match follows
+     * {@link Double#equals(Object)} rather than {@code ==}: two {@code NaN}s <i>do</i> match each other, and
+     * {@code +0.0} and {@code -0.0} do <i>not</i> match. Same rule as {@link DoubleList#difference(DoubleList)}.
      *
      * <p><b>Usage Examples:</b>
      * <pre>{@code
@@ -735,9 +756,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * CharList a = CharList.of('a', 'b', 'c', 'a');
      * CharList b = CharList.of('a', 'b', 'd');
      * Difference<CharList, CharList> diff = Difference.of(a, b);
-     * // common: ['a', 'b']
-     * // onlyOnLeft: ['c', 'a']
-     * // onlyOnRight: ['d']
+     * // common: [a, b]
+     * // onlyOnLeft: [c, a]
+     * // onlyOnRight: [d]
      * }</pre>
      *
      * @param a the first CharList to compare. Can be {@code null} or empty.
@@ -1106,6 +1127,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
+     * <p><b>{@code NaN} and signed zero.</b> Occurrences are counted after boxing, so a match follows
+     * {@link Float#equals(Object)} rather than {@code ==}: two {@code NaN}s <i>do</i> match each other, and
+     * {@code +0.0} and {@code -0.0} do <i>not</i> match. Same rule as {@link FloatList#difference(FloatList)}.
+     *
      * <p><b>Usage Examples:</b>
      * <pre>{@code
      * FloatList a = FloatList.of(1.0f, 2.0f, 3.0f, 2.0f);
@@ -1186,6 +1211,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * if {@code 1} appears twice in the first list and once in the second list, the result will
      * have one {@code 1} in common and one {@code 1} in left only.
      *
+     * <p><b>{@code NaN} and signed zero.</b> Occurrences are counted after boxing, so a match follows
+     * {@link Double#equals(Object)} rather than {@code ==}: two {@code NaN}s <i>do</i> match each other, and
+     * {@code +0.0} and {@code -0.0} do <i>not</i> match. Same rule as {@link DoubleList#difference(DoubleList)}.
+     *
      * <p><b>Usage Examples:</b>
      * <pre>{@code
      * DoubleList a = DoubleList.of(1.0, 2.0, 3.0, 2.0);
@@ -1255,8 +1284,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * and 2 times in the second, it will appear 2 times in the common elements.
      *
      * <p>For collection/array comparisons the returned collection maintains the order of elements
-     * as they appear in the first collection. For {@link MapDifference} and {@link BeanDifference}
-     * the returned value is instead a map of the common entries/properties.
+     * as they appear in the first collection. For the single-map / single-bean {@link MapDifference}
+     * and {@link BeanDifference} comparisons the returned value is instead a map of the common
+     * entries/properties; for their collection-based comparisons it is a {@code List} of the
+     * maps/beans matched on both sides.
      *
      * <p><b>Usage Examples:</b>
      * <pre>{@code
@@ -1284,8 +1315,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * second collection, it will appear 3 times in the left-only elements.
      *
      * <p>For collection/array comparisons the returned collection maintains the order of elements
-     * as they appear in the first collection. For {@link MapDifference} and {@link BeanDifference}
-     * the returned value is instead a map of the entries/properties present only on the left.
+     * as they appear in the first collection. For the single-map / single-bean {@link MapDifference}
+     * and {@link BeanDifference} comparisons the returned value is instead a map of the
+     * entries/properties present only on the left; for their collection-based comparisons it is a
+     * {@code List} of the maps/beans matched only on the left.
      *
      * <p><b>Usage Examples:</b>
      * <pre>{@code
@@ -1313,8 +1346,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * second collection, it will appear 3 times in the right-only elements.
      *
      * <p>For collection/array comparisons the returned collection maintains the order of elements
-     * as they appear in the second collection. For {@link MapDifference} and {@link BeanDifference}
-     * the returned value is instead a map of the entries/properties present only on the right.
+     * as they appear in the second collection. For the single-map / single-bean {@link MapDifference}
+     * and {@link BeanDifference} comparisons the returned value is instead a map of the
+     * entries/properties present only on the right; for their collection-based comparisons it is a
+     * {@code List} of the maps/beans matched only on the right.
+     *
+     * <p>When several right-hand elements compare equal, the count is exact but the identities are not:
+     * the instances reported are the earliest equal occurrences in the second collection, not specifically
+     * the ones left over after matching. This is only observable for equal-but-distinct instances.
      *
      * <p><b>Usage Examples:</b>
      * <pre>{@code
@@ -1359,11 +1398,50 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @see #onlyOnLeft()
      * @see #onlyOnRight()
      */
-    @SuppressWarnings("rawtypes")
     public boolean areEqual() {
-        return (onlyOnLeft instanceof Collection && (((Collection) onlyOnLeft).isEmpty() && ((Collection) onlyOnRight).isEmpty()))
-                || (onlyOnLeft instanceof Map && (((Map) onlyOnLeft).isEmpty() && ((Map) onlyOnRight).isEmpty()))
-                || (onlyOnLeft instanceof PrimitiveList && (((PrimitiveList) onlyOnLeft).isEmpty() && ((PrimitiveList) onlyOnRight).isEmpty()));
+        // Each container is tested on its own type. Deciding the kind once from onlyOnLeft and casting
+        // onlyOnRight to it would bake in an assumption - that L and R are always the same kind - that
+        // nothing here enforces, and an unrecognised container would make the whole test silently false,
+        // reporting "not equal" for two empty results.
+        return isEmptyResult(onlyOnLeft) && isEmptyResult(onlyOnRight);
+    }
+
+    /**
+     * Throws if {@code c} holds two elements with the same extracted identifier.
+     *
+     * <p>Same rule, and the same {@link IllegalStateException}, as the
+     * {@code N.toMap(.., Fn.throwingMerger(), ..)} that the both-sides-non-empty path of the collection-based
+     * {@code MapDifference.of}/{@code BeanDifference.of} factories builds - so a duplicate identifier is
+     * reported whether or not the other collection happens to be empty.</p>
+     *
+     * @param <T> the element type
+     * @param c the collection to check; must be non-empty
+     * @param idExtractor the identifier function
+     * @throws IllegalStateException if two elements produce the same identifier
+     */
+    private static <T> void checkNoDuplicateIds(final Collection<? extends T> c, final Function<? super T, ?> idExtractor) throws IllegalStateException {
+        N.toMap(c, idExtractor, Fn.identity(), Fn.throwingMerger(), IntFunctions.ofLinkedHashMap());
+    }
+
+    /**
+     * Reports whether one of the three result-container kinds this class produces is empty.
+     *
+     * @param result a {@link #common()}/{@link #onlyOnLeft()}/{@link #onlyOnRight()} container
+     * @return {@code true} if it holds no elements/entries
+     * @throws IllegalStateException if {@code result} is none of the container kinds this class produces -
+     *         a bug in a factory rather than a caller error, so it fails loudly instead of answering
+     *         {@code false} for something it cannot measure
+     */
+    private static boolean isEmptyResult(final Object result) throws IllegalStateException {
+        if (result instanceof Collection) {
+            return ((Collection<?>) result).isEmpty();
+        } else if (result instanceof Map) {
+            return ((Map<?, ?>) result).isEmpty();
+        } else if (result instanceof PrimitiveList) {
+            return ((PrimitiveList<?, ?, ?>) result).isEmpty();
+        }
+
+        throw new IllegalStateException("Unsupported difference result container: " + (result == null ? "null" : result.getClass().getName()));
     }
 
     /**
@@ -1489,7 +1567,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * @see N#intersection(Collection, Collection)
      * @see N#commonSet(Collection, Collection)
      */
-    static abstract sealed class KeyValueDifference<L, R, D> extends Difference<L, R> permits MapDifference, BeanDifference {
+    public abstract static sealed class KeyValueDifference<L, R, D> extends Difference<L, R> permits MapDifference, BeanDifference {
 
         /**
          * The entries/properties present in both structures whose values are not equivalent.
@@ -1569,10 +1647,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @return {@code true} if the two structures have exactly the same entries/properties with the same values, {@code false} otherwise
          * @see #differentValues()
          */
-        @SuppressWarnings("rawtypes")
         @Override
         public boolean areEqual() {
-            return super.areEqual() && ((Map) diffValues).isEmpty();
+            // Measured through the same helper as the three base containers, so a container kind it cannot
+            // measure fails loudly here too rather than reporting "not equal".
+            return super.areEqual() && isEmptyResult(diffValues);
         }
 
         /**
@@ -1596,7 +1675,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * }</pre>
          *
          * @param obj the object to compare with this {@code KeyValueDifference}; may be {@code null}
-         * @return {@code true} if the specified object is also a {@code KeyValueDifference} with equal
+         * @return {@code true} if the specified object is of exactly the same class as this one and has equal
          *         common, left-only, right-only, and different-value contents; {@code false} otherwise
          *         (including when {@code obj} is {@code null})
          */
@@ -1606,7 +1685,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 return true;
             }
 
-            if (obj instanceof KeyValueDifference other) {
+            // Require the exact same class rather than any KeyValueDifference: a MapDifference over
+            // Map<String, Object> and a BeanDifference hold structurally identical containers, so an
+            // "instanceof KeyValueDifference" test makes results of two different comparisons compare
+            // equal. This mirrors the base class, which excludes KeyValueDifference for the same reason.
+            if (obj != null && obj.getClass() == getClass()) {
+                final KeyValueDifference<?, ?, ?> other = (KeyValueDifference<?, ?, ?>) obj;
+
                 return common().equals(other.common()) && onlyOnLeft().equals(other.onlyOnLeft()) && onlyOnRight().equals(other.onlyOnRight())
                         && differentValues().equals(other.differentValues());
             }
@@ -1734,18 +1819,184 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         }
 
         /**
+         * Creates the set used to record which entries of the right-hand map the left-hand pass already
+         * consumed, using <i>that map's own</i> key equality.
+         *
+         * <p>The left-hand pass decides "does map2 have this key?" by calling {@code map2.get}/
+         * {@code map2.containsKey}, i.e. through map2's key equality. The right-hand pass must skip exactly
+         * the entries that pass consumed. Probing the result maps instead ({@code common.containsKey(key2)})
+         * is wrong, because they are {@code HashMap}/{@code LinkedHashMap} keyed by {@code equals}/
+         * {@code hashCode}: whenever map2's key equality is <i>coarser</i> than {@code equals} the two
+         * disagree and the same entry is filed twice - once in {@code common} (or {@code differentValues})
+         * and again in {@code onlyOnRight}. A plain natural-ordering {@code TreeMap<BigDecimal>} is enough to
+         * trigger it, since {@code 2.0} and {@code 2.00} compare equal but are not {@code equals}.
+         *
+         * <p>The tracker therefore mirrors map2: a {@code SortedMap}'s comparator (a {@code null} comparator
+         * means natural ordering, which {@code TreeSet} accepts) and identity for an {@code IdentityHashMap}.
+         * Only keys that map2 has already accepted are added, so its comparator is never handed a key it
+         * rejected.
+         *
+         * <p>Every other conforming {@link Map} defines {@code containsKey} through {@code equals}/
+         * {@code hashCode} - the same relation the result maps use - so for those this returns {@code null}
+         * and the callers fall back to probing {@code common}/{@code differentValues} directly. That keeps
+         * the overwhelmingly common case allocation-free: measured on two 200k-entry {@code HashMap}s, always
+         * allocating a tracker raised the per-call allocation from 11.6 MB to 18.2 MB.
+         *
+         * <p>A map that hides a coarser relation behind a class this method cannot recognise gets no tracker:
+         * {@code Collections.unmodifiableMap(someTreeMap)} and {@code ImmutableMap.wrap(someTreeMap)} both
+         * forward {@code containsKey} to the {@code TreeMap} while being neither a {@code SortedMap} nor a
+         * type whose backing map can be reached portably. Those are not repaired here; they are caught after
+         * the fact by {@link #checkConsumedRightEntries(int, int, Map)}, and the fix for a caller is to use
+         * the sorted view ({@link Collections#unmodifiableSortedMap(SortedMap)},
+         * {@link ImmutableSortedMap#wrap(SortedMap)}), which this method does recognise.
+         *
+         * @param map2 the right-hand map whose key equality is to be mirrored
+         * @return an empty set that answers membership the way {@code map2} does, or {@code null} when
+         *         {@code map2} uses {@code equals}/{@code hashCode} and no separate tracking is needed
+         */
+        @SuppressWarnings("unchecked")
+        private static Set<Object> newConsumedKeyTracker(final Map<?, ?> map2) {
+            if (map2 instanceof SortedMap) {
+                return new TreeSet<>((Comparator<Object>) ((SortedMap<?, ?>) map2).comparator());
+            } else if (map2 instanceof IdentityHashMap) {
+                return Collections.newSetFromMap(new IdentityHashMap<>());
+            }
+
+            return null;
+        }
+
+        /**
+         * Verifies that the right-hand pass skipped exactly the entries the left-hand pass consumed.
+         *
+         * <p>The two passes speak different languages: the left pass resolves each key of {@code map1}
+         * through {@code map2}'s own key equality, while the right pass decides "already consumed?" through
+         * {@code equals}/{@code hashCode} (or through the tracker from
+         * {@link #newConsumedKeyTracker(Map)} when one could be built). Whenever those two relations
+         * disagree the result is self-contradictory rather than merely surprising:</p>
+         * <ul>
+         *   <li>if {@code map2}'s equality is <i>coarser</i> than {@code equals} and no tracker was
+         *       available, an entry is filed both as common (or differing) <i>and</i> as right-only, so a
+         *       consumer applying the difference applies the same change twice;</li>
+         *   <li>if {@code map1}'s equality is <i>finer</i> than {@code map2}'s, several left entries resolve
+         *       to one right entry, so {@code areEqual()} can report {@code true} for maps of different
+         *       sizes.</li>
+         * </ul>
+         *
+         * <p>Both cases are caught by one identity: every left key that {@code map2} resolved consumes
+         * exactly one entry of {@code map2}, so the number of resolutions must equal the number of entries
+         * the right pass skipped. Counting resolutions and skips - rather than comparing against
+         * {@code map1.size()}/{@code map2.size()} - keeps this correct when only a subset of the keys is
+         * being compared, because both counters then range over the selected entries alone.</p>
+         *
+         * <p>The check is deliberately <i>conservative</i> in one corner: when the right-hand map hides a
+         * coarser relation and the key selection happens to exclude the spelling that map stores, the
+         * result would have come out right by accident, yet the counts still disagree and the call is
+         * rejected. That input is broken in general - the same map pair compared without a selection really
+         * does double-file - and the remedy is the same, so failing is preferred over returning an answer
+         * that only luck made correct.</p>
+         *
+         * @param resolvedLeftCount the number of compared {@code map1} entries whose key {@code map2} resolved
+         * @param consumedRightCount the number of compared {@code map2} entries the right-hand pass skipped as
+         *        already consumed
+         * @param map2 the right-hand map, named in the exception message
+         * @throws IllegalArgumentException if the two counts disagree
+         */
+        private static void checkConsumedRightEntries(final int resolvedLeftCount, final int consumedRightCount, final Map<?, ?> map2)
+                throws IllegalArgumentException {
+            if (resolvedLeftCount != consumedRightCount) {
+                throw new IllegalArgumentException(
+                        "Cannot compute a consistent difference: " + resolvedLeftCount + " entry/entries of the first map were matched in the second map (a "
+                                + map2.getClass().getName() + "), but " + consumedRightCount + " entry/entries of the second map account for them."
+                                + " The two maps disagree on which keys are \"the same key\", so no partition into common/left-only/right-only"
+                                + " exists - some entry would have to be reported twice, or one entry would have to answer for several."
+                                + " Compare maps that share one key equality: use keys compared by equals/hashCode, or, if the right-hand map"
+                                + " sorts or identity-compares its keys, pass it as a SortedMap/IdentityHashMap rather than behind a wrapper"
+                                + " that hides that (for example Collections.unmodifiableSortedMap instead of Collections.unmodifiableMap).");
+            }
+        }
+
+        /**
+         * Verifies that every compared entry of one input is still represented in the results.
+         *
+         * <p>{@link #checkConsumedRightEntries(int, int, Map)} catches an input map whose key equality is
+         * <i>coarser</i> than {@code equals}. This catches the opposite: an input whose key equality is
+         * <i>finer</i>, so that two of its keys are distinct to it but {@code equals}-equal to each other -
+         * an {@code IdentityHashMap} holding two equal-but-distinct keys, or a {@code SortedMap} whose
+         * comparator splits keys that {@code equals} joins. The result maps are keyed by
+         * {@code equals}/{@code hashCode}, so the second such entry silently overwrites the first and the
+         * difference reports fewer entries than the input holds. The consumed-entry identity cannot see it,
+         * because nothing was consumed - both entries were headed for the same bucket.</p>
+         *
+         * @param considered the number of entries of that input the comparison looked at
+         * @param buckets the result containers those entries were distributed into
+         * @param which {@code "first"} or {@code "second"}, for the message
+         * @param source the input map, named in the message
+         * @throws IllegalArgumentException if the buckets hold fewer entries than were considered
+         */
+        private static void checkNoEntriesCollapsed(final int considered, final String which, final Map<?, ?> source, final Map<?, ?>... buckets)
+                throws IllegalArgumentException {
+            int held = 0;
+
+            for (final Map<?, ?> bucket : buckets) {
+                held += bucket.size();
+            }
+
+            if (held < considered) {
+                throw new IllegalArgumentException("Cannot compute a consistent difference: " + considered + " compared entry/entries of the " + which
+                        + " map (a " + source.getClass().getName() + ") collapsed into " + held
+                        + " result entry/entries. Its key equality is finer than equals/hashCode - it holds keys that are distinct to it"
+                        + " but equal to each other - and the result maps are keyed by equals/hashCode, so reporting them would lose one."
+                        + " Compare maps whose keys are distinct under equals/hashCode.");
+            }
+        }
+
+        /**
          * Compares two maps and identifies the differences between them using default equality comparison for values.
          * <p>
          * This method creates a {@code MapDifference} object that contains:
          * <ul>
-         *   <li>Common entries: Key-value pairs present in both maps with equal values (using {@code equals})</li>
+         *   <li>Common entries: Key-value pairs present in both maps with equal values</li>
          *   <li>Left-only entries: Key-value pairs present only in the first map</li>
          *   <li>Right-only entries: Key-value pairs present only in the second map</li>
          *   <li>Different values: Keys present in both maps but with different values</li>
          * </ul>
          *
-         * <p>The comparison uses the standard {@code equals} method to compare values. Null values are
+         * <p>Values are compared with {@link N#deepEquals(Object, Object)}, so array-valued entries are matched
+         * by content (including nested arrays) rather than by reference; use
+         * {@link #ofByValues(Map, Map, BiPredicate)} to supply a different value equivalence. Null values are
          * handled correctly - if both maps have a {@code null} value for the same key, it's considered a common entry.
+         *
+         * <p>Which keys count as "the same key" is decided by {@code map2}: every key of {@code map1} is
+         * looked up in {@code map2}, so a {@code SortedMap} whose comparator is inconsistent with
+         * {@code equals} matches by that comparator. A plain {@code TreeMap<BigDecimal>}, for instance,
+         * treats {@code 2.0} and {@code 2.00} as one key. The result maps are hash-based and keyed by
+         * {@code equals}/{@code hashCode}, so they report whichever key object {@code map1} (or, for
+         * {@code onlyOnRight}, {@code map2}) actually stores.
+         *
+         * <p><b>Both maps must agree on what "the same key" means, and a {@code SortedMap}/
+         * {@code IdentityHashMap} must expose that through its type.</b> When they do not, no consistent
+         * partition exists - an entry would have to be reported both as common (or differing) and as
+         * right-only, or one entry of {@code map2} would have to answer for several entries of
+         * {@code map1} - and this method throws {@link IllegalArgumentException} rather than return a
+         * self-contradictory result. Three shapes trigger it:</p>
+         * <ul>
+         *   <li>a right-hand map whose key equality is <i>coarser</i> than {@code equals} but whose type
+         *       does not reveal it - for example {@code Collections.unmodifiableMap(aTreeMap)} or
+         *       {@code ImmutableMap.wrap(aTreeMap)}; use {@link Collections#unmodifiableSortedMap(SortedMap)}
+         *       or {@link ImmutableSortedMap#wrap(SortedMap)} instead;</li>
+         *   <li>a left-hand map whose key equality is <i>finer</i> than the right-hand map's - for example a
+         *       {@code HashMap} holding both {@code 2.0} and {@code 2.00} compared against a
+         *       {@code TreeMap<BigDecimal>}, where two left entries would answer to one right entry;</li>
+         *   <li>either map holding two keys that are distinct to <i>it</i> but {@code equals}-equal to each
+         *       other <i>when both would be filed into the same result map</i> - an {@code IdentityHashMap}
+         *       holding two equal-but-distinct keys compared against an empty or unrelated map, say. The result
+         *       maps are keyed by {@code equals}/{@code hashCode}, so one of the two would silently overwrite the
+         *       other and the difference would report fewer entries than the input holds. This one is rejected
+         *       even when the other map is empty. When the two keys are filed into <i>different</i> result maps -
+         *       {@code map2}'s {@code kA} matching a key of {@code map1} while its {@code equals}-equal {@code kB}
+         *       does not - nothing is lost, so the call succeeds and both entries are reported; because the result
+         *       maps are keyed by {@code equals}/{@code hashCode}, the same key then appears in two of them.</li>
+         * </ul>
          *
          * <p>The order of entries in the result maps depends on the input map types:
          * <ul>
@@ -1765,14 +2016,26 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // differentValues: {"c": Pair.of(3, 4)}
          * }</pre>
          *
+         * <p><b>Note - untyped {@code null} arguments.</b> This class inherits the collection and array
+         * factories declared on {@link Difference}, so a call written with bare {@code null} literals -
+         * {@code MapDifference.of(null, null)} - is ambiguous between them and does not compile. Give the
+         * arguments a type ({@code MapDifference.of((Map<K, V>) null, (Map<K, V>) null)}) or pass typed
+         * variables; both maps may be {@code null} at run time.
+         *
          * @param <CK> the common key type shared by both maps
          * @param <K1> the key type of the first map (must extend CK)
          * @param <V1> the value type of the first map
          * @param <K2> the key type of the second map (must extend CK)
          * @param <V2> the value type of the second map
          * @param map1 the first map to compare. Can be {@code null} or empty.
-         * @param map2 the second map to compare. Can be {@code null} or empty.
+         * @param map2 the second map to compare. Can be {@code null} or empty. Every key of {@code map1} is
+         *        looked up in this map, so this map must tolerate them: if it rejects {@code null} keys (for
+         *        example {@code Map.of(...)} or a natural-ordering {@code TreeMap}) and {@code map1} has a
+         *        {@code null} key, the lookup throws {@link NullPointerException}. {@code map1} is never
+         *        queried in return.
          * @return a {@code MapDifference} object containing the comparison results
+         * @throws IllegalArgumentException if the two maps do not agree on which keys are "the same key"
+         *         - see the key-equality note above.
          * @see Maps#difference(Map, Map)
          * @see Maps#symmetricDifference(Map, Map)
          * @see N#difference(Collection, Collection)
@@ -1784,8 +2047,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @see N#commonSet(Collection, Collection)
          */
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
-                final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2) {
-            return of(map1, map2, null, (k, v1, v2) -> N.equals(v1, v2));
+                final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2) throws IllegalArgumentException {
+            return ofByEntries(map1, map2, null, (k, v1, v2) -> N.deepEquals(v1, v2));
         }
 
         /**
@@ -1804,6 +2067,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * <p>If {@code keysToCompare} is {@code null} or empty, all keys from both maps are compared (equivalent
          * to calling {@link #of(Map, Map)}).
+         *
+         * <p>Values are compared with {@link N#deepEquals(Object, Object)}, so array-valued entries are matched
+         * by content (including nested arrays) rather than by reference.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1825,9 +2091,20 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param <K2> the key type of the second map (must extend CK)
          * @param <V2> the value type of the second map
          * @param map1 the first map to compare. Can be {@code null} or empty.
-         * @param map2 the second map to compare. Can be {@code null} or empty.
+         * @param map2 the second map to compare. Can be {@code null} or empty. Every key of {@code map1} is
+         *        looked up in this map, so this map must tolerate them: if it rejects {@code null} keys (for
+         *        example {@code Map.of(...)} or a natural-ordering {@code TreeMap}) and {@code map1} has a
+         *        {@code null} key, the lookup throws {@link NullPointerException}. {@code map1} is never
+         *        queried in return.
          * @param keysToCompare the keys to compare between the two maps. If {@code null} or empty, all keys will be compared.
+         *        If it is not already a {@link Set}, it is copied into a
+         *        {@code HashSet} for the lookups, so its elements must have consistent {@code equals}/{@code hashCode}.
+         *        A {@code Set} is used as given; if that {@code Set} rejects {@code null} (for example
+         *        {@code Set.of(...)} or a natural-ordering {@code TreeSet}) and a compared map has a {@code null}
+         *        key, the lookup throws {@link NullPointerException}.
          * @return a {@code MapDifference} object containing the comparison results for the specified keys
+         * @throws IllegalArgumentException if the two maps do not agree on which keys are "the same key"
+         *         - see {@link #of(Map, Map)}.
          * @see Maps#difference(Map, Map)
          * @see Maps#symmetricDifference(Map, Map)
          * @see N#difference(Collection, Collection)
@@ -1839,12 +2116,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @see N#commonSet(Collection, Collection)
          */
         public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
-                final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2, final Collection<CK> keysToCompare) {
-            return of(map1, map2, keysToCompare, (k, v1, v2) -> N.equals(v1, v2));
+                final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2, final Collection<CK> keysToCompare)
+                throws IllegalArgumentException {
+            return ofByEntries(map1, map2, keysToCompare, (k, v1, v2) -> N.deepEquals(v1, v2));
         }
 
         /**
          * Compares two maps using a custom value equivalence predicate to determine if values are equal.
+         *
+         * <p>The name is not {@code of} because three-argument {@code of} overloads taking a key/property
+         * selection and taking a value equivalence would be mutually ambiguous for a {@code null}
+         * argument, which the selection overload documents as "compare everything".</p>
          * <p>
          * This method creates a {@code MapDifference} object that contains:
          * <ul>
@@ -1868,7 +2150,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * // Compare with tolerance of 0.01
          * BiPredicate<Double, Double> approxEqual = (v1, v2) -> Math.abs(v1 - v2) < 0.01;
-         * MapDifference<?, ?, ?> diff = MapDifference.of(map1, map2, approxEqual);
+         * MapDifference<?, ?, ?> diff = MapDifference.ofByValues(map1, map2, approxEqual);
          * // Results in:
          * // common: {"a": 1.0, "b": 2.001} (both are considered equal)
          * // onlyOnLeft: {}
@@ -1882,10 +2164,15 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param <K2> the key type of the second map (must extend CK)
          * @param <V2> the value type of the second map
          * @param map1 the first map to compare. Can be {@code null} or empty.
-         * @param map2 the second map to compare. Can be {@code null} or empty.
+         * @param map2 the second map to compare. Can be {@code null} or empty. Every key of {@code map1} is
+         *        looked up in this map, so this map must tolerate them: if it rejects {@code null} keys (for
+         *        example {@code Map.of(...)} or a natural-ordering {@code TreeMap}) and {@code map1} has a
+         *        {@code null} key, the lookup throws {@link NullPointerException}. {@code map1} is never
+         *        queried in return.
          * @param valueEquivalence the predicate to determine if two values are equivalent.
          * @return a {@code MapDifference} object containing the comparison results
-         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}.
+         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}, or if the two maps do
+         *         not agree on which keys are "the same key" - see {@link #of(Map, Map)}.
          * @see Maps#difference(Map, Map)
          * @see Maps#symmetricDifference(Map, Map)
          * @see N#difference(Collection, Collection)
@@ -1896,16 +2183,20 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @see N#intersection(Collection, Collection)
          * @see N#commonSet(Collection, Collection)
          */
-        public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
+        public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> ofByValues(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
                 final BiPredicate<? super V1, ? super V2> valueEquivalence) throws IllegalArgumentException {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
-            return of(map1, map2, null, (k, v1, v2) -> valueEquivalence.test(v1, v2));
+            return ofByEntries(map1, map2, null, (k, v1, v2) -> valueEquivalence.test(v1, v2));
         }
 
         /**
          * Compares two maps using a custom value equivalence predicate that also considers the key.
+         *
+         * <p>The name is not {@code of} because three-argument {@code of} overloads taking a key/property
+         * selection and taking a value equivalence would be mutually ambiguous for a {@code null}
+         * argument, which the selection overload documents as "compare everything".</p>
          * <p>
          * This method creates a {@code MapDifference} object that contains:
          * <ul>
@@ -1940,7 +2231,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     return Math.abs(v1 - v2) <= tolerance;
          * };
          *
-         * MapDifference<?, ?, ?> diff = MapDifference.of(prices1, prices2, priceEqual);
+         * MapDifference<?, ?, ?> diff = MapDifference.ofByEntries(prices1, prices2, priceEqual);
          * // Results in:
          * // common: {"gold": 1850.50} (within $5 tolerance)
          * // onlyOnLeft: {}
@@ -1954,10 +2245,15 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param <K2> the key type of the second map (must extend CK)
          * @param <V2> the value type of the second map
          * @param map1 the first map to compare. Can be {@code null} or empty.
-         * @param map2 the second map to compare. Can be {@code null} or empty.
+         * @param map2 the second map to compare. Can be {@code null} or empty. Every key of {@code map1} is
+         *        looked up in this map, so this map must tolerate them: if it rejects {@code null} keys (for
+         *        example {@code Map.of(...)} or a natural-ordering {@code TreeMap}) and {@code map1} has a
+         *        {@code null} key, the lookup throws {@link NullPointerException}. {@code map1} is never
+         *        queried in return.
          * @param valueEquivalence the predicate to determine if two values are equivalent for a given key.
          * @return a {@code MapDifference} object containing the comparison results
-         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}.
+         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}, or if the two maps do
+         *         not agree on which keys are "the same key" - see {@link #of(Map, Map)}.
          * @see Maps#difference(Map, Map)
          * @see Maps#symmetricDifference(Map, Map)
          * @see N#difference(Collection, Collection)
@@ -1968,16 +2264,20 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @see N#intersection(Collection, Collection)
          * @see N#commonSet(Collection, Collection)
          */
-        public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
+        public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> ofByEntries(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2,
                 final TriPredicate<? super K1, ? super V1, ? super V2> valueEquivalence) throws IllegalArgumentException {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
-            return of(map1, map2, null, valueEquivalence);
+            return ofByEntries(map1, map2, null, valueEquivalence);
         }
 
         /**
          * Compares two maps for specified keys using a custom value equivalence predicate.
+         *
+         * <p>The name is not {@code of} because three-argument {@code of} overloads taking a key/property
+         * selection and taking a value equivalence would be mutually ambiguous for a {@code null}
+         * argument, which the selection overload documents as "compare everything".</p>
          * <p>
          * This method combines the functionality of key filtering and custom value comparison.
          * It creates a {@code MapDifference} object that contains:
@@ -2020,7 +2320,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     return Objects.equals(v1, v2);
          * };
          *
-         * MapDifference<?, ?, ?> diff = MapDifference.of(config1, config2, keysToCheck, configEqual);
+         * MapDifference<?, ?, ?> diff = MapDifference.ofByEntries(config1, config2, keysToCheck, configEqual);
          * // Results in:
          * // common: {"timeout": 30, "debug": true}
          * // onlyOnLeft: {}
@@ -2035,11 +2335,21 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param <K2> the key type of the second map (must extend CK)
          * @param <V2> the value type of the second map
          * @param map1 the first map to compare. Can be {@code null} or empty.
-         * @param map2 the second map to compare. Can be {@code null} or empty.
+         * @param map2 the second map to compare. Can be {@code null} or empty. Every key of {@code map1} is
+         *        looked up in this map, so this map must tolerate them: if it rejects {@code null} keys (for
+         *        example {@code Map.of(...)} or a natural-ordering {@code TreeMap}) and {@code map1} has a
+         *        {@code null} key, the lookup throws {@link NullPointerException}. {@code map1} is never
+         *        queried in return.
          * @param keysToCompare the keys to compare. If {@code null} or empty, all keys will be compared.
+         *        If it is not already a {@link Set}, it is copied into a
+         *        {@code HashSet} for the lookups, so its elements must have consistent {@code equals}/{@code hashCode}.
+         *        A {@code Set} is used as given; if that {@code Set} rejects {@code null} (for example
+         *        {@code Set.of(...)} or a natural-ordering {@code TreeSet}) and a compared map has a {@code null}
+         *        key, the lookup throws {@link NullPointerException}.
          * @param valueEquivalence the predicate to determine if values are equivalent.
          * @return a {@code MapDifference} object containing the comparison results
-         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}.
+         * @throws IllegalArgumentException if {@code valueEquivalence} is {@code null}, or if the two maps do
+         *         not agree on which keys are "the same key" - see {@link #of(Map, Map)}.
          * @see Maps#difference(Map, Map)
          * @see Maps#symmetricDifference(Map, Map)
          * @see N#difference(Collection, Collection)
@@ -2052,7 +2362,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          */
         @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
         @SuppressWarnings("unlikely-arg-type")
-        public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> of(
+        public static <CK, K1 extends CK, V1, K2 extends CK, V2> MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> ofByEntries(
                 final Map<? extends K1, ? extends V1> map1, final Map<? extends K2, ? extends V2> map2, final Collection<CK> keysToCompare,
                 final TriPredicate<? super K1, ? super V1, ? super V2> valueEquivalence) throws IllegalArgumentException {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
@@ -2065,16 +2375,27 @@ public sealed class Difference<L, R> permits KeyValueDifference {
             final Map<K2, V2> onlyOnRight = isOrderedMap ? new LinkedHashMap<>() : new HashMap<>();
             final Map<CK, Pair<V1, V2>> differentValues = isOrderedMap ? new LinkedHashMap<>() : new HashMap<>();
 
-            if (N.isEmpty(keysToCompare)) {
+            // The selection is probed once per entry of both maps. A List-valued selection would make that
+            // a linear scan and the whole comparison O(n * m), so copy anything that is not already a Set
+            // into a HashSet. An existing Set is reused as-is (including a SortedSet, whose contains() is
+            // O(log m) and whose comparator may define a different key equality than equals/hashCode).
+            final Collection<CK> keySelection = N.isEmpty(keysToCompare) || keysToCompare instanceof Set ? keysToCompare : new HashSet<>(keysToCompare);
+
+            if (N.isEmpty(keySelection)) {
                 if (N.isEmpty(map1)) {
                     if (N.isEmpty(map2)) {
                         // Do nothing. All empty.
                     } else {
                         onlyOnRight.putAll(map2);
+                        checkNoEntriesCollapsed(map2.size(), "second", map2, onlyOnRight);
                     }
                 } else if (N.isEmpty(map2)) {
                     onlyOnLeft.putAll(map1);
+                    checkNoEntriesCollapsed(map1.size(), "first", map1, onlyOnLeft);
                 } else {
+                    final Set<Object> consumedRightKeys = newConsumedKeyTracker(map2);
+                    int resolvedLeftCount = 0;
+                    int consumedRightCount = 0;
                     K1 key1 = null;
                     V1 val1 = null;
                     K2 key2 = null;
@@ -2089,10 +2410,20 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                         //noinspection SuspiciousMethodCalls
                         if (val2 == null && !map2.containsKey(key1)) {
                             onlyOnLeft.put(key1, val1);
-                        } else if (valueEquivalence.test(key1, val1, val2)) {
-                            common.put(key1, val1);
                         } else {
-                            differentValues.put(key1, Pair.of(val1, val2));
+                            // map2 resolved this key, so one of its entries is consumed here whichever bucket
+                            // the value comparison below picks.
+                            resolvedLeftCount++;
+
+                            if (consumedRightKeys != null) {
+                                consumedRightKeys.add(key1);
+                            }
+
+                            if (valueEquivalence.test(key1, val1, val2)) {
+                                common.put(key1, val1);
+                            } else {
+                                differentValues.put(key1, Pair.of(val1, val2));
+                            }
                         }
                     }
 
@@ -2100,12 +2431,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                         key2 = entry2.getKey();
 
                         //noinspection SuspiciousMethodCalls
-                        if (common.containsKey(key2) || differentValues.containsKey(key2)) {
+                        if (consumedRightKeys == null ? common.containsKey(key2) || differentValues.containsKey(key2) : consumedRightKeys.contains(key2)) {
+                            consumedRightCount++;
                             continue;
                         }
 
                         onlyOnRight.put(key2, entry2.getValue());
                     }
+
+                    checkConsumedRightEntries(resolvedLeftCount, consumedRightCount, map2);
+                    checkNoEntriesCollapsed(map1.size(), "first", map1, common, onlyOnLeft, differentValues);
+                    checkNoEntriesCollapsed(map2.size(), "second", map2, common, onlyOnRight, differentValues);
                 }
 
             } else {
@@ -2113,11 +2449,34 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     if (N.isEmpty(map2)) {
                         // Do nothing. All empty.
                     } else {
-                        Maps.putAllIf(onlyOnRight, map2, keysToCompare::contains);
+                        int selectedRightCount = 0;
+
+                        for (final Entry<? extends K2, ? extends V2> entry : map2.entrySet()) {
+                            if (keySelection.contains(entry.getKey())) {
+                                selectedRightCount++;
+                                onlyOnRight.put(entry.getKey(), entry.getValue());
+                            }
+                        }
+
+                        checkNoEntriesCollapsed(selectedRightCount, "second", map2, onlyOnRight);
                     }
                 } else if (N.isEmpty(map2)) {
-                    Maps.putAllIf(onlyOnLeft, map1, keysToCompare::contains);
+                    int selectedLeftCount = 0;
+
+                    for (final Entry<? extends K1, ? extends V1> entry : map1.entrySet()) {
+                        if (keySelection.contains(entry.getKey())) {
+                            selectedLeftCount++;
+                            onlyOnLeft.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+
+                    checkNoEntriesCollapsed(selectedLeftCount, "first", map1, onlyOnLeft);
                 } else {
+                    final Set<Object> consumedRightKeys = newConsumedKeyTracker(map2);
+                    int resolvedLeftCount = 0;
+                    int consumedRightCount = 0;
+                    int selectedLeftCount = 0;
+                    int selectedRightCount = 0;
                     K1 key1 = null;
                     V1 val1 = null;
                     K2 key2 = null;
@@ -2126,10 +2485,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     for (final Entry<K1, V1> entry1 : ((Map<K1, V1>) map1).entrySet()) {
                         key1 = entry1.getKey();
 
-                        if (!keysToCompare.contains(key1)) {
+                        if (!keySelection.contains(key1)) {
                             continue;
                         }
 
+                        selectedLeftCount++;
                         val1 = entry1.getValue();
                         //noinspection SuspiciousMethodCalls
                         val2 = map2.get(key1);
@@ -2137,23 +2497,50 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                         //noinspection SuspiciousMethodCalls
                         if (val2 == null && !map2.containsKey(key1)) {
                             onlyOnLeft.put(key1, val1);
-                        } else if (valueEquivalence.test(key1, val1, val2)) {
-                            common.put(key1, val1);
                         } else {
-                            differentValues.put(key1, Pair.of(val1, val2));
+                            // map2 resolved this key, so one of its entries is consumed here whichever bucket
+                            // the value comparison below picks.
+                            resolvedLeftCount++;
+
+                            if (consumedRightKeys != null) {
+                                consumedRightKeys.add(key1);
+                            }
+
+                            if (valueEquivalence.test(key1, val1, val2)) {
+                                common.put(key1, val1);
+                            } else {
+                                differentValues.put(key1, Pair.of(val1, val2));
+                            }
                         }
                     }
 
                     for (final Entry<K2, V2> entry2 : ((Map<K2, V2>) map2).entrySet()) {
                         key2 = entry2.getKey();
 
+                        // "Already consumed?" is asked before "selected?" so that the count stays exact: a
+                        // tracker mirroring map2 can recognise an entry the equals-based key selection would
+                        // not, and that entry is consumed either way.
                         //noinspection SuspiciousMethodCalls
-                        if (!keysToCompare.contains(key2) || common.containsKey(key2) || differentValues.containsKey(key2)) {
+                        if (consumedRightKeys == null ? common.containsKey(key2) || differentValues.containsKey(key2) : consumedRightKeys.contains(key2)) {
+                            consumedRightCount++;
+                            selectedRightCount++;
                             continue;
                         }
 
+                        //noinspection SuspiciousMethodCalls
+                        if (!keySelection.contains(key2)) {
+                            continue;
+                        }
+
+                        selectedRightCount++;
                         onlyOnRight.put(key2, entry2.getValue());
                     }
+
+                    // Both counters range over the selected entries only, so the identity holds unchanged
+                    // when a key selection is in force.
+                    checkConsumedRightEntries(resolvedLeftCount, consumedRightCount, map2);
+                    checkNoEntriesCollapsed(selectedLeftCount, "first", map1, common, onlyOnLeft, differentValues);
+                    checkNoEntriesCollapsed(selectedRightCount, "second", map2, common, onlyOnRight, differentValues);
                 }
 
             }
@@ -2202,12 +2589,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param b the second collection of maps to compare. Can be {@code null} or empty.
          * @param idExtractor Function to extract a unique identifier from each map.
          * @return a {@code MapDifference} object containing the comparison results
+         * @throws IllegalArgumentException if {@code idExtractor} is {@code null}, or if a matched pair of maps
+         *         does not agree on which keys are "the same key" - see {@link #of(Map, Map)}.
          * @throws IllegalStateException if duplicate IDs are found within a single collection
-         * @throws IllegalArgumentException if {@code idExtractor} is {@code null}.
          */
         public static <CK, CV, K> MapDifference<List<Map<CK, CV>>, List<Map<CK, CV>>, Map<K, MapDifference<Map<CK, CV>, Map<CK, CV>, Map<CK, Pair<CV, CV>>>>> of(
                 final Collection<? extends Map<CK, CV>> a, final Collection<? extends Map<CK, CV>> b,
-                final Function<? super Map<CK, CV>, ? extends K> idExtractor) throws IllegalArgumentException {
+                final Function<? super Map<CK, CV>, ? extends K> idExtractor) throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(idExtractor, cs.idExtractor);
 
             return of(a, b, null, idExtractor, idExtractor);
@@ -2258,12 +2646,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param keysToCompare the keys to compare within each map. If {@code null} or empty, all keys are compared.
          * @param idExtractor Function to extract a unique identifier from each map.
          * @return a {@code MapDifference} object containing the comparison results
+         * @throws IllegalArgumentException if {@code idExtractor} is {@code null}, or if a matched pair of maps
+         *         does not agree on which keys are "the same key" - see {@link #of(Map, Map)}.
          * @throws IllegalStateException if duplicate IDs are found within a single collection
-         * @throws IllegalArgumentException if {@code idExtractor} is {@code null}.
          */
         public static <CK, CV, K> MapDifference<List<Map<CK, CV>>, List<Map<CK, CV>>, Map<K, MapDifference<Map<CK, CV>, Map<CK, CV>, Map<CK, Pair<CV, CV>>>>> of(
                 final Collection<? extends Map<CK, CV>> a, final Collection<? extends Map<CK, CV>> b, final Collection<CK> keysToCompare,
-                final Function<? super Map<CK, CV>, ? extends K> idExtractor) throws IllegalArgumentException {
+                final Function<? super Map<CK, CV>, ? extends K> idExtractor) throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(idExtractor, cs.idExtractor);
 
             return of(a, b, keysToCompare, idExtractor, idExtractor);
@@ -2317,13 +2706,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param idExtractor1 Function to extract IDs from maps in the first collection.
          * @param idExtractor2 Function to extract IDs from maps in the second collection.
          * @return a {@code MapDifference} object containing the comparison results
+         * @throws IllegalArgumentException if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}, or if
+         *         a matched pair of maps does not agree on which keys are "the same key" - see {@link #of(Map, Map)}.
          * @throws IllegalStateException if duplicate IDs are found within a single collection
-         * @throws IllegalArgumentException if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          */
         public static <CK, K1 extends CK, V1, K2 extends CK, V2, K> MapDifference<List<Map<K1, V1>>, List<Map<K2, V2>>, Map<K, MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>>>> of(
                 final Collection<? extends Map<K1, V1>> a, final Collection<? extends Map<K2, V2>> b,
                 final Function<? super Map<K1, V1>, ? extends K> idExtractor1, final Function<? super Map<K2, V2>, ? extends K> idExtractor2)
-                throws IllegalArgumentException {
+                throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(idExtractor1, cs.idExtractor1);
             N.checkArgNotNull(idExtractor2, cs.idExtractor2);
 
@@ -2394,17 +2784,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param idExtractor1 Function to extract IDs from maps in the first collection.
          * @param idExtractor2 Function to extract IDs from maps in the second collection.
          * @return a {@code MapDifference} object containing detailed comparison results
+         * @throws IllegalArgumentException if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}, or if
+         *         a matched pair of maps does not agree on which keys are "the same key" - see {@link #of(Map, Map)}.
          * @throws IllegalStateException if duplicate IDs are found within a single collection
-         * @throws IllegalArgumentException if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          */
         public static <CK, K1 extends CK, V1, K2 extends CK, V2, K> MapDifference<List<Map<K1, V1>>, List<Map<K2, V2>>, Map<K, MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>>>> of(
                 final Collection<? extends Map<K1, V1>> a, final Collection<? extends Map<K2, V2>> b, final Collection<CK> keysToCompare,
                 final Function<? super Map<K1, V1>, ? extends K> idExtractor1, final Function<? super Map<K2, V2>, ? extends K> idExtractor2)
-                throws IllegalArgumentException {
+                throws IllegalArgumentException, IllegalStateException {
             N.checkArgNotNull(idExtractor1, cs.idExtractor1);
             N.checkArgNotNull(idExtractor2, cs.idExtractor2);
-
-            final boolean isEmptyPropNamesToCompare = N.isEmpty(keysToCompare);
 
             final List<Map<K1, V1>> common = new ArrayList<>();
             final List<Map<K1, V1>> onlyOnLeft = new ArrayList<>();
@@ -2415,9 +2804,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 if (N.isEmpty(b)) {
                     // Do nothing. All empty.
                 } else {
+                    // The id check belongs on this path too. It used to run only in the both-sides-non-empty
+                    // branch below, so a collection carrying duplicate ids was accepted in silence while the
+                    // other side was empty and started throwing the documented IllegalStateException the moment
+                    // one element was added to it.
+                    checkNoDuplicateIds(b, idExtractor2);
+
                     onlyOnRight.addAll(b);
                 }
             } else if (N.isEmpty(b)) {
+                checkNoDuplicateIds(a, idExtractor1);
+
                 onlyOnLeft.addAll(a);
             } else {
                 final Map<K, Map<? extends K1, ? extends V1>> beanMapA = N.toMap(a, idExtractor1, Fn.identity(), Fn.throwingMerger(),
@@ -2427,19 +2824,22 @@ public sealed class Difference<L, R> permits KeyValueDifference {
 
                 Map<K1, V1> mapA = null;
                 Map<K2, V2> mapB = null;
-                boolean areEqual = false;
 
                 for (final Map.Entry<K, Map<? extends K1, ? extends V1>> entry : beanMapA.entrySet()) {
                     mapA = (Map<K1, V1>) entry.getValue();
 
                     if (beanMapB.containsKey(entry.getKey())) {
                         mapB = (Map<K2, V2>) beanMapB.get(entry.getKey());
-                        areEqual = isEmptyPropNamesToCompare ? N.equals(mapA, mapB) : N.equalsByKeys(mapA, mapB, keysToCompare);
+                        // Compute the per-map difference once and decide equality from it, so this check cannot
+                        // disagree with the value equality used to build that difference. A raw N.equals/
+                        // N.equalsByKeys pre-check compares array values by reference and would file an
+                        // equal-content pair under differentValues with an empty difference.
+                        final MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> mapDiff = MapDifference.of(mapA, mapB, keysToCompare);
 
-                        if (areEqual) {
+                        if (mapDiff.areEqual()) {
                             common.add(mapA);
                         } else {
-                            differentValues.put(entry.getKey(), MapDifference.of(mapA, mapB, keysToCompare));
+                            differentValues.put(entry.getKey(), mapDiff);
                         }
                     } else {
                         onlyOnLeft.add(mapA);
@@ -2476,8 +2876,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * <p>Special handling:
      * <ul>
      *   <li>Properties annotated with {@code @DiffIgnore} are excluded from comparison</li>
-     *   <li>When comparing all properties, {@code null} values in both beans are ignored</li>
+     *   <li>When comparing all properties, a property whose value is {@code null} on both sides is omitted
+     *       from every result map, provided the value-equivalence predicate accepts the two as equivalent</li>
      *   <li>When comparing specific properties, {@code null} values are included in the comparison</li>
+     *   <li>When one bean is {@code null}, every property of the other bean is reported on its own side,
+     *       {@code null}-valued properties included</li>
+     *   <li>The value-equivalence predicate is invoked for every property present on both sides, including
+     *       when both values are {@code null}; predicate arguments may therefore be {@code null}</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2522,7 +2927,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <p>
          * This method creates a {@code BeanDifference} object that contains:
          * <ul>
-         *   <li>Common properties: Properties present in both beans with equal values (using {@code equals})</li>
+         *   <li>Common properties: Properties present in both beans with equal values, compared with
+         *       {@link N#deepEquals(Object, Object)} so array-valued properties are matched by content
+         *       (including nested arrays) rather than by reference</li>
          *   <li>Left-only properties: Properties present only in the first bean</li>
          *   <li>Right-only properties: Properties present only in the second bean</li>
          *   <li>Different values: Properties present in both beans but with different values</li>
@@ -2530,10 +2937,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * <p>Special behavior:
          * <ul>
-         *   <li>Properties annotated with {@code @DiffIgnore} are excluded from comparison</li>
+         *   <li>Properties annotated with {@code @DiffIgnore} on <i>either</i> bean class are excluded from comparison</li>
          *   <li>Properties where both beans have {@code null} values are not included in the results</li>
          *   <li>The beans can be of different classes; only properties with matching names are compared</li>
-         *   <li>Property values are compared using the standard {@code equals} method</li>
+         *   <li>If exactly one bean is {@code null}, every property of the other is reported on its own
+         *       side, {@code null}-valued properties included</li>
          * </ul>
          *
          * <p><b>Usage Examples:</b></p>
@@ -2552,11 +2960,22 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Note: lastModified is ignored due to @DiffIgnore
          * }</pre>
          *
-         * @param bean1 the first bean to compare. May be {@code null}, in which case all properties of {@code bean2} are reported as right-only.
-         * @param bean2 the second bean to compare. May be {@code null}, in which case all properties of {@code bean1} are reported as left-only.
+         * <p><b>Note - untyped {@code null} arguments.</b> This class inherits the collection and array
+         * factories declared on {@link Difference}, so a call written with bare {@code null} literals -
+         * {@code BeanDifference.of(null, null)} - is ambiguous between them and does not compile. Cast the
+         * arguments ({@code BeanDifference.of((Object) null, (Object) null)}) or pass typed variables; both
+         * beans may be {@code null} at run time.
+         *
+         * @param bean1 the first bean to compare. May be {@code null}, in which case every property of
+         *        {@code bean2} that is not {@code @DiffIgnore}-annotated is reported as right-only, including
+         *        properties whose value is {@code null}.
+         * @param bean2 the second bean to compare. May be {@code null}, in which case every property of
+         *        {@code bean1} that is not {@code @DiffIgnore}-annotated is reported as left-only, including
+         *        properties whose value is {@code null}.
          * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class (e.g., a
          *         primitive wrapper, array, {@link Collection}, or {@link Map}).
+         * @throws RuntimeException if bean metadata cannot be resolved or a selected property cannot be read; a getter or reflection failure is propagated as an unchecked exception
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -2570,8 +2989,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @see N#commonSet(Collection, Collection)
          * @see com.landawn.abacus.annotation.DiffIgnore
          */
-        public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2) {
-            return of(bean1, bean2, null, (k, v1, v2) -> N.equals(v1, v2));
+        public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2)
+                throws IllegalArgumentException, RuntimeException {
+            return ofByProps(bean1, bean2, null, (k, v1, v2) -> N.deepEquals(v1, v2));
         }
 
         /**
@@ -2591,6 +3011,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *       right-only property; if it exists in neither bean, it is omitted entirely</li>
          * </ul>
          *
+         * <p>Property values are compared with {@link N#deepEquals(Object, Object)}, so array-valued properties
+         * are matched by content (including nested arrays) rather than by reference.
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * record Employee(String id, String name, Double salary, String department) {}
@@ -2609,11 +3032,14 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * // Note: salary and department differences are ignored
          * }</pre>
          *
-         * @param bean1 the first bean to compare. May be {@code null}, in which case properties from {@code bean2} are reported as right-only.
-         * @param bean2 the second bean to compare. May be {@code null}, in which case properties from {@code bean1} are reported as left-only.
+         * @param bean1 the first bean to compare. May be {@code null}, in which case the requested properties of
+         *        {@code bean2} are reported as right-only, including those whose value is {@code null}.
+         * @param bean2 the second bean to compare. May be {@code null}, in which case the requested properties of
+         *        {@code bean1} are reported as left-only, including those whose value is {@code null}.
          * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
          * @return a {@code BeanDifference} object containing the comparison results for the specified properties
          * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class.
+         * @throws RuntimeException if bean metadata cannot be resolved or a selected property cannot be read; a getter or reflection failure is propagated as an unchecked exception
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object)
          * @see Maps#difference(Map, Map)
@@ -2628,12 +3054,16 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @see com.landawn.abacus.annotation.DiffIgnore
          */
         public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
-                final Collection<String> propNamesToCompare) {
-            return of(bean1, bean2, propNamesToCompare, (k, v1, v2) -> N.equals(v1, v2));
+                final Collection<String> propNamesToCompare) throws IllegalArgumentException, RuntimeException {
+            return ofByProps(bean1, bean2, propNamesToCompare, (k, v1, v2) -> N.deepEquals(v1, v2));
         }
 
         /**
          * Compares two beans using a custom value equivalence predicate.
+         *
+         * <p>The name is not {@code of} because three-argument {@code of} overloads taking a key/property
+         * selection and taking a value equivalence would be mutually ambiguous for a {@code null}
+         * argument, which the selection overload documents as "compare everything".</p>
          * <p>
          * This method allows for custom comparison logic when determining if property values
          * are equal. The predicate receives both property values and should return {@code true}
@@ -2664,7 +3094,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     return Objects.equals(v1, v2);
          * };
          *
-         * BeanDifference<?, ?, ?> diff = BeanDifference.of(p1, p2, fuzzyEquals);
+         * BeanDifference<?, ?, ?> diff = BeanDifference.ofByValues(p1, p2, fuzzyEquals);
          * // Results in:
          * // common: {"name": "Widget", "price": 10.99, "description": "A useful widget"}
          * // All properties are considered equal due to custom comparison
@@ -2672,10 +3102,12 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *
          * @param bean1 the first bean to compare. May be {@code null}.
          * @param bean2 the second bean to compare. May be {@code null}.
-         * @param valueEquivalence the predicate to determine if two property values are equivalent.
+         * @param valueEquivalence the predicate to determine if two property values are equivalent. It is invoked
+         *        for every property present on both beans, so either argument may be {@code null}.
          * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class, or if
          *         {@code valueEquivalence} is {@code null}.
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -2689,17 +3121,19 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @see N#commonSet(Collection, Collection)
          * @see com.landawn.abacus.annotation.DiffIgnore
          */
-        public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
-                final BiPredicate<?, ?> valueEquivalence) throws IllegalArgumentException {
+        public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> ofByValues(final Object bean1,
+                final Object bean2, final BiPredicate<Object, Object> valueEquivalence) throws IllegalArgumentException, RuntimeException {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
-            final BiPredicate<Object, Object> valueEquivalenceToUse = (BiPredicate<Object, Object>) valueEquivalence;
-
-            return of(bean1, bean2, null, (k, v1, v2) -> valueEquivalenceToUse.test(v1, v2));
+            return ofByProps(bean1, bean2, null, (k, v1, v2) -> valueEquivalence.test(v1, v2));
         }
 
         /**
          * Compares two beans using a property-aware custom value equivalence predicate.
+         *
+         * <p>The name is not {@code of} because three-argument {@code of} overloads taking a key/property
+         * selection and taking a value equivalence would be mutually ambiguous for a {@code null}
+         * argument, which the selection overload documents as "compare everything".</p>
          * <p>
          * This method provides the most flexible bean comparison, allowing the equivalence logic
          * to vary based on the property name. The TriPredicate receives the property name and
@@ -2737,17 +3171,19 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     }
          * };
          *
-         * BeanDifference<?, ?, ?> diff = BeanDifference.of(acc1, acc2, smartEquals);
+         * BeanDifference<?, ?, ?> diff = BeanDifference.ofByProps(acc1, acc2, smartEquals);
          * // Results may show all properties as common if they meet the criteria
          * }</pre>
          *
          * @param bean1 the first bean to compare. May be {@code null}.
          * @param bean2 the second bean to compare. May be {@code null}.
          * @param valueEquivalence the predicate to determine if values are equivalent for a given property;
-         *                         receives {@code (propertyName, value1, value2)}.
+         *                         receives {@code (propertyName, value1, value2)}. It is invoked for every property
+         *                         present on both beans, so either value may be {@code null}.
          * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class, or if
          *         {@code valueEquivalence} is {@code null}.
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -2761,15 +3197,19 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @see N#commonSet(Collection, Collection)
          * @see com.landawn.abacus.annotation.DiffIgnore
          */
-        public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
-                final TriPredicate<String, ?, ?> valueEquivalence) throws IllegalArgumentException {
+        public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> ofByProps(final Object bean1,
+                final Object bean2, final TriPredicate<String, Object, Object> valueEquivalence) throws IllegalArgumentException, RuntimeException {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
-            return of(bean1, bean2, null, valueEquivalence);
+            return ofByProps(bean1, bean2, null, valueEquivalence);
         }
 
         /**
          * Compares two beans for specified properties using a property-aware custom value equivalence predicate.
+         *
+         * <p>The name is not {@code of} because three-argument {@code of} overloads taking a key/property
+         * selection and taking a value equivalence would be mutually ambiguous for a {@code null}
+         * argument, which the selection overload documents as "compare everything".</p>
          * <p>
          * This method combines selective property comparison with custom equivalence logic that can
          * vary by property name. It provides maximum control over the comparison process.
@@ -2777,7 +3217,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <p>Behavior:
          * <ul>
          *   <li>Only properties in {@code propNamesToCompare} are examined</li>
-         *   <li>The {@code valueEquivalence} predicate determines equality for each property</li>
+         *   <li>The {@code valueEquivalence} predicate determines equality for each property, and is consulted
+         *       even when both values are {@code null}</li>
          *   <li>{@code null} values in both beans are included in comparison (unlike the default behavior)</li>
          *   <li>{@code @DiffIgnore} annotations are ignored when specific properties are requested</li>
          * </ul>
@@ -2805,7 +3246,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *     }
          * };
          *
-         * BeanDifference<?, ?, ?> diff = BeanDifference.of(c1, c2, fieldsToCheck, fieldEquals);
+         * BeanDifference<?, ?, ?> diff = BeanDifference.ofByProps(c1, c2, fieldsToCheck, fieldEquals);
          * // Results in:
          * // common: {"name": "John Doe", "creditLimit": 5000.0}
          * // differentValues: {"email": Pair.of("john@old.com", "john@new.com")}
@@ -2815,10 +3256,12 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param bean1 the first bean to compare. May be {@code null}.
          * @param bean2 the second bean to compare. May be {@code null}.
          * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
-         * @param valueEquivalence the predicate to determine if values are equivalent for a given property.
+         * @param valueEquivalence the predicate to determine if values are equivalent for a given property. It is
+         *        invoked for every requested property present on both beans, so either value may be {@code null}.
          * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class, or if
          *         {@code valueEquivalence} is {@code null}.
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -2833,8 +3276,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @see com.landawn.abacus.annotation.DiffIgnore
          */
         @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
-        public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> of(final Object bean1, final Object bean2,
-                final Collection<String> propNamesToCompare, final TriPredicate<String, ?, ?> valueEquivalence) throws IllegalArgumentException {
+        public static BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> ofByProps(final Object bean1,
+                final Object bean2, final Collection<String> propNamesToCompare, final TriPredicate<String, Object, Object> valueEquivalence)
+                throws IllegalArgumentException, RuntimeException {
             N.checkArgNotNull(valueEquivalence, cs.valueEquivalence);
 
             if (bean1 != null && !Beans.isBeanClass(bean1.getClass())) {
@@ -2845,7 +3289,6 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 throw new IllegalArgumentException(bean2.getClass().getCanonicalName() + " is not a bean class"); // NOSONAR
             }
 
-            final TriPredicate<String, Object, Object> valueEquivalenceToUse = (TriPredicate<String, Object, Object>) valueEquivalence;
             final Map<String, Object> common = new LinkedHashMap<>();
             final Map<String, Object> onlyOnLeft = new LinkedHashMap<>();
             final Map<String, Object> onlyOnRight = new LinkedHashMap<>();
@@ -2856,10 +3299,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     if (bean2 == null) {
                         // Do nothing. All empty.
                     } else {
-                        Beans.beanToMap(bean2, true, Beans.getIgnoredPropNamesForDiff(bean2.getClass()), onlyOnRight);
+                        // ignoreNullProperty must be false: a property that is present but null is still a
+                        // property the other side does not have at all. Skipping it would drop it from the
+                        // result entirely and let a bean whose properties are all null compare "equal" to null.
+                        Beans.beanToMap(bean2, false, Beans.getIgnoredPropNamesForDiff(bean2.getClass()), onlyOnRight);
                     }
                 } else if (bean2 == null) {
-                    Beans.beanToMap(bean1, true, Beans.getIgnoredPropNamesForDiff(bean1.getClass()), onlyOnLeft);
+                    Beans.beanToMap(bean1, false, Beans.getIgnoredPropNamesForDiff(bean1.getClass()), onlyOnLeft);
                 } else {
                     final Class<?> bean1Class = bean1.getClass();
                     final Class<?> bean2Class = bean2.getClass();
@@ -2868,6 +3314,13 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     final ImmutableSet<String> diffIgnoredPropNamesForBean2 = Beans.getIgnoredPropNamesForDiff(bean2Class);
                     final BeanInfo beanInfo1 = ParserUtil.getBeanInfo(bean1Class);
                     final BeanInfo beanInfo2 = ParserUtil.getBeanInfo(bean2Class);
+                    // BeanInfo.getPropInfo resolves a name FUZZILY (Beans.isPropName matches case-insensitively
+                    // and across naming styles), so bean1's "userName" legitimately resolves to bean2's
+                    // "username". Reconciling the second pass by exact name therefore filed one logical property
+                    // in both `common` and `onlyOnRight`, and let a @DiffIgnore property spelled differently on
+                    // the two classes leak into `onlyOnRight`. Track what the first pass actually consumed, by
+                    // PropInfo identity - the same shape MapDifference uses for its consumed-key tracker.
+                    final Set<PropInfo> consumedPropInfosOfBean2 = Collections.newSetFromMap(new IdentityHashMap<>());
                     Object val1 = null;
                     Object val2 = null;
 
@@ -2875,28 +3328,38 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                         PropInfo propInfo2 = null;
 
                         for (final PropInfo propInfo1 : beanInfo1.propInfoList) {
+                            propInfo2 = beanInfo2.getPropInfo(propInfo1.name);
                             // A property annotated @DiffIgnore on EITHER bean class is excluded from the diff,
-                            // mirroring the second-bean loop below (which already checks both ignore sets).
+                            // including a fuzzy match whose canonical name on the right differs from the left.
                             if ((!diffIgnoredPropNamesForBean1.isEmpty() && diffIgnoredPropNamesForBean1.contains(propInfo1.name))
-                                    || (!diffIgnoredPropNamesForBean2.isEmpty() && diffIgnoredPropNamesForBean2.contains(propInfo1.name))) {
+                                    || (!diffIgnoredPropNamesForBean2.isEmpty() && (diffIgnoredPropNamesForBean2.contains(propInfo1.name)
+                                            || (propInfo2 != null && diffIgnoredPropNamesForBean2.contains(propInfo2.name))))) {
+                                if (propInfo2 != null) {
+                                    consumedPropInfosOfBean2.add(propInfo2);
+                                }
+
                                 continue;
                             }
 
                             val1 = propInfo1.getPropValue(bean1);
-                            propInfo2 = beanInfo2.getPropInfo(propInfo1.name);
 
                             if (propInfo2 == null) {
                                 onlyOnLeft.put(propInfo1.name, val1);
                             } else {
+                                consumedPropInfosOfBean2.add(propInfo2);
                                 val2 = propInfo2.getPropValue(bean2);
 
-                                if (val2 == null && val1 == null) {
-                                    ignoredPropNamesForNullValues.add(propInfo1.name);
-                                    continue; // ignore null value comparison.
-                                }
-
-                                if (valueEquivalenceToUse.test(propInfo1.name, val1, val2)) {
-                                    common.put(propInfo1.name, val1);
+                                // The equivalence predicate decides first, even when both values are null: a
+                                // caller-supplied predicate may well consider two nulls different, and skipping
+                                // the call would silently override it. Only once the predicate has agreed the
+                                // two sides match is a null/null property dropped from the results, which is the
+                                // long-standing behaviour of this all-properties overload.
+                                if (valueEquivalence.test(propInfo1.name, val1, val2)) {
+                                    if (val1 == null && val2 == null) {
+                                        ignoredPropNamesForNullValues.add(propInfo1.name);
+                                    } else {
+                                        common.put(propInfo1.name, val1);
+                                    }
                                 } else {
                                     differentValues.put(propInfo1.name, Pair.of(val1, val2));
                                 }
@@ -2905,7 +3368,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     }
 
                     for (final PropInfo propInfo : beanInfo2.propInfoList) {
-                        if (!diffIgnoredPropNamesForBean2.isEmpty() && diffIgnoredPropNamesForBean2.contains(propInfo.name)) {
+                        if (consumedPropInfosOfBean2.contains(propInfo)
+                                || (!diffIgnoredPropNamesForBean2.isEmpty() && diffIgnoredPropNamesForBean2.contains(propInfo.name))) {
                             continue;
                         }
 
@@ -2973,8 +3437,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                         } else {
                             val2 = propInfo2.getPropValue(bean2);
 
-                            if ((val2 == null && val1 == null) // Compare all specified properties even values are both null
-                                    || valueEquivalenceToUse.test(propName, val1, val2)) {
+                            // Every explicitly requested property is compared, including one that is null on both
+                            // sides; the predicate is consulted for that case too rather than being short-circuited.
+                            if (valueEquivalence.test(propName, val1, val2)) {
                                 common.put(propName, val1);
                             } else {
                                 differentValues.put(propName, Pair.of(val1, val2));
@@ -3009,8 +3474,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * <p>The comparison process:
          * <ol>
          *   <li>Each bean is identified using the {@code idExtractor} function</li>
-         *   <li>Beans with matching identifiers are tested for equality; a pair found to be unequal is
-         *       then detailed property by property via {@link #of(Object, Object)}</li>
+         *   <li>Beans with matching identifiers are always compared property by property via
+         *       {@link #of(Object, Object, Collection)}; that per-bean difference decides whether the pair is
+         *       reported as common or listed under {@code differentValues}</li>
          *   <li>All properties are considered (except those marked with {@code @DiffIgnore})</li>
          *   <li>Results are categorized into common, left-only, right-only, and different beans</li>
          * </ol>
@@ -3045,9 +3511,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
          *         instance, or if {@code idExtractor} is {@code null}.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
          */
         public static <T, K> BeanDifference<List<T>, List<T>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
-                final Collection<? extends T> a, final Collection<? extends T> b, final Function<? super T, K> idExtractor) throws IllegalArgumentException {
+                final Collection<? extends T> a, final Collection<? extends T> b, final Function<? super T, K> idExtractor)
+                throws IllegalArgumentException, IllegalStateException, RuntimeException {
             N.checkArgNotNull(idExtractor, cs.idExtractor);
 
             return of(a, b, null, idExtractor, idExtractor);
@@ -3099,10 +3567,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
          *         instance, or if {@code idExtractor} is {@code null}.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
          */
         public static <T, K> BeanDifference<List<T>, List<T>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T> a, final Collection<? extends T> b, final Collection<String> propNamesToCompare,
-                final Function<? super T, K> idExtractor) throws IllegalArgumentException {
+                final Function<? super T, K> idExtractor) throws IllegalArgumentException, IllegalStateException, RuntimeException {
             N.checkArgNotNull(idExtractor, cs.idExtractor);
 
             return of(a, b, propNamesToCompare, idExtractor, idExtractor);
@@ -3158,10 +3627,11 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
          *         instance, or if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
          */
         public static <T1, T2, K> BeanDifference<List<T1>, List<T2>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Function<? super T1, ? extends K> idExtractor1,
-                final Function<? super T2, ? extends K> idExtractor2) throws IllegalArgumentException {
+                final Function<? super T2, ? extends K> idExtractor2) throws IllegalArgumentException, IllegalStateException, RuntimeException {
             N.checkArgNotNull(idExtractor1, cs.idExtractor1);
             N.checkArgNotNull(idExtractor2, cs.idExtractor2);
 
@@ -3228,18 +3698,21 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
          *         instance, or if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
          */
         public static <T1, T2, K> BeanDifference<List<T1>, List<T2>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Collection<String> propNamesToCompare,
-                final Function<? super T1, ? extends K> idExtractor1, final Function<? super T2, ? extends K> idExtractor2) throws IllegalArgumentException {
+                final Function<? super T1, ? extends K> idExtractor1, final Function<? super T2, ? extends K> idExtractor2)
+                throws IllegalArgumentException, IllegalStateException, RuntimeException {
+
+            N.checkArgNotNull(idExtractor1, cs.idExtractor1);
+            N.checkArgNotNull(idExtractor2, cs.idExtractor2);
 
             // Validate every (non-null) element in both collections, not just the first: a collection whose
             // leading element is a bean (or null) can still hold a non-bean element later, which would
             // otherwise slip through and be mishandled as a bean.
             checkAllBeanElements(a);
             checkAllBeanElements(b);
-            N.checkArgNotNull(idExtractor1, cs.idExtractor1);
-            N.checkArgNotNull(idExtractor2, cs.idExtractor2);
 
             final List<T1> common = new ArrayList<>();
             final List<T1> onlyOnLeft = new ArrayList<>();
@@ -3250,9 +3723,17 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                 if (N.isEmpty(b)) {
                     // Do nothing. All empty.
                 } else {
+                    // The id check belongs on this path too. It used to run only in the both-sides-non-empty
+                    // branch below, so a collection carrying duplicate ids was accepted in silence while the
+                    // other side was empty and started throwing the documented IllegalStateException the moment
+                    // one element was added to it.
+                    checkNoDuplicateIds(b, idExtractor2);
+
                     onlyOnRight.addAll(b);
                 }
             } else if (N.isEmpty(b)) {
+                checkNoDuplicateIds(a, idExtractor1);
+
                 onlyOnLeft.addAll(a);
             } else {
                 final Map<K, T1> beanMapA = N.toMap(a, idExtractor1, Fn.identity(), Fn.throwingMerger(), IntFunctions.ofLinkedHashMap());
@@ -3292,7 +3773,10 @@ public sealed class Difference<L, R> permits KeyValueDifference {
 
         }
 
-        private static void checkAllBeanElements(final Collection<?> c) {
+        /**
+         * @throws IllegalArgumentException if a non-null element of {@code c} does not have a bean class
+         */
+        private static void checkAllBeanElements(final Collection<?> c) throws IllegalArgumentException {
             if (N.isEmpty(c)) {
                 return;
             }

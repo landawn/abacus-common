@@ -89,7 +89,7 @@ public class UncheckedException extends RuntimeException {
      * @param cause the throwable to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
-    public UncheckedException(final Throwable cause) {
+    public UncheckedException(final Throwable cause) throws IllegalArgumentException {
         super(requireCause(cause));
 
         copySuppressed(cause);
@@ -120,7 +120,7 @@ public class UncheckedException extends RuntimeException {
      * @param cause the throwable to wrap. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
-    public UncheckedException(final String message, final Throwable cause) {
+    public UncheckedException(final String message, final Throwable cause) throws IllegalArgumentException {
         super(message, requireCause(cause));
 
         copySuppressed(cause);
@@ -133,7 +133,7 @@ public class UncheckedException extends RuntimeException {
      * @return {@code cause}, unchanged
      * @throws IllegalArgumentException if {@code cause} is {@code null}.
      */
-    private static Throwable requireCause(final Throwable cause) {
+    private static Throwable requireCause(final Throwable cause) throws IllegalArgumentException {
         N.checkArgNotNull(cause, cs.cause);
 
         return cause;

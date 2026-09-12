@@ -43,6 +43,18 @@ public final class BrotliInputStream extends InputStream {
 
     private final org.brotli.dec.BrotliInputStream in;
 
+    // Byte-at-a-time reads are buffered HERE rather than by the decoder, because only one of the two entry
+    // points may buffer: the decoder's own read() fills a private buffer, and its read(byte[], int, int)
+    // copies the leftover of that buffer into the caller's array and then still returns -1 whenever the
+    // same call has to decode more and the stream is already finished - silently losing the bytes it just
+    // copied. Owning the buffer here keeps read() cheap while guaranteeing that a partially drained buffer
+    // is never reported as end-of-stream.
+    private final byte[] buf;
+
+    private int bufOff;
+
+    private int bufLen;
+
     /**
      * Creates a new BrotliInputStream that decompresses data from the specified source stream.
      * Uses the default internal buffer size for reading.
@@ -57,12 +69,10 @@ public final class BrotliInputStream extends InputStream {
      *
      * @param source the input stream containing Brotli-compressed data
      * @throws IllegalArgumentException if {@code source} is {@code null}.
-     * @throws IOException if an I/O error occurs while initializing the decompressor
+     * @throws IOException if initializing the Brotli decoder cannot read a valid header from the source
      */
-    public BrotliInputStream(final InputStream source) throws IOException {
-        N.checkArgNotNull(source, cs.source);
-
-        in = new org.brotli.dec.BrotliInputStream(source);
+    public BrotliInputStream(final InputStream source) throws IllegalArgumentException, IOException {
+        this(source, org.brotli.dec.BrotliInputStream.DEFAULT_INTERNAL_BUFFER_SIZE);
     }
 
     /**
@@ -82,13 +92,16 @@ public final class BrotliInputStream extends InputStream {
      * @param byteReadBufferSize the size of the internal buffer for reading, in bytes
      * @throws IllegalArgumentException if {@code byteReadBufferSize} is not positive, or if {@code source} is
      *         {@code null}.
-     * @throws IOException if an I/O error occurs while initializing the decompressor
+     * @throws IOException if initializing the Brotli decoder cannot read a valid header from the source
      */
-    public BrotliInputStream(final InputStream source, final int byteReadBufferSize) throws IOException {
+    public BrotliInputStream(final InputStream source, final int byteReadBufferSize) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(source, cs.source);
-        N.checkArgPositive(byteReadBufferSize, "byteReadBufferSize");
+        N.checkArgPositive(byteReadBufferSize, cs.byteReadBufferSize);
 
-        in = new org.brotli.dec.BrotliInputStream(source, byteReadBufferSize);
+        // The decoder's own buffer is only ever read by its own read(), which this class never calls, so it
+        // is kept at the minimum and the buffering happens in buf instead (see the field comment above).
+        in = new org.brotli.dec.BrotliInputStream(source, 1);
+        buf = new byte[byteReadBufferSize];
     }
 
     /**
@@ -104,11 +117,21 @@ public final class BrotliInputStream extends InputStream {
      * }</pre>
      *
      * @return the next byte of decompressed data, or -1 if the end of the stream is reached
-     * @throws IOException if an I/O error occurs during decompression
+     * @throws IllegalStateException if this stream has been closed and more data must be decoded
+     * @throws IOException if compressed input cannot be read or contains invalid Brotli data
      */
     @Override
-    public int read() throws IOException {
-        return in.read();
+    public int read() throws IllegalStateException, IOException {
+        if (bufOff >= bufLen) {
+            bufLen = in.read(buf, 0, buf.length);
+            bufOff = 0;
+
+            if (bufLen <= 0) {
+                return -1;
+            }
+        }
+
+        return buf[bufOff++] & 0xFF;
     }
 
     /**
@@ -124,11 +147,14 @@ public final class BrotliInputStream extends InputStream {
      *
      * @param b the buffer into which the data is read
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
-     * @throws IOException if an I/O error occurs during decompression
+     * @throws NullPointerException if {@code b} is {@code null}
+     * @throws IllegalStateException if this stream has been closed and no buffered byte remains to satisfy the
+     *         request; when some remain, they are transferred and the (possibly short) count is returned instead
+     * @throws IOException if compressed input cannot be read or contains invalid Brotli data
      */
     @Override
-    public int read(final byte[] b) throws IOException {
-        return in.read(b);
+    public int read(final byte[] b) throws NullPointerException, IllegalStateException, IOException {
+        return read(b, 0, b.length);
     }
 
     /**
@@ -144,11 +170,14 @@ public final class BrotliInputStream extends InputStream {
      * @param off the start offset in array b at which the data is written
      * @param len the maximum number of bytes to read
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
-     * @throws IOException if an I/O error occurs during decompression
+     * @throws NullPointerException if {@code b} is {@code null}
      * @throws IndexOutOfBoundsException if off is negative, len is negative, or len is greater than b.length - off
+     * @throws IllegalStateException if this stream has been closed and no buffered byte remains to satisfy the
+     *         request; when some remain, they are transferred and the (possibly short) count is returned instead
+     * @throws IOException if compressed input cannot be read or contains invalid Brotli data
      */
     @Override
-    public int read(final byte[] b, final int off, final int len) throws IOException {
+    public int read(final byte[] b, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException, IllegalStateException, IOException {
         // Enforce InputStream.read(byte[], int, int) contract: bad offset/length must throw
         // IndexOutOfBoundsException. The underlying org.brotli.dec.BrotliInputStream throws
         // IllegalArgumentException, so we validate first to surface the correct exception type.
@@ -156,7 +185,41 @@ public final class BrotliInputStream extends InputStream {
             throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", b.length=" + b.length);
         }
 
-        return in.read(b, off, len);
+        if (len == 0) {
+            return 0;
+        }
+
+        int copied = 0;
+
+        if (bufOff < bufLen) {
+            copied = Math.min(bufLen - bufOff, len);
+            System.arraycopy(buf, bufOff, b, off, copied);
+            bufOff += copied;
+
+            if (copied == len) {
+                return copied;
+            }
+        }
+
+        final int n;
+
+        if (copied > 0) {
+            try {
+                n = in.read(b, off + copied, len - copied);
+            } catch (final IllegalStateException e) {
+                // The decoder rejects decoding after close with an IllegalStateException (BrotliRuntimeException,
+                // which signals corruption, is a plain RuntimeException and is deliberately NOT caught here). Bytes
+                // already written into the caller's array must be reported rather than lost: propagating would leave
+                // the caller unable to learn how much of `b` is valid. The state is unchanged, so the next call -
+                // which finds the buffer empty and goes straight to the decoder - raises the same exception.
+                return copied;
+            }
+        } else {
+            n = in.read(b, off + copied, len - copied);
+        }
+
+        // -1 only when no byte at all was transferred; bytes already copied out of buf must be reported.
+        return n <= 0 ? (copied > 0 ? copied : -1) : copied + n;
     }
 
     /**
@@ -172,11 +235,33 @@ public final class BrotliInputStream extends InputStream {
      * @param n the number of bytes to be skipped
      * @return the actual number of bytes skipped
      * @throws IllegalArgumentException if n is negative.
-     * @throws IOException if an I/O error occurs during the skip operation
+     * @throws IllegalStateException if this stream has been closed and no buffered byte remains to skip; when some
+     *         remain, they are skipped and the (possibly short) count is returned instead
+     * @throws IOException if compressed input cannot be read or decoded while skipping
      */
     @Override
-    public long skip(final long n) throws IllegalArgumentException, IOException {
+    public long skip(final long n) throws IllegalArgumentException, IllegalStateException, IOException {
         N.checkArgNotNegative(n, cs.n);
+
+        // Bytes still sitting in buf have already been consumed from the source, so they must be counted as
+        // skipped here; delegating the whole request would discard them without reporting them.
+        final long fromBuffer = Math.min(Math.max(bufLen - bufOff, 0), n);
+        bufOff += (int) fromBuffer;
+
+        if (fromBuffer == n) {
+            return n;
+        }
+
+        if (fromBuffer > 0) {
+            try {
+                return fromBuffer + in.skip(n - fromBuffer);
+            } catch (final IllegalStateException e) {
+                // Same invariant as read(byte[], int, int): bufOff has already been advanced past these bytes, so
+                // they are consumed. Unlike a read there is no caller array to inspect afterwards, so failing to
+                // report them would discard them without a trace. The next call raises the same exception.
+                return fromBuffer;
+            }
+        }
 
         return in.skip(n);
     }
@@ -184,23 +269,12 @@ public final class BrotliInputStream extends InputStream {
     /**
      * Returns an estimate of the number of bytes that can be read (or skipped over)
      * from this input stream without blocking by the next invocation of a method
-     * for this input stream. This is delegated to the underlying stream and may
-     * return {@code 0} if the underlying Brotli decoder does not provide an estimate.
-     *
-     * <p>Note that this method provides only an estimate; the actual number of bytes
-     * that can be read without blocking may be more or less than the returned value.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * int n = brotliStream.available();
-     * if (n > 0) {
-     *     byte[] buffer = new byte[n];
-     *     brotliStream.read(buffer);
-     * }
-     * }</pre>
+     * for this input stream. The Brotli decoder does not override {@code available()}, so this method
+     * always returns {@code 0}, even when decoded bytes are already buffered and could be read
+     * immediately. A {@code 0} result therefore does not mean the end of the stream has been reached.
      *
      * @return an estimate of the number of bytes that can be read without blocking
-     * @throws IOException if an I/O error occurs
+     * @throws IOException retained by the {@link InputStream} contract; the current decoder implementation returns zero without performing I/O
      */
     @Override
     public int available() throws IOException {
@@ -209,19 +283,12 @@ public final class BrotliInputStream extends InputStream {
 
     /**
      * Marks the current position in this input stream.
-     * This call is delegated to the underlying input stream; its effect depends on whether that
-     * stream supports mark/reset (see {@link #markSupported()}).
+     * This stream does not support mark/reset: the Brotli decoder does not override
+     * {@code mark}, so this call is always a no-op and {@link #markSupported()} always
+     * returns {@code false}, whatever the source stream supports. {@link #reset()} always
+     * throws {@link IOException}.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * if (brotliStream.markSupported()) {
-     *     brotliStream.mark(1024);   // Mark with 1KB read limit
-     *     // Read some data
-     *     brotliStream.reset();   // Resets to marked position
-     * }
-     * }</pre>
-     *
-     * @param readLimit the maximum limit of bytes that can be read before the mark position becomes invalid
+     * @param readLimit the maximum limit of bytes that can be read before the mark position becomes invalid (ignored)
      */
     @Override
     public synchronized void mark(final int readLimit) {
@@ -229,10 +296,9 @@ public final class BrotliInputStream extends InputStream {
     }
 
     /**
-     * Repositions this stream to the position at the time the mark method was last called.
-     * This call is delegated to the underlying input stream.
+     * Always throws {@link IOException}: this stream does not support mark/reset (see {@link #mark(int)}).
      *
-     * @throws IOException if the underlying input stream has not been marked, or does not support mark/reset
+     * @throws IOException always; mark/reset is not supported by the Brotli decoder
      */
     @Override
     public synchronized void reset() throws IOException {
@@ -242,14 +308,7 @@ public final class BrotliInputStream extends InputStream {
     /**
      * Tests if this input stream supports the mark and reset methods.
      *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * if (brotliStream.markSupported()) {
-     *     System.out.println("Mark/reset operations are supported");
-     * }
-     * }</pre>
-     *
-     * @return {@code true} if this stream instance supports the mark and reset methods; {@code false} otherwise
+     * @return always {@code false}; the Brotli decoder does not support mark/reset.
      */
     @Override
     public boolean markSupported() {
@@ -258,9 +317,13 @@ public final class BrotliInputStream extends InputStream {
 
     /**
      * Closes this input stream and releases any system resources associated with the stream.
-     * After this stream has been closed, further read() or skip() invocations fail (the underlying
-     * Brotli decoder throws {@code IllegalStateException}); available() returns 0; reset() continues
-     * to throw IOException because mark/reset is unsupported.
+     * After close, the bytes this stream had already decoded and buffered are still served: {@link #read()}
+     * returns them one at a time, and {@link #skip(long)} and an array read report however many of them they
+     * could transfer, even when that is fewer than requested. Only a call that can transfer nothing at all
+     * throws {@link IllegalStateException} - an unchecked exception, not an {@link IOException} - because the
+     * decoder rejects any further decoding after close. No buffered byte is ever consumed without being
+     * reported. A zero-length read still returns zero. Callers must not rely on reading after close; closing
+     * twice is harmless, and reset() continues to throw IOException because mark/reset is unsupported.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -272,7 +335,7 @@ public final class BrotliInputStream extends InputStream {
      * }
      * }</pre>
      *
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if closing the decoder or its underlying input stream fails
      */
     @Override
     public void close() throws IOException {

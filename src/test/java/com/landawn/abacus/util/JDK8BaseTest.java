@@ -25,7 +25,7 @@ public class JDK8BaseTest extends AbstractTest {
 
         N.println(Strings.base64UrlEncode(str.getBytes()));
 
-        assertEquals(str, Strings.base64DecodeToUtf8String(Strings.base64Encode(str.getBytes())));
+        assertEquals(str, Strings.base64DecodeToString(Strings.base64Encode(str.getBytes())));
 
     }
 }

@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -19,10 +20,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,7 +66,7 @@ public class OffsetDateTimeTypeTest extends TestBase {
     public void testStringOfWithValue() {
         OffsetDateTime dateTime = OffsetDateTime.of(2023, 5, 15, 10, 30, 45, 123456789, ZoneOffset.ofHoursMinutes(5, 30));
         String result = offsetDateTimeType.stringOf(dateTime);
-        assertEquals("2023-05-15T10:30:45.123+05:30", result);
+        assertEquals("2023-05-15T10:30:45.123456789+05:30", result);
     }
 
     @Test
@@ -72,8 +78,8 @@ public class OffsetDateTimeTypeTest extends TestBase {
     @Test
     public void testValueOf_Object_OffsetDateTime_identity() {
         OffsetDateTime odt = OffsetDateTime.of(2023, 5, 15, 10, 30, 45, 123456789, ZoneOffset.UTC);
-        assertEquals(odt, offsetDateTimeType.valueOf((Object) odt));
-        assertEquals(123456789, offsetDateTimeType.valueOf((Object) odt).getNano());
+        assertEquals(odt, offsetDateTimeType.valueOf(odt));
+        assertEquals(123456789, offsetDateTimeType.valueOf(odt).getNano());
     }
 
     @Test
@@ -328,5 +334,75 @@ public class OffsetDateTimeTypeTest extends TestBase {
         offsetDateTimeType.serializeTo(writer, dateTime, config);
         verify(writer, times(2)).write('"'); // Opening and closing quotes
         verify(writer).write(anyString());
+    }
+
+    // --- review fixes 2026-09-06 (T10-01, T10-02, T10-03) ---
+
+    @Test
+    public void reviewFixes20260906_T1001_fastPathRejectsImpossibleCalendarValues() {
+        // the 20/24-char 'Z' fast path resolved with SMART and silently moved Feb 30 -> Feb 28, 24:00 -> next day
+        for (final String s : new String[] { "2023-02-30T10:30:45Z", "2023-02-30T10:30:45.123Z", "2023-04-31T10:30:45Z", "2023-02-29T00:00:00Z",
+                "2023-02-29T00:00:00.000Z", "2023-10-15T24:00:00Z", "2023-10-15T24:00:00.000Z" }) {
+            assertThrows(DateTimeParseException.class, () -> offsetDateTimeType.valueOf(s), s);
+            assertThrows(DateTimeParseException.class, () -> offsetDateTimeType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        assertThrows(DateTimeParseException.class, () -> offsetDateTimeType.valueOf("2023-02-30T10:30:45+00:00"));
+
+        for (final String s : new String[] { "2024-02-29T00:00:00Z", "2024-02-29T00:00:00.000Z", "0000-02-29T00:00:00Z", "0001-01-01T00:00:00.000Z",
+                "9999-12-31T23:59:59.999Z", "2023-10-15T10:30:45.123456789Z", "2023-10-15T10:30:45+05:30:15" }) {
+            assertEquals(OffsetDateTime.parse(s), offsetDateTimeType.valueOf(s), s);
+            assertEquals(OffsetDateTime.parse(s), offsetDateTimeType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        final OffsetDateTime x = OffsetDateTime.parse("2024-02-29T12:34:56.789+05:30");
+        assertEquals(x, offsetDateTimeType.valueOf(offsetDateTimeType.stringOf(x)));
+    }
+
+    @Test
+    public void reviewFixes20260906_T1002_T1003_numericGrammarAndOverflow() {
+        for (final String s : new String[] { "170000000000000000000", "9223372036854775808", "-9223372036854775809", "0x1F4A0", "1700000000000L",
+                "1700000000000d", "12345L" }) {
+            assertThrows(DateTimeParseException.class, () -> offsetDateTimeType.valueOf(s), s);
+            assertThrows(DateTimeParseException.class, () -> offsetDateTimeType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        for (final String s : new String[] { "1700000000000", "+1700000000000", "-1700000000000", "9223372036854775807" }) {
+            final OffsetDateTime expected = OffsetDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(s)), ZoneId.systemDefault());
+            assertEquals(expected, offsetDateTimeType.valueOf(s), s);
+            assertEquals(expected, offsetDateTimeType.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        assertEquals(OffsetDateTime.ofInstant(Instant.ofEpochMilli(12345L), ZoneId.systemDefault()), offsetDateTimeType.valueOf("12345"));
+        assertThrows(DateTimeParseException.class, () -> offsetDateTimeType.valueOf("1234"));
+        assertThrows(DateTimeParseException.class, () -> offsetDateTimeType.valueOf("0"));
+    }
+
+    // Finding 125 sibling (2026-09-08): the Calendar branch read only getTimeInMillis() and rebuilt the value in
+    // the JVM default zone, discarding the zone the caller had explicitly attached - in a target type whose whole
+    // point is to carry an offset, and which serializes that offset through stringOf.
+    @Test
+    public void reviewFixes20260908_calendarKeepsItsOwnOffset() {
+        final long millis = 1703502645123L;
+
+        for (final String zoneName : new String[] { "Asia/Tokyo", "America/Los_Angeles", "UTC", "GMT+05:30" }) {
+            final TimeZone tz = TimeZone.getTimeZone(zoneName);
+            final GregorianCalendar cal = new GregorianCalendar(tz);
+            cal.setTimeInMillis(millis);
+
+            final OffsetDateTime odt = offsetDateTimeType.valueOf(cal);
+
+            assertEquals(millis, odt.toInstant().toEpochMilli(), zoneName);
+            assertEquals(tz.toZoneId().getRules().getOffset(Instant.ofEpochMilli(millis)), odt.getOffset(), zoneName);
+            // Same result as GregorianCalendar.toZonedDateTime(), which is the JDK's own conversion.
+            assertEquals(cal.toZonedDateTime().toOffsetDateTime(), odt, zoneName);
+        }
+
+        final GregorianCalendar tokyo = new GregorianCalendar(TimeZone.getTimeZone("Asia/Tokyo"));
+        tokyo.setTimeInMillis(millis);
+        assertTrue(offsetDateTimeType.stringOf(offsetDateTimeType.valueOf(tokyo)).endsWith("+09:00"));
+
+        // A java.util.Date carries no zone, so it keeps being read in the default zone.
+        assertEquals(ZoneId.systemDefault().getRules().getOffset(Instant.ofEpochMilli(millis)), offsetDateTimeType.valueOf(new Date(millis)).getOffset());
     }
 }

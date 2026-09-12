@@ -47,7 +47,7 @@ import com.landawn.abacus.util.cs;
  * @see java.util.function.BiFunction
  */
 @FunctionalInterface
-public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R, RuntimeException> { // NOSONAR
+public interface ObjBiIntFunction<T, R> extends Throwables.ObjBiIntFunction<T, R, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Applies this function to the given arguments.
      *

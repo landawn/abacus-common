@@ -34,6 +34,346 @@ import com.landawn.abacus.util.u.Optional;
 public class IteratorStreamTest extends TestBase {
 
     @Test
+    public void testSkipLastResumesPartiallyFilledBufferAfterSourceFailure() {
+        for (boolean failHasNext : new boolean[] { false, true }) {
+            for (int size : new int[] { 2, 4 }) {
+                for (boolean nextFirst : new boolean[] { false, true }) {
+                    Iterator<Integer> source = new Iterator<>() {
+                        private int next = 1;
+                        private boolean failed;
+
+                        private void failOnce() {
+                            if (next == 2 && !failed) {
+                                failed = true;
+                                throw new IllegalStateException("source failed while filling the trailing buffer");
+                            }
+                        }
+
+                        @Override
+                        public boolean hasNext() {
+                            if (failHasNext) {
+                                failOnce();
+                            }
+                            return next <= size;
+                        }
+
+                        @Override
+                        public Integer next() {
+                            if (!failHasNext) {
+                                failOnce();
+                            }
+                            if (!hasNext()) {
+                                throw new java.util.NoSuchElementException();
+                            }
+                            return next++ == 1 ? null : next - 1;
+                        }
+                    };
+                    try (Stream<Integer> stream = Stream.of(source).skipLast(2)) {
+                        ObjIteratorEx<Integer> iterator = stream.iteratorEx();
+                        if (nextFirst) {
+                            assertThrows(IllegalStateException.class, iterator::next);
+                        } else {
+                            assertThrows(IllegalStateException.class, iterator::hasNext);
+                        }
+                        assertEquals(size == 2 ? Collections.emptyList() : Arrays.asList(null, 2), iterator.toList());
+                        assertThrows(java.util.NoSuchElementException.class, iterator::next);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testFirstMappingWaitsForSuccessfulSourceRead() {
+        for (boolean mapElse : new boolean[] { false, true }) {
+            AtomicInteger attempts = new AtomicInteger();
+            AtomicInteger delivered = new AtomicInteger();
+            IllegalStateException failure = new IllegalStateException("source failed");
+            Stream<Integer> source = Stream.generate(() -> {
+                if (attempts.getAndIncrement() == 0) {
+                    throw failure;
+                }
+                return delivered.incrementAndGet();
+            }).limit(2);
+
+            try (Stream<Integer> mapped = mapElse ? source.mapFirstOrElse(value -> value * 10, value -> value * 100)
+                    : source.mapFirst(value -> value * 10)) {
+                ObjIteratorEx<Integer> iterator = mapped.iteratorEx();
+                org.junit.jupiter.api.Assertions.assertSame(failure, assertThrows(IllegalStateException.class, iterator::next));
+                assertEquals(10, iterator.next());
+                assertEquals(mapElse ? 200 : 2, iterator.next());
+                assertFalse(iterator.hasNext());
+            }
+        }
+    }
+
+    @Test
+    public void testDropWhileContinuesAfterUpstreamFailure() {
+        for (boolean failureInHasNext : new boolean[] { false, true }) {
+            IllegalStateException failure = new IllegalStateException("source failed");
+            Iterator<Integer> source = new Iterator<>() {
+                private int next = 1;
+                private boolean failed;
+
+                private void failOnce() {
+                    if (next == 2 && !failed) {
+                        failed = true;
+                        throw failure;
+                    }
+                }
+
+                @Override
+                public boolean hasNext() {
+                    if (failureInHasNext) {
+                        failOnce();
+                    }
+                    return next <= 4;
+                }
+
+                @Override
+                public Integer next() {
+                    if (!failureInHasNext) {
+                        failOnce();
+                    }
+                    return next++;
+                }
+            };
+
+            try (Stream<Integer> stream = Stream.of(source).dropWhile(value -> value < 3)) {
+                ObjIteratorEx<Integer> iterator = stream.iteratorEx();
+                org.junit.jupiter.api.Assertions.assertSame(failure, assertThrows(IllegalStateException.class, iterator::hasNext));
+                assertEquals(Arrays.asList(3, 4), iterator.toList());
+            }
+        }
+    }
+
+    @Test
+    public void testDeferredSkipAndLimitPreserveZeroConsumptionLaziness() {
+        for (final boolean deferredStream : new boolean[] { false, true }) {
+            for (final int operation : new int[] { 0, 1, 2, 3, 4, 5 }) {
+                final AtomicInteger initialized = new AtomicInteger();
+                final Stream<Integer> source = deferredStream ? Stream.defer(() -> {
+                    initialized.incrementAndGet();
+                    return Stream.repeat(7, Long.MAX_VALUE);
+                }) : Stream.of(ObjIteratorEx.defer(() -> {
+                    initialized.incrementAndGet();
+                    return Stream.repeat(7, Long.MAX_VALUE).iteratorEx();
+                }));
+
+                try (source) {
+                    switch (operation) {
+                        case 0 -> source.skip(0);
+                        case 1 -> source.iteratorEx().advance(0);
+                        case 2 -> source.limit(0).iteratorEx().advance(1);
+                        case 3 -> assertFalse(source.limit(0).skip(1).iteratorEx().hasNext());
+                        case 4 -> source.limit(0).limit(5).iteratorEx().advance(1);
+                        case 5 -> assertFalse(source.limit(0).limit(5).skip(1).iteratorEx().hasNext());
+                        default -> throw new AssertionError();
+                    }
+                    assertEquals(0, initialized.get());
+                }
+                // Stream.defer closes its supplied stream even before traversal; iterator defer stays uninitialized.
+                assertEquals(deferredStream ? 1 : 0, initialized.get());
+            }
+        }
+    }
+
+    @Test
+    public void testSkipRecoversWhenEmptySourceAppendsFailingCollectionIterator() {
+        final java.util.Collection<Integer> values = new java.util.AbstractCollection<>() {
+            @Override
+            public Iterator<Integer> iterator() {
+                final AtomicInteger attempts = new AtomicInteger();
+                final AtomicInteger delivered = new AtomicInteger();
+                return ObjIterator.generate(() -> {
+                    if (attempts.getAndIncrement() == 1) {
+                        throw new IllegalStateException("second attempt");
+                    }
+                    return delivered.getAndIncrement();
+                }).limit(4);
+            }
+
+            @Override
+            public int size() {
+                return 4;
+            }
+        };
+
+        try (final Stream<Integer> stream = Stream.of(ObjIteratorEx.<Integer> empty()).appendIfEmpty(values).skip(2)) {
+            final ObjIterator<Integer> iterator = stream.iterator();
+            assertThrows(IllegalStateException.class, iterator::hasNext);
+            assertEquals(2, iterator.next());
+            assertEquals(3, iterator.next());
+            assertFalse(iterator.hasNext());
+        }
+    }
+
+    @Test
+    public void testSkipRetriesFailureAtomicBulkAdvanceWithoutLosingProgress() {
+        final ObjIteratorEx<Integer> source = new ObjIteratorEx<>() {
+            private final ObjIteratorEx<Integer> delegate = ObjIteratorEx.of(0, 1, 2);
+            private boolean failed;
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return delegate.hasNext();
+            }
+
+            @Override
+            public Integer next() {
+                return delegate.next();
+            }
+
+            @Override
+            public void advance(final long n) {
+                if (!failed) {
+                    failed = true;
+                    throw new IllegalStateException("first advance");
+                }
+                delegate.advance(n);
+            }
+        };
+
+        try (final Stream<Integer> stream = Stream.of(source).skip(2)) {
+            final ObjIterator<Integer> iterator = stream.iterator();
+            assertThrows(IllegalStateException.class, iterator::hasNext);
+            assertEquals(2, iterator.next());
+            assertFalse(iterator.hasNext());
+        }
+    }
+
+    @Test
+    public void testSkipPreservesProgressWhenSupplierFailsBeforeProducingValue() {
+        for (final int entryPoint : new int[] { 0, 1, 2, 3, 4 }) {
+            final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+            final java.util.concurrent.atomic.AtomicInteger delivered = new java.util.concurrent.atomic.AtomicInteger();
+            try (final Stream<Integer> stream = Stream.generate(() -> {
+                if (attempts.getAndIncrement() == 1) {
+                    throw new IllegalStateException("second attempt");
+                }
+                return delivered.getAndIncrement();
+            }).limit(4).skip(2)) {
+                final ObjIteratorEx<Integer> iterator = stream.iteratorEx();
+                assertThrows(IllegalStateException.class, () -> {
+                    switch (entryPoint) {
+                        case 0 -> iterator.hasNext();
+                        case 1 -> iterator.next();
+                        case 2 -> iterator.count();
+                        case 3 -> iterator.advance(1);
+                        case 4 -> iterator.toArray(new Integer[0]);
+                        default -> throw new AssertionError();
+                    }
+                });
+                assertTrue(iterator.hasNext());
+                assertEquals(2, iterator.next());
+                assertEquals(3, iterator.next());
+                assertFalse(iterator.hasNext());
+                assertEquals(5, attempts.get());
+                assertEquals(4, delivered.get());
+            }
+        }
+    }
+
+    @Test
+    public void testLimitAdvancePreservesQuotaAfterSourceFailure() {
+        final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger delivered = new java.util.concurrent.atomic.AtomicInteger();
+        try (final Stream<Integer> stream = Stream.generate(() -> {
+            if (attempts.getAndIncrement() == 1) {
+                throw new IllegalStateException("second attempt");
+            }
+            return delivered.getAndIncrement();
+        }).limit(2)) {
+            final ObjIteratorEx<Integer> iterator = stream.iteratorEx();
+            assertThrows(IllegalStateException.class, () -> iterator.advance(2));
+            assertTrue(iterator.hasNext());
+            assertEquals(1, iterator.next());
+            assertFalse(iterator.hasNext());
+            assertThrows(java.util.NoSuchElementException.class, iterator::next);
+            assertEquals(3, attempts.get());
+            assertEquals(2, delivered.get());
+        }
+    }
+
+    @Test
+    public void testSkipPreservesFastBulkAdvanceForHugeSources() {
+        for (final int deferredMode : new int[] { 0, 1, 2 }) {
+            final long size = Long.MAX_VALUE;
+            final Integer expected = 7;
+            try (final Stream<Integer> source = Stream.repeat(7, size)) {
+                final ObjIteratorEx<Integer> delegate = source.iteratorEx();
+                final long[] advanced = { 0 };
+                final ObjIteratorEx<Integer> guard = new ObjIteratorEx<Integer>() {
+                    @Override
+                    boolean supportsFailureAtomicAdvance() {
+                        return delegate.supportsFailureAtomicAdvance();
+                    }
+
+                    @Override
+                    public boolean hasNext() {
+                        return delegate.hasNext();
+                    }
+
+                    @Override
+                    public Integer next() {
+                        // Fail immediately if a regression tries to traverse the huge skipped prefix.
+                        assertEquals(size - 1, advanced[0]);
+                        return delegate.next();
+                    }
+
+                    @Override
+                    public void advance(final long n) {
+                        delegate.advance(n);
+                        advanced[0] += n;
+                    }
+                };
+
+                final Stream<Integer> deferred = switch (deferredMode) {
+                    case 0 -> Stream.of(guard);
+                    case 1 -> Stream.of(ObjIteratorEx.defer(() -> guard));
+                    case 2 -> Stream.defer(() -> Stream.of(guard));
+                    default -> throw new AssertionError();
+                };
+
+                try (final Stream<Integer> result = deferred.limit(size).skip(1).skip(size - 2)) {
+                    final ObjIteratorEx<Integer> iterator = result.iteratorEx();
+                    assertTrue(iterator.hasNext());
+                    assertEquals(expected, iterator.next());
+                    assertFalse(iterator.hasNext());
+                    assertEquals(size - 1, advanced[0]);
+                }
+            }
+        }
+    }
+
+
+    @Test
+    public void testLimitPreservesQuotaWhenSupplierFailsBeforeProducingValue() {
+        final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+        try (final Stream<Integer> stream = Stream.of(ObjIterator.generate(() -> {
+            if (attempts.getAndIncrement() == 0) {
+                throw new IllegalStateException("first attempt");
+            }
+            return 7;
+        })).limit(1)) {
+            final ObjIterator<Integer> iterator = stream.iterator();
+            assertTrue(iterator.hasNext());
+            assertThrows(IllegalStateException.class, iterator::next);
+            assertTrue(iterator.hasNext());
+            assertEquals(7, iterator.next());
+            assertFalse(iterator.hasNext());
+            assertThrows(java.util.NoSuchElementException.class, iterator::next);
+            assertEquals(2, attempts.get());
+        }
+    }
+
+
+    @Test
     public void testToJdkStreamCloseRunsSourceHandlersOnce() {
         final AtomicInteger closeCount = new AtomicInteger();
         final Stream<Integer> source = Stream.of(Arrays.asList(1, 2, 3).iterator()).onClose(closeCount::incrementAndGet);
@@ -1526,5 +1866,108 @@ public class IteratorStreamTest extends TestBase {
         assertEquals(2, result.size());
         assertEquals(3, result.get(0).size());
         assertEquals(3, result.get(1).size());
+    }
+
+    @Test
+    public void testSlidingResumesOnlyTheUnfinishedGapAfterSourceFailure() {
+        for (int shape = 0; shape < 4; shape++) {
+            final int windowSize = shape == 1 ? 3 : 2;
+            final int increment = windowSize + 3;
+            final int size = increment * 2 + windowSize;
+            for (boolean failHasNext : new boolean[] { false, true }) {
+                for (boolean directNext : new boolean[] { false, true }) {
+                    for (boolean countRemainder : new boolean[] { false, true }) {
+                        for (boolean ignoreNotPaired : new boolean[] { false, true }) {
+                            Iterator<Integer> source = new Iterator<>() {
+                                private int index;
+                                private boolean failed;
+
+                                private void failOnce() {
+                                    if (index == windowSize + 1 && !failed) {
+                                        failed = true;
+                                        throw new IllegalStateException("source failed partway through a window gap");
+                                    }
+                                }
+
+                                @Override
+                                public boolean hasNext() {
+                                    if (failHasNext) {
+                                        failOnce();
+                                    }
+                                    return index < size;
+                                }
+
+                                @Override
+                                public Integer next() {
+                                    if (!failHasNext) {
+                                        failOnce();
+                                    }
+                                    if (index >= size) {
+                                        throw new java.util.NoSuchElementException();
+                                    }
+                                    return index++;
+                                }
+                            };
+                            Stream<List<Integer>> windows = switch (shape) {
+                                case 0 -> Stream.of(source).slidingMap(increment, ignoreNotPaired, (a, b) -> Arrays.asList(a, b));
+                                case 1 -> Stream.of(source).slidingMap(increment, ignoreNotPaired, (a, b, c) -> Arrays.asList(a, b, c));
+                                case 2 -> Stream.of(source).sliding(windowSize, increment, n -> new ArrayList<Integer>(n));
+                                default -> Stream.of(source).sliding(windowSize, increment, java.util.stream.Collectors.toList());
+                            };
+                            try (windows) {
+                                ObjIteratorEx<List<Integer>> iterator = windows.iteratorEx();
+                                assertEquals(windowSize == 2 ? Arrays.asList(0, 1) : Arrays.asList(0, 1, 2), iterator.next());
+                                if (directNext) {
+                                    assertThrows(IllegalStateException.class, iterator::next);
+                                } else {
+                                    assertThrows(IllegalStateException.class, iterator::hasNext);
+                                }
+                                if (countRemainder) {
+                                    assertEquals(2, iterator.count(), "shape=" + shape);
+                                } else {
+                                    for (int start : new int[] { increment, increment * 2 }) {
+                                        assertTrue(iterator.hasNext());
+                                        assertTrue(iterator.hasNext());
+                                        assertEquals(windowSize == 2 ? Arrays.asList(start, start + 1) : Arrays.asList(start, start + 1, start + 2),
+                                                iterator.next(), "shape=" + shape);
+                                    }
+                                    assertFalse(iterator.hasNext());
+                                    assertThrows(java.util.NoSuchElementException.class, iterator::next);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testTakeLastResumesPartialDrainWithoutNpe() {
+        final Iterator<Integer> source = new Iterator<>() {
+            private int next = 1;
+            private boolean failed;
+
+            @Override
+            public boolean hasNext() {
+                if (next == 3 && !failed) {
+                    failed = true;
+                    throw new IllegalStateException("drain failed");
+                }
+                return next <= 4;
+            }
+
+            @Override
+            public Integer next() {
+                return next++;
+            }
+        };
+
+        final Stream<Integer> last = Stream.of(source).takeLast(2);
+        final java.util.Iterator<Integer> iter = last.iterator();
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(3, iter.next());
+        assertEquals(4, iter.next());
+        assertFalse(iter.hasNext());
     }
 }

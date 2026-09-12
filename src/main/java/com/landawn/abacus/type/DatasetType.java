@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.type;
 
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.Strings;
 
@@ -101,11 +102,12 @@ public class DatasetType extends AbstractType<Dataset> {
      *
      * @param x the {@link Dataset} to serialize; may be {@code null}
      * @return the JSON string, or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final Dataset x) {
+    public String stringOf(final Dataset x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
 
@@ -119,11 +121,13 @@ public class DatasetType extends AbstractType<Dataset> {
      *
      * @param str the JSON string to parse; may be {@code null} or empty
      * @return the deserialized {@link Dataset}, or {@code null} if {@code str} is {@code null} or empty
+     * @throws ParsingException if the nonempty input has invalid JSON syntax or does not match the target type.
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(Dataset)
      */
     @Override
-    public Dataset valueOf(final String str) {
+    public Dataset valueOf(final String str) throws ParsingException, RuntimeException {
         return (Strings.isEmpty(str)) ? null : Utils.jsonParser.deserialize(str, typeClass);
     }
 }

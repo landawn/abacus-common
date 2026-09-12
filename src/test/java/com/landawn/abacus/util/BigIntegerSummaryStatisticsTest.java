@@ -263,4 +263,53 @@ public class BigIntegerSummaryStatisticsTest extends TestBase {
         assertEquals(new BigInteger("7"), stats.getMax());
     }
 
+
+    @Test
+    public void reviewFixes20260908_toStringRendersWithLocaleRootWhateverTheDefaultLocaleIs() {
+        final BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();
+        stats.accept(new BigInteger("10"));
+        stats.accept(new BigInteger("20"));
+        stats.accept(new BigInteger("30"));
+
+        // The %d conversion for `count` is the locale-sensitive one: under a locale whose numbering system is
+        // not latn it used to be rendered in Devanagari / Arabic-Indic digits.
+        final String expected = "{min=10, max=30, count=3, sum=60, average=20}";
+        assertEquals(expected, stats.toString());
+
+        final java.util.Locale prev = java.util.Locale.getDefault();
+
+        try {
+            for (final String tag : new String[] { "de-DE", "fr-FR", "hi-IN-u-nu-deva", "ar-EG-u-nu-arab" }) {
+                java.util.Locale.setDefault(java.util.Locale.forLanguageTag(tag));
+                assertEquals(expected, stats.toString(), tag);
+            }
+        } finally {
+            java.util.Locale.setDefault(prev);
+        }
+    }
+
+    @Test
+    public void testAcceptAndCombineLeaveInstanceUnchangedWhenCountWouldOverflow() {
+        // Both ArithmeticException sources documented on accept(..) and combine(..) - the count overflow and a
+        // sum BigInteger cannot represent - promise "this instance is unchanged". Only the count half is
+        // reachable in a test: the sum half needs a magnitude of roughly 2^31 bits (hundreds of MB), so it
+        // would surface as OutOfMemoryError first. Both halves are exception-safe by the same shape - accept()
+        // and combine() compute newCount/newSum into locals before publishing any field - so pinning the
+        // reachable branch on BOTH methods is the strongest guard available.
+        final BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics(Long.MAX_VALUE, new BigInteger("10"), new BigInteger("30"),
+                new BigInteger("60"));
+
+        Assertions.assertThrows(ArithmeticException.class, () -> stats.accept(new BigInteger("7")));
+
+        assertEquals(Long.MAX_VALUE, stats.getCount());
+        assertEquals(new BigInteger("60"), stats.getSum());
+        assertEquals(new BigInteger("10"), stats.getMin());
+        assertEquals(new BigInteger("30"), stats.getMax());
+
+        final BigIntegerSummaryStatistics other = new BigIntegerSummaryStatistics(2L, new BigInteger("1"), new BigInteger("2"), new BigInteger("3"));
+        Assertions.assertThrows(ArithmeticException.class, () -> stats.combine(other));
+
+        assertEquals(Long.MAX_VALUE, stats.getCount());
+        assertEquals(new BigInteger("60"), stats.getSum());
+    }
 }

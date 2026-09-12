@@ -124,6 +124,10 @@ public final class IndexedBoolean extends AbstractIndexed {
      */
     @Override
     public int hashCode() {
+        // Deliberately NOT the sibling Indexed* template `31 * Boolean.hashCode(value) + hashLong(index)`:
+        // the compact 0/1 form is this class's published hash (of(true, 10) -> 10, of(false, 10) -> 41, pinned
+        // by IndexedBooleanTest#testHashCode_SpecificValues), so regenerating it from the template would
+        // silently change every stored hash. equals/hashCode stay mutually consistent either way.
         return 31 * (value ? 0 : 1) + hashLong(index);
     }
 

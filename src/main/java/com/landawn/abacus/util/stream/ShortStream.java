@@ -207,7 +207,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * individually satisfy the predicate.<br>
      * There is no guarantee of encounter-order prefix semantics in parallel streams.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
+     * <p>Parallel-stream behavior of these related operations:</p>
      * <pre>
      * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
      * │     Method      │        Boundary         │                            Warning                             │
@@ -215,11 +215,13 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
      * │                 │ (predicate false)       │ individually satisfy the predicate                             │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
+     * │ dropWhile (+    │ first unmatched         │ prefix boundary is preserved: only the leading run is          │
+     * │ onDrop)         │ (predicate false)       │ dropped (predicate checks are serialized). Downstream          │
+     * │                 │                         │ encounter order is unspecified                                 │
      * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
+     * │ skipUntil       │ first matched           │ prefix boundary is preserved: only the leading run is          │
+     * │                 │ (predicate true)        │ skipped (it is dropWhile(not predicate)). Downstream           │
+     * │                 │                         │ encounter order is unspecified                                 │
      * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
      * </pre>
      *
@@ -244,12 +246,13 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param predicate a non-interfering, stateless predicate that tests each element to determine when to stop taking elements
      * @return a new {@code ShortStream} consisting of elements from this stream until an element is encountered that doesn't match the predicate
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#takeWhile(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract ShortStream takeWhile(final ShortPredicate predicate);
+    public abstract ShortStream takeWhile(final ShortPredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the remaining elements of this stream after
@@ -261,28 +264,25 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * returns {@code false}, effectively performing a "drop while condition is true"
      * operation that preserves encounter order in sequential streams.
      *
-     * <p><b>Notes on parallel streams:</b><br>
-     * ⚠️ In a parallel stream, elements after the first unmatched element (the first element for which
-     * the predicate returns {@code false}) may still be processed and dropped if they individually
-     * satisfy the predicate.<br>
-     * In sequential streams the behavior is well-defined and deterministic; in parallel streams there
-     * is no guarantee of encounter-order prefix/suffix semantics.
+     * <p><b>Notes on parallel streams:</b> The initial matching prefix is determined in the order this
+     * operation's <i>immediate upstream</i> hands it elements: the predicate checks are serialized under
+     * the source iterator's lock, so exactly the leading run of that arrival order is dropped. That is
+     * source encounter order only when no parallel stage precedes this one. An upstream parallel stage
+     * merges its workers' output in completion order, so the prefix dropped here can differ from the
+     * source-order prefix, and elements that follow the source-order boundary can be dropped with it.
+     * Once the predicate first returns {@code false}, that element and all later elements are retained
+     * without further predicate checks. Parallel downstream processing may reorder the retained elements.
      *
-     * <p>Parallel-stream behavior of these related short-circuiting operations:</p>
-     * <pre>
-     * ┌─────────────────┬─────────────────────────┬────────────────────────────────────────────────────────────────┐
-     * │     Method      │        Boundary         │                            Warning                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ takeWhile       │ first unmatched         │ elements after it may still be processed and included if they  │
-     * │                 │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ dropWhile (+    │ first unmatched         │ elements after it may still be processed and dropped if they   │
-     * │ onDrop)         │ (predicate false)       │ individually satisfy the predicate                             │
-     * ├─────────────────┼─────────────────────────┼────────────────────────────────────────────────────────────────┤
-     * │ skipUntil       │ first matched           │ elements after it may still be processed and skipped if they   │
-     * │                 │ (predicate true)        │ do not satisfy the predicate                                   │
-     * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
-     * </pre>
+     * <p>Parallel-stream behavior of these related operations:</p>
+     * <ul>
+     *   <li>{@code takeWhile}: elements after the first predicate failure may still be included
+     *       if they individually satisfy the predicate.</li>
+     *   <li>{@code dropWhile}, including the {@code onDrop} overload: drops only the initial
+     *       matching prefix; the first nonmatching element and all later elements are retained.</li>
+     *   <li>{@code skipUntil}: skips only the initial nonmatching prefix; the first matching
+     *       element and all later elements are retained.</li>
+     * </ul>
+     * <p>Parallel processing does not guarantee the encounter order of the retained elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -306,12 +306,13 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @return a new stream consisting of the remaining elements of this stream after dropping elements
      *         while the given predicate returns {@code true}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#dropWhile(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
     @Override
-    public abstract ShortStream dropWhile(final ShortPredicate predicate);
+    public abstract ShortStream dropWhile(final ShortPredicate predicate) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a ShortStream consisting of the results of applying the given function to the elements of this stream.
@@ -340,11 +341,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mapper a non-interfering, stateless function that transforms each element from short to short
      * @return a new ShortStream consisting of the results of applying the mapper function to each element
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see Stream#map(Function)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract ShortStream map(ShortUnaryOperator mapper);
+    public abstract ShortStream map(ShortUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an IntStream consisting of the results of applying the given
@@ -377,12 +379,13 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mapper a non-interfering, stateless function that transforms each element from short to int
      * @return a new IntStream consisting of the results of applying the mapper function to each element
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #map(ShortUnaryOperator)
      * @see #mapToObj(ShortFunction)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream mapToInt(ShortToIntFunction mapper);
+    public abstract IntStream mapToInt(ShortToIntFunction mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an object-valued {@code Stream} consisting of the results of applying the given function to the elements of this stream.
@@ -411,10 +414,11 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> mapToObj(ShortFunction<? extends T> mapper);
+    public abstract <T> Stream<T> mapToObj(ShortFunction<? extends T> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of replacing each element of
@@ -449,11 +453,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mapper a non-interfering, stateless function that transforms each element from short to ShortStream
      * @return a new {@link ShortStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see Stream#flatMap(Function)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract ShortStream flatMap(ShortFunction<? extends ShortStream> mapper);
+    public abstract ShortStream flatMap(ShortFunction<? extends ShortStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     // public abstract ShortStream flatmap(ShortFunction<ShortIterator> mapper);
 
@@ -499,6 +504,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mapper a non-interfering, stateless function that transforms each element from short to {@code Collection<Short>}
      * @return a new {@code ShortStream} consisting of the flattened contents of the collections produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(ShortFunction)
      * @see #flatMapArray(ShortFunction)
      * @see Stream#flatmap(java.util.function.Function)
@@ -506,7 +512,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     // @ai-ignore flatmap/flatMap naming - intentional: flatMap maps to ShortStream, flatmap maps to Collection<Short>, flatMapArray maps to short[]. Do not suggest renaming.
     @ParallelSupported
     @IntermediateOp
-    public abstract ShortStream flatmap(ShortFunction<? extends Collection<Short>> mapper); //NOSONAR
+    public abstract ShortStream flatmap(ShortFunction<? extends Collection<Short>> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns a stream consisting of the results of replacing each element of this stream with the contents
@@ -535,6 +541,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mapper a non-interfering, stateless function that transforms each element from short to short[]
      * @return a new {@code ShortStream} consisting of the flattened contents of the arrays produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      * @see #flatMap(ShortFunction)
      * @see #flatMapToInt(ShortFunction)
      * @see #flatMapToObj(ShortFunction)
@@ -542,7 +549,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     // @ai-ignore flatMapArray/flatMap naming - intentional: flatMap maps to ShortStream, flatMapArray maps to short[]. Do not suggest renaming.
     @ParallelSupported
     @IntermediateOp
-    public abstract ShortStream flatMapArray(ShortFunction<short[]> mapper); //NOSONAR
+    public abstract ShortStream flatMapArray(ShortFunction<short[]> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns an {@code IntStream} consisting of the results of replacing each element of
@@ -572,10 +579,11 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *               which produces an IntStream of new values
      * @return a new {@link IntStream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract IntStream flatMapToInt(ShortFunction<? extends IntStream> mapper);
+    public abstract IntStream flatMapToInt(ShortFunction<? extends IntStream> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of replacing each element of
@@ -606,10 +614,11 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *               which produces a Stream of new values
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the mapped streams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatMapToObj(ShortFunction<? extends Stream<? extends T>> mapper);
+    public abstract <T> Stream<T> flatMapToObj(ShortFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of replacing each element of
@@ -638,10 +647,11 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *               which produces a Collection of new values
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the collections produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatmapToObj(ShortFunction<? extends Collection<? extends T>> mapper); //NOSONAR
+    public abstract <T> Stream<T> flatmapToObj(ShortFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException; //NOSONAR
 
     /**
      * Returns a stream consisting of the results of replacing each element of
@@ -674,11 +684,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *               which produces an array of new values
      * @return a new object-valued {@link Stream} consisting of the flattened contents of the arrays produced by the mapper
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract <T> Stream<T> flatMapArrayToObj(ShortFunction<T[]> mapper);
+    public abstract <T> Stream<T> flatMapArrayToObj(ShortFunction<T[]> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given function to the elements of this stream.
@@ -710,11 +721,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return the new stream containing only the mapped values that were present
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code mapper} is {@code null}
      */
     @Beta
     @ParallelSupported
     @IntermediateOp
-    public abstract ShortStream mapPartial(ShortFunction<OptionalShort> mapper);
+    public abstract ShortStream mapPartial(ShortFunction<OptionalShort> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given mapper function to the first and last element of the ranges in this stream,
@@ -741,17 +753,23 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
      *              The first argument tested by sameRange is the first(not the last) element of the current range, and the second argument is the next element to check.
      *              If {@code true} is returned, the next element belongs to the same range as the first element.
      * @param mapper a function that maps a range (defined by its first and last element) to an output element
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code sameRange}, {@code mapper} is {@code null}
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract ShortStream rangeMap(final ShortBiPredicate sameRange, final ShortBinaryOperator mapper);
+    public abstract ShortStream rangeMap(final ShortBiPredicate sameRange, final ShortBinaryOperator mapper)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the results of applying the given mapper function to the first and last element of the ranges in this stream,
@@ -775,11 +793,15 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Create custom range objects
      * ShortStream.of((short) 1, (short) 2, (short) 5, (short) 6)
      *       .rangeMapToObj((first, next) -> next - first == 1,
-     *                      (first, last) -> new Range(first, last))
+     *                      (first, last) -> Range.closed(first, last))
      *       .toList();   // returns list of Range objects
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
      *
      * @param <T> the element type of the new stream
      * @param sameRange a predicate that determines if the next element belongs to the same range as the first element of the current range.
@@ -788,11 +810,13 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mapper a function that maps a range (defined by its first and last element) to an output object of type T
      * @return a new stream consisting of the results of applying the mapper function to each range of elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code sameRange}, {@code mapper} is {@code null}
      * @see Stream#rangeMap(BiPredicate, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract <T> Stream<T> rangeMapToObj(final ShortBiPredicate sameRange, final ShortBiFunction<? extends T> mapper);
+    public abstract <T> Stream<T> rangeMapToObj(final ShortBiPredicate sameRange, final ShortBiFunction<? extends T> mapper)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream into groups based on a predicate.
@@ -820,15 +844,20 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers the current group in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last (not the first) element of the current group, and the second parameter is the next element to check.
      * @return a stream of lists, each containing a sequence of consecutive elements that are collapsible with each other
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code collapsible} is {@code null}
      * @see Stream#collapse(BiPredicate)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<ShortList> collapse(final ShortBiPredicate collapsible);
+    public abstract Stream<ShortList> collapse(final ShortBiPredicate collapsible) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream by applying a merge function when elements are collapsible.
@@ -854,16 +883,22 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last (not the first) element of the current group, and the second parameter is the next element to check.
      * @param mergeFunction a function to merge two collapsible elements into one
      * @return a stream of merged elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code collapsible}, {@code mergeFunction} is {@code null}
      * @see Stream#collapse(BiPredicate, BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract ShortStream collapse(final ShortBiPredicate collapsible, final ShortBinaryOperator mergeFunction);
+    public abstract ShortStream collapse(final ShortBiPredicate collapsible, final ShortBinaryOperator mergeFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Collapses consecutive elements in the stream by applying a merge function when elements are collapsible.
@@ -891,16 +926,22 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
+     * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
+     * the grouping predicate throws.</p>
+     *
      * @param collapsible a predicate that determines if the next element from this stream should be collapsed with the first and last elements of current group
      *          The collapsible predicate takes three elements: the first and last elements of current group, and the next element to check.
      * @param mergeFunction a function to merge two collapsible elements into one
      * @return a stream of merged elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code collapsible}, {@code mergeFunction} is {@code null}
      * @see Stream#collapse(TriPredicate, BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract ShortStream collapse(final ShortTriPredicate collapsible, final ShortBinaryOperator mergeFunction);
+    public abstract ShortStream collapse(final ShortTriPredicate collapsible, final ShortBinaryOperator mergeFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -928,14 +969,17 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
+     * <p>The first successfully read source element initializes the result without invoking the accumulator.</p>
+     *
      * @param accumulator a {@code ShortBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code ShortStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(BinaryOperator)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract ShortStream scan(final ShortBinaryOperator accumulator);
+    public abstract ShortStream scan(final ShortBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -967,11 +1011,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param accumulator a {@code ShortBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code ShortStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(Object, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract ShortStream scan(final short init, final ShortBinaryOperator accumulator);
+    public abstract ShortStream scan(final short init, final ShortBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a scan (also known as prefix sum, cumulative sum, running total, or integral) operation on the elements of the stream.
@@ -1001,11 +1046,13 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param accumulator a {@code ShortBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code ShortStream} consisting of the results of the scan operation on the elements of the original stream.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#scan(Object, boolean, BiFunction)
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract ShortStream scan(final short init, final boolean initIncluded, final ShortBinaryOperator accumulator);
+    public abstract ShortStream scan(final short init, final boolean initIncluded, final ShortBinaryOperator accumulator)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a stream consisting of the specified elements followed by the elements of this stream.
@@ -1027,7 +1074,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract ShortStream prepend(final short... a);
+    public abstract ShortStream prepend(final short... a) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of the elements of this stream with the specified elements appended.
@@ -1049,7 +1096,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract ShortStream append(final short... a);
+    public abstract ShortStream append(final short... a) throws IllegalStateException;
 
     /**
      * Returns a stream consisting of this stream's elements when it is non-empty, or the specified elements when it is empty.
@@ -1077,7 +1124,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract ShortStream appendIfEmpty(final short... a);
+    public abstract ShortStream appendIfEmpty(final short... a) throws IllegalStateException;
 
     /**
      * Returns a {@code ShortStream} consisting of the top n elements of this stream, according to the natural order of the elements.
@@ -1104,7 +1151,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract ShortStream top(int n);
+    public abstract ShortStream top(int n) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a {@code ShortStream} consisting of the top n elements of this stream compared by the provided Comparator.
@@ -1133,7 +1180,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract ShortStream top(final int n, Comparator<? super Short> comparator);
+    public abstract ShortStream top(final int n, Comparator<? super Short> comparator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns a {@code ShortList} containing the elements of this stream.
@@ -1155,7 +1202,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract ShortList toShortList();
+    public abstract ShortList toShortList() throws IllegalStateException;
 
     /**
      * Returns a {@code Map} whose keys and values are the result of applying the provided mapping functions to the input elements.
@@ -1173,7 +1220,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Map indices to values
      * Map<Long, Short> indexMap = ShortStream.of((short)10, (short)20, (short)30)
      *                                        .indexed()
-     *                                        .toMap(IndexedShort::index, IndexedShort::value);
+     *                                        .toMap(IndexedShort::longIndex, IndexedShort::value);
      * // Result: {0=10, 1=20, 2=30}
      *
      * // This will throw IllegalStateException due to duplicate keys
@@ -1195,6 +1242,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param valueMapper a mapping function to produce values
      * @return a {@code Map} whose keys and values are the result of applying mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are found
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper} is {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function)
@@ -1202,7 +1250,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Throwables.ShortFunction<? extends K, E> keyMapper,
-            Throwables.ShortFunction<? extends V, E2> valueMapper) throws E, E2;
+            Throwables.ShortFunction<? extends V, E2> valueMapper) throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a {@code Map} whose keys and values are the result of applying the provided mapping functions to the input elements.
@@ -1216,20 +1264,20 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * LinkedHashMap<Short, String> linkedMap = ShortStream.of((short)3, (short)1, (short)2)
      *                                                     .toMap(n -> n,
      *                                                            n -> "Value: " + n,
-     *                                                            LinkedHashMap::new);
+     *                                                            () -> new LinkedHashMap<Short, String>());
      * // Result: {3="Value: 3", 1="Value: 1", 2="Value: 2"} (insertion order preserved)
      *
      * // Create a TreeMap for sorted keys
      * TreeMap<Short, Integer> treeMap = ShortStream.of((short)5, (short)2, (short)8)
      *                                              .toMap(n -> n,
      *                                                     n -> (int)(n * 2),
-     *                                                     TreeMap::new);
+     *                                                     Suppliers.ofTreeMap());
      * // Result: {2=4, 5=10, 8=16} (sorted by key)
      *
      * // Create a ConcurrentHashMap for thread-safe operations
      * ConcurrentHashMap<Short, Short> concurrentMap =
      *     ShortStream.of((short)1, (short)2, (short)3)
-     *                .toMap(n -> n, n -> (short)(n * n), ConcurrentHashMap::new);
+     *                .toMap(n -> n, n -> (short)(n * n), Suppliers.ofConcurrentHashMap());
      * // Result: {1=1, 2=4, 3=9}
      * }</pre>
      *
@@ -1245,6 +1293,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} whose keys and values are the result of applying mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are found
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, Supplier)
@@ -1252,7 +1301,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.ShortFunction<? extends K, E> keyMapper,
-            Throwables.ShortFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory) throws E, E2;
+            Throwables.ShortFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a {@code Map} whose keys and values are the result of applying the provided mapping functions to the input elements.
@@ -1296,6 +1346,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mergeFunction a merge function, used to resolve collisions between values associated with the same key
      * @return a {@code Map} whose keys and values are the result of applying mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction} is {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator)
@@ -1303,7 +1354,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, E extends Exception, E2 extends Exception> Map<K, V> toMap(Throwables.ShortFunction<? extends K, E> keyMapper,
-            Throwables.ShortFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction) throws E, E2;
+            Throwables.ShortFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Returns a {@code Map} whose keys and values are the result of applying the provided mapping functions to the input elements.
@@ -1320,7 +1372,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *                .toMap(n -> n <= 3 ? "low" : "high",
      *                       n -> (int)n,
      *                       (v1, v2) -> v1 + v2,
-     *                       LinkedHashMap::new);
+     *                       () -> new LinkedHashMap<String, Integer>());
      * // Result: {low=6, high=9} (insertion order preserved, 1+2+3=6, 4+5=9)
      *
      * // Create a TreeMap with sorted keys and keep maximum value
@@ -1329,7 +1381,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *                .toMap(n -> n / 10,
      *                       n -> n,
      *                       (v1, v2) -> v1 > v2 ? v1 : v2,
-     *                       TreeMap::new);
+     *                       Suppliers.ofTreeMap());
      * // Result: {0=8, 1=19, 2=22} (sorted by key, max values)
      *
      * // Create a ConcurrentHashMap with thread-safe merge operations
@@ -1338,7 +1390,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *                .toMap(n -> n % 2 == 0 ? "even" : "odd",
      *                       n -> (int)n,
      *                       Integer::sum,
-     *                       ConcurrentHashMap::new);
+     *                       Suppliers.ofConcurrentHashMap());
      * // Result: {odd=20, even=30} (5+15=20, 10+20=30)
      * }</pre>
      *
@@ -1355,6 +1407,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} whose keys and values are the result of applying mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, {@code mapFactory} is {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -1362,7 +1415,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     @ParallelSupported
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.ShortFunction<? extends K, E> keyMapper,
-            Throwables.ShortFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory) throws E, E2;
+            Throwables.ShortFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, E, E2;
 
     /**
      * Groups the elements of this stream according to a classification function and collects the elements in each group using the specified downstream collector.
@@ -1400,7 +1454,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Result: {0="5, 8, 3", 1="12, 15"}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported};
+     * maintains a downstream accumulation result for each key; additional buffering depends on the collector.
      *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
@@ -1409,13 +1464,14 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param downstream a {@code Collector} implementing the downstream reduction
      * @return a {@code Map} containing the results of the group-and-reduce operation
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code downstream} is {@code null}
      * @throws E if the classification function throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, E extends Exception> Map<K, D> groupTo(Throwables.ShortFunction<? extends K, E> keyMapper,
-            final Collector<? super Short, ?, D> downstream) throws E;
+            final Collector<? super Short, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Groups the elements of this stream according to a classification function and collects the elements in each group using the specified downstream collector.
@@ -1429,7 +1485,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *     ShortStream.of((short)3, (short)1, (short)4, (short)2, (short)5)
      *                .groupTo(n -> n % 2 == 0 ? "even" : "odd",
      *                         Collectors.toList(),
-     *                         LinkedHashMap::new);
+     *                         () -> new LinkedHashMap<String, List<Short>>());
      * // Result: {odd=[3, 1, 5], even=[4, 2]} (insertion order preserved)
      *
      * // Group into TreeMap for sorted keys with counting
@@ -1437,7 +1493,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *     ShortStream.of((short)15, (short)5, (short)25, (short)12, (short)8)
      *                .groupTo(n -> n / 10,
      *                         Collectors.counting(),
-     *                         TreeMap::new);
+     *                         Suppliers.ofTreeMap());
      * // Result: {0=2, 1=2, 2=1} (sorted by key)
      *
      * // Group into ConcurrentHashMap with averaging
@@ -1445,11 +1501,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *     ShortStream.of((short)10, (short)20, (short)15, (short)25, (short)30)
      *                .groupTo(n -> n < 20 ? "low" : "high",
      *                         Collectors.averagingDouble(Short::doubleValue),
-     *                         ConcurrentHashMap::new);
+     *                         Suppliers.ofConcurrentHashMap());
      * // Result: {low=12.5, high=25.0}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported};
+     * maintains a downstream accumulation result for each key; additional buffering depends on the collector.
      *
      * @param <K> the type of the keys
      * @param <D> the result type of the downstream reduction
@@ -1460,13 +1517,14 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param mapFactory a supplier providing a new empty {@code Map} into which the results will be inserted
      * @return a {@code Map} containing the results of the group-and-reduce operation
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}
      * @throws E if the classification function throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, M extends Map<K, D>, E extends Exception> M groupTo(Throwables.ShortFunction<? extends K, E> keyMapper,
-            final Collector<? super Short, ?, D> downstream, final Supplier<? extends M> mapFactory) throws E;
+            final Collector<? super Short, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Performs a reduction on the elements of this stream, using the provided identity value and
@@ -1496,11 +1554,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param accumulator the function for combining the current accumulated value and the current stream element
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#reduce(Object, BinaryOperator)
      */
     @ParallelSupported
     @TerminalOp
-    public abstract short reduce(short identity, ShortBinaryOperator accumulator);
+    public abstract short reduce(short identity, ShortBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a reduction on the elements of this stream, using the provided accumulator function, and returns the reduced value.
@@ -1526,11 +1585,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param accumulator the function for combining the current reduced value and the current stream element
      * @return an OptionalShort describing the result of the reduction. If the stream is empty, an empty {@code OptionalShort} is returned.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see Stream#reduce(BinaryOperator)
      */
     @ParallelSupported
     @TerminalOp
-    public abstract OptionalShort reduce(ShortBinaryOperator accumulator);
+    public abstract OptionalShort reduce(ShortBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream using a Collector.
@@ -1575,13 +1635,15 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *                It is unnecessary to specify {@code combiner} if {@code R} is a {@code Map/Collection/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code combiner} is {@code null}
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see BiConsumers#ofAddAll()
      * @see BiConsumers#ofPutAll()
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <R> R collect(Supplier<R> supplier, ObjShortConsumer<? super R> accumulator, BiConsumer<R, R> combiner);
+    public abstract <R> R collect(Supplier<R> supplier, ObjShortConsumer<? super R> accumulator, BiConsumer<R, R> combiner)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream using a Collector.
@@ -1624,6 +1686,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a result.
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator} is {@code null}
      * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of: {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
      *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
      * @see #collect(Supplier, ObjShortConsumer, BiConsumer)
@@ -1632,7 +1695,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <R> R collect(Supplier<R> supplier, ObjShortConsumer<? super R> accumulator);
+    public abstract <R> R collect(Supplier<R> supplier, ObjShortConsumer<? super R> accumulator)
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Performs an action for each element of this stream.
@@ -1658,11 +1722,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws E;
+    public abstract <E extends Exception> void forEach(final Throwables.ShortConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Performs an action for each element of this stream, passing the element's index as well.
@@ -1691,12 +1756,16 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * @param <E> the type of exception thrown by the action
      * @param action a non-interfering action to perform on the elements, taking both index and element
+     *        &#9888;&#65039; On a parallel stream that index is an invocation counter shared by the
+     *        workers, not the element's position; only sequential execution pairs an element with its
+     *        true index. It is an {@code int} and wraps past {@code Integer.MAX_VALUE}.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
      * @throws E if the action throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> void forEachIndexed(Throwables.IntShortConsumer<E> action) throws E;
+    public abstract <E extends Exception> void forEachIndexed(Throwables.IntShortConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether any elements of this stream match the provided predicate.
@@ -1730,11 +1799,13 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if any elements of the stream match the provided predicate, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean anyMatch(final Throwables.ShortPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean anyMatch(final Throwables.ShortPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether all elements of this stream match the provided predicate.
@@ -1768,11 +1839,13 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either all elements of the stream match the provided predicate or the stream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean allMatch(final Throwables.ShortPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean allMatch(final Throwables.ShortPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns whether no elements of this stream match the provided predicate.
@@ -1806,19 +1879,23 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param predicate a non-interfering, stateless predicate that tests each element
      * @return {@code true} if either no elements of the stream match the provided predicate or the stream is empty, otherwise {@code false}
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> boolean noneMatch(final Throwables.ShortPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> boolean noneMatch(final Throwables.ShortPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns the first element of this stream wrapped in an {@code OptionalShort}, or an empty
      * {@code OptionalShort} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is a deterministic alias of {@link #first()}: it always returns the first element
-     * in encounter order, even for parallel streams. The {@code findFirst} name is kept to align with
+     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it
+     * deterministically returns the first element in encounter order. In a <b>parallel</b> stream the
+     * first element to reach the terminal operation wins, so the result is <b>not</b> guaranteed to be
+     * first in encounter order and may differ between runs. The {@code findFirst} name is kept to align with
      * the standard {@link java.util.stream.Stream#findFirst()} API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1839,7 +1916,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @ParallelSupported
     @TerminalOp
-    public OptionalShort findFirst() {
+    public OptionalShort findFirst() throws IllegalStateException {
         assertNotClosed();
 
         return first();
@@ -1850,10 +1927,10 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * {@code OptionalShort} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>Despite the name, this method is deterministic: unlike {@link java.util.stream.Stream#findAny()},
-     * which may return an arbitrary element (especially for parallel streams), this method is an alias of
-     * {@link #first()} and always returns the first element in encounter order, even for parallel
-     * streams. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
+     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it returns the first element in encounter order.
+     * In a <b>parallel</b> stream, exactly as for {@code findFirst}, the first element to reach the
+     * terminal operation wins, so the result is <b>not</b> guaranteed to be first in encounter
+     * order and may differ between runs. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1873,7 +1950,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @ParallelSupported
     @TerminalOp
-    public OptionalShort findAny() {
+    public OptionalShort findAny() throws IllegalStateException {
         assertNotClosed();
 
         return first();
@@ -1902,6 +1979,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalShort} containing the first element that matches the predicate, or an empty {@code OptionalShort} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findAny(Throwables.ShortPredicate)
      * @see #findLast(Throwables.ShortPredicate)
@@ -1909,7 +1987,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalShort findFirst(final Throwables.ShortPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalShort findFirst(final Throwables.ShortPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns any element of this stream that matches the given {@code predicate}, wrapped in an
@@ -1920,7 +1999,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * streams there is no ordering guarantee: the matching element found first by any worker thread is
      * returned, so the result may differ between runs — which is what can make it faster than
      * {@link #findFirst(Throwables.ShortPredicate)} in parallel. (Note the contrast with the no-arg {@link #findAny()},
-     * which is a deterministic alias of {@link #first()}.)</p>
+     * which is an alias of {@link #first()}.)</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1936,6 +2015,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalShort} containing a matching element, or an empty {@code OptionalShort} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.ShortPredicate)
      * @see #findLast(Throwables.ShortPredicate)
@@ -1943,17 +2023,18 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalShort findAny(final Throwables.ShortPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalShort findAny(final Throwables.ShortPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns the last element of this stream that matches the given {@code predicate}, wrapped in an
      * {@code OptionalShort}, or an empty {@code OptionalShort} if no element matches. This is a terminal
      * operation, and the stream is then closed.
      *
-     * <p>Unlike {@link #findFirst(Throwables.ShortPredicate)}, this operation cannot short-circuit: every element
-     * must be tested, because a later element is always a better candidate. The result is deterministic
-     * even for parallel streams: when several elements match, the one at the largest encounter-order
-     * index wins.</p>
+     * <p>Finding the last match generally requires traversing the source. Array-backed streams may
+     * instead search backwards and stop at the first matching element. When several elements match,
+     * the one at the largest encounter-order index in the current pipeline wins. Parallel
+     * intermediate operations may already have reordered the original source.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1969,6 +2050,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code OptionalShort} containing the last element that matches the predicate, or an empty {@code OptionalShort} if no element matches
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
      * @see #findFirst(Throwables.ShortPredicate)
      * @see #findAny(Throwables.ShortPredicate)
@@ -1977,7 +2059,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     @Beta
     @ParallelSupported
     @TerminalOp
-    public abstract <E extends Exception> OptionalShort findLast(final Throwables.ShortPredicate<E> predicate) throws E;
+    public abstract <E extends Exception> OptionalShort findLast(final Throwables.ShortPredicate<E> predicate)
+            throws IllegalStateException, IllegalArgumentException, E;
 
     /**
      * Returns an {@code OptionalShort} describing the minimum element of this stream,
@@ -2005,7 +2088,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalShort min();
+    public abstract OptionalShort min() throws IllegalStateException;
 
     /**
      * Returns an {@code OptionalShort} describing the maximum element of this stream,
@@ -2033,7 +2116,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalShort max();
+    public abstract OptionalShort max() throws IllegalStateException;
 
     /**
      * Returns the <i>k-th</i> largest element in the stream using natural (numeric) ordering.
@@ -2066,7 +2149,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalShort kthLargest(int k);
+    public abstract OptionalShort kthLargest(int k) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns the sum of elements in this stream as an {@code int}.
@@ -2102,7 +2185,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract int sum();
+    public abstract int sum() throws IllegalStateException, ArithmeticException;
 
     /**
      * Returns an OptionalDouble describing the arithmetic mean of elements of this stream,
@@ -2133,7 +2216,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract OptionalDouble average();
+    public abstract OptionalDouble average() throws IllegalStateException;
 
     /**
      * Returns statistics about the elements of this stream.
@@ -2162,7 +2245,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract ShortSummaryStatistics summaryStatistics();
+    public abstract ShortSummaryStatistics summaryStatistics() throws IllegalStateException;
 
     /**
      * Returns a pair consisting of ShortSummaryStatistics for the elements of this stream,
@@ -2186,7 +2269,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @TerminalOp
-    public abstract Pair<ShortSummaryStatistics, Optional<Map<Percentage, Short>>> summaryStatisticsAndPercentiles();
+    public abstract Pair<ShortSummaryStatistics, Optional<Map<Percentage, Short>>> summaryStatisticsAndPercentiles() throws IllegalStateException;
 
     /**
      * Merges this stream with another stream, selecting elements based on the provided selector function.
@@ -2213,10 +2296,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return the merged stream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract ShortStream mergeWith(final ShortStream b, final ShortBiFunction<MergeResult> nextSelector);
+    public abstract ShortStream mergeWith(final ShortStream b, final ShortBiFunction<MergeResult> nextSelector)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with the given stream using the provided zip function.
@@ -2240,11 +2325,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param zipFunction a ShortBinaryOperator that determines the combination of elements in the combined ShortStream.
      * @return a new ShortStream that is the result of combining the current ShortStream with the given ShortStream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      * @see #zipWith(ShortStream, short, short, ShortBinaryOperator)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract ShortStream zipWith(ShortStream b, ShortBinaryOperator zipFunction);
+    public abstract ShortStream zipWith(ShortStream b, ShortBinaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with two other streams using the provided zip function.
@@ -2268,11 +2354,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param zipFunction a ShortTernaryOperator that determines the combination of elements in the combined ShortStream.
      * @return a new ShortStream that is the result of combining the current ShortStream with the given ShortStreams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      * @see #zipWith(ShortStream, ShortStream, short, short, short, ShortTernaryOperator)
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract ShortStream zipWith(ShortStream b, ShortStream c, ShortTernaryOperator zipFunction);
+    public abstract ShortStream zipWith(ShortStream b, ShortStream c, ShortTernaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with the given stream using the provided zip function, with default values for missing elements.
@@ -2296,10 +2383,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param zipFunction a ShortBinaryOperator that determines the combination of elements in the combined ShortStream.
      * @return a new ShortStream that is the result of combining the current ShortStream with the given ShortStream
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
-    public abstract ShortStream zipWith(ShortStream b, short valueForNoneA, short valueForNoneB, ShortBinaryOperator zipFunction);
+    public abstract ShortStream zipWith(ShortStream b, short valueForNoneA, short valueForNoneB, ShortBinaryOperator zipFunction)
+            throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Zips this stream with two other streams using the provided zip function, with default values for missing elements.
@@ -2327,11 +2416,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param zipFunction a ShortTernaryOperator that determines the combination of elements in the combined ShortStream.
      * @return a new ShortStream that is the result of combining the current ShortStream with the given ShortStreams
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
     @IntermediateOp
     public abstract ShortStream zipWith(ShortStream b, ShortStream c, short valueForNoneA, short valueForNoneB, short valueForNoneC,
-            ShortTernaryOperator zipFunction);
+            ShortTernaryOperator zipFunction) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Returns an {@code IntStream} consisting of the elements of this stream, each widened to
@@ -2358,7 +2448,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract IntStream asIntStream();
+    public abstract IntStream asIntStream() throws IllegalStateException;
 
     /**
      * Returns a Stream consisting of the elements of this stream, each boxed to a Short.
@@ -2400,9 +2490,12 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      */
     @SequentialOnly
     @IntermediateOp
-    public abstract Stream<Short> boxed();
+    public abstract Stream<Short> boxed() throws IllegalStateException;
 
-    abstract ShortIteratorEx iteratorEx();
+    /**
+     * @throws IllegalStateException if the stream is already closed.
+     */
+    abstract ShortIteratorEx iteratorEx() throws IllegalStateException;
 
     // private static final ShortStream EMPTY_STREAM = new ArrayShortStream(N.EMPTY_SHORT_ARRAY, true, null);
 
@@ -2597,7 +2690,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
      *         the array length, or {@code fromIndex} is greater than {@code toIndex}
      */
-    public static ShortStream of(final short[] a, final int fromIndex, final int toIndex) {
+    public static ShortStream of(final short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return isEmptyRange(N.len(a), fromIndex, toIndex) ? empty() : new ArrayShortStream(a, fromIndex, toIndex);
     }
 
@@ -2652,7 +2745,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @return a new stream
      * @throws IndexOutOfBoundsException if fromIndex is negative, toIndex is less than fromIndex, or toIndex is greater than the array length
      */
-    public static ShortStream of(final Short[] a, final int fromIndex, final int toIndex) {
+    public static ShortStream of(final Short[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return Stream.of(a, fromIndex, toIndex).mapToShort(FS.unbox());
     }
 
@@ -3064,6 +3157,11 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0) {
                     return;
@@ -3123,7 +3221,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @return a sequential ShortStream for the range of short elements
      * @throws IllegalArgumentException if by is zero.
      */
-    public static ShortStream range(final short startInclusive, final short endExclusive, final short by) {
+    public static ShortStream range(final short startInclusive, final short endExclusive, final short by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("'by' cannot be zero");
         }
@@ -3151,6 +3249,11 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                 final short result = next;
                 next += by;
                 return result;
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
             }
 
             @Override
@@ -3243,6 +3346,11 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0) {
                     return;
@@ -3303,7 +3411,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @return a sequential ShortStream for the range of short elements
      * @throws IllegalArgumentException if by is zero.
      */
-    public static ShortStream rangeClosed(final short startInclusive, final short endInclusive, final short by) {
+    public static ShortStream rangeClosed(final short startInclusive, final short endInclusive, final short by) throws IllegalArgumentException {
         if (by == 0) {
             throw new IllegalArgumentException("'by' cannot be zero");
         }
@@ -3333,6 +3441,11 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                 final short result = next;
                 next += by;
                 return result;
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
             }
 
             @Override
@@ -3429,6 +3542,11 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0) {
                     return;
@@ -3444,8 +3562,11 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                 return ret;
             }
 
+            /**
+             * @throws IllegalStateException if the number of remaining elements exceeds {@link Integer#MAX_VALUE}.
+             */
             @Override
-            public short[] toArray() {
+            public short[] toArray() throws IllegalStateException {
                 if (cnt > Integer.MAX_VALUE) {
                     throw new IllegalStateException("Cannot create array larger than Integer.MAX_VALUE: " + cnt);
                 }
@@ -3657,15 +3778,28 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             private boolean isFirst = true;
             private boolean hasMore = true;
             private boolean hasNextVal = false;
+            private short pending;
+            private boolean hasPending = false;
 
             @Override
             public boolean hasNext() {
                 if (!hasNextVal && hasMore) {
                     if (isFirst) {
-                        isFirst = false;
-                        hasNextVal = hasNext.test(cur = init);
+                        hasNextVal = hasNext.test(init);
+                        if (hasNextVal) {
+                            isFirst = false;
+                            cur = init;
+                        }
                     } else {
-                        hasNextVal = hasNext.test(cur = f.applyAsShort(cur));
+                        if (!hasPending) {
+                            pending = f.applyAsShort(cur);
+                            hasPending = true;
+                        }
+                        hasNextVal = hasNext.test(pending);
+                        hasPending = false;
+                        if (hasNextVal) {
+                            cur = pending;
+                        }
                     }
 
                     if (!hasNextVal) {
@@ -3812,6 +3946,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @return a ShortStream containing all the shorts from the input arrays
      * @see Stream#concat(Object[][])
      */
+    @SafeVarargs
     public static ShortStream concat(final short[]... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -3837,6 +3972,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @return a ShortStream containing all the shorts from the input iterators in order
      * @see Stream#concat(Iterator[])
      */
+    @SafeVarargs
     public static ShortStream concat(final ShortIterator... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -3869,6 +4005,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @return a ShortStream containing all the shorts from the input streams in order
      * @see Stream#concat(Stream[])
      */
+    @SafeVarargs
     public static ShortStream concat(final ShortStream... a) {
         if (N.isEmpty(a)) {
             return empty();
@@ -4255,7 +4392,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     public static ShortStream zip(final ShortStream a, final ShortStream b, final ShortBinaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), zipFunction).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> zip(ia, ib, zipFunction).onClose(newCloseHandler(a, b)));
     }
 
     /**
@@ -4285,7 +4422,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), iterate(c), zipFunction).onClose(newCloseHandler(Array.asList(a, b, c)));
+        return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
+                (ia, ib, ic) -> zip(ia, ib, ic, zipFunction).onClose(newCloseHandler(Array.asList(a, b, c))));
     }
 
     /**
@@ -4557,7 +4695,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             final ShortBinaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b),
+                (ia, ib) -> zip(ia, ib, valueForNoneA, valueForNoneB, zipFunction).onClose(newCloseHandler(a, b)));
     }
 
     /**
@@ -4591,8 +4730,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             final short valueForNoneC, final ShortTernaryOperator zipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        return zip(iterate(a), iterate(b), iterate(c), valueForNoneA, valueForNoneB, valueForNoneC, zipFunction)
-                .onClose(newCloseHandler(Array.asList(a, b, c)));
+        return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
+                (ia, ib, ic) -> zip(ia, ib, ic, valueForNoneA, valueForNoneB, valueForNoneC, zipFunction).onClose(newCloseHandler(Array.asList(a, b, c))));
     }
 
     /**
@@ -4762,46 +4901,29 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
 
             @Override
             public short nextShort() {
-                if (hasNextA) {
-                    if (iterB.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = iterB.nextShort())) == MergeResult.TAKE_FIRST) {
-                            hasNextA = false;
-                            hasNextB = true;
-                            return nextA;
-                        } else {
-                            return nextB;
-                        }
-                    } else {
+                if (!hasNextA && iterA.hasNext()) {
+                    nextA = iterA.nextShort();
+                    hasNextA = true;
+                }
+                if (!hasNextB && iterB.hasNext()) {
+                    nextB = iterB.nextShort();
+                    hasNextB = true;
+                }
+
+                if (hasNextA && hasNextB) {
+                    if (nextSelector.apply(nextA, nextB) == MergeResult.TAKE_FIRST) {
                         hasNextA = false;
                         return nextA;
-                    }
-                } else if (hasNextB) {
-                    if (iterA.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.nextShort()), nextB) == MergeResult.TAKE_FIRST) {
-                            return nextA;
-                        } else {
-                            hasNextA = true;
-                            hasNextB = false;
-                            return nextB;
-                        }
                     } else {
                         hasNextB = false;
                         return nextB;
                     }
-                } else if (iterA.hasNext()) {
-                    if (iterB.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.nextShort()), (nextB = iterB.nextShort())) == MergeResult.TAKE_FIRST) {
-                            hasNextB = true;
-                            return nextA;
-                        } else {
-                            hasNextA = true;
-                            return nextB;
-                        }
-                    } else {
-                        return iterA.nextShort();
-                    }
-                } else if (iterB.hasNext()) {
-                    return iterB.nextShort();
+                } else if (hasNextA) {
+                    hasNextA = false;
+                    return nextA;
+                } else if (hasNextB) {
+                    hasNextB = false;
+                    return nextB;
                 } else {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4871,7 +4993,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     public static ShortStream merge(final ShortStream a, final ShortStream b, final ShortBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
-        return merge(iterate(a), iterate(b), nextSelector).onClose(newCloseHandler(a, b));
+        return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> merge(ia, ib, nextSelector).onClose(newCloseHandler(a, b)));
     }
 
     /**

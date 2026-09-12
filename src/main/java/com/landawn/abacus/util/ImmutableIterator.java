@@ -16,7 +16,9 @@
 
 package com.landawn.abacus.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -60,11 +62,11 @@ import com.landawn.abacus.annotation.Beta;
 abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
 
     /**
-     * This operation is not supported by {@code ImmutableIterator}.
-     * Attempting to call this method will always throw {@link UnsupportedOperationException}.
+     * This operation is not supported. Attempting to call this method will always throw
+     * {@link UnsupportedOperationException}.
      *
      * @throws UnsupportedOperationException always
-     * @deprecated {@code ImmutableIterator} does not support element removal
+     * @deprecated this iterator does not support element removal
      */
     @Deprecated
     @Override
@@ -82,7 +84,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "a", "c").iterator();
+     * ObjIterator<String> iter = ObjIterator.of("a", "b", "a", "c");
      * Set<String> set = iter.toSet();
      * System.out.println(set);   // [a, b, c] (order may vary)
      * }</pre>
@@ -102,7 +104,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "c").iterator();
+     * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
      * LinkedList<String> list = iter.toCollection(LinkedList::new);
      * System.out.println(list);   // [a, b, c]
      * }</pre>
@@ -110,13 +112,34 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      * @param <C> the type of the collection to create
      * @param supplier a {@link Supplier} that provides a new empty collection instance
      * @return a collection containing all remaining elements from this iterator
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is null or returns null, or a remaining element violates a destination restriction
+     * @throws NullPointerException if a remaining element is null and the destination rejects null elements
+     * @throws ClassCastException if a remaining element is incompatible with the destination's type or comparison requirements
+     * @throws UnsupportedOperationException if an element remains and the target collection does not support adding it
+     * @throws RuntimeException if invoking {@code supplier} fails
      */
-    public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier) throws IllegalArgumentException {
+    public <C extends Collection<T>> C toCollection(final Supplier<? extends C> supplier)
+            throws IllegalArgumentException, NullPointerException, ClassCastException, UnsupportedOperationException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final C c = N.checkArgNotNull(supplier.get(), "supplier.get()");
+        return drainTo(N.checkArgNotNull(supplier.get(), "supplier.get()"));
+    }
 
+    /**
+     * Drains the remaining elements into {@code c} and returns it. Private on purpose: the methods that
+     * publish an <i>owning</i> immutable result must not route through the overridable
+     * {@link #toCollection(Supplier)} or {@link #toSet()}, because a subclass may return storage it retains.
+     *
+     * @param <C> the type of the collection
+     * @param c the collection to drain into
+     * @return {@code c}
+     * @throws IllegalArgumentException if a remaining element violates a destination restriction
+     * @throws NullPointerException if a remaining element is null and the destination rejects null elements
+     * @throws ClassCastException if a remaining element is incompatible with the destination's type or comparison requirements
+     * @throws UnsupportedOperationException if an element remains and the target collection does not support adding it
+     */
+    private <C extends Collection<T>> C drainTo(final C c)
+            throws IllegalArgumentException, NullPointerException, ClassCastException, UnsupportedOperationException {
         while (hasNext()) {
             c.add(next());
         }
@@ -132,15 +155,22 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ImmutableIterator<Integer> iter = ImmutableSet.of(1, 2, 3).iterator();
+     * ObjIterator<Integer> iter = ObjIterator.of(1, 2, 3);
      * ImmutableList<Integer> list = iter.toImmutableList();
-     * System.out.println(list);   // [1, 2, 3] (order depends on source)
+     * System.out.println(list);   // [1, 2, 3]
      * }</pre>
      *
      * @return an {@link ImmutableList} containing all remaining elements from this iterator
      */
     public ImmutableList<T> toImmutableList() {
-        return ImmutableList.wrap(toCollection(Suppliers.ofList()));
+        // The list is created here and nothing else can reach it, so ownership transfers to the result;
+        // wrap() would mark it a live view and force ImmutableList.copyOf(...) to copy it again. It is
+        // filled directly rather than through toCollection(...): that method is public and non-final on this
+        // class, so a subclass returning storage it retains would make ownsBacking=true a lie. ArrayList is
+        // what Suppliers.ofList() builds, so nothing else about the result changes.
+        final List<T> list = drainTo(new ArrayList<>());
+
+        return ImmutableList.create(list, false, true);
     }
 
     /**
@@ -152,7 +182,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "a", "c").iterator();
+     * ObjIterator<String> iter = ObjIterator.of("a", "b", "a", "c");
      * ImmutableSet<String> set = iter.toImmutableSet();
      * System.out.println(set.size());   // 3 (duplicates removed)
      * }</pre>
@@ -160,7 +190,12 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      * @return an {@link ImmutableSet} containing all remaining unique elements from this iterator
      */
     public ImmutableSet<T> toImmutableSet() {
-        return ImmutableSet.wrap(toSet());
+        // See toImmutableList(): the set is created here, so it is private to this call and the result owns
+        // it. N.newHashSet() is what Suppliers.ofSet() - and therefore toSet() - builds, so the element
+        // order is unchanged.
+        final Set<T> set = drainTo(N.<T> newHashSet());
+
+        return new ImmutableSet<>(set, false, true);
     }
 
     /**
@@ -173,7 +208,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ImmutableIterator<String> iter = ImmutableList.of("a", "b", "c").iterator();
+     * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
      * iter.next();   // element is skipped (the first one)
      * long remaining = iter.count();
      * System.out.println(remaining);        // 2

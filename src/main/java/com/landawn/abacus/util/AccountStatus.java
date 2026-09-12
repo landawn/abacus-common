@@ -118,7 +118,7 @@ public enum AccountStatus {
      * @throws IllegalArgumentException if no {@code AccountStatus} exists for the specified integer value.
      * @see #code()
      */
-    public static AccountStatus fromCode(final int code) {
+    public static AccountStatus fromCode(final int code) throws IllegalArgumentException {
         switch (code) {
             case 0:
                 return BLANK;

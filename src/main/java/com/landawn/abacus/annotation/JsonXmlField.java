@@ -53,7 +53,7 @@ import com.landawn.abacus.util.EnumType;
  *     private Double salary;
  *
  *     @JsonXmlField(ignore = true)
- *     private String password;
+ *     private String password;  // omitted from output only; still read from input
  * }
  * }</pre>
  *
@@ -117,6 +117,8 @@ public @interface JsonXmlField {
      * {@link java.time.format.DateTimeFormatter} pattern syntax. When Joda-Time is present,
      * {@code DateTime} and {@code MutableDateTime} fields use its {@code DateTimeFormat} syntax.
      * {@code java.time.Instant} is not supported by this format option.
+     * Formatted text uses normal string escaping when JSON string quotation is enabled,
+     * including literal quotation marks, backslashes and control characters in the pattern.
      *
      * <p>The special value {@code "long"} reads and writes epoch milliseconds. It is not valid for
      * {@code java.time.LocalDate} or {@code java.time.LocalTime}, which do not identify an instant.</p>
@@ -139,6 +141,12 @@ public @interface JsonXmlField {
     /**
      * Specifies the time zone for date/time field serialization.
      *
+     * <p>The ID is trimmed and resolved with {@link java.util.TimeZone#getTimeZone(String)} when the bean
+     * is first introspected. <b>An unrecognised ID (a typo such as {@code "America/New York"} or
+     * {@code "UTC+1"}) is not rejected - it silently resolves to GMT</b>, shifting every formatted instant
+     * without an error; region IDs ({@code "Europe/Paris"}), {@code "UTC"}, {@code "GMT"} and custom
+     * offsets in the form {@code "GMT+02:00"} are accepted. An empty string selects the JVM default zone.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <ul>
      *   <li>{@code @JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss", timeZone = "UTC")}</li>
@@ -146,12 +154,16 @@ public @interface JsonXmlField {
      * </ul>
      *
      * @return the time zone ID (e.g., {@code "UTC"}, {@code "America/New_York"}), or an empty string for the system default
+     * @see java.util.TimeZone#getTimeZone(String)
      */
     String timeZone() default "";
 
     /**
      * Specifies the number format pattern for numeric field serialization.
      * Uses {@link DecimalFormat} pattern syntax.
+     * Formatted values that are not valid JSON number tokens (for example, grouped numbers or
+     * currency amounts) use JSON string quotation and escaping according to the serialization
+     * configuration. Valid numeric tokens remain numbers. XML retains formatted text.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -177,6 +189,13 @@ public @interface JsonXmlField {
      *   <li>{@link EnumType#CODE} - Uses an integer code defined by the enum (for example, via {@code public int code()}).</li>
      * </ul>
      *
+     * <p><b>Interaction with {@link JsonXmlConfig#enumerated()}:</b> a field-level {@code NAME} is
+     * indistinguishable from the default and is therefore overridden by a class-level
+     * {@code @JsonXmlConfig(enumerated = ORDINAL)} or {@code CODE}; only {@code ORDINAL} and {@code CODE}
+     * override the class-level setting. To force names for one field in such a class, spell the type
+     * out through {@link #type()}, e.g. {@code @JsonXmlField(type = "com.example.Status(NAME)")}, which
+     * is consulted before either {@code enumerated} setting.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * @JsonXmlField(enumerated = EnumType.ORDINAL)
@@ -188,8 +207,17 @@ public @interface JsonXmlField {
     EnumType enumerated() default EnumType.NAME;
 
     /**
-     * Specifies whether this field should be completely ignored during serialization and deserialization.
-     * When set to {@code true}, the field will be excluded from JSON/XML processing.
+     * Specifies whether this field is omitted from serialized JSON/XML output. When set to {@code true},
+     * the property is never written by the JSON/XML serializers.
+     *
+     * <p><b>Deserialization is not affected:</b> the parsers still resolve the property by name, so a
+     * matching value in the input is read and applied to the bean exactly as without the annotation, and
+     * it is not reported as an unknown property even with {@code setIgnoreUnmatchedProperty(false)}. To
+     * drop a property from input as well, use {@link Transient @Transient} (or the {@code transient}
+     * modifier), or configure the parser with {@code DeserializationConfig.setIgnoredPropNames(Class, Set)}.
+     * To write a property but never read it, use {@link #direction()} {@code = Direction.SERIALIZE_ONLY}
+     * instead; combining {@code ignore = true} with a non-default {@link #direction()} is rejected with an
+     * {@code IllegalArgumentException} when the bean is first introspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -197,14 +225,14 @@ public @interface JsonXmlField {
      *     private String username;
      *
      *     @JsonXmlField(ignore = true)
-     *     private String password;  // field is never included in JSON/XML
+     *     private String password;  // never written to JSON/XML output; still populated from input
      *
      *     @JsonXmlField(ignore = true)
-     *     private String internalId;  // field is hidden from serialization
+     *     private String internalId;  // omitted from serialized output
      * }
      * }</pre>
      *
-     * @return {@code true} to ignore this field during JSON/XML processing, {@code false} to include it
+     * @return {@code true} to omit this field from serialized output, {@code false} to include it
      */
     boolean ignore() default false;
 

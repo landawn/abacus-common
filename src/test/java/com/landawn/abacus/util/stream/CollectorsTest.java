@@ -110,6 +110,42 @@ public class CollectorsTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Collectors.toCollection(null));
     }
 
+    @Test
+    public void testCreateRejectsNullVarargsCharacteristics() {
+        final Supplier<StringBuilder> supplier = StringBuilder::new;
+        final BiConsumer<StringBuilder, String> accumulator = StringBuilder::append;
+        final BinaryOperator<StringBuilder> combiner = StringBuilder::append;
+
+        assertTrue(assertThrows(IllegalArgumentException.class,
+                () -> Collectors.create(supplier, accumulator, combiner, (Characteristics[]) null)).getMessage().contains("characteristics"));
+        assertTrue(assertThrows(IllegalArgumentException.class,
+                () -> Collectors.create(supplier, accumulator, combiner, Characteristics.UNORDERED, null)).getMessage().contains("characteristics[1]"));
+        assertTrue(assertThrows(IllegalArgumentException.class,
+                () -> Collectors.create(supplier, accumulator, combiner, StringBuilder::toString, (Characteristics[]) null)).getMessage()
+                        .contains("characteristics"));
+        assertTrue(assertThrows(IllegalArgumentException.class,
+                () -> Collectors.create(supplier, accumulator, combiner, StringBuilder::toString, Characteristics.UNORDERED, null)).getMessage()
+                        .contains("characteristics[1]"));
+    }
+
+    @Test
+    public void testCreateCollectionCharacteristicsRetainsNullAsEmpty() {
+        final Supplier<StringBuilder> supplier = StringBuilder::new;
+        final BiConsumer<StringBuilder, String> accumulator = StringBuilder::append;
+        final BinaryOperator<StringBuilder> combiner = StringBuilder::append;
+
+        assertEquals("ab", java.util.stream.Stream.of("a", "b")
+                .collect(Collectors.create(supplier, accumulator, combiner, (Collection<Characteristics>) null)).toString());
+        assertEquals("ab", java.util.stream.Stream.of("a", "b")
+                .collect(Collectors.create(supplier, accumulator, combiner, StringBuilder::toString, (Collection<Characteristics>) null)));
+        assertTrue(assertThrows(IllegalArgumentException.class,
+                () -> Collectors.create(supplier, accumulator, combiner, Arrays.asList(Characteristics.UNORDERED, null))).getMessage()
+                        .contains("characteristics[1]"));
+        assertTrue(assertThrows(IllegalArgumentException.class,
+                () -> Collectors.create(supplier, accumulator, combiner, StringBuilder::toString, Arrays.asList(Characteristics.UNORDERED, null)))
+                        .getMessage().contains("characteristics[1]"));
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -3775,7 +3811,12 @@ public class CollectorsTest extends TestBase {
 
         assertThrows(IllegalStateException.class, () -> Arrays.asList("a", "b", "a").stream().collect(Collectors.toMap(Function.identity(), String::length)));
 
-        assertThrows(NullPointerException.class, () -> Arrays.asList("a", null, "b").stream().collect(Collectors.groupingBy(Function.identity())));
+        // A null key is rejected with IllegalArgumentException, matching Stream.groupTo and the rest of this
+        // library, rather than the NullPointerException java.util.stream.Collectors.groupingBy would raise.
+        assertThrows(IllegalArgumentException.class, () -> Arrays.asList("a", null, "b").stream().collect(Collectors.groupingBy(Function.identity())));
+        assertThrows(IllegalArgumentException.class, () -> Arrays.asList("a", null, "b").stream().collect(Collectors.countingBy(Function.identity())));
+        assertThrows(IllegalArgumentException.class,
+                () -> Arrays.asList("a", null, "b").stream().collect(Collectors.groupingByConcurrent(Function.identity())));
 
         assertThrows(UnsupportedOperationException.class, () -> stringList.parallelStream().collect(Collectors.first()));
 
@@ -4612,7 +4653,7 @@ public class CollectorsTest extends TestBase {
         assertEquals(10, Stream.of(1, 5, 5).collect(Collectors.maxAll(Comparator.<Integer> naturalOrder(), downstream)));
         assertEquals(2, Stream.of(5, 1, 1).collect(Collectors.minAll(Comparator.<Integer> naturalOrder(), downstream)));
 
-        final Optional<Pair<Integer, Integer>> withRepresentative = Stream.of(1, 5, 5).collect(Collectors.maxAllWith(Comparators.naturalOrder(), downstream));
+        final Optional<Pair<Integer, Integer>> withRepresentative = Stream.of(1, 5, 5).collect(Collectors.maxAllWith(Comparators.<Integer> naturalOrder(), downstream));
         assertTrue(withRepresentative.isPresent());
         assertEquals(Integer.valueOf(5), withRepresentative.get().left());
         assertEquals(Integer.valueOf(10), withRepresentative.get().right());
@@ -4802,6 +4843,83 @@ public class CollectorsTest extends TestBase {
         assertEquals(N.asMap(false, 2, true, 2), Stream.of(1, 2, 3, 4).collect(collector));
         assertEquals(N.asMap(false, 0, true, 0), Stream.<Integer> empty().collect(collector));
         assertArrayEquals(new int[] { 1, 1, 1, 1 }, accessorCalls);
+    }
+
+    @Test
+    public void testGroupingPreservesDownstreamFinisherFailure() {
+        for (final boolean iteratorSource : new boolean[] { false, true }) {
+            for (final boolean parallel : new boolean[] { false, true }) {
+                final IllegalStateException failure = new IllegalStateException("downstream result is invalid");
+                final Collector<Integer, ?, Integer> downstream = Collectors.collectingAndThen(Collectors.<Integer> toList(), values -> {
+                    throw failure;
+                });
+
+                final Stream<Integer> objectSource = iteratorSource ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3);
+                final Stream<Integer> objects = parallel ? objectSource.parallel(2) : objectSource;
+                Assertions.assertSame(failure, assertThrows(IllegalStateException.class, () -> objects.groupTo(value -> value % 2, downstream)));
+
+                final IntStream intSource = iteratorSource ? IntStream.of(com.landawn.abacus.util.IntIterator.of(1, 2, 3)) : IntStream.of(1, 2, 3);
+                final IntStream ints = parallel ? intSource.parallel(2) : intSource;
+                Assertions.assertSame(failure, assertThrows(IllegalStateException.class, () -> ints.groupTo(value -> value % 2, downstream)));
+            }
+        }
+    }
+
+    @Test
+    public void testGroupingFinishesValuesInConcurrentSkipListMap() {
+        final Map<Integer, Integer> values = new java.util.concurrent.ConcurrentSkipListMap<>(N.asMap(1, 2, 3, 4));
+        Collectors.replaceAll(values, Integer::sum);
+        assertEquals(N.asMap(1, 3, 3, 7), values);
+        Collectors.replaceAll(java.util.Collections.emptyMap(), (key, value) -> {
+            throw new AssertionError("empty map must not invoke the function");
+        });
+
+        for (final boolean iteratorSource : new boolean[] { false, true }) {
+            for (final boolean parallel : new boolean[] { false, true }) {
+                final Stream<Integer> objectSource = iteratorSource ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3);
+                final Stream<Integer> objects = parallel ? objectSource.parallel(2) : objectSource;
+                assertEquals(N.asMap(0, 1L, 1, 2L), objects.groupTo(value -> value % 2, Collectors.counting(), java.util.concurrent.ConcurrentSkipListMap::new));
+
+                final IntStream intSource = iteratorSource ? IntStream.of(com.landawn.abacus.util.IntIterator.of(1, 2, 3)) : IntStream.of(1, 2, 3);
+                final IntStream ints = parallel ? intSource.parallel(2) : intSource;
+                assertEquals(N.asMap(0, 1L, 1, 2L), ints.groupTo(value -> value % 2, Collectors.counting(), java.util.concurrent.ConcurrentSkipListMap::new));
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------
+    // Stream review 2026-09-09 (pass B) - toSet(int) allocation
+    // ------------------------------------------------------------------------------------------------------
+
+    /**
+     * {@code toSet(int atMostSize)} used to hand {@code atMostSize} straight to {@code N.newHashSet}, sizing the
+     * hash table for the whole bound however few elements actually arrived, so a 3-element stream collected with
+     * {@code toSet(Integer.MAX_VALUE)} exhausted the heap. Its siblings all cap: {@code toList(int)} and
+     * {@code first(int)} at {@code N.min(256, n)}, {@code maxAll(cmp, int)} at {@code Math.min(16, n)}.
+     *
+     * <p>Measured on a 3-element stream before the fix: {@code toSet(20_000_000)} retained ~144 MB against
+     * ~26 MB for {@code toList(20_000_000)}; after the fix, ~4 MB. The threshold below is deliberately loose -
+     * it only has to separate "sized for the bound" from "sized for what arrived".
+     */
+    @Test
+    public void testToSet_withHugeAtMostSizeDoesNotPreallocateForTheWholeBound() {
+        final int hugeBound = 20_000_000;
+
+        // correctness first: the bound itself still behaves
+        assertEquals(N.asSet(1, 2, 3), Stream.of(1, 2, 3).collect(Collectors.toSet(hugeBound)));
+        assertEquals(2, Stream.of(1, 2, 2, 3).collect(Collectors.toSet(2)).size());
+        assertThrows(IllegalArgumentException.class, () -> Collectors.toSet(-1));
+
+        Stream.of(1, 2, 3).collect(Collectors.toSet(hugeBound)); // warm up the classes before measuring
+        System.gc();
+
+        final Runtime rt = Runtime.getRuntime();
+        final long before = rt.totalMemory() - rt.freeMemory();
+        final Set<Integer> collected = Stream.of(1, 2, 3).collect(Collectors.toSet(hugeBound));
+        final long delta = rt.totalMemory() - rt.freeMemory() - before;
+
+        assertEquals(3, collected.size());
+        assertTrue(delta < 32L * 1024 * 1024, "toSet(" + hugeBound + ") on a 3-element stream retained " + delta + " bytes");
     }
 
 }

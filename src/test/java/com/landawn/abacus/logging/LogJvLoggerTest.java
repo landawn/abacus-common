@@ -76,60 +76,18 @@ public class LogJvLoggerTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Test trace methods")
     @EnabledIf("isLog4j2Available")
-    public void testTraceMethods() {
-        Log4Jv2Logger logger = new Log4Jv2Logger("test.log4j2.trace");
-
+    public void testMessageAndThrowableOverloads() {
+        Log4Jv2Logger logger = new Log4Jv2Logger("test.log4j2.levels");
         assertDoesNotThrow(() -> {
             logger.trace("Trace message");
             logger.trace("Trace with exception", new Exception("Test"));
-        });
-    }
-
-    @Test
-    @DisplayName("Test debug methods")
-    @EnabledIf("isLog4j2Available")
-    public void testDebugMethods() {
-        Log4Jv2Logger logger = new Log4Jv2Logger("test.log4j2.debug");
-
-        assertDoesNotThrow(() -> {
             logger.debug("Debug message");
             logger.debug("Debug with exception", new RuntimeException("Test"));
-        });
-    }
-
-    @Test
-    @DisplayName("Test info methods")
-    @EnabledIf("isLog4j2Available")
-    public void testInfoMethods() {
-        Log4Jv2Logger logger = new Log4Jv2Logger("test.log4j2.info");
-
-        assertDoesNotThrow(() -> {
             logger.info("Info message");
             logger.info("Info with exception", new IllegalArgumentException("Test"));
-        });
-    }
-
-    @Test
-    @DisplayName("Test warn methods")
-    @EnabledIf("isLog4j2Available")
-    public void testWarnMethods() {
-        Log4Jv2Logger logger = new Log4Jv2Logger("test.log4j2.warn");
-
-        assertDoesNotThrow(() -> {
             logger.warn("Warning message");
             logger.warn("Warning with exception", new IllegalStateException("Test"));
-        });
-    }
-
-    @Test
-    @DisplayName("Test error methods")
-    @EnabledIf("isLog4j2Available")
-    public void testErrorMethods() {
-        Log4Jv2Logger logger = new Log4Jv2Logger("test.log4j2.error");
-
-        assertDoesNotThrow(() -> {
             logger.error("Error message");
             logger.error("Error with exception", new Error("Test"));
         });

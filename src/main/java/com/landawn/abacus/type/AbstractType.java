@@ -31,6 +31,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.TypeAttrParser;
+import com.landawn.abacus.util.cs;
 
 /**
  * The abstract base class for all types in the type system.
@@ -157,8 +158,11 @@ public abstract class AbstractType<T> implements Type<T> {
      * </p>
      *
      * @param typeName the fully qualified or simple type name (may include generic parameters)
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractType(final String typeName) {
+    protected AbstractType(final String typeName) throws IllegalArgumentException {
+        N.checkArgNotNull(typeName, cs.typeName);
+
         String simpleName = typeName;
 
         if (typeName.indexOf('.') > 0 && Strings.startsWithAny(typeName, "java.lang.", "java.util.", "java.time.", "com.landawn.abacus.")) { //NOSONAR
@@ -749,7 +753,7 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public int compare(final T x, final T y) {
+    public int compare(final T x, final T y) throws UnsupportedOperationException {
         if (!isComparable()) {
             throw new UnsupportedOperationException(name() + " does not support compare operation");
         }
@@ -805,10 +809,11 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
      * @return the retrieved value, possibly {@code null}
+     * @throws NullPointerException if {@code rs} is {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public T get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public T get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return valueOf(rs.getString(columnIndex));
     }
 
@@ -824,10 +829,11 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
      * @return the retrieved value, possibly {@code null}
+     * @throws NullPointerException if {@code rs} is {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public T get(final ResultSet rs, final String columnName) throws SQLException {
+    public T get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return valueOf(rs.getString(columnName));
     }
 
@@ -846,10 +852,11 @@ public abstract class AbstractType<T> implements Type<T> {
      *                    compatibility, but this is a {@link PreparedStatement} parameter index, not a
      *                    {@link ResultSet} column index
      * @param x the value to set, may be {@code null}
+     * @throws NullPointerException if {@code stmt} is {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws NullPointerException, SQLException {
         stmt.setString(columnIndex, stringOf(x));
     }
 
@@ -866,10 +873,11 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param stmt the {@code CallableStatement}
      * @param parameterName the parameter name
      * @param x the value to set, may be {@code null}
+     * @throws NullPointerException if {@code stmt} is {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final T x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final T x) throws NullPointerException, SQLException {
         stmt.setString(parameterName, stringOf(x));
     }
 
@@ -887,10 +895,11 @@ public abstract class AbstractType<T> implements Type<T> {
      *                    {@link ResultSet} column index
      * @param x the value to set, may be {@code null}
      * @param sqlTypeOrLength the {@code java.sql.Types} code or column length (ignored by default)
+     * @throws NullPointerException if {@code stmt} is {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final T x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final T x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
         this.set(stmt, columnIndex, x);
     }
 
@@ -906,10 +915,11 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param parameterName the parameter name
      * @param x the value to set, may be {@code null}
      * @param sqlTypeOrLength the {@code java.sql.Types} code or column length (ignored by default)
+     * @throws NullPointerException if {@code stmt} is {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final T x, final int sqlTypeOrLength) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final T x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
         this.set(stmt, parameterName, x);
     }
 
@@ -926,7 +936,8 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @param appendable the target to append to
      * @param x the value to append
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code appendable} is {@code null}
+     * @throws IOException if appending the value to {@code appendable} fails
      * @implNote
      * {@code appendTo} writes a string representation of {@code x} for general text output. Conceptually this is the
      * human-readable form produced by {@code toString()}, as opposed to {@link #stringOf(Object)}, which returns a
@@ -938,7 +949,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}.
      */
     @Override
-    public void appendTo(final Appendable appendable, final T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -963,20 +974,21 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param writer the CharacterWriter to write to
      * @param x the value to write
      * @param config the serialization configuration, may be {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws NullPointerException if {@code writer} is {@code null}
+     * @throws IOException if writing the serialized value to {@code writer} fails
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
             final char ch = config == null ? 0 : config.getStringQuotation();
 
             if (ch == 0) {
-                writer.writeCharacter(stringOf(x));
+                Utils.writeStringContent(writer, stringOf(x), ch);
             } else {
                 writer.write(ch);
-                writer.writeCharacter(stringOf(x));
+                Utils.writeStringContent(writer, stringOf(x), ch);
                 writer.write(ch);
             }
         }
@@ -991,7 +1003,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws UnsupportedOperationException if not supported by this type
      */
     @Override
-    public T collectionToArray(final Collection<?> c) {
+    public T collectionToArray(final Collection<?> c) throws UnsupportedOperationException {
         throw new UnsupportedOperationException(name() + " does not support collectionToArray operation");
     }
 
@@ -1006,7 +1018,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws UnsupportedOperationException if not supported by this type
      */
     @Override
-    public <E> Collection<E> arrayToCollection(final T array, final Class<?> collClass) {
+    public <E> Collection<E> arrayToCollection(final T array, final Class<?> collClass) throws UnsupportedOperationException {
         throw new UnsupportedOperationException(name() + " does not support arrayToCollection operation");
     }
 
@@ -1019,7 +1031,7 @@ public abstract class AbstractType<T> implements Type<T> {
      * @throws UnsupportedOperationException if not supported by this type
      */
     @Override
-    public void arrayToCollection(final T array, final Collection<?> output) {
+    public void arrayToCollection(final T array, final Collection<?> output) throws UnsupportedOperationException {
         throw new UnsupportedOperationException(name() + " does not support arrayToCollection operation");
     }
 
@@ -1037,15 +1049,14 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Calculates the deep hash code for a value of this type.
-     * Default implementation computes the hash code via {@link N#hashCode(Object)},
-     * which for most non-array types matches {@link #hashCode(Object)}.
+     * Default implementation computes the hash code via {@link N#deepHashCode(Object)}.
      *
      * @param x the value
      * @return the deep hash code
      */
     @Override
     public int deepHashCode(final T x) {
-        return N.hashCode(x);
+        return N.deepHashCode(x);
     }
 
     /**
@@ -1063,8 +1074,7 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks deep equality between two values of this type.
-     * Default implementation compares the values via {@link N#equals(Object, Object)},
-     * which for most non-array types matches {@link #equals(Object, Object)}.
+     * Default implementation compares the values via {@link N#deepEquals(Object, Object)}.
      *
      * @param x the first value
      * @param y the second value
@@ -1072,7 +1082,7 @@ public abstract class AbstractType<T> implements Type<T> {
      */
     @Override
     public boolean deepEquals(final T x, final T y) {
-        return N.equals(x, y);
+        return N.deepEquals(x, y);
     }
 
     /**
@@ -1219,9 +1229,10 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if a character sequence possibly represents a millisecond timestamp (i.e., a long integer).
-     * A string is considered a possible millisecond value if it has more than 4 characters and
-     * the characters at positions 2 and 4 are both digits, which distinguishes pure numeric
-     * values from date strings like {@code "2023-01-01"} where position 4 is {@code '-'}.
+     * A string is considered a possible millisecond value if it has more than 4 characters, the characters at
+     * positions 2 and 4 are both digits - which distinguishes pure numeric values from date strings like
+     * {@code "2023-01-01"} where position 4 is {@code '-'} - and the last character is a digit too, so text
+     * carrying a trailing type suffix ({@code "1700000000000L"}) or a time zone is not read as a timestamp.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1250,7 +1261,7 @@ public abstract class AbstractType<T> implements Type<T> {
             if (ch >= '0' && ch <= '9') {
                 ch = dateTime.charAt(4);
 
-                return ch >= '0' && ch <= '9';
+                return ch >= '0' && ch <= '9' && isDigit(dateTime.charAt(len - 1));
             }
         }
 
@@ -1260,8 +1271,16 @@ public abstract class AbstractType<T> implements Type<T> {
     /**
      * Checks if a region of a character array possibly represents a millisecond timestamp
      * (i.e., a long integer). The region is considered a possible millisecond value if it has
-     * more than 4 characters and the characters at relative positions 2 and 4 are both digits,
-     * which distinguishes pure numeric values from date strings where position 4 is a separator.
+     * more than 4 characters, the characters at relative positions 2 and 4 are both digits -
+     * which distinguishes pure numeric values from date strings where position 4 is a separator -
+     * and the last character of the region is a digit too.
+     * <p>
+     * The last-character test is what keeps the {@code char[]} readers in step with their {@code String}
+     * counterparts: {@link #parseLong(char[], int, int)} tolerates a trailing {@code l}/{@code L}/{@code f}/
+     * {@code F}/{@code d}/{@code D} type suffix that {@link Long#parseLong(String)} rejects, so without it
+     * {@code "1700000000000L"} would be read as a timestamp from a {@code char[]} and as a date from a
+     * {@code String}.
+     * </p>
      *
      * @param cbuf the character array to inspect
      * @param offset the starting position within the array
@@ -1275,11 +1294,15 @@ public abstract class AbstractType<T> implements Type<T> {
             if (ch >= '0' && ch <= '9') {
                 ch = cbuf[offset + 4];
 
-                return ch >= '0' && ch <= '9';
+                return ch >= '0' && ch <= '9' && isDigit(cbuf[offset + len - 1]);
             }
         }
 
         return false;
+    }
+
+    private static boolean isDigit(final char ch) {
+        return ch >= '0' && ch <= '9';
     }
 
     /**
@@ -1296,11 +1319,18 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param offset the starting position within {@code cbuf}
      * @param len the number of characters to parse
      * @return the parsed integer value
-     * @throws NumberFormatException if the characters cannot be parsed as an integer
      * @throws IllegalArgumentException if {@code offset} or {@code len} is negative.
+     * @throws IndexOutOfBoundsException if {@code cbuf} is non-null, {@code len > 0}, and the selected region
+     *         extends beyond the array
+     * @throws NumberFormatException if the characters cannot be parsed as an integer
+     * @throws ArithmeticException if the digits form a well-formed number outside the {@code int} range
+     *         (e.g. {@code "2147483648"}); unlike {@link Integer#parseInt(String)}, the fallback path reports
+     *         overflow this way rather than as a {@code NumberFormatException}
      * @see Integer#parseInt(String)
+     * @see Numbers#toInt(String)
      */
-    protected static int parseInt(final char[] cbuf, final int offset, int len) throws NumberFormatException {
+    protected static int parseInt(final char[] cbuf, final int offset, int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException, NumberFormatException, ArithmeticException {
         if (offset < 0 || len < 0) {
             throw new IllegalArgumentException("'offset' and 'len' cannot be negative");
         }
@@ -1366,11 +1396,18 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param offset the starting position within {@code cbuf}
      * @param len the number of characters to parse
      * @return the parsed long value
-     * @throws NumberFormatException if the characters cannot be parsed as a long
      * @throws IllegalArgumentException if {@code offset} or {@code len} is negative.
+     * @throws IndexOutOfBoundsException if {@code cbuf} is non-null, {@code len > 0}, and the selected region
+     *         extends beyond the array
+     * @throws NumberFormatException if the characters cannot be parsed as a long
+     * @throws ArithmeticException if the digits form a well-formed number outside the {@code long} range
+     *         (e.g. {@code "9223372036854775808"}); unlike {@link Long#parseLong(String)}, the fallback path
+     *         reports overflow this way rather than as a {@code NumberFormatException}
      * @see Long#parseLong(String)
+     * @see Numbers#toLong(String)
      */
-    protected static long parseLong(final char[] cbuf, final int offset, int len) throws NumberFormatException {
+    protected static long parseLong(final char[] cbuf, final int offset, int len)
+            throws IllegalArgumentException, IndexOutOfBoundsException, NumberFormatException, ArithmeticException {
         if (offset < 0 || len < 0) {
             throw new IllegalArgumentException("'offset' and 'len' cannot be negative");
         }
@@ -1441,19 +1478,96 @@ public abstract class AbstractType<T> implements Type<T> {
      * For multi-character inputs, delegates to {@link Boolean#valueOf(String)}, which
      * returns {@code true} only if the string equals "true" (case-insensitive).
      * </p>
+     * <p>
+     * Leading and trailing {@linkplain #isPadding(char) padding} is removed first, so {@code " Y"} and
+     * {@code " true "} are accepted. The callers test for blank text with
+     * {@link Strings#isBlank(CharSequence)}, which follows {@link Character#isWhitespace(char)}: stripping here
+     * with the same definition is what keeps text padded with Unicode whitespace above {@code U+0020} (U+3000
+     * followed by {@code "true"}, say) - text that is not blank - from being handed to
+     * {@link Boolean#valueOf(String)} with its padding still attached.
+     * </p>
      *
      * @param str the string to parse; must not be {@code null}
      * @return a non-{@code null} {@code Boolean} representing the parsed value
      * @throws NullPointerException if {@code str} is {@code null}
      * @see Boolean#valueOf(String)
      */
-    protected static Boolean parseBoolean(final String str) {
-        if (str.length() == 1) {
-            final char ch = str.charAt(0);
+    protected static Boolean parseBoolean(final String str) throws NullPointerException {
+        final String value = stripPadding(str);
+
+        if (value.length() == 1) {
+            final char ch = value.charAt(0);
             return ch == 'Y' || ch == 'y' || ch == '1';
         }
 
-        return Boolean.valueOf(str);
+        return Boolean.valueOf(value);
+    }
+
+    /**
+     * Tests whether {@code ch} is padding for the purposes of {@link #parseBoolean(String)}, i.e. a character that
+     * either {@link Strings#isBlank(CharSequence)} (which follows {@link Character#isWhitespace(char)}) or
+     * {@link String#trim()} (which removes every character {@code <= ' '}) would discard.
+     * <p>
+     * The two definitions do not coincide - U+3000 is Unicode whitespace but is greater than {@code ' '}, and
+     * U+0001 is {@code <= ' '} but is not Unicode whitespace - so both are treated as padding. Honouring only one
+     * of the two leaves the readers that go through {@code char[]} disagreeing with those that go through
+     * {@code String} on the same text.
+     * </p>
+     *
+     * @param ch the character to test
+     * @return {@code true} if a leading or trailing {@code ch} is removed before parsing
+     */
+    static boolean isPadding(final char ch) {
+        return ch <= ' ' || Character.isWhitespace(ch);
+    }
+
+    /**
+     * Removes leading and trailing {@linkplain #isPadding(char) padding} from {@code str}.
+     *
+     * @param str the string to strip; must not be {@code null}
+     * @return {@code str} without leading and trailing padding
+     */
+    static String stripPadding(final String str) {
+        int start = 0;
+        int end = str.length();
+
+        while (start < end && isPadding(str.charAt(start))) {
+            start++;
+        }
+
+        while (end > start && isPadding(str.charAt(end - 1))) {
+            end--;
+        }
+
+        return start == 0 && end == str.length() ? str : str.substring(start, end);
+    }
+
+    /**
+     * Parses {@code str} as a {@code char}.
+     * <p>
+     * A single-character string yields that character. A longer string is parsed as a numeric UTF-16
+     * code-unit value in {@code [Character.MIN_VALUE, Character.MAX_VALUE]} (for example {@code "65"}
+     * yields {@code 'A'}). Callers are responsible for {@code null} or empty input.
+     * </p>
+     *
+     * @param str the string to parse; must not be {@code null} or empty
+     * @return the character represented by {@code str}
+     * @throws NullPointerException if {@code str} is {@code null}
+     * @throws NumberFormatException if {@code str} is empty or has more than one character and cannot be parsed as an integer
+     * @throws IllegalArgumentException if the parsed integer is outside the {@code char} range
+     */
+    protected static char parseChar(final String str) throws NullPointerException, NumberFormatException, IllegalArgumentException {
+        if (str.length() == 1) {
+            return str.charAt(0);
+        }
+
+        final int intValue = Integer.parseInt(str);
+
+        if (intValue < Character.MIN_VALUE || intValue > Character.MAX_VALUE) {
+            throw new IllegalArgumentException("Integer value out of char range: " + intValue);
+        }
+
+        return (char) intValue;
     }
 
     /**
@@ -1544,28 +1658,5 @@ public abstract class AbstractType<T> implements Type<T> {
         }
 
         return len > Integer.MAX_VALUE / elementPlusDelimiterLen ? Integer.MAX_VALUE : len * elementPlusDelimiterLen;
-    }
-
-    /**
-     * Converts a raw element produced by an untyped first-pass JSON parse into the declared element type
-     * of a tuple slot ({@code Pair}, {@code Triple}, {@code Tuple1..9}).
-     *
-     * @param raw the raw element value from the untyped parse, may be {@code null}
-     * @param type the declared type of the tuple slot
-     * @return the element converted to the declared type, or {@code null} if {@code raw} is {@code null}
-     */
-    protected static Object convertTupleElement(final Object raw, final Type<?> type) {
-        if (raw == null) {
-            return null;
-        }
-
-        // A parameterized slot must be re-deserialized with its declared element types: the
-        // untyped first-pass parse produced parser defaults (Integer, LinkedHashMap, ...), and
-        // both the raw-assignability shortcut and N.convert would keep them unconverted.
-        if (type.isParameterizedType() && !(raw instanceof CharSequence)) {
-            return type.valueOf(Utils.jsonParser.serialize(raw));
-        }
-
-        return type.javaType().isAssignableFrom(raw.getClass()) ? raw : N.convert(raw, type);
     }
 }

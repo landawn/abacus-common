@@ -17,6 +17,7 @@ package com.landawn.abacus.type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.Numbers;
 
 /**
@@ -26,11 +27,16 @@ import com.landawn.abacus.util.Numbers;
  *
  * <p>Retrieval reads the column as a generic {@link Object} via
  * {@link java.sql.ResultSet#getObject(int)}: {@link Number} values are narrowed via
- * {@link Number#byteValue()}, and any other (non-{@link Number}) value is parsed from its
- * string form using {@link com.landawn.abacus.util.Numbers#toByte(String)}.</p>
+ * {@link com.landawn.abacus.util.Numbers#toByte(Object)}, and any other (non-{@link Number}) value is parsed from its
+ * string form using {@link com.landawn.abacus.util.Numbers#toByte(String)}. Following that method's contract, an
+ * empty string column value is read as {@code 0}, not {@code null} (unlike {@code valueOf("")}); a whitespace-only or
+ * otherwise non-numeric string throws {@link NumberFormatException}.</p>
  *
  * <p>String serialization and JDBC write operations are inherited from
  * {@link AbstractByteType}.</p>
+ *
+ * <p>JDBC numeric coercion truncates finite fractional values toward zero, then checks the target range.
+ * NaN, infinities and out-of-range integer parts throw {@link ArithmeticException}; no wraparound occurs.</p>
  *
  * @see AbstractByteType
  */
@@ -74,24 +80,27 @@ public final class ByteType extends AbstractByteType {
     /**
      * Retrieves a {@link Byte} from a {@link java.sql.ResultSet} at the specified column index.
      * The column value is read via {@link java.sql.ResultSet#getObject(int)}: if the result is
-     * a {@link Number}, it is narrowed via {@link Number#byteValue()}; for any other (non-{@link Number})
+     * a {@link Number}, it is narrowed via {@link com.landawn.abacus.util.Numbers#toByte(Object)}; for any other (non-{@link Number})
      * value, its string representation is parsed using
      * {@link com.landawn.abacus.util.Numbers#toByte(String)}.
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the column containing the byte value
      * @return the {@code Byte} value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      * @throws NumberFormatException if a non-numeric string value cannot be parsed as a {@code byte}
+     * @throws ArithmeticException if the numeric value is nonfinite or its integer part is out of range
      */
+    @MayReturnNull
     @Override
-    public Byte get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Byte get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, NumberFormatException, ArithmeticException {
         final Object result = rs.getObject(columnIndex);
 
         if (result == null) { // NOSONAR
             return null; // NOSONAR
         } else if (result instanceof Number) {
-            return ((Number) result).byteValue();
+            return Numbers.toByte(result);
         } else {
             return Numbers.toByte(result.toString());
         }
@@ -100,24 +109,27 @@ public final class ByteType extends AbstractByteType {
     /**
      * Retrieves a {@link Byte} from a {@link java.sql.ResultSet} using the specified column label.
      * The column value is read via {@link java.sql.ResultSet#getObject(String)}: if the result is
-     * a {@link Number}, it is narrowed via {@link Number#byteValue()}; for any other (non-{@link Number})
+     * a {@link Number}, it is narrowed via {@link com.landawn.abacus.util.Numbers#toByte(Object)}; for any other (non-{@link Number})
      * value, its string representation is parsed using
      * {@link com.landawn.abacus.util.Numbers#toByte(String)}.
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
      * @return the {@code Byte} value in the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      * @throws NumberFormatException if a non-numeric string value cannot be parsed as a {@code byte}
+     * @throws ArithmeticException if the numeric value is nonfinite or its integer part is out of range
      */
+    @MayReturnNull
     @Override
-    public Byte get(final ResultSet rs, final String columnName) throws SQLException {
+    public Byte get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, NumberFormatException, ArithmeticException {
         final Object result = rs.getObject(columnName);
 
         if (result == null) {
             return null; // NOSONAR
         } else if (result instanceof Number) {
-            return ((Number) result).byteValue();
+            return Numbers.toByte(result);
         } else {
             return Numbers.toByte(result.toString());
         }

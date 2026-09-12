@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,6 +45,15 @@ public class TimeTypeTest extends TestBase {
     public void test_valueOf_String_SysTime() {
         Time result = type.valueOf("sysTime");
         assertNotNull(result);
+    }
+
+    @Test
+    public void test_stringOf_valueOf_roundTrip_preservesEpochMillis() {
+        final Time value = new Time(1736937045123L);
+        final String text = type.stringOf(value);
+
+        assertEquals("2025-01-15T10:30:45.123Z", text);
+        assertEquals(value.getTime(), type.valueOf(text).getTime());
     }
 
     @Test
@@ -108,5 +118,31 @@ public class TimeTypeTest extends TestBase {
     @Test
     public void test_name() {
         assertEquals("Time", type.name());
+    }
+
+    // --- review fixes 2026-09-06 (T9-02, T9-03): the char[] fast path is a sibling of the ones pinned in
+    // DateTypeTest / CalendarTypeTest / TimestampTypeTest and carries the identical guard.
+
+    @Test
+    public void reviewFixes20260906_T902_T903_charArrayAgreesWithStringOverload() {
+        // a trailing type suffix used to be stripped by parseLong(char[]) only, so the two overloads disagreed
+        for (final String s : new String[] { "1700000000000L", "1700000000000d", "12345L" }) {
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        // overflowing text used to escape the char[] path as ArithmeticException("long overflow")
+        for (final String s : new String[] { "99999999999999999999", "9223372036854775808", "-9223372036854775809" }) {
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s), s);
+            assertThrows(IllegalArgumentException.class, () -> type.valueOf(s.toCharArray(), 0, s.length()), s);
+        }
+
+        for (final String s : new String[] { "1700000000000", "+1700000000000", "-1700000000000" }) {
+            assertEquals(Long.parseLong(s), type.valueOf(s.toCharArray(), 0, s.length()).getTime(), s);
+            assertEquals(Long.parseLong(s), type.valueOf(s).getTime(), s);
+        }
+
+        assertNull(type.valueOf((char[]) null, 0, 0));
+        assertNull(type.valueOf(new char[0], 0, 0));
     }
 }

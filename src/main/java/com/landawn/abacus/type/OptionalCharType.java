@@ -157,14 +157,14 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * @see #valueOf(Object)
      * @see #stringOf(OptionalChar)
      */
-    @SuppressWarnings("deprecation")
     @Override
-    public OptionalChar valueOf(final String str) {
-        return Strings.isEmpty(str) ? OptionalChar.empty() : OptionalChar.of(Strings.parseChar(str));
+    public OptionalChar valueOf(final String str) throws NumberFormatException, IllegalArgumentException {
+        return Strings.isEmpty(str) ? OptionalChar.empty() : OptionalChar.of(parseChar(str));
     }
 
     /**
-     * Retrieves a character value from a ResultSet at the specified column index and wraps it in an {@link OptionalChar}.
+     * Retrieves a string value from a ResultSet at the specified column index and wraps its first character in an
+     * {@link OptionalChar}; any further characters (including the low half of a surrogate pair) are ignored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -184,11 +184,13 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      *
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
-     * @return an OptionalChar containing the character value, or empty if the column value is SQL NULL or an empty string
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @return an OptionalChar containing the first character of the column value ({@code "AB"} yields {@code 'A'}),
+     *         or empty if the column value is SQL NULL or an empty string
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public OptionalChar get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public OptionalChar get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final String result = rs.getString(columnIndex);
 
         if (result == null || result.isEmpty()) {
@@ -199,7 +201,8 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
     }
 
     /**
-     * Retrieves a character value from a ResultSet using the specified column label and wraps it in an {@link OptionalChar}.
+     * Retrieves a string value from a ResultSet using the specified column label and wraps its first character in an
+     * {@link OptionalChar}; any further characters (including the low half of a surrogate pair) are ignored.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -219,11 +222,13 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      *
      * @param rs the ResultSet to read from
      * @param columnName the label for the column specified with the SQL AS clause
-     * @return an OptionalChar containing the character value, or empty if the column value is SQL NULL or an empty string
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @return an OptionalChar containing the first character of the column value ({@code "AB"} yields {@code 'A'}),
+     *         or empty if the column value is SQL NULL or an empty string
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public OptionalChar get(final ResultSet rs, final String columnName) throws SQLException {
+    public OptionalChar get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final String result = rs.getString(columnName);
 
         if (result == null || result.isEmpty()) {
@@ -254,10 +259,11 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the OptionalChar value to set
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalChar x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalChar x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, Types.VARCHAR);
         } else {
@@ -286,10 +292,11 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OptionalChar value to set
-     * @throws SQLException if a database access error occurs or the parameterName is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final OptionalChar x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final OptionalChar x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, Types.VARCHAR);
         } else {
@@ -307,7 +314,8 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      *
      * @param appendable the Appendable to write to
      * @param x the OptionalChar value to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -319,7 +327,7 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final OptionalChar x) throws IOException {
+    public void appendTo(final Appendable appendable, final OptionalChar x) throws NullPointerException, IOException {
         if (x == null || x.isEmpty()) {
             appendable.append(NULL_STRING);
         } else {
@@ -347,10 +355,11 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * @param writer the CharacterWriter to write to
      * @param x the OptionalChar value to write
      * @param config the serialization configuration specifying character quotation; may be {@code null}
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final OptionalChar x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final OptionalChar x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null || x.isEmpty()) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

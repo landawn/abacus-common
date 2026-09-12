@@ -30,9 +30,8 @@ import java.io.Writer;
  *       backslash-escape mode they are escaped as {@code \\} (the backslash is the escape character there)</li>
  *   <li>Tabs, newlines, carriage returns, backspaces, and form-feeds are passed
  *       through literally (they are part of the quoted field's value per RFC 4180)</li>
- *   <li>Control characters (U+0000 through U+001F, except those listed above, plus U+007F) are escaped as
- *       <code>&#92;uXXXX</code> Unicode escapes (e.g. <code>&#92;u0000</code>)</li>
- *   <li>Special Unicode line separators (U+2028, U+2029) are escaped as <code>&#92;u2028</code> and <code>&#92;u2029</code></li>
+ *   <li>Other control characters and Unicode line/paragraph separators are preserved literally;
+ *       CSV has no Unicode-escape decoding rule</li>
  * </ul>
  *
  * <p>The escape mode (double-quote vs backslash) is determined by the
@@ -79,10 +78,8 @@ public final class BufferedCsvWriter extends CharacterWriter {
 
     /**
      * Standard CSV character replacement mappings (RFC 4180 double-quote escaping).
-     * Double quotes are escaped as {@code ""}, while backslashes, tabs, newlines, carriage returns,
-     * backspaces, and form-feeds are passed through literally; other control characters (U+0000 through
-     * U+001F and U+007F) and the line/paragraph separators (U+2028, U+2029) are escaped as
-     * <code>&#92;uXXXX</code> sequences.
+     * Double quotes are escaped as {@code ""}; all other characters are preserved literally.
+     * This includes control characters and Unicode line/paragraph separators.
      */
     static final char[][] REPLACEMENT_CHARS;
 
@@ -98,31 +95,8 @@ public final class BufferedCsvWriter extends CharacterWriter {
         final int length = 10000;
         REPLACEMENT_CHARS = new char[length][];
 
-        // for (int i = 0; i <= 0x1f; i++) {
-        // REPLACEMENT_CHARS[i] = String.format("\\u%04x", (int) i);
-        // }
-        for (int i = 0; i < length; i++) {
-            if ((i < 32) || (i == 127)) {
-                REPLACEMENT_CHARS[i] = getCharNum((char) i).toCharArray();
-            }
-        }
-
-        // RFC 4180 escaping: only the quote character is escaped (by doubling). CR, LF, TAB,
-        // backspace, form-feed inside a quoted field must be passed through literally — they
-        // are part of the field's value, not control sequences. Setting REPLACEMENT_CHARS[c]
-        // to null leaves the character unmodified by writeCharacter().
+        // A CSV parser does not decode Unicode escapes. Preserve character data and escape only quotes.
         REPLACEMENT_CHARS['"'] = "\"\"".toCharArray();
-        // REPLACEMENT_CHARS['\''] = "\\\'".toCharArray();
-        REPLACEMENT_CHARS['\\'] = null;
-        REPLACEMENT_CHARS['\t'] = null;
-        REPLACEMENT_CHARS['\b'] = null;
-        REPLACEMENT_CHARS['\n'] = null;
-        REPLACEMENT_CHARS['\r'] = null;
-        REPLACEMENT_CHARS['\f'] = null;
-
-        // Escape Unicode line and paragraph separators as explicit code points.
-        REPLACEMENT_CHARS['\u2028'] = "\\u2028".toCharArray();
-        REPLACEMENT_CHARS['\u2029'] = "\\u2029".toCharArray();
 
         REPLACEMENT_CHARS_BACK_SLASH = REPLACEMENT_CHARS.clone();
         REPLACEMENT_CHARS_BACK_SLASH['"'] = BACK_SLASH_CHAR_ARRAY;
@@ -193,8 +167,9 @@ public final class BufferedCsvWriter extends CharacterWriter {
      * }</pre>
      *
      * @param os the OutputStream to write to
+     * @throws IllegalArgumentException if {@code os} is {@code null}
      */
-    BufferedCsvWriter(final OutputStream os) {
+    BufferedCsvWriter(final OutputStream os) throws IllegalArgumentException {
         super(os, CsvUtil.isBackSlashEscapeCharForWrite() ? REPLACEMENT_CHARS_BACK_SLASH : REPLACEMENT_CHARS);
     }
 
@@ -223,8 +198,9 @@ public final class BufferedCsvWriter extends CharacterWriter {
      * }</pre>
      *
      * @param writer the Writer to write to
+     * @throws NullPointerException if {@code writer} is {@code null}
      */
-    BufferedCsvWriter(final Writer writer) {
+    BufferedCsvWriter(final Writer writer) throws NullPointerException {
         super(writer, CsvUtil.isBackSlashEscapeCharForWrite() ? REPLACEMENT_CHARS_BACK_SLASH : REPLACEMENT_CHARS);
     }
 

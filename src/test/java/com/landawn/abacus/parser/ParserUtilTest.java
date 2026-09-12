@@ -31,7 +31,6 @@ import com.landawn.abacus.annotation.Id;
 import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.Table;
-import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.JsonNameTag;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
@@ -52,6 +51,7 @@ import com.landawn.abacus.util.TypeReference;
 
 import lombok.Value;
 import lombok.experimental.Accessors;
+import testfixtures.entity.extendDirty.basic.Account;
 
 public class ParserUtilTest extends AbstractTest {
 
@@ -1120,7 +1120,7 @@ public class ParserUtilTest extends AbstractTest {
     @Test
     public void test_setPropValue() {
         final Account account = Beans.newRandomBean(Account.class);
-        N.println(account);
+        assertNotNull(account);
         Beans.setPropValue(account, Beans.getPropSetter(Account.class, "id"), 1);
         assertEquals(1, account.getId());
 
@@ -1803,23 +1803,17 @@ public class ParserUtilTest extends AbstractTest {
     @Test
     public void test_setGetNullBeanProperty() {
         final Account account = Beans.newRandomBean(Account.class);
-        N.println(account);
         account.setContact(null);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(Account.class);
 
-        N.println(beanInfo.getPropValue(account, "contact.email"));
         assertEquals((String) null, beanInfo.getPropValue(account, "contact.email"));
-        N.println(beanInfo.getPropValue(account, "contact.status"));
         assertEquals(Integer.valueOf(0), beanInfo.getPropValue(account, "contact.status"));
 
-        N.println(account.getContact());
         beanInfo.setPropValue(account, "contact.email", "test@email.com");
-        N.println(account.getContact());
         assertEquals("test@email.com", account.getContact().getEmail());
 
         beanInfo.setPropValue(account, "contact.status", "2");
-        N.println(account.getContact());
         assertEquals(2, account.getContact().getStatus());
     }
 
@@ -2100,154 +2094,43 @@ public class ParserUtilTest extends AbstractTest {
     public void test_toScreamingSnakeCase() {
         final Account account = createAccount(Account.class);
 
-        Map<String, Object> props = Beans.beanToMap(account);
+        Map<String, Object> snake = Beans.beanToMap(account);
+        Maps.replaceKeysWithSnakeCase(snake);
+        assertTrue(snake.containsKey("first_name"));
+        assertTrue(snake.containsKey("email_address"));
+        assertTrue(snake.containsKey("last_name"));
+        assertFalse(snake.containsKey("firstName"));
 
-        Maps.replaceKeysWithSnakeCase(props);
-
-        N.println(props);
-
-        props = Beans.beanToMap(account);
-
-        Maps.replaceKeysWithScreamingSnakeCase(props);
-
-        N.println(props);
-        assertNotNull(props);
+        Map<String, Object> screaming = Beans.beanToMap(account);
+        Maps.replaceKeysWithScreamingSnakeCase(screaming);
+        assertTrue(screaming.containsKey("FIRST_NAME"));
+        assertTrue(screaming.containsKey("EMAIL_ADDRESS"));
+        assertTrue(screaming.containsKey("LAST_NAME"));
+        assertFalse(screaming.containsKey("firstName"));
     }
 
     @Test
     public void test_ImmutableBuilderEntity() {
-        {
-            final ImmutableBuilderEntity bean = ImmutableBuilderEntity.builder().id(111).firstName("fn").lastName("ln").build();
+        assertJsonRoundTrip(ImmutableBuilderEntity.builder().id(111).firstName("fn").lastName("ln").build(), ImmutableBuilderEntity.class);
+        assertJsonRoundTrip(ImmutableBuilderEntity2.builder().id(111).firstName("fn").lastName("ln").build(), ImmutableBuilderEntity2.class);
+        assertJsonRoundTrip(ImmutableBuilderEntity3.builder().id(111).firstName("fn").lastName("ln").build(), ImmutableBuilderEntity3.class);
+        assertJsonRoundTrip(new ImmutableEntity4().id(111).firstName("fn").lastName("ln"), ImmutableEntity4.class);
+        assertJsonRoundTrip(new ImmutableEntity5(111, "fn", "ln"), ImmutableEntity5.class);
+        assertJsonRoundTrip(new ImmutableEntity6(111, "fn", "ln"), ImmutableEntity6.class);
+        assertJsonRoundTrip(new ImmutableEntity7(111, "fn", "ln"), ImmutableEntity7.class);
+        assertJsonRoundTrip(new ImmutableEntity8(111, "fn", "ln"), ImmutableEntity8.class);
+        assertJsonRoundTrip(new ImmutableEntity9(111, "fn", "ln"), ImmutableEntity9.class);
+        assertJsonRoundTrip(new RecordA(111, "fn", "ln"), RecordA.class);
+        assertJsonRoundTrip(new RecordB(111, "fn", "ln"), RecordB.class);
+    }
 
-            N.println(bean);
-            final String json = N.toJson(bean);
-
-            N.println(json);
-            final ImmutableBuilderEntity bean2 = N.fromJson(json, ImmutableBuilderEntity.class);
-
-            assertEquals(bean, bean2);
-        }
-
-        {
-            final ImmutableBuilderEntity2 bean = ImmutableBuilderEntity2.builder().id(111).firstName("fn").lastName("ln").build();
-
-            N.println(bean);
-            final String json = N.toJson(bean);
-
-            N.println(json);
-            final ImmutableBuilderEntity2 bean2 = N.fromJson(json, ImmutableBuilderEntity2.class);
-
-            assertEquals(bean, bean2);
-        }
-
-        {
-            final ImmutableBuilderEntity3 bean = ImmutableBuilderEntity3.builder().id(111).firstName("fn").lastName("ln").build();
-
-            N.println(bean);
-            final String json = N.toJson(bean);
-
-            N.println(json);
-            final ImmutableBuilderEntity3 bean2 = N.fromJson(json, ImmutableBuilderEntity3.class);
-
-            assertEquals(bean, bean2);
-        }
-
-        {
-            final ImmutableEntity4 bean = new ImmutableEntity4().id(111).firstName("fn").lastName("ln");
-
-            N.println(bean);
-            final String json = N.toJson(bean);
-
-            N.println(json);
-            final ImmutableEntity4 bean2 = N.fromJson(json, ImmutableEntity4.class);
-
-            assertEquals(bean, bean2);
-        }
-
-        {
-            final ImmutableEntity5 bean = new ImmutableEntity5(111, "fn", "ln");
-
-            N.println(bean);
-            final String json = N.toJson(bean);
-
-            N.println(json);
-            final ImmutableEntity5 bean2 = N.fromJson(json, ImmutableEntity5.class);
-
-            assertEquals(bean, bean2);
-        }
-
-        {
-            final ImmutableEntity6 bean = new ImmutableEntity6(111, "fn", "ln");
-
-            N.println(bean);
-            final String json = N.toJson(bean);
-
-            N.println(json);
-            final ImmutableEntity6 bean2 = N.fromJson(json, ImmutableEntity6.class);
-
-            assertEquals(bean, bean2);
-        }
-
-        {
-            final ImmutableEntity7 bean = new ImmutableEntity7(111, "fn", "ln");
-
-            N.println(bean);
-            final String json = N.toJson(bean);
-
-            N.println(json);
-            final ImmutableEntity7 bean2 = N.fromJson(json, ImmutableEntity7.class);
-
-            assertEquals(bean, bean2);
-        }
-
-        {
-            final ImmutableEntity8 bean = new ImmutableEntity8(111, "fn", "ln");
-
-            N.println(bean);
-            final String json = N.toJson(bean);
-
-            N.println(json);
-            final ImmutableEntity8 bean2 = N.fromJson(json, ImmutableEntity8.class);
-
-            assertEquals(bean, bean2);
-        }
-
-        {
-            final ImmutableEntity9 bean = new ImmutableEntity9(111, "fn", "ln");
-
-            N.println(bean);
-            final String json = N.toJson(bean);
-
-            N.println(json);
-            final ImmutableEntity9 bean2 = N.fromJson(json, ImmutableEntity9.class);
-
-            assertEquals(bean, bean2);
-        }
-
-        {
-            final RecordA bean = new RecordA(111, "fn", "ln");
-
-            N.println(bean);
-            final String json = N.toJson(bean);
-
-            N.println(json);
-            final RecordA bean2 = N.fromJson(json, RecordA.class);
-
-            assertEquals(bean, bean2);
-        }
-
-        {
-            final RecordB bean = new RecordB(111, "fn", "ln");
-
-            N.println(bean);
-            final String json = N.toJson(bean);
-
-            N.println(json);
-            final RecordB bean2 = N.fromJson(json, RecordB.class);
-
-            assertEquals(bean, bean2);
-        }
-
+    private static <T> void assertJsonRoundTrip(final T bean, final Class<T> type) {
+        final String json = N.toJson(bean);
+        assertTrue(json.contains("\"id\""));
+        assertTrue(json.contains("111"));
+        assertTrue(json.contains("fn"));
+        assertTrue(json.contains("ln"));
+        assertEquals(bean, N.fromJson(json, type));
     }
 
     // TODO: Remaining ParserUtil.ASMPropInfo gaps are ReflectASM-specific generated access paths that are not meaningfully isolated beyond public ParserUtil/PropInfo coverage.
@@ -2470,6 +2353,177 @@ public class ParserUtilTest extends AbstractTest {
         final PropInfo values = ParserUtil.getBeanInfo(beanType).getPropInfo("values");
 
         assertEquals(List[].class, values.type.javaType());
+        assertEquals(String.class, values.type.elementType().elementType().javaType());
+
+        final GenericArrayBean<List<String>> bean = ParserFactory.createJsonParser()
+                .deserialize("{\"values\":[[1]]}", com.landawn.abacus.type.Type.of(beanType));
+        assertEquals(List.of("1"), bean.values[0]);
+    }
+
+    public static class ParameterizedArrayBean {
+        public List<String>[] values;
+        public List<List<String>[]> nested;
+    }
+
+    public static class ArrayBeanValue<T> {
+        public T value;
+    }
+
+    public static class ParameterizedBeanArrayFields<T> {
+        public ArrayBeanValue<T>[] values;
+        public List<ArrayBeanValue<T>[]> nested;
+        public ParameterizedBeanArrayFields<T>[] children;
+    }
+
+    public static class ArrayOwner<T> {
+        public class Member {
+            public T value;
+        }
+    }
+
+    public static class ArrayOwnerFields<T> {
+        public ArrayOwner<T>.Member[] values;
+        public ArrayBeanValue<? extends T>[] upper;
+        public ArrayBeanValue<? super T>[] lower;
+        public List<T[]> arrays;
+    }
+
+    public static class RecursiveArrayOwner<T> {
+        public T value;
+
+        public class Member<U> extends RecursiveArrayOwner<Member<U>> {
+        }
+    }
+
+    public static class SwappedArrayOwner<A, B> {
+        public A first;
+        public B second;
+
+        public class Member extends SwappedArrayOwner<B, A> {
+        }
+    }
+
+    public static class ReorderedSuperclassOwner<A, B> {
+        public class Member {
+            public A first;
+            public B second;
+        }
+
+        public class Swapped extends ReorderedSuperclassOwner<B, A>.Member {
+            public Swapped(ReorderedSuperclassOwner<B, A> owner) {
+                owner.super();
+            }
+        }
+    }
+
+    @Test
+    public void test_getBeanInfo_resolvesReorderedSuperclassOwnerBeforeUpdatingBindings() {
+        java.lang.reflect.Type beanType = new TypeReference<ReorderedSuperclassOwner<String, Integer>.Swapped>() {
+        }.javaType();
+        ParserUtil.BeanInfo info = ParserUtil.getBeanInfo(beanType);
+        assertEquals(Integer.class, info.getPropInfo("first").type.javaType());
+        assertEquals(String.class, info.getPropInfo("second").type.javaType());
+
+        ParserUtil.BeanInfo rawInfo = ParserUtil.getBeanInfo(ReorderedSuperclassOwner.Swapped.class);
+        assertEquals(Object.class, rawInfo.getPropInfo("first").type.javaType());
+        assertEquals(Object.class, rawInfo.getPropInfo("second").type.javaType());
+    }
+
+    @Test
+    public void test_getBeanInfo_resolvesRecursiveAndSwappedOwnerVariables() {
+        final java.lang.reflect.Type recursive = new TypeReference<RecursiveArrayOwner<String>.Member<Integer>>() {
+        }.javaType();
+        assertEquals(recursive, ParserUtil.getBeanInfo(recursive).getPropInfo("value").type.reflectType());
+
+        final java.lang.reflect.Type swapped = new TypeReference<SwappedArrayOwner<String, Integer>.Member>() {
+        }.javaType();
+        final ParserUtil.BeanInfo swappedInfo = ParserUtil.getBeanInfo(swapped);
+        assertEquals(Integer.class, swappedInfo.getPropInfo("first").type.javaType());
+        assertEquals(String.class, swappedInfo.getPropInfo("second").type.javaType());
+
+        final ParserUtil.BeanInfo rawInfo = ParserUtil.getBeanInfo(SwappedArrayOwner.Member.class);
+        assertEquals(Object.class, rawInfo.getPropInfo("first").type.javaType());
+        assertEquals(Object.class, rawInfo.getPropInfo("second").type.javaType());
+    }
+
+    @Test
+    public void test_getBeanInfo_preservesArrayOwnersAndWildcardSubstitution() {
+        final ParserUtil.BeanInfo info = ParserUtil.getBeanInfo(new TypeReference<ArrayOwnerFields<String>>() {
+        }.javaType());
+        for (final String name : new String[] { "values", "upper", "lower" }) {
+            final java.lang.reflect.Type expected = switch (name) {
+                case "values" -> new TypeReference<ArrayOwner<String>.Member>() {
+                }.javaType();
+                case "upper" -> new TypeReference<ArrayBeanValue<? extends String>>() {
+                }.javaType();
+                case "lower" -> new TypeReference<ArrayBeanValue<? super String>>() {
+                }.javaType();
+                default -> throw new AssertionError();
+            };
+            final java.lang.reflect.Type actual = info.getPropInfo(name).type.elementType().reflectType();
+            assertEquals(expected, actual);
+            assertEquals(actual, expected);
+            assertEquals(expected.hashCode(), actual.hashCode());
+            assertEquals(expected.getTypeName(), actual.getTypeName());
+        }
+        assertEquals(String.class, ParserUtil.getBeanInfo(info.getPropInfo("values").type.elementType().reflectType()).getPropInfo("value").type.javaType());
+        assertEquals(String[].class, info.getPropInfo("arrays").type.elementType().javaType());
+
+        final ParserUtil.BeanInfo rawInfo = ParserUtil.getBeanInfo(ArrayOwnerFields.class);
+        assertEquals(Object[].class, rawInfo.getPropInfo("arrays").type.elementType().javaType());
+        assertEquals(Object.class, rawInfo.getPropInfo("upper").type.elementType().parameterTypes().get(0).javaType());
+    }
+
+    @Test
+    public void test_getBeanInfo_preservesBeanArrayComponentsAndVariableSubstitution() {
+        final TypeReference<ParameterizedBeanArrayFields<String>> reference = new TypeReference<>() {
+        };
+        final ParameterizedBeanArrayFields<String> bean = ParserFactory.createJsonParser()
+                .deserialize("{\"values\":[{\"value\":1},null],\"nested\":[[{\"value\":2}]],\"children\":[{\"values\":[{\"value\":3}]}]}", reference.type());
+
+        assertEquals("1", bean.values[0].value);
+        assertNull(bean.values[1]);
+        assertEquals("2", bean.nested.get(0)[0].value);
+        assertEquals("3", bean.children[0].values[0].value);
+
+        final PropInfo values = ParserUtil.getBeanInfo(reference.javaType()).getPropInfo("values");
+        final java.lang.reflect.Type expected = new TypeReference<ArrayBeanValue<String>>() {
+        }.javaType();
+        assertEquals(expected, values.type.elementType().reflectType());
+        assertEquals(expected.hashCode(), values.type.elementType().reflectType().hashCode());
+        assertEquals(expected.getTypeName(), values.type.elementType().reflectType().getTypeName());
+    }
+
+    @Test
+    public void test_getBeanInfo_preservesParameterizedArrayComponents() {
+        final ParameterizedArrayBean bean = N.fromJson("{\"values\":[[1]],\"nested\":[[[2]]]}", ParameterizedArrayBean.class);
+
+        assertEquals(List.of("1"), bean.values[0]);
+        assertEquals(List.of("2"), bean.nested.get(0)[0]);
+    }
+
+    public static class EscapedJsonNameBean {
+        @JsonXmlField(name = "a\"b\\c\nd")
+        public String value;
+    }
+
+    @Test
+    public void test_jsonPropertyNamesEscapeQuotesBackslashesAndControls() {
+        final EscapedJsonNameBean bean = new EscapedJsonNameBean();
+        bean.value = "value";
+        final JsonParser parser = ParserFactory.createJsonParser();
+
+        for (boolean pretty : new boolean[] { false, true }) {
+            final String json = parser.serialize(bean, JsonSerConfig.create().setPrettyFormat(pretty));
+            assertEquals(Map.of("a\"b\\c\nd", "value"), parser.deserialize(json, Map.class));
+            assertEquals("value", parser.deserialize(json, EscapedJsonNameBean.class).value);
+        }
+
+        bean.value = null;
+        final String json = parser.serialize(bean, JsonSerConfig.create().setExclusion(Exclusion.NONE));
+        final Map<?, ?> values = parser.deserialize(json, Map.class);
+        assertTrue(values.containsKey("a\"b\\c\nd"));
+        assertNull(values.get("a\"b\\c\nd"));
     }
 
     public static class GenericBaseBean<T> {
@@ -2541,6 +2595,256 @@ public class ParserUtilTest extends AbstractTest {
         final PropInfo value = ParserUtil.getBeanInfo(beanType).getPropInfo("value");
 
         assertEquals(String.class, value.type.javaType());
+    }
+
+    // --- review fixes 2026-09-06 (P3-06): ignoredFields applies to getter-only computed properties ---
+
+    @com.landawn.abacus.annotation.Entity
+    @JsonXmlConfig(ignoredFields = { "fullName", "password" })
+    public static class ComputedUser {
+        private String first;
+        private String last;
+        private String password;
+
+        public String getFirst() {
+            return first;
+        }
+
+        public void setFirst(String first) {
+            this.first = first;
+        }
+
+        public String getLast() {
+            return last;
+        }
+
+        public void setLast(String last) {
+            this.last = last;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        /** Computed: no backing field. */
+        public String getFullName() {
+            return first + " " + last;
+        }
+    }
+
+    @com.landawn.abacus.annotation.Entity
+    @JsonXmlConfig(ignoredFields = { "full.*" })
+    public static class ComputedUserRegex extends ComputedUser {
+    }
+
+    @Test
+    public void reviewFixes20260906_ignoredFieldsDropsGetterOnlyComputedProperty() {
+        ComputedUser user = new ComputedUser();
+        user.setFirst("Ada");
+        user.setLast("Lovelace");
+        user.setPassword("s3cret");
+
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(ComputedUser.class);
+        // The property still exists (it can be read), it is just not serialized.
+        assertTrue(beanInfo.propNameList.contains("fullName"));
+        assertEquals(List.of("first", "last"), N.map(beanInfo.jsonXmlSerializablePropInfos, it -> it.name));
+
+        String json = N.toJson(user);
+        assertFalse(json.contains("fullName"), json);
+        assertFalse(json.contains("password"), json);
+        assertTrue(json.contains("\"first\": \"Ada\""), json);
+
+        String xml = N.toXml(user);
+        assertFalse(xml.contains("fullName"), xml);
+        assertFalse(xml.contains("password"), xml);
+        assertTrue(xml.contains("<last>Lovelace</last>"), xml);
+
+        // A regex entry matches the property name too.
+        ComputedUserRegex regexUser = new ComputedUserRegex();
+        regexUser.setFirst("Ada");
+        regexUser.setLast("Lovelace");
+        regexUser.setPassword("s3cret");
+        String regexJson = N.toJson(regexUser);
+        assertFalse(regexJson.contains("fullName"), regexJson);
+        assertTrue(regexJson.contains("password"), regexJson);
+
+        // ignoredFields is a serialization filter: an ignored settable property is still populated on read.
+        ComputedUser restored = N.fromJson("{\"first\": \"A\", \"last\": \"B\", \"password\": \"p\"}", ComputedUser.class);
+        assertEquals("A B", restored.getFullName());
+        assertEquals("p", restored.getPassword());
+
+        // Name-based overload: a null field no longer means "serializable"; the two-arg overload keeps its contract.
+        JsonXmlConfig config = ComputedUser.class.getAnnotation(JsonXmlConfig.class);
+        assertFalse(ParserUtil.isJsonXmlSerializable("fullName", null, config));
+        assertTrue(ParserUtil.isJsonXmlSerializable("first", null, config));
+        assertTrue(ParserUtil.isJsonXmlSerializable(null, null, config));
+        assertTrue(ParserUtil.isJsonXmlSerializable(null, null));
+        assertTrue(ParserUtil.isJsonXmlSerializable("anything", null, null));
+    }
+
+    // --- review fixes 2026-09-06 (P3-07): getBeanInfo(java.lang.reflect.Type) validates its argument ---
+
+    public static class ReflectTypeHolder<T> {
+        public List<?> wildcard;
+        public T[] genericArray;
+        public List<String> parameterized;
+    }
+
+    @Test
+    public void reviewFixes20260906_getBeanInfoRejectsUnsupportedReflectTypesWithIllegalArgument() throws Exception {
+        java.lang.reflect.Type typeVariable = List.class.getTypeParameters()[0];
+        java.lang.reflect.Type wildcard = ((java.lang.reflect.ParameterizedType) ReflectTypeHolder.class.getField("wildcard").getGenericType())
+                .getActualTypeArguments()[0];
+        java.lang.reflect.Type genericArray = ReflectTypeHolder.class.getField("genericArray").getGenericType();
+        assertTrue(wildcard instanceof java.lang.reflect.WildcardType);
+        assertTrue(genericArray instanceof java.lang.reflect.GenericArrayType);
+
+        for (java.lang.reflect.Type type : new java.lang.reflect.Type[] { typeVariable, wildcard, genericArray, null }) {
+            IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type), String.valueOf(type));
+            assertNotNull(e.getMessage());
+        }
+
+        // A Class and a ParameterizedType with a Class raw type are still accepted.
+        assertEquals(TestBean.class, ParserUtil.getBeanInfo((java.lang.reflect.Type) TestBean.class).clazz);
+        java.lang.reflect.Type parameterized = new TypeReference<GenericArrayBean<List<String>>>() {
+        }.javaType();
+        assertEquals(GenericArrayBean.class, ParserUtil.getBeanInfo(parameterized).clazz);
+
+        // A null property name is an argument error on the chain lookup too, as it already was on getPropInfo.
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertThrows(IllegalArgumentException.class, () -> beanInfo.getPropInfoChain(null));
+        assertThrows(IllegalArgumentException.class, () -> beanInfo.getPropInfo((String) null));
+    }
+
+    // --- review fixes 2026-09-06 (P3-09): a document naming a getter-only property is read, not NPE'd ---
+
+    @com.landawn.abacus.annotation.Entity
+    public static class ComputedUserOpen {
+        private String first;
+        private String last;
+
+        public String getFirst() {
+            return first;
+        }
+
+        public void setFirst(String first) {
+            this.first = first;
+        }
+
+        public String getLast() {
+            return last;
+        }
+
+        public void setLast(String last) {
+            this.last = last;
+        }
+
+        /** Computed: getter only, no field, no setter; serialized as "fullName". */
+        public String getFullName() {
+            return first + " " + last;
+        }
+    }
+
+    @Test
+    public void reviewFixes20260906_documentNamingAGetterOnlyPropertyIsReadWithoutError() {
+        ComputedUserOpen source = new ComputedUserOpen();
+        source.setFirst("Ada");
+        source.setLast("Lovelace");
+
+        // The bean's own output names the computed property, so its own round trip used to NPE.
+        String selfJson = N.toJson(source);
+        assertTrue(selfJson.contains("fullName"), selfJson);
+
+        String[] jsonDocs = { selfJson, "{\"first\": \"Ada\", \"fullName\": \"x\", \"last\": \"Lovelace\"}",
+                "{\"first\": \"Ada\", \"fullName\": null, \"last\": \"Lovelace\"}", "{\"fullName\": {\"nested\": [1, 2]}, \"first\": \"Ada\", \"last\": \"Lovelace\"}",
+                "{\"first\": \"Ada\", \"last\": \"Lovelace\", \"fullName\": \"\"}" };
+
+        for (boolean ignoreUnmatched : new boolean[] { true, false }) {
+            JsonDeserConfig config = JsonDeserConfig.create().setIgnoreUnmatchedProperty(ignoreUnmatched);
+
+            for (String json : jsonDocs) {
+                ComputedUserOpen restored = N.fromJson(json, config, ComputedUserOpen.class);
+                assertEquals("Ada", restored.getFirst(), json);
+                assertEquals("Lovelace", restored.getLast(), json);
+                assertEquals("Ada Lovelace", restored.getFullName(), json);
+            }
+
+            // A read-only property is a MATCHED name whose value is skipped (like a declared SERIALIZE_ONLY
+            // direction), so strict mode does not report it; a truly unknown name still is.
+            if (!ignoreUnmatched) {
+                assertThrows(com.landawn.abacus.exception.ParsingException.class,
+                        () -> N.fromJson("{\"first\": \"Ada\", \"nobody\": 1}", config, ComputedUserOpen.class));
+            }
+        }
+
+        for (XmlParser xmlParser : List.of(ParserFactory.createXmlParser(), ParserFactory.createAbacusXmlParser())) {
+            String selfXml = xmlParser.serialize(source);
+            assertTrue(selfXml.contains("<fullName>Ada Lovelace</fullName>"), selfXml);
+            String[] xmlDocs = { selfXml, selfXml.replace("<fullName>Ada Lovelace</fullName>", "<fullName></fullName>"),
+                    selfXml.replace("<fullName>Ada Lovelace</fullName>", "<fullName>null</fullName>") };
+
+            for (boolean ignoreUnmatched : new boolean[] { true, false }) {
+                XmlDeserConfig config = XmlDeserConfig.create().setIgnoreUnmatchedProperty(ignoreUnmatched);
+
+                for (String xml : xmlDocs) {
+                    ComputedUserOpen restored = xmlParser.deserialize(xml, config, ComputedUserOpen.class);
+                    assertEquals("Ada", restored.getFirst(), xml);
+                    assertEquals("Lovelace", restored.getLast(), xml);
+                }
+            }
+        }
+    }
+
+
+    public static class EscapedXmlNameBean {
+        @JsonXmlField(name = "a&b\"c<d\ne")
+        public String value;
+    }
+
+    public static class PlainXmlNameBean {
+        @JsonXmlField(name = "user_id")
+        public String value;
+    }
+
+    @Test
+    public void reviewFixes20260908_xmlNameTagEscapesTheAnnotationNameInAttributePosition() {
+        final EscapedXmlNameBean bean = new EscapedXmlNameBean();
+        bean.value = "v";
+
+        final XmlSerConfig generic = new XmlSerConfig().setTagByPropertyName(false);
+        final String expected = "<bean name=\"escapedXmlNameBean\"><property name=\"a&amp;b&quot;c&lt;d&#xa;e\">v</property></bean>";
+
+        // Before the fix the name went in verbatim: `&`, `"` and `<` made the document unreadable
+        // (`<property name="a&b"c<d`), and the newline was legal but normalised to a space by every XML
+        // reader, so the property name no longer matched and the value was silently dropped.
+        for (final XmlParser parser : List.of(ParserFactory.createXmlParser(), ParserFactory.createAbacusXmlParser())) {
+            assertEquals(expected, parser.serialize(bean, generic));
+        }
+
+        final EscapedXmlNameBean back = ParserFactory.createXmlParser().deserialize(expected, EscapedXmlNameBean.class);
+        assertEquals("v", back.value);
+
+        // A name needing no escaping is still written byte-for-byte as before.
+        final PlainXmlNameBean plain = new PlainXmlNameBean();
+        plain.value = "v";
+        assertEquals("<bean name=\"plainXmlNameBean\"><property name=\"user_id\">v</property></bean>",
+                ParserFactory.createXmlParser().serialize(plain, generic));
+
+        // Attribute position is escaped; element-name position is not, because XML has no escaping
+        // mechanism there - that name can only be rejected, which is the writers' job.
+        final XmlNameTag tag = new XmlNameTag("a&b", "int", false);
+        assertEquals("a&b", String.valueOf(tag.name));
+        assertEquals("<property name=\"a&amp;b\">", String.valueOf(tag.epStart));
+        assertEquals("<property name=\"a&amp;b\" type=\"int\">", String.valueOf(tag.epStartWithType));
+        assertEquals("<property name=\"a&amp;b\" isNull=\"true\" />", String.valueOf(tag.epNull));
+        assertEquals("<a&b>", String.valueOf(tag.namedStart));
+
+        // Type names keep the escaping they always had.
+        assertEquals("<property name=\"p\" type=\"List&lt;String&gt;\">", String.valueOf(new XmlNameTag("p", "List<String>", false).epStartWithType));
     }
 
 }

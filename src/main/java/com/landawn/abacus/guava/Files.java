@@ -23,6 +23,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.Charset;
+import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.LinkOption;
@@ -54,8 +55,9 @@ import com.landawn.abacus.util.ImmutableList;
  * enhanced API for file manipulation, I/O operations, and path management with improved {@code null} safety and
  * performance optimizations.
  *
- * <p>Note: This class is copied from Google Guava under Apache License 2.0 and may be modified for enhanced
- * functionality, performance improvements, and integration with the Abacus framework utilities.</p>
+ * <p>Note: This class delegates to Google Guava (Apache License 2.0); every method is a thin wrapper over
+ * {@code com.google.common.io.Files} / {@code MoreFiles} or {@code java.nio.file.Files}, so the behaviour
+ * documented here is the delegate's behaviour.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
@@ -73,7 +75,10 @@ import com.landawn.abacus.util.ImmutableList;
  * <ul>
  *   <li><b>Guava Integration:</b> Seamless wrapper around Google Guava's proven file utilities</li>
  *   <li><b>Performance Focus:</b> Optimized operations with minimal overhead and efficient algorithms</li>
- *   <li><b>Safety First:</b> Robust error handling and null-safe operations throughout</li>
+ *   <li><b>Null handling:</b> no method accepts a {@code null} argument; all methods reject one with a
+ *       {@link NullPointerException} (the delegated Guava/JDK checks). The related
+ *       {@link Traverser#forTree(java.util.function.Function)} / {@link Traverser#forGraph(java.util.function.Function)}
+ *       factories throw {@link IllegalArgumentException} for a {@code null} function instead.</li>
  *   <li><b>Modern Standards:</b> Support for both legacy File and modern Path APIs</li>
  *   <li><b>Consistency:</b> Uniform API design across all file operations</li>
  * </ul>
@@ -95,7 +100,10 @@ import com.landawn.abacus.util.ImmutableList;
  *   <li><b>Default Charset:</b> UTF-8 as the default for text operations</li>
  *   <li><b>StandardCharsets:</b> Full support for all standard Java charset constants</li>
  *   <li><b>Custom Charsets:</b> Ability to specify any valid Charset for encoding/decoding</li>
- *   <li><b>Platform Independence:</b> Consistent behavior across different operating systems</li>
+ *   <li><b>Malformed input:</b> the JDK-backed {@link #readString(File)} / {@link #readAllLines(File)} reject
+ *       undecodable bytes with a {@link java.nio.charset.MalformedInputException}, whereas the Guava-backed
+ *       {@link #readLines(File, Charset)} and {@code asCharSource(...)} replace them with U+FFFD - so a Latin-1
+ *       text file read with the UTF-8 default succeeds through {@code readLines} but throws from {@code readString}</li>
  * </ul>
  *
  * <p><b>Common Usage Patterns:</b>
@@ -116,7 +124,8 @@ import com.landawn.abacus.util.ImmutableList;
  *
  * // Directory operations
  * Files.createParentDirs(new File("path/to/nested/file.txt"));
- * Files.deleteRecursively(tempDir.toPath());
+ * // ALLOW_INSECURE is required on Windows (no SecureDirectoryStream); see deleteRecursively
+ * Files.deleteRecursively(tempDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
  *
  * // Advanced I/O with Sources and Sinks
  * ByteSource source = Files.asByteSource(inputFile);
@@ -178,9 +187,11 @@ import com.landawn.abacus.util.ImmutableList;
  * <p><b>Error Handling:</b>
  * <ul>
  *   <li><b>IOException Propagation:</b> Proper exception handling and propagation</li>
- *   <li><b>Security Exceptions:</b> Handles SecurityManager restrictions gracefully</li>
+ *   <li><b>Security Exceptions:</b> a {@link SecurityException} raised by a security manager propagates to the
+ *       caller unchanged (nothing is caught here)</li>
  *   <li><b>File Not Found:</b> Clear error messages for missing files and directories</li>
- *   <li><b>Path Validation:</b> Validates paths and file operations before execution</li>
+ *   <li><b>Argument Validation:</b> limited to the delegates' own {@code null} and range checks; no path
+ *       validation is performed before an operation</li>
  * </ul>
  *
  * <p><b>Memory Management:</b>
@@ -194,8 +205,12 @@ import com.landawn.abacus.util.ImmutableList;
  * <p><b>Platform Compatibility:</b>
  * <ul>
  *   <li><b>Cross-Platform Paths:</b> Handles platform-specific path separators and conventions</li>
- *   <li><b>File System Features:</b> Adapts to different file system capabilities</li>
- *   <li><b>Symbolic Links:</b> Proper handling of symbolic links and junction points</li>
+ *   <li><b>File System Features:</b> Adapts to different file system capabilities; on file systems without
+ *       {@link SecureDirectoryStream} (Windows) the recursive-delete methods require
+ *       {@link RecursiveDeleteOption#ALLOW_INSECURE}</li>
+ *   <li><b>Symbolic Links:</b> {@link #fileTraverser()} follows symbolic links (and may loop);
+ *       {@link #pathTraverser()} and the recursive-delete methods avoid following them where the file system
+ *       allows - see each method</li>
  *   <li><b>Security Contexts:</b> Works within various security manager configurations</li>
  * </ul>
  *
@@ -338,10 +353,10 @@ public abstract class Files { //NOSONAR
      * @param file the file to read from.
      * @param charset the charset used to decode the input stream (see {@link StandardCharsets} for helpful predefined constants).
      * @return a BufferedReader instance for reading from the file.
-     * @throws FileNotFoundException if the file does not exist, is a directory rather than a regular file,
-     *     or for some other reason cannot be opened for reading.
+     * @throws NullPointerException if a reference argument is {@code null}.
+     * @throws FileNotFoundException if the file does not exist, is a directory rather than a regular file,     or for some other reason cannot be opened for reading.
      */
-    public static BufferedReader newReader(final File file, final Charset charset) throws FileNotFoundException {
+    public static BufferedReader newReader(final File file, final Charset charset) throws NullPointerException, FileNotFoundException {
         return com.google.common.io.Files.newReader(file, charset);
     }
 
@@ -368,10 +383,10 @@ public abstract class Files { //NOSONAR
      * @param file the file to write to
      * @param charset the charset used to encode the output stream (see {@link StandardCharsets} for helpful predefined constants)
      * @return a BufferedWriter instance for writing to the file
-     * @throws FileNotFoundException if the file exists but is a directory rather than a regular file,
-     *     does not exist but cannot be created, or cannot be opened for any other reason
+     * @throws NullPointerException if a reference argument is {@code null}.
+     * @throws FileNotFoundException if the file exists but is a directory rather than a regular file,     does not exist but cannot be created, or cannot be opened for any other reason
      */
-    public static BufferedWriter newWriter(final File file, final Charset charset) throws FileNotFoundException {
+    public static BufferedWriter newWriter(final File file, final Charset charset) throws NullPointerException, FileNotFoundException {
         return com.google.common.io.Files.newWriter(file, charset);
     }
 
@@ -390,8 +405,9 @@ public abstract class Files { //NOSONAR
      *
      * @param file the file to create a ByteSource for
      * @return a ByteSource that reads from the given file
+     * @throws NullPointerException if a reference argument is {@code null}.
      */
-    public static ByteSource asByteSource(final File file) {
+    public static ByteSource asByteSource(final File file) throws NullPointerException {
         return com.google.common.io.Files.asByteSource(file);
     }
 
@@ -414,8 +430,10 @@ public abstract class Files { //NOSONAR
      * @param path the path to create a ByteSource for
      * @param options zero or more open options that control how the file is opened
      * @return a ByteSource that reads from the given path
+     * @throws NullPointerException if a reference argument is {@code null}.
      */
-    public static ByteSource asByteSource(final Path path, final OpenOption... options) {
+    @SafeVarargs
+    public static ByteSource asByteSource(final Path path, final OpenOption... options) throws NullPointerException {
         return com.google.common.io.MoreFiles.asByteSource(path, options);
     }
 
@@ -442,8 +460,10 @@ public abstract class Files { //NOSONAR
      * @param file the file to create a ByteSink for
      * @param modes optional file write modes; if empty, the file will be truncated
      * @return a ByteSink that writes to the given file
+     * @throws NullPointerException if a reference argument or an element of {@code modes} is {@code null}.
      */
-    public static ByteSink asByteSink(final File file, final FileWriteMode... modes) {
+    @SafeVarargs
+    public static ByteSink asByteSink(final File file, final FileWriteMode... modes) throws NullPointerException {
         return com.google.common.io.Files.asByteSink(file, modes);
     }
 
@@ -469,8 +489,10 @@ public abstract class Files { //NOSONAR
      * @param path the path to create a ByteSink for.
      * @param options zero or more open options that control how the file is opened.
      * @return a ByteSink that writes to the given path.
+     * @throws NullPointerException if a reference argument is {@code null}.
      */
-    public static ByteSink asByteSink(final Path path, final OpenOption... options) {
+    @SafeVarargs
+    public static ByteSink asByteSink(final Path path, final OpenOption... options) throws NullPointerException {
         return com.google.common.io.MoreFiles.asByteSink(path, options);
     }
 
@@ -492,8 +514,9 @@ public abstract class Files { //NOSONAR
      * @param file the file to create a CharSource for.
      * @param charset the character set to use when reading the file.
      * @return a CharSource that reads from the given file using the specified charset.
+     * @throws NullPointerException if a reference argument is {@code null}.
      */
-    public static CharSource asCharSource(final File file, final Charset charset) {
+    public static CharSource asCharSource(final File file, final Charset charset) throws NullPointerException {
         return com.google.common.io.Files.asCharSource(file, charset);
     }
 
@@ -519,8 +542,10 @@ public abstract class Files { //NOSONAR
      * @param charset the character set to use when reading the file.
      * @param options zero or more open options that control how the file is opened.
      * @return a CharSource that reads from the given path using the specified charset.
+     * @throws NullPointerException if a reference argument is {@code null}.
      */
-    public static CharSource asCharSource(final Path path, final Charset charset, final OpenOption... options) {
+    @SafeVarargs
+    public static CharSource asCharSource(final Path path, final Charset charset, final OpenOption... options) throws NullPointerException {
         return com.google.common.io.MoreFiles.asCharSource(path, charset, options);
     }
 
@@ -548,8 +573,10 @@ public abstract class Files { //NOSONAR
      * @param charset the character set to use when writing to the file.
      * @param modes optional file write modes; if empty, the file will be truncated.
      * @return a CharSink that writes to the given file using the specified charset.
+     * @throws NullPointerException if a reference argument or an element of {@code modes} is {@code null}.
      */
-    public static CharSink asCharSink(final File file, final Charset charset, final FileWriteMode... modes) {
+    @SafeVarargs
+    public static CharSink asCharSink(final File file, final Charset charset, final FileWriteMode... modes) throws NullPointerException {
         return com.google.common.io.Files.asCharSink(file, charset, modes);
     }
 
@@ -576,8 +603,10 @@ public abstract class Files { //NOSONAR
      * @param charset the character set to use when writing to the file.
      * @param options zero or more open options that control how the file is opened.
      * @return a CharSink that writes to the given path using the specified charset.
+     * @throws NullPointerException if a reference argument is {@code null}.
      */
-    public static CharSink asCharSink(final Path path, final Charset charset, final OpenOption... options) {
+    @SafeVarargs
+    public static CharSink asCharSink(final Path path, final Charset charset, final OpenOption... options) throws NullPointerException {
         return com.google.common.io.MoreFiles.asCharSink(path, charset, options);
     }
 
@@ -596,10 +625,11 @@ public abstract class Files { //NOSONAR
      *
      * @param file the file to read.
      * @return a byte array containing all bytes from the file.
-     * @throws IOException if an I/O error occurs while reading the file.
+     * @throws NullPointerException if a reference argument is {@code null}.
+     * @throws IOException if opening, reading or closing the input file fails
      * @throws OutOfMemoryError if the file is larger than the available heap space.
      */
-    public static byte[] toByteArray(final File file) throws IOException {
+    public static byte[] toByteArray(final File file) throws NullPointerException, IOException, OutOfMemoryError {
         return com.google.common.io.Files.toByteArray(file);
     }
 
@@ -621,10 +651,11 @@ public abstract class Files { //NOSONAR
      *
      * @param from the byte array containing data to write to the file.
      * @param to the destination file to write to.
+     * @throws NullPointerException if a reference argument is {@code null}.
      * @throws FileNotFoundException if the parent directory of {@code to} doesn't exist.
-     * @throws IOException if an I/O error occurs while writing to the file.
+     * @throws IOException if writing the bytes to the destination file or closing its output stream fails
      */
-    public static void write(final byte[] from, final File to) throws IOException {
+    public static void write(final byte[] from, final File to) throws NullPointerException, FileNotFoundException, IOException {
         com.google.common.io.Files.write(from, to);
     }
 
@@ -648,9 +679,10 @@ public abstract class Files { //NOSONAR
      * @param file2 the second file to compare.
      * @return {@code true} if the {@code File} objects are equal or their contents contain the same bytes,
      *         {@code false} otherwise.
-     * @throws IOException if an I/O error occurs while reading either file.
+     * @throws NullPointerException if a reference argument is {@code null}.
+     * @throws IOException if a comparison that requires file contents cannot open, read or close either input file
      */
-    public static boolean equal(final File file1, final File file2) throws IOException { //NOSONAR
+    public static boolean equal(final File file1, final File file2) throws NullPointerException, IOException { //NOSONAR
         return com.google.common.io.Files.equal(file1, file2);
     }
 
@@ -673,9 +705,10 @@ public abstract class Files { //NOSONAR
      * @param path2 the second path to compare.
      * @return {@code true} if the paths identify the same entry or their contents contain the same bytes,
      *         {@code false} otherwise.
+     * @throws NullPointerException if a reference argument is {@code null}.
      * @throws IOException if the same-file check or content comparison fails.
      */
-    public static boolean equal(final Path path1, final Path path2) throws IOException { //NOSONAR
+    public static boolean equal(final Path path1, final Path path2) throws NullPointerException, IOException { //NOSONAR
         return com.google.common.io.MoreFiles.equal(path1, path2);
     }
 
@@ -694,9 +727,10 @@ public abstract class Files { //NOSONAR
      * }</pre>
      *
      * @param file the file to create or update.
-     * @throws IOException if an I/O error occurs while creating or updating the file.
+     * @throws NullPointerException if a reference argument is {@code null}.
+     * @throws IOException if the file cannot be created or its last-modified time cannot be updated
      */
-    public static void touch(final File file) throws IOException {
+    public static void touch(final File file) throws NullPointerException, IOException {
         com.google.common.io.Files.touch(file);
     }
 
@@ -716,9 +750,10 @@ public abstract class Files { //NOSONAR
      * }</pre>
      *
      * @param path the path of the file to create or update.
-     * @throws IOException if an I/O error occurs while creating or updating the file.
+     * @throws NullPointerException if a reference argument is {@code null}.
+     * @throws IOException if the file cannot be created or its last-modified time cannot be updated
      */
-    public static void touch(final Path path) throws IOException {
+    public static void touch(final Path path) throws NullPointerException, IOException {
         com.google.common.io.MoreFiles.touch(path);
     }
 
@@ -769,7 +804,7 @@ public abstract class Files { //NOSONAR
      *     call to {@code createTempDirectory}.
      */
     @Deprecated
-    public static File createTempDir() {
+    public static File createTempDir() throws IllegalStateException {
         return com.google.common.io.Files.createTempDir(); //NOSONAR
     }
 
@@ -795,11 +830,11 @@ public abstract class Files { //NOSONAR
      * }</pre>
      *
      * @param file the file whose parent directories should be created.
-     * @throws IOException if an I/O error occurs, or if any necessary but nonexistent parent
-     *     directories of the specified file could not be created.
+     * @throws NullPointerException if a reference argument is {@code null}.
+     * @throws IOException if resolving the canonical parent path fails or a missing parent directory cannot be created
      * @see #createParentDirectories(Path, FileAttribute...)
      */
-    public static void createParentDirs(final File file) throws IOException {
+    public static void createParentDirs(final File file) throws NullPointerException, IOException {
         com.google.common.io.Files.createParentDirs(file);
     }
 
@@ -825,11 +860,12 @@ public abstract class Files { //NOSONAR
      *
      * @param path the path whose parent directories should be created.
      * @param attrs an optional list of file attributes to set atomically when creating the directories.
-     * @throws IOException if an I/O error occurs, or if any necessary but nonexistent parent
-     *     directories of the specified path could not be created.
+     * @throws NullPointerException if {@code path} is null, or directory creation uses a null attribute array or attribute element.
+     * @throws IOException if a missing parent directory cannot be created with the supplied attributes
      * @see #createParentDirs(File)
      */
-    public static void createParentDirectories(final Path path, final FileAttribute<?>... attrs) throws IOException {
+    @SafeVarargs
+    public static void createParentDirectories(final Path path, final FileAttribute<?>... attrs) throws NullPointerException, IOException {
         com.google.common.io.MoreFiles.createParentDirectories(path, attrs);
     }
 
@@ -850,9 +886,10 @@ public abstract class Files { //NOSONAR
      *
      * @param from the source file.
      * @param to the output stream to write to.
-     * @throws IOException if an I/O error occurs while reading from the file or writing to the stream.
+     * @throws NullPointerException if a reference argument is {@code null}.
+     * @throws IOException if opening or reading {@code from}, writing bytes to {@code to}, or closing the input file fails
      */
-    public static void copy(final File from, final OutputStream to) throws IOException {
+    public static void copy(final File from, final OutputStream to) throws NullPointerException, IOException {
         com.google.common.io.Files.copy(from, to);
     }
 
@@ -880,10 +917,11 @@ public abstract class Files { //NOSONAR
      *
      * @param from the source file.
      * @param to the destination file.
-     * @throws IOException if an I/O error occurs during the copy operation.
+     * @throws NullPointerException if a reference argument is {@code null}.
      * @throws IllegalArgumentException if {@code from.equals(to)}.
+     * @throws IOException if opening either file, copying bytes to the destination or closing either file stream fails
      */
-    public static void copy(final File from, final File to) throws IOException {
+    public static void copy(final File from, final File to) throws NullPointerException, IllegalArgumentException, IOException {
         com.google.common.io.Files.copy(from, to);
     }
 
@@ -909,10 +947,11 @@ public abstract class Files { //NOSONAR
      *
      * @param from the source file.
      * @param to the destination file (must be the complete target path, not just a directory).
-     * @throws IOException if an I/O error occurs during the move operation.
+     * @throws NullPointerException if a reference argument is {@code null}.
      * @throws IllegalArgumentException if {@code from.equals(to)}.
+     * @throws IOException if renaming fails and the fallback cannot copy the contents or delete the original file
      */
-    public static void move(final File from, final File to) throws IOException {
+    public static void move(final File from, final File to) throws NullPointerException, IllegalArgumentException, IOException {
         com.google.common.io.Files.move(from, to);
     }
 
@@ -929,9 +968,11 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
      *
-     * <p><b>Note:</b> {@link #readAllLines(File, Charset)} performs the equivalent operation but is
-     * backed by {@code java.nio.file.Files} rather than Guava's {@code com.google.common.io.Files};
-     * both return an equivalent mutable {@link List} of lines with terminators stripped.
+     * <p><b>Note:</b> {@link #readAllLines(File, Charset)} is the {@code java.nio.file.Files}-backed
+     * sibling of this Guava-backed method. Both return a mutable {@link List} of lines with terminators
+     * stripped, but they differ on undecodable input: this method replaces malformed bytes with
+     * U+FFFD and never fails on them, whereas {@code readAllLines} rejects them with a
+     * {@link java.nio.charset.MalformedInputException}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -945,11 +986,12 @@ public abstract class Files { //NOSONAR
      * @param charset the charset used to decode the input stream; see {@link StandardCharsets} for
      *     helpful predefined constants.
      * @return a mutable {@link List} containing all the lines.
-     * @throws IOException if an I/O error occurs while reading the file.
+     * @throws NullPointerException if a reference argument is {@code null}.
+     * @throws IOException if opening the file, reading its characters or closing its reader fails
      * @see #readAllLines(File, Charset)
      * @see #readAllLines(File)
      */
-    public static List<String> readLines(final File file, final Charset charset) throws IOException {
+    public static List<String> readLines(final File file, final Charset charset) throws NullPointerException, IOException {
         return com.google.common.io.Files.readLines(file, charset);
     }
 
@@ -973,11 +1015,12 @@ public abstract class Files { //NOSONAR
      *
      * @param file the file to map.
      * @return a read-only buffer reflecting {@code file}.
+     * @throws NullPointerException if a reference argument is {@code null}.
      * @throws FileNotFoundException if the {@code file} does not exist.
-     * @throws IOException if an I/O error occurs.
+     * @throws IOException if opening, sizing, mapping, or closing the file fails.
      * @see FileChannel#map(MapMode, long, long)
      */
-    public static MappedByteBuffer map(final File file) throws IOException {
+    public static MappedByteBuffer map(final File file) throws NullPointerException, FileNotFoundException, IOException {
         return com.google.common.io.Files.map(file);
     }
 
@@ -997,27 +1040,35 @@ public abstract class Files { //NOSONAR
      * buffer.putInt(0, 42);   // writes an int at the beginning of the file
      * }</pre>
      *
+     * <p>A missing file is handled per mode: in {@link MapMode#READ_ONLY} it is an error; in
+     * {@link MapMode#READ_WRITE} or {@link MapMode#PRIVATE} the file is opened read-write, which
+     * <i>creates</i> it empty, and a zero-capacity buffer is returned.
+     *
      * @param file the file to map.
      * @param mode the mode to use when mapping {@code file} (READ_ONLY, READ_WRITE, or PRIVATE).
      * @return a buffer reflecting {@code file}.
-     * @throws FileNotFoundException if the {@code file} does not exist.
-     * @throws IOException if an I/O error occurs.
+     * @throws NullPointerException if {@code file} or {@code mode} is {@code null}.
+     * @throws FileNotFoundException if the {@code file} does not exist and {@code mode} is     {@link MapMode#READ_ONLY}; in {@code READ_WRITE} or {@code PRIVATE} mode a missing file is     created empty and a zero-capacity buffer is returned instead.
+     * @throws IOException if opening, sizing, mapping, or closing the file fails.
      * @see FileChannel#map(MapMode, long, long)
      */
-    public static MappedByteBuffer map(final File file, final MapMode mode) throws IOException {
+    public static MappedByteBuffer map(final File file, final MapMode mode) throws NullPointerException, FileNotFoundException, IOException {
         return com.google.common.io.Files.map(file, mode);
     }
 
     /**
      * Maps a file in to memory as per {@link FileChannel#map(java.nio.channels.FileChannel.MapMode,
      * long, long)} using the requested {@link MapMode}. This method allows you to specify the
-     * size of the mapping, which can be different from the file's current size.
+     * size of the mapping, which can be different from the file's current size. A {@code size}
+     * larger than the file only works in {@link MapMode#READ_WRITE} or {@link MapMode#PRIVATE} mode
+     * (the file is extended to {@code size}); in {@link MapMode#READ_ONLY} mode it fails with an
+     * {@link IOException} ("Channel not open for writing").
      *
      * <p>Files are mapped from offset 0 to {@code size}.
      *
-     * <p>If the mode is {@link MapMode#READ_WRITE} and the file does not exist, it will be created
-     * with the requested {@code size}. Thus, this method is useful for creating memory mapped files
-     * which do not yet exist.
+     * <p>If the mode is {@link MapMode#READ_WRITE} or {@link MapMode#PRIVATE} and the file does not
+     * exist, it will be created with the requested {@code size}. Thus, this method is useful for
+     * creating memory mapped files which do not yet exist.
      *
      * <p>This only works for files ≤ {@link Integer#MAX_VALUE} bytes.
      *
@@ -1031,10 +1082,15 @@ public abstract class Files { //NOSONAR
      * @param mode the mode to use when mapping {@code file}.
      * @param size the number of bytes to map starting from offset 0.
      * @return a buffer reflecting {@code file}.
-     * @throws IOException if an I/O error occurs.
+     * @throws IllegalArgumentException if {@code size} is negative or exceeds {@link Integer#MAX_VALUE}.
+     * @throws NullPointerException if {@code file} or {@code mode} is {@code null}.
+     * @throws FileNotFoundException if the {@code file} does not exist and {@code mode} is     {@link MapMode#READ_ONLY}.
+     * @throws IOException if opening or mapping the file fails, including a requested size beyond the file length in {@link
+     *         MapMode#READ_ONLY} mode
      * @see FileChannel#map(MapMode, long, long)
      */
-    public static MappedByteBuffer map(final File file, final MapMode mode, final long size) throws IOException {
+    public static MappedByteBuffer map(final File file, final MapMode mode, final long size)
+            throws IllegalArgumentException, NullPointerException, FileNotFoundException, IOException {
         return com.google.common.io.Files.map(file, mode, size);
     }
 
@@ -1064,8 +1120,9 @@ public abstract class Files { //NOSONAR
      *
      * @param pathname the path to simplify.
      * @return the simplified path.
+     * @throws NullPointerException if a reference argument is {@code null}.
      */
-    public static String simplifyPath(final String pathname) {
+    public static String simplifyPath(final String pathname) throws NullPointerException {
         return com.google.common.io.Files.simplifyPath(pathname);
     }
 
@@ -1086,8 +1143,9 @@ public abstract class Files { //NOSONAR
      * @param file the name of the file to trim the extension from. This can be either a fully
      *     qualified file name (including a path) or just a file name.
      * @return the file name without its path or extension.
+     * @throws NullPointerException if a reference argument is {@code null}.
      */
-    public static String getNameWithoutExtension(final String file) {
+    public static String getNameWithoutExtension(final String file) throws NullPointerException {
         return com.google.common.io.Files.getNameWithoutExtension(file);
     }
 
@@ -1105,8 +1163,9 @@ public abstract class Files { //NOSONAR
      *
      * @param path the path whose file name should be extracted without extension.
      * @return the file name without its extension.
+     * @throws NullPointerException if a reference argument is {@code null}.
      */
-    public static String getNameWithoutExtension(final Path path) {
+    public static String getNameWithoutExtension(final Path path) throws NullPointerException {
         return com.google.common.io.MoreFiles.getNameWithoutExtension(path);
     }
 
@@ -1138,8 +1197,9 @@ public abstract class Files { //NOSONAR
      *
      * @param fullName the file name to extract the extension from.
      * @return the file extension (without the dot), or empty string if none.
+     * @throws NullPointerException if a reference argument is {@code null}.
      */
-    public static String getFileExtension(final String fullName) {
+    public static String getFileExtension(final String fullName) throws NullPointerException {
         return com.google.common.io.Files.getFileExtension(fullName);
     }
 
@@ -1166,8 +1226,9 @@ public abstract class Files { //NOSONAR
      *
      * @param path the path whose file extension should be extracted.
      * @return the file extension (without the dot), or empty string if none.
+     * @throws NullPointerException if a reference argument is {@code null}.
      */
-    public static String getFileExtension(final Path path) {
+    public static String getFileExtension(final Path path) throws NullPointerException {
         return com.google.common.io.MoreFiles.getFileExtension(path);
     }
 
@@ -1230,9 +1291,11 @@ public abstract class Files { //NOSONAR
      * directory, no exception will be thrown and the returned stream will contain a single
      * element: that path.
      *
-     * <p>{@link DirectoryIteratorException} may be thrown while consuming the stream
-     * created by this traverser if an {@link IOException} occurs while reading a
-     * directory's contents.
+     * <p>A {@link DirectoryIteratorException} (wrapping the {@link IOException}) is thrown if a
+     * directory's contents cannot be read. For the start path itself it is thrown by the traversal
+     * method (Guava lists every start node up front to validate it, and lists it again during
+     * traversal); for a descendant directory it is thrown while consuming the stream. See
+     * {@link Traverser} for the eager start-node validation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1274,13 +1337,13 @@ public abstract class Files { //NOSONAR
      *
      * @param dir the directory whose entries should be listed
      * @return an immutable list of paths to the entries (files and immediate subdirectories) in the directory
+     * @throws NullPointerException if a reference argument is {@code null}.
      * @throws NoSuchFileException if the file does not exist <i>(optional specific exception)</i>
-     * @throws NotDirectoryException if the file could not be opened because it is not a directory
-     *     <i>(optional specific exception)</i>
-     * @throws IOException if an I/O error occurs
+     * @throws NotDirectoryException if the file could not be opened because it is not a directory     <i>(optional specific exception)</i>
+     * @throws IOException if opening, reading, or closing the directory stream fails.
      * @see IOUtil#listFiles(File)
      */
-    public static ImmutableList<Path> listFiles(final Path dir) throws IOException {
+    public static ImmutableList<Path> listFiles(final Path dir) throws NullPointerException, NoSuchFileException, NotDirectoryException, IOException {
         return ImmutableList.wrap(com.google.common.io.MoreFiles.listFiles(dir));
     }
 
@@ -1305,25 +1368,36 @@ public abstract class Files { //NOSONAR
      * guarantee the security of recursive deletes. If you wish to allow the recursive deletes anyway,
      * pass {@link RecursiveDeleteOption#ALLOW_INSECURE} to this method to override that behavior.
      *
+     * <p><b>Windows and other file systems without {@link SecureDirectoryStream}:</b> the option is
+     * effectively mandatory there - without it the no-option form <i>always</i> throws
+     * {@link InsecureRecursiveDeleteException}, for a regular file, a directory, and even a path
+     * that does not exist, because the insecure check runs before {@code path} is touched. Only
+     * with {@link RecursiveDeleteOption#ALLOW_INSECURE} does a missing path yield the
+     * {@link NoSuchFileException} below.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Safe recursive delete
+     * // Secure recursive delete - only on file systems with SecureDirectoryStream (Linux/macOS);
+     * // on Windows this throws InsecureRecursiveDeleteException regardless of the path
      * Files.deleteRecursively(Paths.get("/tmp/old_data"));
      *
-     * // Force recursive delete even on insecure file systems
+     * // Recursive delete on insecure file systems (required on Windows)
      * Files.deleteRecursively(Paths.get("/tmp/old_data"), RecursiveDeleteOption.ALLOW_INSECURE);
      * }</pre>
      *
      * @param path the path to delete (file or directory).
      * @param options optional delete options, such as {@link RecursiveDeleteOption#ALLOW_INSECURE}.
-     * @throws NoSuchFileException if {@code path} does not exist <i>(optional specific exception)</i>.
-     * @throws InsecureRecursiveDeleteException if the security of recursive deletes can't be
-     *     guaranteed for the file system and {@link RecursiveDeleteOption#ALLOW_INSECURE} was not
-     *     specified.
-     * @throws IOException if {@code path} or any file in the subtree rooted at it can't be deleted
-     *     for any reason.
+     * @throws NullPointerException if {@code path} is null, or {@code options} is null when the file system requires checking permission for insecure
+     *         deletion.
+     * @throws InsecureRecursiveDeleteException if the security of recursive deletes can't be guaranteed for the file system and {@link
+     *         RecursiveDeleteOption#ALLOW_INSECURE} was not specified - thrown before the existence of {@code path} is checked.
+     * @throws NoSuchFileException if {@code path} does not exist <i>(optional specific exception)</i>; on a file system without {@link
+     *         SecureDirectoryStream} this is only reached when {@link RecursiveDeleteOption#ALLOW_INSECURE} is given.
+     * @throws IOException if {@code path} or any file in the subtree rooted at it can't be deleted for any reason.
      */
-    public static void deleteRecursively(final Path path, final RecursiveDeleteOption... options) throws IOException {
+    @SafeVarargs
+    public static void deleteRecursively(final Path path, final RecursiveDeleteOption... options)
+            throws NullPointerException, InsecureRecursiveDeleteException, NoSuchFileException, IOException {
         com.google.common.io.MoreFiles.deleteRecursively(path, options);
     }
 
@@ -1350,9 +1424,16 @@ public abstract class Files { //NOSONAR
      * guarantee the security of recursive deletes. If you wish to allow the recursive deletes anyway,
      * pass {@link RecursiveDeleteOption#ALLOW_INSECURE} to this method to override that behavior.
      *
+     * <p><b>Windows and other file systems without {@link SecureDirectoryStream}:</b> the no-option
+     * form always throws {@link InsecureRecursiveDeleteException} for an existing directory; pass
+     * {@link RecursiveDeleteOption#ALLOW_INSECURE}. (Unlike {@link #deleteRecursively}, this method
+     * opens {@code path} first, so a missing path yields {@link NoSuchFileException} and a regular
+     * file {@link NotDirectoryException} even without the option.)
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Empty a directory but keep the directory itself
+     * // (add RecursiveDeleteOption.ALLOW_INSECURE on Windows - see above)
      * Path tempDir = Paths.get("/tmp/working");
      * Files.deleteDirectoryContents(tempDir);
      * // tempDir still exists but is now empty
@@ -1360,15 +1441,17 @@ public abstract class Files { //NOSONAR
      *
      * @param path the directory whose contents should be deleted.
      * @param options optional delete options, such as {@link RecursiveDeleteOption#ALLOW_INSECURE}.
+     * @throws NullPointerException if {@code path} is null, or {@code options} is null when the file system requires checking permission for insecure
+     *         deletion.
      * @throws NoSuchFileException if {@code path} does not exist <i>(optional specific exception)</i>.
-     * @throws NotDirectoryException if the file at {@code path} is not a directory <i>(optional
-     *     specific exception)</i>.
-     * @throws InsecureRecursiveDeleteException if the security of recursive deletes can't be
-     *     guaranteed for the file system and {@link RecursiveDeleteOption#ALLOW_INSECURE} was not
-     *     specified.
+     * @throws NotDirectoryException if the file at {@code path} is not a directory <i>(optional specific exception)</i>.
      * @throws IOException if one or more files can't be deleted for any reason.
+     * @throws InsecureRecursiveDeleteException if the security of recursive deletes can't be guaranteed for the file system and {@link
+     *         RecursiveDeleteOption#ALLOW_INSECURE} was not specified.
      */
-    public static void deleteDirectoryContents(final Path path, final RecursiveDeleteOption... options) throws IOException {
+    @SafeVarargs
+    public static void deleteDirectoryContents(final Path path, final RecursiveDeleteOption... options)
+            throws NullPointerException, NoSuchFileException, NotDirectoryException, IOException, InsecureRecursiveDeleteException {
         com.google.common.io.MoreFiles.deleteDirectoryContents(path, options);
     }
 
@@ -1389,8 +1472,10 @@ public abstract class Files { //NOSONAR
      *
      * @param options link options to use when checking if a path is a directory.
      * @return a predicate that tests if a path is a directory.
+     * @throws NullPointerException if a reference argument is {@code null}.
      */
-    public static Predicate<Path> isDirectory(final LinkOption... options) {
+    @SafeVarargs
+    public static Predicate<Path> isDirectory(final LinkOption... options) throws NullPointerException {
         return com.google.common.io.MoreFiles.isDirectory(options);
     }
 
@@ -1411,8 +1496,10 @@ public abstract class Files { //NOSONAR
      *
      * @param options link options to use when checking if a path is a regular file.
      * @return a predicate that tests if a path is a regular file.
+     * @throws NullPointerException if a reference argument is {@code null}.
      */
-    public static Predicate<Path> isRegularFile(final LinkOption... options) {
+    @SafeVarargs
+    public static Predicate<Path> isRegularFile(final LinkOption... options) throws NullPointerException {
         return com.google.common.io.MoreFiles.isRegularFile(options);
     }
 
@@ -1432,14 +1519,15 @@ public abstract class Files { //NOSONAR
      *
      * @param   file the file to read from.
      * @return  a byte array containing the content read from the file.
-     * @throws IOException if an I/O error occurs while reading from the file
-     * @throws OutOfMemoryError if the file is too large to fit into memory, for example larger than {@code 2GB}
+     * @throws NullPointerException if a reference argument is {@code null}.
+     * @throws IOException if opening the file, reading its bytes or closing the input channel fails
      * @throws SecurityException if a security manager is installed and denies read access to the file
+     * @throws OutOfMemoryError if the file is too large to fit into memory, for example larger than {@code 2GB}
      * @see #readString(File)
      * @see java.nio.file.Files#readAllBytes(Path)
      * @see IOUtil#readAllBytes(File)
      */
-    public static byte[] readAllBytes(final File file) throws IOException {
+    public static byte[] readAllBytes(final File file) throws NullPointerException, IOException, SecurityException, OutOfMemoryError {
         return java.nio.file.Files.readAllBytes(file.toPath());
     }
 
@@ -1458,17 +1546,23 @@ public abstract class Files { //NOSONAR
      * String content = Files.readString(new File("config.json"));
      * }</pre>
      *
+     * <p>Unlike the Guava-backed {@code asCharSource(file, charset).read()} (and
+     * {@link IOUtil#readAllToString(File)}), which replace malformed input with U+FFFD, this
+     * JDK-backed method rejects undecodable bytes with a {@link java.nio.charset.MalformedInputException}
+     * (an {@code IOException}) - e.g. any Latin-1 text file containing a non-ASCII byte.
+     *
      * @param file the file to read from.
      * @return a string containing the content read from the file.
-     * @throws IOException if an I/O error occurs reading from the file.
+     * @throws NullPointerException if {@code file} is {@code null}.
+     * @throws MalformedInputException if the file's bytes are not decodable as UTF-8.
+     * @throws IOException if opening the file, reading its bytes or closing the input channel fails
+     * @throws SecurityException in the case of the default provider, and a security manager is         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked.
      * @throws OutOfMemoryError if the file is extremely large, for example larger than {@code 2GB}.
-     * @throws SecurityException in the case of the default provider, and a security manager is
-     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked.
      * @see #readString(File, Charset)
      * @see java.nio.file.Files#readString(Path)
      * @see IOUtil#readAllToString(File)
      */
-    public static String readString(final File file) throws IOException {
+    public static String readString(final File file) throws NullPointerException, MalformedInputException, IOException, SecurityException, OutOfMemoryError {
         return readString(file, Charsets.UTF_8);
     }
 
@@ -1482,6 +1576,12 @@ public abstract class Files { //NOSONAR
      *
      * <p>This method is equivalent to: {@link java.nio.file.Files#readString(Path, Charset)}.
      *
+     * <p>Unlike the Guava-backed {@code asCharSource(file, charset).read()} (and
+     * {@link IOUtil#readAllToString(File, Charset)}), which replace malformed input with U+FFFD, this
+     * JDK-backed method rejects undecodable bytes with a {@link java.nio.charset.MalformedInputException}
+     * (an {@code IOException}). Note the asymmetry with {@link #writeString(File, CharSequence, Charset)},
+     * which silently replaces unencodable characters.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String content = Files.readString(new File("document.txt"), StandardCharsets.ISO_8859_1);
@@ -1491,14 +1591,16 @@ public abstract class Files { //NOSONAR
      * @param charset the character set used to decode the input stream; see {@link StandardCharsets} for
      *     helpful predefined constants.
      * @return a string containing the content read from the file.
-     * @throws IOException if an I/O error occurs reading from the file.
+     * @throws NullPointerException if {@code file} or {@code charset} is {@code null}.
+     * @throws MalformedInputException if the file's bytes are not decodable in {@code charset}.
+     * @throws IOException if opening the file, reading its bytes or closing the input channel fails
+     * @throws SecurityException in the case of the default provider, and a security manager is         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked.
      * @throws OutOfMemoryError if the file is extremely large, for example, larger than {@code 2GB}.
-     * @throws SecurityException in the case of the default provider, and a security manager is
-     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked.
      * @see java.nio.file.Files#readString(Path, Charset)
      * @see IOUtil#readAllToString(File, Charset)
      */
-    public static String readString(final File file, final Charset charset) throws IOException {
+    public static String readString(final File file, final Charset charset)
+            throws NullPointerException, MalformedInputException, IOException, SecurityException, OutOfMemoryError {
         return java.nio.file.Files.readString(file.toPath(), charset);
     }
 
@@ -1506,7 +1608,9 @@ public abstract class Files { //NOSONAR
      * Writes the given character sequence to a file using UTF-8 charset, overwriting any existing content.
      *
      * <p>This is a convenience method equivalent to {@code asCharSink(file, StandardCharsets.UTF_8).write(from)}
-     * and mirrors {@link #readString(File)}.
+     * and is the writing counterpart of {@link #readString(File)}. Every {@code char} is encodable in UTF-8,
+     * so no data is lost here; unpaired surrogates, however, are written as the replacement byte {@code '?'}
+     * (see {@link #writeString(File, CharSequence, Charset)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1515,13 +1619,14 @@ public abstract class Files { //NOSONAR
      *
      * @param file the file to write to.
      * @param from the character sequence to write.
-     * @throws IOException if an I/O error occurs writing to the file.
+     * @throws NullPointerException if {@code file} or {@code from} is {@code null}.
+     * @throws IOException if opening the destination file, encoding or writing the supplied characters, or closing the writer fails
      * @see #writeString(File, CharSequence, Charset)
      * @see #readString(File)
      * @see #asCharSink(File, Charset, FileWriteMode...)
      * @see IOUtil#write(CharSequence, File)
      */
-    public static void writeString(final File file, final CharSequence from) throws IOException {
+    public static void writeString(final File file, final CharSequence from) throws NullPointerException, IOException {
         writeString(file, from, Charsets.UTF_8);
     }
 
@@ -1529,7 +1634,14 @@ public abstract class Files { //NOSONAR
      * Writes the given character sequence to a file using the given character set, overwriting any existing content.
      *
      * <p>This is a convenience method equivalent to {@code asCharSink(file, charset).write(from)}
-     * and mirrors {@link #readString(File, Charset)}.
+     * and is the writing counterpart of {@link #readString(File, Charset)}.
+     *
+     * <p><b>Lossy encoding:</b> characters that cannot be encoded in {@code charset} are replaced by
+     * the charset's replacement (typically {@code '?'}) and <i>no exception is thrown</i> - e.g.
+     * {@code writeString(f, "日本", ISO_8859_1)} writes the two bytes {@code "??"}. This differs from
+     * {@link java.nio.file.Files#writeString(Path, CharSequence, Charset, java.nio.file.OpenOption...)},
+     * which throws {@code UnmappableCharacterException}, and from {@link #readString(File, Charset)},
+     * which throws on malformed input - the pair is strict on read and lossy on write.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1540,11 +1652,12 @@ public abstract class Files { //NOSONAR
      * @param from the character sequence to write.
      * @param charset the character set used to encode the output; see {@link StandardCharsets} for
      *     helpful predefined constants.
-     * @throws IOException if an I/O error occurs writing to the file.
+     * @throws NullPointerException if {@code file}, {@code from} or {@code charset} is {@code null}.
+     * @throws IOException if opening the destination file, encoding or writing the supplied characters, or closing the writer fails
      * @see #readString(File, Charset)
      * @see #asCharSink(File, Charset, FileWriteMode...)
      */
-    public static void writeString(final File file, final CharSequence from, final Charset charset) throws IOException {
+    public static void writeString(final File file, final CharSequence from, final Charset charset) throws NullPointerException, IOException {
         asCharSink(file, charset).write(from);
     }
 
@@ -1563,9 +1676,12 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
      *
-     * <p><b>Note:</b> this method is backed by {@code java.nio.file.Files}; the Guava-backed
-     * {@link #readLines(File, Charset)} performs the equivalent operation. Both return an
-     * equivalent mutable {@link List} of lines with terminators stripped.
+     * <p><b>Note:</b> this method is backed by {@code java.nio.file.Files}. Unlike the Guava-backed
+     * {@link #readLines(File, Charset)} (and {@link IOUtil#readAllLines(File)}), which replace malformed
+     * input with U+FFFD, this JDK-backed method rejects undecodable bytes with a
+     * {@link java.nio.charset.MalformedInputException} (an {@code IOException}) - e.g. any Latin-1 text
+     * file containing a non-ASCII byte. Both return a mutable {@link List} of lines with terminators
+     * stripped; a UTF-8 byte-order mark is kept as U+FEFF at the start of the first line by both.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1577,15 +1693,16 @@ public abstract class Files { //NOSONAR
      *
      * @param file the file to read from.
      * @return a mutable {@link List} containing all the lines.
-     * @throws IOException if an I/O error occurs.
-     * @throws SecurityException in the case of the default provider, and a security manager is
-     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked.
+     * @throws NullPointerException if {@code file} is {@code null}.
+     * @throws MalformedInputException if the file's bytes are not decodable as UTF-8.
+     * @throws IOException if opening or reading the file fails.
+     * @throws SecurityException in the case of the default provider, and a security manager is         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked.
      * @see #readAllLines(File, Charset)
      * @see #readLines(File, Charset)
      * @see java.nio.file.Files#readAllLines(Path, Charset)
      * @see IOUtil#readAllLines(File)
      */
-    public static List<String> readAllLines(final File file) throws IOException {
+    public static List<String> readAllLines(final File file) throws NullPointerException, MalformedInputException, IOException, SecurityException {
         return readAllLines(file, StandardCharsets.UTF_8);
     }
 
@@ -1599,9 +1716,11 @@ public abstract class Files { //NOSONAR
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link
      * java.nio.file.Files#readAllLines(java.nio.file.Path, Charset)}.
      *
-     * <p><b>Note:</b> this method is backed by {@code java.nio.file.Files}; the Guava-backed
-     * {@link #readLines(File, Charset)} performs the equivalent operation. Both return an
-     * equivalent mutable {@link List} of lines with terminators stripped.
+     * <p><b>Note:</b> this method is backed by {@code java.nio.file.Files}. Unlike the Guava-backed
+     * {@link #readLines(File, Charset)} (and {@link IOUtil#readAllLines(File, Charset)}), which replace
+     * malformed input with U+FFFD, this JDK-backed method rejects undecodable bytes with a
+     * {@link java.nio.charset.MalformedInputException} (an {@code IOException}). Both return a mutable
+     * {@link List} of lines with terminators stripped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1618,15 +1737,16 @@ public abstract class Files { //NOSONAR
      * @param file the file to read from.
      * @param charset the character set used to decode the input stream (see {@link StandardCharsets} for helpful predefined constants).
      * @return a mutable {@link List} containing all the lines from the file.
-     * @throws IOException if an I/O error occurs while reading from the file.
-     * @throws SecurityException in the case of the default provider, and a security manager is
-     *         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked
-     *         to check read access to the file.
+     * @throws NullPointerException if {@code file} or {@code charset} is {@code null}.
+     * @throws MalformedInputException if the file's bytes are not decodable in {@code charset}.
+     * @throws IOException if opening the file, reading its lines or closing its reader fails
+     * @throws SecurityException in the case of the default provider, and a security manager is         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked         to check read access to the file.
      * @see #readLines(File, Charset)
      * @see java.nio.file.Files#readAllLines(Path, Charset)
      * @see IOUtil#readAllLines(File, Charset)
      */
-    public static List<String> readAllLines(final File file, final Charset charset) throws IOException {
+    public static List<String> readAllLines(final File file, final Charset charset)
+            throws NullPointerException, MalformedInputException, IOException, SecurityException {
         return java.nio.file.Files.readAllLines(file.toPath(), charset);
     }
 

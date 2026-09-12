@@ -34,7 +34,7 @@ import com.landawn.abacus.util.cs;
  * @see IntFunction
  */
 @FunctionalInterface
-public interface IntObjFunction<T, R> extends Throwables.IntObjFunction<T, R, RuntimeException> { // NOSONAR
+public interface IntObjFunction<T, R> extends Throwables.IntObjFunction<T, R, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Applies this function to the given arguments.
      *

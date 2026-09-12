@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -101,6 +102,30 @@ public class DurationTypeTest extends TestBase {
     @Test
     public void test_name() {
         assertEquals("Duration", type.name());
+    }
+
+    // --- review fixes 2026-09-06 (T9-08) ---
+
+    @Test
+    public void reviewFixes20260906_T908_documentedNumbersToLongGrammar() {
+        // out-of-range millisecond text: ArithmeticException (the Numbers.toLong contract), now documented
+        assertThrows(ArithmeticException.class, () -> type.valueOf("9223372036854775808"));
+        assertThrows(ArithmeticException.class, () -> type.valueOf("-9223372036854775809"));
+        assertEquals(Long.MAX_VALUE, type.valueOf("9223372036854775807").toMillis());
+
+        // documented leniency: L suffix, 0x hex, explicit plus sign
+        assertEquals(Duration.ofMillis(1000), type.valueOf("1000L"));
+        assertEquals(Duration.ofMillis(1000), type.valueOf("1000l"));
+        assertEquals(Duration.ofMillis(1000), type.valueOf("0x3E8"));
+        assertEquals(Duration.ofMillis(1000), type.valueOf("+1000"));
+
+        // surrounding whitespace and non-numeric text stay NumberFormatException
+        assertThrows(NumberFormatException.class, () -> type.valueOf(" 1000"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("1000 "));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("PT1S"));
+
+        assertNull(type.valueOf((String) null));
+        assertNull(type.valueOf(""));
     }
 
 }

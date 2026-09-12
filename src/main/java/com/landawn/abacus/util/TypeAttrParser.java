@@ -22,9 +22,9 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.exception.ParsingException;
 
 /**
  * A parser for type attribute strings that extracts class names, generic type parameters,
@@ -50,6 +50,16 @@ import com.landawn.abacus.annotation.Internal;
  * </ul>
  */
 public final class TypeAttrParser {
+    // Type-attribute syntax has its own backslash escape grammar, independent of the CSV default dialect.
+    private static final CsvParser ARGUMENT_PARSER = new CsvParser(',', '"', '\\');
+
+    // parse() re-enters itself once per generic nesting level, once per array suffix, and twice per
+    // parameterized qualified-member segment, so hostile input would otherwise raise a StackOverflowError
+    // (around 6000 levels on a default stack, around 400 on a 256k one) instead of the documented
+    // IllegalArgumentException. The cap therefore counts re-entries, not textual levels: a repeated
+    // A<...>[] or Owner<...>.Member costs two per level and trips at 32. No real declaration comes close
+    // to either figure - the deepest generic nesting in this project is 2.
+    private static final int MAX_NESTING_DEPTH = 64;
 
     private final String className;
 
@@ -120,6 +130,12 @@ public final class TypeAttrParser {
      * each unquoted argument while whitespace inside a double-quoted argument is preserved.
      * Returns an empty array if no constructor parameters were present.
      *
+     * <p><b>Special case:</b> an argument list that is a single comma once the surrounding whitespace is
+     * stripped ({@code Foo(,)}, {@code Foo( , )}) yields the single argument {@code ","} rather than the two
+     * empty arguments plain CSV would give, so a comma delimiter can be written without quoting;
+     * {@code Foo(",")} is the explicit equivalent. No other all-empty list is special-cased:
+     * {@code Foo(,,)} yields three empty arguments.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TypeAttrParser parser = TypeAttrParser.parse("StringBuilder(100)");
@@ -145,12 +161,17 @@ public final class TypeAttrParser {
      *   <li>Generic type parameters enclosed in angle brackets: {@code <...>}</li>
      *   <li>Constructor parameters enclosed in parentheses: {@code (...)}</li>
      *   <li>Nested generics with proper bracket matching</li>
+     *   <li>Array dimensions after a generic declaration, including nested generic arrays</li>
      *   <li>Qualified member types whose owner segments are parameterized</li>
      *   <li>Comma-separated lists in both contexts</li>
      *   <li>Double-quoted CSV constructor arguments whose commas, parentheses, or angle
      *       brackets are data rather than outer type delimiters. Backslash-escaped and
      *       doubled double quotes are recognized consistently with {@link CsvParser}.</li>
      * </ul>
+     *
+     * <p>An unescaped double quote inside an otherwise <i>unquoted</i> argument is plain data to
+     * {@link CsvParser}, but this parser always reads it as opening a quoted region, so such an argument may
+     * be rejected as unbalanced: {@code Foo(bc"d"ef)} parses while {@code Foo(a"b)} does not.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -170,19 +191,64 @@ public final class TypeAttrParser {
      * @param attr the type attribute string to parse
      * @return a {@code TypeAttrParser} instance containing the parsed components; the returned
      *         instance never has {@code null} type-parameter or constructor-parameter arrays
-     * @throws IllegalArgumentException if the class name or a generic parameter at any nesting level is empty, or if
-     *         generic angle brackets, constructor parentheses, or quoted constructor arguments are missing,
-     *         unbalanced, out of order, or otherwise malformed.
-     * @throws NullPointerException if {@code attr} is {@code null}
+     * @throws IllegalArgumentException if {@code attr} is {@code null}, or if the class name (ignoring any trailing array brackets) or a generic
+     *         parameter at any nesting level is empty, if generic angle brackets, constructor parentheses, or
+     *         quoted constructor arguments are missing, unbalanced, out of order, or otherwise malformed, or if
+     *         the declaration needs more than 64 levels of recursive parsing. That limit counts parsing levels
+     *         rather than textual nesting levels: a generic nesting level costs one level and so does an array
+     *         suffix, while a parameterized qualified-member segment costs two (its owner arguments are
+     *         validated, then the normalized name is re-parsed). A declaration that repeats one of the
+     *         two-level shapes, {@code A<...>[]} or {@code Owner<...>.Member}, is therefore rejected beyond 32
+     *         textual levels. Array dimensions on their own, such as {@code int[][][]}, do not recurse per
+     *         dimension and are not limited at all.
      * @see #getClassName()
      * @see #getTypeParameters()
      * @see #getParameters()
      */
-    public static TypeAttrParser parse(final String attr) {
-        final String normalizedMemberType = normalizeQualifiedMemberType(attr);
+    public static TypeAttrParser parse(final String attr) throws IllegalArgumentException {
+        N.checkArgNotNull(attr, cs.attr);
+
+        return parse(attr, 0, attr);
+    }
+
+    /**
+     * Parses {@code attr} at the given nesting depth. Every re-entry passes {@code depth + 1}, so a
+     * pathologically nested declaration is rejected with the documented {@code IllegalArgumentException}
+     * rather than overflowing the stack. {@code root} is the declaration the caller handed to
+     * {@link #parse(String)}; it is what the depth-guard message names, because {@code attr} at the depth the
+     * guard trips is an inner fragment that is not itself deeply nested.
+     *
+     * @throws IllegalArgumentException if {@code depth} exceeds the parsing limit or {@code attr} has malformed type syntax
+     */
+    private static TypeAttrParser parse(final String attr, final int depth, final String root) throws IllegalArgumentException {
+        if (depth > MAX_NESTING_DEPTH) {
+            throw new IllegalArgumentException("Malformed type attribute: nesting deeper than " + MAX_NESTING_DEPTH + " levels in: " + root);
+        }
+
+        int componentEnd = attr.length();
+        while (componentEnd > 0 && Character.isWhitespace(attr.charAt(componentEnd - 1))) {
+            componentEnd--;
+        }
+
+        final int arrayEnd = componentEnd;
+        while (componentEnd >= 2 && attr.charAt(componentEnd - 2) == '[' && attr.charAt(componentEnd - 1) == ']') {
+            componentEnd -= 2;
+        }
+
+        if (componentEnd < arrayEnd) {
+            final String componentName = attr.substring(0, componentEnd).trim();
+            if (componentName.endsWith(")")) {
+                throw new IllegalArgumentException("Malformed type attribute: array dimensions after constructor arguments in: " + attr);
+            }
+
+            final TypeAttrParser component = parse(componentName, depth + 1, root);
+            return new TypeAttrParser(component.className + attr.substring(componentEnd, arrayEnd), component.typeParameters, component.parameters);
+        }
+
+        final String normalizedMemberType = normalizeQualifiedMemberType(attr, depth, root);
 
         if (normalizedMemberType != null) {
-            return parse(normalizedMemberType);
+            return parse(normalizedMemberType, depth + 1, root);
         }
 
         String className = null;
@@ -277,7 +343,7 @@ public final class TypeAttrParser {
 
                 // Validate every nested declaration as well. Merely balancing the outer text is
                 // insufficient for inputs such as List<Map<String,>> or Map<String, List<>>.
-                parse(typeParameter);
+                parse(typeParameter, depth + 1, root);
             }
 
             typeParameters = typeParameterList.toArray(new String[0]);
@@ -300,7 +366,15 @@ public final class TypeAttrParser {
             endIndex = findClosingParenthesis(attr, beginIndex);
 
             final String str = attr.substring(beginIndex + 1, endIndex).trim();
-            parameters = str.isEmpty() ? N.EMPTY_STRING_ARRAY : (COMMA.equals(str) ? new String[] { COMMA } : CsvUtil.CSV_HEADER_PARSER.apply(str));
+
+            try {
+                parameters = str.isEmpty() ? N.EMPTY_STRING_ARRAY : (COMMA.equals(str) ? new String[] { COMMA } : ARGUMENT_PARSER.parseLineToArray(str));
+            } catch (final ParsingException e) {
+                // The delimiter scanner above opens a quoted region on any '"', while the argument parser treats
+                // a '"' inside an unquoted field as data, so a substring the scanner accepted can still be
+                // malformed CSV. Report it as the malformed type attribute this method documents.
+                throw new IllegalArgumentException("Malformed type attribute: malformed quoted constructor argument in: " + attr, e);
+            }
         } else if (attr.indexOf(_PARENTHESIS_R, N.max(0, endIndex)) >= 0) {
             throw new IllegalArgumentException("Malformed type attribute: unexpected closing ')' in: " + attr);
         }
@@ -313,11 +387,27 @@ public final class TypeAttrParser {
             className = attr.trim(); // the generics/constructor-paren paths above both trim; a bare name must too
         }
 
-        if (Strings.isEmpty(className)) {
+        if (Strings.isEmpty(withoutArrayBrackets(className))) {
             throw new IllegalArgumentException("Malformed type attribute: missing class name in: " + attr);
         }
 
         return new TypeAttrParser(className, typeParameters, parameters);
+    }
+
+    /**
+     * Strips a trailing run of {@code []} pairs from a class name. Checking emptiness through this keeps the
+     * component-less array rejection reachable from every path: the bare spelling {@code "[]"} is rejected by
+     * the array branch, which peels the brackets and re-enters with an empty name, but {@code "[]()"} and
+     * {@code "[]<A>"} never take that branch and would otherwise parse to the class name {@code "[]"}.
+     */
+    private static String withoutArrayBrackets(final String className) {
+        int end = className.length();
+
+        while (end >= 2 && className.charAt(end - 2) == '[' && className.charAt(end - 1) == ']') {
+            end -= 2;
+        }
+
+        return end == className.length() ? className : className.substring(0, end).trim();
     }
 
     /**
@@ -326,7 +416,7 @@ public final class TypeAttrParser {
      * {@code Owner.Member<Integer>}. The original owner arguments are still validated before they
      * are removed; callers that need them retain them in the original reflection type or type name.
      */
-    private static String normalizeQualifiedMemberType(final String attr) {
+    private static String normalizeQualifiedMemberType(final String attr, final int depth, final String root) {
         final int firstParenthesisIndex = attr.indexOf(_PARENTHESIS_L);
         final int classSyntaxEndIndex = firstParenthesisIndex < 0 ? attr.length() : firstParenthesisIndex;
         final int firstGenericStart = attr.substring(0, classSyntaxEndIndex).indexOf('<');
@@ -349,7 +439,7 @@ public final class TypeAttrParser {
         }
 
         // Validate the owner's generic clause before removing it from the parser-facing name.
-        parse(ownerName + attr.substring(firstGenericStart, firstGenericEnd + 1));
+        parse(ownerName + attr.substring(firstGenericStart, firstGenericEnd + 1), depth + 1, root);
 
         final StringBuilder normalized = new StringBuilder(ownerName);
 
@@ -384,7 +474,7 @@ public final class TypeAttrParser {
                     // This member is itself an owner. Validate its generic arguments, then continue
                     // with the next member segment without exposing those arguments as the final
                     // member's own type parameters.
-                    parse(memberName + genericClause);
+                    parse(memberName + genericClause, depth + 1, root);
                     continue;
                 }
 
@@ -418,7 +508,7 @@ public final class TypeAttrParser {
     /**
      * Finds the closing angle bracket paired with {@code beginIndex}. Angle brackets inside a
      * nested type's parenthesized, double-quoted CSV constructor arguments are treated as data.
-     * Backslash-escaped and doubled double quotes follow {@link CsvParser}'s default rules.
+     * Backslash-escaped and doubled double quotes follow the explicitly configured argument parser's rules.
      */
     private static int findClosingGeneric(final String attr, final int beginIndex) {
         int depth = 0;
@@ -473,7 +563,7 @@ public final class TypeAttrParser {
     /**
      * Finds the closing parenthesis paired with {@code beginIndex}. Parentheses inside double-quoted
      * CSV constructor arguments are treated as data, while balanced nested parentheses are allowed.
-     * Backslash-escaped and doubled double quotes follow {@link CsvParser}'s default rules.
+     * Backslash-escaped and doubled double quotes follow the explicitly configured argument parser's rules.
      */
     private static int findClosingParenthesis(final String attr, final int beginIndex) {
         int depth = 0;
@@ -536,18 +626,21 @@ public final class TypeAttrParser {
      * fallback signature, a trailing {@code String[]}) arguments. If the attribute string declares
      * no type or constructor parameters, the no-argument constructor is used.
      *
+     * <p>A non-null class token determines the result type. With a null token, the class name is resolved dynamically;
+     * the caller is responsible for choosing a compatible result type.</p>
+     *
      * @param <T> the type of object to create
      * @param cls the class to instantiate, or {@code null} to derive it from the class name
      *            in the attribute string
      * @param attr the type attribute string containing the class name and constructor parameters
      * @return a new instance of the specified class
-     * @throws IllegalArgumentException if no suitable constructor is found.
+     * @throws IllegalArgumentException if {@code attr} is {@code null}, or if {@code attr} has malformed type syntax or no suitable constructor is found
      * @throws RuntimeException if the class cannot be resolved or instantiation fails
      * @see #parse(String)
      */
     @SuppressWarnings("unchecked")
     @Internal
-    static <T> T newInstance(Class<?> cls, final String attr) {
+    static <T> T newInstance(Class<T> cls, final String attr) throws IllegalArgumentException, RuntimeException {
         final TypeAttrParser attrResult = TypeAttrParser.parse(attr);
         final String className = attrResult.getClassName();
         final String[] attrTypeParameters = attrResult.getTypeParameters();
@@ -574,6 +667,9 @@ public final class TypeAttrParser {
             }
 
             Constructor<?> constructor = ClassUtil.getDeclaredConstructor(cls, parameterTypes);
+            // Keep the signature that was tried FIRST: the fallback below overwrites parameterTypes, and a
+            // failure message naming only the String[] fallback hides the arity the caller actually wrote.
+            final Class<?>[] primaryParameterTypes = parameterTypes;
 
             if (constructor == null && attrParameters.length > 0) {
                 parameterLength = attrTypeParameters.length + 1;
@@ -597,8 +693,8 @@ public final class TypeAttrParser {
             }
 
             if (constructor == null) {
-                throw new IllegalArgumentException(
-                        "No constructor found with parameters: " + N.toString(parameterTypes) + ". in class: " + cls.getCanonicalName());
+                throw new IllegalArgumentException("No constructor found with parameters: " + N.toString(primaryParameterTypes)
+                        + (parameterTypes == primaryParameterTypes ? "" : " or " + N.toString(parameterTypes)) + ". in class: " + cls.getCanonicalName());
             }
 
             ClassUtil.setAccessibleQuietly(constructor, true);
@@ -623,6 +719,9 @@ public final class TypeAttrParser {
      *     StringBuilder.class, "StringBuilder", CharSequence.class, "initial text");
      * }</pre>
      *
+     * <p>A non-null class token determines the result type. With a null token, the class name is resolved dynamically;
+     * the caller is responsible for choosing a compatible result type.</p>
+     *
      * @param <T> the type of object to create
      * @param cls the target class to instantiate, or {@code null} to derive it from the
      *            class name in {@code attr}
@@ -630,15 +729,14 @@ public final class TypeAttrParser {
      * @param args alternating {@code (Class, value)} pairs prepended to the parsed parameters;
      *             must have an even length, with every even-indexed element being a {@code Class}
      * @return a new instance of the specified class
-     * @throws IllegalArgumentException if {@code args} has an odd length, if an even-indexed element of {@code args}
-     *         is not a {@code Class}, or if no matching constructor is found.
-     * @throws NullPointerException if {@code attr} or {@code args} is {@code null}
+     * @throws IllegalArgumentException if {@code args} or {@code attr} is {@code null}, {@code attr} has malformed type syntax,
+     *         {@code args} has an odd length or an even-indexed element that is not a {@code Class}, or no matching constructor is found
      * @throws RuntimeException if the class cannot be resolved or instantiation fails
      * @see #parse(String)
      */
     @SuppressWarnings("unchecked")
-    public static <T> T newInstance(Class<?> cls, final String attr, final Object... args) {
-        Objects.requireNonNull(args, "args");
+    public static <T> T newInstance(Class<T> cls, final String attr, final Object... args) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(args, cs.args);
 
         final TypeAttrParser attrResult = TypeAttrParser.parse(attr);
         final String className = attrResult.getClassName();
@@ -681,6 +779,9 @@ public final class TypeAttrParser {
             }
 
             Constructor<?> constructor = ClassUtil.getDeclaredConstructor(cls, parameterTypes);
+            // Keep the signature that was tried FIRST: the fallback below overwrites parameterTypes, and a
+            // failure message naming only the String[] fallback hides the arity the caller actually wrote.
+            final Class<?>[] primaryParameterTypes = parameterTypes;
 
             if (constructor == null && attrParameters.length > 0) {
                 parameterLength = attrTypeParameters.length + 1 + (args.length / 2);
@@ -709,8 +810,8 @@ public final class TypeAttrParser {
             }
 
             if (constructor == null) {
-                throw new IllegalArgumentException(
-                        "No constructor found with parameters: " + N.toString(parameterTypes) + ". in class: " + cls.getCanonicalName());
+                throw new IllegalArgumentException("No constructor found with parameters: " + N.toString(primaryParameterTypes)
+                        + (parameterTypes == primaryParameterTypes ? "" : " or " + N.toString(parameterTypes)) + ". in class: " + cls.getCanonicalName());
             }
 
             ClassUtil.setAccessibleQuietly(constructor, true);

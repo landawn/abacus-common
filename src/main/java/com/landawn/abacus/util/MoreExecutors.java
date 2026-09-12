@@ -62,7 +62,9 @@ public final class MoreExecutors {
      *
      * <p>This method performs the following actions:</p>
      * <ul>
-     *   <li>Configures the executor to use daemon threads</li>
+     *   <li>Installs a thread factory that makes <i>subsequently created</i> threads daemon threads; worker
+     *       threads the executor has already started are unaffected and will still keep the JVM alive, so
+     *       convert the executor before submitting any work</li>
      *   <li>Wraps it in an unconfigurable executor service</li>
      *   <li>Registers a shutdown hook to terminate the executor on JVM exit</li>
      * </ul>
@@ -77,11 +79,14 @@ public final class MoreExecutors {
      * }</pre>
      *
      * @param executor the executor to modify
-     * @return an unconfigurable ExecutorService that will shut down on JVM exit
+     * @return an unconfigurable ExecutorService that shuts down on JVM exit, provided all of its threads were
+     *         created after this call
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws IllegalStateException if the virtual machine is already in the process of shutting down, so the
+     *         shutdown hook cannot be registered.
      * @see #getExitingExecutorService(ThreadPoolExecutor, long, TimeUnit)
      */
-    public static ExecutorService getExitingExecutorService(final ThreadPoolExecutor executor) {
+    public static ExecutorService getExitingExecutorService(final ThreadPoolExecutor executor) throws IllegalArgumentException, IllegalStateException {
         return getExitingExecutorService(executor, 120, TimeUnit.SECONDS);
     }
 
@@ -91,7 +96,9 @@ public final class MoreExecutors {
      *
      * <p>This method performs the following actions:</p>
      * <ul>
-     *   <li>Configures the executor to use daemon threads</li>
+     *   <li>Installs a thread factory that makes <i>subsequently created</i> threads daemon threads; worker
+     *       threads the executor has already started are unaffected and will still keep the JVM alive, so
+     *       convert the executor before submitting any work</li>
      *   <li>Wraps it in an unconfigurable executor service</li>
      *   <li>Registers a shutdown hook to terminate the executor on JVM exit</li>
      * </ul>
@@ -111,22 +118,39 @@ public final class MoreExecutors {
      * );
      * }</pre>
      *
+     * <p>The conversion is failure-atomic: if the shutdown hook cannot be registered - {@link Runtime#addShutdownHook}
+     * throws {@link IllegalStateException} once the JVM has begun shutting down - the caller's executor is left with
+     * the thread factory it had, rather than with daemon threads and no hook to drain them. (The rollback assumes the
+     * caller is not reconfiguring the same executor from another thread: a factory installed by someone else in the
+     * meantime is left alone.)</p>
+     *
      * @param executor the executor to modify
      * @param terminationTimeout the maximum time to wait for the executor to terminate
      * @param timeUnit the time unit for the termination timeout
-     * @return an unconfigurable ExecutorService that will shut down on JVM exit
+     * @return an unconfigurable ExecutorService that shuts down on JVM exit, provided all of its threads were
+     *         created after this call
      * @throws IllegalArgumentException if {@code executor} or {@code timeUnit} is {@code null}, or
      *         {@code terminationTimeout} is negative.
+     * @throws IllegalStateException if the virtual machine is already in the process of shutting down, so the
+     *         shutdown hook cannot be registered.
      */
-    public static ExecutorService getExitingExecutorService(final ThreadPoolExecutor executor, final long terminationTimeout, final TimeUnit timeUnit) {
+    public static ExecutorService getExitingExecutorService(final ThreadPoolExecutor executor, final long terminationTimeout, final TimeUnit timeUnit)
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(executor, cs.executor);
         N.checkArgNotNull(timeUnit, cs.timeUnit);
-        N.checkArgNotNegative(terminationTimeout, "terminationTimeout");
+        N.checkArgNotNegative(terminationTimeout, cs.terminationTimeout);
 
-        useDaemonThreadFactory(executor);
-        final ExecutorService service = Executors.unconfigurableExecutorService(executor);
-        addDelayedShutdownHook(service, terminationTimeout, timeUnit);
-        return service;
+        final ThreadFactory originalThreadFactory = executor.getThreadFactory();
+        final ThreadFactory daemonThreadFactory = useDaemonThreadFactory(executor);
+
+        try {
+            final ExecutorService service = Executors.unconfigurableExecutorService(executor);
+            addDelayedShutdownHook(service, terminationTimeout, timeUnit);
+            return service;
+        } catch (final RuntimeException | Error e) {
+            restoreThreadFactory(executor, daemonThreadFactory, originalThreadFactory);
+            throw e;
+        }
     }
 
     /**
@@ -135,7 +159,9 @@ public final class MoreExecutors {
      *
      * <p>This method performs the following actions:</p>
      * <ul>
-     *   <li>Configures the executor to use daemon threads</li>
+     *   <li>Installs a thread factory that makes <i>subsequently created</i> threads daemon threads; worker
+     *       threads the executor has already started are unaffected and will still keep the JVM alive, so
+     *       convert the executor before submitting any work</li>
      *   <li>Wraps it in an unconfigurable scheduled executor service</li>
      *   <li>Registers a shutdown hook to terminate the executor on JVM exit</li>
      * </ul>
@@ -148,11 +174,15 @@ public final class MoreExecutors {
      * }</pre>
      *
      * @param executor the scheduled executor to modify
-     * @return an unconfigurable ScheduledExecutorService that will shut down on JVM exit
+     * @return an unconfigurable ScheduledExecutorService that shuts down on JVM exit, provided all of its
+     *         threads were created after this call
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws IllegalStateException if the virtual machine is already in the process of shutting down, so the
+     *         shutdown hook cannot be registered.
      * @see #getExitingScheduledExecutorService(ScheduledThreadPoolExecutor, long, TimeUnit)
      */
-    public static ScheduledExecutorService getExitingScheduledExecutorService(final ScheduledThreadPoolExecutor executor) {
+    public static ScheduledExecutorService getExitingScheduledExecutorService(final ScheduledThreadPoolExecutor executor)
+            throws IllegalArgumentException, IllegalStateException {
         return getExitingScheduledExecutorService(executor, 120, TimeUnit.SECONDS);
     }
 
@@ -162,7 +192,9 @@ public final class MoreExecutors {
      *
      * <p>This method performs the following actions:</p>
      * <ul>
-     *   <li>Configures the executor to use daemon threads</li>
+     *   <li>Installs a thread factory that makes <i>subsequently created</i> threads daemon threads; worker
+     *       threads the executor has already started are unaffected and will still keep the JVM alive, so
+     *       convert the executor before submitting any work</li>
      *   <li>Wraps it in an unconfigurable scheduled executor service</li>
      *   <li>Registers a shutdown hook to terminate the executor on JVM exit</li>
      * </ul>
@@ -178,23 +210,39 @@ public final class MoreExecutors {
      *     MoreExecutors.getExitingScheduledExecutorService(scheduler, 30, TimeUnit.SECONDS);
      * }</pre>
      *
+     * <p>The conversion is failure-atomic: if the shutdown hook cannot be registered - {@link Runtime#addShutdownHook}
+     * throws {@link IllegalStateException} once the JVM has begun shutting down - the caller's executor is left with
+     * the thread factory it had, rather than with daemon threads and no hook to drain them. (The rollback assumes the
+     * caller is not reconfiguring the same executor from another thread: a factory installed by someone else in the
+     * meantime is left alone.)</p>
+     *
      * @param executor the scheduled executor to modify
      * @param terminationTimeout the maximum time to wait for the executor to terminate
      * @param timeUnit the time unit for the termination timeout
-     * @return an unconfigurable ScheduledExecutorService that will shut down on JVM exit
+     * @return an unconfigurable ScheduledExecutorService that shuts down on JVM exit, provided all of its
+     *         threads were created after this call
      * @throws IllegalArgumentException if {@code executor} or {@code timeUnit} is {@code null}, or
      *         {@code terminationTimeout} is negative.
+     * @throws IllegalStateException if the virtual machine is already in the process of shutting down, so the
+     *         shutdown hook cannot be registered.
      */
     public static ScheduledExecutorService getExitingScheduledExecutorService(final ScheduledThreadPoolExecutor executor, final long terminationTimeout,
-            final TimeUnit timeUnit) {
+            final TimeUnit timeUnit) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(executor, cs.executor);
         N.checkArgNotNull(timeUnit, cs.timeUnit);
-        N.checkArgNotNegative(terminationTimeout, "terminationTimeout");
+        N.checkArgNotNegative(terminationTimeout, cs.terminationTimeout);
 
-        useDaemonThreadFactory(executor);
-        final ScheduledExecutorService service = Executors.unconfigurableScheduledExecutorService(executor);
-        addDelayedShutdownHook(service, terminationTimeout, timeUnit);
-        return service;
+        final ThreadFactory originalThreadFactory = executor.getThreadFactory();
+        final ThreadFactory daemonThreadFactory = useDaemonThreadFactory(executor);
+
+        try {
+            final ScheduledExecutorService service = Executors.unconfigurableScheduledExecutorService(executor);
+            addDelayedShutdownHook(service, terminationTimeout, timeUnit);
+            return service;
+        } catch (final RuntimeException | Error e) {
+            restoreThreadFactory(executor, daemonThreadFactory, originalThreadFactory);
+            throw e;
+        }
     }
 
     /**
@@ -221,12 +269,14 @@ public final class MoreExecutors {
      * @param timeUnit the time unit for the termination timeout
      * @throws IllegalArgumentException if {@code service} or {@code timeUnit} is {@code null}, or
      *         {@code terminationTimeout} is negative.
+     * @throws IllegalStateException if the virtual machine is already in the process of shutting down, so the
+     *         shutdown hook cannot be registered.
      */
     public static void addDelayedShutdownHook(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(service);
         N.checkArgNotNull(timeUnit);
-        N.checkArgNotNegative(terminationTimeout, "terminationTimeout");
+        N.checkArgNotNegative(terminationTimeout, cs.terminationTimeout);
 
         addShutdownHook(MoreExecutors.newThread("DelayedShutdownHook-for-" + service, () -> {
             try {
@@ -249,8 +299,11 @@ public final class MoreExecutors {
      * This is a package-private utility method.
      *
      * @param hook the thread to add as a shutdown hook
+     * @throws IllegalStateException if the virtual machine is already shutting down
+     * @throws IllegalArgumentException if {@code hook} has already been registered or started
+     * @throws SecurityException if the runtime denies permission to register shutdown hooks
      */
-    static void addShutdownHook(final Thread hook) {
+    static void addShutdownHook(final Thread hook) throws IllegalStateException, IllegalArgumentException, SecurityException {
         Runtime.getRuntime().addShutdownHook(hook);
     }
 
@@ -264,9 +317,11 @@ public final class MoreExecutors {
      * preserves that result.</p>
      *
      * @param executor the executor to configure with daemon threads
+     * @return the daemon thread factory that was installed, so that a caller whose setup fails afterwards can tell
+     *         it apart from one a third party installed in the meantime
      */
-    private static void useDaemonThreadFactory(final ThreadPoolExecutor executor) {
-        executor.setThreadFactory(new ThreadFactory() {
+    private static ThreadFactory useDaemonThreadFactory(final ThreadPoolExecutor executor) {
+        final ThreadFactory daemonThreadFactory = new ThreadFactory() {
             private final ThreadFactory impl = executor.getThreadFactory();
 
             /**
@@ -275,9 +330,10 @@ public final class MoreExecutors {
              * @param r the runnable to execute in the new thread; must not be {@code null}
              * @return the created thread, or {@code null} if the wrapped factory returns {@code null}
              * @throws IllegalArgumentException if {@code r} is {@code null}.
+             * @throws IllegalThreadStateException if the underlying thread factory returns a thread that has already been started
              */
             @Override
-            public Thread newThread(final Runnable r) throws IllegalArgumentException {
+            public Thread newThread(final Runnable r) throws IllegalArgumentException, IllegalThreadStateException {
                 N.checkArgNotNull(r, cs.r);
 
                 final Thread res = impl.newThread(r);
@@ -288,7 +344,33 @@ public final class MoreExecutors {
 
                 return res;
             }
-        });
+        };
+
+        executor.setThreadFactory(daemonThreadFactory);
+
+        return daemonThreadFactory;
+    }
+
+    /**
+     * Undoes {@link #useDaemonThreadFactory(ThreadPoolExecutor)} after the rest of the conversion failed, so that a
+     * failed call leaves the caller's executor exactly as it found it.
+     *
+     * <p>The factory is put back only if {@code installed} is still the executor's factory: if the caller replaced it
+     * from another thread while the conversion was running, that replacement is the more recent intent and is kept.
+     * A failure of the restore itself is swallowed - the original failure is the one worth reporting.</p>
+     *
+     * @param executor the executor to restore
+     * @param installed the daemon thread factory this class installed
+     * @param original the thread factory the executor had before the conversion started
+     */
+    static void restoreThreadFactory(final ThreadPoolExecutor executor, final ThreadFactory installed, final ThreadFactory original) {
+        try {
+            if (executor.getThreadFactory() == installed) {
+                executor.setThreadFactory(original);
+            }
+        } catch (final RuntimeException e) { // NOSONAR
+            // Best effort only: the exception that triggered the rollback is propagated by the caller.
+        }
     }
 
     /**
@@ -301,9 +383,11 @@ public final class MoreExecutors {
      * @param name the desired name for the thread
      * @param runnable the runnable to execute in the thread
      * @return a new thread configured with the given name and runnable
+     * @throws IllegalArgumentException if {@code name} or {@code runnable} is {@code null}.
      */
-    static Thread newThread(final String name, final Runnable runnable) {
+    static Thread newThread(final String name, final Runnable runnable) throws IllegalArgumentException {
         N.checkArgNotNull(name);
+        N.checkArgNotNull(runnable);
 
         final Thread result = Executors.defaultThreadFactory().newThread(runnable);
         try {

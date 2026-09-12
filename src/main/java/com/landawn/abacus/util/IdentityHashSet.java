@@ -79,7 +79,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * @param initialCapacity the initial capacity of the identity hash set
      * @throws IllegalArgumentException if the initial capacity is negative.
      */
-    public IdentityHashSet(final int initialCapacity) {
+    public IdentityHashSet(final int initialCapacity) throws IllegalArgumentException {
         map = N.newIdentityHashMap(initialCapacity);
     }
 
@@ -204,6 +204,8 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * Removes from this set all of its elements that are contained in the specified collection
      * using reference-equality comparison. For each element e in the collection, removes from
      * this set any element e2 such that (e==e2).
+     * The collection's elements are captured before removal, so a live view of this set can
+     * be supplied without invalidating its iterator.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -231,7 +233,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
         boolean modified = false;
 
         if (N.notEmpty(c)) {
-            for (final Object e : c) {
+            for (final Object e : c.toArray()) {
                 if (remove(e)) {
                     modified = true;
                 }
@@ -371,11 +373,12 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * @param a the array into which the elements of this set are to be stored, if it is
      *          big enough; otherwise, a new array of the same runtime type is allocated
      * @return an array containing all of the elements in this set
+     * @throws NullPointerException if {@code a} is {@code null}
      * @throws ArrayStoreException if the runtime type of the specified array is not a
      *         supertype of the runtime type of every element in this set
      */
     @Override
-    public <A> A[] toArray(final A[] a) {
+    public <A> A[] toArray(final A[] a) throws NullPointerException, ArrayStoreException {
         return map.keySet().toArray(a);
     }
 
@@ -507,10 +510,13 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * String str = set.toString();   // returns something like "[a, b]"
      * }</pre>
      *
+     * <p>Direct self-references are rendered with the standard collection/map marker; indirect cycles are not detected.</p>
+     *
      * @return a string representation of this set
      */
     @Override
     public String toString() {
-        return map.keySet().toString();
+        // Format through this wrapper so direct self-references use the standard marker.
+        return super.toString();
     }
 }

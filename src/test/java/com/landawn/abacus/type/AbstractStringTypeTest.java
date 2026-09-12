@@ -6,8 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +21,8 @@ import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import javax.sql.rowset.serial.SerialClob;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -251,5 +256,20 @@ public class AbstractStringTypeTest extends TestBase {
         stringType.serializeTo(writer, "world", config);
         verify(writer, times(2)).write('"');
         verify(writer).writeCharacter("world");
+    }
+
+    // T3-01: getSubString(1, 0) is rejected by the JDK's own SerialClob for a zero-length lob (SerialException); the
+    // guard sits inside the try so free() still runs.
+    @Test
+    public void reviewFixes20260906_valueOfClob_zeroLength_returnsEmptyAndFrees() throws SQLException {
+        Clob clob = mock(Clob.class);
+        when(clob.length()).thenReturn(0L);
+
+        assertEquals("", stringType.valueOf(clob));
+        verify(clob, never()).getSubString(anyLong(), anyInt());
+        verify(clob, times(1)).free();
+
+        assertEquals("", stringType.valueOf(new SerialClob(new char[0])));
+        assertEquals("abc", stringType.valueOf(new SerialClob("abc".toCharArray())));
     }
 }

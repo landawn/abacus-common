@@ -23,15 +23,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -39,12 +44,15 @@ import java.util.function.Function;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.landawn.abacus.exception.UncheckedException;
@@ -59,6 +67,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.RowDataset;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.function.TriConsumer;
@@ -107,20 +116,27 @@ import lombok.Data;
  * format (XLS vs XLSX) from the filename extension (anything other than {@code .xls} produces an
  * XLSX/XSSF workbook), whereas the {@code OutputStream} writers require the format to be passed
  * explicitly. {@code InputStream}/{@code OutputStream} overloads do not close the supplied stream,
- * and {@code OutputStream} overloads do not flush it; the caller owns those operations.
+ * and flushing of an {@code OutputStream} depends on the POI implementation; the caller remains
+ * responsible for flushing and closing it.
  * {@code File}/{@code Path} overloads manage their own file resources internally.
  *
  * <p><b>Header-handling divergence between read families:</b> the {@code readDatasetFromSheet}
  * family always consumes the first physically defined row returned by the sheet iterator as the
  * header row and uses those cell values as the {@link Dataset}
- * column names (synthesizing a unique {@code "Column_i"}, with a numeric suffix if needed, for
- * blank/empty header cells), and therefore has no
- * {@code skipFirstRow} parameter. In contrast, the {@code readRowsFromSheet} and
+ * column names, and therefore has no {@code skipFirstRow} parameter. Each header name is the
+ * {@link #CELL_TO_STRING} rendering of its cell: a text cell is taken verbatim, a numeric header
+ * {@code 2024} becomes {@code "2024.0"}, a boolean {@code "true"}, a formula its formula text. Only a
+ * missing cell, a {@code CellType.BLANK} cell or an empty string is replaced by a synthesized unique
+ * {@code "Column_i"} (with a numeric suffix if needed); a whitespace-only name is kept as-is and, like
+ * every other non-empty name, may not repeat within the header row. In contrast, the {@code readRowsFromSheet} and
  * {@code streamRowsFromSheet} families never interpret a row as headers; they expose a raw
  * {@code skipFirstRow} boolean and simply discard the first physically defined row when it is
  * {@code true}. Choose
  * {@code readDatasetFromSheet} when the first row holds column names, and the row/stream families
  * for header-agnostic row processing.
+ * Dataset width is the largest cell index plus one across all physical rows, so data beyond the
+ * header row's width is retained under synthesized column names. Missing data cells become
+ * {@code null}; a sheet with no cells yields an empty Dataset.
  *
  * <p>Streams returned by {@code streamRowsFromSheet} carry an {@code onClose()} handler that closes
  * the underlying workbook (and, for {@code File}/{@code Path} sources, the underlying input stream);
@@ -132,13 +148,38 @@ import lombok.Data;
  * {@code writeRowsToSheet} writes each data row using that row's own size, so rows wider or narrower
  * than {@code headers} are emitted ragged (no padding or truncation to the header column count); the
  * {@code Dataset} overloads are rectangular by construction. The {@code exportSheetToCsv} File-sink
- * overloads use whatever charset {@link IOUtil#newFileWriter(File)} selects; supply a {@link Writer}
- * (e.g. an {@link java.io.OutputStreamWriter} over a chosen {@link java.nio.charset.Charset}) for
- * explicit encoding control.
+ * overloads use whatever charset {@link IOUtil#newOutputStreamWriter(OutputStream)} selects; supply a
+ * {@link Writer} (e.g. an {@link java.io.OutputStreamWriter} over a chosen
+ * {@link java.nio.charset.Charset}) for explicit encoding control.
+ *
+ * <p><b>File destinations are replaced, never truncated in place.</b> Every {@code File}/{@code Path}
+ * sink writes to a sibling temporary file and moves it onto the destination only after the write
+ * completes, so a failure while generating or writing the content leaves the previous file intact. The
+ * replacement uses an atomic move when supported, falling back to a non-atomic replacement otherwise;
+ * if that fallback move fails, the destination's state is filesystem-dependent. This needs
+ * write access to the destination's directory and briefly uses space for both copies, and - because the
+ * destination is replaced rather than rewritten - the file that ends up there is a new one: an existing
+ * destination's permissions, hard links, and (on POSIX) ownership are not carried over, and a destination
+ * that is a symbolic link is replaced by a regular file instead of being written through (the link's
+ * former target keeps its old content).
+ *
+ * <p><b>Numeric rendering differs between the readers and {@code exportSheetToCsv}.</b> The reader families
+ * expose the cell's underlying value, so a NUMERIC cell yields a {@code Double} - {@code 1001.0} for an
+ * integer, and a date's serial number (e.g. {@code 45244.59259259259}) for a date cell.
+ * {@code exportSheetToCsv} instead renders NUMERIC cells through POI's
+ * {@link org.apache.poi.ss.usermodel.DataFormatter} under {@link java.util.Locale#ROOT}, i.e. exactly as the
+ * sheet displays them ({@code 1001}, {@code 2023-11-14}), because a CSV export is expected to reproduce the
+ * spreadsheet rather than its internal representation. Use {@link org.apache.poi.ss.usermodel.DateUtil} on the
+ * {@link Cell} directly if a reader path needs the date rather than the serial number.
  *
  * <p>I/O errors are rethrown as {@link UncheckedException} or
  * {@link com.landawn.abacus.exception.UncheckedIOException}. A missing sheet name causes
- * {@code IllegalArgumentException}. All methods are stateless and thread-safe.
+ * {@code IllegalArgumentException} in the readers; the writers validate the sheet name up front and throw
+ * {@code IllegalArgumentException} - before any workbook or temporary file exists - for a name that is
+ * {@code null}, empty, longer than 31 characters (which POI would otherwise silently truncate, so a later
+ * read by the original name would fail), contains any of {@code : \ / ? * [ ]}, or starts or ends with an
+ * apostrophe. Methods keep no shared workbook state. Callers must coordinate
+ * access to shared destinations, mutable options, callbacks, and POI objects.
  *
  * <p><b>Usage Examples:</b>
  * <pre>{@code
@@ -265,14 +306,19 @@ public final class ExcelUtil {
      * The resulting Dataset provides column-based access to the data with type preservation.</p>
      *
      * <p><b>Header handling:</b> the {@code readDatasetFromSheet} family always consumes the first
-     * physically defined row returned by the sheet iterator as the header row and uses those cell
-     * values as column names (synthesizing a unique {@code "Column_i"},
-     * with a numeric suffix if needed, for blank/empty header cells); it has no {@code skipFirstRow}
-     * parameter. This differs from the
+     * physically defined row returned by the sheet iterator as the header row and uses the
+     * {@link #CELL_TO_STRING} rendering of those cells as column names (a numeric header {@code 2024}
+     * becomes {@code "2024.0"}, a formula its text); only a missing cell, a {@code CellType.BLANK} cell
+     * or an empty string is replaced by a synthesized unique {@code "Column_i"} (with a numeric suffix
+     * when needed), while a whitespace-only name is kept as-is and may not repeat. It has no
+     * {@code skipFirstRow} parameter. This differs from the
      * {@link #readRowsFromSheet(File, int, boolean, Function)} and
      * {@link #streamRowsFromSheet(File, int, boolean)} families, which never interpret a row as
      * headers and instead expose a raw {@code skipFirstRow} boolean. See the class-level
      * documentation for details.</p>
+     *
+     * <p>Columns extend to the widest physical row. Missing trailing headers receive synthesized
+     * names, and missing data cells become {@code null}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -283,10 +329,12 @@ public final class ExcelUtil {
      *
      * @param excelFile the Excel file to read, must exist and be a valid Excel file.
      * @return a Dataset containing the sheet data with the first row as column names, or an empty Dataset if the sheet is empty.
-     * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if the header row contains duplicate non-blank column names.
+     * @throws IllegalArgumentException if {@code excelFile} is {@code null},
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
+     *         input stream fails with an {@code IOException}
      */
-    public static Dataset readDatasetFromSheet(final File excelFile) {
+    public static Dataset readDatasetFromSheet(final File excelFile) throws IllegalArgumentException, UncheckedException {
         return readDatasetFromSheet(excelFile, 0, RowExtractors.DEFAULT);
     }
 
@@ -315,12 +363,15 @@ public final class ExcelUtil {
      * @param rowExtractor custom function to extract row data. Receives three parameters:
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
-     * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet index is out of bounds,
-     *         or if the header row contains duplicate non-blank column names.
+     * @throws IllegalArgumentException if {@code excelFile} or {@code rowExtractor} is {@code null},
+     *         or the sheet index is out of bounds,
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
+     *         input stream fails with an {@code IOException}
      */
     public static Dataset readDatasetFromSheet(final File excelFile, final int sheetIndex,
-            final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException {
+            final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelFile, cs.excelFile);
         N.checkArgNotNull(rowExtractor, cs.rowExtractor);
 
         try (InputStream is = new FileInputStream(excelFile)) {
@@ -342,12 +393,14 @@ public final class ExcelUtil {
      * @param rowExtractor custom function to extract row data. Receives three parameters:
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
-     * @throws UncheckedException if an I/O error occurs while reading the stream, or if the content is not a valid Excel stream.
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet index is out of bounds,
-     *         or if the header row contains duplicate non-blank column names.
+     * @throws IllegalArgumentException if {@code excelInputStream} or {@code rowExtractor} is {@code null},
+     *         or the sheet index is out of bounds,
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     * @throws UncheckedException if reading {@code excelInputStream} to create the workbook, or closing the workbook, fails with an {@code IOException}
      */
     public static Dataset readDatasetFromSheet(final InputStream excelInputStream, final int sheetIndex,
-            final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException {
+            final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelInputStream, cs.excelInputStream);
         N.checkArgNotNull(rowExtractor, cs.rowExtractor);
 
         try (Workbook workbook = WorkbookFactory.create(closeShield(excelInputStream))) {
@@ -367,12 +420,15 @@ public final class ExcelUtil {
      * @param rowExtractor custom function to extract row data. Receives three parameters:
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
-     * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet index is out of bounds,
-     *         or if the header row contains duplicate non-blank column names.
+     * @throws IllegalArgumentException if {@code excelPath} or {@code rowExtractor} is {@code null},
+     *         or the sheet index is out of bounds,
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     * @throws UncheckedException if opening or reading the file identified by {@code excelPath}, creating its workbook, or closing the
+     *         workbook or an owned input stream fails with an {@code IOException}
      */
     public static Dataset readDatasetFromSheet(final Path excelPath, final int sheetIndex,
-            final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException {
+            final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelPath, cs.excelPath);
         N.checkArgNotNull(rowExtractor, cs.rowExtractor);
 
         return readDatasetFromSheet(excelPath.toFile(), sheetIndex, rowExtractor);
@@ -397,16 +453,19 @@ public final class ExcelUtil {
      * }</pre>
      *
      * @param excelFile the Excel file to read, must exist and be a valid Excel file.
-     * @param sheetName the name of the sheet to read, case-sensitive.
+     * @param sheetName the name of the sheet to read, case-insensitive.
      * @param rowExtractor custom function to extract row data. Receives three parameters:
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
-     * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet name is not found in
-     *         the workbook, or if the header row contains duplicate non-blank column names.
+     * @throws IllegalArgumentException if {@code excelFile} or {@code rowExtractor} is {@code null},
+     *         or the sheet name is not found in the workbook,
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
+     *         input stream fails with an {@code IOException}
      */
     public static Dataset readDatasetFromSheet(final File excelFile, final String sheetName,
-            final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException {
+            final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelFile, cs.excelFile);
         N.checkArgNotNull(rowExtractor, cs.rowExtractor);
 
         try (InputStream is = new FileInputStream(excelFile)) {
@@ -424,16 +483,18 @@ public final class ExcelUtil {
      * to process each row after the header row.
      *
      * @param excelInputStream the input stream of the Excel content, must be a valid Excel stream. It is not closed by this method.
-     * @param sheetName the name of the sheet to read, case-sensitive.
+     * @param sheetName the name of the sheet to read, case-insensitive.
      * @param rowExtractor custom function to extract row data. Receives three parameters:
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
-     * @throws UncheckedException if an I/O error occurs or if the content is not a valid Excel stream.
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet name is not found in
-     *         the workbook, or if the header row contains duplicate non-blank column names.
+     * @throws IllegalArgumentException if {@code excelInputStream} or {@code rowExtractor} is {@code null},
+     *         or the sheet name is not found in the workbook,
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     * @throws UncheckedException if reading {@code excelInputStream} to create the workbook, or closing the workbook, fails with an {@code IOException}
      */
     public static Dataset readDatasetFromSheet(final InputStream excelInputStream, final String sheetName,
-            final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException {
+            final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelInputStream, cs.excelInputStream);
         N.checkArgNotNull(rowExtractor, cs.rowExtractor);
 
         try (Workbook workbook = WorkbookFactory.create(closeShield(excelInputStream))) {
@@ -449,22 +510,28 @@ public final class ExcelUtil {
      * This is a thin {@link Path}-based delegate to {@link #readDatasetFromSheet(File, String, TriConsumer)}.
      *
      * @param excelPath the path of the Excel file to read, must exist and be a valid Excel file.
-     * @param sheetName the name of the sheet to read, case-sensitive.
+     * @param sheetName the name of the sheet to read, case-insensitive.
      * @param rowExtractor custom function to extract row data. Receives three parameters:
      *                     column headers array, current row, and output array to populate with extracted values.
      * @return a Dataset containing the extracted sheet data with the first row as column names.
-     * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowExtractor} is {@code null}, or the sheet name is not found in
-     *         the workbook, or if the header row contains duplicate non-blank column names.
+     * @throws IllegalArgumentException if {@code excelPath} or {@code rowExtractor} is {@code null},
+     *         or the sheet name is not found in the workbook,
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     * @throws UncheckedException if opening or reading the file identified by {@code excelPath}, creating its workbook, or closing the
+     *         workbook or an owned input stream fails with an {@code IOException}
      */
     public static Dataset readDatasetFromSheet(final Path excelPath, final String sheetName,
-            final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException {
+            final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelPath, cs.excelPath);
         N.checkArgNotNull(rowExtractor, cs.rowExtractor);
 
         return readDatasetFromSheet(excelPath.toFile(), sheetName, rowExtractor);
     }
 
-    private static Sheet getRequiredSheet(final Workbook workbook, final String sheetName) {
+    /**
+     * @throws IllegalArgumentException if the workbook contains no sheet with the requested name
+     */
+    private static Sheet getRequiredSheet(final Workbook workbook, final String sheetName) throws IllegalArgumentException {
         final Sheet sheet = workbook.getSheet(sheetName);
 
         if (sheet == null) {
@@ -474,7 +541,11 @@ public final class ExcelUtil {
         return sheet;
     }
 
-    private static Dataset readDatasetFromSheet(final Sheet sheet, final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) {
+    /**
+     * @throws IllegalArgumentException if two non-empty column headers have the same name, including whitespace-only names
+     */
+    private static Dataset readDatasetFromSheet(final Sheet sheet, final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor)
+            throws IllegalArgumentException {
         final Iterator<Row> rowIter = sheet.rowIterator();
 
         if (!rowIter.hasNext()) {
@@ -482,15 +553,29 @@ public final class ExcelUtil {
         }
 
         final Row headerRow = rowIter.next();
-        final int columnCount = Math.max(headerRow.getLastCellNum(), 0);
+        // A trailing column may have data without a header cell. Measure the whole sheet before
+        // allocating extractor buffers so such values survive under synthesized column names.
+        final int columnCount = widestRowOf(sheet, false);
         final String[] headers = new String[columnCount];
         final Set<String> usedHeaderNames = new HashSet<>(columnCount);
+
+        // A Dataset cannot hold two columns with the same name. Blank header cells get a synthesized
+        // "Column_i" below, but a genuinely duplicated header is a mapping mistake in the sheet: report it
+        // with both positions instead of letting RowDataset fail later with only the name.
+        final Map<String, Integer> headerPositions = new HashMap<>(columnCount);
 
         for (int i = 0; i < columnCount; i++) {
             final Cell cell = headerRow.getCell(i);
             final String name = cell == null ? "" : CELL_TO_STRING.apply(cell);
 
             if (!name.isEmpty()) {
+                final Integer previous = headerPositions.putIfAbsent(name, i);
+
+                if (previous != null) {
+                    throw new IllegalArgumentException(
+                            "Duplicate header name '" + name + "' in columns " + previous + " and " + i + " of sheet: " + sheet.getSheetName());
+                }
+
                 headers[i] = name;
                 usedHeaderNames.add(name);
             }
@@ -552,9 +637,11 @@ public final class ExcelUtil {
      *
      * @param excelFile the Excel file to read, must exist and be a valid Excel file.
      * @return a list of rows, where each row is a list of cell values with preserved types.
-     * @throws UncheckedException if an I/O error occurs while reading the file or if the file is not a valid Excel file.
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
+     *         input stream fails with an {@code IOException}
+     * @throws IllegalArgumentException if {@code excelFile} is {@code null}.
      */
-    public static List<List<Object>> readRowsFromSheet(final File excelFile) {
+    public static List<List<Object>> readRowsFromSheet(final File excelFile) throws UncheckedException, IllegalArgumentException {
         return readRowsFromSheet(excelFile, 0, false, RowMappers.DEFAULT);
     }
 
@@ -590,11 +677,14 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows.
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
-     * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}, or the sheet index is out of bounds.
+     * @throws IllegalArgumentException if {@code excelFile} or {@code rowMapper} is {@code null},
+     *         or the sheet index is out of bounds.
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
+     *         input stream fails with an {@code IOException}
      */
     public static <T> List<T> readRowsFromSheet(final File excelFile, final int sheetIndex, final boolean skipFirstRow,
-            final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException {
+            final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelFile, cs.excelFile);
         N.checkArgNotNull(rowMapper, cs.rowMapper);
 
         try (InputStream is = new FileInputStream(excelFile)) {
@@ -620,11 +710,13 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows.
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
-     * @throws UncheckedException if an I/O error occurs while reading the stream, or if the content is not a valid Excel stream.
-     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}, or the sheet index is out of bounds.
+     * @throws IllegalArgumentException if {@code excelInputStream} or {@code rowMapper} is {@code null},
+     *         or the sheet index is out of bounds.
+     * @throws UncheckedException if reading {@code excelInputStream} to create the workbook, or closing the workbook, fails with an {@code IOException}
      */
     public static <T> List<T> readRowsFromSheet(final InputStream excelInputStream, final int sheetIndex, final boolean skipFirstRow,
-            final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException {
+            final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelInputStream, cs.excelInputStream);
         N.checkArgNotNull(rowMapper, cs.rowMapper);
 
         try (Workbook workbook = WorkbookFactory.create(closeShield(excelInputStream))) {
@@ -644,11 +736,14 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows.
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
-     * @throws UncheckedException if an I/O error occurs while reading the file, or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}, or the sheet index is out of bounds.
+     * @throws IllegalArgumentException if {@code excelPath} or {@code rowMapper} is {@code null},
+     *         or the sheet index is out of bounds.
+     * @throws UncheckedException if opening or reading the file identified by {@code excelPath}, creating its workbook, or closing the
+     *         workbook or an owned input stream fails with an {@code IOException}
      */
     public static <T> List<T> readRowsFromSheet(final Path excelPath, final int sheetIndex, final boolean skipFirstRow,
-            final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException {
+            final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelPath, cs.excelPath);
         N.checkArgNotNull(rowMapper, cs.rowMapper);
 
         return readRowsFromSheet(excelPath.toFile(), sheetIndex, skipFirstRow, rowMapper);
@@ -679,16 +774,18 @@ public final class ExcelUtil {
      *
      * @param <T> the type of objects to map rows to.
      * @param excelFile the Excel file to read, must exist and be a valid Excel file.
-     * @param sheetName the name of the sheet to read, case-sensitive.
+     * @param sheetName the name of the sheet to read, case-insensitive.
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows.
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
-     * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}, or the sheet name is not found in the
-     *         workbook.
+     * @throws IllegalArgumentException if {@code excelFile} or {@code rowMapper} is {@code null},
+     *         or the sheet name is not found in the workbook.
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
+     *         input stream fails with an {@code IOException}
      */
     public static <T> List<T> readRowsFromSheet(final File excelFile, final String sheetName, final boolean skipFirstRow,
-            final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException {
+            final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelFile, cs.excelFile);
         N.checkArgNotNull(rowMapper, cs.rowMapper);
 
         try (InputStream is = new FileInputStream(excelFile)) {
@@ -710,16 +807,17 @@ public final class ExcelUtil {
      *
      * @param <T> the type of objects to map rows to.
      * @param excelInputStream the input stream of the Excel content, must be a valid Excel stream. It is not closed by this method.
-     * @param sheetName the name of the sheet to read, case-sensitive.
+     * @param sheetName the name of the sheet to read, case-insensitive.
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows.
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
-     * @throws UncheckedException if an I/O error occurs or if the content is not a valid Excel stream.
-     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}, or the sheet name is not found in the
-     *         workbook.
+     * @throws IllegalArgumentException if {@code excelInputStream} or {@code rowMapper} is {@code null},
+     *         or the sheet name is not found in the workbook.
+     * @throws UncheckedException if reading {@code excelInputStream} to create the workbook, or closing the workbook, fails with an {@code IOException}
      */
     public static <T> List<T> readRowsFromSheet(final InputStream excelInputStream, final String sheetName, final boolean skipFirstRow,
-            final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException {
+            final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelInputStream, cs.excelInputStream);
         N.checkArgNotNull(rowMapper, cs.rowMapper);
 
         try (Workbook workbook = WorkbookFactory.create(closeShield(excelInputStream))) {
@@ -736,16 +834,18 @@ public final class ExcelUtil {
      *
      * @param <T> the type of objects to map rows to.
      * @param excelPath the path of the Excel file to read, must exist and be a valid Excel file.
-     * @param sheetName the name of the sheet to read, case-sensitive.
+     * @param sheetName the name of the sheet to read, case-insensitive.
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows.
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
-     * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file.
-     * @throws IllegalArgumentException if {@code rowMapper} is {@code null}, or the sheet name is not found in the
-     *         workbook.
+     * @throws IllegalArgumentException if {@code excelPath} or {@code rowMapper} is {@code null},
+     *         or the sheet name is not found in the workbook.
+     * @throws UncheckedException if opening or reading the file identified by {@code excelPath}, creating its workbook, or closing the
+     *         workbook or an owned input stream fails with an {@code IOException}
      */
     public static <T> List<T> readRowsFromSheet(final Path excelPath, final String sheetName, final boolean skipFirstRow,
-            final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException {
+            final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelPath, cs.excelPath);
         N.checkArgNotNull(rowMapper, cs.rowMapper);
 
         return readRowsFromSheet(excelPath.toFile(), sheetName, skipFirstRow, rowMapper);
@@ -774,7 +874,7 @@ public final class ExcelUtil {
      * <p><b>Note:</b> The entire workbook is still loaded into memory via {@code WorkbookFactory.create()}.
      * The "streaming" refers to iterating over the already-loaded rows via Stream API, not to
      * memory-efficient incremental parsing. For truly memory-efficient streaming of very large files,
-     * consider using Apache POI's SAX-based or SXSSF-based APIs directly.</p>
+     * consider Apache POI's XSSF SAX/event API for XLSX files or HSSF event API for XLS files.</p>
      *
      * <p><strong>Important:</strong> The Stream must be closed after use to release file handles
      * and workbook resources. Always use try-with-resources or explicitly call {@code close()}
@@ -792,10 +892,15 @@ public final class ExcelUtil {
      * @param sheetIndex the zero-based index of the sheet to stream (0 for first sheet)
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
-     * @throws UncheckedException if an I/O error occurs while reading the file or if the file is not a valid Excel file
-     * @throws IllegalArgumentException if the sheet index is out of bounds.
+     * @throws IllegalArgumentException if {@code excelFile} is {@code null},
+     *         or the sheet index is out of bounds.
+     * @throws UncheckedException if opening or reading {@code excelFile} to create the workbook fails with an {@code IOException},
+     *         including unreadable or unsupported workbook content
      */
-    public static Stream<Row> streamRowsFromSheet(final File excelFile, final int sheetIndex, final boolean skipFirstRow) {
+    public static Stream<Row> streamRowsFromSheet(final File excelFile, final int sheetIndex, final boolean skipFirstRow)
+            throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelFile, cs.excelFile);
+
         InputStream is = null;
         Stream<Row> result = null;
 
@@ -833,10 +938,15 @@ public final class ExcelUtil {
      * @param sheetIndex the zero-based index of the sheet to stream (0 for first sheet)
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
-     * @throws UncheckedException if an I/O error occurs while reading the stream or if the content is not a valid Excel stream
-     * @throws IllegalArgumentException if the sheet index is out of bounds.
+     * @throws IllegalArgumentException if {@code excelInputStream} is {@code null},
+     *         or the sheet index is out of bounds.
+     * @throws UncheckedException if reading {@code excelInputStream} to create the workbook fails with an {@code
+     *         IOException}, including unreadable or unsupported workbook content
      */
-    public static Stream<Row> streamRowsFromSheet(final InputStream excelInputStream, final int sheetIndex, final boolean skipFirstRow) {
+    public static Stream<Row> streamRowsFromSheet(final InputStream excelInputStream, final int sheetIndex, final boolean skipFirstRow)
+            throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelInputStream, cs.excelInputStream);
+
         return streamFromSource(excelInputStream, false, sheetIndex, null, skipFirstRow);
     }
 
@@ -849,10 +959,15 @@ public final class ExcelUtil {
      * @param sheetIndex the zero-based index of the sheet to stream (0 for first sheet)
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
-     * @throws UncheckedException if an I/O error occurs while reading the file or if the file is not a valid Excel file
-     * @throws IllegalArgumentException if the sheet index is out of bounds.
+     * @throws IllegalArgumentException if {@code excelPath} is {@code null},
+     *         or the sheet index is out of bounds.
+     * @throws UncheckedException if opening or reading the file identified by {@code excelPath} to create the workbook fails with an
+     *         {@code IOException}, including unreadable or unsupported workbook content
      */
-    public static Stream<Row> streamRowsFromSheet(final Path excelPath, final int sheetIndex, final boolean skipFirstRow) {
+    public static Stream<Row> streamRowsFromSheet(final Path excelPath, final int sheetIndex, final boolean skipFirstRow)
+            throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelPath, cs.excelPath);
+
         return streamRowsFromSheet(excelPath.toFile(), sheetIndex, skipFirstRow);
     }
 
@@ -880,13 +995,18 @@ public final class ExcelUtil {
      * }</pre>
      *
      * @param excelFile the Excel file to read, must exist and be a valid Excel file
-     * @param sheetName the name of the sheet to stream, case-sensitive
+     * @param sheetName the name of the sheet to stream, case-insensitive
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
-     * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file
-     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
+     * @throws IllegalArgumentException if {@code excelFile} is {@code null},
+     *         or the sheet name is not found in the workbook.
+     * @throws UncheckedException if opening or reading {@code excelFile} to create the workbook fails with an {@code IOException},
+     *         including unreadable or unsupported workbook content
      */
-    public static Stream<Row> streamRowsFromSheet(final File excelFile, final String sheetName, final boolean skipFirstRow) {
+    public static Stream<Row> streamRowsFromSheet(final File excelFile, final String sheetName, final boolean skipFirstRow)
+            throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelFile, cs.excelFile);
+
         InputStream is = null;
         Stream<Row> result = null;
 
@@ -917,13 +1037,18 @@ public final class ExcelUtil {
      * {@code true}.</p>
      *
      * @param excelInputStream the input stream of the Excel content, must be a valid Excel stream. It is not closed by the returned Stream.
-     * @param sheetName the name of the sheet to stream, case-sensitive
+     * @param sheetName the name of the sheet to stream, case-insensitive
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
-     * @throws UncheckedException if an I/O error occurs or if the content is not a valid Excel stream
-     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
+     * @throws IllegalArgumentException if {@code excelInputStream} is {@code null},
+     *         or the sheet name is not found in the workbook.
+     * @throws UncheckedException if reading {@code excelInputStream} to create the workbook fails with an {@code
+     *         IOException}, including unreadable or unsupported workbook content
      */
-    public static Stream<Row> streamRowsFromSheet(final InputStream excelInputStream, final String sheetName, final boolean skipFirstRow) {
+    public static Stream<Row> streamRowsFromSheet(final InputStream excelInputStream, final String sheetName, final boolean skipFirstRow)
+            throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelInputStream, cs.excelInputStream);
+
         return streamFromSource(excelInputStream, false, -1, sheetName, skipFirstRow);
     }
 
@@ -933,13 +1058,18 @@ public final class ExcelUtil {
      * The returned Stream must be closed after use.
      *
      * @param excelPath the path of the Excel file to read, must exist and be a valid Excel file
-     * @param sheetName the name of the sheet to stream, case-sensitive
+     * @param sheetName the name of the sheet to stream, case-insensitive
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
-     * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file
-     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
+     * @throws IllegalArgumentException if {@code excelPath} is {@code null},
+     *         or the sheet name is not found in the workbook.
+     * @throws UncheckedException if opening or reading the file identified by {@code excelPath} to create the workbook fails with an
+     *         {@code IOException}, including unreadable or unsupported workbook content
      */
-    public static Stream<Row> streamRowsFromSheet(final Path excelPath, final String sheetName, final boolean skipFirstRow) {
+    public static Stream<Row> streamRowsFromSheet(final Path excelPath, final String sheetName, final boolean skipFirstRow)
+            throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(excelPath, cs.excelPath);
+
         return streamRowsFromSheet(excelPath.toFile(), sheetName, skipFirstRow);
     }
 
@@ -950,9 +1080,18 @@ public final class ExcelUtil {
      * selects the sheet. If wiring fails before the Stream is created, this method closes the workbook
      * before rethrowing; it never closes {@code is} itself; a caller that owns {@code is} is responsible
      * for closing it on that path (see the {@code finally} blocks in the {@code File}-based callers).
+     *
+     * @param is the workbook source; never closed by this method itself
+     * @param closeInputStream whether the returned Stream's {@code onClose} should also close {@code is}
+     * @param sheetIndex the zero-based sheet index, or a negative value to select by {@code sheetName}
+     * @param sheetName the sheet name, or {@code null} to select by {@code sheetIndex}
+     * @param skipFirstRow whether to drop the first row, typically the header
+     * @return a lazy Stream of the selected sheet's rows, closing the workbook when closed
+     * @throws IllegalArgumentException if {@code sheetIndex} is outside the workbook range, or the named sheet does not exist
+     * @throws UncheckedException if opening or reading the Excel workbook fails
      */
     private static Stream<Row> streamFromSource(final InputStream is, final boolean closeInputStream, final int sheetIndex, final String sheetName,
-            final boolean skipFirstRow) {
+            final boolean skipFirstRow) throws IllegalArgumentException, UncheckedException {
         Workbook workbook = null;
         Stream<Row> result = null;
 
@@ -1014,13 +1153,20 @@ public final class ExcelUtil {
      * ExcelUtil.writeRowsToSheet("Users", headers, rows, new File("users.xlsx"));
      * }</pre>
      *
-     * @param sheetName the name of the sheet to create in the workbook
+     * @param sheetName the name of the sheet to create in the workbook; 1 to 31 characters, must not contain any of
+     *        {@code : \ / ? * [ ]} and must not start or end with an apostrophe (Excel sheet names are case-insensitive)
      * @param headers the column headers as a list of objects (will be converted to strings)
      * @param rows the data rows, where each row is a collection of cell values
-     * @param outputExcelFile the file to write the Excel data to (will be created or overwritten)
-     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created
+     * @param outputExcelFile the file to write the Excel data to; an existing file is replaced only after the
+     *        write succeeds (see the class-level note on file destinations), never truncated up front
+     * @throws IllegalArgumentException if {@code headers}, {@code rows}, {@code outputExcelFile} or {@code sheetName} is {@code null},
+     *         or if {@code sheetName} is empty, longer than 31 characters or contains a character POI rejects (see the parameter).
+     *         Validation occurs before any temporary file is created.
+     * @throws UncheckedException if creating or writing the temporary workbook file, closing the workbook or output stream, or replacing
+     *         the destination file fails with an {@code IOException}
      */
-    public static void writeRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows, final File outputExcelFile) {
+    public static void writeRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows, final File outputExcelFile)
+            throws IllegalArgumentException, UncheckedException {
         writeRowsToSheet(sheetName, headers, rows, (SheetCreateOptions) null, outputExcelFile);
     }
 
@@ -1050,20 +1196,45 @@ public final class ExcelUtil {
      * ExcelUtil.writeRowsToSheet("Report", headers, data, options, new File("report.xlsx"));
      * }</pre>
      *
-     * @param sheetName the name of the sheet to create in the workbook
+     * @param sheetName the name of the sheet to create in the workbook; 1 to 31 characters, must not contain any of
+     *        {@code : \ / ? * [ ]} and must not start or end with an apostrophe (Excel sheet names are case-insensitive)
      * @param headers the column headers as a list of objects (will be converted to strings)
      * @param rows the data rows, where each row is a collection of cell values
      * @param sheetCreateOptions configuration options for sheet formatting (null to apply no formatting)
-     * @param outputExcelFile the file to write the Excel data to (will be created or overwritten)
-     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created
+     * @param outputExcelFile the file to write the Excel data to; an existing file is replaced only after the
+     *        write succeeds (see the class-level note on file destinations), never truncated up front
+     * @throws IllegalArgumentException if {@code headers}, {@code rows}, {@code outputExcelFile} or {@code sheetName} is {@code null},
+     *         or if {@code sheetName} is empty, longer than 31 characters or contains a character POI rejects (see the parameter).
+     *         Validation occurs before any temporary file is created.
+     * @throws UncheckedException if creating or writing the temporary workbook file, closing the workbook or output stream, or replacing
+     *         the destination file fails with an {@code IOException}
      */
     public static void writeRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
-            final SheetCreateOptions sheetCreateOptions, final File outputExcelFile) {
+            final SheetCreateOptions sheetCreateOptions, final File outputExcelFile) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(headers, cs.headers);
+        N.checkArgNotNull(rows, cs.rows);
+        N.checkArgNotNull(outputExcelFile, cs.outputExcelFile);
+
+        validateSheetName(sheetName);
+
         final int columnCount = headers.size();
 
         final Consumer<Sheet> sheetSetter = createSheetSetter(sheetCreateOptions, columnCount);
 
-        writeRowsToSheet(sheetName, headers, rows, sheetSetter, outputExcelFile);
+        try {
+            writeToFileAtomically(outputExcelFile, os -> doWriteRowsToSheet(sheetName, headers, rows, sheetSetter, os, formatOf(outputExcelFile),
+                    dateFormatOf(sheetCreateOptions), dateTimeFormatOf(sheetCreateOptions)));
+        } catch (IOException e) {
+            throw new UncheckedException(e);
+        }
+    }
+
+    private static String dateFormatOf(final SheetCreateOptions options) {
+        return options == null ? null : options.getDateFormat();
+    }
+
+    private static String dateTimeFormatOf(final SheetCreateOptions options) {
+        return options == null ? null : options.getDateTimeFormat();
     }
 
     static Consumer<Sheet> createSheetSetter(final SheetCreateOptions sheetCreateOptions, final int columnCount) {
@@ -1087,7 +1258,8 @@ public final class ExcelUtil {
             if (sheetCreateOptions.getAutoFilter() != null) {
                 sheet.setAutoFilter(sheetCreateOptions.getAutoFilter());
             } else if (sheetCreateOptions.isAutoFilterByFirstRow() && columnCount > 0) {
-                sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, columnCount - 1));
+                // The filter reference includes both its header and every completed data row.
+                sheet.setAutoFilter(new CellRangeAddress(0, sheet.getLastRowNum(), 0, columnCount - 1));
             }
         };
     }
@@ -1119,20 +1291,30 @@ public final class ExcelUtil {
      * ExcelUtil.writeRowsToSheet("CustomSheet", headers, rows, customFormatter, new File("custom.xlsx"));
      * }</pre>
      *
-     * @param sheetName the name of the sheet to create in the workbook.
+     * @param sheetName the name of the sheet to create in the workbook; 1 to 31 characters, must not contain any of
+     *        {@code : \ / ? * [ ]} and must not start or end with an apostrophe (Excel sheet names are case-insensitive).
      * @param headers the column headers as a list of objects (will be converted to strings).
      * @param rows the data rows, where each row is a collection of cell values.
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written; must not be {@code null}.
-     * @param outputExcelFile the file to write the Excel data to (will be created or overwritten).
-     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
-     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}.
+     * @param outputExcelFile the file to write the Excel data to; an existing file is replaced only after the
+     *        write succeeds (see the class-level note on file destinations), never truncated up front.
+     * @throws IllegalArgumentException if {@code headers}, {@code rows}, {@code sheetSetter}, {@code outputExcelFile} or
+     *         {@code sheetName} is {@code null},
+     *         or if {@code sheetName} is empty, longer than 31 characters or contains a character POI rejects (see the parameter).
+     *         Validation occurs before any temporary file is created.
+     * @throws UncheckedException if creating or writing the temporary workbook file, closing the workbook or output stream, or replacing
+     *         the destination file fails with an {@code IOException}
      */
     public static void writeRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
-            final Consumer<? super Sheet> sheetSetter, final File outputExcelFile) throws IllegalArgumentException {
+            final Consumer<? super Sheet> sheetSetter, final File outputExcelFile) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(headers, cs.headers);
+        N.checkArgNotNull(rows, cs.rows);
+        N.checkArgNotNull(outputExcelFile, cs.outputExcelFile);
         N.checkArgNotNull(sheetSetter, cs.sheetSetter);
+        validateSheetName(sheetName);
 
-        try (OutputStream os = new FileOutputStream(outputExcelFile)) {
-            writeRowsToSheet(sheetName, headers, rows, sheetSetter, os, formatOf(outputExcelFile));
+        try {
+            writeToFileAtomically(outputExcelFile, os -> writeRowsToSheet(sheetName, headers, rows, sheetSetter, os, formatOf(outputExcelFile)));
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -1155,21 +1337,56 @@ public final class ExcelUtil {
      * }
      * }</pre>
      *
-     * @param sheetName the name of the sheet to create in the workbook.
+     * @param sheetName the name of the sheet to create in the workbook; 1 to 31 characters, must not contain any of
+     *        {@code : \ / ? * [ ]} and must not start or end with an apostrophe (Excel sheet names are case-insensitive).
      * @param headers the column headers as a list of objects (will be converted to strings).
      * @param rows the data rows, where each row is a collection of cell values.
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written; must not be {@code null}.
      * @param outputStream the stream to write the Excel data to; it is not closed by this method.
      * @param format the workbook format to produce ({@link ExcelFormat#XLS} or {@link ExcelFormat#XLSX}), must not be {@code null}.
-     * @throws UncheckedException if an I/O error occurs while writing.
-     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}, or {@code format} is {@code null}.
+     * @throws IllegalArgumentException if {@code headers}, {@code rows}, {@code sheetSetter}, {@code outputStream}, {@code format} or
+     *         {@code sheetName} is {@code null},
+     *         or if {@code sheetName} is empty, longer than 31 characters or contains a character POI rejects (see the parameter).
+     *         Nothing is written to {@code outputStream} in that case.
+     * @throws UncheckedException if writing the workbook to {@code outputStream} or closing the workbook fails with an {@code
+     *         IOException}
      */
     public static void writeRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
-            final Consumer<? super Sheet> sheetSetter, final OutputStream outputStream, final ExcelFormat format) throws IllegalArgumentException {
+            final Consumer<? super Sheet> sheetSetter, final OutputStream outputStream, final ExcelFormat format)
+            throws IllegalArgumentException, UncheckedException {
+        doWriteRowsToSheet(sheetName, headers, rows, sheetSetter, outputStream, format, null, null);
+    }
+
+    /**
+     * Core row writer. {@code dateFormat}/{@code dateTimeFormat} may be {@code null}, in which case
+     * {@link #DEFAULT_DATE_FORMAT} / {@link #DEFAULT_DATE_TIME_FORMAT} are used.
+     *
+     * @param sheetName the name of the sheet to create
+     * @param headers the non-null header list; an empty list creates an empty physical header row
+     * @param rows the data rows; each inner collection is one row
+     * @param sheetSetter applied to the sheet after all rows are written; must not be {@code null}
+     * @param outputStream the destination; not closed by this method
+     * @param format the workbook format to create
+     * @param dateFormat the Excel format string for date-only cells, or {@code null} for the default
+     * @param dateTimeFormat the Excel format string for date-time cells, or {@code null} for the default
+     * @throws IllegalArgumentException if {@code headers}, {@code rows}, {@code sheetSetter}, {@code outputStream}, {@code format} or
+     *         {@code sheetName} is {@code null},
+     *         or if {@code sheetName} is empty, longer than 31 characters or contains a character POI rejects (see {@link #validateSheetName(String)}).
+     *         Nothing is written to {@code outputStream} in that case.
+     * @throws UncheckedException if writing the workbook to the output stream or closing the workbook fails
+     */
+    private static void doWriteRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
+            final Consumer<? super Sheet> sheetSetter, final OutputStream outputStream, final ExcelFormat format, final String dateFormat,
+            final String dateTimeFormat) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(headers, cs.headers);
+        N.checkArgNotNull(rows, cs.rows);
+        N.checkArgNotNull(outputStream, cs.outputStream);
         N.checkArgNotNull(sheetSetter, cs.sheetSetter);
+        validateSheetName(sheetName);
 
         try (Workbook workbook = newWorkbookForOutput(format)) {
             final Sheet sheet = workbook.createSheet(sheetName);
+            final TemporalCellStyles styles = new TemporalCellStyles(workbook, dateFormat, dateTimeFormat);
 
             final int columnCount = headers.size();
 
@@ -1186,7 +1403,7 @@ public final class ExcelUtil {
                 final Iterator<?> iter = rowData.iterator();
 
                 for (int i = 0; i < rowData.size(); i++) {
-                    setCellValue(row.createCell(i), iter.next());
+                    setCellValue(row.createCell(i), iter.next(), styles);
                 }
             }
 
@@ -1203,16 +1420,23 @@ public final class ExcelUtil {
      * This is a thin {@link Path}-based delegate to {@link #writeRowsToSheet(String, List, List, Consumer, File)};
      * the workbook format is inferred from the path's filename extension.
      *
-     * @param sheetName the name of the sheet to create in the workbook.
+     * @param sheetName the name of the sheet to create in the workbook; 1 to 31 characters, must not contain any of
+     *        {@code : \ / ? * [ ]} and must not start or end with an apostrophe (Excel sheet names are case-insensitive).
      * @param headers the column headers as a list of objects (will be converted to strings).
      * @param rows the data rows, where each row is a collection of cell values.
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written; must not be {@code null}.
-     * @param outputExcelPath the path to write the Excel data to (will be created or overwritten).
-     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
-     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}.
+     * @param outputExcelPath the path to write the Excel data to; an existing file is replaced only after the
+     *        write succeeds (see the class-level note on file destinations), never truncated up front.
+     * @throws IllegalArgumentException if {@code headers}, {@code rows}, {@code sheetSetter}, {@code outputExcelPath} or
+     *         {@code sheetName} is {@code null},
+     *         or if {@code sheetName} is empty, longer than 31 characters or contains a character POI rejects (see the parameter).
+     *         Validation occurs before any temporary file is created.
+     * @throws UncheckedException if creating or writing the temporary workbook file, closing the workbook or output stream, or replacing
+     *         the destination file fails with an {@code IOException}
      */
     public static void writeRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
-            final Consumer<? super Sheet> sheetSetter, final Path outputExcelPath) throws IllegalArgumentException {
+            final Consumer<? super Sheet> sheetSetter, final Path outputExcelPath) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(outputExcelPath, cs.outputExcelPath);
         N.checkArgNotNull(sheetSetter, cs.sheetSetter);
 
         writeRowsToSheet(sheetName, headers, rows, sheetSetter, outputExcelPath.toFile());
@@ -1234,12 +1458,19 @@ public final class ExcelUtil {
      * ExcelUtil.writeDatasetToSheet("ImportedData", dataset, new File("output.xlsx"));
      * }</pre>
      *
-     * @param sheetName the name of the sheet to create in the workbook.
+     * @param sheetName the name of the sheet to create in the workbook; 1 to 31 characters, must not contain any of
+     *        {@code : \ / ? * [ ]} and must not start or end with an apostrophe (Excel sheet names are case-insensitive).
      * @param dataset the Dataset containing the data to write, must not be {@code null}.
-     * @param outputExcelFile the file to write the Excel data to (will be created or overwritten).
-     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
+     * @param outputExcelFile the file to write the Excel data to; an existing file is replaced only after the
+     *        write succeeds (see the class-level note on file destinations), never truncated up front.
+     * @throws IllegalArgumentException if {@code dataset}, {@code outputExcelFile} or {@code sheetName} is {@code null},
+     *         or if {@code sheetName} is empty, longer than 31 characters or contains a character POI rejects (see the parameter).
+     *         Validation occurs before any temporary file is created.
+     * @throws UncheckedException if creating or writing the temporary workbook file, closing the workbook or output stream, or replacing
+     *         the destination file fails with an {@code IOException}
      */
-    public static void writeDatasetToSheet(final String sheetName, final Dataset dataset, final File outputExcelFile) {
+    public static void writeDatasetToSheet(final String sheetName, final Dataset dataset, final File outputExcelFile)
+            throws IllegalArgumentException, UncheckedException {
         writeDatasetToSheet(sheetName, dataset, (SheetCreateOptions) null, outputExcelFile);
     }
 
@@ -1264,19 +1495,35 @@ public final class ExcelUtil {
      * ExcelUtil.writeDatasetToSheet("Analysis", dataset, options, new File("analysis.xlsx"));
      * }</pre>
      *
-     * @param sheetName the name of the sheet to create in the workbook.
+     * @param sheetName the name of the sheet to create in the workbook; 1 to 31 characters, must not contain any of
+     *        {@code : \ / ? * [ ]} and must not start or end with an apostrophe (Excel sheet names are case-insensitive).
      * @param dataset the Dataset containing the data to write, must not be {@code null}.
      * @param sheetCreateOptions configuration options for sheet formatting (null to apply no formatting).
-     * @param outputExcelFile the file to write the Excel data to (will be created or overwritten).
-     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
+     * @param outputExcelFile the file to write the Excel data to; an existing file is replaced only after the
+     *        write succeeds (see the class-level note on file destinations), never truncated up front.
+     * @throws IllegalArgumentException if {@code dataset}, {@code outputExcelFile} or {@code sheetName} is {@code null},
+     *         or if {@code sheetName} is empty, longer than 31 characters or contains a character POI rejects (see the parameter).
+     *         Validation occurs before any temporary file is created.
+     * @throws UncheckedException if creating or writing the temporary workbook file, closing the workbook or output stream, or replacing
+     *         the destination file fails with an {@code IOException}
      */
     public static void writeDatasetToSheet(final String sheetName, final Dataset dataset, final SheetCreateOptions sheetCreateOptions,
-            final File outputExcelFile) {
+            final File outputExcelFile) throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(dataset, cs.dataset);
+        N.checkArgNotNull(outputExcelFile, cs.outputExcelFile);
+
+        validateSheetName(sheetName);
+
         final int columnCount = dataset.columnCount();
 
         final Consumer<Sheet> sheetSetter = createSheetSetter(sheetCreateOptions, columnCount);
 
-        writeDatasetToSheet(sheetName, dataset, sheetSetter, outputExcelFile);
+        try {
+            writeToFileAtomically(outputExcelFile, os -> doWriteDatasetToSheet(sheetName, dataset, sheetSetter, os, formatOf(outputExcelFile),
+                    dateFormatOf(sheetCreateOptions), dateTimeFormatOf(sheetCreateOptions)));
+        } catch (IOException e) {
+            throw new UncheckedException(e);
+        }
     }
 
     /**
@@ -1301,19 +1548,28 @@ public final class ExcelUtil {
      * ExcelUtil.writeDatasetToSheet("FormattedData", dataset, formatter, new File("formatted.xlsx"));
      * }</pre>
      *
-     * @param sheetName the name of the sheet to create in the workbook.
+     * @param sheetName the name of the sheet to create in the workbook; 1 to 31 characters, must not contain any of
+     *        {@code : \ / ? * [ ]} and must not start or end with an apostrophe (Excel sheet names are case-insensitive).
      * @param dataset the Dataset containing the data to write, must not be {@code null}.
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written; must not be {@code null}.
-     * @param outputExcelFile the file to write the Excel data to (will be created or overwritten).
-     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
-     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}.
+     * @param outputExcelFile the file to write the Excel data to; an existing file is replaced only after the
+     *        write succeeds (see the class-level note on file destinations), never truncated up front.
+     * @throws IllegalArgumentException if {@code dataset}, {@code sheetSetter}, {@code outputExcelFile} or {@code sheetName} is
+     *         {@code null},
+     *         or if {@code sheetName} is empty, longer than 31 characters or contains a character POI rejects (see the parameter).
+     *         Validation occurs before any temporary file is created.
+     * @throws UncheckedException if creating or writing the temporary workbook file, closing the workbook or output stream, or replacing
+     *         the destination file fails with an {@code IOException}
      */
     public static void writeDatasetToSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter, final File outputExcelFile)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(dataset, cs.dataset);
+        N.checkArgNotNull(outputExcelFile, cs.outputExcelFile);
         N.checkArgNotNull(sheetSetter, cs.sheetSetter);
+        validateSheetName(sheetName);
 
-        try (OutputStream os = new FileOutputStream(outputExcelFile)) {
-            writeDatasetToSheet(sheetName, dataset, sheetSetter, os, formatOf(outputExcelFile));
+        try {
+            writeToFileAtomically(outputExcelFile, os -> writeDatasetToSheet(sheetName, dataset, sheetSetter, os, formatOf(outputExcelFile)));
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -1337,20 +1593,52 @@ public final class ExcelUtil {
      * }
      * }</pre>
      *
-     * @param sheetName the name of the sheet to create in the workbook.
+     * @param sheetName the name of the sheet to create in the workbook; 1 to 31 characters, must not contain any of
+     *        {@code : \ / ? * [ ]} and must not start or end with an apostrophe (Excel sheet names are case-insensitive).
      * @param dataset the Dataset containing the data to write, must not be {@code null}.
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written; must not be {@code null}.
      * @param outputStream the stream to write the Excel data to; it is not closed by this method.
      * @param format the workbook format to produce ({@link ExcelFormat#XLS} or {@link ExcelFormat#XLSX}), must not be {@code null}.
-     * @throws UncheckedException if an I/O error occurs while writing.
-     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}, or {@code format} is {@code null}.
+     * @throws IllegalArgumentException if {@code dataset}, {@code sheetSetter}, {@code outputStream}, {@code format} or
+     *         {@code sheetName} is {@code null},
+     *         or if {@code sheetName} is empty, longer than 31 characters or contains a character POI rejects (see the parameter).
+     *         Nothing is written to {@code outputStream} in that case.
+     * @throws UncheckedException if writing the workbook to {@code outputStream} or closing the workbook fails with an {@code
+     *         IOException}
      */
     public static void writeDatasetToSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter,
-            final OutputStream outputStream, final ExcelFormat format) throws IllegalArgumentException {
+            final OutputStream outputStream, final ExcelFormat format) throws IllegalArgumentException, UncheckedException {
+        doWriteDatasetToSheet(sheetName, dataset, sheetSetter, outputStream, format, null, null);
+    }
+
+    /**
+     * Core {@link Dataset} writer. {@code dateFormat}/{@code dateTimeFormat} may be {@code null}, in which
+     * case {@link #DEFAULT_DATE_FORMAT} / {@link #DEFAULT_DATE_TIME_FORMAT} are used.
+     *
+     * @param sheetName the name of the sheet to create
+     * @param dataset the Dataset to write; its column names become the header row
+     * @param sheetSetter applied to the sheet after all rows are written; must not be {@code null}
+     * @param outputStream the destination; not closed by this method
+     * @param format the workbook format to create
+     * @param dateFormat the Excel format string for date-only cells, or {@code null} for the default
+     * @param dateTimeFormat the Excel format string for date-time cells, or {@code null} for the default
+     * @throws IllegalArgumentException if {@code dataset}, {@code sheetSetter}, {@code outputStream}, {@code format} or
+     *         {@code sheetName} is {@code null},
+     *         or if {@code sheetName} is empty, longer than 31 characters or contains a character POI rejects (see {@link #validateSheetName(String)}).
+     *         Nothing is written to {@code outputStream} in that case.
+     * @throws UncheckedException if writing the workbook to the output stream or closing the workbook fails
+     */
+    private static void doWriteDatasetToSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter,
+            final OutputStream outputStream, final ExcelFormat format, final String dateFormat, final String dateTimeFormat)
+            throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(dataset, cs.dataset);
+        N.checkArgNotNull(outputStream, cs.outputStream);
         N.checkArgNotNull(sheetSetter, cs.sheetSetter);
+        validateSheetName(sheetName);
 
         try (Workbook workbook = newWorkbookForOutput(format)) {
             final Sheet sheet = workbook.createSheet(sheetName);
+            final TemporalCellStyles styles = new TemporalCellStyles(workbook, dateFormat, dateTimeFormat);
 
             final int columnCount = dataset.columnCount();
 
@@ -1366,7 +1654,7 @@ public final class ExcelUtil {
                 final Row row = sheet.createRow(rowNum.getAndIncrement());
 
                 for (int i = 0; i < rowData.length(); i++) {
-                    setCellValue(row.createCell(i), rowData.get(i));
+                    setCellValue(row.createCell(i), rowData.get(i), styles);
                 }
             });
 
@@ -1383,35 +1671,112 @@ public final class ExcelUtil {
      * This is a thin {@link Path}-based delegate to {@link #writeDatasetToSheet(String, Dataset, Consumer, File)};
      * the workbook format is inferred from the path's filename extension.
      *
-     * @param sheetName the name of the sheet to create in the workbook.
+     * @param sheetName the name of the sheet to create in the workbook; 1 to 31 characters, must not contain any of
+     *        {@code : \ / ? * [ ]} and must not start or end with an apostrophe (Excel sheet names are case-insensitive).
      * @param dataset the Dataset containing the data to write, must not be {@code null}.
      * @param sheetSetter a consumer to apply custom formatting to the sheet after data is written; must not be {@code null}.
-     * @param outputExcelPath the path to write the Excel data to (will be created or overwritten).
-     * @throws UncheckedException if an I/O error occurs while writing the file or if the file cannot be created.
-     * @throws IllegalArgumentException if {@code sheetSetter} is {@code null}.
+     * @param outputExcelPath the path to write the Excel data to; an existing file is replaced only after the
+     *        write succeeds (see the class-level note on file destinations), never truncated up front.
+     * @throws IllegalArgumentException if {@code dataset}, {@code sheetSetter}, {@code outputExcelPath} or {@code sheetName} is
+     *         {@code null},
+     *         or if {@code sheetName} is empty, longer than 31 characters or contains a character POI rejects (see the parameter).
+     *         Validation occurs before any temporary file is created.
+     * @throws UncheckedException if creating or writing the temporary workbook file, closing the workbook or output stream, or replacing
+     *         the destination file fails with an {@code IOException}
      */
     public static void writeDatasetToSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter, final Path outputExcelPath)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, UncheckedException {
+        N.checkArgNotNull(outputExcelPath, cs.outputExcelPath);
         N.checkArgNotNull(sheetSetter, cs.sheetSetter);
 
         writeDatasetToSheet(sheetName, dataset, sheetSetter, outputExcelPath.toFile());
     }
 
+    /** Default Excel number-format applied to date-only values. */
+    public static final String DEFAULT_DATE_FORMAT = "yyyy-mm-dd";
+
+    /** Default Excel number-format applied to values that carry both a date and a time. */
+    public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-mm-dd hh:mm:ss";
+
+    /**
+     * Lazily created, per-workbook {@link CellStyle}s for temporal values.
+     *
+     * <p>Excel stores a date as a plain number; without a date {@code CellStyle} the cell renders as that
+     * raw serial number (for example {@code 45000} instead of {@code 2023-03-15}), which is what every
+     * date written by this class used to look like. A {@code CellStyle} belongs to the workbook that
+     * created it and a workbook has a hard cap on the number of styles it can hold, so at most one style
+     * per format is created per write and shared by every cell.</p>
+     */
+    private static final class TemporalCellStyles {
+        private final Workbook workbook;
+        private final String dateFormat;
+        private final String dateTimeFormat;
+        private CellStyle dateStyle;
+        private CellStyle dateTimeStyle;
+
+        TemporalCellStyles(final Workbook workbook, final String dateFormat, final String dateTimeFormat) {
+            this.workbook = workbook;
+            this.dateFormat = Strings.isEmpty(dateFormat) ? DEFAULT_DATE_FORMAT : dateFormat;
+            this.dateTimeFormat = Strings.isEmpty(dateTimeFormat) ? DEFAULT_DATE_TIME_FORMAT : dateTimeFormat;
+        }
+
+        CellStyle dateStyle() {
+            if (dateStyle == null) {
+                dateStyle = newStyle(dateFormat);
+            }
+
+            return dateStyle;
+        }
+
+        CellStyle dateTimeStyle() {
+            if (dateTimeStyle == null) {
+                dateTimeStyle = newStyle(dateTimeFormat);
+            }
+
+            return dateTimeStyle;
+        }
+
+        private CellStyle newStyle(final String format) {
+            final CellStyle style = workbook.createCellStyle();
+            style.setDataFormat(workbook.createDataFormat().getFormat(format));
+            return style;
+        }
+    }
+
     static void setCellValue(final Cell cell, final Object cellValue) {
+        setCellValue(cell, cellValue, null);
+    }
+
+    /**
+     * Writes {@code cellValue} into {@code cell}, applying a date or date-time {@link CellStyle} to
+     * temporal values so Excel renders them as dates rather than as the underlying serial number.
+     *
+     * @param cell the cell to populate
+     * @param cellValue the value to write; {@code null} blanks the cell
+     * @param styles the per-workbook style cache, or {@code null} to write temporal values unstyled
+     */
+    static void setCellValue(final Cell cell, final Object cellValue, final TemporalCellStyles styles) {
         if (cellValue == null) {
             cell.setBlank();
         } else if (cellValue instanceof String val) {
             cell.setCellValue(val);
         } else if (cellValue instanceof Boolean val) {
             cell.setCellValue(val);
+        } else if (cellValue instanceof java.sql.Date val) { // date-only: must be tested before java.util.Date
+            cell.setCellValue(val);
+            applyStyle(cell, styles == null ? null : styles.dateStyle());
         } else if (cellValue instanceof java.util.Date val) {
             cell.setCellValue(val);
+            applyStyle(cell, styles == null ? null : styles.dateTimeStyle());
         } else if (cellValue instanceof LocalDate val) {
             cell.setCellValue(val);
+            applyStyle(cell, styles == null ? null : styles.dateStyle());
         } else if (cellValue instanceof LocalDateTime val) {
             cell.setCellValue(val);
+            applyStyle(cell, styles == null ? null : styles.dateTimeStyle());
         } else if (cellValue instanceof java.util.Calendar val) {
             cell.setCellValue(val);
+            applyStyle(cell, styles == null ? null : styles.dateTimeStyle());
         } else if (cellValue instanceof Number val) {
             cell.setCellValue(val.doubleValue());
         } else {
@@ -1419,10 +1784,80 @@ public final class ExcelUtil {
         }
     }
 
-    private static Workbook newWorkbookForOutput(final ExcelFormat format) {
+    private static void applyStyle(final Cell cell, final CellStyle style) {
+        if (style != null) {
+            cell.setCellStyle(style);
+        }
+    }
+
+    /**
+     * Runs {@code writeAction} against a sibling temporary file and moves it onto {@code target} only after
+     * it completes.
+     *
+     * <p>Opening {@code new FileOutputStream(target)} truncates the destination immediately, so any failure
+     * while building or serializing the workbook - an invalid option, an OOM on a large dataset, a throwing
+     * {@code sheetSetter}, a short write - used to leave the caller's existing file at zero bytes. Writing
+     * out of place protects the destination from content-generation and serialization failures. The move
+     * is atomic when supported; the non-atomic fallback has filesystem-dependent failure semantics.</p>
+     *
+     * @param target the destination file; replaced only after {@code writeAction} completes normally
+     * @param writeAction the workbook serialization, invoked with a stream over the temporary file
+     * @throws IOException if the temporary file cannot be created or written, or the move onto
+     *         {@code target} fails; failures before the move leave {@code target} untouched
+     */
+    private static void writeToFileAtomically(final File target, final Throwables.Consumer<OutputStream, IOException> writeAction) throws IOException {
+        final File parent = target.getAbsoluteFile().getParentFile();
+        // File.createTempFile rejects a prefix shorter than three characters, which a destination such as
+        // "a" would produce.
+        final File tempFile = File.createTempFile(Strings.padEnd(target.getName() + ".", 3, '_'), ".tmp", parent);
+        boolean written = false;
+
+        try {
+            try (OutputStream os = new FileOutputStream(tempFile)) {
+                writeAction.accept(os);
+            }
+
+            try {
+                Files.move(tempFile.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (final AtomicMoveNotSupportedException e) {
+                // Not every file store supports an atomic replace; a plain replace still beats truncating
+                // the destination before the content exists.
+                Files.move(tempFile.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            written = true;
+        } finally {
+            if (!written) {
+                IOUtil.deleteQuietly(tempFile);
+            }
+        }
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code format} is {@code null}
+     */
+    private static Workbook newWorkbookForOutput(final ExcelFormat format) throws IllegalArgumentException {
         N.checkArgNotNull(format, cs.format);
 
         return format == ExcelFormat.XLS ? new HSSFWorkbook() : new XSSFWorkbook();
+    }
+
+    /**
+     * Rejects a sheet name POI would refuse or silently alter, before any workbook or temporary file exists.
+     *
+     * <p>{@code Workbook.createSheet} throws for {@code null}, an empty name and the characters
+     * {@code : \ / ? * [ ]}, but silently truncates a name longer than 31 characters - the write then
+     * "succeeds" while a later {@code getSheet(originalName)} finds nothing. Applying POI's own validation
+     * up front makes every bad name fail the same way, from the same place.</p>
+     *
+     * @param sheetName the requested sheet name
+     * @throws IllegalArgumentException if {@code sheetName} is {@code null}, empty, longer than 31 characters,
+     *         contains any of {@code : \ / ? * [ ]}, or starts or ends with an apostrophe
+     */
+    private static void validateSheetName(final String sheetName) throws IllegalArgumentException {
+        N.checkArgNotNull(sheetName, cs.sheetName);
+
+        WorkbookUtil.validateSheetName(sheetName);
     }
 
     /**
@@ -1474,12 +1909,20 @@ public final class ExcelUtil {
      * Converts the specified sheet from an Excel file to a CSV file.
      * This convenience method exports an Excel sheet to comma-separated values format,
      * preserving all data including the header row. The charset depends on the
-     * underlying {@code IOUtil.newFileWriter} implementation.
+     * underlying {@code IOUtil.newOutputStreamWriter} implementation.
      *
-     * <p>Cell values are converted to their string representations: numeric cells are
-     * formatted as numbers, formulas are exported as formula text, and blank cells
-     * become empty strings. The CSV format uses comma as delimiter and proper quoting
-     * for values containing special characters.</p>
+     * <p>Cell values are converted to their string representations: numeric cells are rendered exactly as
+     * the sheet displays them (see below), boolean cells as {@code true}/{@code false}, formulas as formula
+     * text (they are not evaluated), and blank and error cells as empty strings. The CSV format uses comma
+     * as delimiter and proper quoting for values containing special characters.</p>
+     *
+     * <p><b>Numeric and date cells.</b> Excel stores every number - dates included - as a {@code double}, so
+     * the underlying value of an integer cell is {@code 1001.0} and that of a date cell is a serial number
+     * such as {@code 45244.59259259259}. Numeric cells are therefore rendered through POI's
+     * {@link org.apache.poi.ss.usermodel.DataFormatter} using the cell's own number format under
+     * {@link java.util.Locale#ROOT}, which yields {@code 1001} and {@code 2023-11-14} respectively. Because a
+     * formatted number can legitimately contain a comma (a thousands-separator format yields {@code 1,001}),
+     * numeric fields are written as quoted strings.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1492,14 +1935,27 @@ public final class ExcelUtil {
      *
      * @param excelFile the Excel file to read, must exist and be a valid Excel file
      * @param sheetIndex the zero-based index of the sheet to convert (0 for first sheet)
-     * @param outputCsvFile the CSV file to write to (will be created or overwritten)
-     * @throws UncheckedException if an I/O error occurs while reading the Excel file or if the file is not a valid Excel file
-     * @throws UncheckedIOException if an I/O error occurs while opening or closing the CSV output file (write-phase errors surface as {@code UncheckedException})
-     * @throws IllegalArgumentException if the sheet index is out of bounds.
+     * @param outputCsvFile the CSV file to write to; an existing file is replaced only after the write
+     *        succeeds (see the class-level note on file destinations), never truncated up front
+     * @throws IllegalArgumentException if {@code excelFile} or {@code outputCsvFile} is {@code null},
+     *         or the sheet index is out of bounds.
+     * @throws UncheckedIOException if creating or closing the temporary CSV output, closing its writer, or replacing {@code
+     *         outputCsvFile} fails; failures while writing CSV rows are wrapped as {@code UncheckedException}
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating or closing its workbook, or writing CSV headers or
+     *         rows fails with an {@code IOException}
+     * @throws IllegalStateException if a cell has a type that cannot be represented by this CSV exporter
      */
-    public static void exportSheetToCsv(final File excelFile, final int sheetIndex, final File outputCsvFile) {
-        try (Writer writer = IOUtil.newFileWriter(outputCsvFile)) {
-            exportSheetToCsv(excelFile, sheetIndex, null, writer);
+    public static void exportSheetToCsv(final File excelFile, final int sheetIndex, final File outputCsvFile)
+            throws IllegalArgumentException, UncheckedIOException, UncheckedException, IllegalStateException {
+        N.checkArgNotNull(excelFile, cs.excelFile);
+        N.checkArgNotNull(outputCsvFile, cs.outputCsvFile);
+
+        try {
+            writeToFileAtomically(outputCsvFile, os -> {
+                try (Writer writer = IOUtil.newOutputStreamWriter(os)) {
+                    exportSheetToCsv(excelFile, sheetIndex, null, writer);
+                }
+            });
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -1509,7 +1965,7 @@ public final class ExcelUtil {
      * Converts the sheet with the specified name from an Excel file to a CSV file.
      * This method allows exporting a specific worksheet by name rather than index, which is
      * more robust when working with workbooks where sheet positions might change. The charset
-     * depends on the underlying {@code IOUtil.newFileWriter} implementation and all original
+     * depends on the underlying {@code IOUtil.newOutputStreamWriter} implementation and all original
      * data, including headers, is preserved.
      *
      * <p>The conversion process maintains data fidelity by converting each cell type appropriately:
@@ -1526,15 +1982,28 @@ public final class ExcelUtil {
      * }</pre>
      *
      * @param excelFile the Excel file to read, must exist and be a valid Excel file
-     * @param sheetName the name of the sheet to convert, case-sensitive
-     * @param outputCsvFile the CSV file to write to (will be created or overwritten)
-     * @throws UncheckedException if an I/O error occurs while reading the Excel file or if the file is not a valid Excel file
-     * @throws UncheckedIOException if an I/O error occurs while opening or closing the CSV output file (write-phase errors surface as {@code UncheckedException})
-     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
+     * @param sheetName the name of the sheet to convert, case-insensitive
+     * @param outputCsvFile the CSV file to write to; an existing file is replaced only after the write
+     *        succeeds (see the class-level note on file destinations), never truncated up front
+     * @throws IllegalArgumentException if {@code excelFile} or {@code outputCsvFile} is {@code null},
+     *         or the sheet name is not found in the workbook.
+     * @throws UncheckedIOException if creating or closing the temporary CSV output, closing its writer, or replacing {@code
+     *         outputCsvFile} fails; failures while writing CSV rows are wrapped as {@code UncheckedException}
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating or closing its workbook, or writing CSV headers or
+     *         rows fails with an {@code IOException}
+     * @throws IllegalStateException if a cell has a type that cannot be represented by this CSV exporter
      */
-    public static void exportSheetToCsv(final File excelFile, final String sheetName, final File outputCsvFile) {
-        try (Writer writer = IOUtil.newFileWriter(outputCsvFile)) {
-            exportSheetToCsv(excelFile, sheetName, null, writer);
+    public static void exportSheetToCsv(final File excelFile, final String sheetName, final File outputCsvFile)
+            throws IllegalArgumentException, UncheckedIOException, UncheckedException, IllegalStateException {
+        N.checkArgNotNull(excelFile, cs.excelFile);
+        N.checkArgNotNull(outputCsvFile, cs.outputCsvFile);
+
+        try {
+            writeToFileAtomically(outputCsvFile, os -> {
+                try (Writer writer = IOUtil.newOutputStreamWriter(os)) {
+                    exportSheetToCsv(excelFile, sheetName, null, writer);
+                }
+            });
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -1566,12 +2035,23 @@ public final class ExcelUtil {
      *
      * @param excelFile the Excel file to read, must exist and be a valid Excel file
      * @param sheetIndex the zero-based index of the sheet to convert (0 for first sheet)
-     * @param csvHeaders custom headers for the CSV file; {@code null} or empty preserves the original Excel rows.
+     * @param csvHeaders custom headers for the CSV file. {@code null} or empty preserves the original Excel
+     *        rows (the sheet's own first row becomes the first CSV record); a non-empty list is written as the
+     *        header record <i>and the sheet's first row is skipped</i>, i.e. it replaces rather than prepends.
+     *        All records, including replacement headers, are padded with empty fields to the widest emitted record.
+     *        A {@code null} label is written as the unquoted token {@code null}, an empty label as {@code ""}.
      * @param outputWriter the Writer to write the CSV content to; it is flushed but not closed.
-     * @throws UncheckedException if an I/O error occurs during conversion or if the file is not a valid Excel file
-     * @throws IllegalArgumentException if the sheet index is out of bounds.
+     * @throws IllegalArgumentException if {@code excelFile} or {@code outputWriter} is {@code null},
+     *         or the sheet index is out of bounds.
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating or closing its workbook, or writing CSV headers or
+     *         rows fails with an {@code IOException}
+     * @throws IllegalStateException if a cell has a type that cannot be represented by this CSV exporter
      */
-    public static void exportSheetToCsv(final File excelFile, final int sheetIndex, final List<String> csvHeaders, final Writer outputWriter) {
+    public static void exportSheetToCsv(final File excelFile, final int sheetIndex, final List<String> csvHeaders, final Writer outputWriter)
+            throws IllegalArgumentException, UncheckedException, IllegalStateException {
+        N.checkArgNotNull(excelFile, cs.excelFile);
+        N.checkArgNotNull(outputWriter, cs.outputWriter);
+
         try (InputStream is = new FileInputStream(excelFile); //
              Workbook workbook = WorkbookFactory.create(is)) {
             final Sheet sheet = workbook.getSheetAt(sheetIndex);
@@ -1607,13 +2087,24 @@ public final class ExcelUtil {
      * }</pre>
      *
      * @param excelFile the Excel file to read, must exist and be a valid Excel file
-     * @param sheetName the name of the sheet to convert, case-sensitive
-     * @param csvHeaders custom headers for the CSV file; {@code null} or empty preserves the original Excel rows.
+     * @param sheetName the name of the sheet to convert, case-insensitive
+     * @param csvHeaders custom headers for the CSV file. {@code null} or empty preserves the original Excel
+     *        rows (the sheet's own first row becomes the first CSV record); a non-empty list is written as the
+     *        header record <i>and the sheet's first row is skipped</i>, i.e. it replaces rather than prepends.
+     *        All records, including replacement headers, are padded with empty fields to the widest emitted record.
+     *        A {@code null} label is written as the unquoted token {@code null}, an empty label as {@code ""}.
      * @param outputWriter the Writer to write the CSV content to; it is flushed but not closed.
-     * @throws UncheckedException if an I/O error occurs or if the file is not a valid Excel file
-     * @throws IllegalArgumentException if the sheet name is not found in the workbook.
+     * @throws IllegalArgumentException if {@code excelFile} or {@code outputWriter} is {@code null},
+     *         or the sheet name is not found in the workbook.
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating or closing its workbook, or writing CSV headers or
+     *         rows fails with an {@code IOException}
+     * @throws IllegalStateException if a cell has a type that cannot be represented by this CSV exporter
      */
-    public static void exportSheetToCsv(final File excelFile, final String sheetName, final List<String> csvHeaders, final Writer outputWriter) {
+    public static void exportSheetToCsv(final File excelFile, final String sheetName, final List<String> csvHeaders, final Writer outputWriter)
+            throws IllegalArgumentException, UncheckedException, IllegalStateException {
+        N.checkArgNotNull(excelFile, cs.excelFile);
+        N.checkArgNotNull(outputWriter, cs.outputWriter);
+
         try (InputStream is = new FileInputStream(excelFile); //
              Workbook workbook = WorkbookFactory.create(is)) {
             final Sheet sheet = getRequiredSheet(workbook, sheetName);
@@ -1624,27 +2115,65 @@ public final class ExcelUtil {
         }
     }
 
-    private static void exportSheetToCsv(final Sheet sheet, final List<String> csvHeaders, final Writer output) throws IOException {
+    /**
+     * Returns the largest cell index plus one across the selected physical rows of {@code sheet}.
+     * Used to retain sparse columns in Dataset reads and pad CSV records to a shared width.
+     *
+     * @param sheet the sheet to measure
+     * @param skipFirstRow whether the first physically defined row is a header that will not be written
+     * @return the largest {@code Row.getLastCellNum()} over the rows that will be written, never negative
+     */
+    private static int widestRowOf(final Sheet sheet, final boolean skipFirstRow) {
+        int widest = 0;
+        boolean skip = skipFirstRow;
+
+        for (final Row row : sheet) {
+            if (skip) {
+                skip = false;
+                continue;
+            }
+
+            widest = Math.max(widest, row.getLastCellNum());
+        }
+
+        return widest;
+    }
+
+    /**
+     * @throws IOException if writing or flushing CSV content to the output writer fails
+     * @throws IllegalStateException if a cell has a type that cannot be represented by this CSV exporter
+     */
+    private static void exportSheetToCsv(final Sheet sheet, final List<String> csvHeaders, final Writer output) throws IOException, IllegalStateException {
         final Type<Object> strType = Type.of(String.class);
         final char separator = SK._COMMA;
 
+        // NUMERIC cells are rendered through POI's DataFormatter, i.e. exactly as the sheet itself displays
+        // them, rather than through the raw double returned by getNumericCellValue(). Excel stores every
+        // number - including dates - as a double, so the raw value turned the integer 1001 into "1001.0" and
+        // the date 2023-11-14 into its serial number "45244.59259259259". Locale.ROOT keeps the rendering
+        // deterministic across machines. Because a formatted number can legitimately contain the separator
+        // (a thousands-separator format yields "1,001"), the result is written as a quoted string field.
+        final DataFormatter dataFormatter = new DataFormatter(Locale.ROOT);
+
+        boolean skipFirstRow = N.notEmpty(csvHeaders);
+        // Replacement headers must use the same width as data records, including columns beyond
+        // the supplied labels. Compute this before writing any record so no data is truncated.
+        final int fieldCount = Math.max(csvHeaders == null ? 0 : csvHeaders.size(), widestRowOf(sheet, skipFirstRow));
         final BufferedCsvWriter bw = Objectory.createBufferedCsvWriter(output);
 
         try {
-            if (N.notEmpty(csvHeaders)) {
-                int idx = 0;
+            if (skipFirstRow) {
+                final Iterator<String> headerIter = csvHeaders.iterator();
 
-                for (String csvHeader : csvHeaders) {
-                    if (idx++ > 0) {
+                for (int i = 0; i < fieldCount; i++) {
+                    if (i > 0) {
                         bw.write(separator);
                     }
 
-                    CsvUtil.writeField(bw, strType, csvHeader);
+                    CsvUtil.writeField(bw, strType, headerIter.hasNext() ? headerIter.next() : "");
                 }
-
             }
 
-            boolean skipFirstRow = N.notEmpty(csvHeaders);
             int linesWritten = skipFirstRow ? 1 : 0;
 
             for (Row row : sheet) {
@@ -1657,7 +2186,7 @@ public final class ExcelUtil {
                     bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 }
 
-                final int cellCount = Math.max(row.getLastCellNum(), 0);
+                final int cellCount = fieldCount;
 
                 for (int i = 0; i < cellCount; i++) {
                     if (i > 0) {
@@ -1671,11 +2200,11 @@ public final class ExcelUtil {
                     } else {
                         switch (cell.getCellType()) {
                             case STRING -> CsvUtil.writeField(bw, strType, cell.getStringCellValue());
-                            case NUMERIC -> CsvUtil.writeField(bw, null, cell.getNumericCellValue());
+                            case NUMERIC -> CsvUtil.writeField(bw, strType, dataFormatter.formatCellValue(cell));
                             case BOOLEAN -> CsvUtil.writeField(bw, null, cell.getBooleanCellValue());
                             case FORMULA -> CsvUtil.writeField(bw, strType, cell.getCellFormula());
                             case ERROR -> CsvUtil.writeField(bw, strType, "");
-                            default -> throw new RuntimeException("Unsupported cell type: " + cell.getCellType());
+                            default -> throw new IllegalStateException("Unsupported cell type: " + cell.getCellType());
                         }
                     }
                 }
@@ -2204,10 +2733,11 @@ public final class ExcelUtil {
         private CellRangeAddress autoFilter;
 
         /**
-         * Whether to apply auto-filter to all columns in the first row.
+         * Whether to apply auto-filter using all header columns and all written data rows.
          * When set to {@code true}, creates filter dropdown buttons for all columns in the header row,
          * enabling users to filter and sort data interactively. This is a convenience option that
-         * automatically determines the correct column range based on the data written.
+         * uses the header width and extends through the last written row. Header-only sheets
+         * receive a header-only filter; an empty header list creates no automatic filter.
          *
          * <p>This option is ignored if {@link #autoFilter} is also set. Use {@code autoFilter}
          * for more precise control over the filter range.</p>
@@ -2215,6 +2745,24 @@ public final class ExcelUtil {
          * <p><b>Default:</b> {@code false} (no auto-filter)</p>
          */
         private boolean autoFilterByFirstRow;
+
+        /**
+         * Excel number-format applied to date-only cell values ({@link java.time.LocalDate} and
+         * {@link java.sql.Date}). Without a date format Excel renders a date cell as its raw serial
+         * number, so a format is always applied; this option only overrides which one.
+         *
+         * <p><b>Default:</b> {@code null}; {@code null} or an empty string means {@link ExcelUtil#DEFAULT_DATE_FORMAT}</p>
+         */
+        private String dateFormat;
+
+        /**
+         * Excel number-format applied to cell values that carry both a date and a time
+         * ({@link java.util.Date}, {@link java.sql.Timestamp}, {@link java.time.LocalDateTime} and
+         * {@link java.util.Calendar}).
+         *
+         * <p><b>Default:</b> {@code null}; {@code null} or an empty string means {@link ExcelUtil#DEFAULT_DATE_TIME_FORMAT}</p>
+         */
+        private String dateTimeFormat;
     }
 
     /**
@@ -2272,8 +2820,8 @@ public final class ExcelUtil {
          * @throws IllegalArgumentException if either split is negative.
          */
         public FreezePane {
-            N.checkArgNotNegative(colSplit, "colSplit");
-            N.checkArgNotNegative(rowSplit, "rowSplit");
+            N.checkArgNotNegative(colSplit, cs.colSplit);
+            N.checkArgNotNegative(rowSplit, cs.rowSplit);
         }
     }
 }

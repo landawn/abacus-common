@@ -42,22 +42,16 @@ public class BufferedCsvWriterTest extends TestBase {
     }
 
     @Test
-    public void testReplacementChars_ControlCharsBelow32_HexEscaped_ExceptAllowed() {
+    public void testReplacementChars_ControlCharsBelow32RemainLiteral() {
         for (int i = 0; i < 32; i++) {
-            char c = (char) i;
-            if (c == '\r' || c == '\n' || c == '\t' || c == '\b' || c == '\f') {
-                assertNull(BufferedCsvWriter.REPLACEMENT_CHARS[c], "char 0x" + Integer.toHexString(i) + " must be left literal");
-            } else {
-                assertTrue(BufferedCsvWriter.REPLACEMENT_CHARS[c] != null, "char 0x" + Integer.toHexString(i) + " must be escaped");
-            }
+            assertNull(BufferedCsvWriter.REPLACEMENT_CHARS[i], "char 0x" + Integer.toHexString(i) + " must be left literal");
         }
     }
 
     @Test
-    public void testReplacementChars_LineParaSeparators_Escaped() {
-        // U+2028 and U+2029 are escaped to remain JS-eval safe.
-        assertArrayEquals("\\u2028".toCharArray(), BufferedCsvWriter.REPLACEMENT_CHARS[0x2028]);
-        assertArrayEquals("\\u2029".toCharArray(), BufferedCsvWriter.REPLACEMENT_CHARS[0x2029]);
+    public void testReplacementChars_LineParaSeparatorsRemainLiteral() {
+        assertNull(BufferedCsvWriter.REPLACEMENT_CHARS[0x2028]);
+        assertNull(BufferedCsvWriter.REPLACEMENT_CHARS[0x2029]);
     }
 
     @Test
@@ -85,17 +79,17 @@ public class BufferedCsvWriterTest extends TestBase {
     }
 
     @Test
-    public void testWriteCharacter_NullCharIsHexEscaped() throws IOException {
+    public void testWriteCharacter_NullCharIsLiteral() throws IOException {
         BufferedCsvWriter w = new BufferedCsvWriter();
         w.writeCharacter("a" + (char) 0x00 + "b");
-        assertEquals("a\\u0000b", w.toString());
+        assertEquals("a\0b", w.toString());
     }
 
     @Test
-    public void testWriteCharacter_DELIsHexEscaped() throws IOException {
+    public void testWriteCharacter_DELIsLiteral() throws IOException {
         BufferedCsvWriter w = new BufferedCsvWriter();
         w.writeCharacter(String.valueOf((char) 0x7F));
-        assertEquals("\\u007f", w.toString());
+        assertEquals("\u007f", w.toString());
     }
 
     @Test
@@ -128,8 +122,8 @@ public class BufferedCsvWriterTest extends TestBase {
     @Test
     public void testReplacementChars_BackslashMode_EscapesLiteralBackslash() {
         // regression: REPLACEMENT_CHARS_BACK_SLASH['\\'] was null, so literal backslashes were
-        // written raw in backslash-escape mode; a backslash-aware reader (e.g. the default
-        // CsvParser) then collapsed "\\" to "\" and merged "\" + "\"" into an escaped quote,
+        // written raw in backslash-escape mode; an explicitly backslash-aware reader
+        // then collapsed "\\" to "\" and merged "\" + "\"" into an escaped quote,
         // corrupting round-trips. In this mode the backslash is the escape character and must
         // itself be escaped as \\.
         assertArrayEquals("\\\\".toCharArray(), BufferedCsvWriter.REPLACEMENT_CHARS_BACK_SLASH['\\']);
@@ -151,7 +145,7 @@ public class BufferedCsvWriterTest extends TestBase {
 
     @Test
     public void testBackslashMode_RoundTripsThroughCsvParser() throws IOException {
-        // write a quoted field in backslash mode, then read it back with the default CsvParser
+        // Write a quoted field in backslash mode, then read it back with a matching CsvParser
         // (escape = backslash): the value must survive unchanged, including backslash-before-quote
         try {
             CsvUtil.setEscapeCharToBackSlashForWrite();
@@ -162,7 +156,7 @@ public class BufferedCsvWriterTest extends TestBase {
             w.write('"');
             final String csvField = w.toString();
 
-            final java.util.List<String> parsed = new CsvParser().parseLine("x," + csvField + ",y");
+            final java.util.List<String> parsed = new CsvParser(',', '"', '\\').parseLine("x," + csvField + ",y");
             assertEquals(3, parsed.size());
             assertEquals(value, parsed.get(1));
         } finally {

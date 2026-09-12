@@ -241,10 +241,12 @@ public class TimedTest extends TestBase {
 
             @Override
             public boolean equals(Object o) {
-                if (this == o)
+                if (this == o) {
                     return true;
-                if (!(o instanceof CustomData))
+                }
+                if (!(o instanceof CustomData)) {
                     return false;
+                }
                 CustomData that = (CustomData) o;
                 return value == that.value && name.equals(that.name);
             }

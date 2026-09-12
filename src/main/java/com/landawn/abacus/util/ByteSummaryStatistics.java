@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util;
 
+import java.util.Locale;
+
 import com.landawn.abacus.util.function.ByteConsumer;
 
 /**
@@ -25,6 +27,16 @@ import com.landawn.abacus.util.function.ByteConsumer;
  *
  * <p>This implementation is not thread-safe. If used in parallel stream operations,
  * proper synchronization or thread-safe alternatives should be used.</p>
+ *
+ * <p>Values are treated as <b>signed</b> bytes throughout: {@code accept((byte) 200)} records {@code -56}.
+ * {@link #getMin()} and {@link #getMax()} are {@code byte}s and therefore always lie in -128..127; so does
+ * {@link #getAverage()} for a statistic built only from {@link #accept(byte)} calls and
+ * {@link #combine(ByteSummaryStatistics)} of such statistics, while {@link #getSum()} is the {@code long}
+ * total of those signed values and may fall outside that range. The
+ * {@linkplain #ByteSummaryStatistics(long, byte, byte, long) four-argument constructor} does not cross-check
+ * {@code sum} against {@code count}, so a statistic created that way can report any {@code double} average. To
+ * summarise octets as unsigned, widen each value with {@code b & 0xFF} and accumulate into
+ * {@link java.util.IntSummaryStatistics} or {@link java.util.LongSummaryStatistics} instead.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -81,7 +93,7 @@ public class ByteSummaryStatistics implements ByteConsumer {
      *         {@link Byte#MAX_VALUE}, {@link Byte#MIN_VALUE}, and zero for min, max, and sum; or if a non-empty
      *         state has {@code min} greater than {@code max}.
      */
-    public ByteSummaryStatistics(final long count, final byte min, final byte max, final long sum) {
+    public ByteSummaryStatistics(final long count, final byte min, final byte max, final long sum) throws IllegalArgumentException {
         if (count < 0) {
             throw new IllegalArgumentException("count must be non-negative");
         }
@@ -116,11 +128,15 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * }</pre>
      *
      * @param value the byte value to record
+     * @throws ArithmeticException if the count or sum would overflow; this instance is unchanged
      */
     @Override
-    public void accept(final byte value) {
-        ++count;
-        sum += value;
+    public void accept(final byte value) throws ArithmeticException {
+        // Calculate both totals first: a rejected update must not alter any statistic.
+        final long newCount = Math.addExact(count, 1L);
+        final long newSum = Math.addExact(sum, value);
+        count = newCount;
+        sum = newSum;
         min = N.min(min, value);
         max = N.max(max, value);
     }
@@ -149,10 +165,14 @@ public class ByteSummaryStatistics implements ByteConsumer {
      *
      * @param other another {@code ByteSummaryStatistics} to combine with this one; must not be {@code null}
      * @throws NullPointerException if {@code other} is {@code null}
+     * @throws ArithmeticException if the combined count or sum would overflow; this instance is unchanged
      */
-    public void combine(final ByteSummaryStatistics other) {
-        count += other.count;
-        sum += other.sum;
+    public void combine(final ByteSummaryStatistics other) throws NullPointerException, ArithmeticException {
+        // Snapshot the totals before assignment, including when other == this.
+        final long newCount = Math.addExact(count, other.count);
+        final long newSum = Math.addExact(sum, other.sum);
+        count = newCount;
+        sum = newSum;
         min = N.min(min, other.min);
         max = N.max(max, other.max);
     }
@@ -216,8 +236,8 @@ public class ByteSummaryStatistics implements ByteConsumer {
     /**
      * Returns the sum of values recorded.
      *
-     * <p>Note that the sum is maintained as a {@code long} to avoid overflow
-     * for large numbers of byte values.</p>
+     * <p>The sum is maintained as a {@code long}. Updates that would exceed its range
+     * throw {@link ArithmeticException} without changing this instance.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -270,10 +290,13 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * // {min=10, max=20, count=2, sum=30, average=15.000000}
      * }</pre>
      *
+     * <p>The text is rendered with {@link java.util.Locale#ROOT}, so the decimal separator and the digits are the
+     * same on every machine regardless of the default locale.</p>
+     *
      * @return a string representation of this summary
      */
     @Override
     public String toString() {
-        return String.format("{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());
+        return String.format(Locale.ROOT, "{min=%d, max=%d, count=%d, sum=%d, average=%f}", getMin(), getMax(), getCount(), getSum(), getAverage());
     }
 }

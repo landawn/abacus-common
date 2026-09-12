@@ -14,10 +14,12 @@ public class CharTernaryOperatorTest extends TestBase {
         CharTernaryOperator middle = new CharTernaryOperator() {
             @Override
             public char applyAsChar(char a, char b, char c) {
-                if ((a >= b && a <= c) || (a >= c && a <= b))
+                if ((a >= b && a <= c) || (a >= c && a <= b)) {
                     return a;
-                if ((b >= a && b <= c) || (b >= c && b <= a))
+                }
+                if ((b >= a && b <= c) || (b >= c && b <= a)) {
                     return b;
+                }
                 return c;
             }
         };

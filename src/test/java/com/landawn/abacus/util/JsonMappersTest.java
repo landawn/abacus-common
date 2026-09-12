@@ -7,7 +7,6 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -18,12 +17,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationConfig;
@@ -42,7 +44,7 @@ public class JsonMappersTest extends TestBase {
         public Person() {
         }
 
-        public Person(String name, Integer age) {
+        public Person(final String name, final Integer age) {
             this.name = name;
             this.age = age;
         }
@@ -51,7 +53,7 @@ public class JsonMappersTest extends TestBase {
             return name;
         }
 
-        public void setName(String name) {
+        public void setName(final String name) {
             this.name = name;
         }
 
@@ -59,27 +61,25 @@ public class JsonMappersTest extends TestBase {
             return age;
         }
 
-        public void setAge(Integer age) {
+        public void setAge(final Integer age) {
             this.age = age;
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) {
                 return true;
             }
-
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-
-            Person person = (Person) o;
-            return java.util.Objects.equals(name, person.name) && java.util.Objects.equals(age, person.age);
+            final Person person = (Person) o;
+            return Objects.equals(name, person.name) && Objects.equals(age, person.age);
         }
 
         @Override
         public int hashCode() {
-            return java.util.Objects.hash(name, age);
+            return Objects.hash(name, age);
         }
     }
 
@@ -94,16 +94,52 @@ public class JsonMappersTest extends TestBase {
         }
     }
 
+    @JsonPropertyOrder({ "value", "missing" })
+    public static class InclusionBean {
+        public String value = "x";
+        public String missing = null;
+
+        public String getValue() {
+            return value;
+        }
+
+        public String getMissing() {
+            return missing;
+        }
+    }
+
+    // Jackson caches a serializer per concrete type, so every entry point under test needs a type of its own
+    // whose serializer is built after the mutation - a type already serialized keeps its old serializer.
+    public static class InclusionBeanPlain extends InclusionBean {
+    }
+
+    public static class InclusionBeanPretty extends InclusionBean {
+    }
+
+    public static class InclusionBeanNullConfig extends InclusionBean {
+    }
+
+    public static class InclusionBeanFeature extends InclusionBean {
+    }
+
+    public static class InclusionBeanOwnConfig extends InclusionBean {
+    }
+
     @TempDir
     File tempDir;
 
-    @Test
-    public void testRoundTrip() {
-        Person original = new Person("RoundTrip", 99);
-        String json = JsonMappers.toJson(original);
-        Person deserialized = JsonMappers.fromJson(json, Person.class);
+    private static DataInput dataInput(final byte[] bytes) {
+        return new DataInputStream(new ByteArrayInputStream(bytes));
+    }
 
-        Assertions.assertEquals(original, deserialized);
+    private static JsonMappers.One one() {
+        return JsonMappers.wrap(new ObjectMapper());
+    }
+
+    private File tempFile(final String name, final String content) throws IOException {
+        final File file = new File(tempDir, name);
+        Files.writeString(file.toPath(), content);
+        return file;
     }
 
     @Test
@@ -132,197 +168,153 @@ public class JsonMappersTest extends TestBase {
     }
 
     @Test
-    public void testComplexTypeWithMap() {
-        Map<String, Person> map = new HashMap<>();
+    public void testFromJsonDataInputWithTypeReferenceReportsNullTargetTypeLikeItsSiblings() {
+        final byte[] bytes = "[]".getBytes(StandardCharsets.UTF_8);
+        final DeserializationConfig config = JsonMappers.createDeserializationConfig();
+        final JsonMappers.One wrapper = one();
+
+        // These three were the only TypeReference overloads left without an explicit guard. Jackson already threw
+        // an IllegalArgumentException of its own here, so the exception type proves nothing - the message is what
+        // pins them to the same guard the other 20 use (Jackson's own reads: argument "typeRef" is null).
+        Assertions.assertEquals("'targetType' cannot be null", Assertions
+                .assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(dataInput(bytes), (TypeReference<?>) null))
+                .getMessage());
+        Assertions.assertEquals("'targetType' cannot be null", Assertions
+                .assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(dataInput(bytes), (TypeReference<?>) null, config))
+                .getMessage());
+        Assertions.assertEquals("'targetType' cannot be null",
+                Assertions.assertThrows(IllegalArgumentException.class, () -> wrapper.fromJson(dataInput(bytes), (TypeReference<?>) null)).getMessage());
+    }
+
+    @Test
+    public void testCreateSerializationConfigDoesNotShareMutableStateWithDefaultMapper() {
+        final SerializationConfig mine = JsonMappers.createSerializationConfig();
+        final SerializationConfig other = JsonMappers.createSerializationConfig();
+        final JsonInclude.Value nonNull = JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL);
+
+        try {
+            // withPropertyInclusion(..) is the one Jackson config method that writes through the config's
+            // ConfigOverrides in place and returns the receiver instead of a copy.
+            Assertions.assertSame(mine, mine.withPropertyInclusion(nonNull));
+
+            // none of the entry points backed by this class's own mapper may see that mutation
+            Assertions.assertEquals("{\"value\":\"x\",\"missing\":null}", JsonMappers.toJson(new InclusionBeanPlain()));
+            Assertions.assertEquals("{\"value\":\"x\",\"missing\":null}", JsonMappers.toJson(new InclusionBeanPretty(), true).replaceAll("\\s", ""));
+            Assertions.assertEquals("{\"value\":\"x\",\"missing\":null}", JsonMappers.toJson(new InclusionBeanNullConfig(), (SerializationConfig) null));
+            Assertions.assertEquals("{\"value\":\"x\",\"missing\":null}",
+                    JsonMappers.toJson(new InclusionBeanFeature(), SerializationFeature.WRITE_ENUMS_USING_TO_STRING));
+
+            // nor may any other config handed out by the factories, before or after the mutation
+            Assertions.assertEquals(JsonInclude.Include.NON_NULL, mine.getDefaultPropertyInclusion().getValueInclusion());
+            Assertions.assertEquals(JsonInclude.Include.USE_DEFAULTS, other.getDefaultPropertyInclusion().getValueInclusion());
+            Assertions.assertEquals(JsonInclude.Include.USE_DEFAULTS,
+                    JsonMappers.createSerializationConfig().getDefaultPropertyInclusion().getValueInclusion());
+            Assertions.assertEquals(JsonInclude.Include.USE_DEFAULTS,
+                    JsonMappers.createDeserializationConfig().getDefaultPropertyInclusion().getValueInclusion());
+
+            // the caller that asked for NON_NULL still gets exactly what it asked for
+            Assertions.assertEquals("{\"value\":\"x\"}", JsonMappers.toJson(new InclusionBeanOwnConfig(), mine));
+        } finally {
+            // an unfixed build shares this object with the default mapper: put it back rather than leaving
+            // the rest of the suite to run against a mutated default inclusion
+            mine.withPropertyInclusion(JsonInclude.Value.empty());
+        }
+    }
+
+    @Test
+    public void testCreateConfigHandsOutJacksonsProcessWideObjectsByReference() {
+        // The flip side of the isolation above, and the reason createSerializationConfig()'s javadoc must not
+        // promise that a returned config shares NO mutable state: its own ConfigOverrides is copied, but
+        // everything it hands out is still Jackson's JVM-wide default. Identity only - mutating any of these
+        // really does change toJson(..) for the whole process, which is exactly why no test may do it.
+        final SerializationConfig ser = JsonMappers.createSerializationConfig();
+        final DeserializationConfig deser = JsonMappers.createDeserializationConfig();
+        final ObjectMapper untouched = new ObjectMapper();
+
+        Assertions.assertSame(ser.getDefaultPrettyPrinter(), JsonMappers.createSerializationConfig().getDefaultPrettyPrinter());
+        Assertions.assertSame(ser.getDefaultPrettyPrinter(), untouched.getSerializationConfig().getDefaultPrettyPrinter());
+
+        Assertions.assertSame(ser.getDateFormat(), deser.getDateFormat());
+        Assertions.assertSame(ser.getDateFormat(), untouched.getSerializationConfig().getDateFormat());
+
+        Assertions.assertSame(ser.getAnnotationIntrospector(), deser.getAnnotationIntrospector());
+        Assertions.assertSame(ser.getAnnotationIntrospector(), untouched.getSerializationConfig().getAnnotationIntrospector());
+    }
+
+    @Test
+    public void testToJson() {
+        final Person person = new Person("John", 30);
+        final String json = JsonMappers.toJson(person);
+        Assertions.assertTrue(json.contains("\"name\":\"John\""));
+        Assertions.assertTrue(json.contains("\"age\":30"));
+        Assertions.assertEquals("null", JsonMappers.toJson(null));
+        Assertions.assertEquals("42", JsonMappers.toJson(42));
+        Assertions.assertEquals("test", JsonMappers.fromJson(JsonMappers.toJson("test"), String.class));
+        Assertions.assertEquals(person, JsonMappers.fromJson(json, Person.class));
+
+        final List<Person> empty = new ArrayList<>();
+        Assertions.assertEquals(0, JsonMappers.fromJson(JsonMappers.toJson(empty), new TypeReference<List<Person>>() {
+        }).size());
+
+        final List<Person> people = new ArrayList<>();
+        people.add(new Person("List1", 25));
+        people.add(new Person("List2", 26));
+        Assertions.assertEquals(2, JsonMappers.fromJson(JsonMappers.toJson(people), new TypeReference<List<Person>>() {
+        }).size());
+
+        final Map<String, Person> map = new HashMap<>();
         map.put("person1", new Person("Map1", 20));
         map.put("person2", new Person("Map2", 21));
-
-        String json = JsonMappers.toJson(map);
-        Map<String, Person> deserialized = JsonMappers.fromJson(json, new TypeReference<Map<String, Person>>() {
+        final Map<String, Person> deserialized = JsonMappers.fromJson(JsonMappers.toJson(map), new TypeReference<Map<String, Person>>() {
         });
-
         Assertions.assertEquals(2, deserialized.size());
         Assertions.assertEquals("Map1", deserialized.get("person1").name);
     }
 
     @Test
-    public void testListSerialization() {
-        List<Person> people = new ArrayList<>();
-        people.add(new Person("List1", 25));
-        people.add(new Person("List2", 26));
+    public void testToJson_PrettyFormat() {
+        final Person person = new Person("Alice", 25);
+        final String compact = JsonMappers.toJson(person, false);
+        final String pretty = JsonMappers.toJson(person, true);
 
-        String json = JsonMappers.toJson(people);
-        List<Person> deserialized = JsonMappers.fromJson(json, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertEquals(2, deserialized.size());
-    }
-
-    @Test
-    public void testPrimitiveTypes() {
-        String intJson = JsonMappers.toJson(42);
-        Integer intValue = JsonMappers.fromJson(intJson, Integer.class);
-        Assertions.assertEquals(42, intValue);
-
-        String stringJson = JsonMappers.toJson("test");
-        String stringValue = JsonMappers.fromJson(stringJson, String.class);
-        Assertions.assertEquals("test", stringValue);
-    }
-
-    @Test
-    public void testToJson_Object() {
-        Person person = new Person("John", 30);
-        String json = JsonMappers.toJson(person);
-        Assertions.assertNotNull(json);
-        Assertions.assertTrue(json.contains("John"));
-        Assertions.assertTrue(json.contains("30"));
-
-        String nullJson = JsonMappers.toJson(null);
-        Assertions.assertEquals("null", nullJson);
-    }
-
-    @Test
-    public void testToJson_ObjectWithPrettyFormat() {
-        Person person = new Person("Alice", 25);
-
-        String compact = JsonMappers.toJson(person, false);
-        Assertions.assertNotNull(compact);
         Assertions.assertFalse(compact.contains("\n"));
-
-        String pretty = JsonMappers.toJson(person, true);
-        Assertions.assertNotNull(pretty);
-        Assertions.assertTrue(pretty.contains("\n") || pretty.contains("  "));
+        Assertions.assertTrue(pretty.contains("\n"));
+        Assertions.assertTrue(pretty.contains("Alice"));
     }
 
     @Test
-    public void testToJson_ObjectWithSerializationFeatures() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("key", "value");
-
-        String json = JsonMappers.toJson(data, SerializationFeature.INDENT_OUTPUT);
-        Assertions.assertNotNull(json);
-        Assertions.assertTrue(json.contains("\n") || json.length() > 20);
+    public void testToJson_SerializationFeatures() {
+        final Person person = new Person("John", null);
+        final String json = JsonMappers.toJson(person, SerializationFeature.WRITE_NULL_MAP_VALUES, SerializationFeature.INDENT_OUTPUT);
+        Assertions.assertTrue(json.contains("John"));
+        Assertions.assertTrue(json.contains("\n") || json.contains("  "));
     }
 
     @Test
-    public void testToJson_ObjectWithSerializationConfig() {
-        Person person = new Person("Bob", 40);
-        SerializationConfig config = JsonMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-
-        String json = JsonMappers.toJson(person, config);
-        Assertions.assertNotNull(json);
+    public void testToJson_SerializationConfig() {
+        final Person person = new Person("Bob", 40);
+        final SerializationConfig config = JsonMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
+        final String json = JsonMappers.toJson(person, config);
         Assertions.assertTrue(json.contains("Bob"));
+        Assertions.assertTrue(json.contains("\n"));
     }
 
     @Test
-    public void testEmptyCollections() {
-        List<Person> empty = new ArrayList<>();
-        String json = JsonMappers.toJson(empty);
-        List<Person> deserialized = JsonMappers.fromJson(json, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(deserialized);
-        Assertions.assertEquals(0, deserialized.size());
-    }
-
-    @Test
-    public void testToJson() {
-        Person person = new Person("John", 30);
-
-        String json = JsonMappers.toJson(person);
-
-        Assertions.assertNotNull(json);
-        Assertions.assertTrue(json.contains("\"name\":\"John\""));
-        Assertions.assertTrue(json.contains("\"age\":30"));
-    }
-
-    @Test
-    public void testToJsonWithPrettyFormat() {
-        Person person = new Person("John", 30);
-
-        String prettyJson = JsonMappers.toJson(person, true);
-        String compactJson = JsonMappers.toJson(person, false);
-
-        Assertions.assertNotNull(prettyJson);
-        Assertions.assertNotNull(compactJson);
-        Assertions.assertTrue(prettyJson.contains("\n"));
-        Assertions.assertFalse(compactJson.contains("\n"));
-    }
-
-    @Test
-    public void testToJsonWithSerializationFeatures() {
-        Person person = new Person("John", null);
-
-        String json = JsonMappers.toJson(person, SerializationFeature.WRITE_NULL_MAP_VALUES, SerializationFeature.INDENT_OUTPUT);
-
-        Assertions.assertNotNull(json);
-        Assertions.assertTrue(json.contains("John"));
-    }
-
-    @Test
-    public void testToJsonWithSerializationConfig() {
-        Person person = new Person("John", 30);
-        SerializationConfig config = JsonMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-
-        String json = JsonMappers.toJson(person, config);
-
-        Assertions.assertNotNull(json);
-        Assertions.assertTrue(json.contains("John"));
-    }
-
-    @Test
-    public void testToJson_ObjectToFile() throws IOException {
-        Person person = new Person("Charlie", 35);
-        File outputFile = new File(tempDir, "person.json");
-
+    public void testToJson_File() throws IOException {
+        final Person person = new Person("Charlie", 35);
+        final File outputFile = new File(tempDir, "person.json");
         JsonMappers.toJson(person, outputFile);
+        Assertions.assertTrue(Files.readString(outputFile.toPath()).contains("Charlie"));
 
-        Assertions.assertTrue(outputFile.exists());
-        String content = Files.readString(outputFile.toPath());
-        Assertions.assertTrue(content.contains("Charlie"));
+        final File prettyFile = new File(tempDir, "person-pretty.json");
+        JsonMappers.toJson(person, prettyFile, JsonMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT));
+        Assertions.assertTrue(Files.readString(prettyFile.toPath()).contains("Charlie"));
     }
 
     @Test
-    public void testToJson_ObjectToFileWithConfig() throws IOException {
-        Person person = new Person("Diana", 28);
-        File outputFile = new File(tempDir, "person-pretty.json");
-        SerializationConfig config = JsonMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-
-        JsonMappers.toJson(person, outputFile, config);
-
-        Assertions.assertTrue(outputFile.exists());
-        String content = Files.readString(outputFile.toPath());
-        Assertions.assertTrue(content.contains("Diana"));
-    }
-
-    @Test
-    public void testToJson_ObjectToOutputStream() throws IOException {
-        Person person = new Person("Eve", 32);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        JsonMappers.toJson(person, baos);
-
-        String json = baos.toString(StandardCharsets.UTF_8.name());
-        Assertions.assertTrue(json.contains("Eve"));
-        Assertions.assertTrue(json.contains("32"));
-    }
-
-    @Test
-    public void testToJson_ObjectToOutputStreamWithConfig() throws IOException {
-        Person person = new Person("Frank", 45);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        SerializationConfig config = JsonMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-
-        JsonMappers.toJson(person, baos, config);
-
-        String json = baos.toString(StandardCharsets.UTF_8.name());
-        Assertions.assertTrue(json.contains("Frank"));
-    }
-
-    @Test
-    public void testToJson_OutputStream_closedByDefaultAutoClose() {
+    public void testToJson_OutputStream() throws IOException {
         final boolean[] closed = { false };
-        ByteArrayOutputStream baos = new ByteArrayOutputStream() {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream() {
             @Override
             public void close() throws IOException {
                 closed[0] = true;
@@ -330,1606 +322,287 @@ public class JsonMappersTest extends TestBase {
             }
         };
 
-        JsonMappers.toJson(new Person("AutoClose", 1), baos);
-
-        // Jackson's JsonGenerator.Feature.AUTO_CLOSE_TARGET is enabled by default,
-        // so the stream is closed after writing (as documented).
+        JsonMappers.toJson(new Person("Eve", 32), baos);
         Assertions.assertTrue(closed[0]);
-        Assertions.assertTrue(baos.toString().contains("AutoClose"));
+        Assertions.assertTrue(baos.toString(StandardCharsets.UTF_8.name()).contains("Eve"));
+
+        final ByteArrayOutputStream configured = new ByteArrayOutputStream();
+        JsonMappers.toJson(new Person("Frank", 45), configured, JsonMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT));
+        Assertions.assertTrue(configured.toString(StandardCharsets.UTF_8.name()).contains("Frank"));
     }
 
     @Test
-    public void testFromJson_InputStream_closedByDefaultAutoClose() {
-        final boolean[] closed = { false };
-        byte[] bytes = "{\"name\":\"AutoClose\",\"age\":2}".getBytes(StandardCharsets.UTF_8);
-        ByteArrayInputStream bais = new ByteArrayInputStream(bytes) {
-            @Override
-            public void close() throws IOException {
-                closed[0] = true;
-                super.close();
-            }
-        };
+    public void testToJson_Writer() throws IOException {
+        final StringWriter writer = new StringWriter();
+        JsonMappers.toJson(new Person("Grace", 29), writer);
+        Assertions.assertTrue(writer.toString().contains("Grace"));
 
-        Person person = JsonMappers.fromJson(bais, Person.class);
-
-        // Jackson's JsonParser.Feature.AUTO_CLOSE_SOURCE is enabled by default,
-        // so the source stream is closed after reading (as documented).
-        Assertions.assertTrue(closed[0]);
-        Assertions.assertEquals("AutoClose", person.name);
+        final StringWriter configured = new StringWriter();
+        JsonMappers.toJson(new Person("Henry", 50), configured, JsonMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT));
+        Assertions.assertTrue(configured.toString().contains("Henry"));
     }
 
     @Test
-    public void testToJson_ObjectToWriter() throws IOException {
-        Person person = new Person("Grace", 29);
-        StringWriter writer = new StringWriter();
+    public void testToJson_DataOutput() throws IOException {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        JsonMappers.toJson(new Person("Ivy", 27), (DataOutput) new DataOutputStream(baos));
+        Assertions.assertTrue(baos.toString(StandardCharsets.UTF_8.name()).contains("Ivy"));
 
-        JsonMappers.toJson(person, writer);
+        final ByteArrayOutputStream configured = new ByteArrayOutputStream();
+        JsonMappers.toJson(new Person("Jack", 33), (DataOutput) new DataOutputStream(configured), JsonMappers.createSerializationConfig());
+        Assertions.assertTrue(configured.toString(StandardCharsets.UTF_8.name()).contains("Jack"));
 
-        String json = writer.toString();
-        Assertions.assertTrue(json.contains("Grace"));
-        Assertions.assertTrue(json.contains("29"));
+        final ByteArrayOutputStream binary = new ByteArrayOutputStream();
+        final DataOutputStream output = new DataOutputStream(binary);
+        output.writeInt(42);
+        JsonMappers.toJson(new Person("Ivy", 27), (DataOutput) output);
+        final DataInputStream input = new DataInputStream(new ByteArrayInputStream(binary.toByteArray()));
+        Assertions.assertEquals(42, input.readInt());
+        final Person decoded = JsonMappers.fromJson((DataInput) input, Person.class);
+        Assertions.assertEquals("Ivy", decoded.name);
+        Assertions.assertEquals(27, decoded.age);
     }
 
     @Test
-    public void testToJson_ObjectToWriterWithConfig() throws IOException {
-        Person person = new Person("Henry", 50);
-        StringWriter writer = new StringWriter();
-        SerializationConfig config = JsonMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-
-        JsonMappers.toJson(person, writer, config);
-
-        String json = writer.toString();
-        Assertions.assertTrue(json.contains("Henry"));
-    }
-
-    @Test
-    public void testToJson_ObjectToDataOutput() throws IOException {
-        Person person = new Person("Ivy", 27);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutput dos = new DataOutputStream(baos);
-
-        JsonMappers.toJson(person, dos);
-
-        String json = baos.toString(StandardCharsets.UTF_8.name());
-        Assertions.assertTrue(json.contains("Ivy"));
-    }
-
-    @Test
-    public void testToJson_ObjectToDataOutputWithConfig() throws IOException {
-        Person person = new Person("Jack", 33);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutput dos = new DataOutputStream(baos);
-        SerializationConfig config = JsonMappers.createSerializationConfig();
-
-        JsonMappers.toJson(person, dos, config);
-
-        String json = baos.toString(StandardCharsets.UTF_8.name());
-        Assertions.assertTrue(json.contains("Jack"));
-    }
-
-    @Test
-    public void testToJsonToFile() throws Exception {
-        Person person = new Person("John", 30);
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-
-        JsonMappers.toJson(person, tempFile);
-
-        Assertions.assertTrue(tempFile.exists());
-        Assertions.assertTrue(tempFile.length() > 0);
-    }
-
-    @Test
-    public void testToJsonToFileWithConfig() throws Exception {
-        Person person = new Person("John", 30);
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-        SerializationConfig config = JsonMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-
-        JsonMappers.toJson(person, tempFile, config);
-
-        Assertions.assertTrue(tempFile.exists());
-        Assertions.assertTrue(tempFile.length() > 0);
-    }
-
-    @Test
-    public void testToJsonToOutputStream() throws Exception {
-        Person person = new Person("John", 30);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        JsonMappers.toJson(person, os);
-
-        String json = os.toString();
-        Assertions.assertTrue(json.contains("John"));
-        Assertions.assertTrue(json.contains("30"));
-    }
-
-    @Test
-    public void testToJsonToOutputStreamWithConfig() throws Exception {
-        Person person = new Person("John", 30);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        SerializationConfig config = JsonMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-
-        JsonMappers.toJson(person, os, config);
-
-        String json = os.toString();
-        Assertions.assertTrue(json.contains("John"));
-    }
-
-    @Test
-    public void testToJsonToWriter() throws Exception {
-        Person person = new Person("John", 30);
-        StringWriter writer = new StringWriter();
-
-        JsonMappers.toJson(person, writer);
-
-        String json = writer.toString();
-        Assertions.assertTrue(json.contains("John"));
-        Assertions.assertTrue(json.contains("30"));
-    }
-
-    @Test
-    public void testToJsonToWriterWithConfig() throws Exception {
-        Person person = new Person("John", 30);
-        StringWriter writer = new StringWriter();
-        SerializationConfig config = JsonMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-
-        JsonMappers.toJson(person, writer, config);
-
-        String json = writer.toString();
-        Assertions.assertTrue(json.contains("John"));
-    }
-
-    @Test
-    public void testToJsonToDataOutput() throws Exception {
-        Person person = new Person("John", 30);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
-
-        JsonMappers.toJson(person, (DataOutput) dos);
-
-        String json = baos.toString();
-        Assertions.assertTrue(json.contains("John"));
-    }
-
-    @Test
-    public void testToJsonToDataOutputWithConfig() throws Exception {
-        Person person = new Person("John", 30);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
-        SerializationConfig config = JsonMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
-
-        JsonMappers.toJson(person, (DataOutput) dos, config);
-
-        String json = baos.toString();
-        Assertions.assertTrue(json.contains("John"));
+    public void testFromJson() {
+        final Person person = JsonMappers.fromJson("{\"name\":\"Mary\",\"age\":24}", Person.class);
+        Assertions.assertEquals("Mary", person.name);
+        Assertions.assertEquals(24, person.age);
+        Assertions.assertNull(JsonMappers.fromJson("null", Person.class));
     }
 
     @Test
     public void testFromJson_ByteArray() {
-        String jsonString = "{\"name\":\"Kate\",\"age\":26}";
-        byte[] jsonBytes = jsonString.getBytes(StandardCharsets.UTF_8);
+        final byte[] json = "{\"name\":\"Kate\",\"age\":26}".getBytes(StandardCharsets.UTF_8);
+        Assertions.assertEquals("Kate", JsonMappers.fromJson(json, Person.class).name);
 
-        Person person = JsonMappers.fromJson(jsonBytes, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Kate", person.name);
-        Assertions.assertEquals(26, person.age);
-    }
-
-    @Test
-    public void testFromJson_ByteArrayWithOffset() {
-        String prefix = "XXXX";
-        String jsonString = "{\"name\":\"Leo\",\"age\":31}";
-        String suffix = "YYYY";
-        byte[] buffer = (prefix + jsonString + suffix).getBytes(StandardCharsets.UTF_8);
-
-        Person person = JsonMappers.fromJson(buffer, prefix.length(), jsonString.length(), Person.class);
-
-        Assertions.assertNotNull(person);
+        final byte[] buffered = "XXXX{\"name\":\"Leo\",\"age\":31}YYYY".getBytes(StandardCharsets.UTF_8);
+        final Person person = JsonMappers.fromJson(buffered, 4, "{\"name\":\"Leo\",\"age\":31}".length(), Person.class);
         Assertions.assertEquals("Leo", person.name);
         Assertions.assertEquals(31, person.age);
     }
 
     @Test
-    public void testFromJson_String() {
-        String json = "{\"name\":\"Mary\",\"age\":24}";
-
-        Person person = JsonMappers.fromJson(json, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Mary", person.name);
-        Assertions.assertEquals(24, person.age);
-
-        Person nullPerson = JsonMappers.fromJson("null", Person.class);
-        Assertions.assertNull(nullPerson);
-    }
-
-    @Test
-    public void testFromJson_StringWithDeserializationFeatures() {
-        String json = "{\"name\":\"Nancy\",\"age\":22,\"unknown\":\"field\"}";
-
-        Person person = JsonMappers.fromJson(json, Person.class,
+    public void testFromJson_DeserializationFeatures() {
+        final String json = "{\"name\":\"Nancy\",\"age\":22,\"unknown\":\"field\"}";
+        final Person ignored = JsonMappers.fromJson(json, Person.class,
                 JsonMappers.createDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+        Assertions.assertEquals("Nancy", ignored.name);
 
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Nancy", person.name);
+        final Person features = JsonMappers.fromJson("{\"name\":\"John\",\"age\":30}", Person.class, DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+        Assertions.assertEquals("John", features.name);
     }
 
     @Test
-    public void testFromJson_StringWithDeserializationConfig() {
-        String json = "{\"name\":\"Oscar\",\"age\":38}";
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        Person person = JsonMappers.fromJson(json, Person.class, config);
-
-        Assertions.assertNotNull(person);
+    public void testFromJson_DeserializationConfig() {
+        final DeserializationConfig config = JsonMappers.createDeserializationConfig();
+        final Person person = JsonMappers.fromJson("{\"name\":\"Oscar\",\"age\":38}", Person.class, config);
         Assertions.assertEquals("Oscar", person.name);
         Assertions.assertEquals(38, person.age);
     }
 
     @Test
-    public void testFromJson_ByteArrayWithTypeReference() {
-        String jsonString = "[{\"name\":\"Zoe\",\"age\":30},{\"name\":\"Adam\",\"age\":35}]";
-        byte[] jsonBytes = jsonString.getBytes(StandardCharsets.UTF_8);
-
-        List<Person> people = JsonMappers.fromJson(jsonBytes, new TypeReference<List<Person>>() {
+    public void testFromJson_TypeReference() {
+        final String json = "[{\"name\":\"Carol\",\"age\":31},{\"name\":\"David\",\"age\":33}]";
+        final List<Person> people = JsonMappers.fromJson(json, new TypeReference<List<Person>>() {
         });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals(2, people.size());
-        Assertions.assertEquals("Zoe", people.get(0).name);
-    }
-
-    @Test
-    public void testFromJson_ByteArrayWithOffsetAndTypeReference() {
-        String prefix = "XXX";
-        String jsonString = "[{\"name\":\"Ben\",\"age\":28}]";
-        String suffix = "YYY";
-        byte[] buffer = (prefix + jsonString + suffix).getBytes(StandardCharsets.UTF_8);
-
-        List<Person> people = JsonMappers.fromJson(buffer, prefix.length(), jsonString.length(), new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals(1, people.size());
-        Assertions.assertEquals("Ben", people.get(0).name);
-    }
-
-    @Test
-    public void testFromJson_StringWithTypeReference() {
-        String json = "[{\"name\":\"Carol\",\"age\":31},{\"name\":\"David\",\"age\":33}]";
-
-        List<Person> people = JsonMappers.fromJson(json, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
         Assertions.assertEquals(2, people.size());
         Assertions.assertEquals("Carol", people.get(0).name);
-        Assertions.assertEquals("David", people.get(1).name);
-    }
 
-    @Test
-    public void testFromJson_StringWithTypeReferenceAndFeatures() {
-        String json = "[{\"name\":\"Emma\",\"age\":25}]";
-
-        List<Person> people = JsonMappers.fromJson(json, new TypeReference<List<Person>>() {
+        final List<Person> withFeatures = JsonMappers.fromJson("[{\"name\":\"Emma\",\"age\":25}]", new TypeReference<List<Person>>() {
         }, DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        Assertions.assertEquals(1, withFeatures.size());
 
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals(1, people.size());
-    }
+        final List<Person> withConfig = JsonMappers.fromJson("[{\"name\":\"Fiona\",\"age\":37}]", new TypeReference<List<Person>>() {
+        }, JsonMappers.createDeserializationConfig());
+        Assertions.assertEquals("Fiona", withConfig.get(0).name);
 
-    @Test
-    public void testFromJson_StringWithTypeReferenceAndConfig() {
-        String json = "[{\"name\":\"Fiona\",\"age\":37}]";
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
+        final byte[] bytes = "[{\"name\":\"Zoe\",\"age\":30}]".getBytes(StandardCharsets.UTF_8);
+        Assertions.assertEquals("Zoe", JsonMappers.fromJson(bytes, new TypeReference<List<Person>>() {
+        }).get(0).name);
 
-        List<Person> people = JsonMappers.fromJson(json, new TypeReference<List<Person>>() {
-        }, config);
+        final byte[] buffered = "XXX[{\"name\":\"Ben\",\"age\":28}]YYY".getBytes(StandardCharsets.UTF_8);
+        Assertions.assertEquals("Ben", JsonMappers.fromJson(buffered, 3, "[{\"name\":\"Ben\",\"age\":28}]".length(), new TypeReference<List<Person>>() {
+        }).get(0).name);
 
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals(1, people.size());
-        Assertions.assertEquals("Fiona", people.get(0).name);
-    }
-
-    @Test
-    public void testFromJsonByteArray() {
-        byte[] jsonBytes = "{\"name\":\"John\",\"age\":30}".getBytes();
-
-        Person person = JsonMappers.fromJson(jsonBytes, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-        Assertions.assertEquals(30, person.getAge());
-    }
-
-    @Test
-    public void testFromJsonByteArrayPartial() {
-        byte[] jsonBytes = "xxx{\"name\":\"John\",\"age\":30}yyy".getBytes();
-
-        Person person = JsonMappers.fromJson(jsonBytes, 3, jsonBytes.length - 6, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-        Assertions.assertEquals(30, person.getAge());
-    }
-
-    @Test
-    public void testFromJsonString() {
-        String json = "{\"name\":\"John\",\"age\":30}";
-
-        Person person = JsonMappers.fromJson(json, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-        Assertions.assertEquals(30, person.getAge());
-    }
-
-    @Test
-    public void testFromJsonStringWithFeatures() {
-        String json = "{\"name\":\"John\",\"age\":30}";
-
-        Person person = JsonMappers.fromJson(json, Person.class, DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS,
-                DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromJsonStringWithConfig() {
-        String json = "{\"name\":\"John\",\"age\":30}";
-        DeserializationConfig config = JsonMappers.createDeserializationConfig().without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-
-        Person person = JsonMappers.fromJson(json, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromJsonWithTypeReferenceByteArray() {
-        String json = "[\"a\",\"b\",\"c\"]";
-        byte[] jsonBytes = json.getBytes();
-
-        List<String> list = JsonMappers.fromJson(jsonBytes, new TypeReference<List<String>>() {
+        final Map<String, String> map = JsonMappers.fromJson("{\"key1\":\"value1\",\"key2\":\"value2\"}", new TypeReference<Map<String, String>>() {
         });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(3, list.size());
-        Assertions.assertEquals("a", list.get(0));
-    }
-
-    @Test
-    public void testFromJsonWithTypeReferenceByteArrayPartial() {
-        String json = "xxx[\"a\",\"b\"]yyy";
-        byte[] jsonBytes = json.getBytes();
-
-        List<String> list = JsonMappers.fromJson(jsonBytes, 3, jsonBytes.length - 6, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromJsonWithTypeReferenceString() {
-        String json = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
-
-        Map<String, String> map = JsonMappers.fromJson(json, new TypeReference<Map<String, String>>() {
-        });
-
-        Assertions.assertNotNull(map);
         Assertions.assertEquals("value1", map.get("key1"));
-        Assertions.assertEquals("value2", map.get("key2"));
     }
 
     @Test
-    public void testFromJsonWithTypeReferenceStringWithFeatures() {
-        String json = "[\"a\",\"b\"]";
+    public void testFromJson_Sources() throws IOException {
+        final String json = "{\"name\":\"Paul\",\"age\":42}";
+        final File file = tempFile("test-person.json", json);
+        Assertions.assertEquals("Paul", JsonMappers.fromJson(file, Person.class).name);
+        Assertions.assertEquals("Paul", JsonMappers.fromJson(file, Person.class, JsonMappers.createDeserializationConfig()).name);
 
-        List<String> list = JsonMappers.fromJson(json, new TypeReference<List<String>>() {
-        }, DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+        final boolean[] closed = { false };
+        final ByteArrayInputStream autoClose = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)) {
+            @Override
+            public void close() throws IOException {
+                closed[0] = true;
+                super.close();
+            }
+        };
+        Assertions.assertEquals("Paul", JsonMappers.fromJson(autoClose, Person.class).name);
+        Assertions.assertTrue(closed[0]);
 
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
+        Assertions.assertEquals("Paul", JsonMappers.fromJson(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)), Person.class,
+                JsonMappers.createDeserializationConfig()).name);
+        Assertions.assertEquals("Paul", JsonMappers.fromJson(new StringReader(json), Person.class).name);
+        Assertions.assertEquals("Paul", JsonMappers.fromJson(new StringReader(json), Person.class, JsonMappers.createDeserializationConfig()).name);
+
+        final URL url = file.toURI().toURL();
+        Assertions.assertEquals("Paul", JsonMappers.fromJson(url, Person.class).name);
+        Assertions.assertEquals("Paul", JsonMappers.fromJson(url, Person.class, JsonMappers.createDeserializationConfig()).name);
+
+        Assertions.assertEquals("Paul",
+                JsonMappers.fromJson((DataInput) new DataInputStream(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))), Person.class).name);
+        Assertions.assertEquals("Paul", JsonMappers.fromJson((DataInput) new DataInputStream(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))),
+                Person.class, JsonMappers.createDeserializationConfig()).name);
     }
 
     @Test
-    public void testFromJsonWithTypeReferenceStringWithConfig() {
-        String json = "[\"a\",\"b\"]";
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        List<String> list = JsonMappers.fromJson(json, new TypeReference<List<String>>() {
-        }, config);
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
+    public void testFromJson_Sources_TypeReference() throws IOException {
+        final String json = "[{\"name\":\"Rachel\",\"age\":29}]";
+        final TypeReference<List<Person>> type = new TypeReference<>() {
+        };
+        final File file = tempFile("test-list.json", json);
+        Assertions.assertEquals("Rachel", JsonMappers.fromJson(file, type).get(0).name);
+        Assertions.assertEquals("Rachel", JsonMappers.fromJson(file, type, JsonMappers.createDeserializationConfig()).get(0).name);
+        Assertions.assertEquals("Rachel", JsonMappers.fromJson(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)), type).get(0).name);
+        Assertions.assertEquals("Rachel",
+                JsonMappers.fromJson(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)), type, JsonMappers.createDeserializationConfig())
+                        .get(0).name);
+        Assertions.assertEquals("Rachel", JsonMappers.fromJson(new StringReader(json), type).get(0).name);
+        Assertions.assertEquals("Rachel", JsonMappers.fromJson(new StringReader(json), type, JsonMappers.createDeserializationConfig()).get(0).name);
+        Assertions.assertEquals("Rachel", JsonMappers.fromJson(file.toURI().toURL(), type).get(0).name);
+        Assertions.assertEquals("Rachel", JsonMappers.fromJson(file.toURI().toURL(), type, JsonMappers.createDeserializationConfig()).get(0).name);
+        Assertions.assertEquals("Rachel",
+                JsonMappers.fromJson((DataInput) new DataInputStream(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))), type).get(0).name);
+        Assertions.assertEquals("Rachel",
+                JsonMappers
+                        .fromJson((DataInput) new DataInputStream(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))), type,
+                                JsonMappers.createDeserializationConfig())
+                        .get(0).name);
     }
 
     @Test
-    public void testFromJson_File() throws IOException {
-        File jsonFile = new File(tempDir, "test-person.json");
-        String json = "{\"name\":\"Paul\",\"age\":42}";
-        Files.writeString(jsonFile.toPath(), json);
-
-        Person person = JsonMappers.fromJson(jsonFile, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Paul", person.name);
-        Assertions.assertEquals(42, person.age);
-    }
-
-    @Test
-    public void testFromJson_FileWithConfig() throws IOException {
-        File jsonFile = new File(tempDir, "test-person-config.json");
-        String json = "{\"name\":\"Quinn\",\"age\":36}";
-        Files.writeString(jsonFile.toPath(), json);
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        Person person = JsonMappers.fromJson(jsonFile, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Quinn", person.name);
-    }
-
-    @Test
-    public void testFromJson_InputStream() throws IOException {
-        String json = "{\"name\":\"Rachel\",\"age\":29}";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
-
-        Person person = JsonMappers.fromJson(bais, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Rachel", person.name);
-        Assertions.assertEquals(29, person.age);
-    }
-
-    @Test
-    public void testFromJson_InputStreamWithConfig() throws IOException {
-        String json = "{\"name\":\"Sam\",\"age\":34}";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        Person person = JsonMappers.fromJson(bais, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Sam", person.name);
-    }
-
-    @Test
-    public void testFromJson_Reader() throws IOException {
-        String json = "{\"name\":\"Tina\",\"age\":27}";
-        StringReader reader = new StringReader(json);
-
-        Person person = JsonMappers.fromJson(reader, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Tina", person.name);
-        Assertions.assertEquals(27, person.age);
-    }
-
-    @Test
-    public void testFromJson_ReaderWithConfig() throws IOException {
-        String json = "{\"name\":\"Uma\",\"age\":41}";
-        StringReader reader = new StringReader(json);
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        Person person = JsonMappers.fromJson(reader, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Uma", person.name);
-    }
-
-    @Test
-    public void testFromJson_URL() throws IOException {
-        File jsonFile = new File(tempDir, "url-test.json");
-        String json = "{\"name\":\"Victor\",\"age\":39}";
-        Files.writeString(jsonFile.toPath(), json);
-        URL url = jsonFile.toURI().toURL();
-
-        Person person = JsonMappers.fromJson(url, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Victor", person.name);
-    }
-
-    @Test
-    public void testFromJson_URLWithConfig() throws IOException {
-        File jsonFile = new File(tempDir, "url-config-test.json");
-        String json = "{\"name\":\"Wendy\",\"age\":23}";
-        Files.writeString(jsonFile.toPath(), json);
-        URL url = jsonFile.toURI().toURL();
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        Person person = JsonMappers.fromJson(url, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Wendy", person.name);
-    }
-
-    @Test
-    public void testFromJson_DataInput() throws IOException {
-        String json = "{\"name\":\"Xavier\",\"age\":44}";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
-        DataInput dis = new DataInputStream(bais);
-
-        Person person = JsonMappers.fromJson(dis, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Xavier", person.name);
-    }
-
-    @Test
-    public void testFromJson_DataInputWithConfig() throws IOException {
-        String json = "{\"name\":\"Yara\",\"age\":26}";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
-        DataInput dis = new DataInputStream(bais);
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        Person person = JsonMappers.fromJson(dis, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Yara", person.name);
-    }
-
-    @Test
-    public void testFromJson_FileWithTypeReference() throws IOException {
-        File jsonFile = new File(tempDir, "people-list.json");
-        String json = "[{\"name\":\"George\",\"age\":40}]";
-        Files.writeString(jsonFile.toPath(), json);
-
-        List<Person> people = JsonMappers.fromJson(jsonFile, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals(1, people.size());
-        Assertions.assertEquals("George", people.get(0).name);
-    }
-
-    @Test
-    public void testFromJson_FileWithTypeReferenceAndConfig() throws IOException {
-        File jsonFile = new File(tempDir, "people-config.json");
-        String json = "[{\"name\":\"Hannah\",\"age\":28}]";
-        Files.writeString(jsonFile.toPath(), json);
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        List<Person> people = JsonMappers.fromJson(jsonFile, new TypeReference<List<Person>>() {
-        }, config);
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Hannah", people.get(0).name);
-    }
-
-    @Test
-    public void testFromJson_InputStreamWithTypeReference() throws IOException {
-        String json = "[{\"name\":\"Ian\",\"age\":32}]";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
-
-        List<Person> people = JsonMappers.fromJson(bais, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals(1, people.size());
-        Assertions.assertEquals("Ian", people.get(0).name);
-    }
-
-    @Test
-    public void testFromJson_InputStreamWithTypeReferenceAndConfig() throws IOException {
-        String json = "[{\"name\":\"Julia\",\"age\":29}]";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        List<Person> people = JsonMappers.fromJson(bais, new TypeReference<List<Person>>() {
-        }, config);
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Julia", people.get(0).name);
-    }
-
-    @Test
-    public void testFromJson_ReaderWithTypeReference() throws IOException {
-        String json = "[{\"name\":\"Kevin\",\"age\":35}]";
-        StringReader reader = new StringReader(json);
-
-        List<Person> people = JsonMappers.fromJson(reader, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals(1, people.size());
-        Assertions.assertEquals("Kevin", people.get(0).name);
-    }
-
-    @Test
-    public void testFromJson_ReaderWithTypeReferenceAndConfig() throws IOException {
-        String json = "[{\"name\":\"Laura\",\"age\":27}]";
-        StringReader reader = new StringReader(json);
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        List<Person> people = JsonMappers.fromJson(reader, new TypeReference<List<Person>>() {
-        }, config);
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Laura", people.get(0).name);
-    }
-
-    @Test
-    public void testFromJson_URLWithTypeReference() throws IOException {
-        File jsonFile = new File(tempDir, "url-type-ref.json");
-        String json = "[{\"name\":\"Mike\",\"age\":43}]";
-        Files.writeString(jsonFile.toPath(), json);
-        URL url = jsonFile.toURI().toURL();
-
-        List<Person> people = JsonMappers.fromJson(url, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Mike", people.get(0).name);
-    }
-
-    @Test
-    public void testFromJson_URLWithTypeReferenceAndConfig() throws IOException {
-        File jsonFile = new File(tempDir, "url-type-config.json");
-        String json = "[{\"name\":\"Nina\",\"age\":24}]";
-        Files.writeString(jsonFile.toPath(), json);
-        URL url = jsonFile.toURI().toURL();
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        List<Person> people = JsonMappers.fromJson(url, new TypeReference<List<Person>>() {
-        }, config);
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Nina", people.get(0).name);
-    }
-
-    @Test
-    public void testFromJson_DataInputWithTypeReference() throws IOException {
-        String json = "[{\"name\":\"Oliver\",\"age\":38}]";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
-        DataInput dis = new DataInputStream(bais);
-
-        List<Person> people = JsonMappers.fromJson(dis, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Oliver", people.get(0).name);
-    }
-
-    @Test
-    public void testFromJson_DataInputWithTypeReferenceAndConfig() throws IOException {
-        String json = "[{\"name\":\"Pam\",\"age\":31}]";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
-        DataInput dis = new DataInputStream(bais);
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        List<Person> people = JsonMappers.fromJson(dis, new TypeReference<List<Person>>() {
-        }, config);
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Pam", people.get(0).name);
-    }
-
-    @Test
-    public void testFromJsonFile() throws Exception {
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("{\"name\":\"John\",\"age\":30}");
-        }
-
-        Person person = JsonMappers.fromJson(tempFile, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromJsonFileWithConfig() throws Exception {
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("{\"name\":\"John\",\"age\":30}");
-        }
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        Person person = JsonMappers.fromJson(tempFile, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromJsonInputStream() throws Exception {
-        String json = "{\"name\":\"John\",\"age\":30}";
-        ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes());
-
-        Person person = JsonMappers.fromJson(is, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromJsonInputStreamWithConfig() throws Exception {
-        String json = "{\"name\":\"John\",\"age\":30}";
-        ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes());
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        Person person = JsonMappers.fromJson(is, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromJsonReader() throws Exception {
-        String json = "{\"name\":\"John\",\"age\":30}";
-        StringReader reader = new StringReader(json);
-
-        Person person = JsonMappers.fromJson(reader, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromJsonReaderWithConfig() throws Exception {
-        String json = "{\"name\":\"John\",\"age\":30}";
-        StringReader reader = new StringReader(json);
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        Person person = JsonMappers.fromJson(reader, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromJsonURL() throws Exception {
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("{\"name\":\"John\",\"age\":30}");
-        }
-        URL url = tempFile.toURI().toURL();
-
-        Person person = JsonMappers.fromJson(url, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromJsonURLWithConfig() throws Exception {
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("{\"name\":\"John\",\"age\":30}");
-        }
-        URL url = tempFile.toURI().toURL();
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        Person person = JsonMappers.fromJson(url, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromJsonDataInput() throws Exception {
-        String json = "{\"name\":\"John\",\"age\":30}";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes());
-        DataInputStream dis = new DataInputStream(bais);
-
-        Person person = JsonMappers.fromJson((DataInput) dis, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromJsonDataInputWithConfig() throws Exception {
-        String json = "{\"name\":\"John\",\"age\":30}";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes());
-        DataInputStream dis = new DataInputStream(bais);
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        Person person = JsonMappers.fromJson((DataInput) dis, Person.class, config);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testFromJsonWithTypeReferenceFile() throws Exception {
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("[\"a\",\"b\"]");
-        }
-
-        List<String> list = JsonMappers.fromJson(tempFile, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromJsonWithTypeReferenceFileWithConfig() throws Exception {
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("[\"a\",\"b\"]");
-        }
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        List<String> list = JsonMappers.fromJson(tempFile, new TypeReference<List<String>>() {
-        }, config);
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromJsonWithTypeReferenceInputStream() throws Exception {
-        String json = "[\"a\",\"b\"]";
-        ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes());
-
-        List<String> list = JsonMappers.fromJson(is, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromJsonWithTypeReferenceInputStreamWithConfig() throws Exception {
-        String json = "[\"a\",\"b\"]";
-        ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes());
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        List<String> list = JsonMappers.fromJson(is, new TypeReference<List<String>>() {
-        }, config);
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromJsonWithTypeReferenceReader() throws Exception {
-        String json = "[\"a\",\"b\"]";
-        StringReader reader = new StringReader(json);
-
-        List<String> list = JsonMappers.fromJson(reader, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromJsonWithTypeReferenceReaderWithConfig() throws Exception {
-        String json = "[\"a\",\"b\"]";
-        StringReader reader = new StringReader(json);
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        List<String> list = JsonMappers.fromJson(reader, new TypeReference<List<String>>() {
-        }, config);
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromJsonWithTypeReferenceURL() throws Exception {
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("[\"a\",\"b\"]");
-        }
-        URL url = tempFile.toURI().toURL();
-
-        List<String> list = JsonMappers.fromJson(url, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromJsonWithTypeReferenceURLWithConfig() throws Exception {
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("[\"a\",\"b\"]");
-        }
-        URL url = tempFile.toURI().toURL();
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        List<String> list = JsonMappers.fromJson(url, new TypeReference<List<String>>() {
-        }, config);
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromJsonWithTypeReferenceDataInput() throws Exception {
-        String json = "[\"a\",\"b\"]";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes());
-        DataInputStream dis = new DataInputStream(bais);
-
-        List<String> list = JsonMappers.fromJson((DataInput) dis, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testFromJsonWithTypeReferenceDataInputWithConfig() throws Exception {
-        String json = "[\"a\",\"b\"]";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes());
-        DataInputStream dis = new DataInputStream(bais);
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-
-        List<String> list = JsonMappers.fromJson((DataInput) dis, new TypeReference<List<String>>() {
-        }, config);
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
+    public void testFromJsonWithTypeReferenceRejectsNullTargetType() throws IOException {
+        final String json = "[]";
+        final byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+        final File file = tempFile("null-target-type.json", json);
+        final DeserializationConfig config = JsonMappers.createDeserializationConfig();
+        final JsonMappers.One wrapper = one();
+
+        // a null targetType is an argument error on every TypeReference overload, with the same message on all of
+        // them - not a raw NullPointerException out of Jackson, and not Jackson's own 'argument "typeRef" is null'
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> JsonMappers.fromJson(json, (TypeReference<?>) null));
+        Assertions.assertEquals("'targetType' cannot be null", e.getMessage());
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(bytes, (TypeReference<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(bytes, 0, bytes.length, (TypeReference<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(file, (TypeReference<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(new ByteArrayInputStream(bytes), (TypeReference<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(new StringReader(json), (TypeReference<?>) null));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(json, (TypeReference<?>) null, config));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(file, (TypeReference<?>) null, config));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> JsonMappers.fromJson(new ByteArrayInputStream(bytes), (TypeReference<?>) null, config));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(new StringReader(json), (TypeReference<?>) null, config));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> wrapper.fromJson(json, (TypeReference<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> wrapper.fromJson(bytes, (TypeReference<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> wrapper.fromJson(bytes, 0, bytes.length, (TypeReference<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> wrapper.fromJson(file, (TypeReference<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> wrapper.fromJson(new ByteArrayInputStream(bytes), (TypeReference<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> wrapper.fromJson(new StringReader(json), (TypeReference<?>) null));
+
+        // unchanged shapes, kept here so the two families stay pinned together
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(json, (Class<?>) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(file.toURI().toURL(), (TypeReference<?>) null));
     }
 
     @Test
     public void testCreateSerializationConfig() {
-        SerializationConfig config = JsonMappers.createSerializationConfig();
-        Assertions.assertNotNull(config);
+        Assertions.assertNotNull(JsonMappers.createSerializationConfig());
     }
 
     @Test
     public void testCreateDeserializationConfig() {
-        DeserializationConfig config = JsonMappers.createDeserializationConfig();
-        Assertions.assertNotNull(config);
+        Assertions.assertNotNull(JsonMappers.createDeserializationConfig());
     }
 
     @Test
     public void testWrap() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        Assertions.assertNotNull(wrapper);
+        Assertions.assertNotNull(JsonMappers.wrap(new ObjectMapper()));
     }
 
     @Test
-    public void testOne_ToJson_Object() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        Person person = new Person("Alice", 25);
-        String json = one.toJson(person);
-
-        Assertions.assertNotNull(json);
+    public void testOne_ToJson() throws IOException {
+        final JsonMappers.One wrapper = one();
+        final Person person = new Person("Alice", 25);
+        final String json = wrapper.toJson(person);
         Assertions.assertTrue(json.contains("Alice"));
-    }
 
-    @Test
-    public void testOne_ToJson_ObjectWithPrettyFormat() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
+        final String pretty = wrapper.toJson(person, true);
+        final String compact = wrapper.toJson(person, false);
+        Assertions.assertTrue(pretty.contains("\n"));
+        Assertions.assertFalse(compact.contains("\n"));
 
-        Person person = new Person("Bob", 30);
-        String pretty = one.toJson(person, true);
-        String compact = one.toJson(person, false);
+        final File file = new File(tempDir, "one-person.json");
+        wrapper.toJson(person, file);
+        Assertions.assertTrue(Files.readString(file.toPath()).contains("Alice"));
 
-        Assertions.assertNotNull(pretty);
-        Assertions.assertNotNull(compact);
-    }
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        wrapper.toJson(person, baos);
+        Assertions.assertTrue(baos.toString(StandardCharsets.UTF_8.name()).contains("Alice"));
 
-    @Test
-    public void testOne_FromJson_ByteArray() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        String jsonString = "{\"name\":\"Grace\",\"age\":29}";
-        byte[] jsonBytes = jsonString.getBytes(StandardCharsets.UTF_8);
-
-        Person person = one.fromJson(jsonBytes, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Grace", person.name);
-    }
-
-    @Test
-    public void testOne_FromJson_ByteArrayWithOffset() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        String prefix = "XX";
-        String jsonString = "{\"name\":\"Henry\",\"age\":50}";
-        byte[] buffer = (prefix + jsonString).getBytes(StandardCharsets.UTF_8);
-
-        Person person = one.fromJson(buffer, prefix.length(), jsonString.length(), Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Henry", person.name);
-    }
-
-    @Test
-    public void testOne_FromJson_String() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        String json = "{\"name\":\"Ivy\",\"age\":27}";
-
-        Person person = one.fromJson(json, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Ivy", person.name);
-    }
-
-    @Test
-    public void testOne_FromJson_ByteArrayWithTypeReference() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        String jsonString = "[{\"name\":\"Oscar\",\"age\":38}]";
-        byte[] jsonBytes = jsonString.getBytes(StandardCharsets.UTF_8);
-
-        List<Person> people = one.fromJson(jsonBytes, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals(1, people.size());
-        Assertions.assertEquals("Oscar", people.get(0).name);
-    }
-
-    @Test
-    public void testOne_FromJson_ByteArrayWithOffsetAndTypeReference() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        String prefix = "YY";
-        String jsonString = "[{\"name\":\"Paul\",\"age\":42}]";
-        byte[] buffer = (prefix + jsonString).getBytes(StandardCharsets.UTF_8);
-
-        List<Person> people = one.fromJson(buffer, prefix.length(), jsonString.length(), new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Paul", people.get(0).name);
-    }
-
-    @Test
-    public void testOne_FromJson_StringWithTypeReference() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        String json = "[{\"name\":\"Quinn\",\"age\":36}]";
-
-        List<Person> people = one.fromJson(json, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Quinn", people.get(0).name);
-    }
-
-    @Test
-    public void testOneToJson() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        Person person = new Person("John", 30);
-
-        String json = wrapper.toJson(person);
-
-        Assertions.assertNotNull(json);
-        Assertions.assertTrue(json.contains("John"));
-    }
-
-    @Test
-    public void testOneToJsonPretty() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        Person person = new Person("John", 30);
-
-        String prettyJson = wrapper.toJson(person, true);
-        String compactJson = wrapper.toJson(person, false);
-
-        Assertions.assertNotNull(prettyJson);
-        Assertions.assertNotNull(compactJson);
-        Assertions.assertTrue(prettyJson.contains("\n"));
-        Assertions.assertFalse(compactJson.contains("\n"));
-    }
-
-    @Test
-    public void testOneFromJsonByteArray() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        byte[] jsonBytes = "{\"name\":\"John\",\"age\":30}".getBytes();
-
-        Person person = wrapper.fromJson(jsonBytes, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromJsonByteArrayPartial() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        byte[] jsonBytes = "xxx{\"name\":\"John\",\"age\":30}yyy".getBytes();
-
-        Person person = wrapper.fromJson(jsonBytes, 3, jsonBytes.length - 6, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromJsonString() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        String json = "{\"name\":\"John\",\"age\":30}";
-
-        Person person = wrapper.fromJson(json, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromJsonWithTypeReferenceByteArray() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        String json = "[\"a\",\"b\"]";
-        byte[] jsonBytes = json.getBytes();
-
-        List<String> list = wrapper.fromJson(jsonBytes, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOneFromJsonWithTypeReferenceByteArrayPartial() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        String json = "xxx[\"a\",\"b\"]yyy";
-        byte[] jsonBytes = json.getBytes();
-
-        List<String> list = wrapper.fromJson(jsonBytes, 3, jsonBytes.length - 6, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOneFromJsonWithTypeReferenceString() {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        String json = "[\"a\",\"b\"]";
-
-        List<String> list = wrapper.fromJson(json, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOne_ToJson_ObjectToFile() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        Person person = new Person("Charlie", 35);
-        File outputFile = new File(tempDir, "one-person.json");
-
-        one.toJson(person, outputFile);
-
-        Assertions.assertTrue(outputFile.exists());
-    }
-
-    @Test
-    public void testOne_ToJson_ObjectToOutputStream() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        Person person = new Person("Diana", 28);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        one.toJson(person, baos);
-
-        String json = baos.toString(StandardCharsets.UTF_8.name());
-        Assertions.assertTrue(json.contains("Diana"));
-    }
-
-    @Test
-    public void testOne_ToJson_ObjectToWriter() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        Person person = new Person("Eve", 32);
-        StringWriter writer = new StringWriter();
-
-        one.toJson(person, writer);
-
-        String json = writer.toString();
-        Assertions.assertTrue(json.contains("Eve"));
-    }
-
-    @Test
-    public void testOne_ToJson_ObjectToDataOutput() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        Person person = new Person("Frank", 40);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutput dos = new DataOutputStream(baos);
-
-        one.toJson(person, dos);
-
-        String json = baos.toString(StandardCharsets.UTF_8.name());
-        Assertions.assertTrue(json.contains("Frank"));
-    }
-
-    @Test
-    public void testOne_FromJson_File() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        File jsonFile = new File(tempDir, "one-test.json");
-        String json = "{\"name\":\"Jack\",\"age\":33}";
-        Files.writeString(jsonFile.toPath(), json);
-
-        Person person = one.fromJson(jsonFile, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Jack", person.name);
-    }
-
-    @Test
-    public void testOne_FromJson_InputStream() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        String json = "{\"name\":\"Kate\",\"age\":26}";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
-
-        Person person = one.fromJson(bais, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Kate", person.name);
-    }
-
-    @Test
-    public void testOne_FromJson_Reader() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        String json = "{\"name\":\"Leo\",\"age\":31}";
-        StringReader reader = new StringReader(json);
-
-        Person person = one.fromJson(reader, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Leo", person.name);
-    }
-
-    @Test
-    public void testOne_FromJson_URL() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        File jsonFile = new File(tempDir, "one-url.json");
-        String json = "{\"name\":\"Mary\",\"age\":24}";
-        Files.writeString(jsonFile.toPath(), json);
-        URL url = jsonFile.toURI().toURL();
-
-        Person person = one.fromJson(url, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Mary", person.name);
-    }
-
-    @Test
-    public void testOne_FromJson_DataInput() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        String json = "{\"name\":\"Nancy\",\"age\":22}";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
-        DataInput dis = new DataInputStream(bais);
-
-        Person person = one.fromJson(dis, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("Nancy", person.name);
-    }
-
-    @Test
-    public void testOne_FromJson_FileWithTypeReference() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        File jsonFile = new File(tempDir, "one-list.json");
-        String json = "[{\"name\":\"Rachel\",\"age\":29}]";
-        Files.writeString(jsonFile.toPath(), json);
-
-        List<Person> people = one.fromJson(jsonFile, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Rachel", people.get(0).name);
-    }
-
-    @Test
-    public void testOne_FromJson_InputStreamWithTypeReference() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        String json = "[{\"name\":\"Sam\",\"age\":34}]";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
-
-        List<Person> people = one.fromJson(bais, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Sam", people.get(0).name);
-    }
-
-    @Test
-    public void testOne_FromJson_ReaderWithTypeReference() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        String json = "[{\"name\":\"Tina\",\"age\":27}]";
-        StringReader reader = new StringReader(json);
-
-        List<Person> people = one.fromJson(reader, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Tina", people.get(0).name);
-    }
-
-    @Test
-    public void testOne_FromJson_URLWithTypeReference() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        File jsonFile = new File(tempDir, "one-url-list.json");
-        String json = "[{\"name\":\"Uma\",\"age\":41}]";
-        Files.writeString(jsonFile.toPath(), json);
-        URL url = jsonFile.toURI().toURL();
-
-        List<Person> people = one.fromJson(url, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Uma", people.get(0).name);
-    }
-
-    @Test
-    public void testOne_FromJson_DataInputWithTypeReference() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One one = JsonMappers.wrap(mapper);
-
-        String json = "[{\"name\":\"Victor\",\"age\":39}]";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8));
-        DataInput dis = new DataInputStream(bais);
-
-        List<Person> people = one.fromJson(dis, new TypeReference<List<Person>>() {
-        });
-
-        Assertions.assertNotNull(people);
-        Assertions.assertEquals("Victor", people.get(0).name);
-    }
-
-    @Test
-    public void testOneToJsonFile() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        Person person = new Person("John", 30);
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-
-        wrapper.toJson(person, tempFile);
-
-        Assertions.assertTrue(tempFile.exists());
-        Assertions.assertTrue(tempFile.length() > 0);
-    }
-
-    @Test
-    public void testOneToJsonOutputStream() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        Person person = new Person("John", 30);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        wrapper.toJson(person, os);
-
-        String json = os.toString();
-        Assertions.assertTrue(json.contains("John"));
-    }
-
-    @Test
-    public void testOneToJsonWriter() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        Person person = new Person("John", 30);
-        StringWriter writer = new StringWriter();
-
+        final StringWriter writer = new StringWriter();
         wrapper.toJson(person, writer);
+        Assertions.assertTrue(writer.toString().contains("Alice"));
 
-        String json = writer.toString();
-        Assertions.assertTrue(json.contains("John"));
+        final ByteArrayOutputStream data = new ByteArrayOutputStream();
+        wrapper.toJson(person, (DataOutput) new DataOutputStream(data));
+        Assertions.assertTrue(data.toString(StandardCharsets.UTF_8.name()).contains("Alice"));
     }
 
     @Test
-    public void testOneToJsonDataOutput() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        Person person = new Person("John", 30);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
+    public void testOne_FromJson() throws IOException {
+        final JsonMappers.One wrapper = one();
+        final String json = "{\"name\":\"Grace\",\"age\":29}";
+        Assertions.assertEquals("Grace", wrapper.fromJson(json, Person.class).name);
+        Assertions.assertEquals("Grace", wrapper.fromJson(json.getBytes(StandardCharsets.UTF_8), Person.class).name);
 
-        wrapper.toJson(person, (DataOutput) dos);
+        final byte[] buffered = "XX{\"name\":\"Henry\",\"age\":50}".getBytes(StandardCharsets.UTF_8);
+        Assertions.assertEquals("Henry", wrapper.fromJson(buffered, 2, "{\"name\":\"Henry\",\"age\":50}".length(), Person.class).name);
 
-        String json = baos.toString();
-        Assertions.assertTrue(json.contains("John"));
-    }
+        final TypeReference<List<Person>> type = new TypeReference<>() {
+        };
+        Assertions.assertEquals("Oscar", wrapper.fromJson("[{\"name\":\"Oscar\",\"age\":38}]", type).get(0).name);
+        Assertions.assertEquals("Oscar", wrapper.fromJson("[{\"name\":\"Oscar\",\"age\":38}]".getBytes(StandardCharsets.UTF_8), type).get(0).name);
+        final byte[] typeBuffered = "YY[{\"name\":\"Paul\",\"age\":42}]".getBytes(StandardCharsets.UTF_8);
+        Assertions.assertEquals("Paul", wrapper.fromJson(typeBuffered, 2, "[{\"name\":\"Paul\",\"age\":42}]".length(), type).get(0).name);
 
-    @Test
-    public void testOneFromJsonFile() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("{\"name\":\"John\",\"age\":30}");
-        }
+        final File file = tempFile("one-test.json", json);
+        Assertions.assertEquals("Grace", wrapper.fromJson(file, Person.class).name);
+        Assertions.assertEquals("Grace", wrapper.fromJson(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)), Person.class).name);
+        Assertions.assertEquals("Grace", wrapper.fromJson(new StringReader(json), Person.class).name);
+        Assertions.assertEquals("Grace", wrapper.fromJson(file.toURI().toURL(), Person.class).name);
+        Assertions.assertEquals("Grace",
+                wrapper.fromJson((DataInput) new DataInputStream(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))), Person.class).name);
 
-        Person person = wrapper.fromJson(tempFile, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromJsonInputStream() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        String json = "{\"name\":\"John\",\"age\":30}";
-        ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes());
-
-        Person person = wrapper.fromJson(is, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromJsonReader() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        String json = "{\"name\":\"John\",\"age\":30}";
-        StringReader reader = new StringReader(json);
-
-        Person person = wrapper.fromJson(reader, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromJsonURL() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("{\"name\":\"John\",\"age\":30}");
-        }
-        URL url = tempFile.toURI().toURL();
-
-        Person person = wrapper.fromJson(url, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromJsonDataInput() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        String json = "{\"name\":\"John\",\"age\":30}";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes());
-        DataInputStream dis = new DataInputStream(bais);
-
-        Person person = wrapper.fromJson((DataInput) dis, Person.class);
-
-        Assertions.assertNotNull(person);
-        Assertions.assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testOneFromJsonWithTypeReferenceFile() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("[\"a\",\"b\"]");
-        }
-
-        List<String> list = wrapper.fromJson(tempFile, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOneFromJsonWithTypeReferenceInputStream() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        String json = "[\"a\",\"b\"]";
-        ByteArrayInputStream is = new ByteArrayInputStream(json.getBytes());
-
-        List<String> list = wrapper.fromJson(is, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOneFromJsonWithTypeReferenceReader() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        String json = "[\"a\",\"b\"]";
-        StringReader reader = new StringReader(json);
-
-        List<String> list = wrapper.fromJson(reader, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOneFromJsonWithTypeReferenceURL() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        File tempFile = File.createTempFile("test", ".json");
-        tempFile.deleteOnExit();
-        try (FileWriter writer = new FileWriter(tempFile)) {
-            writer.write("[\"a\",\"b\"]");
-        }
-        URL url = tempFile.toURI().toURL();
-
-        List<String> list = wrapper.fromJson(url, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testOneFromJsonWithTypeReferenceDataInput() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonMappers.One wrapper = JsonMappers.wrap(mapper);
-        String json = "[\"a\",\"b\"]";
-        ByteArrayInputStream bais = new ByteArrayInputStream(json.getBytes());
-        DataInputStream dis = new DataInputStream(bais);
-
-        List<String> list = wrapper.fromJson((DataInput) dis, new TypeReference<List<String>>() {
-        });
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(2, list.size());
+        final String listJson = "[{\"name\":\"Rachel\",\"age\":29}]";
+        final File listFile = tempFile("one-list.json", listJson);
+        Assertions.assertEquals("Rachel", wrapper.fromJson(listFile, type).get(0).name);
+        Assertions.assertEquals("Rachel", wrapper.fromJson(new ByteArrayInputStream(listJson.getBytes(StandardCharsets.UTF_8)), type).get(0).name);
+        Assertions.assertEquals("Rachel", wrapper.fromJson(new StringReader(listJson), type).get(0).name);
+        Assertions.assertEquals("Rachel", wrapper.fromJson(listFile.toURI().toURL(), type).get(0).name);
+        Assertions.assertEquals("Rachel",
+                wrapper.fromJson((DataInput) new DataInputStream(new ByteArrayInputStream(listJson.getBytes(StandardCharsets.UTF_8))), type).get(0).name);
     }
 
     @Test
@@ -1937,20 +610,20 @@ public class JsonMappersTest extends TestBase {
         final byte[] json = "xx{\"name\":\"Ada\",\"age\":37}yy".getBytes(StandardCharsets.UTF_8);
         final int offset = 2;
         final int len = json.length - 4;
-        final TypeReference<Person> type = new TypeReference<Person>() {
+        final TypeReference<Person> type = new TypeReference<>() {
         };
-        final JsonMappers.One one = JsonMappers.wrap(new ObjectMapper());
+        final JsonMappers.One wrapper = one();
 
         Assertions.assertEquals("Ada", JsonMappers.fromJson(json, offset, len, Person.class).name);
         Assertions.assertEquals("Ada", JsonMappers.fromJson(json, offset, len, type).name);
-        Assertions.assertEquals("Ada", one.fromJson(json, offset, len, Person.class).name);
-        Assertions.assertEquals("Ada", one.fromJson(json, offset, len, type).name);
+        Assertions.assertEquals("Ada", wrapper.fromJson(json, offset, len, Person.class).name);
+        Assertions.assertEquals("Ada", wrapper.fromJson(json, offset, len, type).name);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson((byte[]) null, 0, 0, Person.class));
         Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(json, 0, -1, Person.class));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> JsonMappers.fromJson(json, -1, 1, type));
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> one.fromJson(json, json.length, 1, Person.class));
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> one.fromJson(json, 1, Integer.MAX_VALUE, type));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> wrapper.fromJson(json, json.length, 1, Person.class));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> wrapper.fromJson(json, 1, Integer.MAX_VALUE, type));
     }
 
     @Test
@@ -1963,7 +636,7 @@ public class JsonMappersTest extends TestBase {
                 () -> JsonMappers.fromJson("{}", Person.class, (DeserializationFeature) null, new DeserializationFeature[0]));
         Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson("{}", new TypeReference<Person>() {
         }, DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, (DeserializationFeature[]) null));
-        Assertions.assertThrows(NullPointerException.class, () -> JsonMappers.wrap(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.wrap(null));
     }
 
     @Test
@@ -1971,35 +644,29 @@ public class JsonMappersTest extends TestBase {
         final File sourceFile = findSourceFile();
         final String source = Files.readString(sourceFile.toPath());
         final String[] lines = source.split("\r?\n");
-
         final List<String> methodsWithoutExamples = new ArrayList<>();
 
         int javadocStart = -1;
         int javadocEnd = -1;
-
         for (int i = 0; i < lines.length; i++) {
             final String trimmed = lines[i].trim();
-
             if (trimmed.equals("/**")) {
                 javadocStart = i;
                 javadocEnd = -1;
             } else if (javadocStart >= 0 && trimmed.equals("*/")) {
                 javadocEnd = i;
-            } else if (javadocEnd >= 0) {
-                if (isPublicMethodSignature(trimmed) || isMultiLineMethodContinuation(lines, i)) {
-                    if (isPublicMethodSignature(lines, javadocEnd, i)) {
-                        final StringBuilder javadocContent = new StringBuilder();
-                        for (int j = javadocStart; j <= javadocEnd; j++) {
-                            javadocContent.append(lines[j]).append('\n');
-                        }
-                        final String javadoc = javadocContent.toString();
-                        if (!javadoc.contains("<p><b>Usage Examples:</b></p>")) {
-                            methodsWithoutExamples.add("Line " + (javadocStart + 1) + ": method after javadoc missing usage examples");
-                        }
+            } else if (javadocEnd >= 0 && (isPublicMethodSignature(trimmed) || isMultiLineMethodContinuation(lines, i))) {
+                if (isPublicMethodSignature(lines, javadocEnd, i)) {
+                    final StringBuilder javadocContent = new StringBuilder();
+                    for (int j = javadocStart; j <= javadocEnd; j++) {
+                        javadocContent.append(lines[j]).append('\n');
                     }
-                    javadocStart = -1;
-                    javadocEnd = -1;
+                    if (!javadocContent.toString().contains("<p><b>Usage Examples:</b></p>")) {
+                        methodsWithoutExamples.add("Line " + (javadocStart + 1) + ": method after javadoc missing usage examples");
+                    }
                 }
+                javadocStart = -1;
+                javadocEnd = -1;
             }
         }
 
@@ -2027,7 +694,7 @@ public class JsonMappersTest extends TestBase {
         return false;
     }
 
-    private static File findSourceFile() throws IOException {
+    private static File findSourceFile() {
         final String relativePath = "src" + File.separator + "main" + File.separator + "java" + File.separator + "com" + File.separator + "landawn"
                 + File.separator + "abacus" + File.separator + "util" + File.separator + "JsonMappers.java";
         final File file = new File(relativePath);
@@ -2036,5 +703,4 @@ public class JsonMappersTest extends TestBase {
         }
         return new File("..", relativePath);
     }
-
 }

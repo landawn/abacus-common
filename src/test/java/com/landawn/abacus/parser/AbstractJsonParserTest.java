@@ -16,10 +16,13 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import com.landawn.abacus.entity.extendDirty.basic.Account;
 import com.landawn.abacus.type.TypeFactory;
+import com.landawn.abacus.util.ImmutableList;
+import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.stream.Stream;
+
+import testfixtures.entity.extendDirty.basic.Account;
 
 public abstract class AbstractJsonParserTest extends AbstractParserTest {
 
@@ -74,7 +77,7 @@ public abstract class AbstractJsonParserTest extends AbstractParserTest {
         JsonParser json = (JsonParser) parser;
         Object[] output = new Object[3];
 
-        json.parse("[\"a\",\"b\",\"c\"]", output);
+        json.parseInto("[\"a\",\"b\",\"c\"]", output);
 
         assertEquals("a", output[0]);
         assertEquals("b", output[1]);
@@ -86,7 +89,7 @@ public abstract class AbstractJsonParserTest extends AbstractParserTest {
         JsonParser json = (JsonParser) parser;
         Object[] output = new Object[2];
 
-        json.parse("[\"x\",\"y\"]", JsonDeserConfig.create(), output);
+        json.parseInto("[\"x\",\"y\"]", JsonDeserConfig.create(), output);
 
         assertEquals("x", output[0]);
         assertEquals("y", output[1]);
@@ -97,7 +100,7 @@ public abstract class AbstractJsonParserTest extends AbstractParserTest {
         JsonParser json = (JsonParser) parser;
         List<Object> output = new ArrayList<>();
 
-        json.parse("[\"a\",\"b\"]", output);
+        json.parseInto("[\"a\",\"b\"]", output);
 
         assertEquals(2, output.size());
         assertEquals("a", output.get(0));
@@ -109,7 +112,7 @@ public abstract class AbstractJsonParserTest extends AbstractParserTest {
         JsonParser json = (JsonParser) parser;
         List<Object> output = new ArrayList<>();
 
-        json.parse("[\"x\",\"y\"]", JsonDeserConfig.create(), output);
+        json.parseInto("[\"x\",\"y\"]", JsonDeserConfig.create(), output);
 
         assertEquals(2, output.size());
         assertEquals("x", output.get(0));
@@ -121,7 +124,7 @@ public abstract class AbstractJsonParserTest extends AbstractParserTest {
         JsonParser json = (JsonParser) parser;
         Map<String, Object> output = new HashMap<>();
 
-        json.parse("{\"name\":\"alpha\"}", output);
+        json.parseInto("{\"name\":\"alpha\"}", output);
 
         assertEquals("alpha", output.get("name"));
     }
@@ -131,7 +134,7 @@ public abstract class AbstractJsonParserTest extends AbstractParserTest {
         JsonParser json = (JsonParser) parser;
         Map<String, Object> output = new HashMap<>();
 
-        json.parse("{\"name\":\"beta\"}", JsonDeserConfig.create(), output);
+        json.parseInto("{\"name\":\"beta\"}", JsonDeserConfig.create(), output);
 
         assertEquals("beta", output.get("name"));
     }
@@ -140,9 +143,19 @@ public abstract class AbstractJsonParserTest extends AbstractParserTest {
     public void testParseEmptySourceRejectsNullOutput() {
         JsonParser json = (JsonParser) parser;
 
-        assertThrows(IllegalArgumentException.class, () -> json.parse("", JsonDeserConfig.create(), (Object[]) null));
-        assertThrows(IllegalArgumentException.class, () -> json.parse("", JsonDeserConfig.create(), (List<?>) null));
-        assertThrows(IllegalArgumentException.class, () -> json.parse("", JsonDeserConfig.create(), (Map<?, ?>) null));
+        assertThrows(IllegalArgumentException.class, () -> json.parseInto("", JsonDeserConfig.create(), (Object[]) null));
+        assertThrows(IllegalArgumentException.class, () -> json.parseInto("", JsonDeserConfig.create(), (List<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> json.parseInto("", JsonDeserConfig.create(), (Map<?, ?>) null));
+    }
+
+    @Test
+    public void testParseIntoImmutableDestinationThrows() {
+        JsonParser json = (JsonParser) parser;
+
+        assertThrows(UnsupportedOperationException.class, () -> json.parseInto("[\"a\"]", ImmutableList.of("z")));
+        assertThrows(UnsupportedOperationException.class, () -> json.parseInto("{\"a\":1}", ImmutableMap.of("z", 0)));
+        json.parseInto("", ImmutableList.of("z"));
+        json.parseInto((String) null, ImmutableMap.of("z", 0));
     }
 
     @Test

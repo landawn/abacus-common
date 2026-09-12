@@ -60,6 +60,32 @@ import com.landawn.abacus.util.function.Supplier;
 
 public class AbstractByteStreamTest extends TestBase {
 
+    @Test
+    public void testScanInitializesOnlyAfterSuccessfulSourceRead() {
+        final IllegalStateException failure = new IllegalStateException("first read failed");
+        final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger accumulatorCalls = new java.util.concurrent.atomic.AtomicInteger();
+
+        try (ByteStream stream = ByteStream.of(new byte[] { 1, 2, 3 }).map(value -> {
+            if (attempts.getAndIncrement() == 0) {
+                throw failure;
+            }
+            return value;
+        }).scan((left, right) -> {
+            accumulatorCalls.incrementAndGet();
+            return (byte) (left + right);
+        })) {
+            final com.landawn.abacus.util.ByteIterator iter = stream.iterator();
+            org.junit.jupiter.api.Assertions.assertSame(failure,
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextByte));
+            org.junit.jupiter.api.Assertions.assertEquals((byte) 2, iter.nextByte());
+            org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
+            org.junit.jupiter.api.Assertions.assertEquals((byte) 5, iter.nextByte());
+            org.junit.jupiter.api.Assertions.assertEquals(1, accumulatorCalls.get());
+            org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+        }
+    }
+
     private final byte[] testData = { 1, 2, 3, 4, 5 };
     private ByteStream stream;
     private ByteStream stream2;

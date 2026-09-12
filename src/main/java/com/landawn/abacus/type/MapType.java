@@ -19,6 +19,8 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
@@ -61,9 +63,10 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * @param typeClass the concrete {@code Map} implementation class to handle
      * @param keyTypeName the name of the key type parameter
      * @param valueTypeName the name of the value type parameter
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings("rawtypes")
-    MapType(final Class<T> typeClass, final String keyTypeName, final String valueTypeName) {
+    MapType(final Class<T> typeClass, final String keyTypeName, final String valueTypeName) throws IllegalArgumentException {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
 
         declaringName = getTypeName(typeClass.isInterface() ? typeClass : Map.class, keyTypeName, valueTypeName, true);
@@ -196,14 +199,20 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
      *
+     * <p>A {@code null} key is written as the quoted string {@code "null"} (JSON object keys must be strings). Reading
+     * that text back yields the String key {@code "null"} when the key type is {@code String}, and fails (e.g. with a
+     * {@code NumberFormatException}) for other key types; a {@code null} key therefore does not round-trip. Only an
+     * unquoted {@code null} key in the input text (e.g. {@code {null: 1}}) is parsed back to a {@code null} key.</p>
+     *
      * @param x the {@code Map} object to convert, may be {@code null}
-     * @return the map's JSON representation
-     *         or {@code null} if the input is {@code null}
+     * @return the map's JSON representation, or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
-    public String stringOf(final T x) {
+    public String stringOf(final T x) throws RuntimeException {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.isEmpty()) {
@@ -229,11 +238,19 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      *
      * @param str the JSON string to parse, may be {@code null} or blank
      * @return the parsed {@code Map} object, or {@code null} if the input is {@code null} or blank
+     * @throws ParsingException if {@code str} is not a well-formed JSON object text
+     * @throws IllegalArgumentException if the map class cannot be instantiated (an interface without a known implementation, an abstract class, or a
+     *         class without an accessible no-arg constructor)
+     * @throws NumberFormatException if a key in the text cannot be converted to a numeric declared key type; a JSON array text such as {@code "[]"}
+     *         is read as one key, so it fails this way for {@code Map<Integer, String>} and as a {@code ParsingException} for {@code Map<String,
+     *         Integer>}
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(Map)
      */
+    @MayReturnNull
     @Override
-    public T valueOf(final String str) {
+    public T valueOf(final String str) throws ParsingException, IllegalArgumentException, NumberFormatException, RuntimeException {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if ("{}".equals(str)) {
@@ -248,6 +265,14 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * in the form {@code {key1:value1, key2:value2}}, with each key and value rendered by its own type's {@code appendTo}.
      * If the map is {@code null}, the literal string {@code "null"} is appended.
      * <p>
+     * Each key and each value is appended by its declared handler. When a declared handler is {@code Object} the
+     * handler of that entry half's runtime class is used instead, exactly as {@code AbstractTupleType.appendElement} -
+     * the slot writer the Pair/Triple/Tuple, {@code Map.Entry} and optional handlers use - resolves a slot:
+     * {@code ObjectType} has no {@code appendTo} of its own, so it would otherwise fall back to {@code stringOf}, i.e.
+     * the JSON form. A map, collection or bean key or value therefore keeps the {@code toString()}-style form
+     * ({@code {k:{a:1}}}, not {@code {k:{"a": 1}}}), matching what the same value appends as when it is not in a map.
+     * A {@code null} key or value is appended as the literal {@code null}.
+     * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
      * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
@@ -255,7 +280,9 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      *
      * @param appendable the target to write to
      * @param x the {@code Map} to append, may be {@code null}
-     * @throws IOException if an I/O error occurs while appending
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -268,7 +295,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public void appendTo(final Appendable appendable, final T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -286,7 +313,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
                 if (entry.getKey() == null) {
                     appendable.append(NULL_STRING);
                 } else {
-                    keyType.appendTo(appendable, entry.getKey());
+                    AbstractTupleType.appendElement(appendable, keyType, entry.getKey());
                 }
 
                 appendable.append(SK._COLON);
@@ -294,7 +321,7 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
                 if (entry.getValue() == null) {
                     appendable.append(NULL_STRING);
                 } else {
-                    valueType.appendTo(appendable, entry.getValue());
+                    AbstractTupleType.appendElement(appendable, valueType, entry.getValue());
                 }
             }
 
@@ -310,8 +337,10 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
      * @param valueTypeName the name of the value type
      * @param isDeclaringName {@code true} to use declaring (simple) names; {@code false} for canonical names
      * @return the formatted type name string, e.g. {@code "Map<String, Integer>"}
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName)
+            throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + SK.COMMA_SPACE
                     + TypeFactory.getType(valueTypeName).declaringName() + SK.GREATER_THAN;

@@ -24,7 +24,8 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.stream.DoubleStream;
 
 /**
- * A specialized iterator for primitive double values that extends {@code ImmutableIterator<Double>}.
+ * A specialized iterator for primitive double values that does not support element removal
+ * ({@link #remove()} always throws {@link UnsupportedOperationException}).
  * This class provides efficient iteration over double values without boxing overhead.
  *
  * <p>DoubleIterator is particularly useful when working with large collections of primitive
@@ -61,7 +62,7 @@ import com.landawn.abacus.util.stream.DoubleStream;
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
@@ -84,8 +85,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if this iterator has no remaining element
+         */
         @Override
-        public double nextDouble() {
+        public double nextDouble() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
@@ -171,8 +176,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
                 return cursor < toIndex;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -210,9 +219,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * });
      * }</pre>
      *
+     * <p>The returned iterator initializes its source on its first traversal operation. If the supplier returns null, initialization throws IllegalStateException; a RuntimeException or Error from initialization is cached and rethrown by subsequent traversal operations.</p>
+     *
      * @param iteratorSupplier a {@link Supplier} that provides the {@code DoubleIterator} when needed
      * @return a lazily initialized {@code DoubleIterator}
-     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static DoubleIterator defer(final Supplier<? extends DoubleIterator> iteratorSupplier) throws IllegalArgumentException {
@@ -237,7 +247,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
                 return iter.nextDouble();
             }
 
-            private void init() {
+            /**
+             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null}
+             */
+            private void init() throws IllegalStateException {
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
@@ -301,7 +314,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Creates a {@code DoubleIterator} that generates values while the {@code hasNext} condition
      * returns {@code true}. The {@code hasNext} supplier is called at most once per element;
-     * its result is cached until the next call to {@code nextDouble()}.
+     * its result is cached until the next call to {@code nextDouble()}. Once {@code hasNext} has returned
+     * {@code false} the iterator is permanently exhausted: the condition is never re-evaluated, so the
+     * iterator does not resume even if the state it inspects changes later.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -334,8 +349,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
                 return hasNextValue;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -363,7 +382,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      */
     @Deprecated
     @Override
-    public Double next() {
+    public Double next() throws NoSuchElementException {
         return nextDouble();
     }
 
@@ -380,7 +399,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * @return the next double value
      * @throws NoSuchElementException if the iteration has no more elements
      */
-    public abstract double nextDouble();
+    public abstract double nextDouble() throws NoSuchElementException;
 
     /**
      * Returns a new {@code DoubleIterator} that skips the first {@code n} elements.
@@ -409,6 +428,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
         return new DoubleIterator() {
             private boolean skipped = false;
+            private long remaining = n;
 
             @Override
             public boolean hasNext() {
@@ -419,8 +439,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -429,10 +453,9 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
             }
 
             private void skip() {
-                long idx = 0;
-
-                while (idx++ < n && iter.hasNext()) {
+                while (remaining > 0 && iter.hasNext()) {
                     iter.nextDouble();
+                    remaining--;
                 }
 
                 skipped = true;
@@ -474,14 +497,19 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
                 return cnt > 0 && iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final double result = iter.nextDouble();
                 cnt--;
-                return iter.nextDouble();
+                return result;
             }
         };
     }
@@ -527,8 +555,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
                 return hasNextValue;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNextValue && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -594,9 +626,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
     /**
      * Converts this iterator to a {@link DoubleStream}.
      *
-     * <p><b>Note:</b> The returned stream is backed by this iterator. Consuming the stream
-     * will consume the iterator, and vice versa. After the stream is consumed, this iterator
-     * will be exhausted.</p>
+     * <p>The stream shares this iterator's traversal position and consumes elements as needed.
+     * Operations that consume all remaining elements exhaust this iterator; short-circuiting
+     * operations may leave elements unconsumed. Do not access this iterator independently
+     * while the stream is consuming it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -643,10 +676,11 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * // Prints indices 100, 101, 102 with corresponding values
      * }</pre>
      *
+     * <p>The returned iterator throws ArithmeticException when traversal would assign an index greater than Long.MAX_VALUE.</p>
+     *
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedDouble} objects with indices starting at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative.
-     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
     public ObjIterator<IndexedDouble> indexed(final long startIndex) throws IllegalArgumentException {
@@ -663,8 +697,13 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws ArithmeticException if an element remains after index {@link Long#MAX_VALUE} has already been assigned
+             * @throws NoSuchElementException if the source iterator has no remaining element
+             */
             @Override
-            public IndexedDouble next() {
+            public IndexedDouble next() throws ArithmeticException, NoSuchElementException {
                 if (indexOverflow) {
                     if (iter.hasNext()) {
                         throw new ArithmeticException("long overflow");
@@ -699,13 +738,13 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * }</pre>
      *
      * @param action the action to perform on each element
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws NullPointerException if {@code action} is {@code null}, as specified by {@link java.util.Iterator#forEachRemaining(java.util.function.Consumer)}.
      * @deprecated use {@link #foreachRemaining(Throwables.DoubleConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Double> action) throws IllegalArgumentException {
-        N.checkArgNotNull(action, cs.action);
+    public void forEachRemaining(final java.util.function.Consumer<? super Double> action) throws NullPointerException {
+        N.requireNonNull(action, cs.action);
 
         super.forEachRemaining(action);
     }
@@ -722,10 +761,10 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each element
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.DoubleConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachRemaining(final Throwables.DoubleConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);//NOSONAR
 
         while (hasNext()) {
@@ -746,12 +785,12 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      *
      * @param <E> the type of exception the action may throw
      * @param action the action to perform on each (index, value) pair
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
-     * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if {@code action} throws while processing a remaining element and its index
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntDoubleConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachIndexed(final Throwables.IntDoubleConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         N.checkArgNotNull(action, cs.action);
 
         int idx = 0;

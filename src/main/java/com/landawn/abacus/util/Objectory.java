@@ -88,8 +88,21 @@ public final class Objectory {
 
     /**
      * The default buffer size used by the {@code char[]}, {@code byte[]}, {@link StringBuilder} and
-     * {@link ByteArrayOutputStream} factories, derived from the available heap and clamped to
-     * {@code [16 KB, 128 KB]}. Only buffers of exactly this length are eligible for pooling.
+     * {@link ByteArrayOutputStream} factories. Only buffers of exactly this length are eligible for pooling.
+     *
+     * <p><b>Units.</b> The expression below is {@code clamp(IOUtil.MAX_MEMORY_IN_MB, 16 * KB, 128 * KB)}:
+     * {@link IOUtil#MAX_MEMORY_IN_MB} is a megabyte count, but it is used here as a raw scaling number
+     * rather than as a byte count, so the result is one byte of buffer per megabyte of maximum heap. In
+     * practice the 16 KB floor binds for every heap up to and including 16 GB; above that the value scales
+     * linearly (a 32 GB heap gives 32 KB, a 64 GB heap gives 64 KB) and it saturates at the 128 KB ceiling
+     * from 128 GB up.
+     *
+     * <p>The expression is kept as it is deliberately. Multiplying the heap figure by {@code KB} to "repair"
+     * the units would pin the value at the 128 KB ceiling on every machine with a heap of 128 MB or more,
+     * raising the buffers retained by the four pools sized from this constant ({@code POOL_SIZE_FOR_BUFFER}
+     * entries each) from roughly 6 MB to roughly 48 MB, and moving the flush threshold of every
+     * {@link BufferedWriter} and the fast-path cutoff of every {@link BufferedReader} with it. A different
+     * default buffer size should be chosen and measured on its own merits, not derived from this note.
      */
     static final int BUFFER_SIZE = Math.min(Math.max(IOUtil.MAX_MEMORY_IN_MB, KB * 16), 128 * KB);
 
@@ -344,7 +357,7 @@ public final class Objectory {
      * @return an {@code Object[]} of the specified size
      * @throws IllegalArgumentException if {@code size} is negative.
      */
-    public static Object[] createObjectArray(final int size) {
+    public static Object[] createObjectArray(final int size) throws IllegalArgumentException {
         if (size < 0) {
             throw new IllegalArgumentException("The specified array size cannot be negative: " + size);
         }
@@ -704,10 +717,10 @@ public final class Objectory {
      *
      * @param os the {@code OutputStream} to write to
      * @return a {@code BufferedWriter} writing to the specified stream
-     * @throws NullPointerException if {@code os} is {@code null}
+     * @throws IllegalArgumentException if {@code os} is {@code null}
      */
-    public static java.io.BufferedWriter createBufferedWriter(final OutputStream os) {
-        N.requireNonNull(os, "os");
+    public static java.io.BufferedWriter createBufferedWriter(final OutputStream os) throws IllegalArgumentException {
+        N.checkArgNotNull(os, cs.os);
 
         BufferedWriter bw = bufferedWriterPool.poll();
 
@@ -725,8 +738,20 @@ public final class Objectory {
     /**
      * Creates or retrieves a {@link BufferedWriter} that writes to the specified
      * {@link Writer}. If {@code writer} is already a
-     * {@link java.io.BufferedWriter}, it is returned as-is (and will not be
-     * pooled by {@link #recycle(java.io.BufferedWriter)}).
+     * {@link java.io.BufferedWriter}, it is returned as-is, including when it is one of this class's own
+     * pooled writers (anything obtained from {@link #createBufferedWriter()},
+     * {@link #createBufferedJsonWriter()}, {@link #createBufferedXmlWriter()},
+     * {@link #createBufferedCsvWriter()} or any of their {@code OutputStream}/{@code Writer} overloads,
+     * including this method).
+     *
+     * <p><b>A pass-through result is not a second handle.</b> Only a {@link java.io.BufferedWriter} that
+     * this class did not create is exempt from pooling: {@link #recycle(java.io.BufferedWriter)} pools any
+     * of this class's own writers by runtime type and cannot tell that the caller still owns it. Such an
+     * instance must be recycled exactly once in total, through whichever handle owns it; recycling both
+     * handles puts the same instance in the pool twice, and two later borrowers are then handed the same
+     * writer. Test for the pass-through first, as this library does internally, and skip the recycle call
+     * when the argument was already buffered:
+     * {@code final boolean buffered = writer instanceof java.io.BufferedWriter;}.</p>
      *
      * <p>After use, the writer should be recycled using {@link #recycle(java.io.BufferedWriter)}.</p>
      *
@@ -745,10 +770,10 @@ public final class Objectory {
      *
      * @param writer the {@code Writer} to write to
      * @return a {@code BufferedWriter} writing to the specified writer
-     * @throws NullPointerException if {@code writer} is {@code null}
+     * @throws IllegalArgumentException if {@code writer} is {@code null}
      */
-    public static java.io.BufferedWriter createBufferedWriter(final Writer writer) {
-        N.requireNonNull(writer, "writer");
+    public static java.io.BufferedWriter createBufferedWriter(final Writer writer) throws IllegalArgumentException {
+        N.checkArgNotNull(writer, cs.writer);
 
         if (writer instanceof java.io.BufferedWriter) {
             return (java.io.BufferedWriter) writer;
@@ -823,10 +848,10 @@ public final class Objectory {
      *
      * @param os the {@code OutputStream} to write to
      * @return a {@code BufferedXmlWriter} writing to the specified stream
-     * @throws NullPointerException if {@code os} is {@code null}
+     * @throws IllegalArgumentException if {@code os} is {@code null}
      */
-    public static BufferedXmlWriter createBufferedXmlWriter(final OutputStream os) {
-        N.requireNonNull(os, "os");
+    public static BufferedXmlWriter createBufferedXmlWriter(final OutputStream os) throws IllegalArgumentException {
+        N.checkArgNotNull(os, cs.os);
 
         BufferedXmlWriter bw = bufferedXmlWriterPool.poll();
 
@@ -861,10 +886,10 @@ public final class Objectory {
      *
      * @param writer the {@code Writer} to write to
      * @return a {@code BufferedXmlWriter} writing to the specified writer
-     * @throws NullPointerException if {@code writer} is {@code null}
+     * @throws IllegalArgumentException if {@code writer} is {@code null}
      */
-    public static BufferedXmlWriter createBufferedXmlWriter(final Writer writer) {
-        N.requireNonNull(writer, "writer");
+    public static BufferedXmlWriter createBufferedXmlWriter(final Writer writer) throws IllegalArgumentException {
+        N.checkArgNotNull(writer, cs.writer);
 
         BufferedXmlWriter bw = bufferedXmlWriterPool.poll();
 
@@ -933,10 +958,10 @@ public final class Objectory {
      *
      * @param os the {@code OutputStream} to write to
      * @return a {@code BufferedJsonWriter} writing to the specified stream
-     * @throws NullPointerException if {@code os} is {@code null}
+     * @throws IllegalArgumentException if {@code os} is {@code null}
      */
-    public static BufferedJsonWriter createBufferedJsonWriter(final OutputStream os) {
-        N.requireNonNull(os, "os");
+    public static BufferedJsonWriter createBufferedJsonWriter(final OutputStream os) throws IllegalArgumentException {
+        N.checkArgNotNull(os, cs.os);
 
         BufferedJsonWriter bw = bufferedJsonWriterPool.poll();
 
@@ -971,10 +996,10 @@ public final class Objectory {
      *
      * @param writer the {@code Writer} to write to
      * @return a {@code BufferedJsonWriter} writing to the specified writer
-     * @throws NullPointerException if {@code writer} is {@code null}
+     * @throws IllegalArgumentException if {@code writer} is {@code null}
      */
-    public static BufferedJsonWriter createBufferedJsonWriter(final Writer writer) {
-        N.requireNonNull(writer, "writer");
+    public static BufferedJsonWriter createBufferedJsonWriter(final Writer writer) throws IllegalArgumentException {
+        N.checkArgNotNull(writer, cs.writer);
 
         BufferedJsonWriter bw = bufferedJsonWriterPool.poll();
 
@@ -1045,10 +1070,10 @@ public final class Objectory {
      *
      * @param os the {@code OutputStream} to write to
      * @return a {@code BufferedCsvWriter} writing to the specified stream
-     * @throws NullPointerException if {@code os} is {@code null}
+     * @throws IllegalArgumentException if {@code os} is {@code null}
      */
-    public static BufferedCsvWriter createBufferedCsvWriter(final OutputStream os) {
-        N.requireNonNull(os, "os");
+    public static BufferedCsvWriter createBufferedCsvWriter(final OutputStream os) throws IllegalArgumentException {
+        N.checkArgNotNull(os, cs.os);
 
         BufferedCsvWriter bw = CsvUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCsvWriterPool.poll() : bufferedCsvWriterPool.poll();
 
@@ -1083,10 +1108,10 @@ public final class Objectory {
      *
      * @param writer the {@code Writer} to write to
      * @return a {@code BufferedCsvWriter} writing to the specified writer
-     * @throws NullPointerException if {@code writer} is {@code null}
+     * @throws IllegalArgumentException if {@code writer} is {@code null}
      */
-    public static BufferedCsvWriter createBufferedCsvWriter(final Writer writer) {
-        N.requireNonNull(writer, "writer");
+    public static BufferedCsvWriter createBufferedCsvWriter(final Writer writer) throws IllegalArgumentException {
+        N.checkArgNotNull(writer, cs.writer);
 
         BufferedCsvWriter bw = CsvUtil.isBackSlashEscapeCharForWrite() ? backSlashBufferedCsvWriterPool.poll() : bufferedCsvWriterPool.poll();
 
@@ -1123,10 +1148,10 @@ public final class Objectory {
      *
      * @param str the {@code String} to read from
      * @return a {@code BufferedReader} reading from the specified string
-     * @throws NullPointerException if {@code str} is {@code null}
+     * @throws IllegalArgumentException if {@code str} is {@code null}
      */
-    public static java.io.BufferedReader createBufferedReader(final String str) {
-        return createBufferedReader(new java.io.StringReader(N.requireNonNull(str, "str")));
+    public static java.io.BufferedReader createBufferedReader(final String str) throws IllegalArgumentException {
+        return createBufferedReader(new java.io.StringReader(N.checkArgNotNull(str, cs.str)));
     }
 
     /**
@@ -1152,10 +1177,10 @@ public final class Objectory {
      *
      * @param is the {@code InputStream} to read from
      * @return a {@code BufferedReader} reading from the specified stream
-     * @throws NullPointerException if {@code is} is {@code null}
+     * @throws IllegalArgumentException if {@code is} is {@code null}
      */
-    public static java.io.BufferedReader createBufferedReader(final InputStream is) {
-        N.requireNonNull(is, "is");
+    public static java.io.BufferedReader createBufferedReader(final InputStream is) throws IllegalArgumentException {
+        N.checkArgNotNull(is, cs.is);
 
         final BufferedReader br = bufferedReaderPool.poll();
 
@@ -1173,8 +1198,19 @@ public final class Objectory {
     /**
      * Creates or retrieves a {@link BufferedReader} that reads from the
      * specified {@link Reader}. If {@code reader} is already a
-     * {@link java.io.BufferedReader}, it is returned as-is (and will not be
-     * pooled by {@link #recycle(java.io.BufferedReader)}).
+     * {@link java.io.BufferedReader}, it is returned as-is, including when it is one of this class's own
+     * pooled readers (anything obtained from {@link #createBufferedReader(String)},
+     * {@link #createBufferedReader(InputStream)} or this method).
+     *
+     * <p><b>A pass-through result is not a second handle.</b> Only a {@link java.io.BufferedReader} that
+     * this class did not create is exempt from pooling: {@link #recycle(java.io.BufferedReader)} pools any
+     * of this class's own readers by runtime type and cannot tell that the caller still owns it. Recycling
+     * a pass-through result therefore resets the caller's reader, detaching it from its source, and if the
+     * caller recycles it too the same instance is placed in the pool twice and later handed to two
+     * borrowers at once. Such an instance must be recycled exactly once in total, through whichever handle
+     * owns it. Test for the pass-through first, as this library does internally, and skip the recycle call
+     * when the argument was already buffered:
+     * {@code final boolean buffered = reader instanceof java.io.BufferedReader;}.</p>
      *
      * <p>After use, the reader should be recycled using {@link #recycle(java.io.BufferedReader)}.</p>
      *
@@ -1193,10 +1229,10 @@ public final class Objectory {
      *
      * @param reader the {@code Reader} to read from
      * @return a {@code BufferedReader} reading from the specified reader
-     * @throws NullPointerException if {@code reader} is {@code null}
+     * @throws IllegalArgumentException if {@code reader} is {@code null}
      */
-    public static java.io.BufferedReader createBufferedReader(final Reader reader) {
-        N.requireNonNull(reader, "reader");
+    public static java.io.BufferedReader createBufferedReader(final Reader reader) throws IllegalArgumentException {
+        N.checkArgNotNull(reader, cs.reader);
 
         if (reader instanceof java.io.BufferedReader) {
             return (java.io.BufferedReader) reader;
@@ -1396,8 +1432,9 @@ public final class Objectory {
     /**
      * Returns a {@code char[]} buffer to the object pool for reuse.
      * Only arrays whose length is exactly the internal default buffer size are
-     * pooled; a {@code null} array or any other length is silently ignored. Accepted
-     * buffers are filled with {@code '\0'} before they become available for reuse.
+     * pooled; a {@code null} array or any other length is silently ignored. An
+     * eligible buffer is filled with {@code '\0'} before it is offered to the pool,
+     * whether or not the pool has room to accept it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1429,8 +1466,9 @@ public final class Objectory {
     /**
      * Returns a {@code byte[]} buffer to the object pool for reuse.
      * Only arrays whose length is exactly the internal default buffer size are
-     * pooled; a {@code null} array or any other length is silently ignored. Accepted
-     * buffers are zero-filled before they become available for reuse.
+     * pooled; a {@code null} array or any other length is silently ignored. An
+     * eligible buffer is zero-filled before it is offered to the pool, whether or
+     * not the pool has room to accept it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1489,7 +1527,7 @@ public final class Objectory {
 
     /**
      * Returns a {@link ByteArrayOutputStream} to the object pool for reuse.
-     * The stream's valid bytes are zeroed and the stream is reset before it is added to the pool. A {@code null}
+     * The stream's whole backing array is zeroed and the stream is reset before it is added to the pool. A {@code null}
      * stream, a stream whose capacity exceeds the internal default buffer size,
      * or a stream offered when the pool is already full is silently ignored
      * (not pooled).
@@ -1514,9 +1552,12 @@ public final class Objectory {
         }
 
         if (byteArrayOutputStreamPool.size() < POOL_SIZE_FOR_BUFFER) {
-            // ByteArrayOutputStream.array() exposes the backing storage. Clear valid data before
-            // reset/pooling so the next borrower cannot observe the previous borrower's bytes.
-            Arrays.fill(os.array(), 0, os.size(), (byte) 0);
+            // ByteArrayOutputStream.array() exposes the whole backing storage, so the next borrower can read
+            // past size(). size() is not an upper bound on what this borrower wrote: reset() zeroes only the
+            // count, and array() hands out the buffer for direct writes. Clearing just [0, size()) therefore
+            // leaves a payload behind whenever either happened (write 1 KB, reset(), write 10, recycle ->
+            // 990 bytes survive). Wipe the whole array (capacity() <= BUFFER_SIZE on this path) before pooling.
+            Arrays.fill(os.array(), (byte) 0);
             os.reset();
             byteArrayOutputStreamPool.offer(os);
         }
@@ -1540,16 +1581,16 @@ public final class Objectory {
      * }</pre>
      *
      * @param bw the BufferedXmlWriter to recycle; may be {@code null}
-     * @throws UncheckedIOException if an I/O error occurs while flushing the buffer
+     * @throws UncheckedIOException if flushing buffered characters to the underlying writer before recycling fails
      * @see #createBufferedXmlWriter()
      */
-    public static void recycle(final BufferedXmlWriter bw) {
+    public static void recycle(final BufferedXmlWriter bw) throws UncheckedIOException {
         if (bw == null) {
             return;
         }
 
         try {
-            bw.flushBufferToWriter();
+            bw.flushBufferToDestination();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -1576,16 +1617,16 @@ public final class Objectory {
      * }</pre>
      *
      * @param bw the BufferedJsonWriter to recycle; may be {@code null}
-     * @throws UncheckedIOException if an I/O error occurs while flushing the buffer
+     * @throws UncheckedIOException if flushing buffered characters to the underlying writer before recycling fails
      * @see #createBufferedJsonWriter()
      */
-    public static void recycle(final BufferedJsonWriter bw) {
+    public static void recycle(final BufferedJsonWriter bw) throws UncheckedIOException {
         if (bw == null) {
             return;
         }
 
         try {
-            bw.flushBufferToWriter();
+            bw.flushBufferToDestination();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -1613,16 +1654,16 @@ public final class Objectory {
      * }</pre>
      *
      * @param bw the BufferedCsvWriter to recycle; may be {@code null}
-     * @throws UncheckedIOException if an I/O error occurs while flushing the buffer
+     * @throws UncheckedIOException if flushing buffered characters to the underlying writer before recycling fails
      * @see #createBufferedCsvWriter()
      */
-    public static void recycle(final BufferedCsvWriter bw) {
+    public static void recycle(final BufferedCsvWriter bw) throws UncheckedIOException {
         if (bw == null) {
             return;
         }
 
         try {
-            bw.flushBufferToWriter();
+            bw.flushBufferToDestination();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -1659,10 +1700,10 @@ public final class Objectory {
      * }</pre>
      *
      * @param writer the {@code BufferedWriter} to recycle; may be {@code null}
-     * @throws UncheckedIOException if an I/O error occurs while flushing the buffer
+     * @throws UncheckedIOException if flushing buffered characters to the underlying writer before recycling fails
      * @see #createBufferedWriter()
      */
-    public static void recycle(final java.io.BufferedWriter writer) {
+    public static void recycle(final java.io.BufferedWriter writer) throws UncheckedIOException {
         if (writer instanceof BufferedJsonWriter) {
             recycle((BufferedJsonWriter) writer);
         } else if (writer instanceof BufferedXmlWriter) {
@@ -1671,7 +1712,7 @@ public final class Objectory {
             recycle((BufferedCsvWriter) writer);
         } else if (writer instanceof BufferedWriter bw) {
             try {
-                bw.flushBufferToWriter();
+                bw.flushBufferToDestination();
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }

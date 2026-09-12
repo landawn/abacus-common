@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import java.util.List;
 
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Sheet;
@@ -55,9 +56,10 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * @param rowKeyTypeName the type name for row keys
      * @param columnKeyTypeName the type name for column keys
      * @param elementTypeName the type name for values/elements
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    SheetType(final String rowKeyTypeName, final String columnKeyTypeName, final String elementTypeName) {
+    SheetType(final String rowKeyTypeName, final String columnKeyTypeName, final String elementTypeName) throws IllegalArgumentException {
         super(getTypeName(Sheet.class, rowKeyTypeName, columnKeyTypeName, elementTypeName, false));
 
         declaringName = getTypeName(Sheet.class, rowKeyTypeName, columnKeyTypeName, elementTypeName, true);
@@ -199,11 +201,12 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      *
      * @param x the Sheet to convert to string
      * @return the JSON string representation of the sheet, or {@code null} if the input is null
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final Sheet<R, C, E> x) {
+    public String stringOf(final Sheet<R, C, E> x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(x, Utils.jsc);
     }
 
@@ -229,11 +232,13 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * @param str the JSON string to parse
      * @return the parsed Sheet object with its declared row, column, and element types preserved,
      *         or {@code null} if the input string is {@code null} or blank
+     * @throws ParsingException if the nonempty input has invalid JSON syntax or does not match the target type.
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(Sheet)
      */
     @Override
-    public Sheet<R, C, E> valueOf(final String str) {
+    public Sheet<R, C, E> valueOf(final String str) throws ParsingException, RuntimeException {
         return Strings.isBlank(str) ? null : Utils.jsonParser.deserialize(str, this);
     }
 
@@ -248,9 +253,11 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * @param elementTypeName the type name for values/elements
      * @param isDeclaringName whether to use declaring names (true) or full names (false)
      * @return the formatted type name string
+     * @throws NullPointerException if {@code typeClass} is {@code null}.
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     protected static String getTypeName(final Class<?> typeClass, final String rowKeyTypeName, final String columnKeyTypeName, final String elementTypeName,
-            final boolean isDeclaringName) {
+            final boolean isDeclaringName) throws NullPointerException, IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(rowKeyTypeName).declaringName() + SK.COMMA_SPACE
                     + TypeFactory.getType(columnKeyTypeName).declaringName() + SK.COMMA_SPACE + TypeFactory.getType(elementTypeName).declaringName()

@@ -16,6 +16,10 @@
 
 package com.landawn.abacus.util;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -189,7 +193,9 @@ import com.landawn.abacus.util.stream.ShortStream;
  * <ul>
  *   <li><b>Serializable:</b> Implements {@link java.io.Serializable}</li>
  *   <li><b>Compatibility:</b> A serialVersionUID identifies the class, but compatibility still depends on future field changes</li>
- *   <li><b>Format:</b> Default Java serialization includes the backing array, including unused capacity</li>
+ *   <li><b>Format:</b> A custom {@code writeObject} writes only the elements in
+ *       {@code [0, size())}, so spare capacity is never emitted; {@code readObject} rejects a stream whose
+ *       {@code size} does not fit its {@code elementData}</li>
  * </ul>
  *
  * <p><b>Integration with Collections Framework:</b>
@@ -356,7 +362,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IllegalArgumentException if the specified initial capacity is negative.
      * @throws OutOfMemoryError if the requested array size exceeds the maximum array size
      */
-    public ShortList(final int initialCapacity) throws IllegalArgumentException {
+    public ShortList(final int initialCapacity) throws IllegalArgumentException, OutOfMemoryError {
         N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
 
         elementData = initialCapacity == 0 ? N.EMPTY_SHORT_ARRAY : new short[initialCapacity];
@@ -377,10 +383,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * }</pre>
      *
      * @param a the array to be used as the backing array for this list.
-     * @throws NullPointerException if the specified array is {@code null}
+     * @throws IllegalArgumentException if the specified array is {@code null}
      */
-    public ShortList(final short[] a) {
-        this(N.requireNonNull(a), a.length);
+    public ShortList(final short[] a) throws IllegalArgumentException {
+        this(N.checkArgNotNull(a, cs.a), a.length);
     }
 
     /**
@@ -399,10 +405,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param a the array to be used as the backing array for this list.
      * @param size the number of elements in the list. Must be between 0 and a.length (inclusive).
-     * @throws NullPointerException if {@code a} is {@code null}
-     * @throws IndexOutOfBoundsException if size is negative or greater than a.length
+     * @throws IllegalArgumentException if {@code size} is negative, or if {@code a} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code size} is greater than the array length
      */
-    public ShortList(final short[] a, final int size) throws IndexOutOfBoundsException {
+    public ShortList(final short[] a, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(a, cs.a);
         N.checkFromIndexSize(0, size, a.length);
 
         elementData = a;
@@ -448,11 +455,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param size the number of elements from the array to include in the list.
      *             Must be between 0 and the array length (inclusive).
      * @return a new ShortList backed by the specified array with the given logical size
-     * @throws IndexOutOfBoundsException if {@code size} is negative or greater than the array length
+     * @throws IllegalArgumentException if {@code size} is negative
+     * @throws IndexOutOfBoundsException if {@code size} is greater than the array length
      * @see #of(short...)
      * @see #copyOf(short[], int, int)
      */
-    public static ShortList of(final short[] a, final int size) throws IndexOutOfBoundsException {
+    public static ShortList of(final short[] a, final int size) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkFromIndexSize(0, size, N.len(a));
 
         return new ShortList(N.nullToEmpty(a), size);
@@ -502,11 +510,13 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param fromIndex the initial index of the range to be copied, inclusive.
      * @param toIndex the final index of the range to be copied, exclusive.
      * @return a new ShortList containing a copy of the elements in the specified range
-     * @throws NullPointerException if {@code a} is {@code null}
+     * @throws IllegalArgumentException if {@code a} is {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0} or {@code toIndex > a.length}
      *                                   or {@code fromIndex > toIndex}
      */
-    public static ShortList copyOf(final short[] a, final int fromIndex, final int toIndex) {
+    public static ShortList copyOf(final short[] a, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(a, cs.a);
+
         return of(N.copyOfRange(a, fromIndex, toIndex));
     }
 
@@ -550,7 +560,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return a new ShortList containing the sequence of values
      * @throws IllegalArgumentException if by is zero.
      */
-    public static ShortList range(final short startInclusive, final short endExclusive, final short by) {
+    public static ShortList range(final short startInclusive, final short endExclusive, final short by) throws IllegalArgumentException {
         return of(Array.range(startInclusive, endExclusive, by));
     }
 
@@ -591,7 +601,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return a new ShortList containing the sequence of values including both endpoints
      * @throws IllegalArgumentException if by is zero.
      */
-    public static ShortList rangeClosed(final short startInclusive, final short endInclusive, final short by) {
+    public static ShortList rangeClosed(final short startInclusive, final short endInclusive, final short by) throws IllegalArgumentException {
         return of(Array.rangeClosed(startInclusive, endInclusive, by));
     }
 
@@ -610,7 +620,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return a new ShortList containing the element repeated len times
      * @throws IllegalArgumentException if len is negative.
      */
-    public static ShortList repeat(final short element, final int len) {
+    public static ShortList repeat(final short element, final int len) throws IllegalArgumentException {
         return of(Array.repeat(element, len));
     }
 
@@ -626,11 +636,16 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * ShortList.random(-1);         // throws NegativeArraySizeException (len < 0)
      * }</pre>
      *
+     * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
+     * deliberate, but it is roughly two orders of magnitude slower than
+     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
+     * and wrap it with {@code of(..)}.</p>
+     *
      * @param len the number of random elements to generate. Must be non-negative.
      * @return a new ShortList containing len random short values
      * @throws NegativeArraySizeException if len is negative
      */
-    public static ShortList random(final int len) {
+    public static ShortList random(final int len) throws NegativeArraySizeException {
         final short[] a = new short[len];
 
         for (int i = 0; i < len; i++) {
@@ -679,7 +694,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
-    public short get(final int index) {
+    public short get(final int index) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         return elementData[index];
@@ -701,7 +716,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException if {@code index < 0 || index >= size()}
      */
-    public short set(final int index, final short e) {
+    public short set(final int index, final short e) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         final short oldValue = elementData[index];
@@ -756,7 +771,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
      */
-    public void add(final int index, final short e) {
+    public void add(final int index, final short e) throws IndexOutOfBoundsException {
         rangeCheckForAdd(index);
 
         ensureCapacity(size + 1);
@@ -809,7 +824,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      */
     @Override
-    public boolean addAll(final int index, final ShortList c) {
+    public boolean addAll(final int index, final ShortList c) throws IndexOutOfBoundsException {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(c)) {
@@ -857,7 +872,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
      */
     @Override
-    public boolean addAll(final int index, final short[] a) {
+    public boolean addAll(final int index, final short[] a) throws IndexOutOfBoundsException {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(a)) {
@@ -974,7 +989,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * This method compares elements by value, removing every occurrence of any value found in the
      * specified list.
      *
-     * @param c the ShortList containing elements to be removed from this list
+     * @param c the ShortList containing elements to be removed from this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call
      */
     @Override
@@ -991,7 +1006,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * This method compares elements by value, removing every occurrence of any value found in the
      * specified array.
      *
-     * @param a the array containing elements to be removed from this list
+     * @param a the array containing elements to be removed from this list. If {@code null} or empty, this list remains unchanged.
      * @return {@code true} if this list changed as a result of the call
      */
     @Override
@@ -1018,6 +1033,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * // list now contains: [1, 3, 5]
      * }</pre>
      *
+     * <p>The list is left unchanged if {@code p} throws: no element is moved until every
+     * {@code p.test(..)} call has returned. Nothing is allocated when no element matches.</p>
+     *
      * @param p the predicate which returns {@code true} for elements to be removed.
      * @return {@code true} if any elements were removed; {@code false} if the list was unchanged
      * @throws IllegalArgumentException if {@code p} is {@code null}.
@@ -1025,21 +1043,39 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     public boolean removeIf(final ShortPredicate p) throws IllegalArgumentException {
         N.checkArgNotNull(p, cs.p);
 
-        final ShortList tmp = new ShortList(size());
+        // Split into locate-then-compact so the list is left untouched if the predicate throws:
+        // no element is moved until every p.test(..) call has returned. Nothing is allocated
+        // unless at least one element matches, and the marker set costs one bit per element.
+        int first = 0;
 
-        for (int i = 0; i < size; i++) {
-            if (!p.test(elementData[i])) {
-                tmp.add(elementData[i]);
-            }
+        while (first < size && !p.test(elementData[first])) {
+            first++;
         }
 
-        if (tmp.size() == size()) {
+        if (first == size) {
             return false;
         }
 
-        N.copy(tmp.elementData, 0, elementData, 0, tmp.size());
-        N.fill(elementData, tmp.size(), size, (short) 0);
-        size = tmp.size;
+        // bit k of removed[] corresponds to element (first + k); bit 0 is the match just found
+        final long[] removed = new long[((size - first) >> 6) + 1];
+        removed[0] |= 1L;
+
+        for (int i = first + 1; i < size; i++) {
+            if (p.test(elementData[i])) {
+                removed[(i - first) >> 6] |= 1L << (i - first);
+            }
+        }
+
+        int w = first;
+
+        for (int i = first + 1; i < size; i++) {
+            if ((removed[(i - first) >> 6] & (1L << (i - first))) == 0) {
+                elementData[w++] = elementData[i];
+            }
+        }
+
+        N.fill(elementData, w, size, (short) 0);
+        size = w;
 
         return true;
     }
@@ -1095,7 +1131,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * <p>If the specified list is {@code null} or empty, all elements are removed from this list.</p>
      *
-     * @param c the ShortList containing elements to be retained in this list
+     * @param c the ShortList containing elements to be retained in this list.
+     *          If {@code null} or empty, all elements of this list are removed
      * @return {@code true} if this list changed as a result of the call
      */
     @Override
@@ -1116,7 +1153,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * <p>If the specified array is {@code null} or empty, all elements are removed from this list.</p>
      *
-     * @param a the array containing elements to be retained in this list
+     * @param a the array containing elements to be retained in this list.
+     *          If {@code null} or empty, all elements of this list are removed
      * @return {@code true} if this list changed as a result of the call
      */
     @Override
@@ -1142,7 +1180,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
         int w = 0;
 
-        if (c.size() > 3 && size() > 9) {
+        // Compaction must not change membership when another list wraps the same array.
+        if (elementData == c.elementData || needToSet(size(), c.size())) {
             final Set<Short> set = c.toSet();
 
             for (int i = 0; i < size; i++) {
@@ -1191,7 +1230,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IndexOutOfBoundsException if the index is out of range ({@code index < 0 || index >= size()})
      * @see #removeAllAt(int...)
      */
-    public short removeAt(final int index) {
+    public short removeAt(final int index) throws IndexOutOfBoundsException {
         rangeCheck(index);
 
         final short oldValue = elementData[index];
@@ -1213,7 +1252,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see #removeAt(int)
      */
     @Override
-    public void removeAllAt(final int... indices) {
+    public void removeAllAt(final int... indices) throws IndexOutOfBoundsException {
         if (N.isEmpty(indices)) {
             return;
         }
@@ -1274,7 +1313,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *         would cause elements to be moved outside the list bounds
      */
     @Override
-    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) {
+    public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
         N.checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
 
         N.moveRange(elementData, fromIndex, toIndex, newPositionAfterMove);
@@ -1293,7 +1332,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
-    public void replaceRange(final int fromIndex, final int toIndex, final ShortList replacement) throws IndexOutOfBoundsException {
+    public void replaceRange(final int fromIndex, final int toIndex, final ShortList replacement) throws IndexOutOfBoundsException, OutOfMemoryError {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
@@ -1306,13 +1345,15 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.size();
 
         if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError("Required capacity is too large: " + newSizeLong + " > " + MAX_ARRAY_SIZE);
         }
 
         final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
-            elementData = N.copyOf(elementData, newSize);
+            // Grow with the same amortized policy ensureCapacity uses. Sizing the array to exactly
+            // newSize would make a loop of growing replaceRange calls reallocate and copy every time.
+            elementData = N.copyOf(elementData, calNewCapacity(newSize, elementData.length));
         }
 
         if (toIndex - fromIndex != replacement.size() && toIndex != size) {
@@ -1341,7 +1382,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws OutOfMemoryError if the resulting size would exceed the maximum supported array size
      */
     @Override
-    public void replaceRange(final int fromIndex, final int toIndex, final short[] replacement) throws IndexOutOfBoundsException {
+    public void replaceRange(final int fromIndex, final int toIndex, final short[] replacement) throws IndexOutOfBoundsException, OutOfMemoryError {
         N.checkFromToIndex(fromIndex, toIndex, size());
 
         if (N.isEmpty(replacement)) {
@@ -1354,13 +1395,15 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         final long newSizeLong = (long) size - (long) (toIndex - fromIndex) + replacement.length;
 
         if (newSizeLong < 0 || newSizeLong > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError("Required capacity is too large: " + newSizeLong + " > " + MAX_ARRAY_SIZE);
         }
 
         final int newSize = (int) newSizeLong;
 
         if (elementData.length < newSize) {
-            elementData = N.copyOf(elementData, newSize);
+            // Grow with the same amortized policy ensureCapacity uses. Sizing the array to exactly
+            // newSize would make a loop of growing replaceRange calls reallocate and copy every time.
+            elementData = N.copyOf(elementData, calNewCapacity(newSize, elementData.length));
         }
 
         if (toIndex - fromIndex != replacement.length && toIndex != size) {
@@ -1535,7 +1578,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Returns {@code true} if this list contains any of the elements in the specified ShortList.
      * The operation returns as soon as any match is found.
      *
-     * @param c the ShortList to be checked for containment in this list
+     * @param c the ShortList to be checked for containment in this list.
+     *          If {@code null} or empty, {@code false} is returned
      * @return {@code true} if this list contains any element from the specified list
      */
     @Override
@@ -1551,7 +1595,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Returns {@code true} if this list contains any of the elements in the specified array.
      * The operation returns as soon as any match is found.
      *
-     * @param a the array to be checked for containment in this list
+     * @param a the array to be checked for containment in this list.
+     *          If {@code null} or empty, {@code false} is returned
      * @return {@code true} if this list contains any element from the specified array
      */
     @Override
@@ -1568,7 +1613,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * present in the specified ShortList. Duplicate values in {@code c} do not require additional
      * occurrences in this list; only value presence is checked.
      *
-     * @param c the ShortList whose distinct values must all be present in this list
+     * @param c the ShortList whose distinct values must all be present in this list.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list contains every distinct element of the specified list
      */
     @Override
@@ -1603,7 +1649,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * present in the specified array. Duplicate values in {@code a} do not require additional
      * occurrences in this list; only value presence is checked.
      *
-     * @param a the array whose distinct values must all be present in this list
+     * @param a the array whose distinct values must all be present in this list.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list contains every distinct element of the specified array
      */
     @Override
@@ -1621,7 +1668,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Returns {@code true} if this list has no elements in common with the specified ShortList.
      * Two lists are disjoint if they share no common elements.
      *
-     * @param c the ShortList to be checked for disjointness with this list
+     * @param c the ShortList to be checked for disjointness with this list.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list has no elements in common with the specified list
      */
     @Override
@@ -1653,7 +1701,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * Returns {@code true} if this list has no elements in common with the specified array.
      * This list and the array are disjoint if they share no common elements.
      *
-     * @param b the array to be checked for disjointness with this list
+     * @param b the array to be checked for disjointness with this list.
+     *          If {@code null} or empty, {@code true} is returned (vacuously)
      * @return {@code true} if this list has no elements in common with the specified array
      */
     @Override
@@ -1686,7 +1735,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param b the list to find common elements with this list
      * @return a new ShortList containing elements present in both this list and the specified list,
      *         considering the minimum number of occurrences in either list.
-     *         Returns an empty list if either list is empty.
+     *         Returns an empty list if the specified list is {@code null} or empty, or if this list is empty.
      * @see #intersection(short[])
      * @see #difference(ShortList)
      * @see #symmetricDifference(ShortList)
@@ -1851,9 +1900,20 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * // - (short)4 appears only in list2, so it remains
      * }</pre>
      *
+     * <p><b>Ordering of the second operand's contributions.</b> Occurrences of equal values are
+     * interchangeable, so when a value survives {@code n} times, those {@code n} occurrences are taken from
+     * that value's <i>earliest</i> positions in the second operand and emitted in index order. This appended
+     * portion is a subsequence of the second operand by value, but the complete result is not necessarily equal to
+     * {@code difference(b)}
+     * followed by {@code b.difference(this)} when the second operand holds duplicates of a partially
+     * cancelled value. For example {@code ShortList.of((short) 2).symmetricDifference(ShortList.of((short) 2, (short) 1, (short) 2))}
+     * returns {@code [2, 1]}, whereas concatenating the two differences would give {@code [1, 2]};
+     * both contain the same elements.</p>
+     *
      * @param b the list to compare with this list for symmetric difference
      * @return a new ShortList containing elements that are present in either this list or the specified list,
-     *         but not in both, considering the number of occurrences
+     *         but not in both, considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty
      * @see #symmetricDifference(short[])
      * @see #difference(ShortList)
      * @see #intersection(ShortList)
@@ -1911,9 +1971,20 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * // - (short)4 appears only in array, so it remains
      * }</pre>
      *
+     * <p><b>Ordering of the second operand's contributions.</b> Occurrences of equal values are
+     * interchangeable, so when a value survives {@code n} times, those {@code n} occurrences are taken from
+     * that value's <i>earliest</i> positions in the second operand and emitted in index order. This appended
+     * portion is a subsequence of the second operand by value, but the complete result is not necessarily equal to
+     * {@code difference(b)}
+     * followed by {@code b.difference(this)} when the second operand holds duplicates of a partially
+     * cancelled value. For example {@code ShortList.of((short) 2).symmetricDifference(ShortList.of((short) 2, (short) 1, (short) 2))}
+     * returns {@code [2, 1]}, whereas concatenating the two differences would give {@code [1, 2]};
+     * both contain the same elements.</p>
+     *
      * @param b the array to compare with this list for symmetric difference
      * @return a new ShortList containing elements that are present in either this list or the specified array,
-     *         but not in both, considering the number of occurrences
+     *         but not in both, considering the number of occurrences.
+     *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty
      * @see #symmetricDifference(ShortList)
      * @see #difference(short[])
      * @see #intersection(short[])
@@ -2054,7 +2125,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param valueToFind the element to search for
      * @param startIndexFromBack the index to start searching backwards from (inclusive).
-     *        Can be size() to search the entire list.
+     *        Any value greater than or equal to {@code size()} is treated as {@code size() - 1};
+     *        if it is negative (or this list is empty), {@code -1} is returned.
      * @return the index of the last occurrence of the element at position &lt;= startIndexFromBack,
      *         or -1 if the element is not found
      */
@@ -2463,7 +2535,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Rotates all elements in this list by the specified distance.
      * After calling rotate(distance), the element at index i will be moved to
-     * index (i + distance) % size.
+     * index {@code Math.floorMod((long) i + distance, size())} when the list is non-empty.
      *
      * <p>Positive values of distance rotate elements towards higher indices (right rotation),
      * while negative values rotate towards lower indices (left rotation).
@@ -2485,6 +2557,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * <p>After shuffling, each permutation of the list elements is equally likely.
      * This method uses the default source of randomness.</p>
+     *
+     * <p>The source is {@link java.util.concurrent.ThreadLocalRandom}, which is <b>not</b>
+     * cryptographically secure. Note that this is a <i>different</i> generator from the one the
+     * {@code random(..)} factories use; call {@link #shuffle(Random)} with a
+     * {@link java.security.SecureRandom} when the permutation must be unpredictable.</p>
+     *
      */
     @Override
     public void shuffle() {
@@ -2521,7 +2599,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IndexOutOfBoundsException if either index is out of range (i &lt; 0 || i &gt;= size() || j &lt; 0 || j &gt;= size())
      */
     @Override
-    public void swap(final int i, final int j) {
+    public void swap(final int i, final int j) throws IndexOutOfBoundsException {
         rangeCheck(i);
         rangeCheck(j);
 
@@ -2566,6 +2644,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * is treated as backward iteration to the beginning of the list (same semantics as
      * {@link #forEach(int, int, ShortConsumer)}).
      *
+     * <p>If the sign of {@code step} contradicts the direction of the range — a positive step with
+     * {@code fromIndex > toIndex}, or a negative step with {@code fromIndex < toIndex} — the result is an
+     * empty list rather than an exception. Only {@code step == 0} is rejected.</p>
+     *
      * @param fromIndex the starting index (inclusive) of the range to copy
      * @param toIndex the ending index (exclusive) of the range to copy; use {@code -1} for backward iteration to index 0
      * @param step the stride between selected indices; must not be zero
@@ -2575,7 +2657,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see N#copyOfRange(short[], int, int, int)
      */
     @Override
-    public ShortList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException {
+    public ShortList copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex < toIndex ? fromIndex : (toIndex == -1 ? 0 : toIndex), Math.max(fromIndex, toIndex));
 
         if (size == 0) {
@@ -2602,15 +2684,14 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @throws IllegalArgumentException if {@code chunkSize <= 0}.
      */
     @Override
-    public List<ShortList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException {
+    public List<ShortList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex);
 
-        final List<short[]> list = N.split(elementData, fromIndex, toIndex, chunkSize);
-        @SuppressWarnings("rawtypes")
-        final List<ShortList> result = (List) list;
+        final List<short[]> arrays = N.split(elementData, fromIndex, toIndex, chunkSize);
+        final List<ShortList> result = new ArrayList<>(arrays.size());
 
-        for (int i = 0, len = list.size(); i < len; i++) {
-            result.set(i, of(list.get(i)));
+        for (final short[] array : arrays) {
+            result.add(of(array));
         }
 
         return result;
@@ -2625,6 +2706,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @return this list instance (for method chaining)
      */
+    @Beta
     @Override
     public ShortList trimToSize() {
         if (elementData.length > size) {
@@ -2751,7 +2833,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param supplier a function that creates a new collection instance with the specified initial capacity
      * @return a new collection containing the boxed elements from the specified range
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
      */
     @Override
     public <C extends Collection<Short>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
@@ -2777,7 +2859,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param supplier a function that creates a new Multiset instance with the specified initial capacity
      * @return a new Multiset containing the boxed elements from the specified range
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
      */
     @Override
     public Multiset<Short> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Short>> supplier)
@@ -2826,6 +2908,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * new ShortList().stream().count();   // returns 0 (empty list)
      * }</pre>
      *
+     * <p>The stream captures the backing array reference and the range endpoints when it is created,
+     * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured
+     * range can be observed by a stream that has not consumed those positions yet. Growing the list
+     * afterwards does not extend the stream, and any operation that reallocates the backing array leaves
+     * the stream reading the old one. Do not modify the list while a stream over it is in flight.</p>
+     *
      * @return a sequential ShortStream over the elements in this list
      */
     public ShortStream stream() {
@@ -2846,6 +2934,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * list.stream(2, 2).count();   // returns 0 (empty range)
      * list.stream(0, 6);           // throws IndexOutOfBoundsException (toIndex > size())
      * }</pre>
+     *
+     * <p>The stream captures the backing array reference and the range endpoints when it is created,
+     * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured
+     * range can be observed by a stream that has not consumed those positions yet. Growing the list
+     * afterwards does not extend the stream, and any operation that reallocates the backing array leaves
+     * the stream reading the old one. Do not modify the list while a stream over it is in flight.</p>
      *
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
@@ -2876,7 +2970,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see #first()
      * @see #getLast()
      */
-    public short getFirst() {
+    public short getFirst() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return elementData[0];
@@ -2900,7 +2994,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see #last()
      * @see #getFirst()
      */
-    public short getLast() {
+    public short getLast() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return elementData[size - 1];
@@ -2941,7 +3035,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @see #addFirst(short)
      */
     public void addLast(final short e) {
-        add(size, e);
+        add(e);
     }
 
     /**
@@ -2959,7 +3053,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return the first short value that was removed from the list
      * @throws NoSuchElementException if the list is empty
      */
-    public short removeFirst() {
+    public short removeFirst() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return removeAt(0);
@@ -2978,7 +3072,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return the last short value that was removed from the list
      * @throws NoSuchElementException if the list is empty
      */
-    public short removeLast() {
+    public short removeLast() throws NoSuchElementException {
         throwNoSuchElementExceptionIfEmpty();
 
         return removeAt(size - 1);
@@ -3037,7 +3131,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     private void ensureCapacity(final int minCapacity) {
         if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
-            throw new OutOfMemoryError();
+            throw new OutOfMemoryError(
+                    "Required capacity is too large: " + (minCapacity < 0 ? "it overflowed the int range" : minCapacity + " > " + MAX_ARRAY_SIZE));
         }
 
         if (N.isEmpty(elementData)) {
@@ -3047,5 +3142,54 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
             elementData = Arrays.copyOf(elementData, newCapacity);
         }
+    }
+
+    /**
+     * Writes this list to the given stream using only the elements in {@code [0, size())}.
+     *
+     * <p>The default serialized form would emit the whole backing array. That is wasteful for a list
+     * whose capacity exceeds its size, and — because {@link #ShortList(short[], int)} and
+     * {@code of(short[], int)} adopt the caller's array without copying — it would also write out
+     * whatever the caller left beyond {@code size()}. This method writes the same two fields under the
+     * same names, so streams stay readable in both directions across this change.</p>
+     *
+     * @param os the stream to write to
+     * @throws IOException if writing the list size or serialized short values to {@code os} fails
+     */
+    @Serial
+    private void writeObject(final ObjectOutputStream os) throws IOException {
+        final ObjectOutputStream.PutField fields = os.putFields();
+
+        fields.put("elementData", size == elementData.length ? elementData : N.copyOfRange(elementData, 0, size));
+        fields.put("size", size);
+
+        os.writeFields();
+    }
+
+    /**
+     * Restores this list from the given stream, rejecting a stream whose {@code size} does not fit its
+     * {@code elementData}.
+     *
+     * <p>Without this check a corrupted or hand-crafted stream would deserialize successfully and then
+     * fail much later with an {@link IndexOutOfBoundsException} from an unrelated method.</p>
+     *
+     * @param is the stream to read from
+     * @throws ClassNotFoundException if the class of a serialized object cannot be found
+     * @throws IOException if reading the serialized fields from {@code is} fails, the stored array is null or not a {@code short[]},
+     *         or the stored size is negative or greater than the array length
+     */
+    @Serial
+    private void readObject(final ObjectInputStream is) throws ClassNotFoundException, IOException {
+        final ObjectInputStream.GetField fields = is.readFields();
+        final Object a = fields.get("elementData", null);
+        final int sz = fields.get("size", 0);
+
+        if (!(a instanceof short[] array) || sz < 0 || sz > array.length) {
+            throw new InvalidObjectException(
+                    "Invalid serialized ShortList: size=" + sz + ", elementData=" + (a == null ? "null" : a.getClass().getSimpleName()));
+        }
+
+        elementData = array;
+        size = sz;
     }
 }

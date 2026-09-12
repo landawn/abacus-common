@@ -163,8 +163,9 @@ public final class BufferedXmlWriter extends CharacterWriter {
      * }</pre>
      *
      * @param os the OutputStream to write to
+     * @throws IllegalArgumentException if {@code os} is {@code null}
      */
-    BufferedXmlWriter(final OutputStream os) {
+    BufferedXmlWriter(final OutputStream os) throws IllegalArgumentException {
         super(os, REPLACEMENT_CHARS);
     }
 
@@ -192,8 +193,9 @@ public final class BufferedXmlWriter extends CharacterWriter {
      * }</pre>
      *
      * @param writer the Writer to write to
+     * @throws NullPointerException if {@code writer} is {@code null}
      */
-    BufferedXmlWriter(final Writer writer) {
+    BufferedXmlWriter(final Writer writer) throws NullPointerException {
         super(writer, REPLACEMENT_CHARS);
     }
 

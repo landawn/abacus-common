@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SK;
 
@@ -80,12 +81,12 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * @param array the array to convert; may be {@code null}
      * @param collClass the class of the collection to create
      *                  (e.g., {@code ArrayList.class}, {@code HashSet.class})
-     * @return the new collection populated with the array elements
-     *         or {@code null} if {@code array} is {@code null}
+     * @return the new collection populated with the array elements, or {@code null} if {@code array} is {@code null}
      * @throws IllegalArgumentException if {@code collClass} cannot be instantiated.
      */
+    @MayReturnNull
     @Override
-    public <E> Collection<E> arrayToCollection(final T array, final Class<?> collClass) {
+    public <E> Collection<E> arrayToCollection(final T array, final Class<?> collClass) throws IllegalArgumentException {
         if (array == null) {
             return null; // NOSONAR
         }
@@ -102,30 +103,33 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * Splits the string representation of an array into its element substrings.
      * <p>
      * If the string is wrapped in a matching pair of square brackets ({@code '['} ... {@code ']'}),
-     * the surrounding brackets are removed first. The remaining content is then split on the
-     * {@code ELEMENT_SEPARATOR}, honoring quoted regions so that a delimiter occurring inside a
-     * single- or double-quoted element is not treated as a separator. As a fallback for
-     * comma-delimited representations, if splitting on {@code ELEMENT_SEPARATOR} yields a single
-     * element but the content contains a comma, the content is re-split on a comma instead.
+     * the surrounding brackets are removed first. The remaining content is split on commas,
+     * honoring quoted regions so that a comma inside a single- or double-quoted element is not a
+     * separator. Structural whitespace surrounding the array and its elements is ignored, and
+     * whitespace-only content produces an empty array. A character consisting of whitespace must
+     * therefore be quoted (for example, {@code [' ']}).
+     * Empty unquoted elements are rejected. Use {@code stringOf}, rather than a human-readable
+     * {@code appendTo} rendering, when characters include commas, quotes, or whitespace.
      * </p>
      *
      * @param str the array string to split, optionally enclosed in {@code []}; must not be {@code null}
      * @return the array of element substrings; quote characters that delimit an individual element
      *         are preserved in that element
      * @throws NullPointerException if {@code str} is {@code null}
+     * @throws IllegalArgumentException if a comma-delimited element contains only whitespace
      */
-    protected static String[] split(final String str) {
+    protected static String[] split(final String str) throws NullPointerException, IllegalArgumentException {
+        final String input = str.strip();
         final String source;
 
-        if (str.length() >= 2 && str.charAt(0) == SK._BRACKET_L && str.charAt(str.length() - 1) == SK._BRACKET_R) {
-            source = str.substring(1, str.length() - 1);
+        if (input.length() >= 2 && input.charAt(0) == SK._BRACKET_L && input.charAt(input.length() - 1) == SK._BRACKET_R) {
+            source = input.substring(1, input.length() - 1).strip();
         } else {
-            source = str;
+            source = input;
         }
 
-        final String[] elements = splitElements(source, ELEMENT_SEPARATOR);
-
-        return (elements.length == 1 && source.indexOf(SK._COMMA) >= 0) ? splitElements(source, String.valueOf(SK._COMMA)) : elements;
+        // Always use the comma itself: choosing a delimiter from the first separator loses mixed-space elements.
+        return source.isEmpty() ? N.EMPTY_STRING_ARRAY : splitElements(source, String.valueOf(SK._COMMA));
     }
 
     /**
@@ -144,8 +148,9 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * @param str the string to split
      * @param delimiter the delimiter to split on
      * @return the array of element substrings separated by unquoted occurrences of {@code delimiter}
+     * @throws IllegalArgumentException if an unquoted element before, between, or after delimiters is empty or contains only whitespace
      */
-    private static String[] splitElements(final String str, final String delimiter) {
+    private static String[] splitElements(final String str, final String delimiter) throws IllegalArgumentException {
         final List<String> result = new ArrayList<>();
         final StringBuilder sb = new StringBuilder();
         char quoteChar = 0;
@@ -156,7 +161,13 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
 
             if (quoteChar == 0) {
                 if (startsWithDelimiter(str, i, delimiter)) {
-                    result.add(sb.toString());
+                    final String element = sb.toString().strip();
+
+                    if (element.isEmpty()) {
+                        throw new IllegalArgumentException("Missing array element at index " + result.size());
+                    }
+
+                    result.add(element);
                     sb.setLength(0);
                     i += delimiter.length() - 1;
                 } else {
@@ -179,7 +190,13 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
             }
         }
 
-        result.add(sb.toString());
+        final String element = sb.toString().strip();
+
+        if (element.isEmpty()) {
+            throw new IllegalArgumentException("Missing array element at index " + result.size());
+        }
+
+        result.add(element);
 
         return result.toArray(new String[result.size()]);
     }

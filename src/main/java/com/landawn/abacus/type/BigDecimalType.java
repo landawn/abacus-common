@@ -106,24 +106,45 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @see #stringOf(BigDecimal)
      */
     @Override
-    public BigDecimal valueOf(final String str) {
+    public BigDecimal valueOf(final String str) throws NumberFormatException {
         return Strings.isEmpty(str) ? null : new BigDecimal(str.trim(), MathContext.UNLIMITED);
     }
 
     /**
      * Parses a sub-sequence of a character array and returns a new {@link java.math.BigDecimal}
      * with unlimited precision ({@link java.math.MathContext#UNLIMITED}).
+     * Leading and trailing whitespace within the range is ignored, using the same rule as
+     * {@link String#trim()}, so a padded value parses exactly as it does through {@link #valueOf(String)}.
      *
      * @param cbuf the character array containing the decimal digits; may be {@code null}
      * @param offset the 0-based start position within {@code cbuf}
      * @param len the number of characters to parse
      * @return a new {@code BigDecimal} constructed from the specified characters,
      *         or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
-     * @throws NumberFormatException if the character sequence cannot be parsed as a valid {@code BigDecimal}
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
+     * @throws NumberFormatException if the character sequence cannot be parsed as a valid {@code BigDecimal},         including a range that contains only whitespace (which trims to the empty string, exactly as         {@code valueOf("   ")} does)
      */
     @Override
-    public BigDecimal valueOf(final char[] cbuf, final int offset, final int len) {
-        return (cbuf == null || len == 0) ? null : new BigDecimal(cbuf, offset, len, MathContext.UNLIMITED);
+    public BigDecimal valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, NumberFormatException {
+        if (cbuf == null || len == 0) {
+            return null;
+        }
+
+        // Same trimming rule as String.trim() (used by valueOf(String)), applied without copying.
+        int from = offset;
+        int to = offset + len;
+
+        while (from < to && cbuf[from] <= ' ') {
+            from++;
+        }
+
+        while (to > from && cbuf[to - 1] <= ' ') {
+            to--;
+        }
+
+        // A whitespace-only range is NOT null: valueOf(String) trims it to "" and rejects it, and so must this
+        // overload, or the same padded text would parse from JSON and throw from XML again.
+        return new BigDecimal(cbuf, from, to - from, MathContext.UNLIMITED);
     }
 
     /**
@@ -133,10 +154,11 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the column containing the decimal value
      * @return the {@code BigDecimal} value at the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public BigDecimal get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public BigDecimal get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getBigDecimal(columnIndex);
     }
 
@@ -147,10 +169,11 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
      * @return the {@code BigDecimal} value in the specified column, or {@code null} if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or {@code columnName} is not found
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public BigDecimal get(final ResultSet rs, final String columnName) throws SQLException {
+    public BigDecimal get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getBigDecimal(columnName);
     }
 
@@ -161,10 +184,11 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @param stmt the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code BigDecimal} value to set; may be {@code null}
-     * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final BigDecimal x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final BigDecimal x) throws NullPointerException, SQLException {
         stmt.setBigDecimal(columnIndex, x);
     }
 
@@ -175,10 +199,11 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @param stmt the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code BigDecimal} value to set; may be {@code null}
-     * @throws SQLException if a database access error occurs or {@code parameterName} is not found
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final BigDecimal x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final BigDecimal x) throws NullPointerException, SQLException {
         stmt.setBigDecimal(parameterName, x);
     }
 
@@ -200,10 +225,11 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code BigDecimal} value to write; may be {@code null}
      * @param config the serialization configuration controlling output format; may be {@code null}
-     * @throws IOException if an I/O error occurs during writing
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final BigDecimal x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final BigDecimal x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             if (config != null && config.isWriteNullNumberAsZero()) {
                 writer.write('0');

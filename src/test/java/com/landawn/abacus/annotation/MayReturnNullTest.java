@@ -19,7 +19,7 @@ import com.landawn.abacus.TestBase;
 
 public class MayReturnNullTest extends TestBase {
 
-    static class TestClass {
+    public static class TestClass {
         @MayReturnNull
         public String findValue() {
             return null;

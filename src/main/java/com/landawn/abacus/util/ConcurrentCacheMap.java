@@ -19,6 +19,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.Internal;
@@ -40,7 +43,13 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * {@code null} keys or values, consistent with the underlying {@link ConcurrentHashMap}.
  * Read and query operations are null-safe: {@link #get(Object)} and {@link #remove(Object)}
  * return {@code null}, while {@link #containsKey(Object)}, {@link #containsValue(Object)}, and
- * {@link #remove(Object, Object)} return {@code false} for {@code null} arguments instead of throwing.</p>
+ * {@link #remove(Object, Object)} return {@code false} for {@code null} arguments instead of throwing.
+ * The compound update operations ({@link #replace(Object, Object, Object)}, {@link #replace(Object, Object)},
+ * {@link #computeIfAbsent(Object, Function)}, {@link #computeIfPresent(Object, BiFunction)},
+ * {@link #compute(Object, BiFunction)}, {@link #merge(Object, Object, BiFunction)} and
+ * {@link #replaceAll(BiFunction)}) are not null-tolerant: like the write operations they throw
+ * {@link NullPointerException}, so {@link #remove(Object, Object)} is the only conditional method
+ * that accepts {@code null} arguments.</p>
  *
  * <p><b>View collections:</b> The {@link #keySet()}, {@link #values()}, and {@link #entrySet()}
  * methods return live views backed by the underlying map. Changes to the map are reflected
@@ -58,16 +67,10 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * Integer value = cache.get("answer");
  * }</pre>
  *
- * <p><b>Thread safety note:</b> {@link #putIfAbsent(Object, Object)} and
- * {@link #remove(Object, Object)} delegate directly to the underlying {@link ConcurrentHashMap}
- * and are therefore genuinely atomic. However, this class extends {@link AbstractMap} and does
- * <i>not</i> override the other
- * default compound methods. As a result, default {@link Map} methods inherited from
- * {@code AbstractMap} (such as {@link Map#computeIfAbsent}, {@link Map#merge},
- * {@link Map#compute}) are <i>not</i> guaranteed to be atomic on this class. For atomic
- * compound operations beyond {@code putIfAbsent} and conditional {@code remove}, use a
- * {@link ConcurrentHashMap} directly or
- * apply explicit external synchronization.</p>
+ * <p><b>Thread safety note:</b> Compound update operations such as {@link #putIfAbsent(Object, Object)},
+ * {@link #computeIfAbsent(Object, Function)}, {@link #compute(Object, BiFunction)},
+ * {@link #merge(Object, Object, BiFunction)}, and the conditional remove/replace methods delegate
+ * directly to the underlying {@link ConcurrentHashMap} and retain its atomicity guarantees.</p>
  *
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
@@ -77,7 +80,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
 @Internal
 @Beta
 @SuppressWarnings("java:S2160")
-public final class ConcurrentCacheMap<K, V> extends AbstractMap<K, V> {
+public final class ConcurrentCacheMap<K, V> extends AbstractMap<K, V> implements ConcurrentMap<K, V> {
     private final ConcurrentHashMap<K, V> map;
 
     /**
@@ -97,7 +100,7 @@ public final class ConcurrentCacheMap<K, V> extends AbstractMap<K, V> {
      * @param capacity the initial capacity hint; used to size the underlying hash table
      * @throws IllegalArgumentException if {@code capacity} is negative.
      */
-    public ConcurrentCacheMap(final int capacity) {
+    public ConcurrentCacheMap(final int capacity) throws IllegalArgumentException {
         this.map = new ConcurrentHashMap<>(capacity);
     }
 
@@ -151,7 +154,7 @@ public final class ConcurrentCacheMap<K, V> extends AbstractMap<K, V> {
      */
     @MayReturnNull
     @Override
-    public V put(final K key, final V value) {
+    public V put(final K key, final V value) throws NullPointerException {
         return map.put(key, value);
     }
 
@@ -181,7 +184,7 @@ public final class ConcurrentCacheMap<K, V> extends AbstractMap<K, V> {
      */
     @MayReturnNull
     @Override
-    public V putIfAbsent(final K key, final V value) {
+    public V putIfAbsent(final K key, final V value) throws NullPointerException {
         return map.putIfAbsent(key, value);
     }
 
@@ -195,7 +198,7 @@ public final class ConcurrentCacheMap<K, V> extends AbstractMap<K, V> {
      *         or if any key or value in the specified map is {@code null}
      */
     @Override
-    public void putAll(final Map<? extends K, ? extends V> m) {
+    public void putAll(final Map<? extends K, ? extends V> m) throws NullPointerException {
         map.putAll(m);
     }
 
@@ -247,6 +250,150 @@ public final class ConcurrentCacheMap<K, V> extends AbstractMap<K, V> {
         }
 
         return map.remove(key, value);
+    }
+
+    /**
+     * Atomically replaces the entry for {@code key} only when it is currently mapped to {@code oldValue}.
+     * Delegates to {@link ConcurrentHashMap#replace(Object, Object, Object)} and retains its atomicity.
+     *
+     * <p>Unlike {@link #remove(Object, Object)}, which returns {@code false} for a {@code null} argument,
+     * this method throws {@link NullPointerException}.</p>
+     *
+     * @param key key whose mapping is to be conditionally replaced
+     * @param oldValue value expected to be associated with {@code key}
+     * @param newValue value to be associated with {@code key}
+     * @return {@code true} if the value was replaced; {@code false} if the key was absent or was
+     *         mapped to a different value
+     * @throws NullPointerException if {@code key}, {@code oldValue} or {@code newValue} is {@code null}
+     */
+    @Override
+    public boolean replace(final K key, final V oldValue, final V newValue) throws NullPointerException {
+        return map.replace(key, oldValue, newValue);
+    }
+
+    /**
+     * Atomically replaces the entry for {@code key} only when it is currently mapped to some value.
+     * Delegates to {@link ConcurrentHashMap#replace(Object, Object)} and retains its atomicity.
+     *
+     * <p>Unlike the null-tolerant query operations of this class, this method throws
+     * {@link NullPointerException} for a {@code null} key or value.</p>
+     *
+     * @param key key whose mapping is to be replaced
+     * @param value value to be associated with {@code key}
+     * @return the previous value associated with {@code key},
+     *         or {@code null} if there was no mapping for the key
+     * @throws NullPointerException if the specified key or value is {@code null}
+     */
+    @MayReturnNull
+    @Override
+    public V replace(final K key, final V value) throws NullPointerException {
+        return map.replace(key, value);
+    }
+
+    /**
+     * Atomically computes and inserts a value for {@code key} if no mapping is currently present.
+     * Delegates to {@link ConcurrentHashMap#computeIfAbsent(Object, Function)} and retains its
+     * atomicity, so the mapping function is applied at most once per absent key.
+     *
+     * <p>If the mapping function returns {@code null}, no mapping is recorded and {@code null} is
+     * returned. Unlike the null-tolerant query operations of this class, this method throws
+     * {@link NullPointerException} for a {@code null} key or mapping function.</p>
+     *
+     * @param key key with which the computed value is to be associated
+     * @param mappingFunction the function computing a value for an absent key
+     * @return the current (existing or computed) value associated with {@code key},
+     *         or {@code null} if the mapping function returned {@code null}
+     * @throws NullPointerException if the specified key or mapping function is {@code null}
+     * @throws IllegalStateException if the computation detectably attempts a recursive update to this map that would otherwise never complete
+     */
+    @MayReturnNull
+    @Override
+    public V computeIfAbsent(final K key, final Function<? super K, ? extends V> mappingFunction) throws NullPointerException, IllegalStateException {
+        return map.computeIfAbsent(key, mappingFunction);
+    }
+
+    /**
+     * Atomically recomputes the value for {@code key} when it is currently mapped to a value.
+     * Delegates to {@link ConcurrentHashMap#computeIfPresent(Object, BiFunction)} and retains its atomicity.
+     *
+     * <p>If the remapping function returns {@code null}, the mapping is removed. Unlike the
+     * null-tolerant query operations of this class, this method throws {@link NullPointerException}
+     * for a {@code null} key or remapping function.</p>
+     *
+     * @param key key whose mapped value is to be recomputed
+     * @param remappingFunction the function recomputing a value from the key and its current value
+     * @return the new value associated with {@code key}, or {@code null} if the key was absent
+     *         or the remapping function returned {@code null}
+     * @throws NullPointerException if the specified key or remapping function is {@code null}
+     * @throws IllegalStateException if the computation detectably attempts a recursive update to this map that would otherwise never complete
+     */
+    @MayReturnNull
+    @Override
+    public V computeIfPresent(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction)
+            throws NullPointerException, IllegalStateException {
+        return map.computeIfPresent(key, remappingFunction);
+    }
+
+    /**
+     * Atomically computes a new mapping for {@code key}, whether or not it is currently mapped.
+     * Delegates to {@link ConcurrentHashMap#compute(Object, BiFunction)} and retains its atomicity.
+     *
+     * <p>The remapping function receives {@code null} as the current value when no mapping exists;
+     * if it returns {@code null}, any existing mapping is removed and no mapping is recorded.
+     * Unlike the null-tolerant query operations of this class, this method throws
+     * {@link NullPointerException} for a {@code null} key or remapping function.</p>
+     *
+     * @param key key whose mapping is to be computed
+     * @param remappingFunction the function computing a value from the key and its current value
+     * @return the new value associated with {@code key}, or {@code null} if the remapping function
+     *         returned {@code null}
+     * @throws NullPointerException if the specified key or remapping function is {@code null}
+     * @throws IllegalStateException if the computation detectably attempts a recursive update to this map that would otherwise never complete
+     */
+    @MayReturnNull
+    @Override
+    public V compute(final K key, final BiFunction<? super K, ? super V, ? extends V> remappingFunction) throws NullPointerException, IllegalStateException {
+        return map.compute(key, remappingFunction);
+    }
+
+    /**
+     * Atomically associates {@code value} with {@code key} if the key is absent, otherwise replaces
+     * the current value with the result of applying {@code remappingFunction} to the current value
+     * and {@code value}. Delegates to {@link ConcurrentHashMap#merge(Object, Object, BiFunction)}
+     * and retains its atomicity.
+     *
+     * <p>If the remapping function returns {@code null}, the mapping is removed. Unlike the
+     * null-tolerant query operations of this class, this method throws {@link NullPointerException}
+     * for a {@code null} key, value or remapping function.</p>
+     *
+     * @param key key with which the value is to be associated
+     * @param value the value to associate with an absent {@code key}, or to merge with the current value
+     * @param remappingFunction the function merging the current value with {@code value}
+     * @return the new value associated with {@code key}, or {@code null} if the remapping function
+     *         returned {@code null}
+     * @throws NullPointerException if the specified key, value or remapping function is {@code null}
+     * @throws IllegalStateException if the computation detectably attempts a recursive update to this map that would otherwise never complete
+     */
+    @MayReturnNull
+    @Override
+    public V merge(final K key, final V value, final BiFunction<? super V, ? super V, ? extends V> remappingFunction)
+            throws NullPointerException, IllegalStateException {
+        return map.merge(key, value, remappingFunction);
+    }
+
+    /**
+     * Replaces the value of each entry with the result of applying {@code function} to that entry.
+     * Delegates to {@link ConcurrentHashMap#replaceAll(BiFunction)}: each entry is replaced
+     * atomically, but the traversal as a whole is not, so entries inserted or removed by other
+     * threads while it runs may or may not be visited.
+     *
+     * @param function the function computing a replacement value from a key and its current value
+     * @throws NullPointerException if {@code function} is {@code null}, or if it returns
+     *         {@code null} for any entry
+     */
+    @Override
+    public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws NullPointerException {
+        map.replaceAll(function);
     }
 
     /**
@@ -418,10 +565,13 @@ public final class ConcurrentCacheMap<K, V> extends AbstractMap<K, V> {
      * consists of a list of key-value mappings in the order returned by the
      * map's {@link #entrySet()} view's iterator, enclosed in braces ({@code "{}"}).
      *
+     * <p>Direct self-references are rendered with the standard collection/map marker; indirect cycles are not detected.</p>
+     *
      * @return a string representation of this map
      */
     @Override
     public String toString() {
-        return map.toString();
+        // Format through this wrapper so direct self-references use the standard marker.
+        return super.toString();
     }
 }

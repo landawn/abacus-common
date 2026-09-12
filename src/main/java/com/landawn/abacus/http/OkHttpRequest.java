@@ -21,14 +21,16 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.time.Duration;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.landawn.abacus.annotation.Beta;
+import com.landawn.abacus.exception.HttpResponseException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
@@ -46,8 +48,6 @@ import com.landawn.abacus.util.URLEncodedUtil;
 import com.landawn.abacus.util.cs;
 
 import okhttp3.CacheControl;
-import okhttp3.ConnectionPool;
-import okhttp3.Dispatcher;
 import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
@@ -57,9 +57,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import okio.BufferedSource;
-import okio.ForwardingSource;
-import okio.Okio;
 
 /**
  * A fluent HTTP request builder and executor based on OkHttp.
@@ -71,11 +68,25 @@ import okio.Okio;
  *
  * <p><b>Thread-safety:</b> Instances of this class are mutable builders and are not thread-safe.
  * Each request should be configured and executed from a single thread; the underlying OkHttp
- * {@code OkHttpClient} is itself thread-safe and is reused across calls when possible.</p>
+ * {@code OkHttpClient} is itself thread-safe and is meant to be shared.</p>
+ *
+ * <p><b>Connection reuse:</b> per-request options such as {@link #connectTimeout(long)} and
+ * {@link #readTimeout(long)} build a derived {@code OkHttpClient}, which — as OkHttp intends —
+ * shares the originating client's dispatcher and connection pool. Sockets and TLS sessions are
+ * therefore reused across requests whether or not per-request options are set.</p>
+ *
+ * <p><b>Request bodies:</b> a body configured through {@code jsonBody}, {@code xmlBody}, {@code formBody} or
+ * one of the {@code body(..)} overloads is sent with POST, PUT, PATCH and DELETE. OkHttp forbids a body on
+ * GET and HEAD, so {@link #get()}, {@link #head()} and the typed/asynchronous variants throw
+ * {@link IllegalArgumentException} when a body has been configured; through the {@code async*} methods that
+ * exception surfaces as the failure of the returned future rather than being thrown at submission. Note that
+ * {@code formBody(..)} with an empty or {@code null} map still installs an (empty) form body.</p>
  *
  * <p><b>Response ownership:</b> Methods that return a raw {@link Response} transfer ownership to the caller.
  * The response must be closed, preferably with try-with-resources. This also applies to a raw response obtained
- * from a completed asynchronous request.</p>
+ * from a completed asynchronous request. If cancellation wins before an asynchronous raw response
+ * is published, the discarded response is closed automatically. Cancellation uses the underlying
+ * task's interruption semantics; it does not guarantee that an in-progress HTTP call stops immediately.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -111,7 +122,17 @@ public final class OkHttpRequest {
 
     private static final KryoParser KRYO_PARSER = ParserFactory.isKryoParserAvailable() ? ParserFactory.createKryoParser() : null;
 
-    private static final OkHttpClient DEFAULT_CLIENT = new OkHttpClient();
+    /**
+     * The client used by the {@code url(..)} factories, and the base every timeout-configured client
+     * is derived from so that they all share one dispatcher and connection pool.
+     */
+    static final OkHttpClient DEFAULT_CLIENT = new OkHttpClient();
+
+    /**
+     * Maximum number of bytes read from an error response body when building an
+     * {@link HttpResponseException}; see {@link HttpUtil#MAX_ERROR_BODY_SIZE}.
+     */
+    private static final int MAX_ERROR_BODY_SIZE = HttpUtil.MAX_ERROR_BODY_SIZE;
 
     private final String url;
     private final HttpUrl httpUrl;
@@ -123,18 +144,6 @@ public final class OkHttpRequest {
     private final Request.Builder requestBuilder;
     private RequestBody body;
 
-    private boolean closeHttpClientAfterExecution = false;
-
-    private static final class ExecutedResponse {
-        final Response response;
-        final OkHttpClient perRequestClient;
-
-        ExecutedResponse(final Response response, final OkHttpClient perRequestClient) {
-            this.response = response;
-            this.perRequestClient = perRequestClient;
-        }
-    }
-
     /**
      * Constructs an {@code OkHttpRequest} for the given target and client.
      * Exactly one of {@code url} and {@code httpUrl} identifies the target; at least one must be
@@ -143,11 +152,13 @@ public final class OkHttpRequest {
      *
      * @param url the target URL as a string, or {@code null} when {@code httpUrl} is supplied
      * @param httpUrl the target URL as an OkHttp {@link HttpUrl}, or {@code null} when {@code url} is supplied
-     * @param httpClient the OkHttp client used to execute this request
-     * @throws IllegalArgumentException if {@code url} is {@code null} or empty and {@code httpUrl} is {@code null}.
+     * @param httpClient the OkHttp client used to execute this request; must not be {@code null}
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty and {@code httpUrl} is
+     *         {@code null}, or if {@code httpClient} is {@code null}.
      */
-    OkHttpRequest(final String url, final HttpUrl httpUrl, final OkHttpClient httpClient) {
+    OkHttpRequest(final String url, final HttpUrl httpUrl, final OkHttpClient httpClient) throws IllegalArgumentException {
         N.checkArgument(!(Strings.isEmpty(url) && httpUrl == null), "'url' cannot be null or empty");
+        N.checkArgNotNull(httpClient, cs.httpClient);
 
         this.url = url;
         this.httpUrl = httpUrl;
@@ -169,9 +180,9 @@ public final class OkHttpRequest {
      * @param url the URL string for the request
      * @param httpClient the OkHttpClient to use for executing the request
      * @return a new OkHttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or {@code httpClient} is {@code null}.
      */
-    public static OkHttpRequest create(final String url, final OkHttpClient httpClient) {
+    public static OkHttpRequest create(final String url, final OkHttpClient httpClient) throws IllegalArgumentException {
         return new OkHttpRequest(url, null, httpClient);
     }
 
@@ -190,9 +201,9 @@ public final class OkHttpRequest {
      * @param url the URL object for the request
      * @param httpClient the OkHttpClient to use for executing the request
      * @return a new OkHttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
+     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}, or {@code httpClient} is {@code null}.
      */
-    public static OkHttpRequest create(final URL url, final OkHttpClient httpClient) {
+    public static OkHttpRequest create(final URL url, final OkHttpClient httpClient) throws IllegalArgumentException {
         return new OkHttpRequest(null, HttpUrl.get(url), httpClient);
     }
 
@@ -211,9 +222,9 @@ public final class OkHttpRequest {
      * @param url the HttpUrl object for the request
      * @param httpClient the OkHttpClient to use for executing the request
      * @return a new OkHttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is {@code null}.
+     * @throws IllegalArgumentException if {@code url} is {@code null}, or {@code httpClient} is {@code null}.
      */
-    public static OkHttpRequest create(final HttpUrl url, final OkHttpClient httpClient) {
+    public static OkHttpRequest create(final HttpUrl url, final OkHttpClient httpClient) throws IllegalArgumentException {
         return new OkHttpRequest(null, url, httpClient);
     }
 
@@ -234,7 +245,7 @@ public final class OkHttpRequest {
      * @return a new OkHttpRequest instance
      * @throws IllegalArgumentException if {@code url} is {@code null} or empty.
      */
-    public static OkHttpRequest url(final String url) {
+    public static OkHttpRequest url(final String url) throws IllegalArgumentException {
         return create(url, DEFAULT_CLIENT);
     }
 
@@ -253,7 +264,7 @@ public final class OkHttpRequest {
      * @return a new OkHttpRequest instance
      * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
      */
-    public static OkHttpRequest url(final URL url) {
+    public static OkHttpRequest url(final URL url) throws IllegalArgumentException {
         return create(url, DEFAULT_CLIENT);
     }
 
@@ -272,13 +283,16 @@ public final class OkHttpRequest {
      * @return a new OkHttpRequest instance
      * @throws IllegalArgumentException if {@code url} is {@code null}.
      */
-    public static OkHttpRequest url(final HttpUrl url) {
+    public static OkHttpRequest url(final HttpUrl url) throws IllegalArgumentException {
         return create(url, DEFAULT_CLIENT);
     }
 
     /**
      * Creates a new OkHttpRequest instance with the specified URL and timeout settings.
-     * A new HTTP client is created with the specified timeouts and will be closed after execution.
+     * The request uses a client derived from the default client with the specified timeouts. The derived
+     * client shares the default client's dispatcher and connection pool and is <i>not</i> closed after
+     * execution, so sockets and TLS sessions stay reusable across requests. Following OkHttp's contract,
+     * a timeout of {@code 0} disables that timeout.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -289,24 +303,41 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @param url the URL string for the request
-     * @param connectTimeoutInMillis the connection timeout in milliseconds
-     * @param readTimeoutInMillis the read timeout in milliseconds
+     * @param connectTimeoutInMillis the connection timeout in milliseconds; must be non-negative and fit in an {@code int}
+     * @param readTimeoutInMillis the read timeout in milliseconds; must be non-negative and fit in an {@code int}
      * @return a new OkHttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or either timeout is negative
+     *         or too large for an {@code int}.
      */
-    public static OkHttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
-        return create(url, newClient(connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
+    public static OkHttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
+        return create(url, newClient(connectTimeoutInMillis, readTimeoutInMillis));
     }
 
-    private static OkHttpClient newClient(final long connectTimeoutInMillis, final long readTimeoutInMillis) {
-        return new OkHttpClient.Builder().connectTimeout(connectTimeoutInMillis, TimeUnit.MILLISECONDS)
+    /**
+     * Builds a timeout-configured client that shares {@link #DEFAULT_CLIENT}'s dispatcher and
+     * connection pool, so sockets stay reusable across requests.
+     *
+     * @param connectTimeoutInMillis the connection timeout in milliseconds
+     * @param readTimeoutInMillis the read timeout in milliseconds
+     * @return a derived client with the requested timeouts
+     * @throws IllegalArgumentException if either timeout is negative or too large for an {@code int}
+     */
+    private static OkHttpClient newClient(final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
+        N.checkArgNotNegative(connectTimeoutInMillis, cs.connectTimeoutInMillis);
+        N.checkArgNotNegative(readTimeoutInMillis, cs.readTimeoutInMillis);
+
+        return DEFAULT_CLIENT.newBuilder()
+                .connectTimeout(connectTimeoutInMillis, TimeUnit.MILLISECONDS)
                 .readTimeout(readTimeoutInMillis, TimeUnit.MILLISECONDS)
                 .build();
     }
 
     /**
      * Creates a new OkHttpRequest instance with the specified URL and timeout settings.
-     * A new HTTP client is created with the specified timeouts and will be closed after execution.
+     * The request uses a client derived from the default client with the specified timeouts. The derived
+     * client shares the default client's dispatcher and connection pool and is <i>not</i> closed after
+     * execution, so sockets and TLS sessions stay reusable across requests. Following OkHttp's contract,
+     * a timeout of {@code 0} disables that timeout.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -317,18 +348,22 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @param url the URL object for the request
-     * @param connectTimeoutInMillis the connection timeout in milliseconds
-     * @param readTimeoutInMillis the read timeout in milliseconds
+     * @param connectTimeoutInMillis the connection timeout in milliseconds; must be non-negative and fit in an {@code int}
+     * @param readTimeoutInMillis the read timeout in milliseconds; must be non-negative and fit in an {@code int}
      * @return a new OkHttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
+     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}, or
+     *         either timeout is negative or too large for an {@code int}.
      */
-    public static OkHttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
-        return create(url, newClient(connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
+    public static OkHttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
+        return create(url, newClient(connectTimeoutInMillis, readTimeoutInMillis));
     }
 
     /**
      * Creates a new OkHttpRequest instance with the specified HttpUrl and timeout settings.
-     * A new HTTP client is created with the specified timeouts and will be closed after execution.
+     * The request uses a client derived from the default client with the specified timeouts. The derived
+     * client shares the default client's dispatcher and connection pool and is <i>not</i> closed after
+     * execution, so sockets and TLS sessions stay reusable across requests. Following OkHttp's contract,
+     * a timeout of {@code 0} disables that timeout.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -339,24 +374,29 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @param url the HttpUrl object for the request
-     * @param connectTimeoutInMillis the connection timeout in milliseconds
-     * @param readTimeoutInMillis the read timeout in milliseconds
+     * @param connectTimeoutInMillis the connection timeout in milliseconds; must be non-negative and fit in an {@code int}
+     * @param readTimeoutInMillis the read timeout in milliseconds; must be non-negative and fit in an {@code int}
      * @return a new OkHttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is {@code null}.
+     * @throws IllegalArgumentException if {@code url} is {@code null}, or either timeout is negative or too
+     *         large for an {@code int}.
      */
-    public static OkHttpRequest url(final HttpUrl url, final long connectTimeoutInMillis, final long readTimeoutInMillis) {
-        return create(url, newClient(connectTimeoutInMillis, readTimeoutInMillis)).closeHttpClientAfterExecution(true);
+    public static OkHttpRequest url(final HttpUrl url, final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
+        return create(url, newClient(connectTimeoutInMillis, readTimeoutInMillis));
     }
 
-    OkHttpRequest closeHttpClientAfterExecution(final boolean shouldClose) {
-        closeHttpClientAfterExecution = shouldClose;
-
-        return this;
-    }
-
+    /**
+     * Returns the builder used to derive a per-request client, creating it on first use.
+     *
+     * <p>The derived client deliberately keeps the originating client's {@code Dispatcher} and
+     * {@code ConnectionPool}, which is what {@link OkHttpClient#newBuilder()} does by default.
+     * Replacing them per request gave every call a private, immediately discarded pool, so no
+     * connection or TLS session was ever reused.</p>
+     *
+     * @return the per-request client builder
+     */
     private OkHttpClient.Builder clientBuilder() {
         if (httpClientBuilder == null) {
-            httpClientBuilder = httpClient.newBuilder().dispatcher(new Dispatcher()).connectionPool(new ConnectionPool());
+            httpClientBuilder = httpClient.newBuilder();
         }
 
         return httpClientBuilder;
@@ -382,7 +422,9 @@ public final class OkHttpRequest {
      * @return This OkHttpRequest instance for method chaining
      * @throws IllegalArgumentException if {@code connectTimeout} is negative or too large for an {@code int}.
      */
-    public OkHttpRequest connectTimeout(final long connectTimeout) {
+    public OkHttpRequest connectTimeout(final long connectTimeout) throws IllegalArgumentException {
+        N.checkArgNotNegative(connectTimeout, cs.connectTimeout);
+
         clientBuilder().connectTimeout(connectTimeout, TimeUnit.MILLISECONDS);
 
         return this;
@@ -398,17 +440,52 @@ public final class OkHttpRequest {
      *     .get();
      * }</pre>
      *
+     * <p>The timeout is applied with millisecond precision. A positive duration shorter than one
+     * millisecond is rejected rather than silently truncated to {@code 0}, which OkHttp would read as
+     * "no timeout".</p>
+     *
      * @param connectTimeout The connection timeout as a Duration; must not be {@code null} and must not
-     *        be negative. {@link Duration#ZERO} disables the timeout.
+     *        be negative. {@link Duration#ZERO} disables the timeout; any other value must be at least
+     *        1 ms and fit in an {@code int} number of milliseconds.
      * @return This OkHttpRequest instance for method chaining
-     * @throws NullPointerException if {@code connectTimeout} is {@code null}
-     * @throws IllegalArgumentException if {@code connectTimeout} is negative or too large for an {@code int} number
-     *         of milliseconds.
+     * @throws IllegalArgumentException if {@code connectTimeout} is {@code null}, negative, positive but
+     *         shorter than 1 ms, or too large for an {@code int} number of milliseconds.
      */
-    public OkHttpRequest connectTimeout(final Duration connectTimeout) {
-        clientBuilder().connectTimeout(connectTimeout);
+    public OkHttpRequest connectTimeout(final Duration connectTimeout) throws IllegalArgumentException {
+        N.checkArgNotNull(connectTimeout, cs.connectTimeout);
+
+        clientBuilder().connectTimeout(toTimeoutMillis(connectTimeout, cs.connectTimeout), TimeUnit.MILLISECONDS);
 
         return this;
+    }
+
+    /**
+     * Converts a timeout {@code Duration} to whole milliseconds, enforcing this class's documented
+     * {@link IllegalArgumentException} contract before the value reaches OkHttp (whose own checks
+     * throw {@code IllegalStateException} for a negative value, and accept a sub-millisecond one as 0).
+     *
+     * @param timeout the non-null duration to convert
+     * @param argName the argument name for the exception message
+     * @return the duration in milliseconds; {@code 0} only for {@link Duration#ZERO}
+     * @throws IllegalArgumentException if {@code timeout} is negative, positive but shorter than 1 ms,
+     *         or does not fit in a {@code long} number of milliseconds
+     */
+    private static long toTimeoutMillis(final Duration timeout, final String argName) throws IllegalArgumentException {
+        N.checkArgument(!timeout.isNegative(), "'%s' can not be negative: %s", argName, timeout);
+
+        final long millis;
+
+        try {
+            millis = timeout.toMillis();
+        } catch (final ArithmeticException e) {
+            throw new IllegalArgumentException("'" + argName + "' is too large for a millisecond timeout: " + timeout, e);
+        }
+
+        // Duration.toMillis() truncates, so a positive sub-millisecond value would reach OkHttp as 0,
+        // which OkHttp defines as "no timeout" - the opposite of what the caller asked for.
+        N.checkArgument(millis > 0 || timeout.isZero(), "'%s' must be zero or at least 1 ms: %s", argName, timeout);
+
+        return millis;
     }
 
     /**
@@ -431,7 +508,9 @@ public final class OkHttpRequest {
      * @return This OkHttpRequest instance for method chaining
      * @throws IllegalArgumentException if {@code readTimeout} is negative or too large for an {@code int}.
      */
-    public OkHttpRequest readTimeout(final long readTimeout) {
+    public OkHttpRequest readTimeout(final long readTimeout) throws IllegalArgumentException {
+        N.checkArgNotNegative(readTimeout, cs.readTimeout);
+
         clientBuilder().readTimeout(readTimeout, TimeUnit.MILLISECONDS);
 
         return this;
@@ -447,15 +526,21 @@ public final class OkHttpRequest {
      *     .get();
      * }</pre>
      *
+     * <p>The timeout is applied with millisecond precision. A positive duration shorter than one
+     * millisecond is rejected rather than silently truncated to {@code 0}, which OkHttp would read as
+     * "no timeout".</p>
+     *
      * @param readTimeout The read timeout as a Duration; must not be {@code null} and must not be
-     *        negative. {@link Duration#ZERO} disables the timeout.
+     *        negative. {@link Duration#ZERO} disables the timeout; any other value must be at least
+     *        1 ms and fit in an {@code int} number of milliseconds.
      * @return This OkHttpRequest instance for method chaining
-     * @throws NullPointerException if {@code readTimeout} is {@code null}
-     * @throws IllegalArgumentException if {@code readTimeout} is negative or too large for an {@code int} number of
-     *         milliseconds.
+     * @throws IllegalArgumentException if {@code readTimeout} is {@code null}, negative, positive but
+     *         shorter than 1 ms, or too large for an {@code int} number of milliseconds.
      */
-    public OkHttpRequest readTimeout(final Duration readTimeout) {
-        clientBuilder().readTimeout(readTimeout);
+    public OkHttpRequest readTimeout(final Duration readTimeout) throws IllegalArgumentException {
+        N.checkArgNotNull(readTimeout, cs.readTimeout);
+
+        clientBuilder().readTimeout(toTimeoutMillis(readTimeout, cs.readTimeout), TimeUnit.MILLISECONDS);
 
         return this;
     }
@@ -478,8 +563,11 @@ public final class OkHttpRequest {
      *
      * @param cacheControl the cache control directives
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code cacheControl} is {@code null}.
      */
-    public OkHttpRequest cacheControl(final CacheControl cacheControl) {
+    public OkHttpRequest cacheControl(final CacheControl cacheControl) throws IllegalArgumentException {
+        N.checkArgNotNull(cacheControl, cs.cacheControl);
+
         requestBuilder.cacheControl(cacheControl);
         return this;
     }
@@ -563,6 +651,11 @@ public final class OkHttpRequest {
      *     .get();
      * }</pre>
      *
+     * <p>Neither argument is validated: a {@code null} username or password is stringified as the
+     * literal {@code "null"} before encoding (so {@code basicAuth(null, "p")} sends the credential
+     * {@code null:p}), consistent with {@link HttpHeaders#setBasicAuthentication(String, String)},
+     * {@link HttpSettings#basicAuth(String, String)} and {@link HttpRequest#basicAuth(String, String)}.</p>
+     *
      * @param username the username for authentication
      * @param password the password for authentication
      * @return this OkHttpRequest instance for method chaining
@@ -587,11 +680,14 @@ public final class OkHttpRequest {
      * @param name the header name
      * @param value the header value
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code name} is {@code null}.
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
-    public OkHttpRequest header(final String name, final Object value) {
-        requestBuilder.header(name, HttpHeaders.valueOf(value));
+    public OkHttpRequest header(final String name, final Object value) throws IllegalArgumentException {
+        N.checkArgNotNull(name, cs.name);
+
+        requestBuilder.header(name, HttpHeaders.valueOf(name, value));
         return this;
     }
 
@@ -611,12 +707,13 @@ public final class OkHttpRequest {
      * @param name2 the second header name
      * @param value2 the second header value
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if any header name is {@code null}.
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
-    public OkHttpRequest headers(final String name1, final Object value1, final String name2, final Object value2) {
-        requestBuilder.header(name1, HttpHeaders.valueOf(value1));
-        requestBuilder.header(name2, HttpHeaders.valueOf(value2));
+    public OkHttpRequest headers(final String name1, final Object value1, final String name2, final Object value2) throws IllegalArgumentException {
+        header(name1, value1);
+        header(name2, value2);
 
         return this;
     }
@@ -641,13 +738,15 @@ public final class OkHttpRequest {
      * @param name3 the third header name
      * @param value3 the third header value
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if any header name is {@code null}.
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
-    public OkHttpRequest headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3) {
-        requestBuilder.header(name1, HttpHeaders.valueOf(value1));
-        requestBuilder.header(name2, HttpHeaders.valueOf(value2));
-        requestBuilder.header(name3, HttpHeaders.valueOf(value3));
+    public OkHttpRequest headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3)
+            throws IllegalArgumentException {
+        header(name1, value1);
+        header(name2, value2);
+        header(name3, value3);
 
         return this;
     }
@@ -672,14 +771,15 @@ public final class OkHttpRequest {
      *
      * @param headers A map containing header names and values
      * @return This OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if a header name is {@code null} or empty, or a name or formatted value contains a character rejected by OkHttp.
      * @see #setHeaders(Headers)
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
-    public OkHttpRequest headers(final Map<String, ?> headers) {
+    public OkHttpRequest headers(final Map<String, ?> headers) throws IllegalArgumentException {
         if (N.notEmpty(headers)) {
             for (final Map.Entry<String, ?> entry : headers.entrySet()) {
-                requestBuilder.header(entry.getKey(), HttpHeaders.valueOf(entry.getValue()));
+                header(entry.getKey(), entry.getValue());
             }
         }
 
@@ -703,11 +803,14 @@ public final class OkHttpRequest {
      *
      * @param headers the Headers object containing all headers to set
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code headers} is {@code null}.
      * @see #header(String, Object)
      * @see Request.Builder#headers(Headers)
      * @see HttpHeaders
      */
-    public OkHttpRequest setHeaders(final Headers headers) {
+    public OkHttpRequest setHeaders(final Headers headers) throws IllegalArgumentException {
+        N.checkArgNotNull(headers, cs.headers);
+
         requestBuilder.headers(headers);
         return this;
     }
@@ -731,17 +834,27 @@ public final class OkHttpRequest {
      * @see HttpHeaders
      */
     public OkHttpRequest setHeaders(final HttpHeaders headers) {
-        final Map<String, String> map = new HashMap<>();
+        final Headers.Builder builder = new Headers.Builder();
 
         if (headers != null && !headers.isEmpty()) {
-            for (String headerName : headers.headerNames()) {
-                map.put(headerName, HttpHeaders.valueOf(headers.get(headerName)));
+            for (final String headerName : headers.headerNames()) {
+                final Object headerValue = headers.get(headerName);
+
+                // A collection-valued header is emitted as repeated header lines rather than being
+                // collapsed into one comma-joined value, which reorders values when the bridge goes through
+                // a HashMap. Cookie is the exception: RFC 6265 5.4 allows a request only one Cookie line, so
+                // the field-aware HttpHeaders.valueOf(name, value) joins its cookie-pairs with "; " instead.
+                if (headerValue instanceof Collection && !HttpHeaders.Names.COOKIE.equalsIgnoreCase(headerName)) {
+                    for (final Object element : (Collection<?>) headerValue) {
+                        builder.add(headerName, HttpHeaders.valueOf(element));
+                    }
+                } else {
+                    builder.add(headerName, HttpHeaders.valueOf(headerName, headerValue));
+                }
             }
         }
 
-        final Headers newHeaders = Headers.of(map);
-
-        return setHeaders(newHeaders);
+        return setHeaders(builder.build());
     }
 
     /**
@@ -762,6 +875,7 @@ public final class OkHttpRequest {
      * @param name the header name
      * @param value the header value
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code name} is {@code null}.
      * @deprecated This method is deprecated due to limited use cases in typical HTTP workflows.
      *             Most scenarios require replacing headers rather than adding duplicates.
      *             Use {@link #header(String, Object)} instead, which replaces any existing header
@@ -770,8 +884,10 @@ public final class OkHttpRequest {
      *             the underlying OkHttp RequestBuilder directly.
      */
     @Deprecated
-    public OkHttpRequest addHeader(final String name, final Object value) {
-        requestBuilder.addHeader(name, HttpHeaders.valueOf(value));
+    public OkHttpRequest addHeader(final String name, final Object value) throws IllegalArgumentException {
+        N.checkArgNotNull(name, cs.name);
+
+        requestBuilder.addHeader(name, HttpHeaders.valueOf(name, value));
         return this;
     }
 
@@ -788,6 +904,7 @@ public final class OkHttpRequest {
      *
      * @param name the name of the headers to remove
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code name} is {@code null}.
      * @deprecated This method is deprecated due to limited use cases in typical HTTP workflows.
      *             In most scenarios, headers are set but rarely need to be explicitly removed.
      *             If you need to override a header, use {@link #header(String, Object)} which
@@ -796,7 +913,9 @@ public final class OkHttpRequest {
      *             RequestBuilder directly.
      */
     @Deprecated
-    public OkHttpRequest removeHeader(final String name) {
+    public OkHttpRequest removeHeader(final String name) throws IllegalArgumentException {
+        N.checkArgNotNull(name, cs.name);
+
         requestBuilder.removeHeader(name);
         return this;
     }
@@ -860,8 +979,9 @@ public final class OkHttpRequest {
      *
      * @param json the JSON string to send as the request body
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code json} is {@code null}.
      */
-    public OkHttpRequest jsonBody(final String json) {
+    public OkHttpRequest jsonBody(final String json) throws IllegalArgumentException {
         return body(json, APPLICATION_JSON_MEDIA_TYPE);
     }
 
@@ -897,8 +1017,9 @@ public final class OkHttpRequest {
      *
      * @param xml the XML string to send as the request body
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code xml} is {@code null}.
      */
-    public OkHttpRequest xmlBody(final String xml) {
+    public OkHttpRequest xmlBody(final String xml) throws IllegalArgumentException {
         return body(xml, APPLICATION_XML_MEDIA_TYPE);
     }
 
@@ -939,9 +1060,10 @@ public final class OkHttpRequest {
      *
      * @param formBodyByMap A map containing form field names and values
      * @return This OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if an entry with a non-{@code null} value has a {@code null} key.
      * @see FormBody.Builder
      */
-    public OkHttpRequest formBody(final Map<?, ?> formBodyByMap) {
+    public OkHttpRequest formBody(final Map<?, ?> formBodyByMap) throws IllegalArgumentException {
         if (N.isEmpty(formBodyByMap)) {
             body = new FormBody.Builder().build();
             return this;
@@ -951,6 +1073,8 @@ public final class OkHttpRequest {
 
         for (final Map.Entry<?, ?> entry : formBodyByMap.entrySet()) {
             if (entry.getValue() != null) {
+                N.checkArgNotNull(entry.getKey(), cs.formFieldName);
+
                 formBodyBuilder.add(N.stringOf(entry.getKey()), N.stringOf(entry.getValue()));
             }
         }
@@ -961,7 +1085,8 @@ public final class OkHttpRequest {
 
     /**
      * Sets the request body as form data with Content-Type: application/x-www-form-urlencoded.
-     * The bean properties will be encoded as form fields using getter methods.
+     * The bean properties will be encoded as form fields using getter methods. Properties with
+     * {@code null} values are skipped, consistently with {@link #formBody(Map)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1005,60 +1130,6 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Sets the request body as form data from a map.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * Map<String, String> formData = new HashMap<>();
-     * formData.put("username", "john_doe");
-     * formData.put("password", "secret123");
-     *
-     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/login")
-     *         .body(formData);   // deprecated; prefer formBody(Map)
-     * // req.post();   // returns the response when executed (network)
-     * }</pre>
-     *
-     * @param formBodyByMap a map containing form field names and values
-     * @return this OkHttpRequest instance for method chaining
-     * @see FormBody.Builder
-     * @deprecated This method has been replaced by {@link #formBody(Map)} for better API clarity.
-     *             The new method name explicitly indicates that it creates form-urlencoded body data,
-     *             making the code more readable and self-documenting. Please update your code to use
-     *             {@code formBody(Map)} instead.
-     */
-    @Deprecated
-    public OkHttpRequest body(final Map<?, ?> formBodyByMap) {
-        return formBody(formBodyByMap);
-    }
-
-    /**
-     * Sets the request body as form data from a bean object.
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
-     * LoginRequest login = new LoginRequest();
-     * login.setUsername("john_doe");
-     * login.setPassword("secret123");
-     *
-     * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/login")
-     *         .body(login);   // deprecated; prefer formBody(Object)
-     * // req.post();   // returns the response when executed (network)
-     * }</pre>
-     *
-     * @param formBodyByBean a bean object whose properties will be used as form fields
-     * @return this OkHttpRequest instance for method chaining
-     * @see FormBody.Builder
-     * @deprecated This method has been replaced by {@link #formBody(Object)} for better API clarity.
-     *             The new method name explicitly indicates that it creates form-urlencoded body data,
-     *             making the code more readable and self-documenting. Please update your code to use
-     *             {@code formBody(Object)} instead.
-     */
-    @Deprecated
-    public OkHttpRequest body(final Object formBodyByBean) {
-        return formBody(formBodyByBean);
-    }
-
-    /**
      * Sets the request body with a custom RequestBody instance.
      * This allows full control over the request body content and media type.
      *
@@ -1093,9 +1164,12 @@ public final class OkHttpRequest {
      * @param content the string content of the request body
      * @param contentType the media type of the content, or {@code null} to use default
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code content} is {@code null}.
      * @see RequestBody#create(String, MediaType)
      */
-    public OkHttpRequest body(final String content, final MediaType contentType) {
+    public OkHttpRequest body(final String content, final MediaType contentType) throws IllegalArgumentException {
+        N.checkArgNotNull(content, cs.content);
+
         body = RequestBody.create(content, contentType);
 
         return this;
@@ -1116,9 +1190,12 @@ public final class OkHttpRequest {
      * @param content the byte array content of the request body
      * @param contentType the media type of the content, or {@code null} to use default
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code content} is {@code null}.
      * @see RequestBody#create(byte[], MediaType)
      */
-    public OkHttpRequest body(final byte[] content, final MediaType contentType) {
+    public OkHttpRequest body(final byte[] content, final MediaType contentType) throws IllegalArgumentException {
+        N.checkArgNotNull(content, cs.content);
+
         body = RequestBody.create(content, contentType);
 
         return this;
@@ -1142,10 +1219,15 @@ public final class OkHttpRequest {
      * @param byteCount the number of bytes to read from the array
      * @param contentType the media type of the content, or {@code null} to use default
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code content} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code offset} or {@code byteCount} lies outside {@code content}
      * @see RequestBody#create(byte[], MediaType, int, int)
      */
-    public OkHttpRequest body(final byte[] content, final int offset, final int byteCount, final MediaType contentType) {
+    public OkHttpRequest body(final byte[] content, final int offset, final int byteCount, final MediaType contentType)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(content, cs.content);
+        N.checkFromIndexSize(offset, byteCount, content.length);
+
         body = RequestBody.create(content, contentType, offset, byteCount);
 
         return this;
@@ -1166,9 +1248,12 @@ public final class OkHttpRequest {
      * @param content the file containing the request body content
      * @param contentType the media type of the content, or {@code null} to use default
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code content} is {@code null}.
      * @see RequestBody#create(File, MediaType)
      */
-    public OkHttpRequest body(final File content, final MediaType contentType) {
+    public OkHttpRequest body(final File content, final MediaType contentType) throws IllegalArgumentException {
+        N.checkArgNotNull(content, cs.content);
+
         body = RequestBody.create(content, contentType);
 
         return this;
@@ -1189,9 +1274,11 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return the HTTP response; the caller must close it
+     * @throws IllegalArgumentException if a request body has been configured on this request (OkHttp
+     *         forbids a body on GET)
      * @throws UncheckedIOException if the request could not be executed
      */
-    public Response get() throws UncheckedIOException {
+    public Response get() throws IllegalArgumentException, UncheckedIOException {
         return execute(HttpMethod.GET);
     }
 
@@ -1207,9 +1294,12 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or {@link HttpResponse}, or a
+     *         request body has been configured on this request (OkHttp forbids a body on GET)
+     * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
+     * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
-    public <T> T get(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T get(final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.GET, resultClass);
     }
 
@@ -1249,9 +1339,10 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
+     * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
+     * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
-    public <T> T post(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T post(final Class<T> resultClass) throws UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.POST, resultClass);
     }
 
@@ -1291,9 +1382,10 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
+     * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
+     * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
-    public <T> T put(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T put(final Class<T> resultClass) throws UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.PUT, resultClass);
     }
 
@@ -1333,9 +1425,10 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
+     * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
+     * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
-    public <T> T patch(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T patch(final Class<T> resultClass) throws UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.PATCH, resultClass);
     }
 
@@ -1371,9 +1464,10 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
+     * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
+     * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
-    public <T> T delete(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T delete(final Class<T> resultClass) throws UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.DELETE, resultClass);
     }
 
@@ -1392,9 +1486,11 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return the HTTP response (with no body); the caller must close it
+     * @throws IllegalArgumentException if a request body has been configured on this request (OkHttp
+     *         forbids a body on HEAD)
      * @throws UncheckedIOException if the request could not be executed
      */
-    public Response head() throws UncheckedIOException {
+    public Response head() throws IllegalArgumentException, UncheckedIOException {
         return execute(HttpMethod.HEAD);
     }
 
@@ -1412,10 +1508,12 @@ public final class OkHttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @return the HTTP response; the caller must close it
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, or a request body has been
+     *         configured and {@code httpMethod} is GET or HEAD (OkHttp forbids a body on those methods)
      * @throws UncheckedIOException if the request could not be executed
      */
     @Beta
-    public Response execute(final HttpMethod httpMethod) throws UncheckedIOException {
+    public Response execute(final HttpMethod httpMethod) throws IllegalArgumentException, UncheckedIOException {
         return execute(httpMethod, Response.class);
     }
 
@@ -1439,37 +1537,46 @@ public final class OkHttpRequest {
      *         caller must close the returned response.
      * @throws IllegalArgumentException if {@code httpMethod} or {@code resultClass} is {@code null}, or
      *         {@code resultClass} is the abacus {@link HttpResponse} type (use OkHttp's {@code Response} class
-     *         directly instead).
-     * @throws UncheckedIOException if the request could not be executed or the response indicates a non-2xx status
+     *         directly instead), or a request body has been configured and {@code httpMethod} is GET or HEAD
+     *         (OkHttp forbids a body on those methods).
+     * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
+     * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
     @Beta
-    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException {
+    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException, HttpResponseException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(resultClass, cs.resultClass);
-        N.checkArgument(!HttpResponse.class.equals(resultClass), "Return type cannot be HttpResponse");
+        N.checkArgument(!HttpResponse.class.equals(resultClass),
+                "Return type cannot be HttpResponse. Use okhttp3.Response, or a body type such as String.class");
 
         final boolean returningResponse = Response.class.equals(resultClass);
-
         Response resp = null;
-        ExecutedResponse executedResponse = null;
-        Throwable primaryFailure = null;
-        boolean responseCleanupManaged = false;
+        boolean responseOwnershipTransferred = false;
 
         try {
+            // The request as it was built here, not resp.request(): after a redirect the latter
+            // describes the followed request, while the content metadata below must describe what
+            // this call actually serialized.
             final Request request = createRequest(httpMethod);
-            // Defer per-request client shutdown when handing the Response back to the caller —
-            // they need the client's dispatcher/connection-pool alive while reading the body.
-            executedResponse = execute(request);
-            resp = executedResponse.response;
+
+            resp = execute(request);
 
             if (returningResponse) {
-                // attachCleanup either transfers cleanup to the returned response or performs it
-                // itself before propagating a construction failure.
-                responseCleanupManaged = true;
-                return (T) attachCleanup(resp, executedResponse.perRequestClient);
+                // Ownership passes to the caller, who must close it (see the class javadoc).
+                responseOwnershipTransferred = true;
+                return (T) resp;
             }
 
-            final String contentType = request.header(HttpHeaders.Names.CONTENT_TYPE);
+            String contentType = request.header(HttpHeaders.Names.CONTENT_TYPE);
+
+            if (contentType == null && request.body() != null && request.body().contentType() != null) {
+                // OkHttp materialises Content-Type from the body only inside BridgeInterceptor, on the
+                // network request - never on the built Request. The media type every body setter of
+                // this class attaches is therefore invisible to request.header(..), which would leave
+                // the request-derived format/charset fallback below dead for all of them.
+                contentType = request.body().contentType().toString();
+            }
+
             final String contentEncoding = request.header(HttpHeaders.Names.CONTENT_ENCODING);
             final ContentFormat requestContentFormat = HttpUtil.getContentFormat(contentType, contentEncoding);
             final Charset requestCharset = HttpUtil.getCharset(contentType);
@@ -1479,272 +1586,89 @@ public final class OkHttpRequest {
             final ResponseBody respBody = resp.body();
 
             if (!resp.isSuccessful()) {
-                String responseBody = null;
-
-                if (respBody != null) {
-                    final InputStream errorStream = HttpUtil.wrapInputStream(respBody.byteStream(), respContentFormat);
-
-                    try {
-                        responseBody = IOUtil.readAllToString(errorStream, respCharset);
-                    } finally {
-                        IOUtil.closeQuietly(errorStream);
-                    }
-                }
-
-                throw new IOException(resp.code() + ": " + resp.message() + (Strings.isEmpty(responseBody) ? "" : ". " + responseBody));
+                // Only a bounded prefix of the error body is captured, so that an arbitrarily large
+                // error page cannot be materialized into an exception message.
+                throw new HttpResponseException(request.url().toString(), resp.code(), resp.message(), respHeaders,
+                        readBoundedErrorBody(respBody, respContentFormat, respCharset));
             }
 
-            if (resultClass.equals(Void.class)) {
+            if (resultClass.equals(Void.class) || respBody == null) {
                 return null;
-            } else {
-                if (respBody == null) {
-                    return null;
-                }
+            }
 
-                final InputStream is = HttpUtil.wrapInputStream(respBody.byteStream(), respContentFormat);
+            final InputStream is = HttpUtil.hasResponseBody(httpMethod.name(), resp.code()) ? HttpUtil.wrapInputStream(respBody.byteStream(), respContentFormat)
+                    : N.emptyInputStream();
 
-                try {
-                    if (resultClass.equals(String.class)) {
-                        return (T) IOUtil.readAllToString(is, respCharset);
-                    } else if (byte[].class.equals(resultClass)) {
-                        return (T) IOUtil.readAllBytes(is);
+            try {
+                if (resultClass.equals(String.class)) {
+                    return (T) IOUtil.readAllToString(is, respCharset);
+                } else if (byte[].class.equals(resultClass)) {
+                    return (T) IOUtil.readAllBytes(is);
+                } else {
+                    if (respContentFormat == ContentFormat.KRYO && KRYO_PARSER != null) {
+                        return KRYO_PARSER.deserialize(is, resultClass);
+                    } else if (respContentFormat == ContentFormat.FORM_URL_ENCODED) {
+                        return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), respCharset, resultClass);
                     } else {
-                        if (respContentFormat == ContentFormat.KRYO && KRYO_PARSER != null) {
-                            return KRYO_PARSER.deserialize(is, resultClass);
-                        } else if (respContentFormat == ContentFormat.FORM_URL_ENCODED) {
-                            return URLEncodedUtil.decode(IOUtil.readAllToString(is, respCharset), respCharset, resultClass);
-                        } else {
-                            final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
+                        final BufferedReader br = Objectory.createBufferedReader(IOUtil.newInputStreamReader(is, respCharset));
 
-                            try {
-                                return HttpUtil.getParser(respContentFormat).deserialize(br, resultClass);
-                            } finally {
-                                Objectory.recycle(br);
-                            }
+                        try {
+                            return HttpUtil.getParser(respContentFormat).deserialize(br, resultClass);
+                        } finally {
+                            Objectory.recycle(br);
                         }
                     }
-                } finally {
-                    IOUtil.closeQuietly(is);
                 }
+            } finally {
+                IOUtil.closeQuietly(is);
             }
         } catch (final IOException e) {
             // Parity with com.landawn.abacus.http.HttpRequest and http.v2.HttpRequest: surface
-            // I/O failures (including non-2xx responses) as an unchecked UncheckedIOException so
-            // callers are not forced into try/catch on the fluent API.
-            final UncheckedIOException uncheckedFailure = new UncheckedIOException(e);
-            primaryFailure = uncheckedFailure;
-            throw uncheckedFailure;
-        } catch (final RuntimeException | Error e) {
-            primaryFailure = e;
-            throw e;
+            // I/O failures as an unchecked UncheckedIOException so callers are not forced into
+            // try/catch on the fluent API.
+            throw new UncheckedIOException(e);
         } finally {
-            if (primaryFailure == null) {
-                // Preserve the established success-path cleanup behavior, including which cleanup
-                // failure is surfaced when more than one cleanup action fails.
-                try {
-                    if (!responseCleanupManaged && resp != null) {
-                        IOUtil.close(resp);
-                    }
-                } finally {
-                    if (!responseCleanupManaged) {
-                        doAfterExecution(executedResponse == null ? null : executedResponse.perRequestClient);
-                    }
-                }
-            } else {
-                if (!responseCleanupManaged && resp != null) {
-                    try {
-                        IOUtil.close(resp);
-                    } catch (final RuntimeException | Error cleanupFailure) {
-                        if (cleanupFailure != primaryFailure) {
-                            primaryFailure.addSuppressed(cleanupFailure);
-                        }
-                    }
-                }
-
-                if (!responseCleanupManaged) {
-                    try {
-                        doAfterExecution(executedResponse == null ? null : executedResponse.perRequestClient);
-                    } catch (final RuntimeException | Error cleanupFailure) {
-                        if (cleanupFailure != primaryFailure) {
-                            primaryFailure.addSuppressed(cleanupFailure);
-                        }
-                    }
-                }
+            if (!responseOwnershipTransferred) {
+                IOUtil.closeQuietly(resp);
             }
         }
     }
 
-    private Response attachCleanup(final Response response, final OkHttpClient perRequestClient) {
-        final ResponseBody body = response.body();
-
-        if (body == null) {
-            doAfterExecution(perRequestClient);
-            return response;
+    /**
+     * Reads at most {@link #MAX_ERROR_BODY_SIZE} bytes of an error response body.
+     *
+     * @param respBody the error response body, or {@code null} when there is none
+     * @param respContentFormat the response content format, used to decompress the body
+     * @param respCharset the charset to decode the captured bytes with
+     * @return the decoded prefix of the error body; never {@code null}, empty if it cannot be read
+     */
+    private static String readBoundedErrorBody(final ResponseBody respBody, final ContentFormat respContentFormat, final Charset respCharset) {
+        if (respBody == null) {
+            return Strings.EMPTY;
         }
+
+        InputStream errorStream = null;
 
         try {
-            return response.newBuilder().body(new ResponseBody() {
-                private final AtomicBoolean closed = new AtomicBoolean();
-                private final BufferedSource source = Okio.buffer(new ForwardingSource(body.source()) {
-                    @Override
-                    public void close() throws IOException {
-                        try {
-                            super.close();
-                        } catch (final IOException | RuntimeException | Error primaryFailure) {
-                            try {
-                                closeOnce();
-                            } catch (final RuntimeException | Error cleanupFailure) {
-                                if (cleanupFailure != primaryFailure) {
-                                    primaryFailure.addSuppressed(cleanupFailure);
-                                }
-                            }
+            errorStream = HttpUtil.wrapInputStream(respBody.byteStream(), respContentFormat);
 
-                            throw primaryFailure;
-                        }
-
-                        closeOnce();
-                    }
-                });
-
-                @Override
-                public MediaType contentType() {
-                    return body.contentType();
-                }
-
-                @Override
-                public long contentLength() {
-                    return body.contentLength();
-                }
-
-                @Override
-                public BufferedSource source() {
-                    return source;
-                }
-
-                @Override
-                public void close() {
-                    try {
-                        body.close();
-                    } catch (final RuntimeException | Error primaryFailure) {
-                        try {
-                            closeOnce();
-                        } catch (final RuntimeException | Error cleanupFailure) {
-                            if (cleanupFailure != primaryFailure) {
-                                primaryFailure.addSuppressed(cleanupFailure);
-                            }
-                        }
-
-                        throw primaryFailure;
-                    }
-
-                    closeOnce();
-                }
-
-                private void closeOnce() {
-                    // Response.close() may be reached concurrently through normal completion,
-                    // cancellation, and error handling. Claim cleanup atomically so the per-request
-                    // client is released exactly once.
-                    if (closed.compareAndSet(false, true)) {
-                        doAfterExecution(perRequestClient);
-                    }
-                }
-            }).build();
-        } catch (final RuntimeException | Error e) {
-            // The caller never received this response, so close both sides of the handoff here.
-            // Preserve the construction failure even if either cleanup operation also fails.
-            try {
-                response.close();
-            } catch (final RuntimeException | Error cleanupFailure) {
-                if (cleanupFailure != e) {
-                    e.addSuppressed(cleanupFailure);
-                }
-            }
-
-            try {
-                doAfterExecution(perRequestClient);
-            } catch (final RuntimeException | Error cleanupFailure) {
-                if (cleanupFailure != e) {
-                    e.addSuppressed(cleanupFailure);
-                }
-            }
-
-            throw e;
+            return new String(errorStream.readNBytes(MAX_ERROR_BODY_SIZE), respCharset);
+        } catch (final IOException | RuntimeException e) {
+            // The status code is what matters here; a failure to read the error body must never
+            // replace the HttpResponseException that is about to be thrown.
+            return Strings.EMPTY;
+        } finally {
+            IOUtil.closeQuietly(errorStream);
         }
     }
 
-    private ExecutedResponse execute(final Request request) throws IOException {
-        if (httpClientBuilder != null) {
-            // OkHttpClient.Builder otherwise reuses the same Dispatcher and ConnectionPool in
-            // every client it builds. Raw responses may overlap sequentially, so each execution
-            // must own independent lifecycle resources that its response can safely shut down.
-            final OkHttpClient builtClient = httpClientBuilder.dispatcher(new Dispatcher()).connectionPool(new ConnectionPool()).build();
-            try {
-                final Response response = builtClient.newCall(request).execute();
-                // clientBuilder() installs a request-owned dispatcher and connection pool. Defer
-                // their release until a typed response is consumed or a raw response is closed.
-                pendingPerRequestClient = builtClient;
-
-                return new ExecutedResponse(response, builtClient);
-            } catch (final IOException | RuntimeException | Error e) {
-                // Failure path: the response was never returned, so cleanup must happen here.
-                try {
-                    shutdownClient(builtClient);
-                } catch (final RuntimeException | Error cleanupFailure) {
-                    if (cleanupFailure != e) {
-                        e.addSuppressed(cleanupFailure);
-                    }
-                }
-
-                throw e;
-            }
-        } else {
-            return new ExecutedResponse(httpClient.newCall(request).execute(), null);
-        }
-    }
-
-    /** Most recently built per-request client, retained only for lifecycle visibility. Cleanup is
-     *  driven by the client captured in each {@link ExecutedResponse}, never by this shared slot. */
-    private volatile OkHttpClient pendingPerRequestClient;
-
-    void doAfterExecution() {
-        doAfterExecution(pendingPerRequestClient);
-    }
-
-    private void doAfterExecution(final OkHttpClient perRequestClient) {
-        if (perRequestClient != null) {
-            try {
-                shutdownClient(perRequestClient);
-            } finally {
-                // A later overlapping raw response may already own a newer per-request client.
-                // Closing this response must not clear or shut down that newer client's state.
-                if (pendingPerRequestClient == perRequestClient) {
-                    pendingPerRequestClient = null;
-                }
-            }
-        }
-
-        if (closeHttpClientAfterExecution && httpClientBuilder == null && httpClient != DEFAULT_CLIENT) {
-            // Timeout factories create and own this client; create(..., client) leaves this flag false.
-            shutdownClient(httpClient);
-        }
-    }
-
-    private static void shutdownClient(final OkHttpClient client) {
-        try {
-            client.dispatcher().executorService().shutdown();
-        } catch (final RuntimeException | Error primaryFailure) {
-            try {
-                client.connectionPool().evictAll();
-            } catch (final RuntimeException | Error cleanupFailure) {
-                if (cleanupFailure != primaryFailure) {
-                    primaryFailure.addSuppressed(cleanupFailure);
-                }
-            }
-
-            throw primaryFailure;
-        }
-
-        client.connectionPool().evictAll();
+    /**
+     * @throws IOException if executing the OkHttp call fails because of a connection, timeout, cancellation, or response-read failure
+     */
+    private Response execute(final Request request) throws IOException {
+        // A derived client shares the originating client's dispatcher and connection pool, so it
+        // owns no resources of its own and there is nothing to release once the call completes.
+        return (httpClientBuilder == null ? httpClient : httpClientBuilder.build()).newCall(request).execute();
     }
 
     private Request createRequest(final HttpMethod httpMethod) {
@@ -1796,6 +1720,28 @@ public final class OkHttpRequest {
         return asyncGet(HttpUtil.DEFAULT_EXECUTOR);
     }
 
+    private static <T> ContinuableFuture<T> submitAsync(final Callable<T> action, final Executor executor) {
+        final FutureTask<T> task = new FutureTask<>(action) {
+            @Override
+            protected void set(final T value) {
+                super.set(value);
+
+                // FutureTask atomically arbitrates publication against cancellation. Once a value
+                // is published cancellation cannot succeed; if cancellation won, no caller owns it.
+                if (isCancelled() && value instanceof Response response) {
+                    try {
+                        response.close();
+                    } catch (final Exception | Error e) {
+                        // The future is already cancelled; orphan cleanup cannot replace that outcome.
+                    }
+                }
+            }
+        };
+
+        executor.execute(task);
+        return ContinuableFuture.wrap(task).thenUse(executor);
+    }
+
     /**
      * Executes a GET request asynchronously using the specified executor.
      * The request is executed on the provided executor and returns immediately with a ContinuableFuture.
@@ -1817,7 +1763,7 @@ public final class OkHttpRequest {
     public ContinuableFuture<Response> asyncGet(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(this::get, executor);
+        return submitAsync(this::get, executor);
     }
 
     /**
@@ -1862,7 +1808,7 @@ public final class OkHttpRequest {
     public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(() -> get(resultClass), executor);
+        return submitAsync(() -> get(resultClass), executor);
     }
 
     /**
@@ -1905,7 +1851,7 @@ public final class OkHttpRequest {
     public ContinuableFuture<Response> asyncPost(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(this::post, executor);
+        return submitAsync(this::post, executor);
     }
 
     /**
@@ -1949,7 +1895,7 @@ public final class OkHttpRequest {
     public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(() -> post(resultClass), executor);
+        return submitAsync(() -> post(resultClass), executor);
     }
 
     /**
@@ -1992,7 +1938,7 @@ public final class OkHttpRequest {
     public ContinuableFuture<Response> asyncPut(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(this::put, executor);
+        return submitAsync(this::put, executor);
     }
 
     /**
@@ -2036,7 +1982,7 @@ public final class OkHttpRequest {
     public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(() -> put(resultClass), executor);
+        return submitAsync(() -> put(resultClass), executor);
     }
 
     /**
@@ -2079,7 +2025,7 @@ public final class OkHttpRequest {
     public ContinuableFuture<Response> asyncPatch(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(this::patch, executor);
+        return submitAsync(this::patch, executor);
     }
 
     /**
@@ -2123,7 +2069,7 @@ public final class OkHttpRequest {
     public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(() -> patch(resultClass), executor);
+        return submitAsync(() -> patch(resultClass), executor);
     }
 
     /**
@@ -2164,7 +2110,7 @@ public final class OkHttpRequest {
     public ContinuableFuture<Response> asyncDelete(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(this::delete, executor);
+        return submitAsync(this::delete, executor);
     }
 
     /**
@@ -2206,7 +2152,7 @@ public final class OkHttpRequest {
     public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(() -> delete(resultClass), executor);
+        return submitAsync(() -> delete(resultClass), executor);
     }
 
     /**
@@ -2247,7 +2193,7 @@ public final class OkHttpRequest {
     public ContinuableFuture<Response> asyncHead(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(this::head, executor);
+        return submitAsync(this::head, executor);
     }
 
     /**
@@ -2292,7 +2238,7 @@ public final class OkHttpRequest {
     public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod, final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(() -> execute(httpMethod), executor);
+        return submitAsync(() -> execute(httpMethod), executor);
     }
 
     /**
@@ -2339,6 +2285,6 @@ public final class OkHttpRequest {
             throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return ContinuableFuture.call(() -> execute(httpMethod, resultClass), executor);
+        return submitAsync(() -> execute(httpMethod, resultClass), executor);
     }
 }

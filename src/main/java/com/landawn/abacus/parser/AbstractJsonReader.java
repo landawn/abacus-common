@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.parser;
 
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Strings;
@@ -167,10 +168,11 @@ abstract class AbstractJsonReader implements JsonReader { //NOSONAR
      * }</pre>
      *
      * @return the token identifier, or {@link JsonReader#EOF} ({@code -1}) if the end of input is reached
-     * @throws UncheckedIOException if an I/O error occurs during reading
+     * @throws UncheckedIOException if reading from the underlying character stream fails
+     * @throws ParsingException if tokenization encounters an unterminated string, malformed escape, or unexpected text within an unquoted value
      */
     @Override
-    public int nextToken() throws UncheckedIOException {
+    public int nextToken() throws UncheckedIOException, ParsingException {
         return nextToken(strType);
     }
 }

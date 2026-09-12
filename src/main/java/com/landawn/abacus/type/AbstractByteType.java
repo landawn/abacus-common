@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -67,6 +68,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final Number x) {
         if (x == null) {
@@ -83,9 +85,12 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * </p>
      * <ul>
      *   <li>Empty or {@code null} strings — returns the default value.</li>
+     *   <li>Parsing follows {@link Numbers#toByte(String)}: decimal first; a {@code 0x}/{@code 0X}/{@code #} prefix
+     *       (optionally after a sign) selects hexadecimal.</li>
      *   <li>If parsing fails and the string ends with {@code 'l'}, {@code 'L'}, {@code 'f'},
      *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, the suffix is stripped and parsing is retried.</li>
-     *   <li>All other strings — parsed as a decimal {@code byte} value.</li>
+     *   <li>The string is not trimmed; surrounding whitespace is rejected (unlike the float/double types).</li>
+     *   <li>All other strings — parsed as a {@code byte} value.</li>
      * </ul>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
@@ -95,11 +100,12 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @param str the string to convert, may be {@code null} or empty
      * @return the parsed {@code Byte} value, or the default value if {@code str} is empty or {@code null}
      * @throws NumberFormatException if the string cannot be parsed as a {@code byte}
+     * @throws ArithmeticException if the string is a well-formed integer outside the {@code byte} range
      * @see #valueOf(Object)
      * @see #stringOf(Number)
      */
     @Override
-    public Byte valueOf(final String str) {
+    public Byte valueOf(final String str) throws NumberFormatException, ArithmeticException {
         if (Strings.isEmpty(str)) {
             return (Byte) defaultValue();
         }
@@ -121,25 +127,34 @@ public abstract class AbstractByteType extends NumberType<Number> {
 
     /**
      * Converts a region of the specified character array to a {@code Byte} value.
-     * Parses the region as an integer and checks that the result is within {@code byte} range
+     * Parses the region as an integer with the grammar of {@link #valueOf(String)} (decimal, or hexadecimal after a
+     * {@code 0x}/{@code 0X}/{@code #} prefix) and checks that the result is within {@code byte} range
      * ({@code Byte.MIN_VALUE} to {@code Byte.MAX_VALUE}).
      *
      * @param cbuf the character array to convert, may be {@code null}
      * @param offset the starting position in the array (0-based)
      * @param len the number of characters to read
      * @return the {@code Byte} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
-     * @throws NumberFormatException if the value is out of {@code byte} range or not a valid number
+     * @throws NumberFormatException if the region is not a valid integer
+     * @throws ArithmeticException if the region is a well-formed integer outside the {@code byte} range
      */
     @Override
-    public Byte valueOf(final char[] cbuf, final int offset, final int len) {
+    public Byte valueOf(final char[] cbuf, final int offset, final int len) throws NumberFormatException, ArithmeticException {
         if ((cbuf == null) || (len == 0)) {
             return (Byte) defaultValue();
+        }
+
+        // See AbstractIntegerType.valueOf(char[]): the shared fast path cannot parse a hex token.
+        if (AbstractIntegerType.hasRadixPrefix(cbuf, offset, len)) {
+            return Numbers.toByte(new String(cbuf, offset, len));
         }
 
         final int i = parseInt(cbuf, offset, len);
 
         if ((i < Byte.MIN_VALUE) || (i > Byte.MAX_VALUE)) {
-            throw new NumberFormatException("Value out of range. Value:\"" + i + "\" Radix:" + 10);
+            // Unified overflow policy: a well-formed but out-of-range value is an ArithmeticException, as
+            // Numbers.toByte throws on the String path; NumberFormatException is reserved for malformed text.
+            throw new ArithmeticException("byte overflow: " + i);
         }
 
         return (byte) i;
@@ -163,10 +178,11 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the column index (1-based)
      * @return the byte value at the specified column, or {@code 0} if SQL {@code NULL}
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the {@code columnIndex} is invalid
      */
     @Override
-    public Byte get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Byte get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getByte(columnIndex);
     }
 
@@ -178,10 +194,11 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label
      * @return the byte value at the specified column, or {@code 0} if SQL {@code NULL}
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the {@code columnName} is not found
      */
     @Override
-    public Byte get(final ResultSet rs, final String columnName) throws SQLException {
+    public Byte get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getByte(columnName);
     }
 
@@ -193,10 +210,11 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code Number} value to set as byte, or {@code null} for SQL {@code NULL}
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(columnIndex, Types.TINYINT);
         } else {
@@ -212,10 +230,11 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the {@code Number} value to set as byte, or {@code null} for SQL {@code NULL}
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
             stmt.setNull(parameterName, Types.TINYINT);
         } else {
@@ -233,7 +252,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Number} value to append as byte
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if appending the value to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -268,7 +287,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Number} value to write as byte
      * @param config the serialization configuration, may be {@code null}
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if writing the serialized value to {@code writer} fails
      */
     @Override
     public void serializeTo(final CharacterWriter writer, Number x, final JsonXmlSerConfig<?> config) throws IOException {

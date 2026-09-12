@@ -20,8 +20,11 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserConfig;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BufferedJsonWriter;
@@ -32,6 +35,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.cs;
 
 /**
  * Type handler for object arrays, providing serialization, deserialization,
@@ -84,8 +88,9 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * This constructor initializes the type handler by extracting the element type from the array class.
      *
      * @param arrayClass the array class to create a type handler for (e.g., String[].class)
+     * @throws IllegalArgumentException if {@code arrayClass} is {@code null} or is not an array class, so it has no component type.
      */
-    ObjectArrayType(final Class<T[]> arrayClass) {
+    ObjectArrayType(final Class<T[]> arrayClass) throws IllegalArgumentException {
         super(ClassUtil.getCanonicalClassName(arrayClass));
 
         typeClass = arrayClass;
@@ -100,9 +105,10 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * This constructor initializes the type handler by creating an array type from the element type.
      *
      * @param elementType the Type handler for the array's element type
+     * @throws IllegalArgumentException if {@code elementType} is {@code null} or represents {@code void}, which cannot be an array component.
      */
-    ObjectArrayType(final Type<T> elementType) {
-        super(elementType.name() + "[]");
+    ObjectArrayType(final Type<T> elementType) throws IllegalArgumentException {
+        super(N.checkArgNotNull(elementType, cs.elementType).name() + "[]");
 
         typeClass = (Class<T[]>) N.newArray(elementType.javaType(), 0).getClass();
         this.elementType = elementType;
@@ -175,12 +181,14 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      *
      * @param x the array to convert
      * @return JSON string representation, {@code null} if input is {@code null}, or {@code "[]"} for empty arrays
-     * @throws UncheckedIOException if an I/O error occurs during serialization
+     * @throws UncheckedIOException if an element type handler throws an IOException while producing the string representation.
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
-    public String stringOf(final T[] x) {
+    public String stringOf(final T[] x) throws UncheckedIOException, RuntimeException {
         if (x == null) {
             return null; // NOSONAR
         } else if (x.length == 0) {
@@ -229,6 +237,15 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * Converts a JSON string representation to an object array.
      * Returns {@code null} if the input is {@code null}, empty, or blank, and an empty array
      * for the special "[]" representation; otherwise parses the string as JSON.
+     * Structural whitespace surrounding the array (any character for which
+     * {@link Character#isWhitespace(char)} is {@code true}, for example {@code '\t'}, {@code '\n'} or
+     * the ideographic space U+3000) is ignored, as it is for the primitive and boxed array types.
+     *
+     * <p>The returned array's component type is always the declared element type. A nested array or object in a slot
+     * whose element type is {@code String} is stored as the raw text of that value ({@code "[[1]]"} yields
+     * {@code {"[1]"}}); an element type that accepts structured values ({@code Object}, {@code Serializable}) keeps the
+     * parsed {@code List}/{@code Map}; for any other element type the element type's own parse failure is propagated
+     * (for example {@code NumberFormatException} for {@code Integer[]}).</p>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form produced by
      * {@code stringOf} back into a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the type's default). Strings produced by {@link Object#toString()} are not
@@ -236,23 +253,40 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      *
      * @param str the JSON string to parse
      * @return the parsed array, {@code null} if input is {@code null}, empty, or blank, or an empty array for the "[]" representation
+     * @throws ParsingException if {@code str} is not a valid JSON array text
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(Object[])
      */
+    @MayReturnNull
     @Override
-    public T[] valueOf(final String str) {
+    public T[] valueOf(final String str) throws ParsingException, RuntimeException {
         if (Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
+        }
+
+        // isBlank accepted the input with Character.isWhitespace; the JSON parser only skips ASCII whitespace
+        // around the root value, so strip with the same predicate (strip() returns this when nothing changes).
+        final String trimmed = str.strip();
+
+        if (STR_FOR_EMPTY_ARRAY.equals(trimmed)) {
             return Array.newInstance(elementType.javaType(), 0);
         } else {
-            return Utils.jsonParser.deserialize(str, jdc, typeClass);
+            return Utils.jsonParser.deserialize(trimmed, jdc, this);
         }
     }
 
     /**
      * Appends the {@code toString()}-style string representation of an object array to an Appendable.
      * Optimizes performance by using buffered writers when appropriate.
+     * <p>
+     * Each element is appended by the declared element type's handler. When that declared type is {@code Object} the
+     * handler of the element's runtime class is used instead, exactly as {@code AbstractTupleType.appendElement} -
+     * the slot writer the Pair/Triple/Tuple, {@code Map.Entry} and optional handlers use - resolves a slot:
+     * {@code ObjectType} has no {@code appendTo} of its own, so it would otherwise fall back to {@code stringOf}, i.e.
+     * the JSON form. A map, collection or bean element therefore keeps the {@code toString()}-style form
+     * ({@code [{k:1}]}, not {@code [{"k": 1}]}), matching what the same value appends as when it is not in a container.
+     * A {@code null} element is appended as the literal {@code null}.
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
@@ -261,7 +295,9 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      *
      * @param appendable the Appendable to write to
      * @param x the array to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -273,7 +309,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final T[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final T[] x) throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -293,7 +329,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                         if (x[i] == null) {
                             bw.write(NULL_CHAR_ARRAY);
                         } else {
-                            elementType.appendTo(bw, x[i]);
+                            AbstractTupleType.appendElement(bw, elementType, x[i]);
                         }
                     }
 
@@ -322,7 +358,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                     if (element == null) {
                         appendable.append(NULL_STRING);
                     } else {
-                        elementType.appendTo(appendable, element);
+                        AbstractTupleType.appendElement(appendable, elementType, element);
                     }
                 }
 
@@ -343,16 +379,50 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
      * quoting or escaping.
+     * <p>
+     * When the element type is serializable (for example {@code String[]}, {@code Integer[]}, enum arrays) each element
+     * is written by its own type handler. When it is not (for example {@code Object[]}, {@code Bean[]},
+     * {@code Map[]}, {@code Object[][]}) the array is rendered the same way {@link #stringOf(Object[])} renders it: under a
+     * {@link com.landawn.abacus.parser.JsonSerConfig} the JSON parser writes real JSON (a number stays a number, a
+     * bean becomes an object, so {@code new Object[] {1, "a", null, bean}} becomes
+     * {@code [1, "a", null, {"name": "z", "age": 3}]}), and under an XML configuration the JSON text of the array is
+     * written as escaped character content. A {@code null} config writes the elements element by element without
+     * quotation, as before. That embedded JSON is always written compactly: {@code prettyFormat} is not propagated to
+     * it, because this handler is not told the caller's current indentation and a pretty embedded array would restart
+     * at the left margin.
      *
      * @param writer the CharacterWriter to write to
      * @param x the array to write
      * @param config the serialization configuration
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final T[] x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final T[] x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
+        } else if (x.length > 0 && config != null && !isSerializable()) {
+            // A non-serializable element type (Object, bean, map, nested array) would otherwise go element by element
+            // through SingleValueType.serializeTo, which quotes stringOf(element): 1 -> "1", a bean -> a JSON string.
+            // Build the JSON the same way stringOf does. The writer is handed to the parser only when it is already a
+            // JSON writer; any other writer (XML, CSV) receives the text through writeCharacter so it is escaped for
+            // that format instead of receiving raw JSON.
+            if (config instanceof JsonSerConfig jsc) {
+                // Pretty format is deliberately not propagated to the embedded write: this handler is not told the
+                // caller's current indentation, so a pretty embedded array would restart at the left margin and
+                // mis-align every one of its lines. Same rule as AbstractTupleType.serializeSlot.
+                final JsonSerConfig embeddedConfig = jsc.isPrettyFormat() ? jsc.copy().setPrettyFormat(false) : jsc;
+
+                if (writer instanceof BufferedJsonWriter) {
+                    Utils.jsonParser.serialize(x, embeddedConfig, writer);
+                } else {
+                    writer.writeCharacter(Utils.jsonParser.serialize(x, embeddedConfig));
+                }
+            } else {
+                writer.writeCharacter(stringOf(x));
+            }
         } else {
             writer.write(SK._BRACKET_L);
 
@@ -375,9 +445,11 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @param c the collection to convert
      * @return an array containing all elements from the collection, or {@code null} if the collection is null
      * @throws ArrayStoreException if any element in the collection is not assignable to the array's component type
+     * @throws ArrayIndexOutOfBoundsException if the collection supplies more elements during iteration than the size used to allocate the array.
      */
+    @MayReturnNull
     @Override
-    public T[] collectionToArray(final Collection<?> c) {
+    public T[] collectionToArray(final Collection<?> c) throws ArrayStoreException, ArrayIndexOutOfBoundsException {
         if (c == null) {
             return null; // NOSONAR
         }
@@ -399,10 +471,14 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      *
      * @param x the array to convert
      * @param output the collection to add elements to
+     * @throws NullPointerException if the input array is nonempty and {@code output} is {@code null}, or the output collection rejects a null array element.
+     * @throws UnsupportedOperationException if the input array is nonempty and the output collection does not support adding elements.
      * @throws ClassCastException if the output collection cannot accept the array's elements
+     * @throws IllegalArgumentException if the output collection rejects an element for a restriction other than its type or nullness.
      */
     @Override
-    public void arrayToCollection(final T[] x, final Collection<?> output) {
+    public void arrayToCollection(final T[] x, final Collection<?> output)
+            throws NullPointerException, UnsupportedOperationException, ClassCastException, IllegalArgumentException {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 
@@ -412,8 +488,8 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     /**
      * Computes a hash code for the given array.
-     * This method delegates to {@link N#hashCode(Object[])}, which hashes elements by content
-     * (recursively for nested arrays), consistent with {@link #equals(Object[], Object[])}.
+     * This method delegates to {@link N#hashCode(Object[])}, which hashes elements with
+     * {@link java.util.Objects#hashCode(Object)} (shallow), consistent with {@link #equals(Object[], Object[])}.
      *
      * @param x the array to hash
      * @return the computed hash code
@@ -437,8 +513,8 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     /**
      * Compares two arrays for equality.
-     * This method delegates to {@link N#equals(Object[], Object[])}, which compares elements by content
-     * (recursively for nested arrays).
+     * This method delegates to {@link N#equals(Object[], Object[])}, which compares elements with
+     * {@link java.util.Objects#equals(Object, Object)} (shallow).
      *
      * @param x the first array
      * @param y the second array
@@ -469,6 +545,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @param x the array to convert to string
      * @return string representation of the array, {@code null} if input is {@code null}, or {@code "[]"} for empty arrays
      */
+    @MayReturnNull
     @Override
     public String toString(final Object[] x) {
         if (x == null) {
@@ -487,6 +564,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * @param x the array to convert to string
      * @return deep string representation of the array, {@code null} if input is {@code null}, or {@code "[]"} for empty arrays
      */
+    @MayReturnNull
     @Override
     public String deepToString(final Object[] x) {
         if (x == null) {

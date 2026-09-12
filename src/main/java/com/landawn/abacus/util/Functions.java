@@ -24,6 +24,20 @@ import com.landawn.abacus.util.function.IntObjFunction;
 /**
  * Utility class providing various Function implementations and factory methods.
  * This class contains methods for creating indexed functions.
+ *
+ * <p>This class is a top-level sibling of {@link Fn} (formerly nested as {@code Fn.Functions}),
+ * not a nested type. Use {@link Fn} for the general functional-interface factory and {@link Fnn}
+ * for {@link Throwables} variants that can declare checked exceptions. For two-argument functions
+ * see {@link BiFunctions}; for three-argument functions see {@link TriFunctions}; for identity
+ * operators see {@link UnaryOperators}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see BiFunctions
+ * @see TriFunctions
+ * @see UnaryOperators
+ * @see Consumers
+ * @see Predicates
  */
 public final class Functions {
 
@@ -40,6 +54,10 @@ public final class Functions {
      * Functions.indexed((i, s) -> i + ":" + s).apply("hello");  // returns "0:hello"
      * }</pre>
      *
+     * <p>The returned callback uses indices from zero through {@link Integer#MAX_VALUE}. Later calls
+     * throw {@link ArithmeticException} without invoking user code. An invocation consumes its index
+     * even when user code throws.</p>
+     *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
      * @param func the IntObjFunction that accepts an index and element and produces a result
@@ -53,11 +71,20 @@ public final class Functions {
         N.checkArgNotNull(func, cs.func);
 
         return new Function<>() {
-            private final MutableInt idx = new MutableInt(0);
+            private long idx;
 
+            /**
+             * {@inheritDoc}
+             * @throws ArithmeticException if all nonnegative {@code int} indices have already been used by prior invocations
+             */
             @Override
-            public R apply(final T t) {
-                return func.apply(idx.getAndIncrement(), t);
+            public R apply(final T t) throws ArithmeticException {
+                // Keep exhaustion representable and reject before invoking user code.
+                if (idx > Integer.MAX_VALUE) {
+                    throw new ArithmeticException("Index exceeds Integer.MAX_VALUE");
+                }
+
+                return func.apply((int) idx++, t);
             }
         };
     }

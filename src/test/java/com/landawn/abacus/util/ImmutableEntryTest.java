@@ -150,7 +150,7 @@ public class ImmutableEntryTest extends TestBase {
 
     @Test
     public void testCopyOf_WithNullEntry() {
-        Assertions.assertThrows(NullPointerException.class, () -> {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
             ImmutableEntry.copyOf(null);
         });
     }

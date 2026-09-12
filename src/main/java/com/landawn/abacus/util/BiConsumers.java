@@ -27,6 +27,24 @@ import com.landawn.abacus.util.function.IntBiObjConsumer;
 /**
  * Utility class providing various BiConsumer implementations and factory methods.
  * This class contains predefined BiConsumers for common collection and map operations.
+ *
+ * <p>This class is a top-level sibling of {@link Fn} (formerly nested as {@code Fn.BiConsumers}),
+ * not a nested type. Use {@link Fn} for the general functional-interface factory and {@link Fnn}
+ * for {@link Throwables} variants that can declare checked exceptions. For one-argument consumers
+ * see {@link Consumers}; for three-argument consumers see {@link TriConsumers}.</p>
+ *
+ * <p>Note: the former {@code Fn.BiConsumers.ofAddAlll()} and {@code Fn.BiConsumers.ofRemoveAlll()}
+ * factories for {@link PrimitiveList} have been removed. {@code PrimitiveList} is not a
+ * {@link Collection}, so {@code ofAddAll()} / {@code ofRemoveAll()} cannot stand in for them;
+ * use a typed lambda instead, for example {@code (a, b) -> a.addAll(b)} or
+ * {@code (a, b) -> a.removeAll(b)}.</p>
+ *
+ * @see Fn
+ * @see Fnn
+ * @see Consumers
+ * @see TriConsumers
+ * @see BiFunctions
+ * @see BiPredicates
  */
 public final class BiConsumers {
 
@@ -42,19 +60,11 @@ public final class BiConsumers {
     /** The Constant ADD_ALL. */
     private static final BiConsumer<Collection<Object>, Collection<Object>> ADD_ALL = Collection::addAll;
 
-    // /** The Constant ADD_ALL_2. */ // commented out with ofAddAlll (triple-l PrimitiveList marker)
-    // @SuppressWarnings("rawtypes")
-    // private static final BiConsumer<PrimitiveList, PrimitiveList> ADD_ALL_2 = PrimitiveList::addAll;
-
     /** The Constant REMOVE. */
     private static final BiConsumer<Collection<Object>, Object> REMOVE = Collection::remove;
 
     /** The Constant REMOVE_ALL. */
     private static final BiConsumer<Collection<Object>, Collection<Object>> REMOVE_ALL = Collection::removeAll;
-
-    // /** The Constant REMOVE_ALL_2. */ // commented out with ofRemoveAlll (triple-l PrimitiveList marker)
-    // @SuppressWarnings("rawtypes")
-    // private static final BiConsumer<PrimitiveList, PrimitiveList> REMOVE_ALL_2 = PrimitiveList::removeAll;
 
     /** The Constant PUT. */
     private static final BiConsumer<Map<Object, Object>, Map.Entry<Object, Object>> PUT = (t, u) -> t.put(u.getKey(), u.getValue());
@@ -125,24 +135,6 @@ public final class BiConsumers {
         return (BiConsumer<C, C>) ADD_ALL;
     }
 
-    // /**
-    //  * Returns a BiConsumer that adds all elements from one PrimitiveList to another.
-    //  * The BiConsumer calls PrimitiveList.addAll(list) on the first argument with the second argument.
-    //  *
-    //  * <p><b>Usage Examples:</b></p>
-    //  * <pre>{@code
-    //  * BiConsumers.ofAddAlll().accept(com.landawn.abacus.util.IntList.of(1, 2), com.landawn.abacus.util.IntList.of(3, 4));   // adds 3 and 4 to the first list
-    //  * }</pre>
-    //  *
-    //  * @param <T> the type of PrimitiveList
-    //  * @return a BiConsumer that adds all elements from the second PrimitiveList to the first PrimitiveList
-    //  */
-    // @Beta
-    // @SuppressWarnings("rawtypes")
-    // public static <T extends PrimitiveList> BiConsumer<T, T> ofAddAlll() {
-    //     return (BiConsumer<T, T>) ADD_ALL_2;
-    // }
-
     /**
      * Returns a BiConsumer that removes an element from a collection.
      * The BiConsumer calls Collection.remove(element) on the first argument with the second argument.
@@ -176,24 +168,6 @@ public final class BiConsumers {
     public static <T, C extends Collection<T>> BiConsumer<C, C> ofRemoveAll() {
         return (BiConsumer<C, C>) REMOVE_ALL;
     }
-
-    // /**
-    //  * Returns a BiConsumer that removes all elements of one PrimitiveList from another.
-    //  * The BiConsumer calls PrimitiveList.removeAll(list) on the first argument with the second argument.
-    //  *
-    //  * <p><b>Usage Examples:</b></p>
-    //  * <pre>{@code
-    //  * BiConsumers.ofRemoveAlll().accept(com.landawn.abacus.util.IntList.of(1, 2, 3), com.landawn.abacus.util.IntList.of(2));   // removes 2 from the first list
-    //  * }</pre>
-    //  *
-    //  * @param <T> the type of PrimitiveList
-    //  * @return a BiConsumer that removes all elements in the second PrimitiveList from the first PrimitiveList
-    //  */
-    // @Beta
-    // @SuppressWarnings("rawtypes")
-    // public static <T extends PrimitiveList> BiConsumer<T, T> ofRemoveAlll() {
-    //     return (BiConsumer<T, T>) REMOVE_ALL_2;
-    // }
 
     /**
      * Returns a BiConsumer that puts a Map.Entry into a Map.
@@ -291,6 +265,10 @@ public final class BiConsumers {
      * BiConsumers.indexed((i, t, u) -> System.out.println(i)).accept("a", "b");  // prints 0
      * }</pre>
      *
+     * <p>The returned callback uses indices from zero through {@link Integer#MAX_VALUE}. Later calls
+     * throw {@link ArithmeticException} without invoking user code. An invocation consumes its index
+     * even when user code throws.</p>
+     *
      * @param <T> the type of the first argument to the consumer
      * @param <U> the type of the second argument to the consumer
      * @param action the IntBiObjConsumer that accepts an index and two elements
@@ -304,11 +282,20 @@ public final class BiConsumers {
         N.checkArgNotNull(action, cs.action);
 
         return new BiConsumer<>() {
-            private final MutableInt idx = new MutableInt(0);
+            private long idx;
 
+            /**
+             * {@inheritDoc}
+             * @throws ArithmeticException if all nonnegative {@code int} indices have already been used by prior invocations
+             */
             @Override
-            public void accept(final T t, final U u) {
-                action.accept(idx.getAndIncrement(), t, u);
+            public void accept(final T t, final U u) throws ArithmeticException {
+                // Keep exhaustion representable and reject before invoking user code.
+                if (idx > Integer.MAX_VALUE) {
+                    throw new ArithmeticException("Index exceeds Integer.MAX_VALUE");
+                }
+
+                action.accept((int) idx++, t, u);
             }
         };
     }

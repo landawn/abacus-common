@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.N;
 
 public class ByteBufferTypeTest extends TestBase {
 
@@ -224,6 +225,119 @@ public class ByteBufferTypeTest extends TestBase {
         // InputStreamType/ReaderType siblings which return the requested class.
         assertEquals(java.nio.MappedByteBuffer.class, new ByteBufferType(java.nio.MappedByteBuffer.class).javaType());
         assertEquals(ByteBuffer.class, new ByteBufferType().javaType());
+    }
+
+    // ---- review fixes 2026-09-06: T3-04 valueOf(Object) with a byte[] ----
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectByteArrayWrapsRawBytes() {
+        final byte[] bytes = { 1, 2, 3 };
+        final ByteBuffer result = type.valueOf((Object) bytes);
+
+        assertEquals(3, result.position());
+        assertEquals(3, result.limit());
+        assertEquals(3, result.capacity());
+        Assertions.assertArrayEquals(bytes, ByteBufferType.byteArrayOf(result));
+        // same semantics as the static valueOf(byte[]): the array is wrapped, not copied
+        Assertions.assertSame(bytes, result.array());
+        assertEquals("AQID", type.stringOf(result));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectEmptyByteArrayGivesEmptyBuffer() {
+        final ByteBuffer result = type.valueOf((Object) new byte[0]);
+
+        assertEquals(0, result.position());
+        assertEquals(0, result.limit());
+        assertEquals(0, ByteBufferType.byteArrayOf(result).length);
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectOtherInputsUnchanged() {
+        Assertions.assertNull(type.valueOf((Object) null));
+
+        final ByteBuffer fromString = type.valueOf((Object) "AQID");
+        assertEquals(3, fromString.position());
+        Assertions.assertArrayEquals(new byte[] { 1, 2, 3 }, ByteBufferType.byteArrayOf(fromString));
+
+        final ByteBuffer original = ByteBuffer.allocate(8);
+        original.put((byte) 9).put((byte) 8);
+        final ByteBuffer fromBuffer = type.valueOf((Object) original);
+        Assertions.assertNotSame(original, fromBuffer);
+        Assertions.assertArrayEquals(new byte[] { 9, 8 }, ByteBufferType.byteArrayOf(fromBuffer));
+        assertEquals(2, fromBuffer.position());
+        assertEquals(2, original.position()); // untouched
+        assertEquals(8, original.limit());
+
+        // invalid text still fails as Base64 (the list text is exactly what a byte[] used to become)
+        Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf((Object) "[1, 2, 3]"));
+    }
+
+    @Test
+    public void reviewFixes20260906_convertByteArrayToByteBuffer() {
+        final ByteBuffer result = N.convert(new byte[] { 1, 2, 3 }, ByteBuffer.class);
+
+        assertEquals(3, result.position());
+        Assertions.assertArrayEquals(new byte[] { 1, 2, 3 }, ByteBufferType.byteArrayOf(result));
+        Assertions.assertArrayEquals(new byte[] { 1, 2, 3 },
+                ByteBufferType.byteArrayOf(Type.of(ByteBuffer.class).valueOf((Object) new byte[] { 1, 2, 3 })));
+    }
+
+    @Test
+    public void reviewFixes20260906_valueOfObjectByteArrayOnSubclassHandlerMatchesStringPath() {
+        final ByteBufferType mapped = new ByteBufferType(java.nio.MappedByteBuffer.class);
+
+        // both paths agree, and both now build an instance of the DECLARED subclass (they used to hand
+        // back a plain heap buffer, which javaType() == MappedByteBuffer.class never admitted)
+        assertEquals(mapped.valueOf("AQID").getClass(), mapped.valueOf((Object) new byte[] { 1, 2, 3 }).getClass());
+        Assertions.assertArrayEquals(new byte[] { 1, 2, 3 }, ByteBufferType.byteArrayOf(mapped.valueOf((Object) new byte[] { 1, 2, 3 })));
+        Assertions.assertInstanceOf(java.nio.MappedByteBuffer.class, mapped.valueOf("AQID"));
+        Assertions.assertInstanceOf(java.nio.MappedByteBuffer.class, mapped.valueOf((Object) new byte[] { 1, 2, 3 }));
+    }
+
+    // ---- F77/F87 review fixes 2026-09-08: valueOf must produce an instance of javaType() ----
+
+    @Test
+    public void reviewFixes20260908_valueOfAlwaysProducesAnInstanceOfJavaType() {
+        // A handler bound to a ByteBuffer subclass used to advertise that class from javaType() while every
+        // valueOf ended at ByteBuffer.wrap(..), a HeapByteBuffer that is not an instance of it.
+        for (final ByteBufferType handler : new ByteBufferType[] { new ByteBufferType(), new ByteBufferType(ByteBuffer.class),
+                new ByteBufferType(java.nio.MappedByteBuffer.class) }) {
+            final ByteBuffer fromString = handler.valueOf("AQID");
+            final ByteBuffer fromBytes = handler.valueOf((Object) new byte[] { 1, 2, 3 });
+            final ByteBuffer empty = handler.valueOf("");
+
+            for (final ByteBuffer buffer : new ByteBuffer[] { fromString, fromBytes, empty }) {
+                Assertions.assertTrue(handler.javaType().isInstance(buffer), handler.javaType() + " vs " + buffer.getClass());
+            }
+
+            // the position-at-end convention and the Base64 round trip are unchanged for every handler
+            assertEquals(3, fromString.position());
+            assertEquals(3, fromBytes.position());
+            assertEquals(0, empty.position());
+            Assertions.assertArrayEquals(new byte[] { 1, 2, 3 }, ByteBufferType.byteArrayOf(fromString));
+            Assertions.assertArrayEquals(new byte[] { 1, 2, 3 }, ByteBufferType.byteArrayOf(fromBytes));
+            assertEquals("AQID", handler.stringOf(fromBytes));
+            Assertions.assertNull(handler.valueOf((String) null));
+        }
+
+        // the plain-ByteBuffer handler still shares the caller's array (the static valueOf(byte[]) contract)
+        final byte[] bytes = { 1, 2, 3 };
+        Assertions.assertSame(bytes, type.valueOf((Object) bytes).array());
+    }
+
+    @Test
+    public void reviewFixes20260908_bufferClassThatCannotBeConstructedIsRejected() {
+        // Read-only buffer classes are satisfied by neither a heap nor a direct allocation; the handler must
+        // say so rather than return something javaType() does not accept.
+        final Class<? extends ByteBuffer> readOnlyHeap = com.landawn.abacus.util.ClassUtil.forName("java.nio.HeapByteBufferR").asSubclass(ByteBuffer.class);
+        final ByteBufferType readOnly = new ByteBufferType(readOnlyHeap);
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> readOnly.valueOf("AQID"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> readOnly.valueOf((Object) new byte[] { 1, 2, 3 }));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> readOnly.valueOf(""));
+        // a null input never needs a buffer at all
+        Assertions.assertNull(readOnly.valueOf((String) null));
     }
 
 }

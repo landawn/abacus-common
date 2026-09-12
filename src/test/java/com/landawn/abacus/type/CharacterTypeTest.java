@@ -286,4 +286,19 @@ public class CharacterTypeTest extends TestBase {
         verify(writer).writeCharacter('A');
     }
 
+    // T4-05: the char[] overload no longer tolerates a type suffix ("1L" used to yield U+0001) and accepts the same
+    // digits as valueOf(String).
+    @Test
+    public void reviewFixes20260906_valueOf_charArray_sameGrammarAsString() {
+        Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("1L".toCharArray(), 0, 2));
+        Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("1L"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("65536".toCharArray(), 0, 5));
+
+        assertEquals(Character.valueOf('A'), type.valueOf("65".toCharArray(), 0, 2));
+        assertEquals(Character.valueOf('A'), type.valueOf("٦٥".toCharArray(), 0, 2));
+        assertEquals(Character.valueOf('A'), type.valueOf("٦٥"));
+        assertEquals(Character.valueOf('Z'), type.valueOf("Z".toCharArray(), 0, 1));
+        assertNull(type.valueOf((char[]) null, 0, 0));
+    }
+
 }

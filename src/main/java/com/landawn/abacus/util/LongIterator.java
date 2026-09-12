@@ -27,7 +27,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * A specialized iterator for primitive long values. This class provides an efficient way to iterate over
  * long values without the overhead of boxing/unboxing that comes with using Iterator&lt;Long&gt;.
  *
- * <p>This abstract class extends {@link ImmutableIterator} to ensure that the {@code remove()} operation
+ * <p>This abstract class does not support element removal: the {@code remove()} operation
  * is not supported. The traversal position itself is mutable and is consumed as values are read, so
  * instances are neither reusable nor safe for concurrent consumption. Transformation methods such as
  * {@code skip()}, {@code limit()} and {@code filter()} return wrappers over this same source iterator;
@@ -47,7 +47,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 public abstract class LongIterator extends ImmutableIterator<Long> {
 
     /**
@@ -70,8 +70,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if this iterator has no remaining element
+         */
         @Override
-        public long nextLong() {
+        public long nextLong() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
@@ -156,8 +160,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
                 return cursor < toIndex;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -194,9 +202,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // The supplier is not invoked until iter.hasNext() or iter.nextLong() is called
      * }</pre>
      *
+     * <p>The returned iterator initializes its source on its first traversal operation. If the supplier returns null, initialization throws IllegalStateException; a RuntimeException or Error from initialization is cached and rethrown by subsequent traversal operations.</p>
+     *
      * @param iteratorSupplier a {@link Supplier} that provides the {@code LongIterator} when needed
      * @return a lazily initialized {@code LongIterator} that delegates to the iterator provided by the supplier
-     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static LongIterator defer(final Supplier<? extends LongIterator> iteratorSupplier) throws IllegalArgumentException {
@@ -221,7 +230,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
                 return iter.nextLong();
             }
 
-            private void init() {
+            /**
+             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null}
+             */
+            private void init() throws IllegalStateException {
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
@@ -285,7 +297,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * This allows for creating finite iterators with dynamic termination conditions.
      *
      * <p>The {@code hasNext} supplier is called at most once per element; its result is cached
-     * until the next call to {@code nextLong()}.</p>
+     * until the next call to {@code nextLong()}. Once {@code hasNext} has returned {@code false} the
+     * iterator is permanently exhausted: the condition is never re-evaluated, so the iterator does not
+     * resume even if the state it inspects changes later.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -319,8 +333,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
                 return hasNextValue;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -349,7 +367,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      */
     @Deprecated
     @Override
-    public Long next() {
+    public Long next() throws NoSuchElementException {
         return nextLong();
     }
 
@@ -366,7 +384,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * @return the next long value
      * @throws NoSuchElementException if the iteration has no more elements
      */
-    public abstract long nextLong();
+    public abstract long nextLong() throws NoSuchElementException;
 
     /**
      * Returns a new {@code LongIterator} that skips the first {@code n} elements.
@@ -394,6 +412,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
 
         return new LongIterator() {
             private boolean skipped = false;
+            private long remaining = n;
 
             @Override
             public boolean hasNext() {
@@ -404,8 +423,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -414,10 +437,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
             }
 
             private void skip() {
-                long idx = 0;
-
-                while (idx++ < n && iter.hasNext()) {
+                while (remaining > 0 && iter.hasNext()) {
                     iter.nextLong();
+                    remaining--;
                 }
 
                 skipped = true;
@@ -458,14 +480,19 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
                 return cnt > 0 && iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final long result = iter.nextLong();
                 cnt--;
-                return iter.nextLong();
+                return result;
             }
         };
     }
@@ -510,8 +537,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
                 return hasNext;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -578,6 +609,11 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * Converts this iterator to a {@link LongStream}.
      * The stream is sequential and consumes elements from this iterator as needed.
      *
+     * <p>The stream shares this iterator's traversal position and consumes elements as needed.
+     * Operations that consume all remaining elements exhaust this iterator; short-circuiting
+     * operations may leave elements unconsumed. Do not access this iterator independently
+     * while the stream is consuming it.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long sum = LongIterator.of(1L, 2L, 3L).stream().sum();
@@ -616,10 +652,11 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // Produces: IndexedLong(index=5, value=10), IndexedLong(index=6, value=20), IndexedLong(index=7, value=30)
      * }</pre>
      *
+     * <p>The returned iterator throws ArithmeticException when traversal would assign an index greater than Long.MAX_VALUE.</p>
+     *
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedLong} objects with indices starting at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative.
-     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
     public ObjIterator<IndexedLong> indexed(final long startIndex) throws IllegalArgumentException {
@@ -636,8 +673,13 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if the source iterator has no remaining element
+             * @throws ArithmeticException if an element remains after index {@link Long#MAX_VALUE} has already been assigned
+             */
             @Override
-            public IndexedLong next() {
+            public IndexedLong next() throws NoSuchElementException, ArithmeticException {
                 if (indexOverflow) {
                     if (!iter.hasNext()) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
@@ -672,13 +714,13 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * }</pre>
      *
      * @param action the action to be performed for each element
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws NullPointerException if {@code action} is {@code null}, as specified by {@link java.util.Iterator#forEachRemaining(java.util.function.Consumer)}.
      * @deprecated use {@link #foreachRemaining(Throwables.LongConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Long> action) throws IllegalArgumentException {
-        N.checkArgNotNull(action, cs.action);
+    public void forEachRemaining(final java.util.function.Consumer<? super Long> action) throws NullPointerException {
+        N.requireNonNull(action, cs.action);
 
         super.forEachRemaining(action);
     }
@@ -695,10 +737,10 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to be performed for each element
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.LongConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachRemaining(final Throwables.LongConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);//NOSONAR
 
         while (hasNext()) {
@@ -725,12 +767,12 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to be performed for each element, accepting index and value
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
-     * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if {@code action} throws while processing a remaining element and its index
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntLongConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachIndexed(final Throwables.IntLongConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         N.checkArgNotNull(action, cs.action);
 
         int idx = 0;

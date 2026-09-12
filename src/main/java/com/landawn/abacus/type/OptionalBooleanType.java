@@ -138,20 +138,29 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      *
      * result = type.valueOf("");
      * // Returns: OptionalBoolean.empty()
+     *
+     * result = type.valueOf("  ");
+     * // Returns: OptionalBoolean.empty()
      * }</pre>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
-     * @param str the string to convert ("true", "false", or parseable boolean strings)
-     * @return an OptionalBoolean containing the parsed boolean value, or empty if the input is empty or null
+     * @param str the string to convert ("true", "false", or parseable boolean strings); surrounding padding is removed
+     *            first ({@linkplain Character#isWhitespace(char) Unicode whitespace} such as {@code U+3000}, or any
+     *            character {@code <= ' '})
+     * @return an OptionalBoolean containing the parsed boolean value, or empty if the input is {@code null}, empty, or
+     *         blank (whitespace only) - the boolean handlers treat a blank string as absent, unlike the numeric
+     *         handlers which reject it
      * @see #valueOf(Object)
      * @see #stringOf(OptionalBoolean)
      */
     @Override
     public OptionalBoolean valueOf(final String str) {
-        return Strings.isBlank(str) ? OptionalBoolean.empty() : OptionalBoolean.of(parseBoolean(str.trim()));
+        // parseBoolean already strips padding with the same definition Strings.isBlank uses (plus every
+        // character <= ' '), so an outer String.trim() here would be a no-op that only reads narrower.
+        return Strings.isBlank(str) ? OptionalBoolean.empty() : OptionalBoolean.of(parseBoolean(str));
     }
 
     /**
@@ -177,10 +186,11 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @param rs the ResultSet to read from
      * @param columnIndex the column index (1-based) to retrieve the value from
      * @return an OptionalBoolean containing the boolean value, or empty if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public OptionalBoolean get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public OptionalBoolean get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final Object result = rs.getObject(columnIndex);
 
         return result == null ? OptionalBoolean.empty() : OptionalBoolean.of(result instanceof Boolean b ? b : N.convert(result, Boolean.class));
@@ -209,10 +219,11 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @param rs the ResultSet to read from
      * @param columnName the label for the column specified with the SQL AS clause
      * @return an OptionalBoolean containing the boolean value, or empty if the column value is SQL NULL
-     * @throws SQLException if a database access error occurs or the columnName is invalid
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
     @Override
-    public OptionalBoolean get(final ResultSet rs, final String columnName) throws SQLException {
+    public OptionalBoolean get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final Object result = rs.getObject(columnName);
 
         return result == null ? OptionalBoolean.empty() : OptionalBoolean.of(result instanceof Boolean b ? b : N.convert(result, Boolean.class));
@@ -239,10 +250,11 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the OptionalBoolean value to set
-     * @throws SQLException if a database access error occurs or the columnIndex is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalBoolean x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalBoolean x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(columnIndex, java.sql.Types.BOOLEAN);
         } else {
@@ -271,10 +283,11 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OptionalBoolean value to set
-     * @throws SQLException if a database access error occurs or the parameterName is invalid
+     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final OptionalBoolean x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final OptionalBoolean x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
             stmt.setNull(parameterName, java.sql.Types.BOOLEAN);
         } else {
@@ -293,7 +306,8 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      *
      * @param appendable the Appendable to write to
      * @param x the OptionalBoolean value to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -305,7 +319,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final OptionalBoolean x) throws IOException {
+    public void appendTo(final Appendable appendable, final OptionalBoolean x) throws NullPointerException, IOException {
         appendable.append((x == null || x.isEmpty()) ? NULL_STRING : (x.get() ? TRUE_STRING : FALSE_STRING));
     }
 
@@ -323,10 +337,11 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @param writer the CharacterWriter to write to
      * @param x the OptionalBoolean value to write
      * @param config the serialization configuration
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final OptionalBoolean x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final OptionalBoolean x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null || x.isEmpty()) {
             writer.write(config != null && config.isWriteNullBooleanAsFalse() ? FALSE_CHAR_ARRAY : NULL_CHAR_ARRAY);
         } else {

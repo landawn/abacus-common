@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class TransientTest extends TestBase {
-    static class TestEntity {
+    public static class TestEntity {
         @Transient
         private String field;
     }

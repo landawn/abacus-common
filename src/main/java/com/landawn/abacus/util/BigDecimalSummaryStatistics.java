@@ -16,6 +16,8 @@ package com.landawn.abacus.util;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 import com.landawn.abacus.util.function.Consumer;
 
@@ -100,7 +102,7 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      *         values or a nonzero sum; or if a non-empty state has a null min/max value or {@code min} compares
      *         greater than {@code max}.
      */
-    public BigDecimalSummaryStatistics(final long count, final BigDecimal min, final BigDecimal max, final BigDecimal sum) {
+    public BigDecimalSummaryStatistics(final long count, final BigDecimal min, final BigDecimal max, final BigDecimal sum) throws IllegalArgumentException {
         if (count < 0) {
             throw new IllegalArgumentException("count must be non-negative");
         }
@@ -136,13 +138,18 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      *
      * @param value the input value to be recorded, must not be {@code null}
      * @throws IllegalArgumentException if {@code value} is {@code null}.
+     * @throws ArithmeticException if the count would overflow or the sum cannot be represented by
+     *         {@code BigDecimal}; this instance is unchanged
      */
     @Override
-    public void accept(final BigDecimal value) throws IllegalArgumentException {
+    public void accept(final BigDecimal value) throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotNull(value, cs.value);
 
-        ++count;
-        sum = sum.add(value);
+        // Check the count and calculate the sum before publishing either total.
+        final long newCount = Math.addExact(count, 1L);
+        final BigDecimal newSum = sum.add(value);
+        count = newCount;
+        sum = newSum;
         min = min == null ? value : min.compareTo(value) > 0 ? value : min;
         max = max == null ? value : max.compareTo(value) < 0 ? value : max;
     }
@@ -170,10 +177,15 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      *
      * @param other another {@code BigDecimalSummaryStatistics} to be combined with this one; must not be {@code null}
      * @throws NullPointerException if {@code other} is {@code null}
+     * @throws ArithmeticException if the combined count would overflow or the sum cannot be represented
+     *         by {@code BigDecimal}; this instance is unchanged
      */
-    public void combine(final BigDecimalSummaryStatistics other) {
-        count += other.count;
-        sum = sum.add(other.sum);
+    public void combine(final BigDecimalSummaryStatistics other) throws NullPointerException, ArithmeticException {
+        // Read both source totals before assignment so self-combination is also safe.
+        final long newCount = Math.addExact(count, other.count);
+        final BigDecimal newSum = sum.add(other.sum);
+        count = newCount;
+        sum = newSum;
         min = N.min(min, other.min);
         max = N.max(max, other.max);
     }
@@ -270,17 +282,23 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
 
     private static final String DECIMAL_FORMAT_PATTERN = "#,##0.000000";
 
-    private static final ThreadLocal<DecimalFormat> TO_STRING_FORMAT = ThreadLocal.withInitial(() -> new DecimalFormat(DECIMAL_FORMAT_PATTERN));
+    // Locale.ROOT symbols, not the default locale's: toString() must render the same grouping separator,
+    // decimal separator and digits on every machine, like the rest of the *SummaryStatistics family.
+    private static final ThreadLocal<DecimalFormat> TO_STRING_FORMAT = ThreadLocal
+            .withInitial(() -> new DecimalFormat(DECIMAL_FORMAT_PATTERN, DecimalFormatSymbols.getInstance(Locale.ROOT)));
 
     /**
      * Returns a string representation of this summary statistics object.
      *
      * <p>The representation includes min, max, count, sum, and average formatted
-     * using the {@code DecimalFormat} pattern {@code "#,##0.000000"}, which applies
-     * locale-specific grouping and decimal separators and six decimal places. If min or max is
+     * using the {@code DecimalFormat} pattern {@code "#,##0.000000"} with six decimal places. If min or max is
      * {@code null} (no values recorded), it is shown as {@code null}.</p>
      *
-     * <p>Example output in a locale that uses {@code ','} for grouping and {@code '.'} for decimals:</p>
+     * <p>The text is rendered with {@link java.util.Locale#ROOT}, so the grouping separator ({@code ','}), the
+     * decimal separator ({@code '.'}) and the digits are the same on every machine regardless of the default
+     * locale.</p>
+     *
+     * <p>Example output:</p>
      * <pre>{@code
      * {min=5.250000, max=25.750000, count=3, sum=46.500000, average=15.500000}
      * }</pre>

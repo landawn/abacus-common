@@ -2,7 +2,6 @@ package com.landawn.abacus.guava.hash;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,1051 +12,263 @@ import java.util.List;
 
 import javax.crypto.spec.SecretKeySpec;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.google.common.hash.Funnel;
 import com.google.common.hash.HashCode;
-import com.google.common.hash.PrimitiveSink;
 import com.landawn.abacus.TestBase;
 
 public class HashingTest extends TestBase {
 
-    static class Person {
-        final String name;
-        final int age;
-
-        Person(String name, int age) {
-            this.name = name;
-            this.age = age;
-        }
-    }
-
-    private static final Funnel<Person> PERSON_FUNNEL = (Person from, PrimitiveSink into) -> {
-        into.putString(from.name, StandardCharsets.UTF_8);
-        into.putInt(from.age);
-    };
+    private static final byte[] DATA = "test".getBytes(StandardCharsets.UTF_8);
 
     @Test
-    public void testHashingWithFunnel() {
-        Person person1 = new Person("Alice", 30);
-        Person person2 = new Person("Alice", 30);
-        Person person3 = new Person("Bob", 25);
-
-        HashFunction hf = Hashing.sha256();
-
-        HashCode hash1 = hf.hash(person1, PERSON_FUNNEL);
-        HashCode hash2 = hf.hash(person2, PERSON_FUNNEL);
-        HashCode hash3 = hf.hash(person3, PERSON_FUNNEL);
-
-        assertEquals(hash1, hash2);
-        assertNotEquals(hash1, hash3);
-    }
-
-    @Test
-    @DisplayName("Test goodFastHash with valid minimum bits")
     public void testGoodFastHash() {
-        HashFunction hashFunc = Hashing.goodFastHash(128);
+        assertEquals(32, Hashing.goodFastHash(1).bits());
+        assertEquals(32, Hashing.goodFastHash(32).bits());
+        assertEquals(128, Hashing.goodFastHash(33).bits());
+        assertEquals(128, Hashing.goodFastHash(128).bits());
+        assertEquals(256, Hashing.goodFastHash(129).bits());
+        assertEquals(384, Hashing.goodFastHash(300).bits());
+        assertEquals(Hashing.goodFastHash(128), Hashing.goodFastHash(128));
+        assertEquals(Hashing.goodFastHash(128).hash(DATA), Hashing.goodFastHash(100).hash(DATA));
 
-        assertNotNull(hashFunc);
-        assertTrue(hashFunc.bits() >= 128);
-    }
+        HashFunction upper = Hashing.goodFastHash(Integer.MAX_VALUE - 127);
+        assertTrue(upper.bits() >= Integer.MAX_VALUE - 127);
+        assertEquals(0, upper.bits() % 128);
 
-    @Test
-    @DisplayName("Test goodFastHash with different bit lengths")
-    public void testGoodFastHashDifferentBitLengths() {
-        HashFunction hash32 = Hashing.goodFastHash(32);
-        HashFunction hash64 = Hashing.goodFastHash(64);
-        HashFunction hash128 = Hashing.goodFastHash(128);
-
-        assertNotNull(hash32);
-        assertNotNull(hash64);
-        assertNotNull(hash128);
-        assertTrue(hash32.bits() >= 32);
-        assertTrue(hash64.bits() >= 64);
-        assertTrue(hash128.bits() >= 128);
-    }
-
-    @Test
-    @DisplayName("Test goodFastHash produces consistent function")
-    public void testGoodFastHashConsistent() {
-        HashFunction hashFunc1 = Hashing.goodFastHash(128);
-        HashFunction hashFunc2 = Hashing.goodFastHash(128);
-
-        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
-        HashCode hash1 = hashFunc1.hash(data);
-        HashCode hash2 = hashFunc2.hash(data);
-
-        // Same instance should produce same hash
-        assertEquals(hash1, hash2);
-    }
-
-    @Test
-    @DisplayName("Test goodFastHash throws exception for invalid bits")
-    public void testGoodFastHashInvalidBits() {
         assertThrows(IllegalArgumentException.class, () -> Hashing.goodFastHash(0));
         assertThrows(IllegalArgumentException.class, () -> Hashing.goodFastHash(-1));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.goodFastHash(Integer.MIN_VALUE));
+        IllegalArgumentException max = assertThrows(IllegalArgumentException.class, () -> Hashing.goodFastHash(Integer.MAX_VALUE));
+        assertTrue(max.getMessage().contains(String.valueOf(Integer.MAX_VALUE - 127)));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.goodFastHash(Integer.MAX_VALUE - 40));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.goodFastHash(Integer.MAX_VALUE - 126));
     }
 
     @Test
-    @DisplayName("Test murmur3_32 different seeds produce different hashes")
-    public void testMurmur3_32DifferentSeeds() {
-        HashFunction hashFunc1 = Hashing.murmur3_32(0);
-        HashFunction hashFunc2 = Hashing.murmur3_32(42);
+    public void testMurmur3_32() {
+        HashFunction noSeed = Hashing.murmur3_32();
+        HashFunction seed0 = Hashing.murmur3_32(0);
+        HashFunction seed42 = Hashing.murmur3_32(42);
+        HashFunction seedNeg = Hashing.murmur3_32(-1);
 
-        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
-        HashCode hash1 = hashFunc1.hash(data);
-        HashCode hash2 = hashFunc2.hash(data);
-
-        assertNotEquals(hash1, hash2);
-    }
-
-    // Test murmur3_32() methods
-
-    @Test
-    @DisplayName("Test murmur3_32 with no seed")
-    public void testMurmur3_32NoSeed() {
-        HashFunction hashFunc = Hashing.murmur3_32();
-
-        assertNotNull(hashFunc);
-        assertEquals(32, hashFunc.bits());
+        assertEquals(32, noSeed.bits());
+        assertEquals(32, seed42.bits());
+        assertEquals(32, seedNeg.bits());
+        assertEquals(noSeed.hash(DATA), Hashing.murmur3_32().hash(DATA));
+        assertEquals(seed42.hash(DATA), Hashing.murmur3_32(42).hash(DATA));
+        assertNotEquals(seed0.hash(DATA), seed42.hash(DATA));
+        assertNotEquals(seed0.hash(DATA), seedNeg.hash(DATA));
     }
 
     @Test
-    @DisplayName("Test murmur3_32 with seed")
-    public void testMurmur3_32WithSeed() {
-        HashFunction hashFunc = Hashing.murmur3_32(42);
+    public void testMurmur3_128() {
+        HashFunction noSeed = Hashing.murmur3_128();
+        HashFunction seed0 = Hashing.murmur3_128(0);
+        HashFunction seed42 = Hashing.murmur3_128(42);
 
-        assertNotNull(hashFunc);
-        assertEquals(32, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test murmur3_32 same seed produces consistent hashes")
-    public void testMurmur3_32SameSeedConsistent() {
-        int seed = 12345;
-        HashFunction hashFunc1 = Hashing.murmur3_32(seed);
-        HashFunction hashFunc2 = Hashing.murmur3_32(seed);
-
-        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
-        HashCode hash1 = hashFunc1.hash(data);
-        HashCode hash2 = hashFunc2.hash(data);
-
-        assertEquals(hash1, hash2);
-    }
-
-    @Test
-    @DisplayName("Test murmur3_32 with negative seed")
-    public void testMurmur3_32NegativeSeed() {
-        HashFunction hashFunc = Hashing.murmur3_32(-1);
-
-        assertNotNull(hashFunc);
-        assertEquals(32, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test murmur3_128 different seeds produce different hashes")
-    public void testMurmur3_128DifferentSeeds() {
-        HashFunction hashFunc1 = Hashing.murmur3_128(0);
-        HashFunction hashFunc2 = Hashing.murmur3_128(42);
-
-        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
-        HashCode hash1 = hashFunc1.hash(data);
-        HashCode hash2 = hashFunc2.hash(data);
-
-        assertNotEquals(hash1, hash2);
-    }
-
-    // Test murmur3_128() methods
-
-    @Test
-    @DisplayName("Test murmur3_128 with no seed")
-    public void testMurmur3_128NoSeed() {
-        HashFunction hashFunc = Hashing.murmur3_128();
-
-        assertNotNull(hashFunc);
-        assertEquals(128, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test murmur3_128 with seed")
-    public void testMurmur3_128WithSeed() {
-        HashFunction hashFunc = Hashing.murmur3_128(42);
-
-        assertNotNull(hashFunc);
-        assertEquals(128, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test combining hashes for composite key")
-    public void testCompositeKeyScenario() {
-        String userId = "user123";
-        String sessionId = "session456";
-
-        HashCode userHash = Hashing.murmur3_128().hash(userId, StandardCharsets.UTF_8);
-        HashCode sessionHash = Hashing.murmur3_128().hash(sessionId, StandardCharsets.UTF_8);
-
-        HashCode compositeHash = Hashing.combineOrdered(userHash, sessionHash);
-
-        assertNotNull(compositeHash);
-    }
-
-    @Test
-    @DisplayName("Test sipHash24 different keys produce different hashes")
-    public void testSipHash24DifferentKeys() {
-        HashFunction hashFunc1 = Hashing.sipHash24(0, 0);
-        HashFunction hashFunc2 = Hashing.sipHash24(1, 1);
-
-        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
-        HashCode hash1 = hashFunc1.hash(data);
-        HashCode hash2 = hashFunc2.hash(data);
-
-        assertNotEquals(hash1, hash2);
-    }
-
-    @Test
-    public void testSipHash24WithKey() {
-        long k0 = 0x0706050403020100L;
-        long k1 = 0x0f0e0d0c0b0a0908L;
-
-        HashFunction hf1 = Hashing.sipHash24(k0, k1);
-        HashFunction hf2 = Hashing.sipHash24(k0, k1);
-        HashFunction hf3 = Hashing.sipHash24(k1, k0);
-
-        byte[] data = "test".getBytes();
-        HashCode hash1 = hf1.hash(data);
-        HashCode hash2 = hf2.hash(data);
-        HashCode hash3 = hf3.hash(data);
-
-        assertEquals(hash1, hash2);
-        assertNotEquals(hash1, hash3);
-    }
-
-    // Test sipHash24() methods
-
-    @Test
-    @DisplayName("Test sipHash24 with default seed")
-    public void testSipHash24DefaultSeed() {
-        HashFunction hashFunc = Hashing.sipHash24();
-
-        assertNotNull(hashFunc);
-        assertEquals(64, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test sipHash24 with custom key")
-    public void testSipHash24CustomKey() {
-        long k0 = 0x0706050403020100L;
-        long k1 = 0x0f0e0d0c0b0a0908L;
-        HashFunction hashFunc = Hashing.sipHash24(k0, k1);
-
-        assertNotNull(hashFunc);
-        assertEquals(64, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test sipHash24 same key produces consistent hashes")
-    public void testSipHash24SameKeyConsistent() {
-        long k0 = 123456789L;
-        long k1 = 987654321L;
-
-        HashFunction hashFunc1 = Hashing.sipHash24(k0, k1);
-        HashFunction hashFunc2 = Hashing.sipHash24(k0, k1);
-
-        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
-        HashCode hash1 = hashFunc1.hash(data);
-        HashCode hash2 = hashFunc2.hash(data);
-
-        assertEquals(hash1, hash2);
+        assertEquals(128, noSeed.bits());
+        assertEquals(128, seed42.bits());
+        assertEquals(noSeed.hash(DATA), Hashing.murmur3_128().hash(DATA));
+        assertEquals(seed42.hash(DATA), Hashing.murmur3_128(42).hash(DATA));
+        assertNotEquals(seed0.hash(DATA), seed42.hash(DATA));
     }
 
     @Test
     public void testSipHash24() {
-        HashFunction hf = Hashing.sipHash24();
-        assertNotNull(hf);
-        assertEquals(64, hf.bits());
+        long k0 = 0x0706050403020100L;
+        long k1 = 0x0f0e0d0c0b0a0908L;
+        HashFunction def = Hashing.sipHash24();
+        HashFunction keyed = Hashing.sipHash24(k0, k1);
 
-        HashCode hash = hf.hash("siphash test".getBytes());
-        assertEquals(8, hash.asBytes().length);
+        assertEquals(64, def.bits());
+        assertEquals(64, keyed.bits());
+        assertEquals(8, def.hash(DATA).asBytes().length);
+        assertEquals(keyed.hash(DATA), Hashing.sipHash24(k0, k1).hash(DATA));
+        assertNotEquals(keyed.hash(DATA), Hashing.sipHash24(k1, k0).hash(DATA));
+        assertNotEquals(Hashing.sipHash24(0, 0).hash(DATA), Hashing.sipHash24(1, 1).hash(DATA));
     }
 
-    // Test cryptographic hash functions
-
     @Test
-    @DisplayName("Test md5")
     @SuppressWarnings("deprecation")
-    public void testMd5() {
-        HashFunction hashFunc = Hashing.md5();
+    public void testCryptographicAndChecksumFactories() {
+        assertEquals(128, Hashing.md5().bits());
+        assertEquals(160, Hashing.sha1().bits());
+        assertEquals(256, Hashing.sha256().bits());
+        assertEquals(384, Hashing.sha384().bits());
+        assertEquals(512, Hashing.sha512().bits());
+        assertEquals(32, Hashing.crc32c().bits());
+        assertEquals(32, Hashing.crc32().bits());
+        assertEquals(32, Hashing.adler32().bits());
+        assertEquals(64, Hashing.farmHashFingerprint64().bits());
 
-        assertNotNull(hashFunc);
-        assertEquals(128, hashFunc.bits());
+        byte[] hello = "Hello World".getBytes(StandardCharsets.UTF_8);
+        assertEquals(Hashing.md5().hash(hello), Hashing.md5().hash(hello));
+        assertEquals(16, Hashing.md5().hash(hello).asBytes().length);
+        assertEquals(20, Hashing.sha1().hash(hello).asBytes().length);
+        assertEquals(32, Hashing.sha256().hash(hello).asBytes().length);
+        assertEquals(4, Hashing.crc32c().hash(hello).asBytes().length);
+        assertEquals(4, Hashing.crc32().hash(hello).asBytes().length);
+        assertEquals(4, Hashing.adler32().hash(hello).asBytes().length);
+        assertEquals(Hashing.farmHashFingerprint64().hash(DATA), Hashing.farmHashFingerprint64().hash(DATA));
+
+        HashCode sha256 = Hashing.sha256().hash(DATA);
+        HashCode sha384 = Hashing.sha384().hash(DATA);
+        HashCode sha512 = Hashing.sha512().hash(DATA);
+        assertEquals(256, sha256.bits());
+        assertEquals(384, sha384.bits());
+        assertEquals(512, sha512.bits());
+        assertNotEquals(sha256, sha384);
+        assertNotEquals(Hashing.crc32c().hash(DATA), Hashing.crc32().hash(DATA));
+        assertNotEquals(Hashing.crc32().hash(DATA), Hashing.adler32().hash(DATA));
     }
 
     @Test
-    @DisplayName("Test md5 produces consistent hash for same input")
-    @SuppressWarnings("deprecation")
-    public void testMd5_HashData() {
-        byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
-        HashCode hash1 = Hashing.md5().hash(data);
-        HashCode hash2 = Hashing.md5().hash(data);
+    public void testHmacFactories() {
+        byte[] keyBytes = "secret".getBytes(StandardCharsets.UTF_8);
+        byte[] message = "message".getBytes(StandardCharsets.UTF_8);
+        Key md5Key = new SecretKeySpec(keyBytes, "HmacMD5");
+        Key sha1Key = new SecretKeySpec(keyBytes, "HmacSHA1");
+        Key sha256Key = new SecretKeySpec(keyBytes, "HmacSHA256");
+        Key sha512Key = new SecretKeySpec(keyBytes, "HmacSHA512");
 
-        assertNotNull(hash1);
-        assertEquals(hash1, hash2);
-        assertEquals(16, hash1.asBytes().length);
-    }
+        assertEquals(128, Hashing.hmacMd5(md5Key).bits());
+        assertEquals(128, Hashing.hmacMd5(keyBytes).bits());
+        assertEquals(160, Hashing.hmacSha1(sha1Key).bits());
+        assertEquals(160, Hashing.hmacSha1(keyBytes).bits());
+        assertEquals(256, Hashing.hmacSha256(sha256Key).bits());
+        assertEquals(256, Hashing.hmacSha256(keyBytes).bits());
+        assertEquals(512, Hashing.hmacSha512(sha512Key).bits());
+        assertEquals(512, Hashing.hmacSha512(keyBytes).bits());
 
-    @Test
-    @DisplayName("Test sha1")
-    @SuppressWarnings("deprecation")
-    public void testSha1() {
-        HashFunction hashFunc = Hashing.sha1();
+        assertEquals(Hashing.hmacSha1(sha1Key).hash(message), Hashing.hmacSha1(sha1Key).hash(message));
+        assertEquals(Hashing.hmacSha1(keyBytes).hash(message), Hashing.hmacSha1(keyBytes).hash(message));
+        assertEquals(Hashing.hmacSha256(keyBytes).hash(message), Hashing.hmacSha256(keyBytes).hash(message));
+        assertEquals(Hashing.hmacSha512(sha512Key).hash(message), Hashing.hmacSha512(sha512Key).hash(message));
+        assertNotEquals(Hashing.hmacSha256(keyBytes).hash(message), Hashing.hmacSha256("secret2".getBytes(StandardCharsets.UTF_8)).hash(message));
 
-        assertNotNull(hashFunc);
-        assertEquals(160, hashFunc.bits());
-    }
+        assertEquals(Hashing.hmacMd5(keyBytes).hash(message), Hashing.hmacMd5(new SecretKeySpec(keyBytes, "HmacSHA256")).hash(message));
+        assertEquals(Hashing.hmacMd5(keyBytes).hash(message), Hashing.hmacMd5(new SecretKeySpec(keyBytes, "AES")).hash(message));
+        assertEquals(Hashing.hmacSha256(keyBytes).hash(message), Hashing.hmacSha256(new SecretKeySpec(keyBytes, "HmacMD5")).hash(message));
 
-    @Test
-    @DisplayName("Test sha1 produces consistent hash for same input")
-    @SuppressWarnings("deprecation")
-    public void testSha1_HashData() {
-        byte[] data = "Hello World".getBytes(StandardCharsets.UTF_8);
-        HashCode hash1 = Hashing.sha1().hash(data);
-        HashCode hash2 = Hashing.sha1().hash(data);
+        Key publicLikeKey = new Key() {
+            @Override
+            public String getAlgorithm() {
+                return "RSA";
+            }
 
-        assertNotNull(hash1);
-        assertEquals(hash1, hash2);
-        assertEquals(20, hash1.asBytes().length);
-    }
+            @Override
+            public String getFormat() {
+                return "X.509";
+            }
 
-    @Test
-    @DisplayName("Test file integrity checking scenario")
-    public void testFileIntegrityScenario() {
-        byte[] fileContent = "Important file content".getBytes(StandardCharsets.UTF_8);
-
-        HashCode originalChecksum = Hashing.sha256().hash(fileContent);
-        HashCode verifyChecksum = Hashing.sha256().hash(fileContent);
-
-        assertEquals(originalChecksum, verifyChecksum);
-
-        // Modified content
-        byte[] modifiedContent = "Different content".getBytes(StandardCharsets.UTF_8);
-        HashCode modifiedChecksum = Hashing.sha256().hash(modifiedContent);
-
-        assertNotEquals(originalChecksum, modifiedChecksum);
-    }
-
-    @Test
-    @DisplayName("Test sha256")
-    public void testSha256() {
-        HashFunction hashFunc = Hashing.sha256();
-
-        assertNotNull(hashFunc);
-        assertEquals(256, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test different SHA algorithms produce different hashes")
-    public void testDifferentShaAlgorithms() {
-        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
-
-        HashCode sha256Hash = Hashing.sha256().hash(data);
-        HashCode sha384Hash = Hashing.sha384().hash(data);
-        HashCode sha512Hash = Hashing.sha512().hash(data);
-
-        assertNotNull(sha256Hash);
-        assertNotNull(sha384Hash);
-        assertNotNull(sha512Hash);
-        assertEquals(256, sha256Hash.bits());
-        assertEquals(384, sha384Hash.bits());
-        assertEquals(512, sha512Hash.bits());
-    }
-
-    @Test
-    @DisplayName("Test password hashing scenario")
-    public void testPasswordHashingScenario() {
-        String password = "myPassword123";
-        String salt = "randomSalt";
-
-        byte[] saltedPassword = (password + salt).getBytes(StandardCharsets.UTF_8);
-        HashCode hash = Hashing.sha256().hash(saltedPassword);
-
-        assertNotNull(hash);
-        assertEquals(256, hash.bits());
-    }
-
-    @Test
-    @DisplayName("Test sha384")
-    public void testSha384() {
-        HashFunction hashFunc = Hashing.sha384();
-
-        assertNotNull(hashFunc);
-        assertEquals(384, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test sha512")
-    public void testSha512() {
-        HashFunction hashFunc = Hashing.sha512();
-
-        assertNotNull(hashFunc);
-        assertEquals(512, hashFunc.bits());
-    }
-
-    // Test HMAC functions with Key
-
-    @Test
-    @DisplayName("Test hmacMd5 with Key")
-    public void testHmacMd5WithKey() {
-        Key key = new SecretKeySpec("secret".getBytes(StandardCharsets.UTF_8), "HmacMD5");
-        HashFunction hashFunc = Hashing.hmacMd5(key);
-
-        assertNotNull(hashFunc);
-        assertEquals(128, hashFunc.bits());
-    }
-
-    // Test HMAC functions with byte array
-
-    @Test
-    @DisplayName("Test hmacMd5 with byte array")
-    public void testHmacMd5WithBytes() {
-        byte[] key = "secret".getBytes(StandardCharsets.UTF_8);
-        HashFunction hashFunc = Hashing.hmacMd5(key);
-
-        assertNotNull(hashFunc);
-        assertEquals(128, hashFunc.bits());
-    }
-
-    @Test
-    public void testHmacMd5WithByteArray() {
-        byte[] keyBytes = "secret key".getBytes(StandardCharsets.UTF_8);
-        HashFunction hf = Hashing.hmacMd5(keyBytes);
-        assertNotNull(hf);
-
-        HashCode hash = hf.hash("message".getBytes());
-        assertNotNull(hash);
-
+            @Override
+            public byte[] getEncoded() {
+                return new byte[] { 1, 2, 3 };
+            }
+        };
+        assertThrows(IllegalArgumentException.class, () -> Hashing.hmacMd5(publicLikeKey));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.hmacSha1(publicLikeKey));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.hmacSha256(publicLikeKey));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.hmacSha512(publicLikeKey));
+        assertThrows(NullPointerException.class, () -> Hashing.hmacMd5((Key) null));
+        assertThrows(NullPointerException.class, () -> Hashing.hmacSha256((Key) null));
         assertThrows(IllegalArgumentException.class, () -> Hashing.hmacMd5(new byte[0]));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.hmacSha512(new byte[0]));
     }
 
     @Test
-    @DisplayName("Test hmacSha1 with Key")
-    public void testHmacSha1WithKey() {
-        Key key = new SecretKeySpec("secret".getBytes(StandardCharsets.UTF_8), "HmacSHA1");
-        HashFunction hashFunc = Hashing.hmacSha1(key);
-
-        assertNotNull(hashFunc);
-        assertEquals(160, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test hmacSha1 with Key produces consistent hash")
-    public void testHmacSha1WithKey_HashData() {
-        Key key = new SecretKeySpec("secret".getBytes(StandardCharsets.UTF_8), "HmacSHA1");
-        byte[] data = "message to authenticate".getBytes(StandardCharsets.UTF_8);
-
-        HashCode hash1 = Hashing.hmacSha1(key).hash(data);
-        HashCode hash2 = Hashing.hmacSha1(key).hash(data);
-
-        assertNotNull(hash1);
-        assertEquals(hash1, hash2);
-        assertEquals(20, hash1.asBytes().length);
-    }
-
-    @Test
-    @DisplayName("Test hmacSha1 with byte array")
-    public void testHmacSha1WithBytes() {
-        byte[] key = "secret".getBytes(StandardCharsets.UTF_8);
-        HashFunction hashFunc = Hashing.hmacSha1(key);
-
-        assertNotNull(hashFunc);
-        assertEquals(160, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test hmacSha1 with byte array produces consistent hash")
-    public void testHmacSha1WithBytes_HashData() {
-        byte[] key = "mySecretKey".getBytes(StandardCharsets.UTF_8);
-        byte[] data = "authenticated message".getBytes(StandardCharsets.UTF_8);
-
-        HashCode hash1 = Hashing.hmacSha1(key).hash(data);
-        HashCode hash2 = Hashing.hmacSha1(key).hash(data);
-
-        assertNotNull(hash1);
-        assertEquals(hash1, hash2);
-        assertEquals(20, hash1.asBytes().length);
-    }
-
-    @Test
-    @DisplayName("Test HMAC with different keys produce different hashes")
-    public void testHmacDifferentKeys() {
-        byte[] key1 = "secret1".getBytes(StandardCharsets.UTF_8);
-        byte[] key2 = "secret2".getBytes(StandardCharsets.UTF_8);
-        byte[] data = "message".getBytes(StandardCharsets.UTF_8);
-
-        HashCode hash1 = Hashing.hmacSha256(key1).hash(data);
-        HashCode hash2 = Hashing.hmacSha256(key2).hash(data);
-
-        assertNotEquals(hash1, hash2);
-    }
-
-    @Test
-    @DisplayName("Test hmacSha256 with Key")
-    public void testHmacSha256WithKey() {
-        Key key = new SecretKeySpec("secret".getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        HashFunction hashFunc = Hashing.hmacSha256(key);
-
-        assertNotNull(hashFunc);
-        assertEquals(256, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test hmacSha256 with byte array")
-    public void testHmacSha256WithBytes() {
-        byte[] key = "secret".getBytes(StandardCharsets.UTF_8);
-        HashFunction hashFunc = Hashing.hmacSha256(key);
-
-        assertNotNull(hashFunc);
-        assertEquals(256, hashFunc.bits());
-    }
-
-    @Test
-    public void testHmacSha256WithByteArray() {
-        byte[] keyBytes = "strongSecretKey".getBytes(StandardCharsets.UTF_8);
-        HashFunction hf = Hashing.hmacSha256(keyBytes);
-        assertNotNull(hf);
-
-        HashCode hash = hf.hash("important data".getBytes());
-        assertNotNull(hash);
-    }
-
-    @Test
-    @DisplayName("Test HMAC with same key produces consistent hashes")
-    public void testHmacSameKeyConsistent() {
-        byte[] key = "secret".getBytes(StandardCharsets.UTF_8);
-        byte[] data = "message".getBytes(StandardCharsets.UTF_8);
-
-        HashCode hash1 = Hashing.hmacSha256(key).hash(data);
-        HashCode hash2 = Hashing.hmacSha256(key).hash(data);
-
-        assertEquals(hash1, hash2);
-    }
-
-    @Test
-    @DisplayName("Test HMAC message authentication scenario")
-    public void testMessageAuthenticationScenario() {
-        String message = "Important message";
-        byte[] secretKey = "sharedSecret".getBytes(StandardCharsets.UTF_8);
-
-        HashCode mac = Hashing.hmacSha256(secretKey).hash(message, StandardCharsets.UTF_8);
-
-        assertNotNull(mac);
-        assertEquals(256, mac.bits());
-
-        // Verify with same key
-        HashCode verifyMac = Hashing.hmacSha256(secretKey).hash(message, StandardCharsets.UTF_8);
-        assertEquals(mac, verifyMac);
-
-        // Different key produces different MAC
-        byte[] wrongKey = "wrongSecret".getBytes(StandardCharsets.UTF_8);
-        HashCode wrongMac = Hashing.hmacSha256(wrongKey).hash(message, StandardCharsets.UTF_8);
-        assertNotEquals(mac, wrongMac);
-    }
-
-    @Test
-    @DisplayName("Test hmacSha512 with Key")
-    public void testHmacSha512WithKey() {
-        Key key = new SecretKeySpec("secret".getBytes(StandardCharsets.UTF_8), "HmacSHA512");
-        HashFunction hashFunc = Hashing.hmacSha512(key);
-
-        assertNotNull(hashFunc);
-        assertEquals(512, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test hmacSha512 with Key produces consistent hash")
-    public void testHmacSha512WithKey_HashData() {
-        Key key = new SecretKeySpec("topsecret".getBytes(StandardCharsets.UTF_8), "HmacSHA512");
-        byte[] data = "critical data".getBytes(StandardCharsets.UTF_8);
-
-        HashCode hash1 = Hashing.hmacSha512(key).hash(data);
-        HashCode hash2 = Hashing.hmacSha512(key).hash(data);
-
-        assertNotNull(hash1);
-        assertEquals(hash1, hash2);
-        assertEquals(64, hash1.asBytes().length);
-    }
-
-    @Test
-    @DisplayName("Test hmacSha512 with byte array")
-    public void testHmacSha512WithBytes() {
-        byte[] key = "secret".getBytes(StandardCharsets.UTF_8);
-        HashFunction hashFunc = Hashing.hmacSha512(key);
-
-        assertNotNull(hashFunc);
-        assertEquals(512, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test hmacSha512 with byte array produces consistent hash")
-    public void testHmacSha512WithBytes_HashData() {
-        byte[] key = "mySecretKey512".getBytes(StandardCharsets.UTF_8);
-        byte[] data = "critical data".getBytes(StandardCharsets.UTF_8);
-
-        HashCode hash1 = Hashing.hmacSha512(key).hash(data);
-        HashCode hash2 = Hashing.hmacSha512(key).hash(data);
-
-        assertNotNull(hash1);
-        assertEquals(hash1, hash2);
-        assertEquals(64, hash1.asBytes().length);
-    }
-
-    // Test checksum functions
-
-    @Test
-    @DisplayName("Test crc32c")
-    public void testCrc32c() {
-        HashFunction hashFunc = Hashing.crc32c();
-
-        assertNotNull(hashFunc);
-        assertEquals(32, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test crc32c produces consistent hash for same input")
-    public void testCrc32c_HashData() {
-        byte[] data = "data to check".getBytes(StandardCharsets.UTF_8);
-        HashCode hash1 = Hashing.crc32c().hash(data);
-        HashCode hash2 = Hashing.crc32c().hash(data);
-
-        assertNotNull(hash1);
-        assertEquals(hash1, hash2);
-        assertEquals(4, hash1.asBytes().length);
-    }
-
-    @Test
-    @DisplayName("Test checksum functions produce different hashes")
-    public void testChecksumFunctionsDifferent() {
-        byte[] data = "test data".getBytes(StandardCharsets.UTF_8);
-
-        HashCode crc32cHash = Hashing.crc32c().hash(data);
-        HashCode crc32Hash = Hashing.crc32().hash(data);
-        HashCode adler32Hash = Hashing.adler32().hash(data);
-
-        assertNotNull(crc32cHash);
-        assertNotNull(crc32Hash);
-        assertNotNull(adler32Hash);
-        // Different algorithms should produce different hashes
-    }
-
-    @Test
-    @DisplayName("Test crc32")
-    public void testCrc32() {
-        HashFunction hashFunc = Hashing.crc32();
-
-        assertNotNull(hashFunc);
-        assertEquals(32, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test crc32 produces consistent hash for same input")
-    public void testCrc32_HashData() {
-        byte[] data = "file contents".getBytes(StandardCharsets.UTF_8);
-        HashCode hash1 = Hashing.crc32().hash(data);
-        HashCode hash2 = Hashing.crc32().hash(data);
-
-        assertNotNull(hash1);
-        assertEquals(hash1, hash2);
-        assertEquals(4, hash1.asBytes().length);
-    }
-
-    @Test
-    @DisplayName("Test adler32")
-    public void testAdler32() {
-        HashFunction hashFunc = Hashing.adler32();
-
-        assertNotNull(hashFunc);
-        assertEquals(32, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test adler32 produces consistent hash for same input")
-    public void testAdler32_HashData() {
-        byte[] data = "compressed data".getBytes(StandardCharsets.UTF_8);
-        HashCode hash1 = Hashing.adler32().hash(data);
-        HashCode hash2 = Hashing.adler32().hash(data);
-
-        assertNotNull(hash1);
-        assertEquals(hash1, hash2);
-        assertEquals(4, hash1.asBytes().length);
-    }
-
-    @Test
-    @DisplayName("Test farmHashFingerprint64 produces consistent hashes")
-    public void testFarmHashFingerprint64Consistent() {
-        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
-
-        HashCode hash1 = Hashing.farmHashFingerprint64().hash(data);
-        HashCode hash2 = Hashing.farmHashFingerprint64().hash(data);
-
-        assertEquals(hash1, hash2);
-    }
-
-    // Test farmHashFingerprint64()
-
-    @Test
-    @DisplayName("Test farmHashFingerprint64")
-    public void testFarmHashFingerprint64() {
-        HashFunction hashFunc = Hashing.farmHashFingerprint64();
-
-        assertNotNull(hashFunc);
-        assertEquals(64, hashFunc.bits());
-    }
-
-    @Test
-    @DisplayName("Test concatenating produces consistent hashes")
-    public void testConcatenatingConsistent() {
-        HashFunction concatenated = Hashing.concatenating(Hashing.murmur3_128(), Hashing.sha256());
-
-        byte[] data = "test".getBytes(StandardCharsets.UTF_8);
-        HashCode hash1 = concatenated.hash(data);
-        HashCode hash2 = concatenated.hash(data);
-
-        assertEquals(hash1, hash2);
-    }
-
-    // Test concatenating() methods
-
-    @Test
-    @DisplayName("Test concatenating two hash functions")
-    public void testConcatenatingTwo() {
-        HashFunction first = Hashing.murmur3_128();
-        HashFunction second = Hashing.murmur3_128();
-
-        HashFunction concatenated = Hashing.concatenating(first, second);
-
-        assertNotNull(concatenated);
-        assertEquals(256, concatenated.bits()); // 128 + 128
-    }
-
-    @Test
-    @DisplayName("Test concatenating three hash functions")
-    public void testConcatenatingThree() {
-        HashFunction first = Hashing.murmur3_128();
-        HashFunction second = Hashing.murmur3_128();
-        HashFunction third = Hashing.murmur3_128();
-
-        HashFunction concatenated = Hashing.concatenating(first, second, third);
-
-        assertNotNull(concatenated);
-        assertEquals(384, concatenated.bits()); // 128 + 128 + 128
-    }
-
-    @Test
-    @DisplayName("Test concatenating iterable of hash functions")
-    public void testConcatenatingIterable() {
-        List<HashFunction> functions = Arrays.asList(Hashing.murmur3_32(), Hashing.murmur3_32(), Hashing.murmur3_32());
-
-        HashFunction concatenated = Hashing.concatenating(functions);
-
-        assertNotNull(concatenated);
-        assertEquals(96, concatenated.bits()); // 32 + 32 + 32
-    }
-
-    @Test
-    @DisplayName("Test concatenating with different bit lengths")
-    public void testConcatenatingDifferentBitLengths() {
-        HashFunction concatenated = Hashing.concatenating(Hashing.murmur3_32(), // 32 bits
-                Hashing.murmur3_128(), // 128 bits
-                Hashing.sha256() // 256 bits
-        );
-
-        assertNotNull(concatenated);
-        assertEquals(416, concatenated.bits()); // 32 + 128 + 256
-    }
-
-    @Test
-    public void testConcatenatingTwoFunctions() {
-        HashFunction first = Hashing.murmur3_32();
-        HashFunction second = Hashing.murmur3_32(42);
-
-        HashFunction concatenated = Hashing.concatenating(first, second);
-        assertNotNull(concatenated);
-        assertEquals(64, concatenated.bits());
-
-        HashCode hash = concatenated.hash("test".getBytes());
-        assertEquals(8, hash.asBytes().length);
-    }
-
-    @Test
-    public void testConcatenatingRejectsUnsupportedHashFunctionImplementation() {
-        final HashFunction unsupported = (HashFunction) java.lang.reflect.Proxy.newProxyInstance(HashFunction.class.getClassLoader(),
+    public void testConcatenating() {
+        HashFunction two = Hashing.concatenating(Hashing.murmur3_32(), Hashing.murmur3_32(42));
+        HashFunction three = Hashing.concatenating(Hashing.murmur3_128(), Hashing.murmur3_128(42), Hashing.murmur3_128(123));
+        HashFunction iterable = Hashing.concatenating(Arrays.asList(Hashing.murmur3_32(), Hashing.murmur3_32(), Hashing.murmur3_32()));
+        HashFunction mixed = Hashing.concatenating(Hashing.murmur3_32(), Hashing.murmur3_128(), Hashing.sha256());
+
+        assertEquals(64, two.bits());
+        assertEquals(8, two.hash(DATA).asBytes().length);
+        assertEquals(384, three.bits());
+        assertEquals(96, iterable.bits());
+        assertEquals(416, mixed.bits());
+        assertEquals(two.hash(DATA), Hashing.concatenating(Hashing.murmur3_32(), Hashing.murmur3_32(42)).hash(DATA));
+
+        HashFunction unsupported = (HashFunction) java.lang.reflect.Proxy.newProxyInstance(HashFunction.class.getClassLoader(),
                 new Class<?>[] { HashFunction.class }, (proxy, method, args) -> {
                     throw new UnsupportedOperationException("Proxy hash function should not be invoked");
                 });
-
         assertThrows(IllegalArgumentException.class, () -> Hashing.concatenating(Arrays.asList(Hashing.sha256(), unsupported)));
-    }
 
-    @Test
-    @DisplayName("concatenating with null element throws IllegalArgumentException, not NPE")
-    public void testConcatenatingWithNullElementThrowsIAENotNPE() {
         IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
                 () -> Hashing.concatenating(Arrays.asList(Hashing.sha256(), (HashFunction) null)));
         assertTrue(iae.getMessage().contains("null"));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.concatenating(List.of()));
     }
 
     @Test
-    @DisplayName("Test combineOrdered is order-dependent")
-    public void testCombineOrderedOrderDependent() {
-        HashCode hash1 = Hashing.murmur3_128().hash("test1");
-        HashCode hash2 = Hashing.murmur3_128().hash("test2");
+    public void testCombineOrderedAndUnordered() {
+        HashCode a = Hashing.murmur3_128().hash("test1");
+        HashCode b = Hashing.murmur3_128().hash("test2");
+        HashCode c = Hashing.murmur3_128().hash("test3");
 
-        HashCode combined1 = Hashing.combineOrdered(hash1, hash2);
-        HashCode combined2 = Hashing.combineOrdered(hash2, hash1);
+        assertEquals(128, Hashing.combineOrdered(a, b).bits());
+        assertEquals(128, Hashing.combineOrdered(a, b, c).bits());
+        assertEquals(Hashing.combineOrdered(a, b), Hashing.combineOrdered(a, b));
+        assertNotEquals(Hashing.combineOrdered(a, b), Hashing.combineOrdered(b, a));
+        assertEquals(Hashing.combineOrdered(a, b, c), Hashing.combineOrdered(Arrays.asList(a, b, c)));
 
-        assertNotEquals(combined1, combined2);
-    }
-
-    // Test combineOrdered() methods
-
-    @Test
-    @DisplayName("Test combineOrdered two hash codes")
-    public void testCombineOrderedTwo() {
-        HashCode hash1 = Hashing.murmur3_128().hash("test1");
-        HashCode hash2 = Hashing.murmur3_128().hash("test2");
-
-        HashCode combined = Hashing.combineOrdered(hash1, hash2);
-
-        assertNotNull(combined);
-        assertEquals(128, combined.bits());
+        assertEquals(Hashing.combineUnordered(a, b), Hashing.combineUnordered(b, a));
+        assertEquals(Hashing.combineUnordered(a, b, c), Hashing.combineUnordered(c, a, b));
+        assertEquals(Hashing.combineUnordered(a, b, c), Hashing.combineUnordered(Arrays.asList(a, b, c)));
+        assertEquals(a, Hashing.combineOrdered(List.of(a)));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.combineOrdered(List.of()));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.combineOrdered(Hashing.sha256().hash(DATA), Hashing.sha512().hash(DATA)));
     }
 
     @Test
-    @DisplayName("Test combineOrdered three hash codes")
-    public void testCombineOrderedThree() {
-        HashCode hash1 = Hashing.murmur3_128().hash("test1");
-        HashCode hash2 = Hashing.murmur3_128().hash("test2");
-        HashCode hash3 = Hashing.murmur3_128().hash("test3");
-
-        HashCode combined = Hashing.combineOrdered(hash1, hash2, hash3);
-
-        assertNotNull(combined);
-        assertEquals(128, combined.bits());
-    }
-
-    @Test
-    @DisplayName("Test combineOrdered iterable")
-    public void testCombineOrderedIterable() {
-        List<HashCode> hashes = Arrays.asList(Hashing.murmur3_128().hash("test1"), Hashing.murmur3_128().hash("test2"), Hashing.murmur3_128().hash("test3"));
-
-        HashCode combined = Hashing.combineOrdered(hashes);
-
-        assertNotNull(combined);
-        assertEquals(128, combined.bits());
-    }
-
-    @Test
-    @DisplayName("Test combineOrdered is deterministic")
-    public void testCombineOrderedDeterministic() {
-        HashCode hash1 = Hashing.murmur3_128().hash("test1");
-        HashCode hash2 = Hashing.murmur3_128().hash("test2");
-
-        HashCode combined1 = Hashing.combineOrdered(hash1, hash2);
-        HashCode combined2 = Hashing.combineOrdered(hash1, hash2);
-
-        assertEquals(combined1, combined2);
-    }
-
-    @Test
-    @DisplayName("Test combineUnordered is order-independent")
-    public void testCombineUnorderedOrderIndependent() {
-        HashCode hash1 = Hashing.murmur3_128().hash("test1");
-        HashCode hash2 = Hashing.murmur3_128().hash("test2");
-
-        HashCode combined1 = Hashing.combineUnordered(hash1, hash2);
-        HashCode combined2 = Hashing.combineUnordered(hash2, hash1);
-
-        assertEquals(combined1, combined2);
-    }
-
-    // Test combineUnordered() methods
-
-    @Test
-    @DisplayName("Test combineUnordered two hash codes")
-    public void testCombineUnorderedTwo() {
-        HashCode hash1 = Hashing.murmur3_128().hash("test1");
-        HashCode hash2 = Hashing.murmur3_128().hash("test2");
-
-        HashCode combined = Hashing.combineUnordered(hash1, hash2);
-
-        assertNotNull(combined);
-        assertEquals(128, combined.bits());
-    }
-
-    @Test
-    @DisplayName("Test combineUnordered three hash codes")
-    public void testCombineUnorderedThree() {
-        HashCode hash1 = Hashing.murmur3_128().hash("test1");
-        HashCode hash2 = Hashing.murmur3_128().hash("test2");
-        HashCode hash3 = Hashing.murmur3_128().hash("test3");
-
-        HashCode combined = Hashing.combineUnordered(hash1, hash2, hash3);
-
-        assertNotNull(combined);
-        assertEquals(128, combined.bits());
-    }
-
-    @Test
-    @DisplayName("Test combineUnordered iterable")
-    public void testCombineUnorderedIterable() {
-        List<HashCode> hashes = Arrays.asList(Hashing.murmur3_128().hash("test1"), Hashing.murmur3_128().hash("test2"), Hashing.murmur3_128().hash("test3"));
-
-        HashCode combined = Hashing.combineUnordered(hashes);
-
-        assertNotNull(combined);
-        assertEquals(128, combined.bits());
-    }
-
-    @Test
-    @DisplayName("Test combineUnordered is deterministic")
-    public void testCombineUnorderedDeterministic() {
-        HashCode hash1 = Hashing.murmur3_128().hash("test1");
-        HashCode hash2 = Hashing.murmur3_128().hash("test2");
-
-        HashCode combined1 = Hashing.combineUnordered(hash1, hash2);
-        HashCode combined2 = Hashing.combineUnordered(hash1, hash2);
-
-        assertEquals(combined1, combined2);
-    }
-
-    // Test consistentHash() methods
-
-    @Test
-    @DisplayName("Test consistentHash with HashCode")
-    public void testConsistentHashWithHashCode() {
+    public void testConsistentHash() {
         HashCode hashCode = Hashing.murmur3_128().hash("test");
-        int buckets = 10;
-
-        int bucket = Hashing.consistentHash(hashCode, buckets);
-
-        assertTrue(bucket >= 0);
-        assertTrue(bucket < buckets);
-    }
-
-    @Test
-    @DisplayName("Test consistentHash with long")
-    public void testConsistentHashWithLong() {
-        long value = 123456789L;
-        int buckets = 100;
-
-        int bucket = Hashing.consistentHash(value, buckets);
-
-        assertTrue(bucket >= 0);
-        assertTrue(bucket < buckets);
-    }
-
-    @Test
-    @DisplayName("Test consistentHash with different bucket counts")
-    public void testConsistentHashDifferentBuckets() {
         long value = 123456789L;
 
-        int bucket10 = Hashing.consistentHash(value, 10);
-        int bucket100 = Hashing.consistentHash(value, 100);
-        int bucket1000 = Hashing.consistentHash(value, 1000);
+        int fromHash = Hashing.consistentHash(hashCode, 10);
+        int fromLong = Hashing.consistentHash(value, 100);
+        assertTrue(fromHash >= 0 && fromHash < 10);
+        assertTrue(fromLong >= 0 && fromLong < 100);
+        assertEquals(fromHash, Hashing.consistentHash(hashCode, 10));
+        assertEquals(fromLong, Hashing.consistentHash(value, 100));
+        assertEquals(0, Hashing.consistentHash(value, 1));
 
-        assertTrue(bucket10 >= 0 && bucket10 < 10);
-        assertTrue(bucket100 >= 0 && bucket100 < 100);
-        assertTrue(bucket1000 >= 0 && bucket1000 < 1000);
-    }
-
-    @Test
-    @DisplayName("Test consistentHash is deterministic")
-    public void testConsistentHashDeterministic() {
-        long value = 123456789L;
-        int buckets = 100;
-
-        int bucket1 = Hashing.consistentHash(value, buckets);
-        int bucket2 = Hashing.consistentHash(value, buckets);
-        int bucket3 = Hashing.consistentHash(value, buckets);
-
-        assertEquals(bucket1, bucket2);
-        assertEquals(bucket2, bucket3);
-    }
-
-    @Test
-    @DisplayName("Test consistentHash with minimum buckets")
-    public void testConsistentHashMinimumBuckets() {
-        long value = 123456789L;
-
-        int bucket = Hashing.consistentHash(value, 1);
-
-        assertEquals(0, bucket);
-    }
-
-    @Test
-    @DisplayName("Test consistentHash minimizes redistribution")
-    public void testConsistentHashMinimizesRedistribution() {
-        long value = 123456789L;
-
-        // When buckets grow from 10 to 11, most items should stay in the same bucket
         int bucket10 = Hashing.consistentHash(value, 10);
         int bucket11 = Hashing.consistentHash(value, 11);
-
-        // The value should either stay in the same bucket or move to bucket 10 (the new one)
         assertTrue(bucket11 == bucket10 || bucket11 == 10);
-    }
 
-    @Test
-    @DisplayName("Test load balancing with consistent hashing")
-    public void testLoadBalancingScenario() {
-        int serverCount = 10;
-
-        // Simulate distributing user IDs to servers
-        long userId1 = 123456L;
-        long userId2 = 789012L;
-        long userId3 = 345678L;
-
-        int server1 = Hashing.consistentHash(userId1, serverCount);
-        int server2 = Hashing.consistentHash(userId2, serverCount);
-        int server3 = Hashing.consistentHash(userId3, serverCount);
-
-        assertTrue(server1 >= 0 && server1 < serverCount);
-        assertTrue(server2 >= 0 && server2 < serverCount);
-        assertTrue(server3 >= 0 && server3 < serverCount);
-
-        // Same user should always go to same server
-        assertEquals(server1, Hashing.consistentHash(userId1, serverCount));
-    }
-
-    @Test
-    @DisplayName("Test consistentHash throws for invalid bucket count")
-    public void testConsistentHashInvalidBuckets() {
-        HashCode hashCode = Hashing.murmur3_128().hash("test");
-
+        assertTrue(Hashing.consistentHash(-12345L, 50) >= 0);
+        assertTrue(Hashing.consistentHash(0L, 10) < 10);
         assertThrows(IllegalArgumentException.class, () -> Hashing.consistentHash(hashCode, 0));
         assertThrows(IllegalArgumentException.class, () -> Hashing.consistentHash(hashCode, -1));
         assertThrows(IllegalArgumentException.class, () -> Hashing.consistentHash(123L, 0));
         assertThrows(IllegalArgumentException.class, () -> Hashing.consistentHash(123L, -1));
     }
 
-    // Integration and real-world scenario tests
-
     @Test
-    @DisplayName("Test choosing appropriate hash function for different scenarios")
-    public void testChoosingHashFunction() {
-        byte[] data = "test data".getBytes(StandardCharsets.UTF_8);
+    @SuppressWarnings("deprecation")
+    public void testCombineAndConcatenatingNullArguments() {
+        HashCode hc = Hashing.sha256().hash("x".getBytes(StandardCharsets.UTF_8));
 
-        // Fast non-cryptographic
-        HashCode fast = Hashing.murmur3_128().hash(data);
-        assertNotNull(fast);
+        assertThrows(NullPointerException.class, () -> Hashing.combineOrdered(hc, null));
+        assertThrows(NullPointerException.class, () -> Hashing.combineOrdered(null, hc));
+        assertThrows(NullPointerException.class, () -> Hashing.combineOrdered(hc, hc, null));
+        assertThrows(NullPointerException.class, () -> Hashing.combineOrdered((Iterable<HashCode>) null));
+        assertThrows(NullPointerException.class, () -> Hashing.combineOrdered(Arrays.asList(hc, null)));
 
-        // Cryptographic
-        HashCode secure = Hashing.sha256().hash(data);
-        assertNotNull(secure);
+        assertThrows(NullPointerException.class, () -> Hashing.combineUnordered(hc, null));
+        assertThrows(NullPointerException.class, () -> Hashing.combineUnordered(hc, hc, null));
+        assertThrows(NullPointerException.class, () -> Hashing.combineUnordered((Iterable<HashCode>) null));
 
-        // Checksum
-        HashCode checksum = Hashing.crc32().hash(data);
-        assertNotNull(checksum);
+        assertThrows(NullPointerException.class, () -> Hashing.consistentHash((HashCode) null, 3));
+
+        assertThrows(NullPointerException.class, () -> Hashing.concatenating((Iterable<HashFunction>) null));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.concatenating(Arrays.asList(Hashing.sha256(), null)));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.concatenating(null, Hashing.sha256()));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.concatenating(Hashing.sha256(), null));
+        assertThrows(IllegalArgumentException.class, () -> Hashing.concatenating(Hashing.sha256(), Hashing.md5(), null));
     }
-
 }

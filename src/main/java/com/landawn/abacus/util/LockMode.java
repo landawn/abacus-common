@@ -193,7 +193,7 @@ public enum LockMode {
      * @return the corresponding LockMode
      * @throws IllegalArgumentException if the intValue does not correspond to a valid LockMode.
      */
-    public static LockMode of(final int intValue) {
+    public static LockMode of(final int intValue) throws IllegalArgumentException {
         switch (intValue) {
             case 1:
                 return R;
@@ -264,9 +264,11 @@ public enum LockMode {
      * @param lockMode the LockMode to check against
      * @return {@code true} if this mode and {@code lockMode} have at least one lock flag in common,
      *         {@code false} otherwise
-     * @throws NullPointerException if {@code lockMode} is {@code null}
+     * @throws IllegalArgumentException if {@code lockMode} is {@code null}
      */
-    public boolean isXLockOf(final LockMode lockMode) {
+    public boolean isXLockOf(final LockMode lockMode) throws IllegalArgumentException {
+        N.checkArgNotNull(lockMode, cs.lockMode);
+
         return (intValue & lockMode.intValue) > 0;
     }
 }

@@ -20,11 +20,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * Type handler for {@link java.sql.SQLXML} objects. Provides JDBC support for reading SQLXML values
  * from a {@link ResultSet} and binding them to {@link PreparedStatement}/{@link CallableStatement} parameters.
  * This handler deliberately limits database-managed SQLXML instances to JDBC transfer;
- * {@link #stringOf(SQLXML)} and {@link #valueOf(String)} throw {@link UnsupportedOperationException}. Callers that
+ * {@link #stringOf(SQLXML)} and {@link #valueOf(String)} throw {@link UnsupportedOperationException},
+ * while {@link #valueOf(Object)} returns an object that already is a {@link SQLXML} unchanged, maps
+ * {@code null} to {@code null}, and rejects everything else without touching it. Callers that
  * need the XML text can use {@link SQLXML#getString()} directly and handle its {@link SQLException} and lifecycle.
  * Callers retain ownership of retrieved values and must invoke {@link SQLXML#free()} when the value is no longer
  * needed; this handler does not release a value passed to or returned from a JDBC operation.
@@ -120,6 +124,29 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     }
 
     /**
+     * Returns {@code obj} unchanged if it already is a {@link SQLXML}; otherwise the conversion is not supported.
+     * Unlike the inherited default, this method never serializes the value: {@code AbstractType.valueOf(Object)}
+     * renders {@code obj} with the handler registered for its own runtime class and feeds that text to
+     * {@link #valueOf(String)}, which always throws - so the caller's locator would be read for nothing.
+     *
+     * @param obj the object to convert; may be {@code null}
+     * @return the same {@link SQLXML} instance if {@code obj} is a {@link SQLXML}, or {@code null} if {@code obj} is
+     *         {@code null}
+     * @throws UnsupportedOperationException if {@code obj} is non-null and not a {@link SQLXML}
+     */
+    @MayReturnNull
+    @Override
+    public SQLXML valueOf(final Object obj) throws UnsupportedOperationException {
+        if (obj == null) {
+            return null; // NOSONAR
+        } else if (obj instanceof SQLXML value) {
+            return value;
+        }
+
+        throw new UnsupportedOperationException("SQLXML cannot be created from " + obj.getClass().getName());
+    }
+
+    /**
      * Retrieves a SQL XML value from the specified column in the ResultSet.
      * A SQL XML represents XML data stored in the database.
      *
@@ -133,10 +160,11 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * @param rs the ResultSet to read from
      * @param columnIndex the 1-based index of the column to retrieve
      * @return the SQLXML value from the specified column, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column index is invalid
      */
     @Override
-    public SQLXML get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public SQLXML get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         return rs.getSQLXML(columnIndex);
     }
 
@@ -154,10 +182,11 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * @param rs the ResultSet to read from
      * @param columnName the label of the column to retrieve (column name or alias)
      * @return the SQLXML value from the specified column, or {@code null} if the column value is SQL NULL
+     * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column label is not found
      */
     @Override
-    public SQLXML get(final ResultSet rs, final String columnName) throws SQLException {
+    public SQLXML get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         return rs.getSQLXML(columnName);
     }
 
@@ -175,10 +204,11 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * @param stmt the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the SQLXML value to set as the parameter
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final SQLXML x) throws SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final SQLXML x) throws NullPointerException, SQLException {
         stmt.setSQLXML(columnIndex, x);
     }
 
@@ -196,10 +226,11 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * @param stmt the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the SQLXML value to set as the parameter
+     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final SQLXML x) throws SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final SQLXML x) throws NullPointerException, SQLException {
         stmt.setSQLXML(parameterName, x);
     }
 }

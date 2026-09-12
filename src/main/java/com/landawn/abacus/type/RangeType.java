@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
@@ -76,6 +77,12 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
     private final Type<T> elementType;
 
     /**
+     * The two-endpoint array type {@link #valueOf(String)} deserializes into. It depends only on
+     * {@link #elementType}, so it is resolved once here rather than rebuilt on every call.
+     */
+    private final Type<?> endpointArrayType;
+
+    /**
      * Constructs a new RangeType with the specified parameter type.
      * This constructor is package-private and intended to be called only by the TypeFactory.
      *
@@ -89,6 +96,10 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
         typeClass = (Class) Range.class;
         elementType = TypeFactory.getType(parameterTypeName);
         parameterTypes = List.of(elementType);
+
+        // Keep the descriptor, not just its raw class, so generic endpoints retain their value types.
+        final Type<?> endpointType = elementType.isPrimitive() ? TypeFactory.getType(ClassUtil.wrap(elementType.javaType())) : elementType;
+        endpointArrayType = TypeFactory.getType(endpointType.name() + "[]");
     }
 
     /**
@@ -154,10 +165,17 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      *   <li>{@code CLOSED_OPEN}: {@code "[lower, upper)"}</li>
      *   <li>{@code CLOSED_CLOSED}: {@code "[lower, upper]"}</li>
      * </ul>
-     * Endpoints are written using the element type's serialization, separated by a comma and space.
+     * Endpoints are written using the declared element type's serialization, retaining generic arguments,
+     * separated by a comma and space. Untyped ranges select the runtime endpoint handler.
+     * Endpoints are written with the type system's default serialization config, so {@code java.util.Date},
+     * {@code Timestamp}, {@code Instant}, {@code OffsetDateTime} and {@code ZonedDateTime} endpoints are emitted as
+     * epoch milliseconds: sub-millisecond precision, the UTC offset and the region zone are not round-tripped (the
+     * value is read back, to millisecond precision, in the system default zone). {@code LocalDate}/{@code LocalTime}/
+     * {@code LocalDateTime} endpoints are written as ISO text and round-trip exactly.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
-     * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is
+     * via {@link #valueOf(String)}. Non-null values of this type generally round-trip, subject to the endpoint
+     * caveat above; {@code null}/empty handling is
      * type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
@@ -167,6 +185,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final Range<T> x) {
         if (x == null) {
@@ -178,10 +197,13 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
         final String postfix = (boundType == BoundType.OPEN_OPEN || boundType == BoundType.CLOSED_OPEN) ? ")" : "]";
         Type<T> type = elementType;
 
-        if (x.lowerEndpoint() != null) {
-            type = TypeFactory.getType(x.lowerEndpoint().getClass());
-        } else if (x.upperEndpoint() != null) {
-            type = TypeFactory.getType(x.upperEndpoint().getClass());
+        // Only an untyped range needs runtime dispatch; a raw class would erase declared endpoint generics.
+        if (elementType.isObject()) {
+            if (x.lowerEndpoint() != null) {
+                type = TypeFactory.getType(x.lowerEndpoint().getClass());
+            } else if (x.upperEndpoint() != null) {
+                type = TypeFactory.getType(x.upperEndpoint().getClass());
+            }
         }
 
         final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
@@ -216,7 +238,11 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      *   <li>{@code "[lower, upper)"} for closed-open range</li>
      *   <li>{@code "[lower, upper]"} for closed-closed range</li>
      * </ul>
-     * Endpoints are deserialized as a JSON array using the configured element type.
+     * Endpoints are deserialized as a JSON array using the complete declared element type, including
+     * nested generic arguments. Primitive element descriptors are boxed; null endpoints remain invalid.
+     * For integral endpoint types, unquoted decimals such as {@code 1.5} may truncate toward zero under
+     * the JSON parser's numeric conversion rules. Quoted fractions are rejected; tokens that cannot be
+     * converted numerically are passed to the declared element type's text parser.
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
@@ -224,12 +250,20 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      *
      * @param str the string to parse
      * @return the parsed Range object, or {@code null} if the input string is {@code null} or empty
-     * @throws IllegalArgumentException if the string format is invalid or does not contain exactly two endpoints.
+     * @throws IllegalArgumentException if the string format is invalid or does not contain exactly two endpoints,
+     *         or if the endpoints are out of order or {@code null} (rejected by {@code Range} itself)
+     * @throws RuntimeException if an endpoint cannot be parsed as the element type; the exception is the element
+     *         handler's own, for example {@code NumberFormatException} for {@code ["1.5", 2]} with an
+     *         {@code Integer} element type, {@code ArithmeticException} for {@code "[2147483648, 2147483649]"}
+     *         (out of the {@code int} range), or {@code com.landawn.abacus.exception.ParsingException} for a
+     *         malformed endpoint list such as {@code "[1 5]"}. A nested endpoint list ({@code "[[1, 5]]"}) is
+     *         accepted and unwrapped, not rejected.
      * @see #valueOf(Object)
      * @see #stringOf(Range)
      */
+    @MayReturnNull
     @Override
-    public Range<T> valueOf(String str) {
+    public Range<T> valueOf(String str) throws IllegalArgumentException, RuntimeException {
         str = Strings.trim(str);
 
         if (Strings.isEmpty(str)) {
@@ -247,8 +281,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
             throw new IllegalArgumentException("Invalid Range format. Expected format like '[lower, upper]' but got: " + str);
         }
 
-        final Class<?> endpointClass = ClassUtil.wrap(elementType.javaType());
-        final Object endpoints = Utils.jsonParser.deserialize(str, 1, str.length() - 1, Utils.jdc, Array.newInstance(endpointClass, 0).getClass());
+        final Object endpoints = Utils.jsonParser.deserialize(str, 1, str.length() - 1, Utils.jdc, endpointArrayType);
 
         if ((endpoints == null) || (Array.getLength(endpoints) != 2)) {
             throw new IllegalArgumentException("Invalid Range format. Expected exactly 2 endpoints but got: " + str);
@@ -276,7 +309,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the Range to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws IOException if appending the range text or null literal to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -313,7 +346,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @param writer the CharacterWriter to write to
      * @param x the Range to write
      * @param config the serialization configuration that determines string quotation
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws IOException if writing the range text, configured string quotation or null literal to {@code writer} fails
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final Range<T> x, final JsonXmlSerConfig<?> config) throws IOException {

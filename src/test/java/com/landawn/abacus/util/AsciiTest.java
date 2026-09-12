@@ -1,7 +1,13 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -381,8 +387,9 @@ public class AsciiTest extends TestBase {
     public void testByteCasting() {
         for (byte b = Ascii.MIN; b <= Ascii.MAX && b >= 0; b++) {
             assertTrue(b >= 0 && b <= 127);
-            if (b == Ascii.MAX)
+            if (b == Ascii.MAX) {
                 break;
+            }
         }
     }
 
@@ -434,4 +441,48 @@ public class AsciiTest extends TestBase {
         Assertions.assertEquals(127, Ascii.MAX);
     }
 
+    /**
+     * Contract pin for the class javadoc: this class defines constants for the 33 RFC 20 control characters
+     * ({@code 0x00}-{@code 0x1F} plus {@link Ascii#DEL}), for the space character {@link Ascii#SP} and for the
+     * {@link Ascii#MIN}/{@link Ascii#MAX} range bounds - and for none of the printable characters
+     * {@code 0x21}-{@code 0x7E}.
+     */
+    @Test
+    public void testConstantsCoverTheControlCharactersOnly() throws Exception {
+        final Set<Integer> covered = new HashSet<>();
+        int constants = 0;
+
+        for (final Field field : Ascii.class.getDeclaredFields()) {
+            if (field.isSynthetic() || !Modifier.isPublic(field.getModifiers()) || !Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+
+            constants++;
+            final Object value = field.get(null);
+            covered.add(value instanceof Character ? (int) (Character) value : (int) (Byte) value);
+        }
+
+        assertEquals(40, constants);
+        assertEquals(34, covered.size());
+
+        for (int c = 0x00; c <= 0x1F; c++) {
+            assertTrue(covered.contains(c), "no constant for control character 0x" + Integer.toHexString(c));
+        }
+
+        assertTrue(covered.contains(0x20), "no constant for SP");
+        assertTrue(covered.contains(0x7F), "no constant for DEL");
+
+        for (int c = 0x21; c <= 0x7E; c++) {
+            assertFalse(covered.contains(c), "unexpected constant for printable character 0x" + Integer.toHexString(c));
+        }
+
+        // the documented alternate names
+        assertEquals(Ascii.LF, Ascii.NL);
+        assertEquals(Ascii.DC1, Ascii.XON);
+        assertEquals(Ascii.DC3, Ascii.XOFF);
+        assertEquals(Ascii.SP, Ascii.SPACE);
+        // and the documented range bounds
+        assertEquals(0x00, Ascii.MIN);
+        assertEquals(0x7F, Ascii.MAX);
+    }
 }

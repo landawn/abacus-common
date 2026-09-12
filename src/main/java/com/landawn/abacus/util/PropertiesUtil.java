@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
@@ -26,14 +27,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -145,6 +147,9 @@ public final class PropertiesUtil {
 
     private static final String TYPE = "type";
 
+    /** Value of the {@link #TYPE} attribute marking an element as a nested {@code Properties}. */
+    private static final String PROPERTIES_TYPE_ATTR = "Properties";
+
     private static final XmlSerConfig xsc = XmlSerConfig.create()
             .setTagByPropertyName(true)
             .setWriteTypeInfo(false)
@@ -160,59 +165,197 @@ public final class PropertiesUtil {
         scheduledExecutor = MoreExecutors.getExitingScheduledExecutorService(executor);
     }
 
+    /** Poll period of the auto-refresh task, in milliseconds. */
+    private static final long REFRESH_PERIOD_MILLIS = 1000;
+
+    /** Upper bound on the back-off applied after repeated reload failures, in milliseconds. */
+    private static final long MAX_REFRESH_BACKOFF_MILLIS = 5 * 60 * 1000L;
+
     private static final Map<Resource, Properties<String, ?>> registeredAutoRefreshProperties = new ConcurrentHashMap<>(256);
 
-    static {
-        final Runnable refreshTask = new TimerTask() {
-            @Override
-            public void run() {
-                synchronized (registeredAutoRefreshProperties) {
-                    Properties<String, ?> properties = null;
-                    Resource resource = null;
-                    File file = null;
+    /** Guards {@link #refreshTaskFuture}; never held while a reload is in progress. */
+    private static final Object refreshTaskLock = new Object();
 
-                    for (final Map.Entry<Resource, Properties<String, ?>> entry : registeredAutoRefreshProperties.entrySet()) {
-                        resource = entry.getKey();
-                        properties = entry.getValue();
+    /**
+     * The scheduled poll, or {@code null} while nothing is registered.
+     *
+     * <p>The task used to be scheduled unconditionally from a static initializer, so merely calling any
+     * method on this class - {@code load(InputStream)}, say, which has nothing to do with auto-refresh -
+     * started a thread that woke once a second for the life of the JVM. It is now started on the first
+     * registration and cancelled again when the last resource is unregistered.</p>
+     */
+    private static ScheduledFuture<?> refreshTaskFuture;
 
-                        file = resource.getFile();
+    private static final Runnable refreshTask = () -> {
+        synchronized (registeredAutoRefreshProperties) {
+            for (final Map.Entry<Resource, Properties<String, ?>> entry : registeredAutoRefreshProperties.entrySet()) {
+                refreshIfNeeded(entry.getKey(), entry.getValue());
+            }
+        }
+    };
 
-                        if ((file != null) && (file.lastModified() > resource.getLastLoadTime())) {
-                            final long lastLoadTime = file.lastModified();
-                            InputStream is = null;
+    /**
+     * Reloads {@code properties} from {@code resource} if the backing file changed since the last
+     * successful load and the failure back-off (if any) has elapsed.
+     *
+     * <p>The last <i>observed</i> modification time and the last <i>attempt</i> are tracked separately.
+     * Previously the modification time was recorded only on success, so a file that could not be parsed
+     * was re-read - and logged at {@code error} - on every poll, once a second, forever. Recording it on
+     * failure too would have been wrong in the other direction: a reload that fails because the file is
+     * mid-rewrite must still be retried once that same content settles. Tracking both lets a failing
+     * resource back off exponentially while any genuinely new modification resets the back-off and is
+     * retried at once.</p>
+     *
+     * @param resource the registered resource to check
+     * @param properties the live instance to refresh in place
+     */
+    @SuppressWarnings({ "unchecked" })
+    private static void refreshIfNeeded(final Resource resource, final Properties<String, ?> properties) {
+        final File file = resource.getFile();
 
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Start to refresh properties with the updated file: {}; propertyCount={}", file.getAbsolutePath(),
-                                        properties.size());
-                            }
+        if (file == null) {
+            return;
+        }
 
-                            try {
-                                is = IOUtil.newFileInputStream(resource.getFile());
+        final long lastModified = file.lastModified();
 
-                                if (resource.getType() == ResourceType.PROPERTIES) {
-                                    merge(load(is), (Properties<String, String>) properties);
-                                } else {
-                                    merge(loadFromXml(is, (Class<Properties<String, Object>>) properties.getClass()), (Properties<String, Object>) properties);
-                                }
+        if (lastModified <= resource.getLastLoadTime()) {
+            return;
+        }
 
-                                resource.setLastLoadTime(lastLoadTime);
-                            } catch (final Exception e) {
-                                logger.error(e, "Failed to refresh properties from file: {}; propertyCount={}", file.getAbsolutePath(), properties.size());
-                            } finally {
-                                IOUtil.close(is);
-                            }
+        if (lastModified == resource.getLastFailedModifiedTime() && System.currentTimeMillis() < resource.getNextRetryTime()) {
+            // This exact content already failed; wait out the back-off instead of re-reading every second.
+            return;
+        }
 
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("End to refresh properties with the updated file: {}; propertyCount={}", file.getAbsolutePath(),
-                                        properties.size());
-                            }
-                        }
-                    }
+        if (logger.isDebugEnabled()) {
+            logger.debug("Start to refresh properties with the updated file: {}; propertyCount={}", file.getAbsolutePath(), properties.size());
+        }
+
+        InputStream is = null;
+
+        try {
+            is = IOUtil.newFileInputStream(file);
+
+            if (resource.getType() == ResourceType.PROPERTIES) {
+                replaceContents(load(is), (Properties<String, String>) properties);
+            } else {
+                replaceContents(loadFromXml(is, (Class<Properties<String, Object>>) properties.getClass()), (Properties<String, Object>) properties);
+            }
+
+            resource.setLastLoadTime(lastModified);
+            resource.recordRefreshSuccess();
+        } catch (final Exception e) {
+            final long backoffMillis = resource.recordRefreshFailure(lastModified, MAX_REFRESH_BACKOFF_MILLIS);
+
+            logger.error(e, "Failed to refresh properties from file: {}; propertyCount={}; next retry in {} ms", file.getAbsolutePath(), properties.size(),
+                    backoffMillis);
+        } finally {
+            IOUtil.close(is);
+        }
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("End to refresh properties with the updated file: {}; propertyCount={}", file.getAbsolutePath(), properties.size());
+        }
+    }
+
+    /**
+     * Registers {@code properties} for auto-refresh, starting the shared poll task if it is not already
+     * running. The caller must hold the {@code registeredAutoRefreshProperties} monitor.
+     *
+     * @param resource the resource descriptor to register
+     * @param properties the instance to refresh in place
+     */
+    private static void registerForAutoRefresh(final Resource resource, final Properties<String, ?> properties) {
+        registeredAutoRefreshProperties.put(resource, properties);
+
+        synchronized (refreshTaskLock) {
+            if (refreshTaskFuture == null) {
+                refreshTaskFuture = scheduledExecutor.scheduleWithFixedDelay(refreshTask, REFRESH_PERIOD_MILLIS, REFRESH_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
+            }
+        }
+    }
+
+    /**
+     * Stops auto-refreshing the properties previously loaded from {@code source}, releasing the strong
+     * references this class holds to that instance and - for the XML overloads - to its class.
+     *
+     * <p>Registered resources are held by a static map with no expiry, so without this call an
+     * auto-refreshed {@code Properties} instance (and, through the registered target class, the class
+     * loader that defined its type) stays reachable for the lifetime of the JVM. Applications that
+     * redeploy, or that load configuration for short-lived components, should unregister when done. The
+     * shared poll thread stops automatically once the last resource is unregistered.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * Properties<String, String> props = PropertiesUtil.load(configFile, true);
+     * // ... later, when the configuration is no longer needed:
+     * PropertiesUtil.stopAutoRefresh(configFile);
+     * }</pre>
+     *
+     * @param source the file originally passed to {@code load(File, true)} or
+     *        {@code loadFromXml(File, true, ...)}
+     * @return {@code true} if at least one registration was removed
+     * @throws IllegalArgumentException if {@code source} is {@code null}
+     * @see #load(File, boolean)
+     * @see #loadFromXml(File, boolean, Class)
+     */
+    public static boolean stopAutoRefresh(final File source) throws IllegalArgumentException {
+        N.checkArgNotNull(source, cs.source);
+
+        final String normalizedPath = normalizeFilePath(source).getPath();
+        boolean removed = false;
+
+        synchronized (registeredAutoRefreshProperties) {
+            final Iterator<Map.Entry<Resource, Properties<String, ?>>> iter = registeredAutoRefreshProperties.entrySet().iterator();
+
+            while (iter.hasNext()) {
+                if (normalizedPath.equals(iter.next().getKey().getFilePath())) {
+                    iter.remove();
+                    removed = true;
                 }
             }
-        };
 
-        scheduledExecutor.scheduleWithFixedDelay(refreshTask, 1000, 1000, TimeUnit.MILLISECONDS);
+            stopRefreshTaskIfIdle();
+        }
+
+        return removed;
+    }
+
+    /**
+     * Stops auto-refreshing every registered resource. Intended for container shutdown, and for tests
+     * that must not leak registrations into one another.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * PropertiesUtil.stopAllAutoRefresh();   // e.g. from ServletContextListener#contextDestroyed
+     * }</pre>
+     *
+     * @return the number of registrations removed
+     * @see #stopAutoRefresh(File)
+     */
+    public static int stopAllAutoRefresh() {
+        synchronized (registeredAutoRefreshProperties) {
+            final int count = registeredAutoRefreshProperties.size();
+            registeredAutoRefreshProperties.clear();
+            stopRefreshTaskIfIdle();
+
+            return count;
+        }
+    }
+
+    /** Cancels the shared poll task once nothing is registered. The caller holds the registry monitor. */
+    private static void stopRefreshTaskIfIdle() {
+        if (!registeredAutoRefreshProperties.isEmpty()) {
+            return;
+        }
+
+        synchronized (refreshTaskLock) {
+            if (refreshTaskFuture != null) {
+                refreshTaskFuture.cancel(false);
+                refreshTaskFuture = null;
+            }
+        }
     }
 
     private PropertiesUtil() {
@@ -306,9 +449,11 @@ public final class PropertiesUtil {
      * @param file the file whose path should be decoded
      * @return a {@code File} with {@code %20} replaced by spaces if the decoded path exists;
      *         the original {@code file} otherwise
-     * @throws NullPointerException if {@code file} is {@code null}
+     * @throws IllegalArgumentException if {@code file} is {@code null}
      */
-    public static File formatPath(File file) {
+    public static File formatPath(File file) throws IllegalArgumentException {
+        N.checkArgNotNull(file, cs.file);
+
         if (!file.exists()) {
             final String formattedPath = file.getAbsolutePath().replace("%20", " ");
             final File formattedFile = new File(formattedPath); //NOSONAR
@@ -333,13 +478,16 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
+     * <p>Name comparison during the recursive search is <b>case-insensitive on every platform</b>, so
+     * {@code "Config"} also matches a directory named {@code "config"} on Linux.</p>
+     *
      * @param configDir the name of the configuration directory to find
      * @return the File object representing the found directory, or {@code null} if not found
-     * @throws RuntimeException if {@code configDir} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code configDir} is {@code null} or empty
      * @see #findFile(String)
      */
     @MayReturnNull
-    public static File findDir(final String configDir) {
+    public static File findDir(final String configDir) throws IllegalArgumentException {
         return findFile(configDir, true, null);
     }
 
@@ -355,14 +503,17 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
+     * <p>Name comparison during the recursive search is <b>case-insensitive on every platform</b>, so
+     * {@code "Application.Properties"} also matches {@code "application.properties"} on Linux.</p>
+     *
      * @param configFileName the name of the configuration file to find
      * @return the File object representing the found file, or {@code null} if not found
-     * @throws RuntimeException if {@code configFileName} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code configFileName} is {@code null} or empty
      * @see #findDir(String)
      * @see #findFileRelativeTo(File, String)
      */
     @MayReturnNull
-    public static File findFile(final String configFileName) {
+    public static File findFile(final String configFileName) throws IllegalArgumentException {
         return findFile(configFileName, false, null);
     }
 
@@ -373,11 +524,11 @@ public final class PropertiesUtil {
      * @param isDir Indicates whether the target is a directory.
      * @param foundDir A set of directories that have already been searched.
      * @return The found file as a File object, or {@code null} if the file is not found.
-     * @throws RuntimeException if the target file name is empty or {@code null}.
+     * @throws IllegalArgumentException if the target file name is empty or {@code null}.
      */
-    private static File findFile(final String configFileName, final boolean isDir, Set<String> foundDir) {
+    private static File findFile(final String configFileName, final boolean isDir, Set<String> foundDir) throws IllegalArgumentException {
         if (Strings.isEmpty(configFileName)) {
-            throw new RuntimeException("target file name cannot be empty or null: " + configFileName);
+            throw new IllegalArgumentException("target file name cannot be empty or null: " + configFileName);
         }
 
         if (logger.isInfoEnabled()) {
@@ -460,8 +611,9 @@ public final class PropertiesUtil {
 
     /**
      * Finds a file by searching from the directory of a source file.
-     * The search starts in the parent directory of the source file, then falls back
-     * to common configuration paths if not found. This method is useful for finding
+     * For a relative target, the exact path under the source file's parent is checked first,
+     * followed by recursive searching there, then working-directory and common configuration paths.
+     * Existing absolute targets are returned directly. This method is useful for finding
      * related configuration files that are referenced from within another configuration file.
      *
      * <p><b>Usage Examples:</b></p>
@@ -474,14 +626,28 @@ public final class PropertiesUtil {
      * @param srcFile the source file whose directory will be used as the starting point
      * @param targetFileName the name of the file to find
      * @return the found file, or {@code null} if not found
-     * @throws RuntimeException if {@code targetFileName} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code targetFileName} is {@code null} or empty
      */
     @MayReturnNull
-    public static File findFileRelativeTo(final File srcFile, final String targetFileName) {
+    public static File findFileRelativeTo(final File srcFile, final String targetFileName) throws IllegalArgumentException {
+        N.checkArgNotEmpty(targetFileName, cs.targetFileName);
         File targetFile = new File(targetFileName);
 
+        if (!targetFile.isAbsolute() && srcFile != null && srcFile.exists()) {
+            final File parent = srcFile.toPath().toAbsolutePath().normalize().toFile().getParentFile();
+            final File exact = new File(parent, targetFileName);
+            if (exact.isFile()) {
+                return exact;
+            }
+            // Exact source-relative paths take precedence over recursive suffix matches and global fallbacks.
+            final File relative = findFileInDir(targetFileName, parent, false);
+            if (relative != null && relative.isFile()) {
+                return relative;
+            }
+        }
+
         if (!targetFile.isFile()) {
-            if ((srcFile != null) && srcFile.exists()) {
+            if (targetFile.isAbsolute() && srcFile != null && srcFile.exists()) {
                 targetFile = findFileInDir(targetFileName, srcFile.getParentFile(), false);
             }
 
@@ -498,6 +664,7 @@ public final class PropertiesUtil {
      * The search is recursive and will search all subdirectories.
      * Directories named .cvs, .svn, and .git are ignored during the search.
      * The file name can include a relative path which will be preserved during the search.
+     * Name comparison is <b>case-insensitive on every platform</b>.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -510,12 +677,12 @@ public final class PropertiesUtil {
      * @param dir the directory to search in
      * @param isDir {@code true} if searching for a directory, {@code false} for a file
      * @return the found file or directory, or {@code null} if not found
-     * @throws RuntimeException if the target file name is empty or null
+     * @throws IllegalArgumentException if the target file name is empty or null
      */
     @MayReturnNull
-    public static File findFileInDir(final String configFileName, final File dir, final boolean isDir) {
+    public static File findFileInDir(final String configFileName, final File dir, final boolean isDir) throws IllegalArgumentException {
         if (Strings.isEmpty(configFileName)) {
-            throw new RuntimeException("target file name cannot be empty or null: " + configFileName);
+            throw new IllegalArgumentException("target file name cannot be empty or null: " + configFileName);
         }
 
         String folderPrefix = null;
@@ -650,6 +817,13 @@ public final class PropertiesUtil {
      * The properties are loaded as key-value pairs of strings in the standard Java properties format
      * (key=value pairs, one per line, with support for comments starting with # or !).
      *
+     * <p><b>Character encoding:</b> this byte-oriented overload reads the {@code .properties} wire
+     * format, which is ISO-8859-1 with {@code \u005CuXXXX} escapes for every other character - the same
+     * rule as {@link java.util.Properties#load(java.io.InputStream)}. Pair it with
+     * {@link #store(Properties, String, File)} or {@link #store(Properties, String, OutputStream)}.
+     * Text written through a {@code Writer} in another charset will <i>not</i> read back correctly
+     * here; use {@link #load(Reader)} with that same charset instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, String> props = PropertiesUtil.load(new File("config.properties"));
@@ -658,12 +832,13 @@ public final class PropertiesUtil {
      *
      * @param source the file from which to load the properties.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code source} is {@code null}, or a property key or value contains a malformed Unicode escape
+     * @throws UncheckedIOException if opening or reading the properties source file fails
      * @see #load(File, boolean)
      * @see #load(InputStream)
      * @see #load(Reader)
      */
-    public static Properties<String, String> load(final File source) {
+    public static Properties<String, String> load(final File source) throws IllegalArgumentException, UncheckedIOException {
         return load(source, false);
     }
 
@@ -685,10 +860,13 @@ public final class PropertiesUtil {
      * @param autoRefresh if {@code true}, the properties will be automatically refreshed when the file is modified.
      *                    A background thread checks the file last modification time every second.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code source} is {@code null}, or a property key or value contains a malformed Unicode escape
+     * @throws UncheckedIOException if opening or reading the properties source file fails
      * @see #load(File)
      */
-    public static Properties<String, String> load(final File source, final boolean autoRefresh) {
+    public static Properties<String, String> load(final File source, final boolean autoRefresh) throws IllegalArgumentException, UncheckedIOException {
+        N.checkArgNotNull(source, cs.source);
+
         InputStream is = null;
 
         try {
@@ -705,10 +883,15 @@ public final class PropertiesUtil {
                         return registered;
                     }
 
+                    // Sample the modification time BEFORE the content, exactly as refreshIfNeeded does. Read
+                    // after it and a write that lands while this load is in flight is recorded as already
+                    // loaded: every later poll sees "lastModified <= lastLoadTime" and the pre-write content
+                    // is served until the file happens to be written again.
+                    final long lastModified = resource.getFile().lastModified();
                     is = IOUtil.newFileInputStream(resource.getFile());
                     final Properties<String, String> properties = load(is);
-                    resource.setLastLoadTime(resource.getFile().lastModified());
-                    registeredAutoRefreshProperties.put(resource, properties);
+                    resource.setLastLoadTime(lastModified);
+                    registerForAutoRefresh(resource, properties);
 
                     return properties;
                 }
@@ -726,6 +909,13 @@ public final class PropertiesUtil {
      * The stream should contain properties in the standard Java properties format
      * (key=value pairs, one per line, with support for comments starting with # or !).
      *
+     * <p><b>Character encoding:</b> this byte-oriented overload reads the {@code .properties} wire
+     * format, which is ISO-8859-1 with {@code \u005CuXXXX} escapes for every other character - the same
+     * rule as {@link java.util.Properties#load(java.io.InputStream)}. Pair it with
+     * {@link #store(Properties, String, File)} or {@link #store(Properties, String, OutputStream)}.
+     * Text written through a {@code Writer} in another charset will <i>not</i> read back correctly
+     * here; use {@link #load(Reader)} with that same charset instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * try (InputStream is = new FileInputStream("config.properties")) {
@@ -735,9 +925,12 @@ public final class PropertiesUtil {
      *
      * @param source the InputStream from which to load the properties; it is not closed by this method.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code source} is {@code null}, or a property key or value contains a malformed Unicode escape
+     * @throws UncheckedIOException if reading properties from {@code source} fails
      */
-    public static Properties<String, String> load(final InputStream source) {
+    public static Properties<String, String> load(final InputStream source) throws IllegalArgumentException, UncheckedIOException {
+        N.checkArgNotNull(source, cs.source);
+
         final java.util.Properties tmp = new java.util.Properties();
 
         try {
@@ -748,7 +941,7 @@ public final class PropertiesUtil {
 
         final Properties<String, String> result = new Properties<>();
 
-        merge(tmp, result);
+        replaceContents(tmp, result);
 
         return result;
     }
@@ -757,6 +950,10 @@ public final class PropertiesUtil {
      * Loads properties from the specified Reader.
      * The reader should provide properties in the standard Java properties format
      * (key=value pairs, one per line, with support for comments starting with # or !).
+     *
+     * <p><b>Character encoding:</b> this character-oriented overload consumes text already decoded by
+     * the supplied {@code Reader} and applies no ISO-8859-1 rule of its own. Pair it with
+     * {@link #store(Properties, String, Writer)} using the same charset.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -767,9 +964,12 @@ public final class PropertiesUtil {
      *
      * @param source the Reader from which to load the properties; it is not closed by this method.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs while reading from the reader
+     * @throws IllegalArgumentException if {@code source} is {@code null}, or a property key or value contains a malformed Unicode escape
+     * @throws UncheckedIOException if reading properties from {@code source} fails
      */
-    public static Properties<String, String> load(final Reader source) {
+    public static Properties<String, String> load(final Reader source) throws IllegalArgumentException, UncheckedIOException {
+        N.checkArgNotNull(source, cs.source);
+
         final java.util.Properties tmp = new java.util.Properties();
 
         try {
@@ -780,25 +980,34 @@ public final class PropertiesUtil {
 
         final Properties<String, String> result = new Properties<>();
 
-        merge(tmp, result);
+        replaceContents(tmp, result);
 
         return result;
     }
 
     /**
-     * Merges the source properties into the target properties.
+     * Replaces every mapping of {@code targetProperties} with those of {@code srcProperties}.
      *
-     * @param srcProperties the source properties to merge from.
-     * @param targetProperties the target properties to merge into.
+     * <p>This is a wholesale replacement, not a merge: keys absent from the source are dropped, which is
+     * what a reload of a changed file requires.</p>
+     *
+     * @param srcProperties the properties to copy from
+     * @param targetProperties the live instance whose contents are replaced
      */
     @SuppressWarnings("rawtypes")
-    private static void merge(final java.util.Properties srcProperties, final Properties<String, String> targetProperties) {
-
+    private static void replaceContents(final java.util.Properties srcProperties, final Properties<String, String> targetProperties) {
         targetProperties.reset(new LinkedHashMap<>((Map) srcProperties));
     }
 
-    private static <K, V> void merge(final Properties<? extends K, ? extends V> srcProperties, final Properties<K, V> targetProperties) {
-
+    /**
+     * Replaces every mapping of {@code targetProperties} with those of {@code srcProperties}.
+     *
+     * @param <K> the key type
+     * @param <V> the value type
+     * @param srcProperties the properties to copy from
+     * @param targetProperties the live instance whose contents are replaced
+     */
+    private static <K, V> void replaceContents(final Properties<? extends K, ? extends V> srcProperties, final Properties<K, V> targetProperties) {
         targetProperties.reset(new LinkedHashMap<>(srcProperties.values));
     }
 
@@ -817,13 +1026,15 @@ public final class PropertiesUtil {
      *
      * @param source the XML file from which to load the properties.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws UncheckedIOException if opening or reading the properties source file fails
      * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(File, boolean)
      * @see #loadFromXml(File, Class)
      */
-    public static Properties<String, Object> loadFromXml(final File source) {
+    public static Properties<String, Object> loadFromXml(final File source)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException, RuntimeException {
         return loadFromXml(source, false);
     }
 
@@ -833,6 +1044,10 @@ public final class PropertiesUtil {
      * background scheduler that reloads it whenever the source file's last-modified
      * timestamp advances. If a properties instance for the same file has already been
      * registered for auto-refresh, that same instance is returned instead of loading a new one.
+     *
+     * <p>Only the returned root instance keeps its identity across a reload. A reload replaces every nested
+     * {@code Properties} value with a new instance, so do not cache a nested {@code Properties} obtained from
+     * {@link Properties#get(Object)}; re-read it from the root instance after each refresh.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -844,12 +1059,14 @@ public final class PropertiesUtil {
      * @param autoRefresh if {@code true}, the properties will be automatically refreshed when the file is modified.
      *                    A background thread checks the file last modification time every second.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws UncheckedIOException if opening or reading the properties source file fails
      * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(File)
      */
-    public static Properties<String, Object> loadFromXml(final File source, final boolean autoRefresh) {
+    public static Properties<String, Object> loadFromXml(final File source, final boolean autoRefresh)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException, RuntimeException {
         return loadFromXml(source, autoRefresh, Properties.class);
     }
 
@@ -868,12 +1085,14 @@ public final class PropertiesUtil {
      *
      * @param source the InputStream from which to load the properties; it is not closed by this method.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs while reading the stream
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws UncheckedIOException if reading properties from {@code source} fails
      * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(InputStream, Class)
      */
-    public static Properties<String, Object> loadFromXml(final InputStream source) {
+    public static Properties<String, Object> loadFromXml(final InputStream source)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException, RuntimeException {
         return loadFromXml(source, Properties.class);
     }
 
@@ -892,12 +1111,14 @@ public final class PropertiesUtil {
      *
      * @param source the Reader from which to load the properties; it is not closed by this method.
      * @return a Properties object containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs while reading from the reader
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws UncheckedIOException if reading properties from {@code source} fails
      * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(Reader, Class)
      */
-    public static Properties<String, Object> loadFromXml(final Reader source) {
+    public static Properties<String, Object> loadFromXml(final Reader source)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException, RuntimeException {
         return loadFromXml(source, Properties.class);
     }
 
@@ -925,13 +1146,15 @@ public final class PropertiesUtil {
      * @param source the XML file from which to load the properties.
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws UncheckedIOException if opening or reading the properties source file fails
      * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(File)
      * @see #loadFromXml(File, boolean, Class)
      */
-    public static <T extends Properties<String, Object>> T loadFromXml(final File source, final Class<? extends T> targetClass) {
+    public static <T extends Properties<String, Object>> T loadFromXml(final File source, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException, RuntimeException {
         return loadFromXml(source, false, targetClass);
     }
 
@@ -941,6 +1164,10 @@ public final class PropertiesUtil {
      * scheduler that reloads it whenever the source file's last-modified timestamp advances.
      * If a properties instance for the same file and target class has already been registered for
      * auto-refresh, that same instance is returned instead of loading a new one.
+     *
+     * <p>Only the returned root instance keeps its identity across a reload. A reload replaces every nested
+     * {@code Properties} value with a new instance, so do not cache a nested {@code Properties} obtained from
+     * {@link Properties#get(Object)}; re-read it from the root instance after each refresh.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -963,12 +1190,16 @@ public final class PropertiesUtil {
      *                    A background thread checks the file last modification time every second.
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs reading the file
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws UncheckedIOException if opening or reading the properties source file fails
      * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(File, Class)
      */
-    public static <T extends Properties<String, Object>> T loadFromXml(final File source, final boolean autoRefresh, final Class<? extends T> targetClass) {
+    public static <T extends Properties<String, Object>> T loadFromXml(final File source, final boolean autoRefresh, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+
         InputStream is = null;
 
         try {
@@ -982,10 +1213,14 @@ public final class PropertiesUtil {
                         return registered;
                     }
 
+                    // Sampled before the content for the same reason as in load(File, boolean): a write that
+                    // lands during this load must leave lastLoadTime older than the file so the next poll
+                    // still sees it.
+                    final long lastModified = resource.getFile().lastModified();
                     is = IOUtil.newFileInputStream(resource.getFile());
                     final T properties = loadFromXml(is, targetClass);
-                    resource.setLastLoadTime(resource.getFile().lastModified());
-                    registeredAutoRefreshProperties.put(resource, properties);
+                    resource.setLastLoadTime(lastModified);
+                    registerForAutoRefresh(resource, properties);
 
                     return properties;
                 }
@@ -1024,17 +1259,21 @@ public final class PropertiesUtil {
      * @param source the InputStream from which to load the properties; it is not closed by this method.
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs reading the stream
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws UncheckedIOException if reading properties from {@code source} fails
      * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(InputStream)
      */
-    public static <T extends Properties<String, Object>> T loadFromXml(final InputStream source, final Class<? extends T> targetClass) {
+    public static <T extends Properties<String, Object>> T loadFromXml(final InputStream source, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
 
         Document doc;
         try {
-            doc = docBuilder.parse(source);
+            doc = docBuilder.parse(leaveOpen(source));
         } catch (final SAXException e) {
             throw new ParsingException(e);
         } catch (final IOException e) {
@@ -1076,17 +1315,21 @@ public final class PropertiesUtil {
      * @param source the Reader from which to load the properties; it is not closed by this method.
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
-     * @throws UncheckedIOException if an I/O error occurs reading from the reader
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if the XML cannot be parsed or has no document element
+     * @throws UncheckedIOException if reading properties from {@code source} fails
      * @throws RuntimeException if sibling element names collide after property-name normalization
      * @see #loadFromXml(Reader)
      */
-    public static <T extends Properties<String, Object>> T loadFromXml(final Reader source, final Class<? extends T> targetClass) {
+    public static <T extends Properties<String, Object>> T loadFromXml(final Reader source, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
 
         Document doc;
         try {
-            doc = docBuilder.parse(new InputSource(source));
+            doc = docBuilder.parse(new InputSource(leaveOpen(source)));
         } catch (final SAXException e) {
             throw new ParsingException(e);
         } catch (final IOException e) {
@@ -1144,15 +1387,34 @@ public final class PropertiesUtil {
             propSetMethod = getPropSetterForXml(targetClass, propName);
 
             if (XmlUtil.isTextElement(propNode)) {
-                if (Strings.isEmpty(typeAttr)) {
+                if (PROPERTIES_TYPE_ATTR.equals(Strings.strip(typeAttr))) {
+                    // An EMPTY nested Properties has no element children, so isTextElement() classifies it as
+                    // a text node. storeToXml writes type="Properties" for exactly that case and getTypeName
+                    // (the xmlToJava generator) already honours the marker; without this branch the value came
+                    // back as the String "" and the generated Properties-typed getter threw ClassCastException.
+                    propValue = loadFromXml(propNode, propSetMethod, false, null,
+                            (Class<T>) (propSetMethod == null ? Properties.class : propSetMethod.getParameterTypes()[0]));
+                } else if (Strings.isEmpty(typeAttr)) {
                     propValue = Strings.strip(XmlUtil.getTextContent(propNode));
                 } else {
-                    propValue = Type.of(typeAttr).valueOf(Strings.strip(XmlUtil.getTextContent(propNode)));
+                    final Type<?> declaredType = XmlUtil.getAttributeType(propNode);
+
+                    if (declaredType == null) {
+                        throw new ParsingException("XML type attribute is not allowed: " + typeAttr.trim());
+                    }
+
+                    propValue = declaredType.valueOf(Strings.strip(XmlUtil.getTextContent(propNode)));
                 }
             } else {
-                // Reuse an existing nested Properties value when present so recursive refreshes can
-                // preserve its identity; duplicate/list-style sibling properties are rejected above.
-                final T targetPropValue = (T) properties.get(propName);
+                // Reuse an existing nested Properties value when present, which happens only when a
+                // subclass constructor pre-populated this name: the auto-refresh path always passes
+                // output == null, so refreshIfNeeded builds a fresh nested instance and does NOT preserve
+                // nested identity. Duplicate/list-style sibling properties are rejected above. A subclass
+                // constructor that pre-populates this name with something that is not a Properties has
+                // nothing to reuse - the erased cast to T turned that into a ClassCastException, so
+                // replace such a value instead.
+                final Object existingPropValue = properties.get(propName);
+                final T targetPropValue = existingPropValue instanceof Properties ? (T) existingPropValue : null;
                 final Class<T> propClass = (Class<T>) (propSetMethod == null ? Properties.class : propSetMethod.getParameterTypes()[0]);
                 propValue = loadFromXml(propNode, propSetMethod, false, targetPropValue, propClass);
             }
@@ -1224,6 +1486,10 @@ public final class PropertiesUtil {
      * are converted with {@link String#valueOf(Object)}; null keys or values are rejected because the
      * standard {@link java.util.Properties} representation does not support them.
      *
+     * <p><b>Character encoding:</b> this byte-oriented overload writes the {@code .properties} wire
+     * format - ISO-8859-1 with {@code \u005CuXXXX} escapes for every other character - so any character
+     * survives a round trip through {@link #load(File)} / {@link #load(InputStream)}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, String> props = new Properties<>();
@@ -1235,19 +1501,32 @@ public final class PropertiesUtil {
      * @param properties the properties to store.
      * @param comments the comments to include as a leading comment line in the stored file; may be {@code null} for no comment.
      * @param output the file to which the properties will be stored. The file is created if it does not already exist.
-     * @throws NullPointerException if {@code properties}, {@code output}, or any key or value is {@code null}
-     * @throws UncheckedIOException if an I/O error occurs while writing to the file
+     * @throws IllegalArgumentException if {@code properties} or {@code output} is {@code null}; the output file is neither created nor modified
+     * @throws NullPointerException if any key or value is {@code null}; the output file is neither created nor modified
+     * @throws UncheckedIOException if opening, writing, or flushing the properties output file fails
      * @see #store(Properties, String, OutputStream)
      * @see #store(Properties, String, Writer)
      */
-    public static void store(final Properties<?, ?> properties, final String comments, final File output) {
+    public static void store(final Properties<?, ?> properties, final String comments, final File output)
+            throws IllegalArgumentException, NullPointerException, UncheckedIOException {
+        N.checkArgNotNull(output, cs.output);
+
+        // Convert (and thereby validate) before touching the file: opening it truncates it, so a rejected
+        // argument must not be allowed to destroy an existing file. storeToXml(.., File) validates before
+        // opening too, but only partially - it resolves value types only when writeTypeInfo is true - so it
+        // is not a model for completeness here; this conversion materialises every key and value up front.
+        // The write below intentionally duplicates store(properties, comments, OutputStream) rather than
+        // delegating to it - keep the two bodies in step.
+        final java.util.Properties tmp = toJavaProperties(properties);
+
         OutputStream os = null;
 
         try {
             IOUtil.createNewFileIfNotExists(output);
 
             os = IOUtil.newFileOutputStream(output);
-            store(properties, comments, os);
+            tmp.store(os, comments);
+            os.flush();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -1258,6 +1537,10 @@ public final class PropertiesUtil {
     /**
      * Stores the specified properties to the given OutputStream with optional comments.
      * Non-string keys and values are converted with {@link String#valueOf(Object)}.
+     *
+     * <p><b>Character encoding:</b> this byte-oriented overload writes the {@code .properties} wire
+     * format - ISO-8859-1 with {@code \u005CuXXXX} escapes for every other character - so any character
+     * survives a round trip through {@link #load(File)} / {@link #load(InputStream)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1271,10 +1554,14 @@ public final class PropertiesUtil {
      * @param properties the properties to store.
      * @param comments the comments to include as a leading comment line in the stored output; may be {@code null} for no comment.
      * @param output the OutputStream to which the properties will be stored. The stream is flushed but not closed.
-     * @throws NullPointerException if {@code properties}, {@code output}, or any key or value is {@code null}
-     * @throws UncheckedIOException if an I/O error occurs while writing to the stream
+     * @throws IllegalArgumentException if {@code properties} or {@code output} is {@code null}
+     * @throws NullPointerException if any key or value is {@code null}
+     * @throws UncheckedIOException if writing or flushing properties to {@code output} fails
      */
-    public static void store(final Properties<?, ?> properties, final String comments, final OutputStream output) {
+    public static void store(final Properties<?, ?> properties, final String comments, final OutputStream output)
+            throws IllegalArgumentException, NullPointerException, UncheckedIOException {
+        N.checkArgNotNull(output, cs.output);
+
         final java.util.Properties tmp = toJavaProperties(properties);
 
         try {
@@ -1289,6 +1576,13 @@ public final class PropertiesUtil {
      * Stores the specified properties to the given Writer with optional comments.
      * Non-string keys and values are converted with {@link String#valueOf(Object)}.
      *
+     * <p><b>Character encoding:</b> this character-oriented overload writes characters <i>verbatim</i>,
+     * with no {@code \u005CuXXXX} escaping, in whatever charset the supplied {@code Writer} encodes to -
+     * the same rule as {@link java.util.Properties#store(java.io.Writer, String)}. Read it back with
+     * {@link #load(Reader)} using that same charset: {@link #load(File)} and {@link #load(InputStream)}
+     * decode ISO-8859-1 and would mis-decode it. A character the writer's charset cannot represent is
+     * replaced by that encoder, losing data.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, String> properties = new Properties<>();
@@ -1301,10 +1595,14 @@ public final class PropertiesUtil {
      * @param properties the properties to store.
      * @param comments the comments to include as a leading comment line in the stored output; may be {@code null} for no comment.
      * @param output the Writer to which the properties will be stored. The writer is flushed but not closed.
-     * @throws NullPointerException if {@code properties}, {@code output}, or any key or value is {@code null}
-     * @throws UncheckedIOException if an I/O error occurs while writing to the writer
+     * @throws IllegalArgumentException if {@code properties} or {@code output} is {@code null}
+     * @throws NullPointerException if any key or value is {@code null}
+     * @throws UncheckedIOException if writing or flushing properties to {@code output} fails
      */
-    public static void store(final Properties<?, ?> properties, final String comments, final Writer output) {
+    public static void store(final Properties<?, ?> properties, final String comments, final Writer output)
+            throws IllegalArgumentException, NullPointerException, UncheckedIOException {
+        N.checkArgNotNull(output, cs.output);
+
         final java.util.Properties tmp = toJavaProperties(properties);
 
         try {
@@ -1317,8 +1615,12 @@ public final class PropertiesUtil {
         }
     }
 
-    private static java.util.Properties toJavaProperties(final Properties<?, ?> properties) {
-        Objects.requireNonNull(properties, "properties");
+    /**
+     * @throws IllegalArgumentException if {@code properties} is {@code null}
+     * @throws NullPointerException if a property key or value is null
+     */
+    private static java.util.Properties toJavaProperties(final Properties<?, ?> properties) throws IllegalArgumentException, NullPointerException {
+        N.checkArgNotNull(properties, cs.properties);
 
         final java.util.Properties result = new java.util.Properties();
 
@@ -1339,6 +1641,12 @@ public final class PropertiesUtil {
      * Type information is required to reconstruct non-string scalar and collection values
      * when the XML is loaded again.
      *
+     * <p><b>Round-trip caveats.</b> {@link #loadFromXml(File)} and its siblings strip leading and trailing
+     * whitespace from every text value, so a value of {@code "  v  "} is read back as {@code "v"}. An empty
+     * nested {@code Properties} round-trips only with {@code writeTypeInfo} {@code true}, which marks it
+     * {@code type="Properties"}; written without type information it is {@code <name></name>}, which no longer
+     * differs from an empty text value and loads as an empty {@code String}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> props = new Properties<>();
@@ -1353,16 +1661,21 @@ public final class PropertiesUtil {
      *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
      *                      When {@code false}, all values are written as plain text without type attributes.
      * @param output the file to which the properties will be stored, encoded as UTF-8. The file is created if it does not already exist.
-     * @throws NullPointerException if {@code properties}, {@code output}, or a key for a non-null value is {@code null}
-     * @throws IllegalArgumentException if the root name or a property key is not a usable, namespace-free XML element
-     *         name, or if nested {@code Properties} instances contain a reference cycle.
-     * @throws UncheckedIOException if an I/O error occurs while writing to the file
+     * @throws IllegalArgumentException if {@code properties} or {@code output} is {@code null}; if the root name
+     *         or a property key is not a usable, namespace-free XML element name; if nested {@code Properties}
+     *         instances contain a reference cycle; or if {@code writeTypeInfo} is {@code true} and a value has a
+     *         type the loader would not accept. These conditions are checked before anything is written.
+     * @throws NullPointerException if a key for a non-null value is {@code null}
+     * @throws UncheckedIOException if opening, writing, or flushing the properties output file fails
      * @see #storeToXml(Properties, String, boolean, OutputStream)
      * @see #storeToXml(Properties, String, boolean, Writer)
      * @see #loadFromXml(File)
      */
-    public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final File output) {
-        validateXmlStructure(properties, rootElementName);
+    public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final File output)
+            throws IllegalArgumentException, NullPointerException, UncheckedIOException {
+        N.checkArgNotNull(output, cs.output);
+
+        validateXmlStructure(properties, rootElementName, writeTypeInfo);
 
         OutputStream os = null;
         Writer writer = null;
@@ -1389,6 +1702,12 @@ public final class PropertiesUtil {
      * Each non-null mapping is written under its own key nested inside the root element;
      * null-valued mappings are omitted.
      *
+     * <p><b>Round-trip caveats.</b> {@link #loadFromXml(File)} and its siblings strip leading and trailing
+     * whitespace from every text value, so a value of {@code "  v  "} is read back as {@code "v"}. An empty
+     * nested {@code Properties} round-trips only with {@code writeTypeInfo} {@code true}, which marks it
+     * {@code type="Properties"}; written without type information it is {@code <name></name>}, which no longer
+     * differs from an empty text value and loads as an empty {@code String}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Properties<String, Object> properties = new Properties<>();
@@ -1404,16 +1723,20 @@ public final class PropertiesUtil {
      *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
      *                      When {@code false}, all values are written as plain text without type attributes.
      * @param output the OutputStream to which the properties will be stored, encoded as UTF-8. The stream is flushed but not closed.
-     * @throws NullPointerException if {@code properties}, {@code output}, or a key for a non-null value is {@code null}
-     * @throws IllegalArgumentException if the root name or a property key is not a usable, namespace-free XML element
-     *         name, or if nested {@code Properties} instances contain a reference cycle.
-     * @throws UncheckedIOException if an I/O error occurs while writing to the stream
+     * @throws IllegalArgumentException if {@code properties} or {@code output} is {@code null}; if the root name
+     *         or a property key is not a usable, namespace-free XML element name; if nested {@code Properties}
+     *         instances contain a reference cycle; or if {@code writeTypeInfo} is {@code true} and a value has a
+     *         type the loader would not accept. These conditions are checked before anything is written.
+     * @throws NullPointerException if a key for a non-null value is {@code null}
+     * @throws UncheckedIOException if writing or flushing properties to {@code output} fails
      * @see #storeToXml(Properties, String, boolean, File)
      * @see #loadFromXml(InputStream)
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final OutputStream output)
-            throws UncheckedIOException {
-        validateXmlStructure(properties, rootElementName);
+            throws IllegalArgumentException, NullPointerException, UncheckedIOException {
+        N.checkArgNotNull(output, cs.output);
+
+        validateXmlStructure(properties, rootElementName, writeTypeInfo);
 
         final java.io.OutputStreamWriter writer = IOUtil.newOutputStreamWriter(output, Charsets.UTF_8);
         try {
@@ -1428,6 +1751,12 @@ public final class PropertiesUtil {
      * Stores the specified properties to the given XML Writer.
      * Each non-null mapping is written under its own key nested inside the root element;
      * null-valued mappings are omitted.
+     *
+     * <p><b>Round-trip caveats.</b> {@link #loadFromXml(File)} and its siblings strip leading and trailing
+     * whitespace from every text value, so a value of {@code "  v  "} is read back as {@code "v"}. An empty
+     * nested {@code Properties} round-trips only with {@code writeTypeInfo} {@code true}, which marks it
+     * {@code type="Properties"}; written without type information it is {@code <name></name>}, which no longer
+     * differs from an empty text value and loads as an empty {@code String}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1444,38 +1773,54 @@ public final class PropertiesUtil {
      *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
      *                      When {@code false}, all values are written as plain text without type attributes.
      * @param output the Writer to which the properties will be stored. The writer is flushed but not closed.
-     * @throws NullPointerException if {@code properties}, {@code output}, or a key for a non-null value is {@code null}
-     * @throws IllegalArgumentException if the root name or a property key is not a usable, namespace-free XML element
-     *         name, or if nested {@code Properties} instances contain a reference cycle.
-     * @throws UncheckedIOException if an I/O error occurs while writing to the writer
+     * @throws IllegalArgumentException if {@code properties} or {@code output} is {@code null}; if the root name
+     *         or a property key is not a usable, namespace-free XML element name; if nested {@code Properties}
+     *         instances contain a reference cycle; or if {@code writeTypeInfo} is {@code true} and a value has a
+     *         type the loader would not accept. These conditions are checked before anything is written.
+     * @throws NullPointerException if a key for a non-null value is {@code null}
+     * @throws UncheckedIOException if writing or flushing properties to {@code output} fails
      * @see #storeToXml(Properties, String, boolean, File)
      * @see #loadFromXml(Reader)
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final Writer output)
-            throws UncheckedIOException {
-        validateXmlStructure(properties, rootElementName);
+            throws IllegalArgumentException, NullPointerException, UncheckedIOException {
+        N.checkArgNotNull(output, cs.output);
+
+        validateXmlStructure(properties, rootElementName, writeTypeInfo);
         storeToXml(properties, rootElementName, writeTypeInfo, true, output);
     }
 
-    private static void validateXmlStructure(final Properties<?, ?> properties, final String rootElementName) {
-        Objects.requireNonNull(properties, "properties");
-        final Document document;
+    /**
+     * Lazily created scratch {@link Document} used only to validate element names.
+     *
+     * <p>A fresh {@code DocumentBuilderFactory.newInstance()} plus builder plus document used to be
+     * constructed on <i>every</i> {@code storeToXml} call, and {@code newInstance()} alone performs
+     * service-loader discovery. One document is enough: nothing is ever appended to it. DOM nodes are
+     * not thread-safe, so all use of it goes through {@link #validateXmlElementName} under
+     * {@link #nameValidationLock}.</p>
+     */
+    private static Document nameValidationDocument;
 
-        try {
-            // Use the JDK DOM factory directly. XML storing has no reason to acquire the optional
-            // parser/JAXB dependencies used by XmlUtil's deserialization paths.
-            document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-        } catch (final ParserConfigurationException e) {
-            throw new IllegalStateException("No DOM implementation is available for validating XML element names", e);
-        }
+    /** Guards {@link #nameValidationDocument}, which is a shared, non-thread-safe DOM object. */
+    private static final Object nameValidationLock = new Object();
 
-        validateXmlElementName(rootElementName, "rootElementName", document);
+    /**
+     * @throws IllegalArgumentException if {@code properties} is null, an emitted element name is invalid or contains a colon,
+     *         nested properties contain a reference cycle, or a requested type attribute cannot be represented
+     * @throws IllegalStateException if no DOM implementation is available for validating element names
+     * @throws NullPointerException if a property with a non-null value has a null key
+     */
+    private static void validateXmlStructure(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo)
+            throws IllegalArgumentException, IllegalStateException, NullPointerException {
+        N.checkArgNotNull(properties, cs.properties);
+
+        validateXmlElementName(rootElementName, "rootElementName");
 
         final Set<Properties<?, ?>> ancestors = Collections.newSetFromMap(new IdentityHashMap<>());
-        validateXmlProperties(properties, document, ancestors);
+        validateXmlProperties(properties, ancestors, writeTypeInfo);
     }
 
-    private static void validateXmlProperties(final Properties<?, ?> properties, final Document document, final Set<Properties<?, ?>> ancestors) {
+    private static void validateXmlProperties(final Properties<?, ?> properties, final Set<Properties<?, ?>> ancestors, final boolean writeTypeInfo) {
         if (!ancestors.add(properties)) {
             throw new IllegalArgumentException("Nested properties contain a reference cycle");
         }
@@ -1490,10 +1835,14 @@ public final class PropertiesUtil {
                 }
 
                 final Object key = Objects.requireNonNull(entry.getKey(), "property key");
-                validateXmlElementName(String.valueOf(key), "property key", document);
+                validateXmlElementName(String.valueOf(key), "property key");
 
                 if (value instanceof Properties) {
-                    validateXmlProperties((Properties<?, ?>) value, document, ancestors);
+                    validateXmlProperties((Properties<?, ?>) value, ancestors, writeTypeInfo);
+                } else if (writeTypeInfo) {
+                    // Resolve the type attribute now, before any output is produced, so an unwritable
+                    // type cannot leave a truncated or half-written document behind.
+                    loadableTypeAttr(Type.of(value.getClass()), String.valueOf(key));
                 }
             }
         } finally {
@@ -1501,15 +1850,40 @@ public final class PropertiesUtil {
         }
     }
 
-    private static void validateXmlElementName(final String name, final String argumentName, final Document document) {
+    /**
+     * Rejects {@code name} unless the DOM implementation accepts it as an element name.
+     *
+     * <p>Validation is delegated to {@link Document#createElement(String)} rather than to a hand-rolled
+     * XML {@code Name} production so that exactly the names the platform's DOM would accept are accepted
+     * here. The scratch document is shared and DOM is not thread-safe, hence the lock.</p>
+     *
+     * @param name the candidate element name
+     * @param argumentName what {@code name} came from, for the error message
+     * @throws IllegalArgumentException if {@code name} is {@code null} or empty, contains {@code ':'}, or is not a valid
+     *         XML element name
+     * @throws IllegalStateException if no DOM implementation is available
+     */
+    private static void validateXmlElementName(final String name, final String argumentName) throws IllegalArgumentException, IllegalStateException {
         if (Strings.isEmpty(name) || name.indexOf(':') >= 0) {
             throw new IllegalArgumentException(argumentName + " must be a non-empty, namespace-free XML element name: " + name);
         }
 
-        try {
-            document.createElement(name);
-        } catch (final RuntimeException e) {
-            throw new IllegalArgumentException(argumentName + " must be a valid XML element name: " + name, e);
+        synchronized (nameValidationLock) {
+            if (nameValidationDocument == null) {
+                try {
+                    // The JDK DOM factory directly: XML storing has no reason to acquire the optional
+                    // parser/JAXB dependencies used by XmlUtil's deserialization paths.
+                    nameValidationDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+                } catch (final ParserConfigurationException e) {
+                    throw new IllegalStateException("No DOM implementation is available for validating XML element names", e);
+                }
+            }
+
+            try {
+                nameValidationDocument.createElement(name);
+            } catch (final RuntimeException e) {
+                throw new IllegalArgumentException(argumentName + " must be a valid XML element name: " + name, e);
+            }
         }
     }
 
@@ -1522,7 +1896,7 @@ public final class PropertiesUtil {
      * @param writeTypeInfo if {@code true}, type information will be written as attributes in the XML.
      * @param isFirstCall if {@code true}, this is the first call (writes XML declaration).
      * @param output the Writer to which the properties will be stored.
-     * @throws UncheckedIOException if an I/O error occurs while writing
+     * @throws UncheckedIOException if writing or flushing XML property elements to {@code output} fails
      */
     private static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final boolean isFirstCall,
             final Writer output) throws UncheckedIOException {
@@ -1536,7 +1910,7 @@ public final class PropertiesUtil {
             if ((isFirstCall || !writeTypeInfo) || !properties.getClass().equals(Properties.class)) {
                 bw.write("<" + rootElementName + ">");
             } else {
-                bw.write("<" + rootElementName + " type=\"Properties\">");
+                bw.write("<" + rootElementName + " " + TYPE + "=\"" + PROPERTIES_TYPE_ATTR + "\">");
             }
 
             String propName = null;
@@ -1559,13 +1933,9 @@ public final class PropertiesUtil {
                     type = Type.of(propValue.getClass());
 
                     if (writeTypeInfo) {
-                        if (ClassUtil.isPrimitiveWrapper(type.javaType())) {
-                            bw.write("<" + propName + " type=\"" + ClassUtil.getSimpleClassName(ClassUtil.unwrap(type.javaType())) + "\">");
-                        } else {
-                            // escape: parameterized declaring names contain '<'/'>', which are
-                            // illegal inside an XML attribute value (the output couldn't be re-parsed).
-                            bw.write("<" + propName + " type=\"" + escapeTypeAttr(type.declaringName()) + "\">");
-                        }
+                        // escape: parameterized declaring names contain '<'/'>', which are
+                        // illegal inside an XML attribute value (the output couldn't be re-parsed).
+                        bw.write("<" + propName + " type=\"" + escapeTypeAttr(loadableTypeAttr(type, propName)) + "\">");
                     } else {
                         bw.write("<" + propName + ">");
                     }
@@ -1584,6 +1954,49 @@ public final class PropertiesUtil {
         } finally {
             Objectory.recycle(bw);
         }
+    }
+
+    /**
+     * Returns the {@code type} attribute value to write for {@code type}, guaranteed to be one that
+     * {@link #loadFromXml(File)} will accept.
+     *
+     * <p>The writer used to emit {@link Type#declaringName()} unconditionally. That name is the
+     * library's internal spelling and is not always the one the reader's type allowlist recognises:
+     * a {@link java.time.Duration} was written as {@code type="JdkDuration"}, which
+     * {@code loadFromXml} then rejected with "XML type attribute is not allowed" — so
+     * {@code storeToXml} silently produced a document this library could not read back. The
+     * canonical class name is tried as a fallback ({@code java.time.Duration} is allowlisted), and a
+     * type with no accepted spelling is reported here, at write time, instead of turning into an
+     * unloadable file.</p>
+     *
+     * @param type the resolved type of the value being written
+     * @param propName the property being written, for the error message
+     * @return a type name the reader will resolve
+     * @throws IllegalArgumentException if no spelling of {@code type} is accepted by the reader
+     */
+    private static String loadableTypeAttr(final Type<?> type, final String propName) throws IllegalArgumentException {
+        if (ClassUtil.isPrimitiveWrapper(type.javaType())) {
+            // "int", "boolean", ... are always accepted.
+            return ClassUtil.getSimpleClassName(ClassUtil.unwrap(type.javaType()));
+        }
+
+        // Preferred: the declaring name keeps generic parameters (e.g. "List<Object>").
+        final String declaringName = type.declaringName();
+
+        if (XmlUtil.isResolvableXmlTypeAttributeName(declaringName)) {
+            return declaringName;
+        }
+
+        final String canonicalName = type.javaType().getCanonicalName();
+
+        if (XmlUtil.isResolvableXmlTypeAttributeName(canonicalName)) {
+            return canonicalName;
+        }
+
+        throw new IllegalArgumentException("Cannot write type information for property '" + propName + "' of type " + declaringName
+                + ": no name for it is accepted by the XML type allowlist, so the result could not be loaded back. "
+                + "Store it as text with writeTypeInfo=false, convert it to a supported type, or enable "
+                + "-Dabacus.xml.allowTypeAttrClassForName=true for trusted XML.");
     }
 
     /**
@@ -1623,18 +2036,25 @@ public final class PropertiesUtil {
      * // Generates Config.java with typed getters/setters
      * }</pre>
      *
-     * @param xml the XML content as a string.
+     * @param xml the XML content as a string. Being a character source, any {@code encoding=} declaration
+     *        inside it is ignored; the string is parsed as-is.
      * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
      * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
-     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling
-     *         property names are duplicated, an unsupported type is declared, or a nested class would have the same
-     *         name as an enclosing class.
-     * @throws RuntimeException if XML parsing or file I/O fails
+     * @throws IllegalArgumentException if {@code xml} is {@code null}, a source path or generated Java identifier is invalid, an unsupported type
+     *         is declared, or a nested class would have the same name as an enclosing class.
+     * @throws RuntimeException if XML parsing fails, the document has no root element, sibling element names
+     *         collide after property-name normalization, or reading XML or writing the generated source fails
      */
-    public static void xmlToJava(final String xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
-        xmlToJava(IOUtil.stringToInputStream(xml), srcPath, packageName, className, isPublicField);
+    public static void xmlToJava(final String xml, final String srcPath, final String packageName, final String className, final boolean isPublicField)
+            throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(xml, cs.xml);
+
+        // A String is already decoded, so it is a character source: hand it to the parser as a Reader
+        // and let any encoding= declaration inside it be ignored, exactly as the Reader overload does.
+        // Encoding it to bytes first would let a stale declaration re-decode the text and corrupt it.
+        xmlToJava(new StringReader(xml), srcPath, packageName, className, isPublicField);
     }
 
     /**
@@ -1656,25 +2076,34 @@ public final class PropertiesUtil {
      * PropertiesUtil.xmlToJava(xmlFile, "src/main/java", "com.example", "AppConfig", false);
      * }</pre>
      *
-     * @param xml the XML file from which to generate Java code.
+     * @param xml the XML file from which to generate Java code. It is read as a <i>byte</i> source, so the
+     *        document's own {@code encoding=} declaration (or BOM) selects the charset, consistently with
+     *        {@link #loadFromXml(File)}.
      * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
      * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
-     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling
-     *         property names are duplicated, an unsupported type is declared, or a nested class would have the same
-     *         name as an enclosing class.
-     * @throws RuntimeException if XML parsing or file I/O fails
+     * @throws IllegalArgumentException if {@code xml} is {@code null}, a source path or generated Java identifier is invalid, an unsupported type
+     *         is declared, or a nested class would have the same name as an enclosing class.
+     * @throws RuntimeException if XML parsing fails, the document has no root element, sibling element names
+     *         collide after property-name normalization, or reading XML or writing the generated source fails
      */
-    public static void xmlToJava(final File xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
-        Reader reader = null;
+    public static void xmlToJava(final File xml, final String srcPath, final String packageName, final String className, final boolean isPublicField)
+            throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(xml, cs.xml);
+
+        InputStream is = null;
 
         try {
-            reader = IOUtil.newFileReader(xml);
+            // Read the file as BYTES, not through a fixed-charset Reader. A file is a byte source, so
+            // its own encoding= declaration decides the charset; wrapping it in a UTF-8 Reader first
+            // discarded that declaration and made an ISO-8859-1 document fail to parse even though
+            // loadFromXml(File) read the very same file correctly.
+            is = IOUtil.newFileInputStream(xml);
 
-            xmlToJava(reader, srcPath, packageName, className, isPublicField);
+            xmlToJava(is, srcPath, packageName, className, isPublicField);
         } finally {
-            IOUtil.close(reader);
+            IOUtil.close(is);
         }
     }
 
@@ -1698,18 +2127,25 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param xml the InputStream from which to generate Java code; it is not closed by this method.
+     * @param xml the InputStream from which to generate Java code; it is not closed by this method. It is
+     *        read as a <i>byte</i> source, so the document's own {@code encoding=} declaration (or BOM)
+     *        selects the charset.
      * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
      * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
-     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling
-     *         property names are duplicated, an unsupported type is declared, or a nested class would have the same
-     *         name as an enclosing class.
-     * @throws RuntimeException if XML parsing or file I/O fails
+     * @throws IllegalArgumentException if {@code xml} is {@code null}, a source path or generated Java identifier is invalid, an unsupported type
+     *         is declared, or a nested class would have the same name as an enclosing class.
+     * @throws RuntimeException if XML parsing fails, the document has no root element, sibling element names
+     *         collide after property-name normalization, or reading XML or writing the generated source fails
      */
-    public static void xmlToJava(final InputStream xml, final String srcPath, final String packageName, final String className, final boolean isPublicField) {
-        xmlToJava(IOUtil.newInputStreamReader(xml), srcPath, packageName, className, isPublicField);
+    public static void xmlToJava(final InputStream xml, final String srcPath, final String packageName, final String className, final boolean isPublicField)
+            throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(xml, cs.xml);
+
+        // Byte source: pass the raw stream so the parser applies the document's own encoding
+        // declaration (and BOM sniffing) rather than a charset chosen here. See xmlToJava(File).
+        xmlToJava(new InputSource(leaveOpen(xml)), srcPath, packageName, className, isPublicField);
     }
 
     /**
@@ -1733,26 +2169,67 @@ public final class PropertiesUtil {
      * }
      * }</pre>
      *
-     * @param xml the Reader from which to generate Java code; it is not closed by this method.
+     * @param xml the Reader from which to generate Java code; it is not closed by this method. Being a
+     *        character source, any {@code encoding=} declaration in the document is ignored.
      * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
      * @param className the name of the generated Java class. If {@code null}, uses the normalized and capitalized root element name.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
-     * @throws IllegalArgumentException if a source path or generated Java identifier is invalid, normalized sibling
-     *         property names are duplicated, an unsupported type is declared, or a nested class would have the same
-     *         name as an enclosing class.
-     * @throws RuntimeException if XML parsing or file I/O fails
+     * @throws IllegalArgumentException if {@code xml} is {@code null}, a source path or generated Java identifier is invalid, an unsupported type
+     *         is declared, or a nested class would have the same name as an enclosing class.
+     * @throws RuntimeException if XML parsing fails, the document has no root element, sibling element names
+     *         collide after property-name normalization, or reading XML or writing the generated source fails
+     */
+    public static void xmlToJava(final Reader xml, final String srcPath, final String packageName, final String className, final boolean isPublicField)
+            throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(xml, cs.xml);
+
+        xmlToJava(new InputSource(leaveOpen(xml)), srcPath, packageName, className, isPublicField);
+    }
+
+    // DOM parsers may close their input. Public stream/reader overloads leave ownership with the caller.
+    private static InputStream leaveOpen(final InputStream source) {
+        return source == null ? null : new java.io.FilterInputStream(source) {
+            @Override
+            public void close() {
+                // The caller closes the original stream.
+            }
+        };
+    }
+
+    private static Reader leaveOpen(final Reader source) {
+        return source == null ? null : new java.io.FilterReader(source) {
+            @Override
+            public void close() {
+                // The caller closes the original reader.
+            }
+        };
+    }
+
+    /**
+     * Shared implementation of the {@code xmlToJava} overloads. The caller decides whether the
+     * {@link InputSource} carries a byte stream (encoding taken from the document's own declaration)
+     * or a character stream (encoding already resolved, declaration ignored).
+     *
+     * @param xml the parser input; not closed by this method
+     * @param srcPath the source path where the generated Java code will be saved
+     * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package
+     * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used
+     * @param isPublicField retained for signature compatibility; has no effect on the generated source
+     * @throws IllegalArgumentException if {@code srcPath} is null or empty, or a supplied package or class name is not a valid Java identifier
+     * @throws RuntimeException if parsing the XML, validating the generated structure, or writing the Java source fails
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    public static void xmlToJava(final Reader xml, final String srcPath, final String packageName, String className, final boolean isPublicField) {
-        N.checkArgNotEmpty(srcPath, "srcPath");
+    private static void xmlToJava(final InputSource xml, final String srcPath, final String packageName, String className, final boolean isPublicField)
+            throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotEmpty(srcPath, cs.srcPath);
         validatePackageName(packageName);
 
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
         Writer writer = null;
 
         try { //NOSONAR
-            final Document doc = docBuilder.parse(new InputSource(xml));
+            final Document doc = docBuilder.parse(xml);
             final Node root = doc.getDocumentElement();
 
             if (root == null) {
@@ -1767,7 +2244,7 @@ public final class PropertiesUtil {
             if (className == null) {
                 className = generatedClassName(root);
             } else {
-                checkJavaIdentifier(className, "className");
+                checkJavaTypeIdentifier(className, cs.className);
             }
 
             validateGeneratedStructure(root, className, N.newHashSet());
@@ -1802,7 +2279,7 @@ public final class PropertiesUtil {
         }
 
         for (final String identifier : packageName.split("\\.", -1)) {
-            checkJavaIdentifier(identifier, "packageName");
+            checkJavaIdentifier(identifier, cs.packageName);
         }
     }
 
@@ -1812,14 +2289,26 @@ public final class PropertiesUtil {
         }
     }
 
+    /**
+     * Validates a name that will declare a generated class. Such a name must be a JLS {@code TypeIdentifier},
+     * so the restricted identifiers {@code permits}, {@code record}, {@code sealed}, {@code var} and
+     * {@code yield} are rejected even though they are legal identifiers elsewhere (a generated field may
+     * still be named {@code record}).
+     */
+    private static void checkJavaTypeIdentifier(final String identifier, final String argumentName) {
+        if (!Strings.isValidJavaTypeIdentifier(identifier)) {
+            throw new IllegalArgumentException(argumentName + " must be a valid Java type name: " + identifier);
+        }
+    }
+
     private static String generatedClassName(final Node node) {
         final String className = Strings.capitalize(Beans.normalizePropName(node.getNodeName()));
-        checkJavaIdentifier(className, "XML element name");
+        checkJavaTypeIdentifier(className, "XML element name");
         return className;
     }
 
     private static void validateGeneratedStructure(final Node node, final String className, final Set<String> enclosingClassNames) {
-        checkJavaIdentifier(className, "generated class name");
+        checkJavaTypeIdentifier(className, "generated class name");
 
         if (!enclosingClassNames.add(className)) {
             throw new IllegalArgumentException("A generated nested class has the same name as an enclosing class: " + className);
@@ -1859,11 +2348,11 @@ public final class PropertiesUtil {
             output.write(spaces + "/**" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(spaces + " * Auto-generated by Abacus." + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(spaces + " */" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(spaces + "public class " + className + " extends " + Properties.class.getCanonicalName() + "<String, Object> {"
+            output.write(spaces + "public class " + className + " extends " + Properties.class.getCanonicalName() + "<java.lang.String, java.lang.Object> {"
                     + IOUtil.LINE_SEPARATOR_UNIX);
         } else {
-            output.write(spaces + "public static class " + className + " extends " + Properties.class.getCanonicalName() + "<String, Object> {"
-                    + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(spaces + "public static class " + className + " extends " + Properties.class.getCanonicalName()
+                    + "<java.lang.String, java.lang.Object> {" + IOUtil.LINE_SEPARATOR_UNIX);
         }
 
         final NodeList childNodes = xmlNode.getChildNodes();
@@ -1903,30 +2392,31 @@ public final class PropertiesUtil {
             // Retain generic mutation methods for compatibility, but deprecate them in favor of
             // the generated property-specific accessors.
             output.write(IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(methodSpace + "@Deprecated" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(methodSpace + "@Override" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(methodSpace + "public " + className + " set(String propName, Object propValue) {" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(methodSpace + "@java.lang.Deprecated" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(methodSpace + "@java.lang.Override" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(methodSpace + "public " + className + " set(java.lang.String propName, java.lang.Object propValue) {" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "    " + "return (" + className + ") super.set(propName, propValue);" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "}" + IOUtil.LINE_SEPARATOR_UNIX);
 
             output.write(IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(methodSpace + "@Deprecated" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(methodSpace + "@Override" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(methodSpace + "public Object put(String propName, Object propValue) {" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(methodSpace + "@java.lang.Deprecated" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(methodSpace + "@java.lang.Override" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(methodSpace + "public java.lang.Object put(java.lang.String propName, java.lang.Object propValue) {" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "    " + "return super.put(propName, propValue);" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "}" + IOUtil.LINE_SEPARATOR_UNIX);
 
             output.write(IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(methodSpace + "@Deprecated" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(methodSpace + "@Override" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(methodSpace + "public void putAll(java.util.Map<? extends String, ? extends Object> m) {" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(methodSpace + "@java.lang.Deprecated" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(methodSpace + "@java.lang.Override" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(
+                    methodSpace + "public void putAll(java.util.Map<? extends java.lang.String, ? extends java.lang.Object> m) {" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "    " + "super.putAll(m);" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "}" + IOUtil.LINE_SEPARATOR_UNIX);
 
             output.write(IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(methodSpace + "@Deprecated" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(methodSpace + "@Override" + IOUtil.LINE_SEPARATOR_UNIX);
-            output.write(methodSpace + "public Object remove(Object propName) {" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(methodSpace + "@java.lang.Deprecated" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(methodSpace + "@java.lang.Override" + IOUtil.LINE_SEPARATOR_UNIX);
+            output.write(methodSpace + "public java.lang.Object remove(java.lang.Object propName) {" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "    " + "return super.remove(propName);" + IOUtil.LINE_SEPARATOR_UNIX);
             output.write(methodSpace + "}" + IOUtil.LINE_SEPARATOR_UNIX);
 
@@ -1989,12 +2479,12 @@ public final class PropertiesUtil {
     private static String getTypeName(final Node node, final String propName) {
         // A node with an element child is a nested Properties type; a text-only node is a String property.
         // Must match loadFromXml's detection (XmlUtil.isTextElement) — see comment in xmlPropertiesToJava.
-        String typeName = XmlUtil.isTextElement(node) ? "String" : Strings.capitalize(propName);
+        String typeName = XmlUtil.isTextElement(node) ? "java.lang.String" : Strings.capitalize(propName);
         final String typeAttr = XmlUtil.getAttribute(node, TYPE);
 
         if (Strings.isNotEmpty(typeAttr)) {
-            if (typeAttr.equals("Properties")) {
-                typeName = Properties.class.getCanonicalName() + "<String, Object>";
+            if (typeAttr.equals(PROPERTIES_TYPE_ATTR)) {
+                typeName = Properties.class.getCanonicalName() + "<java.lang.String, java.lang.Object>";
             } else {
                 final Type<?> type = Type.of(typeAttr);
                 if (type == null || type.javaType() == void.class) {
@@ -2321,6 +2811,15 @@ public final class PropertiesUtil {
         /** The last load time. */
         private long lastLoadTime;
 
+        /** Modification time of the content whose reload last failed, or 0 if the last attempt succeeded. */
+        private long lastFailedModifiedTime;
+
+        /** Wall-clock time before which a repeatedly failing reload must not be retried. */
+        private long nextRetryTime;
+
+        /** Current back-off delay, doubled on each consecutive failure of the same content. */
+        private long refreshBackoffMillis;
+
         /** The resource type. */
         private final ResourceType resourceType;
 
@@ -2363,6 +2862,63 @@ public final class PropertiesUtil {
          */
         public File getFile() {
             return file;
+        }
+
+        /**
+         * Returns the modification time of the content whose reload last failed.
+         *
+         * @return that modification time, or {@code 0} if the most recent attempt succeeded
+         */
+        long getLastFailedModifiedTime() {
+            return lastFailedModifiedTime;
+        }
+
+        /**
+         * Returns the earliest wall-clock time at which a repeatedly failing reload may be retried.
+         *
+         * @return that time in milliseconds since the epoch, or {@code 0} when no back-off is active
+         */
+        long getNextRetryTime() {
+            return nextRetryTime;
+        }
+
+        /** Clears any active failure back-off after a successful reload. */
+        void recordRefreshSuccess() {
+            lastFailedModifiedTime = 0;
+            nextRetryTime = 0;
+            refreshBackoffMillis = 0;
+        }
+
+        /**
+         * Records a failed reload and returns how long the next retry of this same content is deferred.
+         * The delay starts at one poll period and doubles for each consecutive failure of the same
+         * content, capped at {@code maxBackoffMillis}. A different modification time resets it, so a
+         * fixed file is picked up on the very next poll.
+         *
+         * @param failedModifiedTime modification time of the content that failed to load
+         * @param maxBackoffMillis upper bound for the back-off
+         * @return the back-off applied, in milliseconds
+         */
+        long recordRefreshFailure(final long failedModifiedTime, final long maxBackoffMillis) {
+            if (failedModifiedTime != lastFailedModifiedTime) {
+                lastFailedModifiedTime = failedModifiedTime;
+                refreshBackoffMillis = REFRESH_PERIOD_MILLIS;
+            } else {
+                refreshBackoffMillis = Math.min(maxBackoffMillis, Math.max(REFRESH_PERIOD_MILLIS, refreshBackoffMillis * 2));
+            }
+
+            nextRetryTime = System.currentTimeMillis() + refreshBackoffMillis;
+
+            return refreshBackoffMillis;
+        }
+
+        /**
+         * Returns the normalized path of the backing file.
+         *
+         * @return the absolute, canonicalized path used for resource identity
+         */
+        String getFilePath() {
+            return filePath;
         }
 
         /**

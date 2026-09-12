@@ -29,14 +29,15 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CodingErrorAction;
+import java.util.AbstractMap;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -60,7 +61,8 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
  *   <li><b>Encoding modes:</b> HTML form encoding plus URI-component safe sets derived from RFC 2396</li>
  *   <li><b>Object Serialization:</b> Automatic conversion of Java objects to URL-encoded query strings</li>
  *   <li><b>Flexible Parsing:</b> Support for both Map-based and object-based parameter decoding</li>
- *   <li><b>Charset Support:</b> Full Unicode support with configurable character encoding</li>
+ *   <li><b>Charset Support:</b> Configurable, lossless character encoding; malformed UTF-16 and characters not
+ *       representable in the selected charset are rejected rather than replaced</li>
  *   <li><b>Naming Policies:</b> Customizable field naming strategies for object serialization</li>
  *
  *   <li><b>Stateless operation:</b> Separate calls share no mutable encoding state</li>
@@ -159,7 +161,7 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
  *   <li><b>Bean Properties:</b> Automatic discovery and encoding of JavaBean properties</li>
  *   <li><b>Bean Access:</b> Properties are discovered through the library's JavaBean metadata</li>
  *   <li><b>Value Handling:</b> Map values, array-pair values, and bean property values are converted with their normal string representation</li>
- *   <li><b>Null Values:</b> Null bean properties are omitted; explicit null Map/array values are encoded as {@code "null"}</li>
+ *   <li><b>Null Values:</b> Null bean properties are omitted; explicit null Map/array values are encoded as valueless tokens (the name only, matching how decode parses a token without {@code '='})</li>
  *   <li><b>Type Conversion:</b> Automatic conversion of primitive and wrapper types</li>
  * </ul>
  *
@@ -301,18 +303,6 @@ public final class URLEncodedUtil {
     public static final String NAME_VALUE_SEPARATOR = "=";
 
     /**
-     * Array of accepted query-parameter separator characters: ampersand ('&amp;') and semicolon (';').
-     * Used to construct {@link #QP_SEP_PATTERN}.
-     */
-    private static final char[] QP_SEPS = { QP_SEP_A, QP_SEP_S };
-
-    /**
-     * Regular-expression character class matching either query-parameter separator
-     * ({@code '&'} or {@code ';'}), used by {@link java.util.Scanner} to split query strings.
-     */
-    private static final String QP_SEP_PATTERN = "[" + String.valueOf(QP_SEPS) + "]";
-
-    /**
      * Unreserved characters, i.e., alphanumeric, plus: {@code _ - ! . ~ ' ( ) *}
      * <p>
      * This list is the same as the {@code unreserved} list in <a href="http://www.ietf.org/rfc/rfc2396.txt">RFC
@@ -321,7 +311,7 @@ public final class URLEncodedUtil {
     private static final BitSet UNRESERVED = new BitSet(256);
 
     /**
-     * Punctuation characters: , ; : $ & + =
+     * Punctuation characters: , ; : $ &amp; + =
      * <p>
      * These are the additional characters allowed by userinfo.
      */
@@ -434,10 +424,16 @@ public final class URLEncodedUtil {
      * <p>
      * This method accepts various parameter formats:
      * <ul>
-     * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs</li>
-     * <li>JavaBean: Bean properties are encoded using camelCase naming</li>
-     * <li>{@code Object[]}: Pairs of name-value elements (must have even length)</li>
-     * <li>{@code String}: If it contains "=", parsed as name=value parameter pairs which are then encoded; otherwise encoded as a single value</li>
+     * <li>{@code Map<String, ?>}: non-null String keys and their values are encoded as name=value pairs</li>
+     * <li>JavaBean: Bean properties are encoded with their original names ({@link NamingPolicy#NO_CHANGE})</li>
+     * <li>{@code Object[]}: pairs of non-null String names and arbitrary values (must have even length)</li>
+     * <li>{@code CharSequence}: if it contains {@code '='} it is taken to be an ALREADY-ENCODED query string and is
+     *     appended verbatim (nothing is escaped, and duplicate names are preserved); otherwise it is encoded as a
+     *     single form field. See the {@code parameters} note below.</li>
+     * <li>Any other value - including a primitive array (an {@code int[]} is not an {@code Object[]}), a
+     *     {@code Collection} and a bare scalar - is converted with {@link N#stringOf(Object)} and encoded as a
+     *     single valueless form field (the text only, with no {@code '='} and no value); it is NOT split into
+     *     name/value pairs.</li>
      * </ul>
      * Characters are percent-encoded according to application/x-www-form-urlencoded rules, where spaces become '+'.
      *
@@ -450,20 +446,27 @@ public final class URLEncodedUtil {
      * // query: "name=John+Doe&age=30"
      * }</pre>
      *
-     * <p><b>Note:</b> This overload applies {@link NamingPolicy#CAMEL_CASE} as the naming policy. This affects
-     * not only bean property names but also {@code Map} keys, so a key such as {@code "first_name"}
-     * is emitted as {@code "firstName"}. To preserve {@code Map} keys (or any names) verbatim, use
-     * {@link #encode(Object, Charset, NamingPolicy)} with {@link NamingPolicy#NO_CHANGE}.
+     * <p><b>Note:</b> This overload applies {@link NamingPolicy#NO_CHANGE} as the naming policy, so Map keys,
+     * {@code Object[]} names, and bean property names are emitted verbatim ({@code first_name} stays
+     * {@code first_name}). To rewrite names, use
+     * {@link #encode(Object, Charset, NamingPolicy)} with another policy such as {@link NamingPolicy#CAMEL_CASE}.
      *
-     * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
+     * @param parameters the parameters to encode (Map, bean, Object array pairs, String, or any other value); may be
+     *        {@code null}. A {@code CharSequence} containing {@code '='} is treated as an already URL-encoded
+     *        query string and appended verbatim; one without {@code '='} is encoded as a single form field.
+     *        Any other value - including a primitive array and a {@code Collection} - is converted with
+     *        {@link N#stringOf(Object)} and encoded as a single valueless form field; it is NOT split into
+     *        name/value pairs.
      * @return a URL-encoded query string (e.g., "name=John+Doe&amp;age=30"); returns empty string if {@code parameters} is {@code null}.
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length, or a
-     *         {@code String} containing {@code '='} where a parameter segment lacks {@code '='}.
+     * @throws IllegalArgumentException if a Map key or {@code Object[]} name element is {@code null}, an
+     *         {@code Object[]} has odd length, an effective name is empty and its value is null, or text to encode
+     *         contains malformed UTF-16
+     * @throws ClassCastException if a non-null Map key or {@code Object[]} name element is not a String
      * @see #encode(Object, Charset)
      * @see #encode(Object, Charset, NamingPolicy)
      * @see URLEncoder#encode(String, Charset)
      */
-    public static String encode(final Object parameters) {
+    public static String encode(final Object parameters) throws IllegalArgumentException, ClassCastException {
         return encode(parameters, IOUtil.DEFAULT_CHARSET);
     }
 
@@ -472,10 +475,16 @@ public final class URLEncodedUtil {
      * <p>
      * This method accepts various parameter formats:
      * <ul>
-     * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs</li>
-     * <li>JavaBean: Bean properties are encoded using camelCase naming (default)</li>
-     * <li>{@code Object[]}: Pairs of name-value elements (must have even length)</li>
-     * <li>{@code String}: If it contains "=", parsed as name=value parameter pairs which are then encoded; otherwise encoded as a single value</li>
+     * <li>{@code Map<String, ?>}: non-null String keys and their values are encoded as name=value pairs</li>
+     * <li>JavaBean: Bean properties are encoded with their original names ({@link NamingPolicy#NO_CHANGE})</li>
+     * <li>{@code Object[]}: pairs of non-null String names and arbitrary values (must have even length)</li>
+     * <li>{@code CharSequence}: if it contains {@code '='} it is taken to be an ALREADY-ENCODED query string and is
+     *     appended verbatim (nothing is escaped, and duplicate names are preserved); otherwise it is encoded as a
+     *     single form field. See the {@code parameters} note below.</li>
+     * <li>Any other value - including a primitive array (an {@code int[]} is not an {@code Object[]}), a
+     *     {@code Collection} and a bare scalar - is converted with {@link N#stringOf(Object)} and encoded as a
+     *     single valueless form field (the text only, with no {@code '='} and no value); it is NOT split into
+     *     name/value pairs.</li>
      * </ul>
      * Characters are percent-encoded using the specified charset according to application/x-www-form-urlencoded rules.
      *
@@ -486,22 +495,29 @@ public final class URLEncodedUtil {
      * // query: "name=%E4%B8%AD%E6%96%87"
      * }</pre>
      *
-     * <p><b>Note:</b> This overload applies {@link NamingPolicy#CAMEL_CASE} as the naming policy. This affects
-     * not only bean property names but also {@code Map} keys, so a key such as {@code "first_name"}
-     * is emitted as {@code "firstName"}. To preserve {@code Map} keys (or any names) verbatim, use
-     * {@link #encode(Object, Charset, NamingPolicy)} with {@link NamingPolicy#NO_CHANGE}.
+     * <p><b>Note:</b> This overload applies {@link NamingPolicy#NO_CHANGE} as the naming policy, so Map keys,
+     * {@code Object[]} names, and bean property names are emitted verbatim ({@code first_name} stays
+     * {@code first_name}). To rewrite names, use
+     * {@link #encode(Object, Charset, NamingPolicy)} with another policy such as {@link NamingPolicy#CAMEL_CASE}.
      *
-     * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
+     * @param parameters the parameters to encode (Map, bean, Object array pairs, String, or any other value); may be
+     *        {@code null}. A {@code CharSequence} containing {@code '='} is treated as an already URL-encoded
+     *        query string and appended verbatim; one without {@code '='} is encoded as a single form field.
+     *        Any other value - including a primitive array and a {@code Collection} - is converted with
+     *        {@link N#stringOf(Object)} and encoded as a single valueless form field; it is NOT split into
+     *        name/value pairs.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @return a URL-encoded query string; returns empty string if {@code parameters} is {@code null}.
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length, or a
-     *         {@code String} containing {@code '='} where a parameter segment lacks {@code '='}.
+     * @throws IllegalArgumentException if a Map key or {@code Object[]} name element is {@code null}, an
+     *         {@code Object[]} has odd length, an effective name is empty and its value is null, or text to encode contains malformed UTF-16 or a character that
+     *         {@code charset} cannot represent
+     * @throws ClassCastException if a non-null Map key or {@code Object[]} name element is not a String
      * @see #encode(Object)
      * @see #encode(Object, Charset, NamingPolicy)
      * @see URLEncoder#encode(String, Charset)
      */
-    public static String encode(final Object parameters, final Charset charset) {
-        return encode(parameters, charset, NamingPolicy.CAMEL_CASE);
+    public static String encode(final Object parameters, final Charset charset) throws IllegalArgumentException, ClassCastException {
+        return encode(parameters, charset, NamingPolicy.NO_CHANGE);
     }
 
     /**
@@ -509,12 +525,22 @@ public final class URLEncodedUtil {
      * <p>
      * This method accepts various parameter formats:
      * <ul>
-     * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs (keys transformed by naming policy)</li>
+     * <li>{@code Map<String, ?>}: non-null String keys and arbitrary values are encoded as name=value pairs (keys transformed by naming policy)</li>
      * <li>JavaBean: Bean properties are encoded with names transformed according to the naming policy</li>
-     * <li>{@code Object[]}: Pairs of name-value elements (must have even length; names transformed by naming policy)</li>
-     * <li>{@code String}: If it contains "=", parsed as name=value parameter pairs which are then encoded; otherwise encoded as a single value</li>
+     * <li>{@code Object[]}: pairs of non-null String names and arbitrary values (must have even length; names transformed by naming policy)</li>
+     * <li>{@code CharSequence}: if it contains {@code '='} it is taken to be an ALREADY-ENCODED query string and is
+     *     appended verbatim (nothing is escaped, and duplicate names are preserved); otherwise it is encoded as a
+     *     single form field. See the {@code parameters} note below.</li>
+     * <li>Any other value - including a primitive array (an {@code int[]} is not an {@code Object[]}), a
+     *     {@code Collection} and a bare scalar - is converted with {@link N#stringOf(Object)} and encoded as a
+     *     single valueless form field (the text only, with no {@code '='} and no value); it is NOT split into
+     *     name/value pairs.</li>
      * </ul>
      * Characters are percent-encoded using the specified charset according to application/x-www-form-urlencoded rules.
+     * A {@code null} Map value or {@code Object[]} value element is encoded as a valueless token (the name only,
+     * without {@code '='}), matching how {@link #decode(String)} parses such a token, so a decode→encode round trip
+     * preserves {@code null}. An empty effective name with a null value is rejected because its empty token would disappear on decoding. A String value of {@code "null"} is encoded as {@code name=null}. Null JavaBean
+     * properties are omitted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -525,16 +551,24 @@ public final class URLEncodedUtil {
      * // query: "first_name=John&user_age=30"
      * }</pre>
      *
-     * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
+     * @param parameters the parameters to encode (Map, bean, Object array pairs, String, or any other value); may be
+     *        {@code null}. A {@code CharSequence} containing {@code '='} is treated as an already URL-encoded
+     *        query string and appended verbatim; one without {@code '='} is encoded as a single form field.
+     *        Any other value - including a primitive array and a {@code Collection} - is converted with
+     *        {@link N#stringOf(Object)} and encoded as a single valueless form field; it is NOT split into
+     *        name/value pairs.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @return a URL-encoded query string; returns empty string if {@code parameters} is {@code null}.
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length, or a
-     *         {@code String} containing {@code '='} where a parameter segment lacks {@code '='}.
+     * @throws IllegalArgumentException if a Map key or {@code Object[]} name element is {@code null}, an
+     *         {@code Object[]} has odd length, an effective name is empty and its value is null, or text to encode contains malformed UTF-16 or a character that
+     *         {@code charset} cannot represent
+     * @throws ClassCastException if a non-null Map key or {@code Object[]} name element is not a String
      * @see #encode(Object, Charset)
      */
-    public static String encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
+    public static String encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy)
+            throws IllegalArgumentException, ClassCastException {
         if (parameters == null) {
             return Strings.EMPTY;
         }
@@ -559,8 +593,9 @@ public final class URLEncodedUtil {
      * identifier ({@code #...}) in the URL is preserved and placed after the encoded parameters.
      * If {@code parameters} is a {@code CharSequence} containing {@code '='}, it is treated as an
      * already URL-encoded query string and appended verbatim (duplicate parameter names are preserved).
-     * If {@code parameters} is {@code null}, an empty Map, an empty CharSequence, or an empty Object array,
-     * the original URL is returned unchanged.
+     * If {@code parameters} is {@code null}, an empty Map, an empty CharSequence, an empty Object array, or an
+     * object whose encodable fields are all omitted (for example, an all-null bean), the original URL is returned
+     * unchanged.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -572,22 +607,28 @@ public final class URLEncodedUtil {
      * // fullUrl: "http://search.example.com?q=java+url+encoding&page=1"
      * }</pre>
      *
-     * <p><b>Note:</b> This overload applies {@link NamingPolicy#CAMEL_CASE} as the naming policy. This affects
-     * not only bean property names but also {@code Map} keys, so a key such as {@code "first_name"}
-     * is emitted as {@code "firstName"}. To preserve {@code Map} keys (or any names) verbatim, use
-     * {@link #encode(String, Object, Charset, NamingPolicy)} with {@link NamingPolicy#NO_CHANGE}.
+     * <p><b>Note:</b> This overload applies {@link NamingPolicy#NO_CHANGE} as the naming policy, so Map keys,
+     * {@code Object[]} names, and bean property names are emitted verbatim ({@code first_name} stays
+     * {@code first_name}). To rewrite names, use
+     * {@link #encode(String, Object, Charset, NamingPolicy)} with another policy such as {@link NamingPolicy#CAMEL_CASE}.
      *
      * @param url the base URL to which the query string will be appended (e.g., "http://example.com/path").
-     * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}.
+     * @param parameters the parameters to encode and append (Map, bean, Object array pairs, String, or any other
+     *        value); may be {@code null}. Any other value - including a primitive array and a {@code Collection} -
+     *        is converted with {@link N#stringOf(Object)} and encoded as a single valueless form field; it is NOT
+     *        split into name/value pairs. An empty {@code Collection} or empty primitive array is therefore
+     *        <b>not</b> one of the empty cases below - it encodes as the text {@code []}.
      * @return the URL with the encoded query string appended (e.g., "http://example.com/path?name=value");
      *         returns the original URL if {@code parameters} is {@code null}, an empty {@code Map},
-     *         an empty {@code CharSequence}, or an empty {@code Object[]}.
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
-     * @throws NullPointerException if {@code url} is {@code null}
+     *         an empty {@code CharSequence}, an empty {@code Object[]}, or otherwise produces no encoded fields.
+     * @throws IllegalArgumentException if {@code url}, a Map key, or an {@code Object[]} name element is
+     *         {@code null}; if an {@code Object[]} has odd length; if an effective name is empty and its value
+     *         is {@code null}; or if text to encode contains malformed UTF-16.
+     * @throws ClassCastException if a non-null Map key or {@code Object[]} name element is not a String
      * @see #encode(String, Object, Charset)
      * @see #encode(Object)
      */
-    public static String encode(final String url, final Object parameters) {
+    public static String encode(final String url, final Object parameters) throws IllegalArgumentException, ClassCastException {
         return encode(url, parameters, IOUtil.DEFAULT_CHARSET);
     }
 
@@ -600,8 +641,9 @@ public final class URLEncodedUtil {
      * fragment identifier ({@code #...}) in the URL is preserved and placed after the encoded parameters.
      * If {@code parameters} is a {@code CharSequence} containing {@code '='}, it is treated as an
      * already URL-encoded query string and appended verbatim (duplicate parameter names are preserved).
-     * If {@code parameters} is {@code null}, an empty Map, an empty CharSequence, or an empty Object array,
-     * the original URL is returned unchanged.
+     * If {@code parameters} is {@code null}, an empty Map, an empty CharSequence, an empty Object array, or an
+     * object whose encodable fields are all omitted (for example, an all-null bean), the original URL is returned
+     * unchanged.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -611,24 +653,31 @@ public final class URLEncodedUtil {
      * // fullUrl: "http://example.com?name=%E4%B8%AD%E6%96%87"
      * }</pre>
      *
-     * <p><b>Note:</b> This overload applies {@link NamingPolicy#CAMEL_CASE} as the naming policy. This affects
-     * not only bean property names but also {@code Map} keys, so a key such as {@code "first_name"}
-     * is emitted as {@code "firstName"}. To preserve {@code Map} keys (or any names) verbatim, use
-     * {@link #encode(String, Object, Charset, NamingPolicy)} with {@link NamingPolicy#NO_CHANGE}.
+     * <p><b>Note:</b> This overload applies {@link NamingPolicy#NO_CHANGE} as the naming policy, so Map keys,
+     * {@code Object[]} names, and bean property names are emitted verbatim ({@code first_name} stays
+     * {@code first_name}). To rewrite names, use
+     * {@link #encode(String, Object, Charset, NamingPolicy)} with another policy such as {@link NamingPolicy#CAMEL_CASE}.
      *
      * @param url the base URL to which the query string will be appended.
-     * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}.
+     * @param parameters the parameters to encode and append (Map, bean, Object array pairs, String, or any other
+     *        value); may be {@code null}. Any other value - including a primitive array and a {@code Collection} -
+     *        is converted with {@link N#stringOf(Object)} and encoded as a single valueless form field; it is NOT
+     *        split into name/value pairs. An empty {@code Collection} or empty primitive array is therefore
+     *        <b>not</b> one of the empty cases below - it encodes as the text {@code []}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @return the URL with the encoded query string appended;
      *         returns the original URL if {@code parameters} is {@code null}, an empty {@code Map},
-     *         an empty {@code CharSequence}, or an empty {@code Object[]}.
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
-     * @throws NullPointerException if {@code url} is {@code null}
+     *         an empty {@code CharSequence}, an empty {@code Object[]}, or otherwise produces no encoded fields.
+     * @throws IllegalArgumentException if {@code url}, a Map key, or an {@code Object[]} name element is
+     *         {@code null}; if an {@code Object[]} has odd length; if an effective name is empty and its value
+     *         is {@code null}; or if text to encode contains malformed UTF-16 or a character that {@code charset}
+     *         cannot represent.
+     * @throws ClassCastException if a non-null Map key or {@code Object[]} name element is not a String
      * @see #encode(String, Object)
      * @see #encode(String, Object, Charset, NamingPolicy)
      */
-    public static String encode(final String url, final Object parameters, final Charset charset) {
-        return encode(url, parameters, charset, NamingPolicy.CAMEL_CASE);
+    public static String encode(final String url, final Object parameters, final Charset charset) throws IllegalArgumentException, ClassCastException {
+        return encode(url, parameters, charset, NamingPolicy.NO_CHANGE);
     }
 
     /**
@@ -642,8 +691,9 @@ public final class URLEncodedUtil {
      * If {@code parameters} is a {@code CharSequence} containing {@code '='}, it is treated as an
      * already URL-encoded query string and appended verbatim (duplicate parameter names are preserved;
      * the naming policy is not applied).
-     * If {@code parameters} is {@code null}, an empty Map, an empty CharSequence, or an empty Object array,
-     * the original URL is returned unchanged.
+     * If {@code parameters} is {@code null}, an empty Map, an empty CharSequence, an empty Object array, or an
+     * object whose encodable fields are all omitted (for example, an all-null bean), the original URL is returned
+     * unchanged.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -656,20 +706,27 @@ public final class URLEncodedUtil {
      * }</pre>
      *
      * @param url the base URL to which the query string will be appended.
-     * @param parameters the parameters to encode and append (Map, bean, Object array pairs, or String); may be {@code null}.
+     * @param parameters the parameters to encode and append (Map, bean, Object array pairs, String, or any other
+     *        value); may be {@code null}. Any other value - including a primitive array and a {@code Collection} -
+     *        is converted with {@link N#stringOf(Object)} and encoded as a single valueless form field; it is NOT
+     *        split into name/value pairs. An empty {@code Collection} or empty primitive array is therefore
+     *        <b>not</b> one of the empty cases below - it encodes as the text {@code []}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @return the URL with the encoded query string appended;
      *         returns the original URL if {@code parameters} is {@code null}, an empty {@code Map},
-     *         an empty {@code CharSequence}, or an empty {@code Object[]}.
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length.
-     * @throws NullPointerException if {@code url} is {@code null}
+     *         an empty {@code CharSequence}, an empty {@code Object[]}, or otherwise produces no encoded fields.
+     * @throws IllegalArgumentException if {@code url} is {@code null}, or if a Map key or {@code Object[]} name element is {@code null}, an
+     *         {@code Object[]} has odd length, an effective name is empty and its value is null, or text to encode contains malformed UTF-16 or a character that
+     *         {@code charset} cannot represent
+     * @throws ClassCastException if a non-null Map key or {@code Object[]} name element is not a String
      * @see #encode(String, Object, Charset)
      */
     @SuppressWarnings("rawtypes")
-    public static String encode(final String url, final Object parameters, final Charset charset, final NamingPolicy namingPolicy) {
-        Objects.requireNonNull(url, "url");
+    public static String encode(final String url, final Object parameters, final Charset charset, final NamingPolicy namingPolicy)
+            throws IllegalArgumentException, ClassCastException {
+        N.checkArgNotNull(url, cs.url);
 
         if (parameters == null || (parameters instanceof Map && ((Map) parameters).isEmpty()) || (parameters instanceof CharSequence seq && seq.isEmpty())
                 || (parameters instanceof Object[] a && a.length == 0)) {
@@ -693,6 +750,8 @@ public final class URLEncodedUtil {
                 sb.append('?');
             }
 
+            final int parameterStart = sb.length();
+
             if (parameters instanceof CharSequence queryString && queryString.toString().contains(NAME_VALUE_SEPARATOR)) {
                 // A pre-built query STRING is documented (HttpRequest.query(String)) as already
                 // URL-encoded: append it verbatim. Routing it through the map-based splitter
@@ -701,6 +760,10 @@ public final class URLEncodedUtil {
                 sb.append(queryString);
             } else {
                 encode(parameters, charset, namingPolicy, sb);
+            }
+
+            if (sb.length() == parameterStart) {
+                return url;
             }
 
             sb.append(fragment);
@@ -726,20 +789,26 @@ public final class URLEncodedUtil {
      * // sb: "http://example.com?key=value"
      * }</pre>
      *
-     * <p><b>Note:</b> This overload applies {@link NamingPolicy#CAMEL_CASE} as the naming policy. This affects
-     * not only bean property names but also {@code Map} keys, so a key such as {@code "first_name"}
-     * is emitted as {@code "firstName"}. To preserve {@code Map} keys (or any names) verbatim, use
-     * {@link #encode(Object, Charset, NamingPolicy, Appendable)} with {@link NamingPolicy#NO_CHANGE}.
+     * <p><b>Note:</b> This overload applies {@link NamingPolicy#NO_CHANGE} as the naming policy, so Map keys,
+     * {@code Object[]} names, and bean property names are emitted verbatim ({@code first_name} stays
+     * {@code first_name}). To rewrite names, use
+     * {@link #encode(Object, Charset, NamingPolicy, Appendable)} with another policy such as {@link NamingPolicy#CAMEL_CASE}.
      *
-     * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
+     * @param parameters the parameters to encode (Map, bean, Object array pairs, String, or any other value); may be
+     *        {@code null}. A {@code CharSequence} containing {@code '='} is treated as an already URL-encoded
+     *        query string and appended verbatim; one without {@code '='} is encoded as a single form field.
+     *        Any other value - including a primitive array and a {@code Collection} - is converted with
+     *        {@link N#stringOf(Object)} and encoded as a single valueless form field; it is NOT split into
+     *        name/value pairs.
      * @param output the {@code Appendable} (e.g., {@code StringBuilder}, {@code Writer}) to which the encoded query string will be appended.
-     * @throws NullPointerException if {@code output} is {@code null}
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length, or a
-     *         {@code String} containing {@code '='} where a parameter segment lacks {@code '='}.
-     * @throws UncheckedIOException if an I/O error occurs while appending to the output.
+     * @throws IllegalArgumentException if {@code output}, a Map key, or an {@code Object[]} name element is
+     *         {@code null}; if an {@code Object[]} has odd length; if an effective name is empty and its value
+     *         is {@code null}; or if text to encode contains malformed UTF-16.
+     * @throws ClassCastException if a non-null Map key or {@code Object[]} name element is not a String
+     * @throws UncheckedIOException if appending percent-encoded names, values, or separators to {@code output} fails
      * @see #encode(Object, Charset, Appendable)
      */
-    public static void encode(final Object parameters, final Appendable output) {
+    public static void encode(final Object parameters, final Appendable output) throws IllegalArgumentException, ClassCastException, UncheckedIOException {
         encode(parameters, IOUtil.DEFAULT_CHARSET, output);
     }
 
@@ -759,22 +828,30 @@ public final class URLEncodedUtil {
      * // query.txt contains: "name=%E4%B8%AD%E6%96%87"
      * }</pre>
      *
-     * <p><b>Note:</b> This overload applies {@link NamingPolicy#CAMEL_CASE} as the naming policy. This affects
-     * not only bean property names but also {@code Map} keys, so a key such as {@code "first_name"}
-     * is emitted as {@code "firstName"}. To preserve {@code Map} keys (or any names) verbatim, use
-     * {@link #encode(Object, Charset, NamingPolicy, Appendable)} with {@link NamingPolicy#NO_CHANGE}.
+     * <p><b>Note:</b> This overload applies {@link NamingPolicy#NO_CHANGE} as the naming policy, so Map keys,
+     * {@code Object[]} names, and bean property names are emitted verbatim ({@code first_name} stays
+     * {@code first_name}). To rewrite names, use
+     * {@link #encode(Object, Charset, NamingPolicy, Appendable)} with another policy such as {@link NamingPolicy#CAMEL_CASE}.
      *
-     * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
+     * @param parameters the parameters to encode (Map, bean, Object array pairs, String, or any other value); may be
+     *        {@code null}. A {@code CharSequence} containing {@code '='} is treated as an already URL-encoded
+     *        query string and appended verbatim; one without {@code '='} is encoded as a single form field.
+     *        Any other value - including a primitive array and a {@code Collection} - is converted with
+     *        {@link N#stringOf(Object)} and encoded as a single valueless form field; it is NOT split into
+     *        name/value pairs.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @param output the {@code Appendable} to which the encoded query string will be appended.
-     * @throws NullPointerException if {@code output} is {@code null}
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length, or a
-     *         {@code String} containing {@code '='} where a parameter segment lacks {@code '='}.
-     * @throws UncheckedIOException if an I/O error occurs while appending to the output.
+     * @throws IllegalArgumentException if {@code output}, a Map key, or an {@code Object[]} name element is
+     *         {@code null}; if an {@code Object[]} has odd length; if an effective name is empty and its value
+     *         is {@code null}; or if text to encode contains malformed UTF-16 or a character that {@code charset}
+     *         cannot represent.
+     * @throws ClassCastException if a non-null Map key or {@code Object[]} name element is not a String
+     * @throws UncheckedIOException if appending percent-encoded names, values, or separators to {@code output} fails
      * @see #encode(Object, Charset, NamingPolicy, Appendable)
      */
-    public static void encode(final Object parameters, final Charset charset, final Appendable output) {
-        encode(parameters, charset, NamingPolicy.CAMEL_CASE, output);
+    public static void encode(final Object parameters, final Charset charset, final Appendable output)
+            throws IllegalArgumentException, ClassCastException, UncheckedIOException {
+        encode(parameters, charset, NamingPolicy.NO_CHANGE, output);
     }
 
     /**
@@ -788,11 +865,21 @@ public final class URLEncodedUtil {
      * <p>
      * The method accepts various parameter formats:
      * <ul>
-     * <li>{@code Map<String, ?>}: Keys and values are encoded as name=value pairs</li>
+     * <li>{@code Map<String, ?>}: non-null String keys and their values are encoded as name=value pairs</li>
      * <li>JavaBean: Bean properties are encoded with names transformed by the naming policy</li>
-     * <li>{@code Object[]}: Pairs of name-value elements (must have even length)</li>
-     * <li>{@code String}: If it contains "=", parsed as name=value parameter pairs which are then encoded; otherwise encoded as a single value</li>
+     * <li>{@code Object[]}: pairs of non-null String names and arbitrary values (must have even length)</li>
+     * <li>{@code CharSequence}: if it contains {@code '='} it is taken to be an ALREADY-ENCODED query string and is
+     *     appended verbatim (nothing is escaped, and duplicate names are preserved); otherwise it is encoded as a
+     *     single form field. See the {@code parameters} note below.</li>
+     * <li>Any other value - including a primitive array (an {@code int[]} is not an {@code Object[]}), a
+     *     {@code Collection} and a bare scalar - is converted with {@link N#stringOf(Object)} and encoded as a
+     *     single valueless form field (the text only, with no {@code '='} and no value); it is NOT split into
+     *     name/value pairs.</li>
      * </ul>
+     * A {@code null} Map value or {@code Object[]} value element is encoded as a valueless token (the name only,
+     * without {@code '='}), matching how {@link #decode(String)} parses such a token, so a decode→encode round trip
+     * preserves {@code null}. An empty effective name with a null value is rejected because its empty token would disappear on decoding. A String value of {@code "null"} is encoded as {@code name=null}. Null JavaBean
+     * properties are omitted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -804,21 +891,27 @@ public final class URLEncodedUtil {
      * // sb: "first_name=John&age=30"
      * }</pre>
      *
-     * @param parameters the parameters to encode (Map, bean, Object array pairs, or String); may be {@code null}.
+     * @param parameters the parameters to encode (Map, bean, Object array pairs, String, or any other value); may be
+     *        {@code null}. A {@code CharSequence} containing {@code '='} is treated as an already URL-encoded
+     *        query string and appended verbatim; one without {@code '='} is encoded as a single form field.
+     *        Any other value - including a primitive array and a {@code Collection} - is converted with
+     *        {@link N#stringOf(Object)} and encoded as a single valueless form field; it is NOT split into
+     *        name/value pairs.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
      *                     if {@code null} or NO_CHANGE, names are not transformed.
      * @param output the {@code Appendable} to which the encoded query string will be appended.
-     * @throws NullPointerException if {@code output} is {@code null}
-     * @throws IllegalArgumentException if {@code parameters} is an {@code Object[]} with an odd length, or a
-     *         {@code String} containing {@code '='} where a parameter segment lacks {@code '='}.
-     * @throws UncheckedIOException if an I/O error occurs while appending to the output.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if a Map key or {@code Object[]} name element is {@code null}, an
+     *         {@code Object[]} has odd length, an effective name is empty and its value is null, or text to encode contains malformed UTF-16 or a character that
+     *         {@code charset} cannot represent
+     * @throws ClassCastException if a non-null Map key or {@code Object[]} name element is not a String
+     * @throws UncheckedIOException if appending percent-encoded names, values, or separators to {@code output} fails
      * @see #encode(Object, Charset, Appendable)
      */
     @SuppressWarnings("rawtypes")
     public static void encode(final Object parameters, final Charset charset, final NamingPolicy namingPolicy, final Appendable output)
-            throws UncheckedIOException {
-        Objects.requireNonNull(output, "output");
+            throws IllegalArgumentException, ClassCastException, UncheckedIOException {
+        N.checkArgNotNull(output, cs.output);
 
         if (parameters == null || (parameters instanceof Map && ((Map) parameters).isEmpty())) {
             return;
@@ -831,19 +924,25 @@ public final class URLEncodedUtil {
                 final Map<String, Object> map = (Map<String, Object>) parameters;
                 int i = 0;
                 for (final Map.Entry<String, Object> entry : map.entrySet()) {
+                    final String rawName = requireParameterName(entry.getKey());
+                    final String parameterName = isNoChange ? rawName : namingPolicy.convert(rawName);
+                    if (parameterName.isEmpty() && entry.getValue() == null) {
+                        throw new IllegalArgumentException("An empty parameter name requires a non-null value");
+                    }
+
                     if (i++ > 0) {
                         output.append(QP_SEP_A);
                     }
 
-                    if (isNoChange) {
-                        encodeFormFields(entry.getKey(), charset, output);
-                    } else {
-                        encodeFormFields(namingPolicy.convert(entry.getKey()), charset, output);
+                    encodeFormFields(parameterName, charset, output);
+
+                    // A null value is a valueless token ("flag"), matching decode: emit the name only so
+                    // decode(encode(map)) preserves null instead of turning it into the literal string "null".
+                    if (entry.getValue() != null) {
+                        output.append(NAME_VALUE_SEPARATOR);
+
+                        encodeFormFields(N.stringOf(entry.getValue()), charset, output);
                     }
-
-                    output.append(NAME_VALUE_SEPARATOR);
-
-                    encodeFormFields(N.stringOf(entry.getValue()), charset, output);
                 }
             } else if (Beans.isBeanClass(parameters.getClass())) {
                 encode(Beans.beanToMap(parameters, true, null, namingPolicy), charset, NamingPolicy.NO_CHANGE, output);
@@ -854,25 +953,35 @@ public final class URLEncodedUtil {
                 }
 
                 for (int i = 0, len = a.length; i < len; i += 2) {
+                    final String rawName = requireParameterName(a[i]);
+                    final String parameterName = isNoChange ? rawName : namingPolicy.convert(rawName);
+                    if (parameterName.isEmpty() && a[i + 1] == null) {
+                        throw new IllegalArgumentException("An empty parameter name requires a non-null value");
+                    }
+
                     if (i > 0) {
                         output.append(QP_SEP_A);
                     }
 
-                    if (isNoChange) {
-                        encodeFormFields((String) a[i], charset, output);
-                    } else {
-                        encodeFormFields(namingPolicy.convert((String) a[i]), charset, output);
+                    encodeFormFields(parameterName, charset, output);
+
+                    // Same valueless-token rule as the Map path above: a null value emits the name only.
+                    if (a[i + 1] != null) {
+                        output.append(NAME_VALUE_SEPARATOR);
+
+                        encodeFormFields(N.stringOf(a[i + 1]), charset, output);
                     }
-
-                    output.append(NAME_VALUE_SEPARATOR);
-
-                    encodeFormFields(N.stringOf(a[i + 1]), charset, output);
                 }
             } else if (parameters instanceof CharSequence source) {
                 final String str = source.toString();
 
                 if (str.contains(NAME_VALUE_SEPARATOR)) {
-                    encodeParameterString(str, charset, output);
+                    // A CharSequence that already reads as a query string ("a=1&b=2") is a pre-built,
+                    // already-encoded query and is appended verbatim - the same rule
+                    // encode(String, Object, Charset, NamingPolicy) applies. Re-splitting it into
+                    // name/value pairs and re-encoding them escaped the existing escapes a second time
+                    // ("q=a%20b" -> "q=a%2520b"), so the two overloads disagreed on the same input.
+                    output.append(str);
                 } else {
                     encodeFormFields(str, charset, output);
                 }
@@ -884,94 +993,138 @@ public final class URLEncodedUtil {
         }
     }
 
-    /**
-     * Encodes an unescaped {@code name=value&name=value} parameter string without routing it
-     * through a map. Keeping the entries as a sequence is important because repeated parameter
-     * names are meaningful in form data and must not be collapsed.
-     */
-    private static void encodeParameterString(final String source, final Charset charset, final Appendable output) throws IOException {
-        final List<String> names = new ArrayList<>();
-        final List<String> values = new ArrayList<>();
-        int start = 0;
+    // Renders a caller-supplied query token for an exception message: bounded to 64 UTF-16 code units, with
+    // every ISO control character, U+2028/U+2029 and unpaired surrogate replaced by a backslash-u hex escape.
+    // Mirrors Numbers.escapeForErrorMessage, which exists for the same reason and is private to its own class.
+    private static String forErrorMessage(final String token) {
+        final String bounded = Strings.abbreviate(token, 64);
 
-        while (start <= source.length()) {
-            int end = source.indexOf(QP_SEP_A, start);
+        if (Strings.isEmpty(bounded)) {
+            return bounded;
+        }
 
-            if (end < 0) {
-                end = source.length();
-            }
+        StringBuilder sb = null;
 
-            final String entry = source.substring(start, end).trim();
+        for (int i = 0, len = bounded.length(); i < len; i++) {
+            final char ch = bounded.charAt(i);
 
-            if (!entry.isEmpty()) {
-                final int separatorIndex = entry.indexOf(NAME_VALUE_SEPARATOR);
-
-                if (separatorIndex < 0) {
-                    throw new IllegalArgumentException("Invalid map entry String: " + entry);
+            // a well-formed surrogate pair (an emoji, say) is printable: pass it through together
+            if (Character.isHighSurrogate(ch) && i + 1 < len && Character.isLowSurrogate(bounded.charAt(i + 1))) {
+                if (sb != null) {
+                    sb.append(ch).append(bounded.charAt(i + 1));
                 }
 
-                names.add(entry.substring(0, separatorIndex).trim());
-                values.add(entry.substring(separatorIndex + NAME_VALUE_SEPARATOR.length()).trim());
-            }
+                i++;
+            } else if (Character.isISOControl(ch) || ch == 0x2028 || ch == 0x2029 || Character.isSurrogate(ch)) {
+                if (sb == null) {
+                    sb = new StringBuilder(len + 16).append(bounded, 0, i);
+                }
 
-            if (end == source.length()) {
-                break;
+                sb.append("\\u")
+                        .append(Character.toUpperCase(Character.forDigit((ch >> 12) & 0xF, RADIX)))
+                        .append(Character.toUpperCase(Character.forDigit((ch >> 8) & 0xF, RADIX)))
+                        .append(Character.toUpperCase(Character.forDigit((ch >> 4) & 0xF, RADIX)))
+                        .append(Character.toUpperCase(Character.forDigit(ch & 0xF, RADIX)));
+            } else if (sb != null) {
+                sb.append(ch);
             }
-
-            start = end + 1;
         }
 
-        for (int i = 0, size = names.size(); i < size; i++) {
-            if (i > 0) {
-                output.append(QP_SEP_A);
-            }
+        return sb == null ? bounded : sb.toString();
+    }
 
-            encodeFormFields(names.get(i), charset, output);
-            output.append(NAME_VALUE_SEPARATOR);
-            encodeFormFields(values.get(i), charset, output);
+    private static String requireParameterName(final Object name) {
+        if (name == null) {
+            throw new IllegalArgumentException("Parameter name must not be null");
         }
+
+        return (String) name;
     }
 
     /**
      * Encodes a single field value using {@code application/x-www-form-urlencoded} rules.
      * Alphanumeric characters and the characters {@code -}, {@code _}, {@code .}, and {@code *}
      * are passed through unchanged; space is converted to {@code '+'}, and all other bytes
-     * are percent-encoded as {@code %XX} using the given charset.
+     * are percent-encoded as {@code %XX} using the given charset. Malformed UTF-16 and characters that the charset
+     * cannot represent are rejected rather than replaced.
      *
      * @param content the string to encode; {@code null} is written as the literal text {@code "null"}.
      * @param charset the charset used to convert characters to bytes before percent-encoding;
      *                if {@code null}, defaults to UTF-8.
      * @param output the {@code Appendable} to which the encoded content is appended.
-     * @throws IOException if an I/O error occurs while appending to the output.
+     * @throws IllegalArgumentException if {@code content} contains malformed UTF-16 or a character that the selected
+     *         charset cannot represent
+     * @throws IOException if appending percent-encoded names, values, or separators to {@code output} fails
      */
-    private static void encodeFormFields(final String content, final Charset charset, final Appendable output) throws IOException {
+    private static void encodeFormFields(final String content, final Charset charset, final Appendable output) throws IllegalArgumentException, IOException {
         urlEncode(content, (charset != null) ? charset : IOUtil.DEFAULT_CHARSET, URL_ENCODER, true, output);
     }
 
+    /**
+     * @throws IllegalArgumentException if {@code charset} is null, or {@code content} contains malformed UTF-16
+     *         or characters that {@code charset} cannot represent
+     * @throws IOException if appending the encoded characters to {@code output} fails
+     */
     private static void urlEncode(final String content, final Charset charset, final BitSet safeChars, final boolean blankAsPlus, final Appendable output)
-            throws IOException {
+            throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(charset, cs.charset);
+
         if (content == null) {
             output.append(Strings.NULL);
 
             return;
         }
 
-        final ByteBuffer bb = charset.encode(content);
+        // Safe characters are ASCII and therefore identical in any ASCII-superset charset, so they pass
+        // through literally. Every byte of a run of non-safe characters is percent-escaped, so the decoder
+        // always sees a contiguous %XX run holding the characters' complete encoded byte sequence. Emitting
+        // individual safe-valued bytes from a multi-byte encoding (e.g. the 0x61 in UTF-16's 00 61) would
+        // split a character across the literal/escape boundary and make the run undecodable.
+        for (int i = 0, len = content.length(); i < len;) {
+            final char ch = content.charAt(i);
 
-        while (bb.hasRemaining()) {
-            final int b = bb.get() & 0xff;
-
-            if (safeChars.get(b)) {
-                output.append((char) b);
-            } else if (blankAsPlus && (b == ' ')) {
+            if (ch < 128 && safeChars.get(ch)) {
+                output.append(ch);
+                i++;
+            } else if (blankAsPlus && ch == ' ') {
                 output.append('+');
+                i++;
             } else {
-                output.append('%');
+                int runEnd = i + 1;
 
-                final char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, RADIX));
-                final char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, RADIX));
-                output.append(hex1);
-                output.append(hex2);
+                while (runEnd < len) {
+                    final char next = content.charAt(runEnd);
+
+                    if (next < 128 && (safeChars.get(next) || (blankAsPlus && next == ' '))) {
+                        break;
+                    }
+
+                    runEnd++;
+                }
+
+                final ByteBuffer bb;
+
+                try {
+                    bb = charset.newEncoder()
+                            .onMalformedInput(CodingErrorAction.REPORT)
+                            .onUnmappableCharacter(CodingErrorAction.REPORT)
+                            .encode(CharBuffer.wrap(content, i, runEnd));
+                } catch (final CharacterCodingException e) {
+                    throw new IllegalArgumentException(
+                            "Input contains malformed UTF-16 or a character not representable in " + charset.name() + " in the run beginning at index " + i, e);
+                }
+
+                while (bb.hasRemaining()) {
+                    final int b = bb.get() & 0xff;
+                    output.append('%');
+
+                    final char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, RADIX));
+                    final char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, RADIX));
+                    output.append(hex1);
+                    output.append(hex2);
+                }
+
+                i = runEnd;
             }
         }
     }
@@ -988,9 +1141,11 @@ public final class URLEncodedUtil {
      * @param charset the charset used to convert characters to bytes before percent-encoding;
      *                must not be {@code null}.
      * @param output the {@code Appendable} to which the encoded content is appended.
-     * @throws IOException if an I/O error occurs while appending to the output.
+     * @throws IllegalArgumentException if {@code charset} is {@code null}, or if {@code content} contains malformed
+     *         UTF-16 or a character that the selected charset cannot represent
+     * @throws IOException if appending percent-encoded names, values, or separators to {@code output} fails
      */
-    static void encUserInfo(final String content, final Charset charset, final Appendable output) throws IOException {
+    static void encUserInfo(final String content, final Charset charset, final Appendable output) throws IllegalArgumentException, IOException {
         urlEncode(content, charset, USERINFO, false, output);
     }
 
@@ -1005,9 +1160,11 @@ public final class URLEncodedUtil {
      * @param charset the charset used to convert characters to bytes before percent-encoding;
      *                must not be {@code null}.
      * @param output the {@code Appendable} to which the encoded content is appended.
-     * @throws IOException if an I/O error occurs while appending to the output.
+     * @throws IllegalArgumentException if {@code charset} is {@code null}, or if {@code content} contains malformed
+     *         UTF-16 or a character that the selected charset cannot represent
+     * @throws IOException if appending percent-encoded names, values, or separators to {@code output} fails
      */
-    static void encUric(final String content, final Charset charset, final Appendable output) throws IOException {
+    static void encUric(final String content, final Charset charset, final Appendable output) throws IllegalArgumentException, IOException {
         urlEncode(content, charset, URIC, false, output);
     }
 
@@ -1022,9 +1179,11 @@ public final class URLEncodedUtil {
      * @param charset the charset used to convert characters to bytes before percent-encoding;
      *                must not be {@code null}.
      * @param output the {@code Appendable} to which the encoded content is appended.
-     * @throws IOException if an I/O error occurs while appending to the output.
+     * @throws IllegalArgumentException if {@code charset} is {@code null}, or if {@code content} contains malformed
+     *         UTF-16 or a character that the selected charset cannot represent
+     * @throws IOException if appending percent-encoded names, values, or separators to {@code output} fails
      */
-    static void encPath(final String content, final Charset charset, final Appendable output) throws IOException {
+    static void encPath(final String content, final Charset charset, final Appendable output) throws IllegalArgumentException, IOException {
         urlEncode(content, charset, PATH_SAFE, false, output);
     }
 
@@ -1033,13 +1192,16 @@ public final class URLEncodedUtil {
      * <p>
      * This method parses a URL query string (e.g., "name=value&amp;foo=bar") and converts it into a map
      * where keys are parameter names and values are parameter values. Both '+' characters and <i>%XX</i> sequences
-     * are decoded. Parameter names and values are trimmed of whitespace. If a parameter appears multiple times,
+     * are decoded. Leading and trailing whitespace in parameter names and values is preserved. If a parameter appears multiple times,
      * only the last occurrence is retained (use {@link #decodeToMultimap(String)} to preserve all values).
      * </p>
      * <p>
      * Supports both <i>&amp;</i> and ';' as parameter separators (the semicolon separator follows
      * the W3C HTML 4.01 recommendation, Appendix B.2.2).
      * </p>
+     * <p>Decoding is strict: a percent escape must contain two ASCII hexadecimal digits, and each
+     * contiguous run of encoded bytes must be valid UTF-8. Use {@link #decodeLenient(String)} to
+     * preserve malformed escapes and replace malformed byte sequences.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1051,11 +1213,12 @@ public final class URLEncodedUtil {
      * @return a {@code LinkedHashMap} containing parameter names as keys and decoded parameter values as values;
      *         returns an empty map if {@code urlQuery} is {@code null} or empty. A token without
      *         {@code '='} is stored with a {@code null} value.
+     * @throws IllegalArgumentException if a percent escape or its UTF-8 byte sequence is malformed
      * @see #decode(String, Charset)
      * @see #decodeToMultimap(String)
      * @see URLDecoder#decode(String, String)
      */
-    public static Map<String, String> decode(final String urlQuery) {
+    public static Map<String, String> decode(final String urlQuery) throws IllegalArgumentException {
         return decode(urlQuery, IOUtil.DEFAULT_CHARSET);
     }
 
@@ -1064,13 +1227,16 @@ public final class URLEncodedUtil {
      * <p>
      * This method parses a URL query string and converts it into a map where keys are parameter names
      * and values are parameter values. Both '+' characters and <i>%XX</i> sequences are decoded using the
-     * specified charset. Parameter names and values are trimmed of whitespace. If a parameter appears
+     * specified charset. Leading and trailing whitespace in parameter names and values is preserved. If a parameter appears
      * multiple times, only the last occurrence is retained.
      * </p>
      * <p>
      * Supports both <i>&amp;</i> and ';' as parameter separators (the semicolon separator follows
      * the W3C HTML 4.01 recommendation, Appendix B.2.2).
      * </p>
+     * <p>Decoding is strict: percent escapes accept ASCII hexadecimal digits only, and encoded bytes
+     * must be valid in the selected charset. Use {@link #decodeLenient(String, Charset)} for explicit
+     * replacement/preservation behavior.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1083,12 +1249,42 @@ public final class URLEncodedUtil {
      * @return a {@code LinkedHashMap} containing parameter names as keys and decoded parameter values as values;
      *         returns an empty map if {@code urlQuery} is {@code null} or empty. A token without
      *         {@code '='} is stored with a {@code null} value.
+     * @throws IllegalArgumentException if a percent escape or its encoded byte sequence is malformed
      * @see #decode(String)
      * @see #decode(String, Charset, Supplier)
      * @see URLDecoder#decode(String, Charset)
      */
-    public static Map<String, String> decode(final String urlQuery, final Charset charset) {
+    public static Map<String, String> decode(final String urlQuery, final Charset charset) throws IllegalArgumentException {
         return decode(urlQuery, charset, Suppliers.of(LinkedHashMap::new));
+    }
+
+    /**
+     * Leniently decodes a URL-encoded query string into a {@code Map<String, String>} using UTF-8.
+     * Invalid or incomplete percent escapes are retained literally, and malformed encoded byte
+     * sequences are replaced according to the charset decoder's replacement policy. Only ASCII
+     * hexadecimal digits are recognized in percent escapes.
+     *
+     * @param urlQuery the URL query string to decode, may be {@code null} or empty
+     * @return a {@code LinkedHashMap} containing the decoded parameters
+     * @see #decode(String)
+     * @see #decodeLenient(String, Charset)
+     */
+    public static Map<String, String> decodeLenient(final String urlQuery) {
+        return decodeLenient(urlQuery, IOUtil.DEFAULT_CHARSET);
+    }
+
+    /**
+     * Leniently decodes a URL-encoded query string into a {@code Map<String, String>}.
+     * Invalid or incomplete percent escapes are retained literally, and malformed encoded byte
+     * sequences are replaced. Only ASCII hexadecimal digits are recognized in percent escapes.
+     *
+     * @param urlQuery the URL query string to decode, may be {@code null} or empty
+     * @param charset the charset used to decode percent-encoded bytes; {@code null} selects UTF-8
+     * @return a {@code LinkedHashMap} containing the decoded parameters
+     * @see #decode(String, Charset)
+     */
+    public static Map<String, String> decodeLenient(final String urlQuery, final Charset charset) {
+        return decodeLenient(urlQuery, charset, Suppliers.of(LinkedHashMap::new));
     }
 
     /**
@@ -1096,7 +1292,7 @@ public final class URLEncodedUtil {
      * <p>
      * This method provides flexibility in choosing the Map implementation (e.g., {@code TreeMap}, {@code HashMap}, etc.)
      * by accepting a custom supplier. Both '+' characters and <i>%XX</i> sequences are decoded using the specified charset.
-     * Parameter names and values are trimmed of whitespace. If a parameter appears multiple times, only the last
+     * Leading and trailing whitespace in parameter names and values is preserved. If a parameter appears multiple times, only the last
      * occurrence is retained.
      * </p>
      * <p>
@@ -1113,15 +1309,53 @@ public final class URLEncodedUtil {
      * @param <M> the type of the Map to return, must extend {@code Map<String, String>}.
      * @param urlQuery the URL query string to decode, may be {@code null} or empty.
      * @param charset the charset to use for decoding percent-encoded characters; if {@code null}, defaults to UTF-8.
-     * @param mapSupplier a supplier that provides an instance of the desired Map implementation;
+     * @param mapSupplier a supplier that provides an instance of the desired Map implementation; must not be
+     *         {@code null} and must not return {@code null}.
      * @return a Map of type M containing parameter names as keys and decoded parameter values as values;
      *         returns an empty map (from supplier) if {@code urlQuery} is {@code null} or empty. A token
-     *         without {@code '='} is stored with a {@code null} value.
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null} or returns {@code null}.
+     *         without {@code '='} is stored with a {@code null} value, so the supplied {@code Map} must
+     *         tolerate {@code null} values.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null} or returns {@code null},
+     *         or if a percent escape or its encoded byte sequence is malformed
+     * @throws NullPointerException if the {@code Map} returned by {@code mapSupplier} does not permit
+     *         {@code null} values (for example {@code Hashtable} or {@code ConcurrentHashMap}) and
+     *         {@code urlQuery} contains a token without {@code '='}; use a {@code null}-tolerant
+     *         {@code Map} or {@link #decodeToMultimap(String)} instead
      * @see #decode(String, Charset)
      */
     public static <M extends Map<String, String>> M decode(final String urlQuery, final Charset charset, final Supplier<M> mapSupplier)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, NullPointerException {
+        return decode(urlQuery, charset, mapSupplier, true);
+    }
+
+    /**
+     * Lenient counterpart to {@link #decode(String, Charset, Supplier)}.
+     * Invalid or incomplete percent escapes are retained literally, and malformed encoded byte
+     * sequences are replaced. Only ASCII hexadecimal digits are recognized in percent escapes.
+     *
+     * @param <M> the map type
+     * @param urlQuery the URL query string to decode, may be {@code null} or empty
+     * @param charset the charset used to decode percent-encoded bytes; {@code null} selects UTF-8
+     * @param mapSupplier supplier for the result map; must not be {@code null} and must not return {@code null}
+     * @return the supplied map populated with decoded parameters; a token without {@code '='} is stored
+     *         with a {@code null} value, so the supplied {@code Map} must tolerate {@code null} values
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null} or returns {@code null}
+     * @throws NullPointerException if the {@code Map} returned by {@code mapSupplier} does not permit
+     *         {@code null} values (for example {@code Hashtable} or {@code ConcurrentHashMap}) and
+     *         {@code urlQuery} contains a token without {@code '='}; use a {@code null}-tolerant
+     *         {@code Map} or {@link #decodeToMultimap(String)} instead
+     */
+    public static <M extends Map<String, String>> M decodeLenient(final String urlQuery, final Charset charset, final Supplier<M> mapSupplier)
+            throws IllegalArgumentException, NullPointerException {
+        return decode(urlQuery, charset, mapSupplier, false);
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code mapSupplier} is null or returns null, or strict decoding rejects malformed input
+     * @throws NullPointerException if a valueless query parameter is inserted into a map that does not permit null values
+     */
+    private static <M extends Map<String, String>> M decode(final String urlQuery, final Charset charset, final Supplier<M> mapSupplier, final boolean strict)
+            throws IllegalArgumentException, NullPointerException {
         N.checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         final M result = N.checkArgNotNull(mapSupplier.get(), "mapSupplier result");
@@ -1130,35 +1364,31 @@ public final class URLEncodedUtil {
             return result;
         }
 
-        try (final Scanner scanner = new Scanner(urlQuery)) {
-            scanner.useDelimiter(QP_SEP_PATTERN);
-
-            String name = null;
-            String value = null;
-
-            while (scanner.hasNext()) {
-                final String token = scanner.next();
-
-                // Consecutive separators ("a=1&&b=2") produce an empty token; real-world URLs
-                // contain them and every mainstream parser skips them instead of fabricating
-                // an empty-string parameter name.
-                if (token.isEmpty()) {
-                    continue;
+        forEachDecodedQueryParameter(urlQuery, charset, strict, (name, value) -> {
+            if (value == null) {
+                // A token without '=' is documented to be stored with a null value, but a null-hostile Map
+                // (Hashtable/ConcurrentHashMap/ConcurrentSkipListMap - which ConcurrentMap.class and
+                // ConcurrentNavigableMap.class also resolve to) rejects it with a message-less NPE, against
+                // this class's promise of descriptive NPE messages. The type stays NullPointerException
+                // because Map.put is required to throw it for a value the map rejects; only the message is
+                // added. Gated on value == null so an unrelated NPE from the map is not misreported.
+                try {
+                    result.put(name, null);
+                } catch (final NullPointerException e) {
+                    // The token is a decoded piece of the query, i.e. caller- and in any server-side use
+                    // attacker-controlled, so it is bounded and its control characters escaped before it is
+                    // interpolated: a raw token could otherwise forge lines in a log that records this message,
+                    // and a huge one would allocate a message as large as the query.
+                    final NullPointerException npe = new NullPointerException(
+                            "The Map created for this call (" + result.getClass().getName() + ") does not permit null values, but the query contains"
+                                    + " the valueless token \"" + forErrorMessage(name) + "\". Use a null-tolerant Map or decodeToMultimap(..).");
+                    npe.initCause(e);
+                    throw npe;
                 }
-
-                final int i = token.indexOf(NAME_VALUE_SEPARATOR);
-
-                if (i != -1) {
-                    name = decodeFormFields(token.substring(0, i).trim(), charset);
-                    value = decodeFormFields(token.substring(i + 1).trim(), charset);
-                } else {
-                    name = decodeFormFields(token.trim(), charset);
-                    value = null;
-                }
-
+            } else {
                 result.put(name, value);
             }
-        }
+        });
 
         return result;
     }
@@ -1169,12 +1399,14 @@ public final class URLEncodedUtil {
      * This method parses a URL query string and converts it into a multimap where keys are parameter names
      * and values are lists of parameter values. Unlike {@link #decode(String)}, this method preserves all
      * values when a parameter appears multiple times in the query string. Both '+' characters and <i>%XX</i>
-     * sequences are decoded. Parameter names and values are trimmed of whitespace.
+     * sequences are decoded. Leading and trailing whitespace in parameter names and values is preserved.
      * </p>
      * <p>
      * Supports both <i>&amp;</i> and ';' as parameter separators (the semicolon separator follows
      * the W3C HTML 4.01 recommendation, Appendix B.2.2).
      * </p>
+     * <p>Percent escapes and UTF-8 byte sequences are validated strictly. Use
+     * {@link #decodeToMultimapLenient(String)} for explicit lenient handling.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1186,10 +1418,11 @@ public final class URLEncodedUtil {
      * @return a {@code ListMultimap} containing parameter names as keys and lists of decoded parameter values;
      *         returns an empty multimap if {@code urlQuery} is {@code null} or empty. A token without
      *         {@code '='} is stored with a {@code null} value.
+     * @throws IllegalArgumentException if a percent escape or its UTF-8 byte sequence is malformed
      * @see #decodeToMultimap(String, Charset)
      * @see #decode(String)
      */
-    public static ListMultimap<String, String> decodeToMultimap(final String urlQuery) {
+    public static ListMultimap<String, String> decodeToMultimap(final String urlQuery) throws IllegalArgumentException {
         return decodeToMultimap(urlQuery, IOUtil.DEFAULT_CHARSET);
     }
 
@@ -1199,12 +1432,14 @@ public final class URLEncodedUtil {
      * This method parses a URL query string and converts it into a multimap where keys are parameter names
      * and values are lists of parameter values. Unlike {@link #decode(String, Charset)}, this method preserves
      * all values when a parameter appears multiple times in the query string. Both '+' characters and <i>%XX</i>
-     * sequences are decoded using the specified charset. Parameter names and values are trimmed of whitespace.
+     * sequences are decoded using the specified charset. Leading and trailing whitespace in parameter names and values is preserved.
      * </p>
      * <p>
      * Supports both <i>&amp;</i> and ';' as parameter separators (the semicolon separator follows
      * the W3C HTML 4.01 recommendation, Appendix B.2.2).
      * </p>
+     * <p>Percent escapes accept ASCII hexadecimal digits only, and encoded byte sequences are
+     * validated strictly in the selected charset.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1217,45 +1452,48 @@ public final class URLEncodedUtil {
      * @return a {@code ListMultimap} containing parameter names as keys and lists of decoded parameter values;
      *         returns an empty multimap if {@code urlQuery} is {@code null} or empty. A token without
      *         {@code '='} is stored with a {@code null} value.
+     * @throws IllegalArgumentException if a percent escape or its encoded byte sequence is malformed
      * @see #decodeToMultimap(String)
      * @see #decode(String, Charset)
      */
-    public static ListMultimap<String, String> decodeToMultimap(final String urlQuery, final Charset charset) {
+    public static ListMultimap<String, String> decodeToMultimap(final String urlQuery, final Charset charset) throws IllegalArgumentException {
+        return decodeToMultimap(urlQuery, charset, true);
+    }
+
+    /**
+     * Leniently decodes a URL-encoded query string into a {@code ListMultimap<String, String>}
+     * using UTF-8, preserving repeated parameters in encounter order.
+     *
+     * @param urlQuery the URL query string to decode, may be {@code null} or empty
+     * @return a multimap containing all decoded parameter values
+     * @see #decodeToMultimap(String)
+     */
+    public static ListMultimap<String, String> decodeToMultimapLenient(final String urlQuery) {
+        return decodeToMultimapLenient(urlQuery, IOUtil.DEFAULT_CHARSET);
+    }
+
+    /**
+     * Leniently decodes a URL-encoded query string into a {@code ListMultimap<String, String>},
+     * preserving repeated parameters in encounter order. Invalid or incomplete percent escapes
+     * are retained literally, and malformed encoded byte sequences are replaced.
+     *
+     * @param urlQuery the URL query string to decode, may be {@code null} or empty
+     * @param charset the charset used to decode percent-encoded bytes; {@code null} selects UTF-8
+     * @return a multimap containing all decoded parameter values
+     * @see #decodeToMultimap(String, Charset)
+     */
+    public static ListMultimap<String, String> decodeToMultimapLenient(final String urlQuery, final Charset charset) {
+        return decodeToMultimap(urlQuery, charset, false);
+    }
+
+    private static ListMultimap<String, String> decodeToMultimap(final String urlQuery, final Charset charset, final boolean strict) {
         final ListMultimap<String, String> result = N.newLinkedListMultimap();
 
         if (Strings.isEmpty(urlQuery)) {
             return result;
         }
 
-        try (final Scanner scanner = new Scanner(urlQuery)) {
-            scanner.useDelimiter(QP_SEP_PATTERN);
-
-            String name = null;
-            String value = null;
-
-            while (scanner.hasNext()) {
-                final String token = scanner.next();
-
-                // Consecutive separators ("a=1&&b=2") produce an empty token; real-world URLs
-                // contain them and every mainstream parser skips them instead of fabricating
-                // an empty-string parameter name.
-                if (token.isEmpty()) {
-                    continue;
-                }
-
-                final int i = token.indexOf(NAME_VALUE_SEPARATOR);
-
-                if (i != -1) {
-                    name = decodeFormFields(token.substring(0, i).trim(), charset);
-                    value = decodeFormFields(token.substring(i + 1).trim(), charset);
-                } else {
-                    name = decodeFormFields(token.trim(), charset);
-                    value = null;
-                }
-
-                result.put(name, value);
-            }
-        }
+        forEachDecodedQueryParameter(urlQuery, charset, strict, result::put);
 
         return result;
     }
@@ -1266,12 +1504,13 @@ public final class URLEncodedUtil {
      * This method parses a URL query string and populates a JavaBean or Map instance with the decoded parameters.
      * Parameter names are matched to bean property names (exact match first, falling back to case-insensitive matching). Values are automatically converted
      * to the appropriate property types using the bean's property information. Both '+' characters and <i>%XX</i>
-     * sequences are decoded. Parameter names and values are trimmed of whitespace.
+     * sequences are decoded. Leading and trailing whitespace in parameter names and values is preserved.
      * </p>
      * <p>
      * Supports both <i>&amp;</i> and ';' as parameter separators (the semicolon separator follows
      * the W3C HTML 4.01 recommendation, Appendix B.2.2).
      * </p>
+     * <p>Percent escapes and UTF-8 byte sequences are validated strictly.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1285,11 +1524,20 @@ public final class URLEncodedUtil {
      * @param targetType the class of the bean or Map to create and populate; must not be {@code null}.
      * @return an instance of type T populated with the decoded parameter values;
      *         returns an empty instance if {@code urlQuery} is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}, neither a {@code Map} type, nor a
-     *         supported bean class.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, neither a {@code Map} type nor a
+     *         supported bean class, a {@code Map} type for which no assignable mutable instance can be created
+     *         (for example {@link ImmutableMap}, {@link ImmutableSortedMap}, {@link ImmutableNavigableMap} or
+     *         {@link java.util.EnumMap}), a percent escape or its UTF-8 byte sequence is malformed, or conversion
+     *         fails
+     * @throws NullPointerException if the {@code Map} created for {@code targetType} does not permit
+     *         {@code null} values (for example {@code Hashtable}, {@code ConcurrentHashMap} or
+     *         {@code ConcurrentSkipListMap}, which {@code ConcurrentMap.class} and
+     *         {@code ConcurrentNavigableMap.class} also resolve to) and {@code urlQuery} contains a token
+     *         without {@code '='}; use a {@code null}-tolerant {@code Map} or
+     *         {@link #decodeToMultimap(String)} instead
      * @see #decode(String, Charset, Class)
      */
-    public static <T> T decode(final String urlQuery, final Class<? extends T> targetType) {
+    public static <T> T decode(final String urlQuery, final Class<? extends T> targetType) throws IllegalArgumentException, NullPointerException {
         return decode(urlQuery, IOUtil.DEFAULT_CHARSET, targetType);
     }
 
@@ -1299,7 +1547,7 @@ public final class URLEncodedUtil {
      * This method parses a URL query string and populates a JavaBean or Map instance with the decoded parameters.
      * Parameter names are matched to bean property names (exact match first, falling back to case-insensitive matching). Values are automatically converted
      * to the appropriate property types using the bean's property information. Both '+' characters and <i>%XX</i>
-     * sequences are decoded using the specified charset. Parameter names and values are trimmed of whitespace.
+     * sequences are decoded using the specified charset. Leading and trailing whitespace in parameter names and values is preserved.
      * </p>
      * <p>
      * If {@code targetType} is a Map class, this method delegates to {@link #decode(String, Charset, Supplier)}.
@@ -1309,6 +1557,8 @@ public final class URLEncodedUtil {
      * Supports both <i>&amp;</i> and ';' as parameter separators (the semicolon separator follows
      * the W3C HTML 4.01 recommendation, Appendix B.2.2).
      * </p>
+     * <p>Percent escapes accept ASCII hexadecimal digits only, and encoded byte sequences are
+     * validated strictly in the selected charset.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1323,18 +1573,105 @@ public final class URLEncodedUtil {
      * @param targetType the class of the bean or Map to create and populate; must not be {@code null}.
      * @return an instance of type T populated with the decoded parameter values;
      *         returns an empty instance if {@code urlQuery} is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}, neither a {@code Map} type, nor a
-     *         supported bean class.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, neither a {@code Map} type nor a
+     *         supported bean class, a {@code Map} type for which no assignable mutable instance can be created
+     *         (for example {@link ImmutableMap}, {@link ImmutableSortedMap}, {@link ImmutableNavigableMap} or
+     *         {@link java.util.EnumMap}), a percent escape or its encoded byte sequence is malformed, or conversion
+     *         fails
+     * @throws NullPointerException if the {@code Map} created for {@code targetType} does not permit
+     *         {@code null} values (for example {@code Hashtable}, {@code ConcurrentHashMap} or
+     *         {@code ConcurrentSkipListMap}, which {@code ConcurrentMap.class} and
+     *         {@code ConcurrentNavigableMap.class} also resolve to) and {@code urlQuery} contains a token
+     *         without {@code '='}; use a {@code null}-tolerant {@code Map} or
+     *         {@link #decodeToMultimap(String)} instead
      * @see #decode(String, Class)
      */
+    public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetType)
+            throws IllegalArgumentException, NullPointerException {
+        return decode(urlQuery, charset, targetType, true);
+    }
+
+    /**
+     * Leniently decodes a URL-encoded query string into a bean or map using UTF-8.
+     *
+     * @param <T> the target type
+     * @param urlQuery the URL query string to decode, may be {@code null} or empty
+     * @param targetType the supported bean or map type; must not be {@code null}
+     * @return a populated target instance
+     * @throws IllegalArgumentException if {@code targetType} is invalid - including a {@code Map} type for which
+     *         no assignable mutable instance can be created, such as {@link ImmutableMap} or
+     *         {@link java.util.EnumMap} - or a decoded value cannot be converted
+     * @throws NullPointerException if the {@code Map} created for {@code targetType} does not permit
+     *         {@code null} values (for example {@code Hashtable}, {@code ConcurrentHashMap} or
+     *         {@code ConcurrentSkipListMap}, which {@code ConcurrentMap.class} and
+     *         {@code ConcurrentNavigableMap.class} also resolve to) and {@code urlQuery} contains a token
+     *         without {@code '='}; use a {@code null}-tolerant {@code Map} or
+     *         {@link #decodeToMultimap(String)} instead
+     * @see #decode(String, Class)
+     */
+    public static <T> T decodeLenient(final String urlQuery, final Class<? extends T> targetType) throws IllegalArgumentException, NullPointerException {
+        return decodeLenient(urlQuery, IOUtil.DEFAULT_CHARSET, targetType);
+    }
+
+    /**
+     * Leniently decodes a URL-encoded query string into a bean or map. Invalid or incomplete
+     * percent escapes are retained literally, and malformed encoded byte sequences are replaced.
+     *
+     * @param <T> the target type
+     * @param urlQuery the URL query string to decode, may be {@code null} or empty
+     * @param charset the charset used to decode percent-encoded bytes; {@code null} selects UTF-8
+     * @param targetType the supported bean or map type; must not be {@code null}
+     * @return a populated target instance
+     * @throws IllegalArgumentException if {@code targetType} is invalid - including a {@code Map} type for which
+     *         no assignable mutable instance can be created, such as {@link ImmutableMap} or
+     *         {@link java.util.EnumMap} - or a decoded value cannot be converted
+     * @throws NullPointerException if the {@code Map} created for {@code targetType} does not permit
+     *         {@code null} values (for example {@code Hashtable}, {@code ConcurrentHashMap} or
+     *         {@code ConcurrentSkipListMap}, which {@code ConcurrentMap.class} and
+     *         {@code ConcurrentNavigableMap.class} also resolve to) and {@code urlQuery} contains a token
+     *         without {@code '='}; use a {@code null}-tolerant {@code Map} or
+     *         {@link #decodeToMultimap(String)} instead
+     * @see #decode(String, Charset, Class)
+     */
+    public static <T> T decodeLenient(final String urlQuery, final Charset charset, final Class<? extends T> targetType)
+            throws IllegalArgumentException, NullPointerException {
+        return decode(urlQuery, charset, targetType, false);
+    }
+
+    /**
+     * @throws IllegalArgumentException if {@code targetType} is null, a mutable instance of the requested map type
+     *         cannot be created, the target is not a map or bean type, or strict decoding rejects malformed input
+     * @throws NullPointerException if a valueless query parameter is inserted into a map that does not permit null values
+     */
     @SuppressWarnings("rawtypes")
-    public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetType) throws IllegalArgumentException {
+    private static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetType, final boolean strict)
+            throws IllegalArgumentException, NullPointerException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         if (Map.class.isAssignableFrom(targetType)) {
-            final Supplier<Map<String, String>> supplier = Suppliers.ofMap((Class) targetType);
+            // Suppliers.ofMap maps the bare Map/AbstractMap interfaces to HashMap, which would make
+            // decode(q, charset, Map.class) lose the parameter order that every other decode overload
+            // preserves. Only the unspecific types are redirected; a concrete request is honored, or rejected
+            // just below if no assignable instance can be created for it.
+            final Supplier<Map<String, String>> supplier;
 
-            return (T) decode(urlQuery, charset, supplier);
+            if (Map.class.equals(targetType) || AbstractMap.class.equals(targetType)) {
+                supplier = Suppliers.of(LinkedHashMap::new);
+            } else {
+                supplier = Suppliers.ofMap((Class) targetType);
+            }
+
+            // Suppliers.ofMap substitutes a plain HashMap/TreeMap for the Map types it cannot build
+            // (EnumMap, ImmutableMap, ImmutableSortedMap, ImmutableNavigableMap), and the unchecked cast
+            // below erases, so the caller used to get a bare ClassCastException in its own frame. Reject
+            // them here, the way Suppliers.ofMap already rejects the sibling ImmutableBiMap.
+            final Map<String, String> result = supplier.get();
+
+            if (!targetType.isInstance(result)) {
+                throw new IllegalArgumentException("Cannot decode into " + targetType.getName() + ": no mutable instance of that type can be created");
+            }
+
+            return (T) decode(urlQuery, charset, () -> result, strict);
         }
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
@@ -1344,47 +1681,68 @@ public final class URLEncodedUtil {
             return beanInfo.finishBeanResult(result);
         }
 
-        try (final Scanner scanner = new Scanner(urlQuery)) {
-            scanner.useDelimiter(QP_SEP_PATTERN);
+        forEachDecodedQueryParameter(urlQuery, charset, strict, (name, value) -> {
+            final PropInfo propInfo = beanInfo.getPropInfo(name);
+            final Object propValue = value == null ? propInfo == null ? null : propInfo.type.defaultValue()
+                    : propInfo == null ? value : propInfo.readPropValue(value);
 
-            PropInfo propInfo = null;
-            Object propValue = null;
-            String name = null;
-            String value = null;
-
-            while (scanner.hasNext()) {
-                final String token = scanner.next();
-
-                // Consecutive separators ("a=1&&b=2") produce an empty token; real-world URLs
-                // contain them and every mainstream parser skips them instead of fabricating
-                // an empty-string parameter name.
-                if (token.isEmpty()) {
-                    continue;
-                }
-
-                final int i = token.indexOf(NAME_VALUE_SEPARATOR);
-
-                if (i != -1) {
-                    name = decodeFormFields(token.substring(0, i).trim(), charset);
-                    value = decodeFormFields(token.substring(i + 1).trim(), charset);
-                } else {
-                    name = decodeFormFields(token.trim(), charset);
-                    value = null;
-                }
-
-                propInfo = beanInfo.getPropInfo(name);
-
-                if (value == null) {
-                    propValue = propInfo == null ? null : propInfo.type.defaultValue();
-                } else {
-                    propValue = propInfo == null ? value : propInfo.readPropValue(value);
-                }
-
-                beanInfo.setPropValue(result, name, propValue, true);
-            }
-        }
+            beanInfo.setPropValue(result, name, propValue, true);
+        });
 
         return beanInfo.finishBeanResult(result);
+    }
+
+    /**
+     * Visits the non-empty query tokens separated by {@code '&'} or {@code ';'} after form decoding.
+     * Empty tokens caused by leading, trailing, or consecutive separators are skipped, while whitespace-only
+     * tokens are deliberately preserved. A token without {@code '='} is reported with a {@code null} value.
+     *
+     * @param urlQuery the raw query string, without any leading {@code '?'}; must not be {@code null}
+     * @param charset the charset used to decode percent escapes and {@code '+'}
+     * @param strict {@code true} to reject a malformed percent escape with an
+     *        {@link IllegalArgumentException}; {@code false} to pass it through unchanged
+     * @param action receives each decoded name and its value, or {@code null} for a valueless token
+     */
+    private static void forEachDecodedQueryParameter(final String urlQuery, final Charset charset, final boolean strict,
+            final BiConsumer<String, String> action) {
+        final int len = urlQuery.length();
+        int tokenStart = 0;
+        // The first '=' of the current token, tracked while the token is being scanned. Looking it up with
+        // indexOf(..) instead searched to the END of the whole query and then discarded anything past the
+        // token, so a query of valueless tokens ("a&b&c&...") re-scanned the tail once per token - quadratic
+        // in the query length.
+        int separatorIndex = -1;
+
+        for (int tokenEnd = 0; tokenEnd <= len; tokenEnd++) {
+            if (tokenEnd < len) {
+                final char ch = urlQuery.charAt(tokenEnd);
+
+                if (ch != QP_SEP_A && ch != QP_SEP_S) {
+                    if (separatorIndex < tokenStart && ch == '=') {
+                        separatorIndex = tokenEnd;
+                    }
+
+                    continue;
+                }
+            }
+
+            if (tokenStart < tokenEnd) {
+                final String name;
+                final String value;
+
+                if (separatorIndex < tokenStart) {
+                    name = decodeFormFields(urlQuery.substring(tokenStart, tokenEnd), charset, strict);
+                    value = null;
+                } else {
+                    name = decodeFormFields(urlQuery.substring(tokenStart, separatorIndex), charset, strict);
+                    value = decodeFormFields(urlQuery.substring(separatorIndex + 1, tokenEnd), charset, strict);
+                }
+
+                action.accept(name, value);
+            }
+
+            tokenStart = tokenEnd + 1;
+        }
     }
 
     /**
@@ -1397,8 +1755,9 @@ public final class URLEncodedUtil {
      * with ", " and converted to the property type.
      * </p>
      * <p>
-     * If a parameter value is {@code null}, empty, or contains only a single empty string, the property is set
-     * to its default value (as determined by the property type).
+     * If a parameter value is {@code null}, empty, or contains only a single empty or {@code null} string, the
+     * property is set to its default value (as determined by the property type). A {@code null} element inside a
+     * multi-element array is joined as the text {@code "null"}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1453,12 +1812,12 @@ public final class URLEncodedUtil {
         return beanInfo.finishBeanResult(result);
     }
 
-    private static String decodeFormFields(final String content, final Charset charset) {
+    private static String decodeFormFields(final String content, final Charset charset, final boolean strict) {
         if (content == null) {
             return null;
         }
 
-        return urlDecode(content, (charset != null) ? charset : IOUtil.DEFAULT_CHARSET, true);
+        return urlDecode(content, (charset != null) ? charset : IOUtil.DEFAULT_CHARSET, true, strict);
     }
 
     /**
@@ -1472,9 +1831,13 @@ public final class URLEncodedUtil {
      * @param plusAsBlank if {@code true}, {@code '+'} characters are converted to spaces
      *                    (required for {@code application/x-www-form-urlencoded} query strings);
      *                    if {@code false}, {@code '+'} is left as-is.
+     * @param strict if {@code true}, malformed escapes and invalid encoded byte sequences are rejected;
+     *               otherwise malformed escapes are retained and invalid byte sequences are replaced
      * @return the decoded string.
+     * @throws IllegalArgumentException in strict mode if a percent escape or encoded byte sequence is malformed
      */
-    private static String urlDecode(final String content, final Charset charset, final boolean plusAsBlank) {
+    private static String urlDecode(final String content, final Charset charset, final boolean plusAsBlank, final boolean strict)
+            throws IllegalArgumentException {
         if (content == null) {
             return null;
         }
@@ -1488,22 +1851,51 @@ public final class URLEncodedUtil {
         for (int i = 0, len = content.length(); i < len;) {
             final char c = content.charAt(i);
 
-            if (c == '%' && i + 2 < len && Character.digit(content.charAt(i + 1), 16) >= 0 && Character.digit(content.charAt(i + 2), 16) >= 0) {
+            if (c == '%') {
+                final int escapeStart = i;
+                final int upperDigit = i + 1 < len ? asciiHexDigit(content.charAt(i + 1)) : -1;
+                final int lowerDigit = i + 2 < len ? asciiHexDigit(content.charAt(i + 2)) : -1;
+
+                if (upperDigit < 0 || lowerDigit < 0) {
+                    if (strict) {
+                        throw new IllegalArgumentException(
+                                "Invalid percent escape at index " + escapeStart + ": '%' must be followed by two ASCII hexadecimal digits");
+                    }
+
+                    result.append(c);
+                    i++;
+                    continue;
+                }
+
                 final java.io.ByteArrayOutputStream escapedBytes = new java.io.ByteArrayOutputStream();
 
                 while (i + 2 < len && content.charAt(i) == '%') {
-                    final int upperDigit = Character.digit(content.charAt(i + 1), 16);
-                    final int lowerDigit = Character.digit(content.charAt(i + 2), 16);
+                    final int nextUpperDigit = asciiHexDigit(content.charAt(i + 1));
+                    final int nextLowerDigit = asciiHexDigit(content.charAt(i + 2));
 
-                    if (upperDigit < 0 || lowerDigit < 0) {
+                    if (nextUpperDigit < 0 || nextLowerDigit < 0) {
                         break;
                     }
 
-                    escapedBytes.write((upperDigit << 4) + lowerDigit);
+                    escapedBytes.write((nextUpperDigit << 4) + nextLowerDigit);
                     i += 3;
                 }
 
-                result.append(new String(escapedBytes.toByteArray(), charset));
+                final byte[] bytes = escapedBytes.toByteArray();
+
+                if (strict) {
+                    try {
+                        result.append(charset.newDecoder()
+                                .onMalformedInput(CodingErrorAction.REPORT)
+                                .onUnmappableCharacter(CodingErrorAction.REPORT)
+                                .decode(ByteBuffer.wrap(bytes)));
+                    } catch (final CharacterCodingException e) {
+                        throw new IllegalArgumentException("Invalid percent-encoded byte sequence at index " + escapeStart + " for charset " + charset.name(),
+                                e);
+                    }
+                } else {
+                    result.append(new String(bytes, charset));
+                }
             } else if (plusAsBlank && c == '+') {
                 result.append(' ');
                 i++;
@@ -1516,5 +1908,17 @@ public final class URLEncodedUtil {
         }
 
         return result.toString();
+    }
+
+    private static int asciiHexDigit(final char ch) {
+        if (ch >= '0' && ch <= '9') {
+            return ch - '0';
+        } else if (ch >= 'A' && ch <= 'F') {
+            return ch - 'A' + 10;
+        } else if (ch >= 'a' && ch <= 'f') {
+            return ch - 'a' + 10;
+        }
+
+        return -1;
     }
 }

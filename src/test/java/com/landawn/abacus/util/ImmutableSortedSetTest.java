@@ -70,16 +70,6 @@ public class ImmutableSortedSetTest extends TestBase {
 
     //
     //
-    //    @Test
-    //    public void test_just_withNullableComparator() {
-    //        ImmutableSortedSet<Integer> set = ImmutableSortedSet.just(10);
-    //        assertNotNull(set);
-    //        assertEquals(1, set.size());
-    //        assertTrue(set.contains(10));
-    //    }
-
-    //
-    //
     //
 
     @Test
@@ -753,4 +743,160 @@ public class ImmutableSortedSetTest extends TestBase {
         });
     }
 
+    /** A key/element type that is deliberately NOT Comparable. */
+    private static final class NotComparableSS {
+        private final String s;
+
+        NotComparableSS(final String s) {
+            this.s = s;
+        }
+
+        @Override
+        public String toString() {
+            return s;
+        }
+    }
+
+    @Test
+    public void testOf_neverSilentlyFallsBackToAnUnsortedImmutableSet() {
+        // With a Comparable bound on of(...), a non-Comparable element selected the inherited
+        // ImmutableSet.of(...) instead and produced an UNSORTED set with no error at all.
+        Assertions.assertThrows(ClassCastException.class, () -> ImmutableSortedSet.of(new NotComparableSS("z")));
+        Assertions.assertThrows(ClassCastException.class, () -> ImmutableSortedSet.of(new NotComparableSS("z"), new NotComparableSS("a")));
+        Assertions.assertThrows(ClassCastException.class,
+                () -> ImmutableSortedSet.of(new NotComparableSS("a"), new NotComparableSS("b"), new NotComparableSS("c")));
+    }
+
+    @Test
+    public void testOf_isStillSortedForComparableElements() {
+        final ImmutableSortedSet<String> s = ImmutableSortedSet.of("c", "a", "b");
+
+        Assertions.assertEquals(java.util.Arrays.asList("a", "b", "c"), new java.util.ArrayList<>(s));
+        Assertions.assertEquals("a", s.first());
+        Assertions.assertEquals("c", s.last());
+        Assertions.assertNull(s.comparator());
+        // a null element still fails as NullPointerException (from TreeSet's natural ordering), not CCE
+        Assertions.assertThrows(NullPointerException.class, () -> ImmutableSortedSet.of((String) null));
+    }
+
+    @Test
+    public void testBuilderIsBlocked() {
+        // ImmutableSet.builder() is inherited through this class's name and would silently build an
+        // unsorted ImmutableSet in insertion order.
+        Assertions.assertThrows(UnsupportedOperationException.class, ImmutableSortedSet::builder);
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> ImmutableSortedSet.builder(new java.util.TreeSet<String>()));
+    }
+
+    @Test
+    public void testCopyOf_copiesAWrappedView() {
+        final java.util.TreeSet<String> live = new java.util.TreeSet<>(java.util.List.of("a"));
+        final ImmutableSortedSet<String> view = ImmutableSortedSet.wrap(live);
+        final ImmutableSortedSet<String> copy = ImmutableSortedSet.copyOf(view);
+
+        Assertions.assertNotSame(view, copy);
+
+        live.add("b");
+
+        Assertions.assertEquals(2, view.size());
+        Assertions.assertEquals(1, copy.size());
+        Assertions.assertFalse(copy.contains("b"));
+    }
+
+    @Test
+    public void testRangeViewsInheritOwnership() {
+        final ImmutableSortedSet<String> owned = ImmutableSortedSet.of("a", "b", "c");
+        final ImmutableSortedSet<String> ownedHead = owned.headSet("c");
+        Assertions.assertSame(ownedHead, ImmutableSortedSet.copyOf(ownedHead));
+
+        final java.util.TreeSet<String> live = new java.util.TreeSet<>(java.util.List.of("a", "c"));
+        final ImmutableSortedSet<String> viewHead = ImmutableSortedSet.wrap(live).headSet("d");
+        final ImmutableSortedSet<String> copy = ImmutableSortedSet.copyOf(viewHead);
+        Assertions.assertNotSame(viewHead, copy);
+
+        live.add("b");
+        Assertions.assertEquals(3, viewHead.size());
+        Assertions.assertEquals(2, copy.size());
+
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> viewHead.add("z"));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> ownedHead.add("z"));
+    }
+
+    @Test
+    public void test_reversed_isNarrowedToAnImmutableSortedSet() {
+        // Called through the SortedSet interface so the assertion is about the runtime answer, not the
+        // compiled descriptor: the SortedSet.reversed() default hands back a java.util.ReverseOrderSortedSetView,
+        // which is neither an ImmutableSortedSet nor an Immutable.
+        final SortedSet<Integer> source = ImmutableSortedSet.of(1, 2, 3);
+        final SortedSet<Integer> reversed = source.reversed();
+
+        assertTrue(reversed instanceof ImmutableSortedSet, "reversed() returned " + reversed.getClass().getName());
+        assertTrue(reversed instanceof Immutable, "reversed() returned " + reversed.getClass().getName());
+        assertEquals(Arrays.asList(3, 2, 1), new ArrayList<>(reversed));
+        assertEquals(Integer.valueOf(3), reversed.first());
+        assertEquals(Integer.valueOf(1), reversed.last());
+
+        final ImmutableSortedSet<Integer> narrowed = ImmutableSortedSet.of(1, 2, 3).reversed();
+        assertEquals("[3, 2, 1]", narrowed.toString());
+        assertEquals("[3]", narrowed.headSet(2).toString());
+        assertThrows(UnsupportedOperationException.class, () -> narrowed.add(4));
+    }
+
+    @Test
+    public void test_reversed_propagatesOwnershipAndIsEqualAfterDoubleReverse() {
+        final ImmutableSortedSet<Integer> owning = ImmutableSortedSet.of(1, 2, 3);
+        final ImmutableSortedSet<Integer> reversed = owning.reversed();
+
+        // an owning parent yields an owning view, exactly like headSet/tailSet/subSet
+        assertSame(reversed, ImmutableSortedSet.copyOf(reversed));
+
+        // reversed().reversed() is equal but NOT the same instance - the rule descendingSet() already follows
+        assertEquals(owning, reversed.reversed());
+        Assertions.assertNotSame(owning, reversed.reversed());
+
+        final TreeSet<Integer> live = new TreeSet<>(Arrays.asList(1, 2));
+        final ImmutableSortedSet<Integer> wrapped = ImmutableSortedSet.wrap(live).reversed();
+        live.add(3);
+        assertEquals("[3, 2, 1]", wrapped.toString());
+        Assertions.assertNotSame(wrapped, ImmutableSortedSet.copyOf(wrapped));
+    }
+
+    @Test
+    public void test_copyOf_sortedSourceKeepsItsComparatorAndNeedNotBeComparable() {
+        // pins the copyOf(Collection) javadoc: a SortedSet source retains its comparator, so its elements
+        // need not implement Comparable; other collections use natural ordering and throw ClassCastException.
+        final Comparator<Object> byToString = Comparator.comparing(Object::toString);
+        final SortedSet<Object> source = new TreeSet<>(byToString);
+        final Object y = new Object() {
+            @Override
+            public String toString() {
+                return "y";
+            }
+        };
+        final Object z = new Object() {
+            @Override
+            public String toString() {
+                return "z";
+            }
+        };
+        source.add(y);
+        source.add(z);
+        assertFalse(y instanceof Comparable);
+
+        final ImmutableSortedSet<Object> copy = ImmutableSortedSet.copyOf(source);
+        assertSame(byToString, copy.comparator());
+        assertEquals(2, copy.size());
+        assertEquals("[y, z]", copy.toString());
+
+        assertThrows(ClassCastException.class, () -> ImmutableSortedSet.copyOf(Arrays.asList(y, z)));
+
+        // the "including when it is empty" half: an empty SortedSet source keeps its comparator too, which
+        // a size-based short circuit to the shared empty() instance would silently drop
+        final ImmutableSortedSet<Object> emptyCopy = ImmutableSortedSet.copyOf(new TreeSet<>(byToString));
+        assertEquals(0, emptyCopy.size());
+        assertSame(byToString, emptyCopy.comparator());
+        Assertions.assertNotSame(ImmutableSortedSet.empty(), emptyCopy);
+
+        // a non-sorted empty source has no comparator to keep, so it does collapse to natural ordering
+        assertNull(ImmutableSortedSet.copyOf(new ArrayList<>()).comparator());
+    }
 }

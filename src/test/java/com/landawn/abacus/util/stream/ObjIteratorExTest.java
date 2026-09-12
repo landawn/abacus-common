@@ -418,6 +418,23 @@ public class ObjIteratorExTest extends TestBase {
     }
 
     @Test
+    public void testDeferCachesInitializationError() {
+        final int[] invocationCount = { 0 };
+        final AssertionError failure = new AssertionError("initialization failed");
+        final ObjIteratorEx<String> iter = ObjIteratorEx.defer(() -> {
+            invocationCount[0]++;
+            throw failure;
+        });
+
+        // Errors use the same cached-failure path as runtime exceptions; the supplier must not run again.
+        Assertions.assertSame(failure, Assertions.assertThrows(AssertionError.class, iter::hasNext));
+        Assertions.assertSame(failure, Assertions.assertThrows(AssertionError.class, iter::next));
+        Assertions.assertSame(failure, Assertions.assertThrows(AssertionError.class, iter::count));
+        Assertions.assertEquals(1, invocationCount[0]);
+        iter.closeResource();
+    }
+
+    @Test
     public void testDeferRejectsNullIteratorFromSupplier() {
         final int[] invocationCount = { 0 };
         final ObjIteratorEx<String> iter = ObjIteratorEx.defer(() -> {

@@ -17,7 +17,6 @@ package com.landawn.abacus.util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
-import java.security.Security;
 import java.util.Objects;
 
 import com.landawn.abacus.annotation.MayReturnNull;
@@ -68,33 +67,28 @@ public final class Password {
      * }</pre>
      *
      * @param algorithm the non-null name of the digest algorithm to use (for example, {@code "SHA-256"} or {@code "SHA-512"})
-     * @throws NullPointerException if {@code algorithm} is {@code null}
+     * @throws IllegalArgumentException if {@code algorithm} is {@code null}
      * @throws RuntimeException wrapping {@link java.security.NoSuchAlgorithmException} if the specified algorithm
      *         is not available from any registered security provider
      * @see MessageDigest#getInstance(String)
      */
-    public Password(final String algorithm) {
-        Objects.requireNonNull(algorithm, "algorithm");
+    public Password(final String algorithm) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(algorithm, cs.algorithm);
 
         try {
             msgDigest = MessageDigest.getInstance(algorithm);
 
-            // Resolve the canonical standard algorithm name. msgDigest.getAlgorithm() may return
-            // the name exactly as requested (e.g. "sha-256" or an alias like "SHA256"), while
+            // Resolve the canonical algorithm name. msgDigest.getAlgorithm() may return the name
+            // exactly as requested (e.g. "sha-256" or an alias like "SHA256"), while
             // Provider.getService("MessageDigest", ...) accepts aliases/case variants and yields
-            // the provider's standard name. Fall back to getAlgorithm() if no service is found.
-            String canonicalAlgorithm = null;
+            // the provider's own spelling. Ask the provider that actually supplied this digest:
+            // getInstance may have skipped earlier providers whose SPI failed to instantiate, so
+            // scanning Security.getProviders() can name an implementation that is not in use (and
+            // forces lazy service parsing in every provider ahead of the match).
+            // Fall back to getAlgorithm() if no service is found.
+            final Provider.Service service = msgDigest.getProvider().getService("MessageDigest", algorithm);
 
-            for (final Provider provider : Security.getProviders()) {
-                final Provider.Service service = provider.getService("MessageDigest", algorithm);
-
-                if (service != null) {
-                    canonicalAlgorithm = service.getAlgorithm();
-                    break;
-                }
-            }
-
-            this.algorithm = canonicalAlgorithm == null ? msgDigest.getAlgorithm() : canonicalAlgorithm;
+            this.algorithm = service == null ? msgDigest.getAlgorithm() : service.getAlgorithm();
         } catch (final NoSuchAlgorithmException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -103,13 +97,23 @@ public final class Password {
     /**
      * Returns the name of the hashing algorithm used by this Password instance.
      *
+     * <p>This is not necessarily the string passed to the constructor: the name is resolved through
+     * the {@code MessageDigest} service of the provider that supplied the implementation, so an
+     * alias or a differently-cased request is reported using that provider's own spelling. Two
+     * {@code Password} instances created from different spellings of the same algorithm therefore
+     * report the same name and compare {@linkplain #equals(Object) equal}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Password password = new Password("SHA-256");
      * String algo = password.getAlgorithm();   // returns "SHA-256"
+     *
+     * Password lowerCase = new Password("sha-256");
+     * String same = lowerCase.getAlgorithm();   // returns the provider's spelling, e.g. "SHA-256"
      * }</pre>
      *
-     * @return the algorithm name (e.g., "SHA-256", "MD5")
+     * @return the algorithm name as spelled by the provider that supplied the implementation
+     *         (e.g., "SHA-256", "MD5")
      */
     public String getAlgorithm() {
         return algorithm;
@@ -117,7 +121,9 @@ public final class Password {
 
     /**
      * Digests the given password string with the configured algorithm and returns
-     * the resulting digest encoded in Base64 format. This method is synchronized because
+     * the resulting digest encoded in Base64 format. The input is encoded as UTF-8 without
+     * Unicode normalization, so canonically equivalent strings may have different digests.
+     * This method is synchronized because
      * the underlying {@link MessageDigest} instance is reused.
      *
      * <p><b>&#9888;&#65039; Password storage:</b> The returned value is a fast unsalted digest,
@@ -132,13 +138,16 @@ public final class Password {
      *
      * @param x the plain-text password to hash; may be {@code null}
      * @return the Base64-encoded digest of {@code x}, or {@code null} if {@code x} is {@code null}
+     * @throws IllegalArgumentException if {@code x} contains an unpaired UTF-16 surrogate
      */
     @MayReturnNull
-    public synchronized String digest(final String x) {
+    public synchronized String digest(final String x) throws IllegalArgumentException {
         if (x == null) {
             return null;
         }
 
+        // Replacing malformed UTF-16 with '?' would make distinct passwords share a digest.
+        Utf8.encodedLength(x);
         try {
             return Strings.base64Encode(msgDigest.digest(x.getBytes(Charsets.UTF_8)));
         } finally {
@@ -168,8 +177,10 @@ public final class Password {
      * @return {@code true} if {@code digest(plainPassword)} equals {@code encodedDigest},
      *         or if both arguments are {@code null}; {@code false} if only one is {@code null}
      *         or if the hashes do not match
+     * @throws IllegalArgumentException if both arguments are non-null and {@code plainPassword}
+     *         contains an unpaired UTF-16 surrogate
      */
-    public boolean isEqual(final String plainPassword, final String encodedDigest) {
+    public boolean isEqual(final String plainPassword, final String encodedDigest) throws IllegalArgumentException {
         if (plainPassword == null) {
             return encodedDigest == null;
         }

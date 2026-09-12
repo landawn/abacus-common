@@ -261,9 +261,70 @@ public class MoreExecutorsTest extends TestBase {
             });
         });
 
-        Assertions.assertDoesNotThrow(() -> {
+        // G18-73 (2026-09-08): re-pointed. This used to assert that a null runnable is accepted, which pinned the
+        // dropped N.checkArgNotNull(runnable) - the call built a thread that silently does nothing when started.
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
             MoreExecutors.newThread("test", null);
         });
+    }
+
+    // G18-73 (2026-09-08): a conversion that fails after the thread factory was swapped must put the caller's
+    // factory back, so that a failed call never leaves a daemonised pool with no hook to drain it.
+    @Test
+    public void fixG18_failedConversionRestoresTheOriginalThreadFactory() {
+        final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
+        try {
+            final ThreadFactory originalFactory = executor.getThreadFactory();
+            final ExecutorService service = MoreExecutors.getExitingExecutorService(executor, 1, TimeUnit.SECONDS);
+            final ThreadFactory installedFactory = executor.getThreadFactory();
+
+            assertNotNull(service);
+            Assertions.assertNotSame(originalFactory, installedFactory, "the conversion must install its own daemon factory");
+
+            // The rollback the conversion runs when the shutdown hook cannot be registered.
+            MoreExecutors.restoreThreadFactory(executor, installedFactory, originalFactory);
+            assertSame(originalFactory, executor.getThreadFactory());
+
+            // Nothing to undo: the factory is no longer the one this class installed, so the rollback is a no-op.
+            MoreExecutors.restoreThreadFactory(executor, installedFactory, originalFactory);
+            assertSame(originalFactory, executor.getThreadFactory());
+
+            // A factory a third party installed while the conversion was running is the more recent intent: keep it.
+            final ThreadFactory foreignFactory = Executors.defaultThreadFactory();
+            executor.setThreadFactory(foreignFactory);
+            MoreExecutors.restoreThreadFactory(executor, installedFactory, originalFactory);
+            assertSame(foreignFactory, executor.getThreadFactory());
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    // G18-73 (2026-09-08): a failing rollback must not replace the exception that triggered it.
+    @Test
+    public void fixG18_failedRollbackIsSwallowed() {
+        final ThreadFactory[] installed = new ThreadFactory[1];
+        final ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>()) {
+            @Override
+            public void setThreadFactory(final ThreadFactory threadFactory) {
+                if (installed[0] != null && threadFactory != installed[0]) {
+                    throw new IllegalStateException("refusing to restore");
+                }
+
+                super.setThreadFactory(threadFactory);
+            }
+        };
+
+        try {
+            final ThreadFactory originalFactory = executor.getThreadFactory();
+            MoreExecutors.getExitingExecutorService(executor, 1, TimeUnit.SECONDS);
+            installed[0] = executor.getThreadFactory();
+
+            Assertions.assertDoesNotThrow(() -> MoreExecutors.restoreThreadFactory(executor, installed[0], originalFactory));
+            assertSame(installed[0], executor.getThreadFactory());
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     @Test
@@ -289,5 +350,41 @@ public class MoreExecutorsTest extends TestBase {
         } finally {
             scheduledExecutor.shutdownNow();
         }
+    }
+
+    @Test
+    public void testDaemonConversionOnlyAffectsThreadsCreatedAfterwards() {
+        Assertions.assertTimeoutPreemptively(java.time.Duration.ofSeconds(20), () -> {
+            // corePoolSize 2 with an unbounded queue: ThreadPoolExecutor.execute() adds a fresh worker while the
+            // pool is below core size, so the second submit is guaranteed to build a thread with the new factory.
+            final ThreadPoolExecutor executor = new ThreadPoolExecutor(2, 2, 600L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+            final java.util.concurrent.atomic.AtomicReference<Thread> beforeThread = new java.util.concurrent.atomic.AtomicReference<>();
+            final java.util.concurrent.atomic.AtomicReference<Thread> afterThread = new java.util.concurrent.atomic.AtomicReference<>();
+
+            try {
+                final CountDownLatch startedBefore = new CountDownLatch(1);
+                executor.execute(() -> {
+                    beforeThread.set(Thread.currentThread());
+                    startedBefore.countDown();
+                });
+                Assertions.assertTrue(startedBefore.await(10, TimeUnit.SECONDS));
+
+                final ExecutorService exiting = MoreExecutors.getExitingExecutorService(executor, 1, TimeUnit.MILLISECONDS);
+                assertNotNull(exiting);
+
+                final CountDownLatch startedAfter = new CountDownLatch(1);
+                exiting.execute(() -> {
+                    afterThread.set(Thread.currentThread());
+                    startedAfter.countDown();
+                });
+                Assertions.assertTrue(startedAfter.await(10, TimeUnit.SECONDS));
+
+                Assertions.assertNotSame(beforeThread.get(), afterThread.get());
+                Assertions.assertFalse(beforeThread.get().isDaemon(), "a worker that existed before the conversion stays non-daemon");
+                Assertions.assertTrue(afterThread.get().isDaemon(), "a worker created after the conversion is a daemon");
+            } finally {
+                executor.shutdownNow();
+            }
+        });
     }
 }

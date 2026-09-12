@@ -30,6 +30,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -39,9 +41,79 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
  * This class provides a comprehensive set of static methods for converting Java objects to JSON and parsing JSON back
  * to Java objects from various sources including strings, files, streams, and URLs.
  *
- * <p>The class maintains bounded caches of configuration-bound JsonMapper instances. A cached mapper is never
- * reconfigured after its first use, preventing Jackson's serializer and root-deserializer caches from leaking one
- * call's configuration into another. Checked processing and I/O exceptions are wrapped in runtime exceptions.</p>
+ * <p>The class maintains bounded caches of configuration-bound JsonMapper instances, keyed by the supplied
+ * {@link SerializationConfig} / {@link DeserializationConfig}. A cached mapper is never reconfigured after its first
+ * use, preventing Jackson's serializer and root-deserializer caches from leaking one call's configuration into
+ * another. Checked processing and I/O exceptions are wrapped in runtime exceptions.</p>
+ *
+ * <p><b>Reuse your config objects.</b> Jackson's config classes do not override {@code equals}/{@code hashCode},
+ * so these caches match on object identity. A config obtained from {@link #createSerializationConfig()} or built
+ * with {@code with(...)} is a fresh instance every time and carries its own {@code ConfigOverrides}, so calling
+ * those inside a loop constructs (and retains) a new mapper per call. Hold a single config instance and pass it
+ * repeatedly. The
+ * {@code SerializationFeature}/{@code DeserializationFeature} overloads do not use these caches at all - they
+ * derive a lightweight {@link ObjectWriter}/{@link ObjectReader} instead - and are the cheaper choice when you only
+ * need to toggle features.</p>
+ *
+ * <p><b>Input conventions:</b> a {@code null} {@code SerializationConfig}/{@code DeserializationConfig} means
+ * "use the default configuration". An empty or blank JSON source is <i>not</i> treated as {@code null}: it fails
+ * with a wrapped {@code MismatchedInputException} ("No content to map"). Compare {@link FastJson}, which returns
+ * {@code null} for empty input. File output targets must already have an existing parent directory; unlike
+ * {@link FastJson}, this class does not create one.</p>
+ *
+ * <p><b>Number types when the target is {@code Map} or {@code Object}.</b> A JSON decimal is bound to a
+ * {@link Double} here ({@code 1.5} becomes {@code Double}, and {@code -0.0} keeps its sign), whereas
+ * {@link FastJson} produces a {@link java.math.BigDecimal} for the same input and loses the sign of
+ * {@code -0.0}. Integers agree across both ({@code int}-range to {@link Integer}, wider to {@link Long},
+ * beyond {@code long} to {@link java.math.BigInteger}). Code that casts the result of
+ * {@code fromJson(json, Map.class).get(key)} to a concrete numeric type is therefore not portable between
+ * the two facades. Deserialize into a typed bean when the numeric type matters.</p>
+ *
+ * <p><b>Date and {@code java.time} handling.</b> {@link java.util.Date}, {@link java.sql.Timestamp},
+ * {@link java.sql.Date} and {@link java.util.Calendar} are written as epoch milliseconds (Jackson's
+ * {@code WRITE_DATES_AS_TIMESTAMPS} default), which is time-zone independent; {@link XmlMappers} writes the
+ * identical value. This does <i>not</i> match {@link FastJson}, whose default is an offsetless local-time
+ * string: reading FastJson's date text into a {@code Date}-typed property here throws
+ * {@code InvalidFormatException}, while reading it into an untyped {@code Map} silently yields the raw
+ * {@link String}. One exception to the zone-independence: {@link java.sql.Time} is written as wall-clock
+ * {@code "HH:mm:ss"} by <i>both</i> facades, carries no date at all, and is therefore zone-dependent in
+ * both. Finally, no Java-8 time module is registered here and this library does not declare
+ * {@code jackson-datatype-jsr310}, so serializing any {@code java.time} value
+ * ({@code Instant}, {@code LocalDate}, {@code ZonedDateTime}, …) throws {@code InvalidDefinitionException};
+ * register {@code JavaTimeModule} on your own mapper and {@link #wrap(ObjectMapper)} it.</p>
+ *
+ * <p><b>A bean with no discoverable properties is rejected.</b> Jackson's
+ * {@link SerializationFeature#FAIL_ON_EMPTY_BEANS} is on by default, so serializing an object that exposes
+ * no properties fails with a wrapped {@code InvalidDefinitionException} instead of producing {@code "{}"}.
+ * The feature overloads can only turn features <i>on</i>; to allow it, pass a config built as
+ * {@code createSerializationConfig().without(SerializationFeature.FAIL_ON_EMPTY_BEANS)} to the
+ * {@link SerializationConfig} overload, which then yields {@code "{}"}. {@link FastJson} writes
+ * {@code "{}"} for the same input without any configuration, and {@link JsonUtil} rejects it with an
+ * {@link IllegalArgumentException}.</p>
+ *
+ * <p><b>Non-finite values become quoted strings.</b> JSON cannot represent {@code NaN} or {@code Infinity},
+ * so Jackson writes them as the strings {@code "NaN"}, {@code "Infinity"} and {@code "-Infinity"}. Reading
+ * back into a <i>typed</i> target ({@code double}/{@link Double} field) restores the original value exactly,
+ * and other parsers accept the document. Reading back into an <i>untyped</i> target leaves them as
+ * {@link String}: {@code fromJson(json, Map.class).get(k)} yields {@code "NaN"} the {@code String}, not a
+ * {@code Double}. Note also that a bare top-level {@code "Infinity"} written this way makes
+ * {@link FastJson#fromJson(String, Class)} raise an {@link ArrayIndexOutOfBoundsException} - see that
+ * class's parse-failure note. For comparison: {@code FastJson} writes non-finite values as {@code null} and
+ * loses them, and {@link JsonUtil} rejects them outright.</p>
+ *
+ * <p><b>Byte output escapes characters outside the BMP.</b> Jackson's UTF-8 generator writes a non-BMP
+ * character such as an emoji as a {@code &#92;uXXXX&#92;uXXXX} surrogate escape, while the {@code String}- and
+ * {@code Writer}-based paths emit it as raw UTF-8. So {@code toJson(obj)} and {@code toJson(obj, outputStream)}
+ * can produce <i>different bytes</i> for the same object. Both are valid JSON and both parse back to the same
+ * value, but do not compare, hash or sign the output of one path against the other. {@link FastJson} and
+ * {@link XmlMappers} emit raw UTF-8 on every path.</p>
+ *
+ * <p><b>A failed write does not leave the target file intact.</b> The {@code File} overloads open (and
+ * therefore truncate) the target before serialization runs, so if serialization throws part-way the file is
+ * left empty or holding a fragment and any previous content is gone. Serialize to a {@code String} or a
+ * {@code byte[]} first, or write to a temporary file and rename, when the destination must survive a failure.
+ * The same applies to a caller-supplied {@code OutputStream} or {@code Writer}, which may already have
+ * received a partial document when the exception is thrown.</p>
  *
  * <p><b>Security:</b> Default polymorphic typing is not enabled by this class. Enabling it in a caller-provided
  * {@link DeserializationConfig} can allow JSON input to select Java implementation types; use an appropriately
@@ -100,61 +172,27 @@ public final class JsonMappers {
     };
 
     private static final JsonMapper defaultJsonMapper = new JsonMapper();
-    private static final JsonMapper defaultJsonMapperForPretty;
-    private static final SerializationConfig defaultSerializationConfig = defaultJsonMapper.getSerializationConfig();
-    private static final DeserializationConfig defaultDeserializationConfig = defaultJsonMapper.getDeserializationConfig();
 
-    private static final SerializationConfig defaultSerializationConfigForCopy;
-    private static final SerializationFeature serializationFeatureNotEnabledByDefault;
-    private static final DeserializationConfig defaultDeserializationConfigForCopy;
-    private static final DeserializationFeature deserializationFeatureNotEnabledByDefault;
-
-    static {
-        // Initialize defaultJsonMapperForPretty properly
-        final JsonMapper temp = new JsonMapper();
-        temp.enable(SerializationFeature.INDENT_OUTPUT);
-        defaultJsonMapperForPretty = temp;
-
-        {
-            SerializationFeature tmp = null;
-            for (final SerializationFeature serializationFeature : SerializationFeature.values()) {
-                if (!defaultSerializationConfig.isEnabled(serializationFeature)) {
-                    tmp = serializationFeature;
-                    break;
-                }
-            }
-
-            serializationFeatureNotEnabledByDefault = tmp;
-            if (tmp != null) {
-                defaultSerializationConfigForCopy = defaultSerializationConfig.with(serializationFeatureNotEnabledByDefault);
-            } else {
-                defaultSerializationConfigForCopy = defaultSerializationConfig;
-            }
-        }
-
-        {
-            DeserializationFeature tmp = null;
-            for (final DeserializationFeature deserializationFeature : DeserializationFeature.values()) {
-                if (!defaultDeserializationConfig.isEnabled(deserializationFeature)) {
-                    tmp = deserializationFeature;
-                    break;
-                }
-            }
-
-            deserializationFeatureNotEnabledByDefault = tmp;
-            if (tmp != null) {
-                defaultDeserializationConfigForCopy = defaultDeserializationConfig.with(deserializationFeatureNotEnabledByDefault);
-            } else {
-                defaultDeserializationConfigForCopy = defaultDeserializationConfig;
-            }
-        }
-    }
+    /**
+     * Pretty-printing is done through an {@link ObjectWriter} derived from {@link #defaultJsonMapper} rather than
+     * through a second, separately configured mapper. An {@code ObjectWriter} is immutable and thread-safe, shares
+     * the mapper's serializer cache, and needs no {@code copy()} - which {@link ObjectMapper#copy()} refuses to
+     * perform for subclasses that do not override it. {@code writer(INDENT_OUTPUT)} is used rather than
+     * {@code writerWithDefaultPrettyPrinter()} so that the feature itself is enabled on the writer's config:
+     * a custom serializer that queries {@code SerializerProvider.isEnabled(INDENT_OUTPUT)} still sees {@code true},
+     * exactly as it did when this was a mapper with the feature enabled.
+     */
+    private static final ObjectWriter defaultJsonWriterForPretty = defaultJsonMapper.writer(SerializationFeature.INDENT_OUTPUT);
 
     private JsonMappers() {
         // Utility class - prevent instantiation
     }
 
-    private static void checkByteRange(final byte[] json, final int offset, final int len) {
+    /**
+     * @throws IllegalArgumentException if {@code json} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code offset} or {@code len} is negative, or the range exceeds {@code json.length}.
+     */
+    private static void checkByteRange(final byte[] json, final int offset, final int len) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(json, cs.json);
         N.checkFromIndexSize(offset, len, json.length);
     }
@@ -215,7 +253,7 @@ public final class JsonMappers {
     public static String toJson(final Object obj, final boolean prettyFormat) {
         try {
             if (prettyFormat) {
-                return defaultJsonMapperForPretty.writeValueAsString(obj);
+                return defaultJsonWriterForPretty.writeValueAsString(obj);
             } else {
                 return defaultJsonMapper.writeValueAsString(obj);
             }
@@ -263,11 +301,20 @@ public final class JsonMappers {
      * @see SerializationFeature
      * @see #toJson(Object, SerializationConfig)
      */
-    public static String toJson(final Object obj, final SerializationFeature first, final SerializationFeature... features) {
+    @SafeVarargs
+    public static String toJson(final Object obj, final SerializationFeature first, final SerializationFeature... features) throws IllegalArgumentException {
         N.checkArgNotNull(first, cs.first);
         N.checkArgNotNull(features, cs.features);
 
-        return toJson(obj, defaultSerializationConfig.with(first, features));
+        // Uses an ObjectWriter rather than a feature-derived SerializationConfig: SerializationConfig does not
+        // override equals/hashCode, so a config built here can never be found again in the mapper cache and every
+        // call would construct (and retain) a brand-new JsonMapper. ObjectWriter is immutable, thread-safe, cheap
+        // to derive, and shares the default mapper's serializer cache.
+        try {
+            return defaultJsonMapper.writer(first, features).writeValueAsString(obj);
+        } catch (final JsonProcessingException e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
+        }
     }
 
     /**
@@ -523,7 +570,7 @@ public final class JsonMappers {
      *     // Write some binary data
      *     dos.writeInt(42);
      *     // Write JSON data
-     *     JsonMappers.toJson(myObject, dos);
+     *     JsonMappers.toJson(myObject, (DataOutput) dos);
      * }
      * }</pre>
      *
@@ -639,7 +686,8 @@ public final class JsonMappers {
      * @throws RuntimeException if deserialization fails or the JSON is invalid
      * @see #fromJson(byte[], Class)
      */
-    public static <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkByteRange(json, offset, len);
 
         try {
@@ -724,17 +772,25 @@ public final class JsonMappers {
      * @param first the first deserialization feature to apply (required)
      * @param features additional deserialization features to apply; may be empty but not {@code null}
      * @return the deserialized object; {@code null} if JSON string is "null"
-     * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType}, {@code first} or the {@code features} array is {@code null}.
      * @throws RuntimeException if deserialization fails
      * @see DeserializationFeature
      * @see #fromJson(String, Class, DeserializationConfig)
      */
+    @SafeVarargs
     public static <T> T fromJson(final String json, final Class<? extends T> targetType, final DeserializationFeature first,
-            final DeserializationFeature... features) {
+            final DeserializationFeature... features) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
         N.checkArgNotNull(first, cs.first);
         N.checkArgNotNull(features, cs.features);
 
-        return fromJson(json, targetType, defaultDeserializationConfig.with(first, features));
+        // See toJson(Object, SerializationFeature, SerializationFeature...) for why this uses an ObjectReader
+        // instead of a feature-derived DeserializationConfig.
+        try {
+            return defaultJsonMapper.reader(first, features).forType(targetType).readValue(json);
+        } catch (final IOException e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
+        }
     }
 
     /**
@@ -1034,14 +1090,17 @@ public final class JsonMappers {
      * @param json the URL pointing to JSON content
      * @param targetType the class of the object to deserialize to
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws RuntimeException if network access fails or JSON is invalid
+     * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}.
+     * @throws RuntimeException if opening, reading, or closing the URL stream fails, or its JSON cannot be deserialized to {@code targetType}
      * @see #fromJson(URL, Class, DeserializationConfig)
      * @see #fromJson(URL, TypeReference)
      */
-    @SuppressWarnings("deprecation")
-    public static <T> T fromJson(final URL json, final Class<? extends T> targetType) {
-        try {
-            return defaultJsonMapper.readValue(json, targetType);
+    public static <T> T fromJson(final URL json, final Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(json, cs.json);
+        N.checkArgNotNull(targetType, cs.targetType);
+
+        try (InputStream is = json.openStream()) {
+            return defaultJsonMapper.readValue(is, targetType);
         } catch (final IOException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -1068,16 +1127,20 @@ public final class JsonMappers {
      * @param targetType the class of the object to deserialize to
      * @param config the custom deserialization configuration; if {@code null}, uses default
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws RuntimeException if network access fails or JSON is invalid
+     * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}.
+     * @throws RuntimeException if opening, reading, or closing the URL stream fails, or its JSON cannot be deserialized to {@code targetType}
      * @see #fromJson(URL, Class)
      * @see DeserializationConfig
      */
-    @SuppressWarnings("deprecation")
-    public static <T> T fromJson(final URL json, final Class<? extends T> targetType, final DeserializationConfig config) {
+    public static <T> T fromJson(final URL json, final Class<? extends T> targetType, final DeserializationConfig config)
+            throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(json, cs.json);
+        N.checkArgNotNull(targetType, cs.targetType);
+
         final JsonMapper jsonMapper = getJsonMapper(config);
 
-        try {
-            return jsonMapper.readValue(json, targetType);
+        try (InputStream is = json.openStream()) {
+            return jsonMapper.readValue(is, targetType);
         } catch (final IOException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
@@ -1099,7 +1162,7 @@ public final class JsonMappers {
      *     // Read some binary data
      *     int version = dis.readInt();
      *     // Read JSON data
-     *     Config config = JsonMappers.fromJson(dis, Config.class);
+     *     Config config = JsonMappers.fromJson((DataInput) dis, Config.class);
      * }
      * }</pre>
      *
@@ -1189,11 +1252,14 @@ public final class JsonMappers {
      * @param json the JSON content as a UTF-8 encoded byte array
      * @param targetType TypeReference capturing the generic type information
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws RuntimeException if deserialization fails or type doesn't match
      * @see TypeReference
      * @see #fromJson(byte[], Class)
      */
-    public static <T> T fromJson(final byte[] json, final TypeReference<? extends T> targetType) {
+    public static <T> T fromJson(final byte[] json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         try {
             return defaultJsonMapper.readValue(json, targetType);
         } catch (final IOException e) {
@@ -1225,14 +1291,18 @@ public final class JsonMappers {
      * @param len the number of bytes to read from the offset
      * @param targetType TypeReference capturing the generic type information
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative.
+     * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}, or {@code len} is
+     *         negative.
      * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
      * @throws RuntimeException if deserialization fails or the JSON is invalid
      * @see TypeReference
      * @see #fromJson(byte[], int, int, Class)
      */
-    public static <T> T fromJson(final byte[] json, final int offset, final int len, final TypeReference<? extends T> targetType) {
+    public static <T> T fromJson(final byte[] json, final int offset, final int len, final TypeReference<? extends T> targetType)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkByteRange(json, offset, len);
+
+        N.checkArgNotNull(targetType, cs.targetType);
 
         try {
             return defaultJsonMapper.readValue(json, offset, len, targetType);
@@ -1269,12 +1339,15 @@ public final class JsonMappers {
      * @param json the JSON content as a string
      * @param targetType TypeReference capturing the generic type information
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws RuntimeException if deserialization fails or JSON is invalid
      * @see TypeReference
      * @see #fromJson(String, Class)
      * @see #fromJson(String, TypeReference, DeserializationFeature, DeserializationFeature...)
      */
-    public static <T> T fromJson(final String json, final TypeReference<? extends T> targetType) {
+    public static <T> T fromJson(final String json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         try {
             return defaultJsonMapper.readValue(json, targetType);
         } catch (final IOException e) {
@@ -1312,18 +1385,26 @@ public final class JsonMappers {
      * @param first the first deserialization feature to apply (required)
      * @param features additional deserialization features to apply; may be empty but not {@code null}
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws IllegalArgumentException if {@code first} or the {@code features} array is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType}, {@code first} or the {@code features} array is {@code null}.
      * @throws RuntimeException if deserialization fails
      * @see TypeReference
      * @see DeserializationFeature
      * @see #fromJson(String, TypeReference, DeserializationConfig)
      */
+    @SafeVarargs
     public static <T> T fromJson(final String json, final TypeReference<? extends T> targetType, final DeserializationFeature first,
-            final DeserializationFeature... features) {
+            final DeserializationFeature... features) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
         N.checkArgNotNull(first, cs.first);
         N.checkArgNotNull(features, cs.features);
 
-        return fromJson(json, targetType, defaultDeserializationConfig.with(first, features));
+        // See toJson(Object, SerializationFeature, SerializationFeature...) for why this uses an ObjectReader
+        // instead of a feature-derived DeserializationConfig.
+        try {
+            return defaultJsonMapper.reader(first, features).forType(targetType).readValue(json);
+        } catch (final IOException e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
+        }
     }
 
     /**
@@ -1351,12 +1432,16 @@ public final class JsonMappers {
      * @param targetType TypeReference capturing the generic type information
      * @param config the custom deserialization configuration; if {@code null}, uses default
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws RuntimeException if deserialization fails
      * @see TypeReference
      * @see DeserializationConfig
      * @see #createDeserializationConfig()
      */
-    public static <T> T fromJson(final String json, final TypeReference<? extends T> targetType, final DeserializationConfig config) {
+    public static <T> T fromJson(final String json, final TypeReference<? extends T> targetType, final DeserializationConfig config)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -1393,12 +1478,15 @@ public final class JsonMappers {
      * @param json the file containing JSON content
      * @param targetType TypeReference capturing the generic type information
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws RuntimeException if file cannot be read or JSON is invalid
      * @see TypeReference
      * @see #fromJson(File, Class)
      * @see #fromJson(File, TypeReference, DeserializationConfig)
      */
-    public static <T> T fromJson(final File json, final TypeReference<? extends T> targetType) {
+    public static <T> T fromJson(final File json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         try {
             return defaultJsonMapper.readValue(json, targetType);
         } catch (final IOException e) {
@@ -1430,12 +1518,16 @@ public final class JsonMappers {
      * @param targetType TypeReference capturing the generic type information
      * @param config the custom deserialization configuration; if {@code null}, uses default
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws RuntimeException if file cannot be read or JSON is invalid
      * @see TypeReference
      * @see DeserializationConfig
      * @see #fromJson(File, TypeReference)
      */
-    public static <T> T fromJson(final File json, final TypeReference<? extends T> targetType, final DeserializationConfig config) {
+    public static <T> T fromJson(final File json, final TypeReference<? extends T> targetType, final DeserializationConfig config)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -1473,12 +1565,15 @@ public final class JsonMappers {
      * @param json the input stream containing JSON content
      * @param targetType TypeReference capturing the generic type information
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws RuntimeException if reading fails or JSON is invalid
      * @see TypeReference
      * @see #fromJson(InputStream, Class)
      * @see #fromJson(InputStream, TypeReference, DeserializationConfig)
      */
-    public static <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType) {
+    public static <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         try {
             return defaultJsonMapper.readValue(json, targetType);
         } catch (final IOException e) {
@@ -1507,12 +1602,16 @@ public final class JsonMappers {
      * @param targetType TypeReference capturing the generic type information
      * @param config the custom deserialization configuration; if {@code null}, uses default
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws RuntimeException if reading fails or the JSON is invalid
      * @see TypeReference
      * @see DeserializationConfig
      * @see #fromJson(InputStream, TypeReference)
      */
-    public static <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType, final DeserializationConfig config) {
+    public static <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType, final DeserializationConfig config)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -1541,12 +1640,15 @@ public final class JsonMappers {
      * @param json the reader containing JSON content; closed after reading by Jackson's default auto-close behavior
      * @param targetType TypeReference capturing the generic type information
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws RuntimeException if reading fails or the JSON is invalid
      * @see TypeReference
      * @see #fromJson(Reader, TypeReference, DeserializationConfig)
      * @see #fromJson(Reader, Class)
      */
-    public static <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType) {
+    public static <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         try {
             return defaultJsonMapper.readValue(json, targetType);
         } catch (final IOException e) {
@@ -1575,12 +1677,16 @@ public final class JsonMappers {
      * @param targetType TypeReference capturing the generic type information
      * @param config the custom deserialization configuration; if {@code null}, uses default
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws RuntimeException if reading fails or the JSON is invalid
      * @see TypeReference
      * @see DeserializationConfig
      * @see #fromJson(Reader, TypeReference)
      */
-    public static <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType, final DeserializationConfig config) {
+    public static <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType, final DeserializationConfig config)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -1611,15 +1717,18 @@ public final class JsonMappers {
      * @param json the URL pointing to JSON data to deserialize
      * @param targetType TypeReference capturing the generic type information
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws RuntimeException if network access fails or the JSON is invalid
+     * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}.
+     * @throws RuntimeException if opening, reading, or closing the URL stream fails, or its JSON cannot be deserialized to {@code targetType}
      * @see TypeReference
      * @see #fromJson(URL, TypeReference, DeserializationConfig)
      * @see #fromJson(URL, Class)
      */
-    @SuppressWarnings("deprecation")
-    public static <T> T fromJson(final URL json, final TypeReference<? extends T> targetType) {
-        try {
-            return defaultJsonMapper.readValue(json, targetType);
+    public static <T> T fromJson(final URL json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(json, cs.json);
+        N.checkArgNotNull(targetType, cs.targetType);
+
+        try (InputStream is = json.openStream()) {
+            return defaultJsonMapper.readValue(is, targetType);
         } catch (final IOException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -1644,17 +1753,21 @@ public final class JsonMappers {
      * @param targetType TypeReference capturing the generic type information
      * @param config the custom deserialization configuration; if {@code null}, uses default
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws RuntimeException if network access fails or the JSON is invalid
+     * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}.
+     * @throws RuntimeException if opening, reading, or closing the URL stream fails, or its JSON cannot be deserialized to {@code targetType}
      * @see TypeReference
      * @see DeserializationConfig
      * @see #fromJson(URL, TypeReference)
      */
-    @SuppressWarnings("deprecation")
-    public static <T> T fromJson(final URL json, final TypeReference<? extends T> targetType, final DeserializationConfig config) {
+    public static <T> T fromJson(final URL json, final TypeReference<? extends T> targetType, final DeserializationConfig config)
+            throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(json, cs.json);
+        N.checkArgNotNull(targetType, cs.targetType);
+
         final JsonMapper jsonMapper = getJsonMapper(config);
 
-        try {
-            return jsonMapper.readValue(json, targetType);
+        try (InputStream is = json.openStream()) {
+            return jsonMapper.readValue(is, targetType);
         } catch (final IOException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
@@ -1670,7 +1783,7 @@ public final class JsonMappers {
      * <pre>{@code
      * // Read JSON from a DataInputStream
      * DataInputStream dis = new DataInputStream(inputStream);
-     * List<Product> products = JsonMappers.fromJson(dis,
+     * List<Product> products = JsonMappers.fromJson((DataInput) dis,
      *     new TypeReference<List<Product>>() {});
      * }</pre>
      *
@@ -1678,13 +1791,16 @@ public final class JsonMappers {
      * @param json the DataInput containing JSON content
      * @param targetType TypeReference capturing the generic type information
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws RuntimeException if reading fails or the JSON is invalid
      * @see TypeReference
      * @see #fromJson(DataInput, TypeReference, DeserializationConfig)
      * @see #fromJson(DataInput, Class)
      * @see DataInput
      */
-    public static <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType) {
+    public static <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         try {
             return defaultJsonMapper.readValue(json, defaultJsonMapper.constructType(targetType));
         } catch (final IOException e) {
@@ -1703,7 +1819,7 @@ public final class JsonMappers {
      * DataInputStream dis = new DataInputStream(socket.getInputStream());
      * DeserializationConfig config = JsonMappers.createDeserializationConfig()
      *     .with(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
-     * List<Order> orders = JsonMappers.fromJson(dis,
+     * List<Order> orders = JsonMappers.fromJson((DataInput) dis,
      *     new TypeReference<List<Order>>() {}, config);
      * }</pre>
      *
@@ -1712,13 +1828,17 @@ public final class JsonMappers {
      * @param targetType TypeReference capturing the generic type information
      * @param config the custom deserialization configuration; if {@code null}, uses default
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws RuntimeException if reading fails or the JSON is invalid
      * @see TypeReference
      * @see DeserializationConfig
      * @see #fromJson(DataInput, TypeReference)
      * @see DataInput
      */
-    public static <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType, final DeserializationConfig config) {
+    public static <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType, final DeserializationConfig config)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -1734,6 +1854,15 @@ public final class JsonMappers {
      * Creates a new SerializationConfig instance with default settings.
      * This method provides a base configuration that can be customized for specific serialization needs.
      * The returned configuration is a copy and can be modified without affecting other operations.
+     * It carries its own {@code ConfigOverrides}, so {@code withPropertyInclusion(..)} - which writes through that
+     * object in place and returns the same config - changes only the instance it is invoked on. Jackson state
+     * reached <i>through</i> the configuration is <i>not</i> copied: {@code getDefaultPrettyPrinter()},
+     * {@code getDateFormat()} and {@code getAnnotationIntrospector()} hand back process-wide instances, so mutating
+     * one of those in place changes every mapper in the JVM, this class's own included.
+     *
+     * <p>Each call builds and discards a complete copy of the default mapper, which costs a few hundred nanoseconds
+     * and several kilobytes of garbage; create the configuration once and pass it repeatedly rather than calling
+     * this per operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1748,13 +1877,27 @@ public final class JsonMappers {
      * @see SerializationFeature
      */
     public static SerializationConfig createSerializationConfig() {
-        return defaultSerializationConfigForCopy.without(serializationFeatureNotEnabledByDefault);
+        // Derived from a throw-away copy of the default mapper rather than from the default mapper itself:
+        // with(..)/without(..) carry the mapper's ConfigOverrides by reference, and
+        // SerializationConfig.withPropertyInclusion(..) writes through that shared object in place and returns
+        // the same config, so a config derived directly from defaultJsonMapper would let one caller change
+        // toJson(..) for the whole process. ObjectMapper.copy() does ConfigOverrides.copy(), giving the returned
+        // config its own.
+        return defaultJsonMapper.copy().getSerializationConfig();
     }
 
     /**
      * Creates a new DeserializationConfig instance with default settings.
      * This method provides a base configuration that can be customized for specific deserialization needs.
      * The returned configuration is a copy and can be modified without affecting other operations.
+     * It carries its own {@code ConfigOverrides} rather than sharing this class's mappers'. Jackson state reached
+     * <i>through</i> the configuration is <i>not</i> copied: {@code getDateFormat()} and
+     * {@code getAnnotationIntrospector()} hand back process-wide instances, so mutating one of those in place
+     * changes every mapper in the JVM, this class's own included.
+     *
+     * <p>Each call builds and discards a complete copy of the default mapper, which costs a few hundred nanoseconds
+     * and several kilobytes of garbage; create the configuration once and pass it repeatedly rather than calling
+     * this per operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1769,7 +1912,9 @@ public final class JsonMappers {
      * @see DeserializationFeature
      */
     public static DeserializationConfig createDeserializationConfig() {
-        return defaultDeserializationConfigForCopy.without(deserializationFeatureNotEnabledByDefault);
+        // Same reason as createSerializationConfig(): copy() is what gives the returned config a ConfigOverrides
+        // of its own instead of defaultJsonMapper's.
+        return defaultJsonMapper.copy().getDeserializationConfig();
     }
 
     private static JsonMapper getJsonMapper(final SerializationConfig config) {
@@ -1817,8 +1962,13 @@ public final class JsonMappers {
      * the simplified API provided by the {@link One} wrapper.
      *
      * <p>The supplied mapper remains caller-owned and is used directly for compact output and all reads; this
-     * class neither resets nor closes it. A copied snapshot with pretty printing enabled is created for formatted
-     * output. Configure the mapper completely before wrapping and do not mutate it while the wrapper is in use.</p>
+     * class neither resets nor closes it. Pretty-printed output goes through an {@link ObjectWriter} derived from
+     * the mapper when the wrapper is created. Configure the mapper completely before wrapping it: if it is mutated
+     * afterwards, which of those changes the pretty-printing path picks up is unspecified.</p>
+     *
+     * <p><b>The output format follows the supplied mapper, not this class's name.</b> Wrapping an
+     * {@code XmlMapper} (or any other {@link ObjectMapper} subclass bound to a non-JSON format) makes
+     * {@code toJson} emit that format instead of JSON. Pass a JSON-capable mapper unless that is intended.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1832,14 +1982,15 @@ public final class JsonMappers {
      * MyObject obj = jsonOps.fromJson(json, MyObject.class);
      * }</pre>
      *
-     * @param jsonMapper the ObjectMapper instance to wrap; must not be {@code null}
+     * @param jsonMapper the ObjectMapper instance to wrap; must not be {@code null}. Subclasses are supported:
+     *        no {@link ObjectMapper#copy()} is performed, so mappers that do not override {@code copy()} are accepted.
      * @return a {@link One} instance wrapping the provided ObjectMapper
-     * @throws NullPointerException if {@code jsonMapper} is {@code null}
+     * @throws IllegalArgumentException if {@code jsonMapper} is {@code null}
      * @see One
      * @see ObjectMapper
      */
-    public static One wrap(final ObjectMapper jsonMapper) {
-        return new One(N.requireNonNull(jsonMapper, "jsonMapper"));
+    public static One wrap(final ObjectMapper jsonMapper) throws IllegalArgumentException {
+        return new One(N.checkArgNotNull(jsonMapper, cs.jsonMapper));
     }
 
     /**
@@ -1850,37 +2001,41 @@ public final class JsonMappers {
      * <p>Key features:</p>
      * <ul>
      *   <li>Encapsulates a specific ObjectMapper configuration</li>
-     *   <li>Automatic pretty printing support with a separate mapper instance</li>
+     *   <li>Automatic pretty printing support with a derived ObjectWriter</li>
      *   <li>Consistent exception handling (wraps checked exceptions as RuntimeException)</li>
      *   <li>Support for multiple input/output formats</li>
      * </ul>
      *
      * <p>This class is typically obtained through {@link JsonMappers#wrap(ObjectMapper)} rather than
      * instantiated directly. Configure the supplied mapper before wrapping it and do not mutate it while this
-     * wrapper is in use. The pretty-printing mapper is a snapshot made when the wrapper is constructed.</p>
+     * wrapper is in use: compact output and every read go straight to the wrapped mapper, while pretty-printed
+     * output goes through an {@link ObjectWriter} derived from it at construction time, so mutating the mapper
+     * afterwards can make the two paths disagree.</p>
      *
      * @see JsonMappers#wrap(ObjectMapper)
      */
     public static final class One {
 
         private final ObjectMapper jsonMapper;
-        private final ObjectMapper jsonMapperForPretty;
+        private final ObjectWriter jsonWriterForPretty;
 
         /**
-         * Creates a wrapper around the specified mapper. The mapper is used as-is for compact output
-         * and for every read; a {@linkplain ObjectMapper#copy() copy} with
-         * {@link SerializationFeature#INDENT_OUTPUT} enabled is taken at construction time and used
-         * whenever pretty formatting is requested. Later changes to {@code jsonMapper} are therefore
-         * not reflected in the pretty-printing snapshot.
+         * Creates a wrapper around the specified mapper. The mapper is used as-is for compact output and for
+         * every read; an {@link ObjectWriter} with {@link SerializationFeature#INDENT_OUTPUT} enabled is derived
+         * from it at construction time and used whenever pretty formatting is requested. The mapper is neither
+         * copied nor modified, so subclasses that do not override {@link ObjectMapper#copy()} are supported.
          *
          * @param jsonMapper the mapper to wrap; must not be {@code null}
          * @see JsonMappers#wrap(ObjectMapper)
          */
         One(final ObjectMapper jsonMapper) {
             this.jsonMapper = jsonMapper;
-            jsonMapperForPretty = jsonMapper.copy();
-
-            jsonMapperForPretty.enable(SerializationFeature.INDENT_OUTPUT);
+            // Deriving an ObjectWriter instead of copy()-ing the mapper: ObjectMapper.copy() throws
+            // IllegalStateException for any subclass that does not override it, which made wrap() reject
+            // perfectly usable custom mappers. writer(INDENT_OUTPUT) - rather than
+            // writerWithDefaultPrettyPrinter() - keeps the feature enabled on the writer's config, so a
+            // custom serializer querying isEnabled(INDENT_OUTPUT) still sees true.
+            jsonWriterForPretty = jsonMapper.writer(SerializationFeature.INDENT_OUTPUT);
         }
 
         /**
@@ -1925,15 +2080,18 @@ public final class JsonMappers {
          * }</pre>
          *
          * @param obj the object to serialize; can be {@code null} (produces {@code "null"})
-         * @param prettyFormat if {@code true}, formats the JSON with indentation and line breaks;
-         *                     if {@code false}, output is compact (single line)
+         * @param prettyFormat if {@code true}, formats the JSON with indentation and line breaks; if {@code false},
+         *                     serializes with the wrapped mapper exactly as configured. Note that {@code false} does
+         *                     not force compact output: a wrapped mapper that already enables
+         *                     {@link SerializationFeature#INDENT_OUTPUT} still produces indented JSON. This flag can
+         *                     only add pretty printing, never remove it.
          * @return a JSON string representation of the object
          * @throws RuntimeException if serialization fails
          */
         public String toJson(final Object obj, final boolean prettyFormat) {
             try {
                 if (prettyFormat) {
-                    return jsonMapperForPretty.writeValueAsString(obj);
+                    return jsonWriterForPretty.writeValueAsString(obj);
                 } else {
                     return jsonMapper.writeValueAsString(obj);
                 }
@@ -2029,7 +2187,7 @@ public final class JsonMappers {
          * <pre>{@code
          * Message message = new Message("Hello", System.currentTimeMillis());
          * DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-         * jsonOps.toJson(message, dos);
+         * jsonOps.toJson(message, (DataOutput) dos);
          * }</pre>
          *
          * @param obj the object to serialize; can be {@code null} (produces {@code "null"})
@@ -2090,7 +2248,8 @@ public final class JsonMappers {
          * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
-        public <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType) {
+        public <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType)
+                throws IllegalArgumentException, IndexOutOfBoundsException {
             checkByteRange(json, offset, len);
 
             try {
@@ -2215,12 +2374,15 @@ public final class JsonMappers {
          * @param json the URL pointing to JSON data
          * @param targetType the class of the target object
          * @return the deserialized object; {@code null} if JSON contains "null"
-         * @throws RuntimeException wrapping any IOException that occurs during network access or deserialization
+         * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}.
+         * @throws RuntimeException if opening, reading, or closing the URL stream fails, or its JSON cannot be deserialized to {@code targetType}
          */
-        @SuppressWarnings("deprecation")
-        public <T> T fromJson(final URL json, final Class<? extends T> targetType) {
-            try {
-                return jsonMapper.readValue(json, targetType);
+        public <T> T fromJson(final URL json, final Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
+            N.checkArgNotNull(json, cs.json);
+            N.checkArgNotNull(targetType, cs.targetType);
+
+            try (InputStream is = json.openStream()) {
+                return jsonMapper.readValue(is, targetType);
             } catch (final IOException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
@@ -2233,7 +2395,7 @@ public final class JsonMappers {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DataInputStream dis = new DataInputStream(socket.getInputStream());
-         * Command command = jsonOps.fromJson(dis, Command.class);
+         * Command command = jsonOps.fromJson((DataInput) dis, Command.class);
          * }</pre>
          *
          * @param <T> the type of the object to deserialize to
@@ -2266,10 +2428,13 @@ public final class JsonMappers {
          * @param json byte array containing JSON data
          * @param targetType TypeReference describing the target type
          * @return the deserialized object; {@code null} if JSON contains "null"
+         * @throws IllegalArgumentException if {@code targetType} is {@code null}.
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
-        public <T> T fromJson(final byte[] json, final TypeReference<? extends T> targetType) {
+        public <T> T fromJson(final byte[] json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+            N.checkArgNotNull(targetType, cs.targetType);
+
             try {
                 return jsonMapper.readValue(json, targetType);
             } catch (final IOException e) {
@@ -2295,13 +2460,17 @@ public final class JsonMappers {
          * @param len the number of bytes to read
          * @param targetType TypeReference describing the target type
          * @return the deserialized object; {@code null} if JSON contains "null"
-         * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative.
+         * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}, or {@code len}
+         *         is negative.
          * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
-        public <T> T fromJson(final byte[] json, final int offset, final int len, final TypeReference<? extends T> targetType) {
+        public <T> T fromJson(final byte[] json, final int offset, final int len, final TypeReference<? extends T> targetType)
+                throws IllegalArgumentException, IndexOutOfBoundsException {
             checkByteRange(json, offset, len);
+
+            N.checkArgNotNull(targetType, cs.targetType);
 
             try {
                 return jsonMapper.readValue(json, offset, len, targetType);
@@ -2329,10 +2498,13 @@ public final class JsonMappers {
          * @param json JSON string to deserialize
          * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map
          * @return the deserialized object; {@code null} if JSON contains "null"
+         * @throws IllegalArgumentException if {@code targetType} is {@code null}.
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
-        public <T> T fromJson(final String json, final TypeReference<? extends T> targetType) {
+        public <T> T fromJson(final String json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+            N.checkArgNotNull(targetType, cs.targetType);
+
             try {
                 return jsonMapper.readValue(json, targetType);
             } catch (final IOException e) {
@@ -2355,10 +2527,13 @@ public final class JsonMappers {
          * @param json the file containing JSON data
          * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map
          * @return the deserialized object; {@code null} if JSON contains "null"
+         * @throws IllegalArgumentException if {@code targetType} is {@code null}.
          * @throws RuntimeException wrapping any IOException that occurs during file reading or deserialization
          * @see TypeReference
          */
-        public <T> T fromJson(final File json, final TypeReference<? extends T> targetType) {
+        public <T> T fromJson(final File json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+            N.checkArgNotNull(targetType, cs.targetType);
+
             try {
                 return jsonMapper.readValue(json, targetType);
             } catch (final IOException e) {
@@ -2384,10 +2559,13 @@ public final class JsonMappers {
          * @param json the InputStream containing JSON data; closed after reading by Jackson's default auto-close behavior
          * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map
          * @return the deserialized object; {@code null} if JSON contains "null"
+         * @throws IllegalArgumentException if {@code targetType} is {@code null}.
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
-        public <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType) {
+        public <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+            N.checkArgNotNull(targetType, cs.targetType);
+
             try {
                 return jsonMapper.readValue(json, targetType);
             } catch (final IOException e) {
@@ -2412,10 +2590,13 @@ public final class JsonMappers {
          * @param json the Reader containing JSON data; closed after reading by Jackson's default auto-close behavior
          * @param targetType TypeReference describing the target type, can be Bean/Array/Collection/Map
          * @return the deserialized object; {@code null} if JSON contains "null"
+         * @throws IllegalArgumentException if {@code targetType} is {@code null}.
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
-        public <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType) {
+        public <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+            N.checkArgNotNull(targetType, cs.targetType);
+
             try {
                 return jsonMapper.readValue(json, targetType);
             } catch (final IOException e) {
@@ -2438,13 +2619,16 @@ public final class JsonMappers {
          * @param json the URL pointing to JSON data
          * @param targetType TypeReference describing the target type
          * @return the deserialized object; {@code null} if JSON contains "null"
-         * @throws RuntimeException wrapping any IOException that occurs during network access or deserialization
+         * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}.
+         * @throws RuntimeException if opening, reading, or closing the URL stream fails, or its JSON cannot be deserialized to {@code targetType}
          * @see TypeReference
          */
-        @SuppressWarnings("deprecation")
-        public <T> T fromJson(final URL json, final TypeReference<? extends T> targetType) {
-            try {
-                return jsonMapper.readValue(json, targetType);
+        public <T> T fromJson(final URL json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
+            N.checkArgNotNull(json, cs.json);
+            N.checkArgNotNull(targetType, cs.targetType);
+
+            try (InputStream is = json.openStream()) {
+                return jsonMapper.readValue(is, targetType);
             } catch (final IOException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
@@ -2457,7 +2641,7 @@ public final class JsonMappers {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * DataInputStream dis = new DataInputStream(binaryStream);
-         * Map<Long, UserProfile> profiles = jsonOps.fromJson(dis,
+         * Map<Long, UserProfile> profiles = jsonOps.fromJson((DataInput) dis,
          *     new TypeReference<Map<Long, UserProfile>>() {});
          * }</pre>
          *
@@ -2465,11 +2649,14 @@ public final class JsonMappers {
          * @param json the DataInput containing JSON data
          * @param targetType TypeReference describing the target type
          * @return the deserialized object; {@code null} if JSON contains "null"
+         * @throws IllegalArgumentException if {@code targetType} is {@code null}.
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          * @see DataInput
          */
-        public <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType) {
+        public <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+            N.checkArgNotNull(targetType, cs.targetType);
+
             try {
                 return jsonMapper.readValue(json, jsonMapper.constructType(targetType));
             } catch (final IOException e) {

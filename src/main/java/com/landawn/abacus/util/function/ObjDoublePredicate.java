@@ -31,7 +31,7 @@ import com.landawn.abacus.util.cs;
  * @see java.util.function.Predicate
  */
 @FunctionalInterface
-public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, RuntimeException> { // NOSONAR
+public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, RuntimeException> { // NOSONAR //NOSONAR
     /**
      * Evaluates this predicate on the given arguments.
      *
@@ -57,7 +57,7 @@ public interface ObjDoublePredicate<T> extends Throwables.ObjDoublePredicate<T, 
      * ObjDoublePredicate<Product> isPriceAbove = (product, threshold) ->
      *     product.getPrice() > threshold;
      * ObjDoublePredicate<Product> isPriceNotAbove = isPriceAbove.negate();
-     * // isPriceNotAbove tests if price <= threshold
+     * // isPriceNotAbove tests !(price > threshold), which is also true if either value is NaN.
      * }</pre>
      *
      * @return a predicate that represents the logical negation of this predicate

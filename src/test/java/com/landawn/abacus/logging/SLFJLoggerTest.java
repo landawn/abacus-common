@@ -186,21 +186,21 @@ public class SLFJLoggerTest extends TestBase {
         final SLF4JLogger logger = new SLF4JLogger("test.location.aware", handler.proxy());
 
         logger.trace("Trace message");
-        assertRecordedLog(handler, TRACE_INT, "Trace message", null);
+        assertRecordedLog(handler, TRACE_INT, "Trace message", null, SLF4JLogger.class.getName());
 
         logger.debug("Debug message");
-        assertRecordedLog(handler, DEBUG_INT, "Debug message", null);
+        assertRecordedLog(handler, DEBUG_INT, "Debug message", null, SLF4JLogger.class.getName());
 
         logger.info("Info {}", 123);
-        assertRecordedLog(handler, INFO_INT, "Info 123", null);
+        assertRecordedLog(handler, INFO_INT, "Info 123", null, AbstractLogger.class.getName());
 
         final Exception warnException = new Exception("warn");
         logger.warn("Warn message", warnException);
-        assertRecordedLog(handler, WARN_INT, "Warn message", warnException);
+        assertRecordedLog(handler, WARN_INT, "Warn message", warnException, SLF4JLogger.class.getName());
 
         final Exception errorException = new Exception("error");
         logger.error(errorException, "Error {}", 456);
-        assertRecordedLog(handler, ERROR_INT, "Error 456", errorException);
+        assertRecordedLog(handler, ERROR_INT, "Error 456", errorException, AbstractLogger.class.getName());
     }
 
     @DisplayName("Test special logger names")
@@ -238,8 +238,9 @@ public class SLFJLoggerTest extends TestBase {
         }
     }
 
-    private static void assertRecordedLog(final RecordingLocationAwareLogger handler, final int level, final String message, final Throwable throwable) {
-        assertEquals(SLF4JLogger.class.getName(), handler.lastFqcn);
+    private static void assertRecordedLog(final RecordingLocationAwareLogger handler, final int level, final String message, final Throwable throwable,
+            final String callerBoundary) {
+        assertEquals(callerBoundary, handler.lastFqcn);
         assertEquals(level, handler.lastLevel);
         assertEquals(message, handler.lastMessage);
         assertEquals(throwable, handler.lastThrowable);

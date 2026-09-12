@@ -4,60 +4,68 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.HttpResponseException;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.N;
 
 import okhttp3.CacheControl;
-import okhttp3.ConnectionPool;
 import okhttp3.Dispatcher;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
-import okhttp3.Protocol;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
-import okio.BufferedSource;
-import okio.ForwardingSource;
-import okio.Okio;
 
 public class OkHttpRequestTest extends TestBase {
+
+    @Test
+    public void testHeadersPropagatesNameAndValueValidation() {
+        final Map<String, Object> nullName = new HashMap<>();
+        nullName.put(null, "value");
+
+        // Bulk headers must preserve the same validation as the single-header overload.
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).headers(nullName));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).headers(Map.of("", "value")));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).headers(Map.of("bad\nname", "value")));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).headers(Map.of("X-Test", "bad\nvalue")));
+        final OkHttpRequest request = OkHttpRequest.url(baseUrl);
+        assertSame(request, request.headers((Map<String, ?>) null));
+        assertSame(request, request.headers(Map.of()));
+        assertSame(request, request.headers(Map.of("X-Test", "value")));
+    }
 
     private MockWebServer server;
     private String baseUrl;
@@ -155,27 +163,6 @@ public class OkHttpRequestTest extends TestBase {
     public void testUrlWithStringAndTimeouts() {
         OkHttpRequest request = OkHttpRequest.url("https://api.example.com", 5000L, 10000L);
         assertNotNull(request);
-    }
-
-    @Test
-    public void testAsyncMethodsReturnTypes() throws Exception {
-        enqueueResponses(4);
-        OkHttpRequest request = OkHttpRequest.url(baseUrl);
-
-        ContinuableFuture<Response> future1 = request.asyncGet();
-        assertNotNull(future1);
-
-        ContinuableFuture<Response> future2 = request.asyncGet(executor);
-        assertNotNull(future2);
-
-        ContinuableFuture<String> future3 = request.asyncGet(String.class);
-        assertNotNull(future3);
-
-        ContinuableFuture<String> future4 = request.asyncGet(String.class, executor);
-        assertNotNull(future4);
-
-        awaitAndClose(future1, future2);
-        await(future3, future4);
     }
 
     @Test
@@ -286,14 +273,6 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testHeadersWithOkHttpHeaders() {
-        okhttp3.Headers headers = new okhttp3.Headers.Builder().add("Accept", "application/json").add("Content-Type", "application/json").build();
-
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").setHeaders(headers);
-        assertNotNull(request);
-    }
-
-    @Test
     public void testHeadersWithHttpHeaders() {
         HttpHeaders headers = HttpHeaders.create();
         headers.set("Accept", "application/json");
@@ -319,8 +298,43 @@ public class OkHttpRequestTest extends TestBase {
         OkHttpRequest.url(baseUrl).setHeaders(headers).execute(HttpMethod.GET).close();
 
         RecordedRequest recordedRequest = server.takeRequest();
-        // RFC 7230 §3.2.2 — multi-value headers are comma-separated, not semicolon-separated.
-        assertEquals("application/json, text/plain", recordedRequest.getHeader("Accept"));
+        // A collection value is emitted as repeated header lines, which preserves the individual
+        // values and their order; collapsing them into one comma-joined value is lossy for headers
+        // such as Cookie and was additionally reordered by the HashMap the bridge used to go through.
+        assertEquals(Arrays.asList("application/json", "text/plain"), recordedRequest.getHeaders().values("Accept"));
+    }
+
+    @Test
+    public void testCookieCollectionIsSentAsOneSemicolonJoinedLine() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse().setResponseCode(200));
+
+        final HttpHeaders headers = HttpHeaders.create();
+        headers.set("Cookie", Arrays.asList("a=1", "b=2"));
+
+        OkHttpRequest.url(baseUrl).setHeaders(headers).execute(HttpMethod.GET).close();
+
+        // RFC 6265 5.4: a request carries exactly one Cookie field line, its cookie-pairs separated by "; ".
+        // Neither a comma join nor repeated lines is conformant here.
+        assertEquals(List.of("a=1; b=2"), server.takeRequest().getHeaders().values("Cookie"));
+
+        server.enqueue(new MockResponse().setResponseCode(200));
+        OkHttpRequest.url(baseUrl).header("cookie", Arrays.asList("a=1", "b=2")).execute(HttpMethod.GET).close();
+        assertEquals(List.of("a=1; b=2"), server.takeRequest().getHeaders().values("cookie"));
+
+        server.enqueue(new MockResponse().setResponseCode(200));
+        OkHttpRequest.url(baseUrl).addHeader("COOKIE", Arrays.asList("a=1", "b=2")).execute(HttpMethod.GET).close();
+        assertEquals(List.of("a=1; b=2"), server.takeRequest().getHeaders().values("COOKIE"));
+    }
+
+    @Test
+    public void testFormBodyMapNullKeyMessageNamesTheArgument() {
+        final Map<Object, Object> formData = new HashMap<>();
+        formData.put(null, "value");
+
+        // "form field name" would have been passed through verbatim as the whole message by
+        // N.checkArgNotNull(..): longer than 9 characters and containing a space.
+        assertEquals("'formFieldName' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).formBody(formData)).getMessage());
     }
 
     @Test
@@ -363,16 +377,6 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testQueryWithMap() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("param1", "value1");
-        params.put("param2", 123);
-
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").query(params);
-        assertNotNull(request);
-    }
-
-    @Test
     public void testQueryString() {
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         OkHttpRequest result = request.query("param1=value1&param2=value2");
@@ -387,15 +391,6 @@ public class OkHttpRequestTest extends TestBase {
         params.put("param2", 123);
         OkHttpRequest result = request.query(params);
         assertSame(request, result);
-    }
-
-    @Test
-    public void testJsonBodyWithObject() {
-        Map<String, String> obj = new HashMap<>();
-        obj.put("key", "value");
-
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").jsonBody(obj);
-        assertNotNull(request);
     }
 
     @Test
@@ -431,47 +426,13 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testFormBodyWithMap() {
-        Map<String, String> formData = new HashMap<>();
-        formData.put("username", "john");
-        formData.put("password", "secret");
-
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").formBody(formData);
-        assertNotNull(request);
-
-        OkHttpRequest requestWithEmpty = OkHttpRequest.url("https://api.example.com").formBody(new HashMap<>());
-        assertNotNull(requestWithEmpty);
-    }
-
-    @Test
-    public void testFormBodyWithBean() {
-        TestBean bean = new TestBean();
-        bean.setName("test");
-        bean.setValue("value");
-
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").formBody(bean);
-        assertNotNull(request);
-
-        OkHttpRequest requestWithNull = OkHttpRequest.url("https://api.example.com").formBody((Object) null);
-        assertNotNull(requestWithNull);
-    }
-
-    @Test
     public void testFormBodyMap() {
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         Map<String, String> formData = new HashMap<>();
         formData.put("field1", "value1");
         formData.put("field2", "value2");
-        OkHttpRequest result = request.formBody(formData);
-        assertSame(request, result);
-    }
-
-    @Test
-    public void testFormBodyEmptyMap() {
-        OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        Map<String, String> formData = new HashMap<>();
-        OkHttpRequest result = request.formBody(formData);
-        assertSame(request, result);
+        assertSame(request, request.formBody(formData));
+        assertSame(request, request.formBody(new HashMap<>()));
     }
 
     @Test
@@ -480,8 +441,8 @@ public class OkHttpRequestTest extends TestBase {
         TestBean bean = new TestBean();
         bean.field1 = "value1";
         bean.field2 = "value2";
-        OkHttpRequest result = request.formBody(bean);
-        assertSame(request, result);
+        assertSame(request, request.formBody(bean));
+        assertSame(request, request.formBody((Object) null));
     }
 
     @Test
@@ -507,28 +468,9 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testFormBodyNull() {
-        OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        OkHttpRequest result = request.formBody((Object) null);
-        assertSame(request, result);
-    }
-
-    @Test
-    public void testFormBodyWithNonBean() {
-        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url("https://api.example.com").formBody("not a bean"));
-    }
-
-    @Test
     public void testFormBodyInvalidObject() {
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
         assertThrows(IllegalArgumentException.class, () -> request.formBody("not a bean"));
-    }
-
-    @Test
-    public void testBodyWithRequestBody() {
-        RequestBody body = RequestBody.create("test", MediaType.get("text/plain"));
-        OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body(body);
-        assertNotNull(request);
     }
 
     @Test
@@ -542,24 +484,6 @@ public class OkHttpRequestTest extends TestBase {
         byte[] data = "test data".getBytes();
         OkHttpRequest request = OkHttpRequest.url("https://api.example.com").body(data, 0, 4, MediaType.get("text/plain"));
         assertNotNull(request);
-    }
-
-    @Test
-    public void testBodyMap() {
-        OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        Map<String, String> formData = new HashMap<>();
-        formData.put("field1", "value1");
-        OkHttpRequest result = request.body(formData);
-        assertSame(request, result);
-    }
-
-    @Test
-    public void testBodyObject() {
-        OkHttpRequest request = OkHttpRequest.url(baseUrl);
-        TestBean bean = new TestBean();
-        bean.field1 = "value1";
-        OkHttpRequest result = request.body(bean);
-        assertSame(request, result);
     }
 
     @Test
@@ -959,27 +883,6 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testAsyncPostMethods() throws Exception {
-        enqueueResponses(4);
-        OkHttpRequest request = OkHttpRequest.url(baseUrl).jsonBody("{}");
-
-        ContinuableFuture<Response> future1 = request.asyncPost();
-        assertNotNull(future1);
-
-        ContinuableFuture<Response> future2 = request.asyncPost(executor);
-        assertNotNull(future2);
-
-        ContinuableFuture<String> future3 = request.asyncPost(String.class);
-        assertNotNull(future3);
-
-        ContinuableFuture<String> future4 = request.asyncPost(String.class, executor);
-        assertNotNull(future4);
-
-        awaitAndClose(future1, future2);
-        await(future3, future4);
-    }
-
-    @Test
     public void testAsyncPost() throws Exception {
         server.enqueue(new MockResponse().setBody("Async POST response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
@@ -1027,27 +930,6 @@ public class OkHttpRequestTest extends TestBase {
         ContinuableFuture<String> future = request.asyncPost(String.class, executor);
         String result = future.get();
         assertEquals("Async POST response", result);
-    }
-
-    @Test
-    public void testAsyncPutMethods() throws Exception {
-        enqueueResponses(4);
-        OkHttpRequest request = OkHttpRequest.url(baseUrl).jsonBody("{}");
-
-        ContinuableFuture<Response> future1 = request.asyncPut();
-        assertNotNull(future1);
-
-        ContinuableFuture<Response> future2 = request.asyncPut(executor);
-        assertNotNull(future2);
-
-        ContinuableFuture<String> future3 = request.asyncPut(String.class);
-        assertNotNull(future3);
-
-        ContinuableFuture<String> future4 = request.asyncPut(String.class, executor);
-        assertNotNull(future4);
-
-        awaitAndClose(future1, future2);
-        await(future3, future4);
     }
 
     @Test
@@ -1101,27 +983,6 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testAsyncPatchMethods() throws Exception {
-        enqueueResponses(4);
-        OkHttpRequest request = OkHttpRequest.url(baseUrl).jsonBody("{}");
-
-        ContinuableFuture<Response> future1 = request.asyncPatch();
-        assertNotNull(future1);
-
-        ContinuableFuture<Response> future2 = request.asyncPatch(executor);
-        assertNotNull(future2);
-
-        ContinuableFuture<String> future3 = request.asyncPatch(String.class);
-        assertNotNull(future3);
-
-        ContinuableFuture<String> future4 = request.asyncPatch(String.class, executor);
-        assertNotNull(future4);
-
-        awaitAndClose(future1, future2);
-        await(future3, future4);
-    }
-
-    @Test
     public void testAsyncPatch() throws Exception {
         server.enqueue(new MockResponse().setBody("Async PATCH response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
@@ -1172,27 +1033,6 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testAsyncDeleteMethods() throws Exception {
-        enqueueResponses(4);
-        OkHttpRequest request = OkHttpRequest.url(baseUrl);
-
-        ContinuableFuture<Response> future1 = request.asyncDelete();
-        assertNotNull(future1);
-
-        ContinuableFuture<Response> future2 = request.asyncDelete(executor);
-        assertNotNull(future2);
-
-        ContinuableFuture<String> future3 = request.asyncDelete(String.class);
-        assertNotNull(future3);
-
-        ContinuableFuture<String> future4 = request.asyncDelete(String.class, executor);
-        assertNotNull(future4);
-
-        awaitAndClose(future1, future2);
-        await(future3, future4);
-    }
-
-    @Test
     public void testAsyncDelete() throws Exception {
         server.enqueue(new MockResponse().setBody("Async DELETE response"));
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
@@ -1239,20 +1079,6 @@ public class OkHttpRequestTest extends TestBase {
     }
 
     @Test
-    public void testAsyncHeadMethods() throws Exception {
-        enqueueResponses(2);
-        OkHttpRequest request = OkHttpRequest.url(baseUrl);
-
-        ContinuableFuture<Response> future1 = request.asyncHead();
-        assertNotNull(future1);
-
-        ContinuableFuture<Response> future2 = request.asyncHead(executor);
-        assertNotNull(future2);
-
-        awaitAndClose(future1, future2);
-    }
-
-    @Test
     public void testAsyncHead() throws Exception {
         server.enqueue(new MockResponse());
         OkHttpRequest request = OkHttpRequest.url(baseUrl);
@@ -1274,27 +1100,6 @@ public class OkHttpRequestTest extends TestBase {
         assertNotNull(response);
 
         IOUtil.close(response);
-    }
-
-    @Test
-    public void testAsyncExecuteMethods() throws Exception {
-        enqueueResponses(4);
-        OkHttpRequest request = OkHttpRequest.url(baseUrl);
-
-        ContinuableFuture<Response> future1 = request.asyncExecute(HttpMethod.GET);
-        assertNotNull(future1);
-
-        ContinuableFuture<Response> future2 = request.asyncExecute(HttpMethod.GET, executor);
-        assertNotNull(future2);
-
-        ContinuableFuture<String> future3 = request.asyncExecute(HttpMethod.GET, String.class);
-        assertNotNull(future3);
-
-        ContinuableFuture<String> future4 = request.asyncExecute(HttpMethod.GET, String.class, executor);
-        assertNotNull(future4);
-
-        awaitAndClose(future1, future2);
-        await(future3, future4);
     }
 
     @Test
@@ -1406,450 +1211,171 @@ public class OkHttpRequestTest extends TestBase {
         IOUtil.close(resp);
     }
 
-    // --- Bug fix: per-request OkHttpClient (built from httpClientBuilder) must be shut down ---
+    // --- B4: per-request options must not destroy connection reuse ---
+    //
+    // clientBuilder() used to install a private Dispatcher and ConnectionPool on every derived
+    // client, and execute(Request) replaced them again and evicted the pool afterwards, so every
+    // request with a timeout opened a brand-new TCP connection. A derived client now shares its
+    // parent's dispatcher and pool, which is what OkHttpClient.newBuilder() does by default.
 
     @Test
     public void testExecuteWithCustomTimeout_completesSuccessfully() throws Exception {
-        // When connectTimeout/readTimeout are set, an internal httpClientBuilder is used.
-        // Verify the request still executes successfully (regression test).
         server.enqueue(new MockResponse().setBody("timeout-client body").setResponseCode(200));
         final String result = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L).get(String.class);
         assertEquals("timeout-client body", result);
     }
 
     @Test
-    public void testExecuteResponseClassClosesTimeoutClientWhenResponseCloses() throws Exception {
-        server.enqueue(new MockResponse().setBody("raw body").setResponseCode(200));
+    public void testPerRequestTimeoutSharesDispatcherAndConnectionPool() throws Exception {
+        final OkHttpClient base = new OkHttpClient();
+        final OkHttpRequest request = OkHttpRequest.create(baseUrl, base).readTimeout(5_000L);
+        final OkHttpClient.Builder builder = (OkHttpClient.Builder) getField(request, "httpClientBuilder");
+        final OkHttpClient derived = builder.build();
 
+        assertSame(base.dispatcher(), derived.dispatcher(), "a derived client must share the dispatcher");
+        assertSame(base.connectionPool(), derived.connectionPool(), "a derived client must share the connection pool");
+        assertEquals(5_000, derived.readTimeoutMillis());
+    }
+
+    @Test
+    public void testTimeoutFactoryClientSharesDefaultClientPool() throws Exception {
         final OkHttpRequest request = OkHttpRequest.url(baseUrl, 5_000L, 10_000L);
         final OkHttpClient client = (OkHttpClient) getField(request, "httpClient");
-        final Response response = request.execute(HttpMethod.GET, Response.class);
+        final OkHttpClient defaultClient = (OkHttpClient) getStaticField("DEFAULT_CLIENT");
 
-        assertFalse(client.dispatcher().executorService().isShutdown());
-
-        IOUtil.close(response);
-
-        assertTrue(client.dispatcher().executorService().isShutdown());
+        assertSame(defaultClient.dispatcher(), client.dispatcher());
+        assertSame(defaultClient.connectionPool(), client.connectionPool());
+        assertEquals(5_000, client.connectTimeoutMillis());
+        assertEquals(10_000, client.readTimeoutMillis());
     }
 
     @Test
-    public void testExecuteResponseClassClosesBuilderClientWhenResponseCloses() throws Exception {
-        server.enqueue(new MockResponse().setBody("raw body").setResponseCode(200));
+    public void testSequentialTimeoutRequestsReuseOneConnection() throws Exception {
+        final OkHttpClient base = new OkHttpClient();
+        enqueueResponses(4);
 
-        final OkHttpRequest request = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L);
-        final Response response = request.execute(HttpMethod.GET, Response.class);
-        final OkHttpClient client = (OkHttpClient) getField(request, "pendingPerRequestClient");
+        for (int i = 0; i < 4; i++) {
+            assertEquals("OK", OkHttpRequest.create(baseUrl, base).readTimeout(5_000L).get(String.class));
+        }
 
-        assertNotNull(client);
-
-        IOUtil.close(response);
-
-        assertTrue(client.dispatcher().executorService().isShutdown());
-        assertNull(getField(request, "pendingPerRequestClient"));
+        // RecordedRequest.getSequenceNumber() is the request's index on the connection that carried
+        // it. Reuse gives 0,1,2,3; a fresh connection per request would give 0,0,0,0.
+        for (int i = 0; i < 4; i++) {
+            assertEquals(i, server.takeRequest().getSequenceNumber(), "request " + i + " must reuse the first connection");
+        }
     }
 
     @Test
-    public void testExecuteResponseClassClosesBuilderClientWhenBodyStringIsConsumed() throws Exception {
+    public void testTimeoutRequestDoesNotShutDownTheSharedClient() throws Exception {
         server.enqueue(new MockResponse().setBody("raw body").setResponseCode(200));
 
-        final OkHttpRequest request = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L);
-        final Response response = request.execute(HttpMethod.GET, Response.class);
-        final OkHttpClient client = (OkHttpClient) getField(request, "pendingPerRequestClient");
+        final OkHttpClient base = new OkHttpClient();
+        final Response response = OkHttpRequest.create(baseUrl, base).readTimeout(5_000L).execute(HttpMethod.GET, Response.class);
 
         try {
             assertEquals("raw body", response.body().string());
-            assertTrue(client.dispatcher().executorService().isShutdown());
-            assertNull(getField(request, "pendingPerRequestClient"));
+        } finally {
+            IOUtil.close(response);
+        }
+
+        assertFalse(base.dispatcher().executorService().isShutdown(), "the caller's client must never be shut down");
+
+        server.enqueue(new MockResponse().setBody("second").setResponseCode(200));
+        assertEquals("second", OkHttpRequest.create(baseUrl, base).readTimeout(5_000L).get(String.class));
+    }
+
+    @Test
+    public void testTimeoutFactoryClientStaysUsableAfterExecution() throws Exception {
+        server.enqueue(new MockResponse().setBody("first").setResponseCode(200));
+
+        final OkHttpRequest request = OkHttpRequest.url(baseUrl, 5_000L, 10_000L);
+        assertEquals("first", request.get(String.class));
+
+        final OkHttpClient client = (OkHttpClient) getField(request, "httpClient");
+        assertFalse(client.dispatcher().executorService().isShutdown());
+        assertFalse(((OkHttpClient) getStaticField("DEFAULT_CLIENT")).dispatcher().executorService().isShutdown());
+    }
+
+    @Test
+    public void testRawResponseIsStillReadableAfterExecutionReturns() throws Exception {
+        server.enqueue(new MockResponse().setBody("raw body").setResponseCode(200));
+
+        final Response response = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L).execute(HttpMethod.GET, Response.class);
+
+        try {
+            assertEquals("raw body", response.body().string());
         } finally {
             IOUtil.close(response);
         }
     }
 
     @Test
-    public void testExecuteResponseClassClosesBuilderClientWhenBodyBytesAreConsumed() throws Exception {
+    public void testRawResponseBodyIsReadableAsBytes() throws Exception {
         server.enqueue(new MockResponse().setBody("raw body").setResponseCode(200));
 
-        final OkHttpRequest request = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L);
-        final Response response = request.execute(HttpMethod.GET, Response.class);
-        final OkHttpClient client = (OkHttpClient) getField(request, "pendingPerRequestClient");
+        final Response response = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L).execute(HttpMethod.GET, Response.class);
 
         try {
             assertArrayEquals("raw body".getBytes(), response.body().bytes());
-            assertTrue(client.dispatcher().executorService().isShutdown());
-            assertNull(getField(request, "pendingPerRequestClient"));
         } finally {
             IOUtil.close(response);
         }
     }
 
     @Test
-    public void testExecuteResponseClassClosesBuilderClientWhenBodySourceIsClosed() throws Exception {
+    public void testRawResponseBodyIsReadableThroughItsSource() throws Exception {
         server.enqueue(new MockResponse().setBody("raw body").setResponseCode(200));
 
-        final OkHttpRequest request = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L);
-        final Response response = request.execute(HttpMethod.GET, Response.class);
-        final OkHttpClient client = (OkHttpClient) getField(request, "pendingPerRequestClient");
+        final Response response = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L).execute(HttpMethod.GET, Response.class);
 
-        try {
-            final BufferedSource source = response.body().source();
+        try (okio.BufferedSource source = response.body().source()) {
             assertEquals("raw body", source.readUtf8());
-            source.close();
-
-            assertTrue(client.dispatcher().executorService().isShutdown());
-            assertNull(getField(request, "pendingPerRequestClient"));
         } finally {
             IOUtil.close(response);
         }
     }
 
     @Test
-    public void testExecuteResponseClassCleansUpWhenAttachingBodySourceFails() throws Exception {
-        final IllegalStateException sourceFailure = new IllegalStateException("source failure");
-        final IllegalStateException closeFailure = new IllegalStateException("close failure");
-        final AtomicInteger closeCount = new AtomicInteger();
-        final ResponseBody failingBody = new ResponseBody() {
-            @Override
-            public MediaType contentType() {
-                return null;
-            }
+    public void testTypedResponseClosesTheResponse() throws Exception {
+        server.enqueue(new MockResponse().setBody("body").setResponseCode(200));
 
-            @Override
-            public long contentLength() {
-                return 0;
-            }
+        assertEquals("body", OkHttpRequest.url(baseUrl).get(String.class));
 
-            @Override
-            public BufferedSource source() {
-                throw sourceFailure;
-            }
+        // A second request proves the socket from the first was released back to the pool.
+        server.enqueue(new MockResponse().setBody("body2").setResponseCode(200));
+        assertEquals("body2", OkHttpRequest.url(baseUrl).get(String.class));
+    }
 
-            @Override
-            public void close() {
-                closeCount.incrementAndGet();
-                throw closeFailure;
-            }
-        };
-        final OkHttpClient baseClient = new OkHttpClient.Builder()
-                .addInterceptor(
-                        chain -> new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200).message("OK").body(failingBody).build())
-                .build();
-        final OkHttpRequest request = OkHttpRequest.create(baseUrl, baseClient).connectTimeout(5_000L);
+    // --- B6: error bodies are captured as structured, bounded data ---
 
-        try {
-            final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.execute(HttpMethod.GET, Response.class));
-            final OkHttpClient.Builder perRequestBuilder = (OkHttpClient.Builder) getField(request, "httpClientBuilder");
-            final OkHttpClient lifecycleProbe = perRequestBuilder.build();
+    @Test
+    public void testHttpErrorRaisesHttpResponseExceptionWithStructuredData() {
+        server.enqueue(new MockResponse().setBody("boom").setResponseCode(503).setHeader("X-Trace", "abc"));
 
-            try {
-                assertSame(sourceFailure, thrown);
-                assertEquals(1, closeCount.get());
-                assertEquals(1, thrown.getSuppressed().length);
-                assertSame(closeFailure, thrown.getSuppressed()[0]);
-                assertTrue(lifecycleProbe.dispatcher().executorService().isShutdown());
-                assertNull(getField(request, "pendingPerRequestClient"));
-            } finally {
-                lifecycleProbe.dispatcher().executorService().shutdown();
-                lifecycleProbe.connectionPool().evictAll();
-            }
-        } finally {
-            request.doAfterExecution();
+        final HttpResponseException e = assertThrows(HttpResponseException.class, () -> OkHttpRequest.url(baseUrl).get(String.class));
 
-            if (closeCount.get() == 0) {
-                try {
-                    failingBody.close();
-                } catch (final RuntimeException e) {
-                    // expected test-body failure
-                }
-            }
-        }
+        assertEquals(503, e.statusCode());
+        assertEquals("boom", e.responseBody());
+        assertEquals("abc", e.header("x-trace"));
+        assertTrue(e.getMessage().contains("503"));
     }
 
     @Test
-    public void testPerRequestClientIsClosedWhenInterceptorThrowsError() throws Exception {
-        final AssertionError failure = new AssertionError("interceptor failure");
-        final OkHttpClient baseClient = new OkHttpClient.Builder().addInterceptor(chain -> {
-            throw failure;
-        }).build();
-        final OkHttpRequest request = OkHttpRequest.create(baseUrl, baseClient).connectTimeout(5_000L);
+    public void testLargeErrorBodyIsTruncatedInMessageAndCapture() {
+        final String huge = "E".repeat(200_000);
+        server.enqueue(new MockResponse().setBody(huge).setResponseCode(500));
 
-        assertSame(failure, assertThrows(AssertionError.class, () -> request.execute(HttpMethod.GET, String.class)));
+        final HttpResponseException e = assertThrows(HttpResponseException.class, () -> OkHttpRequest.url(baseUrl).get(String.class));
 
-        final OkHttpClient.Builder perRequestBuilder = (OkHttpClient.Builder) getField(request, "httpClientBuilder");
-        final OkHttpClient lifecycleProbe = perRequestBuilder.build();
-
-        try {
-            assertTrue(lifecycleProbe.dispatcher().executorService().isShutdown());
-        } finally {
-            lifecycleProbe.dispatcher().executorService().shutdown();
-            lifecycleProbe.connectionPool().evictAll();
-        }
+        assertTrue(e.responseBody().length() <= HttpUtil.MAX_ERROR_BODY_SIZE, "captured body must be bounded: " + e.responseBody().length());
+        assertTrue(e.getMessage().length() < 2_000, "message must be bounded: " + e.getMessage().length());
+        assertTrue(e.getMessage().endsWith("... (truncated)"));
     }
 
-    @Test
-    public void testOverlappingRawResponsesCloseTheirOwnPerRequestClients() throws Exception {
-        server.enqueue(new MockResponse().setBody("first").setResponseCode(200));
-        server.enqueue(new MockResponse().setBody("second").setResponseCode(200));
-
-        final OkHttpRequest request = OkHttpRequest.url(baseUrl).connectTimeout(5_000L).readTimeout(10_000L);
-        final Response firstResponse = request.execute(HttpMethod.GET, Response.class);
-        final OkHttpClient firstClient = (OkHttpClient) getField(request, "pendingPerRequestClient");
-        final Response secondResponse = request.execute(HttpMethod.GET, Response.class);
-        final OkHttpClient secondClient = (OkHttpClient) getField(request, "pendingPerRequestClient");
-
-        try {
-            assertNotSame(firstClient, secondClient);
-            assertFalse(firstClient.dispatcher().executorService().isShutdown());
-            assertFalse(secondClient.dispatcher().executorService().isShutdown());
-
-            IOUtil.close(firstResponse);
-
-            assertTrue(firstClient.dispatcher().executorService().isShutdown());
-            assertFalse(secondClient.dispatcher().executorService().isShutdown());
-            assertSame(secondClient, getField(request, "pendingPerRequestClient"));
-        } finally {
-            IOUtil.close(firstResponse);
-            IOUtil.close(secondResponse);
-        }
-
-        assertTrue(secondClient.dispatcher().executorService().isShutdown());
-        assertNull(getField(request, "pendingPerRequestClient"));
-    }
-
-    @Test
-    public void testAttachedResponseRunsClientCleanupOnceWhenClosedConcurrently() throws Exception {
-        final int threadCount = 16;
-        final CountDownLatch allClosing = new CountDownLatch(threadCount);
-        final CountDownLatch releaseClose = new CountDownLatch(1);
-        final ExecutorService clientExecutor = mock(ExecutorService.class);
-        final OkHttpClient client = new OkHttpClient.Builder().dispatcher(new okhttp3.Dispatcher(clientExecutor)).build();
-        final OkHttpRequest request = OkHttpRequest.create(baseUrl, client).closeHttpClientAfterExecution(true);
-        final ResponseBody body = new ResponseBody() {
-            private final BufferedSource source = new Buffer();
-
-            @Override
-            public MediaType contentType() {
-                return null;
-            }
-
-            @Override
-            public long contentLength() {
-                return 0;
-            }
-
-            @Override
-            public BufferedSource source() {
-                return source;
-            }
-
-            @Override
-            public void close() {
-                allClosing.countDown();
-
-                try {
-                    releaseClose.await();
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new AssertionError(e);
-                }
-            }
-        };
-        final Response rawResponse = new Response.Builder().request(new okhttp3.Request.Builder().url(baseUrl).build())
-                .protocol(Protocol.HTTP_1_1)
-                .code(200)
-                .message("OK")
-                .body(body)
-                .build();
-        final Method attachCleanup = OkHttpRequest.class.getDeclaredMethod("attachCleanup", Response.class, OkHttpClient.class);
-        attachCleanup.setAccessible(true);
-        final Response response = (Response) attachCleanup.invoke(request, rawResponse, null);
-        final ExecutorService closerExecutor = Executors.newFixedThreadPool(threadCount);
-
-        try {
-            final Future<?>[] closes = new Future<?>[threadCount];
-
-            for (int i = 0; i < threadCount; i++) {
-                closes[i] = closerExecutor.submit(response::close);
-            }
-
-            assertTrue(allClosing.await(5, TimeUnit.SECONDS), "all close calls should reach the delegate body");
-            releaseClose.countDown();
-
-            for (final Future<?> close : closes) {
-                close.get(5, TimeUnit.SECONDS);
-            }
-
-            verify(clientExecutor, times(1)).shutdown();
-        } finally {
-            releaseClose.countDown();
-            closerExecutor.shutdownNow();
-        }
-    }
-
-    @Test
-    public void testAttachedResponsePreservesBodyCloseFailureWhenClientCleanupFails() throws Exception {
-        final IOException bodyFailure = new IOException("body close failure");
-        final IllegalStateException cleanupFailure = new IllegalStateException("client cleanup failure");
-        final AtomicInteger bodyCloseCount = new AtomicInteger();
-        final ExecutorService clientExecutor = mock(ExecutorService.class);
-        org.mockito.Mockito.doThrow(cleanupFailure).when(clientExecutor).shutdown();
-        final OkHttpClient client = new OkHttpClient.Builder().dispatcher(new Dispatcher(clientExecutor)).build();
-        final OkHttpRequest request = OkHttpRequest.create(baseUrl, client);
-        final ResponseBody body = new ResponseBody() {
-            private final BufferedSource source = new Buffer();
-
-            @Override
-            public MediaType contentType() {
-                return null;
-            }
-
-            @Override
-            public long contentLength() {
-                return 0;
-            }
-
-            @Override
-            public BufferedSource source() {
-                return source;
-            }
-
-            @Override
-            public void close() {
-                bodyCloseCount.incrementAndGet();
-                throw new com.landawn.abacus.exception.UncheckedIOException(bodyFailure);
-            }
-        };
-        final Response response = attachCleanup(request, body, client);
-
-        final com.landawn.abacus.exception.UncheckedIOException thrown = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, response::close);
-
-        assertSame(bodyFailure, thrown.getCause());
-        assertEquals(1, bodyCloseCount.get());
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        verify(clientExecutor, times(1)).shutdown();
-    }
-
-    @Test
-    public void testAttachedResponsePreservesSourceCloseFailureWhenClientCleanupFails() throws Exception {
-        final IOException sourceFailure = new IOException("source close failure");
-        final IllegalStateException cleanupFailure = new IllegalStateException("client cleanup failure");
-        final AtomicInteger sourceCloseCount = new AtomicInteger();
-        final ExecutorService clientExecutor = mock(ExecutorService.class);
-        org.mockito.Mockito.doThrow(cleanupFailure).when(clientExecutor).shutdown();
-        final OkHttpClient client = new OkHttpClient.Builder().dispatcher(new Dispatcher(clientExecutor)).build();
-        final OkHttpRequest request = OkHttpRequest.create(baseUrl, client);
-        final BufferedSource failingSource = Okio.buffer(new ForwardingSource(new Buffer()) {
-            @Override
-            public void close() throws IOException {
-                sourceCloseCount.incrementAndGet();
-                throw sourceFailure;
-            }
-        });
-        final ResponseBody body = new ResponseBody() {
-            @Override
-            public MediaType contentType() {
-                return null;
-            }
-
-            @Override
-            public long contentLength() {
-                return 0;
-            }
-
-            @Override
-            public BufferedSource source() {
-                return failingSource;
-            }
-
-            @Override
-            public void close() {
-                // The test exercises the source handoff directly.
-            }
-        };
-        final Response response = attachCleanup(request, body, client);
-
-        final IOException thrown = assertThrows(IOException.class, () -> response.body().source().close());
-
-        assertSame(sourceFailure, thrown);
-        assertEquals(1, sourceCloseCount.get());
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        verify(clientExecutor, times(1)).shutdown();
-    }
-
-    @Test
-    public void testShutdownClientPreservesDispatcherFailureWhenPoolEvictionFails() throws Exception {
-        final IllegalStateException shutdownFailure = new IllegalStateException("dispatcher shutdown failure");
-        final AssertionError evictionFailure = new AssertionError("pool eviction failure");
-        final ExecutorService clientExecutor = mock(ExecutorService.class);
-        final ConnectionPool connectionPool = mock(ConnectionPool.class);
-        org.mockito.Mockito.doThrow(shutdownFailure).when(clientExecutor).shutdown();
-        org.mockito.Mockito.doThrow(evictionFailure).when(connectionPool).evictAll();
-        final OkHttpClient client = new OkHttpClient.Builder().dispatcher(new Dispatcher(clientExecutor)).connectionPool(connectionPool).build();
-        final Method shutdownClient = OkHttpRequest.class.getDeclaredMethod("shutdownClient", OkHttpClient.class);
-        shutdownClient.setAccessible(true);
-
-        final java.lang.reflect.InvocationTargetException invocationFailure = assertThrows(java.lang.reflect.InvocationTargetException.class,
-                () -> shutdownClient.invoke(null, client));
-        final Throwable thrown = invocationFailure.getCause();
-
-        assertSame(shutdownFailure, thrown);
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(evictionFailure, thrown.getSuppressed()[0]);
-        verify(clientExecutor, times(1)).shutdown();
-        verify(connectionPool, times(1)).evictAll();
-    }
-
-    @Test
-    public void testExecutePreservesBodyReadFailureWhenClientCleanupFails() {
-        final IllegalStateException bodyReadFailure = new IllegalStateException("body read failure");
-        final AssertionError cleanupFailure = new AssertionError("client cleanup failure");
-        final ExecutorService clientExecutor = mock(ExecutorService.class);
-        org.mockito.Mockito.doThrow(cleanupFailure).when(clientExecutor).shutdown();
-        final ResponseBody body = new ResponseBody() {
-            @Override
-            public MediaType contentType() {
-                return null;
-            }
-
-            @Override
-            public long contentLength() {
-                return 0;
-            }
-
-            @Override
-            public BufferedSource source() {
-                throw bodyReadFailure;
-            }
-
-            @Override
-            public void close() {
-                // Keep response cleanup successful so this test isolates client-cleanup suppression.
-            }
-        };
-        final OkHttpClient client = new OkHttpClient.Builder().dispatcher(new Dispatcher(clientExecutor))
-                .addInterceptor(chain -> new Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200).message("OK").body(body).build())
-                .build();
-        final OkHttpRequest request = OkHttpRequest.create(baseUrl, client).closeHttpClientAfterExecution(true);
-
-        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.execute(HttpMethod.GET, String.class));
-
-        assertSame(bodyReadFailure, thrown);
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        verify(clientExecutor, times(1)).shutdown();
-    }
-
-    private Response attachCleanup(final OkHttpRequest request, final ResponseBody body, final OkHttpClient perRequestClient) throws Exception {
-        final Response rawResponse = new Response.Builder().request(new okhttp3.Request.Builder().url(baseUrl).build())
-                .protocol(Protocol.HTTP_1_1)
-                .code(200)
-                .message("OK")
-                .body(body)
-                .build();
-        final Method attachCleanup = OkHttpRequest.class.getDeclaredMethod("attachCleanup", Response.class, OkHttpClient.class);
-        attachCleanup.setAccessible(true);
-        return (Response) attachCleanup.invoke(request, rawResponse, perRequestClient);
+    private static Object getStaticField(final String name) throws Exception {
+        final Field field = OkHttpRequest.class.getDeclaredField(name);
+        field.setAccessible(true);
+        return field.get(null);
     }
 
     private void enqueueResponses(final int count) {
@@ -1876,6 +1402,196 @@ public class OkHttpRequestTest extends TestBase {
         final Field field = target.getClass().getDeclaredField(name);
         field.setAccessible(true);
         return field.get(target);
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // a05 F-1: the request-derived format/charset fallback must see the body's media type, because
+    // OkHttp never materialises Content-Type on the built Request (only in BridgeInterceptor).
+    // ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void testXmlBodyDrivesFallbackFormatForContentTypeLessResponse() throws Exception {
+        final TestBean bean = new TestBean();
+        bean.setName("café");
+        bean.setValue("v");
+        final String xml = N.toXml(bean);
+        server.enqueue(new MockResponse().setBody(xml)); // deliberately no Content-Type header
+
+        final TestBean result = OkHttpRequest.url(baseUrl).xmlBody(bean).post(TestBean.class);
+
+        assertNotNull(result);
+        assertEquals("café", result.getName());
+        assertEquals("v", result.getValue());
+
+        final RecordedRequest recorded = server.takeRequest();
+        assertTrue(String.valueOf(recorded.getHeader("Content-Type")).startsWith("application/xml"), recorded.getHeader("Content-Type"));
+        assertEquals(xml, recorded.getBody().readUtf8());
+    }
+
+    @Test
+    public void testJsonBodyStillDeserializesContentTypeLessJsonResponse() throws Exception {
+        server.enqueue(new MockResponse().setBody("{\"name\":\"n\",\"value\":\"v\"}"));
+
+        final TestBean result = OkHttpRequest.url(baseUrl).jsonBody(Map.of("q", 1)).post(TestBean.class);
+
+        assertEquals("n", result.getName());
+        assertEquals("v", result.getValue());
+    }
+
+    @Test
+    public void testBodyMediaTypeCharsetDrivesFallbackDecodingOfContentTypeLessResponse() throws Exception {
+        server.enqueue(new MockResponse().setBody(new Buffer().write("café".getBytes(StandardCharsets.ISO_8859_1))));
+
+        final String result = OkHttpRequest.url(baseUrl).body("x", MediaType.get("text/plain; charset=ISO-8859-1")).post(String.class);
+
+        assertEquals("café", result, "Latin-1 bytes must be decoded with the request body's charset, not UTF-8");
+    }
+
+    @Test
+    public void testFormBodyDrivesFallbackFormatForContentTypeLessResponse() throws Exception {
+        server.enqueue(new MockResponse().setBody("a=1&b=2"));
+
+        final Map<String, Object> result = OkHttpRequest.url(baseUrl).formBody(Map.of("k", "v")).post(Map.class);
+
+        assertEquals("1", result.get("a"));
+        assertEquals("2", result.get("b"));
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testExplicitContentTypeHeaderWinsOverBodyMediaType() throws Exception {
+        server.enqueue(new MockResponse().setBody("{\"name\":\"n\"}"));
+
+        final TestBean result = OkHttpRequest.url(baseUrl)
+                .header("Content-Type", "application/json")
+                .body("<x/>", MediaType.get("application/xml"))
+                .post(TestBean.class);
+
+        // The explicitly set header drives the request-side fallback (the JSON body above was parsed as JSON,
+        // not handed to the XML parser). On the wire, however, OkHttp's BridgeInterceptor overwrites
+        // Content-Type from the body's media type whenever the body carries one - pinned here so the
+        // two contracts are not confused.
+        assertEquals("n", result.getName());
+        assertEquals("application/xml; charset=utf-8", server.takeRequest().getHeader("Content-Type"));
+    }
+
+    @Test
+    public void testResponseContentTypeWinsOverRequestBodyMediaType() throws Exception {
+        server.enqueue(new MockResponse().setHeader("Content-Type", "application/json").setBody("{\"name\":\"n\"}"));
+
+        final TestBean result = OkHttpRequest.url(baseUrl).xmlBody(new TestBean()).post(TestBean.class);
+
+        assertEquals("n", result.getName());
+    }
+
+    @Test
+    public void testGetWithoutBodyIsUnaffectedByBodyDerivedContentType() throws Exception {
+        server.enqueue(new MockResponse().setBody("plain"));
+
+        assertEquals("plain", OkHttpRequest.url(baseUrl).get(String.class));
+        assertNull(server.takeRequest().getHeader("Content-Type"));
+
+        // A POST without a configured body sends the synthetic empty body, whose media type is null.
+        server.enqueue(new MockResponse().setBody("{\"name\":\"p\"}"));
+        assertEquals("p", OkHttpRequest.url(baseUrl).post(TestBean.class).getName());
+        assertNull(server.takeRequest().getHeader("Content-Type"));
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // a05 F-2 / F-3: timeout validation surfaces the documented IllegalArgumentException.
+    // ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void testSubMillisecondDurationTimeoutsAreRejected() {
+        for (final Duration tooSmall : List.of(Duration.ofNanos(1), Duration.ofNanos(999_999))) {
+            final IllegalArgumentException connect = assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).connectTimeout(tooSmall));
+            assertTrue(connect.getMessage().contains("at least 1 ms"), connect.getMessage());
+
+            final IllegalArgumentException read = assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).readTimeout(tooSmall));
+            assertTrue(read.getMessage().contains("at least 1 ms"), read.getMessage());
+        }
+    }
+
+    @Test
+    public void testOneMillisecondAndZeroDurationTimeoutsAreAccepted() throws Exception {
+        OkHttpRequest request = OkHttpRequest.url(baseUrl).connectTimeout(Duration.ofMillis(1)).readTimeout(Duration.ofMillis(1));
+        OkHttpClient client = ((OkHttpClient.Builder) getField(request, "httpClientBuilder")).build();
+        assertEquals(1, client.connectTimeoutMillis());
+        assertEquals(1, client.readTimeoutMillis());
+
+        request = OkHttpRequest.url(baseUrl).connectTimeout(Duration.ZERO).readTimeout(Duration.ZERO);
+        client = ((OkHttpClient.Builder) getField(request, "httpClientBuilder")).build();
+        assertEquals(0, client.connectTimeoutMillis(), "ZERO disables the timeout");
+        assertEquals(0, client.readTimeoutMillis(), "ZERO disables the timeout");
+
+        request = OkHttpRequest.url(baseUrl).connectTimeout(Duration.ofSeconds(5)).readTimeout(Duration.ofMillis(1_500));
+        client = ((OkHttpClient.Builder) getField(request, "httpClientBuilder")).build();
+        assertEquals(5_000, client.connectTimeoutMillis());
+        assertEquals(1_500, client.readTimeoutMillis());
+    }
+
+    private static void assertConventionalIllegalArgument(final Executable executable) {
+        final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, executable);
+        assertFalse(String.valueOf(ex.getMessage()).contains("okhttp3"), "must not leak OkHttp's internals: " + ex.getMessage());
+    }
+
+    @Test
+    public void testNegativeTimeoutsThrowIllegalArgumentExceptionNotOkHttpIllegalState() throws Exception {
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(baseUrl).connectTimeout(-1L));
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(baseUrl).readTimeout(-1L));
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(baseUrl).connectTimeout(Long.MIN_VALUE));
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(baseUrl).readTimeout(Long.MIN_VALUE));
+
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(baseUrl).connectTimeout(Duration.ofMillis(-1)));
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(baseUrl).readTimeout(Duration.ofMillis(-1)));
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(baseUrl).connectTimeout(Duration.ofNanos(-1)));
+
+        // Duration.toMillis() overflow must not escape as ArithmeticException.
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(baseUrl).connectTimeout(Duration.ofSeconds(Long.MAX_VALUE)));
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(baseUrl).readTimeout(Duration.ofSeconds(Long.MAX_VALUE)));
+
+        // Factories validate before OkHttp sees the value.
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(baseUrl, -1L, 1_000L));
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(baseUrl, 1_000L, -1L));
+        final URL url = new URL(baseUrl);
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(url, -1L, 1_000L));
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(url, 1_000L, Long.MIN_VALUE));
+        final HttpUrl httpUrl = HttpUrl.get(baseUrl);
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(httpUrl, Long.MIN_VALUE, 1_000L));
+        assertConventionalIllegalArgument(() -> OkHttpRequest.url(httpUrl, 1_000L, -1L));
+
+        // Too large for an int stays an IllegalArgumentException (locked).
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).connectTimeout(Integer.MAX_VALUE + 1L));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).readTimeout(Duration.ofMillis(Integer.MAX_VALUE + 1L)));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl, Integer.MAX_VALUE + 1L, 1_000L));
+
+        // Zero and valid values are still accepted by the factories.
+        assertNotNull(OkHttpRequest.url(baseUrl, 0L, 0L));
+        assertNotNull(OkHttpRequest.url(url, 3_000L, 10_000L));
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // a05 F-6: a configured body is rejected on GET/HEAD by OkHttp (documented); DELETE accepts it.
+    // ------------------------------------------------------------------------------------------------
+
+    @Test
+    public void testConfiguredBodyIsRejectedOnGetAndHeadButAcceptedOnDelete() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).jsonBody("{}").get());
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).jsonBody("{}").get(String.class));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).formBody(new HashMap<>()).get());
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).jsonBody("{}").head());
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(baseUrl).jsonBody("{}").execute(HttpMethod.GET));
+
+        // Through the async variants the same failure surfaces as the future's failure.
+        final ContinuableFuture<Response> future = OkHttpRequest.url(baseUrl).jsonBody("{}").asyncGet();
+        final ExecutionException ee = assertThrows(ExecutionException.class, () -> future.get(5, TimeUnit.SECONDS));
+        assertTrue(ee.getCause() instanceof IllegalArgumentException, String.valueOf(ee.getCause()));
+
+        server.enqueue(new MockResponse().setBody("deleted"));
+        assertEquals("deleted", OkHttpRequest.url(baseUrl).jsonBody("{}").delete(String.class));
+        final RecordedRequest recorded = server.takeRequest();
+        assertEquals("DELETE", recorded.getMethod());
+        assertEquals("{}", recorded.getBody().readUtf8());
     }
 
 }

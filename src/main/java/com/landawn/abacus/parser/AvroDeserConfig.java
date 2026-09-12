@@ -24,10 +24,12 @@ import com.landawn.abacus.util.N;
  * This class extends {@link DeserializationConfig} and adds the Avro {@link Schema} required for
  * deserializing types that are not {@code SpecificRecord} instances.
  *
- * <p><b>Settings applied by {@link AvroParser}:</b> {@link #getSchema()}/{@link #setSchema(Schema)}
- * and the inherited element type ({@link #setElementType(Class)} and overloads) used when deserializing
- * collections. Other inherited deserialization options (for example ignore-unmatched-property and map
- * key/value types) are not consulted by the current Avro implementation.</p>
+ * <p><b>Settings applied by {@link AvroParser}:</b> {@link #getSchema()}/{@link #setSchema(Schema)},
+ * the inherited element type ({@link #setElementType(Class)} and overloads) used when deserializing
+ * collections, and {@link #setIgnoreUnmatchedProperty(boolean)}: while it is enabled (the default) a schema
+ * field without a matching bean property is skipped, otherwise it is rejected with a
+ * {@link com.landawn.abacus.exception.ParsingException}. Other inherited deserialization options (for
+ * example map key/value types) are not consulted by the current Avro implementation.</p>
  *
  * <p><b>Design note:</b> The {@link #getSchema()}/{@link #setSchema(Schema)} pair is intentionally
  * duplicated between this class and {@link AvroSerConfig}. A shared {@code AvroConfig} base is not
@@ -106,29 +108,21 @@ public class AvroDeserConfig extends DeserializationConfig<AvroDeserConfig> {
     /**
      * Computes a hash code for this configuration based on its settings.
      *
-     * <p>The hash code includes the schema setting in addition to settings
+     * <p>The hash code combines the schema setting with the hash code of the settings
      * inherited from the parent class.</p>
      *
      * @return a hash code value for this configuration
      */
     @Override
     public int hashCode() {
-        int h = 17;
-        h = 31 * h + N.hashCode(getIgnoredPropNames());
-        h = 31 * h + N.hashCode(isIgnoreUnmatchedProperty());
-        h = 31 * h + N.hashCode(elementType);
-        h = 31 * h + N.hashCode(mapKeyType);
-        h = 31 * h + N.hashCode(mapValueType);
-        h = 31 * h + N.hashCode(valueTypeMap);
-        h = 31 * h + N.hashCode(beanInfoForValueTypes);
-        return 31 * h + N.hashCode(schema);
+        return 31 * super.hashCode() + N.hashCode(schema);
     }
 
     /**
      * Compares this configuration with another object for equality.
-     * Two configurations are considered equal if they have the same ignored properties,
-     * unmatched property handling, element/map key/map value types, value-type mappings,
-     * bean-derived value types, and schema.
+     * Two configurations are considered equal if they are of exactly the same class, all settings
+     * inherited from the parent class are equal (see {@link DeserializationConfig#equals(Object)}),
+     * and they have the same schema.
      *
      * @param obj the object to compare with
      * @return {@code true} if the objects are equal, {@code false} otherwise
@@ -136,18 +130,7 @@ public class AvroDeserConfig extends DeserializationConfig<AvroDeserConfig> {
     @SuppressFBWarnings
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj instanceof AvroDeserConfig other) { //NOSONAR
-            return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(isIgnoreUnmatchedProperty(), other.isIgnoreUnmatchedProperty())
-                    && N.equals(elementType, other.elementType) && N.equals(mapKeyType, other.mapKeyType) && N.equals(mapValueType, other.mapValueType)
-                    && N.equals(valueTypeMap, other.valueTypeMap) && N.equals(beanInfoForValueTypes, other.beanInfoForValueTypes)
-                    && N.equals(schema, other.schema);
-        }
-
-        return false;
+        return this == obj || (obj instanceof AvroDeserConfig other && super.equals(obj) && N.equals(schema, other.schema));
     }
 
     /**

@@ -72,7 +72,8 @@ public class CharNFunctionTest extends TestBase {
     public void testApplyWithAnonymousClass() {
         CharNFunction<String> toUpper = new CharNFunction<>() {
             @Override
-            public String apply(char... args) {
+            @SafeVarargs
+            public final String apply(char... args) {
                 StringBuilder sb = new StringBuilder();
                 for (char c : args) {
                     sb.append(Character.toUpperCase(c));
@@ -104,8 +105,9 @@ public class CharNFunctionTest extends TestBase {
         CharNFunction<String> toString = args -> {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < args.length; i++) {
-                if (i > 0)
+                if (i > 0) {
                     sb.append(",");
+                }
                 sb.append((int) args[i]);
             }
             return sb.toString();

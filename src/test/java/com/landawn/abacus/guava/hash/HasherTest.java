@@ -478,4 +478,131 @@ public class HasherTest extends TestBase {
 
         assertNotNull(hash);
     }
+
+    // ---------------------------------------------------------------------------------------------
+    // a02 F-1: put(byte[], off, len) - IOOBE (not OutOfMemoryError) for an oversized len on every
+    // function, including the non-streaming farmHashFingerprint64 and a concatenation containing it.
+    // ---------------------------------------------------------------------------------------------
+
+    /**
+     * Like assertThrows but ALSO reports an {@code OutOfMemoryError} as a plain assertion failure. JUnit's
+     * assertThrows rethrows VirtualMachineErrors as unrecoverable, which on the unpatched code aborted the whole
+     * run instead of failing this test. The OOM here is the "Requested array size exceeds VM limit" kind, raised
+     * before any memory is allocated, so catching it is harmless.
+     */
+    private static void assertIndexOutOfBoundsNotOom(final Runnable call) {
+        Throwable thrown = null;
+        try {
+            call.run();
+        } catch (final Throwable t) {
+            thrown = t;
+        }
+        assertNotNull(thrown, "expected IndexOutOfBoundsException but nothing was thrown");
+        assertTrue(thrown instanceof IndexOutOfBoundsException, "expected IndexOutOfBoundsException but got " + thrown);
+    }
+
+    @Test
+    public void testPutByteArrayWithOffsetAndLength_FarmHash_HugeLen_ThrowsIndexOutOfBounds() {
+        HashFunction farm = Hashing.farmHashFingerprint64();
+
+        // unpatched: OutOfMemoryError ("Requested array size exceeds VM limit") from Guava's ensureCapacity(len)
+        assertIndexOutOfBoundsNotOom(() -> farm.newHasher().put(new byte[3], 2, Integer.MAX_VALUE));
+        assertIndexOutOfBoundsNotOom(() -> farm.newHasher().put(new byte[3], 0, Integer.MAX_VALUE));
+        assertIndexOutOfBoundsNotOom(() -> farm.newHasher().put(new byte[3], 0, 200_000_000));
+    }
+
+    @Test
+    public void testPutByteArrayWithOffsetAndLength_ConcatenatingFarmHash_HugeLen_ThrowsIndexOutOfBounds() {
+        HashFunction concat = Hashing.concatenating(Hashing.farmHashFingerprint64(), Hashing.sha256());
+
+        assertIndexOutOfBoundsNotOom(() -> concat.newHasher().put(new byte[3], 2, Integer.MAX_VALUE));
+        assertIndexOutOfBoundsNotOom(() -> concat.newHasher().put(new byte[3], 0, Integer.MAX_VALUE));
+        assertIndexOutOfBoundsNotOom(() -> concat.newHasher().put(new byte[3], 0, 200_000_000));
+    }
+
+    @Test
+    public void testPutByteArrayWithOffsetAndLength_FarmHash_SmallBadRangesAndNull() {
+        HashFunction farm = Hashing.farmHashFingerprint64();
+        HashFunction concat = Hashing.concatenating(Hashing.farmHashFingerprint64(), Hashing.sha256());
+
+        assertThrows(IndexOutOfBoundsException.class, () -> farm.newHasher().put(new byte[3], 1, 3));
+        assertThrows(IndexOutOfBoundsException.class, () -> farm.newHasher().put(new byte[3], 0, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> farm.newHasher().put(new byte[3], -1, 1));
+        assertThrows(NullPointerException.class, () -> farm.newHasher().put((byte[]) null, 0, 0));
+
+        assertThrows(IndexOutOfBoundsException.class, () -> concat.newHasher().put(new byte[3], 1, 3));
+        assertThrows(IndexOutOfBoundsException.class, () -> concat.newHasher().put(new byte[3], 0, -1));
+        assertThrows(NullPointerException.class, () -> concat.newHasher().put((byte[]) null, 0, 0));
+
+        // valid sub-range still hashes like the copied slice
+        byte[] bytes = { 1, 2, 3, 4, 5 };
+        assertEquals(farm.hash(new byte[] { 2, 3, 4 }), farm.newHasher().put(bytes, 1, 3).hash());
+        assertEquals(farm.hash(new byte[0]), farm.newHasher().put(bytes, 5, 0).hash());
+    }
+
+    @Test
+    public void testPutByteArrayWithOffsetAndLength_Sha256_StillThrowsIndexOutOfBounds() {
+        Hasher sha = Hashing.sha256().newHasher();
+
+        assertThrows(IndexOutOfBoundsException.class, () -> sha.put(new byte[3], 2, Integer.MAX_VALUE));
+        assertThrows(IndexOutOfBoundsException.class, () -> sha.put(new byte[3], 0, 200_000_000));
+        assertThrows(IndexOutOfBoundsException.class, () -> sha.put(new byte[3], 0, -1));
+        assertThrows(NullPointerException.class, () -> sha.put((byte[]) null, 0, 0));
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // a02 F-3: put(CharSequence, Charset) replaces unencodable chars / unpaired surrogates before
+    // hashing (collisions), unlike put(CharSequence); chunking is only safe for stateless encodings.
+    // ---------------------------------------------------------------------------------------------
+
+    @Test
+    public void testPutCharSequenceWithCharset_UnpairedSurrogate_CollidesWithReplacementChar() {
+        HashCode malformed = Hashing.sha256().newHasher().put("a\uD800", StandardCharsets.UTF_8).hash();
+        HashCode replaced = Hashing.sha256().newHasher().put("a?", StandardCharsets.UTF_8).hash();
+        assertEquals(replaced, malformed);
+
+        // the unencoded overload hashes every char exactly and does not collide
+        HashCode malformedRaw = Hashing.sha256().newHasher().put("a\uD800").hash();
+        HashCode replacedRaw = Hashing.sha256().newHasher().put("a?").hash();
+        assertNotEquals(replacedRaw, malformedRaw);
+    }
+
+    @Test
+    public void testPutCharSequenceWithCharset_UnmappableChar_CollidesWithReplacementChar() {
+        HashCode cjk = Hashing.murmur3_128().newHasher().put("世", StandardCharsets.ISO_8859_1).hash();
+        HashCode qm = Hashing.murmur3_128().newHasher().put("?", StandardCharsets.ISO_8859_1).hash();
+        assertEquals(qm, cjk);
+
+        assertNotEquals(Hashing.murmur3_128().newHasher().put("世").hash(), Hashing.murmur3_128().newHasher().put("?").hash());
+    }
+
+    @Test
+    public void testPutCharSequenceWithCharset_ChunkedEqualsWholeOnlyForStatelessEncodings() {
+        HashCode utf8Chunked = Hashing.sha256().newHasher().put("foo", StandardCharsets.UTF_8).put("bar", StandardCharsets.UTF_8).hash();
+        HashCode utf8Whole = Hashing.sha256().newHasher().put("foobar", StandardCharsets.UTF_8).hash();
+        assertEquals(utf8Whole, utf8Chunked);
+
+        // UTF-16 writes a byte-order mark per call, so the chunked form differs
+        HashCode utf16Chunked = Hashing.sha256().newHasher().put("foo", StandardCharsets.UTF_16).put("bar", StandardCharsets.UTF_16).hash();
+        HashCode utf16Whole = Hashing.sha256().newHasher().put("foobar", StandardCharsets.UTF_16).hash();
+        assertNotEquals(utf16Whole, utf16Chunked);
+    }
+
+    // a02 F-4 / F-6: null contracts on the interface as now documented
+
+    @Test
+    public void testPutNullArguments_DocumentedExceptionTypes() {
+        assertThrows(NullPointerException.class, () -> Hashing.sha256().newHasher().put((ByteBuffer) null));
+        assertThrows(NullPointerException.class, () -> Hashing.sha256().newHasher().put((CharSequence) null));
+        assertThrows(NullPointerException.class, () -> Hashing.sha256().newHasher().put((CharSequence) null, StandardCharsets.UTF_8));
+        assertThrows(NullPointerException.class, () -> Hashing.sha256().newHasher().put("x", (Charset) null));
+
+        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class, () -> Hashing.sha256().newHasher().put("x", (Funnel<String>) null));
+        assertTrue(iae.getMessage().contains("funnel"));
+
+        // a null instance is passed to the funnel unchecked
+        Funnel<Object> noop = (from, into) -> {
+        };
+        assertNotNull(Hashing.sha256().newHasher().put(null, noop).hash());
+    }
 }

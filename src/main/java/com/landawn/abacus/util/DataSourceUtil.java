@@ -191,6 +191,10 @@ public final class DataSourceUtil {
      * Resources are closed in reverse order: ResultSet -&gt; Statement -&gt; Connection.
      * If {@code rs} is {@code null}, this method does nothing (after validating the argument combination).
      *
+     * <p>All known resources are attempted even after a RuntimeException or Error. The first
+     * failure remains primary, with later failures suppressed; only a primary SQLException is
+     * wrapped in UncheckedSQLException. RuntimeException and Error instances are rethrown unchanged.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ResultSet rs = stmt.executeQuery("SELECT * FROM users");
@@ -224,7 +228,7 @@ public final class DataSourceUtil {
         Connection conn = null;
         Statement stmt = null;
 
-        SQLException failure = null;
+        Throwable failure = null;
 
         try {
             if (closeStatement) {
@@ -234,13 +238,13 @@ public final class DataSourceUtil {
             if (closeConnection && stmt != null) {
                 conn = stmt.getConnection();
             }
-        } catch (final SQLException e) {
+        } catch (final SQLException | RuntimeException | Error e) {
             failure = e;
         }
 
         try {
             rs.close();
-        } catch (final SQLException e) {
+        } catch (final SQLException | RuntimeException | Error e) {
             failure = addCloseException(failure, e);
         }
 
@@ -248,7 +252,7 @@ public final class DataSourceUtil {
             if (stmt != null) {
                 stmt.close();
             }
-        } catch (final SQLException e) {
+        } catch (final SQLException | RuntimeException | Error e) {
             failure = addCloseException(failure, e);
         }
 
@@ -256,12 +260,12 @@ public final class DataSourceUtil {
             if (conn != null) {
                 conn.close();
             }
-        } catch (final SQLException e) {
+        } catch (final SQLException | RuntimeException | Error e) {
             failure = addCloseException(failure, e);
         }
 
         if (failure != null) {
-            throw new UncheckedSQLException(failure);
+            throwCloseFailure(failure);
         }
     }
 
@@ -324,12 +328,12 @@ public final class DataSourceUtil {
         }
     }
 
-    private static SQLException addCloseException(final SQLException firstException, final SQLException closeException) {
+    private static Throwable addCloseException(final Throwable firstException, final Throwable closeException) {
         if (firstException == null) {
             return closeException;
         }
 
-        // Throwable rejects self-suppression. Some drivers and mocks reuse the same SQLException
+        // Throwable rejects self-suppression. Some drivers and mocks reuse the same failure
         // instance for lookup and close failures; keep that original failure instead of masking it
         // with IllegalArgumentException from addSuppressed.
         if (firstException != closeException) {
@@ -340,9 +344,28 @@ public final class DataSourceUtil {
     }
 
     /**
+     * @throws UncheckedSQLException if {@code failure} is a {@link SQLException}
+     * @throws RuntimeException if {@code failure} is a runtime exception
+     * @throws Error if {@code failure} is an error
+     */
+    private static void throwCloseFailure(final Throwable failure) throws UncheckedSQLException, RuntimeException, Error {
+        if (failure instanceof SQLException sqlFailure) {
+            throw new UncheckedSQLException(sqlFailure);
+        } else if (failure instanceof RuntimeException runtimeFailure) {
+            throw runtimeFailure;
+        } else if (failure instanceof Error error) {
+            throw error;
+        }
+    }
+
+    /**
      * Closes a ResultSet and Statement in the proper order.
      * The ResultSet is closed first, followed by the Statement. The Statement is closed
      * even if closing the ResultSet throws; any {@code null} argument is skipped.
+     *
+     * <p>All known resources are attempted even after a RuntimeException or Error. The first
+     * failure remains primary, with later failures suppressed; only a primary SQLException is
+     * wrapped in UncheckedSQLException. RuntimeException and Error instances are rethrown unchanged.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -361,13 +384,13 @@ public final class DataSourceUtil {
      *         closes fail, the ResultSet's exception is thrown with the Statement's failure added as a suppressed exception
      */
     public static void close(final ResultSet rs, final Statement stmt) throws UncheckedSQLException {
-        SQLException closeException = null;
+        Throwable closeException = null;
 
         try {
             if (rs != null) {
                 rs.close();
             }
-        } catch (final SQLException e) {
+        } catch (final SQLException | RuntimeException | Error e) {
             closeException = e;
         }
 
@@ -375,12 +398,12 @@ public final class DataSourceUtil {
             if (stmt != null) {
                 stmt.close();
             }
-        } catch (final SQLException e) {
+        } catch (final SQLException | RuntimeException | Error e) {
             closeException = addCloseException(closeException, e);
         }
 
         if (closeException != null) {
-            throw new UncheckedSQLException(closeException);
+            throwCloseFailure(closeException);
         }
     }
 
@@ -388,6 +411,10 @@ public final class DataSourceUtil {
      * Closes a Statement and Connection in the proper order.
      * The Statement is closed first, followed by the Connection. The Connection is closed
      * even if closing the Statement throws; any {@code null} argument is skipped.
+     *
+     * <p>All known resources are attempted even after a RuntimeException or Error. The first
+     * failure remains primary, with later failures suppressed; only a primary SQLException is
+     * wrapped in UncheckedSQLException. RuntimeException and Error instances are rethrown unchanged.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -406,13 +433,13 @@ public final class DataSourceUtil {
      *         closes fail, the Statement's exception is thrown with the Connection's failure added as a suppressed exception
      */
     public static void close(final Statement stmt, final Connection conn) throws UncheckedSQLException {
-        SQLException closeException = null;
+        Throwable closeException = null;
 
         try {
             if (stmt != null) {
                 stmt.close();
             }
-        } catch (final SQLException e) {
+        } catch (final SQLException | RuntimeException | Error e) {
             closeException = e;
         }
 
@@ -420,12 +447,12 @@ public final class DataSourceUtil {
             if (conn != null) {
                 conn.close();
             }
-        } catch (final SQLException e) {
+        } catch (final SQLException | RuntimeException | Error e) {
             closeException = addCloseException(closeException, e);
         }
 
         if (closeException != null) {
-            throw new UncheckedSQLException(closeException);
+            throwCloseFailure(closeException);
         }
     }
 
@@ -434,6 +461,10 @@ public final class DataSourceUtil {
      * Resources are closed in reverse order of creation: ResultSet -&gt; Statement -&gt; Connection.
      * If any close operation fails, the first exception is thrown after attempting to close remaining resources,
      * with later close failures added as suppressed exceptions.
+     *
+     * <p>All known resources are attempted even after a RuntimeException or Error. The first
+     * failure remains primary, with later failures suppressed; only a primary SQLException is
+     * wrapped in UncheckedSQLException. RuntimeException and Error instances are rethrown unchanged.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -453,13 +484,13 @@ public final class DataSourceUtil {
      * @throws UncheckedSQLException if a database access error occurs while closing any of the resources
      */
     public static void close(final ResultSet rs, final Statement stmt, final Connection conn) throws UncheckedSQLException {
-        SQLException closeException = null;
+        Throwable closeException = null;
 
         try {
             if (rs != null) {
                 rs.close();
             }
-        } catch (final SQLException e) {
+        } catch (final SQLException | RuntimeException | Error e) {
             closeException = e;
         }
 
@@ -467,7 +498,7 @@ public final class DataSourceUtil {
             if (stmt != null) {
                 stmt.close();
             }
-        } catch (final SQLException e) {
+        } catch (final SQLException | RuntimeException | Error e) {
             closeException = addCloseException(closeException, e);
         }
 
@@ -475,12 +506,12 @@ public final class DataSourceUtil {
             if (conn != null) {
                 conn.close();
             }
-        } catch (final SQLException e) {
+        } catch (final SQLException | RuntimeException | Error e) {
             closeException = addCloseException(closeException, e);
         }
 
         if (closeException != null) {
-            throw new UncheckedSQLException(closeException);
+            throwCloseFailure(closeException);
         }
     }
 
@@ -530,8 +561,9 @@ public final class DataSourceUtil {
 
     /**
      * Unconditionally closes a ResultSet and optionally its associated Statement and Connection.
-     * Any exceptions during closing are ignored and logged. Any failure to retrieve the Statement
-     * or Connection from the ResultSet is also logged and swallowed. If {@code rs} is {@code null},
+     * Any exceptions during closing are ignored and logged. SQL and runtime exceptions while retrieving
+     * the Statement or Connection are also logged and swallowed; errors still propagate after cleanup.
+     * If {@code rs} is {@code null},
      * this method does nothing (after validating the argument combination).
      *
      * <p><b>Usage Examples:</b></p>
@@ -571,7 +603,7 @@ public final class DataSourceUtil {
             if (closeConnection && stmt != null) {
                 conn = stmt.getConnection();
             }
-        } catch (final SQLException e) {
+        } catch (final Exception e) {
             logger.error("Failed to get Statement or Connection by ResultSet", e);
         } finally {
             closeQuietly(rs, stmt, conn);
@@ -747,12 +779,14 @@ public final class DataSourceUtil {
      * @param stmt the Statement containing the batch commands to execute; must not be {@code null}
      * @return an array of update counts containing one element for each command in the batch;
      *         the elements are ordered according to the order in which commands were added to the batch
-     * @throws NullPointerException if {@code stmt} is {@code null}
+     * @throws IllegalArgumentException if {@code stmt} is {@code null}
      * @throws SQLException if a database access error occurs or the driver does not support batch statements
      * @see Statement#executeBatch()
      */
     @SuppressWarnings("UnusedReturnValue")
-    public static int[] executeBatch(final Statement stmt) throws SQLException {
+    public static int[] executeBatch(final Statement stmt) throws IllegalArgumentException, SQLException {
+        N.checkArgNotNull(stmt, cs.stmt);
+
         try {
             return stmt.executeBatch();
         } finally {

@@ -1415,7 +1415,11 @@ public final class SK {
      */
     public static final String CURRENT_TIMESTAMP = "CURRENT_TIMESTAMP";
 
-    /** Constant for the COUNT(*) aggregate function. */
+    /**
+     * SQL COUNT(*) aggregate expression: {@code "count(*)"}.
+     * Note the lowercase spelling - this is the only SQL keyword constant in this class whose value is not
+     * upper case, so a case-sensitive comparison against {@code "COUNT(*)"} will not match it.
+     */
     public static final String COUNT_ALL = "count(*)";
 
     // --------------------End SQL constants------------------------

@@ -83,11 +83,12 @@ public final class Utf8 {
      *
      * @param sequence the character sequence to measure
      * @return the number of bytes needed to encode the sequence in UTF-8
-     * @throws NullPointerException if {@code sequence} is {@code null}
-     * @throws IllegalArgumentException if the sequence contains ill-formed UTF-16 (unpaired surrogates), or if the
+     * @throws IllegalArgumentException if {@code sequence} is {@code null}, or if the sequence contains ill-formed UTF-16 (unpaired surrogates), or if the
      *         UTF-8 encoded length overflows {@code int}.
      */
-    public static int encodedLength(final CharSequence sequence) {
+    public static int encodedLength(final CharSequence sequence) throws IllegalArgumentException {
+        N.checkArgNotNull(sequence, cs.sequence);
+
         // Warning to maintainers: this implementation is highly optimized.
         final int utf16Length = sequence.length();
         int utf8Length = utf16Length;
@@ -128,7 +129,7 @@ public final class Utf8 {
      *         from {@code start} onwards
      * @throws IllegalArgumentException if an unpaired surrogate is encountered.
      */
-    private static int encodedLengthGeneral(final CharSequence sequence, final int start) {
+    private static int encodedLengthGeneral(final CharSequence sequence, final int start) throws IllegalArgumentException {
         final int utf16Length = sequence.length();
         int utf8Length = 0;
         for (int i = start; i < utf16Length; i++) {
@@ -178,10 +179,12 @@ public final class Utf8 {
      *
      * @param bytes the byte array to validate
      * @return {@code true} if the bytes form a valid UTF-8 sequence, {@code false} otherwise
-     * @throws NullPointerException if {@code bytes} is {@code null}
+     * @throws IllegalArgumentException if {@code bytes} is {@code null}
      * @see #isWellFormed(byte[], int, int)
      */
-    public static boolean isWellFormed(final byte[] bytes) {
+    public static boolean isWellFormed(final byte[] bytes) throws IllegalArgumentException {
+        N.checkArgNotNull(bytes, cs.bytes);
+
         return isWellFormed(bytes, 0, bytes.length);
     }
 
@@ -206,12 +209,13 @@ public final class Utf8 {
      * @param off the offset in the buffer of the first byte to validate
      * @param len the number of bytes to validate from the buffer
      * @return {@code true} if the specified byte range forms a valid UTF-8 sequence
-     * @throws NullPointerException if {@code bytes} is {@code null}
-     * @throws IllegalArgumentException if {@code len} is negative.
+     * @throws IllegalArgumentException if {@code bytes} is {@code null} or {@code len} is negative
      * @throws IndexOutOfBoundsException if {@code off} is negative, or
      *         {@code off + len} is greater than {@code bytes.length}
      */
-    public static boolean isWellFormed(final byte[] bytes, final int off, final int len) throws IndexOutOfBoundsException {
+    public static boolean isWellFormed(final byte[] bytes, final int off, final int len) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(bytes, cs.bytes);
+
         N.checkFromIndexSize(off, len, bytes.length);
 
         final int end = off + len;

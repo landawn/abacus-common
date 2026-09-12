@@ -127,9 +127,6 @@ public class ImmutableArrayTest extends TestBase {
         Assertions.assertEquals(0, array.length());
         Assertions.assertTrue(array.isEmpty());
         Assertions.assertNotSame(ImmutableArray.empty(), array);
-
-        String[] copy = array.copy(0, 0);
-        Assertions.assertEquals(String[].class, copy.getClass());
     }
 
     @Test
@@ -148,6 +145,14 @@ public class ImmutableArrayTest extends TestBase {
         ImmutableArray<String> array = ImmutableArray.wrap(null);
         Assertions.assertEquals(0, array.length());
         Assertions.assertTrue(array.isEmpty());
+        Assertions.assertSame(ImmutableArray.empty(), array);
+        Assertions.assertNotSame(ImmutableArray.empty(), ImmutableArray.wrap(new String[0]));
+    }
+
+    @Test
+    public void testForEach_nullActionThrowsNpe() {
+        Assertions.assertThrows(NullPointerException.class, () -> ImmutableArray.of("a").forEach(null));
+        Assertions.assertThrows(NullPointerException.class, () -> ImmutableArray.empty().forEach(null));
     }
 
     @Test
@@ -221,42 +226,6 @@ public class ImmutableArrayTest extends TestBase {
         Assertions.assertTrue(array.contains("c"));
         Assertions.assertFalse(array.contains("d"));
         Assertions.assertFalse(array.contains(null));
-    }
-
-    @Test
-    public void testCopy() {
-        ImmutableArray<String> array = ImmutableArray.of("a", "b", "c", "d", "e");
-
-        Object[] copy1 = array.copy(1, 4);
-        Assertions.assertEquals(3, copy1.length);
-        Assertions.assertEquals("b", copy1[0]);
-        Assertions.assertEquals("c", copy1[1]);
-        Assertions.assertEquals("d", copy1[2]);
-
-        Object[] copy2 = array.copy(0, 5);
-        Assertions.assertEquals(5, copy2.length);
-        Assertions.assertEquals("a", copy2[0]);
-        Assertions.assertEquals("e", copy2[4]);
-
-        Object[] copy3 = array.copy(2, 2);
-        Assertions.assertEquals(0, copy3.length);
-    }
-
-    @Test
-    public void testCopy_DefensiveCopy() {
-        ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
-        Object[] copy = array.copy(0, 3);
-        copy[0] = "modified";
-        Assertions.assertEquals("a", array.get(0));
-    }
-
-    @Test
-    public void testCopy_InvalidRange() {
-        ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
-
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> array.copy(-1, 2));
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> array.copy(0, 4));
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> array.copy(2, 1));
     }
 
     @Test
@@ -335,7 +304,7 @@ public class ImmutableArrayTest extends TestBase {
     @Test
     public void testForEach_NullConsumer() {
         ImmutableArray<String> array = ImmutableArray.of("a");
-        Assertions.assertThrows(IllegalArgumentException.class, () -> array.forEach((Consumer<String>) null));
+        Assertions.assertThrows(NullPointerException.class, () -> array.forEach((Consumer<String>) null));
     }
 
     @Test
@@ -429,5 +398,22 @@ public class ImmutableArrayTest extends TestBase {
     public void testToString_Empty() {
         ImmutableArray<String> array = ImmutableArray.copyOf(new String[0]);
         Assertions.assertNotNull(array.toString());
+    }
+
+    @Test
+    public void testEmptyArrayViewIsTheSharedEmptyList() {
+        // the identity split between copyOf(null) and copyOf(new T[0]) is pinned by testCopyOf_Null /
+        // testCopyOf_Empty, so it is documented rather than changed.
+        Assertions.assertSame(ImmutableArray.<String> empty(), ImmutableArray.copyOf((String[]) null));
+        Assertions.assertNotSame(ImmutableArray.<String> empty(), ImmutableArray.copyOf(new String[0]));
+
+        // a zero-length array can never gain elements, so its list view is the shared empty list
+        Assertions.assertSame(ImmutableList.empty(), ImmutableArray.empty().asList());
+        Assertions.assertSame(ImmutableList.empty(), ImmutableArray.copyOf(new String[0]).asList());
+
+        // a non-empty array still gets a real view of its own storage
+        final ImmutableArray<String> two = ImmutableArray.of("a", "b");
+        Assertions.assertEquals(Arrays.asList("a", "b"), two.asList());
+        Assertions.assertNotSame(ImmutableList.empty(), two.asList());
     }
 }

@@ -28,8 +28,8 @@ import com.landawn.abacus.util.stream.Stream;
  * without the overhead of boxing/unboxing.
  *
  * <p>This class provides various utility methods for transformation, filtering, and conversion
- * operations. It extends {@link ImmutableIterator} to ensure that the {@code remove()} operation
- * is not supported; the traversal position itself is mutable and is consumed as values are read,
+ * operations. Element removal is not supported ({@link #remove()} always throws
+ * {@link UnsupportedOperationException}); the traversal position itself is mutable and is consumed as values are read,
  * so instances are neither reusable nor safe for concurrent consumption. Transformation methods
  * return wrappers over this same source iterator; consuming a wrapper also advances the source.</p>
  *
@@ -50,7 +50,7 @@ import com.landawn.abacus.util.stream.Stream;
  * @see com.landawn.abacus.util.Iterators
  * @see com.landawn.abacus.util.Enumerations
  */
-@SuppressWarnings({ "java:S6548" })
+@SuppressWarnings("java:S6548")
 public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
     /**
@@ -73,8 +73,12 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if this iterator has no remaining element
+         */
         @Override
-        public boolean nextBoolean() {
+        public boolean nextBoolean() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
@@ -159,8 +163,12 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
                 return cursor < toIndex;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public boolean nextBoolean() {
+            public boolean nextBoolean() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -194,9 +202,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // Iterator is not created until first use
      * }</pre>
      *
+     * <p>The returned iterator initializes its source on its first traversal operation. If the supplier returns null, initialization throws IllegalStateException; a RuntimeException or Error from initialization is cached and rethrown by subsequent traversal operations.</p>
+     *
      * @param iteratorSupplier a Supplier that provides the {@code BooleanIterator} when needed
      * @return a {@code BooleanIterator} that is initialized on the first call to {@code hasNext()} or {@code nextBoolean()}
-     * @throws IllegalStateException if the supplier returns {@code null} when invoked
      * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
      */
     public static BooleanIterator defer(final Supplier<? extends BooleanIterator> iteratorSupplier) throws IllegalArgumentException {
@@ -221,7 +230,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
                 return iter.nextBoolean();
             }
 
-            private void init() {
+            /**
+             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null}
+             */
+            private void init() throws IllegalStateException {
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
@@ -282,7 +294,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     /**
      * Returns a {@code BooleanIterator} that generates values while a condition is {@code true}.
      * The {@code hasNext} supplier is called at most once per element; its result is cached
-     * until the next call to {@code nextBoolean()}.
+     * until the next call to {@code nextBoolean()}. Once {@code hasNext} has returned {@code false} the
+     * iterator is permanently exhausted: the condition is never re-evaluated, so the iterator does not
+     * resume even if the state it inspects changes later.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -294,7 +308,14 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // Generates 5 boolean values based on even/odd counter
      * }</pre>
      *
-     * @param hasNext the {@link BooleanSupplier} that determines if there are more elements
+     * <p><b>API Note:</b> unlike the other primitive siblings, both parameters here have the same type
+     * ({@code BooleanSupplier}), because the value supplier for {@code boolean} is a {@code BooleanSupplier}
+     * too. Transposing the two arguments therefore compiles silently and produces a wrong iterator - the
+     * <i>first</i> argument is always the continuation condition, the <i>second</i> always produces the
+     * values.</p>
+     *
+     * @param hasNext the {@link BooleanSupplier} that determines if there are more elements; it is
+     *                <i>not</i> the value supplier
      * @param supplier the supplier function to generate boolean values
      * @return a conditional {@code BooleanIterator}
      * @throws IllegalArgumentException if any of {@code hasNext}, {@code supplier} is {@code null}.
@@ -316,8 +337,12 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
                 return hasNextValue;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public boolean nextBoolean() {
+            public boolean nextBoolean() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -344,7 +369,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      */
     @Deprecated
     @Override
-    public Boolean next() {
+    public Boolean next() throws NoSuchElementException {
         return nextBoolean();
     }
 
@@ -361,7 +386,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * @return the next boolean value
      * @throws NoSuchElementException if the iteration has no more elements
      */
-    public abstract boolean nextBoolean();
+    public abstract boolean nextBoolean() throws NoSuchElementException;
 
     /**
      * Returns a new {@code BooleanIterator} that skips the first {@code n} elements.
@@ -390,6 +415,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
 
         return new BooleanIterator() {
             private boolean skipped = false;
+            private long remaining = n;
 
             @Override
             public boolean hasNext() {
@@ -400,8 +426,12 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public boolean nextBoolean() {
+            public boolean nextBoolean() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -410,10 +440,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
             }
 
             private void skip() {
-                long idx = 0;
-
-                while (idx++ < n && iter.hasNext()) {
+                while (remaining > 0 && iter.hasNext()) {
                     iter.nextBoolean();
+                    remaining--;
                 }
 
                 skipped = true;
@@ -455,14 +484,19 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
                 return cnt > 0 && iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public boolean nextBoolean() {
+            public boolean nextBoolean() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final boolean result = iter.nextBoolean();
                 cnt--;
-                return iter.nextBoolean();
+                return result;
             }
         };
     }
@@ -507,8 +541,12 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
                 return hasNext;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public boolean nextBoolean() {
+            public boolean nextBoolean() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -576,6 +614,11 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * Note: unlike the primitive-specific iterator types, {@code BooleanIterator} does not
      * have a corresponding primitive stream type, so this method returns a boxed stream.
      *
+     * <p>The stream shares this iterator's traversal position and consumes elements as needed.
+     * Operations that consume all remaining elements exhaust this iterator; short-circuiting
+     * operations may leave elements unconsumed. Do not access this iterator independently
+     * while the stream is consuming it.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false, true);
@@ -618,10 +661,11 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * // Produces: IndexedBoolean(index=10, value=true), IndexedBoolean(index=11, value=false)
      * }</pre>
      *
+     * <p>The returned iterator throws ArithmeticException when traversal would assign an index greater than Long.MAX_VALUE.</p>
+     *
      * @param startIndex the starting index value; must be non-negative
      * @return an {@link ObjIterator} of {@link IndexedBoolean} elements with indices starting at {@code startIndex}
      * @throws IllegalArgumentException if {@code startIndex} is negative.
-     * @throws ArithmeticException if another element would require an index greater than {@link Long#MAX_VALUE}
      */
     @Beta
     public ObjIterator<IndexedBoolean> indexed(final long startIndex) throws IllegalArgumentException {
@@ -638,8 +682,13 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws ArithmeticException if an element remains after index {@link Long#MAX_VALUE} has already been assigned
+             * @throws NoSuchElementException if the source iterator has no remaining element
+             */
             @Override
-            public IndexedBoolean next() {
+            public IndexedBoolean next() throws ArithmeticException, NoSuchElementException {
                 if (indexOverflow) {
                     if (iter.hasNext()) {
                         throw new ArithmeticException("long overflow");
@@ -673,13 +722,13 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * }</pre>
      *
      * @param action the action to be performed for each element
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws NullPointerException if {@code action} is {@code null}, as specified by {@link java.util.Iterator#forEachRemaining(java.util.function.Consumer)}.
      * @deprecated use {@link #foreachRemaining(Throwables.BooleanConsumer)} instead to avoid boxing overhead
      */
     @Deprecated
     @Override
-    public void forEachRemaining(final java.util.function.Consumer<? super Boolean> action) throws IllegalArgumentException {
-        N.checkArgNotNull(action, cs.action);
+    public void forEachRemaining(final java.util.function.Consumer<? super Boolean> action) throws NullPointerException {
+        N.requireNonNull(action, cs.action);
 
         super.forEachRemaining(action);
     }
@@ -697,10 +746,10 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to be performed for each element
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      */
-    public <E extends Exception> void foreachRemaining(final Throwables.BooleanConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachRemaining(final Throwables.BooleanConsumer<E> action) throws IllegalArgumentException, E {
         N.checkArgNotNull(action, cs.action);//NOSONAR
 
         while (hasNext()) {
@@ -721,12 +770,12 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      *
      * @param <E> the type of exception that the action may throw
      * @param action the action to be performed for each (index, value) pair
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws IllegalStateException if elements remain after the zero-based index has reached
      *         {@link Integer#MAX_VALUE}, i.e. the index would overflow
-     * @throws E if the action throws an exception
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if {@code action} throws while processing a remaining element and its index
      */
-    public <E extends Exception> void foreachIndexed(final Throwables.IntBooleanConsumer<E> action) throws E, IllegalArgumentException {
+    public <E extends Exception> void foreachIndexed(final Throwables.IntBooleanConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
         N.checkArgNotNull(action, cs.action);
 
         int idx = 0;

@@ -28,12 +28,15 @@ public class BooleanTriConsumerTest extends TestBase {
     public void testAcceptWithLambda() {
         AtomicInteger trueCount = new AtomicInteger(0);
         BooleanTriConsumer consumer = (a, b, c) -> {
-            if (a)
+            if (a) {
                 trueCount.incrementAndGet();
-            if (b)
+            }
+            if (b) {
                 trueCount.incrementAndGet();
-            if (c)
+            }
+            if (c) {
                 trueCount.incrementAndGet();
+            }
         };
 
         consumer.accept(true, false, true);

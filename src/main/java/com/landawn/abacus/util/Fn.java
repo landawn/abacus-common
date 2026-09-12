@@ -16,8 +16,10 @@
 package com.landawn.abacus.util;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -162,8 +162,9 @@ import com.landawn.abacus.util.stream.Stream;
  * <p>The type-conversion shorthands use a compact {@code <source>2<target>} notation. The letters are
  * not globally unique — {@code c} means {@link Consumer} in {@code c2f}/{@code f2c} but
  * {@link Callable} in {@code c2r}/{@code r2c} — and a leading {@code j} marks the JDK (Java standard
- * library) variant of the source type. The following table maps each shorthand to its full
- * descriptive name:</p>
+ * library) variant of the source type where both variants share a letter. The absence of a {@code j} does
+ * not imply the abacus variant: {@code c2f}, {@code f2c} and {@code r2c} declare JDK source types too. The
+ * following table maps each shorthand to its full descriptive name:</p>
  * <table border="1">
  *   <caption>Conversion method shorthand mapping</caption>
  *   <tr>
@@ -173,17 +174,17 @@ import com.landawn.abacus.util.stream.Stream;
  *   </tr>
  *   <tr>
  *     <td>{@code c2f}</td>
- *     <td>{@link Consumer} to {@link Function}</td>
+ *     <td>{@link java.util.function.Consumer} to {@link Function}</td>
  *     <td>{@code consumerToFunction}</td>
  *   </tr>
  *   <tr>
  *     <td>{@code f2c}</td>
- *     <td>{@link Function} to {@link Consumer}</td>
+ *     <td>{@link java.util.function.Function} to {@link Consumer}</td>
  *     <td>{@code functionToConsumer}</td>
  *   </tr>
  *   <tr>
  *     <td>{@code r2c}</td>
- *     <td>{@link Runnable} to {@link Callable}</td>
+ *     <td>{@link java.lang.Runnable} to {@link Callable}</td>
  *     <td>{@code runnableToCallable}</td>
  *   </tr>
  *   <tr>
@@ -200,6 +201,11 @@ import com.landawn.abacus.util.stream.Stream;
  *     <td>{@code jc2c}</td>
  *     <td>{@link java.util.concurrent.Callable} to {@link Callable}</td>
  *     <td>{@code jdkCallableToCallable}</td>
+ *   </tr>
+ *   <tr>
+ *     <td>{@code jc2r}</td>
+ *     <td>{@link java.util.concurrent.Callable} to {@link Runnable}</td>
+ *     <td>{@code jdkCallableToRunnable}</td>
  *   </tr>
  * </table>
  *
@@ -291,9 +297,9 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li>Factory method calls: O(1) - minimal object creation overhead</li>
+ *   <li>Fixed-arity factories usually take O(1); collection-based predicate composites snapshot their inputs in O(n) time and storage</li>
  *   <li>Primitive operations: Optimized to avoid boxing/unboxing when possible</li>
- *   <li>Stateless functions: No memory overhead beyond the function object itself</li>
+ *   <li>Function invocation costs depend on the operation and any supplied delegates</li>
  *   <li>Stateful functions: May maintain internal state - use with caution in concurrent environments</li>
  * </ul>
  *
@@ -307,13 +313,18 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Nested Utility Classes:</b>
  * <ul>
- *   <li><b>{@link Predicates}:</b> Extended predicate operations and compositions</li>
- *   <li><b>{@link Functions}:</b> Advanced function utilities and transformations</li>
- *   <li><b>{@link Consumers}:</b> Consumer operations with enhanced functionality</li>
- *   <li><b>{@link BinaryOperators}:</b> Binary operations for reduction and selection</li>
  *   <li><b>{@link Entries}:</b> Map.Entry specific operations and transformations</li>
+ *   <li><b>{@link Pairs}:</b> Conversions from a {@link Pair} to a List or a Set</li>
+ *   <li><b>{@link Triples}:</b> Conversions from a {@link Triple} to a List or a Set</li>
+ *   <li><b>{@link Disposables}:</b> {@code cloneArray()}, {@code toStr()} and {@code join()} for {@code DisposableArray} views</li>
  *   <li><b>Primitive Classes:</b> FC, FB, FS, FI, FL, FF, FD for type-specific operations</li>
  * </ul>
+ *
+ * <p><b>Related classes in this package</b> - siblings of {@code Fn}, not nested in it:
+ * {@link Predicates}, {@link BiPredicates}, {@link TriPredicates}, {@link Consumers}, {@link BiConsumers},
+ * {@link Functions}, {@link BiFunctions}, {@link UnaryOperators}, {@link BinaryOperators},
+ * {@link Suppliers}, {@link LongSuppliers}, {@link IntFunctions}.
+ * {@link TriConsumers} and {@link TriFunctions} are siblings too, but are currently empty placeholders.</p>
  *
  * <p><b>Exception Handling Strategy:</b>
  * <ul>
@@ -379,6 +390,20 @@ import com.landawn.abacus.util.stream.Stream;
  * </ul>
  *
  * @see Fnn
+ * @see Consumers
+ * @see BiConsumers
+ * @see TriConsumers
+ * @see Functions
+ * @see BiFunctions
+ * @see TriFunctions
+ * @see Predicates
+ * @see BiPredicates
+ * @see TriPredicates
+ * @see UnaryOperators
+ * @see BinaryOperators
+ * @see Suppliers
+ * @see IntFunctions
+ * @see LongSuppliers
  * @see Predicate
  * @see Function
  * @see Consumer
@@ -393,13 +418,6 @@ import com.landawn.abacus.util.stream.Stream;
 public final class Fn {
 
     static final Object NONE = ClassUtil.newNullSentinel();
-
-    private static final ScheduledExecutorService SCHEDULER;
-
-    static {
-        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(2);
-        SCHEDULER = MoreExecutors.getExitingScheduledExecutorService(executor);
-    }
 
     static final Runnable EMPTY_ACTION = () -> {
     };
@@ -621,6 +639,11 @@ public final class Fn {
      * cached.get();   // returns the cached result (expensiveOp not called again)
      * }</pre>
      *
+     * <p><b>Thread Safety:</b> The returned supplier is thread-safe: the delegate is invoked at most once on
+     * success, and if it throws, nothing is cached and a later {@code get()} retries. Re-entering
+     * {@code get()} from within the delegate throws {@link IllegalStateException}; that failure is not cached
+     * and a later call may retry once the recursive attempt has unwound.
+     *
      * @param <T> the type of the value supplied
      * @param supplier the supplier whose result should be memoized
      * @return a memoized Supplier that caches the result of the first invocation
@@ -649,7 +672,11 @@ public final class Fn {
      * <p><b>Thread Safety:</b> The returned supplier is fully thread-safe. Multiple threads can
      * safely call {@code get()} concurrently. The implementation uses double-checked locking to
      * ensure that a successful delegate call is made at most once per expiration period, even under
-     * concurrent access. If the delegate throws, the failure is not cached and a later call retries it.
+     * concurrent access. Refreshes are serialized on a private monitor, not on the returned supplier
+     * itself, so caller code that synchronizes on the returned object can neither block nor interleave
+     * with a refresh. If the delegate throws, the failure is not cached and a later call retries it.
+     * Re-entering {@code get()} from within the delegate throws {@link IllegalStateException}; that failure
+     * is not cached and a later call may retry once the recursive attempt has unwound.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -702,12 +729,16 @@ public final class Fn {
     public static <T> Supplier<T> memoizeWithExpiration(final java.util.function.Supplier<T> supplier, final long duration, final TimeUnit unit)
             throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
-        N.checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
         N.checkArgNotNull(unit, cs.unit);
+        N.checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
 
         return new Supplier<>() {
             private final java.util.function.Supplier<T> delegate = supplier;
             private final long durationNanos = unit.toNanos(duration);
+            // A private monitor rather than `this`: the returned supplier is handed to the caller, and a caller
+            // doing `synchronized (memoizedSupplier) { ... }` must not be able to block or interleave with a
+            // refresh. Same reason memoize(Function) uses its own resultMapLock.
+            private final Object lock = new Object();
             private volatile T value;
             // The special value 0 means "not yet initialized".
             private volatile long expirationNanos = 0;
@@ -725,7 +756,7 @@ public final class Fn {
                 long nanos = expirationNanos;
                 final long now = System.nanoTime();
                 if (nanos == 0 || now - nanos >= 0) {
-                    synchronized (this) {
+                    synchronized (lock) {
                         if (nanos == expirationNanos) { // recheck for lost race
                             if (computing) {
                                 if (recursiveFailure == null) {
@@ -774,7 +805,11 @@ public final class Fn {
      * <p><b>Thread Safety:</b> The returned supplier is fully thread-safe. Multiple threads can
      * safely call {@code get()} concurrently. The implementation uses double-checked locking to
      * ensure that a successful delegate call is made at most once per expiration period, even under
-     * concurrent access. If the delegate throws, the failure is not cached and a later call retries it.
+     * concurrent access. Refreshes are serialized on a private monitor, not on the returned supplier
+     * itself, so caller code that synchronizes on the returned object can neither block nor interleave
+     * with a refresh. If the delegate throws, the failure is not cached and a later call retries it.
+     * Re-entering {@code get()} from within the delegate throws {@link IllegalStateException}; that failure
+     * is not cached and a later call may retry once the recursive attempt has unwound.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -799,15 +834,15 @@ public final class Fn {
      * @return a new supplier that caches the result of the delegate supplier for the specified
      *         duration. The returned supplier's {@code get()} method will return cached values
      *         within the expiration window and fetch fresh values when the cache expires
-     * @throws NullPointerException if {@code duration} is {@code null}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if {@code duration} is not
-     *         positive when converted to milliseconds.
+     * @throws IllegalArgumentException if {@code supplier} or {@code duration} is {@code null}, or if
+     *         {@code duration} is not positive when converted to milliseconds.
      * @see #memoizeWithExpiration(java.util.function.Supplier, long, TimeUnit)
      * @see Duration
      */
     public static <T> Supplier<T> memoizeWithExpiration(final java.util.function.Supplier<T> supplier, final Duration duration)
             throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
+        N.checkArgNotNull(duration, cs.duration);
 
         return memoizeWithExpiration(supplier, duration.toMillis(), TimeUnit.MILLISECONDS);
     }
@@ -820,6 +855,20 @@ public final class Fn {
      * <p>This implementation is <b>thread-safe</b> and uses a {@link ConcurrentHashMap} internally
      * for caching {@code non-null} inputs and a double-checked locking pattern for {@code null} inputs.
      * The function will only be invoked once per unique input, even in concurrent scenarios.
+     * Cached <i>hits</i> are lock-free, but <i>misses</i> are not: every invocation of the underlying function is
+     * serialized on a single lock owned by the returned function, so two threads computing two <i>different</i>
+     * keys still wait for one another, and the underlying function runs while that lock is held. Do not memoize a
+     * function that blocks waiting on another thread through this method.
+     *
+     * <p><b>Recursion:</b> A function that re-enters the memoized function with the <i>same</i> input throws
+     * {@link IllegalStateException}. That input stays poisoned for the rest of the enclosing computation, so a
+     * function that swallows the exception still cannot publish a value for it: the call for that input fails and
+     * no value is cached <i>for it</i>. Poisoning is per input, not per computation: <i>other</i> inputs the same
+     * function computes are unaffected, and recursion on a different input is supported. In a cycle across two
+     * inputs (a computation of {@code A} asks for {@code B}, whose computation asks for {@code A} again and
+     * swallows the failure) only {@code A} fails - {@code B} is computed and cached as usual, and because the
+     * cached {@code B} no longer re-enters {@code A}, retrying {@code A} then <i>succeeds</i>. Treat the
+     * exception as a defect report about the function, not as a stable outcome to depend on.
      *
      * <p><b>Null Handling:</b> Both {@code null} inputs and {@code null} return values are properly supported.
      * If the function returns {@code null} for a given input, that {@code null} result will be cached and returned
@@ -864,7 +913,9 @@ public final class Fn {
             private final Object resultMapLock = new Object();
             private volatile R resultForNull = none; //NOSONAR
             private final ThreadLocal<Set<T>> keysInProgress = new ThreadLocal<>();
-            private final ThreadLocal<IllegalStateException> recursiveFailure = new ThreadLocal<>();
+            // Poisoned inputs of the computations this thread is currently running, keyed by input:
+            // a recursion on one input must not fail an unrelated input computed by the same delegate.
+            private final ThreadLocal<Map<T, IllegalStateException>> recursiveFailures = new ThreadLocal<>();
 
             @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
             @Override
@@ -922,7 +973,8 @@ public final class Fn {
 
                 try {
                     final R computed = func.apply(key);
-                    final IllegalStateException failure = recursiveFailure.get();
+                    final Map<T, IllegalStateException> failures = recursiveFailures.get();
+                    final IllegalStateException failure = failures == null ? null : failures.get(key);
 
                     if (failure != null) {
                         throw failure;
@@ -932,9 +984,18 @@ public final class Fn {
                 } finally {
                     keys.remove(key);
 
+                    final Map<T, IllegalStateException> failures = recursiveFailures.get();
+
+                    if (failures != null) {
+                        failures.remove(key);
+
+                        if (failures.isEmpty()) {
+                            recursiveFailures.remove();
+                        }
+                    }
+
                     if (keys.isEmpty()) {
                         keysInProgress.remove();
-                        recursiveFailure.remove();
                     }
                 }
             }
@@ -943,11 +1004,18 @@ public final class Fn {
                 final Set<T> keys = keysInProgress.get();
 
                 if (keys != null && keys.contains(key)) {
-                    IllegalStateException failure = recursiveFailure.get();
+                    Map<T, IllegalStateException> failures = recursiveFailures.get();
+
+                    if (failures == null) {
+                        failures = new HashMap<>();
+                        recursiveFailures.set(failures);
+                    }
+
+                    IllegalStateException failure = failures.get(key);
 
                     if (failure == null) {
                         failure = new IllegalStateException("Recursive computation of memoized value");
-                        recursiveFailure.set(failure);
+                        failures.put(key, failure);
                     }
 
                     throw failure;
@@ -1017,22 +1085,30 @@ public final class Fn {
      */
     public static Runnable close(final AutoCloseable closeable) {
         return new Runnable() {
+            // A private monitor rather than `this`: the returned runnable is handed to the caller, and the
+            // monitor is held across the caller's own close() code, so a caller doing
+            // `synchronized (closer) { ... }` must not be able to block - or invert lock order against - a
+            // close in flight. Same reason memoizeWithExpiration and memoize(Function) use their own locks.
+            private final Object lock = new Object();
             private volatile boolean isClosed = false;
 
             @Override
             public void run() {
-                if (isClosed) {
-                    return;
-                }
-
-                synchronized (this) {
+                // No unsynchronized fast path: it let a concurrent second caller return while the close
+                // was still in flight, because isClosed means "someone has STARTED closing". Entering the
+                // monitor makes that caller wait until the resource really is closed - the guarantee
+                // Fn.shutdown(ExecutorService) has always given by acting inside the lock. isClosed is
+                // still flipped before the close so a RE-ENTRANT call (a close handler that runs this same
+                // runnable) short-circuits on the reentrant monitor instead of closing twice.
+                synchronized (lock) {
                     if (isClosed) {
                         return;
                     }
-                    isClosed = true;
-                }
 
-                IOUtil.close(closeable);
+                    isClosed = true;
+
+                    IOUtil.close(closeable);
+                }
             }
         };
     }
@@ -1046,28 +1122,42 @@ public final class Fn {
      * Fn.closeAll(s1,s2).run();                                  // closes all
      * }</pre>
      *
+     * <p>The resources are read <i>live</i>: {@code run()} closes whatever {@code a} holds at the moment it is
+     * called, not what it held when this method returned. Nulling its elements first therefore closes nothing
+     * and reports success, and replacing them afterwards brings the new resources in. Pass an array you do not
+     * mutate (or copy it yourself) if you want the set frozen at construction.</p>
+     *
      * @param a the array of AutoCloseable resources to close
      * @return a Runnable that closes all resources when executed
      * @see IOUtil#closeAll(AutoCloseable...)
      */
+    @SafeVarargs
     public static Runnable closeAll(final AutoCloseable... a) {
         return new Runnable() {
+            // A private monitor rather than `this`: the returned runnable is handed to the caller, and the
+            // monitor is held across the caller's own close() code, so a caller doing
+            // `synchronized (closer) { ... }` must not be able to block - or invert lock order against - a
+            // close in flight. Same reason memoizeWithExpiration and memoize(Function) use their own locks.
+            private final Object lock = new Object();
             private volatile boolean isClosed = false;
 
             @Override
             public void run() {
-                if (isClosed) {
-                    return;
-                }
-
-                synchronized (this) {
+                // No unsynchronized fast path: it let a concurrent second caller return while the close
+                // was still in flight, because isClosed means "someone has STARTED closing". Entering the
+                // monitor makes that caller wait until the resource really is closed - the guarantee
+                // Fn.shutdown(ExecutorService) has always given by acting inside the lock. isClosed is
+                // still flipped before the close so a RE-ENTRANT call (a close handler that runs this same
+                // runnable) short-circuits on the reentrant monitor instead of closing twice.
+                synchronized (lock) {
                     if (isClosed) {
                         return;
                     }
-                    isClosed = true;
-                }
 
-                IOUtil.closeAll(a);
+                    isClosed = true;
+
+                    IOUtil.closeAll(a);
+                }
             }
         };
     }
@@ -1081,28 +1171,42 @@ public final class Fn {
      * Fn.closeAll(Arrays.asList(s1, s2)).run();                  // closes all
      * }</pre>
      *
+     * <p>The resources are read <i>live</i>: {@code run()} closes whatever {@code c} holds at the moment it is
+     * called, not what it held when this method returned. Emptying {@code c} first therefore closes nothing and
+     * reports success, and adding to it afterwards brings the new resources in. Pass a collection you do not
+     * mutate (or copy it yourself) if you want the set frozen at construction, and do not let another thread
+     * modify {@code c} while {@code run()} is iterating it.</p>
+     *
      * @param c the collection of AutoCloseable resources to close
      * @return a Runnable that closes all resources when executed
      * @see IOUtil#closeAll(Iterable)
      */
     public static Runnable closeAll(final Collection<? extends AutoCloseable> c) {
         return new Runnable() {
+            // A private monitor rather than `this`: the returned runnable is handed to the caller, and the
+            // monitor is held across the caller's own close() code, so a caller doing
+            // `synchronized (closer) { ... }` must not be able to block - or invert lock order against - a
+            // close in flight. Same reason memoizeWithExpiration and memoize(Function) use their own locks.
+            private final Object lock = new Object();
             private volatile boolean isClosed = false;
 
             @Override
             public void run() {
-                if (isClosed) {
-                    return;
-                }
-
-                synchronized (this) {
+                // No unsynchronized fast path: it let a concurrent second caller return while the close
+                // was still in flight, because isClosed means "someone has STARTED closing". Entering the
+                // monitor makes that caller wait until the resource really is closed - the guarantee
+                // Fn.shutdown(ExecutorService) has always given by acting inside the lock. isClosed is
+                // still flipped before the close so a RE-ENTRANT call (a close handler that runs this same
+                // runnable) short-circuits on the reentrant monitor instead of closing twice.
+                synchronized (lock) {
                     if (isClosed) {
                         return;
                     }
-                    isClosed = true;
-                }
 
-                IOUtil.closeAll(c);
+                    isClosed = true;
+
+                    IOUtil.closeAll(c);
+                }
             }
         };
     }
@@ -1123,22 +1227,30 @@ public final class Fn {
      */
     public static Runnable closeQuietly(final AutoCloseable closeable) {
         return new Runnable() {
+            // A private monitor rather than `this`: the returned runnable is handed to the caller, and the
+            // monitor is held across the caller's own close() code, so a caller doing
+            // `synchronized (closer) { ... }` must not be able to block - or invert lock order against - a
+            // close in flight. Same reason memoizeWithExpiration and memoize(Function) use their own locks.
+            private final Object lock = new Object();
             private volatile boolean isClosed = false;
 
             @Override
             public void run() {
-                if (isClosed) {
-                    return;
-                }
-
-                synchronized (this) {
+                // No unsynchronized fast path: it let a concurrent second caller return while the close
+                // was still in flight, because isClosed means "someone has STARTED closing". Entering the
+                // monitor makes that caller wait until the resource really is closed - the guarantee
+                // Fn.shutdown(ExecutorService) has always given by acting inside the lock. isClosed is
+                // still flipped before the close so a RE-ENTRANT call (a close handler that runs this same
+                // runnable) short-circuits on the reentrant monitor instead of closing twice.
+                synchronized (lock) {
                     if (isClosed) {
                         return;
                     }
-                    isClosed = true;
-                }
 
-                IOUtil.closeQuietly(closeable);
+                    isClosed = true;
+
+                    IOUtil.closeQuietly(closeable);
+                }
             }
         };
     }
@@ -1153,28 +1265,42 @@ public final class Fn {
      * Fn.closeAllQuietly(s1,s2).run();                           // closes all quietly
      * }</pre>
      *
+     * <p>The resources are read <i>live</i>: {@code run()} closes whatever {@code a} holds at the moment it is
+     * called, not what it held when this method returned. Nulling its elements first therefore closes nothing
+     * and reports success, and replacing them afterwards brings the new resources in. Pass an array you do not
+     * mutate (or copy it yourself) if you want the set frozen at construction.</p>
+     *
      * @param a the array of AutoCloseable resources to close quietly
      * @return a Runnable that closes all resources quietly when executed
      * @see IOUtil#closeAllQuietly(AutoCloseable...)
      */
+    @SafeVarargs
     public static Runnable closeAllQuietly(final AutoCloseable... a) {
         return new Runnable() {
+            // A private monitor rather than `this`: the returned runnable is handed to the caller, and the
+            // monitor is held across the caller's own close() code, so a caller doing
+            // `synchronized (closer) { ... }` must not be able to block - or invert lock order against - a
+            // close in flight. Same reason memoizeWithExpiration and memoize(Function) use their own locks.
+            private final Object lock = new Object();
             private volatile boolean isClosed = false;
 
             @Override
             public void run() {
-                if (isClosed) {
-                    return;
-                }
-
-                synchronized (this) {
+                // No unsynchronized fast path: it let a concurrent second caller return while the close
+                // was still in flight, because isClosed means "someone has STARTED closing". Entering the
+                // monitor makes that caller wait until the resource really is closed - the guarantee
+                // Fn.shutdown(ExecutorService) has always given by acting inside the lock. isClosed is
+                // still flipped before the close so a RE-ENTRANT call (a close handler that runs this same
+                // runnable) short-circuits on the reentrant monitor instead of closing twice.
+                synchronized (lock) {
                     if (isClosed) {
                         return;
                     }
-                    isClosed = true;
-                }
 
-                IOUtil.closeAllQuietly(a);
+                    isClosed = true;
+
+                    IOUtil.closeAllQuietly(a);
+                }
             }
         };
     }
@@ -1189,28 +1315,42 @@ public final class Fn {
      * Fn.closeAllQuietly(Arrays.asList(s1, s2)).run();           // closes all quietly
      * }</pre>
      *
+     * <p>The resources are read <i>live</i>: {@code run()} closes whatever {@code c} holds at the moment it is
+     * called, not what it held when this method returned. Emptying {@code c} first therefore closes nothing and
+     * reports success, and adding to it afterwards brings the new resources in. Pass a collection you do not
+     * mutate (or copy it yourself) if you want the set frozen at construction, and do not let another thread
+     * modify {@code c} while {@code run()} is iterating it.</p>
+     *
      * @param c the collection of AutoCloseable resources to close quietly
      * @return a Runnable that closes all resources quietly when executed
      * @see IOUtil#closeAllQuietly(Iterable)
      */
     public static Runnable closeAllQuietly(final Collection<? extends AutoCloseable> c) {
         return new Runnable() {
+            // A private monitor rather than `this`: the returned runnable is handed to the caller, and the
+            // monitor is held across the caller's own close() code, so a caller doing
+            // `synchronized (closer) { ... }` must not be able to block - or invert lock order against - a
+            // close in flight. Same reason memoizeWithExpiration and memoize(Function) use their own locks.
+            private final Object lock = new Object();
             private volatile boolean isClosed = false;
 
             @Override
             public void run() {
-                if (isClosed) {
-                    return;
-                }
-
-                synchronized (this) {
+                // No unsynchronized fast path: it let a concurrent second caller return while the close
+                // was still in flight, because isClosed means "someone has STARTED closing". Entering the
+                // monitor makes that caller wait until the resource really is closed - the guarantee
+                // Fn.shutdown(ExecutorService) has always given by acting inside the lock. isClosed is
+                // still flipped before the close so a RE-ENTRANT call (a close handler that runs this same
+                // runnable) short-circuits on the reentrant monitor instead of closing twice.
+                synchronized (lock) {
                     if (isClosed) {
                         return;
                     }
-                    isClosed = true;
-                }
 
-                IOUtil.closeAllQuietly(c);
+                    isClosed = true;
+
+                    IOUtil.closeAllQuietly(c);
+                }
             }
         };
     }
@@ -1247,6 +1387,10 @@ public final class Fn {
         N.checkArgNotNull(service, cs.service);
 
         return new Runnable() {
+            // A private monitor rather than `this`: the returned runnable is handed to the caller, so a caller
+            // doing `synchronized (shutdownTask) { ... }` must not be able to block a shutdown in flight.
+            // Same reason memoizeWithExpiration and memoize(Function) use their own locks.
+            private final Object lock = new Object();
             private volatile boolean isClosed = false;
 
             @Override
@@ -1255,7 +1399,7 @@ public final class Fn {
                     return;
                 }
 
-                synchronized (this) {
+                synchronized (lock) {
                     if (isClosed) {
                         return;
                     }
@@ -1270,6 +1414,9 @@ public final class Fn {
     /**
      * Returns a Runnable that shuts down the specified ExecutorService and waits for termination.
      * The returned Runnable ensures the service is shut down only once, even if called multiple times.
+     *
+     * <p>Only the invocation that actually performs the shutdown waits for termination. Any later or
+     * concurrent invocation returns immediately without waiting.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1287,10 +1434,14 @@ public final class Fn {
      */
     public static Runnable shutdown(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit) throws IllegalArgumentException {
         N.checkArgNotNull(service, cs.service);
-        N.checkArgNotNull(timeUnit, cs.unit);
-        N.checkArgNotNegative(terminationTimeout, "terminationTimeout");
+        N.checkArgNotNull(timeUnit, cs.timeUnit);
+        N.checkArgNotNegative(terminationTimeout, cs.terminationTimeout);
 
         return new Runnable() {
+            // A private monitor rather than `this`: the returned runnable is handed to the caller, so a caller
+            // doing `synchronized (shutdownTask) { ... }` must not be able to block a shutdown in flight.
+            // Same reason memoizeWithExpiration and memoize(Function) use their own locks.
+            private final Object lock = new Object();
             private volatile boolean isClosed = false;
 
             @Override
@@ -1299,7 +1450,7 @@ public final class Fn {
                     return;
                 }
 
-                synchronized (this) {
+                synchronized (lock) {
                     if (isClosed) {
                         return;
                     }
@@ -1396,8 +1547,11 @@ public final class Fn {
 
     /**
      * Returns a {@code Function} that converts a {@code Throwable} to a {@code RuntimeException}.
-     * If the input is already a {@code RuntimeException}, it is returned as-is;
-     * otherwise, the {@code Throwable} is wrapped in a {@code RuntimeException}.
+     * Delegates to {@link ExceptionUtil#toRuntimeException(Throwable, boolean)} with interrupt restoration enabled.
+     * Recognized reflection and execution wrappers are unwrapped first; an ordinary {@code RuntimeException}
+     * is then returned as-is, while checked exceptions and errors are wrapped.
+     * A direct {@code InterruptedException} restores the current thread's interrupt flag, but an interruption
+     * reached through an {@code ExecutionException} belongs to another thread and does not set this thread's flag.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1446,16 +1600,18 @@ public final class Fn {
 
     /**
      * Returns a Consumer that sleeps for the specified number of milliseconds.
-     * The input value is ignored.
+     * The input value is ignored. A zero or negative {@code millis} results in no sleep.
+     * If the sleeping thread is interrupted, the interrupt flag is restored and a
+     * {@link RuntimeException} is thrown.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.sleep(100).accept("x");
-     * Fn.sleep(0).accept("x");
+     * Fn.sleep(100).accept("x");   // sleeps 100ms, then returns normally
+     * Fn.sleep(0).accept("x");     // no sleep, returns immediately
      * }</pre>
      *
      * @param <T> the type of the input (ignored)
-     * @param millis the sleep duration in milliseconds
+     * @param millis the sleep duration in milliseconds; zero or negative results in no sleep
      * @return a Consumer that sleeps for the specified duration
      * @see N#sleep(long)
      */
@@ -1465,15 +1621,18 @@ public final class Fn {
 
     /**
      * Returns a Consumer that sleeps uninterruptibly for the specified number of milliseconds.
-     * The input value is ignored. If interrupted, the interrupt status is preserved.
+     * The input value is ignored. A zero or negative {@code millis} results in no sleep.
+     * Unlike {@link #sleep(long)}, an interrupt does not cut the sleep short: the full duration is
+     * served and the interrupt status is restored before the consumer returns.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.sleepUninterruptibly(500).accept("x");
+     * Fn.sleepUninterruptibly(500).accept("x");   // sleeps 500ms uninterruptibly
+     * Fn.sleepUninterruptibly(0).accept("x");     // no sleep, returns immediately
      * }</pre>
      *
      * @param <T> the type of the input (ignored)
-     * @param millis the sleep duration in milliseconds
+     * @param millis the sleep duration in milliseconds; zero or negative results in no sleep
      * @return a Consumer that sleeps uninterruptibly for the specified duration
      * @see N#sleepUninterruptibly(long)
      */
@@ -1499,7 +1658,7 @@ public final class Fn {
      * @see RateLimiter#create(double)
      */
     @Stateful
-    public static <T> Consumer<T> rateLimiter(final double permitsPerSecond) {
+    public static <T> Consumer<T> rateLimiter(final double permitsPerSecond) throws IllegalArgumentException {
         return rateLimiter(RateLimiter.create(permitsPerSecond));
     }
 
@@ -1521,7 +1680,7 @@ public final class Fn {
      */
     @Stateful
     public static <T> Consumer<T> rateLimiter(final RateLimiter rateLimiter) throws IllegalArgumentException {
-        N.checkArgNotNull(rateLimiter);
+        N.checkArgNotNull(rateLimiter, cs.rateLimiter);
 
         return t -> rateLimiter.acquire();
     }
@@ -1560,7 +1719,7 @@ public final class Fn {
      * @see N#println(Object)
      */
     public static <T, U> BiConsumer<T, U> println(final String separator) throws IllegalArgumentException {
-        N.checkArgNotNull(separator);
+        N.checkArgNotNull(separator, cs.separator);
 
         switch (separator) { // NOSONAR
             case "=":
@@ -1696,7 +1855,7 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.toJson().apply(myObject);   // returns JSON string
-     * Fn.toJson().apply(null);       // returns "null"
+     * Fn.toJson().apply(null);       // returns "" (an empty string, not the text "null")
      * }</pre>
      *
      * @param <T> the type of the input object
@@ -1820,9 +1979,16 @@ public final class Fn {
     /**
      * Returns a Function that wraps objects with custom hash and equals functions.
      *
+     * <p>The returned function captures {@code hashFunction} and {@code equalsFunction} once, so every
+     * wrapper it produces shares those same instances and therefore compares with the others.
+     * Wrappers from separate {@code Fn.wrap(...)} calls can also compare equal when both factories
+     * receive the exact same hash and equality function instances. Textually identical lambda expressions
+     * do not guarantee shared delegate instances.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.wrap(String::hashCode, String::equals).apply("hello");  // returns a custom-hash/equals Wrapper of "hello"
+     * Function<String, Wrapper<String>> wrap = Fn.wrap(String::hashCode, String::equals);
+     * wrap.apply("hello").equals(wrap.apply("hello"));   // true
      * }</pre>
      *
      * @param <T> the type to wrap
@@ -1837,6 +2003,8 @@ public final class Fn {
         N.checkArgNotNull(hashFunction, cs.hashFunction);
         N.checkArgNotNull(equalsFunction, cs.equalsFunction);
 
+        // Capture the same function instances for every wrapper this factory produces, so they compare
+        // with one another. Separate factories also compare when they receive these same delegate instances.
         return t -> Wrapper.of(t, hashFunction, equalsFunction);
     }
 
@@ -2195,7 +2363,7 @@ public final class Fn {
      * @return a QuadFunction that creates Tuple4 objects
      * @see Tuple4#of(Object, Object, Object, Object)
      */
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings("rawtypes")
     public static <A, B, C, D> QuadFunction<A, B, C, D, Tuple4<A, B, C, D>> tuple4() {
         return (QuadFunction) TUPLE_4;
     }
@@ -2464,7 +2632,7 @@ public final class Fn {
      * @see Class#cast(Object)
      */
     public static <T, U> Function<T, U> cast(final Class<U> clazz) throws IllegalArgumentException {
-        N.checkArgNotNull(clazz);
+        N.checkArgNotNull(clazz, cs.clazz);
 
         return clazz::cast;
     }
@@ -2529,8 +2697,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.isNull(Map.Entry::getValue).test(N.newEntry("a", null));   // returns true
-     * Fn.isNull(Map.Entry::getValue).test(Map.entry("a", "x"));     // returns false
+     * Predicate<Map.Entry<String, String>> hasNullValue = Fn.isNull(Map.Entry::getValue);
+     * hasNullValue.test(N.newEntry("a", null));   // returns true
+     * hasNullValue.test(Map.entry("a", "x"));     // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2567,9 +2736,10 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.isEmpty(Map.Entry::getValue).test(Map.entry("a", ""));      // returns true
-     * Fn.isEmpty(Map.Entry::getValue).test(N.newEntry("a", null));   // returns true
-     * Fn.isEmpty(Map.Entry::getValue).test(Map.entry("a", "x"));     // returns false
+     * Predicate<Map.Entry<String, String>> hasEmptyValue = Fn.isEmpty(Map.Entry::getValue);
+     * hasEmptyValue.test(Map.entry("a", ""));      // returns true
+     * hasEmptyValue.test(N.newEntry("a", null));   // returns true
+     * hasEmptyValue.test(Map.entry("a", "x"));     // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2607,9 +2777,10 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.isBlank(Map.Entry::getValue).test(Map.entry("a", "   "));     // returns true
-     * Fn.isBlank(Map.Entry::getValue).test(N.newEntry("a", null));     // returns true
-     * Fn.isBlank(Map.Entry::getValue).test(Map.entry("a", "hello"));   // returns false
+     * Predicate<Map.Entry<String, String>> hasBlankValue = Fn.isBlank(Map.Entry::getValue);
+     * hasBlankValue.test(Map.entry("a", "   "));     // returns true
+     * hasBlankValue.test(N.newEntry("a", null));     // returns true
+     * hasBlankValue.test(Map.entry("a", "hello"));   // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2703,8 +2874,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.notNull(Map.Entry::getValue).test(Map.entry("a", "x"));     // returns true
-     * Fn.notNull(Map.Entry::getValue).test(N.newEntry("a", null));   // returns false
+     * Predicate<Map.Entry<String, String>> hasValue = Fn.notNull(Map.Entry::getValue);
+     * hasValue.test(Map.entry("a", "x"));     // returns true
+     * hasValue.test(N.newEntry("a", null));   // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2742,9 +2914,10 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.notEmpty(Map.Entry::getValue).test(Map.entry("a", "hello"));   // returns true
-     * Fn.notEmpty(Map.Entry::getValue).test(Map.entry("a", ""));        // returns false
-     * Fn.notEmpty(Map.Entry::getValue).test(N.newEntry("a", null));     // returns false
+     * Predicate<Map.Entry<String, String>> hasNonEmptyValue = Fn.notEmpty(Map.Entry::getValue);
+     * hasNonEmptyValue.test(Map.entry("a", "hello"));   // returns true
+     * hasNonEmptyValue.test(Map.entry("a", ""));        // returns false
+     * hasNonEmptyValue.test(N.newEntry("a", null));     // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2782,9 +2955,10 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.notBlank(Map.Entry::getValue).test(Map.entry("a", "hello"));   // returns true
-     * Fn.notBlank(Map.Entry::getValue).test(Map.entry("a", "   "));     // returns false
-     * Fn.notBlank(Map.Entry::getValue).test(N.newEntry("a", null));     // returns false
+     * Predicate<Map.Entry<String, String>> hasNonBlankValue = Fn.notBlank(Map.Entry::getValue);
+     * hasNonBlankValue.test(Map.entry("a", "hello"));   // returns true
+     * hasNonBlankValue.test(Map.entry("a", "   "));     // returns false
+     * hasNonBlankValue.test(N.newEntry("a", null));     // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2978,6 +3152,11 @@ public final class Fn {
      * Fn.greaterThan(5).test(3);    // returns false
      * }</pre>
      *
+     *
+     * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
+     * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
+     * {@code non-null}.</p>
+     *
      * @param <T> the type of objects that may be compared
      * @param target the value to compare against
      * @return a Predicate that tests if input &gt; target
@@ -2996,6 +3175,11 @@ public final class Fn {
      * Fn.greaterThanOrEqual(5).test(5);    // returns true
      * Fn.greaterThanOrEqual(5).test(3);    // returns false
      * }</pre>
+     *
+     *
+     * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
+     * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
+     * {@code non-null}.</p>
      *
      * @param <T> the type of objects that may be compared
      * @param target the value to compare against
@@ -3016,6 +3200,11 @@ public final class Fn {
      * Fn.lessThan(5).test(10);   // returns false
      * }</pre>
      *
+     *
+     * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
+     * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
+     * {@code non-null}.</p>
+     *
      * @param <T> the type of objects that may be compared
      * @param target the value to compare against
      * @return a Predicate that tests if input &lt; target
@@ -3034,6 +3223,11 @@ public final class Fn {
      * Fn.lessThanOrEqual(5).test(5);    // returns true
      * Fn.lessThanOrEqual(5).test(10);   // returns false
      * }</pre>
+     *
+     *
+     * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
+     * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
+     * {@code non-null}.</p>
      *
      * @param <T> the type of objects that may be compared
      * @param target the value to compare against
@@ -3054,6 +3248,11 @@ public final class Fn {
      * Fn.gtAndLt(5,15).test(5);    // returns false
      * Fn.gtAndLt(5,15).test(15);   // returns false
      * }</pre>
+     *
+     *
+     * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
+     * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
+     * {@code non-null}.</p>
      *
      * @param <T> the type of objects that may be compared
      * @param minValue the lower bound (exclusive)
@@ -3076,6 +3275,11 @@ public final class Fn {
      * Fn.geAndLt(5,15).test(15);   // returns false
      * }</pre>
      *
+     *
+     * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
+     * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
+     * {@code non-null}.</p>
+     *
      * @param <T> the type of objects that may be compared
      * @param minValue the lower bound (inclusive)
      * @param maxValue the upper bound (exclusive)
@@ -3096,6 +3300,11 @@ public final class Fn {
      * Fn.geAndLe(5,15).test(15);   // returns true
      * Fn.geAndLe(5,15).test(4);    // returns false
      * }</pre>
+     *
+     *
+     * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
+     * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
+     * {@code non-null}.</p>
      *
      * @param <T> the type of objects that may be compared
      * @param minValue the lower bound (inclusive)
@@ -3118,6 +3327,11 @@ public final class Fn {
      * Fn.gtAndLe(5,15).test(5);    // returns false
      * }</pre>
      *
+     *
+     * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
+     * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
+     * {@code non-null}.</p>
+     *
      * @param <T> the type of objects that may be compared
      * @param minValue the lower bound (exclusive)
      * @param maxValue the upper bound (inclusive)
@@ -3138,6 +3352,11 @@ public final class Fn {
      * Fn.between(5,15).test(5);    // returns false
      * Fn.between(5,15).test(15);   // returns false
      * }</pre>
+     *
+     *
+     * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
+     * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
+     * {@code non-null}.</p>
      *
      * @param <T> the type of objects that may be compared
      * @param minValue the lower bound (exclusive)
@@ -3161,6 +3380,12 @@ public final class Fn {
      * Fn.in(List.of(1,2,3)).test(5);      // returns false
      * }</pre>
      *
+     * <p>Membership is evaluated live: every call to {@code test(...)} consults {@code c} as it is at
+     * that moment, so elements added to or removed from {@code c} after this method returns are taken
+     * into account. The returned predicate propagates whatever {@code c.contains(...)} throws - testing
+     * {@code null} against a collection that does not permit {@code null} elements (for example
+     * {@code List.of()}) throws {@link NullPointerException}, empty or not.</p>
+     *
      * @param <T> the type of the input to the predicate
      * @param c the collection to check membership in
      * @return a Predicate that tests for collection membership
@@ -3168,7 +3393,7 @@ public final class Fn {
      * @see Collection#contains(Object)
      */
     public static <T> Predicate<T> in(final Collection<?> c) throws IllegalArgumentException {
-        N.checkArgNotNull(c);
+        N.checkArgNotNull(c, cs.c);
 
         // Evaluate containment live (like notIn): freezing emptiness at construction would make an
         // initially-empty-then-populated collection silently mis-test, and contains() on an empty
@@ -3186,6 +3411,12 @@ public final class Fn {
      * Fn.notIn(List.of("a","b")).test("a");   // returns false
      * }</pre>
      *
+     * <p>Membership is evaluated live: every call to {@code test(...)} consults {@code c} as it is at
+     * that moment, so elements added to or removed from {@code c} after this method returns are taken
+     * into account. The returned predicate propagates whatever {@code c.contains(...)} throws - testing
+     * {@code null} against a collection that does not permit {@code null} elements (for example
+     * {@code List.of()}) throws {@link NullPointerException}, empty or not.</p>
+     *
      * @param <T> the type of the input to the predicate
      * @param c the collection to check membership in
      * @return a Predicate that tests for non-membership in a collection
@@ -3193,7 +3424,7 @@ public final class Fn {
      * @see Collection#contains(Object)
      */
     public static <T> Predicate<T> notIn(final Collection<?> c) throws IllegalArgumentException {
-        N.checkArgNotNull(c);
+        N.checkArgNotNull(c, cs.c);
 
         // Evaluate containment live: freezing emptiness at construction would make an
         // initially-empty-then-populated collection silently mis-test.
@@ -3218,7 +3449,7 @@ public final class Fn {
      * @see Class#isInstance(Object)
      */
     public static <T> Predicate<T> instanceOf(final Class<?> clazz) throws IllegalArgumentException {
-        N.checkArgNotNull(clazz);
+        N.checkArgNotNull(clazz, cs.clazz);
 
         return clazz::isInstance;
     }
@@ -3234,13 +3465,18 @@ public final class Fn {
      * Fn.subtypeOf(String.class).test(Integer.class);   // returns false
      * }</pre>
      *
+     * <p>Unlike {@link #instanceOf(Class)}, which tests {@code false} for {@code null}, the returned
+     * predicate throws a {@link NullPointerException} for a {@code null} input - that is what
+     * {@link Class#isAssignableFrom(Class)} does with a {@code null} argument.</p>
+     *
      * @param clazz the superclass to test against
      * @return a Predicate that tests if classes are subtypes of clazz
      * @throws IllegalArgumentException if clazz is null.
      * @see Class#isAssignableFrom(Class)
+     * @see #instanceOf(Class)
      */
     public static Predicate<Class<?>> subtypeOf(final Class<?> clazz) throws IllegalArgumentException {
-        N.checkArgNotNull(clazz);
+        N.checkArgNotNull(clazz, cs.clazz);
 
         return clazz::isAssignableFrom;
     }
@@ -3262,7 +3498,7 @@ public final class Fn {
      * @see String#startsWith(String)
      */
     public static Predicate<String> startsWith(final String prefix) throws IllegalArgumentException {
-        N.checkArgNotNull(prefix);
+        N.checkArgNotNull(prefix, cs.prefix);
 
         return value -> value != null && value.startsWith(prefix);
     }
@@ -3284,7 +3520,7 @@ public final class Fn {
      * @see String#endsWith(String)
      */
     public static Predicate<String> endsWith(final String suffix) throws IllegalArgumentException {
-        N.checkArgNotNull(suffix);
+        N.checkArgNotNull(suffix, cs.suffix);
 
         return value -> value != null && value.endsWith(suffix);
     }
@@ -3306,7 +3542,7 @@ public final class Fn {
      * @see String#contains(CharSequence)
      */
     public static Predicate<String> contains(final String valueToFind) throws IllegalArgumentException {
-        N.checkArgNotNull(valueToFind);
+        N.checkArgNotNull(valueToFind, cs.valueToFind);
 
         return value -> value != null && value.contains(valueToFind);
     }
@@ -3328,7 +3564,7 @@ public final class Fn {
      * @see String#startsWith(String)
      */
     public static Predicate<String> notStartsWith(final String prefix) throws IllegalArgumentException {
-        N.checkArgNotNull(prefix);
+        N.checkArgNotNull(prefix, cs.prefix);
 
         return value -> value == null || !value.startsWith(prefix);
     }
@@ -3350,7 +3586,7 @@ public final class Fn {
      * @see String#endsWith(String)
      */
     public static Predicate<String> notEndsWith(final String suffix) throws IllegalArgumentException {
-        N.checkArgNotNull(suffix);
+        N.checkArgNotNull(suffix, cs.suffix);
 
         return value -> value == null || !value.endsWith(suffix);
     }
@@ -3372,7 +3608,7 @@ public final class Fn {
      * @see String#contains(CharSequence)
      */
     public static Predicate<String> notContains(final String str) throws IllegalArgumentException {
-        N.checkArgNotNull(str);
+        N.checkArgNotNull(str, cs.str);
 
         return value -> value == null || !value.contains(str);
     }
@@ -3395,7 +3631,7 @@ public final class Fn {
      * @see Matcher#find()
      */
     public static Predicate<CharSequence> matches(final Pattern pattern) throws IllegalArgumentException {
-        N.checkArgNotNull(pattern);
+        N.checkArgNotNull(pattern, cs.pattern);
 
         return value -> value != null && pattern.matcher(value).find();
     }
@@ -3673,6 +3909,10 @@ public final class Fn {
     /**
      * Returns a Predicate that performs logical AND on all predicates in the collection.
      *
+     * <p>The collection is copied, so later changes to it do not affect the returned predicate. (Reading it live
+     * would let an emptied collection silently turn this into {@link #alwaysTrue()}, and would make the returned
+     * predicate unsafe to share with threads that mutate the collection.)</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.and(N.asList((Predicate<String>) s -> !s.isEmpty(), s -> s.length() < 5)).test("abc");   // returns true
@@ -3687,8 +3927,10 @@ public final class Fn {
     public static <T> Predicate<T> and(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
 
+        final List<? extends java.util.function.Predicate<? super T>> predicates = new ArrayList<>(c);
+
         return t -> {
-            for (final java.util.function.Predicate<? super T> p : c) {
+            for (final java.util.function.Predicate<? super T> p : predicates) {
                 if (!p.test(t)) {
                     return false;
                 }
@@ -3752,11 +3994,20 @@ public final class Fn {
     /**
      * Returns a BiPredicate that performs logical AND on all bi-predicates in the list.
      *
+     * <p>The collection is copied, so later changes to it do not affect the returned predicate. (Reading it live
+     * would let an emptied collection silently turn this into {@link #alwaysTrue()}, and would make the returned
+     * predicate unsafe to share with threads that mutate the collection.)</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.and(N.asList((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0)).test("ab", 2);   // returns true
      * Fn.and(N.asList((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0)).test("ab", 3);   // returns false
      * }</pre>
+     *
+     * <p>This overload takes a {@code List}, not the {@code Collection} that the
+     * {@link #and(Collection)} sibling takes: both would erase to {@code and(Collection)} and could
+     * not coexist. Copy a non-{@code List} collection - {@code Fn.and(new ArrayList<>(set))} - to
+     * use it here.</p>
      *
      * @param <T> the type of the first input to the predicate
      * @param <U> the type of the second input to the predicate
@@ -3767,8 +4018,10 @@ public final class Fn {
     public static <T, U> BiPredicate<T, U> and(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
 
+        final List<? extends java.util.function.BiPredicate<? super T, ? super U>> predicates = new ArrayList<>(c);
+
         return (t, u) -> {
-            for (final java.util.function.BiPredicate<? super T, ? super U> p : c) {
+            for (final java.util.function.BiPredicate<? super T, ? super U> p : predicates) {
                 if (!p.test(t, u)) {
                     return false;
                 }
@@ -3875,6 +4128,10 @@ public final class Fn {
     /**
      * Returns a Predicate that performs logical OR on all predicates in the collection.
      *
+     * <p>The collection is copied, so later changes to it do not affect the returned predicate. (Reading it live
+     * would let an emptied collection silently turn this into {@link #alwaysFalse()}, and would make the returned
+     * predicate unsafe to share with threads that mutate the collection.)</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.or(N.asList((Predicate<String>) String::isEmpty, s -> s.length() > 3)).test("hello");   // returns true
@@ -3889,8 +4146,10 @@ public final class Fn {
     public static <T> Predicate<T> or(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
 
+        final List<? extends java.util.function.Predicate<? super T>> predicates = new ArrayList<>(c);
+
         return t -> {
-            for (final java.util.function.Predicate<? super T> p : c) {
+            for (final java.util.function.Predicate<? super T> p : predicates) {
                 if (p.test(t)) {
                     return true;
                 }
@@ -3954,11 +4213,20 @@ public final class Fn {
     /**
      * Returns a BiPredicate that performs logical OR on all bi-predicates in the list.
      *
+     * <p>The collection is copied, so later changes to it do not affect the returned predicate. (Reading it live
+     * would let an emptied collection silently turn this into {@link #alwaysFalse()}, and would make the returned
+     * predicate unsafe to share with threads that mutate the collection.)</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.or(N.asList((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n > 0)).test("", 5);      // returns true
      * Fn.or(N.asList((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n > 0)).test("ab", -1);   // returns false
      * }</pre>
+     *
+     * <p>This overload takes a {@code List}, not the {@code Collection} that the
+     * {@link #or(Collection)} sibling takes: both would erase to {@code or(Collection)} and could
+     * not coexist. Copy a non-{@code List} collection - {@code Fn.or(new ArrayList<>(set))} - to
+     * use it here.</p>
      *
      * @param <T> the type of the first input to the predicate
      * @param <U> the type of the second input to the predicate
@@ -3969,8 +4237,10 @@ public final class Fn {
     public static <T, U> BiPredicate<T, U> or(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
 
+        final List<? extends java.util.function.BiPredicate<? super T, ? super U>> predicates = new ArrayList<>(c);
+
         return (t, u) -> {
-            for (final java.util.function.BiPredicate<? super T, ? super U> p : c) {
+            for (final java.util.function.BiPredicate<? super T, ? super U> p : predicates) {
                 if (p.test(t, u)) {
                     return true;
                 }
@@ -3985,8 +4255,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.testByKey(k->k>5).test(Map.entry(10,"v"));        // returns true
-     * Fn.testByKey(k->k!=null).test(Map.entry("k","v"));   // returns true
+     * Fn.<Integer, String> testByKey(k -> k > 5).test(Map.entry(10, "v"));       // returns true
+     * Fn.<String, String> testByKey(k -> k != null).test(Map.entry("k", "v"));   // returns true
      * }</pre>
      *
      * @param <K> the key type
@@ -4006,8 +4276,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.testByValue(v->v>50).test(Map.entry("k",100));          // returns true
-     * Fn.testByValue(String::isEmpty).test(Map.entry("k",""));   // returns true
+     * Fn.<String, Integer> testByValue(v -> v > 50).test(Map.entry("k", 100));          // returns true
+     * Fn.<String, String> testByValue(String::isEmpty).test(Map.entry("k", ""));        // returns true
      * }</pre>
      *
      * @param <K> the key type
@@ -4067,7 +4337,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.applyByKey(k->k*2).apply(Map.entry(5,"v"));             // returns 10
+     * Fn.<Integer, String, Integer> applyByKey(k -> k * 2).apply(Map.entry(5, "v"));   // returns 10
      * }</pre>
      *
      * @param <K> the key type
@@ -4089,7 +4359,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.applyByValue(v->v*2).apply(Map.entry("k",5));           // returns 10
+     * Fn.<String, Integer, Integer> applyByValue(v -> v * 2).apply(Map.entry("k", 5));   // returns 10
      * }</pre>
      *
      * @param <K> the key type
@@ -4112,7 +4382,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.mapKey(k->k.toUpperCase()).apply(Map.entry("key","val")); // returns Entry("KEY","val")
+     * Fn.<String, String, String> mapKey(k -> k.toUpperCase()).apply(Map.entry("key", "val"));   // returns Entry("KEY", "val")
      * }</pre>
      *
      * @param <K> the key type
@@ -4135,7 +4405,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.mapValue(v->v*2).apply(Map.entry("k",5));               // returns Entry("k",10)
+     * Fn.<String, Integer, Integer> mapValue(v -> v * 2).apply(Map.entry("k", 5));   // returns Entry("k", 10)
      * }</pre>
      *
      * @param <K> the key type
@@ -4228,7 +4498,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Map<String, Integer> inventory = Map.of("apple", 5, "banana", 12, "cherry", 3);
+     * Map<String, Integer> inventory = new TreeMap<>(Map.of("apple", 5, "banana", 12, "cherry", 3));
      *
      * // Create descriptive strings from map entries
      * List<String> descriptions = inventory.entrySet().stream()
@@ -4992,6 +5262,7 @@ public final class Fn {
      *
      * <p>This method provides a reusable function for extracting int values from any Number subtype
      * (Integer, Long, Double, etc.). It can be used in stream operations to convert numbers to ints.
+     * A {@code null} argument yields {@code 0}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5017,6 +5288,7 @@ public final class Fn {
      *
      * <p>This method provides a reusable function for extracting long values from any Number subtype
      * (Integer, Long, Double, etc.). It can be used in stream operations to convert numbers to longs.
+     * A {@code null} argument yields {@code 0}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5042,6 +5314,9 @@ public final class Fn {
      *
      * <p>This method provides a reusable function for extracting double values from any Number subtype
      * (Integer, Long, Double, etc.). It can be used in stream operations to convert numbers to doubles.
+     * A {@code Float} is widened through its canonical decimal spelling (so {@code 1.21f} becomes
+     * {@code 1.21}, not {@code 1.2100000381469727}); every other {@code Number} is converted with
+     * {@link Number#doubleValue()}. A {@code null} argument yields {@code 0}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5053,7 +5328,7 @@ public final class Fn {
      *
      * @param <T> the Number type
      * @return a ToDoubleFunction that converts Numbers to double
-     * @see Number#doubleValue()
+     * @see Numbers#toDouble(Object)
      * @see #numToInt()
      * @see #numToLong()
      */
@@ -5109,7 +5384,7 @@ public final class Fn {
     private static final BinaryOperator<Object> RETURN_SECOND = (a, b) -> b;
 
     /** The Constant MIN. */
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings("rawtypes")
     private static final BinaryOperator<Comparable> MIN = (a, b) -> Comparators.NULL_LAST_COMPARATOR.compare(a, b) <= 0 ? a : b;
 
     @SuppressWarnings("rawtypes")
@@ -5159,10 +5434,8 @@ public final class Fn {
     private static final Function<Future<Object>, Object> FUTURE_GETTER = f -> {
         try {
             return f.get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // Restore interrupt status
-            throw ExceptionUtil.toRuntimeException(e, true);
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
+            // toRuntimeException(e, true) already restores the interrupt status for an InterruptedException.
             throw ExceptionUtil.toRuntimeException(e, true);
         }
     };
@@ -5350,15 +5623,20 @@ public final class Fn {
      * <p>The predicate allows elements to pass for a specified duration in milliseconds.
      * After the time limit expires, all subsequent elements will fail the test.
      *
+     * <p><b>The window opens when this method is called</b>, not when the returned predicate is first evaluated,
+     * so a predicate that is built well before the pipeline that uses it may already be expired on its first
+     * {@code test(..)}. Elapsed time is measured with {@link System#nanoTime()} and is therefore unaffected by
+     * wall-clock adjustments.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Predicate<Object> p = Fn.timeLimit(5000);   // 5 seconds
+     * Predicate<Object> p = Fn.timeLimit(5000);   // 5 seconds, counted from this line
      * p.test("data");                             // returns true within 5 sec, false after
      * Fn.timeLimit(0).test("data");               // returns false (zero time limit)
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
-     * @param timeInMillis the time limit in milliseconds
+     * @param timeInMillis the time limit in milliseconds, counted from this call
      * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      * @throws IllegalArgumentException if timeInMillis is negative.
      */
@@ -5371,13 +5649,15 @@ public final class Fn {
             return Fn.alwaysFalse();
         }
 
-        final java.util.concurrent.atomic.AtomicBoolean ongoing = new java.util.concurrent.atomic.AtomicBoolean(true);
+        // A captured deadline rather than a scheduled flag-flip: the previous implementation queued a task on a
+        // shared scheduler that could never be cancelled (one live task per predicate created), and forced Fn's
+        // class initializer to build a thread pool plus a JVM shutdown hook for a method most callers never use.
+        // Saturate the conversion, and compare by subtraction so the arithmetic stays correct across the point
+        // where nanoTime() wraps.
+        final long durationNanos = timeInMillis > Long.MAX_VALUE / 1_000_000L ? Long.MAX_VALUE : timeInMillis * 1_000_000L;
+        final long deadline = System.nanoTime() + durationNanos;
 
-        final Runnable task = () -> ongoing.set(false);
-
-        SCHEDULER.schedule(task, timeInMillis, TimeUnit.MILLISECONDS);
-
-        return t -> ongoing.get();
+        return t -> System.nanoTime() - deadline < 0;
     }
 
     /**
@@ -5393,8 +5673,11 @@ public final class Fn {
      * Fn.timeLimit(Duration.ofMillis(0)).test("data");   // returns false (zero time limit)
      * }</pre>
      *
+     * <p>As with {@link #timeLimit(long)}, the window opens when this method is called rather than on first use.
+     * The {@code Duration} is converted with {@link Duration#toMillis()}.</p>
+     *
      * @param <T> the type of the input to the predicate
-     * @param duration the time limit as a Duration
+     * @param duration the time limit as a Duration, counted from this call
      * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
      * @throws IllegalArgumentException if duration is {@code null} or negative.
      */
@@ -5438,7 +5721,9 @@ public final class Fn {
      * Returns a stateful {@code Predicate}. Don't save or cache for reuse or use it in parallel stream.
      *
      * <p>The predicate tests elements along with their index position using the provided IntObjPredicate.
-     * The index starts from 0 and increments for each element tested.
+     * The index starts from 0 and increments for each element tested, including when the callback throws.
+     * After index {@link Integer#MAX_VALUE}, every invocation throws {@link ArithmeticException}
+     * before calling the supplied predicate.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5614,7 +5899,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.minByKey().apply(Map.entry("a",1),Map.entry("b",2));    // returns Entry("a",1)
+     * Fn.<String, Integer> minByKey().apply(Map.entry("a", 1), Map.entry("b", 2));   // returns Entry("a", 1)
      * }</pre>
      *
      * @param <K> the type of the Comparable keys
@@ -5633,7 +5918,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.minByValue().apply(Map.entry("a",5),Map.entry("b",2));  // returns Entry("b",2)
+     * Fn.<String, Integer> minByValue().apply(Map.entry("a", 5), Map.entry("b", 2));   // returns Entry("b", 2)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -5739,7 +6024,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.maxByKey().apply(Map.entry("a",1),Map.entry("b",2));    // returns Entry("b",2)
+     * Fn.<String, Integer> maxByKey().apply(Map.entry("a", 1), Map.entry("b", 2));   // returns Entry("b", 2)
      * }</pre>
      *
      * @param <K> the type of the Comparable keys
@@ -5758,7 +6043,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.maxByValue().apply(Map.entry("a",5),Map.entry("b",2));  // returns Entry("a",5)
+     * Fn.<String, Integer> maxByValue().apply(Map.entry("a", 5), Map.entry("b", 2));   // returns Entry("a", 5)
      * }</pre>
      *
      * @param <K> the type of the keys
@@ -5835,8 +6120,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.compare().apply("apple","banana");   // returns negative
-     * Fn.compare().apply(5,5);                // returns 0
+     * Fn.<String> compare().apply("apple", "banana");   // returns a negative value
+     * Fn.<Integer> compare().apply(5, 5);               // returns 0
      * }</pre>
      *
      * @param <T> the type of the Comparable values
@@ -5877,23 +6162,27 @@ public final class Fn {
     /**
      * Returns a Function that gets the result from a Future, returning the default value on error.
      *
-     * <p>If the Future throws an InterruptedException or ExecutionException, the function
-     * will return the provided default value instead of propagating the exception. This is useful
-     * for handling futures in streams without explicit exception handling.
+     * <p>If the {@code Future} throws an {@link InterruptedException} or an
+     * {@link java.util.concurrent.ExecutionException}, the function returns {@code defaultValue} instead of
+     * propagating. An {@code InterruptedException} additionally restores the current thread's interrupt status.
+     * Unchecked failures are <b>not</b> converted: in particular a
+     * {@link java.util.concurrent.CancellationException} from a cancelled task propagates to the caller.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Future<String>> futures = executeTasks();
      *
-     * // Get results, using "FAILED" for any that error
+     * // Get results, using "FAILED" for any that failed or were interrupted
      * List<String> results = futures.stream()
      *     .map(Fn.futureGetOrDefaultOnError("FAILED"))
      *     .collect(Collectors.toList());
      * }</pre>
      *
      * @param <T> the type of the Future's result
-     * @param defaultValue the value to return if the Future throws an exception
-     * @return a Function that gets the Future's result or returns the default value on error
+     * @param defaultValue the value to return if the {@code Future} completed with an
+     *                     {@link java.util.concurrent.ExecutionException} or the wait was interrupted
+     * @return a Function that gets the {@code Future}'s result, or {@code defaultValue} if the task failed
+     *         or the wait was interrupted
      * @see #futureGet()
      */
     @Beta
@@ -5913,8 +6202,11 @@ public final class Fn {
     /**
      * Returns a Function that gets the result from a Future.
      *
-     * <p>If the Future throws an InterruptedException or ExecutionException, the function
-     * will wrap it in a RuntimeException and throw it.
+     * <p>An {@link InterruptedException} is wrapped and rethrown, and the interrupt flag is restored. An
+     * {@link java.util.concurrent.ExecutionException} and recognized reflection wrappers are <b>unwrapped</b>:
+     * an ordinary {@link RuntimeException} cause is rethrown unchanged, while checked exceptions and errors
+     * are wrapped in a {@code RuntimeException}. An interruption reached through an {@code ExecutionException}
+     * belongs to the task's thread and does not set the current thread's interrupt flag.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6176,9 +6468,9 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
-     * Supplier<String> supplier = () -> "value";
+     * Supplier<String> explicitSupplier = () -> "value";
      * // You can use:
-     * var supplier = Fn.s(() -> "value");
+     * var inferredSupplier = Fn.s(() -> "value");
      * }</pre>
      *
      * @param <T> the type of results supplied by the supplier
@@ -6259,9 +6551,9 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
-     * Predicate<String> predicate = s -> s.length() > 5;
+     * Predicate<String> explicitPredicate = s -> s.length() > 5;
      * // You can use:
-     * var predicate = Fn.p((String s) -> s.length() > 5);
+     * var inferredPredicate = Fn.p((String s) -> s.length() > 5);
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -6353,9 +6645,9 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
-     * BiPredicate<String, Integer> biPredicate = (str, len) -> str.length() > len;
+     * BiPredicate<String, Integer> explicitBiPredicate = (str, len) -> str.length() > len;
      * // You can use:
-     * var biPredicate = Fn.p((String str, Integer len) -> str.length() > len);
+     * var inferredBiPredicate = Fn.p((String str, Integer len) -> str.length() > len);
      * }</pre>
      *
      * @param <T> the type of the first input to the bi-predicate
@@ -6418,10 +6710,10 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
-     * TriPredicate<String, Integer, Boolean> triPredicate =
+     * TriPredicate<String, Integer, Boolean> explicitTriPredicate =
      *     (str, len, flag) -> flag && str.length() > len;
      * // You can use:
-     * var triPredicate = Fn.p((String str, Integer len, Boolean flag) ->
+     * var inferredTriPredicate = Fn.p((String str, Integer len, Boolean flag) ->
      *     flag && str.length() > len);
      * }</pre>
      *
@@ -6452,9 +6744,9 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Instead of explicitly typing:
-     * Consumer<String> logger = str -> System.out.println("Log: " + str);
+     * Consumer<String> explicitLogger = str -> System.out.println("Log: " + str);
      * // You can use:
-     * var logger = Fn.c((String str) -> System.out.println("Log: " + str));
+     * var inferredLogger = Fn.c((String str) -> System.out.println("Log: " + str));
      * }</pre>
      *
      * @param <T> the type of the input to the consumer
@@ -6810,7 +7102,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.o(String::toUpperCase).apply("hello");                  // returns "HELLO"
+     * Fn.o((String s) -> s.toUpperCase()).apply("hello");   // returns "HELLO"
      * }</pre>
      *
      * @param <T> the type of the operand and result of the unary operator
@@ -7400,7 +7692,8 @@ public final class Fn {
      *
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
      * without explicit try-catch blocks. Any <i>checked</i> exception thrown by the function will be caught and the provided
-     * default value will be returned instead; unchecked exceptions ({@link RuntimeException} / {@link Error}) propagate to the caller.</p>
+     * default value will be returned instead; unchecked exceptions ({@link RuntimeException} / {@link Error}) propagate to the caller.
+     * If the checked exception is an {@link InterruptedException}, the current thread's interrupt status is restored.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7429,6 +7722,9 @@ public final class Fn {
             } catch (final RuntimeException e) {
                 throw e;
             } catch (final Exception e) {
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
                 return defaultOnError;
             }
         };
@@ -7548,7 +7844,8 @@ public final class Fn {
      *
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
      * without explicit try-catch blocks. Any <i>checked</i> exception thrown by the bi-function will be caught and the provided
-     * default value will be returned instead; unchecked exceptions ({@link RuntimeException} / {@link Error}) propagate to the caller.</p>
+     * default value will be returned instead; unchecked exceptions ({@link RuntimeException} / {@link Error}) propagate to the caller.
+     * If the checked exception is an {@link InterruptedException}, the current thread's interrupt status is restored.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7577,6 +7874,9 @@ public final class Fn {
             } catch (final RuntimeException e) {
                 throw e;
             } catch (final Exception e) {
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
                 return defaultOnError;
             }
         };
@@ -7661,7 +7961,8 @@ public final class Fn {
      *
      * <p>This utility method simplifies functional programming by allowing the use of operations that might throw checked exceptions
      * without explicit try-catch blocks. Any <i>checked</i> exception thrown by the tri-function will be caught and the provided
-     * default value will be returned instead; unchecked exceptions ({@link RuntimeException} / {@link Error}) propagate to the caller.</p>
+     * default value will be returned instead; unchecked exceptions ({@link RuntimeException} / {@link Error}) propagate to the caller.
+     * If the checked exception is an {@link InterruptedException}, the current thread's interrupt status is restored.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7691,6 +7992,9 @@ public final class Fn {
             } catch (final RuntimeException e) {
                 throw e;
             } catch (final Exception e) {
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
                 return defaultOnError;
             }
         };
@@ -9870,7 +10174,9 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the sum of all elements in a byte array.
-         * The sum is accumulated in and returned as an Integer; large arrays can overflow the integer range.
+         * The sum is accumulated in a {@code long} and narrowed with {@link Numbers#toIntExact(long)}, so a total
+         * outside the {@code int} range throws {@link ArithmeticException} rather than wrapping - the same
+         * contract {@code FI.sum()} documents.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10211,7 +10517,9 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the sum of all elements in a short array.
-         * The sum is accumulated in and returned as an Integer; large arrays can overflow the integer range.
+         * The sum is accumulated in a {@code long} and narrowed with {@link Numbers#toIntExact(long)}, so a total
+         * outside the {@code int} range throws {@link ArithmeticException} rather than wrapping - the same
+         * contract {@code FI.sum()} documents.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -10981,6 +11289,23 @@ public final class Fn {
     /**
      * Utility class for FloatPredicate/Function/Consumer operations.
      * This class provides common float predicates, functions, and binary operators.
+     *
+     * <p><b>How {@code NaN} and {@code -0.0} are treated</b> &mdash; this class deliberately mixes three
+     * conventional policies, so two spellings of what looks like the same test can disagree:</p>
+     * <ul>
+     *   <li>{@link #positive()} and {@link #notNegative()} use the primitive {@code >} / {@code >=} operators:
+     *       every comparison against {@code NaN} is {@code false}, and {@code -0.0} counts as not negative.</li>
+     *   <li>{@link #equal()}, {@link #notEqual()}, {@link #greaterThan()}, {@link #greaterThanOrEqual()},
+     *       {@link #lessThan()} and {@link #lessThanOrEqual()} use {@code N.compare} / {@code N.equals}, that is
+     *       the {@link Float#compare(float, float)} total order: {@code NaN} sorts above every other value and equals
+     *       itself, and {@code -0.0} sorts strictly below {@code 0.0}.</li>
+     *   <li>{@link FloatBinaryOperators#MIN} and {@link FloatBinaryOperators#MAX} use {@link Math} {@code min}/{@code max},
+     *       which propagate {@code NaN} and also distinguish {@code -0.0} from {@code 0.0}.</li>
+     * </ul>
+     * <p>Concretely: {@code FF.positive().test(NaN)} is {@code false} while {@code FF.greaterThan().test(NaN, 0)}
+     * is {@code true}, and {@code FF.notNegative().test(-0.0)} is {@code true} while
+     * {@code FF.greaterThanOrEqual().test(-0.0, 0.0)} is {@code false}. Pick the family whose ordering you need
+     * rather than assuming they agree.</p>
      */
     public static final class FF {
 
@@ -11016,6 +11341,8 @@ public final class Fn {
 
         /**
          * Returns a FloatPredicate that tests if a float value is positive (greater than zero).
+         * Uses the primitive {@code >} operator, so {@code NaN} is not positive &mdash; unlike
+         * {@link #greaterThan()}, which orders {@code NaN} above every other value.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11032,6 +11359,8 @@ public final class Fn {
 
         /**
          * Returns a FloatPredicate that tests if a float value is not negative (greater than or equal to zero).
+         * Uses the primitive {@code >=} operator, returning {@code true} for {@code -0.0} and {@code false} for unordered {@code NaN}, unlike
+         * {@link #greaterThanOrEqual()}, which orders {@code -0.0} strictly below {@code 0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11048,7 +11377,8 @@ public final class Fn {
 
         /**
          * Returns a FloatBiPredicate that tests if two float values are equal.
-         * Uses N.equals for proper float comparison including NaN handling.
+         * Uses {@code N.equals}, that is the {@link Float#compare(float, float)} total order: {@code NaN} equals itself and
+         * {@code 0.0} does <i>not</i> equal {@code -0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11065,7 +11395,8 @@ public final class Fn {
 
         /**
          * Returns a FloatBiPredicate that tests if two float values are not equal.
-         * Uses N.compare for proper float comparison including NaN handling.
+         * Uses {@code N.compare}, that is the {@link Float#compare(float, float)} total order: {@code NaN} sorts above
+         * every other value and {@code -0.0} sorts strictly below {@code 0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11082,7 +11413,8 @@ public final class Fn {
 
         /**
          * Returns a FloatBiPredicate that tests if the first float is greater than the second.
-         * Uses N.compare for proper float comparison including NaN handling.
+         * Uses {@code N.compare}, that is the {@link Float#compare(float, float)} total order: {@code NaN} sorts above
+         * every other value and {@code -0.0} sorts strictly below {@code 0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11099,7 +11431,8 @@ public final class Fn {
 
         /**
          * Returns a FloatBiPredicate that tests if the first float is greater than or equal to the second.
-         * Uses N.compare for proper float comparison including NaN handling.
+         * Uses {@code N.compare}, that is the {@link Float#compare(float, float)} total order: {@code NaN} sorts above
+         * every other value and {@code -0.0} sorts strictly below {@code 0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11116,7 +11449,8 @@ public final class Fn {
 
         /**
          * Returns a FloatBiPredicate that tests if the first float is less than the second.
-         * Uses N.compare for proper float comparison including NaN handling.
+         * Uses {@code N.compare}, that is the {@link Float#compare(float, float)} total order: {@code NaN} sorts above
+         * every other value and {@code -0.0} sorts strictly below {@code 0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11133,7 +11467,8 @@ public final class Fn {
 
         /**
          * Returns a FloatBiPredicate that tests if the first float is less than or equal to the second.
-         * Uses N.compare for proper float comparison including NaN handling.
+         * Uses {@code N.compare}, that is the {@link Float#compare(float, float)} total order: {@code NaN} sorts above
+         * every other value and {@code -0.0} sorts strictly below {@code 0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11330,6 +11665,23 @@ public final class Fn {
     /**
      * Utility class for DoublePredicate/Function/Consumer operations.
      * This class provides common double predicates, functions, and binary operators.
+     *
+     * <p><b>How {@code NaN} and {@code -0.0} are treated</b> &mdash; this class deliberately mixes three
+     * conventional policies, so two spellings of what looks like the same test can disagree:</p>
+     * <ul>
+     *   <li>{@link #positive()} and {@link #notNegative()} use the primitive {@code >} / {@code >=} operators:
+     *       every comparison against {@code NaN} is {@code false}, and {@code -0.0} counts as not negative.</li>
+     *   <li>{@link #equal()}, {@link #notEqual()}, {@link #greaterThan()}, {@link #greaterThanOrEqual()},
+     *       {@link #lessThan()} and {@link #lessThanOrEqual()} use {@code N.compare} / {@code N.equals}, that is
+     *       the {@link Double#compare(double, double)} total order: {@code NaN} sorts above every other value and equals
+     *       itself, and {@code -0.0} sorts strictly below {@code 0.0}.</li>
+     *   <li>{@link DoubleBinaryOperators#MIN} and {@link DoubleBinaryOperators#MAX} use {@link Math} {@code min}/{@code max},
+     *       which propagate {@code NaN} and also distinguish {@code -0.0} from {@code 0.0}.</li>
+     * </ul>
+     * <p>Concretely: {@code FD.positive().test(NaN)} is {@code false} while {@code FD.greaterThan().test(NaN, 0)}
+     * is {@code true}, and {@code FD.notNegative().test(-0.0)} is {@code true} while
+     * {@code FD.greaterThanOrEqual().test(-0.0, 0.0)} is {@code false}. Pick the family whose ordering you need
+     * rather than assuming they agree.</p>
      */
     public static final class FD {
 
@@ -11365,6 +11717,8 @@ public final class Fn {
 
         /**
          * Returns a DoublePredicate that tests if a double value is positive (greater than zero).
+         * Uses the primitive {@code >} operator, so {@code NaN} is not positive &mdash; unlike
+         * {@link #greaterThan()}, which orders {@code NaN} above every other value.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11381,6 +11735,8 @@ public final class Fn {
 
         /**
          * Returns a DoublePredicate that tests if a double value is not negative (greater than or equal to zero).
+         * Uses the primitive {@code >=} operator, returning {@code true} for {@code -0.0} and {@code false} for unordered {@code NaN}, unlike
+         * {@link #greaterThanOrEqual()}, which orders {@code -0.0} strictly below {@code 0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11397,7 +11753,8 @@ public final class Fn {
 
         /**
          * Returns a DoubleBiPredicate that tests if two double values are equal.
-         * Uses N.equals for proper double comparison including NaN handling.
+         * Uses {@code N.equals}, that is the {@link Double#compare(double, double)} total order: {@code NaN} equals itself and
+         * {@code 0.0} does <i>not</i> equal {@code -0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11414,7 +11771,8 @@ public final class Fn {
 
         /**
          * Returns a DoubleBiPredicate that tests if two double values are not equal.
-         * Uses N.compare for proper double comparison including NaN handling.
+         * Uses {@code N.compare}, that is the {@link Double#compare(double, double)} total order: {@code NaN} sorts above
+         * every other value and {@code -0.0} sorts strictly below {@code 0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11431,7 +11789,8 @@ public final class Fn {
 
         /**
          * Returns a DoubleBiPredicate that tests if the first double is greater than the second.
-         * Uses N.compare for proper double comparison including NaN handling.
+         * Uses {@code N.compare}, that is the {@link Double#compare(double, double)} total order: {@code NaN} sorts above
+         * every other value and {@code -0.0} sorts strictly below {@code 0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11448,7 +11807,8 @@ public final class Fn {
 
         /**
          * Returns a DoubleBiPredicate that tests if the first double is greater than or equal to the second.
-         * Uses N.compare for proper double comparison including NaN handling.
+         * Uses {@code N.compare}, that is the {@link Double#compare(double, double)} total order: {@code NaN} sorts above
+         * every other value and {@code -0.0} sorts strictly below {@code 0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11465,7 +11825,8 @@ public final class Fn {
 
         /**
          * Returns a DoubleBiPredicate that tests if the first double is less than the second.
-         * Uses N.compare for proper double comparison including NaN handling.
+         * Uses {@code N.compare}, that is the {@link Double#compare(double, double)} total order: {@code NaN} sorts above
+         * every other value and {@code -0.0} sorts strictly below {@code 0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11482,7 +11843,8 @@ public final class Fn {
 
         /**
          * Returns a DoubleBiPredicate that tests if the first double is less than or equal to the second.
-         * Uses N.compare for proper double comparison including NaN handling.
+         * Uses {@code N.compare}, that is the {@link Double#compare(double, double)} total order: {@code NaN} sorts above
+         * every other value and {@code -0.0} sorts strictly below {@code 0.0}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

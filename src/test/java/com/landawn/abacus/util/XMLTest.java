@@ -8,10 +8,11 @@ import java.io.StringWriter;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.entity.extendDirty.basic.Account;
-import com.landawn.abacus.entity.extendDirty.basic.AccountContact;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.parser.XmlParser;
+
+import testfixtures.entity.extendDirty.basic.Account;
+import testfixtures.entity.extendDirty.basic.AccountContact;
 
 public class XMLTest extends AbstractTest {
     private static final XmlParser abacusXmlParser = ParserFactory.createAbacusXmlParser();

@@ -13,7 +13,7 @@ import com.landawn.abacus.TestBase;
 public class MutableTest extends TestBase {
 
     @Mutable
-    static class TestMutableClass {
+    public static class TestMutableClass {
         private int value;
 
         @Mutable

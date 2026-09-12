@@ -299,4 +299,16 @@ public class OptionalBooleanTypeTest extends TestBase {
         optionalBooleanType.serializeTo(writer, OptionalBoolean.empty(), config);
         verify(writer, org.mockito.Mockito.times(2)).write(FALSE_CHAR_ARRAY);
     }
+
+    // T5-04 (2026-09-06): blank input is treated like empty (documented now); the numeric siblings reject it.
+    @Test
+    public void reviewFixes20260906_valueOfBlankReturnsEmpty() {
+        assertTrue(optionalBooleanType.valueOf(" ").isEmpty());
+        assertTrue(optionalBooleanType.valueOf("\t\n").isEmpty());
+        assertTrue(optionalBooleanType.valueOf("").isEmpty());
+        assertTrue(optionalBooleanType.valueOf((String) null).isEmpty());
+        assertTrue(optionalBooleanType.valueOf(" true ").get());
+        assertTrue(optionalBooleanType.valueOf(" Y ").get());
+        assertFalse(optionalBooleanType.valueOf(" no ").get());
+    }
 }

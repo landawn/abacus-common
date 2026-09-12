@@ -11,18 +11,12 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.IOUtil;
 
-import okhttp3.Call;
-import okhttp3.Connection;
-import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
-import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okio.BufferedSink;
@@ -278,7 +272,7 @@ public class CurlInterceptorTest extends TestBase {
             assertNotNull(curl);
             assertTrue(curl.contains("curl -X POST"));
             assertTrue(curl.contains("-H 'content-type: application/json'"));
-            assertTrue(curl.contains("-d '{\"name\":\"test\"}'"));
+            assertTrue(curl.contains("--data-raw '{\"name\":\"test\"}'"));
         } finally {
             server.shutdown();
         }
@@ -369,73 +363,22 @@ public class CurlInterceptorTest extends TestBase {
     public void testInterceptProceedsRequest() throws IOException {
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor(capturedCurl::set);
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setBody("response"));
+        server.start();
 
-        Interceptor.Chain chain = new Interceptor.Chain() {
-            @Override
-            public Request request() {
-                return new Request.Builder().url("http://example.com").build();
+        try {
+            Request request = new Request.Builder().url(server.url("/")).get().build();
+            try (Response response = client.newCall(request).execute()) {
+                assertEquals(200, response.code());
             }
-
-            @Override
-            public Response proceed(Request request) throws IOException {
-                return new Response.Builder().request(request)
-                        .protocol(Protocol.HTTP_1_1)
-                        .code(200)
-                        .message("OK")
-                        .body(ResponseBody.create(MediaType.parse("text/plain"), "response"))
-                        .build();
-            }
-
-            @Override
-            public Connection connection() {
-                return null;
-            }
-
-            @Override
-            public Call call() {
-                return null;
-            }
-
-            @Override
-            public int connectTimeoutMillis() {
-                return 0;
-            }
-
-            @Override
-            public Interceptor.Chain withConnectTimeout(int timeout, java.util.concurrent.TimeUnit unit) {
-                return this;
-            }
-
-            @Override
-            public int readTimeoutMillis() {
-                return 0;
-            }
-
-            @Override
-            public Interceptor.Chain withReadTimeout(int timeout, java.util.concurrent.TimeUnit unit) {
-                return this;
-            }
-
-            @Override
-            public int writeTimeoutMillis() {
-                return 0;
-            }
-
-            @Override
-            public Interceptor.Chain withWriteTimeout(int timeout, java.util.concurrent.TimeUnit unit) {
-                return this;
-            }
-        };
-
-        Response response = interceptor.intercept(chain);
-        assertNotNull(response);
-        assertEquals(200, response.code());
-
-        String curl = capturedCurl.get();
-        assertNotNull(curl);
-        assertTrue(curl.contains("http://example.com"));
-
-        IOUtil.close(response);
+            String curl = capturedCurl.get();
+            assertNotNull(curl);
+            assertTrue(curl.contains(server.url("/").toString()));
+        } finally {
+            server.shutdown();
+        }
     }
 
     @Test
@@ -445,77 +388,27 @@ public class CurlInterceptorTest extends TestBase {
         // with UTF-8 instead of the actual charset, so the round-tripped curl payload was wrong.
         AtomicReference<String> capturedCurl = new AtomicReference<>();
         CurlInterceptor interceptor = new CurlInterceptor(capturedCurl::set);
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
 
         String text = "café";
         MediaType iso = MediaType.parse("text/plain; Charset=ISO-8859-1");
         RequestBody body = RequestBody.create(text, iso);
 
-        Request request = new Request.Builder().url("http://example.com").post(body).build();
+        MockWebServer server = new MockWebServer();
+        server.enqueue(new MockResponse().setBody("ok"));
+        server.start();
 
-        Interceptor.Chain chain = new Interceptor.Chain() {
-            @Override
-            public Request request() {
-                return request;
+        try {
+            Request request = new Request.Builder().url(server.url("/")).post(body).build();
+            try (Response response = client.newCall(request).execute()) {
+                assertEquals(200, response.code());
             }
-
-            @Override
-            public Response proceed(Request r) {
-                return new Response.Builder().request(r)
-                        .protocol(Protocol.HTTP_1_1)
-                        .code(200)
-                        .message("OK")
-                        .body(ResponseBody.create(MediaType.parse("text/plain"), "ok"))
-                        .build();
-            }
-
-            @Override
-            public Connection connection() {
-                return null;
-            }
-
-            @Override
-            public Call call() {
-                return null;
-            }
-
-            @Override
-            public int connectTimeoutMillis() {
-                return 0;
-            }
-
-            @Override
-            public Interceptor.Chain withConnectTimeout(int t, java.util.concurrent.TimeUnit u) {
-                return this;
-            }
-
-            @Override
-            public int readTimeoutMillis() {
-                return 0;
-            }
-
-            @Override
-            public Interceptor.Chain withReadTimeout(int t, java.util.concurrent.TimeUnit u) {
-                return this;
-            }
-
-            @Override
-            public int writeTimeoutMillis() {
-                return 0;
-            }
-
-            @Override
-            public Interceptor.Chain withWriteTimeout(int t, java.util.concurrent.TimeUnit u) {
-                return this;
-            }
-        };
-
-        Response response = interceptor.intercept(chain);
-        IOUtil.close(response);
-
-        String curl = capturedCurl.get();
-        assertNotNull(curl);
-        // The body "café" must round-trip via ISO-8859-1, not be mangled because of UTF-8 fallback.
-        assertTrue(curl.contains(text), "curl should contain decoded body, got: " + curl);
+            String curl = capturedCurl.get();
+            assertNotNull(curl);
+            assertTrue(curl.contains(text), "curl should contain decoded body, got: " + curl);
+        } finally {
+            server.shutdown();
+        }
     }
 
 }

@@ -29,8 +29,8 @@ public class IntToFloatFunctionTest extends TestBase {
         assertEquals(-50f, IntToFloatFunction.DEFAULT.applyAsFloat(-50));
         assertEquals(16_777_216f, IntToFloatFunction.DEFAULT.applyAsFloat(16_777_217));
         assertEquals(16_777_218f, IntToFloatFunction.DEFAULT.applyAsFloat(16_777_218));
-        assertEquals((float) Integer.MAX_VALUE, IntToFloatFunction.DEFAULT.applyAsFloat(Integer.MAX_VALUE));
-        assertEquals((float) Integer.MIN_VALUE, IntToFloatFunction.DEFAULT.applyAsFloat(Integer.MIN_VALUE));
+        assertEquals(Integer.MAX_VALUE, IntToFloatFunction.DEFAULT.applyAsFloat(Integer.MAX_VALUE));
+        assertEquals(Integer.MIN_VALUE, IntToFloatFunction.DEFAULT.applyAsFloat(Integer.MIN_VALUE));
     }
 
     @Test

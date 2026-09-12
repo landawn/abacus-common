@@ -174,7 +174,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
      *         or {@code fromIndex > toIndex}
      */
-    ArrayCharStream(final char[] values, final int fromIndex, final int toIndex) {
+    ArrayCharStream(final char[] values, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         this(values, fromIndex, toIndex, null);
     }
 
@@ -198,7 +198,8 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
      *         or {@code fromIndex > toIndex}
      */
-    ArrayCharStream(final char[] values, final int fromIndex, final int toIndex, final Collection<LocalRunnable> closeHandlers) {
+    ArrayCharStream(final char[] values, final int fromIndex, final int toIndex, final Collection<LocalRunnable> closeHandlers)
+            throws IndexOutOfBoundsException {
         this(values, fromIndex, toIndex, false, closeHandlers);
     }
 
@@ -224,7 +225,8 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
      *         or {@code fromIndex > toIndex}
      */
-    ArrayCharStream(final char[] values, final int fromIndex, final int toIndex, final boolean sorted, final Collection<LocalRunnable> closeHandlers) {
+    ArrayCharStream(final char[] values, final int fromIndex, final int toIndex, final boolean sorted, final Collection<LocalRunnable> closeHandlers)
+            throws IndexOutOfBoundsException {
         super(sorted, closeHandlers);
 
         checkFromToIndex(fromIndex, toIndex, N.len(values));
@@ -243,7 +245,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public CharStream filter(final CharPredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public CharStream filter(final CharPredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -288,7 +290,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public CharStream takeWhile(final CharPredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public CharStream takeWhile(final CharPredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -333,7 +335,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
     @Override
-    public CharStream dropWhile(final CharPredicate predicate) throws IllegalArgumentException, IllegalStateException {
+    public CharStream dropWhile(final CharPredicate predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -347,14 +349,13 @@ class ArrayCharStream extends AbstractCharStream {
             public boolean hasNext() {
                 if (!hasNext && cursor < toIndex) {
                     if (!dropped) {
-                        dropped = true;
-
                         do {
                             if (!predicate.test(elements[cursor])) {
                                 hasNext = true;
                                 break;
                             }
                         } while (++cursor < toIndex);
+                        dropped = true;
                     } else {
                         hasNext = true;
                     }
@@ -454,7 +455,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public CharStream map(final CharUnaryOperator mapper) throws IllegalArgumentException, IllegalStateException {
+    public CharStream map(final CharUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -499,7 +500,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public IntStream mapToInt(final CharToIntFunction mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream mapToInt(final CharToIntFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -544,7 +545,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> mapToObj(final CharFunction<? extends T> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> mapToObj(final CharFunction<? extends T> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -594,7 +595,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public CharStream flatMap(final CharFunction<? extends CharStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public CharStream flatMap(final CharFunction<? extends CharStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -663,7 +664,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public CharStream flatmap(final CharFunction<? extends Collection<Character>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public CharStream flatmap(final CharFunction<? extends Collection<Character>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -705,7 +706,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public CharStream flatMapArray(final CharFunction<char[]> mapper) throws IllegalArgumentException, IllegalStateException {
+    public CharStream flatMapArray(final CharFunction<char[]> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -757,7 +758,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public IntStream flatMapToInt(final CharFunction<? extends IntStream> mapper) throws IllegalArgumentException, IllegalStateException {
+    public IntStream flatMapToInt(final CharFunction<? extends IntStream> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -827,7 +828,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> flatMapToObj(final CharFunction<? extends Stream<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatMapToObj(final CharFunction<? extends Stream<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -897,7 +898,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
     @Override
-    public <T> Stream<T> flatmapToObj(final CharFunction<? extends Collection<? extends T>> mapper) throws IllegalArgumentException, IllegalStateException {
+    public <T> Stream<T> flatmapToObj(final CharFunction<? extends Collection<? extends T>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
@@ -1028,7 +1029,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
-    public CharStream onEach(final CharConsumer action) throws IllegalArgumentException, IllegalStateException {
+    public CharStream onEach(final CharConsumer action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -1073,11 +1074,11 @@ class ArrayCharStream extends AbstractCharStream {
      * @param <E> the type of exception the action may throw
      * @param action the non-interfering action to perform on each element
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the action throws an exception
      * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws E if the action throws an exception
      */
     @Override
-    public <E extends Exception> void forEach(final Throwables.CharConsumer<E> action) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> void forEach(final Throwables.CharConsumer<E> action) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -1099,7 +1100,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    protected char[] toArray(final boolean closeStream) {
+    protected char[] toArray(final boolean closeStream) throws IllegalStateException {
         assertNotClosed();
 
         try {
@@ -1185,7 +1186,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
-    public <C extends Collection<Character>> C toCollection(final Supplier<? extends C> supplier) throws IllegalArgumentException, IllegalStateException {
+    public <C extends Collection<Character>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1235,7 +1236,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
-    public Multiset<Character> toMultiset(final Supplier<? extends Multiset<Character>> supplier) throws IllegalArgumentException, IllegalStateException {
+    public Multiset<Character> toMultiset(final Supplier<? extends Multiset<Character>> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1268,15 +1269,15 @@ class ArrayCharStream extends AbstractCharStream {
      * @param mapFactory supplier that creates a new, empty map of the desired type
      * @return a map containing the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if {@code keyMapper} throws
-     * @throws E2 if {@code valueMapper} throws
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws E if {@code keyMapper} throws
+     * @throws E2 if {@code valueMapper} throws
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.CharFunction<? extends K, E> keyMapper,
             final Throwables.CharFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalArgumentException, IllegalStateException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1309,8 +1310,8 @@ class ArrayCharStream extends AbstractCharStream {
      * @param mapFactory supplier that creates a new, empty map of the desired type
      * @return a map from group key to downstream collection result
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} returns a {@code null} key, or if {@code keyMapper} or
-     *         {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream} or {@code mapFactory} is {@code null}, or
+     *         {@code keyMapper} returns a {@code null} key.
      * @throws E if {@code keyMapper} throws
      */
     @Override
@@ -1320,6 +1321,7 @@ class ArrayCharStream extends AbstractCharStream {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
@@ -1451,7 +1453,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
-    public char reduce(final char identity, final CharBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public char reduce(final char identity, final CharBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -1480,7 +1482,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
     @Override
-    public OptionalChar reduce(final CharBinaryOperator accumulator) throws IllegalArgumentException, IllegalStateException {
+    public OptionalChar reduce(final CharBinaryOperator accumulator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -1521,7 +1523,7 @@ class ArrayCharStream extends AbstractCharStream {
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjCharConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1629,7 +1631,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws ArithmeticException if the sum overflows the {@code int} range
      */
     @Override
-    public int sum() throws IllegalStateException {
+    public int sum() throws IllegalStateException, ArithmeticException {
         assertNotClosed();
 
         try {
@@ -1720,11 +1722,11 @@ class ArrayCharStream extends AbstractCharStream {
      * @param predicate a non-interfering, stateless predicate to apply to stream elements
      * @return {@code true} if any element matches, {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
-    public <E extends Exception> boolean anyMatch(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean anyMatch(final Throwables.CharPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1751,11 +1753,11 @@ class ArrayCharStream extends AbstractCharStream {
      * @param predicate a non-interfering, stateless predicate to apply to stream elements
      * @return {@code true} if all elements match (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
-    public <E extends Exception> boolean allMatch(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean allMatch(final Throwables.CharPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1782,11 +1784,11 @@ class ArrayCharStream extends AbstractCharStream {
      * @param predicate a non-interfering, stateless predicate to apply to stream elements
      * @return {@code true} if no elements match (or the stream is empty), {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
-    public <E extends Exception> boolean noneMatch(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> boolean noneMatch(final Throwables.CharPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1813,11 +1815,11 @@ class ArrayCharStream extends AbstractCharStream {
      * @param predicate a non-interfering, stateless predicate to apply to stream elements
      * @return an {@code OptionalChar} containing the first matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
-    public <E extends Exception> OptionalChar findFirst(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> OptionalChar findFirst(final Throwables.CharPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1844,11 +1846,11 @@ class ArrayCharStream extends AbstractCharStream {
      * @param predicate a non-interfering, stateless predicate to apply to stream elements
      * @return an {@code OptionalChar} containing the last matching element, or empty if none match
      * @throws IllegalStateException if the stream is already closed
-     * @throws E if the predicate throws
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws E if the predicate throws
      */
     @Override
-    public <E extends Exception> OptionalChar findLast(final Throwables.CharPredicate<E> predicate) throws IllegalArgumentException, IllegalStateException, E {
+    public <E extends Exception> OptionalChar findLast(final Throwables.CharPredicate<E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -1932,7 +1934,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    CharIteratorEx iteratorEx() {
+    CharIteratorEx iteratorEx() throws IllegalStateException {
         assertNotClosed();
 
         return CharIteratorEx.of(elements, fromIndex, toIndex);
@@ -1948,7 +1950,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     @Override
-    public CharStream appendIfEmpty(final Supplier<? extends CharStream> supplier) throws IllegalArgumentException, IllegalStateException {
+    public CharStream appendIfEmpty(final Supplier<? extends CharStream> supplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -2001,9 +2003,21 @@ class ArrayCharStream extends AbstractCharStream {
 
                 private void init() {
                     if (iter == null) {
+                        @SuppressWarnings("resource")
                         final CharStream s = supplier.get();
-                        holder.setValue(s);
-                        iter = s.iteratorEx();
+                        try {
+                            iter = s == null ? CharIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
+                            holder.setValue(s);
+                        } catch (final RuntimeException | Error e) {
+                            if (s != null) {
+                                try {
+                                    s.close();
+                                } catch (final RuntimeException ce) {
+                                    e.addSuppressed(ce);
+                                }
+                            }
+                            throw e;
+                        }
                     }
                 }
             }, false).onClose(() -> close(holder));
@@ -2023,7 +2037,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     @Override
-    public CharStream ifEmpty(final Runnable action) throws IllegalArgumentException, IllegalStateException {
+    public CharStream ifEmpty(final Runnable action) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(action, cs.action);
@@ -2078,7 +2092,7 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
-    protected Tuple3<char[], Integer, Integer> arrayForIntermediateOp() {
+    protected Tuple3<char[], Integer, Integer> arrayForIntermediateOp() throws IllegalStateException {
         assertNotClosed();
 
         return Tuple.of(elements, fromIndex, toIndex);
@@ -2097,7 +2111,7 @@ class ArrayCharStream extends AbstractCharStream {
      */
     @Override
     protected CharStream parallel(final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor,
-            final boolean cancelUncompletedThreads) {
+            final boolean cancelUncompletedThreads) throws IllegalStateException {
         assertNotClosed();
 
         return new ParallelArrayCharStream(elements, fromIndex, toIndex, isSorted(), maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,

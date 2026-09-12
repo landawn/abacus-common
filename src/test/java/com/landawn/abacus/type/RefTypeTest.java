@@ -2,6 +2,8 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -82,5 +84,25 @@ public class RefTypeTest extends TestBase {
 
         refType.set(stmt, "param", ref);
         verify(stmt).setObject("param", ref);
+    }
+
+    // FINDING R04-6 (2026-09-08): BlobType/ClobType/NClobType were given a valueOf(Object) identity/null override;
+    // RefType was not, so both null and a genuine Ref fell through to AbstractType.valueOf(Object), which
+    // renders the value with the handler of its own runtime class and feeds the text to the always-throwing
+    // valueOf(String).
+    @Test
+    public void reviewFixes20260908_valueOfObjectReturnsSameInstanceOrNull() {
+        final Ref value = mock(Ref.class);
+
+        assertSame(value, refType.valueOf((Object) value));
+        assertNull(refType.valueOf((Object) null));
+    }
+
+    @Test
+    public void reviewFixes20260908_valueOfObjectRejectsForeignValues() {
+        assertThrows(UnsupportedOperationException.class, () -> refType.valueOf((Object) "x"));
+        assertThrows(UnsupportedOperationException.class, () -> refType.valueOf((Object) 42));
+        // the String overload is unchanged
+        assertThrows(UnsupportedOperationException.class, () -> refType.valueOf("x"));
     }
 }

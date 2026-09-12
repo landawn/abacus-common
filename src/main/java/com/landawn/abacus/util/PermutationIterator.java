@@ -108,6 +108,7 @@ public final class PermutationIterator {
         }
 
         return new ObjIteratorEx<>() {
+            @SuppressWarnings("unchecked")
             final T[] items = elements.toArray((T[]) new Object[elements.size()]);
             final int[] c = Array.repeat(0, items.length);
             final int[] o = Array.repeat(1, items.length);
@@ -203,7 +204,7 @@ public final class PermutationIterator {
      * @see #ordered(Collection, Comparator)
      * @see #of(Collection)
      */
-    public static <T extends Comparable<? super T>> ObjIterator<List<T>> ordered(final Collection<T> elements) {
+    public static <T extends Comparable<? super T>> ObjIterator<List<T>> ordered(final Collection<T> elements) throws IllegalArgumentException {
         return ordered(elements, Comparators.naturalOrder());
     }
 
@@ -242,16 +243,13 @@ public final class PermutationIterator {
      * @return an iterator that lazily yields every distinct permutation in the lexicographical
      *         order defined by {@code comparator}; for an empty collection it yields a single
      *         empty list
-     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws IllegalArgumentException if {@code elements} or {@code comparator} is {@code null}.
      * @see #ordered(Collection)
      * @see #of(Collection)
      */
-    @SuppressWarnings("unchecked")
     public static <T> ObjIterator<List<T>> ordered(final Collection<T> elements, final Comparator<? super T> comparator) throws IllegalArgumentException {
         N.checkArgNotNull(elements, cs.elements);
         N.checkArgNotNull(comparator, cs.comparator);
-
-        final Comparator<? super T> comparatorToUse = comparator;
 
         if (elements.isEmpty()) {
             return new ObjIteratorEx<>() {
@@ -276,10 +274,11 @@ public final class PermutationIterator {
         }
 
         return new ObjIteratorEx<>() {
+            @SuppressWarnings("unchecked")
             T[] next = elements.toArray((T[]) new Object[elements.size()]);
 
             { //NOSONAR
-                N.sort(next, comparatorToUse);
+                N.sort(next, comparator);
             }
 
             int hasNext = next.length == 0 ? -1 : 1; // 0 = read; 1 = yes, -1 = done.
@@ -332,7 +331,7 @@ public final class PermutationIterator {
 
             private int findNextJ() {
                 for (int k = next.length - 2; k >= 0; k--) {
-                    if (comparatorToUse.compare(next[k], next[k + 1]) < 0) {
+                    if (comparator.compare(next[k], next[k + 1]) < 0) {
                         return k;
                     }
                 }
@@ -343,7 +342,7 @@ public final class PermutationIterator {
                 final T ak = next[j];
 
                 for (int l = next.length - 1; l > j; l--) {
-                    if (comparatorToUse.compare(ak, next[l]) < 0) {
+                    if (comparator.compare(ak, next[l]) < 0) {
                         return l;
                     }
                 }

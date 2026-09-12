@@ -165,7 +165,7 @@ public class AbstractIntegerTypeTest extends TestBase {
     public void testAppendTo_TruncatesNonIntNumberToIntRange() throws IOException {
         StringBuilder sb = new StringBuilder();
         // (Integer.MAX_VALUE + 1L) as a Long is 2147483648; truncated to int it's Integer.MIN_VALUE.
-        final Long large = Long.valueOf(((long) Integer.MAX_VALUE) + 1L);
+        final Long large = Long.valueOf((Integer.MAX_VALUE) + 1L);
         integerType.appendTo(sb, large);
         assertEquals(integerType.stringOf(large), sb.toString());
         assertEquals(String.valueOf(Integer.MIN_VALUE), sb.toString());

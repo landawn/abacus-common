@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -124,44 +126,22 @@ public class PropertiesUtilTest extends TestBase {
     @Test
     public void testGetCommonConfigPaths_PathsExist() {
         java.util.List<String> paths = PropertiesUtil.getCommonConfigPaths();
+        assertNotNull(paths);
         for (String path : paths) {
+            assertNotNull(path);
+            assertTrue(path.length() > 0);
             File dir = new File(path);
             assertTrue(dir.exists());
             assertTrue(dir.isDirectory());
         }
     }
 
-    // ==================== getCommonConfigPaths() ====================
-
-    @Test
-    public void testGetCommonConfigPaths() {
-        java.util.List<String> paths = PropertiesUtil.getCommonConfigPaths();
-        assertNotNull(paths);
-    }
-
-    @Test
-    public void testGetCommonConfigPaths_ReturnsNonNullList() {
-        java.util.List<String> paths = PropertiesUtil.getCommonConfigPaths();
-        assertNotNull(paths);
-        for (String path : paths) {
-            assertNotNull(path);
-            assertTrue(path.length() > 0);
-        }
-    }
-
     @Test
     public void testFormatPath_ExistingFileUnchanged() {
         File result = PropertiesUtil.formatPath(testPropertiesFile);
-        assertEquals(testPropertiesFile.getAbsolutePath(), result.getAbsolutePath());
-    }
-
-    // ==================== formatPath(File) ====================
-
-    @Test
-    public void testFormatPath() {
-        File result = PropertiesUtil.formatPath(testPropertiesFile);
         assertNotNull(result);
         assertEquals(testPropertiesFile.getAbsolutePath(), result.getAbsolutePath());
+        assertEquals(testPropertiesFile, PropertiesUtil.formatPath(testPropertiesFile));
     }
 
     @Test
@@ -190,12 +170,6 @@ public class PropertiesUtilTest extends TestBase {
         File result = PropertiesUtil.formatPath(encodedFile);
         assertNotNull(result);
         assertTrue(result.exists());
-    }
-
-    @Test
-    public void testFormatPath_WithNoEncodedSpaces() throws IOException {
-        File result = PropertiesUtil.formatPath(testPropertiesFile);
-        assertEquals(testPropertiesFile, result);
     }
 
     // ==================== findDir(String) ====================
@@ -1965,8 +1939,8 @@ public class PropertiesUtilTest extends TestBase {
 
         File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "deprecated", "DepConfig.java");
         String content = Files.readString(generatedFile.toPath());
-        assertTrue(content.contains("@Deprecated"));
-        assertTrue(content.contains("@Override"));
+        assertTrue(content.contains("@java.lang.Deprecated"));
+        assertTrue(content.contains("@java.lang.Override"));
     }
 
     // --- Regression tests for review fixes ---
@@ -2048,6 +2022,26 @@ public class PropertiesUtilTest extends TestBase {
 
         final Properties<String, Object> reloaded = PropertiesUtil.loadFromXml(new java.io.StringReader(xml)); // must parse
         org.junit.jupiter.api.Assertions.assertEquals(8080, reloaded.get("port"));
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.List.of("s1", "s2"), reloaded.get("serverList"));
+    }
+
+    @Test
+    public void testLoadFromXmlRejectsUntrustedTypeAttribute() {
+        final String propertyName = "abacus.xml.allowTypeAttrClassForName";
+        final String previousValue = System.getProperty(propertyName);
+
+        try {
+            System.setProperty(propertyName, "false");
+            final String xml = "<config><value type=\"java.lang.ProcessBuilder\">ignored</value></config>";
+
+            assertThrows(ParsingException.class, () -> PropertiesUtil.loadFromXml(new StringReader(xml)));
+        } finally {
+            if (previousValue == null) {
+                System.clearProperty(propertyName);
+            } else {
+                System.setProperty(propertyName, previousValue);
+            }
+        }
     }
 
     // --- regression tests for 2026-06-12 deep-review fixes ---
@@ -2069,10 +2063,10 @@ public class PropertiesUtilTest extends TestBase {
         assertTrue(generatedFile.exists());
         String content = Files.readString(generatedFile.toPath());
         assertTrue(content.contains("public Database getDatabase()"), content);
-        assertTrue(content.contains("public static class Database extends com.landawn.abacus.util.Properties<String, Object>"), content);
-        assertFalse(content.contains("public String getDatabase()"), content);
+        assertTrue(content.contains("public static class Database extends com.landawn.abacus.util.Properties<java.lang.String, java.lang.Object>"), content);
+        assertFalse(content.contains("public java.lang.String getDatabase()"), content);
         // The leaf inside the nested class is still a plain String property
-        assertTrue(content.contains("public String getUrl()"), content);
+        assertTrue(content.contains("public java.lang.String getUrl()"), content);
     }
 
     @Test
@@ -2091,7 +2085,7 @@ public class PropertiesUtilTest extends TestBase {
         File generatedFile = new File(srcPath + File.separator + "com" + File.separator + "textcdata", "TextCdataConfig.java");
         assertTrue(generatedFile.exists());
         String content = Files.readString(generatedFile.toPath());
-        assertTrue(content.contains("public String getName()"), content);
+        assertTrue(content.contains("public java.lang.String getName()"), content);
         assertFalse(content.contains("class Name"), content);
     }
 
@@ -2170,6 +2164,27 @@ public class PropertiesUtilTest extends TestBase {
     }
 
     @Test
+    public void testXmlToJavaSupportsNestedClassesThatShadowJavaLangTypes() throws Exception {
+        final String xml = "<config><string><value>x</value></string><object><value>y</value></object>"
+                + "<override><value>z</value></override><deprecated><value>q</value></deprecated></config>";
+        final Path sourceRoot = Files.createDirectories(tempDir.resolve("shadowed-types-source"));
+        PropertiesUtil.xmlToJava(xml, sourceRoot.toString(), "com.shadowedtypes", "Config", false);
+
+        final javax.tools.JavaCompiler compiler = javax.tools.ToolProvider.getSystemJavaCompiler();
+        assertNotNull(compiler, "The test requires a JDK, not a JRE");
+        assertEquals(0, compiler.run(null, null, null, "-classpath", System.getProperty("java.class.path"),
+                sourceRoot.resolve("com/shadowedtypes/Config.java").toString()));
+
+        try (java.net.URLClassLoader loader = new java.net.URLClassLoader(new java.net.URL[] { sourceRoot.toUri().toURL() }, getClass().getClassLoader())) {
+            final Class<? extends Properties<String, Object>> configClass = (Class<? extends Properties<String, Object>>) loader
+                    .loadClass("com.shadowedtypes.Config");
+            final Properties<String, Object> config = PropertiesUtil.loadFromXml(new StringReader(xml), configClass);
+            final Object nested = configClass.getMethod("getString").invoke(config);
+            assertEquals("x", nested.getClass().getMethod("getValue").invoke(nested));
+        }
+    }
+
+    @Test
     public void testXmlToJavaSupportsDefaultPackage() throws IOException {
         final Path sourceRoot = Files.createDirectories(tempDir.resolve("default-package-source"));
         PropertiesUtil.xmlToJava("<config><name>test</name></config>", sourceRoot.toString(), "", "Config", false);
@@ -2194,4 +2209,349 @@ public class PropertiesUtilTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> PropertiesUtil.xmlToJava("<config/>", tempDir.toString(), "com.valid", "../Config", false));
     }
 
+    //
+    // ============================ review fixes 2026-09-06 ============================
+    //
+
+    /** Pre-populates the nested name with a Properties, which is the only way into the reuse path. */
+    public static class PreNestedProperties extends Properties<String, Object> {
+        public final Properties<String, Object> preset = new Properties<>();
+
+        public PreNestedProperties() {
+            preset.put("stale", "1");
+            put("a", preset);
+        }
+    }
+
+    /** Pre-populates the same name with a String, which the reuse path used to choke on. */
+    public static class PreStringProperties extends Properties<String, Object> {
+        public PreStringProperties() {
+            put("a", "x");
+        }
+    }
+
+    /**
+     * Target class for the auto-refresh race. Its constructor runs strictly between "content fully read" and
+     * "lastModified() sampled" - loadFromXml(InputStream, Class) parses the whole stream before it
+     * instantiates the target class - so it can stand in for a writer that lands inside that window without
+     * a real race.
+     */
+    public static class RaceProperties extends Properties<String, Object> {
+        static volatile File watched;
+        static volatile long bumpTo;
+        static final java.util.concurrent.atomic.AtomicInteger constructions = new java.util.concurrent.atomic.AtomicInteger();
+
+        public RaceProperties() {
+            if (constructions.incrementAndGet() == 1 && watched != null) {
+                watched.setLastModified(bumpTo);
+            }
+        }
+    }
+
+    @Test
+    public void reviewFixes20260906_emptyNestedPropertiesRoundTripsWhenMarked() {
+        final Properties<String, Object> source = new Properties<>();
+        source.put("nested", new Properties<>());
+
+        // An EMPTY nested Properties has no element children, so XmlUtil.isTextElement() calls it a text node
+        // and the loader handed back the String "". storeToXml writes type="Properties" for exactly this case
+        // and the xmlToJava generator has always honoured that marker; now the loader does too.
+        final StringWriter typed = new StringWriter();
+        PropertiesUtil.storeToXml(source, "config", true, typed);
+        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><config><nested type=\"Properties\"></nested></config>", typed.toString());
+
+        final Object loaded = PropertiesUtil.loadFromXml(new StringReader(typed.toString())).get("nested");
+        assertTrue(loaded instanceof Properties, "expected a Properties, was " + loaded.getClass().getName());
+        assertTrue(((Properties<?, ?>) loaded).isEmpty());
+
+        // The shape xmlToJava generates - a Properties-typed accessor - no longer sees a String.
+        final TypedProperties viaSetter = PropertiesUtil.loadFromXml(
+                new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\"?><config><nested type=\"Properties\"></nested></config>"), TypedProperties.class);
+        assertNotNull(viaSetter.getNested());
+        assertTrue(viaSetter.getNested().isEmpty());
+
+        // Control: a NON-empty nested Properties was never affected and still round-trips.
+        final Properties<String, Object> filled = new Properties<>();
+        filled.put("k", "v");
+        source.put("nested", filled);
+        final StringWriter nonEmpty = new StringWriter();
+        PropertiesUtil.storeToXml(source, "config", true, nonEmpty);
+        assertEquals("v", ((Properties<?, ?>) PropertiesUtil.loadFromXml(new StringReader(nonEmpty.toString())).get("nested")).get("k"));
+
+        // Control: without the marker the empty element is genuinely ambiguous, and is still read as "".
+        // That is the documented limitation of writeTypeInfo=false, not a second bug.
+        assertEquals("",
+                PropertiesUtil.loadFromXml(new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\"?><config><nested></nested></config>")).get("nested"));
+
+        // Control: an empty element carrying some OTHER type attribute still goes through that type.
+        assertNull(PropertiesUtil.loadFromXml(new StringReader("<r><k type=\"Integer\"></k></r>")).get("k"));
+    }
+
+    @Test
+    public void reviewFixes20260906_prePopulatedNestedValueIsReusedOrReplaced() {
+        // loadFromXml(Node, ..., output, ...) is reached with a non-null output only from a target class whose
+        // constructor pre-populates a nested name - so the reuse path is live, not dead code. With a
+        // Properties already there it keeps that instance and drops the keys the XML no longer has.
+        final PreNestedProperties reused = PropertiesUtil.loadFromXml(new StringReader("<r><a><b>1</b></a></r>"), PreNestedProperties.class);
+        Assertions.assertSame(reused.preset, reused.get("a"));
+        assertEquals("1", reused.preset.get("b"));
+        assertFalse(reused.preset.containsKey("stale"), "keys the new document does not have must be removed");
+
+        // With anything else under that name there is nothing to reuse. The cast to T (bound Properties) is
+        // erased to a checkcast, so this used to fail with ClassCastException instead of replacing the value.
+        final PreStringProperties replaced = PropertiesUtil.loadFromXml(new StringReader("<r><a><b>1</b></a></r>"), PreStringProperties.class);
+        assertTrue(replaced.get("a") instanceof Properties, "expected the String to be replaced, was " + replaced.get("a"));
+        assertEquals("1", ((Properties<?, ?>) replaced.get("a")).get("b"));
+
+        // Control: a target class with an empty constructor is unaffected.
+        final CustomProperties plain = PropertiesUtil.loadFromXml(new StringReader("<r><a><b>1</b></a></r>"), CustomProperties.class);
+        assertEquals("1", ((Properties<?, ?>) plain.get("a")).get("b"));
+    }
+
+    @Test
+    public void reviewFixes20260906_autoRefreshSeesAWriteThatLandsDuringTheInitialLoad() throws Exception {
+        // The initial load sampled lastModified() AFTER reading the content, so a write that landed while the
+        // load was in flight was recorded as already loaded and every later poll short-circuited on
+        // "lastModified <= lastLoadTime". refreshIfNeeded had always sampled first; now both do.
+        final File cfg = tempDir.resolve("race.xml").toFile();
+        Files.writeString(cfg.toPath(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?><race><k>old</k></race>");
+
+        // Whole seconds, so a coarse-grained file system cannot round the two stamps together.
+        final long readAt = (System.currentTimeMillis() - 600_000) / 1000 * 1000;
+        assertTrue(cfg.setLastModified(readAt));
+        RaceProperties.constructions.set(0);
+        RaceProperties.bumpTo = readAt + 300_000;
+        RaceProperties.watched = cfg;
+
+        try {
+            final RaceProperties props = PropertiesUtil.loadFromXml(cfg, true, RaceProperties.class);
+            assertEquals("old", props.get("k"));
+            assertEquals(1, RaceProperties.constructions.get(), "the target class must be built inside the window");
+            assertEquals(RaceProperties.bumpTo, cfg.lastModified(), "the simulated write must have re-stamped the file");
+
+            // The content that "concurrent" writer meant to publish, under the stamp it already applied.
+            Files.writeString(cfg.toPath(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?><race><k>new</k></race>");
+            assertTrue(cfg.setLastModified(RaceProperties.bumpTo));
+
+            final long deadline = System.currentTimeMillis() + 15_000;
+            while (!"new".equals(props.get("k")) && System.currentTimeMillis() < deadline) {
+                Thread.sleep(50);
+            }
+            assertEquals("new", props.get("k"), "a write that landed during the initial load was never picked up");
+        } finally {
+            RaceProperties.watched = null;
+            PropertiesUtil.stopAutoRefresh(cfg);
+        }
+
+        // Control: the ordinary auto-refresh path - no write during the load - still reloads a changed file.
+        final File plain = tempDir.resolve("plain.properties").toFile();
+        Files.writeString(plain.toPath(), "k=old" + System.lineSeparator());
+
+        try {
+            final Properties<String, String> props = PropertiesUtil.load(plain, true);
+            assertEquals("old", props.get("k"));
+
+            Files.writeString(plain.toPath(), "k=new" + System.lineSeparator());
+            assertTrue(plain.setLastModified(System.currentTimeMillis() + 2_000));
+
+            final long deadline = System.currentTimeMillis() + 15_000;
+            while (!"new".equals(props.get("k")) && System.currentTimeMillis() < deadline) {
+                Thread.sleep(50);
+            }
+            assertEquals("new", props.get("k"));
+        } finally {
+            PropertiesUtil.stopAutoRefresh(plain);
+        }
+    }
+
+    @Test
+    public void reviewFixes20260906_xmlTextValuesAreReadBackStripped() {
+        // The writer keeps the whitespace; the loader strips it before (and, for a typed value, on the way
+        // into) valueOf. So a String value with surrounding whitespace does not survive the round trip - now
+        // stated in the storeToXml javadocs, which previously implied only non-String values were at risk.
+        final Properties<String, Object> source = new Properties<>();
+        source.put("k", "  v  ");
+
+        for (final boolean writeTypeInfo : new boolean[] { false, true }) {
+            final StringWriter w = new StringWriter();
+            PropertiesUtil.storeToXml(source, "root", writeTypeInfo, w);
+            assertTrue(w.toString().contains(">  v  <"), w.toString());
+            assertEquals("v", PropertiesUtil.loadFromXml(new StringReader(w.toString())).get("k"));
+        }
+
+        // Control: interior whitespace is untouched, so this is a strip and not a squeeze.
+        source.put("k", "a  b");
+        final StringWriter inner = new StringWriter();
+        PropertiesUtil.storeToXml(source, "root", false, inner);
+        assertEquals("a  b", PropertiesUtil.loadFromXml(new StringReader(inner.toString())).get("k"));
+    }
+
+
+    /**
+     * A generated class name must be a JLS {@code TypeIdentifier}, so the five restricted identifiers
+     * ({@code permits}, {@code record}, {@code sealed}, {@code var}, {@code yield}) cannot name it - while a
+     * generated property of the same name stays legal, because they are excluded from {@code TypeIdentifier}
+     * only.
+     */
+    @Test
+    public void testXmlToJava_RejectsRestrictedIdentifierAsClassNameButAcceptsItAsPropertyName() throws IOException {
+        final String srcPath = tempDir.resolve("restricted").toFile().getAbsolutePath();
+        assertTrue(new File(srcPath).mkdirs() || new File(srcPath).isDirectory());
+
+        for (final String restricted : new String[] { "record", "var", "sealed", "permits", "yield" }) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                    () -> PropertiesUtil.xmlToJava("<config><host>h</host></config>", srcPath, "com.restricted", restricted, false),
+                    "className must reject the restricted identifier: " + restricted);
+            assertTrue(e.getMessage().contains(restricted), e.getMessage());
+            assertFalse(new File(srcPath + File.separator + "com" + File.separator + "restricted", restricted + ".java").exists(),
+                    "nothing may be written when generation is refused");
+        }
+
+        // A property (field/accessor) named after a restricted identifier is still generated.
+        PropertiesUtil.xmlToJava("<config><record>r</record><var>v</var></config>", srcPath, "com.restricted", "Restricted", false);
+
+        final File generated = new File(srcPath + File.separator + "com" + File.separator + "restricted", "Restricted.java");
+        assertTrue(generated.exists());
+
+        final String content = new String(Files.readAllBytes(generated.toPath()), StandardCharsets.UTF_8);
+        assertTrue(content.contains("class Restricted"), content);
+        assertTrue(content.contains("public void setRecord(java.lang.String record)"), content);
+        assertTrue(content.contains("public void setVar(java.lang.String var)"), content);
+    }
+
+    /**
+     * {@code store(Properties, String, File)} used to open - and therefore truncate - the destination before
+     * validating anything, so a rejected argument silently destroyed the user's previous configuration. All the
+     * validation lives in the conversion to {@code java.util.Properties}, which is now done first, matching the
+     * ordering {@code storeToXml(.., File)} has always used.
+     */
+    @Test
+    public void reviewFixes20260911_storeToFileDoesNotDestroyTheTargetWhenAnArgumentIsRejected() throws IOException {
+        final File target = tempDir.resolve("precious.properties").toFile();
+        final String original = "#PRECIOUS EXISTING CONTENT" + System.lineSeparator() + "keep=me" + System.lineSeparator();
+        Files.writeString(target.toPath(), original, StandardCharsets.ISO_8859_1);
+        final long originalSize = target.length();
+        assertTrue(originalSize > 0);
+
+        // 1. a null VALUE
+        final Properties<String, String> nullValue = new Properties<>();
+        nullValue.put("a", "1");
+        nullValue.put("b", null);
+        assertThrows(NullPointerException.class, () -> PropertiesUtil.store(nullValue, "c", target));
+        assertEquals(original, Files.readString(target.toPath(), StandardCharsets.ISO_8859_1));
+
+        // 2. a null KEY
+        final Properties<String, String> nullKey = new Properties<>();
+        nullKey.put(null, "z");
+        assertThrows(NullPointerException.class, () -> PropertiesUtil.store(nullKey, "c", target));
+        assertEquals(original, Files.readString(target.toPath(), StandardCharsets.ISO_8859_1));
+
+        // 3. a null properties argument
+        assertThrows(IllegalArgumentException.class, () -> PropertiesUtil.store(null, "c", target));
+        assertEquals(original, Files.readString(target.toPath(), StandardCharsets.ISO_8859_1));
+
+        // 4. a rejected argument must not leave a new empty file behind either
+        final File absent = tempDir.resolve("never-created.properties").toFile();
+        assertFalse(absent.exists());
+        assertThrows(NullPointerException.class, () -> PropertiesUtil.store(nullValue, "c", absent));
+        assertFalse(absent.exists());
+
+        // 5. a null output file: rejected by IOUtil.createNewFileIfNotExists with IllegalArgumentException,
+        // NOT the NullPointerException the @throws tag used to name for it.
+        final Properties<String, String> valid = new Properties<>();
+        valid.put("a", "1");
+        assertThrows(IllegalArgumentException.class, () -> PropertiesUtil.store(valid, "c", (File) null));
+
+        // Control: a valid store still replaces the contents.
+        final Properties<String, String> good = new Properties<>();
+        good.put("a", "1");
+        good.put("k", "v");
+        PropertiesUtil.store(good, "header", target);
+
+        final Properties<String, String> reloaded = PropertiesUtil.load(target);
+        assertEquals("1", reloaded.get("a"));
+        assertEquals("v", reloaded.get("k"));
+        assertEquals(2, reloaded.size());
+    }
+
+    /**
+     * Pins the case-insensitivity note now carried in the main description of {@code findDir}/{@code findFile}
+     * (it used to sit after the {@code @param} tag, where javadoc renders it inside the parameter table). The
+     * recursive search compares names with {@code equalsIgnoreCase} on every platform.
+     */
+    @Test
+    public void reviewFixes20260911_theRecursiveSearchComparesNamesCaseInsensitively() throws IOException {
+        final File root = tempDir.resolve("ci-search").toFile();
+        final File nested = new File(root, "nested");
+        assertTrue(nested.mkdirs());
+
+        final File dir = new File(nested, "config");
+        assertTrue(dir.mkdirs());
+        final File file = new File(nested, "application.properties");
+        assertTrue(file.createNewFile());
+
+        assertEquals(dir.getCanonicalFile(), PropertiesUtil.findFileInDir("Config", root, true).getCanonicalFile());
+        assertEquals(dir.getCanonicalFile(), PropertiesUtil.findFileInDir("CONFIG", root, true).getCanonicalFile());
+        assertEquals(file.getCanonicalFile(), PropertiesUtil.findFileInDir("Application.Properties", root, false).getCanonicalFile());
+        assertEquals(file.getCanonicalFile(), PropertiesUtil.findFileInDir("APPLICATION.PROPERTIES", root, false).getCanonicalFile());
+
+        // Control: a genuinely different name is still not found.
+        assertNull(PropertiesUtil.findFileInDir("configs", root, true));
+
+        // The documented methods themselves: findDir(x) -> findFile(x, true, null) and the public
+        // findFileInDir(String, File, boolean) both funnel into the same private
+        // findFileInDir(folderPrefix, name, dir, isDir, foundDir), whose comparison is
+        // file.getName().equalsIgnoreCase(name), so an upper-cased name must resolve to the same kind of
+        // entry a lower-cased one does. The search lists a directory and compares names in Java rather
+        // than asking the filesystem to look a name up, which is why this holds on a case-sensitive
+        // filesystem too.
+        assertNotNull(PropertiesUtil.findDir("com"));
+        final File dirIgnoringCase = PropertiesUtil.findDir("COM");
+        assertNotNull(dirIgnoringCase, "findDir must match a directory name ignoring case");
+        assertTrue(dirIgnoringCase.isDirectory());
+        assertTrue(dirIgnoringCase.getName().equalsIgnoreCase("com"), dirIgnoringCase.getAbsolutePath());
+
+        assertNotNull(PropertiesUtil.findFile("PropertiesUtil.java"));
+        final File fileIgnoringCase = PropertiesUtil.findFile("PROPERTIESUTIL.JAVA");
+        assertNotNull(fileIgnoringCase, "findFile must match a file name ignoring case");
+        assertTrue(fileIgnoringCase.isFile());
+        assertTrue(fileIgnoringCase.getName().equalsIgnoreCase("PropertiesUtil.java"), fileIgnoringCase.getAbsolutePath());
+    }
+
+    /**
+     * Pins the auto-refresh identity rule now documented on {@code loadFromXml(File, boolean)}: only the returned
+     * ROOT instance keeps its identity across a reload; every nested {@code Properties} is rebuilt, so a cached
+     * nested instance goes stale. (The in-file comment used to claim nested identity was preserved - the
+     * refresh path always passes {@code output == null}, so it never is.)
+     */
+    @Test
+    public void reviewFixes20260911_autoRefreshRebuildsNestedPropertiesAndKeepsOnlyTheRootIdentity() throws Exception {
+        final File cfg = tempDir.resolve("nested-identity.xml").toFile();
+        Files.writeString(cfg.toPath(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?><config><db><url>one</url></db></config>");
+
+        try {
+            final Properties<String, Object> root = PropertiesUtil.loadFromXml(cfg, true);
+            assertSame(root, PropertiesUtil.loadFromXml(cfg, true), "the root instance is shared, not reloaded");
+
+            final Properties<String, Object> nested = (Properties<String, Object>) root.get("db");
+            assertEquals("one", nested.get("url"));
+
+            Files.writeString(cfg.toPath(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?><config><db><url>two</url></db></config>");
+            assertTrue(cfg.setLastModified(System.currentTimeMillis() + 2_000));
+
+            final long deadline = System.currentTimeMillis() + 30_000;
+            while (root.get("db") == nested && System.currentTimeMillis() < deadline) {
+                Thread.sleep(50);
+            }
+
+            final Object refreshed = root.get("db");
+            assertNotSame(nested, refreshed, "a reload must have replaced the nested Properties");
+            assertEquals("two", ((Properties<?, ?>) refreshed).get("url"));
+
+            // The cached nested instance is stale - this is exactly what the javadoc warns about.
+            assertEquals("one", nested.get("url"));
+        } finally {
+            PropertiesUtil.stopAutoRefresh(cfg);
+        }
+    }
 }

@@ -16,6 +16,8 @@ package com.landawn.abacus.parser;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -157,7 +159,7 @@ class JsonStringReader extends AbstractJsonReader {
      * @param reader the underlying reader (may be {@code null})
      * @throws IllegalArgumentException if {@code beginIndex} or {@code toIndex} is invalid.
      */
-    JsonStringReader(final char[] strValue, final int beginIndex, final int toIndex, final char[] cbuf, final Reader reader) {
+    JsonStringReader(final char[] strValue, final int beginIndex, final int toIndex, final char[] cbuf, final Reader reader) throws IllegalArgumentException {
         if (beginIndex < 0 || toIndex < 0 || toIndex < beginIndex || beginIndex > strValue.length || toIndex > strValue.length) {
             throw new IllegalArgumentException("Invalid beginIndex or toIndex: " + beginIndex + ", " + toIndex);
         }
@@ -238,10 +240,11 @@ class JsonStringReader extends AbstractJsonReader {
      *
      * @param nextTokenValueType the expected type of the next token value
      * @return the token identifier, or {@code -1} if no next token is found
-     * @throws UncheckedIOException if an I/O error occurs during reading
+     * @throws UncheckedIOException if reading from the underlying character stream fails
+     * @throws ParsingException if a quoted string is unterminated, an escape sequence is malformed, or unquoted token text contains unexpected whitespace
      */
     @Override
-    public int nextToken(final Type<?> nextTokenValueType) throws UncheckedIOException {
+    public int nextToken(final Type<?> nextTokenValueType) throws UncheckedIOException, ParsingException {
         lastEvent = nextEvent;
 
         text = null;
@@ -297,19 +300,16 @@ class JsonStringReader extends AbstractJsonReader {
                     if (nextChar == 0 && strBeginIndex - startIndexForText == 1) {
                         boolean isNumber = false;
 
-                        if (nextEvent == 'f' && strEndIndex - strBeginIndex > 3) { // false
-                            if (saveChar(strValue[strBeginIndex++]) == 'a' && saveChar(strValue[strBeginIndex++]) == 'l'
-                                    && saveChar(strValue[strBeginIndex++]) == 's' && saveChar(strValue[strBeginIndex++]) == 'e') {
+                        if (nextEvent == 'f') { // false
+                            if (matchLiteralChar('a') && matchLiteralChar('l') && matchLiteralChar('s') && matchLiteralChar('e')) {
                                 text = FALSE;
                             }
-                        } else if (nextEvent == 't' && strEndIndex - strBeginIndex > 2) { // true
-                            if (saveChar(strValue[strBeginIndex++]) == 'r' && saveChar(strValue[strBeginIndex++]) == 'u'
-                                    && saveChar(strValue[strBeginIndex++]) == 'e') {
+                        } else if (nextEvent == 't') { // true
+                            if (matchLiteralChar('r') && matchLiteralChar('u') && matchLiteralChar('e')) {
                                 text = TRUE;
                             }
-                        } else if (nextEvent == 'n' && strEndIndex - strBeginIndex > 2) { // null
-                            if (saveChar(strValue[strBeginIndex++]) == 'u' && saveChar(strValue[strBeginIndex++]) == 'l'
-                                    && saveChar(strValue[strBeginIndex++]) == 'l') { //NOSONAR
+                        } else if (nextEvent == 'n') { // null
+                            if (matchLiteralChar('u') && matchLiteralChar('l') && matchLiteralChar('l')) { //NOSONAR
                                 text = NULL;
                             }
                         } else if ((nextEvent >= '0' && nextEvent <= '9') || nextEvent == '-' || nextEvent == '+') { // number.
@@ -360,9 +360,13 @@ class JsonStringReader extends AbstractJsonReader {
 
     /**
      * Checks if the reader has text content available.
-     * This is {@code true} when a value has been parsed (string, number, boolean, or {@code null}).
+     * This is {@code true} when the current token carries non-empty text: an unquoted value
+     * (number, boolean, {@code null} or any other unquoted token) or a quoted string with at least
+     * one character. It is {@code false} for an empty quoted string ({@code ""} or {@code ''}), for a
+     * structural token that no unquoted text precedes (a quoted string's text belongs to its closing-quote
+     * token) and at EOF when only whitespace followed the last value.
      *
-     * @return {@code true} if text content is available, {@code false} otherwise
+     * @return {@code true} if non-empty text content is available, {@code false} otherwise
      */
     @Override
     public boolean hasText() {
@@ -381,6 +385,8 @@ class JsonStringReader extends AbstractJsonReader {
      *   <li>Scientific notation: 1.23e10, -4.56E-7</li>
      *   <li>Type suffixes: 123L, 45.6f, 78.9d</li>
      * </ul>
+     * <p>Decimal {@code float} values are rounded directly from their decimal value, without an
+     * intermediate rounding to {@code double}.</p>
      *
      * @param firstChar the first character of the number
      * @param nextTokenValueType the expected type of the next token value
@@ -488,7 +494,8 @@ class JsonStringReader extends AbstractJsonReader {
             if (nextTokenValueType != null && (nextTokenValueType.isNumber() || typeFlag > 0)) {
                 if (pointPosition > 0) {
                     if (nextTokenValueType.isFloat() || typeFlag == 'f' || typeFlag == 'F') {
-                        numValue = (float) (((double) ret) / POWERS_OF_TEN[digitCount - pointPosition]);
+                        // Rounding through double can land on a float midpoint and round a second time in the wrong direction.
+                        numValue = BigDecimal.valueOf(ret, digitCount - pointPosition).floatValue();
                     } else { // ignore 'l' or 'L' if it's specified.
                         numValue = ((double) ret) / POWERS_OF_TEN[digitCount - pointPosition];
                     }
@@ -513,6 +520,36 @@ class JsonStringReader extends AbstractJsonReader {
         //        logger.warn("#######: " + getText());
         //        System.out.println("#######: " + getText());
         //    }
+    }
+
+    /**
+     * Peeks at the next character of a {@code true}/{@code false}/{@code null} literal and consumes it only
+     * when it can belong to the literal.
+     *
+     * <p>A structural character (a token event below 32: brace, bracket, quote, colon, comma) terminates the
+     * unquoted token, so it is left in the buffer for the scan that follows; consuming it fused the next value
+     * into this token ({@code "[tru,1]"} produced the single element {@code "tru,1"}, {@code "[t]"} ate the
+     * {@code ']'}). Whitespace is deliberately not a stop: {@link #saveChar(int)} records it, so {@code "fal se"}
+     * is still rejected as text after whitespace. A non-structural mismatch is consumed (and saved) exactly as
+     * the surrounding scan would have consumed it.</p>
+     *
+     * @param expected the character the literal requires at this position
+     * @return {@code true} if the next character was consumed and matched {@code expected}
+     */
+    protected boolean matchLiteralChar(final char expected) {
+        if (strBeginIndex >= strEndIndex) {
+            return false;
+        }
+
+        final int ch = strValue[strBeginIndex];
+
+        if (ch < 128 && charEvents[ch] > 0 && charEvents[ch] < 32) {
+            return false;
+        }
+
+        strBeginIndex++;
+
+        return saveChar(ch) == expected;
     }
 
     /**
@@ -571,7 +608,10 @@ class JsonStringReader extends AbstractJsonReader {
         return ch;
     }
 
-    private void checkNoTextAfterWhitespace() {
+    /**
+     * @throws ParsingException if a non-whitespace character follows whitespace within an unquoted JSON value
+     */
+    private void checkNoTextAfterWhitespace() throws ParsingException {
         if (whitespaceAfterText) {
             throw new ParsingException("Unexpected non-whitespace character after an unquoted JSON value");
         }
@@ -600,7 +640,7 @@ class JsonStringReader extends AbstractJsonReader {
      *
      * @throws ParsingException always thrown
      */
-    protected void throwExceptionDueToUnexpectedNonStringToken() {
+    protected void throwExceptionDueToUnexpectedNonStringToken() throws ParsingException {
         throw new ParsingException(
                 "\"false\", \"true\", \"null\" or a number is expected in or before \"" + (nextChar > 0 ? String.valueOf(cbuf, 0, N.min(32, nextChar))
                         : String.valueOf(strValue, Math.max(0, strBeginIndex - 1), N.min(32, strEndIndex - Math.max(0, strBeginIndex - 1)))));
@@ -623,6 +663,16 @@ class JsonStringReader extends AbstractJsonReader {
     /**
      * Reads and converts the current token value to the specified type.
      *
+     * <p>Exact decimal/integer targets consume the original token, preserving decimal precision
+     * and scale. Conversions from a floating-point cache to another numeric type also consume
+     * the token, avoiding double rounding and spelling-dependent fractional truncation. The
+     * token's Java type suffix ({@code 123L}, {@code 1.5f}) is dropped first, and a target whose
+     * parser cannot read the token's spelling at all - a fractional token into {@code BigInteger}
+     * or an integral slot - converts the cached {@code Number} instead (truncating toward zero)
+     * rather than failing. An unquoted number read into a {@code String} target keeps the token's
+     * spelling ({@code 007} stays {@code "007"}, {@code 1.50} stays {@code "1.50"}); an
+     * {@code Object} target receives the parsed {@code Number}.</p>
+     *
      * @param <T> the target type
      * @param type the type descriptor for conversion
      * @return the converted value
@@ -632,6 +682,32 @@ class JsonStringReader extends AbstractJsonReader {
     public <T> T readValue(final Type<? extends T> type) {
         if (nextEvent != END_DOUBLE_QUOTE && nextEvent != END_SINGLE_QUOTE) {
             if (numValue != null) {
+                // The final target may only become known after nextToken() cached a floating value.
+                // Reusing that approximation would lose BigDecimal digits/scale or round a float twice.
+                if (type.javaType() == BigDecimal.class || type.javaType() == BigInteger.class
+                        || (type.isNumber() && ((numValue instanceof Float && !type.isFloat()) || (numValue instanceof Double && !type.isDouble())))) {
+                    // The Java type suffix the tokenizer accepts (123L, 1.5f) belongs to no numeric
+                    // grammar: only the integer/long handlers strip one, BigInteger/BigDecimal reject it.
+                    final String token = stripNumberTypeSuffix(getText());
+
+                    // A fractional token has no integral spelling, so an integral target can only throw below.
+                    // Answered here rather than through the catch: a NumberFormatException fills in a stack
+                    // trace per value, and "1.0" into an int slot is an ordinary shape, not a malformed one -
+                    // measured ~40x the cost of the same list of integral tokens.
+                    if (token.indexOf('.') >= 0 && isIntegralNumberClass(type.javaType())) {
+                        return (T) Numbers.convert(numValue, (Type<Number>) type);
+                    }
+
+                    try {
+                        return type.valueOf(token);
+                    } catch (final NumberFormatException e) {
+                        // The target cannot read this spelling at all. The cached value is a valid parse of the
+                        // very same token, so convert that instead of failing on a token the tokenizer already
+                        // accepted. A range violation still escapes as ArithmeticException.
+                        return (T) Numbers.convert(numValue, (Type<Number>) type);
+                    }
+                }
+
                 if (type.isObject() || type.javaType().equals(numValue.getClass())) {
                     return (T) numValue;
                 } else if (type.isNumber()) {
@@ -641,6 +717,11 @@ class JsonStringReader extends AbstractJsonReader {
                 } else {
                     if (text != null) {
                         return type.valueOf(text);
+                    } else if (type.isString()) {
+                        // An unquoted number read into a String target keeps its spelling ("007",
+                        // "1.50", "+5", "123L"): the fast-path Number is a parsing cache, and going
+                        // through Number.toString() re-spelled only the tokens the fast path accepted.
+                        return (T) getText();
                     } else {
                         return N.convert(numValue, type);
                     }
@@ -703,6 +784,44 @@ class JsonStringReader extends AbstractJsonReader {
     }
 
     /**
+     * Removes the trailing Java numeric type suffix ({@code l}, {@code L}, {@code f}, {@code F},
+     * {@code d}, {@code D}) that the number tokenizer accepts on an unquoted value.
+     *
+     * <p>Only the integer/long type handlers strip such a suffix themselves; {@code BigInteger},
+     * {@code BigDecimal} and the floating-point parsers reject {@code "123L"} / {@code "1.5f"}
+     * outright, so a raw token handed straight to {@code Type.valueOf(String)} must be bare.</p>
+     *
+     * @param token the raw number token
+     * @return {@code token} without its type suffix, or {@code token} itself when it carries none
+     */
+    private static String stripNumberTypeSuffix(final String token) {
+        final int len = token.length();
+
+        if (len > 1) {
+            final char lastChar = token.charAt(len - 1);
+
+            if (lastChar == 'l' || lastChar == 'L' || lastChar == 'f' || lastChar == 'F' || lastChar == 'd' || lastChar == 'D') {
+                return token.substring(0, len - 1);
+            }
+        }
+
+        return token;
+    }
+
+    /**
+     * Returns whether {@code cls} is one of the integral numeric targets whose {@code Type.valueOf(String)}
+     * rejects a fractional spelling outright: the integral primitives, their wrappers and {@code BigInteger}.
+     * A {@code BigDecimal} or floating-point target reads {@code "1.5"} fine and is deliberately not listed.
+     *
+     * @param cls the target class
+     * @return {@code true} when a token holding a decimal point cannot be handed to that target's parser
+     */
+    private static boolean isIntegralNumberClass(final Class<?> cls) {
+        return cls == int.class || cls == Integer.class || cls == long.class || cls == Long.class || cls == short.class || cls == Short.class
+                || cls == byte.class || cls == Byte.class || cls == BigInteger.class;
+    }
+
+    /**
      * Reads property information from the current token using the provided {@code symbolReader}.
      *
      * @param symbolReader the symbol reader to use for lookup
@@ -716,7 +835,7 @@ class JsonStringReader extends AbstractJsonReader {
     /**
      * Closes the reader and releases associated resources.
      *
-     * @throws UncheckedIOException if an I/O error occurs
+     * @throws UncheckedIOException if closing the optional underlying reader fails
      */
     @Override
     public void close() throws UncheckedIOException {
@@ -753,7 +872,7 @@ class JsonStringReader extends AbstractJsonReader {
      *         would not exceed the current capacity, typically because {@link Integer#MAX_VALUE}
      *         has been reached)
      */
-    void enlargeCharBuffer() {
+    void enlargeCharBuffer() throws ParsingException {
         final long newCapacityLong = Math.max((long) cbufLen + 1, (long) (cbufLen * 1.75));
         final int newCapacity = (int) Math.min(newCapacityLong, Integer.MAX_VALUE);
 
@@ -774,7 +893,7 @@ class JsonStringReader extends AbstractJsonReader {
      * @throws ParsingException if the escape sequence is incomplete or malformed, including
      *         when a unicode escape sequence contains invalid hex digits
      */
-    protected char readEscapeCharacter() {
+    protected char readEscapeCharacter() throws ParsingException {
         if (strBeginIndex >= strEndIndex) {
             throw new ParsingException("Incomplete escape sequence at end of input");
         }

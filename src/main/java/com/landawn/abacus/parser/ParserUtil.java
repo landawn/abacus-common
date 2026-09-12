@@ -15,6 +15,7 @@
 package com.landawn.abacus.parser;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -28,12 +29,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -45,9 +48,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import com.landawn.abacus.annotation.AccessFieldByMethod;
 import com.landawn.abacus.annotation.Beta;
@@ -64,18 +70,21 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.annotation.Transient;
 import com.landawn.abacus.annotation.Type.Scope;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.type.ObjectType;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
-import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.Beans;
+import com.landawn.abacus.util.BufferedJsonWriter;
+import com.landawn.abacus.util.BufferedXmlWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ConcurrentCacheMap;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.EnumType;
+import com.landawn.abacus.util.EscapeUtil;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableMap;
@@ -84,11 +93,12 @@ import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Numbers;
+import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Splitter;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.stream.Stream;
+import com.landawn.abacus.util.cs;
 
 /**
  * Utility class for parser-related operations, providing methods for handling
@@ -148,6 +158,17 @@ public final class ParserUtil {
     // Bean metadata cache, keyed by the complete reflective type.
     private static final Map<java.lang.reflect.Type, BeanInfo> beanInfoPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
+    /**
+     * The point past which a {@link BeanInfo}'s lookup-time caches ({@code propInfoMap} fuzzy hits, the
+     * negative cache of unknown names and {@code propInfoQueueMap}) stop accepting new entries.
+     *
+     * <p>Those caches are keyed by caller-supplied strings (JSON keys, XML element names, map keys), so without
+     * a cap a stream of documents with distinct unknown names grows them for the lifetime of the JVM (the
+     * {@code BeanInfo} itself is pooled forever). Skipping an insert only costs a recomputation on the next
+     * lookup and changes no result. Same precedent as {@code Beans.MAX_CACHED_NAMES}.</p>
+     */
+    private static final int MAX_CACHED_PROP_NAMES = POOL_SIZE * 2;
+
     private ParserUtil() {
         // Singleton.
     }
@@ -160,8 +181,10 @@ public final class ParserUtil {
      * {@code @JSONField(serialize=false)}, or {@code @JsonIgnore}. It is also excluded when its name
      * equals, or matches as a regular expression, one of {@code JsonXmlConfig.ignoredFields()}.</p>
      *
-     * <p>A {@code null} field is reported as serializable, so callers holding a method-only property
-     * do not need a null check.</p>
+     * <p>A {@code null} field is reported as serializable: this overload knows the property only through its
+     * field, so it cannot apply {@code ignoredFields} to a method-only property. Bean introspection uses
+     * {@link #isJsonXmlSerializable(String, Field, JsonXmlConfig)}, which matches by property name and
+     * therefore also honours {@code ignoredFields} for getter-only (computed) properties.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -175,43 +198,69 @@ public final class ParserUtil {
      * @return {@code true} if the field should be serialized, {@code false} otherwise
      */
     static boolean isJsonXmlSerializable(final Field field, final JsonXmlConfig jsonXmlConfig) {
-        if (field == null) {
-            return true;
-        }
+        return isJsonXmlSerializable(field == null ? null : field.getName(), field, jsonXmlConfig);
+    }
 
-        if (Modifier.isStatic(field.getModifiers()) || (field.isAnnotationPresent(JsonXmlField.class) && field.getAnnotation(JsonXmlField.class).ignore())) {
-            return false;
-        }
-
-        try {
-            if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
-                    && !field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).serialize()) {
+    /**
+     * Determines whether a property should be serialized to JSON or XML based on its name, its backing field's
+     * modifiers and annotations, and the class-level {@code JsonXmlConfig}.
+     *
+     * <p>A field-backed property is excluded when the field is static or explicitly marked as ignored through
+     * {@code @JsonXmlField(ignore=true)}, {@code @JSONField(serialize=false)} or {@code @JsonIgnore}. Any
+     * property, field-backed or not, is excluded when {@code propName} (or, for a field-backed property whose
+     * field is named differently, the field name) equals or matches as a regular expression one of
+     * {@code JsonXmlConfig.ignoredFields()}. That is what lets {@code ignoredFields} drop a getter-only
+     * computed property such as {@code getFullName()}, the "computed values" use case the annotation
+     * documents.</p>
+     *
+     * @param propName the property name; {@code null} when unknown, in which case only the field is consulted
+     * @param field the backing field, or {@code null} for a method-only property
+     * @param jsonXmlConfig the JSON/XML configuration that may contain ignored field patterns
+     * @return {@code true} if the property should be serialized, {@code false} otherwise
+     */
+    static boolean isJsonXmlSerializable(final String propName, final Field field, final JsonXmlConfig jsonXmlConfig) {
+        if (field != null) {
+            if (Modifier.isStatic(field.getModifiers())
+                    || (field.isAnnotationPresent(JsonXmlField.class) && field.getAnnotation(JsonXmlField.class).ignore())) {
                 return false;
             }
-        } catch (final Throwable e) { // NOSONAR
-            // ignore
-        }
 
-        try {
-            if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonIgnore.class)
-                    && field.getAnnotation(com.fasterxml.jackson.annotation.JsonIgnore.class).value()) {
-                return false;
+            try {
+                if (field.isAnnotationPresent(com.alibaba.fastjson2.annotation.JSONField.class)
+                        && !field.getAnnotation(com.alibaba.fastjson2.annotation.JSONField.class).serialize()) {
+                    return false;
+                }
+            } catch (final Throwable e) { // NOSONAR
+                // ignore
             }
-        } catch (final Throwable e) { // NOSONAR
-            // ignore
+
+            try {
+                if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonIgnore.class)
+                        && field.getAnnotation(com.fasterxml.jackson.annotation.JsonIgnore.class).value()) {
+                    return false;
+                }
+            } catch (final Throwable e) { // NOSONAR
+                // ignore
+            }
         }
 
         if (jsonXmlConfig != null && N.notEmpty(jsonXmlConfig.ignoredFields())) {
-            final String fieldName = field.getName();
+            // Match the PROPERTY name so a getter-only property can be ignored; keep matching the field name
+            // too so an existing config that lists a differently-named backing field keeps working.
+            final String fieldName = field == null || field.getName().equals(propName) ? null : field.getName();
 
             for (final String ignoreFieldName : jsonXmlConfig.ignoredFields()) {
-                if (fieldName.equals(ignoreFieldName) || fieldName.matches(ignoreFieldName)) {
+                if (isIgnoredName(propName, ignoreFieldName) || isIgnoredName(fieldName, ignoreFieldName)) {
                     return false;
                 }
             }
         }
 
         return true;
+    }
+
+    private static boolean isIgnoredName(final String name, final String ignoreFieldName) {
+        return name != null && (name.equals(ignoreFieldName) || name.matches(ignoreFieldName));
     }
 
     /**
@@ -521,7 +570,7 @@ public final class ParserUtil {
      *         custom name when one is configured, otherwise the policy-converted property name
      * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace.
      */
-    static JsonNameTag[] getJsonNameTags(final String propName, final Field field) {
+    static JsonNameTag[] getJsonNameTags(final String propName, final Field field) throws IllegalArgumentException {
         final String jsonXmlFieldName = getCustomFieldName(field);
 
         final NamingPolicy[] namingPolicies = NAMING_POLICIES;
@@ -545,7 +594,7 @@ public final class ParserUtil {
      * @return the custom field name, or {@code null} if none is specified
      * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace.
      */
-    private static String getCustomFieldName(final Field field) {
+    private static String getCustomFieldName(final Field field) throws IllegalArgumentException {
         String jsonXmlFieldName = null;
 
         if (field != null) {
@@ -604,7 +653,7 @@ public final class ParserUtil {
      *         custom name when one is configured, otherwise the policy-converted property name
      * @throws IllegalArgumentException if the custom name contains leading/trailing whitespace.
      */
-    static XmlNameTag[] getXmlNameTags(final String propName, final Field field, final String typeName, final boolean isBean) {
+    static XmlNameTag[] getXmlNameTags(final String propName, final Field field, final String typeName, final boolean isBean) throws IllegalArgumentException {
         final String jsonXmlFieldName = getCustomFieldName(field);
 
         final NamingPolicy[] namingPolicies = NAMING_POLICIES;
@@ -629,6 +678,14 @@ public final class ParserUtil {
      * </ul>
      *
      * <p>The field's own name is automatically removed from the alias list if present.</p>
+     *
+     * <p>An alias is an <i>explicit</i> binding, and {@link BeanInfo} registers it before the naming-policy
+     * spellings it derives from the property names, in one pass over all properties. So the outcome does not
+     * depend on the order the fields are declared in, and an alias wins over another property's derived
+     * spelling: {@code @JsonXmlField(aliases = {"first_name"}) String surname} claims {@code "first_name"}
+     * even when the bean also declares {@code firstName}, whose SNAKE_CASE spelling that is. An alias that
+     * collides with another property's <i>own</i> name, {@code @Column} name or alias is rejected with an
+     * {@link IllegalArgumentException} when the {@code BeanInfo} is built, again in every declaration order.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -811,7 +868,8 @@ public final class ParserUtil {
      *
      * <p>This method maintains a cache of BeanInfo instances to improve performance.
      * The BeanInfo contains metadata about the class including property information,
-     * annotations, and type details.</p>
+     * annotations, and type details. Property types retain resolved arguments from generic
+     * superclasses and their parameterized owners, including reordered owner arguments.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -819,18 +877,26 @@ public final class ParserUtil {
      * List<PropInfo> properties = beanInfo.propInfoList;
      * }</pre>
      *
-     * @param beanType the java type of the bean class to get information for
+     * @param beanType the java type of the bean class to get information for: a {@link Class}, or a
+     *        {@link ParameterizedType} whose raw type is a {@code Class}
      * @return a BeanInfo instance containing metadata about the class
-     * @throws IllegalArgumentException if the class is not a bean class (no properties).
+     * @throws IllegalArgumentException if {@code beanType} is {@code null}, is neither a {@code Class} nor a
+     *         {@code ParameterizedType} with a {@code Class} raw type (for example a {@code TypeVariable},
+     *         {@code WildcardType} or {@code GenericArrayType}), or is not a bean class (no properties).
      * @see BeanInfo
      */
-    public static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType) {
-        Class<?> beanClass = null;
+    public static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType) throws IllegalArgumentException {
+        N.checkArgNotNull(beanType, cs.beanType);
+
+        final Class<?> beanClass;
 
         if (beanType instanceof ParameterizedType pt && pt.getRawType() instanceof Class cls) {
             beanClass = cls;
+        } else if (beanType instanceof Class cls) {
+            beanClass = cls;
         } else {
-            beanClass = (Class<?>) beanType;
+            throw new IllegalArgumentException("Unsupported bean type: " + beanType + " (" + beanType.getClass().getName()
+                    + "); expected a Class or a ParameterizedType whose raw type is a Class");
         }
 
         return getBeanInfo(beanClass, beanType);
@@ -854,11 +920,14 @@ public final class ParserUtil {
      * @throws IllegalArgumentException if the class is not a bean class (no properties).
      * @see BeanInfo
      */
-    public static BeanInfo getBeanInfo(final Class<?> beanClass) {
+    public static BeanInfo getBeanInfo(final Class<?> beanClass) throws IllegalArgumentException {
         return getBeanInfo(beanClass, beanClass);
     }
 
-    private static BeanInfo getBeanInfo(final Class<?> beanClass, java.lang.reflect.Type javaType) {
+    /**
+     * @throws IllegalArgumentException if the class has no bean properties or its property metadata contains conflicting aliases, invalid names, or incompatible field exposure
+     */
+    private static BeanInfo getBeanInfo(final Class<?> beanClass, java.lang.reflect.Type javaType) throws IllegalArgumentException {
         if (!Beans.isBeanClass(beanClass)) {
             throw new IllegalArgumentException(
                     "No property getter/setter method or public field found in the specified bean: " + ClassUtil.getCanonicalClassName(beanClass));
@@ -892,12 +961,13 @@ public final class ParserUtil {
      * @param beanType the java type of the bean class to get information for
      * @param isASMSupported whether ASM support is enabled
      * @return a BeanInfo instance containing metadata about the class
+     * @throws IllegalArgumentException if the class has no bean properties or its property metadata contains conflicting aliases, invalid names, or incompatible field exposure
      * @see BeanInfo
      * @deprecated This overload is for internal tests only. Use {@link #getBeanInfo(java.lang.reflect.Type)} for normal bean metadata lookup.
      */
     @Deprecated
     @Internal
-    static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType, final boolean isASMSupported) {
+    static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType, final boolean isASMSupported) throws IllegalArgumentException {
         Class<?> beanClass = null;
 
         if (beanType instanceof ParameterizedType pt && pt.getRawType() instanceof Class cls) {
@@ -1077,13 +1147,33 @@ public final class ParserUtil {
         /** The names of {@link #transientSeriPropInfos}, for fast membership tests. */
         final Set<String> transientSeriPropNameSet = N.newHashSet();
 
+        /**
+         * Every spelling that resolves to a property: names, naming-policy tags, column names and aliases
+         * (registered at construction, unconditionally) plus fuzzy hits memoized by {@link #getPropInfo(String)}
+         * (capped at {@link ParserUtil#MAX_CACHED_PROP_NAMES}). Holds real bindings only; misses live in
+         * {@link #missedPropNames} so the fuzzy scan in {@code getPropInfo} never has to walk over them.
+         */
         private final Map<String, Optional<PropInfo>> propInfoMap;
+
+        /**
+         * Negative cache of {@link #getPropInfo(String)}: names that resolved to nothing. Bounded by
+         * {@link ParserUtil#MAX_CACHED_PROP_NAMES} because the keys are caller-supplied (unknown JSON keys).
+         */
+        private final Set<String> missedPropNames = ConcurrentHashMap.newKeySet();
 
         private final Map<String, List<PropInfo>> propInfoQueueMap;
 
         private final PropInfo[] propInfoArray;
 
         private final Map<Integer, PropInfo> hashPropInfoMap;
+
+        /**
+         * {@code true} when some property's naming-policy tag or column name is bound in {@link #propInfoMap}
+         * to a DIFFERENT property (e.g. {@code userName} and {@code user_name} both spell {@code USER_NAME}).
+         * Lets {@link #readPropInfo(char[], int, int)} skip the exact-binding check for every bean without such
+         * a collision.
+         */
+        private final boolean hasSharedNameTags;
 
         /** Optional table name if this bean is mapped to a database table */
         public final Optional<String> tableName;
@@ -1109,8 +1199,9 @@ public final class ParserUtil {
          *
          * @param beanClass the class to analyze
          * @param beanType the Java type of the class
+         * @throws IllegalArgumentException if property aliases conflict, a table name has surrounding whitespace, or field exposure conflicts with a transient or non-serializable field
          */
-        BeanInfo(final Class<?> beanClass, final java.lang.reflect.Type beanType) {
+        BeanInfo(final Class<?> beanClass, final java.lang.reflect.Type beanType) throws IllegalArgumentException {
             this(beanClass, beanType, ASMUtil.isASMAvailable());
         }
 
@@ -1123,9 +1214,10 @@ public final class ParserUtil {
          * @param beanClass the class to analyze
          * @param beanType the Java type of the class
          * @param isASMSupported whether to enable ASM-based optimizations
+         * @throws IllegalArgumentException if property aliases conflict, a table name has surrounding whitespace, or field exposure conflicts with a transient or non-serializable field
          */
         @SuppressWarnings("deprecation")
-        BeanInfo(final Class<?> beanClass, final java.lang.reflect.Type beanType, final boolean isASMSupported) {
+        BeanInfo(final Class<?> beanClass, final java.lang.reflect.Type beanType, final boolean isASMSupported) throws IllegalArgumentException {
             annotations = ImmutableMap.wrap(getAnnotations(beanClass));
             simpleClassName = ClassUtil.getSimpleClassName(beanClass);
             canonicalClassName = ClassUtil.getCanonicalClassName(beanClass);
@@ -1234,59 +1326,14 @@ public final class ParserUtil {
 
                 propInfos[idx++] = propInfo;
 
-                final Optional<PropInfo> propInfoOpt = Optional.of(propInfo);
-                propInfoMap.put(propName, propInfoOpt);
-                String jsonTagName = null;
+                // Pass 1 of the name registration: the property's own name. Column names, aliases and
+                // naming-policy tags are registered in the passes after this loop.
+                propInfoMap.put(propName, Optional.of(propInfo));
 
-                for (final JsonNameTag nameTag : propInfo.jsonNameTags) {
-                    jsonTagName = String.valueOf(nameTag.name);
-
-                    if (!propInfoMap.containsKey(jsonTagName)) {
-                        propInfoMap.put(jsonTagName, propInfoOpt);
-                    }
-                }
-
-                if (propInfo.columnName.isPresent() && !propInfoMap.containsKey(propInfo.columnName.get())) {
-                    propInfoMap.put(propInfo.columnName.get(), propInfoOpt);
-
-                    // Use Locale.ROOT so case-folded lookup keys match across JVM locales.
-                    // tr_TR turns "ID".toLowerCase() into "ıd" (dotless i), breaking lookups.
-                    final String lower = propInfo.columnName.get().toLowerCase(java.util.Locale.ROOT);
-                    if (!propInfoMap.containsKey(lower)) {
-                        propInfoMap.put(lower, propInfoOpt);
-                    }
-
-                    final String upper = propInfo.columnName.get().toUpperCase(java.util.Locale.ROOT);
-                    if (!propInfoMap.containsKey(upper)) {
-                        propInfoMap.put(upper, propInfoOpt);
-                    }
-                }
-
-                final ImmutableList<String> aliases = propInfo.aliases;
-
-                if (N.notEmpty(aliases)) {
-                    for (final String alias : aliases) {
-                        final Optional<PropInfo> existing = propInfoMap.get(alias);
-
-                        if (existing != null) {
-                            // The naming-policy tags of THIS property were registered above; an alias
-                            // that merely restates one of them (e.g. aliases = {"first_name"} on
-                            // firstName) is redundant, not a collision - only an alias already bound
-                            // to a DIFFERENT property is an error.
-                            if (existing.orElseNull() == propInfo) {
-                                continue;
-                            }
-
-                            throw new IllegalArgumentException("Cannot set alias: " + alias + " for property/field: " + propInfo.field + " because " + alias
-                                    + " is a property/field name in class: " + beanClass);
-                        }
-
-                        propInfoMap.put(alias, propInfoOpt);
-                    }
-                }
-
-                if (!isJsonXmlSerializable(propInfo.field, jsonXmlConfig)) {
-                    if (propInfo.jsonXmlExpose != JsonXmlField.Direction.BOTH) {
+                // These two checks reject a DECLARED direction on a property that cannot honour it; the implicit
+                // SERIALIZE_ONLY of a read-only (getter-only) property is not a declaration.
+                if (!isJsonXmlSerializable(propInfo.name, propInfo.field, jsonXmlConfig)) {
+                    if (propInfo.jsonXmlExpose != JsonXmlField.Direction.BOTH && !propInfo.isReadOnlyProperty) {
                         throw new IllegalArgumentException(
                                 "JsonXmlField.Expose cannot be: " + propInfo.jsonXmlExpose + " for non-serializable field: " + propInfo.field);
                     }
@@ -1296,7 +1343,7 @@ public final class ParserUtil {
                     seriPropInfoList.add(propInfo);
 
                     if (propInfo.isTransient) {
-                        if (propInfo.jsonXmlExpose != JsonXmlField.Direction.BOTH) {
+                        if (propInfo.jsonXmlExpose != JsonXmlField.Direction.BOTH && !propInfo.isReadOnlyProperty) {
                             throw new IllegalArgumentException(
                                     "JsonXmlField.Expose cannot be: " + propInfo.jsonXmlExpose + " for transient field: " + propInfo.field);
                         }
@@ -1313,11 +1360,74 @@ public final class ParserUtil {
                 maxLength = Math.max(propInfo.jsonNameTags[defaultNameIndex].name.length, maxLength);
             }
 
+            // Name registration is done in passes over ALL properties, explicit bindings before derived
+            // ones, so the outcome for a bean does not depend on the order its fields are declared in:
+            //   pass 1 (above): property names;
+            //   pass 2: @Column names (+ ROOT lower/upper case), first declared wins;
+            //   pass 3: aliases - an alias may not restate another property's name/column/alias;
+            //   pass 4: naming-policy tags, first declared wins, and never over an explicit binding, so an
+            //           explicit alias beats another property's derived spelling in every declaration order.
+            for (final PropInfo e : propInfos) {
+                if (e.columnName.isPresent() && !propInfoMap.containsKey(e.columnName.get())) {
+                    final Optional<PropInfo> propInfoOpt = Optional.of(e);
+                    propInfoMap.put(e.columnName.get(), propInfoOpt);
+
+                    // Use Locale.ROOT so case-folded lookup keys match across JVM locales.
+                    // tr_TR turns "ID".toLowerCase() into "ıd" (dotless i), breaking lookups.
+                    final String lower = e.columnName.get().toLowerCase(java.util.Locale.ROOT);
+                    if (!propInfoMap.containsKey(lower)) {
+                        propInfoMap.put(lower, propInfoOpt);
+                    }
+
+                    final String upper = e.columnName.get().toUpperCase(java.util.Locale.ROOT);
+                    if (!propInfoMap.containsKey(upper)) {
+                        propInfoMap.put(upper, propInfoOpt);
+                    }
+                }
+            }
+
+            for (final PropInfo e : propInfos) {
+                if (N.notEmpty(e.aliases)) {
+                    for (final String alias : e.aliases) {
+                        final Optional<PropInfo> existing = propInfoMap.get(alias);
+
+                        if (existing != null) {
+                            // An alias restating the property's own name or column is redundant, not a
+                            // collision. Only explicit bindings are registered at this point, so anything
+                            // else here really is another property's name, column or alias.
+                            if (existing.orElseNull() == e) {
+                                continue;
+                            }
+
+                            throw new IllegalArgumentException("Cannot set alias: " + alias + " for property/field: " + (e.field == null ? e.name : e.field)
+                                    + " because " + alias + " is already the name, column name or alias of property: " + existing.orElseNull().name
+                                    + " in class: " + beanClass);
+                        }
+
+                        propInfoMap.put(alias, Optional.of(e));
+                    }
+                }
+            }
+
+            for (final PropInfo e : propInfos) {
+                final Optional<PropInfo> propInfoOpt = Optional.of(e);
+                String jsonTagName = null;
+
+                for (final JsonNameTag nameTag : e.jsonNameTags) {
+                    jsonTagName = String.valueOf(nameTag.name);
+
+                    if (!propInfoMap.containsKey(jsonTagName)) {
+                        propInfoMap.put(jsonTagName, propInfoOpt);
+                    }
+                }
+            }
+
             jsonXmlSerializablePropInfos = seriPropInfoList.toArray(new PropInfo[0]);
             nonTransientSeriPropInfos = nonTransientSeriPropInfoList.toArray(new PropInfo[0]);
             transientSeriPropInfos = transientSeriPropInfoList.toArray(new PropInfo[0]);
 
             propInfoArray = new PropInfo[maxLength + 1];
+            boolean sharedNameTags = false;
 
             for (final PropInfo e : propInfos) {
                 hashPropInfoMap.put(ParserUtil.hashCode(e.jsonNameTags[defaultNameIndex].name), e);
@@ -1325,7 +1435,19 @@ public final class ParserUtil {
                 if (multiSet.getCount(e.jsonNameTags[defaultNameIndex].name.length) == 1) {
                     propInfoArray[e.jsonNameTags[defaultNameIndex].name.length] = e;
                 }
+
+                // readPropInfo accepts a candidate through any of its tags/column; note whether one of those
+                // spellings is bound to another property, so that only such beans pay for the exact check.
+                for (final JsonNameTag nameTag : e.jsonNameTags) {
+                    sharedNameTags |= propInfoMap.get(String.valueOf(nameTag.name)).orElseNull() != e;
+                }
+
+                if (e.columnName.isPresent()) {
+                    sharedNameTags |= propInfoMap.get(e.columnName.get()).orElseNull() != e;
+                }
             }
+
+            hasSharedNameTags = sharedNameTags;
 
             propInfoList = ImmutableList.wrap(N.toList(propInfos));
 
@@ -1433,16 +1555,24 @@ public final class ParserUtil {
                 // class. Collect only the lexical owner's bindings here: the member does not
                 // inherit the owner's superclass/interfaces, and visiting that hierarchy would
                 // wrongly prevent the member's own (nearer) superclass binding from winning.
-                collectOwnerTypeArguments(parameterizedType.getOwnerType(), typeParamArgMap);
+                // Resolve all arguments against the inherited bindings before owner variables are rebound.
+                // An owner such as Outer<B, A> must not overwrite A/B before either substitution completes.
+                final ParameterizedType resolvedType = (ParameterizedType) PropInfo.resolvePropertyType(parameterizedType, typeParamArgMap);
+                collectOwnerTypeArguments(resolvedType.getOwnerType(), typeParamArgMap);
 
                 final TypeVariable<?>[] typeParams = currentClass.getTypeParameters();
-                final java.lang.reflect.Type[] typeArgs = parameterizedType.getActualTypeArguments();
+                final java.lang.reflect.Type[] typeArgs = resolvedType.getActualTypeArguments();
+                final Map<TypeVariable<?>, java.lang.reflect.Type> inheritedBindings = new HashMap<>();
 
                 for (int i = 0, len = typeParams.length; i < len; i++) {
-                    if (!typeParams[i].equals(typeArgs[i])) {
-                        typeParamArgMap.put(typeParams[i], typeArgs[i]);
+                    // Resolve all arguments against the existing lexical bindings before replacing
+                    // any of them; inherited self-references and swapped owner variables need parallel substitution.
+                    final java.lang.reflect.Type resolved = PropInfo.resolvePropertyType(typeArgs[i], typeParamArgMap);
+                    if (!typeParams[i].equals(resolved)) {
+                        inheritedBindings.put(typeParams[i], resolved);
                     }
                 }
+                typeParamArgMap.putAll(inheritedBindings);
             } else if (currentType instanceof Class<?>) {
                 currentClass = (Class<?>) currentType;
 
@@ -1492,6 +1622,10 @@ public final class ParserUtil {
          * <p>This method does not resolve nested property paths (dot notation). Use
          * {@link #getPropInfoChain(String)} for nested paths such as {@code "address.city"}.</p>
          *
+         * <p>Lookup outcomes are memoized per spelling, hits and misses alike, but only up to a fixed number of
+         * caller-supplied names per bean; beyond that the answer is recomputed on every call. This keeps a
+         * stream of documents with ever-new unknown keys from growing the bean's caches without bound.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * PropInfo nameInfo = beanInfo.getPropInfo("name");
@@ -1499,13 +1633,20 @@ public final class ParserUtil {
          *
          * @param propName the property name to look up
          * @return the PropInfo for the property, or {@code null} if not found
+         * @throws IllegalArgumentException if {@code propName} is {@code null}
          * @see PropInfo
          */
         @Override
-        public PropInfo getPropInfo(final String propName) {
+        public PropInfo getPropInfo(final String propName) throws IllegalArgumentException {
             Optional<PropInfo> propInfoOpt = propInfoMap.get(propName);
 
             if (propInfoOpt == null) {
+                N.checkArgNotNull(propName, cs.propName);
+
+                if (missedPropNames.contains(propName)) {
+                    return null;
+                }
+
                 PropInfo propInfo = null;
 
                 final Method method = Beans.getPropGetter(clazz, propName);
@@ -1515,9 +1656,10 @@ public final class ParserUtil {
                 }
 
                 if (propInfoOpt == null) {
+                    // propInfoMap holds bindings only (misses are kept apart in missedPropNames), so this scan
+                    // is bounded by the bean's own vocabulary plus the capped fuzzy hits, not by the number of
+                    // unknown keys ever seen. The isPresent() guard stays as a belt-and-braces check.
                     for (final Map.Entry<String, Optional<PropInfo>> entry : propInfoMap.entrySet()) { //NOSONAR
-                        // Skip cached MISSES (Optional.empty): a negative-cache key that fuzzy-matches
-                        // the query would shadow the real property and poison the cache with null.
                         if (entry.getValue().isPresent() && isPropName(clazz, propName, entry.getKey())) {
                             propInfoOpt = entry.getValue();
 
@@ -1526,6 +1668,8 @@ public final class ParserUtil {
                     }
 
                     if ((propInfoOpt == null) && !propName.equalsIgnoreCase(Beans.normalizePropName(propName))) {
+                        // The recursive call memoizes its own outcome under the normalized spelling, through
+                        // the same bounded caches.
                         propInfo = getPropInfo(Beans.normalizePropName(propName));
 
                         if (propInfo != null) {
@@ -1534,15 +1678,23 @@ public final class ParserUtil {
                     }
                 }
 
-                // Cache the result (including a miss marker) to avoid querying next time.
-                if (propInfoOpt == null) {
-                    propInfoOpt = Optional.empty();
-                } else if (propInfoOpt.isPresent()) {
-                    propInfo = propInfoOpt.orElseThrow();
-                    hashPropInfoMap.put(ParserUtil.hashCode(propInfo.jsonNameTags[defaultNameIndex].name), propInfo);
+                // Memoize the outcome, but only while the caches are below MAX_CACHED_PROP_NAMES: both keys
+                // are caller data (a fuzzy HIT can be spelled in unboundedly many ways too). size() on a
+                // ConcurrentHashMap is cheap and a small overshoot under concurrency is harmless.
+                if (propInfoOpt == null || !propInfoOpt.isPresent()) {
+                    if (missedPropNames.size() < MAX_CACHED_PROP_NAMES) {
+                        missedPropNames.add(propName);
+                    }
+
+                    return null;
                 }
 
-                propInfoMap.put(propName, propInfoOpt);
+                propInfo = propInfoOpt.orElseThrow();
+                hashPropInfoMap.put(ParserUtil.hashCode(propInfo.jsonNameTags[defaultNameIndex].name), propInfo);
+
+                if (propInfoMap.size() < MAX_CACHED_PROP_NAMES) {
+                    propInfoMap.put(propName, propInfoOpt);
+                }
             }
 
             return propInfoOpt.orElseNull();
@@ -1606,7 +1758,7 @@ public final class ParserUtil {
          * @throws IllegalArgumentException if no getter method is found for the property.
          */
         @SuppressWarnings("unchecked")
-        public <T> T getPropValue(final Object obj, final String propName) {
+        public <T> T getPropValue(final Object obj, final String propName) throws IllegalArgumentException {
             final PropInfo propInfo = getPropInfo(propName);
 
             if (propInfo == null) {
@@ -1649,9 +1801,10 @@ public final class ParserUtil {
          * @param obj the object to set the property value on
          * @param propName the property name
          * @param propValue the value to set
-         * @throws IllegalArgumentException if no setter method is found for {@code propName}.
+         * @throws IllegalArgumentException if no setter is found for {@code propName}, or the property is
+         *         read-only (a getter with no backing field and no setter).
          */
-        public void setPropValue(final Object obj, final String propName, final Object propValue) {
+        public void setPropValue(final Object obj, final String propName, final Object propValue) throws IllegalArgumentException {
             setPropValue(obj, propName, propValue, false);
         }
 
@@ -1671,13 +1824,26 @@ public final class ParserUtil {
          * @param obj the object to set the property value on
          * @param propName the property name (supports nested paths)
          * @param propValue the value to set
-         * @param ignoreUnmatchedProperty if {@code true}, silently ignore properties that don't exist
+         * @param ignoreUnmatchedProperty if {@code true}, silently ignore properties that don't exist or that are
+         *        read-only (a getter with no backing field and no setter)
          * @return {@code true} if the property was set, {@code false} if it was ignored
-         * @throws IllegalArgumentException if no setter found and ignoreUnmatchedProperty is false.
+         * @throws IllegalArgumentException if no setter is found for {@code propName}, or the property is read-only,
+         *         and {@code ignoreUnmatchedProperty} is {@code false}.
          */
         @SuppressWarnings("rawtypes")
-        public boolean setPropValue(final Object obj, final String propName, final Object propValue, final boolean ignoreUnmatchedProperty) {
+        public boolean setPropValue(final Object obj, final String propName, final Object propValue, final boolean ignoreUnmatchedProperty)
+                throws IllegalArgumentException {
             PropInfo propInfo = getPropInfo(propName);
+
+            if (propInfo != null && propInfo.isReadOnlyProperty) {
+                // Nothing can store the value; treat it like an unmatched name rather than failing inside setPropValue.
+                if (!ignoreUnmatchedProperty) {
+                    throw new IllegalArgumentException("No setter method found with property name: " + propName + " in class: " + clazz.getCanonicalName()
+                            + " (the property is read-only: a getter without a backing field or setter)");
+                }
+
+                return false;
+            }
 
             if (propInfo == null) {
                 final List<PropInfo> propInfoQueue = getPropInfoChain(propName);
@@ -1753,9 +1919,10 @@ public final class ParserUtil {
          * @param obj the object to set the property value on
          * @param propInfoFromOtherBean property information from another bean
          * @param propValue the value to set
-         * @throws IllegalArgumentException if no setter method is found for the property.
+         * @throws IllegalArgumentException if no writable property is found for the name or any of its aliases (a
+         *         read-only property - a getter with no backing field and no setter - counts as no match).
          */
-        public void setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue) {
+        public void setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue) throws IllegalArgumentException {
             setPropValue(obj, propInfoFromOtherBean, propValue, false);
         }
 
@@ -1776,11 +1943,14 @@ public final class ParserUtil {
          * @param obj the object to set the property value on
          * @param propInfoFromOtherBean property information from another bean
          * @param propValue the value to set
-         * @param ignoreUnmatchedProperty if {@code true}, silently ignore properties that don't exist
+         * @param ignoreUnmatchedProperty if {@code true}, silently ignore properties that don't exist or that are
+         *        read-only (a getter with no backing field and no setter)
          * @return {@code true} if the property was set, {@code false} if it was ignored
-         * @throws IllegalArgumentException if no setter found and ignoreUnmatchedProperty is false.
+         * @throws IllegalArgumentException if no writable property is found for the name or any of its aliases and
+         *         {@code ignoreUnmatchedProperty} is {@code false}.
          */
-        public boolean setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue, final boolean ignoreUnmatchedProperty) {
+        public boolean setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue, final boolean ignoreUnmatchedProperty)
+                throws IllegalArgumentException {
             if (propInfoFromOtherBean.aliases.isEmpty()) {
                 return setPropValue(obj, propInfoFromOtherBean.name, propValue, ignoreUnmatchedProperty);
             } else {
@@ -1820,11 +1990,15 @@ public final class ParserUtil {
          * @return {@code true} if the names match according to any supported pattern
          */
         private boolean isPropName(final Class<?> cls, String inputPropName, final String propNameByMethod) {
+            // A copy of Beans.isPropName (private there, different package here). Keep the two in sync - they
+            // diverged on exactly this length check once, with Beans' copy throwing where this one returns
+            // false, which turned every "ignore unmatched property" lookup into a hard failure.
+            // Trim before measuring: the cap is about the length of the name, not of the caller's padding.
+            inputPropName = inputPropName.trim();
+
             if (inputPropName.length() > 128) {
                 return false;
             }
-
-            inputPropName = inputPropName.trim();
 
             return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(SK.UNDERSCORE, Strings.EMPTY).equalsIgnoreCase(propNameByMethod)
                     || inputPropName.equalsIgnoreCase(ClassUtil.getSimpleClassName(cls) + SK._PERIOD + propNameByMethod)
@@ -1849,11 +2023,20 @@ public final class ParserUtil {
          * @param propName the property path (e.g., "address.street")
          * @return an immutable list holding one PropInfo per path segment; an empty list if {@code propName}
          *         contains no {@code '.'} separator, or if any segment cannot be resolved
+         * @throws IllegalArgumentException if {@code propName} is {@code null}
          */
-        public List<PropInfo> getPropInfoChain(final String propName) {
+        public List<PropInfo> getPropInfoChain(final String propName) throws IllegalArgumentException {
+            N.checkArgNotNull(propName, cs.propName);
+
             List<PropInfo> propInfoQueue = propInfoQueueMap.get(propName);
 
             if (propInfoQueue == null) {
+                // A name without a separator can never be a chain. Answer without caching: the tolerant map/bean
+                // paths ask for every unmatched flat key, and each one would otherwise pin an empty list here.
+                if (propName.indexOf(PROP_NAME_SEPARATOR) < 0) {
+                    return N.emptyList();
+                }
+
                 propInfoQueue = new ArrayList<>();
 
                 final String[] strs = PROP_NAME_SPLITTER.splitToArray(propName);
@@ -1889,7 +2072,10 @@ public final class ParserUtil {
 
                 propInfoQueue = N.isEmpty(propInfoQueue) ? N.emptyList() : ImmutableList.wrap(propInfoQueue);
 
-                propInfoQueueMap.put(propName, propInfoQueue);
+                // Keys are caller-supplied paths; cap the memoization like getPropInfo does.
+                if (propInfoQueueMap.size() < MAX_CACHED_PROP_NAMES) {
+                    propInfoQueueMap.put(propName, propInfoQueue);
+                }
             }
 
             return propInfoQueue;
@@ -1900,6 +2086,11 @@ public final class ParserUtil {
          *
          * <p>This method is used internally by parsers for fast property lookup
          * during deserialization. It uses hash-based lookup for optimal performance.</p>
+         *
+         * <p>The answer is the same one {@link #getPropInfo(String)} gives for the exact text: when two
+         * properties share a naming-policy spelling or column name (for example {@code userName} and
+         * {@code user_name} both spell {@code USER_NAME}), the explicit binding - {@code @Column}, alias, then
+         * declaration order - wins, whichever property the length/hash shortcut proposed.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1930,8 +2121,20 @@ public final class ParserUtil {
                 propInfo = hashPropInfoMap.get(ParserUtil.hashCode(cbuf, fromIndex, toIndex));
             }
 
-            if (propInfo != null && !matchesPropName(propInfo, cbuf, fromIndex, len)) {
-                propInfo = null;
+            if (propInfo != null && !matches(cbuf, fromIndex, len, propInfo.name)) {
+                if (!matchesNameTagOrColumn(propInfo, cbuf, fromIndex, len)) {
+                    propInfo = null;
+                } else if (hasSharedNameTags) {
+                    // The shortcut candidate matched only through a derived spelling, and in this bean some
+                    // derived spelling belongs to another property: let the exact binding decide, so that the
+                    // JSON path routes the key exactly like getPropInfo (map/XML/Avro) does. Beans without such
+                    // a collision, and every exact-name key, never reach this allocation.
+                    final Optional<PropInfo> exact = propInfoMap.get(new String(cbuf, fromIndex, len));
+
+                    if (exact != null && exact.isPresent()) {
+                        propInfo = exact.orElseThrow();
+                    }
+                }
             }
 
             if (propInfo == null) {
@@ -1942,11 +2145,7 @@ public final class ParserUtil {
             return propInfo;
         }
 
-        private boolean matchesPropName(final PropInfo propInfo, final char[] cbuf, final int fromIndex, final int len) {
-            if (matches(cbuf, fromIndex, len, propInfo.name)) {
-                return true;
-            }
-
+        private boolean matchesNameTagOrColumn(final PropInfo propInfo, final char[] cbuf, final int fromIndex, final int len) {
             for (final JsonNameTag nameTag : propInfo.jsonNameTags) {
                 if (matches(cbuf, fromIndex, len, nameTag.name)) {
                     return true;
@@ -2072,7 +2271,7 @@ public final class ParserUtil {
          * @throws RuntimeException if instantiation fails
          */
         @Beta
-        <T> T newInstance() {
+        <T> T newInstance() throws RuntimeException {
             return (T) (noArgsConstructor == null ? ClassUtil.invokeConstructor(allArgsConstructor, defaultFieldValues)
                     : ClassUtil.invokeConstructor(noArgsConstructor));
         }
@@ -2092,7 +2291,7 @@ public final class ParserUtil {
          * @throws RuntimeException if instantiation fails
          */
         @Beta
-        <T> T newInstance(final Object... args) {
+        <T> T newInstance(final Object... args) throws RuntimeException {
             if (N.isEmpty(args)) {
                 return newInstance();
             }
@@ -2155,7 +2354,7 @@ public final class ParserUtil {
          * @return an array of default values matching the all-args constructor
          * @throws UnsupportedOperationException if no all-args constructor exists
          */
-        private Object[] createArgsForConstructor() {
+        private Object[] createArgsForConstructor() throws UnsupportedOperationException {
             if (allArgsConstructor == null) {
                 throw new UnsupportedOperationException("No all arguments constructor found in class: " + ClassUtil.getCanonicalClassName(clazz));
             }
@@ -2235,6 +2434,7 @@ public final class ParserUtil {
      * @see JsonXmlField
      */
     public static class PropInfo {
+        private static final Pattern JSON_NUMBER_TOKEN = Pattern.compile("-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?");
 
         /**
          * The class that declares this property.
@@ -2387,6 +2587,13 @@ public final class ParserUtil {
         private final ThreadLocal<NumberFormat> numberFormatTL;
 
         /**
+         * The (boxed) property class a number-format read must hand back; {@code null} when
+         * {@link #numberFormat} is {@code null}. Boxed so a {@code Double} parsed for a primitive
+         * {@code double} property is recognized as already having the right type.
+         */
+        private final Class<?> numberTargetClass;
+
+        /**
          * Indicates whether any formatting (date or number) is specified for this property.
          */
         final boolean hasFormat;
@@ -2400,6 +2607,10 @@ public final class ParserUtil {
         /**
          * The JSON/XML exposure setting for this property.
          * Controls when this property should be included in serialization/deserialization.
+         *
+         * <p>Taken from {@code @JsonXmlField(direction = ...)} when declared; otherwise {@link Direction#BOTH},
+         * except for a read-only property ({@link #isReadOnlyProperty}), which is {@link Direction#SERIALIZE_ONLY}
+         * so that a document carrying its value is read without error and the value is skipped.</p>
          */
         public final Direction jsonXmlExpose;
 
@@ -2444,6 +2655,15 @@ public final class ParserUtil {
          * True for certain collection/map properties in XML binding contexts.
          */
         final boolean canSetFieldByGetMethod;
+
+        /**
+         * {@code true} when nothing can store a value into this property: it has a getter but no backing
+         * field, no setter and no getter-returned collection to fill (a computed property such as
+         * {@code getFullName()}), and it is not a component of an immutable bean assembled through a
+         * constructor or builder. Such a property is exposed as {@link Direction#SERIALIZE_ONLY}, so the parsers
+         * skip its value on read instead of failing, and {@link #setPropValue(Object, Object)} rejects it.
+         */
+        final boolean isReadOnlyProperty;
 
         /**
          * The ordinal position of this field in the bean.
@@ -2491,12 +2711,14 @@ public final class ParserUtil {
          * @param idPropNames list of property names that are identifiers
          * @param readOnlyIdPropNames list of property names that are read-only identifiers
          * @param typeParamArgMap mapping of type variables to actual types for generic resolution
+         * @throws UnsupportedOperationException if the long date format is selected for LocalDate or LocalTime
+         * @throws IllegalArgumentException if a column name has surrounding whitespace
          */
         @SuppressWarnings("deprecation")
         PropInfo(final String propName, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableBean,
                 final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames,
-                final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) {
+                final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) throws UnsupportedOperationException, IllegalArgumentException {
             declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
             this.field = field;
             this.name = propName;
@@ -2522,8 +2744,13 @@ public final class ParserUtil {
             // Must honor @AccessFieldByMethod just like isFieldGettable/isFieldSettable above (and like the ASM
             // path, where fieldAccessIndex is -1 when !isFieldGettable): otherwise getPropValue/setPropValue would
             // prefer the VarHandle and read/write the field directly, bypassing the mandated getter/setter.
+            // isFieldHandleSettable must also exclude isByBuilder just like isFieldSettable: setPropValue's target for
+            // a builder-based bean is the BUILDER instance, while the VarHandle's coordinate is the BEAN, so the retry
+            // branch that prefers the VarHandle threw "ClassCastException: Cannot cast Bean$Builder to Bean" for a
+            // non-final field. The Gettable twin must NOT exclude it - getPropValue's target is the finished BEAN,
+            // which is how serialization reads a builder-based bean.
             this.isFieldHandleGettable = !isAccessFieldByMethod && fieldHandle != null && fieldHandle.isAccessModeSupported(AccessMode.GET);
-            this.isFieldHandleSettable = !isAccessFieldByMethod && fieldHandle != null && fieldHandle.isAccessModeSupported(AccessMode.SET);
+            this.isFieldHandleSettable = !isAccessFieldByMethod && fieldHandle != null && fieldHandle.isAccessModeSupported(AccessMode.SET) && !isByBuilder;
 
             isTransient = annotations.containsKey(Transient.class) || annotations.keySet().stream().anyMatch(it -> it.getSimpleName().equals("Transient"))
                     || (field != null && Modifier.isTransient(field.getModifiers()));
@@ -2576,17 +2803,32 @@ public final class ParserUtil {
             }
 
             final String numberFormatStr = Strings.trim(getNumberFormat(field, type.isNumber() ? jsonXmlConfig : null));
-            // Use Locale.ROOT-derived symbols so the wire format ("#,##0.00") parses/formats
-            // identically on every JVM. Default-locale DecimalFormat would write "1.234,56" on
-            // de_DE (German) and "1,234.56" elsewhere, breaking round-trips across systems.
-            numberFormat = Strings.isEmpty(numberFormatStr) ? null
-                    : new DecimalFormat(numberFormatStr, DecimalFormatSymbols.getInstance(java.util.Locale.ROOT));
+
+            if (Strings.isEmpty(numberFormatStr)) {
+                numberFormat = null;
+            } else {
+                // Use Locale.ROOT-derived symbols so the wire format ("#,##0.00") parses/formats
+                // identically on every JVM. Default-locale DecimalFormat would write "1.234,56" on
+                // de_DE (German) and "1,234.56" elsewhere, breaking round-trips across systems.
+                final DecimalFormat decimalFormat = new DecimalFormat(numberFormatStr, DecimalFormatSymbols.getInstance(java.util.Locale.ROOT));
+
+                // DecimalFormat.parse answers Long/Double by default, which silently rounds a BigDecimal
+                // (12345678901234567.89 -> ...568) or a BigInteger beyond 2^53. Exact BigDecimal parsing fixes
+                // that for the exact and integral targets only: for float/double targets it would turn "-0.00"
+                // into BigDecimal 0.00 (no negative zero) and break the -0.0 round trip, and for Number/Object
+                // targets it would change the runtime class the caller receives.
+                if (isExactOrIntegralNumberType(clazz)) {
+                    decimalFormat.setParseBigDecimal(true);
+                }
+
+                numberFormat = decimalFormat;
+            }
+
+            // The clone inherits parseBigDecimal, so set it on the prototype before the ThreadLocal is built.
             numberFormatTL = numberFormat == null ? null : ThreadLocal.withInitial(() -> (NumberFormat) numberFormat.clone());
+            numberTargetClass = numberFormat == null ? null : ClassUtil.wrap(clazz);
 
             hasFormat = Strings.isNotEmpty(dateFormat) || numberFormat != null;
-
-            jsonXmlExpose = field != null && field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).direction()
-                    : JsonXmlField.Direction.BOTH;
 
             boolean tmpIsMarkedToId = annotations.containsKey(Id.class) || annotations.containsKey(ReadOnlyId.class) || idPropNames.contains(propName);
 
@@ -2663,6 +2905,16 @@ public final class ParserUtil {
             canSetFieldByGetMethod = Beans.isRegisteredXmlBindingClass(declaringClass) && getMethod != null
                     && (Map.class.isAssignableFrom(getMethod.getReturnType()) || Collection.class.isAssignableFrom(getMethod.getReturnType()));
 
+            // An immutable bean stores values into a constructor/builder slot, so its components are never read-only
+            // even without a setter; everything else needs a field, a setter or a fillable getter collection.
+            isReadOnlyProperty = field == null && setMethod == null && !canSetFieldByGetMethod && !isImmutableBean;
+
+            // A declared direction wins; a read-only property is implicitly serialize-only, which is exactly what the
+            // JSON/XML parsers need to skip its value on read (a document may legitimately carry the computed value
+            // this bean wrote out) instead of dereferencing the missing field.
+            jsonXmlExpose = field != null && field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).direction()
+                    : (isReadOnlyProperty ? JsonXmlField.Direction.SERIALIZE_ONLY : JsonXmlField.Direction.BOTH);
+
             this.fieldOrder = fieldOrder;
             this.isImmutableBean = isImmutableBean;
             this.isByBuilder = isByBuilder;
@@ -2694,7 +2946,7 @@ public final class ParserUtil {
          * @throws RuntimeException if reflection access fails
          */
         @SuppressWarnings("unchecked")
-        public <T> T getPropValue(final Object obj) {
+        public <T> T getPropValue(final Object obj) throws RuntimeException {
             if (isImmutableBean && obj instanceof Object[]) {
                 return (T) ((Object[]) obj)[fieldOrder];
             }
@@ -2708,6 +2960,15 @@ public final class ParserUtil {
             } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
+        }
+
+        /**
+         * The message for the {@code UnsupportedOperationException} raised when a value is stored into a
+         * read-only property.
+         */
+        final String readOnlyMessage() {
+            return "Property '" + name + "' of class " + ClassUtil.getCanonicalClassName(declaringClass)
+                    + " is read-only (a getter without a backing field or setter); its value cannot be set";
         }
 
         /**
@@ -2730,6 +2991,10 @@ public final class ParserUtil {
          *   <li>Forced field access as last resort</li>
          * </ol>
          *
+         * <p>For a builder-based immutable bean {@code obj} is the builder instance, so the value is routed to the
+         * <i>builder's</i> setter. A property whose builder declares no setter is silently skipped - the bean's own
+         * field cannot be written into the builder, and the builder author chose not to accept that property.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * class Person {
@@ -2743,21 +3008,39 @@ public final class ParserUtil {
          *
          * @param obj the object to set the property value on
          * @param propValue the value to set (will be converted if necessary)
+         * @throws UnsupportedOperationException if this property is read-only and cannot accept {@code propValue}
          * @throws RuntimeException if reflection access fails or type conversion fails
          */
         @SuppressFBWarnings
-        public void setPropValue(final Object obj, Object propValue) {
+        public void setPropValue(final Object obj, Object propValue) throws UnsupportedOperationException, RuntimeException {
+            if (isReadOnlyProperty) {
+                throw new UnsupportedOperationException(readOnlyMessage());
+            }
+
             if (isJsonRawValue && propValue != null && !clazz.isAssignableFrom(propValue.getClass())) {
                 propValue = N.toJson(propValue);
             }
 
-            if (isImmutableBean && !isByBuilder) {
-                // Coalesce nulls to the type's default before storing in the Object[] slot.
-                // The canonical-constructor invocation later auto-unboxes primitive slots; a raw
-                // null overwriting the default would NPE on unbox (e.g. record R(int x) and JSON
-                // {"x": null} -> NPE on Integer.intValue()).
-                ((Object[]) obj)[fieldOrder] = propValue == null ? type.defaultValue() : propValue;
-                return;
+            if (isImmutableBean) {
+                if (!isByBuilder) {
+                    // Coalesce nulls to the type's default before storing in the Object[] slot.
+                    // The canonical-constructor invocation later auto-unboxes primitive slots; a raw
+                    // null overwriting the default would NPE on unbox (e.g. record R(int x) and JSON
+                    // {"x": null} -> NPE on Integer.intValue()).
+                    ((Object[]) obj)[fieldOrder] = propValue == null ? type.defaultValue() : propValue;
+                    return;
+                }
+
+                if (setMethod == null) {
+                    // `obj` is the BUILDER and the builder declares no setter for this property, so the value has
+                    // nowhere to go: every writer below ends up at `field`, which belongs to the BEAN, and writing it
+                    // into the builder throws ("Can not set final ... field Bean.x to Bean$Builder"). The builder
+                    // author chose not to accept this property, so skip it - the same thing the parsers do for a
+                    // value the target cannot take (ignoreUnmatchedProperty defaults to true), and what keeps
+                    // fromJson(toJson(bean)), mapToBean(beanToMap(bean)) and copyAs(bean, sameClass) working for a
+                    // bean whose builder omits a property the bean itself still serializes.
+                    return;
+                }
             }
 
             propValue = propValue == null ? type.defaultValue() : propValue;
@@ -2852,7 +3135,9 @@ public final class ParserUtil {
             propFuncMap.put(long.class, new DateTimeReaderWriter<Long>() {
                 @Override
                 public Long read(final PropInfo propInfo, final String strValue) {
-                    return strValue == null ? 0L : Numbers.toLong(strValue);
+                    // Same null markers as the ten temporal readers below: Numbers.toLong("") returns 0,
+                    // which fabricated the 1970 epoch, and the literal "null" threw NumberFormatException.
+                    return isNullDateText(strValue) ? 0L : Numbers.toLong(strValue);
                 }
 
                 @Override
@@ -2864,7 +3149,9 @@ public final class ParserUtil {
             propFuncMap.put(Long.class, new DateTimeReaderWriter<Long>() {
                 @Override
                 public Long read(final PropInfo propInfo, final String strValue) {
-                    return strValue == null ? null : Numbers.toLong(strValue);
+                    // Same null markers as the ten temporal readers below: Numbers.toLong("") returns 0,
+                    // which fabricated the 1970 epoch, and the literal "null" threw NumberFormatException.
+                    return isNullDateText(strValue) ? null : Numbers.toLong(strValue);
                 }
 
                 @Override
@@ -2880,14 +3167,14 @@ public final class ParserUtil {
             propFuncMap.put(java.util.Date.class, new DateTimeReaderWriter<java.util.Date>() {
                 @Override
                 public java.util.Date read(final PropInfo propInfo, final String strValue) {
-                    if (strValue == null) {
+                    if (isNullDateText(strValue)) {
                         return null;
                     }
 
                     if (propInfo.isLongDateFormat) {
                         return new java.util.Date(Numbers.toLong(strValue));
                     } else {
-                        return Dates.parseJUDate(strValue, propInfo.dateFormat, propInfo.timeZone);
+                        return Dates.parseToJUDate(strValue, propInfo.dateFormat, propInfo.timeZone);
                     }
                 }
 
@@ -2905,7 +3192,7 @@ public final class ParserUtil {
             propFuncMap.put(java.util.Calendar.class, new DateTimeReaderWriter<java.util.Calendar>() {
                 @Override
                 public java.util.Calendar read(final PropInfo propInfo, final String strValue) {
-                    if (strValue == null) {
+                    if (isNullDateText(strValue)) {
                         return null;
                     }
 
@@ -2915,7 +3202,7 @@ public final class ParserUtil {
                         calendar.setTimeZone(propInfo.timeZone);
                         return calendar;
                     } else {
-                        return Dates.parseCalendar(strValue, propInfo.dateFormat, propInfo.timeZone);
+                        return Dates.parseToCalendar(strValue, propInfo.dateFormat, propInfo.timeZone);
                     }
                 }
 
@@ -2933,14 +3220,14 @@ public final class ParserUtil {
             propFuncMap.put(java.sql.Timestamp.class, new DateTimeReaderWriter<java.sql.Timestamp>() {
                 @Override
                 public java.sql.Timestamp read(final PropInfo propInfo, final String strValue) {
-                    if (strValue == null) {
+                    if (isNullDateText(strValue)) {
                         return null;
                     }
 
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Timestamp(Numbers.toLong(strValue));
                     } else {
-                        return Dates.parseTimestamp(strValue, propInfo.dateFormat, propInfo.timeZone);
+                        return Dates.parseToTimestamp(strValue, propInfo.dateFormat, propInfo.timeZone);
                     }
                 }
 
@@ -2957,14 +3244,17 @@ public final class ParserUtil {
             propFuncMap.put(java.sql.Date.class, new DateTimeReaderWriter<java.sql.Date>() {
                 @Override
                 public java.sql.Date read(final PropInfo propInfo, final String strValue) {
-                    if (strValue == null) {
+                    if (isNullDateText(strValue)) {
                         return null;
                     }
 
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Date(Numbers.toLong(strValue));
                     } else {
-                        return Dates.parseDate(strValue, propInfo.dateFormat, propInfo.timeZone);
+                        // The write side renders wall-clock fields in propInfo.zoneId, so anchor the parsed
+                        // civil date at start-of-day in that same zone to keep the round-trip stable.
+                        return new java.sql.Date(
+                                Dates.parseToLocalDate(strValue, propInfo.dateFormat).atStartOfDay(propInfo.zoneId).toInstant().toEpochMilli());
                     }
                 }
 
@@ -2981,14 +3271,19 @@ public final class ParserUtil {
             propFuncMap.put(java.sql.Time.class, new DateTimeReaderWriter<java.sql.Time>() {
                 @Override
                 public java.sql.Time read(final PropInfo propInfo, final String strValue) {
-                    if (strValue == null) {
+                    if (isNullDateText(strValue)) {
                         return null;
                     }
 
                     if (propInfo.isLongDateFormat) {
                         return new java.sql.Time(Numbers.toLong(strValue));
                     } else {
-                        return Dates.parseTime(strValue, propInfo.dateFormat, propInfo.timeZone);
+                        // Same zone anchoring as the java.sql.Date reader above, on the SQL time epoch date.
+                        return new java.sql.Time(Dates.parseToLocalTime(strValue, propInfo.dateFormat)
+                                .atDate(LocalDate.of(1970, 1, 1))
+                                .atZone(propInfo.zoneId)
+                                .toInstant()
+                                .toEpochMilli());
                     }
                 }
 
@@ -3005,7 +3300,7 @@ public final class ParserUtil {
             propFuncMap.put(java.time.LocalDateTime.class, new DateTimeReaderWriter<java.time.LocalDateTime>() {
                 @Override
                 public java.time.LocalDateTime read(final PropInfo propInfo, final String strValue) {
-                    if (strValue == null) {
+                    if (isNullDateText(strValue)) {
                         return null;
                     }
 
@@ -3030,9 +3325,12 @@ public final class ParserUtil {
             });
 
             propFuncMap.put(java.time.LocalDate.class, new DateTimeReaderWriter<java.time.LocalDate>() {
+                /**
+                 * @throws UnsupportedOperationException if the property uses the long date format and the input is not null, empty, or the null literal
+                 */
                 @Override
-                public java.time.LocalDate read(final PropInfo propInfo, final String strValue) {
-                    if (strValue == null) {
+                public java.time.LocalDate read(final PropInfo propInfo, final String strValue) throws UnsupportedOperationException {
+                    if (isNullDateText(strValue)) {
                         return null;
                     }
 
@@ -3043,8 +3341,11 @@ public final class ParserUtil {
                     }
                 }
 
+                /**
+                 * @throws UnsupportedOperationException if the property uses the long date format
+                 */
                 @Override
-                public void write(final PropInfo propInfo, final java.time.LocalDate x, final CharacterWriter writer) {
+                public void write(final PropInfo propInfo, final java.time.LocalDate x, final CharacterWriter writer) throws UnsupportedOperationException {
                     if (propInfo.isLongDateFormat) {
                         throw new UnsupportedOperationException("Date format cannot be 'long' for type java.time.LocalDate");
                     } else {
@@ -3054,9 +3355,12 @@ public final class ParserUtil {
             });
 
             propFuncMap.put(java.time.LocalTime.class, new DateTimeReaderWriter<java.time.LocalTime>() {
+                /**
+                 * @throws UnsupportedOperationException if the property uses the long date format and the input is not null, empty, or the null literal
+                 */
                 @Override
-                public java.time.LocalTime read(final PropInfo propInfo, final String strValue) {
-                    if (strValue == null) {
+                public java.time.LocalTime read(final PropInfo propInfo, final String strValue) throws UnsupportedOperationException {
+                    if (isNullDateText(strValue)) {
                         return null;
                     }
 
@@ -3067,8 +3371,11 @@ public final class ParserUtil {
                     }
                 }
 
+                /**
+                 * @throws UnsupportedOperationException if the property uses the long date format
+                 */
                 @Override
-                public void write(final PropInfo propInfo, final java.time.LocalTime x, final CharacterWriter writer) {
+                public void write(final PropInfo propInfo, final java.time.LocalTime x, final CharacterWriter writer) throws UnsupportedOperationException {
                     if (propInfo.isLongDateFormat) {
                         throw new UnsupportedOperationException("Date format cannot be 'long' for type java.time.LocalTime");
                     } else {
@@ -3080,7 +3387,7 @@ public final class ParserUtil {
             propFuncMap.put(java.time.ZonedDateTime.class, new DateTimeReaderWriter<java.time.ZonedDateTime>() {
                 @Override
                 public java.time.ZonedDateTime read(final PropInfo propInfo, final String strValue) {
-                    if (strValue == null) {
+                    if (isNullDateText(strValue)) {
                         return null;
                     }
 
@@ -3106,7 +3413,7 @@ public final class ParserUtil {
                     propFuncMap.put(org.joda.time.DateTime.class, new DateTimeReaderWriter<org.joda.time.DateTime>() {
                         @Override
                         public org.joda.time.DateTime read(final PropInfo propInfo, final String strValue) {
-                            if (strValue == null) {
+                            if (isNullDateText(strValue)) {
                                 return null;
                             }
 
@@ -3131,7 +3438,7 @@ public final class ParserUtil {
                     propFuncMap.put(org.joda.time.MutableDateTime.class, new DateTimeReaderWriter<org.joda.time.MutableDateTime>() {
                         @Override
                         public org.joda.time.MutableDateTime read(final PropInfo propInfo, final String strValue) {
-                            if (strValue == null) {
+                            if (isNullDateText(strValue)) {
                                 return null;
                             }
 
@@ -3193,14 +3500,23 @@ public final class ParserUtil {
          * }</pre>
          *
          * @param strValue the string value to parse
-         * @return the parsed value in the appropriate type. Returns {@code null} when {@code strValue} is
+         * @return the parsed value in the property's own type. A number-format read converts the parsed number
+         *         to the property type ({@code Integer} for an {@code int}/{@code Integer} property, an exact
+         *         {@code BigDecimal}/{@code BigInteger} for those property types, and so on), so the value can
+         *         be stored without a further conversion. Returns {@code null} when {@code strValue} is
          *         {@code null}: the number-format branch, the date-format readers and most other types all
-         *         pass {@code null} through. The one exception is a primitive {@code long} property with the
-         *         {@code "long"} date format, whose reader returns {@code 0L}
+         *         pass {@code null} through; every date-format reader also returns {@code null} for empty text
+         *         and the literal {@code "null"} (case-insensitive), the same markers the no-format date types
+         *         accept. Two entries differ: a primitive {@code long} property with the {@code "long"} date
+         *         format returns {@code 0L} for those markers, and a {@code String} property - whose reader is
+         *         the identity - returns the text it was handed unchanged
          * @throws UnsupportedOperationException if a date format is specified for an unsupported type
-         * @throws RuntimeException if a number format is specified and {@code strValue} cannot be parsed against it
+         * @throws ParsingException if a number format is specified and {@code strValue} cannot be parsed
+         *         against it in full
+         * @throws RuntimeException if the parsed number cannot be converted to the property type (for example
+         *         {@code NaN} into a {@code BigDecimal} property, which raises an {@code ArithmeticException})
          */
-        public Object readPropValue(final String strValue) {
+        public Object readPropValue(final String strValue) throws UnsupportedOperationException, ParsingException, RuntimeException {
             if (hasFormat) {
                 if (dateFormat != null) {
                     final DateTimeReaderWriter<?> func = propFuncMap.get(clazz);
@@ -3225,11 +3541,18 @@ public final class ParserUtil {
                     final Number result = numberFormatTL.get().parse(strValue, position);
 
                     if (result == null || position.getIndex() != strValue.length()) {
-                        throw new RuntimeException(
+                        // ParsingException, not a bare RuntimeException: a caller catching the parser's own
+                        // failure type must catch this malformed-value failure with it.
+                        throw new ParsingException(
                                 "Failed to parse complete number value: " + strValue + " with format: " + numberFormat + " at index: " + position.getIndex());
                     }
 
-                    return result;
+                    // Hand back the property's own type. Leaving the raw Long/Double/BigDecimal to setPropValue
+                    // made every formatted int/short/byte/BigDecimal read go through its exception-and-retry
+                    // branch (one IllegalArgumentException per value plus a spurious "Failed to set value" warning
+                    // every 100). A value that already has the right class (a Double for a Double property, which
+                    // also keeps -0.0 intact) is returned as is.
+                    return numberTargetClass.isInstance(result) ? result : N.convert(result, jsonXmlType);
                 }
             } else {
                 return jsonXmlType.valueOf(strValue);
@@ -3269,19 +3592,17 @@ public final class ParserUtil {
          * @param writer the character writer to write to
          * @param x the value to write
          * @param config the serialization configuration
-         * @throws IOException if an I/O error occurs during writing
          * @throws UnsupportedOperationException if date format is specified for unsupported types
+         * @throws IOException if writing the formatted, raw or type-serialized property value, its quotation marks or the null literal to
+         *         {@code writer} fails
          */
-        public void writePropValue(final CharacterWriter writer, final Object x, final JsonXmlSerConfig<?> config) throws IOException {
+        public void writePropValue(final CharacterWriter writer, final Object x, final JsonXmlSerConfig<?> config)
+                throws UnsupportedOperationException, IOException {
             if (hasFormat) {
                 if (x == null) {
                     writer.write(NULL_CHAR_ARRAY);
                 } else if (dateFormat != null) {
                     final boolean isQuote = (config != null) && (config.getStringQuotation() != 0);
-
-                    if (isQuote) {
-                        writer.write(config.getStringQuotation());
-                    }
 
                     @SuppressWarnings("rawtypes")
                     final DateTimeReaderWriter func = propFuncMap.get(clazz);
@@ -3292,13 +3613,34 @@ public final class ParserUtil {
                                 + ClassUtil.getCanonicalClassName(clazz));
                     }
 
-                    func.write(this, x, writer);
-
-                    if (isQuote) {
-                        writer.write(config.getStringQuotation());
+                    if (config instanceof JsonSerConfig && isQuote) {
+                        // Formatters write literal text; their quotes, backslashes and controls must
+                        // pass through the same escaping as other JSON strings.
+                        final BufferedJsonWriter formatted = Objectory.createBufferedJsonWriter();
+                        try {
+                            func.write(this, x, formatted);
+                            Type.of(String.class).serializeTo(writer, formatted.toString(), config);
+                        } finally {
+                            Objectory.recycle(formatted);
+                        }
+                    } else {
+                        if (isQuote) {
+                            writer.write(config.getStringQuotation());
+                        }
+                        func.write(this, x, writer);
+                        if (isQuote) {
+                            writer.write(config.getStringQuotation());
+                        }
                     }
                 } else {
-                    writer.write(numberFormatTL.get().format(x));
+                    final String formatted = numberFormatTL.get().format(x);
+                    // Grouping separators, affixes and leading zeroes are legal DecimalFormat output,
+                    // but not JSON numbers. Use the normal string writer for quoting and escaping.
+                    if (config instanceof JsonSerConfig && !JSON_NUMBER_TOKEN.matcher(formatted).matches()) {
+                        Type.of(String.class).serializeTo(writer, formatted, config);
+                    } else {
+                        writer.write(formatted);
+                    }
                 }
             } else if (isJsonRawValue) {
                 if (x == null) {
@@ -3479,7 +3821,10 @@ public final class ParserUtil {
             return null;
         }
 
-        private String getTypeName(final com.landawn.abacus.annotation.Type typeAnno, final Class<?> propClass) {
+        /**
+         * @throws IllegalArgumentException if an explicit type name has surrounding whitespace or the type handler lacks a required no-argument constructor
+         */
+        private String getTypeName(final com.landawn.abacus.annotation.Type typeAnno, final Class<?> propClass) throws IllegalArgumentException {
             @SuppressWarnings("deprecation")
             final Optional<String> typeName = N.firstNonEmpty(typeAnno.value(), typeAnno.name());
 
@@ -3547,9 +3892,9 @@ public final class ParserUtil {
                         : setMethod != null ? setMethod.getGenericParameterTypes()[0] : getMethod.getGenericReturnType();
 
                 if ((genericType instanceof TypeVariable) && typeParamArgMap.containsKey(genericType)) {
-                    return getType(typeParamArgMap.get(genericType), typeParamArgMap);
+                    return getType(genericType, typeParamArgMap);
                 } else if (genericType instanceof GenericArrayType genericArrayType) {
-                    return Type.<T> of(Array.newInstance(getType(genericArrayType.getGenericComponentType(), typeParamArgMap).javaType(), 0).getClass());
+                    return getType(genericArrayType, typeParamArgMap);
                 } else if (genericType instanceof ParameterizedType parameterizedType) {
                     return getType(parameterizedType, typeParamArgMap);
                 } else {
@@ -3606,26 +3951,233 @@ public final class ParserUtil {
             }
         }
 
-        private <T> Type<T> getType(java.lang.reflect.Type genericType, final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) {
-            if ((genericType instanceof TypeVariable) && typeParamArgMap.containsKey(genericType)) {
-                return getType(typeParamArgMap.get(genericType), typeParamArgMap);
-            } else if (genericType instanceof GenericArrayType genericArrayType) {
-                return Type.<T> of(Array.newInstance(getType(genericArrayType.getGenericComponentType(), typeParamArgMap).javaType(), 0).getClass());
-            } else if (genericType instanceof ParameterizedType parameterizedType) {
-                final java.lang.reflect.Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-                final List<Type<?>> actualArgTypes = new ArrayList<>(actualTypeArguments.length);
+        // Keep structural generic metadata when substituting bean property variables. Rendering a
+        // name here erases bean component arguments before TypeFactory can preserve them.
+        private static java.lang.reflect.Type resolvePropertyType(final java.lang.reflect.Type source,
+                final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables) {
+            return resolvePropertyType(source, resolvedVariables, new HashSet<>());
+        }
 
-                for (java.lang.reflect.Type actualTypeArgument : actualTypeArguments) {
-                    actualArgTypes.add(getType(actualTypeArgument, typeParamArgMap));
+        private static java.lang.reflect.Type resolvePropertyType(final java.lang.reflect.Type source,
+                final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables, final Set<TypeVariable<?>> resolvingVariables) {
+            if (source instanceof TypeVariable<?> variable) {
+                final java.lang.reflect.Type resolved = resolvedVariables.get(variable);
+                if (resolved == null || resolved == variable || !resolvingVariables.add(variable)) {
+                    return variable;
                 }
 
-                final String typeName = ClassUtil.getCanonicalClassName((Class<?>) parameterizedType.getRawType())
-                        + Stream.of(actualArgTypes).map(Type::name).join(",", "<", ">");
-
-                return Type.of(typeName);
-            } else {
-                return Type.of(genericType);
+                try {
+                    return resolvePropertyType(resolved, resolvedVariables, resolvingVariables);
+                } finally {
+                    resolvingVariables.remove(variable);
+                }
             }
+
+            if (source instanceof ParameterizedType parameterizedType) {
+                final java.lang.reflect.Type owner = parameterizedType.getOwnerType();
+                final java.lang.reflect.Type resolvedOwner = owner == null ? null : resolvePropertyType(owner, resolvedVariables, resolvingVariables);
+                final java.lang.reflect.Type[] arguments = parameterizedType.getActualTypeArguments();
+                final java.lang.reflect.Type[] resolvedArguments = new java.lang.reflect.Type[arguments.length];
+                boolean changed = resolvedOwner != owner;
+
+                for (int i = 0; i < arguments.length; i++) {
+                    resolvedArguments[i] = resolvePropertyType(arguments[i], resolvedVariables, resolvingVariables);
+                    changed |= resolvedArguments[i] != arguments[i];
+                }
+
+                return changed ? new ResolvedParameterizedType(resolvedOwner, parameterizedType.getRawType(), resolvedArguments) : parameterizedType;
+            }
+
+            if (source instanceof GenericArrayType arrayType) {
+                final java.lang.reflect.Type componentType = arrayType.getGenericComponentType();
+                final java.lang.reflect.Type resolvedComponentType = resolvePropertyType(componentType, resolvedVariables, resolvingVariables);
+
+                if (resolvedComponentType == componentType) {
+                    return arrayType;
+                }
+
+                return resolvedComponentType instanceof Class<?> componentClass ? java.lang.reflect.Array.newInstance(componentClass, 0).getClass()
+                        : new ResolvedGenericArrayType(resolvedComponentType);
+            }
+
+            if (source instanceof WildcardType wildcardType) {
+                final java.lang.reflect.Type[] upperBounds = resolvePropertyTypes(wildcardType.getUpperBounds(), resolvedVariables, resolvingVariables);
+                final java.lang.reflect.Type[] lowerBounds = resolvePropertyTypes(wildcardType.getLowerBounds(), resolvedVariables, resolvingVariables);
+
+                return Arrays.equals(upperBounds, wildcardType.getUpperBounds()) && Arrays.equals(lowerBounds, wildcardType.getLowerBounds()) ? wildcardType
+                        : new ResolvedWildcardType(upperBounds, lowerBounds);
+            }
+
+            return source;
+        }
+
+        private static java.lang.reflect.Type[] resolvePropertyTypes(final java.lang.reflect.Type[] sources,
+                final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables, final Set<TypeVariable<?>> resolvingVariables) {
+            final java.lang.reflect.Type[] result = new java.lang.reflect.Type[sources.length];
+
+            for (int i = 0; i < sources.length; i++) {
+                result[i] = resolvePropertyType(sources[i], resolvedVariables, resolvingVariables);
+            }
+
+            return result;
+        }
+
+        private static final class ResolvedParameterizedType implements ParameterizedType {
+            private final java.lang.reflect.Type ownerType;
+            private final java.lang.reflect.Type rawType;
+            private final java.lang.reflect.Type[] typeArguments;
+
+            ResolvedParameterizedType(final java.lang.reflect.Type ownerType, final java.lang.reflect.Type rawType,
+                    final java.lang.reflect.Type[] typeArguments) {
+                this.ownerType = ownerType;
+                this.rawType = rawType;
+                this.typeArguments = typeArguments.clone();
+            }
+
+            @Override
+            public java.lang.reflect.Type[] getActualTypeArguments() {
+                return typeArguments.clone();
+            }
+
+            @Override
+            public java.lang.reflect.Type getRawType() {
+                return rawType;
+            }
+
+            @Override
+            public java.lang.reflect.Type getOwnerType() {
+                return ownerType;
+            }
+
+            @Override
+            public boolean equals(final Object obj) {
+                return obj instanceof ParameterizedType other && Objects.equals(ownerType, other.getOwnerType()) && Objects.equals(rawType, other.getRawType())
+                        && Arrays.equals(typeArguments, other.getActualTypeArguments());
+            }
+
+            @Override
+            public int hashCode() {
+                return Arrays.hashCode(typeArguments) ^ Objects.hashCode(ownerType) ^ Objects.hashCode(rawType);
+            }
+
+            @Override
+            public String getTypeName() {
+                final StringBuilder result;
+
+                if (ownerType != null && rawType instanceof Class<?> rawClass) {
+                    result = new StringBuilder(ownerType.getTypeName()).append('$').append(rawClass.getSimpleName());
+                } else {
+                    result = new StringBuilder(rawType.getTypeName());
+                }
+
+                if (typeArguments.length == 0) {
+                    return result.toString();
+                }
+
+                result.append('<');
+
+                for (int i = 0; i < typeArguments.length; i++) {
+                    if (i > 0) {
+                        result.append(", ");
+                    }
+
+                    result.append(typeArguments[i].getTypeName());
+                }
+
+                return result.append('>').toString();
+            }
+
+            @Override
+            public String toString() {
+                return getTypeName();
+            }
+        }
+
+        /**
+         * Produced by {@link #resolvePropertyType} when a generic array's component resolves to something other than a
+         * {@link Class}, such as the parameterized component {@code List<String>} in {@code List<String>[]}.
+         * Preserves the substituted component for reflection and {@link TypeFactory} resolution.
+         */
+        private static final class ResolvedGenericArrayType implements GenericArrayType {
+            private final java.lang.reflect.Type componentType;
+
+            ResolvedGenericArrayType(final java.lang.reflect.Type componentType) {
+                this.componentType = componentType;
+            }
+
+            @Override
+            public java.lang.reflect.Type getGenericComponentType() {
+                return componentType;
+            }
+
+            @Override
+            public boolean equals(final Object obj) {
+                return obj instanceof GenericArrayType other && Objects.equals(componentType, other.getGenericComponentType());
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hashCode(componentType);
+            }
+
+            @Override
+            public String getTypeName() {
+                return componentType.getTypeName() + "[]";
+            }
+
+            @Override
+            public String toString() {
+                return getTypeName();
+            }
+        }
+
+        private static final class ResolvedWildcardType implements WildcardType {
+            private final java.lang.reflect.Type[] upperBounds;
+            private final java.lang.reflect.Type[] lowerBounds;
+
+            ResolvedWildcardType(final java.lang.reflect.Type[] upperBounds, final java.lang.reflect.Type[] lowerBounds) {
+                this.upperBounds = upperBounds.clone();
+                this.lowerBounds = lowerBounds.clone();
+            }
+
+            @Override
+            public java.lang.reflect.Type[] getUpperBounds() {
+                return upperBounds.clone();
+            }
+
+            @Override
+            public java.lang.reflect.Type[] getLowerBounds() {
+                return lowerBounds.clone();
+            }
+
+            @Override
+            public boolean equals(final Object obj) {
+                return obj instanceof WildcardType other && Arrays.equals(upperBounds, other.getUpperBounds())
+                        && Arrays.equals(lowerBounds, other.getLowerBounds());
+            }
+
+            @Override
+            public int hashCode() {
+                return Arrays.hashCode(upperBounds) ^ Arrays.hashCode(lowerBounds);
+            }
+
+            @Override
+            public String getTypeName() {
+                if (lowerBounds.length > 0) {
+                    return "? super " + lowerBounds[0].getTypeName();
+                }
+
+                return upperBounds.length == 0 || upperBounds[0] == Object.class ? "?" : "? extends " + upperBounds[0].getTypeName();
+            }
+
+            @Override
+            public String toString() {
+                return getTypeName();
+            }
+        }
+
+        private <T> Type<T> getType(java.lang.reflect.Type genericType, final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) {
+            return Type.of(resolvePropertyType(genericType, typeParamArgMap));
         }
 
         /**
@@ -3751,16 +4303,29 @@ public final class ParserUtil {
          *
          * <p>This override uses reflectasm ({@code FieldAccess}/{@code MethodAccess}) for faster
          * property access than standard reflection.</p>
+         * @throws UnsupportedOperationException if this property is read-only and cannot accept {@code propValue}
          */
         @SuppressFBWarnings
         @Override
-        public void setPropValue(final Object obj, Object propValue) {
-            if (isImmutableBean && !isByBuilder) {
-                // Coalesce nulls to the type default; otherwise primitive-typed record/builder
-                // components NPE on auto-unbox during canonical-constructor invocation.
-                ((Object[]) obj)[fieldOrder] = propValue == null ? type.defaultValue() : propValue;
+        public void setPropValue(final Object obj, Object propValue) throws UnsupportedOperationException {
+            if (isReadOnlyProperty) {
+                throw new UnsupportedOperationException(readOnlyMessage());
+            }
 
-                return;
+            if (isImmutableBean) {
+                if (!isByBuilder) {
+                    // Coalesce nulls to the type default; otherwise primitive-typed record/builder
+                    // components NPE on auto-unbox during canonical-constructor invocation.
+                    ((Object[]) obj)[fieldOrder] = propValue == null ? type.defaultValue() : propValue;
+
+                    return;
+                }
+
+                if (setMethod == null) {
+                    // Same as PropInfo.setPropValue: with no setter on the builder the value has nowhere to go, and
+                    // the `field.set(obj, ..)` fallback below would write the BEAN's field into the BUILDER instance.
+                    return;
+                }
             }
 
             propValue = propValue == null ? type.defaultValue() : propValue;
@@ -3878,9 +4443,10 @@ public final class ParserUtil {
             this.name = name.toCharArray();
             nameWithColon = (name + ": ").toCharArray();
             nameNull = (name + ": null").toCharArray();
-            quotedName = ("\"" + name + "\"").toCharArray();
-            quotedNameWithColon = ("\"" + name + "\": ").toCharArray();
-            quotedNameNull = ("\"" + name + "\": null").toCharArray();
+            final String escapedName = EscapeUtil.escapeJson(name);
+            quotedName = ("\"" + escapedName + "\"").toCharArray();
+            quotedNameWithColon = ("\"" + escapedName + "\": ").toCharArray();
+            quotedNameNull = ("\"" + escapedName + "\": null").toCharArray();
         }
 
         @Override
@@ -3937,8 +4503,10 @@ public final class ParserUtil {
          *
          * <p>When {@code isBean} is {@code true}, this tag uses {@code <bean name="...">}
          * elements. Otherwise it uses {@code <property name="...">} elements. The
-         * {@code *WithType} fragment variants embed {@code typeName} (with angle brackets
-         * escaped) as a {@code type="..."} attribute.</p>
+         * {@code *WithType} fragment variants embed {@code typeName} as a {@code type="..."}
+         * attribute. Both the name and the type name are escaped for attribute position (see
+         * {@link #escapeXmlAttributeValue(String)}); the {@code named*} fragments, which put the name in
+         * element-name position where XML has no escaping mechanism, use it verbatim.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3953,20 +4521,28 @@ public final class ParserUtil {
         public XmlNameTag(final String name, final String typeName, final boolean isBean) {
             this.name = name.toCharArray();
 
-            final String typeAttr = typeName.replace("<", "&lt;").replace(">", "&gt;"); //NOSONAR
+            // The name is arbitrary text: @JsonXmlField(name = "..."), @JSONField(name = "...") and
+            // @JsonProperty("...") each hand their value straight through. Interpolated verbatim it wrote
+            // <property name="a&b">, which no XML reader accepts, and a name holding a tab/newline/carriage
+            // return survived parsing but was renamed by attribute-value normalisation, so the property was
+            // silently dropped on read. Element-name position (the named* fragments below) has no escaping
+            // mechanism at all, so a name that is not a valid XML element name can only be rejected; that
+            // check belongs to the writers, which alone know whether the named* or the ep* style is in use.
+            final String nameAttr = escapeXmlAttributeValue(name);
+            final String typeAttr = escapeXmlAttributeValue(typeName);
 
             if (isBean) {
-                epStart = ("<bean name=\"" + name + "\">").toCharArray();
-                epStartWithType = ("<bean name=\"" + name + "\" type=\"" + typeAttr + "\">").toCharArray();
+                epStart = ("<bean name=\"" + nameAttr + "\">").toCharArray();
+                epStartWithType = ("<bean name=\"" + nameAttr + "\" type=\"" + typeAttr + "\">").toCharArray();
                 epEnd = ("</bean>").toCharArray();
-                epNull = ("<bean name=\"" + name + "\" isNull=\"true\" />").toCharArray();
-                epNullWithType = ("<bean name=\"" + name + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
+                epNull = ("<bean name=\"" + nameAttr + "\" isNull=\"true\" />").toCharArray();
+                epNullWithType = ("<bean name=\"" + nameAttr + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
             } else {
-                epStart = ("<property name=\"" + name + "\">").toCharArray();
-                epStartWithType = ("<property name=\"" + name + "\" type=\"" + typeAttr + "\">").toCharArray();
+                epStart = ("<property name=\"" + nameAttr + "\">").toCharArray();
+                epStartWithType = ("<property name=\"" + nameAttr + "\" type=\"" + typeAttr + "\">").toCharArray();
                 epEnd = ("</property>").toCharArray();
-                epNull = ("<property name=\"" + name + "\" isNull=\"true\" />").toCharArray();
-                epNullWithType = ("<property name=\"" + name + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
+                epNull = ("<property name=\"" + nameAttr + "\" isNull=\"true\" />").toCharArray();
+                epNullWithType = ("<property name=\"" + nameAttr + "\" type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
             }
 
             namedStart = ("<" + name + ">").toCharArray();
@@ -3974,6 +4550,32 @@ public final class ParserUtil {
             namedEnd = ("</" + name + ">").toCharArray();
             namedNull = ("<" + name + " isNull=\"true\" />").toCharArray();
             namedNullWithType = ("<" + name + " type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
+        }
+
+        /**
+         * Escapes {@code value} so it can be written inside a double-quoted XML attribute, applying the same
+         * substitutions {@link BufferedXmlWriter} applies to text: {@code &}, {@code <}, {@code >}, {@code "}
+         * and {@code '} become the predefined entities and every character below {@code U+0020}, plus
+         * {@code U+007F}, becomes a numeric character reference. The three escapes that matter here are
+         * {@code &}, {@code <} and {@code "}, which make the document unreadable, and tab/newline/carriage
+         * return, which an XML reader would otherwise normalise to spaces and so rename the property.
+         *
+         * @param value the attribute text to escape
+         * @return {@code value} with the characters above replaced; the same String content when it holds none
+         */
+        private static String escapeXmlAttributeValue(final String value) {
+            final BufferedXmlWriter writer = Objectory.createBufferedXmlWriter();
+
+            try {
+                writer.writeCharacter(value);
+
+                return writer.toString();
+            } catch (final IOException e) {
+                // Unreachable: a buffer-backed BufferedXmlWriter never fails.
+                throw new UncheckedIOException(e); //NOSONAR
+            } finally {
+                Objectory.recycle(writer);
+            }
         }
 
         @Override
@@ -3990,6 +4592,30 @@ public final class ParserUtil {
         public String toString() {
             return N.toString(name);
         }
+    }
+
+    /**
+     * Returns {@code true} for the nullable date text markers accepted by every formatted date reader (legacy,
+     * java.time and Joda alike): a {@code null} reference, empty text, or the case-insensitive literal
+     * {@code "null"}. These are the same markers the no-format date types treat as {@code null}; blank text
+     * such as {@code " "} is deliberately not one of them and is left to the parser to reject.
+     */
+    private static boolean isNullDateText(final String strValue) {
+        return strValue == null || strValue.isEmpty() || "null".equalsIgnoreCase(strValue);
+    }
+
+    /**
+     * Returns {@code true} for the property types whose {@code numberFormat} reads use exact
+     * {@code BigDecimal} parsing: {@code BigDecimal}, {@code BigInteger} and the integral primitives and
+     * wrappers. Floating-point targets keep {@code DecimalFormat}'s default parse mode so {@code -0.0} survives,
+     * and {@code Number}/{@code Object} targets keep it so the runtime class they receive does not change.
+     */
+    private static boolean isExactOrIntegralNumberType(final Class<?> cls) {
+        return cls == java.math.BigDecimal.class || cls == java.math.BigInteger.class //
+                || cls == int.class || cls == Integer.class //
+                || cls == long.class || cls == Long.class //
+                || cls == short.class || cls == Short.class //
+                || cls == byte.class || cls == Byte.class;
     }
 
     /**
@@ -4055,7 +4681,7 @@ public final class ParserUtil {
          * @param timeZone the property's time zone
          * @throws IllegalArgumentException if {@code dateFormat} is neither {@code "long"} nor a valid Joda pattern.
          */
-        JodaDateTimeFormatterHolder(final String dateFormat, final TimeZone timeZone) {
+        JodaDateTimeFormatterHolder(final String dateFormat, final TimeZone timeZone) throws IllegalArgumentException {
             dtz = org.joda.time.DateTimeZone.forTimeZone(timeZone);
             // "long" means epoch millis (isLongDateFormat); only the zone is needed then and
             // DateTimeFormat.forPattern would reject "long" as a pattern.

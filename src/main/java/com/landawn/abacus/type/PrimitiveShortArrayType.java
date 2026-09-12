@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
@@ -75,7 +76,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
-     * Type<Short> elementType = type.elementType();
+     * Type<?> elementType = type.elementType();
      * System.out.println(elementType.name());   // Output: short
      * }</pre>
      *
@@ -133,6 +134,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @MayReturnNull
     @Override
     public String stringOf(final short[] x) {
         if (x == null) {
@@ -169,12 +171,15 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * @param str the string to parse, expected format is "[value1, value2, ...]"
      * @return the parsed short array, or {@code null} if the input string is {@code null}, empty, or blank.
      *         Returns an empty array for "[]".
-     * @throws NumberFormatException if any element in the string cannot be parsed as a short
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
+     * @throws NumberFormatException if an element is not a valid integer literal
+     * @throws ArithmeticException if an element is outside the {@code short} range
      * @see #valueOf(Object)
      * @see #stringOf(short[])
      */
+    @MayReturnNull
     @Override
-    public short[] valueOf(final String str) {
+    public short[] valueOf(final String str) throws IllegalArgumentException, NumberFormatException, ArithmeticException {
         if (Strings.isBlank(str)) {
             return null; // NOSONAR
         } else if (STR_FOR_EMPTY_ARRAY.equals(str)) {
@@ -220,7 +225,8 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the short array to append
-     * @throws IOException if an I/O error occurs during the append operation
+     * @throws NullPointerException if {@code appendable} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -232,7 +238,7 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final short[] x) throws IOException {
+    public void appendTo(final Appendable appendable, final short[] x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -287,10 +293,11 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * @param writer the CharacterWriter to write to
      * @param x the short array to write
      * @param config the serialization configuration (currently unused for short arrays)
-     * @throws IOException if an I/O error occurs during the write operation
+     * @throws NullPointerException if {@code writer} is {@code null}.
+     * @throws IOException if writing the representation to the destination fails.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final short[] x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final short[] x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -325,11 +332,13 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * @param c the Collection of Short objects to convert
      * @return an array containing the unboxed collection elements, or {@code null} if the input collection is null
-     * @throws ClassCastException if any element in the collection is not a Short
-     * @throws NullPointerException if any element in the collection is {@code null}
+     * @throws ClassCastException if an element is not a {@code Short}.
+     * @throws NullPointerException if an element is {@code null} and cannot be unboxed.
+     * @throws ArrayIndexOutOfBoundsException if the collection supplies more elements during iteration than the size used to allocate the array.
      */
+    @MayReturnNull
     @Override
-    public short[] collectionToArray(final Collection<?> c) {
+    public short[] collectionToArray(final Collection<?> c) throws ClassCastException, NullPointerException, ArrayIndexOutOfBoundsException {
         if (c == null) {
             return null; // NOSONAR
         }
@@ -365,10 +374,14 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      *
      * @param x the short array to convert
      * @param output the Collection to add the array elements to
+     * @throws NullPointerException if the input array is nonempty and {@code output} is {@code null}.
+     * @throws UnsupportedOperationException if the input array is nonempty and the output collection does not support adding elements.
      * @throws ClassCastException if the output collection cannot accept Short objects
+     * @throws IllegalArgumentException if the output collection rejects an element for a restriction other than its type or nullness.
      */
     @Override
-    public void arrayToCollection(final short[] x, final Collection<?> output) {
+    public void arrayToCollection(final short[] x, final Collection<?> output)
+            throws NullPointerException, UnsupportedOperationException, ClassCastException, IllegalArgumentException {
         if (N.notEmpty(x)) {
             final Collection<Object> c = (Collection<Object>) output;
 

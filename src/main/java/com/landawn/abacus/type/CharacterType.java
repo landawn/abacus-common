@@ -17,6 +17,8 @@ package com.landawn.abacus.type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.landawn.abacus.annotation.MayReturnNull;
+
 /**
  * Type handler for {@link Character} (wrapper class) values.
  * This class provides database read operations and type information for {@link Character} objects.
@@ -71,12 +73,13 @@ public final class CharacterType extends AbstractCharacterType {
      *
      * @param rs          the {@link ResultSet} to read from; must not be {@code null}
      * @param columnIndex the 1-based column index
-     * @return the first character of the column value
-     *         or {@code null} if the column value is SQL {@code NULL} or an empty string
-     * @throws SQLException if a database access error occurs
+     * @return the first character of the column value, or {@code null} if the column value is SQL {@code NULL} or an empty string
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
+    @MayReturnNull
     @Override
-    public Character get(final ResultSet rs, final int columnIndex) throws SQLException {
+    public Character get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final String result = rs.getString(columnIndex);
 
         if (result == null || result.isEmpty()) {
@@ -92,12 +95,13 @@ public final class CharacterType extends AbstractCharacterType {
      *
      * @param rs         the {@link ResultSet} to read from; must not be {@code null}
      * @param columnName the label of the column to retrieve
-     * @return the first character of the column value
-     *         or {@code null} if the column value is SQL {@code NULL} or an empty string
-     * @throws SQLException if a database access error occurs
+     * @return the first character of the column value, or {@code null} if the column value is SQL {@code NULL} or an empty string
+     * @throws NullPointerException if {@code rs} is {@code null}.
+     * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      */
+    @MayReturnNull
     @Override
-    public Character get(final ResultSet rs, final String columnName) throws SQLException {
+    public Character get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final String result = rs.getString(columnName);
 
         if (result == null || result.isEmpty()) {

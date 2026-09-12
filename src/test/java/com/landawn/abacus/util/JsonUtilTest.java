@@ -3,11 +3,12 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,7 +21,6 @@ import java.util.TreeMap;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -36,7 +36,7 @@ public class JsonUtilTest extends TestBase {
         public SimpleBean() {
         }
 
-        public SimpleBean(String name, int age, boolean active) {
+        public SimpleBean(final String name, final int age, final boolean active) {
             this.name = name;
             this.age = age;
             this.active = active;
@@ -46,7 +46,7 @@ public class JsonUtilTest extends TestBase {
             return name;
         }
 
-        public void setName(String name) {
+        public void setName(final String name) {
             this.name = name;
         }
 
@@ -54,7 +54,7 @@ public class JsonUtilTest extends TestBase {
             return age;
         }
 
-        public void setAge(int age) {
+        public void setAge(final int age) {
             this.age = age;
         }
 
@@ -62,37 +62,8 @@ public class JsonUtilTest extends TestBase {
             return active;
         }
 
-        public void setActive(boolean active) {
+        public void setActive(final boolean active) {
             this.active = active;
-        }
-    }
-
-    public static class TestBean {
-        private String name;
-        private int age;
-
-        public TestBean() {
-        }
-
-        public TestBean(String name, int age) {
-            this.name = name;
-            this.age = age;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getAge() {
-            return age;
-        }
-
-        public void setAge(int age) {
-            this.age = age;
         }
     }
 
@@ -104,7 +75,7 @@ public class JsonUtilTest extends TestBase {
         public NestedBean() {
         }
 
-        public NestedBean(String id, SimpleBean simpleBean, List<String> tags) {
+        public NestedBean(final String id, final SimpleBean simpleBean, final List<String> tags) {
             this.id = id;
             this.simpleBean = simpleBean;
             this.tags = tags;
@@ -114,7 +85,7 @@ public class JsonUtilTest extends TestBase {
             return id;
         }
 
-        public void setId(String id) {
+        public void setId(final String id) {
             this.id = id;
         }
 
@@ -122,7 +93,7 @@ public class JsonUtilTest extends TestBase {
             return simpleBean;
         }
 
-        public void setSimpleBean(SimpleBean simpleBean) {
+        public void setSimpleBean(final SimpleBean simpleBean) {
             this.simpleBean = simpleBean;
         }
 
@@ -130,1273 +101,338 @@ public class JsonUtilTest extends TestBase {
             return tags;
         }
 
-        public void setTags(List<String> tags) {
+        public void setTags(final List<String> tags) {
             this.tags = tags;
         }
     }
 
     @Test
-    public void testWrapAndUnwrapRoundTrip() {
-        SimpleBean original = new SimpleBean("Liam", 27, true);
-        JSONObject json = JsonUtil.wrap(original);
-        SimpleBean restored = JsonUtil.unwrap(json, SimpleBean.class);
+    public void testWrap() {
+        final SimpleBean original = new SimpleBean("Liam", 27, true);
+        final JSONObject json = JsonUtil.wrap(original);
+        assertEquals("Liam", json.getString("name"));
+        assertEquals(27, json.getInt("age"));
+        assertEquals(true, json.getBoolean("active"));
 
+        final SimpleBean restored = JsonUtil.unwrap(json, SimpleBean.class);
         assertEquals(original.getName(), restored.getName());
         assertEquals(original.getAge(), restored.getAge());
         assertEquals(original.isActive(), restored.isActive());
+
+        final NestedBean nested = new NestedBean("123", new SimpleBean("Charlie", 35, false), Arrays.asList("tag1", "tag2"));
+        final JSONObject nestedJson = JsonUtil.wrap(nested);
+        assertEquals("123", nestedJson.getString("id"));
+        assertEquals("Charlie", nestedJson.getJSONObject("simpleBean").getString("name"));
     }
 
     @Test
-    public void testWrapCollectionAndUnwrapRoundTrip() {
-        List<Integer> original = Arrays.asList(5, 10, 15, 20);
-        JSONArray json = JsonUtil.wrap(original);
-        List<Integer> restored = JsonUtil.toList(json, Integer.class);
-
-        assertEquals(original.size(), restored.size());
-        for (int i = 0; i < original.size(); i++) {
-            assertEquals(original.get(i), restored.get(i));
-        }
-    }
-
-    @Test
-    public void testWrapMap() {
-        Map<String, Object> map = new HashMap<>();
+    public void testWrap_Map() {
+        final Map<String, Object> map = new HashMap<>();
         map.put("name", "Alice");
         map.put("age", 30);
         map.put("active", true);
-
-        JSONObject json = JsonUtil.wrap(map);
-
-        assertNotNull(json);
+        final JSONObject json = JsonUtil.wrap(map);
         assertEquals("Alice", json.getString("name"));
         assertEquals(30, json.getInt("age"));
         assertEquals(true, json.getBoolean("active"));
+
+        assertEquals(0, JsonUtil.wrap(new HashMap<>()).length());
+
+        final Map<String, Object> withNull = new HashMap<>();
+        withNull.put("key1", "value1");
+        withNull.put("key2", null);
+        final JSONObject omitted = JsonUtil.wrap(withNull);
+        assertEquals("value1", omitted.getString("key1"));
+        assertTrue(omitted.isNull("key2"));
+        assertFalse(omitted.has("key2"));
+
+        final Map<String, Object> asObject = new HashMap<>();
+        asObject.put("id", 123);
+        assertEquals(123, JsonUtil.wrap((Object) asObject).getInt("id"));
     }
 
     @Test
-    public void testWrapEmptyMap() {
-        Map<String, Object> map = new HashMap<>();
-        JSONObject json = JsonUtil.wrap(map);
+    public void testWrap_Arrays() {
+        final JSONArray booleans = JsonUtil.wrap(new boolean[] { true, false, true });
+        assertEquals(3, booleans.length());
+        assertEquals(true, booleans.getBoolean(0));
+        assertEquals(0, JsonUtil.wrap(new boolean[0]).length());
 
-        assertNotNull(json);
-        assertEquals(0, json.length());
+        final JSONArray chars = JsonUtil.wrap(new char[] { 'H', 'e', 'l' });
+        assertEquals(3, chars.length());
+        assertEquals('H', chars.get(0));
+        assertEquals(0, JsonUtil.wrap(new char[0]).length());
+
+        final JSONArray bytes = JsonUtil.wrap(new byte[] { 10, 20, 50 });
+        assertEquals(10, bytes.getInt(0));
+        assertEquals(50, bytes.getInt(2));
+        assertEquals(0, JsonUtil.wrap(new byte[0]).length());
+
+        final JSONArray shorts = JsonUtil.wrap(new short[] { 100, 400 });
+        assertEquals(100, shorts.getInt(0));
+        assertEquals(0, JsonUtil.wrap(new short[0]).length());
+
+        final JSONArray ints = JsonUtil.wrap(new int[] { 1, 3, 5 });
+        assertEquals(5, ints.getInt(2));
+        assertEquals(0, JsonUtil.wrap(new int[0]).length());
+
+        final JSONArray longs = JsonUtil.wrap(new long[] { 1000L, 3000L });
+        assertEquals(3000L, longs.getLong(1));
+        assertEquals(0, JsonUtil.wrap(new long[0]).length());
+
+        final JSONArray floats = JsonUtil.wrap(new float[] { 1.5f, 3.5f });
+        assertEquals(1.5, floats.getDouble(0), 0.001);
+        assertEquals(0, JsonUtil.wrap(new float[0]).length());
+
+        final JSONArray doubles = JsonUtil.wrap(new double[] { 19.99, 39.99 });
+        assertEquals(19.99, doubles.getDouble(0), 0.001);
+        assertEquals(0, JsonUtil.wrap(new double[0]).length());
+
+        final JSONArray objects = JsonUtil.wrap(new Object[] { "text", 123, true, null });
+        assertEquals("text", objects.getString(0));
+        assertTrue(objects.isNull(3));
+        assertEquals(0, JsonUtil.wrap(new Object[0]).length());
+
+        final Map<String, Object> nestedMap = new HashMap<>();
+        nestedMap.put("key", "value");
+        assertEquals(2, JsonUtil.wrap(new Object[] { nestedMap, Arrays.asList(1, 2, 3) }).length());
     }
 
     @Test
-    public void testWrapMapWithNullValues() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("key1", "value1");
-        map.put("key2", null);
+    public void testWrap_Collection() {
+        final List<Integer> original = Arrays.asList(5, 10, 15, 20);
+        assertEquals(original, JsonUtil.toList(JsonUtil.wrap(original), Integer.class));
 
-        JSONObject json = JsonUtil.wrap(map);
+        final JSONArray names = JsonUtil.wrap(Arrays.asList("Alice", "Bob", "Charlie"));
+        assertEquals(3, names.length());
+        assertEquals("Alice", names.getString(0));
+        assertEquals(0, JsonUtil.wrap(new ArrayList<>()).length());
 
-        assertNotNull(json);
-        assertEquals("value1", json.getString("key1"));
-        assertTrue(json.isNull("key2"));
+        final JSONArray set = JsonUtil.wrap(new LinkedHashSet<>(Arrays.asList(1, 2, 3)));
+        assertEquals(3, set.length());
+
+        final JSONArray withNull = JsonUtil.wrap(Arrays.asList("text", null, 123));
+        assertTrue(withNull.isNull(1));
+        assertEquals(123, withNull.getInt(2));
     }
 
     @Test
-    public void testWrapMapWithNull() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("nullValue", null);
-
-        JSONObject json = JsonUtil.wrap(map);
-
-        Assertions.assertNotNull(json);
-        Assertions.assertFalse(json.has("nullValue"));
-    }
-
-    @Test
-    public void testWrapBean() {
-        SimpleBean bean = new SimpleBean("Bob", 25, true);
-        JSONObject json = JsonUtil.wrap(bean);
-
-        assertNotNull(json);
-        assertEquals("Bob", json.getString("name"));
-        assertEquals(25, json.getInt("age"));
-        assertEquals(true, json.getBoolean("active"));
-    }
-
-    @Test
-    public void testWrapObjectWithMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("key", "value");
-
-        JSONObject json = JsonUtil.wrap((Object) map);
-
-        assertNotNull(json);
-        assertEquals("value", json.getString("key"));
-    }
-
-    @Test
-    public void testWrapObject() {
-        TestBean bean = new TestBean("Alice", 25);
-
-        JSONObject json = JsonUtil.wrap(bean);
-
-        Assertions.assertNotNull(json);
-        Assertions.assertEquals("Alice", json.getString("name"));
-        Assertions.assertEquals(25, json.getInt("age"));
-    }
-
-    @Test
-    public void testWrapObjectAsMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", 123);
-
-        JSONObject json = JsonUtil.wrap((Object) map);
-
-        Assertions.assertNotNull(json);
-        Assertions.assertEquals(123, json.getInt("id"));
-    }
-
-    @Test
-    public void testWrapNestedBean() {
-        SimpleBean simpleBean = new SimpleBean("Charlie", 35, false);
-        NestedBean nestedBean = new NestedBean("123", simpleBean, Arrays.asList("tag1", "tag2"));
-
-        JSONObject json = JsonUtil.wrap(nestedBean);
-
-        assertNotNull(json);
-        assertEquals("123", json.getString("id"));
-        assertNotNull(json.getJSONObject("simpleBean"));
-        assertEquals("Charlie", json.getJSONObject("simpleBean").getString("name"));
-    }
-
-    @Test
-    public void testWrapBooleanArray() {
-        boolean[] array = { true, false, true, false };
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(4, json.length());
-        assertEquals(true, json.getBoolean(0));
-        assertEquals(false, json.getBoolean(1));
-        assertEquals(true, json.getBoolean(2));
-        assertEquals(false, json.getBoolean(3));
-    }
-
-    @Test
-    public void testWrapEmptyBooleanArray() {
-        boolean[] array = {};
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(0, json.length());
-    }
-
-    @Test
-    public void testWrapCharArray() {
-        char[] array = { 'H', 'e', 'l', 'l', 'o' };
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(5, json.length());
-        assertEquals('H', json.get(0));
-        assertEquals('e', json.get(1));
-        assertEquals('l', json.get(2));
-    }
-
-    @Test
-    public void testWrapEmptyCharArray() {
-        char[] array = {};
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(0, json.length());
-    }
-
-    @Test
-    public void testWrapByteArray() {
-        byte[] array = { 10, 20, 30, 40, 50 };
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(5, json.length());
-        assertEquals(10, json.getInt(0));
-        assertEquals(20, json.getInt(1));
-        assertEquals(50, json.getInt(4));
-    }
-
-    @Test
-    public void testWrapEmptyByteArray() {
-        byte[] array = {};
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(0, json.length());
-    }
-
-    @Test
-    public void testWrapShortArray() {
-        short[] array = { 100, 200, 300, 400 };
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(4, json.length());
-        assertEquals(100, json.getInt(0));
-        assertEquals(200, json.getInt(1));
-        assertEquals(400, json.getInt(3));
-    }
-
-    @Test
-    public void testWrapEmptyShortArray() {
-        short[] array = {};
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(0, json.length());
-    }
-
-    @Test
-    public void testWrapIntArray() {
-        int[] array = { 1, 2, 3, 4, 5 };
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(5, json.length());
-        assertEquals(1, json.getInt(0));
-        assertEquals(3, json.getInt(2));
-        assertEquals(5, json.getInt(4));
-    }
-
-    @Test
-    public void testWrapEmptyIntArray() {
-        int[] array = {};
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(0, json.length());
-    }
-
-    @Test
-    public void testWrapLongArray() {
-        long[] array = { 1000L, 2000L, 3000L };
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(3, json.length());
-        assertEquals(1000L, json.getLong(0));
-        assertEquals(2000L, json.getLong(1));
-        assertEquals(3000L, json.getLong(2));
-    }
-
-    @Test
-    public void testWrapEmptyLongArray() {
-        long[] array = {};
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(0, json.length());
-    }
-
-    @Test
-    public void testWrapFloatArray() {
-        float[] array = { 1.5f, 2.5f, 3.5f };
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(3, json.length());
-        assertEquals(1.5, json.getDouble(0), 0.001);
-        assertEquals(2.5, json.getDouble(1), 0.001);
-        assertEquals(3.5, json.getDouble(2), 0.001);
-    }
-
-    @Test
-    public void testWrapEmptyFloatArray() {
-        float[] array = {};
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(0, json.length());
-    }
-
-    @Test
-    public void testWrapDoubleArray() {
-        double[] array = { 19.99, 29.99, 39.99 };
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(3, json.length());
-        assertEquals(19.99, json.getDouble(0), 0.001);
-        assertEquals(29.99, json.getDouble(1), 0.001);
-        assertEquals(39.99, json.getDouble(2), 0.001);
-    }
-
-    @Test
-    public void testWrapEmptyDoubleArray() {
-        double[] array = {};
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(0, json.length());
-    }
-
-    @Test
-    public void testWrapObjectArray() {
-        Object[] array = { "text", 123, true, null };
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(4, json.length());
-        assertEquals("text", json.getString(0));
-        assertEquals(123, json.getInt(1));
-        assertEquals(true, json.getBoolean(2));
-        assertTrue(json.isNull(3));
-    }
-
-    @Test
-    public void testWrapEmptyObjectArray() {
-        Object[] array = {};
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(0, json.length());
-    }
-
-    @Test
-    public void testWrapObjectArrayWithNestedCollections() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("key", "value");
-        List<Integer> list = Arrays.asList(1, 2, 3);
-
-        Object[] array = { map, list };
-        JSONArray json = JsonUtil.wrap(array);
-
-        assertNotNull(json);
-        assertEquals(2, json.length());
-    }
-
-    @Test
-    public void testWrapList() {
-        List<String> list = Arrays.asList("Alice", "Bob", "Charlie");
-        JSONArray json = JsonUtil.wrap(list);
-
-        assertNotNull(json);
-        assertEquals(3, json.length());
-        assertEquals("Alice", json.getString(0));
-        assertEquals("Bob", json.getString(1));
-        assertEquals("Charlie", json.getString(2));
-    }
-
-    @Test
-    public void testWrapEmptyList() {
-        List<String> list = new ArrayList<>();
-        JSONArray json = JsonUtil.wrap(list);
-
-        assertNotNull(json);
-        assertEquals(0, json.length());
-    }
-
-    @Test
-    public void testWrapSet() {
-        Set<Integer> set = new LinkedHashSet<>(Arrays.asList(1, 2, 3));
-        JSONArray json = JsonUtil.wrap(set);
-
-        assertNotNull(json);
-        assertEquals(3, json.length());
-    }
-
-    @Test
-    public void testWrapCollectionWithNullElements() {
-        List<Object> list = Arrays.asList("text", null, 123);
-        JSONArray json = JsonUtil.wrap(list);
-
-        assertNotNull(json);
-        assertEquals(3, json.length());
-        assertEquals("text", json.getString(0));
-        assertTrue(json.isNull(1));
-        assertEquals(123, json.getInt(2));
-    }
-
-    @Test
-    public void testWrapCollection() {
-        List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
-
-        JSONArray json = JsonUtil.wrap(names);
-
-        Assertions.assertNotNull(json);
-        Assertions.assertEquals(3, json.length());
-        Assertions.assertEquals("Alice", json.getString(0));
-        Assertions.assertEquals("Bob", json.getString(1));
-        Assertions.assertEquals("Charlie", json.getString(2));
-    }
-
-    @Test
-    public void testUnwrapJSONObjectToMap() {
-        JSONObject json = new JSONObject();
+    public void testUnwrap() {
+        final JSONObject json = new JSONObject();
         json.put("name", "David");
         json.put("age", 40);
-
-        Map<String, Object> map = JsonUtil.unwrap(json);
-
-        assertNotNull(map);
+        json.put("active", true);
+        final Map<String, Object> map = JsonUtil.unwrap(json);
         assertEquals("David", map.get("name"));
         assertEquals(40, map.get("age"));
-    }
+        assertEquals(true, map.get("active"));
 
-    @Test
-    public void testUnwrapEmptyJSONObject() {
-        JSONObject json = new JSONObject();
-        Map<String, Object> map = JsonUtil.unwrap(json);
+        assertEquals(0, JsonUtil.unwrap(new JSONObject()).size());
 
-        assertNotNull(map);
-        assertEquals(0, map.size());
-    }
+        final JSONObject withNull = new JSONObject();
+        withNull.put("key1", "value1");
+        withNull.put("key2", JSONObject.NULL);
+        assertEquals("value1", JsonUtil.unwrap(withNull).get("key1"));
+        assertNull(JsonUtil.unwrap(withNull).get("key2"));
 
-    @Test
-    public void testUnwrapJSONObjectWithNull() {
-        JSONObject json = new JSONObject();
-        json.put("key1", "value1");
-        json.put("key2", JSONObject.NULL);
-
-        Map<String, Object> map = JsonUtil.unwrap(json);
-
-        assertNotNull(map);
-        assertEquals("value1", map.get("key1"));
-        assertNull(map.get("key2"));
-    }
-
-    @Test
-    public void testUnwrapJSONObject() {
-        JSONObject json = new JSONObject();
-        json.put("name", "John");
-        json.put("age", 30);
-        json.put("active", true);
-
-        Map<String, Object> map = JsonUtil.unwrap(json);
-
-        Assertions.assertNotNull(map);
-        Assertions.assertEquals("John", map.get("name"));
-        Assertions.assertEquals(30, map.get("age"));
-        Assertions.assertEquals(true, map.get("active"));
-    }
-
-    @Test
-    public void testNestedStructures() {
-        JSONObject outer = new JSONObject();
-        JSONObject inner = new JSONObject();
+        final JSONObject inner = new JSONObject();
         inner.put("innerKey", "innerValue");
+        final JSONObject outer = new JSONObject();
         outer.put("nested", inner);
         outer.put("simple", "value");
-
-        Map<String, Object> result = JsonUtil.unwrap(outer);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals("value", result.get("simple"));
-        Assertions.assertTrue(result.get("nested") instanceof Map);
+        final Map<String, Object> nested = JsonUtil.unwrap(outer);
+        assertEquals("value", nested.get("simple"));
         @SuppressWarnings("unchecked")
-        Map<String, Object> nestedMap = (Map<String, Object>) result.get("nested");
-        Assertions.assertEquals("innerValue", nestedMap.get("innerKey"));
+        final Map<String, Object> nestedMap = (Map<String, Object>) nested.get("nested");
+        assertEquals("innerValue", nestedMap.get("innerKey"));
     }
 
     @Test
-    public void testUnwrapJSONObjectToBean() {
-        JSONObject json = new JSONObject();
+    public void testUnwrap_JSONObjectTarget() {
+        final JSONObject json = new JSONObject();
         json.put("name", "Eve");
         json.put("age", 28);
         json.put("active", true);
-
-        SimpleBean bean = JsonUtil.unwrap(json, SimpleBean.class);
-
-        assertNotNull(bean);
+        final SimpleBean bean = JsonUtil.unwrap(json, SimpleBean.class);
         assertEquals("Eve", bean.getName());
         assertEquals(28, bean.getAge());
-        assertEquals(true, bean.isActive());
-    }
+        assertTrue(bean.isActive());
 
-    @Test
-    public void testUnwrapJSONObjectToTreeMap() {
-        JSONObject json = new JSONObject();
-        json.put("z", 3);
-        json.put("a", 1);
-        json.put("m", 2);
+        final TreeMap<String, Object> tree = JsonUtil.unwrap(json, TreeMap.class);
+        assertEquals(3, tree.size());
+        assertEquals(3, JsonUtil.unwrap(json, LinkedHashMap.class).size());
 
-        TreeMap<String, Object> map = JsonUtil.unwrap(json, TreeMap.class);
+        final JSONObject missing = new JSONObject();
+        missing.put("name", "Frank");
+        missing.put("unknownField", "value");
+        final SimpleBean partial = JsonUtil.unwrap(missing, SimpleBean.class);
+        assertEquals("Frank", partial.getName());
+        assertEquals(0, partial.getAge());
 
-        assertNotNull(map);
-        assertEquals(3, map.size());
-    }
-
-    @Test
-    public void testUnwrapJSONObjectToLinkedHashMap() {
-        JSONObject json = new JSONObject();
-        json.put("first", 1);
-        json.put("second", 2);
-
-        LinkedHashMap<String, Object> map = JsonUtil.unwrap(json, LinkedHashMap.class);
-
-        assertNotNull(map);
-        assertEquals(2, map.size());
-    }
-
-    @Test
-    public void testUnwrapJSONObjectToBeanWithMissingProperties() {
-        JSONObject json = new JSONObject();
-        json.put("name", "Frank");
-        json.put("unknownField", "value");
-
-        SimpleBean bean = JsonUtil.unwrap(json, SimpleBean.class);
-
-        assertNotNull(bean);
-        assertEquals("Frank", bean.getName());
-        assertEquals(0, bean.getAge());
-    }
-
-    @Test
-    public void testUnwrapJSONObjectWithNestedObjects() {
-        JSONObject simpleJson = new JSONObject();
+        final JSONObject simpleJson = new JSONObject();
         simpleJson.put("name", "George");
         simpleJson.put("age", 45);
         simpleJson.put("active", false);
-
-        JSONObject nestedJson = new JSONObject();
+        final JSONObject nestedJson = new JSONObject();
         nestedJson.put("id", "456");
         nestedJson.put("simpleBean", simpleJson);
+        final NestedBean nested = JsonUtil.unwrap(nestedJson, NestedBean.class);
+        assertEquals("456", nested.getId());
+        assertEquals("George", nested.getSimpleBean().getName());
 
-        NestedBean bean = JsonUtil.unwrap(nestedJson, NestedBean.class);
+        final Type<Map<String, Object>> mapType = new TypeReference<Map<String, Object>>() {
+        }.type();
+        assertEquals("value", JsonUtil.unwrap(new JSONObject().put("key", "value"), mapType).get("key"));
 
-        assertNotNull(bean);
-        assertEquals("456", bean.getId());
-        assertNotNull(bean.getSimpleBean());
-        assertEquals("George", bean.getSimpleBean().getName());
+        final Object asObject = JsonUtil.unwrap(json, CommonUtil.typeOf(Object.class));
+        assertTrue(asObject instanceof Map);
+        assertEquals(json, JsonUtil.unwrap(json, CommonUtil.typeOf(JSONObject.class)));
+
+        final Type<SimpleBean> beanType = CommonUtil.typeOf(SimpleBean.class);
+        assertEquals("Eve", JsonUtil.unwrap(json, beanType).getName());
     }
 
     @Test
-    public void testUnwrapJSONObjectWithType() {
-        JSONObject json = new JSONObject();
-        json.put("key", "value");
-
-        Type<Map<String, Object>> type = N.typeOf("Map<String, Object>");
-        Map<String, Object> map = JsonUtil.unwrap(json, type);
-
-        assertNotNull(map);
-        assertEquals("value", map.get("key"));
-    }
-
-    @Test
-    public void testUnwrapJSONObjectWithObjectType() {
-        JSONObject json = new JSONObject();
-        json.put("name", "Helen");
-
-        Type<Object> type = N.typeOf(Object.class);
-        Object result = JsonUtil.unwrap(json, type);
-
-        assertNotNull(result);
-        assertTrue(result instanceof Map);
-    }
-
-    @Test
-    public void testUnwrapJSONObjectReturnsJSONObject() {
-        JSONObject json = new JSONObject();
-        json.put("test", "value");
-
-        Type<JSONObject> type = N.typeOf(JSONObject.class);
-        JSONObject result = JsonUtil.unwrap(json, type);
-
-        assertNotNull(result);
-        assertEquals(json, result);
-    }
-
-    @Test
-    public void testUnwrapJSONObjectWithBeanType() {
-        JSONObject json = new JSONObject();
-        json.put("name", "Ivan");
-        json.put("age", 50);
-        json.put("active", true);
-
-        Type<SimpleBean> type = N.typeOf(SimpleBean.class);
-        SimpleBean bean = JsonUtil.unwrap(json, type);
-
-        assertNotNull(bean);
-        assertEquals("Ivan", bean.getName());
-        assertEquals(50, bean.getAge());
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToList() {
-        JSONArray json = new JSONArray();
-        json.put("text");
-        json.put(123);
-        json.put(true);
-
-        List<Object> list = JsonUtil.unwrap(json);
-
-        assertNotNull(list);
-        assertEquals(3, list.size());
-        assertEquals("text", list.get(0));
-        assertEquals(123, list.get(1));
-        assertEquals(true, list.get(2));
-    }
-
-    @Test
-    public void testUnwrapEmptyJSONArray() {
-        JSONArray json = new JSONArray();
-        List<Object> list = JsonUtil.unwrap(json);
-
-        assertNotNull(list);
-        assertEquals(0, list.size());
-    }
-
-    @Test
-    public void testUnwrapJSONArrayWithNull() {
-        JSONArray json = new JSONArray();
-        json.put("value");
-        json.put(JSONObject.NULL);
-
-        List<Object> list = JsonUtil.unwrap(json);
-
-        assertNotNull(list);
-        assertEquals(2, list.size());
-        assertEquals("value", list.get(0));
-        assertNull(list.get(1));
-    }
-
-    @Test
-    public void testUnwrapJSONArray() {
-        JSONArray json = new JSONArray();
-        json.put("text");
-        json.put(123);
-        json.put(true);
-        json.put(JSONObject.NULL);
-
-        List<Object> list = JsonUtil.unwrap(json);
-
-        Assertions.assertNotNull(list);
-        Assertions.assertEquals(4, list.size());
-        Assertions.assertEquals("text", list.get(0));
-        Assertions.assertEquals(123, list.get(1));
-        Assertions.assertEquals(true, list.get(2));
-        Assertions.assertNull(list.get(3));
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToListClass() {
-        JSONArray json = new JSONArray();
-        json.put("a");
-        json.put("b");
-        json.put("c");
-
-        List<String> list = JsonUtil.unwrap(json, List.class);
-
-        assertNotNull(list);
-        assertEquals(3, list.size());
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToSet() {
-        JSONArray json = new JSONArray();
-        json.put(1);
-        json.put(2);
-        json.put(3);
-
-        Set<Integer> set = JsonUtil.unwrap(json, Set.class);
-
-        assertNotNull(set);
-        assertEquals(3, set.size());
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToIntArray() {
-        JSONArray json = new JSONArray();
-        json.put(10);
-        json.put(20);
-        json.put(30);
-
-        int[] array = JsonUtil.unwrap(json, int[].class);
-
-        assertNotNull(array);
-        assertEquals(3, array.length);
-        assertEquals(10, array[0]);
-        assertEquals(20, array[1]);
-        assertEquals(30, array[2]);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToStringArray() {
-        JSONArray json = new JSONArray();
-        json.put("apple");
-        json.put("banana");
-
-        String[] array = JsonUtil.unwrap(json, String[].class);
-
-        assertNotNull(array);
-        assertEquals(2, array.length);
-        assertEquals("apple", array[0]);
-        assertEquals("banana", array[1]);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToBooleanArray() {
-        JSONArray json = new JSONArray();
-        json.put(true);
-        json.put(false);
-        json.put(true);
-
-        boolean[] array = JsonUtil.unwrap(json, boolean[].class);
-
-        assertNotNull(array);
-        assertEquals(3, array.length);
-        assertEquals(true, array[0]);
-        assertEquals(false, array[1]);
-        assertEquals(true, array[2]);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToPrimitiveArray() {
-        JSONArray json = new JSONArray();
-        json.put(85);
-        json.put(90);
-        json.put(78);
-        json.put(92);
-        json.put(88);
-
-        int[] scores = JsonUtil.unwrap(json, int[].class);
-
-        Assertions.assertNotNull(scores);
-        Assertions.assertEquals(5, scores.length);
-        Assertions.assertEquals(85, scores[0]);
-        Assertions.assertEquals(88, scores[4]);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToObjectArray() {
-        JSONArray json = new JSONArray();
-        json.put("Alice");
-        json.put("Bob");
-        json.put("Charlie");
-
-        String[] names = JsonUtil.unwrap(json, String[].class);
-
-        Assertions.assertNotNull(names);
-        Assertions.assertEquals(3, names.length);
-        Assertions.assertEquals("Alice", names[0]);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayWithType() {
-        JSONArray json = new JSONArray();
-        json.put(1);
-        json.put(2);
-        json.put(3);
-
-        Type<List<Integer>> type = N.typeOf("List<Integer>");
-        List<Integer> list = JsonUtil.unwrap(json, type);
-
-        assertNotNull(list);
-        assertEquals(3, list.size());
-    }
-
-    @Test
-    public void testUnwrapJSONArrayWithObjectType() {
-        JSONArray json = new JSONArray();
-        json.put("item");
-
-        Type<Object> type = N.typeOf(Object.class);
-        Object result = JsonUtil.unwrap(json, type);
-
-        assertNotNull(result);
-        assertTrue(result instanceof List);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayReturnsJSONArray() {
-        JSONArray json = new JSONArray();
-        json.put("test");
-
-        Type<JSONArray> type = N.typeOf(JSONArray.class);
-        JSONArray result = JsonUtil.unwrap(json, type);
-
-        assertNotNull(result);
-        assertEquals(json, result);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayWithSetType() {
-        JSONArray json = new JSONArray();
-        json.put("x");
-        json.put("y");
-        json.put("z");
-
-        Type<Set<String>> type = N.typeOf("Set<String>");
-        Set<String> set = JsonUtil.unwrap(json, type);
-
-        assertNotNull(set);
-        assertEquals(3, set.size());
-    }
-
-    @Test
-    public void testUnwrapJSONArrayWithPrimitiveArrayType() {
-        JSONArray json = new JSONArray();
-        json.put(5);
-        json.put(10);
-        json.put(15);
-
-        Type<int[]> type = N.typeOf(int[].class);
-        int[] array = JsonUtil.unwrap(json, type);
-
-        assertNotNull(array);
-        assertEquals(3, array.length);
-        assertArrayEquals(new int[] { 5, 10, 15 }, array);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayWithObjectArrayType() {
-        JSONArray json = new JSONArray();
-        json.put("a");
-        json.put("b");
-
-        Type<String[]> type = N.typeOf(String[].class);
-        String[] array = JsonUtil.unwrap(json, type);
-
-        assertNotNull(array);
-        assertEquals(2, array.length);
-        assertArrayEquals(new String[] { "a", "b" }, array);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayWithObjectArrayTypeConvertsScalars() {
-        JSONArray strings = new JSONArray();
-        strings.put(1);
-        strings.put(true);
-
-        String[] stringArray = JsonUtil.unwrap(strings, String[].class);
-
-        assertArrayEquals(new String[] { "1", "true" }, stringArray);
-
-        JSONArray integers = new JSONArray();
-        integers.put("1");
-        integers.put(2);
-
-        Integer[] integerArray = JsonUtil.unwrap(integers, Integer[].class);
-
-        assertArrayEquals(new Integer[] { 1, 2 }, integerArray);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayWithNestedObjects() {
-        JSONObject obj1 = new JSONObject();
-        obj1.put("name", "John");
-
-        JSONObject obj2 = new JSONObject();
-        obj2.put("name", "Jane");
-
-        JSONArray json = new JSONArray();
-        json.put(obj1);
-        json.put(obj2);
-
-        Type<List<SimpleBean>> type = Type.ofList(SimpleBean.class);
-        List<SimpleBean> beans = JsonUtil.unwrap(json, type);
-
-        assertNotNull(beans);
-        assertEquals(2, beans.size());
-        assertEquals("John", beans.get(0).getName());
-        assertEquals("Jane", beans.get(1).getName());
-    }
-
-    @Test
-    public void testUnwrapJSONArrayWithNestedArrays() {
-        JSONArray inner1 = new JSONArray();
-        inner1.put(1);
-        inner1.put(2);
-
-        JSONArray inner2 = new JSONArray();
-        inner2.put(3);
-        inner2.put(4);
-
-        JSONArray json = new JSONArray();
-        json.put(inner1);
-        json.put(inner2);
-
-        Type<List<List<Integer>>> type = N.typeOf("List<List<Integer>>");
-        List<List<Integer>> result = JsonUtil.unwrap(json, type);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals(2, result.get(0).size());
-        assertEquals(1, result.get(0).get(0));
-        assertEquals(4, result.get(1).get(1));
-    }
-
-    @Test
-    public void testComplexNestedArray() {
-        JSONArray outer = new JSONArray();
-        JSONArray inner1 = new JSONArray();
-        inner1.put(1);
-        inner1.put(2);
-        inner1.put(3);
-        JSONArray inner2 = new JSONArray();
-        inner2.put(4);
-        inner2.put(5);
-        inner2.put(6);
-        outer.put(inner1);
-        outer.put(inner2);
-
-        Type<List<List<Integer>>> type = N.typeOf("List<List<Integer>>");
-        List<List<Integer>> result = JsonUtil.unwrap(outer, type);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(2, result.size());
-        Assertions.assertEquals(3, result.get(0).size());
-        Assertions.assertEquals(1, result.get(0).get(0));
-        Assertions.assertEquals(6, result.get(1).get(2));
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToPrimitiveArraysWithNull() {
-        JSONArray json = new JSONArray();
-        json.put(1);
-        json.put(JSONObject.NULL);
-        json.put(3);
-
-        int[] array = JsonUtil.unwrap(json, int[].class);
-
-        assertNotNull(array);
-        assertEquals(3, array.length);
-        assertEquals(1, array[0]);
-        assertEquals(0, array[1]);
-        assertEquals(3, array[2]);
-    }
-
-    @Test
-    public void testUnwrapWithDifferentCollectionTypes() {
-        JSONArray json = new JSONArray();
-        json.put("a");
-        json.put("b");
-
-        Type<ArrayList<String>> arrayListType = N.typeOf("ArrayList<String>");
-        ArrayList<String> arrayList = JsonUtil.unwrap(json, arrayListType);
-
-        assertNotNull(arrayList);
-        assertTrue(arrayList instanceof ArrayList);
-        assertEquals(2, arrayList.size());
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToTypedCollectionConvertsScalarElements() {
-        JSONArray json = new JSONArray();
-        json.put(123);
-        json.put(true);
-
-        Type<List<String>> type = N.typeOf("List<String>");
-        List<String> result = JsonUtil.unwrap(json, type);
-
-        assertEquals(Arrays.asList("123", "true"), result);
-        assertEquals(String.class, result.get(0).getClass());
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToDoubleArray() {
-        JSONArray json = new JSONArray();
-        json.put(1.1);
-        json.put(2.2);
-        json.put(3.3);
-
-        double[] array = JsonUtil.unwrap(json, double[].class);
-
-        assertNotNull(array);
-        assertEquals(3, array.length);
-        assertEquals(1.1, array[0], 0.001);
-        assertEquals(2.2, array[1], 0.001);
-        assertEquals(3.3, array[2], 0.001);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToLongArray() {
-        JSONArray json = new JSONArray();
-        json.put(1000000L);
-        json.put(2000000L);
-
-        long[] array = JsonUtil.unwrap(json, long[].class);
-
-        assertNotNull(array);
-        assertEquals(2, array.length);
-        assertEquals(1000000L, array[0]);
-        assertEquals(2000000L, array[1]);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToFloatArray() {
-        JSONArray json = new JSONArray();
-        json.put(1.5f);
-        json.put(2.5f);
-
-        float[] array = JsonUtil.unwrap(json, float[].class);
-
-        assertNotNull(array);
-        assertEquals(2, array.length);
-        assertEquals(1.5f, array[0], 0.001f);
-        assertEquals(2.5f, array[1], 0.001f);
-    }
-
-    @Test
-    public void testUnwrapJSONObjectWithInvalidType() {
-        JSONObject json = new JSONObject();
-        json.put("key", "value");
-
-        Type<String> type = N.typeOf(String.class);
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            JsonUtil.unwrap(json, type);
-        });
-    }
-
-    @Test
-    public void testExceptionHandling() {
-        JSONObject json = new JSONObject();
-        json.put("key", "value");
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            JsonUtil.unwrap(json, String.class);
-        });
-
-        JSONArray array = new JSONArray();
-        array.put(1);
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            JsonUtil.unwrap(array, String.class);
-        });
-    }
-
-    @Test
-    public void testUnwrapJSONArrayWithInvalidType() {
-        JSONArray json = new JSONArray();
-        json.put("value");
-
-        Type<String> type = N.typeOf(String.class);
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            JsonUtil.unwrap(json, type);
-        });
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToByteArray() {
-        JSONArray json = new JSONArray();
-        json.put(10);
-        json.put(20);
-
-        byte[] array = JsonUtil.unwrap(json, byte[].class);
-
-        assertArrayEquals(new byte[] { 10, 20 }, array);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToShortArray() {
-        JSONArray json = new JSONArray();
-        json.put(100);
-        json.put(200);
-
-        short[] array = JsonUtil.unwrap(json, short[].class);
-
-        assertArrayEquals(new short[] { 100, 200 }, array);
-    }
-
-    @Test
-    public void testUnwrapJSONArrayToCharArray() {
-        JSONArray json = new JSONArray();
-        json.put("A");
-        json.put("B");
-
-        char[] array = JsonUtil.unwrap(json, char[].class);
-
-        assertArrayEquals(new char[] { 'A', 'B' }, array);
-    }
-
-    @Test
-    public void testToListWithStringClass() {
-        JSONArray json = new JSONArray();
-        json.put("apple");
-        json.put("banana");
-        json.put("cherry");
-
-        List<String> list = JsonUtil.toList(json, String.class);
-
-        assertNotNull(list);
-        assertEquals(3, list.size());
-        assertEquals("apple", list.get(0));
-        assertEquals("banana", list.get(1));
-        assertEquals("cherry", list.get(2));
-    }
-
-    @Test
-    public void testToListWithIntegerClass() {
-        JSONArray json = new JSONArray();
-        json.put(100);
-        json.put(200);
-
-        List<Integer> list = JsonUtil.toList(json, Integer.class);
-
-        assertNotNull(list);
-        assertEquals(2, list.size());
-        assertEquals(100, list.get(0));
-        assertEquals(200, list.get(1));
-    }
-
-    @Test
-    public void testToListConvertsScalarElementsToElementType() {
-        JSONArray strings = new JSONArray();
-        strings.put(123);
-
-        List<String> stringList = JsonUtil.toList(strings, String.class);
-
-        assertEquals("123", stringList.get(0));
-
-        JSONArray integers = new JSONArray();
-        integers.put("123");
-
-        List<Integer> integerList = JsonUtil.toList(integers, Integer.class);
-
-        assertEquals(Integer.valueOf(123), integerList.get(0));
-    }
-
-    @Test
-    public void testToListWithObjectClass() {
-        JSONArray json = new JSONArray();
-        json.put("text");
-        json.put(123);
-        json.put(true);
-
-        List<Object> list = JsonUtil.toList(json, Object.class);
-
-        assertNotNull(list);
-        assertEquals(3, list.size());
-    }
-
-    @Test
-    public void testToListWithBeanClass() {
-        JSONObject obj1 = new JSONObject();
-        obj1.put("name", "Kate");
-        obj1.put("age", 32);
-
-        JSONArray json = new JSONArray();
-        json.put(obj1);
-
-        List<SimpleBean> list = JsonUtil.toList(json, SimpleBean.class);
-
-        assertNotNull(list);
-        assertEquals(1, list.size());
-        assertEquals("Kate", list.get(0).getName());
-        assertEquals(32, list.get(0).getAge());
-    }
-
-    @Test
-    public void testToListEmptyArray() {
-        JSONArray json = new JSONArray();
-        List<String> list = JsonUtil.toList(json, String.class);
-
-        assertNotNull(list);
-        assertEquals(0, list.size());
-    }
-
-    @Test
-    public void testToListWithClass() {
-        JSONArray json = new JSONArray();
-        json.put("apple");
-        json.put("banana");
-        json.put("orange");
-
-        List<String> fruits = JsonUtil.toList(json, String.class);
-
-        Assertions.assertNotNull(fruits);
-        Assertions.assertEquals(3, fruits.size());
-        Assertions.assertEquals("apple", fruits.get(0));
-        Assertions.assertEquals("banana", fruits.get(1));
-        Assertions.assertEquals("orange", fruits.get(2));
-    }
-
-    @Test
-    public void testToListWithType() {
-        JSONArray json = new JSONArray();
-        json.put("x");
-        json.put("y");
-
-        Type<String> type = N.typeOf(String.class);
-        List<String> list = JsonUtil.toList(json, type);
-
-        assertNotNull(list);
-        assertEquals(2, list.size());
-        assertEquals("x", list.get(0));
-        assertEquals("y", list.get(1));
-    }
-
-    @Test
-    public void testToListWithMapType() {
-        JSONObject map1 = new JSONObject();
-        map1.put("id", 1);
-
-        JSONObject map2 = new JSONObject();
-        map2.put("id", 2);
-
-        JSONArray json = new JSONArray();
-        json.put(map1);
-        json.put(map2);
-
-        Type<Map<String, Object>> type = N.typeOf("Map<String, Object>");
-        List<Map<String, Object>> list = JsonUtil.toList(json, type);
-
-        assertNotNull(list);
-        assertEquals(2, list.size());
-        assertEquals(1, list.get(0).get("id"));
-        assertEquals(2, list.get(1).get("id"));
-    }
-
-    @Test
-    public void testUnwrapJSONObjectConvertsScalarMapValuesToValueType() {
-        JSONObject json = new JSONObject();
-        json.put("id", 123);
-
-        Type<Map<String, String>> type = N.typeOf("Map<String, String>");
-        Map<String, String> map = JsonUtil.unwrap(json, type);
-
-        assertEquals("123", map.get("id"));
-    }
-
-    @Test
-    public void testUnwrapJSONObjectConvertsMapKeysToKeyType() {
-        JSONObject json = new JSONObject();
-        json.put("123", "value");
-
-        Type<Map<Integer, String>> type = N.typeOf("Map<Integer, String>");
-        Map<Integer, String> map = JsonUtil.unwrap(json, type);
-
+    public void testUnwrap_JSONObjectConvertsMapTypes() {
+        final JSONObject values = new JSONObject();
+        values.put("id", 123);
+        final Type<Map<String, String>> valueType = new TypeReference<Map<String, String>>() {
+        }.type();
+        assertEquals("123", JsonUtil.unwrap(values, valueType).get("id"));
+
+        final JSONObject keys = new JSONObject();
+        keys.put("123", "value");
+        final Type<Map<Integer, String>> keyType = new TypeReference<Map<Integer, String>>() {
+        }.type();
+        final Map<Integer, String> map = JsonUtil.unwrap(keys, keyType);
         assertEquals("value", map.get(123));
         assertFalse(map.containsKey("123"));
     }
 
     @Test
-    public void testToListWithNestedListType() {
-        JSONArray inner = new JSONArray();
-        inner.put(7);
-        inner.put(8);
+    public void testUnwrap_JSONArray() {
+        final JSONArray json = new JSONArray();
+        json.put("text");
+        json.put(123);
+        json.put(true);
+        json.put(JSONObject.NULL);
+        final List<Object> list = JsonUtil.unwrap(json);
+        assertEquals(4, list.size());
+        assertEquals("text", list.get(0));
+        assertNull(list.get(3));
+        assertEquals(0, JsonUtil.unwrap(new JSONArray()).size());
 
-        JSONArray json = new JSONArray();
-        json.put(inner);
+        final JSONArray withNull = new JSONArray();
+        withNull.put("value");
+        withNull.put(JSONObject.NULL);
+        assertNull(JsonUtil.unwrap(withNull).get(1));
 
-        Type<List<Integer>> type = N.typeOf("List<Integer>");
-        List<List<Integer>> list = JsonUtil.toList(json, type);
+        assertEquals(3, JsonUtil.unwrap(new JSONArray().put("a").put("b").put("c"), List.class).size());
+        assertEquals(3, JsonUtil.unwrap(new JSONArray().put(1).put(2).put(3), Set.class).size());
 
-        assertNotNull(list);
-        assertEquals(1, list.size());
-        assertEquals(2, list.get(0).size());
-        assertEquals(7, list.get(0).get(0));
+        final Object asObject = JsonUtil.unwrap(json, CommonUtil.typeOf(Object.class));
+        assertTrue(asObject instanceof List);
+        assertEquals(json, JsonUtil.unwrap(json, CommonUtil.typeOf(JSONArray.class)));
     }
 
     @Test
-    public void testToListWithNullElements() {
-        JSONArray json = new JSONArray();
-        json.put("first");
-        json.put(JSONObject.NULL);
-        json.put("third");
+    public void testUnwrap_JSONArrayTargets() {
+        assertArrayEquals(new int[] { 10, 20, 30 }, JsonUtil.unwrap(new JSONArray().put(10).put(20).put(30), int[].class));
+        assertArrayEquals(new String[] { "apple", "banana" }, JsonUtil.unwrap(new JSONArray().put("apple").put("banana"), String[].class));
+        assertArrayEquals(new boolean[] { true, false, true }, JsonUtil.unwrap(new JSONArray().put(true).put(false).put(true), boolean[].class));
+        assertArrayEquals(new byte[] { 10, 20 }, JsonUtil.unwrap(new JSONArray().put(10).put(20), byte[].class));
+        assertArrayEquals(new short[] { 100, 200 }, JsonUtil.unwrap(new JSONArray().put(100).put(200), short[].class));
+        assertArrayEquals(new char[] { 'A', 'B' }, JsonUtil.unwrap(new JSONArray().put("A").put("B"), char[].class));
+        assertArrayEquals(new long[] { 1000000L, 2000000L }, JsonUtil.unwrap(new JSONArray().put(1000000L).put(2000000L), long[].class));
+        assertEquals(1.1, JsonUtil.unwrap(new JSONArray().put(1.1).put(2.2), double[].class)[0], 0.001);
+        assertEquals(1.5f, JsonUtil.unwrap(new JSONArray().put(1.5f).put(2.5f), float[].class)[0], 0.001f);
 
-        Type<String> type = N.typeOf(String.class);
-        List<String> list = JsonUtil.toList(json, type);
+        final Type<int[]> intType = CommonUtil.typeOf(int[].class);
+        assertArrayEquals(new int[] { 5, 10, 15 }, JsonUtil.unwrap(new JSONArray().put(5).put(10).put(15), intType));
+        assertArrayEquals(new String[] { "a", "b" }, JsonUtil.unwrap(new JSONArray().put("a").put("b"), CommonUtil.typeOf(String[].class)));
 
-        assertNotNull(list);
-        assertEquals(3, list.size());
-        assertEquals("first", list.get(0));
-        assertNull(list.get(1));
-        assertEquals("third", list.get(2));
+        final int[] withNull = JsonUtil.unwrap(new JSONArray().put(1).put(JSONObject.NULL).put(3), int[].class);
+        assertEquals(0, withNull[1]);
+        assertEquals(3, withNull[2]);
+    }
+
+    @Test
+    public void testUnwrap_JSONArrayTypedCollections() {
+        final Type<List<Integer>> listType = new TypeReference<List<Integer>>() {
+        }.type();
+        assertEquals(3, JsonUtil.unwrap(new JSONArray().put(1).put(2).put(3), listType).size());
+
+        final Type<Set<String>> setType = new TypeReference<Set<String>>() {
+        }.type();
+        assertEquals(3, JsonUtil.unwrap(new JSONArray().put("x").put("y").put("z"), setType).size());
+
+        final Type<ArrayList<String>> arrayListType = new TypeReference<ArrayList<String>>() {
+        }.type();
+        assertTrue(JsonUtil.unwrap(new JSONArray().put("a").put("b"), arrayListType) instanceof ArrayList);
+
+        assertArrayEquals(new String[] { "1", "true" }, JsonUtil.unwrap(new JSONArray().put(1).put(true), String[].class));
+        assertArrayEquals(new Integer[] { 1, 2 }, JsonUtil.unwrap(new JSONArray().put("1").put(2), Integer[].class));
+
+        final Type<List<String>> stringListType = new TypeReference<List<String>>() {
+        }.type();
+        assertEquals(Arrays.asList("123", "true"), JsonUtil.unwrap(new JSONArray().put(123).put(true), stringListType));
+
+        final JSONObject obj1 = new JSONObject().put("name", "John");
+        final JSONObject obj2 = new JSONObject().put("name", "Jane");
+        final List<SimpleBean> beans = JsonUtil.unwrap(new JSONArray().put(obj1).put(obj2), Type.ofList(SimpleBean.class));
+        assertEquals("John", beans.get(0).getName());
+        assertEquals("Jane", beans.get(1).getName());
+
+        final JSONArray nested = new JSONArray().put(new JSONArray().put(1).put(2)).put(new JSONArray().put(3).put(4));
+        final Type<List<List<Integer>>> nestedType = new TypeReference<List<List<Integer>>>() {
+        }.type();
+        final List<List<Integer>> result = JsonUtil.unwrap(nested, nestedType);
+        assertEquals(1, result.get(0).get(0));
+        assertEquals(4, result.get(1).get(1));
+    }
+
+    @Test
+    public void testUnwrap_InvalidType() {
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(new JSONObject().put("key", "value"), String.class));
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(new JSONObject().put("key", "value"), CommonUtil.typeOf(String.class)));
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(new JSONArray().put(1), String.class));
+        assertThrows(IllegalArgumentException.class, () -> JsonUtil.unwrap(new JSONArray().put("value"), CommonUtil.typeOf(String.class)));
+    }
+
+    @Test
+    public void testToList() {
+        final JSONArray strings = new JSONArray().put("apple").put("banana").put("cherry");
+        assertEquals(Arrays.asList("apple", "banana", "cherry"), JsonUtil.toList(strings, String.class));
+        assertEquals(Arrays.asList(100, 200), JsonUtil.toList(new JSONArray().put(100).put(200), Integer.class));
+        assertEquals("123", JsonUtil.toList(new JSONArray().put(123), String.class).get(0));
+        assertEquals(Integer.valueOf(123), JsonUtil.toList(new JSONArray().put("123"), Integer.class).get(0));
+
+        final List<Object> mixed = JsonUtil.toList(new JSONArray().put("text").put(123).put(true), Object.class);
+        assertEquals(3, mixed.size());
+
+        final JSONObject obj = new JSONObject().put("name", "Kate").put("age", 32);
+        final List<SimpleBean> beans = JsonUtil.toList(new JSONArray().put(obj), SimpleBean.class);
+        assertEquals("Kate", beans.get(0).getName());
+        assertEquals(32, beans.get(0).getAge());
+
+        assertEquals(0, JsonUtil.toList(new JSONArray(), String.class).size());
+        assertEquals(Arrays.asList("x", "y"), JsonUtil.toList(new JSONArray().put("x").put("y"), CommonUtil.typeOf(String.class)));
+
+        final Type<Map<String, Object>> mapType = new TypeReference<Map<String, Object>>() {
+        }.type();
+        final List<Map<String, Object>> maps = JsonUtil.toList(new JSONArray().put(new JSONObject().put("id", 1)).put(new JSONObject().put("id", 2)), mapType);
+        assertEquals(1, maps.get(0).get("id"));
+        assertEquals(2, maps.get(1).get("id"));
+
+        final Type<List<Integer>> nestedType = new TypeReference<List<Integer>>() {
+        }.type();
+        final List<List<Integer>> nested = JsonUtil.toList(new JSONArray().put(new JSONArray().put(7).put(8)), nestedType);
+        assertEquals(7, nested.get(0).get(0));
+
+        final List<String> withNull = JsonUtil.toList(new JSONArray().put("first").put(JSONObject.NULL).put("third"), CommonUtil.typeOf(String.class));
+        assertEquals("first", withNull.get(0));
+        assertNull(withNull.get(1));
+        assertEquals("third", withNull.get(2));
     }
 
     @Test
@@ -1415,4 +451,42 @@ public class JsonUtilTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> JsonUtil.toList(array, (Type<Object>) null));
     }
 
+    @Test
+    public void testUnwrapNumberBoxTypesMatchTheDocumentedMapping() {
+        // A parsed integer literal: Integer / Long / BigInteger by magnitude.
+        assertEquals(Integer.class, JsonUtil.unwrap(new JSONObject("{\"k\":1}")).get("k").getClass());
+        assertEquals(Long.class, JsonUtil.unwrap(new JSONObject("{\"k\":2147483648}")).get("k").getClass());
+        assertEquals(BigInteger.class, JsonUtil.unwrap(new JSONObject("{\"k\":9223372036854775808}")).get("k").getClass());
+
+        // A parsed decimal or exponent literal is a BigDecimal, NOT a Double.
+        assertEquals(BigDecimal.class, JsonUtil.unwrap(new JSONObject("{\"score\":95.5}")).get("score").getClass());
+        assertEquals(BigDecimal.class, JsonUtil.unwrap(new JSONObject("{\"k\":1e10}")).get("k").getClass());
+        assertEquals(BigDecimal.class, JsonUtil.unwrap(new JSONArray("[1.5]")).get(0).getClass());
+        assertEquals(BigDecimal.class, ((Map<?, ?>) JsonUtil.unwrap(new JSONObject("{\"a\":{\"b\":2.5}}")).get("a")).get("b").getClass());
+
+        // ... except for the literals BigDecimal itself rejects, which org.json falls back to Double for: a
+        // negative literal whose value is zero, and a negative exponent past BigDecimal's int scale. Both are
+        // valid RFC-8259 JSON (the grammar puts no bound on the exponent), so a (BigDecimal) cast would break.
+        assertEquals(Double.class, JsonUtil.unwrap(new JSONObject("{\"k\":-0}")).get("k").getClass());
+        assertEquals(Double.class, JsonUtil.unwrap(new JSONObject("{\"k\":-0.0}")).get("k").getClass());
+        assertEquals(Double.class, JsonUtil.unwrap(new JSONArray("[-0e5]")).get(0).getClass());
+        assertEquals(Double.class, JsonUtil.unwrap(new JSONObject("{\"k\":1e-2147483648}")).get("k").getClass());
+        assertEquals(Double.class, JsonUtil.unwrap(new JSONArray("[1e-2147483648]")).get(0).getClass());
+        // the last in-range exponent is still a BigDecimal, so the boundary is BigDecimal's scale, not org.json's
+        assertEquals(BigDecimal.class, JsonUtil.unwrap(new JSONObject("{\"k\":1e-2147483647}")).get("k").getClass());
+
+        // A number put in programmatically is returned unchanged, keeping the caller's box type.
+        assertEquals(Double.class, JsonUtil.unwrap(JsonUtil.wrap(Map.of("score", 95.5d))).get("score").getClass());
+        assertEquals(Float.class, JsonUtil.unwrap(new JSONObject().put("score", 95.5f)).get("score").getClass());
+
+        // An explicit target type is how a caller asks for a specific box type.
+        assertEquals(Double.class, JsonUtil.toList(new JSONArray("[1.5]"), Double.class).get(0).getClass());
+
+        // ... but a RAW Map class is not an explicit target type for the values: its value type is Object, so the
+        // box types survive untouched. Only a parameterised map type, or a bean property, re-boxes.
+        final JSONObject scored = new JSONObject("{\"score\":95.5}");
+        assertEquals(BigDecimal.class, JsonUtil.unwrap(scored, Map.class).get("score").getClass());
+        assertEquals(BigDecimal.class, JsonUtil.unwrap(scored, HashMap.class).get("score").getClass());
+        assertEquals(Double.class, JsonUtil.unwrap(scored, Type.<Map<String, Double>> of("Map<String, Double>")).get("score").getClass());
+    }
 }

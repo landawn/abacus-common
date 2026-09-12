@@ -15,8 +15,9 @@ public class NPredicateTest extends TestBase {
     public void testTest() {
         NPredicate<Integer> predicate = args -> {
             for (Integer n : args) {
-                if (n <= 0)
+                if (n <= 0) {
                     return false;
+                }
             }
             return true;
         };
@@ -37,7 +38,8 @@ public class NPredicateTest extends TestBase {
     public void testTestWithAnonymousClass() {
         NPredicate<Integer> predicate = new NPredicate<>() {
             @Override
-            public boolean test(Integer... args) {
+            @SafeVarargs
+            public final boolean test(Integer... args) {
                 int sum = 0;
                 for (Integer n : args) {
                     sum += n;
@@ -67,8 +69,9 @@ public class NPredicateTest extends TestBase {
     public void testAllMatch() {
         NPredicate<String> predicate = args -> {
             for (String s : args) {
-                if (s.length() <= 3)
+                if (s.length() <= 3) {
                     return false;
+                }
             }
             return true;
         };
@@ -81,8 +84,9 @@ public class NPredicateTest extends TestBase {
     public void testAnyMatch() {
         NPredicate<Integer> predicate = args -> {
             for (Integer n : args) {
-                if (n > 100)
+                if (n > 100) {
                     return true;
+                }
             }
             return false;
         };
@@ -103,8 +107,9 @@ public class NPredicateTest extends TestBase {
     public void testTestWithLambda() {
         NPredicate<String> predicate = args -> {
             for (String s : args) {
-                if (s.isEmpty())
+                if (s.isEmpty()) {
                     return true;
+                }
             }
             return false;
         };
@@ -117,8 +122,9 @@ public class NPredicateTest extends TestBase {
     public void testWithNullValues() {
         NPredicate<String> predicate = args -> {
             for (String s : args) {
-                if (s == null)
+                if (s == null) {
                     return true;
+                }
             }
             return false;
         };
@@ -131,8 +137,9 @@ public class NPredicateTest extends TestBase {
     public void testNegate() {
         NPredicate<Integer> predicate = args -> {
             for (Integer n : args) {
-                if (n % 2 != 0)
+                if (n % 2 != 0) {
                     return false;
+                }
             }
             return true;
         };
@@ -146,8 +153,9 @@ public class NPredicateTest extends TestBase {
     public void testAnd() {
         NPredicate<Integer> predicate1 = args -> {
             for (Integer n : args) {
-                if (n <= 0)
+                if (n <= 0) {
                     return false;
+                }
             }
             return true;
         };
@@ -198,8 +206,9 @@ public class NPredicateTest extends TestBase {
     public void testOr() {
         NPredicate<String> predicate1 = args -> {
             for (String s : args) {
-                if (s.isEmpty())
+                if (s.isEmpty()) {
                     return true;
+                }
             }
             return false;
         };

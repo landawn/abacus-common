@@ -48,8 +48,10 @@ public interface CharToIntFunction {
      * CharToIntFunction toCodePoint = c -> (int) c;
      * int code = toCodePoint.applyAsInt('Z');   // Returns 90
      *
-     * CharToIntFunction digitValue = c -> Character.isDigit(c) ? c - '0' : -1;
+     * CharToIntFunction digitValue = c -> Character.digit(c, 10);
      * int value = digitValue.applyAsInt('7');   // Returns 7
+     * int unicodeValue = digitValue.applyAsInt('\u0667'); // Arabic-Indic seven also returns 7
+     * int notADigit = digitValue.applyAsInt('x'); // Returns -1
      * }</pre>
      *
      * @param value the function argument

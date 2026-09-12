@@ -12,12 +12,13 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.entity.pjo.basic.Account;
-import com.landawn.abacus.entity.pjo.basic.AccountDevice;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.JsonUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
+
+import testfixtures.entity.pjo.basic.Account;
+import testfixtures.entity.pjo.basic.AccountDevice;
 
 public class JsonUtilTest extends AbstractTest {
 
@@ -111,7 +112,9 @@ public class JsonUtilTest extends AbstractTest {
         {
             List<String> list = N.toList("a", "b", "c");
 
-            List<String> list2 = JsonUtil.unwrap(JsonUtil.wrap(list));
+            // unwrap(JSONArray) now returns List<Object>: the element type comes from the JSON, not from the
+            // assignment target. Use the checked API when a typed list is wanted.
+            List<String> list2 = JsonUtil.toList(JsonUtil.wrap(list), String.class);
 
             assertTrue(N.equals(list, list2));
         }
